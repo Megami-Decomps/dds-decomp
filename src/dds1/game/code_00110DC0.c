@@ -4,7 +4,11 @@ INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110DC0);
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110E28);
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110EA0);
+void func_00110EA0(s32 arg0, u32 arg1) {
+    if (arg0 != 0) {
+        **(u32 **)((s32)arg0 + 0x18) = arg1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110EB8);
 
@@ -16,6 +20,8 @@ INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110FF0);
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00111050);
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_001110D0);
+u32 func_001110D0(void) {
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_001110D8);

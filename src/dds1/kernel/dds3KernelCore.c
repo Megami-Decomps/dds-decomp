@@ -1,8 +1,11 @@
 #include "common.h"
 
 typedef struct KwlnTask KwlnTask;
+
 typedef s32 (*TaskUpdate)(KwlnTask* task);
+
 typedef void (*TaskDestroy)(KwlnTask* task);
+
 struct KwlnTask {
     u8 unk00[0x18];
     s32 nameSum;
@@ -23,38 +26,69 @@ struct KwlnTask {
 };
 
 extern void func_001006E0(KwlnTask* task);
+
 extern void func_00100858(KwlnTask* task);
+
 extern void func_00100A98(KwlnTask* task);
+
 extern void func_00100AE0(void);
+
 extern s32 func_00100B40(KwlnTask* task);
+
 extern void func_00100D40(void);
+
 extern void func_00100E68(KwlnTask* task);
+
 extern void func_00100EF0(KwlnTask* task);
+
 extern void func_00100F68(void);
+
 extern void func_00101368(KwlnTask* task, s32 arg1);
+
 extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
+
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
+
 extern s32 func_001019C8(void* target);
+
 extern void func_00101B08(KwlnTask* task);
+
 extern void* func_002CFEB8(s32 arg0);
+
 extern void func_002CFF98(void* ptr);
+
 extern void func_003003F0();
 
 extern KwlnTask* D_003BA800;
+
 extern void* D_003BA808;
+
 extern KwlnTask* D_003BA80C;
+
 extern void* D_003BA814;
+
 extern KwlnTask* D_003BA818;
+
 extern void* D_003BA820;
+
 extern s32 D_003BA824;
+
 extern u8 D_003BA828[];
+
 extern u8 D_003BA830[];
+
 extern u8 D_003BDC48[];
+
 extern u8 D_003244D0[];
+
 extern u8 D_00324510[];
+
 extern u8 D_0039DE88[];
+
 extern u8 D_0039DEB8[];
+
 extern u8 D_0039DEC8[];
+
 extern u8 D_0039DEF8[];
 
 void func_00100A98(KwlnTask* task)
@@ -83,7 +117,6 @@ void func_00100AE0(void)
         }
     }
 }
-
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100B40);
 
@@ -128,7 +161,6 @@ void func_00100EF0(KwlnTask* task)
     }
 }
 
-
 void func_00100F68(void)
 {
     KwlnTask* node;
@@ -146,7 +178,6 @@ void func_00100F68(void)
         }
     }
 }
-
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100FC8);
 
@@ -166,7 +197,6 @@ void* func_001011C0(u32 arg0)
     }
 }
 
-
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101218);
 
 void func_001012B0(KwlnTask* task, void* arg1)
@@ -178,7 +208,6 @@ void func_001012B0(KwlnTask* task, void* arg1)
         task = task->listNext;
     } while (task != 0);
 }
-
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DE88);
 
@@ -214,7 +243,6 @@ s32 func_00101540(void)
     return 1;
 }
 
-
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
 
 s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
@@ -240,7 +268,6 @@ void func_00101790(KwlnTask* task)
     func_00100858(task);
 }
 
-
 void func_001017F8(KwlnTask* task, s32 arg1)
 {
     u32 state;
@@ -254,7 +281,6 @@ void func_001017F8(KwlnTask* task, s32 arg1)
     }
 }
 
-
 s32 func_00101818(KwlnTask* task)
 {
     u32 state;
@@ -267,8 +293,6 @@ s32 func_00101818(KwlnTask* task)
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskGetTaskByName);
-
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101880);
 
 KwlnTask* func_00101938(u32 prio)
 {
@@ -301,7 +325,6 @@ KwlnTask* func_00101938(u32 prio)
     }
     return 0;
 }
-
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
 s32 func_001019C8(void* target)

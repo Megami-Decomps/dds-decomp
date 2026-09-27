@@ -4,11 +4,15 @@ INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112BE0);
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112C20);
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112D08);
+u32 func_00112D08(void) {
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112D10);
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112DD8);
+u32 func_00112DD8(s32 arg0) {
+    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x80);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112DE8);
 

@@ -6,7 +6,10 @@ INCLUDE_ASM(const s32, "game/code_003478C0", func_00347948);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347988);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00347D40);
+void func_00347D40(u8 *arg0, u32 arg1) {
+    *(u32 *)(arg0 + 4) = arg1;
+    *arg0 = 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347D50);
 

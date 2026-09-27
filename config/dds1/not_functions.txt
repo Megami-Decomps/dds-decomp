@@ -1,13 +1,20 @@
 # False function starts (tools/find_fragments.py); romwright_sync.py drops them.
 0x00100D0C  # reads $16 before setting it
 0x00101010  # reads $18 before setting it
+0x00101880  # branched into from func_00101880
 0x00103DFC  # reads $16 before setting it
+0x00104914  # branched into from func_00104810
 0x00104918  # reads $17 before setting it
+0x00108010  # branched into from func_00107FD8
+0x00108038  # branched into from func_00108010
 0x00108D6C  # reads $18 before setting it
 0x0010D098  # reads $16 before setting it
 0x0010D0B8  # reads $16 before setting it
 0x0010D300  # reads $16 before setting it
 0x0010D310  # reads $16 before setting it
+0x00113F68  # branched into from func_00113F28
+0x00113F78  # branched into from func_00113F68
+0x00113F88  # branched into from func_00113F78
 0x00113F98  # reads $16 before setting it
 0x00113FC0  # reads $16 before setting it
 0x00113FE8  # reads $16 before setting it
@@ -19,6 +26,13 @@
 0x00114A18  # reads $16 before setting it
 0x00114A38  # reads $16 before setting it
 0x00180000  # restores $31 from a frame it did not push
+0x0018CCC0  # branched into from func_0018CC98
+0x0018CCD0  # branched into from func_0018CC98
+0x0018CCE0  # branched into from func_0018CC98
+0x0018CD18  # branched into from func_0018CCF0
+0x0018CD28  # branched into from func_0018CCF0
+0x0018CD38  # branched into from func_0018CCF0
+0x0018CD80  # branched into from func_0018CD50
 0x0018CD88  # restores $31 from a frame it did not push
 0x001B5350  # restores $31 from a frame it did not push
 0x001CCA88  # reads $16 before setting it
@@ -49,6 +63,10 @@
 0x00231C88  # reads $16 before setting it
 0x00231C90  # reads $16 before setting it
 0x00232488  # reads $17 before setting it
+0x002324F8  # branched into from func_00232438
+0x00232530  # branched into from func_002324F8
+0x00232540  # branched into from func_00232530
+0x00232550  # branched into from func_00232540
 0x00232560  # reads $17 before setting it
 0x00234160  # reads $16 before setting it
 0x00234180  # reads $16 before setting it
@@ -69,6 +87,7 @@
 0x0028F250  # reads $16 before setting it
 0x0028F270  # reads $16 before setting it
 0x0028F290  # reads $16 before setting it
+0x002C0000  # branched into from func_002C0000
 0x002E6118  # reads $16 before setting it
 0x002E7364  # restores $31 from a frame it did not push
 0x002E9970  # restores $31 from a frame it did not push

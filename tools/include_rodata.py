@@ -47,6 +47,11 @@ def place(version):
         # files for anything else are left over from an earlier split.
         full = ROOT / "asm" / version / "data" / f"{unit}.rodata.s"
         owned = {n for n, _ in LABEL.findall(full.read_text())} if full.exists() else set()
+        # Symbols splat migrated into an asm function's own file come with its
+        # INCLUDE_ASM and must not be included again.
+        for f in nonmatchings.glob("*.s"):
+            if "glabel " in f.read_text():
+                owned -= {n for n, _ in LABEL.findall(rodata_part(f))}
         text = c.read_text()
         text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?',
                       lambda m: m.group(0) if m.group(1) in owned else "", text, flags=re.M)

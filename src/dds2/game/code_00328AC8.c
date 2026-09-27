@@ -10,7 +10,15 @@ INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328BA0);
 
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328C00);
 
-INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328C30);
+void func_00328C30(s32 *arg0) {
+    s32 *piVar1;
+
+    piVar1 = (s32 *)arg0[1];
+    if (piVar1 != (s32 *)0x0) {
+        arg0[1] = *piVar1;
+    }
+    *arg0 = (s32)piVar1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328C50);
 

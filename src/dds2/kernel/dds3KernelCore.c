@@ -237,8 +237,6 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101740);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101820);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101880);
-
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
 s32 func_001018B0(void* target)
 {

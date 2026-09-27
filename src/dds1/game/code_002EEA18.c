@@ -6,7 +6,10 @@ INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEAA0);
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEAE0);
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEE98);
+void func_002EEE98(u8 *arg0, u32 arg1) {
+    *(u32 *)(arg0 + 4) = arg1;
+    *arg0 = 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEEA8);
 
@@ -47,7 +50,6 @@ INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFC68);
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFCD0);
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFD30);
-
 
 INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50C0);
 

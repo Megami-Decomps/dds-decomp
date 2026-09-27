@@ -1,12 +1,19 @@
 #include "common.h"
 
+extern s32 D_00436558;
+
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B840);
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B870);
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B890);
 
-INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B8B0);
+void func_0019B8B0(s32 arg0) {
+    if (arg0 < 1) {
+        arg0 = 0x14;
+    }
+    D_00436558 = arg0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B8C8);
 

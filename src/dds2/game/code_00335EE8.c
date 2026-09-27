@@ -5,7 +5,10 @@ void func_00335EE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00335EF0);
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00335F20);
+void func_00335F20(s32 arg0, s32 arg1, u32 arg2, s32 arg3) {
+    func_003340D0();
+    *(s32 *)(arg0 + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(arg1 + 4) + 0x10) + 0xc) + arg3 * 0x10;
+}
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00335F78);
 

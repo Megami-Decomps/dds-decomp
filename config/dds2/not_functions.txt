@@ -1,7 +1,9 @@
 # False function starts (tools/find_fragments.py); romwright_sync.py drops them.
 0x00100D0C  # reads $18 before setting it
 0x00101010  # restores $31 from a frame it did not push
+0x00101880  # branched into from func_00101880
 0x00103CEC  # reads $16 before setting it
+0x00104804  # branched into from func_00104700
 0x00104808  # reads $17 before setting it
 0x00108C8C  # reads $18 before setting it
 0x0010D2C0  # reads $16 before setting it
@@ -11,10 +13,18 @@
 0x00114C60  # reads $16 before setting it
 0x00114C80  # reads $16 before setting it
 0x00114CA0  # reads $16 before setting it
+0x00154EA8  # branched into from func_00154E48
 0x00154EB8  # reads $16 before setting it
 0x00154ED0  # reads $16 before setting it
 0x00154EE8  # reads $16 before setting it
 0x00170000  # reads $19 before setting it
+0x001948F8  # branched into from func_001948D0
+0x00194908  # branched into from func_001948D0
+0x00194918  # branched into from func_001948D0
+0x00194950  # branched into from func_00194928
+0x00194960  # branched into from func_00194928
+0x00194970  # branched into from func_00194928
+0x001949B8  # branched into from func_00194988
 0x001949C0  # restores $31 from a frame it did not push
 0x001BFFB8  # restores $31 from a frame it did not push
 0x001C0D38  # reads $21 before setting it
@@ -47,6 +57,10 @@
 0x0024C998  # reads $16 before setting it
 0x0024C9A0  # reads $16 before setting it
 0x0024D198  # reads $17 before setting it
+0x0024D208  # branched into from func_0024D148
+0x0024D240  # branched into from func_0024D208
+0x0024D250  # branched into from func_0024D240
+0x0024D260  # branched into from func_0024D250
 0x0024D270  # reads $17 before setting it
 0x0024EEF8  # reads $16 before setting it
 0x0024EF18  # reads $16 before setting it

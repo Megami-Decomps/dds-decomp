@@ -52,6 +52,9 @@ TYPES = [
 NARROW = [(r"\bu64\b", "u32"), (r"\bs64\b", "s32")]
 
 
+CURRENT = {}
+
+
 def functions(version):
     """name -> vram for every function in config/<v>/symbol_addrs.txt."""
     text = (ROOT / "config" / version / "symbol_addrs.txt").read_text()
@@ -117,6 +120,8 @@ def clean(text, func):
         return None
     text = re.sub(r"/\*.*?\*/", "", head, flags=re.S) + "\x00" + re.sub(r"/\*.*?\*/", "", body_text, flags=re.S)
     text = re.sub(r"\bFUN_([0-9a-f]{8})\b", lambda m: "func_" + m[1].upper(), text)
+    # The draft store may predate renames: use the current name at each address.
+    text = re.sub(r"\bfunc_([0-9A-F]{8})\b", lambda m: CURRENT.get(int(m[1], 16), m[0]), text)
     # DAT_, _DAT_, Ghidra's typed-RAM names (uRam0034e028), string labels
     # (s__2_2_2_00324770) and PTR_ labels are all plain globals.
     text = re.sub(r"\b_?DAT_([0-9a-f]{8})\b|\b[a-z]{1,3}Ram([0-9a-f]{8})\b|\b(?:s|PTR)_\w*?_([0-9a-f]{8})\b",
@@ -227,6 +232,7 @@ def main():
     if not units:
         ap.error("no units selected")
     setup_store(args.version)
+    CURRENT.update({a: n for n, a in functions(args.version).items()})
     wanted = [(unit, func) for unit in units for func in INCLUDE_ASM.findall((src / f"{unit}.c").read_text())]
     drafts = export(args.version, [f for _, f in wanted], args.refresh, args.jobs)
 

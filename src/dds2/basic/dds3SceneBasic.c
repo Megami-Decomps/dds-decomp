@@ -1,6 +1,12 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", func_00110DE0);
+void func_00110DE0(s32 arg0) {
+    s32 temp_v0;
+
+    temp_v0 = *(s32 *)(arg0 + 0x18);
+    func_0012ADA0();
+    *(u32 *)(temp_v0 + 0x14) = 0;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3SceneBasic", func_00110E08);
 

@@ -12,7 +12,10 @@ INCLUDE_ASM(const s32, "game/code_00329600", func_00329888);
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_003298C0);
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_003298F8);
+u32 func_003298F8(s32 arg0) {
+    *(s16 *)(arg0 + 0xe) = *(s16 *)(arg0 + 0xe) + 1;
+    return *(u32 *)(arg0 + 8);
+}
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329910);
 

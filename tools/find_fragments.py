@@ -90,18 +90,61 @@ def main():
         # reads callee-saved registers.
         if path.relative_to(ROOT / "asm" / args.version).parts[0] in ("data", "nonmatchings", "sdk", "matchings"):
             continue
-        for name, body in functions(path):
+        funcs = list(functions(path))
+        for name, body in funcs:
             if body and (why := fragment_reason(body)):
                 found.append((body[0][0], name, why, path.relative_to(ROOT)))
-    found.sort()
+        found += branched_into(funcs, path)
+    found = sorted({f[0]: f for f in found}.values())
     for addr, name, why, path in found:
         print(f"0x{addr:08X}  {name:32} {why:44} {path}")
     print(f"{len(found)} fragments")
     if args.write:
         out = ROOT / "config" / args.version / "not_functions.txt"
+        # Starts already folded away are no longer in the asm; keep them.
+        old = {}
+        if out.exists():
+            for line in out.read_text().splitlines():
+                if line.strip() and not line.startswith("#"):
+                    old[int(line.split()[0], 16)] = line.split("#", 1)[1].strip() if "#" in line else ""
+        rows = {**old, **{a: why for a, _, why, _ in found}}
         out.write_text("# False function starts (tools/find_fragments.py); romwright_sync.py drops them.\n" +
-                       "".join(f"0x{a:08X}  # {why}\n" for a, _, why, _ in found))
-        print(f"-> {out.relative_to(ROOT)}")
+                       "".join(f"0x{a:08X}  # {rows[a]}\n" for a in sorted(rows)))
+        print(f"-> {out.relative_to(ROOT)} ({len(rows)} starts)")
+
+
+LOCAL_BRANCH = re.compile(r"^(?:b\w*|j)$")
+LOCAL_LABEL = re.compile(r"\.L([0-9A-F]{8})\b")
+
+
+def branched_into(funcs, path):
+    """Starts that a neighbouring function jumps into with a local branch (or a
+    jump-table entry): the code between is one function, split at a case label."""
+    starts = sorted(body[0][0] for _, body in funcs if body)
+    names = {body[0][0]: name for name, body in funcs if body}
+    ends = {body[0][0]: body[-1][0] + 4 for _, body in funcs if body}
+    text = path.read_text()
+    tables = {}
+    for m in re.finditer(r"^dlabel (jtbl_[0-9A-F]{8})\n(.*?)^enddlabel", text, re.M | re.S):
+        tables[m.group(1)] = [int(x, 16) for x in LOCAL_LABEL.findall(m.group(2))]
+    out = []
+    for name, body in funcs:
+        if not body:
+            continue
+        lo, hi = body[0][0], ends[body[0][0]]
+        targets = [int(m.group(1), 16) for _, op, args in body if LOCAL_BRANCH.match(op)
+                   for m in LOCAL_LABEL.finditer(args)]
+        for _, op, args in body:
+            for jt in re.findall(r"%lo\((jtbl_[0-9A-F]{8})\)", args):
+                targets += tables.get(jt, [])
+        for t in targets:
+            if lo <= t < hi:
+                continue
+            a, b = (lo, t) if t > lo else (t, lo)
+            for s in starts:
+                if a < s <= b:
+                    out.append((s, names[s], f"branched into from {name}", path.relative_to(ROOT)))
+    return out
 
 
 if __name__ == "__main__":
