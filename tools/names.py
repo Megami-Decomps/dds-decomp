@@ -10,9 +10,10 @@ generated blocks, so it wins) and a line in config/<v>/name_sources.txt:
     0x002CF76C  sdfAddHandler  evidence  string "sdfAddHandler : unknown type %d"
     0x00216CC8  mdlManagerSetFlag  inferred  stores arg to mdl->flags
 
-`evidence` means the name is the developers' own (a string naming its function, a
-task registration, a script command table, a real Persona 4 symbol). `inferred`
-means we chose it, following the module-prefix camelCase convention of the
+`evidence` means the binary itself names the function: a message inside it that
+carries its own name (`sdfAddHandler : unknown type %d`). Names from other
+decomps (Persona 3/4), task labels and our own choices are `inferred`: someone
+chose them, following the module-prefix camelCase convention of the
 evidence names; revise freely. C references in src/<v> are renamed; unmatched
 functions need `python3 configure.py --force-split <v>` so asm files follow.
 DDS2 picks names up from DDS1 through `tools/shared_funcs.py names`.

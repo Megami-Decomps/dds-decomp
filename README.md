@@ -117,8 +117,10 @@ file-name hints.
    curated row in `symbol_addrs.txt`, records provenance in
    `config/<v>/name_sources.txt` and renames C references (run
    `configure.py --force-split` afterwards so asm follows).
-   - `evidence` means the developers' own name: a string naming its function, a
-     task registration, a script command table, or a real Persona 4 symbol.
+   - `evidence` means the binary names the function itself, e.g. a message
+     inside it that carries its own name. Names from the Persona 3/4 decomps
+     are chosen by those projects, and task labels are not proof, so both
+     count as `inferred`.
    - `inferred` means a name we chose in their convention: lowercase module
      prefix plus CamelCase, e.g. `sdfAddHandler`, `evtLipsExecFunction`.
    - `python tools/names.py harvest <v>` lists the naming strings and the
