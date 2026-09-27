@@ -1,0 +1,89 @@
+name: "Shin Megami Tensei: Digital Devil Saga 2 (USA) (SLUS_211.52)"
+sha1: 9be91ee1b4a535a4cb6ec89237b5a6ba41be2add
+options:
+  basename: SLUS_211.52
+  platform: ps2
+  compiler: EEGCC
+  base_path: ../..
+  target_path: orig/dds2/SLUS_211.52
+  elf_path: build/dds2/SLUS_211.52.elf
+  asset_path: assets/dds2
+  asm_path: asm/dds2
+  src_path: src/dds2
+  build_path: build/dds2
+  ld_script_path: build/dds2/SLUS_211.52.ld
+  ld_dependencies: True
+  symbol_addrs_path:
+    - config/dds2/symbol_addrs.txt
+  reloc_addrs_path:
+    - config/dds2/reloc_addrs.txt
+  undefined_funcs_auto_path: config/dds2/undefined_funcs_auto.txt
+  undefined_syms_auto_path: config/dds2/undefined_syms_auto.txt
+
+  gp_value: 0x0043ae70
+  # The original assembler (ee-as 2.9-ee) is used for C and INCLUDE_ASM alike,
+  # so keep register names numeric: old gas predates some o32 aliases.
+  mips_abi_gpr: numeric
+  mips_abi_float_regs: numeric
+  named_regs_for_c_funcs: False
+  add_set_gp_64: False
+  use_legacy_include_asm: True
+  asm_inc_header: ""
+  generate_asm_macros_files: False
+  find_file_boundaries: True
+  disassemble_all: True
+  make_full_disasm_for_code: True
+  disasm_unknown: True
+  create_undefined_funcs_auto: True
+  create_undefined_syms_auto: True
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  section_order: [".text", ".data", ".rodata", ".lit4", ".sdata", ".sbss", ".bss"]
+  o_as_suffix: True
+  ld_bss_is_noload: True
+  emit_subalign: False
+  ld_align_segment_vram_end: False
+  ld_align_section_vram_end: False
+  ld_generate_symbol_per_data_segment: True
+
+segments:
+  # ELF file header + program headers; not loaded.
+  - [0x0, bin, elf_header]
+
+  - name: main
+    type: code
+    align: 1
+    start: 0x1000
+    vram: 0x100000
+    bss_size: 0x4FE04
+    subsegments:
+      - [0x1000, asm, game]  # Atlus game/engine code; split into TUs as they are identified
+      # Sony SDK / C runtime, one file per library (boundaries = first romwright signature hit)
+      - [0x249BF8, asm, sdk/libgraph]  # first signature hit 0x00348BF8
+      - [0x24B2F0, asm, sdk/libdma]  # first signature hit 0x0034A2F0
+      - [0x24BD58, asm, sdk/libpad]  # first signature hit 0x0034AD58
+      - [0x24CE68, asm, sdk/libcdvd]  # first signature hit 0x0034BE68
+      - [0x24EB88, asm, sdk/libmrpc]  # first signature hit 0x0034DB88
+      - [0x24F1A0, asm, sdk/libipu]  # first signature hit 0x0034E1A0
+      - [0x24F788, asm, sdk/libsdr]  # first signature hit 0x0034E788
+      - [0x250118, asm, sdk/libmc]  # first signature hit 0x0034F118
+      - [0x25C248, asm, sdk/libc]  # first signature hit 0x0035B248
+      - [0x266880, asm, sdk/libkernl]  # first signature hit 0x00365880
+      # .vutext: VU1 microcode (no VU disassembler in splat yet).
+      - [0x271B80, textbin, vutext]
+      # .ctors, .dtors, .reginfo
+      - [0x280330, databin, ctors_dtors_reginfo]
+      - [0x280380, data, data]
+      - [0x311C68, databin, eh_frame]
+      - [0x311C6C, databin, vudata]
+      - [0x311F80, rodata, rodata]
+      - [0x333E80, lit4, lit4]
+      - [0x336B80, sdata, sdata]
+      - { start: 0x339D2C, type: sbss, vram: 0x438D80, name: sbss }
+      - { start: 0x339D2C, type: bss, vram: 0x439280, name: bss }
+
+  # Padding, .DVP overlay tables/microcode copies, .shstrtab and section headers; not loaded.
+  - [0x339D2C, bin, elf_trailer]
+  - [0x33E660]

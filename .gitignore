@@ -1,0 +1,36 @@
+# Copyrighted inputs: never commit
+*.iso
+*.ISO
+*.bin
+*.elf
+*.7z
+*.zip
+*.cue
+orig/*/
+!orig/.gitkeep
+
+# Generated
+/asm/
+/build/
+/tools/bin/
+/tools/compilers/
+/build.ninja
+/.ninja_*
+/objdiff.json
+/report.json
+/ctx.c
+/nonmatchings/
+/permuter/
+config/*/undefined_funcs_auto.txt
+config/*/undefined_syms_auto.txt
+config/*/*.ld
+.splache
+*.o
+*.d
+__pycache__/
+*.pyc
+.venv/
+
+# Local tool overrides
+/config/local.json
+config/*/checksum.sha1

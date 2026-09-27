@@ -1,0 +1,22 @@
+{
+  "dds1": {
+    "title": "Shin Megami Tensei: Digital Devil Saga (USA)",
+    "serial": "SLUS_209.74",
+    "iso_glob": "*Digital Devil Saga (USA)*.iso",
+    "iso_size": 4539547648,
+    "elf_sha1": "6d18898e2724bf1d145392766e8ba1e678487419",
+    "elf_size": 2895680,
+    "entry": "0x00100008",
+    "gp": "0x003c0cf0"
+  },
+  "dds2": {
+    "title": "Shin Megami Tensei: Digital Devil Saga 2 (USA)",
+    "serial": "SLUS_211.52",
+    "iso_glob": "*Digital Devil Saga 2 (USA)*.iso",
+    "iso_size": 4677500928,
+    "elf_sha1": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add",
+    "elf_size": 3401312,
+    "entry": "0x00100008",
+    "gp": "0x0043ae70"
+  }
+}

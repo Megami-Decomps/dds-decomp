@@ -1,0 +1,109 @@
+name: "Shin Megami Tensei: Digital Devil Saga (USA) (SLUS_209.74)"
+sha1: 6d18898e2724bf1d145392766e8ba1e678487419
+options:
+  basename: SLUS_209.74
+  platform: ps2
+  compiler: EEGCC
+  base_path: ../..
+  target_path: orig/dds1/SLUS_209.74
+  elf_path: build/dds1/SLUS_209.74.elf
+  asset_path: assets/dds1
+  asm_path: asm/dds1
+  src_path: src/dds1
+  build_path: build/dds1
+  ld_script_path: build/dds1/SLUS_209.74.ld
+  ld_dependencies: True
+  symbol_addrs_path:
+    - config/dds1/symbol_addrs.txt
+  reloc_addrs_path:
+    - config/dds1/reloc_addrs.txt
+  undefined_funcs_auto_path: config/dds1/undefined_funcs_auto.txt
+  undefined_syms_auto_path: config/dds1/undefined_syms_auto.txt
+
+  gp_value: 0x003c0cf0
+  # The original assembler (ee-as 2.9-ee) is used for C and INCLUDE_ASM alike,
+  # so keep register names numeric: old gas predates some o32 aliases.
+  mips_abi_gpr: numeric
+  mips_abi_float_regs: numeric
+  named_regs_for_c_funcs: False
+  add_set_gp_64: False
+  use_legacy_include_asm: True
+  asm_inc_header: ""
+  generate_asm_macros_files: False
+  find_file_boundaries: True
+  disassemble_all: True
+  make_full_disasm_for_code: True
+  disasm_unknown: True
+  create_undefined_funcs_auto: True
+  create_undefined_syms_auto: True
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  section_order: [".text", ".data", ".rodata", ".lit4", ".sdata", ".sbss", ".bss"]
+  o_as_suffix: True
+  ld_bss_is_noload: True
+  emit_subalign: False
+  ld_align_segment_vram_end: False
+  ld_align_section_vram_end: False
+  ld_generate_symbol_per_data_segment: True
+
+segments:
+  # ELF file header + program headers; not loaded.
+  - [0x0, bin, elf_header]
+
+  - name: main
+    type: code
+    align: 1
+    start: 0x1000
+    vram: 0x100000
+    bss_size: 0x4EFB4
+    subsegments:
+      # Atlus game/engine code. Unknown TU boundaries: asm chunks are named by address
+      # (code_<vram>) until the original unit is identified.
+      - [0x1000, asm, game/code_00100000]
+      - [0x29C8, c, game/sdkTask]  # P4 transfer, see docs/p4-transfer.md
+      - [0x2A68, asm, game/code_00101A68]
+      - [0xED38, c, game/scrCommonCommand]  # P4 transfer, see docs/p4-transfer.md
+      - [0xFEF0, asm, game/code_0010EEF0]
+      - [0x1DE88, c, game/code_0011CE88]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1DEB8, asm, game/code_0011CEB8]
+      - [0x50098, c, game/code_0014F098]  # P4 transfer, see docs/p4-transfer.md
+      - [0x504C8, asm, game/code_0014F4C8]
+      - [0x9E160, c, game/itfMesManager]  # P4 transfer, see docs/p4-transfer.md
+      - [0x9EB88, asm, game/code_0019DB88]
+      - [0xF70E8, c, game/code_001F60E8]  # P4 transfer, see docs/p4-transfer.md
+      - [0xF7110, asm, game/code_001F6110]
+      - [0x19B810, c, game/code_0029A810]  # P4 transfer, see docs/p4-transfer.md
+      - [0x19B840, asm, game/code_0029A840]
+      - [0x1DE8B8, c, game/effMiscVu]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1DEC98, asm, game/code_002DDC98]
+      - [0x1E8C20, c, game/effMisc]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1E9398, asm, game/code_002E8398]
+      # Sony SDK / C runtime, one file per library (boundaries = first romwright signature hit)
+      - [0x1F0D50, asm, sdk/libgraph]  # first signature hit 0x002EFD50
+      - [0x1F2448, asm, sdk/libdma]  # first signature hit 0x002F1448
+      - [0x1F2EB0, asm, sdk/libpad]  # first signature hit 0x002F1EB0
+      - [0x1F3FC0, asm, sdk/libcdvd]  # first signature hit 0x002F2FC0
+      - [0x1F5CE0, asm, sdk/libmrpc]  # first signature hit 0x002F4CE0
+      - [0x1F6310, asm, sdk/libipu]  # first signature hit 0x002F5310
+      - [0x1F68F8, asm, sdk/libsdr]  # first signature hit 0x002F58F8
+      - [0x1F7300, asm, sdk/libmc]  # first signature hit 0x002F6300
+      - [0x200F58, asm, sdk/libc]  # first signature hit 0x002FFF58
+      - [0x20B600, asm, sdk/libkernl]  # first signature hit 0x0030A600
+      # .vutext: VU1 microcode (no VU disassembler in splat yet).
+      - [0x216BA0, textbin, vutext]
+      # .ctors, .dtors, .reginfo
+      - [0x225350, databin, ctors_dtors_reginfo]
+      - [0x225380, data, data]
+      - [0x29EAF0, databin, eh_frame]
+      - [0x29EAF4, databin, vudata]
+      - [0x29EE00, rodata, rodata]
+      - [0x2B9D00, lit4, lit4]
+      - [0x2BB700, sdata, sdata]
+      - { start: 0x2BE63C, type: sbss, vram: 0x3BD680, name: sbss }
+      - { start: 0x2BE63C, type: bss, vram: 0x3BDB00, name: bss }
+
+  # Padding, .DVP overlay tables/microcode copies, .shstrtab and section headers; not loaded.
+  - [0x2BE63C, bin, elf_trailer]
+  - [0x2C2F40]

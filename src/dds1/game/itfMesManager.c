@@ -1,0 +1,92 @@
+#include "common.h"
+
+void func_002EB278(int *param_1, int param_2, u8 *param_3, int param_4);
+
+/* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
+void func_0019D160(u8 *arg0)
+{
+    u8 *base;
+    u8 *fixups;
+    s32 size;
+    if (*(u8 *)(arg0 + 0x1C) == 0) {
+        base = arg0 + 0x20;
+        fixups = arg0 + *(s32 *)(arg0 + 0x10);
+        size = *(s32 *)(arg0 + 0x14);
+        func_002EB278((int *)base, (int)base, fixups, size);
+        *(u8 *)(arg0 + 0x1C) = 1;
+    }
+}
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D1A8);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D1D8);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D1F0);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D208);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D240);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D268);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D298);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D460);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D580);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D5D0);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D610);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D640);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D730);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D850);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D888);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D8B8);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D8E8);
+
+/* Persona 4 func_0027a340 @ 0027A340 (src/itfMesManager.c), recompiled unchanged */
+void func_0019D920(u8 *arg0, int arg1)
+{
+    while (arg0 != ((void*)0)) {
+        *(int *)(arg0 + 0x14) = arg1;
+        arg0 = *(u8 **)(arg0 + 0x24);
+    }
+}
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D958);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019D9F8);
+
+/* Persona 4 func_0027a4d0 @ 0027A4D0 (src/itfMesManager.c), recompiled unchanged */
+void func_0019DA50(int param_1,u32 param_2)
+{
+  int iVar1;
+  for (; param_1 != 0; param_1 = *(int *)(param_1 + 0x24)) {
+    for (iVar1 = *(int *)(param_1 + 0x1c); iVar1 != 0; iVar1 = *(int *)(iVar1 + 0x28)) {
+      *(u32 *)(iVar1 + 0x10) = *(u32 *)(iVar1 + 0x10) & 0xffffff00 | param_2;
+    }
+  }
+  return;
+}
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019DAA0);
+
+INCLUDE_ASM(const s32, "game/itfMesManager", func_0019DAF0);
+
+/* Persona 4 func_0027a580 @ 0027A580 (src/itfMesManager.c), recompiled unchanged */
+void func_0019DB40(int param_1)
+{
+  for (; param_1 != 0; param_1 = *(int *)(param_1 + 0x24)) {
+    if (*(u8 *)(*(int *)(param_1 + 0x1c) + 0x16) == '\0') {
+      func_00195388(param_1);
+    }
+  }
+  return;
+}
