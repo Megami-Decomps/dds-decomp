@@ -24,7 +24,9 @@ extern u32 D_00438F14;
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00195E50);
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00195EE0);
+void func_00195EE0(s32 arg0) {
+    func_003297C8(*(u32 *)(arg0 + 8));
+}
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00195EF8);
 
@@ -210,8 +212,12 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00197CC0);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197CD0);
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197D38);
+void func_00197D38(void) {
+    func_001682B0();
+}
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197D50);
+void func_00197D50(void) {
+    func_001683F0();
+}
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197D68);

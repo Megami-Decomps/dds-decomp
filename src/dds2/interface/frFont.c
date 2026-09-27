@@ -54,7 +54,10 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019CE78);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D010);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D038);
+void func_0019D038(s32 arg0) {
+    *(u32 *)(arg0 + 0x40) = 1;
+    func_0019D010(arg0, 0x80);
+}
 
 void func_0019D058(s32 arg0, u8 arg1) {
     u32 temp_v0;
@@ -100,9 +103,13 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D830);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D848);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D8A8);
+void func_0019D8A8(u32 arg0) {
+    func_0019C130(8, arg0, 0);
+}
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D8C8);
+void func_0019D8C8(void) {
+    func_0019C238(8);
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D8E0);
 
@@ -116,7 +123,9 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DA98);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DAD8);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019DB18);
+void func_0019DB18(void) {
+    D_00436554 = 0x19;
+}
 
 void func_0019DB28(u32 arg0) {
     D_00436554 = arg0;

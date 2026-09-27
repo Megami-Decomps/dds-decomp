@@ -67,6 +67,46 @@
 0x0024EF38  # reads $16 before setting it
 0x0024EF80  # reads $16 before setting it
 0x0024EFD0  # reads $16 before setting it
+0x002702A8  # branched into from func_00270210
+0x00270300  # branched into from func_002702A8
+0x00270310  # branched into from func_00270300
+0x00270380  # branched into from func_00270310
+0x00270384  # fallen into from func_00270380
+0x00270E28  # branched into from func_00270DD8
+0x00270E80  # branched into from func_00270E28
+0x00270E90  # branched into from func_00270E80
+0x00270F00  # branched into from func_00270E90
+0x00270F04  # fallen into from func_00270F00
+0x00271428  # branched into from func_00271368
+0x00271480  # branched into from func_00271428
+0x00271490  # branched into from func_00271480
+0x00271500  # branched into from func_00271490
+0x00271504  # fallen into from func_00271500
+0x00272E10  # branched into from func_00272DA8
+0x00272E70  # branched into from func_00272E10
+0x00272E80  # branched into from func_00272E70
+0x00272EF8  # branched into from func_00272E80
+0x00272EFC  # fallen into from func_00272EF8
+0x002736F0  # branched into from func_00273668
+0x00273770  # branched into from func_002736F0
+0x00273780  # branched into from func_00273770
+0x00273818  # branched into from func_00273780
+0x0027381C  # fallen into from func_00273818
+0x00274290  # branched into from func_002741D0
+0x00274308  # branched into from func_00274290
+0x00274318  # branched into from func_00274308
+0x002743A8  # branched into from func_00274318
+0x002743AC  # fallen into from func_002743A8
+0x00274958  # branched into from func_002748D0
+0x002749C8  # branched into from func_00274958
+0x002749D8  # branched into from func_002749C8
+0x00274A60  # branched into from func_002749D8
+0x00274A64  # fallen into from func_00274A60
+0x00274F10  # branched into from func_00274EA8
+0x00274F68  # branched into from func_00274F10
+0x00274F78  # branched into from func_00274F68
+0x00274FE8  # branched into from func_00274F78
+0x00274FEC  # fallen into from func_00274FE8
 0x002880E0  # reads $22 before setting it
 0x002CE278  # reads $16 before setting it
 0x002CE290  # reads $16 before setting it

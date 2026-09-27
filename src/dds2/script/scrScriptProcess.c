@@ -53,11 +53,15 @@ void func_0010BE08(void)
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE40);
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE78);
+void func_0010BE78(u32 arg0) {
+    func_0010BD50(arg0, 0);
+}
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE90);
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BEC8);
+void func_0010BEC8(u32 arg0) {
+    func_0010BC40(arg0, 0);
+}
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BEE0);
 

@@ -1,6 +1,13 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112BE0);
+void func_00112BE0(s32 arg0) {
+    s32 temp_v0;
+
+    func_0010F810();
+    temp_v0 = *(s32 *)(arg0 + 0x18);
+    func_00111A68(*(u32 *)(temp_v0 + 0x80));
+    func_00328E48(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112C20);
 
@@ -22,7 +29,9 @@ INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112F28);
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112FC0);
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00113080);
+void func_00113080(void) {
+    func_00110B50();
+}
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00113098);
 

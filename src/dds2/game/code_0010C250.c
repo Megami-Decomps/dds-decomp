@@ -16,9 +16,19 @@ u32 func_0010C278(void) {
     return *(u32 *)(temp_v0 + 0xf0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C298);
+void func_0010C298(u32 arg0) {
+    s64 temp_v0;
 
-INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C2D8);
+    temp_v0 = func_00101958();
+    if (temp_v0 != 0) {
+        func_0010BF48(temp_v0);
+    }
+    func_00101950(arg0, 0);
+}
+
+void func_0010C2D8(void) {
+    func_0010D5A8();
+}
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C2F0);
 

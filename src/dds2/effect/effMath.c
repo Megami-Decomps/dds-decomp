@@ -1,6 +1,8 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/effMath", func_00195BC8);
+void func_00195BC8(s32 arg0) {
+    func_003297C8(*(u32 *)(arg0 + 8));
+}
 
 INCLUDE_ASM(const s32, "effect/effMath", func_00195BE0);
 

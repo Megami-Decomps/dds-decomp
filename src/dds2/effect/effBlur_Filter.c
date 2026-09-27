@@ -2,7 +2,9 @@
 
 extern u32 func_00159BB8(u32);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E8F0);
+void func_0018E8F0(void) {
+    func_00328E48();
+}
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E908);
 
@@ -25,7 +27,9 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA98);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EBC8);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECB8);
+void func_0018ECB8(s32 arg0) {
+    func_003297C8(*(u32 *)(arg0 + 0x30));
+}
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);
 
@@ -50,7 +54,9 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F018);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F098);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F1B8);
+void func_0018F1B8(s32 arg0) {
+    func_003297C8(*(u32 *)(arg0 + 0x30));
+}
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F1D0);
 

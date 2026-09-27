@@ -6,9 +6,13 @@ extern s32 func_00102790(void);
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_001019F0);
 
-INCLUDE_ASM(const s32, "game/code_001019F0", func_00101A60);
+void func_00101A60(u32 arg0, u32 arg1, u32 arg2) {
+    func_00100F48(1, arg0, arg1, arg2);
+}
 
-INCLUDE_ASM(const s32, "game/code_001019F0", func_00101A90);
+void func_00101A90(u32 arg0, u32 arg1, u32 arg2) {
+    func_00100F48(0, arg0, arg1, arg2);
+}
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_00101AC0);
 

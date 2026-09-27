@@ -55,12 +55,20 @@ void func_001695D0(u32 arg0) {
     D_00436414 = D_00436414 | arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_001695E0);
+void func_001695E0(u32 arg0) {
+    D_00436414 = D_00436414 & ~arg0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_001695F8);
+u8 func_001695F8(u32 arg0) {
+    return (D_00436414 & arg0) != 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_00169608);
+void func_00169608(void) {
+    D_00436414 = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00169418", func_00169610);
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_001696B8);
+void func_001696B8(void) {
+    func_00169610();
+}

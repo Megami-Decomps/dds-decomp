@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern u64 func_0016AEB0(u64, u64);
+
 extern u64 func_00328D68(u64);
 
 extern s32 D_00438F04;
@@ -8,7 +10,10 @@ extern s32 func_00185400(void);
 
 extern u8 D_0043643C;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017EDE8);
+void func_0017EDE8(u32 arg0) {
+    func_00159AF0(*(u32 *)((s32)arg0 + 0x1c));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017EE18);
 
@@ -100,7 +105,11 @@ void func_00180260(s32 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180278);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180318);
+void func_00180318(s32 arg0) {
+    func_0016A620(*(u32 *)(arg0 + 0x134c));
+    func_0016A620(*(u32 *)(arg0 + 0x1348));
+    func_003297C8(*(u32 *)(arg0 + 0x1350));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180350);
 
@@ -116,7 +125,11 @@ void func_00180768(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180770);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001807E0);
+void func_001807E0(u32 arg0) {
+    func_0016A620(*(u32 *)((s32)arg0 + 0x14));
+    func_0016A620(*(u32 *)((s32)arg0 + 0x18));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180818);
 
@@ -318,7 +331,10 @@ u64 func_00182250(void) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182288);
+void func_00182288(u32 arg0) {
+    func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
+    func_00328E48(arg0);
+}
 
 u64 func_001822B8(void) {
     u64 temp_v0;
@@ -378,7 +394,10 @@ u64 func_00182938(void) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182970);
+void func_00182970(u32 arg0) {
+    func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
+    func_00328E48(arg0);
+}
 
 u64 func_001829A0(void) {
     u64 temp_v0;
@@ -414,7 +433,10 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DC8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182E70);
+void func_00182E70(u32 arg0) {
+    func_0018E8F0(*(u32 *)((s32)arg0 + 0x34));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182EA0);
 
@@ -428,11 +450,19 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182F98);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182FA0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183030);
+void func_00183030(u64 arg0) {
+    u64 temp_v0;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00182FA0(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183050);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001830F0);
+void func_001830F0(u32 arg0) {
+    func_0018FC88(*(u32 *)((s32)arg0 + 0x38));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183120);
 
@@ -446,11 +476,19 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001832E0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001832E8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183378);
+void func_00183378(u64 arg0) {
+    u64 temp_v0;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_001832E8(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183398);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183448);
+void func_00183448(u32 arg0) {
+    func_0018E8F0(*(u32 *)((s32)arg0 + 0x38));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183478);
 
@@ -464,11 +502,20 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183638);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183640);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001836D0);
+void func_001836D0(u64 arg0) {
+    u64 temp_v0;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001836F0);
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00183640(temp_v0);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183708);
+void func_001836F0(void) {
+    func_00183640();
+}
+
+void func_00183708(void) {
+    func_00328E48();
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183720);
 
@@ -478,11 +525,20 @@ void func_00183830(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183838);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001838E8);
+void func_001838E8(u64 arg0) {
+    u64 temp_v0;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183908);
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00183838(temp_v0);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183920);
+void func_00183908(void) {
+    func_00183838();
+}
+
+void func_00183920(void) {
+    func_00328E48();
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183938);
 
@@ -492,11 +548,19 @@ void func_00183A50(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183A58);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183AE8);
+void func_00183AE8(u64 arg0) {
+    u64 temp_v0;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00183A58(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183B08);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183BB8);
+void func_00183BB8(u32 arg0) {
+    func_0018ECB8(*(u32 *)((s32)arg0 + 0x34));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183BE8);
 
@@ -508,11 +572,19 @@ void func_00183DC0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183DC8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183E58);
+void func_00183E58(u64 arg0) {
+    u64 temp_v0;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00183DC8(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183E78);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183F28);
+void func_00183F28(u32 arg0) {
+    func_0018F1B8(*(u32 *)((s32)arg0 + 0x34));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183F58);
 
@@ -532,7 +604,10 @@ u64 func_00184198(void) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001841D0);
+void func_001841D0(u32 arg0) {
+    func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
+    func_00328E48(arg0);
+}
 
 u64 func_00184200(void) {
     u64 temp_v0;
@@ -562,7 +637,10 @@ u64 func_00184448(void) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184480);
+void func_00184480(u32 arg0) {
+    func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
+    func_00328E48(arg0);
+}
 
 u64 func_001844B0(void) {
     u64 temp_v0;
@@ -584,11 +662,26 @@ void func_001846B0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001846B8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001847E0);
+void func_001847E0(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_001846B8(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184828);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184880);
+void func_00184880(u32 arg0) {
+    s32 temp_v0;
+
+    temp_v0 = *(s32 *)((s32)arg0 + 0x74);
+    if (temp_v0 != 0) {
+        func_00157658(temp_v0);
+    }
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001848B8);
 
@@ -691,7 +784,10 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186B88);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186C60);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186D40);
+void func_00186D40(u32 arg0) {
+    func_0016A620(*(u32 *)((s32)arg0 + 0x60));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186D70);
 
@@ -709,7 +805,11 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186E68);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186F28);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186FE0);
+void func_00186FE0(u32 arg0) {
+    func_0016A620(*(u32 *)((s32)arg0 + 100));
+    func_0016A620(*(u32 *)((s32)arg0 + 0x60));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187018);
 
@@ -727,7 +827,11 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187168);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187228);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001872E0);
+void func_001872E0(u32 arg0) {
+    func_0016A620(*(u32 *)((s32)arg0 + 100));
+    func_0016A620(*(u32 *)((s32)arg0 + 0x60));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187318);
 
@@ -758,53 +862,80 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187490);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001874A8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001874F0);
+void func_001874F0(void) {
+    func_001874A8(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187508);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187558);
+void func_00187558(void) {
+    func_00187508(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187570);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001875B8);
+void func_001875B8(void) {
+    func_00187570(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001875D0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187620);
+void func_00187620(void) {
+    func_001875D0(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187638);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187680);
+void func_00187680(void) {
+    func_00187638(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187698);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001876E8);
+void func_001876E8(void) {
+    func_00187698(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187700);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187748);
+void func_00187748(void) {
+    func_00187700(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187760);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001877B0);
+void func_001877B0(void) {
+    func_00187760(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001877C8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187810);
+void func_00187810(void) {
+    func_001877C8(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187828);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187878);
+void func_00187878(void) {
+    func_00187828(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187890);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001878D8);
+void func_001878D8(void) {
+    func_00187890(0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001878F0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187940);
+void func_00187940(void) {
+    func_001878F0(0);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187958);
+void func_00187958(u32 arg0) {
+    func_0016D228(*(u32 *)((s32)arg0 + 0x20));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187988);
 
@@ -816,11 +947,19 @@ void func_00187AA0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187AA8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187B68);
+void func_00187B68(u64 arg0) {
+    u64 temp_v0;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00187AA8(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187B88);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187CA8);
+void func_00187CA8(u32 arg0) {
+    func_0016B130(*(u32 *)((s32)arg0 + 0x30));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187CD8);
 
@@ -834,7 +973,11 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187E48);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187E50);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187F90);
+void func_00187F90(u32 arg0) {
+    func_00333918(*(u32 *)((s32)arg0 + 0xa8));
+    func_003297C8(*(u32 *)((s32)arg0 + 0xac));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187FC8);
 
@@ -844,11 +987,21 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188320);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188350);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001884E8);
+void func_001884E8(u64 arg0) {
+    u64 temp_v0;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188508);
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00188350(temp_v0);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188520);
+void func_00188508(void) {
+    func_00188350();
+}
+
+void func_00188520(u32 arg0) {
+    func_00187F90(*(u32 *)((s32)arg0 + 0x5c));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188550);
 
@@ -870,11 +1023,21 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188A70);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188AD0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188C78);
+void func_00188C78(u64 arg0) {
+    u64 temp_v0;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188C98);
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_00188AD0(temp_v0);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188CB0);
+void func_00188C98(void) {
+    func_00188AD0();
+}
+
+void func_00188CB0(u32 arg0) {
+    func_00187F90(*(u32 *)((s32)arg0 + 0x7c));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188CE0);
 
@@ -928,7 +1091,14 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189DE0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189DE8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189FF0);
+void func_00189FF0(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_00189DE8(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A038);
 
@@ -948,7 +1118,16 @@ void func_0018A690(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A698);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A8E8);
+void func_0018A8E8(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u64 temp_v2;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v2 = func_0016AEB0(arg0, 2);
+    func_0018A698(temp_v0, temp_v1, temp_v2);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A950);
 
@@ -966,7 +1145,14 @@ void func_0018B128(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B130);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B350);
+void func_0018B350(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0018B130(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B398);
 
@@ -988,7 +1174,16 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BA18);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BB38);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC28);
+void func_0018BC28(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u64 temp_v2;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v2 = func_0016AEB0(arg0, 2);
+    func_0018BB38(temp_v0, temp_v1, temp_v2);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC90);
 

@@ -98,6 +98,8 @@ def main():
     version = unit.relative_to(ROOT / "src").parts[0]
     unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
+    func_starts = sorted({int(m.group(2), 16) for m in re.finditer(
+        r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)})
     gp = int(VERSIONS[version]["gp"], 16)
     retail = (ROOT / RETAIL[version]).read_bytes()
     segs = load_segments(retail)
@@ -135,6 +137,14 @@ def main():
             continue
         roff = va_to_off(segs, addr)
         diffs = []
+        # A function may not run into the next retail function: that means the
+        # retail "start" there is really part of this one (tools/find_fragments.py).
+        nxt = next((a for a in func_starts if a > addr), None)
+        if nxt is not None and addr + size > nxt and any(
+                struct.unpack_from("<I", text, off + (nxt - addr) + j)[0] for j in range(0, off + size - (off + nxt - addr), 4)):
+            print(f"OVER {name} @ 0x{addr:08X}: runs past the next function at 0x{nxt:08X}")
+            bad += 1
+            continue
         pending_hi = {}
         rodata_hi = None
         for i in range(0, size, 4):

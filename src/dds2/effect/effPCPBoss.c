@@ -1,12 +1,21 @@
 #include "common.h"
 
+extern u64 func_0016AEB0(u64, u64);
+
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C190);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C288);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C4E8);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C618);
+void func_0018C618(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0018C4E8(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C660);
 
@@ -20,11 +29,24 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D220);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D228);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D2C8);
+void func_0018D2C8(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u64 temp_v2;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v2 = func_0016AEB0(arg0, 2);
+    func_0018D228(temp_v0, temp_v1, temp_v2);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D330);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossFree);
+void effPCPBossFree(u32 arg0) {
+    func_0016A620(*(u32 *)((s32)arg0 + 0x2c));
+    func_0016A620(*(u32 *)((s32)arg0 + 0x28));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D3E8);
 
@@ -79,9 +101,13 @@ void func_0018D598(void) {
 void func_0018D5A0(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D5A8);
+u32 func_0018D5A8(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D5B0);
+u32 func_0018D5B0(void) {
+    return 0;
+}
 
 u32 func_0018D5B8(void) {
     return 0;
@@ -96,11 +122,17 @@ void func_0018D5C8(void) {
 void func_0018D5D0(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D5D8);
+u32 func_0018D5D8(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D5E0);
+u32 func_0018D5E0(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D5E8);
+u32 func_0018D5E8(void) {
+    return 0;
+}
 
 void func_0018D5F0(void) {
 }
@@ -178,20 +210,40 @@ void func_0018D6A0(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D6A8);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D710);
+void func_0018D710(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0018D6A8(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D758);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D7D0);
+void func_0018D7D0(void) {
+    func_0018C788();
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D7E8);
+void func_0018D7E8(void) {
+    func_0018C820();
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D800);
+void func_0018D800(void) {
+    func_0018D210();
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D818);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D830);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018DA38);
+void func_0018DA38(u64 arg0) {
+    u64 temp_v0;
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018DA58);
+    temp_v0 = func_0016AEB0(arg0, 0);
+    func_0018D830(temp_v0);
+}
+
+void func_0018DA58(void) {
+    func_0018D830();
+}

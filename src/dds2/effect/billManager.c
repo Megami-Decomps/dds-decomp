@@ -18,15 +18,28 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158DB0);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00158E00);
+void func_00158E00(u32 arg0) {
+    s32 temp_v0;
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00158E38);
+    temp_v0 = *(s32 *)((s32)arg0 + 0x30);
+    if (temp_v0 != 0) {
+        func_00157E50(temp_v0);
+    }
+    func_00328E48(arg0);
+}
+
+void func_00158E38(s32 arg0) {
+    func_00157EA0(arg0, *(u32 *)(arg0 + 0x30));
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158E50);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158ED8);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00158F58);
+void func_00158F58(u32 arg0) {
+    func_00159848(*(u32 *)((s32)arg0 + 0x30));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158F88);
 

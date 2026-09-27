@@ -4,7 +4,9 @@ extern s32 func_002467B8(u32);
 
 extern s64 strcmp(u64, s32);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_002467A0);
+void func_002467A0(void) {
+    func_00246108();
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_002467B8);
 

@@ -1,6 +1,13 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328AC8);
+extern u64 func_00328A60(u64);
+
+void func_00328AC8(void) {
+    u64 temp_v0;
+
+    temp_v0 = func_00328A60(0xffffffffffffffff);
+    func_003289C8(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328AE8);
 

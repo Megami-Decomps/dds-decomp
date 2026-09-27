@@ -93,7 +93,10 @@ SdfPacket *func_00330CE8(SdfPacket *arg0) {
     return arg0 + 1;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330D00);
+void func_00330D00(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
+    func_00333950(*(u32 *)(arg1 * 4 + *(s32 *)(*(s32 *)(arg0 + 0xc) + 0xc)), arg2,
+                                arg3);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330D30);
 
@@ -292,7 +295,14 @@ void func_00331AB0(SdfModel *arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B18);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B38);
+void func_00331B38(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,
+                                    u32 arg4) {
+    arg0[3] = arg4;
+    *arg0 = arg1;
+    arg0[2] = arg3;
+    arg0[1] = (s32)arg2;
+    func_00348BD8(arg2);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B68);
 

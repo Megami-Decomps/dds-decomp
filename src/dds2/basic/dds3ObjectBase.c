@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern u64 func_00111838(u64);
+extern s64 func_00111CF8(u64, u64);
+
 extern u32 func_00112AB0(void);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
@@ -55,7 +58,17 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112328);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112978);
+void func_00112978(u64 arg0) {
+    s64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_00111CF8(arg0, 1);
+    if (temp_v0 == 0) {
+        temp_v1 = func_00111838(arg0);
+        func_00111C30(arg0, temp_v1);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001129C8);
 

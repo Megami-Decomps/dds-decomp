@@ -12,7 +12,14 @@ void func_0010F860(void *arg, s32 arg1);
 
 void func_0010F8B0(void *arg);
 
-INCLUDE_ASM(const s32, "basic/dds3EventObjectBasic", func_001163B0);
+void func_001163B0(s32 arg0) {
+    u32 *puVar1;
+
+    func_0010F810();
+    puVar1 = *(u32 **)(arg0 + 0x18);
+    func_00111A68(*puVar1);
+    func_00328E48(puVar1);
+}
 
 s32 func_001163F0(EventObj *arg) {
     void *data;

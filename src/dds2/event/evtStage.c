@@ -1,6 +1,18 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0023A9A8);
+extern s32 func_00112A90(void);
+
+extern s32 func_0010FFE8(void);
+
+void func_0023A9A8(void) {
+    s64 temp_v0;
+
+    temp_v0 = func_0010FFE8();
+    if (temp_v0 != 0) {
+        func_00110070(temp_v0);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023A9E0);
 
@@ -12,9 +24,25 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0023AC80);
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023ACE8);
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0023AD98);
+void func_0023AD98(void) {
+    s64 temp_v0;
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0023ADD0);
+    temp_v0 = func_00112A90();
+    if (temp_v0 != 0) {
+        func_00117810(temp_v0);
+        return;
+    }
+}
+
+void func_0023ADD0(void) {
+    s64 temp_v0;
+
+    temp_v0 = func_00112A90();
+    if (temp_v0 != 0) {
+        func_00117820(temp_v0);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023AE08);
 

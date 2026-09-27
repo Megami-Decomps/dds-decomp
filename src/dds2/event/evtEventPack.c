@@ -1,12 +1,19 @@
 #include "common.h"
 
+extern u64 func_00101958(void);
+
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D230);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D390);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D4D0);
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D690);
+void func_0025D690(void) {
+    u64 temp_v0;
+
+    temp_v0 = func_00101958();
+    func_00328E48(temp_v0);
+}
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D6B0);
 

@@ -17,15 +17,23 @@ INCLUDE_ASM(const s32, "file/fileManager", func_002C7EF8);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7F38);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C7FF0);
+void func_002C7FF0(u32 arg0) {
+    func_002C7F38(arg0, 0, 0, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C8018);
+void func_002C8018(u32 arg0) {
+    func_002C7F38(arg0, 1, 0, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8040);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C80C8);
+void func_002C80C8(u32 arg0) {
+    func_002C8040(arg0, 0, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C80E8);
+void func_002C80E8(u32 arg0) {
+    func_002C8040(arg0, 1, 0, 0);
+}
 
 u32 func_002C8108(s32 arg0) {
     return *(u32 *)(arg0 + 0x20);

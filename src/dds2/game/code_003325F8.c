@@ -12,7 +12,9 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332920);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003329B8);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332A00);
+void func_00332A00(s32 arg0) {
+    func_003329B8(*(u32 *)(arg0 + 0x90));
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332A18);
 
@@ -48,13 +50,26 @@ void func_00332E50(u32 arg0) {
     D_00438A3C = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332E58);
+void func_00332E58(u32 arg0) {
+    func_00340498(arg0, 4, 4);
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332E78);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F70);
+void func_00332F70(s32 arg0, s32 arg1, s32 arg2) {
+    s32 temp_v0;
+
+    if ((arg1 < *(s16 *)(arg0 + 4)) && (arg2 != 0)) {
+        temp_v0 = (s32)arg1;
+        do {
+            temp_v0 = temp_v0 + 1;
+        } while ((s64)temp_v0 != (s64)*(s16 *)(arg0 + 4));
+        *(s16 *)(arg0 + 4) = (s16)arg1;
+    }
+    func_003405D8();
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332FC8);
 
@@ -62,13 +77,17 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00333060);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003330F0);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333120);
+void func_00333120(u32 arg0) {
+    func_00340498(arg0, 4, 8);
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333140);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003331A8);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003331F0);
+void func_003331F0(void) {
+    func_00340558();
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333208);
 
@@ -158,7 +177,9 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00333990);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333A30);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333B18);
+void func_00333B18(s32 arg0, s32 arg1) {
+    func_00333A30(arg1 + 0x68, *(u32 *)(arg0 + 0x38));
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333B38);
 

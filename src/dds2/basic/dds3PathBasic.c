@@ -45,7 +45,10 @@ void func_00116DE8(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
 
 void func_00341120(void *arg0, f32 arg1);
 
-INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00117170);
+void func_00117170(u32 arg0) {
+    func_0019AA18(*(u32 *)((s32)arg0 + 0x10));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_001171A0);
 

@@ -95,6 +95,7 @@ def main():
             if body and (why := fragment_reason(body)):
                 found.append((body[0][0], name, why, path.relative_to(ROOT)))
         found += branched_into(funcs, path)
+        found += fallen_into(funcs, path)
     found = sorted({f[0]: f for f in found}.values())
     for addr, name, why, path in found:
         print(f"0x{addr:08X}  {name:32} {why:44} {path}")
@@ -144,6 +145,29 @@ def branched_into(funcs, path):
             for s in starts:
                 if a < s <= b:
                     out.append((s, names[s], f"branched into from {name}", path.relative_to(ROOT)))
+    return out
+
+
+TERMINATORS = ("jr", "j", "b", "eret")
+
+
+def fallen_into(funcs, path):
+    """Starts the previous function runs into: its last instruction (ignoring
+    alignment nops) is not the delay slot of a return, jump or unconditional
+    branch, so execution continues past the "start"."""
+    out = []
+    for (prev_name, prev), (name, body) in zip(funcs, funcs[1:]):
+        if not prev or not body:
+            continue
+        ops = [op for _, op, _ in prev]
+        while ops and ops[-1] == "nop":
+            ops.pop()  # alignment padding, or a nop delay slot
+        if ops and ops[-1] in TERMINATORS + ("syscall", "break"):
+            continue
+        if len(ops) >= 2 and ops[-2] in TERMINATORS:
+            continue
+        if name.startswith("func_"):  # named entry points (_start) are real
+            out.append((body[0][0], name, f"fallen into from {prev_name}", path.relative_to(ROOT)))
     return out
 
 

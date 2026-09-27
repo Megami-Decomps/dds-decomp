@@ -67,7 +67,9 @@ s32 func_0032B8D8(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B908);
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B948);
+void func_0032B948(s32 arg0, u32 arg1) {
+    memcpy(*(u32 *)(arg0 + 0x30), arg1, *(u32 *)(arg0 + 0x34));
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B968);
 
@@ -127,8 +129,12 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BF78);
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032C138);
+void func_0032C138(u32 arg0) {
+    func_0032BF78(arg0, 0);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032C150);
+void func_0032C150(u32 arg0) {
+    func_0032BF78(arg0, 1);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032C168);

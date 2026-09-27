@@ -119,9 +119,13 @@ void func_00334638(StateByte *a0) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334658);
+void func_00334658(void) {
+    func_00328E48();
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334670);
+void func_00334670(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 8) = arg1;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334678);
 
@@ -176,7 +180,9 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003350B0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335108);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335160);
+void func_00335160(s32 arg0) {
+    *(u8 *)(arg0 + 0x10) = ((u8)(*(u16 *)(*(s32 *)(arg0 + 0xc) + 0x14) >> 4) ^ 1) & 1;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335180);
 
@@ -202,7 +208,9 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003352C8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335308);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003353B8);
+void func_003353B8(s32 arg0) {
+    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x14);
+}
 
 void *func_003353C8(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -216,7 +224,9 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335428);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335468);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335518);
+void func_00335518(s32 arg0) {
+    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x10);
+}
 
 void *func_00335528(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -230,7 +240,9 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335588);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003355C8);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335678);
+void func_00335678(s32 arg0) {
+    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x20);
+}
 
 void *func_00335688(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -244,7 +256,9 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003356E8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335728);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003357D8);
+void func_003357D8(s32 arg0) {
+    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x28);
+}
 
 void *func_003357E8(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -268,7 +282,14 @@ void *func_003358F0(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335950);
+void func_00335950(u32 arg0) {
+    u8 temp_v0 [16];
+    u8 temp_v1 [32];
+
+    func_00334678(arg0, temp_v0);
+    func_003348D8(temp_v0, temp_v1);
+    func_003333F8(*(u32 *)((s32)arg0 + 0xc), temp_v1);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003359A0);
 
@@ -282,7 +303,14 @@ void *func_00335A68(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335AC8);
+void func_00335AC8(u32 arg0) {
+    u8 temp_v0 [16];
+    u8 temp_v1 [32];
+
+    func_00334678(arg0, temp_v0);
+    func_003348D8(temp_v0, temp_v1);
+    func_00333560(*(u32 *)((s32)arg0 + 0xc), temp_v1);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335B18);
 
@@ -300,7 +328,9 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C40);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C80);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335D30);
+void func_00335D30(s32 arg0) {
+    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x18);
+}
 
 void *func_00335D40(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -310,9 +340,19 @@ void *func_00335D40(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335DA0);
+void func_00335DA0(u32 arg0) {
+    u32 temp_v0 [4];
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335DD8);
+    func_00334678(arg0, temp_v0);
+    func_003333F8(*(u32 *)((s32)arg0 + 0xc), temp_v0[0]);
+}
+
+void func_00335DD8(u32 arg0) {
+    u32 temp_v0 [4];
+
+    func_00334678(arg0, temp_v0);
+    func_003333F8(*(u32 *)((s32)arg0 + 0xc), temp_v0[0]);
+}
 
 void func_00335E10(void) {
 }
@@ -325,6 +365,16 @@ void *func_00335E18(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335E78);
+void func_00335E78(u32 arg0) {
+    u32 temp_v0 [4];
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335EB0);
+    func_00334678(arg0, temp_v0);
+    func_00333560(*(u32 *)((s32)arg0 + 0xc), temp_v0[0]);
+}
+
+void func_00335EB0(u32 arg0) {
+    u32 temp_v0 [4];
+
+    func_00334678(arg0, temp_v0);
+    func_00333560(*(u32 *)((s32)arg0 + 0xc), temp_v0[0]);
+}

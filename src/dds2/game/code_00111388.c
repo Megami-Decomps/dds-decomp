@@ -16,4 +16,11 @@ INCLUDE_ASM(const s32, "game/code_00111388", func_001115B0);
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_00111628);
 
-INCLUDE_ASM(const s32, "game/code_00111388", func_00111668);
+void func_00111668(s32 arg0) {
+    u32 *puVar1;
+
+    puVar1 = *(u32 **)(arg0 + 0x18);
+    func_00111920();
+    func_00111C90(*puVar1, 0, 1);
+    func_00328E48(puVar1);
+}

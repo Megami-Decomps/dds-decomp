@@ -1,6 +1,10 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/effManager", func_001573D8);
+void func_001573D8(void) {
+    func_0015B290();
+    func_00162E40();
+    func_00157CE0();
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", func_00157400);
 
@@ -52,6 +56,8 @@ INCLUDE_ASM(const s32, "effect/effManager", func_00157878);
 
 INCLUDE_ASM(const s32, "effect/effManager", func_001578C0);
 
-INCLUDE_ASM(const s32, "effect/effManager", func_001579C8);
+void func_001579C8(u32 arg0) {
+    func_001575D0(5, 0, arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", func_001579E8);

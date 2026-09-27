@@ -1,5 +1,9 @@
 #include "common.h"
 
+extern u32 D_004371EC;
+
+extern u64 func_0010FFA8(void);
+
 extern u64 func_0010D650(u64);
 
 extern u64 func_0023A7A0(u64, u64);
@@ -34,7 +38,12 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E460);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E648);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E6D8);
+void func_0023E6D8(u64 arg0, u64 arg1) {
+    u64 temp_v0;
+
+    temp_v0 = func_0010FFA8();
+    func_00110C70(temp_v0, arg1, arg0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E718);
 
@@ -85,7 +94,9 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EEA0);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EF40);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EFF8);
+void func_0023EFF8(void) {
+    func_0023CEA8(D_004371EC);
+}
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421810);
 

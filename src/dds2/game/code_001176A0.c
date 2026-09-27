@@ -1,5 +1,9 @@
 #include "common.h"
 
+extern u32 D_00435E80;
+
+extern s32 D_00435DD0;
+
 extern s64 func_0011D588(void);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
@@ -58,7 +62,20 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00117998);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001179E8);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117A10);
+void func_00117A10(void) {
+    func_0010BE08();
+    func_0023A028();
+    *(u32 *)(D_00435DD0 + 0xa5c) = 8;
+    func_0011AB38();
+    func_00122B58(0);
+    func_00313C40();
+    func_0026CE90();
+    func_00314200();
+    func_0011C998();
+    func_0011CA28();
+    func_0011D438();
+    func_001B7900();
+}
 
 void func_00117A80(void) {
 }
@@ -69,7 +86,9 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118008);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118598);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118680);
+void func_00118680(void) {
+    func_0011D558(D_00435E80);
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118698);
 
@@ -96,9 +115,13 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118B90);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118BA8);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118C58);
+void func_00118C58(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
+    func_0011D4C8(10, arg1, arg2, arg0, arg3);
+}
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118C80);
+void func_00118C80(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
+    func_0011D4C8(7, arg1, arg2, arg0, arg3);
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CA8);
 

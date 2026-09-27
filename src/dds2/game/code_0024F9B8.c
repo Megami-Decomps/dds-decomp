@@ -26,7 +26,9 @@ void func_0024FE50(void) {
     *puVar1 = *puVar1 & 0xfffffffe;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FE80);
+void func_0024FE80(u32 arg0) {
+    kwlnTaskDestroyWithHierarchy(arg0, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FE98);
 

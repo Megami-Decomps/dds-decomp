@@ -1,6 +1,15 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00160B58);
+void func_00160B58(u32 arg0) {
+    s32 temp_v0;
+
+    temp_v0 = *(s32 *)((s32)arg0 + 0x174);
+    if (temp_v0 != 0) {
+        func_003297C8(temp_v0);
+    }
+    func_0015B510(arg0);
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00160B98);
 
@@ -12,7 +21,9 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001616A8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001617F8);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001618C8);
+void func_001618C8(s32 arg0) {
+    func_003297C8(*(u32 *)(arg0 + 0xc));
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001618E0);
 

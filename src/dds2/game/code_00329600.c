@@ -1,14 +1,30 @@
 #include "common.h"
 
+extern u64 func_00329930(void);
+
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329600);
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_003297B0);
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_003297C8);
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_00329868);
+void func_00329868(void) {
+    u64 temp_v0;
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_00329888);
+    temp_v0 = func_00329930();
+    func_003297C8(temp_v0);
+}
+
+void func_00329888(s32 *arg0) {
+    s32 temp_v0;
+
+    temp_v0 = *arg0;
+    if (temp_v0 != 0) {
+        *arg0 = 0;
+        func_003297C8(temp_v0);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_003298C0);
 

@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern u32 func_0010C408(void);
+
 typedef union ScrStackValue {
     s32 i;
     f32 f;
@@ -65,65 +67,173 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C6B0);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C708);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C760);
+u32 func_0010C760(u32 arg0) {
+    s32 temp_v0;
+
+    temp_v0 = (s32)arg0;
+    func_0010C348(arg0, *(u32 *)
+                                                  (*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2) * 4 +
+                                                  *(s32 *)(temp_v0 + 0xdc)));
+    *(s32 *)(temp_v0 + 0x18) = *(s32 *)(temp_v0 + 0x18) + 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C7B8);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C810);
+u32 func_0010C810(u32 arg0) {
+    s32 temp_v0;
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C860);
+    temp_v0 = (s32)arg0;
+    func_0010C3A8(arg0, *(s32 *)(temp_v0 + 0xc4) +
+                                                (s32)*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2));
+    *(s32 *)(temp_v0 + 0x18) = *(s32 *)(temp_v0 + 0x18) + 1;
+    return 1;
+}
+
+u32 func_0010C860(s32 arg0) {
+    *(u8 *)(*(s32 *)(arg0 + 0x1c) + arg0 + 0x20) = *(u8 *)(arg0 + 0x3b);
+    *(u32 *)(*(s32 *)(arg0 + 0x1c) * 4 + arg0 + 0x3c) = *(u32 *)(arg0 + 0xa8);
+    *(s32 *)(arg0 + 0x1c) = *(s32 *)(arg0 + 0x1c) + 1;
+    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C8A8);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C900);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C958);
+u32 func_0010C958(s32 arg0) {
+    u32 temp_v0;
+
+    temp_v0 = func_0010C408();
+    *(u32 *)
+      (*(s16 *)(*(s32 *)(arg0 + 0x18) * 4 + *(s32 *)(arg0 + 0xbc) + 2) * 4 +
+      *(s32 *)(arg0 + 0xdc)) = temp_v0;
+    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C9B0);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CA08);
+u32 func_0010CA08(s32 arg0) {
+    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CA20);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CAC0);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CB00);
+u32 func_0010CB00(s32 arg0) {
+    *(u32 *)(arg0 + 0x18) =
+              *(u32 *)
+                (*(s16 *)(*(s32 *)(arg0 + 0x18) * 4 + *(s32 *)(arg0 + 0xbc) + 2) * 0x20 +
+                  *(s32 *)(arg0 + 0xb4) + 0x18);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CB30);
+u32 func_0010CB30(u32 arg0) {
+    s32 temp_v0;
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CB88);
+    temp_v0 = (s32)arg0;
+    func_0010C3D8(arg0, *(u32 *)(temp_v0 + 0x18));
+    *(u32 *)(temp_v0 + 0x18) =
+              *(u32 *)
+                (*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2) * 0x20 +
+                  *(s32 *)(temp_v0 + 0xb4) + 0x18);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CBA0);
+u32 func_0010CB88(s32 arg0) {
+    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+    return 1;
+}
+
+u32 func_0010CBA0(s32 arg0) {
+    *(u32 *)(arg0 + 0x18) =
+              *(u32 *)
+                (*(s16 *)(*(s32 *)(arg0 + 0x18) * 4 + *(s32 *)(arg0 + 0xbc) + 2) * 0x20 +
+                  *(s32 *)(arg0 + 0xb8) + 0x18);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CBD0);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D0B8);
+u32 func_0010D0B8(u32 arg0) {
+    func_0010CBD0(arg0, 0);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D0F0);
+u32 func_0010D0F0(u32 arg0) {
+    func_0010CBD0(arg0, 1);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D128);
+u32 func_0010D128(u32 arg0) {
+    func_0010CBD0(arg0, 2);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D160);
+u32 func_0010D160(u32 arg0) {
+    func_0010CBD0(arg0, 3);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D198);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D280);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D328);
+u32 func_0010D328(u32 arg0) {
+    func_0010CBD0(arg0, 4);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D360);
+u32 func_0010D360(u32 arg0) {
+    func_0010CBD0(arg0, 5);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D398);
+u32 func_0010D398(u32 arg0) {
+    func_0010CBD0(arg0, 6);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D3D0);
+u32 func_0010D3D0(u32 arg0) {
+    func_0010CBD0(arg0, 7);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D408);
+u32 func_0010D408(u32 arg0) {
+    func_0010CBD0(arg0, 8);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D440);
+u32 func_0010D440(u32 arg0) {
+    func_0010CBD0(arg0, 9);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D478);
+u32 func_0010D478(u32 arg0) {
+    func_0010CBD0(arg0, 10);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D4B0);
+u32 func_0010D4B0(u32 arg0) {
+    func_0010CBD0(arg0, 0xb);
+    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D4E8);
 

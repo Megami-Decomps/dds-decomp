@@ -1,10 +1,21 @@
 #include "common.h"
 
+extern u64 func_0016AEB0(u64, u64);
+
 extern u32 func_0017AC70(u32);
 
 extern u32 func_0017AD10(u32);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001787E0);
+void func_001787E0(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u64 temp_v2;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v2 = func_0016AEB0(arg0, 2);
+    func_001784F8(temp_v0, temp_v1, temp_v2);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178848);
 
@@ -28,7 +39,16 @@ void func_00179180(float arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001791A8);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179438);
+void func_00179438(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u64 temp_v2;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v2 = func_0016AEB0(arg0, 2);
+    func_001791A8(temp_v0, temp_v1, temp_v2);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001794A0);
 
@@ -51,7 +71,16 @@ void func_00179D90(float arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179DB0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A058);
+void func_0017A058(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u64 temp_v2;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v2 = func_0016AEB0(arg0, 2);
+    func_00179DB0(temp_v0, temp_v1, temp_v2);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A0C0);
 
@@ -72,7 +101,13 @@ void func_0017A8B8(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A8C0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A9C8);
+void func_0017A9C8(s32 arg0) {
+    if (*(s32 *)(arg0 + 0x30) != 0) {
+        func_0017ACC0(*(s32 *)(arg0 + 0x30));
+    }
+    func_00333918(*(u32 *)(arg0 + 0x28));
+    func_003297C8(*(u32 *)(arg0 + 0x2c));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AA08);
 
@@ -109,11 +144,21 @@ u32 func_0017AD10(u32 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AD28);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AF40);
+void func_0017AF40(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0017AD28(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AF88);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AFD0);
+void func_0017AFD0(s32 arg0) {
+    func_0017D9E0(*(u32 *)(arg0 + 0x184));
+    func_003297C8(*(u32 *)(arg0 + 0x188));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B000);
 
@@ -133,11 +178,21 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B740);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B7A0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B9D0);
+void func_0017B9D0(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0017B7A0(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BA18);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BA60);
+void func_0017BA60(s32 arg0) {
+    func_0017D9E0(*(u32 *)(arg0 + 0x18c));
+    func_003297C8(*(u32 *)(arg0 + 400));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BA90);
 
@@ -157,11 +212,21 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C278);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C2D8);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C4D8);
+void func_0017C4D8(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0017C2D8(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C520);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C568);
+void func_0017C568(s32 arg0) {
+    func_0017D9E0(*(u32 *)(arg0 + 0x194));
+    func_003297C8(*(u32 *)(arg0 + 0x198));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C598);
 
@@ -181,11 +246,21 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CE28);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CE88);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D078);
+void func_0017D078(u64 arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+
+    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v1 = func_0016AEB0(arg0, 1);
+    func_0017CE88(temp_v0, temp_v1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D0C0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D108);
+void func_0017D108(s32 arg0) {
+    func_0017D9E0(*(u32 *)(arg0 + 0x134));
+    func_003297C8(*(u32 *)(arg0 + 0x138));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D138);
 

@@ -1,6 +1,9 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_001655D0);
+void func_001655D0(u32 arg0) {
+    func_001634A8(*(u32 *)((s32)arg0 + 0xdc));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165600);
 
@@ -11,7 +14,10 @@ void func_00165670(float arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00165838);
+void func_00165838(s32 arg0) {
+    func_00165690();
+    func_00163508(*(u32 *)(arg0 + 0xdc));
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165860);
 
@@ -21,7 +27,10 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165A78);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165B98);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00165CC0);
+void func_00165CC0(s32 arg0) {
+    func_001634A8(*(u32 *)(arg0 + 0xf0));
+    func_003297C8(*(u32 *)(arg0 + 0xf8));
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165CF0);
 
@@ -42,7 +51,10 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166350);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00166478);
+void func_00166478(s32 arg0) {
+    func_001634A8(*(u32 *)(arg0 + 0xe0));
+    func_003297C8(*(u32 *)(arg0 + 0xe8));
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001664A8);
 
@@ -58,7 +70,10 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166980);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00166AB0);
+void func_00166AB0(s32 arg0) {
+    func_001634A8(*(u32 *)(arg0 + 0xf4));
+    func_003297C8(*(u32 *)(arg0 + 0xfc));
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166AE0);
 
