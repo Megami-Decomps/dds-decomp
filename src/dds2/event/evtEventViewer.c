@@ -134,3 +134,6 @@ void evtEventViewerFreeBuffer(s32 arg0) {
     }
     *(u32 *)(arg0 + 0x2c) = 0;
 }
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
+

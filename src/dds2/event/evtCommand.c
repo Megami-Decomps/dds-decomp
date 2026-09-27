@@ -252,3 +252,6 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00242BC0);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00242C40);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FE8);
+

@@ -62,147 +62,147 @@ segments:
       # Atlus game/engine code. Named units: real Nocturne (Dec 26 2002 debug build) __FILE__
       # names projected through byte-identical functions (tools/nocturne_tus.py, docs/tu-names.md).
       # Their ranges are lower bounds; code_<vram> gaps are unowned until evidence places them.
-      - [0x1000, asm, game/code_00100000]
+      - [0x1000, c, game/code_00100000]
       - [0x1980, c, kernel/dds3KernelCore]  # Nocturne __FILE__
-      - [0x29F0, asm, game/code_001019F0]
+      - [0x29F0, c, game/code_001019F0]
       - [0x38D8, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__
-      - [0x3DC8, asm, game/code_00102DC8]
+      - [0x3DC8, c, game/code_00102DC8]
       - [0x73B8, c, kernel/dds3KernelDraw]  # Nocturne __FILE__
-      - [0x8EF8, asm, game/code_00107EF8]
+      - [0x8EF8, c, game/code_00107EF8]
       - [0xCD50, c, script/scrScriptProcess]  # Nocturne __FILE__
-      - [0xD250, asm, game/code_0010C250]
+      - [0xD250, c, game/code_0010C250]
       - [0xD618, c, script/scrTraceCode]  # Nocturne __FILE__
-      - [0xE848, asm, game/code_0010D848]
+      - [0xE848, c, game/code_0010D848]
       - [0xE990, c, script/scrCommonCommand]  # Nocturne __FILE__ + P4 transfer
-      - [0x10118, asm, game/code_0010F118]
+      - [0x10118, c, game/code_0010F118]
       - [0x10AA8, c, basic/dds3Basic]  # Nocturne __FILE__
-      - [0x10B00, asm, game/code_0010FB00]
+      - [0x10B00, c, game/code_0010FB00]
       - [0x10F58, c, basic/dds3WorldBasic]  # Nocturne __FILE__
-      - [0x114F0, asm, game/code_001104F0]
+      - [0x114F0, c, game/code_001104F0]
       - [0x11DE0, c, basic/dds3SceneBasic]  # Nocturne __FILE__
-      - [0x11FE8, asm, game/code_00110FE8]
+      - [0x11FE8, c, game/code_00110FE8]
       - [0x12330, c, basic/dds3AreaBasic]  # Nocturne __FILE__
-      - [0x12388, asm, game/code_00111388]
+      - [0x12388, c, game/code_00111388]
       - [0x126A0, c, basic/dds3MoverBasic]  # Nocturne __FILE__
-      - [0x12838, asm, game/code_00111838]
+      - [0x12838, c, game/code_00111838]
       - [0x12A68, c, basic/dds3ObjectBase]  # Nocturne __FILE__
-      - [0x13AB0, asm, game/code_00112AB0]
+      - [0x13AB0, c, game/code_00112AB0]
       - [0x13BE0, c, basic/dds3CameraObjectBasic]  # Nocturne __FILE__
-      - [0x14208, asm, game/code_00113208]
+      - [0x14208, c, game/code_00113208]
       - [0x142F0, c, basic/dds3UnitObjectBasic]  # Nocturne __FILE__
-      - [0x14308, asm, game/code_00113308]
+      - [0x14308, c, game/code_00113308]
       - [0x157D8, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__
-      - [0x16F40, asm, game/code_00115F40]
+      - [0x16F40, c, game/code_00115F40]
       - [0x173B0, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
-      - [0x17440, asm, game/code_00116440]
+      - [0x17440, c, game/code_00116440]
       - [0x175A0, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
-      - [0x177F8, asm, game/code_001167F8]
+      - [0x177F8, c, game/code_001167F8]
       - [0x17AC8, c, basic/dds3ModelBasic]  # Nocturne __FILE__
-      - [0x17AE0, asm, game/code_00116AE0]
+      - [0x17AE0, c, game/code_00116AE0]
       - [0x17CB8, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__
-      - [0x17CF8, asm, game/code_00116CF8]
+      - [0x17CF8, c, game/code_00116CF8]
       - [0x18170, c, basic/dds3PathBasic]  # Nocturne __FILE__
-      - [0x186A0, asm, game/code_001176A0]
+      - [0x186A0, c, game/code_001176A0]
       - [0x1A7A8, c, newdata/datCalc]  # Nocturne __FILE__
-      - [0x1B118, asm, game/code_0011A118]
+      - [0x1B118, c, game/code_0011A118]
       - [0x1FC60, c, game/code_0011EC60]  # mirrors dds1 game/code_0011CE88 (tools/shared_funcs.py)
-      - [0x1FC90, asm, game/code_0011EC90]
+      - [0x1FC90, c, game/code_0011EC90]
       - [0x200F8, c, misc/l2d]  # Nocturne __FILE__
-      - [0x20208, asm, game/code_0011F208]
+      - [0x20208, c, game/code_0011F208]
       - [0x297B8, c, field/fldFileResolver]  # Nocturne __FILE__
-      - [0x29FE8, asm, game/code_00128FE8]
+      - [0x29FE8, c, game/code_00128FE8]
       - [0x451C8, c, field/fldPanel]  # Nocturne __FILE__
-      - [0x452D0, asm, game/code_001442D0]
+      - [0x452D0, c, game/code_001442D0]
       - [0x583D8, c, effect/effManager]  # Nocturne __FILE__
-      - [0x58A50, asm, game/code_00157A50]
+      - [0x58A50, c, game/code_00157A50]
       - [0x58EA0, c, effect/billManager]  # Nocturne __FILE__
-      - [0x5AB48, asm, game/code_00159B48]
+      - [0x5AB48, c, game/code_00159B48]
       - [0x61B58, c, effect/parManager]  # Nocturne __FILE__
-      - [0x63348, asm, game/code_00162348]
+      - [0x63348, c, game/code_00162348]
       - [0x665D0, c, effect/polyManager]  # Nocturne __FILE__
-      - [0x680C0, asm, game/code_001670C0]
+      - [0x680C0, c, game/code_001670C0]
       - [0x696F0, c, effect/effBattle]  # Nocturne __FILE__
-      - [0x6A418, asm, game/code_00169418]
+      - [0x6A418, c, game/code_00169418]
       - [0x6A6D0, c, effect/effBattleMisc]  # Nocturne __FILE__
-      - [0x6B100, asm, game/code_0016A100]
+      - [0x6B100, c, game/code_0016A100]
       - [0x6C0F8, c, effect/effPCPThunder]  # Nocturne __FILE__
-      - [0x6FDD0, asm, game/code_0016EDD0]
+      - [0x6FDD0, c, game/code_0016EDD0]
       - [0x72E00, c, effect/effPCPFlash]  # Nocturne __FILE__
-      - [0x77E28, asm, game/code_00176E28]
+      - [0x77E28, c, game/code_00176E28]
       - [0x797E0, c, effect/effPCPScatter]  # Nocturne __FILE__
-      - [0x7E758, asm, game/code_0017D758]
+      - [0x7E758, c, game/code_0017D758]
       - [0x7F010, c, effect/effPCPNeedle]  # Nocturne __FILE__
-      - [0x7F680, asm, game/code_0017E680]
+      - [0x7F680, c, game/code_0017E680]
       - [0x7FDE8, c, effect/effPCPMisc]  # Nocturne __FILE__
-      - [0x8D078, asm, game/code_0018C078]
+      - [0x8D078, c, game/code_0018C078]
       - [0x8D190, c, effect/effPCPBoss]  # Nocturne __FILE__
-      - [0x8EA70, asm, game/code_0018DA70]
+      - [0x8EA70, c, game/code_0018DA70]
       - [0x8F8F0, c, effect/effBlur_Filter]  # Nocturne __FILE__
-      - [0x909E8, asm, game/code_0018F9E8]
+      - [0x909E8, c, game/code_0018F9E8]
       - [0x90E60, c, effect/effModelTrackPoly]  # Nocturne __FILE__
-      - [0x91D10, asm, game/code_00190D10]
+      - [0x91D10, c, game/code_00190D10]
       - [0x91FF8, c, effect/effMagatuhi]  # Nocturne __FILE__
-      - [0x95700, asm, game/code_00194700]
+      - [0x95700, c, game/code_00194700]
       - [0x96BC8, c, effect/effMath]  # Nocturne __FILE__
-      - [0x96E50, asm, game/code_00195E50]
+      - [0x96E50, c, game/code_00195E50]
       - [0x98E40, c, effect/effEvent]  # Nocturne __FILE__
-      - [0x9B0C0, asm, game/code_0019A0C0]
+      - [0x9B0C0, c, game/code_0019A0C0]
       - [0x9C7A8, c, interface/fmGslCont]  # Nocturne __FILE__
-      - [0x9C840, asm, game/code_0019B840]
+      - [0x9C840, c, game/code_0019B840]
       - [0x9D2A8, c, interface/frFont]  # Nocturne __FILE__
-      - [0x9F138, asm, game/code_0019E138]
+      - [0x9F138, c, game/code_0019E138]
       - [0xA2930, c, interface/itfPanel]  # Nocturne __FILE__
-      - [0xA2B08, asm, game/code_001A1B08]
+      - [0xA2B08, c, game/code_001A1B08]
       - [0xA4370, c, interface/itfMesManager]  # Nocturne __FILE__ + P4 transfer
-      - [0xA6BB8, asm, game/code_001A5BB8]
+      - [0xA6BB8, c, game/code_001A5BB8]
       - [0x108A10, c, game/code_00207A10]  # mirrors dds1 game/code_001F60E8 (tools/shared_funcs.py)
-      - [0x108A38, asm, game/code_00207A38]
+      - [0x108A38, c, game/code_00207A38]
       - [0x132690, c, model/mdlManager]  # Nocturne __FILE__
-      - [0x134660, asm, game/code_00233660]
+      - [0x134660, c, game/code_00233660]
       - [0x13B9A8, c, event/evtStage]  # Nocturne __FILE__
-      - [0x13BF20, asm, game/code_0023AF20]
+      - [0x13BF20, c, game/code_0023AF20]
       - [0x13C3A0, c, event/evtUnitManager]  # Nocturne __FILE__
-      - [0x13E658, asm, game/code_0023D658]
+      - [0x13E658, c, game/code_0023D658]
       - [0x141D20, c, event/evtCommand]  # Nocturne __FILE__
-      - [0x143CB8, asm, game/code_00242CB8]
+      - [0x143CB8, c, game/code_00242CB8]
       - [0x1477A0, c, event/evtEventViewer]  # Nocturne __FILE__
-      - [0x148518, asm, game/code_00247518]
+      - [0x148518, c, game/code_00247518]
       - [0x14ED20, c, event/evtPolygonMovie]  # Nocturne __FILE__
-      - [0x1509B8, asm, game/code_0024F9B8]
+      - [0x1509B8, c, game/code_0024F9B8]
       - [0x150EF0, c, event/evtPicture]  # Nocturne __FILE__
-      - [0x151010, asm, game/code_00250010]
+      - [0x151010, c, game/code_00250010]
       - [0x15E230, c, event/evtEventPack]  # Nocturne __FILE__
-      - [0x15EA20, asm, game/code_0025DA20]
+      - [0x15EA20, c, game/code_0025DA20]
       - [0x1C8D00, c, file/fileManager]  # Nocturne __FILE__
-      - [0x1C93F0, asm, game/code_002C83F0]
+      - [0x1C93F0, c, game/code_002C83F0]
       - [0x1CA2E8, c, mc/mcManager]  # Nocturne __FILE__
-      - [0x1CA660, asm, game/code_002C9660]
+      - [0x1CA660, c, game/code_002C9660]
       - [0x1DD108, c, game/code_002DC108]  # mirrors dds1 game/code_0029A810 (tools/shared_funcs.py)
-      - [0x1DD138, asm, game/code_002DC138]
+      - [0x1DD138, c, game/code_002DC138]
       - [0x229A60, c, sdf/sdfThread]  # Nocturne __FILE__
-      - [0x229AC8, asm, game/code_00328AC8]
+      - [0x229AC8, c, game/code_00328AC8]
       - [0x229E18, c, sdf/sdfChip]  # Nocturne __FILE__
-      - [0x229FA8, asm, game/code_00328FA8]
+      - [0x229FA8, c, game/code_00328FA8]
       - [0x22A240, c, sdf/sdfMemory]  # Nocturne __FILE__
-      - [0x22A600, asm, game/code_00329600]
+      - [0x22A600, c, game/code_00329600]
       - [0x22AD38, c, sdf/sdfGraph]  # Nocturne __FILE__
-      - [0x22AF60, asm, game/code_00329F60]
+      - [0x22AF60, c, game/code_00329F60]
       - [0x22C8D8, c, sdf/sdfTex]  # Nocturne __FILE__
-      - [0x22D278, asm, game/code_0032C278]
+      - [0x22D278, c, game/code_0032C278]
       - [0x231C18, c, sdf/sdfModel]  # Nocturne __FILE__
-      - [0x2335F8, asm, game/code_003325F8]
+      - [0x2335F8, c, game/code_003325F8]
       - [0x2350A8, c, sdf/sdfMotion]  # Nocturne __FILE__
-      - [0x236EE8, asm, game/code_00335EE8]
+      - [0x236EE8, c, game/code_00335EE8]
       - [0x237768, c, game/code_00336768]  # mirrors dds1 game/code_002DD8B8 (tools/shared_funcs.py)
-      - [0x237B48, asm, game/code_00336B48]
+      - [0x237B48, c, game/code_00336B48]
       - [0x23DD78, c, sdf/sdfDevCons]  # Nocturne __FILE__
-      - [0x23E5D0, asm, game/code_0033D5D0]
+      - [0x23E5D0, c, game/code_0033D5D0]
       - [0x241AC8, c, game/code_00340AC8]  # mirrors dds1 game/code_002E7C20 (tools/shared_funcs.py)
-      - [0x242240, asm, game/code_00341240]
+      - [0x242240, c, game/code_00341240]
       - [0x246E18, c, sdf/sdfMovie]  # Nocturne __FILE__
-      - [0x247608, asm, game/code_00346608]
+      - [0x247608, c, game/code_00346608]
       - [0x247CF0, c, sdf/sdfPacDecode]  # Nocturne __FILE__
-      - [0x2488C0, asm, game/code_003478C0]
+      - [0x2488C0, c, game/code_003478C0]
       # Sony SDK / C runtime, one file per library (boundaries = first romwright signature hit)
       - [0x249BF8, asm, sdk/libgraph]  # first signature hit 0x00348BF8
       - [0x24B2F0, asm, sdk/libdma]  # first signature hit 0x0034A2F0
@@ -222,59 +222,74 @@ segments:
       - [0x311C68, databin, eh_frame]
       - [0x311C6C, databin, vudata]
       - [0x311F80, rodata, rodata_00410F80]
+      - [0x311FA0, .rodata, game/code_00100000]
       - [0x312008, .rodata, kernel/dds3KernelCore]
-      - [0x3120A8, rodata, rodata_004110A8]
+      - [0x3120A8, .rodata, game/code_001019F0]
+      - [0x3121B0, .rodata, game/code_00102DC8]
+      - [0x312320, .rodata, game/code_00107EF8]
       - [0x3123F8, .rodata, script/scrScriptProcess]
-      - [0x313510, rodata, rodata_00412510]
+      - [0x313510, .rodata, game/code_0010C250]
       - [0x313550, .rodata, script/scrTraceCode]
       - [0x313648, .rodata, script/scrCommonCommand]
-      - [0x313710, rodata, rodata_00412710]
+      - [0x313710, .rodata, game/code_0010F118]
+      - [0x313790, .rodata, game/code_00111838]
       - [0x3137C0, .rodata, basic/dds3ObjectBase]
-      - [0x313860, rodata, rodata_00412860]
+      - [0x313860, .rodata, game/code_00112AB0]
       - [0x313878, .rodata, basic/dds3CameraObjectBasic]
-      - [0x3138A0, rodata, rodata_004128A0]
+      - [0x3138A0, .rodata, game/code_00113308]
       - [0x313910, .rodata, basic/dds3EffectObjectBasic]
-      - [0x313AB0, rodata, rodata_00412AB0]
+      - [0x313AB0, .rodata, game/code_001176A0]
+      - [0x313B30, .rodata, game/code_0011F208]
       - [0x314000, .rodata, field/fldFileResolver]
-      - [0x314050, rodata, rodata_00413050]
+      - [0x314050, .rodata, game/code_00128FE8]
       - [0x3146B0, .rodata, field/fldPanel]
-      - [0x3146C0, rodata, rodata_004136C0]
+      - [0x3146C0, .rodata, game/code_001442D0]
       - [0x3150C8, .rodata, effect/effManager]
-      - [0x315118, rodata, rodata_00414118]
+      - [0x315118, .rodata, game/code_00157A50]
       - [0x3152D0, .rodata, effect/billManager]
-      - [0x315380, rodata, rodata_00414380]
+      - [0x315380, .rodata, game/code_00162348]
+      - [0x315418, .rodata, game/code_001670C0]
       - [0x3154A0, .rodata, effect/effBattle]
-      - [0x315520, rodata, rodata_00414520]
+      - [0x315520, .rodata, game/code_00169418]
       - [0x3155B0, .rodata, effect/effBattleMisc]
-      - [0x3155F0, rodata, rodata_004145F0]
+      - [0x3155F0, .rodata, game/code_0016EDD0]
       - [0x315610, .rodata, effect/effPCPMisc]
       - [0x315620, .rodata, effect/effBlur_Filter]
       - [0x315630, .rodata, effect/effMagatuhi]
-      - [0x315650, rodata, rodata_00414650]
+      - [0x315650, .rodata, game/code_00194700]
       - [0x315A00, .rodata, effect/effEvent]
       - [0x315A50, .rodata, interface/frFont]
-      - [0x315BD0, rodata, rodata_00414BD0]
+      - [0x315BD0, .rodata, game/code_0019E138]
       - [0x315C70, .rodata, interface/itfMesManager]
-      - [0x315D50, rodata, rodata_00414D50]
+      - [0x315D50, .rodata, game/code_001A5BB8]
+      - [0x31A560, .rodata, game/code_00207A38]
+      - [0x321FF0, .rodata, game/code_00233660]
       - [0x322578, .rodata, event/evtStage]
       - [0x3225D0, .rodata, event/evtUnitManager]
-      - [0x322650, rodata, rodata_00421650]
+      - [0x322650, .rodata, game/code_0023D658]
       - [0x322BC0, .rodata, event/evtCommand]
-      - [0x322FE8, rodata, rodata_00421FE8]
+      - [0x323030, .rodata, game/code_00242CB8]
       - [0x3233B0, .rodata, event/evtEventViewer]
-      - [0x3234A8, rodata, rodata_004224A8]
+      - [0x3234D0, .rodata, game/code_00247518]
       - [0x3240E0, .rodata, event/evtPolygonMovie]
-      - [0x324230, rodata, rodata_00423230]
+      - [0x324230, .rodata, game/code_0024F9B8]
+      - [0x324380, .rodata, game/code_00250010]
       - [0x325830, .rodata, event/evtEventPack]
-      - [0x3258C0, rodata, rodata_004248C0]
+      - [0x3258C0, .rodata, game/code_0025DA20]
       - [0x32C628, .rodata, file/fileManager]
-      - [0x32C648, rodata, rodata_0042B648]
+      - [0x32C648, .rodata, game/code_002C83F0]
+      - [0x32C660, .rodata, game/code_002C9660]
+      - [0x32CBB0, .rodata, game/code_002DC138]
+      - [0x32ECE0, .rodata, game/code_00329F60]
       - [0x32F180, .rodata, sdf/sdfTex]
       - [0x32F1E0, .rodata, sdf/sdfModel]
       - [0x32F220, .rodata, sdf/sdfMotion]
-      - [0x32F240, rodata, rodata_0042E240]
+      - [0x32F240, .rodata, game/code_00336B48]
+      - [0x32F270, .rodata, game/code_0033D5D0]
+      - [0x32F3D0, .rodata, game/code_00341240]
       - [0x32FD20, .rodata, sdf/sdfMovie]
-      - [0x32FD40, rodata, rodata_0042ED40]
+      - [0x32FD40, .rodata, game/code_003478C0]
+      - [0x32FE10, rodata, rodata_0042EE10]
       - [0x333E80, lit4, lit4]
       - [0x336B80, sdata, sdata]
       - { start: 0x339D2C, type: sbss, vram: 0x438D80, name: sbss }

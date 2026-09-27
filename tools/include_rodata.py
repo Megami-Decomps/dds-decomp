@@ -67,11 +67,11 @@ def place(version):
                 if not out.exists():
                     out.write_text(".section .rodata\n\n" + block.group(0))
                 anchors.append((addr, m.start(), sym, sym not in have))
-        for s in nonmatchings.glob("D_*.s"):
+        for s in [s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()]:
             m = LABEL.search(s.read_text())
             if m and m.group(1) in owned and not any(sym == m.group(1) for _, _, sym, _ in anchors):
                 anchors.append((int(m.group(2), 16), None, m.group(1), m.group(1) not in have))
-        anchors.sort()
+        anchors.sort(key=lambda a: a[0])
         # Floating symbols take the position of the next anchored one.
         following = len(text)
         placed = []
