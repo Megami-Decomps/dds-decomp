@@ -136,7 +136,7 @@ s32 func_0010DC80(void)
     {
         return 1;
     }
-    func_001016F8(p0, 1);
+    kwlnTaskDestroyWithHierarchy(p0, 1);
     return 1;
 }
 

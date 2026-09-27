@@ -1,3 +1,21 @@
 # addr	name	evidence|inferred	note
+0x00101570	kwlnTaskCreate	inferred	allocates a KwlnTask from (name, ..., update, destroy, data); P4 names its siblings kwlnTask*
+0x001016B0	kwlnTaskDestroyWithHierarchyByName	evidence	Persona 3 symbol (P4 config/symbol_names.p3.txt); same body as P4 sdkTask.c: GetTaskByName + DestroyWithHierarchy
+0x001016F8	kwlnTaskDestroyWithHierarchy	evidence	P4 sdkTask.c name of the destroy kwlnTaskDestroyWithHierarchyByName calls (DDS has an extra arg)
+0x00101858	kwlnTaskGetTaskByName	evidence	P4 sdkTask.c name of the lookup kwlnTaskDestroyWithHierarchyByName calls
+0x00125440	fldProcSequence	evidence	update proc of the task registered as "fldProcSequence"
+0x00125BF8	fldProcDraw	evidence	update proc of the task registered as "fldProcDraw"
+0x0012C690	encProc	evidence	update proc of the task registered as "encProc"
+0x0014A2D8	fldTitle	evidence	update proc of the task registered as "fldTitle"
+0x0014AA78	fldTitleMini	evidence	update proc of the task registered as "fldTitleMini"
+0x00161898	effBTLFieldColorGetBaseColor	evidence	its message "effBTLFieldColorGetBaseColor:DummyColorLoad"
+0x0021D800	modelViewer	evidence	update proc of the task registered as "modelViewer"
+0x0021DBC0	modelViewerEnd	evidence	update proc of the task registered as "modelViewerEnd"
+0x0026FCD8	staffImageProc	evidence	update proc of the task registered as "staffImageProc"
+0x0026FF70	movieDraw	evidence	update proc of the task registered as "movieDraw"
+0x002707E8	movieViewer	evidence	update proc of the task registered as "movieViewer"
+0x00289950	fileMan	evidence	update proc of the task registered as "fileMan"
+0x002CF6D0	sdfAddHandler	evidence	its message "sdfAddHandler : unknown type %d"
 0x002F0034	sceGsDefDispEnv	evidence	string "sceGsDefDispEnv:Not support displaymode for 0x%x!!" (Sony libgraph)
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
+0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)

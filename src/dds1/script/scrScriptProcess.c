@@ -3,7 +3,7 @@
 typedef struct { u8 pad0[0x40]; s32 unk40[256]; s32 unk440[256]; } ScrProcGlobals;
 extern ScrProcGlobals *D_003BAA00;
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
-s32 func_00101570(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_0010C0C8();
 s32 func_0010C070();
 s32 func_0010B7C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
@@ -30,7 +30,7 @@ s32 func_0010BB28(s32 arg0, s32 arg1)
 s32 func_0010BB88(s32 arg0, s32 arg1)
 {
     s32 r;
-    r = func_00101570(*(s32 *)(arg1 + 0xB4) + (*(s32 *)(arg1 + 0xC8) << 5), arg0, 1, 1, func_0010C0C8, func_0010C070, arg1);
+    r = kwlnTaskCreate(*(s32 *)(arg1 + 0xB4) + (*(s32 *)(arg1 + 0xC8) << 5), arg0, 1, 1, func_0010C0C8, func_0010C070, arg1);
     *(s32 *)(arg1 + 0xE4) = r;
     return r;
 }

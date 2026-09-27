@@ -32,8 +32,8 @@ extern void func_00100E68(KwlnTask* task);
 extern void func_00100EF0(KwlnTask* task);
 extern void func_00100F68(void);
 extern void func_00101368(KwlnTask* task, s32 arg1);
-extern KwlnTask* func_00101858(const char* name);
-extern s32 func_001016F8(KwlnTask* task, s32 arg1);
+extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
 extern s32 func_001019C8(void* target);
 extern void func_00101B08(KwlnTask* task);
 extern void* func_002CFEB8(s32 arg0);
@@ -97,7 +97,7 @@ void func_00100E68(KwlnTask* task)
     child = task->childList;
     while (child != 0) {
         next = child->next;
-        func_001016F8(child, 0);
+        kwlnTaskDestroyWithHierarchy(child, 0);
         child = next;
     }
     func_001006E0(task);
@@ -215,20 +215,20 @@ s32 func_00101540(void)
 }
 
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101570);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
 
-s32 func_001016B0(const char* name, s32 arg1)
+s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
 {
     KwlnTask* task;
 
-    task = func_00101858(name);
+    task = kwlnTaskGetTaskByName(name);
     if (task == 0) {
         return 0;
     }
-    return func_001016F8(task, arg1);
+    return kwlnTaskDestroyWithHierarchy(task, arg1);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_001016F8);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
 void func_00101790(KwlnTask* task)
 {
@@ -266,7 +266,7 @@ s32 func_00101818(KwlnTask* task)
     return (state < 4) ? state : 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101858);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskGetTaskByName);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101880);
 

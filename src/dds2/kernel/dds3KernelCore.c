@@ -201,11 +201,11 @@ s32 func_00101428(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101458);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101598);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchyByName);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_001015E0);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101678);
 

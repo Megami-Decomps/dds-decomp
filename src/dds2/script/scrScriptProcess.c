@@ -2,7 +2,7 @@
 
 void *func_00343ED0(s32 arg0, u32 *arg1, s32 arg2);
 
-s32 func_00101458(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 s32 func_0010C2F0();
 
@@ -35,7 +35,7 @@ s32 func_0010BD50(s32 arg0, s32 arg1)
 s32 func_0010BDB0(s32 arg0, s32 arg1)
 {
     s32 r;
-    r = func_00101458(*(s32 *)(arg1 + 0xB4) + (*(s32 *)(arg1 + 0xC8) << 5), arg0, 1, 1, func_0010C2F0, func_0010C298, arg1);
+    r = kwlnTaskCreate(*(s32 *)(arg1 + 0xB4) + (*(s32 *)(arg1 + 0xC8) << 5), arg0, 1, 1, func_0010C2F0, func_0010C298, arg1);
     *(s32 *)(arg1 + 0xE4) = r;
     return r;
 }
