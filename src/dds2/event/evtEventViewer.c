@@ -14,7 +14,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246878);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246950);
 
-void func_00246A20(u32 arg0) {
+void evtEventViewerProcessPending(u32 arg0) {
     s64 temp_v0;
 
     while (temp_v0 = func_002467B8(arg0), temp_v0 != 0) {
@@ -28,7 +28,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246B00);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246B50);
 
-s32 func_00246BC8(s32 arg0, s32 arg1) {
+s32 evtEventViewerCountEntriesById(s32 arg0, s32 arg1) {
     s32 *piVar1;
     s32 temp_v0;
     s32 temp_v1;
@@ -45,7 +45,7 @@ s32 func_00246BC8(s32 arg0, s32 arg1) {
     return temp_v1;
 }
 
-s32 func_00246C00(s32 arg0) {
+s32 evtEventViewerCountEntries(s32 arg0) {
     s32 temp_v0;
     s32 temp_v1;
 
@@ -86,7 +86,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246DF0);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246E68);
 
-s32 func_00246ED8(u64 arg0, s32 arg1) {
+s32 evtEventViewerFindNameIndex(u64 arg0, s32 arg1) {
     s64 temp_v0;
     s32 temp_v1;
     s32 temp_v2;
@@ -114,7 +114,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247028);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247168);
 
-void func_002473C0(s32 arg0, s32 arg1) {
+void evtEventViewerFreeSlot(s32 arg0, s32 arg1) {
     s32 temp_v0;
     s32 *piVar2;
 
@@ -128,7 +128,7 @@ void func_002473C0(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247400);
 
-void func_002474E0(s32 arg0) {
+void evtEventViewerFreeBuffer(s32 arg0) {
     if (*(s32 *)(arg0 + 0x2c) != 0) {
         func_00110B50(*(s32 *)(arg0 + 0x2c));
     }

@@ -1,31 +1,31 @@
 #include "common.h"
 
-extern u64 func_00111610(u64);
-extern s64 func_00111AD0(u64, u64);
+extern void *func_00111610(void *arg);
+extern u32 func_00111AD0(void *arg0, s32 index);
 
 extern u32 func_00112888(void);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111840);
 
-void func_00111908(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00111908(void *obj, s32 flag) {
+    u32 *flags;
 
-    puVar1 = (u32 *)func_00112888();
-    *puVar1 = *puVar1 | arg1;
+    flags = (u32 *)func_00112888();
+    *flags = *flags | flag;
 }
 
-void func_00111938(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00111938(void *obj, s32 flag) {
+    u32 *flags;
 
-    puVar1 = (u32 *)func_00112888();
-    *puVar1 = *puVar1 & ~arg1;
+    flags = (u32 *)func_00112888();
+    *flags = *flags & ~flag;
 }
 
-u8 func_00111970(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+u8 func_00111970(void *obj, s32 flag) {
+    u32 *flags;
 
-    puVar1 = (u32 *)func_00112888();
-    return (*puVar1 & arg1) != 0;
+    flags = (u32 *)func_00112888();
+    return (*flags & flag) != 0;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001119A0);
@@ -58,14 +58,14 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112100);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001122F0);
 
-void func_00112750(u64 arg0) {
-    s64 temp_v0;
-    u64 temp_v1;
+void func_00112750(void *arg0) {
+    u32 exists;
+    void *val;
 
-    temp_v0 = func_00111AD0(arg0, 1);
-    if (temp_v0 == 0) {
-        temp_v1 = func_00111610(arg0);
-        func_00111A08(arg0, temp_v1);
+    exists = func_00111AD0(arg0, 1);
+    if (exists == 0) {
+        val = func_00111610(arg0);
+        func_00111A08(arg0, val);
         return;
     }
 }

@@ -3,19 +3,41 @@
 0x001016B0	kwlnTaskDestroyWithHierarchyByName	inferred	name from the Persona 3 FES/Persona 4 decomps (decompiler-chosen, not proven original); Persona 3 symbol (P4 config/symbol_names.p3.txt); same body as P4 sdkTask.c: GetTaskByName + DestroyWithHierarchy
 0x001016F8	kwlnTaskDestroyWithHierarchy	inferred	name from the Persona 3 FES/Persona 4 decomps (decompiler-chosen, not proven original); P4 sdkTask.c name of the destroy kwlnTaskDestroyWithHierarchyByName calls (DDS has an extra arg)
 0x00101858	kwlnTaskGetTaskByName	inferred	name from the Persona 3 FES/Persona 4 decomps (decompiler-chosen, not proven original); P4 sdkTask.c name of the lookup kwlnTaskDestroyWithHierarchyByName calls
+0x0010BB88	scrProcCreateTask	inferred	wraps kwlnTaskCreate for a script-proc task; stores id at +0xE4
 0x00125440	fldProcSequence	inferred	update proc of the task registered as "fldProcSequence" (a task label, not proof of the function's name)
 0x00125BF8	fldProcDraw	inferred	update proc of the task registered as "fldProcDraw" (a task label, not proof of the function's name)
 0x0012C690	encProc	inferred	update proc of the task registered as "encProc" (a task label, not proof of the function's name)
 0x0014A2D8	fldTitle	inferred	update proc of the task registered as "fldTitle" (a task label, not proof of the function's name)
 0x0014AA78	fldTitleMini	inferred	update proc of the task registered as "fldTitleMini" (a task label, not proof of the function's name)
 0x00161898	effBTLFieldColorGetBaseColor	evidence	its message "effBTLFieldColorGetBaseColor:DummyColorLoad"
+0x001763B8	effPCPNeedleFree	inferred	releases work handles +0x68/+0x6C/+0x70
+0x001763F0	effPCPNeedleCreate	inferred	spawn wrapper: param-set block 0 + init func_001760F8
+0x00185758	effPCPBossFree	inferred	releases work handles +0x28/+0x2C then system free
+0x00188820	effTrackPolyFreeData	inferred	releases both sub-objects via free-like callees
+0x00188850	effTrackPolyInitData	inferred	initializes track-poly fields to default gray 0x80808080, mode 2, 0
+0x0019B880	itfMesSetFlags	inferred	ORs a bitmask into the shared itfMes flags word D_003BB1E8
+0x0019B890	itfMesClearFlags	inferred	AND-NOTs a bitmask out of the shared itfMes flags word D_003BB1E8
+0x0019D160	itfMesRelocate	inferred	applies the fixup table to a message blob once, then sets its relocated flag
+0x0019D1A8	itfMesIsMsgData	inferred	returns true when the header magic at +8 is MSG0 or MSG1
+0x0019D610	itfMesCountZeroBits	inferred	counts unset bits among the low N bits of a value
 0x0021D800	modelViewer	inferred	update proc of the task registered as "modelViewer" (a task label, not proof of the function's name)
 0x0021DBC0	modelViewerEnd	inferred	update proc of the task registered as "modelViewerEnd" (a task label, not proof of the function's name)
+0x0022C0A8	evtEventViewerProcessPending	inferred	drains pending items while query nonzero, dispatching each
+0x0022C250	evtEventViewerCountEntriesById	inferred	counts viewer list entries whose id matches arg
+0x0022C288	evtEventViewerCountEntries	inferred	counts all entries in the viewer list
+0x0022C560	evtEventViewerFindNameIndex	inferred	linear search of 32-byte name slots, returns index or -1
+0x0022CA48	evtEventViewerFreeSlot	inferred	frees indexed pointer slot via free-like helper and NULLs it
+0x0022CB68	evtEventViewerFreeBuffer	inferred	frees the +0x2c buffer if non-null and NULLs it
+0x00234288	evtPolygonMovieSetFlagBits	inferred	ORs bits into the global flags word behind func_00101A70+8
+0x002342C0	evtPolygonMovieClearFlagBits	inferred	clears bits in the global flags word behind func_00101A70+8
+0x00234398	evtPolygonMovieClampTime	inferred	clamps end-start into [0,duration] and stores float position
 0x0026FCD8	staffImageProc	inferred	update proc of the task registered as "staffImageProc" (a task label, not proof of the function's name)
 0x0026FF70	movieDraw	inferred	update proc of the task registered as "movieDraw" (a task label, not proof of the function's name)
 0x002707E8	movieViewer	inferred	update proc of the task registered as "movieViewer" (a task label, not proof of the function's name)
+0x00288C08	fileWaitReady	inferred	spins until func_00288BA8 reports ready, pumping system tasks each pass
 0x00289950	fileMan	inferred	update proc of the task registered as "fileMan" (a task label, not proof of the function's name)
 0x002CF6D0	sdfAddHandler	evidence	its message "sdfAddHandler : unknown type %d"
+0x002D9718	sdfModelCopyData	inferred	null-checked memcpy of count*16 bytes between model buffers
 0x002F0034	sceGsDefDispEnv	evidence	string "sceGsDefDispEnv:Not support displaymode for 0x%x!!" (Sony libgraph)
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
 0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)

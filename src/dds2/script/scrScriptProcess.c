@@ -32,7 +32,7 @@ s32 func_0010BD50(s32 arg0, s32 arg1)
     return r2;
 }
 
-s32 func_0010BDB0(s32 arg0, s32 arg1)
+s32 scrProcCreateTask(s32 arg0, s32 arg1)
 {
     s32 r;
     r = kwlnTaskCreate(*(s32 *)(arg1 + 0xB4) + (*(s32 *)(arg1 + 0xC8) << 5), arg0, 1, 1, func_0010C2F0, func_0010C298, arg1);

@@ -1,27 +1,53 @@
 #include "common.h"
 
-void func_00188228(u32 arg0) {
-    func_00188820(*(u32 *)((s32)arg0 + 0x38));
-    func_002CFF98(arg0);
+/* Data block touched by the init/step/free helpers below. */
+typedef struct {
+    u8  pad_0x00[0x04]; /* 0x00 */
+    u32 color;          /* 0x04 */
+    s32 unk08;          /* 0x08 */
+    u32 unk0C;          /* 0x0C */
+    s32 unk10;          /* 0x10 */
+    s32 unk14;          /* 0x14 */
+    u8  pad_0x18[0x08]; /* 0x18 */
+    void *unk20;        /* 0x20 */
+    void *unk24;        /* 0x24 */
+} EffTrackPolyData; /* 0x28 */
+
+/* Outer work area holding the table index field and the data pointer. */
+typedef struct {
+    u8             pad_0x00[0x34]; /* 0x00 */
+    s32            unk34;          /* 0x34: cleared on reset */
+    EffTrackPolyData *unk38;      /* 0x38 */
+} EffTrackPolyWork; /* 0x3C */
+
+/* Inner cell whose second word is written by func_001882F0. */
+typedef struct {
+    u32 unk0; /* 0x00 */
+    u32 unk4; /* 0x04 */
+} EffTrackPolyCell;
+
+void func_00188228(EffTrackPolyWork *work) {
+    effTrackPolyFreeData(work->unk38);
+    func_002CFF98(work);
 }
 
-void func_00188258(s32 arg0) {
-    *(u32 *)(arg0 + 0x34) = 0;
-    func_00188850(*(u32 *)(arg0 + 0x38));
+void func_00188258(EffTrackPolyWork *work) {
+    work->unk34 = 0;
+    effTrackPolyInitData(work->unk38);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188278);
 
-void func_001882D8(s32 arg0) {
-    func_00188A78(*(u32 *)(arg0 + 0x38));
+void func_001882D8(EffTrackPolyWork *work) {
+    func_00188A78(work->unk38);
 }
 
-void func_001882F0(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x38) + 4) = arg1;
+void func_001882F0(EffTrackPolyWork *work, u32 value) {
+    ((EffTrackPolyCell *)work->unk38)->unk4 = value;
 }
 
-void func_00188300(s32 arg0) {
-    func_00188E10(*(u32 *)(arg0 + 0x38));
+void func_00188300(EffTrackPolyWork *work) {
+    func_00188E10(work->unk38);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188318);
@@ -32,12 +58,12 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188480);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001884E8);
 
-void func_00188510(s32 *arg0, s32 arg1) {
-    func_00188258(*(u32 *)(arg1 * 4 + *arg0));
+void func_00188510(EffTrackPolyWork ***tables, s32 index) {
+    func_00188258((*tables)[index]);
 }
 
-void func_00188538(s32 *arg0, s32 arg1, u32 arg2) {
-    func_001882F0(*(u32 *)(arg1 * 4 + *arg0), arg2);
+void func_00188538(EffTrackPolyWork ***tables, s32 index, u32 value) {
+    func_001882F0((*tables)[index], value);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188560);
@@ -46,34 +72,32 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001885C0);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188738);
 
-void func_00188820(s32 arg0) {
-    func_002DAA68(*(u32 *)(arg0 + 0x20));
-    func_002D0918(*(u32 *)(arg0 + 0x24));
+void effTrackPolyFreeData(EffTrackPolyData *data) {
+    func_002DAA68(data->unk20);
+    func_002D0918(data->unk24);
 }
 
-void func_00188850(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = 2;
-    *(u32 *)(arg0 + 4) = 0x80808080;
-    *(u32 *)(arg0 + 0xc) = 0;
+void effTrackPolyInitData(EffTrackPolyData *data) {
+    data->unk10 = 2;
+    data->color = 0x80808080;
+    data->unk0C = 0;
 }
 
-void func_00188870(u32 *arg0, u32 arg1) {
-    *arg0 = arg1;
+void func_00188870(u32 *dst, u32 value) {
+    *dst = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188878);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188958);
 
-void func_001889B8(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void func_001889B8(EffTrackPolyData *data, s32 arg1) {
+    s32 pos = data->unk10 + ((data->unk14 - 1) * (arg1 - 1) + arg1) * -2;
 
-    temp_v0 = *(s32 *)(arg0 + 0x10) + ((*(s32 *)(arg0 + 0x14) - 1) * (arg1 - 1) + arg1) * -2
-    ;
-    if (temp_v0 < 2) {
-        temp_v0 = (temp_v0 + *(s32 *)(arg0 + 8)) - 2;
+    if (pos < 2) {
+        pos += data->unk08 - 2;
     }
-    *(s32 *)(arg0 + 0x10) = temp_v0;
+    data->unk10 = pos;
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188A00);

@@ -230,7 +230,7 @@ u32 func_00242738(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
-    func_0024F058(temp_v0, 1);
+    evtPolygonMovieClearFlagBits(temp_v0, 1);
     func_0010D818(temp_v0);
     return 1;
 }

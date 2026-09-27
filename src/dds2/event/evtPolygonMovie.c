@@ -34,14 +34,14 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024ED50);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024EEB8);
 
-void func_0024F020(u32 arg0, u32 arg1) {
+void evtPolygonMovieSetFlagBits(u32 arg0, u32 arg1) {
     s32 temp_v0;
 
     temp_v0 = func_00101958();
     **(u32 **)(temp_v0 + 8) = **(u32 **)(temp_v0 + 8) | arg1;
 }
 
-void func_0024F058(u32 arg0, u32 arg1) {
+void evtPolygonMovieClearFlagBits(u32 arg0, u32 arg1) {
     s32 temp_v0;
 
     temp_v0 = func_00101958();

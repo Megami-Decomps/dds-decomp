@@ -32,9 +32,9 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001901F8);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00190370);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00190458);
+INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effTrackPolyFreeData);
 
-void func_00190488(s32 arg0) {
+void effTrackPolyInitData(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = 2;
     *(u32 *)(arg0 + 4) = 0x80808080;
     *(u32 *)(arg0 + 0xc) = 0;

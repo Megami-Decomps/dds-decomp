@@ -1,27 +1,38 @@
 #include "common.h"
 
-extern u64 func_002286E8(void);
-
-extern u64 func_002286C0(void);
-
-extern s32 func_0010D680(void);
-
-extern u64 func_0010D428(u64);
-extern s64 func_00223AA0(u64, u64);
+/* Script VM helpers (see script/scrCommonCommand.c for the convention). */
+s32 func_0010D428(s32 idx);
+void func_0010D5F0(s32 value);
+s32 func_0010D680(void);
+void *func_00223AA0(s32 type, s32 id);
+void func_00220508(void *unit, s32 flag);
+void func_00115B88(void *unit, s32 flag);
+void func_00220560(s32 which, s32 value);
+void func_001028E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_00102A18(void);
+void func_00226830(s32 arg0, s32 arg1);
+void func_002268C8(s32 arg0);
+void func_00228710(void);
+void func_00228728(void);
+s32 func_002286C0(void);
+s32 func_002286E8(void);
+void func_002286F8(s32 arg0);
+void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002260C0);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226180);
 
-u32 func_002262A0(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+s32 func_002262A0(void)
+{
+    s32 id;
+    void *unit;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_00223AA0(7, temp_v0);
-    if (temp_v1 != 0) {
-        func_00220508(temp_v1, 1);
-        func_00115B88(temp_v1, 1);
+    id = func_0010D428(0);
+    unit = func_00223AA0(7, id);
+    if (unit != NULL) {
+        func_00220508(unit, 1);
+        func_00115B88(unit, 1);
     }
     return 1;
 }
@@ -32,14 +43,15 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226388);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226430);
 
-u32 func_00226470(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+s32 func_00226470(void)
+{
+    s32 id;
+    void *unit;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_00223AA0(7, temp_v0);
-    if (temp_v1 != 0) {
-        func_00220508(temp_v1, 0);
+    id = func_0010D428(0);
+    unit = func_00223AA0(7, id);
+    if (unit != NULL) {
+        func_00220508(unit, 0);
     }
     return 1;
 }
@@ -50,17 +62,20 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226540);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002265B8);
 
-u32 func_00226650(void) {
+s32 func_00226650(void)
+{
     func_001028E8(2, 0, 0, 0);
     return 1;
 }
 
-u32 func_00226680(void) {
+s32 func_00226680(void)
+{
     func_001028E8(0xc, 0, 0, 0);
     return 1;
 }
 
-u32 func_002266B0(void) {
+s32 func_002266B0(void)
+{
     func_001028E8(4, 0, 0, 0);
     return 1;
 }
@@ -71,11 +86,9 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226730);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002267B0);
 
-u32 func_00226800(void) {
-    s64 temp_v0;
-
-    temp_v0 = func_0010D680();
-    if (temp_v0 == 0) {
+s32 func_00226800(void)
+{
+    if (func_0010D680() == 0) {
         func_00102A18();
     }
     return 0;
@@ -83,31 +96,34 @@ u32 func_00226800(void) {
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226830);
 
-u32 func_00226898(void) {
-    u64 temp_v0;
+s32 func_00226898(void)
+{
+    s32 p0;
 
-    temp_v0 = func_0010D428(0);
-    func_00226830(temp_v0, 0);
+    p0 = func_0010D428(0);
+    func_00226830(p0, 0);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002268C8);
 
-u32 func_00226920(void) {
-    u64 temp_v0;
+s32 func_00226920(void)
+{
+    s32 p0;
 
-    temp_v0 = func_0010D428(0);
-    func_002268C8(temp_v0);
+    p0 = func_0010D428(0);
+    func_002268C8(p0);
     return 1;
 }
 
-u32 func_00226948(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+s32 func_00226948(void)
+{
+    s32 p0;
+    s32 p1;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    func_00226830(temp_v0, temp_v1);
+    p0 = func_0010D428(0);
+    p1 = func_0010D428(1);
+    func_00226830(p0, p1);
     return 1;
 }
 
@@ -123,19 +139,21 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226B10);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226B68);
 
-u32 func_00226BD8(void) {
-    u64 temp_v0;
+s32 func_00226BD8(void)
+{
+    s32 p0;
 
-    temp_v0 = func_0010D428(0);
-    func_00220560(0, temp_v0);
+    p0 = func_0010D428(0);
+    func_00220560(0, p0);
     return 1;
 }
 
-u32 func_00226C08(void) {
-    u64 temp_v0;
+s32 func_00226C08(void)
+{
+    s32 p0;
 
-    temp_v0 = func_0010D428(0);
-    func_00220560(1, temp_v0);
+    p0 = func_0010D428(0);
+    func_00220560(1, p0);
     return 1;
 }
 
@@ -177,37 +195,33 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_002274A0);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227648);
 
-u32 func_00227708(void) {
+s32 func_00227708(void)
+{
     func_00228710();
     return 1;
 }
 
-u32 func_00227728(void) {
+s32 func_00227728(void)
+{
     func_00228728();
     return 1;
 }
 
-u32 func_00227748(void) {
-    u64 temp_v0;
-
-    temp_v0 = func_002286C0();
-    func_0010D5F0(temp_v0);
+s32 func_00227748(void)
+{
+    func_0010D5F0(func_002286C0());
     return 1;
 }
 
-u32 func_00227770(void) {
-    u64 temp_v0;
-
-    temp_v0 = func_002286E8();
-    func_0010D5F0(temp_v0);
+s32 func_00227770(void)
+{
+    func_0010D5F0(func_002286E8());
     return 1;
 }
 
-u32 func_00227798(void) {
-    u64 temp_v0;
-
-    temp_v0 = func_0010D428(0);
-    func_002286F8(temp_v0);
+s32 func_00227798(void)
+{
+    func_002286F8(func_0010D428(0));
     return 1;
 }
 
@@ -225,12 +239,13 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC998);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227A00);
 
-u32 func_00227AD8(void) {
-    u64 temp_v0;
+s32 func_00227AD8(void)
+{
+    s32 p0;
 
-    temp_v0 = func_0010D428(0);
-    func_002342C0(temp_v0, 1);
-    func_0010D5F0(temp_v0);
+    p0 = func_0010D428(0);
+    evtPolygonMovieClearFlagBits(p0, 1);
+    func_0010D5F0(p0);
     return 1;
 }
 

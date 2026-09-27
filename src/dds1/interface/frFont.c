@@ -1,10 +1,39 @@
 #include "common.h"
 
+/* Record shared by the matched helpers below; offsets are from retail.
+ * func_00195388 receives the message-window node itself (itfMesManager
+ * func_0019DB40 passes its chain node straight in). */
+typedef struct FrFontCtx {
+    union {
+        u32 word;            /* 0x0: whole word read by func_001963E0 */
+        struct {
+            u8 unk0;         /* 0x0 */
+            u8 flag1;        /* 0x1: set by func_001953A8 */
+            u8 unk2[2];      /* 0x2 */
+        } bytes;
+    } u0;
+    u32 unk4;                /* 0x4 */
+    u32 unk8;                /* 0x8 */
+    u32 unkC;                /* 0xC: refreshed by func_001953A8 */
+    u32 unk10;               /* 0x10 */
+    union {
+        u32 shifted;         /* 0x14: value stored shifted by func_00195460 */
+        void *ptr;           /* 0x14: child pointer read by func_001963E0 */
+    } u14;
+    u32 unk18;               /* 0x18 */
+    s8 flag1C;               /* 0x1C */
+    s8 flag1D;               /* 0x1D */
+    u8 unk1E[0x22];          /* 0x1E */
+    u32 mode40;              /* 0x40: set by func_00195388 */
+} FrFontCtx;
+
 extern u32 D_003BB164;
 
 extern u32 D_003BB178;
 
 extern u32 func_00195C50(void);
+extern void func_00195450(void *, u32, u32);
+extern void func_00196390(void);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194618);
 
@@ -54,25 +83,22 @@ INCLUDE_ASM(const s32, "interface/frFont", func_001951C8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195360);
 
-void func_00195388(s32 arg0) {
-    *(u32 *)(arg0 + 0x40) = 1;
-    func_00195360(arg0, 0x80);
+void func_00195388(FrFontCtx *ctx) {
+    ctx->mode40 = 1;
+    func_00195360(ctx, 0x80);
 }
 
-void func_001953A8(s32 arg0, u8 arg1) {
-    u32 temp_v0;
-
-    *(u8 *)(arg0 + 1) = arg1;
-    temp_v0 = func_00195C50();
-    *(u32 *)(arg0 + 0xc) = temp_v0;
+void func_001953A8(FrFontCtx *ctx, u8 flag) {
+    ctx->u0.bytes.flag1 = flag;
+    ctx->unkC = func_00195C50();
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001953D8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195450);
 
-void func_00195460(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1 >> 4;
+void func_00195460(FrFontCtx *ctx, u32 value) {
+    ctx->u14.shifted = value >> 4;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195470);
@@ -147,28 +173,26 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00196220);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00196390);
 
-void func_001963E0(u32 *arg0) {
-    s8 temp_v0;
+void func_001963E0(FrFontCtx *ctx) {
+    s8 pending;
 
-    if (arg0[5] == 0) {
-        temp_v0 = *(s8 *)(arg0 + 7);
-    }
-    else {
-        if (*(s32 *)(arg0[5] + 0x1c) == 0) {
-            *(u8 *)(arg0 + 7) = 0;
+    if (ctx->u14.ptr == NULL) {
+        pending = ctx->flag1C;
+    } else {
+        if (*(s32 *)((u8 *)ctx->u14.ptr + 0x1c) == 0) {
+            ctx->flag1C = 0;
         }
-        temp_v0 = *(s8 *)(arg0 + 7);
+        pending = ctx->flag1C;
     }
-    if (temp_v0 == '\0') {
-        temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
-    }
-    else {
+    if (pending == 0) {
+        pending = ctx->flag1D;
+    } else {
         func_00196390();
-        temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
+        pending = ctx->flag1D;
     }
-    if (temp_v0 != '\0') {
-        func_00195450(arg0[5], *arg0, arg0[1]);
-        *(u8 *)((s32)arg0 + 0x1d) = 0;
+    if (pending != 0) {
+        func_00195450(ctx->u14.ptr, ctx->u0.word, ctx->unk4);
+        ctx->flag1D = 0;
     }
 }
 

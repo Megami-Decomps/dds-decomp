@@ -1,8 +1,8 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_0017E010);
+INCLUDE_ASM(const s32, "effect/effPCPNeedle", effPCPNeedleFree);
 
-INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_0017E048);
+INCLUDE_ASM(const s32, "effect/effPCPNeedle", effPCPNeedleCreate);
 
 INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_0017E068);
 

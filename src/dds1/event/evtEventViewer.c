@@ -1,10 +1,45 @@
 #include "common.h"
 
-extern s64 strcmp(u64, s32);
+/* Event-viewer entry: doubly linked through next/prev, keyed by id. */
+typedef struct EvtEvEntry {
+    s32 id;                    /* 0x0 */
+    u8 pad[0x78];              /* 0x4 */
+    struct EvtEvEntry *next;   /* 0x7c */
+    struct EvtEvEntry *prev;   /* 0x80 */
+} EvtEvEntry;
 
-extern s32 func_0022BE40(u32);
+/* Event viewer: name table at 0x20, entry list at 0x2030. */
+typedef struct EvtViewer {
+    u8 unk00[0x20];      /* 0x0 */
+    s32 nameCount;       /* 0x20 */
+    u8 unk24[0x200c];    /* 0x24: nameCount names of 32 bytes */
+    s32 entryCount;      /* 0x2030 */
+    EvtEvEntry *head;    /* 0x2034 */
+    EvtEvEntry *tail;    /* 0x2038 */
+    void *slots[1];      /* 0x203c */
+} EvtViewer;
 
-void func_0022BE28(void) {
+/* Min/max tracker fed from a live value. */
+typedef struct EvtRange {
+    u8 unk00[0x10];   /* 0x0 */
+    s32 min;          /* 0x10 */
+    s32 max;          /* 0x14 */
+    s32 value;        /* 0x18 */
+} EvtRange;
+
+typedef struct EvtViewBuf {
+    u8 unk00[0x2c];   /* 0x0 */
+    void *buf;        /* 0x2c */
+} EvtViewBuf;
+
+void func_0022B7A0(void);
+s32 func_0022BE40(s32 arg0);
+void func_0022BF00(s32 arg0);
+void func_00110928(void *ptr);
+s32 strcmp(const char *a, const char *b);
+
+void func_0022BE28(void)
+{
     func_0022B7A0();
 }
 
@@ -16,10 +51,9 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BF00);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BFD8);
 
-void func_0022C0A8(u32 arg0) {
-    s64 temp_v0;
-
-    while (temp_v0 = func_0022BE40(arg0), temp_v0 != 0) {
+void evtEventViewerProcessPending(s32 arg0)
+{
+    while (func_0022BE40(arg0) != 0) {
         func_0022BF00(arg0);
     }
 }
@@ -30,55 +64,59 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C188);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C1D8);
 
-s32 func_0022C250(s32 arg0, s32 arg1) {
-    s32 *piVar1;
-    s32 temp_v0;
-    s32 temp_v1;
+s32 evtEventViewerCountEntriesById(s32 id, EvtViewer *viewer)
+{
+    EvtEvEntry *entry;
+    s32 count;
 
-    piVar1 = *(s32 **)(arg1 + 0x2034);
-    temp_v1 = 0;
-    while (piVar1 != (s32 *)0x0) {
-        temp_v0 = *piVar1;
-        piVar1 = (s32 *)piVar1[0x1f];
-        if (temp_v0 == arg0) {
-            temp_v1 = temp_v1 + 1;
+    count = 0;
+    entry = viewer->head;
+    while (entry != NULL) {
+        if (entry->id == id) {
+            count = count + 1;
         }
+        entry = entry->next;
     }
-    return temp_v1;
+    return count;
 }
 
-s32 func_0022C288(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
+s32 evtEventViewerCountEntries(EvtViewer *viewer)
+{
+    EvtEvEntry *entry;
+    s32 count;
 
-    temp_v1 = 0;
-    for (temp_v0 = *(s32 *)(arg0 + 0x2034); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x7c)) {
-        temp_v1 = temp_v1 + 1;
+    count = 0;
+    entry = viewer->head;
+    while (entry != NULL) {
+        count = count + 1;
+        entry = entry->next;
     }
-    return temp_v1;
+    return count;
 }
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C2C0);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C340);
 
-void func_0022C3C8(s32 arg0) {
-    s32 temp_v0;
+void func_0022C3C8(EvtRange *range)
+{
+    s32 value;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    *(s32 *)(arg0 + 0x10) = temp_v0;
-    if (*(s32 *)(arg0 + 0x14) < temp_v0) {
-        *(s32 *)(arg0 + 0x14) = temp_v0;
+    value = range->value;
+    range->min = value;
+    if (range->max < value) {
+        range->max = value;
     }
 }
 
-void func_0022C3E8(s32 arg0) {
-    s32 temp_v0;
+void func_0022C3E8(EvtRange *range)
+{
+    s32 value;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    *(s32 *)(arg0 + 0x14) = temp_v0;
-    if (temp_v0 < *(s32 *)(arg0 + 0x10)) {
-        *(s32 *)(arg0 + 0x10) = temp_v0;
+    value = range->value;
+    range->max = value;
+    if (value < range->min) {
+        range->min = value;
     }
 }
 
@@ -88,22 +126,21 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C478);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C4F0);
 
-s32 func_0022C560(u64 arg0, s32 arg1) {
-    s64 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+s32 evtEventViewerFindNameIndex(const char *name, EvtViewer *viewer)
+{
+    const char *slot;
+    s32 index;
 
-    temp_v2 = 0;
-    if (0 < *(s32 *)(arg1 + 0x20)) {
-        temp_v1 = arg1 + 0x24;
+    index = 0;
+    if (0 < viewer->nameCount) {
+        slot = (const char *)viewer + 0x24;
         do {
-            temp_v0 = strcmp(arg0, temp_v1);
-            if (temp_v0 == 0) {
-                return temp_v2;
+            if (strcmp(name, slot) == 0) {
+                return index;
             }
-            temp_v2 = temp_v2 + 1;
-            temp_v1 = temp_v1 + 0x20;
-        } while (temp_v2 < *(s32 *)(arg1 + 0x20));
+            index = index + 1;
+            slot = slot + 0x20;
+        } while (index < viewer->nameCount);
     }
     return -1;
 }
@@ -116,23 +153,23 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C6B0);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C7F0);
 
-void func_0022CA48(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-    s32 *piVar2;
+void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
+{
+    void **slot;
 
-    piVar2 = (s32 *)(arg0 * 4 + arg1 + 0x203c);
-    temp_v0 = *piVar2;
-    if (temp_v0 != 0) {
-        func_00110928(temp_v0);
-        *piVar2 = 0;
+    slot = (void **)(index * 4 + (s32)viewer + 0x203c);
+    if (*slot != NULL) {
+        func_00110928(*slot);
+        *slot = NULL;
     }
 }
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022CA88);
 
-void func_0022CB68(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x2c) != 0) {
-        func_00110928(*(s32 *)(arg0 + 0x2c));
+void evtEventViewerFreeBuffer(EvtViewBuf *work)
+{
+    if (work->buf != NULL) {
+        func_00110928(work->buf);
     }
-    *(u32 *)(arg0 + 0x2c) = 0;
+    work->buf = NULL;
 }

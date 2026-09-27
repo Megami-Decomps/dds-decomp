@@ -1,6 +1,7 @@
 #include "common.h"
 
-extern u64 func_00101A70(void);
+s32 func_00101A70(void);
+void func_002CFF98(s32 arg0);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_00241E18);
 
@@ -8,11 +9,9 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_00241F78);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_002420B8);
 
-void func_00242278(void) {
-    u64 temp_v0;
-
-    temp_v0 = func_00101A70();
-    func_002CFF98(temp_v0);
+void func_00242278(void)
+{
+    func_002CFF98(func_00101A70());
 }
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_00242298);

@@ -50,11 +50,11 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3838);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A38A0);
 
-void func_001A38B0(u32 arg0) {
+void itfMesSetFlags(u32 arg0) {
     D_004365E8 = D_004365E8 | arg0;
 }
 
-void func_001A38C0(u32 arg0) {
+void itfMesClearFlags(u32 arg0) {
     D_004365E8 = D_004365E8 & ~arg0;
 }
 
@@ -176,7 +176,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A50C0);
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A50D8);
 
 /* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5180(u8 *arg0)
+void itfMesRelocate(u8 *arg0)
 {
     u8 *base;
     u8 *fixups;
@@ -190,7 +190,7 @@ void func_001A5180(u8 *arg0)
     }
 }
 
-u32 func_001A51C8(s32 arg0) {
+u32 itfMesIsMsgData(s32 arg0) {
     u32 temp_v0;
 
     temp_v0 = 0;
@@ -225,7 +225,7 @@ u32 func_001A5600(s32 arg0) {
     return *(u32 *)((u32)*(u16 *)(arg0 + 0x20) * 4 + *piVar1);
 }
 
-s32 func_001A5640(s32 arg0, u32 arg1) {
+s32 itfMesCountZeroBits(s32 arg0, u32 arg1) {
     s32 temp_v0;
     u32 temp_v1;
 

@@ -1,14 +1,41 @@
 #include "common.h"
 
-void func_00158F68(u32 arg0) {
-    s32 temp_v0;
+typedef struct {
+    u8 pad[0x174]; /* 0x0 */
+    void *unk174;  /* 0x174 child released by func_00158F68 */
+} ParObj;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x174);
-    if (temp_v0 != 0) {
-        func_002D0918(temp_v0);
+typedef struct {
+    u8 pad[0xC]; /* 0x0 */
+    void *unkC;  /* 0xC released by func_00159CD8 */
+} ParNode;
+
+typedef struct {
+    u8 pad[4];   /* 0x0 */
+    u16 unk4;    /* 0x4 cleared by func_00159F30 */
+    u8 pad6[10]; /* 0x6 */
+} ParSlot; /* 0x10 bytes */
+
+typedef struct {
+    u8 pad[4];     /* 0x0 */
+    ParSlot *unk4; /* 0x4 */
+} ParTable;
+
+typedef struct {
+    u8 pad[0x142]; /* 0x0 */
+    u16 unk142;    /* 0x142 read by func_0015A6E0 */
+} ParState;
+
+void func_002D0918(void *arg);
+void func_00153920(void *arg);
+void func_002CFF98(void *arg);
+
+void func_00158F68(ParObj *obj) {
+    if (obj->unk174 != NULL) {
+        func_002D0918(obj->unk174);
     }
-    func_00153920(arg0);
-    func_002CFF98(arg0);
+    func_00153920(obj);
+    func_002CFF98(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00158FA8);
@@ -21,8 +48,8 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00159AB8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159C08);
 
-void func_00159CD8(s32 arg0) {
-    func_002D0918(*(u32 *)(arg0 + 0xc));
+void func_00159CD8(ParNode *node) {
+    func_002D0918(node->unkC);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159CF0);
@@ -31,8 +58,8 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00159D68);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159E20);
 
-void func_00159F30(s32 arg0, s32 arg1) {
-    *(u16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 4) + 4) = 0;
+void func_00159F30(ParTable *table, s32 index) {
+    table->unk4[index].unk4 = 0;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159F48);
@@ -53,8 +80,8 @@ INCLUDE_ASM(const s32, "effect/parManager", func_0015A608);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A658);
 
-u16 func_0015A6E0(s32 arg0) {
-    return *(u16 *)(arg0 + 0x142);
+u16 func_0015A6E0(ParState *obj) {
+    return obj->unk142;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A6E8);

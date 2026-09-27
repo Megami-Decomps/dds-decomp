@@ -300,7 +300,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331C80);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003320E8);
 
-void func_003325C8(SdfObj *arg0, SdfObj *arg1) {
+void sdfModelCopyData(SdfObj *arg0, SdfObj *arg1) {
     s16 n;
 
     if (arg0 == NULL) {

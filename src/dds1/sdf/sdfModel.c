@@ -158,19 +158,20 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8650);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D86E0);
 
-void func_002D8800(SdfModel *arg0, s32 arg1, s32 arg2) {
+void func_002D8800(SdfModel *model, s32 arg1, s32 arg2) {
     s32 i = 0;
     s32 j = 0;
 
-    arg0->unk38 = arg1;
+    model->unk38 = arg1;
     func_002D78F0();
-    func_002D78B8(arg0);
-    func_002D8600(arg0);
+    func_002D78B8(model);
+    func_002D8600(model);
+    /* The re-initialization below is load-bearing for a byte-identical build. */
     i = 0;
     j = 0;
     do {
         i++;
-        func_002D83F8(arg0, arg1, arg2, 0, j);
+        func_002D83F8(model, arg1, arg2, 0, j);
         j = i;
     } while (i != 2);
 }
@@ -179,42 +180,42 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8890);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8918);
 
-SdfModel *func_002D8A08(void *arg0, SdfItemListRef *arg1) {
+SdfModel *func_002D8A08(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
-    SdfModel *ret = func_002D8918(arg0, arg1);
-    SdfItemList *arr = arg1->unk0;
-    s32 n = arr->unk0;
-    u8 *item = &arr->unk10;
+    SdfModel *model = func_002D8918(data, listRef);
+    SdfItemList *list = listRef->unk0;
+    s32 count = list->unk0;
+    u8 *item = &list->unk10;
 
-    if (n != i) {
+    if (count != i) {
         do {
-            func_002D86E0(ret->unk0->unkC[i], item);
+            func_002D86E0(model->unk0->unkC[i], item);
             item += 0x50;
             i++;
-        } while (i != n);
+        } while (i != count);
     }
-    return ret;
+    return model;
 }
 
-SdfModel *func_002D8A90(void *arg0, SdfItemListRef *arg1) {
+SdfModel *func_002D8A90(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
-    SdfModel *ret = func_002D8918(arg0, arg1);
-    SdfItemList *arr;
-    s32 n;
+    SdfModel *model = func_002D8918(data, listRef);
+    SdfItemList *list;
+    s32 count;
     u8 *item;
 
-    ret->unk19 |= 4;
-    arr = arg1->unk0;
-    n = arr->unk0;
-    item = &arr->unk10;
-    if (n != i) {
+    model->unk19 |= 4;
+    list = listRef->unk0;
+    count = list->unk0;
+    item = &list->unk10;
+    if (count != i) {
         do {
-            func_002D8650(ret->unk0->unkC[i], item);
+            func_002D8650(model->unk0->unkC[i], item);
             item += 0x50;
             i++;
-        } while (i != n);
+        } while (i != count);
     }
-    return ret;
+    return model;
 }
 
 void func_002D8B20(void *arg0, void *buf, s32 arg2) {
@@ -339,12 +340,12 @@ void func_002D8C68(void *arg0) {
     func_002D8C00(arg0, (s8)D_003BD2EA);
 }
 
-void func_002D8C88(SdfMsg *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    arg0->unkC = arg4;
-    arg0->unk0 = arg1;
-    arg0->unk8 = arg3;
-    arg0->unk4 = arg2;
-    func_002EFD30(arg2);
+void func_002D8C88(SdfMsg *msg, s32 unk0, s32 unk4, s32 unk8, s32 unkC) {
+    msg->unkC = unkC;
+    msg->unk0 = unk0;
+    msg->unk8 = unk8;
+    msg->unk4 = unk4;
+    func_002EFD30(unk4);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8CB8);
@@ -353,14 +354,14 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8DD0);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D9238);
 
-void func_002D9718(SdfObj *arg0, SdfObj *arg1) {
-    s16 n;
+void sdfModelCopyData(SdfObj *dst, SdfObj *src) {
+    s16 count;
 
-    if (arg0 == NULL) {
+    if (dst == NULL) {
         return;
     }
-    n = arg0->unk4;
-    if (n > 0) {
-        memcpy(arg0->unkC, arg1->unkC, n * 16);
+    count = dst->unk4;
+    if (count > 0) {
+        memcpy(dst->unkC, src->unkC, count * 16);
     }
 }

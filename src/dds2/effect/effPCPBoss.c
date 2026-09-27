@@ -24,7 +24,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D2C8);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D330);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D3B0);
+INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossFree);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D3E8);
 

@@ -1,13 +1,14 @@
 #include "common.h"
 
 extern u32 D_003BAE74;
-extern u64 func_00101A70(void);
+extern void *func_00101A70(void);
+extern void func_002CFF98(void *);
 
 void func_001410E8(void) {
-    u64 temp_v0;
+    void *data;
 
-    temp_v0 = func_00101A70();
-    func_002CFF98(temp_v0);
+    data = func_00101A70();
+    func_002CFF98(data);
     D_003BAE74 = 0;
 }
 
