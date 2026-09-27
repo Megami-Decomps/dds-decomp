@@ -59,27 +59,152 @@ segments:
     vram: 0x100000
     bss_size: 0x4EFB4
     subsegments:
-      # Atlus game/engine code. Unknown TU boundaries: asm chunks are named by address
-      # (code_<vram>) until the original unit is identified.
+      # Atlus game/engine code. Named units: real Nocturne (Dec 26 2002 debug build) __FILE__
+      # names projected through byte-identical functions (tools/nocturne_tus.py, docs/tu-names.md).
+      # Their ranges are lower bounds; code_<vram> gaps are unowned until evidence places them.
       - [0x1000, asm, game/code_00100000]
-      - [0x29C8, c, game/sdkTask]  # P4 transfer, see docs/p4-transfer.md
-      - [0x2A68, asm, game/code_00101A68]
-      - [0xED38, c, game/scrCommonCommand]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1A98, c, kernel/dds3KernelCore]  # Nocturne __FILE__
+      - [0x2B08, asm, game/code_00101B08]
+      - [0x39E8, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__
+      - [0x3ED8, asm, game/code_00102ED8]
+      - [0x7498, c, kernel/dds3KernelDraw]  # Nocturne __FILE__
+      - [0x8FD8, asm, game/code_00107FD8]
+      - [0xCB28, c, script/scrScriptProcess]  # Nocturne __FILE__
+      - [0xD028, asm, game/code_0010C028]
+      - [0xD3F0, c, script/scrTraceCode]  # Nocturne __FILE__
+      - [0xE620, asm, game/code_0010D620]
+      - [0xE768, c, script/scrCommonCommand]  # Nocturne __FILE__ + P4 transfer
       - [0xFEF0, asm, game/code_0010EEF0]
-      - [0x1DE88, c, game/code_0011CE88]  # P4 transfer, see docs/p4-transfer.md
+      - [0x10880, c, basic/dds3Basic]  # Nocturne __FILE__
+      - [0x108D8, asm, game/code_0010F8D8]
+      - [0x10D30, c, basic/dds3WorldBasic]  # Nocturne __FILE__
+      - [0x112C8, asm, game/code_001102C8]
+      - [0x11BB8, c, basic/dds3SceneBasic]  # Nocturne __FILE__
+      - [0x11DC0, asm, game/code_00110DC0]
+      - [0x12108, c, basic/dds3AreaBasic]  # Nocturne __FILE__
+      - [0x12160, asm, game/code_00111160]
+      - [0x12478, c, basic/dds3MoverBasic]  # Nocturne __FILE__
+      - [0x12610, asm, game/code_00111610]
+      - [0x12840, c, basic/dds3ObjectBase]  # Nocturne __FILE__
+      - [0x13888, asm, game/code_00112888]
+      - [0x139B8, c, basic/dds3CameraObjectBasic]  # Nocturne __FILE__
+      - [0x13FE0, asm, game/code_00112FE0]
+      - [0x140C8, c, basic/dds3UnitObjectBasic]  # Nocturne __FILE__
+      - [0x140E0, asm, game/code_001130E0]
+      - [0x15570, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__
+      - [0x16CD8, asm, game/code_00115CD8]
+      - [0x17148, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
+      - [0x171D8, asm, game/code_001161D8]
+      - [0x17338, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
+      - [0x17590, asm, game/code_00116590]
+      - [0x17860, c, basic/dds3ModelBasic]  # Nocturne __FILE__
+      - [0x17878, asm, game/code_00116878]
+      - [0x17A50, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__
+      - [0x17A90, asm, game/code_00116A90]
+      - [0x17F08, c, basic/dds3PathBasic]  # Nocturne __FILE__
+      - [0x18438, asm, game/code_00117438]
+      - [0x1A098, c, newdata/datCalc]  # Nocturne __FILE__
+      - [0x1A900, asm, game/code_00119900]
+      - [0x1DE88, c, game/code_0011CE88]  # P4 transfer
       - [0x1DEB8, asm, game/code_0011CEB8]
-      - [0x50098, c, game/code_0014F098]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1E290, c, misc/l2d]  # Nocturne __FILE__
+      - [0x1E3A0, asm, game/code_0011D3A0]
+      - [0x27200, c, field/fldFileResolver]  # Nocturne __FILE__
+      - [0x27A30, asm, game/code_00126A30]
+      - [0x420E8, c, field/fldPanel]  # Nocturne __FILE__
+      - [0x421F0, asm, game/code_001411F0]
+      - [0x50098, c, game/code_0014F098]  # P4 transfer
       - [0x504C8, asm, game/code_0014F4C8]
-      - [0x9E160, c, game/itfMesManager]  # P4 transfer, see docs/p4-transfer.md
+      - [0x50838, c, effect/effManager]  # Nocturne __FILE__
+      - [0x50EB0, asm, game/code_0014FEB0]
+      - [0x512B0, c, effect/billManager]  # Nocturne __FILE__
+      - [0x52F58, asm, game/code_00151F58]
+      - [0x59F68, c, effect/parManager]  # Nocturne __FILE__
+      - [0x5B758, asm, game/code_0015A758]
+      - [0x5E9E0, c, effect/polyManager]  # Nocturne __FILE__
+      - [0x604D0, asm, game/code_0015F4D0]
+      - [0x61B00, c, effect/effBattle]  # Nocturne __FILE__
+      - [0x62838, asm, game/code_00161838]
+      - [0x62AA0, c, effect/effBattleMisc]  # Nocturne __FILE__
+      - [0x634D0, asm, game/code_001624D0]
+      - [0x644A0, c, effect/effPCPThunder]  # Nocturne __FILE__
+      - [0x68178, asm, game/code_00167178]
+      - [0x6B1A8, c, effect/effPCPFlash]  # Nocturne __FILE__
+      - [0x701D0, asm, game/code_0016F1D0]
+      - [0x71B88, c, effect/effPCPScatter]  # Nocturne __FILE__
+      - [0x76B00, asm, game/code_00175B00]
+      - [0x773B8, c, effect/effPCPNeedle]  # Nocturne __FILE__
+      - [0x77A28, asm, game/code_00176A28]
+      - [0x78190, c, effect/effPCPMisc]  # Nocturne __FILE__
+      - [0x85420, asm, game/code_00184420]
+      - [0x85538, c, effect/effPCPBoss]  # Nocturne __FILE__
+      - [0x86E18, asm, game/code_00185E18]
+      - [0x87DC8, c, effect/effBlur_Filter]  # Nocturne __FILE__
+      - [0x88DB0, asm, game/code_00187DB0]
+      - [0x89228, c, effect/effModelTrackPoly]  # Nocturne __FILE__
+      - [0x8A0D8, asm, game/code_001890D8]
+      - [0x8A3C0, c, effect/effMagatuhi]  # Nocturne __FILE__
+      - [0x8DAC8, asm, game/code_0018CAC8]
+      - [0x8EF90, c, effect/effMath]  # Nocturne __FILE__
+      - [0x8F218, asm, game/code_0018E218]
+      - [0x91208, c, effect/effEvent]  # Nocturne __FILE__
+      - [0x93488, asm, game/code_00192488]
+      - [0x94B70, c, interface/fmGslCont]  # Nocturne __FILE__
+      - [0x94C08, asm, game/code_00193C08]
+      - [0x95618, c, interface/frFont]  # Nocturne __FILE__
+      - [0x97478, asm, game/code_00196478]
+      - [0x9A900, c, interface/itfPanel]  # Nocturne __FILE__
+      - [0x9AAD8, asm, game/code_00199AD8]
+      - [0x9C340, c, interface/itfMesManager]  # Nocturne __FILE__ + P4 transfer
       - [0x9EB88, asm, game/code_0019DB88]
-      - [0xF70E8, c, game/code_001F60E8]  # P4 transfer, see docs/p4-transfer.md
+      - [0xF70E8, c, game/code_001F60E8]  # P4 transfer
       - [0xF7110, asm, game/code_001F6110]
-      - [0x19B810, c, game/code_0029A810]  # P4 transfer, see docs/p4-transfer.md
+      - [0x117B78, c, model/mdlManager]  # Nocturne __FILE__
+      - [0x119B48, asm, game/code_00218B48]
+      - [0x120E38, c, event/evtStage]  # Nocturne __FILE__
+      - [0x1213B0, asm, game/code_002203B0]
+      - [0x121830, c, event/evtUnitManager]  # Nocturne __FILE__
+      - [0x123AC0, asm, game/code_00222AC0]
+      - [0x1270C0, c, event/evtCommand]  # Nocturne __FILE__
+      - [0x129058, asm, game/code_00228058]
+      - [0x12CE28, c, event/evtEventViewer]  # Nocturne __FILE__
+      - [0x12DBA0, asm, game/code_0022CBA0]
+      - [0x133F88, c, event/evtPolygonMovie]  # Nocturne __FILE__
+      - [0x135C18, asm, game/code_00234C18]
+      - [0x136150, c, event/evtPicture]  # Nocturne __FILE__
+      - [0x136270, asm, game/code_00235270]
+      - [0x142E18, c, event/evtEventPack]  # Nocturne __FILE__
+      - [0x143608, asm, game/code_00242608]
+      - [0x1897A0, c, file/fileManager]  # Nocturne __FILE__
+      - [0x189E70, asm, game/code_00288E70]
+      - [0x18AD68, c, mc/mcManager]  # Nocturne __FILE__
+      - [0x18B0E0, asm, game/code_0028A0E0]
+      - [0x19B810, c, game/code_0029A810]  # P4 transfer
       - [0x19B840, asm, game/code_0029A840]
-      - [0x1DE8B8, c, game/effMiscVu]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1D0BB0, c, sdf/sdfThread]  # Nocturne __FILE__
+      - [0x1D0C18, asm, game/code_002CFC18]
+      - [0x1D0F68, c, sdf/sdfChip]  # Nocturne __FILE__
+      - [0x1D10F8, asm, game/code_002D00F8]
+      - [0x1D1390, c, sdf/sdfMemory]  # Nocturne __FILE__
+      - [0x1D1750, asm, game/code_002D0750]
+      - [0x1D1E88, c, sdf/sdfGraph]  # Nocturne __FILE__
+      - [0x1D20B0, asm, game/code_002D10B0]
+      - [0x1D3A28, c, sdf/sdfTex]  # Nocturne __FILE__
+      - [0x1D43C8, asm, game/code_002D33C8]
+      - [0x1D8D68, c, sdf/sdfModel]  # Nocturne __FILE__
+      - [0x1DA748, asm, game/code_002D9748]
+      - [0x1DC1F8, c, sdf/sdfMotion]  # Nocturne __FILE__
+      - [0x1DE038, asm, game/code_002DD038]
+      - [0x1DE8B8, c, game/code_002DD8B8]  # P4 transfer (P4 effMiscVu; sits among sdf*, name unconfirmed)
       - [0x1DEC98, asm, game/code_002DDC98]
-      - [0x1E8C20, c, game/effMisc]  # P4 transfer, see docs/p4-transfer.md
+      - [0x1E4EC8, c, sdf/sdfDevCons]  # Nocturne __FILE__
+      - [0x1E5720, asm, game/code_002E4720]
+      - [0x1E8C20, c, game/code_002E7C20]  # P4 transfer (P4 effMisc; sits among sdf*, name unconfirmed)
       - [0x1E9398, asm, game/code_002E8398]
+      - [0x1EDF70, c, sdf/sdfMovie]  # Nocturne __FILE__
+      - [0x1EE760, asm, game/code_002ED760]
+      - [0x1EEE48, c, sdf/sdfPacDecode]  # Nocturne __FILE__
+      - [0x1EFA18, asm, game/code_002EEA18]
       # Sony SDK / C runtime, one file per library (boundaries = first romwright signature hit)
       - [0x1F0D50, asm, sdk/libgraph]  # first signature hit 0x002EFD50
       - [0x1F2448, asm, sdk/libdma]  # first signature hit 0x002F1448

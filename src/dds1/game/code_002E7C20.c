@@ -28,7 +28,7 @@ void effMiscQuatMultiplyVU(void)
     );
 }
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7C50);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7C50);
 
 /* Persona 4 effMiscNormalizeVU @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void effMiscNormalizeVU(void)
@@ -49,13 +49,13 @@ void effMiscNormalizeVU(void)
     );
 }
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7CA8);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7CA8);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7CD0);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7CD0);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7CF8);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7CF8);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7D48);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7D48);
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void func_002E7D98(void)
@@ -95,17 +95,17 @@ void func_002E7D98(void)
     );
 }
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7E08);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7E08);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E7F20);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7F20);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E8038);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8038);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E8180);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8180);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E8278);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8278);
 
-INCLUDE_ASM(const s32, "game/effMisc", func_002E82F8);
+INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E82F8);
 
 /* Persona 4 effMiscRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 u32 effMiscRand(EffRandState* state)

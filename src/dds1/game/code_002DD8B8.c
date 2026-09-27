@@ -41,23 +41,23 @@ void func_002DD8B8(const RwV3d* axis, f32 angle)
     );
 }
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DD8E8);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD8E8);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DD968);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD968);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DD9E8);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD9E8);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DDA68);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDA68);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DDA98);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDA98);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DDAF8);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDAF8);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DDB58);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDB58);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DDBB8);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDBB8);
 
-INCLUDE_ASM(const s32, "game/effMiscVu", func_002DDBF8);
+INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDBF8);
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void func_002DDC50(void)

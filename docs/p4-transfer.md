@@ -39,27 +39,28 @@ functions.
 
 ## Imported into the build
 
-The game-region transfers are in `src/dds1/game/` and are linked. The retail
-SHA-1 still matches.
+The game-region transfers are in `src/dds1/` and are linked. Units named after
+Nocturne's `__FILE__` strings replaced the P4 unit names (see `docs/tu-names.md`).
+The retail SHA-1 still matches.
 
 | DDS1 | Size | Persona 4 origin | Unit here |
 |---|---:|---|---|
-| `func_001019C8` | 0x8C | `func_00452490`, Kernel/sdkTask.c | `sdkTask.c` |
-| `kwlnTaskGetTimer` 0x101A60 | 0x8 | `kwlnTaskGetTimer`, Kernel/sdkTask.c | `sdkTask.c` |
-| `scrCommand_SCR_GET_TIMER` 0x10DD38 | 0x5C | Script/scrCommonCommand.c | `scrCommonCommand.c` |
-| `scrCommand_SCR_EXISTS` 0x10EEA8 | 0x48 | Script/scrCommonCommand.c | `scrCommonCommand.c` |
-| `func_0011CE88` | 0x30 | `func_00298d70` | `code_0011CE88.c` |
-| `func_0014F098` | 0x30 | `func_002993c0`, Script/scrCommonCommand.c | `code_0014F098.c` |
-| `func_0014F498` | 0x30 | `func_001eb2a0` | `code_0014F098.c` |
-| `func_0019D160` | 0x48 | `func_00278d50`, itfMesManager.c | `itfMesManager.c` |
-| `func_0019D920` | 0x34 | `func_0027a340`, itfMesManager.c | `itfMesManager.c` |
-| `func_0019DA50` | 0x50 | `func_0027a4d0`, itfMesManager.c | `itfMesManager.c` |
-| `func_0019DB40` | 0x48 | `func_0027a580`, itfMesManager.c | `itfMesManager.c` |
-| `func_001F60E8` | 0x28 | `func_001789d0` | `code_001F60E8.c` |
-| `func_0029A810` | 0x30 | `func_00492e30` | `code_0029A810.c` |
-| `func_002DD8B8`, `func_002DDC50` | 0x2C, 0x48 | effMisc.c (VU0 asm) | `effMiscVu.c` |
-| `effMiscQuatMultiplyVU`, `effMiscNormalizeVU`, `func_002E7D98` | | effMisc.c (VU0 asm) | `effMisc.c` |
-| `effMiscRand` 0x2E8340 | 0x54 | effMisc.c | `effMisc.c` |
+| `func_001019C8` | 0x8C | `func_00452490`, Kernel/sdkTask.c | `kernel/dds3KernelCore.c` |
+| `kwlnTaskGetTimer` 0x101A60 | 0x8 | `kwlnTaskGetTimer`, Kernel/sdkTask.c | `kernel/dds3KernelCore.c` |
+| `scrCommand_SCR_GET_TIMER` 0x10DD38 | 0x5C | Script/scrCommonCommand.c | `script/scrCommonCommand.c` |
+| `scrCommand_SCR_EXISTS` 0x10EEA8 | 0x48 | Script/scrCommonCommand.c | `script/scrCommonCommand.c` |
+| `func_0011CE88` | 0x30 | `func_00298d70` | `game/code_0011CE88.c` |
+| `func_0014F098` | 0x30 | `func_002993c0`, Script/scrCommonCommand.c | `game/code_0014F098.c` |
+| `func_0014F498` | 0x30 | `func_001eb2a0` | `game/code_0014F098.c` |
+| `func_0019D160` | 0x48 | `func_00278d50`, itfMesManager.c | `interface/itfMesManager.c` |
+| `func_0019D920` | 0x34 | `func_0027a340`, itfMesManager.c | `interface/itfMesManager.c` |
+| `func_0019DA50` | 0x50 | `func_0027a4d0`, itfMesManager.c | `interface/itfMesManager.c` |
+| `func_0019DB40` | 0x48 | `func_0027a580`, itfMesManager.c | `interface/itfMesManager.c` |
+| `func_001F60E8` | 0x28 | `func_001789d0` | `game/code_001F60E8.c` |
+| `func_0029A810` | 0x30 | `func_00492e30` | `game/code_0029A810.c` |
+| `func_002DD8B8`, `func_002DDC50` | 0x2C, 0x48 | effMisc.c (VU0 asm) | `game/code_002DD8B8.c` |
+| `effMiscQuatMultiplyVU`, `effMiscNormalizeVU`, `func_002E7D98` | | effMisc.c (VU0 asm) | `game/code_002E7C20.c` |
+| `effMiscRand` 0x2E8340 | 0x54 | effMisc.c | `game/code_002E7C20.c` |
 
 P4's global names were replaced by the DDS symbols at the same relocation
 sites. For example, P4's `iGpffffb9ec` becomes DDS `D_003BA800`. The link
@@ -71,9 +72,9 @@ up), which sit inside `sdk/libkernl`, and the trivial game-range stubs
 (0x100538, 0x132B60, 0x196BB0, 0x1FB1A8/E0/F0, 0x2055F0, 0x2A8018, 0x2B4B98,
 0x2EFEE0). DDS2 (SLUS_211.52) was not swept.
 
-## Unit boundaries are provisional
+## Unit names
 
-The unit names (`sdkTask`, `itfMesManager`, and so on) are P4's. DDS has no
-`__FILE__` strings, so each unit spans only the address range between the
-transferred functions. The functions in between are `INCLUDE_ASM`. Widen or
-rename a unit when evidence places its real boundaries.
+P4's `sdkTask` functions fall inside Nocturne's `dds3KernelCore.c` range, and
+the P4 `scrCommonCommand`/`itfMesManager` functions extend Nocturne's units of
+the same name. P4's `effMisc` functions sit among the `sdf*` engine files in
+DDS, so their units stay unnamed (`code_<vram>`) until evidence names them.
