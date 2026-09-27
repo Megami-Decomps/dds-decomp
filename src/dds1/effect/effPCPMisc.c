@@ -956,8 +956,6 @@ void func_0017FF10(u64 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017FF30);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180000);
-
 void func_00180050(u32 arg0) {
     func_001634D8(*(u32 *)((s32)arg0 + 0x30));
     func_002CFF98(arg0);

@@ -1,0 +1,88 @@
+# False function starts (tools/find_fragments.py); romwright_sync.py drops them.
+0x00100D0C  # reads $16 before setting it
+0x00101010  # reads $18 before setting it
+0x00103DFC  # reads $16 before setting it
+0x00104918  # reads $17 before setting it
+0x00108D6C  # reads $18 before setting it
+0x0010D098  # reads $16 before setting it
+0x0010D0B8  # reads $16 before setting it
+0x0010D300  # reads $16 before setting it
+0x0010D310  # reads $16 before setting it
+0x00113F98  # reads $16 before setting it
+0x00113FC0  # reads $16 before setting it
+0x00113FE8  # reads $16 before setting it
+0x00114010  # reads $16 before setting it
+0x00114028  # reads $16 before setting it
+0x00114050  # reads $16 before setting it
+0x00114078  # reads $16 before setting it
+0x001149F8  # reads $16 before setting it
+0x00114A18  # reads $16 before setting it
+0x00114A38  # reads $16 before setting it
+0x00180000  # restores $31 from a frame it did not push
+0x0018CD88  # restores $31 from a frame it did not push
+0x001B5350  # restores $31 from a frame it did not push
+0x001CCA88  # reads $16 before setting it
+0x001CCAA0  # reads $16 before setting it
+0x001CCAB8  # reads $16 before setting it
+0x001CDED8  # reads $19 before setting it
+0x001CDEF0  # reads $19 before setting it
+0x001CDF08  # reads $19 before setting it
+0x001DDE88  # reads $16 before setting it
+0x001DDEA0  # reads $16 before setting it
+0x001DDEB8  # reads $16 before setting it
+0x001DDED0  # reads $16 before setting it
+0x001DDEE8  # reads $16 before setting it
+0x001DDF00  # reads $16 before setting it
+0x001FC73C  # restores $31 from a frame it did not push
+0x00230818  # reads $16 before setting it
+0x00230850  # reads $16 before setting it
+0x00231628  # reads $16 before setting it
+0x00231648  # reads $16 before setting it
+0x00231658  # reads $16 before setting it
+0x00231680  # reads $16 before setting it
+0x00231AB0  # reads $16 before setting it
+0x00231AB8  # reads $17 before setting it
+0x00231B20  # reads $17 before setting it
+0x00231B68  # reads $17 before setting it
+0x00231C78  # reads $16 before setting it
+0x00231C80  # reads $16 before setting it
+0x00231C88  # reads $16 before setting it
+0x00231C90  # reads $16 before setting it
+0x00232488  # reads $17 before setting it
+0x00232560  # reads $17 before setting it
+0x00234160  # reads $16 before setting it
+0x00234180  # reads $16 before setting it
+0x002341A0  # reads $16 before setting it
+0x002341E8  # reads $16 before setting it
+0x00234238  # reads $16 before setting it
+0x00253AB0  # restores $31 from a frame it did not push
+0x0028F150  # reads $16 before setting it
+0x0028F168  # reads $16 before setting it
+0x0028F180  # reads $16 before setting it
+0x0028F198  # reads $16 before setting it
+0x0028F1B0  # reads $16 before setting it
+0x0028F1C8  # reads $16 before setting it
+0x0028F1E0  # reads $16 before setting it
+0x0028F1F8  # reads $16 before setting it
+0x0028F210  # reads $16 before setting it
+0x0028F230  # reads $16 before setting it
+0x0028F250  # reads $16 before setting it
+0x0028F270  # reads $16 before setting it
+0x0028F290  # reads $16 before setting it
+0x002E6118  # reads $16 before setting it
+0x002E7364  # restores $31 from a frame it did not push
+0x002E9970  # restores $31 from a frame it did not push
+0x002E9988  # restores $31 from a frame it did not push
+0x002EEB50  # reads $20 before setting it
+0x002EEBD8  # reads $19 before setting it
+0x002EEBF8  # reads $19 before setting it
+0x002EEC20  # reads $17 before setting it
+0x002EECE8  # reads $17 before setting it
+0x002EED30  # reads $17 before setting it
+0x002EED60  # reads $19 before setting it
+0x002EEDA0  # reads $19 before setting it
+0x002EEE08  # reads $17 before setting it
+0x002EEE60  # reads $20 before setting it
+0x002EF450  # reads $17 before setting it
+0x002EF468  # reads $17 before setting it
+0x002EF538  # reads $17 before setting it

@@ -98,8 +98,6 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100A28);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100C28);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100D0C);
-
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100D50);
 
 void func_00100DD8(KwlnTask* task)
@@ -142,8 +140,6 @@ void func_00100E50(void)
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100EB0);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
-
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101010);
 
 void* func_001010A8(u32 arg0)
 {

@@ -236,10 +236,6 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CF70);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D058);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D098);
-
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D0B8);
-
 u32 func_0010D100(ScrData *scr)
 {
     func_0010C9A8(scr, 4);
@@ -297,10 +293,6 @@ u32 func_0010D288(ScrData *scr)
 }
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D2C0);
-
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D300);
-
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D310);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D380);
 

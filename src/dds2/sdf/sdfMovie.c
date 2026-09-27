@@ -10,6 +10,4 @@ INCLUDE_ASM(const s32, "sdf/sdfMovie", func_003460D8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00346468);
 
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00346530);
-
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_003465E8);

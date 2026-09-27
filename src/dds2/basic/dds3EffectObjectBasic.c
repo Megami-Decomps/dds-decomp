@@ -17,12 +17,6 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114828);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114BF0);
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114C60);
-
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114C80);
-
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CA0);
-
 u32 func_00114CD0(s32 arg0) {
     return **(u32 **)(arg0 + 0x18);
 }

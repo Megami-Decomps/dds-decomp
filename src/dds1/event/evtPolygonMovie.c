@@ -34,16 +34,6 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00233FB8);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00234120);
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00234160);
-
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00234180);
-
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_002341A0);
-
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_002341E8);
-
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00234238);
-
 void func_00234288(u32 arg0, u32 arg1) {
     s32 temp_v0;
 

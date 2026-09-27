@@ -170,8 +170,6 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334F00);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334F98);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335000);
-
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335050);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003350B0);
