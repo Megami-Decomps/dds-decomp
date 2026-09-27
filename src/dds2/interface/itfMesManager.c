@@ -1,5 +1,7 @@
 #include "common.h"
 
+void func_00344120(int *param_1, int param_2, u8 *param_3, int param_4);
+
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3370);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A33C0);
@@ -120,7 +122,20 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A50C0);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A50D8);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5180);
+/* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
+void func_001A5180(u8 *arg0)
+{
+    u8 *base;
+    u8 *fixups;
+    s32 size;
+    if (*(u8 *)(arg0 + 0x1C) == 0) {
+        base = arg0 + 0x20;
+        fixups = arg0 + *(s32 *)(arg0 + 0x10);
+        size = *(s32 *)(arg0 + 0x14);
+        func_00344120((int *)base, (int)base, fixups, size);
+        *(u8 *)(arg0 + 0x1C) = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A51C8);
 
@@ -156,16 +171,42 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A58E8);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5918);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5950);
+/* Persona 4 func_0027a340 @ 0027A340 (src/itfMesManager.c), recompiled unchanged */
+void func_001A5950(u8 *arg0, int arg1)
+{
+    while (arg0 != ((void*)0)) {
+        *(int *)(arg0 + 0x14) = arg1;
+        arg0 = *(u8 **)(arg0 + 0x24);
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5988);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5A28);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5A80);
+/* Persona 4 func_0027a4d0 @ 0027A4D0 (src/itfMesManager.c), recompiled unchanged */
+void func_001A5A80(int param_1,u32 param_2)
+{
+  int iVar1;
+  for (; param_1 != 0; param_1 = *(int *)(param_1 + 0x24)) {
+    for (iVar1 = *(int *)(param_1 + 0x1c); iVar1 != 0; iVar1 = *(int *)(iVar1 + 0x28)) {
+      *(u32 *)(iVar1 + 0x10) = *(u32 *)(iVar1 + 0x10) & 0xffffff00 | param_2;
+    }
+  }
+  return;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5AD0);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5B20);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5B70);
+/* Persona 4 func_0027a580 @ 0027A580 (src/itfMesManager.c), recompiled unchanged */
+void func_001A5B70(int param_1)
+{
+  for (; param_1 != 0; param_1 = *(int *)(param_1 + 0x24)) {
+    if (*(u8 *)(*(int *)(param_1 + 0x1c) + 0x16) == '\0') {
+      func_0019D038(param_1);
+    }
+  }
+  return;
+}

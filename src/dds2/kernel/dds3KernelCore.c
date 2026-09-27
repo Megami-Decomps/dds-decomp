@@ -1,5 +1,13 @@
 #include "common.h"
 
+typedef struct KwlnTask KwlnTask;
+
+extern void* D_00435BD0;
+
+extern void* D_00435BDC;
+
+extern KwlnTask* D_00435BE8;
+
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100980);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_001009C8);
@@ -54,11 +62,46 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101820);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101880);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_001018B0);
+/* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
+s32 func_001018B0(void* target)
+{
+    s32 idx;
+    void* node;
+    node = 0;
+    idx = 0;
+    for (; idx < 3; idx++)
+    {
+        switch (idx)
+        {
+        case 0:
+            node = D_00435BD0;
+            break;
+        case 1:
+            node = D_00435BE8;
+            break;
+        case 2:
+            node = D_00435BDC;
+            break;
+        }
+        while (node != 0)
+        {
+            if (node == target)
+            {
+                return 1;
+            }
+            node = *(void**)((u8*)node + 0x3C);
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101940);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101948);
+/* Persona 4 kwlnTaskGetTimer @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
+u32 kwlnTaskGetTimer(void* task)
+{
+    return *(u32*)((u8*)task + 0x28);
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101950);
 

@@ -21,59 +21,10 @@ import bisect
 import collections
 import json
 import re
-import sqlite3
 import struct
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-RETAIL = {"dds1": "orig/dds1/SLUS_209.74", "dds2": "orig/dds2/SLUS_211.52"}
-IMM_OPS = {0x0F, 0x09, 0x0C, 0x0D, 0x19, 0x1E, 0x1F, 0x20, 0x21, 0x23, 0x24, 0x25, 0x27, 0x28,
-           0x29, 0x2B, 0x2C, 0x2D, 0x31, 0x34, 0x35, 0x37, 0x39, 0x3C, 0x3D, 0x3F}
-
-
-def load_segments(elf):
-    phoff = struct.unpack_from("<I", elf, 0x1C)[0]
-    count = struct.unpack_from("<H", elf, 0x2C)[0]
-    segs = []
-    for i in range(count):
-        p_type, p_off, p_vaddr, _, p_filesz = struct.unpack_from("<5I", elf, phoff + i * 32)
-        if p_type == 1:
-            segs.append((p_vaddr, p_off, p_filesz))
-    return segs
-
-
-def va_to_off(segs, va):
-    for vaddr, off, size in segs:
-        if vaddr <= va < vaddr + size:
-            return off + va - vaddr
-    return None
-
-
-def off_to_va(segs, off):
-    for vaddr, foff, size in segs:
-        if foff <= off < foff + size:
-            return vaddr + off - foff
-    return None
-
-
-def function_sizes(db, program):
-    con = sqlite3.connect(db)
-    pid = con.execute("select id from programs where name=?", (program,)).fetchone()[0]
-    return {int(e, 16): s for e, s in con.execute(
-        "select entry,size from functions where program_id=?", (pid,))}
-
-
-def masked(code):
-    words = []
-    for i in range(0, len(code) - 3, 4):
-        w = struct.unpack_from("<I", code, i)[0]
-        op = w >> 26
-        if op in (2, 3):
-            w &= 0xFC000000
-        elif op in IMM_OPS:
-            w &= 0xFFFF0000
-        words.append(w)
-    return words
+from pairing import RETAIL, ROOT, Build, identical, load_segments, off_to_va, va_to_off
 
 
 def file_refs(elf, segs, text_va, text_size):
@@ -107,23 +58,6 @@ def text_section(elf):
         if elf[names + s[0]:elf.index(b"\0", names + s[0])] == b".text":
             return s[3], s[5]
     raise SystemExit("no .text in Nocturne ELF")
-
-
-class Build:
-    def __init__(self, elf, store, program):
-        self.data = Path(elf).read_bytes()
-        self.segs = load_segments(self.data)
-        self.sizes = function_sizes(store, program)
-        self.entries = sorted(self.sizes)
-
-    def code(self, va):
-        off = va_to_off(self.segs, va)
-        return masked(self.data[off:off + self.sizes[va]])
-
-
-def identical(a, fa, b, fb):
-    size = a.sizes.get(fa)
-    return size is not None and size >= 16 and b.sizes.get(fb) == size and a.code(fa) == b.code(fb)
 
 
 def transfer(src, labels, dst, diff_path, src_is_target):

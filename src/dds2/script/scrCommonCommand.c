@@ -1,5 +1,7 @@
 #include "common.h"
 
+typedef struct KwlnTask KwlnTask;
+
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D990);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D9C8);
@@ -36,7 +38,21 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DEF0);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DF18);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DF60);
+/* Persona 4 scrCommand_SCR_GET_TIMER @ 00299660 (src/Script/scrCommonCommand.c), recompiled unchanged */
+u32 scrCommand_SCR_GET_TIMER()
+{
+    KwlnTask* task;
+    task = (KwlnTask*)func_0010D650(0);
+    if (!func_001018B0(task))
+    {
+        func_0010D818(0);
+    }
+    else
+    {
+        func_0010D818(kwlnTaskGetTimer(task));
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DFC0);
 
@@ -140,4 +156,18 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010F068);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010F0A8);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010F0D0);
+/* Persona 4 scrCommand_SCR_EXISTS @ 00299600 (src/Script/scrCommonCommand.c), recompiled unchanged */
+u32 scrCommand_SCR_EXISTS()
+{
+    KwlnTask* task;
+    task = (KwlnTask*)func_0010D650(0);
+    if (func_0011A100(task))
+    {
+        func_0010D818(1);
+    }
+    else
+    {
+        func_0010D818(0);
+    }
+    return 1;
+}

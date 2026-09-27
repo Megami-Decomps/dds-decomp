@@ -70,7 +70,9 @@ wrong symbol.
 Not imported yet: the 4 kernel wrappers and the SDK-range stubs (0x30B108 and
 up), which sit inside `sdk/libkernl`, and the trivial game-range stubs
 (0x100538, 0x132B60, 0x196BB0, 0x1FB1A8/E0/F0, 0x2055F0, 0x2A8018, 0x2B4B98,
-0x2EFEE0). DDS2 (SLUS_211.52) was not swept.
+0x2EFEE0). DDS2 was not swept against P4 directly; `tools/shared_funcs.py port`
+copied every transfer above except `code_0014F098.c` (its DDS2 copies are not
+contiguous) into the identical DDS2 functions.
 
 ## Unit names
 

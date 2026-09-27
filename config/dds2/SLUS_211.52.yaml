@@ -105,6 +105,8 @@ segments:
       - [0x186A0, asm, game/code_001176A0]
       - [0x1A7A8, c, newdata/datCalc]  # Nocturne __FILE__
       - [0x1B118, asm, game/code_0011A118]
+      - [0x1FC60, c, game/code_0011EC60]  # mirrors dds1 game/code_0011CE88 (tools/shared_funcs.py)
+      - [0x1FC90, asm, game/code_0011EC90]
       - [0x200F8, c, misc/l2d]  # Nocturne __FILE__
       - [0x20208, asm, game/code_0011F208]
       - [0x297B8, c, field/fldFileResolver]  # Nocturne __FILE__
@@ -153,6 +155,8 @@ segments:
       - [0xA2B08, asm, game/code_001A1B08]
       - [0xA4370, c, interface/itfMesManager]  # Nocturne __FILE__ + P4 transfer
       - [0xA6BB8, asm, game/code_001A5BB8]
+      - [0x108A10, c, game/code_00207A10]  # mirrors dds1 game/code_001F60E8 (tools/shared_funcs.py)
+      - [0x108A38, asm, game/code_00207A38]
       - [0x132690, c, model/mdlManager]  # Nocturne __FILE__
       - [0x134660, asm, game/code_00233660]
       - [0x13B9A8, c, event/evtStage]  # Nocturne __FILE__
@@ -173,6 +177,8 @@ segments:
       - [0x1C93F0, asm, game/code_002C83F0]
       - [0x1CA2E8, c, mc/mcManager]  # Nocturne __FILE__
       - [0x1CA660, asm, game/code_002C9660]
+      - [0x1DD108, c, game/code_002DC108]  # mirrors dds1 game/code_0029A810 (tools/shared_funcs.py)
+      - [0x1DD138, asm, game/code_002DC138]
       - [0x229A60, c, sdf/sdfThread]  # Nocturne __FILE__
       - [0x229AC8, asm, game/code_00328AC8]
       - [0x229E18, c, sdf/sdfChip]  # Nocturne __FILE__
@@ -187,8 +193,12 @@ segments:
       - [0x2335F8, asm, game/code_003325F8]
       - [0x2350A8, c, sdf/sdfMotion]  # Nocturne __FILE__
       - [0x236EE8, asm, game/code_00335EE8]
+      - [0x237768, c, game/code_00336768]  # mirrors dds1 game/code_002DD8B8 (tools/shared_funcs.py)
+      - [0x237B48, asm, game/code_00336B48]
       - [0x23DD78, c, sdf/sdfDevCons]  # Nocturne __FILE__
       - [0x23E5D0, asm, game/code_0033D5D0]
+      - [0x241AC8, c, game/code_00340AC8]  # mirrors dds1 game/code_002E7C20 (tools/shared_funcs.py)
+      - [0x242240, asm, game/code_00341240]
       - [0x246E18, c, sdf/sdfMovie]  # Nocturne __FILE__
       - [0x247608, asm, game/code_00346608]
       - [0x247CF0, c, sdf/sdfPacDecode]  # Nocturne __FILE__

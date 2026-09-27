@@ -100,7 +100,12 @@ file-name hints.
      writes `ctx.c`.
    - permuter: `../decomp-permuter/import.py <file.c> <asm/.../func.s>`
      (`permuter_settings.toml`, which compiles through `tools/cc.sh`).
-4. **Verify.** `ninja` must stay green. `ninja report` writes `report.json`
+4. **Share with the other game.** About 8,600 DDS1 functions are byte-identical
+   in DDS2 (relocations masked). `python tools/shared_funcs.py port` copies
+   each decompiled function into the other version's `INCLUDE_ASM` slot,
+   translating every symbol through the pair's relocations; `--from dds2`
+   goes the other way. See [Shared functions](#shared-functions).
+5. **Verify.** `ninja` must stay green. `ninja report` writes `report.json`
    (objdiff/decomp.dev progress, categories `dds1`, `dds2`, `game`, `sdk`).
 
 Build details, all automated by `configure.py`:
@@ -110,6 +115,25 @@ Build details, all automated by `configure.py`:
 - Jump-table entries in `rodata` become absolute words
   (`tools/resolve_jtbl_targets.py`), because `.L` labels cannot cross files.
 - `.sbss` and `.bss` are aligned to 128 bytes, as in Sony's `app.cmd`.
+
+## Shared functions
+
+`tools/shared_funcs.py` works from the romwright DDS1/DDS2 pairing:
+
+```sh
+romwright-cli diff dds2 --reference build/romwright --reference-name dds1 --json \
+    --project build/romwright > build/dds1_diff_dds2.json
+python tools/shared_funcs.py map     # build/shared/dds1_dds2.txt (+ Nocturne columns)
+python tools/shared_funcs.py names   # curated names -> the other version's "shared" block
+python tools/shared_funcs.py units   # C units missing in the other version (--write splits)
+python tools/shared_funcs.py port    # decompiled C -> the other version
+```
+
+A pair counts only when the code is byte-identical after relocation masking.
+Names follow pairs that are in address order on both sides. Ported C may land on
+another identical copy, but it still rebuilds the same bytes because its symbols
+come from that pair's own relocations. `names` also renames the version's C
+references and removes romwright placeholder rows at the named addresses.
 
 ## romwright
 
