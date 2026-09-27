@@ -165,6 +165,14 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CCA8);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CCC8);
 
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1480);
+
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1490);
+
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A14A0);
+
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A14B0);
+
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CCD8);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D0A0);

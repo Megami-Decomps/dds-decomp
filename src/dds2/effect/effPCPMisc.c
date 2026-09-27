@@ -995,3 +995,6 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC90);
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BCE8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BD88);
+
+INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00414610);
+

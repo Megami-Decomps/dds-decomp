@@ -59,3 +59,8 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F3C0);
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F5C0);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F840);
+
+INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414620);
+
+INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414628);
+

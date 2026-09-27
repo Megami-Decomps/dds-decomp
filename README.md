@@ -136,9 +136,29 @@ Build details, all automated by `configure.py`:
 
 - INCLUDE_ASM bodies are rewritten for ee-as by `tools/eeas_compat.py`.
   `%gp_rel` becomes the retail immediate, and VU0 macro ops become `.word`.
-- Jump-table entries in `rodata` become absolute words
+- Jump-table entries in the asm rodata chunks become absolute words
   (`tools/resolve_jtbl_targets.py`), because `.L` labels cannot cross files.
 - `.sbss` and `.bss` are aligned to 128 bytes, as in Sony's `app.cmd`.
+
+Per-unit rodata and function boundaries (committed config, rerun after
+changing unit ranges):
+
+- `python tools/split_rodata.py <v> --write` gives every C unit whose rodata
+  is contiguous in link order its own `.rodata` subsegment (29 in DDS1, 30 in
+  DDS2).
+  - splat then moves each function's jump tables and strings into that
+    function's asm file.
+  - A `switch` in C compiles its own table, and `check_unit.py` checks every
+    entry against retail.
+  - Rodata that C does not produce yet gets `INCLUDE_RODATA` lines, placed in
+    address order by `tools/include_rodata.py`. That covers shared strings and
+    the strings and constants of already-matched functions, and `configure.py`
+    runs it after each split.
+  - ee-gcc starts every jump table on 16 bytes, so a unit with one starts at its
+    first 16-aligned symbol.
+- `python tools/find_fragments.py <v> --write` lists false function starts
+  (code that uses a caller's frame) in `config/<v>/not_functions.txt`.
+  `romwright_sync.py` leaves them out, so they stay part of their function.
 
 ## Shared functions
 

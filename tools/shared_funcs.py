@@ -407,6 +407,14 @@ def cmd_port(args):
             pattern = re.compile(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{dname}\);$', re.M)
             text = pattern.sub(lambda _: new_body, text, count=1)
             add = [d for d in new_pre if d not in text]
+            # A changed type definition replaces the destination's old one in place, so
+            # everything declared after it still sees it first.
+            for d in [d for d in add if TYPE_DECL.match(d) and "{" in d]:
+                old_def = next((b for b in blocks(text) if TYPE_DECL.match(b) and "{" in b
+                                and declared_name(b) == declared_name(d)), None)
+                if old_def:
+                    text = text.replace(old_def, d, 1)
+                    add.remove(d)
             if add:
                 # A source declaration supersedes the destination's older one of the same
                 # name (e.g. a global retyped from void* to a struct pointer).

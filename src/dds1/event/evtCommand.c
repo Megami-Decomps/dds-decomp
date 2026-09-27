@@ -167,6 +167,12 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00227210);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002272B0);
 
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC8E8);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC8F8);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC908);
+
 INCLUDE_ASM(const s32, "event/evtCommand", func_002274A0);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227648);
@@ -207,11 +213,15 @@ u32 func_00227798(void) {
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002277C0);
 
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC968);
+
 INCLUDE_ASM(const s32, "event/evtCommand", func_002278A0);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227920);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002279A0);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC998);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227A00);
 
@@ -237,5 +247,7 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00227DD0);
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227EE0);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227F60);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC9F8);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227FE0);

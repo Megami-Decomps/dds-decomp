@@ -75,6 +75,12 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222658);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222700);
 
+INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC060);
+
+INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC070);
+
+INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC080);
+
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_002227C8);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222A20);

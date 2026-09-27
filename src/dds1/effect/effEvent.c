@@ -42,6 +42,8 @@ void func_00190880(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001908A0);
 
+INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
+
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190AD8);
 
 void func_00190CD0(s32 arg0) {

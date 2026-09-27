@@ -44,11 +44,15 @@ s32 func_0010D7A0(void)
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D7C0);
 
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4C8);
+
 s32 func_0010D808(void)
 {
     func_0010AC10(D_0039F4C8, func_0010D428(0));
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
 
 s32 func_0010D838(void)
 {
@@ -429,6 +433,8 @@ s32 func_0010E9E8(void)
     return 1;
 }
 
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F550);
+
 s32 func_0010EA10(void)
 {
     s32 p0;
@@ -489,6 +495,8 @@ s32 func_0010EB68(void)
     func_00106690(func_0010D428(0));
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F570);
 
 s32 func_0010EB90(void)
 {

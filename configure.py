@@ -83,6 +83,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     print(f"splat: {version}")
     subprocess.run([sys.executable, "-m", "splat", "split", str(yaml)], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text(digest)

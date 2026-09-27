@@ -25,7 +25,7 @@ typedef struct ScrData {
     char name[24];                 // 0x00
     s32 pc;                        // 0x18
     s32 sp;                        // 0x1C
-    u8 stackTypes[28];             // 0x20
+    s8 stackTypes[28];             // 0x20
     ScrStackValue stackValues[28]; // 0x3C
     void *unkAC;                   // 0xAC
     void *unkB0;                   // 0xB0
@@ -296,7 +296,25 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D2C0);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D380);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D428);
+/* Script command parameter `idx` (0 = first) as an int, converting floats and
+ * dereferencing global variable references. */
+s32 func_0010D428(s32 idx) {
+    ScrData *scr = D_003BD78C;
+    s32 i = scr->sp - idx - 1;
+
+    switch (scr->stackTypes[i]) {
+    case 0:
+    case 4:
+        return scr->stackValues[i].i;
+    case 1:
+        return scr->stackValues[i].f;
+    case 2:
+        return D_003BAA00->ints[scr->stackValues[i].i];
+    case 3:
+        return D_003BAA00->floats[scr->stackValues[i].i];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D4F0);
 

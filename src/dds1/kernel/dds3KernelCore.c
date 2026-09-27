@@ -180,6 +180,14 @@ void func_001012B0(KwlnTask* task, void* arg1)
 }
 
 
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DE88);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEB8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEC8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEF8);
+
 void func_001012E8(void)
 {
     u8* tmp;

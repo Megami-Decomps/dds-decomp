@@ -64,22 +64,28 @@ def text_section(obj):
     return data[off:off + size]
 
 
-# Data still lives in the split data/rodata files, so C may not emit its own yet
-# (string literals, switch jump tables, float constants, statics).
+# Only units with their own .rodata subsegment (tools/split_rodata.py) may emit
+# rodata, and only jump tables, which are verified entry by entry. Strings and
+# constants still come from INCLUDE_RODATA; other data is not split per unit.
 DATA_SECTIONS = (".rodata", ".data", ".sdata", ".sbss", ".bss", ".lit4", ".lit8")
 
 
 def relocations(obj):
-    """{text_offset: (type, symbol)} for .text relocations."""
-    out, in_text = {}, False
+    """{section: {offset: (type, symbol)}} for .text and .rodata relocations."""
+    out, section = {".text": {}, ".rodata": {}}, None
     for line in run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(obj)).splitlines():
         if line.startswith("RELOCATION RECORDS FOR"):
-            in_text = "[.text]" in line
+            section = line.split("[", 1)[1].rstrip("]:")
             continue
         parts = line.split()
-        if in_text and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
-            out[int(parts[0], 16)] = (parts[1], parts[2])
+        if section in out and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
+            out[section][int(parts[0], 16)] = (parts[1], parts[2])
     return out
+
+
+def owns_rodata(version, unit):
+    yaml = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
+    return re.search(rf"\.rodata, {re.escape(unit)}\]", yaml) is not None
 
 
 def main():
@@ -90,6 +96,7 @@ def main():
     args = ap.parse_args()
     unit = args.unit.resolve()
     version = unit.relative_to(ROOT / "src").parts[0]
+    unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
     gp = int(VERSIONS[version]["gp"], 16)
     retail = (ROOT / RETAIL[version]).read_bytes()
@@ -104,9 +111,12 @@ def main():
             sys.stderr.write(r.stderr)
             sys.exit(f"compile failed: {args.unit}")
         text = text_section(obj)
-        _, secs = sections(obj)
+        data, secs = sections(obj)
         emitted = {n: secs[n][1] for n in DATA_SECTIONS if secs.get(n, (0, 0))[1]}
-        relocs = relocations(obj)
+        ro_off, ro_size = secs.get(".rodata", (0, 0))
+        rodata = data[ro_off:ro_off + ro_size]
+        all_relocs = relocations(obj)
+        relocs, rodata_relocs = all_relocs[".text"], all_relocs[".rodata"]
         funcs = []
         for line in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)).splitlines():
             parts = line.split()
@@ -114,6 +124,7 @@ def main():
                 funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
 
     ok = bad = 0
+    tables = []  # (offset in our .rodata, retail address, function)
     for off, size, name in sorted(funcs):
         if args.func and name != args.func:
             continue
@@ -125,6 +136,7 @@ def main():
         roff = va_to_off(segs, addr)
         diffs = []
         pending_hi = {}
+        rodata_hi = None
         for i in range(0, size, 4):
             mine = struct.unpack_from("<I", text, off + i)[0]
             want = struct.unpack_from("<I", retail, roff + i)[0]
@@ -140,8 +152,17 @@ def main():
                     (want & 0xFC000000 if rtype == "R_MIPS_26" else want & 0xFFFF0000):
                 diffs.append((i, mine, want, f"{rtype} {sym}"))
                 continue
+            if base == ".rodata":
+                # A switch's jump table: remember where each side keeps it.
+                if rtype == "R_MIPS_HI16":
+                    rodata_hi = (mine & 0xFFFF, want & 0xFFFF)
+                elif rtype == "R_MIPS_LO16" and rodata_hi:
+                    sext = lambda v: (v ^ 0x8000) - 0x8000
+                    tables.append(((rodata_hi[0] << 16) + sext(mine & 0xFFFF),
+                                   (rodata_hi[1] << 16) + sext(want & 0xFFFF), name))
+                continue
             if target is None:
-                continue  # local section: masked
+                continue  # other local section: masked
             addend = mine & 0x3FFFFFF if rtype == "R_MIPS_26" else ((mine & 0xFFFF) ^ 0x8000) - 0x8000
             if rtype == "R_MIPS_26":
                 good = (want & 0x3FFFFFF) == (((target >> 2) + addend) & 0x3FFFFFF)
@@ -170,10 +191,33 @@ def main():
         else:
             ok += 1
             print(f"OK   {name} @ 0x{addr:08X} ({size} bytes)")
+    # Jump tables: every entry must land on the retail case label.
+    funcs_by_off = sorted(funcs)
+    covered = set()
+    for table_off, retail_addr, name in tables:
+        k, wrong = 0, 0
+        while rodata_relocs.get(table_off + 4 * k, ("", ""))[1] == ".text":
+            label = struct.unpack_from("<I", rodata, table_off + 4 * k)[0]
+            owner = next(((o, n) for o, s, n in funcs_by_off if o <= label < o + s), None)
+            want = struct.unpack_from("<I", retail, va_to_off(segs, retail_addr + 4 * k))[0]
+            if owner is None or address(owner[1], syms) is None \
+                    or address(owner[1], syms) + label - owner[0] != want:
+                wrong += 1
+            covered.update(range(table_off + 4 * k, table_off + 4 * k + 4))
+            k += 1
+        if wrong:
+            bad += 1
+            print(f"DIFF jump table of {name} (retail 0x{retail_addr:08X}): {wrong} of {k} entries differ")
+    stray = ro_size - len(covered)
+    if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
+        del emitted[".rodata"]
     for name, size in emitted.items():
         bad += 1
-        print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; reference the existing D_ symbol "
-              "instead or keep the function as INCLUDE_ASM (data is not split per unit yet)")
+        why = ("only jump tables are compiled here; strings and constants stay INCLUDE_RODATA "
+               "(tools/include_rodata.py) for now" if name == ".rodata" and owns_rodata(version, unit_name)
+               else "reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
+               "(this data is not split per unit yet)")
+        print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
     print(f"{ok} match, {bad} differ")
     sys.exit(1 if bad else 0)
 

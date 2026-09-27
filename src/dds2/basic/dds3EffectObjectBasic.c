@@ -92,3 +92,26 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115E20);
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115E88);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115EE8);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412950);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412980);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_004129A8);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_004129F8);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A10);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A28);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A40);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A50);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A68);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A80);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A98);
+

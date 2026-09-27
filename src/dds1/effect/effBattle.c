@@ -46,6 +46,12 @@ u32 func_00160C28(s32 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160C30);
 
+INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DE0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DF0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0E00);
+
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160D88);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161588);
