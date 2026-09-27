@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""Find false function starts: code romwright split off the function it belongs to.
+
+    python3 tools/find_fragments.py dds1 [--write]
+
+ee-gcc emits one frame per function. A "function" that uses a caller's frame
+without building its own is a piece of that caller, usually a switch case or a
+shared tail that romwright took for an entry because it is a jump/branch target.
+Such a piece can never be written as C, and it splits its owner as well.
+
+A start is reported when, before the code sets up any frame, it
+  - reads a callee-saved register ($16-$23, $30) that it never wrote or saved, or
+  - restores $31 from the stack, or pops a frame it did not push.
+
+With --write, the starts go to config/<v>/not_functions.txt. romwright_sync.py
+drops them from the generated symbols; `configure.py --force-split` then
+disassembles each fragment as part of the function before it.
+"""
+import argparse
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+INSN = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/\s+(\S+)\s*(.*)$")
+GLABEL = re.compile(r"^glabel (\w+)")
+REG = re.compile(r"\$(\d+)\b")
+SAVED = {16, 17, 18, 19, 20, 21, 22, 23, 30}
+STORES = ("sb", "sh", "sw", "sd", "sq", "swl", "swr", "sdl", "sdr", "swc1", "sqc2")
+READS_ALL = ("b", "j", "jr", "jalr", "mthi", "mtlo", "mult", "multu", "div", "divu",
+             "mult1", "multu1", "div1", "divu1", "madd", "maddu", "madd1", "maddu1")
+
+
+def functions(path):
+    """(name, [(vram, op, operands)]) per glabel of a splat asm file."""
+    name, body = None, []
+    for line in path.read_text().splitlines():
+        if m := GLABEL.match(line):
+            if name:
+                yield name, body
+            name, body = m[1], []
+        elif name and (m := INSN.search(line)):
+            body.append((int(m[1], 16), m[2], m[3]))
+    if name:
+        yield name, body
+
+
+def fragment_reason(body):
+    written, framed = set(), False
+    for _, op, args in body:
+        regs = [int(r) for r in REG.findall(args)]
+        base = op.split(".")[0]
+        if base in ("addiu", "daddiu") and regs[:2] == [29, 29]:
+            if args.rstrip().split(",")[-1].strip().startswith("-"):
+                framed = True
+            elif not framed:
+                return "pops a frame it did not push"
+            continue
+        if framed:
+            return None
+        if base in STORES:
+            src, addr = regs[0], regs[1:]
+            if 29 in addr and src in SAVED:
+                written.add(src)  # a save of the caller's value, not a use
+                continue
+            reads, dests = regs, []
+        elif base in ("ld", "lw", "lq") and regs and regs[0] == 31 and 29 in regs[1:]:
+            return "restores $31 from a frame it did not push"
+        elif base in READS_ALL or base.startswith(("b", "t")):
+            reads, dests = regs, []
+        else:
+            dests, reads = regs[:1], regs[1:]
+        for r in reads:
+            if r in SAVED and r not in written:
+                return f"reads ${r} before setting it"
+        written.update(dests)
+        if base in ("jr",) and 31 in regs:
+            return None
+    return None
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("version")
+    ap.add_argument("--write", action="store_true")
+    args = ap.parse_args()
+    found = []
+    for path in sorted((ROOT / "asm" / args.version).rglob("*.s")):
+        # Unit files repeat what nonmatchings/ holds; data has no code; SDK code
+        # includes hand-written asm (context switches, setjmp) that legitimately
+        # reads callee-saved registers.
+        if path.relative_to(ROOT / "asm" / args.version).parts[0] in ("data", "nonmatchings", "sdk", "matchings"):
+            continue
+        for name, body in functions(path):
+            if body and (why := fragment_reason(body)):
+                found.append((body[0][0], name, why, path.relative_to(ROOT)))
+    found.sort()
+    for addr, name, why, path in found:
+        print(f"0x{addr:08X}  {name:32} {why:44} {path}")
+    print(f"{len(found)} fragments")
+    if args.write:
+        out = ROOT / "config" / args.version / "not_functions.txt"
+        out.write_text("# False function starts (tools/find_fragments.py); romwright_sync.py drops them.\n" +
+                       "".join(f"0x{a:08X}  # {why}\n" for a, _, why, _ in found))
+        print(f"-> {out.relative_to(ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

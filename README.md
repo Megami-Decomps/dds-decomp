@@ -89,7 +89,16 @@ file-name hints.
    `src/<v>/<dir>/<name>.c` with one `INCLUDE_ASM` per function.
 2. **Decompile.** `python tools/decompile.py func_XXXXXXXX` runs m2c
    (`mipsee-gcc-c`) with the unit's context. Replace the `INCLUDE_ASM` line with
-   the C.
+   the C. For a first pass over whole units,
+   `python tools/rw_bulk.py <v> <dir/unit ...>` (or `--all --skip <dir/unit>`)
+   tries a romwright draft for every `INCLUDE_ASM` function. It keeps only
+   drafts that byte-match with the unit still clean. On first use it builds its
+   own store, `build/romwright-c` (romwright needs MIPS `gp` seeding). Drafts
+   are cached in `build/rw_c/<v>/`. Kept drafts still read like decompiler
+   output, so give them types and struct names afterwards.
+   `python tools/check_unit.py src/<v>/<dir>/<unit>.c [-v] [--func F]` compares
+   every C function in a unit against retail, relocation targets included, and
+   fails when the unit emits data.
 3. **Diff.**
    - objdiff: `objdiff.json` is generated. Targets are splat's full disassembly
      of the unit. Bases are built with `-DSKIP_ASM`, so fallbacks never count as
@@ -100,12 +109,27 @@ file-name hints.
      writes `ctx.c`.
    - permuter: `../decomp-permuter/import.py <file.c> <asm/.../func.s>`
      (`permuter_settings.toml`, which compiles through `tools/cc.sh`).
-4. **Share with the other game.** About 8,600 DDS1 functions are byte-identical
+4. **Name and tidy.** Matched C should read like the original source: structs
+   in place of pointer arithmetic, real types, meaningful argument and local
+   names. `check_unit.py` confirms each change still matches. Function and data
+   names go through `python tools/names.py apply <v> names.tsv`, one row per
+   name: `<old name|0xADDR> <new> <evidence|inferred> <note>`. It writes a
+   curated row in `symbol_addrs.txt`, records provenance in
+   `config/<v>/name_sources.txt` and renames C references (run
+   `configure.py --force-split` afterwards so asm follows).
+   - `evidence` means the developers' own name: a string naming its function, a
+     task registration, a script command table, or a real Persona 4 symbol.
+   - `inferred` means a name we chose in their convention: lowercase module
+     prefix plus CamelCase, e.g. `sdfAddHandler`, `evtLipsExecFunction`.
+   - `python tools/names.py harvest <v>` lists the naming strings and the
+     functions that reference them, as candidates to review. The referencing
+     function may be a caller or a task registrar, not the named function.
+5. **Share with the other game.** About 8,600 DDS1 functions are byte-identical
    in DDS2 (relocations masked). `python tools/shared_funcs.py port` copies
    each decompiled function into the other version's `INCLUDE_ASM` slot,
    translating every symbol through the pair's relocations; `--from dds2`
    goes the other way. See [Shared functions](#shared-functions).
-5. **Verify.** `ninja` must stay green. `ninja report` writes `report.json`
+6. **Verify.** `ninja` must stay green. `ninja report` writes `report.json`
    (objdiff/decomp.dev progress, categories `dds1`, `dds2`, `game`, `sdk`).
 
 Build details, all automated by `configure.py`:

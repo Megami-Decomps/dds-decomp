@@ -1,5 +1,17 @@
 #include "common.h"
 
+/* One 0x14-byte slot per message window; the first field points at its state. */
+typedef struct ItfMesSlot {
+    void *mes;
+    u8 unk4[0x10];
+} ItfMesSlot;
+
+extern ItfMesSlot D_003D6ECC[];
+
+extern u32 func_0019D1F0(u32);
+
+extern u32 D_003BB1E8;
+
 void func_002EB278(int *param_1, int param_2, u8 *param_3, int param_4);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B340);
@@ -12,9 +24,13 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B428);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B4A0);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B530);
+u32 func_0019B530(void) {
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B538);
+u32 func_0019B538(void) {
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B540);
 
@@ -34,9 +50,13 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B808);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B870);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B880);
+void func_0019B880(u32 arg0) {
+    D_003BB1E8 = D_003BB1E8 | arg0;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B890);
+void func_0019B890(u32 arg0) {
+    D_003BB1E8 = D_003BB1E8 & ~arg0;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B8A8);
 
@@ -54,7 +74,9 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019BEB0);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019BFD8);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C060);
+void func_0019C060(s32 arg0, u32 arg1) {
+    *(u32 *)((s32)D_003D6ECC[arg0].mes + 0x4c) = arg1;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C080);
 
@@ -72,13 +94,30 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C378);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C3E8);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C458);
+u32 func_0019C458(s32 arg0) {
+    return *(u32 *)D_003D6ECC[arg0].mes;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C478);
+void func_0019C478(s32 arg0, u32 arg1) {
+    u32 *puVar1;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C4A8);
+    puVar1 = (u32 *)D_003D6ECC[arg0].mes;
+    *puVar1 = (u32)(u16)*puVar1 | (arg1 & 0xffff0000);
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C4D8);
+void func_0019C4A8(s32 arg0, u32 arg1) {
+    u32 *puVar1;
+
+    puVar1 = (u32 *)D_003D6ECC[arg0].mes;
+    *puVar1 = *puVar1 | (arg1 & 0xffff0000);
+}
+
+void func_0019C4D8(s32 arg0, u32 arg1) {
+    u32 *puVar1;
+
+    puVar1 = (u32 *)D_003D6ECC[arg0].mes;
+    *puVar1 = *puVar1 & (~arg1 | 0xffff);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C508);
 
@@ -86,13 +125,19 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C528);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C548);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C568);
+u32 func_0019C568(s32 arg0, s32 arg1) {
+    return *(u32 *)(arg1 * 4 + (s32)D_003D6ECC[arg0].mes + 0xd0);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C590);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C838);
+void func_0019C838(s32 arg0, u32 arg1, u32 arg2) {
+    func_0019D460((u32)D_003D6ECC[arg0].mes, arg1, arg2, 0);
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C868);
+void func_0019C868(s32 arg0) {
+    func_0019D460((u32)D_003D6ECC[arg0].mes);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C898);
 
@@ -104,9 +149,13 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C9F0);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CAB8);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CB78);
+void func_0019CB78(s32 arg0, u8 arg1) {
+    *(u8 *)((s32)D_003D6ECC[arg0].mes + 0x39) = arg1;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CB98);
+void func_0019CB98(s32 arg0, u32 arg1) {
+    *(u32 *)((s32)D_003D6ECC[arg0].mes + 0x1dc) = arg1;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CBB8);
 
@@ -137,7 +186,15 @@ void func_0019D160(u8 *arg0)
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D1A8);
+u32 func_0019D1A8(s32 arg0) {
+    u32 temp_v0;
+
+    temp_v0 = 0;
+    if ((*(s32 *)(arg0 + 8) == 0x3047534d) || (*(s32 *)(arg0 + 8) == 0x3147534d)) {
+        temp_v0 = 1;
+    }
+    return temp_v0;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D1D8);
 
@@ -145,7 +202,9 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D1F0);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D208);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D240);
+u32 func_0019D240(s32 arg0) {
+    return *(u32 *)(*(s32 *)((s32)D_003D6ECC[arg0].mes + 4) + 0x18);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D268);
 
@@ -155,9 +214,28 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D460);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D580);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D5D0);
+u32 func_0019D5D0(s32 arg0) {
+    s32 *piVar1;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D610);
+    piVar1 = (s32 *)func_0019D1F0(*(u32 *)(arg0 + 4));
+    return *(u32 *)((u32)*(u16 *)(arg0 + 0x20) * 4 + *piVar1);
+}
+
+s32 func_0019D610(s32 arg0, u32 arg1) {
+    s32 temp_v0;
+    u32 temp_v1;
+
+    temp_v0 = 0;
+    while (0 < arg0) {
+        temp_v1 = arg1 & 1;
+        arg1 = arg1 >> 1;
+        arg0 = arg0 - 1;
+        if (temp_v1 == 0) {
+            temp_v0 = temp_v0 + 1;
+        }
+    }
+    return temp_v0;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D640);
 
@@ -165,7 +243,15 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D730);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D850);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D888);
+void func_0019D888(u8 *arg0, s32 arg1) {
+    s32 temp_v0;
+
+    temp_v0 = *(s32 *)(arg0 + 0x20);
+    *(u8 *)(arg1 + 0x15) = *arg0 >> 1;
+    *(u8 *)(arg1 + 0x12) = *(u8 *)(temp_v0 + 0x15);
+    *(u8 *)(arg1 + 0x13) = *(u8 *)(temp_v0 + 0x14);
+    *(u8 *)(arg1 + 0x14) = *(u8 *)(temp_v0 + 0x16);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D8B8);
 

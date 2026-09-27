@@ -28,6 +28,7 @@ import bisect
 import collections
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -45,6 +46,8 @@ SH_END = "// END shared"
 INCLUDE_ASM = re.compile(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);$', re.M)
 TOKENS = re.compile(r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|\b[A-Za-z_]\w*\b', re.S)
 DEF = re.compile(r"^[A-Za-z_][\w\s\*]*?\b(\w+)\s*\([^;]*$", re.M)
+TYPE_DECL = re.compile(r"\s*(?:/\*.*?\*/\s*)*(?:typedef|struct|union|enum)\b", re.S)
+FIRST_BODY = re.compile(r"^(?:INCLUDE_ASM\(|[A-Za-z_][\w \t\*]*\b\w+\s*\([^;{]*\)\s*\{?[ \t]*$)", re.M)
 UNIT = re.compile(r"^(\s+- \[)0x([0-9A-Fa-f]+), (\w+), ([^\]]+)\](.*)$")
 
 
@@ -276,19 +279,31 @@ def cmd_units(args):
 
 
 def blocks(text):
+    """Top-level items: each declaration, definition, INCLUDE_ASM or preprocessor line,
+    with any comment lines directly above it. Several declarations on consecutive lines
+    are separate items, so porting picks only the ones a function uses."""
     out, cur, depth = [], [], 0
+
+    def flush():
+        if cur:
+            out.append("\n".join(cur))
+            cur.clear()
+
     for line in text.split("\n"):
-        if not line.strip() and depth == 0:
-            if cur:
-                out.append("\n".join(cur))
-                cur = []
+        stripped = line.strip()
+        if depth == 0 and not stripped:
+            flush()
+            continue
+        if depth == 0 and stripped.startswith("#"):
+            flush()
+            out.append(line)
             continue
         cur.append(line)
         depth += line.count("{") - line.count("}")
-    if cur:
-        out.append("\n".join(cur))
+        if depth == 0 and stripped.endswith((";", "}")):
+            flush()
+    flush()
     return out
-
 
 def translate(text, src, dst, amap):
     """Rewrite symbol identifiers through amap; comments and literals stay verbatim."""
@@ -314,9 +329,21 @@ def translate(text, src, dst, amap):
 
 
 def declared_name(decl):
-    """Identifier a top-level declaration introduces: the name before '(' for prototypes,
-    else the last identifier before ';'."""
-    code = re.sub(r"/\*.*?\*/|//[^\n]*", "", decl, flags=re.S)
+    """Identifier a top-level declaration introduces: the typedef/struct name for type
+    definitions (whose bodies may hold function-pointer members), the name before '('
+    for prototypes, else the last identifier before ';'."""
+    code = re.sub(r"/\*.*?\*/|//[^\n]*", "", decl, flags=re.S).strip()
+    if m := re.match(r"#define\s+(\w+)", code):
+        return m.group(1)
+    if code.startswith(("typedef", "struct", "union", "enum")):
+        if "{" not in code and (m := re.search(r"\(\s*\*\s*(\w+)\s*\)\s*\(", code)):
+            return m.group(1)  # typedef void (*Fn)(...);
+        tail = code.rsplit("}", 1)[-1] if "}" in code else code
+        names = re.findall(r"[A-Za-z_]\w*", tail.rsplit(";", 1)[0])
+        if names:
+            return names[-1]
+        m = re.match(r"(?:typedef\s+)?(?:struct|union|enum)\s+(\w+)", code)
+        return m.group(1) if m else None
     head = code.split("(", 1)[0] if "(" in code else code.rsplit(";", 1)[0]
     names = re.findall(r"[A-Za-z_]\w*", head)
     return names[-1] if names else None
@@ -335,7 +362,7 @@ def cmd_port(args):
     for path in sorted((ROOT / "src" / src.version).rglob("*.c")):
         pre, funcs = [], []
         for b in blocks(path.read_text()):
-            if b.startswith("#") or "INCLUDE_ASM" in b:
+            if (b.startswith("#") and not b.startswith("#define")) or "INCLUDE_ASM" in b:
                 continue
             m = DEF.search(b) if "{" in b else None
             (funcs if m else pre).append((m.group(1) if m else None, b))
@@ -379,18 +406,46 @@ def cmd_port(args):
             text = dpath.read_text()
             pattern = re.compile(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{dname}\);$', re.M)
             text = pattern.sub(lambda _: new_body, text, count=1)
-            head_end = text.find("\n", text.find("#include")) + 1
             add = [d for d in new_pre if d not in text]
             if add:
-                text = text[:head_end] + "\n" + "\n\n".join(add) + "\n" + text[head_end:]
+                # A source declaration supersedes the destination's older one of the same
+                # name (e.g. a global retyped from void* to a struct pointer).
+                # Types are left alone: a forward typedef and its struct share a name.
+                names = {declared_name(d) for d in add if not TYPE_DECL.match(d)}
+                text = "\n\n".join(b for b in blocks(text)
+                                   if "{" in b or TYPE_DECL.match(b) or b.startswith("#include")
+                                   or "INCLUDE_ASM" in b or declared_name(b) not in names) + "\n"
+                # After the declarations already there (earlier ports' types may be
+                # what these depend on), before the first function or INCLUDE_ASM.
+                first = FIRST_BODY.search(text)
+                at = first.start() if first else len(text)
+                text = text[:at] + "\n\n".join(add) + "\n\n" + text[at:]
             dpath.write_text(text)
             ported[dpath.relative_to(ROOT)] += 1
+    # Relocation-masked pairing ignores plain immediates (li 0x15 vs li 0x19), so a
+    # pair is not proof; every ported function must compile to its own retail bytes.
+    for rel in sorted(ported):
+        path = ROOT / rel
+        r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path), "-v"],
+                           capture_output=True, text=True)
+        bad = re.findall(r"^DIFF (\w+) ", r.stdout, re.M)
+        if r.returncode and not bad:
+            skipped.append(f"{rel}: check_unit failed without per-function DIFF; left for review")
+        text = path.read_text()
+        for name in bad:
+            block = next(b for b in blocks(text) if "{" in b and (m := DEF.search(b)) and m.group(1) == name)
+            unit = rel.relative_to(Path("src") / dst.version).with_suffix("").as_posix()
+            text = text.replace(block, f'INCLUDE_ASM(const s32, "{unit}", {name});', 1)
+            ported[rel] -= 1
+            skipped.append(f"{rel}:{name}: ported C differs from {dst.version} retail; reverted")
+        path.write_text(text)
     for p, n in sorted(ported.items()):
         print(f"ported {n} to {p}")
     for s in skipped:
         print(f"skip {s}")
     if ported:
         print("run python3 configure.py --no-split && ninja")
+
 
 
 def main():

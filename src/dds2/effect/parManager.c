@@ -20,7 +20,9 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00161958);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161A10);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00161B20);
+void func_00161B20(s32 arg0, s32 arg1) {
+    *(u16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 4) + 4) = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161B38);
 
@@ -40,7 +42,9 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001621F8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00162248);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001622D0);
+u16 func_001622D0(s32 arg0) {
+    return *(u16 *)(arg0 + 0x142);
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001622D8);
 

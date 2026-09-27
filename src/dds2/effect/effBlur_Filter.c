@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern u32 func_00159BB8(u32);
+
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E8F0);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E908);
@@ -8,9 +10,16 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E980);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA00);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA60);
+void func_0018EA60(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x2c) = arg1;
+}
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA68);
+void func_0018EA68(s32 arg0) {
+    u32 temp_v0;
+
+    temp_v0 = func_00159BB8(2);
+    *(u32 *)(arg0 + 0x2c) = temp_v0;
+}
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA98);
 
@@ -22,9 +31,16 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EED8);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EF40);
+void func_0018EF40(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x2c) = arg1;
+}
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EF48);
+void func_0018EF48(s32 arg0) {
+    u32 temp_v0;
+
+    temp_v0 = func_00159BB8(2);
+    *(u32 *)(arg0 + 0x2c) = temp_v0;
+}
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EF78);
 

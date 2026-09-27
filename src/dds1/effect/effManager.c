@@ -1,20 +1,36 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014F838);
+void func_0014F838(void) {
+    func_001536A0();
+    func_0015B250();
+    func_001500F0();
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014F860);
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014F9C8);
+u32 func_0014F9C8(void) {
+    func_0015B420();
+    func_0015D0C0();
+    func_00150750();
+    func_00151010();
+    func_001602F8();
+    func_0018F848();
+    return 0;
+}
 
 void func_0014FA10(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FA18);
+u32 func_0014FA18(void) {
+    return 1;
+}
 
 void func_0014FA20(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FA28);
+u32 func_0014FA28(void) {
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FA30);
 
@@ -40,6 +56,8 @@ INCLUDE_ASM(const s32, "effect/effManager", func_0014FCD8);
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FD20);
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FE28);
+void func_0014FE28(u32 arg0) {
+    func_0014FA30(5, 0, arg0);
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FE48);

@@ -6,7 +6,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191450);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001917C8);
+void func_001917C8(s32 arg0, s32 arg1, u32 arg2) {
+    *(u32 *)(arg1 * 4 + *(s32 *)(arg0 + 0x20)) = arg2;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001917E0);
 
@@ -44,7 +46,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192F80);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193238);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193250);
+void func_00193250(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x124) = arg1;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193258);
 
@@ -60,7 +64,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001937C0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193A88);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AA0);
+void func_00193AA0(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x128) = arg1;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AA8);
 
@@ -76,7 +82,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001943E0);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001943F8);
+void func_001943F8(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x120) = arg1;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194400);
 

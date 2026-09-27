@@ -1,6 +1,17 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001147D8);
+void func_001147D8(u32 arg0) {
+    u32 *puVar1;
+    s32 temp_v0;
+
+    temp_v0 = (s32)arg0;
+    puVar1 = *(u32 **)(temp_v0 + 0x18);
+    func_00114640(puVar1);
+    func_0010F810(arg0);
+    func_00111A68(*puVar1);
+    func_00328E48(*(u32 *)(temp_v0 + 0x18));
+    *(u32 *)(temp_v0 + 0x18) = 0;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114828);
 
@@ -12,7 +23,9 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114C80);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CA0);
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CD0);
+u32 func_00114CD0(s32 arg0) {
+    return **(u32 **)(arg0 + 0x18);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CE0);
 
@@ -72,9 +85,13 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BD8);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C50);
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115DF0);
+void func_00115DF0(s32 arg0, u32 arg1) {
+    *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) | arg1;
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115E08);
+void func_00115E08(s32 arg0, u32 arg1) {
+    *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) & ~arg1;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115E20);
 

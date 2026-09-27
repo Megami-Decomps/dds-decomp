@@ -1,5 +1,11 @@
 #include "common.h"
 
+extern u32 func_0019D920(void);
+
+extern u32 D_00436568;
+
+extern u32 D_00436554;
+
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2A8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2F8);
@@ -20,7 +26,9 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019C618);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C628);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C638);
+u32 func_0019C638(void) {
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C640);
 
@@ -48,13 +56,21 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D010);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D038);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D058);
+void func_0019D058(s32 arg0, u8 arg1) {
+    u32 temp_v0;
+
+    *(u8 *)(arg0 + 1) = arg1;
+    temp_v0 = func_0019D920();
+    *(u32 *)(arg0 + 0xc) = temp_v0;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D088);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D100);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D110);
+void func_0019D110(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x14) = arg1 >> 4;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D120);
 
@@ -64,7 +80,9 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D1D0);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D1E0);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D1F8);
+void func_0019D1F8(u32 arg0) {
+    D_00436568 = arg0;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D200);
 
@@ -100,7 +118,9 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DAD8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DB18);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019DB28);
+void func_0019DB28(u32 arg0) {
+    D_00436554 = arg0;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DB30);
 
@@ -118,6 +138,29 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DEE0);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019E050);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019E0A0);
+void func_0019E0A0(u32 *arg0) {
+    s8 temp_v0;
+
+    if (arg0[5] == 0) {
+        temp_v0 = *(s8 *)(arg0 + 7);
+    }
+    else {
+        if (*(s32 *)(arg0[5] + 0x1c) == 0) {
+            *(u8 *)(arg0 + 7) = 0;
+        }
+        temp_v0 = *(s8 *)(arg0 + 7);
+    }
+    if (temp_v0 == '\0') {
+        temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
+    }
+    else {
+        func_0019E050();
+        temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
+    }
+    if (temp_v0 != '\0') {
+        func_0019D100(arg0[5], *arg0, arg0[1]);
+        *(u8 *)((s32)arg0 + 0x1d) = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019E110);

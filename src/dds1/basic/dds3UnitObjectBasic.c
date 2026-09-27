@@ -1,3 +1,7 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", func_001130C8);
+void func_00110928(void);
+
+void func_001130C8(void) {
+    func_00110928();
+}

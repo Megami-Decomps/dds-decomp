@@ -1,6 +1,69 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B8D8);
+typedef struct SdfTexRef {
+    void *unk0;
+    s32 unk4;
+} SdfTexRef;
+
+typedef struct SdfTexBuf {
+    u8 pad[0x20];
+    u64 unk20;
+} SdfTexBuf;
+
+typedef struct SdfTex {
+    struct SdfTex *unk0;
+    struct SdfTex *unk4;
+    SdfTexRef *unk8;
+    s16 unkC;
+    s16 unkE;
+    void *unk10;
+    void *unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u16 unk1C;
+    u8 unk1E;
+    u8 unk1F;
+    s32 unk20;
+    s32 unk24;
+    SdfTexBuf *unk28;
+    SdfTexBuf *unk2C;
+    void *unk30;
+    s32 unk34;
+    s32 unk38;
+    void *unk3C;
+} SdfTex;
+
+extern SdfTex *D_004389F8;
+
+void func_0032AA40(void *arg0);
+
+void func_00328E48(void *arg0);
+
+void func_00328420(void *arg0);
+
+void *func_0032BD60(SdfTex *arg0, s32 arg1);
+
+void *func_00328D68(s32 arg0);
+
+void *func_0032B260();
+
+void *func_0032B248(void *arg0);
+
+void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+
+s32 func_0032B8D8(s32 arg0, s32 arg1, s32 arg2) {
+    s32 v1 = (arg1 == 0) ? 4 : 2;
+    s32 v2;
+
+    if ((arg0 == 0x13) || (arg0 == 0x1B)) {
+        v2 = 0x100;
+    } else {
+        v2 = 0x10;
+    }
+    return v2 * v1 * arg2;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B908);
 
@@ -8,7 +71,31 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B948);
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B968);
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BAE0);
+void func_0032BAE0(SdfTex *arg0) {
+    SdfTex *cur;
+    SdfTex *prev;
+
+    if (arg0->unk8->unk0 == NULL) {
+        func_0032AA40(arg0->unk10);
+    }
+    func_0032AA40(arg0->unk14);
+    func_00328E48(arg0->unk28);
+    func_00328E48(arg0->unk2C);
+    cur = arg0->unk0;
+    prev = arg0->unk4;
+    if (prev != NULL) {
+        prev->unk0 = cur;
+    }
+    if (cur != NULL) {
+        cur->unk4 = prev;
+    } else {
+        D_004389F8 = prev;
+    }
+    func_00328420(arg0->unk30);
+    func_00328420(arg0->unk3C);
+    func_00328E48(arg0->unk8);
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BB68);
 
@@ -16,11 +103,25 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBB0);
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBF8);
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BD60);
+void *func_0032BD60(SdfTex *arg0, s32 arg1) {
+    void *buf;
+    void *tmp1;
+    void *tmp2;
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE00);
+    buf = func_00328D68(0x40);
+    tmp1 = func_0032B260(arg0);
+    tmp2 = func_0032B248(arg0);
+    func_0032BBF8(buf, arg0->unkC, arg0->unkE, tmp1, arg0->unk1A, tmp2, arg0->unk19, 1, arg0->unk1B, arg0->unk1C, arg0->unk1F, arg1);
+    return buf;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE30);
+void func_0032BE00(SdfTex *arg0) {
+    arg0->unk28 = func_0032BD60(arg0, 0);
+}
+
+void func_0032BE30(SdfTex *arg0) {
+    arg0->unk2C = func_0032BD60(arg0, 1);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);
 

@@ -1,46 +1,321 @@
 #include "common.h"
 
+typedef struct PacHead {
+    u8 unk0; /* 0x0 */
+    u8 unk1; /* 0x1 */
+    u8 pad2[2]; /* 0x2 */
+    s32 unk4; /* 0x4 */
+    u8 pad8[4]; /* 0x8 */
+    s32 unkC; /* 0xC */
+} PacHead;
+
+typedef struct PacWork {
+    struct PacWork *unk0; /* 0x0 */
+    struct PacState *unk4; /* 0x4 */
+    s32 unk8; /* 0x8 */
+    u8 *unkC; /* 0xC */
+} PacWork;
+
+typedef struct PacAlloc {
+    s32 unk0; /* 0x0 */
+    s32 unk4; /* 0x4 */
+    u8 pad8[24]; /* 0x8 */
+    s32 unk20; /* 0x20 */
+} PacAlloc;
+
+typedef struct PacBuf {
+    s32 unk0; /* 0x0 */
+    s32 unk4; /* 0x4 */
+    u8 *unk8; /* 0x8 */
+    s32 unkC; /* 0xC */
+} PacBuf;
+
+typedef struct PacState {
+    u8 unk0; /* 0x0 */
+    u8 unk1; /* 0x1 */
+    u8 pad2[2]; /* 0x2 */
+    s32 unk4; /* 0x4 */
+    void (*unk8)(struct PacState *); /* 0x8 */
+    void (*unkC)(struct PacState *); /* 0xC */
+    u8 *unk10; /* 0x10 */
+    s32 unk14; /* 0x14 */
+    s32 unk18; /* 0x18 */
+    u8 *unk1C; /* 0x1C */
+    s32 unk20; /* 0x20 */
+    PacBuf *unk24; /* 0x24 */
+    PacBuf *unk28; /* 0x28 */
+    PacAlloc *unk2C; /* 0x2C */
+    PacWork *unk30; /* 0x30 */
+    PacWork *unk34; /* 0x34 */
+} PacState;
+
+PacWork *func_00346E08(PacState *arg0, PacHead *arg1);
+
+void *func_00328E18(s32 size);
+
+extern void *memcpy(void *dst, const void *src, u32 n);
+
+void func_00328E48(void *arg0);
+
+void func_00347290(PacState *arg0, void *arg1);
+
+void func_00347320(PacState *arg0, void *arg1);
+
+void func_003473B0(PacState *arg0, void *arg1);
+
+void func_00347710(PacState *arg0, void *arg1);
+
+void func_00347948(PacState *arg0, void *arg1);
+
+void func_00346B40(PacState *arg0, s32 arg1);
+
+s32 func_00347988(void *arg0, void *arg1, s32 arg2);
+
+void func_00347168(PacState *arg0, PacHead *arg1);
+
+void func_00346C40(PacState *arg0);
+
+void func_003472C0(PacState *arg0);
+
+void func_00347350(PacState *arg0);
+
+s32 func_003298F8(s32 arg0);
+
+s32 func_0032C138(s32 arg0);
+
+void func_00329888(void *arg0);
+
+s32 func_0032C150(void *arg0);
+
+void *func_00328D68(s32 size);
+
+void func_003475A0(PacState *arg0, PacHead *arg1, PacBuf *arg2);
+
+void func_003476D0(PacState *arg0);
+
+void func_003477D8(PacState *arg0);
+
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346E08);
+PacWork *func_00346E08(PacState *arg0, PacHead *arg1) {
+    s32 size = arg1->unk1 & 0xF0;
+    PacWork *node = func_00328E18(size + 0x20);
+    node->unk4 = arg0;
+    memcpy((u8 *)node + 0x10, arg1, size + 0x10);
+    if (arg0->unk34 == NULL) {
+        arg0->unk30 = node;
+    } else {
+        arg0->unk34->unk0 = node;
+    }
+    arg0->unk34 = node;
+    return node;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346E90);
+PacWork *func_00346E90(PacWork *arg0) {
+    PacState *state = arg0->unk4;
+    PacWork *link = (PacWork *)&state->unk30;
+    PacWork *cur = state->unk30;
+    PacWork *prev = NULL;
+    PacWork *next;
+    if (cur != arg0) {
+        do {
+            prev = cur;
+            cur = prev->unk0;
+            link = prev;
+        } while (cur != arg0);
+    }
+    next = arg0->unk0;
+    link->unk0 = next;
+    if (state->unk34 == arg0) {
+        state->unk34 = prev;
+    }
+    func_00328E48(arg0);
+    return next;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346F00);
+s32 func_00346F00(PacState *arg0, s32 arg1, PacHead *arg2) {
+    if (arg1 == 0) {
+        switch (arg2->unk0) {
+        case 1:
+            func_00347290(arg0, arg2);
+            return 0;
+        case 2:
+            func_00347710(arg0, arg2);
+            return 0;
+        case 6:
+            func_00347320(arg0, arg2);
+            return 0;
+        case 8:
+            func_003473B0(arg0, arg2);
+            return 0;
+        case 9:
+            func_00347948(arg0, arg2);
+            return 0;
+        case 0xFF:
+            return 1;
+        default:
+            return 3;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346FE0);
+void *func_00346FE0(u8 *arg0) {
+    s32 x = arg0[0x11] & 0xF0;
+    if (x <= 0) {
+        return NULL;
+    }
+    return arg0 + 0x20;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347000);
+void func_00347000(PacState *arg0) {
+    s32 n = arg0->unk20;
+    s32 t = arg0->unk14;
+    if (t < n) {
+        n = t;
+    }
+    if (n != 0) {
+        memcpy(arg0->unk1C, arg0->unk10, n);
+        func_00346B40(arg0, n);
+        arg0->unk1C += n;
+        {
+            s32 r = arg0->unk20 - n;
+            arg0->unk20 = r;
+            if (r != 0) {
+                return;
+            }
+        }
+        arg0->unkC(arg0);
+    }
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347088);
+void func_00347088(PacState *arg0) {
+    s32 n = arg0->unk14;
+    s32 r = func_00347988(arg0->unk24, arg0->unk10, n);
+    func_00346B40(arg0, n - arg0->unk24->unkC);
+    if (r == 0) {
+        return;
+    }
+    func_00328E48(arg0->unk24);
+    arg0->unkC(arg0);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347100);
+void func_00347100(PacState *arg0) {
+    s32 n = arg0->unk20;
+    if (arg0->unk14 < n) {
+        n = arg0->unk14;
+    }
+    if (n != 0) {
+        func_00346B40(arg0, n);
+        {
+            s32 r = arg0->unk20 - n;
+            arg0->unk20 = r;
+            if (r != 0) {
+                return;
+            }
+        }
+        arg0->unkC(arg0);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347168);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347290);
+void func_00347290(PacState *arg0, void *arg1) {
+    func_00347168(arg0, arg1);
+    arg0->unkC = func_00346C40;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003472C0);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347320);
+void func_00347320(PacState *arg0, void *arg1) {
+    func_00347168(arg0, arg1);
+    arg0->unkC = func_003472C0;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347350);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003473B0);
+void func_003473B0(PacState *arg0, void *arg1) {
+    func_00347168(arg0, arg1);
+    arg0->unkC = func_00347350;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003473E0);
+void func_003473E0(PacState *arg0) {
+    PacBuf *s = arg0->unk28;
+    s32 n = s->unkC;
+    if (arg0->unk14 < n) {
+        n = arg0->unk14;
+    }
+    if (n != 0) {
+        memcpy(s->unk8, arg0->unk10, n);
+        func_00346B40(arg0, n);
+        s->unk8 += n;
+        {
+            s32 r = s->unkC - n;
+            s->unkC = r;
+            if (r != 0) {
+                return;
+            }
+        }
+        s->unk0 = func_0032C138(func_003298F8(s->unk4));
+        func_00329888(&s->unk4);
+        arg0->unkC(arg0);
+    }
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347488);
+void func_00347488(PacState *arg0) {
+    s32 n = arg0->unk20;
+    s32 r = func_00347988(arg0->unk24, arg0->unk10, n);
+    func_00346B40(arg0, n - arg0->unk24->unkC);
+    if (r == 0) {
+        return;
+    }
+    {
+        PacBuf *s = arg0->unk28;
+        s->unk0 = func_0032C138(func_003298F8(s->unk4));
+        func_00329888(&s->unk4);
+    }
+    func_00328E48(arg0->unk24);
+    arg0->unkC(arg0);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347520);
+void func_00347520(PacState *arg0) {
+    PacBuf *s = arg0->unk28;
+    s32 n = s->unkC;
+    if (arg0->unk14 < n) {
+        n = arg0->unk14;
+    }
+    if (n != 0) {
+        func_00346B40(arg0, n);
+        {
+            s32 r = s->unkC - n;
+            s->unkC = r;
+            if (r != 0) {
+                return;
+            }
+        }
+        s->unk0 = func_0032C150(s->unk8);
+        arg0->unkC(arg0);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003475A0);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003476D0);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347710);
+void func_00347710(PacState *arg0, void *arg1) {
+    func_00346E08(arg0, arg1);
+    {
+        void *p = func_00328D68(0x10);
+        arg0->unk2C = (PacAlloc *)p;
+        func_003475A0(arg0, arg1, p);
+    }
+    arg0->unkC = func_003476D0;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347768);
+void func_00347768(PacState *arg0) {
+    func_003475A0(arg0, (u8 *)arg0->unk2C + 0x10, (u8 *)arg0->unk2C + 0x20);
+    arg0->unkC = func_003477D8;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477A8);
 

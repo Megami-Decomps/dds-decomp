@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern s32 func_00101958(void);
+
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024DD20);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024DD48);
@@ -42,9 +44,19 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024EF80);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024EFD0);
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F020);
+void func_0024F020(u32 arg0, u32 arg1) {
+    s32 temp_v0;
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F058);
+    temp_v0 = func_00101958();
+    **(u32 **)(temp_v0 + 8) = **(u32 **)(temp_v0 + 8) | arg1;
+}
+
+void func_0024F058(u32 arg0, u32 arg1) {
+    s32 temp_v0;
+
+    temp_v0 = func_00101958();
+    **(u32 **)(temp_v0 + 8) = **(u32 **)(temp_v0 + 8) & ~arg1;
+}
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F090);
 

@@ -1,12 +1,29 @@
 #include "common.h"
 
+extern u32 func_00112AB0(void);
+
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111B30);
+void func_00111B30(u32 arg0, u32 arg1) {
+    u32 *puVar1;
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111B60);
+    puVar1 = (u32 *)func_00112AB0();
+    *puVar1 = *puVar1 | arg1;
+}
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111B98);
+void func_00111B60(u32 arg0, u32 arg1) {
+    u32 *puVar1;
+
+    puVar1 = (u32 *)func_00112AB0();
+    *puVar1 = *puVar1 & ~arg1;
+}
+
+u8 func_00111B98(u32 arg0, u32 arg1) {
+    u32 *puVar1;
+
+    puVar1 = (u32 *)func_00112AB0();
+    return (*puVar1 & arg1) != 0;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
 

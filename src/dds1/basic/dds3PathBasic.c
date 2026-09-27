@@ -1,9 +1,113 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F08);
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} PathEntry12;
+
+typedef struct {
+    u8 data[0x10];
+} PathEntry16;
+
+typedef struct {
+    s32 unk0;
+    PathEntry12 *unk4;
+} PathData14;
+
+typedef struct {
+    s32 unk0;
+    PathEntry16 *unk4;
+} PathData18;
+
+typedef struct {
+    u8 data[0x28];
+} PathEntry40;
+
+typedef struct {
+    s32 unk0;
+    PathEntry40 *unk4;
+} PathData20;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    f32 unkC;
+    s32 unk10;
+    PathData14 *unk14;
+    PathData18 *unk18;
+    s32 unk1C;
+    PathData20 *unk20;
+} PathObj;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+} PathOut;
+
+void func_00116B80(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
+void func_002E8278(void *arg0, f32 arg1);
+void *memset(void *s, s32 c, u32 n);
+
+void func_00192DE0(s32 arg);
+void func_002CFF98(void *arg);
+
+void func_00116F08(PathObj *arg) {
+    func_00192DE0(arg->unk10);
+    func_002CFF98(arg);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F38);
 
-INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00117050);
+void func_00117050(PathObj *arg) {
+    s32 idx;
+    f32 frac;
+    PathData18 *data;
+    PathEntry16 *base;
+    PathEntry16 *p1;
+    PathEntry16 *p2;
+    if (arg->unk4 & 2) {
+        data = arg->unk18;
+        func_00116B80(&idx, &frac, data, arg->unkC);
+        base = data->unk4;
+        p1 = &base[idx];
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf10, 0(%0)\n"
+            ".set reorder"
+            :
+            : "r"(p1)
+            : "memory"
+        );
+        p2 = &base[idx] + 1;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf11, 0(%0)\n"
+            ".set reorder"
+            :
+            : "r"(p2)
+            : "memory"
+        );
+        func_002E8278(p2, frac);
+    } else {
+        __asm__ volatile (
+            ".set noreorder\n"
+            "vmove.xyzw vf10, vf0\n"
+            ".set reorder"
+            :
+            :
+            : "memory"
+        );
+    }
+}
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_001170D8);

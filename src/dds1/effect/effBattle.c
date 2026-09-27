@@ -2,29 +2,47 @@
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160B00);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160B90);
+u16 func_00160B90(s32 arg0) {
+    return *(u16 *)(arg0 + 0x1c);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160B98);
+u32 func_00160B98(s32 arg0) {
+    return *(u32 *)(arg0 + 0x10);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BA0);
+u32 func_00160BA0(u32 *arg0) {
+    return *arg0;
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BA8);
+void func_00160BA8(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x118) = arg1;
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BB0);
+void func_00160BB0(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x11c) = arg1;
+}
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160BB8);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160BC8);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BE0);
+u32 func_00160BE0(s32 arg0) {
+    return *(u32 *)(arg0 + 0x14);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160BE8);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160C18);
+u32 func_00160C18(s32 arg0) {
+    return *(u32 *)(arg0 + 0x18);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160C20);
+void func_00160C20(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x120) = arg1;
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160C28);
+u32 func_00160C28(s32 arg0) {
+    return *(u32 *)(arg0 + 0x120);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00160C30);
 

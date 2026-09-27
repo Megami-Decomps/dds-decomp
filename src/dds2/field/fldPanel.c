@@ -1,6 +1,16 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "field/fldPanel", func_001441C8);
+extern u32 D_00436204;
+
+extern u64 func_00101958(void);
+
+void func_001441C8(void) {
+    u64 temp_v0;
+
+    temp_v0 = func_00101958();
+    func_00328E48(temp_v0);
+    D_00436204 = 0;
+}
 
 INCLUDE_ASM(const s32, "field/fldPanel", func_001441F0);
 

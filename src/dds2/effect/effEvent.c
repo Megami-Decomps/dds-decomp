@@ -8,7 +8,9 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00197ED8);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00197F40);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00197F58);
+void func_00197F58(s32 arg0, u32 arg1) {
+    *(u32 *)(arg0 + 0x30) = arg1;
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00197F60);
 

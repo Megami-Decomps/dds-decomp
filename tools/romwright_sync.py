@@ -76,7 +76,8 @@ def functions(version: str) -> list[tuple[int, int, str]]:
 def write_symbols(version: str) -> None:
     rows = functions(version)
     counts = collections.Counter(name for _, _, name in rows)
-    path = ROOT / "config" / version / "symbol_addrs.txt"
+    config = ROOT / "config" / version
+    path = config / "symbol_addrs.txt"
     text = path.read_text() if path.exists() else ""
     if BEGIN in text:
         head, rest = text.split(BEGIN, 1)
@@ -84,10 +85,14 @@ def write_symbols(version: str) -> None:
     else:
         head, tail = text, ""
     curated = {int(m.group(2), 16) for line in (head + tail).splitlines() if (m := ROW.match(line))}
+    # False starts (tools/find_fragments.py): pieces of the preceding function.
+    fragments = config / "not_functions.txt"
+    skip = {int(line.split()[0], 16) for line in fragments.read_text().splitlines()
+            if line.strip() and not line.startswith("#")} if fragments.exists() else set()
 
     generated, named = [], 0
     for addr, size, name in rows:
-        if addr in curated:
+        if addr in curated or addr in skip:
             continue
         if PLACEHOLDER.match(name) or counts[name] > 1:
             name = f"func_{addr:08X}"
