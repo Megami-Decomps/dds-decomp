@@ -269,12 +269,10 @@ s64 func_002B2698(s32 callback) {
     return menuSetHandler(context, 1, callback);
 }
 
-/*W13D2:func_002B2790*/
 s64 func_002B2790(s32 callback) {
     s32 context = func_00101958();
     return menuSetHandler(context, 2, callback);
 }
-/*W13D2END*/
 
 u8 func_002B27C8(void) {
     s64 temp_v0;

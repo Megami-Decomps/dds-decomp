@@ -1,6 +1,37 @@
 #include "common.h"
+#include "fpu.h"
 
 extern s32 D_004363C4;
+
+extern u32 D_00435F0C;
+
+extern void advanceTitleStateUnderSemaphore(void);
+extern void func_002433B0(void);
+
+extern u8 D_0044FF90[];
+extern s32 D_004362C8;
+
+extern u32 D_00436330[];
+extern s32 func_001578C0(u32);
+
+extern s32 D_00436320;
+extern u8 D_00450990[];
+extern s32 D_00436214;
+
+extern f32 sdfAtan2(f32, f32);
+
+extern f32 D_0038BAC0[];
+
+extern s32 D_003899D8[];
+extern s32 D_00436228;
+extern s32 D_0039A0B8[];
+extern s32 D_0039A028[];
+
+extern s32 func_0035C860(char *, const char *, ...);
+extern void func_0012B068(char *, s32, s32);
+extern s32 func_00343ED0(char *, void *, s32);
+
+extern u32 D_0044F7F0[];
 
 extern u32 D_004363C8;
 
@@ -386,9 +417,42 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00144F88);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145078);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145118);
+void func_00145118(s32 category, s32 volume) {
+    if (D_00389780[0] < 50) {
+        soundSetSequenceVolumePan(D_00436214 + category, volume, 0x3F);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145160);
+void func_00145160(s32 arg0) {
+    s32 volume;
+    if (D_003899D8[0] == 0) {
+        return;
+    }
+    switch (arg0) {
+    case -1:
+        if (D_00436228 != arg0) {
+            func_00341C78(D_00436228);
+            D_00436228 = arg0;
+        }
+        break;
+    case 0:
+        if (D_00436228 != -1) {
+            func_00342580(D_00436228);
+            D_00436228 = -1;
+        }
+        break;
+    case 1:
+        volume = D_0039A0B8[0] + 1;
+        func_00341BB8(volume);
+        D_00436228 = volume;
+        break;
+    case 2:
+        volume = D_0039A028[0] + 1;
+        func_00341BB8(volume);
+        D_00436228 = volume;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145228);
 
@@ -489,7 +553,29 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00149A00);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00149C38);
+void func_00149C38(void) {
+    if (D_0044F7F0[1] != 0) {
+        func_0032BBB0(D_0044F7F0[1]);
+    }
+    if (D_0044F7F0[2] != 0) {
+        func_0032BBB0(D_0044F7F0[2]);
+    }
+    if (D_0044F7F0[3] != 0) {
+        func_0032BBB0(D_0044F7F0[3]);
+    }
+    if (D_0044F7F0[6] != 0) {
+        func_0032BBB0(D_0044F7F0[6]);
+    }
+    D_0044F7F0[1] = 0;
+    D_0044F7F0[2] = 0;
+    D_0044F7F0[3] = 0;
+    D_0044F7F0[6] = 0;
+    while (func_0032CD98() != 0) {
+        func_0032E348();
+    }
+    D_0043626C = 0;
+    func_0019D1F8(0x54);
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00149CE0);
 
@@ -716,7 +802,15 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B520);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B5D8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B6F0);
+typedef struct FieldResourceIds {
+    s32 entries[2];
+} FieldResourceIds;
+
+void func_0014B6F0(s32 index) {
+    FieldResourceIds ids = *(FieldResourceIds *)D_00436330;
+    D_00436324 = func_00343ED0(ids.entries[index], &D_00436328, 0);
+    D_0043632C = func_001578C0(D_00436328);
+}
 
 void func_0014B748(void) {
     if (D_0043632C != 0) {
@@ -1070,7 +1164,20 @@ void func_001512E8(void) {
     D_00389770[0x138 / 4] = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00151350);
+void func_00151350(void) {
+    func_00341C78(0x680017);
+    advanceTitleStateUnderSemaphore();
+    D_003899E0[0] = 0;
+    D_00389770[0x118 / 4] = 0;
+    func_0014F788();
+    func_0014F408();
+    func_00144DF8();
+    D_00389770[0x114 / 4] = 0;
+    *(s16 *)((u8 *)D_00389770 + 0x104) = 0;
+    D_00451B9C[0] = 0;
+    D_00389770[0x138 / 4] = 1;
+    func_002433B0();
+}
 
 void func_001513C0(void) {
     func_0026C538(D_003A9EB0);
@@ -1183,7 +1290,19 @@ FieldCoordinateRecord *func_001517D0(s16 x, s16 y, s16 z, s16 w) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00151868);
+void func_00151868(f32 *distance, f32 *angle) {
+    f32 *player = (f32 *)D_00389770;
+    f32 *target = (f32 *)D_00451D38;
+    f32 dx = player[0x14C / 4] - target[0x8 / 4];
+    f32 dz = player[0x154 / 4] - target[0x10 / 4];
+    f32 dist = fsqrtf(dx * dx + dz * dz);
+    f32 yaw = 0.0f;
+    if (!(dist < 1.0f)) {
+        yaw = sdfAtan2(dx, dz) * 180.0f / 3.14f;
+    }
+    *distance = dist;
+    *angle = yaw;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00151918);
 
@@ -1273,7 +1392,31 @@ void func_00152C48(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00152C88);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00152FB8);
+static inline s32 scaleToVolume(s32 dist, s32 max, s32 range) {
+    return (max - dist) * 127 / range;
+}
+
+s32 func_00152FB8(f32 x, f32 y, f32 z) {
+    f32 dx = D_0038BAC0[0] - x;
+    f32 dy = D_0038BAC0[1] - y;
+    f32 dz = D_0038BAC0[2] - z;
+    f32 dist = fsqrtf(dx * dx + dy * dy + dz * dz) - 600.0f;
+    s32 volume;
+    if (4800.0f < dist) {
+        dist = 4800.0f;
+    }
+    if (dist < 0.0f) {
+        dist = 0.0f;
+    }
+    volume = scaleToVolume((s32)dist, 4800, 4800);
+    if (volume > 127) {
+        volume = 127;
+    }
+    if (volume < 0) {
+        volume = 0;
+    }
+    return volume;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153068);
 
@@ -1347,7 +1490,6 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001546F8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00154758);
 
-extern u32 D_00435F0C;
 extern void func_00133C18(void);
 
 s32 func_001547F0(void) {
@@ -1575,7 +1717,6 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00156538);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156630);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156700);
-/*W13D2END*/
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156738);
 
@@ -1702,7 +1843,16 @@ s32 func_00156B58(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00156B88);
+u32 func_00156B88(void) {
+    s32 scene;
+    if (func_00140B80()) {
+        scene = 0;
+    } else {
+        scene = func_0013EA18(*(s32 *)(func_0010D8C8() + 0xE4));
+    }
+    func_00140830(scene);
+    return 1;
+}
 
 void func_00156BD0(void) {
     func_00151350();
