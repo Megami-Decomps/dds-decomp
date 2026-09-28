@@ -14,7 +14,22 @@ void func_0031E4D8(void) {
     D_0043895C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E4E0);
+void func_0031E4E0(u32 *entry, s32 mode, s32 value) {
+    switch (mode) {
+    case 0:
+        if (value >= 0x80) {
+            entry[5] = 0;
+        }
+        break;
+    case 1:
+        if (value >= 0x80) {
+            entry[5] = 0x80;
+        }
+        break;
+    }
+    entry[0] = mode;
+    entry[1] = value;
+}
 
 void func_0031E530(u32 *entry, u32 index, u32 value, u32 next) {
     entry[2] = index + 1;
