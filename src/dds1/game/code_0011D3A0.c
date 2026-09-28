@@ -39,6 +39,7 @@ extern char D_0039FCA0[];
 extern char D_0039FCB0[];
 extern char D_0039FCC8[];
 extern void func_0011D998(f32 *arg0, u8 *arg1);
+extern void func_0011DAC0(u32, u32, u32, u32, u32, u32, u8 *);
 extern void func_0011DC70(u32 *arg0, s32 arg1, u8 *arg2);
 extern void func_0011E540(void);
 extern void func_0012E6F0(void);
@@ -91,7 +92,9 @@ void func_0011DAA0(f32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DAC0);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DC50);
+void func_0011DC50(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
+    func_0011DAC0(a, b, c, d, e, f, D_00324530);
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DC70);
 

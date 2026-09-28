@@ -135,6 +135,10 @@ typedef struct {
 } FldClear18; /* 0x18 bytes */
 extern FldClear18 D_003D3FE0[];
 
+extern u64 func_0010FDC0(void);
+extern u32 *func_00110F80(u64 world, const char *name);
+extern void func_003003F0(const char *fmt, ...);
+
 extern u64 func_00101A70(void);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001411F0);
@@ -853,7 +857,14 @@ u32 func_0014DB00(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014DB20);
+s32 func_0014DB20(const char *name) {
+    u32 *entry = func_00110F80(func_0010FDC0(), name);
+    if (entry != 0) {
+        return entry[1];
+    }
+    func_003003F0("field SEARCH_ID NotFound:[%s]\n", name);
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014DB78);
 
