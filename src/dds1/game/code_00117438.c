@@ -62,7 +62,7 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_001176A0);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117730);
 
-s32 func_00117780(void) {
+s32 sysBumpTickCounters(void) {
     s32 base;
 
     base = D_003BAA00;
@@ -80,7 +80,7 @@ void func_001177A8(void) {
     func_002CC7D8();
     func_002CCDC8();
     func_0011B438();
-    func_0011B4C8();
+    dds3ForEachEntry();
     func_001ACCF0();
 }
 
@@ -94,10 +94,10 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00117C48);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118020);
 
 void func_001180F8(void) {
-    func_0011B908(D_003BAAAC);
+    dds3WorkInit(D_003BAAAC);
 }
 
-void func_00118110(void) {
+void sysFirePendingCallback(void) {
     if (D_003BAAAC == 0) {
         return;
     }
@@ -123,7 +123,7 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118408);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001184A8);
 
-void func_00118558(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+void sysDispatchCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_001184A8(arg0, arg1, arg2, (u8)arg3);
 }
 
@@ -137,7 +137,7 @@ void func_00118648(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
     func_0011B878(7, arg1, arg2, arg0, arg3);
 }
 
-void func_00118670(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+void sysDispatchSubCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_00118648(arg0, arg1, arg2, (u8)arg3);
 }
 
@@ -156,8 +156,6 @@ void func_00119000(s32 arg0, u16 arg1) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00119018);
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E0);
 
@@ -178,7 +176,6 @@ INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F8);
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F9);
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA00);
-
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA04);
 

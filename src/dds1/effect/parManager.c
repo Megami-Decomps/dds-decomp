@@ -2,12 +2,12 @@
 
 typedef struct {
     u8 pad[0xA4];    /* 0x0 */
-    u32 unkA4;       /* 0xA4 copied to unkFC by func_0015A608 */
+    u32 unkA4;       /* 0xA4 copied to unkFC by parRestartKind */
     u8 padA8[0x54];  /* 0xA8 */
     void *unkFC;     /* 0xFC */
     u8 pad100[0x40]; /* 0x100 */
     u16 unk140;      /* 0x140 dispatch index for D_0034E250/D_0034E258/D_0034E2F0 */
-    u16 unk142;      /* 0x142 read by func_0015A6E0, set to 1 by func_0015A608 */
+    u16 unk142;      /* 0x142 read by func_0015A6E0, set to 1 by parRestartKind */
     u8 pad144[0x30]; /* 0x144 */
     void *unk174;    /* 0x174 child released by func_00158F68 */
 } ParObj;
@@ -46,14 +46,14 @@ extern ParDispatch D_0034E258[];
 extern void (*D_0034E2F0[])();
 
 void func_002D0918(void *arg);
-void func_00153920(void *arg);
+void destroyEffectResources(void *arg);
 void func_002CFF98(void *arg);
 
 void func_00158F68(ParObj *obj) {
     if (obj->unk174 != NULL) {
         func_002D0918(obj->unk174);
     }
-    func_00153920(obj);
+    destroyEffectResources(obj);
     func_002CFF98(obj);
 }
 
@@ -87,27 +87,27 @@ INCLUDE_ASM(const s32, "effect/parManager", func_0015A118);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A2F8);
 
-void func_0015A378(s32 index, void *arg) {
+void parCreateIndexed(s32 index, void *arg) {
     ParObj *newobj;
 
     newobj = D_0034E250[index].func(arg);
     newobj->unk140 = index;
 }
 
-void func_0015A3C0(ParObj *obj) {
+void parDispatchByKind(ParObj *obj) {
     D_0034E258[obj->unk140].func();
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A3F8);
 
-void func_0015A5B8(ParObj *obj) {
+void parCloneKind(ParObj *obj) {
     ParObj *newobj;
 
     newobj = D_0034E250[obj->unk140].func();
     newobj->unk140 = obj->unk140;
 }
 
-void func_0015A608(ParObj *obj) {
+void parRestartKind(ParObj *obj) {
     D_0034E2F0[obj->unk140]();
     obj->unkFC = (void *)obj->unkA4;
     obj->unk142 = 1;

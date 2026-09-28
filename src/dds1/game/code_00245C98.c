@@ -29,7 +29,7 @@ extern u8 D_0036AA84[];
 extern u8 D_0036AAA0[];
 extern u8 D_0036AABC[];
 
-extern s32 func_00105C48(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern s64 func_0024DC08(void);
 
@@ -38,7 +38,7 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 extern s32 func_00101A70();
 
 s32 func_00245C98(void) {
-    s32 temp_v0 = func_00105C48();
+    s32 temp_v0 = kwlnFadeIsActive();
 
     if (temp_v0 != 0) {
         return 0;
@@ -46,7 +46,7 @@ s32 func_00245C98(void) {
     return func_0024DC08() == 0;
 }
 
-void func_00245CC8(s32 arg0) {
+void evtInstallStateTable(s32 arg0) {
     if (*(s32 *)(arg0 + 0x84) == 2) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AA68;
         func_002858E8(arg0 + 0x54, (s32)D_0036AA68 + 0xC4);
@@ -66,21 +66,21 @@ s32 func_00245DA0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00245DE0);
 
-void func_00246088(s32 arg0) {
+void evtPrimeDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00260670(temp_v0);
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_002460D8(s32 arg0) {
+void evtSetupDispatchSync(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-void func_00246120(s32 arg0) {
+void evtInstallStateTableB(s32 arg0) {
     if (*(s32 *)(arg0 + 0x84) == 1) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AA84;
         func_002858E8(arg0 + 0x54, (s32)D_0036AA84 + 0xA8);
@@ -96,7 +96,7 @@ s32 func_00246160(void) {
     return 1;
 }
 
-s32 func_00246198(void) {
+s32 evtSelectStateAction(void) {
     s32 temp_v0 = func_00101A70();
     s32 temp_v1 = *(s32 *)(temp_v0 + 0xAC);
 
@@ -116,21 +116,21 @@ s32 func_00246198(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246220);
 
-void func_00246460(s32 arg0) {
+void evtStageDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00260AB0(temp_v0);
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_002464B0(s32 arg0) {
+void evtSetupDispatchSyncB(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-void func_002464F8(s32 arg0) {
+void evtInstallStateTableC(s32 arg0) {
     if (*(s32 *)(arg0 + 0x84) == 1) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AAA0;
         func_002858E8(arg0 + 0x54, (s32)D_0036AAA0 + 0x8C);
@@ -146,7 +146,7 @@ s32 func_00246538(void) {
     return 1;
 }
 
-s32 func_00246570(void) {
+s32 evtSelectStateActionB(void) {
     s32 temp_v0 = func_00101A70();
     s32 temp_v1 = *(s32 *)(temp_v0 + 0xAC);
 
@@ -166,28 +166,28 @@ s32 func_00246570(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002465F8);
 
-void func_00246838(s32 arg0) {
+void evtStageDispatchStartB(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00260AB0(temp_v0);
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_00246888(s32 arg0) {
+void evtSetupDispatchSyncC(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-void func_002468D0(s32 arg0) {
+void evtInstallStateTableD(s32 arg0) {
     if (*(s32 *)(arg0 + 0x84) == 2) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AABC;
         func_002858E8(arg0 + 0x54, (s32)D_0036AABC + 0x70);
     }
 }
 
-s32 func_00246910(void) {
+s32 evtEnableStateFlag(void) {
     s32 temp_v0 = func_00101A70();
 
     if ((*(s32 *)(temp_v0 + 0xAC) == 1) && (func_00245A40(temp_v0) == 0)) {
@@ -196,7 +196,7 @@ s32 func_00246910(void) {
     return 1;
 }
 
-s32 func_00246968(void) {
+s32 evtSelectStateActionC(void) {
     s32 temp_v0 = func_00101A70();
     s32 temp_v1 = *(s32 *)(temp_v0 + 0xAC);
 
@@ -216,14 +216,14 @@ s32 func_00246968(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002469F0);
 
-void func_00246BE8(s32 arg0) {
+void evtStageDispatchStartC(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00260AB0(temp_v0);
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_00246C38(s32 arg0) {
+void evtSetupDispatchSyncD(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
@@ -239,7 +239,7 @@ u32 func_00246C80(void) {
     return 1;
 }
 
-s64 func_00246CB0(u64 arg0) {
+s64 evtQueryStateProgress(u64 arg0) {
     s32 temp_v0 = func_00101A70();
     s64 temp_v1 = func_00285670(temp_v0 + 8, temp_v0 + 0x54, 0, arg0);
 
@@ -258,14 +258,14 @@ s64 func_00246CB0(u64 arg0) {
     return temp_v1;
 }
 
-void func_00246D68(s32 arg0) {
+void evtFetchDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0025E108(temp_v0, *(s32 *)(temp_v0 + 0xA4));
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_00246DB8(s32 arg0) {
+void evtSetupDispatchSyncE(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
@@ -280,7 +280,7 @@ s32 func_00246E00(void) {
     return 1;
 }
 
-s32 func_00246E38(void) {
+s32 evtAdvanceStateStage(void) {
     s32 temp_v0 = func_00101A70();
 
     if (*(s32 *)(temp_v0 + 0xAC) == 0xA) {
@@ -297,14 +297,14 @@ s32 func_00246E38(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246EA0);
 
-void func_002470F8(s32 arg0) {
+void evtAlignDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00261760(temp_v0);
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_00247148(s32 arg0) {
+void evtSetupDispatchSyncF(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
@@ -315,7 +315,7 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002472D8);
 
-void func_002473D0(s32 arg0) {
+void evtAccumulateStateScore(s32 arg0) {
     s32 temp_v0 = *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x70) + 0x14) + 0x1C) + 0x60;
 
     if ((u32)(*(s32 *)(temp_v0 + 4) - 0x60) < 0x20) {
@@ -329,7 +329,7 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247588);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247728);
 
-void func_002478B0(s32 arg0) {
+void evtSetupDispatchSyncG(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
@@ -359,7 +359,7 @@ s64 func_002479F0(u64 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247A78);
 
-void func_00247CB0(s32 arg0) {
+void evtSetupDispatchSyncH(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
@@ -368,7 +368,7 @@ void func_00247CB0(s32 arg0) {
 
 u32 func_00247CF8(void) {
     func_00220110(0x323);
-    func_00105AE0(0, 0, 0, 0xf);
+    kwlnFadeOutStart(0, 0, 0, 0xf);
     func_0024DED8(0);
     func_0024DEF8(0, 0);
     func_0024DEF8(1, 1);
@@ -383,7 +383,7 @@ INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF528);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247D58);
 
-void func_00248088(s32 arg0) {
+void evtRefreshDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
     s32 temp_v1 = *(s32 *)(temp_v0 + 0xA4);
 
@@ -393,14 +393,14 @@ void func_00248088(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_002480E8(s32 arg0) {
+void evtSetupDispatchSyncI(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_0024DD78();
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-u32 func_00248130(void) {
+u32 evtResetStateFlags(void) {
     func_0024DED8(0);
     func_0024DEF8(0, 1);
     func_0024DEF8(1, 0);
@@ -409,19 +409,19 @@ u32 func_00248130(void) {
 }
 
 u32 func_00248170(void) {
-    func_00105AE0(0, 0, 0, 0);
+    kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002481A0);
 
-void func_00248240(s32 arg0) {
+void evtDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_00248278(s32 arg0) {
+void evtDispatchSync(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
@@ -455,14 +455,6 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00248468);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00248508);
 
-
-
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF570);
 
 INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF580);
@@ -478,7 +470,6 @@ INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3C0);
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3C8);
 
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3D0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3D8);
 

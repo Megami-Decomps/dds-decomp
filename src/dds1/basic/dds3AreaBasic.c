@@ -10,10 +10,10 @@ typedef struct {
     AreaSub *unk10;
 } AreaObj;
 
-void func_00111A68(void *arg0, s32 arg1, s32 arg2);
+void objExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
 s32 func_00111108(void *arg) {
-    func_00111A68(arg, 0, 5);
+    objExchangeSlot(arg, 0, 5);
     return 1;
 }
 

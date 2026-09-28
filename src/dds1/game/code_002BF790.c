@@ -187,7 +187,7 @@ s32 func_002C16F8(s32 arg0) {
     return 1;
 }
 
-s32 func_002C1728(u8 *object, u32 flags) {
+s32 setWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     s32 child;
     if (object == 0) {
         return 0;
@@ -205,7 +205,7 @@ s32 func_002C1728(u8 *object, u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1770);
 
-void func_002C1888(u8 *work, s32 columns, s32 rows) {
+void setGridDimensions(u8 *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 
@@ -231,7 +231,7 @@ u32 func_002C18C8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1910);
 
-void func_002C1978(s32 columns, u8 *work) {
+void expandWidgetColumnWidth(s32 columns, u8 *work) {
     s32 flags = *(s32 *)(work + 0xc);
     s32 width;
     if (flags & 0x100) {
@@ -346,13 +346,11 @@ s32 func_002C2600(s32 arg0) {
     return func_002C2568(*(s16 *)(arg0 + 0xa) - 1, (void *)arg0);
 }
 
-
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD218);
 
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD220);
 
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD228);
-
 
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD230);
 

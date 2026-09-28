@@ -74,7 +74,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CA18);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CAB0);
 
-void func_0026CAD0(void) {
+void menuSwapStateWords(void) {
     s32 *temp_v0 = (s32 *)D_003BC5D0;
 
     switch (temp_v0[10]) {
@@ -112,14 +112,6 @@ void func_0026D150(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D160);
 
-
-
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE40);
 
 INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE50);
@@ -137,7 +129,6 @@ INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5F0);
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5F8);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC600);
-
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC608);
 

@@ -5,11 +5,11 @@ extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
 extern s32 D_003BD854;
 extern s32 func_002EB028(s32, u32 *, s32);
-extern void func_001FEEF0(s32, u16);
-extern void func_001FEE90(s32, u16);
-extern void func_001FEF50(s32, u16);
-extern void func_001FEF30(s32, u16);
-extern void func_001FF010(s32, u16);
+extern void btlCmdSimpleB(s32, u16);
+extern void btlCmdSimpleA(s32, u16);
+extern void btlCmdSimpleE(s32, u16);
+extern void btlCmdSimpleD(s32, u16);
+extern void btlCmdSimpleJ(s32, u16);
 extern void func_001FF030(s32, u16);
 
 extern s8 D_003BB870;
@@ -81,11 +81,11 @@ extern u32 func_0029BF88(u32, u32);
 extern s32 func_001A17F0(void);
 extern s32 func_001FEC68(s32 context, s32 actor, u32 mask);
 extern void func_0010D5F0();
-extern void func_001FEF10(s32, u16);
+extern void btlCmdSimpleC(s32, u16);
 extern u8 *func_001D4748(s32);
 extern void func_001F60E8(void);
 
-u8 *func_001F6110(void) {
+u8 *battleCreateControlObject(void) {
     u8 *object;
     object = func_001D4748(0);
     object[0] = 1;
@@ -350,103 +350,103 @@ u32 func_001F8578(void) {
 }
 
 u32 func_001F85C8(void) {
-    func_001FEE30(func_0010D6A8());
+    btlCmdWithArgA(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F85F0(void) {
     s32 context = func_0010D6A8();
     u16 value = func_0010D428(0);
-    func_001FEEF0(context, value);
+    btlCmdSimpleB(context, value);
     return 1;
 }
 
 u32 func_001F8630(void) {
-    func_001FEE50(func_0010D6A8());
+    btlCmdWithArgB(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F8658(void) {
-    func_001FEE70(func_0010D6A8());
+    btlCmdWithArgC(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F8680(void) {
     s32 context = func_0010D6A8();
     u16 value = func_0010D428(0);
-    func_001FEE90(context, value);
+    btlCmdSimpleA(context, value);
     return 1;
 }
 
 u32 func_001F86C0(void) {
-    func_001FEED0(func_0010D6A8());
+    btlCmdWithArgE(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F86E8(void) {
-    func_001FEEB0(func_0010D6A8());
+    btlCmdWithArgD(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F8710(void) {
     s32 context = func_0010D6A8();
     u16 value = func_0010D428(0);
-    func_001FEF10(context, value);
+    btlCmdSimpleC(context, value);
     return 1;
 }
 
 u32 func_001F8750(void) {
     s32 context = func_0010D6A8();
     u16 value = func_0010D428(0);
-    func_001FEF30(context, value);
+    btlCmdSimpleD(context, value);
     return 1;
 }
 
 u32 func_001F8790(void) {
     s32 context = func_0010D6A8();
     u16 value = func_0010D428(0);
-    func_001FEF50(context, value);
+    btlCmdSimpleE(context, value);
     return 1;
 }
 
 u32 func_001F87D0(void) {
-    func_001FEE30(func_0010D6A8());
+    btlCmdWithArgA(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F87F8(void) {
-    func_001FEF70(func_0010D6A8(), 0);
+    btlCmdSimpleF(func_0010D6A8(), 0);
     return 1;
 }
 
 u32 func_001F8828(void) {
-    func_001FEF90(func_0010D6A8(), 0);
+    btlCmdSimpleG(func_0010D6A8(), 0);
     return 1;
 }
 
 u32 func_001F8858(void) {
-    func_001FEFB0(func_0010D6A8(), 0);
+    btlCmdSimpleH(func_0010D6A8(), 0);
     return 1;
 }
 
 u32 func_001F8888(void) {
-    func_001FEFF0(func_0010D6A8());
+    btlCmdWithArgF(func_0010D6A8());
     return 1;
 }
 
 u32 func_001F88B0(void) {
     s32 context = func_0010D6A8();
     u16 value = func_0010D428(0);
-    func_001FF010(context, value);
+    btlCmdSimpleJ(context, value);
     return 1;
 }
 
 u32 func_001F88F0(void) {
-    func_001FEFD0(func_0010D6A8(), 0);
+    btlCmdSimpleI(func_0010D6A8(), 0);
     return 1;
 }
 
-u32 func_001F8920(void) {
+u32 nbScriptCheckActorFlag(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, *(s32 *)(context + 0x18), func_0010D428(0) | 0x400000)) {
         func_0010D5F0(1);
@@ -1603,8 +1603,6 @@ void func_001FC7D0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
 }
 
-
-
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6C8);
@@ -1704,7 +1702,6 @@ INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB820);
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB828);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB830);
-
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB838);
 

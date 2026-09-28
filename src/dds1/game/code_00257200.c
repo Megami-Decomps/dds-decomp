@@ -44,9 +44,5 @@ void func_00257EB0(s32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257ED0);
 
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00257200", D_003AF950);
 

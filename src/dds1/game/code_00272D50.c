@@ -27,7 +27,7 @@ void func_00273200(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273220);
 
 void func_00273390(u32 arg0) {
-    func_00271308(2, arg0);
+    setStaffDisplayMode(2, arg0);
 }
 
 void func_002733B0() {
@@ -35,7 +35,7 @@ void func_002733B0() {
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002733B8);
 
-s32 func_00273470(void) {
+s32 freeStaffDisplayResources(void) {
     u8 *context = (u8 *)func_00101A70();
     u32 *resource = *(u32 **)(context + 0x90c);
     func_00273020((s32)context);

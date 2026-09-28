@@ -7,7 +7,7 @@ extern s32 func_00101A70();
 extern s32 D_003BAA00;
 
 void func_00274B80(u32 arg0) {
-    func_00271308(4, arg0);
+    setStaffDisplayMode(4, arg0);
 }
 
 void func_00274BA0(s32 context) {
@@ -56,7 +56,7 @@ void func_002755A0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
 
-s32 func_00275880(void) {
+s32 shopReleaseMenuResources(void) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90c);
     func_002755A0(context);
@@ -93,7 +93,7 @@ u8 func_00276288(void) {
 }
 
 void func_002762B0(u32 arg0) {
-    func_00271308(3, arg0);
+    setStaffDisplayMode(3, arg0);
 }
 
 void func_002762D0() {
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00276368);
 s32 func_00276428(void) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90c);
-    func_00287548();
+    menuResetWorkFloats();
     func_002762D0(context);
     func_002D0918(*(s32 *)menu);
     return 1;
@@ -223,7 +223,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00277CB8);
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00277D38);
 
 void func_00277DD0(u32 arg0) {
-    func_00271308(1, arg0);
+    setStaffDisplayMode(1, arg0);
 }
 
 void func_00277DF0(void) {
@@ -309,14 +309,6 @@ void func_00279130(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00279160);
 
-
-
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22F0);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2310);
@@ -334,7 +326,6 @@ INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC6F8);
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC700);
 
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC708);
-
 
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC710);
 

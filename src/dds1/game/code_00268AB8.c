@@ -41,7 +41,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_002692E0);
 
 void func_002693E0(u32 arg0) {
-    func_002E8F78(arg0, 0x7f, 0x3f);
+    soundSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
 void func_00269400(void) {
@@ -87,12 +87,12 @@ void func_00269530(void) {
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269558);
 
-void func_002695C8(s32 effect) {
+void resetTitleEffectState(s32 effect) {
     s32 context = func_00101A70(D_003BC588);
     if (func_002E97E0() != 0) {
         func_002E97E8();
     }
-    func_002E9788(effect, 0x7f);
+    sdfSoundSendNamedCommand(effect, 0x7f);
     *(s32 *)(context + 4) = 0;
 }
 
@@ -131,7 +131,7 @@ u32 func_00269780(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    func_002E8F78(temp_v0, 0x7f, 0x3f);
+    soundSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
     return 1;
 }
 
@@ -140,13 +140,13 @@ u32 func_002697B0(void) {
     return 1;
 }
 
-s32 func_002697D0(void) {
+s32 initializeTitleEffects(void) {
     s32 value;
     value = func_0010D5A8(0);
     if (func_002E97E0() != 0) {
         func_002E97E8();
     }
-    func_002E9788(value, 0x7f);
+    sdfSoundSendNamedCommand(value, 0x7f);
     return 1;
 }
 
@@ -181,7 +181,7 @@ u32 func_002698E0(void) {
 }
 
 u32 func_00269908(void) {
-    func_0026A840();
+    advanceTitleStateUnderSemaphore();
     return 1;
 }
 
@@ -231,7 +231,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A390);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A3E0);
 
-void func_0026A460(void) {
+void menuStoreTaskResult(void) {
     D_003BD8D4 = func_00288B48();
     D_003D9140[9] = 1;
 }
@@ -242,7 +242,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A588);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A5F0);
 
-u32 func_0026A6E0(void) {
+u32 updateTitleTransition(void) {
     if (D_003D9140[9] == 1) {
         func_0026A490(D_003D9140);
     }
@@ -262,7 +262,7 @@ void func_0026A808(void) {
     SignalSema(D_003BD8D0);
 }
 
-void func_0026A840(void) {
+void advanceTitleStateUnderSemaphore(void) {
     WaitSema(D_003BD8D0);
     if (D_003D9140[4] == 1 && D_003D9140[9] == 3) {
         D_003D9140[9] = 4;
@@ -290,7 +290,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026ABA8);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AD28);
 
-void func_0026AD98(void) {
+void printTitleDebugBanner(void) {
     WaitSema(D_003BD8D0);
     if (D_003DA180[4] != 1) {
         D_003DA180[4] = 0;
@@ -374,7 +374,6 @@ void func_0026BD58(void) {
     func_001176A0();
 }
 
-
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC588);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC58C);
@@ -402,7 +401,6 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C4);
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
-
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5D0);
 

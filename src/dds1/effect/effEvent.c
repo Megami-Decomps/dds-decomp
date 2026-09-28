@@ -62,8 +62,8 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00190AD8);
 void func_00190CD0(EffEventWork *work) {
     D_003BB140 = D_003BB140 - 1;
     if (D_003BB140 == 0) {
-        func_00151F00(D_003BB144);
-        func_00151F00(D_003BB148);
+        billDispatchByKind(D_003BB144);
+        billDispatchByKind(D_003BB148);
     }
     func_002D0918(work->unk84);
 }
@@ -90,14 +90,11 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00192250);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192420);
 
-
-
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB140);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
-
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
 

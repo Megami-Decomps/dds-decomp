@@ -24,12 +24,9 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_002424B0);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_00242510);
 
-
-
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC368);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC370);
-
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC378);
 

@@ -1,7 +1,7 @@
 #include "common.h"
 
-/* Shared resource handed between scatter effects. func_00173018 creates it,
-   func_001730B8 takes a reference, func_00173068 releases it. */
+/* Shared resource handed between scatter effects. effPcpScatterResCreate creates it,
+   effPcpScatterResAddRef takes a reference, effPcpScatterResRelease releases it. */
 typedef struct PcpScatterRes PcpScatterRes;
 
 struct PcpScatterRes {
@@ -9,7 +9,7 @@ struct PcpScatterRes {
     s32 refCount;
 };
 
-extern void *func_00163258(void *data, s32 index);
+extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void *func_002CFEB8(s32 size);
 extern void func_002CFF98(void *ptr);
@@ -19,8 +19,8 @@ extern void func_002DAA68(u32 res);
 extern void func_002D0918(u32 res);
 extern u32 func_002D3288(u32 resId);
 extern void func_002D2D00(u32 res);
-extern void func_00173068(PcpScatterRes *res);
-extern PcpScatterRes *func_001730B8(PcpScatterRes *res);
+extern void effPcpScatterResRelease(PcpScatterRes *res);
+extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern void func_001629F0(u32 handle);
 extern void func_002DDBF8(void);
@@ -184,16 +184,16 @@ struct PcpScatterWork7 {
     ".set reorder" : : "r"(dst) : "memory")
 
 
-extern PcpScatterRes *func_00173018(u32 resId);
+extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
 void func_00170B88(void *data)
 {
-    func_001708A0(func_00163258(data, 0), func_00163258(data, 1), func_00163258(data, 2));
+    func_001708A0(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170BF0);
 
-void func_00170CE0(PcpScatterWork1 *work)
+void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work)
 {
     u32 i;
     u32 count;
@@ -235,12 +235,12 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00171550);
 
 void func_001717E0(void *data)
 {
-    func_00171550(func_00163258(data, 0), func_00163258(data, 1), func_00163258(data, 2));
+    func_00171550(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00171848);
 
-void func_00171938(PcpScatterWork8 *work)
+void effPcpScatterReleaseSharedParticles(PcpScatterWork8 *work)
 {
     u32 i;
     u32 count;
@@ -281,12 +281,12 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172158);
 
 void func_00172400(void *data)
 {
-    func_00172158(func_00163258(data, 0), func_00163258(data, 1), func_00163258(data, 2));
+    func_00172158(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172468);
 
-void func_00172568(PcpScatterWork2 *work)
+void effPcpScatterReleaseLinkedParticles(PcpScatterWork2 *work)
 {
     u32 i;
     u32 count;
@@ -326,7 +326,7 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172C68);
 void func_00172D70(PcpScatterWork3 *work)
 {
     if (work->res != NULL) {
-        func_00173068(work->res);
+        effPcpScatterResRelease(work->res);
     }
     func_002DAA68(work->unk28);
     func_002D0918(work->unk2C);
@@ -338,7 +338,7 @@ void func_00172F88(PcpScatterWork3 *work, u32 resId)
 {
     PcpScatterRes *res;
 
-    res = func_00173018(resId);
+    res = effPcpScatterResCreate(resId);
     work->res = res;
 }
 
@@ -346,7 +346,7 @@ void func_00172FB8(PcpScatterWork3 *work, PcpScatterWork3 *src)
 {
     PcpScatterRes *res;
 
-    res = func_001730B8(src->res);
+    res = effPcpScatterResAddRef(src->res);
     work->res = res;
 }
 
@@ -360,7 +360,7 @@ s32 func_00173000(PcpScatterWork3 *work, s32 index)
     return work->unk24 + index * 0x18;
 }
 
-PcpScatterRes *func_00173018(u32 resId)
+PcpScatterRes *effPcpScatterResCreate(u32 resId)
 {
     PcpScatterRes *res;
 
@@ -370,7 +370,7 @@ PcpScatterRes *func_00173018(u32 resId)
     return res;
 }
 
-void func_00173068(PcpScatterRes *res)
+void effPcpScatterResRelease(PcpScatterRes *res)
 {
     if (--res->refCount == 0) {
         func_002D2D00(res->unk00);
@@ -378,7 +378,7 @@ void func_00173068(PcpScatterRes *res)
     }
 }
 
-PcpScatterRes *func_001730B8(PcpScatterRes *res)
+PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res)
 {
     res->refCount++;
     return res;
@@ -388,7 +388,7 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001730D0);
 
 void func_001732E8(void *data)
 {
-    func_001730D0(func_00163258(data, 0), func_00163258(data, 1));
+    func_001730D0(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
 PcpScatterWork4 *func_00173330(PcpScatterWork4 *work) {
@@ -423,7 +423,7 @@ void func_00173AE0(PcpScatterWork4 *work, u32 value)
     work->unk180 = value;
 }
 
-void func_00173AE8(PcpScatterWork4 *work, void *source)
+void effPcpScatterTransformMatrix(PcpScatterWork4 *work, void *source)
 {
     PCP_LOAD_MATRIX(source);
     PCP_LOAD_BASE(&work->pad50[0]);
@@ -435,7 +435,7 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00173B48);
 
 void func_00173D78(void *data)
 {
-    func_00173B48(func_00163258(data, 0), func_00163258(data, 1));
+    func_00173B48(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
 PcpScatterWork5 *func_00173DC0(PcpScatterWork5 *work)
@@ -483,7 +483,7 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174680);
 
 void func_00174880(void *data)
 {
-    func_00174680(func_00163258(data, 0), func_00163258(data, 1));
+    func_00174680(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
 PcpScatterWork6 *func_001748C8(PcpScatterWork6 *work)
@@ -531,7 +531,7 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00175230);
 
 void func_00175420(void *data)
 {
-    func_00175230(func_00163258(data, 0), func_00163258(data, 1));
+    func_00175230(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
 PcpScatterWork7 *func_00175468(PcpScatterWork7 *work)

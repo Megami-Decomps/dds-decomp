@@ -47,7 +47,7 @@ typedef struct FileJob {
     u32 unk28;    /* 0x28 */
 } FileJob;
 
-/* Completion node drained by func_00289738. */
+/* Completion node drained by fileManDispatchDone. */
 typedef struct FileCbNode {
     u8 unk0[0x18];                   /* 0x00 */
     void (*cb)(void *node, u32 arg); /* 0x18 */
@@ -64,7 +64,7 @@ extern s32 (*D_003BD4A8)(void);
 void WaitSema(s32 sema);
 void SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
-s32 func_002CF440(s32 arg0, s32 arg1, s32 arg2);
+s32 createSemaphore(s32 arg0, s32 arg1, s32 arg2);
 s32 func_002D03F8(s32 arg0);
 s32 func_002D0A48(s32 arg0);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -74,8 +74,8 @@ void func_002F6E90(u32 arg0, s32 arg1);
 void func_002E6D48(u32 arg0, u32 arg1, u32 arg2);
 void func_002E6DA8(u32 arg0, u32 arg1, u32 arg2);
 s32 fileMan(void);
-s32 func_002897A0(void);
-void func_00289A08(s32 arg0);
+s32 fileManUpdate(void);
+void fileReqInit(s32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00288E70);
 
@@ -107,39 +107,39 @@ INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00289540);
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_00289738);
+INCLUDE_ASM(const s32, "game/code_00288E70", fileManDispatchDone);
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_002897A0);
+INCLUDE_ASM(const s32, "game/code_00288E70", fileManUpdate);
 
 s32 fileMan(void) {
-    func_002897A0();
+    fileManUpdate();
     return 0;
 }
 
-void func_00289970(void) {
+void fileManInit(void) {
     memset(&D_003DC658, 0, 0x40);
     D_003DC658.unk7 = 4;
-    D_003DC658.sema = func_002CF440(1, 0x7F, 0);
+    D_003DC658.sema = createSemaphore(1, 0x7F, 0);
     D_003DC658.unk1C = func_002D0A48(func_002D03F8(0x40000));
     kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
-    D_003BD4A8 = func_002897A0;
+    D_003BD4A8 = fileManUpdate;
 }
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_00289A08);
+INCLUDE_ASM(const s32, "game/code_00288E70", fileReqInit);
 
-void func_00289A58(s32 arg0) {
+void fileReqBegin(s32 arg0) {
     D_003BD8E8 = arg0;
-    func_00289A08(arg0);
+    fileReqInit(arg0);
     D_003DC698[arg0].unk10 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_00289AA0);
+INCLUDE_ASM(const s32, "game/code_00288E70", fileReqPoll);
 
 u8 func_00289B98(s32 arg0) {
     return D_003DC698[arg0].unk11;
 }
 
-s32 func_00289BC0(s32 arg0) {
+s32 fileReqGetSize(s32 arg0) {
     return D_003DC698[arg0].unk8 << 10;
 }
 
@@ -182,10 +182,7 @@ void func_00289D50(u32 arg0) {
     func_002F6E90(arg0, 0);
 }
 
-
-
 INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7D8);
-
 
 INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7E0);
 

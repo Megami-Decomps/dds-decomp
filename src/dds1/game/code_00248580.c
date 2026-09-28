@@ -6,7 +6,7 @@ extern u8 D_003BC3E1;
 
 extern s32 func_0010FD80(void);
 
-extern s32 func_0021F600(u32);
+extern s32 mdlFlagTest(u32);
 
 void func_00248580(s32 arg0) {
     func_002BD7A0(*(u32 *)(arg0 + 100));
@@ -34,8 +34,8 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248BA0);
 
 void func_00248C38(s32 arg0) {
     if (arg0 != 0) {
-        func_00284340();
-        func_00284340((s32)arg0 + 0x54);
+        releaseSpriteTextures();
+        releaseSpriteTextures((s32)arg0 + 0x54);
         func_002CFF98(arg0);
         return;
     }
@@ -71,7 +71,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249058);
 u8 func_00249198(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0021F600(0x902);
+    temp_v0 = mdlFlagTest(0x902);
     return temp_v0 == 0;
 }
 
@@ -94,7 +94,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002496D8);
 INCLUDE_ASM(const s32, "game/code_00248580", func_002496F0);
 
 void func_00249770(u32 *arg0) {
-    func_00280488(arg0 + 100);
+    shutdownMenuContext(arg0 + 100);
     func_00276320(arg0 + 2);
     func_00271648(arg0 + 2);
     func_002BC618(arg0[1]);
@@ -106,14 +106,14 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002497C0);
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 
 void func_00249930(s32 arg0) {
-    func_0027F6B8(arg0 + 400);
+    clearMenuEntries(arg0 + 400);
     func_0027FA20(arg0 + 400);
-    func_00283038(*(u32 *)(arg0 + 0x820));
+    destroyPanelGroup(*(u32 *)(arg0 + 0x820));
     func_00283820(*(u32 *)(arg0 + 0x824));
     func_00285160(*(u32 *)(arg0 + 0x828));
 }
 
-void func_00249980(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+void updateAttachedEffect(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_00285440(arg0, arg1, arg2, *(s32 *)(arg3 + 0x828));
 }
 
@@ -154,9 +154,6 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249E20);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249F08);
 
-
-
-
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E0);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E1);
@@ -166,7 +163,6 @@ INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E4);
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E8);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F8);
 

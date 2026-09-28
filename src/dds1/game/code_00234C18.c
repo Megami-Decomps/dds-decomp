@@ -39,8 +39,5 @@ void func_00235120(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 4) = temp_v0;
 }
 
-
-
-
 INCLUDE_SDATA(const s32, "game/code_00234C18", D_003BBF78);
 

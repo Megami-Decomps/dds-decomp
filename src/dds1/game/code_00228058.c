@@ -4,7 +4,7 @@ extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 void *func_002CFEB8(s32 size);
 
-void func_0022A850(s32 arg0);
+void initializeEventVisualData(s32 arg0);
 
 void func_00101A68(s32 arg0, void *arg1);
 
@@ -56,7 +56,7 @@ u32 func_00228180(void) {
         func_003003F0(D_003ACAE0);
         return 1;
     }
-    v1 = func_00235270(0x2afe, func_0010D5A8(0));
+    v1 = evtCreateTask(0x2afe, func_0010D5A8(0));
     func_00101A80(*(s32 *)(v0 + 0xe4), v1);
     func_0010D5F0(v1);
     return 1;
@@ -148,7 +148,7 @@ u32 func_00228460(void) {
 
     temp_v0 = func_0010D428(0);
     temp_v1 = func_0010D428(1);
-    func_00241938(temp_v0, temp_v1);
+    evtPlayBgm(temp_v0, temp_v1);
     return 1;
 }
 
@@ -158,7 +158,7 @@ u32 func_002284A0(void) {
 
     temp_v0 = func_0010D428(0);
     temp_v1 = func_0010D428(1);
-    func_00241990(temp_v0, temp_v1);
+    evtTransitionBgm(temp_v0, temp_v1);
     return 1;
 }
 
@@ -190,7 +190,7 @@ u32 func_00228570(void) {
 
     temp_v0 = func_0010D428(0);
     temp_v1 = func_0010D428(1);
-    func_00241A98(temp_v0, temp_v1);
+    evtSetBgmVolumePan(temp_v0, temp_v1);
     return 1;
 }
 
@@ -215,7 +215,7 @@ u32 func_002285F0(void) {
 }
 
 u32 func_00228630(void) {
-    func_0018F570();
+    effInitCh72Id();
     return 1;
 }
 
@@ -275,7 +275,7 @@ void *func_00228A00(s32 arg0) {
     s32 p;
 
     p = (s32)func_002CFEB8(0x104);
-    func_0022A850(p);
+    initializeEventVisualData(p);
     func_00228B38((u32 *)p);
     func_00101A68(arg0, (void *)p);
     return (void *)func_002287C0;
@@ -285,7 +285,7 @@ void func_00228A58(void) {
     u64 temp_v0;
 
     temp_v0 = func_00101A70();
-    func_00228B78(temp_v0);
+    releaseSolarNoiseSprite(temp_v0);
     func_002CFF98(temp_v0);
     D_003BBDC0 = 0;
 }
@@ -307,15 +307,11 @@ void func_00228B00(void) {
     }
 }
 
-
-
-
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDB8);
 
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDBC);
 
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDC0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDC8);
 

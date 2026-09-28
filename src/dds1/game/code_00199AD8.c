@@ -19,7 +19,7 @@ typedef struct PanelObj {
     s32 unk1C;      /* 0x1C */
     u8 unk20[0x18]; /* 0x20 */
     s32 unk38;      /* 0x38 */
-    u8 unk3C;       /* 0x3C: handler index for func_00199AD8 */
+    u8 unk3C;       /* 0x3C: handler index for itfPanelDispatchHandler */
 } PanelObj;
 
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
@@ -63,7 +63,7 @@ typedef struct PanelCursor {
 
 extern PanelCursor D_00357D90;
 
-void func_00199AD8(PanelObj *arg0) {
+void itfPanelDispatchHandler(PanelObj *arg0) {
     D_00357A50[arg0->unk3C](arg0);
 }
 
@@ -117,15 +117,15 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019ACE0);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AD50);
 
-void func_0019ADF0(s32 arg0, s32 arg1) {
+void itfPanelEmitRecord(s32 arg0, s32 arg1) {
     func_00199998(D_003D6ECC[arg0].ptr->unkA8, 0, arg1, 0, 0, 0);
 }
 
-s8 func_0019AE38(s32 arg0) {
+s8 itfPanelGetStatus(s32 arg0) {
     return D_003D6ECC[arg0].ptr->sub24.unk10;
 }
 
-void func_0019AE58(s32 arg0, s8 arg1) {
+void itfPanelSetStatus(s32 arg0, s8 arg1) {
     D_003D6ECC[arg0].ptr->sub24.unk10 = arg1;
 }
 
@@ -141,19 +141,17 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019B108);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019B1B0);
 
-s16 func_0019B2E0(s32 arg0) {
+s16 itfPanelGetPairFirst(s32 arg0) {
     return D_003D6ECC[arg0].ptr->unk50;
 }
 
-void func_0019B300(s32 arg0, s16 arg1) {
+void itfPanelSetPairFirst(s32 arg0, s16 arg1) {
     D_003D6ECC[arg0].ptr->unk50 = arg1;
 }
 
-s16 func_0019B320(s32 arg0) {
+s16 itfPanelGetPairSecond(s32 arg0) {
     return D_003D6ECC[arg0].ptr->unk52;
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1A8);
 
@@ -168,7 +166,6 @@ INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1C8);
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1D0);
 
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1D8);
-
 
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1E0);
 

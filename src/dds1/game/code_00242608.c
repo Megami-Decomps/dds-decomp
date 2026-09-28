@@ -8,13 +8,13 @@ extern s8 D_003BC39C;
 
 extern s32 func_00101938(u32);
 
-extern s64 func_00241B58(void);
+extern s64 evtFindTaskById(void);
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242608);
 
 void func_00242698(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00241B58();
+    temp_v0 = evtFindTaskById();
     if (temp_v0 != 0) {
         kwlnTaskDestroyWithHierarchy(temp_v0, 0);
         return;
@@ -137,7 +137,7 @@ u32 func_00243F38(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243F48);
 
-void func_00244058(u8 *scene) {
+void shopSavePrimaryTransform(u8 *scene) {
     extern f32 D_003D80F0[];
     extern f32 D_003D80D0[];
     extern s32 D_003BC380;
@@ -150,7 +150,7 @@ void func_00244058(u8 *scene) {
     D_003BC380 = 0;
 }
 
-void func_002440A8(u8 *scene) {
+void shopSaveFullTransform(u8 *scene) {
     extern f32 D_003D80F0[];
     extern f32 D_003D80E0[];
     extern f32 D_003D80D0[];
@@ -165,7 +165,7 @@ void func_002440A8(u8 *scene) {
     D_003BC380 = 1;
 }
 
-void func_00244110(u8 *scene) {
+void shopRestoreTransform(u8 *scene) {
     extern f32 D_003D80F0[];
     extern f32 D_003D80E0[];
     extern f32 D_003D80D0[];
@@ -182,7 +182,7 @@ void func_00244110(u8 *scene) {
     }
 }
 
-void func_00244180(u8 *scene, s32 identifier) {
+void shopRegisterSceneObject(u8 *scene, s32 identifier) {
     s32 count = *(s32 *)(scene + 0x2444);
     s32 i = 0;
     if (count > 0) {
@@ -205,7 +205,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002441E8);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244258);
 
-s32 func_002442D0(u8 *scene) {
+s32 shopReleaseSceneObjects(u8 *scene) {
     extern s32 func_002BD2F8(s32);
     s32 *objects = (s32 *)(scene + 0x74);
     s32 result;
@@ -218,7 +218,7 @@ s32 func_002442D0(u8 *scene) {
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
-void func_00244320(u8 *scene) {
+void shopLoadSpriteAssets(u8 *scene) {
     extern s32 D_0036AA60[];
     extern s32 func_002BC8F0(const char *, s32, s32);
     s32 *resource = (s32 *)(scene + 0x64);
@@ -273,7 +273,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002449F0);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244AB8);
 
-s32 func_00244AF8(void) {
+s32 pollTaskState(void) {
     s32 state = D_003BC39C;
     if (state == 1) {
         return 1;
@@ -317,14 +317,6 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245A40);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245C00);
 
-
-
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
@@ -340,7 +332,6 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC398);
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
 

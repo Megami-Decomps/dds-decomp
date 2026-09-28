@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern u64 func_0010D428(u64);
-extern u64 func_0021F600(u64);
+extern u64 mdlFlagTest(u64);
 
 extern s32 D_003BD78C;
 
@@ -45,7 +45,7 @@ u32 func_0010D6E8(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    temp_v0 = func_0021F600(temp_v0);
+    temp_v0 = mdlFlagTest(temp_v0);
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -54,7 +54,7 @@ u32 func_0010D718(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    func_0021F580(temp_v0);
+    mdlFlagSet(temp_v0);
     return 1;
 }
 
@@ -62,6 +62,6 @@ u32 func_0010D740(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    func_0021F5C0(temp_v0);
+    mdlFlagClear(temp_v0);
     return 1;
 }

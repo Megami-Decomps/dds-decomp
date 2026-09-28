@@ -45,7 +45,7 @@ extern u8 D_003DC5F4[];
 
 extern u32 D_003DC5EC[];
 
-extern void func_002874E8(void);
+extern void stopBattleStage(void);
 
 extern void func_00288500(void);
 
@@ -67,7 +67,7 @@ void func_00282BE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_00282B08(arg0, arg1, arg2, 0, arg3, arg4);
 }
 
-void *func_00282C10(s32 width, s32 height) {
+void *createPanelState(s32 width, s32 height) {
     u8 *item = func_002CFEB8(0x64);
     memset(item, 0, 0x64);
     *(s32 *)(item + 0xC) = width;
@@ -80,7 +80,7 @@ void func_00282C70(u32 arg0) {
 
     temp_v0 = *(s32 *)((s32)arg0 + 0x60);
     if (temp_v0 != 0) {
-        func_0027D7E0(temp_v0);
+        releaseResourceList(temp_v0);
     }
     func_002CFF98(arg0);
 }
@@ -127,7 +127,7 @@ void func_00282D98(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
-s32 func_00282F98(s32 parent) {
+s32 createPanelGroup(s32 parent) {
     s32 *list = func_002CFEB8(0x28);
     s32 i;
     for (i = 0; i < 5; i++) {
@@ -140,7 +140,7 @@ s32 func_00282F98(s32 parent) {
     return (s32)list;
 }
 
-void func_00283038(s32 *list) {
+void destroyPanelGroup(s32 *list) {
     s32 i;
     for (i = 0; i < 5; i++) {
         func_00284C30(list[i + 3]);
@@ -149,7 +149,7 @@ void func_00283038(s32 *list) {
 }
 
 extern void func_00284A90(s32, s32, s32);
-void func_00283090(s32 *object, s32 data) {
+void updateFiveListEntries(s32 *object, s32 data) {
     s32 i;
     for (i = 0; i < 5; i++) {
         func_00284A90(object[i + 3], data, i);
@@ -172,7 +172,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283238);
 
-void *func_00283280(s32 x, s32 y, s32 z) {
+void *createSpriteState(s32 x, s32 y, s32 z) {
     u8 *item = func_002CFEB8(0x20);
     memset(item, 0, 0x20);
     *(s32 *)(item + 0x10) = x;
@@ -223,7 +223,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00283BF8);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283CA8);
 
-s32 func_00283CE8(s32 arg0) {
+s32 menuRateByThreshold(s32 arg0) {
     s32 temp_v0 = *(s32 *)(arg0 + 0x10);
 
     if (temp_v0 < 0x32) {
@@ -258,7 +258,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00284108);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284258);
 
-void func_00284340(s32 *object) {
+void releaseSpriteTextures(s32 *object) {
     u32 i;
     for (i = 0; i < 9; i++) {
         func_002BDD60(object[i + 7]);
@@ -411,7 +411,7 @@ void func_00286050(u32 arg0) {
 }
 
 extern s32 D_003BAA00;
-s32 func_00286068(s32 object) {
+s32 findMatchingPartyEntryIndex(s32 object) {
     s32 i;
     u8 *entry = (u8 *)(D_003BAA00 + 0xA60);
     for (i = 0; i < 5; i++, entry += 0x1A4) {
@@ -427,7 +427,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002860B8);
 INCLUDE_ASM(const s32, "game/code_00282850", func_00286138);
 
 extern s8 D_0037CE40[];
-s32 func_00286170(s32 index) {
+s32 getIndexedNonzeroEffect(s32 index) {
     s32 count = 0;
     s32 i;
     s8 *entry = D_0037CE40;
@@ -454,7 +454,7 @@ u8 func_002862C0(u32 arg0) {
     return *(u8 *)((arg0 & 0xffff) * 0x38 + D_003BAA50 + 3);
 }
 
-u16 func_002862E0(s32 id, s32 object) {
+u16 getAdjustedEntryValue(s32 id, s32 object) {
     s32 entry = (id & 0xFFFF) * 0x38 + D_003BAA50;
     u16 base = *(u16 *)(entry + 4);
     u16 addition = *(u16 *)(entry + 6);
@@ -551,7 +551,7 @@ s32 func_00286E50(s32 entry) {
     return -1;
 }
 
-s32 func_00286EA0(s32 object) {
+s32 getMatchingPartyEntryMask(s32 object) {
     s32 i;
     u8 *entry = (u8 *)(D_003BAA00 + 0xA60);
     for (i = 0; i < 5; i++, entry += 0x1A4) {
@@ -622,7 +622,7 @@ void func_00287420(f32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287450);
 
-void func_002874E8(void) {
+void stopBattleStage(void) {
     if (D_003DC5E8[0] != 1) {
         D_003DC5E8[27] = -1;
         if (D_003DC5E8[26] != 0) {
@@ -635,8 +635,8 @@ void func_002874E8(void) {
     }
 }
 
-void func_00287548(void) {
-    func_002874E8();
+void menuResetWorkFloats(void) {
+    stopBattleStage();
     D_003245E0[4] = 2048.0f;
     D_003245E0[5] = 2048.0f;
 }
@@ -645,7 +645,7 @@ void func_00287580(s32 arg0, s32 arg1, s32 arg2) {
     D_003DC5EC[0] = func_00217068();
 }
 
-void func_002875A8(s32 arg0) {
+void menuForwardTableByte(s32 arg0) {
     func_00287580(D_003DC600[1], *(u8 *)(D_003DC600[-2] + (arg0 & 0xffff) * 60), 0);
 }
 
@@ -671,7 +671,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002878D8);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287998);
 
-void func_00287A18(void) {
+void menuResetWorkPair(void) {
     *(s32 *)(D_0037CE70 + 0) = 0;
     *(s32 *)(D_0037CE70 + 4) = 0;
     *(f32 *)(D_0037CE70 + 8) = -400.0f;
@@ -769,15 +769,15 @@ void func_002886A0(void) {
 
 void func_002886B8(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003B2608, 1);
-    func_00104600(0);
+    kwlnDebugGraphSetEnabled(0);
 }
 
-void func_002886E0(void) {
-    func_00104600(1);
+void createBattleStageTestTask(void) {
+    kwlnDebugGraphSetEnabled(1);
     kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, func_00288500, func_002886A0, 0);
 }
 
-s32 func_00288728(object)
+s32 destroyBattleStageTask(object)
     s32 object;
 {
     if (*(u8 *)(object + 1) == 6) {
@@ -794,15 +794,8 @@ s32 func_00288728(object)
 }
 
 void func_00288788(void) {
-    func_00288728();
+    destroyBattleStageTask();
 }
-
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2608);
 
@@ -833,7 +826,6 @@ INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7C0);
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7C8);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D4);
 

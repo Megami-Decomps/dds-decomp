@@ -51,7 +51,7 @@ typedef struct {
 extern World *D_003BA9BC;
 
 void func_002CFF98(void *arg);
-void func_0010F4F0(void *arg);
+void effObjNodeDestroy(void *arg);
 void *func_0010F418(s32 arg);
 void *func_002CFEB8(s32 arg);
 void func_001102C8(void *arg, s32 arg1);
@@ -68,7 +68,7 @@ void func_0010FD30(void) {
 
     world = D_003BA9BC;
     if (world != NULL) {
-        func_0010F4F0(world);
+        effObjNodeDestroy(world);
         D_003BA9BC = NULL;
     }
 }
@@ -150,7 +150,7 @@ void func_0010FE48(NodeA *arg) {
     if (info->unkC == arg) {
         info->unkC = NULL;
     }
-    func_0010F4F0(arg);
+    effObjNodeDestroy(arg);
 }
 
 void *func_0010FEC8(s32 arg) {

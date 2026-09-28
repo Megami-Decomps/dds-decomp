@@ -62,7 +62,7 @@ typedef struct {
 extern Entry270 D_003BAA20[];
 
 extern void *func_0010FD80(void);
-extern void func_0010F740(void *arg0, void *arg1);
+extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
 
 extern u8 func_00221FD8(EvtUnit *unit);
 
@@ -90,17 +90,17 @@ extern s32 func_0010D6A0(void);
 extern void func_0010AC10(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
 extern s32 func_00242298(s32 arg0, s32 arg1, s32 arg2);
-extern s32 func_00241B58(s32 arg0);
+extern s32 evtFindTaskById(s32 arg0);
 extern void func_00101A80(s32 arg0, s32 arg1);
 extern void func_002223D8(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_00222340(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_003003F0();
 extern u8 D_003AC480[];
 extern void func_00221BE0(EvtUnit *unit, void *arg1, s32 arg2);
-extern s32 func_00217EE0(u32 *arg0, s32 arg1);
+extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void func_00115318(void *arg0, u32 arg1);
-extern void func_0010F6E0(void *arg0, void *arg1);
+extern void effObjSetInnerFirstVec(void *arg0, void *arg1);
 extern f32 func_0010D4F0(s32 idx);
 extern char D_003AC588[];
 extern u8 D_003AC2A0[];
@@ -230,7 +230,7 @@ u32 func_00223B68(void) {
     rid = func_0010D428(1);
     ret = func_00242298(model, param0, rid);
     if (ret != 0) {
-        func_00101A80(func_00241B58(func_0010D428(0)), ret);
+        func_00101A80(evtFindTaskById(func_0010D428(0)), ret);
     }
     return func_0010D5F0(model);
 }
@@ -346,7 +346,7 @@ u32 func_00223FB0(void) {
     v[0] = func_0010D4F0(1);
     v[1] = func_0010D4F0(2);
     v[2] = func_0010D4F0(3);
-    func_0010F6E0(unit, v);
+    effObjSetInnerFirstVec(unit, v);
     return 1;
 }
 
@@ -369,7 +369,7 @@ u32 func_00224130(void) {
     v[0] = func_0010D4F0(1);
     v[1] = func_0010D4F0(2);
     v[2] = func_0010D4F0(3);
-    func_0010F740(unit, v);
+    effObjSetInnerThirdVec(unit, v);
     return 1;
 }
 
@@ -421,7 +421,7 @@ u32 func_002247B0(void) {
     if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return func_00217EE0(unit->unk8C, func_0010D428(1)) != 0;
+    return mdlCheckNodeByte30(unit->unk8C, func_0010D428(1)) != 0;
 }
 
 u32 func_00224828(void) {
@@ -511,7 +511,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224CD8);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224F48);
 
-u32 func_002250D8(void) {
+u32 evtUnitClearFlagBit(void) {
     s32 id;
     EvtUnit *unit;
 
@@ -523,7 +523,7 @@ u32 func_002250D8(void) {
     return 1;
 }
 
-u32 func_00225120(void) {
+u32 evtUnitSetFlagBit(void) {
     s32 id;
     EvtUnit *unit;
 
@@ -662,7 +662,7 @@ u32 func_00225958(void) {
     return 1;
 }
 
-u32 func_00225960(void) {
+u32 evtUnitCheckModelCut(void) {
     s32 id;
     void *unit;
     u32 param1;
@@ -771,10 +771,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00225F08);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00225FE8);
 
-
-
 INCLUDE_SDATA(const s32, "game/code_00222AC0", D_003BBDAC);
-
 
 INCLUDE_SDATA(const s32, "game/code_00222AC0", D_003BBDB0);
 

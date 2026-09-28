@@ -17,7 +17,7 @@ typedef struct Vec3 {
     float z; // 0x08
 } Vec3; // 0x0C
 
-extern float func_002C8588(float *, float *);
+extern float normalizedVectorDot(float *, float *);
 extern void func_002D0A10(void *);
 typedef struct MapResource {
     u32 image;
@@ -98,7 +98,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6130);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C62D8);
 
-s32 func_002C6370(void) {
+s32 releaseLocalMapResources(void) {
     s32 i = 9;
     MapResource *item = D_00390710;
     do {
@@ -192,7 +192,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7BB0);
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7C58);
 
 
-s32 func_002C7D18(const char *name, MapResource *record) {
+s32 loadMapResource(const char *name, MapResource *record) {
     u32 handle = func_002EB028(name, &record->descriptor, 0);
     u32 descriptor = record->descriptor;
     record->handle = handle;
@@ -263,12 +263,12 @@ void func_002C84C8(float arg0, float *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C84F0);
 
-float func_002C8558(float *vector) {
+float vectorLength(float *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] +
                   vector[2] * vector[2]);
 }
 
-float func_002C8588(float *left, float *right) {
+float normalizedVectorDot(float *left, float *right) {
     struct Vector4 { float x, y, z, w; } a, b;
     a = *(struct Vector4 *)left;
     b = *(struct Vector4 *)right;
@@ -277,8 +277,8 @@ float func_002C8588(float *left, float *right) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float func_002C8628(float *left, float *right) {
-    return func_002FA1C0(func_002C8588(left, right));
+float vec3AngleBetween(float *left, float *right) {
+    return func_002FA1C0(normalizedVectorDot(left, right));
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8648);
@@ -341,22 +341,15 @@ float func_002C9780(float *arg0, float *arg1) {
                   (*arg0 * arg1[1] - arg0[1] * *arg1);
 }
 
-float func_002C97C8(float *left, float *right) {
+float vec4ArcCosDot(float *left, float *right) {
     return func_002FA1C0(func_002C9740(left, right));
 }
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3DC0);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E00);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E40);
-
 
 INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
 

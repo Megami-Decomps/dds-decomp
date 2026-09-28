@@ -46,24 +46,24 @@ typedef struct MdlRes {
     u8 unk0[8]; /* 0x0 */
     u32 unk8;   /* 0x8 */
 } MdlRes;
-/* Entry searched by func_00217E10/func_00216BB0 on its s16 id at +0x28.
+/* Entry searched by func_00217E10/mdlReleaseFirstMatch on its s16 id at +0x28.
  * Only the fields read by the matched helpers below are known. */
 typedef struct MdlNode {
     struct MdlNode *next; /* 0x0 */
     u8 pad4[4];           /* 0x4 */
-    void *unk8;           /* 0x8: dereferenced by func_00218410 */
+    void *unk8;           /* 0x8: dereferenced by mdlGetNodeRefHalf */
     u8 padC[0x10];        /* 0xC */
-    f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
-    f32 unk20;            /* 0x20: float slot of func_00217F18/F40 */
+    f32 unk1C;            /* 0x1C: read as int by mdlGetNodeInt1C */
+    f32 unk20;            /* 0x20: float slot of mdlGetNodeFloat20/F40 */
     u8 pad24[4];          /* 0x24 */
     s16 unk28;            /* 0x28: search id */
-    s16 unk2A;            /* 0x2A: slot index used by func_00216B78 */
+    s16 unk2A;            /* 0x2A: slot index used by mdlClearSlotAndRelease */
     u16 unk2C;            /* 0x2C */
     u16 unk2E;            /* 0x2E */
     u8 unk30;             /* 0x30: compared against 5 */
     u8 pad31[7];          /* 0x31 */
 } MdlNode;
-/* 8-byte prefix copied from D_003BBB60 by func_00217038. */
+/* 8-byte prefix copied from D_003BBB60 by mdlBuildPrefixedString. */
 typedef struct Hdr8 {
     u8 b[8];
 } Hdr8;
@@ -81,9 +81,9 @@ extern u32 func_002EB090(void *);
 
 extern u32 D_003BD878;
 
-extern void *func_00216708(void);
+extern void *battleFindGroupedEntity(void);
 
-void func_00216B78(void *arg0, MdlNode *arg1) {
+void mdlClearSlotAndRelease(void *arg0, MdlNode *arg1) {
     s32 off = arg1->unk2A * 4 + 0x20;
     void **slot = (void **)((u8 *)arg0 + off);
 
@@ -93,12 +93,12 @@ void func_00216B78(void *arg0, MdlNode *arg1) {
     func_002DB308(arg1);
 }
 
-void func_00216BB0(MdlCtx *ctx, s32 id) {
+void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     MdlNode *node = (MdlNode *)ctx->inner->list;
 
     while (node != NULL) {
         if (node->unk28 == id) {
-            func_00216B78(ctx, node);
+            mdlClearSlotAndRelease(ctx, node);
             break;
         }
         node = node->next;
@@ -111,7 +111,7 @@ void func_00216CC8(void *arg0, void *arg1, void *arg2) {
     void *handle;
 
     /* arg0/arg1 are ignored. */
-    handle = func_00216708();
+    handle = battleFindGroupedEntity();
     func_00216C00(handle, arg2);
 }
 
@@ -145,7 +145,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00216F68);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216FE0);
 
-char *func_00217038(char *dst, const char *src) {
+char *mdlBuildPrefixedString(char *dst, const char *src) {
     *(Hdr8 *)dst = *(Hdr8 *)D_003BBB60;
     return strcat(dst, src);
 }
@@ -176,25 +176,25 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217C60);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217CA8);
 
-void func_00217DA0(MdlCtx *ctx, s32 arg1, s32 arg2) {
+void mdlAddEntryFlagged(MdlCtx *ctx, s32 arg1, s32 arg2) {
     func_00217CA8(ctx, arg1, arg2, 1, 0.0f, 0.0f);
 }
 
-void func_00217DC0(MdlCtx *ctx, s32 arg1, s32 arg2) {
+void mdlAddEntryPlain(MdlCtx *ctx, s32 arg1, s32 arg2) {
     func_00217CA8(ctx, arg1, arg2, 0, 0.0f, 0.0f);
 }
 
-void func_00217DE0(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
+void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
     func_00217CA8(ctx, arg1, arg2, 1, arg4, arg5);
 }
 
-void func_00217DF8(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
+void mdlAddEntryPlainEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
     func_00217CA8(ctx, arg1, arg2, 0, arg4, arg5);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217E10);
 
-s32 func_00217E58(MdlCtx *ctx, s32 id) {
+s32 mdlGetNodeField2C(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node == NULL) {
@@ -203,7 +203,7 @@ s32 func_00217E58(MdlCtx *ctx, s32 id) {
     return node->unk2C;
 }
 
-s32 func_00217E88(MdlCtx *ctx, s32 id) {
+s32 mdlGetNodeField2E(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node == NULL) {
@@ -212,7 +212,7 @@ s32 func_00217E88(MdlCtx *ctx, s32 id) {
     return node->unk2E;
 }
 
-s32 func_00217EB0(MdlCtx *ctx, s32 id) {
+s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node == NULL) {
@@ -221,7 +221,7 @@ s32 func_00217EB0(MdlCtx *ctx, s32 id) {
     return (s32)node->unk1C;
 }
 
-s32 func_00217EE0(MdlCtx *ctx, s32 id) {
+s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node == NULL) {
@@ -230,7 +230,7 @@ s32 func_00217EE0(MdlCtx *ctx, s32 id) {
     return node->unk30 == 5;
 }
 
-f32 func_00217F18(MdlCtx *ctx, s32 id) {
+f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);
     f32 r = 0.0f;
 
@@ -240,7 +240,7 @@ f32 func_00217F18(MdlCtx *ctx, s32 id) {
     return r;
 }
 
-void func_00217F40(MdlCtx *ctx, s32 id, f32 arg2) {
+void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 arg2) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node != NULL) {
@@ -310,16 +310,16 @@ void func_00218050(MdlCtx *ctx, u32 arg1) {
     u32 *node;
 
     for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
-        func_0021A560(ctx, node, arg1);
+        setModelResourceFrame(ctx, node, arg1);
     }
 }
 
-void func_002180A8(MdlCtx *ctx, u32 arg1) {
+void mdlBroadcastMasked(MdlCtx *ctx, u32 arg1) {
     ctx->inner->unk1C = arg1;
     func_00218050(ctx, (arg1 & 0xFF000000) | 0x808080);
 }
 
-void func_002180E0(MdlCtx *ctx, u32 arg1) {
+void mdlBroadcastValue(MdlCtx *ctx, u32 arg1) {
     ctx->inner->unk1C = arg1;
     func_00218050(ctx, arg1);
 }
@@ -346,7 +346,7 @@ void func_00218368(MdlCtx *ctx) {
     }
 }
 
-u8 func_002183B0(MdlCtx *ctx, s32 id) {
+u8 mdlHasNode(MdlCtx *ctx, s32 id) {
     MdlNode *found;
 
     found = func_00217E10(ctx, id);
@@ -365,11 +365,11 @@ u32 func_002183F0(void) {
     return 8;
 }
 
-u32 func_002183F8(s32 idx) {
+u32 mdlGetTableWord(s32 idx) {
     return D_00367904[idx][0];
 }
 
-s32 func_00218410(MdlCtx *ctx, s32 id) {
+s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node == NULL) {
@@ -384,7 +384,7 @@ void func_00218440(MdlCtx *ctx) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218460);
 
-s32 func_00218580(MdlCtx *ctx) {
+s32 mdlIsInnerSentinel(MdlCtx *ctx) {
     s32 r = 0;
 
     if ((u8)ctx->unk10 == 1) {
@@ -406,10 +406,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00218A08);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218A88);
 
-
-
 INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB60);
-
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB68);
 

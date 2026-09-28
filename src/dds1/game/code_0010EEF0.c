@@ -94,7 +94,7 @@ INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F2F0);
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F418);
 
-void func_0010F4F0(EEF0Node *arg0) {
+void effObjNodeDestroy(EEF0Node *arg0) {
     EEF0Owner *owner;
     EEF0Node *next;
     EEF0Node *prev;
@@ -118,7 +118,7 @@ void func_0010F4F0(EEF0Node *arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F570);
+INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjInnerCreate);
 
 void func_0010F5E8(EEF0Node *arg0) {
     EEF0Node *inner;
@@ -144,7 +144,7 @@ u8 func_0010F650(EEF0Node *arg0, u32 arg1) {
     return (arg0->flags & arg1) != 0;
 }
 
-void func_0010F660(EEF0Node *arg0) {
+void effObjInnerVecInit(EEF0Node *arg0) {
     u8 *p40 = (u8 *)arg0 + 0x40;
     u8 *p50;
     u8 *p60;
@@ -186,21 +186,21 @@ void func_0010F660(EEF0Node *arg0) {
     );
 }
 
-void func_0010F688(EEF0Node *arg0) {
+void effObjInnerVecBackup(EEF0Node *arg0) {
     EEF0_COPY128((u128 *)((u8 *)arg0 + 0xA0), (u128 *)((u8 *)arg0 + 0x60));
     EEF0_COPY128((u128 *)((u8 *)arg0 + 0x90), (u128 *)((u8 *)arg0 + 0x50));
     EEF0_COPY128((u128 *)((u8 *)arg0 + 0x80), (u128 *)((u8 *)arg0 + 0x40));
 }
 
-void func_0010F6C0(EEF0Node *arg0, f32 fparg0) {
+void effObjSetInnerFloat(EEF0Node *arg0, f32 fparg0) {
     arg0->inner->unkC4 = fparg0;
 }
 
-f32 func_0010F6D0(EEF0Node *arg0) {
+f32 effObjGetInnerFloat(EEF0Node *arg0) {
     return arg0->inner->unkC4;
 }
 
-void func_0010F6E0(EEF0Node *arg0, u128 *arg1) {
+void effObjSetInnerFirstVec(EEF0Node *arg0, u128 *arg1) {
     EEF0Node *inner = arg0->inner;
     u128 *dst = (u128 *)((u8 *)inner + 0x40);
 
@@ -208,7 +208,7 @@ void func_0010F6E0(EEF0Node *arg0, u128 *arg1) {
     EEF0_COPY128(dst, arg1);
 }
 
-void func_0010F710(EEF0Node *arg0, u128 *arg1) {
+void effObjSetInnerSecondVec(EEF0Node *arg0, u128 *arg1) {
     EEF0Node *inner = arg0->inner;
     u128 *dst = (u128 *)((u8 *)inner + 0x50);
 
@@ -216,7 +216,7 @@ void func_0010F710(EEF0Node *arg0, u128 *arg1) {
     EEF0_COPY128(dst, arg1);
 }
 
-void func_0010F740(EEF0Node *arg0, u128 *arg1) {
+void effObjSetInnerThirdVec(EEF0Node *arg0, u128 *arg1) {
     EEF0Node *inner = arg0->inner;
     u128 *dst = (u128 *)((u8 *)inner + 0x60);
 
@@ -224,7 +224,7 @@ void func_0010F740(EEF0Node *arg0, u128 *arg1) {
     EEF0_COPY128(dst, arg1);
 }
 
-void func_0010F770(EEF0Node *arg0) {
+void effObjFetchInnerFirstVec(EEF0Node *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x40;
 
     __asm__ volatile (
@@ -238,7 +238,7 @@ void func_0010F770(EEF0Node *arg0) {
     );
 }
 
-void func_0010F788(EEF0Node *arg0) {
+void effObjFetchInnerSecondVecNorm(EEF0Node *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x50;
 
     __asm__ volatile (
@@ -252,7 +252,7 @@ void func_0010F788(EEF0Node *arg0) {
     effMiscNormalizeVU();
 }
 
-void func_0010F7A8(EEF0Node *arg0) {
+void effObjFetchInnerThirdVec(EEF0Node *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x60;
 
     __asm__ volatile (
@@ -265,7 +265,7 @@ void func_0010F7A8(EEF0Node *arg0) {
     );
 }
 
-void func_0010F7C0(EEF0Node *arg0, void *arg1) {
+void effObjAddInnerFirstVec(EEF0Node *arg0, void *arg1) {
     EEF0Node *inner = arg0->inner;
     u8 *src = (u8 *)inner + 0x40;
     u8 *dst;
@@ -284,9 +284,9 @@ void func_0010F7C0(EEF0Node *arg0, void *arg1) {
     EEF0_STORE_V10(dst, inner, 0x40);
 }
 
-INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F7F8);
+INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjQuatMulInnerSecondVec);
 
-void func_0010F848(EEF0Node *arg0, void *arg1) {
+void effObjMulInnerThirdVec(EEF0Node *arg0, void *arg1) {
     EEF0Node *inner = arg0->inner;
     u8 *src = (u8 *)inner + 0x60;
     u8 *dst;
@@ -305,12 +305,9 @@ void func_0010F848(EEF0Node *arg0, void *arg1) {
     EEF0_STORE_V10(dst, inner, 0x60);
 }
 
-
-
 INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9A0);
 
 INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9A8);
-
 
 INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9B0);
 

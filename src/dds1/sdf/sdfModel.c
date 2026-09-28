@@ -2,7 +2,7 @@
 
 extern void *func_002DAAA0(s32 arg0, s32 arg1, s32 arg2);
 extern void *func_002CFEB8(s32 arg0);
-extern void *func_002E75F0(s32 arg0, s32 arg1, s32 arg2);
+extern void *devCreateRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void func_002EFD30(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void func_002D78F0(void);

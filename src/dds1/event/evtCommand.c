@@ -50,7 +50,7 @@ void func_00220458(void *arg0, s32 arg1);
 u32 func_00123DE0(void);
 void func_001109B8(s32 arg0, u32 arg1);
 s32 func_0010D6A0(s32 arg0);
-s32 func_00241B58(s32 arg0);
+s32 evtFindTaskById(s32 arg0);
 s32 func_00241B80(s32 arg0);
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
 void func_002E4C28(const char *msg);

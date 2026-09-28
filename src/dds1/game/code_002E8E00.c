@@ -48,7 +48,7 @@ u32 func_002E8F30(s32 arg0, char *arg1) {
     return func_002E8900(arg0 | 0x80, 0, arg1, len);
 }
 
-void func_002E8F78(s32 id, s32 volume, s32 pan) {
+void soundSetSequenceVolumePan(s32 id, s32 volume, s32 pan) {
     CmdPacket packet;
     func_002E9340(id);
     packet.unk0 = id;

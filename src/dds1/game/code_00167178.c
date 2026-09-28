@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_00163258(u64, u64);
+extern u64 effParamTableGetBlock(u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167178);
 
@@ -24,8 +24,8 @@ void func_00167E78(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_00163258(arg0, 0);
-    temp_v1 = func_00163258(arg0, 1);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
     func_00167BF8(temp_v0, temp_v1);
 }
 

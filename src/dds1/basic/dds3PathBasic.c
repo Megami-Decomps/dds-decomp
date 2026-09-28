@@ -58,11 +58,11 @@ void func_00116B80(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
 void func_002E8278(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
 
-void func_00192DE0(s32 arg);
+void effFreeBuffers(s32 arg);
 void func_002CFF98(void *arg);
 
 void func_00116F08(PathObj *arg) {
-    func_00192DE0(arg->unk10);
+    effFreeBuffers(arg->unk10);
     func_002CFF98(arg);
 }
 

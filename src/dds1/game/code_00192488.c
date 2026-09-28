@@ -2,50 +2,50 @@
 
 /* Primary work object (created by func_00192CC8): owned buffers plus the
  * channel-B cursor (count at +0x8, index at +0x20). Extends past 0x2C with
- * the rand/emit control words used by func_00192C00. */
+ * the rand/emit control words used by effFillRandRecords. */
 typedef struct EffPrim {
-    void *unk0;       /* 0x0: buffer freed by func_00192DE0 */
-    void *unk4;       /* 0x4: buffer freed by func_00192DE0 */
-    u32 unk8;         /* 0x8: count advanced by func_00192E30 */
+    void *unk0;       /* 0x0: buffer freed by effFreeBuffers */
+    void *unk4;       /* 0x4: buffer freed by effFreeBuffers */
+    u32 unk8;         /* 0x8: count advanced by effAdvancePrimCursor */
     u16 unkC;         /* 0xC: flag set by func_00192CC8 */
     u8 unkE[2];       /* 0xE */
     s32 unk10;        /* 0x10 */
-    void *unk14;      /* 0x14: buffer or NULL, tested by func_00192DE0 */
+    void *unk14;      /* 0x14: buffer or NULL, tested by effFreeBuffers */
     void *unk18;      /* 0x18 */
     void *unk1C;      /* 0x1C */
-    u32 unk20;        /* 0x20: channel-B index advanced by func_00192E30 */
-    f32 unk24;        /* 0x24: channel-B position advanced by func_00192E30 */
+    u32 unk20;        /* 0x20: channel-B index advanced by effAdvancePrimCursor */
+    f32 unk24;        /* 0x24: channel-B position advanced by effAdvancePrimCursor */
     f32 unk28;        /* 0x28: channel-B step (0.05f) */
     u8 unk2C[0x18];   /* 0x2C */
-    u32 unk44;        /* 0x44: rand count for func_00192C00 */
-    u32 unk48;        /* 0x48: rand modulus for func_00192C00 */
+    u32 unk44;        /* 0x44: rand count for effFillRandRecords */
+    u32 unk48;        /* 0x48: rand modulus for effFillRandRecords */
     u8 unk4C[0x11C];  /* 0x4C */
     struct EffCntRec *unk168; /* 0x168: counter records */
     s32 *unk16C;      /* 0x16C: base for func_0018E200 */
 } EffPrim;
 
-/* Small channel object (0x18 bytes, created by func_001936A8): float block
+/* Small channel object (0x18 bytes, created by effCreateChannel): float block
  * plus the channel-A cursor (count at +0x4, index at +0xC). */
 typedef struct EffChan {
     void *unk0; /* 0x0: mem handle */
-    u32 unk4;   /* 0x4: count advanced by func_00193740 */
-    void *unk8; /* 0x8: float block copied by func_00192BA0 */
-    u32 unkC;   /* 0xC: channel-A index advanced by func_00193740 */
-    f32 unk10;  /* 0x10: channel-A position advanced by func_00193740 */
+    u32 unk4;   /* 0x4: count advanced by effAdvanceChanCursor */
+    void *unk8; /* 0x8: float block copied by effCopyVertRows */
+    u32 unkC;   /* 0xC: channel-A index advanced by effAdvanceChanCursor */
+    f32 unk10;  /* 0x10: channel-A position advanced by effAdvanceChanCursor */
     f32 unk14;  /* 0x14: channel-A step (0.05f) */
 } EffChan;
 
 /* 8-byte counter record at EffPrim.unk168. */
 typedef struct EffCntRec {
-    s32 unk0; /* 0x0: rand slot advanced by func_00192C00 */
+    s32 unk0; /* 0x0: rand slot advanced by effFillRandRecords */
     u32 unk4; /* 0x4: id released by func_00192638 */
 } EffCntRec;
 
 /* 0x38-byte keyframe record addressed by func_0018E200. */
 typedef struct EffRec38 {
     u8 unk0[0x30]; /* 0x0 */
-    f32 unk30;     /* 0x30: scaled by func_00192C00 */
-    f32 unk34;     /* 0x34: read by func_00192C00 */
+    f32 unk30;     /* 0x30: scaled by effFillRandRecords */
+    f32 unk34;     /* 0x34: read by effFillRandRecords */
 } EffRec38;
 
 /* Interpolated vertex (x, y, z, w) written by func_00192ED0. */
@@ -56,7 +56,7 @@ typedef struct EffVert {
     f32 unkC; /* 0xC */
 } EffVert;
 
-/* Emitter handle for func_00192C00: target primitive at +0x8. */
+/* Emitter handle for effFillRandRecords: target primitive at +0x8. */
 typedef struct EffEmit {
     u8 unk0[8];    /* 0x0 */
     EffPrim *unk8; /* 0x8: target primitive */
@@ -87,7 +87,7 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_001926A8);
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_001929A0);
 
-void func_00192BA0(EffChan *dst, f32 *src) {
+void effCopyVertRows(EffChan *dst, f32 *src) {
     f32 *s;
     u32 i;
     f32 *d2;
@@ -110,7 +110,7 @@ void func_00192BA0(EffChan *dst, f32 *src) {
     } while (i < 4);
 }
 
-void func_00192C00(EffEmit *arg0) {
+void effFillRandRecords(EffEmit *arg0) {
     EffPrim *e = arg0->unk8;
     u32 mod = e->unk48;
     u32 count = e->unk44;
@@ -138,7 +138,7 @@ void func_00192C00(EffEmit *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00192CC8);
 
-void func_00192DE0(EffPrim *arg0) {
+void effFreeBuffers(EffPrim *arg0) {
     if (arg0 != NULL) {
         if (arg0->unk14 != NULL) {
             func_002D0918(arg0->unk4);
@@ -147,7 +147,7 @@ void func_00192DE0(EffPrim *arg0) {
     }
 }
 
-s32 func_00192E30(void *arg0, EffPrim *arg1) {
+s32 effAdvancePrimCursor(void *arg0, EffPrim *arg1) {
     s32 ret = 1;
     f32 pos = arg1->unk24;
     u32 idx = arg1->unk20;
@@ -181,7 +181,7 @@ void func_00193140(EffPrim *arg0, f32 arg1) {
     arg0->unk28 = arg1;
 }
 
-void func_00193148(EffPrim *arg0, s32 arg1) {
+void effBuildAndDispatch(EffPrim *arg0, s32 arg1) {
     void *mem = func_002D03F8(arg0->unk8 * 12);
     void *buf = func_002D0A48(mem);
 
@@ -203,7 +203,7 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_001934E8);
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_001935B8);
 
-void *func_001936A8(void *arg0, u32 arg1) {
+void *effCreateChannel(void *arg0, u32 arg1) {
     void *buf = NULL;
     void *mem;
     EffChan *p;
@@ -225,7 +225,7 @@ void *func_001936A8(void *arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00193720);
 
-s32 func_00193740(void *arg0, EffChan *arg1) {
+s32 effAdvanceChanCursor(void *arg0, EffChan *arg1) {
     s32 ret = 1;
     f32 pos = arg1->unk10;
     u32 idx = arg1->unkC;
@@ -248,29 +248,26 @@ s32 func_00193740(void *arg0, EffChan *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_001937E0);
 
-void func_001938E8(EffChan *arg0) {
+void effClearChanCursor(EffChan *arg0) {
     arg0->unkC = 0;
     arg0->unk10 = 0;
 }
 
-void func_001938F8(EffChan *arg0, f32 arg1) {
+void effSetChanStep(EffChan *arg0, f32 arg1) {
     arg0->unk14 = arg1;
 }
 
-void *func_00193900(void) {
+void *effGetFontListHead(void) {
     return D_003D68C0;
 }
 
-s32 func_00193910(void) {
+s32 effGetFontListCount(void) {
     return D_003D68D8[0];
 }
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00193920);
 
-
-
 INCLUDE_SDATA(const s32, "game/code_00192488", D_003BB150);
-
 
 INCLUDE_SDATA(const s32, "game/code_00192488", D_003BB15C);
 

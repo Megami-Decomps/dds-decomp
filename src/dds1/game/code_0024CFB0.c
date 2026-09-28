@@ -70,7 +70,7 @@ u32 func_0024D398(void) {
         func_0024DEF8(1, 0);
     }
     else {
-        func_00105B98(0, 0, 0, 0xf);
+        kwlnFadeInStart(0, 0, 0, 0xf);
     }
     return 1;
 }
@@ -79,7 +79,7 @@ s32 func_0024D400(void) {
     s32 temp_v0 = func_00101A70();
 
     func_0024B358(1, temp_v0);
-    func_00105AE0(0, 0, 0, 0);
+    kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
 
@@ -127,8 +127,8 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D670);
 
 void func_0024D6E0(void) {
     func_001068F0(0, 0, 0);
-    func_00106D08(0);
-    func_00106F40(0);
+    drawSetupC70B(0);
+    drawEnableCd0(0);
     func_0018F3B0();
     func_0018F438();
     func_0018F750();
@@ -147,7 +147,7 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D778);
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D7B8);
 
-void func_0024D828(ActiveList *list) {
+void collectActiveGameIndices(ActiveList *list) {
     s32 i;
     list->count = 0;
     for (i = 1; i < 0xC0; i++) {
@@ -168,7 +168,7 @@ s32 func_0024D880(u8 *arg0, u8 *arg1) {
     return (temp_A < temp_B) ? -1 : 0;
 }
 
-s32 func_0024D8A8(u8 *buffer, s32 length, u8 excluded) {
+s32 compactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     s32 i;
     s32 count = 0;
     for (i = 0; i < length; i++) {
@@ -211,7 +211,7 @@ s32 func_0024DAB8(s32 arg0) {
         return 0;
     }
     D_003BC410 = arg0;
-    D_003BC415 = func_0024DB08();
+    D_003BC415 = getActiveSoundMode();
     return 1;
 }
 
@@ -225,11 +225,11 @@ s8 func_0024DB00(void) {
     return D_003BC414;
 }
 
-s32 func_0024DB08(void) {
+s32 getActiveSoundMode(void) {
     if (D_003BC408 < 0) {
         return -1;
     }
-    return func_0019B320(D_003BC408);
+    return itfPanelGetPairSecond(D_003BC408);
 }
 
 s8 func_0024DB40(void) {
@@ -241,11 +241,11 @@ u32 func_0024DB48(s32 arg0) {
 
     temp_v0 = 0;
     if (-1 < D_003BC408) {
-        func_0019AE58(D_003BC408, 0);
+        itfPanelSetStatus(D_003BC408, 0);
         if (arg0 != 0) {
             func_0019B4A0(D_003BC408);
         }
-        func_0019BC98(D_003BC408, 0);
+        itfMesCleanupWindow(D_003BC408, 0);
         func_0024DDC0(1);
         D_003BC40C = 0;
         temp_v0 = 1;
@@ -261,14 +261,14 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DBC8);
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DC08);
 
-s32 func_0024DC50(void) {
+s32 updateActiveSoundMode(void) {
     if (D_003BC408 < 0) {
         return 0;
     }
-    if (func_0019B2E0(D_003BC408) < 0) {
+    if (itfPanelGetPairFirst(D_003BC408) < 0) {
         return 0;
     }
-    D_003BC415 = func_0024DB08();
+    D_003BC415 = getActiveSoundMode();
     return 1;
 }
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DC98);
@@ -290,7 +290,7 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DDC0);
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DE30);
 
-s32 func_0024DE78(s32 task) {
+s32 isTaskInActiveStates(s32 task) {
     if (func_00101818(task) == 1) {
         return 1;
     }
@@ -328,7 +328,7 @@ s32 func_0024DF48(void) {
     return 1;
 }
 
-s32 func_0024DF78(void) {
+s32 activateCurrentEventFlag(void) {
     s32 index = func_0010D428(0);
     if (index >= 16) {
         index = 15;
@@ -347,10 +347,6 @@ void func_0024E198(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_002C0DD8(arg0, arg1, 0, arg2, arg3, 0x30303040, 0x53);
 }
 
-
-
-
-
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC408);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC40C);
@@ -362,7 +358,6 @@ INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC410);
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC414);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC415);
-
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC418);
 

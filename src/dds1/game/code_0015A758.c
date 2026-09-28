@@ -32,7 +32,7 @@ typedef struct ParDispatch {
     u32 unk8;        /* 0x8 */
 } ParDispatch; /* 0xC */
 
-/* 20-byte cell initialized by func_0015B8E8 (grey plus zeros). */
+/* 20-byte cell initialized by parCellInit (grey plus zeros). */
 typedef struct ParCell {
     u8 pad00[8];   /* 0x00 */
     u32 unk08;     /* 0x08 cleared */
@@ -43,7 +43,7 @@ typedef struct ParCell {
 extern ParDispatch D_0034E258[];
 extern void (*D_0034E5E0[])(void *, void *, void *);
 extern void *memset(void *dst, s32 c, u32 n);
-extern void func_0015B660();
+extern void parControlInit();
 extern void func_002E84A0(void *arg);
 extern u8 D_003D64B0[];
 extern u8 D_003D64C0[];
@@ -52,7 +52,7 @@ void func_0015A758(ParObj *work, u32 value) {
     work->unkF0 = value;
 }
 
-void func_0015A760(ParObj *work, s32 value) {
+void parObjSetMode(ParObj *work, s32 value) {
     value &= 0xFF;
     switch (work->unk140) {
     case 1:
@@ -77,7 +77,7 @@ void func_0015A760(ParObj *work, s32 value) {
     work->unk142 = 1;
 }
 
-u32 func_0015A7A0(ParObj *work) {
+u32 parObjGetMode(ParObj *work) {
     switch (work->unk140) {
     case 1:
     case 5:
@@ -102,14 +102,14 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A8C8);
 
-void func_0015A968(ParObj *work) {
+void parObjDispatch(ParObj *work) {
     D_0034E258[work->unk140].func(work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);
 
 void func_0015ACF0(void) {
-    func_0015A608();
+    parRestartKind();
 }
 
 void func_0015AD08(float scale, ParObj *work) {
@@ -130,7 +130,7 @@ void func_0015AD90(ParObj *work, u32 value) {
 }
 
 void func_0015AD98(ParObj *work, u8 value) {
-    func_0015A760(work, value);
+    parObjSetMode(work, value);
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
@@ -151,9 +151,9 @@ u32 func_0015B220(void) {
     return 0;
 }
 
-void func_0015B228(void) {
+void parSysReset(void) {
     D_003BB010 = 0;
-    func_0015B660();
+    parControlInit();
     func_002E84A0(&D_003D64B0);
 }
 
@@ -179,7 +179,7 @@ void func_0015B648(s32 arg0) {
     func_002DA438(*(u32 *)(arg0 + 0x40));
 }
 
-void func_0015B660(void) {
+void parControlInit(void) {
     memset(D_003D64C0, 0, 0x2C);
     *(u16 *)(D_003D64C0 + 4) = 0x4000;
 }
@@ -191,7 +191,7 @@ void func_0015B8B8(s32 arg0) {
     func_002D0918(*(u32 *)(arg0 + 0x10));
 }
 
-void func_0015B8E8(void *work, s32 index) {
+void parCellInit(void *work, s32 index) {
     ParCell *cell = (ParCell *)(index * 20 + *(u32 *)((u8 *)work + 0x14));
 
     cell->color10 = 0x80808080;
@@ -252,7 +252,7 @@ void func_0015D078(s32 arg0, u16 arg1) {
     *(u16 *)(arg0 + 2) = arg1;
 }
 
-void func_0015D080(void *work, s32 sub, void *a2, void *a3) {
+void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
     u16 id = *(u16 *)work;
 
     D_0034E5E0[id * 3 + sub](work, a2, a3);
@@ -271,10 +271,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D7E8);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D910);
 
-
-
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB010);
-
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
 

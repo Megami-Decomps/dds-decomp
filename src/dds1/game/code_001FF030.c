@@ -1,18 +1,18 @@
 #include "common.h"
 
-extern s32 *func_00216708();
+extern s32 *battleFindGroupedEntity();
 
 extern u8 D_003BBB0D;
 
 extern s32 func_00211568();
 
-extern s32 func_001D45A8(u32);
+extern s32 countBattleTasksByKind(u32);
 
 extern u32 func_00207BF0(void);
 
 extern u32 func_001A3360(u64, u64, u64);
 
-extern u64 func_001DADC8(u64);
+extern u64 allocateBattleIndexList(u64);
 
 extern u32 func_001DAE48();
 
@@ -59,7 +59,7 @@ extern char D_003BB8A8[];
 
 extern s32 D_003BAA60;
 
-extern s32 func_002CF440(s32, s32, s32);
+extern s32 createSemaphore(s32, s32, s32);
 
 extern u32 D_003BD878;
 
@@ -214,7 +214,7 @@ s32 func_00200F48(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00200F60);
 
-s32 func_00200F80(s32 unused, u32 limit) {
+s32 battleCounterReachedLimit(s32 unused, u32 limit) {
     extern u32 func_001A9488(s32);
     if (func_001A9488(4) < limit) {
         return 0;
@@ -224,7 +224,7 @@ s32 func_00200F80(s32 unused, u32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00200FB0);
 
-s32 func_00201000(s32 unused, u32 limit) {
+s32 battleTurnReachedLimit(s32 unused, u32 limit) {
     s32 *battle = (s32 *)func_001A17F0();
     if ((u32)battle[0x250 / 4] < limit) {
         return 0;
@@ -232,7 +232,7 @@ s32 func_00201000(s32 unused, u32 limit) {
     return 1;
 }
 
-s32 func_00201030(void) {
+s32 battleIsReadyWithoutTurns(void) {
     u8 *battle = (u8 *)func_001A17F0();
     if (*(u16 *)(battle + 0x248) == 2) {
         if (*(s32 *)(battle + 0x250) == 0) {
@@ -359,7 +359,7 @@ s32 func_00202330(s32 unused, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00202390);
 
-s32 func_00202410(u8 *unit, s32 action) {
+s32 battleActionMatchesUnit(u8 *unit, s32 action) {
     s32 *battle = (s32 *)*D_003BB87C;
     if (battle[0x148 / 4] == action) {
         if (*(u32 *)(unit + 0x114) & 0x1000) {
@@ -377,7 +377,7 @@ u64 func_002025F8(u64 arg0, u32 *arg1, u32 *arg2) {
     u32 temp_v0;
     u64 temp_v1;
 
-    temp_v1 = func_001DADC8(0xd);
+    temp_v1 = allocateBattleIndexList(0xd);
     temp_v0 = func_001A3360(arg0, temp_v1, 0);
     *arg1 = temp_v0;
     temp_v0 = func_001DAE48(temp_v1);
@@ -471,7 +471,7 @@ u32 func_00204B40(void) {
     return 0xffffffff;
 }
 
-s32 func_00204B48(s32 battler, s32 command) {
+s32 filterRestrictedBattleCommand(s32 battler, s32 command) {
     if (command == 1 || command == 0x12) {
         if ((*(u16 *)(battler + 0x120) & 0x2000) != 0) {
             return -1;
@@ -484,7 +484,7 @@ u8 func_00204B78(u32 arg0, s32 arg1) {
     return arg1 == 0xf;
 }
 
-s32 func_00204B88(s32 battler) {
+s32 battleSelectDisabledCommand(s32 battler) {
     if (battler == 0) {
         return 15;
     }
@@ -532,7 +532,7 @@ u32 func_002055F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002055F8);
 
-s32 func_00205690(s32 unused, s32 resource) {
+s32 battleInitializeResources(s32 unused, s32 resource) {
     extern u8 D_00360EE0[];
     extern u8 D_00360EF0[];
     extern void func_001DC2A8(s32, u8 *, u8 *);
@@ -603,7 +603,7 @@ s32 func_00206F38(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206F78);
 
-s32 func_00207030(u32 target) {
+s32 battleHasDifferentActiveTarget(u32 target) {
     if (func_00207B68() == 0) {
         return 1;
     }
@@ -689,7 +689,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00207FF0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208248);
 
-void func_002082A0(u8 *unit) {
+void battleMarkSpecialUnit(u8 *unit) {
     s32 species;
     if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
         return;
@@ -795,7 +795,7 @@ void func_00208EA8(void) {
     func_00208E10();
 }
 
-void *func_00208EC0(s32 group, s32 type) {
+void *battleFindActiveMember(s32 group, s32 type) {
     s32 *unit;
     if (group != 1) {
         return 0;
@@ -863,7 +863,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00209528);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002096E8);
 
-s32 func_00209780(u8 *entry) {
+s32 battleCheckAttachedMember(u8 *entry) {
     u8 *unit = *(u8 **)(entry + 0xf4);
     if (unit == 0) {
         return 1;
@@ -993,7 +993,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020ABE0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020AD20);
 
-s32 func_0020AD80(u32 skill) {
+s32 battleMapSkillRange(u32 skill) {
     if (skill < 0x143) {
         if (skill >= 0x13d) {
             return 0x12c;
@@ -1131,7 +1131,7 @@ s32 func_0020D690(s32 battler, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D6D8);
 
-s32 func_0020D818(s32 battler, s32 action) {
+s32 battleNormalizeActionForSkill(s32 battler, s32 action) {
     if ((*(u32 *)(battler + 0x110) & 0x400) == 0 || *(u16 *)(battler + 0x124) != 0x13c) {
         return action;
     }
@@ -1158,7 +1158,7 @@ u8 func_0020D9A8(s32 arg0) {
     return arg0 != 0xd3;
 }
 
-s32 func_0020D9B8(s32 battler, s32 action) {
+s32 battleNormalizeActionForStatus(s32 battler, s32 action) {
     if ((*(u32 *)(battler + 0x110) & 0x400) == 0 || *(u16 *)(battler + 0x124) != 0x115) {
         return action;
     }
@@ -1203,7 +1203,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020E910);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020EA40);
 
-s32 func_0020EBA0(void) {
+s32 battleGetPhaseCommand(void) {
     u8 *battle = (u8 *)func_001A17F0();
     switch (*(u16 *)(battle + 0x25c)) {
     case 0: return 0x11c;
@@ -1212,7 +1212,7 @@ s32 func_0020EBA0(void) {
     }
 }
 
-s32 func_0020EBE0(void) {
+s32 battleGetAlternatePhaseCommand(void) {
     u8 *battle = (u8 *)func_001A17F0();
     switch (*(u16 *)(battle + 0x25c)) {
     case 0: return 0x11f;
@@ -1235,7 +1235,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020F8E0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020F940);
 
-s32 func_0020F9B8(void) {
+s32 battleReleaseScriptResource(void) {
     extern s32 func_001019C8(s32);
     u8 *battle = (u8 *)func_001A17F0();
     if (*(s16 *)(battle + 0x1c0) == -1) {
@@ -1281,7 +1281,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00210450);
 u8 func_00210520(void) {
     s32 temp_v0;
 
-    temp_v0 = func_001D45A8(0x1a);
+    temp_v0 = countBattleTasksByKind(0x1a);
     return temp_v0 == 0;
 }
 
@@ -1307,7 +1307,7 @@ typedef struct BattleTaskData {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00210670);
 
-void *func_00210710(void *battler, s32 action) {
+void *battleCreateActionTask(void *battler, s32 action) {
     extern BattleTask *func_001D4748(s32);
     extern BattleTaskData *func_001D47D8(BattleTask *);
     extern s32 func_00210670(void *);
@@ -1334,7 +1334,7 @@ typedef struct BattleCombatant {
     struct BattleCombatant *next;
 } BattleCombatant;
 
-s32 func_00210790(void) {
+s32 battleHasRestrictedUnit(void) {
     BattleCombatant *unit = *(BattleCombatant **)((u8 *)func_001A17F0() + 0x228);
     while (unit != 0) {
         u32 status = unit->status;
@@ -1351,7 +1351,7 @@ s32 func_00210790(void) {
     return 0;
 }
 
-s32 func_002107F8(u8 **entries, s32 count) {
+s32 battleListHasMarkedFlag(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) == 0x4000) {
@@ -1361,7 +1361,7 @@ s32 func_002107F8(u8 **entries, s32 count) {
     return 0;
 }
 
-s32 func_00210840(u8 **entries, s32 count) {
+s32 battleListCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         if (*(u16 *)(entries[i] + 6) < *(u16 *)(entries[i] + 8)) {
@@ -1371,7 +1371,7 @@ s32 func_00210840(u8 **entries, s32 count) {
     return 1;
 }
 
-s32 func_00210890(u8 **entries, s32 count) {
+s32 battleListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         if (*(u16 *)(entries[i] + 0xa) < *(u16 *)(entries[i] + 0xc)) {
@@ -1381,7 +1381,7 @@ s32 func_00210890(u8 **entries, s32 count) {
     return 1;
 }
 
-s32 func_002108E0(u8 **entries, s32 count, u32 flags) {
+s32 battleListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     s32 i;
     for (i = 0; i < count; i++) {
         if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) & flags) {
@@ -1413,7 +1413,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00211390);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00211450);
 
-void func_00211490(s32 isDevil, s32 modelId, char *filename) {
+void battleFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
     extern void func_003014F0(char *, const char *, const char *, s32);
     if (isDevil == 0) {
         func_003014F0(filename, "%spc%03X_ms.LB", "/model/human/", modelId);
@@ -1447,7 +1447,7 @@ void func_00211708(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00211740);
 
-s32 func_00211880(s32 kind, s32 value) {
+s32 battleGetEntryState(s32 kind, s32 value) {
     u8 *entry = (u8 *)func_00211568(kind, value);
     if (entry != 0) {
         return *(s8 *)(entry + 0xc);
@@ -1486,7 +1486,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002121E8);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002124E8);
 
-void func_00212640(void) {
+void battleReleaseOwnedData(void) {
     extern void func_002CFF98(void *);
     void *data = D_003D7580.ownedData;
     if (data != 0) {
@@ -1512,7 +1512,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00213370);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00213538);
 
-void func_002135B8(void) {
+void battleReleaseRuntimeResource(void) {
     extern void func_0029BFB0(void *);
     extern void func_00105618(void);
     extern void func_001055C0(void);
@@ -1535,9 +1535,9 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00213808);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00213A38);
 
-void func_00213B28(void);
+void battleResetRuntimeState(void);
 
-void func_00213A90(void) {
+void battleResetAsyncState(void) {
     extern void func_002D0A10(void *);
     void *handle = D_003D7580.handle;
     if (handle != 0) {
@@ -1545,10 +1545,10 @@ void func_00213A90(void) {
         D_003D7580.handle = 0;
         D_003D7580.request = 0;
     }
-    func_00213B28();
+    battleResetRuntimeState();
 }
 
-void func_00213AD0(u8 condition) {
+void battleActivateRuntime(u8 condition) {
     extern s32 func_001061E8(void);
     BattleRuntimeState *battle = &D_003D7580;
     battle->unk_06 = condition;
@@ -1562,10 +1562,10 @@ void func_00213AD0(u8 condition) {
     }
 }
 
-void func_00213B28(void) {
+void battleResetRuntimeState(void) {
     D_003D7580.state = 0;
     D_003D7580.active = 0;
-    func_00212640();
+    battleReleaseOwnedData();
 }
 
 s32 func_00213B50(void) {
@@ -1762,7 +1762,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00215A50);
 
 void func_00215FE0(void) {
     D_003BBB0D = 0;
-    func_0011CE18();
+    dds3WorkClear();
 }
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A7128);
@@ -1826,14 +1826,14 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002162E0);
 void func_002166A8(void) {
     s32 i;
 
-    D_003BD878 = func_002CF440(1, 0x7f, 0);
+    D_003BD878 = createSemaphore(1, 0x7f, 0);
     for (i = 0; i != 8; i++) {
         D_00367940[i] = 0;
         D_00367960[i] = 0;
     }
 }
 
-s32 *func_00216708(group, type)
+s32 *battleFindGroupedEntity(group, type)
     s32 group;
     s32 type;
 {
@@ -1879,11 +1879,11 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00216958);
 void func_00216A70(void) {
     s32 *temp_v0;
 
-    temp_v0 = func_00216708();
+    temp_v0 = battleFindGroupedEntity();
     func_00216958(temp_v0);
 }
 
-void func_00216A90(void) {
+void battleReleaseAllEntities(void) {
     u32 i = 0;
     s32 *head = D_00367940;
     do {
@@ -1899,15 +1899,6 @@ void func_00216A90(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00216B00);
-
-
-
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A72F0);
 
@@ -3932,7 +3923,6 @@ INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB40);
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB48);
 
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB50);
-
 
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB58);
 

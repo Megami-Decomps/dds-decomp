@@ -6,7 +6,7 @@ extern u32 effMiscRand(void *state);
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8398);
 
-u32 func_002E83F8(void *arg0, u32 arg1) {
+u32 effMiscRandMod(void *arg0, u32 arg1) {
     return effMiscRand(arg0) % arg1;
 }
 
@@ -34,11 +34,7 @@ void func_002E86C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8700);
 
-
-
-
 INCLUDE_SDATA(const s32, "game/code_002E8398", D_003BD488);
-
 
 INCLUDE_SDATA(const s32, "game/code_002E8398", D_003BD489);
 

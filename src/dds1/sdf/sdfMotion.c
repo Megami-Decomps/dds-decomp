@@ -254,7 +254,7 @@ typedef struct FuncTab {
 void *func_002CFF68(s32 size);
 void func_002CFF98(void *a0);
 void *func_002CFEB8(s32 size);
-ArrObj *func_002E75F0(u16 n, s32 e1, s32 e2);
+ArrObj *devCreateRequest(u16 n, s32 e1, s32 e2);
 s32 func_002DB1C8(void *a0, s32 a1, s32 a2);
 s32 func_002D7D68(void *a0, s32 a1);
 void func_002DA3C0(void *a0, s32 a1);

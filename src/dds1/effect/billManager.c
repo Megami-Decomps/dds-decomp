@@ -15,24 +15,24 @@ typedef struct BillObj {
     f32 unk1C;       /* 0x1C */
     f32 unk20;       /* 0x20 */
     u32 unk24;       /* 0x24 */
-    void (*unk28)(); /* 0x28 invoked by func_00151F38 */
+    void (*unk28)(); /* 0x28 invoked by billInvokeCallback */
     u16 unk2C;       /* 0x2C kind */
     u16 unk2E;       /* 0x2E */
     void *unk30;     /* 0x30 child (kind 0) or data (kind 1) */
     u8 pad34[8];     /* 0x34 */
-    u16 unk3C;       /* 0x3C kind-1 slot set by func_00151260 */
+    u16 unk3C;       /* 0x3C kind-1 slot set by billAllocList */
     u8 pad3E[10];    /* 0x3E */
     u32 unk48;       /* 0x48 */
     u32 unk4C;       /* 0x4C */
-    u16 unk50;       /* 0x50 set to 1 by func_001512E8/func_00151260 */
+    u16 unk50;       /* 0x50 set to 1 by billCloneList/billAllocList */
     u8 pad52[6];     /* 0x52 */
     u32 unk58;       /* 0x58 compared by func_00152200 */
     s32 unk5C;       /* 0x5C entry count read by func_00152288 */
     void *unk60;     /* 0x60 entry list */
 } BillObj;
 
-/* Kind-0 child (0x34 bytes from func_001511C0). Counters at +0x8/+0x14
-   bumped by func_00151E60/func_001512E8, entry count at +0xC. */
+/* Kind-0 child (0x34 bytes from billAllocChild). Counters at +0x8/+0x14
+   bumped by func_00151E60/billCloneList, entry count at +0xC. */
 typedef struct BillData {
     u8 pad[8];    /* 0x0 */
     s32 unk8;     /* 0x8 */
@@ -61,9 +61,9 @@ typedef struct {
     s32 unk10;      /* 0x10 table base + entry offset */
 } BillOut;
 
-/* Dispatch entry (0xC bytes). func creates an instance (func_00151D88)
-   or runs a command on one (func_00151F00); unk4 is copied onto the new
-   instance's unk28 by func_00151D88. */
+/* Dispatch entry (0xC bytes). func creates an instance (billCreateIndexed)
+   or runs a command on one (billDispatchByKind); unk4 is copied onto the new
+   instance's unk28 by billCreateIndexed. */
 typedef struct {
     void *(*func)(); /* 0x0 */
     void (*unk4)();  /* 0x4 */
@@ -96,7 +96,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00151010);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151178);
 
-BillObj *func_001511C0(void *arg0) {
+BillObj *billAllocChild(void *arg0) {
     BillObj *obj;
 
     obj = func_002CFEB8(0x34);
@@ -118,7 +118,7 @@ void func_00151248(BillObj *obj) {
     func_001502B0(obj, obj->unk30);
 }
 
-BillObj *func_00151260(void *arg0) {
+BillObj *billAllocList(void *arg0) {
     BillData *data;
     BillObj *newobj;
     s32 n;
@@ -139,7 +139,7 @@ BillObj *func_00151260(void *arg0) {
     return newobj;
 }
 
-BillObj *func_001512E8(BillObj *obj) {
+BillObj *billCloneList(BillObj *obj) {
     BillData *data;
     s32 n;
     BillObj *newobj;
@@ -193,7 +193,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00151C58);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151CE8);
 
-BillObj *func_00151D88(s32 index, u32 data) {
+BillObj *billCreateIndexed(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_0034E060[index].func(data);
@@ -209,17 +209,17 @@ void *func_00151E08(s32 arg0, s32 arg1) {
     u32 buf[4];
 
     tmp = func_002EB028(arg1, buf, 0);
-    res = func_00151D88(arg0, buf[0]);
+    res = billCreateIndexed(arg0, buf[0]);
     func_002D0918(tmp);
     return res;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151E60);
 
-void func_00151F00(BillObj *obj) {
+void billDispatchByKind(BillObj *obj) {
     D_0034E068[obj->unk2C].func();
 }
 
-void func_00151F38(BillObj *obj) {
+void billInvokeCallback(BillObj *obj) {
     obj->unk28();
 }

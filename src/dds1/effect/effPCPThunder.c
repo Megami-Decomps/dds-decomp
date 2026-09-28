@@ -1,7 +1,7 @@
 #include "common.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
-extern void *func_00163258(void *data, s32 index);
+extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_001632E0(void *work);
 extern void func_00163E10(void *work);
 
@@ -32,14 +32,14 @@ typedef struct {
     u32 unk60;      /* 0x60 handle released by func_002D0918 */
 } EffPCPThunderWork;
 
-/* 12-byte randomized fragment (see func_001656B8). */
+/* 12-byte randomized fragment (see effThunderRandomizeFrag). */
 typedef struct {
     u32 unk00;    /* 0x00 random value modulo work param */
     u32 unk04;    /* 0x04 random value modulo work param, plus 1 */
     u32 color08;  /* 0x08 always grey 0x80808080 */
 } EffThunderFrag; /* 0x0C */
 
-/* 20-byte thunder element (see func_00166B38/func_00167070): randomized on
+/* 20-byte thunder element (see effThunderRandomizeCell/func_00167070): randomized on
  * setup (direction floats plus moduli), then counted down while active. */
 typedef struct {
     f32 f00;      /* 0x00 (float rand - 0.5) * 2 */
@@ -87,7 +87,7 @@ typedef struct {
 void func_001634A0(void *data) {
     void *work;
 
-    work = func_00163258(data, 0);
+    work = effParamTableGetBlock(data, 0);
     func_001632E0(work);
 }
 void func_001634C0(void *work) {
@@ -132,7 +132,7 @@ void func_00163FD0(EffPCPThunderWork *work) {
 void func_00164000(void *data) {
     void *work;
 
-    work = func_00163258(data, 0);
+    work = effParamTableGetBlock(data, 0);
     func_00163E10(work);
 }
 
@@ -165,7 +165,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001646F8);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00164838);
 
-void func_00164A30(EffPCPThunderWorkB *work) {
+void effThunderDestroySubs(EffPCPThunderWorkB *work) {
     s32 count = work->unk68;
     s32 i = 0;
 
@@ -219,7 +219,7 @@ void func_00165690(EffPCPThunderWorkB *work) {
     func_0015CC58(work->unk60, work->unk40, work->unk48, work->unk50);
 }
 
-void func_001656B8(EffPCPThunderWorkB *work, s32 index) {
+void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
 
     frag->unk00 = effMiscRand(&D_0034DF38) % work->unk30;
@@ -245,7 +245,7 @@ void func_00166130(EffPCPThunderWorkB *work, u32 value) {
     work->unk58 = value;
 }
 
-void func_00166138(EffPCPThunderWorkB *work, s32 index) {
+void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
 
     frag->unk00 = effMiscRand(&D_0034DF38) % work->unk30;
@@ -270,7 +270,7 @@ void func_00166B30(EffPCPThunderWorkB *work, u32 value) {
     work->unk4C = value;
 }
 
-void func_00166B38(EffPCPThunderWorkB *work, s32 index) {
+void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
     EffThunderCell *cell = work->unk48 + index;
     f32 v;
 

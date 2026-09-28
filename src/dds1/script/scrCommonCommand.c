@@ -4,19 +4,19 @@ typedef struct KwlnTask KwlnTask;
 typedef struct { u8 pad[0x388]; s32 unk388; } ScrComGlobals;
 typedef struct { f32 x; f32 y; f32 z; s32 w; } ScrVecW;
 f32 func_0010D4F0(s32 idx);
-s32 func_001089F8(s32 arg0, f32 arg1, f32 arg2);
+s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
 s32 func_001082D8(s32 arg0, void *arg1);
-s32 func_00106B88(s32 arg0, f32 arg1, f32 arg2);
+s32 drawSetC70FloatTriple(s32 arg0, f32 arg1, f32 arg2);
 s32 func_00107FD8(s32 arg0, s32 arg1, void *arg2);
 s32 func_00108218(s32 arg0, void *arg1);
 s32 func_001080D8(s32 arg0, s32 arg1, void *arg2);
-s32 func_00106968(s32 arg0, f32 arg1, f32 arg2);
-s32 func_00106520(s32 arg0);
-s32 func_00106700(s32 arg0);
-s32 func_00105AE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_00105B98(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 drawSetD88FloatTriple(s32 arg0, f32 arg1, f32 arg2);
+s32 drawSetDc8Second(s32 arg0);
+s32 drawSetE08Fifth(s32 arg0);
+s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_00106488(f32 arg0);
-s32 func_00108360(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
+s32 evtUnk8360SetVec(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 s32 func_002FC0E0(void);
 extern ScrComGlobals *D_003BAA00;
 extern s8 D_00398628[];
@@ -30,7 +30,7 @@ typedef struct { f32 x; f32 y; f32 z; f32 w; } ScrVec4;
 
 s32 func_0010D768(void)
 {
-    func_0010D5F0(func_002E83F8(0, func_0010D428(0)) + 1);
+    func_0010D5F0(effMiscRandMod(0, func_0010D428(0)) + 1);
     return 1;
 }
 
@@ -173,7 +173,7 @@ s32 func_0010DD98(void)
 {
     s32 p0;
     p0 = func_0010D428(0);
-    func_00105828(p0, func_0010D428(1));
+    kwlnFadeSetupFrames(p0, func_0010D428(1));
     return 1;
 }
 
@@ -236,7 +236,7 @@ s32 func_0010E120(void)
 {
     s32 p0;
     p0 = func_0010D428(0);
-    func_001089F8(p0, func_0010D4F0(1), func_0010D4F0(2));
+    evtUnk89F8SetState(p0, func_0010D4F0(1), func_0010D4F0(2));
     return 1;
 }
 
@@ -263,7 +263,7 @@ s32 func_0010E258(void)
     p3 = func_0010D428(3);
     p2 = func_0010D428(2);
     p1 = func_0010D428(1);
-    func_00106BA0(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    drawSetC70Second(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -273,7 +273,7 @@ s32 func_0010E2E0(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    func_00106BB0(p0, p1, func_0010D428(2));
+    drawSetC70Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -285,13 +285,13 @@ s32 func_0010E338(void)
 
 s32 func_0010E360(void)
 {
-    func_00106CA0(func_0010D428(0));
+    drawSetupC70(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E388(void)
 {
-    func_00106D08(func_0010D428(0));
+    drawSetupC70B(func_0010D428(0));
     return 1;
 }
 
@@ -308,7 +308,7 @@ s32 func_0010E498(void)
     p3 = func_0010D428(3);
     p2 = func_0010D428(2);
     p1 = func_0010D428(1);
-    func_00106DC8(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    drawSetCd0Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -318,7 +318,7 @@ s32 func_0010E520(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    func_00106DD8(p0, p1, func_0010D428(2));
+    drawSetCd0Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -330,13 +330,13 @@ s32 func_0010E578(void)
 
 s32 func_0010E5A0(void)
 {
-    func_00106ED0(func_0010D428(0));
+    drawSetupCd0(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E5C8(void)
 {
-    func_00106F40(func_0010D428(0));
+    drawEnableCd0(func_0010D428(0));
     return 1;
 }
 
@@ -353,7 +353,7 @@ s32 func_0010E6D8(void)
     p3 = func_0010D428(3);
     p2 = func_0010D428(2);
     p1 = func_0010D428(1);
-    func_00106FF0(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    drawSetD30Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -363,7 +363,7 @@ s32 func_0010E760(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    func_00107000(p0, p1, func_0010D428(2));
+    drawSetD30Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -375,13 +375,13 @@ s32 func_0010E7B8(void)
 
 s32 func_0010E7E0(void)
 {
-    func_001070F8(func_0010D428(0));
+    drawSetupD30(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E808(void)
 {
-    func_00107178(func_0010D428(0));
+    drawEnableD30(func_0010D428(0));
     return 1;
 }
 
@@ -398,7 +398,7 @@ s32 func_0010E8D0(void)
     p3 = func_0010D428(3);
     p2 = func_0010D428(2);
     p1 = func_0010D428(1);
-    func_00106980(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    drawSetD88First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -406,7 +406,7 @@ s32 func_0010E958(void)
 {
     s32 p0;
     p0 = func_0010D428(0);
-    func_00106990(p0, func_0010D428(1));
+    drawSetD88Pair(p0, func_0010D428(1));
     return 1;
 }
 
@@ -418,13 +418,13 @@ s32 func_0010E998(void)
 
 s32 func_0010E9C0(void)
 {
-    func_00106A90(func_0010D428(0));
+    drawSetupD88(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E9E8(void)
 {
-    func_00106B18(func_0010D428(0));
+    drawEnableD88(func_0010D428(0));
     return 1;
 }
 
@@ -452,7 +452,7 @@ s32 func_0010EA10(void)
         mode = 0x44;
         break;
     }
-    func_00106520(mode);
+    drawSetDc8Second(mode);
     return 1;
 }
 
@@ -467,7 +467,7 @@ s32 func_0010EA90(void)
     p3 = func_0010D428(3);
     p2 = func_0010D428(2);
     p1 = func_0010D428(1);
-    func_00106530(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    drawSetDc8First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -479,13 +479,13 @@ s32 func_0010EB18(void)
 
 s32 func_0010EB40(void)
 {
-    func_00106608(func_0010D428(0));
+    drawSetupDc8(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010EB68(void)
 {
-    func_00106690(func_0010D428(0));
+    drawEnableDc8(func_0010D428(0));
     return 1;
 }
 
@@ -513,7 +513,7 @@ s32 func_0010EB90(void)
         mode = 0x44;
         break;
     }
-    func_00106700(mode);
+    drawSetE08Fifth(mode);
     return 1;
 }
 
@@ -528,7 +528,7 @@ s32 func_0010EC10(void)
     p3 = func_0010D428(3);
     p2 = func_0010D428(2);
     p1 = func_0010D428(1);
-    func_00106710(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    drawSetE08Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -542,31 +542,31 @@ s32 func_0010ECF0(void)
 
 s32 func_0010ED18(void)
 {
-    func_00106808(func_0010D428(0));
+    drawSetupE08(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010ED40(void)
 {
-    func_00106880(func_0010D428(0));
+    drawEnableE08(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010ED68(void)
 {
     func_001068F0(0, 0, 0);
-    func_00106B18(0);
-    func_00106D08(0);
-    func_00106F40(0);
-    func_00107178(0);
+    drawEnableD88(0);
+    drawSetupC70B(0);
+    drawEnableCd0(0);
+    drawEnableD30(0);
     func_0018F660();
     return 1;
 }
 
 s32 func_0010EDB8(void)
 {
-    func_00106690(0);
-    func_00106880(0);
+    drawEnableDc8(0);
+    drawEnableE08(0);
     func_00132B60(0);
     func_00132B70(0x80);
     func_00132B80(0);
@@ -620,11 +620,6 @@ u32 scrCommand_SCR_EXISTS()
     }
     return 1;
 }
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F550);
 

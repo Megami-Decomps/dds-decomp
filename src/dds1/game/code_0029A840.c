@@ -50,7 +50,7 @@ extern s32 func_001A17F0(void);
 
 extern u64 func_002B3390(u32, u32, u32);
 
-extern void func_00151F00(void *);
+extern void billDispatchByKind(void *);
 extern u64 func_002B0988();
 
 extern u32 D_003BC998;
@@ -89,8 +89,8 @@ extern u32 D_003BC968;
 
 extern u32 func_00151E60(u32);
 
-extern u64 func_00293400(void);
-extern u64 func_00293428(void *);
+extern u64 resolvePrimaryFileBuffer(void);
+extern u64 resolveSecondaryFileBuffer(void *);
 extern u32 func_002B1F58(u16, u64, u64, u32);
 extern u32 func_002B43E0(u16, u64, u64, u32);
 extern void func_002D2D00(u32);
@@ -237,7 +237,7 @@ extern u8 D_0038F938[];
 
 extern void func_002B9050(void);
 
-extern void func_002B9080(void *, void *);
+extern void queueEffectResource(void *, void *);
 extern u32 func_001FC280(void);
 extern void func_001FC720(u32, u32, u32);
 extern void func_001FC738(u32, void *);
@@ -401,7 +401,7 @@ void func_0029ABC0(s32 arg0, void *vec) {
 }
 
 void func_0029ABE0(s32 arg0) {
-    func_002180A8(*(u32 *)(arg0 + 4));
+    mdlBroadcastMasked(*(u32 *)(arg0 + 4));
 }
 
 void func_0029ABF8(s32 arg0, float scale) {
@@ -536,7 +536,7 @@ void func_0029BD18(s32 arg0, void *vec) {
 }
 
 void func_0029BD38(s32 arg0) {
-    func_002180A8(*(u32 *)(arg0 + 0x4c));
+    mdlBroadcastMasked(*(u32 *)(arg0 + 0x4c));
 }
 
 void func_0029BD50(s32 arg0, float f) {
@@ -617,7 +617,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C530);
 void func_0029C570(void) {
     u64 temp_v0;
 
-    temp_v0 = func_00293400();
+    temp_v0 = resolvePrimaryFileBuffer();
     func_0029C530(temp_v0);
 }
 
@@ -639,7 +639,7 @@ void func_0029C5D8(s32 *arg0) {
 
     temp_v0 = *arg0;
     if (temp_v0 == 0) {
-        func_00105828(arg0[1], arg0[2]);
+        kwlnFadeSetupFrames(arg0[1], arg0[2]);
         temp_v0 = *arg0;
     }
     *arg0 = temp_v0 + 1;
@@ -650,7 +650,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C620);
 void func_0029C6F0(void) {
     u64 temp_v0;
 
-    temp_v0 = func_00293400();
+    temp_v0 = resolvePrimaryFileBuffer();
     func_0029C620(temp_v0);
 }
 
@@ -735,7 +735,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029CF38);
 void func_0029CF88(void) {
     u64 temp_v0;
 
-    temp_v0 = func_00293400();
+    temp_v0 = resolvePrimaryFileBuffer();
     func_0029CF38(temp_v0);
 }
 
@@ -775,7 +775,7 @@ void func_0029D1D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029D1E8);
 
-void func_0029D3F0(u8 *work, u32 target) {
+void updateEffectTarget(u8 *work, u32 target) {
     u32 previous = *(u32 *)(work + 0x30);
     if (previous != 0 && previous != target) {
         if (*(u32 *)(work + 0x2C) != 4) {
@@ -859,7 +859,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029DDD0);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029DF00);
 
-void func_0029DFE0(u8 *work) {
+void releaseEffectLinkedTarget(u8 *work) {
     void *handle = *(void **)(work + 0x24);
     if (handle != NULL) {
         D_0037E774[*(s32 *)(work + 0x1C)].fn(handle);
@@ -938,7 +938,7 @@ void func_0029E4C0(u32 arg0) {
 
     temp_v0 = *(s32 *)((s32)arg0 + 100);
     if (temp_v0 != 0) {
-        func_00151F00(temp_v0);
+        billDispatchByKind(temp_v0);
     }
     func_002CFF98(arg0);
 }
@@ -949,7 +949,7 @@ void func_0029E5B0(s32 arg0, s32 arg1) {
     u32 temp_v0;
 
     if (*(s32 *)(arg0 + 100) != 0) {
-        func_00151F00(*(s32 *)(arg0 + 100));
+        billDispatchByKind(*(s32 *)(arg0 + 100));
     }
     temp_v0 = func_00151E60(*(u32 *)(arg1 + 100));
     *(u32 *)(arg0 + 100) = temp_v0;
@@ -1219,7 +1219,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5288);
 void func_002A5378(s32 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_00293400();
+    temp_v0 = resolvePrimaryFileBuffer();
     func_002A5288(*(u16 *)(arg0 + 0xc), temp_v0);
 }
 
@@ -1312,14 +1312,14 @@ void func_002A6390(s32 arg0, u32 arg1) {
 
 void func_002A63E0(s32 arg0) {
     if (*(s32 *)(arg0 + 0x44) != 0) {
-        func_0029A748(*(s32 *)(arg0 + 0x44));
+        clearFileRecordReferences(*(s32 *)(arg0 + 0x44));
         return;
     }
 }
 
 void func_002A6410(s32 arg0) {
     if (*(s32 *)(arg0 + 0x44) != 0) {
-        func_0029A750(*(s32 *)(arg0 + 0x44));
+        acquireFileRecord(*(s32 *)(arg0 + 0x44));
         return;
     }
 }
@@ -1451,7 +1451,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002AA928);
 void func_002AAA18(s32 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_00293400();
+    temp_v0 = resolvePrimaryFileBuffer();
     func_002AA928(*(u16 *)(arg0 + 0xc), temp_v0);
 }
 
@@ -1464,7 +1464,7 @@ void func_002AAA90(s32 arg0) {
     func_002AA928(*(u16 *)(arg0 + 0x2c), *(u32 *)(arg0 + 0x34));
 }
 
-void func_002AAAB0(u8 *work) {
+void resetEffectDispatchCounter(u8 *work) {
     D_0037EC50[*(s32 *)(work + 0x2C)].fn(work);
     *(u32 *)(work + 0x28) = 0;
 }
@@ -1518,14 +1518,14 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002AB1D0);
 
 void func_002AB230(s32 arg0) {
     if (*(s32 *)(arg0 + 0x34) != 0) {
-        func_0029A748(*(s32 *)(arg0 + 0x34));
+        clearFileRecordReferences(*(s32 *)(arg0 + 0x34));
         return;
     }
 }
 
 void func_002AB260(s32 arg0) {
     if (*(s32 *)(arg0 + 0x34) != 0) {
-        func_0029A750(*(s32 *)(arg0 + 0x34));
+        acquireFileRecord(*(s32 *)(arg0 + 0x34));
         return;
     }
 }
@@ -1687,7 +1687,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002AE430);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AE498);
 
-void func_002AE8A8(void) {
+void loadWindEffectTexture(void) {
     D_003BC984 = func_002EB028("/effect/wind00.tmx", &D_003BC988, 0);
 }
 
@@ -1766,7 +1766,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0650);
 void func_002B06E0(s32 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_00293400();
+    temp_v0 = resolvePrimaryFileBuffer();
     func_002B0650(*(u16 *)(arg0 + 0xc), temp_v0);
 }
 
@@ -1782,7 +1782,7 @@ void func_002B07E8(u8 *work) {
     *(u32 *)(work + 0x28) = 0;
 }
 
-void func_002B0830(u8 *work) {
+void advanceEffectDispatchCounter(u8 *work) {
     D_0037EDA0[*(s32 *)(work + 0x2C)].fn(work);
     (*(u32 *)(work + 0x28))++;
 }
@@ -1792,7 +1792,7 @@ void func_002B0880(s32 arg0) {
 }
 
 void func_002B08B8(u32 arg0) {
-    func_002B0830(arg0);
+    advanceEffectDispatchCounter(arg0);
     func_002B0880(arg0);
 }
 
@@ -1847,7 +1847,7 @@ void func_002B0B40(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0B70);
 
-void func_002B1170(void) {
+void loadScalyEffectTexture(void) {
     D_003BC994 = func_002EB028("/effect/scaly00.tmx", &D_003BC998, 0);
 }
 
@@ -1868,8 +1868,8 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B1D68);
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B1F58);
 
 u32 func_002B2088(u8 *work) {
-    u64 first = func_00293400();
-    u64 second = func_00293428(work);
+    u64 first = resolvePrimaryFileBuffer();
+    u64 second = resolveSecondaryFileBuffer(work);
     return func_002B1F58(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
 }
 
@@ -1939,7 +1939,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3130);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3178);
 
-void func_002B3350(u8 *work) {
+void resetEffectObjectSlots(u8 *work) {
     u32 *objects = (u32 *)(*(u32 *)(work + 0x30) + 0x24);
     u32 i;
     for (i = 0; i < 5; i++) {
@@ -1986,7 +1986,7 @@ void func_002B3C20(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3C68);
 
-void func_002B3E80(void) {
+void resetEffectSlots(void) {
     D_003BC9B0[0] = 0;
     D_003BC9B8[0] = 0;
     D_003BC9C0[0] = 0;
@@ -2000,7 +2000,7 @@ void func_002B3E80(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3EC8);
 
-void func_002B4068(u32 index, u8 color, u32 value) {
+void setDormantEffectSlot(u32 index, u8 color, u32 value) {
     if (index < 2) {
         D_003BC9B0[index] = value;
         D_003BC9C0[index] = color;
@@ -2009,7 +2009,7 @@ void func_002B4068(u32 index, u8 color, u32 value) {
     }
 }
 
-void func_002B40A0(u32 index, u8 color, u32 value) {
+void setActiveEffectSlot(u32 index, u8 color, u32 value) {
     if (index < 2) {
         D_003BC9B0[index] = value;
         D_003BC9C0[index] = color;
@@ -2023,7 +2023,7 @@ void func_002B40E0(void) {
 
     temp_v0 = func_001A17F0();
     if ((*(u32 *)(temp_v0 + 500) & 0x6000000) != 0) {
-        func_002B3E80();
+        resetEffectSlots();
         return;
     }
 }
@@ -2046,11 +2046,11 @@ void func_002B4118(s32 arg0) {
             return;
         }
         if (temp_v0 == 0) {
-            func_002B40A0(temp_v2, *puVar4, puVar3[-2]);
+            setActiveEffectSlot(temp_v2, *puVar4, puVar3[-2]);
             temp_v1 = puVar3[-4];
         }
         if ((temp_v1 != 0) && (temp_v0 == temp_v1 - *puVar3)) {
-            func_002B4068(temp_v2, *puVar4, *puVar3);
+            setDormantEffectSlot(temp_v2, *puVar4, *puVar3);
         }
         temp_v2 = temp_v2 + 1;
         puVar4 = puVar4 + 1;
@@ -2071,8 +2071,8 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4328);
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B43E0);
 
 u32 func_002B4498(u8 *work) {
-    u64 first = func_00293400();
-    u64 second = func_00293428(work);
+    u64 first = resolvePrimaryFileBuffer();
+    u64 second = resolveSecondaryFileBuffer(work);
     return func_002B43E0(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
 }
 
@@ -2084,7 +2084,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4618);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4678);
 
-void func_002B46E0(u8 *work) {
+void dispatchEnabledEffectCallback(u8 *work) {
     if (func_001A1438() != 0) {
         void (*callback)(void *) = D_0037EEF4[*(s32 *)(work + 0x2C)].fn;
         if (callback != NULL) {
@@ -2095,7 +2095,7 @@ void func_002B46E0(u8 *work) {
 
 void func_002B4738(u32 arg0) {
     func_002B4678();
-    func_002B46E0(arg0);
+    dispatchEnabledEffectCallback(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4760);
@@ -2112,10 +2112,10 @@ void func_002B4790(Matrix4 *mat, float value) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4798);
 
-void func_002B4998(u8 *work) {
+void releaseEffectParticleResources(u8 *work) {
     void *particle = *(void **)(work + 0xA4);
     if (particle != NULL) {
-        func_00151F00(particle);
+        billDispatchByKind(particle);
     }
     if (*(void **)(work + 0xA8) != NULL) {
         func_0029C378(*(void **)(work + 0xA8));
@@ -2137,7 +2137,7 @@ void func_002B5128(u32 *arg0, u32 arg1) {
     *arg0 = arg1;
 }
 
-void func_002B5130(void) {
+void initializeBattleEffectWork(void) {
     D_003BD074 = D_0038F2B8;
     D_003DF8D0[0] = 0;
     D_003BD058 = 0;
@@ -2145,7 +2145,7 @@ void func_002B5130(void) {
     __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" :: "r"(D_003DF910) : "memory");
 }
 
-s32 func_002B5160(void) {
+s32 updateBattleEffectWork(void) {
     if (D_003BD074 != NULL) {
         if ((func_002B59A8(0) & 1) == 0) {
             func_002B51B0();
@@ -2189,24 +2189,24 @@ void func_002B5590(u32 arg0) {
         D_003BD05C = 0;
     }
     if (D_003BD06C != 0) {
-        func_002934C0(D_003BD06C);
+        fileJobDestroy(D_003BD06C);
         D_003BD06C = 0;
     }
-    func_002934C0(arg0);
+    fileJobDestroy(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B55E8);
 
 void func_002B5698(void) {
     func_002B9050();
-    func_002B9080(D_003BD088, D_003DF8D0);
+    queueEffectResource(D_003BD088, D_003DF8D0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B56C8);
 
 void func_002B5788(void) {
     func_002B9050();
-    func_002B9080(D_003BD090, D_003DF8D0);
+    queueEffectResource(D_003BD090, D_003DF8D0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B57B8);
@@ -2524,7 +2524,7 @@ s32 func_002B7740(void) {
     return func_002B7388((s32)D_003B3958, D_0038DF50, 6);
 }
 
-s32 func_002B7768(void) {
+s32 createPolyTrackTask(void) {
     return func_002B7388((s32)"POLY TRACK S", D_0038E000, 6);
 }
 
@@ -2556,7 +2556,7 @@ s32 func_002B7880(void) {
     return func_002B7388((s32)D_003B3908, D_0038E500, 4);
 }
 
-s32 func_002B78A8(void) {
+s32 createPolyTwinkleTask(void) {
     return func_002B7388((s32)"POLY TWINKLE", D_0038E570, 6);
 }
 
@@ -2644,7 +2644,7 @@ void func_002B9050(void) {
     }
 }
 
-void func_002B9080(void *unused, void *effect) {
+void queueEffectResource(void *unused, void *effect) {
     if (D_003BD118 == 0) {
         D_003BD118 = func_001FC280();
         func_001FC720(D_003BD118, 0xC2, 0xC8);
@@ -2780,7 +2780,7 @@ void func_002BA470(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BA498);
 
-void func_002BA4F8(void) {
+void resetBattleEffectWork(void) {
     u8 *first = D_0038F9D0;
     u8 *second = D_0038FAD0;
 
@@ -3206,7 +3206,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002BE258);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BE2D8);
 
-u32 func_002BE378(u32 effect, u32 slot, u32 kind, u32 value, u32 flags, u32 color) {
+u32 configureEffectWithDefaultSetting(u32 effect, u32 slot, u32 kind, u32 value, u32 flags, u32 color) {
     func_002BE2D8(effect, slot, kind, value, flags, 0, color);
     return 1;
 }
@@ -3227,14 +3227,6 @@ void func_002BED28(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
     func_002C0F88(arg0, arg1, arg2, arg3, arg4, arg5, arg7);
     func_002C0A48(0x44, arg7);
 }
-
-
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3BD0);
 
@@ -3869,7 +3861,6 @@ INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BD1F8);
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BD200);
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BD208);
-
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BD210);
 

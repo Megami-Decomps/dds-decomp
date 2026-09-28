@@ -15,7 +15,7 @@ extern u32 D_003BD970;
 
 extern u32 D_003BD974;
 
-extern s32 func_0021F600(u32);
+extern s32 mdlFlagTest(u32);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2620);
 
@@ -62,7 +62,7 @@ void func_002C2FC0(void) {
     D_003BD25C = 1;
     D_003BD970 = 0;
     D_003BD974 = 0;
-    temp_v0 = func_0021F600(0x413);
+    temp_v0 = mdlFlagTest(0x413);
     D_003BD260 = (u32)(temp_v0 == 0);
 }
 
@@ -84,13 +84,13 @@ u32 func_002C3640(void) {
     s64 temp_v0;
     u32 temp_v1;
 
-    temp_v0 = func_0021F600(0x412);
+    temp_v0 = mdlFlagTest(0x412);
     temp_v1 = 2;
     if (temp_v0 == 0) {
-        temp_v0 = func_0021F600(0x411);
+        temp_v0 = mdlFlagTest(0x411);
         temp_v1 = 1;
         if (temp_v0 == 0) {
-            func_0021F600(0x410);
+            mdlFlagTest(0x410);
             temp_v1 = 0;
         }
     }
@@ -102,7 +102,6 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3690);
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C36E8);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3738);
-
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD238);
 
@@ -119,7 +118,6 @@ INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD254);
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD258);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD25C);
-
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD260);
 

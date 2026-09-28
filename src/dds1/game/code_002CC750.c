@@ -165,7 +165,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD428);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD548);
 
-s32 func_002CD5B8(ScrVmOperand *work) {
+s32 checkScriptStateBits(ScrVmOperand *work) {
     u32 index = 0;
     do {
         u16 id = index;
@@ -231,7 +231,7 @@ void func_002CD808(s32 unused, u32 v, u32 *a, u32 *b) {
     *b = lo << 2;
 }
 
-s32 func_002CD828(u8 *work, u16 index) {
+s32 setScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
     func_002CD808((s32)work, index, &word, &shift);
     *(u32 *)(work + 0x58 + word * 4) |= 1U << shift;
@@ -254,7 +254,7 @@ void func_002CD998(u8 *work, u16 index) {
     *(u32 *)(work + 0x58 + word * 4) &= ~(4U << shift);
 }
 
-void func_002CD9F8(u8 *work) {
+void clearScriptFlags(u8 *work) {
     s32 index;
     for (index = 0; index < 0x260; index++) {
         func_002CD998(work, index);
@@ -294,7 +294,7 @@ s32 func_002CDB00(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CDB40);
 
-s32 func_002CDC40(u8 *work, u16 key) {
+s32 findScriptSlot(u8 *work, u16 key) {
     u32 index;
     u16 *entries = (u16 *)(work + 0x22);
     for (index = 0; index < 24; index++) {
@@ -329,8 +329,8 @@ u16 func_002CDCD8(s32 arg0, s32 arg1, u16 arg2) {
     return temp_v0;
 }
 
-s32 func_002CDCF0(u8 *work, u16 key) {
-    s32 index = func_002CDC40(work, key);
+s32 removeScriptSlot(u8 *work, u16 key) {
+    s32 index = findScriptSlot(work, key);
     if (index >= 0) {
         *(u16 *)(work + 0x22 + index * 2) = 0;
         return 1;
@@ -439,7 +439,7 @@ void func_002CE988(void) {
         if (index >= 0) {
             u32 name = func_002CE968(index);
             if (name != 0) {
-                func_0021F580(name);
+                mdlFlagSet(name);
             }
         }
     } while (index++ >= 0);
@@ -526,7 +526,7 @@ void func_002CF430(void) {
 void func_002CF438(void) {
 }
 
-s32 func_002CF440(u32 initial, u32 option, u32 maximum) {
+s32 createSemaphore(u32 initial, u32 option, u32 maximum) {
     struct {
         u32 attr;
         u32 option;
@@ -564,7 +564,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", sdfAddHandler);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF7B8);
 
-void func_002CF898(void) {
+void drainPendingHandlers(void) {
     u32 current;
     while ((current = D_003BD2CC) != 0) {
         func_002CF7B8(current);
@@ -575,7 +575,7 @@ void func_002CF8C8(u32 arg0, u32 arg1, u32 arg2) {
     iWakeupThread(arg2);
 }
 
-void func_002CF8E0(u32 delay) {
+void sleepWithAlarm(u32 delay) {
     u64 thread = GetThreadId();
     CancelWakeupThread(thread);
     SetAlarm(delay & 0xFFFF, func_002CF8C8, thread);
@@ -612,8 +612,6 @@ void func_002CFAD8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CFB18);
 
-
-
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2B8);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C0);
@@ -623,7 +621,6 @@ INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C8);
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2CC);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2D0);
-
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2D4);
 

@@ -75,7 +75,7 @@ INCLUDE_ASM(const s32, "file/fileManager", func_00288BE8);
 void fileWaitReady(u32 arg0) {
     while (func_00288BA8(arg0) == 0) {
         func_002E7098();
-        func_002897A0();
+        fileManUpdate();
     }
 }
 

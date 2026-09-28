@@ -14,7 +14,7 @@ u32 func_0014F9C8(void) {
     func_00150750();
     func_00151010();
     func_001602F8();
-    func_0018F848();
+    effDispatchActive();
     return 0;
 }
 

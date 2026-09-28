@@ -99,7 +99,7 @@ extern void encProc(void);
 extern void func_0012C7C0(void);
 extern void func_00213A38(void);
 extern void func_00112EE8(s64 arg0, void *arg1, void *arg2);
-extern f32 func_002E79F0(f32 arg0, f32 arg1);
+extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern u32 D_003BAC3C;
 extern s32 D_003BAD00;
@@ -280,7 +280,7 @@ void func_00128F88(u32 arg0) {
     D_003BAC30 = arg0;
 }
 
-void func_00128F90(void) {
+void fldInitDisplayObjects(void) {
     if (D_003BACD4 == 0) {
         void *object;
         D_003BACD4 = 1;
@@ -489,14 +489,14 @@ void func_0012C6C8(u32 arg0, s32 arg1) {
         func_0012C750(3);
         return;
     }
-    func_002E8F78(0xf, 0x7f, 0x3f);
+    soundSetSequenceVolumePan(0xf, 0x7f, 0x3f);
     func_0012C750(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C750);
 
 void func_0012C7C0(void) {
-    func_00213A90();
+    battleResetAsyncState();
 }
 
 void func_0012C7D8(void) {
@@ -545,7 +545,7 @@ s64 func_0012E488(void) {
     return temp_v1;
 }
 
-void func_0012E4C8(u32 value) {
+void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
     func_00112EE8(func_001109F0(func_0010FD80()), D_003C9230, D_003C9220);
     D_003BAD20 = 0;
@@ -657,11 +657,11 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001313E0);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131458);
 
 extern s32 D_003BAB38;
-extern s32 func_00217DF8(s32, s32, s32, f32, f32);
+extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 s32 func_001314C0(s32 value) {
     s32 object = D_003BAB38;
     *(f32 *)(*(s32 *)(object + 0x1C) + 0x20) = 1.0f;
-    return func_00217DF8(object, 0, value, 2.0f, 5.0f);
+    return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131508);
@@ -686,7 +686,7 @@ void func_001315C0(f32 arg0, f32 arg1, f32 arg2) {
     u8 *temp_v0;
     f32 temp_f0;
 
-    temp_f0 = func_002E79F0(arg0, arg2);
+    temp_f0 = sdfAtan2(arg0, arg2);
     temp_v0 = (u8 *)D_0032E3B0;
     temp_f0 *= 180.0f / 3.14f;
     *(u32 *)(temp_v0 + 0x194) = 1;
@@ -702,7 +702,7 @@ void func_00131600(void) {
         f32 temp_f0;
 
         *(u32 *)(temp_v0 + 0x188) = 2;
-        temp_f0 = func_002E79F0(temp_f12, temp_f13);
+        temp_f0 = sdfAtan2(temp_f12, temp_f13);
         temp_f0 *= 180.0f / 3.14f;
         *(f32 *)(temp_v0 + 0x168) = -temp_f0;
     }
@@ -881,7 +881,7 @@ float func_00135058(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
 }
 
-f32 func_00135088(const f32 *vector) {
+f32 calculateFieldVectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
@@ -1007,7 +1007,7 @@ s32 func_0013BE30(u32 task) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013BE90);
 
-s32 func_0013BEE8(u32 task) {
+s32 getFieldTaskRecordValue(u32 task) {
     s32 i;
     for (i = 0; i < D_003BAE14; i++) {
         if (D_003308B0[i] == task) {
@@ -1025,7 +1025,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C2B8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C520);
 
-s32 func_0013C580(void) {
+s32 hasActiveFieldTasks(void) {
     s32 i;
     for (i = 0; i < D_003BAE14; i++) {
         if (D_003308B0[i] != 0) {
@@ -1177,8 +1177,6 @@ void * func_00141098(u32 arg0) {
     func_00101A68(arg0, temp_v0);
     return (void *)func_00140F70;
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC10);
 
@@ -1451,7 +1449,6 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE64);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
-
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE70);
 

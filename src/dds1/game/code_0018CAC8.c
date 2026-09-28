@@ -4,14 +4,14 @@
 typedef struct EffWork {
     u32 type;       /* 0x0: index into the handler tables below */
     void *unk4;     /* 0x4: argument passed to the handler */
-    u32 unk8;       /* 0x8: node list freed by func_0018D3D0 */
+    u32 unk8;       /* 0x8: node list freed by effFreeWorkList */
     u8 unkC[8];     /* 0xC */
-    u32 unk14;      /* 0x14: read by func_0018D988 */
+    u32 unk14;      /* 0x14: read by effGetWorkParam */
     u8 unk18[8];    /* 0x18 */
-    u32 unk20;      /* 0x20: set by func_0018D9E0 */
-    u32 unk24;      /* 0x24: set by func_0018D9E8 */
+    u32 unk20;      /* 0x20: set by effSetWorkFirst */
+    u32 unk24;      /* 0x24: set by effSetWorkSecond */
     u8 unk28[0x10]; /* 0x28 */
-    void *unk38;    /* 0x38: next link freed by func_0018D3D0 */
+    void *unk38;    /* 0x38: next link freed by effFreeWorkList */
     u32 unk3C;      /* 0x3C: sound handle */
 } EffWork;
 
@@ -33,15 +33,15 @@ typedef struct EffSub {
 
 /* Message record with length-prefixed strings at +0x34/+0x40. */
 typedef struct EffMsg {
-    s32 unk0;      /* 0x0: set by func_0018D978 */
-    s32 unk4;      /* 0x4: set by func_0018D978 */
+    s32 unk0;      /* 0x0: set by effSetMsgHeader */
+    s32 unk4;      /* 0x4: set by effSetMsgHeader */
     u8 unk8[0x20]; /* 0x8 */
-    u32 unk28;     /* 0x28: set by func_0018D9F0 */
-    u32 unk2C;     /* 0x2C: set by func_0018D9F0 */
+    u32 unk28;     /* 0x28: set by effSetMsgPair */
+    u32 unk2C;     /* 0x2C: set by effSetMsgPair */
     u8 unk30[4];   /* 0x30 */
-    u32 *unk34;    /* 0x34: words with text at +4 (func_0018D998) */
+    u32 *unk34;    /* 0x34: words with text at +4 (effFormatMsgNames) */
     u8 unk38[8];   /* 0x38 */
-    u32 *unk40;    /* 0x40: words with text at +4 (func_0018D998) */
+    u32 *unk40;    /* 0x40: words with text at +4 (effFormatMsgNames) */
 } EffMsg;
 
 /* 0x44-byte init record built by func_0018D428. */
@@ -68,11 +68,11 @@ typedef struct EffBig44 {
 /* 0x38-byte slot with effMath-style defaults (0, 0.05f). */
 typedef struct EffSlot38 {
     u8 unk0[0x30]; /* 0x0 */
-    s32 unk30;     /* 0x30: cleared by func_0018DF00 */
-    f32 unk34;     /* 0x34: set to 0.05f by func_0018DF00 */
+    s32 unk30;     /* 0x30: cleared by effAllocSlotArray */
+    f32 unk34;     /* 0x34: set to 0.05f by effAllocSlotArray */
 } EffSlot38;
 
-/* Array header written past the last slot by func_0018DF00. */
+/* Array header written past the last slot by effAllocSlotArray. */
 typedef struct EffArrHdr {
     void *unk0; /* 0x0: base */
     u32 unk4;   /* 0x4: count */
@@ -109,7 +109,7 @@ extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
 extern void *func_002CFEB8(s32 arg0);
 extern void func_002D4010(s32 arg0);
-extern void func_002E1370(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern void consCreateDrawPacket(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern void *func_002E1420(s32 arg0);
 extern s32 func_002E1478(s32 arg0);
 extern void func_002D4038(s32 arg0, s32 arg1);
@@ -157,13 +157,13 @@ typedef struct EffHandler32 {
 
 extern EffHandler32 D_00355730[];
 
-/* 8-byte result record allocated by func_0018CAC8. */
+/* 8-byte result record allocated by effAllocDispatch. */
 typedef struct EffResult {
     s32 unk0; /* 0x0: input selector */
     s32 unk4; /* 0x4: handler result */
 } EffResult;
 
-EffResult *func_0018CAC8(s32 arg0, s32 arg1) {
+EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
     EffResult *mem = func_002CFEB8(8);
     s32 ret = D_00355730[arg0].handler(arg1);
 
@@ -172,16 +172,16 @@ EffResult *func_0018CAC8(s32 arg0, s32 arg1) {
     return mem;
 }
 
-void func_0018CB38(EffWork *arg0) {
+void effTypeDispatch(EffWork *arg0) {
     D_00355734[arg0->type].handler(arg0->unk4);
 }
 
-void func_0018CB70(EffWork *arg0) {
+void effTypeDispatchFree(EffWork *arg0) {
     D_00355738[arg0->type].handler(arg0->unk4);
     func_002CFF98(arg0);
 }
 
-u32 func_0018CBB8(EffWork *arg0) {
+u32 effGetHandlerArg(EffWork *arg0) {
     return (u32)arg0->unk4;
 }
 
@@ -196,7 +196,7 @@ u32 func_0018CBD0(void) {
     return 1;
 }
 
-void func_0018CBD8(EffWork *arg0) {
+void effTypeDispatchGuardedA(EffWork *arg0) {
     void (*handler)(void *) = D_0035573C[arg0->type].handler;
 
     if (handler != NULL) {
@@ -204,7 +204,7 @@ void func_0018CBD8(EffWork *arg0) {
     }
 }
 
-void func_0018CC18(EffWork *arg0) {
+void effTypeDispatchGuardedB(EffWork *arg0) {
     void (*handler)(void *) = D_00355744[arg0->type].handler;
 
     if (handler != NULL) {
@@ -212,7 +212,7 @@ void func_0018CC18(EffWork *arg0) {
     }
 }
 
-void func_0018CC58(EffWork *arg0) {
+void effTypeDispatchGuardedC(EffWork *arg0) {
     void (*handler)(void *) = D_00355740[arg0->type].handler;
 
     if (handler != NULL) {
@@ -220,7 +220,7 @@ void func_0018CC58(EffWork *arg0) {
     }
 }
 
-void func_0018CC98(EffWork *arg0, s32 arg1) {
+void effSetSubSlot(EffWork *arg0, s32 arg1) {
     u8 v = arg1;
     u32 t = arg0->type;
 
@@ -245,7 +245,7 @@ void func_0018CC98(EffWork *arg0, s32 arg1) {
     }
 }
 
-u32 func_0018CCF0(EffWork *arg0, s32 arg1) {
+u32 effGetSubSlot(EffWork *arg0, s32 arg1) {
     u8 v = arg1;
     u32 t = arg0->type;
 
@@ -266,7 +266,7 @@ u32 func_0018CCF0(EffWork *arg0, s32 arg1) {
     return 0;
 }
 
-void func_0018CD50(EffWork *arg0) {
+void effAllocSubWork(EffWork *arg0) {
     u32 t = arg0->type;
     u32 v = 0;
 
@@ -289,7 +289,7 @@ void func_0018CD50(EffWork *arg0) {
     default:
         break;
     }
-    func_0018CAC8((EffWork *)t, v);
+    effAllocDispatch((EffWork *)t, v);
 }
 
 void func_0018CDA0(void) {
@@ -365,7 +365,7 @@ s32 func_0018CE68(void) {
     return D_003BB04D;
 }
 
-s32 func_0018CE70(void *arg0) {
+s32 effOpenDataDir(void *arg0) {
     u8 buf[0x70];
 
     if (D_003BD476 != 0) {
@@ -378,7 +378,7 @@ s32 func_0018CE70(void *arg0) {
 }
 
 
-void func_0018CEC0(void) {
+void effRunIfEnabled(void) {
     if (D_003BD476 != 0) {
         func_003101B8();
     }
@@ -389,7 +389,7 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CEF0);
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
 
-void func_0018D3D0(EffWork *arg0) {
+void effFreeWorkList(EffWork *arg0) {
     EffWork *p = (EffWork *)arg0->unk8;
 
     if (p != NULL) {
@@ -407,7 +407,7 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D428);
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
-void func_0018D938(EffWork *arg0) {
+void effFreeWork(EffWork *arg0) {
     if (arg0->unk3C != 0) {
         func_002D2D00(arg0->unk3C);
         arg0->unk3C = 0;
@@ -415,39 +415,39 @@ void func_0018D938(EffWork *arg0) {
     func_002CFF98(arg0);
 }
 
-void func_0018D978(EffMsg *arg0, s32 arg1, s32 arg2) {
+void effSetMsgHeader(EffMsg *arg0, s32 arg1, s32 arg2) {
     arg0->unk0 = arg1;
     arg0->unk4 = arg2;
 }
 
 
-u32 func_0018D988(EffWork *arg0) {
+u32 effGetWorkParam(EffWork *arg0) {
     return arg0->unk14;
 }
 
-u32 func_0018D990(EffWork *arg0) {
+u32 effGetWorkLink(EffWork *arg0) {
     return arg0->unk8;
 }
 
-u32 func_0018D998(EffMsg *arg0, void *arg1) {
+u32 effFormatMsgNames(EffMsg *arg0, void *arg1) {
     func_003014F0(arg1, D_003BB060, arg0->unk40[1], arg0->unk34 + 1);
     return *arg0->unk34;
 }
 
-void func_0018D9E0(EffWork *arg0, u32 arg1) {
+void effSetWorkFirst(EffWork *arg0, u32 arg1) {
     arg0->unk20 = arg1;
 }
 
-void func_0018D9E8(EffWork *arg0, u32 arg1) {
+void effSetWorkSecond(EffWork *arg0, u32 arg1) {
     arg0->unk24 = arg1;
 }
 
-void func_0018D9F0(EffMsg *arg0, u32 arg1, u32 arg2) {
+void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
     arg0->unk28 = arg1;
     arg0->unk2C = arg2;
 }
 
-void func_0018DA00(EffWork *arg0, u64 arg1) {
+void effSetupWorkSound(EffWork *arg0, u64 arg1) {
     u32 temp_v0;
     u64 temp_v1;
     u32 temp_v2 [4];
@@ -482,7 +482,7 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DDF8);
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DE78);
 
-void *func_0018DF00(s32 n) {
+void *effAllocSlotArray(s32 n) {
     void *mem1 = func_002D03F8(n * 0x38 + 0xC);
     void *mem2 = func_002D0A48(mem1);
     u32 i = 0;
@@ -502,16 +502,6 @@ void *func_0018DF00(s32 n) {
     }
     return end;
 }
-
-
-
-
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F88);
 
@@ -622,7 +612,6 @@ INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12D0);
 INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB050);
 
 INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB058);
-
 
 INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB060);
 

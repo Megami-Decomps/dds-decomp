@@ -2,7 +2,7 @@
 
 extern s32 func_002877A8(void);
 
-extern s32 func_00105C48(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern s8 D_003BC529;
 
@@ -124,15 +124,15 @@ void func_00262398(s32 arg0) {
 
     temp_v0 = arg0 + 0x680;
     func_002BDD60(*(u32 *)(arg0 + 0x90));
-    func_0027F6B8(temp_v0);
+    clearMenuEntries(temp_v0);
     func_0027FA20(temp_v0);
-    func_00280488(temp_v0);
-    func_00283038(*(u32 *)(arg0 + 0xd10));
+    shutdownMenuContext(temp_v0);
+    destroyPanelGroup(*(u32 *)(arg0 + 0xd10));
     func_002832F8(*(u32 *)(arg0 + 0xd14));
-    func_0027B010(arg0 + 0xd1c);
+    releaseMenuAssets(arg0 + 0xd1c);
     func_00276320(arg0 + 0x4f8);
     func_00271648(arg0 + 0x4f8);
-    func_00287548();
+    menuResetWorkFloats();
 }
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
@@ -173,7 +173,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
 s32 func_00262A88(void) {
-    if (func_00105C48() != 0) {
+    if (kwlnFadeIsActive() != 0) {
         return 0;
     }
     return func_002877A8() != 1;
@@ -192,12 +192,6 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00262BA8);
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262C08);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262CE8);
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAB8);
 
@@ -226,7 +220,6 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC530);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
-
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
 

@@ -2,7 +2,7 @@
 
 extern u32 func_00265E68(u32, s32);
 
-extern s32 func_0021F600(u32);
+extern s32 mdlFlagTest(u32);
 
 extern s32 func_00101A70();
 extern void func_0024DDC0(s32);
@@ -11,9 +11,9 @@ extern s32 func_002CD788(void *);
 extern s32 func_002CD2A8(u16);
 extern s32 func_002CD548(void *, u16);
 extern void func_002CD428(void *, u16);
-extern void func_0021F580(s32);
+extern void mdlFlagSet(s32);
 
-void func_00263148(u32 address) {
+void kwlnItemApplySelection(u32 address) {
     u8 *scene = (u8 *)address;
     u8 *item = **(u8 ***)(scene + 0x98);
     s32 *data = (s32 *)func_002CD788(item);
@@ -22,9 +22,9 @@ void func_00263148(u32 address) {
         func_002CD548(item, (u16)(s8)item[0x55]) == 0) {
         func_002CD428(item, (u16)(s8)item[0x55]);
         *(s32 *)(scene + 0x24C) = 1;
-        if (func_0021F600(0x910) == 0) {
+        if (mdlFlagTest(0x910) == 0) {
             *(s32 *)(scene + 4) |= 1;
-            func_0021F580(0x910);
+            mdlFlagSet(0x910);
         }
     } else {
         *(s32 *)(scene + 0x24C) = 0;
@@ -38,13 +38,13 @@ u32 func_00263220(u32 arg0) {
     temp_v1 = (s32)arg0;
     temp_v0 = func_00265E68(**(u32 **)(temp_v1 + 0x98), temp_v1 + 0x4c4);
     *(u32 *)(temp_v1 + 0x244) = temp_v0;
-    func_00263148(arg0);
+    kwlnItemApplySelection(arg0);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263260);
 
-s32 func_00263378(u32 *state) {
+s32 kwlnItemDismissOverlay(u32 *state) {
     if (state[1] & 1) {
         func_0024DDC0(1);
         func_0024DA58(1);
@@ -57,9 +57,9 @@ s32 func_00263378(u32 *state) {
 u32 func_002633D8(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0021F600(0x911);
+    temp_v0 = mdlFlagTest(0x911);
     if (temp_v0 == 0) {
-        func_0021F580(0x911);
+        mdlFlagSet(0x911);
     }
     return 0;
 }
@@ -88,7 +88,7 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263728);
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263838);
 
 void func_002639E0(s32 arg0) {
-    func_0027B268(arg0 + 0xd1c, 0x20);
+    drawMenuBackdrop(arg0 + 0xd1c, 0x20);
 }
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);
@@ -159,8 +159,6 @@ void func_00263E70(u32 arg0, u32 arg1) {
     func_002CCE60(arg0, (s32)arg1 + 0x3d0);
     func_00262AC0(arg0, arg1);
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
 

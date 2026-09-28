@@ -16,11 +16,11 @@ typedef struct FntList {
 
 /* 0x24-byte table entry in the D_003D6C80 font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
-    void *unk0;  /* 0x0: buffer released by func_001945A8 */
+    void *unk0;  /* 0x0: buffer released by frFontFreeEntry */
     void *unk4;  /* 0x4: value record (u16 pair read via D_003D6C84 view) */
     u32 unk8;    /* 0x8 */
     u32 unkC;    /* 0xC */
-    u8 *unk10;   /* 0x10: flag bytes set by func_00193C38 */
+    u8 *unk10;   /* 0x10: flag bytes set by frFontSetEntryFlag */
     void *unk14; /* 0x14 */
     void *unk18; /* 0x18 */
     void *unk1C; /* 0x1C */
@@ -33,10 +33,10 @@ typedef struct FrFontSysLocal {
     s32 unk144;             /* 0x144 */
     s32 unk148;             /* 0x148 */
     s32 unk14C;             /* 0x14C */
-    void *unk150;           /* 0x150: passed to func_001982A0 by func_00194440 */
-    void *unk154;           /* 0x154: passed to func_001982A0 by func_00194440 */
-    void *unk158;           /* 0x158: passed to func_002D1B90 by func_00194440 */
-    void *unk15C;           /* 0x15C: passed to func_002D1B90 by func_00194440 */
+    void *unk150;           /* 0x150: passed to func_001982A0 by frFontReleaseAll */
+    void *unk154;           /* 0x154: passed to func_001982A0 by frFontReleaseAll */
+    void *unk158;           /* 0x158: passed to func_002D1B90 by frFontReleaseAll */
+    void *unk15C;           /* 0x15C: passed to func_002D1B90 by frFontReleaseAll */
     u8 unk160[0x34];        /* 0x160 */
     void *unk194;           /* 0x194: glyph slot */
     void *unk198;           /* 0x198: glyph slot */
@@ -52,7 +52,7 @@ extern void func_00193B70(void);
 extern void func_002D0918(void *arg0);
 extern void func_002D1B90(void *arg0);
 
-void func_00193C08(FntNode *arg0) {
+void frFontListInsert(FntNode *arg0) {
     FntNode *head = D_003D68C0.head;
     FntNode *next = head->next;
 
@@ -63,7 +63,7 @@ void func_00193C08(FntNode *arg0) {
     next->prev = arg0;
 }
 
-void func_00193C38(s32 arg0, s32 arg1) {
+void frFontSetEntryFlag(s32 arg0, s32 arg1) {
     FrFontEntry *entry = &D_003D6C80.entries[arg0 & 0xFF];
 
     entry->unk10[0] = 1;
@@ -72,7 +72,7 @@ void func_00193C38(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193C70);
 
-s32 func_00193C98(u32 arg0) {
+s32 frFontBitLength(u32 arg0) {
     s32 count = 0;
 
     if (arg0 == 0) {
@@ -99,7 +99,7 @@ INCLUDE_ASM(const s32, "game/code_00193C08", func_00194190);
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00194228);
 
-void func_00194440(void) {
+void frFontReleaseAll(void) {
     func_00194668();
     func_00194840(D_003D6C80.unk194);
     func_00194840(D_003D6C80.unk198);
@@ -112,7 +112,7 @@ void func_00194440(void) {
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_001944A0);
 
-void func_001945A8(s32 arg0) {
+void frFontFreeEntry(s32 arg0) {
     u32 idx = arg0 & 0xFF;
     FrFontEntry *entry;
 

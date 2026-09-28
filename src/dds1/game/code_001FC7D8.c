@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern s32 func_001A2FD8(s32, s32);
-extern void func_0010F770(s32);
+extern void effObjFetchInnerFirstVec(s32);
 extern s32 func_002D9E98(s32, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 
@@ -131,7 +131,7 @@ u32 func_001FEA78(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEAA8);
 
-s32 func_001FEB10(s32 arg0) {
+s32 btlAllocAndCheck(s32 arg0) {
     s32 temp_v0 = func_002CFF68(0x10);
     s32 temp_v1 = *(s32 *)(arg0 + 0x18);
 
@@ -153,7 +153,7 @@ u32 func_001FEB78(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEB90);
 
-void func_001FEC10(void) {
+void btlClearNodeFlags(void) {
     s32 node = *(s32 *)(func_001A17F0() + 0x224);
 
     if (node != NULL) {
@@ -175,71 +175,69 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FED20);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEDE0);
 
-void func_001FEE30(s32 arg0) {
+void btlCmdWithArgA(s32 arg0) {
     func_00202668(arg0, 0);
 }
 
-void func_001FEE50(s32 arg0) {
+void btlCmdWithArgB(s32 arg0) {
     func_00202F90(arg0, 0);
 }
 
-void func_001FEE70(s32 arg0) {
+void btlCmdWithArgC(s32 arg0) {
     func_00203248(arg0, 0);
 }
 
-void func_001FEE90(void) {
+void btlCmdSimpleA(void) {
     func_00203098();
 }
 
-void func_001FEEB0(s32 arg0) {
+void btlCmdWithArgD(s32 arg0) {
     func_00203A80(arg0, 0);
 }
 
-void func_001FEED0(s32 arg0) {
+void btlCmdWithArgE(s32 arg0) {
     func_00203BA8(arg0, 0);
 }
 
-void func_001FEEF0(void) {
+void btlCmdSimpleB(void) {
     func_002041A0();
 }
 
-void func_001FEF10(void) {
+void btlCmdSimpleC(void) {
     func_002033C0();
 }
 
-void func_001FEF30(void) {
+void btlCmdSimpleD(void) {
     func_002034D0();
 }
 
-void func_001FEF50(void) {
+void btlCmdSimpleE(void) {
     func_002035E0();
 }
 
-void func_001FEF70(void) {
+void btlCmdSimpleF(void) {
     func_00204008();
 }
 
-void func_001FEF90(void) {
+void btlCmdSimpleG(void) {
     func_00204028();
 }
 
-void func_001FEFB0(void) {
+void btlCmdSimpleH(void) {
     func_00203F98();
 }
 
-void func_001FEFD0(void) {
+void btlCmdSimpleI(void) {
     func_00203CA8();
 }
 
-void func_001FEFF0(s32 arg0) {
+void btlCmdWithArgF(s32 arg0) {
     func_00204048(arg0, 0);
 }
 
-void func_001FF010(void) {
+void btlCmdSimpleJ(void) {
     func_00204080();
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB840);
 
@@ -258,7 +256,6 @@ INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB870);
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB874);
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB878);
-
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB87C);
 

@@ -20,11 +20,11 @@ float func_002C97E8(float *arg0) {
                   arg0[3] * arg0[3];
 }
 
-float func_002C9818(float *values) {
+float quaternionMagnitude(float *values) {
     return fsqrtf(func_002C97E8(values));
 }
 
-void func_002C9838(float *values) {
+void quaternionInverse(float *values) {
     float lengthSquared = func_002C97E8(values);
     if (lengthSquared != 0.0f) {
         values[0] = -values[0] / lengthSquared;
@@ -34,8 +34,8 @@ void func_002C9838(float *values) {
     }
 }
 
-void func_002C98D0(float *values) {
-    float length = func_002C9818(values);
+void quaternionNormalize(float *values) {
+    float length = quaternionMagnitude(values);
     values[0] /= length;
     values[1] /= length;
     values[2] /= length;
@@ -50,13 +50,13 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9AD0);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9BF0);
 
-void func_002C9D10(float *out, float *from, float *to, float fraction) {
+void quaternionBlendNormalize(float *out, float *from, float *to, float fraction) {
     float inv = 1.0f - fraction;
     out[0] = from[0] * inv + to[0] * fraction;
     out[1] = from[1] * inv + to[1] * fraction;
     out[2] = from[2] * inv + to[2] * fraction;
     out[3] = from[3] * inv + to[3] * fraction;
-    func_002C98D0(out);
+    quaternionNormalize(out);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9D98);
@@ -97,7 +97,7 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAAC8);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAC60);
 
-void func_002CACD8(u8 *work) {
+void destroyTaskWork(u8 *work) {
     if (work != NULL) {
         func_002CAFE0();
         (*(void (**)(s32, u32))(work + 0x18))(-1, *(u32 *)(work + 0x10));
@@ -165,18 +165,18 @@ u8 func_002CB2B8(s32 arg0) {
     return temp_v0;
 }
 
-s32 func_002CB2E0(u32 name) {
+s32 kwlnTaskExists(u32 name) {
     return kwlnTaskGetTaskByName(name) != 0;
 }
 
-void func_002CB300(u8 *work, u32 *item) {
+void attachTaskItem(u8 *work, u32 *item) {
     u32 result = func_002CAD30(*(u32 *)(work + 0xc), *item, func_002CB5F0(item));
     if (*(u32 *)(work + 0x10) == 0) {
         *(u32 *)(work + 0x10) = result;
     }
 }
 
-void func_002CB358(u8 *work, s32 key) {
+void removeTaskItem(u8 *work, s32 key) {
     void *item = func_002CB0F8(*(void **)(work + 0xc), key);
     if (item != NULL) {
         func_002CAF78(*(void **)(work + 0xc), item);
@@ -203,7 +203,7 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB4B8);
 
 void func_002CB5A8(u8 *work) {
     if (work != NULL) {
-        func_002CACD8(*(u8 **)(work + 0x0C));
+        destroyTaskWork(*(u8 **)(work + 0x0C));
         func_002CFF98(*(void **)(work + 4));
         func_002CFF98(*(void **)(work + 8));
         func_002D0918(*(u32 *)work);
@@ -246,7 +246,7 @@ void func_002CBAF0(ShortPair2C *p, s32 a, s32 b) {
     p->h2E = b;
 }
 
-void func_002CBB00(u8 *work) {
+void destroyGridWork(u8 *work) {
     if (work != NULL) {
         func_002CC570();
         (*(void (**)(s32, u32))(work + 0x20))(0, *(u32 *)(work + 0x30));
@@ -318,8 +318,6 @@ u32 func_002CC748(void) {
     return 0;
 }
 
-
-
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD288);
 
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD290);
@@ -329,7 +327,6 @@ INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD298);
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A0);
 
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A8);
-
 
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2B0);
 

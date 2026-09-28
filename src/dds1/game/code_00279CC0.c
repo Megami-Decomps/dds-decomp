@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_00284340(s32);
+extern void releaseSpriteTextures(s32);
 
 extern void func_002CFF98(void *);
 
@@ -24,7 +24,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279F88);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A0A8);
 
-void func_0027A0E0(s32 selection) {
+void drawSelectionLabel(s32 selection) {
     s32 item = func_00197E08(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     func_001954C8(item, 0xA09DC366);
     func_001958A0(item, 1, 0x53);
@@ -51,7 +51,7 @@ u32 func_0027A778() {
     return 1;
 }
 
-s32 func_0027A7B0(s32 selection) {
+s32 resetMenuSelection(s32 selection) {
     s32 context;
     s32 menu;
     func_00278760();
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AEA8);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AF28);
 
-void func_0027B010(s32 *assets) {
+void releaseMenuAssets(s32 *assets) {
     u32 i;
     for (i = 0; i < 4; i++) {
         func_002BDD60(assets[i]);
@@ -146,7 +146,7 @@ void func_0027B088(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B1B0);
 
-void func_0027B268(s32 *assets, s32 option) {
+void drawMenuBackdrop(s32 *assets, s32 option) {
     func_002C0950(0x30000);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
     func_002BF790(0, 0, 0, 0, assets[0], 0, option);
@@ -178,7 +178,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B888);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BA00);
 
-void *func_0027BA48(s32 arg0, void *arg1) {
+void *menuWalkNodeList(s32 arg0, void *arg1) {
     void *temp_node = *(void **)((s32)arg1 + 0x10);
     s32 temp_i = 0;
 
@@ -261,7 +261,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BF48);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BF90);
 
-void func_0027C070(s32 arg0, s32 arg1) {
+void menuDispatchByFlag(s32 arg0, s32 arg1) {
     func_002C1630((*(s32 *)(arg1 + 0x48) & 1) ? 0x89BDC940 : 0x89BDC980, arg0, *(s32 *)(arg1 + 0x50));
 }
 
@@ -269,11 +269,11 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027C0B0);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027C140);
 
-void func_0027C370(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void menuCallInitWide(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0027C140(arg0, arg1, arg2, 0, 0, 0x100, 0, arg3, arg4);
 }
 
-s32 func_0027C3A0(s32 id, s32 width, s32 height, s32 left, s32 right) {
+s32 createWindowContainer(s32 id, s32 width, s32 height, s32 left, s32 right) {
     s32 item = func_002CFF68(0x8C);
     s32 child;
     *(s32 *)(item + 8) = width;
@@ -291,7 +291,7 @@ void func_0027C430(u32 arg0) {
     func_0027B368(*(u32 *)((s32)arg0 + 0x14));
     temp_v0 = *(s32 *)((s32)arg0 + 0x84);
     if (temp_v0 != 0) {
-        func_0027D1E8(temp_v0);
+        releaseWindowTextures(temp_v0);
     }
     func_002CFF98(arg0);
 }
@@ -306,7 +306,7 @@ void func_0027C478(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027C480);
 
-void func_0027C558(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void menuForwardDupArg(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0027C480(arg0, arg1, arg2, arg3, arg4, arg4);
 }
 
@@ -344,7 +344,7 @@ void func_0027C6A0(s32 arg0) {
     func_0027B888(*(u32 *)(arg0 + 0x14));
 }
 
-s32 func_0027C6B8(s32 window, s32 direction) {
+s32 advanceMenuListSelection(s32 window, s32 direction) {
     s32 item = func_0027BBF0(*(s32 *)(window + 0x14), direction, 0);
     if (item != 0) {
         *(u8 *)(item + 0x54) = 0;
@@ -353,7 +353,7 @@ s32 func_0027C6B8(s32 window, s32 direction) {
     return item;
 }
 
-s32 func_0027C708(s32 window, s32 direction) {
+s32 reverseMenuListSelection(s32 window, s32 direction) {
     s32 item = func_0027BD48(*(s32 *)(window + 0x14), direction, 0);
     if (item != 0) {
         *(u8 *)(item + 0x54) = 0;
@@ -363,11 +363,11 @@ s32 func_0027C708(s32 window, s32 direction) {
 }
 
 void func_0027C758(u32 arg0) {
-    func_0027C6B8(arg0, 0);
+    advanceMenuListSelection(arg0, 0);
 }
 
 void func_0027C770(u32 arg0) {
-    func_0027C708(arg0, 0);
+    reverseMenuListSelection(arg0, 0);
 }
 
 void func_0027C788(s32 arg0) {
@@ -405,7 +405,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027CF28);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D148);
 
-void func_0027D1E8(s32 *object) {
+void releaseWindowTextures(s32 *object) {
     u32 i;
     for (i = 0; i < 7; i++) {
         func_002BDD60(object[i + 3]);
@@ -414,12 +414,12 @@ void func_0027D1E8(s32 *object) {
 }
 
 void func_0027D248(s32 arg0, u32 arg1) {
-    func_002BE378(*(u32 *)(arg0 + 0x10), 0, arg1, 0, 0x14, 0xc);
-    func_002BE378(*(u32 *)(arg0 + 0x14), 0, arg1, 1, 10, 0xc);
-    func_002BE378(*(u32 *)(arg0 + 0x18), 0, arg1, 2, 0, 0xc);
-    func_002BE378(*(u32 *)(arg0 + 0x1c), 0, arg1, 2, 0, 0xc);
-    func_002BE378(*(u32 *)(arg0 + 0x20), 0, arg1, 1, 10, 0xc);
-    func_002BE378(*(u32 *)(arg0 + 0x24), 0, arg1, 0, 0x14, 0xc);
+    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x10), 0, arg1, 0, 0x14, 0xc);
+    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x14), 0, arg1, 1, 10, 0xc);
+    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x18), 0, arg1, 2, 0, 0xc);
+    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x1c), 0, arg1, 2, 0, 0xc);
+    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x20), 0, arg1, 1, 10, 0xc);
+    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x24), 0, arg1, 0, 0x14, 0xc);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D318);
@@ -428,7 +428,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D4A0);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D740);
 
-void func_0027D7E0(s32 *object) {
+void releaseResourceList(s32 *object) {
     s32 i;
     s32 count = object[2];
     for (i = 0; i < count; i++) {
@@ -552,14 +552,14 @@ s32 func_0027E0D0(s32 *arg0, s32 *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E100);
 
-void func_0027E228(s32 *list) {
+void allocateMenuListEntries(s32 *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
         list[i + 1] = func_002CFF68(0x18);
     }
 }
 
-void func_0027E270(s32 *list) {
+void freeMenuListEntries(s32 *list) {
     u32 i;
     s32 *entry = list + 1;
     for (i = 0; i < 4; i++, entry++) {
@@ -585,7 +585,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E2F0);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E3D8);
 
-void func_0027E468(s32 *list) {
+void updateMenuFade(s32 *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
         s32 *entry = (s32 *)list[i + 1];
@@ -653,7 +653,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E8D8);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027EAF0);
 
-void func_0027EC40(s32 *object) {
+void destroyMenuResources(s32 *object) {
     u32 i;
     for (i = 0; i < 2; i++) {
         func_002BDD60(object[i + 3]);
@@ -741,7 +741,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F588);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F638);
 
-void func_0027F6B8(s32 *menu) {
+void clearMenuEntries(s32 *menu) {
     u32 i;
     s32 *entry = menu + 0x56;
     func_002807E8();
@@ -756,7 +756,7 @@ void func_0027F6B8(s32 *menu) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F730);
 
-void func_0027F838(s32 *list) {
+void releaseFourResourceList(s32 *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
         func_002BDD60(list[i + 3]);
@@ -778,7 +778,7 @@ void func_0027FA20(s32 window) {
     for (i = 0; i < 5; i++) {
         s32 *item = (s32 *)(window + 0x15c + i * 0x134);
         if (*item != 0) {
-            func_0027F838(*item);
+            releaseFourResourceList(*item);
             *item = 0;
         }
     }
@@ -791,8 +791,8 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FAA8);
 void func_0027FB90(s32 window) {
     u32 i;
     for (i = 0; i < 5; i++, window += 0x134) {
-        func_00284340(window + 0x94);
-        func_00284340(window + 0xe8);
+        releaseSpriteTextures(window + 0x94);
+        releaseSpriteTextures(window + 0xe8);
     }
 }
 
@@ -829,7 +829,7 @@ void func_0027FC10(s32 arg0, u32 *arg1) {
 }
 
 extern void func_002BD7A0(s32);
-void func_0027FC40(s32 destination, s32 *source) {
+void registerMenuResourceHandles(s32 destination, s32 *source) {
     u32 i;
     for (i = 0; i < 5; i++) {
         func_002BD7A0(source[i]);
@@ -862,7 +862,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_002802E0);
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002803A0);
 
 extern void func_002803A0(s32);
-void func_00280488(s32 context) {
+void shutdownMenuContext(s32 context) {
     u32 i;
     for (i = 0; i < 5; i++) {
         func_002803A0(context + 0x78 + i * 0x134);
@@ -924,12 +924,6 @@ void func_00281898(u32 arg0) {
     memset(arg0, 0, 0x20);
 }
 
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
@@ -955,7 +949,6 @@ INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC730);
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC738);
 
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC740);
-
 
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC748);
 

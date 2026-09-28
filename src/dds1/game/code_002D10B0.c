@@ -71,7 +71,7 @@ extern u32 D_003BD2F4;
 extern u32 D_003BD2F8;
 
 void *func_002CFEB8(s32 size);
-s32 func_002CF440(s32 arg0, s32 arg1, s32 arg2);
+s32 createSemaphore(s32 arg0, s32 arg1, s32 arg2);
 void func_002D1B90(void *arg0);
 void func_002D2F80(void);
 void func_002D2FB0(void);
@@ -166,7 +166,7 @@ void func_002D22C0(void) {
     SdfSemaObj *obj;
 
     obj = &D_003EB848;
-    obj->unk0 = func_002CF440(1, 0x7F, 0);
+    obj->unk0 = createSemaphore(1, 0x7F, 0);
     func_002D2128(obj);
 }
 
@@ -243,7 +243,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2650);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D26A8);
 
-void func_002D2700(SdfTex *arg0) {
+void sdfTexListInsert(SdfTex *arg0) {
     arg0->unk0 = NULL;
     if (D_003BD308 != NULL) {
         arg0->unk4 = D_003BD308;
@@ -260,8 +260,6 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2800);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2950);
 
-
-
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F0);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F1);
@@ -277,7 +275,6 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD300);
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD302);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD304);
-
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD308);
 

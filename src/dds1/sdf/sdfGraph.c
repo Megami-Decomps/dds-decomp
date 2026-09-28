@@ -55,14 +55,11 @@ INCLUDE_ASM(const s32, "sdf/sdfGraph", func_002D1020);
 
 INCLUDE_ASM(const s32, "sdf/sdfGraph", func_002D1080);
 
-
-
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2E8);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2E9);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2EA);
-
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2EC);
 

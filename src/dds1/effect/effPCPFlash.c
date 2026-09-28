@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void *func_00163258(void *data, s32 index);
+extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void func_00170048(u32 res);
 extern void func_00170350(u32 res);
@@ -204,7 +204,7 @@ struct PcpFlashWork10 {
 
 void func_0016A1A8(void *data)
 {
-    func_0016A088(func_00163258(data, 0));
+    func_0016A088(effParamTableGetBlock(data, 0));
 }
 
 void func_0016A1C8(void)
@@ -252,7 +252,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A6C0);
 
 void func_0016A858(void *data)
 {
-    func_0016A6C0(func_00163258(data, 0));
+    func_0016A6C0(effParamTableGetBlock(data, 0));
 }
 
 void func_0016A878(void)
@@ -284,7 +284,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A9D0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AB48);
 
-void func_0016ACD0(void *work, s32 index, void *orientation)
+void rotateFlashParticlePosition(void *work, s32 index, void *orientation)
 {
     u8 *part = *(u8 **)((u8 *)work + 0x40) + index * 0x2C;
     f32 position[4];
@@ -313,7 +313,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AFF0);
 
 void func_0016B210(void *data)
 {
-    func_0016AFF0(func_00163258(data, 0));
+    func_0016AFF0(effParamTableGetBlock(data, 0));
 }
 
 void func_0016B230(void)
@@ -357,7 +357,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016B800);
 
 void func_0016BA38(void *data)
 {
-    func_0016B800(func_00163258(data, 0));
+    func_0016B800(effParamTableGetBlock(data, 0));
 }
 
 void func_0016BA58(void)
@@ -401,7 +401,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016C0E8);
 
 void func_0016C338(void *data)
 {
-    func_0016C0E8(func_00163258(data, 0));
+    func_0016C0E8(effParamTableGetBlock(data, 0));
 }
 
 void func_0016C358(void)
@@ -445,7 +445,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016C9F0);
 
 void func_0016CBB0(void *data)
 {
-    func_0016C9F0(func_00163258(data, 0));
+    func_0016C9F0(effParamTableGetBlock(data, 0));
 }
 
 void func_0016CBD0(void)
@@ -491,7 +491,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D2A8);
 
 void func_0016D3E0(void *data)
 {
-    func_0016D2A8(func_00163258(data, 0));
+    func_0016D2A8(effParamTableGetBlock(data, 0));
 }
 
 void func_0016D400(void)
@@ -539,7 +539,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D940);
 
 void func_0016DB18(void *data)
 {
-    func_0016D940(func_00163258(data, 0));
+    func_0016D940(effParamTableGetBlock(data, 0));
 }
 
 void func_0016DB38(void)
@@ -585,7 +585,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016E290);
 
 void func_0016E4C0(void *data)
 {
-    func_0016E290(func_00163258(data, 0));
+    func_0016E290(effParamTableGetBlock(data, 0));
 }
 
 void func_0016E4E0(void)
@@ -629,7 +629,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016EB00);
 
 void func_0016EC40(void *data)
 {
-    func_0016EB00(func_00163258(data, 0));
+    func_0016EB00(effParamTableGetBlock(data, 0));
 }
 
 void func_0016EC60(void)

@@ -4,7 +4,7 @@ extern s8 D_003BD88C;
 
 extern u32 D_003BBDF0;
 
-void func_0022A850(s32 arg0);
+void initializeEventVisualData(s32 arg0);
 
 void func_0022AB00(s32 arg0);
 
@@ -22,7 +22,7 @@ s32 func_002286E8(s32 object);
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A248);
 
-void func_0022A850(s32 object) {
+void initializeEventVisualData(s32 object) {
     s32 state = func_002286E8(object);
     s16 *values = (s16 *)(object + 0x3C);
     *(u8 *)(object + 0xFC) = state;
@@ -91,14 +91,14 @@ void func_0022AEB8(void) {
     func_0010BDB8();
 }
 
-void func_0022AED0(void) {
+void startEventTestTask(void) {
     D_003BA8EC = 0x80000000;
     kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, func_0022AB90, func_0022AEB8, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);
 
-void func_0022AF18(void) {
+void stopEventTestTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ACD18, 1);
     kwlnTaskDestroyWithHierarchyByName("PolygonMovie", 0);
     func_0021FE38();
@@ -122,7 +122,7 @@ void func_0022B618(void) {
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022B620);
 
-void func_0022B6C0(s32 owner, s32 node) {
+void unlinkEventListNode(s32 owner, s32 node) {
     s32 next = *(s32 *)(node + 0x30);
     s32 previous = *(s32 *)(node + 0x34);
     if (previous == 0) {
@@ -147,7 +147,7 @@ void func_0022B6C0(s32 owner, s32 node) {
     }
 }
 
-void func_0022B710(s32 owner) {
+void reorderEventListNodes(s32 owner) {
     if (owner != 0) {
         s32 current = *(s32 *)(owner + 0x54);
         while (current != 0) {
@@ -155,7 +155,7 @@ void func_0022B710(s32 owner) {
             s32 scan = next;
             while (scan != 0) {
                 if (*(u16 *)scan < *(u16 *)current) {
-                    func_0022B6C0(owner, scan);
+                    unlinkEventListNode(owner, scan);
                     func_0022B620(owner, scan);
                     next = *(s32 *)(scan + 0x30);
                     break;
@@ -168,7 +168,6 @@ void func_0022B710(s32 owner) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022B7A0);
-
 
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBDEC);
 
@@ -205,7 +204,6 @@ INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBE58);
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBE60);
 
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBE68);
-
 
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBE70);
 

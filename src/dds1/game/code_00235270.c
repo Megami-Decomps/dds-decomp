@@ -11,9 +11,9 @@ extern s32 func_002350F8(void);
 extern void func_00235120(s32 arg0, s32 arg1);
 extern void func_002351E0(void);
 extern void func_00235228(void);
-extern s32 func_00241B58();
+extern s32 evtFindTaskById();
 extern void func_003014F0(void *arg0, void *arg1, s32 arg2);
-extern void func_00241B30(s32 arg0, void *arg1);
+extern void evtFormatTaskName(s32 arg0, void *arg1);
 extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
@@ -32,7 +32,7 @@ extern void func_002E9758(s32 arg0);
 extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 arg0);
 extern void func_002E8DD0(u32 arg0);
-extern void func_002E8F78(s32 arg0, s32 arg1, s32 arg2);
+extern void soundSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 extern s32 func_002E4960();
 extern u8 D_003BBF80[];
 extern u8 D_003BBF90[];
@@ -78,7 +78,7 @@ extern u16 D_003BBF88;
 
 extern u32 D_003BBF8C;
 
-void func_00235270(s32 arg0, s32 arg1) {
+void evtCreateTask(s32 arg0, s32 arg1) {
     s32 temp_v0;
 
     temp_v0 = func_002350F8();
@@ -145,7 +145,7 @@ void func_00235488(void) {
     D_003BBF8C = 0;
 }
 
-void func_00235498(void) {
+void evtDestroySkyTask(void) {
     s32 temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(D_003BBF90);
@@ -164,7 +164,7 @@ void func_002354D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00235540);
 
-void func_00235560(void) {
+void evtCreateFrameVariableTask(void) {
     kwlnTaskCreate("FrameVar", 0x2AF9, 1, 1, func_00235540, 0, 0);
 }
 
@@ -198,7 +198,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00235B30);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00235C68);
 
-s32 func_00235DB0(s32 target, s32 x, s32 y) {
+s32 drawFrameChangeLabel(s32 target, s32 x, s32 y) {
     func_002D4038(target, func_002E4960(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
@@ -301,7 +301,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE9D0);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003AE9E0);
 
-s32 func_00239350(s32 target, s32 x, s32 y) {
+s32 drawCutFlagMenuLabel(s32 target, s32 x, s32 y) {
     func_002D4038(target, func_002E4960(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
@@ -328,7 +328,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA80);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239A90);
 
-s32 func_00239DE0(s32 target, s32 x, s32 y) {
+s32 drawMotionChangeMenuLabel(s32 target, s32 x, s32 y) {
     func_002D4038(target, func_002E4960(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
     return 2;
 }
@@ -579,7 +579,7 @@ void func_0023E138(s32 arg0, s32 arg1) {
     }
 }
 
-void func_0023E1B0(s32 output, EvtRuntime *runtime) {
+void writeEventGroupHeader(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 2) {
@@ -701,7 +701,7 @@ void func_0023E668(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E6F0(s32 output, EvtRuntime *runtime) {
+void writeEventGroupMetadata(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         u8 header[8];
@@ -783,7 +783,7 @@ s32 func_00241878(s32 eventId, s32 variation) {
     return ((sequenceId + 0x100) << 0x10) + variation;
 }
 
-s32 func_002418B0(s32 id) {
+s32 evtPreloadBgm(s32 id) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -793,14 +793,14 @@ s32 func_002418B0(s32 id) {
     return sound;
 }
 
-s32 func_002418F8(s32 id) {
+s32 evtIsBgmLoaded(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 1;
     }
     return func_002E92C0(func_00241878(id, 0)) == 1;
 }
 
-s32 func_00241938(s32 id, s32 fade) {
+s32 evtPlayBgm(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -811,7 +811,7 @@ s32 func_00241938(s32 id, s32 fade) {
     return sound;
 }
 
-void func_00241990(s32 id, s32 fade) {
+void evtTransitionBgm(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return;
@@ -824,7 +824,7 @@ void func_00241990(s32 id, s32 fade) {
     func_002E9758(sound);
 }
 
-s32 func_002419F8(s32 id, s32 fade) {
+s32 evtFadeInBgm(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -845,13 +845,13 @@ s32 func_00241A50(s32 id, s32 fade) {
     return sound;
 }
 
-s32 func_00241A98(s32 id, s32 fade) {
+s32 evtSetBgmVolumePan(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
     sound = func_00241878(id, fade);
-    func_002E8F78(sound, 0x7F, 0x3F);
+    soundSetSequenceVolumePan(sound, 0x7F, 0x3F);
     return sound;
 }
 
@@ -865,21 +865,21 @@ s32 func_00241AE8(s32 id, s32 fade) {
     return sound;
 }
 
-void func_00241B30(s32 arg0, void *arg1) {
+void evtFormatTaskName(s32 arg0, void *arg1) {
     func_003014F0(arg1, D_003BC360, arg0);
 }
 
-s32 func_00241B58(u32 arg0) {
+s32 evtFindTaskById(u32 arg0) {
     u8 temp_v0[32];
 
-    func_00241B30(arg0, temp_v0);
+    evtFormatTaskName(arg0, temp_v0);
     return kwlnTaskGetTaskByName(temp_v0);
 }
 
 s32 func_00241B80(u32 arg0) {
     s32 task;
 
-    task = func_00241B58(arg0);
+    task = evtFindTaskById(arg0);
     if (task != 0) {
         return *(s32 *)(func_00101A70(task) + 4);
     } else {
@@ -887,10 +887,10 @@ s32 func_00241B80(u32 arg0) {
     }
 }
 
-s32 func_00241BB8(u32 arg0) {
+s32 evtGetTaskData(u32 arg0) {
     s32 task;
 
-    task = func_00241B58(arg0);
+    task = evtFindTaskById(arg0);
     if (task != 0) {
         return (s32)func_00101A70(task);
     }
@@ -902,8 +902,6 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00241BF0);
 INCLUDE_ASM(const s32, "game/code_00235270", func_00241CA0);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00241D28);
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF80);
 
@@ -1150,7 +1148,6 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC348);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
-
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
 

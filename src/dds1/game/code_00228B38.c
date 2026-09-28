@@ -23,18 +23,18 @@ void func_00228B38(u32 *arg0) {
     *arg0 = func_002BC8F0(D_003BBDD0, "solarnoise.spr", 0);
 }
 
-void func_00228B78(u32 *sprite) {
+void releaseSolarNoiseSprite(u32 *sprite) {
     func_002BDD60(*sprite);
 }
 
-void func_00228B98(s32 object) {
+void initializeSolarOverlay(s32 object) {
     func_002C0950(0x30000, object);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0, object);
     func_002C1380(object);
     func_002C0950(0x30000, object);
 }
 
-void func_00228BF8(s32 object) {
+void finalizeSolarOverlay(s32 object) {
     func_002C1430(object);
     func_002C0A48(0x44, object);
     func_002C0950(0x50000, object);
@@ -54,7 +54,7 @@ INCLUDE_ASM(const s32, "game/code_00228B38", func_00229230);
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229320);
 
-void func_00229410(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
+void drawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
     func_00228CA0(x, y, z, width, layer, 0, context, color);
     if (layer != 0 && layer != 4 && layer != 8) {
         func_00228CA0(x, y, z, width, 9, 0, context, color);
@@ -99,7 +99,7 @@ INCLUDE_ASM(const s32, "game/code_00228B38", func_00229D28);
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229D80);
 
-void func_00229E28(s32 object) {
+void updateSolarPointTimers(s32 object) {
     SolarPoint *point = (SolarPoint *)(object + 0xC);
     s32 i;
     for (i = 7; i >= 0; i--, point++) {
@@ -119,12 +119,6 @@ void func_00229E28(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229ED8);
 
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACBF8);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
@@ -134,7 +128,6 @@ INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC78);
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC88);
 
 INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD8);
 

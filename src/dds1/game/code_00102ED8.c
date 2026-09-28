@@ -68,13 +68,13 @@ extern void func_002E8430(void *data, u32 tag);
 extern s32 func_00104A98(void);
 extern void func_00104B88(void *data, s32 handle);
 
-extern void func_001050B8(u8 *scene);
+extern void kwlnTextureAttachTask(u8 *scene);
 
 extern void func_00105150(s32 arg0);
 
 extern void func_00105890(void);
 
-extern void func_00108A48(void);
+extern void evtUnk8A48Ensure(void);
 
 extern void func_002D0E88(s32 arg0);
 extern void *func_002D3FD0(s32);
@@ -82,7 +82,7 @@ extern void func_002D4010(void *);
 extern void func_00105010(void *, s32, s32);
 extern void func_002D4038(void *, s32);
 extern u32 kwlnTaskGetTimer(void);
-extern s32 func_002E83F8(s32, s32);
+extern s32 effMiscRandMod(s32, s32);
 extern void func_00104068(s32, u8, s32);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
@@ -121,10 +121,10 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001038A0);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103908);
 
-s32 func_00103970(void) {
+s32 kwlnDebugPulseColors(void) {
     if (kwlnTaskGetTimer() % 0x4650 == 0) {
         func_00104068(0, 1, 0xF);
-        func_00104068(1, (u8)(func_002E83F8(0, 150) + 100), 30);
+        func_00104068(1, (u8)(effMiscRandMod(0, 150) + 100), 30);
     }
     return 0;
 }
@@ -151,7 +151,7 @@ u32 func_00104260(void) {
     return 0;
 }
 
-void func_00104268(void) {
+void kwlnInitMagicState(void) {
     func_002E8430(D_00324550, 0x12345678);
 }
 
@@ -160,7 +160,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104290);
 void func_001045F8(void) {
 }
 
-void func_00104600(s8 mode) {
+void kwlnDebugGraphSetEnabled(s8 mode) {
     if (mode == 1) {
         D_003BD6A8 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_00104290, func_001045F8, NULL);
     } else if (mode == 0) {
@@ -170,7 +170,7 @@ void func_00104600(s8 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104678);
 
-void func_00104798(void *task) {
+void kwlnTextureDrawPageCounter(void *task) {
     char buffer[0x70];
     s32 current = func_00104A10();
     s32 count = func_001049A8();
@@ -194,7 +194,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104A98);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104B88);
 
-s32 func_00104D20(s32 resource) {
+s32 kwlnSwapActiveResource(s32 resource) {
     s32 status;
 
     if (D_003BD308 == 0) {
@@ -205,7 +205,7 @@ s32 func_00104D20(s32 resource) {
     return status;
 }
 
-s32 func_00104D70(void) {
+s32 kwlnLoadDefaultResource(void) {
     if (D_003BD308 == 0) {
         return 0;
     }
@@ -216,7 +216,7 @@ s32 func_00104D70(void) {
     return 0;
 }
 
-s32 (*func_00104DB8(void))(void) {
+s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     KwlnResourceNode *node = (KwlnResourceNode *)D_003BD308;
     if (node == NULL) {
         return NULL;
@@ -231,25 +231,25 @@ s32 (*func_00104DB8(void))(void) {
         }
         D_003BA8D8 = (s32)node;
     }
-    return func_00104D70;
+    return kwlnLoadDefaultResource;
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104E20);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105010);
 
-void func_001050B8(u8 *scene) {
+void kwlnTextureAttachTask(u8 *scene) {
     void *task = func_002D3FD0(0x20);
     func_002D4010(task);
     func_00105010(task, 0x7180, 0x79C0);
     (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
 }
 
-s32 func_00105118(void) {
+s32 kwlnEnsureDefaultResource(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }
-    func_001050B8(D_00325748);
+    kwlnTextureAttachTask(D_00325748);
     return 0;
 }
 
@@ -263,7 +263,7 @@ void func_00105320(void) {
     func_00105150(1);
     func_00105890();
     D_003BA7FC = 0;
-    func_00108A48();
+    evtUnk8A48Ensure();
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105370);
@@ -303,7 +303,7 @@ s32 func_00105628(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105630);
 
-void func_00105828(s32 mode, s32 frames) {
+void kwlnFadeSetupFrames(s32 mode, s32 frames) {
     if (frames == 0) {
         D_003BA918 = 0;
         return;
@@ -326,7 +326,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001059F0);
 
-void func_00105A68(void) {
+void kwlnFadeClear(void) {
     D_003BA904 &= ~3;
     D_003BA920.r = 0;
     D_003BA920.g = 0;
@@ -334,7 +334,7 @@ void func_00105A68(void) {
     D_003BA920.a = 0;
 }
 
-void func_00105A90(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
+void kwlnFadeSetColor(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
     D_003BA904 &= ~3;
     D_003BA920.r = arg0;
     D_003BA920.g = arg1;
@@ -346,13 +346,13 @@ void func_00105AB8(KwlnFadeColor **arg0) {
     *arg0 = &D_003BA920;
 }
 
-void func_00105AC8(s8 arg0, s8 arg1, s8 arg2) {
+void kwlnFadeSetRGB(s8 arg0, s8 arg1, s8 arg2) {
     D_003BA920.r = arg0;
     D_003BA920.g = arg1;
     D_003BA920.b = arg2;
 }
 
-void func_00105AE0(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
+void kwlnFadeOutStart(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
     D_003BA920.r = arg0;
     D_003BA920.g = arg1;
     D_003BA920.b = arg2;
@@ -361,7 +361,7 @@ void func_00105AE0(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
         D_003BA920.a = 0;
         D_003BD6C0 = 0;
         D_003BD6C2 = 0;
-        func_00105A68();
+        kwlnFadeClear();
         return;
     }
     D_003BD6C2 = arg3;
@@ -369,7 +369,7 @@ void func_00105AE0(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
     D_003BA904 = (D_003BA904 | 1) & ~2;
 }
 
-void func_00105B48(s32 duration) {
+void kwlnFadeStartIn(s32 duration) {
     D_003BA920.a = -0x80;
     if (duration == 0) {
         D_003BA920.a = 0;
@@ -383,7 +383,7 @@ void func_00105B48(s32 duration) {
     }
 }
 
-void func_00105B98(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
+void kwlnFadeInStart(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
     D_003BA920.r = arg0;
     D_003BA920.g = arg1;
     D_003BA920.b = arg2;
@@ -400,7 +400,7 @@ void func_00105B98(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
     D_003BA904 = (D_003BA904 & ~1) | 2;
 }
 
-void func_00105BF8(s32 duration) {
+void kwlnFadeStartOut(s32 duration) {
     D_003BA920.a = 0;
     if (duration == 0) {
         D_003BD6C0 = 0;
@@ -414,7 +414,7 @@ void func_00105BF8(s32 duration) {
     }
 }
 
-u8 func_00105C48(void) {
+u8 kwlnFadeIsActive(void) {
     return (D_003BA904 & 3) != 0;
 }
 
@@ -424,7 +424,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105D00);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105DD8);
 
-void func_00106088(void) {
+void kwlnFadeResetBackground(void) {
     D_003BA904 &= 0xF3FFFFFF;
     D_003BA928[0] = 0;
     D_003BA928[1] = 0;
@@ -449,8 +449,6 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106368);
 void func_00106488(f32 arg0) {
     D_003245EC[0] = arg0;
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
 
@@ -563,7 +561,6 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA930);
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA934);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA938);
-
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA940);
 

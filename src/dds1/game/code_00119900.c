@@ -43,7 +43,7 @@ extern s32 func_0010BCA0(void);
 extern s32 func_0010D428(s32 idx);
 extern s32 func_0010D5F0(s32 arg0);
 extern void func_0010D608(f32 arg0);
-extern Entry1A4 *func_0011A598(s32 arg0);
+extern Entry1A4 *dds3FindEntry(s32 arg0);
 extern void func_00119900(s32 arg0, s32 arg1);
 extern void func_0011B528(Entry1A4 *arg0);
 extern s32 func_00119368(s32 arg0, s32 arg1);
@@ -54,14 +54,14 @@ extern s32 func_001A92D0(u32 arg0);
 extern s32 func_001A93B8(u32 arg0);
 extern s32 func_001A94A0(u32 arg0);
 extern void *memset(void *dst, s32 c, u32 n);
-extern s32 func_0021F600(s32 arg0);
-extern s32 func_002E83F8(u32 arg0, u32 arg1);
+extern s32 mdlFlagTest(s32 arg0);
+extern s32 effMiscRandMod(u32 arg0, u32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119900);
 
-s32 func_001199B0(s32 index, s32 limit) {
+s32 eventCheckValueThreshold(s32 index, s32 limit) {
     if ((u32)(index - 0x80) < 0x20) {
-        return func_0021F600(index + 0x980) != 0;
+        return mdlFlagTest(index + 0x980) != 0;
     }
     if (*(u8 *)(index + D_003BAA00 + 0x12A0) < limit) {
         return 0;
@@ -78,7 +78,7 @@ u8 func_00119A68(s32 arg0) {
     return *(u8 *)(D_003BAA1C + *(u16 *)(arg0 + 4) * 76 + 4);
 }
 
-s32 func_00119AA8(s32 arg0) {
+s32 dds3FindEntryIndex(s32 arg0) {
     Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
     s32 n = 0;
 
@@ -124,13 +124,13 @@ u16 func_0011A568(s32 arg0) {
     return *(u16 *)(arg0 * 8 + D_003BAA68 + 2);
 }
 
-u16 func_0011A580(s32 arg0) {
+u16 dds3Clamp99(s32 arg0) {
     s32 temp = *(u16 *)(arg0 + 0x14);
 
     return temp < 100 ? temp : 99;
 }
 
-Entry1A4 *func_0011A598(s32 arg0) {
+Entry1A4 *dds3FindEntry(s32 arg0) {
     Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
     s32 n = 0;
 
@@ -151,10 +151,10 @@ Entry1A4 *func_0011A598(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011A5E8);
 
 u8 func_0011A968(s32 arg0) {
-    return func_0011A598(arg0) != 0;
+    return dds3FindEntry(arg0) != 0;
 }
 
-s32 func_0011A988(void) {
+s32 dds3EntryMax(void) {
     Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
     s32 best = 0;
     s32 n = 4;
@@ -199,7 +199,7 @@ void func_0011B418(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B438);
 
-void func_0011B4C8(void) {
+void dds3ForEachEntry(void) {
     Entry4 *p = D_0032AEE8;
     u32 i = 0;
 
@@ -217,7 +217,7 @@ void func_0011B4C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B528);
 
-void func_0011B640(void) {
+void dds3ForEachFlagged(void) {
     s32 off = 0;
     s32 n = 4;
 
@@ -237,7 +237,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B6A8);
 void func_0011B7B8(s32 arg0) {
     s32 temp_v0;
 
-    temp_v0 = func_002E83F8(0, 4);
+    temp_v0 = effMiscRandMod(0, 4);
     *(s32 *)(arg0 + 0x194) = 0x12 - temp_v0;
 }
 
@@ -245,7 +245,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B7F0);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B878);
 
-void func_0011B908(void) {
+void dds3WorkInit(void) {
     D_003BAAB4 = func_0010BCA0();
     memset(D_003C2E70, 0, 0x18);
 }
@@ -351,7 +351,7 @@ s32 func_0011C118(void) {
 
 s32 func_0011C150(void) {
     s32 v0 = func_0010D428(0);
-    s32 val = func_002E83F8(0, v0 * 2);
+    s32 val = effMiscRandMod(0, v0 * 2);
 
     func_0010D608((f32)(val - v0 + 100) / 100.0f);
     return 1;
@@ -413,15 +413,15 @@ void func_0011C550(void) {
     func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x678));
 }
 
-void func_0011C580(void) {
+void eventScriptSelectRandomValue(void) {
     s32 value;
     s32 roll;
 
     if ((*(u16 *)D_003C2E7C[0] & 0x20) == 0) {
-        roll = func_002E83F8(0, 0x20);
+        roll = effMiscRandMod(0, 0x20);
         value = roll != 0 ? 10 : 0x80;
     } else {
-        roll = func_002E83F8(0, 0x30);
+        roll = effMiscRandMod(0, 0x30);
         value = roll != 0 ? 0 : 0x80;
     }
     func_0010D5F0(value);
@@ -443,7 +443,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011CAB0);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011CB90);
 
-void func_0011CE18(void) {
+void dds3WorkClear(void) {
     s32 base = D_003BAA00;
 
     *(s32 *)(base + 0x1360) = 0;
@@ -469,8 +469,6 @@ s32 func_0011CE50(void) {
     func_0010D5F0(func_0011A968(val) == 1);
     return 1;
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAA34);
 
@@ -539,7 +537,6 @@ INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAB4);
 INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAB8);
 
 INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAABC);
-
 
 INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAC0);
 

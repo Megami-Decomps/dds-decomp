@@ -1,7 +1,7 @@
 #include "common.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
-extern void *func_00163258(void *data, s32 index);
+extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_00184890(void *work0, void *work1);
 extern void func_00184B30(void *work);
 extern void func_00184BC8(void *work);
@@ -31,8 +31,8 @@ void func_001849C0(void *data) {
     void *work0;
     void *work1;
 
-    work0 = func_00163258(data, 0);
-    work1 = func_00163258(data, 1);
+    work0 = effParamTableGetBlock(data, 0);
+    work1 = effParamTableGetBlock(data, 1);
     func_00184890(work0, work1);
 }
 
@@ -53,9 +53,9 @@ void func_00185670(void *data) {
     void *work1;
     void *work2;
 
-    work0 = func_00163258(data, 0);
-    work1 = func_00163258(data, 1);
-    work2 = func_00163258(data, 2);
+    work0 = effParamTableGetBlock(data, 0);
+    work1 = effParamTableGetBlock(data, 1);
+    work2 = effParamTableGetBlock(data, 2);
     func_001855D0(work0, work1, work2);
 }
 
@@ -228,8 +228,8 @@ void func_00185AB8(void *data) {
     void *work0;
     void *work1;
 
-    work0 = func_00163258(data, 0);
-    work1 = func_00163258(data, 1);
+    work0 = effParamTableGetBlock(data, 0);
+    work1 = effParamTableGetBlock(data, 1);
     func_00185A50(work0, work1);
 }
 
@@ -254,7 +254,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185BD8);
 void func_00185DE0(void *data) {
     void *work;
 
-    work = func_00163258(data, 0);
+    work = effParamTableGetBlock(data, 0);
     func_00185BD8(work);
 }
 

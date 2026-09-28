@@ -2,7 +2,7 @@
 
 s32 func_0010FDC0(void);
 void func_0010FE48(s32 ctx);
-s32 func_00112868(void);
+s32 objGetSlot1Data(void);
 void func_001175A8(s32 ctx);
 void func_001175B8(s32 ctx);
 
@@ -30,7 +30,7 @@ void func_00220228(void)
 {
     s32 ctx;
 
-    ctx = func_00112868();
+    ctx = objGetSlot1Data();
     if (ctx != 0) {
         func_001175A8(ctx);
     }
@@ -40,7 +40,7 @@ void func_00220260(void)
 {
     s32 ctx;
 
-    ctx = func_00112868();
+    ctx = objGetSlot1Data();
     if (ctx != 0) {
         func_001175B8(ctx);
     }

@@ -6,7 +6,7 @@ extern char *func_0010D5A8(s32 idx);
 extern void func_0010D5F0(s32 value);
 extern void *func_0010D6A0(void);
 
-extern s32 func_0013BEE8(u32 key);
+extern s32 getFieldTaskRecordValue(u32 key);
 extern void func_0013DDF0(void *entry);
 extern s32 func_0013CBA8(s32 index);
 extern s32 func_0013CEB0(s32 param0, s32 param1);
@@ -28,7 +28,7 @@ extern s32 func_0014A1A0(char *str);
 extern void func_0014A960(s32 param0, s32 param1, s32 param2);
 extern s32 func_00222090(s32 param);
 
-/* Work object queried by func_0014F408; +0xE4 holds the key for func_0013BEE8. */
+/* Work object queried by func_0014F408; +0xE4 holds the key for getFieldTaskRecordValue. */
 typedef struct {
     u8 unk00[0xE4]; /* 0x00 */
     u32 key;        /* 0xE4 */
@@ -128,7 +128,7 @@ INCLUDE_ASM(const s32, "game/code_0014F098", func_0014F3E0);
 
 s32 func_0014F408(void) {
     EffCmdWork *work = func_0010D6A0();
-    void *entry = func_0013BEE8(work->key);
+    void *entry = getFieldTaskRecordValue(work->key);
 
     if (entry != NULL) {
         func_0013DDF0(entry);

@@ -37,7 +37,7 @@ typedef struct FrFontSave {
     u32 unk8; /* 0x8: read by func_00194998 */
 } FrFontSave;
 
-/* Glyph/record chain walked by func_001958A0/func_00195B78. */
+/* Glyph/record chain walked by func_001958A0/frFontLinkGlyph. */
 typedef struct FrFontGlyph {
     union {
         s16 h;                        /* 0x0: halfword view */
@@ -83,13 +83,13 @@ extern FrFontSys D_003D6C80;
 extern FrFontGlyph *D_003D6E14[];
 extern u32 func_00195C50(void *arg0);
 extern void func_00195450(FrFontCtx *ctx, u32 arg1, u32 arg2);
-void func_00196390();
+void frFontCreateContext();
 extern void func_00195360(FrFontCtx *ctx, s32 arg1);
 extern s32 func_00100518(void);
 extern s32 func_00195550(FrFontGlyph *arg0);
 extern FrFontGlyph *func_00194840(FrFontGlyph *arg0);
 extern FrFontGlyph *func_00194BA0(FrFontGlyph *arg0, s32 arg1);
-extern FrFontGlyph *func_00195B78(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2);
+extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2);
 extern s32 func_001958A0(FrFontGlyph *arg0, s8 arg1, u32 arg2);
 extern FrFontCtx *func_00195160(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_00195880(FrFontGlyph *arg0, s8 arg1);
@@ -115,7 +115,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00194840);
 s32 func_00194920(FrFontGlyph *arg0) {
     FrFontGlyph **slot = &D_003D6E14[func_00100518() & 0xFF];
 
-    *slot = func_00195B78(*slot, arg0, 0);
+    *slot = frFontLinkGlyph(*slot, arg0, 0);
     return 0;
 }
 
@@ -154,7 +154,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00194E00);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194E80);
 
-void func_00194F78(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 arg5) {
+void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 arg5) {
     arg0->u14.b[1] = arg2;
     arg0->u14.b[0] = arg3;
     arg0->u14.b[2] = arg5;
@@ -171,7 +171,7 @@ void func_00194F78(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 a
     arg0->unk28 = NULL;
 }
 
-void func_00194FC0(FrFontGlyph *arg0) {
+void frFontInitGlyph(FrFontGlyph *arg0) {
     arg0->u0.b.b0 = -0x80;
     arg0->unk4 = 0;
     arg0->unk8 = 0;
@@ -267,10 +267,10 @@ s32 func_00195B10(void) {
 }
 
 FrFontGlyph *func_00195B60(FrFontGlyph *arg0, FrFontGlyph *arg1) {
-    return func_00195B78(arg0, arg1, 1);
+    return frFontLinkGlyph(arg0, arg1, 1);
 }
 
-FrFontGlyph *func_00195B78(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
+FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
     if (arg0 == NULL) {
         return arg1;
     }
@@ -292,7 +292,7 @@ void func_00195BD8(u32 arg0) {
 }
 
 void func_00195BF8(void) {
-    func_001945A8(8);
+    frFontFreeEntry(8);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195C10);
@@ -345,7 +345,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_001961B0);
 INCLUDE_ASM(const s32, "interface/frFont", func_00196220);
 
 /* Old-style definition: callers invoke it without arguments and rely on $a0. */
-void func_00196390(ctx)
+void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 {
     FrFontCtx *newCtx = func_00195160(&D_003BB180, 0, ctx->uC.b.bD, ctx->uC.b.bE, ctx->u14.shifted);
@@ -369,7 +369,7 @@ void func_001963E0(FrFontCtx *ctx) {
     if (pending == 0) {
         pending = ctx->flag1D;
     } else {
-        func_00196390();
+        frFontCreateContext();
         pending = ctx->flag1D;
     }
     if (pending != 0) {
@@ -383,8 +383,6 @@ void func_00196450(FrFontCtx *ctx) {
     ctx->flag1C = 1;
     ctx->flag1D = 1;
 }
-
-
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB160);
 
@@ -401,7 +399,6 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_003BB174);
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB178);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
-
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
 

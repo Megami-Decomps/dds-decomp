@@ -9,7 +9,7 @@ s32 func_0022F408(s32 arg0);
 void func_00232720(void);
 void func_00134C68(void);
 void func_00101A80(s32 arg0, s32 arg1);
-s32 func_00235560(void);
+s32 evtCreateFrameVariableTask(void);
 void func_0022C408(u64 arg0);
 void *func_002329A0(s32 arg0);
 extern u32 D_003BA904;
@@ -162,13 +162,13 @@ void func_002300B8(s32 arg0) {
     if (v1 == -1) {
         return;
     }
-    func_0019BC98(v1, 1);
+    itfMesCleanupWindow(v1, 1);
     v0 = *(s32 *)(arg0 + 8);
     func_0019B4A0(*(s32 *)(v0 + 0x104));
     v0 = *(s32 *)(arg0 + 8);
-    func_0019B300(*(s32 *)(v0 + 0x104), 0);
+    itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
     v0 = *(s32 *)(arg0 + 8);
-    func_0019BFD8(*(s32 *)(v0 + 0x104));
+    itfMesResetWindow(*(s32 *)(v0 + 0x104));
     *(u8 *)(arg0 + 0x23c5) = 0;
     *(u8 *)(arg0 + 0x23c4) = 0;
 }
@@ -301,7 +301,7 @@ u32 func_00231CC8(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231D18);
 
-u32 func_00231E10(u32 arg0, u32 arg1, u8 *scene) {
+u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
     u8 *record = (u8 *)func_0022BE40((s32)scene);
     if (record != NULL) {
         f32 *dst = *(f32 **)(record + 0x2C);
@@ -359,7 +359,7 @@ void *func_002329A0(s32 arg0) {
 
     temp_v0 = func_00101A70();
     func_0022E5A0(*(s32 *)((u8 *)temp_v0 + 0x18), temp_v0);
-    func_00101A80(arg0, func_00235560());
+    func_00101A80(arg0, evtCreateFrameVariableTask());
     D_003BA904 |= 0x2000000;
     return (void *)func_00232720;
 }
@@ -400,20 +400,11 @@ void func_00232D48(void) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232D60);
 
-void func_00232E00(void) {
+void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ADB20, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232E20);
-
-
-
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADB20);
 
@@ -484,7 +475,6 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF58);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
-
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
 

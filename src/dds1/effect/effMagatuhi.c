@@ -15,7 +15,7 @@ typedef struct {
     void *unk34;        /* 0x34 released by func_001893C0 */
 } EffMagatuhiWork; /* 0x38 */
 
-extern void *func_0018CBB8(void *arg);
+extern void *effGetHandlerArg(void *arg);
 
 /* 64-byte vector copy via COP2 (plain C cannot emit lqc2/sqc2). Wrapped in
  * .set noreorder so ee-as keeps the block verbatim. Shared by the three
@@ -52,7 +52,7 @@ typedef struct {
     void *unk190;          /* 0x190 */
 } EffMagatuhiBigWork; /* 0x194 */
 
-/* Float source block read by func_0018A610. */
+/* Float source block read by effMagatuhiCopyFloatBlock. */
 typedef struct EffMagatuhiSrc {
     f32 f00, f04, f08;
     u8 pad0C[4];
@@ -61,7 +61,7 @@ typedef struct EffMagatuhiSrc {
     f32 f20, f24;
 } EffMagatuhiSrc; /* 0x28 */
 
-/* Float destination block written by func_0018A610. */
+/* Float destination block written by effMagatuhiCopyFloatBlock. */
 typedef struct EffMagatuhiDst {
     f32 f00, f04, f08;
     u8 pad0C[4];
@@ -102,8 +102,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189E98);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A098);
 
-void func_0018A610(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
-    EffMagatuhiDst *dst = func_0018CBB8(work->ptr08);
+void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
+    EffMagatuhiDst *dst = effGetHandlerArg(work->ptr08);
 
     dst->f00 = src->f00;
     dst->f04 = src->f04;
@@ -148,7 +148,7 @@ void func_0018B618(EffMagatuhiMidWork *work, void *value) {
     work->unk124 = value;
 }
 
-void func_0018B620(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
+void effMagatuhiCopyVecs(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
     EFF_COPY64(dst, src);
 }
 
@@ -171,7 +171,7 @@ void func_0018BE68(EffMagatuhiMidWork *work, void *value) {
     work->unk128 = value;
 }
 
-void func_0018BE70(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
+void effMagatuhiCopyVecs2(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
     EFF_COPY64(dst, src);
 }
 
@@ -194,7 +194,7 @@ void func_0018C7C0(EffMagatuhiMidWork *work, void *value) {
     work->unk120 = value;
 }
 
-void func_0018C7C8(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
+void effMagatuhiCopyVecs3(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
     EFF_COPY64(dst, src);
 }
 

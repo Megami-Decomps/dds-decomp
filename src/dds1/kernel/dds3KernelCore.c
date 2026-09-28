@@ -377,14 +377,6 @@ void func_00101A78(void) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101A80);
 
-
-
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DE88);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEB8);
@@ -396,7 +388,6 @@ INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEF8);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA824);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
-
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA830);
 

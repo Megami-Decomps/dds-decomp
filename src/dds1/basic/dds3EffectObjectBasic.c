@@ -19,7 +19,7 @@ typedef struct {
     u8 unkF;           /* 0xF kind checked ==7 by func_001158B8 */
     u8 pad10[8];       /* 0x10 */
     EffectData *unk18; /* 0x18 */
-    void *unk1C;       /* 0x1C vector base read by func_001158F0/func_00115930 */
+    void *unk1C;       /* 0x1C vector base read by func_001158F0/effObjGetIntParam */
 } EffectObj;
 
 void func_001143D8(void *arg);
@@ -49,7 +49,7 @@ extern void *func_0014FD20(void);
 
 extern void *func_00151E08(s32 arg0, s32 arg1);
 
-extern void *func_00151D88(s32 arg0, u32 arg1);
+extern void *billCreateIndexed(s32 arg0, u32 arg1);
 
 extern void *func_00151E60(void *arg);
 
@@ -86,7 +86,7 @@ void func_00114BF0(EffectObj *obj, void *vec, s32 arg2) {
 void func_00114C38(u32 arg0, void *vec, s32 arg2) {
     void *handle;
 
-    handle = func_00151D88(1, arg0);
+    handle = billCreateIndexed(1, arg0);
     func_00114B18(handle, vec, arg2);
 }
 
@@ -113,7 +113,7 @@ void func_00114DB8(EffectObj *obj, void *vec, s32 arg2) {
 void func_00114E00(u32 arg0, void *vec, s32 arg2) {
     void *handle;
 
-    handle = func_00151D88(0, arg0);
+    handle = billCreateIndexed(0, arg0);
     func_00114CE8(handle, vec, arg2);
 }
 
@@ -177,7 +177,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158B8);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158F0);
 
-s32 func_00115930(EffectObj *obj) {
+s32 effObjGetIntParam(EffectObj *obj) {
     void *p;
 
     if (func_001158B8(obj) == NULL) {
@@ -204,12 +204,6 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BB8);
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C20);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C80);
-
-
-
-
-
-
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F7D0);
 

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00105C48(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_0024A6C0(s32);
 
@@ -12,7 +12,7 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_00249FA8);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A058);
 
-s32 func_0024A0A0(void) {
+s32 pollSceneState(void) {
     s32 state = D_003BC3E0;
     if (state == 1) {
         return 1;
@@ -33,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A138);
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A170);
 
 s32 func_0024A1A8(void) {
-    s32 temp_v0 = func_00105C48();
+    s32 temp_v0 = kwlnFadeIsActive();
 
     if (temp_v0 != 0) {
         return 0;
@@ -58,7 +58,7 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A2D8);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A340);
 
-s32 func_0024A478(s32 arg0) {
+s32 classifyRemainingFrames(s32 arg0) {
     s32 value = *(s32 *)(arg0 + 0x9C);
     if (value == 0) {
         return 0;
@@ -81,12 +81,6 @@ u8 func_0024A6E8(s32 arg0) {
     return *(u8 *)(temp_v0 * 0xa0 + *(s32 *)(*(s32 *)(arg0 + 100) + 0x18) + 0x14);
 }
 
-
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF658);
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF668);
@@ -96,7 +90,6 @@ INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF678);
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF6A0);
-
 
 INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
 

@@ -8,7 +8,7 @@ typedef struct EffRandState
 extern EffRandState D_00398938;
 extern f32 func_002E77F8(f32 angle);
 extern f32 func_002E78F8(f32 angle);
-extern void func_002E79F0(f32 x, f32 y);
+extern void sdfAtan2(f32 x, f32 y);
 extern f32 D_00398380[4];
 
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
@@ -247,7 +247,7 @@ void func_002E82F8(void)
         "mtc1 $2, %1\n"
         ".set reorder\n"
         : "=f"(x), "=f"(y) : "r"(D_00398380) : "memory");
-    func_002E79F0(x, y);
+    sdfAtan2(x, y);
 }
 
 /* Persona 4 effMiscRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */

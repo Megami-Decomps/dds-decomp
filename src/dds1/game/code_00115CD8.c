@@ -13,7 +13,7 @@ u32 func_001160F8(u32 arg0) {
     u32 *puVar1;
     u32 temp_v0;
 
-    func_0010F570();
+    effObjInnerCreate();
     puVar1 = (u32 *)func_002CFEB8(0x10);
     *(u32 **)((s32)arg0 + 0x18) = puVar1;
     temp_v0 = func_001117A8(arg0);

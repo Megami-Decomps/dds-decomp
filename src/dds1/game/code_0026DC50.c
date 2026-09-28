@@ -18,10 +18,6 @@ void func_0026DEA8(s32 unused, void *data) {
     }
 }
 
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_0026DC50", D_003AFEC8);
 
 INCLUDE_RODATA(const s32, "game/code_0026DC50", D_003AFEE0);

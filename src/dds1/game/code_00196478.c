@@ -24,7 +24,7 @@ void func_00194190(s32 id, const char *path);
 extern u16 D_00356620[];
 extern u32 strlen(const char *str);
 
-/* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
+/* Byte stream read by func_00196478/readEncodedTextCode: base at +0x10, position at +0x18. */
 typedef struct TextStream {
     u8 unk0[0x10]; /* 0x0 */
     u8 *unk10;     /* 0x10: base */
@@ -112,7 +112,7 @@ u32 func_00196478(TextStream *stream) {
     return (b + 0xFF) & 0xFF;
 }
 
-u32 func_001964A0(TextStream *stream) {
+u32 readEncodedTextCode(TextStream *stream) {
     u32 first;
     u32 second;
 
@@ -140,7 +140,7 @@ void func_00196AE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00196B30);
 
-void func_00196B88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
+void drawTextColor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     func_00196B30(arg0, arg1, arg2, arg3 & 0xff, arg4 & 0xff,
                   arg5 & 0xff, arg6 & 0xff, arg7, 0);
@@ -187,17 +187,17 @@ void func_00197220(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197238);
 
-void func_00197348(void) {
+void loadStaffFonts(void) {
     func_00194190(4, "/font/staff1.fnt");
     func_00194190(5, "/font/staff2.fnt");
 }
 
 void func_00197378(void) {
-    func_001945A8(4);
-    func_001945A8(5);
+    frFontFreeEntry(4);
+    frFontFreeEntry(5);
 }
 
-u32 func_00197398(u32 value) {
+u32 decodeFontGlyph(u32 value) {
     s32 adjusted = (value & 0xffff) + 0xffff7f80;
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
 
@@ -207,7 +207,7 @@ u32 func_00197398(u32 value) {
     return 0xffff;
 }
 
-void func_001973E8(u8 *output, const char *input) {
+void convertFontText(u8 *output, const char *input) {
     s32 i;
     s32 length = strlen(input);
 
@@ -215,7 +215,7 @@ void func_001973E8(u8 *output, const char *input) {
         if (input[i] >= 0) {
             output[0] = input[i];
         } else {
-            u32 value = func_00197398((u8)input[i + 1] | ((u8)input[i] << 8));
+            u32 value = decodeFontGlyph((u8)input[i + 1] | ((u8)input[i] << 8));
             if (value != 0xffff) {
                 output[0] = value >> 8;
                 output[1] = value;
@@ -239,7 +239,7 @@ void func_001974B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     func_00195460(temp_v0, arg2 << 4);
     func_001954C8(temp_v0, arg3);
     func_001953A8(temp_v0, 0xfffffffffffffffc);
-    func_00195B78(arg5, temp_v0, 0);
+    frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197580);
@@ -268,7 +268,7 @@ void func_00197B78(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     func_00195450(temp_v0, arg0, arg1);
     func_00195460(temp_v0, arg2 << 4);
     func_001954C8(temp_v0, arg3);
-    func_00195B78(arg5, temp_v0, 0);
+    frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197C40);
@@ -335,7 +335,7 @@ u32 func_001982A0(s32 arg0) {
     return 1;
 }
 
-void func_001982C0(void) {
+void loadBackgroundSprite(void) {
     u32 resource;
     u64 buffer = func_002EB028("/sprite/bg00.tmx", &resource, 0);
 
@@ -371,7 +371,7 @@ u32 func_00198428(void) {
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198460);
 
-TextPoolNode *func_001984C0(TextPool *pool) {
+TextPoolNode *acquireTextPoolNode(TextPool *pool) {
     TextPoolNode *node = pool->firstFree;
     TextPoolNode *next;
 
@@ -397,7 +397,7 @@ TextPoolNode *func_001984C0(TextPool *pool) {
     return node;
 }
 
-void func_00198528(TextPoolNode *node, TextPool *pool) {
+void releaseTextPoolNode(TextPoolNode *node, TextPool *pool) {
     TextPoolNode *previous = node->previous;
     TextPoolNode *next = node->next;
 
@@ -425,7 +425,7 @@ void func_00198528(TextPoolNode *node, TextPool *pool) {
     }
 }
 
-void func_00198580(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
+void scaleTextVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
                    s32 w, const TextVector *input, s32 count) {
     while (count > 0) {
         s32 x = scaleX * input->x;
@@ -445,7 +445,7 @@ void func_00198580(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
     }
 }
 
-void func_00198600(TextStyleNode *entry, u32 color) {
+void setTextStyleColor(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -454,7 +454,7 @@ void func_00198600(TextStyleNode *entry, u32 color) {
     }
 }
 
-void func_00198658(TextStyleNode *entry, u32 color) {
+void setTextStyleColorBits(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -463,7 +463,7 @@ void func_00198658(TextStyleNode *entry, u32 color) {
     }
 }
 
-void func_001986A8(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
+void translateTextStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
     for (; entry != NULL; entry = entry->next) {
         entry->x += xOffset;
         entry->y += yOffset;
@@ -521,8 +521,6 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001997F0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00199828);
 
-
-
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB188);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB18C);
@@ -530,7 +528,6 @@ INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB18C);
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB190);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB198);
-
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB1A0);
 
