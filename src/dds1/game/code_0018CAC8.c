@@ -21,6 +21,16 @@ typedef struct EffHandler {
     u8 unk4[0x14];
 } EffHandler;
 
+/* Sub-object at EffWork.unk4 with per-type byte slots. */
+typedef struct EffSub {
+    u8 unk0[0x20];  /* 0x0 */
+    u8 unk20;       /* 0x20 */
+    u8 unk21[0x1F]; /* 0x21 */
+    u8 unk40;       /* 0x40 */
+    u8 unk41[0xF];  /* 0x41 */
+    u8 unk50;       /* 0x50 */
+} EffSub;
+
 /* Message record with length-prefixed strings at +0x34/+0x40. */
 typedef struct EffMsg {
     s32 unk0;      /* 0x0: set by func_0018D978 */
@@ -210,11 +220,77 @@ void func_0018CC58(EffWork *arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CC98);
+void func_0018CC98(EffWork *arg0, s32 arg1) {
+    u8 v = arg1;
+    u32 t = arg0->type;
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CCF0);
+    switch (t) {
+    case 0:
+        ((EffSub *)arg0->unk4)->unk20 = v;
+        return;
+    case 1:
+        ((EffSub *)arg0->unk4)->unk40 = v;
+        return;
+    case 2:
+        ((EffSub *)arg0->unk4)->unk50 = v;
+        return;
+    case 3:
+        ((EffSub *)arg0->unk4)->unk50 = v;
+        return;
+    case 4:
+        ((EffSub *)arg0->unk4)->unk50 = v;
+        return;
+    default:
+        return;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CD50);
+u32 func_0018CCF0(EffWork *arg0, s32 arg1) {
+    u8 v = arg1;
+    u32 t = arg0->type;
+
+    switch (t) {
+    case 0:
+        return ((EffSub *)arg0->unk4)->unk20;
+    case 1:
+        return ((EffSub *)arg0->unk4)->unk40;
+    case 2:
+        return ((EffSub *)arg0->unk4)->unk50;
+    case 3:
+        return ((EffSub *)arg0->unk4)->unk50;
+    case 4:
+        return ((EffSub *)arg0->unk4)->unk50;
+    default:
+        break;
+    }
+    return 0;
+}
+
+void func_0018CD50(EffWork *arg0) {
+    u32 t = arg0->type;
+    u32 v = 0;
+
+    switch (t) {
+    case 0:
+        v = arg0->unk4;
+        break;
+    case 1:
+        v = arg0->unk4;
+        break;
+    case 2:
+        v = arg0->unk4 + 0x40;
+        break;
+    case 3:
+        v = arg0->unk4 + 0x40;
+        break;
+    case 4:
+        v = arg0->unk4 + 0x40;
+        break;
+    default:
+        break;
+    }
+    func_0018CAC8((EffWork *)t, v);
+}
 
 void func_0018CDA0(void) {
 }

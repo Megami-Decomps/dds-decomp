@@ -131,6 +131,8 @@ def main():
         lit4 = data[l4_off:l4_off + l4_size]
         ri_off, ri_size = secs.get(".reginfo", (0, 0))
         gp0 = struct.unpack_from("<i", data, ri_off + 20)[0] if ri_size >= 24 else 0
+        sd_off, sd_size = secs.get(".sdata", (0, 0))
+        sdata = data[sd_off:sd_off + sd_size]
         ro_off, ro_size = secs.get(".rodata", (0, 0))
         rodata = data[ro_off:ro_off + ro_size]
         all_relocs = relocations(obj)
@@ -143,6 +145,7 @@ def main():
 
     ok = bad = 0
     tables = []  # (offset in our .rodata, retail address, function)
+    small = []   # the same for .sdata
     for off, size, name in sorted(funcs):
         if args.func and name != args.func:
             continue
@@ -162,7 +165,7 @@ def main():
             bad += 1
             continue
         pending_hi = {}
-        rodata_hi = None
+        rodata_hi = sdata_hi = None
         for i in range(0, size, 4):
             mine = struct.unpack_from("<I", text, off + i)[0]
             want = struct.unpack_from("<I", retail, roff + i)[0]
@@ -189,6 +192,19 @@ def main():
                 theirs = struct.unpack_from("<I", retail, va_to_off(segs, gp + (((want & 0xFFFF) ^ 0x8000) - 0x8000)))[0]
                 if ours != theirs:
                     diffs.append((i, mine, want, f"float constant {ours if ours is None else hex(ours)} vs retail {theirs:#x}"))
+                continue
+            if base == ".sdata":
+                # Small data the C emits (a short literal or a variable it defines):
+                # remember where each side keeps it, compare the bytes below.
+                if rtype == "R_MIPS_HI16":
+                    sdata_hi = (mine & 0xFFFF, want & 0xFFFF)
+                elif rtype == "R_MIPS_LO16" and sdata_hi:
+                    sext = lambda v: (v ^ 0x8000) - 0x8000
+                    small.append(((sdata_hi[0] << 16) + sext(mine & 0xFFFF),
+                                  (sdata_hi[1] << 16) + sext(want & 0xFFFF), name))
+                elif rtype == "R_MIPS_GPREL16":
+                    sext = lambda v: (v ^ 0x8000) - 0x8000
+                    small.append((sext(mine & 0xFFFF) + gp0, gp + sext(want & 0xFFFF), name))
                 continue
             if base == ".rodata":
                 # A switch's jump table: remember where each side keeps it.
@@ -234,7 +250,7 @@ def main():
 
     def asm_users(addr):
         sym = next((n for n, a in syms.items() if a == addr), f"D_{addr:08X}")
-        pat = re.compile(rf"%(?:hi|lo)\({re.escape(sym)}\)")
+        pat = re.compile(rf"%(?:hi|lo|gp_rel)\({re.escape(sym)}\)")
         return sorted(n for n in asm_names if (asm_dir / f"{n}.s").exists()
                       and pat.search((asm_dir / f"{n}.s").read_text()))
 
@@ -282,6 +298,27 @@ def main():
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]
+    sd_starts = sorted({o for o, _, _ in small} | {len(sdata)})
+    sd_covered = set()
+    for off, retail_addr, name in dict.fromkeys(small):
+        if not 0 <= off < len(sdata):
+            continue
+        end = next(s for s in sd_starts if s > off)
+        item = sdata[off:end]
+        nul = item.find(b"\0")
+        item = item[:nul + 1] if nul >= 0 and not any(item[nul:]) else item.rstrip(b"\0") or item[:4]
+        theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
+        if item != theirs:
+            bad += 1
+            print(f"DIFF sdata of {name} (retail 0x{retail_addr:08X}): {item[:24]!r} vs {theirs[:24]!r}")
+        elif users := asm_users(retail_addr):
+            bad += 1
+            print(f"SHARED sdata of {name} (retail 0x{retail_addr:08X}) is also used by asm {', '.join(users)}: "
+                  "keep the extern D_ symbol until they are C")
+        sd_covered.update(range(off, end))
+    if emitted.get(".sdata") and owns_rodata(version, unit_name, "sdata") \
+            and not [o for o in range(len(sdata)) if o not in sd_covered and sdata[o]]:
+        del emitted[".sdata"]
     if emitted.get(".lit4") and owns_rodata(version, unit_name, "lit4"):
         del emitted[".lit4"]  # every constant was compared with retail above
     for name, size in emitted.items():
