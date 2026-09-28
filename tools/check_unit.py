@@ -253,8 +253,11 @@ def main():
         pat = re.compile(rf"%(?:hi|lo|gp_rel)\({re.escape(sym)}\)")
         return sorted(n for n in asm_names if (asm_dir / f"{n}.s").exists()
                       and pat.search((asm_dir / f"{n}.s").read_text()))
-    retail_labels = sorted({(int(a, 16), k) for p in [ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s", *asm_dir.glob("*.s")]
-                            if p.exists() for k, a in re.findall(r"^dlabel (D|jtbl)_([0-9A-F]{8})\b", p.read_text(), re.M)})
+    # The unit's whole .rodata as splat split it (symbols later moved into
+    # function files are listed there too).
+    ro_file = ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s"
+    retail_labels = sorted((int(a, 16), k) for k, a in re.findall(r"^dlabel (D|jtbl)_([0-9A-F]{8})\b",
+                                                                  ro_file.read_text() if ro_file.exists() else "", re.M))
 
     def retail_padding(addr, size):
         """Bytes between an item's 8-aligned end and the next retail symbol

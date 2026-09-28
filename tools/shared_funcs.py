@@ -5,6 +5,7 @@
     python3 tools/shared_funcs.py names
     python3 tools/shared_funcs.py units [--write] [--from dds1]
     python3 tools/shared_funcs.py port [--from dds1]
+    python3 tools/shared_funcs.py clones dds1
 
 Pairs come from `romwright-cli diff dds2 --reference build/romwright --reference-name dds1
 --json` (build/dds1_diff_dds2.json) and are kept only when the code is byte-identical
@@ -22,6 +23,8 @@ port   replaces the other version's INCLUDE_ASM with the source version's C for 
        decompiled function whose counterpart is identical. Symbol references are
        translated through the relocations of that pair, so the result rebuilds the same
        bytes even when romwright matched one of several identical copies.
+clones the same within one version: an INCLUDE_ASM function whose masked code equals
+       a decompiled function of the same game gets that C with its own symbols.
 """
 import argparse
 import bisect
@@ -34,7 +37,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from pairing import RETAIL, ROOT, STORE, Build, address_pairs, diff_pairs, identical, ordered_pairs
+from pairing import RETAIL, ROOT, STORE, Build, address_pairs, diff_pairs, identical, ordered_pairs, va_to_off
 
 VERSIONS = json.loads((ROOT / "config/versions.json").read_text())
 PAIR_DIFF = ROOT / "build/dds1_diff_dds2.json"
@@ -334,6 +337,51 @@ def translate(text, src, dst, amap):
     return TOKENS.sub(sub, text), missing
 
 
+
+STRING = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
+
+
+def c_unescape(s):
+    return s.encode("latin-1").decode("unicode_escape").encode("latin-1")
+
+
+def c_escape(b):
+    out = []
+    for c in b:
+        ch = chr(c)
+        out.append({"\n": "\\n", "\t": "\\t", "\"": "\\\"", "\\": "\\\\"}.get(ch)
+                   or (ch if 32 <= c < 127 else f"\\x{c:02x}"))
+    return "".join(out)
+
+
+def translate_strings(body, src, dst, amap):
+    """A string literal the function writes itself sits at some retail address the
+    relocations pair with the counterpart's own string, which may differ (clones
+    that print different messages). Returns the body with the counterpart's
+    strings, or None when a literal cannot be located."""
+    def cstr(build, va):
+        off = va_to_off(build.segs, va)
+        end = build.data.index(b"\0", off)
+        return build.data[off:end]
+
+    def sub(m):
+        want = c_unescape(m.group(1))
+        for x, y in amap.items():
+            if x in src.build.sizes or y in dst.build.sizes:
+                continue
+            try:
+                if cstr(src.build, x) == want:
+                    return '"' + c_escape(cstr(dst.build, y)) + '"'
+            except (ValueError, KeyError, IndexError):
+                continue
+        raise LookupError(m.group(0))
+
+    try:
+        return STRING.sub(sub, body)
+    except LookupError:
+        return None
+
+
 def declared_name(decl):
     """Identifier a top-level declaration introduces: the typedef/struct name for type
     definitions (whose bodies may hold function-pointer members), the name before '('
@@ -357,7 +405,42 @@ def declared_name(decl):
 
 def cmd_port(args):
     src, dst, ordered, loose = oriented(args)
-    pairs = {**loose, **ordered}
+    port(src, dst, {a: [b] for a, b in {**loose, **ordered}.items()})
+
+
+def cmd_clones(args):
+    """Same-game twins: an asm function whose relocation-masked code equals a
+    decompiled function of the same version gets that function's C."""
+    game = Game(args.version)
+    b = game.build
+    by_code = collections.defaultdict(list)
+    for fa in b.sizes:
+        if b.sizes[fa] >= 16:
+            by_code[tuple(b.code(fa))].append(fa)
+    asm_names = set()
+    defined = {}
+    for path in (ROOT / "src" / game.version).rglob("*.c"):
+        text = path.read_text()
+        asm_names.update(INCLUDE_ASM.findall(text))
+        for blk in blocks(text):
+            if "{" in blk and (m := DEF.search(blk)) and not re.fullmatch(r"[^{]*\{\s*\}", blk.strip()):
+                defined[game.address_of(m.group(1))] = m.group(1)
+    pairs = {}
+    for group in by_code.values():
+        done = [a for a in group if a in defined]
+        todo = [a for a in group if game.name_at(a) in asm_names]
+        if done and todo:
+            pairs[done[0]] = todo
+    print(f"{sum(map(len, pairs.values()))} asm functions have a decompiled twin")
+    port(game, game, pairs)
+
+
+ported_names = {}  # unit -> the functions this run gave C (the only ones finish() may revert)
+originals = {}  # unit -> its text before this run
+
+
+def port(src, dst, pairs):
+    """Replace dst's INCLUDE_ASM for each target in pairs[src address] with src's C."""
     dst_files, dst_defined = {}, set()
     for path in (ROOT / "src" / dst.version).rglob("*.c"):
         text = path.read_text()
@@ -376,96 +459,125 @@ def cmd_port(args):
             if re.fullmatch(r"[^{]*\{\s*\}", body.strip()):
                 continue  # splat writes `jr $ra` stubs as empty C in every version
             addr = src.address_of(fname)
-            target = pairs.get(addr)
             rel = path.relative_to(ROOT)
-            if target is None:
-                skipped.append(f"{rel}:{fname}: no identical {dst.version} function")
+            if addr not in pairs:
+                if src is not dst:
+                    skipped.append(f"{rel}:{fname}: no identical {dst.version} function")
                 continue
-            dname = dst.name_at(target)
-            dpath = dst_files.get(dname)
-            if dpath is None:
-                if dname not in dst_defined:
-                    skipped.append(f"{rel}:{fname}: {dname} is not in a {dst.version} C unit (see `units`)")
-                continue
-            amap = {}
-            for x, y in address_pairs(src.build, addr, dst.build, target, src.gp, dst.gp):
-                amap.setdefault(x, y)
-            amap[addr] = target
-            new_body, missing = translate(body, src, dst, amap)
-            used = set(TOKENS.findall(body))
-            chosen = set()
-            while True:
-                more = {i for i, (_, decl) in enumerate(pre) if i not in chosen and declared_name(decl) in used}
-                if not more:
-                    break
-                chosen |= more
-                for i in more:
-                    used |= set(TOKENS.findall(pre[i][1]))
-            new_pre = []
-            for i in sorted(chosen):
-                tdecl, miss = translate(pre[i][1], src, dst, amap)
-                missing += miss
-                new_pre.append(tdecl)
-            if missing:
-                skipped.append(f"{rel}:{fname}: cannot translate {sorted(set(missing))}")
-                continue
-            text = dpath.read_text()
-            pattern = re.compile(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{dname}\);$', re.M)
-            text = pattern.sub(lambda _: new_body, text, count=1)
-            add = [d for d in new_pre if d not in text]
-            # A changed type definition replaces the destination's old one in place, so
-            # everything declared after it still sees it first.
-            for d in [d for d in add if TYPE_DECL.match(d) and "{" in d]:
-                old_def = next((b for b in blocks(text) if TYPE_DECL.match(b) and "{" in b
-                                and declared_name(b) == declared_name(d)), None)
-                if old_def:
-                    text = text.replace(old_def, d, 1)
-                    add.remove(d)
-            if add:
-                # A source declaration supersedes the destination's older one of the same
-                # name (e.g. a global retyped from void* to a struct pointer).
-                # Types are left alone: a forward typedef and its struct share a name.
-                names = {declared_name(d) for d in add if not TYPE_DECL.match(d)}
-                text = "\n\n".join(b for b in blocks(text)
-                                   if "{" in b or TYPE_DECL.match(b) or b.startswith("#include")
-                                   or "INCLUDE_ASM" in b or declared_name(b) not in names) + "\n"
-                # After the declarations already there (earlier ports' types may be
-                # what these depend on), before the first function or INCLUDE_ASM.
-                first = FIRST_BODY.search(text)
-                at = first.start() if first else len(text)
-                text = text[:at] + "\n\n".join(add) + "\n\n" + text[at:]
-            before = dpath.read_text()
-            dpath.write_text(text)
-            # A port that breaks the destination's compile (conflicting prototype,
-            # arity) is undone at once, so one bad function never blocks the unit.
-            if not compiles(dpath, dst.version):
-                dpath.write_text(before)
-                skipped.append(f"{rel}:{fname}: does not compile in {dpath.relative_to(ROOT)}; not ported")
-                continue
-            ported[dpath.relative_to(ROOT)] += 1
+            for target in pairs[addr]:
+                port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defined, ported, skipped)
+    finish(dst, ported, skipped)
+
+
+def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defined, ported, skipped):
+    """Port one function; returns nothing, records the outcome in ported/skipped."""
+    rel = path.relative_to(ROOT)
+    dname = dst.name_at(target)
+    dpath = dst_files.get(dname)
+    if dpath is None:
+        if dname not in dst_defined:
+            skipped.append(f"{rel}:{fname}: {dname} is not in a {dst.version} C unit (see `units`)")
+        return
+    amap = {}
+    for x, y in address_pairs(src.build, addr, dst.build, target, src.gp, dst.gp):
+        amap.setdefault(x, y)
+    amap[addr] = target
+    new_body, missing = translate(body, src, dst, amap)
+    new_body = translate_strings(new_body, src, dst, amap) if STRING.search(new_body) else new_body
+    if new_body is None:
+        skipped.append(f"{rel}:{fname}: a string literal has no retail counterpart")
+        return
+    used = set(TOKENS.findall(body))
+    chosen = set()
+    while True:
+        more = {i for i, (_, decl) in enumerate(pre) if i not in chosen and declared_name(decl) in used}
+        if not more:
+            break
+        chosen |= more
+        for i in more:
+            used |= set(TOKENS.findall(pre[i][1]))
+    new_pre = []
+    for i in sorted(chosen):
+        tdecl, miss = translate(pre[i][1], src, dst, amap)
+        missing += miss
+        new_pre.append(tdecl)
+    if missing:
+        skipped.append(f"{rel}:{fname}: cannot translate {sorted(set(missing))}")
+        return
+    text = dpath.read_text()
+    pattern = re.compile(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{dname}\);$', re.M)
+    text = pattern.sub(lambda _: new_body, text, count=1)
+    add = [d for d in new_pre if d not in text]
+    # A changed type definition replaces the destination's old one in place, so
+    # everything declared after it still sees it first.
+    for d in [d for d in add if TYPE_DECL.match(d) and "{" in d]:
+        old_def = next((b for b in blocks(text) if TYPE_DECL.match(b) and "{" in b
+                        and declared_name(b) == declared_name(d)), None)
+        if old_def:
+            text = text.replace(old_def, d, 1)
+            add.remove(d)
+    if add:
+        # A source declaration supersedes the destination's older one of the same
+        # name (e.g. a global retyped from void* to a struct pointer).
+        # Types are left alone: a forward typedef and its struct share a name.
+        names = {declared_name(d) for d in add if not TYPE_DECL.match(d)}
+        text = "\n\n".join(b for b in blocks(text)
+                           if "{" in b or TYPE_DECL.match(b) or b.startswith("#include")
+                           or "INCLUDE_ASM" in b or declared_name(b) not in names) + "\n"
+        # After the declarations already there (earlier ports' types may be
+        # what these depend on), before the first function or INCLUDE_ASM.
+        first = FIRST_BODY.search(text)
+        at = first.start() if first else len(text)
+        text = text[:at] + "\n\n".join(add) + "\n\n" + text[at:]
+    before = dpath.read_text()
+    originals.setdefault(dpath.relative_to(ROOT), before)
+    dpath.write_text(text)
+    # A port that breaks the destination's compile (conflicting prototype,
+    # arity) is undone at once, so one bad function never blocks the unit.
+    if not compiles(dpath, dst.version):
+        dpath.write_text(before)
+        skipped.append(f"{rel}:{fname}: does not compile in {dpath.relative_to(ROOT)}; not ported")
+        return
+    ported[dpath.relative_to(ROOT)] += 1
+    ported_names.setdefault(dpath.relative_to(ROOT), set()).add(dname)
+
+
+def finish(dst, ported, skipped):
+    """Check every unit that received C; revert whatever does not match."""
     # Relocation-masked pairing ignores plain immediates (li 0x15 vs li 0x19), so a
     # pair is not proof; every ported function must compile to its own retail bytes.
     for rel in sorted(ported):
         path = ROOT / rel
         r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path), "-v"],
                            capture_output=True, text=True)
-        bad = re.findall(r"^(?:DIFF|OVER|SHARED rodata of) (\w+) ", r.stdout, re.M)
-        if r.returncode and not bad:
+        bad = re.findall(r"^(?:DIFF|OVER|SHARED rodata of|PAD rodata of|TWICE) (\w+)\b", r.stdout, re.M)
+        if r.returncode and not [n for n in bad if n in ported_names.get(rel, ())]:
             skipped.append(f"{rel}: check_unit failed without per-function DIFF; left for review")
         text = path.read_text()
-        for name in bad:
-            block = next(b for b in blocks(text) if "{" in b and (m := DEF.search(b)) and m.group(1) == name)
+        for name in [n for n in bad if n in ported_names.get(rel, ())]:
+            block = next((b for b in blocks(text) if "{" in b and (m := DEF.search(b)) and m.group(1) == name), None)
+            if block is None:
+                skipped.append(f"{rel}:{name}: flagged by check_unit but not a C definition here; left for review")
+                continue
             unit = rel.relative_to(Path("src") / dst.version).with_suffix("").as_posix()
             text = text.replace(block, f'INCLUDE_ASM(const s32, "{unit}", {name});', 1)
             ported[rel] -= 1
             skipped.append(f"{rel}:{name}: ported C differs from {dst.version} retail; reverted")
         path.write_text(text)
+        # A ported declaration can change how the unit's other functions compile.
+        if ported[rel] and subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path)],
+                                          capture_output=True).returncode:
+            path.write_text(originals[rel])
+            skipped.append(f"{rel}: still not clean after reverting; all {ported[rel]} ports undone")
+            ported[rel] = 0
     for p, n in sorted(ported.items()):
-        print(f"ported {n} to {p}")
+        if n:
+            print(f"ported {n} to {p}")
     for s in skipped:
         print(f"skip {s}")
     if ported:
         print("run python3 configure.py --no-split && ninja")
+
 
 def compiles(path, version):
     env = dict(os.environ, DDS_VERSION=version)
@@ -482,6 +594,8 @@ def main():
     m.add_argument("--nocturne", help="Nocturne debug-build SLPM_652.42 (needs build/noct_diff_dds1.json)")
     m.add_argument("--us", help="US Nocturne SLUS_209.11 (needs build/noctus_diff_dds1.json)")
     sub.add_parser("names")
+    c = sub.add_parser("clones")
+    c.add_argument("version", choices=("dds1", "dds2"))
     for name in ("units", "port"):
         p = sub.add_parser(name)
         p.add_argument("--from", dest="src", choices=("dds1", "dds2"), default="dds1")
@@ -490,7 +604,8 @@ def main():
     args = ap.parse_args()
     if not PAIR_DIFF.exists():
         sys.exit(f"{PAIR_DIFF.relative_to(ROOT)} missing; see the module docstring")
-    {"map": cmd_map, "names": cmd_names, "units": cmd_units, "port": cmd_port}[args.cmd](args)
+    {"map": cmd_map, "names": cmd_names, "units": cmd_units, "port": cmd_port,
+     "clones": cmd_clones}[args.cmd](args)
 
 
 if __name__ == "__main__":
