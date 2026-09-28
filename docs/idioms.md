@@ -52,6 +52,18 @@ after two hazard nops that retail doesn't have. Use `fsqrtf()` from
 return fsqrtf(dx * dx + dy * dy + dz * dz);   /* func_00122BB0 */
 ```
 
+## Code that changes with unrelated text (CONTEXT)
+
+ee-gcc 2.96's CSE hashes the addresses of symbol-name strings, so the rest of
+the preprocessed unit (other functions, asm include lines, declarations) can
+tip a function between two equivalent instruction selections. For example,
+`lw $2,sym($2)` becomes `lui/addiu/addu`. check_unit compiles every unit a
+second time exactly as the build does, and reports `CONTEXT` when a C
+function's code differs there. Such a function doesn't match in the real
+build. Treat it like `DIFF`: try another natural formulation or park it.
+Editing a unit can make an existing function CONTEXT, so always check the
+whole unit.
+
 ## Tail calls: `jal` + epilogue instead of `j`
 
 -O2 turns a call in tail position into `j callee`. Retail keeps
