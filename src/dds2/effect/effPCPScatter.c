@@ -81,6 +81,24 @@ struct PcpScatterWork7 {
     u32 unk138;
 };
 
+typedef struct PcpScatterWork8 {
+    u8 pad00[0x3C];
+    f32 unk3C;
+    u8 pad40[0x0C];
+    f32 unk4C;
+    f32 unk50;
+    u8 pad54[0x28];
+    u32 *unk7C;
+} PcpScatterWork8;
+
+typedef struct PcpScatterWork2 {
+    u8 pad00[0x40];
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[0x24];
+    u32 unk6C;
+} PcpScatterWork2;
+
 void func_001787E0(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
@@ -102,14 +120,14 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178B80);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179168);
 
-void func_00179178(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x7c) = arg1;
+void func_00179178(PcpScatterWork8 *work, u32 *values) {
+    work->unk7C = values;
 }
 
-void func_00179180(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x3c) = *(float *)(arg1 + 0x3c) * arg0;
-    *(float *)(arg1 + 0x4c) = *(float *)(arg1 + 0x4c) * arg0;
-    *(float *)(arg1 + 0x50) = *(float *)(arg1 + 0x50) * arg0;
+void func_00179180(float scale, PcpScatterWork8 *work) {
+    work->unk3C *= scale;
+    work->unk4C *= scale;
+    work->unk50 *= scale;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001791A8);
@@ -135,13 +153,13 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179780);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179D78);
 
-void func_00179D88(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x6c) = arg1;
+void func_00179D88(PcpScatterWork2 *work, u32 value) {
+    work->unk6C = value;
 }
 
-void func_00179D90(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x40) = *(float *)(arg1 + 0x40) * arg0;
-    *(float *)(arg1 + 0x44) = *(float *)(arg1 + 0x44) * arg0;
+void func_00179D90(float scale, PcpScatterWork2 *work) {
+    work->unk40 *= scale;
+    work->unk44 *= scale;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179DB0);

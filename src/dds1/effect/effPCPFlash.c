@@ -87,8 +87,8 @@ typedef struct PcpFlashWork10 PcpFlashWork10;
 /* func_0016A088 */
 struct PcpFlashWork1 {
     u8 pad00[0x20];
-    u32 unk20;
-    u32 unk24;
+    u32 colorA;
+    u32 colorB;
     u8 pad28[0x10];
     u32 unk38;
     f32 unk3C;
@@ -277,8 +277,8 @@ void func_0016A230(PcpFlashWork1 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_00170238(work->unk44, index);
-    rgb1 = work->unk20 & 0xFFFFFF;
-    rgb2 = work->unk24 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 8) = func_0018DDF8(rgb1 | 0xFF000000, param);

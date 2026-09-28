@@ -59,12 +59,12 @@ typedef struct {
     u8 pad00[0x10];
     u32 unk10;
     u32 color14;
-    s32 unk18;
+    s32 secondWordCount;
     f32 unk1C;
-    u32 *unk20;
-    u32 *unk24;
+    u32 *firstWords;
+    u32 *secondWords;
     void *unk28;
-    u32 unk2C;
+    u32 allocation;
     u32 unk30;
 } PcpScatterPool;
 
@@ -485,11 +485,11 @@ PcpScatterPool *func_00172C68(s32 groups) {
     block = func_002D0A48(handle);
     memset(block, 0, size);
     pool = (PcpScatterPool *)(block + (first + second));
-    pool->unk20 = block;
+    pool->firstWords = block;
     pool->unk10 = 1;
-    pool->unk24 = block + first;
-    pool->unk18 = second;
-    pool->unk2C = handle;
+    pool->secondWords = block + first;
+    pool->secondWordCount = second;
+    pool->allocation = handle;
     pool->unk1C = 1.0f;
     pool->color14 = 0x80808080;
     pool->unk30 = 0;

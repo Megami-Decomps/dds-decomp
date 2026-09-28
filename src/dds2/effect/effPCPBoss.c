@@ -2,6 +2,13 @@
 
 extern u64 effParamTableGetBlock(u64, u64);
 
+typedef struct {
+    u8 pad00[0x24];
+    u32 unk24;
+    u32 resource28;
+    u32 resource2C;
+} EffPCPBossWork;
+
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C190);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C288);
@@ -42,18 +49,18 @@ void func_0018D2C8(u64 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D330);
 
-void effPCPBossFree(u32 arg0) {
-    func_0016A620(*(u32 *)((s32)arg0 + 0x2c));
-    func_0016A620(*(u32 *)((s32)arg0 + 0x28));
-    func_00328E48(arg0);
+void effPCPBossFree(EffPCPBossWork *work) {
+    func_0016A620(work->resource2C);
+    func_0016A620(work->resource28);
+    func_00328E48(work);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D3E8);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D520);
 
-void func_0018D538(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+void func_0018D538(EffPCPBossWork *work, u32 value) {
+    work->unk24 = value;
 }
 
 u32 func_0018D540(void) {

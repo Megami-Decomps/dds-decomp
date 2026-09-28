@@ -22,7 +22,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -63,7 +63,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -129,7 +129,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x10];  /* 0x80 */
@@ -1343,9 +1343,9 @@ EffPCPWork *func_00184828(EffPCPWork *work) {
     u32 handle;
 
     child = func_001846B8(&work->pad3C[4], NULL);
-    handle = work->unk74;
+    handle = work->optionalHandle;
     if (handle != 0) {
-        child->unk74 = func_00157A50(handle);
+        child->optionalHandle = func_00157A50(handle);
     }
     return child;
 }

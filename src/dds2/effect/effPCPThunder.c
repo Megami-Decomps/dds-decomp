@@ -71,15 +71,15 @@ void func_0016B118(void) {
     func_0016AF38();
 }
 
-void func_0016B130(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0x5c));
-    func_003297C8(*(u32 *)(arg0 + 0x60));
+void func_0016B130(EffPCPThunderWorkB *work) {
+    func_001634A8(work->unk5C);
+    func_003297C8(work->unk60);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B160);
 
-void func_0016B170(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x50) = arg1;
+void func_0016B170(EffPCPThunderWorkB *work, u32 value) {
+    work->unk50 = value;
 }
 
 void func_0016B178(float arg0, s32 arg1) {
@@ -101,9 +101,9 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B928);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016BA68);
 
-void func_0016BC28(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0x5c));
-    func_003297C8(*(u32 *)(arg0 + 0x60));
+void func_0016BC28(EffPCPThunderWorkB *work) {
+    func_001634A8(work->unk5C);
+    func_003297C8(work->unk60);
 }
 
 void func_0016BC58(u64 arg0) {
@@ -119,8 +119,8 @@ void func_0016BC78(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016BC90);
 
-void func_0016BCA0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x50) = arg1;
+void func_0016BCA0(EffPCPThunderWorkB *work, u32 value) {
+    work->unk50 = value;
 }
 
 void func_0016BCA8(float arg0, s32 arg1) {
@@ -146,8 +146,8 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", effThunderDestroySubs);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C6F0);
 
-void func_0016C700(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xa8) = arg1;
+void func_0016C700(EffPCPThunderWorkB *work, u32 value) {
+    work->unkA8 = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C708);
