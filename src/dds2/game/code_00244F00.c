@@ -84,45 +84,59 @@ INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F80);
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F88);
 
-void unlinkEventListNode(s32 owner, s32 node) {
-    s32 next = *(s32 *)(node + 0x30);
-    s32 previous = *(s32 *)(node + 0x34);
+typedef struct EventListNode {
+    u16 orderKey;
+    u8 pad02[0x2E];
+    struct EventListNode *next; /* 0x30 */
+    struct EventListNode *prev; /* 0x34 */
+} EventListNode;
+
+typedef struct {
+    u8 pad00[0x50];
+    s32 count;            /* 0x50 */
+    EventListNode *first; /* 0x54 */
+    EventListNode *last;  /* 0x58 */
+} EventList;
+
+void unlinkEventListNode(EventList *owner, EventListNode *node) {
+    EventListNode *next = node->next;
+    EventListNode *previous = node->prev;
     if (previous == 0) {
-        *(s32 *)(owner + 0x54) = next;
+        owner->first = next;
     } else {
-        *(s32 *)(previous + 0x30) = next;
+        previous->next = next;
     }
     {
-        s32 earlier = *(s32 *)(node + 0x34);
-        s32 later = *(s32 *)(node + 0x30);
+        EventListNode *earlier = node->prev;
+        EventListNode *later = node->next;
         if (later == 0) {
-            *(s32 *)(owner + 0x58) = earlier;
+            owner->last = earlier;
         } else {
-            *(s32 *)(later + 0x34) = earlier;
+            later->prev = earlier;
         }
     }
     {
-        s32 count = *(s32 *)(owner + 0x50);
-        *(s32 *)(node + 0x34) = 0;
-        *(s32 *)(node + 0x30) = 0;
-        *(s32 *)(owner + 0x50) = count - 1;
+        s32 count = owner->count;
+        node->prev = 0;
+        node->next = 0;
+        owner->count = count - 1;
     }
 }
 
-void reorderEventListNodes(s32 owner) {
+void reorderEventListNodes(EventList *owner) {
     if (owner != 0) {
-        s32 current = *(s32 *)(owner + 0x54);
+        EventListNode *current = owner->first;
         while (current != 0) {
-            s32 next = *(s32 *)(current + 0x30);
-            s32 scan = next;
+            EventListNode *next = current->next;
+            EventListNode *scan = next;
             while (scan != 0) {
-                if (*(u16 *)scan < *(u16 *)current) {
+                if (scan->orderKey < current->orderKey) {
                     unlinkEventListNode(owner, scan);
                     func_00245F88(owner, scan);
-                    next = *(s32 *)(scan + 0x30);
+                    next = scan->next;
                     break;
                 }
-                scan = *(s32 *)(scan + 0x30);
+                scan = scan->next;
             }
             current = next;
         }

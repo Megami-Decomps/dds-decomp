@@ -160,76 +160,76 @@ void func_0032CEC0(SdfListHead *arg0) {
     arg0->unk1C = 0;
 }
 
-void func_0032CEE8(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_0032CEE8(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1;
+    list->last = packet;
 }
 
-void func_0032CF20(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
+void func_0032CF20(SdfListHead *list, u32 packet, u32 end) {
+    s32 last;
 
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg2;
+    list->last = end;
 }
 
-void func_0032CF58(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_0032CF58(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    *(u8 *)(arg1 + 3) = 0x30;
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    *(u8 *)(packet + 3) = 0x30;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1 + 0x10;
+    list->last = packet + 0x10;
 }
 
-void func_0032CF98(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_0032CF98(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1 + 0x30;
+    list->last = packet + 0x30;
 }
 
-void func_0032CFD0(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_0032CFD0(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    *(u8 *)(arg1 + 3) = 0x50;
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    *(u8 *)(packet + 3) = 0x50;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1 + 0x10;
+    list->last = packet + 0x10;
 }
 
 void prependSdfPacketList(s32 list, s32 item) {

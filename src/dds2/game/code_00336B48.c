@@ -45,16 +45,16 @@ typedef struct ConsNode {
     /* 0x04 */ struct ConsNode *prev;
     /* 0x08 */ u16 unk8;
     /* 0x0A */ u16 unkA;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
+    /* 0x0C */ s16 width;
+    /* 0x0E */ s16 height;
     /* 0x10 */ u16 unk10;
     /* 0x12 */ u16 unk12;
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 pad15;
     /* 0x16 */ u8 unk16;
     /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 unk18;
-    /* 0x1C */ u8 *unk1C;
+    /* 0x18 */ u32 bufferHandle;
+    /* 0x1C */ u8 *pixels;
 } ConsNode;
 
 extern ConsNode *D_00438AB0;
@@ -496,17 +496,16 @@ void devConsListInsert(ConsNode *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", devConsListRemove);
 
-void devConsNodeDestroy(u32 arg0) {
+void devConsNodeDestroy(ConsNode *node) {
     devConsListRemove();
-    func_003297C8(*(u32 *)((s32)arg0 + 0x18));
-    func_00328E48(arg0);
+    func_003297C8(node->bufferHandle);
+    func_00328E48(node);
 }
 
-void devConsNodeClear(s32 arg0) {
-    *(u16 *)(arg0 + 0x10) = 0;
-    *(u16 *)(arg0 + 0x12) = 0;
-    memset(*(u32 *)(arg0 + 0x1c), 0,
-                  (s32)*(s16 *)(arg0 + 0xc) * (s32)*(s16 *)(arg0 + 0xe) * 2);
+void devConsNodeClear(ConsNode *node) {
+    node->unk10 = 0;
+    node->unk12 = 0;
+    memset(node->pixels, 0, node->width * node->height * 2);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CCB0);
@@ -519,14 +518,14 @@ ConsNode *devConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     node = func_00328D68(0x20);
     node->unk8 = arg0;
     node->unkA = arg1;
-    node->unkC = arg2;
-    node->unkE = arg3;
+    node->width = arg2;
+    node->height = arg3;
     node->unk17 = 8;
     node->unk14 = 0;
     node->unk16 = 0;
     h = func_003292A8((arg2 * arg3) * 2);
-    node->unk18 = h;
-    node->unk1C = (u8 *)func_003298F8(h);
+    node->bufferHandle = h;
+    node->pixels = (u8 *)func_003298F8(h);
     devConsNodeClear(node);
     devConsListInsert(node);
     return node;

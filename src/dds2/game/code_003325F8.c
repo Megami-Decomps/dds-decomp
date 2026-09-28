@@ -81,8 +81,8 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332920);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfChunkFindById);
 
-void sdfChunkFindByTag(s32 arg0) {
-    sdfChunkFindById(*(u32 *)(arg0 + 0x90));
+void sdfChunkFindByTag(SdfTextParam *param) {
+    sdfChunkFindById(param->unk90);
 }
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfNamedChunkFindId);
@@ -111,8 +111,8 @@ void func_00332DE8(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
     arg0->unk19 = arg0->unk19 | 2;
 }
 
-void func_00332E00(s32 arg0) {
-    *(u8 *)(arg0 + 0x19) = *(u8 *)(arg0 + 0x19) & 0xfd;
+void func_00332E00(SdfTextParam *param) {
+    param->unk19 = param->unk19 & 0xfd;
 }
 
 f32 func_00332E10(SdfTextParam *arg0) {
@@ -186,24 +186,24 @@ void func_003331F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333208);
 
-void func_00333270(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x10) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
+void func_00333270(SdfTextParam *param, u32 value) {
+    param->unk10 = value;
+    param->unk06 = param->unk06 | 3;
 }
 
-void func_00333288(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
+void func_00333288(SdfTextParam *param, u32 value) {
+    param->unk14 = value;
+    param->unk06 = param->unk06 | 3;
 }
 
-void func_003332A0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x20) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
+void func_003332A0(SdfTextParam *param, u32 value) {
+    param->unk20 = value;
+    param->unk06 = param->unk06 | 3;
 }
 
-void func_003332B8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x28) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
+void func_003332B8(SdfTextParam *param, u32 value) {
+    *(u32 *)&param->unk28 = value;
+    param->unk06 = param->unk06 | 3;
 }
 
 void func_003332D0(SdfTextParam *arg0, f32 fparg0) {
@@ -211,9 +211,9 @@ void func_003332D0(SdfTextParam *arg0, f32 fparg0) {
     arg0->unk06 = arg0->unk06 | 3;
 }
 
-void func_003332E8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x2c) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
+void func_003332E8(SdfTextParam *param, u32 value) {
+    *(u32 *)&param->unk2C = value;
+    param->unk06 = param->unk06 | 3;
 }
 
 SdfSubParam *sdfSubParamCreate(void) {
@@ -226,12 +226,12 @@ SdfSubParam *sdfSubParamCreate(void) {
     return temp;
 }
 
-void func_00333340(s32 arg0) {
-    u32 temp_v0;
+void func_00333340(SdfTextParam *param) {
+    SdfSubParam *subParam;
 
-    if (*(s32 *)(arg0 + 0x38) == 0) {
-        temp_v0 = sdfSubParamCreate();
-        *(u32 *)(arg0 + 0x38) = temp_v0;
+    if (param->unk38 == NULL) {
+        subParam = sdfSubParamCreate();
+        param->unk38 = subParam;
     }
 }
 
@@ -239,27 +239,27 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00333378);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003333F8);
 
-void func_00333460(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 0x30;
+void func_00333460(SdfTextParam *param, u32 value) {
+    *(u32 *)&param->unk18 = value;
+    param->unk06 = param->unk06 | 0x30;
 }
 
-void func_00333478(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x34) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 0x30;
+void func_00333478(SdfTextParam *param, u32 value) {
+    param->unk34 = value;
+    param->unk06 = param->unk06 | 0x30;
 }
 
-void func_00333490(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x30) = arg1;
-    *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 0x30;
+void func_00333490(SdfTextParam *param, u32 value) {
+    param->unk30 = value;
+    param->unk06 = param->unk06 | 0x30;
 }
 
-void func_003334A8(s32 arg0) {
-    u32 temp_v0;
+void func_003334A8(SdfTextParam *param) {
+    SdfSubParam *subParam;
 
-    if (*(s32 *)(arg0 + 0x3c) == 0) {
-        temp_v0 = sdfSubParamCreate();
-        *(u32 *)(arg0 + 0x3c) = temp_v0;
+    if (param->unk3C == NULL) {
+        subParam = sdfSubParamCreate();
+        param->unk3C = subParam;
     }
 }
 

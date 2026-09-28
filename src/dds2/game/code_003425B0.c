@@ -302,6 +302,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00344B40);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344D60);
 
+/* IPU DMA takes a 28-bit physical address and counts 16-byte quadwords. */
 void sdfSoundQueueIpuBuffer(SoundIpuBuffer *stream) {
     vu32 *ipuData = (vu32 *)0x1000B010;
     vu32 *ipuSize = (vu32 *)0x1000B020;

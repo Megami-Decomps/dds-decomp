@@ -21,10 +21,10 @@ extern u32 D_00438AE4;
 extern u32 D_004391CC;
 
 typedef struct SifCommand {
-    s32 unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-    s32 unk8; /* 0x8 */
-    u32 unkC; /* 0xC */
+    s32 source;   /* 0x0 */
+    s32 end;      /* 0x4 */
+    s32 argument; /* 0x8 */
+    u32 command;  /* 0xC */
 } SifCommand;
 
 extern u32 D_0040B990[];
@@ -36,19 +36,19 @@ typedef struct DevState {
     struct DevState *unk4; /* 0x4 */
     u8 pad8[8]; /* 0x8 */
     void *unk10; /* 0x10 */
-    u8 unk14; /* 0x14 */
-    u8 unk15; /* 0x15 */
-    s8 unk16; /* 0x16 */
+    u8 workerIndex; /* 0x14 */
+    u8 operation; /* 0x15 */
+    s8 state; /* 0x16 */
     u8 pad17; /* 0x17 */
     s32 unk18; /* 0x18 */
     s32 unk1C; /* 0x1C */
     s32 unk20; /* 0x20 */
-    s32 unk24; /* 0x24 */
-    s32 unk28; /* 0x28 */
-    s32 unk2C; /* 0x2C */
+    s32 options; /* 0x24 */
+    s32 resourceId; /* 0x28 */
+    s32 result; /* 0x2C */
     u8 pad30[8]; /* 0x30 */
-    void (*unk38)(struct DevState *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4); /* 0x38 */
-    s32 unk3C; /* 0x3C */
+    void (*callback)(struct DevState *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4); /* 0x38 */
+    s32 callbackContext; /* 0x3C */
 } DevState;
 
 typedef struct SemaEntry {
@@ -135,18 +135,18 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D7B8);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D810);
 
-void sdfPktSetCmd(SifCommand *arg0, s32 arg1) {
-    arg0->unkC = D_0040B990[arg1];
+void sdfPktSetCmd(SifCommand *packet, s32 index) {
+    packet->command = D_0040B990[index];
 }
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPktInit);
 
-void *sdfRpcBufHandler(s32 arg0, SifCommand *arg1) {
-    s32 size = arg1->unk4 - arg1->unk0;
+void *sdfRpcBufHandler(s32 unused, SifCommand *packet) {
+    s32 size = packet->end - packet->source;
 
     if (size > 0) {
-        memcpy(arg1, (void *)arg1->unk0, size);
-        return arg1;
+        memcpy(packet, (void *)packet->source, size);
+        return packet;
     }
     return NULL;
 }
@@ -313,23 +313,23 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033ED38);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EDB0);
 
-void sdfDevRelease(u32 arg0) {
-    s32 temp_v0;
+void sdfDevRelease(DevState *state) {
+    s32 resourceId;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x28);
-    *(u32 *)((s32)arg0 + 0x28) = 0xffffffff;
-    if (-1 < temp_v0) {
-        func_00369DF8(temp_v0);
+    resourceId = state->resourceId;
+    state->resourceId = -1;
+    if (resourceId >= 0) {
+        func_00369DF8(resourceId);
     }
-    func_0033EDB0(arg0);
+    func_0033EDB0(state);
 }
 
 void sdfDevDeactivate(DevState *arg0, s32 arg1) {
-    arg0->unk2C = arg1;
-    arg0->unk16 = 9;
+    arg0->result = arg1;
+    arg0->state = 9;
     sdfDevRelease(arg0);
-    if (arg0->unk38 != NULL) {
-        arg0->unk38(arg0, 0, 0, 0, arg0->unk3C);
+    if (arg0->callback != NULL) {
+        arg0->callback(arg0, 0, 0, 0, arg0->callbackContext);
     }
 }
 
@@ -367,28 +367,28 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
         return NULL;
     }
     state = func_0033F9D0(resource, id, 2, callback, context);
-    state->unk24 = options != 0 ? options : D_00438B24;
+    state->options = options != 0 ? options : D_00438B24;
     func_0033EC48(state);
     return state;
 }
 
 s32 func_0033FB38(DevState *arg0, s32 arg1, s32 arg2) {
-    if (arg0->unk16 != 7) {
+    if (arg0->state != 7) {
         return -1;
     }
     arg0->unk18 = arg1;
-    arg0->unk24 = arg2;
-    arg0->unk15 = 3;
-    SignalSema(D_0040BA14[arg0->unk14].sema);
+    arg0->options = arg2;
+    arg0->operation = 3;
+    SignalSema(D_0040BA14[arg0->workerIndex].sema);
     return 0;
 }
 
 s32 func_0033FB98(DevState *arg0) {
-    if (arg0->unk16 != 7) {
+    if (arg0->state != 7) {
         return -1;
     }
-    arg0->unk15 = 4;
-    SignalSema(D_0040BA14[arg0->unk14].sema);
+    arg0->operation = 4;
+    SignalSema(D_0040BA14[arg0->workerIndex].sema);
     return 0;
 }
 
@@ -397,22 +397,22 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FBF0);
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FC50);
 
 s32 func_0033FCB0(DevState *arg0) {
-    if (arg0->unk16 != 9) {
+    if (arg0->state != 9) {
         return -1;
     }
-    arg0->unk2C = 0;
-    arg0->unk16 = 7;
+    arg0->result = 0;
+    arg0->state = 7;
     return 0;
 }
 
 s32 func_0033FCE0(DevState *arg0) {
-    s8 state = arg0->unk16;
+    s8 state = arg0->state;
 
     if (state != 7) {
         return -1;
     }
-    arg0->unk15 = state;
-    SignalSema(D_0040BA14[arg0->unk14].sema);
+    arg0->operation = state;
+    SignalSema(D_0040BA14[arg0->workerIndex].sema);
     return 0;
 }
 
@@ -448,7 +448,7 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
     state = func_0033F9D0(resource, id, 9, context, callback);
     state->unk1C = extra;
     state->unk20 = data;
-    state->unk24 = options != 0 ? options : D_00438B24;
+    state->options = options != 0 ? options : D_00438B24;
     state->unk18 = 0;
     func_0033EC48(state);
     return state;

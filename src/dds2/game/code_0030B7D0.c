@@ -309,21 +309,28 @@ s32 func_0030D7E0(s32 x, s32 n) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030D818);
 
-void func_0030D8A0(s32 arg0, s32 arg1) {
-    if ((arg1 <= *(s32 *)(arg0 + 0x20)) && (arg1 != 0)) {
-        *(s32 *)(arg0 + 0xc) = arg1;
+typedef struct {
+    u8 pad00[0x0C];
+    s32 selectedCount; /* 0x0C */
+    u8 pad10[0x10];
+    s32 maxCount;      /* 0x20 */
+} MapSelection;
+
+void func_0030D8A0(MapSelection *selection, s32 count) {
+    if ((count <= selection->maxCount) && (count != 0)) {
+        selection->selectedCount = count;
     }
 }
 
-void func_0030D8C0(s32 arg0) {
-    if (*(s32 *)(arg0 + 0xc) < 10) {
-        *(s32 *)(arg0 + 0xc) = *(s32 *)(arg0 + 0xc) + 1;
+void func_0030D8C0(MapSelection *selection) {
+    if (selection->selectedCount < 10) {
+        selection->selectedCount = selection->selectedCount + 1;
     }
 }
 
-void func_0030D8E0(s32 arg0) {
-    if (1 < *(s32 *)(arg0 + 0xc)) {
-        *(s32 *)(arg0 + 0xc) = *(s32 *)(arg0 + 0xc) - 1;
+void func_0030D8E0(MapSelection *selection) {
+    if (1 < selection->selectedCount) {
+        selection->selectedCount = selection->selectedCount - 1;
     }
 }
 
@@ -599,9 +606,9 @@ float func_00310B60(float *arg0, float *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", vec4ArcCosDot);
 
-float func_00310BC8(float *arg0) {
-    return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
-                  arg0[3] * arg0[3];
+float func_00310BC8(float *quaternion) {
+    return *quaternion * *quaternion + quaternion[1] * quaternion[1] +
+                  quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3];
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionMagnitude);

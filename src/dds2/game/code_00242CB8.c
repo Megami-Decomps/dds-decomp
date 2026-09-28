@@ -211,6 +211,14 @@ u32 func_00243280(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_002432A0);
 
+typedef struct {
+    u8 pad00[0xA40];
+    u8 flags;          /* 0xA40 */
+    u8 phase;          /* 0xA41 */
+    u8 padA42[2];      /* DDS2 clears +0xA43, unlike the DDS1 phase byte. */
+    u32 phaseCounter;  /* 0xA44 */
+} SolarWorldState;
+
 void func_00243310(void) {
     *(u8 *)(D_00435DD0 + 0xa43) = 0;
 }
@@ -220,7 +228,7 @@ INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243320);
 s32 func_00243330(void) {
     s32 v;
 
-    v = *(u8 *)(D_00435DD0 + 0xa41);
+    v = ((SolarWorldState *)D_00435DD0)->phase;
     if (v >= 9) {
         v = 8 - (v & 7);
     }
@@ -228,35 +236,35 @@ s32 func_00243330(void) {
 }
 
 u8 func_00243358(void) {
-    return *(u8 *)(D_00435DD0 + 0xa41);
+    return ((SolarWorldState *)D_00435DD0)->phase;
 }
 
-void func_00243368(u8 arg0) {
-    *(u8 *)(D_00435DD0 + 0xa41) = arg0 & 0xf;
-    *(u32 *)(D_00435DD0 + 0xa44) = 0;
+void func_00243368(u8 phase) {
+    ((SolarWorldState *)D_00435DD0)->phase = phase & 0xf;
+    ((SolarWorldState *)D_00435DD0)->phaseCounter = 0;
 }
 
 void func_00243380(void) {
-    *(u8 *)(D_00435DD0 + 0xa40) = *(u8 *)(D_00435DD0 + 0xa40) | 1;
+    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags | 1;
 }
 
 void func_00243398(void) {
-    *(u8 *)(D_00435DD0 + 0xa40) = *(u8 *)(D_00435DD0 + 0xa40) & 0xfe;
+    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfe;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_002433B0);
 
 void func_002433E8(void) {
-    *(u8 *)(D_00435DD0 + 0xa40) = *(u8 *)(D_00435DD0 + 0xa40) & 0xfd;
+    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfd;
     D_004371F8 = 0;
 }
 
 void func_00243400(void) {
-    *(u8 *)(D_00435DD0 + 0xa40) = *(u8 *)(D_00435DD0 + 0xa40) | 2;
+    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags | 2;
 }
 
 void func_00243418(void) {
-    *(u8 *)(D_00435DD0 + 0xa40) = *(u8 *)(D_00435DD0 + 0xa40) & 0xfd;
+    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfd;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243430);

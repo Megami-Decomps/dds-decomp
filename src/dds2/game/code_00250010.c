@@ -47,8 +47,9 @@ typedef struct EvtRuntimeChild {
     u16 unk0A;
     u8 pad0C[6];
     u16 unk12;
-    u8 pad14[0x1C];
-    struct EvtRuntimeChild *next;
+    u8 pad14[0x18];
+    void *payload; /* 0x2C: serialized child data */
+    struct EvtRuntimeChild *next; /* 0x30 */
 } EvtRuntimeChild;
 
 typedef struct EvtRuntimeGroup {
@@ -90,18 +91,18 @@ void func_002500E0(u32 arg0) {
     D_004373CC = arg0;
 }
 
-void func_002500E8(s32 arg0, s32 arg1) {
-    s16 temp_v0;
+void func_002500E8(s32 duration, s32 target) {
+    s16 current;
 
-    temp_v0 = func_00135598();
-    if (temp_v0 != arg1) {
-        if (arg0 == 0) {
-            func_00135588(arg1);
+    current = func_00135598();
+    if (current != target) {
+        if (duration == 0) {
+            func_00135588(target);
             D_004373C8 = 0;
         } else {
-            D_00438FB2 = arg0;
-            D_00438FB4 = temp_v0;
-            D_00438FB6 = arg1;
+            D_00438FB2 = duration;
+            D_00438FB4 = current;
+            D_00438FB6 = target;
             D_004373C8 = 1;
             D_00438FB0 = 0;
         }

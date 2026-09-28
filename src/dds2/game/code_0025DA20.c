@@ -95,17 +95,36 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E8D0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E980);
 
-void func_0025EBC8(s32 arg0) {
-    s32 temp_v0;
+typedef struct CampEntryNode {
+    u8 pad00[8];
+    s32 nameIndex; /* 0x08: 32-byte name in the owning scene */
+    u8 pad0C[0x1C];
+    u32 status; /* 0x28 */
+    u8 pad2C[0x50];
+    struct CampEntryNode *next; /* 0x7C */
+} CampEntryNode;
 
-    temp_v0 = *(s32 *)(arg0 + 0x2034);
-    if (temp_v0 != 0) {
-        *(u32 *)(temp_v0 + 0x28) = 0;
-        while (temp_v0 = *(s32 *)(temp_v0 + 0x7c), temp_v0 != 0) {
-            *(u32 *)(temp_v0 + 0x28) = 0;
+typedef struct {
+    u8 pad00[0x2034];
+    CampEntryNode *entries; /* 0x2034 */
+    u8 pad2038[0x3D4];
+    u32 state; /* 0x240C */
+    u8 pad2410[0x34];
+    s32 idCount; /* 0x2444 */
+    s32 registeredIds[20]; /* 0x2448 */
+} CampScene;
+
+void func_0025EBC8(CampScene *scene) {
+    CampEntryNode *node;
+
+    node = scene->entries;
+    if (node != 0) {
+        node->status = 0;
+        while (node = node->next, node != 0) {
+            node->status = 0;
         }
     }
-    *(u32 *)(arg0 + 0x240c) = 0;
+    scene->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EC00);
@@ -213,11 +232,11 @@ void shopRestoreTransform(u8 *scene) {
     }
 }
 
-void func_0025F568(s32 scene, s32 id) {
-    s32 count = *(s32 *)(scene + 0x2444);
+void func_0025F568(CampScene *scene, s32 id) {
+    s32 count = scene->idCount;
     s32 i = 0;
     if (count > 0) {
-        s32 *entry = (s32 *)(scene + 0x2448);
+        s32 *entry = scene->registeredIds;
         s32 value = *entry;
         do {
             entry++;
@@ -232,8 +251,8 @@ void func_0025F568(s32 scene, s32 id) {
         } while (1);
     }
     if (count < 20) {
-        *(s32 *)(scene + 0x2448 + count * 4) = id;
-        ++*(s32 *)(scene + 0x2444);
+        scene->registeredIds[count] = id;
+        ++scene->idCount;
     }
 }
 
