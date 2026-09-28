@@ -63,7 +63,10 @@ EE_AS_FLAGS = "-EL -G8 -Iinclude"
 def i386_prefix() -> str:
     """cc1/ee-as are 32-bit i386 binaries. Without a system /lib/ld-linux.so.2,
     point DDS_I386_LIBDIR at a directory holding ld-linux.so.2 + libc.so.6."""
-    libdir = os.environ.get("DDS_I386_LIBDIR")
+    # The pinned glibc from tools/download_tools.py comes first: ee-gcc 2.96's
+    # output depends on heap layout, so the system libc is only a fallback.
+    libdir = os.environ.get("DDS_I386_LIBDIR") or (
+        str(ROOT / "tools/glibc32") if (ROOT / "tools/glibc32/libc.so.6").exists() else None)
     if libdir:
         libdir = str(Path(libdir).expanduser().resolve())
         return f"{libdir}/ld-linux.so.2 --library-path {libdir} "

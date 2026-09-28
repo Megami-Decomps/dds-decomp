@@ -38,9 +38,8 @@ jobs:
       - name: Install dependencies
         if: steps.orig.outputs.available == 'true'
         run: |
-          sudo dpkg --add-architecture i386
           sudo apt-get update -q
-          sudo apt-get install -y -q libc6:i386 ninja-build cpp
+          sudo apt-get install -y -q ninja-build cpp
           python3 -m pip install -q -r requirements.txt
           python3 tools/download_tools.py
           mkdir -p orig/dds1 orig/dds2

@@ -41,10 +41,11 @@ assembly and are not counted.
 Requirements:
 - Linux x86-64 (or WSL)
 - Python 3.10+, `ninja`, `cpp`, `git`
-- 32-bit glibc, because the 2000-era compiler binaries are i386 ELF.
-  Install `libc6:i386` (Debian/Ubuntu) or `glibc.i686` (Fedora). Without a
-  system `/lib/ld-linux.so.2`, point `DDS_I386_LIBDIR` at a directory that
-  contains `ld-linux.so.2` and `libc.so.6`.
+- A kernel that runs 32-bit i386 programs (any normal x86-64 Linux or WSL2).
+  The 2000-era compiler binaries are i386 ELF. `tools/download_tools.py`
+  fetches the exact 32-bit glibc they are run under (Fedora `glibc-2.43-8`
+  i686), because ee-gcc 2.96's output can depend on the C library's heap
+  layout: a different libc can compile some functions differently.
 
 ```sh
 git clone https://github.com/Raikaru/dds-decomp.git && cd dds-decomp

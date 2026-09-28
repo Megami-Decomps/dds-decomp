@@ -19,6 +19,8 @@ case $in in /*) ;; *) in="$PWD/$in" ;; esac
 case $out in /*) ;; *) out="$PWD/$out" ;; esac
 version=${DDS_VERSION:-dds1}
 ee="$root/tools/compilers/ee-gcc2.96"
+# Pinned 32-bit glibc (tools/download_tools.py) unless overridden.
+[ -z "$DDS_I386_LIBDIR" ] && [ -f "$root/tools/glibc32/libc.so.6" ] && DDS_I386_LIBDIR="$root/tools/glibc32"
 run() {
     if [ -n "$DDS_I386_LIBDIR" ]; then
         "$DDS_I386_LIBDIR/ld-linux.so.2" --library-path "$DDS_I386_LIBDIR" "$@"

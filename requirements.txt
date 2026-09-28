@@ -8,3 +8,4 @@ ninja
 ninja_syntax
 # optional helpers
 m2c @ git+https://github.com/matt-kempster/m2c.git
+zstandard; python_version < "3.14"
