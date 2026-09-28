@@ -8,11 +8,11 @@ void func_001175B8(s32 ctx);
 
 void func_0021FE38(void)
 {
-    s32 ctx;
+    s32 node;
 
-    ctx = dds3GetWorldSecondaryObject();
-    if (ctx != 0) {
-        dds3DestroyWorldNode(ctx);
+    node = dds3GetWorldSecondaryObject();
+    if (node != 0) {
+        dds3DestroyWorldNode(node);
     }
 }
 
@@ -28,21 +28,21 @@ INCLUDE_ASM(const s32, "event/evtStage", func_00220178);
 
 void func_00220228(void)
 {
-    s32 ctx;
+    s32 slotData;
 
-    ctx = objGetSlot1Data();
-    if (ctx != 0) {
-        func_001175A8(ctx);
+    slotData = objGetSlot1Data();
+    if (slotData != 0) {
+        func_001175A8(slotData);
     }
 }
 
 void func_00220260(void)
 {
-    s32 ctx;
+    s32 slotData;
 
-    ctx = objGetSlot1Data();
-    if (ctx != 0) {
-        func_001175B8(ctx);
+    slotData = objGetSlot1Data();
+    if (slotData != 0) {
+        func_001175B8(slotData);
     }
 }
 

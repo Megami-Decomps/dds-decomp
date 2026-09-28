@@ -147,11 +147,11 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226730);
 
 s32 func_002267B0(void)
 {
-    s32 p0;
+    s32 eventId;
 
-    p0 = func_0010D428(0);
-    func_003003F0("call_event:%d\n", p0);
-    func_001028E8(6, (s32)&p0, 4, 0);
+    eventId = func_0010D428(0);
+    func_003003F0("call_event:%d\n", eventId);
+    func_001028E8(6, (s32)&eventId, 4, 0);
     func_0010BDB8();
     return 1;
 }
@@ -164,58 +164,58 @@ s32 func_00226800(void)
     return 0;
 }
 
-void func_00226830(s32 arg0, s32 arg1)
+void func_00226830(s32 eventId, s32 mode)
 {
     s32 args[2];
 
     func_00141D98();
-    func_0012C6C8(2, arg0);
-    D_003BBDA8 = arg1;
+    func_0012C6C8(2, eventId);
+    D_003BBDA8 = mode;
     args[0] = 0;
-    args[1] = arg0;
-    func_001028E8(0xe, (s32)args, 8, arg1 > 0);
+    args[1] = eventId;
+    func_001028E8(0xe, (s32)args, 8, mode > 0);
     func_0010BDB8();
 }
 
 s32 func_00226898(void)
 {
-    s32 p0;
+    s32 eventId;
 
-    p0 = func_0010D428(0);
-    func_00226830(p0, 0);
+    eventId = func_0010D428(0);
+    func_00226830(eventId, 0);
     return 1;
 }
 
-void func_002268C8(s32 arg0)
+void func_002268C8(s32 eventId)
 {
     s32 args[2];
 
     func_00141D18();
-    func_0012C6C8(2, arg0);
+    func_0012C6C8(2, eventId);
     D_003BBDA8 = 0;
     args[0] = 0;
-    args[1] = arg0;
+    args[1] = eventId;
     func_001028E8(0xe, (s32)args, 8, 1);
     func_0010BDB8();
 }
 
 s32 func_00226920(void)
 {
-    s32 p0;
+    s32 eventId;
 
-    p0 = func_0010D428(0);
-    func_002268C8(p0);
+    eventId = func_0010D428(0);
+    func_002268C8(eventId);
     return 1;
 }
 
 s32 func_00226948(void)
 {
-    s32 p0;
-    s32 p1;
+    s32 eventId;
+    s32 mode;
 
-    p0 = func_0010D428(0);
-    p1 = func_0010D428(1);
-    func_00226830(p0, p1);
+    eventId = func_0010D428(0);
+    mode = func_0010D428(1);
+    func_00226830(eventId, mode);
     return 1;
 }
 
@@ -455,11 +455,11 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00227A00);
 
 s32 func_00227AD8(void)
 {
-    s32 p0;
+    s32 movieId;
 
-    p0 = func_0010D428(0);
-    evtPolygonMovieClearFlagBits(p0, 1);
-    func_0010D5F0(p0);
+    movieId = func_0010D428(0);
+    evtPolygonMovieClearFlagBits(movieId, 1);
+    func_0010D5F0(movieId);
     return 1;
 }
 
@@ -475,14 +475,14 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00227DD0);
 
 s32 func_00227EE0(void)
 {
-    s32 i;
+    s32 unitType;
     void *unit;
 
-    i = 4;
+    unitType = 4;
     do {
-        unit = func_00223AA0(i, func_0010D428(0));
-        i++;
-    } while (i < 10 && unit == NULL);
+        unit = func_00223AA0(unitType, func_0010D428(0));
+        unitType++;
+    } while (unitType < 10 && unit == NULL);
     if (unit == NULL) {
         unit = (void *)func_00126200(func_0010D428(0));
         if (unit == NULL) {
@@ -495,14 +495,14 @@ s32 func_00227EE0(void)
 
 s32 func_00227F60(void)
 {
-    s32 i;
+    s32 unitType;
     void *unit;
 
-    i = 4;
+    unitType = 4;
     do {
-        unit = func_00223AA0(i, func_0010D428(0));
-        i++;
-    } while (i < 10 && unit == NULL);
+        unit = func_00223AA0(unitType, func_0010D428(0));
+        unitType++;
+    } while (unitType < 10 && unit == NULL);
     if (unit == NULL) {
         unit = (void *)func_00126200(func_0010D428(0));
         if (unit == NULL) {

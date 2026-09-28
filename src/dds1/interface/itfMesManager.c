@@ -3,9 +3,9 @@
 /* Sized table indexed by func_0019D268: s16 count + u32 items. */
 typedef struct ItfMesTable {
     u8 unk0[0x18]; /* 0x0 */
-    s16 unk18;     /* 0x18: count */
+    s16 count;     /* 0x18 */
     s16 unk1A;     /* 0x1A */
-    u32 unk1C[1];  /* 0x1C: items */
+    u32 items[1];  /* 0x1C */
 } ItfMesTable;
 
 /* 8-byte entry selected by func_0019D1D8/func_0019D1F0. */
@@ -17,9 +17,9 @@ typedef struct ItfMesEntry {
 /* Record behind ItfMesState.sub; func_0019D240 reads word +0x18. */
 typedef struct ItfMesSub {
     u8 unk0[0x18];      /* 0x0 */
-    u32 unk18;          /* 0x18 */
-    u8 unk1C[4];        /* 0x1C */
-    ItfMesEntry unk20[1]; /* 0x20: indexed by func_0019D1D8/func_0019D1F0 */
+    u32 entryCount;        /* 0x18: index of next entry */
+    u8 unk1C[4];          /* 0x1C */
+    ItfMesEntry entries[1]; /* 0x20 */
 } ItfMesSub;
 
 typedef struct FrFontGlyph FrFontGlyph;
@@ -150,7 +150,7 @@ typedef struct ItfMesGlobals {
     u32 unk0; /* 0x0 */
     u32 unk4; /* 0x4: read by func_0019B870 */
     u32 unk8; /* 0x8 */
-    u16 unkC; /* 0xC: set/cleared by func_0019CC90/func_0019CCA8 */
+    u16 flags; /* 0xC: set/cleared by func_0019CC90/func_0019CCA8 */
     u16 unkE; /* 0xE */
 } ItfMesGlobals;
 
@@ -465,16 +465,16 @@ void func_0019C478(s32 window, u32 value) {
     mes->flags = (u32)(u16)mes->flags | (value & 0xffff0000);
 }
 
-void func_0019C4A8(s32 window, u32 value) {
+void func_0019C4A8(s32 window, u32 flags) {
     ItfMesState *mes = D_003D6ECC[window].mes;
 
-    mes->flags |= value & 0xffff0000;
+    mes->flags |= flags & 0xffff0000;
 }
 
-void func_0019C4D8(s32 window, u32 value) {
+void func_0019C4D8(s32 window, u32 flags) {
     ItfMesState *mes = D_003D6ECC[window].mes;
 
-    mes->flags &= ~value | 0xffff;
+    mes->flags &= ~flags | 0xffff;
 }
 
 s16 func_0019C508(s32 window) {
@@ -526,15 +526,15 @@ void func_0019CB98(s32 window, u32 value) {
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CBB8);
 
 void func_0019CC90(u32 bits) {
-    D_003D6EA0.unkC |= bits;
+    D_003D6EA0.flags |= bits;
 }
 
 void func_0019CCA8(u32 bits) {
-    D_003D6EA0.unkC &= ~bits;
+    D_003D6EA0.flags &= ~bits;
 }
 
 u16 func_0019CCC8(void) {
-    return D_003D6EA0.unkC;
+    return D_003D6EA0.flags;
 }
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1480);
@@ -575,15 +575,15 @@ u32 itfMesIsMsgData(ItfMesBin *bin) {
 }
 
 ItfMesEntry *func_0019D1D8(ItfMesState *mes, s32 index) {
-    ItfMesEntry *entries = mes->sub->unk20;
+    ItfMesEntry *entries = mes->sub->entries;
 
     return &entries[index];
 }
 
 ItfMesEntry *func_0019D1F0(ItfMesSub *sub) {
-    ItfMesEntry *entries = (ItfMesEntry *)((u8 *)sub + 0x20);
+    ItfMesEntry *entries = sub->entries;
 
-    return &entries[sub->unk18];
+    return &entries[sub->entryCount];
 }
 
 u32 func_0019D208(s32 window, s32 index) {
@@ -591,16 +591,16 @@ u32 func_0019D208(s32 window, s32 index) {
 }
 
 u32 func_0019D240(s32 window) {
-    return D_003D6ECC[window].mes->sub->unk18;
+    return D_003D6ECC[window].mes->sub->entryCount;
 }
 
 u32 func_0019D268(ItfMesTable *table, s32 index) {
-    s32 count = table->unk18;
+    s32 count = table->count;
 
     if (index < 0 || index >= count) {
         return 0;
     }
-    return table->unk1C[index];
+    return table->items[index];
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D298);

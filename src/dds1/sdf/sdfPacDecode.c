@@ -18,6 +18,14 @@ typedef struct PacReloc {
     u8 payload[1]; /* 0x10 */
 } PacReloc;
 
+/* Extended PAC header: the second header's flags precede data at 0x20. */
+typedef struct PacExtensionHeader {
+    u8 pad00[0x11];
+    u8 extensionFlags; /* 0x11 */
+    u8 pad12[0xE];
+    u8 data[1];        /* 0x20 */
+} PacExtensionHeader;
+
 typedef struct PacWork {
     struct PacWork *unk0; /* 0x0 */
     struct PacState *unk4; /* 0x4 */
@@ -74,10 +82,10 @@ void func_002EE4A8(PacState *arg0);
 void func_002EE828(PacState *arg0);
 void func_002EE900(PacState *arg0);
 void func_002EE930(PacState *arg0);
-void func_002EE3E8(PacState *arg0, void *arg1);
-void func_002EE478(PacState *arg0, void *arg1);
-void func_002EE508(PacState *arg0, void *arg1);
-void func_002EE868(PacState *arg0, void *arg1);
+void func_002EE3E8(PacState *arg0, PacHead *arg1);
+void func_002EE478(PacState *arg0, PacHead *arg1);
+void func_002EE508(PacState *arg0, PacHead *arg1);
+void func_002EE868(PacState *arg0, PacHead *arg1);
 void func_002EEAA0(PacState *arg0, void *arg1);
 void func_002DA058(s32 arg0, s32 arg1);
 s32 func_002D32A0(void *arg0);
@@ -155,12 +163,12 @@ s32 func_002EE058(PacState *arg0, s32 arg1, PacHead *arg2) {
     }
     return 0;
 }
-void *func_002EE138(u8 *header) {
-    s32 extensionSize = header[0x11] & 0xF0;
+void *func_002EE138(PacExtensionHeader *header) {
+    s32 extensionSize = header->extensionFlags & 0xF0;
     if (extensionSize <= 0) {
         return NULL;
     }
-    return header + 0x20;
+    return header->data;
 }
 
 void func_002EE158(PacState *arg0) {
@@ -249,7 +257,7 @@ void func_002EE2C0(PacState *arg0, PacHead *arg1) {
     }
 }
 
-void func_002EE3E8(PacState *arg0, void *arg1) {
+void func_002EE3E8(PacState *arg0, PacHead *arg1) {
     func_002EE2C0(arg0, arg1);
     arg0->unkC = func_002EDD98;
 }
@@ -267,7 +275,7 @@ void func_002EE418(PacState *state) {
     func_002EDD98(state);
 }
 
-void func_002EE478(PacState *arg0, void *arg1) {
+void func_002EE478(PacState *arg0, PacHead *arg1) {
     func_002EE2C0(arg0, arg1);
     arg0->unkC = func_002EE418;
 }
@@ -285,7 +293,7 @@ void func_002EE4A8(PacState *state) {
     func_002EDD98(state);
 }
 
-void func_002EE508(PacState *arg0, void *arg1) {
+void func_002EE508(PacState *arg0, PacHead *arg1) {
     func_002EE2C0(arg0, arg1);
     arg0->unkC = func_002EE4A8;
 }
@@ -353,7 +361,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE6F8);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE828);
 
-void func_002EE868(PacState *arg0, void *arg1) {
+void func_002EE868(PacState *arg0, PacHead *arg1) {
     func_002EDF60(arg0, arg1);
     {
         void *p = func_002CFEB8(0x10);

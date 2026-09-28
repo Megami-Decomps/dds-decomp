@@ -53,10 +53,14 @@ typedef struct {
     void *unk10;       /* 0x10 */
     u8 pad_0x14[0x05]; /* 0x14 */
     u8 unk19;          /* 0x19 */
-    u8 pad_0x1A[0x16]; /* 0x1A */
+    u8 pad_0x1A[0x06]; /* 0x1A */
+    u8 transformStart; /* 0x20: COP2 reads 0x40 bytes across following fields */
+    u8 pad_0x21[0x0F];
     s32 unk30;         /* 0x30 */
     u8 pad_0x34[0x04]; /* 0x34 */
     s32 unk38;         /* 0x38 */
+    u8 pad_0x3C[0x34];
+    u8 scaleVector[0x10]; /* 0x70 */
 } SdfModel;
 
 /* Each model draw node owns a circular list of child draw nodes. */
@@ -306,8 +310,7 @@ void func_002D8B20(SdfDrawNode *drawNode, void *buf, s32 arg2) {
 
 void func_002D8C00(SdfModel *arg0, s32 arg1) {
     u128 buf[4];
-    u8 *p = (u8 *)arg0;
-    u8 *b1 = p + 0x20;
+    u8 *b1 = &arg0->transformStart;
     u8 *b2;
     SdfList *list;
 
@@ -322,7 +325,7 @@ void func_002D8C00(SdfModel *arg0, s32 arg1) {
         : "r" (b1)
         : "memory"
     );
-    b2 = p + 0x70;
+    b2 = arg0->scaleVector;
     __asm__ volatile (
         "lqc2 vf10, 0(%0)"
         :
@@ -354,8 +357,8 @@ void func_002D8C00(SdfModel *arg0, s32 arg1) {
     func_002D8B20(list->unkC[0], buf, arg1);
 }
 
-void func_002D8C68(void *arg0) {
-    func_002D8C00(arg0, (s8)D_003BD2EA);
+void func_002D8C68(SdfModel *model) {
+    func_002D8C00(model, (s8)D_003BD2EA);
 }
 
 void func_002D8C88(SdfMsg *msg, s32 unk0, s32 unk4, s32 unk8, s32 unkC) {

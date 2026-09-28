@@ -5,10 +5,10 @@ extern void *func_00101A70(void);
 extern void func_002CFF98(void *);
 
 void func_001410E8(void) {
-    void *data;
+    void *panelState;
 
-    data = func_00101A70();
-    func_002CFF98(data);
+    panelState = func_00101A70();
+    func_002CFF98(panelState);
     D_003BAE74 = 0;
 }
 

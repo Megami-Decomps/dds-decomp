@@ -12,7 +12,8 @@ typedef struct EvtEvEntry {
 typedef struct EvtViewer {
     u8 unk00[0x20];      /* 0x0 */
     s32 nameCount;       /* 0x20 */
-    u8 unk24[0x200c];    /* 0x24: nameCount names of 32 bytes */
+    char names[256][32]; /* 0x24: fixed-width names */
+    u8 pad2024[0xC];
     s32 entryCount;      /* 0x2030 */
     EvtEvEntry *head;    /* 0x2034 */
     EvtEvEntry *tail;    /* 0x2038 */
@@ -133,7 +134,7 @@ s32 evtEventViewerFindNameIndex(const char *name, EvtViewer *viewer)
 
     index = 0;
     if (0 < viewer->nameCount) {
-        slot = (const char *)viewer + 0x24;
+        slot = viewer->names[0];
         do {
             if (strcmp(name, slot) == 0) {
                 return index;

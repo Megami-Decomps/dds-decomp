@@ -13,6 +13,16 @@ typedef struct PolyMovieClip {
     f32 position;    /* 0xc */
 } PolyMovieClip;
 
+typedef struct PolyMovieState {
+    u8 pad[4];
+    PolyMovieClip *clip;
+} PolyMovieState;
+
+typedef struct PolyMovieObject {
+    u8 pad[0x18];
+    PolyMovieState *state;
+} PolyMovieObject;
+
 s32 func_00101A70(void);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00232F88);
@@ -65,7 +75,7 @@ void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits)
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_002342F8);
 
-void evtPolygonMovieClampTime(s32 arg0, s32 arg1, s32 start, s32 end)
+void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 arg1, s32 start, s32 end)
 {
     PolyMovieClip *clip;
     s32 frame;
@@ -74,7 +84,7 @@ void evtPolygonMovieClampTime(s32 arg0, s32 arg1, s32 start, s32 end)
     if (frame < 0) {
         frame = 0;
     }
-    clip = *(PolyMovieClip **)(*(s32 *)(arg0 + 0x18) + 4);
+    clip = movie->state->clip;
     if (clip != NULL) {
         if ((s32)clip->duration <= frame) {
             frame = (s32)clip->duration;
