@@ -2,14 +2,24 @@
 
 typedef struct {
     void *unk0;  /* 0x0 object deref'd +0x10 by func_00111840, returned by func_00114A68 */
-    u32 unk4;    /* 0x4 flag bits set/cleared by func_00115B88/func_00115BA0 */
-    u8 pad8[4];  /* 0x8 */
+    u32 unk4;    /* 0x4 flag bits */
+    u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
     void *unkC;  /* 0xC bill object deref'd +0x2C/+0x58 by func_00151E60/func_00152200 */
-} EffectData;
+    u32 unk10;   /* 0x10 cleared by func_00115BB8 */
+    u32 unk14;   /* 0x14 cleared by func_00115BB8 */
+    void *unk18; /* 0x18 cleared by func_00115BB8 */
+    u8 pad1C[4]; /* 0x1C */
+    void *unk20; /* 0x20 set to the owner by func_00115BB8 */
+    u16 unk24;   /* 0x24 */
+    u16 unk26;   /* 0x26 kind copied from +0xF */
+} EffectData; /* 0x28 bytes */
 
 typedef struct {
-    u8 pad[0x18];      /* 0x0 */
+    u8 pad[0xF];       /* 0x0 */
+    u8 unkF;           /* 0xF kind checked ==7 by func_001158B8 */
+    u8 pad10[8];       /* 0x10 */
     EffectData *unk18; /* 0x18 */
+    void *unk1C;       /* 0x1C vector base read by func_001158F0/func_00115930 */
 } EffectObj;
 
 void func_001143D8(void *arg);
@@ -25,7 +35,11 @@ void func_00114E90(void *arg0, void *vec, s32 arg2);
 void func_00114FE0(void *arg0, void *vec, s32 arg2);
 void func_001150F0(void);
 void func_00115398(void);
-void func_00115478(void);
+/* Old-style (K&R) callee: callers pass (object, value) positionally. */
+void func_00115478();
+EffectData *func_001158B8(EffectObj *obj);
+void *func_002D0918(void *arg);
+void *func_002EB028(void *arg0, u32 *arg1, s32 arg2);
 
 extern void *func_0014FE28(void);
 
@@ -163,7 +177,15 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158B8);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158F0);
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115930);
+s32 func_00115930(EffectObj *obj) {
+    void *p;
+
+    if (func_001158B8(obj) == NULL) {
+        return 0;
+    }
+    p = obj->unk1C;
+    return (s32)(*(f32 *)((u8 *)p + 0x60));
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115970);
 

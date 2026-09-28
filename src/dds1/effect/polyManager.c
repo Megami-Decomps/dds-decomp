@@ -52,14 +52,21 @@ typedef struct {
 } PolyEntry; /* 0x14 bytes */
 
 typedef struct {
-    u8 pad[0x10];     /* 0x0 */
-    u32 unk10;        /* 0x10 entry count */
-    u32 unk14;        /* 0x14 */
-    u8 pad18[0x50];   /* 0x18 */
-    u32 unk68;        /* 0x68 */
-    u32 unk6C;        /* 0x6C */
-    u8 pad70[0x88];   /* 0x70 */
-    PolyEntry *unkF8; /* 0xF8 */
+    u8 pad[0x10];      /* 0x0 */
+    u32 unk10;         /* 0x10 entry count */
+    u32 unk14;         /* 0x14 */
+    u8 pad18[0x50];    /* 0x18 */
+    u32 unk68;         /* 0x68 */
+    u32 unk6C;         /* 0x6C */
+    u8 pad70[0x50];    /* 0x70 */
+    u32 unkC0;         /* 0xC0 step subtracted by func_0015E100/func_0015E8B8 */
+    u8 padC4[0x18];    /* 0xC4 */
+    u32 unkDC;         /* 0xDC divisor read by func_0015EEF0 */
+    u8 padE0[4];       /* 0xE0 */
+    u32 *unkE4;        /* 0xE4 stepped by func_0015E8B8 */
+    u8 padE8[0xC];     /* 0xE8 */
+    u32 *unkF4;        /* 0xF4 stepped by func_0015E100 */
+    PolyEntry *unkF8;  /* 0xF8 */
 } PolyList;
 
 void func_0015B8B8(u32 arg);
