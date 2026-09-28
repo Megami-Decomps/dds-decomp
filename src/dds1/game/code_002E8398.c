@@ -17,6 +17,10 @@ extern u32 D_003BD49C;
 
 extern u32 D_003BD498;
 extern s8 D_003BDA80;
+extern void func_002D0B50(void *out);
+extern void func_002E4C28(char *fmt, ...);
+extern s32 func_002E92C0(s32 id);
+extern s32 D_003BD490;
 
 typedef struct FE250Entry {
     /* 0x0 */ u8 unk0;
@@ -42,6 +46,13 @@ typedef struct FE0C0 {
     /* 0x208 */ u32 unk208;
     /* 0x20C */ u32 unk20C;
 } FE0C0;
+typedef struct MidiChannel {
+    u8 pad00[0x19];
+    u8 index;
+    u8 enabled;
+    u8 pad1B[0xD];
+    u32 entries[8];
+} MidiChannel;
 
 extern FE250Entry D_003FE0D0[];
 extern FE250Entry D_003FE250[];
@@ -172,7 +183,14 @@ u32 func_002E8F30(s32 arg0, char *arg1) {
     return func_002E8900(arg0 | 0x80, 0, arg1, len);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8F78);
+void func_002E8F78(s32 id, s32 volume, s32 pan) {
+    CmdPacket packet;
+    func_002E9340(id);
+    packet.unk0 = id;
+    packet.unk8 = volume;
+    packet.unkA = (u8)pan;
+    func_002E87A8(0x90, 0, &packet, 0xC);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8FD8);
 
@@ -200,10 +218,18 @@ INCLUDE_ASM(const s32, "game/code_002E8398", func_002E9450);
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E94B0);
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E94E0);
-
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E9510);
-
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002E9540);
+void func_002E9540(s32 id) {
+    u32 packet[4];
+    if (func_002E92C0(id) != 0) {
+        packet[0] = id;
+        func_002E8900(0xB0, 0, packet, 0x10);
+        id >>= 16;
+        if (D_003BD490 == id) {
+            D_003BD490 = -1;
+        }
+    }
+}
 
 u8 func_002E9598(s32 arg0) {
     return D_003FE250[arg0].unk4;
@@ -345,7 +371,12 @@ INCLUDE_RODATA(const s32, "game/code_002E8398", D_003B4DB8);
 
 INCLUDE_RODATA(const s32, "game/code_002E8398", D_003B4E30);
 
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002EAE78);
+void func_002EAE78(void) {
+    s32 info[6];
+    func_002D0B50(info);
+    func_002E4C28(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
+                    info[0], info[1], info[2], info[3], info[4], info[5]);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002EAEB8);
 
@@ -443,7 +474,13 @@ INCLUDE_ASM(const s32, "game/code_002E8398", func_002EC3F0);
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002EC488);
 
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002EC4B0);
+u32 func_002EC4B0(MidiChannel *channel) {
+    u32 result = 0;
+    if (channel->enabled != 0) {
+        result = channel->entries[channel->index];
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002EC4D8);
 

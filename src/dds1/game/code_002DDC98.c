@@ -391,20 +391,28 @@ void func_002E1218(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1228);
 
-u32 func_002E12C0(void) {
+u32 func_002E12C0(s32 width) {
     return 0x50;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E12C8);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1370);
+s32 func_002E1370(s32 owner, s32 width, s32 height) {
+    s32 size = func_002E12C0(width);
+    void *packet = (void *)func_002D3FD0(size);
+    s32 result = func_002E12C8(packet, width, height);
+    func_002D4038(owner, result);
+    return result;
+}
 
 u32 func_002E13E0(u32 arg0, s32 arg1) {
     func_002D45B0(arg0, (arg1 >> 4) - 2);
     return arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1410);
+s32 func_002E1410(s32 width, s32 height) {
+    return (width * height + 2) << 4;
+}
 
 s32 func_002E1420(s32 arg0) {
     return arg0 + 0x20;
@@ -470,7 +478,9 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2BB8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2DE8);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2F40);
+u32 func_002E2F40(s32 count) {
+    return (count * 0x4c + 0x4bU) & 0xfffffff0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2F68);
 
