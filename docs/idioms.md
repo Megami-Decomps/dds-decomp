@@ -83,6 +83,18 @@ s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
 that genuinely recurs. Wrapping a one-off call in an inline just to get
 `jal` is a codegen lever, not source.
 
+## Small shape rules (confirmed while matching)
+
+- `a && b && c` bit tests fold into one masked compare. Nested `if`s keep
+  separate `andi`s.
+- Chained `*p &= ~2; *p &= ~4;` are not folded into one mask.
+- A ternary of two constants can pick the wrong `movn`/`movz` operands;
+  `x = default; if (c) x = other;` gives retail's split.
+- `(w + 8) * 16` folds to `w * 16 + 128` unless `w + 8` is its own local.
+- Stores through `void **`-typed pointers let gcc schedule `int` loads above
+  them (type-based aliasing), and `s32` stores do not. Pick the pointer type
+  the data really has.
+
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 
 Tiny setters that copy one quadword compile in retail to `lq $2,0(src);

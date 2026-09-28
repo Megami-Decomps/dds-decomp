@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fpu.h"
+#include "pcp_vu0.h"
 
 extern void func_00127028(u32, u32);
 extern void func_00123EE8(void);
@@ -104,6 +105,8 @@ extern void func_00112EE8(s64 arg0, void *arg1, void *arg2);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern u32 D_003BAC3C;
+extern u8 D_003BACE0[];
+extern u8 D_003BACE8[];
 extern s32 D_003BAD00;
 extern u32 D_003BACFC;
 extern u32 D_00330738[];
@@ -205,7 +208,29 @@ void func_001278E8(u32 arg0, u32 arg1) {
     D_003BAC88 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001278F8);
+extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
+extern s32 func_003014F0(char *, const char *, ...);
+extern u32 func_00288A80(char *);
+extern void func_00128B50(char *, s32, s32);
+
+s32 func_001278F8(void) {
+    char directory[64];
+    char path[80];
+    u32 area = D_003BAC84;
+    u32 floor = D_003BAC88;
+
+    if (area != 0 || floor != 0) {
+        fldFreeDisplayObjects();
+        D_0032E3B0[31] = area;
+        D_0032E3B0[32] = floor;
+        func_00128B50(directory, area, 1);
+        func_003014F0(path, D_0039FE38, directory, area, floor);
+        D_003BAC3C = func_00288A80(path);
+        D_0032E3B0[30] = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001279A0);
 
@@ -389,9 +414,114 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00129178);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001292E0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001294A0);
+extern u8 D_00324650[];
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129578);
+void func_001294A0(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+    f32 vec[4] = { x, y, z, 1.0f };
+    f32 result[4];
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_003296F0) : "memory");
+    func_002DDD60(D_00324610);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf28\n"
+        "vmove.xyzw vf25, vf29\n"
+        "vmove.xyzw vf26, vf30\n"
+        "vmove.xyzw vf27, vf31\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_00324650) : "memory");
+    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_00324660) : "memory");
+    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(result) : "memory");
+    *dstX = result[0];
+    *dstY = result[1];
+}
+
+extern u8 D_003249B0[];
+extern u8 D_003249F0[];
+extern u8 D_00324A00[];
+extern u8 D_00329790[];
+
+void func_00129578(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+    f32 vec[4] = { x, y, z, 1.0f };
+    f32 result[4];
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_00329790) : "memory");
+    func_002DDD60(D_003249B0);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf28\n"
+        "vmove.xyzw vf25, vf29\n"
+        "vmove.xyzw vf26, vf30\n"
+        "vmove.xyzw vf27, vf31\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_003249F0) : "memory");
+    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_00324A00) : "memory");
+    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(result) : "memory");
+    *dstX = result[0];
+    *dstY = result[1];
+}
 
 void func_00129650(void) {
     u8 *matrix;
@@ -638,19 +768,175 @@ void func_0012B8F0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B940);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012BAD8);
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} FldQuadState; /* 0x2C bytes */
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012BBC8);
+typedef struct {
+    u8 pad0[0x10];
+    void (*invoke)(void *, s32);
+} FldGfxCallback;
+extern FldGfxCallback D_00325708;
+extern FldGfxCallback D_00325748;
+extern void sdfPktInit(void *, s32, s32, s32, s32);
+extern s32 func_002E4908();
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012BCC8);
+void func_0012BAD8(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012BDC8);
+    quad.unk1C = 0x73C0;
+    quad.unk20 = 0x7CC0;
+    quad.unk24 = 0x0FFFFF7E;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x7CC0;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7D;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, 0);
+    func_002D4038(quad.unk28, func_002E4908(packet, arg2));
+    func_0012B8E0((s32)&quad);
+    D_00325748.invoke(&D_00325748, quad.unk28);
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012BEC8);
+void func_0012BBC8(s32 x, s32 y, s32 arg2, s32 arg3) {
+    FldQuadState quad;
+    u8 packet[16];
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012BFC0);
+    quad.unk1C = 0x73C0;
+    quad.unk20 = 0x7CC0;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x7CC0;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, arg2);
+    func_002D4038(quad.unk28, func_002E4908(packet, arg3));
+    func_0012B8E0((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.unk28);
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C0C8);
+void func_0012BCC8(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
+    func_002D4038(quad.unk28, func_002E4908(packet, D_003BACE0, arg2));
+    func_0012B8E0((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.unk28);
+}
+
+void func_0012BDC8(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
+    func_002D4038(quad.unk28, func_002E4908(packet, D_003BACE8, arg2));
+    func_0012B8E0((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.unk28);
+}
+
+void func_0012BEC8(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
+    func_002D4038(quad.unk28, func_002E4908(packet, arg2));
+    func_0012B8E0((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.unk28);
+}
+
+void func_0012BFC0(s32 x, s32 y, s32 arg2, s32 arg3) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, arg2);
+    func_002D4038(quad.unk28, func_002E4908(packet, arg3));
+    func_0012B8E0((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.unk28);
+}
+
+void func_0012C0C8(s32 arg0, s32 arg1, f32 x, f32 y) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012B8F0((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + (s32)(x * 16.0f), quad.unk20 + (s32)(y * 8.0f), quad.unk24, arg0);
+    func_002D4038(quad.unk28, func_002E4908(packet, arg1));
+    func_0012B8E0((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.unk28);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C1F0);
 
@@ -786,7 +1072,60 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EA50);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EEA0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012F4B8);
+extern s32 D_003BAB50;
+extern void func_00136DA0(f32 *);
+extern void effObjSetInnerFirstVec(u32, f32 *);
+extern void effObjFetchInnerFirstVec(u32);
+
+typedef struct {
+    u8 pad0[0x84];
+    s32 unk84;
+    u8 pad88[0xB8];
+    f32 unk140;
+    f32 unk144;
+    f32 unk148;
+    u8 pad14C[0xC];
+    f32 unk158;
+    f32 unk15C;
+    f32 unk160;
+    u8 pad164[0x14];
+    s32 unk178;
+} FldCamState;
+
+void func_0012F4B8(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } vec;
+    f32 cur[3];
+    FldCamState *st;
+    u128 *dst;
+
+    if (D_003BAB34 != 0 && (st = (FldCamState *)D_0032E3B0, st->unk178 != 1) && D_003BAB50 != 0) {
+        cur[0] = st->unk140;
+        cur[1] = st->unk144;
+        cur[2] = st->unk148;
+        func_00136DA0(cur);
+        if (st->unk84 != 0) {
+            st->unk140 = st->unk158;
+            st->unk144 = st->unk15C;
+            st->unk148 = st->unk160;
+            vec.f[0] = st->unk158;
+            vec.f[1] = st->unk15C;
+            vec.f[2] = st->unk160;
+            effObjSetInnerFirstVec(D_003BAB34, vec.f);
+            st->unk84 = 0;
+            effObjFetchInnerFirstVec(D_003BAB34);
+            __asm__ volatile (
+                ".set noreorder\n"
+                "sqc2 vf10, 0(%0)\n"
+                ".set reorder"
+                : : "r"(&vec) : "memory");
+            dst = (u128 *)(*(u32 *)(D_003BAB34 + 0x1C) + 0x70);
+            PCP_COPY_VECTOR(dst, &vec);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012F578);
 
@@ -953,7 +1292,32 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A00A8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131A88);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131CC0);
+extern void *D_003BAD5C;
+extern char D_003A0100[];
+extern u32 D_003BD7C8;
+extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 func_002E5C68(u32, void *, u32);
+extern void func_002E5C38(u32);
+
+void func_00131CC0(s32 area) {
+    char path[64];
+    char directory[32];
+    u32 command;
+
+    D_003BAD78 = 0x80;
+    if (area < 200) {
+        func_00128B50(directory, area, 1);
+        func_003014F0(path, "%sF%03d.SKY", directory, area);
+        command = sdfDevCreateCommandState(path);
+        func_002E5C68(command, D_003BAD5C, 0xE000);
+        func_002E5C38(command);
+        if (area >= 2 && area < 100 && D_003BD7C4 == 0) {
+            D_003BD7C4 = func_002EB028(D_003A0100, &D_003BD7C8, 0);
+            D_003BAD70 = func_002D3288((void *)D_003BD7C8);
+        }
+    }
+}
 
 void func_00131D88(void) {
     if (D_003BAD70 != 0) {
