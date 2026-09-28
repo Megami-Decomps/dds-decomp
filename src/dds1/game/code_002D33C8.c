@@ -93,7 +93,7 @@ void func_002D2C30(void);
 void func_002D3BE0(void *arg0, void (*arg1)(void));
 void prependSdfPacketList(s32 arg0, s32 arg1);
 void func_002D5A68(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28);
-void func_002D7A50(void);
+void func_002D7A50();
 void func_002D4368();
 void func_002D35B8();
 void func_002D4DD0();
@@ -140,7 +140,16 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D38B8);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D39B0);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D3B28);
+void func_002D3B28(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+                   s32 (*alloc)(s32)) {
+    s32 block;
+    if (alloc == NULL) {
+        alloc = func_002D3FD0;
+    }
+    block = alloc(0xB0);
+    func_002D39B0(block, source, a, b, c, d, e);
+    func_002D4070(list, block, block + 0x80);
+}
 
 void func_002D3BE0(void *arg0, void (*arg1)(void)) {
     void **head = arg0;
@@ -193,7 +202,24 @@ u64 func_002D3EE8(void) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D3F30);
+extern s32 D_003BD310;
+extern void func_002D0918(s32);
+extern s32 func_002D03F8(s32);
+extern s32 func_002D0A48(s32);
+
+void func_002D3F30(s32 size) {
+    s32 memory;
+    if (D_003BD310 != 0) {
+        func_002D0918(D_003BD310);
+        D_003BD310 = 0;
+    }
+    size = (size + 0x7F) & ~0x7F;
+    D_003BD314 = size;
+    D_003BD310 = func_002D03F8(size * 2);
+    memory = func_002D0A48(D_003BD310);
+    D_003BD318[0] = memory;
+    D_003BD318[1] = memory + size;
+}
 
 void func_002D3FA0(s32 arg0) {
     D_003BD320 = D_003BD318[arg0];
@@ -416,11 +442,30 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D45F0);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4678);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4730);
+void func_002D4730(u64 *packet, s32 x, s32 y) {
+    u32 low = ((0x1000 - y) << 19) | ((0x1000 - x) << 3);
+    u32 high = ((y + 0x1000) << 19) | ((x + 0x1000) << 3);
+
+    packet[3] = 0;
+    packet[7] = 5;
+    packet[0] = 0x30003;
+    packet[1] = 0x47;
+    packet[2] = 6;
+    packet[4] = (u64)0xFE00 << 46;
+    packet[5] = 1;
+    packet[6] = low;
+    packet[8] = high;
+    packet[9] = 5;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D47B8);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4800);
+extern void func_002D4678(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_002D4800(SdfPacket *packet, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+    func_002D45B0(packet, 5);
+    func_002D4678(packet + 1, a, b, c, d, e, f, 0, g);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D48A8);
 
@@ -680,7 +725,18 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5CD0);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5DF8);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5EB0);
+void func_002D5EB0(s32 list, s64 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
+    SdfPacket *packet;
+    if (alloc == NULL) {
+        alloc = func_002D3FD0;
+    }
+    packet = (SdfPacket *)alloc(0x50);
+    packet->unk0 = 0x20000004;
+    packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    func_002D5DF8((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    func_002D4038(list, (s32)packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5FD8);
 
@@ -741,10 +797,37 @@ void func_002D78B8(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D78F0);
+typedef struct SdfFreeNode {
+    struct SdfFreeNode *next;
+    u8 pad04[8];
+    s32 allocation;
+} SdfFreeNode;
+
+extern void func_002D0918(s32 allocation);
+extern void func_002CFF98(void *allocation);
+
+void func_002D78F0(s32 root) {
+    SdfFreeNode **lists = (SdfFreeNode **)(root + 0x28);
+    s32 i = 0;
+    s32 end = 2;
+    do {
+        SdfFreeNode *node = *lists;
+        while (node != NULL) {
+            SdfFreeNode *next = node->next;
+            if (node->allocation != 0) {
+                func_002D0918(node->allocation);
+            } else {
+                func_002CFF98(node);
+            }
+            node = next;
+        }
+        i++;
+        lists++;
+    } while (i != end);
+}
 
 void func_002D7988(u32 arg0) {
-    func_002D78F0();
+    func_002D78F0(arg0);
     func_002CFF98(*(u32 *)((s32)arg0 + 0x30));
     *(u32 *)((s32)arg0 + 0x30) = 0;
     func_002CFF98(arg0);
@@ -782,9 +865,76 @@ void func_002D7BD8(s32 *arg0, u32 arg1, u32 arg2) {
     func_002D7CD0(arg2, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7C68);
+typedef struct SdfRouteNode SdfRouteNode;
+typedef struct SdfRouteOwner {
+    u8 pad00[0xC];
+    SdfRouteNode *last;
+} SdfRouteOwner;
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7CD0);
+struct SdfRouteNode {
+    SdfRouteNode *next;
+    SdfRouteNode *previous;
+    SdfRouteOwner *owner;
+    SdfRouteNode *unkC;
+    SdfRouteOwner *root;
+};
+
+void func_002D7C68(SdfRouteNode *node) {
+    SdfRouteOwner *owner = node->owner;
+    if (owner == NULL) {
+        SdfRouteOwner *root = node->root;
+        if (*(SdfRouteNode **)((u8 *)root + 4) == node) {
+            *(SdfRouteNode **)((u8 *)root + 4) = NULL;
+        }
+        return;
+    }
+    {
+        SdfRouteNode *previous = node->previous;
+        SdfRouteNode *next = node->next;
+        if (previous != node) {
+            previous->next = next;
+            next->previous = previous;
+            if (owner->last == node) {
+                owner->last = previous;
+            }
+            node->next = node;
+            node->previous = node;
+            return;
+        }
+        if (owner->last == node) {
+            owner->last = NULL;
+        }
+    }
+}
+
+void func_002D7CD0(SdfRouteNode *node, SdfRouteOwner *owner) {
+    if (owner == NULL) {
+        SdfRouteOwner *root = node->root;
+        SdfRouteNode *first = *(SdfRouteNode **)((u8 *)root + 4);
+        if (first != node) {
+            *(SdfRouteNode **)((u8 *)root + 4) = node;
+            if (first != NULL) {
+                first->owner = (SdfRouteOwner *)node;
+                node->unkC = first;
+            }
+            node->owner = NULL;
+        }
+    } else if (node->owner != owner) {
+        SdfRouteNode *last;
+        func_002D7C68(node);
+        last = owner->last;
+        if (last == NULL) {
+            owner->last = node;
+        } else {
+            SdfRouteNode *next = last->next;
+            node->next = next;
+            next->previous = node;
+            last->next = node;
+            node->previous = last;
+        }
+        node->owner = owner;
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD30C);
 

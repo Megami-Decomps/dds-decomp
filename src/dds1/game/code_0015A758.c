@@ -40,6 +40,11 @@ typedef struct ParCell {
     u32 color10;   /* 0x10 set to grey 0x80808080 */
 } ParCell; /* 0x14 */
 
+extern ParDispatch D_0034E250[];
+extern s32 func_00151E60(s32);
+extern void func_00152000(s32, f32, f32);
+extern void func_00152050(s32, s16);
+extern void func_001523B0(s32);
 extern ParDispatch D_0034E258[];
 
 extern void (*D_0034E5E0[])(void *, void *, void *);
@@ -108,7 +113,18 @@ u32 parObjGetMode(ParObj *work) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A8C8);
+ParObj *func_0015A8C8(ParObj *work) {
+    ParObj *particle = D_0034E250[work->unk140].func();
+    particle->unk140 = work->unk140;
+    if (*(s32 *)((u8 *)work + 0x28) == -1) {
+        s32 transform = func_00151E60(*(s32 *)((u8 *)work + 0xF4));
+        func_00152000(transform, *(f32 *)((u8 *)particle + 0x10), *(f32 *)((u8 *)particle + 0x14));
+        func_00152050(transform, *(s16 *)((u8 *)particle + 0x2C));
+        func_001523B0(transform);
+        *(s32 *)((u8 *)particle + 0xF4) = transform;
+    }
+    return particle;
+}
 
 void parObjDispatch(ParObj *work) {
     D_0034E258[work->unk140].func(work);
@@ -145,9 +161,47 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADD0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AE40);
+extern void func_00159CF0(s32);
+extern void func_0015AF70(s32);
+extern void func_0015B058(s32);
+extern void func_0015B148(s32);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AED8);
+void func_0015AE40(void *work) {
+    switch (*(u16 *)work) {
+    case 1:
+        func_00159CF0(*(s32 *)((u8 *)work + 8));
+        return;
+    case 2:
+        func_0015AF70(*(s32 *)((u8 *)work + 0x10));
+        return;
+    case 3:
+        func_0015B058(*(s32 *)((u8 *)work + 0x14));
+        return;
+    case 4:
+        func_0015B148(*(s32 *)((u8 *)work + 0x14));
+        break;
+    }
+}
+
+extern void func_00159F30(s32);
+extern void func_00188510(s32);
+
+void func_0015AED8(void *work, s32 index) {
+    switch (*(u16 *)work) {
+    case 1:
+        func_00159F30(*(s32 *)((u8 *)work + 8));
+        return;
+    case 2:
+        parCellInit((void *)*(s32 *)((u8 *)work + 0x10), index);
+        return;
+    case 3:
+        parCellInit((void *)*(s32 *)((u8 *)work + 0x14), index);
+        return;
+    case 4:
+        func_00188510(*(s32 *)((u8 *)work + 0x14));
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AF70);
 
@@ -282,3 +336,4 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D910);
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB010);
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
+
