@@ -1,45 +1,5 @@
 #include "common.h"
-
-typedef struct NodeA {
-    u8 pad[0x20];
-    struct NodeA *next;
-    struct NodeA *previous;
-} NodeA;
-
-typedef struct NodeB {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    struct NodeB *next;
-    struct NodeB *previous;
-} NodeB;
-
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-} Entry;
-
-typedef struct {
-    NodeA *firstNode;
-    NodeA *lastNode;
-    void *primaryObject;
-    void *secondaryObject;
-    u8 pad10[4];
-    Entry *unk14;
-    u8 pad18[2];
-    u16 unk1A;
-    s16 unk1C;
-    u16 unk1E;
-    NodeB *firstIndex;
-    NodeB *lastIndex;
-} WorldInfo;
-
-typedef struct {
-    u8 pad[0x18];
-    WorldInfo *info;
-} World;
+#include "dds3obj.h"
 
 extern World *D_00435D8C;
 
@@ -50,13 +10,6 @@ void *func_0010F640(s32 arg);
 void *func_00328D68(s32 arg);
 
 void func_001104F0(void *arg, s32 arg1);
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u16 unk6;
-} IndexObj;
 
 void func_00110240(IndexObj *arg);
 

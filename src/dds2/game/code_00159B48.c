@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 extern s32 D_00451EE0[];
 
@@ -20,26 +21,9 @@ extern void *memcpy(void *dest, const void *src, u32 n);
 
 extern void *func_00328D68(s32 size);
 
-typedef struct EffectConfig {
-    s16 unk00;
-    u8 pad02[10];
-} EffectConfig;
-
 extern EffectConfig D_003AA884[];
 
 s32 billCreateIndexed(s32 arg0, s32 arg1);
-
-typedef struct EffectBufferRecord {
-    u8 pad00[0x20];
-    s32 unk20;
-    s32 unk24;
-    u8 pad28[0x18];
-} EffectBufferRecord;
-
-typedef struct EffectBufferTail {
-    s32 allocation;
-    EffectBufferRecord *records;
-} EffectBufferTail;
 
 s32 func_003292A8(s32 size);
 

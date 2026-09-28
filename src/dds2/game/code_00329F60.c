@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern u8 D_004389E0;
 
@@ -9,54 +10,6 @@ extern u32 D_004389E8;
 extern u32 D_00439140;
 
 extern u32 D_00439144;
-
-typedef struct SdfSemaObj {
-    s32 unk0; /* 0x0: semaphore id */
-    void *unk4; /* 0x4 */
-    void *unk8; /* 0x8 */
-    void *unkC; /* 0xC */
-    s32 unk10; /* 0x10 */
-} SdfSemaObj;
-
-typedef struct SdfTexRef {
-    void *unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-} SdfTexRef;
-
-typedef struct SdfTexBuf {
-    s32 unk0; /* 0x0 */
-    u8 pad4[0xC]; /* 0x4 */
-    u64 unk10; /* 0x10 */
-    u64 unk18; /* 0x18 */
-    u64 unk20; /* 0x20 */
-    u64 unk28; /* 0x28 */
-    u64 unk30; /* 0x30 */
-} SdfTexBuf;
-
-typedef struct SdfTex {
-    struct SdfTex *unk0; /* 0x0 */
-    struct SdfTex *unk4; /* 0x4 */
-    SdfTexRef *unk8; /* 0x8 */
-    s16 unkC; /* 0xC */
-    s16 unkE; /* 0xE */
-    void *unk10; /* 0x10 */
-    void *unk14; /* 0x14 */
-    u8 unk18; /* 0x18 */
-    u8 unk19; /* 0x19 */
-    u8 unk1A; /* 0x1A */
-    u8 unk1B; /* 0x1B */
-    u16 unk1C; /* 0x1C */
-    u8 unk1E; /* 0x1E */
-    u8 unk1F; /* 0x1F */
-    s32 unk20; /* 0x20 */
-    s32 unk24; /* 0x24 */
-    SdfTexBuf *unk28; /* 0x28 */
-    SdfTexBuf *unk2C; /* 0x2C */
-    void *unk30; /* 0x30 */
-    s32 unk34; /* 0x34 */
-    s32 unk38; /* 0x38 */
-    void *unk3C; /* 0x3C */
-} SdfTex;
 
 extern SdfTex *D_004389F8;
 
@@ -207,12 +160,12 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B500);
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B558);
 
 void sdfTexListInsert(SdfTex *arg0) {
-    arg0->unk0 = NULL;
+    arg0->next = NULL;
     if (D_004389F8 != NULL) {
-        arg0->unk4 = D_004389F8;
-        D_004389F8->unk0 = arg0;
+        arg0->prev = D_004389F8;
+        D_004389F8->next = arg0;
     } else {
-        arg0->unk4 = NULL;
+        arg0->prev = NULL;
     }
     D_004389F8 = arg0;
 }

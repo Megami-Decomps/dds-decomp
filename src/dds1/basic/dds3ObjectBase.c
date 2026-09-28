@@ -1,34 +1,5 @@
 #include "common.h"
-
-/* Object-base header returned by func_00112888. Flag bits at +0x0,
-   indexed pointer slots at +0x10 exchanged by objExchangeSlot, and the
-   sub-object at +0x30 dereferenced by objGetExtData. */
-typedef struct {
-    u32 flags;      /* 0x0 */
-    u32 unk4;       /* 0x4 read by objGetUnk04 */
-    u32 unk8;       /* 0x8 mode switched by func_00111B40 */
-    u32 unkC;       /* 0xC read by objGetUnk0C */
-    void *slots[8]; /* 0x10 indexed by objGetSlot */
-    void *extData;  /* 0x30 returned by objGetExtData */
-    u8 pad34[4];    /* 0x34 */
-    void *unk38;    /* 0x38 passed to func_002DB308 */
-} ObjBase;
-
-/* Inner object reached through +0x18 (see code_00111610 neighbors);
-   func_00111B40 releases and clears unk8. */
-typedef struct {
-    u8 pad[4]; /* 0x0 */
-    u32 unk4;  /* 0x4 */
-    u32 unk8;  /* 0x8 */
-    u32 unkC;  /* 0xC */
-} ObjInner;
-
-/* Value installed into a slot by objExchangeSlot; its +0xF byte selects
-   the slot index via func_00111758. */
-typedef struct {
-    u8 pad[0xF]; /* 0x0 */
-    u8 kind;     /* 0xF selects the object slot */
-} ObjData;
+#include "dds3obj.h"
 
 extern void *func_00111610(void *arg);
 extern void *objGetSlot(void *arg0, s32 index);

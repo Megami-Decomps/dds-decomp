@@ -1,48 +1,5 @@
 #include "common.h"
-
-/* Dispatch object: a type-selected handler plus instance words. */
-typedef struct EffWork {
-    u32 type;       /* 0x0: index into the handler tables below */
-    void *unk4;     /* 0x4: argument passed to the handler */
-    u32 unk8;       /* 0x8: node list freed by effFreeWorkList */
-    u8 unkC[8];     /* 0xC */
-    u32 unk14;      /* 0x14: read by effGetWorkParam */
-    u8 unk18[8];    /* 0x18 */
-    u32 unk20;      /* 0x20: set by effSetWorkFirst */
-    u32 unk24;      /* 0x24: set by effSetWorkSecond */
-    u8 unk28[0x10]; /* 0x28 */
-    void *unk38;    /* 0x38: next link freed by effFreeWorkList */
-    u32 unk3C;      /* 0x3C: sound handle */
-} EffWork;
-
-/* 24-byte handler-table entry (stride selected by type). */
-typedef struct EffHandler {
-    void (*handler)(void *);
-    u8 unk4[0x14];
-} EffHandler;
-
-/* Sub-object at EffWork.unk4 with per-type byte slots. */
-typedef struct EffSub {
-    u8 unk0[0x20];  /* 0x0 */
-    u8 unk20;       /* 0x20 */
-    u8 unk21[0x1F]; /* 0x21 */
-    u8 unk40;       /* 0x40 */
-    u8 unk41[0xF];  /* 0x41 */
-    u8 unk50;       /* 0x50 */
-} EffSub;
-
-/* Message record with length-prefixed strings at +0x34/+0x40. */
-typedef struct EffMsg {
-    s32 unk0;      /* 0x0: set by effSetMsgHeader */
-    s32 unk4;      /* 0x4: set by effSetMsgHeader */
-    u8 unk8[0x20]; /* 0x8 */
-    u32 unk28;     /* 0x28: set by effSetMsgPair */
-    u32 unk2C;     /* 0x2C: set by effSetMsgPair */
-    u8 unk30[4];   /* 0x30 */
-    u32 *unk34;    /* 0x34: words with text at +4 (effFormatMsgNames) */
-    u8 unk38[8];   /* 0x38 */
-    u32 *unk40;    /* 0x40: words with text at +4 (effFormatMsgNames) */
-} EffMsg;
+#include "eff.h"
 
 /* 0x44-byte init record built by func_0018D428. */
 typedef struct EffBig44 {
@@ -65,19 +22,6 @@ typedef struct EffBig44 {
     void *unk40;   /* 0x40 */
 } EffBig44;
 
-/* 0x38-byte slot with effMath-style defaults (0, 0.05f). */
-typedef struct EffSlot38 {
-    u8 unk0[0x30]; /* 0x0 */
-    s32 unk30;     /* 0x30: cleared by effAllocSlotArray */
-    f32 unk34;     /* 0x34: set to 0.05f by effAllocSlotArray */
-} EffSlot38;
-
-/* Array header written past the last slot by effAllocSlotArray. */
-typedef struct EffArrHdr {
-    void *unk0; /* 0x0: base */
-    u32 unk4;   /* 0x4: count */
-    void *unk8; /* 0x8: mem handle */
-} EffArrHdr;
 
 /* Directory entry filled by func_0018CEF0. */
 typedef struct EffDirEnt {
@@ -150,18 +94,7 @@ typedef struct SndDev {
 } SndDev;
 
 extern SndDev D_003255A8;
-typedef struct EffHandler32 {
-    s32 (*handler)(s32);
-    u8 unk4[0x14];
-} EffHandler32;
-
 extern EffHandler32 D_00355730[];
-
-/* 8-byte result record allocated by effAllocDispatch. */
-typedef struct EffResult {
-    s32 unk0; /* 0x0: input selector */
-    s32 unk4; /* 0x4: handler result */
-} EffResult;
 
 EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
     EffResult *mem = func_002CFEB8(8);

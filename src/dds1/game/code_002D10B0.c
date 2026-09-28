@@ -1,49 +1,5 @@
 #include "common.h"
-
-typedef struct SdfTexRef {
-    void *unk0; /* 0x0 */
-    s32 refCount; /* 0x4 */
-} SdfTexRef;
-
-typedef struct SdfTexBuf {
-    s32 unk0; /* 0x0 */
-    u8 pad4[0xC]; /* 0x4 */
-    u64 unk10; /* 0x10 */
-    u64 unk18; /* 0x18 */
-    u64 unk20; /* 0x20 */
-    u64 unk28; /* 0x28 */
-    u64 unk30; /* 0x30 */
-} SdfTexBuf;
-
-typedef struct {
-    u8 pad00[0xC];
-    u32 word; /* 0x0C */
-} SdfTexResource;
-
-typedef struct SdfTex {
-    struct SdfTex *next; /* 0x0 */
-    struct SdfTex *prev; /* 0x4 */
-    SdfTexRef *reference; /* 0x8 */
-    s16 unkC; /* 0xC */
-    s16 unkE; /* 0xE */
-    SdfTexResource *primaryResource; /* 0x10 */
-    SdfTexResource *secondaryResource; /* 0x14 */
-    u8 unk18; /* 0x18 */
-    u8 unk19; /* 0x19 */
-    u8 unk1A; /* 0x1A */
-    u8 unk1B; /* 0x1B */
-    u16 unk1C; /* 0x1C */
-    u8 unk1E; /* 0x1E */
-    u8 unk1F; /* 0x1F */
-    s32 unk20; /* 0x20 */
-    s32 unk24; /* 0x24 */
-    SdfTexBuf *unk28; /* 0x28 */
-    SdfTexBuf *unk2C; /* 0x2C */
-    void *unk30; /* 0x30 */
-    s32 unk34; /* 0x34 */
-    s32 unk38; /* 0x38 */
-    void *unk3C; /* 0x3C */
-} SdfTex;
+#include "sdf.h"
 
 typedef struct SdfTexHead {
     SdfTex *unk0; /* 0x0 */
@@ -54,14 +10,6 @@ typedef struct SdfTexHead {
     void *unk14; /* 0x14 */
     void *unk18; /* 0x18 */
 } SdfTexHead;
-
-typedef struct SdfSemaObj {
-    s32 unk0; /* 0x0: semaphore id */
-    void *unk4; /* 0x4 */
-    void *unk8; /* 0x8 */
-    void *unkC; /* 0xC */
-    s32 unk10; /* 0x10 */
-} SdfSemaObj;
 
 extern SdfTexHead *D_003BD9E4;
 extern SdfTexHead *D_003BD9E0;

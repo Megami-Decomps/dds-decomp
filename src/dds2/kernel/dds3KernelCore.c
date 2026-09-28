@@ -1,31 +1,7 @@
 #include "common.h"
-
-typedef struct KwlnTask KwlnTask;
+#include "kwln.h"
 
 extern KwlnTask* D_00435BE8;
-
-typedef s32 (*TaskUpdate)(KwlnTask* task);
-
-typedef void (*TaskDestroy)(KwlnTask* task);
-
-struct KwlnTask {
-    u8 unk00[0x18];
-    s32 nameSum;
-    u32 flags;
-    u32 unk20;
-    u32 unk24;
-    u32 timer;
-    s16 unk2C;
-    s16 unk2E;
-    TaskUpdate update;
-    TaskDestroy destroy;
-    u32 unk38;
-    KwlnTask* listNext;
-    KwlnTask* listPrev;
-    KwlnTask* parent;
-    KwlnTask* childList;
-    KwlnTask* next;
-};
 
 extern void func_001005C8(KwlnTask* task);
 

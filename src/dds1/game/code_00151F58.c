@@ -1,21 +1,5 @@
 #include "common.h"
-
-typedef struct EffectConfig {
-    s16 unk00;
-    u8 pad02[10];
-} EffectConfig;
-
-typedef struct EffectBufferRecord {
-    u8 pad00[0x20];
-    s32 unk20;
-    s32 unk24;
-    u8 pad28[0x18];
-} EffectBufferRecord;
-
-typedef struct EffectBufferTail {
-    s32 allocation;
-    EffectBufferRecord *records;
-} EffectBufferTail;
+#include "eff.h"
 
 extern EffectConfig D_0034DF54[];
 
@@ -70,40 +54,40 @@ s32 func_00151FC8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00151FE8);
 
-void func_00151FF8(s32 arg0, float arg1) {
-    *(float *)(arg0 + 0x20) = arg1;
+void func_00151FF8(BillObj *effect, float scale) {
+    effect->unk20 = scale;
 }
 
-void func_00152000(s32 arg0, float arg1, float arg2) {
-    *(float *)(arg0 + 0x10) = arg1;
-    *(float *)(arg0 + 0x14) = arg2;
+void func_00152000(BillObj *effect, float x, float y) {
+    effect->unk10 = x;
+    effect->unk14 = y;
 }
 
-void func_00152010(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+void func_00152010(BillObj *effect, u32 value) {
+    effect->unk24 = value;
 }
 
-void copyEffectPosition(s32 effect, const void *position) {
-    if (*(u16 *)(effect + 0x2c) == 0) {
-        memcpy((void *)(*(s32 *)(effect + 0x30) + 0xc), position, 16);
+void copyEffectPosition(BillObj *effect, const void *position) {
+    if (effect->unk2C == 0) {
+        memcpy((void *)((s32)effect->unk30 + 0xc), position, 16);
     }
 }
 
-void func_00152050(s32 effect, s32 mode) {
+void func_00152050(BillObj *effect, s32 mode) {
     s32 count;
     s32 remaining;
     s32 entry;
     mode = (s16)mode;
-    switch (*(u16 *)(effect + 0x2c)) {
+    switch (effect->unk2C) {
     case 0:
     case 3:
-        *(s16 *)(effect + 0x2e) = mode;
+        effect->unk2E = mode;
         break;
     case 1:
-        count = *(s32 *)(effect + 0x5c);
+        count = effect->entryCount;
         if (count > 0) {
             remaining = count;
-            entry = *(s32 *)(effect + 0x60) + 0xc;
+            entry = (s32)effect->unk60 + 0xc;
             do {
                 s32 node = *(s32 *)entry;
                 u32 flags = *(u32 *)(node + 0x10) & ~6;

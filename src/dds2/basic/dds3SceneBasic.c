@@ -1,14 +1,5 @@
 #include "common.h"
-
-typedef struct {
-    u8 pad0[0x14];
-    u32 state;
-} SceneObject;
-
-typedef struct {
-    u8 pad0[0x18];
-    SceneObject *object;
-} Scene;
+#include "dds3obj.h"
 
 void func_00110DE0(Scene *scene) {
     SceneObject *object;

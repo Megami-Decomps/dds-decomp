@@ -1,15 +1,5 @@
 #include "common.h"
-
-typedef struct {
-    u32 flags;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    void *slots[8];
-    void *extData;
-    u8 pad34[4];
-    void *unk38;
-} ObjBase;
+#include "dds3obj.h"
 
 extern u64 func_00111838(u64);
 

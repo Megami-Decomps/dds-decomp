@@ -1,8 +1,7 @@
 #include "common.h"
+#include "scr.h"
 
 typedef struct KwlnTask KwlnTask;
-typedef struct { u8 pad[0x388]; s32 unk388; } ScrComGlobals;
-typedef struct { f32 x; f32 y; f32 z; s32 w; } ScrVecW;
 f32 func_0010D4F0(s32 idx);
 s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
 s32 func_001082D8(s32 arg0, void *arg1);
@@ -26,7 +25,6 @@ extern char D_0039F508[];
 extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
-typedef struct { f32 x; f32 y; f32 z; f32 w; } ScrVec4;
 
 s32 func_0010D768(void)
 {

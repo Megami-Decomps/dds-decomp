@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern s32 D_004389FC;
 
@@ -20,51 +21,7 @@ extern u32 func_0032D168(u32);
 
 extern u32 func_00328D68(u32);
 
-typedef struct SdfResEntry {
-    u8 pad00[0xC]; /* 0x0 */
-    u32 unk0C; /* 0xC */
-} SdfResEntry;
-
-typedef struct SdfBigPacket {
-    u8 pad00[8]; /* 0x0 */
-    s32 unk08; /* 0x8 */
-    u8 pad0C[0x24]; /* 0xC */
-    u64 unk30; /* 0x30 */
-    u8 pad38[0x48]; /* 0x38 */
-    u64 unk80; /* 0x80 */
-} SdfBigPacket;
-
 extern SdfResEntry *D_0040B298[];
-
-typedef struct SdfListHead {
-    u32 unk0; /* 0x0 */
-    u32 unk4; /* 0x4: list head for the func_002D4038 family */
-    u32 unk8; /* 0x8: list tail */
-    u32 unkC; /* 0xC: 0xFFFF when fresh (func_002D4010) */
-    u32 unk10; /* 0x10 */
-    u32 unk14; /* 0x14 */
-    u32 unk18; /* 0x18 */
-    u32 unk1C; /* 0x1C */
-} SdfListHead;
-
-typedef struct SdfDmaSrc {
-    u16 unk0; /* 0x0 */
-    u8 pad2[6]; /* 0x2 */
-    u64 unk8; /* 0x8 */
-} SdfDmaSrc;
-
-typedef struct SdfDmaNode {
-    u64 unk0; /* 0x0 */
-    u64 unk8; /* 0x8 */
-    int __attribute__((mode(TI))) unk10; /* 0x10: cleared with por/sq */
-} SdfDmaNode;
-
-typedef struct SdfPacket {
-    u64 unk0; /* 0x0 */
-    u64 unk8; /* 0x8 */
-    u64 unk10; /* 0x10 */
-    u64 unk18; /* 0x18 */
-} SdfPacket;
 
 extern volatile s8 D_00438A23;
 
@@ -72,29 +29,11 @@ extern s32 D_00438A28;
 
 extern u32 D_0040B308[];
 
-typedef struct SdfResource {
-    u32 unk00;
-    struct SdfResource *next;
-    u8 pad08[0x18];
-    s32 id;
-} SdfResource;
-
 extern SdfResource *D_004389F8;
 
 void prependSdfPacketList(s32 arg0, s32 arg1);
 
 void func_0032D218();
-
-typedef struct SdfPacketBuilder {
-    u8 pad00[4];
-    void (*prepare)(void);
-    u8 pad08[8];
-    SdfPacket packets[2];
-    s32 source;
-    s32 data;
-    s32 region;
-    s32 mode;
-} SdfPacketBuilder;
 
 void func_0032DC80();
 
@@ -213,8 +152,8 @@ void func_0032CEA8(s32 arg0) {
 void func_0032CEC0(SdfListHead *arg0) {
     arg0->unkC = 0xFFFF;
     arg0->unk0 = 0;
-    arg0->unk4 = 0;
-    arg0->unk8 = 0;
+    arg0->first = 0;
+    arg0->last = 0;
     arg0->unk10 = 0;
     arg0->unk14 = 0;
     arg0->unk18 = 0;
@@ -361,8 +300,8 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D340);
 
 void func_0032D3F0(SdfListHead *arg0) {
     arg0->unk0 = 0;
-    arg0->unk4 = 0;
-    arg0->unk8 = 0;
+    arg0->first = 0;
+    arg0->last = 0;
     arg0->unkC = 0;
 }
 
@@ -379,7 +318,7 @@ void func_0032D408(s32 arg0, u32 *arg1) {
 
 void func_0032D428(SdfListHead *arg0) {
     arg0->unk0 = 0;
-    arg0->unk4 = 0;
+    arg0->first = 0;
 }
 
 void func_0032D438(s32 *arg0, s32 arg1) {

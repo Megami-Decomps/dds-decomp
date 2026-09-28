@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 typedef union SdfSubParam {
     struct {
@@ -52,51 +53,6 @@ typedef struct SdfResourceList {
     u32 unk8;
     u32 *items;
 } SdfResourceList;
-
-typedef struct SdfNode {
-    u16 unk0; /* 0x0 */
-    u8 unk2; /* 0x2 */
-    u8 unk3; /* 0x3: type tag (0x20/0x30/0x50) */
-    u32 unk4; /* 0x4 */
-    u32 unk8; /* 0x8 */
-    u32 unkC; /* 0xC */
-} SdfNode;
-
-typedef struct SdfTex SdfTex;
-
-typedef struct SdfAsset {
-    u8 pad00[8];
-    void *entries[2];
-    u32 unk10;
-    u32 unk14;
-    u32 unk18;
-    f32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    u32 unk28;
-    SdfTex *unk2C;
-    u8 pad30[8];
-    void *third;
-    void *fourth;
-    f32 unk40;
-    f32 unk44;
-} SdfAsset;
-
-typedef struct SdfAssetEntry {
-    u32 pad00;
-    u32 unk04;
-    u32 unk08;
-    u32 pad0C;
-    u32 unk10;
-    u32 unk14;
-    u32 pad18;
-    f32 unk1C;
-    u8 pad20[0x18];
-    u64 unk38;
-    u64 unk40;
-    u64 unk48;
-} SdfAssetEntry;
-
 
 extern SdfSubParam *sdfSubParamCreate(void);
 

@@ -1,58 +1,5 @@
 #include "common.h"
-
-typedef union ScrStackValue {
-    s32 i;
-    f32 f;
-    char *s;
-} ScrStackValue;
-
-typedef union ScrInstr {
-    struct {
-        s16 opCode;
-        s16 sOperand;
-    } parts;
-    s32 iOperand;
-    f32 fOperand;
-} ScrInstr;
-
-typedef struct ScrLabel {
-    char name[24]; // 0x00
-    s32 addr;      // 0x18
-    s32 unk1C;     // 0x1C
-} ScrLabel; // 0x20 bytes
-
-typedef struct ScrData {
-    char name[24];                 // 0x00
-    s32 pc;                        // 0x18
-    s32 sp;                        // 0x1C
-    s8 stackTypes[28];             // 0x20
-    ScrStackValue stackValues[28]; // 0x3C
-    void *unkAC;                   // 0xAC
-    void *unkB0;                   // 0xB0
-    ScrLabel *procedures;          // 0xB4
-    ScrLabel *labels;              // 0xB8
-    ScrInstr *instructions;        // 0xBC
-    void *unkC0;                   // 0xC0
-    char *strings;                 // 0xC4
-    void *unkC8;                   // 0xC8
-    void *unkCC;                   // 0xCC
-    s32 timer;                     // 0xD0
-    s32 cmdTimer;                  // 0xD4
-    void *unkD8;                   // 0xD8
-    s32 *localInt;                 // 0xDC
-    f32 *localFloat;               // 0xE0
-} ScrData;
-
-typedef struct ScrVM {
-    u8 unk00[0x40];  // 0x00
-    s32 ints[256];   // 0x40
-    f32 floats[256]; // 0x440
-} ScrVM;
-
-typedef struct ScrCommand {
-    u32 (*func)(void);
-    s32 paramCount;
-} ScrCommand;
+#include "scr.h"
 
 #define SCR_STACK_RET 27
 #define SCR_STACK_TYPE_STRING 5

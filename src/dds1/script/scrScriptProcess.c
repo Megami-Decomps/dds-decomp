@@ -1,19 +1,7 @@
 #include "common.h"
-
-typedef struct { u8 pad0[0x40]; s32 integers[256]; s32 floatBits[256]; } ScrProcGlobals;
+#include "scr.h"
 extern ScrProcGlobals *D_003BAA00;
 
-/* Task object created by func_0010BA18/func_0010B7C0 and started below. */
-typedef struct {
-    u8   pad_0x00[0xB4]; /* 0x00 */
-    s32  unkB4;          /* 0xB4 */
-    u8   pad_0xB8[0x10]; /* 0xB8 */
-    s32  unkC8;          /* 0xC8 */
-    u8   pad_0xCC[0x0C]; /* 0xCC */
-    void *scriptHandle;  /* 0xD8: back-pointer to the script handle */
-    u8   pad_0xDC[0x08]; /* 0xDC */
-    s32  taskId;         /* 0xE4: id from kwlnTaskCreate */
-} ScrProcTask; /* 0xE8 */
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_0010C0C8();

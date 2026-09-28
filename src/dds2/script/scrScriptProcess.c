@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 
 void *func_00343ED0(s32 arg0, u32 *arg1, s32 arg2);
 
@@ -7,19 +8,6 @@ s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 s32 func_0010C2F0();
 
 s32 func_0010C298();
-
-typedef struct { u8 pad0[0x40]; s32 integers[256]; s32 floatBits[256]; } ScrProcGlobals;
-
-typedef struct {
-    u8 pad0[0xB4];
-    s32 unkB4;
-    u8 padB8[0x10];
-    s32 unkC8;
-    u8 padCC[0xC];
-    void *scriptHandle;
-    u8 padDC[8];
-    s32 taskId;
-} ScrProcTask;
 
 extern ScrProcGlobals *D_00435DD0;
 

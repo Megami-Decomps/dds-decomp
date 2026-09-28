@@ -1,39 +1,5 @@
 #include "common.h"
-
-typedef struct SdfTexRef {
-    void *unk0;
-    s32 refCount;
-} SdfTexRef;
-
-typedef struct SdfTexBuf {
-    u8 pad[0x20];
-    u64 unk20;
-} SdfTexBuf;
-
-typedef struct SdfTex {
-    struct SdfTex *next;
-    struct SdfTex *prev;
-    SdfTexRef *reference;
-    s16 unkC;
-    s16 unkE;
-    void *unk10;
-    void *unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u16 unk1C;
-    u8 unk1E;
-    u8 unk1F;
-    s32 unk20;
-    s32 unk24;
-    SdfTexBuf *unk28;
-    SdfTexBuf *unk2C;
-    u8 *data;
-    s32 dataSize;
-    s32 unk38;
-    void *unk3C;
-} SdfTex;
+#include "sdf.h"
 
 extern SdfTex *D_003BD308;
 extern u8 D_003BD9F0;
@@ -75,9 +41,9 @@ void func_002D2C30(SdfTex *texture) {
     SdfTex *prev;
 
     if (texture->reference->unk0 == NULL) {
-        func_002D1B90(texture->unk10);
+        func_002D1B90(texture->primaryResource);
     }
-    func_002D1B90(texture->unk14);
+    func_002D1B90(texture->secondaryResource);
     func_002CFF98(texture->unk28);
     func_002CFF98(texture->unk2C);
     next = texture->next;
