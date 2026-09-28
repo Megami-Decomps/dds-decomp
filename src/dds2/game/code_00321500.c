@@ -39,6 +39,7 @@ extern u8 D_0045C880[];
 extern void func_00320C88(u32);
 
 extern void func_00321908(u32);
+extern u32 func_0035A828(s32 bytes);
 
 typedef struct ShortRecord {
     u8 kind;
@@ -51,6 +52,7 @@ typedef struct ShortRecordList {
 } ShortRecordList;
 
 void func_003214D0(u32 arg0, s32 arg1);
+s32 func_00322480(s32 *entries, s32 count);
 
 u32 func_00321500(void) {
     u32 node = func_00320C28(0);
@@ -69,7 +71,16 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003216A8);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321798);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003218A0);
+u8 *func_003218A0(u8 *name) {
+    u8 *record;
+    if (name == 0) {
+        return 0;
+    }
+    record = (u8 *)func_0035A828(0x22);
+    memset(record, 0, 0x22);
+    memcpy(record + 0xa, name, 8);
+    return record;
+}
 
 void func_00321908(u32 ptr) {
     if (ptr != 0) {
@@ -132,7 +143,10 @@ void func_00322418(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322438);
+s32 func_00322438(u8 *data) {
+    s32 length = func_00322480(*(s32 **)(data + 8), *(u16 *)(data + 4)) + 0x10;
+    return length + func_00322480(*(s32 **)(data + 0xc), *(u16 *)(data + 6));
+}
 
 s32 func_00322480(s32 *arg0, s32 arg1) {
     s32 temp_v0;
@@ -271,7 +285,20 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003236B0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003238A0);
+void func_003238A0(s32 arg) {
+    s32 index = 0;
+    if ((s32)D_004390CC > 0) {
+        s32 offset = 0;
+        do {
+            u8 *record = (u8 *)(D_004390C8 + offset);
+            if ((*(u32 *)(record + 0x40) & 1) != 0) {
+                func_00323748(record, arg);
+            }
+            index++;
+            offset += 0x48;
+        } while (index < (s32)D_004390CC);
+    }
+}
 
 void func_00323918(u8 *arg0) {
     D_004389A0 = arg0;

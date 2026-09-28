@@ -13,6 +13,8 @@ extern u64 func_0031F0E8(void);
 extern void (*D_004389C4)(void);
 
 extern void func_00320C88(u32);
+extern u32 func_0035A828(s32 bytes);
+extern void func_003211F0(void);
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F0E8);
 
@@ -201,7 +203,14 @@ u64 func_00320A98(u64 arg0, u64 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320C28);
+u32 func_00320C28(u32 userData) {
+    u32 *node = (u32 *)func_0035A828(0x18);
+    memset(node, 0, 0x18);
+    node[3] = userData;
+    node[4] = (u32)func_003211F0;
+    node[5] = (u32)func_003211F0;
+    return (u32)node;
+}
 
 void func_00320C88(u32 node) {
     if (node != 0) {

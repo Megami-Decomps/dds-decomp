@@ -52,7 +52,34 @@ s32 func_0031E550(context)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E578);
+void func_0031E578(s32 *entry) {
+    if (entry[2] > 0) {
+        if (entry[4] == 0) {
+            func_0031E4E0((u32 *)entry, entry[2] - 1, entry[3]);
+            entry[2] = 0;
+        } else {
+            entry[4]--;
+        }
+    }
+    switch (entry[0]) {
+    case 1:
+        if (entry[5] < 0x80) {
+            entry[5] += entry[1];
+        }
+        if (entry[5] > 0x80) {
+            entry[5] = 0x80;
+        }
+        break;
+    case 0:
+        if (entry[5] > 0) {
+            entry[5] -= entry[1];
+        }
+        if (entry[5] < 0) {
+            entry[5] = 0;
+        }
+        break;
+    }
+}
 
 void func_0031E640(u32 arg0) {
     s64 temp_v0;

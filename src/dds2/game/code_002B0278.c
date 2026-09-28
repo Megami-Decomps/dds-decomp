@@ -11,6 +11,12 @@ extern u32 func_002BC120(u32);
 extern u32 func_002B9FF8(u32);
 
 extern s32 D_00435DD0;
+typedef struct MenuSlot {
+    s32 resources[3];
+    u16 unused;
+    u16 flags;
+} MenuSlot;
+extern MenuSlot *D_00435E24;
 
 extern void func_002C21F8(s32);
 
@@ -25,6 +31,14 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 extern void func_0026C900(void);
 extern void func_002B9520(u32);
 extern void *memset(void *, s32, u32);
+
+u32 *func_002B9918(u32 first, u32 second, u32 third,
+                    u32 fourth, u32 fifth, u32 sixth);
+
+typedef struct MenuListDefaults {
+    u32 fields[3];
+} MenuListDefaults;
+extern MenuListDefaults D_0042AF00;
 
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0278);
@@ -445,7 +459,21 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6B00);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6C70);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6D08);
+s32 func_002B6D08(s32 id) {
+    MenuSlot *entry;
+    s32 i;
+    id -= 0x1ab;
+    entry = (MenuSlot *)((id << 4) + (s32)D_00435E24);
+    if ((entry->flags & 2) != 0) {
+        return 0;
+    }
+    for (i = 0; i < 3; i++) {
+        if (entry->resources[i] != -1) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6D78);
 
@@ -496,7 +524,26 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B75C8);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B76B0);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B76E8);
+typedef struct MapPacket {
+    u32 type;
+    u32 value;
+    u32 unk_08;
+    u32 items[11];
+    s32 count;
+} MapPacket;
+
+void func_002B76E8(u32 value, u32 *values, s32 count, MapPacket *packet) {
+    s32 index = 0;
+    packet->value = value;
+    packet->type = 4;
+    packet->count = count;
+    if (count > 0) {
+        do {
+            packet->items[index] = values[index];
+            index++;
+        } while (index < count);
+    }
+}
 
 void func_002B7730(u32 arg0, u32 *arg1) {
     *arg1 = *arg1 | arg0;
@@ -602,7 +649,24 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8208);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B82A0);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8350);
+s32 func_002B8350(u32 *menu) {
+    u8 *node = (u8 *)menu[6];
+    s32 index = 0;
+    if (node != 0) {
+        s32 count = menu[3];
+        do {
+            if (index >= count) {
+                return 0;
+            }
+            if (node == (u8 *)menu[5]) {
+                return 1;
+            }
+            node = *(u8 **)(node + 0x58);
+            index++;
+        } while (node != 0);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B83A0);
 
@@ -780,7 +844,11 @@ void func_002B95D0(u32 first, u32 *menu, u32 second, u32 third, u32 fourth) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B95E8);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9678);
+void func_002B9678(u8 *menu, u32 first, u32 second, u32 third, u32 fourth) {
+    MenuListDefaults defaults = D_0042AF00;
+    *(u32 **)(menu + 0x90) =
+        func_002B9918(first, second, third, fourth, (u32)&defaults, 3);
+}
 
 void func_002B96D8(s32 arg0) {
     *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) & 0xfffffffb;
