@@ -1,200 +1,154 @@
-# Shin Megami Tensei: Digital Devil Saga 1 & 2 (PS2) decompilation
+# Shin Megami Tensei: Digital Devil Saga 1 & 2
 
-A matching decompilation of Digital Devil Saga (USA, `SLUS_209.74`) and Digital
-Devil Saga 2 (USA, `SLUS_211.52`). Each version builds a byte-identical copy of
-the retail executable, and `ninja` fails when the SHA-1 does not match.
+A work-in-progress **matching decompilation** of *Shin Megami Tensei: Digital
+Devil Saga* and *Digital Devil Saga 2* for the PlayStation 2. The goal is C
+source that compiles to byte-identical copies of the retail executables and
+reads like the source the developers wrote.
 
-No game data or executables are included. You extract them from your own disc.
+> [!IMPORTANT]
+> This repository does **not** contain game assets, executables or any other
+> copyrighted material. You need your own copy of the games to build it.
+>
+> This is not a PC port. It rebuilds the original PS2 executables.
 
-| Version | Serial | ELF SHA-1 |
-|---|---|---|
-| `dds1` | SLUS_209.74 | `6d18898e2724bf1d145392766e8ba1e678487419` |
-| `dds2` | SLUS_211.52 | `9be91ee1b4a535a4cb6ec89237b5a6ba41be2add` |
+> [!WARNING]
+> Work in progress. Unfinished functions are still assembly, and function
+> names, types and file layout change often. Most names were chosen by us (see
+> [Names](#names)).
 
-## The retail build
+## Versions
 
-| Code | Toolchain | Evidence |
-|---|---|---|
-| Atlus game/engine (0x100000 to the SDK) | ee-gcc 2.96 (`2.96-ee-001003-1`) `-O2`, default `-G8`, assembled by Sony's ee-as | See below |
-| Sony SDK 2.5.x libraries, newlib, libgcc | Prebuilt archives | romwright signature matches against SDK archives |
-| `.vutext` | VU1 microcode (ee-dvp-as) | Kept as binary |
+| Version | Game | Serial | ELF SHA-1 | Functions in C | Code bytes in C |
+|---|---|---|---|---|---|
+| `dds1` | Digital Devil Saga (USA) | `SLUS_209.74` | `6d18898e2724bf1d145392766e8ba1e678487419` | 4,924 / 9,595 (51.3%) | 14.1% |
+| `dds2` | Digital Devil Saga 2 (USA) | `SLUS_211.52` | `9be91ee1b4a535a4cb6ec89237b5a6ba41be2add` | 4,360 / 10,877 (40.1%) | 9.0% |
 
-How the compiler was pinned (measured, see `docs/p4-transfer.md` for a second
-check):
+Both builds are byte-identical at every commit: `ninja` fails when a SHA-1
+doesn't match. Run `python tools/progress.py` for current numbers. The Sony
+SDK libraries are prebuilt archives in the original game too; they stay
+assembly and are not counted.
 
-- Callee-saved registers are stored with `sd` 5,570 times and with `sq` 3 times
-  (all three in kernel/SDK assembly). MWCC saves with `sq`.
-- `move` is encoded as `daddu`. `.mdebug.eabi64` is present, as the SCE gcc
-  toolchain emits it.
-- 231 random game functions were decompiled by m2c and compiled without
-  edits. Byte-exact results: ee-gcc 2.96 94, gcc 3.2 26, gcc 2.9-991111 21,
-  and MWCC 2.4, 3.0.1 and 3.0.3 0 each.
-- The assembler matters. Modern GNU as encodes `move` as `or` and inserts
-  FPU hazard `nop`s; the original ee-as reproduces retail. C units are
-  therefore assembled with ee-as. Split assembly is explicit `noreorder`
-  code, so it is assembled with the decompals binutils.
+## Quickstart
 
-## Setup
-
-Requirements: Linux x86-64 (or WSL), Python 3.10+, `ninja`, `cpp`, and 32-bit
-glibc (`glibc.i686` / `libc6:i386`). The 1999-2002 compiler binaries are i386
-ELF. Without a system `/lib/ld-linux.so.2`, set
-`DDS_I386_LIBDIR=<dir containing ld-linux.so.2 and libc.so.6>`.
+Requirements:
+- Linux x86-64 (or WSL)
+- Python 3.10+, `ninja`, `cpp`, `git`
+- 32-bit glibc, because the 2000-era compiler binaries are i386 ELF.
+  Install `libc6:i386` (Debian/Ubuntu) or `glibc.i686` (Fedora). Without a
+  system `/lib/ld-linux.so.2`, point `DDS_I386_LIBDIR` at a directory that
+  contains `ld-linux.so.2` and `libc.so.6`.
 
 ```sh
+git clone <this repo> dds-decomp && cd dds-decomp
 python -m pip install -r requirements.txt
-python tools/download_tools.py        # ee-gcc 2.96 (decomp.me), decompals binutils, objdiff-cli
-# put the ISO(s) in the repo root or orig/, then:
-python tools/extract.py               # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.52 (SHA-1 checked)
-python configure.py                   # splat + build.ninja + objdiff.json
-ninja                                 # build and check every version (or: ninja dds1)
+python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objdiff-cli
+# copy your disc image(s) into the repo root or orig/, then:
+python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.52 (SHA-1 checked)
+python configure.py              # split with splat, write build.ninja and objdiff.json
+ninja                            # build and verify every extracted version (or: ninja dds1)
 ```
 
-## Layout
+`ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
+(`build/<v>/SLUS_*`). It is silent when the ELF matches. A mismatch prints
+
+```
+build/dds1/SLUS_209.74: FAILED
+```
+
+and the build fails.
+
+## How it's built
+
+The toolchain was identified from the binaries, not guessed:
+
+| Code | Toolchain |
+|---|---|
+| Atlus game and engine code | ee-gcc 2.96 (`2.96-ee-001003-1`) at `-O2`, assembled by Sony's ee-as with `-G8` |
+| Sony SDK 2.5.x libraries, newlib, libgcc | prebuilt archives, identified by signature matching |
+| `.vutext` | VU1 microcode, kept as binary |
+
+Evidence:
+- Callee-saved registers are stored with `sd`, never `sq` (MWCC uses `sq`).
+- `move` is encoded as `daddu`.
+- `.mdebug.eabi64` is present.
+- Of 231 random functions compiled straight from m2c output, 94 match under
+  ee-gcc 2.96, against 0 to 26 for the other candidate compilers.
+
+The original assembler matters too: modern GNU as encodes `move` differently
+and inserts FPU hazard `nop`s, so C is assembled with ee-as.
+`docs/p4-transfer.md` has a second check against the Persona 4 decomp.
+
+A handful of files were built without sibling-call optimisation. They are
+recorded with their evidence in `config/<v>/cflags.txt`.
+
+## Project structure
 
 ```text
-config/versions.json          identity of each version (serial, SHA-1, gp)
-config/<v>/SLUS_*.yaml        splat config: segments, and the unit list for .text
-config/<v>/symbol_addrs.txt   hand-curated symbols on top; romwright-generated block below
-src/<v>/                      C units (INCLUDE_ASM for functions not yet decompiled)
-include/                      common.h, include_asm.h, macro.inc
-asm/<v>/ assets/<v>/          generated by splat (ignored)
-build/                        build output (ignored); build/romwright/ is the analysis store
-tools/                        extract, download, romwright sync, helpers
-docs/p4-transfer.md           what carried over from the Persona 4 decomp
-docs/tu-names.md              where unit names and ranges come from (Nocturne __FILE__)
+config/versions.json        serial, SHA-1 and gp of each version
+config/<v>/SLUS_*.yaml      splat config: every .text unit and its .rodata/.lit4/.sdata
+config/<v>/symbol_addrs.txt names and addresses (curated on top, generated below)
+config/<v>/name_sources.txt provenance of every curated name (evidence / inferred)
+config/<v>/cflags.txt       per-file compiler options, with evidence
+src/<v>/<dir>/<unit>.c      C units; INCLUDE_ASM marks functions not decompiled yet
+include/                    common.h, include_asm.h, fpu.h, macro.inc
+docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
+docs/idioms.md              source shapes confirmed against retail codegen
+docs/tu-names.md            where unit names come from (Nocturne __FILE__ strings)
+tools/                      build, checking, splitting and analysis tools
+asm/ assets/ build/ orig/   generated or extracted locally (git-ignored)
 ```
 
-`.text` is split into C units named after the original source files
-(`kernel/dds3KernelCore`, `effect/effPCPMisc`, `sdf/sdfModel`, ...), unowned
-`game/code_<vram>` assembly chunks between them, and one file per SDK library
-(`sdk/libgraph`, `sdk/libdma`, `sdk/libkernl`, and so on). DDS has no
-`__FILE__` strings; the names come from a Nocturne debug build that does
-(`docs/tu-names.md`). Library boundaries are the first romwright signature hit
-in each library, so a library's unmatched leading functions can fall into the
-previous file.
+`.text` is split into C units named after the original source files where the
+evidence exists (`kernel/dds3KernelCore`, `effect/effPCPMisc`,
+`sdf/sdfModel`, ...). DDS has no `__FILE__` strings, but a December 2002
+debug build of *Nocturne*, which shares the engine, does. Units without
+proven names are `game/code_<vram>`, split at proven file boundaries.
 
-`python tools/find_tus.py <v> [--sdk-lib DIR] [--p4-diff ... --p4-root ...]`
-writes `build/<v>/tu_evidence.txt`. It lists functions proven to share a unit
-(shared or order-inverted string, jump-table and `.lit4` references), proven
-boundaries (the same string emitted twice), SDK archive members, and Persona 4
-file-name hints.
+## FAQ
 
-## Workflow
+**What is a matching decompilation?**
+Hand-written C that, compiled with the original compiler and flags,
+reproduces the original machine code byte for byte. It isn't the original
+source, but it behaves identically, and its structure and names are meant to
+be what the developers could plausibly have written.
 
-1. **Start a unit.** In `config/<v>/SLUS_*.yaml`, split the `asm` chunk that
-   holds the function and add `[0xFILE_OFFSET, c, <dir>/<name>]` (file offset =
-   vram - 0xFF000). Use the name from `build/<v>/nocturne_tus.txt` when the
-   function has one, else `game/code_<vram>`. `python configure.py` then creates
-   `src/<v>/<dir>/<name>.c` with one `INCLUDE_ASM` per function.
-2. **Decompile.** `python tools/decompile.py func_XXXXXXXX` runs m2c
-   (`mipsee-gcc-c`) with the unit's context. Replace the `INCLUDE_ASM` line with
-   the C. For a first pass over whole units,
-   `python tools/rw_bulk.py <v> <dir/unit ...>` (or `--all --skip <dir/unit>`)
-   tries a romwright draft for every `INCLUDE_ASM` function. It keeps only
-   drafts that byte-match with the unit still clean. On first use it builds its
-   own store, `build/romwright-c` (romwright needs MIPS `gp` seeding). Drafts
-   are cached in `build/rw_c/<v>/`. Kept drafts still read like decompiler
-   output, so give them types and struct names afterwards.
-   `python tools/check_unit.py src/<v>/<dir>/<unit>.c [-v] [--func F]` compares
-   every C function in a unit against retail, relocation targets included, and
-   fails when the unit emits data.
-3. **Diff.**
-   - objdiff: `objdiff.json` is generated. Targets are splat's full disassembly
-     of the unit. Bases are built with `-DSKIP_ASM`, so fallbacks never count as
-     matched.
-   - asm-differ: `python3 ../asm-differ/diff.py -mwo func_XXXXXXXX`
-     (`diff_settings.py`; set `DDS_VERSION=dds2` for the sequel).
-   - decomp.me: compiler `ee-gcc2.96`, flags `-O2`. `python tools/m2ctx.py <file.c>`
-     writes `ctx.c`.
-   - permuter: `../decomp-permuter/import.py <file.c> <asm/.../func.s>`
-     (`permuter_settings.toml`, which compiles through `tools/cc.sh`).
-4. **Name and tidy.** Matched C should read like the original source: structs
-   in place of pointer arithmetic, real types, meaningful argument and local
-   names. `check_unit.py` confirms each change still matches. Function and data
-   names go through `python tools/names.py apply <v> names.tsv`, one row per
-   name: `<old name|0xADDR> <new> <evidence|inferred> <note>`. It writes a
-   curated row in `symbol_addrs.txt`, records provenance in
-   `config/<v>/name_sources.txt` and renames C references (run
-   `configure.py --force-split` afterwards so asm follows).
-   - `evidence` means the binary names the function itself, e.g. a message
-     inside it that carries its own name. Names from the Persona 3/4 decomps
-     are chosen by those projects, and task labels are not proof, so both
-     count as `inferred`.
-   - `inferred` means a name we chose in their convention: lowercase module
-     prefix plus CamelCase, e.g. `sdfAddHandler`, `evtLipsExecFunction`.
-   - `python tools/names.py harvest <v>` lists the naming strings and the
-     functions that reference them, as candidates to review. The referencing
-     function may be a caller or a task registrar, not the named function.
-5. **Share with the other game.** About 8,600 DDS1 functions are byte-identical
-   in DDS2 (relocations masked). `python tools/shared_funcs.py port` copies
-   each decompiled function into the other version's `INCLUDE_ASM` slot,
-   translating every symbol through the pair's relocations; `--from dds2`
-   goes the other way. See [Shared functions](#shared-functions).
-6. **Verify.** `ninja` must stay green. `ninja report` writes `report.json`
-   (objdiff/decomp.dev progress, categories `dds1`, `dds2`, `game`, `sdk`).
+**Are there shortcuts in the matched code?**
+No. `tools/check_unit.py` rejects the common fakematch techniques: register
+pinning, computed-goto label tables standing in for switches, and functions
+that only match when compiled outside their unit. Inline assembly is limited
+to VU0 instructions that C cannot express. The rules are in
+[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md#matching-rules).
 
-Build details, all automated by `configure.py`:
+**Why two games in one repository?**
+DDS2 reuses most of DDS1's engine: about 8,600 functions are byte-identical
+once relocations are masked. Each one decompiled in either game is ported to
+the other automatically (`tools/shared_funcs.py`).
 
-- INCLUDE_ASM bodies are rewritten for ee-as by `tools/eeas_compat.py`.
-  `%gp_rel` becomes the retail immediate, and VU0 macro ops become `.word`.
-- Jump-table entries in the asm rodata chunks become absolute words
-  (`tools/resolve_jtbl_targets.py`), because `.L` labels cannot cross files.
-- `.sbss` and `.bss` are aligned to 128 bytes, as in Sony's `app.cmd`.
+**Can I mod the game with this?**
+Not comfortably yet. Much of the code is still assembly at fixed addresses,
+and data isn't shiftable.
 
-Per-unit rodata and function boundaries (committed config, rerun after
-changing unit ranges):
+## Names
 
-- `python tools/split_rodata.py <v> --write` gives every C unit whose rodata
-  is contiguous in link order its own `.rodata` subsegment (29 in DDS1, 30 in
-  DDS2).
-  - splat then moves each function's jump tables and strings into that
-    function's asm file.
-  - A `switch` in C compiles its own table, and `check_unit.py` checks every
-    entry against retail.
-  - Rodata that C does not produce yet gets `INCLUDE_RODATA` lines, placed in
-    address order by `tools/include_rodata.py`. That covers shared strings and
-    the strings and constants of already-matched functions, and `configure.py`
-    runs it after each split.
-  - ee-gcc starts every jump table on 16 bytes, so a unit with one starts at its
-    first 16-aligned symbol.
-- `python tools/find_fragments.py <v> --write` lists false function starts
-  (code that uses a caller's frame) in `config/<v>/not_functions.txt`.
-  `romwright_sync.py` leaves them out, so they stay part of their function.
+Neither game ships symbols, so nearly every function and variable name here
+was chosen by contributors. Names follow Atlus's convention: a lowercase
+module prefix plus CamelCase, e.g. `sdfAddHandler` or `btlResetRuntime`.
+`config/<v>/name_sources.txt` marks each name as `evidence` (the binary names
+the function in its own debug text) or `inferred` (our choice). Treat
+`inferred` names as descriptions, not original symbols.
 
-## Shared functions
+## Contributing
 
-`tools/shared_funcs.py` works from the romwright DDS1/DDS2 pairing:
+Contributions are welcome, including small ones. Start with
+[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and
+[docs/idioms.md](docs/idioms.md), pick an `INCLUDE_ASM` function, and send a
+pull request once `ninja` stays green and `check_unit.py` is clean for the
+units you touched.
 
-```sh
-romwright-cli diff dds2 --reference build/romwright --reference-name dds1 --json \
-    --project build/romwright > build/dds1_diff_dds2.json
-python tools/shared_funcs.py map     # build/shared/dds1_dds2.txt (+ Nocturne columns)
-python tools/shared_funcs.py names   # curated names -> the other version's "shared" block
-python tools/shared_funcs.py units   # C units missing in the other version (--write splits)
-python tools/shared_funcs.py port    # decompiled C -> the other version
-```
+## Acknowledgements
 
-A pair counts only when the code is byte-identical after relocation masking.
-Names follow pairs that are in address order on both sides. Ported C may land on
-another identical copy, but it still rebuilds the same bytes because its symbols
-come from that pair's own relocations. `names` also renames the version's C
-references and removes romwright placeholder rows at the named addresses.
-
-## romwright
-
-Analysis runs through [romwright](https://github.com/Raikaru/ventris):
-
-```sh
-# SDK signatures from archives you own (not committed):
-romwright-cli signatures build --archive ee/lib/libkernl.a --package ps2sdk:libkernl \
-    --license proprietary-local --out sigs/libkernl.db
-# import both ELFs, then regenerate the function/name block of symbol_addrs.txt:
-ROMWRIGHT=/path/to/romwright-cli DDS_SDK_SIGS=sigs python tools/romwright_sync.py --reimport
-```
-
-`tools/romwright_sync.py` takes a signature name only when it lands on exactly
-one function. Tiny masked stubs such as `__deregister_frame_info` otherwise
-"match" 147 bodies. Rows above the generated block are curated and win at the
-same address. Cross-game name porting uses `romwright-cli diff`; see
-`docs/p4-transfer.md`.
+- [splat](https://github.com/ethteck/splat), [spimdisasm](https://github.com/Decompollaborate/spimdisasm),
+  [m2c](https://github.com/matt-kempster/m2c) and [objdiff](https://github.com/encounter/objdiff)
+- [decomp.me](https://decomp.me) for the ee-gcc 2.96 toolchain packaging
+- the Persona 3/4 decompilation projects, for SDK layout and naming conventions
+- romwright, for analysis and cross-game pairing
