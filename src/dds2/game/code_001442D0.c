@@ -1,6 +1,12 @@
 #include "common.h"
 #include "fpu.h"
 
+/* DDS2 saves store the area flag table earlier than the DDS1 save layout. */
+typedef struct FldAreaFlagsView {
+    u8 pad00[0xFCD0];
+    u64 areaFlags[13][64];
+} FldAreaFlagsView;
+
 extern s32 D_004363C4;
 
 extern u32 D_00435F0C;
@@ -164,7 +170,7 @@ extern void *func_00328D68(s32 size);
 
 extern void func_00101950(s32 arg0, void *arg1);
 
-extern void func_00144400(void);
+extern s32 func_00144400(void);
 
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 
@@ -329,7 +335,34 @@ extern void func_00135568(s32);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00144400);
+extern u8 func_00127398(void);
+extern u8 func_001275D0(void);
+extern s32 func_002CE928(void);
+extern s32 D_00435EE0;
+
+s32 func_00144400(void) {
+    if (func_00127398() != 0) {
+        return 0;
+    }
+    if (func_001275D0() != 0) {
+        return 0;
+    }
+    if (func_002CE928() != 0) {
+        return 0;
+    }
+    if (fldTitleIsActive() != 0) {
+        return 0;
+    }
+    if (D_00389884[0] == 1) {
+        return 0;
+    }
+    if (D_00435EE0 != -0x3e7) {
+        func_0014D838(0x80, 0, 0);
+    } else {
+        func_0014B0F8(0);
+    }
+    return 0;
+}
 
 void *func_00144498(s32 arg0) {
     s32 *temp_v0;
@@ -413,7 +446,23 @@ void func_00144F60(void) {
     D_00389798[0] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00144F88);
+void func_00144F88(s32 id) {
+    if (D_00389770[4] < 0x32) {
+        if (id >= 0x10) {
+            if (id == 0x80) {
+                sndSetSequenceVolumePan(0x6d0060, 0x7f, 0x3f);
+            } else if (id == 0x81) {
+                sndSetSequenceVolumePan(0x6d0061, 0x7f, 0x3f);
+            } else if (id == 0x82) {
+                sndSetSequenceVolumePan(0x6d0064, 0x7f, 0x3f);
+            } else if (id >= 0x200) {
+                sndSetSequenceVolumePan(0x68fe00 + id, 0x7f, 0x3f);
+            } else {
+                sndSetSequenceVolumePan(D_00436214 + id, 0x7f, 0x3f);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", fldPlayFieldSe);
 
@@ -612,7 +661,7 @@ s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     if (index == -1) {
         return 0;
     }
-    return (*(u64 *)(D_00435DD0 + 0xFCD0 + (index * 64 + floor) * 8) >> bit) & 1;
+    return (((FldAreaFlagsView *)D_00435DD0)->areaFlags[index][floor] >> bit) & 1;
 }
 
 extern s32 fldFindRecordItem(s32 floor, s32 bit);
@@ -902,7 +951,45 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BA60);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BD20);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BDE0);
+extern u32 D_004362DC;
+extern u32 D_004362E8;
+extern u32 D_004362F4;
+extern u32 D_004362CC;
+
+void func_0014BDE0(void) {
+    if (D_00389770[0x1F0 / 4] != 0) {
+        func_0032BBB0(D_00389770[0x1F0 / 4]);
+        D_00389770[0x1F0 / 4] = 0;
+    }
+    if (D_00389770[0x1FC / 4] != 0) {
+        func_0032BBB0(D_00389770[0x1FC / 4]);
+        D_00389770[0x1FC / 4] = 0;
+    }
+    if (D_00389770[0x208 / 4] != 0) {
+        func_0032BBB0(D_00389770[0x208 / 4]);
+        D_00389770[0x208 / 4] = 0;
+    }
+    if (D_00389770[0x214 / 4] != 0) {
+        func_0032BBB0(D_00389770[0x214 / 4]);
+        D_00389770[0x214 / 4] = 0;
+    }
+    if (D_004362DC != 0) {
+        func_00157658(D_004362DC);
+        D_004362DC = 0;
+    }
+    if (D_004362E8 != 0) {
+        func_00157658(D_004362E8);
+        D_004362E8 = 0;
+    }
+    if (D_004362F4 != 0) {
+        func_00157658(D_004362F4);
+        D_004362F4 = 0;
+    }
+    if (D_004362CC != 0) {
+        func_00157658(D_004362CC);
+        D_004362CC = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", fldClearMenuEntries);
 
@@ -1419,8 +1506,6 @@ s32 fldCalcDistanceVolume(f32 x, f32 y, f32 z) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153068);
-
-extern s32 func_00127398(s32);
 
 extern char D_00413F78[];
 

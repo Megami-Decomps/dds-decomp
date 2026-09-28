@@ -963,7 +963,49 @@ void func_002A4380(s32 arg0) {
     *(u8 *)(arg0 + 8) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4388);
+typedef struct PickEntry {
+    s8 id;
+    u8 unk1;
+    u8 unk2;
+} PickEntry;
+
+typedef struct PickList {
+    u8 unk0[8];
+    u8 count;
+    PickEntry entry[32];
+} PickList;
+
+void func_002A4388(list)
+    PickList *list;
+{
+    u32 range = 0x20;
+    s32 tries;
+    tries = 0;
+    do {
+        u32 id;
+        s32 i;
+        s32 found;
+        s32 n = list->count;
+        if (n >= 0x20) {
+            return;
+        }
+        id = effMiscRand(0) % range;
+        found = 0;
+        for (i = 0; i < list->count; i++) {
+            if (list->entry[i].id == id) {
+                found = 1;
+                break;
+            }
+        }
+        if (found == 0) {
+            list->entry[list->count].id = id;
+            list->entry[list->count].unk1 = 0;
+            list->entry[list->count].unk2 = 10;
+            list->count++;
+        }
+        tries++;
+    } while (tries <= 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A44C0);
 
@@ -1023,7 +1065,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4A68);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4B70);
 
-extern void func_002A4388(void);
+extern void func_002A4388();
 extern void func_002A44C0(SlideBar *, s32);
 extern void func_002A4B70(SlideBar *, s32);
 extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);

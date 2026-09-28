@@ -113,6 +113,15 @@ typedef struct MenuListDefaults {
 extern MenuListDefaults D_0042AF00;
 
 
+typedef struct MenuLink {
+    u8 unk0[0x48];
+    u32 flags;
+    u8 unk4C[0xC];
+    struct MenuLink *next;
+    u8 unk5C[4];
+    u16 id;
+} MenuLink;
+
 extern void func_002B0278(s32);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0278);
@@ -338,7 +347,25 @@ void func_002B2860(s32 menu) {
     } while (--remaining >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B28A8);
+u32 func_002B28A8(u32 arg0, s32 flag) {
+    s32 context = func_00101958();
+    u32 handle = func_003292A8(0x30);
+    u32 *state = (u32 *)sdfResourceRetainAddress(handle);
+    *(u32 **)(context + 0xaa48) = state;
+    memset(state, 0, 0x30);
+    state[0] = handle;
+    state[5] = flag;
+    if (flag == 0) {
+        state[4] = 0;
+    } else {
+        state[4] = 1;
+    }
+    func_002B27F0(context);
+    state[9] = 1;
+    func_002BB498(*(s32 *)(context + 0x118), *(void **)(context + 0x68), 0, 0);
+    func_002C6988(0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2970);
 
@@ -542,7 +569,31 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4298);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B45D8);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4730);
+typedef struct SkillInfo {
+    u8 unk0[0x20];
+    u32 count;
+    u16 id[14];
+} SkillInfo;
+
+extern void func_00315388(u16, SkillInfo *);
+
+u32 *func_002B4730(void) {
+    SkillInfo info;
+    u32 *bits = (u32 *)func_00328D68(0x58);
+    s32 i;
+    u32 j;
+    memset(bits, 0, 0x58);
+    for (i = 0; i < 0xb0; i++) {
+        func_00315388(i, &info);
+        for (j = 0; j < info.count; j++) {
+            u16 id = info.id[j];
+            if (id != 0) {
+                bits[id >> 5] |= 1 << id;
+            }
+        }
+    }
+    return bits;
+}
 
 void func_002B47F8(void) {
     func_00328E48();
@@ -571,7 +622,28 @@ void func_002B4C48(s32 context) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4CC8);
+u32 func_002B4CC8(s32 callback) {
+    s32 context = func_00101958();
+    u32 handle = func_003292A8(0x3c);
+    u32 *state = (u32 *)sdfResourceRetainAddress(handle);
+    *(u32 **)(context + 0xaa48) = state;
+    memset(state, 0, 0x3c);
+    state[0] = handle;
+    func_002B4270(context);
+    switch (**(s32 **)(*(s32 *)(*(s32 *)(context + 0x104) + 0x18) + 0x1c)) {
+    case 0:
+        func_002BB498(*(s32 *)(context + 0x118), *(s32 *)(context + 0xc8), 0, 0);
+        break;
+    case 2:
+        func_002BB498(*(s32 *)(context + 0x118), *(s32 *)(context + 0xc8), 0x19, 0);
+        break;
+    case 3:
+        func_002BB498(*(s32 *)(context + 0x118), *(s32 *)(context + 0xc8), 0xa, 0);
+        break;
+    }
+    func_002B88F0(0, *(s32 *)(*(s32 *)(context + 0x10c) + 0x18));
+    return 1;
+}
 
 s32 func_002B4DE8(s32 selection) {
     s32 context = func_00101958();
@@ -733,7 +805,18 @@ s64 func_002B5DB0(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5DE8);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5F00);
+void func_002B5F00(s32 context) {
+    s32 slot = D_00435DD0 + **(s32 **)(*(s32 *)(context + 0xa914) + 0x1c) * 0x1c4 + 0xa60;
+    MenuLink *link = *(MenuLink **)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0xaa48) + 0x24) + 0x18) + 0x10);
+    if (link != NULL) {
+        do {
+            if (func_002C4FB8(link->id, slot)) {
+                link->flags |= 1;
+            }
+            link = link->next;
+        } while (link != NULL);
+    }
+}
 
 s64 func_002B5FA8(s32 callback) {
     s32 context = func_00101958();
@@ -1374,7 +1457,22 @@ void func_002B9820(s32 arg0) {
     func_002B8FB8(*(u32 *)(arg0 + 0x18));
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9838);
+typedef struct MenuIconSprites {
+    u32 handle;
+    u32 value;
+    u32 unk8;
+    void *sprite[3];
+} MenuIconSprites;
+
+void func_002B9838(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, s32 *idx, s32 unused) {
+    obj->value = value;
+    obj->sprite[0] = (void *)func_00305348(res, idx[0], 1);
+    obj->sprite[1] = (void *)func_00305348(res, idx[1], 1);
+    obj->sprite[2] = (void *)func_00305348(res, idx[2], 1);
+    func_003071D0(obj->sprite[0], 0, w, h, w, h);
+    func_003071D0(obj->sprite[1], 0, w, h, w, h);
+    func_003071D0(obj->sprite[2], 0, w, h, w, h);
+}
 
 u32 *func_002B9918(u32 first, u32 second, u32 third,
                     u32 fourth, u32 fifth, u32 sixth) {
@@ -1441,19 +1539,143 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AF00);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9FF8);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BA268);
+extern void func_00304CE0();
+
+typedef struct SprInfo {
+    u8 unk0[0x28];
+    u32 flags;
+} SprInfo;
+
+typedef struct SprObj {
+    u8 unk0[0x18];
+    SprInfo *info;
+} SprObj;
+
+typedef struct SprGroup {
+    u32 kind;
+    u32 unk4;
+    s32 count;
+    SprObj *obj[1];
+} SprGroup;
+
+void func_002BA268(SprGroup *group) {
+    s32 i;
+    if (group->obj[0] != NULL && group->kind < 6) {
+        for (i = 0; i < group->count; i++) {
+            SprObj *obj = group->obj[i];
+            u32 *flags = &obj->info->flags;
+            *flags &= ~1;
+            func_00304CE0(obj, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuReleaseResourceList);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BA378);
+typedef struct MenuPos {
+    s32 x;
+    s32 y;
+} MenuPos;
+
+typedef struct MenuPosTable {
+    MenuPos pos[6];
+} MenuPosTable;
+
+typedef struct MenuSpriteInner {
+    u8 unk0[0xC];
+    s32 shade;
+    u8 unk10[0x6C];
+    s32 shadeSource;
+} MenuSpriteInner;
+
+typedef struct MenuSprite {
+    u8 unk0[0x18];
+    MenuSpriteInner *inner;
+} MenuSprite;
+
+typedef struct MenuIconState {
+    u32 kind;
+    u32 unk4;
+    s32 count;
+    MenuSprite *sprite[6];
+    u8 unk24[0x10];
+    s32 fade;
+} MenuIconState;
+
+typedef struct MenuPosTable3 {
+    MenuPos pos[3];
+} MenuPosTable3;
+
+extern MenuPosTable3 D_0042AF48;
+
+s64 func_002BA378(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg) {
+    MenuPosTable3 table = D_0042AF48;
+    s32 shade = state->sprite[0]->inner->shadeSource << 4;
+    s32 i;
+    s32 a;
+    if (state->fade > 0x100) {
+        alpha = 0x200 - state->fade;
+    }
+    for (i = 0; i < state->count; i++) {
+        if (i == 0 && mode != 1) {
+            a = state->fade < 0x100 ? alpha : 0x100;
+        } else {
+            a = alpha;
+        }
+        a = i == 2 ? 0x100 : a;
+        if (i == 2 && mode == 2) {
+            continue;
+        }
+        func_00306CD0(x + table.pos[i].x, y + table.pos[i].y, z, a, 1, state->sprite[i], 0, arg);
+    }
+    state->sprite[0]->inner->shade = shade;
+    if (state->count >= 3) {
+        state->sprite[2]->inner->shade = shade;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AF48);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BA518);
+extern MenuPosTable D_0042AF60;
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BA660);
+s64 func_002BA518(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
+    MenuPosTable table = D_0042AF60;
+    s32 i;
+    for (i = 0; i < state->count; i++) {
+        if (i != 3 && i != 5) {
+            func_00306CD0(x + table.pos[i].x, y + table.pos[i].y, z, w, 1, state->sprite[i], 0, arg);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BA738);
+typedef struct MenuOffsets {
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+} MenuOffsets;
+
+extern MenuOffsets D_0042AF90;
+
+s32 func_002BA660(s32 x, s32 y, s32 z, s32 w, void **state, s32 arg) {
+    MenuOffsets offset = D_0042AF90;
+    func_00306CD0(x + offset.x0, y + offset.y0, z, w, 1, state[3], 0, arg);
+    func_00306CD0(x + offset.x1, y + offset.y1, z, w, 1, state[4], 0, arg);
+}
+
+extern s64 func_002BA378();
+extern s64 func_002BA518();
+extern s32 func_002BA660();
+s64 func_002BA738(s32 a0, s32 a1, s32 a2, s32 a3, u32 *state, s32 a5, s32 a6) {
+    switch (*state) {
+    case 0: case 1: case 2: case 3:
+        return func_002BA378(a0, a1, a2, a3, state, a5, a6);
+    case 4:
+        return func_002BA518(a0, a1, a2, 0x100, state, a6);
+    case 5:
+        return func_002BA660(a0, a1, a2, a3, state, a6);
+    }
+}
 
 void func_002BA7A8(u32 a0, u32 a1, u32 a2, u32 a3, u32 a4, u32 a5, u32 a6) {
     func_002BA738(a0, a1, a2, a3, a4, a5, a6);
@@ -1784,11 +2006,72 @@ void menuSetPageParams(MenuPageParams *page, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BBA38);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BBE78);
+extern s32 func_003054E8();
+extern void func_00328E48();
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BBF38);
+typedef struct MenuSprites {
+    u8 unk0[0x10];
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+} MenuSprites;
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BBFC8);
+void func_002BBE78(MenuSprites *menu) {
+    u32 i;
+    for (i = 0; i < 5; i++) {
+        func_003054E8(menu->icon[i]);
+    }
+    for (i = 0; i < 11; i++) {
+        if (menu->item[i] != NULL) {
+            func_003054E8(menu->item[i]);
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (menu->cursor[i] != NULL) {
+            func_003054E8(menu->cursor[i]);
+        }
+    }
+    func_00328E48(menu);
+}
+
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+
+typedef struct MenuIconSet {
+    u8 pad0[0x10];
+    s32 icon[5];
+    u8 pad24[0x3C];
+    s32 sprite;
+} MenuIconSet;
+
+void func_002BBF38(s32 a0, s32 a1, s32 x, s32 skip, MenuIconSet *set, s32 arg) {
+    u32 i;
+    if (skip == 0) {
+        for (i = 0; i < 5; i++) {
+            func_00306CD0(0xBC0, 0x3C8, x, set->sprite, 0, set->icon[i], 0, arg);
+        }
+    }
+}
+
+extern void func_002BD1D0();
+extern void *func_002BBA38();
+
+typedef struct MenuWindow {
+    u8 unk0[0x154 - 0x78];
+    void *handle;
+    u8 unk158[0x2138 - 0xDC - 4];
+} MenuWindow;
+
+typedef struct MenuWindows {
+    u32 flags;
+    u8 unk4[0x74];
+    MenuWindow win[5];
+} MenuWindows;
+
+void func_002BBFC8(s32 index, MenuWindows *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
+    func_002BD1D0(menu, index);
+    menu->win[index].handle = func_002BBA38(0, a2, a3, a4, a5, a6);
+    menu->flags |= 0x80;
+}
 
 void func_002BC078(s32 index, u8 *menu, u32 first, u32 second) {
     u8 **slot = (u8 **)(menu + index * 0x2138 + 0x154);
@@ -1813,7 +2096,37 @@ void mnuClearEntries(u8 *menu) {
     *(u32 *)menu &= ~0x80;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BC120);
+extern void func_003071D0();
+typedef struct MenuIconEntry {
+    u32 id;
+    s32 x;
+    s32 y;
+} MenuIconEntry;
+
+typedef struct MenuIconLayout {
+    MenuIconEntry entry[3];
+} MenuIconLayout;
+
+typedef struct MenuIconBundle {
+    u32 unk0[3];
+    void *sprite[3];
+    u32 unk18[2];
+} MenuIconBundle;
+
+extern MenuIconLayout D_0042AFD8;
+
+u32 func_002BC120(u32 resource) {
+    MenuIconLayout layout = D_0042AFD8;
+    MenuIconBundle *set = (MenuIconBundle *)func_00328D68(0x20);
+    u32 i;
+    memset(set, 0, 0x20);
+    for (i = 0; i < 3; i++) {
+        void *sprite = (void *)func_00305348(resource, layout.entry[i].id, 1);
+        set->sprite[i] = sprite;
+        func_003071D0(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
+    }
+    return (u32)set;
+}
 
 void func_002BC258(u32 *menu) {
     u32 i = 0;
@@ -1824,7 +2137,39 @@ void func_002BC258(u32 *menu) {
     func_00328E48(menu);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BC2B8);
+typedef struct MenuFadeIcons {
+    u8 unk0[0xC];
+    s32 icon[3];
+    s32 fade;
+    s32 fadeOut;
+} MenuFadeIcons;
+
+void func_002BC2B8(s32 a0, s32 a1, s32 a2, s32 a3, MenuFadeIcons *obj, s32 a5) {
+    s32 fade = obj->fade;
+    s32 next;
+    func_00306CD0(a0, a1, a2, fade, 0, obj->icon[0], 0, a5);
+    func_00306CD0(a0, a1, a2, fade, 0, obj->icon[1], 0, a5);
+    func_00306CD0(a0, a1, a2, fade, 0, obj->icon[2], 0, a5);
+    if (obj->fadeOut == 0) {
+        next = obj->fade;
+        if (next < 0x100) {
+            obj->fade = next + 0x10;
+            next = obj->fade;
+        }
+        if (next > 0x100) {
+            obj->fade = 0x100;
+        }
+    } else {
+        next = obj->fade;
+        if (next > 0) {
+            obj->fade = next - 0x10;
+            next = obj->fade;
+        }
+        if (next < 0) {
+            obj->fade = 0;
+        }
+    }
+}
 
 void func_002BC3C8(s32 arg0, s32 arg1, u32 arg2) {
     u32 temp_v0;
@@ -1903,7 +2248,31 @@ void mnuRegisterResourceHandles(s32 destination, s32 *source) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BC690);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BC9A8);
+void func_002BC9A8(u8 *menu, s32 flag) {
+    u32 i;
+    s32 offset;
+    u32 *res;
+    if (flag == 0) {
+        for (i = 0, res = (u32 *)(menu + 0x24); i < 8; i++, res++) {
+            if (func_00305080(*res) != 0) {
+                func_00305068(*res);
+                func_00305068(res[8]);
+            }
+        }
+    }
+    for (i = 0, offset = 0; i < 5; i++, offset += 0x34) {
+        u8 *entries = *(u8 **)(menu + 8);
+        if (*(s32 *)(entries + offset + 0x10) >= 0) {
+            if ((s32)i < *(s32 *)entries) {
+                func_002BC690(menu, i, 1);
+            } else {
+                func_002BC690(menu, i, 2);
+            }
+        } else {
+            func_002BC690(menu, i, 0);
+        }
+    }
+}
 
 void func_002BCA98(u32 arg0) {
     func_002BC9A8(arg0, 0);
@@ -1911,7 +2280,20 @@ void func_002BCA98(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCAB0);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCBD8);
+extern char D_00437C30[];
+
+void func_002BCBD8(u8 *menu, s32 *counts) {
+    s32 i = 0;
+    *(u32 **)(menu + 0xa690) = func_002B8158(0, 1, 1);
+    *(u32 **)(menu + 0xa694) = func_002B8158(0, 1, 1);
+    if (counts[0] + counts[1] > 0) {
+        do {
+            mnuListAppendNode(*(u32 **)(menu + 0xa690), D_00437C30);
+            i++;
+            mnuListAppendNode(*(u32 **)(menu + 0xa694), D_00437C30);
+        } while (i < counts[0] + counts[1]);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCCB0);
 
@@ -1948,7 +2330,45 @@ void func_002BCD28(MenuWindowSet *set) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCD90);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCE50);
+typedef struct MenuWindowSprites {
+    u8 unk0[0x10];
+    u32 icon[3];
+    u8 unk1C[0xBC - 0x1C];
+    u32 frame[8];
+} MenuWindowSprites;
+
+void func_002BCE50(MenuWindowSprites *win) {
+    u32 i;
+    for (i = 0; i < 3; i++) {
+        if (win->icon[i] != 0) {
+            func_003054E8(win->icon[i]);
+        }
+    }
+    if (win->frame[0] != 0) {
+        func_003054E8(win->frame[0]);
+    }
+    if (win->frame[1] != 0) {
+        func_003054E8(win->frame[1]);
+    }
+    if (win->frame[2] != 0) {
+        func_003054E8(win->frame[2]);
+    }
+    if (win->frame[3] != 0) {
+        func_003054E8(win->frame[3]);
+    }
+    if (win->frame[4] != 0) {
+        func_003054E8(win->frame[4]);
+    }
+    if (win->frame[5] != 0) {
+        func_003054E8(win->frame[5]);
+    }
+    if (win->frame[6] != 0) {
+        func_003054E8(win->frame[6]);
+    }
+    if (win->frame[7] != 0) {
+        func_003054E8(win->frame[7]);
+    }
+}
 
 void mnuShutdownContext(u8 *ctx) {
     u8 *slot = ctx + 0x78;
