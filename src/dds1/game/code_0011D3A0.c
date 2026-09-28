@@ -321,7 +321,33 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011ECC8);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120968);
+extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032F510[], D_0032FA10[], D_0032E5C8[], D_00336A60[];
+extern void *D_003BAD64;
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 func_002E5C68(u32, void *, u32);
+extern void func_002E5C38(u32);
+void func_00120968(void) {
+    u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
+
+    func_002E5C68(command, D_0033EC90, 0x3D8);
+    func_002E5C68(command, D_0033F068, 0x3800);
+    func_002E5C68(command, D_00342868, 0x3800);
+    func_002E5C68(command, D_00346068, 0x1C00);
+    func_002E5C68(command, D_00347C68, 0x640);
+    func_002E5C68(command, D_003482A8, 0xC80);
+    func_002E5C68(command, D_00349030, 0x3840);
+    func_002E5C68(command, D_0034C8F0, 0x1000);
+    func_002E5C68(command, D_0032EF18, 0xC8);
+    func_002E5C68(command, D_0032EFE0, 0x190);
+    func_002E5C68(command, D_0032F510, 0x500);
+    func_002E5C68(command, D_0032FA10, 0xC00);
+    func_002E5C68(command, D_003BAD64, 0x2A0);
+    func_002E5C68(command, D_0032C9B0, 0x1400);
+    func_002E5C68(command, D_0032DDB0, 0x600);
+    func_002E5C68(command, D_0032E5C8, 0x880);
+    func_002E5C68(command, D_00336A60, 0x1200);
+    func_002E5C38(command);
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120AE8);
 
@@ -791,7 +817,28 @@ void func_00122CB8(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122D60);
+extern s32 func_0028F628(void);
+extern void func_00120C08(s32);
+extern char D_003BAB68[];
+void func_00122D60(void) {
+    u8 buffer[0xA0];
+
+    if (func_0028F628() == 1) {
+        return;
+    }
+    if (*(s16 *)(D_003BAA00 + 0xE) != 0) {
+        func_00122CB8();
+        return;
+    }
+    func_00120C08(1);
+    D_0032E570[0x4C / 4] = 0;
+    D_0032E570[0x44 / 4] = 1;
+    mdlFlagSet(0xC0F);
+    func_00126098(0, 0);
+    func_00122F08(buffer, 1, 1, D_003BAB68);
+    *(u32 *)(buffer + 0x90) = 1;
+    func_001028E8(5, buffer, 0xA0, 0);
+}
 
 extern u64 D_003BAB70[], D_003BAB78[], D_003BAB80[], D_003BAB88[], D_003BAB90[];
 extern u64 D_003BAB98[], D_003BABA0[], D_003BABA8[], D_003BABB0[];
@@ -1179,7 +1226,23 @@ void func_001244D0(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124500);
+extern void func_00141DC0(s32);
+extern void func_00133640(s16, s32);
+void func_00124500(void) {
+    s32 code;
+
+    if (D_0032E3B0[75] == 0) {
+        return;
+    }
+    if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) == 0) {
+        func_00141DC0(0x29);
+    }
+    code = func_001243C8();
+    *(s16 *)((u8 *)D_0032E3B0 + 0x128) = code;
+    *(s32 *)(D_003BAA00 + 0xA58) |= 8;
+    D_0032E3B0[3] &= ~1;
+    func_00133640(code, 0);
+}
 
 s32 func_00124590(void) {
     if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) != 0) {
@@ -1192,7 +1255,33 @@ s32 func_00124590(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001245C0);
+typedef struct FldSceneState {
+    u8 pad0[0x128];
+    s16 unk128;
+    u8 pad12A[2];
+    s32 unk12C;
+} FldSceneState;
+void func_001245C0(void) {
+    FldSceneState *state = (FldSceneState *)D_0032E3B0;
+    s32 code;
+
+    if (state->unk12C == 0) {
+        if (state->unk128 != 0) {
+            state->unk128 = 0;
+            func_00133640(0, 0);
+        }
+    } else if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) != 0) {
+        if (state->unk128 == 0) {
+            code = func_001243C8();
+            state->unk128 = code;
+            func_00133640(code, 0x14);
+        }
+    } else if (state->unk128 != 0) {
+        state->unk128 = 0;
+        func_00133640(0, 0x14);
+        func_00141DC0(0x2A);
+    }
+}
 
 void func_00124680(void) {
     if ((*(s32 *)(D_003BAA00 + 0xA58) & 4) != 0) {
@@ -1269,7 +1358,34 @@ void func_001248D0(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124900);
+typedef struct FldEncEntry {
+    s16 stage;
+    s16 flag;
+    s16 chance;
+    s16 result;
+} FldEncEntry;
+extern FldEncEntry *D_003BAA40;
+extern s32 mdlFlagTest();
+extern s32 effMiscRand();
+s16 func_00124900(void) {
+    s32 i;
+    s32 enabled;
+
+    for (i = 0; i < 16; i++) {
+        if (D_003BAA40[i].stage == D_0032E3B0[4]) {
+            enabled = 1;
+            if (D_003BAA40[i].flag != -1) {
+                enabled = mdlFlagTest(D_003BAA40[i].flag) != 0;
+            }
+            if (enabled != 0) {
+                if ((u32)effMiscRand(0) % 100U < (u32)D_003BAA40[i].chance) {
+                    return D_003BAA40[i].result;
+                }
+            }
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001249E0);
 

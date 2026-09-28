@@ -2,7 +2,30 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
+typedef struct {
+    u32 unk0[4];
+    void (*open)(void *, u32);
+    u32 unk14[3];
+} FieldResourceDescriptor;
+
+typedef struct {
+    u32 unk0[4];
+    void (*open)(void *, u64);
+    u32 unk14[3];
+} FieldBufferDescriptor;
+
+static inline s32 fldTestBits(u32 flags, u32 mask) {
+    return (flags & mask) != 0;
+}
+
 extern void func_00127028(u32, u32);
+extern void func_002D4010(u64);
+extern s32 consCalculateDrawPacketSize(s32, s32);
+extern void func_002E1428(u64, s32, s32, s32, s32);
+extern u64 *func_002E1420(u64);
+extern s32 func_002E1478(s32);
+extern void consCreateDrawPacket(u64, s32, s32);
+
 extern s32 D_0032E3C0[];
 extern void func_00131D88(void);
 extern void func_00123EE8(void);
@@ -385,7 +408,13 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00128890);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00128B50);
+extern s32 func_003014F0(char *, const char *, ...);
+/* All 25 code words match. Check_unit rodata range extends beyond selector strings into the separately-owned next string. */
+void func_00128B50(char *path, s32 field, s32 unused) {
+    if (field < 200) func_003014F0(path, "/fld/f/f%03d/", field);
+    else if (field < 500) func_003014F0(path, "/fld/b/f%03d/", field);
+    else func_003014F0(path, "/fld/e/f%03d/", field);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128BB8);
 
@@ -590,23 +619,11 @@ void func_00129720(u32 arg0) {
     D_003BACD0 = arg0;
 }
 
-typedef struct {
-    u32 unk0[4];
-    void (*open)(void *, u32);
-    u32 unk14[3];
-} FieldResourceDescriptor;
-
-typedef struct {
-    u32 unk0[4];
-    void (*open)(void *, u64);
-    u32 unk14[3];
-} FieldBufferDescriptor;
 
 extern void func_002D4010(u64);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129728);
 
 extern void func_002D4038(u64, u64);
-extern u64 *func_002E13E0(u64, s32);
 void func_001297E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     u64 command = func_002D3FD0(0x20);
     u64 packet;
@@ -625,15 +642,124 @@ void func_001297E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129900);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129A08);
+void func_00129A08(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6) {
+    s32 coords[4];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129B68);
+    coords[0] = x0 * 16;
+    coords[1] = y0 * 16;
+    coords[2] = x1 * 16;
+    coords[3] = y1 * 16;
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 2));
+    func_002E1428(packet, 0x49, 2, 0x41, 2);
+    dst = func_002E1420(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | (0x8000LL << 24);
+    pos = coords;
+    for (i = 0; i < 2; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
+
+void func_00129B68(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6) {
+    u32 coords[4];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    FieldBufferDescriptor *descriptor;
+    u32 *pos;
+    u64 lo;
+    u64 hi;
+    s32 i;
+
+    coords[0] = x0;
+    coords[1] = y0;
+    coords[2] = x1;
+    coords[3] = y1;
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 2));
+    func_002E1428(packet, 0x49, 2, 0x41, 2);
+    dst = func_002E1420(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | (0x8000LL << 24);
+    pos = coords;
+    for (i = 0; i < 2; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)pos[0] | ((u64)pos[1] << 32);
+        pos += 2;
+        dst += 2;
+    }
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129CA8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129E30);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129FC0);
+void func_00129FC0(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+    u32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    u32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x0;
+    coords[1] = y0;
+    coords[2] = x1;
+    coords[3] = y0;
+    coords[4] = x1;
+    coords[5] = y1;
+    coords[6] = x0;
+    coords[7] = y1;
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    dst = func_002E1420(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | ((u64)arg7 << 32);
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFFFFULL;
+        dst[0] = (u64)pos[0] | ((u64)pos[1] << 32);
+        pos += 2;
+        dst += 2;
+    }
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A120);
 
@@ -1442,7 +1568,26 @@ void func_00131F08(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00132010);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00132AE8);
+extern s32 D_003BAD58;
+extern s32 D_003BAD88, D_003BAD8C;
+extern s32 *D_003BAD74;
+extern f32 D_003BAD90, D_003BAD94;
+void func_00132AE8(s32 area, s32 value, s32 duration) {
+    if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
+        duration = 0;
+    }
+    if (duration == 0) {
+        D_003BAD8C = area;
+        D_003BAD90 = 1.0f;
+        D_003BAD94 = 1.0f;
+    } else {
+        D_003BAD90 = 0.0f;
+        D_003BAD8C = D_003BAD88;
+        D_003BAD94 = (f32)duration;
+    }
+    D_003BAD88 = area;
+    D_003BAD74[area * 73] = value;
+}
 
 void func_00132B60(u32 arg0) {
     D_003BAD7C = arg0;
@@ -1640,7 +1785,21 @@ s32 func_00135250(s32 key) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00135298);
+typedef struct FldRecE4 {
+    u8 pad0[0xCC];
+    s32 id;
+    s32 value;
+    u8 padD4[0x10];
+} FldRecE4; /* 0xE4 bytes */
+void func_00135298(s32 id, s32 value) {
+    s32 i;
+
+    for (i = 0; i < D_003BADF4; i++) {
+        if (((FldRecE4 *)D_003BADF0)[i].id == id) {
+            ((FldRecE4 *)D_003BADF0)[i].value = value;
+        }
+    }
+}
 
 void func_001352E0(void) {
     s32 count = D_003BADF4;
@@ -1711,7 +1870,23 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AC10);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AE28);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AF20);
+typedef struct FldRoomPlanes {
+    f32 plane[6][4];
+    f32 limit[6];
+    u8 pad78[0x140 - 0x78];
+} FldRoomPlanes;
+extern FldRoomPlanes D_003C9470[];
+extern f32 func_00135058(f32 *, f32 *);
+s32 func_0013AF20(f32 *direction, s32 index) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (func_00135058(direction, D_003C9470[index].plane[i]) - D_003C9470[index].limit[i] > 0.0f) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AFC8);
 
@@ -1776,7 +1951,27 @@ s32 func_0013BE30(u32 task) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013BE90);
+typedef struct FldRoomState {
+    u8 pad0[0x120];
+    s32 unk120;
+    u8 pad124[0xE];
+    s16 unk132;
+    u8 pad134[2];
+    s16 mode;
+    u8 pad138[8];
+} FldRoomState; /* 0x140 bytes */
+extern FldRoomState D_003C93E0[];
+extern s32 D_003BAE14;
+s32 func_0013BE90(u32 task) {
+    s32 i;
+
+    for (i = 0; i < D_003BAE14; i++) {
+        if (D_003308B0[i] == task) {
+            return D_003C93E0[i].unk132;
+        }
+    }
+    return -1;
+}
 
 
 s32 getFieldTaskRecordValue(u32 task) {
@@ -1836,7 +2031,25 @@ extern u32 func_002E5C68(u32, void *, u32);
 extern void func_002E5C38(u32);
 extern u8 D_00332E30[];
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D510);
+extern void func_00128B50(char *, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 func_002E5C68(u32, void *, u32);
+extern void func_002E5C38(u32);
+extern u8 D_00332E30[];
+extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
+void func_0013D510(s32 field) {
+    char path[64];
+    char directory[32];
+    u32 command;
+    if (field < 200) {
+        func_00128B50(directory, field, 1);
+        func_003014F0(path, D_003A01F8, directory, field);
+        command = sdfDevCreateCommandState(path);
+        func_002E5C68(command, D_00332E30, 0x3B80);
+        func_002E5C38(command);
+    }
+}
 
 void func_0013D598(const void *source) {
     memcpy(D_00332E30, source, 0x3B80);
@@ -1869,9 +2082,6 @@ s32 func_0013DB28(void) {
     return D_00337D12[D_003BAE64 * 54];
 }
 
-static inline s32 fldTestBits(u32 flags, u32 mask) {
-    return (flags & mask) != 0;
-}
 s32 func_0013DB58(s32 arg0) {
     u8 *entry = D_00337D00 + D_003BAE64 * 108;
 
@@ -1946,7 +2156,36 @@ INCLUDE_ASM(const s32, "game/code_00126A30", fldFindTableEntry);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FCE0);
+extern u32 D_003CE3E0[][23];
+void func_0013FCE0(void) {
+    s32 i;
+
+    for (i = 0; i < 256; i++) {
+        D_003CE3E0[i][0] = 0;
+        D_003CE3E0[i][1] = 0;
+        D_003CE3E0[i][2] = 0;
+        D_003CE3E0[i][3] = -1;
+        D_003CE3E0[i][4] = 0;
+        D_003CE3E0[i][5] = -1;
+        D_003CE3E0[i][6] = -1;
+        D_003CE3E0[i][7] = 0;
+        D_003CE3E0[i][8] = 0;
+        D_003CE3E0[i][9] = 0;
+        D_003CE3E0[i][11] = 0;
+        D_003CE3E0[i][12] = 0;
+        D_003CE3E0[i][13] = 0;
+        D_003CE3E0[i][14] = 0;
+        D_003CE3E0[i][15] = 0;
+        D_003CE3E0[i][16] = 0;
+        D_003CE3E0[i][17] = 0;
+        D_003CE3E0[i][18] = 0;
+        D_003CE3E0[i][19] = 0;
+        D_003CE3E0[i][20] = 0;
+        D_003CE3E0[i][21] = 0;
+        D_003CE3E0[i][22] = 0;
+    }
+    D_003BAE64 = -1;
+}
 
 void func_0013FD60(s32 field) {
     char path[64];

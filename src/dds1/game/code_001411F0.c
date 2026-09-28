@@ -1034,7 +1034,35 @@ void func_00147C20(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00147CD8);
+typedef struct {
+    s32 unk0, unk4, unk8, unkC;
+    u8 pad10[0x10];
+    s32 *unk20;
+    u8 pad24[8];
+    s32 unk2C, unk30, unk34, unk38;
+    s16 unk3C, unk3E;
+    char name[0x10];
+} FldTblEnt50; /* 0x50 bytes */
+extern FldTblEnt50 D_003D46A0[];
+extern s32 D_003BAF2C;
+void func_00147CD8(void) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        D_003D46A0[i].unk0 = 0;
+        D_003D46A0[i].unk4 = 0;
+        D_003D46A0[i].unk8 = 0;
+        D_003D46A0[i].unkC = 0;
+        D_003D46A0[i].unk20 = 0;
+        D_003D46A0[i].unk2C = 0;
+        D_003D46A0[i].unk30 = 0;
+        D_003D46A0[i].unk34 = 0;
+        D_003D46A0[i].unk38 = 0;
+        D_003D46A0[i].unk3C = 0;
+        D_003D46A0[i].unk3E = 0;
+    }
+    D_003BAF2C = 0;
+}
 
 typedef struct {
     s32 unk0;
@@ -1082,7 +1110,15 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0768);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001486D0);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00148C98);
+void func_00148C98(s32 id) {
+    s32 i;
+
+    for (i = 0; i < D_003BAF80; i++) {
+        if (D_003D50A0[i].unk4 == id && D_003D50A0[i].unk8 == 0) {
+            D_003D50A0[i].unkC = 1;
+        }
+    }
+}
 
 void func_00148CF0(void) {
     s32 i;
@@ -1112,7 +1148,25 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00148FF0);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001493D0);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00149610);
+extern void func_00129720(u32);
+extern void func_00129900(u32);
+extern void func_001297E8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
+void func_00149610(s32 width) {
+    s32 x;
+
+    if (D_0032E3C0[0] < 200) {
+        func_00129720(0x53);
+        func_00129900(0);
+        func_001297E8(1, 0, 0x80, 3, 0, 0, 1, 1);
+        x = 0x9D - (width >> 1);
+        func_00129000(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
+        func_00129000(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
+        x += width;
+        func_00129000(x + 0x63, 0x123, 0x63, 0x2E, 0x65, 1, -0x63, 0x2E, 0x80808080, D_003BAF30);
+        func_00129900(0);
+    }
+}
 
 extern void func_00129720(u32);
 extern void func_00129900(u32);
@@ -1135,16 +1189,6 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00149A98);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x1C];
-    s32 *unk20;
-    u8 pad24[0x14];
-    s32 unk38;
-    u8 pad3C[4];
-    char name[0x10];
-} FldTblEnt50; /* 0x50 bytes */
-extern FldTblEnt50 D_003D46A0[];
 extern s32 D_003BAF2C;
 extern s32 func_001215F8();
 extern void dds3SetObjectFlags();
@@ -1460,7 +1504,19 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BA50);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BC28);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BD58);
+extern s32 D_003D62A0[];
+extern void func_0014B688();
+extern void func_0014BA50();
+void func_0014BD58(void) {
+    s32 i;
+
+    func_0014B688();
+    for (i = 0; i < 64 && i < D_003D62A0[12]; i++) {
+        if (D_003D56A0[i].unk20 != 0 && D_003D56A0[i].active != 0) {
+            func_0014BA50(i, D_003D56A0[i].unk28);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BDF8);
 
@@ -1485,9 +1541,36 @@ s32 func_0014C158(f32 x, f32 y, f32 z) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C210);
 
+extern s32 D_003D62A0[];
+extern void func_0024DAB8(s32);
+extern void func_0024DAE8(s32);
+extern void mdlFlagSet(s32);
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C5C8);
+extern s32 D_0032E5C4[];
+extern s32 D_003D62A0[];
+extern void func_001239C8(void);
+extern void func_0014B858(void);
+extern void func_0014B4D0(void);
+extern void func_00141C40(void);
+extern void func_00123E00(void);
+extern void func_00228740(void);
+void func_0014C5C8(void) {
+    u8 *state = (u8 *)D_0032E3B0;
+
+    if (*(s16 *)(state + 0x104) != 0) {
+        D_0032E5C4[0] = 0;
+        func_001239C8();
+        func_0014B858();
+        func_0014B4D0();
+        func_00141C40();
+        func_00123E00();
+        *(s16 *)(state + 0x104) = 0;
+        D_003D62A0[2] = 0;
+        D_003D62A0[3] = 0;
+        func_00228740();
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0918);
 
