@@ -344,6 +344,12 @@ def main():
         if b < a:
             bad += 1
             print(f"ORDER {m} (0x{b:08X}) comes after {n} (0x{a:08X}) in the source; move it back")
+    seen = {}
+    for _, _, n in placed:
+        seen[n] = seen.get(n, 0) + 1
+    for n in [n for n, k in seen.items() if k > 1]:
+        bad += 1
+        print(f"TWICE {n}: both C and INCLUDE_ASM (or two definitions) in the unit")
     # Every retail function of the unit must still be there, as C or INCLUDE_ASM.
     full = ROOT / "asm" / version / f"{unit_name}.s"
     if full.exists() and not args.func:
