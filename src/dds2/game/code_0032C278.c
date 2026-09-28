@@ -72,9 +72,45 @@ extern s32 D_00438A28;
 
 extern u32 D_0040B308[];
 
+typedef struct SdfResource {
+    u32 unk00;
+    struct SdfResource *next;
+    u8 pad08[0x18];
+    s32 id;
+} SdfResource;
+
+extern SdfResource *D_004389F8;
+
+void func_0032D010(s32 arg0, s32 arg1);
+
+void func_0032D218();
+
+typedef struct SdfPacketBuilder {
+    u8 pad00[4];
+    void (*prepare)(void);
+    u8 pad08[8];
+    SdfPacket packets[2];
+    s32 source;
+    s32 data;
+    s32 region;
+    s32 mode;
+} SdfPacketBuilder;
+
+void func_0032DC80();
+
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C408);
+SdfResource *func_0032C408(s32 id) {
+    SdfResource *resource = D_004389F8;
+
+    while (resource != NULL) {
+        if (resource->id == id) {
+            return resource;
+        }
+        resource = resource->next;
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C448);
 
@@ -232,7 +268,21 @@ void func_0032CFD0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 8) = arg1 + 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D010);
+void func_0032D010(s32 list, s32 item) {
+    s32 head;
+
+    if (*(s32 *)(item + 8) == 0) {
+        return;
+    }
+    head = *(s32 *)(list + 4);
+    if (head == 0) {
+        *(s32 *)(list + 8) = item;
+    } else {
+        func_0032D218(item, head);
+    }
+    *(s32 *)item = head;
+    *(s32 *)(list + 4) = item;
+}
 
 void func_0032D070(s32 arg0, s32 arg1) {
     s32 *piVar1;
@@ -370,7 +420,14 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DC20);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DC80);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DD20);
+void func_0032DD20(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
+    func_0032D460(packet->packets, 2);
+    packet->mode = mode;
+    packet->source = source;
+    packet->data = data;
+    packet->region = region;
+    packet->prepare = func_0032DC80;
+}
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DD98);
 
@@ -652,3 +709,40 @@ void func_00330A88(s32 *arg0, u32 arg1, u32 arg2) {
 INCLUDE_ASM(const s32, "game/code_0032C278", func_00330B18);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_00330B80);
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_004389FC);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A00);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A04);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A08);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A10);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A14);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A1C);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A1D);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A1E);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A20);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A21);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A22);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A23);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A24);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A28);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A2C);
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A30);
+
+
+INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A34);
+

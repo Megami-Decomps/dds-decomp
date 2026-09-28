@@ -747,3 +747,30 @@ void func_0010B990(B728Work *arg0) {
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B9E8);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010BC40);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D18);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D20);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D28);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D30);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D38);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D40);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D48);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D4C);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D50);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D58);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D60);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D64);
+
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D68);
+

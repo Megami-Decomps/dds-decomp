@@ -20,7 +20,39 @@ extern void *memcpy(void *dest, const void *src, u32 n);
 
 extern void *func_00328D68(s32 size);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00159B48);
+typedef struct EffectConfig {
+    s16 unk00;
+    u8 pad02[10];
+} EffectConfig;
+
+extern EffectConfig D_003AA884[];
+
+s32 func_00159978(s32 arg0, s32 arg1);
+
+typedef struct EffectBufferRecord {
+    u8 pad00[0x20];
+    s32 unk20;
+    s32 unk24;
+    u8 pad28[0x18];
+} EffectBufferRecord;
+
+typedef struct EffectBufferTail {
+    s32 allocation;
+    EffectBufferRecord *records;
+} EffectBufferTail;
+
+s32 func_003292A8(s32 size);
+
+EffectBufferRecord *func_003298F8(s32 allocation);
+
+void func_00159B48(s32 index) {
+    s32 *effect = (s32 *)func_00159978(D_003AA884[index].unk00, 0);
+    s32 *resource = *(s32 **)(D_00451EE0[index] + 0x30);
+    s32 references = resource[2];
+
+    effect[12] = (s32)resource;
+    resource[2] = references + 1;
+}
 
 u32 func_00159BB0(void) {
     return 0xf;
@@ -232,7 +264,25 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B270);
 void func_0015B290(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B298);
+EffectBufferTail *func_0015B298(s32 count) {
+    s32 bytes = count * sizeof(EffectBufferRecord);
+    s32 allocation = func_003292A8(bytes + sizeof(EffectBufferTail));
+    EffectBufferRecord *record = func_003298F8(allocation);
+    EffectBufferTail *tail = (EffectBufferTail *)((u8 *)record + bytes);
+
+    tail->allocation = allocation;
+    tail->records = record;
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            remaining--;
+            record->unk20 = 0;
+            record->unk24 = 0;
+            record++;
+        } while (remaining != 0);
+    }
+    return tail;
+}
 
 void func_0015B318(u32 *arg0) {
     func_003297C8(*arg0);

@@ -1,7 +1,5 @@
 #include "common.h"
 
-extern s32 D_00438F04;
-
 extern s32 func_00185400(void);
 
 typedef struct {
@@ -131,7 +129,9 @@ typedef struct {
     u32 unk74;       /* 0x74 optional handle (freed if != 0) */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
-    u8 pad80[0x1C];  /* 0x80 */
+    u8 pad80[0x10];  /* 0x80 */
+    f32 unk90;       /* 0x90 nested work parameter */
+    u8 pad94[0x8];   /* 0x94 */
     u32 unk9C;       /* 0x9C spawn parameter */
     f32 unkA0;       /* 0xA0 spawn parameter */
     u32 unkA4;       /* 0xA4 spawn parameter */
@@ -357,6 +357,113 @@ typedef struct EffPCPNode {
     u8 pad10[0x60];
     u8 vector70[0x10];
 } EffPCPNode;
+
+extern EffPCPWork *D_00438F04;
+
+typedef struct {
+    u8 flags;
+    u8 pad01[3];
+    u32 unk04;
+    u32 unk08;
+    u32 unk0C;
+    u32 unk10;
+    u32 unk14;
+    u32 unk18;
+    u32 unk1C;
+    u32 unk20;
+    u32 unk24;
+} EffPCPCompactParams;
+
+typedef struct {
+    u8 pad00[0x10];
+    u8 flags;
+    u8 pad11[3];
+    u32 color14;
+    u32 unk18;
+    u32 unk1C;
+    u32 unk20;
+    u32 unk24;
+    u32 unk28;
+    u32 unk2C;
+    u32 unk30;
+    u32 unk34;
+    u32 resource;
+} EffPCPCompactWork3C;
+
+extern u32 func_0018FBF8(void *params);
+
+extern u32 func_0018E850(void *params);
+
+typedef struct {
+    u8 pad00[0x10];
+    u8 flags;
+    u8 pad11[3];
+    u32 unk14;
+    u32 unk18;
+    u32 unk1C;
+    u32 color20;
+    u32 unk24;
+    u32 unk28;
+    u32 unk2C;
+    u32 unk30;
+    u32 resource;
+} EffPCPCompactWork;
+
+extern u32 func_0018EBC8(void *params);
+
+extern u32 func_0018F098(void *params);
+
+/* Compact burst variant with a floating-point word at 0x18. */
+typedef struct {
+    u8 pad00[0x18];
+    f32 unk18;
+    f32 unk1C;
+    u32 unk20;
+} EffPCPBurstWork;
+
+extern u8 D_003B1B50[];
+
+extern u8 D_003B1C10[];
+
+extern u8 D_003B1CD0[];
+
+extern u8 D_003B1D90[];
+
+extern u8 D_003B1E50[];
+
+extern u8 D_003B1F10[];
+
+extern void func_00188198(f32 value);
+
+typedef struct {
+    u8 pad00[0x28];
+    f32 scale;
+    u8 pad2C[0x24];
+    u32 state;
+} EffPCPSubEffectWork;
+
+extern void func_00336798(f32 angle);
+
+extern void func_00188828(f32 angle);
+
+typedef struct {
+    u8 pad00[0x10];
+    f32 degreesX;
+    f32 degreesY;
+    f32 degreesZ;
+    u8 pad1C[0x14];
+    f32 angle;
+    f32 angle2;
+    u8 pad38[0x24];
+    u32 child;
+    u8 pad60[0x4];
+    f32 radiansX;
+    f32 radiansY;
+    f32 radiansZ;
+    u8 pad70[0x4];
+    f32 childAngle;
+    f32 childAngle2;
+} EffPCPAngleWork;
 
 void func_0017EDE8(u32 arg0) {
     func_00159AF0(*(u32 *)((s32)arg0 + 0x1c));
@@ -727,14 +834,26 @@ void func_00182218(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182250);
+void *func_00182250(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00182218(work);
+    return work;
+}
 
 void func_00182288(u32 arg0) {
     func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001822B8);
+void *func_001822B8(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00182218(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001822F0);
 
@@ -788,14 +907,26 @@ void func_00182900(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182938);
+void *func_00182938(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00182900(work);
+    return work;
+}
 
 void func_00182970(u32 arg0) {
     func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001829A0);
+void *func_001829A0(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00182900(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001829D8);
 
@@ -817,11 +948,11 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182C60);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DA0);
 
-void func_00182DB8(u32 arg0, u32 arg1) {
-    *(u32 *)(D_00438F04 + 0x10) = arg1;
-}
+INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DB8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DC8);
+void func_00182DC8(u32 unused, f32 value) {
+    ((EffPCPWorkF1C *)D_00438F04)->unk1C = value;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
 
@@ -842,7 +973,22 @@ void func_00182F98(EffPCPWorkF1C *work, f32 val) {
     work->unk1C = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182FA0);
+EffPCPCompactWork3C *func_00182FA0(EffPCPCompactParams *params) {
+    EffPCPCompactWork3C *work;
+
+    work = func_00328D68(0x3C);
+    work->resource = func_0018FBF8(&params->unk18);
+    work->unk1C = 0;
+    work->color14 = 0x80808080;
+    work->flags = params->flags;
+    work->unk20 = params->unk04;
+    work->unk24 = params->unk08;
+    work->unk28 = params->unk0C;
+    work->unk2C = params->unk10;
+    work->unk30 = params->unk14;
+    work->unk18 = params->unk24;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183030);
 
@@ -865,7 +1011,22 @@ void func_001832E0(EffPCPWorkF34 *work, f32 val) {
     work->unk34 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001832E8);
+EffPCPCompactWork3C *func_001832E8(EffPCPCompactParams *params) {
+    EffPCPCompactWork3C *work;
+
+    work = func_00328D68(0x3C);
+    work->resource = func_0018E850(&params->unk18);
+    work->unk1C = 0;
+    work->color14 = 0x80808080;
+    work->flags = params->flags;
+    work->unk20 = params->unk04;
+    work->unk24 = params->unk08;
+    work->unk28 = params->unk0C;
+    work->unk2C = params->unk10;
+    work->unk30 = params->unk14;
+    work->unk18 = params->unk1C;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183378);
 
@@ -924,7 +1085,22 @@ void func_00183A50(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x34) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183A58);
+EffPCPCompactWork *func_00183A58(EffPCPCompactParams *params) {
+    EffPCPCompactWork *work;
+
+    work = func_00328D68(0x38);
+    work->resource = func_0018EBC8(&params->unk18);
+    work->flags = params->flags;
+    work->unk14 = params->unk04;
+    work->unk18 = params->unk08;
+    work->unk1C = params->unk0C;
+    work->unk28 = params->unk10;
+    work->unk2C = params->unk14;
+    work->color20 = 0x80808080;
+    work->unk30 = 0;
+    work->unk24 = params->unk24;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183AE8);
 
@@ -943,7 +1119,22 @@ void func_00183DC0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x20) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183DC8);
+EffPCPCompactWork *func_00183DC8(EffPCPCompactParams *params) {
+    EffPCPCompactWork *work;
+
+    work = func_00328D68(0x38);
+    work->resource = func_0018F098(&params->unk18);
+    work->flags = params->flags;
+    work->unk14 = params->unk04;
+    work->unk18 = params->unk08;
+    work->unk1C = params->unk0C;
+    work->unk28 = params->unk10;
+    work->unk2C = params->unk14;
+    work->color20 = 0x80808080;
+    work->unk30 = 0;
+    work->unk24 = params->unk24;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183E58);
 
@@ -970,14 +1161,26 @@ void func_00184160(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184198);
+void *func_00184198(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00184160(work);
+    return work;
+}
 
 void func_001841D0(u32 arg0) {
     func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184200);
+void *func_00184200(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00184160(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184238);
 
@@ -999,14 +1202,26 @@ void func_00184410(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184448);
+void *func_00184448(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00184410(work);
+    return work;
+}
 
 void func_00184480(u32 arg0) {
     func_0016B130(*(u32 *)((s32)arg0 + 0x1c));
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001844B0);
+void *func_001844B0(void) {
+    void *work;
+
+    work = func_00328D68(0x20);
+    func_00184410(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001844E8);
 
@@ -1235,7 +1450,24 @@ void func_00186E30(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186E38);
+void func_00186E38(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&work->unk10) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186E68);
 
@@ -1259,7 +1491,24 @@ void func_00187130(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187138);
+void func_00187138(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&work->unk10) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187168);
 
@@ -1283,7 +1532,24 @@ void func_00187430(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187438);
+void func_00187438(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&work->unk10) : "memory");
+}
 
 u32 func_00187468(void) {
     D_0043643C = 1;
@@ -1318,7 +1584,15 @@ void func_001874F0(void) {
     func_001874A8(0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187508);
+EffPCPBurstWork *func_00187508(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = func_00328D68(0x24);
+    work->unk18 = 325.0f;
+    work->unk1C = 225.0f;
+    work->unk20 = func_0016D070(D_003B1B50);
+    return work;
+}
 
 void func_00187558(void) {
     func_00187508(0);
@@ -1338,7 +1612,15 @@ void func_001875B8(void) {
     func_00187570(0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001875D0);
+EffPCPBurstWork *func_001875D0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = func_00328D68(0x24);
+    work->unk18 = 325.0f;
+    work->unk1C = 225.0f;
+    work->unk20 = func_0016D070(D_003B1C10);
+    return work;
+}
 
 void func_00187620(void) {
     func_001875D0(0);
@@ -1358,7 +1640,15 @@ void func_00187680(void) {
     func_00187638(0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187698);
+EffPCPBurstWork *func_00187698(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = func_00328D68(0x24);
+    work->unk18 = 325.0f;
+    work->unk1C = 225.0f;
+    work->unk20 = func_0016D070(D_003B1CD0);
+    return work;
+}
 
 void func_001876E8(void) {
     func_00187698(0);
@@ -1378,7 +1668,15 @@ void func_00187748(void) {
     func_00187700(0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187760);
+EffPCPBurstWork *func_00187760(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = func_00328D68(0x24);
+    work->unk18 = 325.0f;
+    work->unk1C = 225.0f;
+    work->unk20 = func_0016D070(D_003B1D90);
+    return work;
+}
 
 void func_001877B0(void) {
     func_00187760(0);
@@ -1398,7 +1696,15 @@ void func_00187810(void) {
     func_001877C8(0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187828);
+EffPCPBurstWork *func_00187828(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = func_00328D68(0x24);
+    work->unk18 = 325.0f;
+    work->unk1C = 225.0f;
+    work->unk20 = func_0016D070(D_003B1E50);
+    return work;
+}
 
 void func_00187878(void) {
     func_00187828(0);
@@ -1418,7 +1724,15 @@ void func_001878D8(void) {
     func_00187890(0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001878F0);
+EffPCPBurstWork *func_001878F0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = func_00328D68(0x24);
+    work->unk18 = 325.0f;
+    work->unk1C = 225.0f;
+    work->unk20 = func_0016D070(D_003B1F10);
+    return work;
+}
 
 void func_00187940(void) {
     func_001878F0(0);
@@ -1472,7 +1786,10 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187FC8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188198);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188320);
+void func_00188320(EffPCPSubEffectWork *work) {
+    func_00188198(work->scale);
+    work->state = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188350);
 
@@ -1491,19 +1808,65 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188550);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188778);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188788);
+void func_00188788(EffPCPWork *work, f32 value) {
+    ((EffPCPWork *)work->unk5C)->unk90 = value;
+}
 
 void func_00188798(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x54) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001887A0);
+void func_001887A0(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&((EffPCPWork *)work->unk5C)->pad3C[4]) : "memory");
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001887D0);
+void func_001887D0(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    func_00336798(1.5707963f);
+    func_00336AA8();
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"((void *)work->unk5C) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188828);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188A70);
+void func_00188A70(EffPCPAngleWork *work) {
+    work->radiansX = work->degreesX * 0.017453291f;
+    work->radiansY = work->degreesY * 0.017453291f;
+    work->radiansZ = work->degreesZ * 0.017453291f;
+    work->childAngle = work->angle;
+    work->childAngle2 = work->angle2;
+    func_00188828(work->angle);
+    work->child = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188AD0);
 
@@ -1522,13 +1885,32 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188CE0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E08);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E18);
+void func_00188E18(EffPCPWork *work, f32 value) {
+    ((EffPCPWork *)work->unk7C)->unk90 = value;
+}
 
 void func_00188E28(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x60) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E30);
+void func_00188E30(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&((EffPCPWork *)work->unk7C)->pad3C[4]) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E60);
 
@@ -1658,7 +2040,12 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BCE8);
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BD88);
 
 
-
-
 INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00414610);
+
+INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
+
+INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
+
+
+INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
 

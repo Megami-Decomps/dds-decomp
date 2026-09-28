@@ -18,10 +18,6 @@ extern u32 D_00436590;
 
 extern s64 func_00101700(u32);
 
-extern u64 func_0032C138(u32);
-
-extern u64 func_00343ED0(u64, u32 *, u64);
-
 /* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
 typedef struct TextStream {
     u8 unk0[0x10]; /* 0x0 */
@@ -54,6 +50,47 @@ typedef struct MemNode {
     struct MemNode *unk4;  /* 0x4 */
 } MemNode;
 
+void func_0019BE20(s32 id, const char *path);
+
+extern u32 strlen(const char *str);
+
+extern s32 func_0032C138(u32);
+
+extern u64 func_00343ED0(const char *, u32 *, u64);
+
+typedef struct TextPoolNode {
+    struct TextPoolNode *previous;
+    struct TextPoolNode *next;
+    s32 index;
+} TextPoolNode;
+
+typedef struct TextPool {
+    TextPoolNode *activeHead;
+    TextPoolNode *activeTail;
+    TextPoolNode *firstFree;
+    TextPoolNode *lastFree;
+} TextPool;
+
+typedef struct TextVector {
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 w;
+} TextVector;
+
+typedef struct TextStyleNode {
+    u8 pad00[4];
+    u32 x;
+    u32 y;
+    u8 pad0C[4];
+    u32 color;
+    u8 pad14[8];
+    struct TextStyleNode *firstChild;
+    u8 pad20[4];
+    struct TextStyleNode *next;
+    struct TextStyleNode *nextChild;
+} TextStyleNode;
+
 u32 func_0019E138(TextStream *stream) {
     s32 *ppos = &stream->unk18;
     u8 *p = stream->unk10 + *ppos;
@@ -63,7 +100,19 @@ u32 func_0019E138(TextStream *stream) {
     return (b + 0xFF) & 0xFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E160);
+u32 func_0019E160(TextStream *stream) {
+    u32 first;
+    u32 second;
+
+    first = (stream->unk10[stream->unk18++] + 0xff) & 0xff;
+    second = stream->unk10[stream->unk18++];
+    if (second == 0xff) {
+        second = 0;
+    } else {
+        second = (second + 0xff) & 0xff;
+    }
+    return (second << 8) | first;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E1B8);
 
@@ -107,7 +156,10 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EEE8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EF38);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F048);
+void func_0019F048(void) {
+    func_0019BE20(4, "/font/staff1.fnt");
+    func_0019BE20(5, "/font/staff2.fnt");
+}
 
 void func_0019F078(void) {
     func_0019C238(4);
@@ -116,7 +168,27 @@ void func_0019F078(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F098);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F0E8);
+void func_0019F0E8(u8 *output, const char *input) {
+    s32 i;
+    s32 length = strlen(input);
+
+    for (i = 0; i < length; i++, output++) {
+        if (input[i] >= 0) {
+            output[0] = input[i];
+        } else {
+            u32 value = func_0019F098((u8)input[i + 1] | ((u8)input[i] << 8));
+            if (value != 0xffff) {
+                output[0] = value >> 8;
+                output[1] = value;
+            } else {
+                output[0] = 0x80;
+                output[1] = 0x80;
+            }
+            output++;
+            i++;
+        }
+    }
+}
 
 void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
                                     u64 arg4, u64 arg5) {
@@ -226,7 +298,13 @@ u32 func_001A02D0(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A02F0);
+void func_001A02F0(void) {
+    u32 resource;
+    u64 buffer = func_00343ED0("/sprite/bg00.tmx", &resource, 0);
+
+    D_00438F24 = func_0032C138(resource);
+    func_003297C8(buffer);
+}
 
 void func_001A0338(void) {
     func_0032BB68(D_00438F24);
@@ -256,28 +334,106 @@ u32 func_001A0458(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0490);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A04F0);
+TextPoolNode *func_001A04F0(TextPool *pool) {
+    TextPoolNode *node = pool->firstFree;
+    TextPoolNode *next;
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0558);
-
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A05B0);
-
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0630);
-
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0688);
-
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A06D8);
-
-u64 func_001A0710(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
-
-    temp_v0 = func_00343ED0(arg0, temp_v2, 0);
-    temp_v1 = func_0032C138(temp_v2[0]);
-    func_003297C8(temp_v0);
-    return temp_v1;
+    if (node == NULL) {
+        return NULL;
+    }
+    next = node->next;
+    if (pool->activeHead != NULL) {
+        node->previous = pool->activeTail;
+        pool->activeTail->next = node;
+    } else {
+        node->previous = NULL;
+        pool->activeHead = node;
+    }
+    node->next = NULL;
+    pool->activeTail = node;
+    if (next != NULL) {
+        next->previous = NULL;
+    } else {
+        pool->lastFree = NULL;
+    }
+    pool->firstFree = next;
+    return node;
 }
+
+void func_001A0558(TextPoolNode *node, TextPool *pool) {
+    TextPoolNode *previous = node->previous;
+    TextPoolNode *next = node->next;
+
+    if (previous != NULL) {
+        previous->next = next;
+    } else {
+        pool->activeHead = next;
+    }
+    if (next != NULL) {
+        next->previous = previous;
+    } else {
+        pool->activeTail = previous;
+    }
+    node->next = NULL;
+    {
+        TextPoolNode *freeTail = pool->lastFree;
+        node->previous = freeTail;
+        if (freeTail != NULL) {
+            freeTail->next = node;
+        }
+    }
+    pool->lastFree = node;
+    if (pool->firstFree == NULL) {
+        pool->firstFree = node;
+    }
+}
+
+void func_001A05B0(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
+                   s32 w, const TextVector *input, s32 count) {
+    while (count > 0) {
+        s32 x = scaleX * input->x;
+        s32 y = scaleY * input->y;
+        s32 z = scaleZ * input->z;
+
+        output->w = w;
+        if (x > 0xff0000) x = 0xff0000;
+        if (y > 0xff0000) y = 0xff0000;
+        if (z > 0xff0000) z = 0xff0000;
+        output->x = x >> 16;
+        output->y = y >> 16;
+        output->z = z >> 16;
+        output++;
+        input++;
+        count--;
+    }
+}
+
+void func_001A0630(TextStyleNode *entry, u32 color) {
+    for (; entry != NULL; entry = entry->next) {
+        TextStyleNode *child;
+        for (child = entry->firstChild; child != NULL; child = child->nextChild) {
+            child->color = color;
+        }
+    }
+}
+
+void func_001A0688(TextStyleNode *entry, u32 color) {
+    for (; entry != NULL; entry = entry->next) {
+        TextStyleNode *child;
+        for (child = entry->firstChild; child != NULL; child = child->nextChild) {
+            child->color = (child->color & ~0xff) | color;
+        }
+    }
+}
+
+void func_001A06D8(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
+    for (; entry != NULL; entry = entry->next) {
+        entry->x += xOffset;
+        entry->y += yOffset;
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0710);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0760);
 
@@ -318,3 +474,18 @@ u32 func_001A1818(void) {
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1820);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436580);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436584);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436588);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_0043658C);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436590);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436598);
+
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_004365A0);
+

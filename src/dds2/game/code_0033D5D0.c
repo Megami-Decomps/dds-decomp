@@ -80,6 +80,19 @@ extern void *func_00328D68(s32 size);
 
 extern u32 strlen(const char *s);
 
+typedef struct DevRequest {
+    s32 handle;
+    s16 flags;
+    u16 count;
+    s16 stride;
+    u16 mode;
+    s32 buffer;
+} DevRequest;
+
+extern s32 func_003292A8(s32 size);
+
+extern s32 func_003298F8(s32 arg0);
+
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D7B8);
@@ -405,9 +418,35 @@ s32 func_00340410(s32 arg0) {
     return acc;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340448);
+s32 func_00340448(s32 number) {
+    s32 shift = 0;
+    s32 bcd = 0;
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340498);
+    while (number > 0) {
+        s32 quotient = number / 10;
+        bcd |= (number - quotient * 10) << shift;
+        number = quotient;
+        shift += 4;
+    }
+    return bcd;
+}
+
+DevRequest *func_00340498(s32 count, s32 stride, s32 mode) {
+    DevRequest *request = func_00328D68(sizeof(*request));
+
+    request->mode = mode;
+    request->flags = 0;
+    request->count = count;
+    request->stride = stride;
+    if (count != 0) {
+        request->handle = func_003292A8(stride * count);
+        request->buffer = func_003298F8(request->handle);
+    } else {
+        request->handle = 0;
+        request->buffer = 0;
+    }
+    return request;
+}
 
 void func_00340528(u32 arg0) {
     func_003297C8(*(u32 *)arg0);
@@ -465,3 +504,66 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340950);
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003409C8);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340A50);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AB8);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AC0);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AC8);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AD0);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AD8);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE0);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE4);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE8);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AF0);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AF8);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B00);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B08);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B0C);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B10);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B14);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B18);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1C);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1E);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1F);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B20);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B24);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B28);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B30);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B38);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B40);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B48);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B50);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B58);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B60);
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B68);
+
+
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B70);
+

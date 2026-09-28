@@ -64,6 +64,23 @@ struct PcpScatterWork6 {
     u32 unk198;
 };
 
+extern void *func_0017B7A0();
+
+extern void *func_0017C2D8();
+
+extern void *func_0017CE88();
+
+typedef struct PcpScatterWork7 PcpScatterWork7;
+
+/* func_00175230 */
+struct PcpScatterWork7 {
+    u8 pad00[0x40];
+    s128 unk40;
+    u8 pad50[0xE4];
+    u32 unk134;
+    u32 unk138;
+};
+
 void func_001787E0(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
@@ -255,7 +272,14 @@ void func_0017B9D0(u64 arg0) {
     func_0017B7A0(temp_v0, temp_v1);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BA18);
+PcpScatterWork5 *func_0017BA18(PcpScatterWork5 *work)
+{
+    PcpScatterWork5 *child;
+
+    child = func_0017B7A0(&work->unk40, NULL);
+    func_0017DCA8(child->unk18C, work->unk18C);
+    return child;
+}
 
 void func_0017BA60(s32 arg0) {
     func_0017D9E0(*(u32 *)(arg0 + 0x18c));
@@ -292,7 +316,14 @@ void func_0017C4D8(u64 arg0) {
     func_0017C2D8(temp_v0, temp_v1);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C520);
+PcpScatterWork6 *func_0017C520(PcpScatterWork6 *work)
+{
+    PcpScatterWork6 *child;
+
+    child = func_0017C2D8(&work->unk40, NULL);
+    func_0017DCA8(child->unk194, work->unk194);
+    return child;
+}
 
 void func_0017C568(s32 arg0) {
     func_0017D9E0(*(u32 *)(arg0 + 0x194));
@@ -329,7 +360,14 @@ void func_0017D078(u64 arg0) {
     func_0017CE88(temp_v0, temp_v1);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D0C0);
+PcpScatterWork7 *func_0017D0C0(PcpScatterWork7 *work)
+{
+    PcpScatterWork7 *child;
+
+    child = func_0017CE88(&work->unk40, NULL);
+    func_0017DCA8(child->unk134, work->unk134);
+    return child;
+}
 
 void func_0017D108(s32 arg0) {
     func_0017D9E0(*(u32 *)(arg0 + 0x134));

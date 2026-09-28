@@ -4,16 +4,11 @@ extern u64 func_002AB598(void);
 
 extern u64 func_0011C0B0(u64, u64);
 
-extern s32 func_0010D650(s32 idx);
-
 extern s32 func_0010D818(s32 arg0);
 
-s32 func_0011EC90(void) {
-    s32 val = func_0010D650(0);
+extern u64 func_0010D650(u64);
 
-    func_0010D818(func_0011C680(val) == 1);
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EC90);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ECC8);
 
@@ -72,3 +67,6 @@ void func_0011F0C0(s32 arg0, u8 arg1) {
 void func_0011F0E0(void) {
     func_00328E48();
 }
+
+INCLUDE_SDATA(const s32, "game/code_0011EC90", D_00435EA8);
+
