@@ -219,17 +219,62 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A170);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A1D0);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A268);
+void func_0021A268(s32 object, s32 id, s32 option) {
+    s32 *block = func_002192D0(object, id);
+    if (block != NULL) {
+        s32 *entry = func_00219350((s32)block);
+        while (entry != NULL) {
+            func_0021A1D0(object, entry, option);
+            entry = func_00219368((s32)entry);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A2E0);
+void func_0021A2E0(s32 item) {
+    switch (*(u16 *)(item + 4)) {
+    case 0:
+        func_00151F00(*(s32 *)(item + 8));
+        break;
+    case 1:
+        func_0014FAB8(*(s32 *)(item + 8));
+        break;
+    case 2:
+        func_00188228(*(s32 *)(item + 8));
+        break;
+    }
+    func_002CFF98((void *)item);
+}
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A368);
+void func_0021A368(s32 object, s32 subtype) {
+    s32 *link = (s32 *)(object + 0x14);
+    s32 item = *link;
+    while (item != 0) {
+        if (*(s16 *)(item + 6) == subtype) {
+            s32 next = *(s32 *)item;
+            func_0021A2E0(item);
+            *link = next;
+            item = next;
+        } else {
+            link = (s32 *)item;
+            item = *(s32 *)item;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A3D8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A490);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A560);
+void func_0021A560(s32 unused, s32 item, s32 frame) {
+    switch (*(u16 *)(item + 4)) {
+    case 0:
+        func_00152010(*(s32 *)(item + 8), frame);
+        return;
+    case 1:
+        func_0014FC60(*(s32 *)(item + 8), frame);
+        break;
+    }
+}
 
 void func_0021A5B8(s32 arg0, s32 arg1, float arg2) {
     switch (*(u16 *)(arg1 + 4)) {

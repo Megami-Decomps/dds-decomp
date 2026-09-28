@@ -198,7 +198,10 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00235B30);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00235C68);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00235DB0);
+s32 func_00235DB0(s32 target, s32 x, s32 y) {
+    func_002D4038(target, func_002E4960(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00235E00);
 
@@ -298,7 +301,10 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE9D0);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003AE9E0);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00239350);
+s32 func_00239350(s32 target, s32 x, s32 y) {
+    func_002D4038(target, func_002E4960(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
+    return 2;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA10);
 
@@ -322,7 +328,10 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA80);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239A90);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00239DE0);
+s32 func_00239DE0(s32 target, s32 x, s32 y) {
+    func_002D4038(target, func_002E4960(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239E30);
 
@@ -570,29 +579,153 @@ void func_0023E138(s32 arg0, s32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E1B0);
+void func_0023E1B0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 2) {
+            s32 header[4];
+            header[0] = *(s32 *)((s32)group + 8);
+            header[1] = 0;
+            header[2] = 0;
+            header[3] = 0;
+            func_0023D5B0(output, header, 0x10);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E228);
+void func_0023E228(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0xA) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x30);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E2B0);
+void func_0023E2B0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0xB) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x20);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E338);
+void func_0023E338(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0xD) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x28);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E3C0);
+void func_0023E3C0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0xE) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x2C);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E448);
+void func_0023E448(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0xF) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x2C);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E4D0);
+void func_0023E4D0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0x17) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x2C);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E558);
+void func_0023E558(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0x1B) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x28);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E5E0);
+void func_0023E5E0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0x10) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x18);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E668);
+void func_0023E668(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0x11) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x24);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E6F0);
+void func_0023E6F0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        u8 header[8];
+        header[0] = *(u8 *)group;
+        header[1] = *(u8 *)((s32)group + 4);
+        *(u16 *)&header[2] = *(u16 *)((s32)group + 8);
+        *(u16 *)&header[4] = *(u16 *)((s32)group + 0x1C);
+        header[6] = *(u8 *)((s32)group + 0x1E);
+        header[7] = *(u8 *)((s32)group + 0x1F);
+        func_0023D5B0(output, header, sizeof(header));
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E770);
+void func_0023E770(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        if (group->type == 0x19) {
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x40);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023E7F8);
 
