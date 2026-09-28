@@ -27,9 +27,11 @@ import argparse
 import bisect
 import collections
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from pairing import RETAIL, ROOT, STORE, Build, address_pairs, diff_pairs, identical, ordered_pairs
@@ -318,6 +320,9 @@ def translate(text, src, dst, amap):
         if addr is None:
             return tok
         if addr in amap:
+            if addr in src.build.sizes and amap[addr] not in dst.build.sizes:
+                missing.append(tok)  # a function whose counterpart is no function start
+                return tok
             return dst.name_at(amap[addr])
         near = [a for a in amap if addr < a < addr + 0x800 and a not in src.build.sizes]
         if near and addr not in src.build.sizes:
@@ -429,7 +434,14 @@ def cmd_port(args):
                 first = FIRST_BODY.search(text)
                 at = first.start() if first else len(text)
                 text = text[:at] + "\n\n".join(add) + "\n\n" + text[at:]
+            before = dpath.read_text()
             dpath.write_text(text)
+            # A port that breaks the destination's compile (conflicting prototype,
+            # arity) is undone at once, so one bad function never blocks the unit.
+            if not compiles(dpath, dst.version):
+                dpath.write_text(before)
+                skipped.append(f"{rel}:{fname}: does not compile in {dpath.relative_to(ROOT)}; not ported")
+                continue
             ported[dpath.relative_to(ROOT)] += 1
     # Relocation-masked pairing ignores plain immediates (li 0x15 vs li 0x19), so a
     # pair is not proof; every ported function must compile to its own retail bytes.
@@ -437,7 +449,7 @@ def cmd_port(args):
         path = ROOT / rel
         r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path), "-v"],
                            capture_output=True, text=True)
-        bad = re.findall(r"^DIFF (\w+) ", r.stdout, re.M)
+        bad = re.findall(r"^(?:DIFF|OVER|SHARED rodata of) (\w+) ", r.stdout, re.M)
         if r.returncode and not bad:
             skipped.append(f"{rel}: check_unit failed without per-function DIFF; left for review")
         text = path.read_text()
@@ -454,6 +466,12 @@ def cmd_port(args):
         print(f"skip {s}")
     if ported:
         print("run python3 configure.py --no-split && ninja")
+
+def compiles(path, version):
+    env = dict(os.environ, DDS_VERSION=version)
+    with tempfile.TemporaryDirectory() as tmp:
+        return subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", str(path), "-o", f"{tmp}/u.o"],
+                              capture_output=True, env=env).returncode == 0
 
 
 

@@ -8,6 +8,10 @@ typedef struct EffRandState
 extern EffRandState D_0040BAE8;
 
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+extern f32 func_003406A0(f32 angle);
+
+extern f32 func_003407A0(f32 angle);
+
 void effMiscQuatMultiplyVU(void)
 {
     __asm__ volatile (
@@ -28,7 +32,22 @@ void effMiscQuatMultiplyVU(void)
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340AF8);
+/* VU-register calling convention: vf10 is the quaternion input and result. */
+void func_00340AF8(void)
+{
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmul.xyzw vf2, vf10, vf10\n"
+        "vaddax.w ACC, vf2, vf2x\n"
+        "vmadday.w ACC, vf0, vf2y\n"
+        "vmaddz.w vf3, vf0, vf2z\n"
+        "vmove.w vf2, vf10\n"
+        "vdiv Q, vf0w, vf3w\n"
+        "vsub.xyz vf2, vf0, vf10\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf2, Q\n"
+        ".set reorder\n");
+}
 
 /* Persona 4 effMiscNormalizeVU @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void effMiscNormalizeVU(void)
@@ -49,13 +68,81 @@ void effMiscNormalizeVU(void)
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340B50);
+f32 func_00340B50(void)
+{
+    f32 result;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vaddw.xyz vf1, vf0, vf0w\n"
+        "vmul.xyzw vf2, vf10, vf10\n"
+        "vmulay.x ACC, vf2, vf2y\n"
+        "vmaddaz.x ACC, vf1, vf2z\n"
+        "vmaddw.x vf2, vf1, vf2w\n"
+        "qmfc2.ni $2, vf2\n"
+        "mtc1 $2, %0\n"
+        ".set reorder\n"
+        : "=f"(result));
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340B78);
+f32 func_00340B78(void)
+{
+    f32 result;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vaddw.xyz vf1, vf0, vf0w\n"
+        "vmul.xyzw vf2, vf10, vf11\n"
+        "vadday.x ACC, vf2, vf2y\n"
+        "vmaddaz.x ACC, vf1, vf2z\n"
+        "vmaddw.x vf2, vf1, vf2w\n"
+        "qmfc2.ni $2, vf2\n"
+        "mtc1 $2, %0\n"
+        ".set reorder\n"
+        : "=f"(result));
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340BA0);
+void func_00340BA0(f32 angle)
+{
+    f32 halfAngle = angle * 0.5f;
+    f32 sine = func_003406A0(halfAngle);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder\n"
+        : : "f"(sine));
+    sine = func_003407A0(halfAngle);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.w vf10, vf0, vf2x\n"
+        ".set reorder\n"
+        : : "f"(sine));
+}
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340BF0);
+void func_00340BF0(f32 angle)
+{
+    f32 halfAngle = angle * 0.5f;
+    f32 sine = func_003406A0(halfAngle);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf11, vf11, vf2x\n"
+        ".set reorder\n"
+        : : "f"(sine));
+    sine = func_003407A0(halfAngle);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.w vf11, vf0, vf2x\n"
+        ".set reorder\n"
+        : : "f"(sine));
+}
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void func_00340C40(void)

@@ -167,14 +167,6 @@ void func_00101198(KwlnTask* task, void* arg1)
     } while (task != 0);
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411008);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411038);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411048);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411078);
-
 void func_001011D0(void)
 {
     u8* tmp;
@@ -295,3 +287,13 @@ void func_00101960(void) {
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101968);
+
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411008);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411038);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411048);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411078);
+

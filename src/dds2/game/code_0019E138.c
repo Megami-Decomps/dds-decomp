@@ -22,7 +22,46 @@ extern u64 func_0032C138(u32);
 
 extern u64 func_00343ED0(u64, u32 *, u64);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E138);
+/* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
+typedef struct TextStream {
+    u8 unk0[0x10]; /* 0x0 */
+    u8 *unk10;     /* 0x10: base */
+    u8 unk14[4];   /* 0x14 */
+    s32 unk18;     /* 0x18: position */
+} TextStream;
+
+s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+
+extern u32 D_004528C0[];
+
+/* Field block split by func_00198038. */
+typedef struct MemBlock {
+    s32 unk0; /* 0x0 */
+    s32 unk4; /* 0x4 */
+    u8 unk8[0x10]; /* 0x8 */
+    s32 unk18; /* 0x18 */
+} MemBlock;
+
+typedef struct MemOut {
+    void *unk0; /* 0x0 */
+    void *unk4; /* 0x4 */
+    void *unk8; /* 0x8 */
+} MemOut;
+
+/* 8-byte node header; payload follows (func_00198248/func_00198270). */
+typedef struct MemNode {
+    u32 unk0;              /* 0x0 */
+    struct MemNode *unk4;  /* 0x4 */
+} MemNode;
+
+u32 func_0019E138(TextStream *stream) {
+    s32 *ppos = &stream->unk18;
+    u8 *p = stream->unk10 + *ppos;
+    u32 b = *p;
+
+    *ppos += 2;
+    return (b + 0xFF) & 0xFF;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E160);
 
@@ -30,9 +69,13 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E1B8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E5D8);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E7C8);
+void func_0019E7C8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    func_0019E848(arg0, arg1, 0, 0, 0, 0, 0x80, arg2, arg3);
+}
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E800);
+void func_0019E800(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    func_0019E848(arg0, arg1, 0, arg2 & 0xFF, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6, arg7);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E848);
 
@@ -42,7 +85,9 @@ u32 func_0019E8E0(u32 arg0) {
     return D_0043654C & arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E8F0);
+void func_0019E8F0(s32 arg0, s32 arg1) {
+    D_004528C0[arg0] = arg1;
+}
 
 u32 func_0019E908(void) {
     return D_0043655C;
@@ -145,15 +190,34 @@ u32 func_001A0060(u32 arg0) {
     return arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0068);
+void func_001A0068(MemBlock *arg0, MemOut *arg1) {
+    s32 v0 = arg0->unk0;
+    s32 v1 = v0 + arg0->unk4;
+    s32 v2 = v1 + arg0->unk18;
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0098);
+    arg1->unk0 = (u8 *)arg0 + v0;
+    arg1->unk4 = (u8 *)arg0 + v1;
+    arg1->unk8 = (u8 *)arg0 + v2;
+}
+
+u32 func_001A0098(u32 arg0) {
+    return *(u32 *)(func_001A0060(arg0) + 0x10);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A00B8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A01D8);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0278);
+void *func_001A0278(MemNode *queue) {
+    MemNode *head = queue->unk4;
+
+    if (head->unk0 == 0) {
+        return NULL;
+    }
+    queue->unk4 = head->unk4;
+    head->unk4 = NULL;
+    return head + 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A02A0);
 

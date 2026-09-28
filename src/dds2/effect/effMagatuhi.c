@@ -1,5 +1,42 @@
 #include "common.h"
 
+/* Small work area: type id and count, an id block, a result table plus an
+ * object released on cleanup. */
+typedef struct {
+    s32   type;         /* 0x00 effect type (== 3 in func_0018CA30) */
+    u16   count04;      /* 0x04 loop count */
+    u8    pad06[2];     /* 0x06 */
+    void *ptr08;        /* 0x08 id block / source block */
+    u8    pad0C[0x0C];  /* 0x0C */
+    u32  *out18;        /* 0x18 result table */
+    u8    pad1C[4];     /* 0x1C */
+    u32  *unk20;        /* 0x20 table written by func_00189B90 */
+    u8    pad24[0x10];  /* 0x24 */
+    void *unk34;        /* 0x34 released by func_001893C0 */
+} EffMagatuhiWork; /* 0x38 */
+
+extern void *func_001947F0(void *arg);
+
+/* Float source block read by func_0018A610. */
+typedef struct EffMagatuhiSrc {
+    f32 f00, f04, f08;
+    u8 pad0C[4];
+    f32 f10, f14, f18;
+    u8 pad1C[4];
+    f32 f20, f24;
+} EffMagatuhiSrc; /* 0x28 */
+
+/* Float destination block written by func_0018A610. */
+typedef struct EffMagatuhiDst {
+    f32 f00, f04, f08;
+    u8 pad0C[4];
+    f32 f10, f14, f18;
+    u8 pad1C[0x18];
+    f32 f34;
+    u8 pad38[0x18];
+    f32 f50;
+} EffMagatuhiDst; /* 0x54 */
+
 void func_00190FF8(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x34));
 }
@@ -30,7 +67,18 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191AD0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191CD0);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192248);
+void func_00192248(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
+    EffMagatuhiDst *dst = func_001947F0(work->ptr08);
+
+    dst->f00 = src->f00;
+    dst->f04 = src->f04;
+    dst->f08 = src->f08;
+    dst->f34 = src->f20;
+    dst->f10 = src->f10;
+    dst->f14 = src->f14;
+    dst->f18 = src->f18;
+    dst->f50 = src->f24;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001922B0);
 

@@ -2,7 +2,66 @@
 
 extern u32 D_00438A3C;
 
-extern u32 func_00333300(void);
+typedef struct SdfSubParam {
+    u64 unk0; /* 0x0 */
+    u64 unk8; /* 0x8 */
+    u32 unk10; /* 0x10 */
+    u32 unk14; /* 0x14 */
+} SdfSubParam;
+
+typedef struct SdfTextParam {
+    u8 pad00[6]; /* 0x00 */
+    u8 unk06; /* 0x06: dirty flags for the setters below */
+    u8 pad07[9]; /* 0x07 */
+    u32 unk10; /* 0x10 */
+    u32 unk14; /* 0x14 */
+    u8 unk18; /* 0x18: func_002DA5B0 stores a u32 over 0x18-0x1B */
+    u8 unk19; /* 0x19: bit 0x2 selects unk88/unk8C over defaults */
+    u8 unk1A; /* 0x1A */
+    u8 unk1B; /* 0x1B */
+    f32 unk1C; /* 0x1C */
+    u32 unk20; /* 0x20 */
+    u8 pad24[4]; /* 0x24 */
+    f32 unk28; /* 0x28 */
+    f32 unk2C; /* 0x2C */
+    u32 unk30; /* 0x30 */
+    u32 unk34; /* 0x34 */
+    SdfSubParam *unk38; /* 0x38 */
+    SdfSubParam *unk3C; /* 0x3C */
+    f32 unk40; /* 0x40 */
+    f32 unk44; /* 0x44 */
+    u8 pad48[0x40]; /* 0x48 */
+    f32 unk88; /* 0x88 */
+    f32 unk8C; /* 0x8C */
+    void *unk90; /* 0x90: resource chunk searched by tag */
+} SdfTextParam;
+
+extern f32 D_00438A48;
+
+extern f32 D_00438A4C;
+
+extern u8 D_00439170;
+
+extern u8 D_00439178;
+
+void func_0032CA90(void *arg0, void (*arg1)(void));
+
+void func_00333140(void);
+
+void func_003338B0(void);
+
+extern SdfSubParam *func_00333300(void);
+
+void *func_00328D68(s32 size);
+
+typedef struct SdfNode {
+    u16 unk0; /* 0x0 */
+    u8 unk2; /* 0x2 */
+    u8 unk3; /* 0x3: type tag (0x20/0x30/0x50) */
+    u32 unk4; /* 0x4 */
+    u32 unk8; /* 0x8 */
+    u32 unkC; /* 0xC */
+} SdfNode;
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
@@ -36,15 +95,29 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D88);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332DB8);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332DE8);
+void func_00332DE8(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
+    arg0->unk88 = fparg0;
+    arg0->unk8C = fparg1;
+    arg0->unk19 = arg0->unk19 | 2;
+}
 
 void func_00332E00(s32 arg0) {
     *(u8 *)(arg0 + 0x19) = *(u8 *)(arg0 + 0x19) & 0xfd;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332E10);
+f32 func_00332E10(SdfTextParam *arg0) {
+    if ((arg0->unk19 & 2) != 0) {
+        return arg0->unk88;
+    }
+    return D_00438A48;
+}
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332E30);
+f32 func_00332E30(SdfTextParam *arg0) {
+    if ((arg0->unk19 & 2) != 0) {
+        return arg0->unk8C;
+    }
+    return D_00438A4C;
+}
 
 void func_00332E50(u32 arg0) {
     D_00438A3C = arg0;
@@ -75,7 +148,10 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332FC8);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333060);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003330F0);
+void func_003330F0(void) {
+    func_0032CA90(&D_00439170, func_00333140);
+    func_0032CA90(&D_00439178, func_003338B0);
+}
 
 void func_00333120(u32 arg0) {
     func_00340498(arg0, 4, 8);
@@ -111,14 +187,25 @@ void func_003332B8(s32 arg0, u32 arg1) {
     *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003332D0);
+void func_003332D0(SdfTextParam *arg0, f32 fparg0) {
+    arg0->unk1C = fparg0;
+    arg0->unk06 = arg0->unk06 | 3;
+}
 
 void func_003332E8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x2c) = arg1;
     *(u8 *)(arg0 + 6) = *(u8 *)(arg0 + 6) | 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333300);
+SdfSubParam *func_00333300(void) {
+    SdfSubParam *temp;
+
+    temp = func_00328D68(0x18);
+    temp->unk8 = (((u64)0x3F800000 << 16 | 0x3F80) << 16);
+    temp->unk0 = 0;
+    temp->unk10 = 0;
+    return temp;
+}
 
 void func_00333340(s32 arg0) {
     u32 temp_v0;
@@ -161,7 +248,11 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003334E0);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333560);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003335C8);
+void func_003335C8(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
+    arg0->unk40 = fparg0;
+    arg0->unk44 = fparg1;
+    arg0->unk06 = arg0->unk06 | 0xC0;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003335E0);
 
@@ -171,7 +262,16 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003338B0);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333918);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333950);
+void *func_00333950(u32 *arg0, SdfNode *arg1, s32 arg2) {
+    u32 *entry = arg0 + arg2;
+
+    arg1->unk3 = 0x30;
+    arg1->unk4 = entry[2] & 0x0FFFFFFF;
+    arg1->unk0 = 0xA;
+    arg1->unk8 = 0;
+    arg1->unkC = 0;
+    return (void *)((u8 *)arg1 + 0x10);
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333990);
 
@@ -183,7 +283,10 @@ void func_00333B18(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333B38);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333BC8);
+void func_00333BC8(SdfTextParam *arg0, SdfTextParam *arg1) {
+    arg1->unk28 = arg0->unk40;
+    arg1->unk2C = arg0->unk44;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333BE0);
 

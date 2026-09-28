@@ -28,12 +28,6 @@ extern u64 func_001B76F0(void);
 
 extern u64 func_00220958(void);
 
-extern u64 func_002192D8(void);
-
-extern u64 func_002290D0(void);
-
-extern u64 func_00229158(void);
-
 extern s32 D_004367F4;
 
 extern u64 func_001E66D8(void);
@@ -50,8 +44,6 @@ extern s32 func_001B2CC0(void);
 
 extern s32 func_00212CB8(u32, u32, u32);
 
-extern s32 func_00212B38(u32, u32);
-
 extern s32 func_001B33C8(void);
 
 extern s32 func_001ABB10(void);
@@ -64,9 +56,101 @@ extern u64 func_001E7FD8(u64);
 
 extern u32 func_001E8058(u64);
 
-extern u64 func_00229198(void);
-
 extern s32 func_001E12C8(u32);
+
+extern s32 D_00436AF0;
+
+extern s32 D_00438F6C;
+
+extern s32 func_00343ED0(s32, u32 *, s32);
+
+extern void func_0020D128(s32, ...);
+
+extern void func_00211188(s32, u16);
+
+extern void func_00211128(s32, u16);
+
+extern void func_002111C8(s32, u16);
+
+extern void func_002111E8(s32, u16);
+
+extern void func_002112A8(s32, u16);
+
+extern s8 D_00436CAC;
+
+extern void func_002112C8(s32, u16);
+
+extern s8 D_00419570[];
+
+extern s8 D_00419590[];
+
+extern s8 D_004195B8[];
+
+extern s8 D_004195D8[];
+
+extern s8 D_004195F8[];
+
+extern s8 D_00419620[];
+
+extern s8 D_00419648[];
+
+extern s8 D_00419668[];
+
+extern s8 D_00419688[];
+
+extern s32 D_003BEA48[];
+
+extern s32 D_003BE6E0[];
+
+extern u8 D_00438B66;
+
+extern s32 sceDopen(char *);
+
+extern s32 D_00438F80;
+
+extern void func_0035C860();
+
+extern void *func_00328D68(s32 size);
+
+extern void func_002152D8(s32, s32);
+
+extern void func_00215C70(s32, s32);
+
+extern void func_00215F28(s32, s32);
+
+extern void func_00216760(s32, s32);
+
+extern void func_00216888(s32, s32);
+
+extern void func_002160A0();
+
+extern void func_00216CA0();
+
+extern void func_00216988();
+
+extern s32 *D_00436CB8;
+
+extern s32 func_00212B38();
+
+extern u32 func_002290D0(void);
+
+extern u32 func_00229158(void);
+
+extern u32 func_00229198(void);
+
+extern u32 func_002192D8(void);
+
+extern s8 D_00453068[];
+
+extern s8 D_00453060[];
+
+extern s32 func_003282F0(s32, s32, s32);
+
+extern u32 D_00438F90;
+
+extern s32 D_003C86F0[];
+
+extern s32 D_003C8710[];
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207A38);
 
@@ -80,7 +164,17 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00207E38);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207EB0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207F40);
+f32 func_00207F40(s32 arg0) {
+    f32 temp_f2;
+    f32 temp_f1;
+
+    temp_f2 = *(f32 *)(arg0 + 0xb4);
+    temp_f1 = *(f32 *)(arg0 + 0xb0);
+    if (temp_f1 < temp_f2) {
+        return temp_f2 * *(f32 *)(arg0 + 0x80);
+    }
+    return temp_f1 * *(f32 *)(arg0 + 0x80);
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207F68);
 
@@ -154,11 +248,26 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002095A0);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209658);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002096B8);
+void func_002096B8(s32 arg0, f32 arg1) {
+    *(f32 *)(arg0 + 0) = arg1;
+    *(s32 *)(arg0 + 4) = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002096C8);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209720);
+void func_00209720(s32 arg0, f32 arg1) {
+    f32 temp_f0;
+
+    *(f32 *)(arg0 + 0xc) = 0.0f;
+    *(f32 *)(arg0 + 0) = arg1;
+    temp_f0 = *(f32 *)(arg0 + 0xc);
+    *(f32 *)(arg0 + 4) = arg1;
+    *(f32 *)(arg0 + 0x10) = temp_f0;
+    if (arg1 == temp_f0) {
+        return;
+    }
+    *(f32 *)(arg0 + 0x8) = 1.0f / (arg1 * arg1 * 0.25f);
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209770);
 
@@ -168,7 +277,10 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00209978);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002099C0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209CD0);
+void func_00209CD0(void) {
+    func_0020D128((s32)"btl:[%s]\n", D_00436AF0);
+    D_00438F6C = func_00343ED0(D_00436AF0, &D_00438F70, 0);
+}
 
 void func_00209D08(void) {
     s32 temp_v0;
@@ -187,7 +299,14 @@ void func_00209D40(void) {
     *(u32 *)(temp_v0 + 0x4e8) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209D78);
+u32 func_00209D78(void) {
+    s32 temp_v0;
+
+    temp_v0 = func_0010D8D0();
+    *(u32 *)(temp_v0 + 0x20) = 1;
+    *(u32 *)(temp_v0 + 0x24) = 0;
+    return 1;
+}
 
 u32 func_00209DA8(void) {
     s32 temp_v0;
@@ -255,43 +374,101 @@ u32 func_0020A0A0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A0E0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A130);
+u32 func_0020A130(void) {
+    func_00211088(func_0010D8D0());
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A158);
+u32 func_0020A158(void) {
+    s32 context = func_0010D8D0();
+    u16 value = func_0010D650(0);
+    func_00211188(context, value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A198);
+u32 func_0020A198(void) {
+    func_002110A8(func_0010D8D0());
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A1C0);
+u32 func_0020A1C0(void) {
+    func_002110C8(func_0010D8D0());
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A1E8);
+u32 func_0020A1E8(void) {
+    s32 context = func_0010D8D0();
+    u16 value = func_0010D650(0);
+    func_00211128(context, value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A228);
+u32 func_0020A228(void) {
+    func_00211168(func_0010D8D0());
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A250);
+u32 func_0020A250(void) {
+    func_00211148(func_0010D8D0());
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A278);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A2B8);
+u32 func_0020A2B8(void) {
+    s32 context = func_0010D8D0();
+    u16 value = func_0010D650(0);
+    func_002111C8(context, value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A2F8);
+u32 func_0020A2F8(void) {
+    s32 context = func_0010D8D0();
+    u16 value = func_0010D650(0);
+    func_002111E8(context, value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A338);
+u32 func_0020A338(void) {
+    func_00211088(func_0010D8D0());
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A360);
+u32 func_0020A360(void) {
+    func_00211208(func_0010D8D0(), 0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A390);
+u32 func_0020A390(void) {
+    func_00211228(func_0010D8D0(), 0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A3C0);
+u32 func_0020A3C0(void) {
+    func_00211248(func_0010D8D0(), 0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A3F0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A430);
+u32 func_0020A430(void) {
+    func_00211288(func_0010D8D0());
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A458);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A480);
+u32 func_0020A480(void) {
+    s32 context = func_0010D8D0();
+    u16 value = func_0010D650(0);
+    func_002112A8(context, value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A4C0);
+u32 func_0020A4C0(void) {
+    func_00211268(func_0010D8D0(), 0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A4F0);
 
@@ -401,13 +578,41 @@ u32 func_0020C078(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C080);
+u32 func_0020C080(void) {
+    if (func_00229110() != 0) {
+        func_0010D818(1);
+    } else {
+        func_0010D818(0);
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C0C0);
+u32 func_0020C0C0(void) {
+    if (func_002291C0() != 0) {
+        func_0010D818(1);
+    } else {
+        func_0010D818(0);
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C100);
+u32 func_0020C100(void) {
+    if (func_00219290() != 0) {
+        func_0010D818(1);
+    } else {
+        func_0010D818(0);
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C140);
+u32 func_0020C140(void) {
+    if (func_0021F808() != 0) {
+        func_0010D818(1);
+    } else {
+        func_0010D818(0);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C180);
 
@@ -457,13 +662,7 @@ u32 func_0020C568(void) {
     return 1;
 }
 
-u32 func_0020C570(void) {
-    u64 temp_v0;
-
-    temp_v0 = func_002290D0();
-    func_0010D818(temp_v0);
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C570);
 
 u32 func_0020C598(void) {
     u64 temp_v0;
@@ -481,33 +680,32 @@ u32 func_0020C5C0(void) {
     return 1;
 }
 
-u32 func_0020C5E8(void) {
-    u64 temp_v0;
+INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C5E8);
 
-    temp_v0 = func_00229158();
-    func_0010D818(temp_v0);
-    return 1;
-}
-
-u32 func_0020C610(void) {
-    u64 temp_v0;
-
-    temp_v0 = func_002192D8();
-    func_0010D818(temp_v0);
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C610);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C638);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C660);
+u32 func_0020C660(void) {
+    func_0010D818(D_00436CAC);
+    return 1;
+}
 
 u32 func_0020C688(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C690);
+u32 func_0020C690(void) {
+    func_00210F58(func_0010D8D0());
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C6B8);
+u32 func_0020C6B8(void) {
+    s32 context = func_0010D8D0();
+    u16 value = func_0010D650(0);
+    func_002112C8(context, value);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C6F8);
 
@@ -552,7 +750,17 @@ u32 func_0020C7E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C810);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C8E0);
+u32 func_0020C8E0(void) {
+    u64 temp_v0;
+
+    temp_v0 = func_001E66D8();
+    func_001E1580(temp_v0);
+    temp_v0 = func_001E6740();
+    func_001E1580(temp_v0);
+    temp_v0 = func_001E8B40(func_0010D8D0(), 0x11);
+    func_001E1580(temp_v0);
+    return 1;
+}
 
 u32 func_0020C938(void) {
     u64 temp_v0;
@@ -572,9 +780,17 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CA10);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CA98);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CB80);
+u32 func_0020CB80(void) {
+    func_0020D128(D_00419570);
+    func_0010D818(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CBB0);
+u32 func_0020CBB0(void) {
+    func_0020D128(D_00419590);
+    func_0010D818(0x14);
+    return 1;
+}
 
 u32 func_0020CBE0(void) {
     s32 temp_v0;
@@ -584,19 +800,41 @@ u32 func_0020CBE0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CC10);
+u32 func_0020CC10(void) {
+    func_0020D128(D_004195B8);
+    func_0010D818(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CC40);
+u32 func_0020CC40(void) {
+    func_0020D128(D_004195D8);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CC68);
+u32 func_0020CC68(void) {
+    func_0020D128(D_004195F8);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CC90);
+u32 func_0020CC90(void) {
+    func_0020D128(D_00419620);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CCB8);
+u32 func_0020CCB8(void) {
+    func_0020D128(D_00419648);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CCE0);
+u32 func_0020CCE0(void) {
+    func_0020D128(D_00419668);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CD08);
+u32 func_0020CD08(void) {
+    func_0020D128(D_00419688);
+    return 1;
+}
 
 u32 func_0020CD30(void) {
     func_002269E0();
@@ -644,7 +882,10 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CE78);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CEF8);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D0D0);
+void func_0020D0D0(void) {
+    D_003BEA48[4] &= ~0x80;
+    D_003BE6E0[4] &= ~0x80;
+}
 
 void func_0020D100(void) {
 }
@@ -825,7 +1066,16 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419880);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D320);
+s32 func_0020D320(s32 arg0) {
+    char buf[0x70];
+
+    if (D_00438B66 != 0) {
+        func_0035C860(buf, "pfs0:/%s", arg0);
+        return sceDopen(buf);
+    }
+    D_00438F80 = 0;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D370);
 
@@ -833,7 +1083,20 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D3A0);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D448);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D8F0);
+void func_0020D8F0(s32 arg0) {
+    s32 temp_v0;
+
+    if (*(s32 *)(arg0 + 8) != 0) {
+        temp_v0 = *(s32 *)(arg0 + 8);
+        do {
+            s32 temp_v1 = *(s32 *)(temp_v0 + 0x40);
+            func_00328E48(temp_v0);
+            temp_v0 = temp_v1;
+        } while (temp_v0 != 0);
+    }
+    func_00328E48(*(s32 *)(arg0 + 4));
+    func_00328E48(arg0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D948);
 
@@ -843,7 +1106,10 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DAB8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DF68);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DFB0);
+void func_0020DFB0(s32 arg0, s32 arg1, s32 arg2) {
+    *(s32 *)(arg0 + 0) = arg1;
+    *(s32 *)(arg0 + 4) = arg2;
+}
 
 u32 func_0020DFC0(s32 arg0) {
     return *(u32 *)(arg0 + 0x14);
@@ -867,7 +1133,20 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E180);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E300);
+s32 func_0020E300(s32 arg0) {
+    s32 temp_v0;
+
+    temp_v0 = (s32)func_00328D68(0x38);
+    *(s32 *)(temp_v0 + 0x14) = 9;
+    *(s32 *)(temp_v0 + 0) = 8;
+    *(s32 *)(temp_v0 + 4) = 8;
+    *(s32 *)(temp_v0 + 8) = 0;
+    *(s32 *)(temp_v0 + 0x10) = 0;
+    *(s32 *)(temp_v0 + 0xc) = 0;
+    *(s32 *)(temp_v0 + 0x18) = 0;
+    strcpy(temp_v0 + 0x1c, arg0);
+    return temp_v0;
+}
 
 void func_0020E368(void) {
     func_00328E48();
@@ -875,7 +1154,10 @@ void func_0020E368(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E7A0);
+void func_0020E7A0(s32 arg0, s32 arg1, s32 arg2) {
+    *(s32 *)(arg0 + 0) = arg1;
+    *(s32 *)(arg0 + 4) = arg2;
+}
 
 u32 func_0020E7B0(s32 arg0) {
     return *(u32 *)(arg0 + 8);
@@ -1088,7 +1370,9 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002126C8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00212728);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00212788);
+s32 func_00212788(s32 arg0, s32 arg1) {
+    return (func_001AA840(arg0 + 0x120, arg1) & arg1) != 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002127B8);
 
@@ -1147,11 +1431,23 @@ u8 func_002133F8(u32 arg0) {
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00213418);
+s32 func_00213418(void) {
+    return func_00212B38() != 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00213438);
+s32 func_00213438(s32 battler) {
+    u32 flags;
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00213460);
+    if (*(u32 *)(battler + 0x110) & 0x200) {
+        return 0;
+    }
+    flags = *(u16 *)(battler + 0x120) & 0x2000;
+    return flags != 0;
+}
+
+s32 func_00213460(void) {
+    return ((*(s32 *)(*(s32 *)D_00436CB8 + 0xc) & 2) > 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00213478);
 
@@ -1184,7 +1480,9 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00213748);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00213818);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00213900);
+s32 func_00213900(s32 arg0) {
+    return ((*(s32 *)(arg0 + 0x110) & 0x1000) > 0);
+}
 
 u8 func_00213910(void) {
     s64 temp_v0;
@@ -1246,7 +1544,9 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00214510);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00214578);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002145E0);
+s32 func_002145E0(void) {
+    return D_00436CAC < 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002145F0);
 
@@ -1360,13 +1660,7 @@ u32 func_00216D30(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00216D50);
 
-u32 func_00216E98(s32 arg0) {
-    u64 temp_v0;
-
-    temp_v0 = func_00229198();
-    func_001E8030(*(u32 *)(arg0 + 0x60), temp_v0);
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_00207A38", func_00216E98);
 
 u32 func_00216ED0(s32 arg0) {
     u64 temp_v0;
@@ -1957,7 +2251,14 @@ u32 func_00226670(void) {
     return 0xffffffff;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00226678);
+s32 func_00226678(s32 battler, s32 command) {
+    if (command == 1 || command == 0x12) {
+        if ((*(u16 *)(battler + 0x120) & 0x2000) != 0) {
+            return -1;
+        }
+    }
+    return command;
+}
 
 u8 func_002266A8(u32 arg0, s32 arg1) {
     return arg1 == 0xf;
@@ -2340,13 +2641,41 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0022E3D0);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0022E428);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0022E450);
+s32 func_0022E450(void) {
+    return D_00453068[0];
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0022E460);
+s32 func_0022E460(void) {
+    u16 state;
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0022E490);
+    if (D_00453060[8] == 0) {
+        return 1;
+    }
+    state = *(u16 *)(D_00453060 + 4);
+    if (state == 0) {
+        return 1;
+    }
+    return state == 2;
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0022E4C0);
+s32 func_0022E490(void) {
+    u16 state;
+
+    if (D_00453060[8] == 0) {
+        return 1;
+    }
+    state = *(u16 *)(D_00453060 + 4);
+    if (state == 0) {
+        return 1;
+    }
+    return state == 4;
+}
+
+void func_0022E4C0(void) {
+    if (D_00453060[8] != 0) {
+        D_00453060[7] = 1;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_0041B9D0);
 
@@ -2571,7 +2900,15 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00230978);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00230D90);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002311C0);
+void func_002311C0(void) {
+    s32 i;
+
+    D_00438F90 = func_003282F0(1, 0x7f, 0);
+    for (i = 0; i != 8; i++) {
+        D_003C86F0[i] = 0;
+        D_003C8710[i] = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00231220);
 
@@ -2579,7 +2916,26 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00231250);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002312A0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002312F8);
+void func_002312F8(s32 arg0, s32 arg1) {
+    s32 *temp_v0;
+    s32 *temp_v1;
+
+    temp_v0 = &D_003C8710[arg0];
+    temp_v1 = (s32 *)*temp_v0;
+    if (temp_v1 == 0) {
+        return;
+    }
+    do {
+        if (*(temp_v1 + 1) == arg1) {
+            *temp_v0 = *temp_v1;
+            func_00328E48(temp_v1);
+            break;
+        } else {
+            temp_v0 = temp_v1;
+            temp_v1 = (s32 *)*temp_v1;
+        }
+    } while (temp_v1 != 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00231358);
 
@@ -2595,6 +2951,9 @@ void func_00231588(void) {
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002315A8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00231618);
+
+
+
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_0041C300);
 
@@ -4517,3 +4876,4 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00420FA8);
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00420FC0);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00420FD8);
+

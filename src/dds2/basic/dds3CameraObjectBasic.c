@@ -45,6 +45,9 @@ INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00113100);
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00113110);
 
+
+
+
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412878);
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412888);

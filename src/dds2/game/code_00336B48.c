@@ -10,19 +10,160 @@ extern u32 D_00438A68;
 
 extern u32 D_00439194;
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336B48);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+extern u8 D_00476250[];
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336BA0);
+typedef struct VuBlendNode {
+    u8 pad00[0x30];
+    u8 result[0x10];
+    struct VuBlendNode *next;
+    void *sourceA;
+    void *sourceB;
+} VuBlendNode;
+
+extern f32 D_00439190;
+
+typedef struct F9B00Entry {
+    /* 0x00 */ u8 unk0[5];
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 pad06[0x1A];
+    /* 0x20 */ u16 unk20;
+    /* 0x22 */ u16 unk22;
+    /* 0x24 */ u8 pad24[4];
+} F9B00Entry;
+
+extern F9B00Entry D_00476480[];
+
+extern u32 D_00438AB4;
+
+extern u8 D_00370B80[];
+
+extern u32 D_0040B810[];
+
+typedef struct ConsNode {
+    /* 0x00 */ struct ConsNode *next;
+    /* 0x04 */ struct ConsNode *prev;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 unkA;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u16 unk10;
+    /* 0x12 */ u16 unk12;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 unk18;
+    /* 0x1C */ u8 *unk1C;
+} ConsNode;
+
+extern ConsNode *D_00438AB0;
+
+extern void *func_00328D68(s32 size);
+
+void func_00336B48(void) {
+    __asm__ volatile (
+        ".set noreorder               \n"
+        "vmulax.xyzw ACC, vf28, vf20x \n"
+        "vmadday.xyzw ACC, vf29, vf20y \n"
+        "vmaddaz.xyzw ACC, vf30, vf20z \n"
+        "vmaddw.xyzw vf2, vf31, vf20w \n"
+        "vmulax.xyzw ACC, vf28, vf21x \n"
+        "vmadday.xyzw ACC, vf29, vf21y \n"
+        "vmaddaz.xyzw ACC, vf30, vf21z \n"
+        "vmaddw.xyzw vf3, vf31, vf21w \n"
+        "vmulax.xyzw ACC, vf28, vf22x \n"
+        "vmadday.xyzw ACC, vf29, vf22y \n"
+        "vmaddaz.xyzw ACC, vf30, vf22z \n"
+        "vmaddw.xyzw vf4, vf31, vf22w \n"
+        "vmulax.xyzw ACC, vf28, vf23x \n"
+        "vmadday.xyzw ACC, vf29, vf23y \n"
+        "vmaddaz.xyzw ACC, vf30, vf23z \n"
+        "vmaddw.xyzw vf31, vf31, vf23w \n"
+        "vmove.xyzw vf28, vf2        \n"
+        "vmove.xyzw vf29, vf3        \n"
+        "vmove.xyzw vf30, vf4        \n"
+        ".set reorder"
+        :
+        :
+        : "memory"
+    );
+}
+
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336BA0(void) {
+    __asm__ volatile (
+        ".set noreorder               \n"
+        "vmulax.xyzw ACC, vf20, vf28x \n"
+        "vmadday.xyzw ACC, vf21, vf28y \n"
+        "vmaddaz.xyzw ACC, vf22, vf28z \n"
+        "vmaddw.xyzw vf28, vf23, vf28w \n"
+        "vmulax.xyzw ACC, vf20, vf29x \n"
+        "vmadday.xyzw ACC, vf21, vf29y \n"
+        "vmaddaz.xyzw ACC, vf22, vf29z \n"
+        "vmaddw.xyzw vf29, vf23, vf29w \n"
+        "vmulax.xyzw ACC, vf20, vf30x \n"
+        "vmadday.xyzw ACC, vf21, vf30y \n"
+        "vmaddaz.xyzw ACC, vf22, vf30z \n"
+        "vmaddw.xyzw vf30, vf23, vf30w \n"
+        "vmulax.xyzw ACC, vf20, vf31x \n"
+        "vmadday.xyzw ACC, vf21, vf31y \n"
+        "vmaddaz.xyzw ACC, vf22, vf31z \n"
+        "vmaddw.xyzw vf31, vf23, vf31w \n"
+        ".set reorder"
+        :
+        :
+        : "memory"
+    );
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336BE8);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336C10);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336C38);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336C38(void *dst, void *src) {
+    __asm__ volatile (
+        ".set noreorder               \n"
+        "lqc2 vf10, 0x0(%1)           \n"
+        "vmulax.xyzw ACC, vf28, vf10x \n"
+        "vmadday.xyzw ACC, vf29, vf10y \n"
+        "vmaddaz.xyzw ACC, vf30, vf10z \n"
+        "vmaddw.xyzw vf10, vf31, vf10w \n"
+        "sqc2 vf10, 0x0(%0) \n"
+        ".set reorder"
+        : : "r"(dst), "r"(src) : "memory");
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336C58);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+f32 func_00336C58(void *arg0, void *arg1) {
+    f32 ret;
+    __asm__ volatile (
+        ".set noreorder           \n"
+        "lqc2 vf10, 0x0(%1)       \n"
+        "lqc2 vf11, 0x0(%2)       \n"
+        "vmul.xyz vf2, vf10, vf11 \n"
+        "vaddy.x vf2, vf2, vf2y   \n"
+        "vaddz.x vf2, vf2, vf2z   \n"
+        "qmfc2.ni $2, vf2        \n"
+        "mtc1 $2, %0 \n"
+        ".set reorder"
+        : "=f"(ret) : "r"(arg0), "r"(arg1) : "memory");
+    return ret;
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336C80);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336C80(void *dst, void *src1, void *src2) {
+    __asm__ volatile (
+        ".set noreorder             \n"
+        "lqc2 vf10, 0x0(%1)         \n"
+        "lqc2 vf11, 0x0(%2)         \n"
+        "vopmula.xyz ACC, vf10, vf11 \n"
+        "vopmsub.xyz vf10, vf11, vf10 \n"
+        "sqc2 vf10, 0x0(%0) \n"
+        ".set reorder"
+        : : "r"(dst), "r"(src1), "r"(src2) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336CA0);
 
@@ -33,7 +174,32 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00336D38);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336E08);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336E60);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336E60(void *arg0) {
+    void *m = (void *)D_00439188;
+    __asm__ volatile (
+        ".set noreorder                \n"
+        "lqc2 vf2, 0x40(%0)            \n"
+        "lqc2 vf5, 0x10(%1)            \n"
+        "lqc2 vf6, 0x20(%1)            \n"
+        "lqc2 vf7, 0x30(%1)            \n"
+        "lqc2 vf3, 0x50(%0)            \n"
+        "lqc2 vf4, 0x60(%0)            \n"
+        "vmulax.xyz ACC, vf5, vf2x    \n"
+        "vmadday.xyz ACC, vf6, vf2y   \n"
+        "vmaddz.xyz vf24, vf7, vf2z   \n"
+        "vmulax.xyz ACC, vf5, vf3x    \n"
+        "vmadday.xyz ACC, vf6, vf3y   \n"
+        "vmaddz.xyz vf25, vf7, vf3z   \n"
+        "vmulax.xyz ACC, vf5, vf4x    \n"
+        "vmadday.xyz ACC, vf6, vf4y   \n"
+        "vmaddz.xyz vf26, vf7, vf4z   \n"
+        "sqc2 vf2, 0x0(%2)            \n"
+        "sqc2 vf3, 0x10(%2)           \n"
+        "sqc2 vf4, 0x20(%2) \n"
+        ".set reorder"
+        : : "r"(arg0), "r"(m), "r"(D_00476250) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
 
@@ -69,9 +235,49 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00337688);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00337718);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337778);
+void func_00337778(VuBlendNode *node) {
+    while (node != NULL) {
+        void *sourceA = node->sourceA;
+        void *sourceB = node->sourceB;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf2, 0x40(%0)\n"
+            "lqc2 vf8, 0x30(%1)\n"
+            "lqc2 vf9, 0x30(%2)\n"
+            "vmulaw.xy ACC, vf8, vf0w\n"
+            "vmaddaw.xy ACC, vf9, vf2w\n"
+            "vmsubw.xy vf15, vf8, vf2w\n"
+            "sqc2 vf15, 0x30(%0)\n"
+            ".set reorder\n"
+            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        node = node->next;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_003377C8);
+void func_003377C8(VuBlendNode *node) {
+    while (node != NULL) {
+        void *sourceA = node->sourceA;
+        void *sourceB = node->sourceB;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf2, 0x40(%0)\n"
+            "lqc2 vf8, 0x30(%1)\n"
+            "lqc2 vf9, 0x30(%2)\n"
+            "lqc2 vf10, 0x20(%1)\n"
+            "lqc2 vf11, 0x20(%2)\n"
+            "vmulaw.xy ACC, vf8, vf0w\n"
+            "vmaddaw.xy ACC, vf9, vf2w\n"
+            "vmsubw.xy vf15, vf8, vf2w\n"
+            "vmulaw.xyzw ACC, vf10, vf0w\n"
+            "vmaddaw.xyzw ACC, vf11, vf2w\n"
+            "vmsubw.xyzw vf16, vf10, vf2w\n"
+            "sqc2 vf15, 0x30(%0)\n"
+            "sqc2 vf16, 0x20(%0)\n"
+            ".set reorder\n"
+            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00337830);
 
@@ -121,7 +327,9 @@ void func_0033A090(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A098);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A0C0);
+void func_0033A0C0(f32 arg0) {
+    D_00439190 = arg0;
+}
 
 void func_0033A0C8(void) {
     D_00439188 = 0;
@@ -227,26 +435,48 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C820);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C878);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C9F0);
+void func_0033C9F0(s32 arg0, u8 arg1) {
+    D_00476480[arg0].unk5 = arg1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA10);
+void func_0033CA10(s32 arg0, u16 arg1) {
+    D_00476480[arg0].unk20 = arg1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA30);
+void func_0033CA30(s32 arg0, u8 arg1) {
+    D_00476480[arg0].unk22 = arg1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA58);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA88);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CB90);
+void func_0033CB90(void) {
+    if (D_00438AB4 == 0) {
+        D_00438AB4 = 1;
+        D_00439194 = func_0032C138(D_00370B80);
+    }
+}
 
 u32 func_0033CBC8(void) {
     func_0033CB90();
     return D_00439194;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CBE8);
+u32 *func_0033CBE8(void) {
+    return D_0040B810;
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CBF8);
+void func_0033CBF8(ConsNode *arg0) {
+    ConsNode *head = D_00438AB0;
+
+    arg0->next = NULL;
+    arg0->prev = head;
+    if (head != NULL) {
+        head->next = arg0;
+    }
+    D_00438AB0 = arg0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CC18);
 
@@ -265,6 +495,27 @@ void func_0033CC78(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CCB0);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CCC8);
+ConsNode *func_0033CCC8(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
+    ConsNode *node;
+    u32 h;
+
+    func_0033CB90();
+    node = func_00328D68(0x20);
+    node->unk8 = arg0;
+    node->unkA = arg1;
+    node->unkC = arg2;
+    node->unkE = arg3;
+    node->unk17 = 8;
+    node->unk14 = 0;
+    node->unk16 = 0;
+    h = func_003292A8((arg2 * arg3) * 2);
+    node->unk18 = h;
+    node->unk1C = (u8 *)func_003298F8(h);
+    func_0033CC78(node);
+    func_0033CBF8(node);
+    return node;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_00336B48", D_0042E258);
+

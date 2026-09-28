@@ -60,7 +60,14 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00117908);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117998);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001179E8);
+s32 func_001179E8(void) {
+    s32 base;
+
+    base = D_00435DD0;
+    *(u32 *)(base + 0x34) += 1;
+    *(u32 *)(base + 0x38) += 1;
+    return 0;
+}
 
 void func_00117A10(void) {
     func_0010BE08();

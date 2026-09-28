@@ -49,6 +49,7 @@ def place(version):
         # files for anything else are left over from an earlier split.
         full = ROOT / "asm" / version / "data" / f"{unit}.rodata.s"
         owned = {n for n, _ in LABEL.findall(full.read_text())} if full.exists() else set()
+        unit_rodata = set(owned)
         # Symbols splat migrated into an asm function's own file come with its
         # INCLUDE_ASM and must not be included again.
         for f in nonmatchings.glob("*.s"):
@@ -74,6 +75,9 @@ def place(version):
             for sym in retail_refs.get(m.group(1), ()):
                 if sym.startswith(("D_", "jtbl_")) and not re.search(rf"\b{sym}\b", code):
                     compiled.add(sym)
+        # Only this unit's own rodata can be compiled here: other names a C
+        # function writes differently (D_X[9] for retail's D_Y) are other data.
+        compiled &= unit_rodata
         # ... unless an asm function still needs the retail copy (check_unit SHARED).
         for f in INCLUDE_ASM.findall(text):
             compiled -= retail_refs.get(f, set())
@@ -100,7 +104,9 @@ def place(version):
                 out = nonmatchings / f"{sym}.s"
                 if not out.exists():
                     out.write_text(".section .rodata\n\n" + block.group(0))
-                anchors.append((addr, m.start(), sym, sym not in have))
+                # Placed by address like any other included symbol: a function may
+                # use rodata the compiler emitted after later functions.
+                anchors.append((addr, None, sym, sym not in have))
         for sym, pos in compiled_at.items():
             if not any(a[2] == sym for a in anchors):
                 anchors.append((int(sym[-8:], 16), pos, None, False))

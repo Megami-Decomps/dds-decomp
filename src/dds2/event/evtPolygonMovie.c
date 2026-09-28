@@ -60,5 +60,8 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F7D0);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F8D0);
 
+
+
+
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_004231F0);
 

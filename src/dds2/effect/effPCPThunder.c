@@ -2,6 +2,64 @@
 
 extern u64 func_0016AEB0(u64, u64);
 
+extern u32 effMiscRand(void *state);
+
+extern u8 D_003AA868[];
+
+/* 12-byte randomized fragment (see func_001656B8). */
+typedef struct {
+    u32 unk00;    /* 0x00 random value modulo work param */
+    u32 unk04;    /* 0x04 random value modulo work param, plus 1 */
+    u32 color08;  /* 0x08 always grey 0x80808080 */
+} EffThunderFrag; /* 0x0C */
+
+/* 20-byte thunder element (see func_00166B38/func_00167070): randomized on
+ * setup (direction floats plus moduli), then counted down while active. */
+typedef struct {
+    f32 f00;      /* 0x00 (float rand - 0.5) * 2 */
+    f32 f04;      /* 0x04 */
+    f32 f08;      /* 0x08 */
+    u32 cnt0C;    /* 0x0C random modulus, then decremented */
+    u32 cnt10;    /* 0x10 random modulus + 1, then decremented */
+} EffThunderCell; /* 0x14 */
+
+/* 0x20-byte sub-element holding a handle released by func_0015B8B8. */
+typedef struct {
+    u8 pad00[0x1C]; /* 0x00 */
+    u32 handle1C;   /* 0x1C released by func_0015B8B8 */
+} EffThunderSub; /* 0x20 */
+
+/* Work for the remaining thunder effects (u32 params and handles only). */
+typedef struct {
+    u128 quad00;      /* 0x00 copied as one quadword on spawn */
+    u8 pad10[0x08];   /* 0x10 */
+    s32 unk18;      /* 0x18 element count */
+    u8 unk1C[0x08]; /* 0x1C */
+    u32 unk24;      /* 0x24 random modulus */
+    u32 unk28;      /* 0x28 random modulus */
+    u8 unk2C[0x04]; /* 0x2C */
+    u32 unk30;      /* 0x30 random modulus */
+    u32 unk34;      /* 0x34 random modulus */
+    u8 unk38[0x08]; /* 0x38 */
+    u32 unk40;      /* 0x40 */
+    u8 unk44[0x04]; /* 0x44 */
+    EffThunderCell *unk48; /* 0x48 thunder element array */
+    u32 unk4C;      /* 0x4C settable param */
+    u32 unk50;      /* 0x50 settable param */
+    u32 unk54;      /* 0x54 fragment array base */
+    u32 unk58;      /* 0x58 settable param */
+    u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
+    u32 unk60;      /* 0x60 handle released by func_0015B8B8/func_002D0918 */
+    u32 unk64;      /* 0x64 handle released by func_002D0918 */
+    s32 unk68;      /* 0x68 sub-element count */
+    u8 pad6C[0x38]; /* 0x6C */
+    EffThunderSub *unkA4; /* 0xA4 sub-element array */
+    u32 unkA8;      /* 0xA8 settable param */
+    u32 unkAC;      /* 0xAC handle released by func_002D0918 */
+} EffPCPThunderWorkB;
+
+extern f32 func_00341240(void *state);
+
 void func_0016B0F8(u64 arg0) {
     u64 temp_v0;
 
@@ -130,7 +188,13 @@ void func_0016D2E8(s32 arg0) {
                                 *(u32 *)(arg0 + 0x48), *(u32 *)(arg0 + 0x50));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D310);
+void func_0016D310(EffPCPThunderWorkB *work, s32 index) {
+    EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
+
+    frag->unk00 = effMiscRand(&D_003AA868) % work->unk30;
+    frag->unk04 = effMiscRand(&D_003AA868) % work->unk34 + 1;
+    frag->color08 = 0x80808080;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D3B0);
 
@@ -150,7 +214,13 @@ void func_0016DD88(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x58) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DD90);
+void func_0016DD90(EffPCPThunderWorkB *work, s32 index) {
+    EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
+
+    frag->unk00 = effMiscRand(&D_003AA868) % work->unk30;
+    frag->unk04 = effMiscRand(&D_003AA868) % work->unk34 + 1;
+    frag->color08 = 0x80808080;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DE30);
 
@@ -169,7 +239,19 @@ void func_0016E788(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x4c) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E790);
+void func_0016E790(EffPCPThunderWorkB *work, s32 index) {
+    EffThunderCell *cell = work->unk48 + index;
+    f32 v;
+
+    v = func_00341240(&D_003AA868) - 0.5f;
+    cell->f00 = v + v;
+    v = func_00341240(&D_003AA868) - 0.5f;
+    cell->f04 = v + v;
+    v = func_00341240(&D_003AA868) - 0.5f;
+    cell->f08 = v + v;
+    cell->cnt0C = effMiscRand(&D_003AA868) % work->unk24;
+    cell->cnt10 = effMiscRand(&D_003AA868) % work->unk28 + 1;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E870);
 

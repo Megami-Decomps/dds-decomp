@@ -4,6 +4,8 @@ extern s32 D_00436400;
 
 extern s32 D_00436404;
 
+extern void (*D_003AAF10[])(void *, void *, void *);
+
 void func_00162348(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0xf0) = arg1;
 }
@@ -151,7 +153,11 @@ void func_00164C68(s32 arg0, u16 arg1) {
     *(u16 *)(arg0 + 2) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00164C70);
+void func_00164C70(void *work, s32 sub, void *a2, void *a3) {
+    u16 id = *(u16 *)work;
+
+    D_003AAF10[id * 3 + sub](work, a2, a3);
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164CB0);
 

@@ -1,5 +1,19 @@
 #include "common.h"
 
+typedef struct {
+    u8 pad[0xA4];    /* 0x0 */
+    u32 unkA4;       /* 0xA4 copied to unkFC by func_0015A608 */
+    u8 padA8[0x54];  /* 0xA8 */
+    void *unkFC;     /* 0xFC */
+    u8 pad100[0x40]; /* 0x100 */
+    u16 unk140;      /* 0x140 dispatch index for D_0034E250/D_0034E258/D_0034E2F0 */
+    u16 unk142;      /* 0x142 read by func_0015A6E0, set to 1 by func_0015A608 */
+    u8 pad144[0x30]; /* 0x144 */
+    void *unk174;    /* 0x174 child released by func_00158F68 */
+} ParObj;
+
+extern void (*D_003AAC20[])();
+
 void func_00160B58(u32 arg0) {
     s32 temp_v0;
 
@@ -49,7 +63,11 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001621A8);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001621F8);
+void func_001621F8(ParObj *obj) {
+    D_003AAC20[obj->unk140]();
+    obj->unkFC = (void *)obj->unkA4;
+    obj->unk142 = 1;
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00162248);
 
