@@ -40,6 +40,11 @@ extern void func_00320C88(u32);
 
 extern void func_00321908(u32);
 extern u32 func_0035A828(s32 bytes);
+extern u8 *func_00321238(void);
+extern u8 *func_00321328(s32 index);
+extern u32 func_00322D50(void);
+extern void func_00322E18(u32 node, u32 context, s32 mode, s32 x, s32 y,
+                          f32 progress);
 
 typedef struct ShortRecord {
     u8 kind;
@@ -50,6 +55,14 @@ typedef struct ShortRecordList {
     s32 count;
     ShortRecord *records;
 } ShortRecordList;
+
+typedef struct MenuInitialTag {
+    u8 reserved;
+    u8 flags;
+    u16 group;
+    u16 kind;
+    u16 index;
+} MenuInitialTag;
 
 void func_003214D0(u32 arg0, s32 arg1);
 s32 func_00322480(s32 *entries, s32 count);
@@ -261,7 +274,16 @@ u32 func_00322D98(void) {
     return D_004390C8;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322DA0);
+f32 func_00322DA0(u8 *entry) {
+    u8 *registry = func_003224F0(*(u32 *)(entry + 4));
+    if ((**(u32 **)(registry + 0xc) & 1) != 0) {
+        u8 *clock = func_00321238();
+        u8 *segment = func_00321328(*(s32 *)(entry + 8));
+        return *(f32 *)(entry + 0x14) +
+            (f32)((s32)*(u16 *)(clock + 2) - *(s32 *)(segment + 0xc));
+    }
+    return *(f32 *)(entry + 0x14);
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
 
@@ -359,11 +381,29 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324840);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324AC0);
+void func_00324AC0(u8 *context) {
+    MenuInitialTag tag;
+    /* Retail only initializes bytes 1 through 7 of this tag. */
+    tag.flags = 0;
+    tag.group = 0;
+    tag.kind = 2;
+    tag.index = 0;
+    memset(context, 0, 0x48);
+    *(u32 *)(context + 0x3c) = func_00321500();
+    func_00320CE0(*(u32 *)(context + 0x3c), 0,
+                   (u32)func_003218A0((u8 *)&tag));
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324C98);
+u32 func_00324C98(u32 context, f32 x, f32 y, f32 progress) {
+    u32 node = func_00322D50();
+    if (node != 0) {
+        func_00322E18(node, context, 0, (s32)x, (s32)y, progress);
+        *(u32 *)(node + 0x40) |= 0x10;
+    }
+    return node;
+}
 
 void func_00324D28(u32 unused, u32 ptr) {
     if (ptr != 0) {

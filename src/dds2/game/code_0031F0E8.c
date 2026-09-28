@@ -66,13 +66,14 @@ void func_0031F300(u32 node) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F340);
 
-void func_0031F410(arg0, arg1)
+void func_0031F410(arg0, arg1, size)
     u32 arg0;
     u32 arg1;
+    u32 size;
 {
-    u32 temp_v0[4];
-    temp_v0[0] = arg1;
-    func_0031F340(arg0, temp_v0);
+    u32 value[4];
+    value[0] = arg1;
+    func_0031F340((u32 *)arg0, value, size);
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
@@ -98,9 +99,36 @@ u32 func_0031F550(u32 context, const char *name) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F5C0);
+u32 func_0031F5C0(u32 *object, u32 value) {
+    u32 index = value >> 16;
+    u32 offset = value - (index << 16);
+    u32 segment;
+    if (value > object[0]) {
+        return 0;
+    }
+    segment = func_00321170(object[1], index);
+    return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F618);
+s32 func_0031F618(u32 *object) {
+    u32 node = *(u32 *)(object[3] + 4);
+    if (node != 0) {
+        do {
+            u32 record = *(u32 *)(node + 0x10);
+            u32 found = func_0031F550(object[2], *(const char **)record);
+            u32 address;
+            u32 replacement;
+            if (found == 0) {
+                return 0;
+            }
+            address = func_0031F5C0(object, *(u32 *)(record + 4));
+            replacement = *(u32 *)(found + 4);
+            node = *(u32 *)(node + 8);
+            *(u32 *)address = replacement;
+        } while (node != 0);
+    }
+    return 1;
+}
 
 u32 func_0031F6A0(u32 object) {
     u32 node = *(u32 *)(*(u32 *)(object + 0xc) + 4);
