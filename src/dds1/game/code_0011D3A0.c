@@ -108,6 +108,13 @@ u8 func_00125DF8(u32 arg0);
 
 u32 *func_00123DD0(void);
 
+extern u32 D_003BAC08[2];
+extern void func_0014CFC0(void);
+extern u32 func_0014D100(void);
+extern void func_00138D88(void);
+extern void func_00125D90(u32);
+extern void func_00220178(void);
+
 void func_0011D3A0(u32 *arg0, u32 arg1, u32 arg2) {
     arg0[4] = arg1;
     arg0[5] = arg2;
@@ -983,7 +990,24 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124900);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001249E0);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124E18);
+s32 func_00124E18(void) {
+    u32 scene;
+    u32 area;
+
+    func_0014CFC0();
+    D_003BAC08[0] = 0;
+    D_003BAC08[1] = func_0014D100();
+    scene = D_0032E3B0[5];
+    area = D_0032E3B0[4];
+    D_0032E3B0[0x3C] = area;
+    D_0032E3B0[0x3D] = scene + 1;
+    func_00138D88();
+    func_00125D90(1);
+    func_00125D90(2);
+    func_00123EA8();
+    func_00220178();
+    return -1;
+}
 
 u8 func_00124E90(void) {
     return func_0010BED8(D_0039FCA0) != 0;

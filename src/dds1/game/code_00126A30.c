@@ -656,7 +656,21 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C1F0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C428);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C648);
+s32 func_0012C648(void) {
+    s32 state = D_003BAD00;
+    s32 result;
+
+    if (state < 3) {
+        if (state < 0) {
+            result = D_003BACFC;
+        } else {
+            result = func_00213B50();
+        }
+    } else {
+        result = D_003BACFC;
+    }
+    return result;
+}
 
 void func_0012C688(u32 arg0) {
     D_003BACF8 = arg0;
@@ -1128,7 +1142,21 @@ f32 calculateFieldVectorLength(const f32 *vector) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001350B8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00135250);
+s32 func_00135250(s32 key) {
+    s32 i = 0;
+
+    if (D_003BADF4 > 0) {
+        u8 *record = (u8 *)D_003BADF0;
+        do {
+            if (*(s32 *)(record + 0xCC) == key) {
+                return *(s32 *)(record + 0xD0);
+            }
+            i++;
+            record += 0xE4;
+        } while (i < D_003BADF4);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135298);
 
