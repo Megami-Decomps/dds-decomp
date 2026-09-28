@@ -170,7 +170,13 @@ u32 func_00283108(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283238);
+void func_00283238(s32 *list, s32 index, s32 value, s32 option) {
+    s32 offset = index * 4;
+    s32 base = (s32)list + 0xC;
+    s32 *item = (s32 *)(base + offset);
+    func_00284C10(*item, value);
+    func_00284C28(*item, option);
+}
 
 void *createSpriteState(s32 x, s32 y, s32 z) {
     u8 *item = func_002CFEB8(0x20);
@@ -684,9 +690,27 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00286FA0);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287040);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002870D8);
+void func_002870D8(s32 index, s32 dx, s32 dy, s32 dz) {
+    s32 offset = (index & 0xFFFF) * 60;
+    f32 *position = (f32 *)(offset + D_003DC5F8[0]);
+    f32 x = position[7] + (f32)dx;
+    f32 y = position[8] + (f32)dy;
+    f32 z = position[9] + (f32)dz;
+    position[7] = x;
+    position[8] = y;
+    position[9] = z;
+}
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287138);
+void func_00287138(s32 index, s32 dx, s32 dy, s32 dz) {
+    s32 offset = (index & 0xFFFF) * 60;
+    f32 *position = (f32 *)(offset + D_003DC5F8[0]);
+    f32 x = position[11] + (f32)dx;
+    f32 y = position[12] + (f32)dy;
+    f32 z = position[13] + (f32)dz;
+    position[11] = x;
+    position[12] = y;
+    position[13] = z;
+}
 
 u8 func_00287198(s32 arg0) {
     return *(u8 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 1);

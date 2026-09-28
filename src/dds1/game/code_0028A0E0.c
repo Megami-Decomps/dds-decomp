@@ -1321,7 +1321,10 @@ s32 fileLoadStateChanged(void) {
     return D_003BC8D8.current != D_003BC8D8.previous;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290E38);
+void func_00290E38(void) {
+    D_003BC8D8.current = D_003BC8D8.previous =
+        *(u32 *)(D_003BAA00 + 0xA54);
+}
 
 void func_00290E50(void) {
     *(u32 *)(D_003BAA00 + 0xa54) = D_003BC8DC;

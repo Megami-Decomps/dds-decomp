@@ -167,7 +167,18 @@ void drawMenuBackdrop(s32 *assets, s32 option) {
     func_0027B088((s32)assets, option);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B2F8);
+s32 func_0027B2F8(s32 left, s32 right, s32 size) {
+    s32 item = func_002CFF68(0x40);
+    *(s32 *)(item + 8) = left;
+    *(s32 *)(item + 0xC) = right;
+    *(s32 *)(item + 0x28) = size * 8;
+    *(s32 *)(item + 0x3C) = 0x100;
+    *(s32 *)(item + 0x18) = 0;
+    *(s32 *)(item + 0x10) = 0;
+    *(s32 *)(item + 0x24) = 0;
+    *(s32 *)(item + 0x1C) = 0;
+    return item;
+}
 
 u32 func_0027B368(u32 arg0) {
     s64 temp_v0;
@@ -536,7 +547,28 @@ void func_0027DE98(s32 arg0) {
     *(s32 *)(arg0 + 0x14) = temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DED0);
+void func_0027DED0(s32 *menu, s32 reset) {
+    s32 initial;
+    s32 last;
+    menu[9] = 0;
+    initial = menu[4];
+    last = menu[7];
+    menu[6] = initial;
+    menu[7] = initial;
+    if (reset == 1) {
+        s32 *node = (s32 *)initial;
+        if (node == NULL) {
+            return;
+        }
+        do {
+            if ((s32)node == last) {
+                return;
+            }
+            func_0027BE90(menu);
+            node = (s32 *)node[22];
+        } while (node != NULL);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DF48);
 
