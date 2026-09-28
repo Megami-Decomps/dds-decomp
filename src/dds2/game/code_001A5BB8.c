@@ -78,7 +78,6 @@ typedef struct UiObject {
 } UiObject;
 
 extern s32 D_003B4F70[];
-
 extern s32 D_00435E20;
 
 extern s32 D_004367F4;
@@ -90,7 +89,6 @@ extern s32 D_003B6928[];
 extern s32 D_00435DEC;
 
 extern s32 D_00435E1C;
-
 extern char D_00415158[];
 
 extern s32 func_0020D128(const char *, ...);
@@ -98,6 +96,7 @@ extern s32 func_0020D128(const char *, ...);
 extern s8 D_0037F550[];
 
 extern void *D_003B4E40[];
+
 
 extern s32 D_003B4F78[];
 
@@ -408,7 +407,12 @@ u8 func_001AA308(void) {
     return D_004366E4 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA318);
+s32 func_001AA318(void) {
+    if (func_001AA308() == 0) {
+        return 0;
+    }
+    return (*(u32 *)(D_004366E4 + 0x218) & 0x06000000) == 0x06000000;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA350);
 
@@ -622,7 +626,13 @@ s32 func_001AD1C0(s32 status, u32 value) {
     return func_002C55C0(status) == value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD200);
+s32 func_001AD200(s32 state) {
+    s32 selection = func_001AD310(state, 1);
+    if (selection == 0) {
+        selection = (effMiscRand((s32)D_0037F550) & 1) ? 2 : 9;
+    }
+    return selection;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD248);
 
@@ -881,9 +891,23 @@ s32 func_001B28C8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2900);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2970);
+s32 func_001B2970(u8 *state) {
+    s32 index = *(s32 *)(state + 0x310);
+    if (index == -1) {
+        return 0;
+    }
+    return func_001B28C8(index);
+}
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B29A8);
+s32 func_001B29A8(u8 *state) {
+    s32 index = *(s32 *)(state + 0x310);
+    u16 property;
+    if (index == -1) {
+        return 0;
+    }
+    property = *(u16 *)(D_00435E20 + index * 56 + 0x2E);
+    return D_003B4F74[property * 3];
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B29F0);
 
@@ -1530,7 +1554,18 @@ u8 func_001BB970(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB988);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB9A0);
+s32 func_001BB9A0(u8 *scene) {
+    u8 *actor = *(u8 **)(scene + 0x24C);
+    s32 count = 0;
+    while (actor != 0) {
+        if ((*(u64 *)(actor + 0x110) & 0x201) == 0x201 &&
+            (*(u16 *)(actor + 0x120) & 2) != 0) {
+            count++;
+        }
+        actor = *(u8 **)(actor + 0x364);
+    }
+    return count;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB9E8);
 
