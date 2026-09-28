@@ -10,6 +10,11 @@ typedef struct {
     u32 unk110;           /* 0x110 */
 } EffBattleMiscCtx; /* 0x114 */
 
+typedef struct {
+    u8 unk00;
+    u8 value; /* 0x01 */
+} EffBattleMiscParam;
+
 extern u32 D_0034E720[];
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161AA0);
@@ -42,8 +47,8 @@ void func_00162058(u32 unused, u32 value) {
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162088);
 
-void func_00162258(u32 arg0, s32 arg1) {
-    func_001D63E8(arg0, *(u8 *)(arg1 + 1));
+void func_00162258(u32 arg0, EffBattleMiscParam *param) {
+    func_001D63E8(arg0, param->value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162270);

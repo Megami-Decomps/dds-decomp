@@ -20,11 +20,6 @@ typedef struct {
     EffTrackPolyData *unk38;      /* 0x38 */
 } EffTrackPolyWork; /* 0x3C */
 
-/* Inner cell whose second word is written by func_001882F0. */
-typedef struct {
-    u32 unk0; /* 0x00 */
-    u32 unk4; /* 0x04 */
-} EffTrackPolyCell;
 
 void func_00188228(EffTrackPolyWork *work) {
     effTrackPolyFreeData(work->unk38);
@@ -42,8 +37,8 @@ void func_001882D8(EffTrackPolyWork *work) {
     func_00188A78(work->unk38);
 }
 
-void func_001882F0(EffTrackPolyWork *work, u32 value) {
-    ((EffTrackPolyCell *)work->unk38)->unk4 = value;
+void func_001882F0(EffTrackPolyWork *work, u32 color) {
+    work->unk38->color = color;
 }
 
 void func_00188300(EffTrackPolyWork *work) {

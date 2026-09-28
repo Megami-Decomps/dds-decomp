@@ -1,7 +1,12 @@
 #include "common.h"
 
-void func_0018DF90(s32 arg0) {
-    func_002D0918(*(u32 *)(arg0 + 8));
+typedef struct {
+    u8 pad00[8];
+    u32 resourceHandle; /* 0x08 */
+} EffMathWork;
+
+void func_0018DF90(EffMathWork *work) {
+    func_002D0918(work->resourceHandle);
 }
 
 INCLUDE_ASM(const s32, "effect/effMath", func_0018DFA8);
@@ -25,6 +30,6 @@ void func_0018E1D8(EffMathSlots *table, s32 index) {
     slot->unk30 = 0;
 }
 
-s32 func_0018E200(s32 *arg0, s32 arg1) {
-    return *arg0 + arg1 * 0x38;
+s32 func_0018E200(s32 *base, s32 index) {
+    return *base + index * 0x38;
 }

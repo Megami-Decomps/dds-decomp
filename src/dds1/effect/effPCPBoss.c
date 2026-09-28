@@ -17,8 +17,8 @@ extern void func_002CFF98(void *work);
 typedef struct {
     u8 unk00[0x24]; /* 0x00 */
     u32 unk24;      /* 0x24 settable param */
-    u32 unk28;      /* 0x28 handle released by func_001629F0 */
-    u32 unk2C;      /* 0x2C handle released by func_001629F0 */
+    u32 resource28;  /* 0x28 released by func_001629F0 */
+    u32 resource2C;  /* 0x2C released by func_001629F0 */
 } EffPCPBossWork;
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184538);
@@ -62,8 +62,8 @@ void func_00185670(void *data) {
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001856D8);
 
 void effPCPBossFree(EffPCPBossWork *work) {
-    func_001629F0(work->unk2C);
-    func_001629F0(work->unk28);
+    func_001629F0(work->resource2C);
+    func_001629F0(work->resource28);
     func_002CFF98(work);
 }
 

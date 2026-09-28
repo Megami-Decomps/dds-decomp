@@ -6,9 +6,9 @@ extern void func_001632E0(void *work);
 extern void func_00163E10(void *work);
 
 extern void func_0015B8B8(u32 handle);
-extern void func_0015CC58(u32 param0, u32 param1, u32 param2, u32 param3);
-extern void func_0015CCD0(u32 param0, u32 param1, u32 param2, u32 param3);
-extern void func_0015CDF0(u32 param0, u32 param1, u32 param2, u32 param3);
+extern void func_0015CC58(u32 param0, u32 param1, void *cells, u32 param3);
+extern void func_0015CCD0(u32 param0, u32 param1, void *cells, u32 param3);
+extern void func_0015CDF0(u32 param0, u32 param1, void *cells, u32 param3);
 extern void func_002D0918(u32 handle);
 extern u32 effMiscRand(void *state);
 extern f32 func_002E8398(void *state);
@@ -59,7 +59,7 @@ typedef struct {
 typedef struct {
     u128 quad00;      /* 0x00 copied as one quadword on spawn */
     u8 pad10[0x08];   /* 0x10 */
-    s32 unk18;      /* 0x18 element count */
+    s32 elementCount; /* 0x18 */
     u8 unk1C[0x08]; /* 0x1C */
     u32 unk24;      /* 0x24 random modulus */
     u32 unk28;      /* 0x28 random modulus */
@@ -69,17 +69,20 @@ typedef struct {
     u8 unk38[0x08]; /* 0x38 */
     u32 unk40;      /* 0x40 */
     u8 unk44[0x04]; /* 0x44 */
-    EffThunderCell *unk48; /* 0x48 thunder element array */
+    EffThunderCell *cells; /* 0x48 thunder element array */
     u32 unk4C;      /* 0x4C settable param */
     u32 unk50;      /* 0x50 settable param */
-    u32 unk54;      /* 0x54 fragment array base */
+    union {
+        u32 resource;
+        EffThunderFrag *fragments;
+    } fragmentData; /* 0x54: fragment array / released handle */
     u32 unk58;      /* 0x58 settable param */
     u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
     u32 unk60;      /* 0x60 handle released by func_0015B8B8/func_002D0918 */
     u32 unk64;      /* 0x64 handle released by func_002D0918 */
-    s32 unk68;      /* 0x68 sub-element count */
+    s32 subCount;    /* 0x68 */
     u8 pad6C[0x38]; /* 0x6C */
-    EffThunderSub *unkA4; /* 0xA4 sub-element array */
+    EffThunderSub *subs; /* 0xA4 sub-element array */
     u32 unkA8;      /* 0xA8 settable param */
     u32 unkAC;      /* 0xAC handle released by func_002D0918 */
 } EffPCPThunderWorkB;
@@ -166,12 +169,12 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001646F8);
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00164838);
 
 void effThunderDestroySubs(EffPCPThunderWorkB *work) {
-    s32 count = work->unk68;
+    s32 count = work->subCount;
     s32 i = 0;
 
     if (count > 0) {
         do {
-            func_0015B8B8(work->unkA4[i].handle1C);
+            func_0015B8B8(work->subs[i].handle1C);
             i++;
         } while (i < count);
     }
@@ -208,19 +211,19 @@ u32 func_00165638(u32 arg0) {
 }
 
 void func_00165640(EffPCPThunderWorkB *work) {
-    func_0015CCD0(work->unk60, work->unk40, work->unk48, work->unk50);
+    func_0015CCD0(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
 void func_00165668(EffPCPThunderWorkB *work) {
-    func_0015CDF0(work->unk60, work->unk40, work->unk48, work->unk50);
+    func_0015CDF0(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
 void func_00165690(EffPCPThunderWorkB *work) {
-    func_0015CC58(work->unk60, work->unk40, work->unk48, work->unk50);
+    func_0015CC58(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
 void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
+    EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
     frag->unk00 = effMiscRand(&D_0034DF38) % work->unk30;
     frag->unk04 = effMiscRand(&D_0034DF38) % work->unk34 + 1;
@@ -246,7 +249,7 @@ void func_00166130(EffPCPThunderWorkB *work, u32 value) {
 }
 
 void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
+    EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
     frag->unk00 = effMiscRand(&D_0034DF38) % work->unk30;
     frag->unk04 = effMiscRand(&D_0034DF38) % work->unk34 + 1;
@@ -261,7 +264,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00166960);
 
 void func_00166AF0(EffPCPThunderWorkB *work) {
     func_0015B8B8(work->unk50);
-    func_002D0918(work->unk54);
+    func_002D0918(work->fragmentData.resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00166B20);
@@ -271,7 +274,7 @@ void func_00166B30(EffPCPThunderWorkB *work, u32 value) {
 }
 
 void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderCell *cell = work->unk48 + index;
+    EffThunderCell *cell = work->cells + index;
     f32 v;
 
     v = func_002E8398(&D_0034DF38) - 0.5f;

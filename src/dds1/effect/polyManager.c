@@ -53,7 +53,7 @@ typedef struct {
 
 typedef struct {
     u8 pad[0x10];      /* 0x0 */
-    u32 unk10;         /* 0x10 entry count */
+    u32 entryCount;     /* 0x10 */
     u32 unk14;         /* 0x14 */
     u8 pad18[0x50];    /* 0x18 */
     u32 unk68;         /* 0x68 */
@@ -66,7 +66,7 @@ typedef struct {
     u32 *unkE4;        /* 0xE4 stepped by func_0015E8B8 */
     u8 padE8[0xC];     /* 0xE8 */
     u32 *unkF4;        /* 0xF4 stepped by func_0015E100 */
-    PolyEntry *unkF8;  /* 0xF8 */
+    PolyEntry *entries; /* 0xF8 */
 } PolyList;
 
 void func_0015B8B8(u32 arg);
@@ -168,12 +168,12 @@ void func_0015F468(PolyList *obj) {
     PolyEntry *entry;
     u32 i;
 
-    count = obj->unk10;
+    count = obj->entryCount;
     i = 0;
     obj->unk14 = 0xFFFFFFF;
     obj->unk6C = 0;
     obj->unk68 = 0;
-    entry = obj->unkF8;
+    entry = obj->entries;
     if (count != 0) {
         do {
             if (entry->unk0 != -0xFFFFFF) {

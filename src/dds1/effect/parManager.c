@@ -6,10 +6,10 @@ typedef struct {
     u8 padA8[0x54];  /* 0xA8 */
     void *unkFC;     /* 0xFC */
     u8 pad100[0x40]; /* 0x100 */
-    u16 unk140;      /* 0x140 dispatch index for D_0034E250/D_0034E258/D_0034E2F0 */
-    u16 unk142;      /* 0x142 read by func_0015A6E0, set to 1 by parRestartKind */
+    u16 dispatchIndex; /* 0x140 selects D_0034E250/D_0034E258/D_0034E2F0 */
+    u16 restartFlag; /* 0x142 read by func_0015A6E0, set to 1 by parRestartKind */
     u8 pad144[0x30]; /* 0x144 */
-    void *unk174;    /* 0x174 child released by func_00158F68 */
+    void *child;      /* 0x174 released by func_00158F68 */
 } ParObj;
 
 typedef struct {
@@ -28,10 +28,6 @@ typedef struct {
     ParSlot *unk4; /* 0x4 */
 } ParTable;
 
-typedef struct {
-    u8 pad[0x142]; /* 0x0 */
-    u16 unk142;    /* 0x142 read by func_0015A6E0 */
-} ParState;
 
 /* Particle dispatch entry (0xC bytes): command func selected by the
    u16 at +0x140. */
@@ -50,8 +46,8 @@ void destroyEffectResources(void *arg);
 void func_002CFF98(void *arg);
 
 void func_00158F68(ParObj *obj) {
-    if (obj->unk174 != NULL) {
-        func_002D0918(obj->unk174);
+    if (obj->child != NULL) {
+        func_002D0918(obj->child);
     }
     destroyEffectResources(obj);
     func_002CFF98(obj);
@@ -91,11 +87,11 @@ void parCreateIndexed(s32 index, void *arg) {
     ParObj *newobj;
 
     newobj = D_0034E250[index].func(arg);
-    newobj->unk140 = index;
+    newobj->dispatchIndex = index;
 }
 
 void parDispatchByKind(ParObj *obj) {
-    D_0034E258[obj->unk140].func();
+    D_0034E258[obj->dispatchIndex].func();
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A3F8);
@@ -103,20 +99,20 @@ INCLUDE_ASM(const s32, "effect/parManager", func_0015A3F8);
 void parCloneKind(ParObj *obj) {
     ParObj *newobj;
 
-    newobj = D_0034E250[obj->unk140].func();
-    newobj->unk140 = obj->unk140;
+    newobj = D_0034E250[obj->dispatchIndex].func();
+    newobj->dispatchIndex = obj->dispatchIndex;
 }
 
 void parRestartKind(ParObj *obj) {
-    D_0034E2F0[obj->unk140]();
+    D_0034E2F0[obj->dispatchIndex]();
     obj->unkFC = (void *)obj->unkA4;
-    obj->unk142 = 1;
+    obj->restartFlag = 1;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A658);
 
-u16 func_0015A6E0(ParState *obj) {
-    return obj->unk142;
+u16 func_0015A6E0(ParObj *obj) {
+    return obj->restartFlag;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A6E8);

@@ -27,7 +27,7 @@ typedef struct BillObj {
     u16 unk50;       /* 0x50 set to 1 by billCloneList/billAllocList */
     u8 pad52[6];     /* 0x52 */
     u32 unk58;       /* 0x58 compared by func_00152200 */
-    s32 unk5C;       /* 0x5C entry count read by func_00152288 */
+    s32 entryCount;  /* 0x5C entry count read by func_00152288 */
     void *unk60;     /* 0x60 entry list */
 } BillObj;
 
@@ -36,7 +36,7 @@ typedef struct BillObj {
 typedef struct BillData {
     u8 pad[8];    /* 0x0 */
     s32 unk8;     /* 0x8 */
-    s32 unkC;     /* 0xC */
+    s32 entryCount; /* 0xC */
     u8 pad10[4];  /* 0x10 */
     s32 unk14;    /* 0x14 */
     u8 pad18[24]; /* 0x18 */
@@ -46,6 +46,11 @@ typedef struct {
     s32 unk0;      /* 0x0 offset added to the table base */
     u8 pad4[0x10]; /* 0x4 */
 } BillEntry; /* 0x14 bytes */
+
+typedef struct {
+    u8 pad00[0x12];
+    s16 value; /* 0x12 */
+} BillRecord;
 
 typedef struct {
     u8 pad[4];       /* 0x0 */
@@ -127,7 +132,7 @@ BillObj *billAllocList(void *arg0) {
     if (arg0 != NULL) {
         data = func_00151A88(arg0);
     }
-    n = data->unkC;
+    n = data->entryCount;
     newobj = func_002CFEB8(n * 20 + 0x6C);
     newobj->unk30 = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
@@ -145,7 +150,7 @@ BillObj *billCloneList(BillObj *obj) {
     BillObj *newobj;
 
     data = obj->unk30;
-    n = data->unkC;
+    n = data->entryCount;
     data->unk14 = data->unk14 + 1;
     newobj = func_002CFEB8(n * 20 + 0x6C);
     newobj->unk30 = data;
@@ -180,7 +185,7 @@ void func_001518A0(BillTable *table, s32 index, BillOut *out) {
     out->unkC = entry;
     base = base + offset;
     out->unk4 = 0;
-    val = *(s16 *)(base + 0x12);
+    val = ((BillRecord *)base)->value;
     out->unk10 = base;
     out->unk8 = val;
 }
