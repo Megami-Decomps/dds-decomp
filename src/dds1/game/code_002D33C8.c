@@ -62,6 +62,10 @@ typedef struct SdfResource {
     s32 id;
 } SdfResource;
 
+extern void *D_003BDA00;
+extern s8 D_003BDA04;
+extern s32 D_003BD9F8[2];
+
 extern SdfResource *D_003BD308;
 
 extern u32 func_002CFEB8(u32);
@@ -156,7 +160,26 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D3D40);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D3E10);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D3E88);
+u64 func_002D3E88(void) {
+    u32 i;
+    s32 *entry;
+    if (D_003BDA04 != 0) {
+        return 1;
+    }
+    if (D_003BDA00 != NULL) {
+        return 1;
+    }
+    i = 0;
+    entry = D_003BD9F8;
+    do {
+        if (*entry != 0) {
+            return 1;
+        }
+        entry++;
+        i++;
+    } while (i < 2);
+    return 0;
+}
 
 u64 func_002D3EE8(void) {
     s64 temp_v0;

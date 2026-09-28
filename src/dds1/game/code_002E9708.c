@@ -21,6 +21,17 @@ extern u64 func_002EB028(u64, u32 *, u64);
 extern u32 D_003BD49C;
 
 extern u32 D_003BD498;
+extern char D_00398948[];
+extern s32 D_003BDA90;
+extern s32 SignalSema(s32);
+extern void FlushCache(s32);
+extern s32 func_002CF440(s32, s32, s32);
+extern s32 GetThreadId(void);
+extern void sceSifSetRpcQueue(void *, s32);
+extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
+extern void sceSifRpcLoop(void *);
+extern u8 D_003FEAC0[];
+extern s32 func_002E99A0();
 
 extern void func_002D0B50(void *out);
 
@@ -30,7 +41,8 @@ typedef struct MidiChannel {
     u8 pad00[0x19];
     u8 index;
     u8 enabled;
-    u8 pad1B[0xD];
+    u8 pad1B[5];
+    u32 earlierEntries[2];
     u32 entries[8];
 } MidiChannel;
 
@@ -39,7 +51,13 @@ extern u32 D_003BD494;
 u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+typedef struct SoundNode {
+    u8 pad00[8];
+    struct SoundNode *next;
+} SoundNode;
 
+extern SoundNode *D_003BDA98;
+extern s32 sceIpuSync(s32, s32);
 void func_002E9708(void) {
     func_002E87A8(0x180, 0, 0, 0);
 }
@@ -52,7 +70,14 @@ void func_002E9758(s32 arg0) {
     func_002E87A8(((arg0 + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9788);
+s32 func_002E9788(const char *name, u8 channel) {
+    if (D_003BD498 != 0) {
+        return 1;
+    }
+    strcpy(D_00398948, name);
+    func_002E8900((channel >> 3) | 0xF0, 0, 0, 0);
+    return 0;
+}
 
 u32 func_002E97E0(void) {
     return D_003BD498;
@@ -94,11 +119,44 @@ void func_002E98F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9918);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9948);
+s32 func_002E9948(s32 arg0, u32 event) {
+    switch (event) {
+    case 1:
+        break;
+    case 3:
+        break;
+    case 6:
+        break;
+    case 5:
+        FlushCache(0);
+        /* Fall through: flush and wake the waiting thread. */
+    case 4:
+        SignalSema(D_003BDA90);
+        break;
+    case 0:
+    case 2:
+    case 7:
+        SignalSema(D_003BDA90);
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002E99A0);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9BE8);
+void func_002E9BE8(void) {
+    u8 queue[0x20];
+    u8 server[0x50];
+    s32 semaphore = func_002CF440(0, 1, 0);
+    D_003BDA90 = semaphore;
+    if (semaphore <= 0) {
+        for (;;) {
+        }
+    }
+    sceSifSetRpcQueue(queue, GetThreadId());
+    sceSifRegisterRpc(server, 0x54524E53, func_002E99A0, D_003FEAC0, 0, 0, queue);
+    sceSifRpcLoop(queue);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9C80);
 
@@ -173,7 +231,12 @@ s32 func_002EB168(s32 arg0) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB1A8);
+u64 func_002EB1A8(u64 arg0, s32 *out) {
+    u32 info[4];
+    u64 buffer = func_002EB028(arg0, info, 0);
+    *out = func_002EB168(info[0]);
+    return buffer;
+}
 
 s32 func_002EB1F0(s32 arg0) {
     s32 temp_v0;
@@ -183,7 +246,12 @@ s32 func_002EB1F0(s32 arg0) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB230);
+u64 func_002EB230(u64 arg0, s32 *out) {
+    u32 info[4];
+    u64 buffer = func_002EB028(arg0, info, 0);
+    *out = func_002EB1F0(info[0]);
+    return buffer;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB278);
 
@@ -191,18 +259,38 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB360);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB3F0);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB490);
+void func_002EB490(SoundNode *node) {
+    SoundNode **tail = &D_003BDA98;
+    SoundNode *current = *tail;
+    if (current != NULL) {
+        tail = &current->next;
+        while ((current = *tail) != NULL) {
+            tail = &current->next;
+        }
+    }
+    *tail = node;
+    node->next = NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB4D0);
+void func_002EB4D0(SoundNode *node) {
+    SoundNode **link = &D_003BDA98;
+    SoundNode *current = *link;
+    while (current != NULL) {
+        if (current == node) {
+            *link = current->next;
+            return;
+        }
+        link = &current->next;
+        current = *link;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB510);
-
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB8C0);
-
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB930);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB9C8);
@@ -217,7 +305,17 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBEB8);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBF88);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBFF0);
+s32 func_002EBFF0(void) {
+    vu32 *ipuCommand = (vu32 *)0x10002000;
+    s32 status;
+    *ipuCommand = 0x40000000;
+    sceIpuSync(0, 0);
+    status = *ipuCommand;
+    sceIpuSync(0, 0);
+    *ipuCommand = 0x40000008;
+    sceIpuSync(0, 0);
+    return status;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC060);
 
@@ -229,7 +327,13 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3C0);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3F0);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC488);
+u32 func_002EC488(MidiChannel *channel) {
+    u32 result = 0;
+    if (channel->enabled != 0) {
+        result = channel->earlierEntries[channel->index];
+    }
+    return result;
+}
 
 u32 func_002EC4B0(MidiChannel *channel) {
     u32 result = 0;
@@ -242,7 +346,6 @@ u32 func_002EC4B0(MidiChannel *channel) {
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC4D8);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC560);
-
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC748);

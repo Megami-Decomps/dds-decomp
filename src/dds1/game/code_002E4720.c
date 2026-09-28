@@ -86,7 +86,8 @@ extern s32 WaitSema(s32 sema);
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 extern void func_002E5E90(DevState *arg0);
 extern void func_002E5F08(DevState *arg0);
-extern void func_002E6BA8(s32 arg0, void *callback, s32 arg2);
+extern DevState *func_002E6BA8(s32 arg0,
+                                void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
 extern void func_002E77F8(f32 arg0);
 extern void func_0030EB78(s32 arg0);
 extern s32 func_00312C08(DevState *arg0);
@@ -97,6 +98,7 @@ extern s32 func_002CF440(s32 arg0, s32 arg1, s32 arg2);
 extern s32 func_002CF670(const char *arg0);
 extern void *func_002CFEB8(s32 size);
 extern void func_002CFF98(void *ptr);
+extern void *func_002CFF68(s32 size);
 extern s32 func_002D03F8(s32 size);
 extern void func_002D0750(s32 arg0, s32 arg1);
 extern s32 func_002D0A48(s32 arg0);
@@ -107,6 +109,22 @@ extern void func_002F4190(u32 arg0);
 extern u32 D_003BD3E8;
 extern u8 D_003BD460[];
 extern u8 D_003BD468[];
+extern s32 GetThreadId(void);
+extern void sceSifSetRpcQueue(void *, s32);
+extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
+extern void sceSifRpcLoop(void *);
+extern u8 D_003F9B90[];
+extern void func_002CF8E0(s32);
+void func_002E4CB0(void);
+extern s32 D_003BDA38;
+extern void func_002F3F98(s32);
+extern s32 func_002F4258(void);
+extern s32 sceCdSearchFile(void *, s32);
+extern u16 D_003BD434;
+extern s32 func_002E69F0(s32, void **);
+extern void func_002E5DA0(DevState *);
+extern DevState *func_002E6B28(void *, s32, s32,
+                                void (*)(DevState *, s32, s32, s32, s32), s32);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
@@ -135,7 +153,13 @@ void *func_002E4A28(s32 arg0, SifCommand *arg1) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4A80);
+void func_002E4A80(void) {
+    u8 queue[0x20];
+    u8 server[0x50];
+    sceSifSetRpcQueue(queue, GetThreadId());
+    sceSifRegisterRpc(server, 0x32647270, func_002E4A28, D_003F9B90, 0, 0, queue);
+    sceSifRpcLoop(queue);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4AE0);
 
@@ -147,7 +171,27 @@ u32 func_002E4CA8(void) {
     return D_003BDA44;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4CB0);
+void func_002E4CB0(void) {
+    u8 file[0x30];
+    s32 status;
+    WaitSema(D_003BDA58);
+    for (;;) {
+        func_002CF8E0(100);
+        func_002F3F98(0);
+        status = func_002F4258();
+        if (D_003BD3E8 == 2) {
+            if (status != 20) {
+                continue;
+            }
+        } else if (status != 18) {
+            continue;
+        }
+        if (sceCdSearchFile(file, D_003BDA38) != 0) {
+            break;
+        }
+    }
+    SignalSema(D_003BDA58);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4D48);
 
@@ -233,18 +277,28 @@ u32 func_002E5968(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5970);
 
-void func_002E5B10(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if (arg1 != 3) {
-        if (arg1 == 4) {
-            D_003BDA68 = arg3;
+void func_002E5B10(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
+    if (event != 3) {
+        if (event == 4) {
+            D_003BDA68 = value;
         }
     } else {
-        D_003BDA6C = arg3;
+        D_003BDA6C = value;
     }
     SignalSema(D_003BD3F4);
 }
+s32 func_002E6E08(DevState *);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5B50);
+DevState *func_002E5B50(s32 command) {
+    DevState *state;
+    if (D_003BD3F4 < 0) {
+        D_003BD3F4 = func_002CF440(0, 0x80, 0);
+    }
+    state = func_002E6BA8(command, func_002E5B10, 0);
+    WaitSema(D_003BD3F4);
+    func_002E6E08(state);
+    return state;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5BB8);
 
@@ -321,9 +375,34 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E69F0);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6B28);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6BA8);
+DevState *func_002E6BA8(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
+                        s32 context) {
+    void *resource;
+    s32 id = func_002E69F0(path, &resource);
+    DevState *state;
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6C10);
+    if (id < 0) {
+        return NULL;
+    }
+    state = func_002E6B28(resource, id, 1, callback, context);
+    func_002E5DA0(state);
+    return state;
+}
+
+DevState *func_002E6C10(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
+                        s32 context, s32 options) {
+    void *resource;
+    s32 id = func_002E69F0(path, &resource);
+    DevState *state;
+
+    if (id < 0) {
+        return NULL;
+    }
+    state = func_002E6B28(resource, id, 2, callback, context);
+    state->unk24 = options != 0 ? options : D_003BD434;
+    func_002E5DA0(state);
+    return state;
+}
 
 s32 func_002E6C90(DevState *arg0, s32 arg1, s32 arg2) {
     if (arg0->unk16 != 7) {
@@ -371,9 +450,41 @@ s32 func_002E6E38(DevState *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6E88);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6EC8);
+DevState *func_002E6EC8(s32 path, s32 data, s32 extra,
+                        void (*context)(DevState *, s32, s32, s32, s32), s32 callback) {
+    void *resource;
+    s32 id = func_002E69F0(path, &resource);
+    DevState *state;
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6F58);
+    if (id < 0) {
+        return NULL;
+    }
+    state = func_002E6B28(resource, id, 8, context, callback);
+    state->unk1C = extra;
+    state->unk20 = data;
+    state->unk18 = 0;
+    func_002E5DA0(state);
+    return state;
+}
+
+DevState *func_002E6F58(s32 path, s32 data, s32 extra,
+                        void (*context)(DevState *, s32, s32, s32, s32),
+                        s32 callback, s32 options) {
+    void *resource;
+    s32 id = func_002E69F0(path, &resource);
+    DevState *state;
+
+    if (id < 0) {
+        return NULL;
+    }
+    state = func_002E6B28(resource, id, 9, context, callback);
+    state->unk1C = extra;
+    state->unk20 = data;
+    state->unk24 = options != 0 ? options : D_003BD434;
+    state->unk18 = 0;
+    func_002E5DA0(state);
+    return state;
+}
 
 void func_002E7000(s32 arg0) {
     SemaEntry *p;
