@@ -1,5 +1,9 @@
 #include "common.h"
 
+extern void func_00284340(s32);
+
+extern void func_002CFF98(void *);
+
 extern u32 func_0027D4A0(u32);
 
 extern u32 func_0027F730(u32);
@@ -499,7 +503,13 @@ void func_0027E228(s32 *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E270);
+void func_0027E270(s32 *list) {
+    u32 i;
+    s32 *entry = list + 1;
+    for (i = 0; i < 4; i++, entry++) {
+        func_002CFF98((void *)*entry);
+    }
+}
 
 void func_0027E2C0(s32 arg0, s32 arg1, s32 *arg2) {
     u32 temp_v0 = *arg2;
@@ -684,7 +694,13 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FA70);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FAA8);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FB90);
+void func_0027FB90(s32 window) {
+    u32 i;
+    for (i = 0; i < 5; i++, window += 0x134) {
+        func_00284340(window + 0x94);
+        func_00284340(window + 0xe8);
+    }
+}
 
 void func_0027FBE0(s32 arg0, u32 *arg1) {
     u32 temp_v0;

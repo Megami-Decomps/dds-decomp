@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern void func_002C2FF8(void);
+extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
 extern char D_003B3CA0[]; /* "LmapMain" */
 
 extern s32 kwlnTaskGetTaskByName(u32);
@@ -38,7 +41,10 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2DA0);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2E38);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2EA0);
+void func_002C2EA0(void) {
+    func_002C2FF8();
+    kwlnTaskDestroyWithHierarchyByName(D_003B3CA0, 1);
+}
 
 s32 func_002C2ED0(void) {
     return kwlnTaskGetTaskByName((u32)D_003B3CA0) != 0;

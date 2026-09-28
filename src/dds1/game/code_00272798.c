@@ -1,12 +1,17 @@
 #include "common.h"
 
+extern void func_00285670(s32, s32, s32, s32);
+
 extern s32 func_00101A70();
 
 INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 
-INCLUDE_ASM(const s32, "game/code_00272798", func_002729C8);
+void func_002729C8(s32 input) {
+    s32 context = func_00101A70();
+    func_00285670(context + 8, context + 0x54, 2, input);
+}
 
 s32 func_00272A00(void) {
     u8 *context = (u8 *)func_00101A70();
@@ -28,7 +33,10 @@ INCLUDE_ASM(const s32, "game/code_00272798", func_00272A90);
 
 INCLUDE_ASM(const s32, "game/code_00272798", func_00272B00);
 
-INCLUDE_ASM(const s32, "game/code_00272798", func_00272B80);
+void func_00272B80(s32 input) {
+    s32 context = func_00101A70();
+    func_00285670(context + 8, context + 0x54, 2, input);
+}
 
 u32 func_00272BB8(void) {
     return 1;

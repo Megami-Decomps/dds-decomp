@@ -1,5 +1,11 @@
 #include "common.h"
 
+extern void func_002C5720(void);
+extern void func_002C5798(void);
+extern void func_002C5C70(void);
+
+extern void func_002C3DB0(void);
+
 extern s32 func_002C4A10(void);
 
 extern s32 D_003BD274;
@@ -41,7 +47,9 @@ s8 func_002C3D88(void) {
     return D_003BD270;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3D90);
+void func_002C3D90(void) {
+    func_002C3DB0();
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3DB0);
 
@@ -57,7 +65,11 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C45C8);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4630);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4650);
+void func_002C4650(void) {
+    func_002C5720();
+    func_002C5798();
+    func_002C5C70();
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4680);
 

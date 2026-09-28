@@ -1,5 +1,9 @@
 #include "common.h"
 
+extern void func_00127028(u32, u32);
+extern void func_00123EE8(void);
+extern void func_00126A30(u32, u32, s32);
+
 extern s32 D_003BAE68;
 
 extern u32 D_003BADE8;
@@ -154,7 +158,14 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00127388);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00127588);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127708);
+void func_00127708(u32 *args) {
+    s32 state;
+    func_00127028(args[4], args[3]);
+    state = D_0032E3B0[4];
+    if (state != 1 && state < 200) func_00123EE8();
+    func_00126A30(args[1], args[0], 0);
+    D_0032E3B0[1] = ((u32 *)args[2])[1];
+}
 
 void func_00127788(u32 *arg0) {
     func_00126A30(arg0[1], *arg0, 1);
@@ -529,6 +540,7 @@ void func_0012E4C8(u32 value) {
     func_00112EE8(func_001109F0(func_0010FD80()), D_003C9230, D_003C9220);
     D_003BAD20 = 0;
 }
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E510);
 
 void func_0012E6F0(void) {
@@ -790,6 +802,7 @@ void func_00133910(void) {
     temp_v0[0] = (u32)D_003306B0;
     temp_v0[1] = (u32)D_003306C0;
 }
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
 
 

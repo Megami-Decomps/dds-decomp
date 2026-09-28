@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern void func_0027C430(u32);
+extern void func_0027D7E0(u32);
+
 extern s32 func_00105C48(void);
 
 extern u8 D_0037B8BC[];
@@ -596,7 +599,14 @@ INCLUDE_ASM(const s32, "game/code_0026DED0", func_00271B50);
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_00271D30);
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_00271DF8);
+void func_00271DF8(u8 *display) {
+    u32 *image = (u32 *)(display + 0x124);
+    u32 index = 0;
+    do {
+        func_0027C430(*image++);
+    } while (++index < 3);
+    func_0027D7E0(*(u32 *)(display + 0x11c));
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_00271E58);
 
