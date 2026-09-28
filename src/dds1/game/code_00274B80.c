@@ -10,7 +10,7 @@ void func_00274B80(u32 arg0) {
     func_00271308(4, arg0);
 }
 
-void func_00274BA0(void) {
+void func_00274BA0(s32 context) {
 }
 
 s32 func_00274BA8(s32 arg0, s32 arg1) {
@@ -56,7 +56,15 @@ void func_002755A0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00275880);
+s32 func_00275880(void) {
+    s32 context = func_00101A70();
+    s32 menu = *(s32 *)(context + 0x90c);
+    func_002755A0(context);
+    func_00274EE0(context);
+    func_00274BA0(context);
+    func_002D0918(*(s32 *)menu);
+    return 1;
+}
 
 void func_002758D8(s32 menu) {
     extern u8 D_0037CA58[];

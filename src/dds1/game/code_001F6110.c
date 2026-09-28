@@ -82,9 +82,19 @@ extern s32 func_001A17F0(void);
 extern s32 func_001FEC68(s32 context, s32 actor, u32 mask);
 extern void func_0010D5F0();
 extern void func_001FEF10(s32, u16);
+extern u8 *func_001D4748(s32);
+extern void func_001F60E8(void);
 
-
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6110);
+u8 *func_001F6110(void) {
+    u8 *object;
+    object = func_001D4748(0);
+    object[0] = 1;
+    *(void (**)(void))(object + 0x4c) = func_001F60E8;
+    *(u16 *)(object + 0x20) = 0x60;
+    *(s32 *)(object + 0x48) = 0;
+    object[0x10] = 0;
+    return object;
+}
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6158);
 
