@@ -64,6 +64,14 @@ build. Treat it like `DIFF`: try another natural formulation or park it.
 Editing a unit can make an existing function CONTEXT, so always check the
 whole unit.
 
+## Unaligned block copies (`ldl/ldr/sdl/sdr`)
+
+Runs of `ldl`/`ldr` and `sdl`/`sdr` pairs copying a fixed-size block come
+from `memcpy(dst, src, SIZE)` with a literal size. ee-gcc 2.96 inlines it
+(sizes 0x40, 0x74, 0x80 and 0x90 are verified in `effPCPMisc`,
+`game/code_0028A0E0` and DDS2 `code_002DC138`). A size held in a variable
+gives a call instead.
+
 ## Branches kept where C gives `movn`/`movz` (irregular switches)
 
 An if-chain of constant results gets if-converted: `if (v == 1) return 10;
