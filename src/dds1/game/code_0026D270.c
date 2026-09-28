@@ -8,7 +8,7 @@ INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D480);
 
 INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D510);
 
-void func_0026D648(void) {
+void titleResetSequenceTimers(void) {
     s32 *temp_v0 = (s32 *)D_003BC5D0;
 
     temp_v0[13] = 1;

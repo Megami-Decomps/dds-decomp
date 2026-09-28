@@ -51,7 +51,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFA80);
 
-void func_002BFAF8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
+void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     GridWidget *widget = (GridWidget *)func_002BD398(a, b);
     widget->x = x;
     widget->y = y;
@@ -195,7 +195,7 @@ s32 func_002C16F8(s32 arg0) {
     return 1;
 }
 
-s32 setWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
+s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     s32 child;
     if (object == 0) {
         return 0;
@@ -213,7 +213,7 @@ s32 setWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1770);
 
-void setGridDimensions(u8 *work, s32 columns, s32 rows) {
+void itfSetGridDimensions(u8 *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 

@@ -183,13 +183,13 @@ void parDispatchKindUpdate(void *work) {
     }
 }
 
-extern void func_00159F30(s32);
+extern void parClearSlotFlag(s32);
 extern void func_00188510(s32);
 
 void parDispatchKindInit(void *work, s32 index) {
     switch (*(u16 *)work) {
     case 1:
-        func_00159F30(*(s32 *)((u8 *)work + 8));
+        parClearSlotFlag(*(s32 *)((u8 *)work + 8));
         return;
     case 2:
         parCellInit((void *)*(s32 *)((u8 *)work + 0x10), index);

@@ -31,18 +31,18 @@ extern char D_003A0828[]; /* "fldTitleMini" */
 
 extern u64 func_0011E998(void);
 
-extern s32 func_0013F848(s32);
+extern s32 fldGetRowValue(s32);
 
-extern s32 func_0013F6B8(s32);
+extern s32 fldGetActorMotionEntry(s32);
 
-extern s32 func_0013F5A8(s32);
+extern s32 fldGetActorStat1(s32);
 
-extern s32 func_0013F4D8(s32);
+extern s32 fldGetActorStat0(s32);
 
 extern s32 func_0010D428(s32);
 
 extern s32 func_0010D6A0(void);
-extern s32 func_0013BE90(u32);
+extern s32 fldFindRoomByTask(u32);
 
 extern u32 D_003BAFC8;
 extern u32 D_003BAFCC;
@@ -93,7 +93,7 @@ extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 extern s32 dds3GetWorldObject(void);
 extern s32 func_00110A38(s32 arg0);
 extern void func_001313E0(void);
-extern void objInvokeSlot1Handler(s32 arg0, s32 arg1);
+extern void dds3InvokeSlot1Handler(s32 arg0, s32 arg1);
 extern void func_0014FB00(u32 arg0);
 extern void func_00127898(u32 arg0, s32 arg1);
 extern s32 func_001277A8(s32 arg0);
@@ -117,7 +117,7 @@ extern s32 D_0032E3D8[];
 extern s32 D_0032E400[];
 extern s32 D_0032E408[];
 extern void func_002E8DD0();
-extern void soundSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
+extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 extern void func_002E8D10(s32 arg0);
 extern void *func_002CFEB8(s32 size);
 extern void func_00101A68(s32 arg0, void *arg1);
@@ -238,7 +238,7 @@ void fldAppendClearEntry(s32 id, f32 x, f32 y, f32 z, f32 w) {
 extern s32 D_0033EAB0[];
 extern s32 mdlFlagTest();
 
-void func_00141540(void) {
+void fldPlayPendingSounds(void) {
     s32 stage;
     s32 i;
 
@@ -267,7 +267,7 @@ typedef struct {
 } FldEnt44; /* 0x44 bytes */
 extern FldEnt44 D_0032E5C8[32];
 
-s8 func_00141A78(s32 id, s32 idx) {
+s8 fldFindSceneEntryData(s32 id, s32 idx) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
@@ -289,7 +289,7 @@ void func_00141B10(void) {
             if (stage == 11) {
                 stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
             }
-            idx = func_00141A78(stage, D_0032E3B0[5] + 1);
+            idx = fldFindSceneEntryData(stage, D_0032E3B0[5] + 1);
             D_003BAE84 = D_0033EAB0[stage];
             D_0032E3B0[10] = idx;
             handle = D_003BAE84 + idx;
@@ -324,7 +324,7 @@ void func_00141C40(void) {
             if (stage == 11) {
                 stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
             }
-            idx = func_00141A78(stage, D_0032E3B0[5] + 1);
+            idx = fldFindSceneEntryData(stage, D_0032E3B0[5] + 1);
             D_003BAE84 = D_0033EAB0[stage];
             D_0032E3B0[10] = idx;
             handle = D_003BAE84 + idx;
@@ -360,21 +360,21 @@ void func_00141D98(void) {
     D_0032E3D8[0] = 0;
 }
 
-void func_00141DC0(s32 arg0) {
+void fldPlayFieldSeVolumePan(s32 arg0) {
     if (D_0032E3C0[0] < 50 && arg0 >= 16) {
         if (arg0 == 0x80) {
-            soundSetSequenceVolumePan(0x6C0060, 0x7F, 0x3F);
+            sndSetSequenceVolumePan(0x6C0060, 0x7F, 0x3F);
         } else if (arg0 == 0x81) {
-            soundSetSequenceVolumePan(0x6C0061, 0x7F, 0x3F);
+            sndSetSequenceVolumePan(0x6C0061, 0x7F, 0x3F);
         } else if (arg0 == 0x82) {
-            soundSetSequenceVolumePan(0x6C0064, 0x7F, 0x3F);
+            sndSetSequenceVolumePan(0x6C0064, 0x7F, 0x3F);
         } else {
-            soundSetSequenceVolumePan(D_003BAE84 + arg0, 0x7F, 0x3F);
+            sndSetSequenceVolumePan(D_003BAE84 + arg0, 0x7F, 0x3F);
         }
     }
 }
 
-void func_00141E88(s32 arg0) {
+void fldPlayFieldSe(s32 arg0) {
     if (D_0032E3C0[0] < 50) {
         if (arg0 == 0x100) {
             func_002E8DD0(0x6C0060);
@@ -389,9 +389,9 @@ void func_00141E88(s32 arg0) {
 }
 
 
-void func_00141F28(s32 arg0, s32 arg1) {
+void fldSetSequenceVolume(s32 arg0, s32 arg1) {
     if (D_0032E3C0[0] < 0x32) {
-        soundSetSequenceVolumePan(D_003BAE84 + arg0, arg1, 0x3F);
+        sndSetSequenceVolumePan(D_003BAE84 + arg0, arg1, 0x3F);
     }
 }
 
@@ -399,7 +399,7 @@ extern s32 D_003BAE98;
 extern s32 D_0033EAE8[];
 extern void func_002E96D8();
 
-void func_00141F70(s32 mode) {
+void fldSetBgmMode(s32 mode) {
     switch (mode) {
     case -1:
         if (D_003BAE98 != mode) {
@@ -443,7 +443,7 @@ void func_00142028(void) {
         if (stage == 11) {
             stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
         }
-        idx = func_00141A78(stage, D_0032E3B0[5] + 1);
+        idx = fldFindSceneEntryData(stage, D_0032E3B0[5] + 1);
         D_003BAE84 = D_0033EAB0[stage];
         D_0032E3B0[10] = idx;
         handle = D_003BAE84 + idx;
@@ -484,7 +484,7 @@ u32 func_00142158(void) {
 INCLUDE_ASM(const s32, "game/code_001411F0", fldLoadArchive);
 
 void func_001421D0(s32 arg0, s32 arg1) {
-    soundSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
 }
 
 void func_00142200(s32 arg0, s32 arg1) {
@@ -562,7 +562,7 @@ extern void func_002D8600();
 extern void func_002D8C68();
 extern void func_002D9238();
 
-void func_00142758(FldEmitter *emitter, f32 x, f32 y, f32 z) {
+void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
     s32 handle;
 
@@ -647,7 +647,7 @@ extern u32 D_003D40A0[];
 extern void func_002D2D00();
 extern s32 func_002D3EE8(void);
 extern void func_00195548(s32);
-void func_00145D38(void) {
+void fldReleaseTitleSlots(void) {
     if (D_003D40A0[2] != 0) {
         func_002D2D00(D_003D40A0[2]);
     }
@@ -671,7 +671,7 @@ typedef struct FldSlot {
 } FldSlot;
 extern FldSlot D_003D40B0[];
 extern void func_002D7AC8(u32, s32, s32);
-void func_00145DB0(void) {
+void fldReleaseMenuSlots(void) {
     s32 i;
 
     for (i = 0; i < D_003BAEE0; i++) {
@@ -706,7 +706,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00146080);
 void func_001462A8(void) {
     func_002D5498();
     func_002D5498();
-    func_00145DB0();
+    fldReleaseMenuSlots();
 }
 
 u32 func_001462D0(void) {
@@ -732,13 +732,13 @@ typedef struct FldSaveWork {
 
 extern s32 D_0032C900[];
 
-s32 func_00146AA8(s32 area, s32 floor, s32 bit) {
+s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 id = D_0032C900[area % 100];
     if (id == -1) return 0;
     return (((FldSaveWork *)D_003BAA00)->areaFlags[id][floor] >> bit) & 1;
 }
 
-void func_00146B10(s32 arg0) {
+void fldSetFlagAndFindRecord(s32 arg0) {
     s32 id;
     s32 bit;
 
@@ -793,7 +793,7 @@ typedef struct {
 } FldSceneEntry; /* 0x14 bytes */
 extern s32 fldFindRecordItem(s32 scene, u32 index);
 
-s32 func_00146CF8(s32 limit) {
+s32 fldFindPrevRecordItem(s32 limit) {
     s32 i;
     u32 j;
     s32 item;
@@ -802,7 +802,7 @@ s32 func_00146CF8(s32 limit) {
 
     for (i = 0; i < (s32)D_003BAEE0; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
-            if (func_00146AA8(D_003BAEB0, i, j) != 0) {
+            if (fldGetFloorFlag(D_003BAEB0, i, j) != 0) {
                 item = fldFindRecordItem(i, j);
                 if (item < limit && best < item) {
                     best = item;
@@ -816,7 +816,7 @@ s32 func_00146CF8(s32 limit) {
     return best;
 }
 
-s32 func_00146DC8(s32 limit) {
+s32 fldFindNextRecordItem(s32 limit) {
     s32 i;
     u32 j;
     s32 item;
@@ -825,7 +825,7 @@ s32 func_00146DC8(s32 limit) {
 
     for (i = 0; i < (s32)D_003BAEE0; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
-            if (func_00146AA8(D_003BAEB0, i, j) != 0) {
+            if (fldGetFloorFlag(D_003BAEB0, i, j) != 0) {
                 item = fldFindRecordItem(i, j);
                 if (limit < item && item < best) {
                     best = item;
@@ -840,7 +840,7 @@ s32 func_00146DC8(s32 limit) {
 }
 
 
-void getSceneEntryPosition(s32 index, f32 *x, f32 *z) {
+void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
     s32 i;
     s32 entry = D_003BAEDC;
     for (i = 0; i < (s32)D_003BAEE0; i++, entry += 0x14) {
@@ -925,7 +925,7 @@ extern s32 D_0034C870[4];
 extern s32 D_0034C880[4];
 extern s32 D_0034C890[4];
 
-void func_00147580(void) {
+void fldReleaseTextureSlots(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
@@ -944,7 +944,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00147638);
 extern s32 D_0034C8B0[];
 extern s32 D_0034C8C0[];
 extern s32 D_003BAF88;
-void initializeMenuResourceEntries(void) {
+void mnuInitializeResourceEntries(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
         D_0034C8B0[i] = func_0014FE28(D_003BAF88);
@@ -970,7 +970,7 @@ void func_001478B8(f32 arg0, f32 arg1, f32 arg2) {
     D_0034C8E0[2] = arg2;
 }
 
-void releaseMenuResourceEntries(void) {
+void mnuReleaseResourceEntries(void) {
     s32 i;
     D_003BAF8C = 0;
     D_003BAF90 = 0;
@@ -1008,7 +1008,7 @@ extern s32 D_003BAF30, D_003BAF34, D_003BAF38;
 extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 extern s32 func_0014FD20(s32);
 extern s32 func_002D3288(s32);
-void initializeFieldMenuResources(void) {
+void fldInitializeMenuResources(void) {
     if (D_0032E3C0[0] < 200) {
         D_003BAF4C = func_0014FD20(D_003BAF48);
         D_003BAF3C = func_0014FD20(D_003BD7F0);
@@ -1028,7 +1028,7 @@ extern s32 D_003BAF4C;
 extern s32 D_003BAF58;
 extern s32 D_003BAF64;
 
-void func_00147C20(void) {
+void fldReleaseResourceHandles(void) {
     if (D_003BAF30 != 0) {
         func_002D2D00(D_003BAF30);
         D_003BAF30 = 0;
@@ -1071,7 +1071,7 @@ typedef struct {
 } FldTblEnt50; /* 0x50 bytes */
 extern FldTblEnt50 D_003D46A0[];
 extern s32 D_003BAF2C;
-void func_00147CD8(void) {
+void fldClearMenuEntries(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
@@ -1104,7 +1104,7 @@ extern s32 D_003BAF70;
 extern s32 D_003BAF7C;
 extern s32 D_003BAF80;
 
-void func_00147D28(void) {
+void fldResetObjectSlots(void) {
     s32 i;
 
     D_003BAF80 = 0;
@@ -1136,7 +1136,7 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0768);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001486D0);
 
-void func_00148C98(s32 id) {
+void fldActivateObjectById(s32 id) {
     s32 i;
 
     for (i = 0; i < D_003BAF80; i++) {
@@ -1146,7 +1146,7 @@ void func_00148C98(s32 id) {
     }
 }
 
-void func_00148CF0(void) {
+void fldReleaseObjectSlots(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
@@ -1176,15 +1176,15 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_001493D0);
 
 extern void func_00129720(u32);
 extern void func_00129900(u32);
-extern void func_001297E8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
-void func_00149610(s32 width) {
+void fldDrawGaugeBar(s32 width) {
     s32 x;
 
     if (D_0032E3C0[0] < 200) {
         func_00129720(0x53);
         func_00129900(0);
-        func_001297E8(1, 0, 0x80, 3, 0, 0, 1, 1);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         x = 0x9D - (width >> 1);
         func_00129000(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
         func_00129000(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
@@ -1196,14 +1196,14 @@ void func_00149610(s32 width) {
 
 extern void func_00129720(u32);
 extern void func_00129900(u32);
-extern void func_001297E8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
 
-void func_00149748(s32 x, s32 y) {
+void fldDrawTitleBanner(s32 x, s32 y) {
     if (D_0032E3C0[0] < 200) {
         func_00129720(0x53);
         func_00129900(0);
-        func_001297E8(1, 0, 0x80, 3, 0, 0, 1, 1);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         func_00129000(x, y, 0x10, 0x11, 0x68, 1, 0x10, 0x11, 0x80808080, D_003BAF30);
         func_00129900(0);
     }
@@ -1219,7 +1219,7 @@ extern s32 D_003BAF2C;
 extern s32 func_001215F8();
 extern void dds3SetObjectFlags();
 
-void func_00149FC0(void) {
+void fldFireRoomEffects(void) {
     s32 i;
 
     for (i = 0; i < D_003BAF2C; i++) {
@@ -1233,19 +1233,19 @@ void func_00149FC0(void) {
 }
 
 extern u8 D_003D44A0[0x200];
-extern void func_00128B50(char *, s32, s32);
+extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 func_002E5C68(u32, void *, u32);
 extern void func_002E5C38(u32);
 
-void func_0014A060(s32 field) {
+void fldLoadNpcPalette(s32 field) {
     char path[64];
     char directory[32];
     u32 command;
 
     if (field < 100) {
-        func_00128B50(directory, field, 1);
+        fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, "%sF%03d.NPL", directory, field);
         command = sdfDevCreateCommandState(path);
         func_002E5C68(command, D_003D44A0, 0x200);
@@ -1253,12 +1253,12 @@ void func_0014A060(s32 field) {
     }
 }
 
-void func_0014A0E8(void *src) {
+void fldSetNpcPalette(void *src) {
     memcpy(D_003D44A0, src, 0x200);
 }
 
 extern int strcmp(const char *, const char *);
-s32 func_0014A1A0(const char *name) {
+s32 fldFindEffectByName(const char *name) {
     s32 i;
 
     for (i = 0; i < D_003BAF2C; i++) {
@@ -1309,7 +1309,7 @@ extern u32 D_003BAFAC;
 extern u32 D_003BAF9C;
 extern s32 func_002EB028();
 extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */
-void func_0014A960(s32 field, s32 arg1, s32 arg2) {
+void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     char path[32];
     s32 size;
     s32 handle;
@@ -1370,7 +1370,7 @@ extern s32 func_002EB028();
 extern s32 func_002D3288();
 extern s32 func_0014FE28();
 
-void func_0014B438(void) {
+void fldLoadWeatherEffects(void) {
     s32 handle;
     s32 size;
 
@@ -1407,7 +1407,7 @@ void func_0014B4D0(void) {
 extern void func_0014FB38(s32 handle);
 extern void func_0014FBF0(s32 handle, f32 *pos);
 
-void func_0014B540(f32 x, f32 y, f32 z) {
+void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
     f32 pos[4];
 
     memset(pos, 0, sizeof(pos));
@@ -1494,7 +1494,7 @@ extern u32 effMiscRand();
 
 extern s16 D_0032E4B4[];
 
-void func_0014B8B0(void) {
+void fldInitSparkTable(void) {
     s32 i;
 
     if (D_0032E4B4[0] == 0) {
@@ -1513,7 +1513,7 @@ void func_0014B8B0(void) {
     }
 }
 
-void func_0014B988(void) {
+void fldResetSparkTable(void) {
     s32 i;
 
     for (i = 0; i < 64; i++) {
@@ -1525,7 +1525,7 @@ void func_0014B988(void) {
 }
 
 
-s32 func_0014BA10(s32 index, const u128 *pos, const u128 *vel) {
+s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     PCP_COPY_VECTOR(D_003D56A0[index].pos, pos);
     PCP_COPY_VECTOR(D_003D56A0[index].vel, vel);
     D_003D56A0[index].unk20 = 1;
@@ -1534,10 +1534,10 @@ s32 func_0014BA10(s32 index, const u128 *pos, const u128 *vel) {
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BA50);
 
 extern void effObjSetInnerFirstVec();
-extern s32 *objGetUnk0C();
+extern s32 *dds3GetUnk0C();
 extern void dds3ClearObjectFlags();
 extern FldVec4 D_003A0918;
-void func_0014BC28(s32 index) {
+void fldFreeSparkSlot(s32 index) {
     FldVec4 vec;
     s32 obj;
     s32 *flags;
@@ -1549,7 +1549,7 @@ void func_0014BC28(s32 index) {
         vec.v[2] = D_003D56A0[index].pos[2];
         effObjSetInnerFirstVec(D_003D62E0[D_003D56A0[index].unk2C].unk0, &vec);
         obj = D_003D62E0[D_003D56A0[index].unk2C].unk0;
-        flags = objGetUnk0C(obj);
+        flags = dds3GetUnk0C(obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = D_003D56A0[index].unk2C;
@@ -1561,7 +1561,7 @@ void func_0014BC28(s32 index) {
 extern s32 D_003D62A0[];
 extern void func_0014B688();
 extern void func_0014BA50();
-void func_0014BD58(void) {
+void fldUpdateSparkSlots(void) {
     s32 i;
 
     func_0014B688();
@@ -1576,7 +1576,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BDF8);
 
 extern s32 D_003D62A0[];
 
-s32 func_0014C158(f32 x, f32 y, f32 z) {
+s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
     for (i = 0; i < 64 && i < D_003D62A0[12]; i++) {
@@ -1723,7 +1723,7 @@ s32 func_0014D400(void) {
     if (temp_v0 == 0) {
         return 1;
     }
-    objInvokeSlot1Handler(temp_v0, 0);
+    dds3InvokeSlot1Handler(temp_v0, 0);
     func_001313E0();
     func_00123E00();
     return 1;
@@ -1750,7 +1750,7 @@ extern f32 func_002E78F8(f32);
 extern s32 func_001312D8();
 extern void func_00131218();
 extern void func_0012CB48();
-s32 func_0014D518(void) {
+s32 fldUpdateLookAtSegment(void) {
     FldCamPose *cam = (FldCamPose *)D_0032E3B0;
     FldVec3 near;
     FldVec3 far;
@@ -1930,7 +1930,7 @@ s32 func_0014DC20(void) {
     return 1;
 }
 
-extern void func_00132AE8(s32, s32, s32);
+extern void fldSetFadeTarget(s32, s32, s32);
 extern void func_00132B60(s32);
 s32 func_0014DC68(void) {
     s32 second;
@@ -1938,7 +1938,7 @@ s32 func_0014DC68(void) {
     D_0032E570[13] = func_0010D428(0) & 0xFF;
     second = func_0010D428(1);
     third = func_0010D428(2);
-    func_00132AE8(D_0032E570[13], second, third);
+    fldSetFadeTarget(D_0032E570[13], second, third);
     func_00132B60(func_0010D428(3));
     return 1;
 }
@@ -1954,7 +1954,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014E270);
 extern s32 D_0032E3C4[];
 extern void func_001211A0(s32, s32, s32, s32);
 
-s32 func_0014E410(void) {
+s32 fldCmdSetSceneBits(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -2094,7 +2094,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014EA78);
 
 extern void func_00121650(s32, s32, s32, s32);
 
-s32 func_0014EB70(void) {
+s32 fldCmdSetSceneBitsValue(void) {
     s32 world;
     s32 stage;
     s32 room;
@@ -2138,42 +2138,21 @@ typedef struct FldSceneParam {
     s32 unk_c;
 } FldSceneParam;
 extern FldSceneParam D_0034C8F0[];
-s32 func_0014ED20(void) {
-    s32 scene = func_0013BE90(*(u32 *)(func_0010D6A0() + 0xE4));
-
-    switch (func_0010D428(0)) {
-    case 0:
-        func_0010D5F0(D_0034C8F0[scene].unk_0);
-        break;
-    case 1:
-        func_0010D5F0(D_0034C8F0[scene].unk_4);
-        break;
-    case 2:
-        func_0010D5F0(D_0034C8F0[scene].unk_6);
-        break;
-    case 3:
-        func_0010D5F0(D_0034C8F0[scene].unk_8);
-        break;
-    case 4:
-        func_0010D5F0(D_0034C8F0[scene].unk_c);
-        break;
-    }
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_001411F0", fldCmdPushSceneParam);
 
 u32 func_0014EE20(void) {
     s32 temp_v0;
     u64 temp_v1;
 
     temp_v0 = func_0010D6A0();
-    temp_v1 = func_0013BE90(*(u32 *)(temp_v0 + 0xe4));
+    temp_v1 = fldFindRoomByTask(*(u32 *)(temp_v0 + 0xe4));
     func_00121750(temp_v1);
     return 1;
 }
 
 
 u32 func_0014EE50(void) {
-    if (func_001217F0(func_0013BE90(*(s32 *)(func_0010D6A0() + 0xE4))) != 0) {
+    if (func_001217F0(fldFindRoomByTask(*(s32 *)(func_0010D6A0() + 0xE4))) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -2188,7 +2167,7 @@ u32 func_0014EEA0(void) {
         func_0013DF60(0);
         return 1;
     }
-    scene = getFieldTaskRecordValue(*(s32 *)(func_0010D6A0() + 0xE4));
+    scene = fldGetTaskRecordValue(*(s32 *)(func_0010D6A0() + 0xE4));
     if (scene) {
         func_0013DF60(scene);
     }
@@ -2211,7 +2190,7 @@ u32 func_0014EF28(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    temp_v0 = func_0013F4D8(temp_v0);
+    temp_v0 = fldGetActorStat0(temp_v0);
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -2220,7 +2199,7 @@ u32 func_0014EF58(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    temp_v0 = func_0013F5A8(temp_v0);
+    temp_v0 = fldGetActorStat1(temp_v0);
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -2229,7 +2208,7 @@ u32 func_0014EF88(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    temp_v0 = func_0013F6B8(temp_v0);
+    temp_v0 = fldGetActorMotionEntry(temp_v0);
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -2238,7 +2217,7 @@ u32 func_0014EFB8(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    temp_v0 = func_0013F848(temp_v0);
+    temp_v0 = fldGetRowValue(temp_v0);
     func_0010D5F0(temp_v0);
     return 1;
 }

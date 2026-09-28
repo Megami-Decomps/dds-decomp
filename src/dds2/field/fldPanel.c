@@ -4,7 +4,7 @@ extern u32 D_00436204;
 
 extern u64 func_00101958(void);
 
-void func_001441C8(void) {
+void fldReleasePanelState(void) {
     u64 temp_v0;
 
     temp_v0 = func_00101958();

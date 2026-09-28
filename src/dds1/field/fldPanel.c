@@ -4,7 +4,7 @@ extern u32 D_003BAE74;
 extern void *func_00101A70(void);
 extern void func_002CFF98(void *);
 
-void func_001410E8(void) {
+void fldReleasePanelState(void) {
     void *panelState;
 
     panelState = func_00101A70();

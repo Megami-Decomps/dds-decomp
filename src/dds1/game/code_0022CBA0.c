@@ -80,7 +80,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F038);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F1C0);
 
-void func_0022F2A8(EventViewerState *viewer) {
+void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;
 
     active = func_0022F408((s32)viewer);
@@ -418,6 +418,8 @@ void evtEventViewerDestroyTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232E20);
 
+INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADB20);
+
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBE78);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBE7A);
@@ -487,6 +489,4 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
-
-INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADB20);
 

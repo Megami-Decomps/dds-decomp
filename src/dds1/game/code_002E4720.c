@@ -96,14 +96,14 @@ extern s32 func_00312C08(DevState *arg0);
 extern void func_003110C8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void EIntr(void);
 extern void sceCdPowerOff(void *arg0);
-extern s32 createSemaphore(s32 arg0, s32 arg1, s32 arg2);
+extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 extern s32 func_002CF670(const char *arg0);
 extern void *func_002CFEB8(s32 size);
 extern void func_002CFF98(void *ptr);
 extern void *func_002CFF68(s32 size);
 extern s32 func_002D03F8(s32 size);
 extern void func_002D0750(s32 arg0, s32 arg1);
-extern s32 func_002D0A48(s32 arg0);
+extern s32 sdfResourceRetainAddress(s32 arg0);
 extern s32 func_002D0A60(s32 arg0);
 extern u32 strlen(const char *s);
 extern void func_002E7730(CmdPkt *arg0, s32 arg1);
@@ -116,7 +116,7 @@ extern void sceSifSetRpcQueue(void *, s32);
 extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 extern void sceSifRpcLoop(void *);
 extern u8 D_003F9B90[];
-extern void sleepWithAlarm(s32);
+extern void sdfSleepWithAlarm(s32);
 void sdfDevWaitForDisc(void);
 extern s32 D_003BDA38;
 extern void func_002F3F98(s32);
@@ -182,7 +182,7 @@ void sdfDevWaitForDisc(void) {
     s32 status;
     WaitSema(D_003BDA58);
     for (;;) {
-        sleepWithAlarm(100);
+        sdfSleepWithAlarm(100);
         func_002F3F98(0);
         status = func_002F4258();
         if (D_003BD3E8 == 2) {
@@ -229,7 +229,7 @@ void func_002E55E0(void) {
     }
 }
 
-u8 func_002E5618(u32 arg0) {
+u8 sdfPacketExists(u32 arg0) {
     u8 buf[16];
 
     return func_002E5158(arg0, buf, 0) != 0;
@@ -252,9 +252,9 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E56A0);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5738);
 
-void func_002E57B8(void) {
-    D_003BDA58 = createSemaphore(1, 0xff, 0);
-    D_003BDA64 = createSemaphore(0, 0xff, 0);
+void sdfInitDeviceSemaphores(void) {
+    D_003BDA58 = sdfCreateSemaphore(1, 0xff, 0);
+    D_003BDA64 = sdfCreateSemaphore(0, 0xff, 0);
     D_003BD3D8 = 0;
     func_002F3CB8(0);
     func_002F4190(D_003BD3E8);
@@ -293,16 +293,16 @@ void func_002E5B10(DevState *state, s32 event, s32 unused, s32 value, s32 contex
     }
     SignalSema(D_003BD3F4);
 }
-s32 func_002E6E08(DevState *);
+s32 sdfDevActivate(DevState *);
 
 DevState *sdfDevCreateCommandState(s32 command) {
     DevState *state;
     if (D_003BD3F4 < 0) {
-        D_003BD3F4 = createSemaphore(0, 0x80, 0);
+        D_003BD3F4 = sdfCreateSemaphore(0, 0x80, 0);
     }
     state = sdfDevCreateCallbackState(command, func_002E5B10, 0);
     WaitSema(D_003BD3F4);
-    func_002E6E08(state);
+    sdfDevActivate(state);
     return state;
 }
 
@@ -326,7 +326,7 @@ u32 func_002E5C88(void) {
 }
 
 u32 func_002E5CB0(void) {
-    func_002E6C90();
+    sdfDevQueueOperation();
     WaitSema(D_003BD3F4);
     return D_003BDA6C;
 }
@@ -410,7 +410,7 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
     return state;
 }
 
-s32 func_002E6C90(DevState *arg0, s32 arg1, s32 arg2) {
+s32 sdfDevQueueOperation(DevState *arg0, s32 arg1, s32 arg2) {
     if (arg0->state != 7) {
         return -1;
     }
@@ -434,7 +434,7 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6D48);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6DA8);
 
-s32 func_002E6E08(DevState *arg0) {
+s32 sdfDevActivate(DevState *arg0) {
     if (arg0->state != 9) {
         return -1;
     }
@@ -513,16 +513,16 @@ void sdfSetThreadPriorities(s32 arg0) {
     } while (i < 4);
 }
 
-void func_002E7078(void) {
+void sdfRaiseDeviceThreadPriority(void) {
     D_003BD42F = 3;
     sdfSetThreadPriorities(0x78);
 }
 
-void func_002E7098(void) {
+void sdfRestoreDeviceThreadPriority(void) {
     sdfSetThreadPriorities(0x48);
 }
 
-void func_002E70B0(void) {
+void sdfTickThreadPriorityOverride(void) {
     u8 val = D_003BD42F;
     u8 next;
 
@@ -534,7 +534,7 @@ void func_002E70B0(void) {
     if (next != 0) {
         return;
     }
-    func_002E7098();
+    sdfRestoreDeviceThreadPriority();
 }
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E70F0);
@@ -556,7 +556,7 @@ void func_002E7210(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7228);
 
-void func_002E7370(void) {
+void sdfLoadDevModule(void) {
     s32 resident;
     if (D_003BD477 == 0) {
         D_003BD478 = 0;
@@ -603,7 +603,7 @@ s32 sdfBcdStrToInt(s32 arg0) {
     return acc;
 }
 
-s32 devDecimalToPackedDigits(s32 number) {
+s32 sdfDecimalToPackedDigits(s32 number) {
     s32 shift = 0;
     s32 bcd = 0;
 
@@ -616,7 +616,7 @@ s32 devDecimalToPackedDigits(s32 number) {
     return bcd;
 }
 
-DevRequest *devCreateRequest(s32 count, s32 stride, s32 mode) {
+DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     DevRequest *request = func_002CFEB8(sizeof(*request));
 
     request->mode = mode;
@@ -625,7 +625,7 @@ DevRequest *devCreateRequest(s32 count, s32 stride, s32 mode) {
     request->stride = stride;
     if (count != 0) {
         request->handle = func_002D03F8(stride * count);
-        request->buffer = func_002D0A48(request->handle);
+        request->buffer = sdfResourceRetainAddress(request->handle);
     } else {
         request->handle = 0;
         request->buffer = 0;
@@ -633,7 +633,7 @@ DevRequest *devCreateRequest(s32 count, s32 stride, s32 mode) {
     return request;
 }
 
-void func_002E7680(s32 *arg0) {
+void sdfDestroyDevRequest(s32 *arg0) {
     func_002D0918(*arg0);
     func_002CFF98(arg0);
 }
@@ -703,6 +703,8 @@ f32 sdfWrapAngle(f32 angle) {
     return angle;
 }
 
+INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
+
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD3C8);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD3D0);
@@ -764,6 +766,4 @@ INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD470);
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD478);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD480);
-
-INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
 

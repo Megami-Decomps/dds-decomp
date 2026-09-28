@@ -8,7 +8,7 @@ void func_002C9328(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "mc/mcManager", func_002C9348);
 
-void func_002C9398(u32 arg0, u32 arg1) {
+void mcMakeDirectory(u32 arg0, u32 arg1) {
     sceMcMkdir(arg0, 0, arg1);
 }
 

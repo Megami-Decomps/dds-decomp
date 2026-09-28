@@ -14,7 +14,7 @@ typedef struct {
 
 void func_00228CA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
-u32 func_002BC8F0(void *arg0, const char *arg1, s32 arg2);
+u32 effLoadIndexedResource(void *arg0, const char *arg1, s32 arg2);
 void func_002BDD60(u32 sprite);
 void func_002C1430(s32 object);
 void func_002C0A48(s32 property, s32 object);
@@ -25,22 +25,22 @@ f32 func_002E8398(s32 seed);
 
 extern u32 D_003BBDD0[];
 
-void func_00228B38(u32 *arg0) {
-    *arg0 = func_002BC8F0(D_003BBDD0, "solarnoise.spr", 0);
+void evtLoadSolarNoiseSprite(u32 *arg0) {
+    *arg0 = effLoadIndexedResource(D_003BBDD0, "solarnoise.spr", 0);
 }
 
-void releaseSolarNoiseSprite(u32 *sprite) {
+void evtReleaseSolarNoiseSprite(u32 *sprite) {
     func_002BDD60(*sprite);
 }
 
-void initializeSolarOverlay(s32 object) {
+void evtInitializeSolarOverlay(s32 object) {
     func_002C0950(0x30000, object);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0, object);
     func_002C1380(object);
     func_002C0950(0x30000, object);
 }
 
-void finalizeSolarOverlay(s32 object) {
+void evtFinalizeSolarOverlay(s32 object) {
     func_002C1430(object);
     func_002C0A48(0x44, object);
     func_002C0950(0x50000, object);
@@ -60,14 +60,14 @@ INCLUDE_ASM(const s32, "game/code_00228B38", func_00229230);
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229320);
 
-void drawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
+void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
     func_00228CA0(x, y, z, width, layer, 0, context, color);
     if (layer != 0 && layer != 4 && layer != 8) {
         func_00228CA0(x, y, z, width, 9, 0, context, color);
     }
 }
 
-s32 func_002294C0(SolarLayerTimer *timer) {
+s32 evtAdvanceSolarShortLayerTimer(SolarLayerTimer *timer) {
     s32 age;
 
     age = timer->age + 1;
@@ -79,7 +79,7 @@ s32 func_002294C0(SolarLayerTimer *timer) {
     return timer->active;
 }
 
-s32 func_00229500(SolarLayerTimer *timer) {
+s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
     s32 age;
 
     age = timer->age + 1;
@@ -105,7 +105,7 @@ INCLUDE_ASM(const s32, "game/code_00228B38", func_00229D28);
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229D80);
 
-void updateSolarPointTimers(s32 object) {
+void evtUpdateSolarPointTimers(s32 object) {
     SolarPoint *point = (SolarPoint *)(object + 0xC);
     s32 i;
     for (i = 7; i >= 0; i--, point++) {
@@ -125,10 +125,6 @@ void updateSolarPointTimers(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229ED8);
 
-INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
-
-INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD8);
-
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACBF8);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
@@ -136,4 +132,8 @@ INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC78);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC88);
+
+INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
+
+INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD8);
 

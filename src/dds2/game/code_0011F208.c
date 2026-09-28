@@ -2,7 +2,7 @@
 
 extern s32 D_00435F68;
 
-extern u64 func_0010FFE8(void);
+extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s64 func_00110628(u64);
 
@@ -14,7 +14,7 @@ extern u64 func_00110CD8(u64, u64);
 
 extern s64 func_00114058(u64);
 
-extern u64 func_0032CE80(u64);
+extern u64 sdfAllocPacketAligned(u64);
 
 extern s32 D_00435DD0;
 
@@ -64,7 +64,7 @@ extern char D_00412F40[];
 
 extern s32 D_00435F7C;
 
-extern u32 acknowledgeCampState(void);
+extern u32 mnuAcknowledgeCampState(void);
 
 u8 func_001283A8(u32 arg0);
 
@@ -124,9 +124,9 @@ extern u32 D_00435F3C;
 
 extern u32 func_003292A8(u32);
 
-extern void *func_003292A0(u32);
+extern void *sdfMemoryGetBlockAddress(u32);
 
-extern void loadModelViewerPackage(s32, s32, s32, void *, u32);
+extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
 
 void func_001258B8(void);
 
@@ -138,7 +138,7 @@ extern void func_0012A0E8(void);
 
 extern s32 func_0012A140(void);
 
-extern void func_0012A078(void);
+extern void fldFreeDisplayObjects(void);
 
 extern s32 func_0032CD98(void);
 
@@ -160,8 +160,8 @@ void func_0011F208(u32 *arg0, u32 arg1, u32 arg2) {
 u64 func_0011F218(void) {
     u64 temp_v0;
 
-    temp_v0 = func_0032CE80(0x20);
-    func_0032CEC0(temp_v0);
+    temp_v0 = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(temp_v0);
     return temp_v0;
 }
 
@@ -171,7 +171,7 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F3D8);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F518);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F800);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldStepValueByPad);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F908);
 
@@ -353,7 +353,7 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00123DE8);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00123EE0);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124040);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldAngleDifference);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00124110);
 
@@ -374,14 +374,14 @@ f32 func_001249B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00124A10);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fieldPointDistance);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldPointDistance);
 
 void func_00124BF0(s64 arg0) {
     u64 temp_v0;
     s64 temp_v1;
     u64 temp_v2;
 
-    temp_v0 = func_0010FFE8();
+    temp_v0 = dds3GetWorldSecondaryObject();
     temp_v0 = func_00110CD8(temp_v0, 6);
     temp_v1 = func_00110628(temp_v0);
     if (temp_v1 == 0) {
@@ -546,27 +546,27 @@ void func_00125AD8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00125B10);
 
-void prepareFieldResourceBuffer(void) {
+void fldPrepareResourceBuffer(void) {
     void *source;
     void *buffer;
     func_001258B8();
     D_00435F40 = D_00435F44;
     D_00435F38 = func_003292A8(D_00435F44);
-    source = func_003292A0(D_00435F34);
-    buffer = func_003292A0(D_00435F38);
+    source = sdfMemoryGetBlockAddress(D_00435F34);
+    buffer = sdfMemoryGetBlockAddress(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
-    loadModelViewerPackage(2, 0, 0x101, buffer, D_00435F40);
+    mdlLoadViewerPackage(2, 0, 0x101, buffer, D_00435F40);
     func_003298C0(D_00435F38);
     D_00435F38 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", releaseFieldResources);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldReleaseResources);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00125E68);
 
 void func_00125EE8(void) {
-    func_0013B970();
+    fldResetTaskSlots();
     fldTestDrawDestroy();
     func_00125E68();
     func_0023A9A8();
@@ -587,12 +587,12 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00125F58);
 void func_00126000(void) {
     if (D_00435F0C != 0) {
         func_00128390(0x40);
-        objInvokeSlot1Handler(D_00435F0C, 0);
+        dds3InvokeSlot1Handler(D_00435F0C, 0);
     }
     D_00389858[0] = 4;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126040);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldCreatePlayerObject);
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EB0);
 
@@ -699,7 +699,7 @@ void func_00126B20(void) {
     D_00389770[3] &= ~8;
 }
 
-u8 isFieldFlagActive(void) {
+u8 fldIsFlagActive(void) {
     s32 flags = *(s32 *)(D_00435DD0 + 0xA58);
     flags &= 1;
     if (flags == 0) return 0;
@@ -708,7 +708,7 @@ u8 isFieldFlagActive(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126B70);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126BA0);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldRollEncounter);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126C80);
 
@@ -730,7 +730,7 @@ u8 func_00127398(void) {
     if (D_00435F7C > 0) {
         return 2;
     }
-    if (acknowledgeCampState() != 0) {
+    if (mnuAcknowledgeCampState() != 0) {
         return 1;
     }
     return func_001283A8(0x20) != 0 ? 0 : 3;
@@ -797,7 +797,7 @@ u8 func_00128580(void) {
     if (D_00389790[0] == 0 && func_0012A150() != 0) {
         func_0012A0E8();
         if (func_0012A140() == 1) return 0;
-        func_0012A078();
+        fldFreeDisplayObjects();
         return 0;
     }
     return func_0032CD98() == 0;
@@ -842,7 +842,7 @@ void func_001286C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001286F8);
 
-void *createDummyFieldMatter(void) {
+void *fldCreateDummyMatter(void) {
     u32 args[8];
     void *matter;
     args[0] = 0;

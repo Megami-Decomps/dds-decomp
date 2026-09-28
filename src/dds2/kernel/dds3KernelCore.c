@@ -41,7 +41,7 @@ extern u8 D_00411078[];
 
 extern void func_00100C28(void);
 
-extern s32 func_001018B0(void* target);
+extern s32 kwlnTaskIsRegistered(void* target);
 
 void func_00100980(KwlnTask* task)
 {
@@ -194,7 +194,7 @@ s32 func_00101700(KwlnTask* task)
 {
     u32 state;
 
-    if (func_001018B0(task) == 0) {
+    if (kwlnTaskIsRegistered(task) == 0) {
         return 0;
     }
     state = task->flags & 0xF;
@@ -206,7 +206,7 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101740);
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101820);
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 func_001018B0(void* target)
+s32 kwlnTaskIsRegistered(void* target)
 {
     s32 idx;
     void* node;

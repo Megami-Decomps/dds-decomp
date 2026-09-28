@@ -1,7 +1,7 @@
 #include "common.h"
 
-extern void func_002C5720(void);
-extern void func_002C5798(void);
+extern void sdfCounterTickCountdown(void);
+extern void mnuTickMapTimers(void);
 extern void func_002C5C70(void);
 
 extern void func_002C3DB0(void);
@@ -90,8 +90,8 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C45C8);
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4630);
 
 void func_002C4650(void) {
-    func_002C5720();
-    func_002C5798();
+    sdfCounterTickCountdown();
+    mnuTickMapTimers();
     func_002C5C70();
 }
 
@@ -107,7 +107,7 @@ s32 func_002C4A10(void) {
     return ((SdfCounterRuntime *)D_003BD274)->channel->display->value;
 }
 
-float func_002C4A28(void) {
+float sdfCounterGetScaledValue(void) {
     SdfCounterTimer *timer;
 
     timer = ((SdfCounterRuntime *)D_003BD274)->timer;
@@ -120,7 +120,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5338);
 
-void func_002C56C0(void) {
+void sdfCounterIncrease(void) {
     s32 temp_v0;
 
     temp_v0 = ((SdfCounterRuntime *)D_003BD274)->timer->value;
@@ -129,7 +129,7 @@ void func_002C56C0(void) {
     }
 }
 
-void func_002C56E8(void) {
+void sdfCounterDecrease(void) {
     s32 temp_v0;
 
     temp_v0 = ((SdfCounterRuntime *)D_003BD274)->timer->value;
@@ -138,7 +138,7 @@ void func_002C56E8(void) {
     }
 }
 
-void func_002C5708(s32 mode) {
+void sdfCounterSetMode(s32 mode) {
     SdfCounterTimer *timer;
 
     timer = ((SdfCounterRuntime *)D_003BD274)->timer;
@@ -146,7 +146,7 @@ void func_002C5708(s32 mode) {
     timer->countdown = 8;
 }
 
-void func_002C5720(void) {
+void sdfCounterTickCountdown(void) {
     SdfCounterTimer *timer;
 
     timer = ((SdfCounterRuntime *)D_003BD274)->timer;
@@ -155,9 +155,9 @@ void func_002C5720(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5748);
+INCLUDE_ASM(const s32, "game/code_002C3868", mnuSetMapTimerFlags);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5798);
+INCLUDE_ASM(const s32, "game/code_002C3868", mnuTickMapTimers);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C57F0);
 

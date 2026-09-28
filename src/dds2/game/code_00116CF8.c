@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0010FFE8(void);
+extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 func_00110C70(u64, u64, u64);
 
@@ -14,7 +14,7 @@ u32 func_00116D50(u64 arg0) {
     s32 temp_v0;
     u64 temp_v1;
 
-    temp_v1 = func_0010FFE8();
+    temp_v1 = dds3GetWorldSecondaryObject();
     temp_v0 = func_00110C70(temp_v1, arg0, 6);
     return *(u32 *)(*(s32 *)(temp_v0 + 0x18) + 0x10);
 }

@@ -34,7 +34,7 @@ void func_002EDC88(u8 *arg0) {
     *arg0 = 0xff;
 }
 
-void func_002EDC98(PacStatePrefix *state, s32 count) {
+void sdfPacAdvanceInput(PacStatePrefix *state, s32 count) {
     state->input = state->input + count;
     state->available = state->available - count;
     state->consumed = state->consumed + count;

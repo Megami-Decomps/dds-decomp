@@ -37,7 +37,7 @@ typedef struct EffMagatuhiDst {
     f32 f50;
 } EffMagatuhiDst; /* 0x54 */
 
-void func_00190FF8(s32 arg0) {
+void effMagatuhiReleaseResource(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x34));
 }
 
@@ -58,7 +58,7 @@ void func_001918B8(void) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001918D0);
 
 void func_00191A98(s32 arg0) {
-    func_00195BC8(*(u32 *)(arg0 + 0x180));
+    effMathReleaseWorkResource(*(u32 *)(arg0 + 0x180));
     func_00190DB0(*(u32 *)(arg0 + 0x18c));
     func_003297C8(*(u32 *)(arg0 + 400));
 }
@@ -83,7 +83,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001922B0);
 
 void func_00192438(s32 arg0) {
-    func_00195BC8(*(u32 *)(arg0 + 0x184));
+    effMathReleaseWorkResource(*(u32 *)(arg0 + 0x184));
     func_00190DB0(*(u32 *)(arg0 + 0x188));
     func_003297C8(*(u32 *)(arg0 + 0x18c));
 }

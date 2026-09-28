@@ -22,7 +22,7 @@ extern u64 func_001E66D8(void);
 
 extern u64 func_001E6740(void);
 
-extern u64 func_001E8B40(u64, u64);
+extern u64 btlCreateCommandSoundTask(u64, u64);
 
 extern u32 D_00436B00;
 
@@ -80,9 +80,9 @@ extern void func_0035C860();
 
 extern void *func_00328D68(s32 size);
 
-extern u32 func_002290D0(void);
+extern u32 battleGetEffectActive(void);
 
-extern u32 func_00229158(void);
+extern u32 battleGetEffectValue(void);
 
 extern u32 func_002192D8(void);
 
@@ -109,17 +109,17 @@ extern void func_002110E8(s32, u16);
 extern void func_00226558(u8);
 extern s32 func_00221090(void);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", battleCreateControlObject);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlCreateControlObject);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207A80);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207C28);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207DC0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlUnitGetMuzzlePosVU);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207E38);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlUnitGetBodyPosVU);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207EB0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlUnitGetEffectPosVU);
 
 f32 func_00207F40(s32 arg0) {
     f32 temp_f2;
@@ -133,25 +133,25 @@ f32 func_00207F40(s32 arg0) {
     return temp_f1 * *(f32 *)(arg0 + 0x80);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207F68);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlUnitGetTopY);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207FB0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlUnitGetBottomY);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208000);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208298);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208530);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlGetMaxUnitTop);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002085D8);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlGetMaxUnitReach);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208668);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlGetExtremeUnitY);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208750);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002089F0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208B10);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlFindFarthestUnit);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
 
@@ -209,19 +209,19 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002091C8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209330);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlTriangleNormalVU);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209390);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002093F0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlPointOffPlaneVU);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209460);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlProjectOnPlaneVU);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002094D0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlPointInBox);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002095A0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlBlendColor);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209658);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlBlendColorVec);
 
 void func_002096B8(s32 arg0, f32 arg1) {
     *(f32 *)(arg0 + 0) = arg1;
@@ -270,7 +270,7 @@ void func_00209D40(void) {
     s32 temp_v0;
 
     temp_v0 = func_001AA6F8();
-    releaseSharedEffectReference(*(u32 *)(temp_v0 + 0x4e8));
+    effReleaseSharedReference(*(u32 *)(temp_v0 + 0x4e8));
     *(u32 *)(temp_v0 + 0x4e8) = 0;
 }
 
@@ -757,7 +757,7 @@ u32 func_0020C078(void) {
 }
 
 u32 func_0020C080(void) {
-    if (func_00229110() != 0) {
+    if (battleHasEffectActor() != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -858,7 +858,7 @@ u32 func_0020C568(void) {
 u32 func_0020C570(void) {
     u32 temp_v0;
 
-    temp_v0 = func_002290D0();
+    temp_v0 = battleGetEffectActive();
     func_0010D818(temp_v0);
     return 1;
 }
@@ -882,7 +882,7 @@ u32 func_0020C5C0(void) {
 u32 func_0020C5E8(void) {
     u32 temp_v0;
 
-    temp_v0 = func_00229158();
+    temp_v0 = battleGetEffectValue();
     func_0010D818(temp_v0);
     return 1;
 }
@@ -962,17 +962,17 @@ u32 func_0020C7E8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C810);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlCmdCameraMove);
 
 u32 func_0020C8E0(void) {
     u64 temp_v0;
 
     temp_v0 = func_001E66D8();
-    func_001E1580(temp_v0);
+    startBattleTask(temp_v0);
     temp_v0 = func_001E6740();
-    func_001E1580(temp_v0);
-    temp_v0 = func_001E8B40(func_0010D8D0(), 0x11);
-    func_001E1580(temp_v0);
+    startBattleTask(temp_v0);
+    temp_v0 = btlCreateCommandSoundTask(func_0010D8D0(), 0x11);
+    startBattleTask(temp_v0);
     return 1;
 }
 
@@ -980,11 +980,11 @@ u32 func_0020C938(void) {
     u64 temp_v0;
 
     temp_v0 = func_001E66D8();
-    func_001E1580(temp_v0);
+    startBattleTask(temp_v0);
     temp_v0 = func_001E6740();
-    func_001E1580(temp_v0);
-    temp_v0 = func_001E8B40(0, 3);
-    func_001E1580(temp_v0);
+    startBattleTask(temp_v0);
+    temp_v0 = btlCreateCommandSoundTask(0, 3);
+    startBattleTask(temp_v0);
     return 1;
 }
 
@@ -992,7 +992,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020C988);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CA10);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CA98);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlCmdCameraMoveBlend);
 
 u32 func_0020CB80(void) {
     func_0020D128(D_00419570);
@@ -1063,7 +1063,7 @@ u32 func_0020CD50(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CD78);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlBindActorSlot);
 
 void func_0020CE28(void) {
 }
@@ -1196,9 +1196,9 @@ void func_0020D268(void) {
 void func_0020D270(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D278);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlFindEntryByCommand);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D2C0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlCountNonPartOpcodes);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419570);
 
@@ -1312,7 +1312,7 @@ void func_0020D8F0(s32 arg0) {
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D948);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlAppendEntry);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DA28);
 
@@ -1335,7 +1335,7 @@ u32 func_0020DFC8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DFD0);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E048);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlTrimResourceName);
 
 u32 func_0020E0F8(s32 arg0) {
     return *(u32 *)(*(s32 *)(arg0 + 0x34) + 4);

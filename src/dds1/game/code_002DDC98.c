@@ -48,7 +48,7 @@ extern f32 D_003BDA30;
 extern void *func_002CFEB8(s32 size);
 extern u8 D_003F98A0[];
 extern void func_002D78B8(u32 object);
-extern void *func_002D3FD0(s32);
+extern void *sdfAllocPacketAligned(s32);
 extern void *func_002E1428(void *, s64, s64, s64, s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
 extern void func_002DDE88(void *, s32);
@@ -146,7 +146,7 @@ void func_002DDD60(void *arg0) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_002DDD88(void *dst, void *src) {
+void sdfVuTransformVector(void *dst, void *src) {
     __asm__ volatile (
         ".set noreorder               \n"
         "lqc2 vf10, 0x0(%1)           \n"
@@ -160,7 +160,7 @@ void func_002DDD88(void *dst, void *src) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-f32 func_002DDDA8(void *arg0, void *arg1) {
+f32 sdfVuDot3(void *arg0, void *arg1) {
     f32 ret;
     __asm__ volatile (
         ".set noreorder           \n"
@@ -177,7 +177,7 @@ f32 func_002DDDA8(void *arg0, void *arg1) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_002DDDD0(void *dst, void *src1, void *src2) {
+void sdfVuCross3(void *dst, void *src1, void *src2) {
     __asm__ volatile (
         ".set noreorder             \n"
         "lqc2 vf10, 0x0(%1)         \n"
@@ -246,7 +246,7 @@ typedef struct {
     u8 *payload;           /* 0x90 */
 } VuWork;
 
-void func_002DDF58(VuWork *work, u16 *params, u32 mask) {
+void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
     u8 *payload = (u8 *)(params + 4);
     u16 second;
     u16 flags;
@@ -470,11 +470,11 @@ u32 func_002E12C0(s32 width) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E12C8);
 
-s32 consCreateDrawPacket(s32 owner, s32 width, s32 height) {
+s32 sdfConsCreateDrawPacket(s32 owner, s32 width, s32 height) {
     s32 size = func_002E12C0(width);
-    void *packet = (void *)func_002D3FD0(size);
+    void *packet = (void *)sdfAllocPacketAligned(size);
     s32 result = func_002E12C8(packet, width, height);
-    func_002D4038(owner, result);
+    sdfAppendPacket(owner, result);
     return result;
 }
 
@@ -483,7 +483,7 @@ u32 func_002E13E0(u32 arg0, s32 arg1) {
     return arg0;
 }
 
-s32 consCalculateDrawPacketSize(s32 width, s32 height) {
+s32 sdfConsCalculateDrawPacketSize(s32 width, s32 height) {
     return (width * height + 2) << 4;
 }
 
@@ -494,7 +494,7 @@ s32 func_002E1420(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1428);
 
 void *func_002E1478(s32 height) {
-    void *packet = func_002D3FD0(consCalculateDrawPacketSize(5, height));
+    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, height));
     func_002E1428(packet, 0x156, 5, 0x53531, height);
     return packet;
 }
@@ -529,7 +529,7 @@ typedef struct DmaPacketHeader {
     u32 unused1C;
 } DmaPacketHeader;
 
-void consInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
+void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
     s32 qwc = (size + 15) >> 4;
     packet->quadwords = qwc;
     packet->address = address & 0x0FFFFFFF;
@@ -556,7 +556,7 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2110);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E21A0);
 
-void initGeometryDmaPacket(u8 *packet, const f32 *matrix) {
+void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
     *(u16 *)packet = 2;
     *(u32 *)(packet + 8) = 0x6403C000;
     *(f32 *)(packet + 12) = matrix[0];
@@ -620,7 +620,7 @@ void func_002E3B80(s32 arg0, u8 arg1) {
     D_003F9B00[arg0].unk22 = arg1;
 }
 
-void devConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
+void sdfDevConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
     F9B00Entry *entry = &D_003F9B00[index];
     entry->unk20 = arg1 & 0xFF;
     D_003F9B00[index].unk22 = arg2 & 0xFF;
@@ -628,7 +628,7 @@ void devConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3BD8);
 
-void devConsInit(void) {
+void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
         D_003BDA34 = func_002D3288(D_00315BA0);
@@ -636,7 +636,7 @@ void devConsInit(void) {
 }
 
 u32 func_002E3D18(void) {
-    devConsInit();
+    sdfDevConsInit();
     return D_003BDA34;
 }
 
@@ -644,7 +644,7 @@ u32 *func_002E3D38(void) {
     return D_00398660;
 }
 
-void devConsListInsert(ConsNode *arg0) {
+void sdfDevConsListInsert(ConsNode *arg0) {
     ConsNode *head = D_003BD3C0;
 
     arg0->next = NULL;
@@ -655,7 +655,7 @@ void devConsListInsert(ConsNode *arg0) {
     D_003BD3C0 = arg0;
 }
 
-void devConsListRemove(ConsNode *arg0) {
+void sdfDevConsListRemove(ConsNode *arg0) {
     ConsNode *next = arg0->next;
     ConsNode *prev = arg0->prev;
 
@@ -669,27 +669,27 @@ void devConsListRemove(ConsNode *arg0) {
     }
 }
 
-void devConsNodeDestroy(ConsNode *arg0) {
-    devConsListRemove(arg0);
+void sdfDevConsNodeDestroy(ConsNode *arg0) {
+    sdfDevConsListRemove(arg0);
     func_002D0918(arg0->bufferHandle);
     func_002CFF98(arg0);
 }
 
-void devConsNodeClear(ConsNode *arg0) {
+void sdfDevConsNodeClear(ConsNode *arg0) {
     arg0->unk10 = 0;
     arg0->unk12 = 0;
     memset(arg0->pixels, 0, arg0->width * arg0->height * 2);
 }
 
 void func_002E3E00(ConsNode *arg0) {
-    devConsNodeClear(arg0);
+    sdfDevConsNodeClear(arg0);
 }
 
-ConsNode *devConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
+ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     ConsNode *node;
     u32 h;
 
-    devConsInit();
+    sdfDevConsInit();
     node = func_002CFEB8(0x20);
     node->unk8 = arg0;
     node->unkA = arg1;
@@ -700,11 +700,13 @@ ConsNode *devConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     node->unk16 = 0;
     h = func_002D03F8((arg2 * arg3) * 2);
     node->bufferHandle = h;
-    node->pixels = (u8 *)func_002D0A48(h);
-    devConsNodeClear(node);
-    devConsListInsert(node);
+    node->pixels = (u8 *)sdfResourceRetainAddress(h);
+    sdfDevConsNodeClear(node);
+    sdfDevConsListInsert(node);
     return node;
 }
+
+INCLUDE_RODATA(const s32, "game/code_002DDC98", D_003B4548);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD350);
 
@@ -745,6 +747,4 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A9);
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C0);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C4);
-
-INCLUDE_RODATA(const s32, "game/code_002DDC98", D_003B4548);
 

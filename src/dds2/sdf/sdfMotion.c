@@ -27,7 +27,7 @@ typedef struct KeyOut {
     f32 weight;
 } KeyOut;
 
-f32 func_00334788(KeyOut *a0);
+f32 sdfInterpolateMotionKeys(KeyOut *a0);
 
 extern s32 (*D_0040B368[])(void *a0, s32 a1);
 
@@ -129,7 +129,7 @@ void func_00334670(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334678);
 
-f32 func_00334788(KeyOut *output) {
+f32 sdfInterpolateMotionKeys(KeyOut *output) {
     f32 first;
     f32 weight;
 
@@ -142,7 +142,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003347B0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334808);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334888);
+INCLUDE_ASM(const s32, "sdf/sdfMotion", sdfMotionBlendFiveFloats);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003348D8);
 

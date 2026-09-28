@@ -1,7 +1,7 @@
 #include "common.h"
 
 typedef struct {
-    void *objectHandle; /* 0x0 passed to func_00111840, returned by func_00114A68 */
+    void *objectHandle; /* 0x0 passed to func_00111840, returned by effObjGetObjectHandle */
     u32 flags;   /* 0x4 effect flag bits */
     u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
     void *bill;   /* 0xC passed to func_00151E60/func_00152200 */
@@ -28,7 +28,7 @@ typedef struct {
 } EffectObj;
 
 void func_001143D8(void *arg);
-void func_0010F5E8(void *arg);
+void effObjFreeInner(void *arg);
 void func_00111840(void *arg);
 void func_002CFF98(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
@@ -63,7 +63,7 @@ void func_00114570(EffectObj *obj) {
 
     data = obj->data;
     func_001143D8(data);
-    func_0010F5E8(obj);
+    effObjFreeInner(obj);
     func_00111840(data->objectHandle);
     func_002CFF98(obj->data);
     obj->data = NULL;
@@ -73,7 +73,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114988);
 
-void *func_00114A68(EffectObj *obj) {
+void *effObjGetObjectHandle(EffectObj *obj) {
     return obj->data->objectHandle;
 }
 
@@ -196,11 +196,11 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115970);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001159E8);
 
-void func_00115B88(EffectObj *obj, s32 flags) {
+void effObjSetFlags(EffectObj *obj, s32 flags) {
     obj->data->flags |= flags;
 }
 
-void func_00115BA0(EffectObj *obj, s32 flags) {
+void effObjClearFlags(EffectObj *obj, s32 flags) {
     obj->data->flags &= ~flags;
 }
 

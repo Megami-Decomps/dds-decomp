@@ -34,7 +34,7 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_00177130);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177220);
 
-void func_001773E8(s32 arg0, s32 arg1) {
+void effAdvanceVectorRecord(s32 arg0, s32 arg1) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)(arg0 + 0x58) + arg1 * 0x10;

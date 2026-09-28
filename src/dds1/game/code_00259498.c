@@ -5,7 +5,7 @@ extern void func_002CFF98(void *);
 
 extern s32 func_002D03F8(s32);
 
-extern void *func_002D03F0(s32);
+extern void *sdfMemoryGetBlockAddress(s32);
 
 extern f32 func_002E8398(s32);
 
@@ -51,9 +51,9 @@ typedef struct {
     u8 pad46[2];
 } MovieSpriteResource;
 
-void *func_0025B7D8(s32 owner, u8 sprite, u8 variant) {
+void *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant) {
     s32 allocation = func_002D03F8(0x48);
-    MovieSpriteResource *resource = func_002D03F0(allocation);
+    MovieSpriteResource *resource = sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->owner = owner;
@@ -64,6 +64,8 @@ void *func_0025B7D8(s32 owner, u8 sprite, u8 variant) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025B888);
+
+INCLUDE_RODATA(const s32, "game/code_00259498", D_003AF9F0);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
 
@@ -78,6 +80,4 @@ INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4CC);
-
-INCLUDE_RODATA(const s32, "game/code_00259498", D_003AF9F0);
 

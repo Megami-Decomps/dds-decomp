@@ -41,7 +41,7 @@ u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 void func_002E9340(s32 arg0);
 
-void func_002E9140(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
+void soundSendSpatialPosition(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
     u32 packet[8];
 
     packet[0] = arg0;
@@ -73,7 +73,7 @@ INCLUDE_ASM(const s32, "game/code_002E9140", func_002E94E0);
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9510);
 
-void soundReleaseMidiTrack(s32 id) {
+void sndReleaseMidiTrack(s32 id) {
     u32 packet[4];
     if (func_002E92C0(id) != 0) {
         packet[0] = id;

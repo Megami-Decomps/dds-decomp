@@ -6,7 +6,7 @@ extern void func_0026C900(void);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", menuCheckTableSums);
+INCLUDE_ASM(const s32, "game/code_0029AFC0", mnuCheckTableSums);
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B008);
 

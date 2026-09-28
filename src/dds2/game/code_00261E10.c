@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00264B58(void);
+extern s32 evtAdvanceSlotFlags(void);
 
 extern s64 func_0026C768(void);
 
@@ -78,7 +78,7 @@ extern void func_002971C0(s32, u32);
 
 extern void func_002958B0();
 
-s32 func_00261E10(void) {
+s32 evtIsFadeDispatchIdle(void) {
     s32 fadeActive = kwlnFadeIsActive();
 
     if (fadeActive != 0) {
@@ -331,7 +331,7 @@ s32 func_00263220(u32 index) {
     return 0;
 }
 
-s32 func_00263270(void) {
+s32 evtShowResultText(void) {
     char text[0x40];
     func_0026C918(0, D_00435E48 + 0x11);
     func_0035C860(text, D_00437840, *(s32 *)(D_00435DD0 + 0x1e654));
@@ -542,7 +542,7 @@ void func_00263EB0(s32 obj) {
     }
 }
 
-s32 func_00263F10(s32 id) {
+s32 evtIsAllowedId(s32 id) {
     u32 i;
     for (i = 0; i < 3; i++) {
         if (D_003CE3F8[i] == id) {
@@ -651,7 +651,7 @@ s64 func_00264B10(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 func_00264B58(void) {
+s32 evtAdvanceSlotFlags(void) {
     s32 i = 0;
     while (func_00263220(*(s32 *)(D_00435DD0 + 0x1e658) + i + 1) == 0) {
         mdlFlagSet(D_003CE14C[(*(s32 *)(D_00435DD0 + 0x1e658) + i) * 3 + 3]);
@@ -666,7 +666,7 @@ u32 func_00264C00(void) {
     s32 temp_v1;
 
     temp_v1 = func_00101958();
-    temp_v0 = func_00264B58();
+    temp_v0 = evtAdvanceSlotFlags();
     *(u8 *)(temp_v1 + 0xcc) = temp_v0;
     if ((*(s32 *)(temp_v1 + 200) == 0) && (*(s8 *)(temp_v1 + 0xcd) == '\x01')) {
         func_0026C5B8(0x22);
@@ -722,7 +722,7 @@ s32 func_00264D80(s32 context) {
     return 0;
 }
 
-s32 func_00264E18(void) {
+s32 evtShowSlotText(void) {
     char text[0x40];
     if (*(s8 *)(func_00101958() + 0xcc) > 0) {
         func_0026C918(0, D_00435E48 + 0x11);
@@ -774,7 +774,7 @@ s64 func_00264FF0(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00265038);
 
-s32 func_00265130(s32 count) {
+s32 evtIsLastSlot(s32 count) {
     s32 active = 0;
     u32 i;
     for (i = 0; i < 8; i++) {

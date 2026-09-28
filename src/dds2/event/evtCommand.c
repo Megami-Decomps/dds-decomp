@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_0010D8A8(void);
+extern s32 scrGetCommandTimer(void);
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 func_0010D650(s32 idx);
@@ -17,7 +17,7 @@ void func_0035B6E0(const char *fmt, ...);
 
 void func_0010BFE0(void);
 
-void func_00241490(s32 arg0, s32 arg1);
+void evtSubmitEventRequest(s32 arg0, s32 arg1);
 
 void func_00144F60(void);
 
@@ -25,7 +25,7 @@ void func_0012EBF8(u32 arg0, s32 arg1);
 
 extern u32 D_004371E8;
 
-void func_00241528(s32 arg0);
+void evtSubmitEventRequestImmediate(s32 arg0);
 
 void func_00144EE0(void);
 
@@ -43,7 +43,7 @@ void func_0033DAD8(const char *msg);
 
 void func_0025D390(s32 arg0, s32 arg1);
 
-s32 func_0010FFE8(void);
+s32 dds3GetWorldSecondaryObject(void);
 
 s32 func_001110E0(s32 arg0);
 
@@ -67,11 +67,11 @@ void func_0023AFC8(void *arg0, s32 arg1);
 
 void func_0023B078(void *unit, s32 flag);
 
-void func_00115DF0(void *unit, s32 flag);
+void effObjSetFlags(void *unit, s32 flag);
 
-s32 func_00243330(void);
+s32 evtGetMirroredSolarPhase(void);
 
-s32 func_00243358(void);
+s32 evtGetRawSolarPhase(void);
 
 void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits);
 
@@ -88,7 +88,7 @@ s32 func_00240F00(void)
     unit = func_0023E6D8(7, id);
     if (unit != NULL) {
         func_0023B078(unit, 1);
-        func_00115DF0(unit, 1);
+        effObjSetFlags(unit, 1);
     }
     return 1;
 }
@@ -158,7 +158,7 @@ s32 func_00241340(void)
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241390);
 
-s32 func_00241410(void)
+s32 evtCommandCallEvent(void)
 {
     s32 p0;
 
@@ -172,14 +172,14 @@ s32 func_00241410(void)
 u32 func_00241460(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0010D8A8();
+    temp_v0 = scrGetCommandTimer();
     if (temp_v0 == 0) {
         func_00102908();
     }
     return 0;
 }
 
-void func_00241490(s32 arg0, s32 arg1)
+void evtSubmitEventRequest(s32 arg0, s32 arg1)
 {
     s32 args[2];
 
@@ -197,11 +197,11 @@ s32 func_002414F8(void)
     s32 p0;
 
     p0 = func_0010D650(0);
-    func_00241490(p0, 0);
+    evtSubmitEventRequest(p0, 0);
     return 1;
 }
 
-void func_00241528(s32 arg0)
+void evtSubmitEventRequestImmediate(s32 arg0)
 {
     s32 args[2];
 
@@ -219,7 +219,7 @@ s32 func_00241580(void)
     s32 p0;
 
     p0 = func_0010D650(0);
-    func_00241528(p0);
+    evtSubmitEventRequestImmediate(p0);
     return 1;
 }
 
@@ -230,7 +230,7 @@ s32 func_002415A8(void)
 
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
-    func_00241490(p0, p1);
+    evtSubmitEventRequest(p0, p1);
     return 1;
 }
 
@@ -310,7 +310,7 @@ s32 func_002417C8(void)
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
     combined = (p0 << 16) + p1;
-    if (func_001110E0(func_0010FFE8()) != combined) {
+    if (func_001110E0(dds3GetWorldSecondaryObject()) != combined) {
         p0 = func_0010D650(0);
         p1 = func_0010D650(1);
         func_0023AA30(p0, p1);
@@ -334,7 +334,7 @@ u32 func_00241868(void) {
     return 1;
 }
 
-s32 func_00241898(void)
+s32 evtCommandShutdownStage(void)
 {
     func_0023A9E0();
     while (func_0032CD98()) {
@@ -348,7 +348,7 @@ s32 func_00241898(void)
     return 1;
 }
 
-s32 func_00241908(void)
+s32 evtCommandShutdownStageAlternate(void)
 {
     func_0023A9E0();
     while (func_0032CD98()) {
@@ -362,7 +362,7 @@ s32 func_00241908(void)
     return 1;
 }
 
-s32 func_00241978(void)
+s32 evtCommandClearAllUnits(void)
 {
     func_0023A9E0();
     func_0035B6E0("unit all clear !!\n");
@@ -434,13 +434,13 @@ u32 func_00242388(void) {
 
 s32 func_002423A8(void)
 {
-    func_0010D818(func_00243330());
+    func_0010D818(evtGetMirroredSolarPhase());
     return 1;
 }
 
 s32 func_002423D0(void)
 {
-    func_0010D818(func_00243358());
+    func_0010D818(evtGetRawSolarPhase());
     return 1;
 }
 
@@ -448,7 +448,7 @@ u32 func_002423F8(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
-    func_00243368(temp_v0);
+    evtSetSolarPhase(temp_v0);
     return 1;
 }
 

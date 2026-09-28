@@ -2,7 +2,7 @@
 
 s32 dds3GetWorldSecondaryObject(void);
 void dds3DestroyWorldNode(s32 ctx);
-s32 objGetSlot1Data(void);
+s32 dds3GetSlot1Data(void);
 void func_001175A8(s32 ctx);
 void func_001175B8(s32 ctx);
 
@@ -30,7 +30,7 @@ void func_00220228(void)
 {
     s32 slotData;
 
-    slotData = objGetSlot1Data();
+    slotData = dds3GetSlot1Data();
     if (slotData != 0) {
         func_001175A8(slotData);
     }
@@ -40,7 +40,7 @@ void func_00220260(void)
 {
     s32 slotData;
 
-    slotData = objGetSlot1Data();
+    slotData = dds3GetSlot1Data();
     if (slotData != 0) {
         func_001175B8(slotData);
     }

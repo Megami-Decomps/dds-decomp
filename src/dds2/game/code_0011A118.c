@@ -101,7 +101,7 @@ extern s32 func_001B3A00(u32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A118);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", eventCheckValueThreshold);
+INCLUDE_ASM(const s32, "game/code_0011A118", evtCheckValueThreshold);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A220);
 
@@ -132,9 +132,9 @@ void func_0011A7F8(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A808);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", eventUpdateFlaggedStats);
+INCLUDE_ASM(const s32, "game/code_0011A118", evtUpdateFlaggedStats);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", eventHasMatchingFlaggedEntry);
+INCLUDE_ASM(const s32, "game/code_0011A118", evtHasMatchingFlaggedEntry);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AA58);
 
@@ -220,7 +220,7 @@ void func_0011C978(s32 arg0) {
     *(u16 *)(arg0 + 0x52) = D_00386248[*(u16 *)(arg0 + 4)].unk0;
 }
 
-void eventUpdateFlaggedEntries(void) {
+void evtUpdateFlaggedEntries(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
@@ -358,7 +358,7 @@ void func_0011D438(void) {
     } while (remaining >= 0);
 }
 
-s32 eventRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
+s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     func_0010C058(D_00435E88, script);
     D_0043E5C0[1] = third;
     D_0043E5C0[2] = first;

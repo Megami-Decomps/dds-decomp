@@ -6,31 +6,31 @@ extern u64 func_0010D650(u64);
 
 extern u64 mdlFlagTest(u64);
 
-u32 func_0010D848(s32 arg0) {
+u32 scrGetProcedureAddress(s32 arg0) {
     return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_00438E8C + 0xb4) + 0x18);
 }
 
-u32 func_0010D860(s32 arg0) {
+u32 scrGetLabelAddress(s32 arg0) {
     return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_00438E8C + 0xb8) + 0x18);
 }
 
-u32 func_0010D878(void) {
+u32 scrGetProgramCounter(void) {
     return *(u32 *)(D_00438E8C + 0x18);
 }
 
-void func_0010D888(u32 arg0) {
+void scrSetProgramCounter(u32 arg0) {
     *(u32 *)(D_00438E8C + 0x18) = arg0;
 }
 
-u32 func_0010D898(void) {
+u32 scrGetTimer(void) {
     return *(u32 *)(D_00438E8C + 0xd0);
 }
 
-u32 func_0010D8A8(void) {
+u32 scrGetCommandTimer(void) {
     return *(u32 *)(D_00438E8C + 0xd4);
 }
 
-u32 func_0010D8B8(void) {
+u32 scrGetWindow(void) {
     return *(u32 *)(D_00438E8C + 0xcc);
 }
 

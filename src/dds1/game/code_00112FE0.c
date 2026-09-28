@@ -12,11 +12,11 @@ typedef struct {
     CameraData *data;
 } CameraObject;
 
-u32 func_00112FE0(CameraObject *camera) {
+u32 dds3GetCameraMode(CameraObject *camera) {
     return camera->data->mode;
 }
 
-void func_00112FF0(CameraObject *camera, s32 mode) {
+void dds3SetCameraMode(CameraObject *camera, s32 mode) {
     if (camera->data->mode != mode) {
         camera->data->mode = mode;
     }

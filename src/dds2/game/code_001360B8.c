@@ -10,7 +10,7 @@ extern void *memset(void *s, s32 c, u32 n);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_00136368);
+INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
 
 void func_00136388(void) {
     u32 *temp_v0 = D_0038BBD8;
@@ -30,7 +30,7 @@ INCLUDE_ASM(const s32, "game/code_001360B8", func_00136A70);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_00136C90);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_00136E60);
+INCLUDE_ASM(const s32, "game/code_001360B8", fldComposeFadeColor);
 
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436168);
 

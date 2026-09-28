@@ -9,17 +9,17 @@ extern ScrData *D_003BD78C;
 extern ScrCommand D_0039E288[];
 extern u32 (*D_00329930[])(ScrData *scr);
 
-void func_0010C120(ScrData *scr, s32 val);
+void scrPushInteger(ScrData *scr, s32 val);
 void func_0010C150(ScrData *scr, f32 val);
-void func_0010C180(ScrData *scr, char *str);
-void func_0010C1B0(ScrData *scr, s32 val);
+void scrPushString(ScrData *scr, char *str);
+void scrPushTypeFourValue(ScrData *scr, s32 val);
 s32 func_0010C1E0(ScrData *scr);
 f32 func_0010C2B8(ScrData *scr);
 u32 func_0010C9A8(ScrData *scr, s32 op);
 
 u32 scrPushImmediateInteger(ScrData *scr)
 {
-    func_0010C120(scr, scr->instructions[scr->pc].parts.sOperand);
+    scrPushInteger(scr, scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
@@ -34,7 +34,7 @@ u32 scrPushImmediateFloat(ScrData *scr)
 
 u32 scrPushGlobalInteger(ScrData *scr)
 {
-    func_0010C120(scr, D_003BAA00->ints[scr->instructions[scr->pc].parts.sOperand]);
+    scrPushInteger(scr, D_003BAA00->ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
@@ -48,7 +48,7 @@ u32 scrPushGlobalFloat(ScrData *scr)
 
 u32 scrPushLocalInteger(ScrData *scr)
 {
-    func_0010C120(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
+    scrPushInteger(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
@@ -62,7 +62,7 @@ u32 scrPushLocalFloat(ScrData *scr)
 
 u32 scrPushStringLiteral(ScrData *scr)
 {
-    func_0010C180(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
+    scrPushString(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
@@ -132,7 +132,7 @@ u32 scrJumpProcedure(ScrData *scr)
 
 u32 scrCallProcedure(ScrData *scr)
 {
-    func_0010C1B0(scr, scr->pc);
+    scrPushTypeFourValue(scr, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }

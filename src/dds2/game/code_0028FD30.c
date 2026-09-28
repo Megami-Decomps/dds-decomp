@@ -14,7 +14,6 @@ extern void func_0026D168(s32, s32, s32);
 
 extern s32 func_0026D0B0(s32, s32);
 
-
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
@@ -87,7 +86,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
 
-void func_00291460(u8 *object, s8 selection) {
+void mnuActivatePanelSelection(u8 *object, s8 selection) {
     u8 *state = object + 0x240;
     if (func_002747B0(*(s32 *)(object + 0xc00), selection) != 0) {
         u32 flags;
@@ -101,7 +100,7 @@ void func_00291460(u8 *object, s8 selection) {
     }
 }
 
-void func_00291510(u8 *object, s8 selection) {
+void mnuSetPanelSelection(u8 *object, s8 selection) {
     u8 *state = object + 0x240;
     if (func_002747B0(*(s32 *)(object + 0xc00), selection) != 0) {
         func_00289128(object, selection);
@@ -120,7 +119,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291C68);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291DD0);
 
-void func_00292458(u8 *object) {
+void itfClearSelectionFlags(u8 *object) {
     object += 0x240;
     *(u32 *)(object + 0x9b0) &= 0xff0000ff;
 }
@@ -168,7 +167,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293148);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002932B0);
 
-void func_00293360(u8 *object) {
+void mnuCollectPanelNodeValues(u8 *object) {
     s32 node = *(s32 *)(*(s32 *)(object + 4) + 0x10);
     s32 count = 0;
     u8 *state = object + 0x240;
@@ -226,7 +225,7 @@ s32 *func_00294538(void) {
     return 0;
 }
 
-void func_00294580(s32 first, s32 second) {
+void mnuStorePanelEntry(s32 first, s32 second) {
     s32 *entry = func_00294538();
     entry[0] = first;
     entry[1] = second;

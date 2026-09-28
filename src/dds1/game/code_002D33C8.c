@@ -20,7 +20,7 @@ extern u64 sdfGraphHasPendingWork(void);
 extern s64 func_00312C08(void);
 
 extern s32 D_003BD30C;
-extern s32 createSemaphore(u32, u32, u32);
+extern s32 sdfCreateSemaphore(u32, u32, u32);
 extern u8 D_003BD9F0;
 extern u8 D_003BDA08;
 extern volatile s8 D_003BD333;
@@ -28,20 +28,20 @@ extern s32 D_003BD338;
 extern u32 D_00398158[];
 extern SdfResEntry *D_003980E8[];
 
-void func_002D2C30(void);
+void sdfTexRelease(void);
 void func_002D3BE0(void *arg0, void (*arg1)(void));
-void prependSdfPacketList(s32 arg0, s32 arg1);
+void sdfPrependPacketList(s32 arg0, s32 arg1);
 void func_002D5A68(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28);
 void func_002D7A50();
 void func_002D4368();
 void func_002D35B8();
 void func_002D4DD0();
-s32 func_002D3FD0(s32 size);
-void func_002D4070(SdfListHead *list, u32 packet, u32 end);
+s32 sdfAllocPacketAligned(s32 size);
+void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
 
-SdfResource *findSdfResourceById(s32 id) {
+SdfResource *sdfFindResourceById(s32 id) {
     SdfResource *resource = D_003BD308;
 
     while (resource != NULL) {
@@ -54,21 +54,21 @@ SdfResource *findSdfResourceById(s32 id) {
 }
 
 void func_002D3598(void) {
-    func_002D3BE0(&D_003BD9F0, func_002D2C30);
+    func_002D3BE0(&D_003BD9F0, sdfTexRelease);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D35B8);
 
-void createSdfResourcePacket(s32 list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
+void sdfCreateResourcePacket(s32 list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
-        alloc = func_002D3FD0;
+        alloc = sdfAllocPacketAligned;
     }
     buffer = alloc(0xf0);
     func_002D35B8(buffer, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
-    func_002D4070(list, buffer, buffer + 0xc0);
+    sdfAppendPacketRange(list, buffer, buffer + 0xc0);
 }
 
 void func_002D3880(SdfBigPacket *arg0, s32 arg1) {
@@ -83,18 +83,18 @@ void sdfCreateDescriptorPacket(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d,
                    s32 (*alloc)(s32)) {
     s32 block;
     if (alloc == NULL) {
-        alloc = func_002D3FD0;
+        alloc = sdfAllocPacketAligned;
     }
     block = alloc(0xB0);
     func_002D39B0(block, source, a, b, c, d, e);
-    func_002D4070(list, block, block + 0x80);
+    sdfAppendPacketRange(list, block, block + 0x80);
 }
 
 void func_002D3BE0(void *arg0, void (*arg1)(void)) {
     void **head = arg0;
 
     if (D_003BD30C < 0) {
-        D_003BD30C = createSemaphore(1, 0x7f, 0);
+        D_003BD30C = sdfCreateSemaphore(1, 0x7f, 0);
     }
     head[0] = (void *)arg1;
     head[1] = NULL;
@@ -144,7 +144,7 @@ u64 func_002D3EE8(void) {
 extern s32 D_003BD310;
 extern void func_002D0918(s32);
 extern s32 func_002D03F8(s32);
-extern s32 func_002D0A48(s32);
+extern s32 sdfResourceRetainAddress(s32);
 
 void sdfResizeDoubleBuffer(s32 size) {
     s32 memory;
@@ -155,21 +155,21 @@ void sdfResizeDoubleBuffer(s32 size) {
     size = (size + 0x7F) & ~0x7F;
     D_003BD314 = size;
     D_003BD310 = func_002D03F8(size * 2);
-    memory = func_002D0A48(D_003BD310);
+    memory = sdfResourceRetainAddress(D_003BD310);
     D_003BD318[0] = memory;
     D_003BD318[1] = memory + size;
 }
 
-void func_002D3FA0(s32 arg0) {
+void sdfSelectDoubleBuffer(s32 arg0) {
     D_003BD320 = D_003BD318[arg0];
     D_003BD324 = D_003BD318[arg0] + D_003BD314;
 }
 
-s32 func_002D3FC0(void) {
+s32 sdfGetBufferRemaining(void) {
     return D_003BD324 - D_003BD320;
 }
 
-s32 func_002D3FD0(s32 arg0) {
+s32 sdfAllocPacketAligned(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = D_003BD320;
@@ -185,7 +185,7 @@ void func_002D3FF8(s32 arg0) {
     D_003BD320 = (arg0 + 0xF) & ~0xF;
 }
 
-void func_002D4010(SdfListHead *list) {
+void sdfInitPacketList(SdfListHead *list) {
     list->unkC = 0xFFFF;
     list->unk0 = 0;
     list->first = 0;
@@ -196,7 +196,7 @@ void func_002D4010(SdfListHead *list) {
     list->unk1C = 0;
 }
 
-void func_002D4038(SdfListHead *list, u32 packet) {
+void sdfAppendPacket(SdfListHead *list, u32 packet) {
     s32 last;
 
     last = list->last;
@@ -210,7 +210,7 @@ void func_002D4038(SdfListHead *list, u32 packet) {
     list->last = packet;
 }
 
-void func_002D4070(SdfListHead *list, u32 packet, u32 end) {
+void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
     s32 last;
 
     last = list->last;
@@ -268,7 +268,7 @@ void func_002D4120(SdfListHead *list, u32 packet) {
     list->last = packet + 0x10;
 }
 
-void prependSdfPacketList(s32 list, s32 item) {
+void sdfPrependPacketList(s32 list, s32 item) {
     s32 head;
 
     if (*(s32 *)(item + 8) == 0) {
@@ -284,7 +284,7 @@ void prependSdfPacketList(s32 list, s32 item) {
     *(s32 *)(list + 4) = item;
 }
 
-void func_002D41C0(s32 arg0, s32 arg1) {
+void sdfAppendPacketList(s32 arg0, s32 arg1) {
     s32 *piVar1;
 
     if (*(s32 *)(arg1 + 4) != 0) {
@@ -305,7 +305,7 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4218);
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4240);
 
 u32 func_002D42B8(u32 arg0) {
-    SdfDmaNode *temp = (SdfDmaNode *)func_002D3FD0(0x20);
+    SdfDmaNode *temp = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     SdfDmaSrc *src = (SdfDmaSrc *)arg0;
     u64 id = src->unk0;
     u32 addr = ((u32)src + 0x10) & 0x0FFFFFFF;
@@ -414,7 +414,7 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4BA0);
 
 void func_002D4C40(u32 arg0, u32 arg1, u32 arg2) {
     func_002D4558(arg1, arg2);
-    func_002D4038(arg0, (s32)arg2 + 0x10);
+    sdfAppendPacket(arg0, (s32)arg2 + 0x10);
 }
 
 void func_002D4C80(s32 arg0, u32 arg1, s32 arg2) {
@@ -433,14 +433,14 @@ void func_002D4CC8(s32 arg0, u32 arg1, s32 arg2) {
     func_002D45F0(arg1, arg0 + 0xb0, 1);
 }
 
-void appendSdfDmaPrimary(s32 list, u32 source, SdfDmaNode *node) {
+void sdfAppendDmaPrimary(s32 list, u32 source, SdfDmaNode *node) {
     node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->unk0 = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
     node->unk10 = 0;
     func_002D40A8(list, (u32)node);
 }
 
-void appendSdfDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
+void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
     node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->unk0 = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
     node->unk10 = 0;
@@ -449,7 +449,7 @@ void appendSdfDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4DD0);
 
-void initSdfPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
+void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
     func_002D45B0(packet->packets, 2);
     packet->mode = mode;
     packet->source = source;
@@ -479,10 +479,10 @@ s32 func_002D5510(s32 (*arg0)(s32)) {
     s32 mem;
 
     if (alloc == NULL) {
-        alloc = func_002D3FD0;
+        alloc = sdfAllocPacketAligned;
     }
     mem = alloc(0x20);
-    func_002D4010((SdfListHead *)mem);
+    sdfInitPacketList((SdfListHead *)mem);
     return mem;
 }
 
@@ -491,11 +491,11 @@ void func_002D5558(s32 arg0, void (*arg1)(s32), s32 arg2, s32 (*arg3)(s32)) {
     s32 mem;
 
     if (alloc == NULL) {
-        alloc = func_002D3FD0;
+        alloc = sdfAllocPacketAligned;
     }
     mem = alloc(arg2);
     arg1(mem);
-    func_002D4038(arg0, mem);
+    sdfAppendPacket(arg0, mem);
 }
 
 void func_002D55B8(SdfPacket *arg0) {
@@ -642,18 +642,18 @@ void func_002D5B18(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 
     func_002D5A68(arg0 + 1, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0, arg_sp8, arg_sp10, arg_sp18, arg_sp20, arg_sp28);
 }
 
-void createSdfExtendedPacket(s32 list, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5,
+void sdfCreateExtendedPacket(s32 list, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5,
                    u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10,
                    s32 arg_sp18, s32 arg_sp20, s32 arg_sp28, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
-        alloc = func_002D3FD0;
+        alloc = sdfAllocPacketAligned;
     }
     buffer = alloc(0x60);
     func_002D5B18((SdfPacket *)buffer, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
                    arg_sp0, arg_sp8, arg_sp10, arg_sp18, arg_sp20, arg_sp28);
-    func_002D4038(list, buffer);
+    sdfAppendPacket(list, buffer);
 }
 
 void func_002D5C90(SdfBigPacket *arg0, s32 arg1) {
@@ -668,13 +668,13 @@ void func_002D5EB0(s32 list, s64 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
-        alloc = func_002D3FD0;
+        alloc = sdfAllocPacketAligned;
     }
     packet = (SdfPacket *)alloc(0x50);
     packet->unk0 = 0x20000004;
     packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
     func_002D5DF8((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
-    func_002D4038(list, (s32)packet);
+    sdfAppendPacket(list, (s32)packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5FD8);

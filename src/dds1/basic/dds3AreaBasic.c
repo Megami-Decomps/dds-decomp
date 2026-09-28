@@ -10,10 +10,10 @@ typedef struct {
     AreaSub *unk10;
 } AreaObj;
 
-void objExchangeSlot(void *arg0, s32 arg1, s32 arg2);
+void dds3ExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
 s32 dds3ExchangeAreaSlot(void *arg) {
-    objExchangeSlot(arg, 0, 5);
+    dds3ExchangeSlot(arg, 0, 5);
     return 1;
 }
 

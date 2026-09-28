@@ -10,16 +10,16 @@ typedef struct {
     void *unk1C;
 } EventObj;
 
-s32 func_0010F878(void *arg, s32 arg1);
+s32 effObjTestNodeFlags(void *arg, s32 arg1);
 
-void func_0010F860(void *arg, s32 arg1);
+void effObjClearNodeFlags(void *arg, s32 arg1);
 
 void effObjInnerVecBackup(void *arg);
 
-void func_001163B0(EventObj *event) {
+void dds3ReleaseEventData(EventObj *event) {
     EventData *data;
 
-    func_0010F810();
+    effObjFreeInner();
     data = event->unk18;
     func_00111A68(data->handle);
     func_00328E48(data);
@@ -29,8 +29,8 @@ s32 func_001163F0(EventObj *arg) {
     void *data;
 
     data = arg->unk1C;
-    if (func_0010F878(data, 1) == 1) {
-        func_0010F860(data, 1);
+    if (effObjTestNodeFlags(data, 1) == 1) {
+        effObjClearNodeFlags(data, 1);
         effObjInnerVecBackup(data);
     }
     return 1;

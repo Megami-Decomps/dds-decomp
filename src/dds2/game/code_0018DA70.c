@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_0018DA70(u32 arg0) {
+void effFreePairedResources(u32 arg0) {
     func_0016EFA8(*(u32 *)((s32)arg0 + 0x74));
     func_0016EFA8(*(u32 *)((s32)arg0 + 0x70));
     func_00328E48(arg0);

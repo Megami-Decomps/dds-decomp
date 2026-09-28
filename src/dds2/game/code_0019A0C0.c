@@ -74,7 +74,7 @@ extern void func_0019AB08(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 
 extern void *func_003292A8(s32 arg0);
 
-extern void *func_003298F8(void *arg0);
+extern void *sdfResourceRetainAddress(void *arg0);
 
 extern void func_0019B418(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 
@@ -202,7 +202,7 @@ void *effCreateChannel(void *arg0, u32 arg1) {
         return buf;
     }
     mem = func_003292A8(0x18);
-    buf = func_003298F8(mem);
+    buf = sdfResourceRetainAddress(mem);
     p = buf;
     p->unk0 = mem;
     p->cursorStep = 0.05f;

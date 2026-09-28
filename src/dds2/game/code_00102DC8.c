@@ -109,7 +109,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104700);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104898);
 
-u32 func_00104900(void) {
+u32 kwlnTextureGetPageIndex(void) {
     return D_00435CAC;
 }
 
@@ -224,7 +224,7 @@ void kwlnFadeSetColor(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
     D_00435CF0.a = arg3;
 }
 
-void func_001059D8(KwlnFadeColor **color) {
+void kwlnFadeGetColor(KwlnFadeColor **color) {
     *color = &D_00435CF0;
 }
 

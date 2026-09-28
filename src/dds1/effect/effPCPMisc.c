@@ -408,13 +408,13 @@ typedef struct {
     u32 handle;
 } EffPCPEventPairGroup;
 
-extern void func_00190208(void *event);
+extern void effEventReleaseNode(void *event);
 extern void func_00190118();
 extern void func_002CFF98(void *ptr);
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
-extern EffPCPWork *func_0017D7A8();
+extern EffPCPWork *effPcpBuildBlockSet();
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -431,10 +431,10 @@ extern u32 func_00187460(void *params);
 extern u32 func_00186F90(void *params);
 extern u32 func_00187FC0(void *params);
 extern u32 func_00186C18(void *params);
-extern void *func_0017CF38(void *block0, u32 *blocks);
+extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
 
 extern void *func_002D03F8(s32 size);
-extern void *func_002D0A48(void *resource);
+extern void *sdfResourceRetainAddress(void *resource);
 extern u32 func_001632E0(void *params);
 extern u32 effParamCreateFromTable(void *data, s32 index);
 extern void func_001655D0(u32 handle);
@@ -524,7 +524,7 @@ extern void func_00177318(void *, s32);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177318);
 
-EffPCPTwinWork *func_00177418(void *src) {
+EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
     EffPCPTwinWork *work = func_002CFEB8(0xBC);
     s32 i;
 
@@ -574,7 +574,7 @@ void func_00177590(EffPCPWork *work) {
 }
 
 
-EffPCPTwinWork *func_00177608(EffPCPTwinWork *src) {
+EffPCPTwinWork *effTwinEffectClone(EffPCPTwinWork *src) {
     EffPCPTwinWork *work = func_002CFEB8(0xBC);
     s32 i;
 
@@ -610,7 +610,7 @@ void func_00177868(EffPCPWork *work, u32 val) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177870);
 
-EffPCPWorkF14 *func_00177990(void *args) {
+EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
     EffPCPWorkF14 *work = func_002CFEB8(0x98);
     u32 *handle = (u32 *)((u8 *)work + 0x3C);
     s32 i = 0;
@@ -646,7 +646,7 @@ void func_00177A68(EffPCPWork *work) {
     func_002CFF98(work);
 }
 
-EffPCPWorkF14 *createPairedEffectResourceWork(EffPCPWork *source) {
+EffPCPWorkF14 *effCreatePairedResourceWork(EffPCPWork *source) {
     EffPCPWorkF14 *work = func_002CFEB8(0x98);
     u32 *handle = (u32 *)((u8 *)work + 0x3C);
     s32 i = 0;
@@ -680,7 +680,7 @@ typedef struct {
 
 extern void effParamWorkCallback1(u32 handle, f32 value);
 
-void func_00177B70(EffPCPStaggered *work) {
+void effPcpStaggerUpdate(EffPCPStaggered *work) {
     void *obj[2];
     f32 pos[4];
     s32 i;
@@ -741,7 +741,7 @@ extern void func_002DD708(f32 angle);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177CF0);
 
-EffPCPCrossWork *func_00177E38(void *src) {
+EffPCPCrossWork *effCrossEffectCreateFromTable(void *src) {
     EffPCPCrossWork *work = func_002CFEB8(0xDC);
     s32 i;
     s32 j;
@@ -769,7 +769,7 @@ EffPCPCrossWork *func_00177E38(void *src) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177F90);
 
 
-EffPCPCrossWork *func_00178028(EffPCPCrossWork *src) {
+EffPCPCrossWork *effCrossEffectClone(EffPCPCrossWork *src) {
     EffPCPCrossWork *work = func_002CFEB8(0xDC);
     s32 i;
     s32 j;
@@ -806,7 +806,7 @@ void func_00178278(EffPCPWork *work, u32 val) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00178280);
 
-EffPCPWorkF14 *createIndexedEffectResourceWork(void *source) {
+EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
     EffPCPWorkF14 *work = func_002CFEB8(0x60);
     u32 *handle = (u32 *)((u8 *)work + 0x1C);
     s32 i;
@@ -840,7 +840,7 @@ void func_001783E8(EffPCPWork *work) {
     func_002CFF98(work);
 }
 
-EffPCPWorkF14 *copyIndexedEffectResourceWork(EffPCPWork *source) {
+EffPCPWorkF14 *effCopyIndexedResourceWork(EffPCPWork *source) {
     u32 *sourceHandle;
     u32 *workHandle;
     s32 i;
@@ -871,7 +871,7 @@ typedef struct {
     u32 delay[6];
 } EffPCPDelayedPairs;
 
-void func_00178500(EffPCPDelayedPairs *work) {
+void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
     void *obj[2];
     u128 vec;
     s32 i;
@@ -920,9 +920,9 @@ void func_00178608(EffPCPChargeWork *work) {
     work->color1344 = 0x80808080;
 }
 
-EffPCPChargeWork *createChargeEffectWork(void *source) {
+EffPCPChargeWork *effCreateChargeWork(void *source) {
     void *resource = func_002D03F8(0x1354);
-    EffPCPChargeWork *work = func_002D0A48(resource);
+    EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
     work->unk1350 = (u32)resource;
     work->unk134C = effParamCreateFromTable(source, 0);
     work->unk1348 = effParamCreateFromTable(source, 1);
@@ -941,9 +941,9 @@ void func_001786C0(EffPCPChargeWork *work) {
     func_002D0918(work->unk1350);
 }
 
-EffPCPChargeWork *copyChargeEffectResources(EffPCPChargeWork *source) {
+EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     void *resource = func_002D03F8(0x1354);
-    EffPCPChargeWork *work = func_002D0A48(resource);
+    EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
     u32 firstHandle = source->unk134C;
     work->unk1350 = (u32)resource;
     work->unk134C = effParamWorkDuplicate(firstHandle);
@@ -1007,7 +1007,7 @@ EffPCPWork1C *func_00178BC0(EffPCPWork *src) {
     return dst;
 }
 
-void func_00178C28(EffPCPWork *work) {
+void effPcpSpawnOnce(EffPCPWork *work) {
     void *obj;
     u128 vec;
 
@@ -1447,7 +1447,7 @@ void func_0017B160(u32 unused, u32 val) {
     D_003BD7FC->unk10 = val;
 }
 
-void setSharedEffectScale(u32 unused, f32 value) {
+void effSetSharedScale(u32 unused, f32 value) {
     ((EffPCPWorkF1C *)D_003BD7FC)->unk1C = value;
 }
 
@@ -1541,7 +1541,7 @@ typedef struct {
     EffPCPCompactRes *resource;
 } EffPCPCompactSrc;
 
-void func_0017B3F8(EffPCPCompactSrc *work) {
+void effPcpCompactRespawn(EffPCPCompactSrc *work) {
     EffPCPCompactParams3C params;
 
     params.flags = work->flags;
@@ -1610,7 +1610,7 @@ typedef struct {
     EffPCPRes44 *resource;
 } EffPCPSrcA;
 
-void func_0017B740(EffPCPSrcA *work) {
+void effPcpCompactLongRespawn(EffPCPSrcA *work) {
     EffPCPParams44 params;
 
     params.flags = work->flags;
@@ -1653,7 +1653,7 @@ typedef struct {
     u32 unk2C;
 } EffPCPFlat30;
 
-void *func_0017B9E8(src)
+void *effPcpCopyWork(src)
     EffPCPFlat30 *src;
 {
     EffPCPFlat30 *dst;
@@ -1670,11 +1670,11 @@ void func_0017BA78(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    func_0017B9E8(param0);
+    effPcpCopyWork(param0);
 }
 
 void func_0017BA98(void) {
-    func_0017B9E8();
+    effPcpCopyWork();
 }
 
 void func_0017BAB0(EffPCPWork *work) {
@@ -1698,7 +1698,7 @@ typedef struct {
     u32 unk3C;
 } EffPCPFlat40;
 
-void *func_0017BBE0(src)
+void *effPcpCopyWorkLong(src)
     EffPCPFlat40 *src;
 {
     EffPCPFlat40 *dst;
@@ -1715,11 +1715,11 @@ void func_0017BC90(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    func_0017BBE0(param0);
+    effPcpCopyWorkLong(param0);
 }
 
 void func_0017BCB0(void) {
-    func_0017BBE0();
+    effPcpCopyWorkLong();
 }
 
 void func_0017BCC8(EffPCPWork *work) {
@@ -1770,7 +1770,7 @@ typedef struct {
     EffPCPRes44 *resource;
 } EffPCPSrcB;
 
-void func_0017BEB0(EffPCPSrcB *work) {
+void effPcpChargeRespawn(EffPCPSrcB *work) {
     EffPCPParams44 params;
 
     params.flags = work->flags;
@@ -1836,7 +1836,7 @@ typedef struct {
     EffPCPRes44 *resource;
 } EffPCPSrcC;
 
-void func_0017C220(EffPCPSrcC *work) {
+void effPcpChargeLongRespawn(EffPCPSrcC *work) {
     EffPCPParams44 params;
 
     params.flags = work->flags;
@@ -1961,7 +1961,7 @@ void func_0017CB88(void *args) {
     func_0017CA60(param0, param1);
 }
 
-EffPCPWork *func_0017CBD0(EffPCPWork *work) {
+EffPCPWork *effPcpCloneWithOptionalHandle(EffPCPWork *work) {
     EffPCPWork *child;
     u32 handle;
 
@@ -1973,7 +1973,7 @@ EffPCPWork *func_0017CBD0(EffPCPWork *work) {
     return child;
 }
 
-void func_0017CC28(EffPCPWork *work) {
+void effPcpReleaseOptionalHandle(EffPCPWork *work) {
     s32 handle;
 
     handle = work->unk74;
@@ -2030,7 +2030,7 @@ typedef struct {
 extern u32 func_0014FD20(u32 param);
 extern u32 func_0014FEB0(u32 handle);
 
-void *func_0017CF38(void *block0, u32 *blocks) {
+void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
     EffPCPTripleWork *work;
     u32 *handle;
     u32 i;
@@ -2063,10 +2063,10 @@ void func_0017D0A0(void *data) {
         *dst = effParamTableGetBlock(data, i);
         dst++;
     } while (i < 7);
-    func_0017CF38(block0, blocks);
+    effPcpTripleHandleCreate(block0, blocks);
 }
 
-EffPCPTripleWork *func_0017D118(EffPCPTripleWork *src) {
+EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     EffPCPTripleWork *work;
     u32 *from;
     u32 *to;
@@ -2126,7 +2126,7 @@ typedef struct {
     void *block15;
 } EffPCPBlockSet;
 
-EffPCPWork *func_0017D7A8(args)
+EffPCPWork *effPcpBuildBlockSet(args)
     void *args;
 {
     EffPCPBlockSet set;
@@ -2182,7 +2182,7 @@ void func_0017E4C8(void *dst, void *src) {
 void func_0017E4F0(void) {
     EffPCPWork *work;
 
-    work = func_0017D7A8();
+    work = effPcpBuildBlockSet();
     work->unkBC = 1;
 }
 
@@ -2191,7 +2191,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017E518);
 void func_0017E668(void) {
     EffPCPWork *work;
 
-    work = func_0017D7A8();
+    work = effPcpBuildBlockSet();
     work->unkBC = 2;
 }
 
@@ -2201,7 +2201,7 @@ typedef struct {
     u32 word[63];
 } EffPCPBlock252;
 
-EffPCPRotateWork *func_0017E7E0(EffPCPBlock252 *src, u32 *blocks) {
+EffPCPRotateWork *effPcpRotateCreate(EffPCPBlock252 *src, u32 *blocks) {
     EffPCPRotateWork *work;
     u8 *sub;
     u32 *p;
@@ -2344,7 +2344,7 @@ void func_0017F0E8(EffPCPWork *work) {
 
 extern void effParamWorkCallback2(u32 handle, void *mtx);
 
-void func_0017F118(EffPCPSpinWork *work) {
+void effSpinEffectUpdate(EffPCPSpinWork *work) {
     u32 handle = (u32)work->handle0;
     u128 mtx[4];
 
@@ -2386,7 +2386,7 @@ void func_0017F1D8(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-void copyEffectMatrix(EffPCPWork *work, void *src) {
+void effCopyMatrix(EffPCPWork *work, void *src) {
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf28, 0(%0)\n"
@@ -2405,7 +2405,7 @@ void copyEffectMatrix(EffPCPWork *work, void *src) {
         : : "r"(&work->unk10) : "memory");
 }
 
-EffPCPSpinWork *func_0017F210(void *src) {
+EffPCPSpinWork *effSpinEffectCreateFromTable(void *src) {
     EffPCPSpinWork *work = func_002CFEB8(0x68);
 
     work->frame = 0;
@@ -2418,7 +2418,7 @@ EffPCPSpinWork *func_0017F210(void *src) {
     return work;
 }
 
-EffPCPSpinWork *func_0017F2D0(EffPCPSpinWork *src) {
+EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
     EffPCPSpinWork *work = func_002CFEB8(0x68);
 
     work->frame = 0;
@@ -2772,7 +2772,7 @@ typedef struct {
 
 extern void func_0017FE50(EffPCPParams76 *params);
 
-void func_0017FF30(EffPCPSrc76 *work) {
+void effPcpScaledRespawn(EffPCPSrc76 *work) {
     EffPCPParams76 params;
     EffPCPRes76 *res;
 
@@ -2824,7 +2824,7 @@ typedef struct {
     u32 state;
 } EffPCPSubEffectWork;
 
-void resetChildEffect(EffPCPSubEffectWork *work) {
+void effResetChild(EffPCPSubEffectWork *work) {
     func_00180540(work->scale);
     work->state = 0;
 }
@@ -2835,7 +2835,7 @@ typedef struct EffPCPBlock50 {
 
 extern u8 *func_001801F8(u32);
 
-u8 *func_001806F8(src)
+u8 *effBeamEffectClone(src)
     u8 *src;
 {
     u8 *work = func_002CFEB8(0x60);
@@ -2868,7 +2868,7 @@ u8 *func_001806F8(src)
         entry[3] = *(u32 *)(src + 0x4C);
         entry += 4;
     }
-    resetChildEffect((EffPCPSubEffectWork *)work);
+    effResetChild((EffPCPSubEffectWork *)work);
     *(u32 *)(*(u8 **)(work + 0x5C) + 0x94) = *(u32 *)(src + 0x34);
     return work;
 }
@@ -2877,11 +2877,11 @@ void func_00180890(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    func_001806F8(param0);
+    effBeamEffectClone(param0);
 }
 
 void func_001808B0(void) {
-    func_001806F8();
+    effBeamEffectClone();
 }
 
 void func_001808C8(EffPCPWork *work) {
@@ -2922,7 +2922,7 @@ void func_00180B48(EffPCPWork *work, void *src) {
         : : "r"(&((EffPCPWork *)work->unk5C)->pad3C[4]) : "memory");
 }
 
-void rotateNestedEffect(EffPCPWork *work, void *src) {
+void effRotateNested(EffPCPWork *work, void *src) {
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf28, 0(%0)\n"
@@ -2964,7 +2964,7 @@ typedef struct {
     f32 childAngle2;
 } EffPCPAngleWork;
 
-void prepareEffectAngles(EffPCPAngleWork *work) {
+void effPrepareAngles(EffPCPAngleWork *work) {
     work->radiansX = work->degreesX * 0.017453291f;
     work->radiansY = work->degreesY * 0.017453291f;
     work->radiansZ = work->degreesZ * 0.017453291f;
@@ -2978,7 +2978,7 @@ typedef struct EffPCPBlock5C {
     u32 word[23];
 } EffPCPBlock5C;
 
-u8 *func_00180E78(src)
+u8 *effBeamEffectCloneLarge(src)
     u8 *src;
 {
     u8 *work = func_002CFEB8(0x80);
@@ -3010,7 +3010,7 @@ u8 *func_00180E78(src)
         entry[3] = *(u32 *)(src + 0x58);
         entry += 4;
     }
-    prepareEffectAngles(work);
+    effPrepareAngles(work);
     *(u32 *)(*(u8 **)(work + 0x7C) + 0x94) = *(u32 *)(src + 0x40);
     return work;
 }
@@ -3019,11 +3019,11 @@ void func_00181020(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    func_00180E78(param0);
+    effBeamEffectCloneLarge(param0);
 }
 
 void func_00181040(void) {
-    func_00180E78();
+    effBeamEffectCloneLarge();
 }
 
 void func_00181058(EffPCPWork *work) {
@@ -3086,7 +3086,7 @@ u8 *func_00181538(u8 *work) {
         flags = work + 0x8C;
         offset = 0;
         *(void **)(copy + 0x178) = func_002D03F8(size);
-        *(void **)(copy + 0x174) = func_002D0A48(*(void **)(copy + 0x178));
+        *(void **)(copy + 0x174) = sdfResourceRetainAddress(*(void **)(copy + 0x178));
         memset(*(void **)(copy + 0x174), 0, size);
         for (; group < 4; group++) {
             u32 *slot = (u32 *)(*(u8 **)(copy + 0x174) + offset);
@@ -3133,7 +3133,7 @@ typedef struct EffPCPSprayWork {
     u32 handle[10];   /* 0x70 handle 0 is the parameter block */
 } EffPCPSprayWork; /* 0x98 */
 
-EffPCPSprayWork *func_00181C80(void *src) {
+EffPCPSprayWork *effSprayEffectCreateFromTable(void *src) {
     EffPCPSprayWork *work = func_002CFEB8(0x98);
     u32 i;
 
@@ -3150,7 +3150,7 @@ EffPCPSprayWork *func_00181C80(void *src) {
     return work;
 }
 
-EffPCPSprayWork *func_00181D80(EffPCPSprayWork *src) {
+EffPCPSprayWork *effSprayEffectClone(EffPCPSprayWork *src) {
     EffPCPSprayWork *work = func_002CFEB8(0x98);
     u32 i;
 
@@ -3167,7 +3167,7 @@ EffPCPSprayWork *func_00181D80(EffPCPSprayWork *src) {
     return work;
 }
 
-void destroyIndexedEffectResources(EffPCPWork *work) {
+void effDestroyIndexedResources(EffPCPWork *work) {
     u32 i = 0;
 
     if (work->unk18 != 0) {
@@ -3239,7 +3239,7 @@ void effPcpEventGroupRelease(EffPCPEventGroup18 *work) {
 
     if (count != 0) {
         do {
-            func_00190208(entry->event);
+            effEventReleaseNode(entry->event);
             entry++;
             i++;
         } while (i < count);
@@ -3288,8 +3288,8 @@ void effPcpPairedEventGroupRelease(EffPCPEventPairGroup *work) {
 
     if (count != 0) {
         do {
-            func_00190208(entry->first);
-            func_00190208(entry->second);
+            effEventReleaseNode(entry->first);
+            effEventReleaseNode(entry->second);
             func_001655D0(entry->handle);
             entry++;
             i++;
@@ -3336,7 +3336,7 @@ void effPcpEventBatchRelease(EffPCPEventGroup *work) {
 
     if (count != 0) {
         do {
-            func_00190208(entry->event);
+            effEventReleaseNode(entry->event);
             entry++;
             i++;
         } while (i < count);
@@ -3395,7 +3395,7 @@ typedef struct {
     u32 count;
 } EffPCPEventWork32;
 
-void destroyParticleEvents(EffPCPEventWork32 *work) {
+void effDestroyParticleEvents(EffPCPEventWork32 *work) {
     u32 i;
     u32 count;
     EffPCPEventEntry32 *entry;
@@ -3405,7 +3405,7 @@ void destroyParticleEvents(EffPCPEventWork32 *work) {
     entry = work->entries;
     for (i = 0; i < count; i++) {
         if (entry->event != NULL) {
-            func_00190208(entry->event);
+            effEventReleaseNode(entry->event);
         }
         entry++;
     }
@@ -3418,11 +3418,11 @@ void destroyParticleEvents(EffPCPEventWork32 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184130);
 
+INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_003A0EF0);
+
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB048);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04D);
-
-INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_003A0EF0);
 

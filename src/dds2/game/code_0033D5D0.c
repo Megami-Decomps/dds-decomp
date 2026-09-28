@@ -91,7 +91,7 @@ typedef struct DevRequest {
 
 extern s32 func_003292A8(s32 size);
 
-extern s32 func_003298F8(s32 arg0);
+extern s32 sdfResourceRetainAddress(s32 arg0);
 
 extern s32 GetThreadId(void);
 
@@ -105,7 +105,7 @@ extern u8 D_00476510[];
 
 extern u32 D_00438AD8;
 
-extern void sleepWithAlarm(s32);
+extern void sdfSleepWithAlarm(s32);
 
 void sdfDevWaitForDisc(void);
 
@@ -174,7 +174,7 @@ void sdfDevWaitForDisc(void) {
     s32 status;
     WaitSema(D_004391B8);
     for (;;) {
-        sleepWithAlarm(100);
+        sdfSleepWithAlarm(100);
         func_0034CE40(0);
         status = func_0034D100();
         if (D_00438AD8 == 2) {
@@ -221,7 +221,7 @@ void func_0033E490(void) {
     }
 }
 
-u8 func_0033E4C8(u32 arg0) {
+u8 sdfPacketExists(u32 arg0) {
     s64 temp_v0;
     u8 temp_v1 [16];
 
@@ -246,7 +246,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E550);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E5E0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E660);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfInitDeviceSemaphores);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E6B0);
 
@@ -292,7 +292,7 @@ u32 func_0033EB30(void) {
 }
 
 u32 func_0033EB58(void) {
-    func_0033FB38();
+    sdfDevQueueOperation();
     WaitSema(D_00438AE4);
     return D_004391CC;
 }
@@ -372,7 +372,7 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
     return state;
 }
 
-s32 func_0033FB38(DevState *arg0, s32 arg1, s32 arg2) {
+s32 sdfDevQueueOperation(DevState *arg0, s32 arg1, s32 arg2) {
     if (arg0->state != 7) {
         return -1;
     }
@@ -396,7 +396,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FBF0);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FC50);
 
-s32 func_0033FCB0(DevState *arg0) {
+s32 sdfDevReactivate(DevState *arg0) {
     if (arg0->state != 9) {
         return -1;
     }
@@ -475,16 +475,16 @@ void sdfSetThreadPriorities(s32 arg0) {
     } while (i < 4);
 }
 
-void func_0033FF20(void) {
+void sdfRaiseDeviceThreadPriority(void) {
     D_00438B1F = 3;
     sdfSetThreadPriorities(0x78);
 }
 
-void func_0033FF40(void) {
+void sdfRestoreDeviceThreadPriority(void) {
     sdfSetThreadPriorities(0x48);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FF58);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfTickThreadPriorityOverride);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FF98);
 
@@ -505,7 +505,7 @@ void func_003400B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003400D0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340218);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfLoadDevModule);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340298);
 
@@ -537,7 +537,7 @@ s32 sdfBcdStrToInt(s32 arg0) {
     return acc;
 }
 
-s32 devDecimalToPackedDigits(s32 number) {
+s32 sdfDecimalToPackedDigits(s32 number) {
     s32 shift = 0;
     s32 bcd = 0;
 
@@ -550,7 +550,7 @@ s32 devDecimalToPackedDigits(s32 number) {
     return bcd;
 }
 
-DevRequest *devCreateRequest(s32 count, s32 stride, s32 mode) {
+DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     DevRequest *request = func_00328D68(sizeof(*request));
 
     request->mode = mode;
@@ -559,7 +559,7 @@ DevRequest *devCreateRequest(s32 count, s32 stride, s32 mode) {
     request->stride = stride;
     if (count != 0) {
         request->handle = func_003292A8(stride * count);
-        request->buffer = func_003298F8(request->handle);
+        request->buffer = sdfResourceRetainAddress(request->handle);
     } else {
         request->handle = 0;
         request->buffer = 0;
@@ -567,7 +567,7 @@ DevRequest *devCreateRequest(s32 count, s32 stride, s32 mode) {
     return request;
 }
 
-void func_00340528(u32 arg0) {
+void sdfDestroyDevRequest(u32 arg0) {
     func_003297C8(*(u32 *)arg0);
     func_00328E48(arg0);
 }

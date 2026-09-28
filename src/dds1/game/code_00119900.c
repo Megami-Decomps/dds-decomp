@@ -63,7 +63,7 @@ extern s32 effMiscRandMod(u32 arg0, u32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119900);
 
-s32 eventCheckValueThreshold(s32 index, s32 limit) {
+s32 evtCheckValueThreshold(s32 index, s32 limit) {
     if ((u32)(index - 0x80) < 0x20) {
         return mdlFlagTest(index + 0x980) != 0;
     }
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_00119F08);
 
 extern void func_00119F08(Entry1A4 *, s32);
 
-void eventUpdateFlaggedStats(void) {
+void evtUpdateFlaggedStats(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
@@ -136,7 +136,7 @@ void eventUpdateFlaggedStats(void) {
 
 extern s32 func_001193A0(Entry1A4 *, s32);
 
-s32 eventHasMatchingFlaggedEntry(s32 mask) {
+s32 evtHasMatchingFlaggedEntry(s32 mask) {
     s32 index = 0;
     s32 offset = 0;
     do {
@@ -233,7 +233,7 @@ void func_0011B418(s32 arg0) {
     *(u16 *)(arg0 + 0x52) = D_0032AEA8[*(u16 *)(arg0 + 4)].unk0;
 }
 
-void eventUpdateFlaggedEntries(void) {
+void evtUpdateFlaggedEntries(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
@@ -299,7 +299,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B7F0);
 extern void func_0010BE30(u32, s32);
 extern void func_0010C0B0(u32);
 
-s32 eventRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
+s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     func_0010BE30(D_003BAAB4, script);
     D_003C2E70[1] = third;
     D_003C2E70[2] = first;
@@ -530,7 +530,7 @@ void func_0011C3C0(void) {
 
 extern s32 func_001190B0(s32);
 
-void eventSelectStatGrade(void) {
+void evtSelectStatGrade(void) {
     s32 total = func_001190B0(D_003C2E70[3]);
     s32 current = *(u16 *)(D_003C2E70[3] + 6);
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
@@ -573,7 +573,7 @@ void func_0011C550(void) {
     func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x678));
 }
 
-void eventScriptSelectRandomValue(void) {
+void evtScriptSelectRandomValue(void) {
     s32 value;
     s32 roll;
 
@@ -591,7 +591,7 @@ void func_0011C5D8(void) {
     func_0010D5F0(*(s16 *)(D_003BAA18 + *(u16 *)(D_003C2E78[0] + 4) * 20));
 }
 
-void eventSelectFineStatGrade(void) {
+void evtSelectFineStatGrade(void) {
     s32 total = func_001190B0(D_003C2E70[3]);
     s32 current = *(u16 *)(D_003C2E70[3] + 6);
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);

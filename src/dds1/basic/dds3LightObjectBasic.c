@@ -19,7 +19,7 @@ typedef struct {
     LightData *unk18;
 } LightObj;
 
-void func_0010F5E8(void *arg);
+void effObjFreeInner(void *arg);
 void func_00111840(s32 arg);
 void func_002CFF98(void *arg);
 void func_002E1938(void *arg0, void *arg1);
@@ -35,7 +35,7 @@ void func_00116338(LightObj *light) {
     func_00111840(data->unk74);
     func_002CFF98(light->unk18);
     light->unk18 = NULL;
-    func_0010F5E8(light);
+    effObjFreeInner(light);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3LightObjectBasic", func_00116388);

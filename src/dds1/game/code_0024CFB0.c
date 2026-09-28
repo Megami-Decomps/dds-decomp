@@ -134,8 +134,8 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D670);
 
 void func_0024D6E0(void) {
     func_001068F0(0, 0, 0);
-    drawSetupC70B(0);
-    drawEnableCd0(0);
+    kwlnDrawSetupC70B(0);
+    kwlnDrawEnableCd0(0);
     func_0018F3B0();
     func_0018F438();
     func_0018F750();
@@ -144,7 +144,7 @@ void func_0024D6E0(void) {
 }
 
 void func_0024D738(void) {
-    func_00226C38();
+    evtCommandShutdownStage();
     func_0024D6E0();
 }
 
@@ -154,7 +154,7 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D778);
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D7B8);
 
-void collectActiveGameIndices(ActiveList *list) {
+void evtCollectActiveGameIndices(ActiveList *list) {
     s32 i;
     list->count = 0;
     for (i = 1; i < 0xC0; i++) {
@@ -175,7 +175,7 @@ s32 func_0024D880(u8 *arg0, u8 *arg1) {
     return (temp_A < temp_B) ? -1 : 0;
 }
 
-s32 compactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
+s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     s32 i;
     s32 count = 0;
     for (i = 0; i < length; i++) {
@@ -218,7 +218,7 @@ s32 func_0024DAB8(s32 arg0) {
         return 0;
     }
     D_003BC410 = arg0;
-    D_003BC415 = getActiveSoundMode();
+    D_003BC415 = sndGetActiveMode();
     return 1;
 }
 
@@ -232,7 +232,7 @@ s8 func_0024DB00(void) {
     return D_003BC414;
 }
 
-s32 getActiveSoundMode(void) {
+s32 sndGetActiveMode(void) {
     if (D_003BC408 < 0) {
         return -1;
     }
@@ -268,14 +268,14 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DBC8);
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DC08);
 
-s32 updateActiveSoundMode(void) {
+s32 sndUpdateActiveMode(void) {
     if (D_003BC408 < 0) {
         return 0;
     }
     if (itfPanelGetPairFirst(D_003BC408) < 0) {
         return 0;
     }
-    D_003BC415 = getActiveSoundMode();
+    D_003BC415 = sndGetActiveMode();
     return 1;
 }
 
@@ -297,7 +297,7 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DDC0);
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DE30);
 
-s32 isTaskInActiveStates(s32 task) {
+s32 evtIsTaskInActiveStates(s32 task) {
     if (func_00101818(task) == 1) {
         return 1;
     }
@@ -335,7 +335,7 @@ s32 func_0024DF48(void) {
     return 1;
 }
 
-s32 activateCurrentEventFlag(void) {
+s32 evtActivateCurrentFlag(void) {
     s32 index = func_0010D428(0);
     if (index >= 16) {
         index = 15;

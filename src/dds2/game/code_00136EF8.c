@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0010FFA8(void);
+extern u64 dds3GetWorldObject(void);
 
 extern s32 D_004360F8;
 
@@ -26,7 +26,7 @@ extern void *memset(void *s, s32 c, u32 n);
 
 extern void *func_003292A8(s32 size);
 
-extern void *func_003298F8(void *p);
+extern void *sdfResourceRetainAddress(void *p);
 
 extern u32 D_0038BD50[];
 
@@ -34,7 +34,7 @@ extern s32 func_0010C100(u32 arg0);
 
 extern s32 func_00110FB0(u64 arg0, u32 arg1);
 
-extern s32 func_001018B0(u32 arg0);
+extern s32 kwlnTaskIsRegistered(u32 arg0);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -97,7 +97,7 @@ extern s16 D_003931A0[];
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void func_0012B068(char *, s32, s32);
+extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern u32 sdfDevCreateCommandState(const char *);
 
@@ -143,12 +143,12 @@ void func_00137B60(void) {
     u8 *temp_v0 = func_003292A8(0x72000);
 
     D_00436190 = (u32)temp_v0;
-    temp_v0 = func_003298F8(temp_v0);
+    temp_v0 = sdfResourceRetainAddress(temp_v0);
     D_00436180 = (u32)temp_v0;
     memset(temp_v0, 0, 0x72000);
     temp_v0 = func_003292A8(0x4A00);
     D_0043618C = (u32)temp_v0;
-    temp_v0 = func_003298F8(temp_v0);
+    temp_v0 = sdfResourceRetainAddress(temp_v0);
     D_00436178 = (u32)temp_v0;
     memset(temp_v0, 0, 0x4A00);
 }
@@ -166,13 +166,13 @@ float func_00137C08(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", calculateFieldVectorLength);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldCalculateVectorLength);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C68);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137E00);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137E48);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldSetRecordValueById);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137E90);
 
@@ -210,9 +210,9 @@ void func_0013B810(void) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B818);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B970);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetTaskSlots);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BA98);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldPushDisplayValue);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BAB8);
 
@@ -224,14 +224,14 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D7F8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DA10);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DB08);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldRoomContainsPoint);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DBB0);
 
 s32 func_0013DC70(u32 flag, u32 slot) {
     D_0038BD50[slot] = 0;
     if (func_0010C100(flag) != 0) {
-        func_00110FB0(func_0010FFA8(), flag);
+        func_00110FB0(dds3GetWorldObject(), flag);
         return 0;
     }
     return -1;
@@ -240,7 +240,7 @@ s32 func_0013DC70(u32 flag, u32 slot) {
 u32 func_0013DCC8(u32 arg0) {
     u32 *temp_v0 = &D_0038BD50[arg0];
 
-    if (func_001018B0(*temp_v0) != 0) {
+    if (kwlnTaskIsRegistered(*temp_v0) != 0) {
         kwlnTaskDestroyWithHierarchy(*temp_v0, 0);
     }
     *temp_v0 = 0;
@@ -270,7 +270,7 @@ void func_0013E9B8(void) {
     if (count > 0) {
         u32 *entry = D_0038BD50;
         do {
-            if (func_001018B0(*entry) == 0) {
+            if (kwlnTaskIsRegistered(*entry) == 0) {
                 *entry = 0;
             }
             i++;
@@ -289,9 +289,9 @@ s32 func_0013EA18(u32 task) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EA78);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldFindRoomByTask);
 
-s32 getFieldTaskRecordValue(u32 task) {
+s32 fldGetTaskRecordValue(u32 task) {
     s32 i;
     for (i = 0; i < D_004361A4; i++) {
         if (D_0038BD50[i] == task) {
@@ -307,9 +307,9 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013ED20);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EEA0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F108);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldCheckEntryActive);
 
-s32 hasActiveFieldTasks(void) {
+s32 fldHasActiveTasks(void) {
     s32 i;
     for (i = 0; i < D_004361A4; i++) {
         if (D_0038BD50[i] != 0) {
@@ -342,7 +342,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FA98);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FFF8);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001400F8);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldLoadInfoTable);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140180);
 
@@ -410,7 +410,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141CF0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001420F0);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetActorStat0);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 
@@ -418,15 +418,15 @@ INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001421C0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001422E8);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetActorMotionEntry);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142478);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetRowValue);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142618);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldFindTableEntry);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142670);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142990);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetActorSlots);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142A10);
 

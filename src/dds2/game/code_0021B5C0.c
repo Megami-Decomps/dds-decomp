@@ -101,9 +101,9 @@ extern BtlEntry *D_00435E30;
 extern BtlWork *func_001AA6F8(void);
 extern s32 func_0020D128(const char *, ...);
 extern BtlTask *func_001E5FF8(s32, s32);
-extern void func_001E1580(BtlTask *);
+extern void startBattleTask(BtlTask *);
 extern s32 func_001B2430(BtlUnit *, s32);
-extern BtlTask *nbSoundCreateStationedSeTask(s32);
+extern BtlTask *sndCreateStationedSeTask(s32);
 extern s32 func_001AB9F0(BtlUnit *, s32);
 extern s32 func_001B3610(BtlUnit *, s32, s32, s32, s32);
 extern s8 func_001B36B8(s32, s32, s32);
@@ -139,7 +139,7 @@ u64 func_0021B600(u64 arg) {
         task->kind = 4;
     }
     task->flags = 0x8000000000000003;
-    func_001E1580(task);
+    startBattleTask(task);
     return task->result;
 }
 
@@ -300,7 +300,7 @@ void func_0021EB78(BtlUnit *unit) {
             mode = unit->mode;
             if (mode < 0x113) {
                 if (mode >= 0x111) {
-                    func_001E1580(nbSoundCreateStationedSeTask(func_001AA6F8()->unk208 + 1));
+                    startBattleTask(sndCreateStationedSeTask(func_001AA6F8()->unk208 + 1));
                 }
             }
         }
@@ -350,7 +350,7 @@ f32 func_0021ED08(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     return scale;
 }
 
-BtlUnit *func_0021ED58(void) {
+BtlUnit *findBattleUnitByMode(void) {
     BtlWork *work = func_001AA6F8();
     BtlSub718 *sub = work->sub;
     BtlUnit *unit;

@@ -69,7 +69,7 @@ void func_00347710(PacState *arg0, void *arg1);
 
 void func_00347948(PacState *arg0, void *arg1);
 
-void func_00346B40(PacState *arg0, s32 arg1);
+void sdfPacAdvanceInput(PacState *arg0, s32 arg1);
 
 s32 func_00347988(void *arg0, void *arg1, s32 arg2);
 
@@ -81,11 +81,11 @@ void func_003472C0(PacState *arg0);
 
 void func_00347350(PacState *arg0);
 
-s32 func_003298F8(s32 arg0);
+s32 sdfResourceRetainAddress(s32 arg0);
 
 s32 func_0032C138(s32 arg0);
 
-void func_00329888(void *arg0);
+void sdfReleaseMemorySlot(void *arg0);
 
 s32 func_0032C150(void *arg0);
 
@@ -162,7 +162,7 @@ s32 func_00346F00(PacState *arg0, s32 arg1, PacHead *arg2) {
     return 0;
 }
 
-void *func_00346FE0(u8 *arg0) {
+void *sdfPacGetExtensionData(u8 *arg0) {
     s32 x = arg0[0x11] & 0xF0;
     if (x <= 0) {
         return NULL;
@@ -178,7 +178,7 @@ void func_00347000(PacState *arg0) {
     }
     if (n != 0) {
         memcpy(arg0->unk1C, arg0->unk10, n);
-        func_00346B40(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         arg0->unk1C += n;
         {
             s32 r = arg0->unk20 - n;
@@ -194,7 +194,7 @@ void func_00347000(PacState *arg0) {
 void func_00347088(PacState *arg0) {
     s32 n = arg0->unk14;
     s32 r = func_00347988(arg0->unk24, arg0->unk10, n);
-    func_00346B40(arg0, n - arg0->unk24->unkC);
+    sdfPacAdvanceInput(arg0, n - arg0->unk24->unkC);
     if (r == 0) {
         return;
     }
@@ -208,7 +208,7 @@ void func_00347100(PacState *arg0) {
         n = arg0->unk14;
     }
     if (n != 0) {
-        func_00346B40(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         {
             s32 r = arg0->unk20 - n;
             arg0->unk20 = r;
@@ -249,7 +249,7 @@ void func_003473E0(PacState *arg0) {
     }
     if (n != 0) {
         memcpy(s->unk8, arg0->unk10, n);
-        func_00346B40(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         s->unk8 += n;
         {
             s32 r = s->unkC - n;
@@ -258,8 +258,8 @@ void func_003473E0(PacState *arg0) {
                 return;
             }
         }
-        s->unk0 = func_0032C138(func_003298F8(s->unk4));
-        func_00329888(&s->unk4);
+        s->unk0 = func_0032C138(sdfResourceRetainAddress(s->unk4));
+        sdfReleaseMemorySlot(&s->unk4);
         arg0->unkC(arg0);
     }
 }
@@ -267,14 +267,14 @@ void func_003473E0(PacState *arg0) {
 void func_00347488(PacState *arg0) {
     s32 n = arg0->unk20;
     s32 r = func_00347988(arg0->unk24, arg0->unk10, n);
-    func_00346B40(arg0, n - arg0->unk24->unkC);
+    sdfPacAdvanceInput(arg0, n - arg0->unk24->unkC);
     if (r == 0) {
         return;
     }
     {
         PacBuf *s = arg0->unk28;
-        s->unk0 = func_0032C138(func_003298F8(s->unk4));
-        func_00329888(&s->unk4);
+        s->unk0 = func_0032C138(sdfResourceRetainAddress(s->unk4));
+        sdfReleaseMemorySlot(&s->unk4);
     }
     func_00328E48(arg0->unk24);
     arg0->unkC(arg0);
@@ -287,7 +287,7 @@ void func_00347520(PacState *arg0) {
         n = arg0->unk14;
     }
     if (n != 0) {
-        func_00346B40(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         {
             s32 r = s->unkC - n;
             s->unkC = r;

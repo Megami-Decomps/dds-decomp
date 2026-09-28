@@ -56,7 +56,7 @@ typedef struct FrFontGlyph {
         u32 w;            /* 0x18: word view */
         u8 b[4];          /* 0x18: byte views */
     } unk18;
-    struct FrFontGlyph *firstChild; /* 0x1C: chain traversed by func_00195C50 */
+    struct FrFontGlyph *firstChild; /* 0x1C: chain traversed by frFontMeasureGlyphChain */
     struct FrFontGlyph *unk20; /* 0x20 */
     struct FrFontGlyph *unk24; /* 0x24 */
     struct FrFontGlyph *next; /* 0x28: next glyph in chain */
@@ -68,7 +68,7 @@ typedef struct FrFontGlyph {
     s32 unk40;        /* 0x40 */
 } FrFontGlyph;
 
-/* Word at +0x194/+0x198 selected by func_00195B10. */
+/* Word at +0x194/+0x198 selected by frFontAdvanceSelectedGlyphSlot. */
 typedef struct FrFontSys {
     u8 unk0[0x194];           /* 0x0 */
     FrFontGlyph *slots[2];    /* 0x194 */
@@ -88,7 +88,7 @@ extern FrFontSys D_003D6C80;
 
 extern FrFontGlyph *D_003D6E14[];
 
-extern u32 func_00195C50(void *arg0);
+extern u32 frFontMeasureGlyphChain(void *arg0);
 
 extern void func_00195450(FrFontCtx *ctx, u32 arg1, u32 arg2);
 
@@ -246,7 +246,7 @@ void func_00195388(FrFontCtx *ctx) {
 
 void func_001953A8(FrFontCtx *ctx, u8 flag) {
     ctx->u0.bytes.flag1 = flag;
-    ctx->uC.w = func_00195C50(ctx);
+    ctx->uC.w = frFontMeasureGlyphChain(ctx);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001953D8);
@@ -296,7 +296,7 @@ void func_00195880(FrFontGlyph *arg0, s8 arg1) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001958A0);
 
-s32 func_00195B10(void) {
+s32 frFontAdvanceSelectedGlyphSlot(void) {
     s32 selection = (func_00100518() & 0xFF) == 0;
     u8 *base = (u8 *)&D_003D6C80;
     FrFontGlyph **slot = (FrFontGlyph **)(base + selection * 4 + 0x194);
@@ -336,7 +336,7 @@ void func_00195BF8(void) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195C10);
 
-u32 func_00195C50(void *arg0) {
+u32 frFontMeasureGlyphChain(void *arg0) {
     FrFontGlyph *glyph = arg0;
     FrFontGlyph *node = glyph->firstChild;
     s32 total = 0;

@@ -16,7 +16,7 @@ typedef struct EffEventNode {
     u32 resource;
 } EffEventNode;
 
-void func_00197E40(EffEventNode *node) {
+void effEventReleaseNode(EffEventNode *node) {
     func_001686F0(node->resource);
     func_00328E48(node);
 }
@@ -31,7 +31,7 @@ void func_00197F40(EffEventNode *node) {
     func_00169168(node->resource);
 }
 
-void func_00197F58(EffEventNode *node, u32 state) {
+void effEventSetState(EffEventNode *node, u32 state) {
     node->state = state;
 }
 
@@ -49,7 +49,7 @@ void func_00198448(s32 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00198460);
 
-void func_001984B8(s32 arg0, u32 arg1) {
+void effEventBindEffect(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x34) = arg1;
     func_00197E70(*(u32 *)(arg0 + 4), arg0 + 8);
 }

@@ -12,7 +12,7 @@ typedef struct {
     u8    pad1C[4];     /* 0x1C */
     u32  *unk20;        /* 0x20 table written by func_00189B90 */
     u8    pad24[0x10];  /* 0x24 */
-    void *resource;     /* 0x34 released by func_001893C0 */
+    void *resource;     /* 0x34 released by effMagatuhiReleaseResource */
 } EffMagatuhiWork; /* 0x38 */
 
 extern void *effGetHandlerArg(void *arg);
@@ -72,7 +72,7 @@ typedef struct EffMagatuhiDst {
     f32 f50;
 } EffMagatuhiDst; /* 0x54 */
 
-void func_001893C0(EffMagatuhiWork *work) {
+void effMagatuhiReleaseResource(EffMagatuhiWork *work) {
     func_002D0918(work->resource);
 }
 
@@ -93,7 +93,7 @@ void func_00189C80(void) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189C98);
 
 void func_00189E60(EffMagatuhiBigWork *work) {
-    func_0018DF90(work->unk180);
+    effMathReleaseWorkResource(work->unk180);
     func_00189178(work->unk18C);
     func_002D0918(work->unk190);
 }
@@ -118,7 +118,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A678);
 
 void func_0018A800(EffMagatuhiBigWork *work) {
-    func_0018DF90(work->unk184);
+    effMathReleaseWorkResource(work->unk184);
     func_00189178(work->unk188);
     func_002D0918(work->unk18C);
 }

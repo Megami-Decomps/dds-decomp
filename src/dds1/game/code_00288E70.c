@@ -64,9 +64,9 @@ extern s32 (*D_003BD4A8)(void);
 void WaitSema(s32 sema);
 void SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
-s32 createSemaphore(s32 arg0, s32 arg1, s32 arg2);
+s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 s32 func_002D03F8(s32 arg0);
-s32 func_002D0A48(s32 arg0);
+s32 sdfResourceRetainAddress(s32 arg0);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 func_002F6858(s32 arg0, void *arg1, s32 *arg2);
@@ -119,8 +119,8 @@ s32 fileMan(void) {
 void fileManInit(void) {
     memset(&D_003DC658, 0, 0x40);
     D_003DC658.unk7 = 4;
-    D_003DC658.sema = createSemaphore(1, 0x7F, 0);
-    D_003DC658.unk1C = func_002D0A48(func_002D03F8(0x40000));
+    D_003DC658.sema = sdfCreateSemaphore(1, 0x7F, 0);
+    D_003DC658.unk1C = sdfResourceRetainAddress(func_002D03F8(0x40000));
     kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     D_003BD4A8 = fileManUpdate;
 }

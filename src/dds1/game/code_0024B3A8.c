@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0024B2D0(s32, s32);
+extern void evtRememberDispatchCallback(s32, s32);
 extern void func_00249C08(s32);
 extern void func_0024DBB0(void);
 
@@ -35,7 +35,7 @@ void evtBSetupDispatchSync(s32 arg0) {
 s32 evtBClearAndReset(void) {
     s32 temp_v0 = func_00101A70();
 
-    func_0024B2D0(0, temp_v0);
+    evtRememberDispatchCallback(0, temp_v0);
     *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x3C) = 0;
     func_00249C08(0);
     func_0024DBB0();

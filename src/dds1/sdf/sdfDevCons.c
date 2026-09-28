@@ -47,7 +47,7 @@ extern u32 D_003987E0[];
 extern void *memmove(void *dst, const void *src, u32 n);
 extern void *memset(void *dst, s32 c, u32 n);
 
-void func_002E3EC8(DevConsState *console) {
+void sdfDevConsAdvanceRow(DevConsState *console) {
     if (console->cursorRow == console->rows - 1) {
         s32 rowBytes = console->columns * 2;
         s32 copyBytes = rowBytes * console->cursorRow;

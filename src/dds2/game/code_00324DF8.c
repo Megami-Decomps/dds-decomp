@@ -22,13 +22,13 @@ extern u8 D_00438A8C;
 
 extern void (*D_004389C4)(void);
 
-extern void func_00328988(s32);
+extern void sdfSleepThreadCount(s32);
 
 extern void func_0033C820(void);
 
 extern void func_0033C878(void);
 
-extern void func_0033FF58(void);
+extern void sdfTickThreadPriorityOverride(void);
 
 extern f32 func_00326A40(u32);
 
@@ -181,7 +181,7 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328160);
 void func_003282E8(void) {
 }
 
-s32 createSemaphore(u32 initial, u32 option, u32 maximum) {
+s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     struct {
         u32 attr;
         u32 option;
@@ -219,22 +219,22 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", sdfAddHandler);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328668);
 
-void drainPendingHandlers(void) {
+void sdfDrainPendingHandlers(void) {
     u32 current;
     while ((current = D_004389BC) != 0) {
         func_00328668(current);
     }
 }
 
-void func_00328778(u32 arg0, u32 arg1, u32 arg2) {
+void sdfWakeAlarmThread(u32 arg0, u32 arg1, u32 arg2) {
     iWakeupThread(arg2);
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", sleepWithAlarm);
+INCLUDE_ASM(const s32, "game/code_00324DF8", sdfSleepWithAlarm);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003287E0);
 
-u32 func_003287F0(u32 base) {
+u32 sdfGetElapsedTimerTicks(u32 base) {
     u32 now;
 
     now = *(volatile u32 *)0x10000000;
@@ -243,12 +243,12 @@ u32 func_003287F0(u32 base) {
 
 void func_00328808(void) {
     for (;;) {
-        func_00328988(1);
+        sdfSleepThreadCount(1);
         func_0033C820();
         if (!D_00438A8C) {
             func_0033C878();
         }
-        func_0033FF58();
+        sdfTickThreadPriorityOverride();
         if (D_004389C4 != NULL) {
             D_004389C4();
         }
@@ -259,7 +259,7 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328858);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328918);
 
-void func_00328988(s32 arg0) {
+void sdfSleepThreadCount(s32 arg0) {
     u64 temp_v0;
     s32 temp_v1;
 

@@ -3,31 +3,31 @@
 
 extern u64 func_00111838(u64);
 
-extern void *objGetSlot(void *arg0, s32 index);
+extern void *dds3GetSlot(void *arg0, s32 index);
 
 void func_001113F0(void *arg0, void *arg1);
 
-void func_001118C0(void *arg0, void *arg1);
+void dds3SetSlotValue(void *arg0, void *arg1);
 
 extern s32 func_00112AB0(void);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
-void func_00111B30(u32 arg0, u32 flags) {
+void dds3SetObjectFlags(u32 arg0, u32 flags) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
     base->flags = base->flags | flags;
 }
 
-void func_00111B60(u32 arg0, u32 flags) {
+void dds3ClearObjectFlags(u32 arg0, u32 flags) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
     base->flags = base->flags & ~flags;
 }
 
-u8 func_00111B98(u32 arg0, u32 flags) {
+u8 dds3TestObjectFlags(u32 arg0, u32 flags) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
@@ -36,22 +36,22 @@ u8 func_00111B98(u32 arg0, u32 flags) {
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objGetExtData);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetExtData);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objSetSlotByKind);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3SetSlotByKind);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objExchangeSlot);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ExchangeSlot);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objGetSlot);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetSlot);
 
-u32 objGetUnk04(void) {
+u32 dds3GetUnk04(void) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
     return base->unk4;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objGetUnk0C);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetUnk0C);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111D68);
 
@@ -63,10 +63,10 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112168);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112230);
 
-s32 objInvokeSlot5Handler(void *arg0) {
+s32 dds3InvokeSlot5Handler(void *arg0) {
     void *v;
 
-    v = objGetSlot(arg0, 5);
+    v = dds3GetSlot(arg0, 5);
     if (v == NULL) {
         return 0;
     }
@@ -82,22 +82,22 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112978);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001129C8);
 
-s32 objInvokeSlot1Handler(void *arg0, void *arg1) {
+s32 dds3InvokeSlot1Handler(void *arg0, void *arg1) {
     void *v;
 
-    v = objGetSlot(arg0, 1);
+    v = dds3GetSlot(arg0, 1);
     if (v == NULL) {
         return 0;
     }
-    func_001118C0(v, arg1);
+    dds3SetSlotValue(v, arg1);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objRunSlot1Handlers);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3RunSlot1Handlers);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objReleaseSlot1Data);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ReleaseSlot1Data);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objGetSlot1Data);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetSlot1Data);
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
 

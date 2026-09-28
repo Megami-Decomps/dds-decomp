@@ -44,7 +44,7 @@ typedef struct MemOut {
     void *unk8; /* 0x8 */
 } MemOut;
 
-/* 8-byte node header; payload follows (func_00198248/enqueueMemNode). */
+/* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
 typedef struct MemNode {
     u32 unk0;              /* 0x0 */
     struct MemNode *unk4;  /* 0x4 */
@@ -100,7 +100,7 @@ u32 func_0019E138(TextStream *stream) {
     return (value + 0xFF) & 0xFF;
 }
 
-u32 readEncodedTextCode(TextStream *stream) {
+u32 itfReadEncodedCode(TextStream *stream) {
     u32 first;
     u32 second;
 
@@ -156,7 +156,7 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EEE8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EF38);
 
-void loadStaffFonts(void) {
+void mnuLoadStaffFonts(void) {
     func_0019BE20(4, "/font/staff1.fnt");
     func_0019BE20(5, "/font/staff2.fnt");
 }
@@ -168,7 +168,7 @@ void func_0019F078(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F098);
 
-void convertFontText(u8 *output, const char *input) {
+void itfConvertText(u8 *output, const char *input) {
     s32 i;
     s32 length = strlen(input);
 
@@ -291,7 +291,7 @@ void *func_001A0278(MemNode *queue) {
     return head + 1;
 }
 
-s32 enqueueMemNode(void *payload, MemNode *queue) {
+s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     MemNode *node = (MemNode *)payload - 1;
     if (payload == NULL) {
         return 0;
@@ -309,7 +309,7 @@ u32 func_001A02D0(s32 arg0) {
     return 1;
 }
 
-void loadBackgroundSprite(void) {
+void itfLoadBackgroundSprite(void) {
     u32 resource;
     u64 buffer = func_00343ED0("/sprite/bg00.tmx", &resource, 0);
 
@@ -343,7 +343,7 @@ u32 func_001A0458(void) {
     return temp_v1;
 }
 
-void initTextPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
+void itfInitPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
     s8 index = 0;
     TextPoolNode *previous = NULL;
     TextPoolNode *node = nodes;
@@ -368,7 +368,7 @@ void initTextPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
     pool->activeHead = NULL;
 }
 
-TextPoolNode *acquireTextPoolNode(TextPool *pool) {
+TextPoolNode *itfAcquirePoolNode(TextPool *pool) {
     TextPoolNode *node = pool->firstFree;
     TextPoolNode *next;
 
@@ -394,7 +394,7 @@ TextPoolNode *acquireTextPoolNode(TextPool *pool) {
     return node;
 }
 
-void releaseTextPoolNode(TextPoolNode *node, TextPool *pool) {
+void itfReleasePoolNode(TextPoolNode *node, TextPool *pool) {
     TextPoolNode *previous = node->previous;
     TextPoolNode *next = node->next;
 
@@ -422,7 +422,7 @@ void releaseTextPoolNode(TextPoolNode *node, TextPool *pool) {
     }
 }
 
-void scaleTextVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
+void itfScaleVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
                    s32 w, const TextVector *input, s32 count) {
     while (count > 0) {
         s32 x = scaleX * input->x;
@@ -442,7 +442,7 @@ void scaleTextVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
     }
 }
 
-void setTextStyleColor(TextStyleNode *entry, u32 color) {
+void itfSetStyleColor(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -451,7 +451,7 @@ void setTextStyleColor(TextStyleNode *entry, u32 color) {
     }
 }
 
-void setTextStyleColorBits(TextStyleNode *entry, u32 color) {
+void itfSetStyleColorBits(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -460,7 +460,7 @@ void setTextStyleColorBits(TextStyleNode *entry, u32 color) {
     }
 }
 
-void translateTextStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
+void itfTranslateStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
     for (; entry != NULL; entry = entry->next) {
         entry->x += xOffset;
         entry->y += yOffset;
@@ -514,7 +514,7 @@ u32 func_001A1818(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", reportCampProcessHalted);
+INCLUDE_ASM(const s32, "game/code_0019E138", mnuReportCampProcessHalted);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
 

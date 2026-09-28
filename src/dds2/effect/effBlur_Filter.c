@@ -18,11 +18,11 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E980);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA00);
 
-void func_0018EA60(BlurFilter *blur, u32 texture) {
+void effBlurSetHandle(BlurFilter *blur, u32 texture) {
     blur->texture = texture;
 }
 
-void func_0018EA68(BlurFilter *blur) {
+void effBlurAcquireHandle(BlurFilter *blur) {
     u32 texture;
 
     texture = func_00159BB8(2);

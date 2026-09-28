@@ -30,23 +30,23 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_002555E8);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_002556C8);
 
-void dspSignalA(void) {
+void itfDspSignalA(void) {
     func_0024DA58(3);
 }
 
-void dspSignalB(void) {
+void itfDspSignalB(void) {
     func_0024DA58(4);
 }
 
-void dspSignalC(void) {
+void itfDspSignalC(void) {
     func_0024DA58(5);
 }
 
-void dspSignalD(void) {
+void itfDspSignalD(void) {
     func_0024DA58(6);
 }
 
-void dspSignalE(void) {
+void itfDspSignalE(void) {
     func_0024DA58(7);
 }
 
@@ -62,13 +62,13 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00255D00);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255E08);
 
-void dspDrawMarksA(s32 arg0, s32 arg1) {
+void itfDspDrawMarksA(s32 arg0, s32 arg1) {
     func_0024E260(0, 0, 0, arg0, 0x3A, arg1);
     func_0024E260(0, 0, 0, arg0, 0x38, arg1);
     func_0024E260(0, 0, 0, arg0, 0x39, arg1);
 }
 
-void dspDrawMarksB(s32 arg0, s32 arg1) {
+void itfDspDrawMarksB(s32 arg0, s32 arg1) {
     func_0024E260(0, 0, 0, arg0, 0xF, arg1);
     func_0024E260(0, 0, 0, arg0, 0x10, arg1);
     func_0024E260(0, 0, 0, arg0, 0x12, arg1);
@@ -76,7 +76,7 @@ void dspDrawMarksB(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255FF8);
 
-void dspDrawStrip(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void itfDspDrawStrip(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0024E260(arg0, arg1, arg2, arg3, 4, arg4);
     func_0024E260(arg0, arg1, arg2, arg3, 5, arg4);
     func_0024E260(arg0, arg1, arg2, arg3, 0xA, arg4);
@@ -105,7 +105,7 @@ typedef struct {
     s32 first; /* 0x08 */
 } DspListHead;
 
-s32 *func_00256B38(void) {
+s32 *mnuAllocateDisplayListNode(void) {
     s32 *temp_v0 = (s32 *)func_002CFEB8(0x14);
 
     memset(temp_v0, 0, 0x14);
@@ -122,7 +122,7 @@ u32 func_00256C00(DspListNode *node) {
     return next;
 }
 
-void func_00256C28(DspListHead *head) {
+void mnuReleaseDisplayListNodes(DspListHead *head) {
     s32 node = head->first;
 
     while (node != NULL) {
@@ -132,17 +132,17 @@ void func_00256C28(DspListHead *head) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256C58);
 
-void dspDrawScaledA(s32 arg0, s32 arg1, s32 arg2) {
+void itfDspDrawScaledA(s32 arg0, s32 arg1, s32 arg2) {
     func_0024E260(0, 0, 0, arg1, 0x16, arg2);
     func_0024E260(0, 0, 0, arg1 * 0.5f, 0x18, arg2);
 }
 
-void dspDrawScaledB(s32 arg0, s32 arg1, s32 arg2) {
+void itfDspDrawScaledB(s32 arg0, s32 arg1, s32 arg2) {
     func_0024E260(0, 0, 0, arg1, 0x17, arg2);
     func_0024E260(0, 0, 0, arg1 * 0.5f, 0x19, arg2);
 }
 
-void dspDrawPair(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void itfDspDrawPair(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0024E260(arg0, arg1, arg2, arg3, 0x14, arg4);
     func_0024E260(arg0, arg1, arg2, arg3, 0x15, arg4);
 }

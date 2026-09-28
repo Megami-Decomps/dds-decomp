@@ -70,7 +70,7 @@ INCLUDE_ASM(const s32, "game/code_0010F118", effObjNodeDestroy);
 
 INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerCreate);
 
-void func_0010F810(s32 arg0) {
+void effObjFreeInner(s32 arg0) {
     s32 temp_v0;
 
     if (arg0 != 0) {
@@ -82,15 +82,15 @@ void func_0010F810(s32 arg0) {
     }
 }
 
-void func_0010F850(s32 arg0, u32 arg1) {
+void effObjSetNodeFlags(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0xc0) = *(u32 *)(arg0 + 0xc0) | arg1;
 }
 
-void func_0010F860(s32 arg0, u32 arg1) {
+void effObjClearNodeFlags(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0xc0) = *(u32 *)(arg0 + 0xc0) & ~arg1;
 }
 
-u8 func_0010F878(s32 arg0, u32 arg1) {
+u8 effObjTestNodeFlags(s32 arg0, u32 arg1) {
     return (*(u32 *)(arg0 + 0xc0) & arg1) != 0;
 }
 

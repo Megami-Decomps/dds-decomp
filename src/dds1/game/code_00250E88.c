@@ -2,19 +2,19 @@
 
 extern void func_002512F0(s32, s32);
 
-extern void func_0025DB80(s32);
+extern void mnuReleaseListNodes(s32);
 
 extern void func_00250978(s32);
 
-extern void func_00257E78(s32);
+extern void mnuCopySceneCoordinates(s32);
 
-extern void destroyGridWork(s32);
+extern void sdfDestroyGridWork(s32);
 
-extern void func_00256C28(s32);
+extern void mnuReleaseDisplayListNodes(s32);
 
 extern void func_002D0918(s32);
 
-extern void menuResetWorkFloats(void);
+extern void mnuResetWorkFloats(void);
 
 extern s32 func_002CB3B8(u32, u32);
 
@@ -53,10 +53,10 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00251960);
 
 void func_002519E8(s32 unused, s32 context) {
     func_002CB3B8(D_003BC4CC, -1);
-    destroyGridWork(*(s32 *)(context + 0x484));
-    func_00256C28(context + 0x584);
+    sdfDestroyGridWork(*(s32 *)(context + 0x484));
+    mnuReleaseDisplayListNodes(context + 0x584);
     func_002D0918(*(s32 *)context);
-    menuResetWorkFloats();
+    mnuResetWorkFloats();
 }
 
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF810);
@@ -84,9 +84,9 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002530D8);
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
 void func_00253520(s32 context) {
-    destroyGridWork(*(s32 *)(context + 0x484));
+    sdfDestroyGridWork(*(s32 *)(context + 0x484));
     func_00250978(context);
-    func_00257E78(context);
+    mnuCopySceneCoordinates(context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253558);
@@ -119,7 +119,7 @@ typedef struct {
     u16 entryIndex; /* 0x0C */
 } SceneMetadataNode;
 
-void updateSceneEntryMetadata(s32 context) {
+void fldUpdateSceneEntryMetadata(s32 context) {
     SceneMetadataNode *node = (SceneMetadataNode *)*(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
     u16 index = node->entryIndex;
     ((SceneMetadataContext *)context)->entryX = D_0036BE38[index].unk4;
@@ -127,16 +127,16 @@ void updateSceneEntryMetadata(s32 context) {
     ((SceneMetadataContext *)context)->entryY = D_0036BE38[index].unk6;
 }
 
-s32 resetSceneState(void) {
-    updateSceneEntryMetadata(func_002CB3B8(D_003BC4CC, 1));
+s32 fldResetSceneState(void) {
+    fldUpdateSceneEntryMetadata(func_002CB3B8(D_003BC4CC, 1));
     return 0;
 }
 
 void func_00253CF8(void) {
     s32 context = func_002CB3B8(D_003BC4CC, 1);
     func_002512F0(context, 1);
-    func_00257E78(context);
-    func_0025DB80(context + 0x590);
+    mnuCopySceneCoordinates(context);
+    mnuReleaseListNodes(context + 0x590);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC420);

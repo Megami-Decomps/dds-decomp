@@ -63,7 +63,7 @@ extern u8 D_003BDA10;
 extern u8 D_003BDA18;
 extern s32 D_003BD348;
 extern void func_002CFF98(void *);
-void *devCreateRequest(s32, s32, s32);
+void *sdfDevCreateBufferedRequest(s32, s32, s32);
 extern u64 func_002D2468(SdfTex *);
 extern u64 func_002D2478(SdfTex *);
 extern u64 func_002D2488(SdfTex *);
@@ -77,7 +77,7 @@ void func_002D3BE0(void *arg0, void (*arg1)(void));
 void func_002D3C30(void *arg0, s32 arg1);
 void func_002DA290(void);
 void sdfAssetRelease(SdfAsset *);
-void func_002E7680(void *);
+void sdfDestroyDevRequest(void *);
 void func_002D2D00(u32);
 SdfAsset *func_002DA730(void);
 u8 *func_002DA830(SdfAsset *, SdfTextParam *, u8 *);
@@ -135,7 +135,7 @@ s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9C28);
 
-u32 func_002D9CC8(SdfTextParam *param) {
+u32 sdfCountMapPositionRecords(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, 0x534f504d);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
@@ -183,7 +183,7 @@ s32 func_002D9E98(SdfTextParam *param, s32 id) {
     return 0;
 }
 
-u32 func_002D9ED8(SdfTextParam *param) {
+u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, 0x51494e55);
     if (chunk != NULL) {
         return *(u32 *)((u8 *)chunk + 8);
@@ -191,7 +191,7 @@ u32 func_002D9ED8(SdfTextParam *param) {
     return 0;
 }
 
-u32 func_002D9F08(SdfTextParam *param) {
+u32 sdfGetLodChunkValue(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, 0x43444f4c);
     if (chunk != NULL) {
         return *(u32 *)((u8 *)chunk + 8);
@@ -229,7 +229,7 @@ void func_002D9FA0(u32 arg0) {
 }
 
 void func_002D9FA8(u32 arg0) {
-    devCreateRequest(arg0, 4, 4);
+    sdfDevCreateBufferedRequest(arg0, 4, 4);
 }
 
 void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
@@ -244,7 +244,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
             func_002D2D00(list->items[i]);
         }
     }
-    func_002E7680(list);
+    sdfDestroyDevRequest(list);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA058);
@@ -272,7 +272,7 @@ void func_002DA240(void) {
 }
 
 SdfResourceList *func_002DA270(s32 capacity) {
-    return devCreateRequest(capacity, 4, 8);
+    return sdfDevCreateBufferedRequest(capacity, 4, 8);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA290);
@@ -284,7 +284,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
     if (retained != 0) {
         func_002D3C30(&D_003BDA10, (s32)resource);
     } else {
-        func_002E7680(resource);
+        sdfDestroyDevRequest(resource);
     }
 }
 
@@ -334,7 +334,7 @@ SdfSubParam *sdfSubParamCreate(void) {
     return temp;
 }
 
-SdfSubParam *func_002DA490(SdfTextParam *param) {
+SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
     SdfSubParam *sub = param->unk38;
     if (sub == NULL) {
         sub = sdfSubParamCreate();
@@ -344,7 +344,7 @@ SdfSubParam *func_002DA490(SdfTextParam *param) {
 }
 
 void func_002DA4C8(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
-    f32 *values = func_002DA490(param)->scalar.values;
+    f32 *values = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
     values[0] = a;
     values[1] = b;
     values[2] = c;
@@ -354,7 +354,7 @@ void func_002DA4C8(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
 }
 
 void func_002DA548(SdfTextParam *param, const f32 *input) {
-    f32 *values = func_002DA490(param)->scalar.values;
+    f32 *values = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
     values[0] = input[0];
     values[1] = input[1];
     values[2] = input[2];
@@ -378,7 +378,7 @@ void func_002DA5E0(SdfTextParam *arg0, u32 arg1) {
     arg0->unk06 |= 0x30;
 }
 
-SdfSubParam *func_002DA5F8(SdfTextParam *param) {
+SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
     SdfSubParam *sub = param->unk3C;
     if (sub == NULL) {
         sub = sdfSubParamCreate();
@@ -388,7 +388,7 @@ SdfSubParam *func_002DA5F8(SdfTextParam *param) {
 }
 
 void func_002DA630(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
-    f32 *values = func_002DA5F8(param)->scalar.values;
+    f32 *values = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
     values[0] = a;
     values[1] = b;
     values[2] = c;
@@ -398,7 +398,7 @@ void func_002DA630(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
 }
 
 void func_002DA6B0(SdfTextParam *param, const f32 *input) {
-    f32 *values = func_002DA5F8(param)->scalar.values;
+    f32 *values = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
     values[0] = input[0];
     values[1] = input[1];
     values[2] = input[2];

@@ -60,7 +60,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00117908);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117998);
 
-s32 sysBumpTickCounters(void) {
+s32 sdfBumpTickCounters(void) {
     s32 base;
 
     base = D_00435DD0;
@@ -70,7 +70,7 @@ s32 sysBumpTickCounters(void) {
 }
 
 void func_00117A10(void) {
-    func_0010BE08();
+    scrClearProcessGlobals();
     func_0023A028();
     *(u32 *)(D_00435DD0 + 0xa5c) = 8;
     func_0011AB38();
@@ -78,7 +78,7 @@ void func_00117A10(void) {
     func_00313C40();
     func_0026CE90();
     func_00314200();
-    eventUpdateFlaggedEntries();
+    evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     func_0011D438();
     func_001B7900();
@@ -97,7 +97,7 @@ void func_00118680(void) {
     dds3WorkInit(D_00435E80);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sysFirePendingCallback);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfFirePendingCallback);
 
 u8 func_001186C8(s64 arg0) {
     s64 temp_v0;
@@ -118,19 +118,19 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001189D0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118AB0);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sysDispatchCmd);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchCmd);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118BA8);
 
 void func_00118C58(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
-    eventRunContext(10, arg1, arg2, arg0, arg3);
+    evtRunContext(10, arg1, arg2, arg0, arg3);
 }
 
 void func_00118C80(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
-    eventRunContext(7, arg1, arg2, arg0, arg3);
+    evtRunContext(7, arg1, arg2, arg0, arg3);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sysDispatchSubCmd);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchSubCmd);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);
 

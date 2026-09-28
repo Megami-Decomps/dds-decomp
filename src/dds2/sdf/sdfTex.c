@@ -13,9 +13,9 @@ void *func_0032BD60(SdfTex *arg0, s32 arg1);
 
 void *func_00328D68(s32 arg0);
 
-void *func_0032B260();
+void *sdfTexGetPrimaryResourceWord();
 
-void *func_0032B248(void *arg0);
+void *sdfTexGetSecondaryResourceWord(void *arg0);
 
 void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 
@@ -39,7 +39,7 @@ void func_0032B948(SdfTex *texture, void *source) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B968);
 
-void func_0032BAE0(SdfTex *texture) {
+void sdfTexRelease(SdfTex *texture) {
     SdfTex *next;
     SdfTex *prev;
 
@@ -77,8 +77,8 @@ void *func_0032BD60(SdfTex *arg0, s32 arg1) {
     void *tmp2;
 
     buf = func_00328D68(0x40);
-    tmp1 = func_0032B260(arg0);
-    tmp2 = func_0032B248(arg0);
+    tmp1 = sdfTexGetPrimaryResourceWord(arg0);
+    tmp2 = sdfTexGetSecondaryResourceWord(arg0);
     func_0032BBF8(buf, arg0->unkC, arg0->unkE, tmp1, arg0->unk1A, tmp2, arg0->unk19, 1, arg0->unk1B, arg0->unk1C, arg0->unk1F, arg1);
     return buf;
 }

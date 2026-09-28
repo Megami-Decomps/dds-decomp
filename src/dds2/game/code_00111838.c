@@ -16,15 +16,15 @@ typedef struct ObjectWithResource {
 
 INCLUDE_ASM(const s32, "game/code_00111838", func_00111838);
 
-void func_001118C0(ObjectWithResource *object, u32 value) {
+void dds3SetSlotValue(ObjectWithResource *object, u32 value) {
     object->resource->value8 = value;
 }
 
-void func_001118D0(ObjectWithResource *object, u32 resourceId) {
+void dds3SetSlotKey(ObjectWithResource *object, u32 resourceId) {
     object->resource->resourceId = resourceId;
 }
 
-void func_001118E0(ObjectWithResource *object) {
+void dds3ReplaceObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
     u32 handle;
 
@@ -36,7 +36,7 @@ void func_001118E0(ObjectWithResource *object) {
     resource->handle = handle;
 }
 
-void func_00111920(ObjectWithResource *object) {
+void dds3ReleaseObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
     s32 handle;
 
@@ -48,7 +48,7 @@ void func_00111920(ObjectWithResource *object) {
     }
 }
 
-u32 func_00111958(ObjectWithResource *object) {
+u32 dds3GetObjectResourceHandle(ObjectWithResource *object) {
     return object->resource->handle;
 }
 

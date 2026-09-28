@@ -39,7 +39,7 @@ void func_0010C2D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C2F0);
 
-void func_0010C348(ScriptCommandBuffer *buffer, u32 value) {
+void scrPushInteger(ScriptCommandBuffer *buffer, u32 value) {
     buffer->kinds[buffer->count] = 0;
     buffer->values[buffer->count] = value;
     buffer->count = buffer->count + 1;
@@ -47,13 +47,13 @@ void func_0010C348(ScriptCommandBuffer *buffer, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C378);
 
-void func_0010C3A8(ScriptCommandBuffer *buffer, u32 value) {
+void scrPushString(ScriptCommandBuffer *buffer, u32 value) {
     buffer->kinds[buffer->count] = 5;
     buffer->values[buffer->count] = value;
     buffer->count = buffer->count + 1;
 }
 
-void func_0010C3D8(ScriptCommandBuffer *buffer, u32 value) {
+void scrPushTypeFourValue(ScriptCommandBuffer *buffer, u32 value) {
     buffer->kinds[buffer->count] = 4;
     buffer->values[buffer->count] = value;
     buffer->count = buffer->count + 1;
@@ -63,14 +63,14 @@ INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C408);
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C4E0);
 
-u32 func_0010C5C8(u32 arg0) {
+u32 scrPushNextInstructionValue(u32 arg0) {
     s32 temp_v0;
     s32 temp_v1;
 
     temp_v1 = (s32)arg0;
     temp_v0 = *(s32 *)(temp_v1 + 0x18) + 1;
     *(s32 *)(temp_v1 + 0x18) = temp_v0;
-    func_0010C348(arg0, *(u32 *)(temp_v0 * 4 + *(s32 *)(temp_v1 + 0xbc)));
+    scrPushInteger(arg0, *(u32 *)(temp_v0 * 4 + *(s32 *)(temp_v1 + 0xbc)));
     *(s32 *)(temp_v1 + 0x18) = *(s32 *)(temp_v1 + 0x18) + 1;
     return 1;
 }

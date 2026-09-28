@@ -4,7 +4,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00345E18);
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00345EB0);
 
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00346040);
+INCLUDE_ASM(const s32, "sdf/sdfMovie", sdfMovieProcessPendingData);
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_003460D8);
 

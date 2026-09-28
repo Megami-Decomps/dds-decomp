@@ -17,7 +17,7 @@ typedef struct {
     void *resource;      /* 0x84: released by func_00190CD0 */
 } EffEventWork; /* 0x88 */
 
-void func_00190208(EffEventWork *work) {
+void effEventReleaseNode(EffEventWork *work) {
     func_00160B00(work->effect);
     func_002CFF98(work);
 }
@@ -30,7 +30,7 @@ void func_00190308(EffEventWork *work) {
     func_00161588(work->effect);
 }
 
-void func_00190320(EffEventWork *work, u32 value) {
+void effEventSetState(EffEventWork *work, u32 value) {
     work->unk30 = value;
 }
 
@@ -48,7 +48,7 @@ void func_00190810(EffEventWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190828);
 
-void func_00190880(EffEventWork *work, void *value) {
+void effEventBindEffect(EffEventWork *work, void *value) {
     work->effect = value;
     func_00190238(work->owner, work->initBlock);
 }

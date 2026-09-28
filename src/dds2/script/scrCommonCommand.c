@@ -19,11 +19,11 @@ s32 func_001081F8(s32 arg0, void *arg1);
 
 s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
 
-s32 drawSetDc8Second(s32 arg0);
+s32 kwlnDrawSetDc8Second(s32 arg0);
 
 extern char D_004126D0[];
 
-s32 drawSetE08Fifth(s32 arg0);
+s32 kwlnDrawSetE08Fifth(s32 arg0);
 
 extern char D_004126F0[];
 
@@ -37,7 +37,7 @@ s32 func_0010D990(void)
 
 s32 func_0010D9C8(void)
 {
-    return func_0010D8A8() != 0;
+    return scrGetCommandTimer() != 0;
 }
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D9E8);
@@ -60,7 +60,7 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DB30);
 
 s32 func_0010DBD0(void)
 {
-    if (func_0010D8A8() == 0)
+    if (scrGetCommandTimer() == 0)
     {
         func_00105FE8(func_0010D650(0));
         return 0;
@@ -70,7 +70,7 @@ s32 func_0010DBD0(void)
 
 s32 func_0010DC10(void)
 {
-    if (func_0010D8A8() == 0)
+    if (scrGetCommandTimer() == 0)
     {
         func_00106080(func_0010D650(0));
         return 0;
@@ -92,7 +92,7 @@ s32 func_0010DC50(void)
     {
         return 1;
     }
-    func_0010D888(func_0010D860(label));
+    scrSetProgramCounter(scrGetLabelAddress(label));
     return 1;
 }
 
@@ -130,7 +130,7 @@ s32 func_0010DEA8(void)
 {
     s32 p0;
     p0 = func_0010D650(0);
-    if (func_001018B0(p0) == 0)
+    if (kwlnTaskIsRegistered(p0) == 0)
     {
         return 1;
     }
@@ -140,12 +140,12 @@ s32 func_0010DEA8(void)
 
 s32 func_0010DEF0(void)
 {
-    return func_001018B0(func_0010D650(0)) == 0;
+    return kwlnTaskIsRegistered(func_0010D650(0)) == 0;
 }
 
 s32 func_0010DF18(void)
 {
-    if (func_001018B0(func_0010D650(0)) != 0)
+    if (kwlnTaskIsRegistered(func_0010D650(0)) != 0)
     {
         func_0010D818(1);
     }
@@ -161,7 +161,7 @@ u32 scrCommand_SCR_GET_TIMER()
 {
     KwlnTask* task;
     task = (KwlnTask*)func_0010D650(0);
-    if (!func_001018B0(task))
+    if (!kwlnTaskIsRegistered(task))
     {
         func_0010D818(0);
     }
@@ -266,7 +266,7 @@ s32 func_0010E480(void)
     p3 = func_0010D650(3);
     p2 = func_0010D650(2);
     p1 = func_0010D650(1);
-    drawSetC70Second(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    kwlnDrawSetC70Second(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -276,7 +276,7 @@ s32 func_0010E508(void)
     s32 p1;
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
-    drawSetC70Triple(p0, p1, func_0010D650(2));
+    kwlnDrawSetC70Triple(p0, p1, func_0010D650(2));
     return 1;
 }
 
@@ -288,13 +288,13 @@ s32 func_0010E560(void)
 
 s32 func_0010E588(void)
 {
-    drawSetupC70(func_0010D650(0));
+    kwlnDrawSetupC70(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010E5B0(void)
 {
-    drawSetupC70B(func_0010D650(0));
+    kwlnDrawSetupC70B(func_0010D650(0));
     return 1;
 }
 
@@ -311,7 +311,7 @@ s32 func_0010E6C0(void)
     p3 = func_0010D650(3);
     p2 = func_0010D650(2);
     p1 = func_0010D650(1);
-    drawSetCd0Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    kwlnDrawSetCd0Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -321,7 +321,7 @@ s32 func_0010E748(void)
     s32 p1;
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
-    drawSetCd0Triple(p0, p1, func_0010D650(2));
+    kwlnDrawSetCd0Triple(p0, p1, func_0010D650(2));
     return 1;
 }
 
@@ -333,13 +333,13 @@ s32 func_0010E7A0(void)
 
 s32 func_0010E7C8(void)
 {
-    drawSetupCd0(func_0010D650(0));
+    kwlnDrawSetupCd0(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010E7F0(void)
 {
-    drawEnableCd0(func_0010D650(0));
+    kwlnDrawEnableCd0(func_0010D650(0));
     return 1;
 }
 
@@ -356,7 +356,7 @@ s32 func_0010E900(void)
     p3 = func_0010D650(3);
     p2 = func_0010D650(2);
     p1 = func_0010D650(1);
-    drawSetD30Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    kwlnDrawSetD30Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -366,7 +366,7 @@ s32 func_0010E988(void)
     s32 p1;
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
-    drawSetD30Triple(p0, p1, func_0010D650(2));
+    kwlnDrawSetD30Triple(p0, p1, func_0010D650(2));
     return 1;
 }
 
@@ -378,13 +378,13 @@ s32 func_0010E9E0(void)
 
 s32 func_0010EA08(void)
 {
-    drawSetupD30(func_0010D650(0));
+    kwlnDrawSetupD30(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010EA30(void)
 {
-    drawEnableD30(func_0010D650(0));
+    kwlnDrawEnableD30(func_0010D650(0));
     return 1;
 }
 
@@ -401,7 +401,7 @@ s32 func_0010EAF8(void)
     p3 = func_0010D650(3);
     p2 = func_0010D650(2);
     p1 = func_0010D650(1);
-    drawSetD88First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    kwlnDrawSetD88First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -409,7 +409,7 @@ s32 func_0010EB80(void)
 {
     s32 p0;
     p0 = func_0010D650(0);
-    drawSetD88Pair(p0, func_0010D650(1));
+    kwlnDrawSetD88Pair(p0, func_0010D650(1));
     return 1;
 }
 
@@ -421,13 +421,13 @@ s32 func_0010EBC0(void)
 
 s32 func_0010EBE8(void)
 {
-    drawSetupD88(func_0010D650(0));
+    kwlnDrawSetupD88(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010EC10(void)
 {
-    drawEnableD88(func_0010D650(0));
+    kwlnDrawEnableD88(func_0010D650(0));
     return 1;
 }
 
@@ -455,7 +455,7 @@ s32 func_0010EC38(void)
         mode = 0x44;
         break;
     }
-    drawSetDc8Second(mode);
+    kwlnDrawSetDc8Second(mode);
     return 1;
 }
 
@@ -470,7 +470,7 @@ s32 func_0010ECB8(void)
     p3 = func_0010D650(3);
     p2 = func_0010D650(2);
     p1 = func_0010D650(1);
-    drawSetDc8First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    kwlnDrawSetDc8First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -482,13 +482,13 @@ s32 func_0010ED40(void)
 
 s32 func_0010ED68(void)
 {
-    drawSetupDc8(func_0010D650(0));
+    kwlnDrawSetupDc8(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010ED90(void)
 {
-    drawEnableDc8(func_0010D650(0));
+    kwlnDrawEnableDc8(func_0010D650(0));
     return 1;
 }
 
@@ -516,7 +516,7 @@ s32 func_0010EDB8(void)
         mode = 0x44;
         break;
     }
-    drawSetE08Fifth(mode);
+    kwlnDrawSetE08Fifth(mode);
     return 1;
 }
 
@@ -531,7 +531,7 @@ s32 func_0010EE38(void)
     p3 = func_0010D650(3);
     p2 = func_0010D650(2);
     p1 = func_0010D650(1);
-    drawSetE08Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    kwlnDrawSetE08Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -541,7 +541,7 @@ s32 func_0010EEC0(void)
     s32 p1;
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
-    drawSetE08Triple(p0, p1, func_0010D650(2));
+    kwlnDrawSetE08Triple(p0, p1, func_0010D650(2));
     return 1;
 }
 
@@ -553,35 +553,35 @@ s32 func_0010EF18(void)
 
 s32 func_0010EF40(void)
 {
-    drawSetupE08(func_0010D650(0));
+    kwlnDrawSetupE08(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010EF68(void)
 {
-    drawEnableE08(func_0010D650(0));
+    kwlnDrawEnableE08(func_0010D650(0));
     return 1;
 }
 
 s32 func_0010EF90(void)
 {
     func_00106810(0, 0, 0);
-    drawEnableD88(0);
-    drawSetupC70B(0);
-    drawEnableCd0(0);
-    drawEnableD30(0);
+    kwlnDrawEnableD88(0);
+    kwlnDrawSetupC70B(0);
+    kwlnDrawEnableCd0(0);
+    kwlnDrawEnableD30(0);
     func_00197298();
     return 1;
 }
 
 s32 func_0010EFE0(void)
 {
-    drawEnableDc8(0);
-    drawEnableE08(0);
+    kwlnDrawEnableDc8(0);
+    kwlnDrawEnableE08(0);
     func_00135568(0);
     func_00135578(0x80);
     func_00135588(0);
-    func_001354F0(0, 1, 0);
+    fldSetFadeTarget(0, 1, 0);
     return 1;
 }
 

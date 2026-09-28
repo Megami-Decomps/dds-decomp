@@ -10,10 +10,10 @@ typedef struct {
     CameraData *data;
 } CameraObject;
 
-void func_00112BE0(CameraObject *camera) {
+void dds3DestroyCameraData(CameraObject *camera) {
     CameraData *data;
 
-    func_0010F810();
+    effObjFreeInner();
     data = camera->data;
     func_00111A68(data->handle);
     func_00328E48(data);
@@ -27,7 +27,7 @@ u32 func_00112D08(void) {
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112D10);
 
-u32 func_00112DD8(CameraObject *camera) {
+u32 dds3GetCameraHandle(CameraObject *camera) {
     return camera->data->handle;
 }
 

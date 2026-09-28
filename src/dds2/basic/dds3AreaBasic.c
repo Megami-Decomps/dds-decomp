@@ -1,6 +1,6 @@
 #include "common.h"
 
-void objExchangeSlot(void *arg0, s32 arg1, s32 arg2);
+void dds3ExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
 typedef struct {
     u8 pad[0xC];
@@ -12,12 +12,12 @@ typedef struct {
     AreaSub *unk10;
 } AreaObj;
 
-s32 func_00111330(void *arg) {
-    objExchangeSlot(arg, 0, 5);
+s32 dds3ExchangeAreaSlot(void *arg) {
+    dds3ExchangeSlot(arg, 0, 5);
     return 1;
 }
 
-s32 func_00111358(AreaObj *arg) {
+s32 dds3InvokeAreaCallback(AreaObj *arg) {
     s32 (*func)(void);
 
     func = arg->unk10->unkC;

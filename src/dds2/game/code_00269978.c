@@ -20,7 +20,7 @@ typedef struct EventDispatchState {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269978);
 
-void func_00269AF8(u32 callback, s32 address) {
+void evtRememberDispatchCallback(u32 callback, s32 address) {
     EventDispatchState *state = (EventDispatchState *)address;
     u32 previous;
 
@@ -53,7 +53,7 @@ extern void func_0026C710(void);
 
 s32 func_00269F70(void) {
     u8 *state = (u8 *)func_00101958();
-    func_00269AF8(0, (s32)state);
+    evtRememberDispatchCallback(0, (s32)state);
     *(u32 *)(*(s32 *)(state + 0x78) + 0x3C) = 0;
     func_00267EA0(0, 0);
     func_0026C710();
@@ -68,7 +68,7 @@ extern void func_002668C0(s32);
 s32 func_00269FC8(void) {
     s32 state = func_00101958();
     func_002690A8(1, state);
-    func_00269AF8((u32)func_00269230, state);
+    evtRememberDispatchCallback((u32)func_00269230, state);
     func_00268AA0(0, -2, state);
     func_00267EA0(1, 0);
     func_002668C0(state);
@@ -160,7 +160,7 @@ s32 func_0026AAC0(void) {
     func_00268C48(2, state);
     func_00268AA0(3, 4, state);
     func_002690A8(2, state);
-    func_00269AF8(0, state);
+    evtRememberDispatchCallback(0, state);
     *(u32 *)(state + 0xA0) = 0;
     func_0026C710();
     func_0026C728();
@@ -176,7 +176,7 @@ s32 func_0026AB38(void) {
     func_00268C48(1, state);
     func_00268AA0(3, 0, state);
     func_002690A8(1, state);
-    func_00269AF8((u32)func_00269230, state);
+    evtRememberDispatchCallback((u32)func_00269230, state);
     func_0026C538(*(s32 *)(state + 0x60));
     return 1;
 }
@@ -306,7 +306,7 @@ s32 func_0026B1C8(void) {
     func_00268CC0(1, state);
     func_00268AA0(1, 0, state);
     func_002690A8(1, state);
-    func_00269AF8((u32)func_00269230, state);
+    evtRememberDispatchCallback((u32)func_00269230, state);
     *(s32 *)(state + 0x14C) = 1;
     *(s32 *)(state + 0xD4) = 0;
     kwlnFadeOutStart(0, 0, 0, 15);

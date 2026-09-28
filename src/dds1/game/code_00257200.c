@@ -31,7 +31,7 @@ typedef struct {
     s16 entryY;                /* 0x59E */
 } SceneCoordWork;
 
-void func_00257E78(SceneCoordWork *work) {
+void mnuCopySceneCoordinates(SceneCoordWork *work) {
     s32 x = work->entryX;
     s32 y = work->entryY;
     SceneCoordPair *point = work->points;

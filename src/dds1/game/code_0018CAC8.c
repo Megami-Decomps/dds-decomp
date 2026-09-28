@@ -52,11 +52,11 @@ extern void func_003101B8(void);
 extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
 extern void *func_002CFEB8(s32 arg0);
-extern void func_002D4010(s32 arg0);
-extern void consCreateDrawPacket(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern void sdfInitPacketList(s32 arg0);
+extern void sdfConsCreateDrawPacket(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern void *func_002E1420(s32 arg0);
 extern s32 func_002E1478(s32 arg0);
-extern void func_002D4038(s32 arg0, s32 arg1);
+extern void sdfAppendPacket(s32 arg0, s32 arg1);
 
 /* Voice parameters read via EffWork.unk3C. */
 typedef struct SndVoice {
@@ -417,7 +417,7 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DE78);
 
 void *effAllocSlotArray(s32 n) {
     void *mem1 = func_002D03F8(n * 0x38 + 0xC);
-    void *mem2 = func_002D0A48(mem1);
+    void *mem2 = sdfResourceRetainAddress(mem1);
     u32 i = 0;
     EffSlot38 *r = mem2;
     u8 *end = (u8 *)r + n * 0x38;
@@ -435,12 +435,6 @@ void *effAllocSlotArray(s32 n) {
     }
     return end;
 }
-
-INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB050);
-
-INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB058);
-
-INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB060);
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F88);
 
@@ -547,4 +541,10 @@ INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12B0);
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12C0);
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12D0);
+
+INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB050);
+
+INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB058);
+
+INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB060);
 

@@ -85,7 +85,7 @@ extern u32 func_002EB090(void *);
 
 extern u32 D_003BD878;
 
-extern void *battleFindGroupedEntity(void);
+extern void *btlFindGroupedEntity(void);
 
 void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
     s32 off = node->slotIndex * 4 + 0x20;
@@ -115,7 +115,7 @@ void func_00216CC8(void *arg0, void *arg1, void *arg2) {
     void *handle;
 
     /* arg0/arg1 are ignored. */
-    handle = battleFindGroupedEntity();
+    handle = btlFindGroupedEntity();
     func_00216C00(handle, arg2);
 }
 
@@ -314,7 +314,7 @@ void func_00218050(MdlCtx *ctx, u32 arg1) {
     u32 *node;
 
     for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
-        setModelResourceFrame(ctx, node, arg1);
+        mdlSetResourceFrame(ctx, node, arg1);
     }
 }
 

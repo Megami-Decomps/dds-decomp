@@ -249,7 +249,7 @@ typedef struct FuncTab {
 void *func_002CFF68(s32 size);
 void func_002CFF98(void *a0);
 void *func_002CFEB8(s32 size);
-ArrObj *devCreateRequest(u16 n, s32 e1, s32 e2);
+ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
 s32 func_002DB1C8(void *a0, s32 a1, s32 a2);
 s32 func_002D7D68(void *a0, s32 a1);
 void func_002DA3C0(void *a0, s32 a1);
@@ -257,15 +257,15 @@ void func_002DA3D8(void *a0, s32 a1);
 void func_002DA3F0(void *a0, s32 a1);
 void func_002DA408(void *a0, s32 a1);
 void func_002DA420(void *a0, f32 a1);
-Blk *func_002DA490(void *a0);
+Blk *sdfEnsurePrimaryTextSubParam(void *a0);
 void func_002DA548(void *a0, void *a1);
 void func_002DA5B0(void *a0, s32 a1);
-Blk *func_002DA5F8(void *a0);
+Blk *sdfEnsureSecondaryTextSubParam(void *a0);
 void func_002DA6B0(void *a0, void *a1);
-void func_002E7680(void *a0);
+void sdfDestroyDevRequest(void *a0);
 void func_002DB220(Pair *a0, void *a1, void *a2);
 void func_002DB3D0(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
-f32 func_002DB8D8(KeyOut *a0);
+f32 sdfInterpolateMotionKeys(KeyOut *a0);
 void func_002DB7C8(void *a0, KeyOut *out, f32 t);
 s32 func_002DB958(KeyOut *a0);
 void func_002DBA80(void *tmp, void *src, void *tbl, s32 x);
@@ -335,7 +335,7 @@ void func_002DB7C0(Triple *a0, s32 a1) {
 }
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB7C8);
 
-f32 func_002DB8D8(KeyOut *a0) {
+f32 sdfInterpolateMotionKeys(KeyOut *a0) {
     f32 t;
     f32 a;
 
@@ -348,7 +348,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB900);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB958);
 
-void func_002DB9D8(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
+void sdfMotionBlendFiveFloats(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
     s32 i;
     f32 inverseWeight;
 
@@ -361,7 +361,7 @@ void func_002DB9D8(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
 }
 
 void func_002DBA28(KeyOut *src, f32 *dst) {
-    func_002DB9D8(dst, src->firstKey, src->secondKey, src->weight);
+    sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
 s32 func_002DBA50(void *a0, s32 a1) {
@@ -570,14 +570,14 @@ void func_002DC998(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
-    func_002DA420(a0->sub, func_002DB8D8(&b));
+    func_002DA420(a0->sub, sdfInterpolateMotionKeys(&b));
 }
 
 void func_002DC9D8(HasSubF *a0, f32 t1, f32 t2) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t1);
-    func_002DA420(a0->sub, (a0->f10 + func_002DB8D8(&b) * t2) - (a0->f10 * t2));
+    func_002DA420(a0->sub, (a0->f10 + sdfInterpolateMotionKeys(&b) * t2) - (a0->f10 * t2));
 }
 
 void func_002DCA30(CmdF *a0) {
@@ -608,14 +608,14 @@ void func_002DCAF0(HasArr *a0, f32 t1, f32 t2) {
 
     func_002DB7C8(a0, &b0, t1);
     func_002DBA28(&b0, b2);
-    func_002DB9D8(b1, a0->f10, b2, t2);
+    sdfMotionBlendFiveFloats(b1, a0->f10, b2, t2);
     func_002DA548(a0->sub, b1);
 }
 
 void func_002DCB68(DstBlk *a0) {
     Blk *p;
 
-    p = func_002DA490(a0->sub);
+    p = sdfEnsurePrimaryTextSubParam(a0->sub);
     a0->blk = *p;
 }
 
@@ -643,14 +643,14 @@ void func_002DCC68(HasArr *a0, f32 t1, f32 t2) {
 
     func_002DB7C8(a0, &b0, t1);
     func_002DBA28(&b0, b1);
-    func_002DB9D8(b2, a0->f10, b1, t2);
+    sdfMotionBlendFiveFloats(b2, a0->f10, b1, t2);
     func_002DA6B0(a0->sub, b2);
 }
 
 void func_002DCCE0(DstBlk *a0) {
     Blk *p;
 
-    p = func_002DA5F8(a0->sub);
+    p = sdfEnsureSecondaryTextSubParam(a0->sub);
     a0->blk = *p;
 }
 

@@ -5,7 +5,7 @@ typedef struct {
     u32 resourceHandle; /* 0x08 */
 } EffMathWork;
 
-void func_0018DF90(EffMathWork *work) {
+void effMathReleaseWorkResource(EffMathWork *work) {
     func_002D0918(work->resourceHandle);
 }
 

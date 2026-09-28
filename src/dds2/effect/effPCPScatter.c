@@ -34,7 +34,7 @@ struct PcpScatterWork4 {
 
 extern PcpScatterWork4 *func_0017AD28(void *param0, void *param1);
 
-extern void func_0017DCA8(u32 param0, u32 param1);
+extern void effShareScatterResource(u32 param0, u32 param1);
 
 typedef struct PcpScatterWork5 PcpScatterWork5;
 
@@ -110,7 +110,7 @@ void func_001787E0(u64 arg0) {
     func_001784F8(temp_v0, temp_v1, temp_v2);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178848);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterSharedDuplicate);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseParticleGroup);
 
@@ -143,7 +143,7 @@ void func_00179438(u64 arg0) {
     func_001791A8(temp_v0, temp_v1, temp_v2);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001794A0);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterLinkedDuplicate);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseSharedParticles);
 
@@ -175,7 +175,7 @@ void func_0017A058(u64 arg0) {
     func_00179DB0(temp_v0, temp_v1, temp_v2);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A0C0);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterTableDuplicate);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseLinkedParticles);
 
@@ -192,7 +192,7 @@ void func_0017A8B0(s32 arg0, u32 arg1) {
 void func_0017A8B8(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A8C0);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterPoolCreate);
 
 void func_0017A9C8(s32 arg0) {
     if (*(s32 *)(arg0 + 0x30) != 0) {
@@ -251,12 +251,12 @@ PcpScatterWork4 *func_0017AF88(PcpScatterWork4 *work) {
     PcpScatterWork4 *child;
 
     child = func_0017AD28(&work->unk40, NULL);
-    func_0017DCA8(child->unk184, work->unk184);
+    effShareScatterResource(child->unk184, work->unk184);
     return child;
 }
 
 void func_0017AFD0(s32 arg0) {
-    func_0017D9E0(*(u32 *)(arg0 + 0x184));
+    effReleaseScatterObject(*(u32 *)(arg0 + 0x184));
     func_003297C8(*(u32 *)(arg0 + 0x188));
 }
 
@@ -295,12 +295,12 @@ PcpScatterWork5 *func_0017BA18(PcpScatterWork5 *work)
     PcpScatterWork5 *child;
 
     child = func_0017B7A0(&work->unk40, NULL);
-    func_0017DCA8(child->unk18C, work->unk18C);
+    effShareScatterResource(child->unk18C, work->unk18C);
     return child;
 }
 
 void func_0017BA60(s32 arg0) {
-    func_0017D9E0(*(u32 *)(arg0 + 0x18c));
+    effReleaseScatterObject(*(u32 *)(arg0 + 0x18c));
     func_003297C8(*(u32 *)(arg0 + 400));
 }
 
@@ -339,12 +339,12 @@ PcpScatterWork6 *func_0017C520(PcpScatterWork6 *work)
     PcpScatterWork6 *child;
 
     child = func_0017C2D8(&work->unk40, NULL);
-    func_0017DCA8(child->unk194, work->unk194);
+    effShareScatterResource(child->unk194, work->unk194);
     return child;
 }
 
 void func_0017C568(s32 arg0) {
-    func_0017D9E0(*(u32 *)(arg0 + 0x194));
+    effReleaseScatterObject(*(u32 *)(arg0 + 0x194));
     func_003297C8(*(u32 *)(arg0 + 0x198));
 }
 
@@ -383,12 +383,12 @@ PcpScatterWork7 *func_0017D0C0(PcpScatterWork7 *work)
     PcpScatterWork7 *child;
 
     child = func_0017CE88(&work->unk40, NULL);
-    func_0017DCA8(child->unk134, work->unk134);
+    effShareScatterResource(child->unk134, work->unk134);
     return child;
 }
 
 void func_0017D108(s32 arg0) {
-    func_0017D9E0(*(u32 *)(arg0 + 0x134));
+    effReleaseScatterObject(*(u32 *)(arg0 + 0x134));
     func_003297C8(*(u32 *)(arg0 + 0x138));
 }
 

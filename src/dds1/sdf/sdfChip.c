@@ -18,7 +18,7 @@ void func_002D00B8(s32 arg0) {
     func_002D3C30(&D_003BD9C0, arg0);
 }
 
-s32 func_002D00D8(s32 address) {
+s32 sdfChipIsInRange(s32 address) {
     s32 inRange;
 
     inRange = 0;

@@ -43,11 +43,11 @@ void func_00233280(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 void func_00346AF8(void *buffer);
 
-s32 countModelRecords(s32 arg0);
+s32 mdlCountRecords(s32 arg0);
 
 s32 *func_00233E40(s32 arg0, s32 arg1);
 
-void loadModelViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
     func_00346A80(buffer, 0);
@@ -101,7 +101,7 @@ s32 * func_00233ED8(s32 arg0) {
     return piVar1;
 }
 
-s32 countModelRecords(s32 arg0) {
+s32 mdlCountRecords(s32 arg0) {
     s32 count;
     s32 *node;
 
@@ -160,12 +160,12 @@ INCLUDE_ASM(const s32, "game/code_00233660", mdlObjDestroy);
 INCLUDE_ASM(const s32, "game/code_00233660", mdlObjInit);
 
 void func_00234838(u32 arg0) {
-    devCreateRequest(arg0, 0x10, 4);
+    sdfDevCreateBufferedRequest(arg0, 0x10, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234858);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234948);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlInsertResourceItem);
 
 void func_002349A0(s32 arg0) {
     func_00159A50(*(u32 *)(arg0 + 8));
@@ -201,11 +201,11 @@ void func_00234BF8(u32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234C20);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234CE0);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlCondInitEntry);
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlDispatchResourceEntry);
 
-void applyModelResourceEntries(s32 object, s32 id, s32 option) {
+void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
     s32 *block = func_00233E40(object, id);
     if (block != NULL) {
         s32 *entry = func_00233EC0((s32)block);
@@ -216,15 +216,15 @@ void applyModelResourceEntries(s32 object, s32 id, s32 option) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", destroyModelResourceItem);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlDestroyResourceItem);
 
-void removeModelResourceSubtype(s32 object, s32 subtype) {
+void mdlRemoveResourceSubtype(s32 object, s32 subtype) {
     s32 *link = (s32 *)(object + 0x14);
     s32 item = *link;
     while (item != 0) {
         if (*(s16 *)(item + 6) == subtype) {
             s32 next = *(s32 *)item;
-            destroyModelResourceItem(item);
+            mdlDestroyResourceItem(item);
             *link = next;
             item = next;
         } else {
@@ -238,9 +238,9 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00234F48);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235000);
 
-INCLUDE_ASM(const s32, "game/code_00233660", setModelResourceFrame);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlSetResourceFrame);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235128);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlSetResourceAmount);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235178);
 
@@ -267,7 +267,7 @@ void func_002354B8(void) {
     D_00453550.unk90[0] = saved;
 }
 
-void rotateModelViewList(void) {
+void mdlRotateViewList(void) {
     s32 i;
     s32 count = D_00453550.unk16;
     s32 first = D_00453550.unk90[0];
@@ -429,10 +429,10 @@ u32 func_002379E0(void) {
     return 0;
 }
 
-s32 countActiveModelRecords(void) {
+s32 mdlCountActiveRecords(void) {
     s32 resource = D_00453550.unk90[0];
-    s32 first = countModelRecords((s32)func_00233E40(resource, -1));
-    s32 second = countModelRecords((s32)func_00233E40(resource, D_00453550.unk22));
+    s32 first = mdlCountRecords((s32)func_00233E40(resource, -1));
+    s32 second = mdlCountRecords((s32)func_00233E40(resource, D_00453550.unk22));
 
     return first + second;
 }
@@ -464,11 +464,11 @@ void mdlViewerTaskDestroy(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002382F0);
 
-INCLUDE_ASM(const s32, "game/code_00233660", modelViewer);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238650);
 
-INCLUDE_ASM(const s32, "game/code_00233660", modelViewerEnd);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlViewerEnd);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002388F8);
 
@@ -476,7 +476,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00238BD8);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238D38);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238ED0);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlFreeViewResources);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238F30);
 
@@ -494,7 +494,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00239C08);
 
 void func_0023A028(void) {
     mdlFlagClearAll();
-    func_00243368(0);
+    evtSetSolarPhase(0);
     func_002433E8();
     func_00243398();
 }
@@ -512,7 +512,7 @@ void mdlFlagClearAll(void) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_0023A090);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlClearFlagRanges);
 
 void mdlFlagSet(s32 arg0) {
     s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;

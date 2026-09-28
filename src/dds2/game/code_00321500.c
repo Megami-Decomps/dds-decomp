@@ -73,10 +73,10 @@ typedef struct MenuLengthData {
 } MenuLengthData;
 
 void func_003214D0(u32 arg0, s32 arg1);
-s32 func_00322480(s32 *entries, s32 count);
+s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
 
 u32 func_00321500(void) {
-    u32 node = func_00320C28(0);
+    u32 node = mnuCreateCallbackNode(0);
     *(void (**)(u32, s32))(node + 0x10) = func_003214D0;
     return node;
 }
@@ -92,7 +92,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003216A8);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321798);
 
-u8 *func_003218A0(u8 *name) {
+u8 *mnuCreateNamedRecord(u8 *name) {
     u8 *record;
     if (name == 0) {
         return 0;
@@ -145,7 +145,7 @@ void func_00321EE8(u32 *record) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321F18);
 
-void func_00321F78(u32 *list, u32 *record) {
+void mnuDeactivateListRecord(u32 *list, u32 *record) {
     u32 flags = record[0];
     u32 count = list[2];
     record[0] = flags & ~1u;
@@ -164,12 +164,12 @@ void func_00322418(void) {
 }
 
 
-s32 func_00322438(MenuLengthData *data) {
-    s32 length = func_00322480(data->firstRecords, data->firstCount) + 0x10;
-    return length + func_00322480(data->secondRecords, data->secondCount);
+s32 dds3MeasureMenuRecord(MenuLengthData *data) {
+    s32 length = dds3MeasureRecordBlock(data->firstRecords, data->firstCount) + 0x10;
+    return length + dds3MeasureRecordBlock(data->secondRecords, data->secondCount);
 }
 
-s32 func_00322480(s32 *records, s32 count) {
+s32 dds3MeasureRecordBlock(s32 *records, s32 count) {
     s32 entryCount;
     s32 length;
 
@@ -282,7 +282,7 @@ u32 func_00322D98(void) {
     return D_004390C8;
 }
 
-f32 func_00322DA0(u8 *entry) {
+f32 mnuEvaluateTimedValue(u8 *entry) {
     u8 *registry = func_003224F0(*(u32 *)(entry + 4));
     if ((**(u32 **)(registry + 0xc) & 1) != 0) {
         u8 *clock = func_00321238();
@@ -315,7 +315,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003236B0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
 
-void func_003238A0(s32 arg) {
+void mnuVisitActiveRecords(s32 arg) {
     s32 index = 0;
     if ((s32)D_004390CC > 0) {
         s32 offset = 0;
@@ -389,7 +389,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324840);
 
-void func_00324AC0(u8 *context) {
+void mnuInitializeEffectContext(u8 *context) {
     MenuInitialTag tag;
     /* Retail only initializes bytes 1 through 7 of this tag. */
     tag.flags = 0;
@@ -399,12 +399,12 @@ void func_00324AC0(u8 *context) {
     memset(context, 0, 0x48);
     *(u32 *)(context + 0x3c) = func_00321500();
     func_00320CE0(*(u32 *)(context + 0x3c), 0,
-                   (u32)func_003218A0((u8 *)&tag));
+                   (u32)mnuCreateNamedRecord((u8 *)&tag));
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
 
-u32 func_00324C98(u32 context, f32 x, f32 y, f32 progress) {
+u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
     u32 node = func_00322D50();
     if (node != 0) {
         func_00322E18(node, context, 0, (s32)x, (s32)y, progress);

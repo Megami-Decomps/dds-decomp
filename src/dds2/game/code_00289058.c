@@ -32,11 +32,11 @@ typedef struct MenuContainer {
     MenuNodeList *list;
 } MenuContainer;
 
-u32 func_00289058(MenuContainer *object) {
+u32 mnuGetSelectedNodeValue(MenuContainer *object) {
     return object->list->selected->value;
 }
 
-s32 func_00289068(MenuContainer *object, s32 index) {
+s32 mnuGetNodeValueByIndex(MenuContainer *object, s32 index) {
     MenuNode *node = object->list->head;
     s32 current = 0;
     while (node != 0) {

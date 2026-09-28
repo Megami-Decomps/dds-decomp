@@ -23,7 +23,7 @@ s32 func_00312C08(void);
 s32 EIntr(void);
 MemBlock *func_002CFEB8(s32 size);
 
-MemBlock *func_002D0390(MemBlock *block) {
+MemBlock *sdfMemoryNextBlock(MemBlock *block) {
     MemBlock *next = block->next;
     if (next->state == 2) {
         return NULL;
@@ -31,7 +31,7 @@ MemBlock *func_002D0390(MemBlock *block) {
     return next;
 }
 
-s32 func_002D03A8(MemBlock *block) {
+s32 sdfMemoryGetBlockSize(MemBlock *block) {
     s32 size;
     s32 interruptsDisabled;
 
@@ -43,7 +43,7 @@ s32 func_002D03A8(MemBlock *block) {
     return size;
 }
 
-u32 func_002D03F0(MemBlock *block) {
+u32 sdfMemoryGetBlockAddress(MemBlock *block) {
     return block->address;
 }
 

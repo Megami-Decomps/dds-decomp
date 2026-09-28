@@ -1,6 +1,6 @@
 #include "common.h"
 
-/* Sized table indexed by func_0019D268: s16 count + u32 items. */
+/* Sized table indexed by itfMesGetTableItem: s16 count + u32 items. */
 typedef struct ItfMesTable {
     u8 unk0[0x18]; /* 0x0 */
     s16 count;     /* 0x18 */
@@ -8,13 +8,13 @@ typedef struct ItfMesTable {
     u32 items[1];  /* 0x1C */
 } ItfMesTable;
 
-/* 8-byte entry selected by func_0019D1D8/func_0019D1F0. */
+/* 8-byte entry selected by itfMesGetEntry/itfMesGetNextEntry. */
 typedef struct ItfMesEntry {
     u32 unk0;            /* 0x0: item list read by func_0019D5D0 */
     ItfMesTable *table;  /* 0x4: read by func_0019C920 */
 } ItfMesEntry;
 
-/* Record behind ItfMesState.sub; func_0019D240 reads word +0x18. */
+/* Record behind ItfMesState.sub; itfMesGetEntryCount reads word +0x18. */
 typedef struct ItfMesSub {
     u8 unk0[0x18];      /* 0x0 */
     u32 entryCount;        /* 0x18: index of next entry */
@@ -150,7 +150,7 @@ typedef struct ItfMesGlobals {
     u32 unk0; /* 0x0 */
     u32 unk4; /* 0x4: read by func_0019B870 */
     u32 unk8; /* 0x8 */
-    u16 flags; /* 0xC: set/cleared by func_0019CC90/func_0019CCA8 */
+    u16 flags; /* 0xC: set/cleared by itfMesSetGlobalFlags/itfMesClearGlobalFlags */
     u16 unkE; /* 0xE */
 } ItfMesGlobals;
 
@@ -175,21 +175,21 @@ extern ItfMesZero D_00357D80;
 
 extern u32 D_003BB1E8;
 
-s32 func_0010D690(void);
+s32 scrGetWindow(void);
 s32 func_0010D428(s32 arg0);
 void func_0014DAF0(s32 arg0);
 void func_0019C060(s32 window, u32 value);
 void func_0019C080(s32 window, u32 value);
 void func_0019C1E8(s32 window, s32 arg1, s32 arg2);
-void func_0019C4A8(s32 window, u32 value);
-void func_0019C4D8(s32 window, u32 value);
+void itfMesSetWindowHighFlags(s32 window, u32 value);
+void itfMesClearWindowHighFlags(s32 window, u32 value);
 void func_0019C968(s32 window, s32 arg1, s32 arg2);
 void func_0019B4A0(s32 window, s32 arg1, s32 arg2);
 void itfMesCleanupWindow(s32 window, s32 arg1);
 void itfMesResetWindow(s32 window);
-ItfMesEntry *func_0019D1D8(ItfMesState *mes, s32 index);
-ItfMesEntry *func_0019D1F0(ItfMesSub *sub);
-u32 func_0019D268(ItfMesTable *table, s32 index);
+ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 index);
+ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
+u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
 void func_0019D0B8(s32 window);
 void func_0019C590(s32 window, s32 arg1, s32 arg2, s32 arg3);
 void func_0019C9F0(s32 window, s32 arg1, s32 arg2);
@@ -200,7 +200,7 @@ void func_0019DDA8(void *arg0, s32 arg1);
 void func_002EB278(int *param_1, int param_2, u8 *param_3, int param_4);
 
 s32 itfMesScriptSetPanelValue(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
@@ -210,7 +210,7 @@ s32 itfMesScriptSetPanelValue(void) {
 }
 
 s32 itfMesScriptSetWindowValue(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
@@ -220,12 +220,12 @@ s32 itfMesScriptSetWindowValue(void) {
 }
 
 s32 itfMesScriptActivatePanel(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
     }
-    func_0019C4A8(window, 0x200000);
+    itfMesSetWindowHighFlags(window, 0x200000);
     func_0014DAF0(2);
     return 1;
 }
@@ -256,7 +256,7 @@ u32 func_0019B538(void) {
 }
 
 s32 itfMesScriptSetWindowGeometry(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
     s32 x;
     s32 y;
     s32 width;
@@ -272,21 +272,21 @@ s32 itfMesScriptSetWindowGeometry(void) {
 }
 
 s32 itfMesScriptToggleMessageFlag(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
     }
     if (func_0010D428(0)) {
-        func_0019C4A8(window, 0x400000);
+        itfMesSetWindowHighFlags(window, 0x400000);
     } else {
-        func_0019C4D8(window, 0x400000);
+        itfMesClearWindowHighFlags(window, 0x400000);
     }
     return 1;
 }
 
 s32 itfMesScriptSetScaledPosition(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
     s32 x;
     s32 y;
 
@@ -300,7 +300,7 @@ s32 itfMesScriptSetScaledPosition(void) {
 }
 
 s32 itfMesScriptSetDefaultBounds(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
@@ -310,23 +310,23 @@ s32 itfMesScriptSetDefaultBounds(void) {
 }
 
 s32 itfMesScriptToggleHighFlags(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
     }
     if (func_0010D428(0)) {
-        func_0019C4D8(window, 0x800000);
-        func_0019C4D8(window, 0x100000);
+        itfMesClearWindowHighFlags(window, 0x800000);
+        itfMesClearWindowHighFlags(window, 0x100000);
     } else {
-        func_0019C4A8(window, 0x800000);
-        func_0019C4A8(window, 0x100000);
+        itfMesSetWindowHighFlags(window, 0x800000);
+        itfMesSetWindowHighFlags(window, 0x100000);
     }
     return 1;
 }
 
 s32 itfMesScriptSetMessageOption(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
 
     if (window < 0) {
         return 1;
@@ -336,7 +336,7 @@ s32 itfMesScriptSetMessageOption(void) {
 }
 
 s32 itfMesScriptSetMessagePair(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
     s32 first;
     s32 second;
 
@@ -350,7 +350,7 @@ s32 itfMesScriptSetMessagePair(void) {
 }
 
 s32 itfMesScriptSetMessageRange(void) {
-    s32 window = func_0010D690();
+    s32 window = scrGetWindow();
     s32 first;
     s32 second;
 
@@ -465,13 +465,13 @@ void func_0019C478(s32 window, u32 value) {
     mes->flags = (u32)(u16)mes->flags | (value & 0xffff0000);
 }
 
-void func_0019C4A8(s32 window, u32 flags) {
+void itfMesSetWindowHighFlags(s32 window, u32 flags) {
     ItfMesState *mes = D_003D6ECC[window].mes;
 
     mes->flags |= flags & 0xffff0000;
 }
 
-void func_0019C4D8(s32 window, u32 flags) {
+void itfMesClearWindowHighFlags(s32 window, u32 flags) {
     ItfMesState *mes = D_003D6ECC[window].mes;
 
     mes->flags &= ~flags | 0xffff;
@@ -506,7 +506,7 @@ void func_0019C868(s32 window) {
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C898);
 
 u32 func_0019C920(s32 window, s32 arg1, s32 arg2) {
-    return func_0019D268(func_0019D1D8(D_003D6ECC[window].mes, arg1)->table, arg2);
+    return itfMesGetTableItem(itfMesGetEntry(D_003D6ECC[window].mes, arg1)->table, arg2);
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C968);
@@ -525,15 +525,15 @@ void func_0019CB98(s32 window, u32 value) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019CBB8);
 
-void func_0019CC90(u32 bits) {
+void itfMesSetGlobalFlags(u32 bits) {
     D_003D6EA0.flags |= bits;
 }
 
-void func_0019CCA8(u32 bits) {
+void itfMesClearGlobalFlags(u32 bits) {
     D_003D6EA0.flags &= ~bits;
 }
 
-u16 func_0019CCC8(void) {
+u16 itfMesGetGlobalFlags(void) {
     return D_003D6EA0.flags;
 }
 
@@ -574,27 +574,27 @@ u32 itfMesIsMsgData(ItfMesBin *bin) {
     return valid;
 }
 
-ItfMesEntry *func_0019D1D8(ItfMesState *mes, s32 index) {
+ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 index) {
     ItfMesEntry *entries = mes->sub->entries;
 
     return &entries[index];
 }
 
-ItfMesEntry *func_0019D1F0(ItfMesSub *sub) {
+ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub) {
     ItfMesEntry *entries = sub->entries;
 
     return &entries[sub->entryCount];
 }
 
 u32 func_0019D208(s32 window, s32 index) {
-    return func_0019D1D8(D_003D6ECC[window].mes, index)->unk0;
+    return itfMesGetEntry(D_003D6ECC[window].mes, index)->unk0;
 }
 
-u32 func_0019D240(s32 window) {
+u32 itfMesGetEntryCount(s32 window) {
     return D_003D6ECC[window].mes->sub->entryCount;
 }
 
-u32 func_0019D268(ItfMesTable *table, s32 index) {
+u32 itfMesGetTableItem(ItfMesTable *table, s32 index) {
     s32 count = table->count;
 
     if (index < 0 || index >= count) {
@@ -612,7 +612,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D580);
 u32 func_0019D5D0(ItfMesIndex *req) {
     u32 *table;
 
-    table = *(u32 **)func_0019D1F0(req->handle);
+    table = *(u32 **)itfMesGetNextEntry(req->handle);
     return table[req->index];
 }
 

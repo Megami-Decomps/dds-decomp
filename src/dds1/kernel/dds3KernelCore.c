@@ -25,7 +25,7 @@ extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
 
-extern s32 func_001019C8(KwlnTask* target);
+extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
 extern void func_00101B08(KwlnTask* task);
 
@@ -253,7 +253,7 @@ s32 func_00101818(KwlnTask* task)
 {
     u32 state;
 
-    if (func_001019C8(task) == 0) {
+    if (kwlnTaskIsRegistered(task) == 0) {
         return 0;
     }
     state = task->flags & 0xF;
@@ -262,7 +262,7 @@ s32 func_00101818(KwlnTask* task)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskGetTaskByName);
 
-KwlnTask* func_00101938(u32 prio)
+KwlnTask* kwlnTaskFindByPriority(u32 prio)
 {
     s32 idx;
     KwlnTask* node;
@@ -295,7 +295,7 @@ KwlnTask* func_00101938(u32 prio)
 }
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 func_001019C8(KwlnTask* target)
+s32 kwlnTaskIsRegistered(KwlnTask* target)
 {
     s32 idx;
     KwlnTask* node;
@@ -353,12 +353,6 @@ void func_00101A78(void) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101A80);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA824);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA830);
-
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DE88);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEB8);
@@ -366,4 +360,10 @@ INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEB8);
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEC8);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEF8);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA824);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA830);
 

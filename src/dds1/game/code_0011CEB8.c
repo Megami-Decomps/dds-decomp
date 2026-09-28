@@ -20,7 +20,7 @@ INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CF38);
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CF88);
 
-void func_0011CFC0(s32 *list, s32 node, s32 linkOffset) {
+void dds3AppendLinkedNode(s32 *list, s32 node, s32 linkOffset) {
     s32 previous;
 
     previous = list[1];

@@ -94,7 +94,7 @@ extern s32 func_001AA708(void *);
 
 extern s32 func_001AA758(void *);
 
-extern void *allocateBattleIndexList(s32);
+extern void *btlAllocateIndexList(s32);
 
 extern u32 func_001E8058();
 
@@ -125,7 +125,7 @@ extern s32 func_002147B0(s32, s32, s32);
 
 extern s32 func_001B2900(void *, s32);
 
-extern s32 func_00213950(s32, s32);
+extern s32 btlElementToBitIndex(s32, s32);
 
 extern s32 func_001B2900(void *, s32);
 
@@ -195,7 +195,7 @@ s32 func_00212340(s32 unused, s32 multiplier) {
     return 0;
 }
 
-s32 func_002123C0(s32 unused, s32 multiplier) {
+s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201) {
@@ -210,7 +210,7 @@ s32 func_002123C0(s32 unused, s32 multiplier) {
     return 0;
 }
 
-s32 func_00212470(s32 unused, s32 multiplier) {
+s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201) {
@@ -270,15 +270,15 @@ u8 func_00212620(void) {
     return temp_v0 != 0;
 }
 
-s32 func_00212640(s32 item) {
+s32 btlValidateItemStillAvailable(s32 item) {
     if (func_001B3188()) {
         if (func_001B31E8(item)) {
             return 1;
         }
-        func_001C8078("                  ::Item is already thrown away");
+        fldIgnoreTaggedSceneEvent("                  ::Item is already thrown away");
         func_0020D128(D_00419B38);
     } else {
-        func_001C8078(D_00419B68);
+        fldIgnoreTaggedSceneEvent(D_00419B68);
         func_0020D128(D_00419B88);
     }
     return 0;
@@ -517,10 +517,10 @@ s32 func_00213460(void) {
 }
 
 s64 func_00213478(s32 unused, u32 limit) {
-    return battleCounterReachedLimit(unused, limit);
+    return btlCounterReachedLimit(unused, limit);
 }
 
-s32 battleCounterReachedLimit(s32 unused, u32 limit) {
+s32 btlCounterReachedLimit(s32 unused, u32 limit) {
     extern u32 func_001B39E8(s32);
     if (func_001B39E8(4) < limit) {
         return 0;
@@ -530,7 +530,7 @@ s32 battleCounterReachedLimit(s32 unused, u32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002134C8);
 
-s32 battleTurnReachedLimit(s32 unused, u32 limit) {
+s32 btlTurnReachedLimit(s32 unused, u32 limit) {
     if (((BattleWork *)func_001AA6F8())->turnCount < limit) {
         return 0;
     }
@@ -544,7 +544,7 @@ s32 func_00213548(s32 unused, u32 limit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", battleIsReadyWithoutTurns);
+INCLUDE_ASM(const s32, "game/code_002112C8", btlIsReadyWithoutTurns);
 
 s32 func_002135B8(u8 *unit, s32 count) {
     void *flags = unit + 0x120;
@@ -602,7 +602,7 @@ s32 func_00213748(u8 *unit) {
         return 0;
     }
     battle = (s32)*D_00436CB8;
-    list = allocateBattleIndexList(13);
+    list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 2, 0, 0);
     count = func_001E8058(list);
     for (i = 0; i < count; i++) {
@@ -635,7 +635,7 @@ u8 func_00213930(void) {
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00213950);
+INCLUDE_ASM(const s32, "game/code_002112C8", btlElementToBitIndex);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00213A58);
 
@@ -672,7 +672,7 @@ s32 func_00213C38(s32 unused, s32 mode) {
     return 0;
 }
 
-s32 func_00213CA8(s32 actor, s32 selection) {
+s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
     s32 battler;
     s32 resolvedSelection;
     if (selection != 0) {
@@ -691,7 +691,7 @@ s32 func_00213CA8(s32 actor, s32 selection) {
     return 0;
 }
 
-s32 func_00213D38(s32 unused, s32 action) {
+s32 battleAnyUnitPassesCheck200(s32 unused, s32 action) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if (func_00214948((u8 *)battler, action, 0x200) == 0) {
@@ -711,7 +711,7 @@ s32 func_00213DA0(s32 unused, s32 action) {
     return 1;
 }
 
-s32 func_00213E18(s32 unused, s32 action) {
+s32 battleAnyUnitPassesCheck400(s32 unused, s32 action) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if (func_00214948((u8 *)battler, action, 0x400) == 0) {
@@ -804,7 +804,7 @@ s32 func_00214330(void) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002143A0);
 
-s32 func_00214470(s32 battler, s32 scanAll) {
+s32 btlHasUnitWithStatusBit(s32 battler, s32 scanAll) {
     if (scanAll != 0) {
         battler = *(s32 *)(func_001AA6F8() + 0x24c);
         while (battler != 0) {
@@ -823,7 +823,7 @@ s32 func_00214470(s32 battler, s32 scanAll) {
     return 0;
 }
 
-s32 func_00214510(void) {
+s32 btlAreUnitsMissingStatusFlag(void) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     while (battler != 0) {
         if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
@@ -835,7 +835,7 @@ s32 func_00214510(void) {
     return 1;
 }
 
-s32 func_00214578(void) {
+s32 btlAreUnitsHoldingStatusFlag(void) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     while (battler != 0) {
         if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
@@ -898,7 +898,7 @@ s32 func_00214948(u8 *unit, s32 action, u32 mask) {
                 if (action & 0x100000) {
                     s32 i;
                     for (i = 0; i < 19; i++) {
-                        s32 index = func_00213950(action, i);
+                        s32 index = btlElementToBitIndex(action, i);
                         if (index == 0x80) {
                             continue;
                         }
@@ -923,7 +923,7 @@ s32 func_00214948(u8 *unit, s32 action, u32 mask) {
     return 2;
 }
 
-s32 func_00214AA0(s32 unused, s32 action) {
+s32 battleAllUnitsPassCheck200(s32 unused, s32 action) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if (func_00214948((u8 *)battler, action, 0x200) == 0) {
@@ -933,7 +933,7 @@ s32 func_00214AA0(s32 unused, s32 action) {
     return 1;
 }
 
-s32 func_00214B00(s32 unused, s32 action) {
+s32 battleAllUnitsPassCheck400(s32 unused, s32 action) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if (func_00214948((u8 *)battler, action, 0x400) == 0) {
@@ -953,7 +953,7 @@ s32 func_00214B60(void *unit) {
     return func_00214C18(unit, 0x1c2) != 0;
 }
 
-s32 battleActionMatchesUnit(s32 unit, s32 action) {
+s32 btlActionMatchesUnit(s32 unit, s32 action) {
     if ((*D_00436CB8)->action == action) {
         if (*(u32 *)(unit + 0x114) & 0x1000) {
             return 1;
@@ -982,7 +982,7 @@ u64 func_00215268(u64 arg0, u32 *arg1, u32 *arg2) {
     u32 temp_v0;
     u64 temp_v1;
 
-    temp_v1 = allocateBattleIndexList(0xd);
+    temp_v1 = btlAllocateIndexList(0xd);
     temp_v0 = func_001AC360(arg0, temp_v1, 0);
     *arg1 = temp_v0;
     temp_v0 = func_001E8058(temp_v1);
@@ -1045,7 +1045,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00216988);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216B40);
 
 u32 func_00216CA0(s32 battle) {
-    void *list = allocateBattleIndexList(13);
+    void *list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 1, 1, 0);
     func_001E8058(list);
     func_001E8030(*(u32 *)(battle + 0x60), *(u32 *)(battle + 0x18));
@@ -1065,10 +1065,10 @@ u32 func_00216D30(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216D50);
 
-extern u32 func_00229198(void);
+extern u32 battleGetEffectActor(void);
 
 u32 func_00216E98(s32 arg0) {
-    u32 value = func_00229198();
+    u32 value = battleGetEffectActor();
     func_001E8030(*(u32 *)(arg0 + 0x60), value);
     return 1;
 }
@@ -1339,7 +1339,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002199C8);
 extern void func_00217470(s32, s32, f32, f32, f32);
 extern void func_001E88A8(s32);
 
-s32 func_00219A70(s32 object) {
+s32 btlTriggerLinkedActionMotion(s32 object) {
     s32 state = *(s32 *)(object + 0x114);
     s32 battler = *(s32 *)(state + 0x18);
     if ((*(u32 *)(battler + 0x110) & 0x200) != 0 &&
@@ -1365,15 +1365,15 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00219B48);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219BD0);
 
-extern s32 func_001EA190(s32, s32);
+extern s32 btlHasMarkedEntry14(s32, s32);
 extern void func_001E9890(void);
 extern void func_001EC868(s32, s32, f32);
 
-s32 func_00219CC8(s32 battler) {
+s32 btlAdvanceTimedActionState(s32 battler) {
     if (*(u32 *)(battler + 0x134) != 0x10c) {
         return 0;
     }
-    if (func_001EA190(battler, 0x10c) != 0) {
+    if (btlHasMarkedEntry14(battler, 0x10c) != 0) {
         if (*(s32 *)(battler + 0x13c) >= 0x12) {
             func_001E9890();
             func_001EC868(battler, battler, 0.0f);
@@ -1421,7 +1421,7 @@ void func_0021A3A0(s32 arg0) {
     }
 }
 
-void func_0021A408(s32 name) {
+void btlClearNamedChunkFlags(s32 name) {
     s32 battler = **(s32 **)(func_001AA6F8() + 0x718);
     if (battler != 0 && (*(u32 *)(battler + 0x110) & 2) != 0) {
         s32 resource = *(s32 *)(battler + 0x340);
@@ -1447,7 +1447,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B070);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B168);
 
-s32 func_0021B250(s32 battler, s32 action) {
+s32 btlResolveBoundActionCode(s32 battler, s32 action) {
     s32 slot = *(s32 *)(func_001AA6F8() + 0x718);
     if (*(s32 *)slot == battler) {
         return -1;
@@ -1471,7 +1471,7 @@ s32 func_0021B250(s32 battler, s32 action) {
     return action;
 }
 
-s32 func_0021B310(s32 actor, s32 base) {
+s32 btlMotionOffsetForActor(s32 actor, s32 base) {
     u32 flags = *(u32 *)(actor + 0x110);
     if ((flags & 1) == 0) {
         return base;

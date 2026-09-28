@@ -13,7 +13,7 @@ typedef struct {
 void dds3DestroyCameraData(CameraObject *camera) {
     CameraData *data;
 
-    func_0010F5E8();
+    effObjFreeInner();
     data = camera->data;
     func_00111840(data->handle);
     func_002CFF98(data);

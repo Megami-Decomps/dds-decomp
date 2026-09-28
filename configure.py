@@ -24,6 +24,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -65,10 +66,11 @@ def i386_prefix() -> str:
     point DDS_I386_LIBDIR at a directory holding ld-linux.so.2 + libc.so.6."""
     # The pinned glibc from tools/download_tools.py comes first: ee-gcc 2.96's
     # output depends on heap layout, so the system libc is only a fallback.
-    libdir = os.environ.get("DDS_I386_LIBDIR") or (
-        str(ROOT / "tools/glibc32") if (ROOT / "tools/glibc32/libc.so.6").exists() else None)
+    libdir = os.environ.get("DDS_I386_LIBDIR")
+    if not libdir and (ROOT / "tools/glibc32/libc.so.6").exists():
+        return "tools/glibc32/ld-linux.so.2 --library-path tools/glibc32 "  # ninja runs in ROOT
     if libdir:
-        libdir = str(Path(libdir).expanduser().resolve())
+        libdir = shlex.quote(str(Path(libdir).expanduser().resolve()))
         return f"{libdir}/ld-linux.so.2 --library-path {libdir} "
     if Path("/lib/ld-linux.so.2").exists():
         return ""

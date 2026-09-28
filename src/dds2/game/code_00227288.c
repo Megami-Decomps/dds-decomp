@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 battleFindGroupedEntity(void);
+extern u64 btlFindGroupedEntity(void);
 
 extern u8 D_00436F5D;
 
@@ -10,13 +10,13 @@ extern s32 D_00435DD0;
 
 extern s32 func_001AA6F8(void);
 
-extern s32 countBattleTasksByKind(u32);
+extern s32 btlCountTasksByKind(u32);
 
-extern u32 func_002290D0(void);
+extern u32 battleGetEffectActive(void);
 
-extern u32 func_00229158(void);
+extern u32 battleGetEffectValue(void);
 
-extern u32 func_00229198(void);
+extern u32 battleGetEffectActor(void);
 
 extern s8 D_00453068[];
 
@@ -26,7 +26,7 @@ extern u8 D_003BF961[];
 
 extern u16 D_003BF962[];
 
-extern s32 createSemaphore(s32, s32, s32);
+extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern u32 D_00438F90;
 
@@ -52,9 +52,9 @@ extern void func_0022A908(u32);
 
 extern void func_0010C250(u32, u32);
 
-extern u32 battleReleaseScriptResource(void);
+extern u32 btlReleaseScriptResource(void);
 
-extern s32 battleFindModelEntry();
+extern s32 btlFindModelEntry();
 
 typedef struct BattleEffectState {
     u32 actor, flags, value;
@@ -66,7 +66,7 @@ typedef struct BattleEffectState {
 
 extern void *func_001E5DA8(void *, s32, s32);
 
-extern void func_001E1580(void *);
+extern void startBattleTask(void *);
 
 extern void func_0035C860();
 
@@ -112,7 +112,7 @@ void func_00227288(void) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002274D0);
+INCLUDE_ASM(const s32, "game/code_00227288", btlIsEffectPhaseInRange);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227528);
 
@@ -132,7 +132,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227CC8);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
-s32 func_00228320(u32 actor) {
+s32 battleIsEffectActor(u32 actor) {
     BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
     u32 active = state->actor;
     if (active != 0) {
@@ -141,18 +141,18 @@ s32 func_00228320(u32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228360);
+INCLUDE_ASM(const s32, "game/code_00227288", btlGetSoleTargetKind);
 
-s32 battleHasDifferentActiveTarget(u32 target) {
-    if (func_00229110() == 0) {
+s32 btlHasDifferentActiveTarget(u32 target) {
+    if (battleHasEffectActor() == 0) {
         return 1;
     }
-    return func_00229198() != target;
+    return battleGetEffectActor() != target;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228458);
+INCLUDE_ASM(const s32, "game/code_00227288", btlSetLinkFlagOff);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228598);
+INCLUDE_ASM(const s32, "game/code_00227288", btlSetLinkFlagOn);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002286D8);
 
@@ -166,7 +166,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00228F20);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
 
-u32 func_002290D0(void) {
+u32 battleGetEffectActive(void) {
     s32 battle = func_001AA6F8();
     u32 battleId = *(u32 *)(battle + 0x2a0);
     BattleEffectState *state;
@@ -180,7 +180,7 @@ u32 func_002290D0(void) {
     return 0;
 }
 
-s32 func_00229110(void) {
+s32 battleHasEffectActor(void) {
     s32 battle = func_001AA6F8();
     u32 battleId = *(u32 *)(battle + 0x2a0);
     BattleEffectState *state;
@@ -194,7 +194,7 @@ s32 func_00229110(void) {
     return state->actor != 0;
 }
 
-u32 func_00229158(void) {
+u32 battleGetEffectValue(void) {
     s32 battle = func_001AA6F8();
     u32 battleId = *(u32 *)(battle + 0x2a0);
     BattleEffectState *state;
@@ -208,7 +208,7 @@ u32 func_00229158(void) {
     return 0;
 }
 
-u32 func_00229198(void) {
+u32 battleGetEffectActor(void) {
     BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
     return state->actor;
 }
@@ -323,13 +323,13 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00229728);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022A7D0);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleReleaseBossData);
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseBossData);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleFindScriptResource);
+INCLUDE_ASM(const s32, "game/code_00227288", btlFindScriptResource);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022A908);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleReleaseScriptResource);
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseScriptResource);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022A9D0);
 
@@ -337,7 +337,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022AA38);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022AAC8);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022AAE8);
+INCLUDE_ASM(const s32, "game/code_00227288", btlHasScriptResource);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022AB60);
 
@@ -349,7 +349,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022AF90);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B108);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleReleaseEventData);
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseEventData);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B288);
 
@@ -364,7 +364,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022B510);
 u8 func_0022B5E0(void) {
     s64 temp_v0;
 
-    temp_v0 = countBattleTasksByKind(0x1a);
+    temp_v0 = btlCountTasksByKind(0x1a);
     return temp_v0 == 0;
 }
 
@@ -450,18 +450,18 @@ u32 func_0022BB28(u32 record) {
             func_0010C250(object, *(u32 *)record);
         }
     }
-    if (battleReleaseScriptResource()) {
+    if (btlReleaseScriptResource()) {
         return 1;
     }
     ++*(u32 *)(record + 8);
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleCreateActionTask);
+INCLUDE_ASM(const s32, "game/code_00227288", btlCreateActionTask);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleHasRestrictedUnit);
+INCLUDE_ASM(const s32, "game/code_00227288", btlHasRestrictedUnit);
 
-s32 battleListHasMarkedFlag(u8 **entries, s32 count) {
+s32 btlListHasMarkedFlag(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         BattleListEntry *entry = (BattleListEntry *)entries[i];
@@ -472,7 +472,7 @@ s32 battleListHasMarkedFlag(u8 **entries, s32 count) {
     return 0;
 }
 
-s32 battleListCountersWithinLimits(u8 **entries, s32 count) {
+s32 btlListCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         BattleListEntry *entry = (BattleListEntry *)entries[i];
@@ -483,7 +483,7 @@ s32 battleListCountersWithinLimits(u8 **entries, s32 count) {
     return 1;
 }
 
-s32 battleListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
+s32 btlListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         BattleListEntry *entry = (BattleListEntry *)entries[i];
@@ -494,7 +494,7 @@ s32 battleListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
     return 1;
 }
 
-s32 battleListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
+s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     s32 i;
     for (i = 0; i < count; i++) {
         BattleListEntry *entry = (BattleListEntry *)entries[i];
@@ -521,13 +521,13 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022C518);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022C600);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleCreateModelEntry);
+INCLUDE_ASM(const s32, "game/code_00227288", btlCreateModelEntry);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleReleaseModelEntry);
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseModelEntry);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleReleaseAllModelEntries);
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseAllModelEntries);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleFormatModelResourcePath);
+INCLUDE_ASM(const s32, "game/code_00227288", btlFormatModelResourcePath);
 
 s32 func_0022C948(u8 *task) {
     s32 result;
@@ -545,13 +545,13 @@ s32 func_0022C948(u8 *task) {
     return (s8)result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleFindModelEntry);
+INCLUDE_ASM(const s32, "game/code_00227288", btlFindModelEntry);
 
 void func_0022CA40(void) {
 }
 
 void func_0022CA48(void) {
-    battleReleaseAllModelEntries();
+    btlReleaseAllModelEntries();
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022CA60);
@@ -559,17 +559,17 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022CA60);
 void func_0022CB68(void) {
     s64 temp_v0;
 
-    temp_v0 = battleFindModelEntry();
+    temp_v0 = btlFindModelEntry();
     if (temp_v0 != 0) {
-        battleReleaseModelEntry(temp_v0);
+        btlReleaseModelEntry(temp_v0);
         return;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022CBA0);
 
-s32 battleGetEntryState(s32 kind, s32 value) {
-    u8 *entry = (u8 *)battleFindModelEntry(kind, value);
+s32 btlGetEntryState(s32 kind, s32 value) {
+    u8 *entry = (u8 *)btlFindModelEntry(kind, value);
     if (entry != 0) {
         return *(s8 *)(entry + 0xc);
     }
@@ -591,7 +591,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022CFB0);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022D040);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleReleaseOwnedData);
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseOwnedData);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022D2F8);
 
@@ -611,21 +611,21 @@ void func_0022DEB8(void) {
     func_001054E0();
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleInitializeGraphicsRuntime);
+INCLUDE_ASM(const s32, "game/code_00227288", btlInitializeGraphicsRuntime);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022DF98);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleInitializeOverlayGraphics);
+INCLUDE_ASM(const s32, "game/code_00227288", btlInitializeOverlayGraphics);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022E0E0);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022E338);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleResetAsyncState);
+INCLUDE_ASM(const s32, "game/code_00227288", btlResetAsyncState);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleActivateRuntime);
+INCLUDE_ASM(const s32, "game/code_00227288", btlActivateRuntime);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleResetRuntimeState);
+INCLUDE_ASM(const s32, "game/code_00227288", btlResetRuntimeState);
 
 s32 func_0022E450(void) {
     return D_00453068[0];
@@ -889,18 +889,18 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00230D90);
 void func_002311C0(void) {
     s32 i;
 
-    D_00438F90 = createSemaphore(1, 0x7f, 0);
+    D_00438F90 = sdfCreateSemaphore(1, 0x7f, 0);
     for (i = 0; i != 8; i++) {
         D_003C86F0[i] = 0;
         D_003C8710[i] = 0;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleFindGroupedEntity);
+INCLUDE_ASM(const s32, "game/code_00227288", btlFindGroupedEntity);
 
-INCLUDE_ASM(const s32, "game/code_00227288", battleGroupContainsId);
+INCLUDE_ASM(const s32, "game/code_00227288", btlGroupContainsId);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002312A0);
+INCLUDE_ASM(const s32, "game/code_00227288", btlAddGroupId);
 
 void func_002312F8(s32 arg0, s32 arg1) {
     s32 *temp_v0;
@@ -923,25 +923,25 @@ void func_002312F8(s32 arg0, s32 arg1) {
     } while (temp_v1 != 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00231358);
+INCLUDE_ASM(const s32, "game/code_00227288", battleCreateGroupNode);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00231470);
+INCLUDE_ASM(const s32, "game/code_00227288", battleDestroyGroupNode);
 
 void func_00231588(void) {
     u64 temp_v0;
 
-    temp_v0 = battleFindGroupedEntity();
-    func_00231470(temp_v0);
+    temp_v0 = btlFindGroupedEntity();
+    battleDestroyGroupNode(temp_v0);
 }
 
-void battleReleaseAllEntities(void) {
+void btlReleaseAllEntities(void) {
     u32 i = 0;
     s32 *head = D_003C86F0;
     do {
         s32 *node = (s32 *)*head;
         while (node != 0) {
             s32 *next = (s32 *)*node;
-            func_00231470(node);
+            battleDestroyGroupNode(node);
             node = next;
         }
         i++;

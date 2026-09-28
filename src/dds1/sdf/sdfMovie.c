@@ -27,14 +27,14 @@ typedef struct MovObj {
     MovSub *stream;
 } MovObj;
 
-/* Called with 3 args (func_002ED198) and 4 args (func_002ECF70); keep K&R. */
+/* Called with 3 args (sdfMovieProcessPendingData) and 4 args (func_002ECF70); keep K&R. */
 void func_002E6D48();
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ECF70);
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED008);
 
-void func_002ED198(MovObj *movie) {
+void sdfMovieProcessPendingData(MovObj *movie) {
     MovSub *stream;
     s32 remaining;
 

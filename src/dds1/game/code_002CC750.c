@@ -23,7 +23,7 @@ typedef struct ScrVmOperand {
     u8 pad_0x16[0x3A]; // 0x16
     float f50;         // 0x50
     u8 unk54;          // 0x54
-    s8 selectedIndex;  // 0x55: active operand chosen by func_002CD7C0
+    s8 selectedIndex;  // 0x55: active operand chosen by scrSelectOperandIndex
     u8 pad_0x56[2];    // 0x56
     u32 flags[0x4C];   // 0x58: eight 4-bit flag slots per word
 } ScrVmOperand;
@@ -113,7 +113,7 @@ extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
 extern void func_001954C8(u32, u32);
 extern void func_001958A0(u32, s32, s32);
 extern void func_00194920(u32);
-extern u32 resolvePrimaryFileBuffer(void);
+extern u32 fileResolvePrimaryBuffer(void);
 extern void func_0029CE50(u32);
 extern s32 func_002CD548(s32, u16);
 extern u16 D_003907BC[];
@@ -202,7 +202,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD428);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD548);
 
-s32 checkScriptStateBits(ScrVmOperand *work) {
+s32 scrCheckStateBits(ScrVmOperand *work) {
     u32 index = 0;
     do {
         u16 id = index;
@@ -219,7 +219,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD630);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD6B0);
 
-s8 func_002CD728(ScrVmOperand *op) {
+s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
     return op->selectedIndex;
 }
 
@@ -233,14 +233,14 @@ u32 func_002CD768(u32 arg0, u16 arg1) {
 }
 
 u32 func_002CD788(ScrVmOperand *p) {
-    return func_002CD730((u32)p, func_002CD728(p) & 0xFFFF);
+    return func_002CD730((u32)p, scrGetSelectedOperandIndex(p) & 0xFFFF);
 }
 
 s8 func_002CD7B8(ScrVmOperand *op) {
     return op->selectedIndex;
 }
 
-s8 func_002CD7C0(ScrVmOperand *p, s32 v) {
+s8 scrSelectOperandIndex(ScrVmOperand *p, s32 v) {
     p->selectedIndex = v;
     func_002CD630(p, v & 0xFFFF);
     return p->selectedIndex;
@@ -258,7 +258,7 @@ u32 func_002CD800(void) {
     return 1;
 }
 
-void func_002CD808(s32 unused, u32 v, u32 *a, u32 *b) {
+void scrDecodePackedFlagIndex(s32 unused, u32 v, u32 *a, u32 *b) {
     u32 lo;
 
     v &= 0xFFFF;
@@ -268,9 +268,9 @@ void func_002CD808(s32 unused, u32 v, u32 *a, u32 *b) {
     *b = lo << 2;
 }
 
-s32 setScriptFlag(ScrVmOperand *work, u16 index) {
+s32 scrSetFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;
-    func_002CD808((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     work->flags[word] |= 1U << shift;
     return 1;
 }
@@ -279,35 +279,35 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD888);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD8E8);
 
-void func_002CD940(ScrVmOperand *work, u16 index) {
+void scrSetSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;
-    func_002CD808((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     work->flags[word] |= 4U << shift;
 }
 
-void func_002CD998(ScrVmOperand *work, u16 index) {
+void scrClearSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;
-    func_002CD808((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     work->flags[word] &= ~(4U << shift);
 }
 
-void clearScriptFlags(ScrVmOperand *work) {
+void scrClearFlags(ScrVmOperand *work) {
     s32 index;
     for (index = 0; index < 0x260; index++) {
-        func_002CD998(work, index);
+        scrClearSecondaryScriptFlag(work, index);
     }
 }
 
-u32 func_002CDA48(ScrVmOperand *work, u16 index) {
+u32 scrGetSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;
-    func_002CD808((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     return work->flags[word] & (4U << shift);
 }
 
 u32 func_002CDA98(ScrVmOperand *work, u16 index) {
     u32 word, shift;
     u32 mask;
-    func_002CD808((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     mask = work->flags[word];
     if (mask & (2U << shift)) {
         return 2;
@@ -331,7 +331,7 @@ s32 func_002CDB00(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CDB40);
 
-s32 findScriptSlot(u8 *work, u16 key) {
+s32 scrFindSlot(u8 *work, u16 key) {
     u32 index;
     u16 *entries = (u16 *)(work + 0x22);
     for (index = 0; index < 24; index++) {
@@ -371,8 +371,8 @@ u16 func_002CDCD8(s32 arg0, s32 arg1, u16 arg2) {
     return temp_v0;
 }
 
-s32 removeScriptSlot(u8 *work, u16 key) {
-    s32 index = findScriptSlot(work, key);
+s32 scrRemoveSlot(u8 *work, u16 key) {
+    s32 index = scrFindSlot(work, key);
     if (index >= 0) {
         *(u16 *)(work + 0x22 + index * 2) = 0;
         return 1;
@@ -595,7 +595,7 @@ void func_002CEA90(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEAE8);
 
 void func_002CEC08(void) {
-    func_0029CE50(resolvePrimaryFileBuffer());
+    func_0029CE50(fileResolvePrimaryBuffer());
 }
 
 void func_002CEC28(s32 arg0) {
@@ -649,7 +649,7 @@ void func_002CF430(void) {
 void func_002CF438(void) {
 }
 
-s32 createSemaphore(u32 initial, u32 option, u32 maximum) {
+s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     struct {
         u32 attr;
         u32 option;

@@ -31,7 +31,7 @@ INCLUDE_ASM(const s32, "game/code_00175B00", func_00175B28);
 
 INCLUDE_ASM(const s32, "game/code_00175B00", func_00175B50);
 
-void func_00175D88(ScatterObject *object) {
+void effReleaseScatterObject(ScatterObject *object) {
     ScatterObject *current;
 
     current = object;
@@ -45,25 +45,25 @@ void func_00175D88(ScatterObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_00175B00", func_00175DD0);
 
-void func_00176020(ScatterObject *object, u32 source) {
+void effCreateScatterResource(ScatterObject *object, u32 source) {
     u32 resource;
 
     resource = effPcpScatterResCreate(source);
     object->scatterResource = resource;
 }
 
-void func_00176050(ScatterObject *object, ScatterObject *source) {
+void effShareScatterResource(ScatterObject *object, ScatterObject *source) {
     u32 resource;
 
     resource = effPcpScatterResAddRef(source->scatterResource);
     object->scatterResource = resource;
 }
 
-s32 func_00176080(ScatterObject *object, s32 index) {
+s32 effGetScatterWideBlock(ScatterObject *object, s32 index) {
     return (s32)object->block64 + index * object->stride * 0x10;
 }
 
-s32 func_00176098(ScatterObject *object, s32 index) {
+s32 effGetScatterNarrowBlock(ScatterObject *object, s32 index) {
     return (s32)object->block68 + index * object->stride * 8;
 }
 

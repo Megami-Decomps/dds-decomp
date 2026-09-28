@@ -8,7 +8,7 @@ s32 func_0010C0C8();
 s32 func_0010C070();
 s32 func_0010B7C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 s32 func_0010BA18(s32 arg0, s32 arg1);
-s32 func_0010BB28(s32 scriptId, s32 option)
+s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 {
     u32 buf[4];
     void *handle;
@@ -49,12 +49,12 @@ void scrClearProcessGlobals(void)
 
 void func_0010BC18(s32 priority, s32 scriptId, s32 option)
 {
-    scrProcCreateTask(priority, func_0010BB28(scriptId, option));
+    scrProcCreateTask(priority, scrOpenProcessFromResource(scriptId, option));
 }
 
 s32 scrCreateProcessWithDefaultOption(s32 scriptId)
 {
-    return func_0010BB28(scriptId, 0);
+    return scrOpenProcessFromResource(scriptId, 0);
 }
 
 void func_0010BC68(s32 priority, s32 taskId, s32 option)

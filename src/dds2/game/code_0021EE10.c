@@ -12,7 +12,7 @@ extern u8 *D_00435E44;
 
 extern u8 D_003BF950[];
 
-extern u32 func_001EA190(u32);
+extern u32 btlHasMarkedEntry14(u32);
 
 extern void func_001E9F30(u32);
 
@@ -120,7 +120,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F0E8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F238);
 
-s32 func_0021F378(u32 id) {
+s32 btlMapActorMotionId(u32 id) {
     switch (id) {
     case 0x12A:
     case 0x12B:
@@ -136,7 +136,7 @@ u8 func_0021F3A0(s32 arg0) {
     return arg0 != 0x196;
 }
 
-s32 func_0021F3B0(s32 actor) {
+s32 btlIsSpecialMotion(s32 actor) {
     if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
         return 0;
     }
@@ -204,7 +204,7 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002205C0);
 
-s32 func_002206A0(ActionUnit *actor, s32 action) {
+s32 btlIsSupportedActorAction(ActionUnit *actor, s32 action) {
     if ((actor->flags & 0x400) == 0) {
         return 0;
     }
@@ -382,7 +382,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221158);
 
 u32 func_00221390(u32 unit) {
     if (*(u32 *)(unit + 0x134) == 0x6b) {
-        if (func_001EA190(unit)) {
+        if (btlHasMarkedEntry14(unit)) {
             *(s32 *)(unit + 0x13c) = 0;
         } else {
             *(s32 *)(unit + 0x13c) = -1;
@@ -432,7 +432,7 @@ u32 func_002214C0(u32 unit) {
     if (*(u32 *)(unit + 0x134) != 0x6c) {
         return 0;
     }
-    if (func_001EA190(unit) && *(u32 *)(unit + 0x13c) == 0x25) {
+    if (btlHasMarkedEntry14(unit) && *(u32 *)(unit + 0x13c) == 0x25) {
         func_001E9890();
         func_001EC868(unit, unit, 0.0f);
     }

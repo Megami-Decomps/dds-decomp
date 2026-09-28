@@ -8,7 +8,7 @@ typedef struct {
     u32 value7C;
 } EffectPair;
 
-void func_00185E18(EffectPair *pair) {
+void effFreePairedResources(EffectPair *pair) {
     func_00167350(pair->secondResource);
     func_00167350(pair->firstResource);
     func_002CFF98(pair);

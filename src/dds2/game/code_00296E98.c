@@ -175,7 +175,7 @@ s32 func_00299A00(void) {
 }
 
 void func_00299A38(u32 arg0, s32 arg1) {
-    func_002C4430(arg1 + 0x584);
+    initPartyPanelSlots(arg1 + 0x584);
     func_002BCA98(arg1 + 0x690);
     func_002BCAB0(arg1 + 0x690);
 }

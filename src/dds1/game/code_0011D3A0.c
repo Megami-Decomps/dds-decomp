@@ -21,7 +21,7 @@ extern s64 func_00113E30(u64);
 
 extern s32 D_003BAA00;
 
-extern u64 func_002D3FD0(u64);
+extern u64 sdfAllocPacketAligned(u64);
 extern u32 D_003BABDC;
 extern s32 D_003BAB08;
 extern s32 D_003BAB0C;
@@ -39,7 +39,7 @@ extern char D_0039FA00[];
 extern char D_0039FCA0[];
 extern char D_0039FCB0[];
 extern char D_0039FCC8[];
-extern void func_0011D998(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep);
+extern void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep);
 extern void func_0011DAC0(u32, u32, u32, u32, u32, u32, u8 *);
 extern void func_0011DC70(u32 *arg0, s32 arg1, u8 *arg2);
 extern s32 func_0011E540(void);
@@ -72,7 +72,7 @@ extern u32 D_0032E4EC[];
 extern void func_002D0A10(u32 arg0);
 extern s32 D_003BABEC;
 extern u8 D_0034C8F0[];
-extern void func_00148C98(s32);
+extern void fldActivateObjectById(s32);
 extern void mdlFlagSet(s32);
 extern void func_0011B150(s32);
 void func_001260A8(void);
@@ -91,7 +91,7 @@ extern u8 D_003BAB3C;
 extern u8 D_0032C9A0[];
 extern s16 D_0032C9B0[];
 extern u8 D_00346068[];
-extern u32 acknowledgeCampState(void);
+extern u32 mnuAcknowledgeCampState(void);
 void func_001244D0(void);
 void func_001246C8(void);
 void func_00124788(void);
@@ -101,9 +101,9 @@ extern u32 D_003BAB64;
 extern u32 D_003BAB60;
 extern u32 D_003BAB5C;
 extern u32 func_002D03F8(u32);
-extern void *func_002D03F0(u32);
-extern void loadModelViewerPackage(s32, s32, s32, void *, u32);
-void func_001238B8(void);
+extern void *sdfMemoryGetBlockAddress(u32);
+extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
+void fldLoadPlayerModel(void);
 u8 func_00125DF8(u32 arg0);
 
 u32 *func_00123DD0(void);
@@ -111,7 +111,7 @@ u32 *func_00123DD0(void);
 extern u32 D_003BAC08[2];
 extern void func_0014CFC0(void);
 extern u32 func_0014D100(void);
-extern void func_00138D88(void);
+extern void fldResetTaskSlots(void);
 extern void func_00125D90(u32);
 extern void func_00220178(void);
 
@@ -123,8 +123,8 @@ void func_0011D3A0(u32 *arg0, u32 arg1, u32 arg2) {
 u64 func_0011D3B0(void) {
     u64 temp_v0;
 
-    temp_v0 = func_002D3FD0(0x20);
-    func_002D4010(temp_v0);
+    temp_v0 = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(temp_v0);
     return temp_v0;
 }
 
@@ -134,7 +134,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D570);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D6B0);
 
-void func_0011D998(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep) {
+void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep) {
     f32 v = *value;
 
     if ((s8)pad[5] & 0x80) {
@@ -184,7 +184,7 @@ void func_0011D998(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep)
 }
 
 void func_0011DAA0(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
-    func_0011D998(value, D_00324530, min, max, step, bigStep);
+    fldStepValueByPad(value, D_00324530, min, max, step, bigStep);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DAC0);
@@ -214,7 +214,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E280);
 
 extern s32 func_0012C648(void);
 extern u8 func_00124F08(void);
-extern void func_001297E8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00129900(s32);
 extern void func_00134348(void);
 extern void func_00132010(void);
@@ -229,7 +229,7 @@ s32 func_0011E540(void) {
         return 0;
     }
     func_00129720(0x53);
-    func_001297E8(1, 0, 0x81, 3, 0, 0, 1, 1);
+    fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
     func_00129900(0);
     func_00134348();
     func_00132010();
@@ -242,10 +242,10 @@ s32 func_0011E540(void) {
         func_0012AEB0();
     }
     func_00129720(0x27);
-    func_001297E8(1, 5, 0x80, 1, 0, 0, 1, 2);
+    fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     func_00129900(0);
     func_00129720(0x39);
-    func_001297E8(1, 5, 0x80, 1, 0, 0, 1, 2);
+    fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     func_00129900(0);
     return 0;
 }
@@ -326,7 +326,7 @@ extern void *D_003BAD64;
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 func_002E5C68(u32, void *, u32);
 extern void func_002E5C38(u32);
-void func_00120968(void) {
+void fldLoadFieldTables(void) {
     u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
 
     func_002E5C68(command, D_0033EC90, 0x3D8);
@@ -584,7 +584,7 @@ void func_00121750(s32 flagIndex) {
     u8 *byte = (u8 *)(D_003BAA00 + byteOffset);
     u8 *entry;
     *byte |= 1 << (flagIndex & 7);
-    func_00148C98(flagIndex);
+    fldActivateObjectById(flagIndex);
     if ((u32)(flagIndex - 0xF0) < 16) {
         mdlFlagSet(flagIndex + 0x610);
     }
@@ -710,7 +710,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121DE0);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121ED8);
 
-f32 func_00122030(f32 a, f32 b) {
+f32 fldAngleDifference(f32 a, f32 b) {
     f32 diff;
 
     if (a < 0.0f || b < 0.0f) {
@@ -751,7 +751,7 @@ f32 func_001229A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122A00);
 
-f32 fieldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
+f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     f32 dx = ax - bx;
     f32 dy = ay - by;
     f32 dz = az - bz;
@@ -820,7 +820,7 @@ void func_00122CB8(void) {
 extern s32 func_0028F628(void);
 extern void func_00120C08(s32);
 extern char D_003BAB68[];
-void func_00122D60(void) {
+void fldStartSequenceRecord(void) {
     u8 buffer[0xA0];
 
     if (func_0028F628() == 1) {
@@ -868,7 +868,7 @@ void func_00122E08(void) {
     func_003003F0(D_003BABA0);
     func_001426E0();
     func_003003F0(D_003BABA8);
-    func_00120968();
+    fldLoadFieldTables();
     func_003003F0(D_003BABB0);
 }
 
@@ -1027,13 +1027,13 @@ u32 func_00123378(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001233D0);
 
+void func_00123990(void);
+extern u32 func_002EB028(const char *, u32 *, u32 *);
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBC0);
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBD0);
 
-void func_00123990(void);
-extern u32 func_002EB028(const char *, u32 *, u32 *);
-void func_001238B8(void) {
+void fldLoadPlayerModel(void) {
     s32 model;
 
     if (func_00121970(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x20) {
@@ -1070,22 +1070,22 @@ void func_00123990(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001239C8);
 
-void prepareFieldResourceBuffer(void) {
+void fldPrepareResourceBuffer(void) {
     void *source;
     void *buffer;
-    func_001238B8();
+    fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
     D_003BAB58 = func_002D03F8(D_003BAB64);
-    source = func_002D03F0(D_003BAB54);
-    buffer = func_002D03F0(D_003BAB58);
+    source = sdfMemoryGetBlockAddress(D_003BAB54);
+    buffer = sdfMemoryGetBlockAddress(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
-    loadModelViewerPackage(2, 0, 0x101, buffer, D_003BAB60);
+    mdlLoadViewerPackage(2, 0, 0x101, buffer, D_003BAB60);
     func_002D0A10(D_003BAB58);
     D_003BAB58 = 0;
 }
 
-void releaseFieldResources(void) {
+void fldReleaseResources(void) {
     if (D_003BAB58 != 0) {
         func_002D0A10(D_003BAB58);
         D_003BAB58 = 0;
@@ -1119,12 +1119,12 @@ void func_00123D20(void) {
         D_003BAB34 = 0;
         D_003BAB38 = 0;
         *func_00123DD0() = 0;
-        releaseFieldResources();
+        fldReleaseResources();
     }
 }
 
 void func_00123D98(void) {
-    func_00138D88();
+    fldResetTaskSlots();
     fldTestDrawDestroy();
     func_00123D20();
     func_0021FE38();
@@ -1144,7 +1144,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00123E00);
 void func_00123EA8(void) {
     if (D_003BAB34 != 0) {
         func_00125DE0(0x40);
-        objInvokeSlot1Handler(D_003BAB34, 0);
+        dds3InvokeSlot1Handler(D_003BAB34, 0);
     }
     D_0032E498[0] = 4;
 }
@@ -1156,7 +1156,7 @@ extern u32 func_00113018(void *, f32 *, f32 *);
 extern s32 D_0032F1DC[];
 extern char D_0039FC50[]; /* "PLAYER_UNIT" */
 extern s32 D_003BAB50;
-void func_00123EE8(void) {
+void fldCreatePlayerObject(void) {
     f32 pos[4];
     f32 rot[4];
 
@@ -1171,7 +1171,7 @@ void func_00123EE8(void) {
         if (D_003BAB50 != 0) {
             dds3ClearObjectFlags(D_003BAB34, 0x20);
         }
-        prepareFieldResourceBuffer();
+        fldPrepareResourceBuffer();
         func_00111E30(D_003BAB34, 2, D_0032F1DC[0]);
     }
 }
@@ -1226,16 +1226,16 @@ void func_001244D0(void) {
 }
 
 
-extern void func_00141DC0(s32);
+extern void fldPlayFieldSeVolumePan(s32);
 extern void func_00133640(s16, s32);
-void func_00124500(void) {
+void fldEnterSceneCommand(void) {
     s32 code;
 
     if (D_0032E3B0[75] == 0) {
         return;
     }
     if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) == 0) {
-        func_00141DC0(0x29);
+        fldPlayFieldSeVolumePan(0x29);
     }
     code = func_001243C8();
     *(s16 *)((u8 *)D_0032E3B0 + 0x128) = code;
@@ -1261,7 +1261,7 @@ typedef struct FldSceneState {
     u8 pad12A[2];
     s32 unk12C;
 } FldSceneState;
-void func_001245C0(void) {
+void fldUpdateSceneCommand(void) {
     FldSceneState *state = (FldSceneState *)D_0032E3B0;
     s32 code;
 
@@ -1279,7 +1279,7 @@ void func_001245C0(void) {
     } else if (state->unk128 != 0) {
         state->unk128 = 0;
         func_00133640(0, 0x14);
-        func_00141DC0(0x2A);
+        fldPlayFieldSeVolumePan(0x2A);
     }
 }
 
@@ -1346,7 +1346,7 @@ void func_00124880(void) {
     D_0032E3B0[3] &= ~8;
 }
 
-u8 isFieldFlagActive(void) {
+u8 fldIsFlagActive(void) {
     s32 flags = *(s32 *)(D_003BAA00 + 0xA58);
     flags &= 1;
     if (flags == 0) return 0;
@@ -1367,7 +1367,7 @@ typedef struct FldEncEntry {
 extern FldEncEntry *D_003BAA40;
 extern s32 mdlFlagTest();
 extern s32 effMiscRand();
-s16 func_00124900(void) {
+s16 fldRollEncounter(void) {
     s32 i;
     s32 enabled;
 
@@ -1400,7 +1400,7 @@ s32 func_00124E18(void) {
     area = D_0032E3B0[4];
     D_0032E3B0[0x3C] = area;
     D_0032E3B0[0x3D] = scene + 1;
-    func_00138D88();
+    fldResetTaskSlots();
     func_00125D90(1);
     func_00125D90(2);
     func_00123EA8();
@@ -1424,7 +1424,7 @@ u8 func_00124F08(void) {
     if (D_003BABEC > 0) {
         return 2;
     }
-    if (acknowledgeCampState() != 0) {
+    if (mnuAcknowledgeCampState() != 0) {
         return 1;
     }
     return func_00125DF8(0x20) != 0 ? 0 : 3;
@@ -1525,7 +1525,7 @@ extern s32 D_003BABF4, D_003BABE4;
 extern char D_0039FD30[], D_0039FD40[];
 extern void kwlnFadeResetBackground(void);
 extern void func_00141158(void), func_00228778(void), fldDestroyTask(void);
-extern void func_00187080(s32), destroyCampTasks(void), func_0010BDB8(void);
+extern void func_00187080(s32), mnuDestroyCampTasks(void), func_0010BDB8(void);
 extern void func_001462A8(void);
 
 void func_00125F18(void) {
@@ -1545,7 +1545,7 @@ void func_00125F18(void) {
         func_00187080(D_003BABE4);
         D_003BABE4 = 0;
     }
-    destroyCampTasks();
+    mnuDestroyCampTasks();
     func_0010BDB8();
     func_001462A8();
 }
@@ -1605,7 +1605,7 @@ void func_00126110(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00126140);
 
-void *createDummyFieldMatter(void) {
+void *fldCreateDummyMatter(void) {
     u32 args[8];
     void *matter;
     args[0] = 0;
@@ -1620,6 +1620,12 @@ void *createDummyFieldMatter(void) {
     func_0010FA98(matter, D_0039FD50);
     return matter;
 }
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD30);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD40);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD50);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAAE0);
 
@@ -1722,10 +1728,4 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BABFC);
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC00);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC08);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD30);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD40);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD50);
 

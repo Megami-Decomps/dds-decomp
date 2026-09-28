@@ -48,7 +48,7 @@ extern char D_003B5D10[];
 
 extern char D_003B5B10[];
 
-extern s32 getEntryFlagsUnlessDisabled(void *);
+extern s32 btlGetEntryFlagsUnlessDisabled(void *);
 
 extern void func_001D3978(void);
 
@@ -61,7 +61,7 @@ extern s32 D_00438F54;
 extern s32 D_00435DD0;
 extern s32 D_00435E38;
 
-void func_001C7FF8(void) {
+void fldInitializeBattleSceneFlow(void) {
     u8 *scene = (u8 *)func_001AA6F8();
     func_00210CB0(7);
     if ((*(u32 *)(scene + 0x218) & 0x400) != 0) {
@@ -77,7 +77,7 @@ void func_001C7FF8(void) {
     func_001C7F10();
 }
 
-void func_001C8078(s32 tag, ...) {
+void fldIgnoreTaggedSceneEvent(s32 tag, ...) {
 }
 
 void func_001C80C0(void) {
@@ -130,7 +130,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8518);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8768);
 
-void func_001C89A0(s32 unused, s16 *count) {
+void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     u8 *roster;
     RosterAvailability *availability;
     u8 *output;
@@ -192,7 +192,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA490);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA760);
 
-void func_001CA790(u32 *state, u32 owner) {
+void fldInitializeSceneObject(u32 *state, u32 owner) {
     memset(state, 0, 0x30);
     state[0] = 1;
     state[11] = owner;
@@ -243,7 +243,7 @@ s32 func_001CA9C0(void) {
     s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
     while (actor != 0) {
         if ((*(u64 *)(actor + 0x110) & 0x421) == 0x401 &&
-            getEntryFlagsUnlessDisabled((void *)(actor + 0x120)) != 0) {
+            btlGetEntryFlagsUnlessDisabled((void *)(actor + 0x120)) != 0) {
             return 0;
         }
         actor = *(s32 *)(actor + 0x364);
@@ -295,7 +295,7 @@ void func_001CCB50(u32 arg0) {
     func_00328E48(arg0);
 }
 
-void func_001CCB88(s64 arg) {
+void fldReleaseSceneSprite(s64 arg) {
     func_001CCB50(func_00101958(arg));
     *(u32 *)(func_001AA6F8() + 0x2D4) = 0;
 }
@@ -359,7 +359,7 @@ void func_001CE3E8(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE418);
 
-void func_001CE548(s32 index) {
+void fldSetSceneSlotRange(s32 index) {
     u8 *scene = (u8 *)D_00438F54;
     if (*(s8 *)(scene + 0x20) < index) {
         s32 i;
@@ -382,11 +382,11 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF0B0);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF500);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", findBattleSceneSlotById);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", btlFindSceneSlotById);
 
-u8 *func_001CF630(s32 index) {
+u8 *fldFindSceneSlotRecord(s32 index) {
     u8 *scene = (u8 *)func_001AA6F8();
-    s32 slot = findBattleSceneSlotById(index);
+    s32 slot = btlFindSceneSlotById(index);
     u8 *entry = 0;
     if (slot != -1) {
         entry = scene + 0x2FE + slot * 3;
@@ -394,7 +394,7 @@ u8 *func_001CF630(s32 index) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", fadeStaleBattleSceneSlots);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", btlFadeStaleSceneSlots);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF720);
 
@@ -402,7 +402,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF800);
 
 extern u8 *D_004367F4;
 
-s32 func_001CFA60(void) {
+s32 fldUpdateConditionalSceneCleanup(void) {
     u8 *scene = (u8 *)func_001AA6F8();
     if ((*(u32 *)(scene + 0x218) & 0x200) == 0) {
         return 0;
@@ -462,19 +462,19 @@ s32 func_001CFFC8(void) {
     if (func_00203FD8() != 0 &&
         func_0022B108() != 0 &&
         func_0022E460() != 0) {
-        loadBattleSoundBank();
+        sndLoadBattleBank();
         func_0022B288();
         return 3;
     }
     return 0;
 }
 
-void func_001D0020(u8 *state) {
+void fldMarkGridTiles(u8 *state) {
     u8 *tile = (u8 *)func_00200D00(*(s16 *)(state + 0x2AC), *(s16 *)(state + 0x2AE));
     *(u64 *)(tile + 0x40) = 0x8000000000000001ULL;
-    func_001E1580(tile);
+    startBattleTask(tile);
     tile = (u8 *)func_00200F28(*(s16 *)(state + 0x2AC), *(s16 *)(state + 0x2AE));
-    func_001E1580(tile);
+    startBattleTask(tile);
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D0078);
@@ -490,7 +490,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D0FE0);
 void func_001D1120(void) {
 }
 
-s32 func_001D1128(u8 *scene) {
+s32 fldConsumeSceneInputFlags(u8 *scene) {
     u32 flags = *(u32 *)(scene + 0x218);
     s32 result;
     if ((flags & 0x800) != 0) {
@@ -532,22 +532,22 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2798);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D28D8);
 
-void func_001D2A20(u8 *scene) {
+void fldMarkLinkedSceneActors(u8 *scene) {
     u8 *node;
     func_00204050(scene);
     node = *(u8 **)(scene + 0x248);
     while (node != 0) {
         if (*(s32 *)node != 0x1F) {
-            func_001DCF18(node, 0x1F);
+            dispatchBattleStateHandler(node, 0x1F);
         }
         node = *(u8 **)(node + 0x178);
     }
-    func_001E1318();
+    flagBattleTasksForUpdate();
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2A78);
 
-void func_001D2C10(u8 *state) {
+void fldMarkSceneRefresh(u8 *state) {
     func_00230960((s32)state);
     *(u32 *)(state + 0x220) |= 4;
 }
@@ -560,7 +560,7 @@ u32 func_001D2C40(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", setBattleScene);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", btlSetScene);
 
 void func_001D2CD0(u32 arg0) {
     s32 temp_v0;
@@ -569,26 +569,26 @@ void func_001D2CD0(u32 arg0) {
     *(u32 *)(temp_v0 + 0x230) = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", updateBattleScene);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", btlUpdateScene);
 
 void func_001D2D78(void) {
     s32 temp_v0;
 
     temp_v0 = func_001AA6F8();
-    setBattleScene(1);
+    btlSetScene(1);
     *(u32 *)(temp_v0 + 0x230) = 0;
 }
 
 void func_001D2DB0(void) {
 }
 
-s32 func_001D2DB8(void) {
+s32 fldGetSceneDescriptorProperty(void) {
     u8 *scene = (u8 *)func_001AA6F8();
     s32 index = *(s32 *)(scene + 0x22C);
     return D_003B6940[index * 3];
 }
 
-u8 *func_001D2DF0(u32 *request) {
+u8 *fldGetActorSceneGroupResource(u32 *request) {
     u8 *scene = (u8 *)func_001AA6F8();
     u8 *entry = scene + 0x368;
     u32 flags;
@@ -612,7 +612,7 @@ u8 *func_001D2DF0(u32 *request) {
     return entry;
 }
 
-u8 *func_001D2E68(u8 group) {
+u8 *fldGetSceneGroupResource(u8 group) {
     u8 *scene = (u8 *)func_001AA6F8();
     u8 *entry;
     switch (group) {
@@ -701,7 +701,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3A78);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3B38);
 
-void func_001D3BA8(s32 handle) {
+void fldAppendSceneGroupHandle(s32 handle) {
     u8 *scene = (u8 *)func_001AA6F8();
     u32 *slot = (u32 *)(scene + 0x458);
     while (*slot != 0) {
@@ -728,21 +728,21 @@ void func_001D3E28(void) {
     *(u32 *)(temp_v0 + 0x218) = *(u32 *)(temp_v0 + 0x218) & 0xfffffffb;
 }
 
-s32 func_001D3E58(void) {
+s32 fldGetActiveSceneGroupValue(void) {
     u8 *scene = (u8 *)func_001AA6F8();
     s32 value = *(s32 *)(scene + 0x458);
     if (value != 0) {
         return value;
     }
-    return *(s32 *)func_001D2E68(scene[0x2FE]);
+    return *(s32 *)fldGetSceneGroupResource(scene[0x2FE]);
 }
 
-s32 func_001D3E90(s32 index) {
+s32 fldGetSceneGroupEntry(s32 index) {
     u8 *scene = (u8 *)func_001AA6F8();
     if (scene[0x2FE] == 0) {
         return 0;
     }
-    return ((s32 *)func_001D2E68(scene[0x2FE]))[index];
+    return ((s32 *)fldGetSceneGroupResource(scene[0x2FE]))[index];
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3ED8);
@@ -765,7 +765,7 @@ u32 func_001D4120(s32 *arg0) {
     return 1;
 }
 
-u8 *func_001D4160(u8 *actor, u32 owner, s32 groupIndex) {
+u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex) {
     u8 group = groupIndex;
     u8 *object = (u8 *)func_001E1468(0xC);
     u8 *fields;
@@ -791,7 +791,7 @@ void func_001D4200(void) {
     *(u32 *)(temp_v0 + 0x218) = *(u32 *)(temp_v0 + 0x218) & 0xfffffffb;
 }
 
-s32 func_001D4230(u32 *request) {
+s32 fldActivateRequestedSceneActor(u32 *request) {
     u8 *scene = (u8 *)func_001AA6F8();
     u32 *actor = (u32 *)request[0];
     *(u32 *)(scene + 0x218) |= 4;
@@ -802,7 +802,7 @@ s32 func_001D4230(u32 *request) {
     return 1;
 }
 
-u8 *func_001D4290(u8 *actor, u32 owner) {
+u8 *fldCreateSceneActorAction(u8 *actor, u32 owner) {
     u8 *object = (u8 *)func_001E1468(8);
     u32 *fields;
     object[0] = 1;
@@ -812,7 +812,7 @@ u8 *func_001D4290(u8 *actor, u32 owner) {
         *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
     }
     *(u32 *)(object + 0x48) = (u32)func_001D4200;
-    *(u32 *)(object + 0x4C) = (u32)func_001D4230;
+    *(u32 *)(object + 0x4C) = (u32)fldActivateRequestedSceneActor;
     fields = (u32 *)func_001E14F8(object);
     fields[0] = (u32)actor;
     fields[1] = owner;
@@ -824,7 +824,7 @@ u32 func_001D4328(u32 *arg0) {
     return 1;
 }
 
-u8 *func_001D4348(s32 owner) {
+u8 *fldCreateActorAction(s32 owner) {
     u8 *object = (u8 *)func_001E1468(4);
     object[0] = 1;
     *(s16 *)(object + 0x20) = 0x63;

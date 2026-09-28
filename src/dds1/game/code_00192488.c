@@ -68,7 +68,7 @@ extern s32 D_003D68D8[];
 extern u8 D_003D68C0[];
 extern void func_002D0918(void *arg0);
 extern void *func_002D03F8(s32 arg0);
-extern void *func_002D0A48(void *arg0);
+extern void *sdfResourceRetainAddress(void *arg0);
 extern void func_00192ED0(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 extern void func_001937E0(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u32 effMiscRand(void *state);
@@ -183,7 +183,7 @@ void func_00193140(EffPrim *arg0, f32 arg1) {
 
 void effBuildAndDispatch(EffPrim *arg0, s32 arg1) {
     void *mem = func_002D03F8(arg0->recordCount * 12);
-    void *buf = func_002D0A48(mem);
+    void *buf = sdfResourceRetainAddress(mem);
 
     func_001931E0(buf, arg0->unk10, arg0->recordCount);
     if (arg1 == 0) {
@@ -212,7 +212,7 @@ void *effCreateChannel(void *arg0, u32 arg1) {
         return buf;
     }
     mem = func_002D03F8(0x18);
-    buf = func_002D0A48(mem);
+    buf = sdfResourceRetainAddress(mem);
     p = buf;
     p->unk0 = mem;
     p->cursorStep = 0.05f;

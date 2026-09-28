@@ -61,7 +61,7 @@ void func_00307270(u8 *object, s32 index, s32 x, s32 y,
     } while (--remaining >= 0);
 }
 
-void func_003072E8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
+void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     GridWidget *widget = (GridWidget *)func_00304AD8(a, b);
     widget->x = x;
     widget->y = y;
@@ -116,14 +116,14 @@ typedef struct RenderCallbackEntry {
 } RenderCallbackEntry;
 
 extern RenderCallbackEntry D_0037FB48[];
-extern s32 func_0032CE80(s32);
-extern void func_0032CEC0(s32);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfResetPacketList(s32);
 
 u8 *func_00307428(u8 *object, u8 *data, s32 kind) {
-    s32 context = func_0032CE80(0x20);
+    s32 context = sdfAllocPacketAligned(0x20);
     u8 *cursor;
     RenderCallbackEntry *entry;
-    func_0032CEC0(context);
+    sdfResetPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
     if (func_003073D0((s32)object) != 0) {
         func_003073D8(object, (s32)cursor, context);
@@ -172,7 +172,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00308058);
 
 void func_003081A8(u8 value, s32 alternate, s32 kind) {
     u32 normalized = value != 0;
-    s32 packet = func_0032CE80(consCalculateDrawPacketSize(1, 1));
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
@@ -185,9 +185,9 @@ void func_003081A8(u8 value, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x4B;
     }
-    context = func_0032CE80(0x20);
-    func_0032CEC0(context);
-    func_0032CEE8(context, packet);
+    context = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(context);
+    sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
 }
@@ -197,7 +197,7 @@ void func_00308288(u8 arg0, u32 arg1) {
 }
 
 void func_003082A8(s32 data, s32 alternate, s32 kind) {
-    s32 packet = func_0032CE80(consCalculateDrawPacketSize(1, 1));
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
@@ -210,9 +210,9 @@ void func_003082A8(s32 data, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x48;
     }
-    context = func_0032CE80(0x20);
-    func_0032CEC0(context);
-    func_0032CEE8(context, packet);
+    context = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(context);
+    sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
 }
@@ -222,7 +222,7 @@ void func_00308380(u32 arg0, u32 arg1) {
 }
 
 void func_003083A0(s32 data, s32 alternate, s32 kind) {
-    s32 packet = func_0032CE80(consCalculateDrawPacketSize(1, 1));
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
@@ -235,9 +235,9 @@ void func_003083A0(s32 data, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x43;
     }
-    context = func_0032CE80(0x20);
-    func_0032CEC0(context);
-    func_0032CEE8(context, packet);
+    context = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(context);
+    sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
 }
@@ -330,7 +330,7 @@ s32 func_00309200(s32 arg0) {
     return 1;
 }
 
-s32 setWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
+s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     s32 child;
     if (object == 0) {
         return 0;
@@ -374,7 +374,7 @@ u8 *func_00309278(const char *text, s32 x, s32 y, s32 columns, s32 rows,
     return widget;
 }
 
-void setGridDimensions(u8 *work, s32 columns, s32 rows) {
+void itfSetGridDimensions(u8 *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 

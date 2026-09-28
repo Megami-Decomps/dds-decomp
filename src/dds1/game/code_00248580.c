@@ -19,8 +19,8 @@ typedef struct {
 } MenuVisualWork;
 
 void func_00248580(MenuVisualWork *work) {
-    func_002BD7A0(work->firstResource);
-    func_002BD7A0(work->secondResource);
+    effResolveAndReleaseResource(work->firstResource);
+    effResolveAndReleaseResource(work->secondResource);
 }
 
 void func_002485B0(MenuVisualWork *work) {
@@ -44,8 +44,8 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248BA0);
 
 void func_00248C38(s32 arg0) {
     if (arg0 != 0) {
-        releaseSpriteTextures();
-        releaseSpriteTextures((s32)arg0 + 0x54);
+        mnuReleaseSpriteTextures();
+        mnuReleaseSpriteTextures((s32)arg0 + 0x54);
         func_002CFF98(arg0);
         return;
     }
@@ -104,7 +104,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002496D8);
 INCLUDE_ASM(const s32, "game/code_00248580", func_002496F0);
 
 void func_00249770(u32 *arg0) {
-    shutdownMenuContext(arg0 + 100);
+    mnuShutdownContext(arg0 + 100);
     func_00276320(arg0 + 2);
     func_00271648(arg0 + 2);
     func_002BC618(arg0[1]);
@@ -116,14 +116,14 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002497C0);
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 
 void func_00249930(s32 arg0) {
-    clearMenuEntries(arg0 + 400);
+    mnuClearEntries(arg0 + 400);
     func_0027FA20(arg0 + 400);
-    destroyPanelGroup(((MenuVisualWork *)arg0)->panelGroup);
+    mnuDestroyPanelGroup(((MenuVisualWork *)arg0)->panelGroup);
     func_00283820(((MenuVisualWork *)arg0)->displayResource);
     func_00285160(((MenuVisualWork *)arg0)->effectResource);
 }
 
-void updateAttachedEffect(s32 arg0, s32 arg1, s32 arg2, MenuVisualWork *work) {
+void effUpdateAttached(s32 arg0, s32 arg1, s32 arg2, MenuVisualWork *work) {
     func_00285440(arg0, arg1, arg2, work->effectResource);
 }
 

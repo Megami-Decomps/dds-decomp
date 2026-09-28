@@ -41,12 +41,12 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2DA0);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2E38);
 
-void func_002C2EA0(void) {
+void fldStopLmapTask(void) {
     func_002C2FF8();
     kwlnTaskDestroyWithHierarchyByName(D_003B3CA0, 1);
 }
 
-s32 func_002C2ED0(void) {
+s32 fldLmapTaskExists(void) {
     return kwlnTaskGetTaskByName((u32)D_003B3CA0) != 0;
 }
 

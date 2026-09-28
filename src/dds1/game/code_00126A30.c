@@ -19,16 +19,16 @@ static inline s32 fldTestBits(u32 flags, u32 mask) {
 }
 
 extern void func_00127028(u32, u32);
-extern void func_002D4010(u64);
-extern s32 consCalculateDrawPacketSize(s32, s32);
+extern void sdfInitPacketList(u64);
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void func_002E1428(u64, s32, s32, s32, s32);
 extern u64 *func_002E1420(u64);
 extern s32 func_002E1478(s32);
-extern void consCreateDrawPacket(u64, s32, s32);
+extern void sdfConsCreateDrawPacket(u64, s32, s32);
 
 extern s32 D_0032E3C0[];
 extern void func_00131D88(void);
-extern void func_00123EE8(void);
+extern void fldCreatePlayerObject(void);
 extern void func_00126A30(u32, u32, s32);
 
 extern s32 D_003BAE68;
@@ -71,7 +71,7 @@ extern s32 D_003BAA34;
 extern u32 D_003BACF8;
 
 extern u32 func_0011D3B0(void);
-extern u64 func_002D3FD0(u64);
+extern u64 sdfAllocPacketAligned(u64);
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
 
@@ -123,10 +123,10 @@ extern u32 D_003BAD20;
 extern char D_003BAD08[];
 extern u8 D_003C9230[];
 extern u8 D_003C9220[];
-extern s32 encProc(void);
+extern s32 fldEncProc(void);
 extern void func_0012C7C0(void);
 extern void func_00213808(void);
-extern void battleClearRuntimeState(void);
+extern void btlClearRuntimeState(void);
 extern void func_00112EE8(s64 arg0, void *arg1, void *arg2);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -144,7 +144,7 @@ extern void *memset(void *s, s32 c, u32 n);
 extern void *func_002CFEB8(s32 size);
 extern void func_00101A68(u32 arg0, void *arg1);
 extern s32 func_00140F70(u32 task);
-extern s32 func_001019C8(u32 arg0);
+extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 D_003BADF4;
@@ -163,7 +163,7 @@ extern s32 D_003BAE1C;
 extern s32 D_003BAE14;
 extern s16 D_003C9510[];
 extern void *func_002D03F8(s32 size);
-extern void *func_002D0A48(void *p);
+extern void *sdfResourceRetainAddress(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
 extern s32 *func_00110F80();
@@ -207,7 +207,7 @@ void func_00127708(u32 *args) {
     s32 state;
     func_00127028(args[4], args[3]);
     state = D_0032E3B0[4];
-    if (state != 1 && state < 200) func_00123EE8();
+    if (state != 1 && state < 200) fldCreatePlayerObject();
     func_00126A30(args[1], args[0], 0);
     D_0032E3B0[1] = ((u32 *)args[2])[1];
 }
@@ -238,9 +238,9 @@ void func_001278E8(u32 arg0, u32 arg1) {
 extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
 extern s32 func_003014F0(char *, const char *, ...);
 extern u32 func_00288A80(char *);
-extern void func_00128B50(char *, s32, s32);
+extern void fldFormatAreaDirectory(char *, s32, s32);
 
-s32 func_001278F8(void) {
+s32 fldLoadAreaResource(void) {
     char directory[64];
     char path[80];
     u32 area = D_003BAC84;
@@ -250,7 +250,7 @@ s32 func_001278F8(void) {
         fldFreeDisplayObjects();
         D_0032E3B0[31] = area;
         D_0032E3B0[32] = floor;
-        func_00128B50(directory, area, 1);
+        fldFormatAreaDirectory(directory, area, 1);
         func_003014F0(path, D_0039FE38, directory, area, floor);
         D_003BAC3C = func_00288A80(path);
         D_0032E3B0[30] = 1;
@@ -325,7 +325,7 @@ void *func_00127C40(void **destination, s32 area, s32 room) {
     if (D_0032E3B0[31] == area) {
         if (D_0032E3B0[32] == room) {
             void *buffer = func_002D03F8(D_003BAC70);
-            void *data = func_002D0A48(buffer);
+            void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC60, D_003BAC70);
             return buffer;
@@ -338,7 +338,7 @@ void *func_00127CB8(void **destination, s32 area, s32 room) {
     if (D_0032E3B0[31] == area) {
         if (D_0032E3B0[32] == room) {
             void *buffer = func_002D03F8(D_003BAC74);
-            void *data = func_002D0A48(buffer);
+            void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC64, D_003BAC74);
             return buffer;
@@ -351,7 +351,7 @@ void *func_00127D30(void **destination, s32 area, s32 room) {
     if (D_0032E3B0[31] == area) {
         if (D_0032E3B0[32] == room) {
             void *buffer = func_002D03F8(D_003BAC78);
-            void *data = func_002D0A48(buffer);
+            void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC68, D_003BAC78);
             return buffer;
@@ -364,7 +364,7 @@ void *func_00127DA8(void **destination, s32 area, s32 room) {
     if (D_0032E3B0[31] == area) {
         if (D_0032E3B0[32] == room) {
             void *buffer = func_002D03F8(D_003BAC7C);
-            void *data = func_002D0A48(buffer);
+            void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC6C, D_003BAC7C);
             return buffer;
@@ -411,7 +411,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern s32 func_003014F0(char *, const char *, ...);
 /* All 25 code words match. Check_unit rodata range extends beyond selector strings into the separately-owned next string. */
-void func_00128B50(char *path, s32 field, s32 unused) {
+void fldFormatAreaDirectory(char *path, s32 field, s32 unused) {
     if (field < 200) func_003014F0(path, "/fld/f/f%03d/", field);
     else if (field < 500) func_003014F0(path, "/fld/b/f%03d/", field);
     else func_003014F0(path, "/fld/e/f%03d/", field);
@@ -449,7 +449,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001292E0);
 
 extern u8 D_00324650[];
 
-void func_001294A0(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
@@ -505,7 +505,7 @@ extern u8 D_003249F0[];
 extern u8 D_00324A00[];
 extern u8 D_00329790[];
 
-void func_00129578(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
@@ -621,29 +621,29 @@ void func_00129720(u32 arg0) {
 }
 
 
-extern void func_002D4010(u64);
+extern void sdfInitPacketList(u64);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129728);
 
-extern void func_002D4038(u64, u64);
-void func_001297E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    u64 command = func_002D3FD0(0x20);
+extern void sdfAppendPacket(u64, u64);
+void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    u64 command = sdfAllocPacketAligned(0x20);
     u64 packet;
     u64 *data;
     FieldBufferDescriptor *descriptor;
 
-    func_002D4010(command);
-    packet = func_002D3FD0(0x30);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(0x30);
     data = func_002E13E0(packet, 0x30);
     data[4] = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
     data[5] = 0x47;
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129900);
 
-void func_00129A08(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6) {
+void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6) {
     s32 coords[4];
     u64 command;
     u64 packet;
@@ -658,9 +658,9 @@ void func_00129A08(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6)
     coords[1] = y0 * 16;
     coords[2] = x1 * 16;
     coords[3] = y1 * 16;
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
-    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 2));
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
     func_002E1428(packet, 0x49, 2, 0x41, 2);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
@@ -675,12 +675,12 @@ void func_00129A08(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6)
         pos += 2;
         dst += 2;
     }
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
 
-void func_00129B68(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6) {
+void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6) {
     u32 coords[4];
     u64 command;
     u64 packet;
@@ -695,9 +695,9 @@ void func_00129B68(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6)
     coords[1] = y0;
     coords[2] = x1;
     coords[3] = y1;
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
-    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 2));
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
     func_002E1428(packet, 0x49, 2, 0x41, 2);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
@@ -712,12 +712,12 @@ void func_00129B68(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6)
         pos += 2;
         dst += 2;
     }
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
 
-void func_00129CA8(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
     s32 coords[8];
     u64 command;
     u64 packet;
@@ -736,9 +736,9 @@ void func_00129CA8(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
-    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     func_002E1428(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
@@ -753,7 +753,7 @@ void func_00129CA8(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
         pos += 2;
         dst += 2;
     }
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
@@ -778,9 +778,9 @@ void func_00129E30(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
-    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     func_002E1428(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     tag = arg4;
@@ -796,12 +796,12 @@ void func_00129E30(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
         pos += 2;
         dst += 2;
     }
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
 
-void func_00129FC0(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
     u32 coords[8];
     u64 command;
     u64 packet;
@@ -820,9 +820,9 @@ void func_00129FC0(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6,
     coords[5] = y1;
     coords[6] = x0;
     coords[7] = y1;
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
-    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     func_002E1428(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
@@ -837,7 +837,7 @@ void func_00129FC0(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6,
         pos += 2;
         dst += 2;
     }
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
@@ -868,9 +868,9 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
-    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     func_002E1428(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
@@ -886,29 +886,29 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
         pos += 2;
         dst += 2;
     }
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
 
 extern s32 func_002D2300(s32);
 extern s32 func_002D2308(s32);
-extern void consInitDmaPacketHeader(u64, s32, s32);
+extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
 extern void func_002D40A8(u64, u64);
 extern void func_002DD708(f32);
-extern void initGeometryDmaPacket(u64, f32 *);
+extern void sdfInitGeometryDmaPacket(u64, f32 *);
 extern void func_002E2680(u64, u8 *, s32, u8 *, u8 *);
-extern void func_002D4038(u64, u64);
-void func_0012AA20(s32 arg0, u8 *arg1) {
-    u64 command = func_002D3FD0(0x20);
+extern void sdfAppendPacket(u64, u64);
+void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
+    u64 command = sdfAllocPacketAligned(0x20);
     u64 header;
     u64 packet;
     f32 mat[16];
     FieldBufferDescriptor *descriptor;
 
-    func_002D4010(command);
-    header = func_002D3FD0(0x20);
-    consInitDmaPacketHeader(header, func_002D2300(arg0), func_002D2308(arg0));
+    sdfInitPacketList(command);
+    header = sdfAllocPacketAligned(0x20);
+    sdfConsInitDmaPacketHeader(header, func_002D2300(arg0), func_002D2308(arg0));
     func_002D40A8(command, header);
     func_002DD708(*(f32 *)(arg1 + 0x44));
     __asm__ volatile(
@@ -919,12 +919,12 @@ void func_0012AA20(s32 arg0, u8 *arg1) {
         "sqc2 vf31, 48(%0)\n"
         ".set reorder"
         : : "r"(mat) : "memory");
-    packet = func_002D3FD0(0x38);
-    initGeometryDmaPacket(packet, mat);
-    func_002D4038(command, packet);
-    packet = func_002D3FD0(0x80);
+    packet = sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket(packet, mat);
+    sdfAppendPacket(command, packet);
+    packet = sdfAllocPacketAligned(0x80);
     func_002E2680(packet, arg1, *(s32 *)(arg1 + 0x40), arg1 + 0x10, arg1 + 0x20);
-    func_002D4038(command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
@@ -936,11 +936,11 @@ extern void func_002D4CC8(const void *, u64, s32);
 extern void func_002D40E8(u64, u64);
 
 void func_0012AB40(void) {
-    u64 command = func_002D3FD0(0x20);
+    u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
-    func_002D4010(command);
-    texture = func_002D3FD0(0x40);
+    sdfInitPacketList(command);
+    texture = sdfAllocPacketAligned(0x40);
     func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
     func_002D40E8(command, texture);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
@@ -948,11 +948,11 @@ void func_0012AB40(void) {
 }
 
 void func_0012ABE0(void) {
-    u64 command = func_002D3FD0(0x20);
+    u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
-    func_002D4010(command);
-    texture = func_002D3FD0(0x40);
+    sdfInitPacketList(command);
+    texture = sdfAllocPacketAligned(0x40);
     func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
     func_002D40E8(command, texture);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
@@ -962,7 +962,7 @@ void func_0012ABE0(void) {
 extern f32 D_0032F4E0[];
 extern u32 D_0032F500[];
 extern u64 func_002EF2B0(const void *, const void *, s32, s32);
-extern void func_002D4038(u64, u64);
+extern void sdfAppendPacket(u64, u64);
 
 void func_0012AC80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     u64 resource;
@@ -976,10 +976,10 @@ void func_0012AC80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     D_0032F4E0[6] = w;
     D_0032F500[1] = second;
     D_0032F500[0] = first;
-    resource = func_002D3FD0(0x20);
-    func_002D4010(resource);
+    resource = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(resource);
     record = func_002EF2B0(D_0032F4E0, D_0032F500, 2, 0x80);
-    func_002D4038(resource, record);
+    sdfAppendPacket(resource, record);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, resource);
 }
@@ -998,15 +998,15 @@ typedef struct FldPrimDesc {
 extern void func_002E1F78(u64, s32);
 extern void func_002E2110(u64, u32, s32);
 extern u64 func_002E21A0(FldPrimDesc *);
-void func_0012AD30(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
+void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
     FldPrimDesc desc;
     f32 verts[12];
     s32 indices[3];
     u64 command;
     FieldBufferDescriptor *descriptor;
 
-    command = func_002D3FD0(0x20);
-    func_002D4010(command);
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
     func_002E1F78(command, 0);
     func_002E2110(command, D_003BACEC, 0);
     memset(&desc, 0, 0x2C);
@@ -1027,7 +1027,7 @@ void func_0012AD30(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f
     indices[0] = a0;
     indices[1] = a1;
     indices[2] = a2;
-    func_002D4038(command, func_002E21A0(&desc));
+    sdfAppendPacket(command, func_002E21A0(&desc));
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
 }
@@ -1042,7 +1042,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B4A0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B570);
 
-extern void func_001297E8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
 
@@ -1050,7 +1050,7 @@ void func_0012B638(s32 x, s32 y, s32 width, s32 height) {
     func_00129000(x, y, 0x10, height, 0, 0, 0x10, 0x20, 0x60000040, D_003BACF0);
     func_00129000(x + 0x10, y, width - 0x20, height, 0x10, 0, 1, 0x20, 0x60000040, D_003BACF0);
     func_00129000(x + width - 0x10, y, 0x10, height, 0x10, 0, 0x10, 0x20, 0x60000040, D_003BACF0);
-    func_001297E8(1, 5, 0x80, 1, 0, 0, 1, 2);
+    fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     func_00129900(0);
 }
 
@@ -1070,13 +1070,13 @@ void func_0012B768(void) {
 extern u32 D_003980F0[];
 extern u32 func_002D5510(s32);
 extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
-extern void createSdfResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
+extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
 void func_0012B798(void) {
     if (D_003BACD8 != 0) {
         u32 packet = func_002D5510(0);
         FieldResourceDescriptor *descriptor;
-        createSdfResourcePacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, D_003BACD8, 0, 0, 0);
+        sdfCreateResourcePacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, D_003BACD8, 0, 0, 0);
         descriptor = (FieldResourceDescriptor *)&D_00324B48[D_003BACD0 * 8];
         descriptor->open(descriptor, packet);
     }
@@ -1110,9 +1110,9 @@ void func_0012B8F0(s32 arg0) {
 
     temp_v1 = func_0011D3B0();
     *(u32 *)(arg0 + 0x28) = temp_v1;
-    temp_v0 = func_002D3FD0(0x40);
+    temp_v0 = sdfAllocPacketAligned(0x40);
     func_002D5608(temp_v0);
-    func_002D4038(*(s32 *)(arg0 + 0x28), temp_v0);
+    sdfAppendPacket(*(s32 *)(arg0 + 0x28), temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B940);
@@ -1140,7 +1140,7 @@ extern FldGfxCallback D_00325748;
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 extern s32 func_002E4908();
 
-void func_0012BAD8(s32 x, s32 y, s32 arg2) {
+void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1156,12 +1156,12 @@ void func_0012BAD8(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7D;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, 0);
-    func_002D4038(quad.unk28, func_002E4908(packet, arg2));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, arg2));
     func_0012B8E0((s32)&quad);
     D_00325748.invoke(&D_00325748, quad.unk28);
 }
 
-void func_0012BBC8(s32 x, s32 y, s32 arg2, s32 arg3) {
+void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1177,12 +1177,12 @@ void func_0012BBC8(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk10 = 0x0FFFFF7F;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, arg2);
-    func_002D4038(quad.unk28, func_002E4908(packet, arg3));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, arg3));
     func_0012B8E0((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
-void func_0012BCC8(s32 x, s32 y, s32 arg2) {
+void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1198,12 +1198,12 @@ void func_0012BCC8(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7F;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
-    func_002D4038(quad.unk28, func_002E4908(packet, D_003BACE0, arg2));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, D_003BACE0, arg2));
     func_0012B8E0((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
-void func_0012BDC8(s32 x, s32 y, s32 arg2) {
+void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1219,12 +1219,12 @@ void func_0012BDC8(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7F;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
-    func_002D4038(quad.unk28, func_002E4908(packet, D_003BACE8, arg2));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, D_003BACE8, arg2));
     func_0012B8E0((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
-void func_0012BEC8(s32 x, s32 y, s32 arg2) {
+void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1240,12 +1240,12 @@ void func_0012BEC8(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7F;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
-    func_002D4038(quad.unk28, func_002E4908(packet, arg2));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, arg2));
     func_0012B8E0((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
-void func_0012BFC0(s32 x, s32 y, s32 arg2, s32 arg3) {
+void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1261,12 +1261,12 @@ void func_0012BFC0(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk10 = 0x0FFFFF7F;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, arg2);
-    func_002D4038(quad.unk28, func_002E4908(packet, arg3));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, arg3));
     func_0012B8E0((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
-void func_0012C0C8(s32 arg0, s32 arg1, f32 x, f32 y) {
+void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1282,7 +1282,7 @@ void func_0012C0C8(s32 arg0, s32 arg1, f32 x, f32 y) {
     quad.unk10 = 0x0FFFFF7F;
     func_0012B8F0((s32)&quad);
     sdfPktInit(packet, quad.unk1C + (s32)(x * 16.0f), quad.unk20 + (s32)(y * 8.0f), quad.unk24, arg0);
-    func_002D4038(quad.unk28, func_002E4908(packet, arg1));
+    sdfAppendPacket(quad.unk28, func_002E4908(packet, arg1));
     func_0012B8E0((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
@@ -1311,7 +1311,7 @@ void func_0012C688(u32 arg0) {
     D_003BACF8 = arg0;
 }
 
-s32 encProc(void) {
+s32 fldEncProc(void) {
     s32 state = D_003BAD00;
 
     if (state < 3) {
@@ -1329,7 +1329,7 @@ void func_0012C6C8(u32 arg0, s32 arg1) {
         func_0012C750(3);
         return;
     }
-    soundSetSequenceVolumePan(0xf, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(0xf, 0x7f, 0x3f);
     func_0012C750(arg0);
 }
 
@@ -1337,12 +1337,12 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C750);
 
 
 void func_0012C7C0(void) {
-    battleResetAsyncState();
+    btlResetAsyncState();
 }
 
 void func_0012C7D8(void) {
-    kwlnTaskCreate((s32)D_003BAD08, 0x2B0F, 0, 1, (s32)encProc, (s32)func_0012C7C0, 0);
-    battleClearRuntimeState();
+    kwlnTaskCreate((s32)D_003BAD08, 0x2B0F, 0, 1, (s32)fldEncProc, (s32)func_0012C7C0, 0);
+    btlClearRuntimeState();
 }
 
 extern f32 D_00330610[];
@@ -1450,7 +1450,7 @@ typedef struct {
     s32 unk178;
 } FldCamState;
 
-void func_0012F4B8(void) {
+void fldUpdateCameraTarget(void) {
     union {
         u128 q;
         f32 f[4];
@@ -1547,7 +1547,7 @@ void func_001312B0(void) {
 }
 
 extern void func_001372D0(f32 *);
-extern void func_0010F638(void *, s32);
+extern void effObjClearNodeFlags(void *, s32);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
 
 extern s32 func_00121970(s32, s32);
@@ -1660,14 +1660,14 @@ extern u32 sdfDevCreateCommandState(const char *);
 extern u32 func_002E5C68(u32, void *, u32);
 extern void func_002E5C38(u32);
 
-void func_00131CC0(s32 area) {
+void fldLoadSkyResource(s32 area) {
     char path[64];
     char directory[32];
     u32 command;
 
     D_003BAD78 = 0x80;
     if (area < 200) {
-        func_00128B50(directory, area, 1);
+        fldFormatAreaDirectory(directory, area, 1);
         func_003014F0(path, "%sF%03d.SKY", directory, area);
         command = sdfDevCreateCommandState(path);
         func_002E5C68(command, D_003BAD5C, 0xE000);
@@ -1695,7 +1695,7 @@ void func_00131D88(void) {
     D_003BAD6C = 0;
 }
 
-void func_00131DE8(void *src) {
+void fldUploadSkyBuffer(void *src) {
     D_003BAD78 = 0x80;
     memcpy(D_003BAD5C, src, 0xE000);
     func_00131D88();
@@ -1705,10 +1705,10 @@ void func_00131DE8(void *src) {
     }
 }
 
+extern f32 func_002E77F8(f32);
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0100);
 
-extern f32 func_002E77F8(f32);
-void func_00131F08(void) {
+void fldUpdateSwayOffset(void) {
     D_003BAD84 = 0;
     switch (D_003BAD7C) {
     case 1:
@@ -1744,7 +1744,7 @@ extern s32 D_003BAD58;
 extern s32 D_003BAD88, D_003BAD8C;
 extern s32 *D_003BAD74;
 extern f32 D_003BAD90, D_003BAD94;
-void func_00132AE8(s32 area, s32 value, s32 duration) {
+void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
     if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
         duration = 0;
     }
@@ -1846,7 +1846,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00133EC0);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001340E0);
 
 extern s32 D_003BADE0;
-s32 func_001342B0(s32 fade, s32 color, s32 alpha) {
+s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     s32 scaled;
 
     if (fade < 0) {
@@ -1912,12 +1912,12 @@ void func_00134FB0(void) {
     u8 *temp_v0 = func_002D03F8(0x72000);
 
     D_003BAE00 = (u32)temp_v0;
-    temp_v0 = func_002D0A48(temp_v0);
+    temp_v0 = sdfResourceRetainAddress(temp_v0);
     D_003BADF0 = (u32)temp_v0;
     memset(temp_v0, 0, 0x72000);
     temp_v0 = func_002D03F8(0x4A00);
     D_003BADFC = (u32)temp_v0;
-    temp_v0 = func_002D0A48(temp_v0);
+    temp_v0 = sdfResourceRetainAddress(temp_v0);
     D_003BADE8 = (u32)temp_v0;
     memset(temp_v0, 0, 0x4A00);
 }
@@ -1935,7 +1935,7 @@ float func_00135058(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
 }
 
-f32 calculateFieldVectorLength(const f32 *vector) {
+f32 fldCalculateVectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
@@ -1963,7 +1963,7 @@ typedef struct FldRecE4 {
     s32 value;
     u8 padD4[0x10];
 } FldRecE4; /* 0xE4 bytes */
-void func_00135298(s32 id, s32 value) {
+void fldSetRecordValueById(s32 id, s32 value) {
     s32 i;
 
     for (i = 0; i < D_003BADF4; i++) {
@@ -2039,7 +2039,7 @@ typedef struct FldTaskInfo {
 } FldTaskInfo;
 extern s32 func_00110A48(u64, u32, s32);
 extern u32 func_00116B78(s32);
-void func_00138D88(void) {
+void fldResetTaskSlots(void) {
     s32 i;
     u64 world;
     u32 id;
@@ -2084,7 +2084,7 @@ typedef struct FldRoomPlanes {
 } FldRoomPlanes;
 extern FldRoomPlanes D_003C9470[];
 extern f32 func_00135058(f32 *, f32 *);
-s32 func_0013AF20(f32 *direction, s32 index) {
+s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -2109,7 +2109,7 @@ s32 func_0013B088(u32 flag, u32 slot) {
 u32 func_0013B0E0(u32 arg0) {
     u32 *temp_v0 = &D_003308B0[arg0];
 
-    if (func_001019C8(*temp_v0) != 0) {
+    if (kwlnTaskIsRegistered(*temp_v0) != 0) {
         kwlnTaskDestroyWithHierarchy(*temp_v0, 0);
     }
     *temp_v0 = 0;
@@ -2139,7 +2139,7 @@ void func_0013BDD0(void) {
     if (count > 0) {
         u32 *entry = D_003308B0;
         do {
-            if (func_001019C8(*entry) == 0) {
+            if (kwlnTaskIsRegistered(*entry) == 0) {
                 *entry = 0;
             }
             i++;
@@ -2169,7 +2169,7 @@ typedef struct FldRoomState {
 } FldRoomState; /* 0x140 bytes */
 extern FldRoomState D_003C93E0[];
 extern s32 D_003BAE14;
-s32 func_0013BE90(u32 task) {
+s32 fldFindRoomByTask(u32 task) {
     s32 i;
 
     for (i = 0; i < D_003BAE14; i++) {
@@ -2181,7 +2181,7 @@ s32 func_0013BE90(u32 task) {
 }
 
 
-s32 getFieldTaskRecordValue(u32 task) {
+s32 fldGetTaskRecordValue(u32 task) {
     s32 i;
     for (i = 0; i < D_003BAE14; i++) {
         if (D_003308B0[i] == task) {
@@ -2199,7 +2199,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C2B8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", fldCheckEntryActive);
 
-s32 hasActiveFieldTasks(void) {
+s32 fldHasActiveTasks(void) {
     s32 i;
     for (i = 0; i < D_003BAE14; i++) {
         if (D_003308B0[i] != 0) {
@@ -2232,25 +2232,25 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013CEB0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D410);
 
-extern void func_00128B50(char *, s32, s32);
+extern void fldFormatAreaDirectory(char *, s32, s32);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 func_002E5C68(u32, void *, u32);
 extern void func_002E5C38(u32);
 extern u8 D_00332E30[];
 
-extern void func_00128B50(char *, s32, s32);
+extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 func_002E5C68(u32, void *, u32);
 extern void func_002E5C38(u32);
 extern u8 D_00332E30[];
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
-void func_0013D510(s32 field) {
+void fldLoadInfoTable(s32 field) {
     char path[64];
     char directory[32];
     u32 command;
     if (field < 200) {
-        func_00128B50(directory, field, 1);
+        fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, D_003A01F8, directory, field);
         command = sdfDevCreateCommandState(path);
         func_002E5C68(command, D_00332E30, 0x3B80);
@@ -2263,6 +2263,8 @@ void func_0013D598(const void *source) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
+
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
 
@@ -2350,7 +2352,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F100);
 extern void func_001279A0();
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
 
-s32 func_0013F4D8(s32 mode) {
+s32 fldGetActorStat0(s32 mode) {
     u8 *actor = D_00337D00 + D_003BAE64 * 108;
     s32 *entry;
     s32 flags;
@@ -2382,7 +2384,7 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0270);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
-s32 func_0013F5A8(u32 kind) {
+s32 fldGetActorStat1(u32 kind) {
     u8 *entry = D_00337D00 + D_003BAE64 * 108;
     s32 *found;
 
@@ -2431,7 +2433,7 @@ typedef struct FldNpcMotion {
 extern FldNpcMotion D_00336A60[];
 extern void *D_003BAE44;
 extern void *D_003BAE48;
-s32 func_0013F6B8(u32 kind) {
+s32 fldGetActorMotionEntry(u32 kind) {
     u8 *entry = D_00337D00 + D_003BAE64 * 108;
     s16 index = *(s16 *)(entry + 0x12);
     s32 *found;
@@ -2468,7 +2470,7 @@ s32 func_0013F6B8(u32 kind) {
     return 0;
 }
 
-s32 func_0013F848(u32 kind) {
+s32 fldGetRowValue(u32 kind) {
     s32 slot = D_003BAE4C;
 
     switch (kind) {
@@ -2511,7 +2513,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", fldFindTableEntry);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
 
 extern u32 D_003CE3E0[][23];
-void func_0013FCE0(void) {
+void fldResetActorSlots(void) {
     s32 i;
 
     for (i = 0; i < 256; i++) {
@@ -2548,7 +2550,7 @@ void func_0013FD60(s32 field) {
     if (field >= 100) {
         memset(D_00337C60, 0, 0x6CA0);
     } else {
-        func_00128B50(directory, field, 1);
+        fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, "%sF%03d.WAP", directory, field);
         command = sdfDevCreateCommandState(path);
         func_002E5C68(command, D_00337C60, 0x6CA0);
@@ -2576,8 +2578,8 @@ extern s32 func_00124E90(void), func_00124EB8(void), func_00124EE0(void);
 extern s32 func_0014D0D0(void);
 extern u16 *func_00101A70(u32);
 extern s32 func_00195CD8(void *, s32, s32);
-extern void func_00149610(s32);
-extern void func_00149748(s32, s32);
+extern void fldDrawGaugeBar(s32);
+extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00140F70);

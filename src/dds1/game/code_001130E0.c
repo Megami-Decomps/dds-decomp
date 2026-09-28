@@ -64,7 +64,7 @@ void func_00113538(BasicObject *obj) {
     BasicObjectData *data;
 
     func_00113AA8();
-    func_0010F5E8(obj);
+    effObjFreeInner(obj);
     data = obj->data;
     if (data->handle != -1) {
         data->handle = -1;
@@ -138,7 +138,7 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_00113E48);
 void func_00113EE8(BasicObject *obj) {
     BasicObjectData *data;
 
-    func_0010F5E8();
+    effObjFreeInner();
     data = obj->data;
     func_00111840(data->handle);
     func_002CFF98(data);

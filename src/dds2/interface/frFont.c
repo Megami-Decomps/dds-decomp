@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_0019D920(void);
+extern u32 frFontMeasureGlyphChain(void);
 
 extern u32 D_00436568;
 
@@ -220,7 +220,7 @@ void func_0019D058(s32 arg0, u8 arg1) {
     u32 temp_v0;
 
     *(u8 *)(arg0 + 1) = arg1;
-    temp_v0 = func_0019D920();
+    temp_v0 = frFontMeasureGlyphChain();
     *(u32 *)(arg0 + 0xc) = temp_v0;
 }
 
@@ -267,7 +267,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D530);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D550);
 
-s32 func_0019D7E0(void) {
+s32 frFontAdvanceSelectedGlyphSlot(void) {
     s32 sel = (func_00100400() & 0xFF) == 0;
     u8 *base = (u8 *)&D_00452720;
     FrFontGlyph **slot = (FrFontGlyph **)(base + sel * 4 + 0x194);
@@ -305,7 +305,7 @@ void func_0019D8C8(void) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D8E0);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D920);
+INCLUDE_ASM(const s32, "interface/frFont", frFontMeasureGlyphChain);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D958);
 

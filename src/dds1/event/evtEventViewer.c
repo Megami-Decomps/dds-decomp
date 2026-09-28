@@ -99,7 +99,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C2C0);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C340);
 
-void func_0022C3C8(EvtRange *range)
+void evtSetRangeMinimumFromCurrent(EvtRange *range)
 {
     s32 value;
 
@@ -110,7 +110,7 @@ void func_0022C3C8(EvtRange *range)
     }
 }
 
-void func_0022C3E8(EvtRange *range)
+void evtSetRangeMaximumFromCurrent(EvtRange *range)
 {
     s32 value;
 

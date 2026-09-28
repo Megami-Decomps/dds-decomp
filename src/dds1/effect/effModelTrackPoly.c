@@ -21,12 +21,12 @@ typedef struct {
 } EffTrackPolyWork; /* 0x3C */
 
 
-void func_00188228(EffTrackPolyWork *work) {
+void effTrackPolyRelease(EffTrackPolyWork *work) {
     effTrackPolyFreeData(work->unk38);
     func_002CFF98(work);
 }
 
-void func_00188258(EffTrackPolyWork *work) {
+void effTrackPolyReset(EffTrackPolyWork *work) {
     work->unk34 = 0;
     effTrackPolyInitData(work->unk38);
 }
@@ -37,7 +37,7 @@ void func_001882D8(EffTrackPolyWork *work) {
     func_00188A78(work->unk38);
 }
 
-void func_001882F0(EffTrackPolyWork *work, u32 color) {
+void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
     work->unk38->color = color;
 }
 
@@ -54,11 +54,11 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188480);
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001884E8);
 
 void func_00188510(EffTrackPolyWork ***tables, s32 index) {
-    func_00188258((*tables)[index]);
+    effTrackPolyReset((*tables)[index]);
 }
 
 void func_00188538(EffTrackPolyWork ***tables, s32 index, u32 value) {
-    func_001882F0((*tables)[index], value);
+    effTrackPolySetColor((*tables)[index], value);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188560);
@@ -86,7 +86,7 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188878);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188958);
 
-void func_001889B8(EffTrackPolyData *data, s32 arg1) {
+void effTrackPolyAdvancePosition(EffTrackPolyData *data, s32 arg1) {
     s32 pos = data->unk10 + ((data->unk14 - 1) * (arg1 - 1) + arg1) * -2;
 
     if (pos < 2) {

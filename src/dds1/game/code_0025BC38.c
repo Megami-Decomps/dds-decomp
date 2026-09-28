@@ -76,7 +76,7 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D798);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D7F8);
 
-s32 *func_0025DA90(void) {
+s32 *mnuAllocateMenuListNode(void) {
     s32 *temp_v0 = (s32 *)func_002CFEB8(0x14);
 
     memset(temp_v0, 0, 0x14);
@@ -93,7 +93,7 @@ u32 func_0025DB58(MenuListNode *node) {
     return next;
 }
 
-void func_0025DB80(MenuListHead *head) {
+void mnuReleaseListNodes(MenuListHead *head) {
     s32 node = head->first;
 
     while (node != NULL) {
@@ -111,6 +111,10 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DDF0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DE60);
 
+INCLUDE_RODATA(const s32, "game/code_0025BC38", D_003AFA00);
+
+INCLUDE_RODATA(const s32, "game/code_0025BC38", D_003AFA18);
+
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D0);
 
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D8);
@@ -118,8 +122,4 @@ INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D8);
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E0);
 
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E8);
-
-INCLUDE_RODATA(const s32, "game/code_0025BC38", D_003AFA00);
-
-INCLUDE_RODATA(const s32, "game/code_0025BC38", D_003AFA18);
 

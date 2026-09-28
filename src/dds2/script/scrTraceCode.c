@@ -11,29 +11,29 @@ extern ScrData *D_00438E8C;
 
 extern ScrVM *D_00435DD0;
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C618);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushImmediateInteger);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C660);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushImmediateFloat);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C6B0);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushGlobalInteger);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C708);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushGlobalFloat);
 
-u32 func_0010C760(ScrData *scr) {
-    func_0010C348(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
+u32 scrPushLocalInteger(ScrData *scr) {
+    scrPushInteger(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C7B8);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushLocalFloat);
 
-u32 func_0010C810(ScrData *scr) {
-    func_0010C3A8(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
+u32 scrPushStringLiteral(ScrData *scr) {
+    scrPushString(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C860(ScrData *scr) {
+u32 scrPushReturnValue(ScrData *scr) {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
     scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
     scr->sp++;
@@ -41,11 +41,11 @@ u32 func_0010C860(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C8A8);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreGlobalInteger);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C900);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreGlobalFloat);
 
-u32 func_0010C958(ScrData *scr) {
+u32 scrStoreLocalInteger(ScrData *scr) {
     u32 value;
 
     value = func_0010C408();
@@ -54,7 +54,7 @@ u32 func_0010C958(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C9B0);
+INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreLocalFloat);
 
 u32 func_0010CA08(ScrData *scr) {
     scr->pc++;
@@ -65,16 +65,16 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CA20);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CAC0);
 
-u32 func_0010CB00(ScrData *scr) {
+u32 scrJumpProcedure(ScrData *scr) {
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
-u32 func_0010CB30(u32 arg0) {
+u32 scrCallProcedure(u32 arg0) {
     s32 temp_v0;
 
     temp_v0 = (s32)arg0;
-    func_0010C3D8(arg0, *(u32 *)(temp_v0 + 0x18));
+    scrPushTypeFourValue(arg0, *(u32 *)(temp_v0 + 0x18));
     *(u32 *)(temp_v0 + 0x18) =
               *(u32 *)
                 (*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2) * 0x20 +
@@ -87,7 +87,7 @@ u32 func_0010CB88(ScrData *scr) {
     return 1;
 }
 
-u32 func_0010CBA0(ScrData *scr) {
+u32 scrJumpLabel(ScrData *scr) {
     scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }

@@ -6,7 +6,7 @@ extern s32 D_003BAA00;
 
 extern s8 D_003BC39C;
 
-extern s32 func_00101938(u32);
+extern s32 kwlnTaskFindByPriority(u32);
 
 extern s64 evtFindTaskById(void);
 
@@ -35,7 +35,7 @@ typedef struct CampTaskData {
     u8 pad08[0x40];
 } CampTaskData;
 
-void campCreateTask(s32 arg0) {
+void mnuCampCreateTask(s32 arg0) {
     char name[0x20];
     CampTaskData *data;
 
@@ -49,7 +49,7 @@ void campCreateTask(s32 arg0) {
     }
 }
 
-void func_00242698(void) {
+void campDestroyTaskById(void) {
     s64 temp_v0;
 
     temp_v0 = evtFindTaskById();
@@ -59,10 +59,10 @@ void func_00242698(void) {
     }
 }
 
-void func_002426D0(void) {
+void campDestroyAllTasks(void) {
     s64 temp_v0;
 
-    while (temp_v0 = func_00101938(0x3ec), temp_v0 != 0) {
+    while (temp_v0 = kwlnTaskFindByPriority(0x3ec), temp_v0 != 0) {
         kwlnTaskDestroyWithHierarchy(temp_v0, 0);
     }
 }
@@ -91,7 +91,7 @@ typedef struct CampDisplayDefaults {
     s32 variant;
 } CampDisplayDefaults;
 
-void campInitDisplayDefaults(CampDisplayDefaults *display) {
+void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->width = 0x100;
     display->height = 0xE0;
     display->color[0] = -0x80;
@@ -134,7 +134,7 @@ typedef struct {
     u32 state; /* 0x240C */
 } CampScene;
 
-s32 func_00243460(u8 *entry, CampScene *scene, s32 nameIndex) {
+s32 campFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
     CampEntryNode *node = scene->entries;
     while (node != NULL) {
         if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24,
@@ -146,7 +146,7 @@ s32 func_00243460(u8 *entry, CampScene *scene, s32 nameIndex) {
     return -1;
 }
 
-void *campFindEntryByName(CampScene *scene, const char *name) {
+void *mnuCampFindEntryByName(CampScene *scene, const char *name) {
     CampEntryNode *node = scene->entries;
     while (node != NULL) {
         if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24, name) == 0) {
@@ -161,7 +161,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243558);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243608);
 
-void func_002437E0(CampScene *scene) {
+void campResetEntryStatus(CampScene *scene) {
     CampEntryNode *node;
 
     node = scene->entries;
@@ -244,7 +244,7 @@ u32 func_00243F38(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243F48);
 
-void shopSavePrimaryTransform(u8 *scene) {
+void mnuShopSavePrimaryTransform(u8 *scene) {
     extern f32 D_003D80F0[];
     extern f32 D_003D80D0[];
     extern s32 D_003BC380;
@@ -257,7 +257,7 @@ void shopSavePrimaryTransform(u8 *scene) {
     D_003BC380 = 0;
 }
 
-void shopSaveFullTransform(u8 *scene) {
+void mnuShopSaveFullTransform(u8 *scene) {
     extern f32 D_003D80F0[];
     extern f32 D_003D80E0[];
     extern f32 D_003D80D0[];
@@ -272,7 +272,7 @@ void shopSaveFullTransform(u8 *scene) {
     D_003BC380 = 1;
 }
 
-void shopRestoreTransform(u8 *scene) {
+void mnuShopRestoreTransform(u8 *scene) {
     extern f32 D_003D80F0[];
     extern f32 D_003D80E0[];
     extern f32 D_003D80D0[];
@@ -289,7 +289,7 @@ void shopRestoreTransform(u8 *scene) {
     }
 }
 
-void shopRegisterSceneObject(u8 *scene, s32 identifier) {
+void mnuShopRegisterSceneObject(u8 *scene, s32 identifier) {
     s32 count = *(s32 *)(scene + 0x2444);
     s32 i = 0;
     if (count > 0) {
@@ -346,24 +346,24 @@ void func_00244258(u8 *scene) {
     params[1] = 0;
 }
 
-s32 shopReleaseSceneObjects(u8 *scene) {
-    extern s32 destroyPackedEffectBatch(s32);
+s32 mnuShopReleaseSceneObjects(u8 *scene) {
+    extern s32 effDestroyPackedBatch(s32);
     s32 *objects = (s32 *)(scene + 0x74);
     s32 result;
     u32 i;
     for (i = 0; i < 2; i++) {
-        result = destroyPackedEffectBatch(*objects++);
+        result = effDestroyPackedBatch(*objects++);
     }
     return result;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
-void shopLoadSpriteAssets(u8 *scene) {
+void mnuShopLoadSpriteAssets(u8 *scene) {
     extern s32 D_0036AA60[];
-    extern s32 func_002BC8F0(const char *, s32, s32);
+    extern s32 effLoadIndexedResource(const char *, s32, s32);
     s32 *resource = (s32 *)(scene + 0x64);
-    *resource = func_002BC8F0("/facility/spr/shop/", D_0036AA60[0], 0);
+    *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244360);
@@ -418,7 +418,7 @@ void func_00244AB8(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003AF428, 0);
 }
 
-s32 pollTaskState(void) {
+s32 mnuPollTaskState(void) {
     s32 state = D_003BC39C;
     if (state == 1) {
         return 1;
@@ -450,7 +450,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
 extern s32 func_00244E08(void *arg0);
 
-s32 campClampSceneCounter(s32 arg0, u8 *arg1) {
+s32 mnuCampClampSceneCounter(s32 arg0, u8 *arg1) {
     s32 v = func_00244E08(arg1);
     s32 sum = *(s32 *)(arg1 + 0x80) + arg0;
     s32 cur;
@@ -481,6 +481,10 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245A40);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245C00);
 
+INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
+
+INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
+
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC380);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
@@ -494,8 +498,4 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
-
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
-
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
 

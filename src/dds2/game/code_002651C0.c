@@ -116,7 +116,7 @@ s64 func_00265850(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 func_00265898(void) {
+s32 evtStartFadeByState(void) {
     s32 context = func_00101958();
     func_0025FC08(context);
     switch (*(s32 *)(context + 8)) {

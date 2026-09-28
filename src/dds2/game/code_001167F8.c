@@ -16,7 +16,7 @@ void func_00116858(void) {
 
 INCLUDE_ASM(const s32, "game/code_001167F8", func_00116870);
 
-void func_00116920(s32 arg0) {
+void dds3ClearUnitObjectLowFlags(s32 arg0) {
     *(u32 *)(*(s32 *)(arg0 + 0x18) + 100) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 100) & 0xfffffffc
     ;
 }

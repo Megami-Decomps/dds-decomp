@@ -289,7 +289,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A2D0);
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A450);
 
 extern s32 func_002D03F8(s32 size);
-extern void *func_002D0A48(s32 allocation);
+extern void *sdfResourceRetainAddress(s32 allocation);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern u32 effMiscRand(void *state);
 extern s32 func_0016FB08();
@@ -354,7 +354,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A9D0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AB48);
 
-void rotateFlashParticlePosition(void *work, s32 index, void *orientation)
+void effRotateFlashParticlePosition(void *work, s32 index, void *orientation)
 {
     u8 *part = *(u8 **)((u8 *)work + 0x40) + index * 0x2C;
     f32 position[4];

@@ -12,11 +12,11 @@ typedef struct ObjectWithSubstate {
     ObjectSubstate *substate;
 } ObjectWithSubstate;
 
-u32 func_00113208(ObjectWithSubstate *object) {
+u32 dds3GetCameraMode(ObjectWithSubstate *object) {
     return object->substate->value84;
 }
 
-void func_00113218(ObjectWithSubstate *object, s32 value) {
+void dds3SetCameraMode(ObjectWithSubstate *object, s32 value) {
     if (object->substate->value84 != value) {
         object->substate->value84 = value;
     }

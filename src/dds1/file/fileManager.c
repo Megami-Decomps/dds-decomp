@@ -25,7 +25,7 @@ INCLUDE_ASM(const s32, "file/fileManager", func_00288818);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002888C8);
 
-void func_00288988(FileWork *list, FileNode *node) {
+void filePrependNode(FileWork *list, FileNode *node) {
     node->next = list->head;
     list->head = node;
 }
@@ -74,7 +74,7 @@ INCLUDE_ASM(const s32, "file/fileManager", func_00288BE8);
 
 void fileWaitReady(u32 id) {
     while (func_00288BA8(id) == 0) {
-        func_002E7098();
+        sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }
 }

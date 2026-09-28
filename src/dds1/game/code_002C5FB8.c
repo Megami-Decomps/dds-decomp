@@ -17,7 +17,7 @@ typedef struct Vec3 {
     float z; // 0x08
 } Vec3; // 0x0C
 
-extern float normalizedVectorDot(float *, float *);
+extern float fldNormalizedVectorDot(float *, float *);
 extern void func_002D0A10(void *);
 typedef struct MapResource {
     u32 image;
@@ -28,7 +28,7 @@ typedef struct MapResource {
 extern MapResource D_00390710[10];
 extern MapResource D_003906F0;
 extern MapResource D_00390700;
-extern u32 func_002C7D80(s32 *);
+extern u32 fldReleaseMapResource(s32 *);
 extern u32 func_002EB028(const char *, void *, s32);
 extern u32 func_002D3288(u32);
 
@@ -69,19 +69,19 @@ typedef struct {
     s32 maxCount;      /* 0x20 */
 } MapSelection;
 
-void func_002C6098(MapSelection *selection, s32 count) {
+void fldSetSelectionCount(MapSelection *selection, s32 count) {
     if ((count <= selection->maxCount) && (count != 0)) {
         selection->selectedCount = count;
     }
 }
 
-void func_002C60B8(MapSelection *selection) {
+void fldIncrementSelectionCount(MapSelection *selection) {
     if (selection->selectedCount < 10) {
         selection->selectedCount = selection->selectedCount + 1;
     }
 }
 
-void func_002C60D8(MapSelection *selection) {
+void fldDecrementSelectionCount(MapSelection *selection) {
     if (1 < selection->selectedCount) {
         selection->selectedCount = selection->selectedCount - 1;
     }
@@ -105,16 +105,16 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6130);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C62D8);
 
-s32 releaseLocalMapResources(void) {
+s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
     MapResource *item = D_00390710;
     do {
-        func_002C7D80((s32 *)item);
+        fldReleaseMapResource((s32 *)item);
         item++;
         --i;
     } while (i >= 0);
-    func_002C7D80((s32 *)&D_003906F0);
-    func_002C7D80((s32 *)&D_00390700);
+    fldReleaseMapResource((s32 *)&D_003906F0);
+    fldReleaseMapResource((s32 *)&D_00390700);
     return 1;
 }
 
@@ -188,7 +188,7 @@ typedef struct {
     s16 elapsed;          /* 0x16 */
 } MapRequestState;
 
-void func_002C7B58(MapRequestState *state, u32 value, u32 argument1, u32 argument2) {
+void fldAdvanceMapRequest(MapRequestState *state, u32 value, u32 argument1, u32 argument2) {
     MapRequestNode *node;
 
     node = state->next;
@@ -206,7 +206,7 @@ void func_002C7B58(MapRequestState *state, u32 value, u32 argument1, u32 argumen
     state->elapsed = state->elapsed + 1;
 }
 
-void func_002C7BA8(MapRequestState *state, u16 interval) {
+void fldSetMapRequestInterval(MapRequestState *state, u16 interval) {
     state->interval = interval;
 }
 
@@ -215,7 +215,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7BB0);
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7C58);
 
 
-s32 loadMapResource(const char *name, MapResource *record) {
+s32 fldLoadMapResource(const char *name, MapResource *record) {
     u32 handle = func_002EB028(name, &record->descriptor, 0);
     u32 descriptor = record->descriptor;
     record->handle = handle;
@@ -228,7 +228,7 @@ s32 loadMapResource(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 func_002C7D80(s32 *arg0) {
+u32 fldReleaseMapResource(s32 *arg0) {
     if (*arg0 != 0) {
         func_002D2D00(*arg0);
         *arg0 = 0;
@@ -254,19 +254,19 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8040);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C80D8);
 
-void func_002C8420(float *arg0, float *arg1) {
+void sdfVec3AddInPlace(float *arg0, float *arg1) {
     *arg0 = *arg0 + *arg1;
     arg0[1] = arg0[1] + arg1[1];
     arg0[2] = arg0[2] + arg1[2];
 }
 
-void func_002C8458(float *arg0, float *arg1) {
+void sdfVec3SubtractInPlace(float *arg0, float *arg1) {
     *arg0 = *arg0 - *arg1;
     arg0[1] = arg0[1] - arg1[1];
     arg0[2] = arg0[2] - arg1[2];
 }
 
-void func_002C8490(float arg0, float arg1, float arg2, float *arg3) {
+void sdfVec3AddComponents(float arg0, float arg1, float arg2, float *arg3) {
     *arg3 = *arg3 + arg0;
     arg3[1] = arg3[1] + arg1;
     arg3[2] = arg3[2] + arg2;
@@ -278,7 +278,7 @@ void func_002C84B8(Vec3 *v, float x, float y, float z) {
     v->z = z;
 }
 
-void func_002C84C8(float arg0, float *arg1) {
+void sdfVec3ScaleInPlace(float arg0, float *arg1) {
     *arg1 = *arg1 * arg0;
     arg1[1] = arg1[1] * arg0;
     arg1[2] = arg1[2] * arg0;
@@ -286,12 +286,12 @@ void func_002C84C8(float arg0, float *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C84F0);
 
-float vectorLength(float *vector) {
+float fldVectorLength(float *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] +
                   vector[2] * vector[2]);
 }
 
-float normalizedVectorDot(float *left, float *right) {
+float fldNormalizedVectorDot(float *left, float *right) {
     struct Vector4 { float x, y, z, w; } a, b;
     a = *(struct Vector4 *)left;
     b = *(struct Vector4 *)right;
@@ -300,8 +300,8 @@ float normalizedVectorDot(float *left, float *right) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float vec3AngleBetween(float *left, float *right) {
-    return func_002FA1C0(normalizedVectorDot(left, right));
+float fldVec3AngleBetween(float *left, float *right) {
+    return func_002FA1C0(fldNormalizedVectorDot(left, right));
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8648);
@@ -335,14 +335,14 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C9268);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C94A8);
 
-void func_002C95F0(float *arg0, float *arg1, float *arg2) {
+void sdfVec4Add(float *arg0, float *arg1, float *arg2) {
     *arg0 = *arg1 + *arg2;
     arg0[1] = arg1[1] + arg2[1];
     arg0[2] = arg1[2] + arg2[2];
     arg0[3] = arg1[3] + arg2[3];
 }
 
-void func_002C9638(float *arg0, float *arg1, float *arg2) {
+void sdfQuatMultiply(float *arg0, float *arg1, float *arg2) {
     *arg0 = (arg1[3] * *arg2 + *arg1 * arg2[3] + arg1[1] * arg2[2]) -
                           arg1[2] * arg2[1];
     arg0[1] = (arg1[3] * arg2[1] + arg1[1] * arg2[3] + arg1[2] * *arg2) -
@@ -353,7 +353,7 @@ void func_002C9638(float *arg0, float *arg1, float *arg2) {
                               arg1[2] * arg2[2];
 }
 
-float func_002C9740(float *arg0, float *arg1) {
+float sdfQuatDot(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2] +
                   arg0[3] * arg1[3];
 }
@@ -364,15 +364,15 @@ float func_002C9780(float *arg0, float *arg1) {
                   (*arg0 * arg1[1] - arg0[1] * *arg1);
 }
 
-float vec4ArcCosDot(float *left, float *right) {
-    return func_002FA1C0(func_002C9740(left, right));
+float fldVec4ArcCosDot(float *left, float *right) {
+    return func_002FA1C0(sdfQuatDot(left, right));
 }
-
-INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3DC0);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E00);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E40);
+
+INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
 

@@ -38,7 +38,7 @@ BillObj *billAllocChild(void *arg0) {
     return obj;
 }
 
-void func_00158E00(BillObj *obj) {
+void billReleaseChild(BillObj *obj) {
     s32 child;
 
     child = (s32)obj->unk30;
@@ -48,7 +48,7 @@ void func_00158E00(BillObj *obj) {
     func_00328E48(obj);
 }
 
-void func_00158E38(BillObj *obj) {
+void billProcessChild(BillObj *obj) {
     func_00157EA0(obj, obj->unk30);
 }
 
@@ -102,7 +102,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00159158);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001591D8);
 
-void func_00159490(s32 arg0, s32 arg1, s32 arg2) {
+void billResolveEntry(s32 arg0, s32 arg1, s32 arg2) {
     s16 temp_v0;
     s32 temp_v1;
     s32 *piVar3;

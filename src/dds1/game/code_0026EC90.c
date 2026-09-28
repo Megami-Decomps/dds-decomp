@@ -2,7 +2,7 @@
 
 extern void func_0027C430(u32);
 
-extern void releaseResourceList(u32);
+extern void mnuReleaseResourceList(u32);
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -12,7 +12,7 @@ extern u8 D_0037B888[];
 
 extern u8 D_003253C8[];
 
-extern char D_003B1140[]; /* "staffImageProc" */
+extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
 extern char D_003B1168[]; /* "staffProc" */
 
@@ -38,7 +38,7 @@ extern u32 D_003DC560[];
 
 extern u32 D_003DC5C8[];
 
-extern s32 movieViewer();
+extern s32 mnuMovieViewer();
 
 extern char D_003BC6B8[]; /* "camp" */
 
@@ -55,7 +55,7 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F118);
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F230);
 
 void func_0026F500(void) {
-    loadStaffFonts();
+    mnuLoadStaffFonts();
 }
 
 void func_0026F518(void) {
@@ -70,7 +70,7 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F918);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", staffImageProc);
+INCLUDE_ASM(const s32, "game/code_0026EC90", mnuStaffImageProc);
 
 void func_0026FD88(void) {
     s64 temp_v0;
@@ -108,7 +108,7 @@ s32 func_0026FF38(void) {
     return 0;
 }
 
-s32 movieDraw(void) {
+s32 mnuMovieDraw(void) {
     func_002ECCF8(D_0037B888, D_003253C8);
     return 0;
 }
@@ -290,14 +290,14 @@ s32 func_00270088(void) {
     return D_0037B8BC[0];
 }
 
-s32 menuSetFrameDivisor(void) {
+s32 mnuSetFrameDivisor(void) {
     func_002EC5E0(0x3c / D_003BA72C);
     return 0;
 }
 
-void createMovieManagerTask(void) {
+void mnuCreateMovieManagerTask(void) {
     func_002EC850();
-    kwlnTaskCreate("movieMan", 0x385, 1, 0, menuSetFrameDivisor, 0, 0);
+    kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
 }
 
 u32 func_00270110(void) {
@@ -312,7 +312,7 @@ u32 func_00270110(void) {
 u32 func_00270140(void) {
     func_00270030();
     D_003BC630 = 0;
-    drawEnableDc8(0);
+    kwlnDrawEnableDc8(0);
     return 1;
 }
 
@@ -335,14 +335,14 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270558);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270738);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", movieViewer);
+INCLUDE_ASM(const s32, "game/code_0026EC90", mnuMovieViewer);
 
-void createMovieViewerTask(void) {
+void mnuCreateMovieViewerTask(void) {
     func_002702A0();
-    D_003DC560[0] = kwlnTaskCreate(D_003B1AC8, 0x2b02, 1, 0, movieViewer, 0, 0);
+    D_003DC560[0] = kwlnTaskCreate(D_003B1AC8, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
 }
 
-void destroyMovieViewerTask(void) {
+void mnuDestroyMovieViewerTask(void) {
     s32 task = kwlnTaskGetTaskByName(D_003B1AC8);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
@@ -375,7 +375,7 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270FB0);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271020);
 
-void releaseStaffImageHandles(u32 *resources) {
+void mnuReleaseStaffImageHandles(u32 *resources) {
     s32 index;
     for (index = 0; index < 7; index++) {
         u32 *slot = &resources[index];
@@ -553,18 +553,18 @@ void *func_00271100(s32 kind, s32 *count, u8 *data) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271180);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271210);
+INCLUDE_ASM(const s32, "game/code_0026EC90", movReleaseCategoryModels);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002712A0);
 
-void setStaffDisplayMode(s32 next, u8 *context) {
+void mnuSetStaffDisplayMode(s32 next, u8 *context) {
     s32 previous = *(s32 *)(context + 0x910);
     if (next != previous) {
         if (previous != 0) {
             func_002712A0(previous);
         }
         if (next != 0) {
-            func_00271210(next, context);
+            movReleaseCategoryModels(next, context);
         }
         *(s32 *)(context + 0x910) = next;
     }
@@ -572,13 +572,13 @@ void setStaffDisplayMode(s32 next, u8 *context) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271368);
 
-void releaseStaffSpriteHandles(u8 *display) {
+void mnuReleaseStaffSpriteHandles(u8 *display) {
     u32 *image = (u32 *)(display + 0x130);
     u32 index = 0;
-    destroyPackedEffectBatch(*(u32 *)(display + 0x118));
-    destroyPackedEffectBatch(*(u32 *)(display + 0x120));
+    effDestroyPackedBatch(*(u32 *)(display + 0x118));
+    effDestroyPackedBatch(*(u32 *)(display + 0x120));
     do {
-        destroyPackedEffectBatch(*image++);
+        effDestroyPackedBatch(*image++);
         index++;
     } while (index < 2);
 }
@@ -588,8 +588,8 @@ void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     func_0027FAA8(arg0, *arg1);
     func_0027FBE0(arg0, arg1 + 9);
     func_0027FC10(arg0, arg1 + 0x11);
-    registerMenuResourceHandles(arg0, arg1 + 0x19);
-    func_0027FF60(arg0);
+    mnuRegisterResourceHandles(arg0, arg1 + 0x19);
+    menuUpdateHandleStates(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271500);
@@ -620,7 +620,7 @@ void func_00271DF8(u8 *display) {
     do {
         func_0027C430(*image++);
     } while (++index < 3);
-    releaseResourceList(*(u32 *)(display + 0x11c));
+    mnuReleaseResourceList(*(u32 *)(display + 0x11c));
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271E58);
@@ -643,13 +643,13 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B20D0);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002720B0);
 
-void destroyCampTasks(void) {
+void mnuDestroyCampTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003BC6B8, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003B20C0, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003B20D0, 0);
 }
 
-s32 acknowledgeCampState(void) {
+s32 mnuAcknowledgeCampState(void) {
     s8 state = D_003BC6B4;
     if (state == 1) {
         return 1;
@@ -687,6 +687,8 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00272688);
 void func_00272778(u32 arg0) {
     func_00272688(0, arg0);
 }
+
+INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2100);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC614);
 
@@ -739,6 +741,4 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B5);
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B8);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6C0);
-
-INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2100);
 

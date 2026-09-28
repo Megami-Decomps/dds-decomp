@@ -18,7 +18,7 @@ INCLUDE_ASM(const s32, "file/fileManager", func_002C7D78);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7E28);
 
-void func_002C7EE8(FileOwner *owner, FileNode *node) {
+void filePrependNode(FileOwner *owner, FileNode *node) {
     node->next = owner->first;
     owner->first = node;
 }
@@ -69,7 +69,7 @@ void fileWaitReady(u32 arg0) {
     s64 temp_v0;
 
     while (temp_v0 = func_002C8128(arg0), temp_v0 == 0) {
-        func_0033FF40();
+        sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }
 }

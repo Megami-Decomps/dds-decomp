@@ -69,7 +69,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_00249C40);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249DC8);
 
-void func_00249EB0(EventViewerState *viewer) {
+void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;
 
     active = func_0024A010();

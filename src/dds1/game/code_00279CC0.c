@@ -48,7 +48,7 @@ typedef struct MenuListItem {
 
 extern void func_0027CDD0(s32, s32, s32, s32, s32);
 
-extern void releaseSpriteTextures(s32);
+extern void mnuReleaseSpriteTextures(s32);
 
 extern void func_002CFF98(void *);
 
@@ -58,7 +58,7 @@ extern u32 func_0027F730(u32);
 
 extern s32 func_002CFEB8(u32);
 
-extern u32 func_0027D148(u32, u32, u32, u32);
+extern u32 mnuCreateWindowState(u32, u32, u32, u32);
 
 extern s32 func_0027B888(u32);
 
@@ -74,7 +74,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279F88);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A0A8);
 
-void drawSelectionLabel(s32 selection) {
+void mnuDrawSelectionLabel(s32 selection) {
     s32 item = func_00197E08(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     func_001954C8(item, 0xA09DC366);
     func_001958A0(item, 1, 0x53);
@@ -87,7 +87,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A468);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A4D0);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuHasAvailableSlotResource);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A540);
 
@@ -101,14 +101,14 @@ u32 func_0027A778() {
     return 1;
 }
 
-s32 resetMenuSelection(s32 selection) {
+s32 mnuResetSelection(s32 selection) {
     s32 context;
     s32 menu;
-    func_00278760();
+    campMenuInit();
     context = func_00101A70(selection);
     menu = *(s32 *)(context + 0x90C);
     func_0027A540(selection);
-    func_00280858(context + 0x15C);
+    menuFlagActiveWindows(context + 0x15C);
     *(s32 *)(menu + 0x2C) = 0;
     return 1;
 }
@@ -133,7 +133,7 @@ void func_0027A9A8(s32 arg0) {
 
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_0027AA68(s32 menu) {
+void mnuDrawListFrames(s32 menu) {
     s32 i;
 
     for (i = **(s32 **)(menu + 0x164); i < 3; i++) {
@@ -146,7 +146,7 @@ void func_0027AA68(s32 menu) {
     }
 }
 
-void func_0027AB10(s32 param) {
+void campMenuDrawStatus(s32 param) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
@@ -154,7 +154,7 @@ void func_0027AB10(s32 param) {
     s32 label;
 
     func_00272778(param);
-    func_0027AA68(context);
+    mnuDrawListFrames(context);
     func_00272350(0x10);
     slots = menu + 4;
     func_0027CDD0(0x1C0, 0x3D0, 0, *(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20), 0x53);
@@ -164,7 +164,7 @@ void func_0027AB10(s32 param) {
     if (label != 0) {
         if (label != 0xFFFF) {
             label &= 0xFFFF;
-            drawSelectionLabel(label);
+            mnuDrawSelectionLabel(label);
             func_0027A140(label, *(s32 *)(context + 0x68), *(s32 *)(context + 0xE0));
         }
     }
@@ -179,19 +179,19 @@ void func_0027AC38(s32 arg0) {
     u32 temp_v1;
     s32 temp_v2;
 
-    temp_v1 = createEffectPayload(2);
+    temp_v1 = effCreatePayload(2);
     *(u32 *)(arg0 + 0x18) = temp_v1;
-    temp_v2 = createEffectPayload(2);
+    temp_v2 = effCreatePayload(2);
     temp_v0 = *(s32 *)(temp_v2 + 8);
     *(s32 *)(arg0 + 0x1c) = temp_v2;
     func_002BDE18(temp_v0 + 0x28, *(u32 *)(arg0 + 0x14), 0, 0xc);
     func_002BDE18(*(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x94, *(u32 *)(arg0 + 0x14), 1, 0xc)
     ;
-    setEffectMaterialSlots(*(u32 *)(arg0 + 0x10), 0, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
-    setEffectMaterialSlots(*(u32 *)(arg0 + 0x10), 1, 0, *(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x6c);
-    setEffectMaterialSlots(*(u32 *)(arg0 + 0x10), 2, 0, *(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x6c);
-    setEffectMaterialSlots(*(u32 *)(arg0 + 0x10), 3, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
-    setEffectMaterialSlots(*(u32 *)(arg0 + 0x10), 4, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
+    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 0, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
+    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 1, 0, *(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x6c);
+    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 2, 0, *(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x6c);
+    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 3, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
+    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 4, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
     func_002BDE18(*(s32 *)(*(s32 *)(arg0 + 0x18) + 8) + 0x28, *(u32 *)(arg0 + 0x14), 2, 0xd)
     ;
     func_002BE0C0(*(u32 *)(arg0 + 4), 0, *(u32 *)(*(s32 *)(arg0 + 0x18) + 8));
@@ -207,20 +207,20 @@ extern u32 D_0037CD18[];
 extern u32 D_0037CD20[];
 
 void func_0027AEA8(u8 *assets) {
-    requestEffectResourceByMode(D_003B2330, D_0037CD18[1], 0, assets);
-    requestEffectResourceByMode(D_003B2330, D_0037CD18[0], 0, assets + 0x10);
-    requestMappedEffectResource(D_003B2348, D_0037CD20[0], assets + 0x14);
+    effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0, assets);
+    effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0, assets + 0x10);
+    effRequestMappedResource(D_003B2348, D_0037CD20[0], assets + 0x14);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AF28);
 
-void releaseMenuAssets(s32 *assets) {
+void mnuReleaseAssets(s32 *assets) {
     u32 i;
     for (i = 0; i < 4; i++) {
         func_002BDD60(assets[i]);
     }
     func_002BDD60(assets[4]);
-    destroyPackedEffectBatch(assets[5]);
+    effDestroyPackedBatch(assets[5]);
     func_002BD988(assets[6]);
     func_002BD988(assets[7]);
 }
@@ -242,7 +242,7 @@ void func_0027B088(s32 arg0, u32 arg1) {
 
 extern void func_002BF970(s32, s32);
 
-void func_0027B1B0(s32 menu, s32 arg) {
+void mnuDrawCursorIcons(s32 menu, s32 arg) {
     s32 icon = *(s32 *)(menu + 8);
     s32 *state = *(s32 **)(icon + 0x18);
 
@@ -258,11 +258,11 @@ void func_0027B1B0(s32 menu, s32 arg) {
     func_002BF970(*(s32 *)(menu + 0xC), 0);
 }
 
-void drawMenuBackdrop(s32 *assets, s32 option) {
+void mnuDrawBackdrop(s32 *assets, s32 option) {
     func_002C0950(0x30000);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
     func_002BF790(0, 0, 0, 0, assets[0], 0, option);
-    func_0027B1B0(assets, option);
+    mnuDrawCursorIcons(assets, option);
     func_0027B088((s32)assets, option);
 }
 
@@ -314,7 +314,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B3A8);
 
 extern MenuListNode *func_002CFF68(s32);
 
-MenuListNode *func_0027B440(list, value)
+MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
     s32 value;
 {
@@ -347,7 +347,7 @@ MenuListNode *func_0027B440(list, value)
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B4F0);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuListContainsFinalNode);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B540);
 
@@ -355,7 +355,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B888);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BA00);
 
-void *menuWalkNodeList(s32 arg0, void *arg1) {
+void *mnuWalkNodeList(s32 arg0, void *arg1) {
     void *temp_node = *(void **)((s32)arg1 + 0x10);
     s32 temp_i = 0;
 
@@ -451,7 +451,7 @@ void mnuDrawFourEntries(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     } while (i < 4);
 }
 
-s32 menuDispatchByFlag(s32 arg0, s32 arg1) {
+s32 mnuDispatchByFlag(s32 arg0, s32 arg1) {
     return func_002C1630((*(s32 *)(arg1 + 0x48) & 1) ? 0x89BDC940 : 0x89BDC980,
                          arg0, *(s32 *)(arg1 + 0x50));
 }
@@ -460,11 +460,11 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027C0B0);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027C140);
 
-void menuCallInitWide(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void mnuCallInitWide(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0027C140(arg0, arg1, arg2, 0, 0, 0x100, 0, arg3, arg4);
 }
 
-s32 createWindowContainer(s32 id, s32 width, s32 height, s32 left, s32 right) {
+s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 left, s32 right) {
     s32 item = func_002CFF68(0x8C);
     s32 child;
     *(s32 *)(item + 8) = width;
@@ -482,7 +482,7 @@ void func_0027C430(u32 arg0) {
     func_0027B368(*(u32 *)((s32)arg0 + 0x14));
     temp_v0 = *(s32 *)((s32)arg0 + 0x84);
     if (temp_v0 != 0) {
-        releaseWindowTextures(temp_v0);
+        mnuReleaseWindowTextures(temp_v0);
     }
     func_002CFF98(arg0);
 }
@@ -512,7 +512,7 @@ void func_0027C480(u8 *panel, s32 x, s32 y, u32 sprite,
     }
 }
 
-void menuForwardDupArg(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void mnuForwardDupArg(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0027C480(arg0, arg1, arg2, arg3, arg4, arg4);
 }
 
@@ -538,7 +538,7 @@ void func_0027C620(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4) {
     u32 temp_v0;
 
-    temp_v0 = func_0027D148(arg1, arg2, arg3, arg4);
+    temp_v0 = mnuCreateWindowState(arg1, arg2, arg3, arg4);
     *(u32 *)(arg0 + 0x84) = temp_v0;
 }
 
@@ -547,7 +547,7 @@ void func_0027C658(s32 arg0) {
 }
 
 void func_0027C670(s32 arg0) {
-    func_0027B440(*(u32 *)(arg0 + 0x14));
+    mnuListAppendNode(*(u32 *)(arg0 + 0x14));
 }
 
 void func_0027C688(s32 arg0) {
@@ -558,30 +558,30 @@ void func_0027C6A0(s32 arg0) {
     func_0027B888(*(u32 *)(arg0 + 0x14));
 }
 
-s32 advanceMenuListSelection(s32 window, s32 direction) {
+s32 mnuAdvanceListSelection(s32 window, s32 direction) {
     s32 item = func_0027BBF0(*(s32 *)(window + 0x14), direction, 0);
     if (item != 0) {
         *(u8 *)(item + 0x54) = 0;
-        func_0027D740(window + 0x4c);
+        mnuClearEntryFlags(window + 0x4c);
     }
     return item;
 }
 
-s32 reverseMenuListSelection(s32 window, s32 direction) {
+s32 mnuReverseListSelection(s32 window, s32 direction) {
     s32 item = func_0027BD48(*(s32 *)(window + 0x14), direction, 0);
     if (item != 0) {
         *(u8 *)(item + 0x54) = 0;
-        func_0027D740(window + 0x4c);
+        mnuClearEntryFlags(window + 0x4c);
     }
     return item;
 }
 
 void func_0027C758(u32 arg0) {
-    advanceMenuListSelection(arg0, 0);
+    mnuAdvanceListSelection(arg0, 0);
 }
 
 void func_0027C770(u32 arg0) {
-    reverseMenuListSelection(arg0, 0);
+    mnuReverseListSelection(arg0, 0);
 }
 
 void func_0027C788(s32 arg0) {
@@ -639,12 +639,12 @@ void func_0027CEE8(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027CF28);
 
 extern s32 func_002D03F8(s32);
-extern s32 *func_002D0A48(s32);
+extern s32 *sdfResourceRetainAddress(s32);
 extern void func_0027CF28(s32 *, u32, u32, u32, u32);
 
-u32 func_0027D148(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+u32 mnuCreateWindowState(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     s32 handle = func_002D03F8(0x28);
-    s32 *obj = func_002D0A48(handle);
+    s32 *obj = sdfResourceRetainAddress(handle);
 
     memset(obj, 0, 0x28);
     *obj = handle;
@@ -652,7 +652,7 @@ u32 func_0027D148(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     return (u32)obj;
 }
 
-void releaseWindowTextures(s32 *object) {
+void mnuReleaseWindowTextures(s32 *object) {
     u32 i;
     for (i = 0; i < 7; i++) {
         func_002BDD60(object[i + 3]);
@@ -661,12 +661,12 @@ void releaseWindowTextures(s32 *object) {
 }
 
 void func_0027D248(s32 arg0, u32 arg1) {
-    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x10), 0, arg1, 0, 0x14, 0xc);
-    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x14), 0, arg1, 1, 10, 0xc);
-    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x18), 0, arg1, 2, 0, 0xc);
-    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x1c), 0, arg1, 2, 0, 0xc);
-    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x20), 0, arg1, 1, 10, 0xc);
-    configureEffectWithDefaultSetting(*(u32 *)(arg0 + 0x24), 0, arg1, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x10), 0, arg1, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x14), 0, arg1, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x18), 0, arg1, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x1c), 0, arg1, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x20), 0, arg1, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x24), 0, arg1, 0, 0x14, 0xc);
 }
 
 void func_0027D318(s32 x, s32 y, s32 z, s32 mask, s32 obj, s32 param) {
@@ -693,7 +693,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D4A0);
 
 extern void func_002BD5A0(void *, s32);
 
-void func_0027D740(u32 *group) {
+void mnuClearEntryFlags(u32 *group) {
     s32 i;
 
     if (group[3] != 0 && group[0] < 3) {
@@ -707,7 +707,7 @@ void func_0027D740(u32 *group) {
     }
 }
 
-void releaseResourceList(s32 *object) {
+void mnuReleaseResourceList(s32 *object) {
     s32 i;
     s32 count = object[2];
     for (i = 0; i < count; i++) {
@@ -735,7 +735,7 @@ void func_0027DD78(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0027DD58(arg0, arg1, arg2, 0x100, arg3, arg4);
 }
 
-void func_0027DDA0(u32 obj) {
+void menuHideWindowHandles(u32 obj) {
     switch (*(u32 *)obj) {
     case 0:
         func_002BF970(*(s32 *)(obj + 0x1C), 0);
@@ -805,7 +805,7 @@ void func_0027DED0(s32 *menu, s32 reset) {
     }
 }
 
-void func_0027DF48(MenuListItem **items, s32 count) {
+void menuLinkItemList(MenuListItem **items, s32 count) {
     s32 i;
 
     items[0]->prev = NULL;
@@ -881,12 +881,24 @@ s32 func_0027E0D0(s32 *arg0, s32 *arg1) {
     return (temp_A < temp_B) ? -1 : 0;
 }
 
-void func_0027E100(s32 menu, s32 sortKey, s32 descending) {
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2358);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2368);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2380);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
+
+void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
     s32 (*comparators[6])(s32 *, s32 *) = {func_0027DFF8, func_0027E050, func_0027E0A8,
                                              func_0027E020, func_0027E078, func_0027E0D0};
     s32 count = 0;
     s32 handle = func_002D03F8(*(s32 *)(menu + 0x20) * 4);
-    s32 **items = (s32 **)func_002D0A48(handle);
+    s32 **items = (s32 **)sdfResourceRetainAddress(handle);
     s32 **out = items;
     s32 *node;
 
@@ -898,14 +910,14 @@ void func_0027E100(s32 menu, s32 sortKey, s32 descending) {
         sortKey += 3;
     }
     func_00300508(items, count, 4, comparators[sortKey]);
-    func_0027DF48((MenuListItem **)items, count);
+    menuLinkItemList((MenuListItem **)items, count);
     func_0027DE60(menu);
     func_0027DE98(menu);
     func_0027DED0((s32 *)menu, 0);
     func_002D0918(handle);
 }
 
-void allocateMenuListEntries(s32 *list) {
+void mnuAllocateListEntries(s32 *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
         list[i + 1] = func_002CFF68(0x18);
@@ -945,7 +957,7 @@ void func_0027E3D8(s32 image, s32 *list, s32 option) {
 }
 
 
-void updateMenuFade(s32 *list) {
+void mnuUpdateFade(s32 *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
         s32 *entry = (s32 *)list[i + 1];
@@ -962,7 +974,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E4E0);
 void func_0027E570(s32 *list) {
     u32 i;
     for (i = 0; i < 3; i++) {
-        destroyPackedEffectBatch(list[i + 16]);
+        effDestroyPackedBatch(list[i + 16]);
     }
 }
 
@@ -1014,7 +1026,7 @@ void func_0027E6F0(u32 *menu) {
     } while (--remaining >= 0);
     if (menu[8] != 0) {
         func_002BF9E0(menu[8], menu[9], 0, 0, 0x400, 0);
-        configureEffectWithDefaultSetting(menu[8], menu[9], menu[18],
+        effConfigureWithDefaultSetting(menu[8], menu[9], menu[18],
                                           0, 10, 2);
     }
 }
@@ -1028,7 +1040,7 @@ void func_0027E790(u32 *menu, s32 x, s32 y, s32 color) {
     func_002BF9E0(x, y, 0, 0, -0x400, 0);
     func_002BE258(x, y, menu[16], 0, 3);
     func_002BF9E0(x, color, 0, 0, 0, 0);
-    configureEffectWithDefaultSetting(x, color, menu[17], 0, 10, 0);
+    effConfigureWithDefaultSetting(x, color, menu[17], 0, 10, 0);
 }
 
 u8 func_0027E850(s32 arg0) {
@@ -1062,7 +1074,7 @@ void *func_0027EAF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) 
     return item;
 }
 
-void destroyMenuResources(s32 *object) {
+void mnuDestroyResources(s32 *object) {
     u32 i;
     for (i = 0; i < 2; i++) {
         func_002BDD60(object[i + 3]);
@@ -1099,7 +1111,7 @@ void mnuReleaseSlotResources(s32 context) {
         s32 node = *(s32 *)(*(s32 *)(context + 8) + offset + 0x10);
         offset += 0x34;
         if (node >= 0 && *slot != 0) {
-            destroyMenuResources(*slot);
+            mnuDestroyResources(*slot);
             *slot = 0;
         }
         slot = (s32 *)((u8 *)slot + 0x134);
@@ -1165,7 +1177,7 @@ void func_0027F198(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     *(s32 *)(temp_v0 + 0xBC) = 0x100;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F1C8);
+INCLUDE_ASM(const s32, "game/code_00279CC0", menuSetPageParams);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F230);
 
@@ -1199,7 +1211,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F588);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F638);
 
-void clearMenuEntries(s32 *menu) {
+void mnuClearEntries(s32 *menu) {
     u32 i;
     s32 *entry = menu + 0x56;
     func_002807E8();
@@ -1214,7 +1226,7 @@ void clearMenuEntries(s32 *menu) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F730);
 
-void releaseFourResourceList(s32 *list) {
+void mnuReleaseFourResourceList(s32 *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
         func_002BDD60(list[i + 3]);
@@ -1269,7 +1281,7 @@ void func_0027FA20(s32 window) {
     for (i = 0; i < 5; i++) {
         s32 *item = (s32 *)(window + 0x15c + i * 0x134);
         if (*item != 0) {
-            releaseFourResourceList(*item);
+            mnuReleaseFourResourceList(*item);
             *item = 0;
         }
     }
@@ -1282,8 +1294,8 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FAA8);
 void func_0027FB90(s32 window) {
     u32 i;
     for (i = 0; i < 5; i++, window += 0x134) {
-        releaseSpriteTextures(window + 0x94);
-        releaseSpriteTextures(window + 0xe8);
+        mnuReleaseSpriteTextures(window + 0x94);
+        mnuReleaseSpriteTextures(window + 0xe8);
     }
 }
 
@@ -1319,19 +1331,19 @@ void func_0027FC10(s32 arg0, u32 *arg1) {
     } while (temp_v1 < 8);
 }
 
-extern void func_002BD7A0(s32);
+extern void effResolveAndReleaseResource(s32);
 
-void registerMenuResourceHandles(s32 destination, s32 *source) {
+void mnuRegisterResourceHandles(s32 destination, s32 *source) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        func_002BD7A0(source[i]);
+        effResolveAndReleaseResource(source[i]);
         *(s32 *)(destination + 0x64 + 4 * i) = source[i];
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FCA0);
 
-void func_0027FF60(s32 obj) {
+void menuUpdateHandleStates(s32 obj) {
     s32 *handle = (s32 *)(obj + 0x24);
     s32 i;
     s32 offset;
@@ -1362,14 +1374,14 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280048);
 
 extern char D_003BC728[];
 
-void func_00280170(s32 menu, s32 *counts) {
+void mnuFillPanelLists(s32 menu, s32 *counts) {
     s32 i = 0;
 
     *(void **)(menu + 0x67C) = (void *)func_0027B2F8(0, 1, 1);
     *(void **)(menu + 0x680) = (void *)func_0027B2F8(0, 1, 1);
     for (i = 0; i < counts[0] + counts[1]; i++) {
-        func_0027B440(*(void **)(menu + 0x67C), D_003BC728);
-        func_0027B440(*(void **)(menu + 0x680), D_003BC728);
+        mnuListAppendNode(*(void **)(menu + 0x67C), D_003BC728);
+        mnuListAppendNode(*(void **)(menu + 0x680), D_003BC728);
     }
 }
 
@@ -1380,14 +1392,14 @@ void func_00280228(s32 arg0) {
 
 void func_00280258(s32 arg0, s32 arg1) {
     func_00280228(arg0);
-    func_00280170(arg0, arg1);
+    mnuFillPanelLists(arg0, arg1);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280290);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002802E0);
 
-void func_002803A0(s32 obj) {
+void menuReleaseHandles(s32 obj) {
     s32 *handle = (s32 *)(obj + 0x10);
     u32 i;
 
@@ -1416,12 +1428,12 @@ void func_002803A0(s32 obj) {
     }
 }
 
-extern void func_002803A0(s32);
+extern void menuReleaseHandles(s32);
 
-void shutdownMenuContext(s32 context) {
+void mnuShutdownContext(s32 context) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        func_002803A0(context + 0x78 + i * 0x134);
+        menuReleaseHandles(context + 0x78 + i * 0x134);
     }
     func_0027FB90(context);
     func_00280228(context);
@@ -1435,7 +1447,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_002806E8);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002807E8);
 
-void func_00280858(u8 *menu) {
+void menuFlagActiveWindows(u8 *menu) {
     u8 *kind = menu + 8;
     u8 *flags = menu + 12;
     u32 i = 0;
@@ -1463,7 +1475,7 @@ void func_002808A8(s32 arg0) {
     } while (temp_v0 < 5);
 }
 
-void func_002808E0(s32 which, s32 *menu) {
+void mnuClearListFlags(s32 which, s32 *menu) {
     func_0027BA90(0, menu[0x67C / 4 + which]);
     if (which == 0) {
         *menu &= ~2;
@@ -1491,10 +1503,10 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280E08);
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
 extern s32 func_001951C8(char *text, s32, s32, s32, s32);
-extern s32 func_00195C50(s32 item);
+extern s32 frFontMeasureGlyphChain(s32 item);
 extern void func_00195450(s32 item, s32 x, s32 y);
 
-void func_00281108(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
+void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
     s32 item;
     s32 width;
@@ -1502,7 +1514,7 @@ void func_00281108(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     func_002CD0D8(textId & 0xFFFF, 1, text);
     item = func_001951C8(text, 0, 0, 0, 0);
     func_001954C8(item, color);
-    width = func_00195C50(item) + 8;
+    width = frFontMeasureGlyphChain(item) + 8;
     func_00195450(item, x - (width * 0x10 >> 1) + 0x5F0, y);
     func_001958A0(item, 1, param);
     func_00194920(item);
@@ -1519,7 +1531,7 @@ void func_002811D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     code = arg4 != 0 ? arg4 : cost;
     if (code != 0) {
         if (func_002CD240(code & 0xFFFF, &outValue) != 0) {
-            func_00281108(0x1120, 0x5F0, arg2, texture, code, param);
+            mnuDrawCenteredLabel(0x1120, 0x5F0, arg2, texture, code, param);
             return;
         }
         item = func_00197760(0, 0, arg2, texture, outValue, 0);
@@ -1530,6 +1542,18 @@ void func_002811D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002812E8);
+
+INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC718);
+
+INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC720);
+
+INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC728);
+
+INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC730);
+
+INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC738);
+
+INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC740);
 
 void func_002814D0(s32 x, s32 y, s32 z, s32 obj, s32 mode, s32 param) {
     s32 pos[2] = {0x180, 0xE0};
@@ -1548,7 +1572,7 @@ void func_002814D0(s32 x, s32 y, s32 z, s32 obj, s32 mode, s32 param) {
     }
 }
 
-void func_002815F0(s32 dst, s32 src, u32 amount) {
+void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     s32 i;
     s32 ctx = *(s32 *)(dst + 0x18);
 
@@ -1570,32 +1594,4 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00281780);
 void func_00281898(u32 arg0) {
     memset(arg0, 0, 0x20);
 }
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC718);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC720);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC728);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC730);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC738);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC740);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC748);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2358);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2368);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2380);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23B0);
 

@@ -11,11 +11,11 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186DC8);
 
-void func_00186E28(EffBlurWork *work, u32 value) {
+void effBlurSetSetting(EffBlurWork *work, u32 value) {
     work->setting = value;
 }
 
-void func_00186E30(EffBlurWork *work) {
+void effBlurAcquireHandle(EffBlurWork *work) {
     work->setting = func_00151FC8(2);
 }
 

@@ -80,7 +80,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246C38);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246CB8);
 
-void func_00246D40(EventViewRange *range) {
+void evtViewerSetMinimumFromCurrent(EventViewRange *range) {
     s32 current;
 
     current = range->current;
@@ -90,7 +90,7 @@ void func_00246D40(EventViewRange *range) {
     }
 }
 
-void func_00246D60(EventViewRange *range) {
+void evtViewerSetMaximumFromCurrent(EventViewRange *range) {
     s32 current;
 
     current = range->current;

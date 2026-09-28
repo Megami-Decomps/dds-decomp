@@ -15,7 +15,7 @@ void func_002D09B8(void) {
     func_002D0918(handle);
 }
 
-void func_002D09D8(s32 *slot) {
+void sdfReleaseMemorySlot(s32 *slot) {
     s32 handle;
 
     handle = *slot;
@@ -35,7 +35,7 @@ typedef struct {
     s16 referenceCount; /* 0x0E */
 } SdfResource;
 
-u32 func_002D0A48(SdfResource *resource) {
+u32 sdfResourceRetainAddress(SdfResource *resource) {
     resource->referenceCount = resource->referenceCount + 1;
     return resource->address;
 }

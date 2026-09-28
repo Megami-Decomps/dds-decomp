@@ -71,7 +71,7 @@ extern void func_00217F88(void *work);
 extern void func_00217FB8(void *work);
 extern void func_00218028(void *work);
 extern void mdlAddEntryFlagged(void *work, s32 arg1, s32 arg2);
-extern void loadModelViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
+extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
 extern void *func_00217680(void *arg0, void *arg1);
 extern void *func_002183D0(void *arg);
 extern void *func_002183E0(void *arg);
@@ -180,7 +180,7 @@ void effParamInitWork(EffInitWork *work) {
 void *effParamCreateInitWork(void *arg0) {
     void *work;
 
-    loadModelViewerPackage(7, D_003BB044, 0x101, (u8 *)arg0 + 0x10, *(u32 *)arg0);
+    mdlLoadViewerPackage(7, D_003BB044, 0x101, (u8 *)arg0 + 0x10, *(u32 *)arg0);
     work = func_00217680((void *)7, (void *)(u32)D_003BB044);
     effParamInitWork(work);
     D_003BB044++;

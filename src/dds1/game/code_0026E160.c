@@ -6,7 +6,7 @@ extern u32 *D_003BC610;
 
 extern s32 func_002D03F8(s32);
 
-extern void *func_002D03F0(s32);
+extern void *sdfMemoryGetBlockAddress(s32);
 
 extern f32 func_002E8398(s32);
 
@@ -36,9 +36,9 @@ typedef struct {
     u8 pad46[2];
 } MovieSpriteResource;
 
-void *createMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
+void *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
     s32 allocation = func_002D03F8(0x48);
-    MovieSpriteResource *resource = func_002D03F0(allocation);
+    MovieSpriteResource *resource = sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->owner = owner;
@@ -52,7 +52,7 @@ void func_0026E5A0(s32 *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
         if (resources[i + 1] != 0) {
-            destroyTaskWork(resources[i + 1]);
+            sdfDestroyTaskWork(resources[i + 1]);
         }
     }
     func_002D0918(resources[0]);
@@ -65,8 +65,8 @@ INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E720);
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E798);
 
-void loadMovieRollSprite(void) {
-    D_003BC610[1] = func_002BC8F0(D_003BC620, "roll.spr", 0);
+void mnuLoadMovieRollSprite(void) {
+    D_003BC610[1] = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);

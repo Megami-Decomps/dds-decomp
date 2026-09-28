@@ -277,7 +277,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172628);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001727A0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", rotateFlashParticlePosition);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effRotateFlashParticlePosition);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001729B0);
 

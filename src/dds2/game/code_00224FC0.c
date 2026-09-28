@@ -6,7 +6,7 @@
 
 extern s32 func_001AA6F8(void);
 
-extern u32 func_001EA190(u32);
+extern u32 btlHasMarkedEntry14(u32);
 
 extern void func_001E9890(void);
 
@@ -79,7 +79,7 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_002260E0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002261A8);
 
-s32 func_002262A0(BattleActionUnit *unit, s32 action) {
+s32 btlFilterActionByUnitFlags(BattleActionUnit *unit, s32 action) {
     u32 flags = unit->flags;
     if ((flags & 0x400) == 0) {
         return action;
@@ -132,7 +132,7 @@ u32 func_00226670(void) {
     return 0xffffffff;
 }
 
-s32 filterRestrictedBattleCommand(s32 battler, s32 command) {
+s32 btlFilterRestrictedCommand(s32 battler, s32 command) {
     if (command == 1 || command == 0x12) {
         if ((*(u16 *)(battler + 0x120) & 0x2000) != 0) {
             return -1;
@@ -145,7 +145,7 @@ u8 func_002266A8(u32 arg0, s32 arg1) {
     return arg1 == 0xf;
 }
 
-s32 battleSelectDisabledCommand(s32 battler) {
+s32 btlSelectDisabledCommand(s32 battler) {
     if (battler == 0) {
         return 15;
     }
@@ -173,7 +173,7 @@ u32 func_00226868(u32 unit) {
     if (*(u32 *)(unit + 0x134) != 0x187) {
         return 0;
     }
-    if (func_001EA190(unit)) {
+    if (btlHasMarkedEntry14(unit)) {
         if (*(s32 *)(unit + 0x13c) >= 0x34) {
             func_001E9890();
             func_001E9660(unit, 517.3f, -476.0f, -947.2f, 0.177f,
@@ -206,7 +206,7 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226AB0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226BB8);
 
-void battleResetEffectState(void) {
+void btlResetEffectState(void) {
     BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
     state->active = 1;
     state->speed = 20.0f;

@@ -24,7 +24,7 @@ typedef struct {
     u32 previousValue; /* 0xC8 */
 } SceneTransition;
 
-void func_0024B2D0(u32 value, SceneTransition *transition) {
+void evtRememberDispatchCallback(u32 value, SceneTransition *transition) {
     u32 previous;
 
     previous = transition->currentValue;

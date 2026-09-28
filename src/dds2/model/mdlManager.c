@@ -8,7 +8,7 @@ extern u32 func_00343F38(u64);
 
 extern u32 D_00438F90;
 
-extern u64 battleFindGroupedEntity(void);
+extern u64 btlFindGroupedEntity(void);
 
 extern s32 func_00232928(void);
 
@@ -77,7 +77,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00231718);
 void func_002317E0(u64 arg0, u64 arg1, u64 arg2) {
     u64 temp_v0;
 
-    temp_v0 = battleFindGroupedEntity();
+    temp_v0 = btlFindGroupedEntity();
     func_00231718(temp_v0, arg2);
 }
 
@@ -227,7 +227,7 @@ void func_00232B68(u32 arg0, u32 arg1) {
 
     for (puVar1 = *(u32 **)((s32)arg0 + 0x14); puVar1 != (u32 *)0x0;
             puVar1 = (u32 *)*puVar1) {
-        setModelResourceFrame(arg0, puVar1, arg1);
+        mdlSetResourceFrame(arg0, puVar1, arg1);
     }
 }
 

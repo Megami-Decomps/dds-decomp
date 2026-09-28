@@ -13,11 +13,11 @@ void func_002729C8(s32 input) {
     func_00285670(context + 8, context + 0x54, 2, input);
 }
 
-s32 startStaffDisplay(void) {
+s32 mnuStartStaffDisplay(void) {
     u8 *context = (u8 *)func_00101A70();
-    setStaffDisplayMode(5, context);
+    mnuSetStaffDisplayMode(5, context);
     func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x114), 0, 1);
-    func_002912C8(0);
+    configTasksCreate(0);
     return 1;
 }
 

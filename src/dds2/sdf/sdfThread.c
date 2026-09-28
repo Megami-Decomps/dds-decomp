@@ -15,7 +15,7 @@ void WaitSema(s32 arg0);
 
 void SignalSema(s32 arg0);
 
-SdfThreadNode *func_00328A60(s32 threadId) {
+SdfThreadNode *sdfFindThreadNode(s32 threadId) {
     s32 requestedId;
     SdfThreadNode *node;
 

@@ -23,7 +23,7 @@ void *func_00110680(void *arg);
 
 s32 func_001106D8(void *arg);
 
-void func_0010FF58(void) {
+void dds3DestroyWorld(void) {
     World *world;
 
     world = D_00435D8C;
@@ -33,13 +33,13 @@ void func_0010FF58(void) {
     }
 }
 
-void func_0010FF88(void *object) {
+void dds3SetWorldObject(void *object) {
     if (D_00435D8C != NULL) {
         D_00435D8C->info->primaryObject = object;
     }
 }
 
-void *func_0010FFA8(void) {
+void *dds3GetWorldObject(void) {
     World *world;
 
     world = D_00435D8C;
@@ -49,13 +49,13 @@ void *func_0010FFA8(void) {
     return world->info->primaryObject;
 }
 
-void func_0010FFC8(void *object) {
+void dds3SetWorldSecondaryObject(void *object) {
     if (D_00435D8C != NULL) {
         D_00435D8C->info->secondaryObject = object;
     }
 }
 
-void *func_0010FFE8(void) {
+void *dds3GetWorldSecondaryObject(void) {
     World *world;
 
     world = D_00435D8C;
@@ -65,7 +65,7 @@ void *func_0010FFE8(void) {
     return world->info->secondaryObject;
 }
 
-void *func_00110008(void) {
+void *dds3AppendWorldNode(void) {
     WorldInfo *info;
     NodeA *node;
 
@@ -88,7 +88,7 @@ void *func_00110008(void) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110070);
+INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3DestroyWorldNode);
 
 void *func_001100F0(s32 arg) {
     WorldInfo *info;

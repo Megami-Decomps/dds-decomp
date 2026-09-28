@@ -87,7 +87,7 @@ void func_0031F4D8(u32 context, const char *name) {
 }
 
 
-u32 func_0031F550(u32 context, const char *name) {
+u32 dds3FindNamedRecord(u32 context, const char *name) {
     u32 node = *(u32 *)(context + 4);
     while (node) {
         u32 data = *(u32 *)(node + 0x10);
@@ -99,7 +99,7 @@ u32 func_0031F550(u32 context, const char *name) {
     return 0;
 }
 
-u32 func_0031F5C0(u32 *object, u32 packedOffset) {
+u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
     u32 segment;
@@ -110,18 +110,18 @@ u32 func_0031F5C0(u32 *object, u32 packedOffset) {
     return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
 }
 
-s32 func_0031F618(u32 *object) {
+s32 dds3ApplyNamedRelocations(u32 *object) {
     u32 node = *(u32 *)(object[3] + 4);
     if (node != 0) {
         do {
             u32 record = *(u32 *)(node + 0x10);
-            u32 found = func_0031F550(object[2], *(const char **)record);
+            u32 found = dds3FindNamedRecord(object[2], *(const char **)record);
             u32 address;
             u32 replacement;
             if (found == 0) {
                 return 0;
             }
-            address = func_0031F5C0(object, *(u32 *)(record + 4));
+            address = dds3ResolvePackedOffset(object, *(u32 *)(record + 4));
             replacement = *(u32 *)(found + 4);
             node = *(u32 *)(node + 8);
             *(u32 *)address = replacement;
@@ -231,7 +231,7 @@ u64 func_00320A98(u64 arg0, u64 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);
 
-u32 func_00320C28(u32 userData) {
+u32 mnuCreateCallbackNode(u32 userData) {
     u32 *node = (u32 *)func_0035A828(0x18);
     memset(node, 0, 0x18);
     node[3] = userData;

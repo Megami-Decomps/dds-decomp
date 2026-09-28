@@ -29,7 +29,7 @@ void func_00329D38(s32 arg0) {
     D_0043913C = 1;
 }
 
-void func_00329D70(SdfGraphObj *graph) {
+void sdfReleaseGraphBuffers(SdfGraphObj *graph) {
     func_0032AA40(graph->firstBuffer);
     graph->firstBuffer = NULL;
     func_0032AA40(graph->secondBuffer);
@@ -38,12 +38,12 @@ void func_00329D70(SdfGraphObj *graph) {
     graph->auxBuffer = NULL;
 }
 
-void func_00329DB8(SdfGraphObj *graph) {
+void sdfRecreateGraphBuffers(SdfGraphObj *graph) {
     s16 width;
     s16 height;
     u8 mode;
 
-    func_00329D70(graph);
+    sdfReleaseGraphBuffers(graph);
     width = graph->width;
     height = graph->height;
     graph->auxBuffer = func_0032AB20(width, height, graph->auxiliaryMode);

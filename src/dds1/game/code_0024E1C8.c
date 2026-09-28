@@ -47,7 +47,7 @@ INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF730);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F4F0);
 
-s32 areResourceSlotsOccupied(void) {
+s32 mnuAreResourceSlotsOccupied(void) {
     s32 i;
     for (i = 0; i < 14; ++i) {
         if (D_0036C698[i] == 0) {
@@ -57,7 +57,7 @@ s32 areResourceSlotsOccupied(void) {
     return 1;
 }
 
-void releaseResourceSlots(void) {
+void mnuReleaseResourceSlots(void) {
     s32 i;
     for (i = 0; i < 14; ++i) {
         if (D_0036C698[i] != 0) {
@@ -71,12 +71,12 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F608);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
 
-void createGameResourceTask(void) {
+void mnuCreateResourceTask(void) {
     s32 data = func_0024F608();
     D_003BC4CC = func_002CB1C8(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
 }
 
-s32 func_0024F7A8(void) {
+s32 mnuCheckResourceTask(void) {
     if (kwlnTaskExists(D_003AF7A8) != 0) {
         return 1;
     }
@@ -84,7 +84,7 @@ s32 func_0024F7A8(void) {
     return 0;
 }
 
-void func_0024F7D8(void) {
+void mnuStopResourceTask(void) {
     func_002CB278(D_003BC4CC);
     D_003BC4CC = 0;
 }
@@ -102,13 +102,13 @@ u32 func_0024FA18(void) {
     return *(u32 *)(*(s32 *)(*(s32 *)(temp_v0 + 0xc) + 0x1c) + 0x70);
 }
 
-void stopResourceAnimation(void) {
+void mnuStopResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
     func_0027BED0(*(s32 *)(object + 0xC));
     func_0027BEB0(*(s32 *)(object + 0xC));
 }
 
-void resetResourceAnimation(void) {
+void mnuResetResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
     func_0027BED0(*(s32 *)(object + 0xC));
     func_0027BE90(*(s32 *)(object + 0xC));

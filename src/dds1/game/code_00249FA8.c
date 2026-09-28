@@ -16,7 +16,7 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_00249FA8);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A058);
 
-s32 pollSceneState(void) {
+s32 fldPollSceneState(void) {
     s32 state = D_003BC3E0;
     if (state == 1) {
         return 1;
@@ -75,7 +75,7 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A2D8);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A340);
 
-s32 classifyRemainingFrames(s32 arg0) {
+s32 fldClassifyRemainingFrames(s32 arg0) {
     s32 value = *(s32 *)(arg0 + 0x9C);
     if (value == 0) {
         return 0;
@@ -98,8 +98,6 @@ u8 func_0024A6E8(s32 arg0) {
     return *(u8 *)(temp_v0 * 0xa0 + *(s32 *)(*(s32 *)(arg0 + 100) + 0x18) + 0x14);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
-
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF658);
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF668);
@@ -109,4 +107,6 @@ INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF678);
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF6A0);
+
+INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
 

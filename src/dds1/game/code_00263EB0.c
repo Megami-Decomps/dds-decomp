@@ -6,7 +6,7 @@ extern void func_0024DD78(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
-s32 menuCheckTableSums(s32 arg0, s32 arg1) {
+s32 mnuCheckTableSums(s32 arg0, s32 arg1) {
     s32 *temp_p = (s32 *)(arg1 + 0x3d0);
     s8 *temp_q = (s8 *)(arg0 + 0x16);
     s32 temp_i = 0;

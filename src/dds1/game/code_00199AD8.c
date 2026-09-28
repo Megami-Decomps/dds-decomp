@@ -48,7 +48,7 @@ typedef struct PanelEntry {
 extern PanelEntry D_003D6ECC[];
 extern void (*D_00357A50[])(PanelObj *);
 extern void func_00199998(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-extern s32 func_0010D690(void);
+extern s32 scrGetWindow(void);
 
 /* Selection state shared by the id helpers below. */
 typedef struct PanelCursor {

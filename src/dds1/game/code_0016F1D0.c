@@ -55,7 +55,7 @@ INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F4D8);
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F5C8);
 
-void func_0016F790(EffectRecordGroup *group, s32 index) {
+void effAdvanceVectorRecord(EffectRecordGroup *group, s32 index) {
     EffectVectorRecord *record;
 
     record = &group->vectors[index];

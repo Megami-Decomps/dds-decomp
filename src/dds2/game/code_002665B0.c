@@ -20,34 +20,34 @@ extern s32 func_00101958();
 extern s32 func_002C3E08(s32, s32, s32, s32);
 extern void func_002C1B70(s32, s32);
 extern void func_002C1B68(s32, s32);
-extern s32 func_002A9820(s32, s32);
+extern s32 movAreTitleEffectsReady(s32, s32);
 extern void func_002B2818(s32);
 extern s32 D_00435DD0;
 extern s32 func_00266F70(s32, s32);
 extern s32 func_003292A8(s32);
-extern s32 func_003298F8(s32);
+extern s32 sdfResourceRetainAddress(s32);
 extern s32 func_00303D00(s32);
-extern void func_002C4430(s32);
+extern void initPartyPanelSlots(s32);
 extern void func_002A9640(s32, s32);
 extern s32 func_002C32B0(void);
-extern void func_002C33A8(s32, s32, s32, s32, s32);
+extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 extern void func_002C0630(s32, s32, s32, s32, s32, s32);
 extern void func_002C16F0(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_00267EA0(s8, s32);
-extern s32 menuWalkNodeList(s32, s32);
+extern s32 mnuWalkNodeList(s32, s32);
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 extern const char D_00424F00[];
 extern const char D_00424F10[];
 extern const char D_00424F20[];
 extern s32 D_0043785C;
 extern s32 func_002B8158(s32, s32, s32, s32);
-extern s32 func_002B82A0(s32, s32);
+extern s32 mnuListAppendNode(s32, s32);
 extern void func_00267500(void);
 extern u8 D_00437870[];
 extern s32 func_00328D68(s32);
 extern s32 func_002BC460(u16, u16);
 extern void func_002C2128(s32, s32, s32, s32, s32, s32);
-extern void destroyPackedEffectBatch(s32);
+extern void effDestroyPackedBatch(s32);
 
 typedef struct MenuResourceGroup {
     u8 pad0[0x64];
@@ -60,7 +60,7 @@ typedef struct MenuResourceGroup {
 } MenuResourceGroup;
 
 void func_002665B0(s32 arg0) {
-    destroyPackedEffectBatch(*(u32 *)(arg0 + 0x3c));
+    effDestroyPackedBatch(*(u32 *)(arg0 + 0x3c));
 }
 
 u8 func_002665C8(void) {
@@ -77,14 +77,14 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
 void func_002668C0(s32 address) {
     MenuResourceGroup *group = (MenuResourceGroup *)address;
     if (group->reducedMode == 0) {
-        func_00304EE0(group->primary);
-        func_00304EE0(group->secondary);
-        func_00304EE0(group->tertiary);
-        func_00304EE0(group->quaternary);
+        effResolveAndReleaseResource(group->primary);
+        effResolveAndReleaseResource(group->secondary);
+        effResolveAndReleaseResource(group->tertiary);
+        effResolveAndReleaseResource(group->quaternary);
         return;
     }
-    func_00304EE0(group->primary);
-    func_00304EE0(group->secondary);
+    effResolveAndReleaseResource(group->primary);
+    effResolveAndReleaseResource(group->secondary);
 }
 
 void func_00266928(s32 address, u32 value) {
@@ -200,7 +200,7 @@ s32 func_002675C8(s32 *items, s32 count, s32 excluded, s32 callback) {
     *(s32 *)(list + 0x3c) = 0;
     for (i = 0; i < count; i++) {
         if (i != excluded) {
-            s32 node = func_002B82A0(list, (s32)D_00437870);
+            s32 node = mnuListAppendNode(list, (s32)D_00437870);
             *(s32 *)(node + 0x60) = items[i];
         }
     }
@@ -214,7 +214,7 @@ void func_00267680(s32 object) {
             return;
         }
         if (*(s32 *)(*(s32 *)(object + 0x80) + 0x20) == 0) {
-            s32 selected = menuWalkNodeList(2 - func_002674F8(),
+            s32 selected = mnuWalkNodeList(2 - func_002674F8(),
                                               *(s32 *)(object + 0x78));
             *(u32 *)(selected + 0x48) |= 1;
         }
@@ -233,7 +233,7 @@ void func_002676F0(s32 object) {
         selectedIndex = 3 - func_002674F8();
     }
     if (*(s32 *)(*(s32 *)(object + 0x7c) + 0x20) == 0) {
-        s32 node = menuWalkNodeList(selectedIndex, *(s32 *)(object + 0x78));
+        s32 node = mnuWalkNodeList(selectedIndex, *(s32 *)(object + 0x78));
         *(u32 *)(node + 0x48) |= 1;
     }
 }
@@ -248,11 +248,11 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002679E8);
 
 s32 func_00267A00(void) {
     s32 heap = func_003292A8(0xa82c);
-    s32 object = func_003298F8(heap);
+    s32 object = sdfResourceRetainAddress(heap);
     memset((void *)object, 0, 0xa82c);
     *(s32 *)object = heap;
     *(s32 *)(object + 4) = func_00303D00(1);
-    func_002C4430(object + 0x70);
+    initPartyPanelSlots(object + 0x70);
     func_002A9640(*(s32 *)(object + 4), object + 8);
     *(s32 *)(object + 0x6c) = 1;
     return object;
@@ -273,7 +273,7 @@ s32 func_00267AC8(s32 object) {
     if (state == 2) {
         return 0;
     }
-    if (func_002A9820(*(s32 *)(object + 4), object + 8) == 0) {
+    if (movAreTitleEffectsReady(*(s32 *)(object + 4), object + 8) == 0) {
         return 1;
     }
     func_002B2818(object + 8);
@@ -289,7 +289,7 @@ void func_00267D30(s32 unused, s32 object) {
     if (*(s32 *)(object + 0xa828) == 0) {
         s32 effect = func_002C32B0();
         *(s32 *)(object + 0xa828) = effect;
-        func_002C33A8(effect, *(s32 *)(object + 8), *(s32 *)(object + 0x14), 1, 2);
+        mnuSetGroupProperties(effect, *(s32 *)(object + 8), *(s32 *)(object + 0x14), 1, 2);
     }
 }
 
@@ -356,7 +356,7 @@ void func_00268470(void) {
     D_0043785C = 0;
 }
 
-s32 pollSceneState(void) {
+s32 fldPollSceneState(void) {
     s32 state = D_00437858;
     if (state == 1) {
         return 1;
@@ -402,7 +402,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002686F0);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", classifyRemainingFrames);
+INCLUDE_ASM(const s32, "game/code_002665B0", fldClassifyRemainingFrames);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002689D0);
 

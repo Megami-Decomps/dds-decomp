@@ -20,7 +20,7 @@ void func_00111668(s32 arg0) {
     u32 *puVar1;
 
     puVar1 = *(u32 **)(arg0 + 0x18);
-    func_00111920();
-    objExchangeSlot(*puVar1, 0, 1);
+    dds3ReleaseObjectResource();
+    dds3ExchangeSlot(*puVar1, 0, 1);
     func_00328E48(puVar1);
 }

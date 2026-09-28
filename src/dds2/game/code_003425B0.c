@@ -45,7 +45,7 @@ extern char D_0040BAF8[];
 
 extern s32 D_004391F0;
 
-extern s32 createSemaphore(s32, s32, s32);
+extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern s32 GetThreadId(void);
 
@@ -97,7 +97,7 @@ s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {
     return 0;
 }
 
-u32 func_00342688(void) {
+u32 sdfSoundIsCommandBusy(void) {
     return D_00438B88;
 }
 
@@ -107,7 +107,7 @@ void func_00342690(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003426B8);
 
-void func_003426E8(u32 arg0) {
+void sdfSoundSetChannelCount(u32 arg0) {
     if (0x10 < arg0) {
         arg0 = 0x10;
     }
@@ -144,7 +144,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00342848);
 void sdfSoundStartRpcServer(void) {
     u8 queue[0x20];
     u8 server[0x50];
-    s32 semaphore = createSemaphore(0, 1, 0);
+    s32 semaphore = sdfCreateSemaphore(0, 1, 0);
     D_004391F0 = semaphore;
     if (semaphore <= 0) {
         for (;;) {
@@ -183,7 +183,7 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042EAC8);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042EB40);
 
-void soundPrintMemoryInfo(void) {
+void sndPrintMemoryInfo(void) {
     s32 info[6];
     func_00329A00(info);
     func_0033DAD8(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
@@ -282,7 +282,7 @@ void sdfSoundRemoveNode(SoundNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003443B8);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfAllocateStreamFrameBuffers);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
 
@@ -344,7 +344,7 @@ u32 sdfMidiPreviousEntry(MidiChannel *channel) {
     return result;
 }
 
-u32 soundGetSelectedChannelEntry(MidiChannel *channel) {
+u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
     u32 result = 0;
     if (channel->enabled != 0) {
         result = channel->entries[channel->index];
@@ -352,7 +352,7 @@ u32 soundGetSelectedChannelEntry(MidiChannel *channel) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345380);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfAdvanceBufferedPlayback);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345408);
 

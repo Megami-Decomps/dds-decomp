@@ -20,7 +20,7 @@ extern u8 D_003D9178[];
 
 extern s32 func_0026A720(void);
 
-extern u64 func_002E97E0(void);
+extern u64 sdfSoundIsCommandBusy(void);
 
 typedef struct { u64 v; } __attribute__((packed)) u64p;
 
@@ -47,7 +47,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_002692E0);
 
 void func_002693E0(u32 arg0) {
-    soundSetSequenceVolumePan(arg0, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
 void func_00269400(void) {
@@ -93,9 +93,9 @@ void func_00269530(void) {
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269558);
 
-void resetTitleEffectState(s32 effect) {
+void mnuResetTitleEffectState(s32 effect) {
     s32 context = func_00101A70(D_003BC588);
-    if (func_002E97E0() != 0) {
+    if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
     sdfSoundSendNamedCommand(effect, 0x7f);
@@ -115,7 +115,7 @@ void func_002696F8(void) {
 }
 
 void func_00269710(void) {
-    func_002E97E0();
+    sdfSoundIsCommandBusy();
 }
 
 void func_00269728(void) {
@@ -137,7 +137,7 @@ u32 func_00269780(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D428(0);
-    soundSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
     return 1;
 }
 
@@ -146,10 +146,10 @@ u32 func_002697B0(void) {
     return 1;
 }
 
-s32 initializeTitleEffects(void) {
+s32 mnuInitializeTitleEffects(void) {
     s32 value;
     value = func_0010D5A8(0);
-    if (func_002E97E0() != 0) {
+    if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
     sdfSoundSendNamedCommand(value, 0x7f);
@@ -164,7 +164,7 @@ u32 func_00269820(void) {
 u32 func_00269840(void) {
     u64 temp_v0;
 
-    temp_v0 = func_002E97E0();
+    temp_v0 = sdfSoundIsCommandBusy();
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -173,7 +173,7 @@ u32 func_00269868(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269870);
+INCLUDE_ASM(const s32, "game/code_00268AB8", movCheckStartupSoundState);
 
 u32 func_002698C0(void) {
     func_0026A778();
@@ -187,7 +187,7 @@ u32 func_002698E0(void) {
 }
 
 u32 func_00269908(void) {
-    advanceTitleStateUnderSemaphore();
+    mnuAdvanceTitleStateUnderSemaphore();
     return 1;
 }
 
@@ -220,7 +220,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269D18);
 
 void func_0026A1C8(void) {
     for (;;) {
-        func_002CFAD8(1);
+        sdfSleepThreadCount(1);
         WaitSema(D_003BD8D0);
         func_00269D18();
         SignalSema(D_003BD8D0);
@@ -237,7 +237,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A390);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A3E0);
 
-void menuStoreTaskResult(void) {
+void mnuStoreTaskResult(void) {
     D_003BD8D4 = func_00288B48();
     D_003D9140[9] = 1;
 }
@@ -248,7 +248,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A588);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A5F0);
 
-u32 updateTitleTransition(void) {
+u32 mnuUpdateTitleTransition(void) {
     if (D_003D9140[9] == 1) {
         func_0026A490(D_003D9140);
     }
@@ -268,7 +268,7 @@ void func_0026A808(void) {
     SignalSema(D_003BD8D0);
 }
 
-void advanceTitleStateUnderSemaphore(void) {
+void mnuAdvanceTitleStateUnderSemaphore(void) {
     WaitSema(D_003BD8D0);
     if (D_003D9140[4] == 1 && D_003D9140[9] == 3) {
         D_003D9140[9] = 4;
@@ -296,7 +296,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026ABA8);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AD28);
 
-void printTitleDebugBanner(void) {
+void mnuPrintTitleDebugBanner(void) {
     WaitSema(D_003BD8D0);
     if (D_003DA180[4] != 1) {
         D_003DA180[4] = 0;
@@ -305,7 +305,7 @@ void printTitleDebugBanner(void) {
     SignalSema(D_003BD8D0);
 }
 
-void func_0026ADE8(void) {
+void mnuResetSoundBuffer(void) {
     D_003DA180[1] = 0;
     D_003DA180[4] = 2;
     func_0026AE10();
@@ -324,7 +324,7 @@ void func_0026AE10(void) {
 
 void func_0026AE50(void) {
     WaitSema(D_003BD8D0);
-    func_0026ADE8();
+    mnuResetSoundBuffer();
     SignalSema(D_003BD8D0);
 }
 

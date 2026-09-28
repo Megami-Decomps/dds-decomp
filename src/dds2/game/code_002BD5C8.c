@@ -22,7 +22,7 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE240);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE438);
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE590);
+INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuBlendPanelSlots);
 
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B028);
 

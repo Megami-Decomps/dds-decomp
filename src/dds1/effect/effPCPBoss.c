@@ -71,7 +71,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185790);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001858C8);
 
-void func_001858E0(EffPCPBossWork *work, u32 value) {
+void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
     work->unk24 = value;
 }
 

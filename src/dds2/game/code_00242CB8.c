@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s64 func_001018B0(u64);
+extern s64 kwlnTaskIsRegistered(u64);
 
 extern u64 func_0010D650(u64);
 
@@ -24,7 +24,7 @@ extern char D_00422050[];
 
 void *func_00328D68(s32 size);
 
-void initializeEventVisualData(s32 arg0);
+void evtInitializeVisualData(s32 arg0);
 
 void func_00101950(s32 arg0, void *arg1);
 
@@ -59,7 +59,7 @@ u32 func_00242E70(void) {
     s64 temp_v1;
 
     temp_v0 = func_0010D650(0);
-    temp_v1 = func_001018B0(temp_v0);
+    temp_v1 = kwlnTaskIsRegistered(temp_v0);
     if (temp_v1 != 0) {
         func_0024FE28(temp_v0);
     }
@@ -71,7 +71,7 @@ u32 func_00242EB8(void) {
     s64 temp_v1;
 
     temp_v0 = func_0010D650(0);
-    temp_v1 = func_001018B0(temp_v0);
+    temp_v1 = kwlnTaskIsRegistered(temp_v0);
     if (temp_v1 != 0) {
         func_0024FE50(temp_v0);
     }
@@ -83,7 +83,7 @@ u32 func_00242F00(void) {
     s64 temp_v1;
 
     temp_v0 = func_0010D650(0);
-    temp_v1 = func_001018B0(temp_v0);
+    temp_v1 = kwlnTaskIsRegistered(temp_v0);
     if (temp_v1 != 0) {
         func_0024FE80(temp_v0);
     }
@@ -100,13 +100,13 @@ u32 func_00242F48(void) {
     temp_v0 = func_0010D650(0);
     temp_v1 = func_0010D650(1);
     temp_v2 = func_0010D650(2);
-    func_001354F0(temp_v0, temp_v1, temp_v2);
+    fldSetFadeTarget(temp_v0, temp_v1, temp_v2);
     return 1;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422050);
 
-u32 func_00242FB0(void) {
+u32 evtSetSkyAlpha(void) {
     s64 v;
 
     v = func_0010D650(1);
@@ -118,23 +118,23 @@ u32 func_00242FB0(void) {
         func_0010AE38("warning : SET_SKY_A alpha > 255\n");
         v = 255;
     }
-    func_002500E8(func_0010D650(0), v);
+    evtStartSkyAlphaTransition(func_0010D650(0), v);
     return 1;
 }
 
-u32 func_00243028(void) {
-    func_002500E0(1);
+u32 evtShowSky(void) {
+    evtSetSkyOverlayEnabled(1);
     return 1;
 }
 
-u32 func_00243048(void) {
-    func_002500E0(0);
+u32 evtHideSky(void) {
+    evtSetSkyOverlayEnabled(0);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243068);
 
-u32 func_002430C0(void) {
+u32 evtOpcodePlayBgm(void) {
     u64 temp_v0;
     u64 temp_v1;
 
@@ -144,7 +144,7 @@ u32 func_002430C0(void) {
     return 1;
 }
 
-u32 func_00243100(void) {
+u32 evtOpcodeTransitionBgm(void) {
     u64 temp_v0;
     u64 temp_v1;
 
@@ -174,7 +174,7 @@ u32 func_002431A0(void) {
     return 1;
 }
 
-u32 func_002431C0(void) {
+u32 evtOpcodeSetBgmVolumePan(void) {
     u64 temp_v0;
     u64 temp_v1;
 
@@ -200,7 +200,7 @@ u32 func_00243240(void) {
 
     temp_v0 = func_0010D650(0);
     temp_v1 = func_0010D650(1);
-    func_0025D0B8(temp_v0, temp_v1);
+    evtRefreshTaskData(temp_v0, temp_v1);
     return 1;
 }
 
@@ -225,7 +225,7 @@ void func_00243310(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243320);
 
-s32 func_00243330(void) {
+s32 evtGetMirroredSolarPhase(void) {
     s32 v;
 
     v = ((SolarWorldState *)D_00435DD0)->phase;
@@ -235,11 +235,11 @@ s32 func_00243330(void) {
     return v;
 }
 
-u8 func_00243358(void) {
+u8 evtGetRawSolarPhase(void) {
     return ((SolarWorldState *)D_00435DD0)->phase;
 }
 
-void func_00243368(u8 phase) {
+void evtSetSolarPhase(u8 phase) {
     ((SolarWorldState *)D_00435DD0)->phase = phase & 0xf;
     ((SolarWorldState *)D_00435DD0)->phaseCounter = 0;
 }
@@ -275,24 +275,24 @@ void *func_002436A8(s32 arg0) {
     s32 p;
 
     p = (s32)func_00328D68(0x104);
-    initializeEventVisualData(p);
-    func_002437F0((u32 *)p);
+    evtInitializeVisualData(p);
+    evtLoadSolarNoiseSprite((u32 *)p);
     func_00101950(arg0, (void *)p);
     return (void *)func_00243430;
 }
 
-void func_00243700(void) {
+void evtFreeSolarOverlayWork(void) {
     u64 temp_v0;
 
     temp_v0 = func_00101958();
-    releaseSolarNoiseSprite(temp_v0);
+    evtReleaseSolarNoiseSprite(temp_v0);
     func_00328E48(temp_v0);
     D_00437200 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243740);
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_002437B8);
+INCLUDE_ASM(const s32, "game/code_00242CB8", evtStopSolarOverlay);
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_004371F8);
 

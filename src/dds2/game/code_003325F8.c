@@ -55,7 +55,7 @@ void *func_00328D68(s32 size);
 
 void func_0032CAE0(void *arg0, s32 arg1);
 
-void func_00340528(void *);
+void sdfDestroyDevRequest(void *);
 
 extern s32 D_00438A38;
 
@@ -89,7 +89,7 @@ INCLUDE_ASM(const s32, "game/code_003325F8", sdfNamedChunkFindId);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332AD8);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332B78);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfCountMapPositionRecords);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332BB0);
 
@@ -101,9 +101,9 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D08);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D48);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D88);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetUniqueChunkValue);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332DB8);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetLodChunkValue);
 
 void func_00332DE8(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
     arg0->unk88 = fparg0;
@@ -134,7 +134,7 @@ void func_00332E50(u32 arg0) {
 }
 
 void func_00332E58(u32 arg0) {
-    devCreateRequest(arg0, 4, 4);
+    sdfDevCreateBufferedRequest(arg0, 4, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfResourceListRelease);
@@ -164,7 +164,7 @@ void func_003330F0(void) {
 }
 
 void func_00333120(u32 arg0) {
-    devCreateRequest(arg0, 4, 8);
+    sdfDevCreateBufferedRequest(arg0, 4, 8);
 }
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333140);
@@ -176,7 +176,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
     if (retained != 0) {
         func_0032CAE0(&D_00439170, (s32)resource);
     } else {
-        func_00340528(resource);
+        sdfDestroyDevRequest(resource);
     }
 }
 
@@ -226,7 +226,7 @@ SdfSubParam *sdfSubParamCreate(void) {
     return temp;
 }
 
-void func_00333340(SdfTextParam *param) {
+void sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
     SdfSubParam *subParam;
 
     if (param->unk38 == NULL) {
@@ -254,7 +254,7 @@ void func_00333490(SdfTextParam *param, u32 value) {
     param->unk06 = param->unk06 | 0x30;
 }
 
-void func_003334A8(SdfTextParam *param) {
+void sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
     SdfSubParam *subParam;
 
     if (param->unk3C == NULL) {

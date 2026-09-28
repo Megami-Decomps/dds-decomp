@@ -71,7 +71,7 @@ void func_002EE2C0(PacState *arg0, PacHead *arg1);
 void func_002EDD98(PacState *arg0);
 void func_002EB278(void *arg0, void *arg1, void *arg2, s32 arg3);
 void func_002CFF98(void *arg0);
-void func_002EDC98(PacState *arg0, s32 arg1);
+void sdfPacAdvanceInput(PacState *arg0, s32 arg1);
 void func_002EDCC0(PacState *arg0);
 PacWork *func_002EDF60(PacState *arg0, PacHead *arg1);
 void *func_002CFF68(s32 size);
@@ -89,11 +89,11 @@ void func_002EE868(PacState *arg0, PacHead *arg1);
 void func_002EEAA0(PacState *arg0, void *arg1);
 void func_002DA058(s32 arg0, s32 arg1);
 s32 func_002D32A0(void *arg0);
-s32 func_002D0A48(s32 arg0);
+s32 sdfResourceRetainAddress(s32 arg0);
 s32 func_002D3288(s32 arg0);
 s32 func_002D0518(s32 arg0);
 s32 func_002D03F8(s32 arg0);
-void func_002D09D8(void *arg0);
+void sdfReleaseMemorySlot(void *arg0);
 void func_002EEE98(void *arg0, void *arg1);
 s32 func_002EEAE0(void *arg0, void *arg1, s32 arg2);
 extern void *memcpy(void *dst, const void *src, u32 n);
@@ -163,7 +163,7 @@ s32 func_002EE058(PacState *arg0, s32 arg1, PacHead *arg2) {
     }
     return 0;
 }
-void *func_002EE138(PacExtensionHeader *header) {
+void *sdfPacGetExtensionData(PacExtensionHeader *header) {
     s32 extensionSize = header->extensionFlags & 0xF0;
     if (extensionSize <= 0) {
         return NULL;
@@ -179,7 +179,7 @@ void func_002EE158(PacState *arg0) {
     }
     if (n != 0) {
         memcpy(arg0->unk1C, arg0->unk10, n);
-        func_002EDC98(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         arg0->unk1C += n;
         {
             s32 r = arg0->unk20 - n;
@@ -195,7 +195,7 @@ void func_002EE158(PacState *arg0) {
 void func_002EE1E0(PacState *arg0) {
     s32 n = arg0->unk14;
     s32 r = func_002EEAE0(arg0->unk24, arg0->unk10, n);
-    func_002EDC98(arg0, n - arg0->unk24->unkC);
+    sdfPacAdvanceInput(arg0, n - arg0->unk24->unkC);
     if (r == 0) {
         return;
     }
@@ -209,7 +209,7 @@ void func_002EE258(PacState *arg0) {
         n = arg0->unk14;
     }
     if (n != 0) {
-        func_002EDC98(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         {
             s32 r = arg0->unk20 - n;
             arg0->unk20 = r;
@@ -239,7 +239,7 @@ void func_002EE2C0(PacState *arg0, PacHead *arg1) {
         } else {
             node->unk8 = func_002D03F8(v);
         }
-        arg0->unk1C = node->unkC = (u8 *)func_002D0A48(node->unk8);
+        arg0->unk1C = node->unkC = (u8 *)sdfResourceRetainAddress(node->unk8);
         switch (arg1->unk1 & 0xF) {
         case 0:
             arg0->unk8 = func_002EE158;
@@ -306,7 +306,7 @@ void func_002EE538(PacState *arg0) {
     }
     if (n != 0) {
         memcpy(s->unk8, arg0->unk10, n);
-        func_002EDC98(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         s->unk8 += n;
         {
             s32 r = s->unkC - n;
@@ -315,8 +315,8 @@ void func_002EE538(PacState *arg0) {
                 return;
             }
         }
-        s->unk0 = func_002D3288(func_002D0A48(s->unk4));
-        func_002D09D8(&s->unk4);
+        s->unk0 = func_002D3288(sdfResourceRetainAddress(s->unk4));
+        sdfReleaseMemorySlot(&s->unk4);
         arg0->unkC(arg0);
     }
 }
@@ -324,14 +324,14 @@ void func_002EE538(PacState *arg0) {
 void func_002EE5E0(PacState *arg0) {
     s32 n = arg0->unk20;
     s32 r = func_002EEAE0(arg0->unk24, arg0->unk10, n);
-    func_002EDC98(arg0, n - arg0->unk24->unkC);
+    sdfPacAdvanceInput(arg0, n - arg0->unk24->unkC);
     if (r == 0) {
         return;
     }
     {
         PacBuf *s = arg0->unk28;
-        s->unk0 = func_002D3288(func_002D0A48(s->unk4));
-        func_002D09D8(&s->unk4);
+        s->unk0 = func_002D3288(sdfResourceRetainAddress(s->unk4));
+        sdfReleaseMemorySlot(&s->unk4);
     }
     func_002CFF98(arg0->unk24);
     arg0->unkC(arg0);
@@ -344,7 +344,7 @@ void func_002EE678(PacState *arg0) {
         n = arg0->unk14;
     }
     if (n != 0) {
-        func_002EDC98(arg0, n);
+        sdfPacAdvanceInput(arg0, n);
         {
             s32 r = s->unkC - n;
             s->unkC = r;
@@ -400,7 +400,7 @@ void func_002EE9A8(PacState *state) {
     if (state->unk20 < available) {
         available = state->unk20;
     }
-    func_002EDC98(state, available);
+    sdfPacAdvanceInput(state, available);
     {
         s32 remaining = state->unk20 - available;
         state->unk20 = remaining;

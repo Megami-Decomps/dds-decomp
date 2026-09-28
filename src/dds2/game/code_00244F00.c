@@ -4,16 +4,16 @@ extern u32 D_00438FA8;
 
 extern u32 D_00438FAC;
 
-void initializeEventVisualData(s32 arg0);
+void evtInitializeVisualData(s32 arg0);
 
 extern s8 D_00438FA4;
 
-s32 func_00243358(s32 object);
+s32 evtGetRawSolarPhase(s32 object);
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
 
-void initializeEventVisualData(s32 object) {
-    s32 state = func_00243358(object);
+void evtInitializeVisualData(s32 object) {
+    s32 state = evtGetRawSolarPhase(object);
     s16 *values = (s16 *)(object + 0x3C);
     *(u8 *)(object + 0xFC) = state;
     values[0] = 0x39;
@@ -74,9 +74,9 @@ void func_00245820(void) {
     func_0010BFE0();
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", startEventTestTask);
+INCLUDE_ASM(const s32, "game/code_00244F00", evtStartTestTask);
 
-INCLUDE_ASM(const s32, "game/code_00244F00", stopEventTestTasks);
+INCLUDE_ASM(const s32, "game/code_00244F00", evtStopTestTasks);
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_002458B8);
 
@@ -98,7 +98,7 @@ typedef struct {
     EventListNode *last;  /* 0x58 */
 } EventList;
 
-void unlinkEventListNode(EventList *owner, EventListNode *node) {
+void evtUnlinkListNode(EventList *owner, EventListNode *node) {
     EventListNode *next = node->next;
     EventListNode *previous = node->prev;
     if (previous == 0) {
@@ -123,7 +123,7 @@ void unlinkEventListNode(EventList *owner, EventListNode *node) {
     }
 }
 
-void reorderEventListNodes(EventList *owner) {
+void evtReorderListNodes(EventList *owner) {
     if (owner != 0) {
         EventListNode *current = owner->first;
         while (current != 0) {
@@ -131,7 +131,7 @@ void reorderEventListNodes(EventList *owner) {
             EventListNode *scan = next;
             while (scan != 0) {
                 if (scan->orderKey < current->orderKey) {
-                    unlinkEventListNode(owner, scan);
+                    evtUnlinkListNode(owner, scan);
                     func_00245F88(owner, scan);
                     next = scan->next;
                     break;

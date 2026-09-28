@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
     u8 pad[4];   /* 0x0 */
-    u16 unk4;    /* 0x4 cleared by func_00159F30 */
+    u16 unk4;    /* 0x4 cleared by parClearSlotFlag */
     u8 pad6[10]; /* 0x6 */
 } ParSlot; /* 0x10 bytes */
 
@@ -42,14 +42,14 @@ extern ParDispatch D_0034E258[];
 extern void (*D_0034E2F0[])();
 
 void func_002D0918(void *arg);
-void destroyEffectResources(void *arg);
+void effDestroyResources(void *arg);
 void func_002CFF98(void *arg);
 
 void func_00158F68(ParObj *obj) {
     if (obj->child != NULL) {
         func_002D0918(obj->child);
     }
-    destroyEffectResources(obj);
+    effDestroyResources(obj);
     func_002CFF98(obj);
 }
 
@@ -73,7 +73,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00159D68);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159E20);
 
-void func_00159F30(ParTable *table, s32 index) {
+void parClearSlotFlag(ParTable *table, s32 index) {
     table->unk4[index].unk4 = 0;
 }
 

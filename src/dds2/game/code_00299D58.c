@@ -8,7 +8,7 @@ extern s32 func_00101958();
 
 extern void func_002C44E8(s32);
 
-extern void func_0029CD60(s32);
+extern void titleRenderFadeAndPanels(s32);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -34,7 +34,7 @@ void func_00299F00(s32 input) {
 
 void func_00299F50(s32 input) {
     s32 context = func_00101958();
-    func_0029CD60(context);
+    titleRenderFadeAndPanels(context);
     func_002C4038(context + 8, context + 0x54, 1, input);
 }
 
@@ -81,7 +81,7 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 void func_0029A588(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
-    func_0029CD60(temp_v0);
+    titleRenderFadeAndPanels(temp_v0);
     func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 

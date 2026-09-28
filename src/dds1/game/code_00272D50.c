@@ -29,7 +29,7 @@ void func_00273200(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273220);
 
 void func_00273390(u32 arg0) {
-    setStaffDisplayMode(2, arg0);
+    mnuSetStaffDisplayMode(2, arg0);
 }
 
 void func_002733B0() {

@@ -53,7 +53,7 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AA40);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AAB8);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AAD8);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfTexInitializeLists);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AB20);
 
@@ -84,7 +84,7 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AFF0);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B018);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B170);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfTexInitializeSemaphore);
 
 u32 func_0032B1B0(s32 arg0) {
     return *(u32 *)(arg0 + 0x28);
@@ -92,7 +92,7 @@ u32 func_0032B1B0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B1B8);
 
-s32 func_0032B1E0(s32 arg0) {
+s32 sdfTexGetOrInitializeSecondaryBuffer(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)(arg0 + 0x2c);
@@ -109,7 +109,7 @@ u8 func_0032B240(s32 arg0) {
     return *(u8 *)(arg0 + 0x18);
 }
 
-u32 func_0032B248(s32 arg0) {
+u32 sdfTexGetSecondaryResourceWord(s32 arg0) {
     u32 temp_v0;
 
     temp_v0 = 0;
@@ -119,7 +119,7 @@ u32 func_0032B248(s32 arg0) {
     return temp_v0;
 }
 
-u32 func_0032B260(s32 arg0) {
+u32 sdfTexGetPrimaryResourceWord(s32 arg0) {
     return *(u32 *)(*(s32 *)(arg0 + 0x10) + 0xc);
 }
 

@@ -25,7 +25,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C750);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C7C0);
 
-void func_0023C828(EventUnit *unit, u32 value) {
+void evtUnitSetValueAndFlag(EventUnit *unit, u32 value) {
     unit->value6C = value;
     unit->flags = unit->flags | 0x20000;
 }
@@ -40,11 +40,11 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C978);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CA60);
 
-u8 func_0023CB48(EventUnit *unit) {
+u8 evtUnitHasStateBits(EventUnit *unit) {
     return (unit->flags & 0x7800) != 0;
 }
 
-void func_0023CB58(EventUnit *unit) {
+void evtUnitSetStateBits(EventUnit *unit) {
     unit->flags = unit->flags | 0x300;
 }
 

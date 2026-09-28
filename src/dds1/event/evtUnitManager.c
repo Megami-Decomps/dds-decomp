@@ -26,7 +26,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221BE0);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221C50);
 
-void func_00221CB8(EvtUnit *unit, u32 value)
+void evtSetUnitValueAndFlag(EvtUnit *unit, u32 value)
 {
     unit->unk6C = value;
     unit->flags = unit->flags | 0x20000;
@@ -42,12 +42,12 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221E08);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221EF0);
 
-u8 func_00221FD8(EvtUnit *unit)
+u8 evtTestUnitStatusFlags(EvtUnit *unit)
 {
     return (unit->flags & 0x7800) != 0;
 }
 
-void func_00221FE8(EvtUnit *unit)
+void evtSetUnitStatusFlags(EvtUnit *unit)
 {
     unit->flags = unit->flags | 0x300;
 }

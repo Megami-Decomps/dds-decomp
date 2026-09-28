@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_001573D8(void) {
+void effManagerInitializeSubsystems(void) {
     func_0015B290();
     func_00162E40();
     func_00157CE0();
@@ -8,7 +8,7 @@ void func_001573D8(void) {
 
 INCLUDE_ASM(const s32, "effect/effManager", func_00157400);
 
-u32 func_00157568(void) {
+u32 effManagerUpdateAndDispatch(void) {
     func_00163010();
     func_00164CB0();
     func_00158340();

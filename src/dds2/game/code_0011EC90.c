@@ -28,7 +28,7 @@ s32 func_0011ED60(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED88);
 
-void func_0011EE28(s32 *list, s32 node, s32 linkOffset) {
+void dds3AppendIntrusiveNode(s32 *list, s32 node, s32 linkOffset) {
     s32 last;
 
     last = list[1];

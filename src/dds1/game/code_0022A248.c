@@ -4,7 +4,7 @@ extern s8 D_003BD88C;
 
 extern u32 D_003BBDF0;
 
-void initializeEventVisualData(s32 arg0);
+void evtInitializeVisualData(s32 arg0);
 
 void func_0022AB00(s32 arg0);
 
@@ -18,7 +18,7 @@ extern char D_003ACD18[]; /* "EventTest" */
 void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
 void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 void func_0021FE38(void);
-s32 func_002286E8(s32 object);
+s32 evtGetSolarPhase(s32 object);
 
 typedef struct EventListNode {
     u16 orderKey;
@@ -36,8 +36,8 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A248);
 
-void initializeEventVisualData(s32 object) {
-    s32 state = func_002286E8(object);
+void evtInitializeVisualData(s32 object) {
+    s32 state = evtGetSolarPhase(object);
     s16 *values = (s16 *)(object + 0x3C);
     *(u8 *)(object + 0xFC) = state;
     values[0] = 0x39;
@@ -105,14 +105,14 @@ void func_0022AEB8(void) {
     func_0010BDB8();
 }
 
-void startEventTestTask(void) {
+void evtStartTestTask(void) {
     D_003BA8EC = 0x80000000;
     kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, func_0022AB90, func_0022AEB8, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);
 
-void stopEventTestTasks(void) {
+void evtStopTestTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ACD18, 1);
     kwlnTaskDestroyWithHierarchyByName("PolygonMovie", 0);
     func_0021FE38();
@@ -136,7 +136,7 @@ void func_0022B618(void) {
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022B620);
 
-void unlinkEventListNode(EventList *owner, EventListNode *node) {
+void evtUnlinkListNode(EventList *owner, EventListNode *node) {
     EventListNode *next = node->next;
     EventListNode *previous = node->prev;
     if (previous == 0) {
@@ -161,7 +161,7 @@ void unlinkEventListNode(EventList *owner, EventListNode *node) {
     }
 }
 
-void reorderEventListNodes(EventList *owner) {
+void evtReorderListNodes(EventList *owner) {
     if (owner != 0) {
         EventListNode *current = owner->first;
         while (current != 0) {
@@ -169,7 +169,7 @@ void reorderEventListNodes(EventList *owner) {
             EventListNode *scan = next;
             while (scan != 0) {
                 if (scan->orderKey < current->orderKey) {
-                    unlinkEventListNode(owner, scan);
+                    evtUnlinkListNode(owner, scan);
                     func_0022B620(owner, scan);
                     next = scan->next;
                     break;

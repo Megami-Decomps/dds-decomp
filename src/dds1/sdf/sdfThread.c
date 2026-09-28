@@ -12,7 +12,7 @@ s32 GetThreadId(void);
 void WaitSema(s32 arg0);
 void SignalSema(s32 arg0);
 
-SdfThreadNode *func_002CFBB0(s32 threadId) {
+SdfThreadNode *sdfFindThreadById(s32 threadId) {
     SdfThreadNode *node;
 
     if (threadId < 0) {

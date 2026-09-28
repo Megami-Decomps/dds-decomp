@@ -31,14 +31,14 @@ extern s32 effMiscRand(s32);
 extern u8 D_003CDA8C[];
 extern u8 D_003CD8F8[];
 
-extern s32 func_00243330(void);
+extern s32 evtGetMirroredSolarPhase(void);
 extern u8 D_003CD8DD[];
 
 
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DA20);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampCreateTask);
 
-void func_0025DAB0(void) {
+void campDestroyTaskById(void) {
     s64 temp_v0;
 
     temp_v0 = evtFindTaskById();
@@ -48,7 +48,7 @@ void func_0025DAB0(void) {
     }
 }
 
-void func_0025DAE8(void) {
+void campDestroyAllTasks(void) {
     s64 temp_v0;
 
     while (temp_v0 = func_00101820(0x3ec), temp_v0 != 0) {
@@ -87,9 +87,9 @@ u32 func_0025E7B0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E7B8);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E7D8);
+INCLUDE_ASM(const s32, "game/code_0025DA20", campFindMatchingEntryIndex);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E858);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindEntryByName);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E8D0);
 
@@ -114,7 +114,7 @@ typedef struct {
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
 
-void func_0025EBC8(CampScene *scene) {
+void fldResetCampSceneEntries(CampScene *scene) {
     CampEntryNode *node;
 
     node = scene->entries;
@@ -187,7 +187,7 @@ u32 func_0025F320(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F330);
 
-void shopSavePrimaryTransform(u8 *scene) {
+void mnuShopSavePrimaryTransform(u8 *scene) {
     extern f32 D_00453CB0[];
     extern f32 D_00453C90[];
     extern s32 D_004377F0;
@@ -200,7 +200,7 @@ void shopSavePrimaryTransform(u8 *scene) {
     D_004377F0 = 0;
 }
 
-void shopSaveFullTransform(u8 *scene) {
+void mnuShopSaveFullTransform(u8 *scene) {
     extern f32 D_00453CB0[];
     extern f32 D_00453CA0[];
     extern f32 D_00453C90[];
@@ -215,7 +215,7 @@ void shopSaveFullTransform(u8 *scene) {
     D_004377F0 = 1;
 }
 
-void shopRestoreTransform(u8 *scene) {
+void mnuShopRestoreTransform(u8 *scene) {
     extern f32 D_00453CB0[];
     extern f32 D_00453CA0[];
     extern f32 D_00453C90[];
@@ -232,7 +232,7 @@ void shopRestoreTransform(u8 *scene) {
     }
 }
 
-void func_0025F568(CampScene *scene, s32 id) {
+void fldRegisterCampSceneId(CampScene *scene, s32 id) {
     s32 count = scene->idCount;
     s32 i = 0;
     if (count > 0) {
@@ -264,7 +264,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F7F0);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", shopReleaseSceneObjects);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopReleaseSceneObjects);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A00);
 
@@ -291,7 +291,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F8B8);
 
 void func_0025FA10(s32 arg0) {
-    destroyPackedEffectBatch(*(u32 *)(arg0 + 0x3c));
+    effDestroyPackedBatch(*(u32 *)(arg0 + 0x3c));
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
@@ -439,7 +439,7 @@ u32 func_00260C48(s32 row) {
     s32 total = 0;
     u32 index = 0;
     do {
-        if (func_00243330() == 8) {
+        if (evtGetMirroredSolarPhase() == 8) {
             total += item[-3];
         } else {
             total += item[0];

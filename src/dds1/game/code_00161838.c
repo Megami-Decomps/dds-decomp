@@ -48,7 +48,7 @@ u32 func_001619E8(void) {
     return 1;
 }
 
-void func_001619F0(u32 arg0) {
+void effBTLFieldColorSetFlags(u32 arg0) {
     D_003BB024 = D_003BB024 | arg0;
 }
 

@@ -77,10 +77,10 @@ extern void func_00105890(void);
 extern void evtUnk8A48Ensure(void);
 
 extern void func_002D0E88(s32 arg0);
-extern void *func_002D3FD0(s32);
-extern void func_002D4010(void *);
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
 extern void func_00105010(void *, s32, s32);
-extern void func_002D4038(void *, s32);
+extern void sdfAppendPacket(void *, s32);
 extern u32 kwlnTaskGetTimer(void);
 extern s32 effMiscRandMod(s32, s32);
 extern void func_00104068(s32, u8, s32);
@@ -94,7 +94,7 @@ extern s32 func_002E4960(s32, s32, s32, s32, const char *);
 
 extern void func_002E1718(void *arg0);
 
-extern void devConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
+extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00102ED8);
 
@@ -142,7 +142,7 @@ void func_00104130(void) {
     D_003BD6A0[0] = 0;
     D_003BD690[1] = 0;
     D_003BD6A0[1] = 0;
-    devConsSetEntryPair(0, 0, 0);
+    sdfDevConsSetEntryPair(0, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104168);
@@ -172,10 +172,10 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104678);
 
 void kwlnTextureDrawPageCounter(void *task) {
     char buffer[0x70];
-    s32 current = func_00104A10();
+    s32 current = kwlnTextureGetPageIndex();
     s32 count = func_001049A8();
     func_003014F0(buffer, "TEX VIEWER [%d/%d]", current, count - 1);
-    func_002D4038(task, func_002E4960(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
+    sdfAppendPacket(task, func_002E4960(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
@@ -184,7 +184,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104810);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001049A8);
 
-u32 func_00104A10(void) {
+u32 kwlnTextureGetPageIndex(void) {
     return D_003BA8DC;
 }
 
@@ -239,8 +239,8 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104E20);
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105010);
 
 void kwlnTextureAttachTask(u8 *scene) {
-    void *task = func_002D3FD0(0x20);
-    func_002D4010(task);
+    void *task = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(task);
     func_00105010(task, 0x7180, 0x79C0);
     (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
 }
@@ -342,7 +342,7 @@ void kwlnFadeSetColor(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
     D_003BA920.a = arg3;
 }
 
-void func_00105AB8(KwlnFadeColor **color) {
+void kwlnFadeGetColor(KwlnFadeColor **color) {
     *color = &D_003BA920;
 }
 

@@ -24,7 +24,7 @@ extern u32 D_003BD2F4;
 extern u32 D_003BD2F8;
 
 void *func_002CFEB8(s32 size);
-s32 createSemaphore(s32 arg0, s32 arg1, s32 arg2);
+s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 void func_002D1B90(void *arg0);
 void func_002D2F80(void);
 void func_002D2FB0(void);
@@ -72,7 +72,7 @@ void func_002D1C08(s32 arg0) {
     func_002D3C30(&D_003BD9E8, arg0);
 }
 
-void func_002D1C28(void) {
+void sdfTexInitializeLists(void) {
     SdfTexHead *head;
 
     head = func_002CFEB8(0x1C);
@@ -115,11 +115,11 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2140);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2168);
 
-void func_002D22C0(void) {
+void sdfTexInitializeSemaphore(void) {
     SdfSemaObj *obj;
 
     obj = &D_003EB848;
-    obj->unk0 = createSemaphore(1, 0x7F, 0);
+    obj->unk0 = sdfCreateSemaphore(1, 0x7F, 0);
     func_002D2128(obj);
 }
 
@@ -129,7 +129,7 @@ u32 func_002D2300(SdfTex *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2308);
 
-s32 func_002D2330(SdfTex *arg0) {
+s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *arg0) {
     SdfTexBuf *buf;
 
     buf = arg0->unk2C;
@@ -146,7 +146,7 @@ u8 func_002D2390(SdfTex *arg0) {
     return arg0->unk18;
 }
 
-u32 func_002D2398(SdfTex *texture) {
+u32 sdfTexGetSecondaryResourceWord(SdfTex *texture) {
     u32 val;
 
     val = 0;
@@ -156,7 +156,7 @@ u32 func_002D2398(SdfTex *texture) {
     return val;
 }
 
-u32 func_002D23B0(SdfTex *texture) {
+u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
     return texture->primaryResource->word;
 }
 

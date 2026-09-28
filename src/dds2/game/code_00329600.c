@@ -15,7 +15,7 @@ void func_00329868(void) {
     func_003297C8(temp_v0);
 }
 
-void func_00329888(s32 *arg0) {
+void sdfReleaseMemorySlot(s32 *arg0) {
     s32 temp_v0;
 
     temp_v0 = *arg0;
@@ -28,7 +28,7 @@ void func_00329888(s32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_003298C0);
 
-u32 func_003298F8(s32 arg0) {
+u32 sdfResourceRetainAddress(s32 arg0) {
     *(s16 *)(arg0 + 0xe) = *(s16 *)(arg0 + 0xe) + 1;
     return *(u32 *)(arg0 + 8);
 }

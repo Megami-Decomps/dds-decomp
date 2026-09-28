@@ -16,7 +16,7 @@ extern s32 func_00128580(void);
 
 extern u32 D_00435BB0;
 
-extern s32 acknowledgeCampState(void);
+extern s32 mnuAcknowledgeCampState(void);
 
 extern s32 func_00299868(void);
 
@@ -24,9 +24,9 @@ extern s32 func_002D13F0(void);
 
 extern s32 func_00260848(void);
 
-extern s32 pollSceneState(void);
+extern s32 fldPollSceneState(void);
 
-extern s32 func_0030AA40(void);
+extern s32 fldLmapTaskExists(void);
 
 extern s32 D_00435D30;
 
@@ -348,14 +348,14 @@ void func_0010A688(void) {
 }
 
 u32 func_0010A6A0(void) {
-    destroyCampTasks();
+    mnuDestroyCampTasks();
     return 0;
 }
 
 u8 func_0010A6C0(void) {
     s64 temp_v0;
 
-    temp_v0 = acknowledgeCampState();
+    temp_v0 = mnuAcknowledgeCampState();
     return temp_v0 == 0;
 }
 
@@ -399,11 +399,11 @@ u8 func_0010A750(void) {
 }
 
 void func_0010A770(void) {
-    func_002D1300(1);
+    configTasksCreate(1);
 }
 
 u32 func_0010A788(void) {
-    configTasksDestroy();
+    mnuConfigTasksDestroy();
     return 0;
 }
 
@@ -432,7 +432,7 @@ u32 evtUnkA6F8Ensure(void) {
 }
 
 void func_0010A888(void) {
-    createBattleStageTestTask();
+    btlCreateStageTestTask();
 }
 
 u32 func_0010A8A0(void) {
@@ -447,8 +447,8 @@ u32 func_0010A8C0(void) {
 void func_0010A8C8(void) {
     D_00435BB0 = 0;
     D_00435D28 = 0;
-    startEventTestTask();
-    func_00250278();
+    evtStartTestTask();
+    evtCreateSkyTask();
 }
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnkA7A8Init);
@@ -490,19 +490,19 @@ void func_0010A998(void) {
 }
 
 u32 func_0010A9B0(void) {
-    destroyCampTasks();
+    mnuDestroyCampTasks();
     return 0;
 }
 
 u8 func_0010A9D0(void) {
     s64 temp_v0;
 
-    temp_v0 = acknowledgeCampState();
+    temp_v0 = mnuAcknowledgeCampState();
     return temp_v0 == 0;
 }
 
 void func_0010A9F0(u32 arg0, u32 arg1) {
-    func_00250278();
+    evtCreateSkyTask();
     func_00260708(arg1);
 }
 
@@ -521,7 +521,7 @@ u8 func_0010AA48(void) {
 }
 
 void func_0010AA68(u32 arg0, s32 arg1) {
-    func_00250278();
+    evtCreateSkyTask();
     if (arg1 != 0) {
         func_00268380(*(u32 *)arg1, ((u32 *)arg1)[1]);
         return;
@@ -538,7 +538,7 @@ u32 func_0010AAB0(void) {
 u8 func_0010AAD8(void) {
     s64 temp_v0;
 
-    temp_v0 = pollSceneState();
+    temp_v0 = fldPollSceneState();
     return temp_v0 == 0;
 }
 
@@ -593,11 +593,11 @@ u32 evtTestFontCheck(void) {
 }
 
 void func_0010ABC8(void) {
-    createMovieViewerTask();
+    mnuCreateMovieViewerTask();
 }
 
 u32 func_0010ABE0(void) {
-    destroyMovieViewerTask();
+    mnuDestroyMovieViewerTask();
     return 0;
 }
 
@@ -629,7 +629,7 @@ void evtUnkAB08Call(s32 arg0, s32 *arg1) {
 }
 
 u32 func_0010AC88(void) {
-    func_0030AA10();
+    fldStopLmapTask();
     func_001286C8();
     return 0;
 }
@@ -637,7 +637,7 @@ u32 func_0010AC88(void) {
 u8 func_0010ACB0(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0030AA40();
+    temp_v0 = fldLmapTaskExists();
     return temp_v0 == 0;
 }
 
@@ -681,7 +681,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnkAB90Ensure);
 
 void func_0010AE08(void) {
     if (D_00435D30 != 0) {
-        devConsNodeDestroy(D_00435D30);
+        sdfDevConsNodeDestroy(D_00435D30);
         D_00435D30 = 0;
     }
 }

@@ -10,7 +10,7 @@ extern s32 D_00435E04;
 
 extern u32 func_0011F218(void);
 
-extern u64 func_0032CE80(u64);
+extern u64 sdfAllocPacketAligned(u64);
 
 extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
 
@@ -28,7 +28,7 @@ extern s32 func_003283E0(u32);
 
 extern u32 D_00436088;
 
-extern u64 func_0010FFA8(void);
+extern u64 dds3GetWorldObject(void);
 
 extern s64 func_00110C18(u64);
 
@@ -106,7 +106,7 @@ extern void func_0012D9D0(u32 value);
 
 extern void func_001295E0(u32, u32);
 
-extern void func_00126040(void);
+extern void fldCreatePlayerObject(void);
 
 extern void func_00128FE8(u32, u32, s32);
 
@@ -154,7 +154,7 @@ void func_00129CC0(u32 *args) {
     s32 state;
     func_001295E0(args[4], args[3]);
     state = D_00389770[4];
-    if (state != 1 && state < 200) func_00126040();
+    if (state != 1 && state < 200) fldCreatePlayerObject();
     func_00128FE8(args[1], args[0], 0);
     D_00389770[1] = ((u32 *)args[2])[1];
 }
@@ -182,11 +182,11 @@ void func_00129EA0(u32 arg0, u32 arg1) {
     D_00436018 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129EB0);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldLoadAreaResource);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129F58);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A078);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldFreeDisplayObjects);
 
 u32 func_0012A0E8(void) {
     u32 temp_v1 = D_00389770[0x1E];
@@ -259,7 +259,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012AC90);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012ADA0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B068);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldFormatAreaDirectory);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B0D0);
 
@@ -283,7 +283,7 @@ void fldInitDisplayObjects(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B4F8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldGetDisplayTableRow);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B518);
 
@@ -291,9 +291,9 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B7F8);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B9B8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldProjectPointSetup);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BA90);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldProjectPointSetupAlt);
 
 void func_0012BB68(void) {
     u8 *matrix;
@@ -361,19 +361,19 @@ void func_0012BC38(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BC40);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BD00);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitFrameQuad);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BE18);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BF38);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsLinesScaled);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C098);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsLines);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C1D8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsQuadTagged);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C360);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C4F0);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsRect);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C650);
 
@@ -383,7 +383,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CB08);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CDC0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CF50);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitModelPacket);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D070);
 
@@ -391,7 +391,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D110);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D1B0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D260);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsTriangle);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D3E0);
 
@@ -440,26 +440,26 @@ void func_0012DE20(s32 arg0) {
 
     temp_v1 = func_0011F218();
     *(u32 *)(arg0 + 0x28) = temp_v1;
-    temp_v0 = func_0032CE80(0x40);
+    temp_v0 = sdfAllocPacketAligned(0x40);
     func_0032E4B8(temp_v0);
-    func_0032CEE8(*(u32 *)(arg0 + 0x28), temp_v0);
+    sdfAppendPacket(*(u32 *)(arg0 + 0x28), temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DE70);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E008);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawFloorQuad);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E0F8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawFloorQuadA);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E1F8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadTiled);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E2F8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadTiledAlt);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E3F8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuad);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E4F0);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadPacket);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E5F8);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadScaled);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E720);
 
@@ -471,7 +471,7 @@ void func_0012EBB8(u32 arg0) {
     D_00436088 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", encProc);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldEncProc);
 
 void func_0012EBF8(u32 arg0, s32 arg1) {
     if ((arg1 < 0x400) && ((*(u16 *)((s32)arg1 * 0x28 + D_00435E04 + 0x20) & 0x8000) != 0))
@@ -480,14 +480,14 @@ void func_0012EBF8(u32 arg0, s32 arg1) {
         func_0012EC80(3);
         return;
     }
-    soundSetSequenceVolumePan(0xf, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(0xf, 0x7f, 0x3f);
     func_0012EC80(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012EC80);
 
 void func_0012ECF0(void) {
-    battleResetAsyncState();
+    btlResetAsyncState();
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012ED08);
@@ -515,7 +515,7 @@ s64 func_001309B8(void) {
     s64 temp_v1;
     s64 temp_v2;
 
-    temp_v0 = func_0010FFA8();
+    temp_v0 = dds3GetWorldObject();
     temp_v1 = func_00110C18(temp_v0);
     temp_v2 = func_00125F38();
     if (temp_v2 == temp_v1) {
@@ -526,7 +526,7 @@ s64 func_001309B8(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
-    func_00113110(func_00110C18(func_0010FFA8()), D_00444980, D_00444970);
+    func_00113110(func_00110C18(dds3GetWorldObject()), D_00444980, D_00444970);
     D_004360B0 = 0;
 }
 
@@ -560,7 +560,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131000);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131478);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131A90);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldUpdateCameraTarget);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131B50);
 
@@ -577,29 +577,29 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133840);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133950);
 
 void func_00133988(void) {
-    func_00111B30(D_00435F0C, 1);
+    dds3SetObjectFlags(D_00435F0C, 1);
     if (D_00435F10 != 0) {
-        func_00111B30(D_00435F10, 1);
+        dds3SetObjectFlags(D_00435F10, 1);
     }
     func_00133C90();
 }
 
 void func_001339C0(void) {
-    func_00111B60(D_00435F0C, 1);
+    dds3ClearObjectFlags(D_00435F0C, 1);
     if (D_00435F10 != 0) {
-        func_00111B60(D_00435F10, 1);
+        dds3ClearObjectFlags(D_00435F10, 1);
         return;
     }
 }
 
 void func_00133A00(void) {
     func_00112B58(D_00435F0C, 0);
-    func_00111B60(D_00435F0C, 0x800);
+    dds3ClearObjectFlags(D_00435F0C, 0x800);
 }
 
 void func_00133A28(void) {
     func_00112B58(D_00435F0C, 0x80);
-    func_00111B30(D_00435F0C, 0x800);
+    dds3SetObjectFlags(D_00435F0C, 0x800);
 }
 
 void func_00133A50(void) {
@@ -624,15 +624,15 @@ void func_00133A78(void) {
 
 void func_00133AA8(void) {
     if (D_00435F10 != 0) {
-        func_00111B30(D_00435F0C, 0x400);
+        dds3SetObjectFlags(D_00435F0C, 0x400);
         return;
     }
-    func_00111B30(D_00435F0C, 0x200);
+    dds3SetObjectFlags(D_00435F0C, 0x200);
 }
 
 void func_00133AE8(void) {
-    func_00111B60(D_00435F0C, 0x400);
-    func_00111B60(D_00435F0C, 0x200);
+    dds3ClearObjectFlags(D_00435F0C, 0x400);
+    dds3ClearObjectFlags(D_00435F0C, 0x200);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133B10);
@@ -691,15 +691,15 @@ void func_00134790(void) {
     D_004360FC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_001347F0);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldUploadSkyBuffer);
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413350);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00134910);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldUpdateSwayOffset);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00134A18);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_001354F0);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSetFadeTarget);
 
 void func_00135568(u32 arg0) {
     D_0043610C = arg0;
@@ -736,7 +736,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135D18);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135D80);
 
 void func_00136098(void) {
-    func_00111B60(D_00435F0C, 0x100);
+    dds3ClearObjectFlags(D_00435F0C, 0x100);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FA0);

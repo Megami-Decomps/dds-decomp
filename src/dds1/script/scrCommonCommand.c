@@ -5,13 +5,13 @@ typedef struct KwlnTask KwlnTask;
 f32 func_0010D4F0(s32 idx);
 s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
 s32 func_001082D8(s32 arg0, void *arg1);
-s32 drawSetC70FloatTriple(s32 arg0, f32 arg1, f32 arg2);
+s32 kwlnDrawSetC70FloatTriple(s32 arg0, f32 arg1, f32 arg2);
 s32 func_00107FD8(s32 arg0, s32 arg1, void *arg2);
 s32 func_00108218(s32 arg0, void *arg1);
 s32 func_001080D8(s32 arg0, s32 arg1, void *arg2);
-s32 drawSetD88FloatTriple(s32 arg0, f32 arg1, f32 arg2);
-s32 drawSetDc8Second(s32 arg0);
-s32 drawSetE08Fifth(s32 arg0);
+s32 kwlnDrawSetD88FloatTriple(s32 arg0, f32 arg1, f32 arg2);
+s32 kwlnDrawSetDc8Second(s32 arg0);
+s32 kwlnDrawSetE08Fifth(s32 arg0);
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_00106488(f32 arg0);
@@ -34,7 +34,7 @@ s32 func_0010D768(void)
 
 s32 func_0010D7A0(void)
 {
-    return func_0010D680() != 0;
+    return scrGetCommandTimer() != 0;
 }
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D7C0);
@@ -57,7 +57,7 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D908);
 
 s32 func_0010D9A8(void)
 {
-    if (func_0010D680() == 0)
+    if (scrGetCommandTimer() == 0)
     {
         func_001060C8(func_0010D428(0));
         return 0;
@@ -67,7 +67,7 @@ s32 func_0010D9A8(void)
 
 s32 func_0010D9E8(void)
 {
-    if (func_0010D680() == 0)
+    if (scrGetCommandTimer() == 0)
     {
         func_00106160(func_0010D428(0));
         return 0;
@@ -89,7 +89,7 @@ s32 func_0010DA28(void)
     {
         return 1;
     }
-    func_0010D660(func_0010D638(label));
+    scrSetProgramCounter(scrGetLabelAddress(label));
     return 1;
 }
 
@@ -125,7 +125,7 @@ s32 func_0010DC80(void)
 {
     s32 p0;
     p0 = func_0010D428(0);
-    if (func_001019C8(p0) == 0)
+    if (kwlnTaskIsRegistered(p0) == 0)
     {
         return 1;
     }
@@ -135,12 +135,12 @@ s32 func_0010DC80(void)
 
 s32 func_0010DCC8(void)
 {
-    return func_001019C8(func_0010D428(0)) == 0;
+    return kwlnTaskIsRegistered(func_0010D428(0)) == 0;
 }
 
 s32 func_0010DCF0(void)
 {
-    if (func_001019C8(func_0010D428(0)) != 0)
+    if (kwlnTaskIsRegistered(func_0010D428(0)) != 0)
     {
         func_0010D5F0(1);
     }
@@ -156,7 +156,7 @@ u32 scrCommand_SCR_GET_TIMER()
 {
     KwlnTask* task;
     task = (KwlnTask*)func_0010D428(0);
-    if (!func_001019C8(task))
+    if (!kwlnTaskIsRegistered(task))
     {
         func_0010D5F0(0);
     }
@@ -261,7 +261,7 @@ s32 func_0010E258(void)
     byte3 = func_0010D428(3);
     byte2 = func_0010D428(2);
     byte1 = func_0010D428(1);
-    drawSetC70Second(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
+    kwlnDrawSetC70Second(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -271,7 +271,7 @@ s32 func_0010E2E0(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    drawSetC70Triple(p0, p1, func_0010D428(2));
+    kwlnDrawSetC70Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -283,13 +283,13 @@ s32 func_0010E338(void)
 
 s32 func_0010E360(void)
 {
-    drawSetupC70(func_0010D428(0));
+    kwlnDrawSetupC70(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E388(void)
 {
-    drawSetupC70B(func_0010D428(0));
+    kwlnDrawSetupC70B(func_0010D428(0));
     return 1;
 }
 
@@ -306,7 +306,7 @@ s32 func_0010E498(void)
     byte3 = func_0010D428(3);
     byte2 = func_0010D428(2);
     byte1 = func_0010D428(1);
-    drawSetCd0Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
+    kwlnDrawSetCd0Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -316,7 +316,7 @@ s32 func_0010E520(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    drawSetCd0Triple(p0, p1, func_0010D428(2));
+    kwlnDrawSetCd0Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -328,13 +328,13 @@ s32 func_0010E578(void)
 
 s32 func_0010E5A0(void)
 {
-    drawSetupCd0(func_0010D428(0));
+    kwlnDrawSetupCd0(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E5C8(void)
 {
-    drawEnableCd0(func_0010D428(0));
+    kwlnDrawEnableCd0(func_0010D428(0));
     return 1;
 }
 
@@ -351,7 +351,7 @@ s32 func_0010E6D8(void)
     byte3 = func_0010D428(3);
     byte2 = func_0010D428(2);
     byte1 = func_0010D428(1);
-    drawSetD30Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
+    kwlnDrawSetD30Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -361,7 +361,7 @@ s32 func_0010E760(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    drawSetD30Triple(p0, p1, func_0010D428(2));
+    kwlnDrawSetD30Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -373,13 +373,13 @@ s32 func_0010E7B8(void)
 
 s32 func_0010E7E0(void)
 {
-    drawSetupD30(func_0010D428(0));
+    kwlnDrawSetupD30(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E808(void)
 {
-    drawEnableD30(func_0010D428(0));
+    kwlnDrawEnableD30(func_0010D428(0));
     return 1;
 }
 
@@ -396,7 +396,7 @@ s32 func_0010E8D0(void)
     byte3 = func_0010D428(3);
     byte2 = func_0010D428(2);
     byte1 = func_0010D428(1);
-    drawSetD88First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
+    kwlnDrawSetD88First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -404,7 +404,7 @@ s32 func_0010E958(void)
 {
     s32 p0;
     p0 = func_0010D428(0);
-    drawSetD88Pair(p0, func_0010D428(1));
+    kwlnDrawSetD88Pair(p0, func_0010D428(1));
     return 1;
 }
 
@@ -416,13 +416,13 @@ s32 func_0010E998(void)
 
 s32 func_0010E9C0(void)
 {
-    drawSetupD88(func_0010D428(0));
+    kwlnDrawSetupD88(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010E9E8(void)
 {
-    drawEnableD88(func_0010D428(0));
+    kwlnDrawEnableD88(func_0010D428(0));
     return 1;
 }
 
@@ -450,7 +450,7 @@ s32 func_0010EA10(void)
         mode = 0x44;
         break;
     }
-    drawSetDc8Second(mode);
+    kwlnDrawSetDc8Second(mode);
     return 1;
 }
 
@@ -465,7 +465,7 @@ s32 func_0010EA90(void)
     byte3 = func_0010D428(3);
     byte2 = func_0010D428(2);
     byte1 = func_0010D428(1);
-    drawSetDc8First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
+    kwlnDrawSetDc8First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -477,13 +477,13 @@ s32 func_0010EB18(void)
 
 s32 func_0010EB40(void)
 {
-    drawSetupDc8(func_0010D428(0));
+    kwlnDrawSetupDc8(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010EB68(void)
 {
-    drawEnableDc8(func_0010D428(0));
+    kwlnDrawEnableDc8(func_0010D428(0));
     return 1;
 }
 
@@ -511,7 +511,7 @@ s32 func_0010EB90(void)
         mode = 0x44;
         break;
     }
-    drawSetE08Fifth(mode);
+    kwlnDrawSetE08Fifth(mode);
     return 1;
 }
 
@@ -526,7 +526,7 @@ s32 func_0010EC10(void)
     byte3 = func_0010D428(3);
     byte2 = func_0010D428(2);
     byte1 = func_0010D428(1);
-    drawSetE08Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
+    kwlnDrawSetE08Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -536,7 +536,7 @@ s32 func_0010EC98(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    drawSetE08Triple(p0, p1, func_0010D428(2));
+    kwlnDrawSetE08Triple(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -548,35 +548,35 @@ s32 func_0010ECF0(void)
 
 s32 func_0010ED18(void)
 {
-    drawSetupE08(func_0010D428(0));
+    kwlnDrawSetupE08(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010ED40(void)
 {
-    drawEnableE08(func_0010D428(0));
+    kwlnDrawEnableE08(func_0010D428(0));
     return 1;
 }
 
 s32 func_0010ED68(void)
 {
     func_001068F0(0, 0, 0);
-    drawEnableD88(0);
-    drawSetupC70B(0);
-    drawEnableCd0(0);
-    drawEnableD30(0);
+    kwlnDrawEnableD88(0);
+    kwlnDrawSetupC70B(0);
+    kwlnDrawEnableCd0(0);
+    kwlnDrawEnableD30(0);
     func_0018F660();
     return 1;
 }
 
 s32 func_0010EDB8(void)
 {
-    drawEnableDc8(0);
-    drawEnableE08(0);
+    kwlnDrawEnableDc8(0);
+    kwlnDrawEnableE08(0);
     func_00132B60(0);
     func_00132B70(0x80);
     func_00132B80(0);
-    func_00132AE8(0, 1, 0);
+    fldSetFadeTarget(0, 1, 0);
     return 1;
 }
 

@@ -37,7 +37,7 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 func_00101A70();
 
-s32 func_00245C98(void) {
+s32 evtIsFadeDispatchIdle(void) {
     s32 temp_v0 = kwlnFadeIsActive();
 
     if (temp_v0 != 0) {
@@ -276,7 +276,7 @@ s32 func_00246E00(void) {
     s32 *temp_v0 = (s32 *)func_00101A70();
 
     temp_v0[32] = 1;
-    campClampSceneCounter(-1, temp_v0);
+    mnuCampClampSceneCounter(-1, temp_v0);
     return 1;
 }
 
@@ -455,6 +455,12 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00248468);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00248508);
 
+INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF570);
+
+INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF580);
+
+INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF590);
+
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3B0);
 
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3B8);
@@ -466,10 +472,4 @@ INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3C8);
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3D0);
 
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3D8);
-
-INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF570);
-
-INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF580);
-
-INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF590);
 

@@ -37,7 +37,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00265610);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265648);
 
-s32 isTitleEntryAvailable(TitleEntry *entry) {
+s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
     if (mdlFlagTest(0x902) == 0 && entry->kind == 4) {
         return 1;
     }
@@ -54,7 +54,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002659C8);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265AB8);
 
-s32 advanceTitleEntryAnimation(TitleEntry *entry) {
+s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
     s32 step = func_002658B8(entry);
     entry->animation += step;
     func_002CD0C0(entry);
@@ -67,7 +67,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C90);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265E68);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265FD8);
+INCLUDE_ASM(const s32, "game/code_002653A0", titleInitFourParameters);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266048);
 

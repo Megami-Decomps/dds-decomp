@@ -22,7 +22,7 @@ extern void func_0012BC38(s32 arg0);
 
 extern void func_0012D3E0(void);
 
-extern void func_0032CEE8(s32 arg0, s32 arg1);
+extern void sdfAppendPacket(s32 arg0, s32 arg1);
 
 extern s32 func_0033D810();
 
@@ -77,7 +77,7 @@ extern void func_00342538(s32 arg0);
 
 extern void func_00342580(u32 arg0);
 
-extern void soundSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
+extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern void func_00341C78(u32 arg0);
 
@@ -87,11 +87,11 @@ INCLUDE_ASM(const s32, "game/code_00250010", evtCreateTask);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250080);
 
-void func_002500E0(u32 arg0) {
+void evtSetSkyOverlayEnabled(u32 arg0) {
     D_004373CC = arg0;
 }
 
-void func_002500E8(s32 duration, s32 target) {
+void evtStartSkyAlphaTransition(s32 duration, s32 target) {
     s16 current;
 
     current = func_00135598();
@@ -109,11 +109,11 @@ void func_002500E8(s32 duration, s32 target) {
     }
 }
 
-u16 func_00250150(void) {
+u16 evtIsSkyAlphaTransitionActive(void) {
     return D_004373C8;
 }
 
-void func_00250158(void) {
+void evtUpdateSkyAlphaTransition(void) {
     if (D_004373C8 != 0) {
         D_00438FB0 += 1;
         func_00135588(D_00438FB4 + (s32)((f32)(D_00438FB6 - D_00438FB4) * ((f32)D_00438FB0 / (f32)D_00438FB2)));
@@ -123,8 +123,8 @@ void func_00250158(void) {
     }
 }
 
-s32 func_002501E0(void) {
-    func_00250158();
+s32 evtUpdateSkyTask(void) {
+    evtUpdateSkyAlphaTransition();
     func_00134A18();
     if (D_004373CC != 0) {
         func_0012BC38(0x53);
@@ -133,14 +133,14 @@ s32 func_002501E0(void) {
     return 0;
 }
 
-void func_00250228(void) {
+void evtResetSkyTaskFlags(void) {
     D_004373C8 = 0;
     D_004373CC = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", evtDestroySkyTask);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250278);
+INCLUDE_ASM(const s32, "game/code_00250010", evtCreateSkyTask);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002502E0);
 
@@ -151,7 +151,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00250338);
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423390);
 
 s32 func_00250508(s32 arg0, s32 arg1, s32 arg2) {
-    func_0032CEE8(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfAppendPacket(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -160,7 +160,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250718);
 
 s32 func_00250880(s32 arg0, s32 arg1, s32 arg2) {
-    func_0032CEE8(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfAppendPacket(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -176,8 +176,8 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002508D0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250A08);
 
-s32 drawFrameChangeLabel(s32 target, s32 x, s32 y) {
-    func_0032CEE8(target, func_0033D810(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+s32 mnuDrawFrameChangeLabel(s32 target, s32 x, s32 y) {
+    sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
@@ -189,7 +189,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00250F20);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00251180);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00251250);
+INCLUDE_ASM(const s32, "game/code_00250010", evtDrawStringEntry);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002512B0);
 
@@ -287,8 +287,8 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423FE0);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", jtbl_00423FF0);
 
-s32 drawCutFlagMenuLabel(s32 target, s32 x, s32 y) {
-    func_0032CEE8(target, func_0033D810(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
+s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
+    sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
 
@@ -314,8 +314,8 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00424090);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254940);
 
-s32 drawMotionChangeMenuLabel(s32 target, s32 x, s32 y) {
-    func_0032CEE8(target, func_0033D810(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
+s32 mnuDrawMotionChangeLabel(s32 target, s32 x, s32 y) {
+    sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
     return 2;
 }
 
@@ -548,7 +548,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00259298);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259428);
 
-INCLUDE_ASM(const s32, "game/code_00250010", writeEventGroupHeader);
+INCLUDE_ASM(const s32, "game/code_00250010", evtWriteGroupHeader);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259518);
 
@@ -568,7 +568,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002598D0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259958);
 
-INCLUDE_ASM(const s32, "game/code_00250010", writeEventGroupMetadata);
+INCLUDE_ASM(const s32, "game/code_00250010", evtWriteGroupMetadata);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259A60);
 
@@ -685,7 +685,7 @@ s32 evtSetBgmVolumePan(s32 id, s32 fade) {
         return 0;
     }
     sound = func_0025CC90(id, fade);
-    soundSetSequenceVolumePan(sound, 0x7F, 0x3F);
+    sndSetSequenceVolumePan(sound, 0x7F, 0x3F);
     return sound;
 }
 
@@ -714,7 +714,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", evtGetTaskData);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025D008);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_0025D0B8);
+INCLUDE_ASM(const s32, "game/code_00250010", evtRefreshTaskData);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025D140);
 

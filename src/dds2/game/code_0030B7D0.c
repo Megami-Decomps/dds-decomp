@@ -80,9 +80,9 @@ typedef struct ScriptFlagEntry {
     u32 flags;
 } ScriptFlagEntry;
 
-extern void func_0030D2D8(void);
+extern void sdfCounterTickCountdown(void);
 
-extern void func_0030D350(void);
+extern void mnuTickMapTimers(void);
 
 extern void func_0030D438(void);
 
@@ -186,7 +186,7 @@ s16 func_0030C9D0(s32 remaining) {
     return *(s16 *)(*(s32 *)(task + 0x70) + 8);
 }
 
-float func_0030CA08(void) {
+float sdfCounterGetScaledValue(void) {
     s32 p;
 
     p = *(s32 *)(D_004388C4 + 0x30);
@@ -199,7 +199,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CC68);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CEF0);
 
-void func_0030D278(void) {
+void sdfCounterIncrease(void) {
     s32 temp_v0;
 
     temp_v0 = **(s32 **)(D_004388C4 + 0x30);
@@ -208,7 +208,7 @@ void func_0030D278(void) {
     }
 }
 
-void func_0030D2A0(void) {
+void sdfCounterDecrease(void) {
     s32 temp_v0;
 
     temp_v0 = **(s32 **)(D_004388C4 + 0x30);
@@ -217,7 +217,7 @@ void func_0030D2A0(void) {
     }
 }
 
-void func_0030D2C0(s32 arg0) {
+void sdfCounterSetMode(s32 arg0) {
     s32 ptr;
 
     ptr = *(s32 *)(D_004388C4 + 0x30);
@@ -225,7 +225,7 @@ void func_0030D2C0(s32 arg0) {
     *(s16 *)(ptr + 4) = 8;
 }
 
-void func_0030D2D8(void) {
+void sdfCounterTickCountdown(void) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)(D_004388C4 + 0x30);
@@ -234,7 +234,7 @@ void func_0030D2D8(void) {
     }
 }
 
-void func_0030D300(s32 flags) {
+void mnuSetMapTimerFlags(s32 flags) {
     s16 *timers = *(s16 **)(D_004388C4 + 0x30);
     if ((flags & 1) != 0) {
         if (timers[6] == 0) {
@@ -252,7 +252,7 @@ void func_0030D300(s32 flags) {
     }
 }
 
-void func_0030D350(void) {
+void mnuTickMapTimers(void) {
     s16 *timers = *(s16 **)(D_004388C4 + 0x30);
     if (timers[6] > 0) {
         timers[6]--;
@@ -316,19 +316,19 @@ typedef struct {
     s32 maxCount;      /* 0x20 */
 } MapSelection;
 
-void func_0030D8A0(MapSelection *selection, s32 count) {
+void fldSetMapSelectedCount(MapSelection *selection, s32 count) {
     if ((count <= selection->maxCount) && (count != 0)) {
         selection->selectedCount = count;
     }
 }
 
-void func_0030D8C0(MapSelection *selection) {
+void fldIncreaseMapSelectedCount(MapSelection *selection) {
     if (selection->selectedCount < 10) {
         selection->selectedCount = selection->selectedCount + 1;
     }
 }
 
-void func_0030D8E0(MapSelection *selection) {
+void fldDecreaseMapSelectedCount(MapSelection *selection) {
     if (1 < selection->selectedCount) {
         selection->selectedCount = selection->selectedCount - 1;
     }
@@ -371,7 +371,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030E010);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030E030);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", releaseLocalMapResources);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", fldReleaseLocalMapResources);
 
 void func_0030E130(void) {
     s32 temp_v0;
@@ -405,7 +405,7 @@ void func_0030E878(void) {
 
 extern s32 func_0030EE40(s32, s32);
 
-extern void func_0030EF88(s32, u16);
+extern void fldSetMapRequestInterval(s32, u16);
 
 extern void func_0030E940(void);
 
@@ -422,7 +422,7 @@ void func_0030E880(void) {
     handler = func_0030EE40(0x14, 0xC);
     D_004390AC = handler;
     *(s32 *)(D_004390AC + 0x18) = (s32)func_0030E940;
-    func_0030EF88(handler, 0);
+    fldSetMapRequestInterval(handler, 0);
     D_004390B0 = func_0030EE40(0x14, 0x18);
     *(s32 *)(D_004390B0 + 0x18) = (s32)func_0030E958;
     D_004390A8 = 5;
@@ -452,7 +452,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030EE40);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030EF18);
 
-void func_0030EF38(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+void fldAdvanceMapRequest(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     u32 *puVar1;
 
     puVar1 = *(u32 **)(arg0 + 8);
@@ -470,7 +470,7 @@ void func_0030EF38(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     *(s16 *)(arg0 + 0x16) = *(s16 *)(arg0 + 0x16) + 1;
 }
 
-void func_0030EF88(s32 arg0, u16 arg1) {
+void fldSetMapRequestInterval(s32 arg0, u16 arg1) {
     *(u16 *)(arg0 + 0x14) = arg1;
 }
 
@@ -478,9 +478,9 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030EF90);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F038);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", loadMapResource);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", fldLoadMapResource);
 
-u32 func_0030F160(s32 *arg0) {
+u32 fldReleaseMapResource(s32 *arg0) {
     if (*arg0 != 0) {
         func_0032BBB0(*arg0);
         *arg0 = 0;
@@ -506,19 +506,19 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F420);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F4B8);
 
-void func_0030F800(float *arg0, float *arg1) {
+void sdfVec3AddInPlace(float *arg0, float *arg1) {
     *arg0 = *arg0 + *arg1;
     arg0[1] = arg0[1] + arg1[1];
     arg0[2] = arg0[2] + arg1[2];
 }
 
-void func_0030F838(float *arg0, float *arg1) {
+void sdfVec3SubtractInPlace(float *arg0, float *arg1) {
     *arg0 = *arg0 - *arg1;
     arg0[1] = arg0[1] - arg1[1];
     arg0[2] = arg0[2] - arg1[2];
 }
 
-void func_0030F870(float arg0, float arg1, float arg2, float *arg3) {
+void sdfVec3AddComponents(float arg0, float arg1, float arg2, float *arg3) {
     *arg3 = *arg3 + arg0;
     arg3[1] = arg3[1] + arg1;
     arg3[2] = arg3[2] + arg2;
@@ -530,7 +530,7 @@ void func_0030F898(f32 x, f32 y, f32 z, f32 *out) {
     out[2] = z;
 }
 
-void func_0030F8A8(float arg0, float *arg1) {
+void sdfVec3ScaleInPlace(float arg0, float *arg1) {
     *arg1 = *arg1 * arg0;
     arg1[1] = arg1[1] * arg0;
     arg1[2] = arg1[2] * arg0;
@@ -538,11 +538,11 @@ void func_0030F8A8(float arg0, float *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F8D0);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", vectorLength);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", fldVectorLength);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", normalizedVectorDot);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", fldNormalizedVectorDot);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", vec3AngleBetween);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", fldVec3AngleBetween);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030FA28);
 
@@ -575,14 +575,14 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310648);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310888);
 
-void func_003109D0(float *arg0, float *arg1, float *arg2) {
+void sdfVec4Add(float *arg0, float *arg1, float *arg2) {
     *arg0 = *arg1 + *arg2;
     arg0[1] = arg1[1] + arg2[1];
     arg0[2] = arg1[2] + arg2[2];
     arg0[3] = arg1[3] + arg2[3];
 }
 
-void func_00310A18(float *arg0, float *arg1, float *arg2) {
+void sdfQuatMultiply(float *arg0, float *arg1, float *arg2) {
     *arg0 = (arg1[3] * *arg2 + *arg1 * arg2[3] + arg1[1] * arg2[2]) -
                           arg1[2] * arg2[1];
     arg0[1] = (arg1[3] * arg2[1] + arg1[1] * arg2[3] + arg1[2] * *arg2) -
@@ -593,7 +593,7 @@ void func_00310A18(float *arg0, float *arg1, float *arg2) {
                               arg1[2] * arg2[2];
 }
 
-float func_00310B20(float *arg0, float *arg1) {
+float sdfQuatDot(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2] +
                   arg0[3] * arg1[3];
 }
@@ -604,9 +604,9 @@ float func_00310B60(float *arg0, float *arg1) {
                   (*arg0 * arg1[1] - arg0[1] * *arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", vec4ArcCosDot);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", fldVec4ArcCosDot);
 
-float func_00310BC8(float *quaternion) {
+float mdlQuaternionLengthSquared(float *quaternion) {
     return *quaternion * *quaternion + quaternion[1] * quaternion[1] +
                   quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3];
 }
@@ -629,17 +629,17 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionBlendNormalize);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311178);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311340);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatBlendAngular);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003114A0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatSquad);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311538);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatLog);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003115F0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatExp);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003116D0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatSquadControl);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003117F0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatForwardVector);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311888);
 
@@ -665,7 +665,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311F20);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003120B8);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", destroyTaskWork);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfDestroyTaskWork);
 
 void func_00312178(s32 arg0, s32 arg1) {
     if (arg1 != 0) {
@@ -687,11 +687,11 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312320);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003123D0);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312438);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfClearTaskList);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003124B0);
 
-void *func_00312550(void *head, s32 key) {
+void *sdfFindTaskListNodeByKey(void *head, s32 key) {
     void *n;
 
     n = *(void **)((s32)head + 8);
@@ -726,19 +726,19 @@ s32 kwlnTaskExists(u32 name) {
     return func_00101740(name) != 0;
 }
 
-void attachTaskItem(u8 *work, u32 *item) {
+void sdfAttachTaskItem(u8 *work, u32 *item) {
     u32 result = func_00312188(*(u32 *)(work + 0xc), *item, func_00312A48(item));
     if (*(u32 *)(work + 0x10) == 0) {
         *(u32 *)(work + 0x10) = result;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", removeTaskItem);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfRemoveTaskItem);
 
 s32 func_003127E8(void *p, s32 key) {
     void *r;
 
-    r = func_00312550(*(void **)((s32)p + 0xC), key);
+    r = sdfFindTaskListNodeByKey(*(void **)((s32)p + 0xC), key);
     if (r != NULL) {
         return *(s32 *)((s32)r + 0x10);
     }
@@ -781,7 +781,7 @@ void func_00312F58(ShortPair2C *p, s32 a, s32 b) {
     p->h2E = b;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", destroyGridWork);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfDestroyGridWork);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312FB0);
 
@@ -865,7 +865,7 @@ void func_00313F88(u8 *work) {
     do {
         u16 id = *source++;
         if (id != 0) {
-            setScriptFlag(work, id);
+            scrSetFlag(work, id);
             *slots = id;
         }
         slots++;
@@ -883,7 +883,7 @@ void func_00314020(u8 *work) {
     do {
         u16 id = *source++;
         if (id != 0) {
-            setScriptFlag(work, id);
+            scrSetFlag(work, id);
         }
         index++;
     } while (index < 40);
@@ -1014,7 +1014,7 @@ u8 func_00314C18(u8 *context, u32 entryId) {
     return context[0x55];
 }
 
-void func_00314C48(s32 unused, u32 v, u32 *a, u32 *b) {
+void scrDecodePackedFlagIndex(s32 unused, u32 v, u32 *a, u32 *b) {
     u32 lo;
 
     v &= 0xFFFF;
@@ -1028,9 +1028,9 @@ void func_00314C68(s32 arg0) {
     memset(arg0 + 0x58, 0, 0x154);
 }
 
-s32 setScriptFlag(u8 *work, u16 index) {
+s32 scrSetFlag(u8 *work, u16 index) {
     u32 word, shift;
-    func_00314C48((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     *(u32 *)(work + 0x58 + word * 4) |= 1U << shift;
     return 1;
 }
@@ -1039,10 +1039,10 @@ void func_00314CE8(u8 *work, u16 id) {
     u32 word, shift;
     u32 status = func_00315030(work, id);
     if (status == 1) {
-        func_00314C48((s32)work, id, &word, &shift);
+        scrDecodePackedFlagIndex((s32)work, id, &word, &shift);
         *(u32 *)(work + 0x58 + word * 4) &= ~(status << shift);
-        if (findScriptSlot(work, id) >= 0) {
-            removeScriptSlot(work, id);
+        if (scrFindSlot(work, id) >= 0) {
+            scrRemoveSlot(work, id);
         }
     }
 }
@@ -1052,14 +1052,14 @@ void func_00314D90(void) {
     s32 temp_v1;
 
     memset(D_00435DD0 + 0x16ef0, 0, 0x10);
-    temp_v0 = func_002C4C28(0x10, 0);
-    temp_v1 = func_002C4C28(0x10, 1);
+    temp_v0 = mnuPickPairedTableValue(0x10, 0);
+    temp_v1 = mnuPickPairedTableValue(0x10, 1);
     for (; (s32)temp_v0 < temp_v1; temp_v0 = temp_v0 + 1) {
         func_001B7940(temp_v0 & 0xffff, 1);
     }
 }
 
-void func_00314E20(u32 id) {
+void scrSetGlobalBitFlag(u32 id) {
     u16 bit;
     u32 *word;
     s32 offset;
@@ -1074,36 +1074,36 @@ void func_00314E20(u32 id) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314E80);
 
-void func_00314ED8(u8 *work, u16 index) {
+void scrSetSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
-    func_00314C48((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     *(u32 *)(work + 0x58 + word * 4) |= 4U << shift;
 }
 
-void func_00314F30(u8 *work, u16 index) {
+void scrClearSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
-    func_00314C48((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     *(u32 *)(work + 0x58 + word * 4) &= ~(4U << shift);
 }
 
 void func_00314F90(u8 *work) {
     s32 index = 0;
     do {
-        func_00314F30(work, (u16)index);
+        scrClearSecondaryScriptFlag(work, (u16)index);
         index++;
     } while (index < 0x2A0);
 }
 
-u32 func_00314FE0(u8 *work, u16 index) {
+u32 scrGetSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
-    func_00314C48((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     return *(u32 *)(work + 0x58 + word * 4) & (4U << shift);
 }
 
 u32 func_00315030(u8 *work, u16 index) {
     u32 word, shift;
     u32 mask;
-    func_00314C48((s32)work, index, &word, &shift);
+    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
     mask = *(u32 *)(work + 0x58 + word * 4);
     if (mask & (2U << shift)) {
         return 2;
@@ -1125,7 +1125,7 @@ s32 func_00315098(s32 arg0, s32 arg1) {
     return 0;
 }
 
-s32 findScriptSlot(u8 *work, u16 key) {
+s32 scrFindSlot(u8 *work, u16 key) {
     u32 index;
     u16 *entries = (u16 *)(work + 0x22);
     for (index = 0; index < 24; index++) {
@@ -1160,8 +1160,8 @@ u16 func_00315170(s32 arg0, s32 arg1, u16 arg2) {
     return temp_v0;
 }
 
-s32 removeScriptSlot(u8 *work, u16 key) {
-    s32 index = findScriptSlot(work, key);
+s32 scrRemoveSlot(u8 *work, u16 key) {
+    s32 index = scrFindSlot(work, key);
     if (index >= 0) {
         *(u16 *)(work + 0x22 + index * 2) = 0;
         return 1;
@@ -1307,7 +1307,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316280);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003162D8);
 
-void func_00316308(u32 context, u16 entryId, u32 bit) {
+void scrSetEntryFlag(u32 context, u16 entryId, u32 bit) {
     ScriptFlagEntry *entry;
     if (bit < 16) {
         entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
@@ -1315,7 +1315,7 @@ void func_00316308(u32 context, u16 entryId, u32 bit) {
     }
 }
 
-void func_00316350(u32 context, u16 entryId, u32 bit) {
+void scrClearEntryFlag(u32 context, u16 entryId, u32 bit) {
     ScriptFlagEntry *entry;
     if (bit < 16) {
         entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
@@ -1323,19 +1323,19 @@ void func_00316350(u32 context, u16 entryId, u32 bit) {
     }
 }
 
-s32 func_003163A0(u32 context, u16 entryId, u32 bit) {
+s32 scrTestEntryFlag(u32 context, u16 entryId, u32 bit) {
     if (bit >= 16) {
         return 0;
     }
     return (((ScriptFlagEntry *)func_00314B80(context, entryId))->flags & (1 << bit)) != 0;
 }
 
-void func_003163F0(u32 context, u16 entryId, u16 lowFlags) {
+void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags) {
     ScriptFlagEntry *entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
     entry->flags = (entry->flags & 0xFFFF0000) | lowFlags;
 }
 
-u16 func_00316430(u32 context, u16 entryId) {
+u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
     return *(u16 *)&((ScriptFlagEntry *)func_00314B80(context, entryId))->flags;
 }
 

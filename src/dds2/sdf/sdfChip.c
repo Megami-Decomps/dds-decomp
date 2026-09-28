@@ -17,7 +17,7 @@ INCLUDE_ASM(const s32, "sdf/sdfChip", func_00328E48);
 
 INCLUDE_ASM(const s32, "sdf/sdfChip", func_00328F68);
 
-s32 func_00328F88(s32 address) {
+s32 sdfChipIsInRange(s32 address) {
     s32 withinRange;
 
     withinRange = 0;

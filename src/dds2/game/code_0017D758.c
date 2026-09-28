@@ -16,7 +16,7 @@ INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D780);
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D7A8);
 
-void func_0017D9E0(u32 arg0) {
+void effReleaseScatterObject(u32 arg0) {
     s32 temp_v0;
 
     temp_v0 = (s32)arg0;
@@ -30,25 +30,25 @@ void func_0017D9E0(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DA28);
 
-void func_0017DC78(s32 arg0, u32 arg1) {
+void effCreateScatterResource(s32 arg0, u32 arg1) {
     u32 temp_v0;
 
     temp_v0 = effPcpScatterResCreate(arg1);
     *(u32 *)(arg0 + 0x7c) = temp_v0;
 }
 
-void func_0017DCA8(s32 arg0, s32 arg1) {
+void effShareScatterResource(s32 arg0, s32 arg1) {
     u32 temp_v0;
 
     temp_v0 = effPcpScatterResAddRef(*(u32 *)(arg1 + 0x7c));
     *(u32 *)(arg0 + 0x7c) = temp_v0;
 }
 
-s32 func_0017DCD8(s32 arg0, s32 arg1) {
+s32 effGetScatterWideBlock(s32 arg0, s32 arg1) {
     return *(s32 *)(arg0 + 100) + arg1 * *(s32 *)(arg0 + 0x5c) * 0x10;
 }
 
-s32 func_0017DCF0(s32 arg0, s32 arg1) {
+s32 effGetScatterNarrowBlock(s32 arg0, s32 arg1) {
     return *(s32 *)(arg0 + 0x68) + arg1 * *(s32 *)(arg0 + 0x5c) * 8;
 }
 

@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 
-void func_00110DE0(Scene *scene) {
+void dds3ClearSceneObjectState(Scene *scene) {
     SceneObject *object;
 
     object = scene->object;

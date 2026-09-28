@@ -139,15 +139,15 @@ void func_00262398(s32 arg0) {
 
     temp_v0 = arg0 + 0x680;
     func_002BDD60(*(u32 *)(arg0 + 0x90));
-    clearMenuEntries(temp_v0);
+    mnuClearEntries(temp_v0);
     func_0027FA20(temp_v0);
-    shutdownMenuContext(temp_v0);
-    destroyPanelGroup(*(u32 *)(arg0 + 0xd10));
+    mnuShutdownContext(temp_v0);
+    mnuDestroyPanelGroup(*(u32 *)(arg0 + 0xd10));
     func_002832F8(*(u32 *)(arg0 + 0xd14));
-    releaseMenuAssets(arg0 + 0xd1c);
+    mnuReleaseAssets(arg0 + 0xd1c);
     func_00276320(arg0 + 0x4f8);
     func_00271648(arg0 + 0x4f8);
-    menuResetWorkFloats();
+    mnuResetWorkFloats();
 }
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
@@ -207,8 +207,8 @@ s32 func_00262A88(void) {
 }
 
 void func_00262AC0(u32 arg0, s32 arg1) {
-    func_00285A68(arg1 + 0x574);
-    func_0027FF60(arg1 + 0x680);
+    initPartyPanelSlots(arg1 + 0x574);
+    menuUpdateHandleStates(arg1 + 0x680);
     func_00280048(arg1 + 0x680);
 }
 
@@ -219,6 +219,14 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00262BA8);
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262C08);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262CE8);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAB8);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAC8);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAD8);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAE8);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC510);
 
@@ -241,12 +249,4 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAB8);
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAC8);
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAD8);
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAE8);
 

@@ -12,7 +12,7 @@ typedef struct {
 
 extern u64 func_00329930(s32);
 
-void func_00116CB8(ModelRangeObj *object) {
+void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     ModelRangeData *data;
     s32 resource;
     u64 handle;

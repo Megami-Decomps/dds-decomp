@@ -314,7 +314,7 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_00195AB0);
 
 void *effAllocSlotArray(s32 n) {
     void *mem1 = func_003292A8(n * 0x38 + 0xC);
-    void *mem2 = func_003298F8(mem1);
+    void *mem2 = sdfResourceRetainAddress(mem1);
     u32 i = 0;
     EffSlot38 *r = mem2;
     u8 *end = (u8 *)r + n * 0x38;

@@ -25,31 +25,31 @@ extern u64 mdlFlagTest(u64);
 
 extern ScriptState *D_003BD78C;
 
-u32 func_0010D620(s32 index) {
+u32 scrGetProcedureAddress(s32 index) {
     return D_003BD78C->procedures[index].address;
 }
 
-u32 func_0010D638(s32 index) {
+u32 scrGetLabelAddress(s32 index) {
     return D_003BD78C->labels[index].address;
 }
 
-u32 func_0010D650(void) {
+u32 scrGetProgramCounter(void) {
     return D_003BD78C->programCounter;
 }
 
-void func_0010D660(u32 address) {
+void scrSetProgramCounter(u32 address) {
     D_003BD78C->programCounter = address;
 }
 
-u32 func_0010D670(void) {
+u32 scrGetTimer(void) {
     return D_003BD78C->timer;
 }
 
-u32 func_0010D680(void) {
+u32 scrGetCommandTimer(void) {
     return D_003BD78C->commandTimer;
 }
 
-u32 func_0010D690(void) {
+u32 scrGetWindow(void) {
     return D_003BD78C->window;
 }
 

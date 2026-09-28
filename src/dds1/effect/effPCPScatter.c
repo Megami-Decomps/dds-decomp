@@ -15,10 +15,10 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern void *func_002CFEB8(s32 size);
 extern u32 effParamWorkDuplicate(u32 param);
 extern u32 func_002D03F8(u32 size);
-extern u32 *func_002D0A48(u32 handle);
+extern u32 *sdfResourceRetainAddress(u32 handle);
 extern void func_002CFF98(void *ptr);
 
-extern void func_00175D88(u32 res);
+extern void effReleaseScatterObject(u32 res);
 extern void func_002DAA68(u32 res);
 extern void func_002D0918(u32 res);
 extern u32 func_002D3288(u32 resId);
@@ -68,7 +68,7 @@ typedef struct {
     u32 unk30;
 } PcpScatterPool;
 
-extern PcpScatterPool *func_00172C68(s32 groups);
+extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void func_00172F88(PcpScatterWork3 *work, u32 resId);
 extern u32 effMiscRand(void *table);
 extern u32 effParamWorkCreate(s32 kind, void *params);
@@ -161,7 +161,7 @@ struct PcpScatterWork4 {
 };
 
 extern PcpScatterWork4 *func_001730D0(void *param0, void *param1);
-extern void func_00176050(u32 param0, u32 param1);
+extern void effShareScatterResource(u32 param0, u32 param1);
 
 /* func_00173B48 */
 struct PcpScatterWork5 {
@@ -229,7 +229,7 @@ void func_00170B88(void *data)
     func_001708A0(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
-PcpScatterWork1 *func_00170BF0(src)
+PcpScatterWork1 *effPcpScatterSharedDuplicate(src)
     PcpScatterWork1 *src;
 {
     PcpScatterWork1 *work;
@@ -247,7 +247,7 @@ PcpScatterWork1 *func_00170BF0(src)
         }
         count = work->unk88;
         handle = func_002D03F8(count * 4);
-        buf = func_002D0A48(handle);
+        buf = sdfResourceRetainAddress(handle);
         work->unk90 = handle;
         work->unk8C = buf;
         for (i = 0; i < count; i++) {
@@ -304,7 +304,7 @@ void func_001717E0(void *data)
     func_00171550(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
-PcpScatterWork8 *func_00171848(src)
+PcpScatterWork8 *effPcpScatterLinkedDuplicate(src)
     PcpScatterWork8 *src;
 {
     PcpScatterWork8 *work;
@@ -322,7 +322,7 @@ PcpScatterWork8 *func_00171848(src)
         }
         count = work->unk78;
         handle = func_002D03F8(count * 4);
-        buf = func_002D0A48(handle);
+        buf = sdfResourceRetainAddress(handle);
         work->unk80 = handle;
         work->unk7C = buf;
         for (i = 0; i < count; i++) {
@@ -395,7 +395,7 @@ typedef struct {
     u32 unk68;
 } PcpScatterWork2Copy;
 
-PcpScatterWork2Copy *func_00172468(src)
+PcpScatterWork2Copy *effPcpScatterTableDuplicate(src)
     PcpScatterWork2Copy *src;
 {
     PcpScatterWork2Copy *work;
@@ -416,7 +416,7 @@ PcpScatterWork2Copy *func_00172468(src)
         }
         count = work->unk60;
         handle = func_002D03F8(count * 4);
-        buf = func_002D0A48(handle);
+        buf = sdfResourceRetainAddress(handle);
         work->unk68 = handle;
         work->unk64 = buf;
         for (i = 0; i < count; i++) {
@@ -468,7 +468,7 @@ extern void *func_002DA730(void);
 extern void func_002DA420(void *obj, f32 value);
 extern u8 D_003D6580[0x2C];
 
-PcpScatterPool *func_00172C68(s32 groups) {
+PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     PcpScatterPool *pool;
     u32 handle;
     u32 *block;
@@ -482,7 +482,7 @@ PcpScatterPool *func_00172C68(s32 groups) {
     second = slots * 2;
     size = (first + second) * 4 + 0x34;
     handle = func_002D03F8(size);
-    block = func_002D0A48(handle);
+    block = sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (PcpScatterPool *)(block + (first + second));
     pool->firstWords = block;
@@ -572,13 +572,13 @@ PcpScatterWork4 *func_00173330(PcpScatterWork4 *work) {
     PcpScatterWork4 *child;
 
     child = func_001730D0(&work->unk40, NULL);
-    func_00176050(child->unk184, work->unk184);
+    effShareScatterResource(child->unk184, work->unk184);
     return child;
 }
 
 void func_00173378(PcpScatterWork4 *work)
 {
-    func_00175D88(work->unk184);
+    effReleaseScatterObject(work->unk184);
     func_002D0918(work->unk188);
 }
 
@@ -622,13 +622,13 @@ PcpScatterWork5 *func_00173DC0(PcpScatterWork5 *work)
     PcpScatterWork5 *child;
 
     child = func_00173B48(&work->unk40, NULL);
-    func_00176050(child->unk18C, work->unk18C);
+    effShareScatterResource(child->unk18C, work->unk18C);
     return child;
 }
 
 void func_00173E08(PcpScatterWork5 *work)
 {
-    func_00175D88(work->unk18C);
+    effReleaseScatterObject(work->unk18C);
     func_002D0918(work->unk190);
 }
 
@@ -672,13 +672,13 @@ PcpScatterWork6 *func_001748C8(PcpScatterWork6 *work)
     PcpScatterWork6 *child;
 
     child = func_00174680(&work->unk40, NULL);
-    func_00176050(child->unk194, work->unk194);
+    effShareScatterResource(child->unk194, work->unk194);
     return child;
 }
 
 void func_00174910(PcpScatterWork6 *work)
 {
-    func_00175D88(work->unk194);
+    effReleaseScatterObject(work->unk194);
     func_002D0918(work->unk198);
 }
 
@@ -722,13 +722,13 @@ PcpScatterWork7 *func_00175468(PcpScatterWork7 *work)
     PcpScatterWork7 *child;
 
     child = func_00175230(&work->unk40, NULL);
-    func_00176050(child->unk134, work->unk134);
+    effShareScatterResource(child->unk134, work->unk134);
     return child;
 }
 
 void func_001754B0(PcpScatterWork7 *work)
 {
-    func_00175D88(work->unk134);
+    effReleaseScatterObject(work->unk134);
     func_002D0918(work->unk138);
 }
 

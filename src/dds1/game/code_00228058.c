@@ -4,7 +4,7 @@ extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 void *func_002CFEB8(s32 size);
 
-void initializeEventVisualData(s32 arg0);
+void evtInitializeVisualData(s32 arg0);
 
 void func_00101A68(s32 arg0, void *arg1);
 
@@ -34,7 +34,7 @@ extern u32 D_003BBDB8;
 
 extern s32 D_003BAA00;
 
-extern s64 func_001019C8(u64);
+extern s64 kwlnTaskIsRegistered(u64);
 
 extern u64 func_0010D428(u64);
 
@@ -67,7 +67,7 @@ u32 func_00228210(void) {
     s64 temp_v1;
 
     temp_v0 = func_0010D428(0);
-    temp_v1 = func_001019C8(temp_v0);
+    temp_v1 = kwlnTaskIsRegistered(temp_v0);
     if (temp_v1 != 0) {
         func_00235088(temp_v0);
     }
@@ -79,7 +79,7 @@ u32 func_00228258(void) {
     s64 temp_v1;
 
     temp_v0 = func_0010D428(0);
-    temp_v1 = func_001019C8(temp_v0);
+    temp_v1 = kwlnTaskIsRegistered(temp_v0);
     if (temp_v1 != 0) {
         func_002350B0(temp_v0);
     }
@@ -91,7 +91,7 @@ u32 func_002282A0(void) {
     s64 temp_v1;
 
     temp_v0 = func_0010D428(0);
-    temp_v1 = func_001019C8(temp_v0);
+    temp_v1 = kwlnTaskIsRegistered(temp_v0);
     if (temp_v1 != 0) {
         func_002350E0(temp_v0);
     }
@@ -108,13 +108,13 @@ u32 func_002282E8(void) {
     temp_v0 = func_0010D428(0);
     temp_v1 = func_0010D428(1);
     temp_v2 = func_0010D428(2);
-    func_00132AE8(temp_v0, temp_v1, temp_v2);
+    fldSetFadeTarget(temp_v0, temp_v1, temp_v2);
     return 1;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACAE0);
 
-u32 func_00228350(void) {
+u32 evtSetSkyAlpha(void) {
     s64 v;
 
     v = func_0010D428(1);
@@ -126,23 +126,23 @@ u32 func_00228350(void) {
         func_0010AC10("warning : SET_SKY_A alpha > 255\n");
         v = 255;
     }
-    func_00235348(func_0010D428(0), v);
+    evtBeginSkyParameterTransition(func_0010D428(0), v);
     return 1;
 }
 
-u32 func_002283C8(void) {
-    func_00235340(1);
+u32 evtShowSky(void) {
+    evtSetSkyOverlayEnabled(1);
     return 1;
 }
 
-u32 func_002283E8(void) {
-    func_00235340(0);
+u32 evtHideSky(void) {
+    evtSetSkyOverlayEnabled(0);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228408);
 
-u32 func_00228460(void) {
+u32 evtOpcodePlayBgm(void) {
     u64 temp_v0;
     u64 temp_v1;
 
@@ -152,7 +152,7 @@ u32 func_00228460(void) {
     return 1;
 }
 
-u32 func_002284A0(void) {
+u32 evtOpcodeTransitionBgm(void) {
     u64 temp_v0;
     u64 temp_v1;
 
@@ -184,7 +184,7 @@ u32 func_00228548(void) {
     return 1;
 }
 
-u32 func_00228570(void) {
+u32 evtOpcodeSetBgmVolumePan(void) {
     u64 temp_v0;
     u64 temp_v1;
 
@@ -230,7 +230,7 @@ typedef struct {
     u32 phaseCounter;  /* 0xA44 */
 } SolarWorldState;
 
-s32 func_002286C0(void) {
+s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
     phase = ((SolarWorldState *)D_003BAA00)->phase;
@@ -240,11 +240,11 @@ s32 func_002286C0(void) {
     return phase;
 }
 
-u8 func_002286E8(void) {
+u8 evtGetSolarPhase(void) {
     return ((SolarWorldState *)D_003BAA00)->phase;
 }
 
-void func_002286F8(u8 phase) {
+void evtSetSolarPhase(u8 phase) {
     ((SolarWorldState *)D_003BAA00)->phase = phase & 0xf;
     ((SolarWorldState *)D_003BAA00)->phaseCounter = 0;
 }
@@ -284,33 +284,33 @@ void *func_00228A00(s32 owner) {
     s32 overlay;
 
     overlay = (s32)func_002CFEB8(0x104);
-    initializeEventVisualData(overlay);
-    func_00228B38((u32 *)overlay);
+    evtInitializeVisualData(overlay);
+    evtLoadSolarNoiseSprite((u32 *)overlay);
     func_00101A68(owner, (void *)overlay);
     return (void *)func_002287C0;
 }
 
-void func_00228A58(void) {
+void evtFreeSolarOverlayWork(void) {
     u64 overlay;
 
     overlay = func_00101A70();
-    releaseSolarNoiseSprite(overlay);
+    evtReleaseSolarNoiseSprite(overlay);
     func_002CFF98(overlay);
     D_003BBDC0 = 0;
 }
 
-void func_00228A98(void) {
+void evtStartSolarOverlay(void) {
     if (D_003BBDC0 != 0) {
         return;
     }
-    D_003BBDC0 = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)func_00228A00, (s32)func_00228A58, 0);
+    D_003BBDC0 = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)func_00228A00, (s32)evtFreeSolarOverlayWork, 0);
     func_00228710();
     func_00228778();
-    func_002286F8(0);
+    evtSetSolarPhase(0);
     ((SolarWorldState *)D_003BAA00)->secondaryPhase = 0;
 }
 
-void func_00228B00(void) {
+void evtStopSolarOverlay(void) {
     if (D_003BBDC0 != 0) {
         kwlnTaskDestroyWithHierarchy(D_003BBDC0, 1);
     }

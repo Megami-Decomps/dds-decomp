@@ -1,11 +1,11 @@
 #include "common.h"
 
-extern u64 func_002CFBB0(u64);
+extern u64 sdfFindThreadById(u64);
 
 void func_002CFC18(void) {
     u64 temp_v0;
 
-    temp_v0 = func_002CFBB0(0xffffffffffffffff);
+    temp_v0 = sdfFindThreadById(0xffffffffffffffff);
     func_002CFB18(temp_v0);
 }
 
@@ -26,7 +26,7 @@ typedef struct {
     SdfNode *next;
 } SdfNodeCursor;
 
-void func_002CFD80(SdfNodeCursor *cursor) {
+void sdfAdvanceNodeCursor(SdfNodeCursor *cursor) {
     SdfNode *next;
 
     next = cursor->next;

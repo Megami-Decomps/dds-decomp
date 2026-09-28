@@ -101,7 +101,7 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263728);
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263838);
 
 void func_002639E0(s32 arg0) {
-    drawMenuBackdrop(arg0 + 0xd1c, 0x20);
+    mnuDrawBackdrop(arg0 + 0xd1c, 0x20);
 }
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);

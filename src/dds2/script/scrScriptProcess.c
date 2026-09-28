@@ -11,7 +11,7 @@ s32 func_0010C298();
 
 extern ScrProcGlobals *D_00435DD0;
 
-s32 func_0010BD50(s32 scriptId, s32 option)
+s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 {
     u32 buf[4];
     void *handle;
@@ -39,7 +39,7 @@ s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
     return id;
 }
 
-void func_0010BE08(void)
+void scrClearProcessGlobals(void)
 {
     s32 i;
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
@@ -52,13 +52,13 @@ void func_0010BE08(void)
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE40);
 
-void func_0010BE78(u32 arg0) {
-    func_0010BD50(arg0, 0);
+void scrCreateProcessWithDefaultOption(u32 arg0) {
+    scrOpenProcessFromResource(arg0, 0);
 }
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE90);
 
-void func_0010BEC8(u32 arg0) {
+void scrCreateTaskWithDefaultOption(u32 arg0) {
     func_0010BC40(arg0, 0);
 }
 

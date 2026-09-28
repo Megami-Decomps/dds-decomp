@@ -78,7 +78,7 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330C18);
 
-SdfPacket *func_00330CA0(SdfModel *arg0, SdfPacket *arg1, s32 arg2) {
+SdfPacket *sdfModelWriteAddressPacket(SdfModel *arg0, SdfPacket *arg1, s32 arg2) {
     u32 a = (arg0->unk30 + (arg2 << 7)) & 0x0FFFFFFF;
 
     arg1->u0.q = ((s64)a << 32) | 0x30000008;

@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_00195BC8(s32 arg0) {
+void effMathReleaseWorkResource(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0010FFE8(void);
+extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 func_00110C70(u64, u64, u64);
 
@@ -28,7 +28,7 @@ void func_00113660(s32 arg0, u32 arg1) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)(arg0 + 0x18);
-    func_00111B30(arg0, 0x2000);
+    dds3SetObjectFlags(arg0, 0x2000);
     *(u32 *)(temp_v0 + 0x1c) = arg1;
     *(u32 *)(temp_v0 + 0x20) = 0;
 }
@@ -47,7 +47,7 @@ void func_00113760(u32 arg0) {
     s32 *piVar1;
 
     func_00113CD0();
-    func_0010F810(arg0);
+    effObjFreeInner(arg0);
     piVar1 = *(s32 **)((s32)arg0 + 0x18);
     if (*piVar1 != -1) {
         *piVar1 = -1;
@@ -99,7 +99,7 @@ u32 func_00114008(u64 arg0) {
     s32 temp_v0;
     u64 temp_v1;
 
-    temp_v1 = func_0010FFE8();
+    temp_v1 = dds3GetWorldSecondaryObject();
     temp_v0 = func_00110C70(temp_v1, arg0, 6);
     return *(u32 *)(*(s32 *)(temp_v0 + 0x18) + 4);
 }
@@ -121,7 +121,7 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_00114070);
 void func_00114110(s32 arg0) {
     u32 *puVar1;
 
-    func_0010F810();
+    effObjFreeInner();
     puVar1 = *(u32 **)(arg0 + 0x18);
     func_00111A68(*puVar1);
     func_00328E48(puVar1);

@@ -16,15 +16,15 @@ extern u32 func_00116D38(u32);
 
 INCLUDE_ASM(const s32, "game/code_00111610", func_00111610);
 
-void func_00111698(SlotObject *obj, u32 value) {
+void dds3SetSlotValue(SlotObject *obj, u32 value) {
     obj->data->value = value;
 }
 
-void func_001116A8(SlotObject *obj, u32 key) {
+void dds3SetSlotKey(SlotObject *obj, u32 key) {
     obj->data->key = key;
 }
 
-void func_001116B8(SlotObject *obj) {
+void dds3ReloadSlotPath(SlotObject *obj) {
     SlotData *data;
     u32 path;
 
@@ -36,7 +36,7 @@ void func_001116B8(SlotObject *obj) {
     data->path = path;
 }
 
-void func_001116F8(SlotObject *obj) {
+void dds3ReleaseSlotPath(SlotObject *obj) {
     SlotData *data;
     s32 path;
 
@@ -48,7 +48,7 @@ void func_001116F8(SlotObject *obj) {
     }
 }
 
-u32 func_00111730(SlotObject *obj) {
+u32 dds3GetSlotPath(SlotObject *obj) {
     return obj->data->path;
 }
 

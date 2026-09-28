@@ -30,7 +30,7 @@ void func_001165F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_00116608);
 
-void func_001166B8(UnitObject *obj) {
+void dds3ClearUnitObjectLowFlags(UnitObject *obj) {
     obj->data->flags = obj->data->flags & 0xfffffffc;
 }
 

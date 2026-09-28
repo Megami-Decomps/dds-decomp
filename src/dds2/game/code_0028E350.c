@@ -49,7 +49,7 @@ INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F380);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F570);
 
-s32 func_0028F770(s32 object, MenuSearchState *state) {
+s32 mnuSelectMatchingNode(s32 object, MenuSearchState *state) {
     MenuSearchNode *current = *(MenuSearchNode **)(*(s32 *)(object + 4) + 0x10);
     s32 index = 0;
     while (current != 0) {

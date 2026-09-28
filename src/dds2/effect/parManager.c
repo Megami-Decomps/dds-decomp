@@ -24,7 +24,7 @@ void func_00160B58(u32 arg0) {
     if (temp_v0 != 0) {
         func_003297C8(temp_v0);
     }
-    destroyEffectResources(arg0);
+    effDestroyResources(arg0);
     func_00328E48(arg0);
 }
 
@@ -48,7 +48,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00161958);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161A10);
 
-void func_00161B20(s32 arg0, s32 arg1) {
+void parClearSlotFlag(s32 arg0, s32 arg1) {
     *(u16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 4) + 4) = 0;
 }
 

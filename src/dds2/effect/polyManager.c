@@ -97,7 +97,7 @@ void func_00166EA0(float factor, PolyTransform *transform) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);
 
-void func_00167058(s32 arg0) {
+void polyResetEntries(s32 arg0) {
     u32 temp_v0;
     s32 *piVar2;
     u32 temp_v1;

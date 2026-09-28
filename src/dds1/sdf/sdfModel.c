@@ -2,7 +2,7 @@
 
 extern void *func_002DAAA0(s32 arg0, s32 arg1, s32 arg2);
 extern void *func_002CFEB8(s32 arg0);
-extern void *devCreateRequest(s32 arg0, s32 arg1, s32 arg2);
+extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void func_002EFD30(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(void);
@@ -143,7 +143,7 @@ extern SdfModel *func_002D8918(void *arg0, void *arg1);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7D68);
 
-SdfPacket *func_002D7DF0(SdfModel *model, SdfPacket *packet, s32 index) {
+SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
     u32 address = (model->unk30 + (index << 7)) & 0x0FFFFFFF;
 
     packet->u0.q = ((s64)address << 32) | 0x30000008;

@@ -4,7 +4,7 @@
 extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
 extern void func_00195880(u32, s32);
 extern void func_00194920(u32);
-extern s32 func_00195C50(u32);
+extern s32 frFontMeasureGlyphChain(u32);
 extern void func_001958A0(u32, s32, s32);
 extern u32 func_001951C8(u32, u32, s32, u32, u32);
 extern void func_001954C8(u32, u32);
@@ -12,16 +12,16 @@ extern void func_00195450(u32, s32, s32);
 extern void func_00195460(u32, u32);
 extern void func_00195470(u32, u8);
 extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
-extern f32 normalizedVectorDot(f32 *, f32 *);
+extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 extern f32 func_002FA1C0(f32);
 extern f32 func_002E77F8(f32);
 extern f32 func_002E78F8(f32);
-extern void func_002C9638(f32 *, f32 *, f32 *);
+extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 extern void func_002C94A8(f32 *, f32 *);
 extern void func_002C8F40(f32 *, f32 *);
 extern void func_002C84F0(f32 *);
 extern void func_002CC5F0(u8 *);
-extern f32 func_002C9740(f32 *, f32 *);
+extern f32 sdfQuatDot(f32 *, f32 *);
 extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
@@ -38,17 +38,17 @@ extern u32 func_002CAD30(u32, u32, u32);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-float func_002C97E8(float *arg0) {
+float sdfQuatLengthSquared(float *arg0) {
     return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
                   arg0[3] * arg0[3];
 }
 
 float quaternionMagnitude(float *values) {
-    return fsqrtf(func_002C97E8(values));
+    return fsqrtf(sdfQuatLengthSquared(values));
 }
 
 void quaternionInverse(float *values) {
-    float lengthSquared = func_002C97E8(values);
+    float lengthSquared = sdfQuatLengthSquared(values);
     if (lengthSquared != 0.0f) {
         values[0] = -values[0] / lengthSquared;
         values[1] = -values[1] / lengthSquared;
@@ -84,8 +84,8 @@ void quaternionBlendNormalize(float *out, float *from, float *to, float fraction
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9D98);
 
-void func_002C9F60(f32 *out, f32 *from, f32 *to, f32 fraction) {
-    f32 angle = func_002C9740(from, to);
+void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
+    f32 angle = sdfQuatDot(from, to);
     if (-0.95f < angle && angle < 0.95f) {
         f32 firstWeight = func_002FA060(angle * (1.0f - fraction));
         f32 secondWeight = func_002FA060(angle * fraction);
@@ -99,15 +99,15 @@ void func_002C9F60(f32 *out, f32 *from, f32 *to, f32 fraction) {
     }
 }
 
-void func_002CA0C0(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f32 fraction) {
+void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f32 fraction) {
     f32 firstBlend[4];
     f32 secondBlend[4];
-    func_002C9F60(firstBlend, first, fourth, fraction);
-    func_002C9F60(secondBlend, second, third, fraction);
-    func_002C9F60(out, firstBlend, secondBlend, (fraction + fraction) * (1.0f - fraction));
+    sdfQuatBlendAngular(firstBlend, first, fourth, fraction);
+    sdfQuatBlendAngular(secondBlend, second, third, fraction);
+    sdfQuatBlendAngular(out, firstBlend, secondBlend, (fraction + fraction) * (1.0f - fraction));
 }
 
-void func_002CA158(f32 *out, f32 *in) {
+void sdfQuatLog(f32 *out, f32 *in) {
     f32 angle = func_002FA1C0(in[3]);
     f32 sine = func_002E77F8(angle);
     out[3] = 0.0f;
@@ -120,7 +120,7 @@ void func_002CA158(f32 *out, f32 *in) {
     }
 }
 
-void func_002CA210(f32 *out, f32 *in) {
+void sdfQuatExp(f32 *out, f32 *in) {
     f32 x = in[0], y = in[1], z = in[2];
     f32 length = fsqrtf(x * x + y * y + z * z);
     f32 sine = func_002E77F8(length);
@@ -134,25 +134,25 @@ void func_002CA210(f32 *out, f32 *in) {
     }
 }
 
-void func_002CA2F0(f32 *out, f32 *from, f32 *rotation, f32 *to) {
+void sdfQuatSquadControl(f32 *out, f32 *from, f32 *rotation, f32 *to) {
     f32 first[4], second[4], middle[4];
     out[0] = -rotation[0];
     out[1] = -rotation[1];
     out[2] = -rotation[2];
     out[3] = rotation[3];
-    func_002C9638(first, out, from);
-    func_002CA158(first, first);
-    func_002C9638(second, out, to);
-    func_002CA158(second, second);
+    sdfQuatMultiply(first, out, from);
+    sdfQuatLog(first, first);
+    sdfQuatMultiply(second, out, to);
+    sdfQuatLog(second, second);
     middle[0] = (first[0] + second[0]) * -0.25f;
     middle[1] = (first[1] + second[1]) * -0.25f;
     middle[2] = (first[2] + second[2]) * -0.25f;
     middle[3] = (first[3] + second[3]) * -0.25f;
-    func_002CA210(middle, middle);
-    func_002C9638(out, rotation, middle);
+    sdfQuatExp(middle, middle);
+    sdfQuatMultiply(out, rotation, middle);
 }
 
-void func_002CA410(f32 *rotation, f32 *out) {
+void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     f32 matrix[16];
     f32 vector[4];
     memset(vector, 0, sizeof(vector));
@@ -167,8 +167,8 @@ f32 func_002CA4A8(f32 *direction, f32 *target) {
     f32 quaternion[4];
     memset(quaternion, 0, sizeof(quaternion));
     quaternion[2] = 1.0f;
-    func_002CA410(direction, quaternion);
-    return normalizedVectorDot(quaternion, target);
+    sdfQuatForwardVector(direction, quaternion);
+    return fldNormalizedVectorDot(quaternion, target);
 }
 
 f32 func_002CA508(f32 *direction, f32 *target) {
@@ -195,7 +195,7 @@ void func_002CA6B0(s32 x, s32 y, u32 first, u32 second) {
 
 s32 func_002CA708(s32 x, s32 y, u32 first, u32 second, u32 third, s32 option) {
     u32 handle = func_00197760(x << 4, y << 3, first, second, third, 0);
-    s32 result = func_00195C50(handle);
+    s32 result = frFontMeasureGlyphChain(handle);
     func_001958A0(handle, 1, option);
     func_00194920(handle);
     return result;
@@ -208,7 +208,7 @@ s32 func_002CA778(s32 x, s32 y, u32 first, u32 second, s8 type, u32 name, s32 fl
     func_00195450(handle, x << 4, y << 3);
     func_00195460(handle, first);
     if (flag < 0) {
-        result = func_00195C50(handle);
+        result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, option);
     func_00194920(handle);
@@ -227,7 +227,7 @@ s32 func_002CAA20(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, u3
     func_00195470(handle, opacity);
     func_001954C8(handle, second);
     if (flag < 0) {
-        result = func_00195C50(handle);
+        result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, option);
     func_00194920(handle);
@@ -238,9 +238,9 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAAC8);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAC60);
 
-void destroyTaskWork(u8 *work) {
+void sdfDestroyTaskWork(u8 *work) {
     if (work != NULL) {
-        func_002CAFE0();
+        sdfClearTaskList();
         (*(void (**)(s32, u32))(work + 0x18))(-1, *(u32 *)(work + 0x10));
         func_002D0918(*(u32 *)work);
     }
@@ -283,7 +283,7 @@ typedef struct {
     void (*onRemove)(u32, u32); /* 0x14 */
 } TaskList;
 
-void func_002CAFE0(TaskList *list) {
+void sdfClearTaskList(TaskList *list) {
     TaskListNode *node;
     if (list != NULL) {
         node = list->head;
@@ -303,7 +303,7 @@ void func_002CAFE0(TaskList *list) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB058);
 
-void *func_002CB0F8(TaskList *list, s32 key) {
+void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
     TaskListNode *node;
 
     node = list->head;
@@ -343,15 +343,15 @@ s32 kwlnTaskExists(u32 name) {
     return kwlnTaskGetTaskByName(name) != 0;
 }
 
-void attachTaskItem(u8 *work, u32 *item) {
+void sdfAttachTaskItem(u8 *work, u32 *item) {
     u32 result = func_002CAD30(*(u32 *)(work + 0xc), *item, func_002CB5F0(item));
     if (*(u32 *)(work + 0x10) == 0) {
         *(u32 *)(work + 0x10) = result;
     }
 }
 
-void removeTaskItem(u8 *work, s32 key) {
-    void *item = func_002CB0F8(*(void **)(work + 0xc), key);
+void sdfRemoveTaskItem(u8 *work, s32 key) {
+    void *item = sdfFindTaskListNodeByKey(*(void **)(work + 0xc), key);
     if (item != NULL) {
         func_002CAF78(*(void **)(work + 0xc), item);
     }
@@ -360,7 +360,7 @@ void removeTaskItem(u8 *work, s32 key) {
 s32 func_002CB390(void *p, s32 key) {
     void *r;
 
-    r = func_002CB0F8(*(void **)((s32)p + 0xC), key);
+    r = sdfFindTaskListNodeByKey(*(void **)((s32)p + 0xC), key);
     if (r != NULL) {
         return *(s32 *)((s32)r + 0x10);
     }
@@ -399,7 +399,7 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB4B8);
 
 void func_002CB5A8(u8 *work) {
     if (work != NULL) {
-        destroyTaskWork(*(u8 **)(work + 0x0C));
+        sdfDestroyTaskWork(*(u8 **)(work + 0x0C));
         func_002CFF98(*(void **)(work + 4));
         func_002CFF98(*(void **)(work + 8));
         func_002D0918(*(u32 *)work);
@@ -442,7 +442,7 @@ void func_002CBAF0(ShortPair2C *p, s32 a, s32 b) {
     p->h2E = b;
 }
 
-void destroyGridWork(u8 *work) {
+void sdfDestroyGridWork(u8 *work) {
     if (work != NULL) {
         func_002CC570();
         (*(void (**)(s32, u32))(work + 0x20))(0, *(u32 *)(work + 0x30));

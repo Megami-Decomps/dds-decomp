@@ -13,7 +13,7 @@ extern u64 billCreateIndexed(u64, u64);
 extern u64 func_00159A50(u32);
 
 typedef struct {
-    void *objectHandle; /* 0x0 returned by func_00114CD0 */
+    void *objectHandle; /* 0x0 returned by effObjGetObjectHandle */
     u32 flags; /* 0x4 effect flag bits */
     u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
     void *bill; /* 0xC bill object */
@@ -43,7 +43,7 @@ void func_001147D8(u32 arg0) {
     temp_v0 = (s32)arg0;
     puVar1 = *(u32 **)(temp_v0 + 0x18);
     func_00114640(puVar1);
-    func_0010F810(arg0);
+    effObjFreeInner(arg0);
     func_00111A68(*puVar1);
     func_00328E48(*(u32 *)(temp_v0 + 0x18));
     *(u32 *)(temp_v0 + 0x18) = 0;
@@ -53,7 +53,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114828);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114BF0);
 
-u32 func_00114CD0(EffectObj *obj) {
+u32 effObjGetObjectHandle(EffectObj *obj) {
     return (u32)obj->data->objectHandle;
 }
 
@@ -176,11 +176,11 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BD8);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C50);
 
-void func_00115DF0(EffectObj *obj, u32 flags) {
+void effObjSetFlags(EffectObj *obj, u32 flags) {
     obj->data->flags = obj->data->flags | flags;
 }
 
-void func_00115E08(EffectObj *obj, u32 flags) {
+void effObjClearFlags(EffectObj *obj, u32 flags) {
     obj->data->flags = obj->data->flags & ~flags;
 }
 

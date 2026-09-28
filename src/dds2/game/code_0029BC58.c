@@ -10,7 +10,7 @@ extern u32 func_0029D790();
 
 extern u64 func_0010D650(u64);
 
-extern u64 func_00342688(void);
+extern u64 sdfSoundIsCommandBusy(void);
 
 extern s32 func_002A2330(void);
 
@@ -86,7 +86,7 @@ typedef struct {
 extern void func_00299A38(TitleSeq *, u8 *);
 extern void func_0029D550(u8 *, TitleSeq *);
 
-void func_0029BEB8(u8 *work) {
+void titleApplySequenceState(u8 *work) {
     s32 state = *(s32 *)(work + 0xB6F4);
     TitleSeq *seq = **(TitleSeq ***)(work + 0x9C);
 
@@ -95,21 +95,21 @@ void func_0029BEB8(u8 *work) {
         break;
     case 4:
         func_0029D550(work + 0x3F4, seq);
-        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 1:
         seq->unk6 = seq->unk8;
         seq->unkA = seq->unkC;
         seq->unkE = 0;
-        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 2:
         seq->unk6 = seq->unk8;
-        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 3:
         seq->unkA = seq->unkC;
-        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     }
     func_00299A38(seq, work);
@@ -145,7 +145,7 @@ typedef struct { BurstSprite sprite[8]; } BurstTable;
 extern BurstTable D_00428420;
 extern void func_00308620(BurstSprite *, u32 *, s32, s32, s32);
 
-void func_0029C4D8(s32 arg0, s32 arg1) {
+void titleDrawBurstSprites(s32 arg0, s32 arg1) {
     BurstTable table = D_00428420;
     s32 scaled = arg0 * 0x13 / 256;
     u32 i;
@@ -178,7 +178,7 @@ extern u32 D_004379C8[];
 extern s32 func_0019F6C8();
 extern void func_0035C860();
 
-void func_0029CA68(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
+void campDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
     char name[32];
     u32 color[4];
     s32 sprite;
@@ -200,20 +200,20 @@ void func_0029CA68(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CB70);
 
 extern struct { s32 v[6]; } D_003D6500;
-extern void func_0029CA68(s32, s32, s32, u32, u8 *, s32, u8 *);
+extern void campDrawMenuIconLayer(s32, s32, s32, u32, u8 *, s32, u8 *);
 extern void func_0029CB70(s32, s32, s32, u32, u8 *, s32, u8 *);
 extern void func_0029C880(s32, s32, s32, u32, u8 *, s32, u8 *);
 
-void func_0029CC90(u8 *work) {
+void titleDrawFadeMenuEntries(u8 *work) {
     u8 *res = work + 0x5C;
     u32 color = func_00309138(0xFFF06480, 0xFFF06400, 0x100 - *(s32 *)(work + 0xB6E0));
 
-    func_0029CA68(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
+    campDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
     func_0029CB70(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
     func_0029C880(D_003D6500.v[4], D_003D6500.v[5], 0, color, res, 0x53, work);
 }
 
-void func_0029CD60(u8 *work) {
+void titleRenderFadeAndPanels(u8 *work) {
     s32 remaining = 0x100 - *(s32 *)(work + 0xB6E0);
 
     func_0029C450(work);
@@ -221,7 +221,7 @@ void func_0029CD60(u8 *work) {
     func_0029C120(work);
     func_0029C3F0(work);
     func_0029DB58(0x1D0, 0x3B8, 0, remaining, work + 0x408, 0x53);
-    func_0029CC90(work);
+    titleDrawFadeMenuEntries(work);
 }
 
 void func_0029CDD8(void) {
@@ -288,7 +288,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D2D8);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D3D8);
 
-s32 advanceTitleEntryAnimation(u8 *entry) {
+s32 mnuAdvanceTitleEntryAnimation(u8 *entry) {
     s32 step = func_0029D1C8(entry);
     *(u16 *)(entry + 0x14) += step;
     func_003144E8(entry);
@@ -301,7 +301,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D5B8);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D790);
 
-void func_0029D900(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
+void titleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);
     state[0] = first;
     state[1] = second;
@@ -363,7 +363,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A08D8);
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A0EE8);
 
 void func_002A1000(u32 arg0) {
-    soundSetSequenceVolumePan(arg0, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
 void func_002A1020(void) {
@@ -438,9 +438,9 @@ void func_002A1178(void) {
     data[1] = 0;
 }
 
-void resetTitleEffectState(s32 effect) {
+void mnuResetTitleEffectState(s32 effect) {
     s32 context = func_00101958(D_004379F8);
-    if (func_00342688() != 0) {
+    if (sdfSoundIsCommandBusy() != 0) {
         func_00342690();
     }
     sdfSoundSendNamedCommand(effect, 0x7f);
@@ -459,7 +459,7 @@ extern char D_003E09F0[];
 void func_002A1278(char *filename) {
     char path[16];
     u32 *state = (u32 *)func_00101958(D_004379F8);
-    if (func_00342688() != 0) {
+    if (sdfSoundIsCommandBusy() != 0) {
         func_0035B6E0(D_00428610);
         func_00342690();
     }
@@ -473,7 +473,7 @@ void func_002A1308(void) {
 }
 
 void func_002A1320(void) {
-    func_00342688();
+    sdfSoundIsCommandBusy();
 }
 
 void func_002A1338(void) {
@@ -495,7 +495,7 @@ u32 func_002A1390(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
-    soundSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
     return 1;
 }
 
@@ -504,10 +504,10 @@ u32 func_002A13C0(void) {
     return 1;
 }
 
-s32 initializeTitleEffects(void) {
+s32 mnuInitializeTitleEffects(void) {
     s32 value;
     value = func_0010D7D0(0);
-    if (func_00342688() != 0) {
+    if (sdfSoundIsCommandBusy() != 0) {
         func_00342690();
     }
     sdfSoundSendNamedCommand(value, 0x7f);
@@ -522,7 +522,7 @@ u32 func_002A1430(void) {
 u32 func_002A1450(void) {
     u64 temp_v0;
 
-    temp_v0 = func_00342688();
+    temp_v0 = sdfSoundIsCommandBusy();
     func_0010D818(temp_v0);
     return 1;
 }
@@ -531,7 +531,7 @@ u32 func_002A1478(void) {
     return 1;
 }
 
-s32 func_002A1480(void) {
+s32 movCheckStartupSoundState(void) {
     if (func_002A2330() == 0) {
         func_002A2200(func_0010D650(0));
         return 0;
@@ -551,7 +551,7 @@ u32 func_002A14F0(void) {
 }
 
 u32 func_002A1518(void) {
-    advanceTitleStateUnderSemaphore();
+    mnuAdvanceTitleStateUnderSemaphore();
     return 1;
 }
 
@@ -611,7 +611,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1928);
 
 void func_002A1DD8(void) {
     for (;;) {
-        func_00328988(1);
+        sdfSleepThreadCount(1);
         WaitSema(D_00438FE8);
         func_002A1928();
         SignalSema(D_00438FE8);
@@ -622,7 +622,7 @@ extern s32 D_00438FE0;
 extern u8 D_00456DB0[];
 
 void func_002A1E08(void) {
-    D_00438FE8 = createSemaphore(1, 0xff, 0);
+    D_00438FE8 = sdfCreateSemaphore(1, 0xff, 0);
     func_00328918(&D_00438FE0, func_002A1DD8, D_00456DB0,
                   0x1000, 0x45, 0);
     func_00328C00();
@@ -644,7 +644,7 @@ void func_002A1FF0(char *filePath, u32 *work) {
     void *fileData;
     s32 frames;
     u32 request = func_00343ED0(filePath, &fileData, 0);
-    s32 bytes = func_00329258(request);
+    s32 bytes = sdfMemoryGetBlockSize(request);
     memcpy((void *)work[5], fileData, bytes);
     frames = bytes / (s32)work[2];
     work[1] = 0;
@@ -652,7 +652,7 @@ void func_002A1FF0(char *filePath, u32 *work) {
     func_003298C0(request);
 }
 
-void menuStoreTaskResult(char *audioPath) {
+void mnuStoreTaskResult(char *audioPath) {
     D_00438FEC = func_002C80C8(audioPath);
     D_00454D30[9] = 1;
 }
@@ -683,7 +683,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A2198);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A2200);
 
-u32 updateTitleTransition(void) {
+u32 mnuUpdateTitleTransition(void) {
     if (D_00454D30[9] == 1) {
         func_002A20A0(D_00454D30);
     }
@@ -703,7 +703,7 @@ extern u32 D_00454D68[];
 
 void func_002A2388(void) {
     WaitSema(D_00438FE8);
-    if (updateTitleTransition() == 1) {
+    if (mnuUpdateTitleTransition() == 1) {
         func_002C81E8();
         func_002A20A0(D_00454D30);
     }
@@ -724,7 +724,7 @@ void func_002A2408(void) {
 
 extern u32 D_00437A38;
 
-void advanceTitleStateUnderSemaphore(void) {
+void mnuAdvanceTitleStateUnderSemaphore(void) {
     WaitSema(D_00438FE8);
     if (D_00454D30[4] == 1 && D_00454D30[9] == 3) {
         D_00454D30[9] = 4;
@@ -786,7 +786,7 @@ void func_002A2998(void) {
 
 void func_002A2A00(void);
 
-void func_002A29D8(void) {
+void mnuResetSoundBuffer(void) {
     D_00455D70[1] = 0;
     D_00455D70[4] = 2;
     func_002A2A00();
@@ -805,7 +805,7 @@ void func_002A2A00(void) {
 
 void func_002A2A40(void) {
     WaitSema(D_00438FE8);
-    func_002A29D8();
+    mnuResetSoundBuffer();
     SignalSema(D_00438FE8);
 }
 
@@ -1028,7 +1028,7 @@ extern void func_002A44C0(SlideBar *, s32);
 extern void func_002A4B70(SlideBar *, s32);
 extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
-void func_002A4D28(SlideBar *bar, s32 arg1) {
+void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
     if (bar->active != 0 || bar->pos != 0) {
         func_002A4388();
         func_002A44C0(bar, arg1);
@@ -1054,7 +1054,7 @@ typedef struct { s32 active; s32 pos; s32 id; s32 timer; } SlideBarTimed;
 extern void func_002A4DF0(SlideBarTimed *, s32, s32);
 extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
-void func_002A4E48(SlideBarTimed *bar, s32 arg1) {
+void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 arg1) {
     if (bar->timer > 0) {
         bar->timer--;
         if (bar->timer == 0) {
@@ -1078,7 +1078,7 @@ void func_002A4E48(SlideBarTimed *bar, s32 arg1) {
     }
 }
 
-void func_002A4F20(SlideBar *bar, s32 arg1) {
+void mnuAdvanceMultiSpriteSlideBar(SlideBar *bar, s32 arg1) {
     s32 half;
 
     if (bar->active == 0 && bar->pos == 0) {
@@ -1122,7 +1122,7 @@ typedef struct {
     s32 pos[2];
 } SlideBarPair;
 
-void func_002A5128(SlideBarPair *bars, s32 arg1) {
+void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 arg1) {
     u32 i;
 
     for (i = 0; i < 2; i++) {
@@ -1169,7 +1169,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5A78);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5B08);
 
-void func_002A5C40(void) {
+void titleResetSequenceTimers(void) {
     u32 *title = (u32 *)D_00437A40;
     title[0x28 / 4] = 1;
     title[0x1C / 4] = title[0x14 / 4] = 0;
@@ -1655,12 +1655,12 @@ INCLUDE_RODATA(const s32, "game/code_0029BC58", D_004298D8);
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_004298E8);
 
-void loadMovieRollSprite(void) {
-    D_00437AB0[1] = func_00304030(D_00437AC0, "staff_01.spr", 0);
+void mnuLoadMovieRollSprite(void) {
+    D_00437AB0[1] = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
 }
 
 void func_002A6000(void) {
-    loadStaffFonts();
+    mnuLoadStaffFonts();
 }
 
 void func_002A6018(void) {
@@ -1683,7 +1683,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6C28);
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_002A6C70(SlideBar *bar) {
+void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     u32 sprite = D_00437AB0[1];
 
     if (bar->active == 0 && bar->pos == 0) {
@@ -1711,7 +1711,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6F88);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A7260);
 
-void func_002A7350(u32 *state, s32 mode) {
+void titleSetPaletteTransition(u32 *state, s32 mode) {
     switch (mode) {
     case 2:
         state[1] = 0;
@@ -1762,7 +1762,7 @@ extern u32 D_00437AB8;
 void func_002A7938(void) {
     D_00437AB8 = 4;
     D_00437AB4 = 0;
-    loadMovieRollSprite();
+    mnuLoadMovieRollSprite();
     func_003458E8(1);
     func_003458F0(0x80, 0x60, 0x180, 0x100, 0x80808080);
 }
@@ -1780,17 +1780,17 @@ s32 func_002A7A30(void) {
     return 0;
 }
 
-s32 movieDraw(void) {
+s32 mnuMovieDraw(void) {
     func_00345BA0(D_003E5608, D_003803C8);
     return 0;
 }
 
-extern char D_0042A338[]; /* "movieDraw" */
+extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void func_002A7A98(u32 resource, void *data) {
     if (D_00437ACC == 0) {
         func_00346778(D_003E5608, data, resource);
-        D_00437ACC = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, movieDraw, 0, 0);
+        D_00437ACC = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
 
@@ -2021,12 +2021,12 @@ u8 func_002A8038(void) {
     return D_003E5608[0];
 }
 
-s32 menuSetFrameDivisor(void) {
+s32 mnuSetFrameDivisor(void) {
     func_00345488(0x3c / D_00435BAC);
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", createMovieManagerTask);
+INCLUDE_ASM(const s32, "game/code_0029BC58", mnuCreateMovieManagerTask);
 
 u32 func_002A80C0(void) {
     u64 temp_v0;
@@ -2040,7 +2040,7 @@ u32 func_002A80C0(void) {
 u32 func_002A80F0(void) {
     func_002A7FD0();
     D_00437AE8 = 0;
-    drawEnableDc8(0);
+    kwlnDrawEnableDc8(0);
     return 1;
 }
 
@@ -2071,12 +2071,12 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A87F0);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A88A0);
 
-void createMovieViewerTask(void) {
+void mnuCreateMovieViewerTask(void) {
     func_002A8268();
     D_00457E48[0] = kwlnTaskCreate(D_0042A418, 0x2b02, 1, 0, func_002A88A0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", destroyMovieViewerTask);
+INCLUDE_ASM(const s32, "game/code_0029BC58", mnuDestroyMovieViewerTask);
 
 void func_002A8B78(void) {
     D_00457E60[2] = 1;
@@ -2101,21 +2101,21 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9068);
 extern u32 D_00438FF8[2];
 extern u32 D_003E6848[];
 extern char D_0042A950[];
-extern u32 func_00304030(char *, u32, u32);
-void func_002A9130(void) {
+extern u32 effLoadIndexedResource(char *, u32, u32);
+void mnuLoadCampResources(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        D_00438FF8[i] = func_00304030(D_0042A950, D_003E6848[i * 2], 1);
+        D_00438FF8[i] = effLoadIndexedResource(D_0042A950, D_003E6848[i * 2], 1);
     }
 }
 
 extern void func_00305068(u32);
-extern void func_00304EE0(u32);
+extern void effResolveAndReleaseResource(u32);
 
 void func_002A91A0(u32 *destination) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        func_00304EE0(D_00438FF8[i]);
+        effResolveAndReleaseResource(D_00438FF8[i]);
         destination[i] = D_00438FF8[i];
     }
 }
@@ -2293,13 +2293,13 @@ u8 *func_002A9258(s32 kind, s32 *count, u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A92D8);
 
-void func_002A9368(s32 kind, u8 *work) {
+void movReleaseCategoryModels(s32 kind, u8 *work) {
     s32 count;
     s32 *entries = (s32 *)func_002A9258(kind, &count, work);
     if (kind != 4) {
         s32 i;
         for (i = 0; i < count; i++) {
-            func_00304EE0(entries[i]);
+            effResolveAndReleaseResource(entries[i]);
         }
     } else {
         func_002A92D8(entries, count, work);
@@ -2328,19 +2328,19 @@ void func_002A9460(s32 kind, u8 *work) {
         func_002A93F8(old, work);
     }
     if (kind != 0) {
-        func_002A9368(kind, work);
+        movReleaseCategoryModels(kind, work);
     }
     *(s32 *)(work + 0xAA4C) = kind;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A94D0);
 
-void func_002A9558(u32 *state) {
+void movReleaseTitleEffects(u32 *state) {
     u32 *handles = state + 0x110 / 4;
     u32 i;
-    destroyPackedEffectBatch(state[0x100 / 4]);
+    effDestroyPackedBatch(state[0x100 / 4]);
     for (i = 0; i < 2; i++) {
-        destroyPackedEffectBatch(*handles++);
+        effDestroyPackedBatch(*handles++);
     }
 }
 
@@ -2349,7 +2349,7 @@ void func_002A95B0(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     func_002BC498(arg0, arg1[1]);
     func_002BC5D0(arg0, arg1 + 4);
     func_002BC600(arg0, arg1 + 0xc);
-    registerMenuResourceHandles(arg0, arg1 + 0x14);
+    mnuRegisterResourceHandles(arg0, arg1 + 0x14);
     func_002BCA98(arg0);
     func_002BE6E8(arg0, arg1[1]);
 }
@@ -2358,7 +2358,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9640);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9788);
 
-s32 func_002A9820(s32 mode, u32 *state) {
+s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
     u32 *entry;
     u32 *tail;
     s32 i;
@@ -2415,7 +2415,7 @@ extern void func_002BAF10(u8 *);
 extern void func_002BAF50(s32, u8 *);
 extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
 
-void func_002A9E00(u8 *work) {
+void staffInitResourceLists(u8 *work) {
     u8 *ctx = work + 0xB10C;
     s32 list;
 
@@ -2434,7 +2434,7 @@ void func_002A9E00(u8 *work) {
 }
 
 extern void func_002B9520(u32);
-extern void releaseResourceList(u32);
+extern void mnuReleaseResourceList(u32);
 
 void func_002A9F08(u8 *work) {
     u32 *handles = (u32 *)(work + 0x104);
@@ -2443,9 +2443,9 @@ void func_002A9F08(u8 *work) {
     for (i = 0; i < 3; i++) {
         func_002B9520(*handles++);
     }
-    releaseResourceList(*(u32 *)(work + 0xF4));
-    releaseResourceList(*(u32 *)(work + 0xF8));
-    releaseResourceList(*(u32 *)(work + 0xFC));
+    mnuReleaseResourceList(*(u32 *)(work + 0xF4));
+    mnuReleaseResourceList(*(u32 *)(work + 0xF8));
+    mnuReleaseResourceList(*(u32 *)(work + 0xFC));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9F78);
@@ -2464,11 +2464,11 @@ void func_002AA1C8(u32 task) {
     func_002C3FC8(work + 8, task);
     func_002A9F08(work);
     func_002BB418(*(u32 *)(work + 0x118));
-    shutdownMenuContext(work + 0x284);
+    mnuShutdownContext(work + 0x284);
     func_0026C728();
-    func_002B7908(work + 0x11c);
+    menuDestroyEffectResources(work + 0x11c);
     func_002A9A40(work);
-    func_002A9558(work);
+    movReleaseTitleEffects(work);
     func_00303D58(*(u32 *)(work + 0x5c));
     func_003297C8(*(u32 *)work);
     D_00437B72 = 2;
@@ -2491,13 +2491,13 @@ INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042AA18);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002AA360);
 
-void destroyCampTasks(void) {
+void mnuDestroyCampTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00437B78, 0);
     kwlnTaskDestroyWithHierarchyByName(D_0042AA08, 0);
     kwlnTaskDestroyWithHierarchyByName(D_0042AA18, 0);
 }
 
-s32 acknowledgeCampState(void) {
+s32 mnuAcknowledgeCampState(void) {
     s8 state = D_00437B72;
     if (state == 1) {
         return 1;

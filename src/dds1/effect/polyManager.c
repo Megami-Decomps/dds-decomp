@@ -44,7 +44,7 @@ typedef struct {
 } PolyNodeF4;
 
 typedef struct {
-    s32 unk0;  /* 0x0 reset to 0xFFFFFF0 by func_0015F468 */
+    s32 unk0;  /* 0x0 reset to 0xFFFFFF0 by polyResetEntries */
     s32 unk4;  /* 0x4 */
     s32 unk8;  /* 0x8 */
     s32 unkC;  /* 0xC */
@@ -163,7 +163,7 @@ void func_0015F2B0(f32 scale, PolyNode *obj) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015F2D0);
 
-void func_0015F468(PolyList *obj) {
+void polyResetEntries(PolyList *obj) {
     u32 count;
     PolyEntry *entry;
     u32 i;
