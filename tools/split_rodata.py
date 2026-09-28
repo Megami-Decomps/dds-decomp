@@ -41,7 +41,10 @@ def layout(version, section="rodata"):
     text = sorted((s[0] - rom0 + vram0, s[1], s[2]) for s in subs if len(s) >= 3 and s[1] in ("c", "asm"))
     kinds = (section, "." + section)
     rodata_rom = next(s[0] for s in subs if s[1] in kinds)
-    end_rom = min(s[0] for s in subs if s[0] > rodata_rom and s[1] not in kinds)
+    # The next subsegment ends the section; dict-style ones (sbss/bss) count too.
+    starts = [s[0] for s in subs if s[1] not in kinds] + \
+             [s["start"] for s in main["subsegments"] if isinstance(s, dict) and "start" in s]
+    end_rom = min(s for s in starts if s > rodata_rom)
     return cfg_path, rom0, vram0, text, rodata_rom, end_rom
 
 
@@ -96,7 +99,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("version")
     ap.add_argument("--write", action="store_true")
-    ap.add_argument("--section", default="rodata", choices=["rodata", "lit4"],
+    ap.add_argument("--section", default="rodata", choices=["rodata", "lit4", "sdata"],
                     help="lit4: the .lit4 float pool, owned the same way")
     args = ap.parse_args()
     cfg_path, rom0, vram0, text, rodata_rom, end_rom, syms, owner = owners(args.version, args.section)
@@ -115,6 +118,13 @@ def main():
     # starts at its first aligned symbol; what comes before belongs to the
     # previous file (referenced here as an extern).
     for i, (addr, kind, key, has_jtbl) in enumerate(rows):
+        if args.section == "sdata" and addr % 4 and i:
+            # Objects start word-aligned; an odd first symbol is the tail of the
+            # previous object's data, so the boundary is the next aligned symbol.
+            end = rows[i + 1][0] if i + 1 < len(rows) else None
+            nxt = next((a for a, _ in syms if a > addr and a % 4 == 0 and (end is None or a < end)), None)
+            if nxt:
+                rows[i][0] = nxt
         if args.section == "rodata" and kind == "c" and has_jtbl and addr % 16:
             end = rows[i + 1][0] if i + 1 < len(rows) else None
             rows[i][0] = next(a for a, _ in syms if a > addr and a % 16 == 0 and (end is None or a < end))
@@ -142,7 +152,8 @@ def main():
     if args.write:
         text_yaml = cfg_path.read_text()
         start = text_yaml.index(f"      - [0x{rodata_rom:X}, ")
-        end = text_yaml.index(f"      - [0x{end_rom:X}, ")
+        end = min(i for i in (text_yaml.find(f"      - [0x{end_rom:X}, "),
+                              text_yaml.find(f"      - {{ start: 0x{end_rom:X},")) if i >= 0)
         cfg_path.write_text(text_yaml[:start] + "\n".join(lines) + "\n" + text_yaml[end:])
         print(f"-> {cfg_path.relative_to(ROOT)}")
     else:

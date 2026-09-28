@@ -203,3 +203,9 @@ void func_0024CF78(s32 arg0) {
 
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
+
+
+
+
+INCLUDE_RODATA(const s32, "game/code_0024B3A8", D_003AF710);
+

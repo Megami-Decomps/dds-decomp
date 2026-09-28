@@ -92,3 +92,6 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112A28);
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112A70);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112A90);
+
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
+

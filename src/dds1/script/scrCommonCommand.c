@@ -47,8 +47,6 @@ s32 func_0010D808(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
-
 s32 func_0010D838(void)
 {
     func_0010AC10(D_0039F4D8, func_0010D5A8(0));
@@ -118,6 +116,8 @@ s32 func_0010DAF0(void)
     func_00104068(p0, p1 & 0xFF, func_0010D428(2));
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DB48);
 
@@ -428,8 +428,6 @@ s32 func_0010E9E8(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F550);
-
 s32 func_0010EA10(void)
 {
     s32 p0;
@@ -490,8 +488,6 @@ s32 func_0010EB68(void)
     func_00106690(func_0010D428(0));
     return 1;
 }
-
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F570);
 
 s32 func_0010EB90(void)
 {
@@ -624,3 +620,11 @@ u32 scrCommand_SCR_EXISTS()
     }
     return 1;
 }
+
+
+
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F550);
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F570);
+

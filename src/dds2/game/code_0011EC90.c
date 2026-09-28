@@ -72,3 +72,6 @@ void func_0011F0C0(s32 arg0, u8 arg1) {
 void func_0011F0E0(void) {
     func_00328E48();
 }
+
+INCLUDE_SDATA(const s32, "game/code_0011EC90", D_00435EA8);
+

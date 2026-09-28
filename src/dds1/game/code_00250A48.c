@@ -1,16 +1,8 @@
 #include "common.h"
 
 extern s32 func_002CB3B8(u32, u32);
+
 extern u32 D_003BC4CC;
-typedef struct {
-    u32 unk0;
-    u16 unk4;
-    u16 unk6;
-    u32 unk8;
-} SceneEntry;
-
-extern SceneEntry D_0036BE38[];
-
 
 INCLUDE_ASM(const s32, "game/code_00250A48", func_00250A48);
 
@@ -79,18 +71,9 @@ INCLUDE_ASM(const s32, "game/code_00250A48", func_00253830);
 
 INCLUDE_ASM(const s32, "game/code_00250A48", func_00253AD0);
 
-void func_00253C78(s32 context) {
-    s32 node = *(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
-    u16 index = *(u16 *)(node + 0xC);
-    *(u16 *)(context + 0x59C) = D_0036BE38[index].unk4;
-    index = *(u16 *)(node + 0xC);
-    *(u16 *)(context + 0x59E) = D_0036BE38[index].unk6;
-}
+INCLUDE_ASM(const s32, "game/code_00250A48", func_00253C78);
 
-s32 func_00253CC8(void) {
-    func_00253C78(func_002CB3B8(D_003BC4CC, 1));
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_00250A48", func_00253CC8);
 
 INCLUDE_ASM(const s32, "game/code_00250A48", func_00253CF8);
 
@@ -107,9 +90,25 @@ INCLUDE_ASM(const s32, "game/code_00250A48", func_00254680);
 INCLUDE_ASM(const s32, "game/code_00250A48", func_002546D8);
 
 INCLUDE_ASM(const s32, "game/code_00250A48", func_00254758);
-INCLUDE_ASM(const s32, "game/code_00250A48", func_00254778);
 
+INCLUDE_ASM(const s32, "game/code_00250A48", func_00254778);
 
 INCLUDE_ASM(const s32, "game/code_00250A48", func_00254810);
 
 INCLUDE_ASM(const s32, "game/code_00250A48", func_002549F0);
+
+
+
+INCLUDE_SDATA(const s32, "game/code_00250A48", D_003BC420);
+
+INCLUDE_SDATA(const s32, "game/code_00250A48", D_003BC424);
+
+INCLUDE_SDATA(const s32, "game/code_00250A48", D_003BC428);
+
+INCLUDE_SDATA(const s32, "game/code_00250A48", D_003BC430);
+
+INCLUDE_SDATA(const s32, "game/code_00250A48", D_003BC438);
+
+
+INCLUDE_SDATA(const s32, "game/code_00250A48", D_003BC440);
+

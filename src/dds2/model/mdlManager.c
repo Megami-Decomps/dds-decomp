@@ -311,3 +311,8 @@ void func_002334F0(u32 arg0) {
 INCLUDE_ASM(const s32, "model/mdlManager", func_00233520);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002335A0);
+INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA0);
+
+
+INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA8);
+

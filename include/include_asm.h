@@ -34,12 +34,19 @@
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
             ".section .text\n")
 
+/* Small data not yet defined in C (tools/include_sdata.py places these). */
+#define INCLUDE_SDATA(TYPE, FOLDER, NAME)                      \
+    __asm__(".section .sdata\n"                                \
+            "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
+            ".section .text\n")
+
 __asm__(".include \"macro.inc\"\n");
 
 #else
 
 #define INCLUDE_ASM(TYPE, FOLDER, NAME)
 #define INCLUDE_RODATA(TYPE, FOLDER, NAME)
+#define INCLUDE_SDATA(TYPE, FOLDER, NAME)
 
 #endif
 

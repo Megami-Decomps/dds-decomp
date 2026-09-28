@@ -103,6 +103,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     subprocess.run([sys.executable, "-m", "splat", "split", str(yaml)], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "tools/include_sdata.py", version], cwd=ROOT, check=True)
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     provide_data_symbols(version)
     stamp.parent.mkdir(parents=True, exist_ok=True)
@@ -142,7 +143,7 @@ def linker_objects(ld_script: Path) -> list[Path]:
     return list(seen)
 
 
-INCLUDE_ASM = re.compile(r'^\s*INCLUDE_(?:ASM|RODATA)\(\s*[^,]+,\s*"([^"]+)"\s*,\s*(\w+)\s*\)', re.M)
+INCLUDE_ASM = re.compile(r'^\s*INCLUDE_(?:ASM|RODATA|SDATA)\(\s*[^,]+,\s*"([^"]+)"\s*,\s*(\w+)\s*\)', re.M)
 
 
 def source_for(obj: Path, version: str) -> tuple[str, Path]:

@@ -407,3 +407,76 @@ void func_0011EBF8(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011EC00);
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E04);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E08);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E0C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E10);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E14);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E18);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E1C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E20);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E24);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E28);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E2C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E30);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E34);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E38);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E3C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E40);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E44);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E48);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E4C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E50);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E54);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E58);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E5C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E60);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E64);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E68);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E6C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E70);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E74);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E78);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E7C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E80);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E88);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E8C);
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E90);
+
+
+INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E94);
+

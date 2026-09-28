@@ -718,3 +718,23 @@ void func_0019DB40(ItfMesNode *node) {
         }
     }
 }
+
+
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1E8);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1F0);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1F8);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB208);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB210);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB218);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB220);
+
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB228);
+

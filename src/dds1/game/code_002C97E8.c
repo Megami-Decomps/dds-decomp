@@ -9,8 +9,6 @@ typedef struct ShortPair2C {
 } ShortPair2C; // 0x30
 
 extern void func_002CAF78(void *, void *);
-extern u32 func_002CB5F0(u32 *);
-extern u32 func_002CAD30(u32, u32, u32);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
@@ -73,13 +71,7 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAAC8);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAC60);
 
-void func_002CACD8(u8 *work) {
-    if (work != NULL) {
-        func_002CAFE0();
-        (*(void (**)(s32, u32))(work + 0x18))(-1, *(u32 *)(work + 0x10));
-        func_002D0918(*(u32 *)work);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CACD8);
 
 void func_002CAD20(s32 arg0, s32 arg1) {
     if (arg1 != 0) {
@@ -145,19 +137,9 @@ s32 func_002CB2E0(u32 name) {
     return kwlnTaskGetTaskByName(name) != 0;
 }
 
-void func_002CB300(u8 *work, u32 *item) {
-    u32 result = func_002CAD30(*(u32 *)(work + 0xc), *item, func_002CB5F0(item));
-    if (*(u32 *)(work + 0x10) == 0) {
-        *(u32 *)(work + 0x10) = result;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB300);
 
-void func_002CB358(u8 *work, s32 key) {
-    void *item = func_002CB0F8(*(void **)(work + 0xc), key);
-    if (item != NULL) {
-        func_002CAF78(*(void **)(work + 0xc), item);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB358);
 
 s32 func_002CB390(void *p, s32 key) {
     void *r;
@@ -170,12 +152,6 @@ s32 func_002CB390(void *p, s32 key) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3B8);
-
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3DC0);
-
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3E00);
-
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3E40);
 
 INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3EE0);
 
@@ -228,13 +204,7 @@ void func_002CBAF0(ShortPair2C *p, s32 a, s32 b) {
     p->h2E = b;
 }
 
-void func_002CBB00(u8 *work) {
-    if (work != NULL) {
-        func_002CC570();
-        (*(void (**)(s32, u32))(work + 0x20))(0, *(u32 *)(work + 0x30));
-        func_002D0918(*(u32 *)work);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBB00);
 
 void func_002CBB48(void) {
     func_002CC570();
@@ -299,3 +269,19 @@ void func_002CC740(void) {
 u32 func_002CC748(void) {
     return 0;
 }
+
+
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD288);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD290);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD298);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A0);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A8);
+
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2B0);
+

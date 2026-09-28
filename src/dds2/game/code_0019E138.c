@@ -318,3 +318,18 @@ u32 func_001A1818(void) {
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1820);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436580);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436584);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436588);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_0043658C);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436590);
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436598);
+
+
+INCLUDE_SDATA(const s32, "game/code_0019E138", D_004365A0);
+

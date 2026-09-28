@@ -57,7 +57,6 @@ typedef struct FileCbNode {
 } FileCbNode;
 
 extern FileManWork D_003DC658;
-extern char D_003BC7E0[];
 extern s32 D_003BC7D8;
 extern s32 (*D_003BD4A8)(void);
 
@@ -116,12 +115,14 @@ s32 fileMan(void) {
     return 0;
 }
 
+INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7D8);
+
 void func_00289970(void) {
     memset(&D_003DC658, 0, 0x40);
     D_003DC658.unk7 = 4;
     D_003DC658.sema = func_002CF440(1, 0x7F, 0);
     D_003DC658.unk1C = func_002D0A48(func_002D03F8(0x40000));
-    kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
+    kwlnTaskCreate((s32)"fileMan", 0x384, 1, 0, (s32)&fileMan, 0, 0);
     D_003BD4A8 = func_002897A0;
 }
 
@@ -181,3 +182,6 @@ void func_00289D28(s32 arg0, s8 arg1) {
 void func_00289D50(u32 arg0) {
     func_002F6E90(arg0, 0);
 }
+
+
+
