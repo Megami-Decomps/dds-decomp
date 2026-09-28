@@ -8,7 +8,9 @@ extern u64 func_00279DC8(u32, u64, u64, u64, u64, u64);
 
 extern u64 func_0027A628(u32, u64, u64);
 
-extern s32 func_00291400(u64, u64);
+extern s32 func_002890A8(s32);
+extern void func_0026D168(s32, s32, s32);
+extern s32 func_0026D0B0(s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028E350);
 
@@ -36,7 +38,19 @@ INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F380);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F570);
 
-INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F770);
+s32 func_0028F770(s32 object, s32 state) {
+    s32 current = *(s32 *)(*(s32 *)(object + 4) + 0x10);
+    s32 index = 0;
+    while (current != 0) {
+        if (*(u16 *)(*(s32 *)(current + 0x70) + 4) == *(s16 *)(state + 6)) {
+            *(s8 *)(state + 5) = index;
+            return 0;
+        }
+        current = *(s32 *)(current + 0x58);
+        index++;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028E350", D_00427428);
 
@@ -84,7 +98,17 @@ u32 func_00290A70(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_00290A78);
 
-INCLUDE_ASM(const s32, "game/code_0028E350", func_00290B28);
+s32 func_00290B28(s32 object) {
+    s32 index = func_002890A8(object);
+    s32 *slot = (s32 *)(index * 4 + object + 0x7ac);
+    s32 source = *(s32 *)(*(s32 *)(*(s32 *)(object + 4) + 0x1c) + 0x70);
+    if (*slot != 0) {
+        func_0026D168(*slot, source, 0);
+    } else {
+        *slot = func_0026D0B0(source, 0);
+    }
+    return 1;
+}
 
 u16 func_00290B98(s32 arg0) {
     s32 temp_v0;
@@ -207,7 +231,17 @@ void func_00294488(void) {
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_002944B0);
 
-INCLUDE_ASM(const s32, "game/code_0028E350", func_00294538);
+s32 *func_00294538(void) {
+    s32 count = D_00437960[2];
+    s32 *entry = (s32 *)D_00437960[1];
+    s32 index;
+    for (index = 0; index < count; index++, entry += 2) {
+        if (entry[0] == 0) {
+            return entry;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_00294580);
 
