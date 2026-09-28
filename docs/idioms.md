@@ -39,6 +39,19 @@ return 1;
 
 (`if/else` with two returns gives the same code.) Example: `func_0014D0D0`.
 
+## Square roots: `sqrt.s`
+
+Retail always has a bare `sqrt.s` (33 in 11 DDS1 units) and never the
+errno-checking `sqrtf` call. gcc's own sqrt.s (with `-fno-math-errno`) comes
+after two hazard nops that retail doesn't have. Use `fsqrtf()` from
+`include/fpu.h`, an asm helper wrapped in `.set noreorder` that gives retail's
+`sqrt.s; jr $31; nop`:
+
+```c
+#include "fpu.h"
+return fsqrtf(dx * dx + dy * dy + dz * dz);   /* func_00122BB0 */
+```
+
 ## Tail calls: `jal` + epilogue instead of `j`
 
 -O2 turns a call in tail position into `j callee`. Retail keeps
