@@ -46,6 +46,14 @@ extern f32 D_003BDA30;
 extern void *func_002CFEB8(s32 size);
 extern u8 D_003F98A0[];
 
+typedef struct VuBlendNode {
+    u8 pad00[0x30];
+    u8 result[0x10];
+    struct VuBlendNode *next;
+    void *sourceA;
+    void *sourceB;
+} VuBlendNode;
+
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_002DDC98(void) {
     __asm__ volatile (
@@ -280,9 +288,49 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE7D8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE868);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE8C8);
+void func_002DE8C8(VuBlendNode *node) {
+    while (node != NULL) {
+        void *sourceA = node->sourceA;
+        void *sourceB = node->sourceB;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf2, 0x40(%0)\n"
+            "lqc2 vf8, 0x30(%1)\n"
+            "lqc2 vf9, 0x30(%2)\n"
+            "vmulaw.xy ACC, vf8, vf0w\n"
+            "vmaddaw.xy ACC, vf9, vf2w\n"
+            "vmsubw.xy vf15, vf8, vf2w\n"
+            "sqc2 vf15, 0x30(%0)\n"
+            ".set reorder\n"
+            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        node = node->next;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE918);
+void func_002DE918(VuBlendNode *node) {
+    while (node != NULL) {
+        void *sourceA = node->sourceA;
+        void *sourceB = node->sourceB;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf2, 0x40(%0)\n"
+            "lqc2 vf8, 0x30(%1)\n"
+            "lqc2 vf9, 0x30(%2)\n"
+            "lqc2 vf10, 0x20(%1)\n"
+            "lqc2 vf11, 0x20(%2)\n"
+            "vmulaw.xy ACC, vf8, vf0w\n"
+            "vmaddaw.xy ACC, vf9, vf2w\n"
+            "vmsubw.xy vf15, vf8, vf2w\n"
+            "vmulaw.xyzw ACC, vf10, vf0w\n"
+            "vmaddaw.xyzw ACC, vf11, vf2w\n"
+            "vmsubw.xyzw vf16, vf10, vf2w\n"
+            "sqc2 vf15, 0x30(%0)\n"
+            "sqc2 vf16, 0x20(%0)\n"
+            ".set reorder\n"
+            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE980);
 

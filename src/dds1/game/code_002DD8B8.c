@@ -47,7 +47,20 @@ INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD968);
 
 INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD9E8);
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDA68);
+/* Build an axis-angle matrix in the VU0 secondary matrix registers. */
+void func_002DDA68(const RwV3d* axis, f32 angle)
+{
+    RwMatrix matrix;
+    func_002DD788(angle, axis, &matrix);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf24, 0(%0)\n"
+        "lqc2 vf25, 16(%0)\n"
+        "lqc2 vf26, 32(%0)\n"
+        "lqc2 vf27, 48(%0)\n"
+        ".set reorder\n"
+        : : "r"(&matrix) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDA98);
 
@@ -57,7 +70,31 @@ INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDB58);
 
 INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDBB8);
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDBF8);
+void func_002DDBF8(void)
+{
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmulax.xyzw ACC, vf28, vf24x\n"
+        "vmadday.xyzw ACC, vf29, vf24y\n"
+        "vmaddaz.xyzw ACC, vf30, vf24z\n"
+        "vmaddw.xyzw vf2, vf31, vf24w\n"
+        "vmulax.xyzw ACC, vf28, vf25x\n"
+        "vmadday.xyzw ACC, vf29, vf25y\n"
+        "vmaddaz.xyzw ACC, vf30, vf25z\n"
+        "vmaddw.xyzw vf3, vf31, vf25w\n"
+        "vmulax.xyzw ACC, vf28, vf26x\n"
+        "vmadday.xyzw ACC, vf29, vf26y\n"
+        "vmaddaz.xyzw ACC, vf30, vf26z\n"
+        "vmaddw.xyzw vf4, vf31, vf26w\n"
+        "vmulax.xyzw ACC, vf28, vf27x\n"
+        "vmadday.xyzw ACC, vf29, vf27y\n"
+        "vmaddaz.xyzw ACC, vf30, vf27z\n"
+        "vmaddw.xyzw vf31, vf31, vf27w\n"
+        "vmove.xyzw vf28, vf2\n"
+        "vmove.xyzw vf29, vf3\n"
+        "vmove.xyzw vf30, vf4\n"
+        ".set reorder\n");
+}
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void func_002DDC50(void)
