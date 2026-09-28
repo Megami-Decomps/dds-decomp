@@ -281,7 +281,7 @@ def main():
     if full.exists() and not args.func:
         source = unit.read_text()
         for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
-            if not re.search(rf"\b{name}\b\s*(?:\(|\);)", source):
+            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[A-Za-z_][^;\n]*\b{name}\s*\([^;]*$", source, re.M):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
     print(f"{ok} match, {bad} differ")

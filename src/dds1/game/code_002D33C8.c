@@ -548,6 +548,8 @@ void func_002D5A08(SdfPacket *arg0) {
     arg0->unk18 = 0xE;
 }
 
+INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5A68);
+
 void func_002D5B18(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28) {
     /* arg1 and below flow through untouched to func_002D5A68. */
     arg0->unk0 = 5;
