@@ -59,18 +59,28 @@ extern u8 D_003BB820[];
 extern u64 func_001D9718(void);
 
 typedef struct BtlUnit {
-    u8 unk_00[0x80];
+    u8 unk_00[0x70];
+    f32 unk_70[4];
     f32 unk_80;
-    u8 unk_84[0x30];
+    u8 unk_84[4];
+    f32 unk_88;
+    u8 unk_8C[4];
+    f32 unk_90[4];
+    f32 unk_A0[4];
+    f32 unk_B0;
     f32 unk_B4;
     u8 unk_B8[0x50];
     u64 unk_108;
     u32 flags;
-    u8 unk_114[0xC];
+    u32 unk_114;
+    u8 unk_118[8];
     u16 unk_120;
     u8 unk_122[2];
     u16 unk_124;
-    u8 unk_126[0x21E];
+    u8 unk_126[0x1F6];
+    u32 unk_31C;
+    u32 unk_320;
+    u8 unk_324[0x20];
     struct BtlUnit *next;
 } BtlUnit;
 
@@ -115,7 +125,16 @@ extern f32 func_0010D4F0(s32);
 extern s32 func_001A17F8(void *);
 extern s32 func_001A1838(void *);
 
-/* W14_HDR_END */
+extern void func_001D6318(BtlUnit *, f32 *);
+extern void func_002E7D98(void);
+extern void effObjFetchInnerFirstVec(u32);
+
+extern f32 func_001F79A0(f32 *, f32 *, f32 *);
+
+typedef union BtlVec4 {
+    f32 f[4];
+    u128 q;
+} BtlVec4;
 
 extern u64 func_001D9780(void);
 
@@ -165,11 +184,78 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6158);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6300);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6498);
+void func_001F6498(BtlUnit *unit) {
+    f32 pos[4];
+    func_001D6318(unit, pos);
+    pos[2] += unit->unk_88;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
+    func_002E7D98();
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_90));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "vmulax.xyzw ACC, vf28, vf10x\n\t"
+        "vmadday.xyzw ACC, vf29, vf10y\n\t"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
+        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
+        "lqc2 vf11, 0(%0)\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        :
+        : "r"(pos));
+}
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6510);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6588);
+void func_001F6510(BtlUnit *unit) {
+    f32 pos[4];
+    func_001D6318(unit, pos);
+    pos[2] += unit->unk_88;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
+    func_002E7D98();
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_A0));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "vmulax.xyzw ACC, vf28, vf10x\n\t"
+        "vmadday.xyzw ACC, vf29, vf10y\n\t"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
+        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
+        "lqc2 vf11, 0(%0)\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        :
+        : "r"(pos));
+}
+
+
+void func_001F6588(BtlUnit *unit) {
+    f32 pos[4];
+    if (!(unit->flags & 2)) {
+        func_001F6498(unit);
+        return;
+    }
+    effObjFetchInnerFirstVec(unit->unk_31C);
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
+    func_002E7D98();
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_90));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "vmulax.xyzw ACC, vf28, vf10x\n\t"
+        "vmadday.xyzw ACC, vf29, vf10y\n\t"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
+        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
+        "lqc2 vf11, 0(%0)\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        :
+        : "r"(pos));
+}
+
 
 f32 func_001F6618(s32 arg0) {
     f32 temp_f2;
@@ -183,9 +269,21 @@ f32 func_001F6618(s32 arg0) {
     return temp_f1 * *(f32 *)(arg0 + 0x80);
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6640);
+f32 func_001F6640(BtlUnit *unit) {
+    f32 pos[4];
+    func_001F6498(unit);
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    return unit->unk_B0 * unit->unk_80 * 0.5f - pos[1];
+}
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6688);
+
+f32 func_001F6688(BtlUnit *unit) {
+    f32 pos[4];
+    func_001F6498(unit);
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    return -pos[1] - unit->unk_B0 * unit->unk_80 * 0.5f;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F66D8);
 
@@ -231,13 +329,83 @@ f32 func_001F6CB0(u32 mask) {
     return best;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6D40);
+f32 func_001F6D40(u32 mask) {
+    BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
+    f32 best = 0.0f;
+    s32 first = 1;
+    f32 pos[4];
+    f32 value;
+    while (unit != NULL) {
+        if ((unit->flags & 1) && (unit->flags & mask)) {
+            func_001F6498(unit);
+            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+            if (mask & 0x200) {
+                value = pos[2] + unit->unk_B4 * unit->unk_80;
+                if (first) {
+                    best = value;
+                    first = 0;
+                } else if (best < value) {
+                    best = value;
+                }
+            } else {
+                value = pos[2] - unit->unk_B4 * unit->unk_80;
+                if (first) {
+                    best = value;
+                    first = 0;
+                } else if (value < best) {
+                    best = value;
+                }
+            }
+        }
+        unit = unit->next;
+    }
+    return best;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6E28);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F70C8);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F71E8);
+BtlUnit *func_001F71E8(u32 mask, f32 *point) {
+    BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
+    BtlUnit *farthest = NULL;
+    f32 best = 0.0f;
+    f32 dist;
+    while (unit != NULL) {
+        if (unit->flags & 1) {
+            if (!(unit->flags & 0xC0)) {
+                if (unit->flags & mask) {
+                    func_001F6498(unit);
+                    __asm__ volatile(
+                        ".set noreorder\n\t"
+                        "mfc1 $2, %2\n\t"
+                        "qmtc2.ni $2, vf2\n\t"
+                        "vaddx.y vf10, vf0, vf2x\n\t"
+                        "lqc2 vf11, 0(%1)\n\t"
+                        "vsub.xyzw vf10, vf10, vf11\n\t"
+                        "vmul.xyz vf2, vf10, vf10\n\t"
+                        "vaddy.x vf2, vf2, vf2y\n\t"
+                        "vaddz.x vf2, vf2, vf2z\n\t"
+                        "vsqrt Q, vf2x\n\t"
+                        "vwaitq\n\t"
+                        "cfc2.ni $2, $vi22\n\t"
+                        "mtc1 $2, %0\n\t"
+                        ".set reorder"
+                        : "=f"(dist)
+                        : "r"(point), "f"(point[1]));
+                    if (best < dist) {
+                        best = dist;
+                        farthest = unit;
+                    }
+                }
+            }
+        }
+        unit = unit->next;
+    }
+    return farthest;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F72C8);
 
@@ -343,7 +511,25 @@ void func_001F7600(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F76F0);
+extern void func_00221FE8(u32);
+extern void func_00221D98(u32, s32);
+
+void func_001F76F0(void) {
+    BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
+    u32 handle;
+    while (unit != NULL) {
+        if (unit->flags & 2) {
+            if (unit->unk_114 & 0x10) {
+                handle = unit->unk_320;
+                func_00221FE8(handle);
+                __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit));
+                func_00221D98(handle, 0);
+            }
+        }
+        unit = unit->next;
+    }
+}
+
 
 s32 func_001F7770(s32 arg0) {
     s32 temp_v0;
@@ -368,13 +554,102 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F77D8);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7868);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7940);
+/* Unit normal of the triangle (a, b, c); result in vf10 (VU register convention). */
+void func_001F7940(f32 *a, f32 *b, f32 *c) {
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%1)\n\t"
+        "lqc2 vf11, 0(%0)\n\t"
+        "vsub.xyzw vf10, vf10, vf11\n\t"
+        "vmove.xyzw vf12, vf10\n\t"
+        "lqc2 vf11, 0(%2)\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        "vsub.xyzw vf11, vf11, vf10\n\t"
+        "vmove.xyzw vf10, vf12\n\t"
+        "vopmula.xyz ACC, vf10, vf11\n\t"
+        "vopmsub.xyz vf10, vf11, vf10\n\t"
+        "vmove.xyzw vf11, vf10\n\t"
+        "vmove.xyzw vf10, vf12\n\t"
+        "vopmula.xyz ACC, vf10, vf11\n\t"
+        "vopmsub.xyz vf10, vf11, vf10\n\t"
+        "vmul.xyz vf2, vf10, vf10\n\t"
+        "vmulax.w ACC, vf0, vf2x\n\t"
+        "vmadday.w ACC, vf0, vf2y\n\t"
+        "vmaddz.w vf2, vf0, vf2z\n\t"
+        "vrsqrt Q, vf0w, vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz vf10, vf10, Q\n\t"
+        ".set reorder"
+        :
+        : "r"(a), "r"(b), "r"(c)
+        : "memory");
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F79A0);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7A00);
+void func_001F7A00(f32 *a, f32 *b, f32 *c, f32 *d) {
+    f32 dist = func_001F79A0(a, b, c);
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        "lqc2 vf11, 0(%1)\n\t"
+        "vsub.xyzw vf10, vf10, vf11\n\t"
+        "vmul.xyz vf2, vf10, vf10\n\t"
+        "vmulax.w ACC, vf0, vf2x\n\t"
+        "vmadday.w ACC, vf0, vf2y\n\t"
+        "vmaddz.w vf2, vf0, vf2z\n\t"
+        "vrsqrt Q, vf0w, vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz vf10, vf10, Q\n\t"
+        ".set reorder"
+        :
+        : "r"(d), "r"(c));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 $2, %0\n\t"
+        "qmtc2.ni $2, vf2\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "lqc2 vf11, 0(%1)\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        :
+        : "f"(dist), "r"(c));
+}
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7A70);
+
+void func_001F7A70(f32 *a, f32 *b, f32 *c) {
+    f32 normal[4];
+    f32 dot;
+    func_001F7940(a, b, c);
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(normal) : "memory");
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%1)\n\t"
+        "lqc2 vf11, 0(%2)\n\t"
+        "vsub.xyzw vf10, vf10, vf11\n\t"
+        "vmove.xyzw vf11, vf10\n\t"
+        "lqc2 vf10, 0(%3)\n\t"
+        "vmul.xyz vf2, vf10, vf11\n\t"
+        "vaddy.x vf2, vf2, vf2y\n\t"
+        "vaddz.x vf2, vf2, vf2z\n\t"
+        "qmfc2.ni $2, vf2\n\t"
+        "mtc1 $2, %0\n\t"
+        ".set reorder"
+        : "=f"(dot)
+        : "r"(a), "r"(c), "r"(normal));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 $2, %0\n\t"
+        "qmtc2.ni $2, vf2\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "lqc2 vf11, 0(%1)\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        :
+        : "f"(dot), "r"(c));
+}
+
 
 
 s32 func_001F7AE0(BtlVec3 *a, BtlVec3 *b, BtlVec3 *p) {
