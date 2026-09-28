@@ -276,6 +276,14 @@ def main():
                else "reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
                "(this data is not split per unit yet)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
+    # Every retail function of the unit must still be there, as C or INCLUDE_ASM.
+    full = ROOT / "asm" / version / f"{unit_name}.s"
+    if full.exists() and not args.func:
+        source = unit.read_text()
+        for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
+            if not re.search(rf"\b{name}\b\s*(?:\(|\);)", source):
+                bad += 1
+                print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
     print(f"{ok} match, {bad} differ")
     sys.exit(1 if bad else 0)
 

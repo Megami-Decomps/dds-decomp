@@ -13,6 +13,9 @@ void func_001539D0(s32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *memcpy(void *dest, const void *src, u32 n);
 extern void *func_002CFEB8(s32 size);
+
+INCLUDE_ASM(const s32, "game/code_00151F58", func_00151F58);
+
 u32 func_00151FC0(void) {
     return 0xf;
 }
