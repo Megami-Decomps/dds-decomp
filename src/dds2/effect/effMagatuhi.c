@@ -37,16 +37,16 @@ typedef struct EffMagatuhiDst {
     f32 f50;
 } EffMagatuhiDst; /* 0x54 */
 
-void effMagatuhiReleaseResource(s32 arg0) {
-    func_003297C8(*(u32 *)(arg0 + 0x34));
+void effMagatuhiReleaseResource(EffMagatuhiWork *work) {
+    func_003297C8(work->unk34);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191450);
 
-void func_001917C8(s32 arg0, s32 arg1, u32 arg2) {
-    *(u32 *)(arg1 * 4 + *(s32 *)(arg0 + 0x20)) = arg2;
+void func_001917C8(EffMagatuhiWork *work, s32 index, u32 value) {
+    work->unk20[index] = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001917E0);

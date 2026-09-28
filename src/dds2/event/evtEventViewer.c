@@ -34,11 +34,11 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246878);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246950);
 
-void evtEventViewerProcessPending(u32 arg0) {
-    s64 temp_v0;
+void evtEventViewerProcessPending(u32 viewer) {
+    s64 pending;
 
-    while (temp_v0 = func_002467B8(arg0), temp_v0 != 0) {
-        func_00246878(arg0);
+    while (pending = func_002467B8(viewer), pending != 0) {
+        func_00246878(viewer);
     }
 }
 
@@ -106,22 +106,22 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246DF0);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246E68);
 
-s32 evtEventViewerFindNameIndex(u64 arg0, s32 arg1) {
-    s64 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+s32 evtEventViewerFindNameIndex(u64 name, s32 table) {
+    s64 comparison;
+    s32 entry;
+    s32 index;
 
-    temp_v2 = 0;
-    if (0 < *(s32 *)(arg1 + 0x20)) {
-        temp_v1 = arg1 + 0x24;
+    index = 0;
+    if (0 < *(s32 *)(table + 0x20)) {
+        entry = table + 0x24;
         do {
-            temp_v0 = strcmp(arg0, temp_v1);
-            if (temp_v0 == 0) {
-                return temp_v2;
+            comparison = strcmp(name, entry);
+            if (comparison == 0) {
+                return index;
             }
-            temp_v2 = temp_v2 + 1;
-            temp_v1 = temp_v1 + 0x20;
-        } while (temp_v2 < *(s32 *)(arg1 + 0x20));
+            index = index + 1;
+            entry = entry + 0x20;
+        } while (index < *(s32 *)(table + 0x20));
     }
     return -1;
 }
@@ -134,15 +134,15 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247028);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247168);
 
-void evtEventViewerFreeSlot(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-    s32 *piVar2;
+void evtEventViewerFreeSlot(s32 index, s32 viewer) {
+    s32 unit;
+    s32 *slot;
 
-    piVar2 = (s32 *)(arg0 * 4 + arg1 + 0x203c);
-    temp_v0 = *piVar2;
-    if (temp_v0 != 0) {
-        func_00110B50(temp_v0);
-        *piVar2 = 0;
+    slot = (s32 *)(index * 4 + viewer + 0x203c);
+    unit = *slot;
+    if (unit != 0) {
+        func_00110B50(unit);
+        *slot = 0;
     }
 }
 

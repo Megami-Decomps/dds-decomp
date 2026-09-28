@@ -9,6 +9,16 @@ typedef struct ParObj {
     u32 unkF0;
 } ParObj;
 
+typedef struct ParListNode {
+    u8 pad00[0x54];
+    struct ParListNode *next;
+} ParListNode;
+
+typedef struct ParCellNode {
+    u8 pad00[0x24];
+    struct ParCellNode *next;
+} ParCellNode;
+
 extern s32 D_00436400;
 
 extern s32 D_00436404;
@@ -93,9 +103,9 @@ void func_00162FC8(u16 *arg0) {
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
-void func_00163000(s32 arg0) {
-    *(s32 *)(arg0 + 0x54) = D_00436400;
-    D_00436400 = arg0;
+void func_00163000(ParListNode *node) {
+    node->next = (ParListNode *)D_00436400;
+    D_00436400 = (s32)node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
@@ -115,9 +125,9 @@ void func_001634A8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", parCellInit);
 
-void func_00163508(s32 arg0) {
-    *(s32 *)(arg0 + 0x24) = D_00436404;
-    D_00436404 = arg0;
+void func_00163508(ParCellNode *node) {
+    node->next = (ParCellNode *)D_00436404;
+    D_00436404 = (s32)node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163518);

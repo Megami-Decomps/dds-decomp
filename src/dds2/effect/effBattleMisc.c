@@ -20,18 +20,18 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001697D0);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169A78);
 
-void func_00169C58(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_00169C58(u32 unused, u32 value) {
+    s32 actor;
 
-    temp_v0 = func_00169438();
-    func_00169A78(*(u32 *)(temp_v0 + 0x110) & 0xe00, arg1);
+    actor = func_00169438();
+    func_00169A78(*(u32 *)(actor + 0x110) & 0xe00, value);
 }
 
-void func_00169C88(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_00169C88(u32 unused, u32 value) {
+    s32 actor;
 
-    temp_v0 = func_00169440();
-    func_00169A78(*(u32 *)(temp_v0 + 0x110) & 0xe00, arg1);
+    actor = func_00169440();
+    func_00169A78(*(u32 *)(actor + 0x110) & 0xe00, value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169CB8);

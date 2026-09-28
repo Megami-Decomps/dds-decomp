@@ -52,20 +52,20 @@ s32 func_00290B28(s32 object) {
     return 1;
 }
 
-u16 func_00290B98(s32 arg0) {
-    s32 temp_v0;
+u16 func_00290B98(s32 object) {
+    s32 values;
 
-    temp_v0 = *(s32 *)(*(s32 *)(**(s32 **)(*(s32 *)(arg0 + 4) + 0x1c) * 4 + arg0 + 0x7ac) + 8);
-    if (*(s32 *)(arg0 + 0x7a4) != 0) {
-        return *(u16 *)(*(s16 *)(*(s32 *)(arg0 + 0x7a4) + 2) * 2 + temp_v0);
+    values = *(s32 *)(*(s32 *)(**(s32 **)(*(s32 *)(object + 4) + 0x1c) * 4 + object + 0x7ac) + 8);
+    if (*(s32 *)(object + 0x7a4) != 0) {
+        return *(u16 *)(*(s16 *)(*(s32 *)(object + 0x7a4) + 2) * 2 + values);
     }
-    return *(u16 *)(*(s16 *)(*(s32 *)(arg0 + 0x7a0) + 2) * 2 + temp_v0);
+    return *(u16 *)(*(s16 *)(*(s32 *)(object + 0x7a0) + 2) * 2 + values);
 }
 
-u16 func_00290BF0(s32 arg0, s32 arg1) {
+u16 func_00290BF0(s32 object, s32 index) {
     return *(u16 *)
-                    (((arg1 << 0x10) >> 0xf) +
-                    *(s32 *)(*(s32 *)(**(s32 **)(*(s32 *)(arg0 + 4) + 0x1c) * 4 + arg0 + 0x7ac) + 8));
+                    (((index << 0x10) >> 0xf) +
+                    *(s32 *)(*(s32 *)(**(s32 **)(*(s32 *)(object + 4) + 0x1c) * 4 + object + 0x7ac) + 8));
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290C20);

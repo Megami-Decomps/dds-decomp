@@ -94,27 +94,27 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A2E0);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A5D8);
 
-void effCopyVertRows(EffChan *dst, f32 *src) {
-    f32 *s;
-    u32 i;
-    f32 *d2;
-    f32 *d1;
+void effCopyVertRows(EffChan *channel, f32 *source) {
+    f32 *row;
+    u32 index;
+    f32 *secondary;
+    f32 *primary;
 
-    s = src;
-    i = 0;
-    src += 16;
-    d2 = (f32 *)((u8 *)dst->unk8 + 0x58);
-    d1 = dst->unk8;
+    row = source;
+    index = 0;
+    source += 16;
+    secondary = (f32 *)((u8 *)channel->unk8 + 0x58);
+    primary = channel->unk8;
     do {
-        i++;
-        d1[0] = s[0];
-        d1[1] = s[1];
-        d1[2] = s[2];
-        s += 4;
-        d1 += 4;
-        *d2 = *src++;
-        d2++;
-    } while (i < 4);
+        index++;
+        primary[0] = row[0];
+        primary[1] = row[1];
+        primary[2] = row[2];
+        row += 4;
+        primary += 4;
+        *secondary = *source++;
+        secondary++;
+    } while (index < 4);
 }
 
 void effFillRandRecords(EffEmit *arg0) {

@@ -3,6 +3,13 @@
 typedef struct TrackPolyData {
     u32 unk0;
     u32 color;
+    u32 count;
+    u32 unkC;
+    s32 position;
+    s32 step;
+    u8 pad18[8];
+    u32 nodeHandle;
+    u32 resourceHandle;
 } TrackPolyData;
 
 typedef struct TrackPoly {
@@ -57,15 +64,15 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001901F8);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00190370);
 
-void effTrackPolyFreeData(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x20));
-    func_003297C8(*(u32 *)(arg0 + 0x24));
+void effTrackPolyFreeData(TrackPolyData *data) {
+    func_00333918(data->nodeHandle);
+    func_003297C8(data->resourceHandle);
 }
 
-void effTrackPolyInitData(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = 2;
-    *(u32 *)(arg0 + 4) = 0x80808080;
-    *(u32 *)(arg0 + 0xc) = 0;
+void effTrackPolyInitData(TrackPolyData *data) {
+    data->position = 2;
+    data->color = 0x80808080;
+    data->unkC = 0;
 }
 
 void func_001904A8(u32 *arg0, u32 arg1) {
@@ -76,15 +83,15 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001904B0);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00190590);
 
-void effTrackPolyAdvancePosition(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void effTrackPolyAdvancePosition(TrackPolyData *data, s32 amount) {
+    s32 position;
 
-    temp_v0 = *(s32 *)(arg0 + 0x10) + ((*(s32 *)(arg0 + 0x14) - 1) * (arg1 - 1) + arg1) * -2
+    position = data->position + ((data->step - 1) * (amount - 1) + amount) * -2
     ;
-    if (temp_v0 < 2) {
-        temp_v0 = (temp_v0 + *(s32 *)(arg0 + 8)) - 2;
+    if (position < 2) {
+        position = (position + data->count) - 2;
     }
-    *(s32 *)(arg0 + 0x10) = temp_v0;
+    data->position = position;
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00190638);

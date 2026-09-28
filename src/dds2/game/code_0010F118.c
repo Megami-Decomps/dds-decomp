@@ -37,10 +37,10 @@ struct EEF0Node {
 };
 
 u32 func_0010F118(void) {
-    u64 temp_v0;
+    u64 id;
 
-    temp_v0 = func_0010D650(0);
-    func_0011A328(temp_v0);
+    id = func_0010D650(0);
+    func_0011A328(id);
     return 1;
 }
 
@@ -50,11 +50,11 @@ u32 func_0010F140(void) {
 }
 
 u32 func_0010F160(void) {
-    u64 temp_v0;
+    u64 id;
 
-    temp_v0 = func_0010D650(0);
-    temp_v0 = func_0011A318(temp_v0);
-    func_0010D818(temp_v0);
+    id = func_0010D650(0);
+    id = func_0011A318(id);
+    func_0010D818(id);
     return 1;
 }
 
@@ -70,28 +70,28 @@ INCLUDE_ASM(const s32, "game/code_0010F118", effObjNodeDestroy);
 
 INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerCreate);
 
-void effObjFreeInner(s32 arg0) {
-    s32 temp_v0;
+void effObjFreeInner(EEF0Node *node) {
+    EEF0Node *inner;
 
-    if (arg0 != 0) {
-        temp_v0 = *(s32 *)((s32)arg0 + 0x1c);
-        if (temp_v0 != 0) {
-            func_00328E48(temp_v0);
-            *(u32 *)((s32)arg0 + 0x1c) = 0;
+    if (node != 0) {
+        inner = node->inner;
+        if (inner != 0) {
+            func_00328E48(inner);
+            node->inner = 0;
         }
     }
 }
 
-void effObjSetNodeFlags(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xc0) = *(u32 *)(arg0 + 0xc0) | arg1;
+void effObjSetNodeFlags(EEF0Node *node, u32 flags) {
+    node->flags = node->flags | flags;
 }
 
-void effObjClearNodeFlags(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xc0) = *(u32 *)(arg0 + 0xc0) & ~arg1;
+void effObjClearNodeFlags(EEF0Node *node, u32 flags) {
+    node->flags = node->flags & ~flags;
 }
 
-u8 effObjTestNodeFlags(s32 arg0, u32 arg1) {
-    return (*(u32 *)(arg0 + 0xc0) & arg1) != 0;
+u8 effObjTestNodeFlags(EEF0Node *node, u32 flags) {
+    return (node->flags & flags) != 0;
 }
 
 void effObjInnerVecInit(EEF0Node *arg0) {

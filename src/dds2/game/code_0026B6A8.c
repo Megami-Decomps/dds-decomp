@@ -11,10 +11,10 @@ extern void func_0026C900(void);
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026B6A8);
 
 s32 func_0026B8F0(void) {
-    s32 *temp_v0 = (s32 *)func_00101958();
+    s32 *state = (s32 *)func_00101958();
 
-    func_002680E0(temp_v0);
-    func_00268128(0, temp_v0);
+    func_002680E0(state);
+    func_00268128(0, state);
     return 1;
 }
 
@@ -52,9 +52,9 @@ u32 func_0026BA68(void) {
 }
 
 s32 func_0026BAB8(void) {
-    s32 temp_v0 = func_00101958();
+    s32 state = func_00101958();
 
-    func_00268128(1, temp_v0);
+    func_00268128(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
@@ -86,18 +86,18 @@ void func_0026BB78(s32 request) {
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BBC8);
 
 u32 func_0026BC00(void) {
-    s32 temp_v0;
+    s32 state;
 
-    temp_v0 = func_00101958();
-    *(u32 *)(temp_v0 + 0x98) = 0;
+    state = func_00101958();
+    *(u32 *)(state + 0x98) = 0;
     return 1;
 }
 
 s32 func_0026BC28(void) {
-    s32 *temp_v0 = (s32 *)func_00101958();
+    s32 *state = (s32 *)func_00101958();
 
-    func_002678C8(temp_v0);
-    func_00267768(temp_v0);
+    func_002678C8(state);
+    func_00267768(state);
     return 1;
 }
 

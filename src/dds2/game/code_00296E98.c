@@ -1,16 +1,18 @@
 #include "common.h"
 
+typedef struct MenuActionOwner MenuActionOwner;
+
 extern u8 D_0043798A;
 
 extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002C6CE8(void);
 
-extern void func_00297240(s32, u32);
+extern void func_00297240(MenuActionOwner *, u32);
 
-extern void func_00297200(s32, u32);
+extern void func_00297200(MenuActionOwner *, u32);
 
-extern void func_002971C0(s32, u32);
+extern void func_002971C0(MenuActionOwner *, u32);
 
 extern s8 D_0043798B;
 
@@ -18,53 +20,66 @@ extern s8 D_00437989;
 
 extern s8 D_00437988;
 
+typedef struct MenuAction {
+    u32 value;
+    u32 mode;
+} MenuAction;
+
+struct MenuActionOwner {
+    u8 pad00[0x30];
+    MenuAction *action;
+    u8 pad34[0x88];
+    u32 counter;
+    u32 valueC0;
+};
+
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00296E98);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297000);
 
-void func_002971C0(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_002971C0(MenuActionOwner *owner, u32 value) {
+    MenuAction *action;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 1;
+    action = owner->action;
+    if (action != (MenuAction *)0x0) {
+        action->value = value;
+        action->mode = 1;
     }
 }
 
-void func_002971E0(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_002971E0(MenuActionOwner *owner, u32 value) {
+    MenuAction *action;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 2;
+    action = owner->action;
+    if (action != (MenuAction *)0x0) {
+        action->value = value;
+        action->mode = 2;
     }
 }
 
-void func_00297200(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00297200(MenuActionOwner *owner, u32 value) {
+    MenuAction *action;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 1;
+    action = owner->action;
+    if (action != (MenuAction *)0x0) {
+        action->value = value;
+        action->mode = 1;
     }
 }
 
-void func_00297220(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00297220(MenuActionOwner *owner, u32 value) {
+    MenuAction *action;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 2;
+    action = owner->action;
+    if (action != (MenuAction *)0x0) {
+        action->value = value;
+        action->mode = 2;
     }
 }
 
-void func_00297240(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xc0) = arg1;
-    *(u32 *)(arg0 + 0xbc) = 0;
+void func_00297240(MenuActionOwner *owner, u32 value) {
+    owner->valueC0 = value;
+    owner->counter = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297250);

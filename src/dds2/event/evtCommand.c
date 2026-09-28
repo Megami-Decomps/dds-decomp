@@ -170,25 +170,25 @@ s32 evtCommandCallEvent(void)
 }
 
 u32 func_00241460(void) {
-    s64 temp_v0;
+    s64 timer;
 
-    temp_v0 = scrGetCommandTimer();
-    if (temp_v0 == 0) {
+    timer = scrGetCommandTimer();
+    if (timer == 0) {
         func_00102908();
     }
     return 0;
 }
 
-void evtSubmitEventRequest(s32 arg0, s32 arg1)
+void evtSubmitEventRequest(s32 eventId, s32 requestMode)
 {
     s32 args[2];
 
     func_00144F60();
-    func_0012EBF8(2, arg0);
-    D_004371E8 = arg1;
+    func_0012EBF8(2, eventId);
+    D_004371E8 = requestMode;
     args[0] = 0;
-    args[1] = arg0;
-    func_001027D8(0xe, (s32)args, 8, arg1 > 0);
+    args[1] = eventId;
+    func_001027D8(0xe, (s32)args, 8, requestMode > 0);
     func_0010BFE0();
 }
 
@@ -201,15 +201,15 @@ s32 func_002414F8(void)
     return 1;
 }
 
-void evtSubmitEventRequestImmediate(s32 arg0)
+void evtSubmitEventRequestImmediate(s32 eventId)
 {
     s32 args[2];
 
     func_00144EE0();
-    func_0012EBF8(2, arg0);
+    func_0012EBF8(2, eventId);
     D_004371E8 = 0;
     args[0] = 0;
-    args[1] = arg0;
+    args[1] = eventId;
     func_001027D8(0xe, (s32)args, 8, 1);
     func_0010BFE0();
 }

@@ -91,9 +91,9 @@ BillObj *billCloneList(BillObj *obj) {
     return newobj;
 }
 
-void func_00158F58(u32 arg0) {
-    func_00159848(*(u32 *)((s32)arg0 + 0x30));
-    func_00328E48(arg0);
+void func_00158F58(BillObj *obj) {
+    func_00159848(obj->unk30);
+    func_00328E48(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158F88);
@@ -102,21 +102,21 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00159158);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001591D8);
 
-void billResolveEntry(s32 arg0, s32 arg1, s32 arg2) {
-    s16 temp_v0;
-    s32 temp_v1;
-    s32 *piVar3;
-    s32 temp_v2;
+void billResolveEntry(s32 table, s32 index, s32 output) {
+    s16 kind;
+    s32 data;
+    s32 *entry;
+    s32 base;
 
-    temp_v2 = *(s32 *)(arg0 + 4);
-    piVar3 = (s32 *)(*(s32 *)(arg0 + 8) + arg1 * 0x14);
-    temp_v1 = *piVar3;
-    *(s32 **)(arg2 + 0xc) = piVar3;
-    temp_v2 = temp_v2 + temp_v1;
-    *(u32 *)(arg2 + 4) = 0;
-    temp_v0 = *(s16 *)(temp_v2 + 0x12);
-    *(s32 *)(arg2 + 0x10) = temp_v2;
-    *(s32 *)(arg2 + 8) = (s32)temp_v0;
+    base = *(s32 *)(table + 4);
+    entry = (s32 *)(*(s32 *)(table + 8) + index * 0x14);
+    data = *entry;
+    *(s32 **)(output + 0xc) = entry;
+    base = base + data;
+    *(u32 *)(output + 4) = 0;
+    kind = *(s16 *)(base + 0x12);
+    *(s32 *)(output + 0x10) = base;
+    *(s32 *)(output + 8) = (s32)kind;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001594C8);
@@ -129,15 +129,15 @@ INCLUDE_ASM(const s32, "effect/billManager", func_001598D8);
 
 INCLUDE_ASM(const s32, "effect/billManager", billCreateIndexed);
 
-u64 func_001599F8(u64 arg0, u64 arg1) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_001599F8(u64 owner, u64 resource) {
+    u64 allocation;
+    u64 billboard;
+    u32 header[4];
 
-    temp_v0 = func_00343ED0(arg1, temp_v2, 0);
-    temp_v1 = billCreateIndexed(arg0, temp_v2[0]);
-    func_003297C8(temp_v0);
-    return temp_v1;
+    allocation = func_00343ED0(resource, header, 0);
+    billboard = billCreateIndexed(owner, header[0]);
+    func_003297C8(allocation);
+    return billboard;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00159A50);

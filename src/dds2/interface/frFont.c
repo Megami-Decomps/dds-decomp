@@ -201,27 +201,27 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019CE10);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019CE78);
 
-void func_0019D010(FrFontCtx *ctx, s32 arg1) {
-    s32 val = (arg1 & 0xFF) * 2;
+void func_0019D010(FrFontCtx *ctx, s32 value) {
+    s32 doubled = (value & 0xFF) * 2;
 
-    if (val >= 0x81) {
+    if (doubled >= 0x81) {
         ctx->u0.bytes.unk0 = -0x80;
     } else {
-        ctx->u0.bytes.unk0 = val;
+        ctx->u0.bytes.unk0 = doubled;
     }
 }
 
-void func_0019D038(s32 arg0) {
-    *(u32 *)(arg0 + 0x40) = 1;
-    func_0019D010(arg0, 0x80);
+void func_0019D038(FrFontCtx *ctx) {
+    ctx->mode40 = 1;
+    func_0019D010(ctx, 0x80);
 }
 
-void func_0019D058(s32 arg0, u8 arg1) {
-    u32 temp_v0;
+void func_0019D058(FrFontCtx *ctx, u8 flag) {
+    u32 measured;
 
-    *(u8 *)(arg0 + 1) = arg1;
-    temp_v0 = frFontMeasureGlyphChain();
-    *(u32 *)(arg0 + 0xc) = temp_v0;
+    ctx->u0.bytes.flag1 = flag;
+    measured = frFontMeasureGlyphChain();
+    ctx->uC.w = measured;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D088);
@@ -231,8 +231,8 @@ void func_0019D100(FrFontCtx *ctx, u32 arg1, u32 arg2) {
     ctx->unk8 = arg2;
 }
 
-void func_0019D110(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1 >> 4;
+void func_0019D110(FrFontCtx *ctx, u32 value) {
+    ctx->u14.shifted = value >> 4;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D120);

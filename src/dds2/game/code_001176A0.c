@@ -6,6 +6,15 @@ extern s32 D_00435DD0;
 
 extern s64 func_0011D588(void);
 
+typedef struct WorldSlotData {
+    u32 value;
+    u32 flags;
+    f32 scale;
+    f32 scaledValue;
+    u8 pad10[8];
+    u32 value18;
+} WorldSlotData;
+
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117728);
@@ -18,28 +27,28 @@ u32 func_001177D8(u32 *arg0) {
     return *arg0;
 }
 
-void func_001177E0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0xc) = arg0 * *(float *)(arg1 + 8);
+void func_001177E0(float value, WorldSlotData *slot) {
+    slot->scaledValue = value * slot->scale;
 }
 
-float func_001177F0(s32 arg0) {
-    return *(float *)(arg0 + 0xc) / *(float *)(arg0 + 8);
+float func_001177F0(WorldSlotData *slot) {
+    return slot->scaledValue / slot->scale;
 }
 
-void func_00117810(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) | 8;
+void func_00117810(WorldSlotData *slot) {
+    slot->flags = slot->flags | 8;
 }
 
-void func_00117820(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) & 0xfffffff7;
+void func_00117820(WorldSlotData *slot) {
+    slot->flags = slot->flags & 0xfffffff7;
 }
 
-void func_00117838(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) | 0x20;
+void func_00117838(WorldSlotData *slot) {
+    slot->flags = slot->flags | 0x20;
 }
 
-void func_00117848(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) & 0xffffffdf;
+void func_00117848(WorldSlotData *slot) {
+    slot->flags = slot->flags & 0xffffffdf;
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117860);

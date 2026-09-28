@@ -53,15 +53,15 @@ u32 func_002890A8(MenuContainer *object) {
     return *(u32 *)object->list->selected;
 }
 
-u32 func_002890B8(s32 arg0) {
-    func_002B8D10(*(u32 *)(arg0 + 4));
-    func_002B8F98(*(u32 *)(arg0 + 4));
+u32 func_002890B8(MenuContainer *object) {
+    func_002B8D10(object->list);
+    func_002B8F98(object->list);
     return 1;
 }
 
-u32 func_002890F0(s32 arg0) {
-    func_002B8CF0(*(u32 *)(arg0 + 4));
-    func_002B8F98(*(u32 *)(arg0 + 4));
+u32 func_002890F0(MenuContainer *object) {
+    func_002B8CF0(object->list);
+    func_002B8F98(object->list);
     return 1;
 }
 
@@ -123,14 +123,14 @@ s32 func_0028A0F8(s32 object) {
     return 1;
 }
 
-s32 func_0028A178(s32 object) {
-    s32 node = *(s32 *)(*(s32 *)(object + 4) + 0x10);
+s32 func_0028A178(MenuContainer *object) {
+    MenuNode *node = object->list->head;
     s32 index = 0;
     while (node != 0) {
-        if (func_0028A018(*(s32 *)(node + 0x70)) != 0) {
+        if (func_0028A018(node->value) != 0) {
             return index;
         }
-        node = *(s32 *)(node + 0x58);
+        node = node->next;
         index++;
     }
     return -1;

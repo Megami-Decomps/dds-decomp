@@ -6,16 +6,33 @@ extern s32 func_00110C70(u64, u64, u64);
 
 extern u32 D_00435DA0;
 
-u32 func_00113308(s32 arg0) {
-    return **(u32 **)(arg0 + 0x18);
+typedef struct EffectObjectData {
+    u32 word00;
+    u32 word04;
+    u32 word08;
+    u32 word0C;
+    s32 activeId;
+    u32 word14;
+    u32 word18;
+    u32 pendingValue;
+    u32 timer;
+} EffectObjectData;
+
+typedef struct EffectObject {
+    u8 pad00[0x18];
+    EffectObjectData *data;
+} EffectObject;
+
+u32 func_00113308(EffectObject *object) {
+    return object->data->word00;
 }
 
-u32 func_00113318(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 8);
+u32 func_00113318(EffectObject *object) {
+    return object->data->word08;
 }
 
-void func_00113328(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x14) = arg1;
+void func_00113328(EffectObject *object, u32 value) {
+    object->data->word14 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113338);
@@ -24,21 +41,21 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_00113408);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113560);
 
-void func_00113660(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_00113660(EffectObject *object, u32 value) {
+    EffectObjectData *data;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    dds3SetObjectFlags(arg0, 0x2000);
-    *(u32 *)(temp_v0 + 0x1c) = arg1;
-    *(u32 *)(temp_v0 + 0x20) = 0;
+    data = object->data;
+    dds3SetObjectFlags(object, 0x2000);
+    data->pendingValue = value;
+    data->timer = 0;
 }
 
-void func_001136A0(s32 arg0) {
-    s32 temp_v0;
+void func_001136A0(EffectObject *object) {
+    EffectObjectData *data;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    *(u32 *)(temp_v0 + 0x20) = 0x1e;
-    *(u32 *)(temp_v0 + 0x1c) = 0;
+    data = object->data;
+    data->timer = 0x1e;
+    data->pendingValue = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_001136B8);

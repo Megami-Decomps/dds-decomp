@@ -53,14 +53,14 @@ u32 func_00299FE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_00299FE8);
 
-u32 func_0029A088(u32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
+u32 func_0029A088(u32 address) {
+    u32 result;
+    s32 context;
 
-    temp_v1 = (s32)arg0;
-    temp_v0 = func_0029D790(**(u32 **)(temp_v1 + 0x9c), temp_v1 + 0x4e8);
-    *(u32 *)(temp_v1 + 0x268) = temp_v0;
-    func_00299FE8(arg0);
+    context = (s32)address;
+    result = func_0029D790(**(u32 **)(context + 0x9c), context + 0x4e8);
+    *(u32 *)(context + 0x268) = result;
+    func_00299FE8(address);
     return 1;
 }
 
@@ -78,18 +78,18 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 
-void func_0029A588(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_0029A588(s32 request) {
+    s32 context = func_00101958();
 
-    titleRenderFadeAndPanels(temp_v0);
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    titleRenderFadeAndPanels(context);
+    func_002C4038(context + 8, context + 0x54, 1, request);
 }
 
-void func_0029A5D8(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_0029A5D8(s32 request) {
+    s32 context = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A620);

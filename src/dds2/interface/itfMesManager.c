@@ -35,9 +35,9 @@ extern ItfMesZero D_003B4770;
 /* Sized table indexed by func_0019D268: s16 count + u32 items. */
 typedef struct ItfMesTable {
     u8 unk0[0x18]; /* 0x0 */
-    s16 unk18;     /* 0x18: count */
-    s16 unk1A;     /* 0x1A */
-    u32 unk1C[1];  /* 0x1C: items */
+    s16 count;      /* 0x18 */
+    s16 unk1A;      /* 0x1A */
+    u32 items[1];   /* 0x1C */
 } ItfMesTable;
 
 /* 8-byte entry selected by func_0019D1D8/func_0019D1F0. */
@@ -498,12 +498,12 @@ u32 itfMesGetEntryCount(s32 arg0) {
 }
 
 u32 itfMesGetTableItem(ItfMesTable *table, s32 index) {
-    s32 count = table->unk18;
+    s32 count = table->count;
 
     if (index < 0 || index >= count) {
         return 0;
     }
-    return table->unk1C[index];
+    return table->items[index];
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A52B8);
@@ -519,20 +519,20 @@ u32 func_001A5600(s32 arg0) {
     return *(u32 *)((u32)*(u16 *)(arg0 + 0x20) * 4 + *piVar1);
 }
 
-s32 itfMesCountZeroBits(s32 arg0, u32 arg1) {
-    s32 temp_v0;
-    u32 temp_v1;
+s32 itfMesCountZeroBits(s32 count, u32 bits) {
+    s32 zeros;
+    u32 bit;
 
-    temp_v0 = 0;
-    while (0 < arg0) {
-        temp_v1 = arg1 & 1;
-        arg1 = arg1 >> 1;
-        arg0 = arg0 - 1;
-        if (temp_v1 == 0) {
-            temp_v0 = temp_v0 + 1;
+    zeros = 0;
+    while (0 < count) {
+        bit = bits & 1;
+        bits = bits >> 1;
+        count = count - 1;
+        if (bit == 0) {
+            zeros = zeros + 1;
         }
     }
-    return temp_v0;
+    return zeros;
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5670);

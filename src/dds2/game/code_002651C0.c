@@ -143,19 +143,19 @@ u32 func_00265980(void) {
     return 1;
 }
 
-u32 func_00265988(s32 arg0) {
-    u32 temp_v0;
-    s64 temp_v1;
+u32 func_00265988(s32 context) {
+    u32 changed;
+    s64 flagSet;
 
-    if (((*(s32 *)(arg0 + 8) == 2) && (temp_v1 = mdlFlagTest(4), temp_v1 != 0)) &&
-          (temp_v1 = mdlFlagTest(0x290), temp_v1 == 0)) {
+    if (((*(s32 *)(context + 8) == 2) && (flagSet = mdlFlagTest(4), flagSet != 0)) &&
+          (flagSet = mdlFlagTest(0x290), flagSet == 0)) {
         mdlFlagSet(0x290);
-        temp_v0 = 1;
+        changed = 1;
     }
     else {
-        temp_v0 = 0;
+        changed = 0;
     }
-    return temp_v0;
+    return changed;
 }
 
 void func_002659E0(void) {

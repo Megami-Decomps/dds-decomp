@@ -16,7 +16,7 @@ typedef struct BtlSub718 {
             s8 active;
         } b;
     };
-    s32 unk4;
+    s32 targetMode;
     s8 b8;
 } BtlSub718;
 
@@ -359,7 +359,7 @@ BtlUnit *findBattleUnitByMode(void) {
     for (unit = work->unitList; unit != 0; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x200) {
-                if (sub->unk4 == unit->mode) {
+                if (sub->targetMode == unit->mode) {
                     return unit;
                 }
             }
@@ -368,16 +368,16 @@ BtlUnit *findBattleUnitByMode(void) {
     return 0;
 }
 
-u64 func_0021EDD8(u64 arg0) {
-    s32 temp_v0;
-    u64 temp_v1;
+u64 func_0021EDD8(u64 value) {
+    s32 work;
+    u64 result;
 
-    temp_v0 = (s32)func_001AA6F8();
-    temp_v1 = 0;
-    if (*(s8 *)(*(s32 *)(temp_v0 + 0x718) + 2) != '\0') {
-        temp_v1 = arg0;
+    work = (s32)func_001AA6F8();
+    result = 0;
+    if (*(s8 *)(*(s32 *)(work + 0x718) + 2) != '\0') {
+        result = value;
     }
-    return temp_v1;
+    return result;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0021B5C0", D_0041AAC8);

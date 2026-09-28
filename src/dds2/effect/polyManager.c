@@ -97,24 +97,24 @@ void func_00166EA0(float factor, PolyTransform *transform) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);
 
-void polyResetEntries(s32 arg0) {
-    u32 temp_v0;
-    s32 *piVar2;
-    u32 temp_v1;
+void polyResetEntries(s32 pool) {
+    u32 entryCount;
+    s32 *record;
+    u32 index;
 
-    temp_v0 = *(u32 *)(arg0 + 0x10);
-    temp_v1 = 0;
-    *(u32 *)(arg0 + 0x14) = 0xfffffff;
-    *(u32 *)(arg0 + 0x6c) = 0;
-    *(u32 *)(arg0 + 0x68) = 0;
-    piVar2 = *(s32 **)(arg0 + 0xf8);
-    if (temp_v0 != 0) {
+    entryCount = *(u32 *)(pool + 0x10);
+    index = 0;
+    *(u32 *)(pool + 0x14) = 0xfffffff;
+    *(u32 *)(pool + 0x6c) = 0;
+    *(u32 *)(pool + 0x68) = 0;
+    record = *(s32 **)(pool + 0xf8);
+    if (entryCount != 0) {
         do {
-            if (*piVar2 != -0xffffff) {
-                *piVar2 = 0xffffff0;
+            if (*record != -0xffffff) {
+                *record = 0xffffff0;
             }
-            temp_v1 = temp_v1 + 1;
-            piVar2 = piVar2 + 5;
-        } while (temp_v1 < temp_v0);
+            index = index + 1;
+            record = record + 5;
+        } while (index < entryCount);
     }
 }

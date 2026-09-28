@@ -17,15 +17,15 @@ extern void (*D_003AAC20[])();
 
 extern BillDispatch D_003AAB88[];
 
-void func_00160B58(u32 arg0) {
-    s32 temp_v0;
+void func_00160B58(ParObj *obj) {
+    s32 child;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x174);
-    if (temp_v0 != 0) {
-        func_003297C8(temp_v0);
+    child = (s32)obj->unk174;
+    if (child != 0) {
+        func_003297C8(child);
     }
-    effDestroyResources(arg0);
-    func_00328E48(arg0);
+    effDestroyResources(obj);
+    func_00328E48(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00160B98);
@@ -74,8 +74,8 @@ void parRestartKind(ParObj *obj) {
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00162248);
 
-u16 func_001622D0(s32 arg0) {
-    return *(u16 *)(arg0 + 0x142);
+u16 func_001622D0(ParObj *obj) {
+    return obj->unk142;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001622D8);

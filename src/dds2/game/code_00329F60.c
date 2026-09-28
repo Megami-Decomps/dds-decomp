@@ -73,11 +73,11 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AEA0);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AF20);
 
-void func_0032AFD8(SdfSemaObj *arg0) {
-    arg0->unk4 = NULL;
-    arg0->unk8 = NULL;
-    arg0->unkC = NULL;
-    arg0->unk10 = 0;
+void func_0032AFD8(SdfSemaObj *semaphore) {
+    semaphore->unk4 = NULL;
+    semaphore->unk8 = NULL;
+    semaphore->unkC = NULL;
+    semaphore->unk10 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AFF0);
@@ -92,15 +92,15 @@ u32 func_0032B1B0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B1B8);
 
-s32 sdfTexGetOrInitializeSecondaryBuffer(s32 arg0) {
-    s32 temp_v0;
+s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
+    SdfTexBuf *buffer;
 
-    temp_v0 = *(s32 *)(arg0 + 0x2c);
-    if (temp_v0 == 0) {
+    buffer = texture->unk2C;
+    if (buffer == NULL) {
         func_0032BE30();
-        temp_v0 = *(s32 *)(arg0 + 0x2c);
+        buffer = texture->unk2C;
     }
-    return temp_v0;
+    return (s32)buffer;
 }
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B218);
@@ -109,34 +109,34 @@ u8 func_0032B240(s32 arg0) {
     return *(u8 *)(arg0 + 0x18);
 }
 
-u32 sdfTexGetSecondaryResourceWord(s32 arg0) {
-    u32 temp_v0;
+u32 sdfTexGetSecondaryResourceWord(SdfTex *texture) {
+    u32 word;
 
-    temp_v0 = 0;
-    if (*(s32 *)(arg0 + 0x14) != 0) {
-        temp_v0 = *(u32 *)(*(s32 *)(arg0 + 0x14) + 0xc);
+    word = 0;
+    if (texture->secondaryResource != NULL) {
+        word = texture->secondaryResource->word;
     }
-    return temp_v0;
+    return word;
 }
 
-u32 sdfTexGetPrimaryResourceWord(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x10) + 0xc);
+u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
+    return texture->primaryResource->word;
 }
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B270);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B2C0);
 
-u64 func_0032B318(s32 arg0) {
-    return *(u64 *)(*(s32 *)(arg0 + 0x28) + 0x20);
+u64 func_0032B318(SdfTex *texture) {
+    return texture->unk28->unk20;
 }
 
-u64 func_0032B328(s32 arg0) {
-    return *(u64 *)(*(s32 *)(arg0 + 0x28) + 0x10);
+u64 func_0032B328(SdfTex *texture) {
+    return texture->unk28->unk10;
 }
 
-u64 func_0032B338(s32 arg0) {
-    return *(u64 *)(*(s32 *)(arg0 + 0x28) + 0x30);
+u64 func_0032B338(SdfTex *texture) {
+    return texture->unk28->unk30;
 }
 
 void func_0032B348(SdfTex *arg0, s32 arg1, s32 arg2) {
@@ -148,8 +148,8 @@ void func_0032B348(SdfTex *arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B370);
 
-void func_0032B3E0(s32 arg0, u8 arg1) {
-    *(u8 *)(arg0 + 0x1f) = arg1;
+void func_0032B3E0(SdfTex *texture, u8 value) {
+    texture->unk1F = value;
     func_0032BE60();
 }
 

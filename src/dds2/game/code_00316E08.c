@@ -41,12 +41,12 @@ void func_00316E08(RgbAlpha *p, u32 color) {
     p->alpha38 = color >> 24;
 }
 
-u32 func_00316E28(s32 arg0) {
-    return *(u32 *)(arg0 + 0x3c);
+u32 func_00316E28(RgbAlpha *entry) {
+    return entry->x3C;
 }
 
-void func_00316E30(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x3c) = arg1;
+void func_00316E30(RgbAlpha *entry, u32 value) {
+    entry->x3C = value;
 }
 
 void func_00316E38(RgbAlpha *dst, CfSrc *src) {
@@ -81,19 +81,19 @@ void func_00316FA8(u32 sprite) {
 }
 
 u32 func_00316FC8(void) {
-    u32 temp_v0;
-    s64 temp_v1;
+    u32 result;
+    s64 status;
 
-    temp_v1 = func_00317FE0(D_0043891C);
-    if (temp_v1 == -1) {
+    status = func_00317FE0(D_0043891C);
+    if (status == -1) {
         func_00128658();
-        temp_v0 = 0xffffffff;
+        result = 0xffffffff;
     }
     else {
         func_00318068(D_0043891C);
-        temp_v0 = 0;
+        result = 0;
     }
-    return temp_v0;
+    return result;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);

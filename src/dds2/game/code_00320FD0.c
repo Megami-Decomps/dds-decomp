@@ -29,10 +29,10 @@ typedef struct ResourceList {
 
 u32 func_00320F68(u32 list, u32 node);
 
-u32 func_00320FD0(u32 record) {
-    u32 state = func_00321170(record);
-    if (state != 0) {
-        return func_00320F68(record, state);
+u32 func_00320FD0(u32 list) {
+    u32 node = func_00321170(list);
+    if (node != 0) {
+        return func_00320F68(list, node);
     }
     return 0;
 }
@@ -131,9 +131,9 @@ void func_003214C8(u32 value) {
     D_0043899C = value;
 }
 
-void func_003214D0(u32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        func_00321908(arg1);
+void func_003214D0(u32 unused, s32 resource) {
+    if (resource != 0) {
+        func_00321908(resource);
         return;
     }
 }

@@ -9,10 +9,10 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D390);
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D4D0);
 
 void evtFreeEventPackState(void) {
-    u64 temp_v0;
+    u64 state;
 
-    temp_v0 = func_00101958();
-    func_00328E48(temp_v0);
+    state = func_00101958();
+    func_00328E48(state);
 }
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D6B0);

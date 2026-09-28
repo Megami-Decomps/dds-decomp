@@ -135,20 +135,20 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_00210B78);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210C10);
 
-u32 func_00210CB0(u32 arg0) {
+u32 func_00210CB0(u32 limit) {
     D_00436CB0 = D_00436CB0 * 0x41c64e6d + 0x3039;
-    return (D_00436CB0 >> 0x10) * (arg0 & 0xffff) >> 0x10;
+    return (D_00436CB0 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210CE0);
 
-s32 btlAllocAndCheck(s32 arg0) {
-    s32 temp_v0 = func_00328E18(0x10);
-    s32 temp_v1 = *(s32 *)(arg0 + 0x18);
+s32 btlAllocAndCheck(s32 object) {
+    s32 allocation = func_00328E18(0x10);
+    s32 actor = *(s32 *)(object + 0x18);
 
-    D_00436CB8 = temp_v0;
-    *(s32 *)temp_v0 = arg0;
-    if (func_00213818(temp_v1, 0) != 0) {
+    D_00436CB8 = allocation;
+    *(s32 *)allocation = object;
+    if (func_00213818(actor, 0) != 0) {
         func_00328E48(D_00436CB8);
         return 1;
     }

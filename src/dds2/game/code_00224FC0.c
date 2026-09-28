@@ -117,12 +117,12 @@ s32 func_00226540(u32 unused1, u32 unused2, s32 action) {
     return action == 0x109 ? 0x1194 : 0x64;
 }
 
-void func_00226558(u8 arg0) {
-    s32 temp_v0;
+void func_00226558(u8 value) {
+    s32 battle;
 
-    temp_v0 = func_001AA6F8();
-    if (*(s32 *)(temp_v0 + 0x2a0) == 0x31b) {
-        **(u8 **)(temp_v0 + 0x718) = arg0;
+    battle = func_001AA6F8();
+    if (*(s32 *)(battle + 0x2a0) == 0x31b) {
+        **(u8 **)(battle + 0x718) = value;
     }
 }
 
