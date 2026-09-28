@@ -10,9 +10,15 @@ typedef struct {
     u8 bytes[0x30];
 } __attribute__((packed)) FileRecordHeader;
 
-void func_00197E40(u32 arg0) {
-    func_001686F0(*(u32 *)((s32)arg0 + 0x34));
-    func_00328E48(arg0);
+typedef struct EffEventNode {
+    u8 pad0[0x30];
+    u32 state;
+    u32 resource;
+} EffEventNode;
+
+void func_00197E40(EffEventNode *node) {
+    func_001686F0(node->resource);
+    func_00328E48(node);
 }
 
 void func_00197E70(FileRecordHeader *destination, const FileRecordHeader *source) {
@@ -21,12 +27,12 @@ void func_00197E70(FileRecordHeader *destination, const FileRecordHeader *source
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00197ED8);
 
-void func_00197F40(s32 arg0) {
-    func_00169168(*(u32 *)(arg0 + 0x34));
+void func_00197F40(EffEventNode *node) {
+    func_00169168(node->resource);
 }
 
-void func_00197F58(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x30) = arg1;
+void func_00197F58(EffEventNode *node, u32 state) {
+    node->state = state;
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00197F60);

@@ -1,27 +1,38 @@
 #include "common.h"
 
-void func_0018FE60(u32 arg0) {
-    effTrackPolyFreeData(*(u32 *)((s32)arg0 + 0x38));
-    func_00328E48(arg0);
+typedef struct TrackPolyData {
+    u32 unk0;
+    u32 color;
+} TrackPolyData;
+
+typedef struct TrackPoly {
+    u8 pad0[0x34];
+    u32 state;
+    TrackPolyData *data;
+} TrackPoly;
+
+void func_0018FE60(TrackPoly *track) {
+    effTrackPolyFreeData(track->data);
+    func_00328E48(track);
 }
 
-void func_0018FE90(s32 arg0) {
-    *(u32 *)(arg0 + 0x34) = 0;
-    effTrackPolyInitData(*(u32 *)(arg0 + 0x38));
+void func_0018FE90(TrackPoly *track) {
+    track->state = 0;
+    effTrackPolyInitData(track->data);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_0018FEB0);
 
-void func_0018FF10(s32 arg0) {
-    func_001906B0(*(u32 *)(arg0 + 0x38));
+void func_0018FF10(TrackPoly *track) {
+    func_001906B0(track->data);
 }
 
-void func_0018FF28(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x38) + 4) = arg1;
+void func_0018FF28(TrackPoly *track, u32 color) {
+    track->data->color = color;
 }
 
-void func_0018FF38(s32 arg0) {
-    func_00190A48(*(u32 *)(arg0 + 0x38));
+void func_0018FF38(TrackPoly *track) {
+    func_00190A48(track->data);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_0018FF50);

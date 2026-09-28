@@ -1,5 +1,14 @@
 #include "common.h"
 
+typedef struct PolyTransform {
+    u8 pad0[0xC8];
+    f32 scaleC8;
+    f32 scaleCC;
+    f32 scaleD0;
+    u8 padD4[8];
+    f32 scaleDC;
+} PolyTransform;
+
 void func_001655D0(u32 arg0) {
     func_001634A8(*(u32 *)((s32)arg0 + 0xdc));
     func_00328E48(arg0);
@@ -7,9 +16,9 @@ void func_001655D0(u32 arg0) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165600);
 
-void func_00165670(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0xcc) = *(float *)(arg1 + 0xcc) * arg0;
-    *(float *)(arg1 + 0xd0) = *(float *)(arg1 + 0xd0) * arg0;
+void func_00165670(float factor, PolyTransform *transform) {
+    transform->scaleCC = transform->scaleCC * factor;
+    transform->scaleD0 = transform->scaleD0 * factor;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
@@ -40,11 +49,11 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165E28);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165FC8);
 
-void func_00166190(float arg0, s32 arg1) {
-    *(float *)(arg1 + 200) = *(float *)(arg1 + 200) * arg0;
-    *(float *)(arg1 + 0xdc) = *(float *)(arg1 + 0xdc) * arg0;
-    *(float *)(arg1 + 0xcc) = *(float *)(arg1 + 0xcc) * arg0;
-    *(float *)(arg1 + 0xd0) = *(float *)(arg1 + 0xd0) * arg0;
+void func_00166190(float factor, PolyTransform *transform) {
+    transform->scaleC8 = transform->scaleC8 * factor;
+    transform->scaleDC = transform->scaleDC * factor;
+    transform->scaleCC = transform->scaleCC * factor;
+    transform->scaleD0 = transform->scaleD0 * factor;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
@@ -62,8 +71,8 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001664F0);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166590);
 
-void func_001667E8(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0xcc) = *(float *)(arg1 + 0xcc) * arg0;
+void func_001667E8(float factor, PolyTransform *transform) {
+    transform->scaleCC = transform->scaleCC * factor;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
@@ -81,9 +90,9 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00166B40);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166CB0);
 
-void func_00166EA0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0xcc) = *(float *)(arg1 + 0xcc) * arg0;
-    *(float *)(arg1 + 0xd0) = *(float *)(arg1 + 0xd0) * arg0;
+void func_00166EA0(float factor, PolyTransform *transform) {
+    transform->scaleCC = transform->scaleCC * factor;
+    transform->scaleD0 = transform->scaleD0 * factor;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);

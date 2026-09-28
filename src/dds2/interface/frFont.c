@@ -25,10 +25,10 @@ typedef struct FrFontGlyph {
         u32 w;            /* 0x18: word view */
         u8 b[4];          /* 0x18: byte views */
     } unk18;
-    struct FrFontGlyph *unk1C; /* 0x1C */
+    struct FrFontGlyph *firstChild; /* 0x1C: child glyph chain */
     struct FrFontGlyph *unk20; /* 0x20 */
     struct FrFontGlyph *unk24; /* 0x24 */
-    struct FrFontGlyph *unk28; /* 0x28 */
+    struct FrFontGlyph *next; /* 0x28: next glyph in chain */
     struct FrFontGlyph *unk2C; /* 0x2C */
     u32 unk30;        /* 0x30 */
     u32 unk34;        /* 0x34 */
@@ -169,10 +169,10 @@ void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s
     arg0->unk8 = 0;
     arg0->unkC = 0;
     arg0->unk2 = 0;
-    arg0->unk1C = NULL;
+    arg0->firstChild = NULL;
     arg0->unk20 = NULL;
     arg0->unk24 = NULL;
-    arg0->unk28 = NULL;
+    arg0->next = NULL;
 }
 
 void frFontInitGlyph(FrFontGlyph *arg0) {
@@ -183,9 +183,9 @@ void frFontInitGlyph(FrFontGlyph *arg0) {
     arg0->unkC = 0;
     arg0->u14.w = 0;
     arg0->unk24 = NULL;
-    arg0->unk28 = NULL;
+    arg0->next = NULL;
     arg0->unk2C = arg0;
-    arg0->unk1C = NULL;
+    arg0->firstChild = NULL;
     arg0->unk20 = NULL;
     arg0->unk18.w = 0;
     arg0->unk30 = 0;
@@ -285,7 +285,7 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
     if (arg1 == NULL) {
         return arg0;
     }
-    arg0->unk28 = arg1->unk2C;
+    arg0->next = arg1->unk2C;
     arg1->unk2C->unk24 = arg0;
     arg1->unk2C = arg0->unk2C;
     if (arg2 == 1) {

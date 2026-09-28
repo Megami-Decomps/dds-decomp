@@ -1,35 +1,44 @@
 #include "common.h"
 
+/* Two clamped cursor coordinates, each followed by its maximum. */
+typedef struct DatCalcCursor {
+    u8 unk0[6];
+    u16 x;
+    u16 xMax;
+    u16 y;
+    u16 yMax;
+} DatCalcCursor;
+
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001197A8);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001197C0);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001198C0);
 
-void func_001199C0(s32 arg0, s32 arg1) {
-    u32 temp_v0;
+void func_001199C0(DatCalcCursor *cursor, s32 delta) {
+    u32 value;
 
-    temp_v0 = (u32)*(u16 *)(arg0 + 6) + arg1;
-    if ((s32)temp_v0 < 0) {
-        temp_v0 = 0;
+    value = (u32)cursor->x + delta;
+    if ((s32)value < 0) {
+        value = 0;
     }
-    if ((s32)(u32)*(u16 *)(arg0 + 8) < (s32)temp_v0) {
-        temp_v0 = (u32)*(u16 *)(arg0 + 8);
+    if ((s32)cursor->xMax < (s32)value) {
+        value = cursor->xMax;
     }
-    *(s16 *)(arg0 + 6) = (s16)temp_v0;
+    cursor->x = (s16)value;
 }
 
-void func_001199E8(s32 arg0, s32 arg1) {
-    u32 temp_v0;
+void func_001199E8(DatCalcCursor *cursor, s32 delta) {
+    u32 value;
 
-    temp_v0 = (u32)*(u16 *)(arg0 + 10) + arg1;
-    if ((s32)temp_v0 < 0) {
-        temp_v0 = 0;
+    value = (u32)cursor->y + delta;
+    if ((s32)value < 0) {
+        value = 0;
     }
-    if ((s32)(u32)*(u16 *)(arg0 + 0xc) < (s32)temp_v0) {
-        temp_v0 = (u32)*(u16 *)(arg0 + 0xc);
+    if ((s32)cursor->yMax < (s32)value) {
+        value = cursor->yMax;
     }
-    *(s16 *)(arg0 + 10) = (s16)temp_v0;
+    cursor->y = (s16)value;
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119A10);

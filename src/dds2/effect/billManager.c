@@ -88,18 +88,18 @@ BillObj *billAllocChild(void *arg0) {
     return obj;
 }
 
-void func_00158E00(u32 arg0) {
-    s32 temp_v0;
+void func_00158E00(BillObj *obj) {
+    s32 child;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x30);
-    if (temp_v0 != 0) {
-        func_00157E50(temp_v0);
+    child = (s32)obj->unk30;
+    if (child != 0) {
+        func_00157E50(child);
     }
-    func_00328E48(arg0);
+    func_00328E48(obj);
 }
 
-void func_00158E38(s32 arg0) {
-    func_00157EA0(arg0, *(u32 *)(arg0 + 0x30));
+void func_00158E38(BillObj *obj) {
+    func_00157EA0(obj, obj->unk30);
 }
 
 BillObj *billAllocList(void *arg0) {

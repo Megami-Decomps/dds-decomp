@@ -2,15 +2,25 @@
 
 extern s32 func_002C8128(u32);
 
+typedef struct FileNode {
+    u8 pad0[4];
+    struct FileNode *next;
+} FileNode;
+
+typedef struct FileOwner {
+    u8 pad0[0x18];
+    FileNode *first;
+} FileOwner;
+
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7D00);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7D78);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7E28);
 
-void func_002C7EE8(s32 arg0, s32 arg1) {
-    *(u32 *)(arg1 + 4) = *(u32 *)(arg0 + 0x18);
-    *(s32 *)(arg0 + 0x18) = arg1;
+void func_002C7EE8(FileOwner *owner, FileNode *node) {
+    node->next = owner->first;
+    owner->first = node;
 }
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7EF8);

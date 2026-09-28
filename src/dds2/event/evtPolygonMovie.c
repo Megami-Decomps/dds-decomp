@@ -1,6 +1,11 @@
 #include "common.h"
 
-extern s32 func_00101958(void);
+typedef struct EventMovie {
+    u8 pad0[8];
+    u32 *flags;
+} EventMovie;
+
+extern EventMovie *func_00101958(void);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024DD20);
 
@@ -34,18 +39,18 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024ED50);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024EEB8);
 
-void evtPolygonMovieSetFlagBits(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void evtPolygonMovieSetFlagBits(u32 arg0, u32 bits) {
+    EventMovie *movie;
 
-    temp_v0 = func_00101958();
-    **(u32 **)(temp_v0 + 8) = **(u32 **)(temp_v0 + 8) | arg1;
+    movie = func_00101958();
+    *movie->flags = *movie->flags | bits;
 }
 
-void evtPolygonMovieClearFlagBits(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void evtPolygonMovieClearFlagBits(u32 arg0, u32 bits) {
+    EventMovie *movie;
 
-    temp_v0 = func_00101958();
-    **(u32 **)(temp_v0 + 8) = **(u32 **)(temp_v0 + 8) & ~arg1;
+    movie = func_00101958();
+    *movie->flags = *movie->flags & ~bits;
 }
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F090);

@@ -48,8 +48,8 @@ typedef struct MdlNode {
     f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
     f32 unk20;            /* 0x20: float slot of func_00217F18/F40 */
     u8 pad24[4];          /* 0x24 */
-    s16 unk28;            /* 0x28: search id */
-    s16 unk2A;            /* 0x2A: slot index used by func_00216B78 */
+    s16 searchId;          /* 0x28: identifies a node in list lookups */
+    s16 slotIndex;         /* 0x2A: slot index used by func_00216B78 */
     u16 unk2C;            /* 0x2C */
     u16 unk2E;            /* 0x2E */
     u8 unk30;             /* 0x30: compared against 5 */
@@ -64,7 +64,7 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     MdlNode *node = (MdlNode *)ctx->inner->list;
 
     while (node != NULL) {
-        if (node->unk28 == id) {
+        if (node->searchId == id) {
             mdlClearSlotAndRelease(ctx, node);
             break;
         }

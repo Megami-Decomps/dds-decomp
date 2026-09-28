@@ -2,6 +2,12 @@
 
 extern u32 func_00159BB8(u32);
 
+typedef struct BlurFilter {
+    u8 pad0[0x2C];
+    u32 texture;
+    u32 resource;
+} BlurFilter;
+
 void func_0018E8F0(void) {
     func_00328E48();
 }
@@ -12,38 +18,38 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E980);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA00);
 
-void func_0018EA60(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x2c) = arg1;
+void func_0018EA60(BlurFilter *blur, u32 texture) {
+    blur->texture = texture;
 }
 
-void func_0018EA68(s32 arg0) {
-    u32 temp_v0;
+void func_0018EA68(BlurFilter *blur) {
+    u32 texture;
 
-    temp_v0 = func_00159BB8(2);
-    *(u32 *)(arg0 + 0x2c) = temp_v0;
+    texture = func_00159BB8(2);
+    blur->texture = texture;
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA98);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EBC8);
 
-void func_0018ECB8(s32 arg0) {
-    func_003297C8(*(u32 *)(arg0 + 0x30));
+void func_0018ECB8(BlurFilter *blur) {
+    func_003297C8(blur->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EED8);
 
-void func_0018EF40(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x2c) = arg1;
+void func_0018EF40(BlurFilter *blur, u32 texture) {
+    blur->texture = texture;
 }
 
-void func_0018EF48(s32 arg0) {
-    u32 temp_v0;
+void func_0018EF48(BlurFilter *blur) {
+    u32 texture;
 
-    temp_v0 = func_00159BB8(2);
-    *(u32 *)(arg0 + 0x2c) = temp_v0;
+    texture = func_00159BB8(2);
+    blur->texture = texture;
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EF78);
@@ -54,8 +60,8 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F018);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F098);
 
-void func_0018F1B8(s32 arg0) {
-    func_003297C8(*(u32 *)(arg0 + 0x30));
+void func_0018F1B8(BlurFilter *blur) {
+    func_003297C8(blur->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F1D0);
