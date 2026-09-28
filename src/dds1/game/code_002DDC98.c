@@ -47,6 +47,7 @@ extern u128 D_003F9890;
 extern f32 D_003BDA30;
 extern void *func_002CFEB8(s32 size);
 extern u8 D_003F98A0[];
+extern void func_002D78B8(u32 object);
 
 typedef struct VuBlendNode {
     u8 pad00[0x30];
@@ -389,7 +390,19 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E06F0);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0820);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1168);
+void func_002E1168(u8 **context, u8 *source) {
+    u32 *objects = *(u32 **)(*context + 12);
+    u16 *indices = (u16 *)(source + 24);
+    if ((*(u16 *)(source + 22) & 0x800) != 0) {
+        s32 count = *indices;
+        if (count != 0) {
+            indices++;
+            do {
+                func_002D78B8(objects[*indices++]);
+            } while (--count != 0);
+        }
+    }
+}
 
 void func_002E11E0(u32 arg0) {
     D_003BDA28 = arg0;
@@ -475,7 +488,19 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2110);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E21A0);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2600);
+void func_002E2600(u8 *packet, const f32 *matrix) {
+    *(u16 *)packet = 2;
+    *(u32 *)(packet + 8) = 0x6403C000;
+    *(f32 *)(packet + 12) = matrix[0];
+    *(f32 *)(packet + 16) = matrix[1];
+    *(f32 *)(packet + 20) = matrix[4];
+    *(f32 *)(packet + 24) = matrix[5];
+    *(f32 *)(packet + 28) = matrix[12];
+    *(f32 *)(packet + 32) = matrix[13];
+    *(u32 *)(packet + 36) = 0x04000000;
+    *(u32 *)(packet + 40) = 0x14000008;
+    memset(packet + 0x2C, 0, 12);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2680);
 
