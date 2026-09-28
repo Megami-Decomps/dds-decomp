@@ -214,6 +214,15 @@ def main():
         else:
             ok += 1
             print(f"OK   {name} @ 0x{addr:08X} ({size} bytes)")
+    asm_dir = ROOT / "asm" / version / "nonmatchings" / unit_name
+    asm_names = set(re.findall(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);', unit.read_text(), re.M))
+
+    def asm_users(addr):
+        sym = next((n for n, a in syms.items() if a == addr), f"D_{addr:08X}")
+        pat = re.compile(rf"%(?:hi|lo)\({re.escape(sym)}\)")
+        return sorted(n for n in asm_names if (asm_dir / f"{n}.s").exists()
+                      and pat.search((asm_dir / f"{n}.s").read_text()))
+
     # Rodata the C emits: jump tables (every entry must land on the retail case
     # label) and data items such as string literals (bytes must equal retail's).
     funcs_by_off = sorted(funcs)
@@ -235,6 +244,11 @@ def main():
             if item != theirs:
                 bad += 1
                 print(f"DIFF rodata of {name} (retail 0x{retail_addr:08X}): {item[:40]!r} vs {theirs[:40]!r}")
+            elif users := asm_users(retail_addr):
+                # The object keeps one copy; an asm function still pulls in its own.
+                bad += 1
+                print(f"SHARED rodata of {name} (retail 0x{retail_addr:08X}) is also used by asm "
+                      f"{', '.join(users)}: keep the extern D_ symbol until they are C")
             covered.update(range(table_off, end))
             continue
         k, wrong = 0, 0

@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern char D_003A0800[]; /* "fldTitle" */
+extern char D_003A0828[]; /* "fldTitleMini" */
+
 extern u64 func_0011E998(void);
 
 extern s32 func_0013F848(s32);
@@ -565,7 +568,7 @@ void func_0014A298(u32 arg0) {
 
 
 s32 func_0014A2A0(void) {
-    return kwlnTaskGetTaskByName("fldTitle") != 0;
+    return kwlnTaskGetTaskByName(D_003A0800) != 0;
 }
 
 void func_0014A2C8(void) {
@@ -589,13 +592,13 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014A960);
 
 void func_0014AA10(void) {
     if (func_0014A2A0() != 0) {
-        kwlnTaskDestroyWithHierarchyByName("fldTitle", 1);
+        kwlnTaskDestroyWithHierarchyByName(D_003A0800, 1);
     }
 }
 
 
 s32 func_0014AA50(void) {
-    return kwlnTaskGetTaskByName("fldTitleMini") != 0;
+    return kwlnTaskGetTaskByName(D_003A0828) != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001411F0", fldTitleMini);
