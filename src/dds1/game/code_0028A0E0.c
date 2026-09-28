@@ -1,6 +1,39 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+
+
+
+extern s32 D_003BC87C;
+
+
+extern s32 D_0037D488[];
+extern s32 D_003BC868;
+extern s32 D_003BC86C;
+extern s32 D_003BC870;
+extern s32 D_003BC874;
+extern s32 D_003BC878;
+extern s32 D_003BC87C;
+extern s32 func_002D2D00();
+extern s32 dds3GetWorldObject();
+extern void func_00110860();
+extern void fileWaitReady();
+extern void func_002D09D8();
+
+
+
+
+
+
+
+extern void *func_0028D978(void);
+extern s32 selectFileMenuBranch(void);
+
+
+
+
+
+
 extern u8 D_003DC800[];
 
 extern void func_00108A88(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -872,7 +905,47 @@ void func_0028B710(void) {
     func_0028B300();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028B748);
+void *func_0028B748(void) {
+    s32 status;
+
+    if (fileReqPoll() == 0) {
+        return NULL;
+    }
+    if (D_003BC808 > 0) {
+        D_003BC808--;
+        fileReqBegin(D_003BC7E8);
+        return NULL;
+    }
+    status = func_00289B98(D_003BC7E8);
+    switch (status) {
+    case 0:
+        return func_0028B3F0();
+    case 2:
+        if (D_003BC848 == 0) {
+            func_0028AE68();
+            func_0028AB30(0);
+            D_003BC854 = 0;
+            D_003BC834 = 2;
+            return (void *)func_0028FB48(func_0028D978, selectFileMenuBranch, 1);
+        }
+        func_0028AB30(0);
+        D_003BC854 = 7;
+        D_003BC858 = 0;
+        fileReqBegin(D_003BC7E8);
+        return func_0028BAC0;
+    case 3:
+        func_0028AE68();
+        func_0028AB30(0);
+        D_003BC854 = 2;
+        D_003BC858 = 0;
+        fileReqBegin(D_003BC7E8);
+        return func_0028BAC0;
+    default:
+        return NULL;
+    case 1:
+        return resetSaveSlotMetadata();
+    }
+}
 
 s32 countSelectableFiles(void) {
     s32 count = 0;
@@ -1066,7 +1139,7 @@ void *func_0028C288(void) {
     return func_0028C140();
 }
 
-void resetSaveSlotMetadata(void) {
+void *resetSaveSlotMetadata(void) {
     s32 index;
     if (func_00289BE8(D_003BC7E8) != 0) {
         func_0028AB30(1);
@@ -1077,11 +1150,11 @@ void resetSaveSlotMetadata(void) {
             func_00289C68(D_003BC7E8, index);
             index++;
         } while (index < 10);
-        func_0028C140();
+        return func_0028C140();
     } else {
         D_003BC804 = 0;
         func_0028AB30(0);
-        func_0028B590();
+        return func_0028B590();
     }
 }
 
@@ -1516,7 +1589,72 @@ void func_0028F440(void) {
 void func_0028F458(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028F460);
+void func_0028F460(void) {
+    s32 *slot;
+    s32 i;
+    s32 world;
+    s32 handle;
+
+    if (D_003BC7FC != 0) {
+        D_003BC7FC = 0;
+        slot = D_0037D488;
+        i = 4;
+        do {
+            handle = *slot;
+            i--;
+            if (handle != 0) {
+                func_002D2D00(handle);
+                *slot = 0;
+            }
+            slot++;
+        } while (i >= 0);
+        if (D_003BC884 != 0) {
+            func_002D2D00(D_003BC884);
+            D_003BC884 = 0;
+        }
+        if (D_003BC880 != 0) {
+            func_002D2D00(D_003BC880);
+            D_003BC880 = 0;
+        }
+        if (D_003BC87C != 0) {
+            func_002D2D00(D_003BC87C);
+            D_003BC87C = 0;
+        }
+        if (D_003BC878 != 0) {
+            func_002D2D00(D_003BC878);
+            D_003BC878 = 0;
+        }
+        if (D_003BC874 != 0) {
+            func_002D2D00(D_003BC874);
+            D_003BC874 = 0;
+        }
+        if (D_003BC870 != 0) {
+            func_002D2D00(D_003BC870);
+            D_003BC870 = 0;
+        }
+        if (D_003BC86C != 0) {
+            func_002D2D00(D_003BC86C);
+            D_003BC86C = 0;
+        }
+        if (D_003BC868 != 0) {
+            func_002D2D00(D_003BC868);
+            D_003BC868 = 0;
+        }
+        world = dds3GetWorldObject();
+        if (world != 0) {
+            func_00110860(world, 1);
+        }
+        if (D_003BC7F8 != 0) {
+            fileWaitReady(D_003BC7F8);
+            D_003BD910 = func_00288B88(D_003BC7F8);
+            func_002887A0(D_003BC7F8);
+            D_003BC7F8 = 0;
+        }
+        func_002D09D8(&D_003BD910);
+        kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
+        func_001005B0();
+    }
+}
 
 u32 func_0028F5F8(void) {
     return 1;
@@ -1568,7 +1706,19 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290520);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002905A8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002905E8);
+void func_002905E8(s32 index, s32 x, s32 y, s32 alpha) {
+    s32 uv[21][2] = {
+        {2, 2},   {2, 2},   {2, 20},  {2, 38},  {2, 56},  {2, 74},  {26, 2},
+        {26, 20}, {26, 38}, {26, 56}, {26, 74}, {26, 74}, {26, 74}, {26, 74},
+        {26, 74}, {26, 74}, {26, 74}, {26, 74}, {26, 74}, {26, 74}, {26, 74},
+    };
+
+    func_00108A80(0x53);
+    func_00108CB8(0);
+    func_00108A88(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_00108FA0(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
+                  (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, D_003BC87C);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290788);
 
@@ -2185,9 +2335,9 @@ FileJob *appendFileJob(FileQueue *queue, u32 id) {
     return job;
 }
 
-void duplicateAndAppendFileJob(FileQueue *queue, void *source) {
+FileJob *duplicateAndAppendFileJob(FileQueue *queue, void *source) {
     void *job = duplicateFileJob(source);
-    appendFileJob(queue, (u32)job);
+    return appendFileJob(queue, (u32)job);
 }
 
 FileJob *appendFileJobFromEntry(FileQueue *queue, void *entry) {

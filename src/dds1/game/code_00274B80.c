@@ -1,5 +1,33 @@
 #include "common.h"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 typedef struct PartyEntryCopy {
     u32 word[0x69];
 } PartyEntryCopy;
@@ -75,7 +103,32 @@ void func_00274F00(context)
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275030);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00275328);
+void func_00275328(context)
+    s32 context;
+{
+    s32 menu = *(s32 *)(context + 0x90C);
+    u16 *entry = (u16 *)(menu + 0x840);
+    s32 i;
+    s32 offset;
+    s32 panel;
+
+    for (i = 0; i < 5; i++) {
+        if (*entry & 1) {
+            func_00275030(i, -3, 1, context);
+        }
+        entry += 0x1A4 / 2;
+    }
+    offset = 0;
+    for (i = 4; i >= 0; i--) {
+        *(PartyEntryCopy *)(offset + D_003BAA00 + 0xA60) = *(PartyEntryCopy *)(offset + menu + 0x1078);
+        offset += 0x1A4;
+    }
+    panel = context + 0x15C;
+    func_0027F0D8(panel);
+    func_00285A68(context + 0x7EC);
+    func_0027FF60(panel);
+    func_00280048(panel);
+}
 
 s32 func_002754A0(void) {
     s32 i;

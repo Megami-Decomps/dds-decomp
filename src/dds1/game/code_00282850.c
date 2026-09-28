@@ -1,5 +1,35 @@
 #include "common.h"
 
+typedef struct RangeEntry {
+    u8 pad0[3];
+    u8 kind;
+    u16 value;
+    u8 pad6[0x32];
+} RangeEntry;
+
+
+
+
+
+extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
+extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
+
+
 extern void func_00288148(s32);
 extern void func_001F3188(s32);
 extern void func_00217878(s32, s32);
@@ -100,7 +130,28 @@ void func_002829C0(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002829E0);
+void func_002829E0(s32 x, s32 y, s32 z, s32 arg3, s32 menu, s32 param) {
+    s32 offset[2];
+    s32 panel = menu + *(s32 *)(menu + 0x684) * 0x134 + 0x78;
+    s32 node;
+
+    func_002828D0(offset, menu, 0);
+    node = *(s32 *)(panel + 0xE0);
+    if (node != 0) {
+        *(s32 *)(node + 0xC) = arg3;
+    }
+    x += *(s32 *)(menu + 0x688) * 0x10;
+    *(s32 *)(menu + 0x688) = (s32)((f32)*(s32 *)(menu + 0x688) / 1.19999993f);
+    if (*(u32 *)menu & 0x100) {
+        func_00282850(x + offset[0], y + offset[1], z, menu, *(s32 *)(menu + 0x684), param);
+    } else {
+        func_00282850(x + offset[0], y + offset[1], z, menu, *(s32 *)(menu + 0x684), param);
+    }
+    node = *(s32 *)(panel + 0xE0);
+    if (node != 0) {
+        *(s32 *)(node + 0xC) = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282B08);
 
@@ -278,7 +329,21 @@ void func_00283BF0(u32 *arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283BF8);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283CA8);
+void func_00283CA8(s32 object) {
+    s32 first = *(s32 *)(object + 0x40);
+    s32 second = *(s32 *)(object + 0x44);
+    s32 firstData = *(s32 *)(first + 8);
+    s32 secondData = *(s32 *)(second + 8);
+    s32 *pos = *(s32 **)(firstData + 0x20);
+
+    pos[0] = 10;
+    pos[1] = *(s8 *)(object + 0x19);
+    pos[2] = 10;
+    pos = *(s32 **)(secondData + 0x20);
+    pos[1] = 5;
+    pos[0] = 10;
+    pos[2] = 10;
+}
 
 s32 menuRateByThreshold(s32 arg0) {
     s32 temp_v0 = *(s32 *)(arg0 + 0x10);
@@ -313,7 +378,16 @@ void func_002840B8(s32 *list) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284108);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284258);
+void func_00284258(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 tableA[9] = {6, 3, 0xE, 0xE, 5, 4, 0xC, 0xA, 8};
+    s32 tableB[9] = {6, 0, 0xD, 0xD, 2, 1, 0xB, 9, 7};
+
+    if (arg1 == 1) {
+        func_00284108(arg0, arg1, arg2, arg3, arg4, arg5, tableA);
+    } else {
+        func_00284108(arg0, arg1, arg2, arg3, arg4, arg5, tableB);
+    }
+}
 
 void releaseSpriteTextures(s32 *object) {
     u32 i;
@@ -356,7 +430,20 @@ s32 func_00284888(void) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002848E0);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284A90);
+void func_00284A90(s32 obj, s32 param, s32 index) {
+    s32 table[5] = {0, 4, 1, 2, 3};
+
+    func_002BFB98(obj + 0x5C, param, 7);
+    func_002BF9E0(*(s32 *)(obj + 0x5C), *(s32 *)(obj + 0x60), 0, 0, 0, 0);
+    func_002BFB98(obj + 0x64, param, 5);
+    func_002BF9E0(*(s32 *)(obj + 0x64), *(s32 *)(obj + 0x68), 0x440, 0x58, 0, 0);
+    func_002BFB98(obj + 0x6C, param, 6);
+    func_002BF9E0(*(s32 *)(obj + 0x6C), *(s32 *)(obj + 0x70), 0x440, 0x58, 0, 0);
+    func_002BFB98(obj + 0x74, param, 9);
+    func_002BF9E0(*(s32 *)(obj + 0x74), *(s32 *)(obj + 0x78), 0x620, 0x50, 0, 0);
+    func_002BFB98(obj + 0x7C, param, table[index]);
+    func_002BF9E0(*(s32 *)(obj + 0x7C), *(s32 *)(obj + 0x80), 0x100, -0x48, 0, 0);
+}
 
 void func_00284BF8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x10) = arg1;
@@ -644,13 +731,85 @@ u16 getAdjustedEntryValue(s32 id, s32 object) {
     return base;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286368);
+u16 func_00286368(s32 arg0) {
+    s32 index = arg0 & 0xFFFF;
+    u16 *record = (u16 *)(index * 0x38 + D_003BAA50);
+    u16 scale = record[2];
+    u16 addition = record[3];
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286440);
+    if (func_002862C0(index) == 1) {
+        s32 count = 0;
+        s32 sum = 0;
+        u16 *entry = (u16 *)(D_003BAA00 + 0xA60);
+        s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002864D8);
+        for (i = 0; i < 5; i++) {
+            u16 flags = entry[0];
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286540);
+            if ((flags & 1) && (flags & 2)) {
+                count++;
+                sum += entry[4];
+            }
+            entry += 0x1A4 / 2;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        scale = addition + sum / count * scale / 100;
+    }
+    return scale;
+}
+
+s32 func_00286440(u16 id, s32 item) {
+    u16 minimum = ((RangeEntry *)D_003BAA50)[id].value;
+    s32 kind = func_002862C0(id);
+
+    switch (kind) {
+    case 1:
+        if (*(u16 *)(item + 6) < minimum) {
+            return 0;
+        }
+        break;
+    case 2:
+        if (*(u16 *)(item + 0xA) < minimum) {
+            return 0;
+        }
+        break;
+    }
+    return 1;
+}
+
+s32 func_002864D8(s32 object, u16 id) {
+    if (func_00286440(id, object) == 0) {
+        return -1;
+    }
+    if (!(((RangeEntry *)D_003BAA50)[id].pad0[1] & 1)) {
+        return 1;
+    }
+    if (id < 0x200) {
+        return 0;
+    }
+    return 1;
+}
+
+s32 func_00286540(u16 id, s32 object) {
+    s32 kind = ((RangeEntry *)D_003BAA50)[id].kind;
+    u16 value = ((RangeEntry *)D_003BAA50)[id].value;
+
+    switch (kind) {
+    case 1:
+        if (*(u16 *)(object + 6) < value) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (*(u16 *)(object + 0xA) < value) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002865B8);
 
@@ -720,7 +879,17 @@ s32 func_002868E0(s32 arg0, s32 arg1) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286990);
+s32 func_00286990(s32 arg0, s32 arg1) {
+    s32 value = ((AffinityRow *)D_003BAA54)[(arg0 - 0x1AB) & 0xFFFF].affinity[arg1];
+
+    if (value == -1) {
+        return 0;
+    }
+    if (value & 0x40000000) {
+        return value & ~0x40000000;
+    }
+    return value;
+}
 
 s32 func_002869E8(s32 arg0) {
     if (arg0 < 0xa0) {
@@ -791,7 +960,20 @@ s32 getMatchingPartyEntryMask(s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286EF8);
+s32 func_00286EF8(s32 amount, s32 divisor) {
+    s32 percent;
+
+    if (divisor != 0) {
+        percent = amount * 100 / divisor;
+        if (percent < 25) {
+            return 2;
+        }
+        if (percent < 50) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 u8 func_00286F48(void) {
     return D_003BC7B4 != 0;
@@ -1012,7 +1194,28 @@ s32 func_00287FE0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00288008);
+void func_00288008(void) {
+    s32 index;
+    s32 node;
+
+    if (D_003DC600[6] != 0 && D_003DC600[6] != 3 && (node = func_00286F80()) != 0) {
+        if (D_003DC600[6] == 1) {
+            index = D_003DC600[7];
+
+            if (index < mdlGetNodeRefHalf(node, 0)) {
+                mdlAddEntryPlainEx(node, 0, index, (s32)D_003DC600[8], (s32)D_003DC600[9]);
+                D_003DC600[6] = 2;
+            }
+        } else if (!(D_003DC600[5] & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || D_003DC600[6] == 4)) {
+            index = *(u8 *)(D_003DC600[0] * 0x3C + D_003DC600[-2] + 1);
+
+            if (index < mdlGetNodeRefHalf(node, 0)) {
+                mdlAddEntryFlaggedEx(node, 0, index, (s32)D_003DC600[8], (s32)D_003DC600[9]);
+                D_003DC600[6] = 3;
+            }
+        }
+    }
+}
 
 void func_00288148(s32 arg0) {
     if (D_003DC5E8[26] != 0) {
