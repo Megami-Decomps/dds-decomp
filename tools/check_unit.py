@@ -172,10 +172,17 @@ def main():
                             masked(text[off:off + size], off, relocs):
                         context[name] = (fsize, size)
         else:
-            print("note: the unit did not compile with its asm included (run ninja once); "
-                  "build-context check skipped", file=sys.stderr)
+            # Usually an INCLUDE_ASM whose asm file splat has not written yet
+            # (run configure.py --force-split). Unverifiable is not clean.
+            context["(unit)"] = (0, 0)
+            sys.stderr.write(rf.stderr[-2000:])
 
     ok = bad = 0
+    if "(unit)" in context:
+        bad += 1
+        print("NOASM the unit does not compile with its asm included (missing asm file? "
+              "run configure.py --force-split); build-context check not possible")
+        del context["(unit)"]
     for name, (fsize, size) in context.items():
         if not args.func or name == args.func:
             bad += 1

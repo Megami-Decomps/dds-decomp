@@ -162,19 +162,77 @@ void func_00308020(u64 *channels, u32 color) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308058);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003081A8);
+void func_003081A8(u8 value, s32 alternate, s32 kind) {
+    u32 normalized = value != 0;
+    s32 packet = func_0032CE80(consCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor[0] = normalized;
+    if (!alternate) {
+        descriptor[1] = 0x4A;
+    } else {
+        descriptor[1] = 0x4B;
+    }
+    context = func_0032CE80(0x20);
+    func_0032CEC0(context);
+    func_0032CEE8(context, packet);
+    entry = &D_0037FB48[kind];
+    entry->draw(entry, context);
+}
 
 void func_00308288(u8 arg0, u32 arg1) {
     func_003081A8(arg0, 0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003082A8);
+void func_003082A8(s32 data, s32 alternate, s32 kind) {
+    s32 packet = func_0032CE80(consCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor[0] = data;
+    if (!alternate) {
+        descriptor[1] = 0x47;
+    } else {
+        descriptor[1] = 0x48;
+    }
+    context = func_0032CE80(0x20);
+    func_0032CEC0(context);
+    func_0032CEE8(context, packet);
+    entry = &D_0037FB48[kind];
+    entry->draw(entry, context);
+}
 
 void func_00308380(u32 arg0, u32 arg1) {
     func_003082A8(arg0, 0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003083A0);
+void func_003083A0(s32 data, s32 alternate, s32 kind) {
+    s32 packet = func_0032CE80(consCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor[0] = data;
+    if (!alternate) {
+        descriptor[1] = 0x42;
+    } else {
+        descriptor[1] = 0x43;
+    }
+    context = func_0032CE80(0x20);
+    func_0032CEC0(context);
+    func_0032CEE8(context, packet);
+    entry = &D_0037FB48[kind];
+    entry->draw(entry, context);
+}
 
 void func_00308478(u32 arg0, u32 arg1) {
     func_003083A0(arg0, 0, arg1);
@@ -280,7 +338,33 @@ s32 setWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309278);
+u8 *func_00309278(const char *text, s32 x, s32 y, s32 columns, s32 rows,
+                  u32 reference) {
+    u8 *widget = (u8 *)func_00328D68(0x40);
+    u32 length;
+    char *copy;
+
+    memset(widget, 0, 0x40);
+    length = strlen(text) + 1;
+    copy = (char *)func_00328D68(length);
+    *(u16 *)(widget + 4) = length;
+    *(char **)widget = copy;
+    memcpy(copy, text, length);
+    *(u32 *)(widget + 0x10) = 0;
+    *(s32 *)(widget + 0x20) = x << 4;
+    *(s32 *)(widget + 0x24) = y << 3;
+    *(u32 *)(widget + 0x30) = reference;
+    *(s16 *)(widget + 6) = rows;
+    *(s32 *)(widget + 0x28) = columns * 12 + 6;
+    *(s32 *)(widget + 0x2C) = rows * 14 + 6;
+    *(u32 *)(widget + 0x14) = 0;
+    *(u32 *)(widget + 0x18) = 0;
+    *(u32 *)(widget + 0x1C) = 0;
+    *(u32 *)(widget + 0xC) = 0;
+    *(u16 *)(widget + 8) = 0;
+    *(u16 *)(widget + 0xA) = 0;
+    return widget;
+}
 
 void setGridDimensions(u8 *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
