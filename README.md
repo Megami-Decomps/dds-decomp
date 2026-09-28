@@ -1,5 +1,13 @@
 # Shin Megami Tensei: Digital Devil Saga 1 & 2
 
+[![Build Status]][actions] [![dds1]][progress] [![dds2]][progress]
+
+[Build Status]: https://github.com/Raikaru/dds-decomp/actions/workflows/build.yml/badge.svg
+[actions]: https://github.com/Raikaru/dds-decomp/actions/workflows/build.yml
+[dds1]: https://decomp.dev/Raikaru/dds-decomp/dds1.svg?mode=shield&label=dds1
+[dds2]: https://decomp.dev/Raikaru/dds-decomp/dds2.svg?mode=shield&label=dds2
+[progress]: https://decomp.dev/Raikaru/dds-decomp
+
 A work-in-progress **matching decompilation** of *Shin Megami Tensei: Digital
 Devil Saga* and *Digital Devil Saga 2* for the PlayStation 2. The goal is C
 source that compiles to byte-identical copies of the retail executables and
