@@ -118,7 +118,17 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243390);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243440);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243460);
+s32 func_00243460(u8 *entry, u8 *scene, s32 nameIndex) {
+    u8 *node = *(u8 **)(scene + 0x2034);
+    while (node != NULL) {
+        if (strcmp((char *)scene + (*(s32 *)(node + 8) << 5) + 0x24,
+                   (char *)*(u8 **)(entry + 0x7c) + (nameIndex << 5)) == 0) {
+            return *(s32 *)(node + 8);
+        }
+        node = *(u8 **)(node + 0x7c);
+    }
+    return -1;
+}
 
 void *campFindEntryByName(u8 *scene, const char *name) {
     void *node = *(void **)(scene + 0x2034);
@@ -282,9 +292,43 @@ void shopRegisterSceneObject(u8 *scene, s32 identifier) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002441E8);
+void func_002441E8(u8 *scene) {
+    extern s32 func_00241A50(s32, s32);
+    s32 count = 0;
+    if (*(s32 *)(scene + 0x2444) > 0) {
+        s32 *entry = (s32 *)(scene + 0x2448);
+        do {
+            s32 identifier = *entry++;
+            count++;
+            func_00241A50(*(s32 *)(*(u8 **)(scene + 8) + 0x10c), identifier);
+        } while (count < *(s32 *)(scene + 0x2444));
+    }
+    *(s32 *)(scene + 0x2444) = 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244258);
+void func_00244258(u8 *scene) {
+    extern u8 *func_002BD258(s32 kind);
+    u8 *object;
+    u8 *graphics;
+    s32 *params;
+    s32 defaultValue = 15;
+    *(s32 *)(scene + 0x68) = 0;
+    object = func_002BD258(6);
+    graphics = *(u8 **)(object + 8);
+    *(u8 **)(scene + 0x74) = object;
+    params = *(s32 **)(graphics + 0x20);
+    params[0] = defaultValue;
+    params[1] = 0;
+    params[2] = 0;
+    params[3] = 0;
+    params[4] = 0;
+    object = func_002BD258(1);
+    graphics = *(u8 **)(object + 8);
+    *(u8 **)(scene + 0x78) = object;
+    params = *(s32 **)(graphics + 0x20);
+    params[0] = defaultValue;
+    params[1] = 0;
+}
 
 s32 shopReleaseSceneObjects(u8 *scene) {
     extern s32 destroyPackedEffectBatch(s32);

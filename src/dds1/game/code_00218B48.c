@@ -192,7 +192,16 @@ void func_00219CC8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00219CE8);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219DD8);
+u8 *func_00219DD8(u8 *object, s32 type, s32 subtype) {
+    extern void *func_002CFF68(s32 size);
+    u8 *item = func_002CFF68(0x20);
+    u8 *previous = *(u8 **)(object + 0x14);
+    *(s16 *)(item + 4) = type;
+    *(u8 **)item = previous;
+    *(s16 *)(item + 6) = subtype;
+    *(u8 **)(object + 0x14) = item;
+    return item;
+}
 
 void func_00219E30(s32 arg0) {
     func_00151E60(*(u32 *)(arg0 + 8));
