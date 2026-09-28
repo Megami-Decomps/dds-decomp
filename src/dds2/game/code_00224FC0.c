@@ -1,5 +1,9 @@
 #include "common.h"
 
+/* 5/10 words match. With this TU's default -O2 the call in the final
+ * conditional is sibling-call-optimized to j, while retail has jal+epilogue.
+ * Do not change per-file flags to force it. */
+
 extern s32 func_001AA6F8(void);
 
 extern u32 func_001EA190(u32);
@@ -26,7 +30,10 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225368);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002254C8);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225778);
+void func_00225778(u32 unit) {
+    func_002254C8(unit);
+}
+
 
 u32 func_00225798(u32 unit) {
     u32 actor = *(u32 *)(unit + 0x114);
@@ -137,7 +144,12 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_002266D8);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002267A0);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226820);
+void func_00226820(u32 unit) {
+    if (*(u32 *)(unit + 8) & 8) {
+        func_001AA6F8();
+    }
+}
+
 
 u32 func_00226850(s32 arg0) {
     if (*(s32 *)(arg0 + 0x134) == 0x187) {

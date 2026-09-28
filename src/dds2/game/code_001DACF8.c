@@ -552,8 +552,6 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E36A0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3720);
 
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004179E0);
-
 typedef struct {
     u8 unk00[0x110];
     u32 flags;
@@ -562,6 +560,8 @@ typedef struct {
 } BattleEntryHeader;
 
 extern s32 getEntryFlagsUnlessDisabled(const void *);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004179E0);
 
 s32 func_001E37A8(BattleEntryHeader *entry) {
     if (!(entry->flags & 0x400)) {

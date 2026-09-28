@@ -154,6 +154,10 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EEE8);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F008);
 
+INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250D8);
+
+INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250E8);
+
 u32 func_0026F138(u32 unused1, u32 unused2, u32 third, u32 record,
                   u32 position, u32 packet) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
@@ -185,14 +189,6 @@ u32 func_0026F5B0(s32 arg0) {
     func_00328E48();
     return temp_v0;
 }
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250D8);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250E8);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250F8);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425108);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F5D8);
 

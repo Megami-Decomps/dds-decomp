@@ -16,15 +16,29 @@ extern void func_00320C88(u32);
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F0E8);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F138);
+void func_0031F138(u32 node) {
+    func_0035A880(*(u32 *)(node + 4));
+    func_0035A880(node);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F168);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F1B8);
+void func_0031F1B8(u32 node) {
+    func_0035A880(*(u32 *)node);
+    func_0035A880(node);
+}
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F1E8);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F208);
+void func_0031F1E8(u32 unused, u32 node) {
+    func_0031F138(node);
+}
+
+
+void func_0031F208(u32 unused, u32 node) {
+    func_0031F1B8(node);
+}
+
 
 u64 func_0031F228(s32 arg0) {
     u64 temp_v0;
@@ -40,7 +54,13 @@ u32 func_0031F270(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F280);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F300);
+void func_0031F300(u32 node) {
+    func_00320C88(*(u32 *)(node + 4));
+    func_00320C88(*(u32 *)(node + 8));
+    func_00320C88(*(u32 *)(node + 0xc));
+    func_0035A880(node);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F340);
 
@@ -55,7 +75,14 @@ void func_0031F410(arg0, arg1)
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F4D8);
+void func_0031F4D8(u32 context, const char *name) {
+    u32 record = func_0031F168();
+    strncpy((char *)*(u32 *)record, name, 0x40);
+    func_00320CE0(*(u32 *)(context + 0xc), 0, record);
+    *(u32 *)(record + 4) = *(u32 *)context;
+    func_0031F410(context, -1, 4);
+}
+
 
 u32 func_0031F550(u32 context, const char *name) {
     u32 node = *(u32 *)(context + 4);
@@ -176,7 +203,16 @@ INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320C28);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320C88);
+void func_00320C88(u32 node) {
+    if (node != 0) {
+        void (*callback)(s32, u32);
+        func_00321018(node);
+        callback = *(void (**)(s32, u32))(node + 0x14);
+        callback(-1, *(u32 *)(node + 0xc));
+        func_0035A880(node);
+    }
+}
+
 
 void func_00320CD0(s32 arg0, s32 arg1) {
     if (arg1 != 0) {

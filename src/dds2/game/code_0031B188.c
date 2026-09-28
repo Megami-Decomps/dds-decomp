@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern void mdlBroadcastMasked(u32 sprite);
+
 extern u32 *D_00438940;
 
 void func_0031BB80(u8 *node);
@@ -91,9 +93,15 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BC10);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BDE8);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BFA0);
+void func_0031BFA0(void) {
+    func_002D2C80(2);
+}
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BFC0);
+
+void func_0031BFC0(void) {
+    func_002D2C90(2);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BFE0);
 
@@ -166,7 +174,10 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C850);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C888);
+void func_0031C888(u8 *model) {
+    mdlBroadcastMasked(*(u32 *)(model + 0x40));
+}
+
 
 void func_0031C8A8(void) {
 }

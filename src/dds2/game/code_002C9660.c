@@ -736,15 +736,11 @@ void func_002D0A90(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B920);
-
 extern char D_0042B920[];
 
 void func_002D0AB8(void) {
     func_0035B6E0(D_0042B920);
 }
-
-INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B938);
 
 extern char D_0042B938[];
 
@@ -754,6 +750,10 @@ void func_002D0AD8(void) {
     *(u32 *)(state + 0x1E650) = money;
     func_0035B6E0(D_0042B938, money);
 }
+
+INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B920);
+
+INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B938);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0B08);
 

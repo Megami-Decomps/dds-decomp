@@ -126,7 +126,10 @@ void func_00292998(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292A60);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292B90);
+s32 func_00292B90(s32 object) {
+    return func_002917C0(object, 0, 8);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292BB0);
 
