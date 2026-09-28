@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern s32 kwlnTaskGetTaskByName(u32);
 
@@ -19,7 +20,9 @@ float func_002C97E8(float *arg0) {
                   arg0[3] * arg0[3];
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9818);
+float func_002C9818(float *values) {
+    return fsqrtf(func_002C97E8(values));
+}
 
 void func_002C9838(float *values) {
     float lengthSquared = func_002C97E8(values);
@@ -30,8 +33,6 @@ void func_002C9838(float *values) {
         values[3] = values[3] / lengthSquared;
     }
 }
-
-extern float func_002C9818(float *);
 
 void func_002C98D0(float *values) {
     float length = func_002C9818(values);

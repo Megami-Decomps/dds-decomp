@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
 
@@ -17,6 +18,19 @@ typedef struct Vec3 {
 } Vec3; // 0x0C
 
 extern float func_002C8588(float *, float *);
+extern void func_002D0A10(void *);
+typedef struct MapResource {
+    u32 image;
+    u32 handle;
+    u32 descriptor;
+    u32 unkC;
+} MapResource;
+extern MapResource D_00390710[10];
+extern MapResource D_003906F0;
+extern MapResource D_00390700;
+extern u32 func_002C7D80(s32 *);
+extern u32 func_002EB028(const char *, void *, s32);
+extern u32 func_002D3288(u32);
 
 extern float func_002FA1C0(float);
 
@@ -84,7 +98,18 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6130);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C62D8);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6370);
+s32 func_002C6370(void) {
+    s32 i = 9;
+    MapResource *item = D_00390710;
+    do {
+        func_002C7D80((s32 *)item);
+        item++;
+        --i;
+    } while (i >= 0);
+    func_002C7D80((s32 *)&D_003906F0);
+    func_002C7D80((s32 *)&D_00390700);
+    return 1;
+}
 
 void func_002C63D8(void) {
     s32 temp_v0;
@@ -166,7 +191,19 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7BB0);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7C58);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7D18);
+
+s32 func_002C7D18(const char *name, MapResource *record) {
+    u32 handle = func_002EB028(name, &record->descriptor, 0);
+    u32 descriptor = record->descriptor;
+    record->handle = handle;
+    record->image = func_002D3288(descriptor);
+    if (record->handle != 0) {
+        func_002D0A10((void *)record->handle);
+        record->handle = 0;
+        record->descriptor = 0;
+    }
+    return 1;
+}
 
 u32 func_002C7D80(s32 *arg0) {
     if (*arg0 != 0) {
@@ -226,9 +263,19 @@ void func_002C84C8(float arg0, float *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C84F0);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8558);
+float func_002C8558(float *vector) {
+    return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] +
+                  vector[2] * vector[2]);
+}
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8588);
+float func_002C8588(float *left, float *right) {
+    struct Vector4 { float x, y, z, w; } a, b;
+    a = *(struct Vector4 *)left;
+    b = *(struct Vector4 *)right;
+    func_002C84F0(&a.x);
+    func_002C84F0(&b.x);
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
 float func_002C8628(float *left, float *right) {
     return func_002FA1C0(func_002C8588(left, right));

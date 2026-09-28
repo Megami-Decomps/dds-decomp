@@ -34,7 +34,6 @@ extern void func_003014F0(void *dst, const char *fmt, ...);
 extern u32 D_003BD924;
 extern u32 D_003BD8EC;
 extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
-extern s32 func_002F6858(s32, s32 *, s32 *);
 extern void func_00105B98(s32, s32, s32, s32);
 extern void *D_003BD900;
 extern s32 D_003BC800;
@@ -159,6 +158,8 @@ extern s32 func_0028B370(void);
 extern s32 func_0028B900(void);
 extern s32 D_003BC844;
 extern void func_00289C98(s32 arg0, s32 arg1, s32 arg2);
+extern void func_00289C68(s32, s32);
+extern void func_00289C38(s32);
 extern void *func_0028BF08(u32 arg0);
 extern void func_0028B590(void);
 extern void func_0028BF38(void);
@@ -166,7 +167,7 @@ extern s32 func_00289BC0(s32 arg0);
 extern u32 D_003BC804;
 extern void func_001005B8(void);
 extern void func_00289D50(u32 arg0);
-extern void func_0028D8F8(void);
+extern void *func_0028D8F8(void);
 extern void func_00293EA0(void *arg0);
 extern void func_00293158(void *src);
 extern void func_00294798(void *dst, void *src);
@@ -188,12 +189,12 @@ extern s32 func_00289DC8(void);
 extern void func_00289E80(u32 arg0, const char *arg1, void *arg2, s32 arg3);
 extern char D_003B2678[];
 extern u8 D_003DC780[];
-extern void func_0028C208(void);
+extern void *func_0028C208(void);
 extern void *func_0028B3F0(void);
 extern void *func_0028AF00(void);
 extern s32 func_00289EB0(void *arg0);
 extern void *func_0028C560(void);
-extern void func_0028C4D0(void);
+extern void *func_0028C4D0(void);
 extern void *func_0028C430(void);
 extern u32 func_00289CD0(s32 arg0, s32 arg1);
 extern s32 func_0028B3B0(void);
@@ -203,6 +204,8 @@ extern void func_0028BAC0(void);
 extern void *func_0028C7C8(void);
 extern void *func_0028D6A0(void);
 extern void func_0028BDA0(void);
+extern void *func_0028D850(void);
+extern void *func_0028C760(void);
 extern s32 func_00289F30(void);
 extern void *func_0028C9A0();
 extern u8 func_00289BE8(s32 arg0);
@@ -267,6 +270,10 @@ typedef struct LoadObj {
     u16 unk4A;
 } LoadObj;
 extern LoadObj *func_00295F58(LoadObj *source);
+extern void *func_0028DC08(void);
+extern s32 func_0028A020(void);
+extern void func_00292720(void *);
+extern void func_0027C370(s32, s32, s32, u32, s32);
 extern LoadObj *func_00295EF8(void *owner);
 extern void func_002961B0(LoadObj *result, LoadObj *owner);
 
@@ -687,11 +694,44 @@ void *func_0028C180(void) {
     return func_0028AF00();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C208);
+void *func_0028C208(void) {
+    s32 value;
+    s32 status = func_00289EB0(&value);
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        if (value == 1) {
+            func_00289C98(D_003BC7E8, D_003BC828, 9);
+        }
+        return func_0028AF00();
+    }
+    if (status == -1) {
+        return func_0028B3F0();
+    }
+    return func_0028AF00();
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C288);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C358);
+void func_0028C358(void) {
+    s32 index;
+    if (func_00289BE8(D_003BC7E8) != 0) {
+        func_0028AB30(1);
+        D_003BC828 = 0;
+        index = 0;
+        do {
+            D_003DC7C0[index] = 0;
+            func_00289C68(D_003BC7E8, index);
+            index++;
+        } while (index < 10);
+        func_0028C140();
+    } else {
+        D_003BC804 = 0;
+        func_0028AB30(0);
+        func_0028B590();
+    }
+}
 
 void *func_0028C3F0(void) {
     u8 buf[0x50];
@@ -722,13 +762,60 @@ void *func_0028C430(void) {
     return func_0028C560();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C4D0);
+void *func_0028C4D0(void) {
+    s32 value;
+    s32 status = func_00289EB0(&value);
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        if (value == 1) {
+            func_00289C98(D_003BC7E8, D_003BC828, 9);
+        }
+        return func_0028C560();
+    }
+    if (status == -1) {
+        func_0028AB30(0);
+        D_003BC810 = 0;
+        D_003BC854 = 0;
+        return (void *)func_0028B370();
+    }
+    return func_0028C560();
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C560);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C600);
+void *func_0028C600(void) {
+    s32 index = 0;
+    u32 *saved;
+    func_0028AB30(1);
+    D_003BC810 = 0;
+    D_003BC828 = 0;
+    func_00289C38(D_003BC7E8);
+    saved = D_003DC7C0;
+    do {
+        *saved++ = 0;
+        func_00289C68(D_003BC7E8, index);
+        index++;
+    } while (index < 10);
+    return func_0028C3F0();
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C670);
+void *func_0028C670(void) {
+    u8 name[0x50];
+    u32 entry = D_003BC7E8;
+    s32 slot = func_00289D00(entry);
+    func_00289CD0(entry, slot);
+    func_0028AB30(2);
+    func_00289C38(entry);
+    if (func_00289CD0(entry, slot) & 2) {
+        return func_0028C710();
+    }
+    name[0] = '/';
+    func_0028A190(name + 1, slot);
+    func_00289E18(entry, name);
+    return func_0028C760;
+}
 
 void *func_0028C710(void) {
     u8 buf[0x50];
@@ -832,9 +919,38 @@ void *func_0028D708(const char *name, u32 *first, u32 *second, void *callback, u
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028D748);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028D7E8);
+void *func_0028D7E8(void) {
+    s32 status = func_0028A0F8();
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        func_0028A008(D_003BD91C);
+        return func_0028D850;
+    }
+    if (status == -1) {
+        func_0028AB30(0);
+        D_003BC854 = 4;
+        return func_0028BDA0;
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028D850);
+void *func_0028D850(void) {
+    s32 status = func_0028A020();
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        return ((void *(*)(void))D_003BD930)();
+    }
+    if (status == -1) {
+        func_0028AB30(0);
+        D_003BC854 = 4;
+        return func_0028BDA0;
+    }
+    return NULL;
+}
 
 void *func_0028D8B8(void) {
     if (D_003BC7F8 != 0) {
@@ -844,7 +960,20 @@ void *func_0028D8B8(void) {
     return func_0028D7E8;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028D8F8);
+void *func_0028D8F8(void) {
+    s32 status = func_00289D68();
+    if (status == 0) {
+        return NULL;
+    }
+    func_001005B0();
+    if (status < 0) {
+        func_0028AB30(0);
+        D_003BC854 = 6;
+        return func_0028BDA0;
+    }
+    func_0028AB30(6);
+    return func_0028BF08((u32)func_0028B560);
+}
 
 void *func_0028D978(void) {
     func_0028AB30(5);
@@ -866,7 +995,20 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DA10);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DAF8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DBA0);
+void *func_0028DBA0(void) {
+    s32 status = func_0028A088();
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        func_0028A008(D_003BD91C);
+        return func_0028DC08;
+    }
+    func_002D0918(D_003BD920);
+    func_0028AB30(0);
+    D_003BC854 = 3;
+    return func_0028BDA0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DC08);
 
@@ -1036,7 +1178,17 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B29E8);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00291418);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00291880);
+s32 func_00291880(void) {
+    if (*(u32 *)(D_003BD938 + 0x34) == 0) {
+        return 0;
+    }
+    if (*(s32 *)(D_003BD938 + 0x24) < 0) {
+        return -1;
+    }
+    func_00292720((void *)D_003BD938);
+    func_0027C370(0x400, 0x400, 0, *(u32 *)(D_003BD938 + 0xC), 0x53);
+    return 0;
+}
 
 u32 func_002918D8(void) {
     u32 temp_v0;
@@ -1465,7 +1617,18 @@ FileJob *func_00295C48(FileQueue *queue, s32 index) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295C90);
+s32 func_00295C90(FileQueue *queue, FileJob *target) {
+    FileJob *job = queue->tail;
+    s32 index = 0;
+    while (job != NULL) {
+        if (job == target) {
+            return index;
+        }
+        job = job->next;
+        index++;
+    }
+    return 0;
+}
 
 s32 func_00295CD0(FileQueue *queue) {
     FileJob *job;
