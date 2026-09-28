@@ -363,7 +363,21 @@ extern void func_00217F88(void *);
 
 extern void func_00217FB8(void *);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029A840);
+/* VU0 model helpers consume vf10 directly, matching the original macro-mode setup. */
+void func_0029A840(void *model) {
+    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    func_00217F88(model);
+    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    func_00217FB8(model);
+    __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder");
+    func_00218028(model);
+    mdlBroadcastMasked(model, 0x80808080);
+    if (*(void **)(model + 0x1C) != NULL) {
+        mdlAddEntryPlain(model, 0, 0);
+        *(float *)(*(u8 **)(model + 0x1C) + 0x20) = 1.0f;
+    }
+    *(u32 *)model &= ~1;
+}
 
 extern u16 D_003BC944;
 extern void loadModelViewerPackage(u32, u16, u32, u32, u32);
@@ -768,7 +782,14 @@ void func_0029C500(s32 arg0, u32 arg1, s32 arg2) {
     func_0029C048(arg1, *(u32 *)(*(s32 *)(arg2 + 0xc) * 4 + *(s32 *)(arg0 + 0x14)));
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C530);
+u32 func_0029C530(source)
+    u32 source;
+{
+    u32 *buffer = (u32 *)func_002CFEB8(12);
+    *buffer = 0;
+    memcpy(buffer + 1, (const void *)source, 8);
+    return (u32)buffer;
+}
 
 void func_0029C570(void) {
     u64 temp_v0;
@@ -894,7 +915,14 @@ void func_0029CF30(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 4) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029CF38);
+u32 func_0029CF38(source)
+    u32 source;
+{
+    u32 *buffer = (u32 *)func_002CFEB8(0x14);
+    *buffer = 0;
+    memcpy(buffer + 1, (const void *)source, 16);
+    return (u32)buffer;
+}
 
 void func_0029CF88(void) {
     u64 temp_v0;
@@ -1820,13 +1848,11 @@ extern void func_002A6390(s32, u32);
 EffectSurfaceNode *initializeEffectSurfaceForKind(u8 *work) {
     EffectSurfaceNode *node = func_002A5A90(work);
     u32 *secondary = resolveSecondaryFileBuffer(work);
-    u16 kind;
 
     if (secondary == NULL) {
         return node;
     }
-    kind = *(u16 *)(work + 0x1C);
-    switch (kind) {
+    switch (*(u16 *)(work + 0x1C)) {
     case 1:
         func_002A6198(node, (u32)secondary);
         break;
