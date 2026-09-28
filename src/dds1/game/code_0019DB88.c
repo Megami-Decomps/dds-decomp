@@ -3164,23 +3164,7 @@ void func_001C7280(u32 arg0) {
     *(u32 *)(temp_v0 + 0x20c) = arg0;
 }
 
-void updateBattleScene(void) {
-    s32 context = func_001A17F0();
-    s32 requested = *(s32 *)(context + 0x20C);
-    s32 next;
-    SceneInitializer *scene;
-
-    if (requested != 0) {
-        setBattleScene(requested);
-        *(s32 *)(context + 0x20C) = 0;
-    }
-    scene = &D_00359A88[*(s32 *)(context + 0x208)];
-    next = scene->update(context);
-    if (next != 0) {
-        func_001C7280(next);
-    }
-    ++*(s32 *)(context + 0x210);
-}
+INCLUDE_ASM(const s32, "game/code_0019DB88", updateBattleScene);
 
 void func_001C7328(void) {
     s32 temp_v0;

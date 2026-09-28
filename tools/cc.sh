@@ -29,15 +29,32 @@ run() {
     fi
 }
 tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
+cleanup() { rm -rf "$tmp" ${srcdir:+"$root/$srcdir"} ${outdir:+"$root/$outdir"}; }
+trap cleanup EXIT
 cd "$root"
-# Per-unit flags of the original build (config/<v>/cflags.txt), as configure.py uses.
-case $in in
-    "$root"/src/*/*.c)
-        rel=${in#"$root"/src/*/}; rel=${rel%.c}
-        unit_flags=$(sed -n "s|^$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/cflags.txt" 2>/dev/null)
-        flags="$flags $unit_flags" ;;
-esac
+# ee-gcc 2.96's code can depend on the lengths of the file names cc1 is given
+# (they shift its heap, and CSE hashes heap addresses). Compile a unit under
+# names exactly as long as the build's: `src/<v>/<dir>/<unit>.c` in and
+# `build/<v>/src/<v>/<dir>/<unit>.o.s` out, in scratch directories named
+# `.xx`/`.xxxx` so the lengths match. DDS_AS_UNIT=src/... compiles another
+# file (an experiment) as if it were that unit.
+canon=${DDS_AS_UNIT:-}
+case $in in "$root"/src/*/*.c) [ -z "$canon" ] && canon=${in#"$root"/} ;; esac
+cc_in=$in
+cc_out=$tmp/out.s
+if [ -n "$canon" ]; then
+    rest=${canon#src/}
+    while :; do srcdir=.$(od -An -N1 -tx1 /dev/urandom | tr -d ' \n'); mkdir "$srcdir" 2>/dev/null && break; done
+    while :; do outdir=.$(od -An -N2 -tx1 /dev/urandom | tr -d ' \n'); mkdir "$outdir" 2>/dev/null && break; done
+    mkdir -p "$srcdir/$(dirname "$rest")" "$outdir/$version/src/$(dirname "$rest")"
+    cp "$in" "$srcdir/$rest"
+    cc_in=$srcdir/$rest
+    cc_out=$outdir/$version/src/${rest%.c}.o.s
+    # Per-unit flags of the original build (config/<v>/cflags.txt), as configure.py uses.
+    rel=${rest#*/}; rel=${rel%.c}
+    unit_flags=$(sed -n "s|^$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/cflags.txt" 2>/dev/null)
+    flags="$flags $unit_flags"
+fi
 run "$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1" \
     -D__GNUC__=2 -D__GNUC_MINOR__=96 -D__GNUC_PATCHLEVEL__=0 \
     -Dmips -DMIPSEL -DR5900 -D_mips -D_MIPSEL -D_R5900 -D__ee__ \
@@ -46,5 +63,5 @@ run "$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1" \
     "-D__SIZE_TYPE__=unsigned int" "-D__PTRDIFF_TYPE__=int" -D__LONG_MAX__=9223372036854775807L \
     -U__mips -D__mips=3 -D__mips64 -D__mips_eabi -D__mips_single_float \
     -Iinclude -Isrc "-DASM_ROOT=\"build/eeasm/asm/$version/nonmatchings/\"" "-DVERSION_$(echo $version | tr a-z A-Z)" \
-    -quiet -O2 $flags "$in" -o "$tmp/out.s"
-run "$ee/ee/bin/as" -EL -G8 -Iinclude -o "$out" "$tmp/out.s"
+    -quiet -O2 $flags "$cc_in" -o "$cc_out"
+run "$ee/ee/bin/as" -EL -G8 -Iinclude -o "$out" "$cc_out"

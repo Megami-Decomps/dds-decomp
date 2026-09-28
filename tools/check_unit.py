@@ -111,13 +111,9 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmp:
         obj = Path(tmp) / "unit.o"
-        env = dict(os.environ, DDS_VERSION=version)
+        # cc.sh compiles under the unit's own path (and flags) even for --source.
+        env = dict(os.environ, DDS_VERSION=version, DDS_AS_UNIT=str(unit.relative_to(ROOT)))
         extra = args.cflags.split()
-        if args.source:  # cc.sh finds a unit's own flags by path; pass them explicitly
-            for line in (ROOT / "config" / version / "cflags.txt").read_text().splitlines():
-                parts = line.split("#", 1)[0].split()
-                if parts and parts[0] == unit_name:
-                    extra = parts[1:] + extra
         r = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", *extra,
                             str(args.source.resolve() if args.source else unit), "-o", str(obj)],
                            capture_output=True, text=True, env=env)
