@@ -85,8 +85,22 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     subprocess.run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
+    provide_data_symbols(version)
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text(digest)
+
+def provide_data_symbols(version: str) -> None:
+    """Give every D_XXXXXXXX the asm refers to its retail address as a fallback.
+
+    Per-unit .lit4/.rodata is compiled by C objects as local labels, so a .data
+    word pointing at such a constant has no global definition. PROVIDE only
+    defines a symbol no object defines."""
+    names = set()
+    for path in (ROOT / "asm" / version).rglob("*.s"):
+        names.update(re.findall(r"\bD_[0-9A-F]{8}\b", path.read_text()))
+    path = ROOT / "config" / version / "undefined_syms_auto.txt"
+    text = path.read_text() if path.exists() else ""
+    path.write_text(text + "".join(f"PROVIDE({n} = 0x{n[2:]});\n" for n in sorted(names)))
 
 
 def align_bss(ld_script: Path) -> None:

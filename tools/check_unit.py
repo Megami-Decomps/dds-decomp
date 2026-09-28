@@ -83,9 +83,9 @@ def relocations(obj):
     return out
 
 
-def owns_rodata(version, unit):
+def owns_rodata(version, unit, section="rodata"):
     yaml = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
-    return re.search(rf"\.rodata, {re.escape(unit)}\]", yaml) is not None
+    return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
 
 
 def main():
@@ -115,6 +115,10 @@ def main():
         text = text_section(obj)
         data, secs = sections(obj)
         emitted = {n: secs[n][1] for n in DATA_SECTIONS if secs.get(n, (0, 0))[1]}
+        l4_off, l4_size = secs.get(".lit4", (0, 0))
+        lit4 = data[l4_off:l4_off + l4_size]
+        ri_off, ri_size = secs.get(".reginfo", (0, 0))
+        gp0 = struct.unpack_from("<i", data, ri_off + 20)[0] if ri_size >= 24 else 0
         ro_off, ro_size = secs.get(".rodata", (0, 0))
         rodata = data[ro_off:ro_off + ro_size]
         all_relocs = relocations(obj)
@@ -161,6 +165,15 @@ def main():
             if (mine & 0xFC000000 if rtype == "R_MIPS_26" else mine & 0xFFFF0000) != \
                     (want & 0xFC000000 if rtype == "R_MIPS_26" else want & 0xFFFF0000):
                 diffs.append((i, mine, want, f"{rtype} {sym}"))
+                continue
+            if base == ".lit4":
+                # A float constant: our pool offset differs from retail's (asm
+                # functions are not compiled here), so compare the value itself.
+                at = (((mine & 0xFFFF) ^ 0x8000) - 0x8000) + gp0  # object gp is .reginfo's
+                ours = struct.unpack_from("<I", lit4, at)[0] if 0 <= at <= len(lit4) - 4 else None
+                theirs = struct.unpack_from("<I", retail, va_to_off(segs, gp + (((want & 0xFFFF) ^ 0x8000) - 0x8000)))[0]
+                if ours != theirs:
+                    diffs.append((i, mine, want, f"float constant {ours if ours is None else hex(ours)} vs retail {theirs:#x}"))
                 continue
             if base == ".rodata":
                 # A switch's jump table: remember where each side keeps it.
@@ -221,6 +234,8 @@ def main():
     stray = ro_size - len(covered)
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]
+    if emitted.get(".lit4") and owns_rodata(version, unit_name, "lit4"):
+        del emitted[".lit4"]  # every constant was compared with retail above
     for name, size in emitted.items():
         bad += 1
         why = ("only jump tables are compiled here; strings and constants stay INCLUDE_RODATA "

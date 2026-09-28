@@ -27,8 +27,6 @@ extern char D_0039F508[];
 extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
-extern f32 D_003B8D18;
-extern f32 D_003B8D1C;
 typedef struct { f32 x; f32 y; f32 z; f32 w; } ScrVec4;
 
 s32 func_0010D768(void)

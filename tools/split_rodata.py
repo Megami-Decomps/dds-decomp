@@ -32,26 +32,27 @@ REF = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/.*?\b\w+?_([0-9A-F
 RODATA_ROW = re.compile(r"^(\s+- \[)0x([0-9A-Fa-f]+), rodata, rodata\](.*)$", re.M)
 
 
-def layout(version):
+def layout(version, section="rodata"):
     cfg_path = ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml"
     cfg = yaml.safe_load(cfg_path.read_text())
     main = next(s for s in cfg["segments"] if isinstance(s, dict) and s.get("subsegments"))
     rom0, vram0 = main["start"], main["vram"]
     subs = [s for s in main["subsegments"] if isinstance(s, list) and len(s) >= 2]
     text = sorted((s[0] - rom0 + vram0, s[1], s[2]) for s in subs if len(s) >= 3 and s[1] in ("c", "asm"))
-    rodata_rom = next(s[0] for s in subs if s[1] in ("rodata", ".rodata"))
-    end_rom = min(s[0] for s in subs if s[0] > rodata_rom and s[1] not in ("rodata", ".rodata"))
+    kinds = (section, "." + section)
+    rodata_rom = next(s[0] for s in subs if s[1] in kinds)
+    end_rom = min(s[0] for s in subs if s[0] > rodata_rom and s[1] not in kinds)
     return cfg_path, rom0, vram0, text, rodata_rom, end_rom
 
 
-def owners(version):
-    cfg_path, rom0, vram0, text, rodata_rom, end_rom = layout(version)
+def owners(version, section="rodata"):
+    cfg_path, rom0, vram0, text, rodata_rom, end_rom = layout(version, section)
     lo, hi = rodata_rom - rom0 + vram0, end_rom - rom0 + vram0
     asm = ROOT / "asm" / version
     # Every rodata symbol splat wrote: the whole section before a split, the asm
     # chunks and per-unit files after one (re-running is idempotent).
     found = {}
-    for path in (asm / "data").rglob("*.rodata.s"):
+    for path in (asm / "data").rglob(f"*.{section}.s"):
         for n, a in LABEL.findall(path.read_text()):
             found.setdefault(int(a, 16), n)
     syms = sorted(found.items())
@@ -95,8 +96,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("version")
     ap.add_argument("--write", action="store_true")
+    ap.add_argument("--section", default="rodata", choices=["rodata", "lit4"],
+                    help="lit4: the .lit4 float pool, owned the same way")
     args = ap.parse_args()
-    cfg_path, rom0, vram0, text, rodata_rom, end_rom, syms, owner = owners(args.version)
+    cfg_path, rom0, vram0, text, rodata_rom, end_rom, syms, owner = owners(args.version, args.section)
     to_rom = lambda vram: vram - vram0 + rom0
     rows, prev = [], None
     for (addr, name), seg in zip(syms, owner):
@@ -112,7 +115,7 @@ def main():
     # starts at its first aligned symbol; what comes before belongs to the
     # previous file (referenced here as an extern).
     for i, (addr, kind, key, has_jtbl) in enumerate(rows):
-        if kind == "c" and has_jtbl and addr % 16:
+        if args.section == "rodata" and kind == "c" and has_jtbl and addr % 16:
             end = rows[i + 1][0] if i + 1 < len(rows) else None
             rows[i][0] = next(a for a, _ in syms if a > addr and a % 16 == 0 and (end is None or a < end))
     lines, first = [], True
@@ -120,11 +123,22 @@ def main():
         rom = rodata_rom if first else to_rom(addr)
         first = False
         if kind == "c":
-            lines.append(f"      - [0x{rom:X}, .rodata, {key}]")
+            lines.append(f"      - [0x{rom:X}, .{args.section}, {key}]")
         else:
-            lines.append(f"      - [0x{rom:X}, rodata, rodata_{rom - rom0 + vram0:08X}]")
+            lines.append(f"      - [0x{rom:X}, {args.section}, {args.section}_{rom - rom0 + vram0:08X}]")
+    if args.section == "lit4" and syms:
+        # The zero fill between the last constant and .sdata is section alignment
+        # in the original link, not any object's literal.
+        elf = (ROOT / "orig" / args.version / VERSIONS[args.version]["serial"]).read_bytes()
+        pad = end_rom
+        while pad > rodata_rom and not any(elf[pad - 4:pad]):
+            pad -= 4
+        rows = [r for r in rows if to_rom(r[0]) < pad]
+        lines = [l for l in lines if int(l.split("[")[1].split(",")[0], 16) < pad]
+        if pad < end_rom:
+            lines.append(f"      - [0x{pad:X}, lit4, lit4_pad]")
     units = sum(1 for _, k, _, _ in rows if k == "c")
-    print(f"{args.version}: {units} C units get their own .rodata, {len(rows) - units} asm chunks")
+    print(f"{args.version}: {units} C units get their own .{args.section}, {len(rows) - units} asm chunks")
     if args.write:
         text_yaml = cfg_path.read_text()
         start = text_yaml.index(f"      - [0x{rodata_rom:X}, ")
