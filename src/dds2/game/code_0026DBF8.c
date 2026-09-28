@@ -59,6 +59,15 @@ extern void func_00274FF8();
 extern u32 func_00274E30(void);
 extern void func_00274E88();
 extern u32 D_00453D00[12];
+extern u8 *D_00435DD0;
+
+typedef struct MenuRecord {
+    u16 type;
+    u16 flags;
+    u8 unk_04[12];
+    u32 unk_10;
+    u8 unk_14[4];
+} MenuRecord;
 extern u32 func_002C7FF0(const char *);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
                             void (*)(), void *);
@@ -853,7 +862,14 @@ void func_00274DF8(u32 arg0) {
     *(u16 *)(temp_v0 + 2) = *(u16 *)(temp_v0 + 2) ^ 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274E30);
+u32 func_00274E30(void) {
+    MenuRecord *record = (MenuRecord *)func_00328D68(sizeof(MenuRecord));
+    memset(record, 0, sizeof(MenuRecord));
+    record->type = 1;
+    record->flags = 0;
+    record->unk_10 = *(u32 *)(D_00435DD0 + 0x3c);
+    return (u32)record;
+}
 
 void func_00274E88(u32 obj) {
     func_00328E48(*(u32 *)(obj + 0x20));
