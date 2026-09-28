@@ -42,12 +42,12 @@ void func_0031F208(u32 unused, u32 node) {
 }
 
 
-u64 func_0031F228(s32 arg0) {
-    u64 temp_v0;
+u64 func_0031F228(s32 object) {
+    u64 record;
 
-    temp_v0 = func_0031F0E8();
-    func_00320CE0(*(u32 *)(arg0 + 4), 0, temp_v0);
-    return temp_v0;
+    record = func_0031F0E8();
+    func_00320CE0(*(u32 *)(object + 4), 0, record);
+    return record;
 }
 
 u32 func_0031F270(s32 arg0) {
@@ -99,14 +99,14 @@ u32 func_0031F550(u32 context, const char *name) {
     return 0;
 }
 
-u32 func_0031F5C0(u32 *object, u32 value) {
-    u32 index = value >> 16;
-    u32 offset = value - (index << 16);
+u32 func_0031F5C0(u32 *object, u32 packedOffset) {
+    u32 segmentIndex = packedOffset >> 16;
+    u32 offset = packedOffset - (segmentIndex << 16);
     u32 segment;
-    if (value > object[0]) {
+    if (packedOffset > object[0]) {
         return 0;
     }
-    segment = func_00321170(object[1], index);
+    segment = func_00321170(object[1], segmentIndex);
     return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
 }
 

@@ -50,6 +50,11 @@ extern void func_002C2920(s32, s32, s32);
 
 extern s8 D_003E7928[];
 
+typedef struct MenuSelectionEntry {
+    u8 pad0[0xE];
+    u16 flags;
+} MenuSelectionEntry;
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE6E8);
@@ -729,8 +734,8 @@ s32 func_002C59B0(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5A28);
 
-s32 func_002C5C28(s32 entry) {
-    u16 flags = *(u16 *)(entry + 0xe);
+s32 func_002C5C28(MenuSelectionEntry *entry) {
+    u16 flags = entry->flags;
     if (flags & 0x400) return 0;
     if (flags & 0x100) return 1;
     if (flags & 0x80) return 2;

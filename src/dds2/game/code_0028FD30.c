@@ -14,6 +14,7 @@ extern void func_0026D168(s32, s32, s32);
 
 extern s32 func_0026D0B0(s32, s32);
 
+
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
@@ -130,20 +131,20 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427740);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292478);
 
-void func_00292998(s32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
-    u64 temp_v2;
+void func_00292998(s32 object) {
+    u32 resource;
+    s32 record;
+    u64 effectHandle;
 
-    temp_v0 = *(u32 *)(arg0 + 0xbec);
+    resource = *(u32 *)(object + 0xbec);
     func_0026D098(0);
-    temp_v1 = func_00291400(0, 8);
-    temp_v2 = func_0027A628(temp_v0, 8, 0);
-    func_0027A798(temp_v2, 7, 0);
-    temp_v2 = func_00279DC8(temp_v0, 8, 1, 0, 0, 0);
-    func_00279F30(temp_v2, 0, 0, 0, 0x80, 0x53, 0, 0);
-    func_0027A798(temp_v2, 8, 0);
-    *(u16 *)(temp_v1 + 2) = (*(u16 *)(temp_v1 + 2) & 0xfff0) | 1;
+    record = func_00291400(0, 8);
+    effectHandle = func_0027A628(resource, 8, 0);
+    func_0027A798(effectHandle, 7, 0);
+    effectHandle = func_00279DC8(resource, 8, 1, 0, 0, 0);
+    func_00279F30(effectHandle, 0, 0, 0, 0x80, 0x53, 0, 0);
+    func_0027A798(effectHandle, 8, 0);
+    *(u16 *)(record + 2) = (*(u16 *)(record + 2) & 0xfff0) | 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292A60);

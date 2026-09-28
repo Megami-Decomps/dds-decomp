@@ -75,6 +75,11 @@ typedef struct ScrVmOperand {
     s8 s55;            // 0x55
 } ScrVmOperand; // 0x56
 
+typedef struct ScriptFlagEntry {
+    u32 unknown;
+    u32 flags;
+} ScriptFlagEntry;
+
 extern void func_0030D2D8(void);
 
 extern void func_0030D350(void);
@@ -1296,18 +1301,18 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316280);
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003162D8);
 
 void func_00316308(u32 context, u16 entryId, u32 bit) {
-    u32 *flags;
+    ScriptFlagEntry *entry;
     if (bit < 16) {
-        flags = (u32 *)func_00314B80(context, entryId);
-        flags[1] |= 1 << bit;
+        entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
+        entry->flags |= 1 << bit;
     }
 }
 
 void func_00316350(u32 context, u16 entryId, u32 bit) {
-    u32 *flags;
+    ScriptFlagEntry *entry;
     if (bit < 16) {
-        flags = (u32 *)func_00314B80(context, entryId);
-        flags[1] &= ~(1 << bit);
+        entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
+        entry->flags &= ~(1 << bit);
     }
 }
 
@@ -1315,16 +1320,16 @@ s32 func_003163A0(u32 context, u16 entryId, u32 bit) {
     if (bit >= 16) {
         return 0;
     }
-    return (*(u32 *)(func_00314B80(context, entryId) + 4) & (1 << bit)) != 0;
+    return (((ScriptFlagEntry *)func_00314B80(context, entryId))->flags & (1 << bit)) != 0;
 }
 
 void func_003163F0(u32 context, u16 entryId, u16 lowFlags) {
-    u32 *flags = (u32 *)func_00314B80(context, entryId);
-    flags[1] = (flags[1] & 0xFFFF0000) | lowFlags;
+    ScriptFlagEntry *entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
+    entry->flags = (entry->flags & 0xFFFF0000) | lowFlags;
 }
 
 u16 func_00316430(u32 context, u16 entryId) {
-    return *(u16 *)(func_00314B80(context, entryId) + 4);
+    return *(u16 *)&((ScriptFlagEntry *)func_00314B80(context, entryId))->flags;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316450);

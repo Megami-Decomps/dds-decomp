@@ -1,5 +1,16 @@
 #include "common.h"
 
+typedef struct SoundSlot {
+    u32 remainingFrames;
+    u32 sequence;
+} SoundSlot;
+
+typedef struct SoundSlotPool {
+    u32 handle;
+    SoundSlot *slots;
+    s32 count;
+} SoundSlotPool;
+
 extern void mdlBroadcastMasked(u32 sprite);
 
 extern u32 *D_00438940;
@@ -43,20 +54,20 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B290);
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B2E0);
 
 void func_0031B328(void) {
-    u32 *pool = D_00438940;
+    SoundSlotPool *pool = (SoundSlotPool *)D_00438940;
     if (pool != 0) {
         s32 index = 0;
-        u32 *slot = (u32 *)pool[1];
-        if ((s32)pool[2] > 0) {
+        SoundSlot *slot = pool->slots;
+        if (pool->count > 0) {
             do {
-                if (slot[1] != 0) {
-                    if (slot[0] == 0 || --slot[0] == 0) {
-                        soundSetSequenceVolumePan(slot[1], 0x7f, 0x3f);
-                        slot[1] = 0;
+                if (slot->sequence != 0) {
+                    if (slot->remainingFrames == 0 || --slot->remainingFrames == 0) {
+                        soundSetSequenceVolumePan(slot->sequence, 0x7f, 0x3f);
+                        slot->sequence = 0;
                     }
                 }
                 index++;
-                slot += 2;
+                slot++;
             } while (index < (s32)D_00438940[2]);
         }
     }

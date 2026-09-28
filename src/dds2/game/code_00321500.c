@@ -64,6 +64,14 @@ typedef struct MenuInitialTag {
     u16 index;
 } MenuInitialTag;
 
+typedef struct MenuLengthData {
+    u8 pad0[4];
+    u16 firstCount;
+    u16 secondCount;
+    s32 *firstRecords;
+    s32 *secondRecords;
+} MenuLengthData;
+
 void func_003214D0(u32 arg0, s32 arg1);
 s32 func_00322480(s32 *entries, s32 count);
 
@@ -156,25 +164,25 @@ void func_00322418(void) {
 }
 
 
-s32 func_00322438(u8 *data) {
-    s32 length = func_00322480(*(s32 **)(data + 8), *(u16 *)(data + 4)) + 0x10;
-    return length + func_00322480(*(s32 **)(data + 0xc), *(u16 *)(data + 6));
+s32 func_00322438(MenuLengthData *data) {
+    s32 length = func_00322480(data->firstRecords, data->firstCount) + 0x10;
+    return length + func_00322480(data->secondRecords, data->secondCount);
 }
 
-s32 func_00322480(s32 *arg0, s32 arg1) {
-    s32 temp_v0;
-    s32 temp_v1;
+s32 func_00322480(s32 *records, s32 count) {
+    s32 entryCount;
+    s32 length;
 
-    temp_v1 = arg1 << 3;
-    if (0 < arg1) {
+    length = count << 3;
+    if (0 < count) {
         do {
-            temp_v0 = *arg0;
-            arg0 = arg0 + 2;
-            arg1 = arg1 - 1;
-            temp_v1 = temp_v1 + temp_v0 * 8;
-        } while (arg1 != 0);
+            entryCount = *records;
+            records = records + 2;
+            count = count - 1;
+            length = length + entryCount * 8;
+        } while (count != 0);
     }
-    return temp_v1;
+    return length;
 }
 
 void func_003224B0(void) {

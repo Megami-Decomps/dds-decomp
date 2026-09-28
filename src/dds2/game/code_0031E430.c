@@ -9,6 +9,18 @@ typedef struct FadeOffset {
     s32 x;
     s32 y;
 } FadeOffset;
+
+typedef struct FadeEntry {
+    s32 mode;
+    s32 step;
+    s32 queuedMode;
+    s32 queuedStep;
+    s32 delay;
+    s32 extent;
+    s32 frame;
+    s32 parameter;
+    s32 secondaryParameter;
+} FadeEntry;
 extern const FadeOffset D_0040B088[];
 extern s32 func_0031E410(s32 index);
 
@@ -19,76 +31,78 @@ s32 func_0031E430(s32 x, s32 y, s32 width, s32 index, s32 effect) {
                          0, width * 2, 0, D_0043895C, texture, effect);
 }
 
-void func_0031E4D0(u32 arg0) {
-    D_0043895C = arg0;
+void func_0031E4D0(u32 tint) {
+    D_0043895C = tint;
 }
 
 void func_0031E4D8(void) {
     D_0043895C = 0;
 }
 
-void func_0031E4E0(u32 *entry, s32 mode, s32 value) {
+void func_0031E4E0(FadeEntry *entry, s32 mode, s32 value) {
     switch (mode) {
     case 0:
         if (value >= 0x80) {
-            entry[5] = 0;
+            entry->extent = 0;
         }
         break;
     case 1:
         if (value >= 0x80) {
-            entry[5] = 0x80;
+            entry->extent = 0x80;
         }
         break;
     }
-    entry[0] = mode;
-    entry[1] = value;
+    entry->mode = mode;
+    entry->step = value;
 }
 
-void func_0031E530(u32 *entry, u32 index, u32 value, u32 next) {
-    entry[2] = index + 1;
-    entry[3] = value;
-    entry[4] = next;
+void func_0031E530(FadeEntry *entry, u32 mode, u32 step, u32 delay) {
+    entry->queuedMode = mode + 1;
+    entry->queuedStep = step;
+    entry->delay = delay;
 }
 
-u32 func_0031E548(s32 arg0) {
-    return *(u32 *)(arg0 + 0x14);
+u32 func_0031E548(FadeEntry *entry) {
+    return entry->extent;
 }
 
-s32 func_0031E550(context)
-    u32 *context;
+/* Keep the K&R signature: the matched drawing callbacks omit this argument. */
+s32 func_0031E550(entry)
+    FadeEntry *entry;
 {
-    if (context[5] == 0) {
-        if (context[0] == 0) {
+    if (entry->extent == 0) {
+        if (entry->mode == 0) {
             return 0;
         }
     }
     return 1;
 }
 
-void func_0031E578(s32 *entry) {
-    if (entry[2] > 0) {
-        if (entry[4] == 0) {
-            func_0031E4E0((u32 *)entry, entry[2] - 1, entry[3]);
-            entry[2] = 0;
+void func_0031E578(u32 address) {
+    FadeEntry *entry = (FadeEntry *)address;
+    if (entry->queuedMode > 0) {
+        if (entry->delay == 0) {
+            func_0031E4E0(entry, entry->queuedMode - 1, entry->queuedStep);
+            entry->queuedMode = 0;
         } else {
-            entry[4]--;
+            entry->delay--;
         }
     }
-    switch (entry[0]) {
+    switch (entry->mode) {
     case 1:
-        if (entry[5] < 0x80) {
-            entry[5] += entry[1];
+        if (entry->extent < 0x80) {
+            entry->extent += entry->step;
         }
-        if (entry[5] > 0x80) {
-            entry[5] = 0x80;
+        if (entry->extent > 0x80) {
+            entry->extent = 0x80;
         }
         break;
     case 0:
-        if (entry[5] > 0) {
-            entry[5] -= entry[1];
+        if (entry->extent > 0) {
+            entry->extent -= entry->step;
         }
-        if (entry[5] < 0) {
-            entry[5] = 0;
+        if (entry->extent < 0) {
+            entry->extent = 0;
         }
         break;
     }
@@ -112,8 +126,8 @@ void func_0031E640(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E6E0);
 
-void func_0031E7C8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031E7C8(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 void func_0031E7D0(u32 arg0) {
@@ -131,8 +145,8 @@ void func_0031E7D0(u32 arg0) {
     }
 }
 
-void func_0031E850(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031E850(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 void func_0031E858(u32 arg0) {
@@ -150,16 +164,16 @@ void func_0031E858(u32 arg0) {
     }
 }
 
-void func_0031E8D8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x1c) = arg1;
+void func_0031E8D8(FadeEntry *entry, u32 parameter) {
+    entry->parameter = parameter;
 }
 
-void func_0031E8E0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x20) = arg1;
+void func_0031E8E0(FadeEntry *entry, u32 parameter) {
+    entry->secondaryParameter = parameter;
 }
 
-void func_0031E8E8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031E8E8(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E8F0);
