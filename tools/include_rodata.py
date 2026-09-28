@@ -55,6 +55,9 @@ def place(version):
             if "glabel " in f.read_text():
                 owned -= {n for n, _ in LABEL.findall(rodata_part(f))}
         text = c.read_text()
+        # Placed from scratch every time: once a function compiles its own
+        # literal, the lines around it must move with it.
+        text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
         # Rodata a C function no longer names is compiled by that function itself
         # (a string literal): nothing to include.
         # The retail references come from the unit's full disassembly, which
@@ -81,9 +84,6 @@ def place(version):
                 if sym in compiled:
                     compiled_at.setdefault(sym, m.start())
         owned -= compiled
-        # Placed from scratch every time: once a function compiles its own
-        # literal, the lines around it must move with it.
-        text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
         have = set(INCLUDE.findall(text))
         anchors = []   # (address, position in text or None, symbol, needs a line)
         for m in INCLUDE_ASM.finditer(text):

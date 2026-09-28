@@ -300,7 +300,8 @@ def blocks(text):
             continue
         cur.append(line)
         depth += line.count("{") - line.count("}")
-        if depth == 0 and stripped.endswith((";", "}")):
+        code = re.sub(r"\s*(/\*.*?\*/|//.*)$", "", stripped)  # a trailing comment
+        if depth == 0 and code.endswith((";", "}")):
             flush()
     flush()
     return out
