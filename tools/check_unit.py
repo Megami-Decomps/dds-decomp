@@ -291,6 +291,14 @@ def main():
                else "reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
                "(this data is not split per unit yet)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
+    # Constructs that force codegen rather than express the original source.
+    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", unit.read_text(), flags=re.S)
+    for pattern, why in ((r"goto\s*\*", "computed goto (write the switch)"),
+                         (r"&&\s*[A-Za-z_]\w*\s*[,}]", "label address table (write the switch)"),
+                         (r"\bregister\b[^;]*\basm\s*\(", "register pinned with asm()")):
+        for m in re.finditer(pattern, source_text):
+            bad += 1
+            print(f"TRICK line {source_text.count(chr(10), 0, m.start()) + 1}: {why}")
     # C functions must keep retail order (the object's text is laid out in source order).
     order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^[A-Za-z_][^;\n=]*?\b(\w+)\s*\([^;\n]*\)\s*\{?\s*$',
                        unit.read_text(), re.M)
