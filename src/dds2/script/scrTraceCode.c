@@ -67,34 +67,25 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C6B0);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C708);
 
-u32 func_0010C760(u32 arg0) {
-    s32 temp_v0;
-
-    temp_v0 = (s32)arg0;
-    func_0010C348(arg0, *(u32 *)
-                                                  (*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2) * 4 +
-                                                  *(s32 *)(temp_v0 + 0xdc)));
-    *(s32 *)(temp_v0 + 0x18) = *(s32 *)(temp_v0 + 0x18) + 1;
+u32 func_0010C760(ScrData *scr) {
+    func_0010C348(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
+    scr->pc++;
     return 1;
 }
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C7B8);
 
-u32 func_0010C810(u32 arg0) {
-    s32 temp_v0;
-
-    temp_v0 = (s32)arg0;
-    func_0010C3A8(arg0, *(s32 *)(temp_v0 + 0xc4) +
-                                                (s32)*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2));
-    *(s32 *)(temp_v0 + 0x18) = *(s32 *)(temp_v0 + 0x18) + 1;
+u32 func_0010C810(ScrData *scr) {
+    func_0010C3A8(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
+    scr->pc++;
     return 1;
 }
 
-u32 func_0010C860(s32 arg0) {
-    *(u8 *)(*(s32 *)(arg0 + 0x1c) + arg0 + 0x20) = *(u8 *)(arg0 + 0x3b);
-    *(u32 *)(*(s32 *)(arg0 + 0x1c) * 4 + arg0 + 0x3c) = *(u32 *)(arg0 + 0xa8);
-    *(s32 *)(arg0 + 0x1c) = *(s32 *)(arg0 + 0x1c) + 1;
-    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+u32 func_0010C860(ScrData *scr) {
+    scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
+    scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
+    scr->sp++;
+    scr->pc++;
     return 1;
 }
 
@@ -102,21 +93,19 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C8A8);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C900);
 
-u32 func_0010C958(s32 arg0) {
-    u32 temp_v0;
+u32 func_0010C958(ScrData *scr) {
+    u32 value;
 
-    temp_v0 = func_0010C408();
-    *(u32 *)
-      (*(s16 *)(*(s32 *)(arg0 + 0x18) * 4 + *(s32 *)(arg0 + 0xbc) + 2) * 4 +
-      *(s32 *)(arg0 + 0xdc)) = temp_v0;
-    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+    value = func_0010C408();
+    scr->localInt[scr->instructions[scr->pc].parts.sOperand] = value;
+    scr->pc++;
     return 1;
 }
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C9B0);
 
-u32 func_0010CA08(s32 arg0) {
-    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+u32 func_0010CA08(ScrData *scr) {
+    scr->pc++;
     return 1;
 }
 
@@ -124,11 +113,8 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CA20);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CAC0);
 
-u32 func_0010CB00(s32 arg0) {
-    *(u32 *)(arg0 + 0x18) =
-              *(u32 *)
-                (*(s16 *)(*(s32 *)(arg0 + 0x18) * 4 + *(s32 *)(arg0 + 0xbc) + 2) * 0x20 +
-                  *(s32 *)(arg0 + 0xb4) + 0x18);
+u32 func_0010CB00(ScrData *scr) {
+    scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
@@ -144,16 +130,13 @@ u32 func_0010CB30(u32 arg0) {
     return 1;
 }
 
-u32 func_0010CB88(s32 arg0) {
-    *(s32 *)(arg0 + 0x18) = *(s32 *)(arg0 + 0x18) + 1;
+u32 func_0010CB88(ScrData *scr) {
+    scr->pc++;
     return 1;
 }
 
-u32 func_0010CBA0(s32 arg0) {
-    *(u32 *)(arg0 + 0x18) =
-              *(u32 *)
-                (*(s16 *)(*(s32 *)(arg0 + 0x18) * 4 + *(s32 *)(arg0 + 0xbc) + 2) * 0x20 +
-                  *(s32 *)(arg0 + 0xb8) + 0x18);
+u32 func_0010CBA0(ScrData *scr) {
+    scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 

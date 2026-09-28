@@ -13,10 +13,10 @@ extern u64 billCreateIndexed(u64, u64);
 extern u64 func_00159A50(u32);
 
 typedef struct {
-    void *unk0;  /* 0x0 object deref'd +0x10 by func_00111840, returned by func_00114A68 */
-    u32 unk4;    /* 0x4 flag bits */
+    void *objectHandle; /* 0x0 returned by func_00114CD0 */
+    u32 flags; /* 0x4 effect flag bits */
     u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
-    void *unkC;  /* 0xC bill object deref'd +0x2C/+0x58 by func_00151E60/func_00152200 */
+    void *bill; /* 0xC bill object */
     u32 unk10;   /* 0x10 cleared by func_00115BB8 */
     u32 unk14;   /* 0x14 cleared by func_00115BB8 */
     void *unk18; /* 0x18 cleared by func_00115BB8 */
@@ -30,8 +30,8 @@ typedef struct {
     u8 pad[0xF];       /* 0x0 */
     u8 unkF;           /* 0xF kind checked ==7 by func_001158B8 */
     u8 pad10[8];       /* 0x10 */
-    EffectData *unk18; /* 0x18 */
-    void *unk1C;       /* 0x1C vector base read by func_001158F0/func_00115930 */
+    EffectData *data; /* 0x18 */
+    void *params; /* 0x1C vector base */
 } EffectObj;
 
 EffectData *func_00115B20(EffectObj *obj);
@@ -53,8 +53,8 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114828);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114BF0);
 
-u32 func_00114CD0(s32 arg0) {
-    return **(u32 **)(arg0 + 0x18);
+u32 func_00114CD0(EffectObj *obj) {
+    return (u32)obj->data->objectHandle;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CE0);
@@ -168,7 +168,7 @@ s32 effObjGetIntParam(EffectObj *obj) {
     if (func_00115B20(obj) == NULL) {
         return 0;
     }
-    p = obj->unk1C;
+    p = obj->params;
     return (s32)(*(f32 *)((u8 *)p + 0x60));
 }
 
@@ -176,12 +176,12 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BD8);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C50);
 
-void func_00115DF0(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) | arg1;
+void func_00115DF0(EffectObj *obj, u32 flags) {
+    obj->data->flags = obj->data->flags | flags;
 }
 
-void func_00115E08(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 4) & ~arg1;
+void func_00115E08(EffectObj *obj, u32 flags) {
+    obj->data->flags = obj->data->flags & ~flags;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115E20);

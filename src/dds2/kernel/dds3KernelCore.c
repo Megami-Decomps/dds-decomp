@@ -17,8 +17,8 @@ struct KwlnTask {
     u32 timer;
     s16 unk2C;
     s16 unk2E;
-    TaskUpdate unk30;
-    TaskDestroy unk34;
+    TaskUpdate update;
+    TaskDestroy destroy;
     u32 unk38;
     KwlnTask* listNext;
     KwlnTask* listPrev;

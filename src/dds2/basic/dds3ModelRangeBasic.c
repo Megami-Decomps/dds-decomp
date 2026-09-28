@@ -1,17 +1,27 @@
 #include "common.h"
 
+typedef struct {
+    u8 pad[4];
+    s32 unk4;
+} ModelRangeData;
+
+typedef struct {
+    u8 pad[0x18];
+    ModelRangeData *unk18;
+} ModelRangeObj;
+
 extern u64 func_00329930(s32);
 
-void func_00116CB8(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    u64 temp_v2;
+void func_00116CB8(ModelRangeObj *object) {
+    ModelRangeData *data;
+    s32 resource;
+    u64 handle;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    temp_v1 = *(s32 *)(temp_v0 + 4);
-    if (temp_v1 != 0) {
-        temp_v2 = func_00329930(temp_v1);
-        func_003298C0(temp_v2);
+    data = object->unk18;
+    resource = data->unk4;
+    if (resource != 0) {
+        handle = func_00329930(resource);
+        func_003298C0(handle);
     }
-    func_00328E48(temp_v0);
+    func_00328E48(data);
 }

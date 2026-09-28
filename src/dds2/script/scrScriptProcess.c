@@ -8,36 +8,47 @@ s32 func_0010C2F0();
 
 s32 func_0010C298();
 
-typedef struct { u8 pad0[0x40]; s32 unk40[256]; s32 unk440[256]; } ScrProcGlobals;
+typedef struct { u8 pad0[0x40]; s32 integers[256]; s32 floatBits[256]; } ScrProcGlobals;
+
+typedef struct {
+    u8 pad0[0xB4];
+    s32 unkB4;
+    u8 padB8[0x10];
+    s32 unkC8;
+    u8 padCC[0xC];
+    void *scriptHandle;
+    u8 padDC[8];
+    s32 taskId;
+} ScrProcTask;
 
 extern ScrProcGlobals *D_00435DD0;
 
-s32 func_0010BD50(s32 arg0, s32 arg1)
+s32 func_0010BD50(s32 scriptId, s32 option)
 {
     u32 buf[4];
-    void *r;
-    s32 p;
-    s32 r2;
-    r = func_00343ED0(arg0, buf, 0);
-    p = buf[0];
-    if (p == 0)
+    void *handle;
+    s32 id;
+    ScrProcTask *task;
+    handle = func_00343ED0(scriptId, buf, 0);
+    id = buf[0];
+    if (id == 0)
     {
         return 0;
     }
-    r2 = func_0010BC40(p, arg1);
-    if (r2 != 0)
+    task = (ScrProcTask *)func_0010BC40(id, option);
+    if (task != NULL)
     {
-        *(s32 *)(r2 + 0xD8) = (s32)r;
+        task->scriptHandle = handle;
     }
-    return r2;
+    return (s32)task;
 }
 
-s32 scrProcCreateTask(s32 arg0, s32 arg1)
+s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
-    s32 r;
-    r = kwlnTaskCreate(*(s32 *)(arg1 + 0xB4) + (*(s32 *)(arg1 + 0xC8) << 5), arg0, 1, 1, func_0010C2F0, func_0010C298, arg1);
-    *(s32 *)(arg1 + 0xE4) = r;
-    return r;
+    s32 id;
+    id = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, func_0010C2F0, func_0010C298, (s32)task);
+    task->taskId = id;
+    return id;
 }
 
 void func_0010BE08(void)
@@ -46,8 +57,8 @@ void func_0010BE08(void)
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (i = 255; i >= 0; i--)
     {
-        D_00435DD0->unk40[255 - i] = 0;
-        D_00435DD0->unk440[255 - i] = 0;
+        D_00435DD0->integers[255 - i] = 0;
+        D_00435DD0->floatBits[255 - i] = 0;
     }
 }
 

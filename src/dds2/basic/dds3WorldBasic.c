@@ -2,8 +2,8 @@
 
 typedef struct NodeA {
     u8 pad[0x20];
-    struct NodeA *unk20;
-    struct NodeA *unk24;
+    struct NodeA *next;
+    struct NodeA *previous;
 } NodeA;
 
 typedef struct NodeB {
@@ -11,8 +11,8 @@ typedef struct NodeB {
     s16 unk2;
     s16 unk4;
     s16 unk6;
-    struct NodeB *unk8;
-    struct NodeB *unkC;
+    struct NodeB *next;
+    struct NodeB *previous;
 } NodeB;
 
 typedef struct {
@@ -22,23 +22,23 @@ typedef struct {
 } Entry;
 
 typedef struct {
-    NodeA *unk0;
-    NodeA *unk4;
-    void *unk8;
-    void *unkC;
+    NodeA *firstNode;
+    NodeA *lastNode;
+    void *primaryObject;
+    void *secondaryObject;
     u8 pad10[4];
     Entry *unk14;
     u8 pad18[2];
     u16 unk1A;
     s16 unk1C;
     u16 unk1E;
-    NodeB *unk20;
-    NodeB *unk24;
+    NodeB *firstIndex;
+    NodeB *lastIndex;
 } WorldInfo;
 
 typedef struct {
     u8 pad[0x18];
-    WorldInfo *unk18;
+    WorldInfo *info;
 } World;
 
 extern World *D_00435D8C;
@@ -80,9 +80,9 @@ void func_0010FF58(void) {
     }
 }
 
-void func_0010FF88(void *arg) {
+void func_0010FF88(void *object) {
     if (D_00435D8C != NULL) {
-        D_00435D8C->unk18->unk8 = arg;
+        D_00435D8C->info->primaryObject = object;
     }
 }
 
@@ -93,12 +93,12 @@ void *func_0010FFA8(void) {
     if (world == NULL) {
         return NULL;
     }
-    return world->unk18->unk8;
+    return world->info->primaryObject;
 }
 
-void func_0010FFC8(void *arg) {
+void func_0010FFC8(void *object) {
     if (D_00435D8C != NULL) {
-        D_00435D8C->unk18->unkC = arg;
+        D_00435D8C->info->secondaryObject = object;
     }
 }
 
@@ -109,7 +109,7 @@ void *func_0010FFE8(void) {
     if (world == NULL) {
         return NULL;
     }
-    return world->unk18->unkC;
+    return world->info->secondaryObject;
 }
 
 void *func_00110008(void) {
@@ -119,18 +119,18 @@ void *func_00110008(void) {
     if (D_00435D8C == NULL) {
         return NULL;
     }
-    info = D_00435D8C->unk18;
+    info = D_00435D8C->info;
     node = func_0010F640(1);
     if (node == NULL) {
         return NULL;
     }
-    if (info->unk4 == NULL) {
-        info->unk0 = node;
-        info->unk4 = node;
+    if (info->lastNode == NULL) {
+        info->firstNode = node;
+        info->lastNode = node;
     } else {
-        info->unk4->unk20 = node;
-        node->unk24 = info->unk4;
-        info->unk4 = node;
+        info->lastNode->next = node;
+        node->previous = info->lastNode;
+        info->lastNode = node;
     }
     return node;
 }
@@ -144,7 +144,7 @@ void *func_001100F0(s32 arg) {
     if (D_00435D8C == NULL) {
         return NULL;
     }
-    info = D_00435D8C->unk18;
+    info = D_00435D8C->info;
     if (info->unk1E < arg) {
         return NULL;
     }
@@ -152,19 +152,19 @@ void *func_001100F0(s32 arg) {
     if (node == NULL) {
         return NULL;
     }
-    node->unkC = NULL;
-    node->unk8 = NULL;
+    node->previous = NULL;
+    node->next = NULL;
     node->unk0 = -1;
     node->unk2 = -1;
     node->unk4 = -1;
     node->unk6 = 0;
-    if (info->unk24 == NULL) {
-        info->unk20 = node;
-        info->unk24 = node;
+    if (info->lastIndex == NULL) {
+        info->firstIndex = node;
+        info->lastIndex = node;
     } else {
-        info->unk24->unk8 = node;
-        node->unkC = info->unk24;
-        info->unk24 = node;
+        info->lastIndex->next = node;
+        node->previous = info->lastIndex;
+        info->lastIndex = node;
     }
     func_001104F0(node, arg);
     return node;

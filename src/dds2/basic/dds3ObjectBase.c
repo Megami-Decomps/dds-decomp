@@ -1,5 +1,16 @@
 #include "common.h"
 
+typedef struct {
+    u32 flags;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    void *slots[8];
+    void *extData;
+    u8 pad34[4];
+    void *unk38;
+} ObjBase;
+
 extern u64 func_00111838(u64);
 
 extern void *objGetSlot(void *arg0, s32 index);
@@ -12,25 +23,25 @@ extern s32 func_00112AB0(void);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
-void func_00111B30(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00111B30(u32 arg0, u32 flags) {
+    ObjBase *base;
 
-    puVar1 = (u32 *)func_00112AB0();
-    *puVar1 = *puVar1 | arg1;
+    base = (ObjBase *)func_00112AB0();
+    base->flags = base->flags | flags;
 }
 
-void func_00111B60(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00111B60(u32 arg0, u32 flags) {
+    ObjBase *base;
 
-    puVar1 = (u32 *)func_00112AB0();
-    *puVar1 = *puVar1 & ~arg1;
+    base = (ObjBase *)func_00112AB0();
+    base->flags = base->flags & ~flags;
 }
 
-u8 func_00111B98(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+u8 func_00111B98(u32 arg0, u32 flags) {
+    ObjBase *base;
 
-    puVar1 = (u32 *)func_00112AB0();
-    return (*puVar1 & arg1) != 0;
+    base = (ObjBase *)func_00112AB0();
+    return (base->flags & flags) != 0;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
@@ -44,10 +55,10 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objExchangeSlot);
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objGetSlot);
 
 u32 objGetUnk04(void) {
-    s32 temp_v0;
+    ObjBase *base;
 
-    temp_v0 = func_00112AB0();
-    return *(u32 *)(temp_v0 + 4);
+    base = (ObjBase *)func_00112AB0();
+    return base->unk4;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", objGetUnk0C);

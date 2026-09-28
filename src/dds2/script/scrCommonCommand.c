@@ -85,19 +85,19 @@ s32 func_0010DC10(void)
 
 s32 func_0010DC50(void)
 {
-    s32 p0;
-    s32 lbl;
-    p0 = func_0010D650(0);
-    if (p0 < 0)
+    s32 argumentIndex;
+    s32 label;
+    argumentIndex = func_0010D650(0);
+    if (argumentIndex < 0)
     {
         return 1;
     }
-    lbl = func_0010D650(p0 + 1);
-    if (lbl < 0)
+    label = func_0010D650(argumentIndex + 1);
+    if (label < 0)
     {
         return 1;
     }
-    func_0010D888(func_0010D860(lbl));
+    func_0010D888(func_0010D860(label));
     return 1;
 }
 

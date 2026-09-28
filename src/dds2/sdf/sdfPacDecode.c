@@ -7,6 +7,7 @@ typedef struct PacHead {
     s32 unk4; /* 0x4 */
     u8 pad8[4]; /* 0x8 */
     s32 unkC; /* 0xC */
+    u8 payload[1]; /* 0x10: variable-length packet data */
 } PacHead;
 
 typedef struct PacWork {
@@ -14,6 +15,7 @@ typedef struct PacWork {
     struct PacState *unk4; /* 0x4 */
     s32 unk8; /* 0x8 */
     u8 *unkC; /* 0xC */
+    u8 packet[1]; /* 0x10: copied header and packet data */
 } PacWork;
 
 typedef struct PacAlloc {
@@ -101,7 +103,7 @@ PacWork *func_00346E08(PacState *arg0, PacHead *arg1) {
     s32 size = arg1->unk1 & 0xF0;
     PacWork *node = func_00328E18(size + 0x20);
     node->unk4 = arg0;
-    memcpy((u8 *)node + 0x10, arg1, size + 0x10);
+    memcpy(node->packet, arg1, size + 0x10);
     if (arg0->unk34 == NULL) {
         arg0->unk30 = node;
     } else {

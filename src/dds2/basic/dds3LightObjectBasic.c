@@ -1,16 +1,25 @@
 #include "common.h"
 
-void func_001165A0(u32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
+typedef struct {
+    u8 pad0[0x74];
+    u32 resource;
+    void *buffer;
+} LightData;
 
-    temp_v1 = (s32)arg0;
-    temp_v0 = *(s32 *)(temp_v1 + 0x18);
-    func_00328E48(*(u32 *)(temp_v0 + 0x78));
-    func_00111A68(*(u32 *)(temp_v0 + 0x74));
-    func_00328E48(*(u32 *)(temp_v1 + 0x18));
-    *(u32 *)(temp_v1 + 0x18) = 0;
-    func_0010F810(arg0);
+typedef struct {
+    u8 pad0[0x18];
+    LightData *data;
+} LightObject;
+
+void func_001165A0(LightObject *light) {
+    LightData *data;
+
+    data = light->data;
+    func_00328E48(data->buffer);
+    func_00111A68(data->resource);
+    func_00328E48(light->data);
+    light->data = NULL;
+    func_0010F810(light);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3LightObjectBasic", func_001165F0);

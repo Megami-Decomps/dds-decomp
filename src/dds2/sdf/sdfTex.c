@@ -2,7 +2,7 @@
 
 typedef struct SdfTexRef {
     void *unk0;
-    s32 unk4;
+    s32 refCount;
 } SdfTexRef;
 
 typedef struct SdfTexBuf {
@@ -11,9 +11,9 @@ typedef struct SdfTexBuf {
 } SdfTexBuf;
 
 typedef struct SdfTex {
-    struct SdfTex *unk0;
-    struct SdfTex *unk4;
-    SdfTexRef *unk8;
+    struct SdfTex *next;
+    struct SdfTex *prev;
+    SdfTexRef *reference;
     s16 unkC;
     s16 unkE;
     void *unk10;
@@ -29,8 +29,8 @@ typedef struct SdfTex {
     s32 unk24;
     SdfTexBuf *unk28;
     SdfTexBuf *unk2C;
-    void *unk30;
-    s32 unk34;
+    u8 *data;
+    s32 dataSize;
     s32 unk38;
     void *unk3C;
 } SdfTex;
@@ -67,36 +67,36 @@ s32 func_0032B8D8(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B908);
 
-void func_0032B948(s32 arg0, u32 arg1) {
-    memcpy(*(u32 *)(arg0 + 0x30), arg1, *(u32 *)(arg0 + 0x34));
+void func_0032B948(SdfTex *texture, void *source) {
+    memcpy(texture->data, source, texture->dataSize);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B968);
 
-void func_0032BAE0(SdfTex *arg0) {
-    SdfTex *cur;
+void func_0032BAE0(SdfTex *texture) {
+    SdfTex *next;
     SdfTex *prev;
 
-    if (arg0->unk8->unk0 == NULL) {
-        func_0032AA40(arg0->unk10);
+    if (texture->reference->unk0 == NULL) {
+        func_0032AA40(texture->unk10);
     }
-    func_0032AA40(arg0->unk14);
-    func_00328E48(arg0->unk28);
-    func_00328E48(arg0->unk2C);
-    cur = arg0->unk0;
-    prev = arg0->unk4;
+    func_0032AA40(texture->unk14);
+    func_00328E48(texture->unk28);
+    func_00328E48(texture->unk2C);
+    next = texture->next;
+    prev = texture->prev;
     if (prev != NULL) {
-        prev->unk0 = cur;
+        prev->next = next;
     }
-    if (cur != NULL) {
-        cur->unk4 = prev;
+    if (next != NULL) {
+        next->prev = prev;
     } else {
         D_004389F8 = prev;
     }
-    func_00328420(arg0->unk30);
-    func_00328420(arg0->unk3C);
-    func_00328E48(arg0->unk8);
-    func_00328E48(arg0);
+    func_00328420(texture->data);
+    func_00328420(texture->unk3C);
+    func_00328E48(texture->reference);
+    func_00328E48(texture);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BB68);

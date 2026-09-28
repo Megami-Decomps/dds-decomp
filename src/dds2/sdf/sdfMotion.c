@@ -17,14 +17,14 @@ void func_003340D0(Pair *a0, void *a1, void *a2);
 
 typedef struct {
     u8 pad[0x30];
-    u8 unk30;
-    u8 unk31;
+    u8 mode;
+    u8 previousMode;
 } StateByte;
 
 typedef struct KeyOut {
-    f32 *p0;
-    f32 *p4;
-    f32 f8;
+    f32 *firstKey;
+    f32 *secondKey;
+    f32 weight;
 } KeyOut;
 
 f32 func_00334788(KeyOut *a0);
@@ -103,19 +103,19 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003343E8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334510);
 
-void func_00334618(StateByte *a0) {
-    u8 t;
+void func_00334618(StateByte *state) {
+    u8 mode;
 
-    t = a0->unk30;
-    if (t != 6) {
-        a0->unk31 = t;
-        a0->unk30 = 6;
+    mode = state->mode;
+    if (mode != 6) {
+        state->previousMode = mode;
+        state->mode = 6;
     }
 }
 
-void func_00334638(StateByte *a0) {
-    if (a0->unk30 == 6) {
-        a0->unk30 = a0->unk31;
+void func_00334638(StateByte *state) {
+    if (state->mode == 6) {
+        state->mode = state->previousMode;
     }
 }
 
@@ -129,13 +129,13 @@ void func_00334670(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334678);
 
-f32 func_00334788(KeyOut *a0) {
-    f32 t;
-    f32 a;
+f32 func_00334788(KeyOut *output) {
+    f32 first;
+    f32 weight;
 
-    t = a0->f8;
-    a = *a0->p0;
-    return (a + (*a0->p4 * t)) - (a * t);
+    weight = output->weight;
+    first = *output->firstKey;
+    return (first + (*output->secondKey * weight)) - (first * weight);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003347B0);
