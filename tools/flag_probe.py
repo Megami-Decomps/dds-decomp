@@ -32,7 +32,7 @@ OPTIONS = [
     "-fno-rerun-cse-after-loop", "-fno-rerun-loop-opt", "-fno-expensive-optimizations",
     "-fno-thread-jumps", "-fno-peephole", "-fno-regmove", "-fno-reorder-blocks",
     "-fno-caller-saves", "-fno-force-mem", "-fno-inline", "-fno-defer-pop",
-    "-fno-omit-frame-pointer", "-funroll-loops", "-g", "-mno-gpopt",
+    "-fno-omit-frame-pointer", "-funroll-loops", "-g", "-mno-gpopt", "-ffast-math", "-fno-math-errno",
 ]
 
 
