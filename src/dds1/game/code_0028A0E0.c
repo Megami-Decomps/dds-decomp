@@ -1108,7 +1108,7 @@ void *prepareSaveDirectory(void) {
     }
     name[0] = '/';
     formatSaveFilename(name + 1, slot);
-    func_00289E18(entry, name);
+    mcMakeDirectory(entry, name);
     return handleSaveSearchResult;
 }
 

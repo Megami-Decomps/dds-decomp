@@ -65,7 +65,7 @@ extern s32 D_0032E474[];
 extern s32 D_0033EB78[];
 extern void func_002E96D8(s32 arg0);
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
-extern s32 func_0010FD80(void);
+extern s32 dds3GetWorldObject(void);
 extern s32 func_00110A38(s32 arg0);
 extern void func_001313E0(void);
 extern void objInvokeSlot1Handler(s32 arg0, s32 arg1);
@@ -136,7 +136,7 @@ typedef struct {
 } FldClear18; /* 0x18 bytes */
 extern FldClear18 D_003D3FE0[];
 
-extern u64 func_0010FDC0(void);
+extern u64 dds3GetWorldSecondaryObject(void);
 extern u32 *func_00110F80(u64 world, const char *name);
 extern void func_003003F0(const char *fmt, ...);
 
@@ -956,7 +956,7 @@ typedef struct {
 extern FldTblEnt50 D_003D46A0[];
 extern s32 D_003BAF2C;
 extern s32 func_001215F8();
-extern void func_00111908();
+extern void dds3SetObjectFlags();
 
 void func_00149FC0(void) {
     s32 i;
@@ -965,7 +965,7 @@ void func_00149FC0(void) {
         s32 room = D_003D46A0[i].unk38;
         if (room != 0 && func_001215F8(D_0032E3B0[4], D_0032E3B0[5] + 1, room) != 0) {
             if (D_003D46A0[i].unk20 != 0) {
-                func_00111908(D_003D46A0[i].unk20, 1);
+                dds3SetObjectFlags(D_003D46A0[i].unk20, 1);
             }
         }
     }
@@ -1352,7 +1352,7 @@ s32 func_0014D3C0(void) {
     s32 temp_v0;
 
     func_00123EA8();
-    temp_v0 = func_00110A38(func_0010FD80());
+    temp_v0 = func_00110A38(dds3GetWorldObject());
     if (temp_v0 == 0) {
         return 1;
     }
@@ -1364,7 +1364,7 @@ s32 func_0014D3C0(void) {
 s32 func_0014D400(void) {
     s32 temp_v0;
 
-    temp_v0 = func_00110A38(func_0010FD80());
+    temp_v0 = func_00110A38(dds3GetWorldObject());
     if (temp_v0 == 0) {
         return 1;
     }
@@ -1425,7 +1425,7 @@ u32 func_0014DB00(void) {
 }
 
 s32 fldFindSearchId(const char *name) {
-    u32 *entry = func_00110F80(func_0010FDC0(), name);
+    u32 *entry = func_00110F80(dds3GetWorldSecondaryObject(), name);
     if (entry != 0) {
         return entry[1];
     }
