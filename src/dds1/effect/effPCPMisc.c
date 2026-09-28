@@ -322,7 +322,6 @@ extern u32 func_00162A70(u32 param);
 extern void func_0017DBB0(s32 id);
 extern void func_0017E4A8(void *dst, void *src);
 extern void func_0017E4C8(void *dst, void *src);
-extern f32 D_003B9284;
 extern void func_002DDBF8(void);
 extern void func_002DD688(f32 scale);
 
@@ -1198,7 +1197,7 @@ void func_0017CED0(EffPCPWork *work, u32 val) {
 }
 
 void func_0017CED8(void *dst, void *src) {
-    func_002DD688(D_003B9284);
+    func_002DD688(3.1415927f);
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf24, 0(%0)\n"

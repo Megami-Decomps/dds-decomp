@@ -98,6 +98,9 @@ def main():
     version = unit.relative_to(ROOT / "src").parts[0]
     unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
+    sys.path.insert(0, str(ROOT / "tools"))
+    from eeas_compat import lit4_range
+    lit4_lo, lit4_hi = lit4_range((ROOT / RETAIL[version]).read_bytes())
     func_starts = sorted({int(m.group(2), 16) for m in re.finditer(
         r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)})
     gp = int(VERSIONS[version]["gp"], 16)
@@ -165,6 +168,9 @@ def main():
             if (mine & 0xFC000000 if rtype == "R_MIPS_26" else mine & 0xFFFF0000) != \
                     (want & 0xFC000000 if rtype == "R_MIPS_26" else want & 0xFFFF0000):
                 diffs.append((i, mine, want, f"{rtype} {sym}"))
+                continue
+            if target is not None and lit4_lo <= target < lit4_hi:
+                diffs.append((i, mine, want, f"{sym} is a .lit4 pool constant: write the float literal"))
                 continue
             if base == ".lit4":
                 # A float constant: our pool offset differs from retail's (asm
