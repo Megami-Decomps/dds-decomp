@@ -611,7 +611,17 @@ void func_00156650(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00156688);
+s32 func_00156688(s32 source) {
+    s32 copy = (s32)func_002CFEB8(0x170);
+    s32 tailLen = 0x20;
+
+    memset((void *)copy, 0, 0x170);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xA0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xA0)), tailLen);
+    func_00153740(copy);
+    func_001565E0(copy);
+    return copy;
+}
 
 void func_00156708(u32 arg0) {
     destroyEffectResources();
