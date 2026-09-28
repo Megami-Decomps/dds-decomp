@@ -298,20 +298,20 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121920);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121970);
 
-u32 func_001219C8(s32 arg0, s32 arg1) {
-    s16 *temp_v0 = D_0032DDB0;
-    s32 temp_v1 = 0;
-    s32 temp_v2 = 0;
+u32 func_001219C8(s32 x, s32 y) {
+    s16 *entry = D_0032DDB0;
+    s32 index = 0;
+    s32 checked = 0;
 
     do {
-        if (temp_v0[0] == arg0 && temp_v0[1] == arg1) {
-            return temp_v1;
+        if (entry[0] == x && entry[1] == y) {
+            return index;
         }
-        temp_v1++;
-        temp_v2++;
-        temp_v0 += 8;
-    } while (temp_v2 < 0x280);
-    return temp_v1;
+        index++;
+        checked++;
+        entry += 8;
+    } while (checked < 0x280);
+    return index;
 }
 
 s16 * func_00121A10(s32 arg0, s32 arg1) {
