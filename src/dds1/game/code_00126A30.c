@@ -166,6 +166,7 @@ extern void *func_002D03F8(s32 size);
 extern void *func_002D0A48(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
+extern s32 *func_00110F80();
 
 typedef struct {
     s16 data[12];
@@ -716,9 +717,89 @@ void func_00129B68(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6)
     descriptor->open(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129CA8);
+void func_00129CA8(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+    s32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129E30);
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    dst = func_002E1420(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | ((u64)arg7 << 32);
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
+
+void func_00129E30(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7, u32 arg8) {
+    s32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    u64 tag;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    dst = func_002E1420(packet);
+    tag = arg4;
+    lo = (u64)arg5 | ((u64)arg6 << 32);
+    hi = (u64)arg7 | ((u64)arg8 << 32);
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = tag;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 void func_00129FC0(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
     u32 coords[8];
@@ -767,7 +848,48 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A358);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A5D8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A890);
+void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7, u32 arg8) {
+    s32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    u64 tag;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    packet = func_002D3FD0(consCalculateDrawPacketSize(2, 4));
+    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    dst = func_002E1420(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | ((u64)arg7 << 32);
+    tag = arg8;
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = tag;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 extern s32 func_002D2300(s32);
 extern s32 func_002D2308(s32);
@@ -862,7 +984,53 @@ void func_0012AC80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     descriptor->open(descriptor, resource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AD30);
+typedef struct FldPrimDesc {
+    s16 kind;
+    s16 count;
+    u8 pad4[4];
+    s32 color;
+    u8 padC[4];
+    f32 *verts;
+    u8 pad14[0xC];
+    s32 *indices;
+    u8 pad24[8];
+} FldPrimDesc; /* 0x2C bytes */
+extern void func_002E1F78(u64, s32);
+extern void func_002E2110(u64, u32, s32);
+extern u64 func_002E21A0(FldPrimDesc *);
+void func_0012AD30(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
+    FldPrimDesc desc;
+    f32 verts[12];
+    s32 indices[3];
+    u64 command;
+    FieldBufferDescriptor *descriptor;
+
+    command = func_002D3FD0(0x20);
+    func_002D4010(command);
+    func_002E1F78(command, 0);
+    func_002E2110(command, D_003BACEC, 0);
+    memset(&desc, 0, 0x2C);
+    desc.color = 0x80808080;
+    desc.kind = 1;
+    desc.count = 3;
+    desc.verts = verts;
+    desc.indices = indices;
+    verts[0] = f0;
+    verts[1] = f1;
+    verts[2] = f2;
+    verts[4] = f3;
+    verts[5] = f4;
+    verts[6] = f5;
+    verts[8] = f6;
+    verts[9] = f7;
+    verts[10] = f8;
+    indices[0] = a0;
+    indices[1] = a1;
+    indices[2] = a2;
+    func_002D4038(command, func_002E21A0(&desc));
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AEB0);
 
@@ -1272,7 +1440,9 @@ typedef struct {
     f32 unk140;
     f32 unk144;
     f32 unk148;
-    u8 pad14C[0xC];
+    f32 unk14C;
+    f32 unk150;
+    f32 unk154;
     f32 unk158;
     f32 unk15C;
     f32 unk160;
@@ -1376,6 +1546,8 @@ void func_001312B0(void) {
     dds3ClearObjectFlags(D_003BAB34, 0x200);
 }
 
+extern void func_001372D0(f32 *);
+extern void func_0010F638(void *, s32);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
 
 extern s32 func_00121970(s32, s32);
@@ -1857,7 +2029,42 @@ void func_00138C28(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138C30);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00138D88);
+extern u64 dds3GetWorldSecondaryObject(void);
+extern s32 D_003BAE18;
+extern s32 D_003BAE20;
+extern s32 D_003BAE2C;
+typedef struct FldTaskInfo {
+    s32 unk0;
+    s32 slot;
+} FldTaskInfo;
+extern s32 func_00110A48(u64, u32, s32);
+extern u32 func_00116B78(s32);
+void func_00138D88(void) {
+    s32 i;
+    u64 world;
+    u32 id;
+    FldTaskInfo *info;
+
+    D_003BAE2C = 1;
+    for (i = 0; i < D_003BAE14; i++) {
+        D_003308B0[i] = 0;
+    }
+    D_003BAE18 = -1;
+    D_003BAE1C = -1;
+    D_003BAE20 = -1;
+    world = dds3GetWorldSecondaryObject();
+    if (world != 0) {
+        for (i = 0; i < D_003BAE14; i++) {
+            info = *(FldTaskInfo **)(D_003307B0[i] + 8);
+            if (info->slot >= 0) {
+                id = func_00116B78(func_00110A48(world, *(u32 *)D_003C92E0[info->slot], 0xD));
+                if (func_0010BED8(id) != 0) {
+                    func_00110D88(dds3GetWorldObject(), id);
+                }
+            }
+        }
+    }
+}
 INCLUDE_ASM(const s32, "game/code_00126A30", fldPushDisplayValue);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138ED0);
@@ -2101,6 +2308,8 @@ s32 func_0013DB58(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DC08);
 
+extern s32 func_00110ED0(u64, s32, void *);
+extern void func_001109B8(u64, s32);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DDF0);
 
 u8 func_0013DF18(void) {
@@ -2138,19 +2347,164 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013EF10);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F100);
 
+extern void func_001279A0();
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F4D8);
+s32 func_0013F4D8(s32 mode) {
+    u8 *actor = D_00337D00 + D_003BAE64 * 108;
+    s32 *entry;
+    s32 flags;
+
+    switch (mode) {
+    case 0:
+        return *(s16 *)(actor + 0x12);
+    case 1:
+        entry = func_00110F80(dds3GetWorldObject(), actor + 0x18);
+        if (entry != NULL) {
+            return entry[1];
+        }
+    case 2:
+        entry = func_00110F80(dds3GetWorldObject(), actor + 0x24);
+        if (entry != NULL) {
+            return entry[1];
+        }
+    case 3:
+        flags = *(u16 *)(actor + 0x14);
+        if (flags & 1) {
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0270);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F5A8);
+s32 func_0013F5A8(u32 kind) {
+    u8 *entry = D_00337D00 + D_003BAE64 * 108;
+    s32 *found;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F6B8);
+    switch (kind) {
+    case 0:
+        switch (*(s16 *)(entry + 0x12)) {
+        case 0:
+            return 12;
+        case 1:
+            return 15;
+        case 2:
+            return 16;
+        case 3:
+            return 13;
+        case 4:
+            return 14;
+        }
+        return 0;
+    case 1:
+        found = func_00110F80(dds3GetWorldObject(), entry + 0x18);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 2:
+        found = func_00110F80(dds3GetWorldObject(), entry + 0x24);
+        if (found != NULL) {
+            return found[1];
+        }
+        return *(s16 *)(entry + 0x14);
+    case 3:
+        return *(s16 *)(entry + 0x14);
+    case 4:
+        return *(s16 *)(entry + 0x16);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F848);
+typedef struct FldNpcMotion {
+    s32 unk0;
+    u8 unk4[0x10];
+    u8 unk14[0x10];
+    u8 unk24[0x10];
+    u8 unk34[0x10];
+    s32 unk44;
+} FldNpcMotion; /* 0x48 bytes */
+extern FldNpcMotion D_00336A60[];
+extern void *D_003BAE44;
+extern void *D_003BAE48;
+s32 func_0013F6B8(u32 kind) {
+    u8 *entry = D_00337D00 + D_003BAE64 * 108;
+    s16 index = *(s16 *)(entry + 0x12);
+    s32 *found;
+    s32 flags;
+
+    switch (kind) {
+    case 0:
+        return D_00336A60[index].unk0;
+    case 1:
+        found = func_00110F80(dds3GetWorldObject(), D_00336A60[index].unk4);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 2:
+        found = func_00110F80(dds3GetWorldObject(), D_00336A60[index].unk14);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 3:
+        D_003BAE44 = D_00336A60[index].unk24;
+        return 0;
+    case 4:
+        D_003BAE48 = D_00336A60[index].unk34;
+        return 0;
+    case 5:
+        return D_00336A60[index].unk44;
+    case 6:
+        flags = entry[0x64];
+        if (flags & 1) {
+            return *(s8 *)(entry + 0x67);
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 func_0013F848(u32 kind) {
+    s32 slot = D_003BAE4C;
+
+    switch (kind) {
+    case 0:
+        return D_00337C60[slot].count;
+    case 1:
+        return D_00337C60[slot].unk4;
+    case 2:
+        return D_00337C60[slot].body.data[0];
+    case 3:
+        return D_00337C60[slot].body.data[1];
+    case 4:
+        return D_00337C60[slot].body.data[2];
+    case 5:
+        return D_00337C60[slot].body.data[3];
+    case 6:
+        return D_00337C60[slot].body.data[4];
+    case 7:
+        return D_00337C60[slot].body.data[5];
+    case 8:
+        return D_00337C60[slot].body.data[6];
+    case 9:
+        return D_00337C60[slot].body.data[7];
+    case 10:
+        return D_00337C60[slot].body.data[8];
+    case 11:
+        return D_00337C60[slot].body.data[9];
+    case 12:
+        return D_00337C60[slot].body.data[10];
+    case 13:
+        return D_00337C60[slot].body.data[11];
+    case 14:
+        return D_00337C60[slot].count - D_003BAE50 - 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", fldFindTableEntry);
 

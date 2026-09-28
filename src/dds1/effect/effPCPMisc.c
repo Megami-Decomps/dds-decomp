@@ -3068,7 +3068,41 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181208);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181490);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181538);
+u8 *func_00181538(u8 *work) {
+    u8 *copy = func_00181208(work, 0);
+    u32 group;
+    u32 offset;
+    u32 count;
+    u32 size;
+    u32 stride;
+    u8 *flags;
+    u32 i;
+
+    if (*(u32 *)(work + 0x174) != 0) {
+        count = *(u32 *)(work + 0x58);
+        size = count * 16;
+        stride = count * 4;
+        group = 0;
+        flags = work + 0x8C;
+        offset = 0;
+        *(void **)(copy + 0x178) = func_002D03F8(size);
+        *(void **)(copy + 0x174) = func_002D0A48(*(void **)(copy + 0x178));
+        memset(*(void **)(copy + 0x174), 0, size);
+        for (; group < 4; group++) {
+            u32 *slot = (u32 *)(*(u8 **)(copy + 0x174) + offset);
+
+            if (*flags != 0) {
+                u32 first = *(u32 *)(offset + *(u32 *)(work + 0x174));
+                for (i = 0; i < count; i++) {
+                    *slot++ = effParamWorkDuplicate(first);
+                }
+            }
+            flags++;
+            offset += stride;
+        }
+    }
+    return copy;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181650);
 

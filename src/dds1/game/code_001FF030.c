@@ -144,9 +144,13 @@ typedef struct BtlTask {
 } BtlTask;
 
 typedef struct BtlState {
-    u8 unk_000[0x1F4];
+    u8 unk_000[0x1C0];
+    s16 unk_1C0;
+    u8 unk_1C2[0x32];
     u32 unk_1F4;
-    u8 unk_1F8[0x2C];
+    u8 unk_1F8[4];
+    u32 unk_1FC;
+    u8 unk_200[0x24];
     BtlTask *tasks;
     BtlUnit *units;
     u8 unk_22C[0x20];
@@ -667,7 +671,36 @@ s32 func_00201300(s32 mask, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00201408);
+extern s32 func_001A2F50();
+
+s32 func_00201408(void *unit, s32 mask) {
+    s32 i;
+    s32 value;
+    if (mask & 0x100000) {
+        for (i = 0; i < 0x13; i++) {
+            value = func_00201300(mask, i);
+            if (value == 0x80) {
+                continue;
+            }
+            value = func_001A2F50(unit, value);
+            if ((u16)value < 100) {
+                continue;
+            }
+            if ((u32)value & 0x80000000) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    value = func_001A2F50(unit, mask);
+    if ((u16)value >= 100) {
+        if (value < 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 
 extern s32 func_00201408(void *, s32);
 
@@ -1519,7 +1552,34 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D50);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205918);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00205B18);
+extern u8 *D_003BAA50;
+
+s32 func_00205B18(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
+    BattleEffectState *effect;
+    if (!(target->flags & 0x400)) {
+        return 0;
+    }
+    switch (target->unk_124) {
+    case 0x107:
+    case 0x108:
+        break;
+    default:
+        return 0;
+    }
+    effect = *(BattleEffectState **)(func_001A17F0() + 0x694);
+    if (effect->active != 1) {
+        return 0;
+    }
+    if (actor->flags & 0x200) {
+        if (command != 0) {
+            if (D_003BAA50[command * 0x38 + 8] == 0) {
+                return 0;
+            }
+        }
+    }
+    return (bits * 2) & 4;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205BD8);
 
@@ -2485,7 +2545,34 @@ void func_00209BC8(void) {
     **(u16 **)(temp_v0 + 0x694) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00209BF0);
+s32 func_00209BF0(BtlUnit *unit, s32 action, u8 option) {
+    u32 flags = unit->flags;
+    u16 species;
+    if (!(flags & 0x400)) {
+        return action;
+    }
+    if (!(flags & 1)) {
+        return -1;
+    }
+    species = unit->unk_124;
+    if ((u16)(species - 0x119) >= 2) {
+        return -1;
+    }
+    func_001A17F0();
+    if (action == 10) {
+        return 0;
+    }
+    if (action == 11) {
+        switch (unit->unk_124) {
+        case 0x11A:
+            return option != 1;
+        default:
+            return option != 1;
+        }
+    }
+    return action;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D98);
 
@@ -3201,7 +3288,35 @@ s32 func_002102D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002103A0);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00210450);
+extern s32 func_0010D428(s32);
+extern u8 *func_001DACF8(s32);
+extern u8 *func_001DAD60(s32);
+extern void *func_001D87D0(void *, s32, s32, s32, s32, s32);
+
+s32 func_00210450(void) {
+    s32 choice = func_0010D428(0);
+    s32 unitIndex = func_0010D428(1);
+    s32 first = func_0010D428(2);
+    s32 second = func_0010D428(3);
+    u8 *unit;
+    if ((u32)unitIndex >= 0x180) {
+        return 1;
+    }
+    if ((u32)first >= 0x180) {
+        return 1;
+    }
+    if (choice == 0) {
+        unit = func_001DACF8(unitIndex);
+    } else {
+        unit = func_001DAD60(unitIndex);
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    func_001D4860(func_001D87D0(unit, choice != 0, first, second, 0x18, 0));
+    return 1;
+}
+
 
 u8 func_00210520(void) {
     s32 temp_v0;
@@ -3336,9 +3451,96 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6848);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6860);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00210BA8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00210D00);
+u16 func_00210BA8(u8 **entries, s32 count, s32 unused, s32 command) {
+    s32 result = -1;
+    if (D_003BAA50[command * 0x38 + 9] & 1) {
+        switch (*(u16 *)(D_003BAA50 + command * 0x38 + 0x16)) {
+        case 2:
+        case 5:
+        case 7:
+        case 9:
+        case 11:
+        case 15:
+            result = battleListCountersWithinLimits(entries, count) ? 3 : 0;
+            break;
+        }
+        if (result != 0) {
+            switch (*(u16 *)(D_003BAA50 + command * 0x38 + 0x1A)) {
+            case 2:
+            case 5:
+            case 7:
+            case 9:
+            case 11:
+            case 15:
+                result = battleListSecondaryCountersWithinLimits(entries, count) ? 3 : 0;
+                break;
+            }
+            if (result != 0) {
+                if (D_003BAA50[command * 0x38 + 0x24] == 2) {
+                    result = battleListHasMatchingFlag(entries, count, *(u16 *)(D_003BAA50 + command * 0x38 + 0x26)) == 0 ? 3 : 0;
+                }
+            }
+        }
+    }
+    return (result < 0) ? 0 : result;
+}
+
+
+extern s8 *D_003BAA4C;
+extern u8 *D_003BAA50;
+
+s32 func_00210D00(u8 *actor, s32 command) {
+    BtlUnit *owner;
+    u8 *entry;
+    void *list;
+    s32 count;
+    s32 marked;
+    s32 i;
+    if (((BtlState *)func_001A17F0())->unk_1FC & 0x800) {
+        return 0;
+    }
+    if (command <= 0) {
+        return 0;
+    }
+    if (D_003BAA4C[command * 2 + 1] == 2) {
+        owner = *(BtlUnit **)(actor + 0x18);
+        if (owner->flags & 0x200) {
+            if (owner->unk_124 == 4) {
+                if (func_0021F600(0x61) == 0) {
+                    return 6;
+                }
+            }
+        }
+    }
+    entry = (u8 *)(command * 0x38 + (s32)D_003BAA50);
+    if ((*(u32 *)(entry + 0x24) & 0x400000FF) == 0x40000002) {
+        if ((~*(u16 *)(entry + 0xC) & 0x7FFF) == 0x4000) {
+            if (battleHasRestrictedUnit() == 0) {
+                return 2;
+            }
+        }
+    }
+    marked = 0;
+    list = allocateBattleIndexList(0xD);
+    func_001A3360((s32)actor, (s32)list, 0);
+    count = func_001DAE48(list);
+    if (D_003BAA50[command * 0x38] & 8) {
+        for (i = 0; i < count; i++) {
+            if (((BtlUnit *)func_001DAE50(list, i))->unk_12E & 0x800) {
+                marked++;
+            }
+        }
+    }
+    func_001DAE08(list);
+    if (count != 0) {
+        if (count != marked) {
+            return 0;
+        }
+    }
+    return 9;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00210EB0);
 
@@ -3955,7 +4157,49 @@ s32 func_00214588(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
     return func_00214490(first, second, mode, settings, extra);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00214618);
+extern void func_002D4010(void *);
+extern void func_002D4038(void *, s32);
+extern s32 func_002E4960(s32, s32, s32, s32, void *, u32);
+extern u8 D_003BBAA8[];
+
+typedef struct BtlMenuDrawer {
+    u8 unk_00[0x10];
+    void (*draw)(struct BtlMenuDrawer *, s32);
+} BtlMenuDrawer;
+
+extern BtlMenuDrawer D_00325748;
+
+s32 func_00214618(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
+    void *handle;
+    u32 first;
+    u32 count;
+    u32 index;
+    u32 end;
+    u32 selected;
+    s32 rowY;
+    func_001FB140(x - 4, y - 4, mode, *(s32 *)(menu + 0xC) * 24 + 4, 0x80806020, 0x30000000);
+    handle = func_002D3FD0(0x20);
+    func_002D4010(handle);
+    first = *(u32 *)(menu + 8);
+    count = *(u32 *)(menu + 0xC);
+    end = first + count;
+    index = first;
+    selected = *(u32 *)(menu + 4);
+    if (index < end) {
+        rowY = (s32)y * 8 + 0x7900;
+        for (; index < end; index++) {
+            s32 flag = 4;
+            if (index != selected) {
+                flag = 0;
+            }
+            func_002D4038(handle, func_002E4960((s32)x * 16 + 0x7000, rowY, 0xFF0000, flag, D_003BBAA8, index));
+            rowY += 0xC0;
+        }
+    }
+    D_00325748.draw(&D_00325748, (s32)handle);
+    return func_00214490(x + 0x2C, y, mode, menu, extra);
+}
+
 
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;

@@ -1,6 +1,31 @@
 #include "common.h"
 #include "fpu.h"
+#include "pcp_vu0.h"
 
+typedef struct FldCamPose {
+    u8 pad0[0x14];
+    s32 stage;
+    u8 pad18[0x38];
+    s32 unk50;
+    u8 pad54[0x10];
+    f32 unk64;
+    u8 pad68[0x58];
+    s32 unkC0;
+    u8 padC4[0x7C];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad14C[0x18];
+    f32 angle;
+} FldCamPose;
+typedef struct FldVec3 {
+    f32 x;
+    f32 y;
+    f32 z;
+} FldVec3;
+typedef struct FldVec4 {
+    f32 v[4];
+} FldVec4;
 extern char D_003A0800[]; /* "fldTitle" */
 extern char D_003A0828[]; /* "fldTitleMini" */
 
@@ -104,7 +129,8 @@ extern void func_001130C8(s32 arg0);
 
 typedef struct {
     s32 unk0;
-    u8 pad4[0x10];
+    s32 unk4;
+    u8 pad8[0xC];
 } FldEnt14; /* 0x14 bytes */
 extern FldEnt14 D_003D62E0[];
 
@@ -1499,10 +1525,38 @@ void func_0014B988(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BA10);
+s32 func_0014BA10(s32 index, const u128 *pos, const u128 *vel) {
+    PCP_COPY_VECTOR(D_003D56A0[index].pos, pos);
+    PCP_COPY_VECTOR(D_003D56A0[index].vel, vel);
+    D_003D56A0[index].unk20 = 1;
+    return 1;
+}
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BA50);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BC28);
+extern void effObjSetInnerFirstVec();
+extern s32 *objGetUnk0C();
+extern void dds3ClearObjectFlags();
+extern FldVec4 D_003A0918;
+void func_0014BC28(s32 index) {
+    FldVec4 vec;
+    s32 obj;
+    s32 *flags;
+    s16 slot;
+
+    vec = D_003A0918;
+    if (D_003D56A0[index].unk20 == 1 && D_003D56A0[index].active != 0 && D_003D56A0[index].unk2C != -1) {
+        vec.v[0] = D_003D56A0[index].pos[0];
+        vec.v[2] = D_003D56A0[index].pos[2];
+        effObjSetInnerFirstVec(D_003D62E0[D_003D56A0[index].unk2C].unk0, &vec);
+        obj = D_003D62E0[D_003D56A0[index].unk2C].unk0;
+        flags = objGetUnk0C(obj);
+        *flags |= 1;
+        dds3ClearObjectFlags(obj, 0x400);
+        slot = D_003D56A0[index].unk2C;
+        D_003D56A0[index].unk2C = -1;
+        D_003D62E0[slot].unk4 = -1;
+    }
+}
 
 extern s32 D_003D62A0[];
 extern void func_0014B688();
@@ -1689,7 +1743,37 @@ extern void *func_00110A48(s32, s32, s32);
 extern void func_0012DB70(s32 *);
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D498);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D518);
+extern FldVec3 D_00330610;
+extern FldVec3 D_00330620;
+extern f32 func_002E77F8(f32);
+extern f32 func_002E78F8(f32);
+extern s32 func_001312D8();
+extern void func_00131218();
+extern void func_0012CB48();
+s32 func_0014D518(void) {
+    FldCamPose *cam = (FldCamPose *)D_0032E3B0;
+    FldVec3 near;
+    FldVec3 far;
+
+    cam->unk50 = 0;
+    cam->unk64 = -cam->angle;
+    near.x = cam->x - func_002E77F8((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.y = cam->y - 200.0f - 10.0f + 60.0f;
+    near.z = cam->z + func_002E78F8((cam->angle + 180.0f) * 3.14f / 180.0f);
+    far.x = cam->x + func_002E77F8(cam->unk64 * 3.14f / 180.0f) * 550.0f;
+    far.y = cam->y - 200.0f - 10.0f + 60.0f;
+    far.z = cam->z + func_002E78F8(cam->unk64 * 3.14f / 180.0f) * 550.0f;
+    D_00330610.x = near.x;
+    D_00330610.y = near.y;
+    D_00330610.z = near.z;
+    D_00330620.x = far.x;
+    D_00330620.y = far.y;
+    D_00330620.z = far.z;
+    func_001312D8();
+    func_00131218();
+    func_0012CB48();
+    return 1;
+}
 
 
 s32 func_0014D6C0(void) {

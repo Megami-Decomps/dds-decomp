@@ -5267,6 +5267,7 @@ u32 func_002B7998(void) {
     return result;
 }
 
+extern s32 D_003BD070;
 typedef struct EffectBlock128 {
     u32 word[32];
 } EffectBlock128;
@@ -5760,7 +5761,6 @@ void func_002BB748(s32 arg0) {
     func_002BB188(*(s32 *)(arg0 + 0xc) + 0x60, *(s32 *)(*(s32 *)(arg0 + 0xc) + 0x74) + 1);
 }
 
-extern s32 D_003BD070;
 extern void func_00294DA0(s32, s32);
 extern void func_00294C30(s32, s32, void *);
 extern void func_002B91D0(s32, void *);

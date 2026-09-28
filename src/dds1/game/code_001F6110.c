@@ -2236,7 +2236,28 @@ void func_001FB2F0(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB320);
+extern char *D_00360380[];
+extern s32 func_00310320(void);
+
+typedef struct BtlReader {
+    u32 flags;
+    u8 unk_04[0x3C];
+    char name[0x40];
+} BtlReader;
+
+s32 func_001FB320(s32 unused, BtlReader *reader) {
+    if (D_003BD476 != 0) {
+        return func_00310320();
+    }
+    if ((u32)D_003BD868 >= 8) {
+        return 0;
+    }
+    strcpy(reader->name, D_00360380[D_003BD868]);
+    reader->flags &= ~0x1000;
+    D_003BD868++;
+    return strlen(reader->name);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB3C8);
 
