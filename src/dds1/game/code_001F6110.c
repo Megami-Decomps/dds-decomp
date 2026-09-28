@@ -70,7 +70,7 @@ typedef struct BtlUnit {
     f32 unk_B0;
     f32 unk_B4;
     u8 unk_B8[0x50];
-    u64 unk_108;
+    u64 unitId; /* 0x108: compared against the battle command's unit ID */
     u32 flags;
     u32 unk_114;
     u8 unk_118[8];
@@ -410,48 +410,46 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F72C8);
 
 void func_001F73E0(void) {
-    s32 temp_v0;
+    BtlUnit *unit;
 
-    temp_v0 = func_001A17F0();
-    for (temp_v0 = *(s32 *)(temp_v0 + 0x228); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x344)) {
-        func_001D5440(temp_v0);
+    for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
+        func_001D5440((s32)unit);
     }
 }
 
 void func_001F7428(void) {
-    s32 temp_v0;
+    BtlUnit *unit;
 
-    temp_v0 = func_001A17F0();
-    for (temp_v0 = *(s32 *)(temp_v0 + 0x228); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x344)) {
-        func_001D54C0(temp_v0);
+    for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
+        func_001D54C0((s32)unit);
     }
 }
 
-void func_001F7470(s32 arg0) {
-    s32 temp_v0;
+void func_001F7470(s32 mask) {
+    BtlUnit *unit;
 
-    temp_v0 = *(s32 *)(func_001A17F0() + 0x228);
-    if (temp_v0 != 0) {
+    unit = ((BtlState *)func_001A17F0())->units;
+    if (unit != NULL) {
         do {
-            if (*(s32 *)(temp_v0 + 0x110) & arg0) {
-                func_001D5440(temp_v0);
+            if (unit->flags & mask) {
+                func_001D5440((s32)unit);
             }
-            temp_v0 = *(s32 *)(temp_v0 + 0x344);
-        } while (temp_v0 != 0);
+            unit = unit->next;
+        } while (unit != NULL);
     }
 }
 
-void func_001F74D0(s32 arg0) {
-    s32 temp_v0;
+void func_001F74D0(s32 mask) {
+    BtlUnit *unit;
 
-    temp_v0 = *(s32 *)(func_001A17F0() + 0x228);
-    if (temp_v0 != 0) {
+    unit = ((BtlState *)func_001A17F0())->units;
+    if (unit != NULL) {
         do {
-            if (*(s32 *)(temp_v0 + 0x110) & arg0) {
-                func_001D54C0(temp_v0);
+            if (unit->flags & mask) {
+                func_001D54C0((s32)unit);
             }
-            temp_v0 = *(s32 *)(temp_v0 + 0x344);
-        } while (temp_v0 != 0);
+            unit = unit->next;
+        } while (unit != NULL);
     }
 }
 
@@ -531,22 +529,22 @@ void btlRefreshUnitEffects(void) {
 }
 
 
-s32 func_001F7770(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1 = 0;
-    s32 temp_v2;
+s32 func_001F7770(s32 mask) {
+    BtlUnit *unit;
+    s32 count = 0;
+    s32 flags;
 
-    temp_v0 = *(s32 *)(func_001A17F0() + 0x228);
-    if (temp_v0 != 0) {
+    unit = ((BtlState *)func_001A17F0())->units;
+    if (unit != NULL) {
         do {
-            temp_v2 = *(s32 *)(temp_v0 + 0x110);
-            if (((temp_v2 & arg0) != 0) && ((temp_v2 & 0x20) == 0)) {
-                temp_v1 += temp_v2 & 1;
+            flags = unit->flags;
+            if (((flags & mask) != 0) && ((flags & 0x20) == 0)) {
+                count += flags & 1;
             }
-            temp_v0 = *(s32 *)(temp_v0 + 0x344);
-        } while (temp_v0 != 0);
+            unit = unit->next;
+        } while (unit != NULL);
     }
-    return temp_v1;
+    return count;
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F77D8);
@@ -1575,7 +1573,7 @@ u32 btlCmdCheckHpPercent(void) {
         mask = 0x400;
     }
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->unk_108 == id) {
+        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->unitId == id) {
             u8 *stats = (u8 *)unit + 0x120;
             s32 current = func_001A17F8(stats);
             s32 maximum = func_001A1838(stats);

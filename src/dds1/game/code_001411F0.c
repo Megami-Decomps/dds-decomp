@@ -8,7 +8,7 @@ typedef struct FldCamPose {
     u8 pad18[0x38];
     s32 unk50;
     u8 pad54[0x10];
-    f32 unk64;
+    f32 negatedAngle;
     u8 pad68[0x58];
     s32 unkC0;
     u8 padC4[0x7C];
@@ -725,17 +725,19 @@ void func_00146A70(s32 arg0, s32 arg1, s32 arg2) {
     D_003BAEB0 = arg0 % 100;
 }
 
-typedef struct FldSaveWork {
-    u8 unk_0[0x13F70];
+
+/* DDS1 floor flags start at +0x13F70; DDS2 stores them elsewhere. */
+typedef struct FldAreaFlagsView {
+    u8 pad00[0x13F70];
     u64 areaFlags[13][64];
-} FldSaveWork;
+} FldAreaFlagsView;
 
 extern s32 D_0032C900[];
 
 s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 id = D_0032C900[area % 100];
     if (id == -1) return 0;
-    return (((FldSaveWork *)D_003BAA00)->areaFlags[id][floor] >> bit) & 1;
+    return (((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][floor] >> bit) & 1;
 }
 
 void fldSetFlagAndFindRecord(s32 arg0) {
@@ -748,7 +750,7 @@ void fldSetFlagAndFindRecord(s32 arg0) {
             bit = arg0 - 1;
             D_0032E3B0[6] = bit;
             D_0032E3B0[0x2F] = arg0;
-            ((FldSaveWork *)D_003BAA00)->areaFlags[id][D_0032E3B0[5]] |= 1ULL << bit;
+            ((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][D_0032E3B0[5]] |= 1ULL << bit;
             D_0032E3B0[0x30] = fldFindRecordItem(D_0032E3B0[5], bit);
         }
     }
@@ -762,7 +764,7 @@ void fldSetFlagBit(s32 area, s32 floor, s32 bit) {
     bit--;
     id = D_0032C900[area % 100];
     if (id != -1) {
-        ((FldSaveWork *)D_003BAA00)->areaFlags[id][floor] |= 1ULL << bit;
+        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][floor] |= 1ULL << bit;
     }
 }
 
@@ -1756,13 +1758,13 @@ s32 fldUpdateLookAtSegment(void) {
     FldVec3 far;
 
     cam->unk50 = 0;
-    cam->unk64 = -cam->angle;
+    cam->negatedAngle = -cam->angle;
     near.x = cam->x - func_002E77F8((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
     near.z = cam->z + func_002E78F8((cam->angle + 180.0f) * 3.14f / 180.0f);
-    far.x = cam->x + func_002E77F8(cam->unk64 * 3.14f / 180.0f) * 550.0f;
+    far.x = cam->x + func_002E77F8(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + func_002E78F8(cam->unk64 * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + func_002E78F8(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     D_00330610.x = near.x;
     D_00330610.y = near.y;
     D_00330610.z = near.z;

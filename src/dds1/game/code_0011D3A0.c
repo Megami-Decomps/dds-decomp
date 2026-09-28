@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fpu.h"
+#include "fld.h"
 
 extern u32 D_003BABE0;
 
@@ -1214,14 +1215,14 @@ s32 func_001243C8(void) {
 }
 
 void func_00124488(void) {
-    if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) != 0) {
+    if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 8) != 0) {
         func_001244D0();
         D_0032E3B0[3] |= 1;
     }
 }
 
 void func_001244D0(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) &= ~8;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags &= ~8;
     D_0032E3B0[3] &= ~1;
 }
 
@@ -1234,18 +1235,18 @@ void fldEnterSceneCommand(void) {
     if (D_0032E3B0[75] == 0) {
         return;
     }
-    if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) == 0) {
+    if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 8) == 0) {
         fldPlayFieldSeVolumePan(0x29);
     }
     code = func_001243C8();
     *(s16 *)((u8 *)D_0032E3B0 + 0x128) = code;
-    *(s32 *)(D_003BAA00 + 0xA58) |= 8;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags |= 8;
     D_0032E3B0[3] &= ~1;
     func_00133640(code, 0);
 }
 
 s32 func_00124590(void) {
-    if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) != 0) {
+    if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 8) != 0) {
         return 1;
     }
     if (D_0032E4DC[0] != 0) {
@@ -1257,7 +1258,7 @@ s32 func_00124590(void) {
 
 typedef struct FldSceneState {
     u8 pad0[0x128];
-    s16 unk128;
+    s16 sceneCommand; /* 0x128 */
     u8 pad12A[2];
     s32 unk12C;
 } FldSceneState;
@@ -1266,88 +1267,88 @@ void fldUpdateSceneCommand(void) {
     s32 code;
 
     if (state->unk12C == 0) {
-        if (state->unk128 != 0) {
-            state->unk128 = 0;
+        if (state->sceneCommand != 0) {
+            state->sceneCommand = 0;
             func_00133640(0, 0);
         }
-    } else if ((*(s32 *)(D_003BAA00 + 0xA58) & 8) != 0) {
-        if (state->unk128 == 0) {
+    } else if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 8) != 0) {
+        if (state->sceneCommand == 0) {
             code = func_001243C8();
-            state->unk128 = code;
+            state->sceneCommand = code;
             func_00133640(code, 0x14);
         }
-    } else if (state->unk128 != 0) {
-        state->unk128 = 0;
+    } else if (state->sceneCommand != 0) {
+        state->sceneCommand = 0;
         func_00133640(0, 0x14);
         fldPlayFieldSeVolumePan(0x2A);
     }
 }
 
 void func_00124680(void) {
-    if ((*(s32 *)(D_003BAA00 + 0xA58) & 4) != 0) {
+    if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 4) != 0) {
         func_001246C8();
         D_0032E3B0[3] |= 2;
     }
 }
 
 void func_001246C8(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) &= ~4;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags &= ~4;
     D_0032E3B0[3] &= ~2;
 }
 
 void func_001246F8(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) |= 4;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags |= 4;
     D_0032E3B0[3] &= ~2;
 }
 
 u8 func_00124728(void) {
-    s32 temp_v0 = *(s32 *)(D_003BAA00 + 0xA58);
+    s32 temp_v0 = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
     temp_v0 &= 4;
     return temp_v0 != 0;
 }
 
 void func_00124740(void) {
-    if ((*(s32 *)(D_003BAA00 + 0xA58) & 2) != 0) {
+    if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 2) != 0) {
         func_00124788();
         D_0032E3B0[3] |= 4;
     }
 }
 
 void func_00124788(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) &= ~2;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags &= ~2;
     D_0032E3B0[3] &= ~4;
 }
 
 void func_001247B8(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) = (*(s32 *)(D_003BAA00 + 0xA58) | 2) & ~1;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags = (((FldWorkFlags *)D_003BAA00)->fieldFlags | 2) & ~1;
     D_0032E3B0[3] &= ~4;
 }
 
 u8 func_001247F0(void) {
-    s32 temp_v0 = *(s32 *)(D_003BAA00 + 0xA58);
+    s32 temp_v0 = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
     temp_v0 &= 2;
     return temp_v0 != 0;
 }
 
 void func_00124808(void) {
-    if ((*(s32 *)(D_003BAA00 + 0xA58) & 1) != 0) {
+    if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 1) != 0) {
         func_00124850();
         D_0032E3B0[3] |= 8;
     }
 }
 
 void func_00124850(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) &= ~1;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags &= ~1;
     D_0032E3B0[3] &= ~8;
 }
 
 void func_00124880(void) {
-    *(s32 *)(D_003BAA00 + 0xA58) = (*(s32 *)(D_003BAA00 + 0xA58) | 1) & ~2;
+    ((FldWorkFlags *)D_003BAA00)->fieldFlags = (((FldWorkFlags *)D_003BAA00)->fieldFlags | 1) & ~2;
     D_0032E3B0[3] &= ~8;
 }
 
 u8 fldIsFlagActive(void) {
-    s32 flags = *(s32 *)(D_003BAA00 + 0xA58);
+    s32 flags = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
     flags &= 1;
     if (flags == 0) return 0;
     return 1;

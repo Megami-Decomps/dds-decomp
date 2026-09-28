@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "kwln.h"
 
 
 
@@ -259,7 +260,6 @@ extern char D_003B2668[];
 
 extern char D_003B26C8[];
 
-typedef struct KwlnTask KwlnTask;
 
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
@@ -465,8 +465,8 @@ typedef struct LoadObj {
     void *deviceHandle; /* 0x34 */
     u32 unk38;          /* 0x38 */
     u32 unk3C;          /* 0x3C */
-    void *unk40;        /* 0x40 */
-    void *unk44;        /* 0x44 */
+    void *referenceHolder; /* 0x40: released by effReleaseReferenceHolder */
+    void *recordWork;     /* 0x44: created by func_0029A5E0 */
     s16 unk48;          /* 0x48 */
     u16 unk4A;
 } LoadObj;
@@ -2445,7 +2445,7 @@ LoadObj *fileLoadObjectCreate(void *owner) {
     obj->owner = owner;
     obj->color = 0x80808080;
     obj->scale = 1.0f;
-    obj->unk44 = NULL;
+    obj->recordWork = NULL;
     obj->deviceHandle = NULL;
     obj->unk38 = 0;
     obj->unk3C = 0;
@@ -2492,26 +2492,26 @@ void loadObjectDestroy(LoadObj *obj) {
         billDispatchByKind(obj->deviceHandle);
     }
     if (obj->unk3C != 0) {
-        u32 count = *(u32 *)((u8 *)obj->unk44 + 8);
+        u32 count = *(u32 *)((u8 *)obj->recordWork + 8);
         u32 i;
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJob **)obj->unk38)[i]);
         }
         func_002D0918(obj->unk3C);
     }
-    if (obj->unk40 != NULL) {
-        effReleaseReferenceHolder((s32)obj->unk40);
+    if (obj->referenceHolder != NULL) {
+        effReleaseReferenceHolder((s32)obj->referenceHolder);
     }
-    if (obj->unk44 != NULL) {
-        func_0029A730((s32)obj->unk44);
+    if (obj->recordWork != NULL) {
+        func_0029A730((s32)obj->recordWork);
     }
     func_002CFF98(obj);
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
-    LoadObj *source = *(LoadObj **)((u8 *)owner->unk44 + 0x24);
+    LoadObj *source = *(LoadObj **)((u8 *)owner->recordWork + 0x24);
     LoadObj *result = func_00295F58(source);
-    fileLoadObjectSetResource(result, *(u16 *)owner->unk44, source);
+    fileLoadObjectSetResource(result, *(u16 *)owner->recordWork, source);
     func_002961B0(result, owner);
     return result;
 }
@@ -2519,10 +2519,10 @@ LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002961B0);
 
 void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data) {
-    if (obj->unk44 != NULL) {
-        func_0029A730((s32)obj->unk44);
+    if (obj->recordWork != NULL) {
+        func_0029A730((s32)obj->recordWork);
     }
-    obj->unk44 = func_0029A5E0(type, (u32)obj->owner, data);
+    obj->recordWork = func_0029A5E0(type, (u32)obj->owner, data);
 }
 
 void fileLoadObjectOpenNamedDevice(LoadObj *obj, void *name) {
@@ -2532,8 +2532,8 @@ void fileLoadObjectOpenNamedDevice(LoadObj *obj, void *name) {
     }
     handle = effRetainResource(name);
     obj->deviceHandle = handle;
-    if (obj->unk44 != NULL) {
-        void *record = *(void **)((u8 *)obj->unk44 + 0x20);
+    if (obj->recordWork != NULL) {
+        void *record = *(void **)((u8 *)obj->recordWork + 0x20);
         func_00152050(handle, *(s16 *)((u8 *)record + 0x54));
     }
 }
@@ -2545,8 +2545,8 @@ void fileLoadObjectOpenDevice(LoadObj *obj, void *name) {
     }
     handle = billCreateIndexed(0, name);
     obj->deviceHandle = handle;
-    if (obj->unk44 != NULL) {
-        void *record = *(void **)((u8 *)obj->unk44 + 0x20);
+    if (obj->recordWork != NULL) {
+        void *record = *(void **)((u8 *)obj->recordWork + 0x20);
         func_00152050(handle, *(s16 *)((u8 *)record + 0x54));
     }
 }
@@ -2557,34 +2557,34 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     }
     obj->deviceHandle = billCreateIndexed(1, name);
     func_001523B0(obj->deviceHandle);
-    if (obj->unk44 != NULL) {
-        void *record = *(void **)((u8 *)obj->unk44 + 0x20);
+    if (obj->recordWork != NULL) {
+        void *record = *(void **)((u8 *)obj->recordWork + 0x20);
         func_00152050(obj->deviceHandle, *(s16 *)((u8 *)record + 0x54));
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296530);
 
-void func_00296628(s32 arg0, u32 arg1) {
-    u32 temp_v0;
+void func_00296628(LoadObj *obj, u32 resource) {
+    u32 holder;
 
-    if (*(s32 *)(arg0 + 0x40) != 0) {
-        effReleaseReferenceHolder(*(s32 *)(arg0 + 0x40));
+    if (obj->referenceHolder != NULL) {
+        effReleaseReferenceHolder((s32)obj->referenceHolder);
     }
-    temp_v0 = func_0029C230(arg1);
-    *(u32 *)(arg0 + 0x40) = temp_v0;
+    holder = func_0029C230(resource);
+    obj->referenceHolder = (void *)holder;
 }
 
-void func_00296678(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x44) != 0) {
-        fileClearRecordReferences((FileRecordSlots *)*(s32 *)(arg0 + 0x44));
+void func_00296678(LoadObj *obj) {
+    if (obj->recordWork != NULL) {
+        fileClearRecordReferences((FileRecordSlots *)obj->recordWork);
         return;
     }
 }
 
-void func_002966A8(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x44) != 0) {
-        fileAcquireRecord(*(s32 *)(arg0 + 0x44));
+void func_002966A8(LoadObj *obj) {
+    if (obj->recordWork != NULL) {
+        fileAcquireRecord((s32)obj->recordWork);
         return;
     }
 }
@@ -2597,11 +2597,11 @@ void func_00296E98(s32 arg0) {
 }
 
 void func_00296EC0(LoadObj *arg0, u128 *arg1) {
-    func_0029A7C8(arg0->unk44, arg1);
+    func_0029A7C8(arg0->recordWork, arg1);
 }
 
 void func_00296ED8(LoadObj *arg0, u128 *arg1) {
-    func_0029A7F8(arg0->unk44, arg1);
+    func_0029A7F8(arg0->recordWork, arg1);
 }
 
 void func_00296EF0(s32 arg0, u32 arg1) {
@@ -2610,7 +2610,7 @@ void func_00296EF0(s32 arg0, u32 arg1) {
 
 void func_00296EF8(LoadObj *arg0, f32 arg1) {
     arg0->scale = arg1;
-    func_0029A810(arg0->unk44);
+    func_0029A810(arg0->recordWork);
 }
 
 void fileResetSlotStates(FileRecordSlots *record) {

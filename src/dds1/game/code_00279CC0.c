@@ -355,17 +355,17 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B888);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BA00);
 
-void *mnuWalkNodeList(s32 arg0, void *arg1) {
-    void *temp_node = *(void **)((s32)arg1 + 0x10);
-    s32 temp_i = 0;
+void *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
+    MenuListNode *node = list->first;
+    s32 index = 0;
 
-    if (temp_node != NULL && arg0 != temp_i) {
+    if (node != NULL && targetIndex != index) {
         do {
-            temp_node = *(void **)((s32)temp_node + 0x58);
-            temp_i++;
-        } while (temp_node != NULL && temp_i != arg0);
+            node = node->next;
+            index++;
+        } while (node != NULL && index != targetIndex);
     }
-    return temp_node;
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BA90);

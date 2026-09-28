@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld.h"
 
 extern s32 D_00435F68;
 
@@ -617,7 +618,7 @@ u32 func_001266E0(void) {
 }
 
 void func_001266E8(void) {
-    if ((*(s32 *)(D_00435DD0 + 0xA58) & 8) != 0) {
+    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
         func_00126730();
         D_00389770[3] |= 1;
     }
@@ -628,7 +629,7 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00126730);
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126778);
 
 s32 func_00126810(void) {
-    if ((*(s32 *)(D_00435DD0 + 0xA58) & 8) != 0) {
+    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
         return 1;
     }
     if (D_0038989C[0] != 0) {
@@ -640,7 +641,7 @@ s32 func_00126810(void) {
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126840);
 
 void func_00126910(void) {
-    if ((*(s32 *)(D_00435DD0 + 0xA58) & 4) != 0) {
+    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 4) != 0) {
         func_00126958();
         D_00389770[3] |= 2;
     }
@@ -649,58 +650,58 @@ void func_00126910(void) {
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126958);
 
 void func_00126998(void) {
-    *(s32 *)(D_00435DD0 + 0xA58) |= 4;
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags |= 4;
     D_00389770[3] &= ~2;
 }
 
 u8 func_001269C8(void) {
-    s32 temp_v0 = *(s32 *)(D_00435DD0 + 0xA58);
+    s32 temp_v0 = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
     temp_v0 &= 4;
     return temp_v0 != 0;
 }
 
 void func_001269E0(void) {
-    if ((*(s32 *)(D_00435DD0 + 0xA58) & 2) != 0) {
+    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 2) != 0) {
         func_00126A28();
         D_00389770[3] |= 4;
     }
 }
 
 void func_00126A28(void) {
-    *(s32 *)(D_00435DD0 + 0xA58) &= ~2;
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~2;
     D_00389770[3] &= ~4;
 }
 
 void func_00126A58(void) {
-    *(s32 *)(D_00435DD0 + 0xA58) = (*(s32 *)(D_00435DD0 + 0xA58) | 2) & ~1;
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags = (((FldWorkFlags *)D_00435DD0)->fieldFlags | 2) & ~1;
     D_00389770[3] &= ~4;
 }
 
 u8 func_00126A90(void) {
-    s32 temp_v0 = *(s32 *)(D_00435DD0 + 0xA58);
+    s32 temp_v0 = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
     temp_v0 &= 2;
     return temp_v0 != 0;
 }
 
 void func_00126AA8(void) {
-    if ((*(s32 *)(D_00435DD0 + 0xA58) & 1) != 0) {
+    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 1) != 0) {
         func_00126AF0();
         D_00389770[3] |= 8;
     }
 }
 
 void func_00126AF0(void) {
-    *(s32 *)(D_00435DD0 + 0xA58) &= ~1;
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~1;
     D_00389770[3] &= ~8;
 }
 
 void func_00126B20(void) {
-    *(s32 *)(D_00435DD0 + 0xA58) = (*(s32 *)(D_00435DD0 + 0xA58) | 1) & ~2;
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags = (((FldWorkFlags *)D_00435DD0)->fieldFlags | 1) & ~2;
     D_00389770[3] &= ~8;
 }
 
 u8 fldIsFlagActive(void) {
-    s32 flags = *(s32 *)(D_00435DD0 + 0xA58);
+    s32 flags = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
     flags &= 1;
     if (flags == 0) return 0;
     return 1;

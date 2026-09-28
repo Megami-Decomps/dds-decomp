@@ -159,22 +159,30 @@ void func_00282BE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_00282B08(arg0, arg1, arg2, 0, arg3, arg4);
 }
 
+typedef struct MenuPanelState {
+    u8 pad00[0xC];
+    s32 width;
+    s32 height;
+    u8 pad14[0x4C];
+    u32 resourceHandle; /* 0x60 */
+} MenuPanelState;
+
 void *mnuCreatePanelState(s32 width, s32 height) {
-    u8 *item = func_002CFEB8(0x64);
-    memset(item, 0, 0x64);
-    *(s32 *)(item + 0xC) = width;
-    *(s32 *)(item + 0x10) = height;
-    return item;
+    MenuPanelState *panel = func_002CFEB8(0x64);
+    memset(panel, 0, 0x64);
+    panel->width = width;
+    panel->height = height;
+    return panel;
 }
 
-void func_00282C70(u32 arg0) {
-    s32 temp_v0;
+void func_00282C70(MenuPanelState *panel) {
+    s32 resourceHandle;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x60);
-    if (temp_v0 != 0) {
-        mnuReleaseResourceList(temp_v0);
+    resourceHandle = panel->resourceHandle;
+    if (resourceHandle != 0) {
+        mnuReleaseResourceList(resourceHandle);
     }
-    func_002CFF98(arg0);
+    func_002CFF98(panel);
 }
 
 void func_00282CA8(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
@@ -191,11 +199,11 @@ void func_00282CD0(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
     func_002BFB98(arg0 + 0x30, arg3, arg4);
 }
 
-void func_00282CF8(s32 arg0) {
-    u32 temp_v0;
+void func_00282CF8(MenuPanelState *panel) {
+    u32 resourceHandle;
 
-    temp_v0 = func_0027D4A0(2);
-    *(u32 *)(arg0 + 0x60) = temp_v0;
+    resourceHandle = func_0027D4A0(2);
+    panel->resourceHandle = resourceHandle;
 }
 
 void func_00282D28(s32 arg0, u32 arg1, u32 arg2, u32 arg3,

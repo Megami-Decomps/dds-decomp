@@ -1941,28 +1941,28 @@ f32 fldCalculateVectorLength(const f32 *vector) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001350B8);
 
-s32 func_00135250(s32 key) {
-    s32 i = 0;
-
-    if (D_003BADF4 > 0) {
-        u8 *record = (u8 *)D_003BADF0;
-        do {
-            if (*(s32 *)(record + 0xCC) == key) {
-                return *(s32 *)(record + 0xD0);
-            }
-            i++;
-            record += 0xE4;
-        } while (i < D_003BADF4);
-    }
-    return 0;
-}
-
 typedef struct FldRecE4 {
     u8 pad0[0xCC];
     s32 id;
     s32 value;
     u8 padD4[0x10];
 } FldRecE4; /* 0xE4 bytes */
+s32 func_00135250(s32 key) {
+    s32 i = 0;
+
+    if (D_003BADF4 > 0) {
+        FldRecE4 *record = (FldRecE4 *)D_003BADF0;
+        do {
+            if (record->id == key) {
+                return record->value;
+            }
+            i++;
+            record++;
+        } while (i < D_003BADF4);
+    }
+    return 0;
+}
+
 void fldSetRecordValueById(s32 id, s32 value) {
     s32 i;
 
@@ -1976,6 +1976,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
 void func_001352E0(void) {
     s32 count = D_003BADF4;
     if (count > 0) {
+        /* Required to match: advance a pointer to the value field, not the record base. */
         u8 *record = (u8 *)D_003BADF0 + 0xd0;
         do {
             count--;
@@ -2162,7 +2163,7 @@ typedef struct FldRoomState {
     u8 pad0[0x120];
     s32 unk120;
     u8 pad124[0xE];
-    s16 unk132;
+    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
     u8 pad134[2];
     s16 mode;
     u8 pad138[8];
@@ -2174,7 +2175,7 @@ s32 fldFindRoomByTask(u32 task) {
 
     for (i = 0; i < D_003BAE14; i++) {
         if (D_003308B0[i] == task) {
-            return D_003C93E0[i].unk132;
+            return D_003C93E0[i].roomId;
         }
     }
     return -1;

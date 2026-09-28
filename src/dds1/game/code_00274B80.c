@@ -61,8 +61,8 @@ void func_00274B80(u32 arg0) {
 void func_00274BA0(s32 context) {
 }
 
-s32 func_00274BA8(s32 arg0, s32 arg1) {
-    if (arg0 < (*(s32 *)(arg1 + 0x20) - 1)) {
+s32 func_00274BA8(s32 index, s32 item) {
+    if (index < (*(s32 *)(item + 0x20) - 1)) {
         return 0;
     }
     return 1;
@@ -198,6 +198,7 @@ typedef struct StaffFadeState {
     s32 fadeB;
 } StaffFadeState;
 
+/* Two-stage fade: B rises first when opening, A falls first when closing. */
 void func_00275F48(s32 opening, StaffFadeState *state) {
     if (opening == 0) {
         if (state->fadeA > 0) {
