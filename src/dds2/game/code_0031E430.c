@@ -38,6 +38,7 @@ extern u32 D_004390C4;
 
 extern u8 D_004390B8;
 
+
 extern u64 func_00325BB0(u64, u32);
 
 extern u64 func_00325AB8(u64, u32);
@@ -48,7 +49,6 @@ extern u64 func_00325790(u64, u32);
 
 extern u64 func_0031F0E8(void);
 
-extern s32 func_0031E550(void);
 
 extern u32 D_0043895C;
 
@@ -71,6 +71,34 @@ extern void func_0033C820(void);
 extern void func_0033C878(void);
 
 extern void func_0033FF58(void);
+extern u8 D_0045C860[];
+extern u8 D_0045C870[];
+extern u8 D_0045C880[];
+extern u32 D_0043899C;
+
+typedef struct ResourceNode {
+    u32 id;
+    u32 value;
+    struct ResourceNode *next;
+    u32 unk_C;
+    u32 handle;
+} ResourceNode;
+
+typedef struct ResourceList {
+    u32 count;
+    ResourceNode *first;
+} ResourceList;
+
+typedef struct ShortRecord {
+    u8 kind;
+    u8 pad[7];
+} ShortRecord;
+
+typedef struct ShortRecordList {
+    s32 count;
+    ShortRecord *records;
+} ShortRecordList;
+
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E430);
 
@@ -84,13 +112,26 @@ void func_0031E4D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E4E0);
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E530);
+void func_0031E530(u32 *entry, u32 index, u32 value, u32 next) {
+    entry[2] = index + 1;
+    entry[3] = value;
+    entry[4] = next;
+}
 
 u32 func_0031E548(s32 arg0) {
     return *(u32 *)(arg0 + 0x14);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E550);
+s32 func_0031E550(context)
+    u32 *context;
+{
+    if (context[5] == 0) {
+        if (context[0] == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E578);
 
@@ -371,16 +412,63 @@ INCLUDE_ASM(const s32, "game/code_0031E430", func_00321018);
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321090);
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00321130);
+ResourceNode *func_00321130(list, value)
+    ResourceList *list;
+    u32 value;
+{
+    ResourceNode *node = list->first;
+    if (node == NULL) {
+        return NULL;
+    }
+    do {
+        if (node->value == value) {
+            break;
+        }
+        node = node->next;
+    } while (node != NULL);
+    return node;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00321170);
+ResourceNode *func_00321170(list, id)
+    ResourceList *list;
+    u32 id;
+{
+    ResourceNode *node = list->first;
+    if (node == NULL) {
+        return NULL;
+    }
+    do {
+        if (node->id == id) {
+            break;
+        }
+        node = node->next;
+    } while (node != NULL);
+    return node;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_003211B0);
+ResourceNode *func_003211B0(list, handle)
+    ResourceList *list;
+    u32 handle;
+{
+    ResourceNode *node = list->first;
+    if (node == NULL) {
+        return NULL;
+    }
+    do {
+        if (node->handle == handle) {
+            break;
+        }
+        node = node->next;
+    } while (node != NULL);
+    return node;
+}
 
 void func_003211F0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_003211F8);
+u8 *func_003211F8(void) {
+    return D_0045C860;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321208);
 
@@ -401,14 +489,18 @@ void func_00321318(u32 arg0, u32 arg1) {
     D_004390C4 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00321328);
+u8 *func_00321328(s32 index) {
+    return (u8 *)D_004390C0 + index * 28;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321340);
 
 void func_003214C0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_003214C8);
+void func_003214C8(u32 value) {
+    D_0043899C = value;
+}
 
 void func_003214D0(u32 arg0, s32 arg1) {
     if (arg1 != 0) {
@@ -438,14 +530,17 @@ INCLUDE_ASM(const s32, "game/code_0031E430", func_003219F0);
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321A30);
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321C60);
-
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321E18);
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321E70);
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00321EC8);
+u8 *func_00321EC8(void) {
+    return D_0045C870;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00321ED8);
+u8 *func_00321ED8(void) {
+    return D_0045C880;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00321EE8);
 
@@ -493,25 +588,49 @@ void func_003224E0(u32 arg0, u32 arg1) {
     D_004390D4 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_003224F0);
+u8 *func_003224F0(u16 index) {
+    return (u8 *)D_004390D0 + index * 28;
+}
 
 void func_00322510(u32 arg0, u32 arg1) {
     D_004390DC = arg0;
     D_004390E0 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00322520);
+u8 *func_00322520(u16 index) {
+    return (u8 *)D_004390DC + index * 24;
+}
 
 void func_00322540(u32 arg0, u32 arg1) {
     D_004390E4 = arg0;
     D_004390E8 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00322550);
+u8 *func_00322550(u8 index) {
+    return (u8 *)D_004390E4 + index * 48;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00322570);
+ShortRecord *func_00322570(ShortRecordList *list) {
+    s32 i;
+    ShortRecord *record = list->records;
+    for (i = 0; i < list->count; i++, record++) {
+        if (record->kind == 0x40) {
+            return record;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_003225C0);
+ShortRecord *func_003225C0(ShortRecordList *list) {
+    s32 i;
+    ShortRecord *record = list->records;
+    for (i = 0; i < list->count; i++, record++) {
+        if (record->kind == 0x40) {
+            return record;
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00322610);
 
@@ -631,12 +750,12 @@ INCLUDE_ASM(const s32, "game/code_0031E430", func_00324E80);
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00324EF0);
 
-void func_00324F20(u32 *arg0) {
-    func_003211B0(*arg0);
+void func_00324F20(ResourceList **list) {
+    func_003211B0(*list);
 }
 
-void func_00324F38(u32 *arg0) {
-    func_00321170(*arg0);
+void func_00324F38(ResourceList **list) {
+    func_00321170(*list);
 }
 
 u64 func_00324F50(s32 arg0, u64 arg1) {
@@ -687,9 +806,17 @@ void func_003268E0(float *arg0, float *arg1) {
     arg0[2] = arg0[2] - arg1[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00326918);
+void func_00326918(float *vec, float x, float y, float z) {
+    vec[0] += x;
+    vec[1] += y;
+    vec[2] += z;
+}
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00326940);
+void func_00326940(float *vec, float x, float y, float z) {
+    vec[0] = x;
+    vec[1] = y;
+    vec[2] = z;
+}
 
 void func_00326950(float arg0, float *arg1) {
     *arg1 = *arg1 * arg0;
