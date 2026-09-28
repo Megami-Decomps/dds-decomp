@@ -108,13 +108,36 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F0E8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F238);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F378);
+s32 func_0021F378(u32 id) {
+    switch (id) {
+    case 0x12A:
+    case 0x12B:
+    case 0x12C:
+    case 0x12D:
+        return 0x11B;
+    default:
+        return 0;
+    }
+}
 
 u8 func_0021F3A0(s32 arg0) {
     return arg0 != 0x196;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F3B0);
+s32 func_0021F3B0(s32 actor) {
+    if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
+        return 0;
+    }
+    switch (*(u16 *)(actor + 0x124)) {
+    case 0x12A:
+    case 0x12B:
+    case 0x12C:
+    case 0x12D:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F3E8);
 
@@ -169,7 +192,20 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002205C0);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002206A0);
+s32 func_002206A0(s32 actor, s32 action) {
+    if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
+        return 0;
+    }
+    switch (action) {
+    case 7:
+    case 8:
+    case 16:
+    case 18:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220700);
 
@@ -429,7 +465,20 @@ u32 func_00221858(u32 unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221888);
+void func_00221888(s32 actor) {
+    if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
+        return;
+    }
+    switch (*(u16 *)(actor + 0x124)) {
+    case 0x11D:
+    case 0x11E:
+    case 0x11F:
+    case 0x120:
+    case 0x121:
+        *(u32 *)(actor + 0x114) |= 0x20000;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002218C8);
 
