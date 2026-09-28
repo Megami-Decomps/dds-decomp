@@ -779,7 +779,21 @@ u8 func_001B0C18(s32 object, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0C68);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0D28);
+s32 func_001B0D28(s32 unused, u32 id) {
+    switch (id) {
+    case 0x31:
+    case 0x32:
+    case 0x33:
+    case 0x185:
+        return 0x35;
+    case 0x186:
+        return 0x1E;
+    case 0x193:
+        return 0x25;
+    default:
+        return *(s8 *)(D_00435E1C + id * 2 + 1) == 2 ? 0x2D : 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0DB0);
 

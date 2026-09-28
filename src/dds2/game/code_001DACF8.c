@@ -353,7 +353,28 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E02A8);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E05B8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0640);
+typedef struct {
+    u32 unk0;
+    s32 soundIndex;
+} BattleVoiceWork;
+
+extern u8 *D_00435E38;
+extern void func_0011A118(s32, s32);
+extern void func_001AF060(void);
+
+s32 func_001E0640(BattleVoiceWork *work) {
+    s32 index = work->soundIndex;
+    if (D_00435E38[index * 8 + 1] & 4) {
+        func_0011A118(index, -1);
+        switch (work->soundIndex) {
+        case 0x53:
+        case 0x54:
+            func_001AF060();
+            break;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E06B0);
 
@@ -1203,9 +1224,39 @@ u8 func_001EA940(s32 arg0) {
     return *(s32 *)(arg0 + 0x134) == 0x5f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA950);
+s32 func_001EA950(s32 actor) {
+    switch (*(u32 *)(actor + 0x134)) {
+    case 0x09:
+        return 0x29;
+    case 0x12:
+        return 0x51;
+    case 0x1B:
+        return 0x2B;
+    case 0x24:
+        return 0x4D;
+    case 0x2D:
+        return 0x3C;
+    case 0x5B:
+        return 0x45;
+    case 0x5C:
+        return 0x6E;
+    case 0x5D:
+        return 0xAA;
+    default:
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA9D8);
+s32 func_001EA9D8(s32 actor) {
+    switch (*(u32 *)(actor + 0x134)) {
+    case 0x5B:
+    case 0x5C:
+    case 0x5D:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 u32 func_001EAA00(void) {
     return 0;
