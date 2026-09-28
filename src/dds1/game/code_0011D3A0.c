@@ -202,7 +202,20 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120C08);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120EC8);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120FA0);
+void func_00120FA0(s32 map, s32 slot, s32 bit, s32 enabled) {
+    if (map < 40) {
+        s32 index = map % 100;
+        if (enabled != 0) {
+            s32 byteOffset = slot * 30 + index * 1920 + 0x1370;
+            u16 *flags = (u16 *)(D_003BAA00 + byteOffset);
+            *flags |= 1 << bit;
+        } else {
+            s32 byteOffset = slot * 30 + index * 1920 + 0x1370;
+            u16 *flags = (u16 *)(D_003BAA00 + byteOffset);
+            *flags &= ~(1 << bit);
+        }
+    }
+}
 
 u8 func_00121048(s32 arg0, u32 arg1, u32 arg2) {
     s32 temp_v0;
@@ -331,9 +344,27 @@ u8 func_00121448(s32 arg0, u32 arg1, u32 arg2) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001214A0);
+void func_001214A0(s32 map, u32 slot, s32 offset, s32 value) {
+    if (map < 40) {
+        s32 index = map % 100;
+        s32 displacement = offset + index * 1920;
+        u8 *entry = (u8 *)(slot * 30 + displacement);
+        entry += D_003BAA00;
+        entry[0x137A] = value;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001214F0);
+s32 func_001214F0(s32 map, u32 slot, s32 offset) {
+    u8 value = 0;
+    if (map < 40) {
+        s32 index = map % 100;
+        s32 displacement = offset + index * 1920;
+        u8 *entry = (u8 *)(slot * 30 + displacement);
+        entry += D_003BAA00;
+        value = entry[0x137A];
+    }
+    return value == 0xff ? -1 : value;
+}
 
 void func_00121550(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
@@ -536,7 +567,12 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122710);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001228D8);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001229A8);
+extern f32 func_001228D8();
+
+f32 func_001229A8(void) {
+    s32 angle = (s32)(360.0f - func_001228D8() + 90.0f);
+    return (f32)(angle % 360);
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122A00);
 
@@ -1034,7 +1070,34 @@ u8 func_00125DF8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125E08);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125F18);
+extern s32 D_003BABF4, D_003BABE4;
+extern char D_0039FD30[], D_0039FD40[];
+extern void kwlnFadeResetBackground(void);
+extern void func_00141158(void), func_00228778(void), fldDestroyTask(void);
+extern void func_00187080(s32), destroyCampTasks(void), func_0010BDB8(void);
+extern void func_001462A8(void);
+
+void func_00125F18(void) {
+    if (D_003BABF4 == 0) return;
+    D_003BABF4 = 0;
+    kwlnFadeResetBackground();
+    func_00125DE0(0x10);
+    func_00125DE0(0x20);
+    func_00125D90(1);
+    func_00125D90(2);
+    kwlnTaskDestroyWithHierarchyByName(D_0039FD30, 1);
+    kwlnTaskDestroyWithHierarchyByName(D_0039FD40, 1);
+    func_00141158();
+    func_00228778();
+    fldDestroyTask();
+    if (D_003BABE4 != 0) {
+        func_00187080(D_003BABE4);
+        D_003BABE4 = 0;
+    }
+    destroyCampTasks();
+    func_0010BDB8();
+    func_001462A8();
+}
 
 u8 func_00125FD0(void) {
     if (D_0032E3D0[0] == 0 && func_00127B98() != 0) {

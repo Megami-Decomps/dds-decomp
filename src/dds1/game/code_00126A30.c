@@ -224,15 +224,70 @@ u8 func_00127B98(void) {
     return D_0032E428[0] != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127BD8);
+s32 func_00127BD8(s32 area, s32 room) {
+    if (D_0032E3B0[31] != area || D_0032E3B0[32] != room) {
+        return 0;
+    }
+    if (D_003BAC3C != 0 && func_00288BE8(D_003BAC3C) != 0) {
+        return 1;
+    }
+    return D_0032E3B0[30] != 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127C40);
+extern u32 D_003BAC60, D_003BAC64, D_003BAC68, D_003BAC6C;
+extern u32 D_003BAC70, D_003BAC74, D_003BAC78, D_003BAC7C;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127CB8);
+void *func_00127C40(void **destination, s32 area, s32 room) {
+    if (D_0032E3B0[31] == area) {
+        if (D_0032E3B0[32] == room) {
+            void *buffer = func_002D03F8(D_003BAC70);
+            void *data = func_002D0A48(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_003BAC60, D_003BAC70);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127D30);
+void *func_00127CB8(void **destination, s32 area, s32 room) {
+    if (D_0032E3B0[31] == area) {
+        if (D_0032E3B0[32] == room) {
+            void *buffer = func_002D03F8(D_003BAC74);
+            void *data = func_002D0A48(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_003BAC64, D_003BAC74);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127DA8);
+void *func_00127D30(void **destination, s32 area, s32 room) {
+    if (D_0032E3B0[31] == area) {
+        if (D_0032E3B0[32] == room) {
+            void *buffer = func_002D03F8(D_003BAC78);
+            void *data = func_002D0A48(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_003BAC68, D_003BAC78);
+            return buffer;
+        }
+    }
+    return NULL;
+}
+
+void *func_00127DA8(void **destination, s32 area, s32 room) {
+    if (D_0032E3B0[31] == area) {
+        if (D_0032E3B0[32] == room) {
+            void *buffer = func_002D03F8(D_003BAC7C);
+            void *data = func_002D0A48(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_003BAC6C, D_003BAC7C);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_0039FE38);
 
@@ -267,6 +322,8 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001281E0);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128780);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128890);
+
+extern s32 func_003014F0(char *, const char *, ...);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128B50);
 
@@ -368,6 +425,19 @@ void func_00129720(u32 arg0) {
     D_003BACD0 = arg0;
 }
 
+typedef struct {
+    u32 unk0[4];
+    void (*open)(void *, u32);
+    u32 unk14[3];
+} FieldResourceDescriptor;
+
+typedef struct {
+    u32 unk0[4];
+    void (*open)(void *, u64);
+    u32 unk14[3];
+} FieldBufferDescriptor;
+
+extern void func_002D4010(u64);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129728);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001297E8);
@@ -394,11 +464,60 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A890);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AA20);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AB40);
+extern s32 func_00100518(void);
+extern u8 D_00326ED0[];
+extern void func_002D4C80(const void *, u64, s32);
+extern void func_002D4CC8(const void *, u64, s32);
+extern void func_002D40E8(u64, u64);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012ABE0);
+void func_0012AB40(void) {
+    u64 command = func_002D3FD0(0x20);
+    u64 texture;
+    FieldBufferDescriptor *descriptor;
+    func_002D4010(command);
+    texture = func_002D3FD0(0x40);
+    func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D40E8(command, texture);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AC80);
+void func_0012ABE0(void) {
+    u64 command = func_002D3FD0(0x20);
+    u64 texture;
+    FieldBufferDescriptor *descriptor;
+    func_002D4010(command);
+    texture = func_002D3FD0(0x40);
+    func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D40E8(command, texture);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
+
+extern f32 D_0032F4E0[];
+extern u32 D_0032F500[];
+extern u64 func_002EF2B0(const void *, const void *, s32, s32);
+extern void func_002D4038(u64, u64);
+
+void func_0012AC80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+    u64 resource;
+    u64 record;
+    FieldBufferDescriptor *descriptor;
+    D_0032F4E0[0] = x;
+    D_0032F4E0[1] = y;
+    D_0032F4E0[2] = z;
+    D_0032F4E0[4] = u;
+    D_0032F4E0[5] = v;
+    D_0032F4E0[6] = w;
+    D_0032F500[1] = second;
+    D_0032F500[0] = first;
+    resource = func_002D3FD0(0x20);
+    func_002D4010(resource);
+    record = func_002EF2B0(D_0032F4E0, D_0032F500, 2, 0x80);
+    func_002D4038(resource, record);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, resource);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AD30);
 
@@ -427,9 +546,30 @@ void func_0012B768(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B798);
+extern u32 D_003980F0[];
+extern u32 func_002D5510(s32);
+extern void func_002D3B28(u32, u32, s32, s32, s32, s32, u32, s32);
+extern void createSdfResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B818);
+void func_0012B798(void) {
+    if (D_003BACD8 != 0) {
+        u32 packet = func_002D5510(0);
+        FieldResourceDescriptor *descriptor;
+        createSdfResourcePacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, D_003BACD8, 0, 0, 0);
+        descriptor = (FieldResourceDescriptor *)&D_00324B48[D_003BACD0 * 8];
+        descriptor->open(descriptor, packet);
+    }
+}
+
+void func_0012B818(void) {
+    if (D_003BACD8 != 0) {
+        u32 packet = func_002D5510(0);
+        FieldResourceDescriptor *descriptor;
+        func_002D3B28(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, D_003BACD8, 0);
+        descriptor = (FieldResourceDescriptor *)&D_00324B48[D_003BACD0 * 8];
+        descriptor->open(descriptor, packet);
+    }
+}
 
 void func_0012B890(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 temp_v0;
@@ -451,7 +591,7 @@ void func_0012B8F0(s32 arg0) {
     *(u32 *)(arg0 + 0x28) = temp_v1;
     temp_v0 = func_002D3FD0(0x40);
     func_002D5608(temp_v0);
-    func_002D4038(*(u32 *)(arg0 + 0x28), temp_v0);
+    func_002D4038(*(s32 *)(arg0 + 0x28), temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B940);
@@ -494,6 +634,7 @@ void func_0012C6C8(u32 arg0, s32 arg1) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C750);
+
 
 void func_0012C7C0(void) {
     battleResetAsyncState();
@@ -614,6 +755,8 @@ u8 func_001311A0(void) {
     return 1;
 }
 
+void func_00131458(void);
+
 void func_001311D8(void) {
     func_00111908(D_003BAB34, 1);
     func_00131458();
@@ -652,9 +795,26 @@ void func_001312B0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001313E0);
+extern s32 func_00121970(s32, s32);
+extern void func_0012EA50(s16, s32, f32);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131458);
+void func_001313E0(void) {
+    s16 node = *(s16 *)(D_003BAB38 + 0x12);
+    if (func_00121970(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
+        func_0012EA50(node, 0x12, 10.0f);
+        return;
+    }
+    func_0012EA50(node, 3, 10.0f);
+}
+
+void func_00131458(void) {
+    s16 node = *(s16 *)(D_003BAB38 + 0x12);
+    if (func_00121970(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
+        func_0012EA50(node, 0x12, 0.0f);
+        return;
+    }
+    func_0012EA50(node, 3, 0.0f);
+}
 
 extern s32 D_003BAB38;
 extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
@@ -664,7 +824,15 @@ s32 func_001314C0(s32 value) {
     return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131508);
+extern void mdlSetNodeFloat20(s32, s32, f32);
+extern void mdlAddEntryFlagged(s32, s32, s32);
+
+void func_00131508(s32 first, s32 second) {
+    mdlSetNodeFloat20(D_003BAB38, 0, 1.0f);
+    mdlSetNodeFloat20(D_003BAB38, 1, 1.0f);
+    mdlAddEntryFlagged(D_003BAB38, 0, first);
+    mdlAddEntryFlagged(D_003BAB38, 1, second);
+}
 
 void func_00131580(void) {
     D_0032E538[0] = 0;
@@ -794,7 +962,21 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00132E38);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00132FD0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00133280);
+extern s32 D_0032E3C0[];
+extern s16 D_0032E4D8[];
+extern s32 D_003BAD58;
+
+void func_00133280(s32 speed) {
+    if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
+        speed = 0;
+    }
+    if (D_003BADC8 != 0 && D_003BAD98 != D_003BADC8) {
+        if (D_0032E4D8[0] == 0) {
+            D_0032E59C[0] = D_003BADC8;
+        }
+        func_00132FD0(D_003BADC8, speed);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001332E8);
 
@@ -821,7 +1003,6 @@ void func_00133910(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
 
-
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133CA0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133EC0);
@@ -832,7 +1013,25 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001342B0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00134C68);
+extern char D_003A0100[];
+extern u32 D_003BD7C8;
+extern u32 D_003BAD64;
+extern u8 D_003C9240[];
+extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 func_0029CE50(const void *);
+extern void func_00134E10(u32);
+
+void func_00134C68(void) {
+    D_003BD7C4 = func_002EB028(D_003A0100, &D_003BD7C8, 0);
+    D_003BAD70 = func_002D3288((void *)D_003BD7C8);
+    D_003BAD68 = func_0029CE50(D_003C9240);
+    if (D_003BD7C4 != 0) {
+        func_002D0A10(D_003BD7C4);
+        D_003BD7C4 = 0;
+    }
+    func_00134E10(D_003BAD64);
+    D_003BAD6C = 1;
+}
 
 void func_00134CD8(void) {
     func_00134348();
@@ -892,6 +1091,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00135250);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135298);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001352E0);
+
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);
 
@@ -1007,6 +1207,7 @@ s32 func_0013BE30(u32 task) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013BE90);
 
+
 s32 getFieldTaskRecordValue(u32 task) {
     s32 i;
     for (i = 0; i < D_003BAE14; i++) {
@@ -1058,9 +1259,17 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013CEB0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D410);
 
+extern void func_00128B50(char *, s32, s32);
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 func_002E5C68(u32, void *, u32);
+extern void func_002E5C38(u32);
+extern u8 D_00332E30[];
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D510);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D598);
+void func_0013D598(const void *source) {
+    memcpy(D_00332E30, source, 0x3B80);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
 
@@ -1150,9 +1359,24 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FCE0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FD60);
+void func_0013FD60(s32 field) {
+    char path[64];
+    char directory[32];
+    u32 command;
+    if (field >= 100) {
+        memset(D_00337C60, 0, 0x6CA0);
+    } else {
+        func_00128B50(directory, field, 1);
+        func_003014F0(path, "%sF%03d.WAP", directory, field);
+        command = sdfDevCreateCommandState(path);
+        func_002E5C68(command, D_00337C60, 0x6CA0);
+        func_002E5C38(command);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FE08);
+void func_0013FE08(const void *source) {
+    memcpy(D_00337C60, source, 0x6CA0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FEC0);
 
