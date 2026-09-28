@@ -1,12 +1,37 @@
 #include "common.h"
 
-/* Small work area: indirect table plus an object released on cleanup. */
+/* Small work area: type id and count, an id block, a result table plus an
+ * object released on cleanup. */
 typedef struct {
-    u8   pad_0x00[0x20]; /* 0x00 */
-    u32  *unk20;         /* 0x20: table written by func_00189B90 */
-    u8   pad_0x24[0x10]; /* 0x24 */
-    void *unk34;         /* 0x34: released by func_001893C0 */
+    s32   type;         /* 0x00 effect type (== 3 in func_0018CA30) */
+    u16   count04;      /* 0x04 loop count */
+    u8    pad06[2];     /* 0x06 */
+    void *ptr08;        /* 0x08 id block / source block */
+    u8    pad0C[0x0C];  /* 0x0C */
+    u32  *out18;        /* 0x18 result table */
+    u8    pad1C[4];     /* 0x1C */
+    u32  *unk20;        /* 0x20 table written by func_00189B90 */
+    u8    pad24[0x10];  /* 0x24 */
+    void *unk34;        /* 0x34 released by func_001893C0 */
 } EffMagatuhiWork; /* 0x38 */
+
+extern void *func_0018CBB8(void *arg);
+
+/* 64-byte vector copy via COP2 (plain C cannot emit lqc2/sqc2). Wrapped in
+ * .set noreorder so ee-as keeps the block verbatim. Shared by the three
+ * byte-identical copy functions below. */
+#define EFF_COPY64(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%1)\n\t" \
+    "lqc2 vf29, 16(%1)\n\t" \
+    "lqc2 vf30, 32(%1)\n\t" \
+    "lqc2 vf31, 48(%1)\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst), "r" (src) : "memory")
 
 /* Mid-size variant holding the pairs freed by func_0018B1D0/func_0018C2A8. */
 typedef struct {
@@ -26,6 +51,26 @@ typedef struct {
     void *unk18C;          /* 0x18C */
     void *unk190;          /* 0x190 */
 } EffMagatuhiBigWork; /* 0x194 */
+
+/* Float source block read by func_0018A610. */
+typedef struct EffMagatuhiSrc {
+    f32 f00, f04, f08;
+    u8 pad0C[4];
+    f32 f10, f14, f18;
+    u8 pad1C[4];
+    f32 f20, f24;
+} EffMagatuhiSrc; /* 0x28 */
+
+/* Float destination block written by func_0018A610. */
+typedef struct EffMagatuhiDst {
+    f32 f00, f04, f08;
+    u8 pad0C[4];
+    f32 f10, f14, f18;
+    u8 pad1C[0x18];
+    f32 f34;
+    u8 pad38[0x18];
+    f32 f50;
+} EffMagatuhiDst; /* 0x54 */
 
 void func_001893C0(EffMagatuhiWork *work) {
     func_002D0918(work->unk34);
@@ -57,7 +102,18 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189E98);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A098);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A610);
+void func_0018A610(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
+    EffMagatuhiDst *dst = func_0018CBB8(work->ptr08);
+
+    dst->f00 = src->f00;
+    dst->f04 = src->f04;
+    dst->f08 = src->f08;
+    dst->f34 = src->f20;
+    dst->f10 = src->f10;
+    dst->f14 = src->f14;
+    dst->f18 = src->f18;
+    dst->f50 = src->f24;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A678);
 
@@ -92,7 +148,9 @@ void func_0018B618(EffMagatuhiMidWork *work, void *value) {
     work->unk124 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B620);
+void func_0018B620(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
+    EFF_COPY64(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B648);
 
@@ -113,7 +171,9 @@ void func_0018BE68(EffMagatuhiMidWork *work, void *value) {
     work->unk128 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE70);
+void func_0018BE70(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
+    EFF_COPY64(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE98);
 
@@ -134,7 +194,9 @@ void func_0018C7C0(EffMagatuhiMidWork *work, void *value) {
     work->unk120 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C7C8);
+void func_0018C7C8(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
+    EFF_COPY64(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C7F0);
 
