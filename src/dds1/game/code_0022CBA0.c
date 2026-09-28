@@ -22,27 +22,38 @@ f32 func_00112ED8(s32 arg0);
 s32 func_00106488(f32 arg0);
 u16 func_0022FF98(s32 arg0);
 
+typedef struct EventViewerState {
+    u8 pad0[4];
+    u32 flags;
+    u8 pad8[0x201C];
+    s32 selectedEntry;
+    u8 pad2028[4];
+    s32 fallbackEntry;
+    u8 pad2030[0x390];
+    s32 updateCount;
+} EventViewerState;
+
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CBA0);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CC40);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CD30);
 
-void func_0022CE68(s32 arg0) {
-    s32 s;
-    s32 v;
+void func_0022CE68(EventViewerState *viewer) {
+    s32 entry;
+    s32 selected;
 
-    v = *(s32 *)(arg0 + 0x2024);
-    if (v != 0) {
-        s = v;
+    selected = viewer->selectedEntry;
+    if (selected != 0) {
+        entry = selected;
     } else {
-        s = *(s32 *)(arg0 + 0x202c);
+        entry = viewer->fallbackEntry;
     }
-    if (s == 0) {
+    if (entry == 0) {
         return;
     }
-    func_001109B8(dds3GetWorldObject(), s);
-    func_00106488(func_00112ED8(s));
+    func_001109B8(dds3GetWorldObject(), entry);
+    func_00106488(func_00112ED8(entry));
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CED0);
@@ -69,17 +80,18 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F038);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F1C0);
 
-void func_0022F2A8(s32 arg0) {
-    s64 temp_v0;
+void func_0022F2A8(EventViewerState *viewer) {
+    s64 active;
 
-    temp_v0 = func_0022F408(arg0);
-    if (temp_v0 != 0) {
-        *(s32 *)(arg0 + 0x23c0) = *(s32 *)(arg0 + 0x23c0) + 1;
+    active = func_0022F408((s32)viewer);
+    if (active != 0) {
+        viewer->updateCount = viewer->updateCount + 1;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F2E0);
 
+/* Required to match: the signed raw load generates the original flag test. */
 s32 func_0022F408(s32 arg0) {
     return (*(s32 *)(arg0 + 4) & 0x10) > 0;
 }

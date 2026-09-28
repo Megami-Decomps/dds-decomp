@@ -16,6 +16,14 @@ typedef struct QuadU32 {
     u32 w; // 0x0C
 } QuadU32; // 0x10
 
+
+typedef struct GridWidget {
+    u8 pad0[0x50];
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+} GridWidget;
 extern s32 func_002C2568(s32, void *);
 
 void func_002BF790(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
@@ -44,11 +52,11 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFA80);
 
 void func_002BFAF8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
-    s32 object = func_002BD398(a, b);
-    *(s32 *)(object + 0x50) = x;
-    *(s32 *)(object + 0x54) = y;
-    *(s32 *)(object + 0x58) = width;
-    *(s32 *)(object + 0x5c) = height;
+    GridWidget *widget = (GridWidget *)func_002BD398(a, b);
+    widget->x = x;
+    widget->y = y;
+    widget->width = width;
+    widget->height = height;
 }
 
 void func_002BFB50(s32 arg0, s32 arg1) {

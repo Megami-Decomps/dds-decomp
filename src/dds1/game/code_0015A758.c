@@ -16,7 +16,7 @@ typedef struct ParObj {
     u8 padF4[0x08];   /* 0xF4 */
     void *unkFC;      /* 0xFC */
     u8 pad100[0x40];  /* 0x100 */
-    u16 unk140;       /* 0x140 dispatch index */
+    u16 kind;         /* 0x140: particle dispatch table index */
     u16 unk142;       /* 0x142 init flag (set to 1) */
     u8 pad144[0x0C];  /* 0x144 */
     u8 mode150;       /* 0x150 mode byte for some kinds */
@@ -67,7 +67,7 @@ void func_0015A758(ParObj *work, u32 value) {
 
 void parObjSetMode(ParObj *work, s32 value) {
     value &= 0xFF;
-    switch (work->unk140) {
+    switch (work->kind) {
     case 1:
     case 5:
     case 11:
@@ -91,7 +91,7 @@ void parObjSetMode(ParObj *work, s32 value) {
 }
 
 u32 parObjGetMode(ParObj *work) {
-    switch (work->unk140) {
+    switch (work->kind) {
     case 1:
     case 5:
     case 11:
@@ -114,8 +114,8 @@ u32 parObjGetMode(ParObj *work) {
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
 ParObj *parInstantiateKind(ParObj *work) {
-    ParObj *particle = D_0034E250[work->unk140].func();
-    particle->unk140 = work->unk140;
+    ParObj *particle = D_0034E250[work->kind].func();
+    particle->kind = work->kind;
     if (*(s32 *)((u8 *)work + 0x28) == -1) {
         s32 transform = func_00151E60(*(s32 *)((u8 *)work + 0xF4));
         func_00152000(transform, *(f32 *)((u8 *)particle + 0x10), *(f32 *)((u8 *)particle + 0x14));
@@ -127,7 +127,7 @@ ParObj *parInstantiateKind(ParObj *work) {
 }
 
 void parObjDispatch(ParObj *work) {
-    D_0034E258[work->unk140].func(work);
+    D_0034E258[work->kind].func(work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);

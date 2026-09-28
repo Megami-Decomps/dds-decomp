@@ -6,16 +6,16 @@
 typedef struct EffPrim {
     void *unk0;       /* 0x0: buffer freed by effFreeBuffers */
     void *unk4;       /* 0x4: buffer freed by effFreeBuffers */
-    u32 unk8;         /* 0x8: count advanced by effAdvancePrimCursor */
+    u32 recordCount; /* 0x8: number of keyframe records */
     u16 unkC;         /* 0xC: flag set by func_00192CC8 */
     u8 unkE[2];       /* 0xE */
     s32 unk10;        /* 0x10 */
     void *unk14;      /* 0x14: buffer or NULL, tested by effFreeBuffers */
     void *unk18;      /* 0x18 */
     void *unk1C;      /* 0x1C */
-    u32 unk20;        /* 0x20: channel-B index advanced by effAdvancePrimCursor */
-    f32 unk24;        /* 0x24: channel-B position advanced by effAdvancePrimCursor */
-    f32 unk28;        /* 0x28: channel-B step (0.05f) */
+    u32 cursorIndex;  /* 0x20: channel-B record index */
+    f32 cursorPosition; /* 0x24: channel-B interpolation position */
+    f32 cursorStep;  /* 0x28: channel-B position increment */
     u8 unk2C[0x18];   /* 0x2C */
     u32 unk44;        /* 0x44: rand count for effFillRandRecords */
     u32 unk48;        /* 0x48: rand modulus for effFillRandRecords */
@@ -28,11 +28,11 @@ typedef struct EffPrim {
  * plus the channel-A cursor (count at +0x4, index at +0xC). */
 typedef struct EffChan {
     void *unk0; /* 0x0: mem handle */
-    u32 unk4;   /* 0x4: count advanced by effAdvanceChanCursor */
+    u32 recordCount; /* 0x4: number of keyframe records */
     void *unk8; /* 0x8: float block copied by effCopyVertRows */
-    u32 unkC;   /* 0xC: channel-A index advanced by effAdvanceChanCursor */
-    f32 unk10;  /* 0x10: channel-A position advanced by effAdvanceChanCursor */
-    f32 unk14;  /* 0x14: channel-A step (0.05f) */
+    u32 cursorIndex; /* 0xC: channel-A record index */
+    f32 cursorPosition; /* 0x10: channel-A interpolation position */
+    f32 cursorStep; /* 0x14: channel-A position increment */
 } EffChan;
 
 /* 8-byte counter record at EffPrim.unk168. */
@@ -149,22 +149,22 @@ void effFreeBuffers(EffPrim *arg0) {
 
 s32 effAdvancePrimCursor(void *arg0, EffPrim *arg1) {
     s32 ret = 1;
-    f32 pos = arg1->unk24;
-    u32 idx = arg1->unk20;
+    f32 pos = arg1->cursorPosition;
+    u32 idx = arg1->cursorIndex;
 
     func_00192ED0(arg0, arg1, idx, pos);
-    pos += arg1->unk28;
+    pos += arg1->cursorStep;
     if (pos > 1.0f) {
         pos -= 1.0f;
         idx += 1;
     }
-    if (idx >= arg1->unk8 - 1) {
+    if (idx >= arg1->recordCount - 1) {
         pos = 0.0f;
         idx = 0;
         ret = 0;
     }
-    arg1->unk20 = idx;
-    arg1->unk24 = pos;
+    arg1->cursorIndex = idx;
+    arg1->cursorPosition = pos;
     return ret;
 }
 
@@ -173,19 +173,19 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_00192ED0);
 INCLUDE_ASM(const s32, "game/code_00192488", func_00193000);
 
 void func_00193130(EffPrim *arg0) {
-    arg0->unk20 = 0;
-    arg0->unk24 = 0;
+    arg0->cursorIndex = 0;
+    arg0->cursorPosition = 0;
 }
 
 void func_00193140(EffPrim *arg0, f32 arg1) {
-    arg0->unk28 = arg1;
+    arg0->cursorStep = arg1;
 }
 
 void effBuildAndDispatch(EffPrim *arg0, s32 arg1) {
-    void *mem = func_002D03F8(arg0->unk8 * 12);
+    void *mem = func_002D03F8(arg0->recordCount * 12);
     void *buf = func_002D0A48(mem);
 
-    func_001931E0(buf, arg0->unk10, arg0->unk8);
+    func_001931E0(buf, arg0->unk10, arg0->recordCount);
     if (arg1 == 0) {
         func_001934E8(arg0, buf);
     } else {
@@ -215,11 +215,11 @@ void *effCreateChannel(void *arg0, u32 arg1) {
     buf = func_002D0A48(mem);
     p = buf;
     p->unk0 = mem;
-    p->unk14 = 0.05f;
-    p->unk4 = arg1;
+    p->cursorStep = 0.05f;
+    p->recordCount = arg1;
     p->unk8 = arg0;
-    p->unk10 = 0;
-    p->unkC = 0;
+    p->cursorPosition = 0;
+    p->cursorIndex = 0;
     return buf;
 }
 
@@ -227,34 +227,34 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_00193720);
 
 s32 effAdvanceChanCursor(void *arg0, EffChan *arg1) {
     s32 ret = 1;
-    f32 pos = arg1->unk10;
-    u32 idx = arg1->unkC;
+    f32 pos = arg1->cursorPosition;
+    u32 idx = arg1->cursorIndex;
 
     func_001937E0(arg0, arg1, idx, pos);
-    pos += arg1->unk14;
+    pos += arg1->cursorStep;
     if (pos > 1.0f) {
         pos -= 1.0f;
         idx += 3;
     }
-    if (idx >= arg1->unk4 - 1) {
+    if (idx >= arg1->recordCount - 1) {
         pos = 0.0f;
         idx = 0;
         ret = 0;
     }
-    arg1->unkC = idx;
-    arg1->unk10 = pos;
+    arg1->cursorIndex = idx;
+    arg1->cursorPosition = pos;
     return ret;
 }
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_001937E0);
 
 void effClearChanCursor(EffChan *arg0) {
-    arg0->unkC = 0;
-    arg0->unk10 = 0;
+    arg0->cursorIndex = 0;
+    arg0->cursorPosition = 0;
 }
 
 void effSetChanStep(EffChan *arg0, f32 arg1) {
-    arg0->unk14 = arg1;
+    arg0->cursorStep = arg1;
 }
 
 void *effGetFontListHead(void) {

@@ -21,9 +21,9 @@ typedef struct Entry4 {
 } Entry4;
 
 typedef struct Entry1A4 {
-    u16 unk0; /* 0x0 */
+    u16 flags; /* 0x0: active and flagged-entry bits */
     u8 pad2[2]; /* 0x2 */
-    u16 unk4; /* 0x4 */
+    u16 rosterIndex; /* 0x4: entry identifier */
     u16 unk6; /* 0x6 */
     u8 pad8[6]; /* 0x8 */
     u16 unkE; /* 0xE */
@@ -87,8 +87,8 @@ s32 dds3FindEntryIndex(s32 arg0) {
     s32 n = 0;
 
     do {
-        if (p->unk0 & 1) {
-            if (p->unk4 == arg0) {
+        if (p->flags & 1) {
+            if (p->rosterIndex == arg0) {
                 return n;
             }
         }
@@ -124,8 +124,8 @@ void eventUpdateFlaggedStats(void) {
     do {
         Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + offset + 0xA60);
         offset += 0x1A4;
-        if (entry->unk0 & 1) {
-            if (entry->unk0 & 2) {
+        if (entry->flags & 1) {
+            if (entry->flags & 2) {
                 func_00119F08(entry, 0x22C);
                 func_00119F08(entry, 0x250);
             }
@@ -142,7 +142,7 @@ s32 eventHasMatchingFlaggedEntry(s32 mask) {
     do {
         Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + offset + 0xA60);
         offset += 0x1A4;
-        if ((entry->unk0 & 1) && (entry->unk0 & 2)) {
+        if ((entry->flags & 1) && (entry->flags & 2)) {
             if (func_001193A0(entry, mask)) {
                 return 1;
             }
@@ -171,10 +171,10 @@ Entry1A4 *dds3FindEntry(s32 arg0) {
     s32 n = 0;
 
     do {
-        if (p->unk4 != arg0) {
+        if (p->rosterIndex != arg0) {
             n++;
         } else {
-            if (p->unk0 & 1) {
+            if (p->flags & 1) {
                 return p;
             }
             n++;
@@ -196,7 +196,7 @@ s32 dds3EntryMax(void) {
     s32 n = 4;
 
     do {
-        if (p->unk0 & 1) {
+        if (p->flags & 1) {
             if (best < p->unk14) {
                 best = p->unk14;
             }
@@ -238,10 +238,10 @@ void eventUpdateFlaggedEntries(void) {
     s32 remaining = 4;
     do {
         Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + offset + 0xA60);
-        if (entry->unk0 & 1) {
+        if (entry->flags & 1) {
             s32 id = 0;
             do {
-                if (entry->unk4 == id) {
+                if (entry->rosterIndex == id) {
                     func_0011B418((s32)entry);
                 }
                 id++;
@@ -277,7 +277,7 @@ void dds3ForEachFlagged(void) {
     do {
         Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + off + 0xa60);
 
-        if (p->unk0 & 1) {
+        if (p->flags & 1) {
             func_0011B528(p);
         }
         off += 0x1a4;

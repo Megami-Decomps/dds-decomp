@@ -19,7 +19,7 @@ typedef struct PanelObj {
     s32 unk1C;      /* 0x1C */
     u8 unk20[0x18]; /* 0x20 */
     s32 unk38;      /* 0x38 */
-    u8 unk3C;       /* 0x3C: handler index for itfPanelDispatchHandler */
+    u8 handlerIndex; /* 0x3C: index into the panel handler table */
 } PanelObj;
 
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
@@ -63,8 +63,8 @@ typedef struct PanelCursor {
 
 extern PanelCursor D_00357D90;
 
-void itfPanelDispatchHandler(PanelObj *arg0) {
-    D_00357A50[arg0->unk3C](arg0);
+void itfPanelDispatchHandler(PanelObj *panel) {
+    D_00357A50[panel->handlerIndex](panel);
 }
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199B08);
