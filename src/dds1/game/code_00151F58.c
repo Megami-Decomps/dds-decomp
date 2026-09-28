@@ -1,5 +1,24 @@
 #include "common.h"
 
+typedef struct EffectConfig {
+    s16 unk00;
+    u8 pad02[10];
+} EffectConfig;
+
+typedef struct EffectBufferRecord {
+    u8 pad00[0x20];
+    s32 unk20;
+    s32 unk24;
+    u8 pad28[0x18];
+} EffectBufferRecord;
+
+typedef struct EffectBufferTail {
+    s32 allocation;
+    EffectBufferRecord *records;
+} EffectBufferTail;
+
+extern EffectConfig D_0034DF54[];
+s32 func_00151D88(s32 arg0, s32 arg1);
 extern s32 D_003D6438[];
 extern s32 D_003D6480[];
 
@@ -13,8 +32,17 @@ void func_001539D0(s32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *memcpy(void *dest, const void *src, u32 n);
 extern void *func_002CFEB8(s32 size);
+s32 func_002D03F8(s32 size);
+EffectBufferRecord *func_002D0A48(s32 allocation);
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00151F58);
+void func_00151F58(s32 index) {
+    s32 *effect = (s32 *)func_00151D88(D_0034DF54[index].unk00, 0);
+    s32 *resource = *(s32 **)(D_003D6438[index] + 0x30);
+    s32 references = resource[2];
+
+    effect[12] = (s32)resource;
+    resource[2] = references + 1;
+}
 
 u32 func_00151FC0(void) {
     return 0xf;
@@ -39,7 +67,11 @@ void func_00152010(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152018);
+void func_00152018(s32 effect, const void *position) {
+    if (*(u16 *)(effect + 0x2c) == 0) {
+        memcpy((void *)(*(s32 *)(effect + 0x30) + 0xc), position, 16);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00152050);
 
@@ -236,7 +268,25 @@ void func_00153680(void) {
 void func_001536A0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001536A8);
+EffectBufferTail *func_001536A8(s32 count) {
+    s32 bytes = count * sizeof(EffectBufferRecord);
+    s32 allocation = func_002D03F8(bytes + sizeof(EffectBufferTail));
+    EffectBufferRecord *record = func_002D0A48(allocation);
+    EffectBufferTail *tail = (EffectBufferTail *)((u8 *)record + bytes);
+
+    tail->allocation = allocation;
+    tail->records = record;
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            remaining--;
+            record->unk20 = 0;
+            record->unk24 = 0;
+            record++;
+        } while (remaining != 0);
+    }
+    return tail;
+}
 
 void func_00153728(u32 *arg0) {
     func_002D0918(*arg0);

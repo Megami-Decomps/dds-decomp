@@ -8,7 +8,9 @@ typedef struct MdlViewState {
     s8 unk0A;
     u8 pad0B[11];
     s16 unk16;
-    u8 pad18[0x74];
+    u8 pad18[10];
+    s16 unk22;
+    u8 pad24[0x68];
     s32 unk8C[1];
     s32 unk90[1];
 } MdlViewState;
@@ -45,7 +47,24 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 void func_00102A18(void);
 void func_00101A80(s32 arg0, s32 arg1);
 void func_0021E3C0(MdlViewState *arg0);
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00218B48);
+void func_002EDBD8(void *buffer, s32 arg1);
+void func_002EDC30(void *buffer);
+void func_002EDE48(void *buffer, s32 arg1, s32 arg2);
+void func_00218768(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_002EDC50(void *buffer);
+s32 *func_002192D0(s32 arg0, s32 arg1);
+s32 func_00219388(s32 arg0);
+void func_00218B48(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    u8 buffer[0x40];
+
+    func_002EDBD8(buffer, 0);
+    if (arg2 & 2) {
+        func_002EDC30(buffer);
+    }
+    func_002EDE48(buffer, arg3, arg4);
+    func_00218768(*(s32 *)(buffer + 0x30), arg0, arg1, arg2);
+    func_002EDC50(buffer);
+}
 
 void func_00218BE8(s32 arg0) {
     func_002CFF98((void *)arg0);
@@ -85,7 +104,21 @@ s32 * func_00219368(s32 arg0) {
     return p;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219388);
+s32 func_00219388(s32 arg0) {
+    s32 count;
+    s32 *node;
+
+    if (arg0 == 0) {
+        return 0;
+    }
+    node = func_00219350(arg0);
+    count = 0;
+    while (node != NULL) {
+        count++;
+        node = func_00219368((s32)node);
+    }
+    return count;
+}
 
 u8 func_002193D8(s32 *arg0, s32 arg1) {
     return *arg0 == arg1;
@@ -241,7 +274,16 @@ void func_0021A948(void) {
     D_003D7A50.unk90[0] = saved;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A998);
+void func_0021A998(void) {
+    s32 i;
+    s32 count = D_003D7A50.unk16;
+    s32 first = D_003D7A50.unk90[0];
+
+    for (i = 0; i < count - 1; i++) {
+        D_003D7A50.unk90[i] = D_003D7A50.unk90[i + 1];
+    }
+    D_003D7A50.unk90[i] = first;
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A9F8);
 
@@ -404,7 +446,13 @@ u32 func_0021CE70(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021CE98);
+s32 func_0021CE98(void) {
+    s32 resource = D_003D7A50.unk90[0];
+    s32 first = func_00219388((s32)func_002192D0(resource, -1));
+    s32 second = func_00219388((s32)func_002192D0(resource, D_003D7A50.unk22));
+
+    return first + second;
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021CF00);
 
