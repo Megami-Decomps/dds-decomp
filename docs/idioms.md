@@ -232,6 +232,15 @@ hand-written.
 The EE ABI passes arguments 5 to 8 in `$8`–`$11` (not on the stack), so a
 7-argument call just loads `$8`–`$10`. Write the full prototype.
 
+## Assembler version
+
+The build uses the ee-as shipped with ee-gcc 2.96. The older
+`ee-gcc2.9-991111` as keeps a `nop` in a `jal` delay slot after a
+large-offset macro, which is what a few retail functions show. It is still not
+the retail assembler: building everything with it changes both ELFs in
+thousands of places, and the text size too. Treat those functions as
+unmatched. Don't switch assemblers per file.
+
 ## Not allowed
 
 These are fakes, and check_unit reports them as `TRICK`:
