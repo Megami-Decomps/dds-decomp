@@ -1,5 +1,15 @@
 #include "common.h"
 
+typedef struct BtlUnit {
+    u8 pad0[0x364];
+    struct BtlUnit *next;
+} BtlUnit;
+
+typedef struct BtlWorkList {
+    u8 pad0[0x24C];
+    BtlUnit *unitList;
+} BtlWorkList;
+
 extern s32 func_00211DE0(void);
 
 extern s32 func_001AA6F8(void);
@@ -156,20 +166,18 @@ INCLUDE_ASM(const s32, "game/code_00207A38", btlFindFarthestUnit);
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
 
 void func_00208D58(void) {
-    s32 temp_v0;
-
-    temp_v0 = func_001AA6F8();
-    for (temp_v0 = *(s32 *)(temp_v0 + 0x24c); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x364)) {
-        func_001E21A0(temp_v0);
+    BtlUnit *unit;
+    BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
+    for (unit = work->unitList; unit != NULL; unit = unit->next) {
+        func_001E21A0((s32)unit);
     }
 }
 
 void func_00208DA0(void) {
-    s32 temp_v0;
-
-    temp_v0 = func_001AA6F8();
-    for (temp_v0 = *(s32 *)(temp_v0 + 0x24c); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x364)) {
-        func_001E2220(temp_v0);
+    BtlUnit *unit;
+    BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
+    for (unit = work->unitList; unit != NULL; unit = unit->next) {
+        func_001E2220((s32)unit);
     }
 }
 

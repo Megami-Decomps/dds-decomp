@@ -138,6 +138,13 @@ extern f32 D_0038BAB0[];
 
 extern f32 D_0038BAC0[];
 
+/* Data transfer descriptor: source-relative byte offset and transfer size. */
+typedef struct FldTransferChunk {
+    u32 unk0;
+    s32 offset;
+    u32 size;
+} FldTransferChunk;
+
 extern f32 D_003897DC[];
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
@@ -169,12 +176,12 @@ s32 func_00129D60(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129D68);
 
-void func_00129E50(u32 arg0, s32 arg1) {
-    func_00344120(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
+void func_00129E50(u32 buffer, FldTransferChunk *chunk) {
+    func_00344120(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
-void func_00129E78(u32 arg0, s32 arg1) {
-    func_00129D68(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
+void func_00129E78(u32 buffer, FldTransferChunk *chunk) {
+    func_00129D68(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void func_00129EA0(u32 arg0, u32 arg1) {

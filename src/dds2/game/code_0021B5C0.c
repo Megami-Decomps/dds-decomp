@@ -120,15 +120,14 @@ extern void func_001E96C8(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32
 extern s32 func_0021C5E0();
 
 void func_0021B5C0(void) {
-    s32 *piVar1;
-    s32 temp_v0;
+    BtlSub718 *sub;
+    s32 task;
 
-    temp_v0 = (s32)func_001AA6F8();
-    piVar1 = *(s32 **)(temp_v0 + 0x718);
-    temp_v0 = *piVar1;
-    if (temp_v0 != 0) {
-        func_001E7D30(temp_v0);
-        *piVar1 = 0;
+    sub = func_001AA6F8()->sub;
+    task = sub->task;
+    if (task != 0) {
+        func_001E7D30(task);
+        sub->task = 0;
     }
 }
 
