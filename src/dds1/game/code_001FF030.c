@@ -35,13 +35,19 @@ extern s32 *D_003BB87C;
 extern s8 D_003D7588[];
 
 typedef struct BattleRuntimeState {
-    u8 unk_00[4];
+    u32 flags;
     u16 state;
     u8 unk_06;
     u8 pending;
     s8 active;
-    u8 unk_09[0x37];
+    u8 unk_09[3];
+    u32 options;
+    u8 unk_10[0x28];
+    void *ownedData;
+    u8 unk_3C[4];
     void *resource;
+    void *request;
+    void *handle;
 } BattleRuntimeState;
 extern BattleRuntimeState D_003D7580;
 
@@ -208,13 +214,33 @@ s32 func_00200F48(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00200F60);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00200F80);
+s32 func_00200F80(s32 unused, u32 limit) {
+    extern u32 func_001A9488(s32);
+    if (func_001A9488(4) < limit) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00200FB0);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00201000);
+s32 func_00201000(s32 unused, u32 limit) {
+    s32 *battle = (s32 *)func_001A17F0();
+    if ((u32)battle[0x250 / 4] < limit) {
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00201030);
+s32 func_00201030(void) {
+    u8 *battle = (u8 *)func_001A17F0();
+    if (*(u16 *)(battle + 0x248) == 2) {
+        if (*(s32 *)(battle + 0x250) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00201070);
 
@@ -333,7 +359,15 @@ s32 func_00202330(s32 unused, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00202390);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00202410);
+s32 func_00202410(u8 *unit, s32 action) {
+    s32 *battle = (s32 *)*D_003BB87C;
+    if (battle[0x148 / 4] == action) {
+        if (*(u32 *)(unit + 0x114) & 0x1000) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00202448);
 
@@ -498,7 +532,13 @@ u32 func_002055F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002055F8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00205690);
+s32 func_00205690(s32 unused, s32 resource) {
+    extern u8 D_00360EE0[];
+    extern u8 D_00360EF0[];
+    extern void func_001DC2A8(s32, u8 *, u8 *);
+    func_001DC2A8(resource, D_00360EE0, D_00360EF0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002056C0);
 
@@ -649,7 +689,25 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00207FF0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208248);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002082A0);
+void func_002082A0(u8 *unit) {
+    s32 species;
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return;
+    }
+    species = *(u16 *)(unit + 0x124);
+    if (species != 0x10a) {
+        if (species < 0x10a) {
+            return;
+        }
+        if (species >= 0x130) {
+            return;
+        }
+        if (species < 0x12e) {
+            return;
+        }
+    }
+    *(u32 *)(unit + 0x114) |= 0x200;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002082E8);
 
@@ -737,7 +795,20 @@ void func_00208EA8(void) {
     func_00208E10();
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00208EC0);
+void *func_00208EC0(s32 group, s32 type) {
+    s32 *unit;
+    if (group != 1) {
+        return 0;
+    }
+    if (type != 0x10e) {
+        return 0;
+    }
+    unit = *(s32 **)(*(s32 *)(func_001A17F0() + 0x694));
+    if (unit == 0) {
+        return 0;
+    }
+    return (unit[0x110 / 4] & 2) ? unit : 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208F10);
 
@@ -792,9 +863,32 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00209528);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002096E8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00209780);
+s32 func_00209780(u8 *entry) {
+    u8 *unit = *(u8 **)(entry + 0xf4);
+    if (unit == 0) {
+        return 1;
+    }
+    if ((*(u32 *)(*(u8 **)(unit + 0x18) + 0x110) & 0x400) == 0) {
+        return 1;
+    }
+    {
+        s32 *data = *(s32 **)(func_001A17F0() + 0x694);
+        s32 flags = data[2] & 4;
+        if (flags) {
+            return 1;
+        }
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002097D0);
+s32 func_002097D0(u8 *unit) {
+    s32 *data;
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return -1;
+    }
+    data = *(s32 **)(func_001A17F0() + 0x694);
+    return (data[2] & 4) ? -1 : 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209818);
 
@@ -989,15 +1083,51 @@ u32 func_0020D548(void) {
     return 7;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D550);
+s32 func_0020D550(s32 battler, s32 action) {
+    u8 *unit = (u8 *)battler;
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return -1;
+    }
+    if (*(u8 *)((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+        return -1;
+    }
+    if (*(u16 *)(unit + 0x124) == 0x114) {
+        return 11;
+    }
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D598);
+s32 func_0020D598(s32 battler, s32 action) {
+    u8 *unit = (u8 *)battler;
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return -1;
+    }
+    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+        return -1;
+    }
+    if (*(u16 *)(unit + 0x124) == 0x111) {
+        return 11;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D5E0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D668);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D690);
+s32 func_0020D690(s32 battler, s32 action) {
+    u8 *unit = (u8 *)battler;
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return -1;
+    }
+    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+        return -1;
+    }
+    if (*(u16 *)(unit + 0x124) == 0x109) {
+        return 11;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D6D8);
 
@@ -1039,7 +1169,19 @@ s32 func_0020D9B8(s32 battler, s32 action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D9F8);
+s32 func_0020D9F8(s32 battler, s32 action) {
+    u8 *unit = (u8 *)battler;
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return -1;
+    }
+    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+        return -1;
+    }
+    if (*(u16 *)(unit + 0x124) == 0x113) {
+        return 11;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020DA40);
 
@@ -1093,7 +1235,18 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020F8E0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020F940);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020F9B8);
+s32 func_0020F9B8(void) {
+    extern s32 func_001019C8(s32);
+    u8 *battle = (u8 *)func_001A17F0();
+    if (*(s16 *)(battle + 0x1c0) == -1) {
+        return 1;
+    }
+    if (func_001019C8(*(s32 *)(battle + 0x2a0)) == 0) {
+        *(s32 *)(battle + 0x2a0) = 0;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020FA08);
 
@@ -1136,11 +1289,67 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00210540);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002105F8);
 
+typedef struct BattleTask {
+    u8 active;
+    u8 unk_01[0xf];
+    u8 phase;
+    u8 unk_11[0xf];
+    s16 kind;
+    u8 unk_22[0x2a];
+    s32 (*update)(void *);
+} BattleTask;
+
+typedef struct BattleTaskData {
+    void *battler;
+    s32 action;
+    s32 finished;
+} BattleTaskData;
+
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00210670);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00210710);
+void *func_00210710(void *battler, s32 action) {
+    extern BattleTask *func_001D4748(s32);
+    extern BattleTaskData *func_001D47D8(BattleTask *);
+    extern s32 func_00210670(void *);
+    BattleTask *task = func_001D4748(12);
+    BattleTaskData *data;
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00210790);
+    task->active = 1;
+    task->kind = 0x62;
+    task->update = func_00210670;
+    task->phase = 0;
+    data = func_001D47D8(task);
+    data->battler = battler;
+    data->action = action;
+    data->finished = 0;
+    return task;
+}
+
+typedef struct BattleCombatant {
+    u8 unk_00[0x110];
+    u32 status;
+    u8 unk_114[0x1a];
+    u16 ailment;
+    u8 unk_130[0x214];
+    struct BattleCombatant *next;
+} BattleCombatant;
+
+s32 func_00210790(void) {
+    BattleCombatant *unit = *(BattleCombatant **)((u8 *)func_001A17F0() + 0x228);
+    while (unit != 0) {
+        u32 status = unit->status;
+        if (status & 0x200) {
+            if (status & 0xe0) {
+                return 1;
+            }
+            if (unit->ailment & 0x4000) {
+                return 1;
+            }
+        }
+        unit = unit->next;
+    }
+    return 0;
+}
 
 s32 func_002107F8(u8 **entries, s32 count) {
     s32 i;
@@ -1270,7 +1479,14 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002121E8);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002124E8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00212640);
+void func_00212640(void) {
+    extern void func_002CFF98(void *);
+    void *data = D_003D7580.ownedData;
+    if (data != 0) {
+        func_002CFF98(data);
+        D_003D7580.ownedData = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00212680);
 
@@ -1312,9 +1528,32 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00213808);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00213A38);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00213A90);
+void func_00213B28(void);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00213AD0);
+void func_00213A90(void) {
+    extern void func_002D0A10(void *);
+    void *handle = D_003D7580.handle;
+    if (handle != 0) {
+        func_002D0A10(handle);
+        D_003D7580.handle = 0;
+        D_003D7580.request = 0;
+    }
+    func_00213B28();
+}
+
+void func_00213AD0(u8 condition) {
+    extern s32 func_001061E8(void);
+    BattleRuntimeState *battle = &D_003D7580;
+    battle->unk_06 = condition;
+    battle->flags = 0;
+    battle->state = 1;
+    battle->active = 1;
+    battle->pending = 0;
+    battle->options = 0;
+    if (func_001061E8() != 0) {
+        battle->options |= 4;
+    }
+}
 
 void func_00213B28(void) {
     D_003D7580.state = 0;
