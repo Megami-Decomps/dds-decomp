@@ -50,7 +50,7 @@ extern u32 func_002192D8(void);
 
 extern void func_00216E98(s32, s32);
 extern u32 func_001AA708(s32);
-extern void func_001AA758(s32);
+extern u32 func_001AA758(s32);
 extern s32 mdlFlagTest(s32);
 extern s32 D_00435DD0;
 extern s32 func_00213F58(s32, s16, s32);
@@ -229,7 +229,15 @@ INCLUDE_ASM(const s32, "game/code_002112C8", battleIsReadyWithoutTurns);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002135B8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00213620);
+s32 func_00213620(s32 battler, u32 limit) {
+    s32 status = battler + 0x120;
+    u32 value = func_001AA708(status);
+    u32 maximum = func_001AA758(status);
+    if (value * 100 < maximum * limit) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_00213688(s32 battler, u32 limit) {
     s32 status = battler + 0x120;
@@ -555,7 +563,14 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00218A78);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218AF0);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00218B78);
+void func_00218B78(void) {
+    s32 state = func_001AA6F8();
+    s32 resource = *(s32 *)(state + 0x718);
+    *(s32 *)resource = 0;
+    *(s32 *)(resource + 4) = 0;
+    *(u8 *)(resource + 8) = 0;
+    func_0011AEE0(6);
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218BA8);
 
