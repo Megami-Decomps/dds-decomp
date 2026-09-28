@@ -1,27 +1,108 @@
 #include "common.h"
 
-extern u32 D_003BD80C;
+/* Parameter blocks copied by the setters below. Sizes are exact: the 0x18
+ * pair (D_00355930/D_00355F88), the 0x24 block (D_00356088), the 0x2C triple
+ * (D_00355AF8/D_00355C70/D_003561C8) and the 0x30 quad
+ * (D_00355880/D_00355908/D_003559A0/D_00355E48). */
+typedef struct Work18 {
+    u8 data[0x18];
+} Work18;
 
-extern u8 D_003BB075;
+typedef struct Work24 {
+    u8 data[0x24];
+} Work24;
 
-extern u8 D_003BB074;
+typedef struct Work2C {
+    u8 data[0x2C];
+} Work2C;
 
-extern u8 D_003BB073;
+typedef struct Work30 {
+    u8 data[0x30];
+} Work30;
+/* Slot addressed by func_0018E660/func_0018E638 with a 0x60 stride. Only the
+ * tail is known: two words cleared and a float reset to 0.05f. */
+typedef struct Slot60 {
+    u8 pad[0x54];
+    s32 unk54;
+    s32 unk58;
+    f32 unk5C;
+} Slot60;
 
-extern u32 D_003BD810;
+typedef struct SlotTab {
+    Slot60 *slots;
+} SlotTab;
+/* Common prefix copied by the per-type setters (func_0018F440 and friends).
+ * The trailing word is real: gcc emits lw/sw for it, so it cannot be part
+ * of the byte blob. BD808/BD804/BD810 use the 0x2C form, BD80C the 0x24. */
+typedef struct BDCommon2C {
+    u8 data[0x28];
+    u32 unk28;
+} BDCommon2C;
 
-extern u8 D_003BB076;
+typedef struct BDWork2C {
+    BDCommon2C common;
+    u32 unk2C;
+} BDWork2C;
 
-extern u32 D_003BD804;
+typedef struct BDCommon24 {
+    u8 data[0x20];
+    u32 unk20;
+} BDCommon24;
 
-extern u8 D_003BB072;
+typedef struct BDWork24 {
+    BDCommon24 common;
+    u32 unk24;
+} BDWork24;
 
-extern u32 D_003BD808;
+extern Work30 D_00355880;
+extern Work30 D_00355908;
+extern Work18 D_00355930;
+extern Work30 D_003559A0;
+extern Work2C D_00355AF8;
+extern Work2C D_00355C70;
+extern Work30 D_00355E48;
+extern Work18 D_00355F88;
+extern Work24 D_00356088;
+extern Work2C D_003561C8;
 
-extern u8 D_003BB071;
+extern BDWork24 *D_003BD80C;
 
-extern u8 D_003BB070;
+extern s8 D_003BB075;
 
+extern s8 D_003BB074;
+
+extern s8 D_003BB073;
+
+extern BDWork2C *D_003BD810;
+
+extern s8 D_003BB076;
+
+extern BDWork2C *D_003BD804;
+
+extern s8 D_003BB072;
+
+extern BDWork2C *D_003BD808;
+
+extern s8 D_003BB071;
+
+extern s8 D_003BB070;
+extern u32 func_00151FC8(s32 arg);
+extern u8 D_003558D8[];
+extern u8 D_003558A8[];
+extern u8 D_00355948[];
+extern u8 D_00355970[];
+
+extern BDWork2C *func_00186C18(void *arg);
+extern BDWork2C *func_00186F90(void *arg);
+extern BDWork24 *func_00187FC0(void *arg);
+extern BDWork2C *func_00187460(void *arg);
+extern void func_00186498(Work30 *arg);
+extern void func_00186CD0(BDWork2C *arg);
+extern void func_00187098(BDWork2C *arg);
+extern void func_00187598(BDWork2C *arg);
+extern void func_00187988(Work30 *arg);
+extern void func_00187C08(Work18 *arg);
+extern void func_00188068(BDWork24 *arg);
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E218);
 
 void func_0018E2A8(s32 arg0) {
@@ -34,7 +115,12 @@ INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E408);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E548);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E638);
+void func_0018E638(SlotTab *tab, s32 idx) {
+    Slot60 *slot = &tab->slots[idx];
+
+    slot->unk5C = 0.05f;
+    slot->unk54 = slot->unk58 = 0;
+}
 
 s32 func_0018E660(s32 *arg0, s32 arg1) {
     return *arg0 + arg1 * 0x60;
@@ -68,7 +154,9 @@ void func_0018F3B0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F3B8);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F418);
+Work30 *func_0018F418(void) {
+    return &D_00355880;
+}
 
 void func_0018F428(void) {
     D_003BB071 = 1;
@@ -78,15 +166,21 @@ void func_0018F438(void) {
     D_003BB071 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F440);
+void func_0018F440(BDCommon2C *src) {
+    D_003BD808->common = *src;
+}
 
-u32 func_0018F4A0(void) {
+BDWork2C *func_0018F4A0(void) {
     return D_003BD808;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F4A8);
+void func_0018F4A8(u32 arg) {
+    D_003BD808->unk2C = arg;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F4B8);
+void func_0018F4B8(void) {
+    D_003BD808->unk2C = func_00151FC8(2);
+}
 
 void func_0018F4E0(void) {
     D_003BB072 = 1;
@@ -96,15 +190,21 @@ void func_0018F4F0(void) {
     D_003BB072 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F4F8);
+void func_0018F4F8(BDCommon2C *src) {
+    D_003BD804->common = *src;
+}
 
-u32 func_0018F558(void) {
+BDWork2C *func_0018F558(void) {
     return D_003BD804;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F560);
+void func_0018F560(u32 arg) {
+    D_003BD804->unk2C = arg;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F570);
+void func_0018F570(void) {
+    D_003BD804->unk2C = func_00151FC8(2);
+}
 
 void func_0018F598(void) {
     D_003BB076 = 1;
@@ -114,15 +214,21 @@ void func_0018F5A8(void) {
     D_003BB076 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F5B0);
+void func_0018F5B0(BDCommon2C *src) {
+    D_003BD810->common = *src;
+}
 
-u32 func_0018F610(void) {
+BDWork2C *func_0018F610(void) {
     return D_003BD810;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F618);
+void func_0018F618(u32 arg) {
+    D_003BD810->unk2C = arg;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F628);
+void func_0018F628(void) {
+    D_003BD810->unk2C = func_00151FC8(3);
+}
 
 void func_0018F650(void) {
     D_003BB073 = 1;
@@ -134,7 +240,9 @@ void func_0018F660(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F668);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F6C8);
+Work30 *func_0018F6C8(void) {
+    return &D_00355908;
+}
 
 void func_0018F6D8(void) {
     D_003BB074 = 1;
@@ -146,7 +254,9 @@ void func_0018F6E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F6F0);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F730);
+Work18 *func_0018F730(void) {
+    return &D_00355930;
+}
 
 void func_0018F740(void) {
     D_003BB075 = 1;
@@ -156,59 +266,107 @@ void func_0018F750(void) {
     D_003BB075 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F758);
+void func_0018F758(BDCommon24 *src) {
+    D_003BD80C->common = *src;
+}
 
-u32 func_0018F7A8(void) {
+BDWork24 *func_0018F7A8(void) {
     return D_003BD80C;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F7B0);
+void func_0018F7B0(u32 arg) {
+    D_003BD80C->unk24 = arg;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F7C0);
+void func_0018F7C0(void) {
+    D_003BD80C->unk24 = func_00151FC8(0);
+}
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F7E8);
+void func_0018F7E8(void) {
+    D_003BD808 = func_00186C18(D_003558D8);
+    D_003BD804 = func_00186F90(D_003558A8);
+    D_003BD80C = func_00187FC0(D_00355948);
+    D_003BD810 = func_00187460(D_00355970);
+    *(s32 *)func_0018F610() = 4;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F848);
+void func_0018F848(void) {
+    if (D_003BB070) {
+        func_00186498(&D_00355880);
+    }
+    if (D_003BB071) {
+        func_00186CD0(D_003BD808);
+    }
+    if (D_003BB072) {
+        func_00187098(D_003BD804);
+    }
+    if (D_003BB076) {
+        func_00187598(D_003BD810);
+    }
+    if (D_003BB073) {
+        func_00187988(&D_00355908);
+    }
+    if (D_003BB074) {
+        func_00187C08(&D_00355930);
+    }
+    if (D_003BB075) {
+        func_00188068(D_003BD80C);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F8F8);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F9B0);
+Work30 *func_0018F9B0(void) {
+    return &D_003559A0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F9C0);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FA20);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FAD8);
+Work2C *func_0018FAD8(void) {
+    return &D_00355AF8;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FAE8);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FB50);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FC08);
+Work2C *func_0018FC08(void) {
+    return &D_00355C70;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FC18);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FC80);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FD38);
+Work30 *func_0018FD38(void) {
+    return &D_00355E48;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FD48);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FDA8);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FE60);
+Work18 *func_0018FE60(void) {
+    return &D_00355F88;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FE70);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FEB0);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FF68);
+Work24 *func_0018FF68(void) {
+    return &D_00356088;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FF78);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FFD0);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_00190088);
+Work2C *func_00190088(void) {
+    return &D_003561C8;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_00190098);
 

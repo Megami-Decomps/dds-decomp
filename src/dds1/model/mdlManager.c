@@ -46,8 +46,35 @@ typedef struct MdlRes {
     u8 unk0[8]; /* 0x0 */
     u32 unk8;   /* 0x8 */
 } MdlRes;
+/* Entry searched by func_00217E10/func_00216BB0 on its s16 id at +0x28.
+ * Only the fields read by the matched helpers below are known. */
+typedef struct MdlNode {
+    struct MdlNode *next; /* 0x0 */
+    u8 pad4[4];           /* 0x4 */
+    void *unk8;           /* 0x8: dereferenced by func_00218410 */
+    u8 padC[0x10];        /* 0xC */
+    f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
+    f32 unk20;            /* 0x20: float slot of func_00217F18/F40 */
+    u8 pad24[4];          /* 0x24 */
+    s16 unk28;            /* 0x28: search id */
+    s16 unk2A;            /* 0x2A: slot index used by func_00216B78 */
+    u16 unk2C;            /* 0x2C */
+    u16 unk2E;            /* 0x2E */
+    u8 unk30;             /* 0x30: compared against 5 */
+    u8 pad31[7];          /* 0x31 */
+} MdlNode;
+/* 8-byte prefix copied from D_003BBB60 by func_00217038. */
+typedef struct Hdr8 {
+    u8 b[8];
+} Hdr8;
 
-extern s32 func_00217E10(void);
+extern u32 D_00367904[][2];
+extern u8 D_003BBB60[];
+extern void func_002DB308(void *arg);
+extern char *strcat(char *dst, const char *src);
+
+MdlNode *func_00217E10(MdlCtx *ctx, s32 id);
+void func_00217CA8(MdlCtx *ctx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 
 extern void *func_00288B90(void);
 extern u32 func_002EB090(void *);
@@ -56,9 +83,27 @@ extern u32 D_003BD878;
 
 extern void *func_00216708(void);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00216B78);
+void func_00216B78(void *arg0, MdlNode *arg1) {
+    s32 off = arg1->unk2A * 4 + 0x20;
+    void **slot = (void **)((u8 *)arg0 + off);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00216BB0);
+    if (*slot == arg1) {
+        *slot = NULL;
+    }
+    func_002DB308(arg1);
+}
+
+void func_00216BB0(MdlCtx *ctx, s32 id) {
+    MdlNode *node = (MdlNode *)ctx->inner->list;
+
+    while (node != NULL) {
+        if (node->unk28 == id) {
+            func_00216B78(ctx, node);
+            break;
+        }
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216C00);
 
@@ -100,7 +145,10 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00216F68);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216FE0);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217038);
+char *func_00217038(char *dst, const char *src) {
+    *(Hdr8 *)dst = *(Hdr8 *)D_003BBB60;
+    return strcat(dst, src);
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217068);
 
@@ -128,28 +176,86 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217C60);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217CA8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217DA0);
+void func_00217DA0(MdlCtx *ctx, s32 arg1, s32 arg2) {
+    func_00217CA8(ctx, arg1, arg2, 1, 0.0f, 0.0f);
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217DC0);
+void func_00217DC0(MdlCtx *ctx, s32 arg1, s32 arg2) {
+    func_00217CA8(ctx, arg1, arg2, 0, 0.0f, 0.0f);
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217DE0);
+void func_00217DE0(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
+    func_00217CA8(ctx, arg1, arg2, 1, arg4, arg5);
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217DF8);
+void func_00217DF8(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
+    func_00217CA8(ctx, arg1, arg2, 0, arg4, arg5);
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217E10);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217E58);
+s32 func_00217E58(MdlCtx *ctx, s32 id) {
+    MdlNode *node = func_00217E10(ctx, id);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217E88);
+    if (node == NULL) {
+        return -1;
+    }
+    return node->unk2C;
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217EB0);
+s32 func_00217E88(MdlCtx *ctx, s32 id) {
+    MdlNode *node = func_00217E10(ctx, id);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217EE0);
+    if (node == NULL) {
+        return 0;
+    }
+    return node->unk2E;
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217F18);
+s32 func_00217EB0(MdlCtx *ctx, s32 id) {
+    MdlNode *node = func_00217E10(ctx, id);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217F40);
+    if (node == NULL) {
+        return 0;
+    }
+    return (s32)node->unk1C;
+}
 
+s32 func_00217EE0(MdlCtx *ctx, s32 id) {
+    MdlNode *node = func_00217E10(ctx, id);
+
+    if (node == NULL) {
+        return 2;
+    }
+    return node->unk30 == 5;
+}
+
+f32 func_00217F18(MdlCtx *ctx, s32 id) {
+    MdlNode *node = func_00217E10(ctx, id);
+    f32 r = 0.0f;
+
+    if (node != NULL) {
+        r = node->unk20;
+    }
+    return r;
+}
+
+void func_00217F40(MdlCtx *ctx, s32 id, f32 arg2) {
+    MdlNode *node = func_00217E10(ctx, id);
+
+    if (node != NULL) {
+        node->unk20 = arg2;
+    }
+}
+
+/* The VU0 vector shims below (func_00217F70/88/A0/B8/00218010/28) move
+ * 16-byte vectors between MdlInner (+0x20/+0x30/+0x40/+0x50/+0x60/+0x70)
+ * and VU0 data memory (vf10 in/out, vf28-30 out). gcc 2.96 cannot address
+ * VU0 memory from plain C: a lone COP2 transfer is sunk into the return
+ * delay slot while retail keeps a nop there, and the vf10 store is
+ * rescheduled across the func_002E7D98 call. They are left as asm
+ * (suspected handwritten shims, like their lqc2 callers in
+ * game/code_0029A840.c). */
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217F70);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217F88);
@@ -174,9 +280,15 @@ void func_00218050(MdlCtx *ctx, u32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002180A8);
+void func_002180A8(MdlCtx *ctx, u32 arg1) {
+    ctx->inner->unk1C = arg1;
+    func_00218050(ctx, (arg1 & 0xFF000000) | 0x808080);
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002180E0);
+void func_002180E0(MdlCtx *ctx, u32 arg1) {
+    ctx->inner->unk1C = arg1;
+    func_00218050(ctx, arg1);
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218100);
 
@@ -185,26 +297,26 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00218158);
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218228);
 
 void func_00218320(MdlCtx *ctx) {
-    u32 *node;
+    MdlNode *node;
 
-    for (node = ctx->inner->list; node != NULL; node = (u32 *)*node) {
+    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
         func_002DB768(node);
     }
 }
 
 void func_00218368(MdlCtx *ctx) {
-    u32 *node;
+    MdlNode *node;
 
-    for (node = ctx->inner->list; node != NULL; node = (u32 *)*node) {
+    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
         func_002DB788(node);
     }
 }
 
-u8 func_002183B0(void) {
-    s32 ready;
+u8 func_002183B0(MdlCtx *ctx, s32 id) {
+    MdlNode *found;
 
-    ready = func_00217E10();
-    return ready != 0;
+    found = func_00217E10(ctx, id);
+    return found != NULL;
 }
 
 u16 func_002183D0(MdlCtx *ctx) {
@@ -219,9 +331,18 @@ u32 func_002183F0(void) {
     return 8;
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002183F8);
+u32 func_002183F8(s32 idx) {
+    return D_00367904[idx][0];
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218410);
+s32 func_00218410(MdlCtx *ctx, s32 id) {
+    MdlNode *node = func_00217E10(ctx, id);
+
+    if (node == NULL) {
+        return 0;
+    }
+    return *(u16 *)node->unk8;
+}
 
 void func_00218440(MdlCtx *ctx) {
     func_002DA1B0(ctx->inner->unk8);
@@ -229,7 +350,14 @@ void func_00218440(MdlCtx *ctx) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218460);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218580);
+s32 func_00218580(MdlCtx *ctx) {
+    s32 r = 0;
+
+    if ((u8)ctx->unk10 == 1) {
+        r = ctx->inner == (MdlInner *)0x30424950;
+    }
+    return r;
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002185B0);
 
