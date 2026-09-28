@@ -310,7 +310,7 @@ typedef struct SoundIpuBuffer {
     u32 buffers[2];
 } SoundIpuBuffer;
 
-void func_002EBF88(SoundIpuBuffer *stream) {
+void sdfSoundQueueIpuBuffer(SoundIpuBuffer *stream) {
     vu32 *ipuData = (vu32 *)0x1000B010;
     vu32 *ipuSize = (vu32 *)0x1000B020;
     vu32 *ipuControl = (vu32 *)0x1000B000;

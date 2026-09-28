@@ -35,7 +35,7 @@ typedef struct TextStream {
     s32 unk18;     /* 0x18: position */
 } TextStream;
 
-/* 8-byte node header; payload follows (func_00198248/func_00198270). */
+/* 8-byte node header; payload follows (func_00198248/enqueueMemNode). */
 typedef struct MemNode {
     u32 unk0;              /* 0x0 */
     struct MemNode *unk4;  /* 0x4 */
@@ -331,7 +331,7 @@ void *func_00198248(MemNode *queue) {
     return head + 1;
 }
 
-s32 func_00198270(void *payload, MemNode *queue) {
+s32 enqueueMemNode(void *payload, MemNode *queue) {
     MemNode *node = (MemNode *)payload - 1;
     if (payload == NULL) {
         return 0;
@@ -383,7 +383,7 @@ u32 func_00198428(void) {
     return temp_v1;
 }
 
-void func_00198460(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
+void initTextPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
     s8 index = 0;
     TextPoolNode *previous = NULL;
     TextPoolNode *node = nodes;
@@ -554,7 +554,7 @@ u32 func_001997E8(void) {
     return 1;
 }
 
-void func_001997F0(void) {
+void reportCampProcessHalted(void) {
     if (func_00102A40() != 5) {
         func_00102A18();
     }

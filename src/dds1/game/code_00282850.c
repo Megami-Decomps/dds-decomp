@@ -201,7 +201,17 @@ void func_00283310(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283788);
+u32 *func_00283788(u32 x, u32 y, u32 z, u32 color, u32 texture) {
+    u32 *sprite = func_002CFEB8(0x28);
+    memset(sprite, 0, 0x28);
+    sprite[4] = x;
+    sprite[5] = y;
+    sprite[6] = z;
+    sprite[7] = color;
+    sprite[8] = texture;
+    sprite[9] = 0x100;
+    return sprite;
+}
 
 void func_00283820(void) {
     func_002CFF98();
@@ -250,7 +260,7 @@ void func_00284080(s32 arg0) {
 void func_002840B8(s32 *list) {
     u32 i;
     for (i = 0; i < 2; i++) {
-        func_002BD2F8(list[i + 16]);
+        destroyPackedEffectBatch(list[i + 16]);
     }
 }
 
@@ -266,7 +276,20 @@ void releaseSpriteTextures(s32 *object) {
     func_002840B8(object);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002843A0);
+u32 func_002843A0(s32 useDefault, s32 index, s32 option) {
+    u32 color = 0xA09DC380;
+    if (!useDefault) {
+        switch (func_00286EF8(index, option)) {
+        case 1:
+            color = 0xB4A06480;
+            break;
+        case 2:
+            color = 0x89554780;
+            break;
+        }
+    }
+    return color;
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284418);
 
@@ -321,7 +344,17 @@ void func_002850C8(s32 arg0, s32 arg1, s32 arg2) {
     *(s32 *)(arg0 + 0x14) = arg2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002850D8);
+u32 *func_002850D8(s32 source) {
+    u32 *item = (u32 *)func_002CFEB8(0x3c);
+    s32 first;
+    u32 second;
+    memset(item, 0, 0x3c);
+    first = func_002CD728(source);
+    second = func_002CD788(source);
+    func_002850C8(item, func_002CD2A8((u16)first), *(u32 *)second);
+    item[14] = 0x100;
+    return item;
+}
 
 void func_00285160(void) {
     func_002CFF98();
@@ -337,7 +370,21 @@ void func_00285178(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285208);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285440);
+void func_00285440(s32 x, s32 y, s32 z, u32 *item, s32 option) {
+    s32 previous;
+    s32 next;
+    func_00285208(x, y, z, item, option);
+    previous = item[13];
+    next = previous + 12;
+    if (previous < 0x200) {
+        item[13] = next;
+        if (next < 0x200) {
+            return;
+        }
+        previous = next;
+    }
+    item[13] = previous - 0x200;
+}
 
 void func_00285490(u32 arg0) {
     memset(arg0, 0, 0x4c);
@@ -422,11 +469,14 @@ s32 findMatchingPartyEntryIndex(s32 object) {
     return 0;
 }
 
+extern s8 D_0037CE40[];
+extern u16 D_0037CE18[];
+extern u16 D_0037CE1A[];
+
 INCLUDE_ASM(const s32, "game/code_00282850", func_002860B8);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00286138);
 
-extern s8 D_0037CE40[];
 s32 getIndexedNonzeroEffect(s32 index) {
     s32 count = 0;
     s32 i;
@@ -438,6 +488,8 @@ s32 getIndexedNonzeroEffect(s32 index) {
     }
     return 0;
 }
+
+extern s8 D_0037CE42[];
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002861B8);
 
@@ -474,7 +526,22 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00286540);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002865B8);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286648);
+s32 func_00286648(u16 ability) {
+    u8 value;
+    if (ability == 0) {
+        return 1;
+    }
+    value = *(u8 *)(D_003BAA50 + ability * 56 + 8);
+    switch (value) {
+    case 0:
+        return 1;
+    case 1:
+        return 2;
+    case 2:
+        return 3;
+    }
+    return 0;
+}
 
 void func_002866B0(u16 arg0) {
     func_00118E38(arg0);
@@ -489,6 +556,8 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002866D0);
 u8 func_002868C0(u32 arg0) {
     return *(s8 *)((arg0 & 0xffff) * 2 + D_003BAA4C) == '\x01';
 }
+
+extern u32 D_003BAA54;
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002868E0);
 
@@ -519,6 +588,7 @@ u16 func_00286AD0(s32 arg0) {
     return *(u16 *)(arg0 + 0x52);
 }
 
+extern u16 D_0037CE00[];
 INCLUDE_ASM(const s32, "game/code_00282850", func_00286AD8);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2420);
@@ -619,6 +689,9 @@ void func_00287420(f32 arg0) {
     D_003245E0[4] = arg0 + 2048.0f;
     func_00287258();
 }
+
+extern s8 D_0037CE90[];
+extern u8 D_0037CE98[];
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287450);
 

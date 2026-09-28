@@ -411,7 +411,7 @@ extern void func_00190208(void *event);
 extern void func_00190118();
 extern s8 D_003BB04C;
 
-extern EffPCPWork *func_0017D7A8(void);
+extern EffPCPWork *func_0017D7A8();
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -1559,6 +1559,8 @@ void func_0017D4B8(EffPCPWork *work, u32 val) {
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017D4C0);
+
+extern EffPCPWork *func_0017D4C0(void *first, void **blocks);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017D7A8);
 

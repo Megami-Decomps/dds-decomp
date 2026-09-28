@@ -41,7 +41,7 @@ void func_0026E5A0(s32 *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
         if (resources[i + 1] != 0) {
-            func_002CACD8(resources[i + 1]);
+            destroyTaskWork(resources[i + 1]);
         }
     }
     func_002D0918(resources[0]);

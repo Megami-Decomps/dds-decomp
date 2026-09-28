@@ -575,10 +575,10 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271368);
 void releaseStaffSpriteHandles(u8 *display) {
     u32 *image = (u32 *)(display + 0x130);
     u32 index = 0;
-    func_002BD2F8(*(u32 *)(display + 0x118));
-    func_002BD2F8(*(u32 *)(display + 0x120));
+    destroyPackedEffectBatch(*(u32 *)(display + 0x118));
+    destroyPackedEffectBatch(*(u32 *)(display + 0x120));
     do {
-        func_002BD2F8(*image++);
+        destroyPackedEffectBatch(*image++);
         index++;
     } while (index < 2);
 }

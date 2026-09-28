@@ -103,7 +103,17 @@ void func_00243A18(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243A58);
+extern s32 D_00368BD8[];
+extern s32 func_001951C8(s32 *resources, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_00195450(s32 resource, s32 width, s32 height);
+
+void func_00243A58(u8 *scene) {
+    s32 resource;
+    *(s32 *)(scene + 0x2410) = 0;
+    resource = func_001951C8(D_00368BD8, 0, 0, 0, 0);
+    *(s32 *)(scene + 0x2410) = resource;
+    func_00195450(resource, 0x960, 0x70);
+}
 
 void func_00243AA8(s32 arg0) {
     func_00194920(*(u32 *)(arg0 + 0x2410));
@@ -220,12 +230,12 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002441E8);
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244258);
 
 s32 shopReleaseSceneObjects(u8 *scene) {
-    extern s32 func_002BD2F8(s32);
+    extern s32 destroyPackedEffectBatch(s32);
     s32 *objects = (s32 *)(scene + 0x74);
     s32 result;
     u32 i;
     for (i = 0; i < 2; i++) {
-        result = func_002BD2F8(*objects++);
+        result = destroyPackedEffectBatch(*objects++);
     }
     return result;
 }
@@ -352,3 +362,4 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
+

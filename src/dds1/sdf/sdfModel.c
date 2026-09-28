@@ -5,7 +5,7 @@ extern void *func_002CFEB8(s32 arg0);
 extern void *devCreateRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void func_002EFD30(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
-extern void func_002D78F0(void);
+extern void sdfFreeNodeLists(void);
 extern void func_002D78B8(void *arg0);
 extern void func_002D8600(void *arg0);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -163,7 +163,7 @@ void func_002D8800(SdfModel *model, s32 arg1, s32 arg2) {
     s32 j = 0;
 
     model->unk38 = arg1;
-    func_002D78F0();
+    sdfFreeNodeLists();
     func_002D78B8(model);
     func_002D8600(model);
     /* The re-initialization below is load-bearing for a byte-identical build. */

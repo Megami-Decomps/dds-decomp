@@ -174,3 +174,4 @@ void func_00263E70(u32 arg0, u32 arg1) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
+

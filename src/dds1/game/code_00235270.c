@@ -42,6 +42,7 @@ extern u16 D_003BD89A;
 extern s16 D_003BD89C;
 extern s16 D_003BD89E;
 
+
 typedef struct EvtRuntimeChild {
     u8 pad00[2];
     u16 unk02;
@@ -375,7 +376,32 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023BC30);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023BE40);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023C178);
+extern s32 func_0018FEB0();
+extern s32 kwlnTaskGetTimer(s32 task);
+extern u8 *D_003BB128;
+extern s32 D_003BD8A0;
+
+s32 evtSynchronizeSelectedEntry(s32 task) {
+    u8 *runtime = func_00101A70();
+    if (func_0018FEB0() == 0) {
+        *(s32 *)(runtime + 0x228C) = 0;
+        return -1;
+    }
+    if (kwlnTaskGetTimer(task) == 0) {
+        s32 selected = *(s32 *)(runtime + 0x23E0);
+        D_003BD8A0 = selected;
+        if (selected != 0) {
+            *(s32 *)(D_003BB128 + 0x24) = selected;
+        }
+    }
+    if (*(s32 *)(D_003BB128 + 0x24) != *(s32 *)(runtime + 0x23E0)) {
+        s32 selected = *(s32 *)(runtime + 0x23E0);
+        if (selected != 0) {
+            *(s32 *)(D_003BB128 + 0x24) = selected;
+        }
+    }
+    return 0;
+}
 
 s32 func_0023C208(void) {
     void *temp_v0;
@@ -400,7 +426,15 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023CA60);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023D420);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023D560);
+extern s32 (*D_00368B48[])(s32, s32, void *);
+
+s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, void *runtime) {
+    s32 mode = *(s32 *)((u8 *)runtime + 0x2280);
+    if (mode == 11 && index != mode) {
+        return 0;
+    }
+    return D_00368B48[index](x, y, runtime);
+}
 
 void func_0023D5B0(s32 arg0, void *arg1, s32 arg2) {
     func_0030F190(arg0, arg1, arg2);

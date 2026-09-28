@@ -669,7 +669,7 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7AA8);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7B20);
 
-f32 func_002E7BA8(f32 angle) {
+f32 sdfWrapAngle(f32 angle) {
     s32 turns;
     if (angle > 3.1415926f) {
         turns = (s32)(angle / 6.2831852f) + 1;

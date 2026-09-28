@@ -114,19 +114,19 @@ extern u64 func_002D2488(SdfTex *);
 
 void *sdfChunkFindById(SdfChunk *chunk, s32 id);
 void *func_002CFEB8(s32 size);
-void *func_002D9DD8(SdfTextParam *, s32);
+void *sdfChunkFindRecordById(SdfTextParam *, s32);
 void func_002D9D00(SdfTextParam *param, void *resource);
 void func_002D9D80(SdfTextParam *param, void *resource);
 void func_002D3BE0(void *arg0, void (*arg1)(void));
 void func_002D3C30(void *arg0, s32 arg1);
 void func_002DA290(void);
-void func_002DAA00(SdfAsset *);
+void sdfAssetRelease(SdfAsset *);
 void func_002E7680(void *);
 void func_002D2D00(u32);
 SdfAsset *func_002DA730(void);
 u8 *func_002DA830(SdfAsset *, SdfTextParam *, u8 *);
 void func_002DA358(SdfResourceList *, SdfAsset *);
-void func_002DAAE0(SdfAsset *, SdfAssetEntry *);
+void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void func_002DAC88(SdfAsset *, void *);
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9748);
 
@@ -155,7 +155,7 @@ void *sdfChunkFindByTag(SdfTextParam *arg0, s32 tag) {
     return sdfChunkFindById(arg0->unk90, tag);
 }
 
-s32 func_002D9B68(SdfTextParam *param, const char *name) {
+s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
     SdfChunk *chunk = sdfChunkFindByTag(param, 0x4D4E444E);
     u8 *entry;
     u8 *end;
@@ -191,7 +191,7 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9D00);
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9D80);
 
-void *func_002D9DD8(SdfTextParam *param, s32 id) {
+void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
     SdfChunk *chunk = sdfChunkFindByTag(param, 0x534F504D);
     u8 *entry;
     u8 *end;
@@ -210,7 +210,7 @@ void *func_002D9DD8(SdfTextParam *param, s32 id) {
 }
 
 s32 func_002D9E58(SdfTextParam *param, s32 id) {
-    void *resource = func_002D9DD8(param, id);
+    void *resource = sdfChunkFindRecordById(param, id);
     if (resource != NULL) {
         func_002D9D00(param, resource);
         return 1;
@@ -219,7 +219,7 @@ s32 func_002D9E58(SdfTextParam *param, s32 id) {
 }
 
 s32 func_002D9E98(SdfTextParam *param, s32 id) {
-    void *resource = func_002D9DD8(param, id);
+    void *resource = sdfChunkFindRecordById(param, id);
     if (resource != NULL) {
         func_002D9D80(param, resource);
         return 1;
@@ -276,7 +276,7 @@ void func_002D9FA8(u32 arg0) {
     devCreateRequest(arg0, 4, 4);
 }
 
-void func_002D9FC8(SdfResourceList *list, s32 freeItems) {
+void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
     s32 i;
     s32 count;
     if (list == NULL) {
@@ -312,7 +312,7 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA1B0);
 
 void func_002DA240(void) {
     func_002D3BE0(&D_003BDA10, func_002DA290);
-    func_002D3BE0(&D_003BDA18, func_002DAA00);
+    func_002D3BE0(&D_003BDA18, sdfAssetRelease);
 }
 
 SdfResourceList *func_002DA270(s32 capacity) {
@@ -321,7 +321,7 @@ SdfResourceList *func_002DA270(s32 capacity) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA290);
 
-void func_002DA2F8(void *resource, s32 retained) {
+void sdfReleaseQueuedResource(void *resource, s32 retained) {
     if (resource == NULL) {
         return;
     }
@@ -461,7 +461,7 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA730);
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA830);
 
-void func_002DAA00(SdfAsset *asset) {
+void sdfAssetRelease(SdfAsset *asset) {
     if (asset == NULL) {
         return;
     }
@@ -492,7 +492,7 @@ void *func_002DAAA0(u32 *arg0, SdfNode *arg1, s32 arg2) {
     return (void *)((u8 *)arg1 + 0x10);
 }
 
-void func_002DAAE0(SdfAsset *asset, SdfAssetEntry *entry) {
+void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     SdfTex *resource;
     entry->unk04 = asset->unk10;
     entry->unk1C = asset->unk1C;
@@ -524,11 +524,11 @@ void func_002DAD18(SdfAsset *arg0, SdfTextParam *arg1) {
     arg1->unk2C = arg0->unk44;
 }
 
-void func_002DAD30(SdfAsset *asset, s32 index) {
+void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
     u8 flags = asset->pad00[6];
     void *entry = asset->entries[index];
     if ((flags >> index) & 1) {
-        func_002DAAE0(asset, entry);
+        sdfAssetCopyTextureState(asset, entry);
     }
     if (flags & (4 << index)) {
         func_002DAC68(asset, entry);
@@ -544,7 +544,7 @@ void func_002DAD30(SdfAsset *asset, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DAE00);
 
-SdfResourceList *func_002DAEE8(SdfTextParam *param, u32 *data) {
+SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     u32 count = *data;
     u8 *cursor = (u8 *)(data + 1);
     SdfResourceList *list = func_002DA270(count >= 0x20 ? count : 0x20);

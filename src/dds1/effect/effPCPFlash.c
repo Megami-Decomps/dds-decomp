@@ -11,6 +11,7 @@ extern s32 func_0018DDF8(s32 color, s32 param);
 
 extern void func_002DD8B8(void *orientation, f32 angle);
 
+
 /* Effect initializers implemented in assembly below. Each is entered both with
    and without spawn arguments, so they are declared unchecked. */
 extern void func_0016A088();

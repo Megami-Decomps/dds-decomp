@@ -113,7 +113,7 @@ u32 parObjGetMode(ParObj *work) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
-ParObj *func_0015A8C8(ParObj *work) {
+ParObj *parInstantiateKind(ParObj *work) {
     ParObj *particle = D_0034E250[work->unk140].func();
     particle->unk140 = work->unk140;
     if (*(s32 *)((u8 *)work + 0x28) == -1) {
@@ -166,7 +166,7 @@ extern void func_0015AF70(s32);
 extern void func_0015B058(s32);
 extern void func_0015B148(s32);
 
-void func_0015AE40(void *work) {
+void parDispatchKindUpdate(void *work) {
     switch (*(u16 *)work) {
     case 1:
         func_00159CF0(*(s32 *)((u8 *)work + 8));
@@ -186,7 +186,7 @@ void func_0015AE40(void *work) {
 extern void func_00159F30(s32);
 extern void func_00188510(s32);
 
-void func_0015AED8(void *work, s32 index) {
+void parDispatchKindInit(void *work, s32 index) {
     switch (*(u16 *)work) {
     case 1:
         func_00159F30(*(s32 *)((u8 *)work + 8));

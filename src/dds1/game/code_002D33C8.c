@@ -140,7 +140,7 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D38B8);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D39B0);
 
-void func_002D3B28(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+void sdfCreateDescriptorPacket(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 (*alloc)(s32)) {
     s32 block;
     if (alloc == NULL) {
@@ -207,7 +207,7 @@ extern void func_002D0918(s32);
 extern s32 func_002D03F8(s32);
 extern s32 func_002D0A48(s32);
 
-void func_002D3F30(s32 size) {
+void sdfResizeDoubleBuffer(s32 size) {
     s32 memory;
     if (D_003BD310 != 0) {
         func_002D0918(D_003BD310);
@@ -806,7 +806,7 @@ typedef struct SdfFreeNode {
 extern void func_002D0918(s32 allocation);
 extern void func_002CFF98(void *allocation);
 
-void func_002D78F0(s32 root) {
+void sdfFreeNodeLists(s32 root) {
     SdfFreeNode **lists = (SdfFreeNode **)(root + 0x28);
     s32 i = 0;
     s32 end = 2;
@@ -827,7 +827,7 @@ void func_002D78F0(s32 root) {
 }
 
 void func_002D7988(u32 arg0) {
-    func_002D78F0(arg0);
+    sdfFreeNodeLists(arg0);
     func_002CFF98(*(u32 *)((s32)arg0 + 0x30));
     *(u32 *)((s32)arg0 + 0x30) = 0;
     func_002CFF98(arg0);
@@ -862,7 +862,7 @@ void func_002D7BD8(s32 *arg0, u32 arg1, u32 arg2) {
     *(s32 **)((s32)arg2 + 0x10) = arg0;
     *(s16 *)(temp_v2 + 4) = (s16)temp_v3;
     *(s32 *)(temp_v0 * 4 + temp_v1) = (s32)arg2;
-    func_002D7CD0(arg2, arg1);
+    sdfLinkRouteNode(arg2, arg1);
 }
 
 typedef struct SdfRouteNode SdfRouteNode;
@@ -879,7 +879,7 @@ struct SdfRouteNode {
     SdfRouteOwner *root;
 };
 
-void func_002D7C68(SdfRouteNode *node) {
+void sdfUnlinkRouteNode(SdfRouteNode *node) {
     SdfRouteOwner *owner = node->owner;
     if (owner == NULL) {
         SdfRouteOwner *root = node->root;
@@ -907,7 +907,7 @@ void func_002D7C68(SdfRouteNode *node) {
     }
 }
 
-void func_002D7CD0(SdfRouteNode *node, SdfRouteOwner *owner) {
+void sdfLinkRouteNode(SdfRouteNode *node, SdfRouteOwner *owner) {
     if (owner == NULL) {
         SdfRouteOwner *root = node->root;
         SdfRouteNode *first = *(SdfRouteNode **)((u8 *)root + 4);
@@ -921,7 +921,7 @@ void func_002D7CD0(SdfRouteNode *node, SdfRouteOwner *owner) {
         }
     } else if (node->owner != owner) {
         SdfRouteNode *last;
-        func_002D7C68(node);
+        sdfUnlinkRouteNode(node);
         last = owner->last;
         if (last == NULL) {
             owner->last = node;
