@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 
 extern u64 fileDuplicateJob(u64);
 
@@ -123,8 +124,6 @@ extern void func_002C92D0(u32 arg0);
 extern void mcHandleDetectionResult(void);
 
 extern char D_0042B720[];
-
-typedef struct KwlnTask KwlnTask;
 
 extern KwlnTask *func_00101740(const char *name);
 
@@ -1254,19 +1253,26 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6710);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6808);
 
-void func_002D6900(s32 arg0, u32 arg1) {
-    u32 temp_v0;
+/* DDS2 loader work has a longer prefix than the DDS1 LoadObj. */
+typedef struct LoadObj {
+    u8 pad00[0x48];
+    void *referenceHolder; /* 0x48 */
+    void *recordWork;      /* 0x4C */
+} LoadObj;
 
-    if (*(s32 *)(arg0 + 0x48) != 0) {
-        effReleaseReferenceHolder(*(s32 *)(arg0 + 0x48));
+void func_002D6900(LoadObj *obj, u32 resource) {
+    u32 holder;
+
+    if (obj->referenceHolder != NULL) {
+        effReleaseReferenceHolder((s32)obj->referenceHolder);
     }
-    temp_v0 = func_002DDF48(arg1);
-    *(u32 *)(arg0 + 0x48) = temp_v0;
+    holder = func_002DDF48(resource);
+    obj->referenceHolder = (void *)holder;
 }
 
-void func_002D6950(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x4c) != 0) {
-        fileClearRecordReferences(*(s32 *)(arg0 + 0x4c));
+void func_002D6950(LoadObj *obj) {
+    if (obj->recordWork != NULL) {
+        fileClearRecordReferences((s32)obj->recordWork);
         return;
     }
 }
@@ -1280,12 +1286,12 @@ void func_002D7398(u32 arg0) {
     func_002D69B8(arg0);
 }
 
-void func_002D73C0(s32 arg0) {
-    func_002DC0C0(*(u32 *)(arg0 + 0x4c));
+void func_002D73C0(LoadObj *obj) {
+    func_002DC0C0((u32)obj->recordWork);
 }
 
-void func_002D73D8(s32 arg0) {
-    func_002DC0F0(*(u32 *)(arg0 + 0x4c));
+void func_002D73D8(LoadObj *obj) {
+    func_002DC0F0((u32)obj->recordWork);
 }
 
 void func_002D73F0(s32 arg0, u32 arg1) {

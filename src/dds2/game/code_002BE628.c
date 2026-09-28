@@ -126,14 +126,19 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0718);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuCreatePanelState);
 
-void func_002C07A0(u32 arg0) {
-    s32 temp_v0;
+typedef struct MenuPanelState {
+    u8 pad00[0x88];
+    u32 resourceHandle;
+} MenuPanelState;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x88);
-    if (temp_v0 != 0) {
-        mnuReleaseResourceList(temp_v0);
+void func_002C07A0(MenuPanelState *panel) {
+    s32 resourceHandle;
+
+    resourceHandle = panel->resourceHandle;
+    if (resourceHandle != 0) {
+        mnuReleaseResourceList(resourceHandle);
     }
-    func_00328E48(arg0);
+    func_00328E48(panel);
 }
 
 void func_002C07D8(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
@@ -145,11 +150,11 @@ void func_002C07D8(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0800);
 
-void func_002C08B0(s32 arg0) {
-    u32 temp_v0;
+void func_002C08B0(MenuPanelState *panel) {
+    u32 resourceHandle;
 
-    temp_v0 = func_002B9FF8(5);
-    *(u32 *)(arg0 + 0x88) = temp_v0;
+    resourceHandle = func_002B9FF8(5);
+    panel->resourceHandle = resourceHandle;
 }
 
 void func_002C08E0(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
