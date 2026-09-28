@@ -1,6 +1,24 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+extern u8 D_003DC800[];
+
+extern void func_00108A88(s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 D_003BC880;
+
+extern void *func_0028AFE0(void);
+extern void *func_0028C288(void);
+extern void func_00289D28(u32 ctx, s32 arg);
+
+extern void *(*D_003BD8FC)(s32);
+extern s32 D_003BC814;
+extern s32 func_00288BA8(u32, void *);
+extern u32 func_00288B88(u32);
+extern u32 func_00288B90(u32);
+extern u32 func_00288B98(u32);
+extern void func_002887A0(u32);
+extern s32 func_0028EFA0(s32);
+
 typedef struct FileRecordSlot {
     u8 pad0[0x10];
     u32 state;
@@ -333,6 +351,7 @@ extern u32 D_003BC834;
 extern s32 func_0028FB48(void *arg0, void *arg1, s32 arg2);
 
 extern void func_0028BAC0(void);
+extern void func_0028DAF8(void);
 
 extern void *func_0028C7C8(void);
 
@@ -612,7 +631,27 @@ void func_0028AE68(void) {
     func_00289C68(D_003BC7E8, 9);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028AF00);
+void *func_0028AF00(void) {
+    char path[0x50];
+    u32 ctx;
+    s32 slot;
+    s32 len;
+
+    func_00289D28(D_003BC7E8, D_003BC828);
+    ctx = D_003BC7E8;
+    slot = func_00289D00(ctx);
+    if ((func_00289CD0(ctx, slot) & 1) == 0) {
+        return func_0028C288();
+    }
+    path[0] = 0x2F;
+    formatSaveFilename(&path[1], slot);
+    len = strlen(&path[1]);
+    path[len + 1] = 0x2F;
+    memcpy(&path[len + 2], &path[1], len);
+    path[len * 2 + 2] = 0;
+    func_00289F80(ctx, path, 1);
+    return func_0028AFE0;
+}
 
 extern s32 func_00289FA8(s32 *);
 extern void func_0028A070(s32, u32, s32);
@@ -632,7 +671,20 @@ void *func_0028B058(void) {
     return func_0028B3F0();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028B0B8);
+void *func_0028B0B8(void) {
+    s32 status = func_0028A020();
+
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        memcpy(D_003DC800 + D_003BC828 * 0x30, (void *)D_003BD924, 0x30);
+        func_002D0918(D_003BD920);
+        return func_0028C288();
+    }
+    func_002D0918(D_003BD920);
+    return func_0028B3F0();
+}
 
 void *beginFileWait(void *callback) {
     kwlnFadeInStart(0, 0, 0, 15);
@@ -984,7 +1036,35 @@ void *handleSaveSlotWriteResult(void) {
     return func_0028AF00();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C288);
+void *func_0028C288(void) {
+    D_003BC828++;
+    if (D_003BC828 == 10) {
+        func_00289C10(D_003BC7E8);
+        D_003BC828 = 0;
+        D_003BC804 = 0;
+        if (countSelectableFiles() == 0) {
+            if (D_003BC848 != 0) {
+                D_003BC810 = 0;
+                func_0028AB30(0);
+                D_003BC854 = 7;
+                D_003BC858 = 0;
+                fileReqBegin(D_003BC7E8);
+                return func_0028BAC0;
+            }
+            if (func_0028B900() == 0) {
+                func_0028AB30(0);
+                D_003BC810 = 0;
+                D_003BC854 = 5;
+                D_003BC858 = 0;
+                fileReqBegin(D_003BC7E8);
+                return func_0028BAC0;
+            }
+        }
+        func_0028AB30(0);
+        return func_0028B590();
+    }
+    return func_0028C140();
+}
 
 void resetSaveSlotMetadata(void) {
     s32 index;
@@ -1300,7 +1380,27 @@ s32 selectFileMenuBranch(void) {
     return func_0028FB48(func_0028B4B0, resetFileSelection, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DA10);
+void *func_0028DA10(void) {
+    char path[0x50];
+    u32 ctx = D_003BC7E8;
+    s32 slot = func_00289D00(ctx);
+    u32 attr = func_00289CD0(ctx, slot);
+    u32 len;
+
+    func_0028AB30(3);
+    if ((attr & 1) == 0) {
+        return func_0028B590();
+    }
+    fileReqGetSlotCode();
+    path[0] = '/';
+    formatSaveFilename(&path[1], slot);
+    len = strlen(&path[1]);
+    path[len + 1] = '/';
+    memcpy(&path[len + 2], &path[1], len);
+    path[len * 2 + 2] = 0;
+    func_00289F80(ctx, path, 1);
+    return func_0028DAF8;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DAF8);
 
@@ -1360,9 +1460,52 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2688);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028E180);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028EF00);
+void *func_0028EF00(s32 arg) {
+    void *next;
+    u32 job;
+    void *(*cur)(s32);
+    D_003BC814++;
+    func_0028EFA0(arg);
+    next = D_003BD8FC(arg);
+    if (next == (void *)-1) {
+        return next;
+    }
+    job = D_003BC7F8;
+    cur = D_003BD8FC;
+    if (next != NULL) {
+        cur = next;
+    }
+    D_003BD8FC = cur;
+    if (job != 0 && func_00288BA8(job, next) != 0) {
+        D_003BC7F8 = 0;
+        D_003BD910 = func_00288B88(job);
+        D_003BD914 = func_00288B90(job);
+        D_003BD918 = func_00288B98(job);
+        func_002887A0(job);
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028EFA0);
+s32 func_0028EFA0(s32 arg0) {
+    func_00108A80(0x52);
+    func_00108CB8(0);
+    func_00108A88(1, 0, 0x80, 3, 0, 0, 1, 1);
+    if (D_003BC80C != 0) {
+        func_00108FA0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                      D_003BC880);
+        func_00108FA0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                      D_003BC884);
+    }
+    if (D_003BC810 != 0) {
+        func_0028E180(arg0);
+    }
+    func_0028AB48();
+    func_0028FB98();
+    func_0028A7A8();
+    func_00108CB8(0);
+    func_00108A88(1, 5, 0x80, 3, 0, 0, 1, 2);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028F0E0);
 
@@ -2052,7 +2195,16 @@ FileJob *appendFileJobFromEntry(FileQueue *queue, void *entry) {
     return appendFileJob(queue, (u32)func_00293D90(entry));
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294B18);
+FileJob *func_00294B18(FileQueue *queue, FileJob *src) {
+    FileJob *job = fileJobCreate();
+
+    memcpy(job, src, 0xC0);
+    func_00293F18(job);
+    job->flags |= 1;
+    job->id = src->id;
+    fileQueueInsertAfter(queue, src, job);
+    return job;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294C30);
 
@@ -2060,7 +2212,9 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294DA0);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294E50);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294F50);
+void func_00294F50(FileJob *dst, FileJob *src) {
+    memcpy(dst, src, 0x90);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295018);
 
@@ -2155,7 +2309,35 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F58);
 
 INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2A18);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F90);
+LoadObj *func_00295F90(FileJob *job) {
+    void *primary = resolvePrimaryFileBuffer(job);
+    LoadObj *obj = func_00295F58(primary);
+    void *secondary;
+
+    loadObjectSetResource(obj, job->option, primary);
+    secondary = resolveSecondaryFileBuffer(job);
+    if (secondary != NULL) {
+        switch (job->slots[0].selector) {
+        case 1:
+            loadObjectOpenDevice(obj, secondary);
+            break;
+        case 2:
+            loadObjectOpenAndStartDevice(obj, secondary);
+            break;
+        case 4:
+            loadObjectOpenNamedDevice(obj, *(void **)secondary);
+            break;
+        case 5:
+            func_00296530(obj, secondary);
+            break;
+        case 7:
+            func_00296628((s32)obj, (u32)secondary);
+            break;
+        }
+        *(u32 *)((u8 *)obj + 0xC) = job->slots[0].selector;
+    }
+    return obj;
+}
 
 void func_00296088(LoadObj *obj) {
     if (obj->deviceHandle != NULL) {

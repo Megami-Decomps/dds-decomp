@@ -1,5 +1,29 @@
 #include "common.h"
 
+
+
+
+
+
+extern void func_00300508(s32 **, s32, s32, s32 (*)(s32 *, s32 *));
+
+extern s32 func_00101A70();
+extern void func_00272778(s32);
+extern void func_00272350(s32);
+extern void func_002723B0(s32, s32);
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
+
+extern void func_0027FCA0(s32, s32, s32);
+
+typedef struct MenuListItem {
+    s32 index;
+    u8 pad4[0x54];
+    struct MenuListItem *next;
+    struct MenuListItem *prev;
+} MenuListItem;
+
 extern void func_0027CDD0(s32, s32, s32, s32, s32);
 
 extern void releaseSpriteTextures(s32);
@@ -100,7 +124,31 @@ void func_0027AA68(s32 menu) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AB10);
+void func_0027AB10(s32 param) {
+    s32 context = func_00101A70();
+    s32 menu = *(s32 *)(context + 0x90C);
+    s32 slots;
+    s32 node;
+    s32 label;
+
+    func_00272778(param);
+    func_0027AA68(context);
+    func_00272350(0x10);
+    slots = menu + 4;
+    func_0027CDD0(0x1C0, 0x3D0, 0, *(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20), 0x53);
+    node = *(s32 *)(*(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20) + 0x14);
+    label = *(s32 *)(*(s32 *)(node + 0x1C) + 0x60);
+    func_0027A9A8(context);
+    if (label != 0) {
+        if (label != 0xFFFF) {
+            label &= 0xFFFF;
+            drawSelectionLabel(label);
+            func_0027A140(label, *(s32 *)(context + 0x68), *(s32 *)(context + 0xE0));
+        }
+    }
+    func_002723B0(2, *(s32 *)(context + 0x78));
+    menuRunPanel(context, 1, param);
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AC00);
 
@@ -626,7 +674,24 @@ void func_0027DD78(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_0027DD58(arg0, arg1, arg2, 0x100, arg3, arg4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DDA0);
+void func_0027DDA0(u32 obj) {
+    switch (*(u32 *)obj) {
+    case 0:
+        func_002BF970(*(s32 *)(obj + 0x1C), 0);
+        func_002BF970(*(s32 *)(obj + 0x20), 0);
+        return;
+    case 1:
+        func_002BF970(*(s32 *)(obj + 0xC), 0);
+        func_002BF970(*(s32 *)(obj + 0x10), 0);
+        func_002BF970(*(s32 *)(obj + 0x14), 0);
+        func_002BF970(*(s32 *)(obj + 0x18), 0);
+        return;
+    case 2:
+        func_002BF970(*(s32 *)(obj + 0x14), 0);
+        func_002BF970(*(s32 *)(obj + 0x18), 0);
+        break;
+    }
+}
 
 void func_0027DE60(s32 arg0) {
     s32 temp_v0;
@@ -679,7 +744,21 @@ void func_0027DED0(s32 *menu, s32 reset) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DF48);
+void func_0027DF48(MenuListItem **items, s32 count) {
+    s32 i;
+
+    items[0]->prev = NULL;
+    items[0]->next = items[1];
+    for (i = 1; i < count - 1; i++) {
+        items[i]->prev = items[i - 1];
+        items[i]->next = items[i + 1];
+    }
+    items[count - 1]->prev = items[count - 2];
+    items[count - 1]->next = NULL;
+    for (i = 0; i < count; i++) {
+        items[i]->index = i;
+    }
+}
 
 s32 func_0027DFF8(s32 *arg0, s32 *arg1) {
     u32 temp_A = *(u32 *)(*arg0 + 0x60);
@@ -741,7 +820,29 @@ s32 func_0027E0D0(s32 *arg0, s32 *arg1) {
     return (temp_A < temp_B) ? -1 : 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E100);
+void func_0027E100(s32 menu, s32 sortKey, s32 descending) {
+    s32 (*comparators[6])(s32 *, s32 *) = {func_0027DFF8, func_0027E050, func_0027E0A8,
+                                             func_0027E020, func_0027E078, func_0027E0D0};
+    s32 count = 0;
+    s32 handle = func_002D03F8(*(s32 *)(menu + 0x20) * 4);
+    s32 **items = (s32 **)func_002D0A48(handle);
+    s32 **out = items;
+    s32 *node;
+
+    for (node = *(s32 **)(menu + 0x10); node != NULL; node = (s32 *)node[0x58 / 4]) {
+        *out++ = node;
+        count++;
+    }
+    if (descending != 0) {
+        sortKey += 3;
+    }
+    func_00300508(items, count, 4, comparators[sortKey]);
+    func_0027DF48((MenuListItem **)items, count);
+    func_0027DE60(menu);
+    func_0027DE98(menu);
+    func_0027DED0((s32 *)menu, 0);
+    func_002D0918(handle);
+}
 
 void allocateMenuListEntries(s32 *list) {
     u32 i;
@@ -1121,7 +1222,32 @@ void registerMenuResourceHandles(s32 destination, s32 *source) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FCA0);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FF60);
+void func_0027FF60(s32 obj) {
+    s32 *handle = (s32 *)(obj + 0x24);
+    s32 i;
+    s32 offset;
+
+    for (i = 0; i < 8U; i++, handle++) {
+        if (func_002BD8F8(*handle) != 0) {
+            func_002BD870(*handle);
+            func_002BD870(handle[8]);
+        }
+    }
+    for (i = 0, offset = 0; i < 5U; i++) {
+        s32 entry = *(s32 *)(obj + 8) + offset;
+
+        offset += 0x34;
+        if (*(s32 *)(entry + 0x10) >= 0) {
+            if (i < **(s32 **)(obj + 8)) {
+                func_0027FCA0(obj, i, 1);
+            } else {
+                func_0027FCA0(obj, i, 2);
+            }
+        } else {
+            func_0027FCA0(obj, i, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280048);
 
@@ -1152,7 +1278,34 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280290);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002802E0);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_002803A0);
+void func_002803A0(s32 obj) {
+    s32 *handle = (s32 *)(obj + 0x10);
+    u32 i;
+
+    for (i = 0; i < 3; i++, handle++) {
+        if (*handle != 0) {
+            func_002BDD60(*handle);
+        }
+    }
+    if (*(s32 *)(obj + 0xC4) != 0) {
+        func_002BDD60(*(s32 *)(obj + 0xC4));
+    }
+    if (*(s32 *)(obj + 0xC8) != 0) {
+        func_002BDD60(*(s32 *)(obj + 0xC8));
+    }
+    if (*(s32 *)(obj + 0xCC) != 0) {
+        func_002BDD60(*(s32 *)(obj + 0xCC));
+    }
+    if (*(s32 *)(obj + 0xD0) != 0) {
+        func_002BDD60(*(s32 *)(obj + 0xD0));
+    }
+    if (*(s32 *)(obj + 0xD4) != 0) {
+        func_002BDD60(*(s32 *)(obj + 0xD4));
+    }
+    if (*(s32 *)(obj + 0xD8) != 0) {
+        func_002BDD60(*(s32 *)(obj + 0xD8));
+    }
+}
 
 extern void func_002803A0(s32);
 
