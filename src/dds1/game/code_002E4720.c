@@ -125,6 +125,10 @@ extern s32 func_002E69F0(s32, void **);
 extern void func_002E5DA0(DevState *);
 extern DevState *func_002E6B28(void *, s32, s32,
                                 void (*)(DevState *, s32, s32, s32, s32), s32);
+extern u8 D_003BD477;
+extern u8 D_003BD478;
+extern s32 func_00312618(const char *, s32, void *, s32 *);
+extern void func_003003F0(const char *);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
@@ -550,7 +554,22 @@ void func_002E7210(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7228);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7370);
+void func_002E7370(void) {
+    s32 resident;
+    if (D_003BD477 == 0) {
+        D_003BD478 = 0;
+        if (func_00312618("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
+            func_003003F0("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
+            return;
+        }
+        if (resident != 0) {
+            func_003003F0("cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n");
+            return;
+        }
+        D_003BD478 = 1;
+        D_003BD477 = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E73F0);
 

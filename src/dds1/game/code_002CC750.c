@@ -115,6 +115,8 @@ extern u32 resolvePrimaryFileBuffer(void);
 extern void func_0029CE50(u32);
 extern s32 func_002CD548(s32, u16);
 extern u16 D_003907BC[];
+u32 func_002CD788(ScrVmOperand *);
+s8 func_002CD7B8(ScrVmOperand *);
 void func_002CC750(s32 left, s32 right) {
     s32 file = func_002FE950("debug.log", D_003BD2B8);
     if (file != 0) {
@@ -162,7 +164,25 @@ void func_002CD2D0(u32 arg0, u16 arg1) {
     *puVar1 = temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD310);
+u32 func_002CD310(ScrVmOperand *work, s32 increment) {
+    u32 *position;
+    u32 limit;
+    u32 result;
+    s32 entry;
+    if (func_002CD7B8(work) == 0) {
+        return 0;
+    }
+    position = (u32 *)func_002CD788(work);
+    entry = work->s55;
+    *position += increment;
+    limit = func_002CD2A8(entry & 0xffff);
+    result = *position;
+    if (limit < result) {
+        *position = limit;
+        result = limit;
+    }
+    return result;
+}
 
 void func_002CD398(u32 v, u32 *a, u32 *b) {
     u32 lo;
@@ -456,7 +476,34 @@ s32 func_002CE248(s32 state, u8 *operand) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE2E8);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE380);
+s32 func_002CE380(u8 *operand) {
+    s32 index = 0;
+    s32 count = func_002CE188(operand);
+    if (count > 0) {
+        u8 *slots = operand + 0xc;
+        do {
+            s32 present = 0;
+            s32 selected = slots[index];
+            s32 offset = 0;
+            s32 remaining = 4;
+            do {
+                u8 *entry = (u8 *)D_003BAA00 + 0xa60 + offset;
+                offset += 0x1a4;
+                if ((*(u16 *)entry & 1) != 0) {
+                    if (func_002CD548((s32)entry, (u16)selected) != 0) {
+                        present = 1;
+                    }
+                }
+                remaining--;
+            } while (remaining >= 0);
+            if (present == 0) {
+                return 0;
+            }
+            index++;
+        } while (index < count);
+    }
+    return 1;
+}
 
 u32 func_002CE468(ScrVmOperand *operand, u8 *value) {
     if (operand->h14 < value[4]) {

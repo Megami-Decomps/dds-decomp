@@ -44,6 +44,25 @@ typedef struct MidiChannel {
     u32 earlierEntries[2];
     u32 entries[8];
 } MidiChannel;
+typedef struct MidiPlaybackState {
+    u8 pad00[0x13];
+    u8 completed;
+    u8 pad14;
+    u8 looping;
+    u8 pad16[3];
+    u8 bufferIndex;
+    u8 pending;
+    u8 pad1B[0xD];
+    u32 buffers[2];
+    u32 bufferSize;
+    u8 pad34[0xC];
+    s32 limit;
+    u8 pad44[4];
+    s32 processed;
+} MidiPlaybackState;
+
+extern s32 func_00312C08(void);
+extern void func_002EC230(s32);
 
 extern u32 D_003BD494;
 
@@ -53,10 +72,44 @@ u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 typedef struct SoundNode {
     u8 pad00[8];
     struct SoundNode *next;
+    u8 active;
+    u8 pad0D[7];
+    u8 twoChannel;
+    u8 loopMode;
+    u8 playbackMode;
+    u8 pad17[5];
+    s32 bufferSize;
+    u32 buffers[2];
+    u8 pad28[0xC];
+    s32 userValue;
+    u8 pad38[4];
+    u16 width;
+    u16 height;
+    u8 pad40[0x14];
+    u32 samples;
+    u8 pad58[4];
+    s32 callback;
+    s32 callbackContext;
+    u8 pad64[0x28];
 } SoundNode;
+
+typedef struct SoundFormat {
+    u8 hasAudio;
+    u8 stereo;
+    u8 loopMode;
+    u8 playbackMode;
+} SoundFormat;
 
 extern SoundNode *D_003BDA98;
 extern s32 sceIpuSync(s32, s32);
+extern u32 func_002CF530(s32);
+extern void func_002EB8C0(SoundNode *, SoundFormat *);
+extern void func_002EB930(SoundNode *, s32, s32, s32);
+extern void func_002EB9C8(SoundNode *, SoundFormat *, s32, s32);
+extern s32 D_003BDA9C;
+extern s32 D_003BDAA0;
+extern void func_002CF7B8(s32);
+extern s32 func_0030B5D0(s32);
 void func_002E9708(void) {
     func_002E87A8(0x180, 0, 0, 0);
 }
@@ -284,7 +337,18 @@ void sdfSoundRemoveNode(SoundNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB510);
+void func_002EB510(SoundNode *node) {
+    s32 channels = 4;
+    s32 size;
+    if (node->twoChannel != 0) {
+        channels = 2;
+    }
+    size = node->width * node->height;
+    size *= channels;
+    node->bufferSize = size;
+    node->buffers[0] = func_002CF530(size);
+    node->buffers[1] = func_002CF530(size);
+}
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
@@ -292,7 +356,13 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB8C0);
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB930);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB9C8);
+void func_002EB9C8(SoundNode *node, SoundFormat *format, s32 callback, s32 context) {
+    func_002EB8C0(node, format);
+    node->callback = callback;
+    node->callbackContext = context;
+    node->active = 1;
+    node->samples = func_002CF530(0x10100) + 0x100;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBA28);
 
@@ -359,20 +429,56 @@ u32 soundGetSelectedChannelEntry(MidiChannel *channel) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC4D8);
+void func_002EC4D8(MidiPlaybackState *state) {
+    s32 interrupt = func_00312C08();
+    s32 pending = state->pending;
+    s32 remaining = pending - 1;
+    if (pending > 0) {
+        state->pending = remaining;
+        state->bufferIndex ^= 1;
+        state->completed++;
+    }
+    state->processed++;
+    if (state->processed == state->limit && state->looping != 0) {
+        state->processed = 0;
+    }
+    if (interrupt != 0) {
+        EIntr();
+    }
+    func_002EC230(0);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC560);
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC748);
+void func_002EC748(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s32 value) {
+    func_002EB930(node, arg1, arg2, arg3);
+    node->userValue = value;
+    sdfSoundAppendNode(node);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC780);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC818);
+void func_002EC818(SoundNode *node, SoundFormat *format, s32 arg2, s32 arg3, s32 value) {
+    func_002EB9C8(node, format, arg2, arg3);
+    node->userValue = value;
+    sdfSoundAppendNode(node);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC850);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC900);
+s32 func_002EC900(void) {
+    if (D_003BDA9C != 0) {
+        func_002CF7B8(D_003BDA9C);
+        D_003BDA9C = 0;
+    }
+    func_0030B5D0(3);
+    if (D_003BDAA0 != 0) {
+        func_002CF7B8(D_003BDAA0);
+        D_003BDAA0 = 0;
+    }
+    return func_0030B5D0(4);
+}
 
 void func_002EC950(void) {
     func_003004E8();
