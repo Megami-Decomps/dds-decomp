@@ -82,8 +82,6 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-extern void func_001E8018();
-
 extern s32 countBattleTasksForOwner(s64);
 
 extern void func_001E15F0(s32);
@@ -405,6 +403,9 @@ u32 func_001E0B50(s32 arg0) {
 typedef struct {
     void *actor;
     s32 option;
+    u32 unk_08;
+    u32 unk_0C;
+    u32 unk_10;
 } SoundTaskArgs;
 
 extern SoundTask *func_001E1468(s32);
@@ -925,8 +926,8 @@ void *allocateBattleIndexList(s32 capacity) {
     return list;
 }
 
-void func_001E8018(void) {
-    func_00328E48();
+void func_001E8018(s32 list) {
+    func_00328E48(list);
 }
 
 void func_001E8030(s32 arg0, u32 arg1) {
@@ -1016,11 +1017,44 @@ u32 func_001E8B08(u32 *arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8B40);
+SoundTask *func_001E8B40(s32 actor, s32 mode) {
+    SoundTask *task = func_001E1468(0x14);
+    SoundTaskArgs *args;
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8BE0);
+    task->enabled = 1;
+    task->status = 0;
+    task->taskId = 0x2A;
+    if (actor != 0 && *(s32 *)(actor + 0x18) != 0) {
+        task->owner = *(u64 *)(*(s32 *)(actor + 0x18) + 0x108);
+    }
+    task->callback.playSound = func_001E8B08;
+    task->unk_48 = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = (void *)actor;
+    args->unk_0C = mode;
+    args->option = 0;
+    args->unk_08 = 0;
+    args->unk_10 = 0;
+    return task;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8C20);
+SoundTask *func_001E8BE0(s32 actor, s32 mode, u32 command) {
+    SoundTask *task = func_001E8B40(actor, mode);
+    SoundTaskArgs *args = func_001E14F8((s32)task);
+
+    args->unk_10 = command;
+    return task;
+}
+
+SoundTask *func_001E8C20(s32 actor, s32 option, s32 flag, s32 mode, s32 command) {
+    SoundTask *task = func_001E8B40(actor, mode);
+    SoundTaskArgs *args = func_001E14F8((s32)task);
+
+    args->unk_10 = command;
+    args->option = option;
+    args->unk_08 = flag;
+    return task;
+}
 
 u32 func_001E8C88(u8 *arguments) {
     u8 *context = (u8 *)func_001AA6F8();
@@ -1063,7 +1097,16 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9130);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9410);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9548);
+void func_001E9548(void) {
+    s32 context = func_001AA6F8();
+    s32 list = *(s32 *)(context + 0x1A8);
+
+    if (list != 0) {
+        func_001E8018(list);
+        *(s32 *)(context + 0x1A8) = 0;
+    }
+    *(u32 *)(context + 0x218) &= ~0x10;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9598);
 
@@ -1181,13 +1224,93 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA058);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA120);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA190);
+s32 func_001EA190(s32 actor) {
+    s32 linked = *(s32 *)(actor + 0x114);
+    u32 count;
+    u8 *entry;
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA210);
+    if (linked == 0) {
+        return 0;
+    }
+    count = func_001E8058(*(s32 *)(linked + 0x60));
+    entry = *(u8 **)(linked + 0x88);
+    for (i = 0; i < count; i++, entry += 0x59C) {
+        if (entry[0x14] != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA2B8);
+s32 func_001EA210(s32 actor) {
+    u32 status = *(u32 *)(actor + 0x124);
+    s32 linked;
+    s32 category;
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA338);
+    switch (status) {
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+        break;
+    default:
+        return 1;
+    }
+    linked = *(s32 *)(actor + 0x114);
+    if (linked == 0) {
+        return 1;
+    }
+    if (func_001EA190(actor)) {
+        return 0;
+    }
+    if (*(u16 *)(*(s32 *)(linked + 0x18) + 0x12E) & 0x480) {
+        return 0;
+    }
+    category = *(s32 *)(actor + 0x134);
+    if (category != 0 && (*(u16 *)(D_00435E30 + category * 32 + 0x1C) & 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+s32 func_001EA2B8(s32 actor) {
+    s32 linked = *(s32 *)(actor + 0x114);
+    u32 count;
+    u8 *entry;
+    u32 i;
+
+    if (linked == 0) {
+        return 0;
+    }
+    count = func_001E8058(*(s32 *)(linked + 0x60));
+    entry = *(u8 **)(linked + 0x88);
+    for (i = 0; i < count; i++, entry += 0x59C) {
+        if (entry[0x10] != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+extern f32 func_00207F68(s32);
+
+s32 func_001EA338(void) {
+    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+
+    while (actor != 0) {
+        u32 flags = *(u32 *)(actor + 0x110);
+        if (flags & 1) {
+            if (flags & 0x400) {
+                if (func_00207F68(actor) > 400.0f) {
+                    return 0;
+                }
+            }
+        }
+        actor = *(s32 *)(actor + 0x364);
+    }
+    return 1;
+}
 
 s32 func_001EA3B8(void) {
     if (func_00208000(0x400, 0, 0) > 600.0f) {
