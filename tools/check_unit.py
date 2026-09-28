@@ -342,7 +342,8 @@ def main():
         del emitted[".sdata"]
     if emitted.get(".lit4") and owns_rodata(version, unit_name, "lit4"):
         del emitted[".lit4"]  # every constant was compared with retail above
-    for name, size in emitted.items():
+    # --func compares one function: the rest of the unit's data is not its business.
+    for name, size in ({} if args.func else emitted).items():
         bad += 1
         why = ("rodata no instruction refers to (unused static data?)"
                if name == ".rodata" and owns_rodata(version, unit_name)
