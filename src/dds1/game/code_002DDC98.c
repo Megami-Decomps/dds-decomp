@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern void func_002E02B0(s32 arg0);
+
 extern u32 D_003BDA34;
 
 extern u32 D_003BD378;
@@ -362,7 +364,22 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E02D8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E03C0);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E04E0);
+void func_002E04E0(u32 arg0) {
+    u32 temp_v0;
+    s32 temp_v1;
+
+    temp_v1 = (s32)arg0;
+    func_002E02B0(temp_v1);
+    temp_v0 = *(u32 *)(temp_v1 + 0x44);
+    if ((temp_v0 & 0x1000) != 0) {
+        func_002E02D8(arg0);
+        temp_v0 = *(u32 *)(temp_v1 + 0x44);
+    }
+    if ((temp_v0 & 1) != 0) {
+        func_002E03C0(arg0);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0540);
 
