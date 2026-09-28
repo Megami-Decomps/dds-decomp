@@ -9,6 +9,8 @@ extern void func_002D0918(u32 res);
 extern s32 func_00170238(s32 base, s32 index);
 extern s32 func_0018DDF8(s32 color, s32 param);
 
+extern void func_002DD8B8(void *orientation, f32 angle);
+
 /* Effect initializers implemented in assembly below. Each is entered both with
    and without spawn arguments, so they are declared unchecked. */
 extern void func_0016A088();
@@ -282,7 +284,28 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A9D0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AB48);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016ACD0);
+void func_0016ACD0(void *work, s32 index, void *orientation)
+{
+    u8 *part = *(u8 **)((u8 *)work + 0x40) + index * 0x2C;
+    f32 position[4];
+
+    position[0] = *(f32 *)(part + 0x10);
+    position[1] = *(f32 *)(part + 0x14);
+    position[2] = *(f32 *)(part + 0x18);
+    func_002DD8B8(orientation, *(f32 *)(part + 0x08));
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddz.xyzw vf10, vf30, vf10z\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(position) : "memory");
+    *(f32 *)(part + 0x10) = position[0];
+    *(f32 *)(part + 0x14) = position[1];
+    *(f32 *)(part + 0x18) = position[2];
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AD58);
 
