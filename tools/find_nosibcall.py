@@ -19,6 +19,11 @@ or a struct return also block sibcalls), but a long run of them with none of
 the other kind means the whole file was built that way. Units already listed
 in config/<v>/cflags.txt are skipped.
 
+A candidate is refuted when an already-matching C function of the run stops
+matching under -fno-optimize-sibling-calls (the option also changes block
+layout: code_001FF030's func_00202178 does, so 0x1FF0C8..0x205EE0 is not a
+sibcall-free file). Check the split units with check_unit before keeping it.
+
 --apply splits each candidate out with tools/split_unit.py (starting right
 after the preceding J function, ending at the next J function) and records it
 in cflags.txt. Rebuild and compare afterwards; a wrong split shows as a
