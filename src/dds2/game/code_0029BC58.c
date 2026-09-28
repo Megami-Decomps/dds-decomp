@@ -717,6 +717,7 @@ void func_002A3AC0(void) {
 
 extern s16 D_003E3792[];
 
+
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3AE8);
 
 s16 func_002A3B10(u32 index) {
@@ -1757,7 +1758,18 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8208);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8268);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A85C0);
+u32 func_002A85C0(void) {
+    u8 *state = (u8 *)D_00457E48;
+    u32 entry = D_00457E48[1];
+    s32 remaining = *(s16 *)(state + 0xA);
+    if (entry != 0 && remaining > 0) {
+        do {
+            entry = *(u32 *)entry;
+            remaining--;
+        } while (entry != 0 && remaining > 0);
+    }
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8610);
 
@@ -1796,8 +1808,15 @@ extern u32 D_00438FF8[2];
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9130);
 
 extern void func_00305068(u32);
+extern void func_00304EE0(u32);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A91A0);
+void func_002A91A0(u32 *destination) {
+    s32 i;
+    for (i = 0; i < 2; i++) {
+        func_00304EE0(D_00438FF8[i]);
+        destination[i] = D_00438FF8[i];
+    }
+}
 
 void func_002A9200(u32 *destination) {
     s32 remaining = 1;

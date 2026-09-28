@@ -1140,7 +1140,16 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A4C0);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A628);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A798);
+u32 func_0027A798(u8 *obj, u32 bits, s16 length) {
+    u32 flags = (*(u32 *)obj & 0xF87FFFFF) | ((bits & 0xF) << 23);
+    *(s16 *)(obj + 0x2E) = length;
+    *(u32 *)obj = flags;
+    if (length == 0) {
+        *(s16 *)(obj + 0x1E) = 0;
+        *(u32 *)obj = (flags & 0xFF87FFFF) | ((bits & 0xF) << 19);
+    }
+    return 0;
+}
 
 void func_0027A7F0(void) {
 }
