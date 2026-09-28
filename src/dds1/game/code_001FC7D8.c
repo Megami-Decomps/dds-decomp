@@ -238,27 +238,3 @@ void func_001FEFF0(s32 arg0) {
 void func_001FF010(void) {
     func_00204080();
 }
-
-
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB840);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB848);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB850);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB858);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB860);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB868);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB870);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB874);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB878);
-
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB87C);
-

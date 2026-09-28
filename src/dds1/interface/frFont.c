@@ -383,25 +383,3 @@ void func_00196450(FrFontCtx *ctx) {
     ctx->flag1C = 1;
     ctx->flag1D = 1;
 }
-
-
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB160);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB164);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB168);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB16C);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB170);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB174);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB178);
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
-
-
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
-

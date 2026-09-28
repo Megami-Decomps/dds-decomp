@@ -80,6 +80,5 @@ INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C158);
 
 
 
-
 INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_00411408);
 

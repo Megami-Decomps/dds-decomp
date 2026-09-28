@@ -630,7 +630,6 @@ u32 scrCommand_SCR_EXISTS()
 }
 
 
-
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126D0);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126F0);

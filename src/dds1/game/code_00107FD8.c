@@ -622,6 +622,8 @@ u32 func_0010AA58(void) {
     return 0;
 }
 
+INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E1F0);
+
 u32 func_0010AA60(void) {
     return kwlnTaskGetTaskByName(D_0039E200) == NULL;
 }
@@ -691,10 +693,6 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AC98);
 void func_0010AEE8(void) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E1F0);
-
-INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E200);
-
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AEF0);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AF68);
@@ -751,33 +749,3 @@ void func_0010B768(B728Work *arg0) {
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B7C0);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010BA18);
-
-
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA948);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA950);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA958);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA960);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA968);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA970);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA978);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA97C);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA980);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA988);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA990);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA994);
-
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA998);
-

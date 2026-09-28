@@ -74,9 +74,3 @@ INCLUDE_ASM(const s32, "effect/effBattle", func_00161600);
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161650);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161790);
-
-
-
-
-INCLUDE_SDATA(const s32, "effect/effBattle", D_003BB024);
-

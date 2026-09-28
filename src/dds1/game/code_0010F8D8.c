@@ -57,11 +57,3 @@ u32 func_0010FBF8(s32 arg0) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FC28);
-
-
-
-INCLUDE_SDATA(const s32, "game/code_0010F8D8", D_003BA9B8);
-
-
-INCLUDE_SDATA(const s32, "game/code_0010F8D8", D_003BA9BC);
-

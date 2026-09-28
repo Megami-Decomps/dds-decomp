@@ -75,20 +75,3 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3310);
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3330);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3350);
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365B0);
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365B8);
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365C0);
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365C8);
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365D0);
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365D8);
-
-
-INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365E0);
-

@@ -520,17 +520,3 @@ u32 func_001997E8(void) {
 INCLUDE_ASM(const s32, "game/code_00196478", func_001997F0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00199828);
-
-
-
-INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB188);
-
-INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB18C);
-
-INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB190);
-
-INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB198);
-
-
-INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB1A0);
-

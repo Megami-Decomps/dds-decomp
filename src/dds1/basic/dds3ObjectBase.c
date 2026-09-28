@@ -169,9 +169,3 @@ void func_00112848(void *arg0) {
 void func_00112868(void *arg0) {
     func_00111730(func_00111AD0(arg0, 1));
 }
-
-
-
-
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
-

@@ -3,6 +3,3 @@
 INCLUDE_ASM(const s32, "misc/l2d", func_0011F0F8);
 
 INCLUDE_ASM(const s32, "misc/l2d", func_0011F170);
-
-INCLUDE_SDATA(const s32, "misc/l2d", D_00435EB0);
-

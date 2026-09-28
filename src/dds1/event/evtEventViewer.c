@@ -174,9 +174,5 @@ void evtEventViewerFreeBuffer(EvtViewBuf *work)
     work->buf = NULL;
 }
 
-
-
-
-
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
 
