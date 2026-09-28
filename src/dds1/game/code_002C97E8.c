@@ -21,9 +21,25 @@ float func_002C97E8(float *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9818);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9838);
+void func_002C9838(float *values) {
+    float lengthSquared = func_002C97E8(values);
+    if (lengthSquared != 0.0f) {
+        values[0] = -values[0] / lengthSquared;
+        values[1] = -values[1] / lengthSquared;
+        values[2] = -values[2] / lengthSquared;
+        values[3] = values[3] / lengthSquared;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C98D0);
+extern float func_002C9818(float *);
+
+void func_002C98D0(float *values) {
+    float length = func_002C9818(values);
+    values[0] /= length;
+    values[1] /= length;
+    values[2] /= length;
+    values[3] /= length;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9948);
 
@@ -33,7 +49,14 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9AD0);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9BF0);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9D10);
+void func_002C9D10(float *out, float *from, float *to, float fraction) {
+    float inv = 1.0f - fraction;
+    out[0] = from[0] * inv + to[0] * fraction;
+    out[1] = from[1] * inv + to[1] * fraction;
+    out[2] = from[2] * inv + to[2] * fraction;
+    out[3] = from[3] * inv + to[3] * fraction;
+    func_002C98D0(out);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9D98);
 
