@@ -1,10 +1,34 @@
 #include "common.h"
 
+extern s32 func_0028A018(s32);
+extern s32 func_00315FC8(u16);
+extern s32 func_00314990(s32, u16);
+extern s32 func_00314B78(s32);
+extern s32 func_0026CF70(s16);
+extern void func_0028D070(s32, s32, s32);
+extern void func_00291118(void);
+extern void func_0026E560(void);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void func_002A2408(void);
+extern void func_002A2550(void);
+extern void mdlFlagSet(u16);
+
 u32 func_00289058(s32 arg0) {
     return *(u32 *)(*(s32 *)(*(s32 *)(arg0 + 4) + 0x1c) + 0x70);
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_00289068);
+s32 func_00289068(s32 object, s32 index) {
+    s32 node = *(s32 *)(*(s32 *)(object + 4) + 0x10);
+    s32 current = 0;
+    while (node != 0) {
+        if (current == index) {
+            return *(s32 *)(node + 0x70);
+        }
+        node = *(s32 *)(node + 0x58);
+        current++;
+    }
+    return 0;
+}
 
 u32 func_002890A8(s32 arg0) {
     return **(u32 **)(*(s32 *)(arg0 + 4) + 0x1c);
@@ -34,7 +58,12 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_00289710);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_00289928);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_00289B40);
+void func_00289B40(s32 object) {
+    s32 state = object + 0x240;
+    s16 id = func_00314B78(*(s32 *)(*(s32 *)(*(s32 *)(object + 4) + 0x1c) + 0x70));
+    *(s32 *)(state + 0x560) = func_0026CF70(id);
+    func_0028D070(object, 5, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_00289BA0);
 
@@ -42,9 +71,25 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_00289DC8);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_00289ED0);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_00289F58);
+void func_00289F58(void) {
+    func_00291118();
+    func_0026E560();
+    kwlnFadeOutStart(0, 0, 0, 0);
+    func_002A2408();
+    func_002A2550();
+}
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_00289FA0);
+s32 func_00289FA0(s32 object) {
+    s32 index;
+    for (index = 1; index < 0xb0; index++) {
+        u16 id = index;
+        if ((func_00315FC8(id) & 1) == 0 &&
+            func_00314990(object, id) == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00289058", D_00426370);
 
@@ -52,9 +97,25 @@ INCLUDE_RODATA(const s32, "game/code_00289058", D_00426380);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028A018);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028A0F8);
+s32 func_0028A0F8(s32 object) {
+    u16 flagIds[6] = {0x9a0, 0x9a1, 0x9a2, 0x9a3, 0x9a4, 0x9a5};
+    u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
+    mdlFlagSet(flagIds[flagIndices[*(u16 *)(object + 4)]]);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028A178);
+s32 func_0028A178(s32 object) {
+    s32 node = *(s32 *)(*(s32 *)(object + 4) + 0x10);
+    s32 index = 0;
+    while (node != 0) {
+        if (func_0028A018(*(s32 *)(node + 0x70)) != 0) {
+            return index;
+        }
+        node = *(s32 *)(node + 0x58);
+        index++;
+    }
+    return -1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00289058", D_004263E0);
 
