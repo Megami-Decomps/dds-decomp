@@ -15,6 +15,7 @@ extern u32 func_0027D4A0(u32);
 extern s32 func_002CFEB8(u32);
 
 extern s32 func_002877A8(void);
+extern void func_002830F8(s32);
 
 extern char D_003B2608[]; /* "battle stage test" */
 
@@ -66,7 +67,13 @@ void func_00282BE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_00282B08(arg0, arg1, arg2, 0, arg3, arg4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00282C10);
+void *func_00282C10(s32 width, s32 height) {
+    u8 *item = func_002CFEB8(0x64);
+    memset(item, 0, 0x64);
+    *(s32 *)(item + 0xC) = width;
+    *(s32 *)(item + 0x10) = height;
+    return item;
+}
 
 void func_00282C70(u32 arg0) {
     s32 temp_v0;
@@ -120,9 +127,26 @@ void func_00282D98(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00282F98);
+s32 func_00282F98(s32 parent) {
+    s32 *list = func_002CFEB8(0x28);
+    s32 i;
+    for (i = 0; i < 5; i++) {
+        s32 child = func_00284888();
+        func_002848E0(child, parent, i);
+        list[i + 3] = child;
+    }
+    func_002830F8(list);
+    list[9] = 0x100;
+    return (s32)list;
+}
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283038);
+void func_00283038(s32 *list) {
+    s32 i;
+    for (i = 0; i < 5; i++) {
+        func_00284C30(list[i + 3]);
+    }
+    func_002CFF98(list);
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283090);
 
@@ -142,7 +166,15 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283238);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283280);
+void *func_00283280(s32 x, s32 y, s32 z) {
+    u8 *item = func_002CFEB8(0x20);
+    memset(item, 0, 0x20);
+    *(s32 *)(item + 0x10) = x;
+    *(s32 *)(item + 0x14) = y;
+    *(s32 *)(item + 0x18) = z;
+    *(s32 *)(item + 0x1C) = 0x100;
+    return item;
+}
 
 void func_002832F8(void) {
     func_002CFF98();
@@ -220,7 +252,13 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00284108);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284258);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284340);
+void func_00284340(s32 *object) {
+    u32 i;
+    for (i = 0; i < 9; i++) {
+        func_002BDD60(object[i + 7]);
+    }
+    func_002840B8(object);
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002843A0);
 
@@ -389,7 +427,15 @@ u8 func_002862C0(u32 arg0) {
     return *(u8 *)((arg0 & 0xffff) * 0x38 + D_003BAA50 + 3);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002862E0);
+u16 func_002862E0(s32 id, s32 object) {
+    s32 entry = (id & 0xFFFF) * 0x38 + D_003BAA50;
+    u16 base = *(u16 *)(entry + 4);
+    u16 addition = *(u16 *)(entry + 6);
+    if (func_002862C0(id & 0xFFFF) == 1) {
+        base = addition + *(u16 *)(object + 8) * base / 100;
+    }
+    return base;
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00286368);
 
@@ -540,7 +586,18 @@ void func_00287420(f32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287450);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002874E8);
+void func_002874E8(void) {
+    if (D_003DC5E8[0] != 1) {
+        D_003DC5E8[27] = -1;
+        if (D_003DC5E8[26] != 0) {
+            func_00288190();
+        }
+        if (D_003DC5E8[2] != 0) {
+            func_002177D0(D_003DC5E8[2]);
+            D_003DC5E8[2] = 0;
+        }
+    }
+}
 
 void func_00287548(void) {
     func_002874E8();
@@ -684,7 +741,21 @@ void func_002886E0(void) {
     kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, func_00288500, func_002886A0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00288728);
+s32 func_00288728(object)
+    s32 object;
+{
+    if (*(u8 *)(object + 1) == 6) {
+        s32 resource = *(s32 *)(object + 0xC);
+        if (resource != 0) {
+            func_002E6E88(resource);
+        }
+        func_002EDC50(object + 0x30);
+        func_002CFF98(*(void **)(object + 8));
+        func_002CFF98((void *)object);
+        return 0;
+    }
+    return 1;
+}
 
 void func_00288788(void) {
     func_00288728();
