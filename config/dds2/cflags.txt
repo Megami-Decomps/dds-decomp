@@ -27,3 +27,8 @@ game/code_0031A638  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no
 game/code_0031D890  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_00341650  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_00341FE8  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_00224FC0  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_0028FD30  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_0031B188  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_0031F0E8  -fno-optimize-sibling-calls  # 8 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_00321500  -fno-optimize-sibling-calls  # 10 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
