@@ -90,6 +90,19 @@ extern u32 func_00208C68(void);
 
 extern s32 func_001A17F0(void);
 
+typedef struct BattleEffectState {
+    u32 actor, flags, value;
+    u16 timer;
+    u8 active, phase;
+    u32 effect;
+    f32 speed;
+} BattleEffectState;
+
+typedef union BtlVec4 {
+    f32 f[4];
+    u128 q;
+} BtlVec4;
+
 typedef struct BtlUnitModel {
     u8 unk_00[0x8C];
     u32 *flags;
@@ -102,13 +115,15 @@ typedef struct BtlUnit {
     s32 unk_EC;
     u8 unk_F0[0x20];
     u32 flags;
-    u8 unk_114[0xC];
+    u32 unk_114;
+    u8 unk_118[8];
     u16 unk_120;
     u8 unk_122[2];
     u16 unk_124;
     u8 unk_126[8];
     u16 unk_12E;
-    u8 unk_130[0x1F0];
+    u8 unk_130[0x1EC];
+    u32 unk_31C;
     struct BtlUnitModel *model;
     u8 unk_324[0x20];
     struct BtlUnit *next;
@@ -1308,9 +1323,91 @@ void func_00204FE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205070);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002051B0);
+s32 func_002051B0(void) {
+    BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
+    BtlUnit *head = unit;
+    s32 result = -1;
+    for (; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->unk_124 == 0x105) {
+                    if (unit->flags & 0x20) {
+                        result = 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (result != -1) {
+        for (unit = head; unit != NULL; unit = unit->next) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit->flags & 2) {
+                        if (!(unit->flags & 0xE0)) {
+                            if (unit->unk_124 != 0x105) {
+                                func_001D4860(func_001D8DE8(unit, 6, 0xA));
+                                unit->flags &= ~1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002052F0);
+
+typedef struct BtlSlotEntry {
+    u16 flags;
+    u8 unk_02[2];
+    u16 kind;
+    u16 unk_06;
+    u16 unk_08;
+    u8 unk_0A[4];
+    u16 unk_0E;
+    u8 unk_10[0x12];
+    u16 data[24];
+    u8 unk_52[0x1A4 - 0x52];
+} BtlSlotEntry;
+
+extern BtlSlotEntry *D_003BAA00;
+
+void func_002052F0(void) {
+    s32 *effect = *(s32 **)((u8 *)func_001A17F0() + 0x694);
+    BtlSlotEntry *entry;
+    BtlSlotEntry *ready = NULL;
+    BtlSlotEntry *active = NULL;
+    u32 i;
+    entry = (BtlSlotEntry *)((u8 *)D_003BAA00 + 0xA60);
+    for (i = 0; i < 5; i++) {
+        u16 flags = entry->flags;
+        effect[i] = flags;
+        if (flags & 1) {
+            if (entry->kind == 3) {
+                ready = entry;
+            }
+            if (entry->kind == 1) {
+                entry->flags = flags | 2;
+                active = entry;
+            } else {
+                entry->flags = flags & ~2;
+            }
+        }
+        entry++;
+    }
+    active->unk_0E = 0;
+    if (ready != NULL) {
+        ready->unk_0E = 0;
+    }
+    memcpy((u8 *)effect + 0x14, active->data, 0x30);
+    for (i = 0; i < 24; i++) {
+        active->data[i] = 0;
+    }
+    active->unk_06 = active->unk_08;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205420);
 
@@ -1405,14 +1502,6 @@ void func_00205838(void) {
     }
 }
 
-typedef struct BattleEffectState {
-    u32 actor, flags, value;
-    u16 timer;
-    u8 active, phase;
-    u32 effect;
-    f32 speed;
-} BattleEffectState;
-
 void battleResetEffectState(void) {
     u8 *battle = (u8 *)func_001A17F0();
     BattleEffectState *data = *(BattleEffectState **)(battle + 0x694);
@@ -1440,7 +1529,19 @@ void func_00205EE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205EF8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00206128);
+s32 func_00206128(s32 unused, s32 value) {
+    BattleEffectState *effect = *(BattleEffectState **)(func_001A17F0() + 0x694);
+    if (effect->active != 1) {
+        return 0;
+    }
+    switch (value) {
+    case 0x12:
+    case 0x13:
+        return 1;
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206180);
 
@@ -1550,7 +1651,38 @@ s32 func_00206F38(s32 arg0) {
     return (temp_v0 ^ arg0) == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00206F78);
+extern s32 func_00207B68(void);
+
+s32 func_00206F78(void) {
+    BtlState *state = (BtlState *)func_001A17F0();
+    BtlUnit *target;
+    BtlUnit *unit;
+    BtlUnit *last;
+    s32 count;
+    if (func_00207B68() == 0) {
+        return -1;
+    }
+    target = (BtlUnit *)func_00207BF0();
+    last = NULL;
+    count = 0;
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x200) {
+                if (!(unit->flags & 0xE0)) {
+                    if (!(unit->unk_12E & 0x800)) {
+                        count++;
+                        last = unit;
+                    }
+                }
+            }
+        }
+    }
+    if (count == 1 && (last == NULL || last == target)) {
+        return 7;
+    }
+    return -1;
+}
+
 
 s32 battleHasDifferentActiveTarget(u32 target) {
     if (func_00207B68() == 0) {
@@ -1833,7 +1965,26 @@ void battleMarkSpecialUnit(u8 *unit) {
     *(u32 *)(unit + 0x114) |= 0x200;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002082E8);
+u8 *func_002082E8(s32 mode, u32 species) {
+    u8 *unit;
+    if (mode != 1) {
+        return NULL;
+    }
+    switch (species) {
+    case 0x10A:
+    case 0x12E:
+    case 0x12F:
+        break;
+    default:
+        return NULL;
+    }
+    unit = **(u8 ***)(func_001A17F0() + 0x694);
+    if (unit == NULL) {
+        return NULL;
+    }
+    return (*(u32 *)(unit + 0x110) & 2) ? unit : NULL;
+}
+
 
 extern u64 func_001A0CB0(void);
 
@@ -2687,6 +2838,7 @@ s32 func_0020D9F8(s32 battler, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020DA40);
 
+
 extern void func_00204838(void *, void *, void *, s32, s32, f32, f32, f32);
 extern void func_001DB698(void *);
 
@@ -2712,6 +2864,9 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020E058);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020E170);
 
+extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_0020DA40(u8 *);
+
 s32 func_0020E868(u8 *unit) {
     u8 *entry = *(u8 **)(unit + 0xf4);
     u8 *other;
@@ -2733,8 +2888,6 @@ s32 func_0020E868(u8 *unit) {
 }
 
 extern void func_001DC760(void);
-extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern void func_0020DA40(u8 *);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020E910);
 
 s32 func_0020EA40(u8 *unit) {
@@ -3340,7 +3493,53 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002118A8);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002118D8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002119A8);
+u32 func_002119A8(u32 colorA, u32 colorB) {
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit = 0x3C000000;
+    color1[0] = colorA;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lw $2, 0(%1)\n"
+        "pextlb $2, $0, $2\n"
+        "pextlh $2, $0, $2\n"
+        "qmtc2.ni $2, vf10\n"
+        "vitof0.xyzw vf10, vf10\n"
+        "qmtc2.ni %0, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vmove.xyzw vf11, vf10\n"
+        ".set reorder"
+        : : "r"(unit), "r"(color1) : "$2", "memory");
+    color2[0] = colorB;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lw $2, 0(%1)\n"
+        "pextlb $2, $0, $2\n"
+        "pextlh $2, $0, $2\n"
+        "qmtc2.ni $2, vf10\n"
+        "vitof0.xyzw vf10, vf10\n"
+        "qmtc2.ni %0, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vmul.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(unit), "r"(color2) : "$2", "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %1\n"
+        "qmtc2.ni $3, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vftoi0.xyzw vf10, vf10\n"
+        "qmfc2.ni %0, vf10\n"
+        "ppach %0, $0, %0\n"
+        "ppacb %0, $0, %0\n"
+        ".set reorder"
+        : "=r"(packed) : "f"(128.0f) : "$3");
+    blended[0] = packed;
+    return blended[0];
+}
+
 
 void func_00211A28(s32 *arg0) {
     s32 *temp_a0 = arg0;

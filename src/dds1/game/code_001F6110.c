@@ -662,9 +662,113 @@ s32 func_001F7AE0(BtlVec3 *a, BtlVec3 *b, BtlVec3 *p) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7BB0);
+u32 func_001F7BB0(u32 colorA, u32 colorB, f32 t) {
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    if (t >= 1.0f) {
+        return colorB;
+    }
+    unit = 0x3C000000;
+    color1[0] = colorB;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lw $2, 0(%1)\n"
+        "pextlb $2, $0, $2\n"
+        "pextlh $2, $0, $2\n"
+        "qmtc2.ni $2, vf10\n"
+        "vitof0.xyzw vf10, vf10\n"
+        "qmtc2.ni %0, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vmove.xyzw vf11, vf10\n"
+        ".set reorder"
+        : : "r"(unit), "r"(color1) : "$2", "memory");
+    color2[0] = colorA;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lw $2, 0(%1)\n"
+        "pextlb $2, $0, $2\n"
+        "pextlh $2, $0, $2\n"
+        "qmtc2.ni $2, vf10\n"
+        "vitof0.xyzw vf10, vf10\n"
+        "qmtc2.ni %0, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder"
+        : : "r"(unit), "r"(color2) : "$2", "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder"
+        : : "f"(1.0f - t) : "$2");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %0\n"
+        "qmtc2.ni $3, vf2\n"
+        "vmulx.xyzw vf11, vf11, vf2x\n"
+        "vadd.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "f"(t) : "$3");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %1\n"
+        "qmtc2.ni $3, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vftoi0.xyzw vf10, vf10\n"
+        "qmfc2.ni %0, vf10\n"
+        "ppach %0, $0, %0\n"
+        "ppacb %0, $0, %0\n"
+        ".set reorder"
+        : "=r"(packed) : "f"(128.0f) : "$3");
+    blended[0] = packed;
+    
+    return packed;
+}
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7C68);
+
+/* Blend two RGBA float vectors (0..1 scale) by t and pack to 8-bit channels. */
+u32 func_001F7C68(f32 *a, f32 *b, f32 t) {
+    u32 packed;
+    s32 blended[4];
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        "lqc2 vf11, 0(%1)\n\t"
+        ".set reorder"
+        : : "r"(a), "r"(b));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 $2, %0\n\t"
+        "qmtc2.ni $2, vf2\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        ".set reorder"
+        : : "f"(1.0f - t));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 $3, %0\n\t"
+        "qmtc2.ni $3, vf2\n\t"
+        "vmulx.xyzw vf11, vf11, vf2x\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        : : "f"(t));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 $3, %1\n\t"
+        "qmtc2.ni $3, vf2\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "vftoi0.xyzw vf10, vf10\n\t"
+        "qmfc2.ni %0, vf10\n\t"
+        "ppach %0, $0, %0\n\t"
+        "ppacb %0, $0, %0\n\t"
+        ".set reorder"
+        : "=r"(packed) : "f"(128.0f));
+    blended[0] = packed;
+    return blended[0];
+}
+
 
 void func_001F7CC8(s32 arg0, f32 arg1) {
     *(f32 *)(arg0 + 0) = arg1;
@@ -1991,9 +2095,47 @@ void func_001FB1E8(void) {
 void func_001FB1F0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB1F8);
+u8 *func_001FB1F8(u8 *list, s32 command) {
+    s32 i;
+    u8 *entry = *(u8 **)(list + 0x14);
+    for (i = 0; i < *(s32 *)(list + 0x18); i++) {
+        if (*(s32 *)(entry + 8) == command) {
+            return entry;
+        }
+        entry += 0x18;
+    }
+    return entry;
+}
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB240);
+
+s32 func_001FB240(u8 *list) {
+    u32 count;
+    u8 *entry;
+    u32 i;
+    s32 found;
+    if (list == NULL) {
+        return 0;
+    }
+    count = *(u32 *)(list + 0x18);
+    if (count == 0) {
+        return 0;
+    }
+    entry = *(u8 **)(list + 0x14);
+    found = 0;
+    for (i = 0; i < count; i++) {
+        switch (entry[4]) {
+        case 0x14:
+        case 0x15:
+            break;
+        default:
+            found++;
+            break;
+        }
+        entry += 0x18;
+    }
+    return found;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5440);
 
@@ -2113,7 +2255,44 @@ void func_001FB870(s32 arg0) {
     func_002CFF98(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB8C8);
+typedef struct BtlEntry {
+    s32 category;
+    s32 flags;
+    s32 id;
+    char name[0x30];
+    struct BtlEntry *prev;
+    struct BtlEntry *next;
+} BtlEntry;
+
+typedef struct BtlEntryList {
+    s32 count;
+    s32 unk_04;
+    BtlEntry *head;
+} BtlEntryList;
+
+void func_001FB8C8(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
+    BtlEntry *entry = func_002CFEB8(0x44);
+    BtlEntry *tail;
+    entry->category = category;
+    entry->flags = flags;
+    entry->id = id;
+    strcpy(entry->name, name);
+    if (list->head == NULL) {
+        list->head = entry;
+        entry->prev = NULL;
+        entry->next = NULL;
+    } else {
+        tail = list->head;
+        while (tail->next != NULL) {
+            tail = tail->next;
+        }
+        tail->next = entry;
+        entry->prev = tail;
+        entry->next = NULL;
+    }
+    list->count++;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB9A8);
 
@@ -2150,7 +2329,19 @@ s32 func_001FBF50(u8 *resource, s32 output) {
     return *(s32 *)(*(s32 *)(resource + 0x34));
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBFC8);
+s32 func_001FBFC8(u8 *resource, char *output) {
+    u32 length;
+    u32 i;
+    func_003014F0(output, D_003BB820, *(s32 *)(resource + 0x34) + 0xC);
+    length = strlen(output);
+    for (i = 0; i < length && output[i] != '.'; i++) {
+    }
+    if (length != i) {
+        output[i] = 0;
+    }
+    return **(s32 **)(resource + 0x34);
+}
+
 
 u32 func_001FC078(s32 arg0) {
     return *(u32 *)(*(s32 *)(arg0 + 0x34) + 4);
