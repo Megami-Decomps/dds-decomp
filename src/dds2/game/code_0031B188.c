@@ -5,12 +5,31 @@ extern void mdlBroadcastMasked(u32 sprite);
 extern u32 *D_00438940;
 
 void func_0031BB80(u8 *node);
+void func_0031B268(void);
 
 void func_0031C578(s32 node);
 
+extern u8 *func_00232198(s32 first, s32 second);
+extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
+extern u32 func_003292A8(s32 bytes);
+extern u32 *func_003292A0(u32 handle);
+
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B188);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B1F8);
+void func_0031B1F8(void) {
+    u32 handle;
+    u32 *pool;
+    if (D_00438940 != 0) {
+        func_0031B268();
+    }
+    handle = func_003292A8(0x32c);
+    D_00438940 = func_003292A0(handle);
+    memset(D_00438940, 0, 0x32c);
+    pool = D_00438940;
+    pool[0] = handle;
+    pool[1] = (u32)(pool + 3);
+    pool[2] = 100;
+}
 
 void func_0031B268(void) {
     if (D_00438940 != (u32 *)0x0) {
@@ -23,7 +42,25 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B290);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B2E0);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B328);
+void func_0031B328(void) {
+    u32 *pool = D_00438940;
+    if (pool != 0) {
+        s32 index = 0;
+        u32 *slot = (u32 *)pool[1];
+        if ((s32)pool[2] > 0) {
+            do {
+                if (slot[1] != 0) {
+                    if (slot[0] == 0 || --slot[0] == 0) {
+                        soundSetSequenceVolumePan(slot[1], 0x7f, 0x3f);
+                        slot[1] = 0;
+                    }
+                }
+                index++;
+                slot += 2;
+            } while (index < (s32)D_00438940[2]);
+        }
+    }
+}
 
 void func_0031B3B0(s32 arg0) {
     *(u16 *)(arg0 + 0x1da) = 0;
@@ -77,7 +114,10 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B960);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BA28);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BB80);
+void func_0031BB80(u8 *node) {
+    *(u32 *)(node + 4) &= ~1U;
+    func_002D46A0(*(u32 *)node);
+}
 
 u32 func_0031BBB0(u32 *owner, u32 resource) {
     u32 handle;
@@ -105,7 +145,21 @@ void func_0031BFC0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BFE0);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C0F8);
+void func_0031C0F8(u32 *group, f32 x, f32 y, f32 z, f32 w) {
+    u16 index = 0;
+    u8 *node = (u8 *)group[0];
+    if ((s32)group[1] > 0) {
+        do {
+            memset(node, 0, 0x50);
+            *(f32 *)(node + 0x20) = x;
+            index++;
+            *(f32 *)(node + 0x24) = y;
+            *(f32 *)(node + 0x28) = z;
+            *(f32 *)(node + 0x2c) = w;
+            node += 0x50;
+        } while (index < (s32)group[1]);
+    }
+}
 
 void func_0031C1A0(s32 *list) {
     u8 *node = (u8 *)list[0];
@@ -136,7 +190,28 @@ void func_0031C208(s32 *list) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C280);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C348);
+u8 *func_0031C348(u32 *group) {
+    s32 index = 0;
+    u8 *node = (u8 *)group[0];
+    if ((s32)group[1] > 0) {
+        do {
+            if ((*(u32 *)(node + 0x44) & 1) == 0) {
+                u32 *model = *(u32 **)(node + 0x40);
+                if (model != 0) {
+                    *model &= ~1U;
+                    *(u16 *)(node + 0x48) = 0;
+                    *(u16 *)(node + 0x4a) = 0;
+                    *(u32 *)(node + 0x44) = 1;
+                    return node;
+                }
+                return 0;
+            }
+            node += 0x50;
+            index++;
+        } while (index < (s32)group[1]);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C3C8);
 
@@ -144,7 +219,15 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C458);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C4A0);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C4E8);
+void func_0031C4E8(u8 *node, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
+    u8 *model = func_00232198(first, second);
+    *(u8 **)(node + 0x40) = model;
+    if (flag != -1) {
+        *(f32 *)(*(u8 **)(model + 0x1c) + 0x20) = z;
+        *(f32 *)(node + 0x4c) = z;
+        mdlAddEntryFlaggedEx(model, 0, flag, x, y);
+    }
+}
 
 void func_0031C578(s32 arg0) {
     *(u32 *)(arg0 + 0x44) = 0;

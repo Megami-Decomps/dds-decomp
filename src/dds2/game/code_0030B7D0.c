@@ -229,9 +229,39 @@ void func_0030D2D8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030D300);
+void func_0030D300(s32 flags) {
+    s16 *timers = *(s16 **)(D_004388C4 + 0x30);
+    if ((flags & 1) != 0) {
+        if (timers[6] == 0) {
+            timers[6] = 1;
+        }
+    } else {
+        timers[6] = 0;
+    }
+    if ((flags & 2) != 0) {
+        if (timers[7] == 0) {
+            timers[7] = 1;
+        }
+    } else {
+        timers[7] = 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030D350);
+void func_0030D350(void) {
+    s16 *timers = *(s16 **)(D_004388C4 + 0x30);
+    if (timers[6] > 0) {
+        timers[6]--;
+        if (timers[6] == 0) {
+            timers[6] = 60;
+        }
+    }
+    if (timers[7] > 0) {
+        timers[7]--;
+        if (timers[7] == 0) {
+            timers[7] = 60;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030D3A8);
 
