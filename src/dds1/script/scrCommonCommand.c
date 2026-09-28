@@ -20,7 +20,6 @@ s32 func_00108360(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 s32 func_002FC0E0(void);
 extern ScrComGlobals *D_003BAA00;
 extern s8 D_00398628[];
-extern char D_0039F4C8[];
 extern char D_0039F4D8[];
 extern char D_0039F4E8[];
 extern char D_0039F508[];
@@ -42,11 +41,9 @@ s32 func_0010D7A0(void)
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D7C0);
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4C8);
-
 s32 func_0010D808(void)
 {
-    func_0010AC10(D_0039F4C8, func_0010D428(0));
+    func_0010AC10("PUT -> %d\n", func_0010D428(0));
     return 1;
 }
 

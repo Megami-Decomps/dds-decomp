@@ -11,6 +11,8 @@ function's asm file, and each C function brings what the compiler emits for it
 - rodata of functions that are already C but whose C does not yet produce it
   (strings and constants still referenced as extern D_ symbols); splat leaves it
   in asm/<v>/matchings/<unit>/<func>.s. It goes directly before that function.
+  Once the C writes the literal itself (the D_ symbol no longer appears in the
+  function), the compiler emits it and no line is needed.
 - rodata several functions share, or that only .data tables point at; splat
   writes it to asm/<v>/nonmatchings/<unit>/<sym>.s. It goes where its address
   falls: before the first function whose rodata comes after it, or at the end.
@@ -53,6 +55,15 @@ def place(version):
             if "glabel " in f.read_text():
                 owned -= {n for n, _ in LABEL.findall(rodata_part(f))}
         text = c.read_text()
+        # Rodata a C function no longer names is compiled by that function itself
+        # (a string literal): nothing to include.
+        compiled = set()
+        for m in DEF.finditer(text):
+            code = function_text(text, m.start())
+            for block in SYMBOL_BLOCK.finditer(rodata_part(matchings / f"{m.group(1)}.s")):
+                if not re.search(rf"\b{block.group(1)}\b", code):
+                    compiled.add(block.group(1))
+        owned -= compiled
         text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?',
                       lambda m: m.group(0) if m.group(1) in owned else "", text, flags=re.M)
         have = set(INCLUDE.findall(text))
@@ -65,8 +76,8 @@ def place(version):
             for block in SYMBOL_BLOCK.finditer(rodata):
                 sym = block.group(1)
                 addr = int(LABEL.search(block.group(0)).group(2), 16)
-                if sym.startswith("jtbl_"):
-                    anchors.append((addr, m.start(), None, False))  # the C switch emits it
+                if sym.startswith("jtbl_") or sym in compiled:
+                    anchors.append((addr, m.start(), None, False))  # the C emits it
                     continue
                 out = nonmatchings / f"{sym}.s"
                 if not out.exists():
@@ -97,6 +108,16 @@ def place(version):
             added += len(inserts[pos])
         c.write_text(text)
     print(f"{version}: {added} INCLUDE_RODATA lines")
+
+
+def function_text(text, start):
+    """Text of the C function definition starting at `start`."""
+    depth, i = 0, text.index("{", start)
+    for j in range(i, len(text)):
+        depth += {"{": 1, "}": -1}.get(text[j], 0)
+        if depth == 0:
+            return text[start:j + 1]
+    return text[start:]
 
 
 if __name__ == "__main__":

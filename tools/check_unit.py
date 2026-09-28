@@ -214,10 +214,29 @@ def main():
         else:
             ok += 1
             print(f"OK   {name} @ 0x{addr:08X} ({size} bytes)")
-    # Jump tables: every entry must land on the retail case label.
+    # Rodata the C emits: jump tables (every entry must land on the retail case
+    # label) and data items such as string literals (bytes must equal retail's).
     funcs_by_off = sorted(funcs)
     covered = set()
-    for table_off, retail_addr, name in tables:
+    starts = sorted({t[0] for t in tables} | {len(rodata)})
+    for table_off, retail_addr, name in dict.fromkeys(tables):
+        if not 0 <= table_off < len(rodata):
+            continue
+        if rodata_relocs.get(table_off, ("", ""))[1] != ".text":
+            end = next(s for s in starts if s > table_off)
+            item = rodata[table_off:end]
+            nul = item.find(b"\0")
+            if nul >= 0 and all(32 <= c < 127 or c in b"\t\n\r\x1b" for c in item[:nul]) \
+                    and not any(item[nul:]):
+                item = item[:nul + 1]  # a string; the rest is alignment
+            else:
+                item = item.rstrip(b"\0") or item[:4]
+            theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
+            if item != theirs:
+                bad += 1
+                print(f"DIFF rodata of {name} (retail 0x{retail_addr:08X}): {item[:40]!r} vs {theirs[:40]!r}")
+            covered.update(range(table_off, end))
+            continue
         k, wrong = 0, 0
         while rodata_relocs.get(table_off + 4 * k, ("", ""))[1] == ".text":
             label = struct.unpack_from("<I", rodata, table_off + 4 * k)[0]
@@ -231,15 +250,15 @@ def main():
         if wrong:
             bad += 1
             print(f"DIFF jump table of {name} (retail 0x{retail_addr:08X}): {wrong} of {k} entries differ")
-    stray = ro_size - len(covered)
+    stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]
     if emitted.get(".lit4") and owns_rodata(version, unit_name, "lit4"):
         del emitted[".lit4"]  # every constant was compared with retail above
     for name, size in emitted.items():
         bad += 1
-        why = ("only jump tables are compiled here; strings and constants stay INCLUDE_RODATA "
-               "(tools/include_rodata.py) for now" if name == ".rodata" and owns_rodata(version, unit_name)
+        why = ("rodata no instruction refers to (unused static data?)"
+               if name == ".rodata" and owns_rodata(version, unit_name)
                else "reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
                "(this data is not split per unit yet)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
