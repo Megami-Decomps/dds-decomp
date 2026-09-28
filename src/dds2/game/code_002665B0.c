@@ -44,6 +44,9 @@ extern s32 func_002B8158(s32, s32, s32, s32);
 extern s32 func_002B82A0(s32, s32);
 extern void func_00267500(void);
 extern u8 D_00437870[];
+extern s32 func_00328D68(s32);
+extern s32 func_002BC460(u16, u16);
+extern void func_002C2128(s32, s32, s32, s32, s32, s32);
 extern void destroyPackedEffectBatch(s32);
 
 void func_002665B0(s32 arg0) {
@@ -115,7 +118,16 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00266F70);
+s32 func_00266F70(s32 resource, s32 context) {
+    s32 panel = func_00328D68(0xa0);
+    func_002C2128(panel, 0, 0, 0x1e,
+        func_002BC460(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
+        *(s32 *)(context + 0xec));
+    func_002C2128(panel + 0x50, 1, 0, 0x1e,
+        func_002BC460(*(u16 *)(resource + 0xa), *(u16 *)(resource + 0xc)),
+        *(s32 *)(context + 0xec));
+    return panel;
+}
 
 void func_00267008(s32 arg0) {
     if (arg0 != 0) {
@@ -197,7 +209,22 @@ void func_00267680(s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002676F0);
+void func_002676F0(s32 object) {
+    s32 state = *(s32 *)(object + 0x84);
+    s32 selectedIndex;
+    if (state != 0) {
+        if (state != 2) {
+            return;
+        }
+        selectedIndex = 0;
+    } else {
+        selectedIndex = 3 - func_002674F8();
+    }
+    if (*(s32 *)(*(s32 *)(object + 0x7c) + 0x20) == 0) {
+        s32 node = menuWalkNodeList(selectedIndex, *(s32 *)(object + 0x78));
+        *(u32 *)(node + 0x48) |= 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267768);
 

@@ -3425,7 +3425,22 @@ INCLUDE_ASM(const s32, "game/code_002DC138", reinitializeEffectFileQueue);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", resetEffectFileQueueState);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FDD70);
+extern u32 D_004386B8;
+extern u8 *fileQueueGetAt(u32, u32);
+extern u8 D_003FFA78[];
+extern u32 D_003FF22C[11];
+extern void func_002D5010(s32 resource, s32 entry);
+
+u32 func_002FDD70(void) {
+    s32 resource;
+    s32 entry;
+    entry = (s32)fileQueueGetAt(D_004386B8, func_002FCA40());
+    resource = func_002D4BD8(D_004386B8, entry);
+    D_003FF22C[0] = 0;
+    func_002D5010(resource, entry);
+    D_004386F4 = (s32)D_003FFA78;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FDDD8);
 
@@ -3443,6 +3458,17 @@ u32 func_002FE230(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE250);
+
+typedef struct EffectFileSelection {
+    u8 reserved[0xC];
+    s32 selected;
+    u32 reserved_10;
+    const void *table;
+    s32 count;
+    u8 tail[0x1C];
+} EffectFileSelection;
+extern EffectFileSelection D_003FF4B0;
+extern u8 D_003FF390[], D_003FF3D8[], D_0045C270[], D_00439074;
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE400);
 
@@ -3575,7 +3601,6 @@ void func_002FEBC8(void) {
 }
 
 extern char D_0042CF58[];
-extern u32 D_004386B8;
 extern char **func_002FC8F8();
 
 s32 func_002FEBF0(void) {
@@ -3631,8 +3656,6 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FF8A0);
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FFBA0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FFDA0);
-
-extern u8 *fileQueueGetAt(u32, u32);
 
 extern u32 func_002FF8A0(u8 *, s32);
 
@@ -4140,7 +4163,6 @@ typedef struct EffectFileHeader {
     u32 length;
 } EffectFileHeader;
 extern EffectFileHeader D_003FB948;
-extern u8 D_003FFA78[];
 extern u8 D_0045C270[];
 extern u32 D_004386C8;
 extern u32 D_004386BC;
@@ -4629,21 +4651,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_00304618);
 
 extern u8 D_00400508[];
 
-u32 sumEffectRecordStatuses(u8 *batch) {
-    u32 index = 0;
-    u32 sum = 0;
-    u8 *bucket = D_00400508 + *(u32 *)(batch + 0x14) * 0x10;
-    if (*(u32 *)(bucket + 8) != 0) {
-        u32 offset = 0;
-        do {
-            sum += func_00304618(*(u32 *)(bucket + 0xC) + offset + 4,
-                                   0, 0, 0);
-            index++;
-            offset += 0x18;
-        } while (index < *(u32 *)(bucket + 8));
-    }
-    return sum;
-}
+INCLUDE_ASM(const s32, "game/code_002DC138", sumEffectRecordStatuses);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304768);
 
@@ -4731,9 +4739,23 @@ void func_00304D80(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304DE8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304EE0);
+void func_00304EE0(u32 *owner) {
+    if (owner[0] != 0) {
+        u32 resource = owner[0];
+        u32 mapped = func_003298F8(resource);
+        func_00304DE8(owner, mapped, 0, -1);
+        func_00329910(owner[0]);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304F40);
+void func_00304F40(u32 *owner, s32 mapping) {
+    if (owner[0] != 0) {
+        u32 resource = owner[0];
+        u32 mapped = func_003298F8(resource);
+        func_00304DE8(owner, mapped, 0, mapping);
+        func_00329910(owner[0]);
+    }
+}
 
 extern void func_0032BB68(s32, u32, u32);
 

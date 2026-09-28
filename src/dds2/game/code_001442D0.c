@@ -1575,6 +1575,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00156538);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156630);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156700);
+/*W13D2END*/
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156738);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern void func_002BD640(u32, u32);
 
@@ -853,7 +854,9 @@ void func_0029C740(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C748);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029CDE0);
+void func_0029CDE0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0029CDF0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
@@ -1077,7 +1080,9 @@ void func_0029E080(s32 arg0) {
     *(s32 *)(arg0 + 0x20) = *(s32 *)(arg0 + 0x20) + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E0D0);
+void func_0029E0D0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0029E0E0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
@@ -1115,7 +1120,9 @@ void func_0029E3A0(s32 arg0) {
     *(s32 *)(arg0 + 0x20) = *(s32 *)(arg0 + 0x20) + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E3F0);
+void func_0029E3F0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0029E400(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
@@ -1161,9 +1168,13 @@ void func_0029E600(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E630);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E728);
+void func_0029E728(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E738);
+void func_0029E738(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_0029E750(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -1674,9 +1685,13 @@ void func_002A39E0(u32 arg0) {
     func_002A39A8(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A3A08);
+void func_002A3A08(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A3A18);
+void func_002A3A18(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002A3A30(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -1791,9 +1806,13 @@ void func_002A54E0(u32 arg0) {
     func_002A54A8(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5508);
+void func_002A5508(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5518);
+void func_002A5518(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002A5530(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -2105,9 +2124,13 @@ void func_002A8018(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A8020);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A85B0);
+void func_002A85B0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A85C0);
+void func_002A85C0(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002A85D8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -2275,9 +2298,13 @@ void func_002AAB80(u32 arg0) {
     func_002AAB48(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AABA8);
+void func_002AABA8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AABB8);
+void func_002AABB8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002AABD0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -2633,9 +2660,13 @@ void func_002AE1A8(u32 arg0) {
     func_002AE170(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AE1D0);
+void func_002AE1D0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AE1E0);
+void func_002AE1E0(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002AE1F8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -2921,20 +2952,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0408);
 
 extern EffectResourceSizeEntry D_0037EDA8[];
 
-u8 *func_002B0598(u16 kind, void *source) {
-    u32 headerSize = 0x40;
-    u32 size = D_0037EDA8[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
-    *(u8 **)(effect + 0x34) = effect + headerSize;
-    *(u32 *)(effect + 0x24) = 0x80808080;
-    *(float *)(effect + 0x20) = 1.0f;
-    *(u32 *)(effect + 0x2C) = kind;
-    *(u32 *)(effect + 0x28) = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
-    memcpy(*(void **)(effect + 0x34), source, size);
-    return effect;
-}
+INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0598);
 
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0650);
@@ -2979,9 +2997,13 @@ void func_002B08B8(u32 arg0) {
     func_002B0880(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B08E0);
+void func_002B08E0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B08F0);
+void func_002B08F0(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002B0908(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -3095,9 +3117,13 @@ void func_002B22C0(u32 arg0) {
     func_002B2288(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B22E8);
+void func_002B22E8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B22F8);
+void func_002B22F8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002B2310(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -3410,9 +3436,13 @@ void func_002B4738(u32 arg0) {
     dispatchEnabledEffectCallback(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4760);
+void func_002B4760(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4770);
+void func_002B4770(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void func_002B4788(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;

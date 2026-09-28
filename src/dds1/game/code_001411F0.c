@@ -465,11 +465,56 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00142800);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001428C0);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldFindRecordItem);
+typedef struct {
+    u8 pad0[0x10];
+    s32 value;
+    u8 pad14[8];
+} FldItem; /* 0x1C bytes */
+
+typedef struct {
+    u8 pad0[4];
+    FldItem *items;
+    u32 count;
+    u8 padC[8];
+} FldSceneRecord; /* 0x14 bytes */
+
+s32 fldFindRecordItem(s32 scene, u32 index) {
+    s32 result = 1;
+    FldSceneRecord *rec = (FldSceneRecord *)D_003BAEDC;
+    s32 i;
+    u32 j;
+    FldItem *item;
+
+    for (i = 0; i < (s32)D_003BAEE0; i++, rec++) {
+        item = rec->items;
+        for (j = 0; j < rec->count; j++, item++) {
+            if (i == scene && j == index) {
+                result = item->value + 1;
+            }
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142C78);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldGetMaxItemValue);
+s32 fldGetMaxItemValue(void) {
+    s32 max = 0;
+    FldSceneRecord *rec = (FldSceneRecord *)D_003BAEDC;
+    s32 i;
+    u32 j;
+    FldItem *item;
+
+    for (i = 0; i < (s32)D_003BAEE0; i++, rec++) {
+        item = rec->items;
+        for (j = 0; j < rec->count; j++, item++) {
+            if (max < item->value) {
+                max = item->value;
+            }
+        }
+    }
+    return max + 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142D78);
 
