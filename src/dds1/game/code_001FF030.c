@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_00216708(void);
+extern s32 *func_00216708();
 
 extern u8 D_003BBB0D;
 
@@ -1413,7 +1413,14 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00211390);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00211450);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00211490);
+void func_00211490(s32 isDevil, s32 modelId, char *filename) {
+    extern void func_003014F0(char *, const char *, const char *, s32);
+    if (isDevil == 0) {
+        func_003014F0(filename, "%spc%03X_ms.LB", "/model/human/", modelId);
+    } else {
+        func_003014F0(filename, "%s%03X_ms.LB", "/model/devil/", modelId);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002114E8);
 
@@ -1826,7 +1833,19 @@ void func_002166A8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00216708);
+s32 *func_00216708(group, type)
+    s32 group;
+    s32 type;
+{
+    s32 *entry = (s32 *)D_00367940[group];
+    while (entry != 0) {
+        if (*(u16 *)((u8 *)entry + 0xa) == type) {
+            break;
+        }
+        entry = (s32 *)*entry;
+    }
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00216738);
 
@@ -1858,13 +1877,26 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00216840);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00216958);
 
 void func_00216A70(void) {
-    u64 temp_v0;
+    s32 *temp_v0;
 
     temp_v0 = func_00216708();
     func_00216958(temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00216A90);
+void func_00216A90(void) {
+    u32 i = 0;
+    s32 *head = D_00367940;
+    do {
+        s32 *node = (s32 *)*head;
+        while (node != 0) {
+            s32 *next = (s32 *)*node;
+            func_00216958(node);
+            node = next;
+        }
+        i++;
+        head++;
+    } while (i < 8);
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00216B00);
 
