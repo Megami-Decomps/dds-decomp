@@ -105,6 +105,7 @@ def place(version):
             if not any(a[2] == sym for a in anchors):
                 anchors.append((int(sym[-8:], 16), pos, None, False))
         for s in [s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()]:
+            align_file(s)
             m = LABEL.search(s.read_text())
             if m and m.group(1) in owned and not any(sym == m.group(1) for _, _, sym, _ in anchors):
                 anchors.append((int(m.group(2), 16), None, m.group(1), m.group(1) not in have))
@@ -129,6 +130,21 @@ def place(version):
             added += len(inserts[pos])
         c.write_text(text)
     print(f"{version}: {added} INCLUDE_RODATA lines")
+
+
+def align_file(path):
+    """Give a standalone rodata file the alignment its address allows (at most
+    8, or 16 for a jump table). ee-gcc aligned every literal it emitted; once a
+    neighbour is compiled from C, the included data must realign exactly as
+    the original did. At the retail address this adds no padding."""
+    text = path.read_text()
+    m = LABEL.search(text)
+    if not m or re.search(r"^\.align \d+\nnonmatching", text, re.M):
+        return
+    addr = int(m.group(2), 16)
+    cap = 4 if m.group(1).startswith("jtbl_") else 3
+    k = next(k for k in range(cap, -1, -1) if addr % (1 << k) == 0)
+    path.write_text(re.sub(r"^nonmatching", f".align {k}\nnonmatching", text, count=1, flags=re.M))
 
 
 def function_text(text, start):
