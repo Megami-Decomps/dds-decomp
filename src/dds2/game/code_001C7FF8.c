@@ -33,6 +33,14 @@ typedef struct {
 } SceneInitializer;
 
 extern SceneInitializer D_003B6938[];
+extern u32 func_001B57B0(void);
+extern s32 func_001AC750(s32, void *);
+extern s32 D_004367C0;
+extern char D_003B5D10[];
+extern s32 getEntryFlagsUnlessDisabled(void *);
+extern void func_001D3978(void);
+
+
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C7FF8);
 
@@ -58,7 +66,13 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8158);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C81F8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C82A0);
+s32 func_001C82A0(s32 unused, u32 limit) {
+    func_001AA6F8();
+    if (limit < func_001B57B0()) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C82D8);
 
@@ -70,7 +84,15 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8768);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C89A0);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8A28);
+char *func_001C8A28(s32 object, s16 *value) {
+    s32 cached = D_004367C0;
+    if (cached == 0) {
+        cached = func_001AC750(*(s32 *)(*(s32 *)(object + 0x2C) + 0x18), D_003B5D10);
+        D_004367C0 = cached;
+    }
+    *value = cached;
+    return D_003B5D10;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8A80);
 
@@ -114,13 +136,45 @@ s64 func_001CA820(void) {
     return *(s32 *)func_001CA7E0();
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA858);
+s32 func_001CA858(void) {
+    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+    while (actor != 0) {
+        if ((*(u64 *)(actor + 0x110) & 0x421) == 0x401) {
+            u16 kind = *(u16 *)(actor + 0x124);
+            if (kind == 0x4C || kind == 0x3C) {
+                return 1;
+            }
+        }
+        actor = *(s32 *)(actor + 0x364);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA8D8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA958);
+s32 func_001CA958(void) {
+    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+    while (actor != 0) {
+        if ((*(u64 *)(actor + 0x110) & 0x421) == 0x401 &&
+            (*(u16 *)(actor + 0x12E) & 1) != 0) {
+            return 1;
+        }
+        actor = *(s32 *)(actor + 0x364);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA9C0);
+s32 func_001CA9C0(void) {
+    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+    while (actor != 0) {
+        if ((*(u64 *)(actor + 0x110) & 0x421) == 0x401 &&
+            getEntryFlagsUnlessDisabled((void *)(actor + 0x120)) != 0) {
+            return 0;
+        }
+        actor = *(s32 *)(actor + 0x364);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CAA30);
 
