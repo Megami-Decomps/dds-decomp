@@ -101,7 +101,6 @@ extern void func_00144F88(s32 param);
 extern void func_00145078(s32 param);
 
 extern s32 func_00145360(s32 param);
-
 extern void func_001453D0(s32 param0, s32 param1);
 
 extern void func_00145400(s32 param0, s32 param1);
@@ -158,7 +157,6 @@ extern s32 D_00389770[];
 extern void func_00342580(s32 arg0);
 
 extern s32 D_00389798[];
-
 extern void func_00341C78();
 
 extern void func_00129E50(u32 arg0, s32 arg1);
@@ -522,9 +520,41 @@ void func_0014A9F0(s32 arg0, s32 arg1, s32 arg2) {
 
 extern s32 D_00387CE0[];
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014AA28);
+s32 func_0014AA28(s32 area, s32 floor, s32 bit) {
+    s32 index = D_00387CE0[area % 100];
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014AA90);
+    if (index == -1) {
+        return 0;
+    }
+    return (*(u64 *)(D_00435DD0 + 0xFCD0 + (index * 64 + floor) * 8) >> bit) & 1;
+}
+
+extern s32 func_001460D8(s32 floor, s32 bit);
+
+void func_0014AA90(s32 bit) {
+    s32 index;
+    s32 floor;
+    s32 bitIndex;
+
+    if (bit <= 0) {
+        return;
+    }
+    index = D_00387CE0[D_00436244 % 100];
+    if (index == -1) {
+        return;
+    }
+    floor = D_00389770[5];
+    bitIndex = bit - 1;
+    {
+        s32 byteOffset = 0xFCD0 + (index * 64 + floor) * 8;
+        u64 mask = (u64)1 << bitIndex;
+        u64 *flags = (u64 *)(D_00435DD0 + byteOffset);
+        D_00389770[6] = bitIndex;
+        D_00389770[47] = bit;
+        *flags |= mask;
+    }
+    D_00389770[48] = func_001460D8(floor, bitIndex);
+}
 
 void func_0014AB38(s32 area, s32 floor, s32 bit) {
     s32 index = D_00387CE0[area % 100];
