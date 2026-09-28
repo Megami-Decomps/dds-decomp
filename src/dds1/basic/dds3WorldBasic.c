@@ -73,9 +73,9 @@ void func_0010FD30(void) {
     }
 }
 
-void func_0010FD60(void *arg) {
+void func_0010FD60(void *object) {
     if (D_003BA9BC != NULL) {
-        D_003BA9BC->unk18->unk8 = arg;
+        D_003BA9BC->unk18->unk8 = object;
     }
 }
 
@@ -89,9 +89,9 @@ void *func_0010FD80(void) {
     return world->unk18->unk8;
 }
 
-void func_0010FDA0(void *arg) {
+void func_0010FDA0(void *object) {
     if (D_003BA9BC != NULL) {
-        D_003BA9BC->unk18->unkC = arg;
+        D_003BA9BC->unk18->unkC = object;
     }
 }
 

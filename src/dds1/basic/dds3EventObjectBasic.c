@@ -1,8 +1,12 @@
 #include "common.h"
 
 typedef struct {
+    s32 handle;
+} EventData;
+
+typedef struct {
     u8 pad[0x18];
-    void *unk18;
+    EventData *unk18;
     void *unk1C;
 } EventObj;
 
@@ -13,19 +17,19 @@ s32 func_0010F650(void *arg, s32 arg1);
 void func_0010F638(void *arg, s32 arg1);
 void effObjInnerVecBackup(void *arg);
 
-void func_00116148(EventObj *arg) {
-    void *data;
+void func_00116148(EventObj *event) {
+    EventData *data;
 
-    func_0010F5E8(arg);
-    data = arg->unk18;
-    func_00111840(*(s32 *)data);
+    func_0010F5E8(event);
+    data = event->unk18;
+    func_00111840(data->handle);
     func_002CFF98(data);
 }
 
-s32 func_00116188(EventObj *arg) {
+s32 func_00116188(EventObj *event) {
     void *data;
 
-    data = arg->unk1C;
+    data = event->unk1C;
     if (func_0010F650(data, 1) == 1) {
         func_0010F638(data, 1);
         effObjInnerVecBackup(data);

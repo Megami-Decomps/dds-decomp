@@ -27,15 +27,15 @@ void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
 extern void *D_00324780[];
 
-void func_00116338(LightObj *arg) {
+void func_00116338(LightObj *light) {
     LightData *data;
 
-    data = arg->unk18;
+    data = light->unk18;
     func_002CFF98(data->unk78);
     func_00111840(data->unk74);
-    func_002CFF98(arg->unk18);
-    arg->unk18 = NULL;
-    func_0010F5E8(arg);
+    func_002CFF98(light->unk18);
+    light->unk18 = NULL;
+    func_0010F5E8(light);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3LightObjectBasic", func_00116388);

@@ -14,14 +14,14 @@ s32 func_002D0A80(s32 arg);
 void func_002D0A10(s32 arg);
 void func_002CFF98(void *arg);
 
-void func_00116A50(ModelRangeObj *arg) {
+void func_00116A50(ModelRangeObj *object) {
     ModelRangeData *data;
-    s32 tmp;
+    s32 resource;
 
-    data = arg->unk18;
-    tmp = data->unk4;
-    if (tmp != 0) {
-        func_002D0A10(func_002D0A80(tmp));
+    data = object->unk18;
+    resource = data->unk4;
+    if (resource != 0) {
+        func_002D0A10(func_002D0A80(resource));
     }
     func_002CFF98(data);
 }

@@ -240,11 +240,11 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
     return r;
 }
 
-void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 arg2) {
+void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node != NULL) {
-        node->unk20 = arg2;
+        node->unk20 = value;
     }
 }
 

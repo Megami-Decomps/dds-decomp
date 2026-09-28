@@ -61,43 +61,43 @@ void *memset(void *s, s32 c, u32 n);
 void effFreeBuffers(s32 arg);
 void func_002CFF98(void *arg);
 
-void func_00116F08(PathObj *arg) {
-    effFreeBuffers(arg->unk10);
-    func_002CFF98(arg);
+void func_00116F08(PathObj *path) {
+    effFreeBuffers(path->unk10);
+    func_002CFF98(path);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F38);
 
-void func_00117050(PathObj *arg) {
-    s32 idx;
-    f32 frac;
+void func_00117050(PathObj *path) {
+    s32 index;
+    f32 fraction;
     PathData18 *data;
-    PathEntry16 *base;
-    PathEntry16 *p1;
-    PathEntry16 *p2;
-    if (arg->unk4 & 2) {
-        data = arg->unk18;
-        func_00116B80(&idx, &frac, data, arg->unkC);
-        base = data->unk4;
-        p1 = &base[idx];
+    PathEntry16 *entries;
+    PathEntry16 *first;
+    PathEntry16 *second;
+    if (path->unk4 & 2) {
+        data = path->unk18;
+        func_00116B80(&index, &fraction, data, path->unkC);
+        entries = data->unk4;
+        first = &entries[index];
         __asm__ volatile (
             ".set noreorder\n"
             "lqc2 vf10, 0(%0)\n"
             ".set reorder"
             :
-            : "r"(p1)
+            : "r"(first)
             : "memory"
         );
-        p2 = &base[idx] + 1;
+        second = &entries[index] + 1;
         __asm__ volatile (
             ".set noreorder\n"
             "lqc2 vf11, 0(%0)\n"
             ".set reorder"
             :
-            : "r"(p2)
+            : "r"(second)
             : "memory"
         );
-        func_002E8278(p2, frac);
+        func_002E8278(second, fraction);
     } else {
         __asm__ volatile (
             ".set noreorder\n"

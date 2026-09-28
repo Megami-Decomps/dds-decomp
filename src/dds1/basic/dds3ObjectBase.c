@@ -50,25 +50,25 @@ void func_002DB308(void *arg);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111840);
 
-void func_00111908(void *obj, s32 flag) {
+void func_00111908(void *obj, s32 flags) {
     ObjBase *base;
 
     base = func_00112888(obj);
-    base->unk0 = base->unk0 | flag;
+    base->unk0 = base->unk0 | flags;
 }
 
-void func_00111938(void *obj, s32 flag) {
+void func_00111938(void *obj, s32 flags) {
     ObjBase *base;
 
     base = func_00112888(obj);
-    base->unk0 = base->unk0 & ~flag;
+    base->unk0 = base->unk0 & ~flags;
 }
 
-u8 func_00111970(void *obj, s32 flag) {
+u8 func_00111970(void *obj, s32 flags) {
     ObjBase *base;
 
     base = func_00112888(obj);
-    return (base->unk0 & flag) != 0;
+    return (base->unk0 & flags) != 0;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001119A0);

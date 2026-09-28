@@ -1,11 +1,21 @@
 #include "common.h"
 
-void func_00110BB8(s32 arg0) {
-    s32 temp_v0;
+typedef struct {
+    u8 pad0[0x14];
+    u32 state;
+} SceneObject;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
+typedef struct {
+    u8 pad0[0x18];
+    SceneObject *object;
+} Scene;
+
+void func_00110BB8(Scene *scene) {
+    SceneObject *object;
+
+    object = scene->object;
     func_00128890();
-    *(u32 *)(temp_v0 + 0x14) = 0;
+    object->state = 0;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3SceneBasic", func_00110BE0);

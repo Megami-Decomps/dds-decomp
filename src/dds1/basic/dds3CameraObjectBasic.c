@@ -1,12 +1,22 @@
 #include "common.h"
 
-void func_001129B8(s32 arg0) {
-    s32 temp_v0;
+typedef struct {
+    u8 pad0[0x80];
+    u32 handle;
+} CameraData;
+
+typedef struct {
+    u8 pad0[0x18];
+    CameraData *data;
+} CameraObject;
+
+void func_001129B8(CameraObject *camera) {
+    CameraData *data;
 
     func_0010F5E8();
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    func_00111840(*(u32 *)(temp_v0 + 0x80));
-    func_002CFF98(temp_v0);
+    data = camera->data;
+    func_00111840(data->handle);
+    func_002CFF98(data);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_001129F8);
@@ -17,8 +27,8 @@ u32 func_00112AE0(void) {
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112AE8);
 
-u32 func_00112BB0(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x80);
+u32 func_00112BB0(CameraObject *camera) {
+    return camera->data->handle;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112BC0);

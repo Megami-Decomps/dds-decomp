@@ -20,19 +20,19 @@ s32 func_0010C0C8();
 s32 func_0010C070();
 s32 func_0010B7C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 s32 func_0010BA18(s32 arg0, s32 arg1);
-s32 func_0010BB28(s32 arg0, s32 arg1)
+s32 func_0010BB28(s32 scriptId, s32 option)
 {
     u32 buf[4];
     void *handle;
     s32 id;
     ScrProcTask *task;
-    handle = func_002EB028(arg0, buf, 0);
+    handle = func_002EB028(scriptId, buf, 0);
     id = buf[0];
     if (id == 0)
     {
         return 0;
     }
-    task = (ScrProcTask *)func_0010BA18(id, arg1);
+    task = (ScrProcTask *)func_0010BA18(id, option);
     if (task != NULL)
     {
         task->unkD8 = handle;
@@ -40,10 +40,10 @@ s32 func_0010BB28(s32 arg0, s32 arg1)
     return (s32)task;
 }
 
-s32 scrProcCreateTask(s32 arg0, ScrProcTask *task)
+s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
     s32 id;
-    id = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), arg0, 1, 1, func_0010C0C8, func_0010C070, (s32)task);
+    id = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, func_0010C0C8, func_0010C070, (s32)task);
     task->unkE4 = id;
     return id;
 }

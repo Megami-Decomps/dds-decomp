@@ -138,10 +138,10 @@ u32 func_0010C680(ScrData *scr)
 
 u32 func_0010C6D8(ScrData *scr)
 {
-    f32 val;
+    f32 value;
 
-    val = func_0010C2B8(scr);
-    D_003BAA00->floats[scr->instructions[scr->pc].parts.sOperand] = val;
+    value = func_0010C2B8(scr);
+    D_003BAA00->floats[scr->instructions[scr->pc].parts.sOperand] = value;
     scr->pc++;
     return 1;
 }

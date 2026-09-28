@@ -7,6 +7,6 @@ typedef struct {
 
 void func_002CFF98(void *arg);
 
-void func_00116860(ModelObj *arg) {
-    func_002CFF98(arg->unk18);
+void func_00116860(ModelObj *model) {
+    func_002CFF98(model->unk18);
 }
