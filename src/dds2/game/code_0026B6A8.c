@@ -59,7 +59,22 @@ s32 func_0026BAB8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BAF8);
+extern s32 kwlnFadeIsActive(void);
+extern void func_002C42C0(s32 *, char *);
+extern char D_003CE998[];
+
+s64 func_0026BAF8(u64 request) {
+    s32 state = func_00101958();
+    s32 *dispatch = (s32 *)(state + 0x54);
+    s64 result = func_002C4038(state + 8, dispatch, 0, request);
+    if (result == 0) {
+        if (*dispatch == 0 && kwlnFadeIsActive() == 0) {
+            func_002C42C0(dispatch, D_003CE998);
+        }
+        result = 0;
+    }
+    return result;
+}
 
 void func_0026BB78(s32 arg0) {
     s32 temp_v0 = func_00101958();
@@ -100,13 +115,18 @@ u32 func_0026BC78(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BC80);
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BD38);
+s32 func_0026BD38(s32 index) {
+    return index == 1 ? 4 : 6;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BD50);
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BE28);
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BEB0);
+void func_0026BEB0(s32 *state, s32 vertical, s32 horizontal) {
+    state[5] = vertical;
+    state[6] = horizontal;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BEC0);
 

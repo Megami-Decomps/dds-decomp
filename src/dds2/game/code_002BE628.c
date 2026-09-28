@@ -158,7 +158,24 @@ void func_002C0950(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0B80);
+extern s32 func_002C2680(void);
+extern void func_002C26D8(s32, s32, s32, s32, s32);
+extern void func_002C0D00(s32);
+
+s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
+    s32 group = func_00328D68(0x2C);
+    s32 *slot = (s32 *)(group + 0x10);
+    s32 index;
+    for (index = 0; index < 5; index++) {
+        s32 entry = func_002C2680();
+        func_002C26D8(entry, owner, texture, mode, index);
+        *slot++ = entry;
+    }
+    func_002C0D00(group);
+    *(s32 *)(group + 0xC) = texture;
+    *(s32 *)(group + 0x28) = 0x100;
+    return group;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", destroyPanelGroup);
 
@@ -474,7 +491,14 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4E58);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4EB8);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4F50);
+extern s32 func_002C4EB8(u16, s32);
+
+s32 func_002C4F50(s32 context, u16 id) {
+    if (func_002C4EB8(id, context) == 0) return -1;
+    if ((*(u8 *)(D_00435E20 + id * 56 + 1) & 1) == 0) return 1;
+    if (id < 0x220) return 0;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4FB8);
 
@@ -506,7 +530,33 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5498);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C54B0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C54C8);
+extern u8 *D_00435DD0;
+
+typedef struct MenuPanelEntry {
+    u16 flags;
+    u8 unknown02[0x12];
+    u16 marker;
+    u8 unknown16[0x19C];
+    u16 currentId;
+    u8 unknown1B4[0x10];
+} MenuPanelEntry;
+
+extern u16 func_002C5580(s32);
+
+u32 func_002C54C8(s32 id) {
+    u32 value;
+    s32 index;
+    if (id < 0xA0) return 0;
+    if (id >= 0xBF) return 0;
+    value = *(u8 *)(id + (s32)D_00435DD0 + 0x1340);
+    for (index = 0; index < 5; index++) {
+        MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60) + index;
+        if (id == func_002C5580((s32)entry)) {
+            value++;
+        }
+    }
+    return value;
+}
 
 u32 func_002C5570(s32 arg0, u16 arg1) {
     *(u16 *)(arg0 + 0x52) = arg1;
@@ -527,17 +577,6 @@ u32 func_002C5588(u32 arg0, u32 arg1) {
 u16 func_002C55C0(s32 arg0) {
     return *(u16 *)(arg0 + 0x1b2);
 }
-
-typedef struct MenuPanelEntry {
-    u16 flags;
-    u8 unknown02[0x12];
-    u16 marker;
-    u8 unknown16[0x19C];
-    u16 currentId;
-    u8 unknown1B4[0x10];
-} MenuPanelEntry;
-
-extern u8 *D_00435DD0;
 
 MenuPanelEntry *func_002C55C8(u32 id) {
     s32 index;
