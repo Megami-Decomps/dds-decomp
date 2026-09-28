@@ -19,6 +19,14 @@ typedef struct GridWidget {
     s32 height;
 } GridWidget;
 
+typedef struct GridQuantizedEntry {
+    u8 pad0[0x44];
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+} GridQuantizedEntry;
+
 extern s32 func_00304AD8();
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -47,15 +55,15 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_003071D0);
 
 void func_00307270(u8 *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
-    u8 *entry = *(u8 **)(object + 0x10) + index * 0x80;
+    GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
     u32 *destination = (u32 *)(*(u8 **)(object + 0x18) + index * 0xA0 + 0x6C);
     u32 *source;
     s32 remaining = 3;
-    *(s32 *)(entry + 0x44) = x >> 4;
-    *(s32 *)(entry + 0x48) = y >> 3;
-    *(s32 *)(entry + 0x4C) = width >> 4;
-    *(s32 *)(entry + 0x50) = height >> 3;
-    source = (u32 *)(entry + 0x44);
+    entry->x = x >> 4;
+    entry->y = y >> 3;
+    entry->width = width >> 4;
+    entry->height = height >> 3;
+    source = (u32 *)&entry->x;
     do {
         *destination++ = *source++;
     } while (--remaining >= 0);
@@ -69,17 +77,17 @@ void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     widget->height = height;
 }
 
-void func_00307340(s32 arg0, s32 arg1) {
-    u32 *puVar1;
-    s32 temp_v0;
+void func_00307340(s32 object, s32 index) {
+    u32 *destination;
+    s32 remaining;
 
-    temp_v0 = 3;
-    puVar1 = (u32 *)(arg1 * 0xa0 + *(s32 *)(arg0 + 0x18) + 0x14);
+    remaining = 3;
+    destination = (u32 *)(index * 0xa0 + *(s32 *)(object + 0x18) + 0x14);
     do {
-        temp_v0 = temp_v0 - 1;
-        *puVar1 = puVar1[0x1c];
-        puVar1 = puVar1 + 1;
-    } while (-1 < temp_v0);
+        remaining = remaining - 1;
+        *destination = destination[0x1c];
+        destination = destination + 1;
+    } while (-1 < remaining);
 }
 
 void func_00307388(s32 *position, s32 x, s32 y) {

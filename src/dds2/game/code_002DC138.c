@@ -94,10 +94,16 @@ extern void *func_002DDAA8(void *);
 /* Reference-counted object header (layout inferred from field accesses). */
 typedef struct RefObj {
     u8 pad_0x00[0x14]; // 0x00
-    s32 cnt14;         // 0x14
+    s32 refCount;      // 0x14 incremented with the global reference count
     s32 unk18;         // 0x18
     s32 cnt1C;         // 0x1C
 } RefObj; // 0x20
+
+typedef struct EffModelOwner {
+    u8 pad00[4];
+    s32 model;
+    void *ownedBuffer;
+} EffModelOwner;
 
 extern u32 D_00437E34;
 
@@ -235,15 +241,15 @@ void *func_002DC280(void *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC2D8);
 
-void func_002DC370(void *p) {
-    void *q = *(void **)((s32)p + 8);
-    if (q != NULL) {
-        func_00328E48(q);
+void func_002DC370(EffModelOwner *owner) {
+    void *buffer = owner->ownedBuffer;
+    if (buffer != NULL) {
+        func_00328E48(buffer);
     }
-    if (*(s32 *)((s32)p + 4) != 0) {
-        func_002DC260(*(s32 *)((s32)p + 4));
+    if (owner->model != 0) {
+        func_002DC260(owner->model);
     }
-    func_00328E48(p);
+    func_00328E48(owner);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effDuplicateEffectHeader);
@@ -420,7 +426,7 @@ u32 func_002DDCA0(u32 arg0, u32 arg1) {
 INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseSharedReference);
 
 RefObj *func_002DDD40(RefObj *obj) {
-    obj->cnt14++;
+    obj->refCount++;
     D_00437E34++;
     return obj;
 }

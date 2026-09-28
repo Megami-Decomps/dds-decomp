@@ -300,13 +300,13 @@ void func_0026FAC8(void) {
 u32 mnuCreateMantraDrawPool(u32 count) {
     u32 size = count * 0x24 + 0xc;
     u32 handle = func_003292A8(size);
-    u32 pool = sdfMemoryGetBlockAddress(handle);
-    memset((void *)pool, 0, size);
-    *(u32 *)pool = handle;
-    *(u32 *)(pool + 8) = count;
-    *(u32 *)(pool + 4) = pool + 0xc;
+    MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(handle);
+    memset(pool, 0, size);
+    pool->handle = handle;
+    pool->count = count;
+    pool->items = (MantraDrawItem *)((u8 *)pool + 0xc);
     func_0010AE38("mtrDrawProcessCreate!! num[%d]\n", count);
-    return pool;
+    return (u32)pool;
 }
 
 void mnuDestroyMantraDrawPool(u32 address) {

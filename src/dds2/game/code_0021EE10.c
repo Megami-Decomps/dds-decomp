@@ -91,23 +91,23 @@ void func_0021EEF8(u32 unused, u32 actor) {
     }
 }
 
-u32 func_0021EF48(u32 unit, u32 actor, u32 action) {
+u32 func_0021EF48(ActionUnit *unit, ActionUnit *actor, u32 action) {
     u8 *state = *(u8 **)(func_001AA6F8() + 0x718);
     state[2] = action == 0x196;
-    if ((*(u32 *)(unit + 0x110) & 0x200) &&
-        (*(u32 *)(actor + 0x110) & 0x400) &&
-        *(u16 *)(actor + 0x124) == 0x115) {
+    if ((unit->flags & 0x200) &&
+        (actor->flags & 0x400) &&
+        actor->mode == 0x115) {
         return func_0021F808() ? 4 : 0;
     }
     return 0;
 }
 
-s32 func_0021EFD8(u32 unit) {
+s32 func_0021EFD8(ActionUnit *unit) {
     if (unit == 0) {
         return func_0021F808() ? 0xf : -1;
     }
-    if ((*(u32 *)(unit + 0x110) & 0x400) &&
-        *(u16 *)(unit + 0x124) == 0x115 &&
+    if ((unit->flags & 0x400) &&
+        unit->mode == 0x115 &&
         func_0021F808()) {
         return 0xf;
     }
@@ -136,11 +136,11 @@ u8 func_0021F3A0(s32 arg0) {
     return arg0 != 0x196;
 }
 
-s32 btlIsSpecialMotion(s32 actor) {
-    if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
+s32 btlIsSpecialMotion(ActionUnit *actor) {
+    if ((actor->flags & 0x400) == 0) {
         return 0;
     }
-    switch (*(u16 *)(actor + 0x124)) {
+    switch (actor->mode) {
     case 0x12A:
     case 0x12B:
     case 0x12C:

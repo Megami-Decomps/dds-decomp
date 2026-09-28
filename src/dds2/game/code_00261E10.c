@@ -48,6 +48,13 @@ typedef struct EvtSlot {
         s32 id;
     } sub[8];
 } EvtSlot;
+
+typedef struct EvtStateTableContext {
+    u8 pad00[0x5C];
+    s32 stateTable;
+    u8 pad60[0x34];
+    s32 dispatchMode;
+} EvtStateTableContext;
 extern s32 func_002C5498();
 extern u8 D_003CE604[];
 extern u16 D_003CE3F8[];
@@ -88,8 +95,8 @@ s32 evtIsFadeDispatchIdle(void) {
 }
 
 void evtInstallStateTable(s32 event) {
-    if (*(s32 *)(event + 0x94) == 2) {
-        *(s32 *)(event + 0x5c) = (s32)D_003CE498;
+    if (((EvtStateTableContext *)event)->dispatchMode == 2) {
+        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE498;
         func_002C42B0(event + 0x58, (s32)(D_003CE498 + 0x118));
     }
 }
@@ -135,8 +142,8 @@ s64 evtSetupDispatchSync(s32 callback) {
 }
 
 void evtInstallStateTableB(s32 event) {
-    if (*(s32 *)(event + 0x94) == 1) {
-        *(s32 *)(event + 0x5c) = (s32)D_003CE4B4;
+    if (((EvtStateTableContext *)event)->dispatchMode == 1) {
+        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE4B4;
         func_002C42B0(event + 0x58, (s32)(D_003CE4B4 + 0xfc));
     }
 }
@@ -180,8 +187,8 @@ s64 evtSetupDispatchSyncB(s32 callback) {
 }
 
 void evtInstallStateTableC(s32 event) {
-    if (*(s32 *)(event + 0x94) == 1) {
-        *(s32 *)(event + 0x5c) = (s32)D_003CE4D0;
+    if (((EvtStateTableContext *)event)->dispatchMode == 1) {
+        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE4D0;
         func_002C42B0(event + 0x58, (s32)(D_003CE4D0 + 0xe0));
     }
 }
@@ -225,8 +232,8 @@ s64 func_00262A00(s32 callback) {
 }
 
 void func_00262A48(s32 event) {
-    if (*(s32 *)(event + 0x94) == 1) {
-        *(s32 *)(event + 0x5c) = (s32)D_003CE4EC;
+    if (((EvtStateTableContext *)event)->dispatchMode == 1) {
+        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE4EC;
         func_002C42B0(event + 0x58, (s32)(D_003CE4EC + 0xc4));
     }
 }
@@ -270,8 +277,8 @@ s64 func_00262E10(s32 callback) {
 }
 
 void evtInstallStateTableD(s32 event) {
-    if (*(s32 *)(event + 0x94) == 2) {
-        *(s32 *)(event + 0x5c) = (s32)D_003CE508;
+    if (((EvtStateTableContext *)event)->dispatchMode == 2) {
+        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE508;
         func_002C42B0(event + 0x58, (s32)(D_003CE508 + 0xa8));
     }
 }

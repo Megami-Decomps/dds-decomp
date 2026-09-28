@@ -27,7 +27,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x10];  /* 0x80 */
@@ -40,7 +40,7 @@ typedef struct {
     u32 unkAC;       /* 0xAC resource released on destroy */
     u8 padB0[0x8];   /* 0xB0 */
     u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 unkBC;       /* 0xBC mode set through the singleton accessor */
+    u32 mode;        /* 0xBC mode set through the singleton accessor */
     u8 padC0[0x50];  /* 0xC0 */
     f32 unk110;      /* 0x110 spawn parameter */
     u32 unk114;      /* 0x114 spawn parameter */
@@ -75,7 +75,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -86,7 +86,7 @@ typedef struct {
     u32 unkAC;       /* 0xAC resource released on destroy */
     u8 padB0[0x8];   /* 0xB0 */
     u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 unkBC;       /* 0xBC mode set through the singleton accessor */
+    u32 mode;        /* 0xBC mode set through the singleton accessor */
     u8 padC0[0x50];  /* 0xC0 */
     f32 unk110;      /* 0x110 spawn parameter */
     u32 unk114;      /* 0x114 spawn parameter */
@@ -116,7 +116,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -127,7 +127,7 @@ typedef struct {
     u32 unkAC;       /* 0xAC resource released on destroy */
     u8 padB0[0x8];   /* 0xB0 */
     u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 unkBC;       /* 0xBC mode set through the singleton accessor */
+    u32 mode;        /* 0xBC mode set through the singleton accessor */
     u8 padC0[0x50];  /* 0xC0 */
     f32 unk110;      /* 0x110 spawn parameter */
     u32 unk114;      /* 0x114 spawn parameter */
@@ -157,7 +157,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -168,7 +168,7 @@ typedef struct {
     u32 unkAC;       /* 0xAC resource released on destroy */
     u8 padB0[0x8];   /* 0xB0 */
     u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 unkBC;       /* 0xBC mode set through the singleton accessor */
+    u32 mode;        /* 0xBC mode set through the singleton accessor */
     u8 padC0[0x50];  /* 0xC0 */
     f32 unk110;      /* 0x110 spawn parameter */
     u32 unk114;      /* 0x114 spawn parameter */
@@ -198,7 +198,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -209,7 +209,7 @@ typedef struct {
     u32 unkAC;       /* 0xAC resource released on destroy */
     u8 padB0[0x8];   /* 0xB0 */
     u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 unkBC;       /* 0xBC mode set through the singleton accessor */
+    u32 mode;        /* 0xBC mode set through the singleton accessor */
     u8 padC0[0x50];  /* 0xC0 */
     f32 unk110;      /* 0x110 spawn parameter */
     u32 unk114;      /* 0x114 spawn parameter */
@@ -247,7 +247,7 @@ typedef struct {
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
-    u32 unk74;       /* 0x74 optional handle (freed if != 0) */
+    u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
     u32 unk7C;       /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
@@ -258,7 +258,7 @@ typedef struct {
     u32 unkAC;       /* 0xAC resource released on destroy */
     u8 padB0[0x8];   /* 0xB0 */
     u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 unkBC;       /* 0xBC mode set through the singleton accessor */
+    u32 mode;        /* 0xBC mode set through the singleton accessor */
     u8 padC0[0x50];  /* 0xC0 */
     f32 unk110;      /* 0x110 spawn parameter */
     u32 unk114;      /* 0x114 spawn parameter */
@@ -1966,9 +1966,9 @@ EffPCPWork *effPcpCloneWithOptionalHandle(EffPCPWork *work) {
     u32 handle;
 
     child = func_0017CA60(&work->pad3C[4], NULL);
-    handle = work->unk74;
+    handle = work->optionalHandle;
     if (handle != 0) {
-        child->unk74 = func_0014FEB0(handle);
+        child->optionalHandle = func_0014FEB0(handle);
     }
     return child;
 }
@@ -1976,7 +1976,7 @@ EffPCPWork *effPcpCloneWithOptionalHandle(EffPCPWork *work) {
 void effPcpReleaseOptionalHandle(EffPCPWork *work) {
     s32 handle;
 
-    handle = work->unk74;
+    handle = work->optionalHandle;
     if (handle != 0) {
         func_0014FAB8(handle);
     }
@@ -2183,7 +2183,7 @@ void func_0017E4F0(void) {
     EffPCPWork *work;
 
     work = effPcpBuildBlockSet();
-    work->unkBC = 1;
+    work->mode = 1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017E518);
@@ -2192,7 +2192,7 @@ void func_0017E668(void) {
     EffPCPWork *work;
 
     work = effPcpBuildBlockSet();
-    work->unkBC = 2;
+    work->mode = 2;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017E690);
