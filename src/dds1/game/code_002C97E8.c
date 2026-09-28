@@ -16,12 +16,13 @@ extern f32 normalizedVectorDot(f32 *, f32 *);
 extern f32 func_002FA1C0(f32);
 extern f32 func_002E77F8(f32);
 extern f32 func_002E78F8(f32);
-extern void func_002C9F60(f32 *, f32 *, f32 *, f32);
 extern void func_002C9638(f32 *, f32 *, f32 *);
 extern void func_002C94A8(f32 *, f32 *);
 extern void func_002C8F40(f32 *, f32 *);
 extern void func_002C84F0(f32 *);
 extern void func_002CC5F0(u8 *);
+extern f32 func_002C9740(f32 *, f32 *);
+extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
 
@@ -83,7 +84,20 @@ void quaternionBlendNormalize(float *out, float *from, float *to, float fraction
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9D98);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9F60);
+void func_002C9F60(f32 *out, f32 *from, f32 *to, f32 fraction) {
+    f32 angle = func_002C9740(from, to);
+    if (-0.95f < angle && angle < 0.95f) {
+        f32 firstWeight = func_002FA060(angle * (1.0f - fraction));
+        f32 secondWeight = func_002FA060(angle * fraction);
+        f32 denominator = func_002FA060(angle);
+        out[0] = (from[0] * firstWeight + to[0] * secondWeight) / denominator;
+        out[1] = (from[1] * firstWeight + to[1] * secondWeight) / denominator;
+        out[2] = (from[2] * firstWeight + to[2] * secondWeight) / denominator;
+        out[3] = (from[3] * firstWeight + to[3] * secondWeight) / denominator;
+    } else {
+        quaternionBlendNormalize(out, from, to, fraction);
+    }
+}
 
 void func_002CA0C0(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f32 fraction) {
     f32 firstBlend[4];

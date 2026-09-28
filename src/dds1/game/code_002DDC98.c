@@ -48,6 +48,11 @@ extern f32 D_003BDA30;
 extern void *func_002CFEB8(s32 size);
 extern u8 D_003F98A0[];
 extern void func_002D78B8(u32 object);
+extern void *func_002D3FD0(s32);
+extern void *func_002E1428(void *, s64, s64, s64, s32);
+extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
+extern void func_002DDE88(void *, s32);
+extern s16 D_003BDA24;
 
 typedef struct VuBlendNode {
     u8 pad00[0x30];
@@ -228,7 +233,26 @@ void func_002DDE80(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DDE88);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DDF58);
+void func_002DDF58(u8 *work, u16 *params, u32 mask) {
+    u8 *payload = (u8 *)(params + 4);
+    u16 second;
+    u16 flags;
+    u16 next;
+    u16 selected;
+    *(u16 *)(work + 0x40) = params[0];
+    second = params[1];
+    *(u16 *)(work + 0x42) = second;
+    flags = params[2];
+    next = params[3];
+    selected = flags & mask;
+    *(u32 *)(work + 0x4c) = flags;
+    *(u32 *)(work + 0x48) = next;
+    *(u32 *)(work + 0x44) = selected;
+    D_003BDA24 = selected & 0x78;
+    *(u32 *)(work + 0x90) = (u32)payload;
+    *(u32 *)(work + 0x80) = 0;
+    func_002DDE88(work, second);
+}
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_002DDFB0(void *arg0) {
@@ -259,7 +283,13 @@ void func_002DDFB0(void *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE010);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE0D8);
+void func_002DE0D8(void *out, u8 *work, void *reference, f32 deltaX, f32 deltaY) {
+    func_002DE010(out, D_003BDA28, reference,
+                  *(u32 *)(work + 8), *(u32 *)(work + 4),
+                  *(f32 *)(work + 0x1c),
+                  *(f32 *)(work + 0x2c) + deltaX,
+                  *(f32 *)(work + 0x28) + deltaY);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE118);
 
@@ -450,7 +480,11 @@ s32 func_002E1420(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1428);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1478);
+void *func_002E1478(s32 height) {
+    void *packet = func_002D3FD0(consCalculateDrawPacketSize(5, height));
+    func_002E1428(packet, 0x156, 5, 0x53531, height);
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E14D8);
 
