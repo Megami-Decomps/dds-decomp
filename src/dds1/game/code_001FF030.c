@@ -1539,7 +1539,27 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00207E68);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00207FF0);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00208248);
+s32 func_00208248(u8 *unit, s32 animation) {
+    s32 species;
+    u32 flags = *(u32 *)(unit + 0x110);
+    if ((flags & 1) == 0) {
+        return animation;
+    }
+    if ((flags & 0x400) == 0) {
+        return animation;
+    }
+    species = *(u16 *)(unit + 0x124);
+    switch (species) {
+    case 0x12e:
+        return animation + 100;
+    case 0x10a:
+        return animation + 300;
+    case 0x12f:
+        return animation + 200;
+    default:
+        return animation;
+    }
+}
 
 void battleMarkSpecialUnit(u8 *unit) {
     s32 species;
@@ -2247,7 +2267,23 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D168);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D2E0);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D4B0);
+s32 func_0020D4B0(u8 *unit, u8 *other, s32 condition) {
+    s32 kind;
+    if ((*(u32 *)(unit + 0x110) & 0x200) == 0) {
+        return 1;
+    }
+    if (condition != 0) {
+        return 0;
+    }
+    kind = *(u16 *)(other + 0x124);
+    switch (kind) {
+    case 0x13d:
+    case 0x13e:
+        return 0;
+    default:
+        return 1;
+    }
+}
 
 void func_0020D4F0(s32 arg0, s32 arg1, s32 arg2) {
     if (arg1 != 0xd5) {
