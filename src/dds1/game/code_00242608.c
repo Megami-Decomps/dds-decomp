@@ -22,7 +22,32 @@ extern char D_003AF418[]; /* "camp_draw" */
 
 extern char D_003AF428[]; /* "camp_update" */
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242608);
+extern void evtFormatTaskName(s32 arg0, void *arg1);
+extern void *func_002CFEB8(s32 size);
+extern void *memset(void *dst, s32 c, u32 n);
+extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern void func_002424B0(void);
+extern void func_00242510(void);
+
+typedef struct CampTaskData {
+    s32 unk0;
+    s32 unk4;
+    u8 pad08[0x40];
+} CampTaskData;
+
+void func_00242608(s32 arg0) {
+    char name[0x20];
+    CampTaskData *data;
+
+    if (evtFindTaskById() == 0) {
+        evtFormatTaskName(arg0, name);
+        data = func_002CFEB8(0x48);
+        memset(data, 0, 0x48);
+        data->unk0 = arg0;
+        data->unk4 = 0;
+        kwlnTaskCreate(name, 0x3EC, 1, 1, func_002424B0, func_00242510, data);
+    }
+}
 
 void func_00242698(void) {
     s64 temp_v0;
@@ -54,7 +79,30 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242BD0);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242E28);
+extern s32 strcmp(const char *a, const char *b);
+
+typedef struct CampDisplayDefaults {
+    s32 width;
+    s32 height;
+    s8 color[4];
+    f32 scaleX;
+    f32 scaleY;
+    s32 enabled;
+    s32 variant;
+} CampDisplayDefaults;
+
+void func_00242E28(CampDisplayDefaults *display) {
+    display->width = 0x100;
+    display->height = 0xE0;
+    display->color[0] = -0x80;
+    display->color[1] = -0x80;
+    display->color[2] = -0x80;
+    display->color[3] = -0x80;
+    display->scaleY = 1.0f;
+    display->scaleX = 1.0f;
+    display->enabled = 1;
+    display->variant = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242E70);
 
@@ -72,7 +120,16 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243440);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243460);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002434E0);
+void *func_002434E0(u8 *scene, const char *name) {
+    void *node = *(void **)(scene + 0x2034);
+    while (node != NULL) {
+        if (strcmp((char *)scene + (*(s32 *)((u8 *)node + 8) << 5) + 0x24, name) == 0) {
+            return node;
+        }
+        node = *(void **)((u8 *)node + 0x7C);
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243558);
 
@@ -331,7 +388,26 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00244FA0);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245190);
+extern s32 func_00244E08(void *arg0);
+
+s32 func_00245190(s32 arg0, u8 *arg1) {
+    s32 v = func_00244E08(arg1);
+    s32 sum = *(s32 *)(arg1 + 0x80) + arg0;
+    s32 cur;
+    *(s32 *)(arg1 + 0x80) = sum;
+    if (sum <= 0) {
+        *(s32 *)(arg1 + 0x80) = 1;
+    }
+    cur = *(s32 *)(arg1 + 0x80);
+    if (cur >= v) {
+        arg1[0xB3] = 1;
+        *(s32 *)(arg1 + 0x80) = v;
+        cur = v;
+    } else {
+        arg1[0xB3] = 0;
+    }
+    return cur;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245208);
 

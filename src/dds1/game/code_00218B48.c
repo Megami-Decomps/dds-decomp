@@ -8,9 +8,22 @@ typedef struct MdlViewState {
     s8 unk0A;
     u8 pad0B[11];
     s16 unk16;
-    u8 pad18[10];
+    s16 unk18;
+    s16 unk1A;
+    s32 unk1C;
+    u8 pad20[2];
     s16 unk22;
-    u8 pad24[0x68];
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    s16 unk2C;
+    u8 pad2E[6];
+    s16 unk34;
+    s16 unk36;
+    u8 pad38[2];
+    s16 unk3A;
+    u8 pad3C[0x50];
     s32 unk8C[1];
     s32 unk90[1];
 } MdlViewState;
@@ -36,7 +49,7 @@ s32 func_0014FD20(s32 arg0);
 void func_00152000(s32 arg0, float arg1, float arg2);
 s32 billCreateIndexed(s32 arg0, s32 arg1);
 s32 func_0021A608(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_0021A660(void *arg0, s16 arg1);
+s32 func_0021A660(s16 *arg0, s32 arg1);
 void func_0021B9F8(void);
 void func_0021BDD0(void);
 void func_002D4038(s32 arg0, s32 arg1);
@@ -215,7 +228,17 @@ void func_0021A088(u32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A0B0);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A170);
+void func_0021A170(s32 arg0) {
+    s32 v = *(s32 *)(arg0 + 0xC);
+    if (*(u8 *)(v + 9) == 0) {
+        s32 count = *(s32 *)(arg0 + 0x14);
+        f32 f = *(f32 *)(*(s32 *)(*(s32 *)(arg0 + 8) + 0x1C) + 0x1C);
+        if ((u32)(s32)f < (u32)count) {
+            return;
+        }
+        mdlObjInit(v, *(s32 *)(arg0 + 0x10), arg0 + 0x18);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", mdlDispatchResourceEntry);
 
@@ -538,7 +561,18 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E068);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E1C8);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E360);
+extern void func_002177D0(s32 resource);
+
+void func_0021E360(void) {
+    s32 i;
+    for (i = 0; i != 12; i++) {
+        s32 handle = D_003D7A50.unk90[i];
+        if (handle != 0) {
+            D_003D7A50.unk90[i] = 0;
+            func_002177D0(handle);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E3C0);
 
@@ -577,7 +611,18 @@ void mdlFlagClearAll(void) {
     } while (i >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F520);
+void mdlFlagClear(s32 arg0);
+
+void func_0021F520(void) {
+    s32 i = 0;
+    do {
+        mdlFlagClear(i++);
+    } while (i < 0xC00);
+    i = 0xD00;
+    do {
+        mdlFlagClear(i++);
+    } while (i < 0x1000);
+}
 
 void mdlFlagSet(s32 arg0) {
     s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;

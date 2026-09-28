@@ -470,7 +470,28 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1938);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1BF0);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1CC8);
+typedef struct DmaPacketHeader {
+    u16 quadwords;
+    u16 pad02;
+    u32 address;
+    u32 tag;
+    u32 command;
+    u16 unused10;
+    u8 pad12[6];
+    u32 unused18;
+    u32 unused1C;
+} DmaPacketHeader;
+
+void func_002E1CC8(DmaPacketHeader *packet, u32 address, s32 size) {
+    s32 qwc = (size + 15) >> 4;
+    packet->quadwords = qwc;
+    packet->address = address & 0x0FFFFFFF;
+    packet->tag = 0x13000000;
+    packet->command = qwc | 0x50000000;
+    packet->unused10 = 0;
+    packet->unused18 = 0;
+    packet->unused1C = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1D08);
 
@@ -552,7 +573,11 @@ void func_002E3B80(s32 arg0, u8 arg1) {
     D_003F9B00[arg0].unk22 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3BA8);
+void func_002E3BA8(s32 index, s32 arg1, s32 arg2) {
+    F9B00Entry *entry = &D_003F9B00[index];
+    entry->unk20 = arg1 & 0xFF;
+    D_003F9B00[index].unk22 = arg2 & 0xFF;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3BD8);
 

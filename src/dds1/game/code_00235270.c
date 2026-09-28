@@ -212,7 +212,27 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00236180);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002363E0);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002364B0);
+extern char D_003BC088[];
+
+typedef struct EvtDrawWork {
+    u8 pad00[0x2280];
+    s32 unk2280;
+    u8 pad2284[0x38];
+    s32 unk22BC;
+    s32 unk22C0;
+    s32 unk22C4;
+    s32 *unk22C8;
+    s32 unk22CC;
+    s32 unk22D0;
+} EvtDrawWork;
+
+s32 func_002364B0(s32 arg0, s32 arg1, s32 arg2, EvtDrawWork *arg3) {
+    if (arg3->unk22C4 == 0) {
+        return 0;
+    }
+    func_002D4038(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, D_003BC088, arg3->unk22C4));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236510);
 
@@ -933,7 +953,25 @@ s32 evtGetTaskData(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00241BF0);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00241CA0);
+extern s32 func_00241BF0(s32 arg0, s32 arg1);
+extern void func_002D2D00(s32 arg0);
+extern s32 func_002D3288(s32 arg0);
+extern void effSetCh72Id(s32 arg0);
+
+void func_00241CA0(s32 arg0, s32 arg1) {
+    s32 data = evtGetTaskData(arg0);
+    s32 v = func_00241BF0(arg0, arg1);
+    if (v != 0) {
+        s32 old = *(s32 *)(data + 0x38);
+        if (old != 0) {
+            func_002D2D00(old);
+            *(s32 *)(data + 0x38) = 0;
+        }
+        v = func_002D3288(v);
+        effSetCh72Id(v);
+        *(s32 *)(data + 0x38) = v;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00241D28);
 
