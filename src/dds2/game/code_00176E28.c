@@ -2,6 +2,19 @@
 
 extern u64 effParamTableGetBlock(u64, u64);
 
+typedef struct EffVectorPart {
+    u8 pad0[8];
+    f32 accumulated;
+    u8 padC[4];
+} EffVectorPart;
+
+typedef struct EffVectorWork {
+    u8 pad0[0x50];
+    f32 increment;
+    u8 pad54[4];
+    EffVectorPart *parts;
+} EffVectorWork;
+
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00176E28);
 
 void func_00177078(u64 arg0) {
@@ -34,11 +47,11 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_00177130);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177220);
 
-void effAdvanceVectorRecord(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void effAdvanceVectorRecord(EffVectorWork *work, s32 index) {
+    EffVectorPart *part;
 
-    temp_v0 = *(s32 *)(arg0 + 0x58) + arg1 * 0x10;
-    *(float *)(temp_v0 + 8) = *(float *)(temp_v0 + 8) + *(float *)(arg0 + 0x50);
+    part = &work->parts[index];
+    part->accumulated = part->accumulated + work->increment;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177408);

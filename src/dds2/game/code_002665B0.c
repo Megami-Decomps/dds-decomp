@@ -59,6 +59,15 @@ typedef struct MenuResourceGroup {
     s32 reducedMode;
 } MenuResourceGroup;
 
+typedef struct MenuProgressNode {
+    u8 pad00[0x48];
+    u32 flags;
+    u8 pad4C[0xC];
+    struct MenuProgressNode *next;
+    u8 pad5C[8];
+    u32 requiredAmount;
+} MenuProgressNode;
+
 void func_002665B0(s32 arg0) {
     effDestroyPackedBatch(*(u32 *)(arg0 + 0x3c));
 }
@@ -109,17 +118,17 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002669C8);
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266A48);
 
 void func_00266AF8(s32 object) {
-    s32 node = *(s32 *)(object + 0x10);
+    MenuProgressNode *node = *(MenuProgressNode **)(object + 0x10);
     if (node != 0) {
         s32 base = D_00435DD0;
         do {
-            u32 limit = *(u32 *)(base + 0x3c);
-            if (limit < *(u32 *)(node + 0x64)) {
-                *(u32 *)(node + 0x48) |= 1;
+            u32 amount = *(u32 *)(base + 0x3c);
+            if (amount < node->requiredAmount) {
+                node->flags |= 1;
             } else {
-                *(u32 *)(node + 0x48) &= ~1u;
+                node->flags &= ~1u;
             }
-            node = *(s32 *)(node + 0x58);
+            node = node->next;
         } while (node != 0);
     }
 }

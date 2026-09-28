@@ -84,8 +84,8 @@ void func_003425D8(void) {
     func_00341650(400, 0, 0, 0);
 }
 
-void func_00342600(s32 arg0) {
-    func_00341650(((arg0 + 1U) & 0xf) | 0xe0, 0, 0, 0);
+void func_00342600(s32 channel) {
+    func_00341650(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 
 s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {
@@ -117,12 +117,12 @@ void sdfSoundSetChannelCount(u32 arg0) {
     func_003417A8((arg0 - 1) | 0x1d0, 0, 0, 0);
 }
 
-u32 func_00342728(u32 arg0) {
+u32 func_00342728(u32 command) {
     if (D_00438B8C != 0) {
         return 0;
     }
-    D_00438B84 = arg0;
-    return arg0;
+    D_00438B84 = command;
+    return command;
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342748);

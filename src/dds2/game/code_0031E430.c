@@ -108,18 +108,18 @@ void itfUpdateFade(u32 address) {
     }
 }
 
-void func_0031E640(u32 arg0) {
-    s64 temp_v0;
-    s32 temp_v1;
+void func_0031E640(u32 address) {
+    s64 active;
+    s32 entry;
 
-    temp_v0 = itfIsFadeActive();
-    if (temp_v0 != 0) {
-        temp_v1 = (s32)arg0;
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(temp_v1 + 0x14), 7, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(temp_v1 + 0x14), 8, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(temp_v1 + 0x14), 9, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(temp_v1 + 0x14), 10, 0x54);
-        itfUpdateFade(arg0);
+    active = itfIsFadeActive();
+    if (active != 0) {
+        entry = (s32)address;
+        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(entry + 0x14), 7, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(entry + 0x14), 8, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(entry + 0x14), 9, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(entry + 0x14), 10, 0x54);
+        itfUpdateFade(address);
         return;
     }
 }
@@ -178,8 +178,8 @@ void func_0031E8E8(FadeEntry *entry, u32 frame) {
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E8F0);
 
-void func_0031ED68(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031ED68(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 void mnuDrawFadeSequenceThree(u32 arg0) {

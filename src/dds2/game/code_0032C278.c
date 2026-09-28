@@ -111,15 +111,15 @@ u64 sdfGraphHasPendingWork(void) {
 }
 
 u64 func_0032CD98(void) {
-    s64 temp_v0;
-    u64 temp_v1;
+    s64 interruptState;
+    u64 pendingWork;
 
-    temp_v0 = func_0036DE70();
-    temp_v1 = sdfGraphHasPendingWork();
-    if (temp_v0 != 0) {
+    interruptState = func_0036DE70();
+    pendingWork = sdfGraphHasPendingWork();
+    if (interruptState != 0) {
         EIntr();
     }
-    return temp_v1;
+    return pendingWork;
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfResizeDoubleBuffer);
@@ -133,12 +133,12 @@ s32 sdfGetBufferRemaining(void) {
     return D_00438A14 - D_00438A10;
 }
 
-s32 sdfAllocPacketAligned(s32 arg0) {
-    s32 temp_v0;
+s32 sdfAllocPacketAligned(s32 size) {
+    s32 address;
 
-    temp_v0 = D_00438A10;
-    D_00438A10 = D_00438A10 + ((arg0 + 0xfU) & 0xfffffff0);
-    return temp_v0;
+    address = D_00438A10;
+    D_00438A10 = D_00438A10 + ((size + 0xfU) & 0xfffffff0);
+    return address;
 }
 
 s32 func_0032CEA0(void) {

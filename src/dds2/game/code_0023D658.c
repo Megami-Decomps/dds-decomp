@@ -296,45 +296,45 @@ u32 func_0023EA90(void) {
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EAE8);
 
 u32 func_0023EBE8(void) {
-    f32 v[4];
-    void *ctx;
+    f32 vector[4];
+    void *world;
     s32 id;
     void *unit;
 
-    memset(v, 0, 0x10);
-    ctx = dds3GetWorldObject();
+    memset(vector, 0, 0x10);
+    world = dds3GetWorldObject();
     id = func_0010D650(0);
-    unit = func_00110C70(ctx, id, 5);
+    unit = func_00110C70(world, id, 5);
     if (unit == NULL) {
         return 1;
     }
-    v[0] = func_0010D718(1);
-    v[1] = func_0010D718(2);
-    v[2] = func_0010D718(3);
-    effObjSetInnerFirstVec(unit, v);
+    vector[0] = func_0010D718(1);
+    vector[1] = func_0010D718(2);
+    vector[2] = func_0010D718(3);
+    effObjSetInnerFirstVec(unit, vector);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EC80);
 
 u32 func_0023ED68(void) {
-    f32 v[4];
-    void *ctx;
+    f32 vector[4];
+    void *world;
     s32 id;
     void *unit;
 
-    memset(v, 0, 0x10);
-    v[3] = 1.0f;
-    ctx = dds3GetWorldObject();
+    memset(vector, 0, 0x10);
+    vector[3] = 1.0f;
+    world = dds3GetWorldObject();
     id = func_0010D650(0);
-    unit = func_00110C70(ctx, id, 5);
+    unit = func_00110C70(world, id, 5);
     if (unit == NULL) {
         return 1;
     }
-    v[0] = func_0010D718(1);
-    v[1] = func_0010D718(2);
-    v[2] = func_0010D718(3);
-    effObjSetInnerThirdVec(unit, v);
+    vector[0] = func_0010D718(1);
+    vector[1] = func_0010D718(2);
+    vector[2] = func_0010D718(3);
+    effObjSetInnerThirdVec(unit, vector);
     return 1;
 }
 

@@ -81,17 +81,17 @@ void mnuClearSpriteRecord(u32 *entry) {
     entry[6] = 0;
 }
 
-void func_002BEFB0(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-    s32 temp_v1;
+void func_002BEFB0(s32 menu, s32 index) {
+    s32 record;
+    s32 remaining;
 
-    temp_v1 = 1;
-    temp_v0 = arg1 * 0x2138 + arg0 + 0x168;
+    remaining = 1;
+    record = index * 0x2138 + menu + 0x168;
     do {
-        temp_v1 = temp_v1 - 1;
-        mnuClearSpriteRecord(temp_v0);
-        temp_v0 = temp_v0 + 0x1024;
-    } while (-1 < temp_v1);
+        remaining = remaining - 1;
+        mnuClearSpriteRecord(record);
+        record = record + 0x1024;
+    } while (-1 < remaining);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF000);

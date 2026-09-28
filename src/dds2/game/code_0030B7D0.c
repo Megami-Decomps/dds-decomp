@@ -200,20 +200,20 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CC68);
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CEF0);
 
 void sdfCounterIncrease(void) {
-    s32 temp_v0;
+    s32 count;
 
-    temp_v0 = **(s32 **)(D_004388C4 + 0x30);
-    if (temp_v0 < 10) {
-        **(s32 **)(D_004388C4 + 0x30) = temp_v0 + 1;
+    count = **(s32 **)(D_004388C4 + 0x30);
+    if (count < 10) {
+        **(s32 **)(D_004388C4 + 0x30) = count + 1;
     }
 }
 
 void sdfCounterDecrease(void) {
-    s32 temp_v0;
+    s32 count;
 
-    temp_v0 = **(s32 **)(D_004388C4 + 0x30);
-    if (temp_v0 != 0) {
-        **(s32 **)(D_004388C4 + 0x30) = temp_v0 - 1;
+    count = **(s32 **)(D_004388C4 + 0x30);
+    if (count != 0) {
+        **(s32 **)(D_004388C4 + 0x30) = count - 1;
     }
 }
 
@@ -506,22 +506,22 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F420);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F4B8);
 
-void sdfVec3AddInPlace(float *arg0, float *arg1) {
-    *arg0 = *arg0 + *arg1;
-    arg0[1] = arg0[1] + arg1[1];
-    arg0[2] = arg0[2] + arg1[2];
+void sdfVec3AddInPlace(float *vector, float *delta) {
+    *vector = *vector + *delta;
+    vector[1] = vector[1] + delta[1];
+    vector[2] = vector[2] + delta[2];
 }
 
-void sdfVec3SubtractInPlace(float *arg0, float *arg1) {
-    *arg0 = *arg0 - *arg1;
-    arg0[1] = arg0[1] - arg1[1];
-    arg0[2] = arg0[2] - arg1[2];
+void sdfVec3SubtractInPlace(float *vector, float *delta) {
+    *vector = *vector - *delta;
+    vector[1] = vector[1] - delta[1];
+    vector[2] = vector[2] - delta[2];
 }
 
-void sdfVec3AddComponents(float arg0, float arg1, float arg2, float *arg3) {
-    *arg3 = *arg3 + arg0;
-    arg3[1] = arg3[1] + arg1;
-    arg3[2] = arg3[2] + arg2;
+void sdfVec3AddComponents(float x, float y, float z, float *vector) {
+    *vector = *vector + x;
+    vector[1] = vector[1] + y;
+    vector[2] = vector[2] + z;
 }
 
 void func_0030F898(f32 x, f32 y, f32 z, f32 *out) {
@@ -530,10 +530,10 @@ void func_0030F898(f32 x, f32 y, f32 z, f32 *out) {
     out[2] = z;
 }
 
-void sdfVec3ScaleInPlace(float arg0, float *arg1) {
-    *arg1 = *arg1 * arg0;
-    arg1[1] = arg1[1] * arg0;
-    arg1[2] = arg1[2] * arg0;
+void sdfVec3ScaleInPlace(float factor, float *vector) {
+    *vector = *vector * factor;
+    vector[1] = vector[1] * factor;
+    vector[2] = vector[2] * factor;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F8D0);

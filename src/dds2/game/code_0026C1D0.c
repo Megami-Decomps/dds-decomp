@@ -54,14 +54,14 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C318);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C388);
 
-s32 func_0026C3E0(u8 *arg0, u8 *arg1) {
-    u8 temp_A = *arg0;
-    u8 temp_B = *arg1;
+s32 func_0026C3E0(u8 *left, u8 *right) {
+    u8 leftValue = *left;
+    u8 rightValue = *right;
 
-    if (temp_B < temp_A) {
+    if (rightValue < leftValue) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (leftValue < rightValue) ? -1 : 0;
 }
 
 s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
@@ -79,11 +79,11 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C458);
 
-void func_0026C4F0(u32 arg0, u32 *arg1) {
-    u32 temp_v0;
+void func_0026C4F0(u32 resource, u32 *record) {
+    u32 value;
 
-    temp_v0 = func_00343ED0(arg0, arg1 + 1, 0);
-    *arg1 = temp_v0;
+    value = func_00343ED0(resource, record + 1, 0);
+    *record = value;
 }
 
 void func_0026C520(u32 *arg0) {

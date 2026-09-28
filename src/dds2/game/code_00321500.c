@@ -72,15 +72,19 @@ typedef struct MenuLengthData {
     s32 *secondRecords;
 } MenuLengthData;
 
+typedef struct MenuCallbackNode {
+    u8 pad00[0x10];
+    void (*callback)(u32, s32);
+} MenuCallbackNode;
+
 void func_003214D0(u32 arg0, s32 arg1);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
 
 u32 func_00321500(void) {
-    u32 node = mnuCreateCallbackNode(0);
-    *(void (**)(u32, s32))(node + 0x10) = func_003214D0;
-    return node;
+    MenuCallbackNode *node = (MenuCallbackNode *)mnuCreateCallbackNode(0);
+    node->callback = func_003214D0;
+    return (u32)node;
 }
-
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321528);
 
 void func_00321688(u32 left, u32 right, u32 value, u32 count) {

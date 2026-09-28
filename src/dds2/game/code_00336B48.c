@@ -138,8 +138,8 @@ void sdfVuTransformVector(void *dst, void *src) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-f32 sdfVuDot3(void *arg0, void *arg1) {
-    f32 ret;
+f32 sdfVuDot3(void *left, void *right) {
+    f32 dot;
     __asm__ volatile (
         ".set noreorder           \n"
         "lqc2 vf10, 0x0(%1)       \n"
@@ -150,8 +150,8 @@ f32 sdfVuDot3(void *arg0, void *arg1) {
         "qmfc2.ni $2, vf2        \n"
         "mtc1 $2, %0 \n"
         ".set reorder"
-        : "=f"(ret) : "r"(arg0), "r"(arg1) : "memory");
-    return ret;
+        : "=f"(dot) : "r"(left), "r"(right) : "memory");
+    return dot;
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */

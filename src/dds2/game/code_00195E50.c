@@ -135,8 +135,8 @@ void effInitSlotTail(SlotTab *tab, s32 idx) {
     slot->unk54 = slot->unk58 = 0;
 }
 
-s32 func_00196298(s32 *arg0, s32 arg1) {
-    return *arg0 + arg1 * 0x60;
+s32 func_00196298(SlotTab *tab, s32 index) {
+    return (s32)&tab->slots[index];
 }
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_001962B0);

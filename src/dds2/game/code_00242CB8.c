@@ -37,20 +37,20 @@ INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00421FE8);
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242D10);
 
 u32 func_00242DE0(void) {
-    s32 v0;
-    s32 v1;
+    s32 world;
+    s32 task;
 
-    v0 = func_0010D8C8();
-    if (v0 == 0) {
+    world = func_0010D8C8();
+    if (world == 0) {
         return 1;
     }
-    if (*(s32 *)(v0 + 0xe4) == 0) {
+    if (*(s32 *)(world + 0xe4) == 0) {
         func_0035B6E0(D_00422050);
         return 1;
     }
-    v1 = evtCreateTask(0x2afe, func_0010D7D0(0));
-    func_00101968(*(s32 *)(v0 + 0xe4), v1);
-    func_0010D818(v1);
+    task = evtCreateTask(0x2afe, func_0010D7D0(0));
+    func_00101968(*(s32 *)(world + 0xe4), task);
+    func_0010D818(task);
     return 1;
 }
 
@@ -91,16 +91,16 @@ u32 func_00242F00(void) {
 }
 
 u32 func_00242F48(void) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
+    u64 first;
+    u64 second;
+    u64 third;
 
     func_00135568(0);
     func_00135578(0x80);
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    temp_v2 = func_0010D650(2);
-    fldSetFadeTarget(temp_v0, temp_v1, temp_v2);
+    first = func_0010D650(0);
+    second = func_0010D650(1);
+    third = func_0010D650(2);
+    fldSetFadeTarget(first, second, third);
     return 1;
 }
 

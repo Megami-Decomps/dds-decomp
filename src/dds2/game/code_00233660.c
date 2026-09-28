@@ -81,24 +81,24 @@ u16 func_00233E38(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233E40);
 
-s32 * func_00233EC0(s32 arg0) {
-    s32 *piVar1;
+s32 * func_00233EC0(s32 table) {
+    s32 *first;
 
-    piVar1 = (s32 *)(arg0 + 8);
-    if (*piVar1 == 0xffff) {
-        piVar1 = (s32 *)0x0;
+    first = (s32 *)(table + 8);
+    if (*first == 0xffff) {
+        first = (s32 *)0x0;
     }
-    return piVar1;
+    return first;
 }
 
-s32 * func_00233ED8(s32 arg0) {
-    s32 *piVar1;
+s32 * func_00233ED8(s32 record) {
+    s32 *next;
 
-    piVar1 = (s32 *)(arg0 + *(s32 *)(arg0 + 4));
-    if (*piVar1 == 0xffff) {
-        piVar1 = (s32 *)0x0;
+    next = (s32 *)(record + *(s32 *)(record + 4));
+    if (*next == 0xffff) {
+        next = (s32 *)0x0;
     }
-    return piVar1;
+    return next;
 }
 
 s32 mdlCountRecords(s32 arg0) {

@@ -88,18 +88,18 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B3D0);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B4F0);
 
-void func_0031B5F8(s32 *arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0031B5F8(s32 *list) {
+    s32 record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *arg0;
-    if (0 < arg0[1]) {
+    index = 0;
+    record = *list;
+    if (0 < list[1]) {
         do {
-            memset(temp_v0, 0, 0x20);
-            temp_v1 = (temp_v1 + 1) & 0xffff;
-            temp_v0 = temp_v0 + 0x20;
-        } while ((s32)temp_v1 < arg0[1]);
+            memset(record, 0, 0x20);
+            index = (index + 1) & 0xffff;
+            record = record + 0x20;
+        } while ((s32)index < list[1]);
     }
 }
 

@@ -85,12 +85,17 @@ extern char D_0041B7E0[];
 typedef struct BattleCombatant {
     u8 unk_00[0x110];
     u32 status;
-    u8 unk_114[0x1a];
+    u32 statusExtra;
+    u8 unk_118[8];
+    u16 entryFlags;
+    u8 unk_122[2];
+    u16 kind;
+    u16 alternateKind;
+    u8 unk_128[6];
     u16 ailment;
     u8 unk_130[0x214];
     struct BattleCombatant *next;
 } BattleCombatant;
-
 typedef struct BattleListEntry {
     u8 pad0[6];
     u16 primaryCount;
@@ -278,20 +283,20 @@ s32 func_00229378(void) {
     return -1;
 }
 
-void func_002293D8(u32 unit) {
-    u32 flags = *(u32 *)(unit + 0x110);
-    if ((flags & 0x200) && *(u16 *)(unit + 0x124) == 2) {
-        *(u32 *)(unit + 0x110) = flags | 0x1000;
-        *(u32 *)(unit + 0x114) |= 0x100000;
-        *(u16 *)(unit + 0x120) |= 0x1000;
+void func_002293D8(BattleCombatant *unit) {
+    u32 flags = unit->status;
+    if ((flags & 0x200) && unit->kind == 2) {
+        unit->status = flags | 0x1000;
+        unit->statusExtra |= 0x100000;
+        unit->entryFlags |= 0x1000;
     }
 }
 
-void func_00229420(u32 unit) {
-    if ((*(u32 *)(unit + 0x110) & 0x400) &&
-        *(u16 *)(unit + 0x124) == 0x144 &&
+void func_00229420(BattleCombatant *unit) {
+    if ((unit->status & 0x400) &&
+        unit->kind == 0x144 &&
         mdlFlagTest(0x841)) {
-        *(u16 *)(unit + 0x126) = 1;
+        unit->alternateKind = 1;
     }
 }
 

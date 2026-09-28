@@ -41,11 +41,11 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_00269C50);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269E98);
 
-void evtBSetupDispatchSync(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSync(s32 request) {
+    s32 state = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(state + 8, state + 0x54, 2, request);
 }
 
 extern void func_00267EA0(s32, s32);
@@ -78,17 +78,17 @@ s32 func_00269FC8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A048);
 
-void evtBDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBDispatchStart(s32 request) {
+    s32 state = func_00101958();
 
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_002C4038(state + 8, state + 0x54, 1, request);
 }
 
-void evtBSetupDispatchSyncB(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSyncB(s32 request) {
+    s32 state = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(state + 8, state + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A1B8);
@@ -107,11 +107,11 @@ void func_0026A3F8(s32 item) {
     func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
 }
 
-void evtBSetupDispatchSyncC(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSyncC(s32 request) {
+    s32 state = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(state + 8, state + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A4B0);
@@ -124,11 +124,11 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A728);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A808);
 
-void evtBSetupDispatchSyncD(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSyncD(s32 request) {
+    s32 state = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(state + 8, state + 0x54, 2, request);
 }
 
 u32 func_0026A8D8(void) {
@@ -143,11 +143,11 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A900);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A998);
 
-void evtBSetupDispatchSyncE(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSyncE(s32 request) {
+    s32 state = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(state + 8, state + 0x54, 2, request);
 }
 
 extern void func_002A9200(s32);

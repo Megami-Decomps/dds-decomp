@@ -267,12 +267,12 @@ void func_002C98B8(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
     func_0019D1F8(0x54);
 }
 
-void func_002C9970(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+void func_002C9970(s32 x, s32 y, u64 width, u64 height) {
+    u64 handle;
 
-    temp_v0 = func_0019F5E8(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_0019D530(temp_v0, 1);
-    func_0019C5B0(temp_v0);
+    handle = func_0019F5E8(x << 4, y << 3, 0, width, height, 0);
+    func_0019D530(handle, 1);
+    func_0019C5B0(handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002C99C0);
@@ -285,12 +285,12 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9BD0);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9CF8);
 
-void func_002CA1D8(u32 arg0) {
-    s32 temp_v0;
+void func_002CA1D8(u32 value) {
+    s32 previous;
 
-    temp_v0 = D_00437D38;
-    D_00437D38 = arg0;
-    if (temp_v0 == 0) {
+    previous = D_00437D38;
+    D_00437D38 = value;
+    if (previous == 0) {
         D_00437D48 = 0;
     }
 }

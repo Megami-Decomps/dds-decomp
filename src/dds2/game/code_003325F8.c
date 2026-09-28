@@ -17,7 +17,7 @@ typedef struct SdfTextParam {
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
     u8 unk18; /* 0x18: func_002DA5B0 stores a u32 over 0x18-0x1B */
-    u8 unk19; /* 0x19: bit 0x2 selects unk88/unk8C over defaults */
+    u8 overrideFlags; /* 0x19: bit 0x2 selects overrideFirst/overrideSecond */
     u8 unk1A; /* 0x1A */
     u8 unk1B; /* 0x1B */
     f32 unk1C; /* 0x1C */
@@ -32,8 +32,8 @@ typedef struct SdfTextParam {
     f32 unk40; /* 0x40 */
     f32 unk44; /* 0x44 */
     u8 pad48[0x40]; /* 0x48 */
-    f32 unk88; /* 0x88 */
-    f32 unk8C; /* 0x8C */
+    f32 overrideFirst; /* 0x88 */
+    f32 overrideSecond; /* 0x8C */
     void *unk90; /* 0x90: resource chunk searched by tag */
 } SdfTextParam;
 
@@ -105,26 +105,26 @@ INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetUniqueChunkValue);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetLodChunkValue);
 
-void func_00332DE8(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
-    arg0->unk88 = fparg0;
-    arg0->unk8C = fparg1;
-    arg0->unk19 = arg0->unk19 | 2;
+void func_00332DE8(SdfTextParam *param, f32 first, f32 second) {
+    param->overrideFirst = first;
+    param->overrideSecond = second;
+    param->overrideFlags = param->overrideFlags | 2;
 }
 
 void func_00332E00(SdfTextParam *param) {
-    param->unk19 = param->unk19 & 0xfd;
+    param->overrideFlags = param->overrideFlags & 0xfd;
 }
 
-f32 func_00332E10(SdfTextParam *arg0) {
-    if ((arg0->unk19 & 2) != 0) {
-        return arg0->unk88;
+f32 func_00332E10(SdfTextParam *param) {
+    if ((param->overrideFlags & 2) != 0) {
+        return param->overrideFirst;
     }
     return D_00438A48;
 }
 
-f32 func_00332E30(SdfTextParam *arg0) {
-    if ((arg0->unk19 & 2) != 0) {
-        return arg0->unk8C;
+f32 func_00332E30(SdfTextParam *param) {
+    if ((param->overrideFlags & 2) != 0) {
+        return param->overrideSecond;
     }
     return D_00438A4C;
 }

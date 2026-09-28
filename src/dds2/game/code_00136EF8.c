@@ -162,8 +162,8 @@ void func_00137BC8(void) {
     D_00436178 = 0;
 }
 
-float func_00137C08(float *arg0, float *arg1) {
-    return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
+float func_00137C08(float *left, float *right) {
+    return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldCalculateVectorLength);
@@ -237,13 +237,13 @@ s32 func_0013DC70(u32 flag, u32 slot) {
     return -1;
 }
 
-u32 func_0013DCC8(u32 arg0) {
-    u32 *temp_v0 = &D_0038BD50[arg0];
+u32 func_0013DCC8(u32 index) {
+    u32 *taskSlot = &D_0038BD50[index];
 
-    if (kwlnTaskIsRegistered(*temp_v0) != 0) {
-        kwlnTaskDestroyWithHierarchy(*temp_v0, 0);
+    if (kwlnTaskIsRegistered(*taskSlot) != 0) {
+        kwlnTaskDestroyWithHierarchy(*taskSlot, 0);
     }
-    *temp_v0 = 0;
+    *taskSlot = 0;
     return 0;
 }
 
@@ -320,12 +320,12 @@ s32 fldHasActiveTasks(void) {
 }
 
 s32 func_0013F1B8(void) {
-    s32 temp_v0 = D_004361CC;
+    s32 index = D_004361CC;
 
-    if (temp_v0 < 0) {
+    if (index < 0) {
         return -1;
     }
-    return D_00444C68[temp_v0 * 160];
+    return D_00444C68[index * 160];
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F1E8);

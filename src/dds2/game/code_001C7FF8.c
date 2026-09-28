@@ -36,6 +36,17 @@ typedef struct RosterAvailability {
     u8 pad[7];
 } RosterAvailability;
 
+
+typedef struct SceneActor {
+    u8 pad_00[0x110];
+    u64 flags;
+    u8 pad_118[0xC];
+    u16 kind;
+    u8 pad_126[8];
+    u16 selectionFlags;
+    u8 pad_130[0x234];
+    struct SceneActor *next;
+} SceneActor;
 extern SceneInitializer D_003B6938[];
 
 extern u32 func_001B57B0(void);
@@ -212,15 +223,15 @@ s64 func_001CA820(void) {
 }
 
 s32 func_001CA858(void) {
-    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+    SceneActor *actor = *(SceneActor **)(func_001AA6F8() + 0x24C);
     while (actor != 0) {
-        if ((*(u64 *)(actor + 0x110) & 0x421) == 0x401) {
-            u16 kind = *(u16 *)(actor + 0x124);
+        if ((actor->flags & 0x421) == 0x401) {
+            u16 kind = actor->kind;
             if (kind == 0x4C || kind == 0x3C) {
                 return 1;
             }
         }
-        actor = *(s32 *)(actor + 0x364);
+        actor = actor->next;
     }
     return 0;
 }
@@ -228,13 +239,13 @@ s32 func_001CA858(void) {
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA8D8);
 
 s32 func_001CA958(void) {
-    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+    SceneActor *actor = *(SceneActor **)(func_001AA6F8() + 0x24C);
     while (actor != 0) {
-        if ((*(u64 *)(actor + 0x110) & 0x421) == 0x401 &&
-            (*(u16 *)(actor + 0x12E) & 1) != 0) {
+        if ((actor->flags & 0x421) == 0x401 &&
+            (actor->selectionFlags & 1) != 0) {
             return 1;
         }
-        actor = *(s32 *)(actor + 0x364);
+        actor = actor->next;
     }
     return 0;
 }

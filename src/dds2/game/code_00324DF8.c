@@ -120,16 +120,16 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326158);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003262A8);
 
-void func_003268A8(float *arg0, float *arg1) {
-    *arg0 = *arg0 + *arg1;
-    arg0[1] = arg0[1] + arg1[1];
-    arg0[2] = arg0[2] + arg1[2];
+void func_003268A8(float *vector, float *delta) {
+    *vector = *vector + *delta;
+    vector[1] = vector[1] + delta[1];
+    vector[2] = vector[2] + delta[2];
 }
 
-void func_003268E0(float *arg0, float *arg1) {
-    *arg0 = *arg0 - *arg1;
-    arg0[1] = arg0[1] - arg1[1];
-    arg0[2] = arg0[2] - arg1[2];
+void func_003268E0(float *vector, float *delta) {
+    *vector = *vector - *delta;
+    vector[1] = vector[1] - delta[1];
+    vector[2] = vector[2] - delta[2];
 }
 
 void func_00326918(float *vec, float x, float y, float z) {
@@ -144,10 +144,10 @@ void func_00326940(float *vec, float x, float y, float z) {
     vec[2] = z;
 }
 
-void func_00326950(float arg0, float *arg1) {
-    *arg1 = *arg1 * arg0;
-    arg1[1] = arg1[1] * arg0;
-    arg1[2] = arg1[2] * arg0;
+void func_00326950(float factor, float *vector) {
+    *vector = *vector * factor;
+    vector[1] = vector[1] * factor;
+    vector[2] = vector[2] * factor;
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326978);

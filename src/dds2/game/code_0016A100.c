@@ -105,12 +105,12 @@ void func_0016A578(void) {
     func_001027D8(0, 0, 0, 0);
 }
 
-u32 func_0016A5A0(s32 arg0) {
-    return *(u32 *)(arg0 + 4);
+u32 func_0016A5A0(EffParamWork *work) {
+    return (u32)work->data;
 }
 
-u16 func_0016A5A8(u16 *arg0) {
-    return *arg0;
+u16 func_0016A5A8(EffParamWork *work) {
+    return work->id;
 }
 
 EffParamWork *effParamWorkCreate(u16 id, void *data) {

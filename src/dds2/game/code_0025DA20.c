@@ -109,7 +109,8 @@ typedef struct {
     CampEntryNode *entries; /* 0x2034 */
     u8 pad2038[0x3D4];
     u32 state; /* 0x240C */
-    u8 pad2410[0x34];
+    u32 effectHandle; /* 0x2410 */
+    u8 pad2414[0x30];
     s32 idCount; /* 0x2444 */
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
@@ -141,9 +142,9 @@ void func_0025EE00(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EE40);
 
-void func_0025EE90(s32 arg0) {
-    func_0019C5B0(*(u32 *)(arg0 + 0x2410));
-    *(u32 *)(arg0 + 0x2410) = 0;
+void func_0025EE90(CampScene *scene) {
+    func_0019C5B0(scene->effectHandle);
+    scene->effectHandle = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EEC0);

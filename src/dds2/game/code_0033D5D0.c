@@ -221,21 +221,21 @@ void func_0033E490(void) {
     }
 }
 
-u8 sdfPacketExists(u32 arg0) {
-    s64 temp_v0;
-    u8 temp_v1 [16];
+u8 sdfPacketExists(u32 index) {
+    s64 packet;
+    u8 buffer[16];
 
-    temp_v0 = func_0033E008(arg0, temp_v1, 0);
-    return temp_v0 != 0;
+    packet = func_0033E008(index, buffer, 0);
+    return packet != 0;
 }
 
-s32 sdfPktQuery(u32 arg0) {
-    u8 buf[16];
-    s32 pkt;
+s32 sdfPktQuery(u32 index) {
+    u8 buffer[16];
+    SifCommand *packet;
 
-    pkt = func_0033E008(arg0, buf, 0);
-    if (pkt != 0) {
-        return *(s32 *)(pkt + 8);
+    packet = (SifCommand *)func_0033E008(index, buffer, 0);
+    if (packet != 0) {
+        return packet->argument;
     }
     return -1;
 }
@@ -324,12 +324,12 @@ void sdfDevRelease(DevState *state) {
     func_0033EDB0(state);
 }
 
-void sdfDevDeactivate(DevState *arg0, s32 arg1) {
-    arg0->result = arg1;
-    arg0->state = 9;
-    sdfDevRelease(arg0);
-    if (arg0->callback != NULL) {
-        arg0->callback(arg0, 0, 0, 0, arg0->callbackContext);
+void sdfDevDeactivate(DevState *state, s32 result) {
+    state->result = result;
+    state->state = 9;
+    sdfDevRelease(state);
+    if (state->callback != NULL) {
+        state->callback(state, 0, 0, 0, state->callbackContext);
     }
 }
 

@@ -115,18 +115,18 @@ s64 func_002ADAA0(s32 callback) {
 }
 
 u32 func_002ADAD8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    func_002BAF50(*(u32 *)(*(s32 *)(temp_v0 + 0xaa48) + 0xc), temp_v0 + 0xb10c);
+    context = func_00101958();
+    func_002BAF50(*(u32 *)(*(s32 *)(context + 0xaa48) + 0xc), context + 0xb10c);
     return 1;
 }
 
 u32 func_002ADB18(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    func_002BAF50(*(u32 *)(temp_v0 + 0x108), temp_v0 + 0xb10c);
+    context = func_00101958();
+    func_002BAF50(*(u32 *)(context + 0x108), context + 0xb10c);
     return 1;
 }
 

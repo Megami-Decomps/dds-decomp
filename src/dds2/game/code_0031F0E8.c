@@ -66,14 +66,14 @@ void func_0031F300(u32 node) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F340);
 
-void func_0031F410(arg0, arg1, size)
-    u32 arg0;
-    u32 arg1;
+void func_0031F410(destination, datum, size)
+    u32 destination;
+    u32 datum;
     u32 size;
 {
     u32 value[4];
-    value[0] = arg1;
-    func_0031F340((u32 *)arg0, value, size);
+    value[0] = datum;
+    func_0031F340((u32 *)destination, value, size);
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
