@@ -50,7 +50,7 @@ extern u32 D_00437E88;
 
 extern u32 func_002DDCA0(u32, u32);
 
-extern u64 func_002F69F0(u32, u32, u32);
+extern s32 *func_002F69F0(u32, u32, u32);
 
 extern s32 func_001AA6F8(void);
 
@@ -1417,8 +1417,10 @@ void func_002EDDE0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EDE10);
 
-void func_002EDE58(s32 arg0) {
-    func_002EDCF0(*(u16 *)(arg0 + 0x2c), *(u32 *)(arg0 + 0x34));
+extern u32 func_002EDCF0(u32, u32);
+
+u32 func_002EDE58(s32 arg0) {
+    return func_002EDCF0(*(u16 *)(arg0 + 0x2c), *(u32 *)(arg0 + 0x34));
 }
 
 void resetEffectDispatchCounter(u8 *work) {
@@ -1868,7 +1870,27 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5EF0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6000);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6450);
+extern void func_0023C978(s32, s32, s32);
+
+void func_002F6450(void) {
+    s32 owner = func_001AA6F8();
+    s32 *entry;
+
+    if ((*(u32 *)(owner + 0x218) & 0x6000000) != 0x6000000) {
+        return;
+    }
+    entry = *(s32 **)(owner + 0x24C);
+    while (entry != NULL) {
+        if (entry[0x110 / 4] & 2) {
+            s32 child = entry[0x340 / 4];
+            if (child != 0) {
+                *(s32 *)(child + 0x60) = entry[0x54 / 4];
+                func_0023C978(child, 0, entry[0x54 / 4]);
+            }
+        }
+        entry = (s32 *)entry[0x364 / 4];
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F64D8);
 
@@ -1894,15 +1916,24 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F69F0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6A80);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6BE8);
+extern void func_00129E50(s32, s32);
+extern void func_002F6A80(s32 *);
 
-u64 func_002F6C30(s32 arg0) {
-    u64 temp_v0;
+s32 *func_002F6BE8(u32 owner, u32 unused, u32 source, u32 kind) {
+    s32 *work = func_002F69F0(owner, source, kind);
+    s32 object = *work;
+    func_00129E50(object, object + 8);
+    func_002F6A80(work);
+    return work;
+}
 
-    temp_v0 = func_002F69F0(*(u32 *)(arg0 + 0x38), **(u32 **)(arg0 + 0x30),
+s32 *func_002F6C30(s32 arg0) {
+    s32 *work;
+
+    work = func_002F69F0(*(u32 *)(arg0 + 0x38), **(u32 **)(arg0 + 0x30),
                                                 (*(u32 **)(arg0 + 0x30))[1]);
-    func_002F6A80(temp_v0);
-    return temp_v0;
+    func_002F6A80(work);
+    return work;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6C70);
@@ -1981,16 +2012,24 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F78A8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7928);
 
-void func_002F79E0(void) {
-    u32 *puVar1;
-
-    puVar1 = (u32 *)func_00328D68(4);
-    *puVar1 = 0;
+u32 *func_002F79E0(u32 owner) {
+    u32 *work = (u32 *)func_00328D68(4);
+    *work = 0;
+    return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7A00);
+u32 *func_002F7A00(u32 owner) {
+    u32 *work = func_002F79E0(owner);
+    *work = func_002EDCF0(4, owner);
+    return work;
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7A48);
+u32 *func_002F7A48(u8 *request) {
+    u32 *source = *(u32 **)(request + 0x30);
+    u32 *work = func_002F79E0(*(u32 *)(request + 0x38));
+    *work = func_002EDE58(*source);
+    return work;
+}
 
 void func_002F7A90(u32 arg0) {
     if (*(s32 *)arg0 != 0) {
@@ -2005,16 +2044,27 @@ void func_002F7C40(s32 arg0) {
     func_002EDF20(**(u32 **)(arg0 + 0x30));
 }
 
-void func_002F7C60(void) {
-    u32 *puVar1;
-
-    puVar1 = (u32 *)func_00328D68(4);
-    *puVar1 = 0;
+u32 *func_002F7C60(u32 owner) {
+    u32 *work = (u32 *)func_00328D68(4);
+    *work = 0;
+    return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7C80);
+u32 *func_002F7C80(s32 source, u16 kind, s32 *settings) {
+    u32 *work = func_002F7C60(source);
+    *work = func_002E7B90(7, source);
+    func_002E7C00((s32 *)*work, kind, settings);
+    return work;
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7CF0);
+extern u32 func_002E7EE0(s32);
+
+u32 *func_002F7CF0(u8 *request) {
+    s32 *source = *(s32 **)(request + 0x30);
+    u32 *work = func_002F7C60(*(u32 *)(request + 0x38));
+    *work = func_002E7EE0(*source);
+    return work;
+}
 
 void func_002F7D38(u32 arg0) {
     if (*(s32 *)arg0 != 0) {
@@ -2029,16 +2079,48 @@ void func_002F7E88(s32 arg0) {
     func_002E8770(**(u32 **)(arg0 + 0x30));
 }
 
-void func_002F7EA8(void) {
-    u32 *puVar1;
-
-    puVar1 = (u32 *)func_00328D68(4);
-    *puVar1 = 0;
+u32 *func_002F7EA8(u32 owner) {
+    u32 *work = (u32 *)func_00328D68(4);
+    *work = 0;
+    return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7EC8);
+extern void mdlAddEntryPlain(s32, u32, u32);
+extern void mdlAddEntryFlagged(s32, u32, u32);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7F58);
+u32 *func_002F7EC8(u32 *owner, u32 kind, u32 source, u32 settings) {
+    u32 *work = func_002F7EA8((u32)owner);
+    s32 object = func_002DC1D0(source, settings);
+    s32 active = *(s32 *)(object + 0x1C);
+    *work = object;
+    if (active != 0) {
+        if (*owner != 0) {
+            mdlAddEntryPlain(object, 0, 0);
+        } else {
+            mdlAddEntryFlagged(object, 0, 0);
+        }
+    }
+    return work;
+}
+
+u32 *func_002F7F58(u8 *request) {
+    u32 *owner = *(u32 **)(request + 0x38);
+    void **source = *(void ***)(request + 0x30);
+    u32 *work = func_002F7EA8((u32)owner);
+    void *a = func_00232EE8(*source);
+    void *b = func_00232EF8(*source);
+    void *object = func_00232198(a, b);
+    *work = (u32)object;
+    func_002DC138(object);
+    if (*(s32 *)(*work + 0x1C) != 0) {
+        if (*owner != 0) {
+            mdlAddEntryPlain(*work, 0, 0);
+        } else {
+            mdlAddEntryFlagged(*work, 0, 0);
+        }
+    }
+    return work;
+}
 
 void func_002F8008(u32 arg0) {
     if (*(s32 *)arg0 != 0) {
@@ -2049,16 +2131,59 @@ void func_002F8008(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8040);
 
-s32 *func_002F81A8(void) {
+s32 *func_002F81A8(s32 *owner) {
     s32 *work = (s32 *)func_00328D68(8);
     work[0] = 0;
     work[1] = 0;
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F81D0);
+s32 *func_002F81D0(s32 *owner, u32 kind, u32 source, u32 settings) {
+    s32 *work = func_002F81A8(owner);
+    s32 object;
+    s32 active;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8270);
+    work[0] = func_002EDCF0(4, (u32)owner);
+    object = func_002DC1D0(source, settings);
+    active = *(s32 *)(object + 0x1C);
+    work[1] = object;
+    if (active != 0) {
+        if (owner[0x34 / 4] != 0) {
+            mdlAddEntryPlain(object, 0, 0);
+        } else {
+            mdlAddEntryFlagged(object, 0, 0);
+        }
+    }
+    return work;
+}
+
+s32 *func_002F8270(u8 *request) {
+    s32 *owner = *(s32 **)(request + 0x38);
+    u32 *source = *(u32 **)(request + 0x30);
+    s32 *work = func_002F81A8(owner);
+    void *a;
+    void *b;
+    void *object;
+    s32 material;
+    u32 modelSource;
+
+    material = func_002EDE58(source[0]);
+    modelSource = source[1];
+    work[0] = material;
+    a = func_00232EE8((void *)modelSource);
+    b = func_00232EF8((void *)source[1]);
+    object = func_00232198(a, b);
+    work[1] = (s32)object;
+    func_002DC138(object);
+    if (*(s32 *)(work[1] + 0x1C) != 0) {
+        if (owner[0x34 / 4] != 0) {
+            mdlAddEntryPlain(work[1], 0, 0);
+        } else {
+            mdlAddEntryFlagged(work[1], 0, 0);
+        }
+    }
+    return work;
+}
 
 extern void func_002EDE10(s32);
 
@@ -2117,9 +2242,22 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8CF0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8FB8);
 
+extern s32 *func_002F8FB8(s32 *);
+
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9048);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9118);
+extern void func_00159FA0(s32);
+extern void func_00159C40(s32, s16);
+
+s32 *func_002F9118(s32 *request) {
+    s32 *source = (s32 *)request[0x30 / 4];
+    s32 *context = (s32 *)request[0x38 / 4];
+    s32 *resource = func_002F8FB8(context);
+    resource[0] = func_00159A50(*source);
+    func_00159FA0(resource[0]);
+    func_00159C40(resource[0], *(s16 *)((u8 *)context + 0x4C));
+    return resource;
+}
 
 void func_002F9180(s32 *work) {
     if (work[0] != 0) {
@@ -2152,7 +2290,19 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9780);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9860);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F98C0);
+extern FnTbl28 D_003EA028[];
+
+void func_002F98C0(work)
+s32 *work;
+{
+    if (func_001AA308() != 0 && (D_00437E08 & 2) == 0) {
+        void (*callback)(s32 *) = (void (*)(s32 *))D_003EA028[work[0x2C / 4]].fn;
+        if (callback != NULL) {
+            callback(work);
+        }
+        work[0x28 / 4]++;
+    }
+}
 
 void dispatchEnabledEffectCallback(u8 *work) {
     if (func_001AA308() != 0) {
@@ -3361,7 +3511,32 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_00304EE0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304F40);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304FB0);
+extern void func_0032BB68(s32, u32, u32);
+extern void func_00304D08(u8 *);
+
+void func_00304FB0(u8 *owner, s32 preserve) {
+    u32 i = 0;
+    u32 count = *(u32 *)(owner + 0x1C);
+    u32 *resources;
+
+    if (count != 0) {
+        resources = *(u32 **)(owner + 0x24);
+        do {
+            if (resources[i] != 0) {
+                u32 *current;
+                func_0032BB68(resources[i], (u32)resources, count);
+                current = *(u32 **)(owner + 0x24);
+                count = *(u32 *)(owner + 0x1C);
+                resources = current;
+                current[i] = 0;
+            }
+            i++;
+        } while (i < count);
+    }
+    if (!preserve) {
+        func_00304D08(owner);
+    }
+}
 
 void func_00305068(u32 arg0) {
     func_00304FB0(arg0, 0);
@@ -3456,7 +3631,13 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_00305EB0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00306030);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003064C0);
+extern void func_00306030(u32, u32, u32, u32, u32, u32, u32, u32,
+                          u32, u32, u32, u32, u32);
+
+void func_003064C0(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g, u32 h,
+                   u32 x, u32 y, u32 width, u32 height) {
+    func_00306030(a, b, c, d, e, f, g, h, x, y, 1, width, height);
+}
 
 void func_00306500(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 arg6, u32 arg7) {

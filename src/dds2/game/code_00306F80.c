@@ -11,7 +11,13 @@ typedef struct QuadU32 {
     u32 w; // 0x0C
 } QuadU32; // 0x10
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00306F80);
+extern s32 func_00304AD8();
+extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
+
+void func_00306F80(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
+    u32 record = func_00304AD8(e, f);
+    func_00306BF0(a, b, c, d, e, f, record, context);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
@@ -54,7 +60,10 @@ void func_00307340(s32 arg0, s32 arg1) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307388);
+void func_00307388(s32 *position, s32 x, s32 y) {
+    position[0] = x;
+    position[1] = y;
+}
 
 void func_00307398(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4) {
@@ -65,9 +74,45 @@ u8 func_003073D0(s32 arg0) {
     return *(u8 *)(arg0 + 0x18);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003073D8);
+void func_003073D8(u8 *work, s32 x, s32 y) {
+    s32 width;
+    s32 height;
+    if (work[0x1A] == 0x13 || work[0x1A] == 0x1B) {
+        width = 0x10;
+        height = 0x10;
+    } else {
+        width = 8;
+        height = 2;
+    }
+    func_00307398(*(u32 *)(work + 0x14), width, height, x, y);
+}
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307428);
+typedef struct RenderCallbackEntry {
+    u8 reserved[0x10];
+    void (*draw)(void *, s32);
+    u8 tail[0xC];
+} RenderCallbackEntry;
+
+extern RenderCallbackEntry D_0037FB48[];
+extern s32 func_0032CE80(s32);
+extern void func_0032CEC0(s32);
+
+u8 *func_00307428(u8 *object, u8 *data, s32 kind) {
+    s32 context = func_0032CE80(0x20);
+    u8 *cursor;
+    RenderCallbackEntry *entry;
+    func_0032CEC0(context);
+    cursor = data + (data[1] & 0xF0) + 0x40;
+    if (func_003073D0((s32)object) != 0) {
+        func_003073D8(object, (s32)cursor, context);
+        cursor += *(s32 *)(object + 0x34);
+    }
+    func_00307398(*(u32 *)(object + 0x10), *(s16 *)(object + 0xC),
+                  *(s16 *)(object + 0xE), (s32)cursor, context);
+    entry = &D_0037FB48[kind];
+    entry->draw(entry, context);
+    return object;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003074F0);
 
@@ -139,11 +184,15 @@ void func_003087D8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g, u32 h) {
     func_00308828(a, b, c, d, e, rgba, g, h);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308808);
+void func_00308808(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 h) {
+    func_003087D8(a, b, c, d, e, value, 0, h);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308828);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003089B8);
+void func_003089B8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 colors, u32 h) {
+    func_00308828(a, b, c, d, e, colors, 0, h);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003089D8);
 
@@ -238,7 +287,23 @@ u32 func_003093D0(u32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309418);
+u32 func_00309418(u32 work) {
+    u32 list;
+
+    func_00328E48(*(u32 *)work);
+    list = *(u32 *)(work + 0x18);
+    if (list != 0) {
+        do {
+            u32 child = *(u32 *)(list + 0x20);
+            if (child != 0) {
+                func_00309418(child);
+            }
+            list = func_00309638(work);
+        } while (list != 0);
+    }
+    func_00328E48(work);
+    return 1;
+}
 
 void expandWidgetColumnWidth(s32 columns, u8 *work) {
     s32 flags = *(s32 *)(work + 0xc);
@@ -261,7 +326,22 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00309538);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309638);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003097D0);
+void func_003097D0(u8 *widget, u8 *node, const char *text) {
+    s32 length;
+    s32 allocation;
+    char *copy;
+
+    func_00328E48(*(u32 *)node);
+    length = strlen(text);
+    allocation = length + 1;
+    copy = (char *)func_00328D68(allocation);
+    *(u16 *)(node + 4) = allocation;
+    *(char **)node = copy;
+    memcpy(copy, text, allocation);
+    if (widget != NULL) {
+        expandWidgetColumnWidth(length, widget);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309880);
 
@@ -329,7 +409,24 @@ void func_00309B48(u32 arg0, u32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309B90);
+s32 func_00309B90(u8 *widget, u32 target) {
+    u32 flags = *(u32 *)(widget + 0xC);
+
+    if (flags & 2) {
+        if (target == *(u32 *)(widget + 0x18)) {
+            return (flags & 1) ? 6 : 4;
+        }
+        return 0;
+    }
+    if (flags & 0x80) {
+        if (target == *(u32 *)(widget + 0x18)) {
+            return 12;
+        }
+    } else if (target == *(u32 *)(widget + 0x18) && (flags & 1)) {
+        return 6;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309C00);
 
@@ -345,13 +442,41 @@ s32 func_0030A048(u32 key, u32 head) {
     return n;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_0030A070);
+s32 func_0030A070(s32 index, u8 *widget) {
+    s16 count = *(s16 *)(widget + 0xA);
+    u16 width;
+    u8 *first;
+
+    if (index >= count) {
+        return 0;
+    }
+    first = *(u8 **)(widget + 0x14);
+    *(u16 *)(widget + 8) = 0;
+    *(u8 **)(widget + 0x10) = first;
+    *(u8 **)(widget + 0x18) = first;
+    if (index > 0) {
+        width = *(u16 *)(widget + 6);
+        do {
+            u8 *current = *(u8 **)(widget + 0x10);
+            if (width >= count - *(u16 *)(current + 6)) {
+                (*(u16 *)(widget + 8))++;
+            } else {
+                *(u8 **)(widget + 0x10) = *(u8 **)(current + 0x1C);
+            }
+            current = *(u8 **)(widget + 0x18);
+            *(u8 **)(widget + 0x18) = *(u8 **)(current + 0x1C);
+        } while (--index != 0);
+    }
+    return 1;
+}
 
 void func_0030A0E8(u32 arg0) {
     func_0030A070(0, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_0030A108);
+void func_0030A108(u8 *entry) {
+    func_0030A070(*(s16 *)(entry + 0xA) - 1, entry);
+}
 
 INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438868);
 
