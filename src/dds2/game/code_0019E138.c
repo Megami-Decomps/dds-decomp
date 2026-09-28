@@ -433,7 +433,16 @@ void func_001A06D8(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0710);
+u64 func_001A0710(const char *arg0) {
+    u64 temp_v0;
+    u64 temp_v1;
+    u32 temp_v2 [4];
+
+    temp_v0 = func_00343ED0(arg0, temp_v2, 0);
+    temp_v1 = func_0032C138(temp_v2[0]);
+    func_003297C8(temp_v0);
+    return temp_v1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0760);
 
@@ -474,6 +483,8 @@ u32 func_001A1818(void) {
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1820);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
+
+
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436580);
 
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436584);

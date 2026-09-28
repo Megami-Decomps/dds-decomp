@@ -349,6 +349,8 @@ void func_0019E110(FrFontCtx *ctx) {
     ctx->flag1C = 1;
     ctx->flag1D = 1;
 }
+
+
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436550);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436554);

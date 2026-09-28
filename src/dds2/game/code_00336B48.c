@@ -520,6 +520,10 @@ ConsNode *func_0033CCC8(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
 
 
 
+
+
+
+
 INCLUDE_RODATA(const s32, "game/code_00336B48", D_0042E258);
 
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A40);

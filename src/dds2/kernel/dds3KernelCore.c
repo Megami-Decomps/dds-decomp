@@ -290,6 +290,10 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101968);
 
 
 
+
+
+
+
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411008);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411038);

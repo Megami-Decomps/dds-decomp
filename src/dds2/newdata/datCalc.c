@@ -53,6 +53,8 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A098);
 INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A0D0);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A100);
+
+
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DD8);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DDC);

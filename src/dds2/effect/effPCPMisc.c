@@ -948,7 +948,9 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182C60);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DA0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DB8);
+void func_00182DB8(u32 unused, u32 val) {
+    D_00438F04->unk10 = val;
+}
 
 void func_00182DC8(u32 unused, f32 value) {
     ((EffPCPWorkF1C *)D_00438F04)->unk1C = value;
@@ -2038,6 +2040,10 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC90);
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BCE8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BD88);
+
+
+
+
 
 
 INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00414610);

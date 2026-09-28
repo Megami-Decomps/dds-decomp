@@ -194,6 +194,8 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115EE8);
 
 
 
+
+
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412950);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412980);
