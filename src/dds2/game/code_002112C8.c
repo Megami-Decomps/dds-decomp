@@ -42,7 +42,7 @@ extern s32 func_00212B38();
 
 extern u32 func_002192D8(void);
 
-extern void func_00216E98(s32, s32);
+extern u32 func_00216E98(s32);
 
 extern s32 mdlFlagTest(s32);
 
@@ -615,7 +615,13 @@ u32 func_00216D30(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216D50);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00216E98);
+extern u32 func_00229198(void);
+
+u32 func_00216E98(s32 arg0) {
+    u32 value = func_00229198();
+    func_001E8030(*(u32 *)(arg0 + 0x60), value);
+    return 1;
+}
 
 u32 func_00216ED0(s32 arg0) {
     u64 temp_v0;
@@ -880,7 +886,24 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B168);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B250);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B310);
+s32 func_0021B310(s32 actor, s32 base) {
+    u32 flags = *(u32 *)(actor + 0x110);
+    if ((flags & 1) == 0) {
+        return base;
+    }
+    if ((flags & 0x400) == 0) {
+        return base;
+    }
+    switch (*(u16 *)(actor + 0x124)) {
+    case 0x110:
+        return base;
+    case 0x111:
+        return base + 100;
+    case 0x112:
+        return base + 200;
+    }
+    return base;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B368);
 
