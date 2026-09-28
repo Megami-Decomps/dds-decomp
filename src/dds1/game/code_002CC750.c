@@ -23,8 +23,10 @@ typedef struct ScrVmOperand {
     u8 pad_0x16[0x3A]; // 0x16
     float f50;         // 0x50
     u8 unk54;          // 0x54
-    s8 s55;            // 0x55
-} ScrVmOperand; // 0x56
+    s8 selectedIndex;  // 0x55: active operand chosen by func_002CD7C0
+    u8 pad_0x56[2];    // 0x56
+    u32 flags[0x4C];   // 0x58: eight 4-bit flag slots per word
+} ScrVmOperand;
 
 extern u8 D_00394680[];
 
@@ -168,14 +170,14 @@ u32 func_002CD310(ScrVmOperand *work, s32 increment) {
     u32 *position;
     u32 limit;
     u32 result;
-    s32 entry;
+    s32 selectedIndex;
     if (func_002CD7B8(work) == 0) {
         return 0;
     }
     position = (u32 *)func_002CD788(work);
-    entry = work->s55;
+    selectedIndex = work->selectedIndex;
     *position += increment;
-    limit = func_002CD2A8(entry & 0xffff);
+    limit = func_002CD2A8(selectedIndex & 0xffff);
     result = *position;
     if (limit < result) {
         *position = limit;
@@ -218,7 +220,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD630);
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD6B0);
 
 s8 func_002CD728(ScrVmOperand *op) {
-    return op->s55;
+    return op->selectedIndex;
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD730);
@@ -235,13 +237,13 @@ u32 func_002CD788(ScrVmOperand *p) {
 }
 
 s8 func_002CD7B8(ScrVmOperand *op) {
-    return op->s55;
+    return op->selectedIndex;
 }
 
 s8 func_002CD7C0(ScrVmOperand *p, s32 v) {
-    p->s55 = v;
+    p->selectedIndex = v;
     func_002CD630(p, v & 0xFFFF);
-    return p->s55;
+    return p->selectedIndex;
 }
 
 u32 func_002CD7F0(u32 arg0, u32 arg1) {
@@ -266,10 +268,10 @@ void func_002CD808(s32 unused, u32 v, u32 *a, u32 *b) {
     *b = lo << 2;
 }
 
-s32 setScriptFlag(u8 *work, u16 index) {
+s32 setScriptFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;
     func_002CD808((s32)work, index, &word, &shift);
-    *(u32 *)(work + 0x58 + word * 4) |= 1U << shift;
+    work->flags[word] |= 1U << shift;
     return 1;
 }
 
@@ -277,36 +279,36 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD888);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD8E8);
 
-void func_002CD940(u8 *work, u16 index) {
+void func_002CD940(ScrVmOperand *work, u16 index) {
     u32 word, shift;
     func_002CD808((s32)work, index, &word, &shift);
-    *(u32 *)(work + 0x58 + word * 4) |= 4U << shift;
+    work->flags[word] |= 4U << shift;
 }
 
-void func_002CD998(u8 *work, u16 index) {
+void func_002CD998(ScrVmOperand *work, u16 index) {
     u32 word, shift;
     func_002CD808((s32)work, index, &word, &shift);
-    *(u32 *)(work + 0x58 + word * 4) &= ~(4U << shift);
+    work->flags[word] &= ~(4U << shift);
 }
 
-void clearScriptFlags(u8 *work) {
+void clearScriptFlags(ScrVmOperand *work) {
     s32 index;
     for (index = 0; index < 0x260; index++) {
         func_002CD998(work, index);
     }
 }
 
-u32 func_002CDA48(u8 *work, u16 index) {
+u32 func_002CDA48(ScrVmOperand *work, u16 index) {
     u32 word, shift;
     func_002CD808((s32)work, index, &word, &shift);
-    return *(u32 *)(work + 0x58 + word * 4) & (4U << shift);
+    return work->flags[word] & (4U << shift);
 }
 
-u32 func_002CDA98(u8 *work, u16 index) {
+u32 func_002CDA98(ScrVmOperand *work, u16 index) {
     u32 word, shift;
     u32 mask;
     func_002CD808((s32)work, index, &word, &shift);
-    mask = *(u32 *)(work + 0x58 + word * 4);
+    mask = work->flags[word];
     if (mask & (2U << shift)) {
         return 2;
     }

@@ -141,14 +141,14 @@ void func_002E97E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9810);
 
-void func_002E9840(u32 arg0) {
-    if (0x10 < arg0) {
-        arg0 = 0x10;
+void func_002E9840(u32 channelCount) {
+    if (0x10 < channelCount) {
+        channelCount = 0x10;
     }
-    if (arg0 == 0) {
-        arg0 = 1;
+    if (channelCount == 0) {
+        channelCount = 1;
     }
-    func_002E8900((arg0 - 1) | 0x1d0, 0, 0, 0);
+    func_002E8900((channelCount - 1) | 0x1d0, 0, 0, 0);
 }
 
 u32 func_002E9880(u32 arg0) {
@@ -251,28 +251,28 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAF70);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB028);
 
-u64 func_002EB040(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_002EB040(u64 name) {
+    u64 handle;
+    u64 resource;
+    u32 info[4];
 
-    temp_v0 = func_002EB028(arg0, temp_v2, 0);
-    temp_v1 = func_002D3288(temp_v2[0]);
-    func_002D0918(temp_v0);
-    return temp_v1;
+    handle = func_002EB028(name, info, 0);
+    resource = func_002D3288(info[0]);
+    func_002D0918(handle);
+    return resource;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB090);
 
-u64 func_002EB118(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_002EB118(u64 name) {
+    u64 handle;
+    u64 resource;
+    u32 info[4];
 
-    temp_v0 = func_002EB028(arg0, temp_v2, 0);
-    temp_v1 = func_002EB090(temp_v2[0]);
-    func_002D0918(temp_v0);
-    return temp_v1;
+    handle = func_002EB028(name, info, 0);
+    resource = func_002EB090(info[0]);
+    func_002D0918(handle);
+    return resource;
 }
 
 s32 func_002EB168(s32 arg0) {
@@ -430,7 +430,7 @@ u32 soundGetSelectedChannelEntry(MidiChannel *channel) {
 }
 
 void func_002EC4D8(MidiPlaybackState *state) {
-    s32 interrupt = func_00312C08();
+    s32 interruptsEnabled = func_00312C08();
     s32 pending = state->pending;
     s32 remaining = pending - 1;
     if (pending > 0) {
@@ -442,7 +442,7 @@ void func_002EC4D8(MidiPlaybackState *state) {
     if (state->processed == state->limit && state->looping != 0) {
         state->processed = 0;
     }
-    if (interrupt != 0) {
+    if (interruptsEnabled != 0) {
         EIntr();
     }
     func_002EC230(0);
@@ -490,12 +490,12 @@ void func_002ECA40(u32 arg0) {
     D_003BD61C = arg0;
 }
 
-void func_002ECA48(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4) {
-    D_003BD620 = arg0 * 0x10 + 0x7000;
-    D_003BD624 = arg1 * 8 + 0x7900;
-    D_003BD628 = D_003BD620 + arg2 * 0x10;
-    D_003BD62C = D_003BD624 + arg3 * 8;
-    D_003BD630 = arg4;
+void func_002ECA48(s32 column, s32 row, s32 width, s32 height, u32 mode) {
+    D_003BD620 = column * 0x10 + 0x7000;
+    D_003BD624 = row * 8 + 0x7900;
+    D_003BD628 = D_003BD620 + width * 0x10;
+    D_003BD62C = D_003BD624 + height * 8;
+    D_003BD630 = mode;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002ECA80);

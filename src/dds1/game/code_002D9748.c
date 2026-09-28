@@ -37,12 +37,12 @@ typedef struct SdfTextParam {
     u8 pad48[0x40]; /* 0x48 */
     f32 unk88; /* 0x88 */
     f32 unk8C; /* 0x8C */
-    void *unk90; /* 0x90: resource chunk searched by tag */
+    void *chunkTable; /* 0x90: resource chunk searched by tag */
 } SdfTextParam;
 
 typedef struct SdfChunk {
-    u32 unk0; /* 0x0: entry id, 0 terminates the list */
-    u32 unk4; /* 0x4: byte offset to the next entry */
+    u32 id;   /* 0x0: entry id, 0 terminates the list */
+    u32 size; /* 0x4: byte offset to the next entry */
 } SdfChunk;
 
 typedef struct SdfResourceList {
@@ -135,24 +135,24 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002D99B0);
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9A70);
 
 void *sdfChunkFindById(SdfChunk *chunk, s32 id) {
-    u32 cur;
+    u32 currentId;
 
     if (chunk == NULL) {
         return NULL;
     }
-    cur = chunk->unk0;
-    while (cur != 0) {
-        if (cur == id) {
+    currentId = chunk->id;
+    while (currentId != 0) {
+        if (currentId == id) {
             return (void *)chunk;
         }
-        chunk = (SdfChunk *)((u8 *)chunk + chunk->unk4);
-        cur = chunk->unk0;
+        chunk = (SdfChunk *)((u8 *)chunk + chunk->size);
+        currentId = chunk->id;
     }
     return NULL;
 }
 
-void *sdfChunkFindByTag(SdfTextParam *arg0, s32 tag) {
-    return sdfChunkFindById(arg0->unk90, tag);
+void *sdfChunkFindByTag(SdfTextParam *param, s32 tag) {
+    return sdfChunkFindById(param->chunkTable, tag);
 }
 
 s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
@@ -164,7 +164,7 @@ s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
         return -1;
     }
     entry = (u8 *)chunk + 8;
-    end = (u8 *)chunk + chunk->unk4;
+    end = (u8 *)chunk + chunk->size;
     length = strlen(name);
     do {
         u32 entryLength = strlen((char *)entry);
@@ -182,7 +182,7 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9C28);
 u32 func_002D9CC8(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, 0x534f504d);
     if (chunk != NULL) {
-        return (chunk->unk4 - 0x10) >> 6;
+        return (chunk->size - 0x10) >> 6;
     }
     return 0;
 }
@@ -199,7 +199,7 @@ void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
         return NULL;
     }
     entry = (u8 *)chunk + 0x10;
-    end = (u8 *)chunk + chunk->unk4;
+    end = (u8 *)chunk + chunk->size;
     while (entry < end) {
         if (*(s32 *)(entry + 4) == id) {
             return entry;

@@ -17,16 +17,16 @@ typedef struct ConsNode {
     /* 0x04 */ struct ConsNode *prev;
     /* 0x08 */ u16 unk8;
     /* 0x0A */ u16 unkA;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
+    /* 0x0C */ s16 width;
+    /* 0x0E */ s16 height;
     /* 0x10 */ u16 unk10;
     /* 0x12 */ u16 unk12;
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 pad15;
     /* 0x16 */ u8 unk16;
     /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 unk18;
-    /* 0x1C */ u8 *unk1C;
+    /* 0x18 */ u32 bufferHandle;
+    /* 0x1C */ u8 *pixels;
 } ConsNode;
 
 typedef struct F9B00Entry {
@@ -233,24 +233,37 @@ void func_002DDE80(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DDE88);
 
-void func_002DDF58(u8 *work, u16 *params, u32 mask) {
+typedef struct {
+    u8 pad00[0x40];
+    u16 param0;            /* 0x40 */
+    u16 param1;            /* 0x42 */
+    u32 selectedFlags;     /* 0x44 */
+    u32 nextParam;         /* 0x48 */
+    u32 flags;             /* 0x4C */
+    u8 pad50[0x30];
+    u32 state;             /* 0x80 */
+    u8 pad84[0x0C];
+    u8 *payload;           /* 0x90 */
+} VuWork;
+
+void func_002DDF58(VuWork *work, u16 *params, u32 mask) {
     u8 *payload = (u8 *)(params + 4);
     u16 second;
     u16 flags;
     u16 next;
     u16 selected;
-    *(u16 *)(work + 0x40) = params[0];
+    work->param0 = params[0];
     second = params[1];
-    *(u16 *)(work + 0x42) = second;
+    work->param1 = second;
     flags = params[2];
     next = params[3];
     selected = flags & mask;
-    *(u32 *)(work + 0x4c) = flags;
-    *(u32 *)(work + 0x48) = next;
-    *(u32 *)(work + 0x44) = selected;
+    work->flags = flags;
+    work->nextParam = next;
+    work->selectedFlags = selected;
     D_003BDA24 = selected & 0x78;
-    *(u32 *)(work + 0x90) = (u32)payload;
-    *(u32 *)(work + 0x80) = 0;
+    work->payload = payload;
+    work->state = 0;
     func_002DDE88(work, second);
 }
 
@@ -658,14 +671,14 @@ void devConsListRemove(ConsNode *arg0) {
 
 void devConsNodeDestroy(ConsNode *arg0) {
     devConsListRemove(arg0);
-    func_002D0918(arg0->unk18);
+    func_002D0918(arg0->bufferHandle);
     func_002CFF98(arg0);
 }
 
 void devConsNodeClear(ConsNode *arg0) {
     arg0->unk10 = 0;
     arg0->unk12 = 0;
-    memset(arg0->unk1C, 0, arg0->unkC * arg0->unkE * 2);
+    memset(arg0->pixels, 0, arg0->width * arg0->height * 2);
 }
 
 void func_002E3E00(ConsNode *arg0) {
@@ -680,14 +693,14 @@ ConsNode *devConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     node = func_002CFEB8(0x20);
     node->unk8 = arg0;
     node->unkA = arg1;
-    node->unkC = arg2;
-    node->unkE = arg3;
+    node->width = arg2;
+    node->height = arg3;
     node->unk17 = 8;
     node->unk14 = 0;
     node->unk16 = 0;
     h = func_002D03F8((arg2 * arg3) * 2);
-    node->unk18 = h;
-    node->unk1C = (u8 *)func_002D0A48(h);
+    node->bufferHandle = h;
+    node->pixels = (u8 *)func_002D0A48(h);
     devConsNodeClear(node);
     devConsListInsert(node);
     return node;

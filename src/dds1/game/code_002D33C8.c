@@ -2,8 +2,8 @@
 
 typedef struct SdfListHead {
     u32 unk0; /* 0x0 */
-    u32 unk4; /* 0x4: list head for the func_002D4038 family */
-    u32 unk8; /* 0x8: list tail */
+    u32 first; /* 0x4: first packet or list node */
+    u32 last; /* 0x8: last packet or list node */
     u32 unkC; /* 0xC: 0xFFFF when fresh (func_002D4010) */
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
@@ -98,7 +98,7 @@ void func_002D4368();
 void func_002D35B8();
 void func_002D4DD0();
 s32 func_002D3FD0(s32 size);
-void func_002D4070(s32 list, u32 first, u32 last);
+void func_002D4070(SdfListHead *list, u32 packet, u32 end);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
 
@@ -246,87 +246,87 @@ void func_002D3FF8(s32 arg0) {
     D_003BD320 = (arg0 + 0xF) & ~0xF;
 }
 
-void func_002D4010(SdfListHead *arg0) {
-    arg0->unkC = 0xFFFF;
-    arg0->unk0 = 0;
-    arg0->unk4 = 0;
-    arg0->unk8 = 0;
-    arg0->unk10 = 0;
-    arg0->unk14 = 0;
-    arg0->unk18 = 0;
-    arg0->unk1C = 0;
+void func_002D4010(SdfListHead *list) {
+    list->unkC = 0xFFFF;
+    list->unk0 = 0;
+    list->first = 0;
+    list->last = 0;
+    list->unk10 = 0;
+    list->unk14 = 0;
+    list->unk18 = 0;
+    list->unk1C = 0;
 }
 
-void func_002D4038(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002D4038(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1;
+    list->last = packet;
 }
 
-void func_002D4070(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
+void func_002D4070(SdfListHead *list, u32 packet, u32 end) {
+    s32 last;
 
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg2;
+    list->last = end;
 }
 
-void func_002D40A8(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002D40A8(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    *(u8 *)(arg1 + 3) = 0x30;
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    *(u8 *)(packet + 3) = 0x30;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1 + 0x10;
+    list->last = packet + 0x10;
 }
 
-void func_002D40E8(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002D40E8(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1 + 0x30;
+    list->last = packet + 0x30;
 }
 
-void func_002D4120(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002D4120(SdfListHead *list, u32 packet) {
+    s32 last;
 
-    *(u8 *)(arg1 + 3) = 0x50;
-    temp_v0 = *(s32 *)(arg0 + 8);
-    if (temp_v0 == 0) {
-        *(u32 *)(arg0 + 4) = arg1;
+    *(u8 *)(packet + 3) = 0x50;
+    last = list->last;
+    if (last == 0) {
+        list->first = packet;
     }
     else {
-        *(u8 *)(temp_v0 + 3) = 0x20;
-        *(u32 *)(temp_v0 + 4) = arg1 & 0xfffffff;
+        *(u8 *)(last + 3) = 0x20;
+        *(u32 *)(last + 4) = packet & 0xfffffff;
     }
-    *(u32 *)(arg0 + 8) = arg1 + 0x10;
+    list->last = packet + 0x10;
 }
 
 void prependSdfPacketList(s32 list, s32 item) {
@@ -395,11 +395,11 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D43F8);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4490);
 
-void func_002D4540(SdfListHead *arg0) {
-    arg0->unk0 = 0;
-    arg0->unk4 = 0;
-    arg0->unk8 = 0;
-    arg0->unkC = 0;
+void func_002D4540(SdfListHead *list) {
+    list->unk0 = 0;
+    list->first = 0;
+    list->last = 0;
+    list->unkC = 0;
 }
 
 void func_002D4558(s32 arg0, u32 *arg1) {
@@ -413,9 +413,9 @@ void func_002D4558(s32 arg0, u32 *arg1) {
     *arg1 = 0;
 }
 
-void func_002D4578(SdfListHead *arg0) {
-    arg0->unk0 = 0;
-    arg0->unk4 = 0;
+void func_002D4578(SdfListHead *list) {
+    list->unk0 = 0;
+    list->first = 0;
 }
 
 void func_002D4588(s32 *arg0, s32 arg1) {

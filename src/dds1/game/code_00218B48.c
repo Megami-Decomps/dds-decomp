@@ -89,32 +89,41 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_00218CA8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218E20);
 
-u32 func_002192C0(s32 arg0) {
-    return *(u32 *)(arg0 + 8);
+typedef struct {
+    s32 kind;        /* 0x00: 0xFFFF terminates record traversal */
+    s32 nextOffset;  /* 0x04: relative byte offset to next record */
+    u32 value08;     /* 0x08 */
+    u16 value0C;     /* 0x0C */
+    u16 field0E;     /* 0x0E */
+    u16 field10;     /* 0x10 */
+} MdlRecord;
+
+u32 func_002192C0(MdlRecord *record) {
+    return record->value08;
 }
 
-u16 func_002192C8(s32 arg0) {
-    return *(u16 *)(arg0 + 0xc);
+u16 func_002192C8(MdlRecord *record) {
+    return record->value0C;
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002192D0);
 
-s32 * func_00219350(s32 arg0) {
-    s32 *p = (s32 *)(arg0 + 8);
+s32 * func_00219350(s32 address) {
+    s32 *record = (s32 *)(address + 8);
 
-    if (*p == 0xffff) {
-        p = NULL;
+    if (*record == 0xffff) {
+        record = NULL;
     }
-    return p;
+    return record;
 }
 
-s32 * func_00219368(s32 arg0) {
-    s32 *p = (s32 *)(arg0 + *(s32 *)(arg0 + 4));
+s32 * func_00219368(MdlRecord *current) {
+    s32 *record = (s32 *)((s32)current + current->nextOffset);
 
-    if (*p == 0xffff) {
-        p = NULL;
+    if (*record == 0xffff) {
+        record = NULL;
     }
-    return p;
+    return record;
 }
 
 s32 countModelRecords(s32 arg0) {
@@ -137,12 +146,12 @@ u8 func_002193D8(s32 *arg0, s32 arg1) {
     return *arg0 == arg1;
 }
 
-u16 func_002193E8(s32 arg0) {
-    return *(u16 *)(arg0 + 0xe);
+u16 func_002193E8(MdlRecord *record) {
+    return record->field0E;
 }
 
-u16 func_002193F0(s32 arg0) {
-    return *(u16 *)(arg0 + 0x10);
+u16 func_002193F0(MdlRecord *record) {
+    return record->field10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002193F8);
@@ -192,14 +201,27 @@ void func_00219CC8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00219CE8);
 
-u8 *func_00219DD8(u8 *object, s32 type, s32 subtype) {
+typedef struct MdlResourceItem {
+    struct MdlResourceItem *next; /* 0x00 */
+    u16 type;                     /* 0x04: billboard / effect kind */
+    s16 subtype;                  /* 0x06 */
+    s32 resource;                 /* 0x08 */
+    u8 pad0C[0x14];
+} MdlResourceItem;
+
+typedef struct {
+    u8 pad00[0x14];
+    MdlResourceItem *first; /* 0x14 */
+} MdlResourceOwner;
+
+MdlResourceItem *func_00219DD8(MdlResourceOwner *object, s32 type, s32 subtype) {
     extern void *func_002CFF68(s32 size);
-    u8 *item = func_002CFF68(0x20);
-    u8 *previous = *(u8 **)(object + 0x14);
-    *(s16 *)(item + 4) = type;
-    *(u8 **)item = previous;
-    *(s16 *)(item + 6) = subtype;
-    *(u8 **)(object + 0x14) = item;
+    MdlResourceItem *item = func_002CFF68(0x20);
+    MdlResourceItem *previous = object->first;
+    item->type = type;
+    item->next = previous;
+    item->subtype = subtype;
+    object->first = item;
     return item;
 }
 
@@ -262,33 +284,33 @@ void applyModelResourceEntries(s32 object, s32 id, s32 option) {
     }
 }
 
-void destroyModelResourceItem(s32 item) {
-    switch (*(u16 *)(item + 4)) {
+void destroyModelResourceItem(MdlResourceItem *item) {
+    switch (item->type) {
     case 0:
-        billDispatchByKind(*(s32 *)(item + 8));
+        billDispatchByKind(item->resource);
         break;
     case 1:
-        func_0014FAB8(*(s32 *)(item + 8));
+        func_0014FAB8(item->resource);
         break;
     case 2:
-        func_00188228(*(s32 *)(item + 8));
+        func_00188228(item->resource);
         break;
     }
     func_002CFF98((void *)item);
 }
 
-void removeModelResourceSubtype(s32 object, s32 subtype) {
-    s32 *link = (s32 *)(object + 0x14);
-    s32 item = *link;
+void removeModelResourceSubtype(MdlResourceOwner *object, s32 subtype) {
+    MdlResourceItem **link = &object->first;
+    MdlResourceItem *item = *link;
     while (item != 0) {
-        if (*(s16 *)(item + 6) == subtype) {
-            s32 next = *(s32 *)item;
+        if (item->subtype == subtype) {
+            MdlResourceItem *next = item->next;
             destroyModelResourceItem(item);
             *link = next;
             item = next;
         } else {
-            link = (s32 *)item;
-            item = *(s32 *)item;
+            link = &item->next;
+            item = item->next;
         }
     }
 }
@@ -297,24 +319,24 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A3D8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A490);
 
-void setModelResourceFrame(s32 unused, s32 item, s32 frame) {
-    switch (*(u16 *)(item + 4)) {
+void setModelResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
+    switch (item->type) {
     case 0:
-        func_00152010(*(s32 *)(item + 8), frame);
+        func_00152010(item->resource, frame);
         return;
     case 1:
-        func_0014FC60(*(s32 *)(item + 8), frame);
+        func_0014FC60(item->resource, frame);
         break;
     }
 }
 
-void func_0021A5B8(s32 arg0, s32 arg1, float arg2) {
-    switch (*(u16 *)(arg1 + 4)) {
+void func_0021A5B8(s32 unused, MdlResourceItem *item, float amount) {
+    switch (item->type) {
     case 0:
-        func_00152000(*(s32 *)(arg1 + 8), arg2, arg2);
+        func_00152000(item->resource, amount, amount);
         return;
     case 1:
-        func_0014FB70(*(s32 *)(arg1 + 8), arg2);
+        func_0014FB70(item->resource, amount);
         break;
     }
 }

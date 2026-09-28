@@ -3,10 +3,10 @@
 extern char D_003B4690[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
 
 typedef struct SifCommand {
-    s32 unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-    s32 unk8; /* 0x8 */
-    u32 unkC; /* 0xC */
+    s32 source;  /* 0x0 */
+    s32 end;     /* 0x4 */
+    s32 argument; /* 0x8 */
+    u32 command; /* 0xC */
 } SifCommand;
 
 typedef struct CmdPkt {
@@ -32,19 +32,19 @@ typedef struct DevState {
     struct DevState *unk4; /* 0x4 */
     u8 pad8[8]; /* 0x8 */
     void *unk10; /* 0x10 */
-    u8 unk14; /* 0x14 */
-    u8 unk15; /* 0x15 */
-    s8 unk16; /* 0x16 */
+    u8 workerIndex; /* 0x14 */
+    u8 operation; /* 0x15 */
+    s8 state; /* 0x16 */
     u8 pad17; /* 0x17 */
     s32 unk18; /* 0x18 */
     s32 unk1C; /* 0x1C */
     s32 unk20; /* 0x20 */
-    s32 unk24; /* 0x24 */
-    s32 unk28; /* 0x28 */
-    s32 unk2C; /* 0x2C */
+    s32 options; /* 0x24 */
+    s32 resourceId; /* 0x28 */
+    s32 result; /* 0x2C */
     u8 pad30[8]; /* 0x30 */
-    void (*unk38)(struct DevState *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4); /* 0x38 */
-    s32 unk3C; /* 0x3C */
+    void (*callback)(struct DevState *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4); /* 0x38 */
+    s32 callbackContext; /* 0x3C */
 } DevState;
 
 typedef struct SemaEntry {
@@ -138,23 +138,23 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4908);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4960);
 
-void sdfPktSetCmd(SifCommand *arg0, s32 arg1) {
-    arg0->unkC = D_003987E0[arg1];
+void sdfPktSetCmd(SifCommand *packet, s32 index) {
+    packet->command = D_003987E0[index];
 }
 
-void sdfPktInit(SifCommand *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    arg0->unk0 = arg1;
-    arg0->unk4 = arg2;
-    arg0->unk8 = arg3;
-    sdfPktSetCmd(arg0, arg4);
+void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
+    packet->source = source;
+    packet->end = end;
+    packet->argument = argument;
+    sdfPktSetCmd(packet, index);
 }
 
-void *sdfRpcBufHandler(s32 arg0, SifCommand *arg1) {
-    s32 size = arg1->unk4 - arg1->unk0;
+void *sdfRpcBufHandler(s32 unused, SifCommand *packet) {
+    s32 size = packet->end - packet->source;
 
     if (size > 0) {
-        memcpy(arg1, (void *)arg1->unk0, size);
-        return arg1;
+        memcpy(packet, (void *)packet->source, size);
+        return packet;
     }
     return NULL;
 }
@@ -353,9 +353,9 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5E90);
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5F08);
 
 void sdfDevRelease(DevState *arg0) {
-    s32 id = arg0->unk28;
+    s32 id = arg0->resourceId;
 
-    arg0->unk28 = -1;
+    arg0->resourceId = -1;
     if (id >= 0) {
         func_0030EB78(id);
     }
@@ -363,11 +363,11 @@ void sdfDevRelease(DevState *arg0) {
 }
 
 void sdfDevDeactivate(DevState *arg0, s32 arg1) {
-    arg0->unk2C = arg1;
-    arg0->unk16 = 9;
+    arg0->result = arg1;
+    arg0->state = 9;
     sdfDevRelease(arg0);
-    if (arg0->unk38 != NULL) {
-        arg0->unk38(arg0, 0, 0, 0, arg0->unk3C);
+    if (arg0->callback != NULL) {
+        arg0->callback(arg0, 0, 0, 0, arg0->callbackContext);
     }
 }
 
@@ -405,28 +405,28 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
         return NULL;
     }
     state = func_002E6B28(resource, id, 2, callback, context);
-    state->unk24 = options != 0 ? options : D_003BD434;
+    state->options = options != 0 ? options : D_003BD434;
     func_002E5DA0(state);
     return state;
 }
 
 s32 func_002E6C90(DevState *arg0, s32 arg1, s32 arg2) {
-    if (arg0->unk16 != 7) {
+    if (arg0->state != 7) {
         return -1;
     }
     arg0->unk18 = arg1;
-    arg0->unk24 = arg2;
-    arg0->unk15 = 3;
-    SignalSema(D_00398864[arg0->unk14].sema);
+    arg0->options = arg2;
+    arg0->operation = 3;
+    SignalSema(D_00398864[arg0->workerIndex].sema);
     return 0;
 }
 
 s32 func_002E6CF0(DevState *arg0) {
-    if (arg0->unk16 != 7) {
+    if (arg0->state != 7) {
         return -1;
     }
-    arg0->unk15 = 4;
-    SignalSema(D_00398864[arg0->unk14].sema);
+    arg0->operation = 4;
+    SignalSema(D_00398864[arg0->workerIndex].sema);
     return 0;
 }
 
@@ -435,22 +435,22 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6D48);
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6DA8);
 
 s32 func_002E6E08(DevState *arg0) {
-    if (arg0->unk16 != 9) {
+    if (arg0->state != 9) {
         return -1;
     }
-    arg0->unk2C = 0;
-    arg0->unk16 = 7;
+    arg0->result = 0;
+    arg0->state = 7;
     return 0;
 }
 
 s32 func_002E6E38(DevState *arg0) {
-    s8 state = arg0->unk16;
+    s8 state = arg0->state;
 
     if (state != 7) {
         return -1;
     }
-    arg0->unk15 = state;
-    SignalSema(D_00398864[arg0->unk14].sema);
+    arg0->operation = state;
+    SignalSema(D_00398864[arg0->workerIndex].sema);
     return 0;
 }
 
@@ -486,7 +486,7 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
     state = func_002E6B28(resource, id, 9, context, callback);
     state->unk1C = extra;
     state->unk20 = data;
-    state->unk24 = options != 0 ? options : D_003BD434;
+    state->options = options != 0 ? options : D_003BD434;
     state->unk18 = 0;
     func_002E5DA0(state);
     return state;

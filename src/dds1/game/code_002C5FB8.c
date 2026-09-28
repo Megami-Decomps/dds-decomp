@@ -62,21 +62,28 @@ s32 func_002C5FD8(s32 x, s32 n) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6010);
 
-void func_002C6098(s32 arg0, s32 arg1) {
-    if ((arg1 <= *(s32 *)(arg0 + 0x20)) && (arg1 != 0)) {
-        *(s32 *)(arg0 + 0xc) = arg1;
+typedef struct {
+    u8 pad00[0x0C];
+    s32 selectedCount; /* 0x0C */
+    u8 pad10[0x10];
+    s32 maxCount;      /* 0x20 */
+} MapSelection;
+
+void func_002C6098(MapSelection *selection, s32 count) {
+    if ((count <= selection->maxCount) && (count != 0)) {
+        selection->selectedCount = count;
     }
 }
 
-void func_002C60B8(s32 arg0) {
-    if (*(s32 *)(arg0 + 0xc) < 10) {
-        *(s32 *)(arg0 + 0xc) = *(s32 *)(arg0 + 0xc) + 1;
+void func_002C60B8(MapSelection *selection) {
+    if (selection->selectedCount < 10) {
+        selection->selectedCount = selection->selectedCount + 1;
     }
 }
 
-void func_002C60D8(s32 arg0) {
-    if (1 < *(s32 *)(arg0 + 0xc)) {
-        *(s32 *)(arg0 + 0xc) = *(s32 *)(arg0 + 0xc) - 1;
+void func_002C60D8(MapSelection *selection) {
+    if (1 < selection->selectedCount) {
+        selection->selectedCount = selection->selectedCount - 1;
     }
 }
 
@@ -165,26 +172,42 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7A60);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7B38);
 
-void func_002C7B58(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    u32 *puVar1;
+typedef struct MapRequestNode {
+    u32 value;
+    u32 argument1;
+    u32 argument2;
+    s32 active;
+    struct MapRequestNode *next;
+} MapRequestNode;
 
-    puVar1 = *(u32 **)(arg0 + 8);
-    if (*(s16 *)(arg0 + 0x16) == *(s16 *)(arg0 + 0x14)) {
-        if (puVar1[3] == 0) {
-            *puVar1 = arg1;
-            puVar1[1] = arg2;
-            puVar1[2] = arg3;
-            *(u32 *)(arg0 + 8) = puVar1[4];
-            puVar1[3] = 1;
+typedef struct {
+    u8 pad00[8];
+    MapRequestNode *next; /* 0x08 */
+    u8 pad0C[8];
+    s16 interval;         /* 0x14 */
+    s16 elapsed;          /* 0x16 */
+} MapRequestState;
+
+void func_002C7B58(MapRequestState *state, u32 value, u32 argument1, u32 argument2) {
+    MapRequestNode *node;
+
+    node = state->next;
+    if (state->elapsed == state->interval) {
+        if (node->active == 0) {
+            node->value = value;
+            node->argument1 = argument1;
+            node->argument2 = argument2;
+            state->next = node->next;
+            node->active = 1;
         }
-        *(u16 *)(arg0 + 0x16) = 0;
+        state->elapsed = 0;
         return;
     }
-    *(s16 *)(arg0 + 0x16) = *(s16 *)(arg0 + 0x16) + 1;
+    state->elapsed = state->elapsed + 1;
 }
 
-void func_002C7BA8(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 0x14) = arg1;
+void func_002C7BA8(MapRequestState *state, u16 interval) {
+    state->interval = interval;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7BB0);

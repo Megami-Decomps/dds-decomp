@@ -266,37 +266,54 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAEC8);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAF78);
 
-void func_002CAFE0(u8 *list) {
-    u8 *node;
+typedef struct TaskListNode {
+    u32 handle; /* 0x00 */
+    s32 key;    /* 0x04 */
+    struct TaskListNode *next; /* 0x08 */
+    u8 pad0C[4];
+    u32 value;  /* 0x10 */
+} TaskListNode;
+
+typedef struct {
+    u32 pad00;
+    u32 tail;  /* 0x04 */
+    TaskListNode *head; /* 0x08 */
+    u32 count; /* 0x0C */
+    u32 pad10;
+    void (*onRemove)(u32, u32); /* 0x14 */
+} TaskList;
+
+void func_002CAFE0(TaskList *list) {
+    TaskListNode *node;
     if (list != NULL) {
-        node = *(u8 **)(list + 8);
+        node = list->head;
         if (node != NULL) {
             do {
-                u8 *current = node;
-                node = *(u8 **)(node + 8);
-                (*(void (**)(u32, u32))(list + 0x14))(*(u32 *)current, *(u32 *)(current + 0x10));
+                TaskListNode *current = node;
+                node = node->next;
+                list->onRemove(current->handle, current->value);
                 func_002CFF98(current);
             } while (node != NULL);
         }
-        *(u32 *)(list + 0xc) = 0;
-        *(u32 *)(list + 8) = 0;
-        *(u32 *)(list + 4) = 0;
+        list->count = 0;
+        list->head = 0;
+        list->tail = 0;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB058);
 
-void *func_002CB0F8(void *head, s32 key) {
-    void *n;
+void *func_002CB0F8(TaskList *list, s32 key) {
+    TaskListNode *node;
 
-    n = *(void **)((s32)head + 8);
-    while (*(s32 *)((s32)n + 4) != key) {
-        n = *(void **)((s32)n + 8);
-        if (n == NULL) {
+    node = list->head;
+    while (node->key != key) {
+        node = node->next;
+        if (node == NULL) {
             break;
         }
     }
-    return n;
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB120);

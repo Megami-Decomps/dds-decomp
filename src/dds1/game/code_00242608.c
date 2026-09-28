@@ -118,25 +118,41 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243390);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243440);
 
-s32 func_00243460(u8 *entry, u8 *scene, s32 nameIndex) {
-    u8 *node = *(u8 **)(scene + 0x2034);
+typedef struct CampEntryNode {
+    u8 pad00[8];
+    s32 nameIndex; /* 0x08: 32-byte name in the owning scene */
+    u8 pad0C[0x1C];
+    u32 status; /* 0x28 */
+    u8 pad2C[0x50];
+    struct CampEntryNode *next; /* 0x7C */
+} CampEntryNode;
+
+typedef struct {
+    u8 pad00[0x2034];
+    CampEntryNode *entries; /* 0x2034 */
+    u8 pad2038[0x3D4];
+    u32 state; /* 0x240C */
+} CampScene;
+
+s32 func_00243460(u8 *entry, CampScene *scene, s32 nameIndex) {
+    CampEntryNode *node = scene->entries;
     while (node != NULL) {
-        if (strcmp((char *)scene + (*(s32 *)(node + 8) << 5) + 0x24,
+        if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24,
                    (char *)*(u8 **)(entry + 0x7c) + (nameIndex << 5)) == 0) {
-            return *(s32 *)(node + 8);
+            return node->nameIndex;
         }
-        node = *(u8 **)(node + 0x7c);
+        node = node->next;
     }
     return -1;
 }
 
-void *campFindEntryByName(u8 *scene, const char *name) {
-    void *node = *(void **)(scene + 0x2034);
+void *campFindEntryByName(CampScene *scene, const char *name) {
+    CampEntryNode *node = scene->entries;
     while (node != NULL) {
-        if (strcmp((char *)scene + (*(s32 *)((u8 *)node + 8) << 5) + 0x24, name) == 0) {
+        if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24, name) == 0) {
             return node;
         }
-        node = *(void **)((u8 *)node + 0x7C);
+        node = node->next;
     }
     return NULL;
 }
@@ -145,17 +161,17 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243558);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243608);
 
-void func_002437E0(s32 arg0) {
-    s32 temp_v0;
+void func_002437E0(CampScene *scene) {
+    CampEntryNode *node;
 
-    temp_v0 = *(s32 *)(arg0 + 0x2034);
-    if (temp_v0 != 0) {
-        *(u32 *)(temp_v0 + 0x28) = 0;
-        while (temp_v0 = *(s32 *)(temp_v0 + 0x7c), temp_v0 != 0) {
-            *(u32 *)(temp_v0 + 0x28) = 0;
+    node = scene->entries;
+    if (node != 0) {
+        node->status = 0;
+        while (node = node->next, node != 0) {
+            node->status = 0;
         }
     }
-    *(u32 *)(arg0 + 0x240c) = 0;
+    scene->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243818);

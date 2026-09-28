@@ -50,8 +50,9 @@ typedef struct EvtRuntimeChild {
     u16 unk0A;
     u8 pad0C[6];
     u16 unk12;
-    u8 pad14[0x1C];
-    struct EvtRuntimeChild *next;
+    u8 pad14[0x18];
+    void *payload; /* 0x2C: serialized child data */
+    struct EvtRuntimeChild *next; /* 0x30 */
 } EvtRuntimeChild;
 
 typedef struct EvtRuntimeGroup {
@@ -79,38 +80,38 @@ extern u16 D_003BBF88;
 
 extern u32 D_003BBF8C;
 
-void evtCreateTask(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void evtCreateTask(s32 taskId, s32 value) {
+    s32 data;
 
-    temp_v0 = func_002350F8();
-    func_00235120(temp_v0, arg1);
-    kwlnTaskCreate(D_003BBF80, arg0, 1, 1, func_002351E0, func_00235228, (void *)temp_v0);
+    data = func_002350F8();
+    func_00235120(data, value);
+    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, (void *)data);
 }
 
-void func_002352E0(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void func_002352E0(s32 taskId, s32 value) {
+    s32 data;
 
-    temp_v0 = func_002350F8();
-    *(s32 *)(temp_v0 + 4) = arg1;
-    kwlnTaskCreate(D_003BBF80, arg0, 1, 1, func_002351E0, func_00235228, (void *)temp_v0);
+    data = func_002350F8();
+    *(s32 *)(data + 4) = value;
+    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, (void *)data);
 }
 
 void func_00235340(u32 arg0) {
     D_003BBF8C = arg0;
 }
 
-void func_00235348(s32 arg0, s32 arg1) {
-    s16 temp_v0;
+void func_00235348(s32 duration, s32 target) {
+    s16 current;
 
-    temp_v0 = func_00132B90();
-    if (temp_v0 != arg1) {
-        if (arg0 == 0) {
-            func_00132B80(arg1);
+    current = func_00132B90();
+    if (current != target) {
+        if (duration == 0) {
+            func_00132B80(target);
             D_003BBF88 = 0;
         } else {
-            D_003BD89A = arg0;
-            D_003BD89C = temp_v0;
-            D_003BD89E = arg1;
+            D_003BD89A = duration;
+            D_003BD89C = current;
+            D_003BD89E = target;
             D_003BBF88 = 1;
             D_003BD898 = 0;
         }
@@ -147,11 +148,11 @@ void func_00235488(void) {
 }
 
 void evtDestroySkyTask(void) {
-    s32 temp_v0;
+    s32 task;
 
-    temp_v0 = kwlnTaskGetTaskByName(D_003BBF90);
-    if (temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(temp_v0, 1);
+    task = kwlnTaskGetTaskByName(D_003BBF90);
+    if (task != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 1);
     }
 }
 
@@ -220,17 +221,17 @@ typedef struct EvtDrawWork {
     u8 pad2284[0x38];
     s32 unk22BC;
     s32 unk22C0;
-    s32 unk22C4;
+    s32 labelValue;
     s32 *unk22C8;
     s32 unk22CC;
     s32 unk22D0;
 } EvtDrawWork;
 
-s32 evtDrawStringEntry(s32 arg0, s32 arg1, s32 arg2, EvtDrawWork *arg3) {
-    if (arg3->unk22C4 == 0) {
+s32 evtDrawStringEntry(s32 output, s32 x, s32 y, EvtDrawWork *work) {
+    if (work->labelValue == 0) {
         return 0;
     }
-    func_002D4038(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, D_003BC088, arg3->unk22C4));
+    func_002D4038(output, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->labelValue));
     return 2;
 }
 
@@ -653,7 +654,7 @@ void func_0023E228(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x30);
+                func_0023D5B0(output, child->payload, 0x30);
             }
         }
     }
@@ -665,7 +666,7 @@ void func_0023E2B0(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xB) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x20);
+                func_0023D5B0(output, child->payload, 0x20);
             }
         }
     }
@@ -677,7 +678,7 @@ void func_0023E338(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x28);
+                func_0023D5B0(output, child->payload, 0x28);
             }
         }
     }
@@ -689,7 +690,7 @@ void func_0023E3C0(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x2C);
+                func_0023D5B0(output, child->payload, 0x2C);
             }
         }
     }
@@ -701,7 +702,7 @@ void func_0023E448(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x2C);
+                func_0023D5B0(output, child->payload, 0x2C);
             }
         }
     }
@@ -713,7 +714,7 @@ void func_0023E4D0(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x2C);
+                func_0023D5B0(output, child->payload, 0x2C);
             }
         }
     }
@@ -725,7 +726,7 @@ void func_0023E558(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x28);
+                func_0023D5B0(output, child->payload, 0x28);
             }
         }
     }
@@ -737,7 +738,7 @@ void func_0023E5E0(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x18);
+                func_0023D5B0(output, child->payload, 0x18);
             }
         }
     }
@@ -749,7 +750,7 @@ void func_0023E668(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x24);
+                func_0023D5B0(output, child->payload, 0x24);
             }
         }
     }
@@ -775,7 +776,7 @@ void func_0023E770(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, *(void **)((s32)child + 0x2C), 0x40);
+                func_0023D5B0(output, child->payload, 0x40);
             }
         }
     }
