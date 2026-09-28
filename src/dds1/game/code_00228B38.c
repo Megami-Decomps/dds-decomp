@@ -119,6 +119,10 @@ void updateSolarPointTimers(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229ED8);
 
+INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
+
+INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD8);
+
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACBF8);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
@@ -126,8 +130,4 @@ INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC78);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC88);
-
-INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
-
-INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD8);
 

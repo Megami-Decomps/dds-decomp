@@ -31,7 +31,7 @@ char *func_0010D5A8(s32 idx);
 void func_00122F08(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 void func_00122FF0(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 s32 func_002D3EE8(void);
-s32 func_0010FDC0(void);
+s32 dds3GetWorldSecondaryObject(void);
 s32 func_00110EB8(s32 arg0);
 void func_0021FEC0(s32 arg0, s32 arg1);
 void func_0021FE38(void);
@@ -295,7 +295,7 @@ s32 func_00226B68(void)
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
     combined = (p0 << 16) + p1;
-    if (func_00110EB8(func_0010FDC0()) != combined) {
+    if (func_00110EB8(dds3GetWorldSecondaryObject()) != combined) {
         p0 = func_0010D428(0);
         p1 = func_0010D428(1);
         func_0021FEC0(p0, p1);

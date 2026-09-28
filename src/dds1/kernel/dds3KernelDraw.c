@@ -11,7 +11,7 @@ extern u16 D_003BD6BA;
 extern u16 D_003BD6BC;
 extern u16 D_003BD6BE;
 
-extern s8 D_00324770[13];
+extern u32 D_00324770[4];
 
 /* Draw state blocks (D_003C2xxx) with dirty flags in D_003BA904. Each
  * setter writes its block, snapshots a flag byte to D_003BD7xx and
@@ -179,15 +179,15 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", drawCopyRow128);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", drawCopyWords20);
 
-void func_001064E8(u32 arg0, s32 arg1) {
-    *(u32 *)(D_00324770 + arg1 * 4) = arg0;
+void func_001064E8(u32 value, s32 index) {
+    D_00324770[index] = value;
 }
 
-void drawInitRect(DrawRect *arg0) {
-    arg0->w = 0x200;
-    arg0->h = 0x1C0;
-    arg0->y = 0;
-    arg0->x = 0;
+void drawInitRect(DrawRect *rect) {
+    rect->w = 0x200;
+    rect->h = 0x1C0;
+    rect->y = 0;
+    rect->x = 0;
 }
 
 void drawSetDc8Second(u32 arg0) {

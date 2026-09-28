@@ -12,7 +12,7 @@ extern s32 D_003BABF0;
 
 extern u32 D_003BABD0;
 
-extern u64 func_0010FDC0(void);
+extern u64 dds3GetWorldSecondaryObject(void);
 extern s64 func_00110400(u64);
 extern u64 func_00110458(u64);
 extern s64 func_001104B0(u64);
@@ -30,7 +30,7 @@ extern s32 D_003BAB14;
 extern s32 D_003BAB18;
 extern s32 D_003BAB1C;
 extern s32 D_003BAB20;
-extern u32 D_0032E3B0[];
+extern s32 D_0032E3B0[];
 extern s32 D_0032E4DC[];
 extern u8 D_00324F88[];
 extern u8 D_003257F8[];
@@ -566,7 +566,25 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121DE0);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121ED8);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122030);
+f32 func_00122030(f32 a, f32 b) {
+    f32 diff;
+
+    if (a < 0.0f || b < 0.0f) {
+        a += 360.0f;
+        b += 360.0f;
+    }
+    a = (s32)a % 360;
+    b = (s32)b % 360;
+    diff = a - b;
+    if (diff > 180.0f || diff < -180.0f) {
+        if (a < b) {
+            a += 360.0f;
+        } else {
+            b += 360.0f;
+        }
+    }
+    return b - a;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122100);
 
@@ -601,7 +619,7 @@ void func_00122BE0(s64 arg0) {
     s64 temp_v1;
     u64 temp_v2;
 
-    temp_v0 = func_0010FDC0();
+    temp_v0 = dds3GetWorldSecondaryObject();
     temp_v0 = func_00110AB0(temp_v0, 6);
     temp_v1 = func_00110400(temp_v0);
     if (temp_v1 == 0) {
@@ -890,7 +908,7 @@ void func_00123D20(void) {
     u32 *buffer;
     u64 active;
     if (D_003BAB34 != 0) {
-        active = func_0010FDC0();
+        active = dds3GetWorldSecondaryObject();
         buffer = D_0032F1A0;
         if (active != 0) {
             effObjFetchInnerFirstVec(D_003BAB34);
@@ -1289,12 +1307,6 @@ void *createDummyFieldMatter(void) {
     return matter;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD30);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD40);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD50);
-
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAAE0);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAAE8);
@@ -1396,4 +1408,10 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BABFC);
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC00);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC08);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD30);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD40);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD50);
 

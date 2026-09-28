@@ -16,7 +16,7 @@ extern u32 D_003BA904;
 s32 func_0022BE40(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
 void func_0022FF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_0010FD80(void);
+s32 dds3GetWorldObject(void);
 void func_001109B8(s32 arg0, u32 arg1);
 f32 func_00112ED8(s32 arg0);
 s32 func_00106488(f32 arg0);
@@ -41,7 +41,7 @@ void func_0022CE68(s32 arg0) {
     if (s == 0) {
         return;
     }
-    func_001109B8(func_0010FD80(), s);
+    func_001109B8(dds3GetWorldObject(), s);
     func_00106488(func_00112ED8(s));
 }
 
@@ -406,8 +406,6 @@ void evtEventViewerDestroyTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232E20);
 
-INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADB20);
-
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBE78);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBE7A);
@@ -477,4 +475,6 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
+
+INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADB20);
 

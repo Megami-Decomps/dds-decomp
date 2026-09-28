@@ -2,7 +2,7 @@
 
 typedef struct SdfThreadNode {
     struct SdfThreadNode *next;
-    s32 unk4;
+    s32 threadId;
 } SdfThreadNode;
 
 extern s32 D_003BD998;
@@ -12,18 +12,16 @@ s32 GetThreadId(void);
 void WaitSema(s32 arg0);
 void SignalSema(s32 arg0);
 
-SdfThreadNode *func_002CFBB0(s32 arg0) {
-    s32 tid;
+SdfThreadNode *func_002CFBB0(s32 threadId) {
     SdfThreadNode *node;
 
-    tid = arg0;
-    if (tid < 0) {
-        tid = GetThreadId();
+    if (threadId < 0) {
+        threadId = GetThreadId();
     }
     WaitSema(D_003BD998);
     node = D_003BD99C;
     while (node != NULL) {
-        if (node->unk4 == tid) {
+        if (node->threadId == threadId) {
             break;
         }
         node = node->next;

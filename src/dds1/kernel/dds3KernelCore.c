@@ -15,8 +15,8 @@ struct KwlnTask {
     u32 timer;
     s16 unk2C;
     s16 unk2E;
-    TaskUpdate unk30;
-    TaskDestroy unk34;
+    TaskUpdate update;
+    TaskDestroy destroy;
     u32 unk38;
     KwlnTask* listNext;
     KwlnTask* listPrev;
@@ -49,7 +49,7 @@ extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
 
-extern s32 func_001019C8(void* target);
+extern s32 func_001019C8(KwlnTask* target);
 
 extern void func_00101B08(KwlnTask* task);
 
@@ -134,8 +134,8 @@ void func_00100E68(KwlnTask* task)
         child = next;
     }
     func_001006E0(task);
-    if (task->unk34 != 0) {
-        task->unk34(task);
+    if (task->destroy != 0) {
+        task->destroy(task);
     }
     task->flags &= ~0xF;
     func_00101B08(task);
@@ -319,10 +319,10 @@ KwlnTask* func_00101938(u32 prio)
 }
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 func_001019C8(void* target)
+s32 func_001019C8(KwlnTask* target)
 {
     s32 idx;
-    void* node;
+    KwlnTask* node;
     node = 0;
     idx = 0;
     for (; idx < 3; idx++)
@@ -345,37 +345,43 @@ s32 func_001019C8(void* target)
             {
                 return 1;
             }
-            node = *(void**)((u8*)node + 0x3C);
+            node = node->listNext;
         }
     }
     return 0;
 }
 
-u32 func_00101A58(void* task)
+u32 func_00101A58(KwlnTask* task)
 {
-    return *(u32*)((u8*)task + 0x24);
+    return task->unk24;
 }
 
 /* Persona 4 kwlnTaskGetTimer @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
-u32 kwlnTaskGetTimer(void* task)
+u32 kwlnTaskGetTimer(KwlnTask* task)
 {
-    return *(u32*)((u8*)task + 0x28);
+    return task->timer;
 }
 
-void func_00101A68(void* task, u32 value)
+void func_00101A68(KwlnTask* task, u32 value)
 {
-    *(u32*)((u8*)task + 0x38) = value;
+    task->unk38 = value;
 }
 
-u32 func_00101A70(void* task)
+u32 func_00101A70(KwlnTask* task)
 {
-    return *(u32*)((u8*)task + 0x38);
+    return task->unk38;
 }
 
 void func_00101A78(void) {
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101A80);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA824);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA830);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DE88);
 
@@ -384,10 +390,4 @@ INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEB8);
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEC8);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEF8);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA824);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA830);
 

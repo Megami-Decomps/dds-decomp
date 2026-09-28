@@ -2,8 +2,8 @@
 
 typedef struct NodeA {
     u8 pad[0x20];
-    struct NodeA *unk20;
-    struct NodeA *unk24;
+    struct NodeA *next;
+    struct NodeA *previous;
 } NodeA;
 
 typedef struct NodeB {
@@ -11,8 +11,8 @@ typedef struct NodeB {
     s16 unk2;
     s16 unk4;
     s16 unk6;
-    struct NodeB *unk8;
-    struct NodeB *unkC;
+    struct NodeB *next;
+    struct NodeB *previous;
 } NodeB;
 
 typedef struct {
@@ -22,23 +22,23 @@ typedef struct {
 } Entry;
 
 typedef struct {
-    NodeA *unk0;
-    NodeA *unk4;
-    void *unk8;
-    void *unkC;
+    NodeA *firstNode;
+    NodeA *lastNode;
+    void *primaryObject;
+    void *secondaryObject;
     u8 pad10[4];
     Entry *unk14;
     u8 pad18[2];
     u16 unk1A;
     s16 unk1C;
     u16 unk1E;
-    NodeB *unk20;
-    NodeB *unk24;
+    NodeB *firstIndex;
+    NodeB *lastIndex;
 } WorldInfo;
 
 typedef struct {
     u8 pad[0x18];
-    WorldInfo *unk18;
+    WorldInfo *info;
 } World;
 
 typedef struct {
@@ -63,7 +63,7 @@ void func_00110490(void *arg);
 void *func_00110458(void *arg);
 s32 func_001104B0(void *arg);
 
-void func_0010FD30(void) {
+void dds3DestroyWorld(void) {
     World *world;
 
     world = D_003BA9BC;
@@ -73,141 +73,141 @@ void func_0010FD30(void) {
     }
 }
 
-void func_0010FD60(void *object) {
+void dds3SetWorldObject(void *object) {
     if (D_003BA9BC != NULL) {
-        D_003BA9BC->unk18->unk8 = object;
+        D_003BA9BC->info->primaryObject = object;
     }
 }
 
-void *func_0010FD80(void) {
+void *dds3GetWorldObject(void) {
     World *world;
 
     world = D_003BA9BC;
     if (world == NULL) {
         return NULL;
     }
-    return world->unk18->unk8;
+    return world->info->primaryObject;
 }
 
-void func_0010FDA0(void *object) {
+void dds3SetWorldSecondaryObject(void *object) {
     if (D_003BA9BC != NULL) {
-        D_003BA9BC->unk18->unkC = object;
+        D_003BA9BC->info->secondaryObject = object;
     }
 }
 
-void *func_0010FDC0(void) {
+void *dds3GetWorldSecondaryObject(void) {
     World *world;
 
     world = D_003BA9BC;
     if (world == NULL) {
         return NULL;
     }
-    return world->unk18->unkC;
+    return world->info->secondaryObject;
 }
 
-void *func_0010FDE0(void) {
+void *dds3AppendWorldNode(void) {
     WorldInfo *info;
     NodeA *node;
 
     if (D_003BA9BC == NULL) {
         return NULL;
     }
-    info = D_003BA9BC->unk18;
+    info = D_003BA9BC->info;
     node = func_0010F418(1);
     if (node == NULL) {
         return NULL;
     }
-    if (info->unk4 == NULL) {
-        info->unk0 = node;
-        info->unk4 = node;
+    if (info->lastNode == NULL) {
+        info->firstNode = node;
+        info->lastNode = node;
     } else {
-        info->unk4->unk20 = node;
-        node->unk24 = info->unk4;
-        info->unk4 = node;
+        info->lastNode->next = node;
+        node->previous = info->lastNode;
+        info->lastNode = node;
     }
     return node;
 }
 
-void func_0010FE48(NodeA *arg) {
+void dds3DestroyWorldNode(NodeA *node) {
     WorldInfo *info;
 
-    if (arg == NULL) {
+    if (node == NULL) {
         return;
     }
     if (D_003BA9BC == NULL) {
         return;
     }
-    info = D_003BA9BC->unk18;
-    if (info->unk0 == arg) {
-        info->unk0 = arg->unk20;
+    info = D_003BA9BC->info;
+    if (info->firstNode == node) {
+        info->firstNode = node->next;
     }
-    if (info->unk4 == arg) {
-        info->unk4 = arg->unk24;
+    if (info->lastNode == node) {
+        info->lastNode = node->previous;
     }
-    if (info->unk8 == arg) {
-        info->unk8 = NULL;
+    if (info->primaryObject == node) {
+        info->primaryObject = NULL;
     }
-    if (info->unkC == arg) {
-        info->unkC = NULL;
+    if (info->secondaryObject == node) {
+        info->secondaryObject = NULL;
     }
-    effObjNodeDestroy(arg);
+    effObjNodeDestroy(node);
 }
 
-void *func_0010FEC8(s32 arg) {
+void *func_0010FEC8(s32 index) {
     WorldInfo *info;
     NodeB *node;
 
     if (D_003BA9BC == NULL) {
         return NULL;
     }
-    info = D_003BA9BC->unk18;
-    if (info->unk1E < arg) {
+    info = D_003BA9BC->info;
+    if (info->unk1E < index) {
         return NULL;
     }
     node = func_002CFEB8(0x10);
     if (node == NULL) {
         return NULL;
     }
-    node->unkC = NULL;
-    node->unk8 = NULL;
+    node->previous = NULL;
+    node->next = NULL;
     node->unk0 = -1;
     node->unk2 = -1;
     node->unk4 = -1;
     node->unk6 = 0;
-    if (info->unk24 == NULL) {
-        info->unk20 = node;
-        info->unk24 = node;
+    if (info->lastIndex == NULL) {
+        info->firstIndex = node;
+        info->lastIndex = node;
     } else {
-        info->unk24->unk8 = node;
-        node->unkC = info->unk24;
-        info->unk24 = node;
+        info->lastIndex->next = node;
+        node->previous = info->lastIndex;
+        info->lastIndex = node;
     }
-    func_001102C8(node, arg);
+    func_001102C8(node, index);
     return node;
 }
 
-void func_0010FF80(NodeB *arg) {
+void func_0010FF80(NodeB *node) {
     WorldInfo *info;
 
-    if (arg == NULL) {
+    if (node == NULL) {
         return;
     }
     if (D_003BA9BC == NULL) {
         return;
     }
-    info = D_003BA9BC->unk18;
-    func_00110120(arg);
-    if (arg->unkC == NULL) {
-        info->unk20 = arg->unk8;
+    info = D_003BA9BC->info;
+    func_00110120(node);
+    if (node->previous == NULL) {
+        info->firstIndex = node->next;
     } else {
-        arg->unkC->unk8 = arg->unk8;
+        node->previous->next = node->next;
     }
-    if (arg->unk8 == NULL) {
-        info->unk24 = arg->unkC;
+    if (node->next == NULL) {
+        info->lastIndex = node->previous;
     } else {
-        arg->unk8->unkC = arg->unkC;
+        node->next->previous = node->previous;
     }
-    func_002CFF98(arg);
+    func_002CFF98(node);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110018);

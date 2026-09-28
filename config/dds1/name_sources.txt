@@ -72,6 +72,24 @@
 0x0010B728	evtUnkB728Link	inferred	splices node into D_003BA998 list with per-path tails and bumps D_003BA990
 0x0010B768	evtUnkB768Unlink	inferred	removes node from D_003BA994/998 list, clears links, decrements D_003BA990
 0x0010BB88	scrProcCreateTask	inferred	wraps kwlnTaskCreate for a script-proc task; stores id at +0xE4
+0x0010BBE0	scrClearProcessGlobals	inferred	Clears both 256-element integer arrays of script process globals.
+0x0010BC50	scrCreateProcessWithDefaultOption	inferred	Calls func_0010BB28 with its second argument zero.
+0x0010BCA0	scrCreateTaskWithDefaultOption	inferred	Calls func_0010BA18 with its second argument zero.
+0x0010C3F0	scrPushImmediateInteger	inferred	Pushes the current instruction's signed operand onto the script stack as an integer.
+0x0010C438	scrPushImmediateFloat	inferred	Advances past the opcode and pushes the following instruction's float operand.
+0x0010C488	scrPushGlobalInteger	inferred	Pushes the indexed global script integer onto the stack.
+0x0010C4E0	scrPushGlobalFloat	inferred	Pushes the indexed global script float onto the stack.
+0x0010C538	scrPushLocalInteger	inferred	Pushes the indexed script-local integer onto the stack.
+0x0010C590	scrPushLocalFloat	inferred	Pushes the indexed script-local float onto the stack.
+0x0010C5E8	scrPushStringLiteral	inferred	Pushes a pointer into the script string table indexed by the current operand.
+0x0010C638	scrPushReturnValue	inferred	Copies the reserved return slot into the current script stack slot.
+0x0010C680	scrStoreGlobalInteger	inferred	Pops an integer and stores it at the instruction-indexed global integer slot.
+0x0010C6D8	scrStoreGlobalFloat	inferred	Pops a float and stores it at the instruction-indexed global float slot.
+0x0010C730	scrStoreLocalInteger	inferred	Pops an integer and stores it at the instruction-indexed local integer slot.
+0x0010C788	scrStoreLocalFloat	inferred	Pops a float and stores it at the instruction-indexed local float slot.
+0x0010C8D8	scrJumpProcedure	inferred	Loads the program counter from the selected procedure address.
+0x0010C908	scrCallProcedure	inferred	Saves the current program counter and jumps to a procedure address.
+0x0010C978	scrJumpLabel	inferred	Loads the program counter from the selected label address.
 0x0010F4F0	effObjNodeDestroy	inferred	unlinks +0x20/+0x24 list, calls owner notify at +0x4 with the node, frees via func_002CFF98
 0x0010F570	effObjInnerCreate	inferred	allocates 0xD0 inner node, inits vectors/flags via func_0010F660, links at +0x1C; returns 1 on success; 27/29 words match, blocked on $2/$3 scratch choice for +0xB0 address
 0x0010F660	effObjInnerVecInit	inferred	sqc2 vf0 clears +0x40/+0x50, vaddw/vmulx-derived vector stored to +0x60
@@ -87,6 +105,19 @@
 0x0010F7C0	effObjAddInnerFirstVec	inferred	flags update, lqc2 inner +0x40 and arg, vadd.xyzw, recomputed-address sqc2
 0x0010F7F8	effObjQuatMulInnerSecondVec	inferred	flags update, lqc2 pair, effMiscQuatMultiplyVU, recomputed-address sqc2; parked: allocator keeps src in saved reg instead of inner, no honest fix found
 0x0010F848	effObjMulInnerThirdVec	inferred	flags update, lqc2 inner +0x60 and arg, vmul.xyzw, recomputed-address sqc2
+0x0010FD30	dds3DestroyWorld	inferred	Destroys the global world object and clears its global pointer.
+0x0010FD60	dds3SetWorldObject	inferred	Stores a supplied object in the world's info offset 0x8 when a world exists.
+0x0010FD80	dds3GetWorldObject	inferred	Returns the world's info offset 0x8 object or null if no world exists.
+0x0010FDA0	dds3SetWorldSecondaryObject	inferred	Stores a supplied object in the world's info offset 0xC when a world exists.
+0x0010FDC0	dds3GetWorldSecondaryObject	inferred	Returns the world's info offset 0xC object or null if no world exists.
+0x0010FDE0	dds3AppendWorldNode	inferred	Allocates a node and appends it to the world's doubly linked list.
+0x0010FE48	dds3DestroyWorldNode	inferred	Clears world references to the supplied node and calls effObjNodeDestroy.
+0x00110BB8	dds3ClearSceneObjectState	inferred	Reads scene object at offset 0x18 and clears its word at offset 0x14 after func_00128890.
+0x00111108	dds3ExchangeAreaSlot	inferred	Exchanges object slot 5 with null and returns success.
+0x00111130	dds3InvokeAreaCallback	inferred	Calls the callback at area subobject offset 0xC if present; otherwise returns success.
+0x00111908	dds3SetObjectFlags	inferred	ORs the supplied flag mask into the object-base flags.
+0x00111938	dds3ClearObjectFlags	inferred	Clears the supplied flag mask from the object-base flags.
+0x00111970	dds3TestObjectFlags	inferred	Tests whether any requested object-base flag is set.
 0x001119E8	objGetExtData	inferred	returns +0x30 pointer from object-base header
 0x00111A08	objSetSlotByKind	inferred	exchanges slot selected by +0xF byte via func_00111758
 0x00111A68	objExchangeSlot	inferred	stores new slot value, returns old value
@@ -98,11 +129,17 @@
 0x00112800	objRunSlot1Handlers	inferred	runs func_001116A8 on slot 1 then tail-calls func_001116B8
 0x00112848	objReleaseSlot1Data	inferred	frees slot 1 value via func_001116F8
 0x00112868	objGetSlot1Data	inferred	fetches slot 1 value via func_00111730
+0x001129B8	dds3DestroyCameraData	inferred	Releases the camera data handle then frees the camera data allocation.
+0x00112BB0	dds3GetCameraHandle	inferred	Returns the handle at camera data offset 0x80.
 0x00115930	effObjGetIntParam	inferred	returns float at +0x60 of vector base as s32, 0 when guard fails
+0x00116148	dds3ReleaseEventData	inferred	Releases the event data handle and frees the event data allocation.
+0x00116A50	dds3ReleaseModelRangeData	inferred	Releases the optional resource owned by model-range data and frees that data.
 0x00117780	sysBumpTickCounters	inferred	increments u32 counters at D_003BAA00+0x34/+0x38, returns 0
 0x00118110	sysFirePendingCallback	inferred	runs func_0011B940 when D_003BAAAC is set
 0x00118558	sysDispatchCmd	inferred	forwards args to func_001184A8 masking last arg to u8
 0x00118670	sysDispatchSubCmd	inferred	forwards args to func_00118648 masking last arg to u8
+0x001192B0	datMoveCursorX	inferred	Adds the supplied delta to cursor x and clamps to zero through xMax.
+0x001192D8	datMoveCursorY	inferred	Adds the supplied delta to cursor y and clamps to zero through yMax.
 0x001199B0	eventCheckValueThreshold	inferred	special indexes delegate to func_0021F600 while ordinary indexes compare a table byte
 0x00119AA8	dds3FindEntryIndex	inferred	counts entries until +4 == arg0 with flag set; returns count or -1 (max 5)
 0x0011A038	eventUpdateFlaggedStats	inferred	Iterates entries and updates flagged statistics.
@@ -761,6 +798,7 @@
 0x00289A58	fileReqBegin	inferred	sets current request index and initializes that entry
 0x00289AA0	fileReqPoll	inferred	polls one request via libmc status call, advances its state machine
 0x00289BC0	fileReqGetSize	inferred	returns entry size field shifted to bytes
+0x00289E18	mcMakeDirectory	inferred	Passes the caller's arguments to sceMcMkdir with the second argument zero.
 0x0028A190	formatSaveFilename	inferred	Formats BASLUS save identifier with product code and slot number
 0x0028A1B8	fileReqGetSlotCode	inferred	reads current request index and signed slot code at stride 0x30
 0x0028A208	fileReloadSaveBuffer	inferred	reloads the 0x33600-byte save buffer from D_003BD924 while preserving the word at +0x30

@@ -365,7 +365,16 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCCE8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD038);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD0C8);
+typedef struct { u32 word[0x1D]; } EffectBlob74;
+extern u8 *func_002DCCE8(s32);
+
+s32 func_002DD0C8(u8 *src) {
+    u8 *dst = func_002DCCE8(0);
+
+    *(u32 *)(dst + 0x40) = *(u32 *)(src + 0x40);
+    *(EffectBlob74 *)(dst + 0x44) = *(EffectBlob74 *)(src + 0x44);
+    return (s32)dst;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD258);
 

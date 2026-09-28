@@ -4,7 +4,7 @@ extern s32 func_0027B888(u32);
 
 extern u8 D_003BC3E1;
 
-extern s32 func_0010FD80(void);
+extern s32 dds3GetWorldObject(void);
 
 extern s32 mdlFlagTest(u32);
 
@@ -125,14 +125,14 @@ void func_00249C08(s8 arg0) {
     s64 temp_v0;
 
     if (arg0 == '\x01') {
-        temp_v0 = func_0010FD80();
+        temp_v0 = dds3GetWorldObject();
         if (temp_v0 != 0) {
             func_00110860(temp_v0, 1);
         }
         D_003BC3E1 = 1;
     }
     else {
-        temp_v0 = func_0010FD80();
+        temp_v0 = dds3GetWorldObject();
         if (temp_v0 != 0) {
             func_00110860(temp_v0, 0);
         }

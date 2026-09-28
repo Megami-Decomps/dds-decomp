@@ -14,7 +14,7 @@ s32 func_002D0A80(s32 arg);
 void func_002D0A10(s32 arg);
 void func_002CFF98(void *arg);
 
-void func_00116A50(ModelRangeObj *object) {
+void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     ModelRangeData *data;
     s32 resource;
 

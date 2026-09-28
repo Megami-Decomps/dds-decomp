@@ -1,6 +1,6 @@
 #include "common.h"
 
-typedef struct { u8 pad0[0x40]; s32 unk40[256]; s32 unk440[256]; } ScrProcGlobals;
+typedef struct { u8 pad0[0x40]; s32 integers[256]; s32 floatBits[256]; } ScrProcGlobals;
 extern ScrProcGlobals *D_003BAA00;
 
 /* Task object created by func_0010BA18/func_0010B7C0 and started below. */
@@ -10,9 +10,9 @@ typedef struct {
     u8   pad_0xB8[0x10]; /* 0xB8 */
     s32  unkC8;          /* 0xC8 */
     u8   pad_0xCC[0x0C]; /* 0xCC */
-    void *unkD8;         /* 0xD8: back-pointer to the script handle */
+    void *scriptHandle;  /* 0xD8: back-pointer to the script handle */
     u8   pad_0xDC[0x08]; /* 0xDC */
-    s32  unkE4;          /* 0xE4: task id from kwlnTaskCreate */
+    s32  taskId;         /* 0xE4: id from kwlnTaskCreate */
 } ScrProcTask; /* 0xE8 */
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -35,7 +35,7 @@ s32 func_0010BB28(s32 scriptId, s32 option)
     task = (ScrProcTask *)func_0010BA18(id, option);
     if (task != NULL)
     {
-        task->unkD8 = handle;
+        task->scriptHandle = handle;
     }
     return (s32)task;
 }
@@ -44,39 +44,39 @@ s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
     s32 id;
     id = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, func_0010C0C8, func_0010C070, (s32)task);
-    task->unkE4 = id;
+    task->taskId = id;
     return id;
 }
 
-void func_0010BBE0(void)
+void scrClearProcessGlobals(void)
 {
     s32 i;
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (i = 255; i >= 0; i--)
     {
-        D_003BAA00->unk40[255 - i] = 0;
-        D_003BAA00->unk440[255 - i] = 0;
+        D_003BAA00->integers[255 - i] = 0;
+        D_003BAA00->floatBits[255 - i] = 0;
     }
 }
 
-void func_0010BC18(s32 arg0, s32 arg1, s32 arg2)
+void func_0010BC18(s32 priority, s32 scriptId, s32 option)
 {
-    scrProcCreateTask(arg0, func_0010BB28(arg1, arg2));
+    scrProcCreateTask(priority, func_0010BB28(scriptId, option));
 }
 
-s32 func_0010BC50(s32 arg0)
+s32 scrCreateProcessWithDefaultOption(s32 scriptId)
 {
-    return func_0010BB28(arg0, 0);
+    return func_0010BB28(scriptId, 0);
 }
 
-void func_0010BC68(s32 arg0, s32 arg1, s32 arg2)
+void func_0010BC68(s32 priority, s32 taskId, s32 option)
 {
-    scrProcCreateTask(arg0, func_0010BA18(arg1, arg2));
+    scrProcCreateTask(priority, func_0010BA18(taskId, option));
 }
 
-s32 func_0010BCA0(s32 arg0)
+s32 scrCreateTaskWithDefaultOption(s32 taskId)
 {
-    return func_0010BA18(arg0, 0);
+    return func_0010BA18(taskId, 0);
 }
 
 s32 func_0010BCB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)

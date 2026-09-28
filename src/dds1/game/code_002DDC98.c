@@ -693,8 +693,6 @@ ConsNode *devConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     return node;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002DDC98", D_003B4548);
-
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD350);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD358);
@@ -734,4 +732,6 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A9);
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C0);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C4);
+
+INCLUDE_RODATA(const s32, "game/code_002DDC98", D_003B4548);
 

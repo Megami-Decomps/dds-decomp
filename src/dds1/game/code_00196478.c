@@ -554,11 +554,13 @@ u32 func_001997E8(void) {
     return 1;
 }
 
+extern char D_003A13F0[]; /* "Camp process halted.\n", followed by padding no C emits */
+
 void reportCampProcessHalted(void) {
     if (func_00102A40() != 5) {
         func_00102A18();
     }
-    func_003003F0("Camp process halted.\n");
+    func_003003F0(D_003A13F0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00199828);

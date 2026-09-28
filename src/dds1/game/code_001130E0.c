@@ -2,7 +2,7 @@
 
 extern u32 D_003BA9D0;
 
-extern u64 func_0010FDC0(void);
+extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 func_00110A48(u64, u64, u64);
 
@@ -28,7 +28,7 @@ void func_00113438(s32 arg0, u32 arg1) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)(arg0 + 0x18);
-    func_00111908(arg0, 0x2000);
+    dds3SetObjectFlags(arg0, 0x2000);
     *(u32 *)(temp_v0 + 0x1c) = arg1;
     *(u32 *)(temp_v0 + 0x20) = 0;
 }
@@ -99,7 +99,7 @@ u32 func_00113DE0(u64 arg0) {
     s32 temp_v0;
     u64 temp_v1;
 
-    temp_v1 = func_0010FDC0();
+    temp_v1 = dds3GetWorldSecondaryObject();
     temp_v0 = func_00110A48(temp_v1, arg0, 6);
     return *(u32 *)(*(s32 *)(temp_v0 + 0x18) + 4);
 }

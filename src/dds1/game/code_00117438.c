@@ -72,7 +72,7 @@ s32 sysBumpTickCounters(void) {
 }
 
 void func_001177A8(void) {
-    func_0010BBE0();
+    scrClearProcessGlobals();
     func_0021F4B8();
     *(u32 *)(D_003BAA00 + 0xa5c) = 8;
     func_0011A238();

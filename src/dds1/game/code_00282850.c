@@ -920,8 +920,6 @@ void func_00288788(void) {
     destroyBattleStageTask();
 }
 
-INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2608);
-
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC778);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC780);
@@ -951,4 +949,6 @@ INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7C8);
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D0);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D4);
+
+INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2608);
 

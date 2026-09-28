@@ -255,15 +255,15 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E1D0);
 s32 func_0010E258(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = func_0010D428(0);
-    p3 = func_0010D428(3);
-    p2 = func_0010D428(2);
-    p1 = func_0010D428(1);
-    drawSetC70Second(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = func_0010D428(0);
+    byte3 = func_0010D428(3);
+    byte2 = func_0010D428(2);
+    byte1 = func_0010D428(1);
+    drawSetC70Second(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -300,15 +300,15 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E3B0);
 s32 func_0010E498(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = func_0010D428(0);
-    p3 = func_0010D428(3);
-    p2 = func_0010D428(2);
-    p1 = func_0010D428(1);
-    drawSetCd0Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = func_0010D428(0);
+    byte3 = func_0010D428(3);
+    byte2 = func_0010D428(2);
+    byte1 = func_0010D428(1);
+    drawSetCd0Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -345,15 +345,15 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E5F0);
 s32 func_0010E6D8(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = func_0010D428(0);
-    p3 = func_0010D428(3);
-    p2 = func_0010D428(2);
-    p1 = func_0010D428(1);
-    drawSetD30Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = func_0010D428(0);
+    byte3 = func_0010D428(3);
+    byte2 = func_0010D428(2);
+    byte1 = func_0010D428(1);
+    drawSetD30Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -390,15 +390,15 @@ INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E830);
 s32 func_0010E8D0(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = func_0010D428(0);
-    p3 = func_0010D428(3);
-    p2 = func_0010D428(2);
-    p1 = func_0010D428(1);
-    drawSetD88First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = func_0010D428(0);
+    byte3 = func_0010D428(3);
+    byte2 = func_0010D428(2);
+    byte1 = func_0010D428(1);
+    drawSetD88First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -459,15 +459,15 @@ s32 func_0010EA10(void)
 s32 func_0010EA90(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = func_0010D428(0);
-    p3 = func_0010D428(3);
-    p2 = func_0010D428(2);
-    p1 = func_0010D428(1);
-    drawSetDc8First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = func_0010D428(0);
+    byte3 = func_0010D428(3);
+    byte2 = func_0010D428(2);
+    byte1 = func_0010D428(1);
+    drawSetDc8First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -520,15 +520,15 @@ s32 func_0010EB90(void)
 s32 func_0010EC10(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = func_0010D428(0);
-    p3 = func_0010D428(3);
-    p2 = func_0010D428(2);
-    p1 = func_0010D428(1);
-    drawSetE08Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = func_0010D428(0);
+    byte3 = func_0010D428(3);
+    byte2 = func_0010D428(2);
+    byte1 = func_0010D428(1);
+    drawSetE08Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 

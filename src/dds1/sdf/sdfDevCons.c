@@ -5,16 +5,16 @@ typedef struct DevConsState {
     struct DevConsState *unk4; /* 0x4 */
     u16 unk8; /* 0x8 */
     u16 unkA; /* 0xA */
-    s16 unkC; /* 0xC */
-    s16 unkE; /* 0xE */
-    u16 unk10; /* 0x10 */
-    s16 unk12; /* 0x12 */
+    s16 columns; /* 0xC */
+    s16 rows; /* 0xE */
+    u16 cursorColumn; /* 0x10 */
+    s16 cursorRow; /* 0x12 */
     u8 unk14; /* 0x14 */
     u8 pad15; /* 0x15 */
     u8 unk16; /* 0x16 */
     u8 unk17; /* 0x17 */
     u8 pad18[4]; /* 0x18 */
-    u8 *unk1C; /* 0x1C */
+    u8 *cells; /* 0x1C: two bytes per character cell */
 } DevConsState;
 
 typedef struct ConsBuf {
@@ -47,18 +47,18 @@ extern u32 D_003987E0[];
 extern void *memmove(void *dst, const void *src, u32 n);
 extern void *memset(void *dst, s32 c, u32 n);
 
-void func_002E3EC8(DevConsState *arg0) {
-    if (arg0->unk12 == arg0->unkE - 1) {
-        s32 t = arg0->unkC * 2;
-        s32 n = t * arg0->unk12;
-        if (arg0->unk12 > 0) {
-            memmove(arg0->unk1C, (u8 *)arg0->unk1C + t, n);
+void func_002E3EC8(DevConsState *console) {
+    if (console->cursorRow == console->rows - 1) {
+        s32 rowBytes = console->columns * 2;
+        s32 copyBytes = rowBytes * console->cursorRow;
+        if (console->cursorRow > 0) {
+            memmove(console->cells, console->cells + rowBytes, copyBytes);
         }
-        memset((u8 *)arg0->unk1C + n, 0, t);
+        memset(console->cells + copyBytes, 0, rowBytes);
     } else {
-        arg0->unk12 = (u16)arg0->unk12 + 1;
+        console->cursorRow = (u16)console->cursorRow + 1;
     }
-    arg0->unk10 = 0;
+    console->cursorColumn = 0;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E3F58);
@@ -87,9 +87,9 @@ s32 func_002E40E8(DevConsState *arg0, const char *fmt, ...) {
     return i;
 }
 
-void func_002E4190(DevConsState *arg0, s16 arg1, s16 arg2) {
-    arg0->unk10 = arg1;
-    arg0->unk12 = arg2;
+void func_002E4190(DevConsState *console, s16 column, s16 row) {
+    console->cursorColumn = column;
+    console->cursorRow = row;
 }
 
 void func_002E41A0(DevConsState *arg0, u8 arg1) {

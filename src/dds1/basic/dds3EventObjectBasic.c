@@ -17,7 +17,7 @@ s32 func_0010F650(void *arg, s32 arg1);
 void func_0010F638(void *arg, s32 arg1);
 void effObjInnerVecBackup(void *arg);
 
-void func_00116148(EventObj *event) {
+void dds3ReleaseEventData(EventObj *event) {
     EventData *data;
 
     func_0010F5E8(event);

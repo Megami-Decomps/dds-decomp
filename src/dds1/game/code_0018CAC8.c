@@ -503,6 +503,12 @@ void *effAllocSlotArray(s32 n) {
     return end;
 }
 
+INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB050);
+
+INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB058);
+
+INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB060);
+
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F88);
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F98);
@@ -608,10 +614,4 @@ INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12B0);
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12C0);
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A12D0);
-
-INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB050);
-
-INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB058);
-
-INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB060);
 

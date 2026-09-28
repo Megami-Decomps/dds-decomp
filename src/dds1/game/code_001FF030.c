@@ -86,6 +86,45 @@ extern u32 func_00208C68(void);
 
 extern s32 func_001A17F0(void);
 
+typedef struct BtlUnit {
+    u8 unk_00[0x110];
+    u32 flags;
+    u8 unk_114[0xC];
+    u16 unk_120;
+    u8 unk_122[2];
+    u16 unk_124;
+    u8 unk_126[0x21E];
+    struct BtlUnit *next;
+} BtlUnit;
+
+typedef struct BtlState {
+    u8 unk_000[0x6A4];
+    s32 unk_6A4;
+    s32 unk_6A8;
+    u8 unk_6AC[8];
+    s32 unk_6B4;
+    s32 unk_6B8;
+    u8 unk_6BC[8];
+    s32 unk_6C4;
+    u8 unk_6C8[0x10];
+    s32 unk_6D8;
+    u8 unk_6DC[8];
+    s32 unk_6E4;
+    s32 unk_6E8;
+    u8 unk_6EC[8];
+    s32 unk_6F4;
+    u8 unk_6F8[0x10];
+    s32 unk_708;
+    s32 table0[0x20];
+    s32 table1[0x180];
+    s32 table2[0x20];
+    s8 unk_E0C;
+    u8 unk_E0D;
+    s16 unk_E0E;
+} BtlState;
+
+/* W14_HDR_END */
+
 typedef struct SoundResourceNode {
     u32 flags;
     u32 unk_04;
@@ -560,7 +599,20 @@ u8 func_002012E0(void) {
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00201300);
+extern const s32 D_003A5A30[20];
+
+s32 func_00201300(s32 mask, s32 index) {
+    s32 table[20];
+    memcpy(table, D_003A5A30, sizeof(table));
+    if ((mask & table[index]) == 0) {
+        return 0x80;
+    }
+    if (index != 0) {
+        return index - 1;
+    }
+    return -1;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00201408);
 
@@ -849,7 +901,6 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00201FE0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00202158);
 
-extern s32 func_00201300(s32, s32);
 extern s32 func_001A8448(void *, s32);
 extern s32 func_001A53D8(void *, s32);
 extern s32 func_001A5578(void *, s32);
@@ -1311,7 +1362,50 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00206128);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206180);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002062B8);
+s32 func_002062B8(BtlUnit *unit, s32 arg1) {
+    u32 id;
+    if (!(unit->flags & 1)) {
+        return arg1;
+    }
+    if (!(unit->flags & 0x400)) {
+        return arg1;
+    }
+    if ((*(BattleEffectState **)(func_001A17F0() + 0x694))->active != 1) {
+        return arg1;
+    }
+    id = unit->unk_124;
+    if (id == 0x124) {
+        return arg1;
+    }
+    switch (arg1) {
+    case 1:
+        if (id == 0x107) {
+            return 1;
+        }
+        if (id == 0x108) {
+            return 0xC8;
+        }
+        break;
+    case 2:
+        if (id == 0x107) {
+            return 0x66;
+        }
+        if (id == 0x108) {
+            return 0xC8;
+        }
+        break;
+    default:
+        if (id == 0x107) {
+            return arg1 + 0x64;
+        }
+        if (id == 0x108) {
+            return arg1 + 0xC8;
+        }
+        break;
+    }
+    return arg1;
+}
+
 
 u8 *func_00206388(s32 category, s32 species) {
     u8 *unit;
@@ -3449,7 +3543,39 @@ s32 func_00214588(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00214618);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00214768);
+extern s32 D_003BAA70;
+extern s32 D_003BAA74;
+extern s32 D_003BAA84;
+
+void func_00214768(void) {
+    BtlState *state = (BtlState *)func_001A17F0();
+    u32 i;
+    state->unk_708 = 0;
+    state->unk_6A8 = 7;
+    state->unk_6B4 = 7;
+    state->unk_6C4 = 0xF;
+    state->unk_6D8 = 0x1D;
+    state->unk_6E4 = 0xF;
+    state->unk_6E8 = 0x20;
+    state->unk_6F4 = 0xF;
+    if (state->unk_E0C == 0) {
+        state->unk_6B8 = 0x180;
+    } else {
+        state->unk_6B8 = 0x20;
+    }
+    for (i = 0; i < 0x20; i++) {
+        state->table0[i] = D_003BAA70 + i * 0x11;
+    }
+    for (i = 0; i < 0x180; i++) {
+        state->table1[i] = D_003BAA74 + i * 0x11;
+    }
+    for (i = 0; i < 0x20; i++) {
+        state->table2[i] = D_003BAA84 + 0xFA0 + i * 0x19;
+    }
+    state->unk_6A4 = 0;
+    state->unk_E0E = -1;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00214868);
 
@@ -3591,7 +3717,64 @@ void func_002167E0(s32 arg0, s32 arg1) {
     } while (temp_v1 != 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00216840);
+typedef struct BattleGroupSlot {
+    s32 unk_0;
+    s32 unk_4;
+    s32 unk_8;
+    s32 unk_C;
+} BattleGroupSlot;
+
+typedef struct BattleGroupNode {
+    struct BattleGroupNode *next;
+    struct BattleGroupNode *prev;
+    s16 group;
+    s16 type;
+    u8 flag;
+    u8 unk_0D[3];
+    s32 unk_10;
+    s32 unk_14;
+    s32 unk_18;
+    s32 unk_1C;
+    BattleGroupSlot slots[8];
+    s32 unk_A0;
+    s32 unk_A4;
+    s32 unk_A8;
+    f32 unk_AC;
+    f32 unk_B0;
+} BattleGroupNode;
+
+void func_00216840(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s32 arg5) {
+    BattleGroupNode *node;
+    BattleGroupNode *head;
+    s32 i;
+    func_00216A70(group, type);
+    node = func_002CFEB8(sizeof(BattleGroupNode));
+    head = (BattleGroupNode *)D_00367940[group];
+    if (head != NULL) {
+        head->prev = node;
+    }
+    D_00367940[group] = (s32)node;
+    node->next = head;
+    node->group = group;
+    node->type = type;
+    node->unk_14 = arg3;
+    node->unk_18 = arg4;
+    node->unk_1C = arg5;
+    node->prev = NULL;
+    node->unk_10 = 0;
+    for (i = 0; i != 8; i++) {
+        node->slots[i].unk_0 = 0;
+        node->slots[i].unk_8 = 0;
+        node->slots[i].unk_C = 0;
+    }
+    node->flag = flag & 1;
+    node->unk_A0 = 0;
+    node->unk_A4 = 0;
+    node->unk_A8 = 0;
+    node->unk_AC = 1.0f;
+    node->unk_B0 = 100.0f;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00216958);
 
@@ -3618,6 +3801,210 @@ void battleReleaseAllEntities(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00216B00);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB880);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB888);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB890);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB898);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8A0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8A8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B4);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8C0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8C8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8D0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8D8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8E0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8E8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8F0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8F8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB900);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB908);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB910);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB918);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB920);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB928);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB930);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB938);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB93E);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB940);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB948);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB950);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB958);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB960);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB968);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB970);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB978);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB980);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB988);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB990);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB998);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9A0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9A8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9B0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9B8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9C0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9C8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9D0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9D8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9E0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9E8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9F0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9F8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA00);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA08);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA10);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA18);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA20);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA28);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA30);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA38);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA40);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA48);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA50);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA58);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA60);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA68);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA70);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA78);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA80);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA88);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA90);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA98);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAA0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAA8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAB0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAB8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAC0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAC8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAD0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAD8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAE0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAE8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAF0);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAF8);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB00);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB08);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0D);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0E);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0F);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB10);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB14);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB18);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB1C);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB1E);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB20);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB24);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB28);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB2C);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB30);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB38);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB40);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB48);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB50);
+
+INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB58);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A72F0);
 
@@ -5440,208 +5827,4 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003ABA38);
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003ABA50);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003ABA68);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB880);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB888);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB890);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB898);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8A0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8A8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B4);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8C0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8C8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8D0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8D8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8E0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8E8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8F0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8F8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB900);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB908);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB910);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB918);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB920);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB928);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB930);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB938);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB93E);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB940);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB948);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB950);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB958);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB960);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB968);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB970);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB978);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB980);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB988);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB990);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB998);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9A0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9A8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9B0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9B8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9C0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9C8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9D0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9D8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9E0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9E8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9F0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9F8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA00);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA08);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA10);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA18);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA20);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA28);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA30);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA38);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA40);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA48);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA50);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA58);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA60);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA68);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA70);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA78);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA80);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA88);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA90);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA98);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAA0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAA8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAB0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAB8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAC0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAC8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAD0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAD8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAE0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAE8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAF0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAF8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB00);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB08);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0D);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0E);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0F);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB10);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB14);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB18);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB1C);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB1E);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB20);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB24);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB28);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB2C);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB30);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB38);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB40);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB48);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB50);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB58);
 

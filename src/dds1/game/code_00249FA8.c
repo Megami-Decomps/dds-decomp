@@ -89,6 +89,8 @@ u8 func_0024A6E8(s32 arg0) {
     return *(u8 *)(temp_v0 * 0xa0 + *(s32 *)(*(s32 *)(arg0 + 100) + 0x18) + 0x14);
 }
 
+INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
+
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF658);
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF668);
@@ -98,6 +100,4 @@ INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF678);
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF6A0);
-
-INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
 

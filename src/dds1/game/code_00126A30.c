@@ -37,7 +37,7 @@ extern u32 D_003BAD40;
 
 extern u32 D_003BAD1C;
 
-extern u64 func_0010FD80(void);
+extern u64 dds3GetWorldObject(void);
 extern s64 func_001109F0(u64);
 extern s64 func_00123DE0(void);
 
@@ -98,8 +98,9 @@ extern u32 D_003BAD20;
 extern char D_003BAD08[];
 extern u8 D_003C9230[];
 extern u8 D_003C9220[];
-extern void encProc(void);
+extern s32 encProc(void);
 extern void func_0012C7C0(void);
+extern void func_00213808(void);
 extern void battleClearRuntimeState(void);
 extern void func_00112EE8(s64 arg0, void *arg1, void *arg2);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
@@ -962,7 +963,16 @@ void func_0012C688(u32 arg0) {
     D_003BACF8 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", encProc);
+s32 encProc(void) {
+    s32 state = D_003BAD00;
+
+    if (state < 3) {
+        if (state >= 0) {
+            func_00213808();
+        }
+    }
+    return 0;
+}
 
 void func_0012C6C8(u32 arg0, s32 arg1) {
     if ((arg1 < 0x400) && ((*(u16 *)((s32)arg1 * 0x28 + D_003BAA34 + 0x20) & 0x8000) != 0))
@@ -1019,7 +1029,7 @@ s64 func_0012E488(void) {
     s64 temp_v1;
     s64 temp_v2;
 
-    temp_v0 = func_0010FD80();
+    temp_v0 = dds3GetWorldObject();
     temp_v1 = func_001109F0(temp_v0);
     temp_v2 = func_00123DE0();
     if (temp_v2 == temp_v1) {
@@ -1030,7 +1040,7 @@ s64 func_0012E488(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    func_00112EE8(func_001109F0(func_0010FD80()), D_003C9230, D_003C9220);
+    func_00112EE8(func_001109F0(dds3GetWorldObject()), D_003C9230, D_003C9220);
     D_003BAD20 = 0;
 }
 
@@ -1153,22 +1163,22 @@ u8 func_001311A0(void) {
 void func_00131458(void);
 
 void func_001311D8(void) {
-    func_00111908(D_003BAB34, 1);
+    dds3SetObjectFlags(D_003BAB34, 1);
     func_00131458();
 }
 
 void func_001311F8(void) {
-    func_00111938(D_003BAB34, 1);
+    dds3ClearObjectFlags(D_003BAB34, 1);
 }
 
 void func_00131218(void) {
     func_00112930(D_003BAB34, 0);
-    func_00111938(D_003BAB34, 0x800);
+    dds3ClearObjectFlags(D_003BAB34, 0x800);
 }
 
 void func_00131240(void) {
     func_00112930(D_003BAB34, 0x80);
-    func_00111908(D_003BAB34, 0x800);
+    dds3SetObjectFlags(D_003BAB34, 0x800);
 }
 
 void func_00131268(void) {
@@ -1180,12 +1190,12 @@ void func_00131278(void) {
 }
 
 void func_00131290(void) {
-    func_00111908(D_003BAB34, 0x200);
+    dds3SetObjectFlags(D_003BAB34, 0x200);
 }
 
 void func_001312B0(void) {
-    func_00111938(D_003BAB34, 0x400);
-    func_00111938(D_003BAB34, 0x200);
+    dds3ClearObjectFlags(D_003BAB34, 0x400);
+    dds3ClearObjectFlags(D_003BAB34, 0x200);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
@@ -1402,10 +1412,10 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001332E8);
 
 void func_00133600(s32 arg0) {
     if (arg0 == 0) {
-        func_00111938(D_003BAB34, 0x100);
+        dds3ClearObjectFlags(D_003BAB34, 0x100);
         return;
     }
-    func_00111908(D_003BAB34, 0x100);
+    dds3SetObjectFlags(D_003BAB34, 0x100);
     func_00113AA8(D_003BAB34);
 }
 
@@ -1600,7 +1610,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AFC8);
 s32 func_0013B088(u32 flag, u32 slot) {
     D_003308B0[slot] = 0;
     if (func_0010BED8(flag) != 0) {
-        func_00110D88(func_0010FD80(), flag);
+        func_00110D88(dds3GetWorldObject(), flag);
         return 0;
     }
     return -1;

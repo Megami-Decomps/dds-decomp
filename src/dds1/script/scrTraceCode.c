@@ -70,14 +70,14 @@ s32 func_0010C1E0(ScrData *scr);
 f32 func_0010C2B8(ScrData *scr);
 u32 func_0010C9A8(ScrData *scr, s32 op);
 
-u32 func_0010C3F0(ScrData *scr)
+u32 scrPushImmediateInteger(ScrData *scr)
 {
     func_0010C120(scr, scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C438(ScrData *scr)
+u32 scrPushImmediateFloat(ScrData *scr)
 {
     scr->pc++;
     func_0010C150(scr, scr->instructions[scr->pc].fOperand);
@@ -85,42 +85,42 @@ u32 func_0010C438(ScrData *scr)
     return 1;
 }
 
-u32 func_0010C488(ScrData *scr)
+u32 scrPushGlobalInteger(ScrData *scr)
 {
     func_0010C120(scr, D_003BAA00->ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C4E0(ScrData *scr)
+u32 scrPushGlobalFloat(ScrData *scr)
 {
     func_0010C150(scr, D_003BAA00->floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C538(ScrData *scr)
+u32 scrPushLocalInteger(ScrData *scr)
 {
     func_0010C120(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C590(ScrData *scr)
+u32 scrPushLocalFloat(ScrData *scr)
 {
     func_0010C150(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C5E8(ScrData *scr)
+u32 scrPushStringLiteral(ScrData *scr)
 {
     func_0010C180(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C638(ScrData *scr)
+u32 scrPushReturnValue(ScrData *scr)
 {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
     scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
@@ -129,14 +129,14 @@ u32 func_0010C638(ScrData *scr)
     return 1;
 }
 
-u32 func_0010C680(ScrData *scr)
+u32 scrStoreGlobalInteger(ScrData *scr)
 {
     D_003BAA00->ints[scr->instructions[scr->pc].parts.sOperand] = func_0010C1E0(scr);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C6D8(ScrData *scr)
+u32 scrStoreGlobalFloat(ScrData *scr)
 {
     f32 value;
 
@@ -146,14 +146,14 @@ u32 func_0010C6D8(ScrData *scr)
     return 1;
 }
 
-u32 func_0010C730(ScrData *scr)
+u32 scrStoreLocalInteger(ScrData *scr)
 {
     scr->localInt[scr->instructions[scr->pc].parts.sOperand] = func_0010C1E0(scr);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010C788(ScrData *scr)
+u32 scrStoreLocalFloat(ScrData *scr)
 {
     scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = func_0010C2B8(scr);
     scr->pc++;
@@ -177,13 +177,13 @@ u32 func_0010C898(ScrData *scr)
     return 1;
 }
 
-u32 func_0010C8D8(ScrData *scr)
+u32 scrJumpProcedure(ScrData *scr)
 {
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
-u32 func_0010C908(ScrData *scr)
+u32 scrCallProcedure(ScrData *scr)
 {
     func_0010C1B0(scr, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
@@ -196,7 +196,7 @@ u32 func_0010C960(ScrData *scr)
     return 1;
 }
 
-u32 func_0010C978(ScrData *scr)
+u32 scrJumpLabel(ScrData *scr)
 {
     scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
@@ -300,18 +300,18 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D380);
  * dereferencing global variable references. */
 s32 func_0010D428(s32 idx) {
     ScrData *scr = D_003BD78C;
-    s32 i = scr->sp - idx - 1;
+    s32 stackIndex = scr->sp - idx - 1;
 
-    switch (scr->stackTypes[i]) {
+    switch (scr->stackTypes[stackIndex]) {
     case 0:
     case 4:
-        return scr->stackValues[i].i;
+        return scr->stackValues[stackIndex].i;
     case 1:
-        return scr->stackValues[i].f;
+        return scr->stackValues[stackIndex].f;
     case 2:
-        return D_003BAA00->ints[scr->stackValues[i].i];
+        return D_003BAA00->ints[scr->stackValues[stackIndex].i];
     case 3:
-        return D_003BAA00->floats[scr->stackValues[i].i];
+        return D_003BAA00->floats[scr->stackValues[stackIndex].i];
     }
     return 0;
 }
@@ -321,13 +321,13 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D4F0);
 char *func_0010D5A8(s32 paramIdx)
 {
     ScrData *scr = D_003BD78C;
-    s32 paramSP = scr->sp - paramIdx - 1;
-    s32 type = (s8)scr->stackTypes[paramSP];
+    s32 stackIndex = scr->sp - paramIdx - 1;
+    s32 type = (s8)scr->stackTypes[stackIndex];
 
     if (type >= 0) {
         if (type >= SCR_STACK_TYPE_STRING) {
             if (type == SCR_STACK_TYPE_STRING) {
-                return scr->stackValues[paramSP].s;
+                return scr->stackValues[stackIndex].s;
             }
         }
     }

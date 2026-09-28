@@ -26,7 +26,7 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_001190B0);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001191B0);
 
-void func_001192B0(DatCalcCursor *cursor, s32 delta) {
+void datMoveCursorX(DatCalcCursor *cursor, s32 delta) {
     u32 value;
 
     value = (u32)cursor->x + delta;
@@ -39,7 +39,7 @@ void func_001192B0(DatCalcCursor *cursor, s32 delta) {
     cursor->x = (s16)value;
 }
 
-void func_001192D8(DatCalcCursor *cursor, s32 delta) {
+void datMoveCursorY(DatCalcCursor *cursor, s32 delta) {
     u32 value;
 
     value = (u32)cursor->y + delta;

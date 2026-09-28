@@ -1,14 +1,14 @@
 #include "common.h"
 
 typedef struct SdfGraphObj {
-    s16 unk0;
+    s16 width;
     s16 unk2;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    void *unk8;
-    void *unkC;
-    void *unk10;
+    s16 height;
+    u8 bufferMode;
+    u8 auxiliaryMode;
+    void *firstBuffer;
+    void *secondBuffer;
+    void *auxBuffer;
 } SdfGraphObj;
 
 extern u8 D_003980E0[];
@@ -25,27 +25,27 @@ void func_002D0E88(s32 arg0) {
     D_003BD9DC = 1;
 }
 
-void func_002D0EC0(SdfGraphObj *arg0) {
-    func_002D1B90(arg0->unk8);
-    arg0->unk8 = NULL;
-    func_002D1B90(arg0->unkC);
-    arg0->unkC = NULL;
-    func_002D1B90(arg0->unk10);
-    arg0->unk10 = NULL;
+void func_002D0EC0(SdfGraphObj *graph) {
+    func_002D1B90(graph->firstBuffer);
+    graph->firstBuffer = NULL;
+    func_002D1B90(graph->secondBuffer);
+    graph->secondBuffer = NULL;
+    func_002D1B90(graph->auxBuffer);
+    graph->auxBuffer = NULL;
 }
 
-void func_002D0F08(SdfGraphObj *arg0) {
-    s16 w;
-    s16 h;
+void func_002D0F08(SdfGraphObj *graph) {
+    s16 width;
+    s16 height;
     u8 mode;
 
-    func_002D0EC0(arg0);
-    w = arg0->unk0;
-    h = arg0->unk4;
-    arg0->unk10 = func_002D1C70(w, h, arg0->unk7);
-    mode = arg0->unk6;
-    arg0->unk8 = func_002D1C70(w, h, mode);
-    arg0->unkC = func_002D1C70(w, h, mode);
+    func_002D0EC0(graph);
+    width = graph->width;
+    height = graph->height;
+    graph->auxBuffer = func_002D1C70(width, height, graph->auxiliaryMode);
+    mode = graph->bufferMode;
+    graph->firstBuffer = func_002D1C70(width, height, mode);
+    graph->secondBuffer = func_002D1C70(width, height, mode);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfGraph", func_002D0F90);

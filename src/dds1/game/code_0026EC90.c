@@ -688,8 +688,6 @@ void func_00272778(u32 arg0) {
     func_00272688(0, arg0);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2100);
-
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC614);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC618);
@@ -741,4 +739,6 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B5);
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B8);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6C0);
+
+INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2100);
 

@@ -1275,20 +1275,6 @@ void func_00281898(u32 arg0) {
     memset(arg0, 0, 0x20);
 }
 
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2358);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2368);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2380);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
-
-INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23B0);
-
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC718);
 
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC720);
@@ -1302,4 +1288,18 @@ INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC738);
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC740);
 
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC748);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2358);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2368);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2380);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
+
+INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23B0);
 

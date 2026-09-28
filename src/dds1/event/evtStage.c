@@ -1,7 +1,7 @@
 #include "common.h"
 
-s32 func_0010FDC0(void);
-void func_0010FE48(s32 ctx);
+s32 dds3GetWorldSecondaryObject(void);
+void dds3DestroyWorldNode(s32 ctx);
 s32 objGetSlot1Data(void);
 void func_001175A8(s32 ctx);
 void func_001175B8(s32 ctx);
@@ -10,9 +10,9 @@ void func_0021FE38(void)
 {
     s32 ctx;
 
-    ctx = func_0010FDC0();
+    ctx = dds3GetWorldSecondaryObject();
     if (ctx != 0) {
-        func_0010FE48(ctx);
+        dds3DestroyWorldNode(ctx);
     }
 }
 

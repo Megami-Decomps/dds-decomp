@@ -7,13 +7,23 @@ typedef struct PacHead {
     s32 unk4; /* 0x4 */
     u8 pad8[4]; /* 0x8 */
     s32 unkC; /* 0xC */
+    u8 payload[1]; /* 0x10: variable-length packet data */
 } PacHead;
+
+/* Relocation record embedded in the work item's data stream. */
+typedef struct PacReloc {
+    s32 offset; /* 0x00: displacement from the payload */
+    s32 count;  /* 0x04: number of relocation bytes */
+    u8 pad08[8];
+    u8 payload[1]; /* 0x10 */
+} PacReloc;
 
 typedef struct PacWork {
     struct PacWork *unk0; /* 0x0 */
     struct PacState *unk4; /* 0x4 */
     s32 unk8; /* 0x8 */
     u8 *unkC; /* 0xC */
+    u8 packet[1]; /* 0x10: copied header and packet data */
 } PacWork;
 
 typedef struct PacAlloc {
@@ -87,7 +97,7 @@ PacWork *func_002EDF60(PacState *arg0, PacHead *arg1) {
     s32 size = arg1->unk1 & 0xF0;
     PacWork *node = func_002CFF68(size + 0x20);
     node->unk4 = arg0;
-    memcpy((u8 *)node + 0x10, arg1, size + 0x10);
+    memcpy(node->packet, arg1, size + 0x10);
     if (arg0->unk34 == NULL) {
         arg0->unk30 = node;
     } else {
@@ -145,12 +155,12 @@ s32 func_002EE058(PacState *arg0, s32 arg1, PacHead *arg2) {
     }
     return 0;
 }
-void *func_002EE138(u8 *arg0) {
-    s32 x = arg0[0x11] & 0xF0;
-    if (x <= 0) {
+void *func_002EE138(u8 *header) {
+    s32 extensionSize = header[0x11] & 0xF0;
+    if (extensionSize <= 0) {
         return NULL;
     }
-    return arg0 + 0x20;
+    return header + 0x20;
 }
 
 void func_002EE158(PacState *arg0) {
@@ -210,7 +220,7 @@ void func_002EE2C0(PacState *arg0, PacHead *arg1) {
     }
     if (arg0->unk1 & 1) {
         PacWork *node = func_002EDF60(arg0, arg1);
-        node->unkC = (u8 *)arg1 + 0x10;
+        node->unkC = arg1->payload;
         arg0->unk8 = func_002EE258;
     } else {
         PacWork *node;
@@ -244,17 +254,17 @@ void func_002EE3E8(PacState *arg0, void *arg1) {
     arg0->unkC = func_002EDD98;
 }
 
-void func_002EE418(PacState *arg0) {
-    PacWork *work = arg0->unk34;
-    u8 *p = work->unkC;
-    u8 *q = p + 0x10;
-    s32 n = *(s32 *)(p + 4);
-    work->unkC = q;
-    if (n != 0) {
-        func_002EB278(q, q, q + *(s32 *)p, n);
-        *(s32 *)(p + 4) = 0;
+void func_002EE418(PacState *state) {
+    PacWork *work = state->unk34;
+    PacReloc *record = (PacReloc *)work->unkC;
+    u8 *payload = record->payload;
+    s32 count = record->count;
+    work->unkC = payload;
+    if (count != 0) {
+        func_002EB278(payload, payload, payload + record->offset, count);
+        record->count = 0;
     }
-    func_002EDD98(arg0);
+    func_002EDD98(state);
 }
 
 void func_002EE478(PacState *arg0, void *arg1) {
@@ -262,17 +272,17 @@ void func_002EE478(PacState *arg0, void *arg1) {
     arg0->unkC = func_002EE418;
 }
 
-void func_002EE4A8(PacState *arg0) {
-    PacWork *work = arg0->unk34;
-    u8 *p = work->unkC;
-    u8 *q = p + 0x10;
-    s32 n = *(s32 *)(p + 4);
-    work->unkC = q;
-    if (n != 0) {
-        func_002EB278(q, q, q + *(s32 *)p, n);
-        *(s32 *)(p + 4) = 0;
+void func_002EE4A8(PacState *state) {
+    PacWork *work = state->unk34;
+    PacReloc *record = (PacReloc *)work->unkC;
+    u8 *payload = record->payload;
+    s32 count = record->count;
+    work->unkC = payload;
+    if (count != 0) {
+        func_002EB278(payload, payload, payload + record->offset, count);
+        record->count = 0;
     }
-    func_002EDD98(arg0);
+    func_002EDD98(state);
 }
 
 void func_002EE508(PacState *arg0, void *arg1) {
@@ -377,19 +387,19 @@ void func_002EE930(PacState *arg0) {
     }
 }
 
-void func_002EE9A8(PacState *arg0) {
-    s32 n = arg0->unk14;
-    if (arg0->unk20 < n) {
-        n = arg0->unk20;
+void func_002EE9A8(PacState *state) {
+    s32 available = state->unk14;
+    if (state->unk20 < available) {
+        available = state->unk20;
     }
-    func_002EDC98(arg0, n);
+    func_002EDC98(state, available);
     {
-        s32 r = arg0->unk20 - n;
-        arg0->unk20 = r;
-        if (r != 0) {
+        s32 remaining = state->unk20 - available;
+        state->unk20 = remaining;
+        if (remaining != 0) {
             return;
         }
     }
-    func_002EE900(arg0);
+    func_002EE900(state);
 }
 

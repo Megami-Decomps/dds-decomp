@@ -345,11 +345,11 @@ float vec4ArcCosDot(float *left, float *right) {
     return func_002FA1C0(func_002C9740(left, right));
 }
 
+INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
+
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3DC0);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E00);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E40);
-
-INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
 

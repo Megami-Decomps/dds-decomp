@@ -15,6 +15,10 @@ typedef struct MdlInner {
     u32 *list;   /* 0x14: intrusive list walked by func_00218320/368 */
     u8 unk18[4]; /* 0x18 */
     u32 unk1C;   /* 0x1C */
+    u8 pad20[0x30];
+    u128 vector50; /* 0x50 */
+    u128 vector60; /* 0x60 */
+    u128 vector70; /* 0x70 */
 } MdlInner;
 
 /* Context shared by the matched mdlManager helpers. */
@@ -54,10 +58,10 @@ typedef struct MdlNode {
     void *unk8;           /* 0x8: dereferenced by mdlGetNodeRefHalf */
     u8 padC[0x10];        /* 0xC */
     f32 unk1C;            /* 0x1C: read as int by mdlGetNodeInt1C */
-    f32 unk20;            /* 0x20: float slot of mdlGetNodeFloat20/F40 */
-    u8 pad24[4];          /* 0x24 */
-    s16 unk28;            /* 0x28: search id */
-    s16 unk2A;            /* 0x2A: slot index used by mdlClearSlotAndRelease */
+    f32 value;             /* 0x20: float slot of mdlGetNodeFloat20/F40 */
+    u8 pad24[4];           /* 0x24 */
+    s16 id;                /* 0x28: search id */
+    s16 slotIndex;         /* 0x2A: slot index used by mdlClearSlotAndRelease */
     u16 unk2C;            /* 0x2C */
     u16 unk2E;            /* 0x2E */
     u8 unk30;             /* 0x30: compared against 5 */
@@ -83,21 +87,21 @@ extern u32 D_003BD878;
 
 extern void *battleFindGroupedEntity(void);
 
-void mdlClearSlotAndRelease(void *arg0, MdlNode *arg1) {
-    s32 off = arg1->unk2A * 4 + 0x20;
-    void **slot = (void **)((u8 *)arg0 + off);
+void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
+    s32 off = node->slotIndex * 4 + 0x20;
+    void **slot = (void **)((u8 *)ctx + off);
 
-    if (*slot == arg1) {
+    if (*slot == node) {
         *slot = NULL;
     }
-    func_002DB308(arg1);
+    func_002DB308(node);
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     MdlNode *node = (MdlNode *)ctx->inner->list;
 
     while (node != NULL) {
-        if (node->unk28 == id) {
+        if (node->id == id) {
             mdlClearSlotAndRelease(ctx, node);
             break;
         }
@@ -235,7 +239,7 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
     f32 r = 0.0f;
 
     if (node != NULL) {
-        r = node->unk20;
+        r = node->value;
     }
     return r;
 }
@@ -244,13 +248,13 @@ void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
     MdlNode *node = func_00217E10(ctx, id);
 
     if (node != NULL) {
-        node->unk20 = value;
+        node->value = value;
     }
 }
 
 /* These shims transfer vectors between model state and VU0 registers. */
 void func_00217F70(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x50;
+    void *vec = &ctx->inner->vector50;
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -265,7 +269,7 @@ void func_00217F88(MdlCtx *ctx) {
         "vmove.w vf10, vf0\n"
         ".set reorder"
         : : : "memory");
-    vec = (u8 *)ctx->inner + 0x50;
+    vec = &ctx->inner->vector50;
     __asm__ volatile (
         ".set noreorder\n"
         "sqc2 vf10, 0(%0)\n"
@@ -274,7 +278,7 @@ void func_00217F88(MdlCtx *ctx) {
 }
 
 void func_00217FA0(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x60;
+    void *vec = &ctx->inner->vector60;
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -285,7 +289,7 @@ void func_00217FA0(MdlCtx *ctx) {
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217FB8);
 
 void func_00218010(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x70;
+    void *vec = &ctx->inner->vector70;
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -294,7 +298,7 @@ void func_00218010(MdlCtx *ctx) {
 }
 
 void func_00218028(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x70;
+    void *vec = &ctx->inner->vector70;
     __asm__ volatile (
         ".set noreorder\n"
         "sqc2 vf10, 0(%0)\n"

@@ -24,7 +24,7 @@ typedef struct MovObj {
     s32 unk10;
     u8 pad14[0x4];
     s32 unk18;
-    MovSub *unk1C;
+    MovSub *stream;
 } MovObj;
 
 /* Called with 3 args (func_002ED198) and 4 args (func_002ECF70); keep K&R. */
@@ -34,21 +34,21 @@ INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ECF70);
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED008);
 
-void func_002ED198(MovObj *arg0) {
-    MovSub *t;
-    s32 n;
+void func_002ED198(MovObj *movie) {
+    MovSub *stream;
+    s32 remaining;
 
-    t = arg0->unk1C;
-    n = arg0->unk18;
-    if (n == 0) {
+    stream = movie->stream;
+    remaining = movie->unk18;
+    if (remaining == 0) {
         return;
     }
-    if ((0x10000 - t->unk5C) < 0x4000 || ((t->unk6C - t->unk68) + 0x10000) < 0x4000) {
-        arg0->unk1 = 5;
+    if ((0x10000 - stream->unk5C) < 0x4000 || ((stream->unk6C - stream->unk68) + 0x10000) < 0x4000) {
+        movie->unk1 = 5;
         return;
     }
-    arg0->unk1 = 4;
-    func_002E6D48(arg0->unk10, t->unk50, n <= 0x4000 ? n : 0x4000);
+    movie->unk1 = 4;
+    func_002E6D48(movie->unk10, stream->unk50, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED230);

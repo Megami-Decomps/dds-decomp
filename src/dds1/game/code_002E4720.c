@@ -703,8 +703,6 @@ f32 sdfWrapAngle(f32 angle) {
     return angle;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
-
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD3C8);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD3D0);
@@ -766,4 +764,6 @@ INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD470);
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD478);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD480);
+
+INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
 

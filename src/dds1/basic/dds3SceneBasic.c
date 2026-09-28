@@ -10,7 +10,7 @@ typedef struct {
     SceneObject *object;
 } Scene;
 
-void func_00110BB8(Scene *scene) {
+void dds3ClearSceneObjectState(Scene *scene) {
     SceneObject *object;
 
     object = scene->object;

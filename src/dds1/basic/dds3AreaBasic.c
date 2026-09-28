@@ -12,12 +12,12 @@ typedef struct {
 
 void objExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
-s32 func_00111108(void *arg) {
+s32 dds3ExchangeAreaSlot(void *arg) {
     objExchangeSlot(arg, 0, 5);
     return 1;
 }
 
-s32 func_00111130(AreaObj *arg) {
+s32 dds3InvokeAreaCallback(AreaObj *arg) {
     s32 (*func)(void);
 
     func = arg->unk10->unkC;

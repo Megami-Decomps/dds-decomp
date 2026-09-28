@@ -43,7 +43,7 @@ extern s32 D_003C2E78[];
 extern s32 D_003C2E7C[];
 extern s32 D_003C2E80[];
 
-extern s32 func_0010BCA0(void);
+extern s32 scrCreateTaskWithDefaultOption(void);
 extern s32 func_0010D428(s32 idx);
 extern s32 func_0010D5F0(s32 arg0);
 extern void func_0010D608(f32 arg0);
@@ -311,7 +311,7 @@ s32 eventRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
 }
 
 void dds3WorkInit(void) {
-    D_003BAAB4 = func_0010BCA0();
+    D_003BAAB4 = scrCreateTaskWithDefaultOption();
     memset(D_003C2E70, 0, 0x18);
 }
 

@@ -61,7 +61,7 @@ typedef struct {
 
 extern Entry270 D_003BAA20[];
 
-extern void *func_0010FD80(void);
+extern void *dds3GetWorldObject(void);
 extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
 
 extern u8 func_00221FD8(EvtUnit *unit);
@@ -79,11 +79,11 @@ extern void *func_00110A38(void *arg0);
 extern s32 func_00222298(EvtUnit *unit);
 extern void func_00115970(void *arg0);
 extern void func_00110928(void *arg0);
-extern void *func_0010FDC0(void);
+extern void *dds3GetWorldSecondaryObject(void);
 extern void func_00222B70(EvtUnit *work, s32 arg1, s128 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
-extern void func_00111908(void *arg0, s32 arg1);
-extern void func_00111938(void *arg0, s32 arg1);
+extern void dds3SetObjectFlags(void *arg0, s32 arg1);
+extern void dds3ClearObjectFlags(void *arg0, s32 arg1);
 extern void func_00113478(void *arg0);
 extern void func_00113438(void *arg0, s32 arg1);
 extern s32 func_0010D6A0(void);
@@ -128,7 +128,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222AC0);
 void func_00222B00(EvtUnit *work, s32 arg1, s32 arg2) {
     void *unit;
 
-    unit = func_00110A48(func_0010FDC0(), arg1, 0x11);
+    unit = func_00110A48(dds3GetWorldSecondaryObject(), arg1, 0x11);
     if (unit != NULL) {
         func_00222AC0(work, (s128 *)(*(u32 *)((u8 *)unit + 0x18) + 0x10), arg2);
         work->unk90 = unit;
@@ -140,7 +140,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222B70);
 void func_00222BA8(EvtUnit *work, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     void *unit;
 
-    unit = func_00110A48(func_0010FDC0(), arg2, 0x11);
+    unit = func_00110A48(dds3GetWorldSecondaryObject(), arg2, 0x11);
     if (unit != NULL) {
         func_00222B70(work, arg1, (s128 *)(*(u32 *)((u8 *)unit + 0x18)), arg3, arg4, arg5, arg6, arg7);
         work->unkAE = 1;
@@ -179,7 +179,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223A10);
 void *func_00223AA0(s32 type, s32 id) {
     void *ctx;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     func_00110A48(ctx, id, type);
 }
 
@@ -188,7 +188,7 @@ u32 func_00223AE0(void) {
     EvtUnit *obj;
     s32 value;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     obj = func_00110A38(ctx);
     value = -1;
     if (obj != NULL) {
@@ -251,14 +251,14 @@ u32 func_00223CA0(void) {
     void *unit;
     u32 ret = 1;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
         return ret;
     }
-    func_00111908(unit, 0x400);
-    func_00111938(unit, 0x200);
+    dds3SetObjectFlags(unit, 0x400);
+    dds3ClearObjectFlags(unit, 0x200);
     return 1;
 }
 
@@ -268,14 +268,14 @@ u32 func_00223D10(void) {
     void *unit;
     u32 ret = 1;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
         return ret;
     }
-    func_00111938(unit, 0x400);
-    func_00111908(unit, 0x200);
+    dds3ClearObjectFlags(unit, 0x400);
+    dds3SetObjectFlags(unit, 0x200);
     return 1;
 }
 
@@ -285,14 +285,14 @@ u32 func_00223D80(void) {
     void *unit;
     u32 ret = 1;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
         return ret;
     }
-    func_00111938(unit, 0x400);
-    func_00111938(unit, 0x200);
+    dds3ClearObjectFlags(unit, 0x400);
+    dds3ClearObjectFlags(unit, 0x200);
     return 1;
 }
 
@@ -302,7 +302,7 @@ u32 func_00223DF0(void) {
     void *unit;
     u32 ret = 1;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
@@ -318,7 +318,7 @@ u32 func_00223E58(void) {
     void *unit;
     u32 ret = 1;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
@@ -337,7 +337,7 @@ u32 func_00223FB0(void) {
     void *unit;
 
     memset(v, 0, 0x10);
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
@@ -360,7 +360,7 @@ u32 func_00224130(void) {
 
     memset(v, 0, 0x10);
     v[3] = 1.0f;
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {
@@ -430,7 +430,7 @@ u32 func_00224828(void) {
     void *unit;
     u32 ret = 1;
 
-    ctx = func_0010FD80();
+    ctx = dds3GetWorldObject();
     id = func_0010D428(0);
     unit = func_00110A48(ctx, id, 5);
     if (unit == NULL) {

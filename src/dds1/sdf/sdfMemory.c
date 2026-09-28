@@ -3,7 +3,7 @@
 typedef struct MemBlock {
     /* 0x0 */ struct MemBlock *prev;
     /* 0x4 */ struct MemBlock *next;
-    /* 0x8 */ u32 addr;
+    /* 0x8 */ u32 address;
     /* 0xC */ u16 state; /* 0 free, 1 used, 2 end marker */
     /* 0xE */ u16 unkE;
 } MemBlock;
@@ -33,18 +33,18 @@ MemBlock *func_002D0390(MemBlock *block) {
 
 s32 func_002D03A8(MemBlock *block) {
     s32 size;
-    s32 intr;
+    s32 interruptsDisabled;
 
-    intr = func_00312C08();
-    size = block->next->addr - block->addr;
-    if (intr) {
+    interruptsDisabled = func_00312C08();
+    size = block->next->address - block->address;
+    if (interruptsDisabled) {
         EIntr();
     }
     return size;
 }
 
 u32 func_002D03F0(MemBlock *block) {
-    return block->addr;
+    return block->address;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMemory", func_002D03F8);

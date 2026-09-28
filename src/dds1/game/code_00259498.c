@@ -54,8 +54,6 @@ void *func_0025B7D8(s32 owner, u8 sprite, u8 variant) {
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025B888);
 
-INCLUDE_RODATA(const s32, "game/code_00259498", D_003AF9F0);
-
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A8);
@@ -69,4 +67,6 @@ INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4CC);
+
+INCLUDE_RODATA(const s32, "game/code_00259498", D_003AF9F0);
 

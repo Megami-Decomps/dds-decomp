@@ -1,10 +1,10 @@
 #include "common.h"
 
 typedef struct {
-    void *unk0;  /* 0x0 object deref'd +0x10 by func_00111840, returned by func_00114A68 */
-    u32 unk4;    /* 0x4 flag bits */
+    void *objectHandle; /* 0x0 passed to func_00111840, returned by func_00114A68 */
+    u32 flags;   /* 0x4 effect flag bits */
     u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
-    void *unkC;  /* 0xC bill object deref'd +0x2C/+0x58 by func_00151E60/func_00152200 */
+    void *bill;   /* 0xC passed to func_00151E60/func_00152200 */
     u32 unk10;   /* 0x10 cleared by func_00115BB8 */
     u32 unk14;   /* 0x14 cleared by func_00115BB8 */
     void *unk18; /* 0x18 cleared by func_00115BB8 */
@@ -15,11 +15,16 @@ typedef struct {
 } EffectData; /* 0x28 bytes */
 
 typedef struct {
-    u8 pad[0xF];       /* 0x0 */
-    u8 unkF;           /* 0xF kind checked ==7 by func_001158B8 */
-    u8 pad10[8];       /* 0x10 */
-    EffectData *unk18; /* 0x18 */
-    void *unk1C;       /* 0x1C vector base read by func_001158F0/effObjGetIntParam */
+    u8 pad0[0x60];
+    f32 parameter;
+} EffectParameters;
+
+typedef struct {
+    u8 pad[0xF];             /* 0x0 */
+    u8 unkF;                 /* 0xF kind checked ==7 by func_001158B8 */
+    u8 pad10[8];             /* 0x10 */
+    EffectData *data;         /* 0x18 */
+    EffectParameters *params; /* 0x1C vector base read by func_001158F0/effObjGetIntParam */
 } EffectObj;
 
 void func_001143D8(void *arg);
@@ -56,12 +61,12 @@ extern void *func_00151E60(void *arg);
 void func_00114570(EffectObj *obj) {
     EffectData *data;
 
-    data = obj->unk18;
+    data = obj->data;
     func_001143D8(data);
     func_0010F5E8(obj);
-    func_00111840(data->unk0);
-    func_002CFF98(obj->unk18);
-    obj->unk18 = NULL;
+    func_00111840(data->objectHandle);
+    func_002CFF98(obj->data);
+    obj->data = NULL;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
@@ -69,59 +74,59 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114988);
 
 void *func_00114A68(EffectObj *obj) {
-    return obj->unk18->unk0;
+    return obj->data->objectHandle;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114A78);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114B18);
 
-void func_00114BF0(EffectObj *obj, void *vec, s32 arg2) {
+void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E60(obj->unk18->unkC);
-    func_00114B18(handle, vec, arg2);
+    handle = func_00151E60(obj->data->bill);
+    func_00114B18(handle, vec, extra);
 }
 
-void func_00114C38(u32 arg0, void *vec, s32 arg2) {
+void func_00114C38(u32 billId, void *vec, s32 extra) {
     void *handle;
 
-    handle = billCreateIndexed(1, arg0);
-    func_00114B18(handle, vec, arg2);
+    handle = billCreateIndexed(1, billId);
+    func_00114B18(handle, vec, extra);
 }
 
-void func_00114C80(s32 arg0, void *vec, s32 arg2) {
+void func_00114C80(s32 billId, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E08(1, arg0);
-    func_00114B18(handle, vec, arg2);
+    handle = func_00151E08(1, billId);
+    func_00114B18(handle, vec, extra);
 }
 
 void func_00114CC8(EffectObj *obj) {
-    func_00152200(obj->unk18->unkC);
+    func_00152200(obj->data->bill);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CE8);
 
-void func_00114DB8(EffectObj *obj, void *vec, s32 arg2) {
+void func_00114DB8(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E60(obj->unk18->unkC);
-    func_00114CE8(handle, vec, arg2);
+    handle = func_00151E60(obj->data->bill);
+    func_00114CE8(handle, vec, extra);
 }
 
-void func_00114E00(u32 arg0, void *vec, s32 arg2) {
+void func_00114E00(u32 billId, void *vec, s32 extra) {
     void *handle;
 
-    handle = billCreateIndexed(0, arg0);
-    func_00114CE8(handle, vec, arg2);
+    handle = billCreateIndexed(0, billId);
+    func_00114CE8(handle, vec, extra);
 }
 
-void func_00114E48(s32 arg0, void *vec, s32 arg2) {
+void func_00114E48(s32 billId, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E08(0, arg0);
-    func_00114CE8(handle, vec, arg2);
+    handle = func_00151E08(0, billId);
+    func_00114CE8(handle, vec, extra);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114E90);
@@ -178,25 +183,25 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158B8);
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158F0);
 
 s32 effObjGetIntParam(EffectObj *obj) {
-    void *p;
+    EffectParameters *parameters;
 
     if (func_001158B8(obj) == NULL) {
         return 0;
     }
-    p = obj->unk1C;
-    return (s32)(*(f32 *)((u8 *)p + 0x60));
+    parameters = obj->params;
+    return (s32)parameters->parameter;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115970);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001159E8);
 
-void func_00115B88(EffectObj *obj, s32 flag) {
-    obj->unk18->unk4 |= flag;
+void func_00115B88(EffectObj *obj, s32 flags) {
+    obj->data->flags |= flags;
 }
 
-void func_00115BA0(EffectObj *obj, s32 flag) {
-    obj->unk18->unk4 &= ~flag;
+void func_00115BA0(EffectObj *obj, s32 flags) {
+    obj->data->flags &= ~flags;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BB8);

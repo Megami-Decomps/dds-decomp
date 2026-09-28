@@ -710,11 +710,11 @@ u32 func_001A1850(s32 object) {
 }
 
 void func_001A1868(u8 *object, s32 value) {
-    func_001192B0(object, value);
+    datMoveCursorX(object, value);
 }
 
 void func_001A1880(u8 *object, s32 value) {
-    func_001192D8(object, value);
+    datMoveCursorY(object, value);
 }
 
 u16 func_001A1898(s32 object) {
@@ -5887,7 +5887,7 @@ s32 func_001DC6F0(void) {
         return 0;
     }
     {
-        s32 state = func_001109F0(func_0010FD80());
+        s32 state = func_001109F0(dds3GetWorldObject());
         if (state == 0) {
             return 0;
         }
@@ -8106,8 +8106,6 @@ u8 *func_001F6030(u8 *owner, u32 soundId, u32 variant, u32 channel, u32 flags) {
     return task;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A5410);
-
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB230);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB238);
@@ -8429,4 +8427,6 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6B0);
+
+INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A5410);
 

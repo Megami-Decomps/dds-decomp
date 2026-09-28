@@ -59,6 +59,20 @@ typedef struct {
     s32 unk38;         /* 0x38 */
 } SdfModel;
 
+/* Each model draw node owns a circular list of child draw nodes. */
+typedef struct SdfDrawNode {
+    u8 pad00[4];
+    struct SdfDrawNode *next;     /* 0x04 */
+    u8 pad08[4];
+    struct SdfDrawNode *children; /* 0x0C */
+    u8 pad10[0x20];
+    u32 address;                  /* 0x30 */
+    u8 pad34[0x2C];
+    u8 vectors[5][0x10];         /* 0x60-0xAF: COP2 inputs */
+    u8 padB0[0x10];
+    u8 transformed[0x40];        /* 0xC0: four COP2 output vectors */
+} SdfDrawNode;
+
 typedef struct {
     u8 pad_0x00[0x0C];
     s32 *unkC;
@@ -91,11 +105,16 @@ typedef struct {
     void *unkC;
 } SdfBuf;
 
+/* The copy descriptor counts fixed-width, 16-byte entries. */
+typedef struct {
+    u8 bytes[0x10];
+} SdfObjectEntry;
+
 typedef struct {
     u8 pad_0x00[0x04];
-    s16 unk4;
+    s16 count;
     u8 pad_0x06[0x06];
-    void *unkC;
+    SdfObjectEntry *entries;
 } SdfObj;
 
 typedef struct {
@@ -106,9 +125,9 @@ typedef struct {
 } SdfMsg;
 
 typedef struct {
-    s32 unk0;            /* 0x00: entry count */
+    s32 count;           /* 0x00: entry count */
     u8 pad_0x04[0x0C];   /* 0x04 */
-    u8 unk10;            /* 0x10: entries, 0x50 stride */
+    u8 entries;          /* 0x10: entries, 0x50 stride */
 } SdfItemList;
 
 typedef struct {
@@ -120,19 +139,19 @@ extern SdfModel *func_002D8918(void *arg0, void *arg1);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7D68);
 
-SdfPacket *func_002D7DF0(SdfModel *arg0, SdfPacket *arg1, s32 arg2) {
-    u32 a = (arg0->unk30 + (arg2 << 7)) & 0x0FFFFFFF;
+SdfPacket *func_002D7DF0(SdfModel *model, SdfPacket *packet, s32 index) {
+    u32 address = (model->unk30 + (index << 7)) & 0x0FFFFFFF;
 
-    arg1->u0.q = ((s64)a << 32) | 0x30000008;
-    arg1->u8.p.wC = 0x6C07C000;
-    arg1->u8.p.w8 = 0;
-    return arg1 + 1;
+    packet->u0.q = ((s64)address << 32) | 0x30000008;
+    packet->u8.p.wC = 0x6C07C000;
+    packet->u8.p.w8 = 0;
+    return packet + 1;
 }
 
-SdfPacket *func_002D7E38(SdfPacket *arg0) {
-    arg0->u8.q = 0;
-    arg0->u0.q = 0x60000000;
-    return arg0 + 1;
+SdfPacket *func_002D7E38(SdfPacket *packet) {
+    packet->u8.q = 0;
+    packet->u0.q = 0x60000000;
+    return packet + 1;
 }
 
 void *func_002D7E50(SdfChunk *arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -184,8 +203,8 @@ SdfModel *func_002D8A08(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
     SdfModel *model = func_002D8918(data, listRef);
     SdfItemList *list = listRef->unk0;
-    s32 count = list->unk0;
-    u8 *item = &list->unk10;
+    s32 count = list->count;
+    u8 *item = &list->entries;
 
     if (count != i) {
         do {
@@ -206,8 +225,8 @@ SdfModel *func_002D8A90(void *data, SdfItemListRef *listRef) {
 
     model->unk19 |= 4;
     list = listRef->unk0;
-    count = list->unk0;
-    item = &list->unk10;
+    count = list->count;
+    item = &list->entries;
     if (count != i) {
         do {
             func_002D8650(model->unk0->unkC[i], item);
@@ -218,23 +237,22 @@ SdfModel *func_002D8A90(void *data, SdfItemListRef *listRef) {
     return model;
 }
 
-void func_002D8B20(void *arg0, void *buf, s32 arg2) {
-    u8 *p = (u8 *)arg0;
-    u8 *b1 = p + 0x80;
+void func_002D8B20(SdfDrawNode *drawNode, void *buf, s32 arg2) {
+    u8 *b1 = drawNode->vectors[2];
     u8 *b2;
     u8 *b3;
     u8 *b4;
     u8 *b5;
     u8 *dst;
     u32 base;
-    void *node;
+    SdfDrawNode *node;
 
     __asm__ volatile ("lqc2 vf28, 0(%0)" :: "r" (b1) : "memory");
-    b2 = p + 0x90;
+    b2 = drawNode->vectors[3];
     __asm__ volatile ("lqc2 vf29, 0(%0)" :: "r" (b2) : "memory");
-    b3 = p + 0xA0;
+    b3 = drawNode->vectors[4];
     __asm__ volatile ("lqc2 vf30, 0(%0)" :: "r" (b3) : "memory");
-    b4 = p + 0x70;
+    b4 = drawNode->vectors[1];
     __asm__ volatile ("lqc2 vf10, 0(%0)" :: "r" (b4) : "memory");
     __asm__ volatile (
         ".set noreorder                   \n"
@@ -246,7 +264,7 @@ void func_002D8B20(void *arg0, void *buf, s32 arg2) {
         :
         : "memory"
     );
-    b5 = p + 0x60;
+    b5 = drawNode->vectors[0];
     __asm__ volatile ("lqc2 vf31, 0(%0)" :: "r" (b5) : "memory");
     __asm__ volatile (
         ".set noreorder          \n"
@@ -260,7 +278,7 @@ void func_002D8B20(void *arg0, void *buf, s32 arg2) {
         : "memory"
     );
     func_002DDC50();
-    dst = p + 0xC0;
+    dst = drawNode->transformed;
     __asm__ volatile (
         ".set noreorder          \n"
         "sqc2 vf28, 0(%0)        \n"
@@ -272,18 +290,18 @@ void func_002D8B20(void *arg0, void *buf, s32 arg2) {
         : "r" (dst)
         : "memory"
     );
-    base = *(u32 *)(p + 0x30);
+    base = drawNode->address;
     if (base != 0) {
         func_002E1FF8(base + (arg2 << 7));
     }
-    node = *(void **)(p + 0x0C);
+    node = drawNode->children;
     if (node == 0) {
         return;
     }
     do {
         func_002D8B20(node, dst, arg2);
-        node = *(void **)((u8 *)node + 4);
-    } while (node != *(void **)(p + 0x0C));
+        node = node->next;
+    } while (node != drawNode->children);
 }
 
 void func_002D8C00(SdfModel *arg0, s32 arg1) {
@@ -360,8 +378,8 @@ void sdfModelCopyData(SdfObj *dst, SdfObj *src) {
     if (dst == NULL) {
         return;
     }
-    count = dst->unk4;
+    count = dst->count;
     if (count > 0) {
-        memcpy(dst->unkC, src->unkC, count * 16);
+        memcpy(dst->entries, src->entries, count * 16);
     }
 }

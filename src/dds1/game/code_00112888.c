@@ -23,7 +23,7 @@ u32 func_00112958(u32 arg0) {
     *(s32 *)((s32)arg0 + 0x18) = temp_v0;
     temp_v1 = func_001117A8(arg0);
     *(u32 *)(temp_v0 + 0x80) = temp_v1;
-    func_00111908(arg0, 0x62);
+    dds3SetObjectFlags(arg0, 0x62);
     *(u32 *)(temp_v0 + 0x88) = 0;
     return 1;
 }

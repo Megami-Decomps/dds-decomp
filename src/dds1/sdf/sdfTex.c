@@ -2,7 +2,7 @@
 
 typedef struct SdfTexRef {
     void *unk0;
-    s32 unk4;
+    s32 refCount;
 } SdfTexRef;
 
 typedef struct SdfTexBuf {
@@ -11,9 +11,9 @@ typedef struct SdfTexBuf {
 } SdfTexBuf;
 
 typedef struct SdfTex {
-    struct SdfTex *unk0;
-    struct SdfTex *unk4;
-    SdfTexRef *unk8;
+    struct SdfTex *next;
+    struct SdfTex *prev;
+    SdfTexRef *reference;
     s16 unkC;
     s16 unkE;
     void *unk10;
@@ -29,8 +29,8 @@ typedef struct SdfTex {
     s32 unk24;
     SdfTexBuf *unk28;
     SdfTexBuf *unk2C;
-    void *unk30;
-    s32 unk34;
+    u8 *data;
+    s32 dataSize;
     s32 unk38;
     void *unk3C;
 } SdfTex;
@@ -64,36 +64,36 @@ s32 func_002D2A28(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2A58);
 
-void *func_002D2A98(SdfTex *arg0, void *arg1) {
-    return memcpy(arg0->unk30, arg1, arg0->unk34);
+void *func_002D2A98(SdfTex *texture, void *source) {
+    return memcpy(texture->data, source, texture->dataSize);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2AB8);
 
-void func_002D2C30(SdfTex *arg0) {
-    SdfTex *cur;
+void func_002D2C30(SdfTex *texture) {
+    SdfTex *next;
     SdfTex *prev;
 
-    if (arg0->unk8->unk0 == NULL) {
-        func_002D1B90(arg0->unk10);
+    if (texture->reference->unk0 == NULL) {
+        func_002D1B90(texture->unk10);
     }
-    func_002D1B90(arg0->unk14);
-    func_002CFF98(arg0->unk28);
-    func_002CFF98(arg0->unk2C);
-    cur = arg0->unk0;
-    prev = arg0->unk4;
+    func_002D1B90(texture->unk14);
+    func_002CFF98(texture->unk28);
+    func_002CFF98(texture->unk2C);
+    next = texture->next;
+    prev = texture->prev;
     if (prev != NULL) {
-        prev->unk0 = cur;
+        prev->next = next;
     }
-    if (cur != NULL) {
-        cur->unk4 = prev;
+    if (next != NULL) {
+        next->prev = prev;
     } else {
         D_003BD308 = prev;
     }
-    func_002CF570(arg0->unk30);
-    func_002CF570(arg0->unk3C);
-    func_002CFF98(arg0->unk8);
-    func_002CFF98(arg0);
+    func_002CF570(texture->data);
+    func_002CF570(texture->unk3C);
+    func_002CFF98(texture->reference);
+    func_002CFF98(texture);
 }
 
 void func_002D2CB8(SdfTex *arg0) {
@@ -101,9 +101,9 @@ void func_002D2CB8(SdfTex *arg0) {
     s32 count;
 
     if (arg0 != NULL) {
-        ref = arg0->unk8;
-        count = ref->unk4 - 1;
-        ref->unk4 = count;
+        ref = arg0->reference;
+        count = ref->refCount - 1;
+        ref->refCount = count;
         if (count == 0) {
             arg0->unk20 = 0;
             func_002D2C30(arg0);
@@ -116,9 +116,9 @@ void func_002D2D00(SdfTex *arg0) {
     s32 count;
 
     if (arg0 != NULL) {
-        ref = arg0->unk8;
-        count = ref->unk4 - 1;
-        ref->unk4 = count;
+        ref = arg0->reference;
+        count = ref->refCount - 1;
+        ref->refCount = count;
         if (count == 0) {
             arg0->unk20 = 0;
             func_002D3C30(&D_003BD9F0, arg0);
