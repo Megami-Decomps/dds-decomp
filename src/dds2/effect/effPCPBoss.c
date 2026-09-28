@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0016AEB0(u64, u64);
+extern u64 effParamTableGetBlock(u64, u64);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C190);
 
@@ -12,8 +12,8 @@ void func_0018C618(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
     func_0018C4E8(temp_v0, temp_v1);
 }
 
@@ -34,9 +34,9 @@ void func_0018D2C8(u64 arg0) {
     u64 temp_v1;
     u64 temp_v2;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
-    temp_v2 = func_0016AEB0(arg0, 2);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
+    temp_v2 = effParamTableGetBlock(arg0, 2);
     func_0018D228(temp_v0, temp_v1, temp_v2);
 }
 
@@ -214,8 +214,8 @@ void func_0018D710(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
     func_0018D6A8(temp_v0, temp_v1);
 }
 
@@ -240,7 +240,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D830);
 void func_0018DA38(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_0018D830(temp_v0);
 }
 

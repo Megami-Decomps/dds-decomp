@@ -99,7 +99,7 @@ typedef struct EffArrHdr {
     void *unk8; /* 0x8: mem handle */
 } EffArrHdr;
 
-EffResult *func_00194700(s32 arg0, s32 arg1) {
+EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
     EffResult *mem = func_00328D68(8);
     s32 ret = D_003B2060[arg0].handler(arg1);
 
@@ -108,13 +108,13 @@ EffResult *func_00194700(s32 arg0, s32 arg1) {
     return mem;
 }
 
-void func_00194770(EffWork *arg0) {
+void effTypeDispatch(EffWork *arg0) {
     D_003B2064[arg0->type].handler(arg0->unk4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_001947A8);
+INCLUDE_ASM(const s32, "game/code_00194700", effTypeDispatchFree);
 
-u32 func_001947F0(s32 arg0) {
+u32 effGetHandlerArg(s32 arg0) {
     return *(u32 *)(arg0 + 4);
 }
 
@@ -129,7 +129,7 @@ u32 func_00194808(void) {
     return 1;
 }
 
-void func_00194810(EffWork *arg0) {
+void effTypeDispatchGuardedA(EffWork *arg0) {
     void (*handler)(void *) = D_003B206C[arg0->type].handler;
 
     if (handler != NULL) {
@@ -137,7 +137,7 @@ void func_00194810(EffWork *arg0) {
     }
 }
 
-void func_00194850(EffWork *arg0) {
+void effTypeDispatchGuardedB(EffWork *arg0) {
     void (*handler)(void *) = D_003B2074[arg0->type].handler;
 
     if (handler != NULL) {
@@ -145,7 +145,7 @@ void func_00194850(EffWork *arg0) {
     }
 }
 
-void func_00194890(EffWork *arg0) {
+void effTypeDispatchGuardedC(EffWork *arg0) {
     void (*handler)(void *) = D_003B2070[arg0->type].handler;
 
     if (handler != NULL) {
@@ -153,7 +153,7 @@ void func_00194890(EffWork *arg0) {
     }
 }
 
-void func_001948D0(EffWork *arg0, s32 arg1) {
+void effSetSubSlot(EffWork *arg0, s32 arg1) {
     u8 v = arg1;
     u32 t = arg0->type;
 
@@ -178,7 +178,7 @@ void func_001948D0(EffWork *arg0, s32 arg1) {
     }
 }
 
-u32 func_00194928(EffWork *arg0, s32 arg1) {
+u32 effGetSubSlot(EffWork *arg0, s32 arg1) {
     u8 v = arg1;
     u32 t = arg0->type;
 
@@ -199,7 +199,7 @@ u32 func_00194928(EffWork *arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00194988);
+INCLUDE_ASM(const s32, "game/code_00194700", effAllocSubWork);
 
 void func_001949D8(void) {
 }
@@ -268,7 +268,7 @@ void func_00194A98(void) {
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194AA0);
 
-s32 func_00194AA8(void *arg0) {
+s32 effOpenDataDir(void *arg0) {
     u8 buf[0x70];
 
     if (D_00438B66 != 0) {
@@ -280,13 +280,13 @@ s32 func_00194AA8(void *arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00194AF8);
+INCLUDE_ASM(const s32, "game/code_00194700", effRunIfEnabled);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194B28);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194BD0);
 
-void func_00195008(EffWork *arg0) {
+void effFreeWorkList(EffWork *arg0) {
     EffWork *p = (EffWork *)arg0->unk8;
 
     if (p != NULL) {
@@ -304,7 +304,7 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_00195060);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_001950F0);
 
-void func_00195570(u32 arg0) {
+void effFreeWork(u32 arg0) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)((s32)arg0 + 0x3c);
@@ -315,38 +315,38 @@ void func_00195570(u32 arg0) {
     func_00328E48(arg0);
 }
 
-void func_001955B0(EffMsg *arg0, s32 arg1, s32 arg2) {
+void effSetMsgHeader(EffMsg *arg0, s32 arg1, s32 arg2) {
     arg0->unk0 = arg1;
     arg0->unk4 = arg2;
 }
 
-u32 func_001955C0(s32 arg0) {
+u32 effGetWorkParam(s32 arg0) {
     return *(u32 *)(arg0 + 0x14);
 }
 
-u32 func_001955C8(s32 arg0) {
+u32 effGetWorkLink(s32 arg0) {
     return *(u32 *)(arg0 + 8);
 }
 
-u32 func_001955D0(EffMsg *arg0, void *arg1) {
+u32 effFormatMsgNames(EffMsg *arg0, void *arg1) {
     func_0035C860(arg1, D_00436450, arg0->unk40[1], arg0->unk34 + 1);
     return *arg0->unk34;
 }
 
-void func_00195618(s32 arg0, u32 arg1) {
+void effSetWorkFirst(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x20) = arg1;
 }
 
-void func_00195620(s32 arg0, u32 arg1) {
+void effSetWorkSecond(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
 }
 
-void func_00195628(EffMsg *arg0, u32 arg1, u32 arg2) {
+void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
     arg0->unk28 = arg1;
     arg0->unk2C = arg2;
 }
 
-void func_00195638(s32 arg0, u64 arg1) {
+void effSetupWorkSound(s32 arg0, u64 arg1) {
     u32 temp_v0;
     u64 temp_v1;
     u32 temp_v2 [4];
@@ -381,7 +381,7 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_00195A30);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195AB0);
 
-void *func_00195B38(s32 n) {
+void *effAllocSlotArray(s32 n) {
     void *mem1 = func_003292A8(n * 0x38 + 0xC);
     void *mem2 = func_003298F8(mem1);
     u32 i = 0;

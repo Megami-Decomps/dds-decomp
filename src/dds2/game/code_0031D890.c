@@ -1,8 +1,12 @@
 #include "common.h"
 
+void func_003297C8(u32 sprite);
+
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D890);
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D928);
+void func_0031D928(u32 *sprite) {
+    func_003297C8(*sprite);
+}
 
 u32 * func_0031D948(s32 arg0) {
     u32 *puVar1;
@@ -33,7 +37,9 @@ INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DEB8);
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DF48);
+void func_0031DF48(u32 *sprite) {
+    func_003297C8(*sprite);
+}
 
 u32 * func_0031DF68(s32 arg0) {
     u32 *puVar1;

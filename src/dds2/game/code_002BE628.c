@@ -46,6 +46,8 @@ extern u32 D_00457F18[];
 
 extern s32 func_00328D68(u32);
 
+extern void func_002C2920(s32, s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE6E8);
@@ -107,14 +109,14 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0630);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0718);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0740);
+INCLUDE_ASM(const s32, "game/code_002BE628", createPanelState);
 
 void func_002C07A0(u32 arg0) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)((s32)arg0 + 0x88);
     if (temp_v0 != 0) {
-        func_002BA308(temp_v0);
+        releaseResourceList(temp_v0);
     }
     func_00328E48(arg0);
 }
@@ -158,9 +160,9 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0B80);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0C40);
+INCLUDE_ASM(const s32, "game/code_002BE628", destroyPanelGroup);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0C98);
+INCLUDE_ASM(const s32, "game/code_002BE628", updateFiveListEntries);
 
 void func_002C0CF8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -201,7 +203,15 @@ void func_002C0F70(s32 arg0, u64 arg1) {
     } while (temp_v2 < 5);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0FD8);
+void *createSpriteState(s32 x, s32 y, s32 z) {
+    u8 *item = func_00328D68(0x20);
+    memset(item, 0, 0x20);
+    *(s32 *)(item + 0x10) = x;
+    *(s32 *)(item + 0x14) = y;
+    *(s32 *)(item + 0x18) = z;
+    *(s32 *)(item + 0x1C) = 0x100;
+    return item;
+}
 
 void func_002C1050(void) {
     func_00328E48();
@@ -217,7 +227,15 @@ void func_002C1068(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1660);
+void *func_002C1660(s32 x, s32 y, s32 z) {
+    u8 *item = func_00328D68(0x20);
+    memset(item, 0, 0x20);
+    *(s32 *)(item + 0x10) = x;
+    *(s32 *)(item + 0x14) = y;
+    *(s32 *)(item + 0x18) = z;
+    *(s32 *)(item + 0x1C) = 0x100;
+    return item;
+}
 
 void func_002C16D8(void) {
     func_00328E48();
@@ -419,13 +437,13 @@ void func_002C4B40(u32 arg0) {
     func_002C49F0(arg0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4B58);
+INCLUDE_ASM(const s32, "game/code_002BE628", findMatchingPartyEntryIndex);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4BA8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4C28);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4C60);
+INCLUDE_ASM(const s32, "game/code_002BE628", getIndexedNonzeroEffect);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4CA8);
 
@@ -442,7 +460,7 @@ u8 func_002C4DB0(u32 arg0) {
     return *(u8 *)((arg0 & 0xffff) * 0x38 + D_00435E20 + 3);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4DD0);
+INCLUDE_ASM(const s32, "game/code_002BE628", getAdjustedEntryValue);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4E58);
 
@@ -546,7 +564,7 @@ s32 func_002C5C28(s32 entry) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5C78);
+INCLUDE_ASM(const s32, "game/code_002BE628", getMatchingPartyEntryMask);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5CD0);
 
@@ -606,7 +624,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6988);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6A20);
 
-void func_002C6A88(void) {
+void menuResetWorkFloats(void) {
     func_002C6A20();
     D_0037F5E0[4] = 2048.0f;
     D_0037F5E0[5] = 2048.0f;
@@ -616,7 +634,7 @@ void func_002C6AC0(s32 arg0, s32 arg1, s32 arg2) {
     D_00457EB4[0] = func_00231B80();
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6AE8);
+INCLUDE_ASM(const s32, "game/code_002BE628", menuForwardTableByte);
 
 u32 func_002C6B28(u32 *arg0) {
     return *arg0 & 1;
@@ -640,7 +658,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6EE0);
 
-void func_002C6F60(void) {
+void menuResetWorkPair(void) {
     *(s32 *)(D_003E7950 + 0) = 0;
     *(s32 *)(D_003E7950 + 4) = 0;
     *(f32 *)(D_003E7950 + 8) = -400.0f;
@@ -737,12 +755,12 @@ void func_002C7C00(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7C18);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7C40);
+INCLUDE_ASM(const s32, "game/code_002BE628", createBattleStageTestTask);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7C88);
+INCLUDE_ASM(const s32, "game/code_002BE628", destroyBattleStageTask);
 
 void func_002C7CE8(void) {
-    func_002C7C88();
+    destroyBattleStageTask();
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B610);

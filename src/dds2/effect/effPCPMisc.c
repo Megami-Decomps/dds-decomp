@@ -84,12 +84,15 @@ typedef struct {
     u32 unk170;      /* 0x170 spawn parameter */
 } EffPCPWorkF14;
 
-/* Large charge-style effect work (allocation 0x1354). Only the tail is
- * touched by the matched C functions: a colour initialised to grey plus
- * handles released on destroy.
+/* Large charge-style effect work (allocation 0x1354). Three fields at
+ * 0xAF0 are cleared on construction; resource handles occupy the tail.
  */
 typedef struct {
-    u8 pad000[0x1334]; /* 0x0000 */
+    u8 pad000[0xAF0];
+    u32 unkAF0;
+    u32 unkAF4;
+    u32 unkAF8;
+    u8 padAFC[0x838];
     u32 unk1334;       /* 0x1334 spawn parameter */
     f32 unk1338;       /* 0x1338 spawn parameter */
     u32 unk133C;       /* 0x133C cleared on init */
@@ -164,9 +167,9 @@ typedef struct {
 
 extern void *func_00328D68(s32 size);
 
-extern u32 func_0016AEE8(void *data, s32 index);
+extern u32 effParamCreateFromTable(void *data, s32 index);
 
-extern u32 func_0016A6A0(u32 param);
+extern u32 effParamWorkDuplicate(u32 param);
 
 extern u32 func_0016AF38(void *params);
 
@@ -315,7 +318,7 @@ extern void func_00336AA8(void);
 extern void func_00336538(f32 scale);
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
-extern void *func_0016AEB0(void *data, s32 index);
+extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void func_00184B90(void *block0, void *blocks);
 
@@ -465,8 +468,16 @@ typedef struct {
     f32 childAngle2;
 } EffPCPAngleWork;
 
+extern void func_0017F4C8(EffPCPWorkF14 *work, s32 index);
+
+extern void func_0017FED8(EffPCPWorkF14 *work, s32 index);
+
+extern void *func_003292A8(s32 size);
+
+extern void *func_003298F8(void *resource);
+
 void func_0017EDE8(u32 arg0) {
-    func_00159AF0(*(u32 *)((s32)arg0 + 0x1c));
+    billDispatchByKind(*(u32 *)((s32)arg0 + 0x1c));
     func_00328E48(arg0);
 }
 
@@ -508,7 +519,25 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F5E8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F6C0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F720);
+EffPCPWorkF14 *createPairedEffectResourceWork(EffPCPWork *source) {
+    EffPCPWorkF14 *work = func_00328D68(0x98);
+    u32 *handle = (u32 *)((u8 *)work + 0x3C);
+    s32 i = 0;
+
+    do {
+        handle[-1] = effParamWorkDuplicate(source->unk38);
+        handle[0] = effParamWorkDuplicate(*(u32 *)source->pad3C);
+        handle += 2;
+        func_0017F4C8(work, i);
+        i++;
+    } while (i < 8);
+    work->unk10 = 0x80808080;
+    work->unk14 = 1.0f;
+    *(u32 *)work = 0;
+    *(u32 *)((u8 *)work + 4) = 0;
+    *(u32 *)((u8 *)work + 8) = 0;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F7C8);
 
@@ -544,11 +573,52 @@ void func_0017FED0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017FED8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017FF78);
+EffPCPWorkF14 *createIndexedEffectResourceWork(void *source) {
+    EffPCPWorkF14 *work = func_00328D68(0x60);
+    u32 *handle = (u32 *)((u8 *)work + 0x1C);
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (i == 0) {
+            work->unk1C = effParamCreateFromTable(source, 6);
+        }
+        handle[-1] = effParamCreateFromTable(source, i);
+        handle[0] = effParamWorkDuplicate(work->unk1C);
+        handle += 2;
+        func_0017FED8(work, i);
+    }
+    work->unk10 = 0x80808080;
+    work->unk14 = 1.0f;
+    *(u32 *)work = 0;
+    *(u32 *)((u8 *)work + 4) = 0;
+    *(u32 *)((u8 *)work + 8) = 0;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180040);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001800A0);
+EffPCPWorkF14 *copyIndexedEffectResourceWork(EffPCPWork *source) {
+    u32 *sourceHandle;
+    u32 *workHandle;
+    s32 i;
+    EffPCPWorkF14 *work = func_00328D68(0x60);
+    sourceHandle = (u32 *)((u8 *)source + 0x1C);
+    workHandle = (u32 *)((u8 *)work + 0x1C);
+
+    for (i = 0; i < 6; i++) {
+        workHandle[-1] = effParamWorkDuplicate(sourceHandle[-1]);
+        workHandle[0] = effParamWorkDuplicate(sourceHandle[0]);
+        sourceHandle += 2;
+        workHandle += 2;
+        func_0017FED8(work, i);
+    }
+    work->unk10 = 0x80808080;
+    work->unk14 = 1.0f;
+    *(u32 *)work = 0;
+    *(u32 *)((u8 *)work + 4) = 0;
+    *(u32 *)((u8 *)work + 8) = 0;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180158);
 
@@ -568,7 +638,20 @@ void func_00180260(s32 arg0) {
     *(u32 *)(arg0 + 0x1344) = 0x80808080;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180278);
+EffPCPChargeWork *createChargeEffectWork(void *source) {
+    void *resource = func_003292A8(0x1354);
+    EffPCPChargeWork *work = func_003298F8(resource);
+    work->unk1350 = (u32)resource;
+    work->unk134C = effParamCreateFromTable(source, 0);
+    work->unk1348 = effParamCreateFromTable(source, 1);
+    func_00180260(work);
+    work->unkAF0 = 0;
+    work->unkAF4 = 0;
+    work->unkAF8 = 0;
+    work->unk1334 = 0x80808080;
+    work->unk1338 = 1.0f;
+    return work;
+}
 
 void func_00180318(s32 arg0) {
     func_0016A620(*(u32 *)(arg0 + 0x134c));
@@ -576,7 +659,21 @@ void func_00180318(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x1350));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180350);
+EffPCPChargeWork *copyChargeEffectResources(EffPCPChargeWork *source) {
+    void *resource = func_003292A8(0x1354);
+    EffPCPChargeWork *work = func_003298F8(resource);
+    u32 firstHandle = source->unk134C;
+    work->unk1350 = (u32)resource;
+    work->unk134C = effParamWorkDuplicate(firstHandle);
+    work->unk1348 = effParamWorkDuplicate(source->unk1348);
+    func_00180260(work);
+    work->unkAF0 = 0;
+    work->unkAF4 = 0;
+    work->unkAF8 = 0;
+    work->unk1334 = 0x80808080;
+    work->unk1338 = 1.0f;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001803E8);
 
@@ -595,8 +692,8 @@ EffPCPWork1C *func_00180770(EffPCPWork *src) {
     u32 handle;
 
     dst = func_00328D68(0x1C);
-    dst->unk14 = func_0016AEE8(src, 0);
-    handle = func_0016AEE8(src, 1);
+    dst->unk14 = effParamCreateFromTable(src, 0);
+    handle = effParamCreateFromTable(src, 1);
     dst->unk00 = 0;
     dst->unk18 = handle;
     dst->unk04 = 0;
@@ -616,8 +713,8 @@ EffPCPWork1C *func_00180818(EffPCPWork *src) {
     u32 handle;
 
     dst = func_00328D68(0x1C);
-    dst->unk14 = func_0016A6A0(src->unk14);
-    handle = func_0016A6A0(src->unk18);
+    dst->unk14 = effParamWorkDuplicate(src->unk14);
+    handle = effParamWorkDuplicate(src->unk18);
     dst->unk00 = 0;
     dst->unk18 = handle;
     dst->unk04 = 0;
@@ -952,7 +1049,7 @@ void func_00182DB8(u32 unused, u32 val) {
     D_00438F04->unk10 = val;
 }
 
-void func_00182DC8(u32 unused, f32 value) {
+void setSharedEffectScale(u32 unused, f32 value) {
     ((EffPCPWorkF1C *)D_00438F04)->unk1C = value;
 }
 
@@ -1300,12 +1397,12 @@ void func_00184CF8(void *data) {
     void **dst;
     u32 i;
 
-    block0 = func_0016AEB0(data, 0);
+    block0 = effParamTableGetBlock(data, 0);
     dst = blocks;
     i = 0;
     do {
         i++;
-        *dst = func_0016AEB0(data, i);
+        *dst = effParamTableGetBlock(data, i);
         dst++;
     } while (i < 7);
     func_00184B90(block0, blocks);
@@ -1382,7 +1479,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186708);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186990);
 
-void func_001869F0(s32 *arg0) {
+void effPcpRotateFireIds(s32 *arg0) {
     s32 temp_v0;
     s32 *piVar2;
     u32 temp_v1;
@@ -1452,7 +1549,7 @@ void func_00186E30(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-void func_00186E38(EffPCPWork *work, void *src) {
+void copyEffectMatrix(EffPCPWork *work, void *src) {
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf28, 0(%0)\n"
@@ -1788,7 +1885,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187FC8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188198);
 
-void func_00188320(EffPCPSubEffectWork *work) {
+void resetChildEffect(EffPCPSubEffectWork *work) {
     func_00188198(work->scale);
     work->state = 0;
 }
@@ -1810,7 +1907,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188550);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188778);
 
-void func_00188788(EffPCPWork *work, f32 value) {
+void effPcpNestedWorkSetFloat(EffPCPWork *work, f32 value) {
     ((EffPCPWork *)work->unk5C)->unk90 = value;
 }
 
@@ -1837,7 +1934,7 @@ void func_001887A0(EffPCPWork *work, void *src) {
         : : "r"(&((EffPCPWork *)work->unk5C)->pad3C[4]) : "memory");
 }
 
-void func_001887D0(EffPCPWork *work, void *src) {
+void rotateNestedEffect(EffPCPWork *work, void *src) {
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf28, 0(%0)\n"
@@ -1860,7 +1957,7 @@ void func_001887D0(EffPCPWork *work, void *src) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188828);
 
-void func_00188A70(EffPCPAngleWork *work) {
+void prepareEffectAngles(EffPCPAngleWork *work) {
     work->radiansX = work->degreesX * 0.017453291f;
     work->radiansY = work->degreesY * 0.017453291f;
     work->radiansZ = work->degreesZ * 0.017453291f;
@@ -1887,7 +1984,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188CE0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E08);
 
-void func_00188E18(EffPCPWork *work, f32 value) {
+void effPcpLinkedWorkSetFloat(EffPCPWork *work, f32 value) {
     ((EffPCPWork *)work->unk7C)->unk90 = value;
 }
 
@@ -1940,7 +2037,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001898D8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001899D8);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189AD8);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", destroyIndexedEffectResources);
 
 void func_00189B48(EffPCPNode *node) {
     EffPCPNode *child;
@@ -1973,7 +2070,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189FF0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A038);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A238);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpEventGroupRelease);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A2B8);
 
@@ -1995,7 +2092,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A8E8);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A950);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018AB78);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpPairedEventGroupRelease);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018AC20);
 
@@ -2013,7 +2110,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B350);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B398);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B5A8);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpEventBatchRelease);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B628);
 
@@ -2037,7 +2134,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC28);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC90);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BCE8);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", destroyParticleEvents);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BD88);
 

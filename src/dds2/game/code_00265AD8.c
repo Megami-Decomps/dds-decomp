@@ -6,6 +6,8 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 func_00101958();
 
+extern void func_0026C900(void);
+
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265E78);
@@ -31,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266038);
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266080);
 
 u32 func_002660D8(void) {
-    func_00105A00(0, 0, 0, 0);
+    kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
 
@@ -39,7 +41,7 @@ INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266108);
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266188);
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_002661D8);
+INCLUDE_ASM(const s32, "game/code_00265AD8", evtDispatchSync);
 
 u32 func_00266210(void) {
     return 1;

@@ -1,10 +1,10 @@
 #include "common.h"
 
-extern u64 func_00231220(void);
+extern u64 battleFindGroupedEntity(void);
 
 extern u8 D_00436F5D;
 
-extern s32 func_0023A170(s32);
+extern s32 mdlFlagTest(s32);
 
 extern s32 D_00435DD0;
 
@@ -12,7 +12,7 @@ extern s32 func_001AA6F8(void);
 
 extern u64 func_00220958(void);
 
-extern s32 func_001E12C8(u32);
+extern s32 countBattleTasksByKind(u32);
 
 extern u32 func_002290D0(void);
 
@@ -24,7 +24,7 @@ extern s8 D_00453068[];
 
 extern s8 D_00453060[];
 
-extern s32 func_003282F0(s32, s32, s32);
+extern s32 createSemaphore(s32, s32, s32);
 
 extern u32 D_00438F90;
 
@@ -334,7 +334,7 @@ u32 func_00226670(void) {
     return 0xffffffff;
 }
 
-s32 func_00226678(s32 battler, s32 command) {
+s32 filterRestrictedBattleCommand(s32 battler, s32 command) {
     if (command == 1 || command == 0x12) {
         if ((*(u16 *)(battler + 0x120) & 0x2000) != 0) {
             return -1;
@@ -347,7 +347,7 @@ u8 func_002266A8(u32 arg0, s32 arg1) {
     return arg1 == 0xf;
 }
 
-s32 func_002266B8(s32 battler) {
+s32 battleSelectDisabledCommand(s32 battler) {
     if (battler == 0) {
         return 15;
     }
@@ -419,7 +419,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00228320);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00228360);
 
-s32 func_00228418(u32 target) {
+s32 battleHasDifferentActiveTarget(u32 target) {
     if (func_00229110() == 0) {
         return 1;
     }
@@ -544,7 +544,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022A8A8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022A908);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022A980);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleReleaseScriptResource);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022A9D0);
 
@@ -579,7 +579,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022B510);
 u8 func_0022B5E0(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001E12C8(0x1a);
+    temp_v0 = countBattleTasksByKind(0x1a);
     return temp_v0 == 0;
 }
 
@@ -604,7 +604,7 @@ u32 func_0022B928(void) {
     do {
         temp_v1 = 0x8ff - temp_v2;
         temp_v2 = temp_v2 + 1;
-        temp_v0 = func_0023A170(temp_v1);
+        temp_v0 = mdlFlagTest(temp_v1);
         if (temp_v0 != 0) {
             temp_v3 = temp_v3 + 1;
         }
@@ -623,11 +623,11 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022BAA8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022BB28);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022BBA8);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleCreateActionTask);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022BC28);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleHasRestrictedUnit);
 
-s32 func_0022BC90(u8 **entries, s32 count) {
+s32 battleListHasMarkedFlag(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) == 0x4000) {
@@ -637,7 +637,7 @@ s32 func_0022BC90(u8 **entries, s32 count) {
     return 0;
 }
 
-s32 func_0022BCD8(u8 **entries, s32 count) {
+s32 battleListCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         if (*(u16 *)(entries[i] + 6) < *(u16 *)(entries[i] + 8)) {
@@ -647,7 +647,7 @@ s32 func_0022BCD8(u8 **entries, s32 count) {
     return 1;
 }
 
-s32 func_0022BD28(u8 **entries, s32 count) {
+s32 battleListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
         if (*(u16 *)(entries[i] + 0xa) < *(u16 *)(entries[i] + 0xc)) {
@@ -657,7 +657,7 @@ s32 func_0022BD28(u8 **entries, s32 count) {
     return 1;
 }
 
-s32 func_0022BD78(u8 **entries, s32 count, u32 flags) {
+s32 battleListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     s32 i;
     for (i = 0; i < count; i++) {
         if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) & flags) {
@@ -689,7 +689,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022C7F0);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022C8B0);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022C8F0);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleFormatModelResourcePath);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022C948);
 
@@ -716,7 +716,7 @@ void func_0022CB68(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022CBA0);
 
-s32 func_0022CD08(s32 kind, s32 value) {
+s32 battleGetEntryState(s32 kind, s32 value) {
     u8 *entry = (u8 *)func_0022C9C8(kind, value);
     if (entry != 0) {
         return *(s8 *)(entry + 0xc);
@@ -736,7 +736,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022CFB0);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022D040);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022D2B8);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleReleaseOwnedData);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022D2F8);
 
@@ -766,11 +766,11 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022E0E0);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022E338);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022E390);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleResetAsyncState);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022E3D0);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleActivateRuntime);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0022E428);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleResetRuntimeState);
 
 s32 func_0022E450(void) {
     return D_00453068[0];
@@ -966,7 +966,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_002303D0);
 
 void func_00230960(void) {
     D_00436F5D = 0;
-    func_0011EBC8();
+    dds3WorkClear();
 }
 
 INCLUDE_RODATA(const s32, "game/code_0021EE10", D_0041C118);
@@ -1034,14 +1034,14 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00230D90);
 void func_002311C0(void) {
     s32 i;
 
-    D_00438F90 = func_003282F0(1, 0x7f, 0);
+    D_00438F90 = createSemaphore(1, 0x7f, 0);
     for (i = 0; i != 8; i++) {
         D_003C86F0[i] = 0;
         D_003C8710[i] = 0;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00231220);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleFindGroupedEntity);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00231250);
 
@@ -1075,11 +1075,11 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00231470);
 void func_00231588(void) {
     u64 temp_v0;
 
-    temp_v0 = func_00231220();
+    temp_v0 = battleFindGroupedEntity();
     func_00231470(temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002315A8);
+INCLUDE_ASM(const s32, "game/code_0021EE10", battleReleaseAllEntities);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00231618);
 

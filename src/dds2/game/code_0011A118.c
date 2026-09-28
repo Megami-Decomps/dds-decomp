@@ -2,7 +2,7 @@
 
 extern s32 D_00435E38;
 
-extern s32 func_0011AE90(void);
+extern s32 dds3FindEntry(void);
 
 extern u32 D_00435E88;
 
@@ -58,7 +58,7 @@ extern s32 D_0043E5D0[];
 
 extern void func_0010D830(f32 arg0);
 
-extern s32 func_003412A0(u32 arg0, u32 arg1);
+extern s32 effMiscRandMod(u32 arg0, u32 arg1);
 
 extern u8 func_001AA308(void);
 
@@ -68,11 +68,11 @@ extern u32 func_001ADA10(void);
 
 extern s32 D_00435E8C;
 
-extern s32 func_0023A170(s32 arg0);
+extern s32 mdlFlagTest(s32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A118);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A1D0);
+INCLUDE_ASM(const s32, "game/code_0011A118", eventCheckValueThreshold);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A220);
 
@@ -83,7 +83,7 @@ u8 func_0011A288(s32 arg0) {
     return *(u8 *)(D_00435DEC + *(u16 *)(arg0 + 4) * 76 + 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A2C8);
+INCLUDE_ASM(const s32, "game/code_0011A118", dds3FindEntryIndex);
 
 s8 func_0011A318(s32 arg0) {
     return *(s8 *)(arg0 + D_00435DD0 + 0xa76);
@@ -115,24 +115,24 @@ u16 func_0011AE60(s32 arg0) {
     return *(u16 *)(arg0 * 8 + D_00435E38 + 2);
 }
 
-u16 func_0011AE78(s32 arg0) {
+u16 dds3Clamp99(s32 arg0) {
     s32 temp = *(u16 *)(arg0 + 0x14);
 
     return temp < 100 ? temp : 99;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AE90);
+INCLUDE_ASM(const s32, "game/code_0011A118", dds3FindEntry);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AEE0);
 
 u8 func_0011B260(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0011AE90();
+    temp_v0 = dds3FindEntry();
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B280);
+INCLUDE_ASM(const s32, "game/code_0011A118", dds3EntryMax);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B2C0);
 
@@ -176,7 +176,7 @@ void func_0011C978(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C998);
 
-void func_0011CA28(void) {
+void dds3ForEachEntry(void) {
     Entry4 *p = D_003862C8;
     u32 i = 0;
 
@@ -194,7 +194,7 @@ void func_0011CA28(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011CA88);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011CFE8);
+INCLUDE_ASM(const s32, "game/code_0011A118", dds3ForEachFlagged);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D050);
 
@@ -205,7 +205,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D130);
 void func_0011D2A0(s32 arg0) {
     s32 temp_v0;
 
-    temp_v0 = func_003412A0(0, 4);
+    temp_v0 = effMiscRandMod(0, 4);
     *(s32 *)(arg0 + 0x1b4) = 0x12 - temp_v0;
 }
 
@@ -221,7 +221,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D438);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D4C8);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D558);
+INCLUDE_ASM(const s32, "game/code_0011A118", dds3WorkInit);
 
 u32 func_0011D588(void) {
     return D_00435E88;
@@ -324,7 +324,7 @@ s32 func_0011DD68(void) {
 
 s32 func_0011DDA0(void) {
     s32 v0 = func_0010D650(0);
-    s32 val = func_003412A0(0, v0 * 2);
+    s32 val = effMiscRandMod(0, v0 * 2);
 
     func_0010D830((f32)(val - v0 + 100) / 100.0f);
     return 1;
@@ -394,7 +394,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E848);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E930);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011EBC8);
+INCLUDE_ASM(const s32, "game/code_0011A118", dds3WorkClear);
 
 void func_0011EBE0(void) {
 }

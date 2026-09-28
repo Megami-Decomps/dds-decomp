@@ -1,6 +1,12 @@
 #include "common.h"
 
-extern s32 func_0023A170(u32);
+extern s32 mdlFlagTest(u32);
+
+extern s64 func_002C4038(s32, s32 *, u64, u64);
+
+extern s32 func_00101958();
+
+extern void func_0026C900(void);
 
 INCLUDE_ASM(const s32, "game/code_002651C0", func_002651C0);
 
@@ -34,9 +40,9 @@ u32 func_00265988(s32 arg0) {
     u32 temp_v0;
     s64 temp_v1;
 
-    if (((*(s32 *)(arg0 + 8) == 2) && (temp_v1 = func_0023A170(4), temp_v1 != 0)) &&
-          (temp_v1 = func_0023A170(0x290), temp_v1 == 0)) {
-        func_0023A0F0(0x290);
+    if (((*(s32 *)(arg0 + 8) == 2) && (temp_v1 = mdlFlagTest(4), temp_v1 != 0)) &&
+          (temp_v1 = mdlFlagTest(0x290), temp_v1 == 0)) {
+        mdlFlagSet(0x290);
         temp_v0 = 1;
     }
     else {

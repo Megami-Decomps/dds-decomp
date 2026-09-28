@@ -36,9 +36,37 @@ typedef struct MidiChannel {
     u8 pad00[0x19];
     u8 index;
     u8 enabled;
-    u8 pad1B[0xD];
+    u8 pad1B[5];
+    u32 earlierEntries[2];
     u32 entries[8];
 } MidiChannel;
+
+extern char D_0040BAF8[];
+
+extern s32 D_004391F0;
+
+extern s32 createSemaphore(s32, s32, s32);
+
+extern s32 GetThreadId(void);
+
+extern void sceSifSetRpcQueue(void *, s32);
+
+extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
+
+extern void sceSifRpcLoop(void *);
+
+extern u8 D_0047B440[];
+
+extern s32 func_00342848();
+
+typedef struct SoundNode {
+    u8 pad00[8];
+    struct SoundNode *next;
+} SoundNode;
+
+extern SoundNode *D_004391F8;
+
+extern s32 sceIpuSync(s32, s32);
 
 void func_003425B0(void) {
     func_00341650(0x180, 0, 0, 0);
@@ -52,7 +80,14 @@ void func_00342600(s32 arg0) {
     func_00341650(((arg0 + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00342630);
+s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {
+    if (D_00438B88 != 0) {
+        return 1;
+    }
+    strcpy(D_0040BAF8, name);
+    func_003417A8((channel >> 3) | 0xF0, 0, 0, 0);
+    return 0;
+}
 
 u32 func_00342688(void) {
     return D_00438B88;
@@ -94,11 +129,23 @@ void func_00342798(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003427C0);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003427F0);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfSoundHandleRpcEvent);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342848);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00342A90);
+void sdfSoundStartRpcServer(void) {
+    u8 queue[0x20];
+    u8 server[0x50];
+    s32 semaphore = createSemaphore(0, 1, 0);
+    D_004391F0 = semaphore;
+    if (semaphore <= 0) {
+        for (;;) {
+        }
+    }
+    sceSifSetRpcQueue(queue, GetThreadId());
+    sceSifRegisterRpc(server, 0x54524E53, func_00342848, D_0047B440, 0, 0, queue);
+    sceSifRpcLoop(queue);
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342B28);
 
@@ -128,7 +175,7 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042EAC8);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042EB40);
 
-void func_00343D20(void) {
+void soundPrintMemoryInfo(void) {
     s32 info[6];
     func_00329A00(info);
     func_0033DAD8(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
@@ -173,7 +220,12 @@ s32 func_00344010(s32 arg0) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344050);
+u64 func_00344050(u64 arg0, s32 *out) {
+    u32 info[4];
+    u64 buffer = func_00343ED0(arg0, info, 0);
+    *out = func_00344010(info[0]);
+    return buffer;
+}
 
 s32 func_00344098(s32 arg0) {
     s32 temp_v0;
@@ -183,7 +235,12 @@ s32 func_00344098(s32 arg0) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003440D8);
+u64 func_003440D8(u64 arg0, s32 *out) {
+    u32 info[4];
+    u64 buffer = func_00343ED0(arg0, info, 0);
+    *out = func_00344098(info[0]);
+    return buffer;
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344120);
 
@@ -191,9 +248,31 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00344208);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344298);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344338);
+void sdfSoundAppendNode(SoundNode *node) {
+    SoundNode **tail = &D_004391F8;
+    SoundNode *current = *tail;
+    if (current != NULL) {
+        tail = &current->next;
+        while ((current = *tail) != NULL) {
+            tail = &current->next;
+        }
+    }
+    *tail = node;
+    node->next = NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344378);
+void sdfSoundRemoveNode(SoundNode *node) {
+    SoundNode **link = &D_004391F8;
+    SoundNode *current = *link;
+    while (current != NULL) {
+        if (current == node) {
+            *link = current->next;
+            return;
+        }
+        link = &current->next;
+        current = *link;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003443B8);
 
@@ -217,7 +296,17 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00344D60);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344E30);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344E98);
+s32 sdfSoundSyncIpu(void) {
+    vu32 *ipuCommand = (vu32 *)0x10002000;
+    s32 status;
+    *ipuCommand = 0x40000000;
+    sceIpuSync(0, 0);
+    status = *ipuCommand;
+    sceIpuSync(0, 0);
+    *ipuCommand = 0x40000008;
+    sceIpuSync(0, 0);
+    return status;
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344F08);
 
@@ -229,9 +318,15 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00345268);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345298);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345330);
+u32 sdfMidiPreviousEntry(MidiChannel *channel) {
+    u32 result = 0;
+    if (channel->enabled != 0) {
+        result = channel->earlierEntries[channel->index];
+    }
+    return result;
+}
 
-u32 func_00345358(MidiChannel *channel) {
+u32 soundGetSelectedChannelEntry(MidiChannel *channel) {
     u32 result = 0;
     if (channel->enabled != 0) {
         result = channel->entries[channel->index];

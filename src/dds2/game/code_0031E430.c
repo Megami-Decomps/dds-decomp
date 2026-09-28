@@ -60,6 +60,18 @@ extern s32 CreateSema(void *);
 
 extern u32 D_004389BC;
 
+extern u8 D_00438A8C;
+
+extern void (*D_004389C4)(void);
+
+extern void func_00328988(s32);
+
+extern void func_0033C820(void);
+
+extern void func_0033C878(void);
+
+extern void func_0033FF58(void);
+
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E430);
 
 void func_0031E4D0(u32 arg0) {
@@ -714,7 +726,7 @@ INCLUDE_ASM(const s32, "game/code_0031E430", func_00328160);
 void func_003282E8(void) {
 }
 
-s32 func_003282F0(u32 initial, u32 option, u32 maximum) {
+s32 createSemaphore(u32 initial, u32 option, u32 maximum) {
     struct {
         u32 attr;
         u32 option;
@@ -752,7 +764,7 @@ INCLUDE_ASM(const s32, "game/code_0031E430", sdfAddHandler);
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00328668);
 
-void func_00328748(void) {
+void drainPendingHandlers(void) {
     u32 current;
     while ((current = D_004389BC) != 0) {
         func_00328668(current);
@@ -763,7 +775,7 @@ void func_00328778(u32 arg0, u32 arg1, u32 arg2) {
     iWakeupThread(arg2);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00328790);
+INCLUDE_ASM(const s32, "game/code_0031E430", sleepWithAlarm);
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_003287E0);
 
@@ -774,7 +786,19 @@ u32 func_003287F0(u32 base) {
     return (now - base) & 0xFFFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_00328808);
+void func_00328808(void) {
+    for (;;) {
+        func_00328988(1);
+        func_0033C820();
+        if (!D_00438A8C) {
+            func_0033C878();
+        }
+        func_0033FF58();
+        if (D_004389C4 != NULL) {
+            D_004389C4();
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_00328858);
 

@@ -34,7 +34,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_00269C50);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269E98);
 
-void func_00269F28(s32 arg0) {
+void evtBSetupDispatchSync(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -47,13 +47,13 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_00269FC8);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A048);
 
-void func_0026A138(s32 arg0) {
+void evtBDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_0026A170(s32 arg0) {
+void evtBSetupDispatchSyncB(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -68,7 +68,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A2E0);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A3F8);
 
-void func_0026A468(s32 arg0) {
+void evtBSetupDispatchSyncC(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -85,7 +85,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A728);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A808);
 
-void func_0026A890(s32 arg0) {
+void evtBSetupDispatchSyncD(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -104,7 +104,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A900);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A998);
 
-void func_0026AA78(s32 arg0) {
+void evtBSetupDispatchSyncE(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -119,7 +119,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026ABB0);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026AC90);
 
-void func_0026AD00(s32 arg0) {
+void evtBDispatchSync(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
@@ -135,7 +135,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026ADC8);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026AEB0);
 
-void func_0026AF20(s32 arg0) {
+void evtBSetupDispatchSyncF(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -163,7 +163,7 @@ s64 func_0026AFE0(u64 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B068);
 
-void func_0026B0D8(s32 arg0) {
+void evtBSetupDispatchSyncG(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C900();
@@ -178,7 +178,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026B260);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B358);
 
-void func_0026B3F8(s32 arg0) {
+void evtBDispatchSyncB(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
@@ -194,14 +194,14 @@ INCLUDE_RODATA(const s32, "game/code_00269978", D_00424FF8);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B4A8);
 
-void func_0026B5F8(s32 arg0) {
+void evtBLateDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_002686F0(temp_v0);
     func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
-void func_0026B648(s32 arg0) {
+void evtBDispatchSyncC(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);

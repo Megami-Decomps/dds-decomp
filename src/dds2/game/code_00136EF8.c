@@ -67,6 +67,14 @@ extern s32 D_004361EC;
 
 extern s32 D_004361F0;
 
+extern s32 D_00435F28;
+
+extern s32 D_00389784[];
+
+extern u8 D_003932A0[];
+
+extern u8 D_00391F30[];
+
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137818);
@@ -118,7 +126,7 @@ float func_00137C08(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C38);
+INCLUDE_ASM(const s32, "game/code_00136EF8", calculateFieldVectorLength);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C68);
 
@@ -243,7 +251,15 @@ s32 func_0013EA18(u32 task) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EA78);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EAD0);
+s32 getFieldTaskRecordValue(u32 task) {
+    s32 i;
+    for (i = 0; i < D_004361A4; i++) {
+        if (D_0038BD50[i] == task) {
+            return D_0038BC50[i][2];
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EB30);
 
@@ -253,7 +269,15 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EEA0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F108);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F168);
+s32 hasActiveFieldTasks(void) {
+    s32 i;
+    for (i = 0; i < D_004361A4; i++) {
+        if (D_0038BD50[i] != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 func_0013F1B8(void) {
     s32 temp_v0 = D_004361CC;
@@ -288,7 +312,16 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_001402B8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001404E0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001406E8);
+u8 *func_001406E8(void) {
+    s32 index = D_00435F28;
+    u8 *entry = D_003932A0 + index * 108;
+    if (*(s16 *)(entry + 4) == D_00389784[0] + 1 && *(s8 *)entry == 10) {
+        D_004361F4 = index;
+        D_004361F8 = 8;
+        return D_00391F30;
+    }
+    return 0;
+}
 
 s32 func_00140750(void) {
     return D_003932B2[D_004361F4 * 54];

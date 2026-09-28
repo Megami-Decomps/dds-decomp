@@ -24,7 +24,7 @@ extern char D_00422050[];
 
 void *func_00328D68(s32 size);
 
-void func_00245508(s32 arg0);
+void initializeEventVisualData(s32 arg0);
 
 void func_00101950(s32 arg0, void *arg1);
 
@@ -48,7 +48,7 @@ u32 func_00242DE0(void) {
         func_0035B6E0(D_00422050);
         return 1;
     }
-    v1 = func_00250010(0x2afe, func_0010D7D0(0));
+    v1 = evtCreateTask(0x2afe, func_0010D7D0(0));
     func_00101968(*(s32 *)(v0 + 0xe4), v1);
     func_0010D818(v1);
     return 1;
@@ -140,7 +140,7 @@ u32 func_002430C0(void) {
 
     temp_v0 = func_0010D650(0);
     temp_v1 = func_0010D650(1);
-    func_0025CD50(temp_v0, temp_v1);
+    evtPlayBgm(temp_v0, temp_v1);
     return 1;
 }
 
@@ -150,7 +150,7 @@ u32 func_00243100(void) {
 
     temp_v0 = func_0010D650(0);
     temp_v1 = func_0010D650(1);
-    func_0025CDA8(temp_v0, temp_v1);
+    evtTransitionBgm(temp_v0, temp_v1);
     return 1;
 }
 
@@ -180,7 +180,7 @@ u32 func_002431C0(void) {
 
     temp_v0 = func_0010D650(0);
     temp_v1 = func_0010D650(1);
-    func_0025CEB0(temp_v0, temp_v1);
+    evtSetBgmVolumePan(temp_v0, temp_v1);
     return 1;
 }
 
@@ -205,7 +205,7 @@ u32 func_00243240(void) {
 }
 
 u32 func_00243280(void) {
-    func_001971A8();
+    effInitCh72Id();
     return 1;
 }
 
@@ -267,7 +267,7 @@ void *func_002436A8(s32 arg0) {
     s32 p;
 
     p = (s32)func_00328D68(0x104);
-    func_00245508(p);
+    initializeEventVisualData(p);
     func_002437F0((u32 *)p);
     func_00101950(arg0, (void *)p);
     return (void *)func_00243430;
@@ -277,7 +277,7 @@ void func_00243700(void) {
     u64 temp_v0;
 
     temp_v0 = func_00101958();
-    func_00243830(temp_v0);
+    releaseSolarNoiseSprite(temp_v0);
     func_00328E48(temp_v0);
     D_00437200 = 0;
 }

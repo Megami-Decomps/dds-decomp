@@ -49,8 +49,8 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00198710);
 void func_00198908(s32 arg0) {
     D_00436530 = D_00436530 - 1;
     if (D_00436530 == 0) {
-        func_00159AF0(D_00436534);
-        func_00159AF0(D_00436538);
+        billDispatchByKind(D_00436534);
+        billDispatchByKind(D_00436538);
     }
     func_003297C8(*(u32 *)(arg0 + 0x84));
 }

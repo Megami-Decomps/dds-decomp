@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_00111C90(void *arg0, s32 arg1, s32 arg2);
+void objExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
 typedef struct {
     u8 pad[0xC];
@@ -13,7 +13,7 @@ typedef struct {
 } AreaObj;
 
 s32 func_00111330(void *arg) {
-    func_00111C90(arg, 0, 5);
+    objExchangeSlot(arg, 0, 5);
     return 1;
 }
 

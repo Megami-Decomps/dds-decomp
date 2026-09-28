@@ -27,7 +27,7 @@ typedef struct EffectConfig {
 
 extern EffectConfig D_003AA884[];
 
-s32 func_00159978(s32 arg0, s32 arg1);
+s32 billCreateIndexed(s32 arg0, s32 arg1);
 
 typedef struct EffectBufferRecord {
     u8 pad00[0x20];
@@ -45,8 +45,10 @@ s32 func_003292A8(s32 size);
 
 EffectBufferRecord *func_003298F8(s32 allocation);
 
-void func_00159B48(s32 index) {
-    s32 *effect = (s32 *)func_00159978(D_003AA884[index].unk00, 0);
+void func_0015E1D0(s32 arg0);
+
+void retainEffectResource(s32 index) {
+    s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].unk00, 0);
     s32 *resource = *(s32 **)(D_00451EE0[index] + 0x30);
     s32 references = resource[2];
 
@@ -77,7 +79,7 @@ void func_00159C00(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00159C08);
+INCLUDE_ASM(const s32, "game/code_00159B48", copyEffectPosition);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00159C40);
 
@@ -217,9 +219,9 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A1B8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A240);
 
-void func_0015A310(u32 arg0) {
+void effDestroy(u32 arg0) {
     func_00333918(*(u32 *)((s32)arg0 + 0x84));
-    func_00159AF0(*(u32 *)((s32)arg0 + 0x80));
+    billDispatchByKind(*(u32 *)((s32)arg0 + 0x80));
     func_00328E48(arg0);
 }
 
@@ -264,7 +266,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B270);
 void func_0015B290(void) {
 }
 
-EffectBufferTail *func_0015B298(s32 count) {
+EffectBufferTail *allocateEffectBuffer(s32 count) {
     s32 bytes = count * sizeof(EffectBufferRecord);
     s32 allocation = func_003292A8(bytes + sizeof(EffectBufferTail));
     EffectBufferRecord *record = func_003298F8(allocation);
@@ -290,7 +292,7 @@ void func_0015B318(u32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B330);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B510);
+INCLUDE_ASM(const s32, "game/code_00159B48", destroyEffectResources);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B5C0);
 
@@ -316,7 +318,7 @@ s32 func_0015B680(s32 arg0) {
 }
 
 void func_0015B700(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -348,10 +350,20 @@ void func_0015BC80(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015BCD0);
+s32 cloneEffectTemplate(s32 source) {
+    s32 copy = (s32)func_00328D68(0x180);
+    s32 tailLen = 0x30;
+
+    memset((void *)copy, 0, 0x180);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015BC38(copy);
+    return copy;
+}
 
 void func_0015BD50(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -383,10 +395,20 @@ void func_0015C2D0(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015C320);
+s32 func_0015C320(s32 source) {
+    s32 copy = (s32)func_00328D68(0x180);
+    s32 tailLen = 0x30;
+
+    memset((void *)copy, 0, 0x180);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015C288(copy);
+    return copy;
+}
 
 void func_0015C3A0(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -403,10 +425,20 @@ void func_0015CE90(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CEC8);
+s32 func_0015CEC8(s32 source) {
+    s32 copy = (s32)func_00328D68(0x170);
+    s32 tailLen = 0x20;
+
+    memset((void *)copy, 0, 0x170);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015CDF0(copy);
+    return copy;
+}
 
 void func_0015CF48(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -437,10 +469,20 @@ void func_0015D468(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015D4A8);
+s32 func_0015D4A8(s32 source) {
+    s32 copy = (s32)func_00328D68(0x170);
+    s32 tailLen = 0x20;
+
+    memset((void *)copy, 0, 0x170);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015D420(copy);
+    return copy;
+}
 
 void func_0015D528(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -472,10 +514,20 @@ void func_0015DB68(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015DBB8);
+s32 func_0015DBB8(s32 source) {
+    s32 copy = (s32)func_00328D68(0x180);
+    s32 tailLen = 0x30;
+
+    memset((void *)copy, 0, 0x180);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015DB20(copy);
+    return copy;
+}
 
 void func_0015DC38(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -495,7 +547,7 @@ void func_0015E240(float arg0, s32 arg1) {
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E278);
 
 void func_0015E2F8(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -527,10 +579,20 @@ void func_0015E7D0(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E820);
+s32 func_0015E820(s32 source) {
+    s32 copy = (s32)func_00328D68(0x180);
+    s32 tailLen = 0x30;
+
+    memset((void *)copy, 0, 0x180);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015E788(copy);
+    return copy;
+}
 
 void func_0015E8A0(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -538,7 +600,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E8C8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EB20);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015ED30);
+void func_0015ED30(s32 effect) {
+    s32 i = 0;
+    s32 node = *(s32 *)(*(s32 *)(effect + 0xf8) + 4);
+    if (*(s32 *)(effect + 0x20) != 0) {
+        do {
+            *(u32 *)(node + 0x20) = 0xf0000001;
+            *(float *)(node + 0x34) = *(float *)(effect + 0x158);
+            i++;
+            node += 0x40;
+        } while ((u32)i < *(u32 *)(effect + 0x20));
+    }
+}
 
 void func_0015ED78(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
@@ -549,10 +622,20 @@ void func_0015ED78(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EDC8);
+s32 func_0015EDC8(s32 source) {
+    s32 copy = (s32)func_00328D68(0x170);
+    s32 tailLen = 0x20;
+
+    memset((void *)copy, 0, 0x170);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015ED30(copy);
+    return copy;
+}
 
 void func_0015EE48(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -573,7 +656,7 @@ void func_0015F578(float arg0, s32 arg1) {
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F5A0);
 
 void func_0015F620(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -605,10 +688,20 @@ void func_0015F820(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F870);
+s32 func_0015F870(s32 source) {
+    s32 copy = (s32)func_00328D68(0x190);
+    s32 tailLen = 0x40;
+
+    memset((void *)copy, 0, 0x190);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    func_0015F7D8(copy);
+    return copy;
+}
 
 void func_0015F8F0(u32 arg0) {
-    func_0015B510();
+    destroyEffectResources();
     func_00328E48(arg0);
 }
 
@@ -644,7 +737,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_001603A0);
 
 void func_00160438(u32 arg0) {
     func_003297C8(*(u32 *)((s32)arg0 + 0x17c));
-    func_0015B510(arg0);
+    destroyEffectResources(arg0);
     func_00328E48(arg0);
 }
 

@@ -60,7 +60,7 @@ void fileWaitReady(u32 arg0) {
 
     while (temp_v0 = func_002C8128(arg0), temp_v0 == 0) {
         func_0033FF40();
-        func_002C8D20();
+        fileManUpdate();
     }
 }
 

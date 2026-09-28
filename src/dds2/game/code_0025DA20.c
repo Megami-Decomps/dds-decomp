@@ -2,7 +2,7 @@
 
 extern s8 D_003CD8D8[34];
 
-extern s64 func_0025CF70(void);
+extern s64 evtFindTaskById(void);
 
 extern s32 func_00101820(u32);
 
@@ -12,12 +12,24 @@ extern s32 func_00261B98(s32);
 
 extern void func_0025FD78(s32);
 
+extern char D_00437838[]; /* "camp" */
+
+extern char D_00424BC0[]; /* "camp_draw" */
+
+extern char D_00424BD0[]; /* "camp_update" */
+
+extern s8 D_00437837;
+
+extern s64 func_002C4038(s32, s32 *, u64, u64);
+
+extern s32 func_00101958();
+
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DA20);
 
 void func_0025DAB0(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0025CF70();
+    temp_v0 = evtFindTaskById();
     if (temp_v0 != 0) {
         kwlnTaskDestroyWithHierarchy(temp_v0, 0);
         return;
@@ -143,11 +155,50 @@ u32 func_0025F320(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F330);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F440);
+void shopSavePrimaryTransform(u8 *scene) {
+    extern f32 D_00453CB0[];
+    extern f32 D_00453C90[];
+    extern s32 D_004377F0;
+    s32 i;
+    f32 *coordinates = (f32 *)(scene + 0x2330);
+    for (i = 0; i < 4; i++) {
+        D_00453CB0[i] = coordinates[i + 8];
+        D_00453C90[i] = coordinates[i];
+    }
+    D_004377F0 = 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F490);
+void shopSaveFullTransform(u8 *scene) {
+    extern f32 D_00453CB0[];
+    extern f32 D_00453CA0[];
+    extern f32 D_00453C90[];
+    extern s32 D_004377F0;
+    s32 i;
+    f32 *coordinates = (f32 *)(scene + 0x2330);
+    for (i = 0; i < 4; i++) {
+        D_00453CB0[i] = coordinates[i + 8];
+        D_00453CA0[i] = coordinates[i + 4];
+        D_00453C90[i] = coordinates[i];
+    }
+    D_004377F0 = 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F4F8);
+void shopRestoreTransform(u8 *scene) {
+    extern f32 D_00453CB0[];
+    extern f32 D_00453CA0[];
+    extern f32 D_00453C90[];
+    extern s32 D_004377F0;
+    s32 i;
+    f32 *coordinates = (f32 *)(scene + 0x2330);
+    s32 useMiddle = D_004377F0;
+    for (i = 0; i < 4; i++) {
+        coordinates[i + 8] = D_00453CB0[i];
+        if (useMiddle != 0) {
+            coordinates[i + 4] = D_00453CA0[i];
+        }
+        coordinates[i] = D_00453C90[i];
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F568);
 
@@ -159,7 +210,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F7F0);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F868);
+INCLUDE_ASM(const s32, "game/code_0025DA20", shopReleaseSceneObjects);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A00);
 
@@ -268,9 +319,25 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BD0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260708);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260808);
+void func_00260808(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_00437838, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_00424BC0, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_00424BD0, 0);
+}
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260848);
+s32 func_00260848(void) {
+    s32 state = D_00437837;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        D_00437837 = 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260880);
 

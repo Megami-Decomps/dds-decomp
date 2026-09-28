@@ -4,15 +4,49 @@ u32 func_00304030(void *arg0, const char *arg1, s32 arg2);
 
 extern u32 D_00437210[];
 
+void func_003054E8(u32 sprite);
+
+void func_00308380(s32 property, s32 object);
+
+void func_00308808(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
+
+void func_00308DB0(s32 object);
+
+void func_00308E60(s32 object);
+
+void func_00308478(s32 property, s32 object);
+
+void func_00243958(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+
+typedef struct SolarPoint {
+    u16 age;
+    s16 duration;
+    u8 active;
+    u8 pad05;
+} SolarPoint;
+
+f32 func_00341240(s32 seed);
+
 void func_002437F0(u32 *arg0) {
     *arg0 = func_00304030(D_00437210, "solarnoise.spr", 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00243830);
+void releaseSolarNoiseSprite(u32 *sprite) {
+    func_003054E8(*sprite);
+}
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00243850);
+void initializeSolarOverlay(s32 object) {
+    func_00308380(0x30000, object);
+    func_00308808(0, 0, 0, 0x2000, 0xE00, 0, object);
+    func_00308DB0(object);
+    func_00308380(0x30000, object);
+}
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_002438B0);
+void finalizeSolarOverlay(s32 object) {
+    func_00308E60(object);
+    func_00308478(0x44, object);
+    func_00308380(0x50000, object);
+}
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_002438F0);
 
@@ -28,7 +62,12 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_00243EE8);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00243FD8);
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_002440C8);
+void drawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
+    func_00243958(x, y, z, width, layer, 0, context, color);
+    if (layer != 0 && layer != 4 && layer != 8) {
+        func_00243958(x, y, z, width, 9, 0, context, color);
+    }
+}
 
 s32 func_00244178(s32 arg0) {
     s32 v;
@@ -68,7 +107,23 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_002449E0);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244A38);
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00244AE0);
+void updateSolarPointTimers(s32 object) {
+    SolarPoint *point = (SolarPoint *)(object + 0xC);
+    s32 i;
+    for (i = 7; i >= 0; i--, point++) {
+        if (point->active != 0) {
+            s32 age = point->age + 1;
+            point->age = age;
+            if ((s16)age > point->duration) {
+                point->age = 0;
+                point->duration = (s16)(func_00341240(0) * 30.0f + 120.0f);
+            }
+        } else {
+            point->age = 0;
+            point->duration = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244B90);
 

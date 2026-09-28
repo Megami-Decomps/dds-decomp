@@ -132,7 +132,13 @@ extern u8 D_00444970[];
 
 extern void func_00113110(s64 arg0, void *arg1, void *arg2);
 
-extern f32 func_00340898(f32 arg0, f32 arg1);
+extern f32 sdfAtan2(f32 arg0, f32 arg1);
+
+extern f32 D_0038BAB0[];
+
+extern f32 D_0038BAC0[];
+
+extern f32 D_003897DC[];
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
 
@@ -265,7 +271,7 @@ void func_0012B4A0(u32 arg0) {
     D_00435FC0 = arg0;
 }
 
-void func_0012B4A8(void) {
+void fldInitDisplayObjects(void) {
     if (D_00436064 == 0) {
         void *object;
         D_00436064 = 1;
@@ -474,14 +480,14 @@ void func_0012EBF8(u32 arg0, s32 arg1) {
         func_0012EC80(3);
         return;
     }
-    func_00341E20(0xf, 0x7f, 0x3f);
+    soundSetSequenceVolumePan(0xf, 0x7f, 0x3f);
     func_0012EC80(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012EC80);
 
 void func_0012ECF0(void) {
-    func_0022E390();
+    battleResetAsyncState();
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012ED08);
@@ -518,7 +524,7 @@ s64 func_001309B8(void) {
     return temp_v1;
 }
 
-void func_001309F8(u32 value) {
+void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
     func_00113110(func_00110C18(func_0010FFA8()), D_00444980, D_00444970);
     D_004360B0 = 0;

@@ -1,18 +1,22 @@
 #include "common.h"
 
-extern s32 func_0023A170(u32);
+extern s32 mdlFlagTest(u32);
 
 extern s64 func_0026C768(void);
 
 extern s32 func_00268BE0(void);
 
-extern s32 func_00105B68(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002B86E8(u32);
 
 extern void func_002686F0(s32);
 
 extern s8 D_00437858;
+
+extern s64 func_002C4038(s32, s32 *, u64, u64);
+
+extern s32 func_00101958();
 
 void func_002665B0(s32 arg0) {
     func_00304A38(*(u32 *)(arg0 + 0x3c));
@@ -21,7 +25,7 @@ void func_002665B0(s32 arg0) {
 u8 func_002665C8(void) {
     s64 temp_v0;
 
-    temp_v0 = func_0023A170(0x31);
+    temp_v0 = mdlFlagTest(0x31);
     return temp_v0 != 0;
 }
 
@@ -181,7 +185,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00268380);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268470);
 
-s32 func_002684B8(void) {
+s32 pollSceneState(void) {
     s32 state = D_00437858;
     if (state == 1) {
         return 1;
@@ -202,7 +206,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00268550);
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268588);
 
 s32 func_002685C0(void) {
-    s32 temp_v0 = func_00105B68();
+    s32 temp_v0 = kwlnFadeIsActive();
 
     if (temp_v0 != 0) {
         return 0;
@@ -227,7 +231,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002686F0);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002689A8);
+INCLUDE_ASM(const s32, "game/code_002665B0", classifyRemainingFrames);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002689D0);
 

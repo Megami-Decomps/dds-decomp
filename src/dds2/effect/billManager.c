@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_00159978(u64, u32);
+extern u64 billCreateIndexed(u64, u32);
 
 extern u64 func_00343ED0(u64, u32 *, u64);
 
@@ -77,7 +77,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158C00);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
 
-BillObj *func_00158DB0(void *arg0) {
+BillObj *billAllocChild(void *arg0) {
     BillObj *obj;
 
     obj = func_00328D68(0x34);
@@ -102,7 +102,7 @@ void func_00158E38(s32 arg0) {
     func_00157EA0(arg0, *(u32 *)(arg0 + 0x30));
 }
 
-BillObj *func_00158E50(void *arg0) {
+BillObj *billAllocList(void *arg0) {
     BillData *data;
     BillObj *newobj;
     s32 n;
@@ -123,7 +123,7 @@ BillObj *func_00158E50(void *arg0) {
     return newobj;
 }
 
-BillObj *func_00158ED8(BillObj *obj) {
+BillObj *billCloneList(BillObj *obj) {
     BillData *data;
     s32 n;
     BillObj *newobj;
@@ -177,7 +177,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00159848);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001598D8);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00159978);
+INCLUDE_ASM(const s32, "effect/billManager", billCreateIndexed);
 
 u64 func_001599F8(u64 arg0, u64 arg1) {
     u64 temp_v0;
@@ -185,17 +185,17 @@ u64 func_001599F8(u64 arg0, u64 arg1) {
     u32 temp_v2 [4];
 
     temp_v0 = func_00343ED0(arg1, temp_v2, 0);
-    temp_v1 = func_00159978(arg0, temp_v2[0]);
+    temp_v1 = billCreateIndexed(arg0, temp_v2[0]);
     func_003297C8(temp_v0);
     return temp_v1;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00159A50);
 
-void func_00159AF0(BillObj *obj) {
+void billDispatchByKind(BillObj *obj) {
     D_003AA998[obj->unk2C].func();
 }
 
-void func_00159B28(BillObj *obj) {
+void billInvokeCallback(BillObj *obj) {
     obj->unk28();
 }

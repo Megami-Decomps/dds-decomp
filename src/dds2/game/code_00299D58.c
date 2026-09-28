@@ -8,9 +8,9 @@ extern s32 func_00101958();
 
 extern void func_002C44E8(s32);
 
-extern void func_002C4038(s32, s32, s32, s32);
-
 extern void func_0029CD60(s32);
+
+extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_00299D58);
 
@@ -78,7 +78,12 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A588);
+void func_0029A588(s32 arg0) {
+    s32 temp_v0 = func_00101958();
+
+    func_0029CD60(temp_v0);
+    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+}
 
 void func_0029A5D8(s32 arg0) {
     s32 temp_v0 = func_00101958();

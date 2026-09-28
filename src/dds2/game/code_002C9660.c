@@ -1,12 +1,12 @@
 #include "common.h"
 
-extern u64 func_002D3D70(u64);
+extern u64 duplicateFileJob(u64);
 
 extern u64 func_003292A8(u64);
 
 extern u64 func_003298F8(u64);
 
-extern s64 func_0033E9F8(u64);
+extern s64 sdfDevCreateCommandState(u64);
 
 extern u64 func_0033EB30(s64);
 
@@ -74,7 +74,7 @@ extern s8 D_00437CD4;
 
 extern s32 func_002CB130(void);
 
-extern void func_002C8FD8(s32 arg0);
+extern void fileReqBegin(s32 arg0);
 
 extern void *func_002CABC0(void);
 
@@ -82,7 +82,7 @@ extern void func_002CB2C0(void);
 
 extern s32 func_002CB100(void);
 
-extern s32 func_002C9140(s32 arg0);
+extern s32 fileReqGetSize(s32 arg0);
 
 extern u32 D_00439020;
 
@@ -110,7 +110,7 @@ extern void func_001004A0(void);
 
 extern void func_002C92D0(u32 arg0);
 
-extern void func_002CC6E0(void);
+extern void handleSaveDetectionResult(void);
 
 extern char D_0042B720[];
 
@@ -148,6 +148,43 @@ extern void func_002D31C0(void *src);
 
 extern void func_002D4818(void *dst, void *src);
 
+/* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
+ * entry per table; the handler lives at +0x0. Slots are declared as separate
+ * arrays (D_00353710/14/18/1C/20/24/28/2C/30/34 and D_00353880/84/88/90/94/
+ * 98/9C/A0/A4). The family2 create table (D_00353880) additionally carries a
+ * fallback selector at +0x0C: nonzero calls the entry handler directly,
+ * zero falls back through D_003536A0.
+ */
+typedef struct EffDispatchEntry {
+    void *(*func)(void *); /* 0x00 handler, may be NULL */
+    u8 pad04[0x08];        /* 0x04 */
+    u32 unk0C;             /* 0x0C fallback selector (create table only) */
+    u8 pad10[0x18];        /* 0x10 */
+} EffDispatchEntry; /* 0x28 */
+
+/* 8-byte parameter work (family1): kind id plus one data pointer. */
+typedef struct EffParamWork {
+    u16 id;       /* 0x00 effect kind */
+    u8 pad02[2];  /* 0x02 */
+    void *data;   /* 0x04 parameter block */
+} EffParamWork; /* 0x08 */
+
+extern EffDispatchEntry D_003E917C[];
+
+extern EffDispatchEntry D_003E9180[];
+
+extern EffDispatchEntry D_003E9184[];
+
+extern EffDispatchEntry D_003E9188[];
+
+extern EffDispatchEntry D_003E918C[];
+
+extern s8 D_00437DE5;
+
+extern void func_002D02D0(void);
+
+extern void func_002CAED0(void);
+
 void func_002C9660(void) {
     func_0034F490();
 }
@@ -171,7 +208,7 @@ void func_002C9708(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9710);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9748);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileReqGetSlotCode);
 
 u32 func_002C9788(void) {
     return 0x1e840;
@@ -215,7 +252,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002C99C0);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9AF0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9BC0);
+INCLUDE_ASM(const s32, "game/code_002C9660", isLoadStepComplete);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9BD0);
 
@@ -255,7 +292,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002CA828);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CA888);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CA9C0);
+INCLUDE_ASM(const s32, "game/code_002C9660", beginFileWait);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAA08);
 
@@ -280,11 +317,11 @@ void *func_002CABC0(void) {
     func_002CA1D8(0);
     D_00437D3C = 1;
     D_00437D40 = 0;
-    func_002C8FD8(D_00437CD0);
+    fileReqBegin(D_00437CD0);
     return func_002CB2C0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAC00);
+INCLUDE_ASM(const s32, "game/code_002C9660", resetFileSelection);
 
 u32 func_002CAC80(void) {
     func_002CA1D8(0);
@@ -306,7 +343,7 @@ void func_002CAD60(void) {
     func_002CA1D8(1);
     D_00437D3C = 0;
     D_00437CF8 = 0;
-    func_002CAC00();
+    resetFileSelection();
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAD90);
@@ -316,7 +353,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAE58);
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAEA8);
 
 void func_002CAED0(void) {
-    func_002CAC00();
+    resetFileSelection();
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAEE8);
@@ -325,7 +362,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAF10);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CAF48);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB090);
+INCLUDE_ASM(const s32, "game/code_002C9660", countSelectableFiles);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB100);
 
@@ -339,7 +376,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB4D0);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB5A0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB610);
+INCLUDE_ASM(const s32, "game/code_002C9660", updateFileWait);
 
 void *func_002CB660(u32 arg0) {
     D_00439020 = arg0;
@@ -352,7 +389,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB678);
 void *func_002CB710(u32 arg0) {
     D_00439020 = arg0;
     D_00437D40 = 0;
-    func_002C8FD8(D_00437CD0);
+    fileReqBegin(D_00437CD0);
     return func_002CB740;
 }
 
@@ -369,11 +406,11 @@ void *func_002CB948(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB988);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBA10);
+INCLUDE_ASM(const s32, "game/code_002C9660", handleSaveSlotWriteResult);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBA90);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBBC8);
+INCLUDE_ASM(const s32, "game/code_002C9660", resetSaveSlotMetadata);
 
 void *func_002CBC60(void) {
     u8 buf[0x50];
@@ -386,13 +423,13 @@ void *func_002CBC60(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBCA0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBD40);
+INCLUDE_ASM(const s32, "game/code_002C9660", handleSaveDirectoryWriteResult);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBDD0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBE70);
+INCLUDE_ASM(const s32, "game/code_002C9660", clearSaveSlotMetadata);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBEE0);
+INCLUDE_ASM(const s32, "game/code_002C9660", prepareSaveDirectory);
 
 void *func_002CBF80(void) {
     u8 buf[0x50];
@@ -405,7 +442,7 @@ void *func_002CBF80(void) {
     return func_002CC038;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CBFD0);
+INCLUDE_ASM(const s32, "game/code_002C9660", handleSaveSearchResult);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC038);
 
@@ -424,38 +461,38 @@ INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B6A8);
 
 INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B6B8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC1E0);
+INCLUDE_ASM(const s32, "game/code_002C9660", requestBaseIcon);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC210);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC488);
+INCLUDE_ASM(const s32, "game/code_002C9660", chooseSaveLoadPath);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC4F0);
+INCLUDE_ASM(const s32, "game/code_002C9660", beginFileRequest);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC530);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC5D0);
+INCLUDE_ASM(const s32, "game/code_002C9660", handleSaveLoadResult);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC638);
+INCLUDE_ASM(const s32, "game/code_002C9660", dispatchSaveReadCallback);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC6A0);
+INCLUDE_ASM(const s32, "game/code_002C9660", finishFileRequest);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC6E0);
+INCLUDE_ASM(const s32, "game/code_002C9660", handleSaveDetectionResult);
 
 void *func_002CC760(void) {
     func_002CA1D8(5);
     func_001004A0();
     func_002C92D0(D_00437CD0);
-    return func_002CC6E0;
+    return handleSaveDetectionResult;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC798);
+INCLUDE_ASM(const s32, "game/code_002C9660", selectFileMenuBranch);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC7F8);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC8E0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC988);
+INCLUDE_ASM(const s32, "game/code_002C9660", handleSaveSetupResult);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC9F0);
 
@@ -557,7 +594,7 @@ INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B868);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CFF38);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0108);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileLoadSetMode);
 
 void func_002D0148(void) {
     D_003E7FD8.unk14 = 0;
@@ -569,7 +606,11 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0160);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D02D0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0340);
+void *func_002D0340(u32 arg0) {
+    D_00439020 = arg0;
+    D_00437D40 = 0;
+    return func_002D02D0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0358);
 
@@ -599,7 +640,10 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D06F0);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0730);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0770);
+void *func_002D0770(void) {
+    func_002CE1A8();
+    return func_002CAED0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0798);
 
@@ -646,7 +690,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0D28);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0D90);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0E98);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileLoadStateChanged);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0EB0);
 
@@ -692,9 +736,21 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D11F8);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D1300);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D13B0);
+INCLUDE_ASM(const s32, "game/code_002C9660", configTasksDestroy);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D13F0);
+s32 func_002D13F0(void) {
+    s32 state = D_00437DE5;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        D_00437DE5 = 0;
+    }
+    return 0;
+}
 
 u32 func_002D1428(s32 arg0) {
     if (arg0 < 4) {
@@ -709,7 +765,7 @@ INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042BB00);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D1450);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D18B8);
+INCLUDE_ASM(const s32, "game/code_002C9660", startQueuedFileLoad);
 
 u32 func_002D1910(void) {
     u32 temp_v0;
@@ -727,8 +783,8 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D27A0);
 
 void func_002D2C50(void) {
     func_002E6390();
-    func_002F1C98();
-    func_002F4570();
+    loadWindEffectTexture();
+    loadScalyEffectTexture();
     func_002D2CA8();
 }
 
@@ -760,25 +816,25 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3128);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D31C0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3410);
+INCLUDE_ASM(const s32, "game/code_002C9660", createFileJob);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3468);
+INCLUDE_ASM(const s32, "game/code_002C9660", resolvePrimaryFileBuffer);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3490);
+INCLUDE_ASM(const s32, "game/code_002C9660", resolveSecondaryFileBuffer);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D34B8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3528);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobDestroy);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3590);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobFreePrimaryBuffer);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D35D0);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobFreeSecondaryBuffer);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3610);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobCreateChild);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3688);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobNotifyPair);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D36D0);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobNotifyComplete);
 
 void func_002D3710(void *arg0) {
     u16 idx = *(u16 *)((u8 *)arg0 + 4);
@@ -803,7 +859,7 @@ void func_002D38E8(u64 arg0, u64 arg1, u16 arg2) {
     u64 temp_v2;
     u64 temp_v3;
 
-    temp_v0 = func_0033E9F8(arg1);
+    temp_v0 = sdfDevCreateCommandState(arg1);
     if (temp_v0 != 0) {
         temp_v1 = func_0033EB30(temp_v0);
         temp_v2 = func_003292A8(temp_v1);
@@ -824,7 +880,7 @@ void func_002D3A68(u64 arg0, u64 arg1, u16 arg2) {
     u64 temp_v2;
     u64 temp_v3;
 
-    temp_v0 = func_0033E9F8(arg1);
+    temp_v0 = sdfDevCreateCommandState(arg1);
     if (temp_v0 != 0) {
         temp_v1 = func_0033EB30(temp_v0);
         temp_v2 = func_003292A8(temp_v1);
@@ -841,7 +897,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3B48);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3CB8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3D70);
+INCLUDE_ASM(const s32, "game/code_002C9660", duplicateFileJob);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3DF8);
 
@@ -861,15 +917,15 @@ void func_002D3F80(u32 arg0) {
     func_002D3F08(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3FC8);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueAppend);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4000);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueInsertAfter);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4040);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueRemove);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4088);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueCreate);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D40D8);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileJobCreate);
 
 void func_002D4120(void) {
     func_00328E48();
@@ -918,16 +974,16 @@ void func_002D4AD8(void *dst, void *src) {
     func_002D4818(dst, &vec);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4B10);
+INCLUDE_ASM(const s32, "game/code_002C9660", appendFileJob);
 
-void func_002D4B60(u64 arg0, u64 arg1) {
+void duplicateAndAppendFileJob(u64 arg0, u64 arg1) {
     u64 temp_v0;
 
-    temp_v0 = func_002D3D70(arg1);
-    func_002D4B10(arg0, temp_v0);
+    temp_v0 = duplicateFileJob(arg1);
+    appendFileJob(arg0, temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4B90);
+INCLUDE_ASM(const s32, "game/code_002C9660", appendFileJobFromEntry);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4BD8);
 
@@ -945,15 +1001,15 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D55B0);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5AA8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5C30);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueFindById);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5C70);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueFindFlaggedById);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5CB8);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueFindBySector);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5D08);
+INCLUDE_ASM(const s32, "game/code_002C9660", fileQueueGetAt);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5D50);
+INCLUDE_ASM(const s32, "game/code_002C9660", findQueuedJobIndex);
 
 s32 func_002D5D90(s32 arg0) {
     s32 temp_v0;
@@ -980,17 +1036,17 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6058);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6160);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6270);
+INCLUDE_ASM(const s32, "game/code_002C9660", loadObjectCreateChild);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D62D8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6538);
+INCLUDE_ASM(const s32, "game/code_002C9660", loadObjectSetResource);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6598);
+INCLUDE_ASM(const s32, "game/code_002C9660", loadObjectOpenNamedDevice);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6610);
+INCLUDE_ASM(const s32, "game/code_002C9660", loadObjectOpenDevice);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6690);
+INCLUDE_ASM(const s32, "game/code_002C9660", loadObjectOpenAndStartDevice);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6710);
 
@@ -1008,7 +1064,7 @@ void func_002D6900(s32 arg0, u32 arg1) {
 
 void func_002D6950(s32 arg0) {
     if (*(s32 *)(arg0 + 0x4c) != 0) {
-        func_002DC040(*(s32 *)(arg0 + 0x4c));
+        clearFileRecordReferences(*(s32 *)(arg0 + 0x4c));
         return;
     }
 }
@@ -1036,7 +1092,7 @@ void func_002D73F0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D73F8);
 
-void func_002D7418(s32 arg0) {
+void resetFileSlotStates(s32 arg0) {
     u32 temp_v0;
     s32 temp_v1;
     u32 temp_v2;
@@ -1105,11 +1161,11 @@ void func_002DC028(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x28));
 }
 
-void func_002DC040(s32 arg0) {
+void clearFileRecordReferences(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002DC048);
+INCLUDE_ASM(const s32, "game/code_002C9660", acquireFileRecord);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DC0A8);
 

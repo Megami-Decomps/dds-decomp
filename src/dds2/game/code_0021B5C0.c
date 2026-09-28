@@ -2,6 +2,8 @@
 
 extern s32 func_001AA6F8(void);
 
+extern void func_0021C5E0();
+
 void func_0021B5C0(void) {
     s32 *piVar1;
     s32 temp_v0;
@@ -35,7 +37,9 @@ INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021C548);
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021C5E0);
 
-INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021C7F8);
+void func_0021C7F8(void) {
+    func_0021C5E0();
+}
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021C818);
 

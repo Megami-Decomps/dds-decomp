@@ -2,9 +2,9 @@
 
 extern s32 D_004389FC;
 
-extern s32 func_003282F0(u32, u32, u32);
+extern s32 createSemaphore(u32, u32, u32);
 
-extern u64 func_0032CD38(void);
+extern u64 sdfGraphHasPendingWork(void);
 
 extern s64 func_0036DE70(void);
 
@@ -81,7 +81,7 @@ typedef struct SdfResource {
 
 extern SdfResource *D_004389F8;
 
-void func_0032D010(s32 arg0, s32 arg1);
+void prependSdfPacketList(s32 arg0, s32 arg1);
 
 void func_0032D218();
 
@@ -98,9 +98,15 @@ typedef struct SdfPacketBuilder {
 
 void func_0032DC80();
 
+extern void *D_00439160;
+
+extern s8 D_00439164;
+
+extern s32 D_00439158[2];
+
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
-SdfResource *func_0032C408(s32 id) {
+SdfResource *findSdfResourceById(s32 id) {
     SdfResource *resource = D_004389F8;
 
     while (resource != NULL) {
@@ -116,7 +122,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C448);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C468);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C658);
+INCLUDE_ASM(const s32, "game/code_0032C278", createSdfResourcePacket);
 
 void func_0032C730(SdfBigPacket *arg0, s32 arg1) {
     arg0->unk80 = (arg0->unk80 & ~0x3FFF) | (u64)(u32)(D_0040B298[arg1]->unk0C >> 6);
@@ -130,7 +136,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C9D8);
 
 void func_0032CA90(u32 *arg0, u32 arg1) {
     if (D_004389FC < 0) {
-        D_004389FC = func_003282F0(1, 0x7f, 0);
+        D_004389FC = createSemaphore(1, 0x7f, 0);
     }
     *arg0 = arg1;
     arg0[1] = 0;
@@ -144,14 +150,33 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CBF0);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CCC0);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CD38);
+u64 sdfGraphHasPendingWork(void) {
+    u32 i;
+    s32 *entry;
+    if (D_00439164 != 0) {
+        return 1;
+    }
+    if (D_00439160 != NULL) {
+        return 1;
+    }
+    i = 0;
+    entry = D_00439158;
+    do {
+        if (*entry != 0) {
+            return 1;
+        }
+        entry++;
+        i++;
+    } while (i < 2);
+    return 0;
+}
 
 u64 func_0032CD98(void) {
     s64 temp_v0;
     u64 temp_v1;
 
     temp_v0 = func_0036DE70();
-    temp_v1 = func_0032CD38();
+    temp_v1 = sdfGraphHasPendingWork();
     if (temp_v0 != 0) {
         EIntr();
     }
@@ -268,7 +293,7 @@ void func_0032CFD0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 8) = arg1 + 0x10;
 }
 
-void func_0032D010(s32 list, s32 item) {
+void prependSdfPacketList(s32 list, s32 item) {
     s32 head;
 
     if (*(s32 *)(item + 8) == 0) {
@@ -414,13 +439,13 @@ void func_0032DB78(s32 arg0, u32 arg1, s32 arg2) {
     func_0032D4A0(arg1, arg0 + 0xb0, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DBC0);
+INCLUDE_ASM(const s32, "game/code_0032C278", appendSdfDmaPrimary);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DC20);
+INCLUDE_ASM(const s32, "game/code_0032C278", appendSdfDmaSecondary);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DC80);
 
-void func_0032DD20(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
+void initSdfPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
     func_0032D460(packet->packets, 2);
     packet->mode = mode;
     packet->source = source;
@@ -596,7 +621,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032E918);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032E9C8);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032EA20);
+INCLUDE_ASM(const s32, "game/code_0032C278", createSdfExtendedPacket);
 
 void func_0032EB40(SdfBigPacket *arg0, s32 arg1) {
     arg0->unk30 = (arg0->unk30 & ~0x3FFF) | (u64)(u32)(D_0040B298[arg1 ^ arg0->unk08]->unk0C >> 6);

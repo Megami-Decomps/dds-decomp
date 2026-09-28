@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0016AEB0(u64, u64);
+extern u64 effParamTableGetBlock(u64, u64);
 
 /* Per-effect work areas. Only the fields touched by the matched spawn,
    teardown and accumulator helpers are known; the update bodies are still
@@ -200,7 +200,7 @@ struct PcpFlashWork10 {
 void func_00171E00(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00171CE0(temp_v0);
 }
 
@@ -247,7 +247,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172318);
 void func_001724B0(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00172318(temp_v0);
 }
 
@@ -277,7 +277,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172628);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001727A0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172928);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", rotateFlashParticlePosition);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001729B0);
 
@@ -286,7 +286,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172C48);
 void func_00172E68(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00172C48(temp_v0);
 }
 
@@ -328,7 +328,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173458);
 void func_00173690(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00173458(temp_v0);
 }
 
@@ -370,7 +370,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173D40);
 void func_00173F90(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00173D40(temp_v0);
 }
 
@@ -412,7 +412,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174648);
 void func_00174808(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00174648(temp_v0);
 }
 
@@ -456,7 +456,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174F00);
 void func_00175038(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00174F00(temp_v0);
 }
 
@@ -503,7 +503,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175598);
 void func_00175770(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00175598(temp_v0);
 }
 
@@ -547,7 +547,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175EE8);
 void func_00176118(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00175EE8(temp_v0);
 }
 
@@ -589,7 +589,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176758);
 void func_00176898(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_00176758(temp_v0);
 }
 

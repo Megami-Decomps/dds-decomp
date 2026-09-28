@@ -18,7 +18,7 @@ extern s32 func_001B2D38(void);
 
 extern u32 func_001AC360(u64, u64, u64);
 
-extern u64 func_001E7FD8(u64);
+extern u64 allocateBattleIndexList(u64);
 
 extern u32 func_001E8058(u64);
 
@@ -182,15 +182,21 @@ s32 func_00213460(void) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00213478);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00213498);
+s32 battleCounterReachedLimit(s32 unused, u32 limit) {
+    extern u32 func_001B39E8(s32);
+    if (func_001B39E8(4) < limit) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002134C8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00213518);
+INCLUDE_ASM(const s32, "game/code_002112C8", battleTurnReachedLimit);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00213548);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00213578);
+INCLUDE_ASM(const s32, "game/code_002112C8", battleIsReadyWithoutTurns);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002135B8);
 
@@ -301,7 +307,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00214B00);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00214B60);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00214BE0);
+INCLUDE_ASM(const s32, "game/code_002112C8", battleActionMatchesUnit);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00214C18);
 
@@ -315,7 +321,7 @@ u64 func_00215268(u64 arg0, u32 *arg1, u32 *arg2) {
     u32 temp_v0;
     u64 temp_v1;
 
-    temp_v1 = func_001E7FD8(0xd);
+    temp_v1 = allocateBattleIndexList(0xd);
     temp_v0 = func_001AC360(arg0, temp_v1, 0);
     *arg1 = temp_v0;
     temp_v0 = func_001E8058(temp_v1);

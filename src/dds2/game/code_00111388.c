@@ -21,6 +21,6 @@ void func_00111668(s32 arg0) {
 
     puVar1 = *(u32 **)(arg0 + 0x18);
     func_00111920();
-    func_00111C90(*puVar1, 0, 1);
+    objExchangeSlot(*puVar1, 0, 1);
     func_00328E48(puVar1);
 }

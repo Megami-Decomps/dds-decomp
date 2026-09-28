@@ -15,7 +15,7 @@ typedef struct {
     void *unk34;        /* 0x34 released by func_001893C0 */
 } EffMagatuhiWork; /* 0x38 */
 
-extern void *func_001947F0(void *arg);
+extern void *effGetHandlerArg(void *arg);
 
 /* Float source block read by func_0018A610. */
 typedef struct EffMagatuhiSrc {
@@ -67,8 +67,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191AD0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191CD0);
 
-void func_00192248(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
-    EffMagatuhiDst *dst = func_001947F0(work->ptr08);
+void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
+    EffMagatuhiDst *dst = effGetHandlerArg(work->ptr08);
 
     dst->f00 = src->f00;
     dst->f04 = src->f04;
@@ -113,7 +113,7 @@ void func_00193250(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x124) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193258);
+INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193280);
 
@@ -134,7 +134,7 @@ void func_00193AA0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x128) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AA8);
+INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs2);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AD0);
 
@@ -155,7 +155,7 @@ void func_001943F8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x120) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194400);
+INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs3);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194428);
 

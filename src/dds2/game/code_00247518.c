@@ -18,7 +18,7 @@ void func_0024D430(void);
 
 void func_00101968(s32 arg0, s32 arg1);
 
-s32 func_00250300(void);
+s32 evtCreateFrameVariableTask(void);
 
 void *func_0024D6B0(s32 arg0);
 
@@ -155,13 +155,13 @@ void func_0024ACC0(s32 arg0) {
     if (v1 == -1) {
         return;
     }
-    func_001A3CC8(v1, 1);
+    itfMesCleanupWindow(v1, 1);
     v0 = *(s32 *)(arg0 + 8);
     func_001A34D0(*(s32 *)(v0 + 0x104));
     v0 = *(s32 *)(arg0 + 8);
-    func_001A3330(*(s32 *)(v0 + 0x104), 0);
+    itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
     v0 = *(s32 *)(arg0 + 8);
-    func_001A4008(*(s32 *)(v0 + 0x104));
+    itfMesResetWindow(*(s32 *)(v0 + 0x104));
     *(u8 *)(arg0 + 0x23c5) = 0;
     *(u8 *)(arg0 + 0x23c4) = 0;
 }
@@ -275,7 +275,26 @@ u32 func_0024C9D8(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CA28);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CB20);
+u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
+    u8 *record = (u8 *)func_002467B8((s32)scene);
+    if (record != NULL) {
+        f32 *dst = *(f32 **)(record + 0x2C);
+        f32 *src = (f32 *)(scene + 0x2350);
+        s32 index = 3;
+        do {
+            index--;
+            dst[0] = src[-8];
+            dst[4] = src[-4];
+            dst[8] = src[0];
+            src++;
+            dst++;
+        } while (index >= 0);
+        func_00249088(*(s32 *)(scene + 0x18), scene);
+        func_0024ABA0((s32)scene);
+        return 0;
+    }
+    return (u32)record;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CBA0);
 
@@ -314,7 +333,7 @@ void *func_0024D6B0(s32 arg0) {
 
     temp_v0 = func_00101958();
     func_00249088(*(s32 *)((u8 *)temp_v0 + 0x18), temp_v0);
-    func_00101968(arg0, func_00250300());
+    func_00101968(arg0, evtCreateFrameVariableTask());
     D_00435CD4 |= 0x2000000;
     return (void *)func_0024D430;
 }
@@ -361,7 +380,7 @@ void func_0024DAE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024DAF8);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024DB98);
+INCLUDE_ASM(const s32, "game/code_00247518", evtEventViewerDestroyTask);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024DBB8);
 

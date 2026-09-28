@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0016AEB0(u64, u64);
+extern u64 effParamTableGetBlock(u64, u64);
 
 extern u32 effMiscRand(void *state);
 
@@ -63,7 +63,7 @@ extern f32 func_00341240(void *state);
 void func_0016B0F8(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_0016AF38(temp_v0);
 }
 
@@ -109,7 +109,7 @@ void func_0016BC28(s32 arg0) {
 void func_0016BC58(u64 arg0) {
     u64 temp_v0;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
     func_0016BA68(temp_v0);
 }
 
@@ -142,7 +142,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C350);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C490);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C688);
+INCLUDE_ASM(const s32, "effect/effPCPThunder", effThunderDestroySubs);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C6F0);
 
@@ -188,7 +188,7 @@ void func_0016D2E8(s32 arg0) {
                                 *(u32 *)(arg0 + 0x48), *(u32 *)(arg0 + 0x50));
 }
 
-void func_0016D310(EffPCPThunderWorkB *work, s32 index) {
+void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
 
     frag->unk00 = effMiscRand(&D_003AA868) % work->unk30;
@@ -214,7 +214,7 @@ void func_0016DD88(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x58) = arg1;
 }
 
-void func_0016DD90(EffPCPThunderWorkB *work, s32 index) {
+void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
 
     frag->unk00 = effMiscRand(&D_003AA868) % work->unk30;
@@ -239,7 +239,7 @@ void func_0016E788(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x4c) = arg1;
 }
 
-void func_0016E790(EffPCPThunderWorkB *work, s32 index) {
+void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
     EffThunderCell *cell = work->unk48 + index;
     f32 v;
 

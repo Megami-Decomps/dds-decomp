@@ -54,7 +54,7 @@ extern u8 D_003B0190[];
 
 extern u8 D_003B01A0[];
 
-extern void func_00232BC0();
+extern void mdlBroadcastMasked();
 
 extern void func_00232AA0(void *work);
 
@@ -62,7 +62,7 @@ extern void func_00232AD0(void *work);
 
 extern void func_00232B40(void *work);
 
-extern void func_002328B8(void *work, s32 arg1, s32 arg2);
+extern void mdlAddEntryFlagged(void *work, s32 arg1, s32 arg2);
 
 extern void *func_00232198(void *arg0, void *arg1);
 
@@ -89,6 +89,14 @@ extern EffDispatchEntry D_003B01CC[];
 
 extern EffDispatchEntry D_003B01D4[];
 
+/* Callback table at D_0037E14C (0x28 bytes per entry). */
+typedef struct Cb3714C {
+    void (*cb)(void *arg); /* 0x00 */
+    u8 pad4[0x24];         /* 0x04 */
+} Cb3714C;
+
+extern Cb3714C D_003B0044[];
+
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A100);
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A438);
@@ -105,7 +113,7 @@ u16 func_0016A5A8(u16 *arg0) {
     return *arg0;
 }
 
-EffParamWork *func_0016A5B0(u16 id, void *data) {
+EffParamWork *effParamWorkCreate(u16 id, void *data) {
     EffParamWork *work;
 
     work = func_00328D68(8);
@@ -118,7 +126,7 @@ INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A620);
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A668);
 
-EffParamWork *func_0016A6A0(EffParamWork *src) {
+EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
     EffParamWork *work;
 
     work = func_00328D68(8);
@@ -127,62 +135,62 @@ EffParamWork *func_0016A6A0(EffParamWork *src) {
     return work;
 }
 
-void func_0016A710(EffParamWork *work) {
+void effParamWorkCallback0(EffParamWork *work) {
     if (D_003B0050[work->id].func != NULL) {
         D_003B0050[work->id].func(work->data);
     }
 }
 
-void func_0016A750(EffParamWork *work) {
+void effParamWorkCallback1(EffParamWork *work) {
     if (D_003B0054[work->id].func != NULL) {
         D_003B0054[work->id].func(work->data);
     }
 }
 
-void func_0016A790(EffParamWork *work) {
+void effParamWorkCallback2(EffParamWork *work) {
     if (D_003B0058[work->id].func != NULL) {
         D_003B0058[work->id].func(work->data);
     }
 }
 
-void func_0016A7D0(EffParamWork *work) {
+void effParamWorkCallback3(EffParamWork *work) {
     if (D_003B005C[work->id].func != NULL) {
         D_003B005C[work->id].func(work->data);
     }
 }
 
-void func_0016A810(EffParamWork *work) {
+void effParamWorkCallback4(EffParamWork *work) {
     if (D_003B0060[work->id].func != NULL) {
         D_003B0060[work->id].func(work->data);
     }
 }
 
-void func_0016A850(EffParamWork *work) {
+void effParamWorkCallback5(EffParamWork *work) {
     if (D_003B0064[work->id].func != NULL) {
         D_003B0064[work->id].func(work->data);
     }
 }
 
 void func_0016A890(u32 arg0) {
-    func_00159978(0, arg0);
+    billCreateIndexed(0, arg0);
 }
 
 void func_0016A8B0(u32 arg0) {
-    func_00159978(1, arg0);
+    billCreateIndexed(1, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A8D0);
+INCLUDE_ASM(const s32, "game/code_0016A100", effParamDispatchFloat);
 
-void func_0016A8E8(EffInitWork *work) {
+void effParamInitWork(EffInitWork *work) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0180));
     func_00232AA0(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0190));
     func_00232AD0(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B01A0));
     func_00232B40(work);
-    func_00232BC0(work, 0x80808080);
+    mdlBroadcastMasked(work, 0x80808080);
     if (work->param != NULL) {
-        func_002328B8(work, 0, 0);
+        mdlAddEntryFlagged(work, 0, 0);
         *(f32 *)((u8 *)work->param + 0x20) = 1.0f;
     }
     work->flags &= ~1u;
@@ -190,13 +198,13 @@ void func_0016A8E8(EffInitWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A990);
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AA18);
+INCLUDE_ASM(const s32, "game/code_0016A100", effParamInitFromGlobal);
 
 void func_0016AA38(void) {
     func_002322E8();
 }
 
-void *func_0016AA50(void *arg0) {
+void *effParamAssembleWork(void *arg0) {
     void *a;
     void *b;
     void *work;
@@ -204,13 +212,13 @@ void *func_0016AA50(void *arg0) {
     a = func_00232EE8(arg0);
     b = func_00232EF8(arg0);
     work = func_00232198(a, b);
-    func_0016A8E8(work);
+    effParamInitWork(work);
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AAA8);
+INCLUDE_ASM(const s32, "game/code_0016A100", effParamForwardVector);
 
-void func_0016AAC0(void *arg0, f32 x) {
+void effParamBuildVector(void *arg0, f32 x) {
     f32 v[3];
 
     v[0] = v[1] = v[2] = x;
@@ -222,7 +230,7 @@ void func_0016AAC0(void *arg0, f32 x) {
     func_00232B40(arg0);
 }
 
-void func_0016AAF0(void *work, void *src) {
+void effParamScatterVectors(void *work, void *src) {
     u8 *d0;
     u8 *d1;
     u8 *d2;
@@ -256,7 +264,7 @@ void func_0016AAF0(void *work, void *src) {
 }
 
 void func_0016AB30(void) {
-    func_00232BC0();
+    mdlBroadcastMasked();
 }
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AB48);
@@ -267,37 +275,37 @@ INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AC40);
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AC78);
 
-void func_0016AD20(EffParamWorkEx *work) {
+void effParamWorkExCallback0(EffParamWorkEx *work) {
     if (D_003B01C0[work->id].func != NULL) {
         D_003B01C0[work->id].func(work->data);
     }
 }
 
-void func_0016AD60(EffParamWorkEx *work) {
+void effParamWorkExCallback1(EffParamWorkEx *work) {
     if (D_003B01C4[work->id].func != NULL) {
         D_003B01C4[work->id].func(work->data);
     }
 }
 
-void func_0016ADA0(EffParamWorkEx *work) {
+void effParamWorkExCallback2(EffParamWorkEx *work) {
     if (D_003B01C8[work->id].func != NULL) {
         D_003B01C8[work->id].func(work->data);
     }
 }
 
-void func_0016ADE0(EffParamWorkEx *work) {
+void effParamWorkExCallback3(EffParamWorkEx *work) {
     if (D_003B01D0[work->id].func != NULL) {
         D_003B01D0[work->id].func(work->data);
     }
 }
 
-void func_0016AE20(EffParamWorkEx *work) {
+void effParamWorkExCallback4(EffParamWorkEx *work) {
     if (D_003B01CC[work->id].func != NULL) {
         D_003B01CC[work->id].func(work->data);
     }
 }
 
-void func_0016AE60(EffParamWorkEx *work) {
+void effParamWorkExCallback5(EffParamWorkEx *work) {
     if (D_003B01D4[work->id].func != NULL) {
         D_003B01D4[work->id].func(work->data);
     }
@@ -311,28 +319,28 @@ u32 func_0016AEA8(s32 arg0) {
     return *(u32 *)(arg0 + 4);
 }
 
-void *func_0016AEB0(void *arg0, s32 index) {
+void *effParamTableGetBlock(void *arg0, s32 index) {
     u8 *data = (u8 *)arg0;
     u8 *row = data + index * 16;
 
     return data + *(s32 *)(row + 0x14);
 }
 
-u32 func_0016AEC8(void *arg0, s32 index) {
+u32 effParamTableGetWord(void *arg0, s32 index) {
     u8 *data = (u8 *)arg0;
 
     data += index * 16;
     return *(u32 *)(data + 0x10);
 }
 
-u32 func_0016AED8(void *arg0, s32 index) {
+u32 effParamTableGetWord2(void *arg0, s32 index) {
     u8 *data = (u8 *)arg0;
 
     data += index * 16;
     return *(u32 *)(data + 0x18);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AEE8);
+INCLUDE_ASM(const s32, "game/code_0016A100", effParamCreateFromTable);
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AF38);
 

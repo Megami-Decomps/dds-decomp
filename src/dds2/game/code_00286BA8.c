@@ -24,7 +24,7 @@ void func_00286F90(void) {
 }
 
 s32 func_00286FD8(void) {
-    if (func_00312738(D_00426060) != 0) {
+    if (kwlnTaskExists(D_00426060) != 0) {
         return 1;
     }
     D_00437924 = 0;

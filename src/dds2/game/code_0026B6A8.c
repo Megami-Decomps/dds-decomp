@@ -43,10 +43,10 @@ u32 func_0026BA68(void) {
 
     temp_v0 = func_00101958();
     if (*(s32 *)(temp_v0 + 0xe4) == 0) {
-        func_00105AB8(0, 0, 0, 0xf);
+        kwlnFadeInStart(0, 0, 0, 0xf);
     }
     else {
-        func_00105AB8(0, 0, 0, 0xf);
+        kwlnFadeInStart(0, 0, 0, 0xf);
     }
     return 1;
 }
@@ -55,7 +55,7 @@ s32 func_0026BAB8(void) {
     s32 temp_v0 = func_00101958();
 
     func_00268128(1, temp_v0);
-    func_00105A00(0, 0, 0, 0);
+    kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
 

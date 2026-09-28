@@ -1,12 +1,12 @@
 #include "common.h"
 
-extern u64 func_002AB598(void);
-
-extern u64 func_0011C0B0(u64, u64);
-
-extern s32 func_0010D818(s32 arg0);
-
 extern u64 func_0010D650(u64);
+
+extern void func_0010D818(s32 value);
+
+extern s32 func_0011C0B0(s32 param0, s32 param1);
+
+extern u32 func_002AB598(void);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EC90);
 
@@ -14,7 +14,10 @@ INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ECC8);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED10);
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED60);
+s32 func_0011ED60(void) {
+    func_0010D818(func_002AB598());
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED88);
 

@@ -34,15 +34,15 @@ extern s32 func_00343ED0(s32, u32 *, s32);
 
 extern void func_0020D128(s32, ...);
 
-extern void func_00211188(s32, u16);
+extern void btlCmdSimpleB(s32, u16);
 
-extern void func_00211128(s32, u16);
+extern void btlCmdSimpleA(s32, u16);
 
-extern void func_002111C8(s32, u16);
+extern void btlCmdSimpleD(s32, u16);
 
-extern void func_002111E8(s32, u16);
+extern void btlCmdSimpleE(s32, u16);
 
-extern void func_002112A8(s32, u16);
+extern void btlCmdSimpleJ(s32, u16);
 
 extern s8 D_00436CAC;
 
@@ -86,13 +86,25 @@ extern u32 func_00229158(void);
 
 extern u32 func_002192D8(void);
 
-extern void func_002111A8(s32, u16);
+extern void btlCmdSimpleC(s32, u16);
 
 extern s32 func_00210EA0(s32 context, s32 actor, u32 mask);
 
 extern void func_0010D818();
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207A38);
+extern u8 *func_001E1468(s32);
+
+extern void func_00207A10(void);
+
+extern void func_001E21A0(s32 actor);
+
+extern void func_001E2220(s32 actor);
+
+extern u32 func_001E8058(s32 actor);
+
+extern s32 func_001E8060(s32 actor, u32 index);
+
+INCLUDE_ASM(const s32, "game/code_00207A38", battleCreateControlObject);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207A80);
 
@@ -160,9 +172,27 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00208DE8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208E48);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208EA8);
+void func_00208EA8(s32 actor) {
+    u32 i = 0;
+    u32 count = func_001E8058(actor);
+    if (count != 0) {
+        do {
+            func_001E21A0(func_001E8060(actor, i));
+            i++;
+        } while (i < count);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208F10);
+void func_00208F10(s32 actor) {
+    u32 i = 0;
+    u32 count = func_001E8058(actor);
+    if (count != 0) {
+        do {
+            func_001E2220(func_001E8060(actor, i));
+            i++;
+        } while (i < count);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208F78);
 
@@ -315,72 +345,72 @@ u32 func_0020A0A0(void) {
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A0E0);
 
 u32 func_0020A130(void) {
-    func_00211088(func_0010D8D0());
+    btlCmdWithArgA(func_0010D8D0());
     return 1;
 }
 
 u32 func_0020A158(void) {
     s32 context = func_0010D8D0();
     u16 value = func_0010D650(0);
-    func_00211188(context, value);
+    btlCmdSimpleB(context, value);
     return 1;
 }
 
 u32 func_0020A198(void) {
-    func_002110A8(func_0010D8D0());
+    btlCmdWithArgB(func_0010D8D0());
     return 1;
 }
 
 u32 func_0020A1C0(void) {
-    func_002110C8(func_0010D8D0());
+    btlCmdWithArgC(func_0010D8D0());
     return 1;
 }
 
 u32 func_0020A1E8(void) {
     s32 context = func_0010D8D0();
     u16 value = func_0010D650(0);
-    func_00211128(context, value);
+    btlCmdSimpleA(context, value);
     return 1;
 }
 
 u32 func_0020A228(void) {
-    func_00211168(func_0010D8D0());
+    btlCmdWithArgE(func_0010D8D0());
     return 1;
 }
 
 u32 func_0020A250(void) {
-    func_00211148(func_0010D8D0());
+    btlCmdWithArgD(func_0010D8D0());
     return 1;
 }
 
 u32 func_0020A278(void) {
     s32 context = func_0010D8D0();
     u16 value = func_0010D650(0);
-    func_002111A8(context, value);
+    btlCmdSimpleC(context, value);
     return 1;
 }
 
 u32 func_0020A2B8(void) {
     s32 context = func_0010D8D0();
     u16 value = func_0010D650(0);
-    func_002111C8(context, value);
+    btlCmdSimpleD(context, value);
     return 1;
 }
 
 u32 func_0020A2F8(void) {
     s32 context = func_0010D8D0();
     u16 value = func_0010D650(0);
-    func_002111E8(context, value);
+    btlCmdSimpleE(context, value);
     return 1;
 }
 
 u32 func_0020A338(void) {
-    func_00211088(func_0010D8D0());
+    btlCmdWithArgA(func_0010D8D0());
     return 1;
 }
 
 u32 func_0020A360(void) {
-    func_00211208(func_0010D8D0(), 0);
+    btlCmdSimpleG(func_0010D8D0(), 0);
     return 1;
 }
 
@@ -390,14 +420,14 @@ u32 func_0020A390(void) {
 }
 
 u32 func_0020A3C0(void) {
-    func_00211248(func_0010D8D0(), 0);
+    btlCmdSimpleH(func_0010D8D0(), 0);
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A3F0);
 
 u32 func_0020A430(void) {
-    func_00211288(func_0010D8D0());
+    btlCmdWithArgF(func_0010D8D0());
     return 1;
 }
 
@@ -406,12 +436,12 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020A458);
 u32 func_0020A480(void) {
     s32 context = func_0010D8D0();
     u16 value = func_0010D650(0);
-    func_002112A8(context, value);
+    btlCmdSimpleJ(context, value);
     return 1;
 }
 
 u32 func_0020A4C0(void) {
-    func_00211268(func_0010D8D0(), 0);
+    btlCmdSimpleI(func_0010D8D0(), 0);
     return 1;
 }
 

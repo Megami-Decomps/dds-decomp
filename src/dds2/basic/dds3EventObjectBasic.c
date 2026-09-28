@@ -10,7 +10,7 @@ s32 func_0010F878(void *arg, s32 arg1);
 
 void func_0010F860(void *arg, s32 arg1);
 
-void func_0010F8B0(void *arg);
+void effObjInnerVecBackup(void *arg);
 
 void func_001163B0(s32 arg0) {
     u32 *puVar1;
@@ -27,7 +27,7 @@ s32 func_001163F0(EventObj *arg) {
     data = arg->unk1C;
     if (func_0010F878(data, 1) == 1) {
         func_0010F860(data, 1);
-        func_0010F8B0(data);
+        effObjInnerVecBackup(data);
     }
     return 1;
 }

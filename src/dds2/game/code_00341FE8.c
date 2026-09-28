@@ -63,7 +63,7 @@ INCLUDE_ASM(const s32, "game/code_00341FE8", func_00342388);
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003423B8);
 
-void func_003423E8(s32 id) {
+void soundReleaseMidiTrack(s32 id) {
     u32 packet[4];
     if (func_00342168(id) != 0) {
         packet[0] = id;

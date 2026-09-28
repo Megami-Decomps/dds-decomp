@@ -4,7 +4,7 @@ extern s32 D_00438E8C;
 
 extern u64 func_0010D650(u64);
 
-extern u64 func_0023A170(u64);
+extern u64 mdlFlagTest(u64);
 
 u32 func_0010D848(s32 arg0) {
     return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_00438E8C + 0xb4) + 0x18);
@@ -46,7 +46,7 @@ u32 func_0010D910(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
-    temp_v0 = func_0023A170(temp_v0);
+    temp_v0 = mdlFlagTest(temp_v0);
     func_0010D818(temp_v0);
     return 1;
 }
@@ -55,7 +55,7 @@ u32 func_0010D940(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
-    func_0023A0F0(temp_v0);
+    mdlFlagSet(temp_v0);
     return 1;
 }
 
@@ -63,6 +63,6 @@ u32 func_0010D968(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
-    func_0023A130(temp_v0);
+    mdlFlagClear(temp_v0);
     return 1;
 }

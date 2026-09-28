@@ -128,7 +128,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00196040);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00196180);
 
-void func_00196270(SlotTab *tab, s32 idx) {
+void effInitSlotTail(SlotTab *tab, s32 idx) {
     Slot60 *slot = &tab->slots[idx];
 
     slot->unk5C = 0.05f;
@@ -167,7 +167,7 @@ void func_00196FE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00196FF0);
 
-Work30 *func_00197050(void) {
+Work30 *effGetCh70Params(void) {
     return &D_003B21B0;
 }
 
@@ -179,19 +179,19 @@ void func_00197070(void) {
     D_00436461 = 0;
 }
 
-void func_00197078(BDCommon2C *src) {
+void effCopyCh71Common(BDCommon2C *src) {
     D_00438F10->common = *src;
 }
 
-u32 func_001970D8(void) {
+u32 effGetCh71Work(void) {
     return D_00438F10;
 }
 
-void func_001970E0(u32 arg) {
+void effSetCh71Id(u32 arg) {
     D_00438F10->unk2C = arg;
 }
 
-void func_001970F0(void) {
+void effInitCh71Id(void) {
     D_00438F10->unk2C = func_00159BB8(2);
 }
 
@@ -203,19 +203,19 @@ void func_00197128(void) {
     D_00436462 = 0;
 }
 
-void func_00197130(BDCommon2C *src) {
+void effCopyCh72Common(BDCommon2C *src) {
     D_00438F0C->common = *src;
 }
 
-u32 func_00197190(void) {
+u32 effGetCh72Work(void) {
     return D_00438F0C;
 }
 
-void func_00197198(u32 arg) {
+void effSetCh72Id(u32 arg) {
     D_00438F0C->unk2C = arg;
 }
 
-void func_001971A8(void) {
+void effInitCh72Id(void) {
     D_00438F0C->unk2C = func_00159BB8(2);
 }
 
@@ -227,19 +227,19 @@ void func_001971E0(void) {
     D_00436466 = 0;
 }
 
-void func_001971E8(BDCommon2C *src) {
+void effCopyCh76Common(BDCommon2C *src) {
     D_00438F18->common = *src;
 }
 
-u32 func_00197248(void) {
+u32 effGetCh76Work(void) {
     return D_00438F18;
 }
 
-void func_00197250(u32 arg) {
+void effSetCh76Id(u32 arg) {
     D_00438F18->unk2C = arg;
 }
 
-void func_00197260(void) {
+void effInitCh76Id(void) {
     D_00438F18->unk2C = func_00159BB8(3);
 }
 
@@ -253,7 +253,7 @@ void func_00197298(void) {
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_001972A0);
 
-Work30 *func_00197300(void) {
+Work30 *effGetCh73Params(void) {
     return &D_003B2238;
 }
 
@@ -267,7 +267,7 @@ void func_00197320(void) {
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197328);
 
-Work18 *func_00197368(void) {
+Work18 *effGetCh74Params(void) {
     return &D_003B2260;
 }
 
@@ -279,35 +279,35 @@ void func_00197388(void) {
     D_00436465 = 0;
 }
 
-void func_00197390(BDCommon24 *src) {
+void effCopyCh75Common(BDCommon24 *src) {
     D_00438F14->common = *src;
 }
 
-u32 func_001973E0(void) {
+u32 effGetCh75Work(void) {
     return D_00438F14;
 }
 
-void func_001973E8(u32 arg) {
+void effSetCh75Id(u32 arg) {
     D_00438F14->unk24 = arg;
 }
 
-void func_001973F8(void) {
+void effInitCh75Id(void) {
     D_00438F14->unk24 = func_00159BB8(0);
 }
 
-void func_00197420(void) {
+void effInitWorks(void) {
     D_00438F10 = func_0018E850(D_003B2208);
     D_00438F0C = func_0018EBC8(D_003B21D8);
     D_00438F14 = func_0018FBF8(D_003B2278);
     D_00438F18 = func_0018F098(D_003B22A0);
-    *(s32 *)func_00197248() = 4;
+    *(s32 *)effGetCh76Work() = 4;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197480);
+INCLUDE_ASM(const s32, "game/code_00195E50", effDispatchActive);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197530);
 
-Work30 *func_001975E8(void) {
+Work30 *effGetLoadDescA(void) {
     return &D_003B22D0;
 }
 
@@ -315,7 +315,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_001975F8);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197658);
 
-Work2C *func_00197710(void) {
+Work2C *effGetLoadDescB(void) {
     return &D_003B2428;
 }
 
@@ -323,7 +323,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00197720);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197788);
 
-Work2C *func_00197840(void) {
+Work2C *effGetLoadDescC(void) {
     return &D_003B25A0;
 }
 
@@ -331,7 +331,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00197850);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_001978B8);
 
-Work30 *func_00197970(void) {
+Work30 *effGetLoadDescD(void) {
     return &D_003B2778;
 }
 
@@ -339,7 +339,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00197980);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_001979E0);
 
-Work18 *func_00197A98(void) {
+Work18 *effGetLoadDescE(void) {
     return &D_003B28B8;
 }
 
@@ -347,7 +347,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00197AA8);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197AE8);
 
-Work24 *func_00197BA0(void) {
+Work24 *effGetLoadDescF(void) {
     return &D_003B29B8;
 }
 
@@ -355,7 +355,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00197BB0);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197C08);
 
-Work2C *func_00197CC0(void) {
+Work2C *effGetLoadDescG(void) {
     return &D_003B2AF8;
 }
 

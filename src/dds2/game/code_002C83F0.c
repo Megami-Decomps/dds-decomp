@@ -19,7 +19,7 @@ extern s32 D_00439000;
 
 extern s32 (*D_00438BC0)(void);
 
-void func_002C8F88(s32 arg0);
+void fileReqInit(s32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
 
@@ -33,30 +33,30 @@ INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8900);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8AC0);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8CB8);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileManDispatchDone);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8D20);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileManUpdate);
 
 u32 fileMan(void) {
-    func_002C8D20();
+    fileManUpdate();
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8EF0);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileManInit);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8F88);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqInit);
 
-void func_002C8FD8(s32 arg0) {
+void fileReqBegin(s32 arg0) {
     D_00439000 = arg0;
-    func_002C8F88(arg0);
+    fileReqInit(arg0);
     D_00457F68[arg0].unk10 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9020);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqPoll);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9118);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9140);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSize);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9168);
 

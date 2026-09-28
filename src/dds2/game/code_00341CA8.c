@@ -34,7 +34,7 @@ INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341D90);
 
 INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341DD8);
 
-void func_00341E20(s32 id, s32 volume, s32 pan) {
+void soundSetSequenceVolumePan(s32 id, s32 volume, s32 pan) {
     CmdPacket packet;
     func_003421E8(id);
     packet.unk0 = id;

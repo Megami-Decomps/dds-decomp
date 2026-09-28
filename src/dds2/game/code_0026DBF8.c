@@ -12,6 +12,10 @@ extern s32 func_0026FDC8(u32, u32);
 
 extern s32 func_00328D68(u32);
 
+void func_003297C8(u32 sprite);
+
+void func_002844E8(u32 sprite);
+
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DBF8);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
@@ -404,7 +408,9 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275358);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275510);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275598);
+void func_00275598(u32 *sprite) {
+    func_003297C8(*sprite);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002755B8);
 

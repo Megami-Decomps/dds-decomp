@@ -77,7 +77,7 @@ extern u32 D_003B2F30[];
 
 extern void func_003297C8(void *arg0);
 
-void func_0019B840(FntNode *arg0) {
+void frFontListInsert(FntNode *arg0) {
     FntNode *head = D_00452360.head;
     FntNode *next = head->next;
 
@@ -103,7 +103,7 @@ void func_0019B8B0(s32 arg0) {
     D_00436558 = arg0;
 }
 
-void func_0019B8C8(s32 arg0, s32 arg1) {
+void frFontSetEntryFlag(s32 arg0, s32 arg1) {
     FrFontEntry *entry = &D_00452720.entries[arg0 & 0xFF];
 
     entry->unk10[0] = 1;
@@ -112,7 +112,7 @@ void func_0019B8C8(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B900);
 
-s32 func_0019B928(u32 arg0) {
+s32 frFontBitLength(u32 arg0) {
     s32 count = 0;
 
     if (arg0 == 0) {
@@ -139,7 +139,7 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BE20);
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BEB8);
 
-void func_0019C0D0(void) {
+void frFontReleaseAll(void) {
     func_0019C2F8();
     func_0019C4D0(D_00452720.unk194);
     func_0019C4D0(D_00452720.unk198);
@@ -152,7 +152,7 @@ void func_0019C0D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019C130);
 
-void func_0019C238(s32 arg0) {
+void frFontFreeEntry(s32 arg0) {
     u32 idx = arg0 & 0xFF;
     FrFontEntry *entry;
 

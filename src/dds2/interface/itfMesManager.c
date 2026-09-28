@@ -164,7 +164,7 @@ void func_001A4988(s32 window, s32 arg1, s32 arg2);
 
 void func_001A4A10(s32 window, s32 arg1, s32 arg2);
 
-s32 func_001A3370(void) {
+s32 itfMesScriptSetPanelValue(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -174,7 +174,7 @@ s32 func_001A3370(void) {
     return 1;
 }
 
-s32 func_001A33C0(void) {
+s32 itfMesScriptSetWindowValue(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -184,7 +184,7 @@ s32 func_001A33C0(void) {
     return 1;
 }
 
-s32 func_001A3410(void) {
+s32 itfMesScriptActivatePanel(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -207,7 +207,7 @@ u32 func_001A3568(void) {
     return 1;
 }
 
-s32 func_001A3570(void) {
+s32 itfMesScriptSetWindowGeometry(void) {
     s32 window = func_0010D8B8();
     s32 x;
     s32 y;
@@ -223,7 +223,7 @@ s32 func_001A3570(void) {
     return 1;
 }
 
-s32 func_001A35F0(void) {
+s32 itfMesScriptToggleMessageFlag(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -237,7 +237,7 @@ s32 func_001A35F0(void) {
     return 1;
 }
 
-s32 func_001A3658(void) {
+s32 itfMesScriptSetScaledPosition(void) {
     s32 window = func_0010D8B8();
     s32 x;
     s32 y;
@@ -251,7 +251,7 @@ s32 func_001A3658(void) {
     return 1;
 }
 
-s32 func_001A36C0(void) {
+s32 itfMesScriptSetDefaultBounds(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -261,7 +261,7 @@ s32 func_001A36C0(void) {
     return 1;
 }
 
-s32 func_001A3700(void) {
+s32 itfMesScriptToggleHighFlags(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -277,7 +277,7 @@ s32 func_001A3700(void) {
     return 1;
 }
 
-s32 func_001A3780(void) {
+s32 itfMesScriptSetMessageOption(void) {
     s32 window = func_0010D8B8();
 
     if (window < 0) {
@@ -287,7 +287,7 @@ s32 func_001A3780(void) {
     return 1;
 }
 
-s32 func_001A37D0(void) {
+s32 itfMesScriptSetMessagePair(void) {
     s32 window = func_0010D8B8();
     s32 first;
     s32 second;
@@ -301,7 +301,7 @@ s32 func_001A37D0(void) {
     return 1;
 }
 
-s32 func_001A3838(void) {
+s32 itfMesScriptSetMessageRange(void) {
     s32 window = func_0010D8B8();
     s32 first;
     s32 second;
@@ -335,13 +335,13 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3A18);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3C28);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3CC8);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesCleanupWindow);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3DA8);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3EE0);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4008);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesResetWindow);
 
 void func_001A4090(s32 arg0, u32 arg1) {
     *(u32 *)((s32)D_0045296C[arg0].mes + 0x4c) = arg1;
@@ -539,7 +539,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5670);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5760);
 
-ItfMesNode *func_001A5880(ItfMesNode *node) {
+ItfMesNode *itfMesGetLastNode(ItfMesNode *node) {
     while (node->next != NULL) {
         node = node->next;
     }
@@ -596,7 +596,7 @@ void func_001A5A80(int param_1,u32 param_2)
   return;
 }
 
-s32 func_001A5AD0(ItfMesNode *node) {
+s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     s32 best = 0;
 
     while (node != NULL) {

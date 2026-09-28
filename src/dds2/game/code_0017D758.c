@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u32 func_0017AC70(u32);
+extern u32 effPcpScatterResCreate(u32);
 
-extern u32 func_0017AD10(u32);
+extern u32 effPcpScatterResAddRef(u32);
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
 
@@ -21,7 +21,7 @@ void func_0017D9E0(u32 arg0) {
 
     temp_v0 = (s32)arg0;
     if (*(s32 *)(temp_v0 + 0x7c) != 0) {
-        func_0017ACC0(*(s32 *)(temp_v0 + 0x7c));
+        effPcpScatterResRelease(*(s32 *)(temp_v0 + 0x7c));
     }
     func_00333918(*(u32 *)(temp_v0 + 0x74));
     func_003297C8(*(u32 *)(temp_v0 + 0x78));
@@ -33,14 +33,14 @@ INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DA28);
 void func_0017DC78(s32 arg0, u32 arg1) {
     u32 temp_v0;
 
-    temp_v0 = func_0017AC70(arg1);
+    temp_v0 = effPcpScatterResCreate(arg1);
     *(u32 *)(arg0 + 0x7c) = temp_v0;
 }
 
 void func_0017DCA8(s32 arg0, s32 arg1) {
     u32 temp_v0;
 
-    temp_v0 = func_0017AD10(*(u32 *)(arg1 + 0x7c));
+    temp_v0 = effPcpScatterResAddRef(*(u32 *)(arg1 + 0x7c));
     *(u32 *)(arg0 + 0x7c) = temp_v0;
 }
 

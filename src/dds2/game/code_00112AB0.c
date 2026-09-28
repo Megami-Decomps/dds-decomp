@@ -19,7 +19,7 @@ u32 func_00112B80(u32 arg0) {
     s32 temp_v0;
     u32 temp_v1;
 
-    func_0010F798();
+    effObjInnerCreate();
     temp_v0 = func_00328D68(0x90);
     *(s32 *)((s32)arg0 + 0x18) = temp_v0;
     temp_v1 = func_001119D0(arg0);

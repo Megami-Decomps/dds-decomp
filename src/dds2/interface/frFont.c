@@ -41,12 +41,12 @@ extern FrFontGlyph *D_004528B4[];
 
 extern s32 func_00100400(void);
 
-extern FrFontGlyph *func_0019D848(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2);
+extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2);
 
 /* Triple word block with one getter per word. */
 typedef struct FrFontSave {
     u32 unk0; /* 0x0: read by func_00194978 */
-    u32 unk4; /* 0x4: read by func_00194988 */
+    u32 unk4; /* 0x4: read by effAllocSubWork */
     u32 unk8; /* 0x8: read by func_00194998 */
 } FrFontSave;
 
@@ -98,6 +98,19 @@ extern FrFontSys D_00452720;
 
 extern FrFontGlyph *func_0019C4D0(FrFontGlyph *arg0);
 
+typedef struct TextStyleNode {
+    u8 pad00[4];
+    u32 x;
+    u32 y;
+    u8 pad0C[4];
+    u32 color;
+    u8 pad14[8];
+    struct TextStyleNode *firstChild;
+    u8 pad20[4];
+    struct TextStyleNode *next;
+    struct TextStyleNode *nextChild;
+} TextStyleNode;
+
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2A8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2F8);
@@ -113,7 +126,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019C4D0);
 s32 func_0019C5B0(FrFontGlyph *arg0) {
     FrFontGlyph **slot = &D_004528B4[func_00100400() & 0xFF];
 
-    *slot = func_0019D848(*slot, arg0, 0);
+    *slot = frFontLinkGlyph(*slot, arg0, 0);
     return 0;
 }
 
@@ -145,7 +158,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019CAB0);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019CB30);
 
-void func_0019CC28(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 arg5) {
+void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 arg5) {
     arg0->u14.b[1] = arg2;
     arg0->u14.b[0] = arg3;
     arg0->u14.b[2] = arg5;
@@ -162,7 +175,7 @@ void func_0019CC28(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 a
     arg0->unk28 = NULL;
 }
 
-void func_0019CC70(FrFontGlyph *arg0) {
+void frFontInitGlyph(FrFontGlyph *arg0) {
     arg0->u0.b.b0 = -0x80;
     arg0->unk4 = 0;
     arg0->unk8 = 0;
@@ -224,7 +237,14 @@ void func_0019D110(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D120);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D178);
+void func_0019D178(TextStyleNode *entry, u32 color) {
+    for (; entry != NULL; entry = entry->next) {
+        TextStyleNode *child;
+        for (child = entry->firstChild; child != NULL; child = child->nextChild) {
+            child->color = color;
+        }
+    }
+}
 
 void func_0019D1D0(s32 arg0) {
     arg0 |= D_00436564;
@@ -258,7 +278,7 @@ s32 func_0019D7E0(void) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D830);
 
-FrFontGlyph *func_0019D848(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
+FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
     if (arg0 == NULL) {
         return arg1;
     }
@@ -280,7 +300,7 @@ void func_0019D8A8(u32 arg0) {
 }
 
 void func_0019D8C8(void) {
-    func_0019C238(8);
+    frFontFreeEntry(8);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D8E0);
@@ -317,7 +337,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DE70);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DEE0);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019E050);
+INCLUDE_ASM(const s32, "interface/frFont", frFontCreateContext);
 
 void func_0019E0A0(u32 *arg0) {
     s8 temp_v0;
@@ -335,7 +355,7 @@ void func_0019E0A0(u32 *arg0) {
         temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
     }
     else {
-        func_0019E050();
+        frFontCreateContext();
         temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
     }
     if (temp_v0 != '\0') {

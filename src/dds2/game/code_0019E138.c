@@ -100,7 +100,7 @@ u32 func_0019E138(TextStream *stream) {
     return (b + 0xFF) & 0xFF;
 }
 
-u32 func_0019E160(TextStream *stream) {
+u32 readEncodedTextCode(TextStream *stream) {
     u32 first;
     u32 second;
 
@@ -156,19 +156,19 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EEE8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EF38);
 
-void func_0019F048(void) {
+void loadStaffFonts(void) {
     func_0019BE20(4, "/font/staff1.fnt");
     func_0019BE20(5, "/font/staff2.fnt");
 }
 
 void func_0019F078(void) {
-    func_0019C238(4);
-    func_0019C238(5);
+    frFontFreeEntry(4);
+    frFontFreeEntry(5);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F098);
 
-void func_0019F0E8(u8 *output, const char *input) {
+void convertFontText(u8 *output, const char *input) {
     s32 i;
     s32 length = strlen(input);
 
@@ -200,7 +200,7 @@ void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     func_0019D110(temp_v0, arg2 << 4);
     func_0019D178(temp_v0, arg3);
     func_0019D058(temp_v0, 0xfffffffffffffffc);
-    func_0019D848(arg5, temp_v0, 0);
+    frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F280);
@@ -229,7 +229,7 @@ void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     func_0019D100(temp_v0, arg0, arg1);
     func_0019D110(temp_v0, arg2 << 4);
     func_0019D178(temp_v0, arg3);
-    func_0019D848(arg5, temp_v0, 0);
+    frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F940);
@@ -298,7 +298,7 @@ u32 func_001A02D0(s32 arg0) {
     return 1;
 }
 
-void func_001A02F0(void) {
+void loadBackgroundSprite(void) {
     u32 resource;
     u64 buffer = func_00343ED0("/sprite/bg00.tmx", &resource, 0);
 
@@ -334,7 +334,7 @@ u32 func_001A0458(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0490);
 
-TextPoolNode *func_001A04F0(TextPool *pool) {
+TextPoolNode *acquireTextPoolNode(TextPool *pool) {
     TextPoolNode *node = pool->firstFree;
     TextPoolNode *next;
 
@@ -360,7 +360,7 @@ TextPoolNode *func_001A04F0(TextPool *pool) {
     return node;
 }
 
-void func_001A0558(TextPoolNode *node, TextPool *pool) {
+void releaseTextPoolNode(TextPoolNode *node, TextPool *pool) {
     TextPoolNode *previous = node->previous;
     TextPoolNode *next = node->next;
 
@@ -388,7 +388,7 @@ void func_001A0558(TextPoolNode *node, TextPool *pool) {
     }
 }
 
-void func_001A05B0(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
+void scaleTextVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
                    s32 w, const TextVector *input, s32 count) {
     while (count > 0) {
         s32 x = scaleX * input->x;
@@ -408,7 +408,7 @@ void func_001A05B0(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
     }
 }
 
-void func_001A0630(TextStyleNode *entry, u32 color) {
+void setTextStyleColor(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -417,7 +417,7 @@ void func_001A0630(TextStyleNode *entry, u32 color) {
     }
 }
 
-void func_001A0688(TextStyleNode *entry, u32 color) {
+void setTextStyleColorBits(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -426,7 +426,7 @@ void func_001A0688(TextStyleNode *entry, u32 color) {
     }
 }
 
-void func_001A06D8(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
+void translateTextStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
     for (; entry != NULL; entry = entry->next) {
         entry->x += xOffset;
         entry->y += yOffset;

@@ -2,6 +2,8 @@
 
 extern s32 func_00101958();
 
+extern s64 func_002C4038(s32, s32 *, u64, u64);
+
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AAEA0);
 
 u32 func_002AAF40(void) {

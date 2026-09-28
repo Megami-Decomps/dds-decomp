@@ -6,7 +6,7 @@ extern s64 func_0026C768(void);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-extern s32 func_00105B68(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_00101958();
 
@@ -37,7 +37,7 @@ extern void func_002971C0(s32, u32);
 extern void func_002958B0();
 
 s32 func_00261E10(void) {
-    s32 temp_v0 = func_00105B68();
+    s32 temp_v0 = kwlnFadeIsActive();
 
     if (temp_v0 != 0) {
         return 0;
@@ -45,7 +45,7 @@ s32 func_00261E10(void) {
     return func_0026C768() == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00261E40);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtInstallStateTable);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00261E80);
 
@@ -55,25 +55,25 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00261F48);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262190);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_002621E8);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtSetupDispatchSync);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00262230);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtInstallStateTableB);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262270);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_002622A8);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtSelectStateAction);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262330);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262598);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_002625F0);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtSetupDispatchSyncB);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00262638);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtInstallStateTableC);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262678);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_002626B8);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtSelectStateActionB);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262740);
 
@@ -93,9 +93,9 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00262DB8);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262E10);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00262E58);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtInstallStateTableD);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00262E98);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtEnableStateFlag);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262EF0);
 
@@ -140,15 +140,15 @@ u32 func_002636F8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00263728);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtQueryStateProgress);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_002637E0);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00263838);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtSetupDispatchSyncE);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263880);
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_002638B8);
+INCLUDE_ASM(const s32, "game/code_00261E10", evtAdvanceStateStage);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263920);
 

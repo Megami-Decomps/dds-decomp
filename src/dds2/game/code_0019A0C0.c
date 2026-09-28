@@ -94,7 +94,7 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A2E0);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A5D8);
 
-void func_0019A7D8(EffChan *dst, f32 *src) {
+void effCopyVertRows(EffChan *dst, f32 *src) {
     f32 *s;
     u32 i;
     f32 *d2;
@@ -117,7 +117,7 @@ void func_0019A7D8(EffChan *dst, f32 *src) {
     } while (i < 4);
 }
 
-void func_0019A838(EffEmit *arg0) {
+void effFillRandRecords(EffEmit *arg0) {
     EffPrim *e = arg0->unk8;
     u32 mod = e->unk48;
     u32 count = e->unk44;
@@ -145,7 +145,7 @@ void func_0019A838(EffEmit *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A900);
 
-void func_0019AA18(EffPrim *arg0) {
+void effFreeBuffers(EffPrim *arg0) {
     if (arg0 != NULL) {
         if (arg0->unk14 != NULL) {
             func_003297C8(arg0->unk4);
@@ -154,7 +154,7 @@ void func_0019AA18(EffPrim *arg0) {
     }
 }
 
-s32 func_0019AA68(void *arg0, EffPrim *arg1) {
+s32 effAdvancePrimCursor(void *arg0, EffPrim *arg1) {
     s32 ret = 1;
     f32 pos = arg1->unk24;
     u32 idx = arg1->unk20;
@@ -183,7 +183,7 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD68);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD78);
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD80);
+INCLUDE_ASM(const s32, "game/code_0019A0C0", effBuildAndDispatch);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
 
@@ -193,7 +193,7 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B120);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B1F0);
 
-void *func_0019B2E0(void *arg0, u32 arg1) {
+void *effCreateChannel(void *arg0, u32 arg1) {
     void *buf = NULL;
     void *mem;
     EffChan *p;
@@ -215,7 +215,7 @@ void *func_0019B2E0(void *arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B358);
 
-s32 func_0019B378(void *arg0, EffChan *arg1) {
+s32 effAdvanceChanCursor(void *arg0, EffChan *arg1) {
     s32 ret = 1;
     f32 pos = arg1->unk10;
     u32 idx = arg1->unkC;
@@ -238,20 +238,20 @@ s32 func_0019B378(void *arg0, EffChan *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B418);
 
-void func_0019B520(EffChan *arg0) {
+void effClearChanCursor(EffChan *arg0) {
     arg0->unkC = 0;
     arg0->unk10 = 0;
 }
 
-void func_0019B530(EffChan *arg0, f32 arg1) {
+void effSetChanStep(EffChan *arg0, f32 arg1) {
     arg0->unk14 = arg1;
 }
 
-void *func_0019B538(void) {
+void *effGetFontListHead(void) {
     return D_00452360;
 }
 
-s32 func_0019B548(void) {
+s32 effGetFontListCount(void) {
     return D_00452378[0];
 }
 

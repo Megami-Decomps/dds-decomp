@@ -76,11 +76,11 @@ extern void func_00342538(s32 arg0);
 
 extern void func_00342580(u32 arg0);
 
-extern void func_00341E20(s32 arg0, s32 arg1, s32 arg2);
+extern void soundSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern void func_00341C78(u32 arg0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250010);
+INCLUDE_ASM(const s32, "game/code_00250010", evtCreateTask);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250080);
 
@@ -135,13 +135,13 @@ void func_00250228(void) {
     D_004373CC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250238);
+INCLUDE_ASM(const s32, "game/code_00250010", evtDestroySkyTask);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250278);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002502E0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250300);
+INCLUDE_ASM(const s32, "game/code_00250010", evtCreateFrameVariableTask);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250338);
 
@@ -173,7 +173,10 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002508D0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250A08);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250B50);
+s32 drawFrameChangeLabel(s32 target, s32 x, s32 y) {
+    func_0032CEE8(target, func_0033D810(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250BA0);
 
@@ -281,7 +284,10 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423FE0);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", jtbl_00423FF0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00254200);
+s32 drawCutFlagMenuLabel(s32 target, s32 x, s32 y) {
+    func_0032CEE8(target, func_0033D810(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
+    return 2;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424020);
 
@@ -305,7 +311,10 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00424090);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254940);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00254C90);
+s32 drawMotionChangeMenuLabel(s32 target, s32 x, s32 y) {
+    func_0032CEE8(target, func_0033D810(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254CE0);
 
@@ -530,7 +539,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00259298);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259428);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002594A0);
+INCLUDE_ASM(const s32, "game/code_00250010", writeEventGroupHeader);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259518);
 
@@ -550,7 +559,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002598D0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259958);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002599E0);
+INCLUDE_ASM(const s32, "game/code_00250010", writeEventGroupMetadata);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259A60);
 
@@ -610,7 +619,7 @@ s32 func_0025CC90(s32 arg0, s32 arg1) {
     return ((temp_v0 + 0x100) << 0x10) + arg1;
 }
 
-s32 func_0025CCC8(s32 id) {
+s32 evtPreloadBgm(s32 id) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -620,14 +629,14 @@ s32 func_0025CCC8(s32 id) {
     return sound;
 }
 
-s32 func_0025CD10(s32 id) {
+s32 evtIsBgmLoaded(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 1;
     }
     return func_00342168(func_0025CC90(id, 0)) == 1;
 }
 
-s32 func_0025CD50(s32 id, s32 fade) {
+s32 evtPlayBgm(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -638,9 +647,9 @@ s32 func_0025CD50(s32 id, s32 fade) {
     return sound;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_0025CDA8);
+INCLUDE_ASM(const s32, "game/code_00250010", evtTransitionBgm);
 
-s32 func_0025CE10(s32 id, s32 fade) {
+s32 evtFadeInBgm(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -661,13 +670,13 @@ s32 func_0025CE68(s32 id, s32 fade) {
     return sound;
 }
 
-s32 func_0025CEB0(s32 id, s32 fade) {
+s32 evtSetBgmVolumePan(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
     sound = func_0025CC90(id, fade);
-    func_00341E20(sound, 0x7F, 0x3F);
+    soundSetSequenceVolumePan(sound, 0x7F, 0x3F);
     return sound;
 }
 
@@ -681,18 +690,18 @@ s32 func_0025CF00(s32 id, s32 fade) {
     return sound;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_0025CF48);
+INCLUDE_ASM(const s32, "game/code_00250010", evtFormatTaskName);
 
-void func_0025CF70(u32 arg0) {
+void evtFindTaskById(u32 arg0) {
     u8 temp_v0 [32];
 
-    func_0025CF48(arg0, temp_v0);
+    evtFormatTaskName(arg0, temp_v0);
     func_00101740(temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025CF98);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_0025CFD0);
+INCLUDE_ASM(const s32, "game/code_00250010", evtGetTaskData);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025D008);
 

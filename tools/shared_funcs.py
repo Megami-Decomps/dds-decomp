@@ -565,10 +565,10 @@ def finish(dst, ported, skipped):
             skipped.append(f"{rel}:{name}: ported C differs from {dst.version} retail; reverted")
         path.write_text(text)
         # A ported declaration can change how the unit's other functions compile.
-        if ported[rel] and subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path)],
+        if rel in originals and subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path)],
                                           capture_output=True).returncode:
             path.write_text(originals[rel])
-            skipped.append(f"{rel}: still not clean after reverting; all {ported[rel]} ports undone")
+            skipped.append(f"{rel}: still not clean after reverting; all ports undone")
             ported[rel] = 0
     for p, n in sorted(ported.items()):
         if n:

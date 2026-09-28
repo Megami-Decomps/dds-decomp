@@ -30,8 +30,8 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C1D0);
 
 void func_0026C240(void) {
     func_00106810(0, 0, 0);
-    func_00106C28(0);
-    func_00106E60(0);
+    drawSetupC70B(0);
+    drawEnableCd0(0);
     func_00196FE8();
     func_00197070();
     func_00197388();
@@ -62,7 +62,7 @@ s32 func_0026C3E0(u8 *arg0, u8 *arg1) {
     return (temp_A < temp_B) ? -1 : 0;
 }
 
-s32 func_0026C408(u8 *buffer, s32 length, u8 excluded) {
+s32 compactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     s32 i;
     s32 count = 0;
     for (i = 0; i < length; i++) {
@@ -105,7 +105,7 @@ s32 func_0026C618(s32 arg0) {
         return 0;
     }
     D_00437888 = arg0;
-    D_0043788D = func_0026C668();
+    D_0043788D = getActiveSoundMode();
     return 1;
 }
 
@@ -119,7 +119,7 @@ s8 func_0026C660(void) {
     return D_0043788C;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C668);
+INCLUDE_ASM(const s32, "game/code_0026C1D0", getActiveSoundMode);
 
 s8 func_0026C6A0(void) {
     return D_0043788D;
@@ -130,11 +130,11 @@ u32 func_0026C6A8(s32 arg0) {
 
     temp_v0 = 0;
     if (-1 < D_00437880) {
-        func_001A2E88(D_00437880, 0);
+        itfPanelSetStatus(D_00437880, 0);
         if (arg0 != 0) {
             func_001A34D0(D_00437880);
         }
-        func_001A3CC8(D_00437880, 0);
+        itfMesCleanupWindow(D_00437880, 0);
         func_0026C948(1);
         D_00437884 = 0;
         temp_v0 = 1;
@@ -150,14 +150,14 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C728);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C768);
 
-s32 func_0026C7B0(void) {
+s32 updateActiveSoundMode(void) {
     if (D_00437880 < 0) {
         return 0;
     }
-    if (func_001A3310(D_00437880) < 0) {
+    if (itfPanelGetPairFirst(D_00437880) < 0) {
         return 0;
     }
-    D_0043788D = func_0026C668();
+    D_0043788D = getActiveSoundMode();
     return 1;
 }
 
@@ -181,7 +181,7 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C948);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C9B8);
 
-s32 func_0026CA00(s32 task) {
+s32 isTaskInActiveStates(s32 task) {
     if (func_00101700(task) == 1) {
         return 1;
     }
@@ -211,7 +211,7 @@ u32 func_0026CAA8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CAD0);
 
-s32 func_0026CB00(void) {
+s32 activateCurrentEventFlag(void) {
     s32 index = func_0010D650(0);
     if (index >= 16) {
         index = 15;

@@ -4,6 +4,8 @@ extern s32 func_00169440(void);
 
 extern s32 func_00169438(void);
 
+extern u32 D_003AB050[];
+
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001696D0);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169710);
@@ -44,4 +46,6 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169F68);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169FF0);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_0016A0E8);
+u32 func_0016A0E8(s32 arg0) {
+    return D_003AB050[arg0];
+}

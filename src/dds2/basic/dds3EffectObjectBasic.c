@@ -8,7 +8,7 @@ extern u64 func_001578C0(void);
 
 extern u64 func_001599F8(u64, u64);
 
-extern u64 func_00159978(u64, u64);
+extern u64 billCreateIndexed(u64, u64);
 
 extern u64 func_00159A50(u32);
 
@@ -71,7 +71,7 @@ void func_00114E58(s32 arg0, u64 arg1, u64 arg2) {
 void func_00114EA0(u64 arg0, u64 arg1, u64 arg2) {
     u64 temp_v0;
 
-    temp_v0 = func_00159978(1, arg0);
+    temp_v0 = billCreateIndexed(1, arg0);
     func_00114D80(temp_v0, arg1, arg2);
 }
 
@@ -98,7 +98,7 @@ void func_00115020(s32 arg0, u64 arg1, u64 arg2) {
 void func_00115068(u64 arg0, u64 arg1, u64 arg2) {
     u64 temp_v0;
 
-    temp_v0 = func_00159978(0, arg0);
+    temp_v0 = billCreateIndexed(0, arg0);
     func_00114F50(temp_v0, arg1, arg2);
 }
 
@@ -162,7 +162,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115B20);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115B58);
 
-s32 func_00115B98(EffectObj *obj) {
+s32 effObjGetIntParam(EffectObj *obj) {
     void *p;
 
     if (func_00115B20(obj) == NULL) {

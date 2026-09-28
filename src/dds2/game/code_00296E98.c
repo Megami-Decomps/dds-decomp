@@ -2,7 +2,7 @@
 
 extern u8 D_0043798A;
 
-extern s32 func_00105B68(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002C6CE8(void);
 
@@ -15,6 +15,8 @@ extern void func_002971C0(s32, u32);
 extern s8 D_0043798B;
 
 extern s8 D_00437989;
+
+extern s8 D_00437988;
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00296E98);
 
@@ -145,7 +147,19 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00299748);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_002997F8);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299868);
+s32 func_00299868(void) {
+    s32 state = D_00437988;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        D_00437988 = 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_002998A0);
 
@@ -154,7 +168,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_002998D8);
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299988);
 
 s32 func_00299A00(void) {
-    if (func_00105B68() != 0) {
+    if (kwlnFadeIsActive() != 0) {
         return 0;
     }
     return func_002C6CE8() != 1;

@@ -22,6 +22,18 @@ extern void func_00230960(s32);
 
 extern s32 D_003B6940[];
 
+extern s32 func_00230978(void);
+
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+
+typedef struct {
+    void (*initialize)(s32);
+    s32 (*update)(s32);
+    s32 flags;
+} SceneInitializer;
+
+extern SceneInitializer D_003B6938[];
+
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C7FF8);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8078);
@@ -331,9 +343,15 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2A78);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2C10);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2C40);
+u32 func_001D2C40(void) {
+    if (func_00230978() != 0) {
+        kwlnFadeInStart(0, 0, 0, 0);
+        return 2;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2C80);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", setBattleScene);
 
 void func_001D2CD0(u32 arg0) {
     s32 temp_v0;
@@ -342,13 +360,13 @@ void func_001D2CD0(u32 arg0) {
     *(u32 *)(temp_v0 + 0x230) = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2CF8);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", updateBattleScene);
 
 void func_001D2D78(void) {
     s32 temp_v0;
 
     temp_v0 = func_001AA6F8();
-    func_001D2C80(1);
+    setBattleScene(1);
     *(u32 *)(temp_v0 + 0x230) = 0;
 }
 
@@ -367,7 +385,25 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2F40);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3018);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3098);
+s32 func_001D3098(u8 *object) {
+    u32 flags = *(u32 *)(*(u8 **)(object + 0x18) + 0x110) & 0xE00;
+    s32 result;
+    switch (flags) {
+    case 0x200:
+        result = 1;
+        break;
+    case 0x400:
+        result = 2;
+        break;
+    case 0x800:
+        result = 3;
+        break;
+    default:
+        result = 0;
+        break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D30E0);
 

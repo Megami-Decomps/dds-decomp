@@ -10,7 +10,7 @@ extern u32 D_0043908C;
 
 extern u32 D_00439090;
 
-extern s32 func_0023A170(u32);
+extern s32 mdlFlagTest(u32);
 
 extern s32 func_00101740(u32);
 
@@ -67,10 +67,10 @@ void func_0030AB20(s32 arg0) {
     D_004388AC = 1;
     D_00439090 = 0;
     D_004388B0 = 0;
-    temp_v0 = func_0023A170(0x1c);
+    temp_v0 = mdlFlagTest(0x1c);
     temp_v1 = 3;
     if (temp_v0 == 0) {
-        temp_v0 = func_0023A170(0x13);
+        temp_v0 = mdlFlagTest(0x13);
         temp_v1 = 2;
         if (temp_v0 == 0) {
             temp_v1 = 1;

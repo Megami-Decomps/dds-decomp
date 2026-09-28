@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u64 func_0016AEB0(u64, u64);
+extern u64 effParamTableGetBlock(u64, u64);
 
-extern u32 func_0017AD10(u32);
+extern u32 effPcpScatterResAddRef(u32);
 
 /* Shared resource handed between scatter effects. func_00173018 creates it,
    func_001730B8 takes a reference, func_00173068 releases it. */
@@ -17,7 +17,7 @@ extern void *func_00328D68(s32 size);
 
 extern u32 func_0032C138(u32 resId);
 
-extern PcpScatterRes *func_0017AC70(u32 resId);
+extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -86,15 +86,15 @@ void func_001787E0(u64 arg0) {
     u64 temp_v1;
     u64 temp_v2;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
-    temp_v2 = func_0016AEB0(arg0, 2);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
+    temp_v2 = effParamTableGetBlock(arg0, 2);
     func_001784F8(temp_v0, temp_v1, temp_v2);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178848);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178938);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseParticleGroup);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001789C0);
 
@@ -119,15 +119,15 @@ void func_00179438(u64 arg0) {
     u64 temp_v1;
     u64 temp_v2;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
-    temp_v2 = func_0016AEB0(arg0, 2);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
+    temp_v2 = effParamTableGetBlock(arg0, 2);
     func_001791A8(temp_v0, temp_v1, temp_v2);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001794A0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179590);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseSharedParticles);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179618);
 
@@ -151,15 +151,15 @@ void func_0017A058(u64 arg0) {
     u64 temp_v1;
     u64 temp_v2;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
-    temp_v2 = func_0016AEB0(arg0, 2);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
+    temp_v2 = effParamTableGetBlock(arg0, 2);
     func_00179DB0(temp_v0, temp_v1, temp_v2);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A0C0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A1C0);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseLinkedParticles);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A248);
 
@@ -178,7 +178,7 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A8C0);
 
 void func_0017A9C8(s32 arg0) {
     if (*(s32 *)(arg0 + 0x30) != 0) {
-        func_0017ACC0(*(s32 *)(arg0 + 0x30));
+        effPcpScatterResRelease(*(s32 *)(arg0 + 0x30));
     }
     func_00333918(*(u32 *)(arg0 + 0x28));
     func_003297C8(*(u32 *)(arg0 + 0x2c));
@@ -189,14 +189,14 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AA08);
 void func_0017ABE0(s32 arg0, u32 arg1) {
     u32 temp_v0;
 
-    temp_v0 = func_0017AC70(arg1);
+    temp_v0 = effPcpScatterResCreate(arg1);
     *(u32 *)(arg0 + 0x30) = temp_v0;
 }
 
 void func_0017AC10(s32 arg0, s32 arg1) {
     u32 temp_v0;
 
-    temp_v0 = func_0017AD10(*(u32 *)(arg1 + 0x30));
+    temp_v0 = effPcpScatterResAddRef(*(u32 *)(arg1 + 0x30));
     *(u32 *)(arg0 + 0x30) = temp_v0;
 }
 
@@ -208,7 +208,7 @@ s32 func_0017AC58(s32 arg0, s32 arg1) {
     return *(s32 *)(arg0 + 0x24) + arg1 * 0x18;
 }
 
-PcpScatterRes *func_0017AC70(u32 resId)
+PcpScatterRes *effPcpScatterResCreate(u32 resId)
 {
     PcpScatterRes *res;
 
@@ -218,9 +218,9 @@ PcpScatterRes *func_0017AC70(u32 resId)
     return res;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017ACC0);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterResRelease);
 
-u32 func_0017AD10(u32 arg0) {
+u32 effPcpScatterResAddRef(u32 arg0) {
     *(s32 *)((s32)arg0 + 4) = *(s32 *)((s32)arg0 + 4) + 1;
     return arg0;
 }
@@ -259,7 +259,7 @@ void func_0017B738(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x180) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B740);
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterTransformMatrix);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B7A0);
 
@@ -267,8 +267,8 @@ void func_0017B9D0(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
     func_0017B7A0(temp_v0, temp_v1);
 }
 
@@ -311,8 +311,8 @@ void func_0017C4D8(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
     func_0017C2D8(temp_v0, temp_v1);
 }
 
@@ -355,8 +355,8 @@ void func_0017D078(u64 arg0) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0016AEB0(arg0, 0);
-    temp_v1 = func_0016AEB0(arg0, 1);
+    temp_v0 = effParamTableGetBlock(arg0, 0);
+    temp_v1 = effParamTableGetBlock(arg0, 1);
     func_0017CE88(temp_v0, temp_v1);
 }
 

@@ -66,9 +66,9 @@ INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F518);
 
 INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F640);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F718);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjNodeDestroy);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F798);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerCreate);
 
 void func_0010F810(s32 arg0) {
     s32 temp_v0;
@@ -94,7 +94,7 @@ u8 func_0010F878(s32 arg0, u32 arg1) {
     return (*(u32 *)(arg0 + 0xc0) & arg1) != 0;
 }
 
-void func_0010F888(EEF0Node *arg0) {
+void effObjInnerVecInit(EEF0Node *arg0) {
     u8 *p40 = (u8 *)arg0 + 0x40;
     u8 *p50;
     u8 *p60;
@@ -136,23 +136,23 @@ void func_0010F888(EEF0Node *arg0) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F8B0);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerVecBackup);
 
-void func_0010F8E8(EEF0Node *arg0, f32 fparg0) {
+void effObjSetInnerFloat(EEF0Node *arg0, f32 fparg0) {
     arg0->inner->unkC4 = fparg0;
 }
 
-f32 func_0010F8F8(EEF0Node *arg0) {
+f32 effObjGetInnerFloat(EEF0Node *arg0) {
     return arg0->inner->unkC4;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F908);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjSetInnerFirstVec);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F938);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjSetInnerSecondVec);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F968);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjSetInnerThirdVec);
 
-void func_0010F998(EEF0Node *arg0) {
+void effObjFetchInnerFirstVec(EEF0Node *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x40;
 
     __asm__ volatile (
@@ -166,9 +166,9 @@ void func_0010F998(EEF0Node *arg0) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F9B0);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjFetchInnerSecondVecNorm);
 
-void func_0010F9D0(EEF0Node *arg0) {
+void effObjFetchInnerThirdVec(EEF0Node *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x60;
 
     __asm__ volatile (
@@ -181,11 +181,11 @@ void func_0010F9D0(EEF0Node *arg0) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F9E8);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjAddInnerFirstVec);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010FA20);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjQuatMulInnerSecondVec);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010FA70);
+INCLUDE_ASM(const s32, "game/code_0010F118", effObjMulInnerThirdVec);
 
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D70);
 

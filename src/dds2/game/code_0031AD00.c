@@ -2,6 +2,8 @@
 
 extern u32 *D_00438940;
 
+void mdlBroadcastMasked(u32 sprite);
+
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AD00);
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031ADD8);

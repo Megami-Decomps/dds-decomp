@@ -15,13 +15,31 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00306F80);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307160);
+s32 func_00307160(s32 object, s32 key) {
+    s32 entry = func_00304AD8(object);
+    s32 result;
+
+    if (*(s32 *)(entry + 0x30) == 0) {
+        func_00307018(object, key);
+    }
+    result = func_003056B0(object, key, entry);
+    if (result == 0) {
+        result = *(s32 *)(object + 0x28);
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003071D0);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307270);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003072E8);
+void func_003072E8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
+    s32 object = func_00304AD8(a, b);
+    *(s32 *)(object + 0x50) = x;
+    *(s32 *)(object + 0x54) = y;
+    *(s32 *)(object + 0x58) = width;
+    *(s32 *)(object + 0x5c) = height;
+}
 
 void func_00307340(s32 arg0, s32 arg1) {
     u32 *puVar1;
@@ -109,11 +127,17 @@ void func_00308608(QuadU32 *q, u32 value) {
     q->w = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308620);
+void func_00308620(u32 a, u32 b, u32 c, u32 value, u32 e, u32 f, u32 g, u32 h) {
+    u32 rgb[3] = {value, value, value};
+    func_00308650(a, b, c, rgb, e, f, g, h);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308650);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003087D8);
+void func_003087D8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g, u32 h) {
+    u32 rgba[4] = {value, value, value, value};
+    func_00308828(a, b, c, d, e, rgba, g, h);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308808);
 
@@ -123,7 +147,10 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_003089B8);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003089D8);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308AC8);
+void func_00308AC8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value) {
+    u32 range[2] = {value, value};
+    func_00308AF0(a, b, c, d, e, f, range);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308AF0);
 
@@ -169,11 +196,25 @@ s32 func_00309200(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309230);
+s32 setWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
+    s32 child;
+    if (object == 0) {
+        return 0;
+    }
+    *(u32 *)(object + 0xc) = (*(u32 *)(object + 0xc) & ~2) | flags;
+    child = *(s32 *)(object + 0x18);
+    if (child != 0) {
+        s32 node = *(s32 *)(child + 0x20);
+        if (node != 0) {
+            *(u32 *)(node + 0xc) |= 2;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309278);
 
-void func_00309390(u8 *work, s32 columns, s32 rows) {
+void setGridDimensions(u8 *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 
@@ -199,7 +240,20 @@ u32 func_003093D0(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309418);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309480);
+void expandWidgetColumnWidth(s32 columns, u8 *work) {
+    s32 flags = *(s32 *)(work + 0xc);
+    s32 width;
+    if (flags & 0x100) {
+        columns += 4;
+        if (flags & 0x200) {
+            columns += 2;
+        }
+    }
+    width = columns * 12 + 6;
+    if (*(s32 *)(work + 0x28) < width) {
+        *(s32 *)(work + 0x28) = width;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003094C8);
 

@@ -61,6 +61,8 @@ extern ConsNode *D_00438AB0;
 
 extern void *func_00328D68(s32 size);
 
+extern void func_00330768(u32 object);
+
 void func_00336B48(void) {
     __asm__ volatile (
         ".set noreorder               \n"
@@ -319,7 +321,19 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003395A0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003396D0);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A018);
+void func_0033A018(u8 **context, u8 *source) {
+    u32 *objects = *(u32 **)(*context + 12);
+    u16 *indices = (u16 *)(source + 24);
+    if ((*(u16 *)(source + 22) & 0x800) != 0) {
+        s32 count = *indices;
+        if (count != 0) {
+            indices++;
+            do {
+                func_00330768(objects[*indices++]);
+            } while (--count != 0);
+        }
+    }
+}
 
 void func_0033A090(u32 arg0) {
     D_00439188 = arg0;
@@ -344,14 +358,14 @@ u32 func_0033A170(void) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A178);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A220);
+INCLUDE_ASM(const s32, "game/code_00336B48", consCreateDrawPacket);
 
 u32 func_0033A290(u32 arg0, s32 arg1) {
     func_0032D460(arg0, (arg1 >> 4) - 2);
     return arg0;
 }
 
-s32 func_0033A2C0(s32 width, s32 height) {
+s32 consCalculateDrawPacketSize(s32 width, s32 height) {
     return (width * height + 2) << 4;
 }
 
@@ -399,7 +413,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AFC0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B050);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B4B0);
+INCLUDE_ASM(const s32, "game/code_00336B48", initGeometryDmaPacket);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B530);
 
@@ -453,7 +467,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA58);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA88);
 
-void func_0033CB90(void) {
+void devConsInit(void) {
     if (D_00438AB4 == 0) {
         D_00438AB4 = 1;
         D_00439194 = func_0032C138(D_00370B80);
@@ -461,7 +475,7 @@ void func_0033CB90(void) {
 }
 
 u32 func_0033CBC8(void) {
-    func_0033CB90();
+    devConsInit();
     return D_00439194;
 }
 
@@ -469,7 +483,7 @@ u32 *func_0033CBE8(void) {
     return D_0040B810;
 }
 
-void func_0033CBF8(ConsNode *arg0) {
+void devConsListInsert(ConsNode *arg0) {
     ConsNode *head = D_00438AB0;
 
     arg0->next = NULL;
@@ -480,15 +494,15 @@ void func_0033CBF8(ConsNode *arg0) {
     D_00438AB0 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CC18);
+INCLUDE_ASM(const s32, "game/code_00336B48", devConsListRemove);
 
-void func_0033CC48(u32 arg0) {
-    func_0033CC18();
+void devConsNodeDestroy(u32 arg0) {
+    devConsListRemove();
     func_003297C8(*(u32 *)((s32)arg0 + 0x18));
     func_00328E48(arg0);
 }
 
-void func_0033CC78(s32 arg0) {
+void devConsNodeClear(s32 arg0) {
     *(u16 *)(arg0 + 0x10) = 0;
     *(u16 *)(arg0 + 0x12) = 0;
     memset(*(u32 *)(arg0 + 0x1c), 0,
@@ -497,11 +511,11 @@ void func_0033CC78(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CCB0);
 
-ConsNode *func_0033CCC8(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
+ConsNode *devConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     ConsNode *node;
     u32 h;
 
-    func_0033CB90();
+    devConsInit();
     node = func_00328D68(0x20);
     node->unk8 = arg0;
     node->unkA = arg1;
@@ -513,8 +527,8 @@ ConsNode *func_0033CCC8(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     h = func_003292A8((arg2 * arg3) * 2);
     node->unk18 = h;
     node->unk1C = (u8 *)func_003298F8(h);
-    func_0033CC78(node);
-    func_0033CBF8(node);
+    devConsNodeClear(node);
+    devConsListInsert(node);
     return node;
 }
 

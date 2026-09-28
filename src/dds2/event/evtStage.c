@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00112A90(void);
+extern s32 objGetSlot1Data(void);
 
 extern s32 func_0010FFE8(void);
 
@@ -27,7 +27,7 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0023ACE8);
 void func_0023AD98(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00112A90();
+    temp_v0 = objGetSlot1Data();
     if (temp_v0 != 0) {
         func_00117810(temp_v0);
         return;
@@ -37,7 +37,7 @@ void func_0023AD98(void) {
 void func_0023ADD0(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00112A90();
+    temp_v0 = objGetSlot1Data();
     if (temp_v0 != 0) {
         func_00117820(temp_v0);
         return;

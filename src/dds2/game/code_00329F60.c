@@ -206,7 +206,7 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B500);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B558);
 
-void func_0032B5B0(SdfTex *arg0) {
+void sdfTexListInsert(SdfTex *arg0) {
     arg0->unk0 = NULL;
     if (D_004389F8 != NULL) {
         arg0->unk4 = D_004389F8;

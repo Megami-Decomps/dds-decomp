@@ -75,8 +75,6 @@ typedef struct ScrVmOperand {
     s8 s55;            // 0x55
 } ScrVmOperand; // 0x56
 
-extern void func_0030BD10(void);
-
 extern void func_0030D2D8(void);
 
 extern void func_0030D350(void);
@@ -90,6 +88,10 @@ extern u32 func_00312188(u32, u32, u32);
 extern void func_003123D0(void *, void *);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
+extern void func_0030BD10();
+
+extern void func_003139D8();
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030B7D0);
 
@@ -285,7 +287,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030E010);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030E030);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030E0C8);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", releaseLocalMapResources);
 
 void func_0030E130(void) {
     s32 temp_v0;
@@ -368,7 +370,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030EF90);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F038);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F0F8);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", loadMapResource);
 
 u32 func_0030F160(s32 *arg0) {
     if (*arg0 != 0) {
@@ -424,11 +426,11 @@ void func_0030F8A8(float arg0, float *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F8D0);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F938);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", vectorLength);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F968);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", normalizedVectorDot);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030FA08);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", vec3AngleBetween);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030FA28);
 
@@ -490,18 +492,18 @@ float func_00310B60(float *arg0, float *arg1) {
                   (*arg0 * arg1[1] - arg0[1] * *arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310BA8);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", vec4ArcCosDot);
 
 float func_00310BC8(float *arg0) {
     return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
                   arg0[3] * arg0[3];
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310BF8);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionMagnitude);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310C18);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionInverse);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310CB0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionNormalize);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310D28);
 
@@ -511,7 +513,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310EB0);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310FD0);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003110F0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionBlendNormalize);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311178);
 
@@ -551,7 +553,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311F20);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003120B8);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312130);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", destroyTaskWork);
 
 void func_00312178(s32 arg0, s32 arg1) {
     if (arg1 != 0) {
@@ -608,18 +610,18 @@ u8 func_00312710(s32 arg0) {
     return temp_v0;
 }
 
-s32 func_00312738(u32 name) {
+s32 kwlnTaskExists(u32 name) {
     return func_00101740(name) != 0;
 }
 
-void func_00312758(u8 *work, u32 *item) {
+void attachTaskItem(u8 *work, u32 *item) {
     u32 result = func_00312188(*(u32 *)(work + 0xc), *item, func_00312A48(item));
     if (*(u32 *)(work + 0x10) == 0) {
         *(u32 *)(work + 0x10) = result;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003127B0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", removeTaskItem);
 
 s32 func_003127E8(void *p, s32 key) {
     void *r;
@@ -667,7 +669,7 @@ void func_00312F58(ShortPair2C *p, s32 a, s32 b) {
     p->h2E = b;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312F68);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", destroyGridWork);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312FB0);
 
@@ -843,7 +845,7 @@ void func_00314C68(s32 arg0) {
     memset(arg0 + 0x58, 0, 0x154);
 }
 
-s32 func_00314C88(u8 *work, u16 index) {
+s32 setScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
     func_00314C48((s32)work, index, &word, &shift);
     *(u32 *)(work + 0x58 + word * 4) |= 1U << shift;
@@ -913,7 +915,7 @@ s32 func_00315098(s32 arg0, s32 arg1) {
     return 0;
 }
 
-s32 func_003150D8(u8 *work, u16 key) {
+s32 findScriptSlot(u8 *work, u16 key) {
     u32 index;
     u16 *entries = (u16 *)(work + 0x22);
     for (index = 0; index < 24; index++) {
@@ -948,8 +950,8 @@ u16 func_00315170(s32 arg0, s32 arg1, u16 arg2) {
     return temp_v0;
 }
 
-s32 func_00315188(u8 *work, u16 key) {
-    s32 index = func_003150D8(work, key);
+s32 removeScriptSlot(u8 *work, u16 key) {
+    s32 index = findScriptSlot(work, key);
     if (index >= 0) {
         *(u16 *)(work + 0x22 + index * 2) = 0;
         return 1;

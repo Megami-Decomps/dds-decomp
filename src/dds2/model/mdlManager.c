@@ -8,7 +8,7 @@ extern u32 func_00343F38(u64);
 
 extern u32 D_00438F90;
 
-extern u64 func_00231220(void);
+extern u64 battleFindGroupedEntity(void);
 
 extern s32 func_00232928(void);
 
@@ -58,14 +58,14 @@ typedef struct MdlNode {
 
 extern u32 D_003C86B4[][2];
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231690);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlClearSlotAndRelease);
 
-void func_002316C8(MdlCtx *ctx, s32 id) {
+void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     MdlNode *node = (MdlNode *)ctx->inner->list;
 
     while (node != NULL) {
         if (node->unk28 == id) {
-            func_00231690(ctx, node);
+            mdlClearSlotAndRelease(ctx, node);
             break;
         }
         node = node->next;
@@ -77,7 +77,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00231718);
 void func_002317E0(u64 arg0, u64 arg1, u64 arg2) {
     u64 temp_v0;
 
-    temp_v0 = func_00231220();
+    temp_v0 = battleFindGroupedEntity();
     func_00231718(temp_v0, arg2);
 }
 
@@ -114,7 +114,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00231A80);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231AF8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231B50);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlBuildPrefixedString);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231B80);
 
@@ -142,27 +142,27 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00232778);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002327C0);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002328B8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlAddEntryFlagged);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002328D8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlAddEntryPlain);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002328F8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlAddEntryFlaggedEx);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232910);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlAddEntryPlainEx);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232928);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232970);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlGetNodeField2C);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002329A0);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlGetNodeField2E);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002329C8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlGetNodeInt1C);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002329F8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlCheckNodeByte30);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232A30);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlGetNodeFloat20);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232A58);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlSetNodeFloat20);
 
 /* These shims transfer vectors between model state and VU0 registers. */
 void func_00232A88(MdlCtx *ctx) {
@@ -227,13 +227,13 @@ void func_00232B68(u32 arg0, u32 arg1) {
 
     for (puVar1 = *(u32 **)((s32)arg0 + 0x14); puVar1 != (u32 *)0x0;
             puVar1 = (u32 *)*puVar1) {
-        func_002350D0(arg0, puVar1, arg1);
+        setModelResourceFrame(arg0, puVar1, arg1);
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232BC0);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlBroadcastMasked);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232BF8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlBroadcastValue);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232C18);
 
@@ -259,7 +259,7 @@ void func_00232E80(s32 arg0) {
     }
 }
 
-u8 func_00232EC8(void) {
+u8 mdlHasNode(void) {
     s64 temp_v0;
 
     temp_v0 = func_00232928();
@@ -278,11 +278,11 @@ u32 func_00232F08(void) {
     return 8;
 }
 
-u32 func_00232F10(s32 idx) {
+u32 mdlGetTableWord(s32 idx) {
     return D_003C86B4[idx][0];
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232F28);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlGetNodeRefHalf);
 
 void func_00232F58(s32 arg0) {
     func_00333060(*(u32 *)(*(s32 *)(arg0 + 0x18) + 8));
@@ -290,7 +290,7 @@ void func_00232F58(s32 arg0) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232F78);
 
-s32 func_00233098(MdlCtx *ctx) {
+s32 mdlIsInnerSentinel(MdlCtx *ctx) {
     s32 r = 0;
 
     if ((u8)ctx->unk10 == 1) {

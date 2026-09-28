@@ -30,6 +30,10 @@ typedef struct CfSrc {
     float f3C;         // 0x3C
 } CfSrc; // 0x40
 
+extern char D_0042D4D0[];
+
+extern s32 func_00101740(const char *arg0);
+
 void func_00316E08(RgbAlpha *p, u32 color) {
     p->rgb18 = color & 0xFFFFFF;
     p->alpha38 = color >> 24;
@@ -60,7 +64,9 @@ void func_00316E70(void) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316E78);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00316ED0);
+u8 func_00316ED0(void) {
+    return func_00101740(D_0042D4D0) != 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
 
