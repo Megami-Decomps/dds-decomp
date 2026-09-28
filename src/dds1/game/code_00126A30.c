@@ -3,6 +3,8 @@
 #include "pcp_vu0.h"
 
 extern void func_00127028(u32, u32);
+extern s32 D_0032E3C0[];
+extern void func_00131D88(void);
 extern void func_00123EE8(void);
 extern void func_00126A30(u32, u32, s32);
 
@@ -18,8 +20,8 @@ extern s32 D_003BADEC;
 extern u32 D_003BAD78;
 
 extern u32 D_003BAD7C;
-extern u32 D_003BAD80;
-extern u32 D_003BAD84;
+extern f32 D_003BAD80;
+extern s32 D_003BAD84;
 
 extern s32 D_003BAD68;
 extern u32 D_003BAD6C;
@@ -69,7 +71,7 @@ extern u32 D_003BAE28;
 extern s32 D_003BAE3C;
 extern u32 D_003BAE64;
 extern u32 D_0032E428[];
-extern u32 D_0032E3B0[];
+extern s32 D_0032E3B0[];
 extern u32 D_0032E538[];
 extern u32 D_0032E544[];
 extern u32 D_0032E570[];
@@ -603,7 +605,23 @@ typedef struct {
 extern void func_002D4010(u64);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129728);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001297E8);
+extern void func_002D4038(u64, u64);
+extern u64 *func_002E13E0(u64, s32);
+void func_001297E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    u64 command = func_002D3FD0(0x20);
+    u64 packet;
+    u64 *data;
+    FieldBufferDescriptor *descriptor;
+
+    func_002D4010(command);
+    packet = func_002D3FD0(0x30);
+    data = func_002E13E0(packet, 0x30);
+    data[4] = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    data[5] = 0x47;
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129900);
 
@@ -625,7 +643,43 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A5D8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A890);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AA20);
+extern s32 func_002D2300(s32);
+extern s32 func_002D2308(s32);
+extern void consInitDmaPacketHeader(u64, s32, s32);
+extern void func_002D40A8(u64, u64);
+extern void func_002DD708(f32);
+extern void initGeometryDmaPacket(u64, f32 *);
+extern void func_002E2680(u64, u8 *, s32, u8 *, u8 *);
+extern void func_002D4038(u64, u64);
+void func_0012AA20(s32 arg0, u8 *arg1) {
+    u64 command = func_002D3FD0(0x20);
+    u64 header;
+    u64 packet;
+    f32 mat[16];
+    FieldBufferDescriptor *descriptor;
+
+    func_002D4010(command);
+    header = func_002D3FD0(0x20);
+    consInitDmaPacketHeader(header, func_002D2300(arg0), func_002D2308(arg0));
+    func_002D40A8(command, header);
+    func_002DD708(*(f32 *)(arg1 + 0x44));
+    __asm__ volatile(
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 16(%0)\n"
+        "sqc2 vf30, 32(%0)\n"
+        "sqc2 vf31, 48(%0)\n"
+        ".set reorder"
+        : : "r"(mat) : "memory");
+    packet = func_002D3FD0(0x38);
+    initGeometryDmaPacket(packet, mat);
+    func_002D4038(command, packet);
+    packet = func_002D3FD0(0x80);
+    func_002E2680(packet, arg1, *(s32 *)(arg1 + 0x40), arg1 + 0x10, arg1 + 0x20);
+    func_002D4038(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 extern s32 func_00100518(void);
 extern u8 D_00326ED0[];
@@ -1084,8 +1138,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EEA0);
 
 extern s32 D_003BAB50;
 extern void func_00136DA0(f32 *);
-extern void effObjSetInnerFirstVec(u32, f32 *);
-extern void effObjFetchInnerFirstVec(u32);
 
 typedef struct {
     u8 pad0[0x84];
@@ -1345,11 +1397,48 @@ void func_00131D88(void) {
     D_003BAD6C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131DE8);
+void func_00131DE8(void *src) {
+    D_003BAD78 = 0x80;
+    memcpy(D_003BAD5C, src, 0xE000);
+    func_00131D88();
+    if (D_0032E3C0[0] >= 2 && D_0032E3C0[0] < 100 && D_003BD7C4 == 0) {
+        D_003BD7C4 = func_002EB028(D_003A0100, &D_003BD7C8, 0);
+        D_003BAD70 = func_002D3288((void *)D_003BD7C8);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0100);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131F08);
+extern f32 func_002E77F8(f32);
+void func_00131F08(void) {
+    D_003BAD84 = 0;
+    switch (D_003BAD7C) {
+    case 1:
+        D_003BAD80 += 0.1f;
+        D_003BAD84 = func_002E77F8(D_003BAD80) * 32.0f;
+        break;
+    case 2:
+        D_003BAD80 += 0.2f;
+        D_003BAD84 = func_002E77F8(D_003BAD80) * 32.0f;
+        break;
+    case 3:
+        D_003BAD80 += 0.05f;
+        D_003BAD84 = func_002E77F8(D_003BAD80) * 32.0f;
+        break;
+    case 4:
+        D_003BAD80 += 0.1f;
+        D_003BAD84 = func_002E77F8(D_003BAD80) * 48.0f;
+        break;
+    case 5:
+        D_003BAD80 += 0.2f;
+        D_003BAD84 = func_002E77F8(D_003BAD80) * 48.0f;
+        break;
+    case 6:
+        D_003BAD80 += 0.05f;
+        D_003BAD84 = func_002E77F8(D_003BAD80) * 48.0f;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00132010);
 
@@ -1439,7 +1528,26 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00133EC0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001340E0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001342B0);
+extern s32 D_003BADE0;
+s32 func_001342B0(s32 fade, s32 color, s32 alpha) {
+    s32 scaled;
+
+    if (fade < 0) {
+        fade = 0;
+    }
+    scaled = alpha * D_003BADE0 / 100;
+    if (fade < 0xE0) {
+        return color | (scaled << 24);
+    }
+    scaled = (1.0f - (f32)(fade - 0xE0) * 0.00390625f) * scaled;
+    if (scaled < 0) {
+        scaled = 0;
+    }
+    if (scaled > 0x80) {
+        scaled = 0x80;
+    }
+    return color | (scaled << 24);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 
@@ -1761,7 +1869,25 @@ s32 func_0013DB28(void) {
     return D_00337D12[D_003BAE64 * 54];
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DB58);
+static inline s32 fldTestBits(u32 flags, u32 mask) {
+    return (flags & mask) != 0;
+}
+s32 func_0013DB58(s32 arg0) {
+    u8 *entry = D_00337D00 + D_003BAE64 * 108;
+
+    if (arg0 == 0 && *(s8 *)entry == 1) {
+        if (*(s16 *)(entry + 0x12) == 5 || *(s16 *)(entry + 0x14) == 5 || *(s16 *)(entry + 0x12) == 6
+            || *(s16 *)(entry + 0x14) == 6 || *(s16 *)(entry + 0x12) == 7 || *(s16 *)(entry + 0x14) == 7
+            || *(s16 *)(entry + 0x12) == 8 || *(s16 *)(entry + 0x14) == 8) {
+            return 0x28;
+        }
+        return 0x14;
+    }
+    if (arg0 == 1) {
+        return fldTestBits(entry[0x54], 8);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DC08);
 
