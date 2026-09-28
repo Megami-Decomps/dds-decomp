@@ -38,10 +38,13 @@ typedef struct SoundTask {
     u8 status;
     u8 unk_11[0xF];
     u16 taskId;
-    u8 unk_22[0x2A];
+    u8 unk_22[0x1E];
+    u64 owner;
+    u32 unk_48;
     union {
         void (*update)(void);
         s32 (*playSound)(u32 *);
+        u32 (*command)(s32);
     } callback;
 } SoundTask;
 
@@ -225,7 +228,30 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DDB60);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DF700);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DF7B8);
+typedef struct {
+    u8 unk00[0x40];
+    void *indices;
+    u32 unk44;
+    u64 previous;
+    u8 unk50[0x18];
+    u32 device;
+    u32 command;
+} BattleIndexWork;
+
+extern void *allocateBattleIndexList(s32);
+extern u32 func_003292A8(s32);
+extern u32 func_003298F8(u32);
+extern void func_001DF700(BattleIndexWork *);
+
+void func_001DF7B8(BattleIndexWork *work) {
+    u32 command;
+    work->indices = allocateBattleIndexList(13);
+    command = func_003292A8(0x48EC);
+    work->device = func_003298F8(command);
+    work->command = command;
+    work->previous = 0;
+    func_001DF700(work);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DF810);
 
@@ -305,7 +331,28 @@ u32 func_001E0B50(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0B70);
+typedef struct {
+    void *actor;
+    s32 option;
+} SoundTaskArgs;
+
+extern SoundTask *func_001E1468(s32);
+extern SoundTaskArgs *func_001E14F8(s32);
+
+SoundTask *func_001E0B70(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x56;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E0B50;
+    task->unk_48 = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0BF8);
 
@@ -342,8 +389,8 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1368);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1468);
 
-u32 func_001E14F8(s32 arg0) {
-    return *(u32 *)(arg0 + 0x54);
+SoundTaskArgs *func_001E14F8(s32 arg0) {
+    return *(SoundTaskArgs **)(arg0 + 0x54);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1500);
@@ -504,7 +551,29 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3720);
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004179E0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E37A8);
+typedef struct {
+    u8 unk00[0x110];
+    u32 flags;
+    u8 unk114[0x10];
+    u16 objectId;
+} BattleEntryHeader;
+
+extern s32 getEntryFlagsUnlessDisabled(const void *);
+
+s32 func_001E37A8(BattleEntryHeader *entry) {
+    if (!(entry->flags & 0x400)) {
+        return 0;
+    }
+    switch (entry->objectId) {
+    case 0x109: case 0x10A: case 0x110: case 0x111: case 0x112:
+    case 0x119: case 0x11D: case 0x11E: case 0x11F: case 0x120:
+    case 0x121: case 0x127: case 0x12E: case 0x12F: case 0x131:
+    case 0x132: case 0x133: case 0x134: case 0x135: case 0x136:
+        return 2;
+    default:
+        return (getEntryFlagsUnlessDisabled((u8 *)entry + 0x120) >> 14) & 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3810);
 
@@ -695,7 +764,22 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7378);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7438);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E74A0);
+extern u32 func_001E7438(s32);
+
+SoundTask *func_001E74A0(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x27;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E7438;
+    task->unk_48 = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 u32 func_001E7528(u32 *arg0) {
     func_001E21A0(*arg0);
@@ -856,6 +940,7 @@ u32 func_001E9008(u32 arg0) {
     *(u32 *)(temp_v0 + 0x180) = *(u32 *)(temp_v0 + 0x180) | 0x80000;
     return 1;
 }
+
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9058);
 
@@ -1140,7 +1225,19 @@ void func_001EC768(u32 arg0) {
     func_001F35C8(arg0, (s32)arg0 + 0x30, (s32)arg0 + 0xc0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EC788);
+typedef struct {
+    u8 unk00[0x674];
+    s32 (*allowDefaultSound)(void *);
+} SoundEventCallbacks;
+extern void func_001F3888(void *, void *, void *);
+
+void func_001EC788(void *actor) {
+    SoundEventCallbacks *callbacks = (SoundEventCallbacks *)func_001AA6F8();
+    if (callbacks->allowDefaultSound && callbacks->allowDefaultSound(actor)) {
+        return;
+    }
+    func_001F3888(actor, (u8 *)actor + 0x30, (u8 *)actor + 0xC0);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EC7E8);
 
@@ -1292,6 +1389,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F4F10);
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5018);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5230);
+
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F52D0);
 
@@ -2065,6 +2163,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206EA8);
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00207268);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00207438);
+
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_002076E0);
 
