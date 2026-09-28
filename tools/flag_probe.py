@@ -48,7 +48,7 @@ def probe(unit: Path, func: str, candidate: Path, options=OPTIONS):
         src.write_text(source)
         for opt in [""] + options:
             r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(unit), "--func", func,
-                                "--source", str(src), "--cflags", opt], capture_output=True, text=True)
+                                "--source", str(src), f"--cflags={opt}"], capture_output=True, text=True)
             if re.search(rf"^OK\s+{func}\b", r.stdout, re.M):
                 if opt == "":
                     return ["(default: matches without any option)"]

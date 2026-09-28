@@ -16,6 +16,15 @@ typedef struct CmdPkt {
     s32 unkC; /* 0xC */
 } CmdPkt;
 
+typedef struct DevRequest {
+    s32 handle;
+    s16 flags;
+    u16 count;
+    s16 stride;
+    u16 mode;
+    s32 buffer;
+} DevRequest;
+
 typedef struct DevState {
     struct DevState *unk0; /* 0x0 */
     struct DevState *unk4; /* 0x4 */
@@ -88,7 +97,7 @@ extern s32 func_002CF440(s32 arg0, s32 arg1, s32 arg2);
 extern s32 func_002CF670(const char *arg0);
 extern void *func_002CFEB8(s32 size);
 extern void func_002CFF98(void *ptr);
-extern s32 func_002D03F8(void);
+extern s32 func_002D03F8(s32 size);
 extern void func_002D0750(s32 arg0, s32 arg1);
 extern s32 func_002D0A48(s32 arg0);
 extern s32 func_002D0A60(s32 arg0);
@@ -462,9 +471,35 @@ s32 func_002E7568(s32 arg0) {
     return acc;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E75A0);
+s32 func_002E75A0(s32 number) {
+    s32 shift = 0;
+    s32 bcd = 0;
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E75F0);
+    while (number > 0) {
+        s32 quotient = number / 10;
+        bcd |= (number - quotient * 10) << shift;
+        number = quotient;
+        shift += 4;
+    }
+    return bcd;
+}
+
+DevRequest *func_002E75F0(s32 count, s32 stride, s32 mode) {
+    DevRequest *request = func_002CFEB8(sizeof(*request));
+
+    request->mode = mode;
+    request->flags = 0;
+    request->count = count;
+    request->stride = stride;
+    if (count != 0) {
+        request->handle = func_002D03F8(stride * count);
+        request->buffer = func_002D0A48(request->handle);
+    } else {
+        request->handle = 0;
+        request->buffer = 0;
+    }
+    return request;
+}
 
 void func_002E7680(s32 *arg0) {
     func_002D0918(*arg0);

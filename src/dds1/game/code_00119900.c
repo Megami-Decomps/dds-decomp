@@ -50,16 +50,24 @@ extern s32 func_00119368(s32 arg0, s32 arg1);
 extern u8 func_001A1438(void);
 extern f32 func_001A4598(void);
 extern u32 func_001A4630(void);
-extern void func_001A92D0(u32 arg0);
-extern void func_001A93B8(u32 arg0);
-extern void func_001A94A0(u32 arg0);
+extern s32 func_001A92D0(u32 arg0);
+extern s32 func_001A93B8(u32 arg0);
+extern s32 func_001A94A0(u32 arg0);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 func_0021F600(s32 arg0);
 extern s32 func_002E83F8(u32 arg0, u32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119900);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_001199B0);
+s32 func_001199B0(s32 index, s32 limit) {
+    if ((u32)(index - 0x80) < 0x20) {
+        return func_0021F600(index + 0x980) != 0;
+    }
+    if (*(u8 *)(index + D_003BAA00 + 0x12A0) < limit) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119A00);
 
@@ -405,7 +413,19 @@ void func_0011C550(void) {
     func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x678));
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011C580);
+void func_0011C580(void) {
+    s32 value;
+    s32 roll;
+
+    if ((*(u16 *)D_003C2E7C[0] & 0x20) == 0) {
+        roll = func_002E83F8(0, 0x20);
+        value = roll != 0 ? 10 : 0x80;
+    } else {
+        roll = func_002E83F8(0, 0x30);
+        value = roll != 0 ? 0 : 0x80;
+    }
+    func_0010D5F0(value);
+}
 
 void func_0011C5D8(void) {
     func_0010D5F0(*(s16 *)(D_003BAA18 + *(u16 *)(D_003C2E78[0] + 4) * 20));

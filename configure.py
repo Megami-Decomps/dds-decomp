@@ -97,6 +97,9 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     if not force and stamp.exists() and stamp.read_text() == digest and (ROOT / "asm" / version).exists():
         return
     print(f"splat: {version}")
+    # splat never deletes files: a unit or rodata split that moved leaves stale
+    # asm behind (and include_rodata.py would include it twice).
+    shutil.rmtree(ROOT / "asm" / version, ignore_errors=True)
     subprocess.run([sys.executable, "-m", "splat", "split", str(yaml)], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
