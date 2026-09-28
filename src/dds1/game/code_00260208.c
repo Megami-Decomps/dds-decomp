@@ -16,49 +16,62 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00260208);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260370);
 
-void func_00260530(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+typedef struct {
+    u32 value;
+    u32 mode;
+} MenuCommand;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 1;
+typedef struct {
+    u8 pad00[0x30];
+    MenuCommand *command; /* 0x30 */
+    u8 pad34[0x74];
+    u32 elapsed;          /* 0xA8 */
+    u32 duration;         /* 0xAC */
+} MenuCommandWork;
+
+void func_00260530(MenuCommandWork *work, u32 value) {
+    MenuCommand *command;
+
+    command = work->command;
+    if (command != (MenuCommand *)0x0) {
+        command->value = value;
+        command->mode = 1;
     }
 }
 
-void func_00260550(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00260550(MenuCommandWork *work, u32 value) {
+    MenuCommand *command;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 2;
+    command = work->command;
+    if (command != (MenuCommand *)0x0) {
+        command->value = value;
+        command->mode = 2;
     }
 }
 
-void func_00260570(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00260570(MenuCommandWork *work, u32 value) {
+    MenuCommand *command;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 1;
+    command = work->command;
+    if (command != (MenuCommand *)0x0) {
+        command->value = value;
+        command->mode = 1;
     }
 }
 
-void func_00260590(s32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00260590(MenuCommandWork *work, u32 value) {
+    MenuCommand *command;
 
-    puVar1 = *(u32 **)(arg0 + 0x30);
-    if (puVar1 != (u32 *)0x0) {
-        *puVar1 = arg1;
-        puVar1[1] = 2;
+    command = work->command;
+    if (command != (MenuCommand *)0x0) {
+        command->value = value;
+        command->mode = 2;
     }
 }
 
-void func_002605B0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xac) = arg1;
-    *(u32 *)(arg0 + 0xa8) = 0;
+void func_002605B0(MenuCommandWork *work, u32 duration) {
+    work->duration = duration;
+    work->elapsed = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_002605C0);

@@ -108,12 +108,23 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253830);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253AD0);
 
+typedef struct {
+    u8 pad00[0x59C];
+    u16 entryX; /* 0x59C */
+    u16 entryY; /* 0x59E */
+} SceneMetadataContext;
+
+typedef struct {
+    u8 pad00[0xC];
+    u16 entryIndex; /* 0x0C */
+} SceneMetadataNode;
+
 void updateSceneEntryMetadata(s32 context) {
-    s32 node = *(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
-    u16 index = *(u16 *)(node + 0xC);
-    *(u16 *)(context + 0x59C) = D_0036BE38[index].unk4;
-    index = *(u16 *)(node + 0xC);
-    *(u16 *)(context + 0x59E) = D_0036BE38[index].unk6;
+    SceneMetadataNode *node = (SceneMetadataNode *)*(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
+    u16 index = node->entryIndex;
+    ((SceneMetadataContext *)context)->entryX = D_0036BE38[index].unk4;
+    index = node->entryIndex;
+    ((SceneMetadataContext *)context)->entryY = D_0036BE38[index].unk6;
 }
 
 s32 resetSceneState(void) {

@@ -25,15 +25,26 @@ INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E240);
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E388);
 
+typedef struct {
+    s32 allocation;    /* 0x00 */
+    u8 pad04[0x2C];
+    s32 lifetime;      /* 0x30 */
+    s32 owner;         /* 0x34 */
+    u8 pad38[0xC];
+    u8 variant;       /* 0x44 */
+    u8 sprite;        /* 0x45 */
+    u8 pad46[2];
+} MovieSpriteResource;
+
 void *createMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
     s32 allocation = func_002D03F8(0x48);
-    u8 *resource = func_002D03F0(allocation);
+    MovieSpriteResource *resource = func_002D03F0(allocation);
     memset(resource, 0, 0x48);
-    *(s32 *)resource = allocation;
-    *(s32 *)(resource + 0x34) = owner;
-    resource[0x45] = sprite;
-    resource[0x44] = variant;
-    *(s32 *)(resource + 0x30) = (s32)(func_002E8398(0) * 30.0f + 10.0f);
+    resource->allocation = allocation;
+    resource->owner = owner;
+    resource->sprite = sprite;
+    resource->variant = variant;
+    resource->lifetime = (s32)(func_002E8398(0) * 30.0f + 10.0f);
     return resource;
 }
 

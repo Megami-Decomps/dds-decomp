@@ -1,10 +1,10 @@
 #include "common.h"
 
 typedef struct CmdPacket {
-    /* 0x0 */ u32 unk0;
+    /* 0x0 */ u32 id;
     /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u16 unkA;
+    /* 0x8 */ u16 volume;
+    /* 0xA */ u16 pan;
     /* 0xC */ u32 unkC;
 } CmdPacket;
 
@@ -51,9 +51,9 @@ u32 func_002E8F30(s32 arg0, char *arg1) {
 void soundSetSequenceVolumePan(s32 id, s32 volume, s32 pan) {
     CmdPacket packet;
     func_002E9340(id);
-    packet.unk0 = id;
-    packet.unk8 = volume;
-    packet.unkA = (u8)pan;
+    packet.id = id;
+    packet.volume = volume;
+    packet.pan = (u8)pan;
     func_002E87A8(0x90, 0, &packet, 0xC);
 }
 

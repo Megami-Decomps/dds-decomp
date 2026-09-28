@@ -2,7 +2,7 @@
 
 typedef struct SdfTexRef {
     void *unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
+    s32 refCount; /* 0x4 */
 } SdfTexRef;
 
 typedef struct SdfTexBuf {
@@ -15,14 +15,19 @@ typedef struct SdfTexBuf {
     u64 unk30; /* 0x30 */
 } SdfTexBuf;
 
+typedef struct {
+    u8 pad00[0xC];
+    u32 word; /* 0x0C */
+} SdfTexResource;
+
 typedef struct SdfTex {
-    struct SdfTex *unk0; /* 0x0 */
-    struct SdfTex *unk4; /* 0x4 */
-    SdfTexRef *unk8; /* 0x8 */
+    struct SdfTex *next; /* 0x0 */
+    struct SdfTex *prev; /* 0x4 */
+    SdfTexRef *reference; /* 0x8 */
     s16 unkC; /* 0xC */
     s16 unkE; /* 0xE */
-    void *unk10; /* 0x10 */
-    void *unk14; /* 0x14 */
+    SdfTexResource *primaryResource; /* 0x10 */
+    SdfTexResource *secondaryResource; /* 0x14 */
     u8 unk18; /* 0x18 */
     u8 unk19; /* 0x19 */
     u8 unk1A; /* 0x1A */
@@ -193,18 +198,18 @@ u8 func_002D2390(SdfTex *arg0) {
     return arg0->unk18;
 }
 
-u32 func_002D2398(SdfTex *arg0) {
+u32 func_002D2398(SdfTex *texture) {
     u32 val;
 
     val = 0;
-    if (arg0->unk14 != NULL) {
-        val = *(u32 *)((u8 *)arg0->unk14 + 0xC);
+    if (texture->secondaryResource != NULL) {
+        val = texture->secondaryResource->word;
     }
     return val;
 }
 
-u32 func_002D23B0(SdfTex *arg0) {
-    return *(u32 *)((u8 *)arg0->unk10 + 0xC);
+u32 func_002D23B0(SdfTex *texture) {
+    return texture->primaryResource->word;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D23C0);
@@ -243,15 +248,15 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2650);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D26A8);
 
-void sdfTexListInsert(SdfTex *arg0) {
-    arg0->unk0 = NULL;
+void sdfTexListInsert(SdfTex *texture) {
+    texture->next = NULL;
     if (D_003BD308 != NULL) {
-        arg0->unk4 = D_003BD308;
-        D_003BD308->unk0 = arg0;
+        texture->prev = D_003BD308;
+        D_003BD308->next = texture;
     } else {
-        arg0->unk4 = NULL;
+        texture->prev = NULL;
     }
-    D_003BD308 = arg0;
+    D_003BD308 = texture;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2728);

@@ -16,8 +16,8 @@ extern s32 CancelWakeupThread(u64);
 
 extern u64 GetThreadId(void);
 
-void func_002CF8C8(u32 arg0, u32 arg1, u32 arg2) {
-    iWakeupThread(arg2);
+void func_002CF8C8(u32 unused0, u32 unused1, u32 threadId) {
+    iWakeupThread(threadId);
 }
 
 void sleepWithAlarm(u32 delay) {
@@ -29,11 +29,11 @@ void sleepWithAlarm(u32 delay) {
 
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CF930);
 
-u32 func_002CF940(u32 base) {
-    u32 now;
+u32 func_002CF940(u32 previous) {
+    u32 current;
 
-    now = *(volatile u32 *)0x10000000;
-    return (now - base) & 0xFFFF;
+    current = *(volatile u32 *)0x10000000;
+    return (current - previous) & 0xFFFF;
 }
 
 void func_002CF958(void) {
@@ -54,17 +54,17 @@ INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CF9A8);
 
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CFA68);
 
-void func_002CFAD8(s32 arg0) {
-    u64 temp_v0;
-    s32 temp_v1;
+void func_002CFAD8(s32 count) {
+    u64 threadId;
+    s32 cancelledWakeup;
 
-    temp_v0 = GetThreadId();
-    temp_v1 = CancelWakeupThread(temp_v0);
-    arg0 = arg0 - temp_v1;
+    threadId = GetThreadId();
+    cancelledWakeup = CancelWakeupThread(threadId);
+    count = count - cancelledWakeup;
     do {
-        arg0 = arg0 - 1;
+        count = count - 1;
         SleepThread();
-    } while (0 < arg0);
+    } while (0 < count);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CFB18);

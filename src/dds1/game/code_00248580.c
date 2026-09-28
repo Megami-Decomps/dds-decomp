@@ -8,14 +8,24 @@ extern s32 dds3GetWorldObject(void);
 
 extern s32 mdlFlagTest(u32);
 
-void func_00248580(s32 arg0) {
-    func_002BD7A0(*(u32 *)(arg0 + 100));
-    func_002BD7A0(*(u32 *)(arg0 + 0x68));
+typedef struct {
+    u8 pad00[0x64];
+    u32 firstResource;   /* 0x64 */
+    u32 secondResource;  /* 0x68 */
+    u8 pad6C[0x7B4];
+    u32 panelGroup;      /* 0x820 */
+    u32 displayResource; /* 0x824 */
+    u32 effectResource;  /* 0x828 */
+} MenuVisualWork;
+
+void func_00248580(MenuVisualWork *work) {
+    func_002BD7A0(work->firstResource);
+    func_002BD7A0(work->secondResource);
 }
 
-void func_002485B0(s32 arg0) {
-    func_002BD870(*(u32 *)(arg0 + 100));
-    func_002BD870(*(u32 *)(arg0 + 0x68));
+void func_002485B0(MenuVisualWork *work) {
+    func_002BD870(work->firstResource);
+    func_002BD870(work->secondResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
@@ -108,13 +118,13 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 void func_00249930(s32 arg0) {
     clearMenuEntries(arg0 + 400);
     func_0027FA20(arg0 + 400);
-    destroyPanelGroup(*(u32 *)(arg0 + 0x820));
-    func_00283820(*(u32 *)(arg0 + 0x824));
-    func_00285160(*(u32 *)(arg0 + 0x828));
+    destroyPanelGroup(((MenuVisualWork *)arg0)->panelGroup);
+    func_00283820(((MenuVisualWork *)arg0)->displayResource);
+    func_00285160(((MenuVisualWork *)arg0)->effectResource);
 }
 
-void updateAttachedEffect(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_00285440(arg0, arg1, arg2, *(s32 *)(arg3 + 0x828));
+void updateAttachedEffect(s32 arg0, s32 arg1, s32 arg2, MenuVisualWork *work) {
+    func_00285440(arg0, arg1, arg2, work->effectResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249998);

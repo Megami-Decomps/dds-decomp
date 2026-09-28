@@ -95,6 +95,16 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00256400);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256540);
 
+typedef struct {
+    u8 pad00[0x10];
+    u32 next; /* 0x10 */
+} DspListNode;
+
+typedef struct {
+    u32 pad00[2];
+    s32 first; /* 0x08 */
+} DspListHead;
+
 s32 *func_00256B38(void) {
     s32 *temp_v0 = (s32 *)func_002CFEB8(0x14);
 
@@ -104,19 +114,19 @@ s32 *func_00256B38(void) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256B78);
 
-u32 func_00256C00(s32 arg0) {
-    u32 temp_v0;
+u32 func_00256C00(DspListNode *node) {
+    u32 next;
 
-    temp_v0 = *(u32 *)(arg0 + 0x10);
+    next = node->next;
     func_002CFF98();
-    return temp_v0;
+    return next;
 }
 
-void func_00256C28(s32 *arg0) {
-    s32 temp_v0 = arg0[2];
+void func_00256C28(DspListHead *head) {
+    s32 node = head->first;
 
-    while (temp_v0 != NULL) {
-        temp_v0 = func_00256C00(temp_v0);
+    while (node != NULL) {
+        node = func_00256C00(node);
     }
 }
 

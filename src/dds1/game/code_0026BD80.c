@@ -4,6 +4,21 @@ extern s32 D_003BC5D0;
 
 extern void func_0026C7E0();
 
+typedef struct {
+    s32 pad00[2];
+    s32 task;             /* 0x08 */
+    s32 pad0C[2];
+    s32 word14;
+    s32 pad18;
+    s32 word1C;
+    s32 pad20;
+    s32 transitionOffset; /* 0x24 */
+    s32 mode;             /* 0x28 */
+    s32 pad2C[2];
+    s32 word34;
+    s32 word38;
+} MenuState;
+
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BD80);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BE38);
@@ -37,7 +52,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C048);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C098);
 
 u8 func_0026C108(void) {
-    return *(s32 *)(D_003BC5D0 + 8) != 0;
+    return ((MenuState *)D_003BC5D0)->task != 0;
 }
 
 void func_0026C118(void) {
@@ -62,10 +77,10 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C290);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C350);
 
 void func_0026C4A8(void) {
-    s32 *temp_v0 = (s32 *)D_003BC5D0;
+    MenuState *state = (MenuState *)D_003BC5D0;
 
-    temp_v0[5] = 0;
-    temp_v0[14] = 0;
+    state->word14 = 0;
+    state->word38 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C4B8);
@@ -79,16 +94,16 @@ void func_0026CAB0(void) {
 }
 
 void menuSwapStateWords(void) {
-    s32 *temp_v0 = (s32 *)D_003BC5D0;
+    MenuState *state = (MenuState *)D_003BC5D0;
 
-    switch (temp_v0[10]) {
+    switch (state->mode) {
     case 0:
-        temp_v0[9] = 0;
-        temp_v0[10] = 1;
+        state->transitionOffset = 0;
+        state->mode = 1;
         break;
     case 1:
-        temp_v0[10] = 0;
-        temp_v0[9] = 0x6a4;
+        state->mode = 0;
+        state->transitionOffset = 0x6a4;
         break;
     }
 }
@@ -100,18 +115,18 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CD88);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D108);
 
 void func_0026D138(void) {
-    s32 *temp_v0 = (s32 *)D_003BC5D0;
+    MenuState *state = (MenuState *)D_003BC5D0;
 
-    temp_v0[13] = 0;
-    temp_v0[5] = 0;
-    temp_v0[7] = 0;
+    state->word34 = 0;
+    state->word14 = 0;
+    state->word1C = 0;
 }
 
 void func_0026D150(void) {
-    s32 *temp_v0 = (s32 *)D_003BC5D0;
+    MenuState *state = (MenuState *)D_003BC5D0;
 
-    temp_v0[13] = 0;
-    temp_v0[5] = 0;
+    state->word34 = 0;
+    state->word14 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D160);

@@ -14,6 +14,16 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BF18);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C030);
 
+typedef struct {
+    u8 pad00[0x10];
+    u32 next; /* 0x10 */
+} MenuListNode;
+
+typedef struct {
+    u32 pad00[2];
+    s32 first; /* 0x08 */
+} MenuListHead;
+
 u8 func_0025C098(s32 arg0) {
     return *(s32 *)(arg0 + 0x6c) != 0;
 }
@@ -32,13 +42,13 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C418);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C4C8);
 
-void func_0025C568(s32 *arg0) {
-    s32 temp_v0;
+void func_0025C568(s32 *frame) {
+    s32 oldFrame;
 
-    temp_v0 = *arg0;
-    *arg0 = temp_v0 + 1;
-    if (0x3c < temp_v0 + 1) {
-        *arg0 = 0;
+    oldFrame = *frame;
+    *frame = oldFrame + 1;
+    if (0x3c < oldFrame + 1) {
+        *frame = 0;
     }
 }
 
@@ -75,19 +85,19 @@ s32 *func_0025DA90(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DAD0);
 
-u32 func_0025DB58(s32 arg0) {
-    u32 temp_v0;
+u32 func_0025DB58(MenuListNode *node) {
+    u32 next;
 
-    temp_v0 = *(u32 *)(arg0 + 0x10);
+    next = node->next;
     func_002CFF98();
-    return temp_v0;
+    return next;
 }
 
-void func_0025DB80(s32 *arg0) {
-    s32 temp_v0 = arg0[2];
+void func_0025DB80(MenuListHead *head) {
+    s32 node = head->first;
 
-    while (temp_v0 != NULL) {
-        temp_v0 = func_0025DB58(temp_v0);
+    while (node != NULL) {
+        node = func_0025DB58(node);
     }
 }
 

@@ -6,9 +6,15 @@ INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEAA0);
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEAE0);
 
-void func_002EEE98(u8 *arg0, u32 arg1) {
-    *(u32 *)(arg0 + 4) = arg1;
-    *arg0 = 1;
+typedef struct {
+    u8 state;    /* 0x00 */
+    u8 pad01[3];
+    u32 value;   /* 0x04 */
+} SdfWordState;
+
+void func_002EEE98(SdfWordState *work, u32 value) {
+    work->value = value;
+    work->state = 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEEA8);

@@ -22,12 +22,17 @@ void func_00265080(void) {
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00265088);
 
-u32 func_002650B0(s32 arg0) {
-    return *(u32 *)(arg0 + 0x1574);
+typedef struct {
+    u8 pad00[0x1574];
+    u32 state; /* 0x1574 */
+} TitleWork;
+
+u32 func_002650B0(TitleWork *work) {
+    return work->state;
 }
 
-void func_002650B8(s32 arg0) {
-    *(u32 *)(arg0 + 0x1574) = 0;
+void func_002650B8(TitleWork *work) {
+    work->state = 0;
 }
 
 void func_002650C0(void) {

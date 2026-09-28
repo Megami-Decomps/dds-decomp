@@ -8,6 +8,30 @@ extern void func_002C3DB0(void);
 
 extern s32 func_002C4A10(void);
 
+typedef struct {
+    u32 *word;         /* 0x00 */
+    u8 pad04[4];
+    s16 value;         /* 0x08 */
+} SdfCounterDisplay;
+
+typedef struct {
+    s32 value;         /* 0x00 */
+    s16 countdown;     /* 0x04 */
+    s16 mode;          /* 0x06 */
+} SdfCounterTimer;
+
+typedef struct {
+    u8 pad00[0x70];
+    SdfCounterDisplay *display; /* 0x70 */
+} SdfCounterChannel;
+
+typedef struct {
+    u8 pad00[0x1C];
+    SdfCounterChannel *channel; /* 0x1C */
+    u8 pad20[0x10];
+    SdfCounterTimer *timer;     /* 0x30 */
+} SdfCounterRuntime;
+
 extern s32 D_003BD274;
 
 extern u32 D_003BD268;
@@ -80,14 +104,14 @@ u32 func_002C49F8(void) {
 }
 
 s32 func_002C4A10(void) {
-    return *(s16 *)(*(s32 *)(*(s32 *)(D_003BD274 + 0x1c) + 0x70) + 8);
+    return ((SdfCounterRuntime *)D_003BD274)->channel->display->value;
 }
 
 float func_002C4A28(void) {
-    s32 p;
+    SdfCounterTimer *timer;
 
-    p = *(s32 *)(D_003BD274 + 0x30);
-    return (float)(*(s32 *)p) / 10.0f;
+    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    return (float)timer->value / 10.0f;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4A58);
@@ -99,35 +123,35 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5338);
 void func_002C56C0(void) {
     s32 temp_v0;
 
-    temp_v0 = **(s32 **)(D_003BD274 + 0x30);
+    temp_v0 = ((SdfCounterRuntime *)D_003BD274)->timer->value;
     if (temp_v0 < 10) {
-        **(s32 **)(D_003BD274 + 0x30) = temp_v0 + 1;
+        ((SdfCounterRuntime *)D_003BD274)->timer->value = temp_v0 + 1;
     }
 }
 
 void func_002C56E8(void) {
     s32 temp_v0;
 
-    temp_v0 = **(s32 **)(D_003BD274 + 0x30);
+    temp_v0 = ((SdfCounterRuntime *)D_003BD274)->timer->value;
     if (temp_v0 != 0) {
-        **(s32 **)(D_003BD274 + 0x30) = temp_v0 - 1;
+        ((SdfCounterRuntime *)D_003BD274)->timer->value = temp_v0 - 1;
     }
 }
 
-void func_002C5708(s32 arg0) {
-    s32 ptr;
+void func_002C5708(s32 mode) {
+    SdfCounterTimer *timer;
 
-    ptr = *(s32 *)(D_003BD274 + 0x30);
-    *(s16 *)(ptr + 6) = arg0;
-    *(s16 *)(ptr + 4) = 8;
+    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    timer->mode = mode;
+    timer->countdown = 8;
 }
 
 void func_002C5720(void) {
-    s32 temp_v0;
+    SdfCounterTimer *timer;
 
-    temp_v0 = *(s32 *)(D_003BD274 + 0x30);
-    if (0 < *(s16 *)(temp_v0 + 4)) {
-        *(s16 *)(temp_v0 + 4) = *(s16 *)(temp_v0 + 4) - 1;
+    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    if (0 < timer->countdown) {
+        timer->countdown = timer->countdown - 1;
     }
 }
 

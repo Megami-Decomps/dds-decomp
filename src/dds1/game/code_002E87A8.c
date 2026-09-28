@@ -1,9 +1,9 @@
 #include "common.h"
 
 typedef struct CmdPacket {
-    /* 0x0 */ u32 unk0;
+    /* 0x0 */ u32 id;
     /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 unk8;
+    /* 0x8 */ u16 setting;
     /* 0xA */ u16 unkA;
     /* 0xC */ u32 unkC;
 } CmdPacket;
@@ -36,13 +36,13 @@ INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8B58);
 
 INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8C30);
 
-void func_002E8D10(s32 arg0) {
+void func_002E8D10(s32 id) {
     CmdPacket packet;
 
-    func_002E9340(arg0);
-    packet.unk0 = arg0;
+    func_002E9340(id);
+    packet.id = id;
     packet.unk4 = 0;
-    packet.unk8 = 0x7F;
+    packet.setting = 0x7F;
     func_002E87A8(0x20, 0, &packet, 0x10);
 }
 
@@ -53,12 +53,12 @@ void func_002E8D58(u32 arg0) {
     func_002E87A8(0x30, 0, temp_v0, 0x10);
 }
 
-void func_002E8D88(s32 arg0) {
+void func_002E8D88(s32 id) {
     CmdPacket packet;
 
-    func_002E9340(arg0);
-    packet.unk0 = arg0;
-    packet.unk8 = 0x7F;
+    func_002E9340(id);
+    packet.id = id;
+    packet.setting = 0x7F;
     func_002E87A8(0x130, 0, &packet, 0x10);
 }
 

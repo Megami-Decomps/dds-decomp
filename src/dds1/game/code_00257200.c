@@ -18,18 +18,31 @@ INCLUDE_ASM(const s32, "game/code_00257200", func_00257C10);
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257DF0);
 
-void func_00257E78(s32 arg0) {
-    s32 temp_v0 = *(s16 *)(arg0 + 0x59C);
-    s32 temp_v1 = *(s16 *)(arg0 + 0x59E);
-    s32 *temp_v2 = (s32 *)(arg0 + 0x49C);
-    s32 temp_v3 = 9;
+typedef struct {
+    s32 x;
+    s32 y;
+} SceneCoordPair;
+
+typedef struct {
+    u8 pad00[0x49C];
+    SceneCoordPair points[10]; /* 0x49C */
+    u8 pad4EC[0xB0];
+    s16 entryX;                /* 0x59C */
+    s16 entryY;                /* 0x59E */
+} SceneCoordWork;
+
+void func_00257E78(SceneCoordWork *work) {
+    s32 x = work->entryX;
+    s32 y = work->entryY;
+    SceneCoordPair *point = work->points;
+    s32 remaining = 9;
 
     do {
-        temp_v2[0] = temp_v0;
-        temp_v2[1] = temp_v1;
-        temp_v2 += 2;
-        temp_v3--;
-    } while (temp_v3 >= 0);
+        point->x = x;
+        point->y = y;
+        point++;
+        remaining--;
+    } while (remaining >= 0);
 }
 
 void func_00257EB0(s32 *arg0) {

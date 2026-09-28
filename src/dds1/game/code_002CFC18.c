@@ -17,14 +17,23 @@ INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFCF0);
 
 INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFD50);
 
-void func_002CFD80(s32 *arg0) {
-    s32 *piVar1;
+typedef struct SdfNode {
+    struct SdfNode *next;
+} SdfNode;
 
-    piVar1 = (s32 *)arg0[1];
-    if (piVar1 != (s32 *)0x0) {
-        arg0[1] = *piVar1;
+typedef struct {
+    SdfNode *current;
+    SdfNode *next;
+} SdfNodeCursor;
+
+void func_002CFD80(SdfNodeCursor *cursor) {
+    SdfNode *next;
+
+    next = cursor->next;
+    if (next != (SdfNode *)0x0) {
+        cursor->next = next->next;
     }
-    *arg0 = (s32)piVar1;
+    cursor->current = next;
 }
 
 INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFDA0);

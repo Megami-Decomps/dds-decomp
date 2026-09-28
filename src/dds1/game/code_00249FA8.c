@@ -51,15 +51,24 @@ s32 func_0024A1A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A1D8);
 
-void func_0024A2B8(s32 arg0) {
-    u16 temp_E = *(u16 *)(arg0 + 0xe);
-    u16 temp_8 = *(u16 *)(arg0 + 8);
-    u16 temp_C = *(u16 *)(arg0 + 0xc);
-    u16 temp_M = temp_E & 0xfa2f;
+typedef struct {
+    u8 pad00[6];
+    u16 previousA; /* 0x06 */
+    u16 currentA;  /* 0x08 */
+    u16 previousB; /* 0x0A */
+    u16 currentB;  /* 0x0C */
+    u16 flags;     /* 0x0E */
+} SceneOptionRecord;
 
-    *(u16 *)(arg0 + 6) = temp_8;
-    *(u16 *)(arg0 + 0xa) = temp_C;
-    *(u16 *)(arg0 + 0xe) = temp_M;
+void func_0024A2B8(SceneOptionRecord *option) {
+    u16 flags = option->flags;
+    u16 currentA = option->currentA;
+    u16 currentB = option->currentB;
+    u16 retainedFlags = flags & 0xfa2f;
+
+    option->previousA = currentA;
+    option->previousB = currentB;
+    option->flags = retainedFlags;
 }
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A2D8);

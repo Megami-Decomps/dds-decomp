@@ -16,9 +16,9 @@ typedef struct FE250Entry {
 } FE250Entry;
 
 typedef struct CmdPacket {
-    /* 0x0 */ u32 unk0;
+    /* 0x0 */ u32 id;
     /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 unk8;
+    /* 0x8 */ u16 setting;
     /* 0xA */ u16 unkA;
     /* 0xC */ u32 unkC;
 } CmdPacket;
@@ -120,13 +120,13 @@ u32 func_002E9610(u32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9630);
 
-void func_002E9690(s32 arg0) {
+void func_002E9690(s32 id) {
     CmdPacket packet;
 
-    func_002E9340(arg0);
-    packet.unk0 = arg0;
+    func_002E9340(id);
+    packet.id = id;
     packet.unk4 = 0;
-    packet.unk8 = 0x17F;
+    packet.setting = 0x17F;
     func_002E87A8(0x20, 0, &packet, 0x10);
 }
 

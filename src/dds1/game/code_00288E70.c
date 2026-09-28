@@ -79,28 +79,28 @@ void fileReqInit(s32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00288E70);
 
-void func_00289030(FileJob *arg0) {
+void func_00289030(FileJob *job) {
     WaitSema(D_003DC658.sema);
-    if (arg0->state != 3) {
+    if (job->state != 3) {
         SignalSema(D_003DC658.sema);
         return;
     }
-    arg0->state = 4;
+    job->state = 4;
     SignalSema(D_003DC658.sema);
-    func_002E6D48(arg0->unkC, arg0->unk28, arg0->unk10 <= 0x8000 ? arg0->unk10 : 0x8000);
+    func_002E6D48(job->unkC, job->unk28, job->unk10 <= 0x8000 ? job->unk10 : 0x8000);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_002890B8);
 
-void func_002892F8(FileJob *arg0) {
+void func_002892F8(FileJob *job) {
     WaitSema(D_003DC658.sema);
-    if (arg0->state != 3) {
+    if (job->state != 3) {
         SignalSema(D_003DC658.sema);
         return;
     }
-    arg0->state = 4;
+    job->state = 4;
     SignalSema(D_003DC658.sema);
-    func_002E6DA8(arg0->unkC, arg0->unk28, arg0->unk10 <= 0x8000 ? arg0->unk10 : 0x8000);
+    func_002E6DA8(job->unkC, job->unk28, job->unk10 <= 0x8000 ? job->unk10 : 0x8000);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);
@@ -127,10 +127,10 @@ void fileManInit(void) {
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileReqInit);
 
-void fileReqBegin(s32 arg0) {
-    D_003BD8E8 = arg0;
-    fileReqInit(arg0);
-    D_003DC698[arg0].unk10 = 0;
+void fileReqBegin(s32 request) {
+    D_003BD8E8 = request;
+    fileReqInit(request);
+    D_003DC698[request].unk10 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileReqPoll);
@@ -155,27 +155,27 @@ void func_00289C38(s32 arg0) {
     D_003DC698[arg0].unk12 = 1;
 }
 
-void func_00289C68(s32 arg0, s32 arg1) {
-    arg1 += arg0 * 0x19;
-    D_003DC6AC[arg1] = 0;
+void func_00289C68(s32 request, s32 flagIndex) {
+    flagIndex += request * 0x19;
+    D_003DC6AC[flagIndex] = 0;
 }
 
-void func_00289C98(s32 arg0, s32 arg1, s32 arg2) {
-    arg1 += arg0 * 0x19;
-    D_003DC6AC[arg1] |= arg2;
+void func_00289C98(s32 request, s32 flagIndex, s32 mask) {
+    flagIndex += request * 0x19;
+    D_003DC6AC[flagIndex] |= mask;
 }
 
-u32 func_00289CD0(s32 arg0, s32 arg1) {
-    arg1 += arg0 * 0x19;
-    return D_003DC6AC[arg1];
+u32 func_00289CD0(s32 request, s32 flagIndex) {
+    flagIndex += request * 0x19;
+    return D_003DC6AC[flagIndex];
 }
 
-s8 func_00289D00(s32 arg0) {
-    return D_003DC698[arg0].unk13;
+s8 func_00289D00(s32 request) {
+    return D_003DC698[request].unk13;
 }
 
-void func_00289D28(s32 arg0, s8 arg1) {
-    D_003DC698[arg0].unk13 = arg1;
+void func_00289D28(s32 request, s8 value) {
+    D_003DC698[request].unk13 = value;
 }
 
 void func_00289D50(u32 arg0) {

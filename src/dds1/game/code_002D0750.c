@@ -9,28 +9,35 @@ INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0900);
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0918);
 
 void func_002D09B8(void) {
-    u64 temp_v0;
+    u64 handle;
 
-    temp_v0 = func_002D0A80();
-    func_002D0918(temp_v0);
+    handle = func_002D0A80();
+    func_002D0918(handle);
 }
 
-void func_002D09D8(s32 *arg0) {
-    s32 temp_v0;
+void func_002D09D8(s32 *slot) {
+    s32 handle;
 
-    temp_v0 = *arg0;
-    if (temp_v0 != 0) {
-        *arg0 = 0;
-        func_002D0918(temp_v0);
+    handle = *slot;
+    if (handle != 0) {
+        *slot = 0;
+        func_002D0918(handle);
         return;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0A10);
 
-u32 func_002D0A48(s32 arg0) {
-    *(s16 *)(arg0 + 0xe) = *(s16 *)(arg0 + 0xe) + 1;
-    return *(u32 *)(arg0 + 8);
+typedef struct {
+    u8 pad00[8];
+    u32 address;     /* 0x08 */
+    u8 pad0C[2];
+    s16 referenceCount; /* 0x0E */
+} SdfResource;
+
+u32 func_002D0A48(SdfResource *resource) {
+    resource->referenceCount = resource->referenceCount + 1;
+    return resource->address;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0A60);

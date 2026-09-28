@@ -6,6 +6,12 @@ typedef struct SolarPoint {
     u8 pad05;
 } SolarPoint;
 
+typedef struct {
+    u8 pad00[4];
+    u16 age;    /* 0x04 */
+    s8 active;  /* 0x06 */
+} SolarLayerTimer;
+
 void func_00228CA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
 u32 func_002BC8F0(void *arg0, const char *arg1, s32 arg2);
@@ -61,28 +67,28 @@ void drawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, 
     }
 }
 
-s32 func_002294C0(s32 arg0) {
-    s32 v;
+s32 func_002294C0(SolarLayerTimer *timer) {
+    s32 age;
 
-    v = *(u16 *)(arg0 + 4) + 1;
-    *(u16 *)(arg0 + 4) = v;
-    if ((f32)(s16)v > 60.0f) {
-        *(u16 *)(arg0 + 4) = 0;
-        *(u8 *)(arg0 + 6) = 0;
+    age = timer->age + 1;
+    timer->age = age;
+    if ((f32)(s16)age > 60.0f) {
+        timer->age = 0;
+        timer->active = 0;
     }
-    return *(s8 *)(arg0 + 6);
+    return timer->active;
 }
 
-s32 func_00229500(s32 arg0) {
-    s32 v;
+s32 func_00229500(SolarLayerTimer *timer) {
+    s32 age;
 
-    v = *(u16 *)(arg0 + 4) + 1;
-    *(u16 *)(arg0 + 4) = v;
-    if ((f32)(s16)v > 80.0f) {
-        *(u16 *)(arg0 + 4) = 0;
-        *(u8 *)(arg0 + 6) = 0;
+    age = timer->age + 1;
+    timer->age = age;
+    if ((f32)(s16)age > 80.0f) {
+        timer->age = 0;
+        timer->active = 0;
     }
-    return *(s8 *)(arg0 + 6);
+    return timer->active;
 }
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229540);

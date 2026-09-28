@@ -8,6 +8,13 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002653A0);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265478);
 
+typedef struct {
+    u8 pad00[4];
+    u16 kind;       /* 0x04 */
+    u8 pad06[0xE];
+    u16 animation;  /* 0x14 */
+} TitleEntry;
+
 void func_002654E8(s32 arg0) {
     func_00265088(arg0);
 }
@@ -30,8 +37,8 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00265610);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265648);
 
-s32 isTitleEntryAvailable(u8 *entry) {
-    if (mdlFlagTest(0x902) == 0 && *(u16 *)(entry + 4) == 4) {
+s32 isTitleEntryAvailable(TitleEntry *entry) {
+    if (mdlFlagTest(0x902) == 0 && entry->kind == 4) {
         return 1;
     }
     return 0;
@@ -47,9 +54,9 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002659C8);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265AB8);
 
-s32 advanceTitleEntryAnimation(u8 *entry) {
+s32 advanceTitleEntryAnimation(TitleEntry *entry) {
     s32 step = func_002658B8(entry);
-    *(u16 *)(entry + 0x14) += step;
+    entry->animation += step;
     func_002CD0C0(entry);
     return step;
 }

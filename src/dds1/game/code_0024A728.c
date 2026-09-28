@@ -18,12 +18,18 @@ INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B090);
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B168);
 
-void func_0024B2D0(u32 arg0, s32 arg1) {
-    u32 temp_v0;
+typedef struct {
+    u8 pad00[0xC4];
+    u32 currentValue;  /* 0xC4 */
+    u32 previousValue; /* 0xC8 */
+} SceneTransition;
 
-    temp_v0 = *(u32 *)(arg1 + 0xc4);
-    *(u32 *)(arg1 + 0xc4) = arg0;
-    *(u32 *)(arg1 + 200) = temp_v0;
+void func_0024B2D0(u32 value, SceneTransition *transition) {
+    u32 previous;
+
+    previous = transition->currentValue;
+    transition->currentValue = value;
+    transition->previousValue = previous;
 }
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B2E0);

@@ -143,21 +143,21 @@ void evtBSetupDispatchSyncF(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C8A0);
 
-s64 func_0024C918(u64 arg0) {
-    s32 temp_v0;
-    s64 temp_v1;
-    s32 *piVar3;
+s64 func_0024C918(u64 input) {
+    s32 context;
+    s64 result;
+    s32 *dispatchState;
 
-    temp_v0 = func_00101A70();
-    piVar3 = (s32 *)(temp_v0 + 0x54);
-    temp_v1 = func_00285670(temp_v0 + 8, piVar3, 0, arg0);
-    if (temp_v1 == 0) {
-        if ((*piVar3 == 0) && (temp_v1 = func_0024DC08(), temp_v1 == 0)) {
-            func_002858E8(piVar3, *(u32 *)(temp_v0 + 0x58));
+    context = func_00101A70();
+    dispatchState = (s32 *)(context + 0x54);
+    result = func_00285670(context + 8, dispatchState, 0, input);
+    if (result == 0) {
+        if ((*dispatchState == 0) && (result = func_0024DC08(), result == 0)) {
+            func_002858E8(dispatchState, *(u32 *)(context + 0x58));
         }
-        temp_v1 = 0;
+        result = 0;
     }
-    return temp_v1;
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C9A0);

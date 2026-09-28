@@ -12,18 +12,23 @@ INCLUDE_ASM(const s32, "game/code_00234C18", func_00234DA8);
 
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234F18);
 
-void func_00235088(void) {
-    u32 *puVar1;
+typedef struct {
+    u32 flags; /* 0x00 */
+    u32 value; /* 0x04 */
+} EventContext;
 
-    puVar1 = (u32 *)func_00101A70();
-    *puVar1 = *puVar1 | 1;
+void func_00235088(void) {
+    EventContext *context;
+
+    context = (EventContext *)func_00101A70();
+    context->flags = context->flags | 1;
 }
 
 void func_002350B0(void) {
-    u32 *puVar1;
+    EventContext *context;
 
-    puVar1 = (u32 *)func_00101A70();
-    *puVar1 = *puVar1 & 0xfffffffe;
+    context = (EventContext *)func_00101A70();
+    context->flags = context->flags & 0xfffffffe;
 }
 
 void func_002350E0(u32 arg0) {
@@ -32,11 +37,11 @@ void func_002350E0(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00234C18", func_002350F8);
 
-void func_00235120(s32 arg0, u32 arg1) {
-    u32 temp_v0;
+void func_00235120(EventContext *context, u32 value) {
+    u32 result;
 
-    temp_v0 = func_001986E0(arg1);
-    *(u32 *)(arg0 + 4) = temp_v0;
+    result = func_001986E0(value);
+    context->value = result;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00234C18", D_003BBF78);
