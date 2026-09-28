@@ -1017,7 +1017,18 @@ void func_00314D90(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314E20);
+void func_00314E20(u32 id) {
+    u16 bit;
+    u32 *word;
+    s32 offset;
+    id &= 0xffff;
+    if (id < 0x1ab) return;
+    if (id >= 0x220) return;
+    bit = id + 0xfe55;
+    offset = 0x16ef0 + (bit >> 5) * 4;
+    word = (u32 *)(D_00435DD0 + offset);
+    *word |= 1U << (bit & 31);
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314E80);
 

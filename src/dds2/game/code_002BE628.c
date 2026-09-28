@@ -66,7 +66,15 @@ void func_002BEE38(u32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BEE50);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BEF90);
+void func_002BEF90(u32 *entry) {
+    entry[0] = 0;
+    entry[1] = 0;
+    entry[2] = 0;
+    entry[3] = 0;
+    entry[4] = 0;
+    entry[5] = 0;
+    entry[6] = 0;
+}
 
 void func_002BEFB0(s32 arg0, s32 arg1) {
     s32 temp_v0;
@@ -199,7 +207,12 @@ u32 func_002C0D10(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0F00);
+void func_002C0F00(u32 *group, s32 index, s32 selected, u32 flags) {
+    s32 offset = index * 4 + 0x10;
+    u32 *entry = (u32 *)((u8 *)group + offset);
+    func_002C2AB0(*entry, selected);
+    func_002C2AC8(*entry, flags);
+}
 
 void func_002C0F48(s32 arg0, s32 arg1, u32 arg2) {
     func_002C2AA0(*(u32 *)(arg1 * 4 + arg0 + 0x10), arg2);
@@ -356,7 +369,10 @@ void func_002C2A88(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x10) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2A90);
+void func_002C2A90(u32 *entry, u32 left, u32 right) {
+    entry[6] = left;
+    entry[7] = right;
+}
 
 void func_002C2AA0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x24) = arg1;
@@ -396,7 +412,12 @@ void func_002C3390(void) {
     func_00328E48();
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33A8);
+void func_002C33A8(u32 *entry, u32 first, u32 second, u32 third, u32 fourth) {
+    entry[6] = first;
+    entry[7] = second;
+    entry[9] = third;
+    entry[10] = fourth;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);
 
