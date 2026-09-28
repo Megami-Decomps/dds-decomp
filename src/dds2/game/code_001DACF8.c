@@ -1325,7 +1325,18 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA4D8);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA598);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA620);
+static inline s32 btlHasFlag(u32 flags, u32 mask) {
+    return (flags & mask) != 0;
+}
+
+s32 func_001EA620(s32 actor) {
+    s32 category = *(s32 *)(actor + 0x134);
+
+    if (category == 0) {
+        return 0;
+    }
+    return btlHasFlag(*(u16 *)(D_00435E30 + category * 32 + 0x1C), 0x100);
+}
 
 s32 func_001EA650(s32 actor) {
     s32 category = *(s32 *)(actor + 0x134);
@@ -1336,7 +1347,23 @@ s32 func_001EA650(s32 actor) {
     return *(s32 *)(D_00435E20 + category * 56 + 0x30) == 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA688);
+extern s32 func_001EA7C8(s32);
+
+s32 func_001EA688(s32 actor) {
+    s32 category;
+
+    if (func_001EA7C8(actor)) {
+        return 1;
+    }
+    if (!func_001EA210(actor)) {
+        return 0;
+    }
+    category = *(s32 *)(actor + 0x134);
+    if (category == 0) {
+        return 0;
+    }
+    return btlHasFlag(*(u16 *)(D_00435E30 + category * 32 + 0x1C), 2);
+}
 
 s32 func_001EA6F8(s32 actor) {
     s32 category = *(s32 *)(actor + 0x134);
@@ -1347,7 +1374,19 @@ s32 func_001EA6F8(s32 actor) {
     return func_001E8058(*(s32 *)(actor + 0x138)) == 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA748);
+s32 func_001EA748(s32 actor) {
+    s32 category = *(s32 *)(actor + 0x134);
+
+    if (category == 0) {
+        return 0;
+    }
+    if ((*(u8 *)(D_00435E20 + category * 56 + 9) & 1) == 0) {
+        if (!func_001EA210(actor)) {
+            return 0;
+        }
+    }
+    return btlHasFlag(*(u16 *)(D_00435E30 + *(s32 *)(actor + 0x134) * 32 + 0x1C), 4);
+}
 
 s32 func_001EA7C8(s32 actor) {
     s32 category = *(s32 *)(actor + 0x134);
@@ -1358,7 +1397,14 @@ s32 func_001EA7C8(s32 actor) {
     return *(s32 *)(D_00435E20 + category * 56 + 0x30) == 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA800);
+s32 func_001EA800(s32 actor) {
+    s32 category = *(s32 *)(actor + 0x134);
+
+    if (category == 0) {
+        return 0;
+    }
+    return btlHasFlag(*(u16 *)(D_00435E30 + category * 32 + 0x1C), 0x40);
+}
 
 s32 func_001EA830(s32 actor) {
     s32 linked;
@@ -1383,7 +1429,29 @@ s32 func_001EA830(s32 actor) {
     return ((*(u32 *)(*(s32 *)(linked + 0x18) + 0x110) ^ *(u32 *)(entry + 0x110)) & 0x600) == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA8B0);
+extern s32 D_00435DEC;
+
+s32 func_001EA8B0(s32 actor) {
+    s32 linked = *(s32 *)(actor + 0x114);
+    s32 entry;
+    u32 category;
+
+    if (linked == 0) {
+        return 0;
+    }
+    if (func_001E8058(*(s32 *)(linked + 0x60)) >= 2) {
+        return 0;
+    }
+    entry = func_001E8060(*(s32 *)(linked + 0x60), 0);
+    if ((*(u32 *)(entry + 0x110) & 0x400) == 0) {
+        return 0;
+    }
+    category = *(u32 *)(entry + 0xC8);
+    if (category >= 0x180) {
+        return 0;
+    }
+    return btlHasFlag(*(u32 *)(D_00435DEC + category * 76), 0x1000);
+}
 
 u8 func_001EA940(s32 arg0) {
     return *(s32 *)(arg0 + 0x134) == 0x5f;
