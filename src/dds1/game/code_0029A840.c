@@ -221,9 +221,11 @@ extern void func_002DB538(void *, float);
 
 extern s32 func_002C2568(s32, void *);
 
-extern float func_002C8588(void);
+extern float func_002C8588(float *, float *);
 
 extern float func_002FA1C0(float);
+
+extern s32 CreateSema(void *);
 
 extern Entry24B D_00393220[];
 
@@ -3801,7 +3803,9 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002C8558);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002C8588);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002C8628);
+float func_002C8628(float *left, float *right) {
+    return func_002FA1C0(func_002C8588(left, right));
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002C8648);
 
@@ -3863,7 +3867,9 @@ float func_002C9780(float *arg0, float *arg1) {
                   (*arg0 * arg1[1] - arg0[1] * *arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002C97C8);
+float func_002C97C8(float *left, float *right) {
+    return func_002FA1C0(func_002C9740(left, right));
+}
 
 float func_002C97E8(float *arg0) {
     return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
@@ -4434,7 +4440,20 @@ void func_002CF430(void) {
 void func_002CF438(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002CF440);
+s32 func_002CF440(u32 initial, u32 option, u32 maximum) {
+    struct {
+        u32 attr;
+        u32 option;
+        u32 initial;
+        u32 reserved[2];
+        u32 maximum;
+    } sema;
+
+    sema.initial = initial;
+    sema.option = option;
+    sema.maximum = maximum;
+    return CreateSema(&sema);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002CF468);
 
