@@ -6,7 +6,7 @@ extern u32 func_003298F8();
 
 extern u64 func_002C8108(void);
 
-extern u32 func_00305148(u64, u64);
+extern u32 func_00305148();
 
 extern s32 func_002DC1D0(u32, u32);
 
@@ -3574,7 +3574,29 @@ void func_002FEBC8(void) {
     func_002FE5B8(D_0042CEE8, D_003FF020, 7);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FEBF0);
+extern char D_0042CF58[];
+extern u32 D_004386B8;
+extern char **func_002FC8F8();
+
+s32 func_002FEBF0(void) {
+    u8 request[0x110];
+    s32 state;
+    s32 result = 0x400001;
+    s32 entry;
+
+    func_00300100(D_0042CF58, 0x20, request);
+    state = *(s32 *)(request + 0x100);
+    if (state == 2) {
+        result = 0x400000;
+    } else if (state == 1) {
+        if (D_004386B8 != 0) {
+            entry = appendFileJobFromEntry(D_004386B8, request);
+            strcpy((char *)(entry + 0x9C), *func_002FC8F8(entry));
+        }
+        result = 0x400002;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FEC80);
 
@@ -3610,8 +3632,8 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FFBA0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FFDA0);
 
-extern u32 D_004386B8;
 extern u8 *fileQueueGetAt(u32, u32);
+
 extern u32 func_002FF8A0(u8 *, s32);
 
 u32 func_002FFE48(void) {
@@ -3626,7 +3648,25 @@ u32 func_002FFE48(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", resetEffectFileResources);
+extern u8 D_00439074;
+
+void resetEffectFileResources(void) {
+    D_003FFA84[0] = 0;
+    D_00439074 = 0;
+    D_004386B0 = 0;
+    if (D_004386B8 != 0) {
+        func_002D4548(D_004386B8);
+        D_004386B8 = 0;
+    }
+    if (D_004386B4 != 0) {
+        func_002D4548(D_004386B4);
+        D_004386B4 = 0;
+    }
+    if (D_004386C4 != 0) {
+        fileJobDestroy(D_004386C4);
+        D_004386C4 = 0;
+    }
+}
 
 void func_003000B8(void) {
     if (D_00438760 != 0) {
@@ -3641,9 +3681,22 @@ void func_003000B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00300100);
 
+extern s32 D_00438764;
+
 INCLUDE_ASM(const s32, "game/code_002DC138", initializeEffectResourceQueue);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", pollEffectResourceQueue);
+u32 pollEffectResourceQueue(void) {
+    u32 result;
+    func_0020E380(D_00438764);
+    func_0020E828(D_00438764, fileQueueGetAt(D_004386B8, func_002FCA40()) + 0x9C);
+    result = func_0020E7B0(D_00438764);
+    if ((u32)(result - 1) < 2) {
+        func_0020E368(D_00438764);
+        D_00438764 = 0;
+        return 0;
+    }
+    return 0x200001;
+}
 
 void func_003002A8(void) {
     if (D_00438768 != 0) {
@@ -3652,7 +3705,15 @@ void func_003002A8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", queueEffectResource);
+void queueEffectResource(s32 unused, s32 entry) {
+    s32 queue = D_00438768;
+    if (queue == 0) {
+        queue = func_0020E300();
+        D_00438768 = queue;
+        func_0020E7A0(queue, 0xC2, 0xC8);
+    }
+    func_0020E7B8(D_00438768, entry);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", updateEffectResourceQueue);
 
@@ -3950,7 +4011,31 @@ void func_00302B90(s32 arg0) {
     func_003025A8(*(u32 **)(arg0 + 0xc) + 4, **(u32 **)(arg0 + 0xc));
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302BB0);
+extern u32 D_004386C8;
+
+s32 func_00302BB0(s32 mode) {
+    u8 status[0xE0];
+    u8 *entry;
+    s32 result = 0x600001;
+
+    func_00300428(mode, status);
+    if (*(s32 *)(status + 0xCC) == 2) {
+        result = 0x400000;
+    } else if (*(s32 *)(status + 0xCC) == 1) {
+        if (*(s32 *)(status + 0xC8) != 8) {
+            entry = fileQueueGetAt(D_004386B8, -*(s32 *)(status + 0xD0));
+            if (D_004386C8 != (u32)entry) {
+                func_002D4E60(D_004386B8, D_004386C8);
+                func_002D4CF0(D_004386B8, D_004386C8, entry);
+            }
+        } else {
+            func_002D4E60(D_004386B8, D_004386C8);
+            func_002D39C8(D_004386C0, status + 0xD0, 4, 4);
+        }
+        result = 0x400002;
+    }
+    return result;
+}
 
 void func_00302C78(void) {
     func_00302BB0(0x4b);
@@ -3964,11 +4049,26 @@ void func_00302CA8(void) {
     func_00302BB0(0xb);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302CC0);
+s32 func_00302CC0(const char *resourceName, s32 mode) {
+    u8 status[0x110];
+    s32 result = 0x600001;
 
-extern void func_00302CC0(const char *, s32);
+    func_00300100(resourceName, mode, status);
+    if (*(s32 *)(status + 0x100) == 2) {
+        result = 0x400000;
+    } else if (*(s32 *)(status + 0x100) == 1) {
+        func_002D4E60(D_004386B8, D_004386C8);
+        if (*(s32 *)(status + 0xFC) != 8) {
+            func_002D3A68(D_004386C0, status,
+                           func_00303C78(*(s32 *)(status + 0xFC)));
+        } else {
+            func_002D39C8(D_004386C0, status + 0x104, 4, 4);
+        }
+        result = 0x400002;
+    }
+    return result;
+}
 extern char D_0042D128[]; /* "/tool/effect/mat/" */
-extern char D_0042CF58[];
 extern char D_0042CF70[]; /* "/tool/effect/" */
 extern char D_0042D140[]; /* "/tool/effect/hlp/" */
 
@@ -4384,7 +4484,21 @@ INCLUDE_ASM(const s32, "game/code_002DC138", removeEffectListEntry);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00303E88);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304030);
+extern char D_004387E8[];
+
+u32 func_00304030(s32 category, s32 index, s32 preserve) {
+    char path[0x80];
+    u32 source;
+    u32 handle;
+    u32 resource;
+    func_0035C860(path, D_004387E8, category, index);
+    handle = func_00343ED0(path, &source, 0);
+    resource = func_00305148(handle, preserve);
+    if (preserve == 0) {
+        func_003297C8(handle);
+    }
+    return resource;
+}
 
 void func_003040B8(u64 arg0, u32 *arg1) {
     u64 temp_v0;
@@ -4407,9 +4521,28 @@ void func_00304110(u64 arg0, u32 *arg1) {
     func_002C7D00(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", requestEffectResourceByMode);
+void requestEffectResourceByMode(s32 category, s32 index, s32 mode, u32 *result) {
+    char path[0x80];
+    func_0035C860(path, D_004387E8, category, index);
+    *result = 0;
+    if (mode == 1) {
+        func_002C8040(path, 0, func_00304110, result);
+    } else {
+        func_002C8040(path, 0, func_003040B8, result);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", loadMappedEffectResource);
+u32 loadMappedEffectResource(s32 category, s32 index) {
+    char path[0x80];
+    u32 buffer;
+    u32 handle;
+    u32 resource;
+    func_0035C860(path, D_004387E8, category, index);
+    handle = func_00343ED0(path, &buffer, 0);
+    resource = func_00304938(buffer);
+    func_003297C8(handle);
+    return resource;
+}
 
 void func_00304258(u64 arg0, u32 *arg1) {
     u64 temp_v0;
@@ -4424,7 +4557,12 @@ void func_00304258(u64 arg0, u32 *arg1) {
     func_002C7D00(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", requestMappedEffectResource);
+void requestMappedEffectResource(s32 category, s32 index, u32 *result) {
+    char path[0x80];
+    func_0035C860(path, D_004387E8, category, index);
+    *result = 0;
+    func_002C8040(path, 0, func_00304258, result);
+}
 
 void *func_00304310(u32 value) {
     u8 *record = (u8 *)func_00328D68(0x44);

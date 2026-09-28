@@ -64,6 +64,25 @@ build. Treat it like `DIFF`: try another natural formulation or park it.
 Editing a unit can make an existing function CONTEXT, so always check the
 whole unit.
 
+## `jal` tails through a shared inline helper
+
+A call returned through a `static inline` helper is not turned into a
+sibling call: gcc 2.96 returns the inlined value through a temporary and
+keeps `jal; epilogue`. That is the natural source when many callers share an
+argument pattern. For example, 123 DDS2 functions call `func_002C4038` as
+`(ctx + 8, ctx + 0x54, mode, cb)`:
+
+```c
+static inline s64 mnuRequest(s32 ctx, u64 mode, s32 cb) {
+    return func_002C4038(ctx + 8, (s32 *)(ctx + 0x54), mode, cb);
+}
+s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
+```
+
+(found by W13_D2 in DDS2 `code_002B0278`). Use this only when a helper like
+that genuinely recurs. Wrapping a one-off call in an inline just to get
+`jal` is a codegen lever, not source.
+
 ## Unaligned block copies (`ldl/ldr/sdl/sdr`)
 
 Runs of `ldl`/`ldr` and `sdl`/`sdr` pairs copying a fixed-size block come
