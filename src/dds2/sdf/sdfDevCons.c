@@ -11,7 +11,7 @@ typedef struct DevConsState {
     s16 cursorRow; /* 0x12 */
     u8 unk14; /* 0x14 */
     u8 pad15; /* 0x15 */
-    u8 unk16; /* 0x16 */
+    u8 charAttribute; /* 0x16: passed with each printed character */
     u8 unk17; /* 0x17 */
     u8 pad18[4]; /* 0x18 */
     u8 *cells; /* 0x1C: two bytes per character cell */
@@ -43,7 +43,7 @@ INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033CE08);
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033CF80);
 
-s32 func_0033CF98(DevConsState *arg0, const char *fmt, ...) {
+s32 func_0033CF98(DevConsState *console, const char *fmt, ...) {
     char buf[0x200];
     __builtin_va_list ap;
     char *p;
@@ -55,7 +55,7 @@ s32 func_0033CF98(DevConsState *arg0, const char *fmt, ...) {
     if (c != 0) {
         do {
             i++;
-            func_0033CE08(arg0, c, arg0->unk16);
+            func_0033CE08(console, c, console->charAttribute);
             p = buf + i;
             c = *p;
         } while (c != 0);
@@ -68,8 +68,8 @@ void func_0033D040(DevConsState *console, s16 column, s16 row) {
     console->cursorRow = row;
 }
 
-void func_0033D050(DevConsState *arg0, u8 arg1) {
-    arg0->unk16 = arg1;
+void func_0033D050(DevConsState *console, u8 attribute) {
+    console->charAttribute = attribute;
 }
 
 u8 func_0033D058(DevConsState *arg0) {

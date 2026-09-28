@@ -117,9 +117,9 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100EB0);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
 
-void* func_001010A8(u32 arg0)
+void* func_001010A8(u32 state)
 {
-    switch (arg0 & 0xF) {
+    switch (state & 0xF) {
     case 1:
         return D_00435BD8;
     case 2:

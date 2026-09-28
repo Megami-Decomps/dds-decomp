@@ -19,7 +19,7 @@ typedef struct {
     u8 pad[0x30];
     u8 mode;
     u8 previousMode;
-} StateByte;
+} MotionState;
 
 typedef struct KeyOut {
     f32 *firstKey;
@@ -103,7 +103,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003343E8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334510);
 
-void func_00334618(StateByte *state) {
+void func_00334618(MotionState *state) {
     u8 mode;
 
     mode = state->mode;
@@ -113,7 +113,7 @@ void func_00334618(StateByte *state) {
     }
 }
 
-void func_00334638(StateByte *state) {
+void func_00334638(MotionState *state) {
     if (state->mode == 6) {
         state->mode = state->previousMode;
     }
@@ -196,12 +196,12 @@ s32 func_003351E0(void *a0, s32 a1) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335210);
 
-void *func_00335268(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335268(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x14);
-    func_00335210(r, a0, D_0040B420, a2);
-    return r;
+    motion = func_00328D68(0x14);
+    func_00335210(motion, source, D_0040B420, options);
+    return motion;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003352C8);
@@ -212,12 +212,12 @@ void func_003353B8(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x14);
 }
 
-void *func_003353C8(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_003353C8(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x14);
-    func_00335210(r, a0, D_0040B438, a2);
-    return r;
+    motion = func_00328D68(0x14);
+    func_00335210(motion, source, D_0040B438, options);
+    return motion;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335428);
@@ -228,12 +228,12 @@ void func_00335518(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x10);
 }
 
-void *func_00335528(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335528(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x14);
-    func_00335210(r, a0, D_0040B450, a2);
-    return r;
+    motion = func_00328D68(0x14);
+    func_00335210(motion, source, D_0040B450, options);
+    return motion;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335588);
@@ -244,12 +244,12 @@ void func_00335678(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x20);
 }
 
-void *func_00335688(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335688(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x14);
-    func_00335210(r, a0, D_0040B468, a2);
-    return r;
+    motion = func_00328D68(0x14);
+    func_00335210(motion, source, D_0040B468, options);
+    return motion;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003356E8);
@@ -260,12 +260,12 @@ void func_003357D8(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x28);
 }
 
-void *func_003357E8(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_003357E8(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x14);
-    func_00335210(r, a0, D_0040B480, a2);
-    return r;
+    motion = func_00328D68(0x14);
+    func_00335210(motion, source, D_0040B480, options);
+    return motion;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335848);
@@ -274,12 +274,12 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335888);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003358E0);
 
-void *func_003358F0(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_003358F0(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x24);
-    func_00335210(r, a0, D_0040B498, a2);
-    return r;
+    motion = func_00328D68(0x24);
+    func_00335210(motion, source, D_0040B498, options);
+    return motion;
 }
 
 void func_00335950(u32 arg0) {
@@ -295,12 +295,12 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003359A0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335A18);
 
-void *func_00335A68(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335A68(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x24);
-    func_00335210(r, a0, D_0040B4B0, a2);
-    return r;
+    motion = func_00328D68(0x24);
+    func_00335210(motion, source, D_0040B4B0, options);
+    return motion;
 }
 
 void func_00335AC8(u32 arg0) {
@@ -316,12 +316,12 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335B18);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335B90);
 
-void *func_00335BE0(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335BE0(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x14);
-    func_00335210(r, a0, D_0040B4C8, a2);
-    return r;
+    motion = func_00328D68(0x14);
+    func_00335210(motion, source, D_0040B4C8, options);
+    return motion;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C40);
@@ -332,12 +332,12 @@ void func_00335D30(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x18);
 }
 
-void *func_00335D40(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335D40(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x24);
-    func_00335210(r, a0, D_0040B4E0, a2);
-    return r;
+    motion = func_00328D68(0x24);
+    func_00335210(motion, source, D_0040B4E0, options);
+    return motion;
 }
 
 void func_00335DA0(u32 arg0) {
@@ -357,12 +357,12 @@ void func_00335DD8(u32 arg0) {
 void func_00335E10(void) {
 }
 
-void *func_00335E18(void *a0, s32 a1, s32 a2) {
-    void *r;
+void *func_00335E18(void *source, s32 unused, s32 options) {
+    void *motion;
 
-    r = func_00328D68(0x24);
-    func_00335210(r, a0, D_0040B4F8, a2);
-    return r;
+    motion = func_00328D68(0x24);
+    func_00335210(motion, source, D_0040B4F8, options);
+    return motion;
 }
 
 void func_00335E78(u32 arg0) {

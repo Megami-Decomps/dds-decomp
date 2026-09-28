@@ -71,16 +71,16 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBB0);
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBF8);
 
-void *func_0032BD60(SdfTex *arg0, s32 arg1) {
-    void *buf;
-    void *tmp1;
-    void *tmp2;
+void *func_0032BD60(SdfTex *texture, s32 variant) {
+    void *packet;
+    void *primary;
+    void *secondary;
 
-    buf = func_00328D68(0x40);
-    tmp1 = sdfTexGetPrimaryResourceWord(arg0);
-    tmp2 = sdfTexGetSecondaryResourceWord(arg0);
-    func_0032BBF8(buf, arg0->unkC, arg0->unkE, tmp1, arg0->unk1A, tmp2, arg0->unk19, 1, arg0->unk1B, arg0->unk1C, arg0->unk1F, arg1);
-    return buf;
+    packet = func_00328D68(0x40);
+    primary = sdfTexGetPrimaryResourceWord(texture);
+    secondary = sdfTexGetSecondaryResourceWord(texture);
+    func_0032BBF8(packet, texture->unkC, texture->unkE, primary, texture->unk1A, secondary, texture->unk19, 1, texture->unk1B, texture->unk1C, texture->unk1F, variant);
+    return packet;
 }
 
 void func_0032BE00(SdfTex *arg0) {

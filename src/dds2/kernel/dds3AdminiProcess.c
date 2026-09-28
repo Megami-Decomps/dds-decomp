@@ -7,10 +7,10 @@ struct AdminWork {
     u32 unk04;
     s8 unk08;
     s8 unk09;
-    u8 unk0A;
+    u8 historyIndex;
     u8 pad0B;
-    s8 unk0C[8];
-    u8 unk14[8];
+    s8 signedHistory[8];
+    u8 unsignedHistory[8];
     void* unk1C;
     u8 unk20;
     u8 unk21;
@@ -53,7 +53,7 @@ s8 func_00102970(void)
     AdminWork* work;
 
     work = func_00102790();
-    return work->unk0C[(work->unk0A + 7) & 7];
+    return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
 u8 func_001029A0(void)
@@ -61,7 +61,7 @@ u8 func_001029A0(void)
     AdminWork* work;
 
     work = func_00102790();
-    return work->unk14[(work->unk0A + 7) & 7];
+    return work->unsignedHistory[(work->historyIndex + 7) & 7];
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_001029D0);

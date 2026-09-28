@@ -98,8 +98,8 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyRow128);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyWords20);
 
-void dds3DrawSetIndexedWord(u32 arg0, s32 arg1) {
-    *(u32 *)(D_0037F770 + arg1 * 4) = arg0;
+void dds3DrawSetIndexedWord(u32 value, s32 index) {
+    *(u32 *)(D_0037F770 + index * 4) = value;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawInitRect);
@@ -134,11 +134,11 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawSetupE08);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawEnableE08);
 
-void func_00106810(s32 arg0, s32 arg1, s32 arg2) {
-    if (arg0 == 0) {
-        D_00435CDA = (s16)arg1;
-        D_00435CDC = (s16)arg2;
-        if ((arg1 == 0) && (arg2 == 0)) {
+void func_00106810(s32 transition, s32 x, s32 y) {
+    if (transition == 0) {
+        D_00435CDA = (s16)x;
+        D_00435CDC = (s16)y;
+        if ((x == 0) && (y == 0)) {
             D_00435CD8 = 0;
         }
         else {
@@ -149,9 +149,9 @@ void func_00106810(s32 arg0, s32 arg1, s32 arg2) {
     }
     D_00438DB8 = D_00435CDA;
     D_00438DBA = D_00435CDC;
-    D_00438DBC = (s16)arg1;
-    D_00438DBE = (s16)arg2;
-    D_00438DB6 = (s16)arg0;
+    D_00438DBC = (s16)x;
+    D_00438DBE = (s16)y;
+    D_00438DB6 = (s16)transition;
     D_00435CD4 = D_00435CD4 | 0x800;
     D_00438DB4 = 0;
 }

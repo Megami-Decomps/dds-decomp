@@ -24,11 +24,11 @@ typedef struct {
     u8 pad_0x00[0x04];
     s16 unk4;
     u8 pad_0x06[0x06];
-    void **unkC;
+    void **entries;
 } SdfList;
 
 typedef struct {
-    SdfList *unk0;     /* 0x00 */
+    SdfList *list;     /* 0x00 */
     u8 pad_0x04[0x0C]; /* 0x04 */
     void *unk10;       /* 0x10 */
     u8 pad_0x14[0x05]; /* 0x14 */
@@ -50,13 +50,13 @@ extern void func_003312A8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_00331590(void *arg0, void *arg1);
 
 typedef struct {
-    s32 unk0;            /* 0x00: entry count */
+    s32 count;           /* 0x00: entry count */
     u8 pad_0x04[0x0C];   /* 0x04 */
-    u8 unk10;            /* 0x10: entries, 0x50 stride */
+    u8 firstItem;        /* 0x10: entries, 0x50 stride */
 } SdfItemList;
 
 typedef struct {
-    SdfItemList *unk0;   /* 0x00 */
+    SdfItemList *items;   /* 0x00 */
 } SdfItemListRef;
 
 extern SdfModel *func_003317C8(void *arg0, void *arg1);
@@ -140,13 +140,13 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_003317C8);
 SdfModel *func_003318B8(void *arg0, SdfItemListRef *arg1) {
     s32 i = 0;
     SdfModel *ret = func_003317C8(arg0, arg1);
-    SdfItemList *arr = arg1->unk0;
-    s32 n = arr->unk0;
-    u8 *item = &arr->unk10;
+    SdfItemList *arr = arg1->items;
+    s32 n = arr->count;
+    u8 *item = &arr->firstItem;
 
     if (n != i) {
         do {
-            func_00331590(ret->unk0->unkC[i], item);
+            func_00331590(ret->list->entries[i], item);
             item += 0x50;
             i++;
         } while (i != n);
@@ -162,12 +162,12 @@ SdfModel *func_00331940(void *arg0, SdfItemListRef *arg1) {
     u8 *item;
 
     ret->unk19 |= 4;
-    arr = arg1->unk0;
-    n = arr->unk0;
-    item = &arr->unk10;
+    arr = arg1->items;
+    n = arr->count;
+    item = &arr->firstItem;
     if (n != i) {
         do {
-            func_00331500(ret->unk0->unkC[i], item);
+            func_00331500(ret->list->entries[i], item);
             item += 0x50;
             i++;
         } while (i != n);
@@ -289,8 +289,8 @@ void func_00331AB0(SdfModel *arg0, s32 arg1) {
         : "m" (buf[0]), "m" (buf[1]), "m" (buf[2]), "m" (buf[3])
         : "memory"
     );
-    list = arg0->unk0;
-    func_003319D0(list->unkC[0], buf, arg1);
+    list = arg0->list;
+    func_003319D0(list->entries[0], buf, arg1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B18);

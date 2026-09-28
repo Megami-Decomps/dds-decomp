@@ -74,11 +74,11 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231718);
 
-void func_002317E0(u64 arg0, u64 arg1, u64 arg2) {
-    u64 temp_v0;
+void func_002317E0(u64 unused0, u64 unused1, u64 command) {
+    u64 entity;
 
-    temp_v0 = btlFindGroupedEntity();
-    func_00231718(temp_v0, arg2);
+    entity = btlFindGroupedEntity();
+    func_00231718(entity, command);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231810);
@@ -87,27 +87,27 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_002318D0);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231980);
 
-void func_002319D8(u32 arg0) {
-    u16 *puVar1;
+void func_002319D8(u32 job) {
+    u16 *words;
 
-    puVar1 = (u16 *)arg0;
-    func_002318D0(*puVar1, puVar1[1], *(u32 *)(puVar1 + 4), puVar1 + 6);
+    words = (u16 *)job;
+    func_002318D0(*words, words[1], *(u32 *)(words + 4), words + 6);
     WaitSema(D_00438F90);
-    func_002312F8(*puVar1, puVar1[1]);
+    func_002312F8(*words, words[1]);
     SignalSema(D_00438F90);
-    func_00328E48(arg0);
+    func_00328E48(job);
 }
 
-void func_00231A30(u64 arg0, s32 arg1) {
-    u64 temp_v0;
-    u32 temp_v1;
+void func_00231A30(u64 resource, s32 destination) {
+    u64 handle;
+    u32 resolved;
 
-    temp_v0 = func_002C8110();
-    temp_v1 = func_00343F38(temp_v0);
-    *(u32 *)(arg1 + 0xc) = temp_v1;
-    temp_v0 = func_002C8108(arg0);
-    func_003297C8(temp_v0);
-    func_002C7D00(arg0);
+    handle = func_002C8110();
+    resolved = func_00343F38(handle);
+    *(u32 *)(destination + 0xc) = resolved;
+    handle = func_002C8108(resource);
+    func_003297C8(handle);
+    func_002C7D00(resource);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231A80);

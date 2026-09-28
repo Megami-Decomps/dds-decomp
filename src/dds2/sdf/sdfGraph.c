@@ -23,9 +23,9 @@ void func_0032AA40(void *arg0);
 
 void *func_0032AB20(s32 arg0, s32 arg1, s32 arg2);
 
-void func_00329D38(s32 arg0) {
-    D_004389D8 = (u8)arg0;
-    func_00329CE0(D_0040B290, arg0, 0);
+void func_00329D38(s32 mode) {
+    D_004389D8 = (u8)mode;
+    func_00329CE0(D_0040B290, mode, 0);
     D_0043913C = 1;
 }
 

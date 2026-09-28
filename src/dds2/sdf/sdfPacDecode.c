@@ -11,8 +11,8 @@ typedef struct PacHead {
 } PacHead;
 
 typedef struct PacWork {
-    struct PacWork *unk0; /* 0x0 */
-    struct PacState *unk4; /* 0x4 */
+    struct PacWork *next; /* 0x0: packet queue link */
+    struct PacState *owner; /* 0x4 */
     s32 unk8; /* 0x8 */
     u8 *unkC; /* 0xC */
     u8 packet[1]; /* 0x10: copied header and packet data */
@@ -47,8 +47,8 @@ typedef struct PacState {
     PacBuf *unk24; /* 0x24 */
     PacBuf *unk28; /* 0x28 */
     PacAlloc *unk2C; /* 0x2C */
-    PacWork *unk30; /* 0x30 */
-    PacWork *unk34; /* 0x34 */
+    PacWork *queueHead; /* 0x30 */
+    PacWork *queueTail; /* 0x34 */
 } PacState;
 
 PacWork *func_00346E08(PacState *arg0, PacHead *arg1);
@@ -102,34 +102,34 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 PacWork *func_00346E08(PacState *arg0, PacHead *arg1) {
     s32 size = arg1->unk1 & 0xF0;
     PacWork *node = func_00328E18(size + 0x20);
-    node->unk4 = arg0;
+    node->owner = arg0;
     memcpy(node->packet, arg1, size + 0x10);
-    if (arg0->unk34 == NULL) {
-        arg0->unk30 = node;
+    if (arg0->queueTail == NULL) {
+        arg0->queueHead = node;
     } else {
-        arg0->unk34->unk0 = node;
+        arg0->queueTail->next = node;
     }
-    arg0->unk34 = node;
+    arg0->queueTail = node;
     return node;
 }
 
 PacWork *func_00346E90(PacWork *arg0) {
-    PacState *state = arg0->unk4;
-    PacWork *link = (PacWork *)&state->unk30;
-    PacWork *cur = state->unk30;
+    PacState *state = arg0->owner;
+    PacWork *link = (PacWork *)&state->queueHead;
+    PacWork *cur = state->queueHead;
     PacWork *prev = NULL;
     PacWork *next;
     if (cur != arg0) {
         do {
             prev = cur;
-            cur = prev->unk0;
+            cur = prev->next;
             link = prev;
         } while (cur != arg0);
     }
-    next = arg0->unk0;
-    link->unk0 = next;
-    if (state->unk34 == arg0) {
-        state->unk34 = prev;
+    next = arg0->next;
+    link->next = next;
+    if (state->queueTail == arg0) {
+        state->queueTail = prev;
     }
     func_00328E48(arg0);
     return next;
