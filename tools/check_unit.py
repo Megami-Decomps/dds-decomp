@@ -253,6 +253,18 @@ def main():
         pat = re.compile(rf"%(?:hi|lo|gp_rel)\({re.escape(sym)}\)")
         return sorted(n for n in asm_names if (asm_dir / f"{n}.s").exists()
                       and pat.search((asm_dir / f"{n}.s").read_text()))
+    retail_labels = sorted({(int(a, 16), k) for p in [ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s", *asm_dir.glob("*.s")]
+                            if p.exists() for k, a in re.findall(r"^dlabel (D|jtbl)_([0-9A-F]{8})\b", p.read_text(), re.M)})
+
+    def retail_padding(addr, size):
+        """Bytes between an item's 8-aligned end and the next retail symbol
+        (jump tables are 16-aligned)."""
+        nxt, kind = next(((a, k) for a, k in retail_labels if a > addr), (None, None))
+        end = (addr + size + 7) & ~7
+        if nxt is None or nxt <= end or kind == "jtbl" and nxt == (end + 15) & ~15:
+            return 0
+        return nxt - end
+
 
     # Rodata the C emits: jump tables (every entry must land on the retail case
     # label) and data items such as string literals (bytes must equal retail's).
@@ -275,6 +287,12 @@ def main():
             if item != theirs:
                 bad += 1
                 print(f"DIFF rodata of {name} (retail 0x{retail_addr:08X}): {item[:40]!r} vs {theirs[:40]!r}")
+            elif (pad := retail_padding(retail_addr, len(item))):
+                # The retail symbol runs on past the literal (unreferenced data
+                # after it); a compiled literal would drop those bytes.
+                bad += 1
+                print(f"PAD rodata of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
+                      "after it that no C emits: keep the extern D_ symbol")
             elif users := asm_users(retail_addr):
                 # The object keeps one copy; an asm function still pulls in its own.
                 bad += 1

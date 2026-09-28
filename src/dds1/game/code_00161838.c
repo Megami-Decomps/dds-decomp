@@ -66,3 +66,17 @@ void func_00161A88(void) {
     func_00161A20();
 }
 
+
+
+
+INCLUDE_SDATA(const s32, "game/code_00161838", D_003BB028);
+
+INCLUDE_SDATA(const s32, "game/code_00161838", D_003BB02C);
+
+INCLUDE_SDATA(const s32, "game/code_00161838", D_003BB030);
+
+INCLUDE_SDATA(const s32, "game/code_00161838", D_003BB034);
+
+
+INCLUDE_SDATA(const s32, "game/code_00161838", D_003BB040);
+

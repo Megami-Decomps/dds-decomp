@@ -1,0 +1,70 @@
+#include "common.h"
+
+typedef struct CmdPacket {
+    /* 0x0 */ u32 unk0;
+    /* 0x4 */ u32 unk4;
+    /* 0x8 */ u16 unk8;
+    /* 0xA */ u16 unkA;
+    /* 0xC */ u32 unkC;
+} CmdPacket;
+
+u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+
+u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+
+void func_002E9340(s32 arg0);
+
+INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E87A8);
+
+void func_002E88F8(u32 arg0) {
+}
+
+u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3) {
+    u32 ret = func_002E87A8(arg0, arg1, arg2, arg3);
+
+    func_002E88F8(ret);
+    return ret;
+}
+
+INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8938);
+
+INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E89D0);
+
+INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8AB0);
+
+INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8B58);
+
+INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8C30);
+
+void func_002E8D10(s32 arg0) {
+    CmdPacket packet;
+
+    func_002E9340(arg0);
+    packet.unk0 = arg0;
+    packet.unk4 = 0;
+    packet.unk8 = 0x7F;
+    func_002E87A8(0x20, 0, &packet, 0x10);
+}
+
+void func_002E8D58(u32 arg0) {
+    u32 temp_v0 [4];
+
+    temp_v0[0] = arg0;
+    func_002E87A8(0x30, 0, temp_v0, 0x10);
+}
+
+void func_002E8D88(s32 arg0) {
+    CmdPacket packet;
+
+    func_002E9340(arg0);
+    packet.unk0 = arg0;
+    packet.unk8 = 0x7F;
+    func_002E87A8(0x130, 0, &packet, 0x10);
+}
+
+void func_002E8DD0(u32 arg0) {
+    u32 temp_v0 [4];
+
+    temp_v0[0] = arg0;
+    func_002E87A8(0x30, 0, temp_v0, 0x10);
+}

@@ -181,3 +181,11 @@ void func_00289D28(s32 arg0, s8 arg1) {
 void func_00289D50(u32 arg0) {
     func_002F6E90(arg0, 0);
 }
+
+
+
+INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7D8);
+
+
+INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7E0);
+

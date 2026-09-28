@@ -152,3 +152,23 @@ void func_0019B300(s32 arg0, s16 arg1) {
 s16 func_0019B320(s32 arg0) {
     return D_003D6ECC[arg0].ptr->unk52;
 }
+
+
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1A8);
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1B0);
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1B8);
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1C0);
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1C8);
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1D0);
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1D8);
+
+
+INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1E0);
+

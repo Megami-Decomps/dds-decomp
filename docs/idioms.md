@@ -26,6 +26,19 @@ case 4: o->sub->c = v; return;
 The table goes into the unit's `.rodata`, and check_unit verifies every entry.
 Retail example: `func_0018CC98`.
 
+## `slt; sltiu 1` vs `slt; xori 1`
+
+A negated comparison written as an expression (`return !(x < 2);`,
+`return x >= 2;`, `x < 2 ? 0 : 1`) gives `slti; xori $2,$2,1`. Retail's
+`slti; sltiu $2,$2,1` comes from early returns:
+
+```c
+if (x < 2) return 0;
+return 1;
+```
+
+(`if/else` with two returns gives the same code.) Example: `func_0014D0D0`.
+
 ## Tail calls: `jal` + epilogue instead of `j`
 
 -O2 turns a call in tail position into `j callee`. Retail keeps

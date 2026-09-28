@@ -348,3 +348,21 @@ void func_0024E198(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
 }
 
 
+
+
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC408);
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC40C);
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC40D);
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC410);
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC414);
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC415);
+
+
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC418);
+

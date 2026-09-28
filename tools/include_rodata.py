@@ -44,6 +44,11 @@ def place(version):
         nonmatchings = ROOT / "asm" / version / "nonmatchings" / unit
         matchings = ROOT / "asm" / version / "matchings" / unit
         if not nonmatchings.is_dir():
+            # Nothing of the unit is asm (its lines may be left over from a split).
+            text = c.read_text()
+            stripped = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
+            if stripped != text:
+                c.write_text(stripped)
             continue
         # The unit's rodata as splat last split it; INCLUDE_RODATA lines and per-symbol
         # files for anything else are left over from an earlier split.

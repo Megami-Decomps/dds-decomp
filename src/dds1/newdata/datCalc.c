@@ -62,3 +62,29 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_00119880);
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001198B8);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001198E8);
+
+
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA08);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA0C);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA10);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA14);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA18);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA1C);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA20);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA24);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA28);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA2C);
+
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA30);
+

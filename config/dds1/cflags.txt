@@ -8,3 +8,22 @@ game/code_0025BC38  -fno-optimize-sibling-calls  # 16 tail calls in 36 functions
 game/code_0026BD80  -fno-optimize-sibling-calls  # 14 tail calls in 31 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_00273AB0  -fno-optimize-sibling-calls  # 10 tail calls in 23 functions, all jal+epilogue, no j to a function; neighbours sibcall (find_nosibcall.py)
 game/code_0024E1C8  -fno-optimize-sibling-calls  # 11 tail calls in 37 functions, all jal+epilogue, no j to a function; neighbours sibcall (find_nosibcall.py)
+game/code_00228B38  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_00249FA8  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_00250E88  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 3 parked candidates match only with it
+game/code_00253E58  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_00257200  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_0025DF68  -fno-optimize-sibling-calls  # 12 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_00262EB8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 3 parked candidates match only with it
+game/code_00263EB0  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_002649B0  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_002665E0  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_0026DC50  -fno-optimize-sibling-calls  # 3 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
+game/code_00272798  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
+game/code_00279328  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
+game/code_002818B8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_002BEDC8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_002C2620  -fno-optimize-sibling-calls  # 8 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_002C3868  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
+game/code_002E87A8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_002E9140  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it

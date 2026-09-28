@@ -405,3 +405,11 @@ void func_002189D8(MdlRes *res) {
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218A08);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218A88);
+
+
+
+INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB60);
+
+
+INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB68);
+

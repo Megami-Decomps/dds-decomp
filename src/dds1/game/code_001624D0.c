@@ -348,3 +348,9 @@ EffParamWork *func_00163290(EffParamWork *work, s32 index) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001632E0);
+
+
+
+
+INCLUDE_SDATA(const s32, "game/code_001624D0", D_003BB044);
+

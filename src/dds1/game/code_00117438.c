@@ -156,3 +156,29 @@ void func_00119000(s32 arg0, u16 arg1) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00119018);
+
+
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E0);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E8);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E9);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9EA);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9EC);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F0);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F4);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F8);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F9);
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA00);
+
+
+INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA04);
+

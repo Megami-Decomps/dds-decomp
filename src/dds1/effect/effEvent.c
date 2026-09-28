@@ -89,3 +89,15 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00192230);
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192250);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192420);
+
+
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB140);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
+
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
+

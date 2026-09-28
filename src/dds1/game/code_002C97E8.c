@@ -171,12 +171,6 @@ s32 func_002CB390(void *p, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3B8);
 
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3DC0);
-
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3E00);
-
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3E40);
-
 INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3EE0);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3F8);
@@ -299,3 +293,19 @@ void func_002CC740(void) {
 u32 func_002CC748(void) {
     return 0;
 }
+
+
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD288);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD290);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD298);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A0);
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A8);
+
+
+INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2B0);
+
