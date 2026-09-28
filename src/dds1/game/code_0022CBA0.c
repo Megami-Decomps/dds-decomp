@@ -301,7 +301,26 @@ u32 func_00231CC8(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231D18);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231E10);
+u32 func_00231E10(u32 arg0, u32 arg1, u8 *scene) {
+    u8 *record = (u8 *)func_0022BE40((s32)scene);
+    if (record != NULL) {
+        f32 *dst = *(f32 **)(record + 0x2C);
+        f32 *src = (f32 *)(scene + 0x2350);
+        s32 index = 3;
+        do {
+            index--;
+            dst[0] = src[-8];
+            dst[4] = src[-4];
+            dst[8] = src[0];
+            src++;
+            dst++;
+        } while (index >= 0);
+        func_0022E5A0(*(s32 *)(scene + 0x18), scene);
+        func_0022FF98((s32)scene);
+        return 0;
+    }
+    return (u32)record;
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231E90);
 

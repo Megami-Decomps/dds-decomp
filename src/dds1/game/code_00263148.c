@@ -5,8 +5,31 @@ extern u32 func_00265E68(u32, s32);
 extern s32 func_0021F600(u32);
 
 extern s32 func_00101A70();
+extern void func_0024DDC0(s32);
+extern void func_0024DA58(s32);
+extern s32 func_002CD788(void *);
+extern s32 func_002CD2A8(u16);
+extern s32 func_002CD548(void *, u16);
+extern void func_002CD428(void *, u16);
+extern void func_0021F580(s32);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263148);
+void func_00263148(u32 address) {
+    u8 *scene = (u8 *)address;
+    u8 *item = **(u8 ***)(scene + 0x98);
+    s32 *data = (s32 *)func_002CD788(item);
+    s8 selection = item[0x55];
+    if (selection != 0 && func_002CD2A8((u16)selection) == *data &&
+        func_002CD548(item, (u16)(s8)item[0x55]) == 0) {
+        func_002CD428(item, (u16)(s8)item[0x55]);
+        *(s32 *)(scene + 0x24C) = 1;
+        if (func_0021F600(0x910) == 0) {
+            *(s32 *)(scene + 4) |= 1;
+            func_0021F580(0x910);
+        }
+    } else {
+        *(s32 *)(scene + 0x24C) = 0;
+    }
+}
 
 u32 func_00263220(u32 arg0) {
     u32 temp_v0;
@@ -21,7 +44,15 @@ u32 func_00263220(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263260);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263378);
+s32 func_00263378(u32 *state) {
+    if (state[1] & 1) {
+        func_0024DDC0(1);
+        func_0024DA58(1);
+        state[1] &= ~1;
+        return 1;
+    }
+    return 0;
+}
 
 u32 func_002633D8(void) {
     s64 temp_v0;

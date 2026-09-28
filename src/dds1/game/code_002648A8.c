@@ -1,3 +1,39 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_002648A8", func_002648A8);
+typedef struct SceneItem {
+    u8 pad00[6];
+    u16 left;
+    u16 sourceLeft;
+    u16 top;
+    u16 sourceTop;
+    u16 active;
+} SceneItem;
+
+extern void func_00265C28(void *, SceneItem *);
+extern void func_002E8F78(s32, s32, s32);
+extern void func_00262AC0(SceneItem *, void *);
+
+void func_002648A8(u8 *scene) {
+    SceneItem *item = *(SceneItem **)(*(s32 *)(scene + 0x98));
+    switch (*(s32 *)(scene + 0x1588)) {
+    case 4:
+        func_00265C28(scene + 0x3D0, item);
+        func_002E8F78(0x10, 0x7F, 0x3F);
+        break;
+    case 1:
+        item->left = item->sourceLeft;
+        item->top = item->sourceTop;
+        item->active = 0;
+        func_002E8F78(0x10, 0x7F, 0x3F);
+        break;
+    case 2:
+        item->left = item->sourceLeft;
+        func_002E8F78(0x10, 0x7F, 0x3F);
+        break;
+    case 3:
+        item->top = item->sourceTop;
+        func_002E8F78(0x10, 0x7F, 0x3F);
+        break;
+    }
+    func_00262AC0(item, scene);
+}
