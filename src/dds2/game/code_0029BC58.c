@@ -6,7 +6,7 @@ typedef struct { s32 active; s32 pos; } SlideBar;
 extern s32 func_002A46C8(s32);
 extern u32 D_00438FE8;
 
-extern u32 func_0029D790(u32, s32);
+extern u32 func_0029D790();
 
 extern u64 func_0010D650(u64);
 
@@ -140,7 +140,20 @@ void func_0029C450(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C4D8);
+typedef struct { u32 word[6]; } BurstSprite;
+typedef struct { BurstSprite sprite[8]; } BurstTable;
+extern BurstTable D_00428420;
+extern void func_00308620(BurstSprite *, u32 *, s32, s32, s32);
+
+void func_0029C4D8(s32 arg0, s32 arg1) {
+    BurstTable table = D_00428420;
+    s32 scaled = arg0 * 0x13 / 256;
+    u32 i;
+
+    for (i = 0; i < 8; i++) {
+        func_00308620(&table.sprite[i], &table.sprite[i].word[3], 0, scaled, arg1);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C618);
 
@@ -161,7 +174,28 @@ void func_0029C878(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C880);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CA68);
+extern u32 D_004379C8[];
+extern s32 func_0019F6C8();
+extern void func_0035C860();
+
+void func_0029CA68(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
+    char name[32];
+    u32 color[4];
+    s32 sprite;
+    u32 packed;
+
+    packed = (alpha & 0xFF) | 0xA09DC300;
+    func_0035C860(name, D_004379C8, *(u32 *)(res + 0x10));
+    sprite = func_0019F6C8(x, y, z, packed, name, 0);
+    func_0019D120(sprite, 3);
+    func_0019D550(sprite, 1, arg5);
+    func_0019C5B0(sprite);
+    color[0] = alpha;
+    color[1] = alpha;
+    color[2] = alpha;
+    color[3] = alpha;
+    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, *(s32 *)(work + 0xAEB0), 0x1B, 0x53);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CB70);
 
