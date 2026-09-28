@@ -1702,7 +1702,27 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181D80);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181E80);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181EF0);
+typedef struct EffPCPNode {
+    u8 pad0[4];
+    struct EffPCPNode *next;
+    u8 pad8[4];
+    struct EffPCPNode *child;
+    u8 pad10[0x60];
+    u8 vector70[0x10];
+} EffPCPNode;
+
+void func_00181EF0(EffPCPNode *node) {
+    EffPCPNode *child;
+
+    __asm__ volatile ("sqc2 vf10, 0(%0)" :: "r" (node->vector70) : "memory");
+    child = node->child;
+    if (child != NULL) {
+        do {
+            func_00181EF0(child);
+            child = child->next;
+        } while (child != node->child);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181F48);
 
