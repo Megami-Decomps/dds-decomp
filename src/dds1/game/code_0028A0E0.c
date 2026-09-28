@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct FileRecordSlot {
     u8 pad0[0x10];
@@ -253,7 +254,7 @@ extern void func_00289C38(s32);
 
 extern void *func_0028BF08(u32 arg0);
 
-extern void func_0028B590(void);
+extern void *func_0028B590(void);
 
 extern void func_0028BF38(void);
 
@@ -385,7 +386,7 @@ typedef struct Cb3714C {
     void (*cbC)(void *, void *); /* 0x0C */
     void (*cb10)(void *arg);  /* 0x10 */
     void (*cb14)(void *arg);  /* 0x14 */
-    void (*cb18)(void *arg);  /* 0x18 */
+    void (*cb18)(void *arg, void *extra);  /* 0x18 */
     void (*cb1C)(void *arg);  /* 0x1C */
     void (*cb20)(void *arg);  /* 0x20 */
     u32 unk24;                /* 0x24 */
@@ -556,7 +557,23 @@ void func_0028A388(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A3D8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A508);
+extern void func_00108A80(s32);
+extern void func_00108CB8(s32);
+extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, s32);
+extern void func_002908D0(void);
+extern void func_00290A88(s32, s32, s32);
+extern s32 D_003BC85C;
+extern s32 D_003BC884;
+
+void func_0028A508(void) {
+    func_00108A80(0x56);
+    func_00108CB8(0);
+    func_00108FA0(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
+    func_00108FA0(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
+    func_002908D0();
+    func_00290A88(0x17E, 0x118, 0x56);
+    D_003BC85C++;
+}
 
 s32 isLoadStepComplete(void) {
     if (D_003BC860 < 7) {
@@ -741,7 +758,33 @@ void func_0028B560(void) {
     resetFileSelection();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028B590);
+extern s32 D_003BC82C;
+extern void *func_0028DCC0(void);
+
+void *func_0028B590(void) {
+    s32 i;
+
+    D_003BC82C = 0;
+    D_003BC810 = 1;
+    for (i = 0; i < 10; i++) {
+        u32 buttons = func_00289CD0(D_003BC7E8, i);
+
+        D_003DC7C0[i] = 0;
+        if (buttons & 1) {
+            if (buttons & 2) {
+                if (buttons & 8) {
+                    D_003DC7C0[i] = 1;
+                }
+            }
+        } else if (buttons & 2) {
+            if (!(buttons & 8)) {
+                D_003DC7C0[i] = 2;
+            }
+        }
+    }
+    fileReqBegin(D_003BC7E8);
+    return func_0028DCC0;
+}
 
 void func_0028B658(void) {
     if (D_003BC848 == 1 && kwlnTaskGetTaskByName(D_003B2658) == NULL) {
@@ -799,9 +842,58 @@ s32 func_0028B900(void) {
     return fileReqGetSize(D_003BC7E8) > 0x4C3FF;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028B930);
+s32 func_0028B930(void) {
+    s32 result = fileReqPoll();
+    if (result == 0) {
+        return result;
+    }
+    if (D_003BC808 > 0) {
+        D_003BC808--;
+        fileReqBegin(D_003BC7E8);
+        return 0;
+    }
+    switch (func_00289B98(D_003BC7E8)) {
+    case 0:
+    case 3:
+        return func_0028B370();
+    case 2:
+        return func_0028B508();
+    case 1:
+        if (func_0028B900() != 0) {
+            return func_0028B508();
+        }
+        return (s32)func_0028B328();
+    default:
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028B9F8);
+extern void *clearSaveSlotMetadata(void);
+
+void *func_0028B9F8(void) {
+    if (fileReqPoll() == 0) {
+        return NULL;
+    }
+    if (D_003BC808 > 0) {
+        D_003BC808--;
+        fileReqBegin(D_003BC7E8);
+        return NULL;
+    }
+    switch (func_00289B98(D_003BC7E8)) {
+    case 0:
+    case 3:
+        return (void *)func_0028B370();
+    case 2:
+        return (void *)func_0028B508();
+    case 1:
+        if (func_0028B900() != 0) {
+            return (void *)func_0028B508();
+        }
+        return clearSaveSlotMetadata();
+    default:
+        return NULL;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028BAC0);
 
@@ -963,7 +1055,30 @@ void *handleSaveDirectoryWriteResult(void) {
     return func_0028C560();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C560);
+void *func_0028C560(void) {
+    s32 slot = D_003BC828;
+    s32 buttons = func_00289CD0(D_003BC7E8, slot);
+
+    slot++;
+    if (buttons & 1) {
+        if (buttons & 2) {
+            if (buttons & 8) {
+                func_0028AB30(0);
+                D_003BC810 = 0;
+                D_003BC854 = 0;
+                return (void *)func_0028B508();
+            }
+        }
+    }
+    D_003BC828 = slot;
+    if (slot == 10) {
+        func_0028AB30(0);
+        D_003BC810 = 0;
+        D_003BC854 = 0;
+        return (void *)func_0028B3B0();
+    }
+    return func_0028C3F0();
+}
 
 void *clearSaveSlotMetadata(void) {
     s32 index = 0;
@@ -1068,7 +1183,21 @@ void *func_0028C8D0(void) {
     return func_0028C888;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028C8F8);
+extern u8 D_0037D0C0[];
+extern u32 D_003BC890;
+extern u32 D_003BC894;
+
+void *func_0028C8F8(void) {
+    s32 slot = D_003BC844 + 1;
+    u8 tens = 0x4F + slot / 10;
+    u8 ones = 0x4F + slot % 10;
+
+    D_0037D0C0[0xD0] = 0x82;
+    D_0037D0C0[0xD1] = tens;
+    D_0037D0C0[0xD2] = 0x82;
+    D_0037D0C0[0xD3] = ones;
+    return beginFileRequest(D_003B2678, &D_003BC890, &D_003BC894, func_0028C8D0, 0);
+}
 
 void *requestBaseIcon(void) {
     return beginFileRequest(D_003B2688, &D_003BD914, &D_003BD918,
@@ -1190,7 +1319,34 @@ void *handleSaveSetupResult(void) {
     return func_0028BDA0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DC08);
+extern s8 D_003BC7ED;
+extern s32 fileLoadStateChanged(void);
+extern void func_00290E38(void);
+extern void func_00290E50(void);
+
+void *func_0028DC08(void) {
+    s32 status = func_0028A020();
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        fileReloadSaveBuffer();
+        func_002D0918(D_003BD920);
+        D_003BC7ED = 1;
+        func_0028A150();
+        if (fileLoadStateChanged() == 0) {
+            func_00290E38();
+        } else {
+            func_00290E50();
+        }
+        func_0028AB30(13);
+        return func_0028BE60(-1);
+    }
+    func_002D0918(D_003BD920);
+    func_0028AB30(0);
+    D_003BC854 = 3;
+    return func_0028BDA0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028DCC0);
 
@@ -1360,7 +1516,22 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290FE0);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002911B8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002912C8);
+extern s32 func_00290FE0();
+extern s32 func_00291418(void);
+extern s32 func_002911B8(void);
+extern s32 startQueuedFileLoad(void);
+extern u32 func_002918D8(void);
+extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, s32 data);
+
+void func_002912C8(void) {
+    if (D_003BD938 == 0) {
+        D_003BD938 = func_00290FE0();
+        kwlnTaskCreate(D_003BC8E8, 0x3F2, 1, 1, func_00291418, NULL, D_003BD938);
+        kwlnTaskCreate(D_003B29D8, 0x2B07, 1, 1, startQueuedFileLoad, NULL, D_003BD938);
+        kwlnTaskCreate(D_003B29E8, 0x520B, 1, 1, func_002918D8, func_002911B8, D_003BD938);
+        D_003BC8D5 = 1;
+    }
+}
 
 void configTasksDestroy(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003BC8E8, 1);
@@ -1449,7 +1620,49 @@ u32 func_00292C48(s32 arg0) {
     return D_0037E130[arg0];
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292C60);
+extern u8 D_003296F0[];
+extern u8 D_00324610[];
+extern u8 D_00324660[];
+extern void func_002DDD60(void *);
+
+void func_00292C60(void) {
+    u8 *matrix;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_003296F0) : "memory");
+    matrix = D_00324610;
+    func_002DDD60(matrix);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : : "memory");
+    matrix += 0x40;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        "vmul.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(matrix) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        "vadd.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(D_00324660) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292CE0);
 
@@ -1561,11 +1774,11 @@ void func_002936E0(void *arg0) {
     }
 }
 
-void func_00293720(void *arg0) {
+void func_00293720(void *arg0, void *extra) {
     u16 idx = *(u16 *)((u8 *)arg0 + 4);
-    void (*cb)(void *) = D_0037E14C[idx].cb18;
+    void (*cb)(void *, void *) = D_0037E14C[idx].cb18;
     if (cb != NULL) {
-        cb(*(void **)((u8 *)arg0 + 8));
+        cb(*(void **)((u8 *)arg0 + 8), extra);
     }
 }
 
@@ -1629,7 +1842,31 @@ void func_00293A00(u64 arg0, u64 arg1, u16 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293AE0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293C50);
+extern u8 D_003BD476;
+extern char D_003BC928[];
+extern char D_003BC930[];
+extern char D_003BC938[];
+extern char *func_002E5D70(void);
+extern s32 func_0030E8F0(const char *path, s32 flags, ...);
+extern void func_00293AE0(s32 fd, s32 arg1);
+extern void func_0030EB78(s32 fd);
+extern void func_00310A68(const char *path, s32 arg1);
+
+void func_00293C50(s32 arg0, s32 arg1) {
+    char path[0xD0];
+    s32 fd;
+
+    if (D_003BD476 != 0) {
+        func_003014F0(path, D_003BC928, arg1);
+        fd = func_0030E8F0(path, 0x602, 0x1B6);
+    } else {
+        func_003014F0(path, D_003BC930, func_002E5D70(), arg1);
+        fd = func_0030E8F0(path, 0x602);
+    }
+    func_00293AE0(fd, arg0);
+    func_0030EB78(fd);
+    func_00310A68(D_003BC938, 0);
+}
 
 void *duplicateFileJob(void *source) {
     FileJob *request = source;
@@ -1739,7 +1976,37 @@ void func_002944D8(FileQueue *queue) {
     func_002CFF98(queue);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294548);
+extern void func_00294670(FileQueue *queue, void *vec);
+extern void func_00294850(FileQueue *queue, f32 scale);
+extern void func_00294938(FileQueue *queue, u32 color);
+extern void func_00294F50(FileJob *dst, FileJob *src);
+
+FileQueue *func_00294548(FileQueue *source) {
+    FileQueue *queue = fileQueueCreate();
+    FileJob *src;
+    s128 vec;
+
+    PCP_COPY_VECTOR(queue, source);
+    PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
+    *(f32 *)((u8 *)queue + 0x74) = *(f32 *)((u8 *)source + 0x74);
+    *(u32 *)((u8 *)queue + 0x68) = *(u32 *)((u8 *)source + 0x68);
+    for (src = source->tail; src != NULL; src = src->next) {
+        FileJob *job = fileJobCreate();
+        job->id = (u32)fileJobCreateChild((FileJob *)src->id);
+        func_00294F50(job, src);
+        fileQueueAppend(queue, job);
+    }
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf0, 0(%0)\n"
+        ".set reorder"
+        : : "r"(&vec) : "memory");
+    func_00294670(queue, &vec);
+    func_00294798(queue, &vec);
+    func_00294850(queue, 1.0f);
+    func_00294938(queue, 0x80808080);
+    return queue;
+}
 
 void func_00294630(FileQueue *queue) {
     FileJob *job;
@@ -1890,7 +2157,26 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2A18);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F90);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296088);
+void func_00296088(LoadObj *obj) {
+    if (obj->deviceHandle != NULL) {
+        billDispatchByKind(obj->deviceHandle);
+    }
+    if (obj->unk3C != 0) {
+        u32 count = *(u32 *)((u8 *)obj->unk44 + 8);
+        u32 i;
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(((FileJob **)obj->unk38)[i]);
+        }
+        func_002D0918(obj->unk3C);
+    }
+    if (obj->unk40 != NULL) {
+        releaseEffectReferenceHolder((s32)obj->unk40);
+    }
+    if (obj->unk44 != NULL) {
+        func_0029A730((s32)obj->unk44);
+    }
+    func_002CFF98(obj);
+}
 
 LoadObj *loadObjectCreateChild(LoadObj *owner) {
     LoadObj *source = *(LoadObj **)((u8 *)owner->unk44 + 0x24);
@@ -2033,11 +2319,70 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00298538);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002985D0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00298CA0);
+typedef struct ScaleEntry {
+    f32 unk0;
+    f32 value;
+} ScaleEntry;
+
+typedef struct ScaleSet {
+    u8 pad0[0x64];
+    f32 unk64;
+    f32 unk68;
+    u8 pad6C[4];
+    ScaleEntry entries[3];
+    u8 pad88[0x40];
+    f32 unkC8;
+    f32 unkCC;
+    f32 unkD0;
+    f32 unkD4;
+    f32 unkD8;
+    f32 unkDC;
+    f32 unkE0;
+    f32 unkE4;
+    u8 padE8[8];
+    f32 unkF0;
+} ScaleSet;
+
+typedef struct ScaleOwner {
+    u8 pad0[0x20];
+    ScaleSet *dst;
+    ScaleSet *src;
+} ScaleOwner;
+
+void func_00298CA0(ScaleOwner *owner, f32 scale) {
+    ScaleSet *src = owner->src;
+    ScaleSet *dst = owner->dst;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+    dst->unkC8 = src->unkC8 * scale;
+    dst->unkD0 = src->unkD0 * scale;
+    dst->unkD8 = src->unkD8 * scale;
+    dst->unkDC = src->unkDC * scale;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00298D28);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00299560);
+void func_00299560(ScaleOwner *owner, f32 scale) {
+    ScaleSet *src = owner->src;
+    ScaleSet *dst = owner->dst;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+    dst->unkC8 = src->unkC8 * scale;
+    dst->unkCC = src->unkCC * scale;
+    dst->unkD4 = src->unkD4 * scale;
+    dst->unkE4 = src->unkE4 * scale;
+    dst->unkF0 = src->unkF0 * scale;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002995F8);
 
@@ -2045,7 +2390,21 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00299DD8);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00299E58);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A558);
+void func_0029A558(ScaleOwner *owner, f32 scale) {
+    ScaleSet *src = owner->src;
+    ScaleSet *dst = owner->dst;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+    dst->unkC8 = src->unkC8 * scale;
+    dst->unkD8 = src->unkD8 * scale;
+    dst->unkE0 = src->unkE0 * scale;
+    dst->unkE4 = src->unkE4 * scale;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A5E0);
 
