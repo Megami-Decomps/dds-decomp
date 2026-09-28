@@ -18,17 +18,38 @@ typedef struct QuadU32 {
 
 extern s32 func_002C2568(s32, void *);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF790);
+void func_002BF790(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+    s32 entry = func_002BD398(e, f);
+    func_002BF400(a, b, c, d, e, f, entry, g);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF970);
+s32 func_002BF970(s32 object, s32 key) {
+    s32 entry = func_002BD398(object);
+    s32 result;
+
+    if (*(s32 *)(entry + 0x30) == 0) {
+        func_002BF828(object, key);
+    }
+    result = func_002BDF28(object, key, entry);
+    if (result == 0) {
+        result = *(s32 *)(object + 0x28);
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFA80);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFAF8);
+void func_002BFAF8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
+    s32 object = func_002BD398(a, b);
+    *(s32 *)(object + 0x50) = x;
+    *(s32 *)(object + 0x54) = y;
+    *(s32 *)(object + 0x58) = width;
+    *(s32 *)(object + 0x5c) = height;
+}
 
 void func_002BFB50(s32 arg0, s32 arg1) {
     u32 *puVar1;
@@ -97,21 +118,34 @@ void func_002C0BD8(QuadU32 *q, u32 value) {
     q->w = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0BF0);
+void func_002C0BF0(u32 a, u32 b, u32 c, u32 value, u32 e, u32 f, u32 g, u32 h) {
+    u32 rgb[3] = {value, value, value};
+    func_002C0C20(a, b, c, rgb, e, f, g, h);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0C20);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DA8);
+void func_002C0DA8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g, u32 h) {
+    u32 rgba[4] = {value, value, value, value};
+    func_002C0DF8(a, b, c, d, e, rgba, g, h);
+}
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DD8);
+void func_002C0DD8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
+    func_002C0DA8(a, b, c, d, e, f, 0, g);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DF8);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0F88);
+void func_002C0F88(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
+    func_002C0DF8(a, b, c, d, e, f, 0, g);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0FA8);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1098);
+void func_002C1098(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value) {
+    u32 range[2] = {value, value};
+    func_002C10C0(a, b, c, d, e, f, range);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C10C0);
 
@@ -153,7 +187,21 @@ s32 func_002C16F8(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1728);
+s32 func_002C1728(u8 *object, u32 flags) {
+    s32 child;
+    if (object == 0) {
+        return 0;
+    }
+    *(u32 *)(object + 0xc) = (*(u32 *)(object + 0xc) & ~2) | flags;
+    child = *(s32 *)(object + 0x18);
+    if (child != 0) {
+        s32 node = *(s32 *)(child + 0x20);
+        if (node != 0) {
+            *(u32 *)(node + 0xc) |= 2;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1770);
 
@@ -183,7 +231,20 @@ u32 func_002C18C8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1910);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1978);
+void func_002C1978(s32 columns, u8 *work) {
+    s32 flags = *(s32 *)(work + 0xc);
+    s32 width;
+    if (flags & 0x100) {
+        columns += 4;
+        if (flags & 0x200) {
+            columns += 2;
+        }
+    }
+    width = columns * 12 + 6;
+    if (*(s32 *)(work + 0x28) < width) {
+        *(s32 *)(work + 0x28) = width;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C19C0);
 

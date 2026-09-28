@@ -49,7 +49,22 @@ INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E240);
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E388);
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E4F0);
+extern s32 func_002D03F8(s32);
+extern void *func_002D03F0(s32);
+extern f32 func_002E8398(s32);
+extern void *memset(void *, s32, u32);
+
+void *func_0026E4F0(s32 owner, u8 sprite, u8 variant) {
+    s32 allocation = func_002D03F8(0x48);
+    u8 *resource = func_002D03F0(allocation);
+    memset(resource, 0, 0x48);
+    *(s32 *)resource = allocation;
+    *(s32 *)(resource + 0x34) = owner;
+    resource[0x45] = sprite;
+    resource[0x44] = variant;
+    *(s32 *)(resource + 0x30) = (s32)(func_002E8398(0) * 30.0f + 10.0f);
+    return resource;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E5A0);
 
@@ -59,7 +74,11 @@ INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E720);
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E798);
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E8A0);
+extern u8 D_003BC620[];
+
+void func_0026E8A0(void) {
+    D_003BC610[1] = func_002BC8F0(D_003BC620, "roll.spr", 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_0026E8D8);
 
@@ -312,7 +331,10 @@ s32 func_00270098(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_002700D0);
+void func_002700D0(void) {
+    func_002EC850();
+    kwlnTaskCreate("movieMan", 0x385, 1, 0, func_00270098, 0, 0);
+}
 
 u32 func_00270110(void) {
     s32 temp_v0;
@@ -356,7 +378,15 @@ void func_00270A30(void) {
     D_003DC560[0] = kwlnTaskCreate(D_003B1AC8, 0x2b02, 1, 0, movieViewer, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_00270A80);
+void func_00270A80(void) {
+    s32 task = kwlnTaskGetTaskByName(D_003B1AC8);
+    if (task != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+        D_003DC560[0] = 0;
+        func_00270030();
+    }
+    func_00270240();
+}
 
 void func_00270AC0(void) {
     D_003DC578[2] = 1;
@@ -534,7 +564,28 @@ INCLUDE_RODATA(const s32, "game/code_0026DED0", D_003B2010);
 
 INCLUDE_RODATA(const s32, "game/code_0026DED0", D_003B2020);
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_00271100);
+void *func_00271100(s32 kind, s32 *count, u8 *data) {
+    switch (kind) {
+    case 1:
+        *count = 4;
+        return data + 0xe0;
+    case 2:
+        *count = 2;
+        return data + 0xd8;
+    case 3:
+        *count = 2;
+        return data + 0x7c;
+    case 4:
+        *count = 9;
+        return data + 0xf0;
+    case 5:
+        *count = 1;
+        return data + 0x114;
+    default:
+        *count = 0;
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_00271180);
 
@@ -628,9 +679,31 @@ INCLUDE_RODATA(const s32, "game/code_0026DED0", D_003B20D0);
 
 INCLUDE_ASM(const s32, "game/code_0026DED0", func_002720B0);
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_002721E8);
+extern char D_003BC6B8[]; /* "camp" */
+extern char D_003B20C0[]; /* "camp_draw" */
+extern char D_003B20D0[]; /* "camp_update" */
 
-INCLUDE_ASM(const s32, "game/code_0026DED0", func_00272228);
+void func_002721E8(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_003BC6B8, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003B20C0, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003B20D0, 0);
+}
+
+extern s8 D_003BC6B4;
+
+s32 func_00272228(void) {
+    s8 state = D_003BC6B4;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        D_003BC6B4 = 0;
+    }
+    return 0;
+}
 
 u8 func_00272260(void) {
     s64 temp_v0;
