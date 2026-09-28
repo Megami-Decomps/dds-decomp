@@ -1,6 +1,14 @@
 #include "common.h"
 #include "eff.h"
 
+/* Particle dispatch object; see the matching DDS1 game unit. */
+typedef struct ParObj {
+    u8 pad0[0x8C];
+    f32 scale8C;
+    u8 pad90[0x60];
+    u32 unkF0;
+} ParObj;
+
 extern s32 D_00436400;
 
 extern s32 D_00436404;
@@ -13,8 +21,8 @@ extern void func_001622D0();
 
 extern void parObjGetMode();
 
-void func_00162348(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xf0) = arg1;
+void func_00162348(ParObj *work, u32 value) {
+    work->unkF0 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", parObjSetMode);
@@ -33,9 +41,9 @@ void func_001628E0(void) {
     parRestartKind();
 }
 
-void func_001628F8(float arg0, s32 arg1) {
+void func_001628F8(float scale, ParObj *work) {
     func_00162248();
-    *(float *)(arg1 + 0x8c) = *(float *)(arg1 + 0x8c) * arg0;
+    work->scale8C = work->scale8C * scale;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162938);
@@ -46,8 +54,8 @@ void func_00162968(void) {
     func_001622E8();
 }
 
-void func_00162980(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xf0) = arg1;
+void func_00162980(ParObj *work, u32 value) {
+    work->unkF0 = value;
 }
 
 void func_00162988(u32 arg0, u8 arg1) {

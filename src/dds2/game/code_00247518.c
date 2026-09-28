@@ -28,6 +28,11 @@ void func_00137818(void);
 
 void func_00246D80(u64 arg0);
 
+typedef struct EventViewerState {
+    u8 pad0[0x23C0];
+    s32 updateCount;
+} EventViewerState;
+
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247518);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002475C8);
@@ -64,12 +69,12 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_00249C40);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249DC8);
 
-void func_00249EB0(s32 arg0) {
-    s64 temp_v0;
+void func_00249EB0(EventViewerState *viewer) {
+    s64 active;
 
-    temp_v0 = func_0024A010();
-    if (temp_v0 != 0) {
-        *(s32 *)(arg0 + 0x23c0) = *(s32 *)(arg0 + 0x23c0) + 1;
+    active = func_0024A010();
+    if (active != 0) {
+        viewer->updateCount = viewer->updateCount + 1;
     }
 }
 

@@ -224,8 +224,8 @@ void kwlnFadeSetColor(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
     D_00435CF0.a = arg3;
 }
 
-void func_001059D8(u32 *arg0) {
-    *arg0 = &D_00435CF0;
+void func_001059D8(KwlnFadeColor **color) {
+    *color = &D_00435CF0;
 }
 
 void kwlnFadeSetRGB(s8 arg0, s8 arg1, s8 arg2) {

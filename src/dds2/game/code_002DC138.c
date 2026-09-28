@@ -303,15 +303,15 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCB58);
 
 void func_002DCBF0(void) {
     s32 *node = D_00437E30;
-    s32 obj;
-    s32 v;
+    s32 object;
+    s32 flags;
 
     if (node != NULL) {
         do {
-            obj = *node;
-            v = *(s32 *)(obj + 0xC);
-            if ((v & 2) != 0) {
-                *(s32 *)(obj + 0xC) = v | 8;
+            object = *node;
+            flags = *(s32 *)(object + 0xC);
+            if ((flags & 2) != 0) {
+                *(s32 *)(object + 0xC) = flags | 8;
             }
             node = *(s32 **)((s32)node + 8);
         } while (node != NULL);
@@ -319,26 +319,26 @@ void func_002DCBF0(void) {
 }
 
 void func_002DCC30(void) {
-    s32 temp_v0;
-    s32 *piVar2;
+    s32 object;
+    s32 *node;
 
-    piVar2 = D_00437E30;
-    while (piVar2 != (s32 *)0x0) {
-        temp_v0 = *piVar2;
-        piVar2 = (s32 *)piVar2[2];
-        *(u32 *)(temp_v0 + 0xc) = *(u32 *)(temp_v0 + 0xc) & 0xffffffef;
+    node = D_00437E30;
+    while (node != (s32 *)0x0) {
+        object = *node;
+        node = (s32 *)node[2];
+        *(u32 *)(object + 0xc) = *(u32 *)(object + 0xc) & 0xffffffef;
     }
 }
 
 void func_002DCC68(void) {
-    s32 temp_v0;
-    s32 *piVar2;
+    s32 object;
+    s32 *node;
 
-    piVar2 = D_00437E30;
-    while (piVar2 != (s32 *)0x0) {
-        temp_v0 = *piVar2;
-        piVar2 = (s32 *)piVar2[2];
-        *(u32 *)(temp_v0 + 0xc) = *(u32 *)(temp_v0 + 0xc) | 0x10;
+    node = D_00437E30;
+    while (node != (s32 *)0x0) {
+        object = *node;
+        node = (s32 *)node[2];
+        *(u32 *)(object + 0xc) = *(u32 *)(object + 0xc) | 0x10;
     }
 }
 

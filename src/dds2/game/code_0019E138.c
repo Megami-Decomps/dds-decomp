@@ -21,9 +21,9 @@ extern s64 func_00101700(u32);
 /* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
 typedef struct TextStream {
     u8 unk0[0x10]; /* 0x0 */
-    u8 *unk10;     /* 0x10: base */
+    u8 *bytes;       /* 0x10: encoded input base */
     u8 unk14[4];   /* 0x14 */
-    s32 unk18;     /* 0x18: position */
+    s32 offset;      /* 0x18: current byte position */
 } TextStream;
 
 s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
@@ -92,20 +92,20 @@ typedef struct TextStyleNode {
 } TextStyleNode;
 
 u32 func_0019E138(TextStream *stream) {
-    s32 *ppos = &stream->unk18;
-    u8 *p = stream->unk10 + *ppos;
-    u32 b = *p;
+    s32 *position = &stream->offset;
+    u8 *byte = stream->bytes + *position;
+    u32 value = *byte;
 
-    *ppos += 2;
-    return (b + 0xFF) & 0xFF;
+    *position += 2;
+    return (value + 0xFF) & 0xFF;
 }
 
 u32 readEncodedTextCode(TextStream *stream) {
     u32 first;
     u32 second;
 
-    first = (stream->unk10[stream->unk18++] + 0xff) & 0xff;
-    second = stream->unk10[stream->unk18++];
+    first = (stream->bytes[stream->offset++] + 0xff) & 0xff;
+    second = stream->bytes[stream->offset++];
     if (second == 0xff) {
         second = 0;
     } else {

@@ -82,8 +82,8 @@ extern u32 D_00435D60;
 
 typedef struct {
     u8 pad00[0xE8];
-    void *unkE8;
-    void *unkEC;
+    void *previous;
+    void *next;
 } B728Work;
 
 extern u8 D_00380748[];
@@ -720,39 +720,39 @@ void func_0010B8D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B8D8);
 
-void evtUnkB728Link(B728Work *arg0) {
-    B728Work *t = D_00435D68;
+void evtUnkB728Link(B728Work *node) {
+    B728Work *tail = D_00435D68;
 
-    if (t == NULL) {
-        D_00435D64 = arg0;
-        D_00435D68 = arg0;
-        arg0->unkE8 = NULL;
-        arg0->unkEC = NULL;
+    if (tail == NULL) {
+        D_00435D64 = node;
+        D_00435D68 = node;
+        node->previous = NULL;
+        node->next = NULL;
     }
     else {
-        arg0->unkE8 = t;
-        t->unkEC = arg0;
-        arg0->unkEC = NULL;
-        D_00435D68 = arg0;
+        node->previous = tail;
+        tail->next = node;
+        node->next = NULL;
+        D_00435D68 = node;
     }
     D_00435D60++;
 }
 
-void evtUnkB768Unlink(B728Work *arg0) {
-    if ((B728Work *)D_00435D64 == arg0) {
-        D_00435D64 = arg0->unkEC;
+void evtUnkB768Unlink(B728Work *node) {
+    if ((B728Work *)D_00435D64 == node) {
+        D_00435D64 = node->next;
     }
     else {
-        ((B728Work *)arg0->unkE8)->unkEC = arg0->unkEC;
+        ((B728Work *)node->previous)->next = node->next;
     }
-    if ((B728Work *)D_00435D68 == arg0) {
-        D_00435D68 = arg0->unkE8;
+    if ((B728Work *)D_00435D68 == node) {
+        D_00435D68 = node->previous;
     }
     else {
-        ((B728Work *)arg0->unkEC)->unkE8 = arg0->unkE8;
+        ((B728Work *)node->next)->previous = node->previous;
     }
-    arg0->unkE8 = NULL;
-    arg0->unkEC = NULL;
+    node->previous = NULL;
+    node->next = NULL;
     D_00435D60--;
 }
 

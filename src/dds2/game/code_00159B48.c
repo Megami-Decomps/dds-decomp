@@ -50,17 +50,17 @@ s32 func_00159BB8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00159BD8);
 
-void func_00159BE8(s32 arg0, float arg1) {
-    *(float *)(arg0 + 0x20) = arg1;
+void func_00159BE8(BillObj *effect, float scale) {
+    effect->unk20 = scale;
 }
 
-void func_00159BF0(s32 arg0, float arg1, float arg2) {
-    *(float *)(arg0 + 0x10) = arg1;
-    *(float *)(arg0 + 0x14) = arg2;
+void func_00159BF0(BillObj *effect, float x, float y) {
+    effect->unk10 = x;
+    effect->unk14 = y;
 }
 
-void func_00159C00(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+void func_00159C00(BillObj *effect, u32 value) {
+    effect->unk24 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", copyEffectPosition);
@@ -69,15 +69,15 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_00159C40);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00159CF0);
 
-s32 func_00159D60(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 0) {
-        return *(s32 *)(*(s32 *)(arg0 + 0x30));
+s32 func_00159D60(BillObj *effect) {
+    if (effect->unk2C == 0) {
+        return *(s32 *)effect->unk30;
     }
     return 0;
 }
 
-u16 func_00159D80(s32 arg0) {
-    return *(u16 *)(arg0 + 0x2c);
+u16 func_00159D80(BillObj *effect) {
+    return effect->unk2C;
 }
 
 void func_00159D88(s32 arg0, s32 arg1) {

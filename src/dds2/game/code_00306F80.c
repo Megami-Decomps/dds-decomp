@@ -11,6 +11,14 @@ typedef struct QuadU32 {
     u32 w; // 0x0C
 } QuadU32; // 0x10
 
+typedef struct GridWidget {
+    u8 pad0[0x50];
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+} GridWidget;
+
 extern s32 func_00304AD8();
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -54,11 +62,11 @@ void func_00307270(u8 *object, s32 index, s32 x, s32 y,
 }
 
 void func_003072E8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
-    s32 object = func_00304AD8(a, b);
-    *(s32 *)(object + 0x50) = x;
-    *(s32 *)(object + 0x54) = y;
-    *(s32 *)(object + 0x58) = width;
-    *(s32 *)(object + 0x5c) = height;
+    GridWidget *widget = (GridWidget *)func_00304AD8(a, b);
+    widget->x = x;
+    widget->y = y;
+    widget->width = width;
+    widget->height = height;
 }
 
 void func_00307340(s32 arg0, s32 arg1) {
