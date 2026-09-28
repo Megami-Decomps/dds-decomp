@@ -596,9 +596,59 @@ void func_0014AC40(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014AC68);
+s32 func_0014AC68(s32 limit) {
+    s32 group = D_00436270;
+    s32 best = -1;
+    s32 groupIndex = 0;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014AD38);
+    for (groupIndex = 0; groupIndex < (s32)D_00436274; groupIndex++, group += 0x14) {
+        u32 entryCount = *(u32 *)(group + 8);
+        u32 entryIndex;
+
+        for (entryIndex = 0; entryIndex < entryCount;) {
+            s32 marked = func_0014AA28(D_00436244, groupIndex, entryIndex);
+            if (marked) {
+                s32 value = func_001460D8(groupIndex, entryIndex);
+                if (value < limit && value > best) {
+                    best = value;
+                }
+            }
+            entryIndex++;
+            entryCount = *(u32 *)(group + 8);
+        }
+    }
+    if (best == -1) {
+        return limit;
+    }
+    return best;
+}
+
+s32 func_0014AD38(s32 limit) {
+    s32 group = D_00436270;
+    s32 best = 999;
+    s32 groupIndex = 0;
+
+    for (groupIndex = 0; groupIndex < (s32)D_00436274; groupIndex++, group += 0x14) {
+        u32 entryCount = *(u32 *)(group + 8);
+        u32 entryIndex;
+
+        for (entryIndex = 0; entryIndex < entryCount;) {
+            s32 marked = func_0014AA28(D_00436244, groupIndex, entryIndex);
+            if (marked) {
+                s32 value = func_001460D8(groupIndex, entryIndex);
+                if (value > limit && value < best) {
+                    best = value;
+                }
+            }
+            entryIndex++;
+            entryCount = *(u32 *)(group + 8);
+        }
+    }
+    if (best == 999) {
+        return limit;
+    }
+    return best;
+}
 
 void getSceneEntryPosition(s32 index, f32 *x, f32 *z) {
     s32 i;

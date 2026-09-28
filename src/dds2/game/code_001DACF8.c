@@ -1327,7 +1327,14 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA598);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA620);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA650);
+s32 func_001EA650(s32 actor) {
+    s32 category = *(s32 *)(actor + 0x134);
+
+    if (category == 0) {
+        return 0;
+    }
+    return *(s32 *)(D_00435E20 + category * 56 + 0x30) == 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA688);
 
