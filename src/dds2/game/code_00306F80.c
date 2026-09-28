@@ -37,7 +37,21 @@ s32 func_00307160(s32 object, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003071D0);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307270);
+void func_00307270(u8 *object, s32 index, s32 x, s32 y,
+                   s32 width, s32 height) {
+    u8 *entry = *(u8 **)(object + 0x10) + index * 0x80;
+    u32 *destination = (u32 *)(*(u8 **)(object + 0x18) + index * 0xA0 + 0x6C);
+    u32 *source;
+    s32 remaining = 3;
+    *(s32 *)(entry + 0x44) = x >> 4;
+    *(s32 *)(entry + 0x48) = y >> 3;
+    *(s32 *)(entry + 0x4C) = width >> 4;
+    *(s32 *)(entry + 0x50) = height >> 3;
+    source = (u32 *)(entry + 0x44);
+    do {
+        *destination++ = *source++;
+    } while (--remaining >= 0);
+}
 
 void func_003072E8(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     s32 object = func_00304AD8(a, b);
@@ -139,7 +153,12 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00307D70);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308020);
+void func_00308020(u64 *channels, u32 color) {
+    u64 green;
+    channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
+    green = color & 0xFF00;
+    channels[1] = (green >> 8) | ((u64)(color & 0xFF) << 32);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308058);
 

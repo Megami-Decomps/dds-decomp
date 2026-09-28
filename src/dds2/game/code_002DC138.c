@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u32 func_00304938(u64);
+extern u32 func_00304938(u32);
 
-extern u64 func_003298F8(u64);
+extern u32 func_003298F8();
 
 extern u64 func_002C8108(void);
 
@@ -22,7 +22,7 @@ extern u32 D_00437E50;
 
 extern u32 D_00437E08;
 
-extern u64 resolvePrimaryFileBuffer(void);
+extern void *resolvePrimaryFileBuffer();
 
 extern s64 func_001AA308(void);
 
@@ -183,6 +183,8 @@ extern u8 D_00400250[];
 
 extern FnTbl24 D_003E9D00[];
 
+extern FnTbl28 D_003EA028[];
+
 extern FnTbl28 D_003EA02C[];
 
 extern void *func_00232198(void *arg0, void *arg1);
@@ -195,7 +197,21 @@ extern FnTbl28 D_003E9E70[];
 
 extern FnTbl24 D_003E9F14[];
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC138);
+/* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
+void func_002DC138(void *model) {
+    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    func_00232AA0(model);
+    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    func_00232AD0(model);
+    __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder");
+    func_00232B40(model);
+    mdlBroadcastMasked(model, 0x80808080);
+    if (*(void **)(model + 0x1C) != NULL) {
+        mdlAddEntryPlain(model, 0, 0);
+        *(float *)(*(u8 **)(model + 0x1C) + 0x20) = 1.0f;
+    }
+    *(u32 *)model &= ~1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC1D0);
 
@@ -821,7 +837,23 @@ u32 func_002E0460(u32 arg0) {
     return arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0478);
+u8 *func_002E0478(u8 *source) {
+    u8 *work = (u8 *)func_00328D68(0x68);
+    memset(work, 0, 0x68);
+    *(s32 *)(work + 0x28) = 0;
+    *(u32 *)(work + 0x24) = 0x80808080;
+    *(float *)(work + 0x20) = 1.0f;
+    __asm__ volatile("sqc2 $vf0, 0(%0)" :: "r"(work) : "memory");
+    __asm__ volatile("sqc2 $vf0, 0(%0)" :: "r"(work + 0x10) : "memory");
+    if (source == NULL) {
+        return work;
+    }
+    memcpy(work + 0x2C, resolvePrimaryFileBuffer(source),
+           *(u32 *)(source + 0x14));
+    *(s32 *)(work + 0x64) =
+        billCreateIndexed(1, resolveSecondaryFileBuffer(source));
+    return work;
+}
 
 void func_002E0528(u32 arg0) {
     s32 temp_v0;
@@ -864,7 +896,22 @@ void func_002E07C0(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", clearBillEffectFrames);
+void clearBillEffectFrames(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x18;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0840);
 
@@ -877,7 +924,22 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0900);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0F30);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1098);
+void func_002E1098(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x1C;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1110);
 
@@ -890,7 +952,22 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E11D0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1908);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1A70);
+void func_002E1A70(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x2C;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1AE8);
 
@@ -903,15 +980,72 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1BB0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E22C8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", clearAnimatedEffectFrames);
+void clearAnimatedEffectFrames(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x18;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E24A8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", initializeAlternatingTransformRows);
+void initializeAlternatingTransformRows(u8 *work, u8 *descriptor) {
+    u32 count = *(u32 *)(descriptor + 0x38);
+    if (count != 0) {
+        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        u32 index;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E25B0);
+        for (index = 0; index < count; index++, row += 8) {
+            if (index & 1) {
+                row[0] = 0.0f;
+                row[1] = 0.0f;
+                row[2] = 0.5f;
+                row[3] = 0.0f;
+                row[4] = 0.0f;
+                row[5] = 1.0f;
+                row[6] = 0.5f;
+            } else {
+                row[0] = 0.5f;
+                row[1] = 0.0f;
+                row[2] = 1.0f;
+                row[3] = 0.0f;
+                row[4] = 0.5f;
+                row[5] = 1.0f;
+                row[6] = 1.0f;
+            }
+            row[7] = 1.0f;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2610);
+extern u8 *func_002E24A8();
+u8 *func_002E25B0(u8 *descriptor, s32 handle) {
+    u8 *work = func_002E24A8(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 3, handle);
+    initializeAlternatingTransformRows(work, descriptor);
+    return work;
+}
+
+u8 *func_002E2610(u8 *owner) {
+    u8 *descriptor = *(u8 **)(owner + 0x34);
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *work = func_002E24A8(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5DE0(*(u32 *)(source + 4));
+    initializeAlternatingTransformRows(work, descriptor);
+    return work;
+}
 
 void func_002E2670(s32 arg0) {
     func_002E5D28(*(u32 *)(arg0 + 4));
@@ -922,15 +1056,72 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E26A0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2C48);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2DB0);
+void func_002E2DB0(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x18;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2E28);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2E88);
+void func_002E2E88(u8 *work, u8 *descriptor) {
+    u32 count = *(u32 *)(descriptor + 0x38);
+    if (count != 0) {
+        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        u32 index;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2F18);
+        for (index = 0; index < count; index++, row += 8) {
+            if (index & 1) {
+                row[0] = 0.0f;
+                row[1] = 0.0f;
+                row[2] = 0.5f;
+                row[3] = 0.0f;
+                row[4] = 0.0f;
+                row[5] = 1.0f;
+                row[6] = 0.5f;
+            } else {
+                row[0] = 0.5f;
+                row[1] = 0.0f;
+                row[2] = 1.0f;
+                row[3] = 0.0f;
+                row[4] = 0.5f;
+                row[5] = 1.0f;
+                row[6] = 1.0f;
+            }
+            row[7] = 1.0f;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2F78);
+extern u8 *func_002E2E28();
+u8 *func_002E2F18(u8 *descriptor, s32 handle) {
+    u8 *work = func_002E2E28(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 4, handle);
+    func_002E2E88(work, descriptor);
+    return work;
+}
+
+u8 *func_002E2F78(u8 *owner) {
+    u8 *descriptor = *(u8 **)(owner + 0x34);
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *work = func_002E2E28(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5DE0(*(u32 *)(source + 4));
+    func_002E2E88(work, descriptor);
+    return work;
+}
 
 void func_002E2FD8(s32 arg0) {
     func_002E5D28(*(u32 *)(arg0 + 4));
@@ -941,15 +1132,72 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E3008);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E35F0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", clearStripEffectFrames);
+void clearStripEffectFrames(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x28;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E37D0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E3830);
+void func_002E3830(u8 *work, u8 *descriptor) {
+    u32 count = *(u32 *)(descriptor + 0x38);
+    if (count != 0) {
+        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        u32 index;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E38C0);
+        for (index = 0; index < count; index++, row += 8) {
+            if (index & 1) {
+                row[0] = 0.0f;
+                row[1] = 0.0f;
+                row[2] = 0.5f;
+                row[3] = 0.0f;
+                row[4] = 0.0f;
+                row[5] = 1.0f;
+                row[6] = 0.5f;
+            } else {
+                row[0] = 0.5f;
+                row[1] = 0.0f;
+                row[2] = 1.0f;
+                row[3] = 0.0f;
+                row[4] = 0.5f;
+                row[5] = 1.0f;
+                row[6] = 1.0f;
+            }
+            row[7] = 1.0f;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E3920);
+extern u8 *func_002E37D0();
+u8 *func_002E38C0(u8 *descriptor, s32 handle) {
+    u8 *work = func_002E37D0(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 3, handle);
+    func_002E3830(work, descriptor);
+    return work;
+}
+
+u8 *func_002E3920(u8 *owner) {
+    u8 *descriptor = *(u8 **)(owner + 0x34);
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *work = func_002E37D0(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5DE0(*(u32 *)(source + 4));
+    func_002E3830(work, descriptor);
+    return work;
+}
 
 void func_002E3980(s32 arg0) {
     func_002E5D28(*(u32 *)(arg0 + 4));
@@ -960,7 +1208,22 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E39B0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4070);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E41D8);
+void func_002E41D8(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x2C;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4250);
 
@@ -973,15 +1236,72 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4320);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4AC8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4C30);
+void func_002E4C30(u8 *owner) {
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *descriptor = *(u8 **)(source + 4);
+    u8 *entry = *(u8 **)source;
+    s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
+
+    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            --remaining;
+            *(s32 *)entry = -1;
+            entry += 0x20;
+        } while (remaining);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4CA8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4D00);
+void func_002E4D00(u8 *work, u8 *descriptor) {
+    u32 count = *(u32 *)(descriptor + 0x38);
+    if (count != 0) {
+        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        u32 index;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4D90);
+        for (index = 0; index < count; index++, row += 8) {
+            if (index & 1) {
+                row[0] = 0.0f;
+                row[1] = 0.0f;
+                row[2] = 0.5f;
+                row[3] = 0.0f;
+                row[4] = 0.0f;
+                row[5] = 1.0f;
+                row[6] = 0.5f;
+            } else {
+                row[0] = 0.5f;
+                row[1] = 0.0f;
+                row[2] = 1.0f;
+                row[3] = 0.0f;
+                row[4] = 0.5f;
+                row[5] = 1.0f;
+                row[6] = 1.0f;
+            }
+            row[7] = 1.0f;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4DF0);
+extern u8 *func_002E4CA8();
+u8 *func_002E4D90(u8 *descriptor, s32 handle) {
+    u8 *work = func_002E4CA8(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 4, handle);
+    func_002E4D00(work, descriptor);
+    return work;
+}
+
+u8 *func_002E4DF0(u8 *owner) {
+    u8 *descriptor = *(u8 **)(owner + 0x34);
+    u8 *source = *(u8 **)(owner + 0x30);
+    u8 *work = func_002E4CA8(descriptor);
+
+    *(s32 *)(work + 4) = func_002E5DE0(*(u32 *)(source + 4));
+    func_002E4D00(work, descriptor);
+    return work;
+}
 
 void func_002E4E50(s32 arg0) {
     func_002E5D28(*(u32 *)(arg0 + 4));
@@ -2234,7 +2554,40 @@ void func_002F8328(s32 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8378);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F84F8);
+extern u8 D_00380828[];
+extern void func_00232390(void *, const void *);
+extern void func_00232AA0(void *);
+extern void func_00232AD0(void *);
+
+/* The model helpers read vf10, following the SDK's VU0 macro-mode convention. */
+void func_002F84F8(u8 *work) {
+    u8 *modelContext = *(u8 **)(work + 0x30);
+    u8 *animation = *(u8 **)(work + 0x38);
+    u32 bits;
+    float scale;
+    __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(work) : "memory");
+    func_00232AA0(*(void **)(modelContext + 4));
+    __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(work + 0x10) : "memory");
+    func_00232AD0(*(void **)(modelContext + 4));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vaddw.xyz vf10, vf0, vf0w\n\t"
+        "vmulx.w vf10, vf0, vf0x\n\t"
+        ".set reorder" ::: "memory");
+    scale = *(float *)(work + 0x20);
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 %0, %1\n\t"
+        "qmtc2.ni %0, $vf2\n\t"
+        "vmulx.xyzw vf10, vf10, $vf2x\n\t"
+        ".set reorder"
+        : "=&r"(bits) : "f"(scale) : "memory");
+    func_00232B40(*(void **)(modelContext + 4));
+    *(float *)(*(u8 **)(*(u8 **)(modelContext + 4) + 0x1C) + 0x20) =
+        *(float *)(animation + 0x94);
+    func_00232390(*(void **)(modelContext + 4), D_00380828);
+    func_002EDF20(*(s32 *)modelContext);
+}
 
 extern s32 *func_003335E0(void);
 
@@ -2324,11 +2677,30 @@ INCLUDE_ASM(const s32, "game/code_002DC138", destroyEffectResourceInstance);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9780);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9860);
+extern FnTbl28 D_003EA018[];
+void func_002F9860(u8 *work) {
+    if (func_001AA308() != 0) {
+        void (*callback)(void *) = D_003EA018[*(s32 *)(work + 0x2C)].fn;
+        if (callback != NULL) {
+            callback(work);
+        }
+        *(s32 *)(work + 0x28) = 0;
+    }
+}
 
-extern FnTbl28 D_003EA028[];
-
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F98C0);
+void func_002F98C0(work)
+u8 *work;
+{
+    if (func_001AA308() != 0 && (D_00437E08 & 2) == 0) {
+        s32 kind = *(s32 *)(work + 0x2C);
+        FnTbl28 *entry = &D_003EA028[kind];
+        void (*callback)(void *) = entry->fn;
+        if (callback != NULL) {
+            callback(work);
+        }
+        (*(s32 *)(work + 0x28))++;
+    }
+}
 
 void dispatchEnabledEffectCallback(u8 *work) {
     if (func_001AA308() != 0) {
@@ -2374,7 +2746,42 @@ void func_002FA388(u32 *arg0, u32 arg1) {
     *arg0 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA390);
+extern f32 func_00341240(void *);
+
+/* Normalize the seed vector with the original VU0 macro-mode operations. */
+void func_002FA390(u8 *work, float *entry) {
+    float vector[4];
+    if (work[0x10] == 0) {
+        vector[0] = *(float *)(work + 0x14);
+        vector[1] = *(float *)(work + 0x18);
+        vector[2] = *(float *)(work + 0x1C);
+    } else {
+        vector[0] = (func_00341240(D_0037F550) - 0.5f) * 2.0f;
+        vector[1] = (func_00341240(D_0037F550) - 0.5f) * 2.0f;
+        vector[2] = (func_00341240(D_0037F550) - 0.5f) * 2.0f;
+    }
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 $vf10, %0\n\t"
+        "vmul.xyz $vf2, $vf10, $vf10\n\t"
+        "vmulax.w ACC, $vf0, $vf2x\n\t"
+        "vmadday.w ACC, $vf0, $vf2y\n\t"
+        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
+        "vrsqrt Q, $vf0w, $vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz $vf10, $vf10, Q\n\t"
+        "sqc2 $vf10, %0\n\t"
+        ".set reorder"
+        : "+m"(vector) :: "memory");
+    entry[0] = vector[0];
+    entry[2] = vector[2];
+    entry[1] = vector[1];
+    entry[5] =
+        *(float *)(work + 0x24) *
+        (func_00341240(D_0037F550) * *(float *)(work + 0x28) +
+         (1.0f - *(float *)(work + 0x28)));
+    entry[4] = func_00341240(D_0037F550) * 6.2831853f;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA4D0);
 
@@ -2384,13 +2791,71 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA5B8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA5F0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA778);
+extern void func_002D4548(s32);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA848);
+void func_002FA778(s32 *work) {
+    u32 i;
+    if (work[0x60 / 4] != 0) {
+        func_002DC260(work[0x60 / 4]);
+    }
+    if (work[0x64 / 4] != 0) {
+        func_00330978(work[0x64 / 4], 1, 1);
+    }
+    if (work[0x6C / 4] != 0) {
+        u32 count = ((s32 *)work[0x70 / 4])[2];
+        for (i = 0; i < count; i++) {
+            func_002D4548(((s32 *)work[0x68 / 4])[i]);
+        }
+        func_003297C8(work[0x6C / 4]);
+    }
+    if (work[0x70 / 4] != 0) {
+        func_002DC028(work[0x70 / 4]);
+    }
+    if (work[0x78 / 4] != 0) {
+        func_003297C8(work[0x78 / 4]);
+    }
+    func_00328E48(work);
+}
+
+extern s32 *func_002FA5B8(s32 *);
+extern void func_002FAAE0(u8 *, u32, s32 *);
+
+s32 *func_002FA848(u8 *owner) {
+    s32 *source = *(s32 **)(*(u8 **)(owner + 0x70) + 0x24);
+    s32 *work = func_002FA5B8(source);
+    memcpy((u8 *)work + 0x10, owner + 0x10, 0x50);
+    func_002FAAE0((u8 *)work, *(u16 *)(*(u8 **)(owner + 0x70)), source);
+    func_002FA978(work, owner);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA978);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FAAE0);
+extern s32 func_002DBED8(u16, s32, s32);
+extern void func_002DC028(s32);
+
+void func_002FAAE0(u8 *work, u32 kind, s32 *config) {
+    s32 previous = *(s32 *)(work + 0x70);
+    s32 allocation;
+    u32 count;
+    u32 i;
+    u8 *entries;
+    if (previous != 0) {
+        func_002DC028(previous);
+    }
+    *(s32 *)(work + 0x70) = func_002DBED8(kind, *(s32 *)work, (s32)config);
+    allocation = *(s32 *)(work + 0x78);
+    if (allocation != 0) {
+        func_003297C8(allocation);
+    }
+    count = *(u32 *)(*(s32 *)(work + 0x70) + 8);
+    *(s32 *)(work + 0x78) = func_003292A8(count * 0x18);
+    *(u8 **)(work + 0x74) = (u8 *)func_003298F8(*(s32 *)(work + 0x78));
+    entries = *(u8 **)(work + 0x74);
+    for (i = 0; i < count; i++, entries += 0x18) {
+        func_002FA390(work, (float *)entries);
+    }
+}
 
 void func_002FABA8(s32 arg0, u32 arg1, u32 arg2) {
     s32 temp_v0;
@@ -2453,7 +2918,31 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB480);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB5C0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB790);
+void func_002FB790(s32 *work) {
+    s32 *resource = (s32 *)work[0x478 / 4];
+    u32 references = *(u16 *)((u8 *)resource + 0x10) + 0xFFFF;
+    *(u16 *)((u8 *)resource + 0x10) = references;
+    if ((u16)references == 0) {
+        s32 data = resource[2];
+        if (data != 0) {
+            func_00328E48(data);
+        }
+        resource = (s32 *)work[0x478 / 4];
+        if (resource[0] != 0) {
+            func_002DC260(resource[0]);
+        }
+        resource = (s32 *)work[0x478 / 4];
+        if (resource[1] != 0) {
+            func_00330978(resource[1], 1, 1);
+        }
+        resource = (s32 *)work[0x478 / 4];
+        if (resource[0x1C / 4] != 0) {
+            func_003297C8(resource[0x1C / 4]);
+        }
+        func_00328E48(work[0x478 / 4]);
+    }
+    func_003297C8(work[0x47C / 4]);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB840);
 
@@ -2519,7 +3008,32 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC2B0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC340);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC500);
+s32 func_002FC500(u8 *descriptor, s32 source) {
+    s32 job;
+
+    if (source != 0) {
+        void *sourceBuffer;
+        job = func_002D3DF8(source);
+        sourceBuffer = resolvePrimaryFileBuffer((void *)job);
+        memcpy(*(void **)(descriptor + 0xC), sourceBuffer,
+               *(u32 *)(descriptor + 0x10));
+    } else {
+        job = createFileJob(*(u16 *)(descriptor + 4));
+        if (*(s32 *)(descriptor + 0xC) != 0) {
+            func_002D3848(job, *(s32 *)(descriptor + 0xC),
+                          *(s32 *)(descriptor + 0x10), *(u16 *)(descriptor + 8));
+        }
+        if (*(s32 *)(descriptor + 0x1C) != 0) {
+            func_002D3A68(job, *(s32 *)(descriptor + 0x1C),
+                          *(u16 *)(descriptor + 0x18));
+        } else {
+            s32 zero = 0;
+            func_002D39C8(job, &zero, 4, 4);
+        }
+    }
+    func_00303C50();
+    return job;
+}
 
 void func_002FC5C8(u32 arg0) {
     if (D_004386B4 == 0) {
@@ -2934,27 +3448,65 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE400);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE5B8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE948);
+extern void func_002FE5B8(const char *, const void *, s32);
+extern char D_0042CEF8[];
+extern u8 D_003FE280[];
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE970);
+void func_002FE948(void) {
+    func_002FE5B8(D_0042CEF8, D_003FE280, 0xF);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", createPolyTrackTask);
+extern char D_0042CED8[];
+extern u8 D_003FE430[];
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE9C0);
+void func_002FE970(void) {
+    func_002FE5B8(D_0042CED8, D_003FE430, 7);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FE9E8);
+extern u8 D_003FE500[];
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FEA10);
+void createPolyTrackTask(void) {
+    func_002FE5B8("POLY TRACK S", D_003FE500, 7);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FEA38);
+extern char D_00437F30[];
+extern u8 D_003FE610[];
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FEA60);
+void func_002FE9C0(void) {
+    func_002FE5B8(D_00437F30, D_003FE610, 7);
+}
+
+extern char D_004386A8[];
+extern u8 D_003FE6E0[];
+
+void func_002FE9E8(void) {
+    func_002FE5B8(D_004386A8, D_003FE6E0, 3);
+}
+
+extern char D_0042CE48[];
+extern u8 D_003FE7C0[];
+
+void func_002FEA10(void) {
+    func_002FE5B8(D_0042CE48, D_003FE7C0, 5);
+}
+
+extern char D_0042CEB8[];
+extern u8 D_003FE780[];
+
+void func_002FEA38(void) {
+    func_002FE5B8(D_0042CEB8, D_003FE780, 2);
+}
+
+extern char D_0042CEA8[];
+extern u8 D_003FE850[];
+
+void func_002FEA60(void) {
+    func_002FE5B8(D_0042CEA8, D_003FE850, 0xB);
+}
 
 extern char D_0042CE98[]; /* "POLY RING" */
 
 extern u8 D_003FE990[];
-
-extern void func_002FE5B8(const char *, const void *, s32);
 
 void func_002FEA88(void) {
     func_002FE5B8(D_0042CE98, D_003FE990, 6);
@@ -3118,7 +3670,11 @@ void func_00301380(s32 arg0) {
     func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0xb8));
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003013A0);
+extern u8 D_00459E30[];
+
+void func_003013A0(void) {
+    func_00300578(D_00459E30, D_00459E30 + 0x24, *(u32 *)(D_00459E30 + 0x34));
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_003013C8);
 
@@ -3235,61 +3791,115 @@ void resetBattleEffectWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_003018C8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003021A8);
+extern u8 D_00400068[];
+extern void func_003018C8(void *, s32, const void *, const void *);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003021D8);
-
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302208);
-
-extern u8 D_00400250[];
+void func_003021A8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x60, *(s32 *)(source + 0xB8), D_00400150, D_00400068);
+}
 
 extern u8 D_004001A0[];
 
-extern void func_003018C8(void *, s32, const void *, const void *);
+void func_003021D8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x8C, *(s32 *)(source + 0xB8), D_00400250, D_004001A0);
+}
+
+void func_00302208(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x7C, *(s32 *)(source + 0xD4), D_00400150, D_00400068);
+}
+
+extern u8 D_00400250[];
+
 
 void func_00302238(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0xA8, *(s32 *)(source + 0xD4), D_00400250, D_004001A0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302268);
+void func_00302268(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x34, *(s32 *)(source + 0xB8), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302298);
+void func_00302298(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x60, *(s32 *)(source + 0xB8), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003022C8);
+void func_003022C8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x8C, *(s32 *)(source + 0xB8), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003022F8);
+void func_003022F8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x34, *(s32 *)(source + 0x8C), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302328);
+void func_00302328(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x60, *(s32 *)(source + 0x8C), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302358);
+void func_00302358(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x80, *(s32 *)(source + 0xD8), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302388);
+void func_00302388(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0xAC, *(s32 *)(source + 0xD8), D_00400250, D_004001A0);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003023B8);
+extern u8 D_004000B8[];
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003023E8);
+void func_003023B8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x90, *(s32 *)(source + 0x80), D_00400150, D_004000B8);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302418);
+void func_003023E8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x9C, *(s32 *)(source + 0xF4), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302448);
+void func_00302418(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0xC8, *(s32 *)(source + 0xF4), D_00400250, D_004001A0);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302478);
+void func_00302448(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source, *(s32 *)(source + 0xF4), D_00400150, D_004000B8);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003024A8);
+void func_00302478(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x34, *(s32 *)(source + 0x70), D_00400150, D_004000B8);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003024D8);
+void func_003024A8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x34, *(s32 *)(source + 0x8C), D_00400150, D_00400068);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302508);
+void func_003024D8(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x60, *(s32 *)(source + 0x8C), D_00400150, D_00400068);
+}
+
+void func_00302508(s32 *work) {
+    u8 *source = (u8 *)work[3];
+    func_003018C8(source + 0x7C, *(s32 *)(source + 0xD4), D_00400150, D_00400068);
+}
 
 void func_00302538(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0xA8, *(s32 *)(source + 0xD4), D_00400250, D_004001A0);
 }
-
-extern u8 D_00400150[];
-
-extern u8 D_00400068[];
 
 void func_00302568(s32 *work) {
     u8 *source = (u8 *)work[3];
@@ -3342,29 +3952,47 @@ void func_00302CA8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00302CC0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302D70);
-
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302D90);
-
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302DB0);
-
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302DD0);
-
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302DF0);
-
-extern char D_0042CF70[]; /* "/tool/effect/" */
-
 extern void func_00302CC0(const char *, s32);
+extern char D_0042D128[]; /* "/tool/effect/mat/" */
+extern char D_0042CF58[];
+extern char D_0042CF70[]; /* "/tool/effect/" */
+extern char D_0042D140[]; /* "/tool/effect/hlp/" */
+
+void func_00302D70(void) {
+    func_00302CC0(D_0042D128, 0x43);
+}
+
+void func_00302D90(void) {
+    func_00302CC0(D_0042D128, 0x43);
+}
+
+void func_00302DB0(void) {
+    func_00302CC0(D_0042CF58, 0x20);
+}
+
+void func_00302DD0(void) {
+    func_00302CC0(D_0042CF70, 0x10);
+}
+
+void func_00302DF0(void) {
+    func_00302CC0(D_0042CF58, 0x20);
+}
 
 void func_00302E10(void) {
     func_00302CC0(D_0042CF70, 0x10);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302E30);
+void func_00302E30(void) {
+    func_00302CC0(D_0042D128, 1);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302E50);
+void func_00302E50(void) {
+    func_00302CC0(D_0042D128, 1);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302E70);
+void func_00302E70(void) {
+    func_00302CC0(D_0042D128, 1);
+}
 
 u32 func_00302E90(void) {
     u32 zero = 0;
@@ -3372,9 +4000,9 @@ u32 func_00302E90(void) {
     return 0x400002;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302EC8);
-
-extern char D_0042D128[]; /* "/tool/effect/mat/" */
+void func_00302EC8(void) {
+    func_00302CC0(D_0042D140, 4);
+}
 
 void func_00302EE8(void) {
     func_00302CC0(D_0042D128, 4);
@@ -3383,8 +4011,6 @@ void func_00302EE8(void) {
 void func_00302F08(void) {
     func_00302CC0(D_0042CF70, 0x10);
 }
-
-extern char D_0042D140[]; /* "/tool/effect/hlp/" */
 
 void func_00302F28(void) {
     func_00302CC0(D_0042D140, 4);
@@ -3477,7 +4103,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", loadMappedEffectResource);
 
 void func_00304258(u64 arg0, u32 *arg1) {
     u64 temp_v0;
-    u64 temp_v1;
+    u32 temp_v1;
     u32 temp_v2;
 
     temp_v0 = func_002C8108();
@@ -3535,7 +4161,16 @@ s32 func_00304AD8(s32 arg0, s32 arg1) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304AF8);
+u32 func_00304AF8(u32 *state) {
+    u32 active = state[0] & 1;
+    if (active != 0) {
+        state[1] = 0;
+    } else {
+        active = 0x10000;
+        state[1] = active;
+    }
+    return active;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304B18);
 
@@ -3543,7 +4178,16 @@ void func_00304CE0(s32 arg0, s32 arg1) {
     func_00304B18(arg0, arg1, *(s32 *)(arg0 + 0x18) + arg1 * 0xa0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304D08);
+extern void func_00304D80(u32, u32);
+
+void func_00304D08(u8 *owner) {
+    u32 index = 0;
+    if (*(u32 *)(owner + 8) != 0) {
+        do {
+            func_00304D80((u32)owner, index++);
+        } while (index < *(u32 *)(owner + 8));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304D60);
 
@@ -3562,8 +4206,6 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_00304EE0);
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304F40);
 
 extern void func_0032BB68(s32, u32, u32);
-
-extern void func_00304D08(u8 *);
 
 void func_00304FB0(u8 *owner, s32 preserve) {
     u32 i = 0;
@@ -3630,7 +4272,7 @@ u32 func_00305558(u32 *arg0, u32 arg1, u32 arg2) {
     *arg0 = arg2;
     arg0[4] = arg1;
     if ((arg2 & 2) != 0) {
-        func_00304AF8();
+        func_00304AF8(arg0);
     }
     arg0[2] = arg0[2] + 1;
     return 1;
