@@ -1489,7 +1489,38 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5018);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5230);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F52D0);
+typedef struct {
+    u8 pad[0x11C];
+    u8 category;
+} BattleActorLink;
+
+typedef struct {
+    u8 pad[0x18];
+    BattleActorLink *primary;
+} BattleActorLinks;
+
+typedef struct {
+    u8 pad[0x114];
+    BattleActorLinks *links;
+    BattleActorLink *secondary;
+    BattleActorLink *tertiary;
+} BattleActorLinkOwner;
+
+BattleActorLink *func_001F52D0(BattleActorLinkOwner *actor, s32 category) {
+    BattleActorLink *candidate = actor->links->primary;
+    if (candidate->category == category) {
+        return candidate;
+    }
+    candidate = actor->secondary;
+    if (candidate != NULL && candidate->category == category) {
+        return candidate;
+    }
+    candidate = actor->tertiary;
+    if (candidate != NULL && candidate->category == category) {
+        return candidate;
+    }
+    return actor->links->primary;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5320);
 

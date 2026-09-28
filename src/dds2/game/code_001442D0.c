@@ -1036,7 +1036,16 @@ s16 func_001514B8(void) {
 
 extern s32 D_00451D38[];
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001514C8);
+void func_001514C8(void) {
+    D_00451D38[0x6C / 4] = -1;
+    D_00451D38[0x54 / 4] = 0;
+    D_00451D38[0x50 / 4] = 0;
+    D_00451D38[0x64 / 4] = 0;
+    D_00451D38[0] = 0;
+    D_00451D38[0x70 / 4] = 0;
+    D_00451D38[0x34 / 4] = 0;
+    D_00451D38[0x04 / 4] = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001514F8);
 
@@ -1171,7 +1180,16 @@ void func_00152C18(void) {
 
 extern void func_00151868(f32 *, f32 *);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00152C48);
+void func_00152C48(void) {
+    f32 distance;
+    f32 angle;
+    f32 *state;
+
+    func_00151868(&distance, &angle);
+    state = (f32 *)D_00451D38;
+    state[0x44 / 4] = angle;
+    state[0x14 / 4] = 180.0f - angle;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00152C88);
 
@@ -1249,13 +1267,37 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001546F8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00154758);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001547F0);
+extern u32 D_00435F0C;
+extern void func_00133C18(void);
+
+s32 func_001547F0(void) {
+    func_00126000();
+    if (D_00435F0C == 0) {
+        return 1;
+    }
+    func_00133C18();
+    return 1;
+}
 
 extern s32 D_003898B0[];
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154828);
+extern void objInvokeSlot1Handler(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154870);
+s32 func_00154828(void) {
+    if (D_00435F0C == 0) {
+        return 1;
+    }
+    objInvokeSlot1Handler(D_00435F0C, 0);
+    func_00133C18();
+    func_00125F58();
+    D_003898B0[0] = 0;
+    return 1;
+}
+
+s32 func_00154870(void) {
+    D_003898B0[0] = 1;
+    return 1;
+}
 
 u32 func_00154880(void) {
     func_00128380(0x10);
@@ -1785,7 +1827,12 @@ s32 func_001571C8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00157258);
+extern s32 D_003898A4[];
+
+s32 func_00157258(void) {
+    D_003898A4[0] = 1;
+    return 1;
+}
 
 extern u8 *D_00435F1C;
 
