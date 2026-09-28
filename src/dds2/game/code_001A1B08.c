@@ -133,7 +133,6 @@ s16 func_001A3350(s32 arg0) {
     return D_0045296C[arg0].ptr->unk52;
 }
 
-
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365B0);
@@ -147,7 +146,6 @@ INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365C8);
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365D0);
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365D8);
-
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365E0);
 

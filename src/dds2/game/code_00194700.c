@@ -402,11 +402,6 @@ void *func_00195B38(s32 n) {
     return end;
 }
 
-
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_00194700", D_004146A8);
 
 INCLUDE_RODATA(const s32, "game/code_00194700", D_004146B8);
@@ -516,7 +511,6 @@ INCLUDE_RODATA(const s32, "game/code_00194700", D_004149F0);
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436440);
 
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436448);
-
 
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436450);
 

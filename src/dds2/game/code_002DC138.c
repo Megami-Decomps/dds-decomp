@@ -3078,8 +3078,6 @@ void func_00306500(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
     func_00308478(0x44, arg7);
 }
 
-
-
 INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042D170);
 
 INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042D180);
@@ -3807,7 +3805,6 @@ INCLUDE_SDATA(const s32, "game/code_002DC138", D_00438848);
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00438850);
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00438858);
-
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00438860);
 

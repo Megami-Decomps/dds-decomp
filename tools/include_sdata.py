@@ -104,6 +104,8 @@ def place(version):
             text = text[:pos] + ("\n" if pos == len(text) else "") + \
                 f'INCLUDE_SDATA(const s32, "{unit}", {sym});\n\n' + text[pos:]
             added += 1
+        # One blank line before each included item, however often this reruns.
+        text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\()", "\n\n", text)
         c.write_text(text)
     print(f"{version}: {added} INCLUDE_SDATA lines")
 

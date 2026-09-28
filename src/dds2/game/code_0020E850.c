@@ -247,3 +247,4 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB0);
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB4);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB8);
+

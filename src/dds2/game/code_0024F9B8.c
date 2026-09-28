@@ -39,7 +39,5 @@ void func_0024FEC0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 4) = temp_v0;
 }
 
-
-
 INCLUDE_SDATA(const s32, "game/code_0024F9B8", D_004373B8);
 

@@ -279,7 +279,6 @@ void func_001063A8(f32 arg0) {
     D_0037F5EC[0] = arg0;
 }
 
-
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C20);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C24);
@@ -391,7 +390,6 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D00);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D04);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D08);
-
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
 

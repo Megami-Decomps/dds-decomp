@@ -606,6 +606,7 @@ void func_0021B4A8(void) {
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B4C0);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B520);
+
 INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CC0);
 
 INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CC8);
@@ -615,7 +616,6 @@ INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CD0);
 INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CD8);
 
 INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CE0);
-
 
 INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CE8);
 

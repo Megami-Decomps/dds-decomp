@@ -627,7 +627,6 @@ void func_001A5B70(int param_1)
   return;
 }
 
-
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365E8);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365F0);
@@ -641,7 +640,6 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436610);
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436618);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436620);
-
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436628);
 

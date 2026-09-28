@@ -20,7 +20,5 @@ INCLUDE_ASM(const s32, "field/fldPanel", func_00144270);
 
 INCLUDE_ASM(const s32, "field/fldPanel", func_001442A0);
 
-
-
 INCLUDE_SDATA(const s32, "field/fldPanel", D_00436204);
 
