@@ -201,7 +201,17 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226AB0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226BB8);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", battleResetEffectState);
+void battleResetEffectState(void) {
+    BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    state->active = 1;
+    state->speed = 20.0f;
+    state->flags = 0;
+    state->phase = 0;
+    state->value = 0;
+    state->timer = 0;
+    state->effect = 0;
+    state->actor = 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00224FC0", D_0041B4D0);
 

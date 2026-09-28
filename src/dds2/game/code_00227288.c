@@ -123,7 +123,14 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227CC8);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228320);
+s32 func_00228320(u32 actor) {
+    BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    u32 active = state->actor;
+    if (active != 0) {
+        return active == actor;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228360);
 
@@ -150,13 +157,52 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00228F20);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002290D0);
+u32 func_002290D0(void) {
+    s32 battle = func_001AA6F8();
+    u32 battleId = *(u32 *)(battle + 0x2a0);
+    BattleEffectState *state;
+    if (battleId != 0x312) {
+        return 0;
+    }
+    state = *(BattleEffectState **)(battle + 0x718);
+    if (state != NULL) {
+        return state->active;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00229110);
+s32 func_00229110(void) {
+    s32 battle = func_001AA6F8();
+    u32 battleId = *(u32 *)(battle + 0x2a0);
+    BattleEffectState *state;
+    if (battleId != 0x312) {
+        return 0;
+    }
+    state = *(BattleEffectState **)(battle + 0x718);
+    if (state == NULL) {
+        return 0;
+    }
+    return state->actor != 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00229158);
+u32 func_00229158(void) {
+    s32 battle = func_001AA6F8();
+    u32 battleId = *(u32 *)(battle + 0x2a0);
+    BattleEffectState *state;
+    if (battleId != 0x312) {
+        return 0;
+    }
+    state = *(BattleEffectState **)(battle + 0x718);
+    if (state != NULL) {
+        return state->value;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00229198);
+u32 func_00229198(void) {
+    BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    return state->actor;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002291C0);
 
