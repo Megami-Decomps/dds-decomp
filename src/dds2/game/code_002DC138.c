@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u32 func_00304938(u32);
 
@@ -789,7 +790,9 @@ void func_002E02F8(s32 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0358);
+void func_002E0358(s128 *dst, s128 *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_002E0368(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
@@ -2944,7 +2947,16 @@ void func_002FB790(s32 *work) {
     func_003297C8(work[0x47C / 4]);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB840);
+typedef struct { u32 word[0x113]; } EffectBlob;
+extern u8 *func_002FB5C0(s32);
+
+s32 func_002FB840(u8 *src) {
+    u8 *dst = func_002FB5C0(0);
+
+    *(EffectBlob *)(dst + 0x2C) = *(EffectBlob *)(src + 0x2C);
+    func_002FB948((s32)dst, (s32)src);
+    return (s32)dst;
+}
 
 void func_002FB948(s32 arg0, s32 arg1) {
     *(u32 *)(arg0 + 0x478) = *(u32 *)(arg1 + 0x478);
@@ -2960,9 +2972,13 @@ void func_002FB968(s32 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB998);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC0A8);
+void func_002FC0A8(s128 *dst, s128 *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC0B8);
+void func_002FC0B8(s128 *dst, s128 *src) {
+    PCP_COPY_VECTOR(dst + 1, src);
+}
 
 void func_002FC0D0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x20) = arg1;

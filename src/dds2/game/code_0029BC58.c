@@ -1,5 +1,8 @@
 #include "common.h"
 
+/* Sliding menu bar: direction flag and 0..max position */
+typedef struct { s32 active; s32 pos; } SlideBar;
+
 extern s32 func_002A46C8(s32);
 extern u32 D_00438FE8;
 
@@ -71,7 +74,46 @@ extern s8 D_00437B72;
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BC58);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BEB8);
+typedef struct {
+    u8 pad0[6];
+    u16 unk6;
+    u16 unk8;
+    u16 unkA;
+    u16 unkC;
+    u16 unkE;
+} TitleSeq;
+
+extern void func_00299A38(TitleSeq *, u8 *);
+extern void func_0029D550(u8 *, TitleSeq *);
+
+void func_0029BEB8(u8 *work) {
+    s32 state = *(s32 *)(work + 0xB6F4);
+    TitleSeq *seq = **(TitleSeq ***)(work + 0x9C);
+
+    switch (state) {
+    case 5:
+        break;
+    case 4:
+        func_0029D550(work + 0x3F4, seq);
+        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        break;
+    case 1:
+        seq->unk6 = seq->unk8;
+        seq->unkA = seq->unkC;
+        seq->unkE = 0;
+        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        break;
+    case 2:
+        seq->unk6 = seq->unk8;
+        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        break;
+    case 3:
+        seq->unkA = seq->unkC;
+        soundSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        break;
+    }
+    func_00299A38(seq, work);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
 
@@ -123,7 +165,19 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CA68);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CB70);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CC90);
+extern struct { s32 v[6]; } D_003D6500;
+extern void func_0029CA68(s32, s32, s32, u32, u8 *, s32, u8 *);
+extern void func_0029CB70(s32, s32, s32, u32, u8 *, s32, u8 *);
+extern void func_0029C880(s32, s32, s32, u32, u8 *, s32, u8 *);
+
+void func_0029CC90(u8 *work) {
+    u8 *res = work + 0x5C;
+    u32 color = func_00309138(0xFFF06480, 0xFFF06400, 0x100 - *(s32 *)(work + 0xB6E0));
+
+    func_0029CA68(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
+    func_0029CB70(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
+    func_0029C880(D_003D6500.v[4], D_003D6500.v[5], 0, color, res, 0x53, work);
+}
 
 void func_0029CD60(u8 *work) {
     s32 remaining = 0x100 - *(s32 *)(work + 0xB6E0);
@@ -935,13 +989,84 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4A68);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4B70);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4D28);
+extern void func_002A4388(void);
+extern void func_002A44C0(SlideBar *, s32);
+extern void func_002A4B70(SlideBar *, s32);
+extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
+
+void func_002A4D28(SlideBar *bar, s32 arg1) {
+    if (bar->active != 0 || bar->pos != 0) {
+        func_002A4388();
+        func_002A44C0(bar, arg1);
+        func_002A3B28(0, 0, 0, bar->pos, 0, 0x16, arg1);
+        func_002A4B70(bar, arg1);
+        if (bar->active != 0) {
+            bar->pos += 8;
+        } else {
+            bar->pos -= 8;
+        }
+        if (bar->pos < 0) {
+            bar->pos = 0;
+        }
+        if (bar->pos > 0x80) {
+            bar->pos = 0x80;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4DF0);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4E48);
+typedef struct { s32 active; s32 pos; s32 id; s32 timer; } SlideBarTimed;
+extern void func_002A4DF0(SlideBarTimed *, s32, s32);
+extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4F20);
+void func_002A4E48(SlideBarTimed *bar, s32 arg1) {
+    if (bar->timer > 0) {
+        bar->timer--;
+        if (bar->timer == 0) {
+            func_002A4DF0(bar, bar->id, 0);
+        }
+    }
+    if (bar->active == 0 && bar->pos == 0) {
+        return;
+    }
+    func_002A3B28(0, 0, 0, bar->pos / 4, 0, 0x12, arg1);
+    if (bar->active != 0) {
+        bar->pos += 0x10;
+    } else {
+        bar->pos -= 8;
+    }
+    if (bar->pos > 0x200) {
+        bar->pos = 0x200;
+    }
+    if (bar->pos < 0) {
+        bar->pos = 0;
+    }
+}
+
+void func_002A4F20(SlideBar *bar, s32 arg1) {
+    s32 half;
+
+    if (bar->active == 0 && bar->pos == 0) {
+        return;
+    }
+    half = bar->pos / 4;
+    func_002A3B28(0, 0, 0, half, 0, 0x13, arg1);
+    func_002A3B28(0, 0, 0, half, 0, 0x1A, arg1);
+    func_002A3B28(0, 0, 0, half, 0, 0x1B, arg1);
+    func_002A3B28(0, 0, 0, half, 0, 0x1C, arg1);
+    if (bar->active != 0) {
+        bar->pos += 0x1B;
+    } else {
+        bar->pos -= 0x1B;
+    }
+    if (bar->pos > 0x200) {
+        bar->pos = 0x200;
+    }
+    if (bar->pos < 0) {
+        bar->pos = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5040);
 
@@ -957,7 +1082,40 @@ void func_002A50F8(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5128);
+typedef struct {
+    u8 active[2];
+    u8 pad2[2];
+    s32 pos[2];
+} SlideBarPair;
+
+void func_002A5128(SlideBarPair *bars, s32 arg1) {
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        s32 pos = bars->pos[i];
+
+        switch (i) {
+        case 0:
+            func_002A3B28(0, 0, 0, pos, 0, 0xF, arg1);
+            func_002A3B28(0, 0, 0, pos, 0, 0x10, arg1);
+            break;
+        case 1:
+            func_002A3B28(0, 0, 0, pos, 0, 0x11, arg1);
+            break;
+        }
+        if (bars->active[i] == 0) {
+            bars->pos[i] -= 8;
+        } else {
+            bars->pos[i] += 8;
+        }
+        if (bars->pos[i] < 0) {
+            bars->pos[i] = 0;
+        }
+        if (bars->pos[i] > 0x80) {
+            bars->pos[i] = 0x80;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5260);
 
@@ -1489,7 +1647,27 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6858);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6C28);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6C70);
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_002A6C70(SlideBar *bar) {
+    u32 sprite = D_00437AB0[1];
+
+    if (bar->active == 0 && bar->pos == 0) {
+        return;
+    }
+    func_00306CD0(0, 0, 0, bar->pos / 2, 0, sprite, 9, 0x53);
+    if (bar->active == 0) {
+        bar->pos -= 8;
+    } else {
+        bar->pos += 8;
+    }
+    if (bar->pos < 0) {
+        bar->pos = 0;
+    }
+    if (bar->pos > 0x200) {
+        bar->pos = 0x200;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6D28);
 
@@ -2196,7 +2374,30 @@ void func_002A9BC8(s32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4,
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9BF8);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9E00);
+extern s32 func_002B9FF8(s32, s32, s32);
+extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
+extern void func_002B9568(s32, s32);
+extern void func_002BAF10(u8 *);
+extern void func_002BAF50(s32, u8 *);
+extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
+
+void func_002A9E00(u8 *work) {
+    u8 *ctx = work + 0xB10C;
+    s32 list;
+
+    *(s32 *)(work + 0xF4) = func_002B9FF8(0, *(s32 *)(work + 0x64), *(s32 *)(work + 0x100));
+    *(s32 *)(work + 0xF8) = func_002B9FF8(1, *(s32 *)(work + 0x64), *(s32 *)(work + 0x100));
+    *(s32 *)(work + 0xFC) = func_002B9FF8(3, *(s32 *)(work + 0x64), *(s32 *)(work + 0x100));
+    *(s32 *)(work + 0x104) = func_002A9BF8(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
+    list = func_002A9BF8(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
+    *(s32 *)(work + 0x108) = list;
+    func_002B9568(list, 0x100);
+    list = func_002A9BF8(D_003E5708, 2, 0x1C0, 0x10, work, 0);
+    *(s32 *)(work + 0x10C) = list;
+    func_002B9568(list, 0x100);
+    func_002BAF10(ctx);
+    func_002BAF50(*(s32 *)(work + 0x104), ctx);
+}
 
 extern void func_002B9520(u32);
 extern void releaseResourceList(u32);
