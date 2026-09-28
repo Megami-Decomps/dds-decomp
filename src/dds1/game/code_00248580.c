@@ -126,8 +126,6 @@ void func_00249930(s32 arg0) {
     func_00285160(*(u32 *)(arg0 + 0x828));
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249980);
-
 void func_00249980(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_00285440(arg0, arg1, arg2, *(s32 *)(arg3 + 0x828));
 }
