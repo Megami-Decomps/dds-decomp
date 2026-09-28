@@ -93,7 +93,8 @@ typedef struct ItfMesNode {
     u8 unk0[4];        /* 0x0 */
     s32 unk4;          /* 0x4: adjusted by func_0019D8E8 */
     s32 unk8;          /* 0x8: adjusted by func_0019D8E8 */
-    u8 unkC[8];        /* 0xC */
+    s32 unkC;          /* 0xC: summed over adjacent nodes sharing unk8 */
+    u8 unk10[4];       /* 0x10 */
     s32 unk14;         /* 0x14: set by func_0019D920 */
     u8 unk18[4];       /* 0x18 */
     ItfMesItem *child; /* 0x1C */
@@ -198,11 +199,36 @@ void func_0019DDA8(void *arg0, s32 arg1);
 
 void func_002EB278(int *param_1, int param_2, u8 *param_3, int param_4);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B340);
+s32 func_0019B340(void) {
+    s32 window = func_0010D690();
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B390);
+    if (window < 0) {
+        return 1;
+    }
+    func_0019C060(window, func_0010D428(0));
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B3E0);
+s32 func_0019B390(void) {
+    s32 window = func_0010D690();
+
+    if (window < 0) {
+        return 1;
+    }
+    func_0019C080(window, func_0010D428(0));
+    return 1;
+}
+
+s32 func_0019B3E0(void) {
+    s32 window = func_0010D690();
+
+    if (window < 0) {
+        return 1;
+    }
+    func_0019C4A8(window, 0x200000);
+    func_0014DAF0(2);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B428);
 
@@ -229,21 +255,113 @@ u32 func_0019B538(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B540);
+s32 func_0019B540(void) {
+    s32 window = func_0010D690();
+    s32 x;
+    s32 y;
+    s32 width;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B5C0);
+    if (window < 0) {
+        return 1;
+    }
+    x = func_0010D428(0);
+    y = func_0010D428(1);
+    width = func_0010D428(2);
+    func_0019C590(window, x, y, width);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B628);
+s32 func_0019B5C0(void) {
+    s32 window = func_0010D690();
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B690);
+    if (window < 0) {
+        return 1;
+    }
+    if (func_0010D428(0)) {
+        func_0019C4A8(window, 0x400000);
+    } else {
+        func_0019C4D8(window, 0x400000);
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B6D0);
+s32 func_0019B628(void) {
+    s32 window = func_0010D690();
+    s32 x;
+    s32 y;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B750);
+    if (window < 0) {
+        return 1;
+    }
+    x = func_0010D428(0);
+    y = func_0010D428(1);
+    func_0019C1E8(window, x << 4, y << 3);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B7A0);
+s32 func_0019B690(void) {
+    s32 window = func_0010D690();
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B808);
+    if (window < 0) {
+        return 1;
+    }
+    func_0019C1E8(window, 0x4B0, 0xAF8);
+    return 1;
+}
+
+s32 func_0019B6D0(void) {
+    s32 window = func_0010D690();
+
+    if (window < 0) {
+        return 1;
+    }
+    if (func_0010D428(0)) {
+        func_0019C4D8(window, 0x800000);
+        func_0019C4D8(window, 0x100000);
+    } else {
+        func_0019C4A8(window, 0x800000);
+        func_0019C4A8(window, 0x100000);
+    }
+    return 1;
+}
+
+s32 func_0019B750(void) {
+    s32 window = func_0010D690();
+
+    if (window < 0) {
+        return 1;
+    }
+    func_0019C968(window, func_0010D428(0), 0);
+    return 1;
+}
+
+s32 func_0019B7A0(void) {
+    s32 window = func_0010D690();
+    s32 first;
+    s32 second;
+
+    if (window < 0) {
+        return 1;
+    }
+    first = func_0010D428(0);
+    second = func_0010D428(1);
+    func_0019C968(window, first, second);
+    return 1;
+}
+
+s32 func_0019B808(void) {
+    s32 window = func_0010D690();
+    s32 first;
+    s32 second;
+
+    if (window < 0) {
+        return 1;
+    }
+    first = func_0010D428(0);
+    second = func_0010D428(1);
+    func_0019C9F0(window, first, second);
+    return 1;
+}
 
 u32 func_0019B870(void) {
     return D_003D6EA0.unk4;
@@ -572,7 +690,23 @@ void func_0019DA50(ItfMesNode *node, u32 color) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019DAA0);
+s32 func_0019DAA0(ItfMesNode *node) {
+    s32 best = 0;
+
+    while (node != NULL) {
+        s32 key = node->unk8;
+        s32 total = 0;
+
+        do {
+            total += node->unkC;
+            node = node->next;
+        } while (node != NULL && key == node->unk8);
+        if (total > best) {
+            best = total;
+        }
+    }
+    return best << 4;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019DAF0);
 
