@@ -283,6 +283,9 @@ def cmd_units(args):
     print(f"wrote {len(edits)} units to {dst.yaml.relative_to(ROOT)}; run python3 configure.py")
 
 
+KNR_HEADER = re.compile(r"^[A-Za-z_][\w \t\*]*\b\w+\s*\(\s*\w+(\s*,\s*\w+)*\s*\)\s*$")
+
+
 def blocks(text):
     """Top-level items: each declaration, definition, INCLUDE_ASM or preprocessor line,
     with any comment lines directly above it. Several declarations on consecutive lines
@@ -306,7 +309,11 @@ def blocks(text):
         cur.append(line)
         depth += line.count("{") - line.count("}")
         code = re.sub(r"\s*(/\*.*?\*/|//.*)$", "", stripped)  # a trailing comment
-        if depth == 0 and code.endswith((";", "}")):
+        # An old-style (K&R) definition declares its parameters between the
+        # header and the body: those `type name;` lines belong to the function.
+        knr_params = depth == 0 and code.endswith(";") and KNR_HEADER.match(cur[0]) is not None \
+            and "{" not in "".join(cur)
+        if depth == 0 and code.endswith((";", "}")) and not knr_params:
             flush()
     flush()
     return out

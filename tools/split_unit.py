@@ -61,9 +61,23 @@ def main():
         groups[key].append(bs)
     new = {"mid": f"game/code_{start:08X}", "tail": f"game/code_{end:08X}" if end else None}
 
+    # Prototypes for the unit's C functions: a function the other part defines
+    # (and this one only calls or takes the address of) needs one once they
+    # are separate files.
+    protos = {}
+    for _, bs in pieces:
+        for b in bs:
+            if "{" in b and not INCLUDE.search(b) and (m := DEF.search(b)):
+                header = b[:b.index("{")].strip()
+                if re.search(r"\)\s*$", header):  # prototype-style definition
+                    protos[m.group(1)] = re.sub(r"\s+", " ", header) + ";"
+                else:  # K&R: parameters declared between header and body
+                    protos[m.group(1)] = re.sub(r"\(.*", "();", header.split("\n")[0])
+
     def write(unit, groups_blocks, old_unit):
         body = [b.replace(f'"{old_unit}"', f'"{unit}"') for bs in groups_blocks for b in bs]
         used = set(TOKENS.findall("\n".join(body)))
+        defined = {m.group(1) for b in body if "{" in b and (m := DEF.search(b))}
         chosen, changed = set(), True
         while changed:
             changed = False
@@ -73,6 +87,8 @@ def main():
                     used |= set(TOKENS.findall(d))
                     changed = True
         decls = [head[i] for i in sorted(chosen)]
+        declared = {declared_name(d) for d in decls}
+        decls += [protos[n] for n in sorted(used & set(protos)) if n not in defined and n not in declared]
         path = ROOT / "src" / args.version / f"{unit}.c"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text('#include "common.h"\n\n' + "\n\n".join(decls + body) + "\n")

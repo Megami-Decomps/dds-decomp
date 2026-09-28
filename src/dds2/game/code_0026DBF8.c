@@ -156,14 +156,14 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F008);
 
 u32 func_0026F138(u32 unused1, u32 unused2, u32 third, u32 record,
                   u32 position, u32 packet) {
-    char markers[9] = "\0/4021356";
+    char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
     u16 index = *(u16 *)(record + 4);
     return func_0026E788(0, 0, third, position, markers[index], 0, packet);
 }
 
 u32 func_0026F190(u32 unused1, u32 unused2, u32 third, u32 record,
                   u32 position, u32 packet) {
-    char markers[9] = "\0/4021356";
+    char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
     u16 index = *(u16 *)(record + 4);
     return func_0026E788(0, 0, third, position, markers[index] + 8, 0,
                           packet);

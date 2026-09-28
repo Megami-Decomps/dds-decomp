@@ -274,6 +274,17 @@ def main():
     funcs_by_off = sorted(funcs)
     covered = set()
     starts = sorted({t[0] for t in tables} | {len(rodata)})
+    # Two retail copies that the C compiles to one object item: gcc merged
+    # identical constants (e.g. two equal string initializers) that the
+    # original kept apart, so the unit's rodata comes out short.
+    by_off = {}
+    for table_off, retail_addr, name in tables:
+        by_off.setdefault(table_off, {}).setdefault(retail_addr, name)
+    for off, uses in by_off.items():
+        if len(uses) > 1:
+            bad += 1
+            print(f"MERGED rodata: {', '.join(f'{n} (retail 0x{a:08X})' for a, n in sorted(uses.items()))} "
+                  "share one compiled item; retail has separate copies (brace-initialize, or keep the extern)")
     for table_off, retail_addr, name in dict.fromkeys(tables):
         if not 0 <= table_off < len(rodata):
             continue
