@@ -39,7 +39,7 @@ Requirements:
   contains `ld-linux.so.2` and `libc.so.6`.
 
 ```sh
-git clone <this repo> dds-decomp && cd dds-decomp
+git clone https://github.com/Raikaru/dds-decomp.git && cd dds-decomp
 python -m pip install -r requirements.txt
 python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objdiff-cli
 # copy your disc image(s) into the repo root or orig/, then:
