@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern void func_00127028(u32, u32);
 extern void func_00123EE8(void);
@@ -503,7 +504,16 @@ void func_0012C7D8(void) {
     func_00213A38();
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C818);
+extern f32 D_00330610[];
+extern f32 D_00330620[];
+extern f32 D_0032E41C[];
+void func_0012C818(void) {
+    f32 *distance = D_0032E41C;
+    f32 dx = D_00330610[0] - D_00330620[0];
+    f32 dy = D_00330610[1] - D_00330620[1];
+    f32 dz = D_00330610[2] - D_00330620[2];
+    *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C880);
 
@@ -646,7 +656,13 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001313E0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131458);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001314C0);
+extern s32 D_003BAB38;
+extern s32 func_00217DF8(s32, s32, s32, f32, f32);
+s32 func_001314C0(s32 value) {
+    s32 object = D_003BAB38;
+    *(f32 *)(*(s32 *)(object + 0x1C) + 0x20) = 1.0f;
+    return func_00217DF8(object, 0, value, 2.0f, 5.0f);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131508);
 
@@ -865,7 +881,9 @@ float func_00135058(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00135088);
+f32 func_00135088(const f32 *vector) {
+    return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001350B8);
 
@@ -989,7 +1007,15 @@ s32 func_0013BE30(u32 task) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013BE90);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013BEE8);
+s32 func_0013BEE8(u32 task) {
+    s32 i;
+    for (i = 0; i < D_003BAE14; i++) {
+        if (D_003308B0[i] == task) {
+            return D_003307B0[i][2];
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013BF48);
 
@@ -999,7 +1025,15 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C2B8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C520);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C580);
+s32 func_0013C580(void) {
+    s32 i;
+    for (i = 0; i < D_003BAE14; i++) {
+        if (D_003308B0[i] != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 func_0013C5D0(void) {
     s32 temp_v0 = D_003BAE3C;
@@ -1036,7 +1070,20 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D6D0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D8D8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DAC0);
+extern s32 D_003BAB40;
+extern s32 D_0032E3C4[];
+extern u8 D_00337D00[];
+extern u8 D_00336A30[];
+u8 *func_0013DAC0(void) {
+    s32 index = D_003BAB40;
+    u8 *entry = D_00337D00 + index * 108;
+    if (*(s16 *)(entry + 4) == D_0032E3C4[0] + 1 && *(s8 *)entry == 10) {
+        D_003BAE64 = index;
+        D_003BAE68 = 8;
+        return D_00336A30;
+    }
+    return 0;
+}
 
 s32 func_0013DB28(void) {
     return D_00337D12[D_003BAE64 * 54];
