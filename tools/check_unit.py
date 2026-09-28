@@ -276,6 +276,14 @@ def main():
                else "reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
                "(this data is not split per unit yet)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
+    # C functions must keep retail order (the object's text is laid out in source order).
+    order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^[A-Za-z_][^;\n=]*?\b(\w+)\s*\([^;\n]*\)\s*\{?\s*$',
+                       unit.read_text(), re.M)
+    placed = [(0, address(a or b, syms), a or b) for a, b in order if address(a or b, syms) is not None]
+    for (_, a, n), (_, b, m) in zip(placed, placed[1:]):
+        if b < a:
+            bad += 1
+            print(f"ORDER {m} (0x{b:08X}) comes after {n} (0x{a:08X}) in the source; move it back")
     # Every retail function of the unit must still be there, as C or INCLUDE_ASM.
     full = ROOT / "asm" / version / f"{unit_name}.s"
     if full.exists() and not args.func:

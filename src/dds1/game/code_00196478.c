@@ -20,9 +20,60 @@ extern u32 D_003BB170;
 
 extern u32 D_003BB16C;
 
-extern u32 D_003BB15C;
+/* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
+typedef struct TextStream {
+    u8 unk0[0x10]; /* 0x0 */
+    u8 *unk10;     /* 0x10: base */
+    u8 unk14[4];   /* 0x14 */
+    s32 unk18;     /* 0x18: position */
+} TextStream;
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196478);
+/* 8-byte node header; payload follows (func_00198248/func_00198270). */
+typedef struct MemNode {
+    u32 unk0;              /* 0x0 */
+    struct MemNode *unk4;  /* 0x4 */
+} MemNode;
+
+/* Field block split by func_00198038. */
+typedef struct MemBlock {
+    s32 unk0; /* 0x0 */
+    s32 unk4; /* 0x4 */
+    u8 unk8[0x10]; /* 0x8 */
+    s32 unk18; /* 0x18 */
+} MemBlock;
+
+typedef struct MemOut {
+    void *unk0; /* 0x0 */
+    void *unk4; /* 0x4 */
+    void *unk8; /* 0x8 */
+} MemOut;
+
+/* Value with u16 pair read by func_001971E0/func_00197200. */
+typedef struct Unk6C84Val {
+    u8 unk0[0x10]; /* 0x0 */
+    u16 unk10;     /* 0x10 */
+    u16 unk12;     /* 0x12 */
+} Unk6C84Val;
+
+/* 0x24-byte record pointing at the value. */
+typedef struct Unk6C84Rec {
+    Unk6C84Val *unk0; /* 0x0 */
+    u8 unk4[0x20];    /* 0x4 */
+} Unk6C84Rec;
+
+extern u32 D_003BB15C;
+extern u32 D_003D6E20[];
+extern Unk6C84Rec D_003D6C84[];
+s32 func_00196B30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+
+u32 func_00196478(TextStream *stream) {
+    s32 *ppos = &stream->unk18;
+    u8 *p = stream->unk10 + *ppos;
+    u32 b = *p;
+
+    *ppos += 2;
+    return (b + 0xFF) & 0xFF;
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001964A0);
 
@@ -30,9 +81,13 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001964F8);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001968C0);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196AB0);
+void func_00196AB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    func_00196B30(arg0, arg1, 0, 0, 0, 0, 0x80, arg2, arg3);
+}
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196AE8);
+void func_00196AE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    func_00196B30(arg0, arg1, 0, arg2 & 0xFF, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6, arg7);
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00196B30);
 
@@ -42,7 +97,9 @@ u32 func_00196BB0(u32 arg0) {
     return D_003BB15C & arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196BC0);
+void func_00196BC0(s32 arg0, s32 arg1) {
+    D_003D6E20[arg0] = arg1;
+}
 
 u32 func_00196BD8(void) {
     return D_003BB16C;
@@ -60,9 +117,13 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197190);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_001971E0);
+u16 func_001971E0(s32 arg0) {
+    return D_003D6C84[arg0].unk0->unk10;
+}
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197200);
+u16 func_00197200(s32 arg0) {
+    return D_003D6C84[arg0].unk0->unk12;
+}
 
 void func_00197220(s32 arg0) {
     if (arg0 < 1) {
@@ -150,15 +211,34 @@ u32 func_00198030(u32 arg0) {
     return arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198038);
+void func_00198038(MemBlock *arg0, MemOut *arg1) {
+    s32 v0 = arg0->unk0;
+    s32 v1 = v0 + arg0->unk4;
+    s32 v2 = v1 + arg0->unk18;
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198068);
+    arg1->unk0 = (u8 *)arg0 + v0;
+    arg1->unk4 = (u8 *)arg0 + v1;
+    arg1->unk8 = (u8 *)arg0 + v2;
+}
+
+u32 func_00198068(u32 arg0) {
+    return *(u32 *)(func_00198030(arg0) + 0x10);
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001981A8);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198248);
+void *func_00198248(MemNode *queue) {
+    MemNode *head = queue->unk4;
+
+    if (head->unk0 == 0) {
+        return NULL;
+    }
+    queue->unk4 = head->unk4;
+    head->unk4 = NULL;
+    return head + 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198270);
 
