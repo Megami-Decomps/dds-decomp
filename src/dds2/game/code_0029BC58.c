@@ -274,7 +274,32 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1040);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1070);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A10A0);
+extern s8 D_004379FC;
+extern char D_003E0B30[];
+extern char D_003E0B50[];
+extern s32 D_003D9D60[];
+extern s32 D_00437A18;
+extern s16 D_00438FCC;
+extern s32 D_00437A1C;
+extern void func_00341AD8(char *, s32, char *, s32);
+extern void func_003421E8(s32);
+extern void func_002A1E58(void);
+extern void func_002A1178(void);
+
+void func_002A10A0(void) {
+    if (D_004379FC != 0) {
+        func_00341CF8();
+        return;
+    }
+    D_004379FC = 1;
+    func_00341AD8(D_003E0B30, 4, D_003E0B50, 4);
+    func_003421E8(D_003D9D60[0]);
+    D_00437A18 = 4;
+    D_00438FCC = -1;
+    D_00437A1C = 0;
+    func_002A1E58();
+    func_002A1178();
+}
 
 u32 func_002A1118(void) {
     return 0x608;
@@ -637,7 +662,13 @@ void func_002A2998(void) {
     SignalSema(D_00438FE8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A29D8);
+void func_002A2A00(void);
+
+void func_002A29D8(void) {
+    D_00455D70[1] = 0;
+    D_00455D70[4] = 2;
+    func_002A2A00();
+}
 
 void func_002A2A00(void) {
     u32 *temp_v0 = D_00455D70;
@@ -716,7 +747,6 @@ void func_002A3AC0(void) {
 }
 
 extern s16 D_003E3792[];
-
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3AE8);
 
@@ -1805,7 +1835,15 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8C80);
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9068);
 
 extern u32 D_00438FF8[2];
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9130);
+extern u32 D_003E6848[];
+extern char D_0042A950[];
+extern u32 func_00304030(char *, u32, u32);
+void func_002A9130(void) {
+    s32 i;
+    for (i = 0; i < 2; i++) {
+        D_00438FF8[i] = func_00304030(D_0042A950, D_003E6848[i * 2], 1);
+    }
+}
 
 extern void func_00305068(u32);
 extern void func_00304EE0(u32);
