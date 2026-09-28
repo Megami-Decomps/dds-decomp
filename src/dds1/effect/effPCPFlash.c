@@ -7,7 +7,6 @@ extern void func_00170350(u32 res);
 extern void func_0016FC28(u32 res);
 extern void func_002D0918(u32 res);
 extern s32 func_00170238(s32 base, s32 index);
-extern s32 func_0016FF20(s32 base, s32 index);
 extern s32 func_0018DDF8(s32 color, s32 param);
 
 /* Effect initializers implemented in assembly below. Each is entered both with

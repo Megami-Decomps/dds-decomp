@@ -437,7 +437,10 @@ extern void func_0017DBB0(s32 id);
 extern void func_0017E4A8(void *dst, void *src);
 extern void func_0017E4C8(void *dst, void *src);
 extern void func_002DDBF8(void);
+extern void func_00180540(f32 value);
 extern void func_002DD688(f32 scale);
+extern void func_002DD8E8(f32 angle);
+extern void func_00180BD0(f32 angle);
 
 
 extern u8 D_00355008[];
@@ -1022,7 +1025,9 @@ void func_0017B160(u32 unused, u32 val) {
     D_003BD7FC->unk10 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B170);
+void func_0017B170(u32 unused, f32 value) {
+    ((EffPCPWorkF1C *)D_003BD7FC)->unk1C = value;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B180);
 
@@ -1578,7 +1583,24 @@ void func_0017F1D8(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F1E0);
+void func_0017F1E0(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&work->unk10) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F210);
 
@@ -1602,7 +1624,24 @@ void func_0017F4D8(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F4E0);
+void func_0017F4E0(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&work->unk10) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F510);
 
@@ -1626,7 +1665,24 @@ void func_0017F7D8(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017F7E0);
+void func_0017F7E0(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&work->unk10) : "memory");
+}
 
 u32 func_0017F810(void) {
     D_003BB04C = 1;
@@ -1868,7 +1924,17 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180370);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180540);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001806C8);
+typedef struct {
+    u8 pad00[0x28];
+    f32 scale;
+    u8 pad2C[0x24];
+    u32 state;
+} EffPCPSubEffectWork;
+
+void func_001806C8(EffPCPSubEffectWork *work) {
+    func_00180540(work->scale);
+    work->state = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001806F8);
 
@@ -1900,13 +1966,76 @@ void func_00180B40(EffPCPWork *work, u32 val) {
     work->unk54 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180B48);
+void func_00180B48(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&((EffPCPWork *)work->unk5C)->pad3C[4]) : "memory");
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180B78);
+void func_00180B78(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    func_002DD8E8(1.5707963f);
+    func_002DDBF8();
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"((void *)work->unk5C) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180BD0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180E18);
+typedef struct {
+    u8 pad00[0x10];
+    f32 degreesX;
+    f32 degreesY;
+    f32 degreesZ;
+    u8 pad1C[0x14];
+    f32 angle;
+    f32 angle2;
+    u8 pad38[0x24];
+    u32 child;
+    u8 pad60[0x4];
+    f32 radiansX;
+    f32 radiansY;
+    f32 radiansZ;
+    u8 pad70[0x4];
+    f32 childAngle;
+    f32 childAngle2;
+} EffPCPAngleWork;
+
+void func_00180E18(EffPCPAngleWork *work) {
+    work->radiansX = work->degreesX * 0.017453291f;
+    work->radiansY = work->degreesY * 0.017453291f;
+    work->radiansZ = work->degreesZ * 0.017453291f;
+    work->childAngle = work->angle;
+    work->childAngle2 = work->angle2;
+    func_00180BD0(work->angle);
+    work->child = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180E78);
 
@@ -1938,7 +2067,24 @@ void func_001811D0(EffPCPWork *work, u32 val) {
     work->unk60 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001811D8);
+void func_001811D8(EffPCPWork *work, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(&((EffPCPWork *)work->unk7C)->pad3C[4]) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181208);
 
@@ -2157,7 +2303,41 @@ void func_00183FD0(void *args) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184038);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184090);
+typedef struct {
+    u8 pad00[0x1C];
+    void *event;
+} EffPCPEventEntry32;
+
+typedef struct {
+    u8 pad00[0x1C];
+    EffPCPEventEntry32 *entries;
+    u32 handle;
+    EffPCPEventOwner *owner;
+    u32 resource;
+    u8 pad2C[0xC];
+    u32 count;
+} EffPCPEventWork32;
+
+void func_00184090(EffPCPEventWork32 *work) {
+    u32 i;
+    u32 count;
+    EffPCPEventEntry32 *entry;
+
+    func_001629F0(work->resource);
+    count = work->count;
+    entry = work->entries;
+    for (i = 0; i < count; i++) {
+        if (entry->event != NULL) {
+            func_00190208(entry->event);
+        }
+        entry++;
+    }
+    if (work->owner->active == 0) {
+        func_00190118(work->owner);
+    }
+    func_002D0918(work->handle);
+    func_002CFF98(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184130);
 
