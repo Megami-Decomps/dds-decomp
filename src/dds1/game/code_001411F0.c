@@ -195,7 +195,17 @@ void func_001414A8(void) {
     D_003BAE8C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001414E0);
+void fldAppendClearEntry(s32 id, f32 x, f32 y, f32 z, f32 w) {
+    s32 i = D_003BAE8C;
+
+    D_003D3FE0[i].unk0 = 0;
+    D_003D3FE0[i].unk4 = id;
+    D_003D3FE0[i].unk8 = x;
+    D_003D3FE0[i].unkC = y;
+    D_003D3FE0[i].unk10 = z;
+    D_003D3FE0[i].unk14 = w;
+    D_003BAE8C = i + 1;
+}
 
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00141540);
@@ -264,7 +274,7 @@ u32 func_00142158(void) {
     return D_003BAEA4;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142160);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldLoadArchive);
 
 void func_001421D0(s32 arg0, s32 arg1) {
     soundSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
@@ -335,11 +345,11 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00142800);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001428C0);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142C00);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldFindRecordItem);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142C78);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142D18);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldGetMaxItemValue);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142D78);
 
@@ -389,7 +399,7 @@ s32 func_00146AA8(s32 area, s32 floor, s32 bit) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00146B10);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00146BC0);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagBit);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00146C30);
 
@@ -434,7 +444,7 @@ void getSceneEntryPosition(s32 index, f32 *x, f32 *z) {
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00146EE8);
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001470A0);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldCheckSceneReady);
 
 
 void func_001470E0(void) {
@@ -936,7 +946,7 @@ u32 func_0014DAF8(void) {
 }
 
 u32 func_0014DB00(void) {
-    func_00127AC0();
+    fldFreeDisplayObjects();
     return 1;
 }
 
@@ -1060,7 +1070,7 @@ s32 func_0014E748(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014E7D0);
 
-extern void func_00146BC0(s32, s32, s32);
+extern void fldSetFlagBit(s32, s32, s32);
 s32 func_0014E870(void) {
     s32 area = func_0010D428(0);
     s32 floor, target;
@@ -1069,7 +1079,7 @@ s32 func_0014E870(void) {
     if (floor == 0) floor = D_0032E3C4[0] + 1;
     target = func_0010D428(2);
     if (target == 0) return 1;
-    func_00146BC0(area, floor, target);
+    fldSetFlagBit(area, floor, target);
     return 1;
 }
 
@@ -1093,16 +1103,16 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014EA78);
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014EB70);
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014EC40);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld1);
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014EC78);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld3);
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014ECB0);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld4);
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014ECE8);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld2);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014ED20);
 

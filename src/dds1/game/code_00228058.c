@@ -210,7 +210,7 @@ u32 func_002285F0(void) {
 
     temp_v0 = func_0010D428(0);
     temp_v1 = func_0010D428(1);
-    func_00241CA0(temp_v0, temp_v1);
+    evtRefreshTaskData(temp_v0, temp_v1);
     return 1;
 }
 

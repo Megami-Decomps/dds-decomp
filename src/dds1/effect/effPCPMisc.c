@@ -409,7 +409,9 @@ typedef struct {
 
 extern void func_00190208(void *event);
 extern void func_00190118();
+extern void func_002CFF98(void *ptr);
 extern s8 D_003BB04C;
+extern s32 D_003BB048;
 
 extern EffPCPWork *func_0017D7A8();
 
@@ -1128,7 +1130,15 @@ void func_0017AEE8(EffPCPWork *work, u32 val) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017AEF0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017AFB8);
+void effPcpSharedWorkRelease(EffPCPWork *work)
+{
+    func_002CFF98(work);
+    if (--D_003BB048 != 0) {
+        return;
+    }
+    func_00186CB8(D_003BD7FC->unk38);
+    func_002CFF98(D_003BD7FC);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B008);
 

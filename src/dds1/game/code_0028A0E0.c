@@ -513,7 +513,12 @@ u32 func_0028A1F8(void) {
     return 0x33600;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A208);
+void fileReloadSaveBuffer(void) {
+    s32 saved = *(s32 *)(D_003BAA00 + 0x30);
+    s32 size = 0x33600;
+    memcpy((void *)D_003BAA00, (void *)D_003BD924, size);
+    *(s32 *)(D_003BAA00 + 0x30) = saved;
+}
 
 u8 func_0028A248(s32 arg0) {
     return arg0 != 0 && D_003BC7FC == 1;
@@ -2008,13 +2013,13 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297270);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002973E8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297558);
-
 typedef struct FileGridDimensions {
     u8 pad0[0xC0];
     s32 columns;
     s32 rows;
 } FileGridDimensions;
+
+INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297558);
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002975C8);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297658);

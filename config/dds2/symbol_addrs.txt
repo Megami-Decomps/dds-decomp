@@ -2,6 +2,11 @@
 _start = 0x00100008; // type:func
 // $gp-relative byte spimdisasm leaves unsymbolized (emits an absolute %lo that encodes wrong)
 D_00435CF3 = 0x00435CF3; // type:u8
+// Names from tools/names.py (provenance: name_sources.txt)
+btlSetBattleActionFlag = 0x00220568; // type:func
+btlStartAction19A = 0x002209F0; // type:func
+btlTickAction19A = 0x00220A38; // type:func
+btlTickAction6B = 0x00221410; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -5602,7 +5607,6 @@ func_0021F808 = 0x0021F808; // type:func
 func_0021F848 = 0x0021F848; // type:func
 func_00220368 = 0x00220368; // type:func
 func_00220450 = 0x00220450; // type:func
-func_00220568 = 0x00220568; // type:func
 func_002205C0 = 0x002205C0; // type:func
 func_002206A0 = 0x002206A0; // type:func
 func_00220700 = 0x00220700; // type:func
@@ -5611,8 +5615,6 @@ func_00220918 = 0x00220918; // type:func
 func_00220958 = 0x00220958; // type:func
 func_00220998 = 0x00220998; // type:func
 func_002209B0 = 0x002209B0; // type:func
-func_002209F0 = 0x002209F0; // type:func
-func_00220A38 = 0x00220A38; // type:func
 func_00220A78 = 0x00220A78; // type:func
 func_00220B20 = 0x00220B20; // type:func
 func_00220C38 = 0x00220C38; // type:func
@@ -5629,7 +5631,6 @@ func_00221128 = 0x00221128; // type:func
 func_00221158 = 0x00221158; // type:func
 func_00221390 = 0x00221390; // type:func
 func_002213E0 = 0x002213E0; // type:func
-func_00221410 = 0x00221410; // type:func
 func_00221498 = 0x00221498; // type:func
 func_002214C0 = 0x002214C0; // type:func
 func_00221538 = 0x00221538; // type:func

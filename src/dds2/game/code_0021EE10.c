@@ -26,6 +26,8 @@ extern void func_001E9890(void);
 
 extern void func_001EC868(u32, u32, f32);
 
+extern void func_001ECBF8();
+
 extern u32 func_001E8058(u32);
 
 extern u32 func_001E8060(u32, u32);
@@ -151,7 +153,19 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220368);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220450);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220568);
+u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
+    u8 *state = *(u8 **)(func_001AA6F8() + 0x718);
+    if (action >= 0x103) {
+        if (action >= 0x105) {
+            if (action == 0x19C) {
+                state[2] = 1;
+            }
+        } else {
+            state[2] = 0;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002205C0);
 
@@ -199,9 +213,28 @@ void func_002209B0(u32 unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002209F0);
+u32 btlStartAction19A(u32 unit) {
+    u32 action = *(u32 *)(unit + 0x134);
+    if (action < 0x19C) {
+        if (action >= 0x19A) {
+            *(u32 *)(unit + 0x110) |= 0x800;
+            func_001E9F30(unit);
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220A38);
+u32 btlTickAction19A(u32 unit) {
+    u32 action = *(u32 *)(unit + 0x134);
+    if (action < 0x19C) {
+        if (action >= 0x19A) {
+            func_001E98C0(unit);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220A78);
 
@@ -319,7 +352,25 @@ u32 func_002213E0(u32 unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221410);
+u32 btlTickAction6B(u32 unit) {
+    if (*(u32 *)(unit + 0x134) != 0x6b) {
+        return 0;
+    }
+    /* The callee takes no arguments (see code_001DACF8.c), so retail
+     * leaves $a0 holding the compared constant across these calls. */
+    if (*(s32 *)(unit + 0x13c) >= 0) {
+        if (*(s32 *)(unit + 0x13c) >= 0xF) {
+            func_001E9890();
+            func_001ECBF8(unit, unit);
+        } else {
+            func_001E98C0();
+        }
+        ++*(s32 *)(unit + 0x13c);
+    } else {
+        func_001E98C0();
+    }
+    return 1;
+}
 
 u32 func_00221498(s32 arg0) {
     if (*(s32 *)(arg0 + 0x134) == 0x6c) {

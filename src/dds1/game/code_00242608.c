@@ -35,7 +35,7 @@ typedef struct CampTaskData {
     u8 pad08[0x40];
 } CampTaskData;
 
-void func_00242608(s32 arg0) {
+void campCreateTask(s32 arg0) {
     char name[0x20];
     CampTaskData *data;
 
@@ -91,7 +91,7 @@ typedef struct CampDisplayDefaults {
     s32 variant;
 } CampDisplayDefaults;
 
-void func_00242E28(CampDisplayDefaults *display) {
+void campInitDisplayDefaults(CampDisplayDefaults *display) {
     display->width = 0x100;
     display->height = 0xE0;
     display->color[0] = -0x80;
@@ -120,7 +120,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243440);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243460);
 
-void *func_002434E0(u8 *scene, const char *name) {
+void *campFindEntryByName(u8 *scene, const char *name) {
     void *node = *(void **)(scene + 0x2034);
     while (node != NULL) {
         if (strcmp((char *)scene + (*(s32 *)((u8 *)node + 8) << 5) + 0x24, name) == 0) {
@@ -390,7 +390,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
 extern s32 func_00244E08(void *arg0);
 
-s32 func_00245190(s32 arg0, u8 *arg1) {
+s32 campClampSceneCounter(s32 arg0, u8 *arg1) {
     s32 v = func_00244E08(arg1);
     s32 sum = *(s32 *)(arg1 + 0x80) + arg0;
     s32 cur;

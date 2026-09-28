@@ -23,6 +23,7 @@ harvest lists strings that name a function (`name : message`, `name()`,
 references each one. It proposes nothing on its own: the referencing function
 may be a caller or a task registrar, so each row needs a look at the code.
 """
+import os
 import argparse
 import concurrent.futures
 import re
@@ -32,7 +33,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RW = str(Path.home() / "ventris/target/release/romwright-cli")
+RW = os.environ.get("ROMWRIGHT", "romwright-cli")
 STORE = ROOT / "build/romwright-c"
 ROW = re.compile(r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;(.*)$")
 IDENT = re.compile(r"^[A-Za-z_]\w*$")

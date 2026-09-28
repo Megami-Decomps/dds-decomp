@@ -228,7 +228,7 @@ void func_0021A088(u32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A0B0);
 
-void func_0021A170(s32 arg0) {
+void mdlCondInitEntry(s32 arg0) {
     s32 v = *(s32 *)(arg0 + 0xC);
     if (*(u8 *)(v + 9) == 0) {
         s32 count = *(s32 *)(arg0 + 0x14);
@@ -563,7 +563,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E1C8);
 
 extern void func_002177D0(s32 resource);
 
-void func_0021E360(void) {
+void mdlFreeViewResources(void) {
     s32 i;
     for (i = 0; i != 12; i++) {
         s32 handle = D_003D7A50.unk90[i];
@@ -613,7 +613,7 @@ void mdlFlagClearAll(void) {
 
 void mdlFlagClear(s32 arg0);
 
-void func_0021F520(void) {
+void mdlClearFlagRanges(void) {
     s32 i = 0;
     do {
         mdlFlagClear(i++);

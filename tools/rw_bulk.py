@@ -34,12 +34,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RW = os.environ.get("ROMWRIGHT", str(Path.home() / "ventris/target/release/romwright-cli"))
+RW = os.environ.get("ROMWRIGHT", "romwright-cli")
 RETAIL = {"dds1": "orig/dds1/SLUS_209.74", "dds2": "orig/dds2/SLUS_211.52"}
 STORE = ROOT / "build/romwright-c"
 SYMBOL = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);\s*// type:func", re.M)
 INCLUDE_ASM = re.compile(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);$', re.M)
-ENV = dict(os.environ, DDS_I386_LIBDIR=os.environ.get("DDS_I386_LIBDIR", str(Path.home() / "opt/glibc32/usr/lib")))
+ENV = dict(os.environ)
 TYPES = [
     (r"\bunsigned long long\b", "u64"), (r"\blong long\b", "s64"),
     (r"\bundefined8\b|\bulonglong\b|\bulong\b", "u64"), (r"\blonglong\b", "s64"),

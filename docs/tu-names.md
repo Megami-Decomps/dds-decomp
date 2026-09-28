@@ -27,7 +27,7 @@ last reference.
   can extend into the neighbouring `game/code_<vram>` chunks.
 
 ```sh
-RW=~/ventris/target/release/romwright-cli
+RW=${ROMWRIGHT:-romwright-cli}
 $RW import SLPM_652.42 --name noct --project build/romwright-noct
 $RW import SLUS_209.11 --name noctus --project build/romwright-noctus
 # plus index-semantics for both, then:

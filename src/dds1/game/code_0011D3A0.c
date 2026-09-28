@@ -63,7 +63,7 @@ extern void func_001278E8(s32, s32);
 extern s32 func_00127B98(void);
 extern void func_00127B30(void);
 extern s32 func_00127B88(void);
-extern void func_00127AC0(void);
+extern void fldFreeDisplayObjects(void);
 extern s32 func_002D3EE8(void);
 extern s32 func_00102A60(void);
 extern s32 func_00102AB0(void);
@@ -1103,7 +1103,7 @@ u8 func_00125FD0(void) {
     if (D_0032E3D0[0] == 0 && func_00127B98() != 0) {
         func_00127B30();
         if (func_00127B88() == 1) return 0;
-        func_00127AC0();
+        fldFreeDisplayObjects();
         return 0;
     }
     return func_002D3EE8() == 0;

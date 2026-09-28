@@ -34,3 +34,6 @@ __pycache__/
 # Local tool overrides
 /config/local.json
 config/*/checksum.sha1
+
+# Agent/session state
+/.omp/

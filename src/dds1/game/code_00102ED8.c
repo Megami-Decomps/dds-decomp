@@ -94,7 +94,7 @@ extern s32 func_002E4960(s32, s32, s32, s32, const char *);
 
 extern void func_002E1718(void *arg0);
 
-extern void func_002E3BA8(s32 arg0, s32 arg1, s32 arg2);
+extern void devConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00102ED8);
 
@@ -142,7 +142,7 @@ void func_00104130(void) {
     D_003BD6A0[0] = 0;
     D_003BD690[1] = 0;
     D_003BD6A0[1] = 0;
-    func_002E3BA8(0, 0, 0);
+    devConsSetEntryPair(0, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104168);

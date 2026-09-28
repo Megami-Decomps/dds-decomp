@@ -8,7 +8,7 @@ extern s32 D_003BAA50;
 
 extern u32 func_002BD258(u32);
 
-extern s32 func_002860B8(u16);
+extern s32 mnuLookupRangeEntry(u16);
 
 extern u32 func_0027D4A0(u32);
 
@@ -195,7 +195,7 @@ void func_00283310(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
     if (arg5 != 0) {
         temp_v1 = 0x12;
     }
-    temp_v0 = func_002860B8(arg4);
+    temp_v0 = mnuLookupRangeEntry(arg4);
     func_002BF4E0(arg0, arg1, arg2, arg3, 1, arg6, temp_v0 * 2 + temp_v1, arg7);
 }
 
@@ -473,9 +473,35 @@ extern s8 D_0037CE40[];
 extern u16 D_0037CE18[];
 extern u16 D_0037CE1A[];
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002860B8);
+s32 mnuLookupRangeEntry(u16 arg0) {
+    u16 *table = D_0037CE18;
+    s8 *entries = D_0037CE40;
+    u32 key = arg0 & 0xffff;
+    u32 i;
+    for (i = 0; i < 0x14; i += 2, table += 2) {
+        if (key < table[0]) {
+            continue;
+        }
+        if (key >= table[1]) {
+            continue;
+        }
+        {
+            u32 j = 0;
+            s8 *entry = entries + 1;
+            for (; j < 6; j++, entry += 3) {
+                if (i != entry[1]) {
+                    continue;
+                }
+                return entry[0];
+            }
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286138);
+u16 mnuPickPairedTableValue(s32 index, s32 alt) {
+    return (alt == 0) ? D_0037CE18[index] : D_0037CE1A[index];
+}
 
 s32 getIndexedNonzeroEffect(s32 index) {
     s32 count = 0;

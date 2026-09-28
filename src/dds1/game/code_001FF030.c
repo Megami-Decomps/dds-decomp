@@ -1023,6 +1023,7 @@ u32 func_00204048(s32 arg0) {
     return 1;
 }
 
+
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00204080);
 
 u32 func_00204198(void) {
@@ -1121,7 +1122,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00204D08);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00204D98);
 
-void func_00204F08(void) {
+void battleResetUnitPlacement(void) {
     u8 *unit = *(u8 **)((u8 *)func_001A17F0() + 0x228);
 
     if (unit == 0) {
@@ -2545,7 +2546,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020FB00);
 
 extern char D_003BB8C0[];
 
-s32 func_0020FB20(void) {
+s32 battleHasScriptResource(void) {
     u8 *battle = (u8 *)func_001A17F0();
 
     if (*(s16 *)(battle + 0x1c0) == -1) {
@@ -3492,7 +3493,7 @@ typedef struct BattleGroupIdEntry {
     s32 id;
 } BattleGroupIdEntry;
 
-void func_00216788(s32 group, s32 id) {
+void battleAddGroupId(s32 group, s32 id) {
     BattleGroupIdEntry *node = func_002CFEB8(sizeof(BattleGroupIdEntry));
     BattleGroupIdEntry **head = (BattleGroupIdEntry **)&D_00367960[group];
     node->id = id;

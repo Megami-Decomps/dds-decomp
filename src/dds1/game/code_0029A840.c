@@ -397,7 +397,12 @@ void func_0029A9F0(void *p) {
     func_002CFF98(p);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AA40);
+u32 *effDuplicateEffectHeader(u32 *source) {
+    u32 *effect = (u32 *)func_0029A958(0);
+    effect[0] = source[0];
+    func_0029AA90(effect, (u8 *)source);
+    return effect;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AA90);
 
@@ -2092,7 +2097,23 @@ void randomizeEffectParticleFields(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A8670);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A8A20);
+extern void func_002AACD0(s32);
+
+void effFreeIndexedEntries(u8 *work) {
+    u32 index = 0;
+    u32 count = *(u32 *)(*(u8 **)(work + 0x34) + 0x38);
+    u8 *pool = *(u8 **)(work + 0x30);
+    u8 *entry = *(u8 **)pool;
+
+    if (count != 0) {
+        do {
+            func_002AACD0(*(s32 *)entry);
+            entry += 0x10;
+            index++;
+        } while (index < count);
+    }
+    func_002CFF98(pool);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A8A90);
 
@@ -3281,15 +3302,7 @@ u32 func_002B4498(u8 *work) {
 
 extern FnTbl28 D_0037EEE8[];
 
-void destroyEffectResourceInstance(u8 *work) {
-    if (func_001A1438() != 0) {
-        void (*release)(void *) = D_0037EEE8[*(s32 *)(work + 0x2C)].fn;
-        if (release != NULL) {
-            release(*(void **)(work + 0x30));
-        }
-    }
-    func_002CFF98(work);
-}
+INCLUDE_ASM(const s32, "game/code_0029A840", destroyEffectResourceInstance);
 
 extern FnTbl28 D_0037EEE0[];
 
@@ -3325,7 +3338,17 @@ void func_002B4618(u8 *work) {
 
 extern FnTbl28 D_0037EEF0[];
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4678);
+void effDispatchIndexedCallback(work)
+u8 *work;
+{
+    if (func_001A1438() != 0) {
+        void (*callback)(void *) = D_0037EEF0[*(s32 *)(work + 0x2C)].fn;
+        if (callback != NULL) {
+            callback(work);
+        }
+        *(u32 *)(work + 0x28) += 1;
+    }
+}
 
 void dispatchEnabledEffectCallback(u8 *work) {
     if (func_001A1438() != 0) {
@@ -3337,7 +3360,7 @@ void dispatchEnabledEffectCallback(u8 *work) {
 }
 
 void func_002B4738(u32 arg0) {
-    func_002B4678();
+    effDispatchIndexedCallback();
     dispatchEnabledEffectCallback(arg0);
 }
 
@@ -4006,7 +4029,18 @@ INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3AA8);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B7B78);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B7E28);
+extern u32 D_003DFA20[];
+
+s32 effResetStaticState(void) {
+    D_003DFA20[0] = 0;
+    D_003DFA20[1] = 0;
+    D_003DFA20[2] = 0;
+    D_003DFA20[3] = 0;
+    D_003DF840[0x88] = 8;
+    D_003DF840[0x89] = 0;
+    D_003DF840[0x8A] = 0;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B7E60);
 
@@ -4156,18 +4190,22 @@ void func_002B9188(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B91D0);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B92F0);
-
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B9320);
-
 typedef struct EffectMapping {
-    u8 reserved[0x14];
+    u8 pad_00[0x0C];
+    u32 field0C;
+    u32 field10;
     u8 *table;
     u32 count;
 } EffectMapping;
 
 extern EffectMapping D_0038F898;
+
+INCLUDE_ASM(const s32, "game/code_0029A840", func_002B92F0);
+
+INCLUDE_ASM(const s32, "game/code_0029A840", func_002B9320);
+
 extern u8 D_0038F7D8[];
+extern u8 D_0038F718[];
 extern u8 D_0038F658[];
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BA058);

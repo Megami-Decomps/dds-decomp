@@ -1,0 +1,5 @@
+# addr	name	evidence|inferred	note
+0x00220568	btlSetBattleActionFlag	inferred	Writes byte 2 of the battle+0x718 state: 0 for actions 0x103-0x104, 1 for action 0x19C
+0x002209F0	btlStartAction19A	inferred	Sets unit flag 0x800 and calls func_001E9F30 when unit action is 0x19A-0x19B; family with func_00221390 (action 0x6b start)
+0x00220A38	btlTickAction19A	inferred	Calls func_001E98C0 and returns 1 when unit action is 0x19A-0x19B; family with func_002213E0 (action 0x6b tick)
+0x00221410	btlTickAction6B	inferred	Counter machine for action 0x6b: flag call when counter negative, flag call and increment below 15, effect calls and increment at/above 15

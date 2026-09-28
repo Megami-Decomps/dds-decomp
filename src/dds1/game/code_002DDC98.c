@@ -482,7 +482,7 @@ typedef struct DmaPacketHeader {
     u32 unused1C;
 } DmaPacketHeader;
 
-void func_002E1CC8(DmaPacketHeader *packet, u32 address, s32 size) {
+void consInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
     s32 qwc = (size + 15) >> 4;
     packet->quadwords = qwc;
     packet->address = address & 0x0FFFFFFF;
@@ -573,7 +573,7 @@ void func_002E3B80(s32 arg0, u8 arg1) {
     D_003F9B00[arg0].unk22 = arg1;
 }
 
-void func_002E3BA8(s32 index, s32 arg1, s32 arg2) {
+void devConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
     F9B00Entry *entry = &D_003F9B00[index];
     entry->unk20 = arg1 & 0xFF;
     D_003F9B00[index].unk22 = arg2 & 0xFF;

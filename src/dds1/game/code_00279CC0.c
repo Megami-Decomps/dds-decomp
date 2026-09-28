@@ -272,7 +272,20 @@ void func_0027BF10(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BF48);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BF90);
+void mnuDrawFourEntries(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 base8 = arg4 + 8;
+    s32 baseC = arg4 + 0xC;
+    u32 i = 0;
+    do {
+        s32 eq = arg4 == *(s32 *)(arg3 + 0x1C);
+        s32 off = (eq * 4 + i) * 8;
+        s32 value = *(s32 *)(base8 + off);
+        if (value != 0) {
+            func_002BF790(arg0, arg1, arg2, 0, value, *(s32 *)(baseC + off), arg5);
+        }
+        i++;
+    } while (i < 4);
+}
 
 s32 menuDispatchByFlag(s32 arg0, s32 arg1) {
     return func_002C1630((*(s32 *)(arg1 + 0x48) & 1) ? 0x89BDC940 : 0x89BDC980,
@@ -760,7 +773,20 @@ void func_0027EF18(u8 *menu, s32 x, s32 y, s32 style, s32 color) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027EFD0);
+void mnuReleaseSlotResources(s32 context) {
+    s32 *slot = (s32 *)(context + 0x154);
+    u32 i = 0;
+    s32 offset = 0;
+    for (; i < 5; i++) {
+        s32 node = *(s32 *)(*(s32 *)(context + 8) + offset + 0x10);
+        offset += 0x34;
+        if (node >= 0 && *slot != 0) {
+            destroyMenuResources(*slot);
+            *slot = 0;
+        }
+        slot = (s32 *)((u8 *)slot + 0x134);
+    }
+}
 
 void func_0027F050(s32 arg0, u32 arg1, u32 arg2, u32 arg3, s32 arg4
                                     ) {

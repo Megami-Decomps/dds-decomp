@@ -9,6 +9,7 @@ calls in its drafts of the remaining functions (pointer vs int arguments,
 void returns), which turns part of rw_bulk.py's near-miss drafts into
 matches. Re-export with `rw_bulk.py <v> --all --refresh` afterwards.
 """
+import os
 import argparse
 import json
 import re
@@ -16,7 +17,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RW = str(Path.home() / "ventris/target/release/romwright-cli")
+RW = os.environ.get("ROMWRIGHT", "romwright-cli")
 DEF = re.compile(r"^(?!static\b|extern\b)([A-Za-z_][\w \t\*]*?)\b(\w+)\s*\(([^;{)]*)\)\s*\{?\s*$", re.M)
 ROW = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);", re.M)
 SCALAR = {"s8": "char", "u8": "uchar", "s16": "short", "u16": "ushort", "s32": "int", "u32": "uint",

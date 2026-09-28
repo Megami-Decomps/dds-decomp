@@ -226,7 +226,7 @@ typedef struct EvtDrawWork {
     s32 unk22D0;
 } EvtDrawWork;
 
-s32 func_002364B0(s32 arg0, s32 arg1, s32 arg2, EvtDrawWork *arg3) {
+s32 evtDrawStringEntry(s32 arg0, s32 arg1, s32 arg2, EvtDrawWork *arg3) {
     if (arg3->unk22C4 == 0) {
         return 0;
     }
@@ -958,7 +958,7 @@ extern void func_002D2D00(s32 arg0);
 extern s32 func_002D3288(s32 arg0);
 extern void effSetCh72Id(s32 arg0);
 
-void func_00241CA0(s32 arg0, s32 arg1) {
+void evtRefreshTaskData(s32 arg0, s32 arg1) {
     s32 data = evtGetTaskData(arg0);
     s32 v = func_00241BF0(arg0, arg1);
     if (v != 0) {

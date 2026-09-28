@@ -276,7 +276,7 @@ s32 func_00246E00(void) {
     s32 *temp_v0 = (s32 *)func_00101A70();
 
     temp_v0[32] = 1;
-    func_00245190(-1, temp_v0);
+    campClampSceneCounter(-1, temp_v0);
     return 1;
 }
 

@@ -137,7 +137,19 @@ extern void *func_002D03F8(s32 size);
 extern void *func_002D0A48(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern s16 D_00337C60[];
+
+typedef struct {
+    s16 data[12];
+} FldRowData; /* 0x18 bytes */
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 count;
+    FldRowData body;
+} FldS16Row; /* 0x20 bytes */
+extern FldS16Row D_00337C60[];
 extern u32 *D_003307B0[];
 extern void func_0012B4A0(u32 value);
 
@@ -197,7 +209,25 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001278F8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001279A0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127AC0);
+void fldFreeDisplayObjects(void) {
+    if (D_003BAC3C != 0) {
+        u32 node = *(u32 *)(D_003BAC3C + 0x60);
+
+        if (node != 0) {
+            do {
+                func_002D0A10(*(u32 *)(node + 8));
+                node = *(u32 *)node;
+            } while (node != 0);
+        }
+        func_00288788(D_003BAC3C);
+        D_003BAC3C = 0;
+    }
+    D_003BAC84 = 0;
+    D_003BAC88 = 0;
+    D_0032E3B0[31] = 0;
+    D_0032E3B0[32] = 0;
+    D_0032E3B0[30] = 0;
+}
 
 u32 func_00127B30(void) {
     u32 sceneState = D_0032E3B0[0x1E];
@@ -351,7 +381,7 @@ void fldInitDisplayObjects(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00128FE0);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldGetDisplayTableRow);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129000);
 
@@ -1003,7 +1033,7 @@ void func_00133600(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133640);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001338F0);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldSetDisplayState);
 
 void func_00133910(void) {
     u32 *temp_v0 = D_00330738;
@@ -1159,7 +1189,7 @@ void func_00138C28(void) {
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138C30);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138D88);
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00138EB0);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldPushDisplayValue);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138ED0);
 
@@ -1255,7 +1285,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C138);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C2B8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C520);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldCheckEntryActive);
 
 s32 hasActiveFieldTasks(void) {
     s32 i;
@@ -1384,7 +1414,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F6B8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F848);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F9E8);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldFindTableEntry);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
 

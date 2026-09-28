@@ -32,7 +32,7 @@ extern void func_00141DC0(s32 param);
 
 extern void func_00141E88(s32 param);
 
-extern s32 func_00142160(s32 param);
+extern s32 fldLoadArchive(s32 param);
 
 extern void func_001421D0(s32 param0, s32 param1);
 
@@ -119,7 +119,7 @@ s32 func_0014F2C8(void) {
 }
 
 u8 func_0014F2F0(void) {
-    return func_00142160(func_0010D428(0)) != 0;
+    return fldLoadArchive(func_0010D428(0)) != 0;
 }
 
 s32 func_0014F318(void) {
