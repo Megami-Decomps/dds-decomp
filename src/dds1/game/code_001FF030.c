@@ -1121,7 +1121,33 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00204D08);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00204D98);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00204F08);
+void func_00204F08(void) {
+    u8 *unit = *(u8 **)((u8 *)func_001A17F0() + 0x228);
+
+    if (unit == 0) {
+        return;
+    }
+    do {
+        if ((*(u32 *)(unit + 0x110) & 1) != 0) {
+            s32 species = *(u16 *)(unit + 0x124);
+            if (species < 0x105) {
+                if (species >= 0x102) {
+                    if (*(u16 *)(unit + 0x120) & 0x2000) {
+                        *(s32 *)(unit + 0x90) = 0;
+                        *(f32 *)(unit + 0x94) = -100.0f;
+                        *(f32 *)(unit + 0x98) = 60.0f;
+                        *(s32 *)(unit + 0x9c) = 0;
+                        *(f32 *)(unit + 0xb4) = 180.0f;
+                        *(f32 *)(unit + 0xb0) = 220.0f;
+                    } else {
+                        func_001D4CA8(unit, 1, species);
+                    }
+                }
+            }
+        }
+        unit = *(u8 **)(unit + 0x344);
+    } while (unit != 0);
+}
 
 extern void func_001D5990(void *);
 
@@ -2519,7 +2545,20 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020FB00);
 
 extern char D_003BB8C0[];
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020FB20);
+s32 func_0020FB20(void) {
+    u8 *battle = (u8 *)func_001A17F0();
+
+    if (*(s16 *)(battle + 0x1c0) == -1) {
+        return 0;
+    }
+    if (*(s32 *)(battle + 0x1e8) == 0) {
+        return 0;
+    }
+    if ((*(s32 *)(battle + 0x1f4) & 0x800) == 0 || *(u8 *)(battle + 0x258) != 1) {
+        return 0;
+    }
+    return battleFindScriptResource(D_003BB8C0) != -1;
+}
 
 void func_0020FB98(void) {
     u8 *battle = (u8 *)func_001A17F0();
@@ -3446,7 +3485,20 @@ s32 battleGroupContainsId(s32 group, s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00216788);
+extern void *func_002CFEB8(s32);
+
+typedef struct BattleGroupIdEntry {
+    struct BattleGroupIdEntry *next;
+    s32 id;
+} BattleGroupIdEntry;
+
+void func_00216788(s32 group, s32 id) {
+    BattleGroupIdEntry *node = func_002CFEB8(sizeof(BattleGroupIdEntry));
+    BattleGroupIdEntry **head = (BattleGroupIdEntry **)&D_00367960[group];
+    node->id = id;
+    node->next = *head;
+    *head = node;
+}
 
 void func_002167E0(s32 arg0, s32 arg1) {
     s32 *temp_v0;
