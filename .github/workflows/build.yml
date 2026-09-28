@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -28,7 +28,7 @@ jobs:
 
       - name: Fetch retail executables
         if: steps.orig.outputs.available == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: Raikaru/dds-decomp-orig
           ssh-key: ${{ secrets.ORIG_DEPLOY_KEY }}
@@ -66,14 +66,14 @@ jobs:
       # decomp.dev reads one artifact per version, named <version>_report.
       - name: Upload dds1 report
         if: steps.orig.outputs.available == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dds1_report
           path: build/dds1/report.json
 
       - name: Upload dds2 report
         if: steps.orig.outputs.available == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dds2_report
           path: build/dds2/report.json
