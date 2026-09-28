@@ -1,28 +1,18 @@
 #include "common.h"
 
-extern u8 D_003BD39C;
 extern void (*D_003BD2D4)(void);
-extern void func_002CFAD8(s32);
-extern void func_002E3970(void);
-extern void func_002E39C8(void);
-extern void func_002E70B0(void);
-
-extern s32 CancelWakeupThread(u64);
-
-extern u64 GetThreadId(void);
 
 extern u64 func_002CF530(u64);
 
 extern u32 D_003BD2C8;
 
 extern u32 func_002CD2A8(u16);
+
 extern u32 func_002CE6B8(u16);
 
 extern u32 func_002CD730(u32, u16);
 
 extern s32 D_003BAA00;
-
-extern u32 D_003BD2CC;
 
 /* Operand block used by the script VM helpers near func_002CD730 (layout inferred from field accesses). */
 typedef struct ScrVmOperand {
@@ -557,90 +547,9 @@ void func_002CF4E0(u64 arg0, u64 arg1, u64 arg2) {
     func_002CF468(arg0, temp_v0, arg1, arg2);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF530);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF570);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF5C0);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF618);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF670);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", sdfAddHandler);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF7B8);
-
-void drainPendingHandlers(void) {
-    u32 current;
-    while ((current = D_003BD2CC) != 0) {
-        func_002CF7B8(current);
-    }
-}
-
-void func_002CF8C8(u32 arg0, u32 arg1, u32 arg2) {
-    iWakeupThread(arg2);
-}
-
-void sleepWithAlarm(u32 delay) {
-    u64 thread = GetThreadId();
-    CancelWakeupThread(thread);
-    SetAlarm(delay & 0xFFFF, func_002CF8C8, thread);
-    SleepThread();
-}
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF930);
-
-u32 func_002CF940(u32 base) {
-    u32 now;
-
-    now = *(volatile u32 *)0x10000000;
-    return (now - base) & 0xFFFF;
-}
-
-void func_002CF958(void) {
-    for (;;) {
-        func_002CFAD8(1);
-        func_002E3970();
-        if (!D_003BD39C) {
-            func_002E39C8();
-        }
-        func_002E70B0();
-        if (D_003BD2D4 != NULL) {
-            D_003BD2D4();
-        }
-    }
-}
-
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF9A8);
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CFA68);
-
-void func_002CFAD8(s32 arg0) {
-    u64 temp_v0;
-    s32 temp_v1;
-
-    temp_v0 = GetThreadId();
-    temp_v1 = CancelWakeupThread(temp_v0);
-    arg0 = arg0 - temp_v1;
-    do {
-        arg0 = arg0 - 1;
-        SleepThread();
-    } while (0 < arg0);
-}
-
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CFB18);
-
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2B8);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C0);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C8);
-
-INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2CC);
-
-INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2D0);
-
-INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2D4);
 

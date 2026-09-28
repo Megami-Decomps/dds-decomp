@@ -27,3 +27,6 @@ game/code_002C2620  -fno-optimize-sibling-calls  # 8 jal+epilogue tail calls, no
 game/code_002C3868  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
 game/code_002E87A8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_002E9140  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
+game/code_0026E160  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_0026E160,func_0026E5A0 match only with it
+game/code_002CF530  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_002CF570,func_002CF5C0,func_002CF618 match only with it
+game/code_00259498  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_0025B7B0 match only with it
