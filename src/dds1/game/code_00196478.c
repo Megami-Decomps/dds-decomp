@@ -1,6 +1,9 @@
 #include "common.h"
 
 extern s32 func_002D3288(u32);
+extern s32 func_00102A40(void);
+extern void func_00102A18(void);
+extern void func_003003F0(const char *);
 extern u64 func_002EB028(const char *, u32 *, u64);
 
 extern u32 D_003BB190;
@@ -328,7 +331,18 @@ void *func_00198248(MemNode *queue) {
     return head + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198270);
+s32 func_00198270(void *payload, MemNode *queue) {
+    MemNode *node = (MemNode *)payload - 1;
+    if (payload == NULL) {
+        return 0;
+    }
+    if (node->unk4 != NULL) {
+        return 0;
+    }
+    node->unk4 = queue->unk4;
+    queue->unk4 = node;
+    return 1;
+}
 
 u32 func_001982A0(s32 arg0) {
     func_002D0918(*(u32 *)(arg0 - 4));
@@ -369,7 +383,30 @@ u32 func_00198428(void) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198460);
+void func_00198460(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
+    s8 index = 0;
+    TextPoolNode *previous = NULL;
+    TextPoolNode *node = nodes;
+    TextPoolNode *next;
+
+    do {
+        count--;
+        next = (TextPoolNode *)((u8 *)node + stride);
+        node->previous = previous;
+        node->index = index;
+        index++;
+        node->next = next;
+        previous = node;
+        node = next;
+    } while (count >= 2);
+    node->previous = previous;
+    node->index = index;
+    node->next = NULL;
+    pool->lastFree = node;
+    pool->firstFree = nodes;
+    pool->activeTail = NULL;
+    pool->activeHead = NULL;
+}
 
 TextPoolNode *acquireTextPoolNode(TextPool *pool) {
     TextPoolNode *node = pool->firstFree;
@@ -517,7 +554,12 @@ u32 func_001997E8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_001997F0);
+void func_001997F0(void) {
+    if (func_00102A40() != 5) {
+        func_00102A18();
+    }
+    func_003003F0("Camp process halted.\n");
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00199828);
 

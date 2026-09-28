@@ -13,7 +13,6 @@ extern u32 D_003BD630;
 extern u32 D_003BD61C;
 
 extern u64 func_002EB090(u32);
-
 extern u64 func_002D3288(u32);
 
 extern u64 func_002EB028(u64, u32 *, u64);
@@ -303,7 +302,24 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBC98);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBEB8);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBF88);
+typedef struct SoundIpuBuffer {
+    u8 pad00[0x18];
+    u8 active;
+    u8 pad19[3];
+    s32 size;
+    u32 buffers[2];
+} SoundIpuBuffer;
+
+void func_002EBF88(SoundIpuBuffer *stream) {
+    vu32 *ipuData = (vu32 *)0x1000B010;
+    vu32 *ipuSize = (vu32 *)0x1000B020;
+    vu32 *ipuControl = (vu32 *)0x1000B000;
+    u8 active = stream->active;
+    *ipuData = stream->buffers[active] & 0x0fffffff;
+    *ipuSize = stream->size / 16;
+    *ipuControl = 0x100;
+    stream->active = active ^ 1;
+}
 
 s32 sdfSoundSyncIpu(void) {
     vu32 *ipuCommand = (vu32 *)0x10002000;
