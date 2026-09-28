@@ -73,6 +73,22 @@ def i386_prefix() -> str:
              "or set DDS_I386_LIBDIR=<dir with ld-linux.so.2 and libc.so.6>")
 
 
+def unit_cflags(version: str) -> dict[str, str]:
+    """Per-unit cc1 flags from config/<v>/cflags.txt (`<dir>/<unit>  <flags>  # evidence`).
+
+    Some original files were built with different options; each entry records the
+    evidence that proves it."""
+    path = ROOT / "config" / version / "cflags.txt"
+    out = {}
+    if path.exists():
+        for line in path.read_text().splitlines():
+            line = line.split("#", 1)[0].strip()
+            if line:
+                unit, flags = line.split(None, 1)
+                out[unit] = flags
+    return out
+
+
 def run_splat(version: str, yaml: Path, force: bool) -> None:
     """Split when the config inputs changed since the last successful split."""
     inputs = [yaml, ROOT / "config" / version / "symbol_addrs.txt", ROOT / "config" / version / "reloc_addrs.txt"]
@@ -152,7 +168,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule(
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
-        f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $in -o $out.s && "
+        f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags $in -o $out.s && "
         f"{prefix}{EE_AS} {EE_AS_FLAGS} -o $out $out.s",
         description="cc $in",
         depfile="$out.d",
@@ -196,10 +212,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     n.build(str(out), "eeasm", str(asm), implicit=["tools/eeas_compat.py"])
                     eeasm.append(str(out))
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
-                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc"], variables={"cdefs": cdefs})
+                flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
+                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt"],
+                        variables={"cdefs": cdefs, "cflags": flags})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")
-                n.build(str(base), "cc", str(src), variables={"cdefs": f"{cdefs} -DSKIP_ASM"})
+                n.build(str(base), "cc", str(src), variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags})
                 # objdiff target: splat's full disassembly of this C unit, assembled as-is.
                 full = Path("asm") / version / src.relative_to(Path("src") / version).with_suffix(".s")
                 target = Path("build") / version / "target" / full.with_suffix(".o")

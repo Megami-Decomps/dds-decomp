@@ -16,7 +16,6 @@ extern u64 func_002EB028(u64, u32 *, u64);
 extern u32 D_003BD49C;
 
 extern u32 D_003BD498;
-extern f32 D_003BA694;
 extern s8 D_003BDA80;
 
 typedef struct FE250Entry {
@@ -182,9 +181,9 @@ void func_002E9140(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
 
     packet[0] = arg0;
     packet[1] = arg1;
-    packet[2] = (s32)(x * D_003BA694);
-    packet[3] = (s32)(y * D_003BA694);
-    packet[4] = (s32)(z * D_003BA694);
+    packet[2] = (s32)(x * 0.1f);
+    packet[3] = (s32)(y * 0.1f);
+    packet[4] = (s32)(z * 0.1f);
     func_002E8900(0x170, 0, packet, 0x20);
 }
 

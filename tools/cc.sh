@@ -29,6 +29,13 @@ run() {
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 cd "$root"
+# Per-unit flags of the original build (config/<v>/cflags.txt), as configure.py uses.
+case $in in
+    "$root"/src/*/*.c)
+        rel=${in#"$root"/src/*/}; rel=${rel%.c}
+        unit_flags=$(sed -n "s|^$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/cflags.txt" 2>/dev/null)
+        flags="$flags $unit_flags" ;;
+esac
 run "$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1" \
     -D__GNUC__=2 -D__GNUC_MINOR__=96 -D__GNUC_PATCHLEVEL__=0 \
     -Dmips -DMIPSEL -DR5900 -D_mips -D_MIPSEL -D_R5900 -D__ee__ \

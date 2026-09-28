@@ -1,0 +1,2 @@
+# Per-unit cc1 flags: <dir>/<unit>  <flags>  # evidence (default is -O2)
+game/code_001FC7D8  -fno-optimize-sibling-calls  # 16 void wrappers 0x1FEE30-0x1FF010 end in jal+epilogue where -O2 sibcalls; sibcalls resume at 0x1FF030; start is the proven TU boundary 0x1FC7D8 (find_tus)

@@ -18,7 +18,7 @@ function's asm file, and each C function brings what the compiler emits for it
   falls: before the first function whose rodata comes after it, or at the end.
 
 Both get per-symbol files in asm/<v>/nonmatchings/<unit>/ and an INCLUDE_RODATA
-line. Lines already present are left alone.
+line. Lines already present are replaced: the placement is recomputed on every run.
 """
 import re
 import sys
@@ -57,15 +57,33 @@ def place(version):
         text = c.read_text()
         # Rodata a C function no longer names is compiled by that function itself
         # (a string literal): nothing to include.
+        # The retail references come from the unit's full disassembly, which
+        # also covers rodata several functions share (splat leaves that
+        # standalone instead of in one function's file).
+        full = ROOT / "asm" / version / f"{unit}.s"
+        retail_refs = {}
+        if full.exists():
+            for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", full.read_text(), re.M | re.S):
+                retail_refs[f.group(1)] = set(re.findall(r"%lo\((\w+)\)", f.group(2)))
         compiled = set()
         for m in DEF.finditer(text):
             code = function_text(text, m.start())
-            for block in SYMBOL_BLOCK.finditer(rodata_part(matchings / f"{m.group(1)}.s")):
-                if not re.search(rf"\b{block.group(1)}\b", code):
-                    compiled.add(block.group(1))
+            for sym in retail_refs.get(m.group(1), ()):
+                if sym.startswith(("D_", "jtbl_")) and not re.search(rf"\b{sym}\b", code):
+                    compiled.add(sym)
+        # ... unless an asm function still needs the retail copy (check_unit SHARED).
+        for f in INCLUDE_ASM.findall(text):
+            compiled -= retail_refs.get(f, set())
+        # The compiler emits each such literal with the first function using it.
+        compiled_at = {}
+        for m in DEF.finditer(text):
+            for sym in retail_refs.get(m.group(1), ()):
+                if sym in compiled:
+                    compiled_at.setdefault(sym, m.start())
         owned -= compiled
-        text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?',
-                      lambda m: m.group(0) if m.group(1) in owned else "", text, flags=re.M)
+        # Placed from scratch every time: once a function compiles its own
+        # literal, the lines around it must move with it.
+        text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
         have = set(INCLUDE.findall(text))
         anchors = []   # (address, position in text or None, symbol, needs a line)
         for m in INCLUDE_ASM.finditer(text):
@@ -83,6 +101,9 @@ def place(version):
                 if not out.exists():
                     out.write_text(".section .rodata\n\n" + block.group(0))
                 anchors.append((addr, m.start(), sym, sym not in have))
+        for sym, pos in compiled_at.items():
+            if not any(a[2] == sym for a in anchors):
+                anchors.append((int(sym[-8:], 16), pos, None, False))
         for s in [s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()]:
             m = LABEL.search(s.read_text())
             if m and m.group(1) in owned and not any(sym == m.group(1) for _, _, sym, _ in anchors):
