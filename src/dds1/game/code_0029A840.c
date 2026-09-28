@@ -429,7 +429,25 @@ u32 *effDuplicateEffectHeader(u32 *source) {
     return effect;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AA90);
+void func_0029AA90(u32 *work, u8 *source) {
+    void *model;
+
+    if (work[1] != 0) {
+        func_0029A938(work[1]);
+    }
+    model = func_00217680(func_002183D0(*(u32 *)(source + 4)), func_002183E0(*(u32 *)(source + 4)));
+    func_0029A840(model);
+    __asm__ volatile (".set noreorder\nvaddw.xyz vf10, vf0, vf0w\nvmulx.w vf10, vf0, vf0x\n.set reorder");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder"
+        : : "f"(*(f32 *)work) : "$2", "memory");
+    func_00218028(model);
+    work[1] = (u32)model;
+}
 
 void func_0029AB28(s32 arg0) {
     func_002DB538(*(void **)(*(s32 *)(arg0 + 4) + 0x1c), 0.0f);
@@ -4156,7 +4174,67 @@ void func_002B2410(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B2440);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B26B0);
+typedef struct EffectVectorRequest {
+    u8 kind;
+    u8 count;
+    u8 size;
+    u8 pad_03;
+    u32 unk04;
+} EffectVectorRequest;
+
+extern u32 func_00161858(void);
+extern u32 func_00161860(void);
+extern u32 func_00161868(void);
+extern u32 func_00161870(void);
+extern void func_00161AA0(u32, void *, void *);
+
+void func_002B26B0(u32 which) {
+    EffectVectorRequest request;
+    u128 result;
+    u32 handle = func_00161858();
+
+    request.kind = 0xB;
+    request.count = 1;
+    request.size = 8;
+    request.unk04 = 0;
+    switch (which) {
+    case 0:
+        break;
+    case 1:
+        handle = func_00161858();
+        request.kind = 0;
+        break;
+    case 2:
+        handle = func_00161860();
+        request.kind = 0;
+        break;
+    case 3:
+        request.kind = 1;
+        break;
+    case 4:
+        request.kind = 2;
+        break;
+    case 5:
+        request.kind = 3;
+        break;
+    case 6:
+        handle = func_00161868();
+        request.kind = 6;
+        break;
+    case 7:
+        handle = func_00161870();
+        request.kind = 7;
+        break;
+    }
+    if (request.kind != 0xB) {
+        u128 *vec = &result;
+
+        func_00161AA0(handle, &request, vec);
+        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(vec) : "memory");
+    } else {
+        __asm__ volatile (".set noreorder\nvmove.xyzw vf10, vf0\n.set reorder");
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B27B8);
 
@@ -4248,7 +4326,38 @@ void releaseEffectTargetSlots(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3698);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3AC0);
+extern s32 func_002B27B8(void *, u32);
+extern s32 mdlGetNodeRefHalf(u32, s32);
+extern void func_001D5DF8(void *, s32, u32, f32);
+extern void func_001F4078(void *, s32);
+
+void func_002B3AC0(u8 *work) {
+    u8 *objects[16];
+    u16 *spec;
+    u32 count;
+    u32 i;
+
+    if (*(s32 *)(work + 0x28) > 0) {
+        return;
+    }
+    spec = *(u16 **)(work + 0x38);
+    count = func_002B27B8(objects, *(u8 *)(spec + 2));
+    for (i = 0; i < count; i++) {
+        u32 flags = *(u32 *)(objects[i] + 0x110);
+        if (flags & 2) {
+            if ((flags & 0x20) == 0) {
+                if ((*(u16 *)(objects[i] + 0x310) & 0x10) == 0) {
+                    if (mdlGetNodeRefHalf(*(u32 *)(*(u8 **)(objects[i] + 0x320) + 0x8C), 0) > spec[0]) {
+                        func_001D5DF8(objects[i], spec[0], spec[1] | 0x100, 1.0f);
+                        if (spec[3] == 0) {
+                            func_001F4078(objects[i], spec[0]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 extern void func_001F3460(u32);
 
@@ -4363,20 +4472,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4270);
 
 
 extern EffectResourceSizeEntry D_0037EEF8[];
-u8 *allocateEffectResourcePayload(u16 kind, void *source) {
-    u32 headerSize = 0x40;
-    u32 size = D_0037EEF8[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
-    *(u8 **)(effect + 0x38) = effect + headerSize;
-    *(u32 *)(effect + 0x24) = 0x80808080;
-    *(float *)(effect + 0x20) = 1.0f;
-    *(u32 *)(effect + 0x2C) = kind;
-    *(u32 *)(effect + 0x28) = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
-    memcpy(*(void **)(effect + 0x38), source, size);
-    return effect;
-}
+INCLUDE_ASM(const s32, "game/code_0029A840", allocateEffectResourcePayload);
 
 extern FnTbl28 D_0037EEE0[];
 
@@ -5171,7 +5267,35 @@ u32 func_002B7998(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B7A28);
+typedef struct EffectBlock128 {
+    u32 word[32];
+} EffectBlock128;
+
+extern EffectBlock128 D_003DF920;
+extern s32 func_002959E8(void *);
+
+u32 func_002B7A28(void) {
+    u8 record[0x110];
+    u32 state;
+    u32 result = 0x400001;
+
+    func_002B8EA8(D_003B39E0, 0x10, record);
+    state = *(u32 *)(record + 0x100);
+    if (state == 2) {
+        result = 0x400000;
+    } else if (state == 1) {
+        if (D_003BD060 != 0) {
+            func_002944D8(D_003BD060);
+        }
+        strcpy((char *)D_003DF8D0, (char *)record + 0xC8);
+        D_003BD060 = func_002959E8(record);
+        D_003DF920 = *(EffectBlock128 *)D_003BD060;
+        D_003BD058 = 0;
+        D_0038F2FC[0] = 0;
+        result = 0x400002;
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3A90);
 
@@ -5399,7 +5523,14 @@ typedef struct EffectMapping {
 
 extern EffectMapping D_0038F898;
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B92F0);
+void func_002B92F0(void) {
+    D_003BD11C = 0;
+    D_003BD128 = 0;
+    D_003BD120 = 0;
+    D_003BD124 = 1;
+    D_0038F898.field0C = 1;
+    D_0038F898.field10 |= 0x10;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B9320);
 
@@ -6034,7 +6165,16 @@ typedef struct EffectRecordGroup {
 extern EffectRecordGroup D_0038FD88[];
 extern u32 func_002BCED8(u32 *, void *, void *, void *);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", sumEffectRecordStatuses);
+s32 sumEffectRecordStatuses(s32 arg0) {
+    EffectRecordGroup *group = &D_0038FD88[*(u32 *)(arg0 + 0x14)];
+    s32 total = 0;
+    u32 i;
+
+    for (i = 0; i < group->count; i++) {
+        total += func_002BCED8((u32 *)(group->records + i * 0x18 + 4), NULL, NULL, NULL);
+    }
+    return total;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BD028);
 
@@ -6141,7 +6281,7 @@ void func_002BD640(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BD6A8);
 
-extern void func_002BD6A8(u32 *, u32, s32, s32);
+extern u32 func_002BD6A8(u32 *, u32, s32, s32);
 
 void func_002BD7A0(u32 *handle) {
     if (*handle != 0) {

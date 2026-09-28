@@ -500,9 +500,61 @@ void func_00177310(EffPCPWorkF18 *work, f32 val) {
     work->unk18 = val;
 }
 
+extern f32 func_002E8398(void *state);
+extern u32 effMiscRand(void *state);
+extern u8 D_0034DF38[];
+extern void effParamWorkCallback2(u32 handle, void *mtx);
+extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
+
+typedef struct EffPCPTwinWork {
+    u32 unk00;
+    u32 unk04;
+    u32 unk08;
+    u8 pad0C[4];
+    u32 color;          /* 0x10 */
+    u32 unk14;
+    f32 scale;          /* 0x18 */
+    u32 pair[8][2];     /* 0x1C parameter handle pairs (source uses [0] and [1]) */
+    u32 shared[8];      /* 0x5C */
+    u32 state[8];       /* 0x7C */
+    u32 counter[8];     /* 0x9C */
+} EffPCPTwinWork; /* 0xBC */
+
+extern void func_00177318(void *, s32);
+
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177318);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177418);
+EffPCPTwinWork *func_00177418(void *src) {
+    EffPCPTwinWork *work = func_002CFEB8(0xBC);
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        if (i == 0) {
+            work->pair[0][0] = effParamCreateFromTable(src, 0);
+            work->pair[0][1] = effParamCreateFromTable(src, 2);
+        } else if (i == 1) {
+            work->pair[1][0] = effParamCreateFromTable(src, 1);
+            work->pair[1][1] = effParamWorkDuplicate(work->pair[0][1]);
+        } else {
+            work->pair[i][0] = effParamWorkDuplicate(work->pair[i & 1][0]);
+            work->pair[i][1] = effParamWorkDuplicate(work->pair[i & 1][1]);
+        }
+        func_00177318(work, i);
+    }
+    work->shared[0] = effParamCreateFromTable(src, 3);
+    work->state[0] = 0;
+    for (i = 1; i < 8; i++) {
+        work->shared[i] = effParamWorkDuplicate(work->shared[0]);
+        work->state[i] = 0;
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    work->unk14 = 0;
+    return work;
+}
 
 void func_00177590(EffPCPWork *work) {
     s32 i;
@@ -521,7 +573,26 @@ void func_00177590(EffPCPWork *work) {
     func_002CFF98(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177608);
+
+EffPCPTwinWork *func_00177608(EffPCPTwinWork *src) {
+    EffPCPTwinWork *work = func_002CFEB8(0xBC);
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        work->pair[i][0] = effParamWorkDuplicate(src->pair[i & 1][0]);
+        work->pair[i][1] = effParamWorkDuplicate(src->pair[i & 1][1]);
+        work->shared[i] = effParamWorkDuplicate(src->shared[0]);
+        work->state[i] = 0;
+        func_00177318(work, i);
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    work->unk14 = 0;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177700);
 
@@ -652,13 +723,72 @@ void func_00177CE8(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
+typedef struct EffPCPCrossWork {
+    u32 unk00;
+    u32 unk04;
+    u32 unk08;
+    u8 pad0C[4];
+    u32 color;        /* 0x10 */
+    f32 scale;        /* 0x14 */
+    u32 base;         /* 0x18 handle of the anchor model */
+    u32 handle[4][3]; /* 0x1C */
+    u8 pad4C[0x60];
+    u32 state[4][3];  /* 0xAC */
+} EffPCPCrossWork; /* 0xDC */
+
+extern void func_00177CF0(void *, s32, s32);
+extern void func_002DD708(f32 angle);
+
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177CF0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177E38);
+EffPCPCrossWork *func_00177E38(void *src) {
+    EffPCPCrossWork *work = func_002CFEB8(0xDC);
+    s32 i;
+    s32 j;
+
+    work->base = effParamCreateFromTable(src, 0);
+    mdlAddEntryPlain(func_00162970(work->base), 0, 0);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            if (j == 0) {
+                work->handle[i][j] = effParamCreateFromTable(src, i + 1);
+            } else {
+                work->handle[i][j] = effParamWorkDuplicate(work->handle[i][0]);
+            }
+            func_00177CF0(work, i, j);
+        }
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177F90);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00178028);
+
+EffPCPCrossWork *func_00178028(EffPCPCrossWork *src) {
+    EffPCPCrossWork *work = func_002CFEB8(0xDC);
+    s32 i;
+    s32 j;
+
+    work->base = effParamWorkDuplicate(src->base);
+    mdlAddEntryPlain(func_00162970(work->base), 0, 0);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            work->handle[i][j] = effParamWorkDuplicate(src->handle[i][0]);
+            func_00177CF0(work, i, j);
+        }
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00178130);
 
@@ -2699,7 +2829,49 @@ void resetChildEffect(EffPCPSubEffectWork *work) {
     work->state = 0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001806F8);
+typedef struct EffPCPBlock50 {
+    u32 word[20];
+} EffPCPBlock50;
+
+extern u8 *func_001801F8(u32);
+
+u8 *func_001806F8(src)
+    u8 *src;
+{
+    u8 *work = func_002CFEB8(0x60);
+    u32 kind;
+    u8 *node;
+    u32 *entry;
+    s32 groups;
+    u32 i;
+
+    *(EffPCPBlock50 *)work = *(EffPCPBlock50 *)src;
+    *(u32 *)(work + 0x54) = 0x80808080;
+    *(u32 *)(work + 0x50) = 0;
+    kind = *(u32 *)(src + 0x30);
+    if (kind < 3) {
+        *(u32 *)(src + 0x30) = 3;
+        kind = 3;
+    }
+    node = func_001801F8(kind);
+    i = 0;
+    *(u8 **)(work + 0x5C) = node;
+    *(u32 *)(work + 0x58) = *(u32 *)(node + 0x9C);
+    groups = *(s32 *)(node + 0x9C) >> 2;
+    entry = *(u32 **)(node + 0xA4);
+    for (i = 0; i < groups; i++) {
+        u32 second;
+
+        entry[0] = *(u32 *)(src + 0x3C);
+        second = *(u32 *)(src + 0x44);
+        entry[1] = entry[2] = second;
+        entry[3] = *(u32 *)(src + 0x4C);
+        entry += 4;
+    }
+    resetChildEffect((EffPCPSubEffectWork *)work);
+    *(u32 *)(*(u8 **)(work + 0x5C) + 0x94) = *(u32 *)(src + 0x34);
+    return work;
+}
 
 void func_00180890(void *args) {
     void *param0;
@@ -2802,7 +2974,46 @@ void prepareEffectAngles(EffPCPAngleWork *work) {
     work->child = 0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180E78);
+typedef struct EffPCPBlock5C {
+    u32 word[23];
+} EffPCPBlock5C;
+
+u8 *func_00180E78(src)
+    u8 *src;
+{
+    u8 *work = func_002CFEB8(0x80);
+    u32 kind;
+    u8 *node;
+    u32 *entry;
+    s32 groups;
+    u32 i;
+
+    *(EffPCPBlock5C *)work = *(EffPCPBlock5C *)src;
+    *(u32 *)(work + 0x60) = 0x80808080;
+    *(u32 *)(work + 0x5C) = 0;
+    kind = *(u32 *)(src + 0x3C);
+    if (kind < 3) {
+        *(u32 *)(src + 0x3C) = 3;
+        kind = 3;
+    }
+    node = func_001801F8(kind);
+    i = 0;
+    *(u8 **)(work + 0x7C) = node;
+    groups = *(s32 *)(node + 0x9C) >> 2;
+    entry = *(u32 **)(node + 0xA4);
+    for (i = 0; i < groups; i++) {
+        u32 second;
+
+        entry[0] = *(u32 *)(src + 0x48);
+        second = *(u32 *)(src + 0x50);
+        entry[1] = entry[2] = second;
+        entry[3] = *(u32 *)(src + 0x58);
+        entry += 4;
+    }
+    prepareEffectAngles(work);
+    *(u32 *)(*(u8 **)(work + 0x7C) + 0x94) = *(u32 *)(src + 0x40);
+    return work;
+}
 
 void func_00181020(void *args) {
     void *param0;
@@ -2877,9 +3088,50 @@ void func_00181C78(EffPCPWork *work, u32 val) {
     work->unk170 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181C80);
+typedef struct EffPCPSprayWork {
+    u8 pad00[0x10];
+    f32 scale;        /* 0x10 */
+    u32 color;        /* 0x14 */
+    u32 count;        /* 0x18 particle count */
+    u32 unk1C;        /* 0x1C */
+    u32 id[10];       /* 0x20 */
+    f32 angle[10];    /* 0x48 random start angles */
+    u32 handle[10];   /* 0x70 handle 0 is the parameter block */
+} EffPCPSprayWork; /* 0x98 */
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181D80);
+EffPCPSprayWork *func_00181C80(void *src) {
+    EffPCPSprayWork *work = func_002CFEB8(0x98);
+    u32 i;
+
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->count = 10;
+    work->unk1C = 0;
+    for (i = 0; i < work->count; i++) {
+        work->handle[i] = 0;
+        work->id[i] = i;
+        work->angle[i] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+    }
+    work->handle[0] = effParamCreateFromTable(src, 0);
+    return work;
+}
+
+EffPCPSprayWork *func_00181D80(EffPCPSprayWork *src) {
+    EffPCPSprayWork *work = func_002CFEB8(0x98);
+    u32 i;
+
+    work->unk1C = 0;
+    work->scale = src->scale;
+    work->count = src->count;
+    work->color = 0x80808080;
+    for (i = 0; i < work->count; i++) {
+        work->handle[i] = 0;
+        work->id[i] = i;
+        work->angle[i] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+    }
+    work->handle[0] = effParamWorkDuplicate(src->handle[0]);
+    return work;
+}
 
 void destroyIndexedEffectResources(EffPCPWork *work) {
     u32 i = 0;
