@@ -24,18 +24,18 @@ u32 func_0026B930(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026B938);
 
-void func_0026B9D0(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_0026B9D0(s32 request) {
+    s32 state = func_00101958();
 
-    func_002686F0(temp_v0);
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_002686F0(state);
+    func_002C4038(state + 8, state + 0x54, 1, request);
 }
 
-void func_0026BA20(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_0026BA20(s32 request) {
+    s32 state = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(state + 8, state + 0x54, 2, request);
 }
 
 u32 func_0026BA68(void) {
@@ -76,11 +76,11 @@ s64 func_0026BAF8(u64 request) {
     return result;
 }
 
-void func_0026BB78(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_0026BB78(s32 request) {
+    s32 state = func_00101958();
 
-    func_002686F0(temp_v0);
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_002686F0(state);
+    func_002C4038(state + 8, state + 0x54, 1, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BBC8);

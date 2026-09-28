@@ -8,8 +8,8 @@ INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AE48);
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AEB8);
 
-void func_0031AF58(s32 arg0) {
-    *(u32 *)(arg0 + 0x1d4) = 0;
+void func_0031AF58(s32 object) {
+    *(u32 *)(object + 0x1d4) = 0;
 }
 
 void func_0031AF60(void) {

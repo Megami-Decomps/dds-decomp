@@ -11,9 +11,9 @@ extern s32 D_00435DEC;
 extern s32 D_00435DD0;
 
 typedef struct Entry1A4 {
-    u16 unk0; /* 0x0 */
+    u16 flags; /* 0x0 */
     u8 pad2[2]; /* 0x2 */
-    u16 unk4; /* 0x4 */
+    u16 rosterIndex; /* 0x4 */
     u16 unk6; /* 0x6 */
     u8 pad8[6]; /* 0x8 */
     u16 unkE; /* 0xE */
@@ -225,10 +225,10 @@ void eventUpdateFlaggedEntries(void) {
     s32 remaining = 4;
     do {
         Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
-        if (entry->unk0 & 1) {
+        if (entry->flags & 1) {
             s32 index = 0;
             do {
-                if (entry->unk4 == index) {
+                if (entry->rosterIndex == index) {
                     func_0011C978(entry);
                 }
                 index++;
@@ -332,7 +332,7 @@ void func_0011D3B8(s32 base, s32 offset, s32 amount) {
 }
 
 void func_0011D3E8(Entry1A4 *entry) {
-    s32 value = D_00386288[entry->unk4];
+    s32 value = D_00386288[entry->rosterIndex];
     func_002C5588(entry, value);
     if (value != 0) {
         *(u8 *)(value + D_00435DD0 + 0x1340) = 1;
@@ -344,10 +344,10 @@ void func_0011D438(void) {
     s32 remaining = 4;
     do {
         Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
-        if (entry->unk0 & 1) {
+        if (entry->flags & 1) {
             s32 index = 0;
             do {
-                if (entry->unk4 == index) {
+                if (entry->rosterIndex == index) {
                     func_0011D3E8(entry);
                 }
                 index++;

@@ -79,9 +79,9 @@ extern void func_002971C0(s32, u32);
 extern void func_002958B0();
 
 s32 func_00261E10(void) {
-    s32 temp_v0 = kwlnFadeIsActive();
+    s32 fadeActive = kwlnFadeIsActive();
 
-    if (temp_v0 != 0) {
+    if (fadeActive != 0) {
         return 0;
     }
     return func_0026C768() == 0;

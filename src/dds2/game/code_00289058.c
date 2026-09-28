@@ -13,25 +13,44 @@ extern void func_002A2408(void);
 extern void func_002A2550(void);
 extern void mdlFlagSet(u16);
 
-u32 func_00289058(s32 arg0) {
-    return *(u32 *)(*(s32 *)(*(s32 *)(arg0 + 4) + 0x1c) + 0x70);
+typedef struct MenuNode {
+    u8 pad0[0x58];
+    struct MenuNode *next;
+    u8 pad5C[0x14];
+    u32 value;
+} MenuNode;
+
+typedef struct MenuNodeList {
+    u8 pad0[0x10];
+    MenuNode *head;
+    u8 pad14[8];
+    MenuNode *selected;
+} MenuNodeList;
+
+typedef struct MenuContainer {
+    u8 pad0[4];
+    MenuNodeList *list;
+} MenuContainer;
+
+u32 func_00289058(MenuContainer *object) {
+    return object->list->selected->value;
 }
 
-s32 func_00289068(s32 object, s32 index) {
-    s32 node = *(s32 *)(*(s32 *)(object + 4) + 0x10);
+s32 func_00289068(MenuContainer *object, s32 index) {
+    MenuNode *node = object->list->head;
     s32 current = 0;
     while (node != 0) {
         if (current == index) {
-            return *(s32 *)(node + 0x70);
+            return node->value;
         }
-        node = *(s32 *)(node + 0x58);
+        node = node->next;
         current++;
     }
     return 0;
 }
 
-u32 func_002890A8(s32 arg0) {
-    return **(u32 **)(*(s32 *)(arg0 + 4) + 0x1c);
+u32 func_002890A8(MenuContainer *object) {
+    return *(u32 *)object->list->selected;
 }
 
 u32 func_002890B8(s32 arg0) {

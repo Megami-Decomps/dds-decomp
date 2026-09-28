@@ -1294,20 +1294,26 @@ void func_002D73F0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D73F8);
 
-void resetFileSlotStates(s32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
-    u32 temp_v2;
+typedef struct FileSlot {
+    u8 pad0[0x10];
+    u32 state;
+    u8 pad14[0xC];
+} FileSlot;
 
-    temp_v0 = *(u32 *)(arg0 + 8);
-    temp_v2 = 0;
-    temp_v1 = *(s32 *)(arg0 + 0x18);
-    if (temp_v0 != 0) {
+void resetFileSlotStates(s32 context) {
+    u32 count;
+    FileSlot *slot;
+    u32 index;
+
+    count = *(u32 *)(context + 8);
+    index = 0;
+    slot = *(FileSlot **)(context + 0x18);
+    if (count != 0) {
         do {
-            temp_v2 = temp_v2 + 1;
-            *(u32 *)(temp_v1 + 0x10) = 0xffffffff;
-            temp_v1 = temp_v1 + 0x20;
-        } while (temp_v2 < temp_v0);
+            index = index + 1;
+            slot->state = 0xffffffff;
+            slot++;
+        } while (index < count);
     }
 }
 

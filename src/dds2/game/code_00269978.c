@@ -12,14 +12,21 @@ extern void func_0026C900(void);
 
 extern void func_002686F0(s32);
 
+typedef struct EventDispatchState {
+    u8 pad0[0xCC];
+    u32 callback;
+    u32 previousCallback;
+} EventDispatchState;
+
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269978);
 
-void func_00269AF8(u32 arg0, s32 arg1) {
-    u32 temp_v0;
+void func_00269AF8(u32 callback, s32 address) {
+    EventDispatchState *state = (EventDispatchState *)address;
+    u32 previous;
 
-    temp_v0 = *(u32 *)(arg1 + 0xcc);
-    *(u32 *)(arg1 + 0xcc) = arg0;
-    *(u32 *)(arg1 + 0xd0) = temp_v0;
+    previous = state->callback;
+    state->callback = callback;
+    state->previousCallback = previous;
 }
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269B08);

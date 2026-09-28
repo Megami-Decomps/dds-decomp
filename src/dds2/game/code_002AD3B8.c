@@ -26,11 +26,11 @@ extern void func_002C2AA8(s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD3B8);
 
-void func_002AD4C0(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_002AD4C0(s32 request) {
+    s32 context = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(context + 8, context + 0x54, 2, request);
 }
 
 u32 func_002AD508(void) {

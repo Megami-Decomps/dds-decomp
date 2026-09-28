@@ -84,14 +84,14 @@ INCLUDE_ASM(const s32, "game/code_002651C0", func_00265408);
 
 s32 func_00265500(void) {
     s32 context = func_00101958();
-    s32 want = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18) + 0x1c) + 0x60);
+    s32 selectedId = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18) + 0x1c) + 0x60);
     s32 node;
     s32 record;
     s32 slot;
     func_00260380(1, context);
     func_00260020(context);
     for (node = *(s32 *)(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18) + 0x10);
-         node != 0 && *(s32 *)(node + 0x60) != want; node = *(s32 *)(node + 0x58)) {
+         node != 0 && *(s32 *)(node + 0x60) != selectedId; node = *(s32 *)(node + 0x58)) {
         func_002B8CF0(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18));
     }
     record = *(s32 *)(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18) + 0x30);

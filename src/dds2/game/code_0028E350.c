@@ -1,5 +1,18 @@
 #include "common.h"
 
+typedef struct MenuSearchState {
+    u8 pad0[5];
+    s8 selectedIndex;
+    s16 targetId;
+} MenuSearchState;
+
+typedef struct MenuSearchNode {
+    u8 pad0[0x58];
+    struct MenuSearchNode *next;
+    u8 pad5C[0x14];
+    u8 *value;
+} MenuSearchNode;
+
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028E350);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028E568);
@@ -36,15 +49,15 @@ INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F380);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F570);
 
-s32 func_0028F770(s32 object, s32 state) {
-    s32 current = *(s32 *)(*(s32 *)(object + 4) + 0x10);
+s32 func_0028F770(s32 object, MenuSearchState *state) {
+    MenuSearchNode *current = *(MenuSearchNode **)(*(s32 *)(object + 4) + 0x10);
     s32 index = 0;
     while (current != 0) {
-        if (*(u16 *)(*(s32 *)(current + 0x70) + 4) == *(s16 *)(state + 6)) {
-            *(s8 *)(state + 5) = index;
+        if (*(u16 *)(current->value + 4) == state->targetId) {
+            state->selectedIndex = index;
             return 0;
         }
-        current = *(s32 *)(current + 0x58);
+        current = current->next;
         index++;
     }
     return 0;

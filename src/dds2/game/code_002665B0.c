@@ -49,6 +49,16 @@ extern s32 func_002BC460(u16, u16);
 extern void func_002C2128(s32, s32, s32, s32, s32, s32);
 extern void destroyPackedEffectBatch(s32);
 
+typedef struct MenuResourceGroup {
+    u8 pad0[0x64];
+    u32 primary;
+    u32 secondary;
+    u32 tertiary;
+    u32 quaternary;
+    u8 pad74[0x380];
+    s32 reducedMode;
+} MenuResourceGroup;
+
 void func_002665B0(s32 arg0) {
     destroyPackedEffectBatch(*(u32 *)(arg0 + 0x3c));
 }
@@ -64,28 +74,30 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002665E8);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
 
-void func_002668C0(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x3f4) == 0) {
-        func_00304EE0(*(u32 *)(arg0 + 100));
-        func_00304EE0(*(u32 *)(arg0 + 0x68));
-        func_00304EE0(*(u32 *)(arg0 + 0x6c));
-        func_00304EE0(*(u32 *)(arg0 + 0x70));
+void func_002668C0(s32 address) {
+    MenuResourceGroup *group = (MenuResourceGroup *)address;
+    if (group->reducedMode == 0) {
+        func_00304EE0(group->primary);
+        func_00304EE0(group->secondary);
+        func_00304EE0(group->tertiary);
+        func_00304EE0(group->quaternary);
         return;
     }
-    func_00304EE0(*(u32 *)(arg0 + 100));
-    func_00304EE0(*(u32 *)(arg0 + 0x68));
+    func_00304EE0(group->primary);
+    func_00304EE0(group->secondary);
 }
 
-void func_00266928(s32 arg0, u32 arg1) {
-    if (*(s32 *)(arg0 + 0x3f4) == 0) {
-        func_00304FB0(*(u32 *)(arg0 + 100));
-        func_00304FB0(*(u32 *)(arg0 + 0x68), arg1);
-        func_00304FB0(*(u32 *)(arg0 + 0x6c), arg1);
-        func_00304FB0(*(u32 *)(arg0 + 0x70), arg1);
+void func_00266928(s32 address, u32 value) {
+    MenuResourceGroup *group = (MenuResourceGroup *)address;
+    if (group->reducedMode == 0) {
+        func_00304FB0(group->primary);
+        func_00304FB0(group->secondary, value);
+        func_00304FB0(group->tertiary, value);
+        func_00304FB0(group->quaternary, value);
         return;
     }
-    func_00304FB0(*(u32 *)(arg0 + 100));
-    func_00304FB0(*(u32 *)(arg0 + 0x68), arg1);
+    func_00304FB0(group->primary);
+    func_00304FB0(group->secondary, value);
 }
 
 void func_002669B0(u32 arg0) {
