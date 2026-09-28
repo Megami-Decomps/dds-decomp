@@ -91,7 +91,7 @@ extern u32 D_003BC968;
 
 extern u32 func_00151E60(u32);
 
-extern u64 resolvePrimaryFileBuffer(void);
+extern void *resolvePrimaryFileBuffer();
 extern u32 *resolveSecondaryFileBuffer(void *);
 extern u32 func_002B1F58(u16, u64, u64, u32);
 extern u32 func_002B43E0(u16, u64, u64, u32);
@@ -1839,7 +1839,15 @@ EffectSurfaceNode *func_002A5A00(u32 percent) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5A58);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5A90);
+EffectSurfaceNode *func_002A5A90(u8 *work) {
+    u8 *source = resolvePrimaryFileBuffer(work);
+    u8 *params = source + 0x1C;
+    EffectSurfaceNode *node = func_002A5A58(params);
+
+    func_002A5F80(node, *(u16 *)(work + 0xC), source);
+    func_002A60C0(node, *(u16 *)(work + 0xC), params);
+    return node;
+}
 
 extern EffectSurfaceNode *func_002A5A90(u8 *);
 extern void func_002A6298(EffectSurfaceNode *, void *);
@@ -2062,7 +2070,12 @@ void releaseEffectRenderResources(u8 *work) {
     func_002CFF98(work);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A7E58);
+u8 *func_002A7E58(u8 *source) {
+    u8 *effect = func_002A7B68(NULL);
+    memcpy(effect + 0x30, source + 0x30, 0x98);
+    func_002A7F78(effect, source);
+    return effect;
+}
 
 extern void func_001523B0(u32);
 extern void func_00152050(u32, s16);
@@ -2307,8 +2320,15 @@ EffectStripNode *func_002AAF70(u32 percent) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AAFF0);
+EffectStripNode *func_002AB028(u8 *work) {
+    u8 *source = resolvePrimaryFileBuffer(work);
+    u8 *params = source + 0x20;
+    EffectStripNode *node = func_002AAFF0(params);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AB028);
+    memcpy(node->pad_0C, source, sizeof(node->pad_0C));
+    func_002AB1D0(node, *(u16 *)(work + 0xC), params);
+    return node;
+}
 
 void func_002AB0D0(u8 *work) {
     void *resource = *(void **)(work + 0x30);
@@ -3415,7 +3435,12 @@ void releaseEffectParticleResources(u8 *work) {
     func_002CFF98(work);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B49E8);
+u8 *func_002B49E8(u8 *source) {
+    u8 *effect = func_002B4798(NULL);
+    memcpy(effect + 0xC, source + 0xC, 0x98);
+    replaceEffectSharedResource(effect, source);
+    return effect;
+}
 
 void replaceEffectSharedResource(u8 *work, u8 *source) {
     u32 resource;
@@ -3480,7 +3505,35 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5300);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5390);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5480);
+extern u32 func_00293D90(u32);
+extern u32 createFileJob(u16);
+extern void func_002937E0(u32, void *, u32, u16);
+extern void func_00293A00(u32, u32, u16);
+extern void func_00293960(u32, void *, u32, u32);
+
+u32 func_002B5480(u8 *request, u32 existingJob) {
+    u32 job;
+    if (existingJob != 0) {
+        void *source;
+        job = func_00293D90(existingJob);
+        source = resolvePrimaryFileBuffer(job);
+        memcpy(*(void **)(request + 0xC), source, *(u32 *)(request + 0x10));
+    } else {
+        job = createFileJob(*(u16 *)(request + 4));
+        if (*(void **)(request + 0xC) != NULL) {
+            func_002937E0(job, *(void **)(request + 0xC),
+                          *(u32 *)(request + 0x10), *(u16 *)(request + 8));
+        }
+        if (*(u32 *)(request + 0x1C) != 0) {
+            func_00293A00(job, *(u32 *)(request + 0x1C), *(u16 *)(request + 0x18));
+        } else {
+            u32 value = 0;
+            func_00293960(job, &value, 4, 4);
+        }
+    }
+    func_002BC510();
+    return job;
+}
 
 void func_002B5548(u32 arg0) {
     if (D_003BD05C == 0) {
@@ -4811,7 +4864,7 @@ extern EffectRecordGroup D_0038FD88[];
 extern u32 func_002BCED8(u32 *, void *, void *, void *);
 
 u32 sumEffectRecordStatuses(s32 owner) {
-    EffectRecordGroup *group = &D_0038FD88[*(s32 *)(owner + 0x14)];
+    EffectRecordGroup *group = D_0038FD88 + *(s32 *)(owner + 0x14);
     u32 index = 0;
     u32 result = 0;
 
