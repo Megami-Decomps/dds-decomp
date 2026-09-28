@@ -68,6 +68,10 @@ extern u32 D_0032E570[];
 extern u32 D_0032E59C[];
 extern u32 D_0032E5A8[];
 extern u32 D_00324B48[];
+extern u8 D_003296F0[];
+extern u8 D_00324610[];
+extern u8 D_00324660[];
+extern void func_002DDD60(void *src);
 extern char D_003C9200[];
 extern u32 D_003C92E0[];
 extern s16 D_00337D12[];
@@ -259,9 +263,65 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001294A0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129578);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129650);
+void func_00129650(void) {
+    u8 *matrix;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_003296F0) : "memory");
+    matrix = D_00324610;
+    func_002DDD60(matrix);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf28\n"
+        "vmove.xyzw vf25, vf29\n"
+        "vmove.xyzw vf26, vf30\n"
+        "vmove.xyzw vf27, vf31\n"
+        ".set reorder"
+        : : : "memory");
+    matrix += 0x40;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(matrix) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf12, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_00324660) : "memory");
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001296B8);
+void func_001296B8(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+    f32 vec[4] = { x, y, z, 1.0f };
+    f32 result[4];
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        "vmul.xyzw vf10, vf10, vf11\n"
+        "vadd.xyzw vf10, vf10, vf12\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(result) : "memory");
+    *dstX = result[0];
+    *dstY = result[1];
+}
 
 void func_00129720(u32 arg0) {
     D_003BACD0 = arg0;

@@ -248,25 +248,59 @@ void func_00217F40(MdlCtx *ctx, s32 id, f32 arg2) {
     }
 }
 
-/* The VU0 vector shims below (func_00217F70/88/A0/B8/00218010/28) move
- * 16-byte vectors between MdlInner (+0x20/+0x30/+0x40/+0x50/+0x60/+0x70)
- * and VU0 data memory (vf10 in/out, vf28-30 out). gcc 2.96 cannot address
- * VU0 memory from plain C: a lone COP2 transfer is sunk into the return
- * delay slot while retail keeps a nop there, and the vf10 store is
- * rescheduled across the func_002E7D98 call. They are left as asm
- * (suspected handwritten shims, like their lqc2 callers in
- * game/code_0029A840.c). */
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217F70);
+/* These shims transfer vectors between model state and VU0 registers. */
+void func_00217F70(MdlCtx *ctx) {
+    void *vec = (u8 *)ctx->inner + 0x50;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217F88);
+void func_00217F88(MdlCtx *ctx) {
+    void *vec;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.w vf10, vf0\n"
+        ".set reorder"
+        : : : "memory");
+    vec = (u8 *)ctx->inner + 0x50;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217FA0);
+void func_00217FA0(MdlCtx *ctx) {
+    void *vec = (u8 *)ctx->inner + 0x60;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217FB8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218010);
+void func_00218010(MdlCtx *ctx) {
+    void *vec = (u8 *)ctx->inner + 0x70;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218028);
+void func_00218028(MdlCtx *ctx) {
+    void *vec = (u8 *)ctx->inner + 0x70;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+}
 
 u32 func_00218040(MdlCtx *ctx) {
     return ctx->inner->unk1C;

@@ -93,6 +93,8 @@ extern void func_001005B8(void);
 extern void func_00289D50(u32 arg0);
 extern void func_0028D8F8(void);
 extern void func_00293EA0(void *arg0);
+extern void func_00293158(void *src);
+extern void func_00294798(void *dst, void *src);
 extern void func_0029A748(s32 arg0);
 extern void func_0029A7C8(void *arg0, u128 *arg1);
 extern void func_0029A7F8(void *arg0, u128 *arg1);
@@ -912,7 +914,16 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294850);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294938);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294A18);
+void func_00294A18(void *dst, void *src) {
+    s128 vec;
+    func_00293158(src);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(&vec) : "memory");
+    func_00294798(dst, &vec);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294A50);
 

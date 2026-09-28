@@ -322,6 +322,9 @@ extern u32 func_00162A70(u32 param);
 extern void func_0017DBB0(s32 id);
 extern void func_0017E4A8(void *dst, void *src);
 extern void func_0017E4C8(void *dst, void *src);
+extern f32 D_003B9284;
+extern void func_002DDBF8(void);
+extern void func_002DD688(f32 scale);
 
 
 extern u8 D_00355008[];
@@ -1194,7 +1197,26 @@ void func_0017CED0(EffPCPWork *work, u32 val) {
     work->unk64 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017CED8);
+void func_0017CED8(void *dst, void *src) {
+    func_002DD688(D_003B9284);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf24, 0(%0)\n"
+        "lqc2 vf25, 0x10(%0)\n"
+        "lqc2 vf26, 0x20(%0)\n"
+        "lqc2 vf27, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(src) : "memory");
+    func_002DDBF8();
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(dst) : "memory");
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017CF38);
 
@@ -1257,7 +1279,20 @@ void func_0017E4C0(EffPCPWork *work, u32 val) {
     work->unkB8 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017E4C8);
+void func_0017E4C8(void *dst, void *src) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%1)\n"
+        "lqc2 vf29, 0x10(%1)\n"
+        "lqc2 vf30, 0x20(%1)\n"
+        "lqc2 vf31, 0x30(%1)\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(dst), "r"(src) : "memory");
+}
 
 void func_0017E4F0(void) {
     EffPCPWork *work;
