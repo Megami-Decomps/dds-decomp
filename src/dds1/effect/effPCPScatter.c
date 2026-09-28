@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Shared resource handed between scatter effects. effPcpScatterResCreate creates it,
    effPcpScatterResAddRef takes a reference, effPcpScatterResRelease releases it. */
@@ -12,6 +13,9 @@ struct PcpScatterRes {
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void *func_002CFEB8(s32 size);
+extern u32 effParamWorkDuplicate(u32 param);
+extern u32 func_002D03F8(u32 size);
+extern u32 *func_002D0A48(u32 handle);
 extern void func_002CFF98(void *ptr);
 
 extern void func_00175D88(u32 res);
@@ -28,9 +32,9 @@ extern void func_002DDBF8(void);
 /* Effect initializers implemented in assembly below (func_001708A0 lives in
    another unit). Each is entered with and without spawn arguments, so they
    are declared unchecked. */
-extern void func_001708A0();
-extern void func_00171550();
-extern void func_00172158();
+extern void *func_001708A0();
+extern void *func_00171550();
+extern void *func_00172158();
 extern void *func_00173B48();
 extern void *func_00174680();
 extern void *func_00175230();
@@ -48,18 +52,46 @@ typedef struct PcpScatterWork6 PcpScatterWork6;
 typedef struct PcpScatterWork7 PcpScatterWork7;
 typedef struct PcpScatterWork8 PcpScatterWork8;
 
+extern void func_00172FB8(PcpScatterWork3 *work, PcpScatterWork3 *src);
+
+/* Pool: `first` words of slot data, then `second` words, then the 0x34-byte control block. */
+typedef struct {
+    u8 pad00[0x10];
+    u32 unk10;
+    u32 color14;
+    s32 unk18;
+    f32 unk1C;
+    u32 *unk20;
+    u32 *unk24;
+    void *unk28;
+    u32 unk2C;
+    u32 unk30;
+} PcpScatterPool;
+
+extern PcpScatterPool *func_00172C68(s32 groups);
+extern void func_00172F88(PcpScatterWork3 *work, u32 resId);
+extern u32 effMiscRand(void *table);
+extern u32 effParamWorkCreate(s32 kind, void *params);
+extern u8 D_0034DF38[];
+
 extern void func_00172D70(PcpScatterWork3 *work);
 
 /* func_001708A0 */
 struct PcpScatterWork1 {
-    u8 pad00[0x3C];
+    u8 pad00[0x20];
+    u32 unk20;
+    u8 pad24[0x18];
     f32 unk3C;
     u32 unk40;
     u32 unk44;
     u32 unk48;
     f32 unk4C;
     f32 unk50;
-    u8 pad54[0x2C];
+    u8 pad54[0x14];
+    u8 unk68;
+    u8 pad69[7];
+    u32 unk70;
+    u8 pad74[0xC];
     PcpScatterWork3 *unk80;
     u32 unk84;
     u32 unk88;
@@ -69,14 +101,20 @@ struct PcpScatterWork1 {
 
 /* func_00171550: the handle at 0x80 is a resource, not a child work area. */
 struct PcpScatterWork8 {
-    u8 pad00[0x3C];
+    u8 pad00[0x20];
+    u32 unk20;
+    u8 pad24[0x18];
     f32 unk3C;
     u32 unk40;
     u32 unk44;
     u32 unk48;
     f32 unk4C;
     f32 unk50;
-    u8 pad54[0x1C];
+    u8 pad54[4];
+    u8 unk58;
+    u8 pad59[7];
+    u32 unk60;
+    u8 pad64[0xC];
     PcpScatterWork3 *unk70;
     u32 unk74;
     u32 unk78;
@@ -191,7 +229,33 @@ void func_00170B88(void *data)
     func_001708A0(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170BF0);
+PcpScatterWork1 *func_00170BF0(src)
+    PcpScatterWork1 *src;
+{
+    PcpScatterWork1 *work;
+    u32 count;
+    u32 handle;
+    u32 *buf;
+    u32 i;
+
+    work = func_001708A0(src, 0, 0);
+    func_00172FB8(work->unk80, src->unk80);
+    if (work->unk68 != 0) {
+        work->unk88 = work->unk20 / work->unk70;
+        if (work->unk20 % work->unk70 != 0) {
+            work->unk88 = work->unk88 + 1;
+        }
+        count = work->unk88;
+        handle = func_002D03F8(count * 4);
+        buf = func_002D0A48(handle);
+        work->unk90 = handle;
+        work->unk8C = buf;
+        for (i = 0; i < count; i++) {
+            work->unk8C[i] = effParamWorkDuplicate(*src->unk8C);
+        }
+    }
+    return work;
+}
 
 void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work)
 {
@@ -217,7 +281,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170D68);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170F28);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00171510);
+void func_00171510(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00171520(PcpScatterWork8 *work, u32 *values)
 {
@@ -238,7 +304,33 @@ void func_001717E0(void *data)
     func_00171550(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00171848);
+PcpScatterWork8 *func_00171848(src)
+    PcpScatterWork8 *src;
+{
+    PcpScatterWork8 *work;
+    u32 count;
+    u32 handle;
+    u32 *buf;
+    u32 i;
+
+    work = func_00171550(src, 0, 0);
+    func_00172FB8(work->unk70, src->unk70);
+    if (work->unk58 != 0) {
+        work->unk78 = work->unk20 / work->unk60;
+        if (work->unk20 % work->unk60 != 0) {
+            work->unk78 = work->unk78 + 1;
+        }
+        count = work->unk78;
+        handle = func_002D03F8(count * 4);
+        buf = func_002D0A48(handle);
+        work->unk80 = handle;
+        work->unk7C = buf;
+        for (i = 0; i < count; i++) {
+            work->unk7C[i] = effParamWorkDuplicate(*src->unk7C);
+        }
+    }
+    return work;
+}
 
 void effPcpScatterReleaseSharedParticles(PcpScatterWork8 *work)
 {
@@ -264,7 +356,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001719C0);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00171B28);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172120);
+void func_00172120(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00172130(PcpScatterWork2 *work, u32 value)
 {
@@ -284,7 +378,53 @@ void func_00172400(void *data)
     func_00172158(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1), effParamTableGetBlock(data, 2));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172468);
+/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (func_00172138 scales
+   the same word as a float). */
+typedef struct {
+    u8 pad00[0x20];
+    u32 unk20;
+    u8 pad24[0x1C];
+    u8 unk40;
+    u8 pad41[7];
+    u32 unk48;
+    u8 pad4C[0xC];
+    PcpScatterWork3 *unk58;
+    u32 unk5C;
+    u32 unk60;
+    u32 *unk64;
+    u32 unk68;
+} PcpScatterWork2Copy;
+
+PcpScatterWork2Copy *func_00172468(src)
+    PcpScatterWork2Copy *src;
+{
+    PcpScatterWork2Copy *work;
+    u32 count;
+    u32 handle;
+    u32 *buf;
+    u32 i;
+
+    work = func_00172158(src, 0, 0);
+    func_00172FB8(work->unk58, src->unk58);
+    if (work->unk40 != 0) {
+        if (work->unk48 == 0) {
+            work->unk48 = 1;
+        }
+        work->unk60 = work->unk20 / work->unk48;
+        if (work->unk20 % work->unk48 != 0) {
+            work->unk60 = work->unk60 + 1;
+        }
+        count = work->unk60;
+        handle = func_002D03F8(count * 4);
+        buf = func_002D0A48(handle);
+        work->unk68 = handle;
+        work->unk64 = buf;
+        for (i = 0; i < count; i++) {
+            work->unk64[i] = effParamWorkDuplicate(*src->unk64);
+        }
+    }
+    return work;
+}
 
 void effPcpScatterReleaseLinkedParticles(PcpScatterWork2 *work)
 {
@@ -310,7 +450,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001725F0);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001726E8);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172C48);
+void func_00172C48(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00172C58(PcpScatterWork3 *work, u32 value)
 {
@@ -321,7 +463,42 @@ void func_00172C60(void)
 {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172C68);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void *func_002DA730(void);
+extern void func_002DA420(void *obj, f32 value);
+extern u8 D_003D6580[0x2C];
+
+PcpScatterPool *func_00172C68(s32 groups) {
+    PcpScatterPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 slots;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    slots = groups * 3;
+    first = slots * 8;
+    second = slots * 2;
+    size = (first + second) * 4 + 0x34;
+    handle = func_002D03F8(size);
+    block = func_002D0A48(handle);
+    memset(block, 0, size);
+    pool = (PcpScatterPool *)(block + (first + second));
+    pool->unk20 = block;
+    pool->unk10 = 1;
+    pool->unk24 = block + first;
+    pool->unk18 = second;
+    pool->unk2C = handle;
+    pool->unk1C = 1.0f;
+    pool->color14 = 0x80808080;
+    pool->unk30 = 0;
+    pool->unk28 = func_002DA730();
+    func_002DA420(pool->unk28, 1.0f);
+    memset(D_003D6580, 0, 0x2C);
+    *(u16 *)(D_003D6580 + 4) = 0x4000;
+    return pool;
+}
 
 void func_00172D70(PcpScatterWork3 *work)
 {
@@ -411,7 +588,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00173738);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001738C8);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00173AC0);
+void func_00173AC0(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
 void func_00173AD8(PcpScatterWork4 *work, f32 value)
 {
@@ -459,7 +638,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001741B0);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174350);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001745F8);
+void func_001745F8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
 void func_00174610(PcpScatterWork5 *work, f32 value)
 {
@@ -507,7 +688,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174D30);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174ED0);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001751A8);
+void func_001751A8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
 void func_001751C0(PcpScatterWork6 *work, f32 value)
 {

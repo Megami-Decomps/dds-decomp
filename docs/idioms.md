@@ -83,6 +83,24 @@ s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
 that genuinely recurs. Wrapping a one-off call in an inline just to get
 `jal` is a codegen lever, not source.
 
+## 128-bit vector copies (`lq; sq; jr; nop`)
+
+Tiny setters that copy one quadword compile in retail to `lq $2,0(src);
+sq $2,0(dst); jr $31; nop`. A plain `u128` copy in C gives `lq; jr; sq`
+(the store moves into the delay slot). The SDK implements
+`sceVu0CopyVector` as an asm statement, and the game did the same: use
+`PCP_COPY_VECTOR(dst, src)` from `include/pcp_vu0.h` (wrapped in
+`.set noreorder`, like `fsqrtf`). This is the only non-COP2 asm helper
+allowed, and only for this exact instruction pair.
+
+## Struct assignment vs `memcpy`
+
+`*dst = *src` on a struct of `u32 word[N]` reproduces retail's `ldl/ldr`
+copies exactly, including the trailing `lw`/`sw` word and, from 0x40 bytes,
+the aligned/unaligned dual loop. `memcpy` with a literal size gives
+`lwl/lwr` on the tail word, so it only matches when the size is a multiple
+of 8. Try the struct assignment first when the tail differs.
+
 ## Unaligned block copies (`ldl/ldr/sdl/sdr`)
 
 Runs of `ldl`/`ldr` and `sdl`/`sdr` pairs copying a fixed-size block come

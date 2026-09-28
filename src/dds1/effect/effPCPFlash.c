@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern void *effParamTableGetBlock(void *data, s32 index);
 
@@ -255,7 +256,9 @@ void func_0016A1E0(PcpFlashWork1 *work)
     func_002D0918(work->unk40);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A210);
+void func_0016A210(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016A220(PcpFlashWork1 *work, u32 value)
 {
@@ -309,7 +312,9 @@ void func_0016A890(PcpFlashWork2 *work)
     func_002D0918(work->unk50);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A8C0);
+void func_0016A8C0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016A8D0(PcpFlashWork2 *work, u32 value)
 {
@@ -392,7 +397,9 @@ void func_0016B248(PcpFlashWork3 *work)
     func_002D0918(work->unk58);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016B278);
+void func_0016B278(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016B288(PcpFlashWork3 *work, u32 value)
 {
@@ -456,7 +463,9 @@ void func_0016BA70(PcpFlashWork4 *work)
     func_002D0918(work->unk60);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016BAA0);
+void func_0016BAA0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016BAB0(PcpFlashWork4 *work, u32 value)
 {
@@ -502,7 +511,9 @@ void func_0016C370(PcpFlashWork5 *work)
     func_002D0918(work->unk78);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016C3A0);
+void func_0016C3A0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016C3B0(PcpFlashWork5 *work, u32 value)
 {
@@ -566,7 +577,9 @@ void func_0016CBE8(PcpFlashWork6 *work)
     func_002D0918(work->unk5C);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016CC18);
+void func_0016CC18(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016CC28(PcpFlashWork6 *work, u32 value)
 {
@@ -634,7 +647,9 @@ void func_0016D418(PcpFlashWork7 *work)
     func_002D0918(work->unk4C);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D448);
+void func_0016D448(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016D458(PcpFlashWork7 *work, u32 value)
 {
@@ -682,7 +697,9 @@ void func_0016DB50(PcpFlashWork8 *work)
     func_002D0918(work->unkE0);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DB80);
+void func_0016DB80(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016DB90(PcpFlashWork8 *work, u32 value)
 {
@@ -728,7 +745,9 @@ void func_0016E4F8(PcpFlashWork9 *work)
     func_002D0918(work->unk60);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016E528);
+void func_0016E528(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016E538(PcpFlashWork9 *work, u32 value)
 {
@@ -792,7 +811,9 @@ void func_0016EC78(PcpFlashWork10 *work)
     func_002D0918(work->unk50);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016ECA8);
+void func_0016ECA8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016ECB8(PcpFlashWork10 *work, u32 value)
 {

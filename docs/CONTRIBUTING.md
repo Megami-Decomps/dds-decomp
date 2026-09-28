@@ -9,8 +9,9 @@ A function counts as decompiled only when it compiles to exactly the retail
 bytes, and it has to reach that the way the original developers would have.
 
 - **No fakematches.** Inline asm is allowed only for COP2/VU0 macro-mode
-  blocks (wrapped in `.set noreorder`) and the `fsqrtf` helper in
-  `include/fpu.h`. Not allowed:
+  blocks (wrapped in `.set noreorder`), the `fsqrtf` helper in
+  `include/fpu.h` and the `PCP_COPY_VECTOR` quadword copy in
+  `include/pcp_vu0.h` (see docs/idioms.md). Not allowed:
   - register pinning (`register x asm("$n")`)
   - computed gotos or label tables standing in for a `switch`
   - dummy variables or `volatile` added to steer codegen
