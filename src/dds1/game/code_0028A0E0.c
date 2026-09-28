@@ -14,8 +14,22 @@ extern u32 D_003BC8F8;
 extern s32 D_003BD938;
 
 extern s32 D_003BAA00;
-extern u32 D_003BC8D8;
+typedef struct LoadMirror {
+    u32 current;
+    u32 previous;
+} LoadMirror;
+extern LoadMirror D_003BC8D8;
 extern u32 D_003BC8DC;
+extern char D_003BC8E8[];
+extern char D_003B29D8[]; /* "config_draw" */
+extern char D_003B29E8[]; /* "config_update" */
+extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 hierarchy);
+extern void func_003003F0(void *arg);
+extern char D_003BC900[];
+extern char D_003BC908[];
+extern char D_003BC910[];
+extern char D_003BC918[];
+extern char D_003BC920[];
 
 extern u32 D_003BC81C;
 
@@ -31,6 +45,8 @@ extern u32 D_003BC7E8;
 extern s32 D_003BC850;
 extern s32 D_003BC860;
 extern u32 D_003BC858;
+extern s32 D_003BC864;
+extern s8 D_003DC803[];
 extern u32 D_003BD904;
 extern u32 D_003BD910;
 extern u32 D_003BC7F8;
@@ -54,6 +70,8 @@ typedef struct LoadCtx374A0 {
     u8 unk10;   /* 0x10 */
     u8 pad11[3]; /* 0x11 */
     u32 unk14;  /* 0x14 */
+    u32 unk18;  /* 0x18 */
+    u32 unk1C;  /* 0x1C */
 } LoadCtx374A0;
 
 extern LoadCtx374A0 D_0037D4A0;
@@ -95,6 +113,9 @@ extern void func_0028D8F8(void);
 extern void func_00293EA0(void *arg0);
 extern void func_00293158(void *src);
 extern void func_00294798(void *dst, void *src);
+extern void *func_002CFEB8(s32 size);
+extern void *func_002CFF68(s32 size);
+extern void func_002CFF98();
 extern void func_0029A748(s32 arg0);
 extern void func_0029A7C8(void *arg0, u128 *arg1);
 extern void func_0029A7F8(void *arg0, u128 *arg1);
@@ -129,6 +150,12 @@ extern s32 func_00289F30(void);
 extern void *func_0028C9A0(void);
 extern u8 func_00289BE8(s32 arg0);
 extern u32 D_003DC7C0[];
+extern void func_00151F00(void *handle);
+extern void *func_00151F58(void *name);
+extern void *func_00151D88(s32 mode, void *name);
+extern void func_001523B0(void *handle);
+extern void func_00152050(void *handle, s16 index);
+extern void *func_0029A5E0(u16 type, u32 owner, void *data);
 
 /* Init record at D_0037D4E0. */
 typedef struct Init374E0 {
@@ -146,20 +173,81 @@ extern u32 D_0037D4AC[];
 
 /* Callback table at D_0037E14C (0x28 bytes per entry). */
 typedef struct Cb3714C {
-    void (*cb)(void *arg); /* 0x00 */
-    u8 pad4[0x24];         /* 0x04 */
+    void (*cb)(void *arg);    /* 0x00 */
+    u8 pad4[8];               /* 0x04 */
+    void (*cbC)(void *, void *); /* 0x0C */
+    void (*cb10)(void *arg);  /* 0x10 */
+    void (*cb14)(void *arg);  /* 0x14 */
+    void (*cb18)(void *arg);  /* 0x18 */
+    void (*cb1C)(void *arg);  /* 0x1C */
+    void (*cb20)(void *arg);  /* 0x20 */
+    u32 unk24;                /* 0x24 */
 } Cb3714C;
 
 extern Cb3714C D_0037E14C[];
+typedef struct FileTypeCallbacks {
+    void *(*create)(void *, u16);
+    void (*unk4)(void *);
+    void (*destroy)(void *);
+    void *(*createChild)(void *, u16);
+    u8 unk10[0x18];
+} FileTypeCallbacks;
+
+extern FileTypeCallbacks D_0037E148[];
 
 /* Object with loader sub-objects (+0x40...). */
 typedef struct LoadObj {
-    u8 unk0[8];   /* 0x00 */
-    f32 unk8;     /* 0x08 */
-    u8 unkC[0x34]; /* 0x0C */
-    void *unk40;  /* 0x40 */
-    void *unk44;  /* 0x44 */
+    void *owner;        /* 0x00 */
+    u32 color;          /* 0x04 */
+    f32 scale;          /* 0x08 */
+    u8 unkC[0x28];     /* 0x0C */
+    void *deviceHandle; /* 0x34 */
+    u32 unk38;          /* 0x38 */
+    u32 unk3C;          /* 0x3C */
+    void *unk40;        /* 0x40 */
+    void *unk44;        /* 0x44 */
+    s16 unk48;          /* 0x48 */
+    u16 unk4A;
 } LoadObj;
+extern LoadObj *func_00295F58(LoadObj *source);
+extern void func_002961B0(LoadObj *result, LoadObj *owner);
+
+typedef struct FileJobBufferSlot {
+    u32 offset;
+    u32 size;
+    void *allocation;
+    u16 selector;
+    u16 unkE;
+} FileJobBufferSlot;
+
+typedef struct FileJob {
+    u32 unk0;
+    u16 type;
+    u16 unk6;
+    void *data;
+    u16 option;
+    u16 unkE;
+    FileJobBufferSlot slots[2];
+    u8 unk30[0x60];
+    u32 id;
+    u32 sector;
+    u32 flags;
+    u8 unk9C[0x10];
+    struct FileJob *next;
+    struct FileJob *prev;
+} FileJob;
+extern FileJob *func_002933A8(u16 type);
+extern void func_00293528(FileJob *job);
+extern void func_00293568(FileJob *job);
+extern void func_0029A730(s32 arg0);
+
+typedef struct FileQueue {
+    u8 unk0[0x80];
+    s32 count;
+    u32 unk84;
+    FileJob *head;
+    FileJob *tail;
+} FileQueue;
 
 void func_0028A0E0(void) {
     func_002F6670();
@@ -184,7 +272,10 @@ void func_0028A188(void) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A190);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A1B8);
+void func_0028A1B8(void) {
+    s32 slot = func_00289D00(D_003BC7E8);
+    D_003BC864 = D_003DC803[slot * 0x30];
+}
 
 u32 func_0028A1F8(void) {
     return 0x33600;
@@ -661,7 +752,17 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2810);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290A88);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290C58);
+void func_00290C58(s8 mode) {
+    D_0037D4A0.unk14 = 0;
+    D_0037D4A0.unk10 = mode;
+    if (mode == 1) {
+        D_0037D4A0.unk1C = 0;
+        D_0037D4A0.unk18 = 0x74;
+    } else {
+        D_0037D4A0.unk18 = 0;
+        D_0037D4A0.unk1C = 0x74;
+    }
+}
 
 void func_00290C98(void) {
     D_0037D4A0.unk14 = 0;
@@ -671,7 +772,9 @@ void func_00290C98(void) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290CB0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290E20);
+s32 func_00290E20(void) {
+    return D_003BC8D8.current != D_003BC8D8.previous;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290E38);
 
@@ -711,7 +814,11 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002911B8);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002912C8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00291378);
+void func_00291378(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_003BC8E8, 1);
+    kwlnTaskDestroyWithHierarchyByName(D_003B29D8, 1);
+    kwlnTaskDestroyWithHierarchyByName(D_003B29E8, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002913B8);
 
@@ -744,7 +851,17 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002918F8);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292720);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292BA8);
+void func_00292BA8(void) {
+    func_003003F0(D_003BC900);
+    func_002A4318();
+    func_003003F0(D_003BC908);
+    func_002AE8A8();
+    func_003003F0(D_003BC910);
+    func_002B1170();
+    func_003003F0(D_003BC918);
+    func_00292C40();
+    func_003003F0(D_003BC920);
+}
 
 void func_00292C18(u32 arg0) {
     D_003BC8F8 = D_003BC8F8 | arg0;
@@ -782,17 +899,59 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293428);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293450);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002934C0);
+void func_002934C0(FileJob *job) {
+    void *data = *(void **)((u8 *)job + 8);
+    if (data != NULL) {
+        u16 index = *(u16 *)((u8 *)job + 4);
+        D_0037E148[index].destroy(data);
+    }
+    func_00293528(job);
+    func_00293568(job);
+    func_002CFF98(job);
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293528);
+void func_00293528(FileJob *job) {
+    void *buffer = job->slots[0].allocation;
+    if (buffer != NULL) {
+        func_002D0918(buffer);
+        job->slots[0].offset = 0;
+        job->slots[0].size = 0;
+        job->slots[0].allocation = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293568);
+void func_00293568(FileJob *job) {
+    void *buffer = job->slots[1].allocation;
+    if (buffer != NULL) {
+        func_002D0918(buffer);
+        job->slots[1].offset = 0;
+        job->slots[1].size = 0;
+        job->slots[1].allocation = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002935A8);
+FileJob *func_002935A8(FileJob *request) {
+    FileJob *job = func_002933A8(request->type);
+    job->option = request->option;
+    job->slots[0].selector = request->slots[0].selector;
+    job->data = D_0037E148[job->type].createChild(request->data, job->type);
+    return job;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293620);
+void func_00293620(FileJob *left, FileJob *right) {
+    void (*cb)(void *, void *) = D_0037E14C[right->type].cbC;
+    if (cb != NULL) {
+        cb(left->data, right->data);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293668);
+void func_00293668(void *arg0) {
+    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    void (*cb)(void *) = D_0037E14C[idx].cb10;
+    if (cb != NULL) {
+        cb(*(void **)((u8 *)arg0 + 8));
+    }
+}
 
 void func_002936A8(void *arg0) {
     u16 idx = *(u16 *)((u8 *)arg0 + 4);
@@ -801,13 +960,37 @@ void func_002936A8(void *arg0) {
     D_0037E14C[idx].cb(data);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002936E0);
+void func_002936E0(void *arg0) {
+    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    void (*cb)(void *) = D_0037E14C[idx].cb14;
+    if (cb != NULL) {
+        cb(*(void **)((u8 *)arg0 + 8));
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293720);
+void func_00293720(void *arg0) {
+    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    void (*cb)(void *) = D_0037E14C[idx].cb18;
+    if (cb != NULL) {
+        cb(*(void **)((u8 *)arg0 + 8));
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293760);
+void func_00293760(void *arg0) {
+    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    void (*cb)(void *) = D_0037E14C[idx].cb1C;
+    if (cb != NULL) {
+        cb(*(void **)((u8 *)arg0 + 8));
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002937A0);
+void func_002937A0(void *arg0) {
+    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    void (*cb)(void *) = D_0037E14C[idx].cb20;
+    if (cb != NULL) {
+        cb(*(void **)((u8 *)arg0 + 8));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002937E0);
 
@@ -872,15 +1055,61 @@ void func_00293F18(void *arg0) {
     func_00293EA0(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293F60);
+void func_00293F60(FileQueue *queue, FileJob *job) {
+    job->next = NULL;
+    if (queue->head != NULL) {
+        queue->head->next = job;
+        job->prev = queue->head;
+    } else {
+        queue->tail = job;
+        job->prev = NULL;
+    }
+    queue->head = job;
+    queue->count++;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293F98);
+void func_00293F98(FileQueue *queue, FileJob *after, FileJob *job) {
+    if (after->next != NULL) {
+        after->next->prev = job;
+        job->next = after->next;
+    } else {
+        job->next = NULL;
+        queue->head = job;
+    }
+    after->next = job;
+    job->prev = after;
+    queue->count++;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293FD8);
+void func_00293FD8(FileQueue *queue, FileJob *job) {
+    if (job->prev != NULL) {
+        job->prev->next = job->next;
+    } else {
+        queue->tail = job->next;
+    }
+    if (job->next != NULL) {
+        job->next->prev = job->prev;
+    } else {
+        queue->head = job->prev;
+    }
+    queue->count--;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294020);
+FileQueue *func_00294020(void) {
+    FileQueue *queue = func_002CFEB8(0x90);
+    memset(queue, 0, 0x90);
+    queue->count = 0;
+    queue->unk84 = 0;
+    func_00293EA0(queue);
+    return queue;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294070);
+FileJob *func_00294070(void) {
+    FileJob *job = func_002CFEB8(0xC0);
+    memset(job, 0, 0xC0);
+    func_00293F18(job);
+    return job;
+}
 
 void func_002940B8(void) {
     func_002CFF98();
@@ -898,11 +1127,11 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002944D8);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294548);
 
-void func_00294630(s32 arg0) {
-    s32 temp_v0;
+void func_00294630(FileQueue *queue) {
+    FileJob *job;
 
-    for (temp_v0 = *(s32 *)(arg0 + 0x8c); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0xac)) {
-        func_00293668(*(u32 *)(temp_v0 + 0x90));
+    for (job = queue->tail; job != NULL; job = job->next) {
+        func_00293668((void *)job->id);
     }
 }
 
@@ -952,32 +1181,77 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002954F0);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002959E8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295B70);
+FileJob *func_00295B70(FileQueue *queue, u32 id) {
+    FileJob *job = queue->tail;
+    while (job != NULL) {
+        if (job->id == id) {
+            return job;
+        }
+        job = job->next;
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295BB0);
+FileJob *func_00295BB0(FileQueue *queue, u32 id) {
+    FileJob *job = queue->tail;
+    while (job != NULL) {
+        if ((job->flags & 1) != 0 && job->id == id) {
+            return job;
+        }
+        job = job->next;
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295BF8);
+FileJob *func_00295BF8(FileQueue *queue, u32 sector) {
+    FileJob *job = queue->tail;
+    while (job != NULL) {
+        if ((job->flags & 3) == 2 && job->sector == sector) {
+            return job;
+        }
+        job = job->next;
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295C48);
+FileJob *func_00295C48(FileQueue *queue, s32 index) {
+    FileJob *job = queue->tail;
+    while (job != NULL) {
+        if (index-- == 0) {
+            return job;
+        }
+        job = job->next;
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295C90);
 
-s32 func_00295CD0(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-
-    temp_v1 = 0;
-    for (temp_v0 = *(s32 *)(arg0 + 0x8c); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0xac)) {
-        temp_v1 = temp_v1 + 1;
+s32 func_00295CD0(FileQueue *queue) {
+    FileJob *job;
+    s32 count = 0;
+    for (job = queue->tail; job != NULL; job = job->next) {
+        count++;
     }
-    return temp_v1;
+    return count;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295D08);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295E00);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295EF8);
+LoadObj *func_00295EF8(void *owner) {
+    LoadObj *obj = func_002CFF68(0x4C);
+    obj->owner = owner;
+    obj->color = 0x80808080;
+    obj->scale = 1.0f;
+    obj->unk44 = NULL;
+    obj->deviceHandle = NULL;
+    obj->unk38 = 0;
+    obj->unk3C = 0;
+    obj->unk48 = 1;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F58);
 
@@ -987,17 +1261,60 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F90);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296088);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296148);
+LoadObj *func_00296148(LoadObj *owner) {
+    LoadObj *source = *(LoadObj **)((u8 *)owner->unk44 + 0x24);
+    LoadObj *result = func_00295F58(source);
+    func_00296358(result, *(u16 *)owner->unk44, source);
+    func_002961B0(result, owner);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002961B0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296358);
+void func_00296358(LoadObj *obj, u32 type, void *data) {
+    if (obj->unk44 != NULL) {
+        func_0029A730((s32)obj->unk44);
+    }
+    obj->unk44 = func_0029A5E0(type, (u32)obj->owner, data);
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002963B8);
+void func_002963B8(LoadObj *obj, void *name) {
+    void *handle;
+    if (obj->deviceHandle != NULL) {
+        func_00151F00(obj->deviceHandle);
+    }
+    handle = func_00151F58(name);
+    obj->deviceHandle = handle;
+    if (obj->unk44 != NULL) {
+        void *record = *(void **)((u8 *)obj->unk44 + 0x20);
+        func_00152050(handle, *(s16 *)((u8 *)record + 0x54));
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296430);
+void func_00296430(LoadObj *obj, void *name) {
+    void *handle;
+    if (obj->deviceHandle != NULL) {
+        func_00151F00(obj->deviceHandle);
+    }
+    handle = func_00151D88(0, name);
+    obj->deviceHandle = handle;
+    if (obj->unk44 != NULL) {
+        void *record = *(void **)((u8 *)obj->unk44 + 0x20);
+        func_00152050(handle, *(s16 *)((u8 *)record + 0x54));
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002964B0);
+void func_002964B0(LoadObj *obj, void *name) {
+    if (obj->deviceHandle != NULL) {
+        func_00151F00(obj->deviceHandle);
+    }
+    obj->deviceHandle = func_00151D88(1, name);
+    func_001523B0(obj->deviceHandle);
+    if (obj->unk44 != NULL) {
+        void *record = *(void **)((u8 *)obj->unk44 + 0x20);
+        func_00152050(obj->deviceHandle, *(s16 *)((u8 *)record + 0x54));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296530);
 
@@ -1045,7 +1362,7 @@ void func_00296EF0(s32 arg0, u32 arg1) {
 }
 
 void func_00296EF8(LoadObj *arg0, f32 arg1) {
-    arg0->unk8 = arg1;
+    arg0->scale = arg1;
     func_0029A810(arg0->unk44);
 }
 
