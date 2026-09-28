@@ -30,7 +30,7 @@ extern void func_002424B0(void);
 extern void func_00242510(void);
 
 typedef struct CampTaskData {
-    s32 unk0;
+    s32 taskId;
     s32 unk4;
     u8 pad08[0x40];
 } CampTaskData;
@@ -43,7 +43,7 @@ void mnuCampCreateTask(s32 arg0) {
         evtFormatTaskName(arg0, name);
         data = func_002CFEB8(0x48);
         memset(data, 0, 0x48);
-        data->unk0 = arg0;
+        data->taskId = arg0;
         data->unk4 = 0;
         kwlnTaskCreate(name, 0x3EC, 1, 1, func_002424B0, func_00242510, data);
     }
@@ -132,6 +132,7 @@ typedef struct {
     CampEntryNode *entries; /* 0x2034 */
     u8 pad2038[0x3D4];
     u32 state; /* 0x240C */
+    u32 fontResource; /* 0x2410: returned by func_001951C8 */
 } CampScene;
 
 s32 campFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
@@ -190,17 +191,17 @@ extern s32 D_00368BD8[];
 extern s32 func_001951C8(s32 *resources, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_00195450(s32 resource, s32 width, s32 height);
 
-void func_00243A58(u8 *scene) {
+void func_00243A58(CampScene *scene) {
     s32 resource;
-    *(s32 *)(scene + 0x2410) = 0;
+    scene->fontResource = 0;
     resource = func_001951C8(D_00368BD8, 0, 0, 0, 0);
-    *(s32 *)(scene + 0x2410) = resource;
+    scene->fontResource = resource;
     func_00195450(resource, 0x960, 0x70);
 }
 
-void func_00243AA8(s32 arg0) {
-    func_00194920(*(u32 *)(arg0 + 0x2410));
-    *(u32 *)(arg0 + 0x2410) = 0;
+void func_00243AA8(CampScene *scene) {
+    func_00194920(scene->fontResource);
+    scene->fontResource = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243AD8);

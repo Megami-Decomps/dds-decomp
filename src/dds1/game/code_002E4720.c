@@ -36,9 +36,9 @@ typedef struct DevState {
     u8 operation; /* 0x15 */
     s8 state; /* 0x16 */
     u8 pad17; /* 0x17 */
-    s32 unk18; /* 0x18 */
-    s32 unk1C; /* 0x1C */
-    s32 unk20; /* 0x20 */
+    s32 operationArg; /* 0x18 */
+    s32 extra; /* 0x1C */
+    s32 data; /* 0x20 */
     s32 options; /* 0x24 */
     s32 resourceId; /* 0x28 */
     s32 result; /* 0x2C */
@@ -414,7 +414,7 @@ s32 sdfDevQueueOperation(DevState *arg0, s32 arg1, s32 arg2) {
     if (arg0->state != 7) {
         return -1;
     }
-    arg0->unk18 = arg1;
+    arg0->operationArg = arg1;
     arg0->options = arg2;
     arg0->operation = 3;
     SignalSema(D_00398864[arg0->workerIndex].sema);
@@ -466,9 +466,9 @@ DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
         return NULL;
     }
     state = func_002E6B28(resource, id, 8, context, callback);
-    state->unk1C = extra;
-    state->unk20 = data;
-    state->unk18 = 0;
+    state->extra = extra;
+    state->data = data;
+    state->operationArg = 0;
     func_002E5DA0(state);
     return state;
 }
@@ -484,10 +484,10 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
         return NULL;
     }
     state = func_002E6B28(resource, id, 9, context, callback);
-    state->unk1C = extra;
-    state->unk20 = data;
+    state->extra = extra;
+    state->data = data;
     state->options = options != 0 ? options : D_003BD434;
-    state->unk18 = 0;
+    state->operationArg = 0;
     func_002E5DA0(state);
     return state;
 }

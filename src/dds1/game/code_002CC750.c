@@ -44,9 +44,9 @@ typedef struct Entry24W {
 /* 0xAARRGGBB color split into RGB and alpha fields. */
 typedef struct RgbAlpha {
     u8 pad_0x00[0x18]; // 0x00
-    u32 rgb18;         // 0x18
+    u32 rgb;           // 0x18: low 24 bits of packed color
     u8 pad_0x1C[0x1C]; // 0x1C
-    u32 alpha38;       // 0x38
+    u32 alpha;         // 0x38: high byte of packed color
     u32 x3C;           // 0x3C
     u8 pad_0x40[0x10]; // 0x40
     float f50;         // 0x50
@@ -619,8 +619,8 @@ void func_002CF3A0(s32 arg0) {
 }
 
 void func_002CF3C8(RgbAlpha *p, u32 color) {
-    p->rgb18 = color & 0xFFFFFF;
-    p->alpha38 = color >> 24;
+    p->rgb = color & 0xFFFFFF;
+    p->alpha = color >> 24;
 }
 
 u32 func_002CF3E8(s32 arg0) {
@@ -632,9 +632,9 @@ void func_002CF3F0(s32 arg0, u32 arg1) {
 }
 
 void func_002CF3F8(RgbAlpha *dst, CfSrc *src) {
-    dst->rgb18 = src->x04;
+    dst->rgb = src->x04;
     dst->f50 = src->f3C;
-    dst->alpha38 = src->x24;
+    dst->alpha = src->x24;
     dst->x3C = src->x28;
 }
 

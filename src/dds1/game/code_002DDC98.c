@@ -17,16 +17,16 @@ typedef struct ConsNode {
     /* 0x04 */ struct ConsNode *prev;
     /* 0x08 */ u16 unk8;
     /* 0x0A */ u16 unkA;
-    /* 0x0C */ s16 width;
-    /* 0x0E */ s16 height;
-    /* 0x10 */ u16 unk10;
-    /* 0x12 */ u16 unk12;
+    /* 0x0C */ s16 columns;
+    /* 0x0E */ s16 rows;
+    /* 0x10 */ u16 cursorColumn;
+    /* 0x12 */ u16 cursorRow;
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 pad15;
     /* 0x16 */ u8 unk16;
     /* 0x17 */ u8 unk17;
     /* 0x18 */ u32 bufferHandle;
-    /* 0x1C */ u8 *pixels;
+    /* 0x1C */ u8 *cells;
 } ConsNode;
 
 typedef struct F9B00Entry {
@@ -676,9 +676,9 @@ void sdfDevConsNodeDestroy(ConsNode *arg0) {
 }
 
 void sdfDevConsNodeClear(ConsNode *arg0) {
-    arg0->unk10 = 0;
-    arg0->unk12 = 0;
-    memset(arg0->pixels, 0, arg0->width * arg0->height * 2);
+    arg0->cursorColumn = 0;
+    arg0->cursorRow = 0;
+    memset(arg0->cells, 0, arg0->columns * arg0->rows * 2);
 }
 
 void func_002E3E00(ConsNode *arg0) {
@@ -693,14 +693,14 @@ ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     node = func_002CFEB8(0x20);
     node->unk8 = arg0;
     node->unkA = arg1;
-    node->width = arg2;
-    node->height = arg3;
+    node->columns = arg2;
+    node->rows = arg3;
     node->unk17 = 8;
     node->unk14 = 0;
     node->unk16 = 0;
     h = func_002D03F8((arg2 * arg3) * 2);
     node->bufferHandle = h;
-    node->pixels = (u8 *)sdfResourceRetainAddress(h);
+    node->cells = (u8 *)sdfResourceRetainAddress(h);
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

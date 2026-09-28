@@ -59,7 +59,7 @@ void func_002D3598(void) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D35B8);
 
-void sdfCreateResourcePacket(s32 list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
+void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0, s32 (*alloc)(s32)) {
     s32 buffer;
 
@@ -79,7 +79,7 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D38B8);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D39B0);
 
-void sdfCreateDescriptorPacket(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 (*alloc)(s32)) {
     s32 block;
     if (alloc == NULL) {
@@ -169,12 +169,12 @@ s32 sdfGetBufferRemaining(void) {
     return D_003BD324 - D_003BD320;
 }
 
-s32 sdfAllocPacketAligned(s32 arg0) {
-    s32 temp_v0;
+s32 sdfAllocPacketAligned(s32 size) {
+    s32 packet;
 
-    temp_v0 = D_003BD320;
-    D_003BD320 = D_003BD320 + ((arg0 + 0xfU) & 0xfffffff0);
-    return temp_v0;
+    packet = D_003BD320;
+    D_003BD320 = D_003BD320 + ((size + 0xfU) & 0xfffffff0);
+    return packet;
 }
 
 s32 func_002D3FF0(void) {

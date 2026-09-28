@@ -16,13 +16,13 @@ typedef struct ParObj {
     u8 padF4[0x08];   /* 0xF4 */
     void *unkFC;      /* 0xFC */
     u8 pad100[0x40];  /* 0x100 */
-    u16 kind;         /* 0x140: particle dispatch table index */
-    u16 unk142;       /* 0x142 init flag (set to 1) */
+    u16 dispatchIndex; /* 0x140: particle dispatch table index */
+    u16 restartFlag;   /* 0x142 set to 1 after mode changes */
     u8 pad144[0x0C];  /* 0x144 */
     u8 mode150;       /* 0x150 mode byte for some kinds */
     u8 mode151;       /* 0x151 mode byte for the other kinds */
     u8 pad152[0x22];  /* 0x152 */
-    void *unk174;     /* 0x174 */
+    void *child;       /* 0x174 */
 } ParObj;
 
 /* Particle dispatch entry (0xC bytes, mirrors effect/parManager.c). */
@@ -67,7 +67,7 @@ void func_0015A758(ParObj *work, u32 value) {
 
 void parObjSetMode(ParObj *work, s32 value) {
     value &= 0xFF;
-    switch (work->kind) {
+    switch (work->dispatchIndex) {
     case 1:
     case 5:
     case 11:
@@ -87,11 +87,11 @@ void parObjSetMode(ParObj *work, s32 value) {
     case 9:
         break;
     }
-    work->unk142 = 1;
+    work->restartFlag = 1;
 }
 
 u32 parObjGetMode(ParObj *work) {
-    switch (work->kind) {
+    switch (work->dispatchIndex) {
     case 1:
     case 5:
     case 11:
@@ -114,8 +114,8 @@ u32 parObjGetMode(ParObj *work) {
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
 ParObj *parInstantiateKind(ParObj *work) {
-    ParObj *particle = D_0034E250[work->kind].func();
-    particle->kind = work->kind;
+    ParObj *particle = D_0034E250[work->dispatchIndex].func();
+    particle->dispatchIndex = work->dispatchIndex;
     if (*(s32 *)((u8 *)work + 0x28) == -1) {
         s32 transform = func_00151E60(*(s32 *)((u8 *)work + 0xF4));
         func_00152000(transform, *(f32 *)((u8 *)particle + 0x10), *(f32 *)((u8 *)particle + 0x14));
@@ -127,7 +127,7 @@ ParObj *parInstantiateKind(ParObj *work) {
 }
 
 void parObjDispatch(ParObj *work) {
-    D_0034E258[work->kind].func(work);
+    D_0034E258[work->dispatchIndex].func(work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);

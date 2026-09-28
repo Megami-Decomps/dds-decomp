@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 
 extern s32 D_003BA960;
 
@@ -29,8 +30,6 @@ extern u64 func_00197748(s32, s32, u64, u64, u64, u64);
 extern u32 D_003BA8E8;
 
 extern u32 D_003BA904;
-
-typedef struct KwlnTask KwlnTask;
 
 extern s32 kwlnTaskCreate(const char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
@@ -90,10 +89,10 @@ extern void *D_003BA994;
 extern void *D_003BA998;
 extern u32 D_003BA990;
 
-typedef struct {
+typedef struct B728Work {
     u8 pad00[0xE8];
-    void *previous;
-    void *next;
+    struct B728Work *previous;
+    struct B728Work *next;
 } B728Work;
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
@@ -735,13 +734,13 @@ void evtUnkB768Unlink(B728Work *node) {
         D_003BA994 = node->next;
     }
     else {
-        ((B728Work *)node->previous)->next = node->next;
+        node->previous->next = node->next;
     }
     if ((B728Work *)D_003BA998 == node) {
         D_003BA998 = node->previous;
     }
     else {
-        ((B728Work *)node->next)->previous = node->previous;
+        node->next->previous = node->previous;
     }
     node->previous = NULL;
     node->next = NULL;

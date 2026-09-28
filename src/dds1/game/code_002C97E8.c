@@ -320,49 +320,57 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB120);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB1C8);
 
-void func_002CB278(u8 *work) {
+typedef struct TaskWork {
+    u32 handle;
+    char *primaryTaskName;
+    char *secondaryTaskName;
+    TaskList *list;
+    u32 firstItemHandle;
+} TaskWork;
+
+void func_002CB278(TaskWork *work) {
     if (work != NULL) {
-        kwlnTaskDestroyWithHierarchyByName(*(char **)(work + 4), 1);
-        kwlnTaskDestroyWithHierarchyByName(*(char **)(work + 8), 0);
+        kwlnTaskDestroyWithHierarchyByName(work->primaryTaskName, 1);
+        kwlnTaskDestroyWithHierarchyByName(work->secondaryTaskName, 0);
     }
 }
 
-u8 func_002CB2B8(s32 arg0) {
-    u8 temp_v0;
-    s64 temp_v1;
+u8 func_002CB2B8(TaskWork *work) {
+    u8 exists;
+    s64 task;
 
-    temp_v0 = 0;
-    if (arg0 != 0) {
-        temp_v1 = kwlnTaskGetTaskByName(*(u32 *)((s32)arg0 + 4));
-        temp_v0 = temp_v1 != 0;
+    exists = 0;
+    if (work != NULL) {
+        task = kwlnTaskGetTaskByName((u32)work->primaryTaskName);
+        exists = task != 0;
     }
-    return temp_v0;
+    return exists;
 }
 
 s32 kwlnTaskExists(u32 name) {
     return kwlnTaskGetTaskByName(name) != 0;
 }
 
-void sdfAttachTaskItem(u8 *work, u32 *item) {
-    u32 result = func_002CAD30(*(u32 *)(work + 0xc), *item, func_002CB5F0(item));
-    if (*(u32 *)(work + 0x10) == 0) {
-        *(u32 *)(work + 0x10) = result;
+void sdfAttachTaskItem(TaskWork *work, u32 *item) {
+    u32 result = func_002CAD30((u32)work->list, *item, func_002CB5F0(item));
+    if (work->firstItemHandle == 0) {
+        work->firstItemHandle = result;
     }
 }
 
-void sdfRemoveTaskItem(u8 *work, s32 key) {
-    void *item = sdfFindTaskListNodeByKey(*(void **)(work + 0xc), key);
+void sdfRemoveTaskItem(TaskWork *work, s32 key) {
+    void *item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
-        func_002CAF78(*(void **)(work + 0xc), item);
+        func_002CAF78(work->list, item);
     }
 }
 
-s32 func_002CB390(void *p, s32 key) {
-    void *r;
+s32 func_002CB390(TaskWork *work, s32 key) {
+    TaskListNode *item;
 
-    r = sdfFindTaskListNodeByKey(*(void **)((s32)p + 0xC), key);
-    if (r != NULL) {
-        return *(s32 *)((s32)r + 0x10);
+    item = sdfFindTaskListNodeByKey(work->list, key);
+    if (item != NULL) {
+        return item->value;
     }
     return 0;
 }

@@ -6,6 +6,13 @@ extern void func_0011B940(void);
 extern u32 D_003BAAAC;
 
 extern s32 D_003BAA00;
+typedef struct EvtScaledValue {
+    u32 unk0;
+    u32 flags;
+    f32 base;
+    f32 scaled;
+} EvtScaledValue;
+
 
 void func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
@@ -20,28 +27,28 @@ u32 func_00117570(u32 *arg0) {
     return *arg0;
 }
 
-void func_00117578(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0xc) = arg0 * *(float *)(arg1 + 8);
+void func_00117578(float multiplier, EvtScaledValue *value) {
+    value->scaled = multiplier * value->base;
 }
 
-float func_00117588(s32 arg0) {
-    return *(float *)(arg0 + 0xc) / *(float *)(arg0 + 8);
+float func_00117588(EvtScaledValue *value) {
+    return value->scaled / value->base;
 }
 
-void func_001175A8(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) | 8;
+void func_001175A8(EvtScaledValue *value) {
+    value->flags = value->flags | 8;
 }
 
-void func_001175B8(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) & 0xfffffff7;
+void func_001175B8(EvtScaledValue *value) {
+    value->flags = value->flags & 0xfffffff7;
 }
 
-void func_001175D0(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) | 0x20;
+void func_001175D0(EvtScaledValue *value) {
+    value->flags = value->flags | 0x20;
 }
 
-void func_001175E0(s32 arg0) {
-    *(u32 *)(arg0 + 4) = *(u32 *)(arg0 + 4) & 0xffffffdf;
+void func_001175E0(EvtScaledValue *value) {
+    value->flags = value->flags & 0xffffffdf;
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001175F8);

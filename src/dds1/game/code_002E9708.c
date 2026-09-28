@@ -86,7 +86,7 @@ typedef struct SoundNode {
     u16 width;
     u16 height;
     u8 pad40[0x14];
-    u32 samples;
+    u32 sampleBuffer;
     u8 pad58[4];
     s32 callback;
     s32 callbackContext;
@@ -361,7 +361,7 @@ void func_002EB9C8(SoundNode *node, SoundFormat *format, s32 callback, s32 conte
     node->callback = callback;
     node->callbackContext = context;
     node->active = 1;
-    node->samples = func_002CF530(0x10100) + 0x100;
+    node->sampleBuffer = func_002CF530(0x10100) + 0x100;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBA28);

@@ -14,11 +14,11 @@ extern s8 D_003BC415;
 
 extern s32 D_003BAA00;
 
-typedef struct {
+typedef struct EvtActiveFlagTable {
     s32 unk0;
     s32 unk4;
-    s8 data[0];
-} UnkBD8A0;
+    s8 flags[0];
+} EvtActiveFlagTable;
 
 typedef struct {
     u8 count;
@@ -26,7 +26,7 @@ typedef struct {
     u16 indices[0];
 } ActiveList;
 
-extern UnkBD8A0 D_003BD8A0;
+extern EvtActiveFlagTable D_003BD8A0;
 
 extern u32 func_002EB028(u32, u32 *, u32);
 
@@ -165,14 +165,14 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     }
 }
 
-s32 func_0024D880(u8 *arg0, u8 *arg1) {
-    u8 temp_A = *arg0;
-    u8 temp_B = *arg1;
+s32 func_0024D880(u8 *left, u8 *right) {
+    u8 leftValue = *left;
+    u8 rightValue = *right;
 
-    if (temp_B < temp_A) {
+    if (rightValue < leftValue) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (leftValue < rightValue) ? -1 : 0;
 }
 
 s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
@@ -308,11 +308,11 @@ s32 evtIsTaskInActiveStates(s32 task) {
 }
 
 void func_0024DED8(s32 arg0) {
-    D_003BD8A0.data[arg0] = 0;
+    D_003BD8A0.flags[arg0] = 0;
 }
 
 s32 func_0024DEE8(s32 arg0) {
-    return D_003BD8A0.data[arg0] != 0;
+    return D_003BD8A0.flags[arg0] != 0;
 }
 
 s32 func_0024DEF8(s32 index, s32 value) {
@@ -329,9 +329,9 @@ u32 func_0024DF20(s32 arg0) {
 }
 
 s32 func_0024DF48(void) {
-    s32 temp_v0 = func_0010D428(0);
+    s32 flagIndex = func_0010D428(0);
 
-    D_003BD8A0.data[temp_v0] = 1;
+    D_003BD8A0.flags[flagIndex] = 1;
     return 1;
 }
 

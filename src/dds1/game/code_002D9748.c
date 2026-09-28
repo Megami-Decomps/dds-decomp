@@ -16,12 +16,12 @@ typedef union SdfSubParam {
 
 typedef struct SdfTextParam {
     u8 pad00[6]; /* 0x00 */
-    u8 unk06; /* 0x06: dirty flags for the setters below */
+    u8 dirtyFlags; /* 0x06: dirty flags for the setters below */
     u8 pad07[9]; /* 0x07 */
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
     u8 unk18; /* 0x18: func_002DA5B0 stores a u32 over 0x18-0x1B */
-    u8 unk19; /* 0x19: bit 0x2 selects unk88/unk8C over defaults */
+    u8 overrideFlags; /* 0x19: bit 0x2 selects unk88/unk8C over defaults */
     u8 unk1A; /* 0x1A */
     u8 unk1B; /* 0x1B */
     f32 unk1C; /* 0x1C */
@@ -31,8 +31,8 @@ typedef struct SdfTextParam {
     f32 unk2C; /* 0x2C */
     u32 unk30; /* 0x30 */
     u32 unk34; /* 0x34 */
-    SdfSubParam *unk38; /* 0x38 */
-    SdfSubParam *unk3C; /* 0x3C */
+    SdfSubParam *primarySubParam; /* 0x38 */
+    SdfSubParam *secondarySubParam; /* 0x3C */
     f32 unk40; /* 0x40 */
     f32 unk44; /* 0x44 */
     u8 pad48[0x40]; /* 0x48 */
@@ -203,22 +203,22 @@ u32 sdfGetLodChunkValue(SdfTextParam *param) {
 void func_002D9F38(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
     arg0->unk88 = fparg0;
     arg0->unk8C = fparg1;
-    arg0->unk19 = arg0->unk19 | 2;
+    arg0->overrideFlags = arg0->overrideFlags | 2;
 }
 
 void func_002D9F50(SdfTextParam *arg0) {
-    arg0->unk19 = arg0->unk19 & ~2;
+    arg0->overrideFlags = arg0->overrideFlags & ~2;
 }
 
 f32 func_002D9F60(SdfTextParam *arg0) {
-    if ((arg0->unk19 & 2) != 0) {
+    if ((arg0->overrideFlags & 2) != 0) {
         return arg0->unk88;
     }
     return D_003BD358;
 }
 
 f32 func_002D9F80(SdfTextParam *arg0) {
-    if ((arg0->unk19 & 2) != 0) {
+    if ((arg0->overrideFlags & 2) != 0) {
         return arg0->unk8C;
     }
     return D_003BD35C;
@@ -296,32 +296,32 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA358);
 
 void func_002DA3C0(SdfTextParam *arg0, u32 arg1) {
     arg0->unk10 = arg1;
-    arg0->unk06 |= 3;
+    arg0->dirtyFlags |= 3;
 }
 
 void func_002DA3D8(SdfTextParam *arg0, u32 arg1) {
     arg0->unk14 = arg1;
-    arg0->unk06 |= 3;
+    arg0->dirtyFlags |= 3;
 }
 
 void func_002DA3F0(SdfTextParam *arg0, u32 arg1) {
     arg0->unk20 = arg1;
-    arg0->unk06 |= 3;
+    arg0->dirtyFlags |= 3;
 }
 
 void func_002DA408(SdfTextParam *arg0, u32 arg1) {
     *(u32 *)&arg0->unk28 = arg1;
-    arg0->unk06 |= 3;
+    arg0->dirtyFlags |= 3;
 }
 
 void func_002DA420(SdfTextParam *arg0, f32 fparg0) {
     arg0->unk1C = fparg0;
-    arg0->unk06 = arg0->unk06 | 3;
+    arg0->dirtyFlags = arg0->dirtyFlags | 3;
 }
 
 void func_002DA438(SdfTextParam *arg0, u32 arg1) {
     *(u32 *)&arg0->unk2C = arg1;
-    arg0->unk06 |= 3;
+    arg0->dirtyFlags |= 3;
 }
 
 SdfSubParam *sdfSubParamCreate(void) {
@@ -335,10 +335,10 @@ SdfSubParam *sdfSubParamCreate(void) {
 }
 
 SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
-    SdfSubParam *sub = param->unk38;
+    SdfSubParam *sub = param->primarySubParam;
     if (sub == NULL) {
         sub = sdfSubParamCreate();
-        param->unk38 = sub;
+        param->primarySubParam = sub;
     }
     return sub;
 }
@@ -350,7 +350,7 @@ void func_002DA4C8(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
     values[2] = c;
     values[3] = d;
     values[4] = e;
-    param->unk06 |= 0xc;
+    param->dirtyFlags |= 0xc;
 }
 
 void func_002DA548(SdfTextParam *param, const f32 *input) {
@@ -360,29 +360,29 @@ void func_002DA548(SdfTextParam *param, const f32 *input) {
     values[2] = input[2];
     values[3] = input[3];
     values[4] = input[4];
-    param->unk06 |= 0xc;
+    param->dirtyFlags |= 0xc;
 }
 
 void func_002DA5B0(SdfTextParam *arg0, u32 arg1) {
     *(u32 *)((u8 *)arg0 + 0x18) = arg1;
-    arg0->unk06 |= 0x30;
+    arg0->dirtyFlags |= 0x30;
 }
 
 void func_002DA5C8(SdfTextParam *arg0, u32 arg1) {
     arg0->unk34 = arg1;
-    arg0->unk06 |= 0x30;
+    arg0->dirtyFlags |= 0x30;
 }
 
 void func_002DA5E0(SdfTextParam *arg0, u32 arg1) {
     arg0->unk30 = arg1;
-    arg0->unk06 |= 0x30;
+    arg0->dirtyFlags |= 0x30;
 }
 
 SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
-    SdfSubParam *sub = param->unk3C;
+    SdfSubParam *sub = param->secondarySubParam;
     if (sub == NULL) {
         sub = sdfSubParamCreate();
-        param->unk3C = sub;
+        param->secondarySubParam = sub;
     }
     return sub;
 }
@@ -394,7 +394,7 @@ void func_002DA630(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
     values[2] = c;
     values[3] = d;
     values[4] = e;
-    param->unk06 |= 0x30;
+    param->dirtyFlags |= 0x30;
 }
 
 void func_002DA6B0(SdfTextParam *param, const f32 *input) {
@@ -404,13 +404,13 @@ void func_002DA6B0(SdfTextParam *param, const f32 *input) {
     values[2] = input[2];
     values[3] = input[3];
     values[4] = input[4];
-    param->unk06 |= 0x30;
+    param->dirtyFlags |= 0x30;
 }
 
 void func_002DA718(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
     arg0->unk40 = fparg0;
     arg0->unk44 = fparg1;
-    arg0->unk06 = arg0->unk06 | 0xC0;
+    arg0->dirtyFlags = arg0->dirtyFlags | 0xC0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA730);

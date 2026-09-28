@@ -229,9 +229,9 @@ void effParamBuildVector(void *arg0, f32 x) {
 }
 
 void effParamScatterVectors(void *work, void *src) {
-    u8 *d0;
-    u8 *d1;
-    u8 *d2;
+    u8 *firstVector;
+    u8 *secondVector;
+    u8 *thirdVector;
 
     __asm__ volatile (
         ".set noreorder\n\t"
@@ -241,24 +241,24 @@ void effParamScatterVectors(void *work, void *src) {
         "lqc2 vf31, 48(%0)\n\t"
         ".set reorder"
         : : "r" (src) : "memory");
-    d0 = *(u8 **)((u8 *)work + 0x18) + 0x20;
+    firstVector = *(u8 **)((u8 *)work + 0x18) + 0x20;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf28, 0(%0)\n\t"
         ".set reorder"
-        : : "r" (d0) : "memory");
-    d1 = *(u8 **)((u8 *)work + 0x18) + 0x30;
+        : : "r" (firstVector) : "memory");
+    secondVector = *(u8 **)((u8 *)work + 0x18) + 0x30;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf29, 0(%0)\n\t"
         ".set reorder"
-        : : "r" (d1) : "memory");
-    d2 = *(u8 **)((u8 *)work + 0x18) + 0x40;
+        : : "r" (secondVector) : "memory");
+    thirdVector = *(u8 **)((u8 *)work + 0x18) + 0x40;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf30, 0(%0)\n\t"
         ".set reorder"
-        : : "r" (d2) : "memory");
+        : : "r" (thirdVector) : "memory");
 }
 
 void func_00162ED8(void) {

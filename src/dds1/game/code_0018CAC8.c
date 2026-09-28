@@ -298,12 +298,12 @@ s32 func_0018CE68(void) {
     return D_003BB04D;
 }
 
-s32 effOpenDataDir(void *arg0) {
-    u8 buf[0x70];
+s32 effOpenDataDir(void *name) {
+    u8 path[0x70];
 
     if (D_003BD476 != 0) {
-        func_003014F0(buf, D_003BB058, arg0);
-        return sceDopen(buf);
+        func_003014F0(path, D_003BB058, name);
+        return sceDopen(path);
     } else {
         D_003BD800 = 0;
         return 0;
@@ -322,18 +322,18 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CEF0);
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
 
-void effFreeWorkList(EffWork *arg0) {
-    EffWork *p = (EffWork *)arg0->unk8;
+void effFreeWorkList(EffWork *root) {
+    EffWork *node = (EffWork *)root->unk8;
 
-    if (p != NULL) {
+    if (node != NULL) {
         do {
-            EffWork *next = p->unk38;
-            func_002CFF98(p);
-            p = next;
-        } while (p != NULL);
+            EffWork *next = node->unk38;
+            func_002CFF98(node);
+            node = next;
+        } while (node != NULL);
     }
-    func_002CFF98(arg0->unk4);
-    func_002CFF98(arg0);
+    func_002CFF98(root->unk4);
+    func_002CFF98(root);
 }
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D428);

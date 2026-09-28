@@ -7,7 +7,7 @@ typedef struct MdlViewState {
     u8 pad09;
     s8 unk0A;
     u8 pad0B[11];
-    s16 unk16;
+    s16 resourceCount;
     s16 unk18;
     s16 unk1A;
     s32 unk1C;
@@ -24,8 +24,8 @@ typedef struct MdlViewState {
     u8 pad38[2];
     s16 unk3A;
     u8 pad3C[0x50];
-    s32 unk8C[1];
-    s32 unk90[1];
+    s32 slotBeforeResources[1]; /* One element before resources[] for rightward rotation. */
+    s32 resources[1];
 } MdlViewState;
 
 typedef struct MdlCtrlState {
@@ -361,27 +361,27 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A880);
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A8F0);
 
 void func_0021A948(void) {
-    s32 i = D_003D7A50.unk16 - 1;
-    s32 saved = D_003D7A50.unk90[i];
+    s32 i = D_003D7A50.resourceCount - 1;
+    s32 saved = D_003D7A50.resources[i];
 
     if (i > 0) {
         do {
-            D_003D7A50.unk90[i] = D_003D7A50.unk8C[i];
+            D_003D7A50.resources[i] = D_003D7A50.slotBeforeResources[i];
             i -= 1;
         } while (i > 0);
     }
-    D_003D7A50.unk90[0] = saved;
+    D_003D7A50.resources[0] = saved;
 }
 
 void mdlRotateViewList(void) {
     s32 i;
-    s32 count = D_003D7A50.unk16;
-    s32 first = D_003D7A50.unk90[0];
+    s32 count = D_003D7A50.resourceCount;
+    s32 first = D_003D7A50.resources[0];
 
     for (i = 0; i < count - 1; i++) {
-        D_003D7A50.unk90[i] = D_003D7A50.unk90[i + 1];
+        D_003D7A50.resources[i] = D_003D7A50.resources[i + 1];
     }
-    D_003D7A50.unk90[i] = first;
+    D_003D7A50.resources[i] = first;
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A9F8);
@@ -490,7 +490,7 @@ u32 func_0021C678(void) {
 }
 
 void func_0021C6A0(void) {
-    s32 p = *(s32 *)(*(s32 *)(D_003D7A50.unk90[0] + 0x18) + 8);
+    s32 p = *(s32 *)(*(s32 *)(D_003D7A50.resources[0] + 0x18) + 8);
 
     if (p != 0) {
         s16 v = *(s16 *)(p + 4);
@@ -546,7 +546,7 @@ u32 func_0021CE70(void) {
 }
 
 s32 mdlCountActiveRecords(void) {
-    s32 resource = D_003D7A50.unk90[0];
+    s32 resource = D_003D7A50.resources[0];
     s32 first = mdlCountRecords((s32)func_002192D0(resource, -1));
     s32 second = mdlCountRecords((s32)func_002192D0(resource, D_003D7A50.unk22));
 
@@ -597,9 +597,9 @@ extern void func_002177D0(s32 resource);
 void mdlFreeViewResources(void) {
     s32 i;
     for (i = 0; i != 12; i++) {
-        s32 handle = D_003D7A50.unk90[i];
+        s32 handle = D_003D7A50.resources[i];
         if (handle != 0) {
-            D_003D7A50.unk90[i] = 0;
+            D_003D7A50.resources[i] = 0;
             func_002177D0(handle);
         }
     }

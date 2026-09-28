@@ -59,17 +59,17 @@ void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     widget->height = height;
 }
 
-void func_002BFB50(s32 arg0, s32 arg1) {
-    u32 *puVar1;
-    s32 temp_v0;
+void func_002BFB50(s32 owner, s32 index) {
+    u32 *destination;
+    s32 remaining;
 
-    temp_v0 = 3;
-    puVar1 = (u32 *)(arg1 * 0xa0 + *(s32 *)(arg0 + 0x18) + 0x14);
+    remaining = 3;
+    destination = (u32 *)(index * 0xa0 + *(s32 *)(owner + 0x18) + 0x14);
     do {
-        temp_v0 = temp_v0 - 1;
-        *puVar1 = puVar1[0x1c];
-        puVar1 = puVar1 + 1;
-    } while (-1 < temp_v0);
+        remaining = remaining - 1;
+        *destination = destination[0x1c];
+        destination = destination + 1;
+    } while (-1 < remaining);
 }
 
 void func_002BFB98(IntPair *p, s32 a, s32 b) {

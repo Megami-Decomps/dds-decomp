@@ -603,34 +603,34 @@ s32 func_0023D970(EvtRuntime *runtime) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023D9D8);
 
-void func_0023DF60(s32 arg0, s32 *arg1) {
-    s32 temp_10 = arg1[4];
-    s32 temp_14 = arg1[5];
-    s32 temp_C = arg1[3];
-    s32 temp_243C = *(s32 *)((u8 *)arg1 + 0x243C);
+void func_0023DF60(s32 output, s32 *state) {
+    s32 first = state[4];
+    s32 second = state[5];
+    s32 third = state[3];
+    s32 metadata = *(s32 *)((u8 *)state + 0x243C);
     s32 buf[4];
 
-    buf[0] = temp_10;
-    buf[1] = temp_14;
-    buf[2] = temp_C;
-    buf[3] = temp_243C;
-    func_0023D5B0(arg0, buf, 0x10);
+    buf[0] = first;
+    buf[1] = second;
+    buf[2] = third;
+    buf[3] = metadata;
+    func_0023D5B0(output, buf, 0x10);
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023DFA8);
 
-void func_0023E138(s32 arg0, s32 arg1) {
-    void *pvVar1;
-    s32 temp_v0;
+void func_0023E138(s32 output, s32 table) {
+    void *entry;
+    s32 index;
 
-    temp_v0 = 0;
-    if (0 < *(s32 *)(arg1 + 0x20)) {
-        pvVar1 = (void *)(arg1 + 0x24);
+    index = 0;
+    if (0 < *(s32 *)(table + 0x20)) {
+        entry = (void *)(table + 0x24);
         do {
-            func_0023D5B0(arg0, pvVar1, 0x20);
-            temp_v0 = temp_v0 + 1;
-            pvVar1 = (void *)((s32)pvVar1 + 0x20);
-        } while (temp_v0 < *(s32 *)(arg1 + 0x20));
+            func_0023D5B0(output, entry, 0x20);
+            index = index + 1;
+            entry = (void *)((s32)entry + 0x20);
+        } while (index < *(s32 *)(table + 0x20));
     }
 }
 

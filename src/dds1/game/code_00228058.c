@@ -115,18 +115,18 @@ u32 func_002282E8(void) {
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACAE0);
 
 u32 evtSetSkyAlpha(void) {
-    s64 v;
+    s64 alpha;
 
-    v = func_0010D428(1);
-    if (v < -255) {
+    alpha = func_0010D428(1);
+    if (alpha < -255) {
         func_0010AC10("warning : SET_SKY_A alpha < -255\n");
-        v = -255;
+        alpha = -255;
     }
-    if (v > 255) {
+    if (alpha > 255) {
         func_0010AC10("warning : SET_SKY_A alpha > 255\n");
-        v = 255;
+        alpha = 255;
     }
-    evtBeginSkyParameterTransition(func_0010D428(0), v);
+    evtBeginSkyParameterTransition(func_0010D428(0), alpha);
     return 1;
 }
 

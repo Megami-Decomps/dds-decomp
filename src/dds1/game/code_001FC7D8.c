@@ -30,6 +30,17 @@ extern void func_00203F98();
 extern void func_00203CA8();
 extern void func_00204048(s32, s32);
 extern void func_00204080();
+typedef struct EffChildCounters {
+    u8 pad00[0x318];
+    u8 firstCountdown;
+    u8 secondCountdown;
+} EffChildCounters;
+
+typedef struct EffCounterOwner {
+    u8 pad00[0x20];
+    EffChildCounters *child;
+} EffCounterOwner;
+
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC7D8);
 
@@ -60,13 +71,14 @@ s32 func_001FD5B0(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD5C8);
 
-void func_001FD990(s32 arg0) {
-    u8 temp_v0;
+void func_001FD990(EffCounterOwner *owner) {
+    u8 remaining;
+    EffChildCounters *child;
 
-    arg0 = *(s32 *)(arg0 + 0x20);
-    temp_v0 = *(u8 *)(arg0 + 0x318);
-    if (temp_v0 != 0) {
-        *(u8 *)(arg0 + 0x318) = temp_v0 + 0xff;
+    child = owner->child;
+    remaining = child->firstCountdown;
+    if (remaining != 0) {
+        child->firstCountdown = remaining + 0xff;
     }
 }
 
@@ -74,13 +86,14 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD9B0);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDA78);
 
-void func_001FDED8(s32 arg0) {
-    u8 temp_v0;
+void func_001FDED8(EffCounterOwner *owner) {
+    u8 remaining;
+    EffChildCounters *child;
 
-    arg0 = *(s32 *)(arg0 + 0x20);
-    temp_v0 = *(u8 *)(arg0 + 0x319);
-    if (temp_v0 != 0) {
-        *(u8 *)(arg0 + 0x319) = temp_v0 + 0xff;
+    child = owner->child;
+    remaining = child->secondCountdown;
+    if (remaining != 0) {
+        child->secondCountdown = remaining + 0xff;
     }
 }
 

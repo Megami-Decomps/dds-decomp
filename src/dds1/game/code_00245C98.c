@@ -37,6 +37,16 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 func_00101A70();
 
+typedef struct EvtDispatchState {
+    u8 pad00[0x84];
+    s32 mode;
+    u8 pad88[0x1C];
+    s32 progressTicks; /* 0xA4 */
+    u8 padA8[4];
+    s32 action;
+    s16 substate;
+} EvtDispatchState;
+
 s32 evtIsFadeDispatchIdle(void) {
     s32 temp_v0 = kwlnFadeIsActive();
 
@@ -47,7 +57,7 @@ s32 evtIsFadeDispatchIdle(void) {
 }
 
 void evtInstallStateTable(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x84) == 2) {
+    if (((EvtDispatchState *)arg0)->mode == 2) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AA68;
         func_002858E8(arg0 + 0x54, (s32)D_0036AA68 + 0xC4);
     }
@@ -81,7 +91,7 @@ void evtSetupDispatchSync(s32 arg0) {
 }
 
 void evtInstallStateTableB(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x84) == 1) {
+    if (((EvtDispatchState *)arg0)->mode == 1) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AA84;
         func_002858E8(arg0 + 0x54, (s32)D_0036AA84 + 0xA8);
     }
@@ -98,7 +108,7 @@ s32 func_00246160(void) {
 
 s32 evtSelectStateAction(void) {
     s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = *(s32 *)(temp_v0 + 0xAC);
+    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
 
     if (temp_v1 == 5) {
         func_002605B0(temp_v0, 3);
@@ -110,7 +120,7 @@ s32 evtSelectStateAction(void) {
         *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
         func_00260570(temp_v2, 10);
     }
-    *(s16 *)(temp_v0 + 0xB0) = 0;
+    ((EvtDispatchState *)temp_v0)->substate = 0;
     return 1;
 }
 
@@ -131,7 +141,7 @@ void evtSetupDispatchSyncB(s32 arg0) {
 }
 
 void evtInstallStateTableC(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x84) == 1) {
+    if (((EvtDispatchState *)arg0)->mode == 1) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AAA0;
         func_002858E8(arg0 + 0x54, (s32)D_0036AAA0 + 0x8C);
     }
@@ -148,7 +158,7 @@ s32 func_00246538(void) {
 
 s32 evtSelectStateActionB(void) {
     s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = *(s32 *)(temp_v0 + 0xAC);
+    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
 
     if (temp_v1 == 5) {
         func_002605B0(temp_v0, 3);
@@ -160,7 +170,7 @@ s32 evtSelectStateActionB(void) {
         *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
         func_00260570(temp_v2, 10);
     }
-    *(s16 *)(temp_v0 + 0xB0) = 0;
+    ((EvtDispatchState *)temp_v0)->substate = 0;
     return 1;
 }
 
@@ -181,7 +191,7 @@ void evtSetupDispatchSyncC(s32 arg0) {
 }
 
 void evtInstallStateTableD(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x84) == 2) {
+    if (((EvtDispatchState *)arg0)->mode == 2) {
         *(s32 *)(arg0 + 0x58) = (s32)D_0036AABC;
         func_002858E8(arg0 + 0x54, (s32)D_0036AABC + 0x70);
     }
@@ -190,15 +200,15 @@ void evtInstallStateTableD(s32 arg0) {
 s32 evtEnableStateFlag(void) {
     s32 temp_v0 = func_00101A70();
 
-    if ((*(s32 *)(temp_v0 + 0xAC) == 1) && (func_00245A40(temp_v0) == 0)) {
-        *(s32 *)(temp_v0 + 0x84) = 2;
+    if ((((EvtDispatchState *)temp_v0)->action == 1) && (func_00245A40(temp_v0) == 0)) {
+        ((EvtDispatchState *)temp_v0)->mode = 2;
     }
     return 1;
 }
 
 s32 evtSelectStateActionC(void) {
     s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = *(s32 *)(temp_v0 + 0xAC);
+    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
 
     if (temp_v1 == 5) {
         func_002605B0(temp_v0, 3);
@@ -210,7 +220,7 @@ s32 evtSelectStateActionC(void) {
         *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
         func_00260570(temp_v2, 10);
     }
-    *(s16 *)(temp_v0 + 0xB0) = 0;
+    ((EvtDispatchState *)temp_v0)->substate = 0;
     return 1;
 }
 
@@ -245,10 +255,10 @@ s64 evtQueryStateProgress(u64 arg0) {
 
     if (temp_v1 == 0) {
         if ((*(s32 *)(temp_v0 + 0x54) == 0) && (func_0024DC08() == 0)) {
-            s32 temp_v2 = *(s32 *)(temp_v0 + 0xA4);
+            s32 temp_v2 = ((EvtDispatchState *)temp_v0)->progressTicks;
 
             if ((f32)temp_v2 < 20.0f) {
-                *(s32 *)(temp_v0 + 0xA4) = temp_v2 + 1;
+                ((EvtDispatchState *)temp_v0)->progressTicks = temp_v2 + 1;
             } else {
                 func_002858E8(temp_v0 + 0x54, (s32)D_0036AB64);
             }
@@ -283,10 +293,10 @@ s32 func_00246E00(void) {
 s32 evtAdvanceStateStage(void) {
     s32 temp_v0 = func_00101A70();
 
-    if (*(s32 *)(temp_v0 + 0xAC) == 0xA) {
+    if (((EvtDispatchState *)temp_v0)->action == 0xA) {
         s32 temp_v1;
 
-        *(s16 *)(temp_v0 + 0xB0) = 0xA;
+        ((EvtDispatchState *)temp_v0)->substate = 0xA;
         func_002605B0(temp_v0, 6);
         temp_v1 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
         *(s32 *)(temp_v1 + 0x2C) = (s32)func_0025ECD0;

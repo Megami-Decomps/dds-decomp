@@ -44,20 +44,20 @@ void func_002C5FB8(u32 arg0) {
     func_00195CD8(arg0, 1, 3);
 }
 
-s32 func_002C5FD8(s32 x, s32 n) {
-    s32 i = 0;
-    s32 cnt = 0;
-    s32 ni;
+s32 func_002C5FD8(s32 mask, s32 ordinal) {
+    s32 bitIndex = 0;
+    s32 count = 0;
+    s32 nextIndex;
 
     do {
-        ni = i + 1;
-        if (n == ni) {
+        nextIndex = bitIndex + 1;
+        if (ordinal == nextIndex) {
             break;
         }
-        cnt += (x >> i) & 1;
-        i = ni;
-    } while (i < 0x1F);
-    return cnt;
+        count += (mask >> bitIndex) & 1;
+        bitIndex = nextIndex;
+    } while (bitIndex < 0x1F);
+    return count;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6010);

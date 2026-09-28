@@ -31,6 +31,10 @@ typedef struct EventViewerState {
     s32 fallbackEntry;
     u8 pad2030[0x390];
     s32 updateCount;
+    u8 pad23C4[0x2C];
+    s32 glyphTickCount; /* 0x23F0 */
+    u8 pad23F4[0x1C];
+    u32 glyph; /* 0x2410: FrFontGlyph passed to func_00195868 */
 } EventViewerState;
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CBA0);
@@ -109,14 +113,15 @@ void func_0022F9F0(void) {
 
 void func_0022F9F8(s32 arg0) {
     s32 temp_v0;
+    EventViewerState *viewer = (EventViewerState *)arg0;
 
-    if ((*(s32 *)(arg0 + 0x18) < *(s32 *)(arg0 + 0x14) - 3) && (0 < *(s32 *)(arg0 + 0x23f0)))
+    if ((*(s32 *)(arg0 + 0x18) < *(s32 *)(arg0 + 0x14) - 3) && (0 < viewer->glyphTickCount))
     {
-        func_00195868(*(u32 *)(arg0 + 0x2410));
-        temp_v0 = *(s32 *)(arg0 + 0x23f0) + 1;
-        *(s32 *)(arg0 + 0x23f0) = temp_v0;
+        func_00195868(viewer->glyph);
+        temp_v0 = viewer->glyphTickCount + 1;
+        viewer->glyphTickCount = temp_v0;
         if (0x1d < temp_v0) {
-            *(u32 *)(arg0 + 0x23f0) = 0;
+            viewer->glyphTickCount = 0;
         }
     }
 }

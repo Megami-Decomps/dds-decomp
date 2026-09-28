@@ -38,7 +38,7 @@ typedef struct TextStream {
 /* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
 typedef struct MemNode {
     u32 unk0;              /* 0x0 */
-    struct MemNode *unk4;  /* 0x4 */
+    struct MemNode *next;  /* 0x4 */
 } MemNode;
 
 /* Field block split by func_00198038. */
@@ -321,13 +321,13 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
 INCLUDE_ASM(const s32, "game/code_00196478", func_001981A8);
 
 void *func_00198248(MemNode *queue) {
-    MemNode *head = queue->unk4;
+    MemNode *head = queue->next;
 
     if (head->unk0 == 0) {
         return NULL;
     }
-    queue->unk4 = head->unk4;
-    head->unk4 = NULL;
+    queue->next = head->next;
+    head->next = NULL;
     return head + 1;
 }
 
@@ -336,11 +336,11 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     if (payload == NULL) {
         return 0;
     }
-    if (node->unk4 != NULL) {
+    if (node->next != NULL) {
         return 0;
     }
-    node->unk4 = queue->unk4;
-    queue->unk4 = node;
+    node->next = queue->next;
+    queue->next = node;
     return 1;
 }
 

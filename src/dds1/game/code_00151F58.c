@@ -106,36 +106,36 @@ void func_00152050(BillObj *effect, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00152100);
 
-s32 func_00152170(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 0) {
-        return *(s32 *)(*(s32 *)(arg0 + 0x30));
+s32 func_00152170(BillObj *effect) {
+    if (effect->unk2C == 0) {
+        return *(s32 *)effect->unk30;
     }
     return 0;
 }
 
-u16 func_00152190(s32 arg0) {
-    return *(u16 *)(arg0 + 0x2c);
+u16 func_00152190(BillObj *effect) {
+    return effect->unk2C;
 }
 
-void func_00152198(s32 arg0, s32 arg1) {
-    s32 v = arg1 & 0xffff;
+void func_00152198(BillObj *effect, s32 value) {
+    s32 v = value & 0xffff;
 
-    switch (*(u16 *)(arg0 + 0x2c)) {
+    switch (effect->unk2C) {
     case 0:
-        *(s16 *)(*(s32 *)(arg0 + 0x30) + 4) = v;
+        *(s16 *)((u8 *)effect->unk30 + 4) = v;
         break;
     case 1:
-        *(s16 *)(arg0 + 0x3c) = v;
+        effect->unk3C = v;
         break;
     }
 }
 
-u16 func_001521D0(s32 arg0) {
-    switch (*(u16 *)(arg0 + 0x2c)) {
+u16 func_001521D0(BillObj *effect) {
+    switch (effect->unk2C) {
     case 0:
-        return *(u16 *)(*(s32 *)(arg0 + 0x30) + 4);
+        return *(u16 *)((u8 *)effect->unk30 + 4);
     case 1:
-        return *(u16 *)(arg0 + 0x3c);
+        return effect->unk3C;
     default:
         return 0;
     }

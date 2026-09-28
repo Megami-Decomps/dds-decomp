@@ -10,8 +10,8 @@ typedef struct EvtUnit {
     u32 unk6C;          /* 0x6C */
     s128 unk70;          /* 0x70: 16-byte vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
-    u32 *unk8C;         /* 0x8C: flag word updated by the status opcodes */
-    void *unk90;        /* 0x90 */
+    u32 *flagWord;       /* 0x8C: status opcodes update its first bit */
+    void *linkedUnit;    /* 0x90: world unit attached by setup helpers */
     s32 unk94;          /* 0x94 */
     s32 unk98;          /* 0x98 */
     s32 unk9C;          /* 0x9C */
@@ -131,7 +131,7 @@ void func_00222B00(EvtUnit *work, s32 arg1, s32 arg2) {
     unit = func_00110A48(dds3GetWorldSecondaryObject(), arg1, 0x11);
     if (unit != NULL) {
         func_00222AC0(work, (s128 *)(*(u32 *)((u8 *)unit + 0x18) + 0x10), arg2);
-        work->unk90 = unit;
+        work->linkedUnit = unit;
     }
 }
 
@@ -144,7 +144,7 @@ void func_00222BA8(EvtUnit *work, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     if (unit != NULL) {
         func_00222B70(work, arg1, (s128 *)(*(u32 *)((u8 *)unit + 0x18)), arg3, arg4, arg5, arg6, arg7);
         work->unkAE = 1;
-        work->unk90 = unit;
+        work->linkedUnit = unit;
     }
 }
 
@@ -421,7 +421,7 @@ u32 func_002247B0(void) {
     if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->unk8C, func_0010D428(1)) != 0;
+    return mdlCheckNodeByte30(unit->flagWord, func_0010D428(1)) != 0;
 }
 
 u32 func_00224828(void) {
@@ -518,7 +518,7 @@ u32 evtUnitClearFlagBit(void) {
     id = func_0010D428(0);
     unit = func_00222090(id);
     if (unit != NULL) {
-        *unit->unk8C &= ~1;
+        *unit->flagWord &= ~1;
     }
     return 1;
 }
@@ -530,7 +530,7 @@ u32 evtUnitSetFlagBit(void) {
     id = func_0010D428(0);
     unit = func_00222090(id);
     if (unit != NULL) {
-        *unit->unk8C |= 1;
+        *unit->flagWord |= 1;
     }
     return 1;
 }

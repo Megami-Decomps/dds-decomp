@@ -81,12 +81,12 @@ s32 func_0016FF20(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x14;
 }
 
-void func_0016FF38(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x50) = arg1;
+void func_0016FF38(EffectRecordGroup *group, u32 incrementBits) {
+    *(u32 *)&group->increment = incrementBits;
 }
 
-void func_0016FF40(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+void func_0016FF40(EffectRecordGroup *group, u32 value) {
+    group->value54 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FF48);

@@ -166,21 +166,21 @@ u16 dds3Clamp99(s32 arg0) {
     return temp < 100 ? temp : 99;
 }
 
-Entry1A4 *dds3FindEntry(s32 arg0) {
-    Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
-    s32 n = 0;
+Entry1A4 *dds3FindEntry(s32 rosterIndex) {
+    Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
+    s32 index = 0;
 
     do {
-        if (p->rosterIndex != arg0) {
-            n++;
+        if (entry->rosterIndex != rosterIndex) {
+            index++;
         } else {
-            if (p->flags & 1) {
-                return p;
+            if (entry->flags & 1) {
+                return entry;
             }
-            n++;
+            index++;
         }
-        p++;
-    } while (n < 5);
+        entry++;
+    } while (index < 5);
     return NULL;
 }
 
@@ -191,20 +191,20 @@ u8 func_0011A968(s32 arg0) {
 }
 
 s32 dds3EntryMax(void) {
-    Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
-    s32 best = 0;
-    s32 n = 4;
+    Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
+    s32 maximum = 0;
+    s32 remaining = 4;
 
     do {
-        if (p->flags & 1) {
-            if (best < p->unk14) {
-                best = p->unk14;
+        if (entry->flags & 1) {
+            if (maximum < entry->unk14) {
+                maximum = entry->unk14;
             }
         }
-        p++;
-        n--;
-    } while (n >= 0);
-    return best;
+        entry++;
+        remaining--;
+    } while (remaining >= 0);
+    return maximum;
 }
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011A9C8);

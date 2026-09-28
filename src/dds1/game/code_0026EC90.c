@@ -572,11 +572,21 @@ void mnuSetStaffDisplayMode(s32 next, u8 *context) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271368);
 
+typedef struct StaffSpriteHandles {
+    u8 pad00[0x118];
+    u32 primaryImage;
+    u32 resourceList;
+    u32 secondaryImage;
+    u32 images[3];
+    u32 extraImages[2];
+} StaffSpriteHandles;
+
 void mnuReleaseStaffSpriteHandles(u8 *display) {
-    u32 *image = (u32 *)(display + 0x130);
+    StaffSpriteHandles *handles = (StaffSpriteHandles *)display;
+    u32 *image = handles->extraImages;
     u32 index = 0;
-    effDestroyPackedBatch(*(u32 *)(display + 0x118));
-    effDestroyPackedBatch(*(u32 *)(display + 0x120));
+    effDestroyPackedBatch(handles->primaryImage);
+    effDestroyPackedBatch(handles->secondaryImage);
     do {
         effDestroyPackedBatch(*image++);
         index++;
@@ -615,12 +625,13 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271B50);
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271D30);
 
 void func_00271DF8(u8 *display) {
-    u32 *image = (u32 *)(display + 0x124);
+    StaffSpriteHandles *handles = (StaffSpriteHandles *)display;
+    u32 *image = handles->images;
     u32 index = 0;
     do {
         func_0027C430(*image++);
     } while (++index < 3);
-    mnuReleaseResourceList(*(u32 *)(display + 0x11c));
+    mnuReleaseResourceList(handles->resourceList);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271E58);

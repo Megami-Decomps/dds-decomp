@@ -9,24 +9,24 @@ extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
 
 
-typedef struct EEF0Node EEF0Node;
+typedef struct EffTransformNode EffTransformNode;
 
 typedef struct {
     u8 pad00[0x4];              /* 0x00 */
-    void (*notify)(EEF0Node *); /* 0x04 called with the node being destroyed */
-} EEF0Owner;
+    void (*notify)(EffTransformNode *); /* 0x04 called with the node being destroyed */
+} EffTransformOwner;
 
 /* Transform node (0xD0 bytes). The links at 0x10/0x20/0x24 tie a node into
  * its owner's list; inner points at a child node whose vectors live in VU
  * registers between calls (loaded with lqc2, stored with sqc2).
  */
-struct EEF0Node {
+struct EffTransformNode {
     u8 pad00[0x10];   /* 0x00 */
-    EEF0Owner *owner; /* 0x10 */
+    EffTransformOwner *owner; /* 0x10 */
     u8 pad14[0x8];    /* 0x14 */
-    EEF0Node *inner;  /* 0x1C */
-    EEF0Node *prev;   /* 0x20 */
-    EEF0Node *next;   /* 0x24 */
+    EffTransformNode *inner;  /* 0x1C */
+    EffTransformNode *prev;   /* 0x20 */
+    EffTransformNode *next;   /* 0x24 */
     u8 pad28[0x18];   /* 0x28 */
     u128 vec40;       /* 0x40 */
     u128 vec50;       /* 0x50 */
@@ -37,7 +37,7 @@ struct EEF0Node {
     u128 vecA0;       /* 0xA0 copy of vec60 */
     u8 vecB0[0x10];   /* 0xB0 cleared on alloc */
     u32 flags;        /* 0xC0 bit0 set, bit1 cleared on vector write */
-    f32 unkC4;        /* 0xC4 */
+    f32 scalar;       /* 0xC4 */
     u32 unkC8;        /* 0xC8 */
 };
 
@@ -94,10 +94,10 @@ INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F2F0);
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F418);
 
-void effObjNodeDestroy(EEF0Node *arg0) {
-    EEF0Owner *owner;
-    EEF0Node *next;
-    EEF0Node *prev;
+void effObjNodeDestroy(EffTransformNode *arg0) {
+    EffTransformOwner *owner;
+    EffTransformNode *next;
+    EffTransformNode *prev;
 
     if (arg0 != NULL) {
         owner = arg0->owner;
@@ -120,8 +120,8 @@ void effObjNodeDestroy(EEF0Node *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjInnerCreate);
 
-void effObjFreeInner(EEF0Node *node) {
-    EEF0Node *inner;
+void effObjFreeInner(EffTransformNode *node) {
+    EffTransformNode *inner;
 
     if (node != NULL) {
         inner = node->inner;
@@ -132,19 +132,19 @@ void effObjFreeInner(EEF0Node *node) {
     }
 }
 
-void effObjSetNodeFlags(EEF0Node *node, u32 flags) {
+void effObjSetNodeFlags(EffTransformNode *node, u32 flags) {
     node->flags |= flags;
 }
 
-void effObjClearNodeFlags(EEF0Node *node, u32 flags) {
+void effObjClearNodeFlags(EffTransformNode *node, u32 flags) {
     node->flags &= ~flags;
 }
 
-u8 effObjTestNodeFlags(EEF0Node *node, u32 flags) {
+u8 effObjTestNodeFlags(EffTransformNode *node, u32 flags) {
     return (node->flags & flags) != 0;
 }
 
-void effObjInnerVecInit(EEF0Node *arg0) {
+void effObjInnerVecInit(EffTransformNode *arg0) {
     u8 *p40 = (u8 *)arg0 + 0x40;
     u8 *p50;
     u8 *p60;
@@ -186,45 +186,45 @@ void effObjInnerVecInit(EEF0Node *arg0) {
     );
 }
 
-void effObjInnerVecBackup(EEF0Node *arg0) {
+void effObjInnerVecBackup(EffTransformNode *arg0) {
     EEF0_COPY128((u128 *)((u8 *)arg0 + 0xA0), (u128 *)((u8 *)arg0 + 0x60));
     EEF0_COPY128((u128 *)((u8 *)arg0 + 0x90), (u128 *)((u8 *)arg0 + 0x50));
     EEF0_COPY128((u128 *)((u8 *)arg0 + 0x80), (u128 *)((u8 *)arg0 + 0x40));
 }
 
-void effObjSetInnerFloat(EEF0Node *arg0, f32 fparg0) {
-    arg0->inner->unkC4 = fparg0;
+void effObjSetInnerFloat(EffTransformNode *arg0, f32 fparg0) {
+    arg0->inner->scalar = fparg0;
 }
 
-f32 effObjGetInnerFloat(EEF0Node *arg0) {
-    return arg0->inner->unkC4;
+f32 effObjGetInnerFloat(EffTransformNode *arg0) {
+    return arg0->inner->scalar;
 }
 
-void effObjSetInnerFirstVec(EEF0Node *arg0, u128 *arg1) {
-    EEF0Node *inner = arg0->inner;
+void effObjSetInnerFirstVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
     u128 *dst = (u128 *)((u8 *)inner + 0x40);
 
     inner->flags = (inner->flags | 1) & ~2;
     EEF0_COPY128(dst, arg1);
 }
 
-void effObjSetInnerSecondVec(EEF0Node *arg0, u128 *arg1) {
-    EEF0Node *inner = arg0->inner;
+void effObjSetInnerSecondVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
     u128 *dst = (u128 *)((u8 *)inner + 0x50);
 
     inner->flags = (inner->flags | 1) & ~2;
     EEF0_COPY128(dst, arg1);
 }
 
-void effObjSetInnerThirdVec(EEF0Node *arg0, u128 *arg1) {
-    EEF0Node *inner = arg0->inner;
+void effObjSetInnerThirdVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
     u128 *dst = (u128 *)((u8 *)inner + 0x60);
 
     inner->flags = (inner->flags | 1) & ~2;
     EEF0_COPY128(dst, arg1);
 }
 
-void effObjFetchInnerFirstVec(EEF0Node *arg0) {
+void effObjFetchInnerFirstVec(EffTransformNode *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x40;
 
     __asm__ volatile (
@@ -238,7 +238,7 @@ void effObjFetchInnerFirstVec(EEF0Node *arg0) {
     );
 }
 
-void effObjFetchInnerSecondVecNorm(EEF0Node *arg0) {
+void effObjFetchInnerSecondVecNorm(EffTransformNode *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x50;
 
     __asm__ volatile (
@@ -252,7 +252,7 @@ void effObjFetchInnerSecondVecNorm(EEF0Node *arg0) {
     effMiscNormalizeVU();
 }
 
-void effObjFetchInnerThirdVec(EEF0Node *arg0) {
+void effObjFetchInnerThirdVec(EffTransformNode *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x60;
 
     __asm__ volatile (
@@ -265,8 +265,8 @@ void effObjFetchInnerThirdVec(EEF0Node *arg0) {
     );
 }
 
-void effObjAddInnerFirstVec(EEF0Node *arg0, void *arg1) {
-    EEF0Node *inner = arg0->inner;
+void effObjAddInnerFirstVec(EffTransformNode *arg0, void *arg1) {
+    EffTransformNode *inner = arg0->inner;
     u8 *src = (u8 *)inner + 0x40;
     u8 *dst;
 
@@ -286,8 +286,8 @@ void effObjAddInnerFirstVec(EEF0Node *arg0, void *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjQuatMulInnerSecondVec);
 
-void effObjMulInnerThirdVec(EEF0Node *arg0, void *arg1) {
-    EEF0Node *inner = arg0->inner;
+void effObjMulInnerThirdVec(EffTransformNode *arg0, void *arg1) {
+    EffTransformNode *inner = arg0->inner;
     u8 *src = (u8 *)inner + 0x60;
     u8 *dst;
 

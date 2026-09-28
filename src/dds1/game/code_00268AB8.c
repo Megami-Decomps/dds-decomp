@@ -78,11 +78,16 @@ u32 func_002694F8(void) {
     return 0x599;
 }
 
-u32 func_00269500(void) {
-    s32 temp_v0;
+typedef struct TitleEffectState {
+    s32 unk00;
+    s32 frameCounter;
+} TitleEffectState;
 
-    temp_v0 = func_00101A70();
-    *(s32 *)(temp_v0 + 4) = *(s32 *)(temp_v0 + 4) + 1;
+u32 func_00269500(void) {
+    TitleEffectState *state;
+
+    state = (TitleEffectState *)func_00101A70();
+    state->frameCounter = state->frameCounter + 1;
     return 0;
 }
 
@@ -94,16 +99,16 @@ void func_00269530(void) {
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269558);
 
 void mnuResetTitleEffectState(s32 effect) {
-    s32 context = func_00101A70(D_003BC588);
+    TitleEffectState *state = (TitleEffectState *)func_00101A70(D_003BC588);
     if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
     sdfSoundSendNamedCommand(effect, 0x7f);
-    *(s32 *)(context + 4) = 0;
+    state->frameCounter = 0;
 }
 
-void func_00269628(s32 arg0) {
-    *(s32 *)func_00101A70(D_003BC588) = arg0;
+void func_00269628(s32 value) {
+    ((TitleEffectState *)func_00101A70(D_003BC588))->unk00 = value;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFC80);
@@ -122,7 +127,7 @@ void func_00269728(void) {
 }
 
 s32 func_00269730(void) {
-    return *(s32 *)(func_00101A70(D_003BC588) + 4);
+    return ((TitleEffectState *)func_00101A70(D_003BC588))->frameCounter;
 }
 
 u32 func_00269758(void) {

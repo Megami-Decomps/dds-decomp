@@ -334,38 +334,38 @@ void kwlnFadeClear(void) {
     D_003BA920.a = 0;
 }
 
-void kwlnFadeSetColor(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
+void kwlnFadeSetColor(s8 red, s8 green, s8 blue, s8 alpha) {
     D_003BA904 &= ~3;
-    D_003BA920.r = arg0;
-    D_003BA920.g = arg1;
-    D_003BA920.b = arg2;
-    D_003BA920.a = arg3;
+    D_003BA920.r = red;
+    D_003BA920.g = green;
+    D_003BA920.b = blue;
+    D_003BA920.a = alpha;
 }
 
 void kwlnFadeGetColor(KwlnFadeColor **color) {
     *color = &D_003BA920;
 }
 
-void kwlnFadeSetRGB(s8 arg0, s8 arg1, s8 arg2) {
-    D_003BA920.r = arg0;
-    D_003BA920.g = arg1;
-    D_003BA920.b = arg2;
+void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
+    D_003BA920.r = red;
+    D_003BA920.g = green;
+    D_003BA920.b = blue;
 }
 
-void kwlnFadeOutStart(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
-    D_003BA920.r = arg0;
-    D_003BA920.g = arg1;
-    D_003BA920.b = arg2;
+void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
+    D_003BA920.r = red;
+    D_003BA920.g = green;
+    D_003BA920.b = blue;
     D_003BA920.a = -0x80;
-    if (arg3 == 0) {
+    if (duration == 0) {
         D_003BA920.a = 0;
         D_003BD6C0 = 0;
         D_003BD6C2 = 0;
         kwlnFadeClear();
         return;
     }
-    D_003BD6C2 = arg3;
-    D_003BD6C0 = arg3;
+    D_003BD6C2 = duration;
+    D_003BD6C0 = duration;
     D_003BA904 = (D_003BA904 | 1) & ~2;
 }
 
@@ -383,19 +383,19 @@ void kwlnFadeStartIn(s32 duration) {
     }
 }
 
-void kwlnFadeInStart(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
-    D_003BA920.r = arg0;
-    D_003BA920.g = arg1;
-    D_003BA920.b = arg2;
+void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
+    D_003BA920.r = red;
+    D_003BA920.g = green;
+    D_003BA920.b = blue;
     D_003BA920.a = 0;
-    if (arg3 == 0) {
+    if (duration == 0) {
         D_003BD6C0 = 0;
         D_003BD6C2 = 0;
         D_003BA920.a = -0x80;
         D_003BA904 &= ~3;
         return;
     }
-    D_003BD6C2 = arg3;
+    D_003BD6C2 = duration;
     D_003BD6C0 = 0;
     D_003BA904 = (D_003BA904 & ~1) | 2;
 }
