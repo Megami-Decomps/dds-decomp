@@ -30,6 +30,11 @@ typedef struct BattleEffectState {
     f32 speed;
 } BattleEffectState;
 
+typedef struct BattleActionUnit {
+    u8 pad0[0x110];
+    u32 flags;
+} BattleActionUnit;
+
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00224FC0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002251A0);
@@ -74,8 +79,8 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_002260E0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002261A8);
 
-s32 func_002262A0(u32 unit, s32 action) {
-    u32 flags = *(u32 *)(unit + 0x110);
+s32 func_002262A0(BattleActionUnit *unit, s32 action) {
+    u32 flags = unit->flags;
     if ((flags & 0x400) == 0) {
         return action;
     }

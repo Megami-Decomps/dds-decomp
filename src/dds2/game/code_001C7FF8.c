@@ -31,6 +31,11 @@ typedef struct {
     s32 flags;
 } SceneInitializer;
 
+typedef struct RosterAvailability {
+    u8 flags;
+    u8 pad[7];
+} RosterAvailability;
+
 extern SceneInitializer D_003B6938[];
 
 extern u32 func_001B57B0(void);
@@ -127,23 +132,23 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8768);
 
 void func_001C89A0(s32 unused, s16 *count) {
     u8 *roster;
-    u8 *availability;
+    RosterAvailability *availability;
     u8 *output;
     s32 found = 0;
     s32 i = 0;
     func_001AA6F8();
     roster = (u8 *)D_00435DD0 + 0x1340;
-    availability = (u8 *)D_00435E38;
+    availability = (RosterAvailability *)D_00435E38;
     output = (u8 *)D_003B5B10;
     do {
-        if (*roster != 0 && (*availability & 2) != 0) {
+        if (*roster != 0 && (availability->flags & 2) != 0) {
             output[0] = i;
             found++;
             output[1] = *roster;
             output += 2;
         }
         i++;
-        availability += 8;
+        availability++;
         roster++;
     } while (i < 0x100);
     *count = found;

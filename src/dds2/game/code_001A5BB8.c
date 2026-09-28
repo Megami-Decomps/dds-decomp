@@ -723,8 +723,8 @@ s32 getSoundResourceForIndex(s32 index) {
     return (s32)D_003B4E40[resource];
 }
 
-void *func_001AED78(s32 arg0) {
-    return D_003B4E88[*(u16 *)(arg0 + 0x124)];
+void *func_001AED78(UiObject *object) {
+    return D_003B4E88[object->index];
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004152F8);
@@ -755,16 +755,16 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0760);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B08A8);
 
-s32 func_001B08F8(s32 arg0) {
-    u16 temp_v0;
-    s32 temp_v1;
+s32 func_001B08F8(UiObject *object) {
+    u16 status;
+    s32 amount;
 
-    temp_v0 = *(u16 *)(arg0 + 0x12e) & 0x7fff;
-    temp_v1 = 0;
-    if ((temp_v0 == 0x80) || (temp_v0 == 0x400)) {
-        temp_v1 = (s32)-(u32)*(u16 *)(arg0 + 0x128) / 5;
+    status = object->statusFlags & 0x7fff;
+    amount = 0;
+    if ((status == 0x80) || (status == 0x400)) {
+        amount = (s32)-(u32)object->maximumValue / 5;
     }
-    return temp_v1;
+    return amount;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0940);
@@ -777,10 +777,10 @@ f32 func_001B0B20(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0B30);
 
-u8 func_001B0C18(s32 object, s32 index) {
+u8 func_001B0C18(UiObject *object, s32 index) {
     if (index == 0) {
-        if ((*(u32 *)(object + 0x110) & 0x400) != 0) {
-            return *(u8 *)(D_00435DEC + *(u16 *)(object + 0x124) * 76 + 0x48);
+        if ((object->flags & 0x400) != 0) {
+            return *(u8 *)(D_00435DEC + object->index * 76 + 0x48);
         }
         return 12;
     }

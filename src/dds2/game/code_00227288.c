@@ -91,6 +91,15 @@ typedef struct BattleCombatant {
     struct BattleCombatant *next;
 } BattleCombatant;
 
+typedef struct BattleListEntry {
+    u8 pad0[6];
+    u16 primaryCount;
+    u16 primaryLimit;
+    u16 secondaryCount;
+    u16 secondaryLimit;
+    u16 flags;
+} BattleListEntry;
+
 extern s32 func_00231B80(s32, s32, s32);
 
 extern s32 func_002C8168(void *);
@@ -455,7 +464,8 @@ INCLUDE_ASM(const s32, "game/code_00227288", battleHasRestrictedUnit);
 s32 battleListHasMarkedFlag(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) == 0x4000) {
+        BattleListEntry *entry = (BattleListEntry *)entries[i];
+        if ((entry->flags & 0x7fff) == 0x4000) {
             return 1;
         }
     }
@@ -465,7 +475,8 @@ s32 battleListHasMarkedFlag(u8 **entries, s32 count) {
 s32 battleListCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if (*(u16 *)(entries[i] + 6) < *(u16 *)(entries[i] + 8)) {
+        BattleListEntry *entry = (BattleListEntry *)entries[i];
+        if (entry->primaryCount < entry->primaryLimit) {
             return 0;
         }
     }
@@ -475,7 +486,8 @@ s32 battleListCountersWithinLimits(u8 **entries, s32 count) {
 s32 battleListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if (*(u16 *)(entries[i] + 0xa) < *(u16 *)(entries[i] + 0xc)) {
+        BattleListEntry *entry = (BattleListEntry *)entries[i];
+        if (entry->secondaryCount < entry->secondaryLimit) {
             return 0;
         }
     }
@@ -485,7 +497,8 @@ s32 battleListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
 s32 battleListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) & flags) {
+        BattleListEntry *entry = (BattleListEntry *)entries[i];
+        if ((entry->flags & 0x7fff) & flags) {
             return 1;
         }
     }

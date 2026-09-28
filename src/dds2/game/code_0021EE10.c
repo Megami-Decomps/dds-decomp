@@ -66,6 +66,18 @@ extern void func_00222450();
 
 extern void func_00224598();
 
+typedef struct ActionUnit {
+    u8 pad0[0x110];
+    u32 flags;
+    u32 stateFlags;
+    u8 pad118[8];
+    u16 statusFlags;
+    u8 pad122[2];
+    u16 mode;
+    u8 pad126[0xE];
+    u32 action;
+} ActionUnit;
+
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021EE10);
 
 void func_0021EEF8(u32 unused, u32 actor) {
@@ -192,8 +204,8 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002205C0);
 
-s32 func_002206A0(s32 actor, s32 action) {
-    if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
+s32 func_002206A0(ActionUnit *actor, s32 action) {
+    if ((actor->flags & 0x400) == 0) {
         return 0;
     }
     switch (action) {
@@ -241,11 +253,11 @@ void func_00220998(void) {
     func_0011AEE0(9);
 }
 
-void func_002209B0(u32 unit) {
-    if ((*(u32 *)(unit + 0x110) & 0x200) != 0 &&
-        *(u16 *)(unit + 0x124) == 9) {
-        *(u32 *)(unit + 0x114) |= 0x2000;
-        *(u16 *)(unit + 0x120) |= 0x4000;
+void func_002209B0(ActionUnit *unit) {
+    if ((unit->flags & 0x200) != 0 &&
+        unit->mode == 9) {
+        unit->stateFlags |= 0x2000;
+        unit->statusFlags |= 0x4000;
     }
 }
 

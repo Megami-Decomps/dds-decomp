@@ -68,6 +68,18 @@ typedef struct MenuRecord {
     u32 unk_10;
     u8 unk_14[4];
 } MenuRecord;
+
+typedef struct MantraDrawItem {
+    u32 kind;
+    u32 flags;
+    u8 pad8[0x1C];
+} MantraDrawItem;
+
+typedef struct MantraDrawPool {
+    u32 handle;
+    MantraDrawItem *items;
+    s32 count;
+} MantraDrawPool;
 extern u32 func_002C7FF0(const char *);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
                             void (*)(), void *);
@@ -297,27 +309,29 @@ u32 func_0026FAD0(u32 count) {
     return pool;
 }
 
-void func_0026FB68(u32 pool) {
-    s32 count = *(s32 *)(pool + 8);
-    u32 item = *(u32 *)(pool + 4);
+void func_0026FB68(u32 address) {
+    MantraDrawPool *pool = (MantraDrawPool *)address;
+    s32 count = pool->count;
+    MantraDrawItem *item = pool->items;
     s32 i;
-    for (i = 0; i < count; i++, item += 0x24) {
-        if (*(u32 *)(item + 4) & 1) {
-            func_0026FBD8(item);
+    for (i = 0; i < count; i++, item++) {
+        if (item->flags & 1) {
+            func_0026FBD8((u32)item);
         }
     }
-    func_003297C8(*(u32 *)pool);
+    func_003297C8(pool->handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026FBD8);
 
-s32 func_0026FC40(s32 list) {
-    s32 count = *(s32 *)(list + 8);
+s32 func_0026FC40(s32 address) {
+    MantraDrawPool *pool = (MantraDrawPool *)address;
+    s32 count = pool->count;
     s32 i;
-    s32 item = *(s32 *)(list + 4);
-    for (i = 0; i < count; i++, item += 0x24) {
-        if ((*(u32 *)(item + 4) & 1) == 0) {
-            return item;
+    MantraDrawItem *item = pool->items;
+    for (i = 0; i < count; i++, item++) {
+        if ((item->flags & 1) == 0) {
+            return (s32)item;
         }
     }
     return 0;
@@ -325,13 +339,14 @@ s32 func_0026FC40(s32 list) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026FC88);
 
-s32 func_0026FDC8(u32 list, u32 kind) {
-    s32 count = *(s32 *)(list + 8);
+s32 func_0026FDC8(u32 address, u32 kind) {
+    MantraDrawPool *pool = (MantraDrawPool *)address;
+    s32 count = pool->count;
     s32 i;
-    s32 item = *(s32 *)(list + 4);
-    for (i = 0; i < count; i++, item += 0x24) {
-        if ((*(u32 *)(item + 4) & 0x7f9) == 0x21 && *(u32 *)item == kind) {
-            return item;
+    MantraDrawItem *item = pool->items;
+    for (i = 0; i < count; i++, item++) {
+        if ((item->flags & 0x7f9) == 0x21 && item->kind == kind) {
+            return (s32)item;
         }
     }
     return 0;
