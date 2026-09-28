@@ -2,6 +2,13 @@
 
 extern s32 func_00101958(void);
 
+typedef struct ScriptCommandBuffer {
+    u8 pad0[0x1C];
+    s32 count;
+    u8 kinds[0x1C];
+    u32 values[0x20];
+} ScriptCommandBuffer;
+
 void func_0010C250(u32 arg0, u32 arg1) {
     s32 temp_v0;
 
@@ -32,24 +39,24 @@ void func_0010C2D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C2F0);
 
-void func_0010C348(s32 arg0, u32 arg1) {
-    *(u8 *)(*(s32 *)(arg0 + 0x1c) + arg0 + 0x20) = 0;
-    *(u32 *)(*(s32 *)(arg0 + 0x1c) * 4 + arg0 + 0x3c) = arg1;
-    *(s32 *)(arg0 + 0x1c) = *(s32 *)(arg0 + 0x1c) + 1;
+void func_0010C348(ScriptCommandBuffer *buffer, u32 value) {
+    buffer->kinds[buffer->count] = 0;
+    buffer->values[buffer->count] = value;
+    buffer->count = buffer->count + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C378);
 
-void func_0010C3A8(s32 arg0, u32 arg1) {
-    *(u8 *)(*(s32 *)(arg0 + 0x1c) + arg0 + 0x20) = 5;
-    *(u32 *)(*(s32 *)(arg0 + 0x1c) * 4 + arg0 + 0x3c) = arg1;
-    *(s32 *)(arg0 + 0x1c) = *(s32 *)(arg0 + 0x1c) + 1;
+void func_0010C3A8(ScriptCommandBuffer *buffer, u32 value) {
+    buffer->kinds[buffer->count] = 5;
+    buffer->values[buffer->count] = value;
+    buffer->count = buffer->count + 1;
 }
 
-void func_0010C3D8(s32 arg0, u32 arg1) {
-    *(u8 *)(*(s32 *)(arg0 + 0x1c) + arg0 + 0x20) = 4;
-    *(u32 *)(*(s32 *)(arg0 + 0x1c) * 4 + arg0 + 0x3c) = arg1;
-    *(s32 *)(arg0 + 0x1c) = *(s32 *)(arg0 + 0x1c) + 1;
+void func_0010C3D8(ScriptCommandBuffer *buffer, u32 value) {
+    buffer->kinds[buffer->count] = 4;
+    buffer->values[buffer->count] = value;
+    buffer->count = buffer->count + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C408);

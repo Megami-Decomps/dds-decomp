@@ -2,42 +2,54 @@
 
 extern u32 func_00116FA0(u32);
 
+typedef struct ObjectResource {
+    u32 unk0;
+    u32 handle;
+    u32 value8;
+    u32 resourceId;
+} ObjectResource;
+
+typedef struct ObjectWithResource {
+    u8 pad0[0x18];
+    ObjectResource *resource;
+} ObjectWithResource;
+
 INCLUDE_ASM(const s32, "game/code_00111838", func_00111838);
 
-void func_001118C0(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 8) = arg1;
+void func_001118C0(ObjectWithResource *object, u32 value) {
+    object->resource->value8 = value;
 }
 
-void func_001118D0(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 0xc) = arg1;
+void func_001118D0(ObjectWithResource *object, u32 resourceId) {
+    object->resource->resourceId = resourceId;
 }
 
-void func_001118E0(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_001118E0(ObjectWithResource *object) {
+    ObjectResource *resource;
+    u32 handle;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    if (*(s32 *)(temp_v0 + 4) != 0) {
-        func_00117170(*(s32 *)(temp_v0 + 4));
+    resource = object->resource;
+    if (resource->handle != 0) {
+        func_00117170(resource->handle);
     }
-    temp_v1 = func_00116FA0(*(u32 *)(temp_v0 + 0xc));
-    *(u32 *)(temp_v0 + 4) = temp_v1;
+    handle = func_00116FA0(resource->resourceId);
+    resource->handle = handle;
 }
 
-void func_00111920(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
+void func_00111920(ObjectWithResource *object) {
+    ObjectResource *resource;
+    s32 handle;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    temp_v1 = *(s32 *)(temp_v0 + 4);
-    if (temp_v1 != 0) {
-        func_00117170(temp_v1);
-        *(u32 *)(temp_v0 + 4) = 0;
+    resource = object->resource;
+    handle = resource->handle;
+    if (handle != 0) {
+        func_00117170(handle);
+        resource->handle = 0;
     }
 }
 
-u32 func_00111958(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 4);
+u32 func_00111958(ObjectWithResource *object) {
+    return object->resource->handle;
 }
 
 void func_00111968(void) {

@@ -1,17 +1,29 @@
 #include "common.h"
 
-u32 func_00113208(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x84);
+typedef struct ObjectSubstate {
+    u8 pad0[0xC];
+    u32 valueC;
+    u8 pad10[0x74];
+    s32 value84;
+} ObjectSubstate;
+
+typedef struct ObjectWithSubstate {
+    u8 pad0[0x18];
+    ObjectSubstate *substate;
+} ObjectWithSubstate;
+
+u32 func_00113208(ObjectWithSubstate *object) {
+    return object->substate->value84;
 }
 
-void func_00113218(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x18) + 0x84) != arg1) {
-        *(s32 *)(*(s32 *)(arg0 + 0x18) + 0x84) = arg1;
+void func_00113218(ObjectWithSubstate *object, s32 value) {
+    if (object->substate->value84 != value) {
+        object->substate->value84 = value;
     }
 }
 
-u32 func_00113230(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0xc);
+u32 func_00113230(ObjectWithSubstate *object) {
+    return object->substate->valueC;
 }
 
 INCLUDE_ASM(const s32, "game/code_00113208", func_00113240);

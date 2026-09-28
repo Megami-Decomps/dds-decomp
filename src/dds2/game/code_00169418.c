@@ -51,16 +51,16 @@ u32 func_001695C8(void) {
     return 1;
 }
 
-void func_001695D0(u32 arg0) {
-    D_00436414 = D_00436414 | arg0;
+void func_001695D0(u32 bits) {
+    D_00436414 = D_00436414 | bits;
 }
 
-void func_001695E0(u32 arg0) {
-    D_00436414 = D_00436414 & ~arg0;
+void func_001695E0(u32 bits) {
+    D_00436414 = D_00436414 & ~bits;
 }
 
-u8 func_001695F8(u32 arg0) {
-    return (D_00436414 & arg0) != 0;
+u8 func_001695F8(u32 bits) {
+    return (D_00436414 & bits) != 0;
 }
 
 void func_00169608(void) {

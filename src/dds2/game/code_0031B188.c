@@ -29,17 +29,17 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B188);
 
 void func_0031B1F8(void) {
     u32 handle;
-    u32 *pool;
+    SoundSlotPool *pool;
     if (D_00438940 != 0) {
         func_0031B268();
     }
     handle = func_003292A8(0x32c);
     D_00438940 = func_003292A0(handle);
     memset(D_00438940, 0, 0x32c);
-    pool = D_00438940;
-    pool[0] = handle;
-    pool[1] = (u32)(pool + 3);
-    pool[2] = 100;
+    pool = (SoundSlotPool *)D_00438940;
+    pool->handle = handle;
+    pool->slots = (SoundSlot *)(pool + 1);
+    pool->count = 100;
 }
 
 void func_0031B268(void) {
