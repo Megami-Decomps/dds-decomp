@@ -1,0 +1,79 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+# Read-only token: the job runs repository build scripts.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # The retail executables are not in this repository. CI reads them from a
+      # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
+      # Pull requests from forks get no secrets and skip the build.
+      - name: Check for retail executables
+        id: orig
+        env:
+          KEY: ${{ secrets.ORIG_DEPLOY_KEY }}
+        run: echo "available=$([ -n "$KEY" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch retail executables
+        if: steps.orig.outputs.available == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Raikaru/dds-decomp-orig
+          ssh-key: ${{ secrets.ORIG_DEPLOY_KEY }}
+          path: .orig-src
+          persist-credentials: false
+
+      - name: Install dependencies
+        if: steps.orig.outputs.available == 'true'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -q
+          sudo apt-get install -y -q libc6:i386 ninja-build cpp
+          python3 -m pip install -q -r requirements.txt
+          python3 tools/download_tools.py
+          mkdir -p orig/dds1 orig/dds2
+          cp .orig-src/orig/dds1/SLUS_209.74 orig/dds1/
+          cp .orig-src/orig/dds2/SLUS_211.52 orig/dds2/
+          rm -rf .orig-src
+
+      - name: Configure
+        if: steps.orig.outputs.available == 'true'
+        run: python3 configure.py dds1 dds2
+
+      # Fails unless both executables are byte-identical to retail.
+      - name: Build
+        if: steps.orig.outputs.available == 'true'
+        run: ninja dds1 dds2
+
+      - name: Progress reports
+        if: steps.orig.outputs.available == 'true'
+        run: |
+          ninja build/dds1/report.json build/dds2/report.json
+          python3 tools/progress.py
+
+      # decomp.dev reads one artifact per version, named <version>_report.
+      - name: Upload dds1 report
+        if: steps.orig.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dds1_report
+          path: build/dds1/report.json
+
+      - name: Upload dds2 report
+        if: steps.orig.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dds2_report
+          path: build/dds2/report.json

@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern char D_003B4690[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
+
 typedef struct SifCommand {
     s32 unk0; /* 0x0 */
     s32 unk4; /* 0x4 */
@@ -563,7 +565,7 @@ void func_002E7370(void) {
             return;
         }
         if (resident != 0) {
-            func_003003F0("cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n");
+            func_003003F0(D_003B4690);
             return;
         }
         D_003BD478 = 1;

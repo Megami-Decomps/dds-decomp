@@ -250,10 +250,19 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     objdiff_objects = sorted({p for rows in units.values() for row in rows
                               for p in (row["target"], row["base"]) if p})
-    n.rule("report", f"{OBJDIFF} report generate -o $out", description="objdiff report")
+    n.rule("report", f"{OBJDIFF} report generate -p $project -o $out", description="objdiff report $out")
     n.build("objdiff", "phony", objdiff_objects)
-    n.build("report.json", "report", implicit=objdiff_objects + ["objdiff.json"])
-    n.build("report", "phony", "report.json")
+    n.build("report.json", "report", implicit=objdiff_objects + ["objdiff.json"], variables={"project": "."})
+    # One report per game for decomp.dev, which tracks each version separately
+    # (CI uploads build/<v>/report.json as the artifact <v>_report).
+    reports = []
+    for version, rows in units.items():
+        objs = sorted({p for row in rows for p in (row["target"], row["base"]) if p})
+        out = f"build/{version}/report.json"
+        n.build(out, "report", implicit=objs + [f"build/{version}/objdiff.json"],
+                variables={"project": f"build/{version}"})
+        reports.append(out)
+    n.build("report", "phony", ["report.json"] + reports)
 
     configure_inputs = ["configure.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions] + [f"config/{v}/symbol_addrs.txt" for v in versions]
@@ -286,6 +295,24 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
     config["progress_categories"] = [{"id": v, "name": VERSIONS[v]["title"]} for v in units] + [
         {"id": "game", "name": "Atlus game/engine"}, {"id": "sdk", "name": "Sony SDK / C runtime"}]
     (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n")
+    # Per-version configs for the per-version reports; objdiff resolves paths
+    # relative to the config's directory.
+    for version in units:
+        sub = dict(config, units=[], progress_categories=[
+            {"id": "game", "name": "Atlus game/engine"}, {"id": "sdk", "name": "Sony SDK / C runtime"}])
+        for unit in config["units"]:
+            if unit["name"].split("/", 1)[0] != version:
+                continue
+            unit = dict(unit, name=unit["name"].split("/", 1)[1],
+                        metadata={"progress_categories": [c for c in unit["metadata"]["progress_categories"]
+                                                          if c != version]})
+            for key in ("target_path", "base_path"):
+                if key in unit:
+                    unit[key] = str(Path("..", "..", unit[key]))
+            sub["units"].append(unit)
+        path = ROOT / "build" / version / "objdiff.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(sub, indent=2) + "\n")
 
 
 def main() -> None:
