@@ -21,8 +21,11 @@ extern u32 func_0029C230(u32);
 extern void *duplicateFileJob(void *);
 
 extern u64 func_002D03F8(u64);
+
 extern u64 func_002D0A48(u64);
+
 extern s64 sdfDevCreateCommandState(u64);
+
 extern u64 func_002E5C88(s64);
 
 extern u32 D_003BC8F8;
@@ -30,61 +33,114 @@ extern u32 D_003BC8F8;
 extern s32 D_003BD938;
 
 extern u32 D_003BC888;
+
 extern void func_003014F0(void *dst, const char *fmt, ...);
+
 extern u32 D_003BD924;
+
 extern u32 D_003BD8EC;
+
 extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
+
 extern void kwlnFadeInStart(s32, s32, s32, s32);
+
 extern void *D_003BD900;
+
 extern s32 D_003BC800;
+
 extern void *updateFileWait(void);
+
 extern void *func_0028B748(void);
+
 extern void (*D_0037E550[][4])(void *);
+
 extern void resetFileSlotStates(FileRecordSlots *record);
+
 extern void *func_00293D90(void *entry);
+
 extern char D_003BC940[];
+
 extern char D_003B2688[]; /* "base.ico"; retail record includes padding */
+
 extern u32 D_003BD914;
+
 extern u32 D_003BD918;
+
 extern u32 *D_003BD928;
+
 extern u32 *D_003BD92C;
+
 extern void *D_003BD930;
+
 extern u32 *D_003BD934;
+
 extern u32 D_003BC824;
+
 extern void *beginFileRequest(const char *, u32 *, u32 *, void *, u32 *);
+
 extern void func_00289F80(u32, const char *, s32);
+
 extern void func_00289F10(void);
+
 extern void *func_0028D748(void);
+
 extern void *handleSaveLoadResult(void);
+
 extern void *func_0028C8F8(void);
+
 extern void *func_0028C828(void);
+
 extern s32 D_003BD91C;
+
 extern u32 D_003BD920;
+
 extern s32 func_0028A088(void);
+
 extern void func_0028A008(s32);
+
 extern void *func_0028B0B8(void);
+
 extern s32 func_00289E38(void);
+
 extern void *func_0028C710(void);
+
 extern s32 D_003BAA00;
+
 extern void *func_0028B2C0(void);
+
 extern void *prepareSaveDirectory(void);
+
 extern void *func_0028B9F8(void);
+
 extern void *func_0028B280(void);
+
 typedef struct LoadMirror {
     u32 current;
     u32 previous;
 } LoadMirror;
+
 extern LoadMirror D_003BC8D8;
+
 extern u32 D_003BC8DC;
+
 extern char D_003BC8E8[];
+
 extern char D_003B29D8[]; /* "config_draw" */
+
 extern char D_003B29E8[]; /* "config_update" */
+
 extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 hierarchy);
+
 extern void func_003003F0(void *arg);
+
 extern char D_003BC900[];
+
 extern char D_003BC908[];
+
 extern char D_003BC910[];
+
 extern char D_003BC918[];
+
 extern char D_003BC920[];
 
 extern u32 D_003BC81C;
@@ -94,27 +150,37 @@ extern u32 D_003BC84C;
 extern u32 D_003BC854;
 
 extern u32 D_003BC80C;
+
 extern u32 D_003BC810;
 
 extern u32 D_003BC7E8;
 
 extern s32 D_003BC850;
+
 extern s32 D_003BC860;
+
 extern u32 D_003BC858;
+
 extern s32 D_003BC864;
+
 extern s8 D_003DC803[];
+
 extern u32 D_003BD904;
+
 extern u32 D_003BD910;
+
 extern u32 D_003BC7F8;
 
 extern u64 func_001978E8(s32, s32, u64, u64, u64, u64);
 
 extern u32 D_003BD8F0;
+
 extern u32 func_001951C8(u32, u32, u32, u32, u32);
 
 extern s32 D_003BC7FC;
 
 extern s8 D_003BC7EC;
+
 extern s32 D_003BC7F0;
 
 /* Loader context at D_0037D4A0. */
@@ -131,90 +197,170 @@ typedef struct LoadCtx374A0 {
 } LoadCtx374A0;
 
 extern LoadCtx374A0 D_0037D4A0;
+
 /* Far scalar: incomplete array forces non-small-data addressing. */
 extern u32 D_0037D4D0[];
+
 extern u32 D_0037E130[];
 
 extern char D_003B2668[];
+
 extern char D_003B26C8[];
 
 typedef struct KwlnTask KwlnTask;
+
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
+
 extern u32 func_00288B48(const char *arg0);
+
 extern void func_0029A810(void *arg0);
+
 extern void func_002966D8(s32 arg0);
+
 extern void *resetFileSelection(void);
+
 extern void *func_0028B238(void);
+
 extern s32 func_0028B930(void);
+
 extern void func_0028C888(void);
+
 extern void func_0028BE78(void);
+
 extern s32 D_003BC808;
+
 extern s32 fileReqPoll(void);
+
 extern u8 func_00289B98(s32 arg0);
+
 extern void fileReqBegin(s32 arg0);
+
 extern s32 func_0028B508(void);
+
 extern void *func_0028B328(void);
+
 extern s32 func_0028B370(void);
+
 extern s32 func_0028B900(void);
+
 extern s32 D_003BC844;
+
 extern void func_00289C98(s32 arg0, s32 arg1, s32 arg2);
+
 extern void func_00289C68(s32, s32);
+
 extern void func_00289C38(s32);
+
 extern void *func_0028BF08(u32 arg0);
+
 extern void func_0028B590(void);
+
 extern void func_0028BF38(void);
+
 extern s32 fileReqGetSize(s32 arg0);
+
 extern u32 D_003BC804;
+
 extern void func_001005B8(void);
+
 extern void func_00289D50(u32 arg0);
+
 extern void *handleSaveDetectionResult(void);
+
 extern void func_00293EA0(void *arg0);
+
 extern void func_00293158(void *src);
+
 extern void func_00294798(void *dst, void *src);
+
 extern void *func_002CFEB8(s32 size);
+
 extern void *func_002CFF68(s32 size);
+
 extern void func_002CFF98();
+
 extern void clearFileRecordReferences(FileRecordSlots *record);
+
 extern void func_0029A7C8(void *arg0, const u128 *arg1);
+
 extern void func_0029A7F8(void *arg0, const u128 *arg1);
+
 extern void func_001028E8(s32 arg0, void *arg1, s32 arg2, s32 arg3);
+
 extern s32 D_003BC848;
+
 extern s32 D_003BC828;
+
 extern char D_003B2658[];
+
 extern void *beginFileWait(void *arg0);
+
 extern void formatSaveFilename(void *arg0, s32 arg1);
+
 extern void func_00289DA8(u32 arg0, void *arg1);
+
 extern void *func_0028C180(void);
+
 extern s32 func_00289DC8(void);
+
 extern void func_00289E80(u32 arg0, const char *arg1, void *arg2, s32 arg3);
+
 extern char D_003B2678[];
+
 extern u8 D_003DC780[];
+
 extern void *handleSaveSlotWriteResult(void);
+
 extern void *func_0028B3F0(void);
+
 extern void *func_0028AF00(void);
+
 extern s32 func_00289EB0(void *arg0);
+
 extern void *func_0028C560(void);
+
 extern void *handleSaveDirectoryWriteResult(void);
+
 extern void *func_0028C430(void);
+
 extern u32 func_00289CD0(s32 arg0, s32 arg1);
+
 extern s32 func_0028B3B0(void);
+
 extern u32 D_003BC834;
+
 extern s32 func_0028FB48(void *arg0, void *arg1, s32 arg2);
+
 extern void func_0028BAC0(void);
+
 extern void *func_0028C7C8(void);
+
 extern void *chooseSaveLoadPath(void);
+
 extern void func_0028BDA0(void);
+
 extern void *dispatchSaveReadCallback(void);
+
 extern void *handleSaveSearchResult(void);
+
 extern s32 func_00289F30(void);
+
 extern void *func_0028C9A0();
+
 extern u8 func_00289BE8(s32 arg0);
+
 extern u32 D_003DC7C0[];
+
 extern void billDispatchByKind(void *handle);
+
 extern void *retainEffectResource(void *name);
+
 extern void *billCreateIndexed(s32 mode, void *name);
+
 extern void func_001523B0(void *handle);
+
 extern void func_00152050(void *handle, s16 index);
+
 extern void *func_0029A5E0(u16 type, u32 owner, void *data);
 
 /* Init record at D_0037D4E0. */
@@ -229,6 +375,7 @@ typedef struct Init374E0 {
 } Init374E0;
 
 extern Init374E0 D_0037D4E0;
+
 extern u32 D_0037D4AC[];
 
 /* Callback table at D_0037E14C (0x28 bytes per entry). */
@@ -245,6 +392,7 @@ typedef struct Cb3714C {
 } Cb3714C;
 
 extern Cb3714C D_0037E14C[];
+
 typedef struct FileTypeCallbacks {
     void *(*create)(void *, u16);
     void (*unk4)(void *);
@@ -269,12 +417,19 @@ typedef struct LoadObj {
     s16 unk48;          /* 0x48 */
     u16 unk4A;
 } LoadObj;
+
 extern LoadObj *func_00295F58(LoadObj *source);
+
 extern void *func_0028DC08(void);
+
 extern s32 func_0028A020(void);
+
 extern void func_00292720(void *);
+
 extern void menuCallInitWide(s32, s32, s32, u32, s32);
+
 extern LoadObj *loadObjectCreate(void *owner);
+
 extern void func_002961B0(LoadObj *result, LoadObj *owner);
 
 typedef struct FileJobBufferSlot {
@@ -301,10 +456,15 @@ typedef struct FileJob {
     struct FileJob *next;
     struct FileJob *prev;
 } FileJob;
+
 extern FileJob *createFileJob(u16 type);
+
 extern void fileJobFreePrimaryBuffer(FileJob *job);
+
 extern void fileJobFreeSecondaryBuffer(FileJob *job);
+
 extern FileJob *fileJobCreate(void);
+
 extern void func_0029A730(s32 arg0);
 
 typedef struct FileQueue {
@@ -314,7 +474,10 @@ typedef struct FileQueue {
     FileJob *head;
     FileJob *tail;
 } FileQueue;
+
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);
+
+extern s8 D_003BC8D5;
 
 void func_0028A0E0(s32 request, u32 first, u32 second) {
     func_002F6670();
@@ -476,7 +639,6 @@ void *func_0028B2C0(void) {
     D_003BC810 = 0;
     return (void *)func_0028FB48(&func_0028B508, &func_0028B238, 1);
 }
-
 
 void *func_0028B300(void) {
     func_0028AB30(0);
@@ -1163,7 +1325,19 @@ void configTasksDestroy(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003B29E8, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002913B8);
+s32 func_002913B8(void) {
+    s32 state = D_003BC8D5;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        D_003BC8D5 = 0;
+    }
+    return 0;
+}
 
 u32 func_002913F0(s32 arg0) {
     if (arg0 < 4) {
@@ -1973,4 +2147,3 @@ INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC930);
 INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC938);
 
 INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC940);
-

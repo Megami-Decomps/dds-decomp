@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern void func_0027CDD0(s32, s32, s32, s32, s32);
+
 extern void releaseSpriteTextures(s32);
 
 extern void func_002CFF98(void *);
@@ -15,6 +17,8 @@ extern u32 func_0027D148(u32, u32, u32, u32);
 extern s32 func_0027B888(u32);
 
 extern s32 func_00101A70();
+
+extern s64 func_00285670(s32, s32 *, u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279CC0);
 
@@ -583,7 +587,14 @@ void func_0027E2C0(s32 arg0, s32 arg1, s32 *arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E2F0);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E3D8);
+void func_0027E3D8(s32 image, s32 *list, s32 option) {
+    u32 i;
+    for (i = 0; i < (u32)list[0]; i++) {
+        s32 *entry = (s32 *)list[i + 1];
+        func_0027CDD0(entry[2], entry[3], image, entry[4], option);
+    }
+}
+
 
 void updateMenuFade(s32 *list) {
     u32 i;
@@ -829,6 +840,7 @@ void func_0027FC10(s32 arg0, u32 *arg1) {
 }
 
 extern void func_002BD7A0(s32);
+
 void registerMenuResourceHandles(s32 destination, s32 *source) {
     u32 i;
     for (i = 0; i < 5; i++) {
@@ -862,6 +874,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_002802E0);
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002803A0);
 
 extern void func_002803A0(s32);
+
 void shutdownMenuContext(s32 context) {
     u32 i;
     for (i = 0; i < 5; i++) {
@@ -951,4 +964,3 @@ INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC738);
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC740);
 
 INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC748);
-

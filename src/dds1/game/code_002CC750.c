@@ -1,5 +1,12 @@
 #include "common.h"
 
+extern u8 D_003BD39C;
+extern void (*D_003BD2D4)(void);
+extern void func_002CFAD8(s32);
+extern void func_002E3970(void);
+extern void func_002E39C8(void);
+extern void func_002E70B0(void);
+
 extern s32 CancelWakeupThread(u64);
 
 extern u64 GetThreadId(void);
@@ -591,7 +598,20 @@ u32 func_002CF940(u32 base) {
     return (now - base) & 0xFFFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF958);
+void func_002CF958(void) {
+    for (;;) {
+        func_002CFAD8(1);
+        func_002E3970();
+        if (!D_003BD39C) {
+            func_002E39C8();
+        }
+        func_002E70B0();
+        if (D_003BD2D4 != NULL) {
+            D_003BD2D4();
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF9A8);
 

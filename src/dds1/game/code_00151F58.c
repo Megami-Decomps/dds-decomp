@@ -18,22 +18,38 @@ typedef struct EffectBufferTail {
 } EffectBufferTail;
 
 extern EffectConfig D_0034DF54[];
+
 s32 billCreateIndexed(s32 arg0, s32 arg1);
+
 extern s32 D_003D6438[];
+
 extern s32 D_003D6480[];
 
 s32 func_002D3FD0(s32 arg0);
+
 void func_002D4010(s32 arg0);
+
 s32 func_00151398(s32 arg0, s32 arg1);
+
 void func_00152E40(s32 arg0, s32 arg1);
+
 void func_00153128(s32 arg0, s32 arg1);
+
 void func_00153740(s32 arg0);
+
 void func_001539D0(s32 arg0);
+
 extern void *memset(void *s, s32 c, u32 n);
+
 extern void *memcpy(void *dest, const void *src, u32 n);
+
 extern void *func_002CFEB8(s32 size);
+
 s32 func_002D03F8(s32 size);
+
 EffectBufferRecord *func_002D0A48(s32 allocation);
+
+void func_001565E0(s32 arg0);
 
 void retainEffectResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].unk00, 0);
@@ -325,6 +341,7 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00153740);
 
 void destroyEffectResources(effect)
     s32 effect;
+
 {
     switch (*(u16 *)(effect + 0x30)) {
     case 1:

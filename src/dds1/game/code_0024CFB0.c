@@ -11,20 +11,20 @@ extern s8 D_003BC40D;
 extern s8 D_003BC414;
 
 extern s8 D_003BC415;
-extern s32 D_003BAA00;
 
+extern s32 D_003BAA00;
 
 typedef struct {
     s32 unk0;
     s32 unk4;
     s8 data[0];
 } UnkBD8A0;
+
 typedef struct {
     u8 count;
     u8 pad;
     u16 indices[0];
 } ActiveList;
-
 
 extern UnkBD8A0 D_003BD8A0;
 
@@ -33,7 +33,14 @@ extern u32 func_002EB028(u32, u32 *, u32);
 extern s64 func_0024DC08(void);
 
 extern s32 func_00101A70();
+
 extern u32 D_003D8100[];
+
+extern void func_0024A2D8(s32 arg0);
+
+extern s64 func_00285670(s32, s32 *, u64, u64);
+
+extern void func_0024DD78(void);
 
 void func_0024CFB0(s32 arg0) {
     func_0024DBC8();
@@ -271,8 +278,8 @@ s32 updateActiveSoundMode(void) {
     D_003BC415 = getActiveSoundMode();
     return 1;
 }
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DC98);
 
+INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DC98);
 
 void func_0024DD78(void) {
     func_0024DC98(1);
@@ -360,4 +367,3 @@ INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC414);
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC415);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC418);
-

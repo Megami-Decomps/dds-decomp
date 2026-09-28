@@ -1,31 +1,49 @@
 #include "common.h"
 
-/* Script VM stack accessors (see script/scrTraceCode.c). */
-extern s32 func_0010D428(s32 idx);
 extern char *func_0010D5A8(s32 idx);
+
 extern void func_0010D5F0(s32 value);
+
 extern void *func_0010D6A0(void);
 
 extern s32 getFieldTaskRecordValue(u32 key);
+
 extern void func_0013DDF0(void *entry);
+
 extern s32 func_0013CBA8(s32 index);
+
 extern s32 func_0013CEB0(s32 param0, s32 param1);
+
 extern s32 func_0013D410(s32 param0, s32 param1);
+
 extern void func_0013D650(void);
+
 extern s32 func_0013DB28(void);
+
 extern s32 func_0013DB58(s32 value);
 
 extern void func_00141D18(void);
+
 extern void func_00141D40(void);
+
 extern void func_00141D98(void);
+
 extern void func_00141DC0(s32 param);
+
 extern void func_00141E88(s32 param);
+
 extern s32 func_00142160(s32 param);
+
 extern void func_001421D0(s32 param0, s32 param1);
+
 extern void func_00142200(s32 param0, s32 param1);
+
 extern void func_00147DB0(s32 handle);
+
 extern s32 func_0014A1A0(char *str);
+
 extern void func_0014A960(s32 param0, s32 param1, s32 param2);
+
 extern s32 func_00222090(s32 param);
 
 /* Work object queried by func_0014F408; +0xE4 holds the key for getFieldTaskRecordValue. */
@@ -35,6 +53,10 @@ typedef struct {
 } EffCmdWork;
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
+extern s32 func_0010D428(s32);
+
+extern s32 D_0032E48C[];
+
 s32 func_0014F098(void) {
     func_0010D5F0(func_0013DB58(func_0010D428(0)));
     return 1;
@@ -124,7 +146,13 @@ s32 func_0014F398(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014F098", func_0014F3E0);
+s32 func_0014F3E0(void) {
+    s32 temp_v0;
+
+    temp_v0 = func_0010D428(0);
+    D_0032E48C[0] = temp_v0;
+    return 1;
+}
 
 s32 func_0014F408(void) {
     EffCmdWork *work = func_0010D6A0();

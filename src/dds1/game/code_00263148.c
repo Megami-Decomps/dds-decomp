@@ -5,13 +5,26 @@ extern u32 func_00265E68(u32, s32);
 extern s32 mdlFlagTest(u32);
 
 extern s32 func_00101A70();
+
 extern void func_0024DDC0(s32);
+
 extern void func_0024DA58(s32);
+
 extern s32 func_002CD788(void *);
+
 extern s32 func_002CD2A8(u16);
+
 extern s32 func_002CD548(void *, u16);
+
 extern void func_002CD428(void *, u16);
+
 extern void mdlFlagSet(s32);
+
+extern void func_00265478(s32 arg0);
+
+extern s64 func_00285670(s32, s32 *, u64, u64);
+
+extern void func_0024DD78(void);
 
 void kwlnItemApplySelection(u32 address) {
     u8 *scene = (u8 *)address;
@@ -161,4 +174,3 @@ void func_00263E70(u32 arg0, u32 arg1) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
-

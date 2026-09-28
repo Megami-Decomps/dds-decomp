@@ -3,12 +3,25 @@
 extern u8 D_00368C40[];
 
 extern s32 D_003BAA00;
-extern s8 D_003BC39C;
 
+extern s8 D_003BC39C;
 
 extern s32 func_00101938(u32);
 
 extern s64 evtFindTaskById(void);
+
+void func_002BDD60(u32 sprite);
+
+extern s64 func_00285670(s32, s32 *, u64, u64);
+
+extern s32 func_00101A70();
+
+extern char D_003BC3A0[]; /* "camp" */
+
+extern char D_003AF418[]; /* "camp_draw" */
+
+extern char D_003AF428[]; /* "camp_update" */
+
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242608);
 
 void func_00242698(void) {
@@ -56,6 +69,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002432D0);
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243390);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243440);
+
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243460);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002434E0);
@@ -271,7 +285,11 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00244970);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002449F0);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244AB8);
+void func_00244AB8(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_003BC3A0, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003AF418, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003AF428, 0);
+}
 
 s32 pollTaskState(void) {
     s32 state = D_003BC39C;
@@ -334,4 +352,3 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
-

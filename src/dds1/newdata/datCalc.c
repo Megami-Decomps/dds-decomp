@@ -9,6 +9,17 @@ typedef struct DatCalcCursor {
     u16 yMax;   /* 0xC */
 } DatCalcCursor;
 
+typedef struct UiObject {
+    u8 unk_00[0x110];
+    u32 flags;
+    u8 unk_114[0x10];
+    u16 index;
+    u16 currentValue;
+    u16 maximumValue;
+    u8 unk_12A[4];
+    u16 statusFlags;
+} UiObject;
+
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119098);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001190B0);
@@ -84,4 +95,3 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA28);
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA2C);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA30);
-

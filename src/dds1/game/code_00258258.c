@@ -1,5 +1,15 @@
 #include "common.h"
 
+extern void func_002CFF98(void *);
+
+extern s32 func_002D03F8(s32);
+
+extern void *func_002D03F0(s32);
+
+extern f32 func_002E8398(s32);
+
+extern void *memset(void *, s32, u32);
+
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258258);
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258508);
@@ -49,7 +59,17 @@ INCLUDE_ASM(const s32, "game/code_00258258", func_0025B350);
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_0025B7B0);
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_0025B7D8);
+void *func_0025B7D8(s32 owner, u8 sprite, u8 variant) {
+    s32 allocation = func_002D03F8(0x48);
+    u8 *resource = func_002D03F0(allocation);
+    memset(resource, 0, 0x48);
+    *(s32 *)resource = allocation;
+    *(s32 *)(resource + 0x34) = owner;
+    resource[0x45] = sprite;
+    resource[0x44] = variant;
+    *(s32 *)(resource + 0x30) = (s32)(func_002E8398(0) * 30.0f + 10.0f);
+    return resource;
+}
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_0025B888);
 
@@ -76,4 +96,3 @@ INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC4C0);
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC4C8);
 
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC4CC);
-

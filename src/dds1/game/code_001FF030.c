@@ -49,6 +49,7 @@ typedef struct BattleRuntimeState {
     void *request;
     void *handle;
 } BattleRuntimeState;
+
 extern BattleRuntimeState D_003D7580;
 
 extern char D_003BB8A0[];
@@ -84,6 +85,25 @@ extern u32 func_002099A0(void);
 extern u32 func_00208C68(void);
 
 extern s32 func_001A17F0(void);
+
+typedef struct SoundResourceNode {
+    u32 flags;
+    u32 unk_04;
+    u32 unk_08;
+    u32 unk_0C;
+    u32 resourceHandle;
+    u32 unk_14;
+    struct SoundResourceNode *previous;
+    struct SoundResourceNode *next;
+} SoundResourceNode;
+
+extern void func_0020B348();
+
+extern void func_0020DC38();
+
+extern void func_00201A40(s32 arg0);
+
+extern void func_001A8CE0(s32);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF030);
 
@@ -1835,7 +1855,9 @@ void func_002166A8(void) {
 
 s32 *battleFindGroupedEntity(group, type)
     s32 group;
+
     s32 type;
+
 {
     s32 *entry = (s32 *)D_00367940[group];
     while (entry != 0) {
@@ -3925,4 +3947,3 @@ INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB48);
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB50);
 
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB58);
-

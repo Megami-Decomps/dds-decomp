@@ -65,13 +65,21 @@ typedef struct SoundResourceLink {
 extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
 
 extern s32 func_002E92C0(u32);
+
 extern void func_001F0998(void);
+
 extern void func_001F0B90(void);
+
 extern s32 func_001F35A0(u32 *);
+
 extern void func_001F3AA8(s32, s32);
+
 extern u32 finishEarringPlayback(void);
+
 extern s32 func_001F0AC8(u16 *);
+
 extern s32 func_001F09F0(u32 *);
+
 extern void *func_002CFF68(s32);
 
 extern u64 func_001F4398(void);
@@ -85,25 +93,39 @@ extern u32 D_003BA904;
 extern s32 func_002D3EE8(void);
 
 extern u32 D_003BB694;
+
 extern u32 D_003BB698;
+
 extern s8 D_00324530[];
+
 extern u8 D_003583A0[];
+
 extern void *D_00358408[];
+
 extern void *D_00358450[];
+
 extern s32 D_00358510[];
+
 extern s32 D_00359A78[];
+
 extern s32 D_00359A90[];
+
 extern u8 D_0035F5D0[];
+
 extern char D_003BB6B0[];
+
 extern u64 func_0010FA80(void);
+
 extern u32 func_001165A8(u64);
 
 extern s32 func_001D6360(void);
 
 extern s32 mdlFlagTest(u32);
+
 extern void func_00215FE0(s32);
 
 extern u32 D_003BB5EC;
+
 extern u32 D_003BB5F0;
 
 extern s32 func_00214868(void);
@@ -117,15 +139,21 @@ extern u32 func_001C1688(void);
 extern u64 func_001978E8(s32, s32, u64, u64, u64, u64);
 
 extern s32 D_003BB3D8;
+
 extern u32 D_003BB3DC;
 
 extern u32 D_003BD834;
+
 extern u32 D_003BD838;
+
 extern u32 D_003BD830;
 
 extern u32 D_003BB3A8;
+
 extern u32 D_003BB3A4;
+
 extern u32 D_003BB3B0;
+
 extern u32 D_003BB3AC;
 
 extern u32 D_003BB3BC;
@@ -137,8 +165,11 @@ extern u32 D_003BB3CC;
 extern u32 func_00101A70(s64);
 
 extern u32 D_003BB3C8;
+
 extern s64 kwlnTaskGetTaskByName(u32);
+
 extern s64 func_001019C8(s64);
+
 extern s32 func_001ADCB8(s32);
 
 extern u32 D_003BB3E0;
@@ -146,8 +177,11 @@ extern u32 D_003BB3E0;
 extern s32 func_001A8DD8(u32, u32);
 
 extern s64 func_001A4078(s32, u64);
+
 extern void func_001DEFE0(s32, s32, f32);
+
 extern void func_001B83D8(s32, s32, s32);
+
 extern void func_001D5DF8(s32, s32, f32, s32);
 
 extern s32 func_001A17F0(void);
@@ -155,31 +189,46 @@ extern s32 func_001A17F0(void);
 extern s32 D_003BAA68;
 
 extern s32 D_003BAA14;
+
 extern s32 D_003BAA28;
 
 extern s32 D_003BAA10;
+
 extern s32 D_003BAA20;
+
 extern s32 D_003BAA30;
+
 extern s32 D_003BAA4C;
+
 extern s32 D_003BAA50;
 
 extern s32 D_003BAA00;
+
 extern s32 D_003BAA54;
+
 extern s32 D_003BAA60;
+
 extern s32 dds3FindEntryIndex();
 
 extern s32 func_001A1B78(s32);
 
 extern s32 D_003BB2E4;
+
 extern s32 func_00101938(u32);
 
 extern u64 D_003BB2E8;
 
 extern s8 D_00358308[13];
+
 extern u32 D_003BB240;
+
 extern s32 D_003BB244;
+
 extern s32 func_001986E0(u32);
+
 extern u8 D_003D6EB0[0x18];
+
+extern void func_001F5028(s32 arg0);
 
 void func_0019DB88(s32 arg0) {
     for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
@@ -617,6 +666,7 @@ s32 func_001A3050(s32 arg0, s32 arg1) {
 }
 
 extern char D_003A1788[];
+
 s32 func_001A3098(s32 index) {
     u16 item = *(u16 *)(D_003BAA68 + index * 8 + 2);
     func_001FB0A8(D_003A1788, index, item);
@@ -650,6 +700,7 @@ void func_001A4060(void) {
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001A4078);
 
 extern s8 D_00324550[];
+
 s32 func_001A40E8(s32 object) {
     s32 result = func_001A4130(object, 1);
     if (result == 0) {
@@ -896,6 +947,7 @@ s32 func_001A8410(s32 arg0) {
 }
 
 extern s32 D_00358518[];
+
 s32 func_001A8448(s32 object, s32 mask) {
     s32 index = *(s32 *)(object + 0x2F0);
     u16 item;
@@ -915,6 +967,7 @@ s32 func_001A84B8(s32 object) {
 }
 
 extern s32 D_00358514[];
+
 s32 func_001A84F0(s32 object) {
     s32 index = *(s32 *)(object + 0x2F0);
     if (index == -1) {
@@ -2120,6 +2173,7 @@ void func_001C71C0(s32 arg0) {
 }
 
 extern s32 func_00215FF8(void);
+
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 u32 func_001C71F0(void) {
@@ -2135,6 +2189,7 @@ typedef struct {
     s32 (*update)(s32);
     s32 flags;
 } SceneInitializer;
+
 extern SceneInitializer D_00359A88[];
 
 void setBattleScene(s32 scene) {
@@ -2518,6 +2573,7 @@ void func_001D0088(void) {
 }
 
 extern s32 countBattleTasksForOwner(s64);
+
 extern void func_001D0728(s32, s32);
 
 void func_001D0090(s32 object) {
@@ -2552,6 +2608,7 @@ void func_001D0668(s32 arg0) {
 }
 
 extern s32 func_001A17F0(void);
+
 extern void func_001D0728(s32, s32);
 
 void func_001D0680(s32 object) {
@@ -2651,7 +2708,9 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D3078);
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D3148);
 
 extern void *func_001D4748(s32);
+
 extern u32 func_001D47D8(s32);
+
 extern u32 func_001D3148(void *);
 
 void *func_001D31B0(u8 *owner, u32 value) {
@@ -2718,7 +2777,6 @@ u32 func_001D35E0(u32 *arg0) {
     func_001D5990(*arg0);
     return 1;
 }
-
 
 void *func_001D3618(u8 *owner) {
     u8 *task = func_001D4748(4);
@@ -2955,6 +3013,7 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D4C38);
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D4CA8);
 
 extern s32 func_002183D0(s32);
+
 extern s32 func_002183E0(s32);
 
 s32 hasMatchingBattleModel(s32 effect, s32 model) {
@@ -4214,6 +4273,7 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F0AC8);
 
 SoundTask *nbSoundCreateReleaseTask(sound)
     u32 *sound;
+
 {
     SoundTask *task = (SoundTask *)func_001D4748(4);
     task->enabled = 1;
@@ -5017,6 +5077,7 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F44C0);
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F4720);
 
 extern s32 func_0026AD28(void);
+
 extern void printTitleDebugBanner(void);
 
 u32 finishEarringPlayback(void) {
@@ -5436,4 +5497,3 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6B0);
-

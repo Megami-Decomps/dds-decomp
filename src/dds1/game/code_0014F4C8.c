@@ -16,7 +16,15 @@ INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F4F0);
 
 INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F5E8);
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F658);
+s32 func_0014F658(void) {
+    s32 value;
+    value = func_0010D5A8(0);
+    if (func_002E97E0() != 0) {
+        func_002E97E8();
+    }
+    sdfSoundSendNamedCommand(value, 0x7f);
+    return 1;
+}
 
 u32 func_0014F6A8(void) {
     func_002E97E8();

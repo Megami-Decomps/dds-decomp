@@ -41,12 +41,20 @@ typedef struct ParCell {
 } ParCell; /* 0x14 */
 
 extern ParDispatch D_0034E258[];
+
 extern void (*D_0034E5E0[])(void *, void *, void *);
+
 extern void *memset(void *dst, s32 c, u32 n);
+
 extern void parControlInit();
+
 extern void func_002E84A0(void *arg);
+
 extern u8 D_003D64B0[];
+
 extern u8 D_003D64C0[];
+
+extern void func_0015A6E0();
 
 void func_0015A758(ParObj *work, u32 value) {
     work->unkF0 = value;
@@ -274,4 +282,3 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D910);
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB010);
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
-

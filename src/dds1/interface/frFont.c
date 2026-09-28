@@ -75,25 +75,57 @@ typedef struct FrFontSys {
 } FrFontSys;
 
 extern u32 D_003BB164;
+
 extern u8 D_003BB174;
+
 extern u32 D_003BB178;
+
 extern u8 D_003BB180[];
+
 extern FrFontSave D_003D6DC4;
+
 extern FrFontSys D_003D6C80;
+
 extern FrFontGlyph *D_003D6E14[];
+
 extern u32 func_00195C50(void *arg0);
+
 extern void func_00195450(FrFontCtx *ctx, u32 arg1, u32 arg2);
+
 void frFontCreateContext();
+
 extern void func_00195360(FrFontCtx *ctx, s32 arg1);
+
 extern s32 func_00100518(void);
+
 extern s32 func_00195550(FrFontGlyph *arg0);
+
 extern FrFontGlyph *func_00194840(FrFontGlyph *arg0);
+
 extern FrFontGlyph *func_00194BA0(FrFontGlyph *arg0, s32 arg1);
+
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2);
+
 extern s32 func_001958A0(FrFontGlyph *arg0, s8 arg1, u32 arg2);
+
 extern FrFontCtx *func_00195160(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
 void func_00195880(FrFontGlyph *arg0, s8 arg1);
+
 FrFontGlyph *func_00195B60(FrFontGlyph *arg0, FrFontGlyph *arg1);
+
+typedef struct TextStyleNode {
+    u8 pad00[4];
+    u32 x;
+    u32 y;
+    u8 pad0C[4];
+    u32 color;
+    u8 pad14[8];
+    struct TextStyleNode *firstChild;
+    u8 pad20[4];
+    struct TextStyleNode *next;
+    struct TextStyleNode *nextChild;
+} TextStyleNode;
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194618);
 
@@ -230,7 +262,14 @@ void func_00195460(FrFontCtx *ctx, u32 value) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195470);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001954C8);
+void func_001954C8(TextStyleNode *entry, u32 color) {
+    for (; entry != NULL; entry = entry->next) {
+        TextStyleNode *child;
+        for (child = entry->firstChild; child != NULL; child = child->nextChild) {
+            child->color = color;
+        }
+    }
+}
 
 void func_00195520(s32 arg0) {
     arg0 |= D_003BB174;
@@ -347,6 +386,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00196220);
 /* Old-style definition: callers invoke it without arguments and rely on $a0. */
 void frFontCreateContext(ctx)
     FrFontCtx *ctx;
+
 {
     FrFontCtx *newCtx = func_00195160(&D_003BB180, 0, ctx->uC.b.bD, ctx->uC.b.bE, ctx->u14.shifted);
 
@@ -401,4 +441,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_003BB178);
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
-

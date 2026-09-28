@@ -1,5 +1,49 @@
 #include "common.h"
 
+/* Billboard instance. Kind in unk2C (0 = data-driven child in unk30,
+   1 = entry list at unk60). Floats/int witnesses: defaults set by
+   func_00151178, color/mode by code_00151F58 setters, child released by
+   func_00151210, list compared by func_00152200. */
+typedef struct BillObj {
+    f32 unk0;        /* 0x0 */
+    f32 unk4;        /* 0x4 */
+    f32 unk8;        /* 0x8 */
+    f32 unkC;        /* 0xC */
+    f32 unk10;       /* 0x10 */
+    f32 unk14;       /* 0x14 */
+    f32 unk18;       /* 0x18 */
+    f32 unk1C;       /* 0x1C */
+    f32 unk20;       /* 0x20 */
+    u32 unk24;       /* 0x24 */
+    void (*unk28)(); /* 0x28 invoked by billInvokeCallback */
+    u16 unk2C;       /* 0x2C kind */
+    u16 unk2E;       /* 0x2E */
+    void *unk30;     /* 0x30 child (kind 0) or data (kind 1) */
+    u8 pad34[8];     /* 0x34 */
+    u16 unk3C;       /* 0x3C kind-1 slot set by billAllocList */
+    u8 pad3E[10];    /* 0x3E */
+    u32 unk48;       /* 0x48 */
+    u32 unk4C;       /* 0x4C */
+    u16 unk50;       /* 0x50 set to 1 by billCloneList/billAllocList */
+    u8 pad52[6];     /* 0x52 */
+    u32 unk58;       /* 0x58 compared by func_00152200 */
+    s32 unk5C;       /* 0x5C entry count read by func_00152288 */
+    void *unk60;     /* 0x60 entry list */
+} BillObj;
+
+/* Dispatch entry (0xC bytes). func creates an instance (billCreateIndexed)
+   or runs a command on one (billDispatchByKind); unk4 is copied onto the new
+   instance's unk28 by billCreateIndexed. */
+typedef struct {
+    void *(*func)(); /* 0x0 */
+    void (*unk4)();  /* 0x4 */
+    u32 unk8;        /* 0x8 */
+} BillDispatch; /* 0xC bytes */
+
+extern BillDispatch D_0034E658[];
+
+extern BillDispatch D_0034E654[];
+
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F4D0);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F520);
@@ -85,4 +129,3 @@ INCLUDE_SDATA(const s32, "game/code_0015F4D0", D_003BB018);
 INCLUDE_SDATA(const s32, "game/code_0015F4D0", D_003BB01C);
 
 INCLUDE_SDATA(const s32, "game/code_0015F4D0", D_003BB020);
-

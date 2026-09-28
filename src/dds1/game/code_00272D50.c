@@ -6,6 +6,8 @@ extern s32 func_00101A70();
 
 extern s32 D_003BAA00;
 
+extern s64 func_00285670(s32, s32 *, u64, u64);
+
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00272D50);
 
 void func_00273020(s32 arg0) {
@@ -69,4 +71,3 @@ void func_00273838(s32 arg0, s32 arg1) {
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002738A0);
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273A30);
-

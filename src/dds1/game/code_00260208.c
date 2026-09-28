@@ -10,6 +10,8 @@ extern s8 D_003BC52A;
 
 extern s8 D_003BC52B;
 
+extern s8 D_003BC528;
+
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260208);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260370);
@@ -164,7 +166,19 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00262818);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_002628C8);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262938);
+s32 func_00262938(void) {
+    s32 state = D_003BC528;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        D_003BC528 = 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262970);
 
@@ -222,4 +236,3 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
-

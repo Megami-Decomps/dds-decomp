@@ -34,6 +34,12 @@ extern s32 func_00101A70();
 
 extern s32 D_003BC588;
 
+extern void func_00134CF0(void);
+
+extern void func_002CF430(void);
+
+extern void func_0021FE38(void);
+
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268AB8);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
@@ -403,4 +409,3 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5D0);
-

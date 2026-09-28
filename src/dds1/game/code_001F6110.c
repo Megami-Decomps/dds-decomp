@@ -1,5 +1,11 @@
 #include "common.h"
 
+extern void func_001D54C0(s32 actor);
+
+extern u32 func_001DAE48(s32 actor);
+extern s32 func_001DAE50(s32 actor, u32 index);
+extern void func_001D5440(s32 actor);
+
 extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
@@ -186,9 +192,29 @@ void func_001F74D0(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7530);
+void func_001F7530(s32 actor) {
+    u32 i = 0;
+    u32 count = func_001DAE48(actor);
+    if (count != 0) {
+        do {
+            func_001D5440(func_001DAE50(actor, i));
+            i++;
+        } while (i < count);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7598);
+
+void func_001F7598(s32 actor) {
+    u32 i = 0;
+    u32 count = func_001DAE48(actor);
+    if (count != 0) {
+        do {
+            func_001D54C0(func_001DAE50(actor, i));
+            i++;
+        } while (i < count);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7600);
 

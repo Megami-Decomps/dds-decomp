@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern s32 func_00161860(void);
+
 extern s32 func_00161858(void);
 
 /* Flag word read by the two wrappers below. */
@@ -8,6 +9,8 @@ typedef struct {
     u8  pad_0x000[0x110]; /* 0x00 */
     u32 unk110;           /* 0x110 */
 } EffBattleMiscCtx; /* 0x114 */
+
+extern u32 D_0034E720[];
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161AA0);
 
@@ -49,4 +52,6 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162338);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001623C0);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001624B8);
+u32 func_001624B8(s32 arg0) {
+    return D_0034E720[arg0];
+}

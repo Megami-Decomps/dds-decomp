@@ -1,14 +1,19 @@
 #include "common.h"
 
 extern void func_002512F0(s32, s32);
+
 extern void func_0025DB80(s32);
 
 extern void func_00250978(s32);
+
 extern void func_00257E78(s32);
 
 extern void destroyGridWork(s32);
+
 extern void func_00256C28(s32);
+
 extern void func_002D0918(s32);
+
 extern void menuResetWorkFloats(void);
 
 extern s32 func_002CB3B8(u32, u32);
@@ -24,6 +29,8 @@ typedef struct {
 
 extern SceneEntry D_0036BE38[];
 
+extern void func_002CFF98(void *);
+
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250E88);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
@@ -32,7 +39,11 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00251260);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_002515C8);
+void func_002515C8(s32 unused, void *data) {
+    if (data != NULL) {
+        func_002CFF98(data);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
 
@@ -126,4 +137,3 @@ INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC428);
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC430);
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC438);
-

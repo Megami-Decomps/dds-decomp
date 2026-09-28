@@ -532,7 +532,15 @@ s32 func_0010EC10(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010EC98);
+s32 func_0010EC98(void)
+{
+    s32 p0;
+    s32 p1;
+    p0 = func_0010D428(0);
+    p1 = func_0010D428(1);
+    drawSetE08Triple(p0, p1, func_0010D428(2));
+    return 1;
+}
 
 s32 func_0010ECF0(void)
 {
