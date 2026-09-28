@@ -80,46 +80,7 @@ s64 func_002653B8(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-/*W13D2:func_00265408*/
-typedef struct EvtSlot {
-    u32 threshold;
-    s32 flag;
-    struct {
-        u8 kind;
-        s32 id;
-    } sub[8];
-} EvtSlot;
-
-s32 func_00265408(void) {
-    char text[0x40];
-    s32 context = func_00101958();
-    s32 index = func_00265038();
-    s32 id;
-    s32 result;
-    *(u8 *)(context + 0x388) = 0;
-    if (*(s8 *)(context + 0xcd) != 0) {
-        if (index < 0) {
-            return 1;
-        }
-        result = func_0026C6A0();
-        if (((EvtSlot *)D_003CE1A8)[index].sub[result].kind == 0) {
-            id = ((EvtSlot *)D_003CE1A8)[index].sub[result].id;
-            func_0026C918(0, D_00435E5C + id * 0x19);
-            func_0011A118(id, 1);
-            result = 1;
-        } else {
-            id = ((EvtSlot *)D_003CE1A8)[index].sub[result].id;
-            func_0035C860(text, D_00437850, id);
-            func_0026C918(0, text);
-            func_0011A0D0(id);
-            result = 1;
-        }
-        *(u8 *)(context + 0x388) = result;
-        func_0026C5B8(0x28);
-    }
-    return 1;
-}
-/*W13D2END*/
+INCLUDE_ASM(const s32, "game/code_002651C0", func_00265408);
 
 s32 func_00265500(void) {
     s32 context = func_00101958();
