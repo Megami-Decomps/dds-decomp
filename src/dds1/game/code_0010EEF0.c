@@ -120,28 +120,28 @@ void effObjNodeDestroy(EEF0Node *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjInnerCreate);
 
-void func_0010F5E8(EEF0Node *arg0) {
+void func_0010F5E8(EEF0Node *node) {
     EEF0Node *inner;
 
-    if (arg0 != NULL) {
-        inner = arg0->inner;
+    if (node != NULL) {
+        inner = node->inner;
         if (inner != NULL) {
             func_002CFF98(inner);
-            arg0->inner = NULL;
+            node->inner = NULL;
         }
     }
 }
 
-void func_0010F628(EEF0Node *arg0, u32 arg1) {
-    arg0->flags |= arg1;
+void func_0010F628(EEF0Node *node, u32 flags) {
+    node->flags |= flags;
 }
 
-void func_0010F638(EEF0Node *arg0, u32 arg1) {
-    arg0->flags &= ~arg1;
+void func_0010F638(EEF0Node *node, u32 flags) {
+    node->flags &= ~flags;
 }
 
-u8 func_0010F650(EEF0Node *arg0, u32 arg1) {
-    return (arg0->flags & arg1) != 0;
+u8 func_0010F650(EEF0Node *node, u32 flags) {
+    return (node->flags & flags) != 0;
 }
 
 void effObjInnerVecInit(EEF0Node *arg0) {

@@ -1,42 +1,62 @@
 #include "common.h"
 
+typedef struct {
+    u8 pad[0x18];
+    u32 address;
+    u8 pad1C[4];
+} ScriptLabel;
+
+typedef struct {
+    u8 pad0[0x18];
+    u32 programCounter;
+    u8 pad1C[0x98];
+    ScriptLabel *procedures;
+    ScriptLabel *labels;
+    u8 padBC[0x10];
+    u32 window;
+    u32 timer;
+    u32 commandTimer;
+    u8 padD8[0x18];
+    u32 unkF0;
+} ScriptState;
+
 extern u64 func_0010D428(u64);
 extern u64 mdlFlagTest(u64);
 
-extern s32 D_003BD78C;
+extern ScriptState *D_003BD78C;
 
-u32 func_0010D620(s32 arg0) {
-    return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_003BD78C + 0xb4) + 0x18);
+u32 func_0010D620(s32 index) {
+    return D_003BD78C->procedures[index].address;
 }
 
-u32 func_0010D638(s32 arg0) {
-    return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_003BD78C + 0xb8) + 0x18);
+u32 func_0010D638(s32 index) {
+    return D_003BD78C->labels[index].address;
 }
 
 u32 func_0010D650(void) {
-    return *(u32 *)(D_003BD78C + 0x18);
+    return D_003BD78C->programCounter;
 }
 
-void func_0010D660(u32 arg0) {
-    *(u32 *)(D_003BD78C + 0x18) = arg0;
+void func_0010D660(u32 address) {
+    D_003BD78C->programCounter = address;
 }
 
 u32 func_0010D670(void) {
-    return *(u32 *)(D_003BD78C + 0xd0);
+    return D_003BD78C->timer;
 }
 
 u32 func_0010D680(void) {
-    return *(u32 *)(D_003BD78C + 0xd4);
+    return D_003BD78C->commandTimer;
 }
 
 u32 func_0010D690(void) {
-    return *(u32 *)(D_003BD78C + 0xcc);
+    return D_003BD78C->window;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6A0);
 
 u32 func_0010D6A8(void) {
-    return *(u32 *)(D_003BD78C + 0xf0);
+    return D_003BD78C->unkF0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6B8);

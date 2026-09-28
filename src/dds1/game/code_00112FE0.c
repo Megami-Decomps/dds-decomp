@@ -1,17 +1,29 @@
 #include "common.h"
 
-u32 func_00112FE0(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x84);
+typedef struct {
+    u8 pad0[0xC];
+    u32 valueC;
+    u8 pad10[0x74];
+    s32 mode;
+} CameraData;
+
+typedef struct {
+    u8 pad0[0x18];
+    CameraData *data;
+} CameraObject;
+
+u32 func_00112FE0(CameraObject *camera) {
+    return camera->data->mode;
 }
 
-void func_00112FF0(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x18) + 0x84) != arg1) {
-        *(s32 *)(*(s32 *)(arg0 + 0x18) + 0x84) = arg1;
+void func_00112FF0(CameraObject *camera, s32 mode) {
+    if (camera->data->mode != mode) {
+        camera->data->mode = mode;
     }
 }
 
-u32 func_00113008(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0xc);
+u32 func_00113008(CameraObject *camera) {
+    return camera->data->valueC;
 }
 
 INCLUDE_ASM(const s32, "game/code_00112FE0", func_00113018);

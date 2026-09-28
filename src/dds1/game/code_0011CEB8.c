@@ -20,19 +20,19 @@ INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CF38);
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CF88);
 
-void func_0011CFC0(s32 *arg0, s32 arg1, s32 arg2) {
-    s32 temp_v0;
+void func_0011CFC0(s32 *list, s32 node, s32 linkOffset) {
+    s32 previous;
 
-    temp_v0 = arg0[1];
-    if (temp_v0 == 0) {
-        *arg0 = arg1;
+    previous = list[1];
+    if (previous == 0) {
+        *list = node;
     }
     else {
-        *(s32 *)(temp_v0 + arg2 + 4) = arg1;
+        *(s32 *)(previous + linkOffset + 4) = node;
     }
-    *(s32 *)(arg1 + arg2) = temp_v0;
-    ((s32 *)(arg1 + arg2))[1] = 0;
-    arg0[1] = arg1;
+    *(s32 *)(node + linkOffset) = previous;
+    ((s32 *)(node + linkOffset))[1] = 0;
+    list[1] = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CFF0);

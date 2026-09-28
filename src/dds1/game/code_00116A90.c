@@ -1,21 +1,31 @@
 #include "common.h"
 
+typedef struct {
+    u8 pad0[0x10];
+    u32 value;
+} PathState;
+
+typedef struct {
+    u8 pad0[0x18];
+    PathState *state;
+} PathObject;
+
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 func_00110A48(u64, u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00116A90", func_00116A90);
 
-void func_00116AD8(s32 arg0, u32 arg1) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x10) = arg1;
+void func_00116AD8(PathObject *path, u32 value) {
+    path->state->value = value;
 }
 
-u32 func_00116AE8(u64 arg0) {
-    s32 temp_v0;
-    u64 temp_v1;
+u32 func_00116AE8(u64 id) {
+    PathObject *path;
+    u64 world;
 
-    temp_v1 = dds3GetWorldSecondaryObject();
-    temp_v0 = func_00110A48(temp_v1, arg0, 6);
-    return *(u32 *)(*(s32 *)(temp_v0 + 0x18) + 0x10);
+    world = dds3GetWorldSecondaryObject();
+    path = (PathObject *)func_00110A48(world, id, 6);
+    return path->state->value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00116A90", func_00116B28);

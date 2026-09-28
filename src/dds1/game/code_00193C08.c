@@ -52,36 +52,36 @@ extern void func_00193B70(void);
 extern void func_002D0918(void *arg0);
 extern void func_002D1B90(void *arg0);
 
-void frFontListInsert(FntNode *arg0) {
+void frFontListInsert(FntNode *node) {
     FntNode *head = D_003D68C0.head;
     FntNode *next = head->next;
 
-    arg0->prev = head;
-    arg0->next = next;
+    node->prev = head;
+    node->next = next;
     D_003D68C0.count += 1;
-    head->next = arg0;
-    next->prev = arg0;
+    head->next = node;
+    next->prev = node;
 }
 
-void frFontSetEntryFlag(s32 arg0, s32 arg1) {
-    FrFontEntry *entry = &D_003D6C80.entries[arg0 & 0xFF];
+void frFontSetEntryFlag(s32 index, s32 value) {
+    FrFontEntry *entry = &D_003D6C80.entries[index & 0xFF];
 
     entry->unk10[0] = 1;
-    entry->unk10[1] = arg1 + 1;
+    entry->unk10[1] = value + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193C70);
 
-s32 frFontBitLength(u32 arg0) {
+s32 frFontBitLength(u32 value) {
     s32 count = 0;
 
-    if (arg0 == 0) {
+    if (value == 0) {
         return 0;
     }
     do {
-        arg0 = arg0 >> 1;
+        value = value >> 1;
         count += 1;
-    } while (arg0 != 0);
+    } while (value != 0);
     return (count + 0xFF) & 0xFF;
 }
 

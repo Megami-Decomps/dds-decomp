@@ -1,11 +1,25 @@
 #include "common.h"
 
+typedef struct {
+    u8 pad0[8];
+    u32 unitHandle;
+    u8 padC[0x58];
+    u32 flags;
+    u8 pad68[0xC];
+    u32 value74;
+} UnitObjectData;
+
+typedef struct {
+    u8 pad0[0x18];
+    UnitObjectData *data;
+} UnitObject;
+
 u32 func_00116590(void) {
     return 1;
 }
 
-u32 func_00116598(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x74);
+u32 func_00116598(UnitObject *obj) {
+    return obj->data->value74;
 }
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_001165A8);
@@ -16,17 +30,16 @@ void func_001165F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_00116608);
 
-void func_001166B8(s32 arg0) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 100) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 100) & 0xfffffffc
-    ;
+void func_001166B8(UnitObject *obj) {
+    obj->data->flags = obj->data->flags & 0xfffffffc;
 }
 
-void func_001166D0(u32 arg0, s32 arg1) {
-    func_00221BE0(*(u32 *)(*(s32 *)(arg1 + 0x18) + 8), arg0);
+void func_001166D0(u32 value, UnitObject *obj) {
+    func_00221BE0(obj->data->unitHandle, value);
 }
 
-void func_001166F0(s32 arg0) {
-    func_00221C50(*(u32 *)(*(s32 *)(arg0 + 0x18) + 8));
+void func_001166F0(UnitObject *obj) {
+    func_00221C50(obj->data->unitHandle);
 }
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_00116710);

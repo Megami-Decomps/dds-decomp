@@ -1,17 +1,25 @@
 #include "common.h"
 
-void func_00185E18(u32 arg0) {
-    func_00167350(*(u32 *)((s32)arg0 + 0x74));
-    func_00167350(*(u32 *)((s32)arg0 + 0x70));
-    func_002CFF98(arg0);
+typedef struct {
+    u8 pad0[0x70];
+    u32 firstResource;
+    u32 secondResource;
+    u8 pad78[4];
+    u32 value7C;
+} EffectPair;
+
+void func_00185E18(EffectPair *pair) {
+    func_00167350(pair->secondResource);
+    func_00167350(pair->firstResource);
+    func_002CFF98(pair);
 }
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00185E50);
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00186030);
 
-void func_00186040(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x7c) = arg1;
+void func_00186040(EffectPair *pair, u32 value) {
+    pair->value7C = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00186048);
