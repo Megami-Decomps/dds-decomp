@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
+
 extern s32 func_002E92C0(u32);
 
 extern u64 func_001F4398(void);
@@ -3899,7 +3901,7 @@ s32 func_001F3A58(s32 arg0) {
 }
 
 void func_001F3A78(s32 arg0, s32 arg1) {
-    func_003014F0(arg1, "%sMIDI%04X.SMG", D_003BB6B0, (arg0 + 0x200) & 0xffff);
+    func_003014F0(arg1, D_003A5158, D_003BB6B0, (arg0 + 0x200) & 0xffff);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A5158);

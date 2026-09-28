@@ -1,5 +1,11 @@
 #include "common.h"
 
+extern char D_003B39C8[]; /* "/tool/effect/ep/" */
+extern char D_003B39E0[]; /* "/tool/effect/" */
+extern char D_003B3B88[]; /* "/tool/effect/mat/" */
+extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
+extern char D_003B3CA0[]; /* "LmapMain" */
+
 extern s32 CancelWakeupThread(u64);
 
 extern u64 GetThreadId(void);
@@ -2783,41 +2789,41 @@ void func_002BB868(void) {
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BB880);
 
 s32 func_002BB930(void) {
-    return func_002BB880("/tool/effect/mat/", 0x43);
+    return func_002BB880(D_003B3B88, 0x43);
 }
 
 s32 func_002BB950(void) {
-    return func_002BB880("/tool/effect/mat/", 0x43);
+    return func_002BB880(D_003B3B88, 0x43);
 }
 
 s32 func_002BB970(void) {
-    return func_002BB880("/tool/effect/ep/", 0x20);
+    return func_002BB880(D_003B39C8, 0x20);
 }
 
 s32 func_002BB990(void) {
-    return func_002BB880("/tool/effect/", 0x10);
+    return func_002BB880(D_003B39E0, 0x10);
 }
 
 s32 func_002BB9B0(void) {
-    return func_002BB880("/tool/effect/ep/", 0x20);
+    return func_002BB880(D_003B39C8, 0x20);
 }
 
 s32 func_002BB9D0(void) {
-    return func_002BB880("/tool/effect/mat/", 1);
+    return func_002BB880(D_003B3B88, 1);
 }
 
 s32 func_002BB9F0(void) {
-    return func_002BB880("/tool/effect/mat/", 1);
+    return func_002BB880(D_003B3B88, 1);
 }
 
 s32 func_002BBA10(void) {
-    return func_002BB880("/tool/effect/mat/", 1);
+    return func_002BB880(D_003B3B88, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BBA30);
 
 s32 func_002BBA68(void) {
-    return func_002BB880("/tool/effect/hlp/", 4);
+    return func_002BB880(D_003B3BA0, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BBA88);
@@ -3409,7 +3415,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002C2E38);
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002C2EA0);
 
 s32 func_002C2ED0(void) {
-    return kwlnTaskGetTaskByName((u32)"LmapMain") != 0;
+    return kwlnTaskGetTaskByName((u32)D_003B3CA0) != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002C2EF8);
