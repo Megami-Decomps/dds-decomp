@@ -64,6 +64,49 @@ build. Treat it like `DIFF`: try another natural formulation or park it.
 Editing a unit can make an existing function CONTEXT, so always check the
 whole unit.
 
+## Branches kept where C gives `movn`/`movz` (irregular switches)
+
+An if-chain of constant results gets if-converted: `if (v == 1) return 10;
+if (v < 4) return 2; return 5;` compiles to `slti; beq; movz`. The same logic
+written as a small `switch`, with the cases grouped, keeps real branches, and
+retail looks like that:
+
+```c
+switch (v) {
+case 1: return 10;
+case 0: case 2: case 3: return 2;
+default: return 5;
+}
+```
+
+Signs of an irregular switch in the asm: a comparison against a small constant
+first (`slti $x, v, 2`), sometimes with a result that looks unused, followed
+by several `beq`/`beqz`/`beqzl` branches and no jump table (fewer than 5
+distinct labels). A case identical to `default` but written out explicitly
+also leaves that stray comparison. Verified on ee-gcc 2.96 (from the
+[Decompedia GCC page](https://decomp.wiki/compilers/GCC)).
+
+## Other GCC patterns (Decompedia; check each on ee-gcc 2.96)
+
+These are documented for GCC 2.8–2.9x projects (Paper Mario, Twisted Metal
+Black, SOTN). They are worth trying, but not yet confirmed here:
+
+- **Branch-likely flips** (`beql` vs `beq`, `bnel` vs `bne`): invert the
+  condition and swap the branches. Inverting `if (p > 0) A else B` does flip
+  the branch sense on ee-gcc 2.96 (`blez` ↔ `bgtz`).
+- **Unexpected register swaps after a branch:** the original probably
+  duplicated the tail in both branches, and GCC merged it. Write
+  `if (x) { ...; return f(a); } ...; return f(b);` instead of computing
+  operands in the branches and calling once.
+- **Negative struct offsets in a loop** (`ptr->unk-1C`): the loop advances a
+  pointer biased into the element alongside the counter; write
+  `for (i = 1; i < n; i++, p++)`.
+- **Range checks** `(u32)(v - 0xE) < 9` are `v >= 14 && v < 23`.
+- **Coalesced loads:** `if (t->a || t->b)` on two adjacent aligned `s16`
+  fields becomes one `lw` (masked with `lui/ori/and` for bytes).
+- **Float division by a constant** can become a 64-bit multiply and shift
+  (constant table on the Decompedia page).
+
 ## Tail calls: `jal` + epilogue instead of `j`
 
 -O2 turns a call in tail position into `j callee`. Retail keeps
