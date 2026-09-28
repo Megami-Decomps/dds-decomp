@@ -343,7 +343,16 @@ u32 func_001F83B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F83E8);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F84A8);
+u32 func_001F84A8(void) {
+    s32 context = func_0010D6A8();
+    u16 first = func_0010D428(0);
+    u32 second = func_0010D428(1);
+    *(u32 *)(context + 0x20) = 2;
+    *(u32 *)(context + 0x24) = first;
+    *(u32 *)(context + 0x8c) = second;
+    *(u32 *)(context + 0x38) = second;
+    return 1;
+}
 
 u32 func_001F8508(void) {
     s32 temp_v0;
