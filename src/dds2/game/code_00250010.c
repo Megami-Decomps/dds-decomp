@@ -80,6 +80,8 @@ extern void soundSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern void func_00341C78(u32 arg0);
 
+extern s32 (*D_003C9928[])(s32, s32, void *);
+
 INCLUDE_ASM(const s32, "game/code_00250010", evtCreateTask);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250080);
@@ -358,7 +360,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00256AE0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00256CF0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00257028);
+INCLUDE_ASM(const s32, "game/code_00250010", evtSynchronizeSelectedEntry);
 
 s32 func_002570B8(void) {
     void *temp_v0;
@@ -385,7 +387,13 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002582D0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00258700);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00258850);
+s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, void *runtime) {
+    s32 mode = *(s32 *)((u8 *)runtime + 0x2280);
+    if (mode == 11 && index != mode) {
+        return 0;
+    }
+    return D_003C9928[index](x, y, runtime);
+}
 
 void func_002588A0(void) {
     func_0036A420();

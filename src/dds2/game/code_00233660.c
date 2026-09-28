@@ -203,14 +203,14 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00234C20);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234CE0);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234D40);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlDispatchResourceEntry);
 
 void applyModelResourceEntries(s32 object, s32 id, s32 option) {
     s32 *block = func_00233E40(object, id);
     if (block != NULL) {
         s32 *entry = func_00233EC0((s32)block);
         while (entry != NULL) {
-            func_00234D40(object, entry, option);
+            mdlDispatchResourceEntry(object, entry, option);
             entry = func_00233ED8((s32)entry);
         }
     }

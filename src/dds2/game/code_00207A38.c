@@ -270,7 +270,7 @@ void func_00209D40(void) {
     s32 temp_v0;
 
     temp_v0 = func_001AA6F8();
-    func_002DDCC8(*(u32 *)(temp_v0 + 0x4e8));
+    releaseSharedEffectReference(*(u32 *)(temp_v0 + 0x4e8));
     *(u32 *)(temp_v0 + 0x4e8) = 0;
 }
 

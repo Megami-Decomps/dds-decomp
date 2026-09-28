@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shared_funcs import DEF, ROOT, blocks  # noqa: E402
 
-BAD = re.compile(r"^(?:DIFF|OVER) (\w+) ", re.M)
+BAD = re.compile(r"^(?:DIFF|OVER|CONTEXT) (\w+)\b", re.M)
 
 
 def revert(path: Path) -> list[str]:

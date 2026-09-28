@@ -93,6 +93,8 @@ extern void func_0030BD10();
 
 extern void func_003139D8();
 
+void func_003298C0(u32 sprite);
+
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030B7D0);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030B838);
@@ -360,11 +362,17 @@ void func_0030E878(void) {
 }
 
 extern s32 func_0030EE40(s32, s32);
+
 extern void func_0030EF88(s32, u16);
+
 extern void func_0030E940(void);
+
 extern void func_0030E958(void);
+
 extern s32 D_004390AC;
+
 extern s32 D_004390B0;
+
 extern u32 D_004390A8;
 
 void func_0030E880(void) {
@@ -824,6 +832,7 @@ void func_00313F88(u8 *work) {
 }
 
 extern u16 D_004052F8[][80];
+
 extern void func_0011CA88(u8 *);
 
 void func_00314020(u8 *work) {
@@ -881,6 +890,7 @@ void func_003146E8(u32 arg0, u16 arg1) {
 }
 
 extern u8 func_00314C10(s32);
+
 extern u32 *func_00314BE0(s32);
 
 u32 func_00314728(u8 *work, u32 amount) {
@@ -919,6 +929,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314868);
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314990);
 
 extern u32 func_00315FC8(u16);
+
 extern s32 func_00314990(u8 *, u16);
 
 s32 func_00314A08(u8 *work) {
@@ -1106,8 +1117,11 @@ s32 removeScriptSlot(u8 *work, u16 key) {
 }
 
 extern u8 D_00401324[];
+
 extern u8 D_00401325[];
+
 extern u16 D_00401326[];
+
 extern u8 D_0040132C[][36];
 
 u8 func_003151D0(u16 scriptId) {
@@ -1215,6 +1229,7 @@ typedef struct ScriptEntry44 {
     u32 state;
     u8 unknown[40];
 } ScriptEntry44;
+
 extern ScriptEntry44 D_00402BE0[];
 
 u32 func_00315FF0(u16 index) {

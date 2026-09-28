@@ -1150,7 +1150,7 @@ void func_002D6900(s32 arg0, u32 arg1) {
     u32 temp_v0;
 
     if (*(s32 *)(arg0 + 0x48) != 0) {
-        func_002DE090(*(s32 *)(arg0 + 0x48));
+        releaseEffectReferenceHolder(*(s32 *)(arg0 + 0x48));
     }
     temp_v0 = func_002DDF48(arg1);
     *(u32 *)(arg0 + 0x48) = temp_v0;

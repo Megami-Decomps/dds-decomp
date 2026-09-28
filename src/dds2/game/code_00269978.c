@@ -90,7 +90,15 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A258);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A2E0);
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026A3F8);
+void func_0026A3F8(s32 item) {
+    s32 state = func_00101958();
+    func_002686F0(state);
+    func_00268838(0, state);
+    func_00269B08(state);
+    func_00268EC8(state);
+    func_00268B48(state);
+    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+}
 
 void evtBSetupDispatchSyncC(s32 arg0) {
     s32 temp_v0 = func_00101958();
@@ -227,7 +235,15 @@ u32 func_0026ADC0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026ADC8);
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026AEB0);
+void func_0026AEB0(s32 item) {
+    s32 state = func_00101958();
+    func_002686F0(state);
+    func_00268838(0, state);
+    func_00269B08(state);
+    func_00268EC8(state);
+    func_00268B48(state);
+    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+}
 
 void evtBSetupDispatchSyncF(s32 arg0) {
     s32 temp_v0 = func_00101958();
@@ -255,7 +271,15 @@ s64 func_0026AFE0(u64 arg0) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026B068);
+void func_0026B068(s32 item) {
+    s32 state = func_00101958();
+    func_002686F0(state);
+    func_00268838(0, state);
+    func_00269B08(state);
+    func_00268EC8(state);
+    func_00268B48(state);
+    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+}
 
 void evtBSetupDispatchSyncG(s32 arg0) {
     s32 temp_v0 = func_00101958();

@@ -67,7 +67,7 @@ void func_00307388(s32 *position, s32 x, s32 y) {
 
 void func_00307398(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4) {
-    func_0032C9D8(arg4, arg0, 0, 0, arg1, arg2, arg3, 0);
+    sdfCreateDescriptorPacket(arg4, arg0, 0, 0, arg1, arg2, arg3, 0);
 }
 
 u8 func_003073D0(s32 arg0) {

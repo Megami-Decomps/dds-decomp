@@ -4,6 +4,8 @@ extern u32 func_00101958(void);
 
 extern u32 func_001A0710(u32);
 
+extern u32 func_00328D68(u32);
+
 INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024F9B8);
 
 INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FA48);
@@ -30,7 +32,12 @@ void func_0024FE80(u32 arg0) {
     kwlnTaskDestroyWithHierarchy(arg0, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FE98);
+s32 *func_0024FE98(s32 *owner) {
+    s32 *work = (s32 *)func_00328D68(8);
+    work[0] = 0;
+    work[1] = 0;
+    return work;
+}
 
 void func_0024FEC0(s32 arg0, u32 arg1) {
     u32 temp_v0;

@@ -33,14 +33,22 @@ typedef struct {
 } SceneInitializer;
 
 extern SceneInitializer D_003B6938[];
+
 extern u32 func_001B57B0(void);
+
 extern s32 func_001AC750(s32, void *);
+
 extern s32 D_004367C0;
+
 extern char D_003B5D10[];
+
 extern s32 getEntryFlagsUnlessDisabled(void *);
+
 extern void func_001D3978(void);
 
+extern u32 D_00435E64;
 
+extern u32 D_00435E5C;
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C7FF8);
 
@@ -62,9 +70,23 @@ void func_001C80D0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_0019B8B0(0xffffffffffffffff);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8158);
+void func_001C8158(s32 x, s32 y, s32 z, s32 w, u16 index) {
+    s32 handle;
+    func_0019B8B0(0x13);
+    handle = func_0019F460(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
+    func_0019D530(handle, 1);
+    func_0019C5B0(handle);
+    func_0019B8B0(-1);
+}
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C81F8);
+void func_001C81F8(s32 x, s32 y, s32 z, s32 w, u16 index) {
+    s32 handle;
+    func_0019B8B0(0x13);
+    handle = func_0019F460(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
+    func_0019D530(handle, 1);
+    func_0019C5B0(handle);
+    func_0019B8B0(-1);
+}
 
 s32 func_001C82A0(s32 unused, u32 limit) {
     func_001AA6F8();
@@ -291,11 +313,11 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF0B0);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF500);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF5D0);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", findBattleSceneSlotById);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF630);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF688);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", fadeStaleBattleSceneSlots);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF720);
 
@@ -346,7 +368,16 @@ u32 func_001CFF00(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFF08);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFFC8);
+s32 func_001CFFC8(void) {
+    if (func_00203FD8() != 0 &&
+        func_0022B108() != 0 &&
+        func_0022E460() != 0) {
+        loadBattleSoundBank();
+        func_0022B288();
+        return 3;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D0020);
 
@@ -433,7 +464,20 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2DF0);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2E68);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2EC8);
+s32 func_001D2EC8(s32 *object) {
+    u32 flags;
+    func_001AA6F8();
+    if (object[2] & 0x40) {
+        return 8;
+    }
+    flags = *(u32 *)(object[6] + 0x110) & 0xE00;
+    switch (flags) {
+    case 0x200: return 0x14;
+    case 0x400: return 0x2D;
+    case 0x800: return 0xF;
+    default: return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2F40);
 

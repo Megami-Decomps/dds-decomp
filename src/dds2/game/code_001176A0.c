@@ -78,7 +78,7 @@ void func_00117A10(void) {
     func_00313C40();
     func_0026CE90();
     func_00314200();
-    func_0011C998();
+    eventUpdateFlaggedEntries();
     dds3ForEachEntry();
     func_0011D438();
     func_001B7900();
@@ -123,11 +123,11 @@ INCLUDE_ASM(const s32, "game/code_001176A0", sysDispatchCmd);
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118BA8);
 
 void func_00118C58(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
-    func_0011D4C8(10, arg1, arg2, arg0, arg3);
+    eventRunContext(10, arg1, arg2, arg0, arg3);
 }
 
 void func_00118C80(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
-    func_0011D4C8(7, arg1, arg2, arg0, arg3);
+    eventRunContext(7, arg1, arg2, arg0, arg3);
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", sysDispatchSubCmd);

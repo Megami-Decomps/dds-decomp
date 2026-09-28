@@ -622,7 +622,18 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340950);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003409C8);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340A50);
+f32 sdfWrapAngle(f32 angle) {
+    s32 turns;
+    if (angle > 3.1415926f) {
+        turns = (s32)(angle / 6.2831852f) + 1;
+        return angle - (f32)turns * 6.2831852f;
+    }
+    if (angle < -3.1415926f) {
+        turns = (s32)(angle / 6.2831852f) - 1;
+        return angle - (f32)turns * 6.2831852f;
+    }
+    return angle;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AB8);
 

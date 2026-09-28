@@ -62,7 +62,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", parObjGetMode);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_001624B8);
+INCLUDE_ASM(const s32, "game/code_00162348", parInstantiateKind);
 
 INCLUDE_ASM(const s32, "game/code_00162348", parObjDispatch);
 
@@ -97,9 +97,9 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001629C0);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00162A30);
+INCLUDE_ASM(const s32, "game/code_00162348", parDispatchKindUpdate);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00162AC8);
+INCLUDE_ASM(const s32, "game/code_00162348", parDispatchKindInit);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162B60);
 

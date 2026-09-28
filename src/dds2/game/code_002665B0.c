@@ -44,10 +44,10 @@ extern s32 func_002B8158(s32, s32, s32, s32);
 extern s32 func_002B82A0(s32, s32);
 extern void func_00267500(void);
 extern u8 D_00437870[];
-extern void func_00304A38(s32);
+extern void destroyPackedEffectBatch(s32);
 
 void func_002665B0(s32 arg0) {
-    func_00304A38(*(u32 *)(arg0 + 0x3c));
+    destroyPackedEffectBatch(*(u32 *)(arg0 + 0x3c));
 }
 
 u8 func_002665C8(void) {

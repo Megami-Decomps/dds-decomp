@@ -1092,7 +1092,7 @@ void func_002BB320(menu)
     u32 *handles = menu + 15;
     u32 i = 0;
     do {
-        func_00304A38(*handles++);
+        destroyPackedEffectBatch(*handles++);
         i++;
     } while (i < 3);
 }

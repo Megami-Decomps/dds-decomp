@@ -26,6 +26,8 @@ extern s8 D_00437885;
 
 extern u32 D_00453CC0[];
 
+void func_003297C8(u32 sprite);
+
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C1D0);
 
 void func_0026C240(void) {

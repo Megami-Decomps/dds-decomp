@@ -43,6 +43,6 @@ run "$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1" \
     -D__LANGUAGE_C -D_LANGUAGE_C -DLANGUAGE_C \
     "-D__SIZE_TYPE__=unsigned int" "-D__PTRDIFF_TYPE__=int" -D__LONG_MAX__=9223372036854775807L \
     -U__mips -D__mips=3 -D__mips64 -D__mips_eabi -D__mips_single_float \
-    -Iinclude -Isrc "-DASM_ROOT=\"build/eeasm/asm/$version/nonmatchings/\"" \
+    -Iinclude -Isrc "-DASM_ROOT=\"build/eeasm/asm/$version/nonmatchings/\"" "-DVERSION_$(echo $version | tr a-z A-Z)" \
     -quiet -O2 $flags "$in" -o "$tmp/out.s"
 run "$ee/ee/bin/as" -EL -G8 -Iinclude -o "$out" "$tmp/out.s"

@@ -75,9 +75,49 @@ extern u8 D_003932A0[];
 
 extern u8 D_00391F30[];
 
+extern s32 D_00438ECC;
+
+extern u32 func_0032C138(void *);
+
+extern char D_00413350[];
+
+extern u32 D_00438ED0;
+
+extern u32 D_004360F4;
+
+extern u8 D_00444990[];
+
+extern u32 func_00343ED0(const char *, u32 *, s32);
+
+extern u32 func_002DEB80(const void *);
+
+extern void func_001379C0(u32);
+
+extern s16 D_003931A0[];
+
+extern s32 func_0035C860(char *, const char *, ...);
+
+extern void func_0012B068(char *, s32, s32);
+
+extern u32 sdfDevCreateCommandState(const char *);
+
+extern u32 func_0033EB10(u32, void *, u32);
+
+extern void func_0033EAE0(u32);
+
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137818);
+void func_00137818(void) {
+    D_00438ECC = func_00343ED0(D_00413350, &D_00438ED0, 0);
+    D_00436100 = func_0032C138((void *)D_00438ED0);
+    D_004360F8 = func_002DEB80(D_00444990);
+    if (D_00438ECC != 0) {
+        func_003298C0(D_00438ECC);
+        D_00438ECC = 0;
+    }
+    func_001379C0(D_004360F4);
+    D_004360FC = 1;
+}
 
 void func_00137888(void) {
     func_00136EF8();

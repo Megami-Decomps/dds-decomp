@@ -1404,7 +1404,7 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285500);
 u32 func_002856E0(u32 ctx, u32 config) {
     u32 data = func_00328D68(0x70);
     memset((void *)data, 0, 0x70);
-    func_00304158(ctx, config, 0, data + 0x6c);
+    requestEffectResourceByMode(ctx, config, 0, data + 0x6c);
     return data;
 }
 

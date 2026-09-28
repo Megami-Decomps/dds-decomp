@@ -557,7 +557,7 @@ def finish(dst, ported, skipped):
         path = ROOT / rel
         r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path), "-v"],
                            capture_output=True, text=True)
-        bad = re.findall(r"^(?:DIFF|OVER|SHARED rodata of|PAD rodata of|TWICE) (\w+)\b", r.stdout, re.M)
+        bad = re.findall(r"^(?:DIFF|OVER|CONTEXT|SHARED rodata of|PAD rodata of|TWICE) (\w+)\b", r.stdout, re.M)
         if r.returncode and not [n for n in bad if n in ported_names.get(rel, ())]:
             skipped.append(f"{rel}: check_unit failed without per-function DIFF; left for review")
         text = path.read_text()

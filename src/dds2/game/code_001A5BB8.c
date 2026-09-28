@@ -32,8 +32,6 @@ extern s32 D_00435E38;
 
 extern s32 func_001AA6F8(void);
 
-extern s32 func_001B32F8(u32, u32);
-
 extern u32 D_004367FC;
 
 extern s32 D_00435DD0;
@@ -106,14 +104,52 @@ extern s32 D_003B4F78[];
 extern s32 D_003B4F74[];
 
 extern f32 D_003B4E28[];
-extern s32 func_001AD0A8(s32, s32);
+
+extern s32 battleCheckSpecialAbility(s32, s32);
+
 extern s32 mdlFlagTest(s32);
+
 extern u32 func_002C55C0(s32);
+
 extern s8 *D_00435E24;
+
 extern s32 func_001AD1C0(s32, u32);
+
 extern s32 eventCheckValueThreshold(s32, s32);
+
 extern void mdlFlagSet(s32);
+
 extern void mdlFlagClear(s32);
+
+extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
+
+extern s32 D_00435E2C;
+
+extern s32 D_00435E2C;
+
+extern u8 *D_00435E04;
+
+extern u8 *D_00435DF4;
+
+extern u8 *D_00435E04;
+
+extern s32 func_001B32F8(s32, s32 *);
+
+extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
+
+typedef struct ActorClassIds {
+    s16 values[8];
+} ActorClassIds;
+
+extern const ActorClassIds D_00415B08;
+
+typedef struct ActorClassPairTable {
+    u32 values[14];
+} ActorClassPairTable;
+
+extern const ActorClassPairTable D_00415B18;
+
+extern u32 D_00438F48;
 
 void func_001A5BB8(s32 arg0) {
     for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
@@ -169,7 +205,22 @@ void func_001A5F08(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     *(s16 *)(arg0 + 6) = arg3;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A5F18);
+void func_001A5F18(u8 *effect) {
+    u32 *handles = (u32 *)(effect + 0xA4);
+    if (handles[0] != 0) {
+        func_001A1930(handles[0]);
+        handles[0] = 0;
+    }
+    if (handles[1] != 0) {
+        func_001A1930(handles[1]);
+        handles[1] = 0;
+    }
+    if (handles[2] != 0) {
+        func_001A1930(handles[2]);
+        handles[2] = 0;
+    }
+    *(u32 *)effect &= ~0xF00;
+}
 
 void func_001A5FA0(s32 *arg0) {
     s32 temp_v0;
@@ -288,9 +339,19 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9130);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9580);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A96E8);
+u64 *func_001A96E8(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)func_0033A290(func_0032CE80(0x30), 0x30);
+    entry[4] = owner;
+    entry[5] = alternative ? 0x48 : 0x47;
+    return entry;
+}
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9740);
+u64 *func_001A9740(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)func_0033A290(func_0032CE80(0x30), 0x30);
+    entry[4] = owner;
+    entry[5] = alternative ? 0x43 : 0x42;
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9798);
 
@@ -550,7 +611,7 @@ void func_001AD090(void) {
     func_00119F68();
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD0A8);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", battleCheckSpecialAbility);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD118);
 
@@ -571,7 +632,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD5B0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD698);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD900);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", battleAllActiveUnitsReady);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD978);
 
@@ -582,11 +643,11 @@ u32 func_001ADA10(void) {
     return *(u32 *)(temp_v0 + 0x278);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADA30);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", battleChooseAvailableUnit);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADAD0);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", battleCountAvailableUnits);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADB30);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", battleCountAvailableParticipants);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADBD0);
 
@@ -853,7 +914,14 @@ u8 func_001B33C8(u32 arg0) {
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B33E8);
+s32 func_001B33E8(s32 object) {
+    s32 choices[24];
+    s32 count = func_001B32F8(object, choices);
+    if (count != 0) {
+        return choices[effMiscRandMod(0, count)];
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3430);
 
@@ -989,10 +1057,10 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004157A0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4210);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4560);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", battleClearUnitStatusMask);
 
 s32 func_001B45C8(s32 object) {
-    if (func_001AD0A8(object, 0x279)) {
+    if (battleCheckSpecialAbility(object, 0x279)) {
         return 1;
     }
     return mdlFlagTest(0x820) != 0;
@@ -1078,9 +1146,16 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B57B0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5810);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5930);
+s16 func_001B5930(s8 classId) {
+    ActorClassIds table = D_00415B08;
+    return table.values[classId];
+}
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5978);
+void func_001B5978(s8 classId, u32 *first, u32 *second) {
+    ActorClassPairTable pairs = D_00415B18;
+    *first = pairs.values[classId * 2];
+    *second = pairs.values[classId * 2 + 1];
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415AF0);
 
@@ -1617,7 +1692,27 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2390);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C23C0);
+s32 func_001C23C0(void) {
+    s32 base;
+    s32 i;
+    if (func_001B88C8(8) == 0) {
+        if (func_001B88C8(2) != 0) {
+            base = D_00438F48;
+            for (i = 0; i < 4; i++) {
+                if (*(s16 *)(base + 2 + i * 2) < 0x80) {
+                    return 0;
+                }
+                if (*(s32 *)(base + 0xC + i * 8) < 11) {
+                    return 0;
+                }
+            }
+            if (*(s32 *)(base + 0x18) == *(s32 *)(base + 0x10) + 23) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2450);
 

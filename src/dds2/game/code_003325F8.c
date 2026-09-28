@@ -48,8 +48,6 @@ void func_0032CA90(void *arg0, void (*arg1)(void));
 
 void func_00333140(void);
 
-void func_003338B0(void);
-
 extern SdfSubParam *sdfSubParamCreate(void);
 
 void *func_00328D68(s32 size);
@@ -63,6 +61,61 @@ typedef struct SdfNode {
     u32 unkC; /* 0xC */
 } SdfNode;
 
+void func_0032CAE0(void *arg0, s32 arg1);
+
+void func_00340528(void *);
+
+typedef struct SdfTex SdfTex;
+
+typedef struct SdfAsset {
+    u8 pad00[8];
+    void *entries[2];
+    u32 unk10;
+    u32 unk14;
+    u32 unk18;
+    f32 unk1C;
+    u32 unk20;
+    u32 unk24;
+    u32 unk28;
+    SdfTex *unk2C;
+    u8 pad30[8];
+    void *third;
+    void *fourth;
+    f32 unk40;
+    f32 unk44;
+} SdfAsset;
+
+extern s32 D_00438A38;
+
+extern void func_00328E48(void *);
+
+void sdfAssetRelease(SdfAsset *);
+
+typedef struct SdfAssetEntry {
+    u32 pad00;
+    u32 unk04;
+    u32 unk08;
+    u32 pad0C;
+    u32 unk10;
+    u32 unk14;
+    u32 pad18;
+    f32 unk1C;
+    u8 pad20[0x18];
+    u64 unk38;
+    u64 unk40;
+    u64 unk48;
+} SdfAssetEntry;
+
+extern u64 func_0032B318(SdfTex *);
+
+extern u64 func_0032B328(SdfTex *);
+
+extern u64 func_0032B338(SdfTex *);
+
+void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
+
+void func_00333B38(SdfAsset *, void *);
+
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332860);
@@ -75,7 +128,7 @@ void sdfChunkFindByTag(s32 arg0) {
     sdfChunkFindById(*(u32 *)(arg0 + 0x90));
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332A18);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfNamedChunkFindId);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332AD8);
 
@@ -85,7 +138,7 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332BB0);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332C30);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332C88);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfChunkFindRecordById);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D08);
 
@@ -127,7 +180,7 @@ void func_00332E58(u32 arg0) {
     devCreateRequest(arg0, 4, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332E78);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfResourceListRelease);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
 
@@ -150,7 +203,7 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00333060);
 
 void func_003330F0(void) {
     func_0032CA90(&D_00439170, func_00333140);
-    func_0032CA90(&D_00439178, func_003338B0);
+    func_0032CA90(&D_00439178, sdfAssetRelease);
 }
 
 void func_00333120(u32 arg0) {
@@ -159,7 +212,16 @@ void func_00333120(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333140);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003331A8);
+void sdfReleaseQueuedResource(void *resource, s32 retained) {
+    if (resource == NULL) {
+        return;
+    }
+    if (retained != 0) {
+        func_0032CAE0(&D_00439170, (s32)resource);
+    } else {
+        func_00340528(resource);
+    }
+}
 
 void func_003331F0(void) {
     func_00340558();
@@ -258,7 +320,17 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003335E0);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003336E0);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003338B0);
+void sdfAssetRelease(SdfAsset *asset) {
+    if (asset == NULL) {
+        return;
+    }
+    D_00438A38--;
+    func_00328E48(asset->entries[0]);
+    func_00328E48(asset->entries[1]);
+    func_00328E48(asset->third);
+    func_00328E48(asset->fourth);
+    func_00328E48(asset);
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333918);
 
@@ -273,7 +345,24 @@ void *func_00333950(u32 *arg0, SdfNode *arg1, s32 arg2) {
     return (void *)((u8 *)arg1 + 0x10);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333990);
+void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
+    SdfTex *resource;
+    entry->unk04 = asset->unk10;
+    entry->unk1C = asset->unk1C;
+    entry->unk08 = asset->unk14;
+    if (D_00438A3C == 1) {
+        entry->unk10 = 0;
+    } else {
+        entry->unk10 = asset->unk20;
+    }
+    entry->unk14 = asset->unk28;
+    resource = asset->unk2C;
+    if (resource != NULL) {
+        entry->unk38 = func_0032B328(resource);
+        entry->unk40 = func_0032B318(resource);
+        entry->unk48 = func_0032B338(resource);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333A30);
 
@@ -288,11 +377,27 @@ void func_00333BC8(SdfTextParam *arg0, SdfTextParam *arg1) {
     arg1->unk2C = arg0->unk44;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333BE0);
+void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
+    u8 flags = asset->pad00[6];
+    void *entry = asset->entries[index];
+    if ((flags >> index) & 1) {
+        sdfAssetCopyTextureState(asset, entry);
+    }
+    if (flags & (4 << index)) {
+        func_00333B18(asset, entry);
+    }
+    if (flags & (16 << index)) {
+        func_00333B38(asset, entry);
+    }
+    if (flags & (64 << index)) {
+        func_00333BC8(asset, entry);
+    }
+    asset->pad00[6] = flags & (0x55 << (index ^ 1));
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333CB0);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333D98);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfAssetListParse);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333E38);
 

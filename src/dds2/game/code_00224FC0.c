@@ -14,13 +14,21 @@ extern u32 func_001E8058(u32);
 
 extern u32 func_001E8060(u32, u32);
 
-extern void func_001E2758(u32);
-
 extern void func_00208D58(void);
 
 extern void func_00224EE8(u32);
 
 extern void func_001E9660(u32, f32, f32, f32, f32, f32, f32, f32, f32);
+
+extern void func_001E2758(void *);
+
+typedef struct BattleEffectState {
+    u32 actor, flags, value;
+    u16 timer;
+    u8 active, phase;
+    u32 effect;
+    f32 speed;
+} BattleEffectState;
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00224FC0);
 
@@ -33,7 +41,6 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_002254C8);
 void func_00225778(u32 unit) {
     func_002254C8(unit);
 }
-
 
 u32 func_00225798(u32 unit) {
     u32 actor = *(u32 *)(unit + 0x114);
@@ -150,7 +157,6 @@ void func_00226820(u32 unit) {
     }
 }
 
-
 u32 func_00226850(s32 arg0) {
     if (*(s32 *)(arg0 + 0x134) == 0x187) {
         *(u32 *)(arg0 + 0x13c) = 0;
@@ -195,7 +201,7 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226AB0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226BB8);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226C48);
+INCLUDE_ASM(const s32, "game/code_00224FC0", battleResetEffectState);
 
 INCLUDE_RODATA(const s32, "game/code_00224FC0", D_0041B4D0);
 

@@ -34,6 +34,8 @@ extern char D_0042D4D0[];
 
 extern s32 func_00101740(const char *arg0);
 
+void func_00316FA8(u32 sprite);
+
 void func_00316E08(RgbAlpha *p, u32 color) {
     p->rgb18 = color & 0xFFFFFF;
     p->alpha38 = color >> 24;
@@ -72,7 +74,11 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316F40);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00316FA8);
+void func_00316FA8(u32 sprite) {
+    if (sprite != 0) {
+        func_00317E48(sprite);
+    }
+}
 
 u32 func_00316FC8(void) {
     u32 temp_v0;

@@ -39,7 +39,7 @@ typedef struct {
     s32 unk38;         /* 0x38 */
 } SdfModel;
 
-extern void func_003307A0(void);
+extern void sdfFreeNodeLists(void);
 
 extern void func_00330768(void *arg0);
 
@@ -121,7 +121,7 @@ void func_003316B0(SdfModel *arg0, s32 arg1, s32 arg2) {
     s32 j = 0;
 
     arg0->unk38 = arg1;
-    func_003307A0();
+    sdfFreeNodeLists();
     func_00330768(arg0);
     func_003314B0(arg0);
     i = 0;

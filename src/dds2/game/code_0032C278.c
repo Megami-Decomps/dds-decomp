@@ -132,7 +132,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C768);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C860);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C9D8);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfCreateDescriptorPacket);
 
 void func_0032CA90(u32 *arg0, u32 arg1) {
     if (D_004389FC < 0) {
@@ -183,7 +183,7 @@ u64 func_0032CD98(void) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CDE0);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfResizeDoubleBuffer);
 
 void func_0032CE50(s32 arg0) {
     D_00438A10 = (&D_00438A08)[arg0];
@@ -690,10 +690,10 @@ void func_00330768(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_003307A0);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfFreeNodeLists);
 
 void func_00330838(u32 arg0) {
-    func_003307A0();
+    sdfFreeNodeLists();
     func_00328E48(*(u32 *)((s32)arg0 + 0x30));
     *(u32 *)((s32)arg0 + 0x30) = 0;
     func_00328E48(arg0);
@@ -728,12 +728,12 @@ void func_00330A88(s32 *arg0, u32 arg1, u32 arg2) {
     *(s32 **)((s32)arg2 + 0x10) = arg0;
     *(s16 *)(temp_v2 + 4) = (s16)temp_v3;
     *(s32 *)(temp_v0 * 4 + temp_v1) = (s32)arg2;
-    func_00330B80(arg2, arg1);
+    sdfLinkRouteNode(arg2, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_00330B18);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfUnlinkRouteNode);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_00330B80);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfLinkRouteNode);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_004389FC);
 

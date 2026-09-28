@@ -1,15 +1,23 @@
 #include "common.h"
 
 extern s32 D_00436530;
+
 extern u32 D_00436534;
+
 extern u32 D_00436538;
+
+typedef struct {
+    u8 bytes[0x30];
+} __attribute__((packed)) FileRecordHeader;
 
 void func_00197E40(u32 arg0) {
     func_001686F0(*(u32 *)((s32)arg0 + 0x34));
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00197E70);
+void func_00197E70(FileRecordHeader *destination, const FileRecordHeader *source) {
+    *destination = *source;
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00197ED8);
 

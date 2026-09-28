@@ -60,6 +60,10 @@ extern void func_001E3448(u32, const u8 *);
 
 extern void func_002218C8(void);
 
+extern void func_00222450();
+
+extern void func_00224598();
+
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021EE10);
 
 void func_0021EEF8(u32 unused, u32 actor) {

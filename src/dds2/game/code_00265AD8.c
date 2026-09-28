@@ -8,11 +8,21 @@ extern s32 func_00101958();
 
 extern void func_0026C900(void);
 
+extern s32 kwlnFadeIsActive(void);
+
+extern void func_002C42C0(s32 *, char *);
+
+extern char D_003CE6AC[];
+
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265E78);
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265EE8);
+s64 func_00265EE8(s32 callback) {
+    s32 context = func_00101958();
+    func_0026C900();
+    return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
+}
 
 u32 func_00265F30(void) {
     func_0026C948(1);
@@ -28,7 +38,11 @@ INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265F60);
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265FE8);
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266038);
+s64 func_00266038(s32 callback) {
+    s32 context = func_00101958();
+    func_0026C900();
+    return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
+}
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266080);
 

@@ -1,16 +1,23 @@
 #include "common.h"
 
-extern u64 func_0010D650(u64);
+extern u32 func_002AB598(void);
 
 extern void func_0010D818(s32 value);
 
 extern s32 func_0011C0B0(s32 param0, s32 param1);
 
-extern u32 func_002AB598(void);
+/* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
+extern s32 func_0010D650(s32);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EC90);
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ECC8);
+s32 func_0011ECC8(void) {
+    s32 param0 = func_0010D650(0);
+    s32 param1 = func_0010D650(1);
+
+    func_0010D818(func_0011C0B0(param0, param1));
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED10);
 

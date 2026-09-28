@@ -142,8 +142,45 @@ def main():
             parts = line.split()
             if len(parts) == 4 and parts[2] in "Tt":
                 funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
+        # The build compiles the unit with its asm included, not with SKIP_ASM.
+        # ee-gcc 2.96's CSE hashes symbol-name addresses, so the preprocessed
+        # text around a function can change its code: compare each C function
+        # as the build compiles it, relocated fields masked.
+        context = {}
+        full = Path(tmp) / "full.o"
+        rf = subprocess.run([str(ROOT / "tools/cc.sh"), *extra,
+                             str(args.source.resolve() if args.source else unit), "-o", str(full)],
+                            capture_output=True, text=True, env=env)
+        if rf.returncode == 0:
+            ftext, frel = text_section(full), relocations(full)[".text"]
+            fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
+                l.split() for l in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only",
+                                       str(full)).splitlines()) if len(p) == 4 and p[2] in "Tt"}
+
+            def masked(code, base, rels):
+                words = list(struct.unpack_from(f"<{len(code) // 4}I", code))
+                for i in range(len(words)):
+                    r = rels.get(base + 4 * i)
+                    if r:
+                        words[i] &= 0xFC000000 if r[0] == "R_MIPS_26" else 0xFFFF0000
+                return words
+
+            for off, size, name in funcs:
+                if name in fsyms:
+                    foff, fsize = fsyms[name]
+                    if fsize != size or masked(ftext[foff:foff + fsize], foff, frel) != \
+                            masked(text[off:off + size], off, relocs):
+                        context[name] = (fsize, size)
+        else:
+            print("note: the unit did not compile with its asm included (run ninja once); "
+                  "build-context check skipped", file=sys.stderr)
 
     ok = bad = 0
+    for name, (fsize, size) in context.items():
+        if not args.func or name == args.func:
+            bad += 1
+            print(f"CONTEXT {name}: compiles differently inside the full unit ({fsize} vs {size} bytes "
+                  "alone); the build uses the full-unit code, so this function does not match there")
     tables = []  # (offset in our .rodata, retail address, function)
     small = []   # the same for .sdata
     for off, size, name in sorted(funcs):

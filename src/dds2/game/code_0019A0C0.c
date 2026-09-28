@@ -62,8 +62,6 @@ extern s32 func_00195E38(s32 *arg0, s32 arg1);
 
 extern void func_0019A2E0(EffPrim *arg0, u32 arg1);
 
-extern void func_003297C8(void *arg0);
-
 /* Interpolated vertex (x, y, z, w) written by func_00192ED0. */
 typedef struct EffVert {
     f32 unk0; /* 0x0 */
@@ -85,6 +83,8 @@ extern u8 D_00452360[];
 
 /* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
 extern s32 D_00452378[];
+
+void func_003297C8(u32 sprite);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A0C0);
 

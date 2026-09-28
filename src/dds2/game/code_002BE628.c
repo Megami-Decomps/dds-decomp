@@ -48,6 +48,8 @@ extern s32 func_00328D68(u32);
 
 extern void func_002C2920(s32, s32, s32);
 
+extern s8 D_003E7928[];
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE6E8);
@@ -159,7 +161,9 @@ void func_002C0950(s32 arg0, u32 arg1) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
 extern s32 func_002C2680(void);
+
 extern void func_002C26D8(s32, s32, s32, s32, s32);
+
 extern void func_002C0D00(s32);
 
 s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
@@ -323,7 +327,20 @@ void func_002C21F8(u32 *group) {
     func_002C1FA0(group);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2258);
+u32 func_002C2258(s32 useDefault, s32 index, s32 option) {
+    u32 color = 0xA09DC380;
+    if (!useDefault) {
+        switch (func_002C5CD0(index, option)) {
+        case 1:
+            color = 0xB4A06480;
+            break;
+        case 2:
+            color = 0x89554780;
+            break;
+        }
+    }
+    return color;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
@@ -468,7 +485,17 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4BA8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4C28);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", getIndexedNonzeroEffect);
+s32 getIndexedNonzeroEffect(s32 index) {
+    s32 count = 0;
+    s32 i;
+    s8 *entry = D_003E7928;
+    for (i = 0; i < 6; i++, entry += 3) {
+        s32 value = *entry;
+        if (value != 0) count++;
+        if (index == count - 1) return value;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4CA8);
 
@@ -485,7 +512,15 @@ u8 func_002C4DB0(u32 arg0) {
     return *(u8 *)((arg0 & 0xffff) * 0x38 + D_00435E20 + 3);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", getAdjustedEntryValue);
+u16 getAdjustedEntryValue(s32 id, s32 object) {
+    s32 entry = (id & 0xFFFF) * 0x38 + D_00435E20;
+    u16 base = *(u16 *)(entry + 4);
+    u16 addition = *(u16 *)(entry + 6);
+    if (func_002C4DB0(id & 0xFFFF) == 1) {
+        base = addition + *(u16 *)(object + 8) * base / 100;
+    }
+    return base;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4E58);
 
@@ -504,7 +539,22 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4FB8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5030);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C50C0);
+s32 func_002C50C0(u16 ability) {
+    u8 value;
+    if (ability == 0) {
+        return 1;
+    }
+    value = *(u8 *)(D_00435E20 + ability * 56 + 8);
+    switch (value) {
+    case 0:
+        return 1;
+    case 1:
+        return 2;
+    case 2:
+        return 3;
+    }
+    return 0;
+}
 
 void func_002C5128(u16 arg0) {
     func_00119548(arg0);
@@ -907,7 +957,21 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7C18);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", createBattleStageTestTask);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", destroyBattleStageTask);
+s32 destroyBattleStageTask(object)
+    s32 object;
+{
+    if (*(u8 *)(object + 1) == 6) {
+        s32 resource = *(s32 *)(object + 0xC);
+        if (resource != 0) {
+            func_0033FD30(resource);
+        }
+        func_00346AF8(object + 0x30);
+        func_00328E48(*(void **)(object + 8));
+        func_00328E48((void *)object);
+        return 0;
+    }
+    return 1;
+}
 
 void func_002C7CE8(void) {
     destroyBattleStageTask();

@@ -150,6 +150,8 @@ extern void func_0010FCC0(void *, const char *);
 
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 
+extern f32 func_001248E8();
+
 void func_0011F208(u32 *arg0, u32 arg1, u32 arg2) {
     arg0[4] = arg1;
     arg0[5] = arg2;
@@ -365,7 +367,10 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00124720);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001248E8);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001249B8);
+f32 func_001249B8(void) {
+    s32 angle = (s32)(360.0f - func_001248E8() + 90.0f);
+    return (f32)(angle % 360);
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00124A10);
 

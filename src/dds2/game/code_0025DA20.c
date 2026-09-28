@@ -272,7 +272,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F8B8);
 
 void func_0025FA10(s32 arg0) {
-    func_00304A38(*(u32 *)(arg0 + 0x3c));
+    destroyPackedEffectBatch(*(u32 *)(arg0 + 0x3c));
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);

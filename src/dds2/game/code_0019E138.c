@@ -44,7 +44,7 @@ typedef struct MemOut {
     void *unk8; /* 0x8 */
 } MemOut;
 
-/* 8-byte node header; payload follows (func_00198248/func_00198270). */
+/* 8-byte node header; payload follows (func_00198248/enqueueMemNode). */
 typedef struct MemNode {
     u32 unk0;              /* 0x0 */
     struct MemNode *unk4;  /* 0x4 */
@@ -291,7 +291,18 @@ void *func_001A0278(MemNode *queue) {
     return head + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A02A0);
+s32 enqueueMemNode(void *payload, MemNode *queue) {
+    MemNode *node = (MemNode *)payload - 1;
+    if (payload == NULL) {
+        return 0;
+    }
+    if (node->unk4 != NULL) {
+        return 0;
+    }
+    node->unk4 = queue->unk4;
+    queue->unk4 = node;
+    return 1;
+}
 
 u32 func_001A02D0(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 - 4));
@@ -332,7 +343,30 @@ u32 func_001A0458(void) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0490);
+void initTextPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
+    s8 index = 0;
+    TextPoolNode *previous = NULL;
+    TextPoolNode *node = nodes;
+    TextPoolNode *next;
+
+    do {
+        count--;
+        next = (TextPoolNode *)((u8 *)node + stride);
+        node->previous = previous;
+        node->index = index;
+        index++;
+        node->next = next;
+        previous = node;
+        node = next;
+    } while (count >= 2);
+    node->previous = previous;
+    node->index = index;
+    node->next = NULL;
+    pool->lastFree = node;
+    pool->firstFree = nodes;
+    pool->activeTail = NULL;
+    pool->activeHead = NULL;
+}
 
 TextPoolNode *acquireTextPoolNode(TextPool *pool) {
     TextPoolNode *node = pool->firstFree;
@@ -480,7 +514,7 @@ u32 func_001A1818(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1820);
+INCLUDE_ASM(const s32, "game/code_0019E138", reportCampProcessHalted);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
 
