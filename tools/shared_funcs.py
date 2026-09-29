@@ -5,6 +5,7 @@
     python3 tools/shared_funcs.py names
     python3 tools/shared_funcs.py units [--write] [--from dds1]
     python3 tools/shared_funcs.py port [--from dds1] [--units U ...] [--keep-types] [--fix-immediates]
+                                       [--near] [--greedy]
     python3 tools/shared_funcs.py clones dds1
 
 Pairs come from `romwright-cli diff dds2 --reference build/romwright --reference-name dds1
@@ -33,6 +34,16 @@ port   replaces the other version's INCLUDE_ASM with the source version's C for 
                           The `mine X retail Y` words check_unit reports for each ported
                           function are used to rewrite the matching hex literals in that
                           function, until it matches or stops changing.
+       --near             also pair each INCLUDE_ASM function of --units with decompiled
+                          source functions whose opcode sequence is the same once every
+                          immediate, register and branch offset is masked (near twins: the
+                          same code with other struct offsets, constants and callees).
+                          Combine with --fix-immediates; check_unit stays the arbiter.
+       --greedy           instead of reverting what fails, add the ported functions to the
+                          unit one at a time and keep only those that leave check_unit
+                          clean. ee-gcc's CONTEXT effect makes a bulk port flip neighbours
+                          (docs/idioms.md), so one bad function must not undo the rest.
+                          Adds #include "pcp_vu0.h" / "fpu.h" when a kept body needs them.
        Callees and globals are translated through the function's own relocations first,
        then through every identical pair. Strings inside __asm__ statements (COP2/VU code)
        are kept verbatim.
@@ -69,7 +80,7 @@ FIRST_BODY = re.compile(r"^(?:INCLUDE_ASM\(|[A-Za-z_][\w \t\*]*\b\w+\s*\([^;{]*\
 UNIT = re.compile(r"^(\s+- \[)0x([0-9A-Fa-f]+), (\w+), ([^\]]+)\](.*)$")
 
 
-OPTS = argparse.Namespace(units=None, keep_types=False, fix_immediates=False)
+OPTS = argparse.Namespace(units=None, keep_types=False, fix_immediates=False, near=False, greedy=False)
 FULL_PAIRS = []  # (source address, destination address) for every identical pair of a cross-version port
 
 
@@ -449,7 +460,47 @@ def declared_name(decl):
 
 def cmd_port(args):
     src, dst, ordered, loose = oriented(args)
-    port(src, dst, {a: [b] for a, b in {**loose, **ordered}.items()})
+    pairs = {a: [b] for a, b in {**loose, **ordered}.items()}
+    if OPTS.near:
+        add_near_pairs(src, dst, pairs)
+    port(src, dst, pairs)
+
+
+def opcode_signature(build, addr):
+    """The function's opcodes with every register, immediate and offset masked."""
+    out = []
+    for w in build.words(addr):
+        op = w >> 26
+        out.append(op if op else (w & 0x3F) + 64)
+    while out and out[-1] == 64:  # trailing nops
+        out.pop()
+    return tuple(out)
+
+
+def add_near_pairs(src, dst, pairs):
+    """--near: pair every INCLUDE_ASM function of the --units with decompiled source functions
+    of the same opcode sequence (other struct offsets, constants and callees)."""
+    targets = {}
+    for path in (ROOT / "src" / dst.version).rglob("*.c"):
+        if wanted_unit(path):
+            for name in INCLUDE_ASM.findall(path.read_text()):
+                addr = dst.address_of(name)
+                if addr in dst.build.sizes and dst.build.sizes[addr] >= 12:
+                    targets[addr] = name
+    by_sig = collections.defaultdict(list)
+    for path in (ROOT / "src" / src.version).rglob("*.c"):
+        for blk in blocks(path.read_text()):
+            if "{" in blk and (m := DEF.search(blk)) and not re.fullmatch(r"[^{]*\{\s*\}", blk.strip()):
+                addr = src.address_of(m.group(1))
+                if addr in src.build.sizes and src.build.sizes[addr] >= 12:
+                    by_sig[opcode_signature(src.build, addr)].append(addr)
+    added = 0
+    for target in targets:
+        for addr in by_sig.get(opcode_signature(dst.build, target), ()):
+            if target not in pairs.setdefault(addr, []):
+                pairs[addr].append(target)
+                added += 1
+    print(f"near: {added} extra pairs for {len(targets)} asm functions")
 
 
 def cmd_clones(args):
@@ -519,7 +570,7 @@ def port(src, dst, pairs):
                 continue
             for target in pairs[addr]:
                 port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defined, ported, skipped)
-    finish(dst, ported, skipped)
+    (greedy_finish if OPTS.greedy else finish)(dst, ported, skipped)
 
 
 def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defined, ported, skipped):
@@ -560,7 +611,8 @@ def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defi
                          and declared_name(b) == declared_name(tdecl)), None)
             if mine:
                 tdecl, miss = mine, []
-        missing += miss
+        if miss:
+            continue  # a declaration the body may not need; one it does need fails to compile below
         new_pre.append(tdecl)
     if missing:
         skipped.append(f"{rel}:{fname}: cannot translate {sorted(set(missing))}")
@@ -692,6 +744,85 @@ def finish(dst, ported, skipped):
         print("run python3 configure.py --no-split && ninja")
 
 
+NEEDS_HEADER = {"PCP_COPY_VECTOR": "pcp_vu0.h", "fsqrtf": "fpu.h"}
+CLEAN_LINE = re.compile(r"^(?:DIFF|OVER|CONTEXT|NOASM|SHARED|PAD|MERGED|DATA|MISSING|ORDER|TWICE|TRICK|STALE)\b", re.M)
+
+
+def unit_clean(path):
+    r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path)], capture_output=True, text=True)
+    return r.returncode == 0 and not CLEAN_LINE.search(r.stdout)
+
+
+def greedy_finish(dst, ported, skipped):
+    """--greedy: start from each unit's original text and add the ported functions one at a
+    time (with only the declarations they need), keeping a function only if the unit stays
+    clean. --fix-immediates is tried on a function that first differs."""
+    for rel in sorted(ported):
+        path = ROOT / rel
+        after, before = path.read_text(), originals.get(rel)
+        if before is None:
+            continue
+        names = ported_names.get(rel, set())
+        unit = rel.relative_to(Path("src") / dst.version).with_suffix("").as_posix()
+        after_blocks = blocks(after)
+        new_decls = [b for b in after_blocks
+                     if ("{" not in b or TYPE_DECL.match(b)) and b not in before and not b.startswith("#")
+                     and declared_name(b)]
+
+        def needed(body, cur):
+            used, chosen, changed = set(TOKENS.findall(body)), [], True
+            while changed:
+                changed = False
+                for d in new_decls:
+                    if d not in chosen and declared_name(d) in used:
+                        chosen.append(d)
+                        used |= set(TOKENS.findall(d))
+                        changed = True
+            have = {declared_name(b) for b in blocks(cur) if declared_name(b)}
+            have |= {m.group(1) for b in blocks(cur) if "{" in b and (m := DEF.search(b))}
+            chosen.sort(key=new_decls.index)
+            return [d for d in chosen if d not in cur and (TYPE_DECL.match(d) or declared_name(d) not in have)]
+
+        def install(cur, name, body):
+            text = re.sub(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{name}\);$', lambda _: body, cur, count=1, flags=re.M)
+            add = needed(body, cur)
+            for token, header in NEEDS_HEADER.items():
+                if token in body and f'#include "{header}"' not in text:
+                    first = re.search(r'^#include .*$', text, re.M)
+                    at = first.end() + 1 if first else 0
+                    text = text[:at] + f'#include "{header}"\n' + text[at:]
+            if add:
+                first = FIRST_BODY.search(text)
+                at = first.start() if first else len(text)
+                text = text[:at] + "\n\n".join(add) + "\n\n" + text[at:]
+            return text
+
+        cur, kept = before, 0
+        for blk in after_blocks:
+            m = DEF.search(blk) if "{" in blk else None
+            if not m or m.group(1) not in names:
+                continue
+            name = m.group(1)
+            trial = install(cur, name, blk)
+            path.write_text(trial)
+            if not unit_clean(path) and OPTS.fix_immediates and compiles(path, dst.version):
+                fix_immediates(path, {name})
+                trial = path.read_text()
+            if unit_clean(path):
+                cur, kept = path.read_text(), kept + 1
+            else:
+                skipped.append(f"{rel}:{name}: does not leave the unit clean; not added")
+        path.write_text(cur)
+        ported[rel] = kept
+    for p, n in sorted(ported.items()):
+        if n:
+            print(f"ported {n} to {p}")
+    for s in skipped:
+        print(f"skip {s}")
+    if ported:
+        print("run python3 configure.py --no-split && ninja")
+
+
 def compiles(path, version):
     env = dict(os.environ, DDS_VERSION=version)
     with tempfile.TemporaryDirectory() as tmp:
@@ -720,9 +851,14 @@ def main():
                            help="a type the destination unit already defines keeps its definition")
             p.add_argument("--fix-immediates", action="store_true",
                            help="rewrite ported struct offsets and constants that check_unit shows differ")
+            p.add_argument("--near", action="store_true",
+                           help="also pair functions with the same opcode sequence (masked immediates)")
+            p.add_argument("--greedy", action="store_true",
+                           help="add ported functions one at a time, keeping only those that leave the unit clean")
     args = ap.parse_args()
     if args.cmd == "port":
         OPTS.units, OPTS.keep_types, OPTS.fix_immediates = args.units, args.keep_types, args.fix_immediates
+        OPTS.near, OPTS.greedy = args.near, args.greedy
     if not PAIR_DIFF.exists():
         sys.exit(f"{PAIR_DIFF.relative_to(ROOT)} missing; see the module docstring")
     {"map": cmd_map, "names": cmd_names, "units": cmd_units, "port": cmd_port,

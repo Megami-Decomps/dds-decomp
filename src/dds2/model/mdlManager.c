@@ -24,7 +24,7 @@ typedef struct MdlInner {
     u8 unk0[8];  /* 0x0 */
     u32 resourceHandle; /* 0x8: released by func_00232F58 */
     u8 unkC[8];  /* 0xC */
-    u32 *list;   /* 0x14: intrusive list walked by func_00232E38/80 */
+    struct MdlNode *list; /* 0x14: intrusive node list */
     u8 unk18[4]; /* 0x18 */
     u32 unk1C;   /* 0x1C */
     u8 pad20[0x30];
@@ -86,7 +86,7 @@ void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
-    MdlNode *node = (MdlNode *)ctx->inner->list;
+    MdlNode *node = ctx->inner->list;
 
     while (node != NULL) {
         if (node->searchId == id) {
@@ -285,7 +285,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00232D40);
 void func_00232E38(MdlCtx *ctx) {
     MdlNode *node;
 
-    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->list; node != NULL; node = node->next) {
         func_00334618(node);
     }
 }
@@ -293,7 +293,7 @@ void func_00232E38(MdlCtx *ctx) {
 void func_00232E80(MdlCtx *ctx) {
     MdlNode *node;
 
-    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->list; node != NULL; node = node->next) {
         func_00334638(node);
     }
 }
@@ -305,12 +305,12 @@ u8 mdlHasNode(void) {
     return temp_v0 != 0;
 }
 
-u16 func_00232EE8(s32 arg0) {
-    return *(u16 *)(*(s32 *)(arg0 + 0xc) + 8);
+u16 func_00232EE8(MdlCtx *ctx) {
+    return ctx->sub->unk8;
 }
 
-u16 func_00232EF8(s32 arg0) {
-    return *(u16 *)(*(s32 *)(arg0 + 0xc) + 10);
+u16 func_00232EF8(MdlCtx *ctx) {
+    return ctx->sub->unkA;
 }
 
 u32 func_00232F08(void) {

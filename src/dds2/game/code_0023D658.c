@@ -2,18 +2,17 @@
 
 extern u32 D_004371EC;
 
-/* Event unit/work object shared by the setup helpers below and the
- * script opcodes. Field layout matches event/evtUnitManager's EvtUnit
- * where they overlap (unk6C, flags, unkBC). */
+/* Event work layout overlaps event/evtUnitManager's EventUnit at
+ * value6C, flags, and valueBC. */
 typedef struct EvtUnit {
     u8 pad00[0x04];     /* 0x00 */
     s32 unk04;          /* 0x04 */
     u8 pad08[0x64];     /* 0x08 */
-    u32 unk6C;          /* 0x6C */
+    u32 value6C;        /* 0x6C */
     s128 unk70;          /* 0x70: 16-byte vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
-    u32 *unk8C;         /* 0x8C: flag word updated by the status opcodes */
-    void *unk90;        /* 0x90 */
+    u32 *modelNode;      /* 0x8C: node flag word updated by script opcodes */
+    void *sourceUnit;    /* 0x90: matching secondary-world unit */
     s32 unk94;          /* 0x94 */
     s32 unk98;          /* 0x98 */
     s32 unk9C;          /* 0x9C */
@@ -27,7 +26,7 @@ typedef struct EvtUnit {
     s16 unkB4;          /* 0xB4 */
     s16 unkB6;          /* 0xB6 */
     u8 padB8[0x04];     /* 0xB8 */
-    u16 unkBC;          /* 0xBC */
+    u16 valueBC;        /* 0xBC */
     s16 unkBE;          /* 0xBE */
     s16 unkC0;          /* 0xC0 */
     u8 padC2[0x2E];     /* 0xC2 */
@@ -154,7 +153,7 @@ void func_0023D698(EvtUnit *work, s32 arg1, s32 arg2) {
     unit = func_00110C70(dds3GetWorldSecondaryObject(), arg1, 0x11);
     if (unit != NULL) {
         func_0023D658(work, (s128 *)(*(u32 *)((u8 *)unit + 0x18) + 0x10), arg2);
-        work->unk90 = unit;
+        work->sourceUnit = unit;
     }
 }
 
@@ -167,7 +166,7 @@ void func_0023D740(EvtUnit *work, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     if (unit != NULL) {
         func_0023D708(work, arg1, (s128 *)(*(u32 *)((u8 *)unit + 0x18)), arg3, arg4, arg5, arg6, arg7);
         work->unkAE = 1;
-        work->unk90 = unit;
+        work->sourceUnit = unit;
     }
 }
 
@@ -518,7 +517,7 @@ u32 func_0023F3E8(void) {
     if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->unk8C, func_0010D650(1)) != 0;
+    return mdlCheckNodeByte30(unit->modelNode, func_0010D650(1)) != 0;
 }
 
 u32 func_0023F460(void) {
@@ -589,7 +588,7 @@ u32 func_0023F6E0(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkBC = func_0010D650(1);
+    unit->valueBC = func_0010D650(1);
     return 1;
 }
 
@@ -670,7 +669,7 @@ u32 evtUnitClearFlagBit(void) {
     id = func_0010D650(0);
     unit = func_0023CC00(id);
     if (unit != NULL) {
-        *unit->unk8C &= ~1;
+        *unit->modelNode &= ~1;
     }
     return 1;
 }
@@ -682,7 +681,7 @@ u32 evtUnitSetFlagBit(void) {
     id = func_0010D650(0);
     unit = func_0023CC00(id);
     if (unit != NULL) {
-        *unit->unk8C |= 1;
+        *unit->modelNode |= 1;
     }
     return 1;
 }

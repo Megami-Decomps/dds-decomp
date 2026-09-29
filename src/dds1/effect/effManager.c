@@ -32,27 +32,88 @@ u32 func_0014FA28(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FA30);
+typedef struct EffTypeOps {
+    s32 (*create)(s32, s32); /* 0x00 */
+    void (*update)();        /* 0x04 */
+    void (*destroy)();       /* 0x08 */
+    void (*fn0C)();          /* 0x0C */
+    s32 (*fn10)();           /* 0x10: returns 1 when absent */
+    void (*fn14)();          /* 0x14 */
+    void (*fn18)();          /* 0x18 */
+    void (*fn1C)();          /* 0x1C */
+    void (*fn20)();          /* 0x20 */
+    s32 (*fn24)();           /* 0x24: returns 1 when absent */
+    void (*fn28)();          /* 0x28 */
+    void (*fn2C)();          /* 0x2C */
+} EffTypeOps;
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FAB8);
+typedef struct EffNode {
+    s32 type;
+    s32 arg;
+    s32 data;
+    f32 unkC;
+} EffNode;
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FB00);
+extern EffTypeOps D_0034DE18[];
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FB38);
+EffNode *func_0014FA30(u16 type, u16 arg, s32 param) {
+    EffNode *node = (EffNode *)func_002CFEB8(0x10);
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FB70);
+    node->type = type;
+    node->unkC = 1.03f;
+    node->arg = arg;
+    node->data = D_0034DE18[type].create(arg, param);
+    return node;
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FBA8);
+void func_0014FAB8(EffNode *node) {
+    D_0034DE18[node->type].destroy(node->data);
+    func_002CFF98(node);
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FBF0);
+void func_0014FB00(EffNode *node) {
+    D_0034DE18[node->type].update(node->data);
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FC28);
+void func_0014FB38(EffNode *node) {
+    D_0034DE18[node->type].fn0C(node->data);
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FC60);
+void func_0014FB70(EffNode *node) {
+    D_0034DE18[node->type].fn2C(node->data);
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FC98);
+s32 func_0014FBA8(EffNode *node) {
+    if (D_0034DE18[node->type].fn10 == NULL) {
+        return 1;
+    }
+    return D_0034DE18[node->type].fn10(node->data);
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FCD8);
+void func_0014FBF0(EffNode *node) {
+    D_0034DE18[node->type].fn14(node->data);
+}
+
+void func_0014FC28(EffNode *node) {
+    D_0034DE18[node->type].fn18(node->data);
+}
+
+void func_0014FC60(EffNode *node) {
+    D_0034DE18[node->type].fn1C(node->data);
+}
+
+void func_0014FC98(EffNode *node, u8 flag) {
+    if (D_0034DE18[node->type].fn20 != NULL) {
+        D_0034DE18[node->type].fn20(node->data, flag);
+    }
+}
+
+s32 func_0014FCD8(EffNode *node) {
+    if (D_0034DE18[node->type].fn24 == NULL) {
+        return 1;
+    }
+    return D_0034DE18[node->type].fn24(node->data);
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FD20);
 

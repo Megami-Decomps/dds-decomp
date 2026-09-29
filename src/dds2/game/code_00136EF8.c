@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern u64 dds3GetWorldObject(void);
 
@@ -263,7 +264,9 @@ float func_00137C08(float *left, float *right) {
     return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldCalculateVectorLength);
+f32 fldCalculateVectorLength(const f32 *vector) {
+    return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C68);
 

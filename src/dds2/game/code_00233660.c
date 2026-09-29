@@ -159,23 +159,23 @@ u16 func_00233E38(MdlRecord *record) {
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233E40);
 
 s32 * func_00233EC0(s32 table) {
-    s32 *first;
+    MdlRecord *first;
 
-    first = (s32 *)(table + 8);
-    if (*first == 0xffff) {
-        first = (s32 *)0x0;
+    first = (MdlRecord *)(table + 8);
+    if (first->kind == 0xffff) {
+        first = NULL;
     }
-    return first;
+    return (s32 *)first;
 }
 
 s32 * func_00233ED8(s32 record) {
-    s32 *next;
+    MdlRecord *next;
 
-    next = (s32 *)(record + *(s32 *)(record + 4));
-    if (*next == 0xffff) {
-        next = (s32 *)0x0;
+    next = (MdlRecord *)(record + ((MdlRecord *)record)->nextOffset);
+    if (next->kind == 0xffff) {
+        next = NULL;
     }
-    return next;
+    return (s32 *)next;
 }
 
 s32 mdlCountRecords(s32 arg0) {

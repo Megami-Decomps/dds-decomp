@@ -245,11 +245,54 @@ s32 func_002CA778(s32 x, s32 y, u32 first, u32 second, s8 type, u32 name, s32 fl
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CA858);
+s32 func_002CA858(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
+    u32 handle = func_00197760(x << 4, y << 3, z, w, style, 0);
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CA8F0);
+    func_00195470(handle, flags);
+    if (width >= 0) {
+        result = 0;
+    } else {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_001958A0(handle, 1, color);
+    func_00194920(handle);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CA988);
+extern u32 func_00197A98(s32, s32, s32, u32, u32, s32);
+
+s32 func_002CA8F0(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
+    u32 handle = func_00197A98(x << 4, y << 3, z, w, style, 0);
+    s32 result;
+
+    func_00195470(handle, flags);
+    if (width >= 0) {
+        result = 0;
+    } else {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_001958A0(handle, 1, color);
+    func_00194920(handle);
+    return result;
+}
+
+extern u32 func_001978E8(s32, s32, s32, u32, u32, s32);
+
+s32 func_002CA988(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
+    u32 handle = func_001978E8(x << 4, y << 3, z, w, style, 0);
+    s32 result;
+
+    func_00195470(handle, flags);
+    if (width >= 0) {
+        result = 0;
+    } else {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_001958A0(handle, 1, color);
+    func_00194920(handle);
+    return result;
+}
 
 s32 func_002CAA20(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, u32 name, u32 extra, s32 flag, s32 option) {
     u32 handle = func_00197C40(x << 4, y << 3, first, width, name, extra);

@@ -155,6 +155,27 @@ INCLUDE_ASM; if a ported declaration changes how other functions in the unit
 compile, all of the unit's ports are undone (fix the layout by hand, then
 re-run).
 
+Most DDS2-only functions that still have a DDS1 twin are *near* twins: the same
+code with other struct offsets, constants and callees, so the identical-pair
+map misses them. `--near` also pairs each INCLUDE_ASM function of `--units` with
+decompiled source functions whose opcode sequence (registers, immediates and
+branch offsets masked) is the same. `--greedy` replaces the all-or-nothing
+revert: it starts from the unit's original text and adds the ported functions
+one at a time with only the declarations they need, keeping a function only if
+`check_unit` stays clean. ee-gcc's CONTEXT effect (see `docs/idioms.md`) makes a
+bulk port flip neighbouring functions, so this recovers the ports that a single
+bad neighbour would otherwise undo. It also adds `#include "pcp_vu0.h"` /
+`"fpu.h"` when a kept body uses `PCP_COPY_VECTOR` / `fsqrtf`.
+
+```sh
+python tools/shared_funcs.py port --units effPCPMisc --near --greedy --fix-immediates --keep-types
+```
+
+What is left after that is hand work: a struct field that moved between the
+games (edit the local struct copy's padding), a constant `--fix-immediates`
+cannot find as a hex literal, and retail's jal-versus-j tails (docs/idioms.md,
+s64 wrappers).
+
 ## Build details
 
 `configure.py` automates all of these:

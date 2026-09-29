@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 #include "fld.h"
 
@@ -862,7 +863,12 @@ f32 func_001249B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00124A10);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldPointDistance);
+f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
+    f32 dx = ax - bx;
+    f32 dy = ay - by;
+    f32 dz = az - bz;
+    return fsqrtf(dx * dx + dy * dy + dz * dz);
+}
 
 void func_00124BF0(s64 mode) {
     u64 iterator;

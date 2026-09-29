@@ -129,14 +129,14 @@ def ordered_pairs(a, b, pairs):
 
 
 def address_pairs(a, fa, b, fb, gp_a, gp_b):
-    """Addresses the two identical functions reference at the same instruction: jal targets,
+    """Addresses the two identical functions reference at the same instruction: jal/j targets,
     lui/%lo pairs and $gp-relative accesses -> [(addr_a, addr_b)]."""
     wa, wb = a.words(fa), b.words(fb)
     out = []
     hi_a, hi_b = {}, {}
     for x, y in zip(wa, wb):
         op, rs, rt = x >> 26, (x >> 21) & 31, (x >> 16) & 31
-        if op == 3:
+        if op in (2, 3):  # jal, and j for tail calls
             out.append(((fa & 0xF0000000) | (x & 0x3FFFFFF) << 2, (fb & 0xF0000000) | (y & 0x3FFFFFF) << 2))
             continue
         if op == 0x0F:

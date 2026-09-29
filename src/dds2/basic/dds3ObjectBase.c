@@ -12,7 +12,7 @@ extern s32 func_00112AB0(void);
 
 s32 func_00111980(u8 arg);
 
-void *dds3SetSlotByKind(void *arg0, ObjData *arg1);
+void *dds3SetSlotByKind(ObjBase *object, ObjData *data);
 
 void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
 
@@ -24,21 +24,21 @@ void dds3ReplaceObjectResource(void *arg0);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
-void dds3SetObjectFlags(u32 arg0, u32 flags) {
+void dds3SetObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
     base->flags = base->flags | flags;
 }
 
-void dds3ClearObjectFlags(u32 arg0, u32 flags) {
+void dds3ClearObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
     base->flags = base->flags & ~flags;
 }
 
-u8 dds3TestObjectFlags(u32 arg0, u32 flags) {
+u8 dds3TestObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
 
     base = (ObjBase *)func_00112AB0();
@@ -49,11 +49,11 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetExtData);
 
-void *dds3SetSlotByKind(void *obj, ObjData *data) {
+void *dds3SetSlotByKind(ObjBase *object, ObjData *data) {
     if (data == NULL) {
         return NULL;
     }
-    return dds3ExchangeSlot(obj, data, func_00111980(data->kind));
+    return dds3ExchangeSlot(object, data, func_00111980(data->kind));
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ExchangeSlot);

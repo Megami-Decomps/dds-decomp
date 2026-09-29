@@ -267,9 +267,14 @@ void func_00162ED8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_00162EF0);
 
-INCLUDE_ASM(const s32, "game/code_001624D0", func_00162FA0);
+void func_00162FA0(EffParamWorkEx *work) {
+    ((void (*)(void *))D_00353888[work->id].func)(work->data);
+    func_002CFF98(work);
+}
 
-INCLUDE_ASM(const s32, "game/code_001624D0", func_00162FE8);
+void func_00162FE8(EffParamWorkEx *work) {
+    ((void (*)(void *))D_00353884[work->id].func)(work->data);
+}
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_00163020);
 

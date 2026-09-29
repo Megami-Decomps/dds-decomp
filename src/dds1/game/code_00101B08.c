@@ -1,17 +1,23 @@
 #include "common.h"
 
-extern s32 func_001028A0(void);
+/* Prefix of the administration record returned by func_001028A0. */
+typedef struct AdminWork {
+    u32 flags;
+    u32 value;
+} AdminWork;
+
+extern AdminWork *func_001028A0(void);
 
 extern u32 D_003BA9BC;
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_00101B08);
 
-void func_00101B78(u32 arg0, u32 arg1, u32 arg2) {
-    func_00101060(1, arg0, arg1, arg2);
+void func_00101B78(u32 object, u32 mask, u32 scope) {
+    func_00101060(1, object, mask, scope);
 }
 
-void func_00101BA8(u32 arg0, u32 arg1, u32 arg2) {
-    func_00101060(0, arg0, arg1, arg2);
+void func_00101BA8(u32 object, u32 mask, u32 scope) {
+    func_00101060(0, object, mask, scope);
 }
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_00101BD8);
@@ -35,10 +41,10 @@ u32 func_00102878(void) {
 INCLUDE_ASM(const s32, "game/code_00101B08", func_001028A0);
 
 u32 func_001028C8(void) {
-    s32 context;
+    AdminWork *context;
 
     context = func_001028A0();
-    return *(u32 *)(context + 4);
+    return context->value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_001028E8);

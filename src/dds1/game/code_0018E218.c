@@ -314,7 +314,54 @@ void effDispatchActive(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F8F8);
+typedef struct ChState {
+    u8 pad00[0x1C];
+    void *src;
+    void *dst;
+    u32 size;
+    u8 pad28[4];
+    s32 (*getter)(void *);
+    u8 pad30[8];
+    s32 *result;
+} ChState;
+
+extern ChState D_00355AB8;
+extern s8 D_003BB0BD;
+extern s8 D_0039862B[];
+extern void *memcpy(void *, const void *, u32);
+extern void func_0018CDD0(void *);
+extern void func_0018CDF8(void);
+extern void func_0018CDF0(void *);
+extern void func_0018CE00(void);
+
+s32 func_0018F8F8(void) {
+    u8 ready = D_003BB0BD;
+
+    if (D_003BB0BD == 0) {
+        ChState *state = &D_00355AB8;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(state->src);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB0BD = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355AB8);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355AB8);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB0BD = 0;
+    }
+    return D_003BB0BD;
+}
 
 Work30 *effGetLoadDescA(void) {
     return &D_003559A0;
@@ -322,7 +369,37 @@ Work30 *effGetLoadDescA(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F9C0);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FA20);
+extern ChState D_00355C30;
+extern s8 D_003BB0CD;
+
+s32 func_0018FA20(void) {
+    u8 ready = D_003BB0CD;
+
+    if (D_003BB0CD == 0) {
+        ChState *state = &D_00355C30;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_00355AF8);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB0CD = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355C30);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355C30);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB0CD = 0;
+    }
+    return D_003BB0CD;
+}
 
 Work2C *effGetLoadDescB(void) {
     return &D_00355AF8;
@@ -330,7 +407,37 @@ Work2C *effGetLoadDescB(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FAE8);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FB50);
+extern ChState D_00355E08;
+extern s8 D_003BB0FF;
+
+s32 func_0018FB50(void) {
+    u8 ready = D_003BB0FF;
+
+    if (D_003BB0FF == 0) {
+        ChState *state = &D_00355E08;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_00355C70);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB0FF = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355E08);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355E08);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB0FF = 0;
+    }
+    return D_003BB0FF;
+}
 
 Work2C *effGetLoadDescC(void) {
     return &D_00355C70;
@@ -338,7 +445,37 @@ Work2C *effGetLoadDescC(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FC18);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FC80);
+extern ChState D_00355F48;
+extern s8 D_003BB114;
+
+s32 func_0018FC80(void) {
+    u8 ready = D_003BB114;
+
+    if (D_003BB114 == 0) {
+        ChState *state = &D_00355F48;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(state->src);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB114 = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355F48);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355F48);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB114 = 0;
+    }
+    return D_003BB114;
+}
 
 Work30 *effGetLoadDescD(void) {
     return &D_00355E48;
@@ -346,7 +483,37 @@ Work30 *effGetLoadDescD(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FD48);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FDA8);
+extern ChState D_00356048;
+extern s8 D_003BB127;
+
+s32 func_0018FDA8(void) {
+    u8 ready = D_003BB127;
+
+    if (D_003BB127 == 0) {
+        ChState *state = &D_00356048;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(state->src);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB127 = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00356048);
+        func_0018CDF8();
+        func_0018CDF0(&D_00356048);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB127 = 0;
+    }
+    return D_003BB127;
+}
 
 Work18 *effGetLoadDescE(void) {
     return &D_00355F88;
@@ -354,7 +521,37 @@ Work18 *effGetLoadDescE(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FE70);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FEB0);
+extern ChState D_00356188;
+extern s8 D_003BB12C;
+
+s32 func_0018FEB0(void) {
+    u8 ready = D_003BB12C;
+
+    if (D_003BB12C == 0) {
+        ChState *state = &D_00356188;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_00356088);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB12C = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00356188);
+        func_0018CDF8();
+        func_0018CDF0(&D_00356188);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB12C = 0;
+    }
+    return D_003BB12C;
+}
 
 Work24 *effGetLoadDescF(void) {
     return &D_00356088;
@@ -362,7 +559,37 @@ Work24 *effGetLoadDescF(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FF78);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FFD0);
+extern ChState D_00356360;
+extern s8 D_003BB13F;
+
+s32 func_0018FFD0(void) {
+    u8 ready = D_003BB13F;
+
+    if (D_003BB13F == 0) {
+        ChState *state = &D_00356360;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_003561C8);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB13F = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00356360);
+        func_0018CDF8();
+        func_0018CDF0(&D_00356360);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB13F = 0;
+    }
+    return D_003BB13F;
+}
 
 Work2C *effGetLoadDescG(void) {
     return &D_003561C8;

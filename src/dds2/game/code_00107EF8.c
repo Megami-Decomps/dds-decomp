@@ -185,6 +185,16 @@ extern s32 func_0033D060(s32 arg0, s32 arg1);
 
 extern void func_0033D050(s32 arg0, s32 arg1);
 
+extern void func_00102908(void);
+
+extern void func_001A9F30(s32 arg0, s32 arg1, s32 arg2);
+
+extern void kwlnTaskDestroyWithHierarchy(void *, s32);
+
+extern void func_0010AEC0(void);
+
+extern void *D_00438E64;
+
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00107EF8);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00107FF8);
@@ -645,7 +655,20 @@ u8 func_0010A7A8(void) {
     return temp_v0 == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnkA688Dispatch);
+void evtUnkA688Dispatch(s32 arg0, s32 *arg1) {
+    if (arg0 == 0) {
+        if (arg1 == NULL) {
+            func_001A9F30(1, 0, 0);
+        }
+        else {
+            func_001A9F30(0, arg1[0], arg1[1]);
+        }
+    }
+    else {
+        func_00102908();
+        func_00128658();
+    }
+}
 
 void func_0010A820(void) {
     func_001A9D70();
@@ -941,7 +964,13 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411370);
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411380);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B118);
+void func_0010B118(s8 mode) {
+    if (mode == 1) {
+        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_0010AEC0, func_0010B110, NULL);
+    } else if (mode == 0) {
+        kwlnTaskDestroyWithHierarchy(D_00438E64, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B190);
 

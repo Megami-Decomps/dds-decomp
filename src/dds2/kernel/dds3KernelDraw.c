@@ -188,9 +188,9 @@ void kwlnDrawSetE08Triple(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106658);
 
-void kwlnDrawSetupE08(s32 arg0) {
+void kwlnDrawSetupE08(s32 mode) {
     DrawBlkE08 *blk = &D_0043E588;
-    s32 t = arg0;
+    s32 t = mode;
 
     D_00438E58 = 0;
     D_00438E54 = 0;
@@ -206,12 +206,12 @@ void kwlnDrawSetupE08(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableE08(s32 arg0) {
+void kwlnDrawEnableE08(s32 mode) {
     D_00438E5A = 0;
     D_00438E58 = D_0043E588.u0C.b[3];
     D_00438E54 = 0;
-    D_00438E56 = arg0;
-    if (arg0 == 0) {
+    D_00438E56 = mode;
+    if (mode == 0) {
         D_00435CD4 &= ~0x200000;
         D_00435CD4 &= ~0x400000;
         func_00197388();
@@ -273,9 +273,9 @@ void kwlnDrawSetC70Triple(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106AE8);
 
-void kwlnDrawSetupC70(s32 arg0) {
+void kwlnDrawSetupC70(s32 mode) {
     DrawBlkC70 *blk = &D_0043E3F0;
-    s32 t = arg0;
+    s32 t = mode;
 
     D_00438E1C = 0;
     D_00438E18 = 0;
@@ -291,9 +291,9 @@ void kwlnDrawSetupC70(s32 arg0) {
     }
 }
 
-void kwlnDrawSetupC70B(s32 arg0) {
+void kwlnDrawSetupC70B(s32 mode) {
     DrawBlkC70 *blk = &D_0043E3F0;
-    s32 t = arg0;
+    s32 t = mode;
 
     D_00438E1E = 0;
     D_00438E18 = 0;
@@ -336,9 +336,9 @@ void kwlnDrawSetCd0Triple(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106D10);
 
-void kwlnDrawSetupCd0(s32 arg0) {
+void kwlnDrawSetupCd0(s32 mode) {
     DrawBlkCD0 *blk = &D_0043E450;
-    s32 t = arg0;
+    s32 t = mode;
 
     D_00438E28 = 0;
     D_00438E24 = 0;
@@ -356,12 +356,12 @@ void kwlnDrawSetupCd0(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableCd0(s32 arg0) {
+void kwlnDrawEnableCd0(s32 mode) {
     D_00438E2A = 0;
     D_00438E28 = D_0043E450.u0C.b[3];
     D_00438E24 = 0;
-    D_00438E26 = arg0;
-    if (arg0 == 0) {
+    D_00438E26 = mode;
+    if (mode == 0) {
         D_00435CD4 &= ~0x2000;
         D_00435CD4 &= ~0x10000;
         func_00197128();
@@ -397,9 +397,9 @@ void kwlnDrawSetD30Triple(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106F38);
 
-void kwlnDrawSetupD30(s32 arg0) {
+void kwlnDrawSetupD30(s32 mode) {
     DrawBlkD30 *blk = &D_0043E4B0;
-    s32 t = arg0;
+    s32 t = mode;
 
     D_00438E34 = 0;
     D_00438E30 = 0;
@@ -417,12 +417,12 @@ void kwlnDrawSetupD30(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableD30(s32 arg0) {
+void kwlnDrawEnableD30(s32 mode) {
     D_00438E36 = 0;
     D_00438E34 = D_0043E4B0.u0C.b[3];
     D_00438E30 = 0;
-    D_00438E32 = arg0;
-    if (arg0 == 0) {
+    D_00438E32 = mode;
+    if (mode == 0) {
         D_00435CD4 &= ~0x800000;
         D_00435CD4 &= ~0x1000000;
         func_001971E0();

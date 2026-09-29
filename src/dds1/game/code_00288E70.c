@@ -7,10 +7,10 @@ typedef struct FileReqEntry {
     u32 sizeKiB;   /* 0x08: converted to bytes by fileReqGetSize */
     u32 unkC;      /* 0x0C */
     u8 unk10;      /* 0x10 */
-    u8 unk11;      /* 0x11 */
-    u8 unk12;      /* 0x12 */
-    s8 unk13;      /* 0x13 */
-    u32 unk14[20]; /* 0x14 */
+    u8 status;     /* 0x11: inspected by memory-card file request polling */
+    u8 slotMetadataDirty; /* 0x12: checked before rebuilding slot metadata */
+    s8 selectedSlot; /* 0x13: used to select a memory-card save directory */
+    u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by D_003DC6AC */
 } FileReqEntry;
 
 extern FileReqEntry D_003DC698[];
@@ -41,11 +41,15 @@ typedef struct FileJob {
     u8 unk2[2];   /* 0x02 */
     u32 unk4;     /* 0x04 */
     u8 unk8[4];   /* 0x08 */
-    u32 unkC;     /* 0x0C */
+    void *deviceRequest; /* 0x0C: transfer backend dereferences mode at +0x16 */
     s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
     u8 unk14[0x14]; /* 0x14 */
-    u32 unk28;    /* 0x28 */
+    u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
 } FileJob;
+
+#define FILE_JOB_READY 3
+#define FILE_JOB_TRANSFERRING 4
+#define FILE_IO_MAX_CHUNK_BYTES 0x8000
 
 /* Completion node drained by fileManDispatchDone. */
 typedef struct FileCbNode {
@@ -71,8 +75,8 @@ s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 func_002F6858(s32 arg0, void *arg1, s32 *arg2);
 void func_002F6E90(u32 arg0, s32 arg1);
-void func_002E6D48(u32 arg0, u32 arg1, u32 arg2);
-void func_002E6DA8(u32 arg0, u32 arg1, u32 arg2);
+void func_002E6D48(void *deviceRequest, u32 transferAddress, u32 byteCount);
+void func_002E6DA8(void *deviceRequest, u32 transferAddress, u32 byteCount);
 s32 fileMan(void);
 s32 fileManUpdate(void);
 void fileReqInit(s32 arg0);
@@ -81,26 +85,26 @@ INCLUDE_ASM(const s32, "game/code_00288E70", func_00288E70);
 
 void func_00289030(FileJob *job) {
     WaitSema(D_003DC658.sema);
-    if (job->state != 3) {
+    if (job->state != FILE_JOB_READY) {
         SignalSema(D_003DC658.sema);
         return;
     }
-    job->state = 4;
+    job->state = FILE_JOB_TRANSFERRING;
     SignalSema(D_003DC658.sema);
-    func_002E6D48(job->unkC, job->unk28, job->transferBytes <= 0x8000 ? job->transferBytes : 0x8000);
+    func_002E6D48(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_002890B8);
 
 void func_002892F8(FileJob *job) {
     WaitSema(D_003DC658.sema);
-    if (job->state != 3) {
+    if (job->state != FILE_JOB_READY) {
         SignalSema(D_003DC658.sema);
         return;
     }
-    job->state = 4;
+    job->state = FILE_JOB_TRANSFERRING;
     SignalSema(D_003DC658.sema);
-    func_002E6DA8(job->unkC, job->unk28, job->transferBytes <= 0x8000 ? job->transferBytes : 0x8000);
+    func_002E6DA8(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);
@@ -135,47 +139,47 @@ void fileReqBegin(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileReqPoll);
 
-u8 func_00289B98(s32 arg0) {
-    return D_003DC698[arg0].unk11;
+u8 func_00289B98(s32 request) {
+    return D_003DC698[request].status;
 }
 
-s32 fileReqGetSize(s32 arg0) {
-    return D_003DC698[arg0].sizeKiB << 10;
+s32 fileReqGetSize(s32 request) {
+    return D_003DC698[request].sizeKiB << 10;
 }
 
-u8 func_00289BE8(s32 arg0) {
-    return D_003DC698[arg0].unk12;
+u8 func_00289BE8(s32 request) {
+    return D_003DC698[request].slotMetadataDirty;
 }
 
-void func_00289C10(s32 arg0) {
-    D_003DC698[arg0].unk12 = 0;
+void func_00289C10(s32 request) {
+    D_003DC698[request].slotMetadataDirty = 0;
 }
 
-void func_00289C38(s32 arg0) {
-    D_003DC698[arg0].unk12 = 1;
+void func_00289C38(s32 request) {
+    D_003DC698[request].slotMetadataDirty = 1;
 }
 
-void func_00289C68(s32 request, s32 flagIndex) {
-    flagIndex += request * 0x19;
-    D_003DC6AC[flagIndex] = 0;
+void func_00289C68(s32 request, s32 slot) {
+    slot += request * 0x19;
+    D_003DC6AC[slot] = 0;
 }
 
-void func_00289C98(s32 request, s32 flagIndex, s32 mask) {
-    flagIndex += request * 0x19;
-    D_003DC6AC[flagIndex] |= mask;
+void func_00289C98(s32 request, s32 slot, s32 mask) {
+    slot += request * 0x19;
+    D_003DC6AC[slot] |= mask;
 }
 
-u32 func_00289CD0(s32 request, s32 flagIndex) {
-    flagIndex += request * 0x19;
-    return D_003DC6AC[flagIndex];
+u32 func_00289CD0(s32 request, s32 slot) {
+    slot += request * 0x19;
+    return D_003DC6AC[slot];
 }
 
 s8 func_00289D00(s32 request) {
-    return D_003DC698[request].unk13;
+    return D_003DC698[request].selectedSlot;
 }
 
-void func_00289D28(s32 request, s8 value) {
-    D_003DC698[request].unk13 = value;
+void func_00289D28(s32 request, s8 selectedSlot) {
+    D_003DC698[request].selectedSlot = selectedSlot;
 }
 
 void func_00289D50(u32 arg0) {

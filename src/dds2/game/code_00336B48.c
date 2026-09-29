@@ -551,7 +551,7 @@ void func_0033A0D8(s32 size) {
     D_00439180 = sdfResourceRetainAddress(D_00438A40);
 }
 
-u32 func_0033A170(void) {
+u32 func_0033A170(s32 tex) {
     return 0x50;
 }
 
@@ -570,7 +570,11 @@ SdfDrawPacket *func_0033A178(SdfDrawPacket *p, void *tex, s32 data) {
     return p;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfConsCreateDrawPacket);
+s32 sdfConsCreateDrawPacket(s32 list, s32 tex, s32 data) {
+    SdfDrawPacket *packet = func_0033A178(sdfAllocPacketAligned(func_0033A170(tex)), (void *)tex, data);
+    sdfAppendPacket(list, (u32)packet);
+    return (s32)packet;
+}
 
 u32 func_0033A290(u32 arg0, s32 arg1) {
     func_0032D460(arg0, (arg1 >> 4) - 2);
@@ -700,7 +704,9 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BA68);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BC98);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BDF0);
+s32 func_0033BDF0(s32 count) {
+    return (count * 0x4C + 0x4B) & ~0xF;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BE18);
 
@@ -765,10 +771,23 @@ void sdfDevConsListInsert(ConsNode *arg0) {
     D_00438AB0 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfDevConsListRemove);
+void sdfDevConsListRemove(node)
+    ConsNode *node;
+{
+    ConsNode *next = node->next;
+    ConsNode *prev = node->prev;
+    if (next != NULL) {
+        next->prev = prev;
+    } else {
+        D_00438AB0 = prev;
+    }
+    if (prev != NULL) {
+        prev->next = next;
+    }
+}
 
 void sdfDevConsNodeDestroy(ConsNode *node) {
-    sdfDevConsListRemove();
+    sdfDevConsListRemove(node);
     func_003297C8(node->bufferHandle);
     func_00328E48(node);
 }
