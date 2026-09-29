@@ -17,16 +17,20 @@ s32 func_001578C0(s32 arg0);
 
 typedef struct MdlViewState {
     s32 unk00;
-    s32 unk04;
+    s32 viewerTask;
     s8 unk08;
     u8 pad09;
     s8 unk0A;
     s8 unk0B;
-    u8 pad0C[10];
-    s16 unk16;
+    u8 pad0C[3];
+    u8 unk0F;
+    u8 pad10[6];
+    s16 resourceCount;
     s16 unk18;
     s16 unk1A;
-    u8 pad1C[6];
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
     s16 unk22;
     u16 unk24;
     s16 unk26;
@@ -41,8 +45,8 @@ typedef struct MdlViewState {
     u8 pad38[2];
     s16 unk3A;
     u8 pad3C[0x50];
-    s32 unk8C[1];
-    s32 unk90[1];
+    s32 slotBeforeResources[1];
+    s32 resources[1];
     u8 pad94[0x2C];
     s32 unkC0;
 } MdlViewState;
@@ -304,18 +308,29 @@ void func_002346C0(MdlPartList *list, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234720);
 
-void mdlObjDestroy(s32 arg0) {
-    if (*(u8 *)(arg0 + 9) != 0) {
-        func_00344A08((void *)(arg0 + 0x20));
+typedef struct MdlObj {
+    s32 unk0;             /* 0x00 */
+    s32 handle;           /* 0x04 */
+    u8 pad08;
+    u8 initialized;       /* 0x09 */
+    u8 pad0A[6];
+    s32 unk10;            /* 0x10 */
+    u8 pad14[0xC];
+    u8 data[1];           /* 0x20 */
+} MdlObj;
+
+void mdlObjDestroy(MdlObj *obj) {
+    if (obj->initialized != 0) {
+        func_00344A08(obj->data);
     }
-    func_003297C8(*(s32 *)(arg0 + 4));
-    func_00328E48((void *)arg0);
+    func_003297C8(obj->handle);
+    func_00328E48(obj);
 }
 
-void mdlObjInit(s32 arg0, s32 arg1, s32 arg2) {
-    if (*(u8 *)(arg0 + 9) == 0) {
-        *(u8 *)(arg0 + 9) = 1;
-        func_00345628(arg0 + 0x20, arg2, *(s32 *)(arg0 + 0), *(s32 *)(arg0 + 0x10), arg1);
+void mdlObjInit(MdlObj *obj, s32 arg1, s32 arg2) {
+    if (obj->initialized == 0) {
+        obj->initialized = 1;
+        func_00345628((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
     }
 }
 
@@ -336,14 +351,14 @@ MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 s
     return item;
 }
 
-void func_002349A0(s32 arg0) {
-    func_00159A50(*(u32 *)(arg0 + 8));
-    *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 1;
+void func_002349A0(MdlPartEntry *entry) {
+    func_00159A50((u32)entry->object);
+    entry->state = entry->state + 1;
 }
 
-void func_002349D8(s32 arg0) {
-    func_00157A50(*(u32 *)(arg0 + 8));
-    *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 1;
+void func_002349D8(MdlPartEntry *entry) {
+    func_00157A50((u32)entry->object);
+    entry->state = entry->state + 1;
 }
 
 s32 func_00234A10(s32 arg0, s32 arg1) {
@@ -378,7 +393,7 @@ void mdlCondInitEntry(s32 arg0) {
         if ((u32)(s32)f < (u32)count) {
             return;
         }
-        mdlObjInit(v, *(s32 *)(arg0 + 0x10), arg0 + 0x18);
+        mdlObjInit((MdlObj *)v, *(s32 *)(arg0 + 0x10), arg0 + 0x18);
     }
 }
 
@@ -477,27 +492,27 @@ void func_00235460(void) {
 }
 
 void func_002354B8(void) {
-    s32 i = D_00453550.unk16 - 1;
-    s32 saved = D_00453550.unk90[i];
+    s32 i = D_00453550.resourceCount - 1;
+    s32 saved = D_00453550.resources[i];
 
     if (i > 0) {
         do {
-            D_00453550.unk90[i] = D_00453550.unk8C[i];
+            D_00453550.resources[i] = D_00453550.slotBeforeResources[i];
             i -= 1;
         } while (i > 0);
     }
-    D_00453550.unk90[0] = saved;
+    D_00453550.resources[0] = saved;
 }
 
 void mdlRotateViewList(void) {
     s32 i;
-    s32 count = D_00453550.unk16;
-    s32 first = D_00453550.unk90[0];
+    s32 count = D_00453550.resourceCount;
+    s32 first = D_00453550.resources[0];
 
     for (i = 0; i < count - 1; i++) {
-        D_00453550.unk90[i] = D_00453550.unk90[i + 1];
+        D_00453550.resources[i] = D_00453550.resources[i + 1];
     }
-    D_00453550.unk90[i] = first;
+    D_00453550.resources[i] = first;
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
@@ -539,7 +554,7 @@ void func_00235860(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasNode(state->unk90[0], state->unk26) == 0) {
+    if (mdlHasNode(state->resources[0], state->unk26) == 0) {
         return;
     }
     height = (f32)state->unk2E;
@@ -548,7 +563,7 @@ void func_00235860(void) {
         width = height;
     }
     state->unk22 = state->unk24;
-    mdlAddEntryFlaggedEx(state->unk90[0], state->unk26, state->unk24, width, height);
+    mdlAddEntryFlaggedEx(state->resources[0], state->unk26, state->unk24, width, height);
 }
 
 void func_002358E8(void) {
@@ -556,7 +571,7 @@ void func_002358E8(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasNode(state->unk90[0], state->unk26) == 0) {
+    if (mdlHasNode(state->resources[0], state->unk26) == 0) {
         return;
     }
     height = (f32)state->unk2E;
@@ -565,7 +580,7 @@ void func_002358E8(void) {
         width = height;
     }
     state->unk22 = state->unk24;
-    mdlAddEntryPlainEx(state->unk90[0], state->unk26, state->unk24, width, height);
+    mdlAddEntryPlainEx(state->resources[0], state->unk26, state->unk24, width, height);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
@@ -694,7 +709,7 @@ u32 func_002379E0(void) {
 }
 
 s32 mdlCountActiveRecords(void) {
-    s32 resource = D_00453550.unk90[0];
+    s32 resource = D_00453550.resources[0];
     s32 first = mdlCountRecords((s32)func_00233E40(resource, -1));
     s32 second = mdlCountRecords((s32)func_00233E40(resource, D_00453550.unk22));
 
@@ -755,9 +770,9 @@ void func_00238140(void) {
 INCLUDE_ASM(const s32, "game/code_00233660", func_002381D8);
 
 void mdlViewerTaskDestroy(void) {
-    if (D_00453550.unk04 != 0) {
-        kwlnTaskDestroyWithHierarchy(D_00453550.unk04, 0);
-        D_00453550.unk04 = 0;
+    if (D_00453550.viewerTask != 0) {
+        kwlnTaskDestroyWithHierarchy(D_00453550.viewerTask, 0);
+        D_00453550.viewerTask = 0;
     }
 }
 
@@ -795,7 +810,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00238D38);
 
 void mdlFreeViewResources(void) {
     MdlViewState *state = &D_00453550;
-    s32 *slot = state->unk90;
+    s32 *slot = state->resources;
     s32 i;
 
     for (i = 0; i != 12; i++) {

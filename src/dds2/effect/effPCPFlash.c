@@ -32,13 +32,25 @@ typedef struct PcpFlashColorSlot {
 } PcpFlashColorSlot;
 
 typedef struct PcpFlashWork2 PcpFlashWork2;
+typedef struct PcpFlashRotatingParticle PcpFlashRotatingParticle;
 
 /* func_0016A6C0 */
 struct PcpFlashWork2 {
-    u8 pad00[0x24];
+    f32 origin[3];
+    u8 pad0C[0x04];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[0x03];
+    s32 lifetime;
+    s32 rampTime;
+    u32 randomRange;
     u32 unk24;
     u32 unk28;
-    u8 pad2C[0x1C];
+    u8 pad2C[0x08];
+    f32 maxScale;
+    u8 pad38[0x08];
+    PcpFlashRotatingParticle *parts;
+    s32 updateCount;
     u32 unk48;
     f32 unk4C;
     u32 ownedBuffer;
@@ -130,9 +142,11 @@ typedef struct PcpFlashPtc20A PcpFlashPtc20A;
 struct PcpFlashPtc20A {
     u8 pad00[0x08];
     f32 increment;
-    u8 pad0C[0x04];
+    f32 unk0C;
     f32 accumulator;
-    u8 pad14[0x0C];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
 };
 
 typedef struct PcpFlashWork6 PcpFlashWork6;
@@ -142,7 +156,11 @@ struct PcpFlashWork6 {
     u8 pad00[0x30];
     u32 colorA;
     u32 colorB;
-    u8 pad38[0x14];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[0x04];
     PcpFlashPtc20A *parts;
     u32 unk50;
     u32 unk54;
@@ -170,9 +188,10 @@ typedef struct PcpFlashPtc20B PcpFlashPtc20B;
 struct PcpFlashPtc20B {
     u8 pad00[0x08];
     f32 increment;
-    u8 pad0C[0x0C];
+    f32 unk0C;
+    u8 pad10[0x08];
     f32 accumulator;
-    u8 pad1C[0x04];
+    f32 unk1C;
 };
 
 typedef struct PcpFlashWork8 PcpFlashWork8;
@@ -182,7 +201,11 @@ struct PcpFlashWork8 {
     u8 pad00[0x28];
     u32 colorA;
     u32 colorB;
-    u8 pad30[0xA0];
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 pad40[0x90];
     PcpFlashPtc20B *parts;
     u32 unkD4;
     u32 unkD8;
@@ -223,13 +246,14 @@ struct PcpFlashWork10 {
     u32 resourceHandle;
 };
 
-typedef struct PcpFlashRotatingParticle {
-    u8 pad00[8];
+struct PcpFlashRotatingParticle {
+    u32 color;
+    s32 age;
     f32 angle;
-    u8 pad0C[4];
+    f32 scale;
     f32 position[3];
     u8 pad1C[0x10];
-} PcpFlashRotatingParticle;
+};
 
 typedef struct PcpFlashRotationWork {
     u8 pad00[0x40];
@@ -594,7 +618,24 @@ void func_00174890(PcpFlashWork6 *work, s32 flag, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174980);
+extern f32 func_00341240(void *state);
+extern u8 D_003AA868[];
+
+void func_00174980(PcpFlashWork6 *work, s32 index) {
+    PcpFlashPtc20A *part = work->parts + index;
+    f32 v;
+    f32 size;
+
+    part->accumulator = func_00341240(D_003AA868) * 6.2831853f;
+    v = func_00341240(D_003AA868) * 0.3f + 0.7f;
+    size = work->unk40 * v;
+    part->unk1C = size;
+    part->unk0C = size;
+    v = (func_00341240(D_003AA868) * 0.5f + 0.5f) * 0.5f;
+    part->unk14 = work->unk38 * v;
+    part->unk18 = work->unk3C * v;
+    part->increment = work->unk44 * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174A58);
 
