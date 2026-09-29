@@ -99,6 +99,16 @@ typedef struct UiObject {
     struct UiObject *next;
 } UiObject;
 
+typedef struct BtlSlotRecord {
+    u8 pad_00[0x84];
+    u32 word[7];
+} BtlSlotRecord;
+
+typedef struct BtlSlotOwner {
+    u8 pad_00[0x18];
+    BtlSlotRecord *records;
+} BtlSlotOwner;
+
 typedef struct BattleController {
     u8 pad_000[0x214];
     s32 frame;
@@ -1728,7 +1738,28 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1F80);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B20C8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B21E0);
+s32 func_001B21E0(u8 *acquirer, u8 *enemy) {
+    s32 result = 0;
+    s32 money;
+    u8 *entry;
+    if (!(*(u32 *)(enemy + 0x110) & 0x400)) {
+        return result;
+    }
+    if (acquirer != 0 && !(*(u32 *)(acquirer + 0x110) & 0x200)) {
+        return result;
+    }
+    entry = (u8 *)(D_00435DEC + *(u16 *)(enemy + 0x124) * 0x4C);
+    money = *(s32 *)(entry + 0x28);
+    if (*(u32 *)entry & 0x2000) {
+        money *= 100;
+    }
+    if (acquirer != 0) {
+        func_0020D128("btl:money=%d\n", money, acquirer);
+    } else {
+        func_0020D128("btl:money=%d(acquisition)\n", money);
+    }
+    return money;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2298);
 
@@ -2916,7 +2947,27 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004162F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB1E8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB550);
+u32 func_001BB550(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
+    u32 word = owner->records[group].word[slot];
+    u32 limit;
+    u32 value;
+    if (delta > 0) {
+        limit = value = word & 0xFF;
+        if ((u32)delta < value) {
+            value = delta;
+        }
+    } else {
+        limit = word & 0xFF;
+        value = 0;
+    }
+    delta = value;
+    if (limit > 0x80) {
+        if (delta >= 0x80) {
+            delta = limit;
+        }
+    }
+    return (word & ~0xFF) | delta;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB5C0);
 

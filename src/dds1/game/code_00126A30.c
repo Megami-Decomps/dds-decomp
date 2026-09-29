@@ -31,7 +31,14 @@ static inline s32 fldTestBits(u32 flags, u32 mask) {
     return (flags & mask) != 0;
 }
 
-extern void fldSpawnActionObjects(u32, u32);
+typedef struct FldActionSpawn {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+} FldActionSpawn;
+extern void fldSpawnActionObjects(FldActionSpawn *, u32);
+extern u64 dds3GetWorldSecondaryObject(void);
+extern s32 evtSpawnActionObj2(s32, s32);
 extern s32 func_001462D0(void);
 extern s32 D_0032E400[];
 extern void func_00131218(void);
@@ -266,7 +273,18 @@ typedef struct FldTransferChunk {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldSpawnActionObjects);
+void fldSpawnActionObjects(FldActionSpawn *spawn, u32 count) {
+    u32 i;
+
+    dds3GetWorldSecondaryObject();
+    for (i = 0; i < count; i++) {
+        s32 object = evtSpawnActionObj2(spawn->unk8, spawn->unk4);
+        spawn++;
+        if (i == 0) {
+            D_0032E3B0[0] = object;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001270A8);
 
@@ -277,7 +295,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00127588);
 /* Handle a field request, creating the player only in non-special scene states. */
 void fldProcessFieldRequest(u32 *request) {
     s32 state;
-    fldSpawnActionObjects(request[4], request[3]);
+    fldSpawnActionObjects((FldActionSpawn *)request[4], request[3]);
     state = D_0032E3B0[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
     func_00126A30(request[1], request[0], 0);
@@ -2564,7 +2582,14 @@ void fldResetTaskSlots(void) {
         }
     }
 }
-INCLUDE_ASM(const s32, "game/code_00126A30", fldPushDisplayValue);
+
+u32 fldPushDisplayValue(u32 value) {
+    u32 i = D_003BAE28;
+
+    D_003C92E0[i] = value;
+    D_003BAE28 = i + 1;
+    return i;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138ED0);
 
@@ -2583,7 +2608,22 @@ typedef struct FldRoomPlanes {
 } FldRoomPlanes;
 extern FldRoomPlanes D_003C9470[];
 extern f32 fldDotVector(f32 *, f32 *);
-INCLUDE_ASM(const s32, "game/code_00126A30", fldRoomContainsPoint);
+
+s32 fldRoomContainsPoint(f32 *point, s32 room) {
+    FldRoomPlanes *planes = &D_003C9470[room];
+    f32 *limit = planes->limit;
+    f32 *plane = planes->plane[0];
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (fldDotVector(point, plane) - *limit > 0.0f) {
+            return 0;
+        }
+        plane += 4;
+        limit++;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AFC8);
 
@@ -2703,7 +2743,22 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C138);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C2B8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldCheckEntryActive);
+s32 fldCheckEntryActive(s32 entry) {
+    s32 entryIdx = D_003BAE1C;
+    s16 *slot;
+
+    if (D_003BAE30 != 0) {
+        return 1;
+    }
+    if (entryIdx == -1) {
+        return 0;
+    }
+    slot = D_003C9510 + entryIdx * 0xA0;
+    if (slot[3] == 1 && slot[4] == entry) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 fldHasActiveTasks(void) {
     s32 i;

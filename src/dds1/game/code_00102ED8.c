@@ -33,14 +33,12 @@ extern s8 D_003BA890;
 
 extern s8 D_003BA7FC;
 
-extern s8 D_003BA92B;
-
 extern s8 D_003BA92C;
 
 extern s16 D_003BA92E;
 
 extern s16 D_003BA930;
-extern s8 D_003BA928[4];
+extern u8 D_003BA928[4];
 
 extern s8 D_0032453B[];
 
@@ -60,6 +58,8 @@ extern u8 D_003BD699;
 extern u16 D_003BD6C0;
 
 extern u16 D_003BD6C2;
+extern u16 D_003BD6C4;
+extern u16 D_003BD6C6;
 
 extern s32 D_003BD308;
 extern s32 D_003BA8D8;
@@ -80,7 +80,7 @@ extern void sdfGraphSetDisplayMode(s32 arg0);
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void func_00105010(void *, s32, s32);
-extern void sdfAppendPacket(void *, s32);
+extern void sdfAppendPacket();
 extern u32 kwlnTaskGetTimer(void);
 extern s32 effMiscRandMod(s32, s32);
 extern void func_00104068(s32, u8, s32);
@@ -90,7 +90,32 @@ extern void func_00104290(void);
 extern void *D_003BD6A8;
 extern s32 func_001049A8(void);
 extern s32 func_003014F0();
-extern s32 func_002E4960(s32, s32, s32, s32, const char *);
+extern s32 func_002E4960();
+extern u64 sdfCreateInitializedPacketList(void);
+extern u32 func_00100518(void);
+extern u8 D_003C2620[];
+extern s32 D_003BA724;
+extern s32 D_003BA934;
+extern s32 D_003BA938;
+typedef struct KwlnPadState {
+    u8 unk0[0x12];
+    s8 unk12;
+    s8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16[2];
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+} KwlnPadState;
+extern KwlnPadState D_00398628;
+extern s32 func_00104A18(s32);
+typedef struct KwlnGraphicsSink {
+    u8 unknown[0x10];
+    void (*submit)(void *, void *);
+} KwlnGraphicsSink;
+extern KwlnGraphicsSink D_00325708;
 
 extern void func_002E1718(void *arg0);
 
@@ -171,7 +196,25 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001039E0);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103B10);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104008);
+void func_00104008(void) {
+    u8 target = D_003BD699;
+
+    if (D_003BD690[1] < target) {
+        if (target - D_003BD690[1] > 0x20) {
+            D_003BD690[1] = D_003BD690[1] + 0x20;
+        } else {
+            D_003BD690[1] = target;
+        }
+    } else if (target < D_003BD690[1]) {
+        if (D_003BD690[1] - target > 0x20) {
+            D_003BD690[1] = D_003BD690[1] - 0x20;
+        } else {
+            D_003BD690[1] = target;
+        }
+    } else {
+        D_003BD690[1] = target;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104068);
 
@@ -228,7 +271,25 @@ u32 kwlnTextureGetPageIndex(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104A18);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104A98);
+s32 func_00104A98(void) {
+    if (D_00398628.unk13 < 0) {
+        return 0;
+    }
+    if (D_00398628.unk14 & 2) {
+        D_003BA8DC -= 1;
+    } else if (D_00398628.unk15 & 2) {
+        D_003BA8DC += 1;
+    } else if ((D_00398628.unk18 & 2) || (D_00398628.unk19 & 2)) {
+        D_003BA8DC -= 10;
+    } else if ((D_00398628.unk1A & 2) || (D_00398628.unk1B & 2)) {
+        D_003BA8DC += 10;
+    }
+    D_003BA8DC = func_00104A18(D_003BA8DC);
+    if (D_00398628.unk12 < 0) {
+        D_003BA890 ^= 1;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104B88);
 
@@ -364,7 +425,12 @@ void func_00105888(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_001059F0);
+u64 func_001059F0(s32 arg0) {
+    u64 list = sdfCreateInitializedPacketList();
+
+    sdfAppendPacket(list, D_003C2620 + arg0 * 0x160 + func_00100518() * 0xB0);
+    return list;
+}
 
 /* The low two bits select the active fade direction; clearing cancels it. */
 void kwlnFadeClear(void) {
@@ -462,9 +528,39 @@ u8 kwlnFadeIsActive(void) {
     return (D_003BA904 & 3) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105C58);
+void func_00105C58(void) {
+    if (kwlnFadeIsActive() != 0) {
+        if (D_003BA904 & 1) {
+            D_003BD6C0 -= 1;
+        } else {
+            D_003BD6C0 += 1;
+        }
+        D_003BA920.a = (D_003BD6C0 << 7) / D_003BD6C2;
+        if (((D_003BA904 & 1) && D_003BD6C0 == 0) || ((D_003BA904 & 2) && D_003BD6C0 == D_003BD6C2)) {
+            D_003BD6C0 = 0;
+            D_003BD6C2 = 0;
+            D_003BA904 &= ~3;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105D00);
+void func_00105D00(void) {
+    void *task;
+
+    if (D_003BA724 != 0) {
+        if (D_003BA934 != 0 || D_003BA938 != 0) {
+            task = sdfAllocPacketAligned(0x20);
+            sdfInitPacketList(task);
+            if (D_003BA934 > 0) {
+                sdfAppendPacket(task, func_002E4960(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_003BA934));
+            }
+            if (D_003BA938 > 0) {
+                sdfAppendPacket(task, func_002E4960(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_003BA938));
+            }
+            D_00325708.submit(&D_00325708, task);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105DD8);
 
@@ -479,12 +575,70 @@ void kwlnFadeResetBackground(void) {
     D_003BA930 = 0x4F;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_001060C8);
+void func_001060C8(s32 duration) {
+    D_003BA928[0] = 0;
+    D_003BA928[1] = 0;
+    D_003BA928[2] = 0;
+    D_003BA928[3] = 0x80;
+    if (duration == 0) {
+        D_003BA928[3] = 0;
+        D_003BD6C4 = 0;
+        D_003BD6C6 = 0;
+        D_003BA92E = 0x31;
+        D_003BA930 = 0x4F;
+        kwlnFadeResetBackground();
+    } else {
+        D_003BD6C6 = duration;
+        D_003BD6C4 = duration;
+        D_003BA904 = (D_003BA904 | 0x04000000) & 0xF7FFFFFF;
+    }
+    D_003245EC[2] = 2048.0f;
+}
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106160);
+void func_00106160(s32 duration) {
+    D_003BA928[0] = 0;
+    D_003BA928[1] = 0;
+    D_003BA928[2] = 0;
+    D_003BA928[3] = 0;
+    if (duration == 0) {
+        D_003BD6C4 = 0;
+        D_003BD6C6 = 0;
+        D_003BA928[3] = 0x80;
+        D_003BA904 &= 0xF3FFFFFF;
+        D_003BA92E = 0;
+        D_003BA930 = 0;
+    } else {
+        D_003BD6C6 = duration;
+        D_003BD6C4 = 0;
+        D_003BA904 = (D_003BA904 & 0xFBFFFFFF) | 0x08000000;
+    }
+    D_003245EC[2] = 2041.0f;
+}
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_001061E8);
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106240);
+s32 func_001061E8(void) {
+    if (D_003BA904 & 0x0C000000) {
+        return 1;
+    }
+    if (D_003BA92C == 0) {
+        if (0x80 - D_003BA928[3] >= 0x80) {
+            return 0;
+        }
+    } else if (D_003BA92E == 0x31) {
+        return 0;
+    }
+    return 1;
+}
+
+void func_00106240(s32 mode) {
+    D_003BA92C = mode;
+    if (D_003BA92C == 0) {
+        D_003BA92E = 0;
+        D_003BA930 = 0;
+    } else {
+        D_003BA928[3] = 0x80;
+    }
+}
+
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106268);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106368);
