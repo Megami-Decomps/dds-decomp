@@ -1,5 +1,9 @@
 #include "common.h"
 
+typedef struct SdfMat4 {
+    f32 m[16];
+} SdfMat4;
+
 typedef struct SdfVec4 {
     f32 x;
     f32 y;
@@ -188,7 +192,26 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_003270C8);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003275C8);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00327AC8);
+void func_00327AC8(SdfMat4 *dst, SdfMat4 *src) {
+    SdfMat4 t = *src;
+
+    dst->m[0] = t.m[0];
+    dst->m[1] = t.m[4];
+    dst->m[2] = t.m[8];
+    dst->m[3] = t.m[12];
+    dst->m[4] = t.m[1];
+    dst->m[5] = t.m[5];
+    dst->m[6] = t.m[9];
+    dst->m[7] = t.m[13];
+    dst->m[8] = t.m[2];
+    dst->m[9] = t.m[6];
+    dst->m[10] = t.m[10];
+    dst->m[11] = t.m[14];
+    dst->m[12] = t.m[3];
+    dst->m[13] = t.m[7];
+    dst->m[14] = t.m[11];
+    dst->m[15] = t.m[15];
+}
 
 extern void *memcpy(void *, const void *, u32);
 

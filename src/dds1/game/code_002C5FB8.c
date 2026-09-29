@@ -19,6 +19,7 @@ typedef struct Vec3 {
 } Vec3; // 0x0C
 
 extern float fldNormalizedVectorDot(float *, float *);
+extern float fldVectorLength(float *vector);
 
 typedef struct MapResource {
     u32 image;

@@ -3144,7 +3144,39 @@ EffPCPWork *effPcpBuildBlockSet(args)
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185500);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001856B0);
+/* Clone of the 0x10C block-set work: zeroed, the 0x50-byte parameter block at
+ * +0x60 copied from `src`, grey colour, unit matrix, and a back pointer. */
+typedef struct EffPCPBlockCloneWork {
+    f32 matrix[16];
+    u8 pad40[0x20];
+    EffPCPBlock50 params;
+    u32 unkB0;
+    u8 padB4[4];
+    u32 color;
+    u32 mode;
+    u8 padC0[0x48];
+    void *source;
+} EffPCPBlockCloneWork;
+
+extern void *memset(void *s, int c, u32 n);
+
+extern void func_00185500(void *dst, void *src);
+
+/* Clone of a block-set work that shares the source's blocks (no back pointer). */
+EffPCPBlockCloneWork *func_001856B0(EffPCPBlockCloneWork *src) {
+    EffPCPBlockCloneWork *work;
+
+    work = func_00328D68(0x10C);
+    memset(work, 0, 0x10C);
+    work->params = src->params;
+    work->unkB0 = 0;
+    work->color = 0x80808080;
+    work->mode = 0;
+    PCP_UNIT_MATRIX(work->matrix);
+    func_00185500(work, src);
+    work->source = NULL;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185808);
 
@@ -3179,22 +3211,6 @@ void func_00186148(void) {
     temp_v0 = effPcpBuildBlockSet();
     *(u32 *)(temp_v0 + 0xbc) = 1;
 }
-
-/* Clone of the 0x10C block-set work: zeroed, the 0x50-byte parameter block at
- * +0x60 copied from `src`, grey colour, unit matrix, and a back pointer. */
-typedef struct EffPCPBlockCloneWork {
-    f32 matrix[16];
-    u8 pad40[0x20];
-    EffPCPBlock50 params;
-    u32 unkB0;
-    u8 padB4[4];
-    u32 color;
-    u32 mode;
-    u8 padC0[0x48];
-    void *source;
-} EffPCPBlockCloneWork;
-
-extern void *memset(void *s, int c, u32 n);
 
 EffPCPBlockCloneWork *func_00186170(EffPCPBlockCloneWork *src) {
     EffPCPBlockCloneWork *work;

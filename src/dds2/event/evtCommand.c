@@ -75,6 +75,52 @@ s32 evtGetRawSolarPhase(void);
 
 void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits);
 
+u32 func_00125F38(void);
+
+void func_00110BE0(s32 arg0, u32 arg1);
+
+f32 func_0010D718(s32 idx);
+
+s32 func_0010D8C8(void);
+
+s32 evtFindTaskById(s32 arg0);
+
+s32 evtGetTaskValueWord(s32 arg0);
+
+extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
+
+typedef struct EvtCampTask {
+    u8 pad00[0x20];
+    s32 resource;
+} EvtCampTask;
+
+typedef struct EvtCommandWork {
+    u8 pad00[0xE4];
+    EvtCampTask *campTask;
+} EvtCommandWork;
+
+extern char D_00421F68[];
+
+void evtSetWorldSlotStatusFlag();
+
+void evtClearWorldSlotStatusFlag();
+
+void func_0023AE08(s32 arg0, f32 arg1);
+
+s32 func_00154FA0(char *name);
+
+s32 func_001235E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+
+extern u32 D_00389770[];
+
+void func_0023AE70(void *arg0, s32 arg1);
+
+s32 func_0023AEB0(void *arg0, void *arg1);
+
+extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
+
+extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
+
 INCLUDE_ASM(const s32, "event/evtCommand", func_00240D20);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00240DE0);
@@ -93,9 +139,45 @@ s32 evtCommandEnablePathUnit(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240F58);
+s32 func_00240F58(void) {
+    void *path = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    s32 found;
+    s32 i;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240FE8);
+    if (path == NULL) {
+        return 1;
+    }
+    i = 4;
+    do {
+        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(1));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        return 1;
+    }
+    func_00115E20(path, found);
+    return 1;
+}
+
+s32 func_00240FE8(void) {
+    void *path = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    s32 found;
+    s32 i;
+
+    if (path == NULL) {
+        return 1;
+    }
+    i = 4;
+    do {
+        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(1));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        return 1;
+    }
+    func_00115EE8(path, found, func_0010D650(2));
+    return 1;
+}
 
 s32 func_00241090(void)
 {
@@ -124,7 +206,23 @@ s32 func_002410D0(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241110);
+s32 func_00241110(void) {
+    void *effect;
+    void *path;
+
+    effect = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    if (effect == NULL) {
+        func_0010AE38("EFFECT_PATH_MOVE not found eff!\n");
+        return 1;
+    }
+    path = evtFindWorldObjectByIdAndKind(0x10, func_0010D650(1));
+    if (path == NULL) {
+        func_0010AE38("EFFECT_PATH_MOVE not found path!\n", effect);
+        return 1;
+    }
+    func_0023AEB0(path, effect);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002411A0);
 
@@ -156,7 +254,19 @@ s32 func_00241340(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241390);
+extern void fldSetDeferredFieldCommand(s32 a, s32 b);
+
+s32 func_00241390(void) {
+    s32 a = func_0010D650(0);
+    s32 b = func_0010D650(1);
+    s32 c = func_0010D650(2);
+    s32 d;
+
+    func_0035B6E0("CALL_NEXT(%d,%d,%d)\n", a, b, c);
+    d = func_0010D650(1);
+    fldSetDeferredFieldCommand(d, func_0010D650(2));
+    return 1;
+}
 
 s32 evtCommandCallEvent(void)
 {
@@ -380,15 +490,59 @@ s32 func_002419B0(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002419F8);
+s32 func_002419F8(void) {
+    void *unit;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241A70);
+    if (func_0010D650(0) < 0) {
+        unit = (void *)func_00125F38();
+    } else {
+        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    func_00110BE0(dds3GetWorldObject(), (u32)unit);
+    return 1;
+}
+
+s32 func_00241A70(void) {
+    void *unit;
+
+    if (func_0010D650(0) < 0) {
+        unit = (void *)func_00125F38();
+    } else {
+        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+        *(u32 *)(*(u8 **)((u8 *)unit + 0x18) + 0x88) |= 1;
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    func_00110BE0(dds3GetWorldObject(), (u32)unit);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241AF8);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241B98);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241C20);
+extern void *memset(void *dst, s32 value, u32 size);
+extern s32 dds3AdvanceWorldCounter();
+extern s32 func_00112E30(s32 world, f32 *pos, f32 *rot);
+extern void effObjSetInnerFloat(s32 obj, f32 value);
+
+s32 func_00241C20(void) {
+    f32 pos[4];
+    f32 rot[4];
+    s32 world;
+
+    memset(pos, 0, 0x10);
+    memset(rot, 0, 0x10);
+    rot[3] = 1.0f;
+    world = dds3AdvanceWorldCounter();
+    effObjSetInnerFloat(func_00112E30(world, pos, rot), 1.0f);
+    func_0010D818(world);
+    return 1;
+}
 
 s32 func_00241CB0(void)
 {
@@ -404,11 +558,47 @@ s32 func_00241CB0(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241CF0);
+s32 func_00241CF0(void) {
+    void *unit;
+    f32 vec[4];
+
+    memset(vec, 0, sizeof(vec));
+    if (func_0010D650(0) < 0) {
+        unit = (void *)func_00125F38();
+    } else {
+        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    vec[0] = func_0010D718(1);
+    vec[1] = func_0010D718(2);
+    vec[2] = func_0010D718(3);
+    effObjSetInnerFirstVec(unit, vec);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241D98);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241E70);
+s32 func_00241E70(void) {
+    void *unit;
+    f32 vec[4];
+
+    if (func_0010D650(0) < 0) {
+        unit = (void *)func_00125F38();
+    } else {
+        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    vec[0] = func_0010D718(1);
+    vec[1] = func_0010D718(2);
+    vec[2] = func_0010D718(3);
+    vec[3] = func_0010D718(4);
+    effObjSetInnerSecondVec(unit, vec);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241F10);
 
@@ -456,11 +646,52 @@ INCLUDE_ASM(const s32, "event/evtCommand", evtCommandWaitForCampTask);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommandStartCampTaskIfAbsent);
+extern s32 mnuCampCreateTask(s32 id);
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommandTestCampTaskReady);
+s32 evtCommandStartCampTaskIfAbsent(void) {
+    s32 id = func_0010D650(0);
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommandDestroyCampTask);
+    if (work == NULL) {
+        return 1;
+    }
+    if (evtFindTaskById(id) != 0) {
+        return 1;
+    }
+    func_0010AE38("read BE (%d)..\n", id);
+    func_00101968((s32)work->campTask, mnuCampCreateTask(id));
+    return 1;
+}
+
+s32 evtCommandTestCampTaskReady(void) {
+    s32 id = func_0010D650(0);
+    s32 ok;
+
+    if (func_0010D8C8() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
+        func_0010AE38(D_00421ED8, id);
+        ok = 1;
+    } else {
+        ok = 0;
+    }
+    func_0010D818(ok);
+    return 1;
+}
+
+extern void mnuCampDestroyTaskById(s32 id);
+
+s32 evtCommandDestroyCampTask(void) {
+    s32 id = func_0010D650(0);
+
+    if (func_0010D8C8() == 0) {
+        return 1;
+    }
+    if (evtFindTaskById(id) == 0) {
+        return 1;
+    }
+    func_0010AE38("del BE (%d)..\n", id);
+    mnuCampDestroyTaskById(id);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
@@ -476,15 +707,126 @@ s32 evtCommandClearPolygonMovieFlag(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommandCreatePolygonMovie);
+s32 evtCommandCreatePolygonMovie(void) {
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
+    s32 a;
+    s32 b;
+    s32 result;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242818);
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->campTask == 0) {
+        func_0035B6E0(D_00421F68);
+        return 1;
+    }
+    a = func_0010D650(0);
+    b = func_0010D650(1);
+    result = func_0024FCB8(work->campTask->resource, a, b);
+    func_00101968((s32)work->campTask, result);
+    func_0010D818(result);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242898);
+s32 func_00242818(void) {
+    s32 found;
+    s32 i = 4;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242918);
+    do {
+        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        found = func_001287B8(func_0010D650(0));
+        if (found == 0) {
+            return 1;
+        }
+    }
+    evtSetWorldSlotStatusFlag(found);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242A30);
+s32 func_00242898(void) {
+    s32 found;
+    s32 i = 4;
+
+    do {
+        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        found = func_001287B8(func_0010D650(0));
+        if (found == 0) {
+            return 1;
+        }
+    }
+    evtClearWorldSlotStatusFlag(found);
+    return 1;
+}
+
+s32 func_00242918(void) {
+    u8 *unit;
+    s32 count;
+    char *owner;
+    s32 i = 4;
+
+    do {
+        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        i++;
+    } while (i < 10 && unit == NULL);
+    if (unit == NULL) {
+        unit = (u8 *)func_001287B8(func_0010D650(0));
+        if (unit == NULL) {
+            return 1;
+        }
+    }
+    func_0023AE08(unit, func_0010D718(1));
+    owner = *(char **)(unit + 8);
+    if (owner == 0) {
+        return 1;
+    }
+    count = func_00154FA0(owner);
+    if (count > 0) {
+        if (func_0010D718(1) > 0.5f) {
+            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
+        } else {
+            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 0);
+        }
+    }
+    return 1;
+}
+
+s32 func_00242A30(void) {
+    u8 *unit;
+    s32 count;
+    char *owner;
+    s32 i = 4;
+
+    do {
+        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        i++;
+    } while (i < 10 && unit == NULL);
+    if (unit == NULL) {
+        unit = (u8 *)func_001287B8(func_0010D650(0));
+        if (unit == NULL) {
+            return 1;
+        }
+    }
+    func_0023AE70(unit, func_0010D650(1));
+    owner = *(char **)(unit + 8);
+    if (owner == 0) {
+        return 1;
+    }
+    count = func_00154FA0(owner);
+    if (count > 0) {
+        if (func_0010D650(1) == 0) {
+            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
+        } else {
+            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 0);
+        }
+    }
+    return 1;
+}
 
 s32 func_00242B40(void)
 {
@@ -528,7 +870,16 @@ s32 func_00242BC0(void)
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242C40);
+s32 func_00242C40(void) {
+    void *path = evtFindWorldObjectByIdAndKind(9, func_0010D650(0));
+
+    if (func_0023AEB0(evtFindWorldObjectByIdAndKind(0x10, func_0010D650(1)), path) != 0) {
+        return 1;
+    }
+    func_0035B6E0(D_00421FB0);
+    func_0010AE38(D_00421FC8);
+    return 1;
+}
 
 
 

@@ -1,5 +1,11 @@
 #include "common.h"
 #include "pcp_vu0.h"
+/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
+#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+
 
 /* Particle/effect work layouts shared by the matched functions of this TU.
  * Every effect in ../effect/src/effPCPMisc.c keeps its own allocation size,
@@ -3009,12 +3015,6 @@ EffPCPWork *effPcpBuildBlockSet(args)
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017D8A8);
-
-/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
-#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 
 typedef struct EffPCPBlock50 {
     u32 word[20];

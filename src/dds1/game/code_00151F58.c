@@ -17,9 +17,32 @@ typedef struct EffTemplatePacketList {
     u32 packetCount;
     u8 pad24[0xD4];
     EffectBufferTail *buffer;
-    u8 padFC[0x5C];
+    u8 padFC[0x58];
+    s32 tagStep;
     f32 recordScale;
+    u32 period;
+    u32 period2;
 } EffTemplatePacketList;
+
+typedef struct EffParticle {
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad0C[4];
+    f32 unk10;
+    u8 pad14[0xC];
+    s32 unk20;
+    s32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+} EffParticle;
+
+extern u8 D_0034DF38[];
+extern f32 func_002E8398(void *);
 
 extern EffectConfig D_0034DF54[];
 
@@ -41,7 +64,7 @@ void func_00153128(s32 arg0, s32 arg1);
 
 void func_00153740(s32 arg0);
 
-void func_001539D0(s32 arg0);
+void func_001539D0(EffTemplatePacketList *effect);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -53,7 +76,9 @@ s32 func_002D03F8(s32 size);
 
 EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
-void func_001565E0(s32 arg0);
+void func_001565E0(EffTemplatePacketList *effect);
+
+void func_00155380(EffTemplatePacketList *effect, u32 index);
 
 void effRetainResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].unk00, 0);
@@ -126,7 +151,37 @@ void effBillSetMode(BillObj *effect, s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152100);
+typedef struct BillEntryList {
+    u8 pad00[0x10];
+    s32 count;
+    u8 pad14[4];
+    s32 *entries;
+} BillEntryList;
+
+void func_00152100(BillObj *effect, s32 value) {
+    s32 count;
+    s32 *entries;
+    s32 *entry;
+
+    value = (s16)value;
+    switch (effect->unk2C) {
+    case 0:
+        *(s16 *)((u8 *)effect->unk30 + 4) = value;
+        break;
+    case 1:
+        count = ((BillEntryList *)effect->unk30)->count;
+        entries = ((BillEntryList *)effect->unk30)->entries;
+        if (count > 0) {
+            entry = entries;
+            do {
+                *(s16 *)(*entry + 4) = value;
+                entry++;
+                count--;
+            } while (count != 0);
+        }
+        break;
+    }
+}
 
 s32 func_00152170(BillObj *effect) {
     if (effect->unk2C == 0) {
@@ -416,7 +471,27 @@ void effDestroyResources(effect)
     func_00153728(*(s32 *)(effect + 0xf8));
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001539D0);
+void func_001539D0(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 i;
+    u32 next;
+    s32 tag;
+
+    tag = 0xf0000001;
+    i = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
+        do {
+            record->unk20 = tag;
+            next = i + 1;
+            record = record + 1;
+            if (next % effect->period == 0) {
+                tag = tag - effect->tagStep;
+            }
+            i = next;
+        } while (i < effect->packetCount);
+    }
+}
 
 void func_00153A40(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
@@ -538,7 +613,28 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_001547D8);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00154FD8);
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00155200);
+void func_00155200(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 i;
+    u32 next;
+    s32 tag;
+
+    tag = 0;
+    i = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
+        do {
+            func_00155380(effect, i);
+            record->unk20 = tag;
+            next = i + 1;
+            record = record + 1;
+            if (next % effect->period == 0) {
+                tag = tag - effect->tagStep;
+            }
+            i = next;
+        } while (i < effect->packetCount);
+    }
+}
 
 void func_001552A0(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
@@ -657,7 +753,27 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00156070);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00156378);
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001565E0);
+void func_001565E0(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 i;
+    u32 next;
+    s32 tag;
+
+    tag = 0xf0000001;
+    i = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
+        do {
+            record->unk20 = tag;
+            next = i + 1;
+            record = record + 1;
+            if (next % effect->period2 == 0) {
+                tag = tag - effect->tagStep;
+            }
+            i = next;
+        } while (i < effect->packetCount);
+    }
+}
 
 void func_00156650(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
@@ -785,16 +901,95 @@ void func_00157988(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001579B0);
+s32 func_001579B0(s32 source) {
+    s32 copy = (s32)func_002CFEB8(0x150);
+    s32 tailLen = 0;
+
+    memset((void *)copy, 0, 0x150);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    *(s32 *)(copy + 0x20) = 1;
+    *(s32 *)(copy + 0x24) = 0;
+    func_00153740(copy);
+    return copy;
+}
 
 void func_00157A30(u32 arg0) {
     effDestroyResources();
     func_002CFF98(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00157A58);
+typedef struct EffParticleSource {
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad0C[4];
+    f32 speed;
+    u8 pad14[0x10];
+    u32 unk24; /* 0x24 */
+    u8 pad28[0x24];
+    u32 color; /* 0x4C */
+    u8 pad50[8];
+    u32 alpha; /* 0x58 */
+    u8 pad5C[0x30];
+    f32 lastSpeed; /* 0x8C */
+    u8 pad90[4];
+    f32 speedJitter; /* 0x94 */
+    f32 angleJitter; /* 0x98 */
+    u8 pad9C[0x54];
+    u32 unkF0; /* 0xF0 */
+    u8 padF4[4];
+    EffectBufferTail *buffer; /* 0xF8 */
+} EffParticleSource;
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00157B58);
+
+
+void func_00157A58(effect)
+    EffParticleSource *effect;
+{
+    EffParticle *particle = (EffParticle *)effect->buffer->records;
+    f32 jitter;
+    u32 color;
+
+    color = effect->color | (effect->alpha << 24);
+    particle->x = effect->x;
+    particle->unk20 = -1;
+    particle->y = effect->y;
+    particle->unk24 = color;
+    particle->z = effect->z;
+    particle->unk28 = 1.0f;
+    particle->unk2C = 0;
+    effect->lastSpeed = effect->speed;
+    jitter = effect->speedJitter;
+    particle->unk28 = effect->speed * (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter));
+    jitter = effect->angleJitter;
+    if (jitter != 0) {
+        particle->unk2C = (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+    } else {
+        particle->unk2C = 0;
+    }
+}
+
+extern u32 func_0015A2F8(u32, u32);
+
+void func_00157B58(EffParticleSource *effect) {
+    EffParticle *particle = (EffParticle *)effect->buffer->records;
+    s32 count = particle->unk20;
+    u32 color;
+
+    if (count == 0) {
+        func_00157A58(effect);
+        count = particle->unk20;
+    }
+    particle->unk20 = count + 1;
+    particle->x = effect->x;
+    effect->unk24 = count + 2;
+    particle->y = effect->y;
+    color = effect->color | (effect->alpha << 24);
+    particle->z = effect->z;
+    particle->unk24 = color;
+    particle->unk24 = func_0015A2F8(color, effect->unkF0);
+}
 
 void func_00157BE8(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
@@ -865,7 +1060,19 @@ void func_00158760(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001587B0);
+s32 func_001587B0(s32 source) {
+    s32 copy = (s32)func_002CFEB8(0x200);
+    s32 tailLen = 0xB0;
+
+    memset((void *)copy, 0, 0x200);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    *(s32 *)(copy + 0x17C) = func_002D03F8(*(s32 *)(copy + 0x20) << 4);
+    *(s32 *)(copy + 0x178) = (s32)sdfResourceRetainAddress(*(s32 *)(copy + 0x17C));
+    func_00153740(copy);
+    func_00158718(copy);
+    return copy;
+}
 
 void func_00158848(u32 arg0) {
     func_002D0918(*(u32 *)(arg0 + 0x17c));
@@ -900,4 +1107,62 @@ void func_00158DD0(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00158E10);
+s32 func_00158E10(s32 source) {
+    s32 copy = (s32)func_002CFEB8(0x190);
+    s32 tailLen = 0x40;
+    s32 count;
+    s32 perRecord;
+    s32 listBytes;
+    s32 *node;
+    s32 *addr;
+    s32 step;
+    s32 base;
+    s32 i;
+
+    memset((void *)copy, 0, 0x190);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_00153740(copy);
+    perRecord = 0;
+    if (*(u16 *)(copy + 0x30) != 0) {
+        count = *(s32 *)(copy + 0x20);
+        switch (*(u16 *)(copy + 0x30)) {
+        case 1:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        case 2:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        case 3:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        case 4:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        }
+        listBytes = count * 12;
+        *(s32 *)(copy + 0x170) = perRecord;
+        *(s32 *)(copy + 0x174) = func_002D03F8(listBytes + perRecord * count * 16);
+        addr = (s32 *)sdfResourceRetainAddress(*(s32 *)(copy + 0x174));
+        i = 0;
+        base = (s32)addr;
+        *(s32 *)(copy + 0x16C) = base;
+        base = base + listBytes;
+        if (count > 0) {
+            step = perRecord * 16;
+            node = addr;
+            do {
+                i++;
+                node[2] = base;
+                node[0] = 0;
+                node[1] = 0;
+                node += 3;
+                base += step;
+            } while (i < count);
+        }
+    } else {
+        *(s32 *)(copy + 0x174) = 0;
+    }
+    func_00158D88(copy);
+    return copy;
+}

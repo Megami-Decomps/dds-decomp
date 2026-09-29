@@ -35,9 +35,10 @@ typedef struct ParDispatch {
 
 /* 20-byte cell initialized by parCellInit (grey plus zeros). */
 typedef struct ParCell {
-    u8 pad00[8];   /* 0x00 */
-    u32 unk08;     /* 0x08 cleared */
-    u32 unk0C;     /* 0x0C cleared */
+    u128 *vertices; /* 0x00 */
+    u8 pad04[4];   /* 0x04 */
+    s32 unk08;     /* 0x08 cleared */
+    s32 unk0C;     /* 0x0C cleared */
     u32 color10;   /* 0x10 set to grey 0x80808080 */
 } ParCell; /* 0x14 */
 
@@ -175,23 +176,23 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADD0);
 
 extern void func_00159CF0(s32);
-extern void func_0015AF70(s32);
-extern void func_0015B058(s32);
-extern void func_0015B148(s32);
+extern void func_0015AF70(s32, s32, u32);
+extern void func_0015B058(s32, s32, u32);
+extern void func_0015B148(s32, s32, u32);
 
-void parDispatchKindUpdate(void *work) {
+void parDispatchKindUpdate(void *work, s32 index, u32 color) {
     switch (*(u16 *)work) {
     case 1:
         func_00159CF0(*(s32 *)((u8 *)work + 8));
         return;
     case 2:
-        func_0015AF70(*(s32 *)((u8 *)work + 0x10));
+        func_0015AF70(*(s32 *)((u8 *)work + 0x10), index, color);
         return;
     case 3:
-        func_0015B058(*(s32 *)((u8 *)work + 0x14));
+        func_0015B058(*(s32 *)((u8 *)work + 0x14), index, color);
         return;
     case 4:
-        func_0015B148(*(s32 *)((u8 *)work + 0x14));
+        func_0015B148(*(s32 *)((u8 *)work + 0x14), index, color);
         break;
     }
 }
@@ -216,11 +217,112 @@ void parDispatchKindInit(void *work, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AF70);
+extern u8 D_003D6490[];
+extern u8 D_003D64A0[];
+extern void effBillSetEntryValue(s32, s32, u32);
+extern void func_0015BB90(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B058);
+void func_0015AF70(s32 particle, s32 index, u32 color) {
+    u128 axis[2];
+    __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
+    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_003D6490));
+    __asm__ volatile (
+        "vopmula.xyz ACC, vf10, vf11\n\t"
+        "vopmsub.xyz vf10, vf11, vf10\n\t"
+        "vmul.xyz vf2, vf10, vf10\n\t"
+        "vmulax.w ACC, vf0, vf2x\n\t"
+        "vmadday.w ACC, vf0, vf2y\n\t"
+        "vmaddz.w vf2, vf0, vf2z\n\t"
+        "vrsqrt Q, vf0w, vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz vf10, vf10, Q");
+    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_003D64A0));
+    __asm__ volatile (
+        "vmul.xyzw vf10, vf10, vf11\n\t"
+        "vmove.xyzw vf2, vf10\n\t"
+        "vmove.xyzw vf10, vf12\n\t"
+        "vmove.xyzw vf12, vf2\n\t"
+        "vmove.xyzw vf11, vf10\n\t"
+        "vadd.xyzw vf10, vf10, vf12");
+    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[0]) : "memory");
+    __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
+    __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
+    func_0015B928(particle, index, axis);
+    func_0015BB90(particle, index);
+    effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
+}
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B148);
+
+extern u8 D_003D6490[];
+extern u8 D_003D64A0[];
+extern void effBillSetEntryValue(s32, s32, u32);
+extern void func_0015BCE8(s32, s32);
+
+void func_0015B058(s32 particle, s32 index, u32 color) {
+    u128 axis[3];
+    __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
+    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_003D6490));
+    __asm__ volatile (
+        "vopmula.xyz ACC, vf10, vf11\n\t"
+        "vopmsub.xyz vf10, vf11, vf10\n\t"
+        "vmul.xyz vf2, vf10, vf10\n\t"
+        "vmulax.w ACC, vf0, vf2x\n\t"
+        "vmadday.w ACC, vf0, vf2y\n\t"
+        "vmaddz.w vf2, vf0, vf2z\n\t"
+        "vrsqrt Q, vf0w, vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz vf10, vf10, Q");
+    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_003D64A0));
+    __asm__ volatile (
+        "vmul.xyzw vf10, vf10, vf11\n\t"
+        "vmove.xyzw vf2, vf10\n\t"
+        "vmove.xyzw vf10, vf12\n\t"
+        "vmove.xyzw vf12, vf2");
+    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[1]) : "memory");
+    __asm__ volatile ("vmove.xyzw vf11, vf10\n\tvadd.xyzw vf10, vf10, vf12");
+    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[0]) : "memory");
+    __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
+    __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[2]) : "memory");
+    func_0015BA38(particle, index, axis);
+    func_0015BCE8(particle, index);
+    effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
+}
+
+
+extern u8 D_003D6490[];
+extern u8 D_003D64A0[];
+extern void func_001884E8(s32, s32, void *);
+extern void func_00188538(s32, s32, u32);
+
+void func_0015B148(s32 particle, s32 index, u32 color) {
+    u128 axis[2];
+    __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
+    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_003D6490));
+    __asm__ volatile (
+        "vopmula.xyz ACC, vf10, vf11\n\t"
+        "vopmsub.xyz vf10, vf11, vf10\n\t"
+        "vmul.xyz vf2, vf10, vf10\n\t"
+        "vmulax.w ACC, vf0, vf2x\n\t"
+        "vmadday.w ACC, vf0, vf2y\n\t"
+        "vmaddz.w vf2, vf0, vf2z\n\t"
+        "vrsqrt Q, vf0w, vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz vf10, vf10, Q");
+    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_003D64A0));
+    __asm__ volatile (
+        "vmul.xyzw vf10, vf10, vf11\n\t"
+        "vmove.xyzw vf2, vf10\n\t"
+        "vmove.xyzw vf10, vf12\n\t"
+        "vmove.xyzw vf12, vf2\n\t"
+        "vmove.xyzw vf11, vf10\n\t"
+        "vadd.xyzw vf10, vf10, vf12");
+    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[0]) : "memory");
+    __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
+    __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
+    func_001884E8(particle, index, axis);
+    func_00188538(particle, index, (color & 0xFF000000) | 0x808080);
+}
+
 
 u32 func_0015B220(void) {
     return 0;
@@ -281,11 +383,59 @@ void func_0015B918(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B928);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B9E0);
+void func_0015B9E0(ParSystem *system, s32 index, void *delta) {
+    ParCell *cell = system->cells + index;
+    s32 count = system->vertexWordCount;
+    u8 *vertex = *(u8 **)cell;
+    s32 i;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(delta) : "memory");
+    if (count > 0) {
+        i = count;
+        do {
+            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex));
+            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex) : "memory");
+            i--;
+            vertex += 0x10;
+        } while (i != 0);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BA38);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BB00);
+void func_0015BB00(ParSystem *system, s32 index, void *delta) {
+    ParCell *cell = system->cells + index;
+    s32 count = cell->unk08 / 3;
+    u8 *vertex = *(u8 **)cell;
+    s32 i;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(delta));
+    if (count > 0) {
+        i = count;
+        do {
+            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex));
+            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex) : "memory");
+            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex + 0x10));
+            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex + 0x10) : "memory");
+            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex + 0x20));
+            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex + 0x20) : "memory");
+            i--;
+            vertex += 0x30;
+        } while (i != 0);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BB90);
 
@@ -389,14 +539,95 @@ void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D0C0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D710);
+typedef struct ParBlock {
+    s32 count;       /* 0x00 */
+    u32 color;       /* 0x04 */
+    s32 base;        /* 0x08 */
+    u8 *vertices;    /* 0x0C */
+    s32 object;      /* 0x10 */
+    s32 handle;      /* 0x14 */
+} ParBlock;
+
+extern s32 func_002DA730();
+extern void func_002DA420(s32, f32);
+
+ParBlock *func_0015D710(s32 count) {
+    s32 points = count * 3;
+    s32 colorBytes = points * 4;
+    s32 handle = func_002D03F8((colorBytes + points) * 4 + 0x18);
+    s32 base = sdfResourceRetainAddress(handle);
+    u8 *vertices = (u8 *)base + points * 16;
+    ParBlock *block = (ParBlock *)(vertices + colorBytes);
+    block->color = 0x80808080;
+    block->count = count;
+    block->vertices = vertices;
+    block->handle = handle;
+    block->base = base;
+    block->object = func_002DA730();
+    func_002DA420(block->object, 1.0f);
+    return block;
+}
+
 
 void func_0015D7B8(s32 arg0) {
     sdfQueueAssetRelease(*(u32 *)(arg0 + 0x10));
     func_002D0918(*(u32 *)(arg0 + 0x14));
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D7E8);
+typedef struct ParDrawState {
+    u16 width;      /* 0x00 */
+    u16 height;     /* 0x02 */
+    u16 flags;      /* 0x04 */
+    u8 pad06[2];
+    s32 unk08;      /* 0x08 */
+    u8 pad0C[4];
+    s32 unk10;      /* 0x10 */
+    u8 pad14[0xC];
+    s32 unk20;      /* 0x20 */
+    u8 pad24[8];
+} ParDrawState; /* 0x2C */
+
+typedef struct ParDrawCmd {
+    s32 count;      /* 0x00 */
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    void (*finish)(void *, s32); /* 0x10 */
+} ParDrawCmd;
+
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(s32);
+extern void sdfConsAppendClearPacket(s32, s32);
+extern void sdfAppendPacket(s32, s32);
+extern s32 func_0015FE20(ParDrawState *);
+
+void func_0015D7E8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
+    s32 list = sdfAllocPacketAligned(0x20);
+    ParDrawState state;
+    s32 remaining;
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
+    remaining = cmd->count * 3;
+    memset(&state, 0, sizeof(state));
+    state.width = 0x10;
+    state.height = 0x30;
+    state.flags = 0x4000;
+    state.unk10 = cmd->unk8;
+    state.unk20 = cmd->unkC;
+    state.unk08 = cmd->unk4;
+    while (remaining >= 0x30) {
+        remaining -= 0x30;
+        sdfAppendPacket(list, func_0015FE20(&state));
+    }
+    if (remaining > 0) {
+        u16 *counts = (u16 *)D_003D64C0;
+        counts[0] = remaining / 3;
+        counts[1] = remaining;
+        sdfAppendPacket(list, func_0015FE20(&state));
+    }
+    emitter->finish(emitter, list);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D910);
 

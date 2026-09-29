@@ -516,7 +516,32 @@ u64 func_002EB230(u64 arg0, s32 *out) {
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", sdfRelocatePackedResourceWords);
+void sdfRelocatePackedResourceWords(s32 *words, s32 base, u8 *table, s32 size) {
+    u8 *cursor = table;
+    s32 value;
+    s32 i;
+
+    while (cursor - table < size) {
+        value = *cursor++;
+        if ((value & 1) == 0) {
+            value >>= 1;
+        } else if ((value & 2) == 0) {
+            value = (value | *cursor++ << 8) >> 2;
+        } else if ((value & 4) == 0) {
+            value = (value | cursor[0] << 8 | cursor[1] << 16) >> 3;
+            cursor += 2;
+        } else {
+            value = (value >> 3) + 2;
+            for (i = 0; i < value; i++) {
+                words++;
+                *words += base;
+            }
+            continue;
+        }
+        words += value;
+        *words += base;
+    }
+}
 
 void func_002EB360(SdfStreamNode *node, s32 inInterrupt) {
     s32 interruptsEnabled = 0;
@@ -756,7 +781,32 @@ void sdfSoundInitFormattedAndAppendNode(SoundNode *node, SoundFormat *format, s3
     sdfSoundAppendNode(node);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC850);
+extern u32 D_003BDAA4;
+extern s32 D_003BDAB4;
+extern void sceIpuInit(void);
+extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
+extern void func_0030B638(s32);
+extern s32 func_002CF468(void *, void *, s32, s32);
+extern void _StartThread();
+extern u8 D_003FEB00[];
+extern s32 func_002EC3C0();
+extern s32 func_002EC3F0();
+extern void func_002EC2F0();
+void func_002EC850(void) {
+    s32 thread;
+
+    sceIpuInit();
+    *(volatile s32 *)0x10002000 = 0x90000000;
+    D_003BDA98 = 0;
+    D_003BDAA4 = 0;
+    D_003BDA9C = sdfAddHandler(1, 3, func_002EC3C0, -1, 0);
+    func_0030B638(3);
+    D_003BDAA0 = sdfAddHandler(1, 4, func_002EC3F0, -1, 0);
+    func_0030B638(4);
+    thread = func_002CF468(func_002EC2F0, D_003FEB00, 0x800, 0x46);
+    D_003BDAB4 = thread;
+    _StartThread(thread, 0);
+}
 
 s32 func_002EC900(void) {
     if (D_003BDA9C != 0) {

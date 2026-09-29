@@ -271,7 +271,7 @@ void func_001634A8(s32 arg0) {
 }
 
 typedef struct ParCell {
-    u8 pad00[4];
+    u128 *history;  /* 0x00 */
     void *vertices; /* 0x04 */
     s32 unk08;
     s32 unk0C;
@@ -282,7 +282,8 @@ typedef struct ParSystem {
     u8 pad00[4];
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
-    u8 pad0C[8];
+    s32 unk0C;
+    u8 pad10[4];
     ParCell *cells;      /* 0x14 */
 } ParSystem;
 

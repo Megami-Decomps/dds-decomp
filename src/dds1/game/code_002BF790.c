@@ -275,9 +275,37 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C10C0);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1228);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1380);
+extern s32 func_00100518(void);
+extern u8 D_00326ED0[];
+extern void func_002D4C80(const void *, void *, s32);
+extern void func_002D4CC8(const void *, void *, s32);
+extern void func_002D40E8(void *, void *);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1430);
+void func_002C1380(s32 surfaceIndex) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfInitPacketList((s32)list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D40E8(list, texture);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (surfaceIndex << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
+
+void func_002C1430(s32 surfaceIndex) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfInitPacketList((s32)list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D40E8(list, texture);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (surfaceIndex << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C14E0);
 

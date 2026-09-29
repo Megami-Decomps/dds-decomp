@@ -86,7 +86,10 @@ typedef struct EffTemplatePacketList {
     u8 padFC[0x58];
     s32 decayStep; /* 0x154 */
     f32 recordScale; /* 0x158 */
-    f32 tailValues[4]; /* 0x15C-0x168: variant-specific scaled values */
+    union {
+        f32 tailValues[4]; /* 0x15C-0x168: variant-specific scaled values */
+        u32 tailWords[4];
+    };
 } EffTemplatePacketList;
 
 typedef struct EffInstance {
@@ -130,7 +133,7 @@ void func_0015AD18(s32 arg0, s32 arg1);
 
 void func_0015B330(s32 arg0);
 
-void func_0015B5C0(s32 arg0);
+void func_0015B5C0(EffTemplatePacketList *effect);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -146,7 +149,7 @@ s32 func_003292A8(s32 size);
 
 EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
-void func_0015E1D0(s32 arg0);
+void func_0015E1D0(EffTemplatePacketList *effect);
 
 void effRetainResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].unk00, 0);
@@ -545,7 +548,27 @@ void effDestroyResources(EffResourceOwner *owner) {
     func_0015B318(owner->buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B5C0);
+void func_0015B5C0(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 i;
+    u32 next;
+    s32 tag;
+
+    tag = 0xf0000001;
+    i = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
+        do {
+            record->unk20 = tag;
+            next = i + 1;
+            record = record + 1;
+            if (next % effect->tailWords[0] == 0) {
+                tag = tag - effect->decayStep;
+            }
+            i = next;
+        } while (i < effect->packetCount);
+    }
+}
 
 void func_0015B630(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
@@ -667,7 +690,30 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015C3C8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CBC8);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CDF0);
+extern void func_0015CF70(EffTemplatePacketList *effect, u32 index);
+
+void func_0015CDF0(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 i;
+    u32 next;
+    s32 tag;
+
+    tag = 0;
+    i = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
+        do {
+            func_0015CF70(effect, i);
+            record->unk20 = tag;
+            next = i + 1;
+            record = record + 1;
+            if (next % effect->tailWords[0] == 0) {
+                tag = tag - effect->decayStep;
+            }
+            i = next;
+        } while (i < effect->packetCount);
+    }
+}
 
 void func_0015CE90(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
@@ -786,7 +832,27 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015DC60);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015DF68);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E1D0);
+void func_0015E1D0(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 i;
+    u32 next;
+    s32 tag;
+
+    tag = 0xf0000001;
+    i = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
+        do {
+            record->unk20 = tag;
+            next = i + 1;
+            record = record + 1;
+            if (next % effect->tailWords[1] == 0) {
+                tag = tag - effect->decayStep;
+            }
+            i = next;
+        } while (i < effect->packetCount);
+    }
+}
 
 void func_0015E240(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
@@ -932,7 +998,34 @@ void func_0015F620(u32 arg0) {
     func_00328E48(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F648);
+extern u8 D_003AA868[];
+extern f32 func_00341240(void *);
+
+void func_0015F648(effect)
+    EffParticle *effect;
+{
+    EffParticleRecord *particle = (EffParticleRecord *)effect->buffer->records;
+    f32 jitter;
+    u32 color;
+
+    color = effect->unk4C | (effect->unk58 << 24);
+    particle->x = effect->x;
+    particle->unk20 = -1;
+    particle->y = effect->y;
+    particle->unk24 = color;
+    particle->z = effect->z;
+    particle->unk28 = 1.0f;
+    particle->unk2C = 0;
+    effect->unk8C = effect->unk10;
+    jitter = effect->unk94;
+    particle->unk28 = effect->unk10 * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = effect->unk98;
+    if (jitter != 0) {
+        particle->unk2C = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+    } else {
+        particle->unk2C = 0;
+    }
+}
 
 void func_0015F748(EffParticle *effect) {
     EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
@@ -1069,4 +1162,62 @@ void func_001609C0(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00160A00);
+s32 func_00160A00(s32 source) {
+    s32 copy = (s32)func_00328D68(0x190);
+    s32 tailLen = 0x40;
+    s32 count;
+    s32 perRecord;
+    s32 listBytes;
+    s32 *node;
+    s32 *addr;
+    s32 step;
+    s32 base;
+    s32 i;
+
+    memset((void *)copy, 0, 0x190);
+    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
+    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    func_0015B330(copy);
+    perRecord = 0;
+    if (*(u16 *)(copy + 0x30) != 0) {
+        count = *(s32 *)(copy + 0x20);
+        switch (*(u16 *)(copy + 0x30)) {
+        case 1:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        case 2:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        case 3:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        case 4:
+            perRecord = *(u16 *)(copy + 0x34);
+            break;
+        }
+        listBytes = count * 12;
+        *(s32 *)(copy + 0x170) = perRecord;
+        *(s32 *)(copy + 0x174) = func_003292A8(listBytes + perRecord * count * 16);
+        addr = (s32 *)sdfResourceRetainAddress(*(s32 *)(copy + 0x174));
+        i = 0;
+        base = (s32)addr;
+        *(s32 *)(copy + 0x16C) = base;
+        base = base + listBytes;
+        if (count > 0) {
+            step = perRecord * 16;
+            node = addr;
+            do {
+                i++;
+                node[2] = base;
+                node[0] = 0;
+                node[1] = 0;
+                node += 3;
+                base += step;
+            } while (i < count);
+        }
+    } else {
+        *(s32 *)(copy + 0x174) = 0;
+    }
+    func_00160978((EffTemplatePacketList *)copy);
+    return copy;
+}

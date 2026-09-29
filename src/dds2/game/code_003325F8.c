@@ -4,11 +4,17 @@
 
 extern u32 D_00438A3C;
 
-typedef struct SdfSubParam {
-    u64 unk0; /* 0x0 */
-    u64 unk8; /* 0x8 */
-    u32 unk10; /* 0x10 */
-    u32 unk14; /* 0x14 */
+typedef union SdfSubParam {
+    struct {
+        u64 unk0;
+        u64 unk8;
+        u32 unk10;
+        u32 unk14;
+    } packed;
+    struct {
+        f32 values[5];
+        u32 unk14;
+    } scalar;
 } SdfSubParam;
 
 typedef struct SdfTextParam {
@@ -62,7 +68,8 @@ extern u8 D_00439178;
 
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
 
-void func_00333140(void);
+typedef struct SdfResourceList SdfResourceList;
+void func_00333140(SdfResourceList *);
 
 extern SdfSubParam *sdfSubParamCreate(void);
 
@@ -106,9 +113,45 @@ void func_0032BBB0(u32);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332860);
+extern void sdfResetPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void func_0032E4B8(void *);
+extern void func_0032E5C8(void *);
+extern void func_0032E6D8(void *);
+extern void func_0032E7E8(void *);
+void func_00332860(u8 *ctx) {
+    u8 *packet = ctx;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332920);
+    func_0032E4B8(ctx + 0x20);
+    func_0032E5C8(ctx + 0x80);
+    func_0032E6D8(ctx + 0xE0);
+    func_0032E7E8(ctx + 0x140);
+    for (i = 0; i != 4; i++) {
+        *(u32 *)(packet + 0x28) = 0x11000000;
+        sdfResetPacketList(packet);
+        sdfAppendPacket(packet, packet + 0x20);
+        packet += 0x60;
+    }
+    sdfResetPacketList(ctx + 0x180);
+    *(u64 *)(ctx + 0x1A0) = 0;
+    *(u64 *)(ctx + 0x1A8) = 0x13000000;
+    sdfAppendPacket(ctx + 0x180, ctx + 0x1A0);
+}
+
+typedef struct SdfPacketOwner {
+    u8 pad00[0x10];
+    void (*sync)(struct SdfPacketOwner *, void *);
+    void (*draw)(struct SdfPacketOwner *, s32, void *);
+} SdfPacketOwner;
+void func_00332920(SdfPacketOwner **owners, u8 *packets) {
+    s32 i;
+
+    for (i = 0; i != 4; i++) {
+        owners[i]->draw(owners[i], 1, packets + i * 0x60);
+    }
+    owners[3]->sync(owners[3], packets + 0x180);
+}
 
 void *sdfChunkFindById(SdfChunk *chunk, s32 id) {
     u32 currentId;
@@ -248,8 +291,8 @@ void func_00332E50(u32 arg0) {
 }
 
 void *sdfDevCreateBufferedRequest(s32, s32, s32);
-void func_00332E58(u32 arg0) {
-    sdfDevCreateBufferedRequest(arg0, 4, 4);
+SdfResourceList *func_00332E58(s32 capacity) {
+    return sdfDevCreateBufferedRequest(capacity, 4, 4);
 }
 
 void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
@@ -282,7 +325,23 @@ void sdfReduceResourceListCount(s32 arg0, s32 arg1, s32 arg2) {
     func_003405D8();
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332FC8);
+extern u32 func_0032B6B0(u32);
+SdfResourceList *func_00332FC8(SdfResourceList *src) {
+    s32 count;
+    SdfResourceList *dst;
+    s32 i;
+
+    if (src == NULL) {
+        return NULL;
+    }
+    count = src->count;
+    dst = func_00332E58(count);
+    for (i = 0; i < count; i++) {
+        dst->items[i] = func_0032B6B0(src->items[i]);
+    }
+    dst->count = count;
+    return dst;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333060);
 
@@ -295,7 +354,14 @@ SdfResourceList *sdfCreateResourceList(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 8);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333140);
+void func_00333140(SdfResourceList *list) {
+    s32 i;
+
+    for (i = 0; i < list->count; i++) {
+        sdfAssetRelease((SdfAsset *)list->items[i]);
+    }
+    sdfDestroyDevRequest(list);
+}
 
 void sdfReleaseQueuedResource(void *resource, s32 retained) {
     if (resource == NULL) {
@@ -348,24 +414,40 @@ SdfSubParam *sdfSubParamCreate(void) {
     SdfSubParam *temp;
 
     temp = func_00328D68(0x18);
-    temp->unk8 = (((u64)0x3F800000 << 16 | 0x3F80) << 16);
-    temp->unk0 = 0;
-    temp->unk10 = 0;
+    temp->packed.unk8 = (((u64)0x3F800000 << 16 | 0x3F80) << 16);
+    temp->packed.unk0 = 0;
+    temp->packed.unk10 = 0;
     return temp;
 }
 
-void sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
-    SdfSubParam *subParam;
-
-    if (param->primarySubParam == NULL) {
-        subParam = sdfSubParamCreate();
-        param->primarySubParam = subParam;
+SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
+    SdfSubParam *sub = param->primarySubParam;
+    if (sub == NULL) {
+        sub = sdfSubParamCreate();
+        param->primarySubParam = sub;
     }
+    return sub;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333378);
+void func_00333378(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
+    f32 *values = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
+    values[0] = a;
+    values[1] = b;
+    values[2] = c;
+    values[3] = d;
+    values[4] = e;
+    param->dirtyFlags |= 0xc;
+}
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003333F8);
+void func_003333F8(SdfTextParam *param, const f32 *input) {
+    f32 *values = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
+    values[0] = input[0];
+    values[1] = input[1];
+    values[2] = input[2];
+    values[3] = input[3];
+    values[4] = input[4];
+    param->dirtyFlags |= 0xc;
+}
 
 void func_00333460(SdfTextParam *param, u32 value) {
     *(u32 *)&param->unk18 = value;
@@ -382,18 +464,34 @@ void func_00333490(SdfTextParam *param, u32 value) {
     param->dirtyFlags = param->dirtyFlags | 0x30;
 }
 
-void sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
-    SdfSubParam *subParam;
-
-    if (param->secondarySubParam == NULL) {
-        subParam = sdfSubParamCreate();
-        param->secondarySubParam = subParam;
+SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
+    SdfSubParam *sub = param->secondarySubParam;
+    if (sub == NULL) {
+        sub = sdfSubParamCreate();
+        param->secondarySubParam = sub;
     }
+    return sub;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003334E0);
+void func_003334E0(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
+    f32 *values = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
+    values[0] = a;
+    values[1] = b;
+    values[2] = c;
+    values[3] = d;
+    values[4] = e;
+    param->dirtyFlags |= 0x30;
+}
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333560);
+void func_00333560(SdfTextParam *param, const f32 *input) {
+    f32 *values = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
+    values[0] = input[0];
+    values[1] = input[1];
+    values[2] = input[2];
+    values[3] = input[3];
+    values[4] = input[4];
+    param->dirtyFlags |= 0x30;
+}
 
 void func_003335C8(SdfTextParam *param, f32 first, f32 second) {
     param->unk40 = first;
@@ -401,7 +499,32 @@ void func_003335C8(SdfTextParam *param, f32 first, f32 second) {
     param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003335E0);
+extern void *func_00328E18(s32);
+SdfAsset *func_003335E0(void) {
+    SdfAsset *asset;
+    u32 *entry;
+    s32 i;
+
+    D_00438A38++;
+    asset = func_00328E18(0x48);
+    asset->pad00[6] = 0xFF;
+    for (i = 0; i != 2; i++) {
+        entry = func_00328D68(0xA0);
+        asset->entries[i] = entry;
+        entry[0] = 0x6E05C000;
+        entry[0x18 / 4] = 0x6005C005;
+        entry[0x30 / 4] = 0;
+        entry[0x34 / 4] = 0x640CC00A;
+        entry[0x98 / 4] = 0x400000C;
+        entry[0x9C / 4] = 0x14000000;
+    }
+    asset->unk40 = 0;
+    asset->unk44 = 0;
+    asset->unk10 = 0x80808080;
+    asset->unk14 = 0x80808080;
+    asset->unk18 = 0x80808080;
+    return asset;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003336E0);
 
@@ -461,7 +584,23 @@ void func_00333B18(s32 arg0, s32 arg1) {
     func_00333A30(arg1 + 0x68, *(u32 *)(arg0 + 0x38));
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333B38);
+extern u16 D_0040B348[];
+void func_00333B38(SdfAsset *asset, void *entryArg) {
+    u8 *entry = entryArg;
+    SdfTex *tex = *(SdfTex **)((u8 *)asset + 0x30);
+    u32 mode;
+
+    *(u32 *)(entry + 0xC) = asset->unk18;
+    mode = *(u32 *)((u8 *)asset + 0x34);
+    *(u32 *)(entry + 0x24) = mode;
+    *(u32 *)(entry + 0x20) = D_0040B348[mode];
+    if (tex != NULL) {
+        *(u64 *)(entry + 0x50) = func_0032B328(tex);
+        *(u64 *)(entry + 0x58) = func_0032B318(tex);
+        *(u64 *)(entry + 0x60) = func_0032B338(tex);
+    }
+    func_00333A30(entry + 0x80, asset->fourth);
+}
 
 void func_00333BC8(SdfTextParam *arg0, SdfTextParam *arg1) {
     arg1->unk28 = arg0->unk40;
@@ -486,7 +625,25 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
     asset->pad00[6] = flags & (0x55 << (index ^ 1));
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333CB0);
+void func_00333CB0(SdfAsset *asset, s32 index) {
+    u8 flags = asset->pad00[6];
+    void *entry = asset->entries[index];
+    if ((flags >> index) & 1) {
+        sdfAssetCopyTextureState(asset, entry);
+    } else if (D_00438A3C != 0) {
+        sdfAssetCopyTextureState(asset, entry);
+    }
+    if (flags & (4 << index)) {
+        func_00333B18(asset, entry);
+    }
+    if (flags & (16 << index)) {
+        func_00333B38(asset, entry);
+    }
+    if (flags & (64 << index)) {
+        func_00333BC8(asset, entry);
+    }
+    asset->pad00[6] = flags & (0x55 << (index ^ 1));
+}
 
 SdfAsset *func_003335E0(void);
 u8 *func_003336E0(SdfAsset *, SdfTextParam *, u8 *);
@@ -508,11 +665,50 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00333E38);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333E98);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333EF8);
+typedef struct SdfSubParamWords {
+    u32 word[6];
+} SdfSubParamWords;
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00334008);
+void func_00333EF8(SdfAsset *dst, SdfAsset *src) {
+    SdfSubParamWords *sub;
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00334078);
+    dst->pad00[6] = 0xFF;
+    dst->unk10 = src->unk10;
+    dst->unk14 = src->unk14;
+    dst->unk1C = src->unk1C;
+    dst->unk18 = src->unk18;
+    *(u16 *)&dst->pad00[4] = *(u16 *)&src->pad00[4];
+    dst->unk2C = src->unk2C;
+    dst->unk20 = src->unk20;
+    dst->unk28 = src->unk28;
+    sub = src->third;
+    if (sub != NULL) {
+        *(SdfSubParamWords *)sdfEnsurePrimaryTextSubParam((SdfTextParam *)dst) = *sub;
+    }
+    sub = src->fourth;
+    if (sub != NULL) {
+        *(SdfSubParamWords *)sdfEnsureSecondaryTextSubParam((SdfTextParam *)dst) = *sub;
+    }
+    dst->unk40 = src->unk40;
+    dst->unk44 = src->unk44;
+}
+
+void func_00333EF8(SdfAsset *, SdfAsset *);
+void func_00334008(SdfResourceList *dst, SdfResourceList *src) {
+    s32 count = dst->count;
+    u32 *srcItems = src->items;
+    u32 *dstItems = dst->items;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        func_00333EF8((SdfAsset *)dstItems[i], (SdfAsset *)srcItems[i]);
+    }
+}
+
+extern s32 (*D_0040B358[])(u32, u32);
+s32 func_00334078(u32 arg0, u32 arg1) {
+    D_0040B358[arg1 >> 16](arg0, arg1);
+}
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A38);
 

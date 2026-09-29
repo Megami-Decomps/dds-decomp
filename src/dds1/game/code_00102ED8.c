@@ -96,7 +96,45 @@ extern void func_002E1718(void *arg0);
 
 extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00102ED8);
+typedef struct KwlnDebugWork {
+    s32 unk0;
+    s32 unk4;
+    s8 unk8;
+    s8 unk9;
+    s8 unkA;
+    u8 padB;
+    s8 slotA[8];
+    s8 slotB[8];
+    s32 unk1C;
+    s8 unk20;
+} KwlnDebugWork;
+
+extern char D_003BA848[];
+extern void *kwlnTaskGetTaskByName(const char *);
+extern void func_00102CD8(void);
+extern void func_00102E58(void);
+extern void *func_002CFEB8(s32);
+
+void func_00102ED8(void) {
+    KwlnDebugWork *work;
+    s32 i;
+
+    if (kwlnTaskGetTaskByName(D_003BA848) == NULL) {
+        work = func_002CFEB8(0x24);
+        work->unk0 = 0;
+        work->unk4 = 0;
+        work->unk8 = -1;
+        work->unk9 = -1;
+        work->unkA = 0;
+        for (i = 0; i < 8; i++) {
+            work->slotA[i] = -1;
+            work->slotB[i] = 0;
+        }
+        work->unk1C = 0;
+        work->unk20 = 0;
+        kwlnTaskCreate(D_003BA848, 2, 0, 1, func_00102CD8, func_00102E58, work);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00102F98);
 
