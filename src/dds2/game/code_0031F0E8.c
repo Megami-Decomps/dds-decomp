@@ -16,6 +16,8 @@ extern void func_00320C88(u32);
 extern u32 func_0035A828(s32 bytes);
 extern void func_003211F0(void);
 
+#define DDS_NAMED_RECORD_NAME_BYTES 0x40
+
 typedef struct DdsNamedRecord {
     const char *name; /* 0x00: up to 0x40 bytes */
     u32 value;        /* 0x04: packed offset or resolved address */
@@ -97,18 +99,19 @@ INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
 
 void func_0031F4D8(u32 context, const char *name) {
     u32 record = func_0031F168();
-    strncpy((char *)*(u32 *)record, name, 0x40);
+    strncpy((char *)*(u32 *)record, name, DDS_NAMED_RECORD_NAME_BYTES);
     func_00320CE0(*(u32 *)(context + 0xc), 0, record);
     *(u32 *)(record + 4) = *(u32 *)context;
     dds3WritePackedValue(context, -1, 4);
 }
 
 
+/* Walk the named-record list; names occupy at most 0x40 bytes. */
 u32 dds3FindNamedRecord(u32 context, const char *name) {
     DdsNamedNode *node = ((DdsNamedList *)context)->first;
     while (node) {
         DdsNamedRecord *record = node->record;
-        if (strncmp(record->name, name, 0x40) == 0) {
+        if (strncmp(record->name, name, DDS_NAMED_RECORD_NAME_BYTES) == 0) {
             return (u32)record;
         }
         node = node->next;
@@ -116,6 +119,7 @@ u32 dds3FindNamedRecord(u32 context, const char *name) {
     return 0;
 }
 
+/* Split a packed segment:offset reference and resolve it to a live address. */
 u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
@@ -127,6 +131,7 @@ u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
 }
 
+/* Replace recorded pointer slots with their matching named addresses. */
 s32 dds3ApplyNamedRelocations(u32 *object) {
     DdsNamedNode *node = ((DdsNamedList *)object[3])->first;
     if (node != NULL) {
@@ -196,54 +201,54 @@ u32 func_00320380(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320388);
 
-u64 func_00320510(u64 arg0, u64 arg1) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_00320510(u64 source, u64 request) {
+    u64 buffer;
+    u64 result;
+    u32 metadata[4];
 
-    temp_v0 = func_00320AE8(arg0, arg1, temp_v2);
-    temp_v1 = func_00325790(temp_v0, temp_v2[0]);
-    func_0035A880(temp_v0);
-    return temp_v1;
+    buffer = func_00320AE8(source, request, metadata);
+    result = func_00325790(buffer, metadata[0]);
+    func_0035A880(buffer);
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320560);
 
-u64 func_003206E8(u64 arg0, u64 arg1) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_003206E8(u64 source, u64 request) {
+    u64 buffer;
+    u64 result;
+    u32 metadata[4];
 
-    temp_v0 = func_00320AE8(arg0, arg1, temp_v2);
-    temp_v1 = func_00325790(temp_v0, temp_v2[0]);
-    func_0035A880(temp_v0);
-    return temp_v1;
+    buffer = func_00320AE8(source, request, metadata);
+    result = func_00325790(buffer, metadata[0]);
+    func_0035A880(buffer);
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320738);
 
-u64 func_003208C0(u64 arg0, u64 arg1) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_003208C0(u64 source, u64 request) {
+    u64 buffer;
+    u64 result;
+    u32 metadata[4];
 
-    temp_v0 = func_00320AE8(arg0, arg1, temp_v2);
-    temp_v1 = func_00325AB8(temp_v0, temp_v2[0]);
-    func_0035A880(temp_v0);
-    return temp_v1;
+    buffer = func_00320AE8(source, request, metadata);
+    result = func_00325AB8(buffer, metadata[0]);
+    func_0035A880(buffer);
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320910);
 
-u64 func_00320A98(u64 arg0, u64 arg1) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_00320A98(u64 source, u64 request) {
+    u64 buffer;
+    u64 result;
+    u32 metadata[4];
 
-    temp_v0 = func_00320AE8(arg0, arg1, temp_v2);
-    temp_v1 = func_00325BB0(temp_v0, temp_v2[0]);
-    func_0035A880(temp_v0);
-    return temp_v1;
+    buffer = func_00320AE8(source, request, metadata);
+    result = func_00325BB0(buffer, metadata[0]);
+    func_0035A880(buffer);
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);

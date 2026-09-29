@@ -25,8 +25,11 @@ typedef struct MenuProgressNode {
     u32 flags;
     u8 pad4C[0xC];
     struct MenuProgressNode *next;
-    u8 pad5C[8];
-    u32 requiredAmount;
+    u8 pad5C[4];
+    u32 itemIndex; /* 0x60: party entry index */
+    u32 requiredAmount; /* 0x64 */
+    u8 pad68[8];
+    s32 panel; /* 0x70: allocated panel resource */
 } MenuProgressNode;
 
 typedef struct {
@@ -116,12 +119,13 @@ void func_00248C38(s32 arg0) {
     }
 }
 
+/* Rebuild each node's panel from its corresponding party entry. */
 void mnuUpdateGroupResources(u8 *scene) {
-    u8 *node = *(u8 **)(*(u8 **)(scene + 0x74) + 0x10);
+    MenuProgressNode *node = *(MenuProgressNode **)(*(u8 **)(scene + 0x74) + 0x10);
 
     while (node != NULL) {
-        *(s32 *)(node + 0x70) = func_00248BA0(D_003BAA00 + *(s32 *)(node + 0x60) * 420 + 0xA60, (s32)scene);
-        node = *(u8 **)(node + 0x58);
+        node->panel = func_00248BA0(D_003BAA00 + node->itemIndex * 420 + 0xA60, (s32)scene);
+        node = node->next;
     }
 }
 

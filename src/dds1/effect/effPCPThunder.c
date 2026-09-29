@@ -33,11 +33,13 @@ typedef struct {
     u32 unk60;      /* 0x60 handle released by func_002D0918 */
 } EffPCPThunderWork;
 
-/* 12-byte randomized fragment (see effThunderRandomizeFrag). */
+#define EFF_THUNDER_FRAGMENT_GREY 0x80808080
+
+/* Two independently sampled ranges and a constant greyscale color. */
 typedef struct {
-    u32 unk00;    /* 0x00 random value modulo work param */
-    u32 unk04;    /* 0x04 random value modulo work param, plus 1 */
-    u32 color08;  /* 0x08 always grey 0x80808080 */
+    u32 firstRandom;  /* 0x00: modulo fragmentFirstRange */
+    u32 secondRandom; /* 0x04: modulo fragmentSecondRange, plus one */
+    u32 color08;      /* 0x08: 0x80808080 */
 } EffThunderFrag; /* 0x0C */
 
 /* 20-byte thunder element (see effThunderRandomizeCell/func_00167070): randomized on
@@ -237,12 +239,13 @@ void func_00165690(EffPCPThunderWorkB *work) {
     func_0015CC58(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
+/* Sample per-fragment timing values; the color is a fixed neutral grey. */
 void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
-    frag->unk00 = effMiscRand(&D_0034DF38) % work->fragmentFirstRange;
-    frag->unk04 = effMiscRand(&D_0034DF38) % work->fragmentSecondRange + 1;
-    frag->color08 = 0x80808080;
+    frag->firstRandom = effMiscRand(&D_0034DF38) % work->fragmentFirstRange;
+    frag->secondRandom = effMiscRand(&D_0034DF38) % work->fragmentSecondRange + 1;
+    frag->color08 = EFF_THUNDER_FRAGMENT_GREY;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00165758);
@@ -274,9 +277,9 @@ void func_00166130(EffPCPThunderWorkB *work, u32 value) {
 void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
-    frag->unk00 = effMiscRand(&D_0034DF38) % work->fragmentFirstRange;
-    frag->unk04 = effMiscRand(&D_0034DF38) % work->fragmentSecondRange + 1;
-    frag->color08 = 0x80808080;
+    frag->firstRandom = effMiscRand(&D_0034DF38) % work->fragmentFirstRange;
+    frag->secondRandom = effMiscRand(&D_0034DF38) % work->fragmentSecondRange + 1;
+    frag->color08 = EFF_THUNDER_FRAGMENT_GREY;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001661D8);
@@ -298,6 +301,7 @@ void func_00166B30(EffPCPThunderWorkB *work, u32 value) {
     work->unk4C = value;
 }
 
+/* Spread all three direction components over [-1, 1] before sampling lifetimes. */
 void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
     EffThunderCell *cell = work->cells + index;
     f32 v;

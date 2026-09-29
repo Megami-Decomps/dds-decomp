@@ -86,6 +86,7 @@ void func_00274EE0(s32 arg0) {
     func_0027C430(*(u32 *)(*(s32 *)(arg0 + 0x90c) + 8));
 }
 
+/* Snapshot five party entries; at most three active slots are displayed. */
 void menuCopyPartyEntries(context)
     s32 context;
 {
@@ -143,14 +144,14 @@ void func_00275328(context)
 
 s32 mnuCountActiveSlots(void) {
     s32 i;
-    s32 temp_v0 = 0;
-    u16 *temp_v1 = (u16 *)(D_003BAA00 + 0xa60);
+    s32 active = 0;
+    u16 *slotFlags = (u16 *)(D_003BAA00 + 0xa60);
 
     for (i = 4; i >= 0; i--) {
-        temp_v0 += *temp_v1 & 1;
-        temp_v1 += 210;
+        active += *slotFlags & 1;
+        slotFlags += 210;
     }
-    return (temp_v0 < 4) ? temp_v0 : 3;
+    return (active < 4) ? active : 3;
 }
 
 extern void menuCopyPartyEntries();
@@ -174,10 +175,10 @@ void func_002754E0(s32 context) {
     }
 }
 
-void func_002755A0(s32 arg0) {
-    func_0027F0D8(arg0 + 0x15c);
-    initPartyPanelSlots(arg0 + 0x7ec);
-    menuUpdateHandleStates(arg0 + 0x15c);
+void func_002755A0(s32 context) {
+    func_0027F0D8(context + 0x15c);
+    initPartyPanelSlots(context + 0x7ec);
+    menuUpdateHandleStates(context + 0x15c);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
@@ -257,10 +258,10 @@ s64 func_00276250(s32 callback) {
 }
 
 u8 func_00276288(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_002877A8();
-    return temp_v0 != 1;
+    result = func_002877A8();
+    return result != 1;
 }
 
 void func_002762B0(u32 arg0) {

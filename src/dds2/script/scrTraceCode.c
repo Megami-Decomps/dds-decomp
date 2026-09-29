@@ -33,6 +33,7 @@ u32 scrPushStringLiteral(ScrData *scr) {
     return 1;
 }
 
+/* Copy the VM's reserved return slot back onto its active operand stack. */
 u32 scrPushReturnValue(ScrData *scr) {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
     scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
@@ -70,13 +71,14 @@ u32 scrJumpProcedure(ScrData *scr) {
     return 1;
 }
 
-u32 scrCallProcedure(u32 arg0) {
-    s32 temp_v0;
+/* Save the return PC before transferring control to a procedure. */
+u32 scrCallProcedure(u32 scriptAddress) {
+    s32 address;
     ScrData *scr;
 
-    temp_v0 = (s32)arg0;
-    scr = (ScrData *)temp_v0;
-    scrPushTypeFourValue(arg0, scr->pc);
+    address = (s32)scriptAddress;
+    scr = (ScrData *)address;
+    scrPushTypeFourValue(scriptAddress, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
@@ -177,34 +179,35 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
  * dereferencing global variable references. */
 s32 func_0010D650(s32 idx) {
     ScrData *scr = D_00438E8C;
-    s32 i = scr->sp - idx - 1;
+    s32 stackIndex = scr->sp - idx - 1;
 
-    switch (scr->stackTypes[i]) {
+    switch (scr->stackTypes[stackIndex]) {
     case 0:
     case 4:
-        return scr->stackValues[i].i;
+        return scr->stackValues[stackIndex].i;
     case 1:
-        return scr->stackValues[i].f;
+        return scr->stackValues[stackIndex].f;
     case 2:
-        return D_00435DD0->ints[scr->stackValues[i].i];
+        return D_00435DD0->ints[scr->stackValues[stackIndex].i];
     case 3:
-        return D_00435DD0->floats[scr->stackValues[i].i];
+        return D_00435DD0->floats[scr->stackValues[stackIndex].i];
     }
     return 0;
 }
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfWaitReadArgFloat);
 
+/* Return a string parameter only when its VM stack tag is STRING. */
 char *func_0010D7D0(s32 paramIdx)
 {
     ScrData *scr = D_00438E8C;
-    s32 paramSP = scr->sp - paramIdx - 1;
-    s32 type = (s8)scr->stackTypes[paramSP];
+    s32 stackIndex = scr->sp - paramIdx - 1;
+    s32 type = (s8)scr->stackTypes[stackIndex];
 
     if (type >= 0) {
         if (type >= SCR_STACK_TYPE_STRING) {
             if (type == SCR_STACK_TYPE_STRING) {
-                return scr->stackValues[paramSP].s;
+                return scr->stackValues[stackIndex].s;
             }
         }
     }
