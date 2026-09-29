@@ -4,8 +4,8 @@
 
 [Build Status]: https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml/badge.svg
 [actions]: https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml
-[dds1]: https://decomp.dev/Megami-Decomps/dds-decomp/dds1.svg?mode=shield&label=dds1
-[dds2]: https://decomp.dev/Megami-Decomps/dds-decomp/dds2.svg?mode=shield&label=dds2
+[dds1]: https://decomp.dev/Raikaru/dds-decomp/dds1.svg?mode=shield&label=dds1
+[dds2]: https://decomp.dev/Raikaru/dds-decomp/dds2.svg?mode=shield&label=dds2
 [progress]: https://decomp.dev/Megami-Decomps/dds-decomp
 
 A work-in-progress **matching decompilation** of *Shin Megami Tensei: Digital
