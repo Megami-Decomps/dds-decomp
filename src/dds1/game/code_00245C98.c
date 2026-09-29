@@ -154,18 +154,18 @@ s32 evtSelectStateAction(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246220);
 
-void evtStageDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtStageDispatchStart(s32 callback) {
+    s32 context = func_00101A70();
 
-    func_00260AB0(temp_v0);
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00260AB0(context);
+    func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncB(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtSetupDispatchSyncB(s32 callback) {
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 void evtInstallStateTableC(EvtDispatchState *state) {
@@ -204,18 +204,18 @@ s32 evtSelectStateActionB(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002465F8);
 
-void evtStageDispatchStartB(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtStageDispatchStartB(s32 callback) {
+    s32 context = func_00101A70();
 
-    func_00260AB0(temp_v0);
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00260AB0(context);
+    func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncC(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtSetupDispatchSyncC(s32 callback) {
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 void evtInstallStateTableD(EvtDispatchState *state) {
@@ -254,18 +254,18 @@ s32 evtSelectStateActionC(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002469F0);
 
-void evtStageDispatchStartC(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtStageDispatchStartC(s32 callback) {
+    s32 context = func_00101A70();
 
-    func_00260AB0(temp_v0);
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00260AB0(context);
+    func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncD(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtSetupDispatchSyncD(s32 callback) {
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 u32 evtResetStateProgressTimer(void) {
@@ -297,18 +297,18 @@ s64 evtQueryStateProgress(u64 argument) {
     return result;
 }
 
-void evtFetchDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtFetchDispatchStart(s32 callback) {
+    s32 context = func_00101A70();
 
-    func_0025E108(temp_v0, ((EvtDispatchState *)temp_v0)->progressTicks);
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_0025E108(context, ((EvtDispatchState *)context)->progressTicks);
+    func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncE(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtSetupDispatchSyncE(s32 callback) {
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 s32 func_00246E00(void) {

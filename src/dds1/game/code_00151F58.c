@@ -89,9 +89,15 @@ void func_001565E0(EffTemplatePacketList *effect);
 
 void func_00155380(EffTemplatePacketList *effect, u32 index);
 
+typedef struct EffResourceOwner {
+    u8 pad00[0x30];
+    s32 *resource; /* 0x30: reference-counted effect resource */
+} EffResourceOwner;
+
+/* Attach the indexed effect resource to a new billboard and increment its reference count. */
 void effRetainResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].unk00, 0);
-    s32 *resource = *(s32 **)(D_003D6438[index] + 0x30);
+    s32 *resource = ((EffResourceOwner *)D_003D6438[index])->resource;
     s32 references = resource[2];
 
     effect[12] = (s32)resource;
@@ -102,18 +108,20 @@ u32 func_00151FC0(void) {
     return 0xf;
 }
 
-s32 func_00151FC8(s32 arg0) {
-    return *(s32 *)(*(s32 *)(D_003D6438[arg0] + 0x30));
+s32 func_00151FC8(s32 index) {
+    return *(s32 *)((EffResourceOwner *)D_003D6438[index])->resource;
 }
 
 void effCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
+/* Adjust the scalar used by an existing billboard instance. */
 void func_00151FF8(BillObj *effect, float scale) {
     effect->unk20 = scale;
 }
 
+/* Set the two billboard coordinates stored at +0x10 and +0x14. */
 void func_00152000(BillObj *effect, float x, float y) {
     effect->unk10 = x;
     effect->unk14 = y;
@@ -257,9 +265,9 @@ s32 billGetKindOneEntry(BillObj *effect) {
     return 0;
 }
 
-s32 func_00152260(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x30) + 4) + 4);
+s32 func_00152260(s32 effectAddress) {
+    if (*(u16 *)(effectAddress + 0x2c) == 1) {
+        return *(s32 *)(*(s32 *)(*(s32 *)(effectAddress + 0x30) + 4) + 4);
     }
     return 0;
 }

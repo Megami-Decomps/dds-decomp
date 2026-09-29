@@ -70,7 +70,13 @@ extern s32 func_00222450();
 extern s32 func_00224598();
 
 typedef struct ActionUnit {
-    u8 pad0[0x110];
+    u8 pad0[0xF8];
+    s16 motionStateA; /* 0xF8: cleared before restoring the unit's motion */
+    s16 motionStateB; /* 0xFA: exact meaning not established */
+    s32 savedMotionIndex; /* 0xFC: passed as the motion table index */
+    s32 savedMotionB; /* 0x100: passed to the motion setter */
+    f32 savedMotionScale; /* 0x104 */
+    u8 pad108[8];
     u32 flags;
     u32 stateFlags;
     u8 pad118[8];
@@ -111,6 +117,7 @@ typedef struct BattleActionFlagState {
 
 extern void func_001E2758(ActionUnit *);
 extern void func_001E22D8(ActionUnit *, s32, s32, f32);
+/* When the action-state byte changes, restore the marked unit's saved motion. */
 void func_0021EE10(void) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     u8 *state = scene->state;
@@ -132,9 +139,9 @@ void func_0021EE10(void) {
             }
             if (unit != 0) {
                 func_001E2758(unit);
-                *(s16 *)((u8 *)unit + 0xF8) = 0;
-                *(s16 *)((u8 *)unit + 0xFA) = 0;
-                func_001E22D8(unit, *(s32 *)((u8 *)unit + 0xFC), *(s32 *)((u8 *)unit + 0x100), *(f32 *)((u8 *)unit + 0x104));
+                unit->motionStateA = 0;
+                unit->motionStateB = 0;
+                func_001E22D8(unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
             }
         }
     }
@@ -342,6 +349,7 @@ u32 func_0021F808(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F848);
 
+/* Same transition for the alternate marked-unit motion (mode 0x11B). */
 void func_00220368(void) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     u8 *state = scene->state;
@@ -363,9 +371,9 @@ void func_00220368(void) {
             }
             if (unit != 0) {
                 func_001E2758(unit);
-                *(s16 *)((u8 *)unit + 0xF8) = 0;
-                *(s16 *)((u8 *)unit + 0xFA) = 0;
-                func_001E22D8(unit, *(s32 *)((u8 *)unit + 0xFC), *(s32 *)((u8 *)unit + 0x100), *(f32 *)((u8 *)unit + 0x104));
+                unit->motionStateA = 0;
+                unit->motionStateB = 0;
+                func_001E22D8(unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
             }
         }
     }

@@ -146,67 +146,71 @@ extern f32 func_00240640(s32);
 
 extern void func_00197F40(void *, f32);
 
-void func_0023D658(EvtUnit *work, s128 *vec, s32 count) {
-    s128 *dst = &work->vector;
+/* Start a bounded vector transition; detach any previous secondary-world source. */
+void func_0023D658(EvtUnit *eventUnit, s128 *sourceVector, s32 stepCount) {
+    s128 *destination = &eventUnit->vector;
 
-    if ((u32)(count - 1) < 100) {
-        work->sourceUnit = NULL;
-        work->mode = 3;
-        PCP_COPY_VECTOR(dst, vec);
-        work->unkB4 = count;
-        work->unkB6 = 0;
-        work->unk94 = 0;
-        work->unkB2 = 0;
+    if ((u32)(stepCount - 1) < 100) {
+        eventUnit->sourceUnit = NULL;
+        eventUnit->mode = 3;
+        PCP_COPY_VECTOR(destination, sourceVector);
+        eventUnit->unkB4 = stepCount;
+        eventUnit->unkB6 = 0;
+        eventUnit->unk94 = 0;
+        eventUnit->unkB2 = 0;
     }
 }
 
-void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 arg1, s32 arg2) {
-    void *unit;
+/* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
+void evtAttachSecondaryWorldUnit(EvtUnit *eventUnit, s32 objectId, s32 stepCount) {
+    void *sourceUnit;
 
-    unit = func_00110C70(dds3GetWorldSecondaryObject(), arg1, 0x11);
-    if (unit != NULL) {
-        func_0023D658(work, (s128 *)(*(u32 *)((u8 *)unit + 0x18) + 0x10), arg2);
-        work->sourceUnit = unit;
+    sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    if (sourceUnit != NULL) {
+        func_0023D658(eventUnit, (s128 *)(*(u32 *)((u8 *)sourceUnit + 0x18) + 0x10), stepCount);
+        eventUnit->sourceUnit = sourceUnit;
     }
 }
 
-void func_0023D708(EvtUnit *work, s32 arg1, s128 *vec, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    s128 *dst = &work->vector;
+/* Configure a mode-one vector transition, without retaining a world source. */
+void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    s128 *destination = &eventUnit->vector;
 
-    work->unkB0 = arg1;
-    work->mode = 1;
-    work->unkAE = 0;
-    work->sourceUnit = NULL;
-    PCP_COPY_VECTOR(dst, vec);
-    work->unkB4 = arg4;
-    work->unkB6 = arg5;
-    work->unk94 = arg6;
-    work->unkB2 = 0;
+    eventUnit->unkB0 = arg1;
+    eventUnit->mode = 1;
+    eventUnit->unkAE = 0;
+    eventUnit->sourceUnit = NULL;
+    PCP_COPY_VECTOR(destination, sourceVector);
+    eventUnit->unkB4 = arg4;
+    eventUnit->unkB6 = arg5;
+    eventUnit->unk94 = arg6;
+    eventUnit->unkB2 = 0;
 }
 
-void func_0023D740(EvtUnit *work, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    void *unit;
+/* Configure the same transition from a secondary-world object's vector. */
+void func_0023D740(EvtUnit *eventUnit, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    void *sourceUnit;
 
-    unit = func_00110C70(dds3GetWorldSecondaryObject(), arg2, 0x11);
-    if (unit != NULL) {
-        func_0023D708(work, arg1, (s128 *)(*(u32 *)((u8 *)unit + 0x18)), arg3, arg4, arg5, arg6, arg7);
-        work->unkAE = 1;
-        work->sourceUnit = unit;
+    sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    if (sourceUnit != NULL) {
+        func_0023D708(eventUnit, arg1, (s128 *)(*(u32 *)((u8 *)sourceUnit + 0x18)), arg3, arg4, arg5, arg6, arg7);
+        eventUnit->unkAE = 1;
+        eventUnit->sourceUnit = sourceUnit;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023D800);
 
-s32 func_0023DA48(EvtUnit *work, s32 arg1) {
-    s32 ret = 0;
+s32 func_0023DA48(EvtUnit *eventUnit, s32 value) {
+    s32 result = 0;
 
-    if (arg1 != 0) {
-        work->unk94 = arg1;
-        work->unkB2 = 0;
-        work->mode = 4;
-        ret = 1;
+    if (value != 0) {
+        eventUnit->unk94 = value;
+        eventUnit->unkB2 = 0;
+        eventUnit->mode = 4;
+        result = 1;
     }
-    return ret;
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023DA70);
