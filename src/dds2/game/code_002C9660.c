@@ -314,7 +314,7 @@ extern LoadMirror D_00437DE8;
 
 extern s32 fileLoadStateChanged(void);
 
-extern void func_002D0EB0(void);
+extern void fileCacheSlotFlagsFromState(void);
 
 extern void *func_00328D68(s32 size);
 
@@ -490,7 +490,7 @@ extern void func_00369DF8(s32 fd);
 
 extern void func_0036BCD0(const char *path, s32 arg1);
 
-void func_002C9660(void) {
+void fileWriteBegin(s32 request, u32 first, u32 second) {
     func_0034F490();
 }
 
@@ -690,7 +690,7 @@ extern u32 D_0043903C;
 extern u32 D_00439040;
 extern void *fileStoreSlotHeader(void);
 
-void *func_002CA828(void) {
+void *fileReadSlotPreviewWait(void) {
     s32 r = func_002C9608();
 
     if (r == 0) {
@@ -704,11 +704,11 @@ void *func_002CA828(void) {
     return func_002CABC0();
 }
 
-extern s32 func_002C95A0(void);
+extern s32 fileWriteWait(void);
 extern u8 D_004580C0[];
 
 void *fileStoreSlotHeader(void) {
-    s32 status = func_002C95A0();
+    s32 status = fileWriteWait();
 
     if (status == 0) {
         return NULL;
@@ -1365,7 +1365,7 @@ void *mcHandleLoadResult(void) {
 
 extern u32 D_00439050;
 void *mcDispatchReadCallback(void) {
-    s32 status = func_002C95A0();
+    s32 status = fileWriteWait();
 
     if (status == 0) {
         return 0;
@@ -1385,7 +1385,7 @@ void *fileFinishRequest(void) {
     if (D_00437CE0 != 0) {
         return NULL;
     }
-    func_002C9660(D_0043903C, *(u32 *)D_00439048, *(u32 *)D_0043904C);
+    fileWriteBegin(D_0043903C, *(u32 *)D_00439048, *(u32 *)D_0043904C);
     return mcHandleLoadResult;
 }
 
@@ -1465,7 +1465,7 @@ void *mcHandleSetupResult(void) {
 extern s8 D_00437CD5;
 
 void *mcdHandleSaveSetupDone(void) {
-    s32 status = func_002C95A0();
+    s32 status = fileWriteWait();
 
     if (status == 0) {
         return NULL;
@@ -1476,9 +1476,9 @@ void *mcdHandleSaveSetupDone(void) {
         D_00437CD5 = 1;
         func_002C96D0();
         if (fileLoadStateChanged() == 0) {
-            func_002D0EB0();
+            fileCacheSlotFlagsFromState();
         } else {
-            func_002D0EC8();
+            fileRestoreSlotFlagsToState();
         }
         func_002CA1D8(13);
         return func_002CB660(-1);
@@ -1856,12 +1856,12 @@ s32 fileLoadStateChanged(void) {
     return D_00437DE8.current != D_00437DE8.previous;
 }
 
-void func_002D0EB0(void) {
+void fileCacheSlotFlagsFromState(void) {
     D_00437DE8.current = D_00437DE8.previous =
         *(u32 *)(D_00435DD0 + 0xA54);
 }
 
-void func_002D0EC8(void) {
+void fileRestoreSlotFlagsToState(void) {
     *(u32 *)(D_00435DD0 + 0xa54) = D_00437DEC;
 }
 
@@ -2228,18 +2228,6 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3B48);
 void fileWriteToPfs(s32 arg0, s32 arg1) {
     char path[0xD0];
     s32 fd;
-
-    if (D_00438B66 != 0) {
-        func_0035C860(path, D_00437E10, arg1);
-        fd = func_00369B70(path, 0x602, 0x1B6);
-    } else {
-        func_0035C860(path, D_00437E18, func_0033EC18(), arg1);
-        fd = func_00369B70(path, 0x602);
-    }
-    func_002D3B48(fd, arg0);
-    func_00369DF8(fd);
-    func_0036BCD0(D_00437E20, 0);
-}
 
     if (D_00438B66 != 0) {
         func_0035C860(path, D_00437E10, arg1);
