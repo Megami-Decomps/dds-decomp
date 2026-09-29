@@ -51,6 +51,23 @@ typedef struct EventViewerState {
     u32 glyph;
 } EventViewerState;
 
+/* One 0x20-byte script-command record; the parameter slots hold a float, a word,
+ * halfwords or bytes depending on the command. */
+typedef union EvtViewParam {
+    f32 f;
+    s32 i;
+    u16 h[2];
+    u8 b[4];
+} EvtViewParam;
+
+typedef struct EvtViewEntry {
+    u8 pad00[8];
+    EvtViewParam p08;
+    EvtViewParam p0C;
+    EvtViewParam p10;
+    EvtViewParam p14;
+} EvtViewEntry;
+
 u16 func_0024ABA0(EventViewerState *viewer);
 
 extern char D_004230D0[]; /* "EventViewer" */
@@ -92,7 +109,35 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_00248D70);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249088);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249518);
+s32 func_00249518(EventViewerState *viewer) {
+    u8 *result = NULL;
+    s32 best = 99999;
+    u8 *node = *(u8 **)((u8 *)viewer + 0x2034);
+
+    while (node != NULL) {
+        if (*(s32 *)node == 2) {
+            u8 *glyph = *(u8 **)(node + 0x54);
+
+            if (glyph != NULL) {
+                do {
+                    s32 x = *(u16 *)glyph;
+
+                    if (x <= viewer->glyphAdvancePosition) {
+                        s32 distance = viewer->glyphAdvancePosition - x;
+
+                        if (distance < best) {
+                            best = distance;
+                            result = glyph;
+                        }
+                    }
+                    glyph = *(u8 **)(glyph + 0x30);
+                } while (glyph != NULL);
+            }
+        }
+        node = *(u8 **)(node + 0x7C);
+    }
+    return (s32)result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249598);
 
@@ -162,9 +207,65 @@ void func_0024A9F0(u32 arg0) {
     func_0024A738(1, *(u32 *)(temp_v0 + 0x18), arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024AA38);
+s32 func_0024AA38(EventViewerState *viewer) {
+    u8 *result = NULL;
+    s32 best = 99999;
+    u8 *node = *(u8 **)((u8 *)viewer + 0x2034);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024AAB8);
+    while (node != NULL) {
+        if (*(s32 *)node == 2) {
+            u8 *glyph = *(u8 **)(node + 0x54);
+
+            if (glyph != NULL) {
+                do {
+                    s32 x = *(u16 *)glyph;
+
+                    if (viewer->glyphAdvancePosition < x) {
+                        s32 distance = x - viewer->glyphAdvancePosition;
+
+                        if (distance < best) {
+                            best = distance;
+                            result = glyph;
+                        }
+                    }
+                    glyph = *(u8 **)(glyph + 0x30);
+                } while (glyph != NULL);
+            }
+        }
+        node = *(u8 **)(node + 0x7C);
+    }
+    return (s32)result;
+}
+
+s32 func_0024AAB8(EventViewerState *viewer) {
+    u8 *result = NULL;
+    s32 best = 99999;
+    u8 *node = *(u8 **)((u8 *)viewer + 0x2034);
+
+    while (node != NULL) {
+        if (*(s32 *)node == 2) {
+            u8 *glyph = *(u8 **)(node + 0x54);
+
+            if (glyph != NULL) {
+                do {
+                    s32 x = *(u16 *)glyph;
+
+                    if (x < viewer->glyphAdvancePosition) {
+                        s32 distance = viewer->glyphAdvancePosition - x;
+
+                        if (distance < best) {
+                            best = distance;
+                            result = glyph;
+                        }
+                    }
+                    glyph = *(u8 **)(glyph + 0x30);
+                } while (glyph != NULL);
+            }
+        }
+        node = *(u8 **)(node + 0x7C);
+    }
+    return (s32)result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024AB38);
 
@@ -295,7 +396,21 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024C540);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024C650);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024C8C0);
+s32 func_0024C8C0(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    s32 value = *(s32 *)((u8 *)viewer + 0x2310);
+    EvtViewEntry *entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+
+    if (entry == NULL) {
+        return 0;
+    }
+    entry->p08.h[0] = value;
+    if (((u32)(value << 16) >> 28) != 0) {
+        entry->p08.h[1] = 0;
+    }
+    func_00249088(viewer->glyphAdvancePosition, viewer);
+    func_0024ABA0(viewer);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024C928);
 
@@ -338,7 +453,22 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
     return (u32)record;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CBA0);
+s32 func_0024CBA0(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    u8 *ctx = (u8 *)viewer;
+    EvtViewEntry *entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+
+    if (entry == NULL) {
+        return 0;
+    }
+    if (*(s32 *)(ctx + 0x2308) == 0) {
+        return 0;
+    }
+    entry->p08.f = *(f32 *)(ctx + 0x23A8);
+    entry->p0C.f = *(f32 *)(ctx + 0x23AC);
+    func_00249088(viewer->glyphAdvancePosition, viewer);
+    func_0024ABA0(viewer);
+    return 0;
+}
 
 u32 func_0024CC08(u32 arg0, u32 arg1, u32 arg2) {
     func_0024ABA0((EventViewerState *)arg2);
@@ -347,7 +477,17 @@ u32 func_0024CC08(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CC28);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CD00);
+s32 func_0024CD00(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    u8 *ctx = (u8 *)viewer;
+    EvtViewEntry *entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+
+    entry->p0C.b[0] = ctx[0x2420];
+    entry->p0C.b[1] = ctx[0x2421];
+    entry->p14.f = *(f32 *)(ctx + 0x2424);
+    func_00249088(viewer->glyphAdvancePosition, viewer);
+    func_0024ABA0(viewer);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CD58);
 
