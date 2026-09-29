@@ -106,6 +106,7 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F858);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F8D8);
 
+/* The current resource task stores this value three pointers below the task object. */
 u32 func_0024FA18(void) {
     s32 taskObject;
 
@@ -147,19 +148,34 @@ extern void func_0027B368(void *);
 extern void func_00249930(s32);
 extern void func_002D0918(s32);
 
-void func_0024FB30(s32 arg0, s32 *arg1) {
-    u8 *owner = (u8 *)arg1[3];
-    u8 *node = *(u8 **)(owner + 0x1C);
+typedef struct MenuCleanupNode {
+    u8 pad00[0x58];
+    struct MenuCleanupNode *next;
+    u8 pad5C[0x14];
+    void *resource;
+} MenuCleanupNode;
+
+typedef struct MenuCleanupOwner {
+    u8 pad00[0x1C];
+    MenuCleanupNode *first;
+    u8 pad20[0x10];
+    void *resource;
+} MenuCleanupOwner;
+
+/* Tear down the linked resource nodes and release the task's allocation. */
+void func_0024FB30(s32 unused, s32 *taskData) {
+    MenuCleanupOwner *owner = (MenuCleanupOwner *)taskData[3];
+    MenuCleanupNode *node = owner->first;
     u8 *record = (u8 *)func_002CB3B8(D_003BC4CC, -1);
 
     while (node != NULL) {
-        func_002CFF98(*(void **)(node + 0x70));
-        node = *(u8 **)(node + 0x58);
+        func_002CFF98(node->resource);
+        node = node->next;
     }
-    func_002CFF98(*(void **)(owner + 0x30));
+    func_002CFF98(owner->resource);
     func_0027B368(owner);
     func_00249930(*(s32 *)(record + 0x24));
-    func_002D0918(arg1[0]);
+    func_002D0918(taskData[0]);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF7A8);

@@ -93,9 +93,9 @@ s32 func_00245D08(void) {
 
 /* Advance command phase when the current menu state is phase one. */
 s32 func_00245DA0(void) {
-    s32 *state = (s32 *)func_00101A70();
+    EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
 
-    if (state[43] == 1) {
+    if (state->action == 1) {
         mnuSetCommandPhase((s32)state, 4);
     }
     return 1;
@@ -103,18 +103,18 @@ s32 func_00245DA0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00245DE0);
 
-void evtPrimeDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtPrimeDispatchStart(s32 callback) {
+    s32 context = func_00101A70();
 
-    func_00260670(temp_v0);
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00260670(context);
+    func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSync(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void evtSetupDispatchSync(s32 callback) {
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 void evtInstallStateTableB(EvtDispatchState *state) {
@@ -125,10 +125,10 @@ void evtInstallStateTableB(EvtDispatchState *state) {
 }
 
 s32 func_00246160(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
+    EvtDispatchState *context = (EvtDispatchState *)func_00101A70();
 
-    if (temp_v0[43] == 1) {
-        func_002453C8(temp_v0);
+    if (context->action == 1) {
+        func_002453C8(context);
     }
     return 1;
 }

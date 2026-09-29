@@ -29,10 +29,11 @@ typedef struct ResourceList {
 
 u32 func_00320F68(u32 list, u32 node);
 
+/* Retain the one-argument call to the old-style lookup declaration: it matches retail. */
 u32 func_00320FD0(u32 list) {
-    u32 node = mnuFindResourceNodeById(list);
-    if (node != 0) {
-        return func_00320F68(list, node);
+    u32 selectedNode = mnuFindResourceNodeById(list);
+    if (selectedNode != 0) {
+        return func_00320F68(list, selectedNode);
     }
     return 0;
 }
@@ -118,8 +119,9 @@ void func_00321318(u32 arg0, u32 arg1) {
     D_004390C4 = arg1;
 }
 
-u8 *func_00321328(s32 index) {
-    return (u8 *)D_004390C0 + index * 28;
+/* The externally owned table stores 28-byte records. */
+u8 *func_00321328(s32 recordIndex) {
+    return (u8 *)D_004390C0 + recordIndex * 28;
 }
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);
