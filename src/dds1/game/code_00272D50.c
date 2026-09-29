@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s64 func_00273750(void);
+extern s32 func_00273750(s32, s32);
 
 extern s32 func_00101A70();
 
@@ -76,14 +76,43 @@ s64 mnuStaffRunPanel2b(u64 request) {
     return menuRunPanel(state, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00273750);
+extern s32 func_00286D20(s32, s32, s32, s32);
+extern s32 func_002866D0(s32, s32, s32, s32);
+extern s32 func_0011A568(s32);
+extern void func_00119900(s32, s32);
+extern void initPartyPanelSlots(s32);
+extern void menuUpdateHandleStates(s32);
+extern void func_00280048(s32);
+
+/* Use a field item: resolve its direct effect (or field-use skill) against the
+ * active unit row; on success consume one from the inventory and refresh the
+ * party panels. Returns 1 when the item was consumed. */
+s32 func_00273750(s32 item, s32 context) {
+    s32 panel = context + 0x15C;
+    s32 unit = D_003BAA00 + *(s32 *)(*(s32 *)(*(s32 *)(context + 0x7D8) + 0x1C)) * 0x1A4 + 0xA60;
+    s32 result = func_00286D20(panel, item & 0xFFFF, unit, unit);
+
+    if (result != 1) {
+        if (result == 2) {
+            return 0;
+        }
+        if (func_002866D0(panel, func_0011A568(item) & 0xFFFF, unit, unit) == 0) {
+            return 0;
+        }
+    }
+    func_00119900(item, -1);
+    initPartyPanelSlots(context + 0x7EC);
+    menuUpdateHandleStates(panel);
+    func_00280048(panel);
+    return 1;
+}
 
 void func_00273838(s32 selection, s32 context) {
     StaffWindowResources *resources;
-    s64 active;
+    s32 active;
 
     resources = ((StaffDisplayContext *)context)->resources;
-    active = func_00273750();
+    active = func_00273750(selection, context);
     if (active != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->firstWindow + 0x14) + 0x1c) + 0x60) =
                   (u32)*(u8 *)(selection + D_003BAA00 + 0x12a0);
