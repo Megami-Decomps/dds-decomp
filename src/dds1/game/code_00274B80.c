@@ -683,22 +683,22 @@ u32 func_00278D68(void) {
     return 1;
 }
 
-extern void func_002CD0C0();
+extern void ptyRecomputeMaxHpMp();
 extern void scrClearSecondaryScriptFlag();
 
 void func_00278D90(s32 obj, s32 id, s32 slot) {
     u16 code = id;
 
-    if (func_002CDB00(obj, code) == 0) {
+    if (ptyHasSkill(obj, code) == 0) {
         *(u16 *)(obj + slot * 2 + 0x22) = code;
-        func_002CD0C0(obj);
+        ptyRecomputeMaxHpMp(obj);
         scrClearSecondaryScriptFlag(obj, code);
     }
 }
 
 void func_00278E08(s32 arg0, s32 arg1) {
     *(u16 *)(arg1 * 2 + arg0 + 0x22) = 0;
-    func_002CD0C0();
+    ptyRecomputeMaxHpMp();
 }
 
 void campMenuHandleInput(void) {

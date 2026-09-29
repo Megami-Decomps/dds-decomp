@@ -593,8 +593,8 @@ u32 *func_002850D8(s32 source) {
     u32 second;
     memset(item, 0, 0x3c);
     first = scrGetSelectedOperandIndex(source);
-    second = func_002CD788(source);
-    func_002850C8(item, func_002CD2A8((u16)first), *(u32 *)second);
+    second = ptyGetCurrentProfileRecord(source);
+    func_002850C8(item, prfGetCapValue((u16)first), *(u32 *)second);
     item[14] = 0x100;
     return item;
 }

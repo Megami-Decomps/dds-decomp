@@ -6,7 +6,7 @@ extern void func_0027C140();
 
 extern void func_0027D318();
 
-extern s32 func_002CD7B8(s32);
+extern s32 ptyGetCurrentProfileId(s32);
 
 extern s32 func_002CD240(s32, s32 *);
 
@@ -1676,7 +1676,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 
 void func_002811D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = func_002CD7B8(D_003BAA00 + partyIndex * 0x1A4 + 0xA60);
+    s32 cost = ptyGetCurrentProfileId(D_003BAA00 + partyIndex * 0x1A4 + 0xA60);
     s32 code;
     s32 texture;
     s32 item;

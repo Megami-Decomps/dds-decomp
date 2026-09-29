@@ -1784,11 +1784,19 @@
 0x002CBC98	sdfGridCursorDown	inferred	moves grid cursor forward one row
 0x002CBCF0	sdfGridCursorLeft	inferred	moves grid cursor back one column
 0x002CBD48	sdfGridCursorRight	inferred	Advances one eight-byte grid cell unless the current index is in the final column.
+0x002CC7D8	ptyClearProfileRecords	inferred	legacy PartyUnitProfileRecords_ClearAll: clears the save-backed profile-point sidecar block
 0x002CC808	ptySelectProfileStage	inferred	party/profile lane; legacy PartyUnit_SelectProfileStageAndInitCurrent: writes unit.current_profile from the 4-row stage table and initialises current_profile-related state
 0x002CC9C0	ptyApplyProfilePreset	inferred	legacy PartyUnit_ApplyProfilePresetForMode: scores the 4 static 12-profile preset rows and applies the best for the mode
+0x002CCB80	ptyLoadPresetSkillSlots	inferred	legacy PartyUnit_LoadPresetSkillSlots8AndMarkBit0: loads the 8 preset skill-slot ids and marks bit0
+0x002CCC18	ptyMarkPresetSkillPool	inferred	legacy PartyUnit_MarkPresetSkillPool40AndMaybeMergeStock: marks the 40-id preset skill pool and merges stock bits
 0x002CCCC0	ptyRebuildProfileSkills	inferred	legacy PartyUnit_RebuildProfileAndSkillState: full profile/skill rebuild (preset apply, profile flag store, skill list)
 0x002CCDC8	ptyRebuildAllProfiles	inferred	legacy Party_RebuildAllActiveProfileAndSkillState: runs ptyRebuildProfileSkills for every present active row
 0x002CCE60	ptyRecomputeMaxVitals	inferred	legacy PartyUnit_RecomputeEffectiveMaxVitalsAndRescaleCurrent: recompute effective max HP/MP then rescale current
+0x002CD0C0	ptyRecomputeMaxHpMp	inferred	legacy PartyUnit_RecomputeMaxHpMpAndClampCurrent: recompute effective max HP/MP and clamp current
+0x002CD2A8	prfGetCapValue	inferred	legacy ProfileId_GetCapValue: profile cap/target value from the profile table
+0x002CD2D0	ptySetProfileRecordToCap	inferred	legacy PartyUnitProfileRecord_SetToCap: sets the record's current profile points to the cap
+0x002CD310	ptyAddProfilePoints	inferred	legacy PartyUnit_AddCurrentProfilePointsClamped: adds clamped delta to the current-profile record points
+0x002CD398	prfDecodeFlagPair	inferred	legacy ProfileFlagPair_Decode: decodes profile_id into packed flag-pair coordinates
 0x002CD428	ptyApplyProfile	inferred	legacy PartyUnit_ApplyProfileById: completed-profile writer; sets profile flags/skill state for the given profile id
 0x002CD548	ptyTestProfileFlag0	inferred	legacy PartyUnit_TestProfileFlagBit0: tests profile flag bit0 in the g_GameState1+0x2E9F0 map
 0x002CD5B8	scrCheckStateBits	inferred	scr script flags and VM helpers in game/code_002CC750.c
@@ -1796,6 +1804,9 @@
 0x002CD6B0	ptyTestProfileFlag1	inferred	legacy PartyUnit_TestProfileFlagBit1: tests profile flag bit1; drives profile-menu status/overlay
 0x002CD728	scrGetSelectedOperandIndex	inferred	Returns the VM operand's currently selected signed index.
 0x002CD730	ptyGetProfileRecord	inferred	legacy PartyUnitProfileRecord_Get: returns the 8-byte per-unit per-profile save sidecar record
+0x002CD768	ptyGetProfileRecordValue	inferred	legacy PartyUnitProfileRecord_GetValue: low dword of a profile record entry
+0x002CD788	ptyGetCurrentProfileRecord	inferred	legacy PartyUnitProfileRecord_GetCurrent: record pointer for unit.current_profile_id_55
+0x002CD7B8	ptyGetCurrentProfileId	inferred	legacy PartyUnit_GetCurrentProfileId: signed byte at PartyUnitData+0x55
 0x002CD7C0	scrSelectOperandIndex	inferred	Stores the selected VM operand index and updates its associated operand.
 0x002CD808	scrDecodePackedFlagIndex	inferred	Splits a script flag index into its packed word index and four-bit-slot shift.
 0x002CD828	scrSetFlag	inferred	scr script flags and VM helpers in game/code_002CC750.c
@@ -1805,17 +1816,37 @@
 0x002CD998	scrClearSecondaryScriptFlag	inferred	Clears bit two of the selected four-bit script flag slot.
 0x002CD9F8	scrClearFlags	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDA48	scrGetSecondaryScriptFlag	inferred	Returns the bit-two mask for the selected script flag slot.
+0x002CDA98	ptyGetSkillNibbleState	inferred	legacy PartyUnitSkillNibble_GetState01: nibble state 2/1/0 from skill-slot nibble bits
+0x002CDB00	ptyHasSkill	inferred	legacy PartyUnit_HasSkillInSkillSlots: scans PartyUnitData.skill_ids_22[24] for skill_id
 0x002CDB40	ptyRemoveProfileSkills	inferred	legacy PartyUnit_RemoveProfileSkillsState1: iterates the profile skill list and prunes skills whose nibble state is 1
 0x002CDC40	scrFindSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CDD38	prfGetParamWord7b4	inferred	legacy ProfileId_GetParamWord_7b4: profile row param word at +0x7B4
+0x002CDD60	prfGetParamWord7b6	inferred	legacy ProfileId_GetParamWord_7b6: profile row param word at +0x7B6
+0x002CDD88	prfGetParamWord7b5	inferred	legacy ProfileId_GetParamWord_7b5: profile row param word at +0x7B5
 0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
+0x002CDE20	prfGetSkillAtIndex	inferred	legacy ProfileId_GetSkillAtIndex: profile skill id at index 0..7
+0x002CDE68	ptyCheckLevelAtLeastProfileParam7b6	inferred	legacy PartyUnit_CheckLevelAtLeastProfileParam7b6: unit level >= profile param word 0x7B6
+0x002CDEB8	ptyIsCurrentProfileId	inferred	legacy PartyUnit_IsCurrentProfileId: unit.current_profile_id_55 == profile_id
 0x002CDED0	prfBuildRawSkillList	inferred	legacy ProfileId_BuildRawSkillList: builds up to 8 nonzero raw skill ids for a profile id
 0x002CDFE8	prfBuildSkillList	inferred	legacy ProfileId_BuildSkillListForUnit: builds the effective skill list for a unit's current profile
+0x002CE170	prfBuildSkillListState0	inferred	legacy ProfileId_BuildSkillListForUnit_State0Only: wrapper calling the state0-only skill-list builder
+0x002CE188	prfCountProfileList	inferred	legacy ProfileIdList_CountUntilZeroOr8: counts nonzero req profile ids until zero or 8
+0x002CE1C8	ptyHasAllReqProfiles	inferred	legacy PartyUnit_AreAllProfilesInReqListFlagBit0: every req profile id holds flag bit0 on the unit
+0x002CE248	ptyReqProfileCountAtLeast	inferred	legacy PartyUnit_IsReqListFlagBit0CountAtLeast: count of req profiles with flag bit0 >= threshold
 0x002CE2E8	ptyProfileCountAtLeast	inferred	legacy PartyUnit_IsGlobalProfileCountAtLeastByClassGate: counts profile ids meeting a unit threshold with a class gate
+0x002CE380	ptyAreReqProfilesInParty	inferred	legacy Party_AreReqProfilesPresentInActiveParty: every req profile present on some active row
+0x002CE468	prfReqCheckUnitLevel	inferred	legacy ProfileReqEntry_CheckUnitLevelAtLeastByte4: requirement entry unit-level gate
+0x002CE480	prfReqCheckGlobalCounter	inferred	legacy ProfileReqEntry_CheckGlobalCounterAtLeastWord8: requirement entry global-counter gate
 0x002CE498	prfReqEvaluateRules	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks: profile requirement rule evaluator, opcode dispatch via the 0x3B3F20 jump table
+0x002CE698	prfReq54Evaluate	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks_NoFailOut: evaluates the two rule blocks without early failure
+0x002CE6B8	prfIsRequirementExcluded	inferred	legacy ProfileId_IsRequirementExcluded: profile id excluded from the requirement check
+0x002CE6E0	prfReq54GetWord1230	inferred	legacy ProfileReq54_GetWord_1230: requirement-54 param word at +0x1230
 0x002CE710	prfReqCheckWithFallback	inferred	legacy ProfileReq_CheckWithFallbackFlagTable: requirement gate with the fallback req->flag table at 0x3931B0
 0x002CE800	prfReqSelectGroup	inferred	legacy ProfileReq_SelectGroupIndexByPartyCounters: selects the first valid requirement-group index from party counters
+0x002CE8F0	prfReq18GetWord3220	inferred	legacy ProfileReq18_GetWord_3220: requirement-18 param word at +0x3220
 0x002CE910	prfReqGetPair	inferred	legacy ProfileReq18_GetPairByGroupAndIndex: fetches a pair from the requirement table row (group, index)
+0x002CE968	prfReq18GetWord3234	inferred	legacy ProfileReq18_GetWord_3234: requirement-18 param word at +0x3234
 0x002CF3C8	scrSetRgbAndAlpha	inferred	Splits a packed AARRGGBB color into its lower RGB word and upper alpha byte.
 0x002CF440	sdfCreateSemaphore	inferred	sdf system, device, DMA, or task infrastructure in game/code_002CC750.c
 0x002CF570	sdfFreeMemoryFromEitherHeap	inferred	Frees a pointer through the chip or other heap according to its address range.

@@ -10,9 +10,9 @@ extern void func_0024DDC0(s32);
 
 extern void func_0024DA58(s32);
 
-extern s32 func_002CD788(void *);
+extern s32 ptyGetCurrentProfileRecord(void *);
 
-extern s32 func_002CD2A8(u16);
+extern s32 prfGetCapValue(u16);
 
 extern s32 ptyTestProfileFlag0(void *, u16);
 
@@ -50,9 +50,9 @@ typedef struct MenuItemScene {
 
 void kwlnItemApplySelection(MenuItemScene *scene) {
     MenuItem *item = *scene->items;
-    s32 *data = (s32 *)func_002CD788(item);
+    s32 *data = (s32 *)ptyGetCurrentProfileRecord(item);
     s8 selection = item->selection;
-    if (selection != 0 && func_002CD2A8((u16)selection) == *data &&
+    if (selection != 0 && prfGetCapValue((u16)selection) == *data &&
         ptyTestProfileFlag0(item, (u16)(s8)item->selection) == 0) {
         ptyApplyProfile(item, (u16)(s8)item->selection);
         scene->selectionApplied = 1;

@@ -100,10 +100,10 @@ s32 brsCalcExpGain(u8 *unit, s32 exp, s32 a2) {
         result = exp;
     } else {
         result = 0;
-        if (func_002CDB00(unit, 0x21F) != 0) {
+        if (ptyHasSkill(unit, 0x21F) != 0) {
             result = exp / 2;
         }
-        if (func_002CDB00(unit, 0x220) != 0) {
+        if (ptyHasSkill(unit, 0x220) != 0) {
             result = exp;
         }
     }
@@ -142,7 +142,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
 s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
     s32 step = ptyCalcLevelUps(entry);
     entry->animation += step;
-    func_002CD0C0(entry);
+    ptyRecomputeMaxHpMp(entry);
     return step;
 }
 
@@ -157,7 +157,7 @@ s32 btlAddBaseStats(u8 *src, u8 *obj) {
             *stat = 99;
         }
     }
-    func_002CD0C0(obj);
+    ptyRecomputeMaxHpMp(obj);
     return 1;
 }
 
@@ -175,9 +175,9 @@ void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fo
 
 extern s32 ptyCalcLevelUps(u8 *);
 extern s32 ptyComputeTotalExp(u8 *, s32);
-extern s32 func_002CD310(u8 *, s32);
-extern s8 func_002CD7B8(u8 *);
-extern u32 func_002CD2A8(u16);
+extern s32 ptyAddProfilePoints(u8 *, s32);
+extern s8 ptyGetCurrentProfileId(u8 *);
+extern u32 prfGetCapValue(u16);
 extern void mnuInitTitleParameters(u32 *, u32, u32, u32, u32);
 
 void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
@@ -190,9 +190,9 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
     mnuInitTitleParameters((u32 *)(state + 0xC), 0x6E0, 0x50,
         *(s32 *)(entry + 0x10) - ptyComputeTotalExp(entry, levelDelta),
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
-    profilePoints = func_002CD310(entry, 0);
+    profilePoints = ptyAddProfilePoints(entry, 0);
     mnuInitTitleParameters((u32 *)(state + 0x1C), 0x3C0, 0x50, profilePoints,
-        func_002CD2A8(func_002CD7B8(entry) & 0xFFFF));
+        prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 
 void func_00266130(u32 fontContext) {
@@ -203,7 +203,7 @@ void func_00266130(u32 fontContext) {
 extern u32 func_002C1630(u32, u32, s32);
 
 u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
-    func_002CD7B8(*(u32 *)(resource + 8));
+    ptyGetCurrentProfileId(*(u32 *)(resource + 8));
     return func_002C1630(0x80808080, 0x80808000, blend);
 }
 
