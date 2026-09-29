@@ -77,51 +77,51 @@ extern u32 D_003B2F30[];
 
 extern void func_003297C8(void *arg0);
 
-void frFontListInsert(FntNode *arg0) {
+void frFontListInsert(FntNode *node) {
     FntNode *head = D_00452360.head;
     FntNode *next = head->next;
 
-    arg0->prev = head;
-    arg0->next = next;
+    node->prev = head;
+    node->next = next;
     D_00452360.count += 1;
-    head->next = arg0;
-    next->prev = arg0;
+    head->next = node;
+    next->prev = node;
 }
 
-u16 func_0019B870(s32 arg0) {
-    return D_00452724[arg0].unk0->unk10;
+u16 func_0019B870(s32 index) {
+    return D_00452724[index].unk0->unk10;
 }
 
-u16 func_0019B890(s32 arg0) {
-    return D_00452724[arg0].unk0->unk12;
+u16 func_0019B890(s32 index) {
+    return D_00452724[index].unk0->unk12;
 }
 
-void func_0019B8B0(s32 arg0) {
-    if (arg0 < 1) {
-        arg0 = 0x14;
+void func_0019B8B0(s32 value) {
+    if (value < 1) {
+        value = 0x14;
     }
-    D_00436558 = arg0;
+    D_00436558 = value;
 }
 
-void frFontSetEntryFlag(s32 arg0, s32 arg1) {
-    FrFontEntry *entry = &D_00452720.entries[arg0 & 0xFF];
+void frFontSetEntryFlag(s32 index, s32 flag) {
+    FrFontEntry *entry = &D_00452720.entries[index & 0xFF];
 
     entry->unk10[0] = 1;
-    entry->unk10[1] = arg1 + 1;
+    entry->unk10[1] = flag + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B900);
 
-s32 frFontBitLength(u32 arg0) {
+s32 frFontBitLength(u32 value) {
     s32 count = 0;
 
-    if (arg0 == 0) {
+    if (value == 0) {
         return 0;
     }
     do {
-        arg0 = arg0 >> 1;
+        value = value >> 1;
         count += 1;
-    } while (arg0 != 0);
+    } while (value != 0);
     return (count + 0xFF) & 0xFF;
 }
 
@@ -152,15 +152,15 @@ void frFontReleaseAll(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019C130);
 
-void frFontFreeEntry(s32 arg0) {
-    u32 idx = arg0 & 0xFF;
+void frFontFreeEntry(s32 index) {
+    u32 slot = index & 0xFF;
     FrFontEntry *entry;
 
-    if (idx < 2) {
+    if (slot < 2) {
         return;
     }
-    D_003B2F30[idx] = 0;
-    entry = &D_00452720.entries[idx];
+    D_003B2F30[slot] = 0;
+    entry = &D_00452720.entries[slot];
     if (entry->unk0 != NULL) {
         func_003297C8(entry->unk0);
         entry->unk1C = NULL;

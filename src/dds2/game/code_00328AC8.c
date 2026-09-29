@@ -2,11 +2,20 @@
 
 extern u64 sdfFindThreadNode(u64);
 
-void func_00328AC8(void) {
-    u64 temp_v0;
+typedef struct SdfCursorNode {
+    struct SdfCursorNode *next;
+} SdfCursorNode;
 
-    temp_v0 = sdfFindThreadNode(0xffffffffffffffff);
-    func_003289C8(temp_v0);
+typedef struct SdfNodeCursor {
+    SdfCursorNode *current;
+    SdfCursorNode *next;
+} SdfNodeCursor;
+
+void func_00328AC8(void) {
+    u64 node;
+
+    node = sdfFindThreadNode(0xffffffffffffffff);
+    func_003289C8(node);
 }
 
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328AE8);
@@ -17,14 +26,14 @@ INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328BA0);
 
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328C00);
 
-void sdfAdvanceNodeCursor(s32 *arg0) {
-    s32 *piVar1;
+void sdfAdvanceNodeCursor(SdfNodeCursor *cursor) {
+    SdfCursorNode *node;
 
-    piVar1 = (s32 *)arg0[1];
-    if (piVar1 != (s32 *)0x0) {
-        arg0[1] = *piVar1;
+    node = cursor->next;
+    if (node != NULL) {
+        cursor->next = node->next;
     }
-    *arg0 = (s32)piVar1;
+    cursor->current = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328C50);

@@ -2,35 +2,57 @@
 
 void func_003297C8(u32 sprite);
 
+typedef struct WideSlot {
+    u32 flags;
+    u8 pad04[0x10];
+} WideSlot;
+
+typedef struct CompactSlot {
+    u32 flags;
+    u8 pad04[0xC];
+} CompactSlot;
+
+typedef struct WideSlotPool {
+    u32 pad00;
+    WideSlot *slots;
+    s32 count;
+} WideSlotPool;
+
+typedef struct CompactSlotPool {
+    u32 pad00;
+    CompactSlot *slots;
+    s32 count;
+} CompactSlotPool;
+
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D890);
 
 void func_0031D928(u32 *sprite) {
     func_003297C8(*sprite);
 }
 
-u32 * func_0031D948(s32 arg0) {
-    u32 *puVar1;
-    s32 temp_v0;
+u32 *func_0031D948(WideSlotPool *pool) {
+    WideSlot *entry;
+    s32 index;
 
-    temp_v0 = 0;
-    puVar1 = *(u32 **)(arg0 + 4);
-    if (0 < *(s32 *)(arg0 + 8)) {
+    index = 0;
+    entry = pool->slots;
+    if (0 < pool->count) {
         do {
-            if ((*puVar1 & 1) == 0) {
-                *puVar1 = *puVar1 | 1;
-                return puVar1;
+            if ((entry->flags & 1) == 0) {
+                entry->flags = entry->flags | 1;
+                return (u32 *)entry;
             }
-            temp_v0 = temp_v0 + 1;
-            puVar1 = puVar1 + 5;
-        } while (temp_v0 < *(s32 *)(arg0 + 8));
+            index = index + 1;
+            entry = entry + 1;
+        } while (index < pool->count);
     }
     return (u32 *)0x0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D998);
 
-void func_0031DA20(u32 *arg0) {
-    *arg0 = *arg0 & 0xfffffffe;
+void func_0031DA20(u32 *flags) {
+    *flags = *flags & 0xfffffffe;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
@@ -41,29 +63,29 @@ void func_0031DF48(u32 *sprite) {
     func_003297C8(*sprite);
 }
 
-u32 * func_0031DF68(s32 arg0) {
-    u32 *puVar1;
-    s32 temp_v0;
+u32 *func_0031DF68(CompactSlotPool *pool) {
+    CompactSlot *entry;
+    s32 index;
 
-    temp_v0 = 0;
-    puVar1 = *(u32 **)(arg0 + 4);
-    if (0 < *(s32 *)(arg0 + 8)) {
+    index = 0;
+    entry = pool->slots;
+    if (0 < pool->count) {
         do {
-            if ((*puVar1 & 1) == 0) {
-                *puVar1 = *puVar1 | 1;
-                return puVar1;
+            if ((entry->flags & 1) == 0) {
+                entry->flags = entry->flags | 1;
+                return (u32 *)entry;
             }
-            temp_v0 = temp_v0 + 1;
-            puVar1 = puVar1 + 4;
-        } while (temp_v0 < *(s32 *)(arg0 + 8));
+            index = index + 1;
+            entry = entry + 1;
+        } while (index < pool->count);
     }
     return (u32 *)0x0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DFB8);
 
-void func_0031E008(u32 *arg0) {
-    *arg0 = *arg0 & 0xfffffffe;
+void func_0031E008(u32 *flags) {
+    *flags = *flags & 0xfffffffe;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E020);

@@ -20,26 +20,42 @@ extern void func_002AA7A0(s32, s32);
 
 extern u8 D_003E7050[];
 
+typedef struct MenuResourceSet {
+    u8 pad00[8];
+    u32 first;
+    u32 second;
+    u32 third;
+    u32 fourth;
+    u32 fifth;
+    u8 pad1C[0x1C];
+    s32 selection;
+} MenuResourceSet;
+
+typedef struct MenuResourceOwner {
+    u8 pad00[0xAA48];
+    MenuResourceSet *resources;
+} MenuResourceOwner;
+
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB890);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8C0);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8F0);
 
-void func_002ABCD0(s32 arg0) {
-    s32 temp_v0;
+void func_002ABCD0(MenuResourceOwner *object) {
+    MenuResourceSet *resources;
 
-    temp_v0 = *(s32 *)(arg0 + 0xaa48);
-    func_002B9520(*(u32 *)(temp_v0 + 8));
-    func_002B9520(*(u32 *)(temp_v0 + 0xc));
+    resources = object->resources;
+    func_002B9520(resources->first);
+    func_002B9520(resources->second);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD08);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
-void func_002ABEB0(s32 arg0) {
-    func_002B9520(*(u32 *)(*(s32 *)(arg0 + 0xaa48) + 0x10));
+void func_002ABEB0(MenuResourceOwner *object) {
+    func_002B9520(object->resources->third);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
@@ -48,8 +64,8 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC408);
 
-void func_002AC660(s32 arg0) {
-    func_002B9520(*(u32 *)(*(s32 *)(arg0 + 0xaa48) + 0x14));
+void func_002AC660(MenuResourceOwner *object) {
+    func_002B9520(object->resources->fourth);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC688);
@@ -58,8 +74,8 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC8F0);
 
-void func_002ACA98(s32 arg0) {
-    func_002B9520(*(u32 *)(*(s32 *)(arg0 + 0xaa48) + 0x18));
+void func_002ACA98(MenuResourceOwner *object) {
+    func_002B9520(object->resources->fifth);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACAC0);
@@ -83,33 +99,33 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF00);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
 
-void func_002AD030(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-    s64 temp_v1;
+void func_002AD030(s32 index, s32 context) {
+    s32 resourceSet;
+    s64 active;
 
-    temp_v0 = *(s32 *)(arg1 + 0xaa48);
-    temp_v1 = func_002ACF38();
-    if (temp_v1 != 0) {
-        *(u32 *)(*(s32 *)(*(s32 *)(*(s32 *)(temp_v0 + 8) + 0x18) + 0x1c) + 0x60) =
-                  (u32)*(u8 *)(arg0 + D_00435DD0 + 0x1340);
-        *(s32 *)(temp_v0 + 0x38) = arg0;
+    resourceSet = *(s32 *)(context + 0xaa48);
+    active = func_002ACF38();
+    if (active != 0) {
+        *(u32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceSet + 8) + 0x18) + 0x1c) + 0x60) =
+                  (u32)*(u8 *)(index + D_00435DD0 + 0x1340);
+        *(s32 *)(resourceSet + 0x38) = index;
     }
-    func_002C1B68(arg1 + 0xaa50, 1);
+    func_002C1B68(context + 0xaa50, 1);
 }
 
 u32 func_002AD0A8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    func_002BAF50(*(u32 *)(*(s32 *)(temp_v0 + 0xaa48) + 8), temp_v0 + 0xb10c);
+    context = func_00101958();
+    func_002BAF50(*(u32 *)(*(s32 *)(context + 0xaa48) + 8), context + 0xb10c);
     return 1;
 }
 
 u32 func_002AD0E8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    func_002BAF50(*(u32 *)(temp_v0 + 0x108), temp_v0 + 0xb10c);
+    context = func_00101958();
+    func_002BAF50(*(u32 *)(context + 0x108), context + 0xb10c);
     return 1;
 }
 

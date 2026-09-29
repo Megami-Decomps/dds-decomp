@@ -46,10 +46,10 @@ INCLUDE_ASM(const s32, "game/code_002C83F0", fileManInit);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqInit);
 
-void fileReqBegin(s32 arg0) {
-    D_00439000 = arg0;
-    fileReqInit(arg0);
-    D_00457F68[arg0].unk10 = 0;
+void fileReqBegin(s32 slot) {
+    D_00439000 = slot;
+    fileReqInit(slot);
+    D_00457F68[slot].unk10 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqPoll);

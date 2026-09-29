@@ -1,6 +1,24 @@
 #include "common.h"
 
-void func_0031D508(s32 node);
+typedef struct ModelInstance {
+    f32 vector0[3];
+    u32 valueC;
+    f32 vector10[3];
+    u8 pad1C[4];
+    u32 flags;
+    u16 firstValue;
+    u16 secondValue;
+    u16 elapsed;
+    u16 duration;
+    u8 pad2C[8];
+} ModelInstance;
+
+void func_0031D508(ModelInstance *item);
+
+typedef struct ModelInstanceList {
+    ModelInstance *items;
+    s32 count;
+} ModelInstanceList;
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031C940);
 
@@ -22,92 +40,92 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D260);
 
-void func_0031D380(s32 *arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0031D380(ModelInstanceList *list) {
+    ModelInstance *item;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *arg0;
-    if (0 < arg0[1]) {
+    index = 0;
+    item = list->items;
+    if (0 < list->count) {
         do {
-            memset(temp_v0, 0, 0x34);
-            temp_v1 = (temp_v1 + 1) & 0xffff;
-            temp_v0 = temp_v0 + 0x34;
-        } while ((s32)temp_v1 < arg0[1]);
+            memset(item, 0, 0x34);
+            index = (index + 1) & 0xffff;
+            item = item + 1;
+        } while ((s32)index < list->count);
     }
 }
 
-void func_0031D3F0(s32 *arg0, u32 arg1) {
-    s32 temp_v0;
-    s32 temp_v1;
+void func_0031D3F0(ModelInstanceList *list, u32 value) {
+    ModelInstance *item;
+    s32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *arg0;
-    if (0 < arg0[1]) {
+    index = 0;
+    item = list->items;
+    if (0 < list->count) {
         do {
-            temp_v1 = temp_v1 + 1;
-            *(u32 *)(temp_v0 + 0x20) = (*(u32 *)(temp_v0 + 0x20) & 0xfffff807) | ((arg1 & 0xff) << 3);
-            temp_v0 = temp_v0 + 0x34;
-        } while (temp_v1 < arg0[1]);
+            index = index + 1;
+            item->flags = (item->flags & 0xfffff807) | ((value & 0xff) << 3);
+            item = item + 1;
+        } while (index < list->count);
     }
 }
 
-void func_0031D440(s32 *list) {
-    u8 *node = (u8 *)list[0];
+void func_0031D440(ModelInstanceList *list) {
+    ModelInstance *item = list->items;
     s32 index = 0;
-    if (list[1] > 0) {
+    if (list->count > 0) {
         do {
-            func_0031D508((s32)node);
-            node += 0x34;
+            func_0031D508(item);
+            item += 1;
             index++;
-        } while (index < list[1]);
+        } while (index < list->count);
     }
 }
 
-s32 func_0031D4A8(s32 *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
+s32 func_0031D4A8(ModelInstanceList *list) {
+    ModelInstance *item;
+    s32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *arg0;
-    if (0 < arg0[1]) {
+    index = 0;
+    item = list->items;
+    if (0 < list->count) {
         do {
-            if ((*(u32 *)(temp_v0 + 0x20) & 1) == 0) {
-                *(u16 *)(temp_v0 + 0x2a) = 10;
-                *(u32 *)(temp_v0 + 0x20) = *(u32 *)(temp_v0 + 0x20) | 1;
-                *(u16 *)(temp_v0 + 0x28) = 0;
-                *(u16 *)(temp_v0 + 0x24) = 0;
-                *(u16 *)(temp_v0 + 0x26) = 0;
-                return temp_v0;
+            if ((item->flags & 1) == 0) {
+                item->duration = 10;
+                item->flags = item->flags | 1;
+                item->elapsed = 0;
+                item->firstValue = 0;
+                item->secondValue = 0;
+                return (s32)item;
             }
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x34;
-        } while (temp_v1 < arg0[1]);
+            index = index + 1;
+            item = item + 1;
+        } while (index < list->count);
     }
     return 0;
 }
 
-void func_0031D508(s32 arg0) {
-    *(u32 *)(arg0 + 0x20) = *(u32 *)(arg0 + 0x20) & 0xfffffffe;
+void func_0031D508(ModelInstance *item) {
+    item->flags = item->flags & 0xfffffffe;
 }
 
-void func_0031D520(u8 *model, s32 value) {
+void func_0031D520(ModelInstance *model, s32 value) {
     value &= 0xFFFF;
-    *(u16 *)(model + 0x24) = value;
-    *(u16 *)(model + 0x26) = value;
+    model->firstValue = value;
+    model->secondValue = value;
 }
 
-void func_0031D530(u8 *model, f32 x, f32 y, f32 z) {
-    *(f32 *)(model + 0x10) = x;
-    *(f32 *)(model + 0x14) = y;
-    *(f32 *)(model + 0x18) = z;
+void func_0031D530(ModelInstance *model, f32 x, f32 y, f32 z) {
+    model->vector10[0] = x;
+    model->vector10[1] = y;
+    model->vector10[2] = z;
 }
 
-void func_0031D540(u8 *model, f32 x, f32 y, f32 z) {
-    *(f32 *)(model + 0x0) = x;
-    *(f32 *)(model + 0x4) = y;
-    *(f32 *)(model + 0x8) = z;
-    *(u32 *)(model + 0xC) = 0;
+void func_0031D540(ModelInstance *model, f32 x, f32 y, f32 z) {
+    model->vector0[0] = x;
+    model->vector0[1] = y;
+    model->vector0[2] = z;
+    model->valueC = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D558);

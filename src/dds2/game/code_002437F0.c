@@ -69,28 +69,28 @@ void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 contex
     }
 }
 
-s32 evtAdvanceSolarShortLayerTimer(s32 arg0) {
-    s32 v;
+s32 evtAdvanceSolarShortLayerTimer(s32 timer) {
+    s32 nextAge;
 
-    v = *(u16 *)(arg0 + 4) + 1;
-    *(u16 *)(arg0 + 4) = v;
-    if ((f32)(s16)v > 60.0f) {
-        *(u16 *)(arg0 + 4) = 0;
-        *(u8 *)(arg0 + 6) = 0;
+    nextAge = *(u16 *)(timer + 4) + 1;
+    *(u16 *)(timer + 4) = nextAge;
+    if ((f32)(s16)nextAge > 60.0f) {
+        *(u16 *)(timer + 4) = 0;
+        *(u8 *)(timer + 6) = 0;
     }
-    return *(s8 *)(arg0 + 6);
+    return *(s8 *)(timer + 6);
 }
 
-s32 evtAdvanceSolarLongLayerTimer(s32 arg0) {
-    s32 v;
+s32 evtAdvanceSolarLongLayerTimer(s32 timer) {
+    s32 nextAge;
 
-    v = *(u16 *)(arg0 + 4) + 1;
-    *(u16 *)(arg0 + 4) = v;
-    if ((f32)(s16)v > 80.0f) {
-        *(u16 *)(arg0 + 4) = 0;
-        *(u8 *)(arg0 + 6) = 0;
+    nextAge = *(u16 *)(timer + 4) + 1;
+    *(u16 *)(timer + 4) = nextAge;
+    if ((f32)(s16)nextAge > 80.0f) {
+        *(u16 *)(timer + 4) = 0;
+        *(u8 *)(timer + 6) = 0;
     }
-    return *(s8 *)(arg0 + 6);
+    return *(s8 *)(timer + 6);
 }
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_002441F8);

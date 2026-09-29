@@ -19,8 +19,8 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E98);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286F18);
 
 void func_00286F90(void) {
-    s32 data = func_00286E98();
-    D_00437924 = func_00312620(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, data);
+    s32 menuData = func_00286E98();
+    D_00437924 = func_00312620(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
 }
 
 s32 func_00286FD8(void) {
@@ -49,10 +49,10 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287638);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 
 u64 func_00287768(void) {
-    u64 temp_v0;
+    u64 selected;
 
-    temp_v0 = func_00312810(D_00437924, 0xffffffffffffffff);
-    func_00288920(temp_v0);
+    selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    func_00288920(selected);
     return 0;
 }
 
@@ -63,10 +63,10 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_002877E8);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287848);
 
 u64 func_00287900(void) {
-    u64 temp_v0;
+    u64 selected;
 
-    temp_v0 = func_00312810(D_00437924, 0xffffffffffffffff);
-    func_0028B1B0(temp_v0);
+    selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    func_0028B1B0(selected);
     return 0;
 }
 

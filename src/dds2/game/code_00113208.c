@@ -4,7 +4,7 @@ typedef struct ObjectSubstate {
     u8 pad0[0xC];
     u32 valueC;
     u8 pad10[0x74];
-    s32 value84;
+    s32 cameraMode;
 } ObjectSubstate;
 
 typedef struct ObjectWithSubstate {
@@ -13,12 +13,12 @@ typedef struct ObjectWithSubstate {
 } ObjectWithSubstate;
 
 u32 dds3GetCameraMode(ObjectWithSubstate *object) {
-    return object->substate->value84;
+    return object->substate->cameraMode;
 }
 
 void dds3SetCameraMode(ObjectWithSubstate *object, s32 value) {
-    if (object->substate->value84 != value) {
-        object->substate->value84 = value;
+    if (object->substate->cameraMode != value) {
+        object->substate->cameraMode = value;
     }
 }
 

@@ -4,56 +4,68 @@ extern u32 effPcpScatterResCreate(u32);
 
 extern u32 effPcpScatterResAddRef(u32);
 
+typedef struct ScatterObject {
+    u8 pad00[0x5C];
+    s32 stride;
+    u8 pad60[4];
+    s32 wideBlocks;
+    s32 narrowBlocks;
+    u8 pad6C[4];
+    u32 *entries;
+    u32 graphics;
+    u32 allocation;
+    u32 sharedResource;
+    u8 pad80[0xB0];
+    u32 value130;
+} ScatterObject;
+
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D770);
 
-void func_0017D778(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x130) = arg1;
+void func_0017D778(ScatterObject *object, u32 value) {
+    object->value130 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D780);
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D7A8);
 
-void effReleaseScatterObject(u32 arg0) {
-    s32 temp_v0;
-
-    temp_v0 = (s32)arg0;
-    if (*(s32 *)(temp_v0 + 0x7c) != 0) {
-        effPcpScatterResRelease(*(s32 *)(temp_v0 + 0x7c));
+void effReleaseScatterObject(ScatterObject *object) {
+    if (object->sharedResource != 0) {
+        effPcpScatterResRelease(object->sharedResource);
     }
-    func_00333918(*(u32 *)(temp_v0 + 0x74));
-    func_003297C8(*(u32 *)(temp_v0 + 0x78));
-    func_00328E48(arg0);
+    func_00333918(object->graphics);
+    func_003297C8(object->allocation);
+    func_00328E48(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DA28);
 
-void effCreateScatterResource(s32 arg0, u32 arg1) {
-    u32 temp_v0;
+void effCreateScatterResource(ScatterObject *object, u32 resource) {
+    u32 shared;
 
-    temp_v0 = effPcpScatterResCreate(arg1);
-    *(u32 *)(arg0 + 0x7c) = temp_v0;
+    shared = effPcpScatterResCreate(resource);
+    object->sharedResource = shared;
 }
 
-void effShareScatterResource(s32 arg0, s32 arg1) {
-    u32 temp_v0;
+void effShareScatterResource(ScatterObject *object, ScatterObject *source) {
+    u32 shared;
 
-    temp_v0 = effPcpScatterResAddRef(*(u32 *)(arg1 + 0x7c));
-    *(u32 *)(arg0 + 0x7c) = temp_v0;
+    shared = effPcpScatterResAddRef(source->sharedResource);
+    object->sharedResource = shared;
 }
 
-s32 effGetScatterWideBlock(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 100) + arg1 * *(s32 *)(arg0 + 0x5c) * 0x10;
+s32 effGetScatterWideBlock(ScatterObject *object, s32 index) {
+    return object->wideBlocks + index * object->stride * 0x10;
 }
 
-s32 effGetScatterNarrowBlock(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 0x68) + arg1 * *(s32 *)(arg0 + 0x5c) * 8;
+s32 effGetScatterNarrowBlock(ScatterObject *object, s32 index) {
+    return object->narrowBlocks + index * object->stride * 8;
 }
 
-u32 func_0017DD08(s32 arg0, s32 arg1) {
-    return *(u32 *)(arg1 * 4 + *(s32 *)(arg0 + 0x70));
+u32 func_0017DD08(ScatterObject *object, s32 index) {
+    return object->entries[index];
 }
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DD20);

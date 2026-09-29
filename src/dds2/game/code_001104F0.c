@@ -4,6 +4,20 @@ extern u32 func_0012A6F0(u32);
 
 extern u32 func_0012AC90(u32, u32, u32, u32, u32, u32);
 
+typedef struct WorldObjectState {
+    u8 pad00[0xC];
+    u32 valueC;
+    u32 value10;
+    u32 handle14;
+    u8 pad18[8];
+    s32 value20;
+} WorldObjectState;
+
+typedef struct WorldObjectStateOwner {
+    u8 pad00[0x18];
+    WorldObjectState *state;
+} WorldObjectStateOwner;
+
 INCLUDE_ASM(const s32, "game/code_001104F0", func_001104F0);
 
 u16 func_00110628(s32 arg0) {
@@ -37,9 +51,9 @@ INCLUDE_ASM(const s32, "game/code_001104F0", func_00110938);
 
 INCLUDE_ASM(const s32, "game/code_001104F0", func_001109F0);
 
-void func_00110A88(s32 arg0, s8 arg1) {
-    if (*(s32 *)(arg0 + 0x18) != 0) {
-        *(s32 *)(*(s32 *)(arg0 + 0x18) + 0x20) = (s32)arg1;
+void func_00110A88(WorldObjectStateOwner *object, s8 value) {
+    if (object->state != NULL) {
+        object->state->value20 = (s32)value;
     }
 }
 
@@ -47,49 +61,49 @@ INCLUDE_ASM(const s32, "game/code_001104F0", func_00110AA8);
 
 INCLUDE_ASM(const s32, "game/code_001104F0", func_00110B50);
 
-void func_00110BE0(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_00110BE0(WorldObjectStateOwner *object, u32 value) {
+    WorldObjectState *state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
+    state = object->state;
     func_00110C18();
-    *(u32 *)(temp_v0 + 0xc) = arg1;
+    state->valueC = value;
 }
 
-u32 func_00110C18(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0xc);
+u32 func_00110C18(WorldObjectStateOwner *object) {
+    return object->state->valueC;
 }
 
-void func_00110C28(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_00110C28(WorldObjectStateOwner *object, u32 value) {
+    WorldObjectState *state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
+    state = object->state;
     func_00110C60();
-    *(u32 *)(temp_v0 + 0x10) = arg1;
+    state->value10 = value;
 }
 
-u32 func_00110C60(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x10);
+u32 func_00110C60(WorldObjectStateOwner *object) {
+    return object->state->value10;
 }
 
 INCLUDE_ASM(const s32, "game/code_001104F0", func_00110C70);
 
 INCLUDE_ASM(const s32, "game/code_001104F0", func_00110CD8);
 
-void func_00110D70(s32 arg0, u32 arg1) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_00110D70(WorldObjectStateOwner *object, u32 resourceId) {
+    WorldObjectState *state;
+    u32 handle;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    temp_v1 = func_0012A6F0(arg1);
-    *(u32 *)(temp_v0 + 0x14) = temp_v1;
+    state = object->state;
+    handle = func_0012A6F0(resourceId);
+    state->handle14 = handle;
 }
 
-void func_00110DA0(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
+void func_00110DA0(WorldObjectStateOwner *object, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 arg6) {
-    s32 temp_v0;
-    u32 temp_v1;
+    WorldObjectState *state;
+    u32 handle;
 
-    temp_v0 = *(s32 *)(arg0 + 0x18);
-    temp_v1 = func_0012AC90(arg1, arg2, arg3, arg4, arg5, arg6);
-    *(u32 *)(temp_v0 + 0x14) = temp_v1;
+    state = object->state;
+    handle = func_0012AC90(arg1, arg2, arg3, arg4, arg5, arg6);
+    state->handle14 = handle;
 }

@@ -4,14 +4,14 @@ extern void func_00295D38();
 
 extern void func_002958B0();
 
-u32 func_00294730(s32 arg0) {
-    u32 temp_v0;
+u32 func_00294730(s32 object) {
+    u32 result;
 
-    temp_v0 = 0;
-    if ((*(s32 *)(arg0 + 8) == 1) || (*(s32 *)(arg0 + 8) == 3)) {
-        temp_v0 = 0x3a;
+    result = 0;
+    if ((*(s32 *)(object + 8) == 1) || (*(s32 *)(object + 8) == 3)) {
+        result = 0x3a;
     }
-    return temp_v0;
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294758);

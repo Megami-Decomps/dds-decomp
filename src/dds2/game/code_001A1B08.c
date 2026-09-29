@@ -105,8 +105,8 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2D80);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", itfPanelEmitRecord);
 
-s8 itfPanelGetStatus(s32 arg0) {
-    return D_0045296C[arg0].ptr->sub24.unk10;
+s8 itfPanelGetStatus(s32 index) {
+    return D_0045296C[index].ptr->sub24.unk10;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", itfPanelSetStatus);
@@ -123,14 +123,14 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3138);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A31E0);
 
-s16 itfPanelGetPairFirst(s32 arg0) {
-    return D_0045296C[arg0].ptr->unk50;
+s16 itfPanelGetPairFirst(s32 index) {
+    return D_0045296C[index].ptr->unk50;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", itfPanelSetPairFirst);
 
-s16 itfPanelGetPairSecond(s32 arg0) {
-    return D_0045296C[arg0].ptr->unk52;
+s16 itfPanelGetPairSecond(s32 index) {
+    return D_0045296C[index].ptr->unk52;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);

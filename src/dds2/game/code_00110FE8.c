@@ -1,12 +1,17 @@
 #include "common.h"
 
+typedef struct WorldObjectPointer {
+    u8 pad00[0x18];
+    u32 *value;
+} WorldObjectPointer;
+
 INCLUDE_ASM(const s32, "game/code_00110FE8", func_00110FE8);
 
 INCLUDE_ASM(const s32, "game/code_00110FE8", func_00111050);
 
-void func_001110C8(s32 arg0, u32 arg1) {
-    if (arg0 != 0) {
-        **(u32 **)((s32)arg0 + 0x18) = arg1;
+void func_001110C8(WorldObjectPointer *object, u32 value) {
+    if (object != NULL) {
+        *object->value = value;
     }
 }
 

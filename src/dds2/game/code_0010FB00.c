@@ -2,6 +2,11 @@
 
 extern u32 D_00435D88;
 
+typedef struct WorldValue {
+    u8 pad00[8];
+    u32 value;
+} WorldValue;
+
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FB00);
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FB70);
@@ -16,42 +21,42 @@ void func_0010FCA8(void) {
     D_00435D88 = (D_00435D88 + 1) & 0xffff;
 }
 
-void func_0010FCC0(s32 arg0, u32 arg1) {
-    if (arg0 != 0) {
-        *(u32 *)((s32)arg0 + 8) = arg1;
+void func_0010FCC0(WorldValue *record, u32 value) {
+    if (record != NULL) {
+        record->value = value;
     }
 }
 
-u32 func_0010FCD0(s32 arg0) {
-    u32 temp_v0;
+u32 func_0010FCD0(WorldValue *record) {
+    u32 value;
 
-    temp_v0 = 0;
-    if (arg0 != 0) {
-        temp_v0 = *(u32 *)((s32)arg0 + 8);
+    value = 0;
+    if (record != NULL) {
+        value = record->value;
     }
-    return temp_v0;
+    return value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FCE8);
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FD58);
 
-u32 func_0010FDF0(s32 arg0) {
-    s32 temp_v0;
+u32 func_0010FDF0(s32 object) {
+    s32 child;
 
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0x18) + 8);
-    if (temp_v0 != 0) {
-        func_0010FC28(temp_v0);
+    child = *(s32 *)(*(s32 *)(object + 0x18) + 8);
+    if (child != 0) {
+        func_0010FC28(child);
     }
     return 1;
 }
 
-u32 func_0010FE20(s32 arg0) {
-    s32 temp_v0;
+u32 func_0010FE20(s32 object) {
+    s32 child;
 
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0x18) + 8);
-    if (temp_v0 != 0) {
-        func_0010FC68(temp_v0);
+    child = *(s32 *)(*(s32 *)(object + 0x18) + 8);
+    if (child != 0) {
+        func_0010FC68(child);
     }
     return 1;
 }

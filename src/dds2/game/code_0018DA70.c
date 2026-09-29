@@ -1,17 +1,25 @@
 #include "common.h"
 
-void effFreePairedResources(u32 arg0) {
-    func_0016EFA8(*(u32 *)((s32)arg0 + 0x74));
-    func_0016EFA8(*(u32 *)((s32)arg0 + 0x70));
-    func_00328E48(arg0);
+typedef struct PairedEffectResources {
+    u8 pad00[0x70];
+    u32 first;
+    u32 second;
+    u8 pad78[4];
+    u32 value7C;
+} PairedEffectResources;
+
+void effFreePairedResources(PairedEffectResources *resources) {
+    func_0016EFA8(resources->second);
+    func_0016EFA8(resources->first);
+    func_00328E48(resources);
 }
 
 INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018DAA8);
 
 INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018DC68);
 
-void func_0018DC78(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x7c) = arg1;
+void func_0018DC78(PairedEffectResources *resources, u32 value) {
+    resources->value7C = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018DC80);

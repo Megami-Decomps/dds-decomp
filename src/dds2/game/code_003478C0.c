@@ -1,14 +1,20 @@
 #include "common.h"
 
+typedef struct SdfRequest {
+    u8 active;
+    u8 pad01[3];
+    u32 value;
+} SdfRequest;
+
 INCLUDE_ASM(const s32, "game/code_003478C0", func_003478C0);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347948);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347988);
 
-void func_00347D40(u8 *arg0, u32 arg1) {
-    *(u32 *)(arg0 + 4) = arg1;
-    *arg0 = 1;
+void func_00347D40(SdfRequest *request, u32 value) {
+    request->value = value;
+    request->active = 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347D50);

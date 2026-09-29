@@ -16,11 +16,11 @@ INCLUDE_ASM(const s32, "game/code_00111388", func_001115B0);
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_00111628);
 
-void func_00111668(s32 arg0) {
-    u32 *puVar1;
+void func_00111668(s32 object) {
+    u32 *resource;
 
-    puVar1 = *(u32 **)(arg0 + 0x18);
+    resource = *(u32 **)(object + 0x18);
     dds3ReleaseObjectResource();
-    dds3ExchangeSlot(*puVar1, 0, 1);
-    func_00328E48(puVar1);
+    dds3ExchangeSlot(*resource, 0, 1);
+    func_00328E48(resource);
 }

@@ -6,8 +6,8 @@ extern s8 D_004391E0;
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_00341240);
 
-u32 effMiscRandMod(void *arg0, u32 arg1) {
-    return effMiscRand(arg0) % arg1;
+u32 effMiscRandMod(void *state, u32 modulus) {
+    return effMiscRand(state) % modulus;
 }
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003412D8);

@@ -20,6 +20,12 @@ extern void func_0030AB88(void);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
+typedef struct LmapTaskState {
+    u32 value0;
+    u32 value4;
+    u32 variant;
+} LmapTaskState;
+
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A128);
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A160);
@@ -59,34 +65,34 @@ INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AAB0);
 
-void func_0030AB20(s32 arg0) {
-    s64 temp_v0;
-    u32 temp_v1;
+void func_0030AB20(LmapTaskState *task) {
+    s64 hasFirstFlag;
+    u32 variant;
 
     D_0043908C = 0;
     D_004388AC = 1;
     D_00439090 = 0;
     D_004388B0 = 0;
-    temp_v0 = mdlFlagTest(0x1c);
-    temp_v1 = 3;
-    if (temp_v0 == 0) {
-        temp_v0 = mdlFlagTest(0x13);
-        temp_v1 = 2;
-        if (temp_v0 == 0) {
-            temp_v1 = 1;
+    hasFirstFlag = mdlFlagTest(0x1c);
+    variant = 3;
+    if (hasFirstFlag == 0) {
+        hasFirstFlag = mdlFlagTest(0x13);
+        variant = 2;
+        if (hasFirstFlag == 0) {
+            variant = 1;
         }
     }
-    *(u32 *)(arg0 + 8) = temp_v1;
-    *(u32 *)(arg0 + 4) = 0;
+    task->variant = variant;
+    task->value4 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AB88);
 
 u8 func_0030ABF0(void) {
-    s64 temp_v0;
+    s64 status;
 
-    temp_v0 = func_0030AC10();
-    return temp_v0 != 0;
+    status = func_0030AC10();
+    return status != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AC10);

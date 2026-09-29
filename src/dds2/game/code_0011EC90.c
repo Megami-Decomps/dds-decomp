@@ -12,10 +12,10 @@ extern s32 func_0010D650(s32);
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EC90);
 
 s32 func_0011ECC8(void) {
-    s32 param0 = func_0010D650(0);
-    s32 param1 = func_0010D650(1);
+    s32 firstOperand = func_0010D650(0);
+    s32 secondOperand = func_0010D650(1);
 
-    func_0010D818(func_0011C0B0(param0, param1));
+    func_0010D818(func_0011C0B0(firstOperand, secondOperand));
     return 1;
 }
 
@@ -51,27 +51,27 @@ INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EED8);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EF18);
 
-void func_0011EF48(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 8) = arg1;
+void func_0011EF48(s32 object, u32 value) {
+    *(u32 *)(object + 8) = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EF50);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EFA0);
 
-void func_0011EFE0(u32 arg0) {
-    func_0019C5B0(*(u32 *)((s32)arg0 + 0x10));
-    func_00328E48(arg0);
+void func_0011EFE0(u32 glyphOwner) {
+    func_0019C5B0(*(u32 *)((s32)glyphOwner + 0x10));
+    func_00328E48(glyphOwner);
 }
 
-void func_0011F010(s32 arg0) {
-    func_0019D518(*(u32 *)(arg0 + 0x10));
+void func_0011F010(s32 glyphOwner) {
+    func_0019D518(*(u32 *)(glyphOwner + 0x10));
 }
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011F028);
 
-void func_0011F0C0(s32 arg0, u8 arg1) {
-    func_0019D120(*(u32 *)(arg0 + 0x10), arg1);
+void func_0011F0C0(s32 glyphOwner, u8 flag) {
+    func_0019D120(*(u32 *)(glyphOwner + 0x10), flag);
 }
 
 void func_0011F0E0(void) {

@@ -9,28 +9,28 @@ typedef struct ScriptCommandBuffer {
     u32 values[0x20];
 } ScriptCommandBuffer;
 
-void func_0010C250(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_0010C250(u32 unused, u32 value) {
+    s32 context;
 
-    temp_v0 = func_00101958();
-    *(u32 *)(temp_v0 + 0xf0) = arg1;
+    context = func_00101958();
+    *(u32 *)(context + 0xf0) = value;
 }
 
 u32 func_0010C278(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    return *(u32 *)(temp_v0 + 0xf0);
+    context = func_00101958();
+    return *(u32 *)(context + 0xf0);
 }
 
-void func_0010C298(u32 arg0) {
-    s64 temp_v0;
+void func_0010C298(u32 task) {
+    s64 context;
 
-    temp_v0 = func_00101958();
-    if (temp_v0 != 0) {
-        func_0010BF48(temp_v0);
+    context = func_00101958();
+    if (context != 0) {
+        func_0010BF48(context);
     }
-    func_00101950(arg0, 0);
+    func_00101950(task, 0);
 }
 
 void func_0010C2D8(void) {
@@ -63,14 +63,14 @@ INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C408);
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C4E0);
 
-u32 scrPushNextInstructionValue(u32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
+u32 scrPushNextInstructionValue(u32 address) {
+    s32 instruction;
+    s32 context;
 
-    temp_v1 = (s32)arg0;
-    temp_v0 = *(s32 *)(temp_v1 + 0x18) + 1;
-    *(s32 *)(temp_v1 + 0x18) = temp_v0;
-    scrPushInteger(arg0, *(u32 *)(temp_v0 * 4 + *(s32 *)(temp_v1 + 0xbc)));
-    *(s32 *)(temp_v1 + 0x18) = *(s32 *)(temp_v1 + 0x18) + 1;
+    context = (s32)address;
+    instruction = *(s32 *)(context + 0x18) + 1;
+    *(s32 *)(context + 0x18) = instruction;
+    scrPushInteger(address, *(u32 *)(instruction * 4 + *(s32 *)(context + 0xbc)));
+    *(s32 *)(context + 0x18) = *(s32 *)(context + 0x18) + 1;
     return 1;
 }

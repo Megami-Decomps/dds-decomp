@@ -1,7 +1,7 @@
 #include "common.h"
 
 typedef struct CmdPacket {
-    /* 0x0 */ u32 unk0;
+    /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
     /* 0x8 */ u16 unk8;
     /* 0xA */ u16 unkA;
@@ -31,35 +31,35 @@ INCLUDE_ASM(const s32, "game/code_00341650", func_00341A00);
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_00341AD8);
 
-void func_00341BB8(s32 arg0) {
+void func_00341BB8(s32 trackId) {
     CmdPacket packet;
 
-    func_003421E8(arg0);
-    packet.unk0 = arg0;
+    func_003421E8(trackId);
+    packet.trackId = trackId;
     packet.unk4 = 0;
     packet.unk8 = 0x7F;
     func_00341650(0x20, 0, &packet, 0x10);
 }
 
-void func_00341C00(u32 arg0) {
-    u32 temp_v0 [4];
+void func_00341C00(u32 value) {
+    u32 packet[4];
 
-    temp_v0[0] = arg0;
-    func_00341650(0x30, 0, temp_v0, 0x10);
+    packet[0] = value;
+    func_00341650(0x30, 0, packet, 0x10);
 }
 
-void func_00341C30(s32 arg0) {
+void func_00341C30(s32 trackId) {
     CmdPacket packet;
 
-    func_003421E8(arg0);
-    packet.unk0 = arg0;
+    func_003421E8(trackId);
+    packet.trackId = trackId;
     packet.unk8 = 0x7F;
     func_00341650(0x130, 0, &packet, 0x10);
 }
 
-void func_00341C78(u32 arg0) {
-    u32 temp_v0 [4];
+void func_00341C78(u32 value) {
+    u32 packet[4];
 
-    temp_v0[0] = arg0;
-    func_00341650(0x30, 0, temp_v0, 0x10);
+    packet[0] = value;
+    func_00341650(0x30, 0, packet, 0x10);
 }

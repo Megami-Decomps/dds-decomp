@@ -13,11 +13,11 @@ INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
 
 void func_00136388(void) {
-    u32 *temp_v0 = D_0038BBD8;
+    u32 *displayTable = D_0038BBD8;
 
-    memset(temp_v0, 0, 0x14);
-    temp_v0[0] = (u32)D_0038BB50;
-    temp_v0[1] = (u32)D_0038BB60;
+    memset(displayTable, 0, 0x14);
+    displayTable[0] = (u32)D_0038BB50;
+    displayTable[1] = (u32)D_0038BB60;
 }
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001363D8);

@@ -20,13 +20,13 @@ INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016F6D0);
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016F850);
 
-void func_0016FAD0(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
+void func_0016FAD0(u64 table) {
+    u64 firstBlock;
+    u64 secondBlock;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    func_0016F850(temp_v0, temp_v1);
+    firstBlock = effParamTableGetBlock(table, 0);
+    secondBlock = effParamTableGetBlock(table, 1);
+    func_0016F850(firstBlock, secondBlock);
 }
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FB18);
@@ -43,15 +43,15 @@ void func_00171590(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_00171598);
 
-void func_00171798(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x20));
-    func_003297C8(*(u32 *)(arg0 + 0x24));
+void func_00171798(s32 object) {
+    func_00333918(*(u32 *)(object + 0x20));
+    func_003297C8(*(u32 *)(object + 0x24));
 }
 
-void func_001717C8(u32 *arg0) {
-    arg0[4] = 3;
-    *arg0 = 0x80808080;
-    arg0[3] = 0;
+void func_001717C8(u32 *state) {
+    state[4] = 3;
+    *state = 0x80808080;
+    state[3] = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_001717E8);

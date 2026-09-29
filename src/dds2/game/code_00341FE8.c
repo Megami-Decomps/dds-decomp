@@ -1,7 +1,7 @@
 #include "common.h"
 
 typedef struct CmdPacket {
-    /* 0x0 */ u32 unk0;
+    /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
     /* 0x8 */ u16 unk8;
     /* 0xA */ u16 unkA;
@@ -75,22 +75,22 @@ void sndReleaseMidiTrack(s32 id) {
     }
 }
 
-u8 func_00342440(s32 arg0) {
-    return D_0047ABD0[arg0].unk4;
+u8 func_00342440(s32 index) {
+    return D_0047ABD0[index].unk4;
 }
 
-u8 func_00342458(s32 arg0) {
-    return D_0047ABD0[arg0].unk5;
+u8 func_00342458(s32 index) {
+    return D_0047ABD0[index].unk5;
 }
 
-s32 func_00342470(s32 arg0) {
-    FE250Entry *entry = &D_0047ABD0[arg0];
-    s32 diff = entry->unk4 - entry->unk5;
+s32 func_00342470(s32 index) {
+    FE250Entry *entry = &D_0047ABD0[index];
+    s32 difference = entry->unk4 - entry->unk5;
 
-    if (diff <= 0) {
-        diff = 0;
+    if (difference <= 0) {
+        difference = 0;
     }
-    return diff;
+    return difference;
 }
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_00342498);
@@ -101,21 +101,21 @@ INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424B8);
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424D8);
 
-void func_00342538(s32 arg0) {
+void func_00342538(s32 trackId) {
     CmdPacket packet;
 
-    func_003421E8(arg0);
-    packet.unk0 = arg0;
+    func_003421E8(trackId);
+    packet.trackId = trackId;
     packet.unk4 = 0;
     packet.unk8 = 0x17F;
     func_00341650(0x20, 0, &packet, 0x10);
 }
 
-void func_00342580(u32 arg0) {
-    u32 temp_v0 [4];
+void func_00342580(u32 value) {
+    u32 packet[4];
 
-    temp_v0[0] = arg0;
-    func_00341650(0xd0, 0, temp_v0, 0x10);
+    packet[0] = value;
+    func_00341650(0xd0, 0, packet, 0x10);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00341FE8", D_00438B80);

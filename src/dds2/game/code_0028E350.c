@@ -79,7 +79,7 @@ u32 func_0028FD08(void) {
     return 0;
 }
 
-void func_0028FD10(u32 arg0) {
-    func_0028FD30(arg0, 0xffffffffffffffff, 0xffffffffffffffff);
+void func_0028FD10(u32 object) {
+    func_0028FD30(object, 0xffffffffffffffff, 0xffffffffffffffff);
 }
 
