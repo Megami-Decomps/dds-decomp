@@ -293,7 +293,24 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CE90);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CF00);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CF88);
+/* DDS2 twin of DDS1 brsCalcExpGain: enemy units (flag 2) keep exp; others
+   start at 0, halve on reward flag 0x23F and restore on 0x240. */
+s32 func_0029CF88(u8 *unit, s32 exp, s32 a2) {
+    s32 result;
+
+    if ((*(u16 *)unit & 2) != 0) {
+        result = exp;
+    } else {
+        result = 0;
+        if (func_00315098(unit, 0x23F) != 0) {
+            result = exp / 2;
+        }
+        if (func_00315098(unit, 0x240) != 0) {
+            result = exp;
+        }
+    }
+    return result;
+}
 
 u32 func_0029D000(void) {
     return 0;
