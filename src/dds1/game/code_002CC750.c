@@ -453,11 +453,17 @@ u8 func_002CDD88(u16 i) {
     return D_003907B5[i].v0;
 }
 
-u32 func_002CDDB0(void) {
+u32 func_002CDDB0() {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CDDB8);
+u32 func_002CDDB8(ScrVmOperand *operand, u32 value) {
+    s8 selected = func_002CD7B8(operand);
+
+    if (func_002CD7B8(operand)) {
+        return func_002CDDB0((u16)selected, value);
+    }
+}
 
 u16 func_002CDE20(u16 scriptId, u32 entry) {
     if (entry >= 8) {

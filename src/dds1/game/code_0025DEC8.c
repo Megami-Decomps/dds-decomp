@@ -4,18 +4,39 @@ extern u32 D_003BAA9C;
 
 extern u64 func_00197C40(u64, u64, u64, u16, u32, u64);
 
-void func_0025DEC8(s32 context, u64 unused, u64 arg2, u64 arg3,
-                                    u64 arg4) {
-    s32 entry;
-    u64 handle;
+typedef struct ItfGlyphData {
+    u8 pad00[0x64];
+    u16 code; /* 0x64 */
+} ItfGlyphData;
 
-    entry = *(s32 *)(*(s32 *)(context + 0x70) + 0x14);
-    if (*(s32 *)(entry + 0x20) != 0) {
-        handle = func_00197C40(0x970, 0xb58, 1, *(u16 *)(*(s32 *)(entry + 0x1c) + 100), D_003BAA9C,
-                                                    arg2);
-        func_001954C8(handle, arg3);
-        func_001958A0(handle, 1, arg4);
-        func_00194920(handle);
+typedef struct ItfGlyphEntry {
+    u8 pad00[0x1C];
+    ItfGlyphData *data; /* 0x1C */
+    s32 active; /* 0x20 */
+} ItfGlyphEntry;
+
+typedef struct ItfGlyphList {
+    u8 pad00[0x14];
+    ItfGlyphEntry *selected; /* 0x14 */
+} ItfGlyphList;
+
+typedef struct ItfGlyphDisplayContext {
+    u8 pad00[0x70];
+    ItfGlyphList *glyphList; /* 0x70 */
+} ItfGlyphDisplayContext;
+
+void func_0025DEC8(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
+                   u64 color, u64 glyphAttribute) {
+    ItfGlyphEntry *entry;
+    u64 glyph;
+
+    entry = context->glyphList->selected;
+    if (entry->active != 0) {
+        glyph = func_00197C40(0x970, 0xb58, 1, entry->data->code, D_003BAA9C,
+                              parentGlyph);
+        func_001954C8(glyph, color);
+        func_001958A0(glyph, 1, glyphAttribute);
+        func_00194920(glyph);
         return;
     }
 }

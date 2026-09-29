@@ -12,8 +12,8 @@ INCLUDE_ASM(const s32, "game/code_00253E58", func_00254680);
 
 INCLUDE_ASM(const s32, "game/code_00253E58", func_002546D8);
 
-void func_00254758(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_0024E260(arg0, arg1, arg2, arg3, 14, arg4);
+void func_00254758(s32 x, s32 y, s32 z, s32 drawContext, s32 drawArgument) {
+    func_0024E260(x, y, z, drawContext, 14, drawArgument);
 }
 
 INCLUDE_ASM(const s32, "game/code_00253E58", func_00254778);

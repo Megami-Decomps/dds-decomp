@@ -26,7 +26,12 @@ typedef struct MdlViewState {
     s16 unk36;
     u8 pad38[2];
     s16 unk3A;
-    u8 pad3C[0x50];
+    u8 pad3C[4];
+    s16 unk40;
+    s16 unk42;
+    s16 unk44;
+    s16 unk46;
+    u8 pad48[0x44];
     s32 slotBeforeResources[1]; /* One element before resources[] for rightward rotation. */
     s32 resources[1];
 } MdlViewState;
@@ -159,7 +164,53 @@ u16 func_002193F0(MdlRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002193F8);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219590);
+typedef struct EffMarkParams {
+    u8 unk0[8];
+    s32 mark0;       /* 0x08 */
+    s32 mark1;       /* 0x0C */
+    u16 start;       /* 0x10 */
+    u16 end;         /* 0x12 */
+    u16 interval;    /* 0x14 */
+    u8 face;         /* 0x16 */
+    u8 blend;        /* 0x17 */
+    u32 colors[4];   /* 0x18 */
+} EffMarkParams;
+
+extern char *D_003679B8[];
+extern u8 D_003679B0[];
+extern u16 D_00367980[];
+extern char D_003BBBB0[];
+extern char D_003BBBB8[];
+
+void func_00219590(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
+    s32 boxY = y + 0x300;
+    s32 labelX = x + 0xC0;
+    u32 color;
+    s32 row;
+    s32 col;
+
+    sdfAppendPacket(list, func_002E4960(labelX, y, z, 0, "MARK0:%d", params->mark0));
+    sdfAppendPacket(list, func_002E4960(labelX, y + 0x60, z, 0, "MARK1:%d", params->mark1));
+    sdfAppendPacket(list, func_002E4960(labelX, y + 0xC0, z, 0, "START:%d", params->start));
+    sdfAppendPacket(list, func_002E4960(labelX, y + 0x120, z, 0, "END  :%d", params->end));
+    sdfAppendPacket(list, func_002E4960(labelX, y + 0x180, z, 0, "ITRVL:%d", params->interval));
+    sdfAppendPacket(list, func_002E4960(labelX, y + 0x1E0, z, 0, "FACE :%d", params->face));
+    sdfAppendPacket(list, func_002E4960(labelX, y + 0x240, z, 0, "BLEND:%d", params->blend));
+    for (row = 0; row != 4; row++) {
+        color = params->colors[row];
+        sdfAppendPacket(list, func_0011D3E8(x + 0x480, boxY, z, 0x300, 0x180, (color & 0xFFFFFF) | 0x80000000, 0x60404040));
+        for (col = 0; col != 4; col++) {
+            sdfAppendPacket(list, func_002E4960(labelX, boxY, z, D_003679B0[col], D_003679B8[col]));
+            sdfAppendPacket(list, func_002E4960(x + 0x240, boxY, z, 0, D_003BBBB0, color & 0xFF));
+            color >>= 8;
+            boxY += 0x60;
+        }
+        boxY += 0x60;
+    }
+    if (selected >= 0) {
+        sdfAppendPacket(list, func_002E4960(x, y + D_00367980[selected], z, 0, D_003BBBB8));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002198D8);
 
