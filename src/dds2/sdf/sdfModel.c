@@ -115,7 +115,7 @@ SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 in
 }
 
 /* Append a zeroed packet with its fixed first command word. */
-SdfPacket *func_00330CE8(SdfPacket *packet) {
+SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
     packet->u8.q = 0;
     packet->u0.q = 0x60000000;
     return packet + 1;
@@ -155,7 +155,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331500);
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331590);
 
 /* Reset the node lists and initialize both per-model slots. */
-void func_003316B0(SdfModel *model, s32 arg1, s32 arg2) {
+void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
     s32 i = 0;
     s32 j = 0;
 
@@ -178,7 +178,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331740);
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003317C8);
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
-SdfModel *func_003318B8(void *data, SdfItemListRef *listRef) {
+SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
     SdfModel *model = func_003317C8(data, listRef);
     SdfItemList *list = listRef->items;
@@ -196,7 +196,7 @@ SdfModel *func_003318B8(void *data, SdfItemListRef *listRef) {
 }
 
 /* Attach each item using the alternate draw-node setup path. */
-SdfModel *func_00331940(void *data, SdfItemListRef *listRef) {
+SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
     SdfModel *model = func_003317C8(data, listRef);
     SdfItemList *list;

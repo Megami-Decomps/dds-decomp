@@ -15,7 +15,7 @@ extern s32 D_003BC870;
 extern s32 D_003BC874;
 extern s32 D_003BC878;
 extern s32 D_003BC87C;
-extern s32 func_002D2D00();
+extern s32 sdfTexReleaseReferenceViaHandler();
 extern s32 dds3GetWorldObject();
 extern void func_00110860();
 extern void fileWaitReady();
@@ -103,13 +103,13 @@ extern s32 D_003BC800;
 
 extern void *fileUpdateWait(void);
 
-extern void *func_0028B748(void);
+extern void *fileSlotStatusPoll(void);
 
 extern void (*D_0037E550[][4])(void *);
 
 extern void fileResetSlotStates(FileRecordSlots *record);
 
-extern void *func_00293D90();
+extern void *fileJobCreateFromCommandState();
 
 extern char D_003BC940[];
 
@@ -367,7 +367,7 @@ extern void *func_0028B3F0(void);
 
 extern void *fileBeginSlotOpen(void);
 
-extern s32 func_00289EB0(void *arg0);
+extern s32 mcPollNonnegativeResult(void *arg0);
 
 extern void *fileScanSlotStatesAdvance(void);
 
@@ -621,7 +621,7 @@ void func_0028A2D0(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
     func_00195548(0x54);
 }
 
-void func_0028A388(s32 x, s32 y, u64 first, u64 second) {
+void fileDrawMenuImageAtPoint(s32 x, s32 y, u64 first, u64 second) {
     u64 imageHandle;
 
     imageHandle = func_001978E8(x << 4, y << 3, 0, first, second, 0);
@@ -630,7 +630,7 @@ void func_0028A388(s32 x, s32 y, u64 first, u64 second) {
 }
 
 extern f32 D_003BC88C;
-extern f32 func_002E77F8(f32);
+extern f32 sdfSinPoly(f32);
 extern s32 itfMesGetGlobalWindowValue(void);
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
@@ -641,10 +641,10 @@ void func_0028A3D8(void) {
     func_00108A80(0x56);
     func_00108CB8(0);
     D_003BC88C = D_003BC88C + 0.39999998f;
-    func_002E77F8(D_003BC88C);
+    sdfSinPoly(D_003BC88C);
     angle = ((s32)D_0037D4D0[2] + 8) % 360;
     D_0037D4D0[2] = angle;
-    wave = func_002E77F8((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
+    wave = sdfSinPoly((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
     D_0037D4D0[3] = (s32)((wave + 1.0f) * 0.5f * 191.0f + 64.0f);
     func_00108FA0(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_0037D4D0[3] << 24) | 0xAEC014,
                   (D_0037D4D0[3] << 24) | 0xAEC014, (D_0037D4D0[3] << 24) | 0xAEC014,
@@ -654,7 +654,7 @@ void func_0028A3D8(void) {
 extern void func_00108A80(s32);
 extern void func_00108CB8(s32);
 extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, s32);
-extern void func_002908D0(void);
+extern void fileCursorPulseUpdate(void);
 extern void func_00290A88(s32, s32, s32);
 extern s32 D_003BC85C;
 extern s32 D_003BC884;
@@ -664,7 +664,7 @@ void fileDrawSaveWindow(void) {
     func_00108CB8(0);
     func_00108FA0(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
     func_00108FA0(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
-    func_002908D0();
+    fileCursorPulseUpdate();
     func_00290A88(0x17E, 0x118, 0x56);
     D_003BC85C++;
 }
@@ -860,7 +860,7 @@ void *fileResetSelection(void) {
     D_003BC804 = 1;
     func_0028AB30(1);
     D_003BC810 = 1;
-    return func_0028B748;
+    return fileSlotStatusPoll;
 }
 
 u32 fileAbortSlotFlow(void) {
@@ -960,7 +960,7 @@ void func_0028B710(void) {
     func_0028B300();
 }
 
-void *func_0028B748(void) {
+void *fileSlotStatusPoll(void) {
     s32 status;
 
     if (fileReqPoll() == 0) {
@@ -1148,7 +1148,7 @@ void *fileScanSlotIconSysBegin(void) {
 
 void *mcHandleSlotWriteResult(void) {
     s32 value;
-    s32 status = func_00289EB0(&value);
+    s32 status = mcPollNonnegativeResult(&value);
     if (status == 0) {
         return NULL;
     }
@@ -1244,7 +1244,7 @@ void *fileScanSlotIconSysAltBegin(void) {
 
 void *mcHandleDirectoryWriteResult(void) {
     s32 value;
-    s32 status = func_00289EB0(&value);
+    s32 status = mcPollNonnegativeResult(&value);
     if (status == 0) {
         return NULL;
     }
@@ -1675,41 +1675,41 @@ void func_0028F460(void) {
             handle = *slot;
             i--;
             if (handle != 0) {
-                func_002D2D00(handle);
+                sdfTexReleaseReferenceViaHandler(handle);
                 *slot = 0;
             }
             slot++;
         } while (i >= 0);
         if (D_003BC884 != 0) {
-            func_002D2D00(D_003BC884);
+            sdfTexReleaseReferenceViaHandler(D_003BC884);
             D_003BC884 = 0;
         }
         if (D_003BC880 != 0) {
-            func_002D2D00(D_003BC880);
+            sdfTexReleaseReferenceViaHandler(D_003BC880);
             D_003BC880 = 0;
         }
         if (D_003BC87C != 0) {
-            func_002D2D00(D_003BC87C);
+            sdfTexReleaseReferenceViaHandler(D_003BC87C);
             D_003BC87C = 0;
         }
         if (D_003BC878 != 0) {
-            func_002D2D00(D_003BC878);
+            sdfTexReleaseReferenceViaHandler(D_003BC878);
             D_003BC878 = 0;
         }
         if (D_003BC874 != 0) {
-            func_002D2D00(D_003BC874);
+            sdfTexReleaseReferenceViaHandler(D_003BC874);
             D_003BC874 = 0;
         }
         if (D_003BC870 != 0) {
-            func_002D2D00(D_003BC870);
+            sdfTexReleaseReferenceViaHandler(D_003BC870);
             D_003BC870 = 0;
         }
         if (D_003BC86C != 0) {
-            func_002D2D00(D_003BC86C);
+            sdfTexReleaseReferenceViaHandler(D_003BC86C);
             D_003BC86C = 0;
         }
         if (D_003BC868 != 0) {
-            func_002D2D00(D_003BC868);
+            sdfTexReleaseReferenceViaHandler(D_003BC868);
             D_003BC868 = 0;
         }
         world = dds3GetWorldObject();
@@ -1774,7 +1774,7 @@ void func_002904A8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002904C8);
 
-void func_00290520(void) {
+void fileCursorStepUp(void) {
     D_0037D4A0.unk4++;
     D_0037D4A0.unk4 = D_0037D4A0.unk4 <= 0 ? 0 : D_0037D4A0.unk4 > 12 ? 12 : D_0037D4A0.unk4;
     if (D_0037D4A0.unk4 >= 7) {
@@ -1783,7 +1783,7 @@ void func_00290520(void) {
     }
 }
 
-void func_002905A8(void) {
+void fileFadeStepDown(void) {
     D_0037D4D0[0] -= 0x10;
     D_0037D4D0[0] = D_0037D4D0[0] <= 0 ? 0 : D_0037D4D0[0] > 0x80 ? 0x80 : D_0037D4D0[0];
 }
@@ -1794,7 +1794,7 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", jtbl_003B26E0);
 
 INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2718);
 
-void func_002905E8(s32 index, s32 x, s32 y, s32 alpha) {
+void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     s32 uv[21][2] = {
         {2, 2},   {2, 2},   {2, 20},  {2, 38},  {2, 56},  {2, 74},  {26, 2},
         {26, 20}, {26, 38}, {26, 56}, {26, 74}, {26, 74}, {26, 74}, {26, 74},
@@ -1808,7 +1808,7 @@ void func_002905E8(s32 index, s32 x, s32 y, s32 alpha) {
                   (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, D_003BC87C);
 }
 
-void func_00290788(s32 dir, s32 step, s32 *outX, s32 *outY) {
+void fileCursorOffsetLookup(s32 dir, s32 step, s32 *outX, s32 *outY) {
     s32 offsets[3][5][2] = {
         {{0, 0}, {2, 1}, {4, 2}, {6, 4}, {8, 6}},
         {{0, 0}, {-2, 1}, {-4, 2}, {-6, 4}, {-8, 6}},
@@ -1829,7 +1829,7 @@ void func_00290898(void) {
     D_0037D4E0.alpha[2] = 0x80;
 }
 
-void func_002908D0(void) {
+void fileCursorPulseUpdate(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
@@ -1857,7 +1857,7 @@ void func_002908D0(void) {
                     }
                     D_0037D4E0.counter[i] = 0;
                 }
-                func_00290788(i, 0, &D_0037D4E0.pos[i][0], &D_0037D4E0.pos[i][1]);
+                fileCursorOffsetLookup(i, 0, &D_0037D4E0.pos[i][0], &D_0037D4E0.pos[i][1]);
             }
         }
     }
@@ -1883,7 +1883,7 @@ void func_00290C98(void) {
     D_0037D4A0.unk4 = 0;
 }
 
-void func_00290CB0(void) {
+void fileLoadCtxSlideUpdate(void) {
     switch (D_0037D4A0.unk10) {
     case 1:
         D_0037D4A0.unk14 -= 0x14;
@@ -2160,7 +2160,7 @@ void *fileResolveSecondaryBuffer(FileJob *job) {
     return NULL;
 }
 
-FileJob *func_00293450(FileJob *request) {
+FileJob *fileJobCreateFromJob(FileJob *request) {
     FileJob *job = fileCreateJob(request->type);
     job->option = request->option;
     job->slots[0].selector = request->slots[0].selector;
@@ -2261,7 +2261,7 @@ void func_002937A0(void *arg0) {
     }
 }
 
-void func_002937E0(job, src, size, option)
+void fileJobSetPrimaryData(job, src, size, option)
     FileJob *job;
     void *src;
     s32 size;
@@ -2290,13 +2290,13 @@ void func_00293880(u64 arg0, u64 arg1, u16 arg2) {
         temp_v3 = sdfResourceRetainAddress(temp_v2);
         func_002E5C68(temp_v0, temp_v3, temp_v1);
         func_002E5C38(temp_v0);
-        func_002937E0(arg0, temp_v3, temp_v1, arg2);
+        fileJobSetPrimaryData(arg0, temp_v3, temp_v1, arg2);
         func_002D0918(temp_v2);
         return;
     }
 }
 
-void func_00293960(job, src, size, selector)
+void fileJobSetSecondaryData(job, src, size, selector)
     FileJob *job;
     void *src;
     s32 size;
@@ -2325,7 +2325,7 @@ void func_00293A00(u64 arg0, u64 arg1, u16 arg2) {
         temp_v3 = sdfResourceRetainAddress(temp_v2);
         func_002E5C68(temp_v0, temp_v3, temp_v1);
         func_002E5C38(temp_v0);
-        func_00293960(arg0, temp_v3, temp_v1, arg2);
+        fileJobSetSecondaryData(arg0, temp_v3, temp_v1, arg2);
         func_002D0918(temp_v2);
         return;
     }
@@ -2363,17 +2363,17 @@ void *fileDuplicateJob(void *source) {
     FileJob *request = source;
     FileJob *job = fileCreateJob(request->type);
     if (request->slots[0].size != 0) {
-        func_002937E0(job, fileResolvePrimaryBuffer(request), request->slots[0].size, request->option);
+        fileJobSetPrimaryData(job, fileResolvePrimaryBuffer(request), request->slots[0].size, request->option);
     }
     if (request->slots[1].size != 0) {
-        func_00293960(job, fileResolveSecondaryBuffer(request), request->slots[1].size, request->slots[0].selector);
+        fileJobSetSecondaryData(job, fileResolveSecondaryBuffer(request), request->slots[1].size, request->slots[0].selector);
     }
     return job;
 }
 
 /* No return on the path where no command state exists: retail hands back
  * whatever v0 held. */
-void *func_00293D90(entry)
+void *fileJobCreateFromCommandState(entry)
     u64 entry;
 {
     s64 command;
@@ -2395,7 +2395,7 @@ void *func_00293D90(entry)
     }
 }
 
-u32 func_00293E30(FileJob *job) {
+u32 fileJobSerializedSize(FileJob *job) {
     u32 size = 0x2C;
 
     if (fileResolvePrimaryBuffer(job) != NULL) {
@@ -2578,7 +2578,7 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, void *source) {
 
 FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry) {
     func_003003F0(D_003BC940);
-    return fileAppendJob(queue, (u32)func_00293D90(entry));
+    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(entry));
 }
 
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {

@@ -16,12 +16,12 @@ u32 func_0014F4C8(void) {
 
 extern s32 D_0032E3B0[];
 
-extern s32 func_0010D428(s32);
+extern s32 scrReadIntParameter(s32);
 
 /* Clear the selected flag only if it was set, and report whether it changed. */
-s32 func_0014F4F0(void) {
+s32 fldCommandClearSelectedFlag(void) {
     s32 changed = 0;
-    switch (func_0010D428(0)) {
+    switch (scrReadIntParameter(0)) {
     case 0:
         if (D_0032E3B0[3] & 1) {
             D_0032E3B0[3] &= ~1;
@@ -71,7 +71,7 @@ s32 func_0014F5E8(void) {
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
     s32 commandName;
-    commandName = func_0010D5A8(0);
+    commandName = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
@@ -95,17 +95,17 @@ u32 fldCommandIsSoundBusy(void) {
 
 extern s32 D_0032E3C0[];
 
-extern s32 func_0010D428(s32);
+extern s32 scrReadIntParameter(s32);
 
 extern void func_00121DE0(s32, s32, s32, s32, s32, s32);
 
 /* Pass five field-script arguments to the underlying handler. */
 s32 func_0014F6F0(void) {
-    s32 first = func_0010D428(0);
-    s32 second = func_0010D428(1);
-    s32 third = func_0010D428(2);
-    s32 fourth = func_0010D428(3);
-    func_00121DE0(D_0032E3C0[0], first, second, third, fourth, func_0010D428(4));
+    s32 first = scrReadIntParameter(0);
+    s32 second = scrReadIntParameter(1);
+    s32 third = scrReadIntParameter(2);
+    s32 fourth = scrReadIntParameter(3);
+    func_00121DE0(D_0032E3C0[0], first, second, third, fourth, scrReadIntParameter(4));
     return 1;
 }
 

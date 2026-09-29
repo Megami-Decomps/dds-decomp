@@ -23,6 +23,35 @@ typedef struct EventUnit {
     s8 valueD1;
 } EventUnit;
 
+/* Event unit: flag bits at 0xa8 drive status queries below. */
+typedef struct EvtUnit {
+    u8 pad[0x6c];      /* 0x0 */
+    u32 value;         /* 0x6c: changed by evtSetUnitValueAndFlag */
+    u8 pad70[0x14];   /* 0x70 */
+    s32 currentTransitionValue; /* 0x84 */
+    s32 previousTransitionValue; /* 0x88 */
+    u8 pad8C[0x1C];   /* 0x8c */
+    u32 flags;         /* 0xa8 */
+    u8 padAC[0x10];   /* 0xac */
+    u16 unkBC;         /* 0xbc */
+    u8 padBE[0x9E];
+    s16 transitionElapsed; /* 0x15c */
+    s16 transitionDuration; /* 0x15e */
+} EvtUnit;
+
+typedef struct PcpScatterWork4 PcpScatterWork4;
+
+/* func_001730D0 */
+struct PcpScatterWork4 {
+    u8 pad00[0x40];
+    s128 unk40;
+    u8 pad50[0x12C];
+    f32 unk17C;
+    u32 unk180;
+    u32 scatterObject;
+    u32 ownedBuffer;
+};
+
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023B3A0);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023B480);
@@ -44,7 +73,10 @@ void evtUnitSetValueAndFlag(EventUnit *unit, u32 value) {
     unit->flags = unit->flags | 0x20000;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtClearUnitValueChangeFlag);
+void evtClearUnitValueChangeFlag(EvtUnit *unit) {
+    unit->flags = unit->flags & ~0x20000;
+    func_0023C5F0(unit);
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C870);
 
@@ -64,7 +96,14 @@ void evtUnitSetStateBits(EventUnit *unit) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CB68);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC00);
+s32 func_0023CC00(s32 id) {
+    u8 *obj = (u8 *)func_00110C70(dds3GetWorldObject(), id, 5);
+
+    if (obj != NULL) {
+        return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+    }
+    return (s32)obj;
+}
 
 s32 evtUnitGetNestedValue(EventUnit *unit) {
     if (unit == NULL) {
@@ -75,7 +114,25 @@ s32 evtUnitGetNestedValue(EventUnit *unit) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC60);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CD98);
+s32 func_0023CD98(u8 *work) {
+    s32 handle;
+
+    if (work == NULL) {
+        return 1;
+    }
+    handle = *(s32 *)(work + 0x68);
+    *(s32 *)(*(u8 **)(*(u8 **)(work + 0x8C) + 0x18) + 0x80) = 0;
+    if (handle != 0) {
+        func_00328E48(handle);
+        *(s32 *)(work + 0x68) = 0;
+    }
+    if (*(s32 *)(work + 0xA0) != 0) {
+        dds3FreePathObject(*(s32 *)(work + 0xA0));
+        *(s32 *)(work + 0xA0) = 0;
+    }
+    func_00328E48(work);
+    return 1;
+}
 
 s32 func_0023CE08(EventUnit *unit) {
     return unit->valueAC;
@@ -101,7 +158,9 @@ void func_0023CE98(EventUnit *unit, s32 first, s32 second) {
     unit->valueD1 = second;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CEA8);
+void func_0023CEA8(u8 *work) {
+    func_0023CED8(work, *(s8 *)(work + 0xD0), *(s8 *)(work + 0xD1), 0, 0, 2);
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CED8);
 

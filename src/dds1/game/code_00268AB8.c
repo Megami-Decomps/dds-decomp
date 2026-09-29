@@ -44,7 +44,7 @@ extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
-extern u64 func_0010D428(u64);
+extern u64 scrReadIntParameter(u64);
 
 extern u32 D_003BC5B0[2];
 
@@ -188,15 +188,15 @@ s32 mnuGetTitleEffectFrameCounter(void) {
 u32 func_00269758(void) {
     u64 sequence;
 
-    sequence = func_0010D428(0);
-    func_002E8D10(sequence);
+    sequence = scrReadIntParameter(0);
+    sndStartTrackDefault(sequence);
     return 1;
 }
 
 u32 func_00269780(void) {
     u64 sequence;
 
-    sequence = func_0010D428(0);
+    sequence = scrReadIntParameter(0);
     sndSetSequenceVolumePan(sequence, 0x7f, 0x3f);
     return 1;
 }
@@ -208,7 +208,7 @@ u32 func_002697B0(void) {
 
 s32 mnuInitializeTitleEffects(void) {
     s32 value;
-    value = func_0010D5A8(0);
+    value = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
@@ -235,7 +235,7 @@ u32 func_00269868(void) {
 
 s32 movCheckStartupSoundState(void) {
     if (func_0026A720() == 0) {
-        func_0026A5F0(func_0010D428(0));
+        func_0026A5F0(scrReadIntParameter(0));
         return 0;
     }
     return func_0026A720() != 1;

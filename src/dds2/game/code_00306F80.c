@@ -2,7 +2,7 @@
 
 extern s32 func_00309638(u32);
 
-extern s32 func_0030A048(u32, u32);
+extern s32 itfFindGridNodeByKey(u32, u32);
 
 typedef struct QuadU32 {
     u32 x; // 0x00
@@ -98,7 +98,7 @@ void func_00306F80(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
-s32 func_00307160(s32 object, s32 key) {
+s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
     s32 entry = func_00304AD8(object);
     s32 result;
 
@@ -165,7 +165,7 @@ void itfGridCopyEntryQuad(s32 object, s32 index) {
     } while (-1 < remaining);
 }
 
-void func_00307388(s32 *position, s32 x, s32 y) {
+void itfGridStorePosition(s32 *position, s32 x, s32 y) {
     position[0] = x;
     position[1] = y;
 }
@@ -176,7 +176,7 @@ void func_00307398(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
 }
 
 /* The overlay packet is present only when this work flag is set. */
-u8 func_003073D0(GridDrawWork *work) {
+u8 itfGridGetOverlayFlag(GridDrawWork *work) {
     return work->overlayEnabled;
 }
 
@@ -211,7 +211,7 @@ GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
     RenderCallbackEntry *entry;
     sdfResetPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
-    if (func_003073D0(object) != 0) {
+    if (itfGridGetOverlayFlag(object) != 0) {
         func_003073D8(object, (s32)cursor, context);
         cursor += object->overlayDataSize;
     }
@@ -249,7 +249,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00307D70);
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
 
 /* Unpack four 8-bit channels into the low and high halves of two 64-bit words. */
-void func_00308020(u64 *channels, u32 color) {
+void itfGridUnpackColorChannels(u64 *channels, u32 color) {
     u64 green;
     channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
     green = color & 0xFF00;
@@ -258,7 +258,7 @@ void func_00308020(u64 *channels, u32 color) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308058);
 
-void func_003081A8(u8 value, s32 alternate, s32 kind) {
+void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     u32 normalized = value != 0;
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
@@ -281,7 +281,7 @@ void func_003081A8(u8 value, s32 alternate, s32 kind) {
 }
 
 void func_00308288(u8 arg0, u32 arg1) {
-    func_003081A8(arg0, 0, arg1);
+    itfGridDrawBooleanDescriptor(arg0, 0, arg1);
 }
 
 void func_003082A8(s32 data, s32 alternate, s32 kind) {
@@ -622,14 +622,14 @@ void func_003097D0(GridTextWidget *widget, u8 *node, const char *text) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309880);
 
-void func_00309A20(u32 owner, u32 key, s32 steps) {
+void itfAdvanceGridScrollPosition(u32 owner, u32 key, s32 steps) {
     GridScrollRange *range;
     GridScrollEntry *entry;
     float *position;
     float delta;
     float previous;
 
-    entry = (GridScrollEntry *)func_0030A048(key, owner);
+    entry = (GridScrollEntry *)itfFindGridNodeByKey(key, owner);
     range = entry->range;
     position = &entry->position;
     delta = range->step;
@@ -648,20 +648,20 @@ void func_00309A90(u32 arg0, u32 arg1) {
 
     temp_v0 = (s32)arg0;
     if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        func_00309A20(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
+        itfAdvanceGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
                                     arg1);
         return;
     }
 }
 
-void func_00309AD8(u32 owner, u32 key, s32 steps) {
+void itfReverseGridScrollPosition(u32 owner, u32 key, s32 steps) {
     GridScrollRange *range;
     GridScrollEntry *entry;
     float *position;
     float delta;
     float previous;
 
-    entry = (GridScrollEntry *)func_0030A048(key, owner);
+    entry = (GridScrollEntry *)itfFindGridNodeByKey(key, owner);
     range = entry->range;
     position = &entry->position;
     delta = range->step;
@@ -680,7 +680,7 @@ void func_00309B48(u32 arg0, u32 arg1) {
 
     temp_v0 = (s32)arg0;
     if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        func_00309AD8(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
+        itfReverseGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
                                     arg1);
         return;
     }
@@ -709,7 +709,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00309C00);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309DF8);
 
-s32 func_0030A048(u32 key, u32 head) {
+s32 itfFindGridNodeByKey(u32 key, u32 head) {
     u32 n;
 
     n = *(u32 *)(head + 0x14);

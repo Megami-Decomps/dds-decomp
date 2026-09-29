@@ -138,10 +138,10 @@ typedef struct {
     u8 pad68[0x74];
     s32 mode; /* 0xDC */
 } SceneFrameOwner;
-extern s32 func_0024A6C0(SceneFrameOwner *);
+extern s32 fldGetModeFrameRecordIndex(SceneFrameOwner *);
 
 /* Scene modes 1 and 2 select different entries from the same frame table. */
-s32 func_0024A6C0(SceneFrameOwner *scene) {
+s32 fldGetModeFrameRecordIndex(SceneFrameOwner *scene) {
     switch (scene->mode) {
     case 1:
         return 0x32;
@@ -155,7 +155,7 @@ s32 func_0024A6C0(SceneFrameOwner *scene) {
 u8 func_0024A6E8(SceneFrameOwner *scene) {
     s32 index;
 
-    index = func_0024A6C0(scene);
+    index = fldGetModeFrameRecordIndex(scene);
     return scene->frameTable->records[index].unk14;
 }
 

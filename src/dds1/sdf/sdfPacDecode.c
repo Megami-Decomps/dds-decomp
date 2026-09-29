@@ -90,10 +90,10 @@ void func_002EE4A8(PacState *arg0);
 void func_002EE828(PacState *arg0);
 void func_002EE900(PacState *arg0);
 void sdfPacAdvanceAllocationEntry(PacState *arg0);
-void func_002EE3E8(PacState *arg0, PacHead *arg1);
+void sdfPacStartRegularPacket(PacState *arg0, PacHead *arg1);
 void func_002EE478(PacState *arg0, PacHead *arg1);
 void func_002EE508(PacState *arg0, PacHead *arg1);
-void func_002EE868(PacState *arg0, PacHead *arg1);
+void sdfPacStartAllocationList(PacState *arg0, PacHead *arg1);
 void func_002EEAA0(PacState *arg0, void *arg1);
 void func_002DA058(s32 arg0, s32 arg1);
 s32 func_002D32A0(void *arg0);
@@ -153,10 +153,10 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     if (status == 0) {
         switch (packet->command) {
         case PAC_COMMAND_PAYLOAD:
-            func_002EE3E8(state, packet);
+            sdfPacStartRegularPacket(state, packet);
             return 0;
         case PAC_COMMAND_ALLOCATION_LIST:
-            func_002EE868(state, packet);
+            sdfPacStartAllocationList(state, packet);
             return 0;
         case 6:
             func_002EE478(state, packet);
@@ -275,7 +275,7 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
 }
 
 /* Begin a regular payload; completion is the normal packet finalizer. */
-void func_002EE3E8(PacState *state, PacHead *packet) {
+void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EDD98;
 }
@@ -387,7 +387,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE6F8);
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE828);
 
 /* Allocate per-packet state for a list of allocation entries. */
-void func_002EE868(PacState *state, PacHead *packet) {
+void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
     sdfPacEnqueuePacket(state, packet);
     {
         void *allocation = func_002CFEB8(0x10);
@@ -399,7 +399,7 @@ void func_002EE868(PacState *state, PacHead *packet) {
 
 
 /* Start the next allocation entry at its inline descriptor. */
-void func_002EE8C0(PacState *state) {
+void sdfPacStartNextAllocationEntry(PacState *state) {
     func_002EE6F8(state, (u8 *)state->allocation + 0x10, (u8 *)state->allocation + 0x20);
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
@@ -424,7 +424,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
 }
 
 /* Discard pending input until the next allocation entry can start. */
-void func_002EE9A8(PacState *state) {
+void sdfPacSkipAllocationEntryBytes(PacState *state) {
     s32 available = state->inputAvailable;
     if (state->pendingBytes < available) {
         available = state->pendingBytes;

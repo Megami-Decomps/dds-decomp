@@ -28,7 +28,7 @@ typedef struct MovObj {
 } MovObj;
 
 /* Called with 3 args (sdfMovieProcessPendingData) and 4 args (func_002ECF70); keep K&R. */
-void func_002E6D48();
+void sdfDevQueueRead();
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ECF70);
 
@@ -48,7 +48,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
         return;
     }
     movie->unk1 = 4;
-    func_002E6D48(movie->unk10, stream->unk50, remaining <= 0x4000 ? remaining : 0x4000);
+    sdfDevQueueRead(movie->unk10, stream->unk50, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED230);

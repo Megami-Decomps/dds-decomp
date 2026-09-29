@@ -94,7 +94,7 @@ s32 func_0021A660(s16 *arg0, s32 arg1);
 void func_0021B9F8(void);
 void func_0021BDD0(void);
 void sdfAppendPacket(s32 arg0, s32 arg1);
-void func_002EC780(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void sdfStreamCreateWithParams(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, s32 data);
@@ -106,7 +106,7 @@ void func_002EDC30(void *buffer);
 void func_002EDE48(void *buffer, s32 arg1, s32 arg2);
 void func_00218768(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_002EDC50(void *buffer);
-s32 *func_002192D0(s32 arg0, s32 arg1);
+s32 *mdlFindViewerRecord(s32 arg0, s32 arg1);
 s32 mdlCountRecords(s32 arg0);
 /* Assemble the resource request in a temporary buffer before loading it. */
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
@@ -150,7 +150,7 @@ u16 func_002192C8(MdlRecord *record) {
 }
 
 /* Follow the relative links in a resource's record table to find an ID. */
-s32 *func_002192D0(s32 resource, s32 id) {
+s32 *mdlFindViewerRecord(s32 resource, s32 id) {
     s32 *table = *(s32 **)(*(s32 *)(resource + 0xC) + 0xA4);
     s32 *record;
     s32 remaining;
@@ -205,7 +205,7 @@ s32 mdlCountRecords(s32 address) {
     return count;
 }
 
-u8 func_002193D8(s32 *recordId, s32 wantedId) {
+u8 mdlRecordMatchesId(s32 *recordId, s32 wantedId) {
     return *recordId == wantedId;
 }
 
@@ -351,7 +351,7 @@ void mdlObjDestroy(MdlObj *obj) {
 void mdlObjInit(MdlObj *obj, s32 arg1, s32 arg2) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
-        func_002EC780((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
+        sdfStreamCreateWithParams((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
     }
 }
 
@@ -622,7 +622,7 @@ void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecordHeader *record, 
 }
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
-    s32 *block = func_002192D0(object, id);
+    s32 *block = mdlFindViewerRecord(object, id);
     if (block != NULL) {
         s32 *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
@@ -1062,7 +1062,7 @@ s32 func_0021BE50(void) {
 extern s8 D_00324510[];
 
 /* Change the viewer scale in hundredths, with larger steps at larger values. */
-void func_0021BE88(void) {
+void mdlAdjustViewerScale(void) {
     s32 value = (s32)(D_003D7A50.unk54 * 100.0f + 0.5f);
 
     if (D_00324510[0x27] & 2) {
@@ -1106,7 +1106,7 @@ void func_0021BE88(void) {
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021BFB0);
 
 u32 func_0021C1E0(void) {
-    func_0021BE88();
+    mdlAdjustViewerScale();
     func_0021BFB0();
     return 0;
 }
@@ -1190,8 +1190,8 @@ u32 func_0021CE70(void) {
 
 s32 mdlCountActiveRecords(void) {
     s32 resource = D_003D7A50.resources[0];
-    s32 first = mdlCountRecords((s32)func_002192D0(resource, -1));
-    s32 second = mdlCountRecords((s32)func_002192D0(resource, D_003D7A50.unk22));
+    s32 first = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
+    s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_003D7A50.unk22));
 
     return first + second;
 }

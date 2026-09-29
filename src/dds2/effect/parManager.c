@@ -1,6 +1,9 @@
 #include "common.h"
+
 #include "ee_mmi.h"
+
 #include "pcp_vu0.h"
+
 #include "eff.h"
 
 typedef struct {
@@ -9,8 +12,8 @@ typedef struct {
     u8 padA8[0x54];  /* 0xA8 */
     void *unkFC;     /* 0xFC */
     u8 pad100[0x40]; /* 0x100 */
-    u16 dispatchIndex; /* 0x140 selects the particle dispatch table */
-    u16 restartFlag; /* 0x142 set on restart, read by parGetRestartFlag */
+    u16 dispatchIndex; /* 0x140 selects D_0034E250/D_0034E258/D_0034E2F0 */
+    u16 restartFlag; /* 0x142 read by parGetRestartFlag, set to 1 by parRestartKind */
     u8 pad144[0x30]; /* 0x144 */
     void *child;      /* 0x174 released by parReleaseObject */
 } ParObj;
@@ -33,7 +36,17 @@ typedef struct {
 
 extern void (*D_003AAC20[])();
 
-extern BillDispatch D_003AAB88[];
+/* Particle dispatch entry (0xC bytes): command func selected by the
+   u16 at +0x140. */
+typedef struct {
+    void *(*func)(); /* 0x0 */
+    u32 unk4;        /* 0x4 */
+    u32 unk8;        /* 0x8 */
+} ParDispatch; /* 0xC bytes */
+
+extern ParDispatch D_003AAB80[];
+
+extern ParDispatch D_003AAB88[];
 
 void parReleaseObject(ParObj *obj) {
     s32 child;
@@ -92,13 +105,25 @@ u32 func_00161EE8(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", parCreateIndexed);
+void parCreateIndexed(s32 index, void *arg) {
+    ParObj *newobj;
 
-INCLUDE_ASM(const s32, "effect/parManager", parDispatchByKind);
+    newobj = D_003AAB80[index].func(arg);
+    newobj->dispatchIndex = index;
+}
+
+void parDispatchByKind(ParObj *obj) {
+    D_003AAB88[obj->dispatchIndex].func();
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
 
-INCLUDE_ASM(const s32, "effect/parManager", parCloneKind);
+void parCloneKind(ParObj *obj) {
+    ParObj *newobj;
+
+    newobj = D_003AAB80[obj->dispatchIndex].func();
+    newobj->dispatchIndex = obj->dispatchIndex;
+}
 
 /* Reissues the dispatch callback and arms the restart flag. */
 void parRestartKind(ParObj *obj) {

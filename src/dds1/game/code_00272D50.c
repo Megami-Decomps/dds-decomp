@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00273750(s32, s32);
+extern s32 mnuUseStaffItem(s32, s32);
 
 extern s32 func_00101A70();
 
@@ -118,7 +118,7 @@ typedef struct StaffItemContext {
 /* Use a field item: resolve its direct effect (or field-use skill) against the
  * active unit row; on success consume one from the inventory and refresh the
  * party panels. Returns 1 when the item was consumed. */
-s32 func_00273750(s32 itemId, s32 context) {
+s32 mnuUseStaffItem(s32 itemId, s32 context) {
     s32 partyPanel = context + 0x15C;
     s32 targetUnit = D_003BAA00 + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
     s32 result = battleItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
@@ -138,12 +138,12 @@ s32 func_00273750(s32 itemId, s32 context) {
     return 1;
 }
 
-void func_00273838(s32 selection, s32 context) {
+void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
     StaffWindowResources *resources;
     s32 consumed;
 
     resources = ((StaffDisplayContext *)context)->resources;
-    consumed = func_00273750(selection, context);
+    consumed = mnuUseStaffItem(selection, context);
     if (consumed != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->firstWindow + 0x14) + 0x1c) + 0x60) =
                   (u32)*(u8 *)(selection + D_003BAA00 + 0x12a0);

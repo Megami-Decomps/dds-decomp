@@ -44,7 +44,7 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F5E8);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F630);
 
-u16 func_0015F670(BillWork *work) {
+u16 effBillGetQueuedCount(BillWork *work) {
     return work->queuedCount;
 }
 

@@ -75,7 +75,7 @@ typedef struct {
     EvtViewNode *last;     /* 0x2038 */
 } EvtViewList;
 
-void func_0022C188(EvtViewNode *node, EvtViewList *owner) {
+void evtEventViewerUnlinkEntry(EvtViewNode *node, EvtViewList *owner) {
     EvtViewNode *next = node->next;
     EvtViewNode *previous = node->prev;
     if (previous == 0) {

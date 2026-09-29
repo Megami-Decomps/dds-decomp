@@ -31,7 +31,7 @@ static inline s32 fldTestBits(u32 flags, u32 mask) {
     return (flags & mask) != 0;
 }
 
-extern void func_00127028(u32, u32);
+extern void fldSpawnActionObjects(u32, u32);
 extern s32 func_001462D0(void);
 extern s32 D_0032E400[];
 extern void func_00131218(void);
@@ -75,7 +75,7 @@ typedef struct {
 extern FldCamRow D_0032FA10[];
 extern f32 D_00330650[];
 extern f32 D_00330660[];
-extern f32 func_002E77F8(f32);
+extern f32 sdfSinPoly(f32);
 extern f32 func_002E78F8(f32);
 extern void btlActivateRuntime(s32 mode);
 extern void func_00110860(u64, s8);
@@ -245,7 +245,7 @@ typedef struct {
 } FldS16Row; /* 0x20 bytes */
 extern FldS16Row D_00337C60[];
 extern u32 *D_003307B0[];
-extern void func_0012B4A0(u32 value);
+extern void fldDrawMarkerQuad(u32 value);
 
 typedef struct {
     s16 unk0;
@@ -266,7 +266,7 @@ typedef struct FldTransferChunk {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127028);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldSpawnActionObjects);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001270A8);
 
@@ -275,9 +275,9 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00127388);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00127588);
 
 /* Handle a field request, creating the player only in non-special scene states. */
-void func_00127708(u32 *request) {
+void fldProcessFieldRequest(u32 *request) {
     s32 state;
-    func_00127028(request[4], request[3]);
+    fldSpawnActionObjects(request[4], request[3]);
     state = D_0032E3B0[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
     func_00126A30(request[1], request[0], 0);
@@ -292,15 +292,15 @@ s32 func_001277A8(s32 arg0) {
     return arg0 + 0xc;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001277B0);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldRelocatePackedWords);
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void func_00127898(u32 buffer, FldTransferChunk *chunk) {
+void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk) {
     sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void func_001278C0(u32 buffer, FldTransferChunk *chunk) {
-    func_001277B0(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
+    fldRelocatePackedWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void fldSetAreaResourceRequest(u32 arg0, u32 arg1) {
@@ -332,7 +332,7 @@ s32 fldLoadAreaResource(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001279A0);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldRequestAreaResource);
 
 typedef struct FldAreaResourceNode {
     struct FldAreaResourceNode *next; /* 0x00 */
@@ -468,7 +468,7 @@ u8 func_00127FD0(void) {
     return strcmp(D_003C9200, buf) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00128000);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldLoadAreaPackedResources);
 
 void fldReleaseAreaResourceCache(void) {
     u32 resourceHandle = D_003BAC48;
@@ -942,9 +942,9 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg
     descriptor->open(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A120);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldSubmitGsGradientTriangle);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A358);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldSubmitGsGradientQuad);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A5D8);
 
@@ -992,7 +992,7 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
 }
 
 extern s32 sdfTexGetPrimaryBuffer(s32);
-extern s32 func_002D2308(s32);
+extern s32 sdfTexGetPrimaryBufferSize(s32);
 extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
 extern void sdfAppendReferencePacket(u64, u64);
 extern void func_002DD708(f32);
@@ -1008,7 +1008,7 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
 
     sdfInitPacketList(command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), func_002D2308(arg0));
+    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), sdfTexGetPrimaryBufferSize(arg0));
     sdfAppendReferencePacket(command, header);
     func_002DD708(*(f32 *)(arg1 + 0x44));
     __asm__ volatile(
@@ -1138,9 +1138,9 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B090);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B2B0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B4A0);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldDrawMarkerQuad);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B570);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldDrawMarkerQuadColored);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -1484,12 +1484,12 @@ void func_0012D240(void) {
     FldCamWork *cam = (FldCamWork *)D_0032E3B0;
     f32 angle;
 
-    D_00330650[0] = cam->x - func_002E77F8(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_00330650[0] = cam->x - sdfSinPoly(cam->angle * 3.14f / 180.0f) * 80.0f;
     D_00330650[1] = cam->y + D_0032FA10[cam->rowIdx].y;
     D_00330650[2] = cam->z - func_002E78F8(cam->angle * 3.14f / 180.0f) * 80.0f;
     D_00330650[3] = 1.0f;
     angle = cam->angle * 3.14f / 180.0f;
-    D_00330660[0] = cam->x + func_002E77F8(angle) * D_0032FA10[cam->rowIdx].dist;
+    D_00330660[0] = cam->x + sdfSinPoly(angle) * D_0032FA10[cam->rowIdx].dist;
     D_00330660[1] = cam->y + D_0032FA10[cam->rowIdx].targetY;
     D_00330660[2] = cam->z + func_002E78F8(angle) * D_0032FA10[cam->rowIdx].dist;
     D_00330660[3] = 1.0f;
@@ -1526,7 +1526,7 @@ void fldSetCameraMoveMode(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E510);
 
-void func_0012E6F0(void) {
+void fldClearCameraMoveMode(void) {
     D_003BAD1C = 0;
 }
 
@@ -1847,7 +1847,7 @@ void func_00131590(void) {
 
 /* Camera facing requests share the field-work block. Both request states
  * advance from 1 to 2 when their new angle is installed. */
-void func_001315A0(f32 arg0, f32 arg1) {
+void fldQueueCameraFacingPoint(f32 arg0, f32 arg1) {
     u8 *temp_v0 = (u8 *)D_0032E3B0;
 
     *(f32 *)(temp_v0 + 0x18C) = arg0;
@@ -1855,7 +1855,7 @@ void func_001315A0(f32 arg0, f32 arg1) {
     *(u32 *)(temp_v0 + 0x188) = 1;
 }
 
-void func_001315C0(f32 arg0, f32 arg1, f32 arg2) {
+void fldQueueCameraFacingAngle(f32 arg0, f32 arg1, f32 arg2) {
     u8 *temp_v0;
     f32 temp_f0;
 
@@ -1866,7 +1866,7 @@ void func_001315C0(f32 arg0, f32 arg1, f32 arg2) {
     *(f32 *)(temp_v0 + 0x198) = -temp_f0;
 }
 
-void func_00131600(void) {
+void fldApplyCameraFacingPoint(void) {
     u8 *temp_v0 = (u8 *)D_0032E3B0;
 
     if (*(u32 *)(temp_v0 + 0x188) != 0) {
@@ -1881,7 +1881,7 @@ void func_00131600(void) {
     }
 }
 
-void func_00131660(void) {
+void fldApplyCameraFacingAngle(void) {
     u8 *temp_v0 = (u8 *)D_0032E3B0;
 
     if (*(u32 *)(temp_v0 + 0x194) != 0) {
@@ -1931,7 +1931,7 @@ void fldLoadSkyResource(s32 area) {
 
 void func_00131D88(void) {
     if (D_003BAD70 != 0) {
-        func_002D2D00(D_003BAD70);
+        sdfTexReleaseReferenceViaHandler(D_003BAD70);
         D_003BAD70 = 0;
     }
     if (D_003BD7C4 != 0) {
@@ -1955,7 +1955,7 @@ void fldUploadSkyBuffer(void *src) {
     }
 }
 
-extern f32 func_002E77F8(f32);
+extern f32 sdfSinPoly(f32);
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0100);
 
 void fldUpdateSwayOffset(void) {
@@ -1963,27 +1963,27 @@ void fldUpdateSwayOffset(void) {
     switch (D_003BAD7C) {
     case 1:
         D_003BAD80 += 0.1f;
-        D_003BAD84 = func_002E77F8(D_003BAD80) * 32.0f;
+        D_003BAD84 = sdfSinPoly(D_003BAD80) * 32.0f;
         break;
     case 2:
         D_003BAD80 += 0.2f;
-        D_003BAD84 = func_002E77F8(D_003BAD80) * 32.0f;
+        D_003BAD84 = sdfSinPoly(D_003BAD80) * 32.0f;
         break;
     case 3:
         D_003BAD80 += 0.05f;
-        D_003BAD84 = func_002E77F8(D_003BAD80) * 32.0f;
+        D_003BAD84 = sdfSinPoly(D_003BAD80) * 32.0f;
         break;
     case 4:
         D_003BAD80 += 0.1f;
-        D_003BAD84 = func_002E77F8(D_003BAD80) * 48.0f;
+        D_003BAD84 = sdfSinPoly(D_003BAD80) * 48.0f;
         break;
     case 5:
         D_003BAD80 += 0.2f;
-        D_003BAD84 = func_002E77F8(D_003BAD80) * 48.0f;
+        D_003BAD84 = sdfSinPoly(D_003BAD80) * 48.0f;
         break;
     case 6:
         D_003BAD80 += 0.05f;
-        D_003BAD84 = func_002E77F8(D_003BAD80) * 48.0f;
+        D_003BAD84 = sdfSinPoly(D_003BAD80) * 48.0f;
         break;
     }
 }
@@ -2011,7 +2011,7 @@ void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
     D_003BAD74[area * 73] = value;
 }
 
-void func_00132B60(u32 arg0) {
+void fldSetSwayMode(u32 arg0) {
     D_003BAD7C = arg0;
     D_003BAD80 = 0;
     D_003BAD84 = 0;
@@ -2132,8 +2132,8 @@ extern s32 func_00107FD8(s32, s32, void *);
 extern s32 func_00108218(s32, void *);
 extern s32 func_001080D8(s32, s32, void *);
 extern s32 evtUnk8360SetVec(s32, f32, f32, f32, f32);
-extern void func_00132B60(u32);
-void func_00133CA0(void) {
+extern void fldSetSwayMode(u32);
+void fldApplyLightSetCurrent(void) {
     FldLightSet *light = &((FldLightSet *)D_003BAD60)[D_003BAD98];
     f32 vec[4];
     f32 dir[4];
@@ -2147,7 +2147,7 @@ void func_00133CA0(void) {
     D_0032E570[15] = value;
     D_0032E570[16] = light->unkC;
     fldSetFadeTarget(area, value, 0);
-    func_00132B60(D_0032E570[16]);
+    fldSetSwayMode(D_0032E570[16]);
     vec[0] = light->unk2C * 0.00390625f;
     vec[1] = light->unk30 * 0.00390625f;
     vec[2] = light->unk34 * 0.00390625f;
@@ -2191,7 +2191,7 @@ void func_00133CA0(void) {
     func_00108218(0, vec);
 }
 
-void func_00133EC0(s32 index) {
+void fldApplyLightSetIndex(s32 index) {
     FldLightSet *light = &((FldLightSet *)D_003BAD5C)[index];
     f32 vec[4];
     f32 dir[4];
@@ -2206,7 +2206,7 @@ void func_00133EC0(s32 index) {
     D_0032E570[15] = value;
     D_0032E570[16] = light->unkC;
     fldSetFadeTarget(area, value, 0);
-    func_00132B60(D_0032E570[16]);
+    fldSetSwayMode(D_0032E570[16]);
     vec[0] = light->unk2C * 0.00390625f;
     vec[1] = light->unk30 * 0.00390625f;
     vec[2] = light->unk34 * 0.00390625f;
@@ -2365,7 +2365,7 @@ void func_00134CD8(void) {
 void func_00134CF0(void) {
     D_003BAD6C = 0;
     if (D_003BAD70 != 0) {
-        func_002D2D00(D_003BAD70);
+        sdfTexReleaseReferenceViaHandler(D_003BAD70);
         D_003BAD70 = 0;
     }
     if (D_003BAD68 != 0) {
@@ -2374,7 +2374,7 @@ void func_00134CF0(void) {
     }
 }
 
-void func_00134D38(FldCameraSetting *destination) {
+void fldCopyCameraSetting(FldCameraSetting *destination) {
     *destination = *D_003C9280;
 }
 
@@ -2583,16 +2583,7 @@ typedef struct FldRoomPlanes {
 } FldRoomPlanes;
 extern FldRoomPlanes D_003C9470[];
 extern f32 fldDotVector(f32 *, f32 *);
-s32 fldRoomContainsPoint(f32 *direction, s32 index) {
-    s32 i;
-
-    for (i = 0; i < 6; i++) {
-        if (fldDotVector(direction, D_003C9470[index].plane[i]) - D_003C9470[index].limit[i] > 0.0f) {
-            return 0;
-        }
-    }
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_00126A30", fldRoomContainsPoint);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AFC8);
 
@@ -2641,7 +2632,7 @@ void func_0013BD70(void) {
     if (count > 0) {
         u32 **entry = D_003307B0;
         do {
-            func_0012B4A0((*entry)[4]);
+            fldDrawMarkerQuad((*entry)[4]);
             i++;
             entry++;
         } while (i < D_003BAE14);
@@ -2858,7 +2849,7 @@ u8 *func_0013D6D0(const char *name) {
     return 0;
 }
 
-u8 *func_0013D8D8(const char *name) {
+u8 *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
     u8 *entry;
     s16 flag;
@@ -2969,7 +2960,7 @@ void func_0013DC08(s32 arg0) {
         if (record == 0) {
             return;
         }
-        if (func_0013D8D8((const char *)record) == 0) {
+        if (fldFindActorEntryByName((const char *)record) == 0) {
             return;
         }
     }
@@ -3006,7 +2997,7 @@ void func_0013DC08(s32 arg0) {
     } else if (kind == 11) {
     } else if (kind == 12) {
     } else if (kind == 4) {
-        func_00131660();
+        fldApplyCameraFacingAngle();
     }
 }
 
@@ -3049,7 +3040,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013EF10);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F100);
 
-extern void func_001279A0();
+extern void fldRequestAreaResource();
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
 
 s32 fldGetActorStat0(s32 mode) {

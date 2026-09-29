@@ -208,7 +208,7 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D8F8);
+INCLUDE_ASM(const s32, "game/code_0024CFB0", evtRandomSwapBytes);
 
 void evtLoadResourcePair(u32 resourceId, u32 *record) {
     u32 handle;
@@ -349,14 +349,14 @@ u32 func_0024DF20(s32 index) {
 }
 
 s32 evtSetCurrentActiveFlag(void) {
-    s32 flagIndex = func_0010D428(0);
+    s32 flagIndex = scrReadIntParameter(0);
 
     D_003BD8A0.flags[flagIndex] = 1;
     return 1;
 }
 
 s32 evtActivateCurrentFlag(void) {
-    s32 index = func_0010D428(0);
+    s32 index = scrReadIntParameter(0);
     if (index >= 16) {
         index = 15;
     }

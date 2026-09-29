@@ -3,7 +3,7 @@
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
 
-extern u64 func_0010D650(u64);
+extern u64 scrReadIntParameter(u64);
 
 extern u32 D_00437A2C;
 
@@ -628,7 +628,7 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6858);
 
-void func_002A6C28(u32 *state, u32 mode) {
+void mnuFadeSetState(u32 *state, u32 mode) {
     switch (mode) {
     case 2: state[1] = 0; mode = 0; break;
     case 3: mode = 1; state[1] = 0x200; break;
@@ -658,7 +658,7 @@ void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     }
 }
 
-void func_002A6D28(u32 *state, u32 mode) {
+void mnuFadeSetStateOff(u32 *state, u32 mode) {
     switch (mode) {
     case 2: state[1] = 0; mode = 0; break;
     case 3: state[1] = 0; mode = 1; break;
@@ -690,7 +690,7 @@ void mnuTitleSetPaletteTransition(u32 *state, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A73C0);
 
-void func_002A7560(u32 *state, u32 mode) {
+void mnuFadeSetStateB(u32 *state, u32 mode) {
     switch (mode) {
     case 2: state[1] = 0; mode = 0; break;
     case 3: mode = 1; state[1] = 0x200; break;
@@ -746,7 +746,7 @@ typedef struct {
     u32 unkC;
 } StaffTaskState;
 
-void func_002A7980(void) {
+void mnuCreateStaffTask(void) {
     u32 handle;
 
     D_00435CBC = 0x80000000;
@@ -762,7 +762,7 @@ void func_002A7980(void) {
 }
 
 u32 mnuStartStaffMovieRequest(void) {
-    func_002A7980();
+    mnuCreateStaffTask();
     return 0xffffffff;
 }
 
@@ -806,7 +806,7 @@ extern char D_0042A380[];
 
 extern u32 D_00437AD0;
 
-s32 func_002A7D28(s32 procedure) {
+s32 movieDrawNextProc(s32 procedure) {
     if (D_00437ACC == 0) {
         func_0035B6E0(D_0042A348);
         return -1;
@@ -1022,14 +1022,14 @@ s32 mnuSetFrameDivisor(void) {
 }
 
 void mnuCreateMovieManagerTask(void) {
-    func_003456F8();
+    sdfSoundInitIpuStream();
     kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
 }
 
 u32 func_002A80C0(void) {
     u64 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     func_002A7AF0(temp_v0);
     D_00437AE8 = 0;
     return 1;
@@ -1425,7 +1425,7 @@ extern u32 D_003E6970[];
 typedef struct { u8 pad0[0x20]; s32 *data; } MotSub;
 typedef struct { u8 pad0[8]; MotSub *sub; } MotRes;
 
-void func_002A94D0(u8 *work) {
+void movLoadTitleEffects(u8 *work) {
     s32 *data;
 
     *(u32 *)(work + 0x100) = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
@@ -1621,7 +1621,7 @@ extern void mnuPlayInputSound();
 
 /* On button 8, exit the camp only when both nested guards permit it;
  * otherwise play the alternate sound without destroying its tasks. */
-s32 func_002AA2A8(s32 menu) {
+s32 mnuStaffCampCancelCheck(s32 menu) {
     u32 buttons = func_002C44E8(8);
     s32 result;
 

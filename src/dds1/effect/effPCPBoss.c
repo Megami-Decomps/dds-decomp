@@ -31,7 +31,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184630);
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184890);
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-void func_001849C0(void *data) {
+void effPCPBossApplyTwoBlocks(void *data) {
     void *firstBlock;
     void *secondBlock;
 
@@ -60,7 +60,7 @@ void func_001855C8(u8 *work, s32 value) {
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001855D0);
 
 /* Apply three packed parameter blocks to the boss effect. */
-void func_00185670(void *data) {
+void effPCPBossApplyThreeBlocks(void *data) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0010D650(u64);
+extern u64 scrReadIntParameter(u64);
 
 extern u64 func_0011A318(u64);
 
@@ -43,7 +43,7 @@ extern void effMiscNormalizeVU(void);
 u32 func_0010F118(void) {
     u64 id;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     func_0011A328(id);
     return 1;
 }
@@ -56,7 +56,7 @@ u32 func_0010F140(void) {
 u32 func_0010F160(void) {
     u64 id;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     id = func_0011A318(id);
     func_0010D818(id);
     return 1;

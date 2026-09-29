@@ -152,7 +152,7 @@ extern s32 func_0019D550(FrFontGlyph *arg0, s8 arg1, u32 arg2);
 
 extern void func_0019BE20();
 
-void func_0019C2A8(void) {
+void frFontLoadDefaultFonts(void) {
     func_0019BE20(0, "/font/font0.fnt");
     func_0019BE20(1, "/font/font1.fnt");
     func_0019BE20(2, "/font/font2.fnt");

@@ -7,8 +7,8 @@ extern s32 func_0018FDA8(void);
 extern s32 func_002E92C0(s32 arg0);
 extern void func_002E9340(s32 arg0);
 extern s32 func_00235540(s32 *task);
-extern s32 func_002350F8(void);
-extern void func_00235120(s32 arg0, s32 arg1);
+extern s32 evtAllocateContext(void);
+extern void evtSetConvertedContextValue(s32 arg0, s32 arg1);
 extern void func_002351E0(void);
 extern void func_00235228(void);
 extern s32 evtFindTaskById();
@@ -17,7 +17,7 @@ extern void evtFormatTaskName(s32 arg0, void *arg1);
 extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
-extern void func_00132B60(s32 arg0);
+extern void fldSetSwayMode(s32 arg0);
 extern void func_00132B70(s32 arg0);
 extern void func_00132B80(s32 arg0);
 extern s16 func_00132B90(void);
@@ -26,8 +26,8 @@ extern void func_00132010(void);
 extern void func_00129720(s32 arg0);
 extern void func_0012AEB0(void);
 extern void sdfAppendPacket(s32 arg0, s32 arg1);
-extern void func_002E8D10(s32 arg0);
-extern void func_002E9690(s32 arg0);
+extern void sndStartTrackDefault(s32 arg0);
+extern void sndStartTrackExtended(s32 arg0);
 extern void func_002E9758(s32 arg0);
 extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 arg0);
@@ -101,8 +101,8 @@ extern char D_003BC0C8[]; /* "NAME:" */
 void evtCreateTask(s32 taskId, s32 value) {
     s32 data;
 
-    data = func_002350F8();
-    func_00235120(data, value);
+    data = evtAllocateContext();
+    evtSetConvertedContextValue(data, value);
     kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, (void *)data);
 }
 
@@ -116,7 +116,7 @@ typedef struct EvtTaskData {
 void evtCreateTaskWithValue(s32 taskId, s32 value) {
     EvtTaskData *data;
 
-    data = (EvtTaskData *)func_002350F8();
+    data = (EvtTaskData *)evtAllocateContext();
     data->value = value;
     kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, data);
 }
@@ -183,7 +183,7 @@ void evtDestroySkyTask(void) {
 }
 
 void evtCreateSkyTask(void) {
-    func_00132B60(0);
+    fldSetSwayMode(0);
     func_00132B70(0x80);
     func_00132B80(0);
     fldSetFadeTarget(0, 1, 0);
@@ -247,7 +247,7 @@ extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, s32, void *);
 extern void func_00236180();
 extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
 
-s32 func_002363E0(s32 arg0, s32 arg1, u8 *work) {
+s32 mnuDrawInfoWindowA(s32 arg0, s32 arg1, u8 *work) {
     u32 packets = sdfCreateInitializedPacketList();
     func_00235598(packets, arg0, arg1, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
     D_00325748.invoke(&D_00325748, (void *)packets);
@@ -342,7 +342,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00238BE8);
 
 extern void func_00238BE8();
 
-s32 func_00238D58(s32 arg0, s32 arg1, u8 *work) {
+s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     u32 packets = sdfCreateInitializedPacketList();
     s32 rows;
     switch (**(s32 **)(work + 0x2308)) {
@@ -452,7 +452,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023B848);
 extern void func_0023B848();
 extern s8 D_00324510[];
 
-s32 func_0023B8F8(s32 arg0, s32 arg1, u8 *work) {
+s32 mnuDrawTimedPrompt(s32 arg0, s32 arg1, u8 *work) {
     u32 packets = sdfCreateInitializedPacketList();
     s32 count;
     func_00235598(packets, arg0, arg1, 0x19, 2, 0, 1, work, 0, func_0023B848);
@@ -966,7 +966,7 @@ s32 evtPlayBgm(s32 id, s32 fade) {
     }
     sound = evtEncodeBgmSoundCode(id, fade);
     func_003003F0("Event BGM play :%08X\n", sound);
-    func_002E8D10(sound);
+    sndStartTrackDefault(sound);
     return sound;
 }
 
@@ -990,7 +990,7 @@ s32 evtFadeInBgm(s32 id, s32 fade) {
     }
     sound = evtEncodeBgmSoundCode(id, fade);
     func_003003F0("Event BGM fade in play :%08X\n", sound);
-    func_002E9690(sound);
+    sndStartTrackExtended(sound);
     return sound;
 }
 
@@ -1059,7 +1059,7 @@ EvtTaskData *evtGetTaskData(u32 taskId) {
 INCLUDE_ASM(const s32, "game/code_00235270", func_00241BF0);
 
 extern s32 func_00241BF0(s32 arg0, s32 arg1);
-extern void func_002D2D00(s32 arg0);
+extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern s32 func_002D3288(s32 arg0);
 extern void effSetCh72Id(s32 arg0);
 
@@ -1069,7 +1069,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
     if (resource != 0) {
         s32 old = data->effectHandle;
         if (old != 0) {
-            func_002D2D00(old);
+            sdfTexReleaseReferenceViaHandler(old);
             data->effectHandle = 0;
         }
         resource = func_002D3288(resource);

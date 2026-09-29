@@ -117,9 +117,9 @@ void func_00346AF8(void *buffer);
 
 s32 mdlCountRecords(s32 arg0);
 
-s32 *func_00233E40(s32 arg0, s32 arg1);
+s32 *mdlFindViewerRecord(s32 arg0, s32 arg1);
 
-void func_00345628(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void sdfStreamCreateWithParams(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 void func_00157710(s32 arg0, float arg1);
 
@@ -332,7 +332,7 @@ u16 func_00233E38(MdlRecord *record) {
 }
 
 /* Follow relative links in the resource's record table to find an ID. */
-s32 *func_00233E40(s32 arg0, s32 key) {
+s32 *mdlFindViewerRecord(s32 arg0, s32 key) {
     s32 *list = *(s32 **)(*(s32 *)(arg0 + 0xC) + 0xA4);
     s32 *entry;
     s32 remaining;
@@ -391,7 +391,7 @@ s32 mdlCountRecords(s32 address) {
     return count;
 }
 
-u8 func_00233F48(s32 *recordId, s32 wantedId) {
+u8 mdlRecordMatchesId(s32 *recordId, s32 wantedId) {
     return *recordId == wantedId;
 }
 
@@ -471,7 +471,7 @@ void mdlObjDestroy(MdlObj *obj) {
 void mdlObjInit(MdlObj *obj, s32 arg1, s32 arg2) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
-        func_00345628((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
+        sdfStreamCreateWithParams((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
     }
 }
 
@@ -558,7 +558,7 @@ s32 mdlDispatchResourceEntry(s32 object, s32 *record, s32 option) {
 }
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
-    s32 *block = func_00233E40(object, id);
+    s32 *block = mdlFindViewerRecord(object, id);
     if (block != NULL) {
         s32 *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
@@ -807,12 +807,12 @@ s32 func_002369C0(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002369F8);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlAdjustViewerScale);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236B20);
 
 u32 func_00236D50(void) {
-    func_002369F8();
+    mdlAdjustViewerScale();
     func_00236B20();
     return 0;
 }
@@ -895,8 +895,8 @@ u32 func_002379E0(void) {
 
 s32 mdlCountActiveRecords(void) {
     s32 resource = D_00453550.resources[0];
-    s32 first = mdlCountRecords((s32)func_00233E40(resource, -1));
-    s32 second = mdlCountRecords((s32)func_00233E40(resource, D_00453550.unk22));
+    s32 first = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
+    s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_00453550.unk22));
 
     return first + second;
 }

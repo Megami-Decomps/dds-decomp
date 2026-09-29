@@ -107,7 +107,7 @@ void func_00113CD0(EffectObject *object) {
 
     data = object->data;
     if (data->activeId != -1) {
-        func_00116958(object, 10);
+        evtEndUnitValueTransitionForObject(object, 10);
         data->activeId = 0xffffffff;
     }
 }
@@ -184,7 +184,7 @@ typedef struct WorldObj {
 } WorldObj;
 
 /* Refresh the object's stored xyz from the source vector. */
-void func_00114618(WorldObj *obj) {
+void dds3RefreshStoredVec3(WorldObj *obj) {
     f32 *src = obj->source;
     WorldSubState *dst = obj->state;
     dst->vec[0] = src[0x10];

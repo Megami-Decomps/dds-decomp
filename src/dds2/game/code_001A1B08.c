@@ -75,7 +75,7 @@ typedef struct PanelVert {
     s32 y;
 } PanelVert;
 
-void func_001A1E68(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     PanelVert *p;
     v->x = x0;
     v->y = y0;
@@ -114,7 +114,7 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2010);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2070);
 
-void func_001A2100(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetRectSpan(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     PanelVert *p = &v[4];
     p->x = x0;
     p->y = y0;
@@ -122,7 +122,7 @@ void func_001A2100(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     p[1].y = y1;
 }
 
-void func_001A2118(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
+void itfPanelInitRects30(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
     PanelVert *p = &v[6];
     p->x = a;
     p->y = b;
@@ -136,7 +136,7 @@ void func_001A2118(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
 }
 
 /* Set both panel colors to the same blue tint with zero alpha. */
-void func_001A2148(s32 *rect) {
+void itfPanelSetBlueTint(s32 *rect) {
     s32 *color = rect + 0x11;
     color[0] = 0x73;
     color[1] = 0x87;

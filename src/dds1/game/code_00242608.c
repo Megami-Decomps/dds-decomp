@@ -216,7 +216,7 @@ void func_00242780(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offse
     }
     world->unk1C -= 1;
     func_002300B8(world, delta, threshold, base, offset, ubase, node);
-    func_0022FDE8(world);
+    evtViewerDispatchFlagMode(world);
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242950);
@@ -402,19 +402,19 @@ void func_00243EC8(CampScene *scene) {
 void func_00243EE0(void) {
 }
 
-void func_00243EE8(CampScene *scene, u32 value) {
+void mnuCampSetPrimaryOption(CampScene *scene, u32 value) {
     scene->options = (scene->options & 0xfffffffc) | (value & 3);
 }
 
-u32 func_00243F08(CampScene *scene) {
+u32 mnuCampGetPrimaryOption(CampScene *scene) {
     return scene->options & 3;
 }
 
-void func_00243F18(CampScene *scene, u32 value) {
+void mnuCampSetSecondaryOption(CampScene *scene, u32 value) {
     scene->options = (scene->options & 0xfffffff3) | ((value & 3) << 2);
 }
 
-u32 func_00243F38(CampScene *scene) {
+u32 mnuCampGetSecondaryOption(CampScene *scene) {
     return (scene->options & 0xc) >> 2;
 }
 
@@ -717,7 +717,7 @@ s32 func_002449F0(s32 *initialSelection) {
     return result;
 }
 
-void func_00244AB8(void) {
+void mnuCampDestroyPanelTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003BC3A0, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003AF418, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003AF428, 0);

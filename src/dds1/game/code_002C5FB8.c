@@ -10,7 +10,7 @@ extern s32 D_003BD97C;
 
 extern u32 D_003BD980;
 
-extern s32 func_002C4A10(void);
+extern s32 sdfCounterGetDisplayValue(void);
 
 typedef struct Vec3 {
     float x; // 0x00
@@ -19,6 +19,7 @@ typedef struct Vec3 {
 } Vec3; // 0x0C
 
 extern float fldNormalizedVectorDot(float *, float *);
+
 extern float fldVectorLength(float *vector);
 
 typedef struct MapResource {
@@ -50,6 +51,58 @@ extern u32 D_003DFEE0[];
 
 s32 func_002D0A10(u32 sprite);
 
+typedef struct {
+    u32 *word;         /* 0x00 */
+    u8 *info;          /* 0x04 */
+    s16 value;         /* 0x08 */
+    u8 pad0A[4];
+    s16 flag;          /* 0x0E */
+} SdfCounterDisplay;
+
+typedef struct {
+    s32 value;            /* 0x00 */
+    s16 countdown;        /* 0x04 */
+    s16 mode;             /* 0x06 */
+    u8 pad08[4];
+    s16 mapTimerPrimary;  /* 0x0C */
+    s16 mapTimerSecondary; /* 0x0E */
+    s32 y;                /* 0x10 */
+    s16 startX;           /* 0x14 */
+    s16 startY;           /* 0x16 */
+    s16 targetX;          /* 0x18 */
+    s16 targetY;          /* 0x1A */
+    s16 curX;             /* 0x1C */
+    s16 curY;             /* 0x1E */
+    s32 frames;           /* 0x20 */
+} SdfCounterTimer;
+
+typedef struct SdfCounterChannel {
+    s32 index;                      /* 0x00 */
+    u8 pad04[0x54];
+    struct SdfCounterChannel *next; /* 0x58 */
+    struct SdfCounterChannel *prev; /* 0x5C */
+    u8 pad60[0x10];
+    SdfCounterDisplay *display;     /* 0x70 */
+} SdfCounterChannel;
+
+struct SdfCounterRuntime;
+
+typedef void (*SdfCounterDrawFn)(s32, s32, s32, struct SdfCounterRuntime *, SdfCounterChannel *, s32);
+
+typedef struct SdfCounterRuntime {
+    u8 pad00[0xC];
+    s32 base;                       /* 0x0C */
+    SdfCounterChannel *first;       /* 0x10 */
+    SdfCounterChannel *last;        /* 0x14 */
+    SdfCounterChannel *selected;    /* 0x18 */
+    SdfCounterChannel *channel;     /* 0x1C */
+    s32 active;                     /* 0x20 */
+    s32 scroll;                     /* 0x24 */
+    s32 posX;                       /* 0x28 */
+    SdfCounterDrawFn draw;          /* 0x2C */
+    SdfCounterTimer *timer;         /* 0x30 */
+} SdfCounterRuntime;
+
 void func_002C5FB8(u32 arg0) {
     func_00195CD8(arg0, 1, 3);
 }
@@ -70,7 +123,34 @@ s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6010);
+void func_002C6010(SdfCounterRuntime *rt, s32 target) {
+    SdfCounterChannel *channel;
+    SdfCounterChannel *prev;
+    s32 i;
+
+    if (target < rt->active) {
+        channel = rt->first;
+        rt->scroll = 0;
+        rt->channel = channel;
+        rt->selected = channel;
+        for (i = 0; i <= target; i++) {
+            prev = channel->prev;
+            if (prev != NULL) {
+                if (rt->active - i >= rt->base - 1) {
+                    rt->selected = prev;
+                    rt->scroll = 1;
+                } else {
+                    rt->scroll = rt->scroll + 1;
+                }
+            }
+            rt->channel = channel;
+            channel = channel->next;
+            if (channel == NULL) {
+                break;
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 pad00[0x0C];
@@ -150,7 +230,7 @@ void func_002C63D8(void) {
     s32 count;
 
     D_003BD978 = 0;
-    count = func_002C4A10();
+    count = sdfCounterGetDisplayValue();
     D_003BD97C = count - 1;
     D_003BD980 = 0x3c;
 }
@@ -262,7 +342,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
 
 u32 fldReleaseMapResource(s32 *image) {
     if (*image != 0) {
-        func_002D2D00(*image);
+        sdfTexReleaseReferenceViaHandler(*image);
         *image = 0;
     }
     return 1;

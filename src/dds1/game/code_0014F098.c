@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern char *func_0010D5A8(s32 idx);
+extern char *scrReadStringParameter(s32 idx);
 
 extern void func_0010D5F0(s32 value);
 
@@ -51,7 +51,7 @@ typedef struct {
 } FldCommandWork;
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 func_0010D428(s32);
+extern s32 scrReadIntParameter(s32);
 
 extern s32 D_0032E48C[];
 
@@ -62,7 +62,7 @@ extern s32 func_0013DF18(void);
 extern s32 D_0032E3D8[];
 
 s32 func_0014F098(void) {
-    func_0010D5F0(func_0013DB58(func_0010D428(0)));
+    func_0010D5F0(func_0013DB58(scrReadIntParameter(0)));
     return 1;
 }
 
@@ -78,16 +78,16 @@ u32 func_0014F0C8(void) {
 }
 
 s32 func_0014F110(void) {
-    s32 param0 = func_0010D428(0);
-    s32 param1 = func_0010D428(1);
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_0010D5F0(func_0013CEB0(param0, param1));
     return 1;
 }
 
 s32 func_0014F158(void) {
-    s32 param0 = func_0010D428(0);
-    s32 param1 = func_0010D428(1);
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_0010D5F0(func_0013D410(param0, param1));
     return 1;
@@ -103,13 +103,13 @@ s32 func_0014F1C0(void) {
 }
 
 s32 func_0014F1E0(void) {
-    D_0032E3D8[0] = func_0010D428(0);
+    D_0032E3D8[0] = scrReadIntParameter(0);
     func_00141B10();
     return 1;
 }
 
 s32 func_0014F210(void) {
-    D_0032E3D8[0] = func_0010D428(0);
+    D_0032E3D8[0] = scrReadIntParameter(0);
     func_00141C40();
     return 1;
 }
@@ -130,24 +130,24 @@ s32 func_0014F280(void) {
 }
 
 s32 fldCommandPlaySeVolumePan(void) {
-    fldPlayFieldSeVolumePan(func_0010D428(0));
+    fldPlayFieldSeVolumePan(scrReadIntParameter(0));
     return 1;
 }
 
 s32 fldCommandPlaySe(void) {
-    fldPlayFieldSe(func_0010D428(0));
+    fldPlayFieldSe(scrReadIntParameter(0));
     return 1;
 }
 
 /* Unlike the other field commands, this reports the archive poll result. */
 u8 fldCommandLoadArchive(void) {
-    return fldPollArchiveLoad(func_0010D428(0)) != 0;
+    return fldPollArchiveLoad(scrReadIntParameter(0)) != 0;
 }
 
 /* Script command: set volume and pan for a grouped sequence ID. */
 s32 func_0014F318(void) {
-    s32 sequenceGroup = func_0010D428(0);
-    s32 sequenceIndex = func_0010D428(1);
+    s32 sequenceGroup = scrReadIntParameter(0);
+    s32 sequenceIndex = scrReadIntParameter(1);
 
     func_001421D0(sequenceGroup, sequenceIndex);
     return 1;
@@ -155,17 +155,17 @@ s32 func_0014F318(void) {
 
 /* Script command: pass the same grouped sequence ID to the other sound path. */
 s32 func_0014F358(void) {
-    s32 sequenceGroup = func_0010D428(0);
-    s32 sequenceIndex = func_0010D428(1);
+    s32 sequenceGroup = scrReadIntParameter(0);
+    s32 sequenceIndex = scrReadIntParameter(1);
 
     func_00142200(sequenceGroup, sequenceIndex);
     return 1;
 }
 
 /* Script command: start a field title using its field ID and display argument. */
-s32 func_0014F398(void) {
-    s32 fieldId = func_0010D428(0);
-    s32 titleArg = func_0010D428(1);
+s32 fldCommandStartTitle(void) {
+    s32 fieldId = scrReadIntParameter(0);
+    s32 titleArg = scrReadIntParameter(1);
 
     fldStartTitle(fieldId, titleArg, 0x3c);
     return 1;
@@ -174,7 +174,7 @@ s32 func_0014F398(void) {
 s32 func_0014F3E0(void) {
     s32 value;
 
-    value = func_0010D428(0);
+    value = scrReadIntParameter(0);
     D_0032E48C[0] = value;
     return 1;
 }
@@ -196,13 +196,13 @@ s32 func_0014F440(void) {
 }
 
 s32 func_0014F468(void) {
-    func_00147DB0(func_00222090(func_0010D428(0)));
+    func_00147DB0(func_00222090(scrReadIntParameter(0)));
     return 1;
 }
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
 s32 fldCommandFindEffectByName(void) {
-    char *effectName = func_0010D5A8(0);
+    char *effectName = scrReadStringParameter(0);
 
     func_0010D5F0(fldFindEffectByName(effectName));
     return 1;

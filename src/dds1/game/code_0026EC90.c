@@ -363,14 +363,14 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A58);
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A78);
 
 void mnuCreateMovieManagerTask(void) {
-    func_002EC850();
+    sdfSoundInitIpuStream();
     kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
 }
 
 u32 func_00270110(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D428(0);
+    temp_v0 = scrReadIntParameter(0);
     func_0026FFF8(temp_v0);
     D_003BC630 = 0;
     return 1;
@@ -762,7 +762,7 @@ void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
 }
 
 void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
-    func_002802E0(arg0, arg3, arg1[3], 7, arg1[4], 0, *arg1, 0x11);
+    mnuInitPageWindow(arg0, arg3, arg1[3], 7, arg1[4], 0, *arg1, 0x11);
     func_0027FAA8(arg0, *arg1);
     func_0027FBE0(arg0, arg1 + 9);
     func_0027FC10(arg0, arg1 + 0x11);
@@ -795,7 +795,7 @@ typedef struct StaffSlots {
     u32 extraResources[5];   /* 0x64 */
 } StaffSlots;
 
-s32 func_002716E8(s32 unused, StaffSlots *slots) {
+s32 mnuStaffSlotsAllFilled(s32 unused, StaffSlots *slots) {
     s32 i;
 
     func_002BC748();
@@ -850,7 +850,7 @@ void func_00271B48(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271B50);
 
-void func_00271D30(StaffSpriteHandles *menu) {
+void mnuCreateStaffPanelSet(StaffSpriteHandles *menu) {
     menu->resourceList = func_0027D4A0(0, *(u32 *)((u8 *)menu + 0x6C), menu->secondaryImage);
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], *(u32 *)((u8 *)menu + 0x74), 0, 0, 0);
@@ -904,7 +904,7 @@ u32 func_00271FC8(void) {
     return 0;
 }
 
-s32 func_00271FF8(s32 menu) {
+s32 mnuStaffCampCancelCheck(s32 menu) {
     u32 buttons = func_00285B20(8);
     s32 result;
 
@@ -979,7 +979,7 @@ void func_00272668(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_00272518(arg0, arg1, arg2, arg3, arg4, 0, arg5);
 }
 
-void func_00272688(s32 arg0, s32 arg1) {
+void mnuDrawStaffCampScreen(s32 arg0, s32 arg1) {
     u8 *menu = (u8 *)func_00101A70(arg1);
 
     mnuDrawBackdrop(menu + 0x13C, 0x20);
@@ -996,7 +996,7 @@ void func_00272688(s32 arg0, s32 arg1) {
 }
 
 void func_00272778(u32 arg0) {
-    func_00272688(0, arg0);
+    mnuDrawStaffCampScreen(0, arg0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2100);

@@ -153,7 +153,7 @@ s64 func_00162938(void) {
     return parGetRestartFlag();
 }
 
-void func_00162958(void *dst, void *src) {
+void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -318,7 +318,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163780);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
 
-void func_00163B68(ParSystem *system, s32 arg1, s32 arg2) {
+void parFillVertexPairs(ParSystem *system, s32 arg1, s32 arg2) {
     s32 count = system->cellCount;
     s32 perCell = system->vertexWordCount >> 1;
     s32 i;

@@ -8,6 +8,8 @@ extern s64 func_002D13F0(void);
 
 extern u8 D_003E7034[];
 
+extern void func_002C42C0();
+
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AAEA0);
 
 u32 func_002AAF40(void) {
@@ -35,7 +37,19 @@ u32 func_002AB240(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB278);
+/* Dispatch a callback; on idle, install the default entry unless busy. */
+s64 func_002AB278(s32 callback) {
+    s32 context = func_00101958();
+    s32 *dispatchEntry = (s32 *)(context + 0x54);
+    s64 state = func_002C4038(context + 8, dispatchEntry, 0, callback);
+    if (state == 0) {
+        if (func_002D13F0() == 0) {
+            func_002C42C0(dispatchEntry, D_003E7034);
+        }
+        return 0;
+    }
+    return state;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB2E8);
 

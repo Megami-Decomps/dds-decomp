@@ -185,7 +185,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00196ED0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 
-void func_00197190(s32 arg0, s32 arg1) {
+void itfInitTextDrawArgs(s32 arg0, s32 arg1) {
     TextDrawArgs args;
 
     args.x = 0;
@@ -265,7 +265,7 @@ void itfConvertText(u8 *output, const char *input) {
 }
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
-void func_001974B8(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph16x18(u64 arg0, u64 arg1, s32 arg2, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
@@ -307,7 +307,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001979C8);
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197A98);
 
 /* Attach the alternate font glyph, with a 12x16 cell, to its parent. */
-void func_00197B78(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph12x16(u64 arg0, u64 arg1, s32 arg2, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
@@ -379,7 +379,7 @@ u32 func_00198068(u32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
 
 /* The header before each payload forms a circular free-node list. */
-u32 func_001981A8(s32 payloadBytes, s32 count) {
+u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     u32 buffer;
     u8 *list;
     MemNode *cursor;
@@ -450,7 +450,7 @@ typedef struct TextBackgroundSprite {
     s16 height;
 } TextBackgroundSprite;
 
-void func_00198320(void) {
+void itfDrawBackgroundSprite(void) {
     s32 origin[4];
     s32 color[4];
     TextBackgroundSprite *panel = (TextBackgroundSprite *)D_003BD81C;
@@ -479,11 +479,11 @@ void func_00198408(void) {
 }
 
 /* Return an all-bits-set ready mask only while the registered task is in state 3. */
-u32 func_00198428(void) {
+u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
     s64 taskState;
     u32 readyMask;
 
-    func_00198320();
+    itfDrawBackgroundSprite();
     taskState = kwlnTaskGetRegisteredState(D_003BB190);
     readyMask = 0xffffffff;
     if (taskState != 3) {
@@ -634,7 +634,7 @@ typedef struct DrawColorRec {
 } DrawColorRec;
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
-u64 func_001986E0(const char *path) {
+u64 itfLoadTextureFromAsset(const char *path) {
     u64 fileAllocation;
     u64 textureHandle;
     u32 assetInfo[4];
@@ -647,7 +647,7 @@ u64 func_001986E0(const char *path) {
 
 /* Pack each RGBA/XYZ pair into GS qwords; the 0x7000/0x7900 biases place
  * vertex coordinates in the GS screen-space origin. */
-void func_00198730(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, u64 command) {
+void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, u64 command) {
     u64 packet;
     u64 *dst;
     s32 i;
@@ -668,7 +668,7 @@ void func_00198730(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 
     sdfAppendPacket(command, packet);
 }
 
-void func_00198858(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, u64 command) {
+void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, u64 command) {
     u64 packet;
     u64 *dst;
     s32 i;
@@ -692,7 +692,7 @@ void func_00198858(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, 
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198990);
 
-void func_00198B30(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, u64 command) {
+void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, u64 command) {
     u64 packet;
     u64 *dst;
     s32 i;
@@ -793,7 +793,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, packet);
 }
 
-void func_00199460(u64 command, u64 value, s32 flag) {
+void itfSendBlendPacket(u64 command, u64 value, s32 flag) {
     u64 packet = sdfAllocPacketAligned(0x30);
     u64 *dst = func_002E13E0(packet, 0x30);
 
@@ -802,7 +802,7 @@ void func_00199460(u64 command, u64 value, s32 flag) {
     sdfAppendPacket(command, packet);
 }
 
-void func_001994D8(u64 command, s32 index, s32 flag) {
+void itfSendTablePacket(u64 command, s32 index, s32 flag) {
     u64 packet = sdfAllocPacketAligned(0x30);
     u64 *dst = func_002E13E0(packet, 0x30);
 

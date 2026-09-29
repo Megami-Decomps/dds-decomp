@@ -29,7 +29,7 @@ void func_00112B58(u32 unused, u32 value) {
     inner->value44 = value;
 }
 
-u32 func_00112B80(WorldInnerOwner *object) {
+u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
     WorldInnerState *inner;
     u32 handle;
 

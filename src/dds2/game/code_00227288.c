@@ -106,7 +106,7 @@ extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s
 
 extern void func_001053F0(s32, s32, f32);
 
-extern s32 func_00105518(void);
+extern s32 kwlnTextureSetReferenceFlagIfPresent(void);
 
 extern void func_0022D040(void);
 
@@ -225,7 +225,7 @@ typedef struct BattleListEntry {
     u16 flags;
 } BattleListEntry;
 
-extern s32 func_00231B80(s32, s32, s32);
+extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 fileRequestIsReady(void *);
 
@@ -319,13 +319,13 @@ extern s32 btlHasEffectActor(void);
 
 extern s64 btlStartTask(void *);
 
-extern s32 func_0010D650(s32);
+extern s32 scrReadIntParameter(s32);
 
 extern u8 *btlFindUnitByModeClear(s32);
 
 extern u8 *btlFindUnitByModeFlagged(s32);
 
-extern void *func_001E5790(void *, s32, s32, s32, s32, s32);
+extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
 extern void *func_00328D68(s32);
 
@@ -964,7 +964,7 @@ s32 btlReleaseScriptResource(void) {
     return 0;
 }
 
-s32 func_0022A9D0(void) {
+s32 btlCanStartPrimaryScriptTask(void) {
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     if (battle->scriptGroup == -1) {
         return 0;
@@ -978,7 +978,7 @@ s32 func_0022A9D0(void) {
     return btlFindScriptResource(D_00436D00) != -1;
 }
 
-void func_0022AA38(void) {
+void btlStartPrimaryScriptTask(void) {
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     s32 scriptId;
     s32 taskId;
@@ -1016,7 +1016,7 @@ s32 btlHasScriptResource(void) {
     return btlFindScriptResource(D_00436D08) != -1;
 }
 
-void func_0022AB60(void) {
+void btlStartSecondaryScriptTask(void) {
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     s32 scriptId;
     s32 taskId;
@@ -1077,7 +1077,7 @@ INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B768);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B288);
 
-void func_0022B348(void) {
+void btlReleaseEventAssets(void) {
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     void *data;
     btlReleaseEventData();
@@ -1089,10 +1089,10 @@ void func_0022B348(void) {
     func_0020D128(D_0041B7D0);
 }
 
-s32 func_0022B398(void) {
-    s32 selector = func_0010D650(0);
-    s32 unitId = func_0010D650(1);
-    s32 action = func_0010D650(2);
+s32 btlCommandSelectEventAction(void) {
+    s32 selector = scrReadIntParameter(0);
+    s32 unitId = scrReadIntParameter(1);
+    s32 action = scrReadIntParameter(2);
     BtlUnit *unit;
     BattleScriptResources *battle;
     s32 result;
@@ -1122,10 +1122,10 @@ s32 func_0022B398(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B460);
 
 s32 func_0022B510(void) {
-    s32 choice = func_0010D650(0);
-    s32 unitIndex = func_0010D650(1);
-    s32 first = func_0010D650(2);
-    s32 second = func_0010D650(3);
+    s32 choice = scrReadIntParameter(0);
+    s32 unitIndex = scrReadIntParameter(1);
+    s32 first = scrReadIntParameter(2);
+    s32 second = scrReadIntParameter(3);
     u8 *unit;
     if ((u32)unitIndex >= 0x180) {
         return 1;
@@ -1141,7 +1141,7 @@ s32 func_0022B510(void) {
     if (unit == NULL) {
         return 1;
     }
-    btlStartTask(func_001E5790(unit, choice != 0, first, second, 0x18, 0));
+    btlStartTask(btlCreateModelChangeTask(unit, choice != 0, first, second, 0x18, 0));
     return 1;
 }
 
@@ -1154,9 +1154,9 @@ u8 func_0022B5E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B600);
 
-s32 func_0022B6E8(void) {
+s32 btlCommandSetSequenceVolumePan(void) {
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
-    s32 index = func_0010D650(0);
+    s32 index = scrReadIntParameter(0);
     if (func_00342168(battle->sequenceBaseHandle) != 0) {
         sndSetSequenceVolumePan(battle->sequenceBaseHandle + index, 0x7f, 0x3f);
         func_0020D128(D_0041B7E0, battle->sequenceBaseHandle + index);
@@ -1169,7 +1169,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022B760);
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B7A0);
 
 u32 func_0022B8E0(void) {
-    u32 index = func_0010D650(0);
+    u32 index = scrReadIntParameter(0);
     u32 value = 0;
     if (index < 100) {
         value = D_003BF961[index * 4];
@@ -1178,7 +1178,7 @@ u32 func_0022B8E0(void) {
     return 1;
 }
 
-u32 func_0022B928(void) {
+u32 btlCommandCountModelFlags(void) {
     s64 isSet;
     s32 flag;
     u32 index;
@@ -1199,7 +1199,7 @@ u32 func_0022B928(void) {
 }
 
 u32 func_0022B988(void) {
-    u32 index = func_0010D650(0);
+    u32 index = scrReadIntParameter(0);
     u32 value = 1;
     if (index < 100) {
         value = D_003BF962[index * 2];
@@ -1209,7 +1209,7 @@ u32 func_0022B988(void) {
 }
 
 u32 func_0022B9D0(void) {
-    s32 index = func_0010D650(0);
+    s32 index = scrReadIntParameter(0);
     if (index < 0x100) {
         func_0011A118(index, 1);
     }
@@ -1523,8 +1523,8 @@ s32 func_0022C948(u8 *task) {
     if (*(s8 *)(task + 0xc) != 0) {
         return 1;
     }
-    if (func_00231B80(*(s32 *)task, *(s32 *)(task + 4), 0) == 0 ||
-        func_00231B80(*(s32 *)task, *(s32 *)(task + 4), 0) == -1) {
+    if (mdlRequestAsset(*(s32 *)task, *(s32 *)(task + 4), 0) == 0 ||
+        mdlRequestAsset(*(s32 *)task, *(s32 *)(task + 4), 0) == -1) {
         return 0;
     }
     if (*(void **)(task + 0x10) == 0) {
@@ -1639,7 +1639,7 @@ void func_0022DE38(void) {
     s32 i;
     u64 clearValue;
     func_001053F0(0x200, 0xe0, 0.0f);
-    func_00105518();
+    kwlnTextureSetReferenceFlagIfPresent();
     entry = D_00380870;
     i = 0;
     clearValue = 0x80008000ULL;
@@ -1655,7 +1655,7 @@ void func_0022DE38(void) {
 
 void func_0022DEB8(void) {
     func_00105538();
-    func_001054E0();
+    kwlnTextureReleaseHeldReference();
 }
 
 void btlInitializeGraphicsRuntime(void) {
@@ -1922,7 +1922,7 @@ typedef struct MenuList {
     u32 rows;
 } MenuList;
 
-s32 func_0022EBC0(MenuList *list) {
+s32 mnuListMoveCursor(MenuList *list) {
     if (D_0040B7D8->b6 & 2) {
         if (list->cursor != 0) {
             list->cursor--;
@@ -2128,7 +2128,7 @@ void btlAddGroupId(s32 group, s32 id) {
     *head = node;
 }
 
-void func_002312F8(s32 group, s32 id) {
+void btlRemoveGroupId(s32 group, s32 id) {
     s32 *link;
     s32 *node;
 

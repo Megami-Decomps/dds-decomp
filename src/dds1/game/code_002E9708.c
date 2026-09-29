@@ -104,7 +104,7 @@ extern SoundNode *D_003BDA98;
 extern s32 sceIpuSync(s32, s32);
 extern u32 func_002CF530(s32);
 extern void sdfSoundInitNodeFromFormat(SoundNode *, SoundFormat *);
-extern void func_002EB930(SoundNode *, s32, s32, s32);
+extern void sdfStreamOpen(SoundNode *, s32, s32, s32);
 extern void sdfSoundInitFormattedNode(SoundNode *, SoundFormat *, s32, s32);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
@@ -244,7 +244,7 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9C80);
 
 extern u8 D_003FE0C0[];
 
-void func_002E9FB0(u32 kind, u8 *dst) {
+void sdfSoundGetTableEntry(u32 kind, u8 *dst) {
     u8 *table;
     u8 *src;
     s32 i;
@@ -377,7 +377,7 @@ extern GsMemBlock *func_002D1D10(void);
 extern char *D_00398A38[];
 extern GsMemBlock *func_002D1D18(void);
 
-void func_002EAC98(void) {
+void sdfDumpGsMemoryForward(void) {
     char buf[8];
     GsMemBlock *head;
     GsMemBlock *node;
@@ -403,7 +403,7 @@ void func_002EAC98(void) {
     }
 }
 
-void func_002EAD88(void) {
+void sdfDumpGsMemoryBackward(void) {
     char buf[8];
     GsMemBlock *head;
     GsMemBlock *node;
@@ -543,7 +543,7 @@ void sdfRelocatePackedResourceWords(s32 *words, s32 base, u8 *table, s32 size) {
     }
 }
 
-void func_002EB360(SdfStreamNode *node, s32 inInterrupt) {
+void sdfStreamNodeUnlink(SdfStreamNode *node, s32 inInterrupt) {
     s32 interruptsEnabled = 0;
     SdfStreamNode *prev;
     SdfStreamNode *next;
@@ -570,13 +570,13 @@ void func_002EB360(SdfStreamNode *node, s32 inInterrupt) {
     }
 }
 
-void func_002EB3F0(SdfStreamNode *node, s32 inInterrupt) {
+void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
     s32 interruptsEnabled = 0;
     if (inInterrupt == 0) {
         interruptsEnabled = func_00312C08();
     }
     if (node->queued != 0) {
-        func_002EB360(node, 1);
+        sdfStreamNodeUnlink(node, 1);
     }
     node->queued = 1;
     if (D_003BDAB0 == 0) {
@@ -646,7 +646,7 @@ void sdfSoundInitNodeFromFormat(SoundNode *node, SoundFormat *format) {
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;
 }
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB930);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfStreamOpen);
 
 void sdfSoundInitFormattedNode(SoundNode *node, SoundFormat *format, s32 callback, s32 context) {
     sdfSoundInitNodeFromFormat(node, format);
@@ -757,12 +757,12 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
 
 void sdfSoundInitAndAppendNode(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s32 value) {
-    func_002EB930(node, arg1, arg2, arg3);
+    sdfStreamOpen(node, arg1, arg2, arg3);
     node->userValue = value;
     sdfSoundAppendNode(node);
 }
 
-void func_002EC780(s32 arg0, SdfStreamParams *params, s32 arg2, s32 arg3, u8 *source) {
+void sdfStreamCreateWithParams(s32 arg0, SdfStreamParams *params, s32 arg2, s32 arg3, u8 *source) {
     SdfStreamParams local = *params;
     switch (source[0x1A]) {
     case 0:
@@ -786,13 +786,13 @@ extern s32 D_003BDAB4;
 extern void sceIpuInit(void);
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
 extern void func_0030B638(s32);
-extern s32 func_002CF468(void *, void *, s32, s32);
+extern s32 sdfCreateThread(void *, void *, s32, s32);
 extern void _StartThread();
 extern u8 D_003FEB00[];
 extern s32 func_002EC3C0();
 extern s32 func_002EC3F0();
 extern void func_002EC2F0();
-void func_002EC850(void) {
+void sdfSoundInitIpuStream(void) {
     s32 thread;
 
     sceIpuInit();
@@ -803,7 +803,7 @@ void func_002EC850(void) {
     func_0030B638(3);
     D_003BDAA0 = sdfAddHandler(1, 4, func_002EC3F0, -1, 0);
     func_0030B638(4);
-    thread = func_002CF468(func_002EC2F0, D_003FEB00, 0x800, 0x46);
+    thread = sdfCreateThread(func_002EC2F0, D_003FEB00, 0x800, 0x46);
     D_003BDAB4 = thread;
     _StartThread(thread, 0);
 }

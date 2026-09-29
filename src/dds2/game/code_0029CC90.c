@@ -31,7 +31,7 @@ extern s32 btlAddBaseStats(u8 *, TitleSeq *);
 
 extern u32 func_00309138(u32, u32, s32);
 
-void func_0029C450(u8 *work);
+void itfUpdateFadeColor(u8 *work);
 
 extern struct { s32 v[6]; } D_003D6500;
 
@@ -53,7 +53,7 @@ void mnuTitleDrawFadeMenuEntries(u8 *work) {
 void mnuTitleRenderFadeAndPanels(u8 *work) {
     s32 remaining = 0x100 - ((TitleMenuWork *)work)->fadeProgress;
 
-    func_0029C450(work);
+    itfUpdateFadeColor(work);
     func_0029C618(work);
     func_0029C120(work);
     func_0029C3F0(work);
@@ -61,7 +61,7 @@ void mnuTitleRenderFadeAndPanels(u8 *work) {
     mnuTitleDrawFadeMenuEntries(work);
 }
 
-void func_0029CDD8(void) {
+void brsDecaySharedAnimCounter(void) {
     func_0029C810();
 }
 

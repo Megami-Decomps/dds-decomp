@@ -137,7 +137,7 @@ void func_0031E7C8(FadeEntry *entry, u32 frame) {
     entry->frame = frame;
 }
 
-void func_0031E7D0(FadeEntry *entry) {
+void itfDrawLowerFadeGlyphPair(FadeEntry *entry) {
     s64 active;
 
     active = itfIsFadeActive();
@@ -154,7 +154,7 @@ void func_0031E850(FadeEntry *entry, u32 frame) {
     entry->frame = frame;
 }
 
-void func_0031E858(FadeEntry *entry) {
+void itfDrawUpperFadeGlyphPair(FadeEntry *entry) {
     s64 active;
 
     active = itfIsFadeActive();
@@ -167,11 +167,11 @@ void func_0031E858(FadeEntry *entry) {
     }
 }
 
-void func_0031E8D8(FadeEntry *entry, u32 parameter) {
+void itfSetFadeParameter(FadeEntry *entry, u32 parameter) {
     entry->parameter = parameter;
 }
 
-void func_0031E8E0(FadeEntry *entry, u32 parameter) {
+void itfSetFadeSecondaryParameter(FadeEntry *entry, u32 parameter) {
     entry->secondaryParameter = parameter;
 }
 
@@ -257,7 +257,7 @@ void mnuDrawFadeSequenceOffset(FadeEntry *entry) {
     }
 }
 
-void func_0031EFB8(FadeEntry *entry) {
+void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
     s64 active;
 
     active = itfIsFadeActive();
@@ -274,7 +274,7 @@ void func_0031F040(FadeEntry *entry, u32 frame) {
     entry->frame = frame;
 }
 
-void func_0031F048(FadeEntry *entry) {
+void itfDrawFadeGlyphForFrame(FadeEntry *entry) {
     s64 active;
 
     active = itfIsFadeActive();

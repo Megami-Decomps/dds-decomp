@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_002C2540(u32, u32);
+extern s32 itfFindGridNodeByKey(u32, u32);
 
 extern s32 func_002C1B30(u32);
 
@@ -73,7 +73,7 @@ void func_002BF790(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
 /* Resolve an entry by key, falling back to the object's stored value. */
-s32 func_002BF970(s32 object, s32 key) {
+s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
     s32 entry = func_002BD398(object);
     s32 result;
 
@@ -128,7 +128,7 @@ void itfCopyGridEntryWords(s32 owner, s32 index) {
 }
 
 /* Store the two grid position coordinates. */
-void func_002BFB98(IntPair *position, s32 x, s32 y) {
+void itfGridStorePosition(IntPair *position, s32 x, s32 y) {
     position->x = x;
     position->y = y;
 }
@@ -179,7 +179,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0340);
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C04C8);
 
 /* Unpack four 8-bit channels into the low and high halves of two 64-bit words. */
-void func_002C05F0(u64 *channels, u32 color) {
+void itfGridUnpackColorChannels(u64 *channels, u32 color) {
     u64 green;
     channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
     green = color & 0xFF00;
@@ -188,7 +188,7 @@ void func_002C05F0(u64 *channels, u32 color) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0628);
 
-void func_002C0778(u8 value, s32 alternate, s32 kind) {
+void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     u32 normalized = value != 0;
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
@@ -211,7 +211,7 @@ void func_002C0778(u8 value, s32 alternate, s32 kind) {
 }
 
 void func_002C0858(u8 value, u32 kind) {
-    func_002C0778(value, 0, kind);
+    itfGridDrawBooleanDescriptor(value, 0, kind);
 }
 
 void func_002C0878(s32 data, s32 alternate, s32 kind) {
@@ -528,14 +528,14 @@ void func_002C1CC8(GridTextWidget *widget, u8 *node, const char *text) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1D78);
 
-void func_002C1F18(u32 arg0, u32 arg1, s32 arg2) {
+void itfAdvanceGridScrollPosition(u32 arg0, u32 arg1, s32 arg2) {
     s32 temp_v0;
     s32 temp_v1;
     float *pfVar3;
     float temp_v2;
     float temp_v3;
 
-    temp_v1 = func_002C2540(arg1, arg0);
+    temp_v1 = itfFindGridNodeByKey(arg1, arg0);
     temp_v0 = *(s32 *)(temp_v1 + 8);
     pfVar3 = (float *)(temp_v1 + 0xc);
     temp_v2 = *(float *)(temp_v0 + 0xc);
@@ -554,20 +554,20 @@ void func_002C1F88(u32 arg0, u32 arg1) {
 
     temp_v0 = (s32)arg0;
     if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        func_002C1F18(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
+        itfAdvanceGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
                                     arg1);
         return;
     }
 }
 
-void func_002C1FD0(u32 arg0, u32 arg1, s32 arg2) {
+void itfReverseGridScrollPosition(u32 arg0, u32 arg1, s32 arg2) {
     s32 temp_v0;
     s32 temp_v1;
     float *pfVar3;
     float temp_v2;
     float temp_v3;
 
-    temp_v1 = func_002C2540(arg1, arg0);
+    temp_v1 = itfFindGridNodeByKey(arg1, arg0);
     temp_v0 = *(s32 *)(temp_v1 + 8);
     pfVar3 = (float *)(temp_v1 + 0xc);
     temp_v2 = *(float *)(temp_v0 + 0xc);
@@ -586,7 +586,7 @@ void func_002C2040(u32 arg0, u32 arg1) {
 
     temp_v0 = (s32)arg0;
     if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        func_002C1FD0(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
+        itfReverseGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
                                     arg1);
         return;
     }
@@ -615,7 +615,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C20F8);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C22F0);
 
-s32 func_002C2540(u32 key, u32 head) {
+s32 itfFindGridNodeByKey(u32 key, u32 head) {
     u32 n;
 
     n = *(u32 *)(head + 0x14);

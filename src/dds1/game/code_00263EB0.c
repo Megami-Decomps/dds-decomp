@@ -102,7 +102,7 @@ extern void func_002858F8(s32 *, char *);
 extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
-s64 func_00264610(u64 request) {
+s64 mnuRunPanelWithIdleFallback(u64 request) {
     s32 context = func_00101A70();
     s32 *panelState = (s32 *)(context + 0x54);
     s64 result;

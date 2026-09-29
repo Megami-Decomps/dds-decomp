@@ -183,7 +183,7 @@ void effDecrementSecondCountdown(EffCounterOwner *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FF18);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectCounterTask);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FFB8);
 
@@ -209,7 +209,7 @@ u32 func_00210688(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210690);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectTask3E);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210720);
 
@@ -217,10 +217,10 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_002107C0);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210850);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_002108E8);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectWaitTask);
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
-s32 func_00210980(BtlWaitTask *task) {
+s32 btlWaitEffectTask(BtlWaitTask *task) {
     if (task->ticks == 0) {
         func_001B7E40(task->value, 0);
         func_001C7DB8(0, 8);
@@ -239,13 +239,13 @@ s32 func_00210980(BtlWaitTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210A28);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectTask44);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210AA8);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210B78);
 
-extern s32 func_0010D650(s32 index);
+extern s32 scrReadIntParameter(s32 index);
 extern BtlEffActor *btlFindUnitByModeClear(s32 id);
 extern BtlEffActor *btlFindUnitByModeFlagged(s32 id);
 extern BtlEffTask *btlCreateEffObjB(BtlEffActor *actor, s32 arg);
@@ -259,9 +259,9 @@ s32 func_00210C10(void) {
     BtlEffActor *unit;
     BtlEffTask *task;
 
-    mode = func_0010D650(0);
-    unitId = func_0010D650(1);
-    arg = func_0010D650(2);
+    mode = scrReadIntParameter(0);
+    unitId = scrReadIntParameter(1);
+    arg = scrReadIntParameter(2);
     if (mode == 0) {
         unit = btlFindUnitByModeClear(unitId);
     } else {

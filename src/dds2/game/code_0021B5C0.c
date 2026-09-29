@@ -146,7 +146,7 @@ void btlCancelCurrentSubtask(void) {
 }
 
 /* Allocate and launch a subtask from the active battle task slot. */
-u64 func_0021B600(u64 input) {
+u64 btlStartSubtaskWithInput(u64 input) {
     BtlTask *task = func_001E5FF8(func_001AA6F8()->sub->task, 0xC);
     if (input != 0) {
         task->arg = input;

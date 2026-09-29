@@ -103,6 +103,12 @@ INCLUDE_ASM(const s32, "file/fileManager", func_002C81E8);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8238);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C82C8);
+void func_002C82C8(a, b, c)
+s32 a;
+s32 b;
+s32 c;
+{
+    func_002C8238(a, b, c, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C82E8);

@@ -220,7 +220,7 @@ s32 evtViewFindGlyphAtOrBefore(EventViewerState *viewer) {
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void func_0024F130(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
 
-void func_00249598(s32 arg0, EventViewerState *viewer) {
+void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
     s32 scene;
     s32 world;
     s32 object;
@@ -269,7 +269,7 @@ void func_00249598(s32 arg0, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002496B0);
 
-void func_00249A98(u32 arg0, EventViewerState *viewer) {
+void evtViewerSyncWorldGroups(u32 arg0, EventViewerState *viewer) {
     u8 *list;
     EvtViewNode *node;
     EvtViewNode *found;
@@ -357,7 +357,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024A158);
 extern void func_002A8008(void);
 extern void func_002A7FD0(void);
 /* Advance or stop the timed viewer action according to the current position. */
-s32 func_0024A380(EventViewerState *viewer) {
+s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
     if (viewer->timedActive == 1) {
         if (viewer->glyphAdvancePosition < viewer->timedStart) {
             func_002A7FD0();
@@ -418,7 +418,7 @@ EvtViewGlyph *func_0024A670(EvtViewNode *group, s32 position, s32 channel) {
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A738);
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
-void func_0024A9F0(u32 viewerAddr) {
+void evtViewerDispatchFlagMode(u32 viewerAddr) {
     s32 viewer;
 
     viewer = (s32)viewerAddr;
@@ -860,7 +860,7 @@ extern void func_001057A8();
 extern s32 sdfGraphHasPendingWorkInterruptSafe();
 extern void evtDestroyWorldSecondaryNode();
 extern void func_003298C0();
-extern void func_001054E0();
+extern void kwlnTextureReleaseHeldReference();
 extern void func_00246E68();
 extern void func_00246DF0();
 extern void func_003297C8();
@@ -869,7 +869,7 @@ extern void func_00106160();
 extern void func_0025F5D0();
 void func_0024ACC0(s32 arg0);
 
-void func_0024D918(viewer)
+void evtViewerRelease(viewer)
     EventViewerState *viewer;
 {
     if (func_0024D908(*(s32 *)((u8 *)viewer + 8)) == 0) {
@@ -899,7 +899,7 @@ void func_0024D918(viewer)
     }
     while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
     }
-    func_001054E0();
+    kwlnTextureReleaseHeldReference();
     while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
     }
     func_00246E68(viewer);
@@ -918,14 +918,14 @@ void func_0024DAA0(void) {
     u64 temp_v0;
 
     temp_v0 = func_00101958();
-    func_0024D918(temp_v0);
+    evtViewerRelease(temp_v0);
 }
 
 void func_0024DAC0(void) {
     u64 temp_v0;
 
     temp_v0 = func_00101958();
-    func_0024D918(temp_v0);
+    evtViewerRelease(temp_v0);
 }
 
 void func_0024DAE0() {

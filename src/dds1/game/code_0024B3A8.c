@@ -70,7 +70,7 @@ s32 evtBClearAndReset(void) {
 extern void func_0024AB70(s32, s32);
 extern void func_0024ACD8(void);
 extern void func_0024A570(s32, s32, s32);
-extern void func_00248580(s32);
+extern void mnuReleaseVisualResources(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 u32 func_0024B7E8(void) {
@@ -80,7 +80,7 @@ u32 func_0024B7E8(void) {
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     func_0024A570(0, -2, context);
     func_00249C08(1);
-    func_00248580(context);
+    mnuReleaseVisualResources(context);
     kwlnFadeOutStart(0, 0, 0, 15);
     return 1;
 }
@@ -100,7 +100,7 @@ void evtBSetupDispatchSyncB(s32 request) {
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
-extern void func_0027BB08(s32);
+extern void mnuSelectFirstListNode(s32);
 extern void func_0024A728(s32, s32);
 extern void func_0024ACD8(void);
 extern void func_0024AF58(void);
@@ -115,7 +115,7 @@ u32 func_0024B9D8(void) {
     s32 context = func_00101A70();
 
     if (*(s32 *)(context + 0xD0) == 0) {
-        func_0027BB08(*(s32 *)(context + 0x78));
+        mnuSelectFirstListNode(*(s32 *)(context + 0x78));
         func_0024A728(3, context);
         evtRememberDispatchCallback((s32)func_0024AF58, context);
         func_0024AE18(3, context);
@@ -169,7 +169,7 @@ void evtBSetupDispatchSyncC(s32 request) {
 }
 
 extern void mnuRefreshThresholdNodeFlags(s32);
-extern void func_0027BB08(s32);
+extern void mnuSelectFirstListNode(s32);
 extern void func_0024A570(s32, s32, s32);
 extern void func_0024B090(s32, s32);
 extern void func_0024AB70(s32, s32);
@@ -179,7 +179,7 @@ u32 func_0024BCD0(void) {
     s32 context = func_00101A70();
 
     mnuRefreshThresholdNodeFlags(*(s32 *)(context + 0x74));
-    func_0027BB08(*(s32 *)(context + 0x74));
+    mnuSelectFirstListNode(*(s32 *)(context + 0x74));
     func_0024A570(3, 2, context);
     func_0024B090(3, context);
     func_0024AB70(4, context);
@@ -290,7 +290,7 @@ typedef struct MenuEntry32 {
 } MenuEntry32;
 
 extern MenuEntry32 D_00347C68[];
-extern void func_0027BB08(s32);
+extern void mnuSelectFirstListNode(s32);
 extern void func_0024DD90(s32, void *);
 extern void func_0024DDC0(s32);
 extern void func_0024DA58(s32);
@@ -303,7 +303,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     s32 *selectionIndex = (s32 *)(*(s32 *)(owner + 0x1C) + 0x60);
 
     if (*(s32 *)(owner + 0x20) == 1) {
-        func_0027BB08(owner);
+        mnuSelectFirstListNode(owner);
     }
     func_0024DD90(0, &D_00347C68[*selectionIndex]);
     func_0024DDC0(1);

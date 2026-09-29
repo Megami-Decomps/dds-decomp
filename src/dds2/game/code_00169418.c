@@ -11,7 +11,7 @@ extern u32 D_00436424;
 extern u32 D_00436414;
 
 /* Keep the original selector and optional overrides separately for field-color lookups. */
-void func_00169418(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
+void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
     D_00436420 = (u32)baseId;
     D_00436418 = D_00436420;
     if (overrideId != 0) {
@@ -41,7 +41,7 @@ u32 func_00169450(void) {
 }
 
 /* Default RGB adjustment used when no field-specific color is supplied. */
-void func_00169458(u32 unused, f32 *color) {
+void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
     color[0] = -0.73f;
     color[1] = 1.55f;
     color[2] = 0.24f;
@@ -51,7 +51,7 @@ INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);
 
 INCLUDE_ASM(const s32, "game/code_00169418", func_00169580);
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_001695A8);
+INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetEntryWord);
 
 u32 func_001695C8(void) {
     return 1;

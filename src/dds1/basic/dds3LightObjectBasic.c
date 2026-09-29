@@ -28,7 +28,7 @@ extern void *D_00324770[];
 extern void *D_00324780[];
 
 /* Releases the light's buffer and resource before freeing the object itself. */
-void func_00116338(LightObject *light) {
+void lightReleaseObject(LightObject *light) {
     LightData *data;
 
     data = light->data;

@@ -29,7 +29,7 @@ void func_00279AF8(s32 selection) {
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
-extern void func_002806E8(void *, u32);
+extern void mnuSelectPage(void *, u32);
 extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
@@ -48,7 +48,7 @@ s32 func_00279B30(s32 menu) {
     u8 *ctx = (u8 *)func_00101A70();
     u32 *panel = (u32 *)(ctx + 0x15C);
 
-    func_002806E8(panel, *((SkillMenuContext *)ctx)->selection->index);
+    mnuSelectPage(panel, *((SkillMenuContext *)ctx)->selection->index);
     *panel |= 0x400;
     ptySkillMenuBuildEquippedSlots(0, menu);
     ptySkillMenuInitPages(ctx);

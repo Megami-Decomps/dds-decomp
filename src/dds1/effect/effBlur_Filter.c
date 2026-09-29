@@ -26,7 +26,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186E60);
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186F90);
 
 /* Release the first variant's owned effect resource. */
-void func_00187080(EffBlurWork *work) {
+void effBlurReleaseFirstResource(EffBlurWork *work) {
     func_002D0918(work->resource);
 }
 
@@ -35,11 +35,11 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00187098);
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_001872A0);
 
 /* The second variant uses the same work layout but separate callbacks. */
-void func_00187308(EffBlurWork *work, u32 setting) {
+void effBlurSetSecondSetting(EffBlurWork *work, u32 setting) {
     work->setting = setting;
 }
 
-void func_00187310(EffBlurWork *work) {
+void effBlurAcquireSecondHandle(EffBlurWork *work) {
     work->setting = func_00151FC8(2);
 }
 
@@ -52,7 +52,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_001873E0);
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00187460);
 
 /* Release the second variant's owned effect resource. */
-void func_00187580(EffBlurWork *work) {
+void effBlurReleaseSecondResource(EffBlurWork *work) {
     func_002D0918(work->resource);
 }
 

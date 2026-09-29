@@ -151,7 +151,7 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001629F0);
 
-INCLUDE_ASM(const s32, "game/code_001624D0", func_00162A38);
+INCLUDE_ASM(const s32, "game/code_001624D0", effParamWorkInvokeCallback);
 
 EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
     EffParamWork *work;

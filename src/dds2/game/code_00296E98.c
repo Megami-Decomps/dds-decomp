@@ -149,7 +149,7 @@ s8 brsTaskHasPendingRows(void) {
     return D_00437989;
 }
 
-s8 func_00298E80(s32 context) {
+s8 brsTaskIsUiUpdateAllowed(s32 context) {
     if (*(s32 *)(context + 0xAEB0) != 0) {
         D_0043798B = 0;
     }
@@ -207,7 +207,7 @@ extern void func_002B2818(s32);
 extern void func_002A95B0(s32, s32, s32, s32);
 extern s32 func_002C0B80(s32, s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
-extern void func_002C6988(s32);
+extern void evtStageTestInit(s32);
 
 /* Battle-result panel fields used while opening its skill-package display. */
 typedef struct BrsSkillPackageWork {
@@ -251,7 +251,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState(work->spriteArg0, work->spriteArg1, work->panelGroup);
-    func_002C6988(0);
+    evtStageTestInit(0);
     mnuForwardTableByte(((BrsRowUnit *)
         (((BrsSelectedRow *)((u8 *)work + 0x2F0))[work->selectedRow].unit))->unitId);
 }
@@ -438,7 +438,7 @@ extern s32 effMiscRand(s32);
 extern s32 D_003D6308[];
 
 /* Choose a reward bucket using this mode's cumulative thresholds. */
-s32 func_00299B20(u32 mode) {
+s32 mnuStaffPickRollByMode(u32 mode) {
     u32 roll = effMiscRand(0) & 0xFF;
     u32 i;
 

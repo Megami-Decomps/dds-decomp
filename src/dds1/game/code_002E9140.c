@@ -122,7 +122,7 @@ u32 func_002E9610(u32 *outSecondaryValue) {
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9630);
 
 /* Sends a prepared track identifier with the 0x17f setting. */
-void func_002E9690(s32 trackId) {
+void sndStartTrackExtended(s32 trackId) {
     CmdPacket packet;
 
     func_002E9340(trackId);

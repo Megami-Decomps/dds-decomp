@@ -810,7 +810,7 @@ void func_0010A8B0(u32 arg0, u32 arg1) {
 
 u32 func_0010A8D8(void) {
     evtDestroySkyTask();
-    func_00244AB8();
+    mnuCampDestroyPanelTasks();
     func_00126068();
     return 0;
 }

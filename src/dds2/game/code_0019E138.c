@@ -198,7 +198,7 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 
 extern void func_0019EDC0();
 
-void func_0019EEE8(s32 arg0, s32 arg1) {
+void itfInitTextDrawArgs(s32 arg0, s32 arg1) {
     TextDrawArgs args;
     args.x = 0;
     args.y = 0;
@@ -228,7 +228,7 @@ void mnuUnloadStaffFonts(void) {
 }
 
 /* DDS2 uses the larger 0xA10-entry glyph table; 0xFFFF is missing. */
-u32 func_0019F098(u32 value) {
+u32 itfDecodeGlyph(u32 value) {
     s32 adjusted = (value & 0xffff) + 0xffff7f80;
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
 
@@ -247,7 +247,7 @@ void itfConvertText(u8 *output, const char *input) {
         if (input[i] >= 0) {
             output[0] = input[i];
         } else {
-            u32 value = func_0019F098((u8)input[i + 1] | ((u8)input[i] << 8));
+            u32 value = itfDecodeGlyph((u8)input[i + 1] | ((u8)input[i] << 8));
             if (value != 0xffff) {
                 output[0] = value >> 8;
                 output[1] = value;
@@ -262,7 +262,7 @@ void itfConvertText(u8 *output, const char *input) {
 }
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
-void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph16x18(u64 arg0, u64 arg1, s32 arg2, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
@@ -305,7 +305,7 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F6C8);
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F798);
 
 /* The sequel uses the negative flag variant on its alternate 12x16 glyph. */
-void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph12x16(u64 arg0, u64 arg1, s32 arg2, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
@@ -319,7 +319,7 @@ void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 colors,
 }
 
 /* Count 0xFx0F separators in the packed text stream. */
-s32 func_0019F940(char *text) {
+s32 itfCountTextSeparators(char *text) {
     s32 separatorCount = 0;
 
     while (*text != 0) {
@@ -335,7 +335,7 @@ s32 func_0019F940(char *text) {
 }
 
 /* Copy one plain-text segment; other two-byte control codes pass through. */
-void func_0019F990(char *src, char *dst, s32 segmentIndex) {
+void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
     s32 currentSegment = 0;
 
     while (*src != 0) {
@@ -409,7 +409,7 @@ extern u8 *sdfResourceRetainAddress(s32);
 extern void *memcpy(void *, const void *, u32);
 
 /* The header before each payload forms a circular free-node list. */
-u8 *func_001A01D8(s32 payload, s32 count) {
+u8 *itfCreateMemNodeRing(s32 payload, s32 count) {
     s32 handle = func_003292A8((payload + 8) * (count + 1) + 4);
     u8 *list = sdfResourceRetainAddress(handle);
     MemNode *node;
@@ -481,7 +481,7 @@ typedef struct TextBackgroundSprite {
     s16 height;
 } TextBackgroundSprite;
 
-void func_001A0350(void) {
+void itfDrawBackgroundSprite(void) {
     s32 origin[4];
     s32 color[4];
     s16 width;
@@ -510,11 +510,11 @@ void func_001A0438(void) {
 }
 
 /* Return an all-bits-set ready mask only while the registered task is in state 3. */
-u32 func_001A0458(void) {
+u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
     s64 taskState;
     u32 readyMask;
 
-    func_001A0350();
+    itfDrawBackgroundSprite();
     taskState = kwlnTaskGetRegisteredState(D_00436590);
     readyMask = 0xffffffff;
     if (taskState != 3) {
@@ -648,7 +648,7 @@ void itfTranslateStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
 }
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
-u64 func_001A0710(const char *path) {
+u64 itfLoadTextureFromAsset(const char *path) {
     u64 fileAllocation;
     u64 textureHandle;
     u32 assetInfo[4];
@@ -659,13 +659,13 @@ u64 func_001A0710(const char *path) {
     return textureHandle;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0760);
+INCLUDE_ASM(const s32, "game/code_0019E138", itfDrawTriFlat3);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0888);
+INCLUDE_ASM(const s32, "game/code_0019E138", itfDrawQuadFlat4);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A09C0);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0B60);
+INCLUDE_ASM(const s32, "game/code_0019E138", itfDrawQuadTextured4);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0CA0);
 
@@ -683,7 +683,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern u8 *func_0033A290(void *, s32);
 extern void sdfAppendPacket();
 
-void func_001A1490(void *list, s64 value, s32 flag) {
+void itfSendBlendPacket(void *list, s64 value, s32 flag) {
     void *packet = sdfAllocPacketAligned(0x30);
     u8 *command = func_0033A290(packet, 0x30);
     *(s64 *)(command + 0x20) = value;
@@ -696,7 +696,7 @@ extern u8 *func_0033A290(void *, s32);
 extern void sdfAppendPacket();
 extern s64 D_003B4390[];
 
-void func_001A1508(void *list, s32 index, s32 flag) {
+void itfSendTablePacket(void *list, s32 index, s32 flag) {
     void *packet = sdfAllocPacketAligned(0x30);
     u8 *command = func_0033A290(packet, 0x30);
     s64 value = D_003B4390[index];

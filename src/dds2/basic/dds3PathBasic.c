@@ -43,7 +43,7 @@ typedef struct {
 
 void func_00116DE8(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
 
-void func_00341120(void *arg0, f32 arg1);
+void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 
 void dds3FreePathObject(PathObj *path) {
     effFreeBuffers(path->unk10);
@@ -81,7 +81,7 @@ void dds3PreparePathVectorPair(PathObj *arg) {
             : "r"(p2)
             : "memory"
         );
-        func_00341120(p2, frac);
+        effMiscQuaternionNlerpVU(p2, frac);
     } else {
         __asm__ volatile (
             ".set noreorder\n"

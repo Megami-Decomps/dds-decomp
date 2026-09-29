@@ -34,11 +34,11 @@ void dds3ClearUnitObjectLowFlags(WorldUnitOwner *object) {
     object->state->flags = object->state->flags & 0xfffffffc;
 }
 
-void func_00116938(u32 value, WorldUnitOwner *object) {
+void evtSetUnitValueTransitionForObject(u32 value, WorldUnitOwner *object) {
     evtSetUnitValueTransition(object->state->unit, value);
 }
 
-void func_00116958(WorldUnitOwner *object) {
+void evtEndUnitValueTransitionForObject(WorldUnitOwner *object) {
     evtEndUnitValueTransition(object->state->unit);
 }
 

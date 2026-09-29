@@ -37,7 +37,7 @@ extern s32 D_003C99B8[];
 
 extern void func_0024ACC0();
 
-extern void func_0024A9F0();
+extern void evtViewerDispatchFlagMode();
 
 extern s64 evtFindTaskById(void);
 
@@ -302,7 +302,7 @@ void func_0025DB98(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offse
     }
     world->unk1C -= 1;
     func_0024ACC0(world, delta, threshold, base, offset, ubase, node);
-    func_0024A9F0(world);
+    evtViewerDispatchFlagMode(world);
 }
 
 void func_0025DD68(FxWorld *world, s32 threshold) {
@@ -550,19 +550,19 @@ void func_0025F2B0(s32 arg0) {
 void func_0025F2C8(void) {
 }
 
-void func_0025F2D0(s32 arg0, u32 arg1) {
+void mnuCampSetPrimaryOption(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x243c) = (*(u32 *)(arg0 + 0x243c) & 0xfffffffc) | (arg1 & 3);
 }
 
-u32 func_0025F2F0(s32 arg0) {
+u32 mnuCampGetPrimaryOption(s32 arg0) {
     return *(u32 *)(arg0 + 0x243c) & 3;
 }
 
-void func_0025F300(s32 arg0, u32 arg1) {
+void mnuCampSetSecondaryOption(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x243c) = (*(u32 *)(arg0 + 0x243c) & 0xfffffff3) | ((arg1 & 3) << 2);
 }
 
-u32 func_0025F320(s32 arg0) {
+u32 mnuCampGetSecondaryOption(s32 arg0) {
     return (*(u32 *)(arg0 + 0x243c) & 0xc) >> 2;
 }
 
@@ -900,7 +900,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BD0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260708);
 
-void func_00260808(void) {
+void mnuCampDestroyPanelTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00437838, 0);
     kwlnTaskDestroyWithHierarchyByName(D_00424BC0, 0);
     kwlnTaskDestroyWithHierarchyByName(D_00424BD0, 0);

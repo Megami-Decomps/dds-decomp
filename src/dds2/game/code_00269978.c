@@ -4,8 +4,6 @@ extern s64 func_0026C768(void);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-extern void func_002C42B0(s32, s32);
-
 extern s32 func_00101958();
 
 extern void func_0026C900(void);
@@ -54,9 +52,9 @@ extern s32 fldClassifyRemainingFrames(s32);
 
 extern void func_0026A728(s32, s32);
 
-extern void func_002B8968(s32);
+extern void mnuSelectFirstListNode(s32);
 
-extern void func_002B8968(s32);
+extern void mnuSelectFirstListNode(s32);
 
 typedef struct MenuEntry32 {
     u8 data[32];
@@ -64,7 +62,7 @@ typedef struct MenuEntry32 {
 
 extern MenuEntry32 D_003A41A8[];
 
-extern void func_002B8968(s32);
+extern void mnuSelectFirstListNode(s32);
 
 extern void func_0026C918(s32, void *);
 
@@ -81,6 +79,32 @@ extern void func_0026C948(s32);
 extern void func_0026C5B8(s32);
 
 extern s32 func_00268C08(s32);
+
+extern void func_00269638(void);
+
+extern void func_00269478(s32, s32);
+
+extern void func_00269478(s32, s32);
+
+extern void func_00269478(s32, s32);
+
+extern void mnuRefreshThresholdNodeFlags(s32);
+
+extern void func_002698A0(s32, s32);
+
+extern void func_00269978(void);
+
+extern void func_002698A0(s32, s32);
+
+extern void func_002676F0(s32);
+
+extern void func_00342580(u32);
+
+extern void func_00342580(u32);
+
+extern u8 D_003CE97C[];
+
+extern void func_002C42B0();
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269978);
 
@@ -200,7 +224,16 @@ void evtBSetupDispatchSyncC(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A4B0);
 
-INCLUDE_ASM(const s32, "game/code_00269978", evtBEnterStateA);
+u32 evtBEnterStateA(void) {
+    s32 context = func_00101958();
+
+    func_00268AA0(3, 0, context);
+    func_002698A0(4, context);
+    func_002690A8(3, context);
+    evtRememberDispatchCallback((s32)func_00269230, context);
+    func_002676F0(context);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A598);
 
@@ -283,7 +316,7 @@ s32 func_0026AB38(void) {
 
 extern s32 kwlnFadeIsActive(void);
 
-extern void func_00286F90(void);
+extern void mnuCreateResourceTask(void);
 
 extern s32 mnuCheckResourceTask(void);
 
@@ -305,7 +338,7 @@ s64 evtPollDispatchAfterFade(u64 request) {
         if (kwlnFadeIsActive() == 0) {
             if (state->fadeStarted == 0) {
                 state->fadeStarted = 1;
-                func_00286F90();
+                mnuCreateResourceTask();
             }
             if (*dispatch == 0 && state->fadeStarted == 1 &&
                 mnuCheckResourceTask() == 0) {
@@ -352,7 +385,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     s32 *slot = &owner->selection->entryIndex;
 
     if (owner->state == 1) {
-        func_002B8968((s32)owner);
+        mnuSelectFirstListNode((s32)owner);
     }
     func_0026C918(0, &D_003A41A8[*slot]);
     func_0026C948(1);

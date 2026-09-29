@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern u64 func_00119AF8(u64);
-extern u64 func_0010D428(u64);
+extern u64 scrReadIntParameter(u64);
 
 extern void *func_002CFEB8(s32 size);
 extern void func_002CFF98(void *p);
@@ -70,7 +70,7 @@ struct EffTransformNode {
 u32 func_0010EEF0(void) {
     u64 context;
 
-    context = func_0010D428(0);
+    context = scrReadIntParameter(0);
     func_00119B08(context);
     return 1;
 }
@@ -83,7 +83,7 @@ u32 func_0010EF18(void) {
 u32 func_0010EF38(void) {
     u64 context;
 
-    context = func_0010D428(0);
+    context = scrReadIntParameter(0);
     context = func_00119AF8(context);
     func_0010D5F0(context);
     return 1;

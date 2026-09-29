@@ -55,7 +55,7 @@ u32 *itfClaimFreeWideSlot(WideSlotPool *pool) {
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D998);
 
 /* Return a wide slot to the pool without disturbing its other flags. */
-void func_0031DA20(u32 *flags) {
+void itfReleaseWideSlot(u32 *flags) {
     *flags = *flags & ~SLOT_IN_USE;
 }
 
@@ -90,7 +90,7 @@ u32 *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DFB8);
 
 /* Return a compact slot to the pool without disturbing its other flags. */
-void func_0031E008(u32 *flags) {
+void itfReleaseCompactSlot(u32 *flags) {
     *flags = *flags & ~SLOT_IN_USE;
 }
 

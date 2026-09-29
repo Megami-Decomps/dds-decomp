@@ -190,7 +190,7 @@ s32 btlSelectDisabledCommand(BattleActionUnit *battler) {
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002266D8);
 
-s32 func_002267A0(void) {
+s32 btlClearUnitRestrictionFlag(void) {
     BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
     BattleActionUnit *unit;
     if (battle->mode != 2) {

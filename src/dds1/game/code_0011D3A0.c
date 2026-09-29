@@ -41,10 +41,10 @@ extern char D_0039FCA0[];
 extern char D_0039FCB0[];
 extern char D_0039FCC8[];
 extern void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep);
-extern void func_0011DAC0(u32, u32, u32, u32, u32, u32, u8 *);
-extern void func_0011DC70(u32 *arg0, s32 arg1, u8 *arg2);
+extern void fldStepIntByPad(u32, u32, u32, u32, u32, u32, u8 *);
+extern void fldStepColorChannelByPad(u32 *arg0, s32 arg1, u8 *arg2);
 extern s32 fldTestDrawUpdate(void);
-extern void func_0012E6F0(void);
+extern void fldClearCameraMoveMode(void);
 extern void func_0013E5A8(u32 arg0);
 extern u32 func_001462D0(void);
 extern s32 func_0010BED8(const char *arg0);
@@ -188,16 +188,16 @@ void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigSte
     fldStepValueByPad(value, D_00324530, min, max, step, bigStep);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DAC0);
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldStepIntByPad);
 
 void func_0011DC50(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
-    func_0011DAC0(a, b, c, d, e, f, D_00324530);
+    fldStepIntByPad(a, b, c, d, e, f, D_00324530);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DC70);
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldStepColorChannelByPad);
 
 void func_0011DE00(u32 *arg0, s32 arg1) {
-    func_0011DC70(arg0, arg1, D_00324530);
+    fldStepColorChannelByPad(arg0, arg1, D_00324530);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DE20);
@@ -271,7 +271,7 @@ void func_0011E960(void) {
     D_003BAB14 = -999;
     D_003BAB18 = -999;
     D_003BAB1C = -999;
-    func_0012E6F0();
+    fldClearCameraMoveMode();
 }
 
 
@@ -859,9 +859,9 @@ extern u8 D_0032F240[];
 extern void func_003003F0(void *);
 extern void fldInitDisplayObjects(void);
 extern void func_00122ED0(void);
-extern void func_001414A8(void);
+extern void fldResetPendingSounds(void);
 extern void func_002E8430(void *, s32);
-extern void func_001479B8(void);
+extern void fldParseMixLb(void);
 extern void func_00131A88(void);
 extern void func_001426E0(void);
 
@@ -871,11 +871,11 @@ void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BAB78);
     func_00122ED0();
     func_003003F0(D_003BAB80);
-    func_001414A8();
+    fldResetPendingSounds();
     func_003003F0(D_003BAB88);
     func_002E8430(D_0032F240, 0x1e240);
     func_003003F0(D_003BAB90);
-    func_001479B8();
+    fldParseMixLb();
     func_003003F0(D_003BAB98);
     func_00131A88();
     func_003003F0(D_003BABA0);
@@ -1019,7 +1019,7 @@ void fldInitializeLinkedSequenceRecord(FieldSequenceRecord *record, s32 stage, s
 
 /* Converts the field work's primary and secondary state words into a
  * compact scene status, giving the primary state precedence. */
-u32 func_00123378(void) {
+u32 fldGetSceneStatusCode(void) {
     u32 *sceneWork = D_0032F1A0;
 
     if (sceneWork[0xD] == 1) {
@@ -1544,7 +1544,7 @@ extern s32 D_003BABF4, D_003BABE4;
 extern char D_0039FD30[], D_0039FD40[];
 extern void kwlnFadeResetBackground(void);
 extern void func_00141158(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
-extern void func_00187080(s32), mnuDestroyCampTasks(void), func_0010BDB8(void);
+extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), func_0010BDB8(void);
 extern void func_001462A8(void);
 
 void func_00125F18(void) {
@@ -1561,7 +1561,7 @@ void func_00125F18(void) {
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_003BABE4 != 0) {
-        func_00187080(D_003BABE4);
+        effBlurReleaseFirstResource(D_003BABE4);
         D_003BABE4 = 0;
     }
     mnuDestroyCampTasks();

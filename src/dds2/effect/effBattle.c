@@ -14,7 +14,7 @@ typedef struct BattleEffect {
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_001686F0);
 
-u16 func_00168780(BattleEffect *effect) {
+u16 effBattleGetMode(BattleEffect *effect) {
     return effect->mode;
 }
 
@@ -36,7 +36,7 @@ void func_001687A0(BattleEffect *effect, u32 value) {
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_001687A8);
 
-void func_001687B8(BattleEffect *effect, s32 value) {
+void effBattleSetInputValue(BattleEffect *effect, s32 value) {
     effect->inputValue = value;
     if (effect->mode == 0) {
         effect->selectedValue = value;
@@ -48,7 +48,7 @@ u32 func_001687D0(BattleEffect *effect) {
 }
 
 /* Mode 1 keeps the lowest value seen; other modes replace it outright. */
-void func_001687D8(BattleEffect *effect, u32 value) {
+void effBattleUpdateSelectedValue(BattleEffect *effect, u32 value) {
     if (effect->mode == 1) {
         if (value < effect->selectedValue) {
             effect->selectedValue = value;

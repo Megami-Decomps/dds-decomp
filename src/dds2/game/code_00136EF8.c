@@ -49,7 +49,7 @@ extern s32 D_004361A4;
 
 extern u32 *D_0038BC50[];
 
-extern void func_0012D9D0(u32 value);
+extern void fldDrawMarkerQuad(u32 value);
 
 extern s32 D_004361CC;
 
@@ -273,7 +273,7 @@ void func_00137888(void) {
 void func_001378A0(void) {
     D_004360FC = 0;
     if (D_00436100 != 0) {
-        func_0032BBB0(D_00436100);
+        sdfTexReleaseReferenceViaHandler(D_00436100);
         D_00436100 = 0;
     }
     if (D_004360F8 != 0) {
@@ -288,7 +288,7 @@ typedef struct FldSaveHeader {
 
 extern u8 D_004449D0[];
 
-void func_001378E8(FldSaveHeader *dst) {
+void fldCopyCameraSetting(FldSaveHeader *dst) {
     *dst = *(FldSaveHeader *)D_004449D0;
 }
 
@@ -575,7 +575,7 @@ void func_0013E958(void) {
     if (count > 0) {
         u32 **entry = D_0038BC50;
         do {
-            func_0012D9D0((*entry)[4]);
+            fldDrawMarkerQuad((*entry)[4]);
             i++;
             entry++;
         } while (i < D_004361A4);

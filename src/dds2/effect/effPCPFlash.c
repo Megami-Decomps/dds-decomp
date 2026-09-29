@@ -599,7 +599,7 @@ void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 flag, s32 param) {
 extern f32 func_00341240(void *state);
 extern u8 D_003AA868[];
 
-void func_00172628(PcpFlashWork2 *work, s32 index, void *orientation) {
+void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orientation) {
     PcpFlashRotatingParticle *part = work->parts + index;
     f32 direction[4];
     f32 factor;
@@ -717,7 +717,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
         f32 blend;
 
         if (part->age == 0) {
-            func_00172628(work, index, &axis);
+            effFlashSpawnRotatingParticle(work, index, &axis);
             func_001727A0(work, index, &axis);
             effFlashColorSlot5Set(work, index, 0);
             if (ramp == 0) {
@@ -1082,7 +1082,7 @@ void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174A58);
 
-void func_00174C18(PcpFlashWork6 *work, s32 index, void *orientation) {
+void effFlashAdvanceOrbitPhase(PcpFlashWork6 *work, s32 index, void *orientation) {
     PcpFlashPtc20A *part;
 
     part = &work->parts[index];
@@ -1153,7 +1153,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
                         part->unk0C = maxScale;
                     }
                 }
-                func_00174C18(work, index, &axis);
+                effFlashAdvanceOrbitPhase(work, index, &axis);
                 func_00174A58(work, index, &axis);
                 age = part->age;
                 if (age < fadeIn && fadeIn != 0) {

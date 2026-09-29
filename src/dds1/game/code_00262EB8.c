@@ -38,7 +38,7 @@ u32 func_00263058(void) {
     return 1;
 }
 
-void func_00263060(s32 input) {
+void mnuStaffRunPanel0(s32 input) {
     s32 context = func_00101A70();
     func_00285B20(0x33);
     func_00285670(context + 8, context + 0x54, 0, input);

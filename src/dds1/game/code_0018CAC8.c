@@ -46,7 +46,7 @@ extern s32 func_00310320(void);
 extern u32 func_002D3288(u32);
 extern u64 func_002EB028(u64, u32 *, u64);
 extern void func_002CFF98(void *arg0);
-extern void func_002D2D00(s32 arg0);
+extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern void func_002D0918(u64 arg0);
 extern void func_001028E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_003101B8(void);
@@ -367,7 +367,7 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
 void effFreeWork(EffWork *work) {
     if (work->unk3C != 0) {
-        func_002D2D00(work->unk3C);
+        sdfTexReleaseReferenceViaHandler(work->unk3C);
         work->unk3C = 0;
     }
     func_002CFF98(work);
@@ -411,7 +411,7 @@ void effSetupWorkSound(EffWork *work, u64 soundResource) {
     u32 resourceWords[4];
 
     if (work->unk3C != 0) {
-        func_002D2D00(work->unk3C);
+        sdfTexReleaseReferenceViaHandler(work->unk3C);
         work->unk3C = 0;
     }
     loadedResource = func_002EB028(soundResource, resourceWords, 0);

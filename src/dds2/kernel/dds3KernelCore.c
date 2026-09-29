@@ -16,7 +16,7 @@ extern void kwlnTaskAdvanceStartDelays(void);
 
 extern KwlnTask* D_00435BD0;
 
-extern void func_00100D50(KwlnTask* task);
+extern void kwlnTaskFinalizeDestroy(KwlnTask* task);
 
 extern void kwlnTaskRequestDestroy(KwlnTask* task);
 
@@ -85,7 +85,7 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100A28);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100C28);
 
-void func_00100D50(KwlnTask* task)
+void kwlnTaskFinalizeDestroy(KwlnTask* task)
 {
     KwlnTask* child;
     KwlnTask* next;
@@ -120,7 +120,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
     func_00100740(task);
     if (task->unk2E == 0) {
-        func_00100D50(task);
+        kwlnTaskFinalizeDestroy(task);
     }
 }
 
@@ -137,7 +137,7 @@ void kwlnTaskAdvanceDestroyDelays(void)
         curr = node;
         node = node->listNext;
         if (curr->unk2E == 0) {
-            func_00100D50(curr);
+            kwlnTaskFinalizeDestroy(curr);
         }
     }
 }
@@ -213,7 +213,7 @@ s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
-void func_00101678(KwlnTask* task)
+void kwlnTaskMarkDestroyPending(KwlnTask* task)
 {
     if ((task->flags & KWLN_TASK_STATE_MASK) != 2) {
         return;

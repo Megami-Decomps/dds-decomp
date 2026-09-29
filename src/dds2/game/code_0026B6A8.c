@@ -8,6 +8,12 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_0026C900(void);
 
+extern s64 func_0026C768(void);
+
+extern u8 D_003CE848[];
+
+extern void func_002C42C0();
+
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026B6A8);
 
 s32 func_0026B8F0(void) {
@@ -61,7 +67,7 @@ s32 func_0026BAB8(void) {
 }
 
 extern s32 kwlnFadeIsActive(void);
-extern void func_002C42C0(s32 *, char *);
+
 extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */

@@ -55,7 +55,7 @@ void evtEventViewerProcessPending(u32 viewer) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246A60);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246B00);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerUnlinkEntry);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246B50);
 

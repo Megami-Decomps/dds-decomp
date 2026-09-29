@@ -167,9 +167,9 @@ extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 st
 
 extern u8 D_0037F530[];
 
-extern void func_0011F928(void *, s32, s64, s64, s64, s64, s8 *);
+extern void fldStepIntByPad(void *, s32, s64, s64, s64, s64, s8 *);
 
-extern s32 func_0011FAD8(u32 *, s32, s8 *);
+extern s32 fldStepColorChannelByPad(u32 *, s32, s8 *);
 
 extern s32 fldTestDrawUpdate(void);
 
@@ -217,7 +217,7 @@ extern s32 D_00435EF4;
 
 extern s32 D_00435EF8;
 
-extern void func_00130C20(void);
+extern void fldClearCameraMoveMode(void);
 
 extern u32 func_001106B8(u64);
 
@@ -314,7 +314,7 @@ extern void kwlnFadeResetBackground(void);
 
 extern void func_00144238(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
 
-extern void func_0018ECB8(s32), mnuDestroyCampTasks(void), func_0010BFE0(void);
+extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), func_0010BFE0(void);
 
 extern void func_0014A228(void);
 
@@ -391,7 +391,7 @@ void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigSte
     fldStepValueByPad(value, D_0037F530, min, max, step, bigStep);
 }
 
-void func_0011F928(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad) {
+void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad) {
     s64 value;
     switch (type) {
     case 1:
@@ -476,10 +476,10 @@ void func_0011F928(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8
 
 
 void func_0011FAB8(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
-    func_0011F928(ptr, type, min, max, step, bigStep, (s8 *)D_0037F530);
+    fldStepIntByPad(ptr, type, min, max, step, bigStep, (s8 *)D_0037F530);
 }
 
-s32 func_0011FAD8(u32 *color, s32 channel, s8 *pad) {
+s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
     s32 old = *color;
     s32 byte = old;
     s32 value;
@@ -544,7 +544,7 @@ s32 func_0011FAD8(u32 *color, s32 channel, s8 *pad) {
 
 
 void func_0011FC68(u32 *arg0, s32 arg1) {
-    func_0011FAD8(arg0, arg1, (s8 *)D_0037F530);
+    fldStepColorChannelByPad(arg0, arg1, (s8 *)D_0037F530);
 }
 
 void func_0011FC88(f32 value, char *out) {
@@ -630,7 +630,7 @@ void func_00120820(void) {
     D_00435EEC = -999;
     D_00435EF0 = -999;
     D_00435EF4 = -999;
-    func_00130C20();
+    fldClearCameraMoveMode();
 }
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00120858);
@@ -1202,7 +1202,7 @@ void func_00124CC8(void) {
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00124D70);
 
 extern void fldInitDisplayObjects();
-extern void func_00144598();
+extern void fldResetPendingSounds();
 extern void func_003412D8();
 extern void func_0014BA60();
 extern void func_001343E8();
@@ -1213,7 +1213,7 @@ extern u8 D_0038A6E0[];
 void func_00124E28(void) {
     fldInitDisplayObjects();
     func_00124E80();
-    func_00144598();
+    fldResetPendingSounds();
     func_003412D8(D_0038A6E0, 0x1E240);
     func_0014BA60();
     func_001343E8();
@@ -1357,7 +1357,7 @@ void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kin
     record->unk_90 = 0;
 }
 
-u32 func_00125328(void) {
+u32 fldGetSceneStatusCode(void) {
     u32 *state = D_0038A640;
 
     if (state[0xD] == 1) {
@@ -1841,7 +1841,7 @@ void func_001284C8(void) {
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_00435F74 != 0) {
-        func_0018ECB8(D_00435F74);
+        effBlurReleaseFirstResource(D_00435F74);
         D_00435F74 = 0;
     }
     mnuDestroyCampTasks();

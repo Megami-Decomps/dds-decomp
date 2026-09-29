@@ -48,7 +48,7 @@ extern void effInitCh72Id(void);
 extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
-extern void func_002D2D00(s32);
+extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void func_002887A0(s32);
 extern void func_002D0A10(s32);
 extern void func_002D0918(s32);
@@ -79,19 +79,19 @@ void evtReleaseEventPackResources(void) {
     if (state != 0) {
         if (resources->effect72 != 0) {
             effInitCh72Id();
-            func_002D2D00(resources->effect72);
+            sdfTexReleaseReferenceViaHandler(resources->effect72);
         }
         if (resources->effect71 != 0) {
             effInitCh71Id();
-            func_002D2D00(resources->effect71);
+            sdfTexReleaseReferenceViaHandler(resources->effect71);
         }
         if (resources->effect76 != 0) {
             effInitCh76Id();
-            func_002D2D00(resources->effect76);
+            sdfTexReleaseReferenceViaHandler(resources->effect76);
         }
         if (resources->effect75 != 0) {
             effInitCh75Id();
-            func_002D2D00(resources->effect75);
+            sdfTexReleaseReferenceViaHandler(resources->effect75);
         }
         if (resources->objectHandle != 0) {
             func_002887A0(resources->objectHandle);

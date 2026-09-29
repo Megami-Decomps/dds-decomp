@@ -97,7 +97,7 @@ void dds3WritePackedValue(destination, datum, size)
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
 
-void func_0031F4D8(u32 context, const char *name) {
+void dds3RecordNamedReference(u32 context, const char *name) {
     u32 record = func_0031F168();
     strncpy((char *)*(u32 *)record, name, DDS_NAMED_RECORD_NAME_BYTES);
     func_00320CE0(*(u32 *)(context + 0xc), 0, record);
@@ -178,7 +178,7 @@ u32 func_0031F708(u32 *object, u32 extra) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F778);
 
-void func_0031F840(u8 *base, u32 adjustment, u32 *offsets, u32 size) {
+void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size) {
     s32 count = size >> 2;
     while (count > 0) {
         u32 *slot = (u32 *)(base + *offsets++);

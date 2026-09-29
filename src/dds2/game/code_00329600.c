@@ -17,6 +17,10 @@ typedef struct SdfListNode {
     struct SdfListNode *next;
 } SdfListNode;
 
+extern u8 D_00439128;
+
+void func_0032CAE0(void *arg0, s32 arg1);
+
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329600);
 
 void func_003297B0(SdfListNode *node) {
@@ -45,12 +49,19 @@ void sdfReleaseMemorySlot(s32 *slot) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_003298C0);
+void func_003298C0(s32 arg0) {
+    s32 id = arg0;
+
+    if (id != 0) {
+        func_0032CAE0(&D_00439128, id);
+    }
+}
 
 u32 sdfResourceRetainAddress(SdfAllocation *allocation) {
     allocation->referenceCount = allocation->referenceCount + 1;
     return allocation->address;
 }
+
 void func_00329910(SdfAllocation *allocation) {
     u16 value = allocation->unsignedReferenceCount;
     if (value != 0) {

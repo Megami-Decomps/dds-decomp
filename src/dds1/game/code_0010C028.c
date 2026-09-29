@@ -28,7 +28,7 @@ u32 scrGetCurrentActor(void) {
     return (u32)context->actor;
 }
 
-void func_0010C070(u32 task) {
+void scrReplaceCurrentTask(u32 task) {
     s64 previousContext;
 
     previousContext = func_00101A70();
@@ -38,7 +38,7 @@ void func_0010C070(u32 task) {
     func_00101A68(task, 0);
 }
 
-void func_0010C0B0(void) {
+void bfStepContext(void) {
     bfContextStep();
 }
 

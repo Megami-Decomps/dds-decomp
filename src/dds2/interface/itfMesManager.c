@@ -160,11 +160,11 @@ typedef struct ItfMesSpan {
 
 s32 scrGetWindow(void);
 
-s32 func_0010D650(s32 arg0);
+s32 scrReadIntParameter(s32 arg0);
 
 void func_001A4090(s32 window, u32 value);
 
-void func_001A40B0(s32 window, s32 count);
+void itfMesCountClearBits(s32 window, s32 count);
 
 void func_00154F18(s32 arg0);
 
@@ -174,7 +174,7 @@ void func_001A45C0(s32 window, s32 arg1, s32 arg2, s32 arg3);
 
 void itfMesClearWindowHighFlags(s32 window, u32 value);
 
-void func_001A4218(s32 window, s32 arg1, s32 arg2);
+void itfMesBlk24MoveTo(s32 window, s32 arg1, s32 arg2);
 
 void func_001A4988(s32 window, s32 arg1, s32 arg2);
 
@@ -186,7 +186,7 @@ void itfMesCleanupWindow(s32 window, s32 arg1);
 
 void itfMesResetWindow(s32 window);
 
-void func_001A50D8(s32 window);
+void itfMesDestroyWindow(s32 window);
 
 void func_0019C5B0(FrFontGlyph *arg0);
 
@@ -231,7 +231,7 @@ s32 itfMesScriptSetPanelValue(void) {
     if (window < 0) {
         return 1;
     }
-    func_001A4090(window, func_0010D650(0));
+    func_001A4090(window, scrReadIntParameter(0));
     return 1;
 }
 
@@ -241,7 +241,7 @@ s32 itfMesScriptSetWindowValue(void) {
     if (window < 0) {
         return 1;
     }
-    func_001A40B0(window, func_0010D650(0));
+    itfMesCountClearBits(window, scrReadIntParameter(0));
     return 1;
 }
 
@@ -290,9 +290,9 @@ s32 itfMesScriptSetWindowGeometry(void) {
     if (window < 0) {
         return 1;
     }
-    x = func_0010D650(0);
-    y = func_0010D650(1);
-    width = func_0010D650(2);
+    x = scrReadIntParameter(0);
+    y = scrReadIntParameter(1);
+    width = scrReadIntParameter(2);
     func_001A45C0(window, x, y, width);
     return 1;
 }
@@ -303,7 +303,7 @@ s32 itfMesScriptToggleMessageFlag(void) {
     if (window < 0) {
         return 1;
     }
-    if (func_0010D650(0)) {
+    if (scrReadIntParameter(0)) {
         itfMesSetWindowHighFlags(window, 0x400000);
     } else {
         itfMesClearWindowHighFlags(window, 0x400000);
@@ -319,9 +319,9 @@ s32 itfMesScriptSetScaledPosition(void) {
     if (window < 0) {
         return 1;
     }
-    x = func_0010D650(0);
-    y = func_0010D650(1);
-    func_001A4218(window, x << 4, y << 3);
+    x = scrReadIntParameter(0);
+    y = scrReadIntParameter(1);
+    itfMesBlk24MoveTo(window, x << 4, y << 3);
     return 1;
 }
 
@@ -331,7 +331,7 @@ s32 itfMesScriptSetDefaultBounds(void) {
     if (window < 0) {
         return 1;
     }
-    func_001A4218(window, 0x4B0, 0xAF8);
+    itfMesBlk24MoveTo(window, 0x4B0, 0xAF8);
     return 1;
 }
 
@@ -341,7 +341,7 @@ s32 itfMesScriptToggleHighFlags(void) {
     if (window < 0) {
         return 1;
     }
-    if (func_0010D650(0)) {
+    if (scrReadIntParameter(0)) {
         itfMesClearWindowHighFlags(window, 0x800000);
         itfMesClearWindowHighFlags(window, 0x100000);
     } else {
@@ -357,7 +357,7 @@ s32 itfMesScriptSetMessageOption(void) {
     if (window < 0) {
         return 1;
     }
-    func_001A4988(window, func_0010D650(0), 0);
+    func_001A4988(window, scrReadIntParameter(0), 0);
     return 1;
 }
 
@@ -369,8 +369,8 @@ s32 itfMesScriptSetMessagePair(void) {
     if (window < 0) {
         return 1;
     }
-    first = func_0010D650(0);
-    second = func_0010D650(1);
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
     func_001A4988(window, first, second);
     return 1;
 }
@@ -383,8 +383,8 @@ s32 itfMesScriptSetMessageRange(void) {
     if (window < 0) {
         return 1;
     }
-    first = func_0010D650(0);
-    second = func_0010D650(1);
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
     func_001A4A10(window, first, second);
     return 1;
 }
@@ -405,11 +405,11 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A38D8);
 
 void func_001A39D0(s32 window) {
     if (window >= 0 && D_0045296C[window].mes != NULL) {
-        func_001A50D8(window);
+        itfMesDestroyWindow(window);
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3A18);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3C28);
 
@@ -464,7 +464,7 @@ void func_001A4090(s32 window, u32 value) {
     D_0045296C[window].mes->blk40.panelValue = value;
 }
 
-void func_001A40B0(s32 window, s32 count) {
+void itfMesCountClearBits(s32 window, s32 count) {
     ItfMesBlk40 *blk = &D_0045296C[window].mes->blk40;
     u32 bits = blk->panelValue;
     s32 bit = bits & 1;
@@ -506,7 +506,7 @@ void itfMesBlk14MoveBy(s32 window, s32 dx, s32 dy) {
     blk->unk4 += dy;
 }
 
-void func_001A4218(s32 window, s32 x, s32 y) {
+void itfMesBlk24MoveTo(s32 window, s32 x, s32 y) {
     ItfMesBlk24 *blk = &D_0045296C[window].mes->blk24;
     s32 delta[2];
     delta[0] = x - blk->unk0;
@@ -518,14 +518,14 @@ void func_001A4218(s32 window, s32 x, s32 y) {
     }
 }
 
-void func_001A42A8(s32 window, s32 dx, s32 dy) {
+void itfMesBlk24MoveBy(s32 window, s32 dx, s32 dy) {
     ItfMesBlk24 *blk = &D_0045296C[window].mes->blk24;
     itfMesOffsetNodeChain((ItfMesNode *)blk->unkC, dx, dy);
     blk->unk0 += dx;
     blk->unk4 += dy;
 }
 
-void func_001A4318(s32 window, s32 x, s32 y) {
+void itfMesBlk40MoveTo(s32 window, s32 x, s32 y) {
     ItfMesBlk40 *blk = &D_0045296C[window].mes->blk40;
     s32 delta[2];
     delta[0] = x - blk->unk0;
@@ -537,7 +537,7 @@ void func_001A4318(s32 window, s32 x, s32 y) {
     }
 }
 
-void func_001A43A8(s32 window, s32 dx, s32 dy) {
+void itfMesBlk40MoveBy(s32 window, s32 dx, s32 dy) {
     ItfMesBlk40 *blk = &D_0045296C[window].mes->blk40;
     itfMesOffsetNodeChain((ItfMesNode *)blk->unk8, dx, dy);
     blk->unk0 += dx;
@@ -605,7 +605,7 @@ void func_001A4888(s32 window) {
     func_001A5480((u32)D_0045296C[window].mes);
 }
 
-ItfMesSub *func_001A48B8(s32 window, ItfMesSub *sub) {
+ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     ItfMesState *mes = D_0045296C[window].mes;
     ItfMesSub *previous = mes->sub;
     ItfMesEntry *entry;
@@ -680,7 +680,7 @@ extern void btlReleaseEffectResourceHandles();
 extern void func_001A5FA0();
 extern void itfReleasePoolNode();
 
-void func_001A50D8(s32 window) {
+void itfMesDestroyWindow(s32 window) {
     ItfMesWindowRec *rec = &D_00452960[window];
     ItfMesState *mes = rec->mes;
     if (mes != NULL) {
@@ -758,10 +758,10 @@ extern s8 func_0019E8E0();
 extern s32 func_0019E908();
 extern s32 func_0019E910();
 extern void func_0023F010();
-extern void func_001A58B8();
+extern void itfMesCopyGlyphShade();
 extern void func_001A5B70();
 
-void func_001A52B8(ItfMesState *mes) {
+void itfMesBuildEntryGlyph(ItfMesState *mes) {
     u8 *m = (u8 *)mes;
     u8 *blk = m + 0x24;
     s32 glyph;
@@ -787,7 +787,7 @@ void func_001A52B8(ItfMesState *mes) {
     if (!(*(u32 *)m & 0x400000) && (D_00452940.flags & 1)) {
         func_001A5B70(glyph);
     }
-    func_001A58B8(glyph, blk);
+    itfMesCopyGlyphShade(glyph, blk);
     flags = func_0019E8E0(3);
     blk[0x11] = flags;
     if (flags & 2) {
@@ -814,7 +814,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5480);
 
 extern void func_0019E8F0();
 
-void func_001A55B0(s32 *table) {
+void itfMesInitCharTable(s32 *table) {
     s32 i;
     for (i = 0; i < 0x20; i++) {
         func_0019E8F0(i, table[i]);
@@ -856,7 +856,7 @@ ItfMesNode *itfMesGetLastNode(ItfMesNode *node) {
 }
 
 /* Copy glyph shade components into the current message block's color bytes. */
-void func_001A58B8(u8 *glyph, s32 block) {
+void itfMesCopyGlyphShade(u8 *glyph, s32 block) {
     s32 shadeAddress;
 
     shadeAddress = *(s32 *)(glyph + 0x20);
@@ -931,7 +931,7 @@ s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     return best << 4;
 }
 
-s32 func_001A5B20(s32 skip, u32 mask) {
+s32 itfMesNthClearBit(s32 skip, u32 mask) {
     s32 bit = 0;
     while (bit < 0x20) {
         if ((mask & 1) == 0) {

@@ -89,7 +89,7 @@ typedef struct EffThunderScale {
 
 extern f32 func_00341240(void *state);
 
-void func_0016B0F8(u64 arg0) {
+void effPCPThunderCreate(u64 arg0) {
     u64 temp_v0;
 
     temp_v0 = effParamTableGetBlock(arg0, 0);
@@ -100,7 +100,7 @@ void func_0016B118(void) {
     func_0016AF38();
 }
 
-void func_0016B130(EffPCPThunderWorkB *work) {
+void effPCPThunderFree(EffPCPThunderWorkB *work) {
     func_001634A8(work->unk5C);
     func_003297C8(work->unk60);
 }
@@ -109,11 +109,11 @@ void func_0016B160(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0016B170(EffPCPThunderWorkB *work, u32 value) {
+void effPCPThunderSetParam50(EffPCPThunderWorkB *work, u32 value) {
     work->unk50 = value;
 }
 
-void func_0016B178(float scale, EffThunderScale *work) {
+void effPCPThunderScale(float scale, EffThunderScale *work) {
     work->scaledA = work->sourceA * scale;
     work->scaledB = work->sourceB * scale;
 }
@@ -132,7 +132,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B928);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016BA68);
 
-void func_0016BC28(EffPCPThunderWorkB *work) {
+void effPCPThunderFree2(EffPCPThunderWorkB *work) {
     func_001634A8(work->unk5C);
     func_003297C8(work->unk60);
 }
@@ -156,7 +156,7 @@ void func_0016BCA0(EffPCPThunderWorkB *work, u32 value) {
     work->unk50 = value;
 }
 
-void func_0016BCA8(float scale, EffThunderScale *work) {
+void effPCPThunderScale2(float scale, EffThunderScale *work) {
     work->scaledA = work->sourceA * scale;
     work->scaledB = work->sourceB * scale;
 }
@@ -181,7 +181,7 @@ void func_0016C6F0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0016C700(EffPCPThunderWorkB *work, u32 value) {
+void effPCPThunderSetParamA8(EffPCPThunderWorkB *work, u32 value) {
     work->unkA8 = value;
 }
 
@@ -193,7 +193,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016CD68);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D070);
 
-void func_0016D228(EffPCPThunderWorkB *work) {
+void effPCPThunderFree3(EffPCPThunderWorkB *work) {
     func_001634A8(work->unk60);
     func_003297C8(work->unk64);
 }
@@ -208,7 +208,7 @@ void func_0016D258(u8 *p, void *src) {
     __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p) : "memory");
 }
 
-void func_0016D288(EffPCPThunderWorkB *work, u32 value) {
+void effPCPThunderSetParam58(EffPCPThunderWorkB *work, u32 value) {
     work->unk58 = value;
 }
 
@@ -243,7 +243,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D9D8);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DB28);
 
-void func_0016DD20(EffPCPThunderWorkB *work) {
+void effPCPThunderFree4(EffPCPThunderWorkB *work) {
     func_001634A8(work->unk5C);
     func_001634A8(work->unk60);
     func_003297C8(work->unk64);
@@ -277,7 +277,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E468);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E5B8);
 
-void func_0016E748(EffPCPThunderWorkB *work) {
+void effPCPThunderFree5(EffPCPThunderWorkB *work) {
     func_001634A8(work->unk50);
     func_003297C8(work->fragmentData.resource);
 }
@@ -286,7 +286,7 @@ void func_0016E778(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0016E788(EffPCPThunderWorkB *work, u32 value) {
+void effPCPThunderSetParam4C(EffPCPThunderWorkB *work, u32 value) {
     work->unk4C = value;
 }
 

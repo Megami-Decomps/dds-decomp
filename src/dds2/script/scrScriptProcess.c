@@ -8,7 +8,7 @@ s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 s32 bfTaskUpdate();
 
-s32 func_0010C298();
+s32 scrReplaceCurrentTask();
 
 extern ScrProcGlobals *D_00435DD0;
 
@@ -40,7 +40,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
     s32 taskId;
-    taskId = kwlnTaskCreate(task->nameTableBase + (task->nameIndex << 5), priority, 1, 1, bfTaskUpdate, func_0010C298, (s32)task);
+    taskId = kwlnTaskCreate(task->nameTableBase + (task->nameIndex << 5), priority, 1, 1, bfTaskUpdate, scrReplaceCurrentTask, (s32)task);
     task->taskId = taskId;
     return taskId;
 }

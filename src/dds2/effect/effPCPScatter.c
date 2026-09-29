@@ -35,7 +35,7 @@ struct PcpScatterWork4 {
     u32 ownedBuffer;
 };
 
-extern PcpScatterWork4 *func_0017AD28();
+extern PcpScatterWork4 *effPcpScatterCreateParticleInstance();
 
 extern void effShareScatterResource(u32 param0, u32 param1);
 
@@ -67,9 +67,9 @@ struct PcpScatterWork6 {
     u32 ownedBuffer;
 };
 
-extern void *func_0017B7A0();
+extern void *effScatterInstanceCreateB();
 
-extern void *func_0017C2D8();
+extern void *effScatterInstanceCreateC();
 
 extern void *func_0017CE88();
 
@@ -322,13 +322,13 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     return res;
 }
 
-extern void func_0032BBB0(u32);
+extern void sdfTexReleaseReferenceViaHandler(u32);
 extern void func_00328E48(void *);
 
 void effPcpScatterResRelease(PcpScatterRes *res) {
     res->refCount--;
     if (res->refCount == 0) {
-        func_0032BBB0(res->resourceHandle);
+        sdfTexReleaseReferenceViaHandler(res->resourceHandle);
         func_00328E48(res);
     }
 }
@@ -400,7 +400,7 @@ extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
 
 /* Allocate particles after the scatter work, then assign randomized offsets. */
-PcpScatterWork4 *func_0017AD28(src, resource)
+PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
     PcpScatterParams *src;
     u32 resource;
 {
@@ -443,13 +443,13 @@ PcpScatterWork4 *effScatterBlockDuplicate(u64 arg0) {
     u64 first = effParamTableGetBlock(arg0, 0);
     u64 second = effParamTableGetBlock(arg0, 1);
 
-    return func_0017AD28(first, second);
+    return effPcpScatterCreateParticleInstance(first, second);
 }
 
 PcpScatterWork4 *func_0017AF88(PcpScatterWork4 *work) {
     PcpScatterWork4 *child;
 
-    child = func_0017AD28(&work->unk40, NULL);
+    child = effPcpScatterCreateParticleInstance(&work->unk40, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }
@@ -509,7 +509,7 @@ typedef struct PcpScatterInstanceB {
 } PcpScatterInstanceB;
 
 /* Same particle layout with a longer parameter block and one extra control word. */
-void *func_0017B7A0(src, resource)
+void *effScatterInstanceCreateB(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
 {
@@ -558,14 +558,14 @@ void func_0017B9D0(u64 arg0) {
 
     temp_v0 = effParamTableGetBlock(arg0, 0);
     temp_v1 = effParamTableGetBlock(arg0, 1);
-    func_0017B7A0(temp_v0, temp_v1);
+    effScatterInstanceCreateB(temp_v0, temp_v1);
 }
 
 PcpScatterWork5 *func_0017BA18(PcpScatterWork5 *work)
 {
     PcpScatterWork5 *child;
 
-    child = func_0017B7A0(&work->unk40, NULL);
+    child = effScatterInstanceCreateB(&work->unk40, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }
@@ -625,7 +625,7 @@ typedef struct PcpScatterInstanceC {
 } PcpScatterInstanceC;
 
 /* Third particle variant has another eight bytes of per-instance state. */
-void *func_0017C2D8(src, resource)
+void *effScatterInstanceCreateC(src, resource)
     PcpScatterParamsC *src;
     u32 resource;
 {
@@ -674,14 +674,14 @@ void func_0017C4D8(u64 arg0) {
 
     temp_v0 = effParamTableGetBlock(arg0, 0);
     temp_v1 = effParamTableGetBlock(arg0, 1);
-    func_0017C2D8(temp_v0, temp_v1);
+    effScatterInstanceCreateC(temp_v0, temp_v1);
 }
 
 PcpScatterWork6 *func_0017C520(PcpScatterWork6 *work)
 {
     PcpScatterWork6 *child;
 
-    child = func_0017C2D8(&work->unk40, NULL);
+    child = effScatterInstanceCreateC(&work->unk40, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }

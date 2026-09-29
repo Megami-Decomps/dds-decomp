@@ -45,7 +45,7 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_001671D8);
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167220);
 
-u16 func_00167260(EffectDispatchState *effect) {
+u16 effBillGetQueuedCount(EffectDispatchState *effect) {
     return effect->valueB2;
 }
 

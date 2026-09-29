@@ -22,7 +22,7 @@ extern s32 D_003BAA98;
 
 extern void func_0027C140();
 
-extern void func_0027D318();
+extern void mnuDrawWindowSprites();
 
 extern s32 ptyGetCurrentProfileId(s32);
 
@@ -354,7 +354,7 @@ typedef struct MenuAssets {
     MenuEffectPayload *layerB;
 } MenuAssets;
 
-void func_0027AC38(MenuAssets *assets) {
+void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     s32 packet;
     MenuEffectPayload *first;
     MenuEffectPayload *second;
@@ -387,7 +387,7 @@ extern u32 D_0037CD18[];
 
 extern u32 D_0037CD20[];
 
-void func_0027AEA8(MenuAssets *assets) {
+void mnuRequestBaseAssets(MenuAssets *assets) {
     effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0, &assets->sprites[0]);
     effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0, &assets->sprites[4]);
     effRequestMappedResource(D_003B2348, D_0037CD20[0], &assets->material);
@@ -438,14 +438,14 @@ void func_0027B088(s32 arg0, u32 arg1) {
     func_002BF790(0x10b0, 0x3c0, 0, 0x61, *(u32 *)(arg0 + 0x10), 3, arg1);
     func_002BF790(0x1300, 0xb70, 0, 0x61, *(u32 *)(arg0 + 0x10), 4, arg1);
     func_002C1548(0, arg1);
-    func_002BF970(*(u32 *)(arg0 + 0x10), 0);
-    func_002BF970(*(u32 *)(arg0 + 0x10), 1);
+    itfGridLookupValueOrDefault(*(u32 *)(arg0 + 0x10), 0);
+    itfGridLookupValueOrDefault(*(u32 *)(arg0 + 0x10), 1);
     func_002BF790(0, 0, 0, 0x60, *(u32 *)(arg0 + 4), 0, arg1);
-    func_002BF970(*(u32 *)(arg0 + 4), 0);
+    itfGridLookupValueOrDefault(*(u32 *)(arg0 + 4), 0);
     func_002C1588(arg1);
 }
 
-extern void func_002BF970(s32, s32);
+extern void itfGridLookupValueOrDefault(s32, s32);
 
 void mnuDrawCursorIcons(s32 menu, s32 arg) {
     s32 icon = *(s32 *)(menu + 8);
@@ -454,13 +454,13 @@ void mnuDrawCursorIcons(s32 menu, s32 arg) {
     state[3] = 0x9000;
     state[4] = 0x3F00;
     func_002BF4E0(-0x4800, -0x1F80, 0, 0x50, 0, icon, 0, arg);
-    func_002BF970(*(s32 *)(menu + 8), 0);
+    itfGridLookupValueOrDefault(*(s32 *)(menu + 8), 0);
     icon = *(s32 *)(menu + 0xC);
     state = *(s32 **)(icon + 0x18);
     state[3] = 0x9000;
     state[4] = 0x3F00;
     func_002BF4E0(-0x2800, -0x1180, 0, 0x50, 0, icon, 0, arg);
-    func_002BF970(*(s32 *)(menu + 0xC), 0);
+    itfGridLookupValueOrDefault(*(s32 *)(menu + 0xC), 0);
 }
 
 void mnuDrawBackdrop(s32 *assets, s32 option) {
@@ -471,7 +471,7 @@ void mnuDrawBackdrop(s32 *assets, s32 option) {
     func_0027B088((s32)assets, option);
 }
 
-s32 func_0027B2F8(s32 left, s32 right, s32 size) {
+s32 mnuCreateListState(s32 left, s32 right, s32 size) {
     s32 item = func_002CFF68(0x40);
     *(s32 *)(item + 8) = left;
     *(s32 *)(item + 0xC) = right;
@@ -612,7 +612,7 @@ typedef struct MenuSpriteGrid {
     MenuSpriteRef slots[8];
 } MenuSpriteGrid;
 
-void func_0027BA00(MenuSpriteGrid *grid, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
+void mnuSetGridSpriteSlot(MenuSpriteGrid *grid, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
     grid->slots[row * 4 + col].sprite = sprite;
     grid->slots[row * 4 + col].effect = effect;
     func_002BF9E0(sprite, effect, x, y, x, y);
@@ -654,7 +654,7 @@ s32 mnuSeekListNode(s32 index, MenuList *list) {
     return 1;
 }
 
-void func_0027BB08(MenuList *list) {
+void mnuSelectFirstListNode(MenuList *list) {
     mnuSeekListNode(0, list);
 }
 
@@ -663,7 +663,7 @@ void func_0027BB28(MenuList *list) {
 }
 
 /* Advance the visible head when a prior window offset can be reduced. */
-s32 func_0027BB48(MenuList *list) {
+s32 mnuAdvanceListWindowStart(MenuList *list) {
     MenuListNode *cursor = list->cursor;
     MenuListNode *last = list->last;
     MenuListNode *head = list->head;
@@ -770,7 +770,7 @@ typedef struct MenuSlotSet {
     MenuSlotEntry *entries;
 } MenuSlotSet;
 
-void func_0027C0B0(MenuSlotSet *menu, s32 index, s32 node) {
+void mnuDispatchEntryWords(MenuSlotSet *menu, s32 index, s32 node) {
     s32 j;
 
     for (j = 0; j < 4; j++) {
@@ -792,7 +792,7 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 left, s32 right)
     *(s32 *)(item + 8) = width;
     *(s32 *)(item + 0xC) = height;
     *(s32 *)item = id;
-    child = func_0027B2F8(id, left, right);
+    child = mnuCreateListState(id, left, right);
     *(s32 *)(item + 0x88) = 0;
     *(s32 *)(item + 0x14) = child;
     return item;
@@ -938,7 +938,7 @@ void func_0027CDD0(s32 arg0, s32 arg1, s32 arg2, s32 menu, s32 param) {
                   *(s32 *)(menu + 0x14), param);
     count = *(s32 *)(menu + 0x84);
     if (count != 0) {
-        func_0027D318(arg0, arg1, arg2, *(s32 *)(*(s32 *)(menu + 0x14) + 4), count, param);
+        mnuDrawWindowSprites(arg0, arg1, arg2, *(s32 *)(*(s32 *)(menu + 0x14) + 4), count, param);
     }
     count = *(s32 *)(menu + 0x88);
     if (count < 0x100) {
@@ -990,7 +990,7 @@ void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     func_002D0918(group->resourceHandle);
 }
 
-void func_0027D248(MenuWindowSpriteGroup *group, u32 arg1) {
+void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 arg1) {
     effConfigureWithDefaultSetting(group->sprites[1], 0, arg1, 0, 0x14, 0xc);
     effConfigureWithDefaultSetting(group->sprites[2], 0, arg1, 1, 10, 0xc);
     effConfigureWithDefaultSetting(group->sprites[3], 0, arg1, 2, 0, 0xc);
@@ -999,7 +999,7 @@ void func_0027D248(MenuWindowSpriteGroup *group, u32 arg1) {
     effConfigureWithDefaultSetting(group->sprites[6], 0, arg1, 0, 0x14, 0xc);
 }
 
-void func_0027D318(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
+void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
     func_002BF790(x, y, z, 0, group->sprites[0], 0, param);
     if (mask & 1) {
         func_002BF790(x, y, z, 0, group->sprites[1], 0, param);
@@ -1011,12 +1011,12 @@ void func_0027D318(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, 
         func_002BF790(x, y, z, 0, group->sprites[5], 0, param);
         func_002BF790(x, y, z, 0, group->sprites[6], 0, param);
     }
-    func_002BF970(group->sprites[1], 0);
-    func_002BF970(group->sprites[2], 0);
-    func_002BF970(group->sprites[3], 0);
-    func_002BF970(group->sprites[4], 0);
-    func_002BF970(group->sprites[5], 0);
-    func_002BF970(group->sprites[6], 0);
+    itfGridLookupValueOrDefault(group->sprites[1], 0);
+    itfGridLookupValueOrDefault(group->sprites[2], 0);
+    itfGridLookupValueOrDefault(group->sprites[3], 0);
+    itfGridLookupValueOrDefault(group->sprites[4], 0);
+    itfGridLookupValueOrDefault(group->sprites[5], 0);
+    itfGridLookupValueOrDefault(group->sprites[6], 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D4A0);
@@ -1068,18 +1068,18 @@ void func_0027DD78(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 void menuHideWindowHandles(u32 obj) {
     switch (*(u32 *)obj) {
     case 0:
-        func_002BF970(*(s32 *)(obj + 0x1C), 0);
-        func_002BF970(*(s32 *)(obj + 0x20), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x1C), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x20), 0);
         return;
     case 1:
-        func_002BF970(*(s32 *)(obj + 0xC), 0);
-        func_002BF970(*(s32 *)(obj + 0x10), 0);
-        func_002BF970(*(s32 *)(obj + 0x14), 0);
-        func_002BF970(*(s32 *)(obj + 0x18), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0xC), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x10), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x14), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x18), 0);
         return;
     case 2:
-        func_002BF970(*(s32 *)(obj + 0x14), 0);
-        func_002BF970(*(s32 *)(obj + 0x18), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x14), 0);
+        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x18), 0);
         break;
     }
 }
@@ -1115,7 +1115,7 @@ void func_0027DE98(MenuList *list) {
 }
 
 /* Reset the cursor to the beginning, optionally replaying its old position. */
-void func_0027DED0(MenuList *list, s32 restoreOffset) {
+void mnuResetNodeLinks(MenuList *list, s32 restoreOffset) {
     MenuListNode *first;
     MenuListNode *oldCursor;
     list->windowOffset = 0;
@@ -1248,7 +1248,7 @@ void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
     menuLinkItemList(items, count);
     func_0027DE60(menu);
     func_0027DE98(menu);
-    func_0027DED0((s32 *)menu, 0);
+    mnuResetNodeLinks((s32 *)menu, 0);
     func_002D0918(handle);
 }
 
@@ -1366,13 +1366,13 @@ s32 func_0027E5C0(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     *(u32 *)(temp_v0 + 8) = 0;
     *(u32 *)(temp_v0 + 0xc) = 0;
     temp_v2 = 1;
-    func_002BFB98(temp_v0 + 0x10, arg0, arg1);
-    func_002BFB98(temp_v0 + 0x18, arg2, arg3);
+    itfGridStorePosition(temp_v0 + 0x10, arg0, arg1);
+    itfGridStorePosition(temp_v0 + 0x18, arg2, arg3);
     temp_v1 = temp_v0;
     do {
         temp_v2 = temp_v2 - 1;
-        func_002BFB98(temp_v1 + 0x20, 0, 0);
-        func_002BFB98(temp_v1 + 0x30, 0, 0);
+        itfGridStorePosition(temp_v1 + 0x20, 0, 0);
+        itfGridStorePosition(temp_v1 + 0x30, 0, 0);
         temp_v1 = temp_v1 + 8;
     } while (-1 < temp_v2);
     mnuInitScrollHandles(temp_v0);
@@ -1385,7 +1385,7 @@ void func_0027E690(u32 arg0) {
 }
 
 void func_0027E6B8(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    func_002BFB98(arg0 + 0x10);
+    itfGridStorePosition(arg0 + 0x10);
     *(u32 *)(arg0 + 4) = arg3;
 }
 
@@ -1675,7 +1675,7 @@ typedef struct MenuFadeSpriteSet {
     s32 fadeOut;
 } MenuFadeSpriteSet;
 
-void func_0027F898(s32 x, s32 y, s32 z, s32 unused, MenuFadeSpriteSet *sprites, s32 param) {
+void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuFadeSpriteSet *sprites, s32 param) {
     s32 px = x + 0x120;
     s32 py = y + 0x30;
     s32 alpha = sprites->alpha;
@@ -1837,8 +1837,8 @@ extern char D_003BC728[];
 void mnuFillPanelLists(s32 menu, s32 *counts) {
     s32 i = 0;
 
-    *(void **)(menu + 0x67C) = (void *)func_0027B2F8(0, 1, 1);
-    *(void **)(menu + 0x680) = (void *)func_0027B2F8(0, 1, 1);
+    *(void **)(menu + 0x67C) = (void *)mnuCreateListState(0, 1, 1);
+    *(void **)(menu + 0x680) = (void *)mnuCreateListState(0, 1, 1);
     for (i = 0; i < counts[0] + counts[1]; i++) {
         mnuListAppendNode(*(void **)(menu + 0x67C), D_003BC728);
         mnuListAppendNode(*(void **)(menu + 0x680), D_003BC728);
@@ -1855,7 +1855,7 @@ void func_00280258(s32 arg0, s32 arg1) {
     mnuFillPanelLists(arg0, arg1);
 }
 
-void func_00280290(MenuWindow *window) {
+void mnuClearPageSelection(MenuWindow *window) {
     if (window->selected >= 0) {
         MenuPage *pages = (MenuPage *)((u8 *)window + 0x20);
 
@@ -1866,7 +1866,7 @@ void func_00280290(MenuWindow *window) {
     window->flags &= ~0x400;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_002802E0);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuInitPageWindow);
 
 void menuReleaseHandles(s32 obj) {
     s32 *handle = (s32 *)(obj + 0x10);
@@ -1908,7 +1908,7 @@ void mnuShutdownContext(s32 context) {
     func_00280228(context);
 }
 
-void func_002804F0(MenuWindow *window) {
+void mnuResolveUnselectedPageHandles(MenuWindow *window) {
     s32 selected = window->selected;
     s32 offset = 0;
     u32 i;
@@ -1960,7 +1960,7 @@ typedef struct MenuHandleSet {
     s32 c[5];
 } MenuHandleSet;
 
-void func_002806E8(MenuWindow *window, s32 selected) {
+void mnuSelectPage(MenuWindow *window, s32 selected) {
     s32 *resource = window->handlesC;
     u32 i;
     MenuHandleSet *handles = (MenuHandleSet *)((u8 *)window + 4);
@@ -1978,7 +1978,7 @@ void func_002806E8(MenuWindow *window, s32 selected) {
         }
     }
     if (window->selected >= 0) {
-        func_002804F0(window);
+        mnuResolveUnselectedPageHandles(window);
     }
     window->selected = selected;
     func_002805B0(window);
@@ -1994,9 +1994,9 @@ void func_002807E8(window)
         effResolveAndReleaseResource(*resource++);
     }
     if (window->selected >= 0) {
-        func_002804F0(window);
+        mnuResolveUnselectedPageHandles(window);
     }
-    func_00280290(window);
+    mnuClearPageSelection(window);
 }
 
 void mnuFlagActiveWindows(u8 *menu) {

@@ -75,8 +75,8 @@ extern s32 effMiscRand(void *);
 extern u8 D_0034DF38[];
 
 /* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
-/* K&R: func_0016F420 passes the table block as the raw 64-bit value. */
-EffectRing *func_0016F1D0(source)
+/* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
+EffectRing *effCreateRingFan(source)
 EffectRing *source;
 {
     u32 handle;
@@ -115,18 +115,18 @@ EffectRing *source;
 }
 
 /* Create a ring from the first parameter-table block. */
-void func_0016F420(u64 table) {
+void effCreateRingFanFromParams(u64 table) {
     u64 block;
 
     block = effParamTableGetBlock(table, 0);
-    func_0016F1D0(block);
+    effCreateRingFan(block);
 }
 
 void func_0016F440(EffectRing *ring) {
-    func_0016F1D0(ring);
+    effCreateRingFan(ring);
 }
 
-void func_0016F458(EffectRecordGroup *group) {
+void effReleaseRingResources(EffectRecordGroup *group) {
     func_001705A0(group->handle7C);
     func_002D0918(group->handle78);
 }
@@ -135,7 +135,7 @@ void func_0016F488(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0016F498(EffectRecordGroup *group, u32 records) {
+void effSetRingColor(EffectRecordGroup *group, u32 records) {
     group->records = (u8 *)records;
 }
 
@@ -149,7 +149,7 @@ void func_0016F4A8(void *work, void *src) {
     VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
 }
 
-void func_0016F4D8(u8 *work, s32 index, s32 param) {
+void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
     s32 slot;
     s32 rgb1;
     s32 rgb2;

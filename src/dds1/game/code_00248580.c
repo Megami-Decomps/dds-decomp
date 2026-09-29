@@ -45,7 +45,7 @@ extern s32 func_0027FA70(u16, u16);
 
 extern void func_00284258(s32, s32, s32, s32, s32, s32);
 
-extern s32 func_0027B2F8(s32, s32, s32, s32);
+extern s32 mnuCreateListState(s32, s32, s32, s32);
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -55,7 +55,7 @@ extern u8 D_003BC3F8[];
 
 extern s32 mnuWalkNodeList(s32, s32);
 
-void func_00248580(MenuVisualWork *work) {
+void mnuReleaseVisualResources(MenuVisualWork *work) {
     effResolveAndReleaseResource(work->firstResource);
     effResolveAndReleaseResource(work->secondResource);
 }
@@ -164,7 +164,7 @@ u8 func_00249198(void) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
 
-extern s32 func_0027B2F8(s32, s32, s32, s32);
+extern s32 mnuCreateListState(s32, s32, s32, s32);
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -174,7 +174,7 @@ extern u8 D_003BC3F8[];
 
 /* Omit the selected entry when building the progress list. */
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
-    s32 list = func_0027B2F8(0, count, 0x15, callback);
+    s32 list = mnuCreateListState(0, count, 0x15, callback);
     s32 i;
     *(s32 *)(list + 0x30) = callback;
     *(s32 *)(list + 0x2c) = (s32)func_002491B8;
@@ -299,7 +299,7 @@ void func_00249770(u32 *arg0) {
     func_002D0918(*arg0);
 }
 
-extern s32 func_002716E8(s32, s32 *);
+extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
 extern void func_002762D8(s32 *);
 extern void func_00271480(s32, s32 *, s32, s32);
 
@@ -314,7 +314,7 @@ s32 mnuTickInitState(u8 *work) {
         return 0;
     }
     group = (s32 *)(work + 8);
-    if (func_002716E8(*(s32 *)(work + 4), group) == 0) {
+    if (mnuStaffSlotsAllFilled(*(s32 *)(work + 4), group) == 0) {
         return 1;
     }
     func_002762D8(group);

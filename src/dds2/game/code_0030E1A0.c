@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "fpu.h"
 
 extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
@@ -63,9 +64,16 @@ typedef struct SdfRing {
     s16 limit;                      /* 0x12 */
     s16 pad14;                      /* 0x14 */
 } SdfRing;
+
 extern s32 func_003292A8(s32);
+
 extern void *sdfMemoryGetBlockAddress(u32);
+
 extern void *memset(void *, s32, u32);
+
+typedef struct SdfMat4 {
+    f32 m[16];
+} SdfMat4;
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E1A0);
 
@@ -154,7 +162,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
 
 u32 fldReleaseMapResource(s32 *arg0) {
     if (*arg0 != 0) {
-        func_0032BBB0(*arg0);
+        sdfTexReleaseReferenceViaHandler(*arg0);
         *arg0 = 0;
     }
     return 1;
@@ -238,7 +246,27 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FD50);
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FFB0);
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_00310210);
+/* Transpose through a local copy so source and destination may alias. */
+void func_00310210(SdfMat4 *dst, SdfMat4 *src) {
+    SdfMat4 t = *src;
+
+    dst->m[0] = t.m[0];
+    dst->m[1] = t.m[4];
+    dst->m[2] = t.m[8];
+    dst->m[3] = t.m[12];
+    dst->m[4] = t.m[1];
+    dst->m[5] = t.m[5];
+    dst->m[6] = t.m[9];
+    dst->m[7] = t.m[13];
+    dst->m[8] = t.m[2];
+    dst->m[9] = t.m[6];
+    dst->m[10] = t.m[10];
+    dst->m[11] = t.m[14];
+    dst->m[12] = t.m[3];
+    dst->m[13] = t.m[7];
+    dst->m[14] = t.m[11];
+    dst->m[15] = t.m[15];
+}
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_00310320);
 

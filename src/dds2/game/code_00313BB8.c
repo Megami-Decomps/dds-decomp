@@ -402,14 +402,14 @@ s32 scrFindSlot(u8 *work, u16 key) {
     return -1;
 }
 
-u16 func_00315118(u8 *work, u32 index) {
+u16 scrGetSlot(u8 *work, u32 index) {
     if (index >= 24) {
         return 0;
     }
     return ((ScriptFlagWork *)work)->slotIds[index];
 }
 
-u32 func_00315138(u8 *work) {
+u32 scrCountSlots(u8 *work) {
     u16 *entries = ((ScriptFlagWork *)work)->slotIds;
     u32 count = 0;
     u32 index;
@@ -421,7 +421,7 @@ u32 func_00315138(u8 *work) {
     return count;
 }
 
-u16 func_00315170(s32 arg0, s32 arg1, u16 arg2) {
+u16 scrSetSlot(s32 arg0, s32 arg1, u16 arg2) {
     u16 temp_v0;
     u16 *puVar2;
 
@@ -681,7 +681,7 @@ u8 *func_003164C0(void) {
     return D_00405CA8;
 }
 
-void func_003164D0(s32 arg0) {
+void sdfResetFlagListEntries(s32 arg0) {
     u32 temp_v0;
     u32 *puVar2;
     u32 temp_v1;

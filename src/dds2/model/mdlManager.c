@@ -143,7 +143,7 @@ void mdlExecuteAndFreeJob(u32 job) {
     words = (u16 *)job;
     func_002318D0(*words, words[1], *(u32 *)(words + 4), words + 6);
     WaitSema(D_00438F90);
-    func_002312F8(*words, words[1]);
+    btlRemoveGroupId(*words, words[1]);
     SignalSema(D_00438F90);
     func_00328E48(job);
 }
@@ -169,10 +169,10 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231B80);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
 void func_00231DB0(u32 arg0, u32 arg1) {
-    func_00231B80(arg0, arg1, 1);
+    mdlRequestAsset(arg0, arg1, 1);
 }
 
 void func_00231DC8(MdlLink *link) {

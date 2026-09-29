@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0026BD80(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 extern u32 *D_003BC610;
 
@@ -15,7 +15,7 @@ extern void *memset(void *, s32, u32);
 extern u8 D_003BC620[];
 
 void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
-    func_0026BD80(a, b, c, d, 0x60, 0x1b, value);
+    mnuDrawSprite(a, b, c, d, 0x60, 0x1b, value);
 }
 
 

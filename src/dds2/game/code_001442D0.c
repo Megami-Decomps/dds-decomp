@@ -4,7 +4,7 @@
 
 #include "fpu.h"
 
-extern s32 func_00125328(void);
+extern s32 fldGetSceneStatusCode(void);
 extern void func_001442A0(s32);
 extern void func_00144270(s32);
 
@@ -222,7 +222,7 @@ extern void func_0014BF98(s32 handle);
 
 extern s32 func_0023CC00(s32 param);
 
-extern char *func_0010D7D0(s32 idx);
+extern char *scrReadStringParameter(s32 idx);
 
 extern s32 fldFindEffectByName(char *str);
 
@@ -261,7 +261,7 @@ extern s32 D_00389798[];
 
 extern void func_00341C78();
 
-extern void func_00129E50(u32 arg0, s32 arg1);
+extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
 extern s32 func_00129D60(s32 arg0);
 
@@ -358,7 +358,7 @@ extern void fldClearFloorFlag(s32, s32, s32);
 extern void fldSetFloorFlag(s32, s32, s32);
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 func_0010D650(s32);
+extern s32 scrReadIntParameter(s32);
 
 extern s32 D_0038984C[];
 
@@ -397,7 +397,7 @@ extern s32 func_0035D600(char *, const char *);
 
 extern void fldSetFadeTarget(s32, s32, s32);
 
-extern void func_00135568(s32);
+extern void fldSetSwayMode(s32);
 
 extern s32 D_00399FF0[];
 
@@ -654,7 +654,7 @@ void fldDestroyTask(void) {
     }
 }
 
-void func_00144598(void) {
+void fldResetPendingSounds(void) {
     FldClear18 *temp_v0 = D_0044F730;
     s32 temp_v1 = 7;
 
@@ -785,7 +785,7 @@ void func_00144CB8(void) {
                     func_00342580(D_00436210);
                 }
                 D_00436210 = handle;
-                func_00341BB8(handle);
+                sndStartTrackDefault(handle);
             }
         }
     }
@@ -794,12 +794,12 @@ void func_00144CB8(void) {
 s32 func_00144DB0(void) {
     if (D_003899D8[0] != 0) {
         if (D_00389798[0] == 0x80) {
-            func_00341BB8(D_0039A0B8[0] + 1);
+            sndStartTrackDefault(D_0039A0B8[0] + 1);
         }
     }
 }
 
-extern void func_00341C30(s32, s32);
+extern void sndStartTrackAlternate(s32, s32);
 
 void func_00144DF8(void) {
     s32 handle;
@@ -821,7 +821,7 @@ void func_00144DF8(void) {
             }
             if (D_00389770[0x130 / 4] != 1) {
                 D_00436210 = handle;
-                func_00341C30(handle, handle);
+                sndStartTrackAlternate(handle, handle);
             }
         }
     }
@@ -907,12 +907,12 @@ void fldSelectBgmMode(s32 arg0) {
         break;
     case 1:
         volume = D_0039A0B8[0] + 1;
-        func_00341BB8(volume);
+        sndStartTrackDefault(volume);
         D_00436228 = volume;
         break;
     case 2:
         volume = D_0039A028[0] + 1;
-        func_00341BB8(volume);
+        sndStartTrackDefault(volume);
         D_00436228 = volume;
         break;
     }
@@ -1091,7 +1091,7 @@ void func_00145730(s32 arg0, s32 arg1) {
         s32 temp_v0 = temp_a0 + 8;
 
         D_00436278 = temp_a1;
-        func_00129E50(arg0, temp_v0);
+        fldRelocatePackedTransferChunk(arg0, temp_v0);
         {
             s32 temp_v1 = func_00129D60(temp_v0);
             s32 temp_4 = *(s32 *)(temp_v1 + 4);
@@ -1195,16 +1195,16 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00149A00);
 
 void fldReleaseResourceSlots(void) {
     if (D_0044F7F0[1] != 0) {
-        func_0032BBB0(D_0044F7F0[1]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[1]);
     }
     if (D_0044F7F0[2] != 0) {
-        func_0032BBB0(D_0044F7F0[2]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[2]);
     }
     if (D_0044F7F0[3] != 0) {
-        func_0032BBB0(D_0044F7F0[3]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[3]);
     }
     if (D_0044F7F0[6] != 0) {
-        func_0032BBB0(D_0044F7F0[6]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[6]);
     }
     D_0044F7F0[1] = 0;
     D_0044F7F0[2] = 0;
@@ -1235,16 +1235,16 @@ void func_00149CE0(void) {
         D_0044F818[i].unk8 = 0;
     }
     if (D_0044F7F0[5] != 0) {
-        func_0032BBB0(D_0044F7F0[5]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[5]);
     }
     if (D_0044F7F0[7] != 0) {
-        func_0032BBB0(D_0044F7F0[7]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[7]);
     }
     if (D_0044F7F0[8] != 0) {
-        func_0032BBB0(D_0044F7F0[8]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[8]);
     }
     if (D_0044F7F0[9] != 0) {
-        func_0032BBB0(D_0044F7F0[9]);
+        sdfTexReleaseReferenceViaHandler(D_0044F7F0[9]);
     }
     D_0044F7F0[5] = 0;
     D_0044F7F0[7] = 0;
@@ -1786,19 +1786,19 @@ extern u32 D_004362CC;
 
 void fldFreeSceneResources(void) {
     if (D_00389770[0x1F0 / 4] != 0) {
-        func_0032BBB0(D_00389770[0x1F0 / 4]);
+        sdfTexReleaseReferenceViaHandler(D_00389770[0x1F0 / 4]);
         D_00389770[0x1F0 / 4] = 0;
     }
     if (D_00389770[0x1FC / 4] != 0) {
-        func_0032BBB0(D_00389770[0x1FC / 4]);
+        sdfTexReleaseReferenceViaHandler(D_00389770[0x1FC / 4]);
         D_00389770[0x1FC / 4] = 0;
     }
     if (D_00389770[0x208 / 4] != 0) {
-        func_0032BBB0(D_00389770[0x208 / 4]);
+        sdfTexReleaseReferenceViaHandler(D_00389770[0x208 / 4]);
         D_00389770[0x208 / 4] = 0;
     }
     if (D_00389770[0x214 / 4] != 0) {
-        func_0032BBB0(D_00389770[0x214 / 4]);
+        sdfTexReleaseReferenceViaHandler(D_00389770[0x214 / 4]);
         D_00389770[0x214 / 4] = 0;
     }
     if (D_004362DC != 0) {
@@ -1953,7 +1953,7 @@ typedef struct FldNpcPalette {
 
 extern FldNpcPalette D_0044FD90;
 
-void func_0014E3A8(s32 field) {
+void fldLoadNpcPalette(s32 field) {
     char path[64];
     char directory[32];
     u32 command;
@@ -2017,11 +2017,11 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014E6A8);
 
 void func_0014EBB8(void) {
     if (D_00436368 != 0) {
-        func_0032BBB0(D_00436368);
+        sdfTexReleaseReferenceViaHandler(D_00436368);
         D_00436368 = 0;
     }
     if (D_0043636C != 0) {
-        func_0032BBB0(D_0043636C);
+        sdfTexReleaseReferenceViaHandler(D_0043636C);
         D_0043636C = 0;
     }
 }
@@ -2044,7 +2044,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014EDB8);
 
 void func_0014F138(void) {
     if (D_0043637C != 0) {
-        func_0032BBB0(D_0043637C);
+        sdfTexReleaseReferenceViaHandler(D_0043637C);
         D_0043637C = 0;
     }
 }
@@ -2213,15 +2213,15 @@ void func_0014F318(void) {
 
 void func_0014F408(void) {
     if (D_004363AC != 0) {
-        func_0032BBB0(D_004363AC);
+        sdfTexReleaseReferenceViaHandler(D_004363AC);
         D_004363AC = 0;
     }
     if (D_004363B0 != 0) {
-        func_0032BBB0(D_004363B0);
+        sdfTexReleaseReferenceViaHandler(D_004363B0);
         D_004363B0 = 0;
     }
     if (D_004363B4 != 0) {
-        func_0032BBB0(D_004363B4);
+        sdfTexReleaseReferenceViaHandler(D_004363B4);
         D_004363B4 = 0;
     }
     effDestroyNode(D_00436388);
@@ -2823,7 +2823,7 @@ s32 func_00154558(void) {
         func_0010D818(0);
         return 1;
     }
-    func_001442A0(func_0010D650(0));
+    func_001442A0(scrReadIntParameter(0));
     func_00144270(1);
     result = func_001442D0();
     switch (result) {
@@ -2857,7 +2857,7 @@ s32 func_00154628(void) {
         func_0010D818(0);
         return 1;
     }
-    func_001442A0(func_0010D650(0));
+    func_001442A0(scrReadIntParameter(0));
     func_00144270(1);
     result = func_001442D0();
     switch (result) {
@@ -2878,7 +2878,7 @@ extern void func_00144270(s32);
 s32 func_001546F8(void) {
     s32 result;
 
-    func_001442A0(func_0010D650(0));
+    func_001442A0(scrReadIntParameter(0));
     func_00144270(1);
     result = func_001442D0();
     if (result == -1) {
@@ -2973,7 +2973,7 @@ s32 func_001548C0(void) {
     FldObj *obj;
     u64 world = dds3GetWorldSecondaryObject();
 
-    obj = func_00110C70(world, func_0010D650(0), 4);
+    obj = func_00110C70(world, scrReadIntParameter(0), 4);
     if (obj == NULL) {
         return 1;
     }
@@ -2992,7 +2992,7 @@ typedef struct FldVec3 {
     f32 z;
 } FldVec3;
 extern f32 D_0038BAB0[];
-extern f32 func_003406A0(f32);
+extern f32 sdfSinPoly(f32);
 extern f32 func_003407A0(f32);
 extern s32 func_00133B10();
 extern void func_00133A00();
@@ -3004,10 +3004,10 @@ s32 fldUpdateLookAtSegment(void) {
 
     cam->focusActive = 0;
     cam->negatedAngle = -cam->angle;
-    near.x = cam->x - func_003406A0((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
     near.z = cam->z + func_003407A0((cam->angle + 180.0f) * 3.14f / 180.0f);
-    far.x = cam->x + func_003406A0(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
     far.z = cam->z + func_003407A0(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     D_0038BAB0[0] = near.x;
@@ -3036,7 +3036,7 @@ s32 func_00154CE0(void) {
     s32 object;
     s32 world;
 
-    if (func_0010D650(0) == -1) {
+    if (scrReadIntParameter(0) == -1) {
         handle = func_00125F38();
         if (handle == 0) {
             return 1;
@@ -3054,11 +3054,11 @@ s32 func_00154CE0(void) {
         D_0038BAE0[1] = rot[1];
         D_0038BAE0[2] = rot[2];
         D_004360B4 = 0;
-        D_004360B8 = func_0010D650(1);
+        D_004360B8 = scrReadIntParameter(1);
         D_003897C0[0] = 4;
     } else {
         world = dds3GetWorldObject();
-        handle = (s32)func_00110C70(world, func_0010D650(0), 4);
+        handle = (s32)func_00110C70(world, scrReadIntParameter(0), 4);
         if (handle == 0) {
             return 1;
         }
@@ -3070,7 +3070,7 @@ s32 func_00154CE0(void) {
 s32 func_00154E08(void) {
     char *temp_v0;
 
-    temp_v0 = func_0010D7D0(0);
+    temp_v0 = scrReadStringParameter(0);
     D_00389770[0x14] = 5;
     strcpy((char *)D_00389770 + 0x40, temp_v0);
     return 1;
@@ -3081,7 +3081,7 @@ extern void evtDisableSolarOverlayAlpha(void);
 extern void evtEnableSolarOverlayAlpha(void);
 
 s32 func_00154E48(void) {
-    s32 mode = func_0010D650(0);
+    s32 mode = scrReadIntParameter(0);
 
     D_00389770[0xCC / 4] = mode;
     D_00389770[0xD0 / 4] = 0;
@@ -3150,7 +3150,7 @@ s32 func_00154FA0(char *name) {
 s32 func_00155020(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     D_003897C8[0] = temp_v0;
     return 1;
 }
@@ -3158,8 +3158,8 @@ s32 func_00155020(void) {
 s32 func_00155048(void) {
     s32 temp_v0;
 
-    D_00389988[11] = func_0010D650(0);
-    temp_v0 = func_0010D650(1);
+    D_00389988[11] = scrReadIntParameter(0);
+    temp_v0 = scrReadIntParameter(1);
     func_00135A68(D_00389988[11], temp_v0);
     return 1;
 }
@@ -3167,11 +3167,11 @@ s32 func_00155048(void) {
 s32 func_00155090(void) {
     s32 second;
     s32 third;
-    D_00389988[13] = func_0010D650(0) & 0xFF;
-    second = func_0010D650(1);
-    third = func_0010D650(2);
+    D_00389988[13] = scrReadIntParameter(0) & 0xFF;
+    second = scrReadIntParameter(1);
+    third = scrReadIntParameter(2);
     fldSetFadeTarget(D_00389988[13], second, third);
-    func_00135568(func_0010D650(3));
+    fldSetSwayMode(scrReadIntParameter(3));
     return 1;
 }
 
@@ -3197,16 +3197,16 @@ s32 func_00155108(void) {
     u64 list;
     FldWorldItem *item;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389770[4];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389770[5] + 1;
     }
-    mode = func_0010D650(3);
-    name = func_0010D7D0(2);
+    mode = scrReadIntParameter(3);
+    name = scrReadStringParameter(2);
     if (name == NULL) {
         for (room = 0; room < 16; room++) {
             func_00122F38(world, stage, room, 0);
@@ -3254,16 +3254,16 @@ s32 func_00155498(void) {
     u64 list;
     FldWorldItem *item;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389770[4];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389770[5] + 1;
     }
-    mode = func_0010D650(3);
-    name = func_0010D7D0(2);
+    mode = scrReadIntParameter(3);
+    name = scrReadStringParameter(2);
     if (strcmp(name, D_004363F0) == 0) {
         name = D_004361D4;
     }
@@ -3311,15 +3311,15 @@ s32 func_00155848(void) {
     s32 searchId;
     void *obj;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389770[4];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389770[5] + 1;
     }
-    name = func_0010D7D0(2);
+    name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
             func_00123038(world, stage, i, 0);
@@ -3332,7 +3332,7 @@ s32 func_00155848(void) {
             searchId = fldFindSearchId(name);
             if (searchId != -1) {
                 obj = func_00110C70(dds3GetWorldSecondaryObject(), searchId, 6);
-                switch (func_0010D650(3)) {
+                switch (scrReadIntParameter(3)) {
                 case 0:
                     func_00112230(obj, 0);
                     break;
@@ -3403,15 +3403,15 @@ s32 func_00155BA8(void) {
     s32 searchId;
     void *obj;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389770[4];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389770[5] + 1;
     }
-    name = func_0010D7D0(2);
+    name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
             func_00123038(world, stage, i, 1);
@@ -3424,7 +3424,7 @@ s32 func_00155BA8(void) {
             searchId = fldFindSearchId(name);
             if (searchId != -1) {
                 obj = func_00110C70(dds3GetWorldSecondaryObject(), searchId, 6);
-                switch (func_0010D650(3)) {
+                switch (scrReadIntParameter(3)) {
                 case 0:
                     func_00112230(obj, 3);
                     break;
@@ -3488,15 +3488,15 @@ s32 fldCmdSetSceneBits(void) {
     char *name;
     s32 i;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389780[0];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389784[0] + 1;
     }
-    name = func_0010D7D0(2);
+    name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
             func_00123138(world, stage, i, 0);
@@ -3513,15 +3513,15 @@ s32 func_00155F90(void) {
     char *name;
     s32 i;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389780[0];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389784[0] + 1;
     }
-    name = func_0010D7D0(2);
+    name = scrReadStringParameter(2);
     if (strcmp(name, D_004363F0) == 0) {
         name = D_004361D8;
     }
@@ -3536,48 +3536,48 @@ s32 func_00155F90(void) {
 }
 
 s32 func_00156070(void) {
-    s32 area = func_0010D650(0);
+    s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
-    floor = func_0010D650(1);
+    floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = func_0010D650(2);
+    target = scrReadIntParameter(2);
     if (target == 0) return 1;
     func_00123238(area, floor, target, 0);
     return 1;
 }
 
 s32 func_001560F8(void) {
-    s32 area = func_0010D650(0);
+    s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
-    floor = func_0010D650(1);
+    floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = func_0010D650(2);
+    target = scrReadIntParameter(2);
     if (target == 0) return 1;
     func_00123238(area, floor, target, 1);
     return 1;
 }
 
 s32 func_00156180(void) {
-    s32 area = func_0010D650(0);
+    s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
-    floor = func_0010D650(1);
+    floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = func_0010D650(2);
+    target = scrReadIntParameter(2);
     if (target == 0) return 1;
     func_00123338(area, floor, target, 0);
     return 1;
 }
 
 s32 func_00156208(void) {
-    s32 area = func_0010D650(0);
+    s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
-    floor = func_0010D650(1);
+    floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = func_0010D650(2);
+    target = scrReadIntParameter(2);
     if (target == 0) return 1;
     func_00123338(area, floor, target, 1);
     return 1;
@@ -3590,41 +3590,41 @@ s32 func_00156290(void) {
     s32 stage;
     s32 slot;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389780[0];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389784[0] + 1;
     }
-    slot = func_0010D650(2);
+    slot = scrReadIntParameter(2);
     if (slot == 0) {
         return 1;
     }
-    fldSetMapSlotByte(world, stage, slot, func_0010D650(3));
+    fldSetMapSlotByte(world, stage, slot, scrReadIntParameter(3));
     return 1;
 }
 
 s32 func_00156330(void) {
-    s32 area = func_0010D650(0);
+    s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
-    floor = func_0010D650(1);
+    floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = func_0010D650(2);
+    target = scrReadIntParameter(2);
     if (target == 0) return 1;
     fldSetFloorFlag(area, floor, target);
     return 1;
 }
 
 s32 func_001563B8(void) {
-    s32 area = func_0010D650(0);
+    s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
-    floor = func_0010D650(1);
+    floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = func_0010D650(2);
+    target = scrReadIntParameter(2);
     if (target == 0) return 1;
     fldClearFloorFlag(area, floor, target);
     return 1;
@@ -3639,27 +3639,27 @@ s32 fldCmdSetSceneBitsValue(void) {
     s32 stage;
     s32 room;
 
-    world = func_0010D650(0);
+    world = scrReadIntParameter(0);
     if (world == 0) {
         world = D_00389780[0];
     }
-    stage = func_0010D650(1);
+    stage = scrReadIntParameter(1);
     if (stage == 0) {
         stage = D_00389784[0] + 1;
     }
-    room = func_0010D650(2);
+    room = scrReadIntParameter(2);
     if (room == 0) {
         for (; room < 16; room++) {
-            func_001235E8(world, stage, room, func_0010D650(3));
+            func_001235E8(world, stage, room, scrReadIntParameter(3));
         }
     } else {
-        func_001235E8(world, stage, room, func_0010D650(3));
+        func_001235E8(world, stage, room, scrReadIntParameter(3));
     }
     return 1;
 }
 
 s32 fldSetFlagFromWorld1(void) {
-    if (func_00125328() == 1) {
+    if (fldGetSceneStatusCode() == 1) {
         func_0010D818(1);
         return 1;
     }
@@ -3668,7 +3668,7 @@ s32 fldSetFlagFromWorld1(void) {
 }
 
 s32 fldSetFlagFromWorld3(void) {
-    if (func_00125328() == 3) {
+    if (fldGetSceneStatusCode() == 3) {
         func_0010D818(1);
         return 1;
     }
@@ -3677,7 +3677,7 @@ s32 fldSetFlagFromWorld3(void) {
 }
 
 s32 fldSetFlagFromWorld4(void) {
-    if (func_00125328() == 4) {
+    if (fldGetSceneStatusCode() == 4) {
         func_0010D818(1);
         return 1;
     }
@@ -3686,7 +3686,7 @@ s32 fldSetFlagFromWorld4(void) {
 }
 
 s32 fldSetFlagFromWorld2(void) {
-    if (func_00125328() == 2) {
+    if (fldGetSceneStatusCode() == 2) {
         func_0010D818(1);
         return 1;
     }
@@ -3710,7 +3710,7 @@ s32 fldCmdPushSceneParam(void) {
     s32 room;
 
     room = fldFindRoomByTask(*(u32 *)(func_0010D8C8() + 0xE4));
-    switch (func_0010D650(0)) {
+    switch (scrReadIntParameter(0)) {
     case 0:
         func_0010D818(D_003A8EB0[room].unk0);
         break;
@@ -3766,7 +3766,7 @@ u32 func_00156960(void) {
 u32 func_001569B8(void) {
     u64 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     func_001411F8(temp_v0);
     return 1;
 }
@@ -3778,7 +3778,7 @@ u32 func_001569E0(void) {
 u32 func_001569E8(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     temp_v0 = fldGetActorStat0(temp_v0);
     func_0010D818(temp_v0);
     return 1;
@@ -3787,7 +3787,7 @@ u32 func_001569E8(void) {
 u32 func_00156A18(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     temp_v0 = func_001421C0(temp_v0);
     func_0010D818(temp_v0);
     return 1;
@@ -3796,7 +3796,7 @@ u32 func_00156A18(void) {
 u32 func_00156A48(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     temp_v0 = fldGetActorMotionEntry(temp_v0);
     func_0010D818(temp_v0);
     return 1;
@@ -3805,7 +3805,7 @@ u32 func_00156A48(void) {
 u32 func_00156A78(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     temp_v0 = fldGetRowValue(temp_v0);
     func_0010D818(temp_v0);
     return 1;
@@ -3814,7 +3814,7 @@ u32 func_00156A78(void) {
 u32 func_00156AA8(void) {
     u64 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     func_00142670(temp_v0);
     return 1;
 }
@@ -3823,8 +3823,8 @@ u32 func_00156AD0(void) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
+    temp_v0 = scrReadIntParameter(0);
+    temp_v1 = scrReadIntParameter(1);
     func_001206D0(temp_v0, temp_v1);
     return 1;
 }
@@ -3841,7 +3841,7 @@ s32 func_00156B30(void) {
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 s32 func_00156B58(void) {
-    func_0010D818(func_00140780(func_0010D650(0)));
+    func_0010D818(func_00140780(scrReadIntParameter(0)));
     return 1;
 }
 
@@ -3861,16 +3861,16 @@ void func_00156BD0(void) {
 }
 
 s32 func_00156BE8(void) {
-    s32 param0 = func_0010D650(0);
-    s32 param1 = func_0010D650(1);
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_0010D818(func_0013FA98(param0, param1));
     return 1;
 }
 
 s32 func_00156C30(void) {
-    s32 param0 = func_0010D650(0);
-    s32 param1 = func_0010D650(1);
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_0010D818(func_0013FFF8(param0, param1));
     return 1;
@@ -3886,13 +3886,13 @@ s32 func_00156C98(void) {
 }
 
 s32 func_00156CB8(void) {
-    D_00389798[0] = func_0010D650(0);
+    D_00389798[0] = scrReadIntParameter(0);
     func_00144CB8();
     return 1;
 }
 
 s32 func_00156CE8(void) {
-    D_00389798[0] = func_0010D650(0);
+    D_00389798[0] = scrReadIntParameter(0);
     func_00144DF8();
     return 1;
 }
@@ -3913,38 +3913,38 @@ s32 func_00156D58(void) {
 }
 
 s32 fldCommandPlaySeVolumePan(void) {
-    fldPlayMenuSound(func_0010D650(0));
+    fldPlayMenuSound(scrReadIntParameter(0));
     return 1;
 }
 
 s32 fldCommandPlaySe(void) {
-    fldPlayFieldSe(func_0010D650(0));
+    fldPlayFieldSe(scrReadIntParameter(0));
     return 1;
 }
 
 u8 fldCommandLoadArchive(void) {
-    return fldPollArchiveLoad(func_0010D650(0)) != 0;
+    return fldPollArchiveLoad(scrReadIntParameter(0)) != 0;
 }
 
 s32 func_00156DF0(void) {
-    s32 param0 = func_0010D650(0);
-    s32 param1 = func_0010D650(1);
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_001453D0(param0, param1);
     return 1;
 }
 
 s32 func_00156E30(void) {
-    s32 param0 = func_0010D650(0);
-    s32 param1 = func_0010D650(1);
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_00145400(param0, param1);
     return 1;
 }
 
-s32 func_00156E70(void) {
-    s32 param0 = func_0010D650(0);
-    s32 param1 = func_0010D650(1);
+s32 fldCommandStartTitle(void) {
+    s32 param0 = scrReadIntParameter(0);
+    s32 param1 = scrReadIntParameter(1);
 
     func_0014EC00(param0, param1, 0x3c);
     return 1;
@@ -3953,7 +3953,7 @@ s32 func_00156E70(void) {
 s32 func_00156EB8(void) {
     s32 temp_v0;
 
-    temp_v0 = func_0010D650(0);
+    temp_v0 = scrReadIntParameter(0);
     D_0038984C[0] = temp_v0;
     return 1;
 }
@@ -3974,13 +3974,13 @@ s32 func_00156F18(void) {
 }
 
 s32 func_00156F40(void) {
-    func_0014BF98(func_0023CC00(func_0010D650(0)));
+    func_0014BF98(func_0023CC00(scrReadIntParameter(0)));
     return 1;
 }
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
 s32 fldCommandFindEffectByName(void) {
-    char *param = func_0010D7D0(0);
+    char *param = scrReadStringParameter(0);
 
     func_0010D818(fldFindEffectByName(param));
     return 1;
@@ -3992,9 +3992,9 @@ s32 func_00156FA0(void) {
 }
 
 /* Clear the selected flag only if it was set, and report whether it changed. */
-s32 func_00156FC8(void) {
+s32 fldCommandClearSelectedFlag(void) {
     s32 changed = 0;
-    switch (func_0010D650(0)) {
+    switch (scrReadIntParameter(0)) {
     case 0:
         if (D_00389770[3] & 1) {
             D_00389770[3] &= ~1;
@@ -4038,7 +4038,7 @@ s32 func_001570C0(void) {
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
     s32 commandName;
-    commandName = func_0010D7D0(0);
+    commandName = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
         func_00342690();
     }
@@ -4059,11 +4059,11 @@ s32 fldCommandIsSoundBusy(void) {
 
 /* Pass five field-script arguments to the underlying handler. */
 s32 func_001571C8(void) {
-    s32 first = func_0010D650(0);
-    s32 second = func_0010D650(1);
-    s32 third = func_0010D650(2);
-    s32 fourth = func_0010D650(3);
-    func_00123DE8(D_00389780[0], first, second, third, fourth, func_0010D650(4));
+    s32 first = scrReadIntParameter(0);
+    s32 second = scrReadIntParameter(1);
+    s32 third = scrReadIntParameter(2);
+    s32 fourth = scrReadIntParameter(3);
+    func_00123DE8(D_00389780[0], first, second, third, fourth, scrReadIntParameter(4));
     return 1;
 }
 
@@ -4092,10 +4092,10 @@ s32 func_00157268(void) {
 }
 
 s32 func_001572A0(void) {
-    if (func_0010D650(0) == 2) {
+    if (scrReadIntParameter(0) == 2) {
         func_00153D40(0);
         D_003898B0[0] = 0;
-    } else if (func_0010D650(0) == 0) {
+    } else if (scrReadIntParameter(0) == 0) {
         func_00153D40(0);
     } else {
         func_00153D40(1);
@@ -4106,7 +4106,7 @@ s32 func_001572A0(void) {
 extern void func_001536B8(s32);
 
 s32 func_00157308(void) {
-    func_001536B8(func_0010D650(0));
+    func_001536B8(scrReadIntParameter(0));
     return 1;
 }
 

@@ -33,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00341650", func_00341AD8);
 
 /* Starts a track with the default 0x7f setting after preparing its identifier. */
 
-void func_00341BB8(s32 trackId) {
+void sndStartTrackDefault(s32 trackId) {
     CmdPacket packet;
 
     func_003421E8(trackId);
@@ -54,7 +54,7 @@ void func_00341C00(u32 value) {
 
 /* Starts the alternate track command, leaving the other packet fields untouched. */
 
-void func_00341C30(s32 trackId) {
+void sndStartTrackAlternate(s32 trackId) {
     CmdPacket packet;
 
     func_003421E8(trackId);

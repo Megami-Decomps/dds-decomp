@@ -8,8 +8,6 @@ void func_001113F0(void *arg0, void *arg1);
 
 void dds3SetSlotValue(void *arg0, void *arg1);
 
-extern s32 func_00112AB0(void);
-
 s32 func_00111980(u8 arg);
 
 void *dds3SetSlotByKind(ObjBase *object, ObjData *data);
@@ -21,6 +19,14 @@ extern void *dds3SpawnSlotRingObj3(void *arg);
 void dds3SetSlotKey(void *arg0, void *arg1);
 
 void dds3ReplaceObjectResource(void *arg0);
+
+/* Prefix of the administration record returned by func_00102790. */
+typedef struct AdminWork {
+    u32 flags;
+    u32 value;
+} AdminWork;
+
+extern AdminWork *func_00112AB0(void);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 

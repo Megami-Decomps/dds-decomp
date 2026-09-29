@@ -2,7 +2,7 @@
 
 extern u32 func_00101958(void);
 
-extern u32 func_001A0710(u32);
+extern u32 itfLoadTextureFromAsset(u32);
 
 extern u32 func_00328D68(u32);
 
@@ -39,17 +39,17 @@ void evtDestroyTaskHierarchy(u32 task) {
 
 /* The owner argument is part of the allocator callback signature; the
  * returned context starts with both words clear. */
-EventContext *func_0024FE98(s32 *owner) {
+EventContext *evtAllocateContext(s32 *owner) {
     EventContext *context = (EventContext *)func_00328D68(8);
     context->flags = 0;
     context->value = 0;
     return context;
 }
 
-void func_0024FEC0(EventContext *context, u32 value) {
+void evtSetConvertedContextValue(EventContext *context, u32 value) {
     u32 result;
 
-    result = func_001A0710(value);
+    result = itfLoadTextureFromAsset(value);
     context->value = result;
 }
 

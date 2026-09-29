@@ -62,7 +62,7 @@ void func_00289E80(u32 port, u32 path, u32 mode, u32 flags) {
 }
 
 /* Return a nonnegative SDK result through out; map -4 to -2. */
-s32 func_00289EB0(s32 *resultOut) {
+s32 mcPollNonnegativeResult(s32 *resultOut) {
     u32 cmdId;
     s32 status;
     s32 result = func_002F6858(1, &cmdId, &status);

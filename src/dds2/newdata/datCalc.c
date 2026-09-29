@@ -11,6 +11,22 @@ typedef struct DatCalcCursor {
 
 extern s32 D_00435DD0;
 
+typedef struct UiObject {
+    u8 unk_00[0x110];
+    u32 flags;
+    u8 unk_114[0x10];
+    u16 index;
+    u16 currentValue;
+    u16 maximumValue;
+    u8 unk_12A[4];
+    u16 statusFlags;
+} UiObject;
+
+typedef struct DatGameCounters {
+    u8 pad00[0x3C];
+    s32 currency;        /* 0x3C: clamped to 0..9,999,999 */
+} DatGameCounters;
+
 void func_001197A8(u8 *work, s32 mask) {
     *(u16 *)(work + 0xE) &= ~mask;
 }
@@ -65,9 +81,22 @@ u32 func_00119F40(void) {
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119F68);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A098);
+s32 func_0011A098(UiObject *object) {
+    return *(u16 *)((u8 *)object + 6) * 100 / *(u16 *)((u8 *)object + 8) < 25;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A0D0);
+/* Add to the party's currency counter, saturating at either bound. */
+s32 func_0011A0D0(s32 delta) {
+    s32 value = ((DatGameCounters *)D_00435DD0)->currency + delta;
+    if (value < 0) {
+        value = 0;
+    }
+    if (value > 0x98967F) {
+        value = 0x98967F;
+    }
+    ((DatGameCounters *)D_00435DD0)->currency = value;
+    return value;
+}
 
 s32 func_0011A100(s32 value) {
     if (*(s32 *)(D_00435DD0 + 0x3C) < value) {

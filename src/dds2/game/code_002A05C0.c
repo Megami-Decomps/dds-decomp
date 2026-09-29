@@ -2,7 +2,7 @@
 
 extern u32 D_00438FE8;
 
-extern u64 func_0010D650(u64);
+extern u64 scrReadIntParameter(u64);
 
 extern u64 sdfSoundIsCommandBusy(void);
 
@@ -197,15 +197,15 @@ s32 mnuGetTitleEffectFrameCounter(void) {
 u32 func_002A1368(void) {
     u64 sequence;
 
-    sequence = func_0010D650(0);
-    func_00341BB8(sequence);
+    sequence = scrReadIntParameter(0);
+    sndStartTrackDefault(sequence);
     return 1;
 }
 
 u32 func_002A1390(void) {
     u64 sequence;
 
-    sequence = func_0010D650(0);
+    sequence = scrReadIntParameter(0);
     sndSetSequenceVolumePan(sequence, 0x7f, 0x3f);
     return 1;
 }
@@ -217,7 +217,7 @@ u32 func_002A13C0(void) {
 
 s32 mnuInitializeTitleEffects(void) {
     s32 value;
-    value = func_0010D7D0(0);
+    value = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
         func_00342690();
     }
@@ -244,7 +244,7 @@ u32 func_002A1478(void) {
 
 s32 movCheckStartupSoundState(void) {
     if (func_002A2330() == 0) {
-        func_002A2200(func_0010D650(0));
+        func_002A2200(scrReadIntParameter(0));
         return 0;
     }
     return func_002A2330() != 1;

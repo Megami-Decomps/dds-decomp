@@ -133,7 +133,7 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
 extern void func_00255FF8(s32 *, s32);
 
-void func_0025C7E0(s32 animationContext, s32 unusedGrid, u8 *slot) {
+void mnuAdvanceGridSlotAnimation(s32 animationContext, s32 unusedGrid, u8 *slot) {
     s32 *counter = *(s32 **)(slot + 4);
     s32 value = *counter + 1;
 
@@ -158,7 +158,7 @@ void func_0025C830(s32 animationContext, s32 owner) {
         MenuAnimationSlot *slot = (MenuAnimationSlot *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * 8);
         for (col = 0; col < 15; col++) {
             if (slot[col].counterAddress != 0) {
-                func_0025C7E0(animationContext, (s32)grid, (u8 *)&slot[col]);
+                mnuAdvanceGridSlotAnimation(animationContext, (s32)grid, (u8 *)&slot[col]);
             }
         }
     }

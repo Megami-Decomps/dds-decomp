@@ -139,7 +139,7 @@ extern s32 func_001B3200(s32);
 
 extern s32 func_00213F58(s32, s32, s32);
 
-extern s32 func_002147B0(s32, s32, s32);
+extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
 extern s32 func_001B2900(void *, s32);
 
@@ -149,7 +149,7 @@ extern s32 func_001B2900(void *, s32);
 
 extern s32 func_001AE8C0(void *, s32);
 
-extern s32 func_001AEAB8(void *, s32);
+extern s32 btlHasSpecialAbility274(void *, s32);
 
 extern s32 func_001AEB20(void *, s32);
 
@@ -475,7 +475,7 @@ s32 func_002129C8(s32 unused, s32 mask) {
 }
 
 /* Look for an active group 0x200 unit in the requested mode. */
-s32 func_00212A40(s32 unused, s32 mode) {
+s32 btlHasGroup200UnitMode(s32 unused, s32 mode) {
     BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
     for (; unit != 0; unit = unit->nextActor) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201 &&
@@ -487,7 +487,7 @@ s32 func_00212A40(s32 unused, s32 mode) {
 }
 
 /* Exclude the supplied unit ID while checking group 0x400 in this mode. */
-s32 func_00212AB0(s32 excludedUnit, s32 mode) {
+s32 btlHasOtherGroup400UnitMode(s32 excludedUnit, s32 mode) {
     BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
     for (; unit != 0; unit = unit->nextActor) {
         if ((*(u64 *)&unit->flags & 0x421) == 0x401 &&
@@ -698,7 +698,7 @@ s32 btlIsReadyWithoutTurns(void) {
     return 0;
 }
 
-s32 func_002135B8(u8 *unit, s32 count) {
+s32 btlIsUnitStatAtOrBelowRate(u8 *unit, s32 count) {
     void *flags = unit + 0x120;
     u32 amount = func_001AA708(flags);
     u32 total = func_001AA758(flags) * count;
@@ -839,7 +839,7 @@ s32 func_00213BB8(s32 unused, s32 mask) {
     return 0;
 }
 
-s32 func_00213C38(s32 unused, s32 mode) {
+s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 mode) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
@@ -1099,7 +1099,7 @@ s32 func_002145E0(void) {
 s32 func_002145F0(s32 unused, s32 action) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if (func_002147B0(battler, action, 0x200)) {
+        if (btlUnitBlocksElementQuery(battler, action, 0x200)) {
             return 1;
         }
     }
@@ -1156,7 +1156,7 @@ s32 func_00214700(s32 arg0, s32 id, s32 mask) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002147B0);
+INCLUDE_ASM(const s32, "game/code_002112C8", btlUnitBlocksElementQuery);
 
 s64 func_00214928(void) {
     return func_001B3200(0);
@@ -1176,7 +1176,7 @@ s32 func_00214948(u8 *unit, s32 action, u32 mask) {
                         }
                         if (func_001B2900(unit, index) != 0 ||
                             func_001AE8C0(unit, index) != 0 ||
-                            func_001AEAB8(unit, index) != 0 ||
+                            btlHasSpecialAbility274(unit, index) != 0 ||
                             func_001AEB20(unit, index) != 0) {
                             return 0;
                         }
@@ -1185,7 +1185,7 @@ s32 func_00214948(u8 *unit, s32 action, u32 mask) {
                 }
                 if (func_001B2900(unit, action) != 0 ||
                     func_001AE8C0(unit, action) != 0 ||
-                    func_001AEAB8(unit, action) != 0) {
+                    btlHasSpecialAbility274(unit, action) != 0) {
                     return 0;
                 }
                 return func_001AEB20(unit, action) == 0;
@@ -1377,7 +1377,7 @@ void func_00217378(u8 *command, u8 *unused) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(userPos) : "memory");
     btlUnitGetMuzzlePosVU(target);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(targetPos) : "memory");
-    func_001E36A0(target, user);
+    btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
         *(u32 *)(command + 0x110) |= 0x200;
     } else {
@@ -1560,7 +1560,7 @@ typedef struct BattleActionRecord {
     BattleUnit *unit;
 } BattleActionRecord;
 
-s32 func_00218D88(BattleActionRecord *record) {
+s32 btlCheckActionRecordUnit(BattleActionRecord *record) {
     if ((record->flags & 8) == 0) {
         return -1;
     }
@@ -1577,7 +1577,7 @@ extern u8 *btlCreateEffObjB(s32, s32);
 
 extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
-s32 func_00218DE0(BattleActionRecord *record) {
+s32 btlStartActionRecordTasks(BattleActionRecord *record) {
     u8 *task;
     if (!(record->flags & 8)) {
         return -1;
@@ -1627,7 +1627,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002190A0);
 
 extern u8 *sndCreateStationedSeTask(s32);
 
-void func_00219170(BattleActionRecord *record, u64 owner, s32 arg2) {
+void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 arg2) {
     BattleUnit *unit;
     u8 *task;
     if (record->flags & 8) {
@@ -1849,7 +1849,7 @@ struct BattleNamedResource {
     NamedChunkHolder *holder;
 };
 
-s8 func_0021A308(s32 name) {
+s8 btlDispatchNamedChunkNode(s32 name) {
     BattleUnit *battler = **(BattleUnit ***)(func_001AA6F8() + 0x718);
     BattleNamedResource *resource;
     NamedChunkDescriptor *chunk;
@@ -1877,7 +1877,7 @@ s8 func_0021A308(s32 name) {
     return D_00438F84;
 }
 
-void func_0021A3A0(NamedChunkNode *node) {
+void btlResetNamedChunkNodeTree(NamedChunkNode *node) {
     NamedChunkNode *child;
 
     node->color = 0x80808080;
@@ -1885,7 +1885,7 @@ void func_0021A3A0(NamedChunkNode *node) {
     node->flags = node->flags & 0xfffd;
     if (child != 0) {
         do {
-            func_0021A3A0(child);
+            btlResetNamedChunkNodeTree(child);
             child = child->next;
         } while (child != node->firstChild);
     }
@@ -1900,7 +1900,7 @@ void btlClearNamedChunkFlags(s32 name) {
         if (index != -1) {
             NamedChunkData *data = chunk->data;
             NamedChunkNode **entries = data->entries;
-            func_0021A3A0(entries[index]);
+            btlResetNamedChunkNodeTree(entries[index]);
         }
     }
 }

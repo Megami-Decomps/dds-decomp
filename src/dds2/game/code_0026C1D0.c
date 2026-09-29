@@ -102,7 +102,7 @@ s32 func_0026C318(s32 first, s32 second, s32 *taskSlot) {
 }
 
 /* Collects indexes of the active entries into the caller's list. */
-void func_0026C388(ActiveList *list) {
+void evtCollectActiveGameIndices(ActiveList *list) {
     s32 index;
     list->count = 0;
     for (index = 1; index < 0x100; index++) {
@@ -138,7 +138,7 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 extern u32 effMiscRand();
 /* Swaps randomly selected elements the requested number of times (not a Fisher-Yates shuffle). */
-void func_0026C458(u8 *buffer, u32 length, s32 count) {
+void evtRandomSwapBytes(u8 *buffer, u32 length, s32 count) {
     u8 *first;
     u8 *second;
     u8 value;
@@ -274,7 +274,7 @@ s8 func_0026C940(void) {
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C948);
 
 void func_0026C9B8(s32 x, s32 y) {
-    func_001A4218(D_00437880, x * 16, y * 8);
+    itfMesBlk24MoveTo(D_00437880, x * 16, y * 8);
     itfPanelEmitRecord(D_00437880, -((0x15F - y) * 8));
 }
 
@@ -309,7 +309,7 @@ u32 func_0026CAA8(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_0026C1D0", evtSetCurrentActiveFlag);
 
 s32 evtActivateCurrentFlag(void) {
-    s32 index = func_0010D650(0);
+    s32 index = scrReadIntParameter(0);
     if (index >= 16) {
         index = 15;
     }
