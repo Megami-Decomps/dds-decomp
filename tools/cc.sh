@@ -64,4 +64,4 @@ run "$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1" \
     -U__mips -D__mips=3 -D__mips64 -D__mips_eabi -D__mips_single_float \
     -Iinclude -Isrc "-DASM_ROOT=\"build/eeasm/asm/$version/nonmatchings/\"" "-DVERSION_$(echo $version | tr a-z A-Z)" \
     -quiet -O2 $flags "$cc_in" -o "$cc_out"
-run "$ee/ee/bin/as" -EL -G8 -Iinclude -o "$out" "$cc_out"
+run "$ee/ee/bin/as" -EL -G8 ${DDS_AS_FLAGS:-} -Iinclude -o "$out" "$cc_out"
