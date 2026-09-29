@@ -233,6 +233,13 @@ calls: `void f(void)` using the registers directly
 - Float constants are literals. ee-as puts each `li.s` constant into the
   unit's `.lit4` pool itself. Derived constants fold at compile time:
   `180.0f / 3.14f` is retail's 57.32484.
+- cc1's decimal-to-float conversion can be one ULP off for long literals
+  (`6.283185005f` gives 0x40C90FD9, retail has 0x40C90FDA). The retail bits
+  come from the expression the programmer likely wrote:
+  `3.14159265f * 2.0f`, `-3.14159265f / 2.0f`.
+- Float arguments to an unprototyped callee are promoted to double and go
+  through soft-float helper calls (extra `jal`s). Give the callee a
+  prototype with `f32` parameters.
 - Strings of 8 bytes or more (counting the NUL) are literals in `.rodata`.
   Shorter ones live in `.sdata`.
 - A literal whose retail copy an asm function of the unit still uses must
