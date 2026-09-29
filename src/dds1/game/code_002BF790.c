@@ -72,6 +72,7 @@ void func_002BF790(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
+/* Resolve an entry by key, falling back to the object's stored value. */
 s32 func_002BF970(s32 object, s32 key) {
     s32 entry = func_002BD398(object);
     s32 result;
@@ -88,6 +89,7 @@ s32 func_002BF970(s32 object, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
 
+/* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
 void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
@@ -125,9 +127,10 @@ void itfCopyGridEntryWords(s32 owner, s32 index) {
     } while (-1 < remaining);
 }
 
-void func_002BFB98(IntPair *p, s32 a, s32 b) {
-    p->x = a;
-    p->y = b;
+/* Store the two grid position coordinates. */
+void func_002BFB98(IntPair *position, s32 x, s32 y) {
+    position->x = x;
+    position->y = y;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFBA8);
@@ -175,6 +178,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0340);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C04C8);
 
+/* Unpack four 8-bit channels into the low and high halves of two 64-bit words. */
 void func_002C05F0(u64 *channels, u32 color) {
     u64 green;
     channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
@@ -206,8 +210,8 @@ void func_002C0778(u8 value, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0858(u8 arg0, u32 arg1) {
-    func_002C0778(arg0, 0, arg1);
+void func_002C0858(u8 value, u32 kind) {
+    func_002C0778(value, 0, kind);
 }
 
 void func_002C0878(s32 data, s32 alternate, s32 kind) {
@@ -231,8 +235,8 @@ void func_002C0878(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0950(u32 arg0, u32 arg1) {
-    func_002C0878(arg0, 0, arg1);
+void func_002C0950(u32 data, u32 kind) {
+    func_002C0878(data, 0, kind);
 }
 
 void func_002C0970(s32 data, s32 alternate, s32 kind) {
@@ -256,8 +260,8 @@ void func_002C0970(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0A48(u32 arg0, u32 arg1) {
-    func_002C0970(arg0, 0, arg1);
+void func_002C0A48(u32 data, u32 kind) {
+    func_002C0970(data, 0, kind);
 }
 
 void func_002C0A68(s32 data, s32 kind) {

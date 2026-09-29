@@ -12,7 +12,7 @@ extern u32 effPcpScatterResAddRef(u32);
 typedef struct PcpScatterRes PcpScatterRes;
 
 struct PcpScatterRes {
-    u32 unk00;
+    u32 resourceHandle;
     s32 refCount;
 };
 
@@ -115,15 +115,16 @@ typedef struct PcpScatterPool {
     PcpScatterRes *sharedResource; /* 0x30: reference counted */
 } PcpScatterPool;
 
-void func_001787E0(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
+/* Spawn a scatter variant from three parameter-table blocks. */
+void func_001787E0(u64 table) {
+    u64 params;
+    u64 resource;
+    u64 options;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    temp_v2 = effParamTableGetBlock(arg0, 2);
-    func_001784F8(temp_v0, temp_v1, temp_v2);
+    params = effParamTableGetBlock(table, 0);
+    resource = effParamTableGetBlock(table, 1);
+    options = effParamTableGetBlock(table, 2);
+    func_001784F8(params, resource, options);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterSharedDuplicate);
@@ -177,15 +178,16 @@ void func_00179180(float scale, PcpScatterWork8 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001791A8);
 
-void func_00179438(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
+/* Spawn the linked variant from its three parameter-table blocks. */
+void func_00179438(u64 table) {
+    u64 params;
+    u64 resource;
+    u64 options;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    temp_v2 = effParamTableGetBlock(arg0, 2);
-    func_001791A8(temp_v0, temp_v1, temp_v2);
+    params = effParamTableGetBlock(table, 0);
+    resource = effParamTableGetBlock(table, 1);
+    options = effParamTableGetBlock(table, 2);
+    func_001791A8(params, resource, options);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterLinkedDuplicate);
@@ -228,15 +230,16 @@ void func_00179D90(float scale, PcpScatterWork2 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179DB0);
 
-void func_0017A058(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
+/* Spawn the table variant from its three parameter-table blocks. */
+void func_0017A058(u64 table) {
+    u64 params;
+    u64 resource;
+    u64 options;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    temp_v2 = effParamTableGetBlock(arg0, 2);
-    func_00179DB0(temp_v0, temp_v1, temp_v2);
+    params = effParamTableGetBlock(table, 0);
+    resource = effParamTableGetBlock(table, 1);
+    options = effParamTableGetBlock(table, 2);
+    func_00179DB0(params, resource, options);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterTableDuplicate);
@@ -314,7 +317,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = func_00328D68(8);
-    res->unk00 = func_0032C138(resId);
+    res->resourceHandle = func_0032C138(resId);
     res->refCount = 1;
     return res;
 }
@@ -325,7 +328,7 @@ extern void func_00328E48(void *);
 void effPcpScatterResRelease(PcpScatterRes *res) {
     res->refCount--;
     if (res->refCount == 0) {
-        func_0032BBB0(res->unk00);
+        func_0032BBB0(res->resourceHandle);
         func_00328E48(res);
     }
 }
@@ -396,6 +399,7 @@ extern void effCreateScatterResource(void *object, u32 resource);
 extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
 
+/* Allocate particles after the scatter work, then assign randomized offsets. */
 PcpScatterWork4 *func_0017AD28(src, resource)
     PcpScatterParams *src;
     u32 resource;
@@ -504,6 +508,7 @@ typedef struct PcpScatterInstanceB {
     u32 ownedBuffer;
 } PcpScatterInstanceB;
 
+/* Same particle layout with a longer parameter block and one extra control word. */
 void *func_0017B7A0(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
@@ -619,6 +624,7 @@ typedef struct PcpScatterInstanceC {
     u32 ownedBuffer;
 } PcpScatterInstanceC;
 
+/* Third particle variant has another eight bytes of per-instance state. */
 void *func_0017C2D8(src, resource)
     PcpScatterParamsC *src;
     u32 resource;

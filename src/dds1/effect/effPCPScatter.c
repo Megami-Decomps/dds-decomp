@@ -567,6 +567,7 @@ typedef struct PcpScatterInstance {
 extern void *func_00175B50();
 extern void effCreateScatterResource(void *object, u32 resource);
 
+/* Allocate particles after the scatter work, then assign randomized offsets. */
 PcpScatterWork4 *func_001730D0(src, resource)
     PcpScatterParams *src;
     u32 resource;
@@ -676,6 +677,7 @@ typedef struct PcpScatterInstanceB {
     u32 ownedBuffer;
 } PcpScatterInstanceB;
 
+/* Same particle layout with a longer parameter block and one extra control word. */
 void *func_00173B48(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
@@ -790,6 +792,7 @@ typedef struct PcpScatterInstanceC {
     u32 ownedBuffer;
 } PcpScatterInstanceC;
 
+/* Third particle variant has another eight bytes of per-instance state. */
 void *func_00174680(src, resource)
     PcpScatterParamsC *src;
     u32 resource;

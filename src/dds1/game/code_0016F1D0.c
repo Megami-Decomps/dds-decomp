@@ -28,6 +28,9 @@ extern void func_001705A0();
 
 extern s32 func_0018DDF8(s32 color, s32 param);
 
+#define EFFECT_RING_START_ANGLE (-1.5707963f)
+#define EFFECT_RING_FULL_TURN (6.2831853f)
+
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
  * `count` vertices spread evenly around the circle from -pi/2. */
 typedef struct EffectRingHeader {
@@ -71,6 +74,7 @@ extern u8 *func_00170558(u32);
 extern s32 effMiscRand(void *);
 extern u8 D_0034DF38[];
 
+/* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
 /* K&R: func_0016F420 passes the table block as the raw 64-bit value. */
 EffectRing *func_0016F1D0(source)
 EffectRing *source;
@@ -96,11 +100,11 @@ EffectRing *source;
     if (ring->spread == 0) {
         ring->spread = 1;
     }
-    angle = -1.5707963f;
+    angle = EFFECT_RING_START_ANGLE;
     ring->matrix = func_00170558(ring->count);
     *(f32 *)(ring->matrix + 0x5C) = 1.0f;
     *(u32 *)(ring->matrix + 0x50) = ring->unk54;
-    step = 6.2831853f / ring->count;
+    step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
         ring->vertices[i].offset = -(effMiscRand(D_0034DF38) % spread);
@@ -110,6 +114,7 @@ EffectRing *source;
     return ring;
 }
 
+/* Create a ring from the first parameter-table block. */
 void func_0016F420(u64 table) {
     u64 block;
 

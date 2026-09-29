@@ -97,17 +97,34 @@ void fldDecrementSelectionCount(MapSelection *selection) {
     }
 }
 
+typedef struct MapSelectionNode {
+    u8 pad00[8];
+    s16 ordinal;           /* 0x08: 1-based bit position */
+} MapSelectionNode;
+
+typedef struct MapSelectionLink {
+    u8 pad00[0x58];
+    struct MapSelectionLink *next; /* 0x58 */
+    u8 pad5C[0x14];
+    MapSelectionNode *selection;   /* 0x70 */
+} MapSelectionLink;
+
+typedef struct MapSelectionContext {
+    u8 pad00[0x10];
+    MapSelectionLink *first;       /* 0x10 */
+} MapSelectionContext;
+
 /* Collect the 1-based selection ids in the linked map nodes into a bitmask. */
-s32 func_002C60F8(void *context) {
-    void *node;
+s32 func_002C60F8(MapSelectionContext *context) {
+    MapSelectionLink *node;
     s32 mask;
 
-    node = *(void **)((s32)context + 0x10);
+    node = context->first;
     mask = 0;
     do {
-        void *selection = *(void **)((s32)node + 0x70);
-        node = *(void **)((s32)node + 0x58);
-        mask |= 1 << (*(s16 *)((s32)selection + 8) - 1);
+        MapSelectionNode *selection = node->selection;
+        node = node->next;
+        mask |= 1 << (selection->ordinal - 1);
     } while (node != NULL);
     return mask;
 }
@@ -130,11 +147,11 @@ s32 fldReleaseLocalMapResources(void) {
 }
 
 void func_002C63D8(void) {
-    s32 temp_v0;
+    s32 count;
 
     D_003BD978 = 0;
-    temp_v0 = func_002C4A10();
-    D_003BD97C = temp_v0 - 1;
+    count = func_002C4A10();
+    D_003BD97C = count - 1;
     D_003BD980 = 0x3c;
 }
 
@@ -203,6 +220,7 @@ typedef struct {
     s16 elapsed;          /* 0x16 */
 } MapRequestState;
 
+/* Dispatch one queued request per interval; inactive nodes are reused. */
 void fldAdvanceMapRequest(MapRequestState *state, u32 value, u32 argument1, u32 argument2) {
     MapRequestNode *node;
 
@@ -242,22 +260,22 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 fldReleaseMapResource(s32 *arg0) {
-    if (*arg0 != 0) {
-        func_002D2D00(*arg0);
-        *arg0 = 0;
+u32 fldReleaseMapResource(s32 *image) {
+    if (*image != 0) {
+        func_002D2D00(*image);
+        *image = 0;
     }
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7DC0);
 
-void func_002C7EC8(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+void func_002C7EC8(s32 gridX, s32 gridY, u64 style, u64 flags) {
+    u64 glyph;
 
-    temp_v0 = func_00197760(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_00195880(temp_v0, 1);
-    func_00194920(temp_v0);
+    glyph = func_00197760(gridX << 4, gridY << 3, 0, style, flags, 0);
+    func_00195880(glyph, 1);
+    func_00194920(glyph);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7F18);
@@ -305,6 +323,7 @@ float fldVectorLength(float *vector) {
                   vector[2] * vector[2]);
 }
 
+/* Normalize copies of the input vectors; callers' vectors stay untouched. */
 float fldNormalizedVectorDot(float *left, float *right) {
     struct Vector4 { float x, y, z, w; } a, b;
     a = *(struct Vector4 *)left;

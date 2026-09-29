@@ -108,6 +108,7 @@ void func_00218768(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_002EDC50(void *buffer);
 s32 *func_002192D0(s32 arg0, s32 arg1);
 s32 mdlCountRecords(s32 arg0);
+/* Assemble the resource request in a temporary buffer before loading it. */
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
@@ -139,6 +140,7 @@ typedef struct {
     u16 field10;     /* 0x10 */
 } MdlRecord;
 
+/* Read the model record's payload word without advancing its relative link. */
 u32 func_002192C0(MdlRecord *record) {
     return record->value08;
 }
@@ -147,6 +149,7 @@ u16 func_002192C8(MdlRecord *record) {
     return record->value0C;
 }
 
+/* Follow the relative links in a resource's record table to find an ID. */
 s32 *func_002192D0(s32 resource, s32 id) {
     s32 *table = *(s32 **)(*(s32 *)(resource + 0xC) + 0xA4);
     s32 *record;
@@ -159,7 +162,7 @@ s32 *func_002192D0(s32 resource, s32 id) {
     remaining = func_002192C8((MdlRecord *)record);
     do {
         remaining--;
-        record = (s32 *)((s32)record + record[1]);
+        record = (s32 *)((s32)record + ((MdlRecord *)record)->nextOffset);
         if (remaining == -1) {
             return NULL;
         }
@@ -185,14 +188,15 @@ s32 * mdlGetNextRecord(MdlRecord *current) {
     return record;
 }
 
-s32 mdlCountRecords(s32 arg0) {
+/* Count relative-offset records until the 0xffff sentinel. */
+s32 mdlCountRecords(s32 address) {
     s32 count;
     s32 *node;
 
-    if (arg0 == 0) {
+    if (address == 0) {
         return 0;
     }
-    node = mdlGetFirstRecord(arg0);
+    node = mdlGetFirstRecord(address);
     count = 0;
     while (node != NULL) {
         count++;
@@ -201,8 +205,8 @@ s32 mdlCountRecords(s32 arg0) {
     return count;
 }
 
-u8 func_002193D8(s32 *arg0, s32 arg1) {
-    return *arg0 == arg1;
+u8 func_002193D8(s32 *recordId, s32 wantedId) {
+    return *recordId == wantedId;
 }
 
 u16 func_002193E8(MdlRecord *record) {
@@ -233,6 +237,7 @@ extern u16 D_00367980[];
 extern char D_003BBBB0[];
 extern char D_003BBBB8[];
 
+/* Draw labeled marker fields and each of four packed color channels. */
 void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
     s32 boxY = y + 0x300;
     s32 labelX = x + 0xC0;
@@ -279,11 +284,15 @@ typedef struct MdlPartList {
     MdlPartEntry *entries; /* 0x0C */
 } MdlPartList;
 
+#define MDL_PART_BILLBOARD 0
+#define MDL_PART_EFFECT 1
+#define MDL_PART_OBJECT 3
+
 void mdlAddBillboardPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
     entry->state = 0;
-    entry->kind = 0;
+    entry->kind = MDL_PART_BILLBOARD;
     entry->object = billCreateIndexed(1, index);
     list->count += 1;
 }
@@ -291,7 +300,7 @@ void mdlAddBillboardPart(MdlPartList *list, s32 index) {
 void mdlAddEffectPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
-    entry->kind = 1;
+    entry->kind = MDL_PART_EFFECT;
     entry->state = 0;
     entry->object = func_0014FD20(index);
     list->count += 1;
@@ -314,7 +323,7 @@ void func_00219BB0(MdlPartList *list, s32 a, void *b, s32 c) {
     node->c = c;
     node->a = a;
     node->b = b;
-    entry->kind = 3;
+    entry->kind = MDL_PART_OBJECT;
     entry->state = 0;
     entry->object = (s32)node;
     list->count += 1;
@@ -358,13 +367,13 @@ void func_00219CE8(MdlPartList *list) {
             MdlPartEntry *entry = &list->entries[i];
 
             switch (entry->kind) {
-            case 0:
+            case MDL_PART_BILLBOARD:
                 billDispatchByKind(entry->object);
                 break;
-            case 1:
+            case MDL_PART_EFFECT:
                 effDestroyNode(entry->object);
                 break;
-            case 3:
+            case MDL_PART_OBJECT:
                 mdlObjDestroy((MdlObj *)entry->object);
                 break;
             }
@@ -906,6 +915,7 @@ void func_0021A8F0(void) {
     D_003D7A84[0] = 0;
 }
 
+/* Rotate the viewer resource list in place without moving its allocation. */
 void mdlRotateViewResourcesRight(void) {
     s32 i = D_003D7A50.resourceCount - 1;
     s32 saved = D_003D7A50.resources[i];
@@ -1051,6 +1061,7 @@ s32 func_0021BE50(void) {
 
 extern s8 D_00324510[];
 
+/* Change the viewer scale in hundredths, with larger steps at larger values. */
 void func_0021BE88(void) {
     s32 value = (s32)(D_003D7A50.unk54 * 100.0f + 0.5f);
 
