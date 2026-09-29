@@ -27,20 +27,30 @@ typedef struct TitleMenuWork {
     s32 sequenceMode;         /* 0xB6F4 */
 } TitleMenuWork;
 
+/* Shared dispatcher layout; the title menu keeps its work and status adjacent. */
+typedef struct {
+    u8 pad00[8];
+    u8 dispatchWork[0x4C]; /* 0x08 */
+    s32 dispatchStatus;     /* 0x54 */
+} PanelDispatchContext;
+
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029BFB8);
 
-s64 itfRunPanelMode1(s32 arg0) {
-    s32 ctx = func_00101958();
-    func_0029AA48(ctx);
-    func_0029AC20(ctx, 0);
-    return func_002C4038(ctx + 8, ctx + 0x54, 1, arg0);
+s64 itfRunPanelMode1(s32 request) {
+    s32 context = func_00101958();
+    PanelDispatchContext *panel = (PanelDispatchContext *)context;
+
+    func_0029AA48(context);
+    func_0029AC20(context, 0);
+    return func_002C4038(panel->dispatchWork, &panel->dispatchStatus, 1, request);
 }
 
-s64 itfRunPanelMode2(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+s64 itfRunPanelMode2(s32 request) {
+    s32 context = func_00101958();
+    PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
     func_0026C8E8(0);
-    return func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    return func_002C4038(panel->dispatchWork, &panel->dispatchStatus, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C120);
@@ -49,16 +59,17 @@ INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C3F0);
 
 extern u32 func_00309138(u32, u32, s32);
 
-void func_0029C450(u8 *work) {
-    s32 remaining = 0x100 - ((TitleMenuWork *)work)->fadeProgress;
+/* The opacity is latched at 0x80; later fade steps leave it untouched. */
+void func_0029C450(TitleMenuWork *work) {
+    s32 remaining = 0x100 - work->fadeProgress;
     u32 opacity;
-    if (((TitleMenuWork *)work)->opacityReady != 0) {
+    if (work->opacityReady != 0) {
         return;
     }
     opacity = func_00309138(0x80808080, 0x80808000, remaining) & 0xFF;
-    ((TitleMenuWork *)work)->opacity = opacity;
+    work->opacity = opacity;
     if (opacity >= 0x80) {
-        ((TitleMenuWork *)work)->opacityReady = 1;
+        work->opacityReady = 1;
     }
 }
 
@@ -70,9 +81,9 @@ extern BurstTable D_00428420;
 
 extern void func_00308620(BurstSprite *, u32 *, s32, s32, s32);
 
-void mnuTitleDrawBurstSprites(s32 arg0, s32 arg1) {
+void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
     BurstTable table = D_00428420;
-    s32 scaled = arg0 * 0x13 / 256;
+    s32 scaled = scaleInput * 0x13 / 256;
     u32 i;
 
     for (i = 0; i < 8; i++) {

@@ -4,7 +4,7 @@ extern u32 D_00435D88;
 
 typedef struct {
     u8 pad0[8];
-    void *callbackTarget;
+    void *callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
 } WorldEntry;
 
 typedef struct {
@@ -22,6 +22,7 @@ INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC28);
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC68);
 
+/* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
 void dds3AdvanceWorldCounter(void) {
     D_00435D88 = (D_00435D88 + 1) & 0xffff;
 }

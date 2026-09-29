@@ -1,16 +1,16 @@
 #include "common.h"
 
-typedef struct {
-    u32 unk0;
-    u32 path;
-    u32 value;
-    u32 key;
-} SlotData;
+typedef struct ObjectResource {
+    u32 owner;      /* 0x00: object passed to the slot constructor */
+    u32 handle;     /* 0x04: resource released before replacement */
+    u32 value;      /* 0x08 */
+    u32 resourceId; /* 0x0C: used to construct the replacement */
+} ObjectResource;
 
-typedef struct {
+typedef struct ObjectWithResource {
     u8 pad0[0x18];
-    SlotData *data;
-} SlotObject;
+    ObjectResource *resource;
+} ObjectWithResource;
 
 extern u32 func_00116D38(u32);
 
@@ -23,7 +23,7 @@ typedef struct {
     u32 unk4;          /* 0x4 */
     SlotEntry *entry;     /* 0x8: slot from D_00329A68 */
     u8 unkC[0xC];      /* 0xC */
-    SlotData *data;    /* 0x18 */
+    ObjectResource *resource; /* 0x18 */
 } SlotObjectFull;
 
 extern SlotObjectFull *func_00110880();
@@ -31,55 +31,57 @@ extern u32 dds3AdvanceWorldCounter();
 extern SlotEntry D_00329A68[];
 extern s32 D_003BA9C0;
 
-SlotObjectFull *dds3SpawnSlotRingObj3(u32 arg0) {
+SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
     SlotObjectFull *obj = func_00110880(3);
-    SlotData *data = obj->data;
-    u32 hash = dds3AdvanceWorldCounter();
+    ObjectResource *resource = obj->resource;
+    u32 sequence = dds3AdvanceWorldCounter();
     s32 slot;
 
-    data->unk0 = arg0;
+    resource->owner = owner;
     slot = D_003BA9C0;
-    obj->unk4 = hash;
+    obj->unk4 = sequence;
     obj->entry = &D_00329A68[slot];
     D_003BA9C0 = slot + 1;
     D_003BA9C0 = D_003BA9C0 % 10;
     return obj;
 }
 
-void dds3SetSlotValue(SlotObject *obj, u32 value) {
-    obj->data->value = value;
+void dds3SetSlotValue(ObjectWithResource *object, u32 value) {
+    object->resource->value = value;
 }
 
-void dds3SetSlotKey(SlotObject *obj, u32 key) {
-    obj->data->key = key;
+void dds3SetSlotKey(ObjectWithResource *object, u32 resourceId) {
+    object->resource->resourceId = resourceId;
 }
 
-void dds3ReloadSlotPath(SlotObject *obj) {
-    SlotData *data;
-    u32 path;
+/* Keep the old handle until it has been freed; the new resource is keyed
+ * by resourceId rather than by the previous handle. */
+void dds3ReloadSlotPath(ObjectWithResource *object) {
+    ObjectResource *resource;
+    u32 handle;
 
-    data = obj->data;
-    if (data->path != 0) {
-        dds3FreePathObject(data->path);
+    resource = object->resource;
+    if (resource->handle != 0) {
+        dds3FreePathObject(resource->handle);
     }
-    path = func_00116D38(data->key);
-    data->path = path;
+    handle = func_00116D38(resource->resourceId);
+    resource->handle = handle;
 }
 
-void dds3ReleaseSlotPath(SlotObject *obj) {
-    SlotData *data;
-    s32 path;
+void dds3ReleaseSlotPath(ObjectWithResource *object) {
+    ObjectResource *resource;
+    s32 handle;
 
-    data = obj->data;
-    path = data->path;
-    if (path != 0) {
-        dds3FreePathObject(path);
-        data->path = 0;
+    resource = object->resource;
+    handle = resource->handle;
+    if (handle != 0) {
+        dds3FreePathObject(handle);
+        resource->handle = 0;
     }
 }
 
-u32 dds3GetSlotPath(SlotObject *obj) {
-    return obj->data->path;
+u32 dds3GetSlotPath(ObjectWithResource *object) {
+    return object->resource->handle;
 }
 
 void func_00111740(void) {

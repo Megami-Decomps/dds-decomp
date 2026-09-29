@@ -80,6 +80,8 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3510);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C35C8);
 
+/* Highest set flag wins; the final 0x410 test is still executed even
+ * though its result does not affect the returned stage. */
 u32 fldGetLmapStage(void) {
     s64 flagSet;
     u32 stage;

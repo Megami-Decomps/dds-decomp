@@ -15,7 +15,7 @@ INCLUDE_ASM(const s32, "game/code_00234C18", func_00234DA8);
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234F18);
 
 typedef struct {
-    u32 flags; /* 0x00 */
+    u32 flags; /* 0x00: bit 0 toggled without disturbing the other bits */
     u32 value; /* 0x04 */
 } EventContext;
 
@@ -37,6 +37,8 @@ void evtDestroyTaskHierarchy(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
+/* The owner argument is part of the allocator callback signature; the
+ * returned context starts with both words clear. */
 EventContext *func_002350F8(s32 *owner) {
     EventContext *context = (EventContext *)func_002CFEB8(8);
     context->flags = 0;

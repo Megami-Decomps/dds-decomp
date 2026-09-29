@@ -3,10 +3,10 @@
 extern u32 func_00116FA0(u32);
 
 typedef struct ObjectResource {
-    u32 unk0;
-    u32 handle;
-    u32 value8;
-    u32 resourceId;
+    u32 owner;      /* 0x00: object that owns this resource */
+    u32 handle;     /* 0x04 */
+    u32 value;      /* 0x08 */
+    u32 resourceId; /* 0x0C */
 } ObjectResource;
 
 typedef struct ObjectWithResource {
@@ -17,13 +17,15 @@ typedef struct ObjectWithResource {
 INCLUDE_ASM(const s32, "game/code_00111838", dds3SpawnSlotRingObj3);
 
 void dds3SetSlotValue(ObjectWithResource *object, u32 value) {
-    object->resource->value8 = value;
+    object->resource->value = value;
 }
 
 void dds3SetSlotKey(ObjectWithResource *object, u32 resourceId) {
     object->resource->resourceId = resourceId;
 }
 
+/* The resource ID determines the replacement; releasing the old handle
+ * does not change the ID stored in the object. */
 void dds3ReplaceObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
     u32 handle;

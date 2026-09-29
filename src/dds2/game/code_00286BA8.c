@@ -18,6 +18,8 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E98);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286F18);
 
+/* Store the task handle so the existence probe and explicit stop can
+ * invalidate or destroy the same resource group. */
 void func_00286F90(void) {
     s32 menuData = func_00286E98();
     D_00437924 = func_00312620(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
@@ -48,6 +50,8 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287638);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 
+/* Both handlers consume the current resource-task selection, but report
+ * completion independently of the selected value. */
 u64 func_00287768(void) {
     u64 selected;
 

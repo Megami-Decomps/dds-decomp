@@ -82,6 +82,8 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F608);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
 
+/* The task handle is shared by the existence probe and explicit stop;
+ * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     s32 data = func_0024F608();
     D_003BC4CC = func_002CB1C8(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
