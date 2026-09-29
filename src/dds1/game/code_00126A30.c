@@ -257,6 +257,13 @@ extern s32 D_003BAE54;
 extern s32 D_003BAE5C;
 extern s32 D_003BAE60;
 
+/* A packed-resource chunk uses an offset from the base and a byte length. */
+typedef struct FldTransferChunk {
+    u32 unk0;
+    s32 offset;
+    u32 size;
+} FldTransferChunk;
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00127028);
@@ -267,17 +274,18 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00127388);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00127588);
 
-void func_00127708(u32 *args) {
+/* Handle a field request, creating the player only in non-special scene states. */
+void func_00127708(u32 *request) {
     s32 state;
-    func_00127028(args[4], args[3]);
+    func_00127028(request[4], request[3]);
     state = D_0032E3B0[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    func_00126A30(args[1], args[0], 0);
-    D_0032E3B0[1] = ((u32 *)args[2])[1];
+    func_00126A30(request[1], request[0], 0);
+    D_0032E3B0[1] = ((u32 *)request[2])[1];
 }
 
-void func_00127788(u32 *arg0) {
-    func_00126A30(arg0[1], *arg0, 1);
+void func_00127788(u32 *request) {
+    func_00126A30(request[1], *request, 1);
 }
 
 s32 func_001277A8(s32 arg0) {
@@ -286,12 +294,13 @@ s32 func_001277A8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001277B0);
 
-void func_00127898(u32 arg0, s32 arg1) {
-    sdfRelocatePackedResourceWords(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
+/* Relocate the words described by this packed-resource transfer chunk. */
+void func_00127898(u32 buffer, FldTransferChunk *chunk) {
+    sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
-void func_001278C0(u32 arg0, s32 arg1) {
-    func_001277B0(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
+void func_001278C0(u32 buffer, FldTransferChunk *chunk) {
+    func_001277B0(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void fldSetAreaResourceRequest(u32 arg0, u32 arg1) {

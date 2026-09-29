@@ -6,6 +6,13 @@
 #define SDF_DMA_TAG_REF_BYTE 0x30
 #define SDF_DMA_TAG_CALL_BYTE 0x50
 
+/* First tag word carries the DMA operation; second is its 28-bit address. */
+typedef struct SdfDmaTagHeader {
+    u8 pad00[3];
+    u8 kind;
+    u32 address;
+} SdfDmaTagHeader;
+
 extern void *D_003BDA00;
 extern s8 D_003BDA04;
 extern s32 D_003BD9F8[2];
@@ -243,8 +250,8 @@ void sdfAppendPacket(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet;
 }
@@ -257,8 +264,8 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = end;
 }
@@ -267,14 +274,14 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
 void sdfAppendReferencePacket(SdfListHead *list, u32 packet) {
     s32 last;
 
-    *(u8 *)(packet + 3) = SDF_DMA_TAG_REF_BYTE;
+    ((SdfDmaTagHeader *)packet)->kind = SDF_DMA_TAG_REF_BYTE;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet + 0x10;
 }
@@ -287,8 +294,8 @@ void func_002D40E8(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet + 0x30;
 }
@@ -297,14 +304,14 @@ void func_002D40E8(SdfListHead *list, u32 packet) {
 void sdfAppendCallPacket(SdfListHead *list, u32 packet) {
     s32 last;
 
-    *(u8 *)(packet + 3) = SDF_DMA_TAG_CALL_BYTE;
+    ((SdfDmaTagHeader *)packet)->kind = SDF_DMA_TAG_CALL_BYTE;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet + 0x10;
 }
@@ -349,27 +356,29 @@ s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4240);
 
-u32 func_002D42B8(u32 arg0) {
-    SdfDmaNode *temp = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
-    SdfDmaSrc *src = (SdfDmaSrc *)arg0;
-    u64 id = src->unk0;
-    u32 addr = ((u32)src + 0x10) & 0x0FFFFFFF;
-    s64 shifted = (s64)addr << 32;
+/* Make a REF DMA node for the payload following the source tag. */
+u32 func_002D42B8(u32 source) {
+    SdfDmaNode *node = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    SdfDmaSrc *src = (SdfDmaSrc *)source;
+    u64 tag = src->unk0;
+    u32 address = ((u32)src + 0x10) & 0x0FFFFFFF;
+    s64 shifted = (s64)address << 32;
 
-    id |= 0x30000000;
-    id |= shifted;
-    temp->unk0 = id;
-    temp->unk10 = 0;
-    temp->unk8 = src->unk8;
-    return (u32)temp;
+    tag |= 0x30000000;
+    tag |= shifted;
+    node->unk0 = tag;
+    node->unk10 = 0;
+    node->unk8 = src->unk8;
+    return (u32)node;
 }
 
+/* Patch the prior NEXT tag to chain in a reference to source's payload. */
 s32 func_002D4320(s32 previous, u32 source) {
     u32 packet;
 
     packet = func_002D42B8(source);
-    *(u8 *)(previous + 3) = SDF_DMA_TAG_NEXT_BYTE;
-    *(u32 *)(previous + 4) = packet & 0xfffffff;
+    ((SdfDmaTagHeader *)previous)->kind = SDF_DMA_TAG_NEXT_BYTE;
+    ((SdfDmaTagHeader *)previous)->address = packet & 0xfffffff;
     return packet + 0x10;
 }
 
