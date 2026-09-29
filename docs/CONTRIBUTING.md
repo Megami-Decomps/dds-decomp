@@ -8,14 +8,19 @@ it, decompile it, verify it, name it, and share it with the other game.
 A function counts as decompiled only when it compiles to exactly the retail
 bytes, and it has to reach that the way the original developers would have.
 
-- **No fakematches.** Inline asm is allowed only for COP2/VU0 macro-mode
-  blocks (wrapped in `.set noreorder`), the `fsqrtf` helper in
-  `include/fpu.h` and the `PCP_COPY_VECTOR` quadword copy in
-  `include/pcp_vu0.h` (see docs/idioms.md). Not allowed:
+- **No fakematches.** Inline asm is allowed only for COP2/VU0 and MMI
+  sequences gcc 2.96 cannot emit from C, under the rules in docs/idioms.md
+  ("Inline asm: COP2 and MMI"): try C first, use the shared macros in
+  `include/pcp_vu0.h` and `include/ee_mmi.h`, and keep the asm small inside
+  real C. A mostly-asm body needs a `/* libvu0: ... */` or
+  `/* vu0 routine: ... */` marker, otherwise check_unit reports `ASMBODY` and
+  it stays `INCLUDE_ASM`. The `fsqrtf` helper is in `include/fpu.h`. Not allowed:
   - register pinning (`register x asm("$n")`)
   - computed gotos or label tables standing in for a `switch`
   - dummy variables or `volatile` added to steer codegen
-  - permuter output that doesn't read like real code
+  - one-off inline wrappers that exist only to change codegen
+  - decomp-permuter, or any scripted/enumerated search over statement or
+    declaration order: every change has to be one a person made for a reason
 - **Plausible source.** Use structs for recurring layouts, real types
   (no `u64` unless the value is 64-bit), meaningful parameter and local
   names, and natural loops and switches.
@@ -86,10 +91,15 @@ lines:
 | `OVER` | the function runs into the next retail function |
 | `CONTEXT` | the function compiles differently inside the full unit, as the build compiles it (see idioms.md) |
 | `SHARED` / `PAD` / `MERGED` | a literal can't be compiled from C yet; keep the `extern` |
-| `DATA` | the unit emits data nothing accounts for |
+| `DATA` / `RODATA` | the unit emits data nothing accounts for, or its `.rodata` no longer lines up with retail |
 | `MISSING` / `ORDER` / `TWICE` | a function was dropped, moved, or defined twice |
 | `STALE` | the unit uses an old `func_` name that symbol_addrs has since renamed; use the new name |
+| `UNDEF` | the C references a name nothing defines (a typo, or the other game's name); relocations compare by address, so only a fresh link would catch it |
+| `NOASM` | an `INCLUDE_ASM` names a function with no assembly file |
 | `TRICK` | computed goto, label table, or pinned register |
+
+`ASMBODY` lines are informational: they list functions whose body is mostly
+inline asm without a `libvu0`/`vu0 routine` marker, which don't count as C.
 
 Always check the whole unit after an edit. A changed declaration, or even a
 new name, can change how other functions compile. Then build:
