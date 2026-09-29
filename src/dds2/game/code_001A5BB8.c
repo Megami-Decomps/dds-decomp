@@ -344,9 +344,10 @@ typedef struct BtlEntry {
 extern s32 func_001197C0();
 extern s32 func_001198C0();
 
-void func_001A5BB8(s32 arg0) {
-    for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
-        frFontEnableContextMode(arg0);
+/* Enable context rendering for every font object in the linked chain. */
+void func_001A5BB8(s32 fontObject) {
+    for (; fontObject != 0; fontObject = *(s32 *)(fontObject + 0x24)) {
+        frFontEnableContextMode(fontObject);
     }
 }
 
@@ -434,17 +435,24 @@ void func_001A5E88(s32 *object) {
     func_001A6078(object, 0, 0);
 }
 
-void func_001A5EB8(s32 arg0) {
-    s32 temp_v0;
-    u32 *puVar2;
+/* Paired arrays: a nonzero slot marker owns the handle at the same index. */
+typedef struct UiResourceSlots {
+    s32 markers[32];
+    s32 handles[32];
+} UiResourceSlots;
 
-    puVar2 = (u32 *)(arg0 + 0x7c);
-    temp_v0 = 0x1f;
+/* Clear 32 words, from the end back toward the beginning of the buffer. */
+void func_001A5EB8(UiResourceSlots *slots) {
+    s32 remaining;
+    u32 *word;
+
+    word = (u32 *)&slots->markers[31];
+    remaining = 0x1f;
     do {
-        temp_v0 = temp_v0 - 1;
-        *puVar2 = 0;
-        puVar2 = puVar2 + -1;
-    } while (-1 < temp_v0);
+        remaining = remaining - 1;
+        *word = 0;
+        word = word + -1;
+    } while (-1 < remaining);
 }
 
 void func_001A5EE8(s32 arg0, s32 arg1) {
@@ -480,18 +488,20 @@ void btlReleaseEffectResourceHandles(BattleEffect *effect) {
     effect->flags &= ~0xF00;
 }
 
-void func_001A5FA0(s32 *arg0) {
-    s32 temp_v0;
+/* Release the handles in the second half for occupied entries in the first. */
+void func_001A5FA0(UiResourceSlots *slots) {
+    s32 remaining;
+    s32 *entries = slots->markers;
 
-    temp_v0 = 0x1f;
+    remaining = 0x1f;
     do {
-        if (*arg0 != 0) {
-            func_003297C8(arg0[0x20]);
-            *arg0 = 0;
+        if (*entries != 0) {
+            func_003297C8(entries[0x20]);
+            *entries = 0;
         }
-        temp_v0 = temp_v0 - 1;
-        arg0 = arg0 + 1;
-    } while (-1 < temp_v0);
+        remaining = remaining - 1;
+        entries = entries + 1;
+    } while (-1 < remaining);
 }
 
 u16 *txtFormatNumberU16(s32 value, u16 *out) {

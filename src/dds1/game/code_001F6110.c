@@ -390,35 +390,36 @@ f32 btlGetExtremeUnitY(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6E28);
 
+/* Compare VU-computed distances from the target's muzzle to eligible units. */
 BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     BtlState *state = (BtlState *)func_001A17F0();
     BtlUnit *unit;
     BtlUnit *nearest;
     s32 first;
-    f32 best;
-    f32 dist;
-    BtlVec4 pos;
+    f32 nearestDistance;
+    f32 distance;
+    BtlVec4 targetPos;
     btlUnitGetMuzzlePosVU(target);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(&pos) : "memory");
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(&targetPos) : "memory");
     unit = state->units;
     nearest = NULL;
     first = 1;
-    best = 0.0f;
+    nearestDistance = 0.0f;
     while (unit != NULL) {
         if (unit->flags & 1) {
             if (!(unit->flags & 0xC0)) {
                 if (target != unit) {
                     if (unit->flags & mask) {
                         btlUnitGetMuzzlePosVU(unit);
-                                        __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" : : "f"(pos.f[1]) : "$2");
-                        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(&pos));
-                        __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmul.xyz $vf2, $vf10, $vf10\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tvsqrt Q, $vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(dist) : : "$2");
+                        __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" : : "f"(targetPos.f[1]) : "$2");
+                        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(&targetPos));
+                        __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmul.xyz $vf2, $vf10, $vf10\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tvsqrt Q, $vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(distance) : : "$2");
                         if (first) {
-                            best = dist;
+                            nearestDistance = distance;
                             nearest = unit;
                             first = 0;
-                        } else if (dist < best) {
-                            best = dist;
+                        } else if (distance < nearestDistance) {
+                            nearestDistance = distance;
                             nearest = unit;
                         }
                     }
@@ -430,11 +431,12 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     return nearest;
 }
 
+/* Return the eligible unit farthest from point, using the VU distance. */
 BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
     BtlUnit *farthest = NULL;
-    f32 best = 0.0f;
-    f32 dist;
+    f32 farthestDistance = 0.0f;
+    f32 distance;
     while (unit != NULL) {
         if (unit->flags & 1) {
             if (!(unit->flags & 0xC0)) {
@@ -455,10 +457,10 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
                         "cfc2.ni $2, $vi22\n\t"
                         "mtc1 $2, %0\n\t"
                         ".set reorder"
-                        : "=f"(dist)
+                        : "=f"(distance)
                         : "r"(point), "f"(point[1]));
-                    if (best < dist) {
-                        best = dist;
+                    if (farthestDistance < distance) {
+                        farthestDistance = distance;
                         farthest = unit;
                     }
                 }
@@ -1543,10 +1545,10 @@ u32 func_001F9E68(void) {
 }
 
 u32 func_001F9EF0(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D6A8();
-    if (func_001FEC68(temp_v0, *(s32 *)(temp_v0 + 0x18), 0xe800000) != 0) {
+    context = func_0010D6A8();
+    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0xe800000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1555,10 +1557,10 @@ u32 func_001F9EF0(void) {
 }
 
 u32 func_001F9F40(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D6A8();
-    if (func_001FEC68(temp_v0, *(s32 *)(temp_v0 + 0x18), 0xec00000) != 0) {
+    context = func_0010D6A8();
+    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0xec00000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
