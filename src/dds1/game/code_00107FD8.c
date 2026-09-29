@@ -458,7 +458,7 @@ u32 func_0010A210(void) {
 }
 
 void func_0010A218(void) {
-    func_0028F0E0(3);
+    fileEnterMcPackScene(3);
 }
 
 u32 func_0010A230(void) {
@@ -500,7 +500,7 @@ u32 func_0010A2D8(void) {
 }
 
 void func_0010A2E0(void) {
-    func_0028F0E0(1);
+    fileEnterMcPackScene(1);
 }
 
 s32 evtUnkA2F8Check(void) {
@@ -534,7 +534,7 @@ u32 func_0010A390(void) {
 }
 
 void func_0010A398(void) {
-    func_0028F0E0(2);
+    fileEnterMcPackScene(2);
 }
 
 u32 func_0010A3B0(void) {

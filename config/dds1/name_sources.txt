@@ -1542,13 +1542,18 @@
 0x00289D28	fileReqSetSelectedSlot	inferred	Stores the selected save slot byte at request offset 0x13.
 0x00289DC8	mcPollSyncResult	inferred	mc polls sync result to 1/0/-1/-2
 0x00289E18	mcMakeDirectory	inferred	Passes the caller's arguments to sceMcMkdir with the second argument zero.
+0x0028A0E0	fileWriteBegin	inferred	legacy Save_FileWrite_Begin (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028A0F8	fileWriteWait	inferred	legacy Save_FileWrite_Wait (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028A190	mcFormatSaveFilename	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028A1B8	fileReqGetSlotCode	inferred	reads current request index and signed slot code at stride 0x30
 0x0028A208	fileReloadSaveBuffer	inferred	reloads the 0x33600-byte save buffer from D_003BD924 while preserving the word at +0x30
 0x0028A508	fileDrawSaveWindow	inferred	Draws two save-window frames with func_00108FA0 and bumps the frame counter.
 0x0028A5D8	fileIsLoadStepComplete	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028A7A8	fileShowStatusDialog	inferred	legacy FileMenu_ShowStatusDialogByCode (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028AE68	fileClearAllSlotFlags	inferred	marks the (selected) request's slot metadata dirty and clears slot flags 0..9 -- the same body as DDS2 func_002CA638, which calls fileReqSetSelectedSlot's request D_00437CD0
 0x0028AF00	fileBeginSlotOpen	inferred	builds '/<name>/<name>' path from formatSaveFilename and starts the slot request via func_00289F80
+0x0028AFE0	fileReadSlotPreviewBegin	inferred	legacy Save_ReadSlotPreview_Begin (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028B058	fileReadSlotPreviewWait	inferred	legacy Save_ReadSlotPreview_Wait (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028B0B8	fileStoreSlotHeader	inferred	on completion copies the 0x30-byte slot header from D_003BD924 into the D_003DC800 table entry for the current slot
 0x0028B1F0	fileBeginWait	inferred	file file requests and records in game/code_0028A0E0.c
 0x0028B430	fileResetSelection	inferred	file file requests and records in game/code_0028A0E0.c
@@ -1559,32 +1564,55 @@
 0x0028B930	fileSlotSelectPoll	inferred	Polls slot request result and dispatches to next state by result code.
 0x0028B9F8	fileSlotSelectPollClear	inferred	Twin of fileSlotSelectPoll that ends in clearSaveSlotMetadata.
 0x0028BE10	fileUpdateWait	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028C180	fileScanSlotIconSysBegin	inferred	legacy Save_ScanSlotIconSys_Begin (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028C208	mcHandleSlotWriteResult	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028C288	fileAdvanceSlotScan	inferred	counts 10 frames, then picks next state (select menu / empty-card path) from countSelectableFiles
 0x0028C358	mcResetSlotMetadata	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
+0x0028C430	fileScanSlotIconSysAltBegin	inferred	legacy Save_ScanSlotIconSysAlt_Begin (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028C4D0	mcHandleDirectoryWriteResult	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
+0x0028C560	fileScanSlotStatesAdvance	inferred	legacy Save_ScanSlotStates_Advance (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028C600	mcClearSlotMetadata	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028C670	mcPrepareDirectory	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
+0x0028C710	fileCreateMainBegin	inferred	legacy Save_CreateMainFile_Begin (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028C760	mcHandleSearchResult	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
+0x0028C7C8	filePrepareMainBlobWrite	inferred	legacy Save_WaitChDirThenPrepareMainBlobWrite (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028C828	fileBuildMainBlobAfterDelete	inferred	legacy Save_WaitDeleteThenBuildMainBlob (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028C888	fileOnAllWritten	inferred	legacy Save_OnAllFilesWritten (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028C8D0	fileWriteIconSysComplete	inferred	legacy Save_WriteIconSys_OnComplete (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028C970	fileRequestBaseIcon	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028C9A0	fileBuildMainBlobAndWrite	inferred	legacy Save_BuildMainBlobAndWrite (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028D6A0	mcChooseLoadPath	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028D708	fileBeginRequest	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028D748	fileWriteWaitOpen	inferred	legacy Save_WriteFile_WaitOpen (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028D7E8	mcHandleLoadResult	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028D850	mcDispatchReadCallback	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028D8B8	fileFinishRequest	inferred	file file requests and records in game/code_0028A0E0.c
 0x0028D8F8	mcHandleDetectionResult	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028D9B0	mnuSelectFileBranch	inferred	mnu menu, title, shop, or movie UI in game/code_0028A0E0.c
 0x0028DA10	fileBeginSlotCreate	inferred	same '/<name>/<name>' path build as fileBeginSlotOpen after fileReqGetSlotCode
+0x0028DAF8	fileLoadMainBlobBegin	inferred	legacy Save_LoadMainBlob_BeginRead (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028DBA0	mcHandleSetupResult	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028DC08	handleSaveSetupDone	inferred	State function after save setup: reloads save buffer and moves to fade/BE60 state.
+0x0028DCC0	fileSlotBrowserUpdate	inferred	legacy SaveSlotBrowser_Update (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028E180	fileDrawSlotListAndPreview	inferred	legacy SaveMenu_DrawSlotListAndPreview (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028EF00	fileRunMenuState	inferred	bumps frame counter, draws frame, calls the current state fn D_003BD8FC and installs the next state; on completion snapshots the D_003BD910.. registers and frees the job
 0x0028EFA0	fileDrawMenuFrame	inferred	sets gfx state, draws two full-screen 0x200x0x1C0 quads (D_003BC880/D_003BC884 textures) then calls the file menu draw helpers
+0x0028F0E0	fileEnterMcPackScene	inferred	legacy FileMenu_EnterMcPackSceneByMode (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028FB48	fileBeginPromptDialog	inferred	legacy FileMenu_BeginPromptDialog (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028FB98	fileShowPromptDialog	inferred	legacy FileMenu_ShowPromptDialogByCode (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x00290480	fileSetPreviewLocation	inferred	legacy SaveMenu_SetPreviewLocationSelectorAndRow (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x00290C58	fileLoadSetMode	inferred	selects loader context mode and buffer sizes
 0x00290E20	fileLoadStateChanged	inferred	compares adjacent loader state snapshots
+0x00290E38	fileCacheSlotFlagsFromState	inferred	legacy ShadowRowSlotFlags_CacheFromGameState (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x00290E50	fileRestoreSlotFlagsToState	inferred	legacy ShadowRowSlotFlags_RestoreToGameState (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x00290E60	fileToggleSlotFlagsBit	inferred	legacy ShadowRowSlotFlags_TogglePartySlotBit (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x00290F40	fileTestSlotFlagsBit	inferred	legacy ShadowRowSlotFlags_TestPartySlotBit (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x002912C8	configTasksCreate	inferred	Creates the three config tasks; counterpart of configTasksDestroy which kills the same names.
 0x00291378	mnuConfigTasksDestroy	inferred	mnu menu, title, shop, or movie UI in game/code_0028A0E0.c
 0x00291880	fileStartQueuedLoad	inferred	file file requests and records in game/code_0028A0E0.c
 0x00292BA8	fileManagerResetSubsystems	inferred	resets five manager globals and four subsystems
+0x00292C18	fileSetRenderFlag	inferred	legacy SetRenderFlag (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x00292C28	fileClearRenderFlag	inferred	legacy ClearRenderFlag (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x00292C60	mnuProjectViewPoint	inferred	Loads matrix D_003296F0 into vf28-31, transforms/perspective-divides a point and adds offset vectors.
 0x002933A8	fileCreateJob	inferred	file file requests and records in game/code_0028A0E0.c
 0x00293400	fileResolvePrimaryBuffer	inferred	file file requests and records in game/code_0028A0E0.c
