@@ -1398,10 +1398,23 @@
 0x00275880	mnuShopReleaseResources	inferred	mnu menu, title, shop, or movie UI in game/code_00274B80.c
 0x00278218	mnuBuildSkillCodeBitset	inferred	Enumerates 96 skill records and sets a bit for every nonzero code in their code lists.
 0x002782F8	mnuIsSkillCodeInBitset	inferred	Checks whether the supplied code's bit is present in the skill-code bitset.
+0x00277A50	ptySkillMenuBuildEquippedSlots	inferred	legacy PartySkillMenu_BuildEquippedSlotList: builds the equipped-skill page for the selected unit, marking rows by current slot membership
+0x00277D38	ptySkillMenuRebuildAfterMutation	inferred	legacy PartySkillMenu_RebuildAfterMutation: rebuilds the equipped-skill list after an assign/remove, then rebinds selection and viewport defaults
+0x00277DF8	ptySkillMenuDrawEntry	inferred	legacy PartySkillMenu_DrawEntryCallback: per-row draw callback; handles placeholder rows and the nibble-bit2 marker visual
+0x002780D0	ptySkillMenuRefreshEntries	inferred	legacy PartySkillMenu_RefreshEntryStates: refreshes entry flags from PartyUnitData (equipped marker, nibble-bit2 page indicator)
+0x00278330	ptySkillMenuInitPages	inferred	legacy PartySkillMenu_InitAndBuildPages: initialises the 4-page skill menu and fills rows from nibble state + global profile bitset
 0x00278760	campMenuInit	inferred	allocates 0x38-byte menu work at context+0x90C and selects the initial label pair from the node type
+0x002788D0	ptySkillMenuShellUpdate	inferred	legacy PartySkillMenu_ShellTask_Update: shell task update for the party skill menu
 0x00278A90	campMenuDrawSlotLabel	inferred	menu draw: label from selected slot, func_0027CDD0 backdrop, menuRunPanel tail
 0x00278E28	campMenuHandleInput	inferred	clears flag 8 on the cursor node, plays input sound and forwards to the node handlers
+0x00278F50	ptySkillMenuHandleSelection	inferred	legacy PartySkillMenu_HandleSelectionInput: confirm/cancel/navigation; applies assign/remove and triggers rebuild + refresh
+0x00279160	ptySkillMenuHandleSlotReorder	inferred	legacy PartySkillMenu_HandleSlotReorderInput: handles slot reorder input in the party skill menu
+0x002793D0	ptySkillMenuCopyPageState	inferred	legacy PartySkillMenu_CopyCurrentPageViewStateToOverlay: copies the current page view state into the overlay buffer
+0x00279760	ptySkillMenuUseSelectedInField	inferred	legacy PartySkillMenu_TryUseSelectedSkillInField: tries to use the selected skill in the field
+0x00279BF8	ptySkillMenuHandlePageSwitch	inferred	legacy PartySkillMenu_HandlePageSwitchRebuild: rebuilds menu pages after a page switch
+0x00279D68	ptySkillMenuBrowseCandidatePages	inferred	legacy PartySkillMenu_BrowseCandidatePages: browses the candidate-skill pages
 0x0027A0E0	mnuDrawSelectionLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
+0x0027A540	ptySkillMenuBuildLinkageSkills	inferred	legacy PartySkillMenu_BuildAvailableLinkageSkillList: builds the list of available linkage skills
 0x0027A7B0	mnuResetSelection	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027AA68	mnuDrawListFrames	inferred	Draws up to three list frames from the current index, alternating x by row.
 0x0027AB10	campMenuDrawStatus	inferred	camp menu per-frame draw: label from selected slot, func_0027CDD0 backdrop, menuRunPanel tail

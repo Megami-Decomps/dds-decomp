@@ -93,7 +93,7 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279CC0);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279D68);
+INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279F88);
 
@@ -149,7 +149,7 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A540);
+INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBuildLinkageSkills);
 
 u32 func_0027A778() {
     s32 temp_v0;
@@ -167,7 +167,7 @@ s32 mnuResetSelection(s32 selection) {
     campMenuInit();
     context = func_00101A70(selection);
     menu = *(s32 *)(context + 0x90C);
-    func_0027A540(selection);
+    ptySkillMenuBuildLinkageSkills(selection);
     mnuFlagActiveWindows(context + 0x15C);
     *(s32 *)(menu + 0x2C) = 0;
     return 1;
