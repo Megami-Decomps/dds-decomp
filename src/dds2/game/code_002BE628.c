@@ -170,7 +170,42 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BFEA0);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0330);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C03B0);
+typedef struct MenuSpacing {
+    s32 step;
+    s32 gap;
+    s32 tail;
+} MenuSpacing;
+
+void func_002C03B0(s32 *out, s32 menu, s32 index) {
+    MenuSpacing spacing = {0x310, 0x370, 0x190};
+    s32 count = **(s32 **)(menu + 8);
+    s32 mode;
+
+    if (!(*(u32 *)(menu + index * 0x2138 + 0x7C) & 0x40)) {
+        mode = index < count ? 1 : 2;
+    } else {
+        mode = 1;
+    }
+    if (*(s32 *)(menu + 0xA698) >= 0) {
+        out[0] = 0xC80;
+        out[1] = 0x20;
+    } else {
+        out[0] = 0xF00;
+        out[1] = 0x28;
+    }
+    switch (mode) {
+    case 1:
+        out[1] += index * spacing.step;
+        break;
+    case 2:
+        out[1] += (count - 1) * spacing.step;
+        if (index >= count) {
+            out[1] += spacing.gap;
+        }
+        out[1] += (index - count) * spacing.tail;
+        break;
+    }
+}
 
 void func_002C04C0(s32 arg0) {
     if (*(s32 *)(arg0 + 4) < 0x100) {
