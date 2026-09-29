@@ -20,16 +20,16 @@ INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B168);
 
 typedef struct {
     u8 pad00[0xC4];
-    u32 currentValue;  /* 0xC4 */
-    u32 previousValue; /* 0xC8 */
+    u32 callback;         /* 0xC4 */
+    u32 previousCallback; /* 0xC8 */
 } SceneTransition;
 
-void evtRememberDispatchCallback(u32 value, SceneTransition *transition) {
+void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
     u32 previous;
 
-    previous = transition->currentValue;
-    transition->currentValue = value;
-    transition->previousValue = previous;
+    previous = transition->callback;
+    transition->callback = callback;
+    transition->previousCallback = previous;
 }
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B2E0);

@@ -61,8 +61,8 @@ void func_00162058(u32 unused, u32 value) {
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162088);
 
-void effBattleMiscApplyParamByte(u32 arg0, EffBattleMiscParam *param) {
-    func_001D63E8(arg0, param->value);
+void effBattleMiscApplyParamByte(u32 owner, EffBattleMiscParam *param) {
+    func_001D63E8(owner, param->value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162270);
@@ -71,6 +71,6 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162338);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001623C0);
 
-u32 effBattleMiscGetTableEntry(s32 arg0) {
-    return D_0034E720[arg0];
+u32 effBattleMiscGetTableEntry(s32 index) {
+    return D_0034E720[index];
 }

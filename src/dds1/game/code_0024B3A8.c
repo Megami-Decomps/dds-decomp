@@ -36,7 +36,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B478);
 
 extern s32 fldClassifyRemainingFrames(s32);
 
-s64 func_0024B6C0(u64 item) {
+s64 func_0024B6C0(u64 request) {
     s32 state = func_00101A70();
 
     func_0024A2D8(state);
@@ -47,7 +47,7 @@ s64 func_0024B6C0(u64 item) {
     func_0024B2E0(state);
     func_0024A930(state);
     func_0024A610(state);
-    return func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+    return func_00285670(state + 8, (s32 *)(state + 0x54), 1, request);
 }
 
 void evtBSetupDispatchSync(s32 request) {

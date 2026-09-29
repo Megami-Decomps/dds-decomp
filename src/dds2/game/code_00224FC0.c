@@ -63,7 +63,9 @@ typedef struct BattleActionContext {
     u32 flags;
     u8 pad220[0x2C];
     BattleActionUnit *firstUnit;
-    u8 pad250[0x50];
+    u8 pad250[0x20];
+    u16 mode;
+    u8 pad272[0x2E];
     s32 battleId;
     u8 pad2A4[0x474];
     BattleEffectState *effect;
@@ -189,22 +191,22 @@ s32 btlSelectDisabledCommand(BattleActionUnit *battler) {
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002266D8);
 
 s32 func_002267A0(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    u8 *unit;
-    if (*(u16 *)(battle + 0x270) != 2) {
+    BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
+    BattleActionUnit *unit;
+    if (battle->mode != 2) {
         return -1;
     }
-    unit = *(u8 **)(battle + 0x24C);
+    unit = battle->firstUnit;
     while (unit != 0) {
-        if (*(u32 *)(unit + 0x110) & 1) {
-            if (*(u16 *)(unit + 0x124) == 0x118) {
-                u16 status = *(u16 *)(unit + 0x120);
-                if (status & 0x2000) {
-                    *(u16 *)(unit + 0x120) = status & ~0x2000;
+        if (unit->flags & 1) {
+            if (unit->kind == 0x118) {
+                u16 entryFlags = unit->entryFlags;
+                if (entryFlags & 0x2000) {
+                    unit->entryFlags = entryFlags & ~0x2000;
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x364);
+        unit = unit->next;
     }
     return -1;
 }

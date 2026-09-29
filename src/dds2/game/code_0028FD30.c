@@ -40,8 +40,8 @@ typedef struct MenuPanelSelector {
 } MenuPanelSelector;
 
 typedef struct MenuPanelEntry {
-    s32 first;
-    s32 second;
+    s32 soundHandle;
+    s32 framesRemaining;
 } MenuPanelEntry;
 
 typedef struct MenuPanelEntryPool {
@@ -288,6 +288,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 extern s32 func_003292A8(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
+/* Allocate twenty countdown entries for sounds attached to this panel. */
 void func_00294420(void) {
     s32 handle;
     MenuPanelEntryPool *pool;
@@ -316,13 +317,13 @@ void func_002944B0(void) {
     MenuPanelEntry *entry = ((MenuPanelEntryPool *)D_00437960)->entries;
 
     for (i = 0; i < ((MenuPanelEntryPool *)D_00437960)->count; i++, entry++) {
-        if (entry->first != 0) {
-            if (entry->second == 0) {
-                sndSetSequenceVolumePan(entry->first, 0x7F, 0x3F);
-                entry->first = 0;
+        if (entry->soundHandle != 0) {
+            if (entry->framesRemaining == 0) {
+                sndSetSequenceVolumePan(entry->soundHandle, 0x7F, 0x3F);
+                entry->soundHandle = 0;
             }
-            if (entry->second > 0) {
-                entry->second--;
+            if (entry->framesRemaining > 0) {
+                entry->framesRemaining--;
             }
         }
     }
@@ -334,21 +335,21 @@ MenuPanelEntry *mnuFindFreePanelEntry(void) {
     MenuPanelEntry *entry = pool->entries;
     s32 index;
     for (index = 0; index < count; index++, entry++) {
-        if (entry->first == 0) {
+        if (entry->soundHandle == 0) {
             return entry;
         }
     }
     return 0;
 }
 
-void mnuStorePanelEntry(s32 first, s32 second) {
+void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining) {
     MenuPanelEntry *entry = mnuFindFreePanelEntry();
-    entry->first = first;
-    entry->second = second;
+    entry->soundHandle = soundHandle;
+    entry->framesRemaining = framesRemaining;
 }
 
-void func_002945B8(u32 arg0) {
-    D_00438FC8 = arg0;
+void func_002945B8(u32 value) {
+    D_00438FC8 = value;
 }
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
 
