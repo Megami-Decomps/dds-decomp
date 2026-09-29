@@ -27,6 +27,59 @@ typedef struct GridQuantizedEntry {
     s32 height;
 } GridQuantizedEntry;
 
+typedef struct GridEntryStorage {
+    u8 pad00[0x10];
+    u8 *entries;           /* 0x10: 0x80 bytes per entry */
+    u8 pad14[4];
+    u8 *renderEntries;     /* 0x18: 0xA0 bytes per entry */
+} GridEntryStorage;
+
+typedef struct GridScrollRange {
+    u32 reserved;
+    float minimum;        /* 0x04 */
+    float maximum;        /* 0x08 */
+    float step;           /* 0x0C */
+} GridScrollRange;
+
+typedef struct GridScrollEntry {
+    u8 pad00[8];
+    GridScrollRange *range; /* 0x08 */
+    float position;         /* 0x0C */
+} GridScrollEntry;
+
+/* Same 0x40-byte text widget layout as the DDS1 grid renderer. */
+typedef struct GridTextWidget {
+    char *text;           /* 0x00 */
+    u16 textLength;       /* 0x04 */
+    s16 rows;             /* 0x06 */
+    u16 unk08;
+    u16 unk0A;
+    u32 flags;            /* 0x0C */
+    void *unk10;
+    void *unk14;
+    void *children;       /* 0x18 */
+    void *unk1C;
+    s32 x;                /* 0x20 */
+    s32 y;                /* 0x24 */
+    s32 width;            /* 0x28 */
+    s32 height;           /* 0x2C */
+    u32 reference;        /* 0x30 */
+    u8 pad34[0xC];
+} GridTextWidget;
+
+typedef struct GridDrawWork {
+    u8 pad00[0xC];
+    s16 width;               /* 0x0C */
+    s16 height;              /* 0x0E */
+    u32 packetHandle;        /* 0x10 */
+    u32 overlayHandle;       /* 0x14 */
+    u8 overlayEnabled;       /* 0x18 */
+    u8 pad19;
+    u8 overlayKind;          /* 0x1A */
+    u8 pad1B[0x19];
+    s32 overlayDataSize;     /* 0x34 */
+} GridDrawWork;
+
 extern s32 func_00304AD8();
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -53,10 +106,10 @@ s32 func_00307160(s32 object, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003071D0);
 
-void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
+void itfGridSetQuantizedBounds(GridEntryStorage *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
-    GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
-    u32 *destination = (u32 *)(*(u8 **)(object + 0x18) + index * 0xA0 + 0x6C);
+    GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
+    u32 *destination = (u32 *)(object->renderEntries + index * 0xA0 + 0x6C);
     u32 *source;
     s32 remaining = 3;
     entry->x = x >> 4;
@@ -82,7 +135,7 @@ void itfGridCopyEntryQuad(s32 object, s32 index) {
     s32 remaining;
 
     remaining = 3;
-    destination = (u32 *)(index * 0xa0 + *(s32 *)(object + 0x18) + 0x14);
+    destination = (u32 *)(index * 0xa0 + (s32)((GridEntryStorage *)object)->renderEntries + 0x14);
     do {
         remaining = remaining - 1;
         *destination = destination[0x1c];
@@ -100,21 +153,21 @@ void func_00307398(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
     sdfCreateDescriptorPacket(arg4, arg0, 0, 0, arg1, arg2, arg3, 0);
 }
 
-u8 func_003073D0(s32 arg0) {
-    return *(u8 *)(arg0 + 0x18);
+u8 func_003073D0(GridDrawWork *work) {
+    return work->overlayEnabled;
 }
 
-void func_003073D8(u8 *work, s32 x, s32 y) {
+void func_003073D8(GridDrawWork *work, s32 x, s32 y) {
     s32 width;
     s32 height;
-    if (work[0x1A] == 0x13 || work[0x1A] == 0x1B) {
+    if (work->overlayKind == 0x13 || work->overlayKind == 0x1B) {
         width = 0x10;
         height = 0x10;
     } else {
         width = 8;
         height = 2;
     }
-    func_00307398(*(u32 *)(work + 0x14), width, height, x, y);
+    func_00307398(work->overlayHandle, width, height, x, y);
 }
 
 typedef struct RenderCallbackEntry {
@@ -127,18 +180,18 @@ extern RenderCallbackEntry D_0037FB48[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfResetPacketList(s32);
 
-u8 *func_00307428(u8 *object, u8 *data, s32 kind) {
+GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
     s32 context = sdfAllocPacketAligned(0x20);
     u8 *cursor;
     RenderCallbackEntry *entry;
     sdfResetPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
-    if (func_003073D0((s32)object) != 0) {
+    if (func_003073D0(object) != 0) {
         func_003073D8(object, (s32)cursor, context);
-        cursor += *(s32 *)(object + 0x34);
+        cursor += object->overlayDataSize;
     }
-    func_00307398(*(u32 *)(object + 0x10), *(s16 *)(object + 0xC),
-                  *(s16 *)(object + 0xE), (s32)cursor, context);
+    func_00307398(object->packetHandle, object->width,
+                  object->height, (s32)cursor, context);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
     return object;
@@ -363,78 +416,78 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     return 1;
 }
 
-u8 *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
-                  u32 reference) {
-    u8 *widget = (u8 *)func_00328D68(0x40);
+GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
+                                        u32 reference) {
+    GridTextWidget *widget = (GridTextWidget *)func_00328D68(0x40);
     u32 length;
     char *copy;
 
     memset(widget, 0, 0x40);
     length = strlen(text) + 1;
     copy = (char *)func_00328D68(length);
-    *(u16 *)(widget + 4) = length;
-    *(char **)widget = copy;
+    widget->textLength = length;
+    widget->text = copy;
     memcpy(copy, text, length);
-    *(u32 *)(widget + 0x10) = 0;
-    *(s32 *)(widget + 0x20) = x << 4;
-    *(s32 *)(widget + 0x24) = y << 3;
-    *(u32 *)(widget + 0x30) = reference;
-    *(s16 *)(widget + 6) = rows;
-    *(s32 *)(widget + 0x28) = columns * 12 + 6;
-    *(s32 *)(widget + 0x2C) = rows * 14 + 6;
-    *(u32 *)(widget + 0x14) = 0;
-    *(u32 *)(widget + 0x18) = 0;
-    *(u32 *)(widget + 0x1C) = 0;
-    *(u32 *)(widget + 0xC) = 0;
-    *(u16 *)(widget + 8) = 0;
-    *(u16 *)(widget + 0xA) = 0;
+    widget->unk10 = NULL;
+    widget->x = x << 4;
+    widget->y = y << 3;
+    widget->reference = reference;
+    widget->rows = rows;
+    widget->width = columns * 12 + 6;
+    widget->height = rows * 14 + 6;
+    widget->unk14 = NULL;
+    widget->children = NULL;
+    widget->unk1C = NULL;
+    widget->flags = 0;
+    widget->unk08 = 0;
+    widget->unk0A = 0;
     return widget;
 }
 
-void itfSetGridDimensions(u8 *work, s32 columns, s32 rows) {
+void itfSetGridDimensions(GridTextWidget *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 
     if (columns != 0) {
-        *(s32 *)(work + 0x28) = columnWidth;
+        work->width = columnWidth;
     }
     if (rows != 0) {
-        *(s32 *)(work + 0x2c) = rowHeight;
-        *(s16 *)(work + 6) = rows;
+        work->height = rowHeight;
+        work->rows = rows;
     }
 }
 
-u32 itfDestroyGridTextWidget(u32 arg0) {
-    s64 temp_v0;
+u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
+    s64 next;
 
-    func_00328E48(*(u32 *)arg0);
+    func_00328E48(widget->text);
     do {
-        temp_v0 = func_00309638(arg0);
-    } while (temp_v0 != 0);
-    func_00328E48(arg0);
+        next = func_00309638(widget);
+    } while (next != 0);
+    func_00328E48(widget);
     return 1;
 }
 
-u32 itfDestroyGridTextWidgetTree(u32 work) {
+u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     u32 list;
 
-    func_00328E48(*(u32 *)work);
-    list = *(u32 *)(work + 0x18);
+    func_00328E48(widget->text);
+    list = (u32)widget->children;
     if (list != 0) {
         do {
             u32 child = *(u32 *)(list + 0x20);
             if (child != 0) {
-                itfDestroyGridTextWidgetTree(child);
+                itfDestroyGridTextWidgetTree((GridTextWidget *)child);
             }
-            list = func_00309638(work);
+            list = func_00309638(widget);
         } while (list != 0);
     }
-    func_00328E48(work);
+    func_00328E48(widget);
     return 1;
 }
 
-void itfExpandWidgetColumnWidth(s32 columns, u8 *work) {
-    s32 flags = *(s32 *)(work + 0xc);
+void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
+    s32 flags = work->flags;
     s32 width;
     if (flags & 0x100) {
         columns += 4;
@@ -443,8 +496,8 @@ void itfExpandWidgetColumnWidth(s32 columns, u8 *work) {
         }
     }
     width = columns * 12 + 6;
-    if (*(s32 *)(work + 0x28) < width) {
-        *(s32 *)(work + 0x28) = width;
+    if (work->width < width) {
+        work->width = width;
     }
 }
 
@@ -454,7 +507,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00309538);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309638);
 
-void func_003097D0(u8 *widget, u8 *node, const char *text) {
+void func_003097D0(GridTextWidget *widget, u8 *node, const char *text) {
     s32 length;
     s32 allocation;
     char *copy;
@@ -473,24 +526,24 @@ void func_003097D0(u8 *widget, u8 *node, const char *text) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309880);
 
-void func_00309A20(u32 arg0, u32 arg1, s32 arg2) {
-    s32 temp_v0;
-    s32 temp_v1;
-    float *pfVar3;
-    float temp_v2;
-    float temp_v3;
+void func_00309A20(u32 owner, u32 key, s32 steps) {
+    GridScrollRange *range;
+    GridScrollEntry *entry;
+    float *position;
+    float delta;
+    float previous;
 
-    temp_v1 = func_0030A048(arg1, arg0);
-    temp_v0 = *(s32 *)(temp_v1 + 8);
-    pfVar3 = (float *)(temp_v1 + 0xc);
-    temp_v2 = *(float *)(temp_v0 + 0xc);
-    if (1 < arg2) {
-        temp_v2 = temp_v2 * (float)(s32)arg2;
+    entry = (GridScrollEntry *)func_0030A048(key, owner);
+    range = entry->range;
+    position = &entry->position;
+    delta = range->step;
+    if (1 < steps) {
+        delta = delta * (float)(s32)steps;
     }
-    temp_v3 = *pfVar3;
-    *pfVar3 = temp_v3 + temp_v2;
-    if (*(float *)(temp_v0 + 8) < temp_v3 + temp_v2) {
-        *pfVar3 = *(float *)(temp_v0 + 4);
+    previous = *position;
+    *position = previous + delta;
+    if (range->maximum < previous + delta) {
+        *position = range->minimum;
     }
 }
 
@@ -505,24 +558,24 @@ void func_00309A90(u32 arg0, u32 arg1) {
     }
 }
 
-void func_00309AD8(u32 arg0, u32 arg1, s32 arg2) {
-    s32 temp_v0;
-    s32 temp_v1;
-    float *pfVar3;
-    float temp_v2;
-    float temp_v3;
+void func_00309AD8(u32 owner, u32 key, s32 steps) {
+    GridScrollRange *range;
+    GridScrollEntry *entry;
+    float *position;
+    float delta;
+    float previous;
 
-    temp_v1 = func_0030A048(arg1, arg0);
-    temp_v0 = *(s32 *)(temp_v1 + 8);
-    pfVar3 = (float *)(temp_v1 + 0xc);
-    temp_v2 = *(float *)(temp_v0 + 0xc);
-    if (1 < arg2) {
-        temp_v2 = temp_v2 * (float)(s32)arg2;
+    entry = (GridScrollEntry *)func_0030A048(key, owner);
+    range = entry->range;
+    position = &entry->position;
+    delta = range->step;
+    if (1 < steps) {
+        delta = delta * (float)(s32)steps;
     }
-    temp_v3 = *pfVar3;
-    *pfVar3 = temp_v3 - temp_v2;
-    if (temp_v3 - temp_v2 < *(float *)(temp_v0 + 4)) {
-        *pfVar3 = *(float *)(temp_v0 + 8);
+    previous = *position;
+    *position = previous - delta;
+    if (previous - delta < range->minimum) {
+        *position = range->maximum;
     }
 }
 

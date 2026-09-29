@@ -54,6 +54,8 @@ typedef struct BtlState {
     BtlList *list;
     u8 unk_2C4[4];
     s32 slot;
+    u8 pad2CC[0x21C];
+    u32 buttonTextureHandle; /* 0x4E8: retained until the battle UI releases it */
 } BtlState;
 
 typedef struct BtlWorkList {
@@ -932,20 +934,20 @@ void func_00209CD0(void) {
 }
 
 void func_00209D08(void) {
-    s32 temp_v0;
-    u32 temp_v1;
+    BtlState *state;
+    u32 handle;
 
-    temp_v0 = func_001AA6F8();
-    temp_v1 = func_002DDCA0(D_00438F70, 0x10000);
-    *(u32 *)(temp_v0 + 0x4e8) = temp_v1;
+    state = (BtlState *)func_001AA6F8();
+    handle = func_002DDCA0(D_00438F70, 0x10000);
+    state->buttonTextureHandle = handle;
 }
 
 void func_00209D40(void) {
-    s32 temp_v0;
+    BtlState *state;
 
-    temp_v0 = func_001AA6F8();
-    effReleaseSharedReference(*(u32 *)(temp_v0 + 0x4e8));
-    *(u32 *)(temp_v0 + 0x4e8) = 0;
+    state = (BtlState *)func_001AA6F8();
+    effReleaseSharedReference(state->buttonTextureHandle);
+    state->buttonTextureHandle = 0;
 }
 
 u32 func_00209D78(void) {
@@ -967,29 +969,29 @@ u32 func_00209DA8(void) {
 }
 
 u32 func_00209DD8(void) {
-    s32 temp_v0;
+    BtlCommandCtx *context;
 
-    temp_v0 = func_0010D8D0();
-    *(u32 *)(temp_v0 + 0x24) = 1;
-    *(u32 *)(temp_v0 + 0x20) = 0xd;
+    context = (BtlCommandCtx *)func_0010D8D0();
+    context->commandValue = 1;
+    context->commandMode = 0xd;
     return 1;
 }
 
 u32 func_00209E08(void) {
-    s32 temp_v0;
+    BtlCommandCtx *context;
 
-    temp_v0 = func_0010D8D0();
-    *(u32 *)(temp_v0 + 0x24) = 1;
-    *(u32 *)(temp_v0 + 0x20) = 0x12;
+    context = (BtlCommandCtx *)func_0010D8D0();
+    context->commandValue = 1;
+    context->commandMode = 0x12;
     return 1;
 }
 
 u32 func_00209E38(void) {
-    s32 temp_v0;
+    BtlCommandCtx *context;
 
-    temp_v0 = func_0010D8D0();
-    *(u32 *)(temp_v0 + 0x24) = 1;
-    *(u32 *)(temp_v0 + 0x20) = 10;
+    context = (BtlCommandCtx *)func_0010D8D0();
+    context->commandValue = 1;
+    context->commandMode = 10;
     return 1;
 }
 
@@ -1007,10 +1009,10 @@ s32 func_0020A048(void) {
 }
 
 u32 func_0020A070(void) {
-    s32 temp_v0;
+    BtlCommandCtx *context;
 
-    temp_v0 = func_0010D8D0();
-    *(u32 *)(temp_v0 + 0xc) = *(u32 *)(temp_v0 + 0xc) | 1;
+    context = (BtlCommandCtx *)func_0010D8D0();
+    context->stateFlags = context->stateFlags | 1;
     return 1;
 }
 

@@ -1,10 +1,17 @@
 #include "common.h"
 
 typedef struct RangeEntry {
-    u8 pad0[3];
+    u8 pad00;
+    u8 flags;
+    u8 pad02;
     u8 kind;
     u16 value;
-    u8 pad6[0x32];
+    u16 addition;
+    u8 pad08[0x1C];
+    u8 secondaryKind; /* 0x24 */
+    u8 pad25;
+    u16 secondaryValue; /* 0x26 */
+    u8 pad28[0x10];
 } RangeEntry;
 
 
@@ -138,26 +145,43 @@ void func_002829C0(s32 arg0) {
     }
 }
 
-void func_002829E0(s32 x, s32 y, s32 z, s32 arg3, s32 menu, s32 param) {
+typedef struct MenuStageTestState {
+    u32 flags;
+    u8 pad04[0x680];
+    s32 selectedPanel; /* 0x684 */
+    s32 scrollOffset;  /* 0x688 */
+} MenuStageTestState;
+
+typedef struct MenuStageNode {
+    u8 pad00[0xC];
+    s32 overrideValue;
+} MenuStageNode;
+
+typedef struct MenuStagePanel {
+    u8 pad00[0xE0];
+    MenuStageNode *node;
+} MenuStagePanel;
+
+void func_002829E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
     s32 offset[2];
-    s32 panel = menu + *(s32 *)(menu + 0x684) * 0x134 + 0x78;
-    s32 node;
+    MenuStagePanel *panel = (MenuStagePanel *)((s32)menu + menu->selectedPanel * 0x134 + 0x78);
+    MenuStageNode *node;
 
     func_002828D0(offset, menu, 0);
-    node = *(s32 *)(panel + 0xE0);
-    if (node != 0) {
-        *(s32 *)(node + 0xC) = arg3;
+    node = panel->node;
+    if (node != NULL) {
+        node->overrideValue = overrideValue;
     }
-    x += *(s32 *)(menu + 0x688) * 0x10;
-    *(s32 *)(menu + 0x688) = (s32)((f32)*(s32 *)(menu + 0x688) / 1.19999993f);
-    if (*(u32 *)menu & 0x100) {
-        func_00282850(x + offset[0], y + offset[1], z, menu, *(s32 *)(menu + 0x684), param);
+    x += menu->scrollOffset * 0x10;
+    menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
+    if (menu->flags & 0x100) {
+        func_00282850(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
     } else {
-        func_00282850(x + offset[0], y + offset[1], z, menu, *(s32 *)(menu + 0x684), param);
+        func_00282850(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
     }
-    node = *(s32 *)(panel + 0xE0);
-    if (node != 0) {
-        *(s32 *)(node + 0xC) = 0;
+    node = panel->node;
+    if (node != NULL) {
+        node->overrideValue = 0;
     }
 }
 
@@ -487,13 +511,27 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002845F8);
 void func_00284880(void) {
 }
 
+typedef struct MenuPanelItem {
+    u8 pad00[0x10];
+    u32 value10;
+    s32 value14;
+    s32 value18;
+    u32 option;
+    s32 selection;
+    u8 pad24[0x38];
+    MenuPoint points[5]; /* 0x5C */
+    u8 pad84[4];
+    u32 initialValue; /* 0x88 */
+    u32 selectionRamp; /* 0x8C */
+} MenuPanelItem;
+
 s32 func_00284888(void) {
-    s32 item = func_002CFEB8(0x90);
+    MenuPanelItem *item = func_002CFEB8(0x90);
     memset(item, 0, 0x90);
-    *(s32 *)(item + 0x14) = 0x63;
-    *(s32 *)(item + 0x10) = 0x8c;
-    *(s32 *)(item + 0x88) = 0x100;
-    return item;
+    item->value14 = 0x63;
+    item->value10 = 0x8c;
+    item->initialValue = 0x100;
+    return (s32)item;
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002848E0);
@@ -502,37 +540,38 @@ INCLUDE_RODATA(const s32, "game/code_00282850", D_003B24D0);
 
 void func_00284A90(s32 obj, s32 param, s32 index) {
     s32 table[5] = {0, 4, 1, 2, 3};
+    MenuPanelItem *item = (MenuPanelItem *)obj;
 
-    func_002BFB98(obj + 0x5C, param, 7);
-    func_002BF9E0(*(s32 *)(obj + 0x5C), *(s32 *)(obj + 0x60), 0, 0, 0, 0);
-    func_002BFB98(obj + 0x64, param, 5);
-    func_002BF9E0(*(s32 *)(obj + 0x64), *(s32 *)(obj + 0x68), 0x440, 0x58, 0, 0);
-    func_002BFB98(obj + 0x6C, param, 6);
-    func_002BF9E0(*(s32 *)(obj + 0x6C), *(s32 *)(obj + 0x70), 0x440, 0x58, 0, 0);
-    func_002BFB98(obj + 0x74, param, 9);
-    func_002BF9E0(*(s32 *)(obj + 0x74), *(s32 *)(obj + 0x78), 0x620, 0x50, 0, 0);
-    func_002BFB98(obj + 0x7C, param, table[index]);
-    func_002BF9E0(*(s32 *)(obj + 0x7C), *(s32 *)(obj + 0x80), 0x100, -0x48, 0, 0);
+    func_002BFB98(&item->points[0], param, 7);
+    func_002BF9E0(item->points[0].x, item->points[0].y, 0, 0, 0, 0);
+    func_002BFB98(&item->points[1], param, 5);
+    func_002BF9E0(item->points[1].x, item->points[1].y, 0x440, 0x58, 0, 0);
+    func_002BFB98(&item->points[2], param, 6);
+    func_002BF9E0(item->points[2].x, item->points[2].y, 0x440, 0x58, 0, 0);
+    func_002BFB98(&item->points[3], param, 9);
+    func_002BF9E0(item->points[3].x, item->points[3].y, 0x620, 0x50, 0, 0);
+    func_002BFB98(&item->points[4], param, table[index]);
+    func_002BF9E0(item->points[4].x, item->points[4].y, 0x100, -0x48, 0, 0);
 }
 
-void func_00284BF8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x10) = arg1;
+void func_00284BF8(MenuPanelItem *item, u32 value) {
+    item->value10 = value;
 }
 
-void func_00284C00(s32 arg0, s32 arg1, s32 arg2) {
-    *(s32 *)(arg0 + 0x18) = arg1;
-    *(s32 *)(arg0 + 0x1c) = arg2;
+void func_00284C00(MenuPanelItem *item, s32 value, s32 option) {
+    item->value18 = value;
+    item->option = option;
 }
 
-void func_00284C10(s32 arg0, s32 arg1) {
-    if (*(s32 *)(arg0 + 0x20) != arg1) {
-        *(u32 *)(arg0 + 0x8c) = 0x100;
+void func_00284C10(MenuPanelItem *item, s32 selection) {
+    if (item->selection != selection) {
+        item->selectionRamp = 0x100;
     }
-    *(s32 *)(arg0 + 0x20) = arg1;
+    item->selection = selection;
 }
 
-void func_00284C28(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x1c) = arg1;
+void func_00284C28(MenuPanelItem *item, u32 option) {
+    item->option = option;
 }
 
 void func_00284C30(void) {
@@ -781,20 +820,20 @@ u16 lookupPartyTableValue(u32 count, s32 base, s32 which) {
 u16 func_00286288(s32 arg0) {
     s32 temp_v0 = (arg0 & 0xffff) * 56 + D_003BAA50;
 
-    if (*(u8 *)(temp_v0 + 0x24) != 2) {
+    if (((RangeEntry *)temp_v0)->secondaryKind != 2) {
         return 0;
     }
-    return *(u16 *)(temp_v0 + 0x26);
+    return ((RangeEntry *)temp_v0)->secondaryValue;
 }
 
 u8 func_002862C0(u32 arg0) {
-    return *(u8 *)((arg0 & 0xffff) * 0x38 + D_003BAA50 + 3);
+    return ((RangeEntry *)((arg0 & 0xffff) * 0x38 + D_003BAA50))->kind;
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     s32 entry = (id & 0xFFFF) * 0x38 + D_003BAA50;
-    u16 base = *(u16 *)(entry + 4);
-    u16 addition = *(u16 *)(entry + 6);
+    u16 base = ((RangeEntry *)entry)->value;
+    u16 addition = ((RangeEntry *)entry)->addition;
     if (func_002862C0(id & 0xFFFF) == 1) {
         base = addition + *(u16 *)(object + 8) * base / 100;
     }
@@ -803,9 +842,9 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
 
 u16 func_00286368(s32 arg0) {
     s32 index = arg0 & 0xFFFF;
-    u16 *record = (u16 *)(index * 0x38 + D_003BAA50);
-    u16 scale = record[2];
-    u16 addition = record[3];
+    RangeEntry *record = (RangeEntry *)(index * 0x38 + D_003BAA50);
+    u16 scale = record->value;
+    u16 addition = record->addition;
 
     if (func_002862C0(index) == 1) {
         s32 count = 0;
@@ -853,7 +892,7 @@ s32 func_002864D8(s32 object, u16 id) {
     if (func_00286440(id, object) == 0) {
         return -1;
     }
-    if (!(((RangeEntry *)D_003BAA50)[id].pad0[1] & 1)) {
+    if (!(((RangeEntry *)D_003BAA50)[id].flags & 1)) {
         return 1;
     }
     if (id < 0x200) {

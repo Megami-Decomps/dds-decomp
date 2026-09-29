@@ -62,10 +62,17 @@ extern u16 D_003E7902[];
 extern s8 D_003E792A[];
 
 typedef struct RangeEntry {
-    u8 pad0[3];
+    u8 pad00;
+    u8 flags;
+    u8 pad02;
     u8 kind;
     u16 value;
-    u8 pad6[0x32];
+    u16 addition;
+    u8 pad08[0x1C];
+    u8 secondaryKind; /* 0x24 */
+    u8 pad25;
+    u16 secondaryValue; /* 0x26 */
+    u8 pad28[0x10];
 } RangeEntry;
 
 typedef struct AffinityRow {
@@ -90,8 +97,6 @@ typedef struct StageCameraTarget {
 extern StageCameraTarget *func_0023B018(f32 *, f32 *);
 
 extern u8 D_00437CB0[];
-
-extern void mnuCalcListEntryOffset(s32 *, s32, s32);
 
 extern void func_002C0330(s32, s32, s32, s32, s32, s32);
 
@@ -182,17 +187,38 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
 
-void mnuCalcListEntryOffset(s32 *out, s32 menu, s32 index) {
+typedef struct MenuListNode {
+    u8 pad00[0xC];
+    s32 overrideValue;
+} MenuListNode;
+
+typedef struct MenuListPanel {
+    u8 pad00[4];
+    u32 layoutFlags; /* 0x04: bit 0x40 forces the regular list spacing */
+    u8 pad08[0xD4];
+    MenuListNode *node;
+} MenuListPanel;
+
+typedef struct MenuListState {
+    u32 flags;
+    u8 pad04[4];
+    s32 *entryCount; /* 0x08 */
+    u8 pad0C[0xA68C];
+    s32 selectedPanel; /* 0xA698 */
+    s32 scrollOffset; /* 0xA69C */
+} MenuListState;
+
+void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
-    s32 count = **(s32 **)(menu + 8);
+    s32 count = *menu->entryCount;
     s32 mode;
 
-    if (!(*(u32 *)(menu + index * 0x2138 + 0x7C) & 0x40)) {
+    if (!(((MenuListPanel *)((s32)menu + index * 0x2138 + 0x78))->layoutFlags & 0x40)) {
         mode = index < count ? 1 : 2;
     } else {
         mode = 1;
     }
-    if (*(s32 *)(menu + 0xA698) >= 0) {
+    if (menu->selectedPanel >= 0) {
         out[0] = 0xC80;
         out[1] = 0x20;
     } else {
@@ -219,26 +245,26 @@ void func_002C04C0(s32 arg0) {
     }
 }
 
-void func_002C04E0(s32 x, s32 y, s32 z, s32 arg3, s32 menu, s32 param) {
+void func_002C04E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
     s32 offset[2];
-    s32 panel = menu + *(s32 *)(menu + 0xA698) * 0x2138 + 0x78;
-    s32 node;
+    MenuListPanel *panel = (MenuListPanel *)((s32)menu + menu->selectedPanel * 0x2138 + 0x78);
+    MenuListNode *node;
 
     mnuCalcListEntryOffset(offset, menu, 0);
-    node = *(s32 *)(panel + 0xDC);
-    if (node != 0) {
-        *(s32 *)(node + 0xC) = arg3;
+    node = panel->node;
+    if (node != NULL) {
+        node->overrideValue = overrideValue;
     }
-    x += *(s32 *)(menu + 0xA69C) * 0x10;
-    *(s32 *)(menu + 0xA69C) = (s32)((f32)*(s32 *)(menu + 0xA69C) / 1.19999993f);
-    if (*(u32 *)menu & 0x80) {
-        func_002C0330(x + offset[0], y + offset[1], z, menu, *(s32 *)(menu + 0xA698), param);
+    x += menu->scrollOffset * 0x10;
+    menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
+    if (menu->flags & 0x80) {
+        func_002C0330(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
     } else {
-        func_002C0330(x + offset[0], y + offset[1], z, menu, *(s32 *)(menu + 0xA698), param);
+        func_002C0330(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
     }
-    node = *(s32 *)(panel + 0xDC);
-    if (node != 0) {
-        *(s32 *)(node + 0xC) = 0;
+    node = panel->node;
+    if (node != NULL) {
+        node->overrideValue = 0;
     }
 }
 
@@ -248,27 +274,22 @@ void func_002C0718(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_002C0630(arg0, arg1, arg2, 0, arg3, arg4);
 }
 
-void *mnuCreatePanelState(s32 width, s32 height) {
-    u8 *panel = (u8 *)func_00328D68(0x8C);
-
-    memset(panel, 0, 0x8C);
-    *(s32 *)(panel + 0xC) = width;
-    *(s32 *)(panel + 0x10) = height;
-    return panel;
-}
-
 typedef struct MenuPoint {
     s32 x;
     s32 y;
 } MenuPoint;
 
 typedef struct MenuPanelState {
-    u8 pad00[0x14];
+    u8 pad00[0xC];
+    s32 width;
+    s32 height;
     u32 state; /* 0x14 */
     u32 firstValueA; /* 0x18 */
     u32 firstValueB; /* 0x1C */
     MenuPoint firstPosition; /* 0x20 */
-    u8 pad28[0x38];
+    MenuPoint corners[5]; /* 0x28 */
+    MenuPoint guideStart; /* 0x50 */
+    MenuPoint guideEnd; /* 0x58 */
     MenuPoint secondPosition; /* 0x60 */
     u32 secondValueA; /* 0x68 */
     u32 secondValueB; /* 0x6C */
@@ -279,6 +300,15 @@ typedef struct MenuPanelState {
     u8 pad84[4];
     u32 resourceHandle; /* 0x88 */
 } MenuPanelState;
+
+void *mnuCreatePanelState(s32 width, s32 height) {
+    MenuPanelState *panel = (MenuPanelState *)func_00328D68(0x8C);
+
+    memset(panel, 0, 0x8C);
+    panel->width = width;
+    panel->height = height;
+    return panel;
+}
 
 void mnuDestroyPanelState(MenuPanelState *panel) {
     s32 resourceHandle;
@@ -297,19 +327,19 @@ void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
     func_00307388(&panel->firstPosition, x, y);
 }
 
-void func_002C0800(u8 *panel, s32 x, s32 y, s32 arg3, s32 arg4, s32 arg5) {
-    func_00307388(panel + 0x50, arg3, arg4);
-    func_00307388(panel + 0x58, arg3, arg5);
-    *(s32 *)(panel + 0x28) = x;
-    *(s32 *)(panel + 0x2C) = y;
-    *(s32 *)(panel + 0x30) = x + 0xC0;
-    *(s32 *)(panel + 0x34) = y - 0x20;
-    *(s32 *)(panel + 0x38) = x - 0x50;
-    *(s32 *)(panel + 0x3C) = y + 0x68;
-    *(s32 *)(panel + 0x40) = x + 0x1D0;
-    *(s32 *)(panel + 0x44) = y + 0x68;
-    *(s32 *)(panel + 0x48) = x + 0xC0;
-    *(s32 *)(panel + 0x4C) = y + 0xF0;
+void func_002C0800(MenuPanelState *panel, s32 x, s32 y, s32 guideX, s32 guideTopY, s32 guideBottomY) {
+    func_00307388(&panel->guideStart, guideX, guideTopY);
+    func_00307388(&panel->guideEnd, guideX, guideBottomY);
+    panel->corners[0].x = x;
+    panel->corners[0].y = y;
+    panel->corners[1].x = x + 0xC0;
+    panel->corners[1].y = y - 0x20;
+    panel->corners[2].x = x - 0x50;
+    panel->corners[2].y = y + 0x68;
+    panel->corners[3].x = x + 0x1D0;
+    panel->corners[3].y = y + 0x68;
+    panel->corners[4].x = x + 0xC0;
+    panel->corners[4].y = y + 0xF0;
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel) {
@@ -925,20 +955,20 @@ u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
 u16 func_002C4D78(s32 arg0) {
     s32 temp_v0 = (arg0 & 0xffff) * 56 + D_00435E20;
 
-    if (*(u8 *)(temp_v0 + 0x24) != 2) {
+    if (((RangeEntry *)temp_v0)->secondaryKind != 2) {
         return 0;
     }
-    return *(u16 *)(temp_v0 + 0x26);
+    return ((RangeEntry *)temp_v0)->secondaryValue;
 }
 
 u8 func_002C4DB0(u32 arg0) {
-    return *(u8 *)((arg0 & 0xffff) * 0x38 + D_00435E20 + 3);
+    return ((RangeEntry *)((arg0 & 0xffff) * 0x38 + D_00435E20))->kind;
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     s32 entry = (id & 0xFFFF) * 0x38 + D_00435E20;
-    u16 base = *(u16 *)(entry + 4);
-    u16 addition = *(u16 *)(entry + 6);
+    u16 base = ((RangeEntry *)entry)->value;
+    u16 addition = ((RangeEntry *)entry)->addition;
     if (func_002C4DB0(id & 0xFFFF) == 1) {
         base = addition + *(u16 *)(object + 8) * base / 100;
     }
@@ -970,7 +1000,7 @@ extern s32 func_002C4EB8(u16, s32);
 
 s32 func_002C4F50(s32 context, u16 id) {
     if (func_002C4EB8(id, context) == 0) return -1;
-    if ((*(u8 *)(D_00435E20 + id * 56 + 1) & 1) == 0) return 1;
+    if ((((RangeEntry *)(D_00435E20 + id * 56))->flags & 1) == 0) return 1;
     if (id < 0x220) return 0;
     return 1;
 }

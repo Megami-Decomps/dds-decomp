@@ -29,8 +29,18 @@
 
 
 typedef struct PartyEntryCopy {
-    u32 word[0x69];
-} PartyEntryCopy;
+    u16 flags;
+    u16 pad02;
+    u32 word[0x68];
+} PartyEntryCopy; /* 0x1A4 bytes */
+
+typedef struct PartyMenuData {
+    u8 pad00[0x840];
+    PartyEntryCopy current[5];
+    s32 activeCount; /* 0x1074 */
+    PartyEntryCopy backup[5];
+    s32 selection; /* 0x18AC */
+} PartyMenuData;
 
 extern void mnuForwardDupArg(s32, s32, s32, s32, s32);
 extern void mnuSeekListNode(s32, s32);
@@ -79,26 +89,26 @@ void func_00274EE0(s32 arg0) {
 void menuCopyPartyEntries(context)
     s32 context;
 {
-    s32 menu = *(s32 *)(context + 0x90C);
-    PartyEntryCopy *to = (PartyEntryCopy *)(menu + 0x840);
+    PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0x90C);
+    PartyEntryCopy *to = menu->current;
     s32 i;
     s32 test = 0xA60;
     s32 offset = 0;
 
-    *(s32 *)(menu + 0x1074) = 0;
+    menu->activeCount = 0;
     for (i = 0; i < 5; i++) {
         *to = *(PartyEntryCopy *)(offset + D_003BAA00 + 0xA60);
-        if (*(u16 *)(D_003BAA00 + test) & 1) {
-            *(s32 *)(menu + 0x1074) = *(s32 *)(menu + 0x1074) + 1;
+        if (((PartyEntryCopy *)(D_003BAA00 + test))->flags & 1) {
+            menu->activeCount = menu->activeCount + 1;
         }
         test += 0x1A4;
         to++;
         offset += 0x1A4;
     }
-    if (*(s32 *)(menu + 0x1074) >= 4) {
-        *(s32 *)(menu + 0x1074) = 3;
+    if (menu->activeCount >= 4) {
+        menu->activeCount = 3;
     }
-    *(s32 *)(menu + 0x18AC) = 0;
+    menu->selection = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275030);
@@ -106,8 +116,8 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00275030);
 void func_00275328(context)
     s32 context;
 {
-    s32 menu = *(s32 *)(context + 0x90C);
-    u16 *entry = (u16 *)(menu + 0x840);
+    PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0x90C);
+    u16 *entry = (u16 *)menu->current;
     s32 i;
     s32 offset;
     s32 panel;
@@ -120,7 +130,8 @@ void func_00275328(context)
     }
     offset = 0;
     for (i = 4; i >= 0; i--) {
-        *(PartyEntryCopy *)(offset + D_003BAA00 + 0xA60) = *(PartyEntryCopy *)(offset + menu + 0x1078);
+        /* Required to match: offset-first arithmetic into menu->backup. */
+        *(PartyEntryCopy *)(offset + D_003BAA00 + 0xA60) = *(PartyEntryCopy *)(offset + (s32)menu + 0x1078);
         offset += 0x1A4;
     }
     panel = context + 0x15C;
@@ -150,8 +161,8 @@ void func_002754E0(s32 context) {
     s32 node;
 
     menuCopyPartyEntries();
-    *(s32 *)(menu + 0x18AC) = 0;
-    memset((void *)(menu + 0x1078), 0, 0x834);
+    ((PartyMenuData *)menu)->selection = 0;
+    memset(((PartyMenuData *)menu)->backup, 0, 0x834);
     *(s32 *)(context + 0x7EC) = 1;
     *(s32 *)(context + 0x7F0) = mnuCountActiveSlots() - 1;
     menuUpdateHandleStates(context + 0x15C);
