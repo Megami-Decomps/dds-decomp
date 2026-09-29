@@ -799,8 +799,8 @@ void fldToggleWorldNodeState(s64 clearMode) {
 extern u32 D_0032E570[];
 extern void func_00118020(s32);
 extern s32 fileLoadStateChanged(void);
-extern void func_00290E38(void);
-extern void func_00290E50(void);
+extern void fileCacheSlotFlagsFromState(void);
+extern void fileRestoreSlotFlagsToState(void);
 void fldSetDeferredFieldCommand(u32, u32);
 extern void func_001028E8(s32, void *, s32, s32);
 
@@ -811,9 +811,9 @@ void func_00122CB8(void) {
         func_00118020(0);
     }
     if (fileLoadStateChanged() == 0) {
-        func_00290E38();
+        fileCacheSlotFlagsFromState();
     } else {
-        func_00290E50();
+        fileRestoreSlotFlagsToState();
     }
     mdlFlagSet(0xc0f);
     {
