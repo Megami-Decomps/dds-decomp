@@ -125,26 +125,26 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00298570);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00298648);
 
-void func_00298E20(void) {
+void brsTaskStart(void) {
     mnuStaffCreateTasks();
     D_0043798A = 0;
     D_0043798B = 1;
 }
 
-s8 func_00298E48(void) {
+s8 brsTaskIsUpdateBlocked(void) {
     return D_0043798B;
 }
 
-u32 func_00298E50(void) {
+u32 brsTaskAllowUpdate(void) {
     D_0043798A = 1;
     return 1;
 }
 
-void func_00298E60(void) {
-    func_00299868();
+void brsTaskPollDone(void) {
+    brsTaskConsumeDone();
 }
 
-s8 func_00298E78(void) {
+s8 brsTaskHasPendingRows(void) {
     return D_00437989;
 }
 
@@ -169,7 +169,7 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     }
 }
 
-void func_00298F08(MenuIconBatch *batch) {
+void gstApplyBundleMacca(MenuIconBatch *batch) {
     func_0011A0D0(batch->resource);
 }
 
@@ -191,7 +191,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00299018);
 
 void brsApplyRewardBundle(u32 arg0, u32 arg1, u32 arg2) {
     gstApplyCounterDeltaTable(arg1);
-    func_00298F08(arg1);
+    gstApplyBundleMacca(arg1);
     func_00299018(arg0, arg2);
 }
 
@@ -273,7 +273,7 @@ extern void func_00303D58(s32);
 extern void func_0026C728(void);
 extern void func_003297C8(s32);
 
-void func_002996B8(s32 arg0) {
+void brsStaffTaskDestroy(s32 arg0) {
     s32 context = func_00101958();
 
     if (*(s32 *)(context + 0xAEB0) != 0) {
@@ -294,7 +294,7 @@ extern void *func_00299578(void);
 extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
 extern void mnuStaffRunPanel2(void);
-extern void func_002996B8(s32);
+extern void brsStaffTaskDestroy(s32);
 
 s32 mnuStaffCreateTasks(void) {
     s32 result;
@@ -302,7 +302,7 @@ s32 mnuStaffCreateTasks(void) {
 
     kwlnTaskCreate(D_00437990, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(D_00428388, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
-    result = kwlnTaskCreate(D_00428398, 0x5211, 1, 0, mnuStaffRunPanel2, func_002996B8, work);
+    result = kwlnTaskCreate(D_00428398, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
     D_00437988 = 1;
     return result;
 }
@@ -320,7 +320,7 @@ u32 mnuStaffDestroyTasks(void) {
     return 0;
 }
 
-s32 func_00299868(void) {
+s32 brsTaskConsumeDone(void) {
     s32 state = D_00437988;
     if (state == 1) {
         return 1;
@@ -334,7 +334,7 @@ s32 func_00299868(void) {
     return 0;
 }
 
-u32 func_002998A0(void) {
+u32 brsTaskTryDestroy(void) {
     if (D_00437988 == 1) {
         mnuStaffDestroyTasks();
         return 1;
@@ -346,7 +346,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_002998D8);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299988);
 
-s32 func_00299A00(void) {
+s32 brsTaskIsFadeIdle(void) {
     if (kwlnFadeIsActive() != 0) {
         return 0;
     }
