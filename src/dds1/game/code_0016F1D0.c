@@ -138,6 +138,7 @@ void func_0016F4A0(u8 *work, f32 value) {
     *(f32 *)(work + 0x64) = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_0016F4A8(void *work, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));

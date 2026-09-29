@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef float f32;
 
@@ -28,17 +29,7 @@ void func_00336768(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     func_00336638(angle, axis, &matrix);
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "lqc2 vf28, 0(%0)        \n"
-        "lqc2 vf29, 16(%0)       \n"
-        "lqc2 vf30, 32(%0)       \n"
-        "lqc2 vf31, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (&matrix)
-        : "memory"
-    );
+    VU0_LOAD_MATRIX(&matrix);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336768", func_00336798);
@@ -52,14 +43,7 @@ void func_00336918(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     func_00336638(angle, axis, &matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf24, 0(%0)\n"
-        "lqc2 vf25, 16(%0)\n"
-        "lqc2 vf26, 32(%0)\n"
-        "lqc2 vf27, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(&matrix) : "memory");
+    VU0_LOAD_MATRIX_B(&matrix);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336768", func_00336948);
@@ -70,6 +54,7 @@ INCLUDE_ASM(const s32, "game/code_00336768", func_00336A08);
 
 INCLUDE_ASM(const s32, "game/code_00336768", func_00336A68);
 
+/* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
 void func_00336AA8(void)
 {
     __asm__ volatile (
@@ -97,6 +82,7 @@ void func_00336AA8(void)
 }
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+/* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
 void func_00336B00(void)
 {
     __asm__ volatile (

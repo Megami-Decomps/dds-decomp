@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 
 typedef struct BtlUnit {
     u8 unk_00[0x70];
@@ -645,6 +646,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002091C8);
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 
 /* Unit normal of the triangle (a, b, c); result in vf10 (VU register convention). */
+/* vu0 routine: unit normal of triangle (a, b, c) into vf10 */
 void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -688,6 +690,7 @@ f32 func_00209390(f32 *a, f32 *b, f32 *c) {
     return dot;
 }
 
+/* vu0 routine: vf10 = c + normalize(d - c) * dist */
 void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
     f32 dist = func_00209390(a, b, c);
     __asm__ volatile(
@@ -717,6 +720,7 @@ void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
         : "f"(dist), "r"(c));
 }
 
+/* vu0 routine: vf10 = c + n * dot(n, a - c), n = unit normal of triangle (a, b, c) */
 void btlProjectOnPlaneVU(f32 *a, f32 *b, f32 *c) {
     f32 normal[4];
     f32 dot;
@@ -758,6 +762,7 @@ s32 btlPointInBox(BtlVec3 *a, BtlVec3 *b, BtlVec3 *p) {
     return 0;
 }
 
+/* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
 u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
     s32 color1[4];
     s32 color2[4];
@@ -769,30 +774,10 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
     }
     unit = 0x3C000000;
     color1[0] = colorB;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = colorA;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -808,23 +793,14 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
         "vadd.xyzw vf10, vf10, vf11\n"
         ".set reorder"
         : : "f"(t) : "$3");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $3, %1\n"
-        "qmtc2.ni $3, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vftoi0.xyzw vf10, vf10\n"
-        "qmfc2.ni %0, vf10\n"
-        "ppach %0, $0, %0\n"
-        "ppacb %0, $0, %0\n"
-        ".set reorder"
-        : "=r"(packed) : "f"(128.0f) : "$3");
+    EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     
     return packed;
 }
 
 /* Blend two RGBA float vectors (0..1 scale) by t and pack to 8-bit channels. */
+/* vu0 routine: blend two RGBA float vectors by t, packed to RGBA8888 */
 u32 btlBlendColorVec(f32 *a, f32 *b, f32 t) {
     u32 packed;
     s32 blended[4];
@@ -849,17 +825,7 @@ u32 btlBlendColorVec(f32 *a, f32 *b, f32 t) {
         "vadd.xyzw vf10, vf10, vf11\n\t"
         ".set reorder"
         : : "f"(t));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 $3, %1\n\t"
-        "qmtc2.ni $3, vf2\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "vftoi0.xyzw vf10, vf10\n\t"
-        "qmfc2.ni %0, vf10\n\t"
-        "ppach %0, $0, %0\n\t"
-        "ppacb %0, $0, %0\n\t"
-        ".set reorder"
-        : "=r"(packed) : "f"(128.0f));
+    EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];
 }

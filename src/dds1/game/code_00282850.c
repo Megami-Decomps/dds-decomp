@@ -136,7 +136,6 @@ extern void btlStopStage(void);
 extern void func_00288500(void);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282850);
-
 INCLUDE_ASM(const s32, "game/code_00282850", func_002828D0);
 
 void func_002829C0(s32 arg0) {
@@ -144,6 +143,7 @@ void func_002829C0(s32 arg0) {
         *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 8;
     }
 }
+
 
 typedef struct MenuStageTestState {
     u32 flags;
@@ -1212,7 +1212,32 @@ void func_00287420(f32 arg0) {
 extern s8 D_0037CE90[];
 extern u8 D_0037CE98[];
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287450);
+void func_00287450(s32 mode) {
+    f32 offset;
+    s32 i;
+    s32 value;
+
+    D_003DC5E8[0] = mode;
+    D_003DC5E8[1] = 0;
+    D_003DC5E8[2] = 0;
+    *(u8 *)&D_003DC5E8[3] = 0;
+    if (mode == 0) {
+        D_003DC5E8[4] = (u32)D_0037CE98;
+        offset = -140.0f;
+    } else {
+        D_003DC5E8[4] = 0;
+        offset = 140.0f;
+    }
+    value = D_0037CE90[mode];
+    D_003DC5E8[5] = 0;
+    for (i = 0; i < 2; i++) {
+        D_003DC5E8[i * 10 + 7] = value;
+        D_003DC5E8[i * 10 + 8] = -1;
+        D_003DC5E8[i * 10 + 9] = 0;
+        D_003DC5E8[i * 10 + 11] = 0;
+    }
+    func_00287420(offset);
+}
 
 void btlStopStage(void) {
     if (D_003DC5E8[0] != 1) {
@@ -1245,7 +1270,18 @@ u32 func_002875E8(u32 *arg0) {
     return *arg0 & 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002875F8);
+typedef struct MenuBlock40 {
+    u32 word[10];
+} MenuBlock40;
+
+s32 func_002875F8(u8 *object) {
+    if (!(*(u32 *)object & 1)) {
+        return 0;
+    }
+    *(MenuBlock40 *)(object + 4) = *(MenuBlock40 *)(object + 0x2C);
+    *(u32 *)object &= ~1;
+    return 1;
+}
 
 void func_00287678(void) {
     D_003DC5E8[5] &= ~1;
@@ -1261,7 +1297,24 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002877A8);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002878D8);
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuSetModelScaleVector);
+extern u8 *D_003BAA20;
+extern void mdlStoreTertiaryVectorVU(void *);
+
+f32 mnuSetModelScaleVector(void *model, s32 useTable) {
+    f32 scale = 1.0f;
+    f32 vector[4];
+
+    if (useTable != 0) {
+        scale = *(f32 *)(D_003BAA20 + D_003DC608[0] * 624 + 0x10);
+    }
+    vector[0] = scale;
+    vector[1] = scale;
+    vector[2] = scale;
+    vector[3] = 1.0f;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(vector));
+    mdlStoreTertiaryVectorVU(model);
+    return scale;
+}
 
 void mnuResetWorkPair(void) {
     *(s32 *)(D_0037CE70 + 0) = 0;

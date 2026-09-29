@@ -18,21 +18,6 @@ typedef struct {
 
 extern void *effGetHandlerArg(void *arg);
 
-/* 64-byte vector copy via COP2 (plain C cannot emit lqc2/sqc2). Wrapped in
- * .set noreorder so ee-as keeps the block verbatim. Shared by the three
- * byte-identical copy functions below. */
-#define EFF_COPY64(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf28, 0(%1)\n\t" \
-    "lqc2 vf29, 16(%1)\n\t" \
-    "lqc2 vf30, 32(%1)\n\t" \
-    "lqc2 vf31, 48(%1)\n\t" \
-    "sqc2 vf28, 0(%0)\n\t" \
-    "sqc2 vf29, 16(%0)\n\t" \
-    "sqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst), "r" (src) : "memory")
 
 /* Mid-size variant holding the pairs freed by func_0018B1D0/func_0018C2A8. */
 typedef struct {
@@ -151,8 +136,9 @@ void effMagatuhiSetSecondResource(EffMagatuhiMidWork *work, void *value) {
     work->unk124 = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effMagatuhiCopyVecs(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
-    EFF_COPY64(dst, src);
+    VU0_COPY_MATRIX(dst, src);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B648);
@@ -176,8 +162,9 @@ void func_0018BE68(EffMagatuhiMidWork *work, void *value) {
     work->unk128 = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effMagatuhiCopyVecs2(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
-    EFF_COPY64(dst, src);
+    VU0_COPY_MATRIX(dst, src);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE98);
@@ -201,8 +188,9 @@ void effMagatuhiSetFirstResource(EffMagatuhiMidWork *work, void *value) {
     work->unk120 = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effMagatuhiCopyVecs3(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
-    EFF_COPY64(dst, src);
+    VU0_COPY_MATRIX(dst, src);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C7F0);

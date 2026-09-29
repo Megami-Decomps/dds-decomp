@@ -101,7 +101,8 @@ typedef struct BattleController {
     u8 pad_000[0x214];
     s32 frame;
     u32 flags;
-    u8 pad_21C[0x30];
+    u32 flags21C;
+    u8 pad_220[0x2C];
     UiObject *actors;
     u8 pad_250[0x74];
     s32 drawTask;
@@ -202,7 +203,8 @@ typedef struct SoundQueue {
     s32 unk00;
     s32 allocation;
     s32 unk08;
-    u32 unk0C;
+    u16 drawFlags;
+    u16 unk0E;
     SndMessageNode *head;
     u32 unk14;
 } SoundQueue;
@@ -240,7 +242,7 @@ typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 unk24; } UiSprite;
 typedef struct UiPanelPlacement {
     UiSprite *frame;
     UiSprite *sprite;
-    s32 pad8;
+    UiSprite *overlay;
     s32 offsetX;
     s32 offsetY;
     s32 rightX;
@@ -249,18 +251,19 @@ typedef struct UiPanelPlacement {
     s32 unk20;
     s32 unk24;
 } UiPanelPlacement;
-typedef struct UiPos { s32 x; s32 y; } UiPos;
 typedef struct UiTexRef { u8 pad0[4]; s32 unk4; s32 unk8; s32 unkC; } UiTexRef;
+typedef struct UiPos { s32 x; s32 y; s32 unk8; UiTexRef *chain; } UiPos;
 typedef struct UiPanelOrigin { s32 x; s32 y; UiTexRef *tex; } UiPanelOrigin;
 typedef struct UiPanel {
     u32 flags;
     u8 pad4[8];
     s32 unkC;
-    u8 pad10[4];
+    s16 index;
+    s16 state;
     UiPanelOrigin origin;
     s32 pad20;
     UiPos pos;
-    u8 pad2C[0x78];
+    u8 pad34[0x70];
     UiPanelPlacement place;
 } UiPanel;
 extern s32 func_0019DBA8();
@@ -283,6 +286,61 @@ typedef struct UiCursor {
     s16 unk18;
     s16 unk1A;
 } UiCursor;
+
+extern void func_001A19C8(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
+
+typedef struct SndSeqSelect {
+    u8 pad0[8];
+    s32 seq;
+    u8 padC[6];
+    s16 current;
+    s16 saved;
+    s16 count;
+    u8 pad18[0xA];
+    s16 entryCount;
+} SndSeqSelect;
+
+extern void func_001A5988();
+extern void sndSetSequenceVolumePan();
+extern void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir);
+typedef struct SndPad {
+    u8 pad00[0x21];
+    s8 confirm;
+    u8 pad22[4];
+    s8 prev;
+    s8 next;
+} SndPad;
+extern SndPad D_0037F510;
+extern s32 func_001A6AB8();
+extern void func_001A5EE8(s32, s32);
+
+typedef struct UiSurface { u8 pad0[0x20]; } UiSurface;
+typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
+extern UiSurface D_0037FB48[];
+extern UiOwnerRef *D_003B4778[];
+extern void func_001A1A98(UiSprite *sprite, UiSurface *surface);
+extern s32 func_001A7798(UiSprite *sprite);
+
+typedef struct BtlEntry {
+    u16 flags;
+    u8 pad2[4];
+    u16 hp;
+    u8 pad8[2];
+    u16 mp;
+    u8 padC[2];
+    u16 status;
+    u8 pad10[4];
+    u16 unk14;
+    u8 unk16[5];
+    u8 pad1B[0x191];
+    u16 unk1AC;
+    u16 unk1AE;
+    u16 unk1B0;
+    u8 pad1B2[0x12];
+} BtlEntry;
+extern s32 func_001197C0();
+extern s32 func_001198C0();
 
 void func_001A5BB8(s32 arg0) {
     for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
@@ -465,22 +523,60 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6528);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A67E0);
+void func_001A67E0(UiPanel *panel, s32 dy) {
+    UiPanelOrigin *origin = &panel->origin;
+    UiPos *pos = &panel->pos;
+    UiPanelPlacement *place = &panel->place;
+    pos->y += dy;
+    itfMesOffsetNodeChain(pos->chain, 0, dy);
+    if (place->sprite != 0) {
+        func_001A19C8(place->sprite, 0, dy, 0, 0, 0);
+    }
+    if (place->frame != 0) {
+        func_001A19C8(place->frame, 0, dy, 0, dy, 0);
+    }
+    if (origin->tex != 0) {
+        origin->y += dy;
+        itfMesOffsetNodeChain(origin->tex, 0, dy);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A68B8);
+s32 func_001A68B8(s32 obj) {
+    SndSeqSelect *sel = (SndSeqSelect *)(obj + 0x40);
+    s32 dir = 0;
+    s32 index;
+    if (D_0037F510.prev & 2) {
+        if (sel->current != 0) {
+            dir = -1;
+        } else if (D_0037F510.prev < 0) {
+            dir = -1;
+        }
+    } else if (D_0037F510.next & 2) {
+        if (sel->current != sel->count - 1 || D_0037F510.next < 0) {
+            dir = 1;
+        }
+    }
+    if (dir != 0) {
+        sndStepSequenceIndex(sel, dir);
+        func_001A5EE8(obj + 0x1D0, 1);
+    }
+    if (D_0037F510.confirm < 0) {
+        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        return 1;
+    }
+    if (sel->entryCount > 0 && (index = func_001A6AB8(sel)) >= 0) {
+        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        if (index != sel->current) {
+            func_001A5988(sel->seq, sel->current, sel->count, 0);
+            func_001A5988(sel->seq, index, sel->count, 1);
+            sel->current = index;
+            sel->saved = index;
+        }
+        return 1;
+    }
+    return 0;
+}
 
-typedef struct SndSeqSelect {
-    u8 pad0[8];
-    s32 seq;
-    u8 padC[6];
-    s16 current;
-    s16 saved;
-    s16 count;
-} SndSeqSelect;
-
-extern void func_001A5988();
-
-extern void sndSetSequenceVolumePan();
 
 void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
     s32 index = sel->current;
@@ -542,7 +638,25 @@ void btlUpdateFadeIndicator(u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6BF8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6DA8);
+void func_001A6DA8(UiPanel *panel) {
+    UiPanelPlacement *place;
+    if (panel->flags & 0x80000) {
+        return;
+    }
+    place = &panel->place;
+    if ((panel->flags & 0x300) >= 0x100) {
+        if (panel->state != 3) {
+            func_001A1A98(place->sprite, &D_0037FB48[panel->index]);
+        }
+        D_00452940.drawFlags |= 2;
+        if (place->overlay != 0) {
+            func_001A1A98(place->overlay, &D_0037FB48[panel->index]);
+        }
+    }
+    if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
+        func_001A7798(place->sprite);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6E88);
 
@@ -957,7 +1071,33 @@ s32 func_001AAA80(s32 index) {
     return D_00435DD0 + index * 0x1c4 + 0xa60;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AAAA8);
+void func_001AAAA8(UiObject *actor) {
+    BtlEntry *src = (BtlEntry *)&actor->entryMask;
+    BtlEntry *dst = (BtlEntry *)func_001AAA80(actor->kind);
+    s32 maxHp;
+    s32 maxMp;
+    if (src->flags & 0x1000) {
+        dst->flags |= 0x1000;
+    } else {
+        dst->flags &= ~0x1000;
+    }
+    if (src->flags & 0x4000) {
+        dst->flags |= 0x4000;
+    } else {
+        dst->flags &= ~0x4000;
+    }
+    dst->unk14 = src->unk14;
+    maxHp = func_001197C0(dst);
+    maxMp = func_001198C0(dst);
+    dst->hp = src->hp < maxHp ? src->hp : maxHp;
+    dst->mp = src->mp < maxMp ? src->mp : maxMp;
+    memcpy(dst->unk16, src->unk16, 5);
+    dst->status = src->status & 0x7FFF;
+    dst->unk1AC = src->unk1AC;
+    dst->unk1AE = src->unk1AE;
+    dst->unk1B0 = src->unk1B0;
+    func_0020D128("btl:player work set[%p]\n", actor);
+}
 
 s32 func_001AABC0(UiObject *object) {
     return dds3FindEntryIndex(object->index);
@@ -1345,7 +1485,29 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE8C0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEAB8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEB20);
+s32 func_001AEB20(s32 unit, u32 slot) {
+    if (((BattleController *)func_001AA6F8())->flags21C & 0x20000) {
+        return 0;
+    }
+    if (slot == 8 && btlCheckSpecialAbility(unit + 0x120, 0x275)) {
+        return 1;
+    }
+    if (slot == 9 && btlCheckSpecialAbility(unit + 0x120, 0x276)) {
+        return 1;
+    }
+    if (slot < 7) {
+        if (slot >= 2 && btlCheckSpecialAbility(unit + 0x120, 0x278)) {
+            return 1;
+        }
+    }
+    if (slot == 8 && func_001AD1C0(unit + 0x120, 0xF0)) {
+        return 1;
+    }
+    if (slot == 9 && func_001AD1C0(unit + 0x120, 0xF1)) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEC18);
 

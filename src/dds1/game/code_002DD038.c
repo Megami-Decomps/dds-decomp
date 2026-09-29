@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 (*D_003982D0[])(void *a0, s32 a1);
 
@@ -28,47 +29,19 @@ INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD348);
  * alternate bank, and vf20-vf23 a third bank copied between the two. */
 
 void func_002DD378(void *matrix) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 16(%0)\n"
-        "lqc2 vf30, 32(%0)\n"
-        "lqc2 vf31, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(matrix) : "memory");
+    VU0_LOAD_MATRIX(matrix);
 }
 
 void func_002DD390(void *matrix) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf24, 0(%0)\n"
-        "lqc2 vf25, 16(%0)\n"
-        "lqc2 vf26, 32(%0)\n"
-        "lqc2 vf27, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(matrix) : "memory");
+    VU0_LOAD_MATRIX_B(matrix);
 }
 
 void func_002DD3A8(void *matrix) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 16(%0)\n"
-        "sqc2 vf30, 32(%0)\n"
-        "sqc2 vf31, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(matrix) : "memory");
+    VU0_STORE_MATRIX(matrix);
 }
 
 void func_002DD3C0(void *matrix) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf24, 0(%0)\n"
-        "sqc2 vf25, 16(%0)\n"
-        "sqc2 vf26, 32(%0)\n"
-        "sqc2 vf27, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(matrix) : "memory");
+    VU0_STORE_MATRIX_B(matrix);
 }
 
 void func_002DD3D8(void) {
@@ -156,6 +129,7 @@ void sdfSetAlternateIdentityMatrixVU(void) {
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD4A8);
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
+/* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void func_002DD4D8(void) {
     __asm__ volatile (
         ".set noreorder\n"
@@ -178,6 +152,7 @@ void func_002DD4D8(void) {
         ".set reorder\n");
 }
 
+/* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
 void func_002DD520(void) {
     __asm__ volatile (
         ".set noreorder\n"
@@ -203,6 +178,7 @@ void func_002DD520(void) {
         ".set reorder\n");
 }
 
+/* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
 void func_002DD578(void) {
     __asm__ volatile (
         ".set noreorder\n"

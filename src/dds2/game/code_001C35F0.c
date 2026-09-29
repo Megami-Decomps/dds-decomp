@@ -1,5 +1,17 @@
 #include "common.h"
 
+typedef struct UiSlotEntry {
+    u8 pad00[0x18];
+    s8 state; /* 0x18 */
+    u8 pad19[0x277];
+} UiSlotEntry; /* 0x290 */
+
+typedef struct UiInputState {
+    u8 pad00[0x3C];
+    u32 flags; /* 0x3C */
+} UiInputState;
+
+
 extern void func_001C35F0(s32, s32, s32);
 
 extern u32 D_004367CC;
@@ -68,7 +80,16 @@ void func_001C3D20(u8 *context, s8 mode) {
     } while (i >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3D70);
+void func_001C3D70(u8 *scene) {
+    UiSlotEntry *entry = (UiSlotEntry *)(scene + 0xE0);
+    s32 i;
+
+    for (i = 0; i < 3; i++, entry++) {
+        if (entry->state == 1) {
+            entry->state = 5;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3DB0);
 

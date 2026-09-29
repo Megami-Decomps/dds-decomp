@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 (*D_0040B480[])(void *a0, s32 a1);
 
@@ -25,25 +26,11 @@ INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336068);
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_003361F8);
 
 void func_00336228(void *matrix) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 16(%0)\n"
-        "lqc2 vf30, 32(%0)\n"
-        "lqc2 vf31, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(matrix) : "memory");
+    VU0_LOAD_MATRIX(matrix);
 }
 
 void func_00336240(void *matrix) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf24, 0(%0)\n"
-        "lqc2 vf25, 16(%0)\n"
-        "lqc2 vf26, 32(%0)\n"
-        "lqc2 vf27, 48(%0)\n"
-        ".set reorder\n"
-        : : "r"(matrix) : "memory");
+    VU0_LOAD_MATRIX_B(matrix);
 }
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336258);
@@ -87,6 +74,7 @@ void sdfSetAlternateIdentityMatrixVU(void) {
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336358);
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
+/* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void func_00336388(void) {
     __asm__ volatile (
         ".set noreorder\n"
@@ -109,6 +97,7 @@ void func_00336388(void) {
         ".set reorder\n");
 }
 
+/* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
 void func_003363D0(void) {
     __asm__ volatile (
         ".set noreorder\n"
@@ -134,6 +123,7 @@ void func_003363D0(void) {
         ".set reorder\n");
 }
 
+/* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
 void func_00336428(void) {
     __asm__ volatile (
         ".set noreorder\n"

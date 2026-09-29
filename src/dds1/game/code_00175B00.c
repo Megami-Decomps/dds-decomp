@@ -32,6 +32,7 @@ void func_00175B20(ScatterObject *object, u32 value) {
     object->value130 = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_00175B28(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
@@ -78,6 +79,7 @@ u32 effGetScatterEntry(ScatterObject *object, s32 index) {
     return object->entries[index];
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_001760C8(void *work, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX((u8 *)work + 0x10);

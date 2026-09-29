@@ -3,11 +3,7 @@
 extern void func_00333288(void *, u32);
 extern void func_00333270(void *, u32);
 extern void func_003332A0(void *, u32);
-/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
-#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+#include "ee_mmi.h"
 extern void *func_003335E0();
 extern void func_003332D0(void *, f32);
 extern void func_001594C8();
@@ -401,7 +397,7 @@ u8 *billCreateUnitObject(s32 index) {
     instance->billboard = (BillObj *)billCreateIndexed(1, index);
     instance->renderState = func_003335E0();
     func_003332D0(instance->renderState, 1.0f);
-    PCP_UNIT_MATRIX(instance->transform);
+    EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
 }
 
@@ -414,8 +410,8 @@ u8 *billCloneUnitObject(EffInstance *source) {
     func_00333288(instance->renderState, 0x80808080);
     func_00333270(instance->renderState, 0x80808080);
     func_003332A0(instance->renderState, 0x80808080);
-    PCP_UNIT_MATRIX(instance->transform);
-    PCP_UNIT_MATRIX(instance->localMatrix);
+    EE_MMI_UNIT_MATRIX(instance->transform);
+    EE_MMI_UNIT_MATRIX(instance->localMatrix);
     return (u8 *)instance;
 }
 
@@ -433,43 +429,22 @@ void billSetChildScale2(EffInstance *instance, f32 scale) {
     func_00159BF0(instance->billboard, scale, scale);
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effCopyMatrixToNext(EffInstance *instance, void *src) {
     u8 *dst;
 
-    __asm__ volatile(
-        "lqc2 $vf28, 0x0(%0)\n\t"
-        "lqc2 $vf29, 0x10(%0)\n\t"
-        "lqc2 $vf30, 0x20(%0)\n\t"
-        "lqc2 $vf31, 0x30(%0)"
-        : : "r"(src) : "memory");
+    VU0_LOAD_MATRIX(src);
     dst = instance->transform;
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "sqc2 $vf28, 0x0(%0)\n\t"
-        "sqc2 $vf29, 0x10(%0)\n\t"
-        "sqc2 $vf30, 0x20(%0)\n\t"
-        "sqc2 $vf31, 0x30(%0)\n\t"
-        ".set reorder"
-        : : "r"(dst) : "memory");
+    VU0_STORE_MATRIX(dst);
 }
 
 void billSetChildValue(EffInstance *instance, u32 value) {
     func_00159C00(instance->billboard, value);
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_0015A3C8(void *dst, void *src) {
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "lqc2 $vf28, 0x0(%1)\n\t"
-        "lqc2 $vf29, 0x10(%1)\n\t"
-        "lqc2 $vf30, 0x20(%1)\n\t"
-        "lqc2 $vf31, 0x30(%1)\n\t"
-        "sqc2 $vf28, 0x0(%0)\n\t"
-        "sqc2 $vf29, 0x10(%0)\n\t"
-        "sqc2 $vf30, 0x20(%0)\n\t"
-        "sqc2 $vf31, 0x30(%0)\n\t"
-        ".set reorder"
-        : : "r"(dst), "r"(src) : "memory");
+    VU0_COPY_MATRIX(dst, src);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A3F0);

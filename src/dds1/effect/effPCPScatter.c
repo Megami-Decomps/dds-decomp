@@ -196,30 +196,6 @@ struct PcpScatterWork7 {
     u32 unk138;
 };
 
-/* VU0 matrix registers consumed by func_002DDBF8. */
-#define PCP_LOAD_MATRIX(src) __asm__ volatile ( \
-    ".set noreorder\n" \
-    "lqc2 vf28, 0(%0)\n" \
-    "lqc2 vf29, 0x10(%0)\n" \
-    "lqc2 vf30, 0x20(%0)\n" \
-    "lqc2 vf31, 0x30(%0)\n" \
-    ".set reorder" : : "r"(src) : "memory")
-
-#define PCP_LOAD_BASE(src) __asm__ volatile ( \
-    ".set noreorder\n" \
-    "lqc2 vf24, 0(%0)\n" \
-    "lqc2 vf25, 0x10(%0)\n" \
-    "lqc2 vf26, 0x20(%0)\n" \
-    "lqc2 vf27, 0x30(%0)\n" \
-    ".set reorder" : : "r"(src) : "memory")
-
-#define PCP_STORE_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n" \
-    "sqc2 vf28, 0(%0)\n" \
-    "sqc2 vf29, 0x10(%0)\n" \
-    "sqc2 vf30, 0x20(%0)\n" \
-    "sqc2 vf31, 0x30(%0)\n" \
-    ".set reorder" : : "r"(dst) : "memory")
 
 
 extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
@@ -669,12 +645,13 @@ void func_00173AE0(PcpScatterWork4 *work, u32 value)
     work->unk180 = value;
 }
 
+/* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
 void effPcpScatterTransformMatrix(PcpScatterWork4 *work, void *source)
 {
-    PCP_LOAD_MATRIX(source);
-    PCP_LOAD_BASE(&work->pad50[0]);
+    VU0_LOAD_MATRIX(source);
+    VU0_LOAD_MATRIX_B(&work->pad50[0]);
     func_002DDBF8();
-    PCP_STORE_MATRIX(work);
+    VU0_STORE_MATRIX(work);
 }
 
 typedef struct PcpScatterParamsB {
@@ -782,12 +759,13 @@ void func_00174618(PcpScatterWork5 *work, u32 value)
     work->unk184 = value;
 }
 
+/* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
 void func_00174620(PcpScatterWork5 *work, void *source)
 {
-    PCP_LOAD_MATRIX(source);
-    PCP_LOAD_BASE(&work->pad50[0]);
+    VU0_LOAD_MATRIX(source);
+    VU0_LOAD_MATRIX_B(&work->pad50[0]);
     func_002DDBF8();
-    PCP_STORE_MATRIX(work);
+    VU0_STORE_MATRIX(work);
 }
 
 typedef struct PcpScatterParamsC {
@@ -895,12 +873,13 @@ void func_001751C8(PcpScatterWork6 *work, u32 value)
     work->unk18C = value;
 }
 
+/* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
 void func_001751D0(PcpScatterWork6 *work, void *source)
 {
-    PCP_LOAD_MATRIX(source);
-    PCP_LOAD_BASE(&work->pad50[0]);
+    VU0_LOAD_MATRIX(source);
+    VU0_LOAD_MATRIX_B(&work->pad50[0]);
     func_002DDBF8();
-    PCP_STORE_MATRIX(work);
+    VU0_STORE_MATRIX(work);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00175230);

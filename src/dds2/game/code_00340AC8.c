@@ -16,6 +16,7 @@ extern void sdfAtan2(f32 x, f32 y);
 
 extern f32 D_0040B530[4];
 
+/* vu0 routine: vf10 = quaternion product vf10 * vf11 */
 void effMiscQuatMultiplyVU(void)
 {
     __asm__ volatile (
@@ -37,6 +38,7 @@ void effMiscQuatMultiplyVU(void)
 }
 
 /* VU-register calling convention: vf10 is the quaternion input and result. */
+/* vu0 routine: vf10 = inverse of quaternion vf10 (conjugate / |q|^2) */
 void effMiscInvertQuaternionVU(void)
 {
     __asm__ volatile (
@@ -149,6 +151,7 @@ void func_00340BF0(f32 angle)
 }
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+/* vu0 routine: rotation matrix vf28-vf31 from the quaternion in vf10 */
 void func_00340C40(void)
 {
     __asm__ volatile (
@@ -194,6 +197,7 @@ INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340EE0);
 
 INCLUDE_ASM(const s32, "game/code_00340AC8", func_00341028);
 
+/* vu0 routine: normalized lerp of quaternions vf10 and vf11 by amount (shorter arc), result in vf10 */
 void func_00341120(f32 amount)
 {
     f32 dot;
@@ -233,6 +237,7 @@ void func_00341120(f32 amount)
     effMiscNormalizeVU();
 }
 
+/* vu0 routine: rotate the global vector by the quaternion matrix, atan2 of the result x and y */
 void func_003411A0(void)
 {
     f32 x;

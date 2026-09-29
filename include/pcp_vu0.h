@@ -51,4 +51,25 @@
     ".set reorder" \
     : : "r" (dst) : "memory")
 
+/* Load four quadwords into the second matrix bank vf24-vf27 (the right-hand
+ * operand of the sdf matrix-multiply routines). */
+#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src) : "memory")
+
+/* Store the second matrix bank vf24-vf27 to four quadwords. */
+#define VU0_STORE_MATRIX_B(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf24, 0(%0)\n\t" \
+    "sqc2 vf25, 16(%0)\n\t" \
+    "sqc2 vf26, 32(%0)\n\t" \
+    "sqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "memory")
+
 #endif

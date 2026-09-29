@@ -391,9 +391,31 @@ typedef struct MenuList {
     MenuListNode *head;
     MenuListNode *cursor;
     s32 count;
+    s32 windowOffset;
 } MenuList;
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuUpdateListScrollFlags);
+void mnuUpdateListScrollFlags(MenuList *list) {
+    MenuListNode *node = list->head;
+    s32 i;
+
+    if (node == NULL) {
+        list->flags = 0;
+        return;
+    }
+    if (node->prev != NULL) {
+        list->flags |= 1;
+    } else {
+        list->flags &= ~1;
+    }
+    for (i = 0; i < list->visibleCount; i++) {
+        node = node->next;
+        if (node == NULL) {
+            list->flags &= ~2;
+            return;
+        }
+    }
+    list->flags |= 2;
+}
 
 extern MenuListNode *func_002CFF68(s32);
 
@@ -468,7 +490,28 @@ void *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuSeekListNode);
+s32 mnuSeekListNode(s32 index, MenuList *list) {
+    s32 size = list->count;
+
+    if (index >= size) {
+        return 0;
+    }
+    list->windowOffset = 0;
+    list->head = list->first;
+    list->cursor = list->first;
+    if (index > 0) {
+        do {
+            if (size - list->head->index <= list->visibleCount) {
+                list->windowOffset += 1;
+            } else {
+                list->head = list->head->next;
+            }
+            list->cursor = list->cursor->next;
+            index--;
+        } while (index != 0);
+    }
+    return 1;
+}
 
 void func_0027BB08(u32 arg0) {
     mnuSeekListNode(0, arg0);

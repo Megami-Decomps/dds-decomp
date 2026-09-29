@@ -2,6 +2,34 @@
 
 #include "sdf.h"
 
+typedef struct SdfTexPacketTail {
+    u64 tag;      /* 0x00 */
+    u64 next;     /* 0x08 */
+} SdfTexPacketTail;
+
+typedef struct SdfTexBlock {
+    struct SdfTexBlock *next; /* 0x00 */
+    struct SdfTexBlock *prev; /* 0x04 */
+    s32 used;                 /* 0x08 */
+    s32 unk0C;
+    s32 size;                 /* 0x10 */
+} SdfTexBlock;
+
+extern void func_00328E48();
+s32 func_0032A968(SdfTexBlock *block);
+
+typedef struct SdfTexReleaseEntry {
+    struct SdfTexReleaseEntry *next; /* 0x00 */
+    s32 address;                     /* 0x04 */
+    s32 handle;                      /* 0x08 */
+    u8 mode;                         /* 0x0C: 1 = handle, 2 = chip memory address */
+    u8 pad0D[0x93];
+} SdfTexReleaseEntry; /* 0xA0 */
+
+extern s32 sdfChipIsInRange();
+extern s32 func_00329930();
+
+
 extern u8 D_004389E0;
 
 extern u32 D_004389E4;
@@ -30,7 +58,7 @@ extern SdfTexHead *D_00439140;
 
 void *func_00328D68(s32 size);
 
-void func_0032AA40(void *arg0);
+s32 func_0032AA40(void *arg0);
 
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 
@@ -93,9 +121,54 @@ void sdfWaitAndSelectBuffer(void) {
     func_0033A0C8();
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A5A0);
+s32 func_0032A5A0(u32 format) {
+    switch (format) {
+    case 0x0:
+    case 0x1:
+    case 0x1B:
+    case 0x24:
+    case 0x2C:
+    case 0x30:
+    case 0x31:
+        return 0x20;
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        return 0x10;
+    case 0x13:
+        return 8;
+    case 0x14:
+        return 4;
+    default:
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A5F0);
+s32 func_0032A5F0(u32 format) {
+    switch (format) {
+    case 0x0:
+    case 0x30:
+        return 0x20;
+    case 0x1:
+    case 0x31:
+        return 0x18;
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        return 0x10;
+    case 0x13:
+    case 0x1B:
+        return 8;
+    case 0x14:
+    case 0x24:
+    case 0x2C:
+        return 4;
+    default:
+        return 0;
+    }
+}
 
 s32 sdfTexListContains(SdfTex *target) {
     SdfTex *node = (SdfTex *)D_00439140;
@@ -118,11 +191,49 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A7A8);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A8C8);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A968);
+s32 func_0032A968(SdfTexBlock *block) {
+    SdfTexBlock *prev = block->prev;
+
+    if (prev != NULL) {
+        if (prev->used == 0) {
+            SdfTexBlock *before = prev->prev;
+
+            block->size = block->size + prev->size;
+            block->prev = before;
+            if (before != NULL) {
+                prev->prev->next = block;
+            } else {
+                D_00439144 = (SdfTexHead *)block;
+            }
+            func_00328E48(prev, block, prev);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A9D8);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AA40);
+extern s32 func_0036DE70();
+
+
+s32 func_0032AA40(void *node) {
+    s32 interruptsEnabled;
+    u8 *next;
+
+    if (node != NULL) {
+        interruptsEnabled = func_0036DE70();
+        *(s32 *)((u8 *)node + 8) = 0;
+        func_0032A968(node);
+        next = *(u8 **)node;
+        if (next != NULL && *(s32 *)(next + 8) == 0) {
+            func_0032A968(next);
+        }
+        if (interruptsEnabled != 0) {
+            EIntr();
+        }
+    }
+}
 
 void func_0032AAB8(s32 arg0) {
     func_0032CAE0(&D_00439148, arg0);
@@ -156,9 +267,45 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032ABD0);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AC30);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AEA0);
+void func_0032AEA0(s32 address, void *packet) {
+    SdfSemaObj *obj = &D_004681F8;
+    SdfTexPacketTail *last;
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AF20);
+    WaitSema(obj->unk0);
+    last = (SdfTexPacketTail *)obj->unk10;
+    if (last != NULL) {
+        last->next = 0;
+        last->tag = ((u64)(address & 0x0FFFFFFF) << 32) | 0x20000000;
+    } else {
+        obj->unkC = (void *)address;
+    }
+    obj->unk10 = (s32)packet;
+    SignalSema(obj->unk0);
+}
+
+void func_0032AF20(s32 address) {
+    SdfSemaObj *obj = &D_004681F8;
+    SdfTexReleaseEntry *entry;
+
+    if (address != 0) {
+        entry = func_00328E18(0xA0);
+        if (sdfChipIsInRange(address) != 0) {
+            entry->address = address;
+            entry->mode = 2;
+        } else {
+            entry->mode = 1;
+            entry->handle = func_00329930(address);
+        }
+        WaitSema(obj->unk0);
+        if (obj->unk8 != NULL) {
+            ((SdfTexReleaseEntry *)obj->unk8)->next = entry;
+        } else {
+            obj->unk4 = entry;
+        }
+        obj->unk8 = entry;
+        SignalSema(obj->unk0);
+    }
+}
 
 void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
     semaphore->unk4 = NULL;
@@ -203,7 +350,14 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     return (s32)buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B218);
+s32 func_0032B218(SdfTex *tex) {
+    SdfTexBuf *buf = tex->unk2C;
+
+    if (buf == NULL) {
+        return 0;
+    }
+    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+}
 
 u8 func_0032B240(s32 arg0) {
     return *(u8 *)(arg0 + 0x18);
@@ -223,7 +377,22 @@ u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
     return texture->primaryResource->word;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B270);
+s32 func_0032B270(u32 format) {
+    switch (format) {
+    case 0:
+        return 0x20;
+    case 1:
+        return 0x18;
+    case 2:
+    case 10:
+        return 0x10;
+    case 19:
+    case 27:
+        return 8;
+    default:
+        return 4;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B2C0);
 
@@ -246,7 +415,15 @@ void sdfTexSetPrimaryBufferModeBits(SdfTex *arg0, s32 arg1, s32 arg2) {
     buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B370);
+void func_0032B370(SdfTex *tex, s32 arg1, s32 arg2) {
+    SdfTexBuf *buf = tex->unk2C;
+
+    if (buf == NULL) {
+        sdfTexCreateSecondPacket();
+        buf = tex->unk2C;
+    }
+    buf->unk10 = (arg2 << 6) | ((arg1 << 5) | (buf->unk10 & ~0x1E0));
+}
 
 void func_0032B3E0(SdfTex *texture, u8 value) {
     texture->unk1F = value;
@@ -286,7 +463,26 @@ void sdfTexListInsert(SdfTex *arg0) {
     D_004389F8 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B5D8);
+extern void *func_00328E18(s32 size);
+
+SdfTex *func_0032B5D8(s32 x, s32 y, s32 arg2, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+    SdfTex *tex = func_00328E18(0x40);
+    SdfTexRef *ref = func_00328E18(8);
+
+    ref->refCount = 1;
+    tex->unk18 = arg6;
+    tex->unk19 = arg5;
+    tex->unkC = x;
+    tex->unkE = y;
+    tex->unk1A = arg2;
+    tex->unk1B = arg3;
+    tex->secondaryResource = (SdfTexResource *)secondary;
+    tex->primaryResource = (SdfTexResource *)primary;
+    tex->reference = ref;
+    sdfTexListInsert(tex);
+    tex->unk38 = 0x80808080;
+    return tex;
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B6B0);
 
