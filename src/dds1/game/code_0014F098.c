@@ -44,11 +44,11 @@ extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
 extern s32 func_00222090(s32 param);
 
-/* Work object queried by func_0014F408; +0xE4 holds the key for fldGetTaskRecordValue. */
+/* Script command context: +0xE4 is the task-record lookup key. */
 typedef struct {
-    u8 unk00[0xE4]; /* 0x00 */
-    u32 key;        /* 0xE4 */
-} EffCmdWork;
+    u8 pad00[0xE4];
+    u32 key;
+} FldCommandWork;
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 extern s32 func_0010D428(s32);
@@ -71,7 +71,7 @@ u32 func_0014F0C8(void) {
     if (func_0013DF18()) {
         scene = 0;
     } else {
-        scene = fldFindTaskRecordId(((EffCmdWork *)func_0010D6A0())->key);
+        scene = fldFindTaskRecordId(((FldCommandWork *)func_0010D6A0())->key);
     }
     func_0013DC08(scene);
     return 1;
@@ -139,31 +139,35 @@ s32 fldCommandPlaySe(void) {
     return 1;
 }
 
+/* Unlike the other field commands, this reports the archive poll result. */
 u8 fldCommandLoadArchive(void) {
     return fldPollArchiveLoad(func_0010D428(0)) != 0;
 }
 
+/* Script command: set volume and pan for a grouped sequence ID. */
 s32 func_0014F318(void) {
-    s32 param0 = func_0010D428(0);
-    s32 param1 = func_0010D428(1);
+    s32 sequenceGroup = func_0010D428(0);
+    s32 sequenceIndex = func_0010D428(1);
 
-    func_001421D0(param0, param1);
+    func_001421D0(sequenceGroup, sequenceIndex);
     return 1;
 }
 
+/* Script command: pass the same grouped sequence ID to the other sound path. */
 s32 func_0014F358(void) {
-    s32 param0 = func_0010D428(0);
-    s32 param1 = func_0010D428(1);
+    s32 sequenceGroup = func_0010D428(0);
+    s32 sequenceIndex = func_0010D428(1);
 
-    func_00142200(param0, param1);
+    func_00142200(sequenceGroup, sequenceIndex);
     return 1;
 }
 
+/* Script command: start a field title using its field ID and display argument. */
 s32 func_0014F398(void) {
-    s32 param0 = func_0010D428(0);
-    s32 param1 = func_0010D428(1);
+    s32 fieldId = func_0010D428(0);
+    s32 titleArg = func_0010D428(1);
 
-    fldStartTitle(param0, param1, 0x3c);
+    fldStartTitle(fieldId, titleArg, 0x3c);
     return 1;
 }
 
@@ -175,12 +179,13 @@ s32 func_0014F3E0(void) {
     return 1;
 }
 
+/* Look up the command's task record before applying its associated entry. */
 s32 func_0014F408(void) {
-    EffCmdWork *work = func_0010D6A0();
-    void *entry = fldGetTaskRecordValue(work->key);
+    FldCommandWork *command = func_0010D6A0();
+    void *record = fldGetTaskRecordValue(command->key);
 
-    if (entry != NULL) {
-        func_0013DDF0(entry);
+    if (record != NULL) {
+        func_0013DDF0(record);
     }
     return 1;
 }
@@ -197,8 +202,8 @@ s32 func_0014F468(void) {
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
 s32 fldCommandFindEffectByName(void) {
-    char *param = func_0010D5A8(0);
+    char *effectName = func_0010D5A8(0);
 
-    func_0010D5F0(fldFindEffectByName(param));
+    func_0010D5F0(fldFindEffectByName(effectName));
     return 1;
 }

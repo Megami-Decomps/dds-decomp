@@ -93,14 +93,16 @@ u32 func_00299FE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_00299FE8);
 
-u32 mnuProcessItemSelection(u32 address) {
-    u32 result;
-    s32 context;
+/* Build the capped skill list for the currently selected menu entry. */
+u32 mnuProcessItemSelection(u32 context) {
+    u32 listState;
+    s32 scene;
 
-    context = (s32)address;
-    result = func_0029D790(**(u32 **)(context + 0x9c), context + 0x4e8);
-    *(u32 *)(context + 0x268) = result;
-    func_00299FE8(address);
+    scene = (s32)context;
+    /* Keep these raw accesses: typed field accesses change the alias schedule. */
+    listState = func_0029D790(**(u32 **)(scene + 0x9c), scene + 0x4e8);
+    *(u32 *)(scene + 0x268) = listState;
+    func_00299FE8(context);
     return 1;
 }
 

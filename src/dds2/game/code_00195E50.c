@@ -1,8 +1,7 @@
 #include "common.h"
 #include "eff.h"
 
-/* Slot addressed by func_0018E660/func_0018E638 with a 0x60 stride. Only the
- * tail is known: two words cleared and a float reset to 0.05f. */
+/* Each slot has a 0x60-byte stride; only its resettable tail is known. */
 typedef struct Slot60 {
     u8 pad[0x54];
     s32 unk54;
@@ -22,9 +21,8 @@ typedef struct Work30 {
 
 extern Work30 D_003B21B0;
 
-/* Common prefix copied by the per-type setters (func_0018F440 and friends).
- * The trailing word is real: gcc emits lw/sw for it, so it cannot be part
- * of the byte blob. BD808/BD804/BD810 use the 0x2C form, BD80C the 0x24. */
+/* Per-channel work copies this 0x2C-byte prefix before its separate ID word.
+ * The prefix's final word is copied with lw/sw rather than as part of the blob. */
 typedef struct BDCommon2C {
     u8 data[0x28];
     u32 unk28;
@@ -32,7 +30,7 @@ typedef struct BDCommon2C {
 
 typedef struct BDWork2C {
     BDCommon2C common;
-    u32 unk2C;
+    u32 id;
 } BDWork2C;
 
 extern BDWork2C *D_00438F10;
@@ -45,10 +43,7 @@ extern BDWork2C *D_00438F18;
 
 extern Work30 D_003B2238;
 
-/* Parameter blocks copied by the setters below. Sizes are exact: the 0x18
- * pair (D_00355930/D_00355F88), the 0x24 block (D_00356088), the 0x2C triple
- * (D_00355AF8/D_00355C70/D_003561C8) and the 0x30 quad
- * (D_00355880/D_00355908/D_003559A0/D_00355E48). */
+/* Parameter blocks have distinct 0x18, 0x24, 0x2C and 0x30 byte layouts. */
 typedef struct Work18 {
     u8 data[0x18];
 } Work18;
@@ -62,7 +57,7 @@ typedef struct BDCommon24 {
 
 typedef struct BDWork24 {
     BDCommon24 common;
-    u32 unk24;
+    u32 id;
 } BDWork24;
 
 extern BDWork24 *D_00438F14;
@@ -136,23 +131,24 @@ extern void func_0018FCA0(BDWork24 *arg);
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 
+/* Allocate contiguous slots followed by their count and allocation handle. */
 SlotTab *func_00195E50(u32 count) {
-    s32 size = count * 0x60;
-    s32 handle = func_003292A8(size + 0xC);
+    s32 slotBytes = count * 0x60;
+    s32 handle = func_003292A8(slotBytes + 0xC);
     Slot60 *slot = (Slot60 *)sdfResourceRetainAddress(handle);
-    SlotTab *table = (SlotTab *)((u8 *)slot + size);
-    u32 i = 0;
+    SlotTab *table = (SlotTab *)((u8 *)slot + slotBytes);
+    u32 index = 0;
     table->handle = handle;
     table->slots = slot;
     table->count = count;
     if (count != 0) {
         do {
-            i++;
+            index++;
             slot->unk54 = 0;
             slot->unk58 = 0;
             slot->unk5C = 0.05f;
             slot++;
-        } while (i < count);
+        } while (index < count);
     }
     return table;
 }
@@ -167,15 +163,15 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00196040);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00196180);
 
-void effInitSlotTail(SlotTab *tab, s32 idx) {
-    Slot60 *slot = &tab->slots[idx];
+void effInitSlotTail(SlotTab *table, s32 index) {
+    Slot60 *slot = &table->slots[index];
 
     slot->unk5C = 0.05f;
     slot->unk54 = slot->unk58 = 0;
 }
 
-s32 effGetSlotAt(SlotTab *tab, s32 index) {
-    return (s32)&tab->slots[index];
+s32 effGetSlotAt(SlotTab *table, s32 index) {
+    return (s32)&table->slots[index];
 }
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_001962B0);
@@ -242,12 +238,12 @@ u32 effGetCh71Work(void) {
     return D_00438F10;
 }
 
-void effSetCh71Id(u32 arg) {
-    D_00438F10->unk2C = arg;
+void effSetCh71Id(u32 id) {
+    D_00438F10->id = id;
 }
 
 void effInitCh71Id(void) {
-    D_00438F10->unk2C = func_00159BB8(2);
+    D_00438F10->id = func_00159BB8(2);
 }
 
 void func_00197118(void) {
@@ -266,12 +262,12 @@ u32 effGetCh72Work(void) {
     return D_00438F0C;
 }
 
-void effSetCh72Id(u32 arg) {
-    D_00438F0C->unk2C = arg;
+void effSetCh72Id(u32 id) {
+    D_00438F0C->id = id;
 }
 
 void effInitCh72Id(void) {
-    D_00438F0C->unk2C = func_00159BB8(2);
+    D_00438F0C->id = func_00159BB8(2);
 }
 
 void func_001971D0(void) {
@@ -290,12 +286,12 @@ u32 effGetCh76Work(void) {
     return D_00438F18;
 }
 
-void effSetCh76Id(u32 arg) {
-    D_00438F18->unk2C = arg;
+void effSetCh76Id(u32 id) {
+    D_00438F18->id = id;
 }
 
 void effInitCh76Id(void) {
-    D_00438F18->unk2C = func_00159BB8(3);
+    D_00438F18->id = func_00159BB8(3);
 }
 
 void func_00197288(void) {
@@ -342,12 +338,12 @@ u32 effGetCh75Work(void) {
     return D_00438F14;
 }
 
-void effSetCh75Id(u32 arg) {
-    D_00438F14->unk24 = arg;
+void effSetCh75Id(u32 id) {
+    D_00438F14->id = id;
 }
 
 void effInitCh75Id(void) {
-    D_00438F14->unk24 = func_00159BB8(0);
+    D_00438F14->id = func_00159BB8(0);
 }
 
 void effInitWorks(void) {
