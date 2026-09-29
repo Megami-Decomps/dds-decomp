@@ -21,11 +21,16 @@ version=${DDS_VERSION:-dds1}
 ee="$root/tools/compilers/ee-gcc2.96"
 # Pinned 32-bit glibc (tools/download_tools.py) unless overridden.
 [ -z "$DDS_I386_LIBDIR" ] && [ -f "$root/tools/glibc32/libc.so.6" ] && DDS_I386_LIBDIR="$root/tools/glibc32"
+# ee-gcc 2.96 hashes heap addresses (CSE), so under ASLR a fragile function
+# can compile differently from run to run. Run it with a fixed address-space
+# layout (setarch -R), as configure.py's build rules do, unless DDS_ALLOW_ASLR is set.
+aslr=
+[ -z "$DDS_ALLOW_ASLR" ] && command -v setarch >/dev/null && aslr="setarch $(uname -m) -R"
 run() {
     if [ -n "$DDS_I386_LIBDIR" ]; then
-        "$DDS_I386_LIBDIR/ld-linux.so.2" --library-path "$DDS_I386_LIBDIR" "$@"
+        $aslr "$DDS_I386_LIBDIR/ld-linux.so.2" --library-path "$DDS_I386_LIBDIR" "$@"
     else
-        "$@"
+        $aslr "$@"
     fi
 }
 tmp=$(mktemp -d)
