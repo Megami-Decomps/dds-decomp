@@ -36,13 +36,13 @@ extern EffHandler D_003B2068[];
 
 extern void func_0036B420(void);
 
-EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
-    EffResult *mem = func_00328D68(8);
-    s32 ret = D_003B2060[arg0].handler(arg1);
+EffResult *effAllocDispatch(s32 kind, s32 input) {
+    EffResult *result = func_00328D68(8);
+    s32 value = D_003B2060[kind].handler(input);
 
-    mem->unk0 = arg0;
-    mem->unk4 = ret;
-    return mem;
+    result->unk0 = kind;
+    result->unk4 = value;
+    return result;
 }
 
 void effTypeDispatch(EffWork *arg0) {

@@ -2,10 +2,16 @@
 
 /* Small channel object (0x18 bytes, created by func_001936A8): float block
  * plus the channel-A cursor (count at +0x4, index at +0xC). */
+typedef struct EffFloatRows {
+    f32 primary[16];
+    u8 pad40[0x18];
+    f32 secondary[4];
+} EffFloatRows;
+
 typedef struct EffChan {
     void *unk0; /* 0x0: mem handle */
     u32 recordCount; /* 0x4: number of keyframe records */
-    void *unk8; /* 0x8: float block copied by effCopyVertRows */
+    EffFloatRows *rows; /* 0x8: interpolation rows owned by the channel */
     u32 cursorIndex; /* 0xC: channel-A record index */
     f32 cursorPosition; /* 0x10: channel-A interpolation position */
     f32 cursorStep; /* 0x14: channel-A position increment */
@@ -109,8 +115,8 @@ void effCopyVertRows(EffChan *channel, f32 *source) {
     row = source;
     index = 0;
     source += 16;
-    secondary = (f32 *)((u8 *)channel->unk8 + 0x58);
-    primary = channel->unk8;
+    secondary = channel->rows->secondary;
+    primary = channel->rows->primary;
     do {
         index++;
         primary[0] = row[0];
@@ -224,7 +230,7 @@ void *effCreateChannel(void *arg0, u32 arg1) {
     p->unk0 = mem;
     p->cursorStep = 0.05f;
     p->recordCount = arg1;
-    p->unk8 = arg0;
+    p->rows = arg0;
     p->cursorPosition = 0;
     p->cursorIndex = 0;
     return buf;

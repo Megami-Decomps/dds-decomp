@@ -18,9 +18,19 @@ extern void func_002C42C0(s32 *, char *);
 
 extern char D_003D64C8[];
 
-s32 mnuCheckTableSums(s32 bytes, s32 table) {
-    s32 *tableValues = (s32 *)(table + 0x3F4);
-    s8 *byteValues = (s8 *)(bytes + 0x16);
+typedef struct MenuSumBytes {
+    u8 pad00[0x16];
+    s8 values[5];
+} MenuSumBytes;
+
+typedef struct MenuSumTable {
+    u8 pad00[0x3F4];
+    s32 values[5];
+} MenuSumTable;
+
+s32 mnuCheckTableSums(MenuSumBytes *bytes, MenuSumTable *table) {
+    s32 *tableValues = table->values;
+    s8 *byteValues = bytes->values;
     s32 index = 0;
 
     do {

@@ -96,6 +96,14 @@ typedef struct SndDev {
 extern SndDev D_003255A8;
 extern EffHandler32 D_00355730[];
 
+extern u8 D_003296F0[];
+
+extern u8 D_00324610[];
+
+extern u8 D_00324660[];
+
+extern void func_002DDD60(void *);
+
 EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
     EffResult *mem = func_002CFEB8(8);
     s32 ret = D_00355730[arg0].handler(arg1);
@@ -405,11 +413,112 @@ void func_0018DBB0(void) {
     func_001028E8(0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DBD8);
+void func_0018DBD8(void) {
+    u8 *matrix;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_003296F0) : "memory");
+    matrix = D_00324610;
+    func_002DDD60(matrix);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : : "memory");
+    matrix += 0x40;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        "vmul.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(matrix) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        "vadd.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(D_00324660) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DC58);
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DD40);
+u32 func_0018DD40(u32 colorA, u32 colorB, f32 t) {
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    if (t >= 1.0f) {
+        return colorB;
+    }
+    unit = 0x3C000000;
+    color1[0] = colorB;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lw $2, 0(%1)\n"
+        "pextlb $2, $0, $2\n"
+        "pextlh $2, $0, $2\n"
+        "qmtc2.ni $2, vf10\n"
+        "vitof0.xyzw vf10, vf10\n"
+        "qmtc2.ni %0, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vmove.xyzw vf11, vf10\n"
+        ".set reorder"
+        : : "r"(unit), "r"(color1) : "$2", "memory");
+    color2[0] = colorA;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lw $2, 0(%1)\n"
+        "pextlb $2, $0, $2\n"
+        "pextlh $2, $0, $2\n"
+        "qmtc2.ni $2, vf10\n"
+        "vitof0.xyzw vf10, vf10\n"
+        "qmtc2.ni %0, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder"
+        : : "r"(unit), "r"(color2) : "$2", "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder"
+        : : "f"(1.0f - t) : "$2");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %0\n"
+        "qmtc2.ni $3, vf2\n"
+        "vmulx.xyzw vf11, vf11, vf2x\n"
+        "vadd.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "f"(t) : "$3");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %1\n"
+        "qmtc2.ni $3, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vftoi0.xyzw vf10, vf10\n"
+        "qmfc2.ni %0, vf10\n"
+        "ppach %0, $0, %0\n"
+        "ppacb %0, $0, %0\n"
+        ".set reorder"
+        : "=r"(packed) : "f"(128.0f) : "$3");
+    blended[0] = packed;
+    
+    return packed;
+}
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DDF8);
 

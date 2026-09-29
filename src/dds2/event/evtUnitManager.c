@@ -1,12 +1,26 @@
 #include "common.h"
 
+typedef struct EventUnitData {
+    u8 pad00[8];
+    s32 value08;
+} EventUnitData;
+
 typedef struct EventUnit {
-    u8 pad0[0x6C];
+    u8 pad0[0x18];
+    EventUnitData *data;
+    u8 pad1C[0x50];
     u32 value6C;
     u8 pad70[0x38];
     u32 flags;
-    u8 padAC[0x10];
+    s16 valueAC;
+    u8 padAE[0xA];
+    f32 valueB8;
     u16 valueBC;
+    s16 valueBE;
+    s16 valueC0;
+    u8 padC2[0xE];
+    s8 valueD0;
+    s8 valueD1;
 } EventUnit;
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023B3A0);
@@ -52,39 +66,39 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CB68);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC00);
 
-s32 func_0023CC48(u8 *obj) {
-    if (obj == NULL) {
+s32 func_0023CC48(EventUnit *unit) {
+    if (unit == NULL) {
         return 0;
     }
-    return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+    return unit->data->value08;
 }
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC60);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CD98);
 
-s32 func_0023CE08(u8 *work) {
-    return *(s16 *)(work + 0xAC);
+s32 func_0023CE08(EventUnit *unit) {
+    return unit->valueAC;
 }
 
 void func_0023CE10(EventUnit *unit, u16 value) {
     unit->valueBC = value;
 }
 
-void func_0023CE18(u8 *work, f32 value) {
-    *(f32 *)(work + 0xB8) = value;
+void func_0023CE18(EventUnit *unit, f32 value) {
+    unit->valueB8 = value;
 }
 
-void func_0023CE20(u8 *work, s32 a, s32 b) {
-    *(s16 *)(work + 0xBE) = a;
-    *(s16 *)(work + 0xC0) = b;
+void func_0023CE20(EventUnit *unit, s32 a, s32 b) {
+    unit->valueBE = a;
+    unit->valueC0 = b;
 }
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CE30);
 
-void func_0023CE98(u8 *work, s32 a, s32 b) {
-    *(s8 *)(work + 0xD0) = a;
-    *(s8 *)(work + 0xD1) = b;
+void func_0023CE98(EventUnit *unit, s32 first, s32 second) {
+    unit->valueD0 = first;
+    unit->valueD1 = second;
 }
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CEA8);

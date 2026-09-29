@@ -3,6 +3,8 @@
 extern u64 func_0010D428(u64);
 extern u64 func_0011B140(u64, u64);
 
+extern u32 D_003BD7A8;
+
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CEB8);
 
 u32 func_0011CEF0(void) {
@@ -41,7 +43,12 @@ INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D030);
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D070);
 
-INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D0B0);
+void func_0011D0B0(void) {
+    u32 current;
+    while ((current = D_003BD7A8) != 0) {
+        func_0011D070(current);
+    }
+}
 
 void func_0011D0E0(s32 node, u32 value) {
     *(u32 *)(node + 8) = value;

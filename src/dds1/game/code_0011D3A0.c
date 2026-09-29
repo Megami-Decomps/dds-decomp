@@ -116,17 +116,17 @@ extern void fldResetTaskSlots(void);
 extern void func_00125D90(u32);
 extern void func_00220178(void);
 
-void func_0011D3A0(u32 *arg0, u32 arg1, u32 arg2) {
-    arg0[4] = arg1;
-    arg0[5] = arg2;
+void func_0011D3A0(u32 *packet, u32 first, u32 second) {
+    packet[4] = first;
+    packet[5] = second;
 }
 
 u64 func_0011D3B0(void) {
-    u64 temp_v0;
+    u64 packet;
 
-    temp_v0 = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(temp_v0);
-    return temp_v0;
+    packet = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    return packet;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D3E8);
@@ -375,17 +375,17 @@ void func_00120FA0(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00121048(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00121048(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1370);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x1370);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -403,17 +403,17 @@ void func_001210A0(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00121148(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00121148(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1372);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x1372);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -431,17 +431,17 @@ void func_001211A0(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00121248(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00121248(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1374);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x1374);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -459,17 +459,17 @@ void func_001212A0(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00121348(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00121348(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1376);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x1376);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -487,17 +487,17 @@ void func_001213A0(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00121448(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00121448(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1378);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x1378);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -537,17 +537,17 @@ void func_00121550(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001215F8(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_001215F8(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x138A);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x138A);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -565,40 +565,49 @@ void func_00121650(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001216F8(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_001216F8(s32 map, u32 slot, u32 bit) {
+    s32 mapIndex;
+    u8 *slotBase;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_003BAA00;
-        temp_v2 = *(u16 *)(temp_v1 + 0x138C);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += D_003BAA00;
+        flags = *(u16 *)(slotBase + 0x138C);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
 
+typedef struct FieldActivationRecord {
+    s32 kind;
+    s16 parameter;
+    u8 pad06[10];
+} FieldActivationRecord;
+
+#define FIELD_ACTIVATION_FLAGS_OFFSET 0x15970
+
 void func_00121750(s32 flagIndex) {
-    s32 byteOffset = (flagIndex >> 3) + 0x15970;
+    s32 byteOffset = (flagIndex >> 3) + FIELD_ACTIVATION_FLAGS_OFFSET;
     u8 *byte = (u8 *)(D_003BAA00 + byteOffset);
-    u8 *entry;
+    FieldActivationRecord *entry;
     *byte |= 1 << (flagIndex & 7);
     fldActivateObjectById(flagIndex);
     if ((u32)(flagIndex - 0xF0) < 16) {
         mdlFlagSet(flagIndex + 0x610);
     }
-    entry = (u8 *)(flagIndex * 16 + (s32)D_0034C8F0);
-    if (*(s32 *)entry == 2) {
-        func_0011B150(*(s16 *)(entry + 4));
+    entry = (FieldActivationRecord *)(flagIndex * 16 + (s32)D_0034C8F0);
+    if (entry->kind == 2) {
+        func_0011B150(entry->parameter);
     }
 }
 
-u8 func_001217F0(u32 arg0) {
-    return (*(u8 *)(((s32)arg0 >> 3) + D_003BAA00 + 0x15970) >> (arg0 & 7)) & 1;
+u8 func_001217F0(u32 flagIndex) {
+    return (*(u8 *)(((s32)flagIndex >> 3) + D_003BAA00 + FIELD_ACTIVATION_FLAGS_OFFSET) >> (flagIndex & 7)) & 1;
 }
 
+/* Coordinate tables have 28-byte records; the first record is reserved. */
 s32 func_00121818(s32 x, s32 y) {
     u8 *records = D_0033F068;
     u8 *second = records + 2;
@@ -689,17 +698,17 @@ u32 func_001219C8(s32 x, s32 y) {
     return index;
 }
 
-s16 * func_00121A10(s32 arg0, s32 arg1) {
-    s16 *temp_v0 = D_0032DDB0;
-    s32 temp_v1 = 0;
+s16 * func_00121A10(s32 x, s32 y) {
+    s16 *entry = D_0032DDB0;
+    s32 checked = 0;
 
     do {
-        if (temp_v0[0] == arg0 && temp_v0[1] == arg1) {
-            return temp_v0;
+        if (entry[0] == x && entry[1] == y) {
+            return entry;
         }
-        temp_v1++;
-        temp_v0 += 8;
-    } while (temp_v1 < 0x60);
+        checked++;
+        entry += 8;
+    } while (checked < 0x60);
     return NULL;
 }
 
@@ -759,32 +768,32 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     return fsqrtf(dx * dx + dy * dy + dz * dz);
 }
 
-void func_00122BE0(s64 arg0) {
-    u64 temp_v0;
-    s64 temp_v1;
-    u64 temp_v2;
+void func_00122BE0(s64 clearMode) {
+    u64 list;
+    s64 status;
+    u64 object;
 
-    temp_v0 = dds3GetWorldSecondaryObject();
-    temp_v0 = func_00110AB0(temp_v0, 6);
-    temp_v1 = func_00110400(temp_v0);
-    if (temp_v1 == 0) {
+    list = dds3GetWorldSecondaryObject();
+    list = func_00110AB0(list, 6);
+    status = func_00110400(list);
+    if (status == 0) {
         return;
     }
-    func_00110490(temp_v0);
+    func_00110490(list);
     do {
-        temp_v2 = func_00110458(temp_v0);
-        temp_v1 = func_00113E30(temp_v2);
-        if (temp_v1 == 4) {
-            if (arg0 == 0) {
-                func_00113E20(temp_v2, 3);
+        object = func_00110458(list);
+        status = func_00113E30(object);
+        if (status == 4) {
+            if (clearMode == 0) {
+                func_00113E20(object, 3);
             }
             else {
-                func_00113E20(temp_v2, 0);
+                func_00113E20(object, 0);
             }
         }
-        temp_v1 = func_001104B0(temp_v0);
-    } while (temp_v1 != 0);
-    func_0010FF80(temp_v0);
+        status = func_001104B0(list);
+    } while (status != 0);
+    func_0010FF80(list);
 }
 
 extern u32 D_0032E570[];
@@ -838,6 +847,7 @@ void fldStartSequenceRecord(void) {
     func_00126098(0, 0);
     func_00122F08(buffer, 1, 1, D_003BAB68);
     *(u32 *)(buffer + 0x90) = 1;
+    /* Record options at +0x90; command submission copies the padded 0xA0-byte packet. */
     func_001028E8(5, buffer, 0xA0, 0);
 }
 
@@ -907,7 +917,7 @@ typedef struct FieldSequenceRecord {
     u8 unk_68[8];
     char detail[16];
     char note[16];
-    u32 unk_90;
+    u32 options;
 } FieldSequenceRecord;
 
 void func_00122F08(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
@@ -931,7 +941,7 @@ void func_00122F08(FieldSequenceRecord *record, s32 stage, s32 kind, const char 
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
     D_003BAB3C = 0;
     D_0032C9A0[0] = 0;
 }
@@ -957,7 +967,7 @@ void func_00122FF0(FieldSequenceRecord *record, s32 stage, s32 kind, const char 
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001230D0);
@@ -984,7 +994,7 @@ void func_001231D0(FieldSequenceRecord *record, s32 stage, s32 kind, const char 
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     strcpy(record->note, subname);
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 void func_001232C0(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
@@ -1002,7 +1012,7 @@ void func_001232C0(FieldSequenceRecord *record, s32 stage, s32 kind, const char 
     record->unk_62 = 0;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 u32 func_00123378(void) {
@@ -1260,13 +1270,13 @@ typedef struct FldSceneState {
     u8 pad0[0x128];
     s16 sceneCommand; /* 0x128 */
     u8 pad12A[2];
-    s32 unk12C;
+    s32 commandEnabled; /* 0x12C: D_0032E3B0[75] gates scene command updates */
 } FldSceneState;
 void fldUpdateSceneCommand(void) {
     FldSceneState *state = (FldSceneState *)D_0032E3B0;
     s32 code;
 
-    if (state->unk12C == 0) {
+    if (state->commandEnabled == 0) {
         if (state->sceneCommand != 0) {
             state->sceneCommand = 0;
             func_00133640(0, 0);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 /* Slot addressed by func_0018E660/func_0018E638 with a 0x60 stride. Only the
  * tail is known: two words cleared and a float reset to 0.05f. */
@@ -132,8 +133,8 @@ extern void func_0018FCA0(BDWork24 *arg);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00195E50);
 
-void func_00195EE0(s32 arg0) {
-    func_003297C8(*(u32 *)(arg0 + 8));
+void func_00195EE0(EffArrHdr *header) {
+    func_003297C8(header->unk8);
 }
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00195EF8);

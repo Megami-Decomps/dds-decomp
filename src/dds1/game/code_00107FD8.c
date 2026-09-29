@@ -141,6 +141,12 @@ extern s8 D_0032453B[];
 
 extern void func_0010B428(void *arg0);
 
+extern void kwlnTaskDestroyWithHierarchy(void *, s32);
+
+extern void func_0010AC98(void);
+
+extern void *D_003BD764;
+
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001080D8);
@@ -909,7 +915,13 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E1F0);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E200);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AEF0);
+void func_0010AEF0(s8 mode) {
+    if (mode == 1) {
+        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_0010AC98, func_0010AEE8, NULL);
+    } else if (mode == 0) {
+        kwlnTaskDestroyWithHierarchy(D_003BD764, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AF68);
 

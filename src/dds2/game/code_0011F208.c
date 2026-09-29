@@ -736,7 +736,15 @@ u8 func_00123788(u32 arg0) {
     return (*(u8 *)(((s32)arg0 >> 3) + D_00435DD0 + 0x110d0) >> (arg0 & 7)) & 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001237B0);
+s32 func_001237B0(s32 a, s32 b) {
+    s32 i;
+    for (i = 1; i < 0x200; i++) {
+        if (a == *(s16 *)(D_0039A5A8 + i * 0x1E) && b == *(s16 *)(D_0039A5A8 + i * 0x1E + 2)) {
+            return i;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00123808);
 
@@ -922,7 +930,25 @@ void func_00124CC8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00124D70);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124E28);
+extern void fldInitDisplayObjects();
+extern void func_00144598();
+extern void func_003412D8();
+extern void func_0014BA60();
+extern void func_001343E8();
+extern void func_00145818();
+extern void func_00122828();
+extern u8 D_0038A6E0[];
+
+void func_00124E28(void) {
+    fldInitDisplayObjects();
+    func_00124E80();
+    func_00144598();
+    func_003412D8(D_0038A6E0, 0x1E240);
+    func_0014BA60();
+    func_001343E8();
+    func_00145818();
+    func_00122828();
+}
 
 void func_00124E80(void) {
     u32 *buffer = D_0038A640;
@@ -1479,7 +1505,16 @@ void func_001286C8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001286F8);
+s32 func_001286F8(s32 *out0, s32 *out1) {
+    if (D_00389770[0x3C] == -1 && D_00389770[0x3D] == D_00389770[0x3C]) {
+        return 0;
+    }
+    *out0 = D_00389770[0x3C] + 0xC8;
+    *out1 = D_00389770[0x3D];
+    D_00389770[0x3C] = -1;
+    D_00389770[0x3D] = -1;
+    return 1;
+}
 
 void *fldCreateDummyMatter(void) {
     u32 args[8];

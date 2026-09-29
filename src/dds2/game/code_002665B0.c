@@ -192,8 +192,8 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002669C8);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266A48);
 
-void func_00266AF8(s32 object) {
-    MenuProgressNode *node = *(MenuProgressNode **)(object + 0x10);
+void func_00266AF8(MenuProgressList *list) {
+    MenuProgressNode *node = list->head;
     if (node != 0) {
         s32 base = D_00435DD0;
         do {

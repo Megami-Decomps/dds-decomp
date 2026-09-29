@@ -1490,7 +1490,26 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6EE0);
+#define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
+
+extern s32 D_00435DF0;
+extern void func_00232B40(s32);
+
+f32 func_002C6EE0(s32 arg0, s32 useTable) {
+    f32 scale = 1.0f;
+    f32 vec[4];
+
+    if (useTable != 0) {
+        scale = *(f32 *)(D_00435DF0 + D_00457ED0[0] * 0x270 + 0x10);
+    }
+    vec[0] = scale;
+    vec[1] = scale;
+    vec[2] = scale;
+    vec[3] = 1.0f;
+    VU_LOAD10(vec);
+    func_00232B40(arg0);
+    return scale;
+}
 
 void mnuResetWorkPair(void) {
     *(s32 *)(D_003E7950 + 0) = 0;
@@ -1501,7 +1520,33 @@ void mnuResetWorkPair(void) {
     *(s32 *)(D_003E7940 + 8) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6F98);
+extern void func_00232AA0(s32);
+
+void func_002C6F98(s32 arg0) {
+    f32 vec[4];
+    u8 *entry;
+    f32 scale;
+
+    memset(vec, 0, sizeof(vec));
+    vec[3] = 1.0f;
+    entry = (u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
+    vec[0] = *(f32 *)(entry + 0x1C);
+    vec[1] = *(f32 *)(entry + 0x20);
+    if (*(s8 *)((u8 *)D_00457EB0 + 0xC) != 1) {
+        func_002C6EE0(arg0, 0);
+        vec[2] = *(f32 *)((u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]) + 0x24);
+        mnuResetWorkPair();
+    } else {
+        scale = func_002C6EE0(arg0, 1);
+        entry = (u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
+        vec[0] -= *(f32 *)(entry + 0x1C) - *(f32 *)(entry + 0x1C) * scale;
+        vec[1] -= *(f32 *)(entry + 0x20) - *(f32 *)(entry + 0x20) * scale;
+        vec[2] = 0.0f;
+        *(f32 *)(D_003E7950 + 8) = (-400.0f - *(f32 *)(entry + 0x24)) * scale;
+    }
+    VU_LOAD10(vec);
+    func_00232AA0(arg0);
+}
 
 void stageTestApplyEntryRotation(s32 arg0) {
     f32 *entry = (f32 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);

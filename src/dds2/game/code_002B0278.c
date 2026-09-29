@@ -1066,7 +1066,13 @@ s64 func_002B6800(s32 callback) {
     return menuSetHandler(context, 2, callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuDrawSelectionLabel);
+void mnuDrawSelectionLabel(u16 id) {
+    s32 label = func_0019FE00(0x11B0, 0xA88, 0, 0, id, 1);
+
+    func_0019D178(label, 0xA09DC35A);
+    func_0019D550(label, 1, 0x53);
+    func_0019C5B0(label);
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6898);
 
@@ -1779,7 +1785,23 @@ void func_002BA268(SprGroup *group) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuReleaseResourceList);
+typedef struct ResourceList {
+    /* 0x0 */ u32 unk0;
+    /* 0x4 */ u32 unk4;
+    /* 0x8 */ s32 count;
+    /* 0xC */ u32 items[1];
+} ResourceList;
+
+void mnuReleaseResourceList(ResourceList *list) {
+    s32 i;
+
+    for (i = 0; i < list->count; i++) {
+        if (list->items[i] != 0) {
+            func_003054E8(list->items[i]);
+        }
+    }
+    func_00328E48(list);
+}
 
 typedef struct MenuPos {
     s32 x;
@@ -2124,7 +2146,43 @@ void func_002BB0D0(u8 *menu) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BB0E8);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BB290);
+typedef struct ScrollParams {
+    s32 a;
+    s32 b;
+    s32 c;
+} ScrollParams;
+
+typedef struct ScrollInner {
+    u8 unk0[0x20];
+    ScrollParams *params;
+} ScrollInner;
+
+typedef struct ScrollHandle {
+    u8 unk0[8];
+    ScrollInner *inner;
+} ScrollHandle;
+
+extern ScrollHandle *func_00304998(s32);
+
+void func_002BB290(u8 *menu) {
+    ScrollHandle *handle;
+
+    handle = func_00304998(1);
+    *(ScrollHandle **)(menu + 0x3C) = handle;
+    handle->inner->params->a = 10;
+    handle->inner->params->b = 0;
+
+    handle = func_00304998(3);
+    *(ScrollHandle **)(menu + 0x40) = handle;
+    handle->inner->params->a = 8;
+    handle->inner->params->b = 4;
+    handle->inner->params->c = 8;
+
+    handle = func_00304998(1);
+    *(ScrollHandle **)(menu + 0x44) = handle;
+    handle->inner->params->a = 10;
+    handle->inner->params->b = 0;
+}
 
 void func_002BB320(menu)
     u32 *menu;

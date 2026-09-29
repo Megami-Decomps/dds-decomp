@@ -785,7 +785,19 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143F78);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00144028);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00144178);
+extern void *func_00328D68(s32 size);
+extern void func_00101950(s32, void *);
+extern void func_00144028();
+
+void *func_00144178(s32 arg0) {
+    s16 *node = func_00328D68(8);
+    node[1] = 1;
+    node[0] = 0;
+    node[2] = 0;
+    node[3] = 0;
+    func_00101950(arg0, node);
+    return func_00144028;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);
 

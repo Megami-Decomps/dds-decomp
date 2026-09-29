@@ -4,6 +4,8 @@ extern u64 sdfSoundIsCommandBusy(void);
 
 extern u64 func_0014A250(void);
 
+extern s32 D_0032E4E4[];
+
 u32 func_0014F4C8(void) {
     u64 value;
 
@@ -102,7 +104,10 @@ s32 func_0014F6F0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F780);
+s32 func_0014F780(void) {
+    D_0032E4E4[0] = 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F790);
 

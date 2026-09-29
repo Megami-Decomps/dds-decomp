@@ -190,19 +190,16 @@ u32 func_0016D290(u32 arg0) {
     return arg0;
 }
 
-void func_0016D298(s32 arg0) {
-    func_001648C0(*(u32 *)(arg0 + 0x60), *(u32 *)(arg0 + 0x40),
-                                *(u32 *)(arg0 + 0x48), *(u32 *)(arg0 + 0x50));
+void func_0016D298(EffPCPThunderWorkB *work) {
+    func_001648C0(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
-void func_0016D2C0(s32 arg0) {
-    func_001649E0(*(u32 *)(arg0 + 0x60), *(u32 *)(arg0 + 0x40),
-                                *(u32 *)(arg0 + 0x48), *(u32 *)(arg0 + 0x50));
+void func_0016D2C0(EffPCPThunderWorkB *work) {
+    func_001649E0(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
-void func_0016D2E8(s32 arg0) {
-    func_00164848(*(u32 *)(arg0 + 0x60), *(u32 *)(arg0 + 0x40),
-                                *(u32 *)(arg0 + 0x48), *(u32 *)(arg0 + 0x50));
+void func_0016D2E8(EffPCPThunderWorkB *work) {
+    func_00164848(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
 void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
@@ -260,8 +257,8 @@ void func_0016E748(s32 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E778);
 
-void func_0016E788(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x4c) = arg1;
+void func_0016E788(EffPCPThunderWorkB *work, u32 value) {
+    work->unk4C = value;
 }
 
 void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {

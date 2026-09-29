@@ -2,6 +2,10 @@
 
 extern u64 func_002D0A80(void);
 
+extern u8 D_003BD9C8;
+
+void func_002D3C30(void *arg0, s32 arg1);
+
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0750);
 
 void func_002D0900(u8 *node) {
@@ -30,7 +34,13 @@ void sdfReleaseMemorySlot(s32 *slot) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0A10);
+void func_002D0A10(s32 arg0) {
+    s32 id = arg0;
+
+    if (id != 0) {
+        func_002D3C30(&D_003BD9C8, id);
+    }
+}
 
 typedef struct {
     u8 pad00[8];

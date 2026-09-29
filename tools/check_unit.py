@@ -205,7 +205,7 @@ def main():
             bad += 1
             continue
         pending_hi = {}
-        rodata_hi = sdata_hi = None
+        rodata_hi = sdata_hi = text_hi = None
         for i in range(0, size, 4):
             mine = struct.unpack_from("<I", text, off + i)[0]
             want = struct.unpack_from("<I", retail, roff + i)[0]
@@ -264,6 +264,23 @@ def main():
                 if where is None or (want & 0x3FFFFFF) != ((where + tgt - owner[0]) >> 2) & 0x3FFFFFF:
                     diffs.append((i, mine, want, f"{rtype} into {owner[1] if owner else '?'} "
                                                  "(retail calls a different function)"))
+                continue
+            if base == ".text" and rtype in ("R_MIPS_HI16", "R_MIPS_LO16"):
+                # A function pointer into this unit's own C (lui/addiu pair).
+                if rtype == "R_MIPS_HI16":
+                    text_hi = (i, mine, want)
+                    continue
+                if text_hi is None:
+                    continue
+                sext = lambda v: (v ^ 0x8000) - 0x8000
+                tgt = ((text_hi[1] & 0xFFFF) << 16) + sext(mine & 0xFFFF)
+                theirs = ((text_hi[2] & 0xFFFF) << 16) + sext(want & 0xFFFF)
+                owner = next(((o, n) for o, s, n in funcs if o <= tgt < o + s), None)
+                where = address(owner[1], syms) if owner else None
+                if where is None or where + tgt - owner[0] != theirs:
+                    diffs.append((i, mine, want, f"{rtype} address of {owner[1] if owner else '?'} "
+                                                 "(retail uses a different function)"))
+                text_hi = None
                 continue
             if target is None:
                 continue  # other local section: masked

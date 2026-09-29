@@ -315,7 +315,11 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109028);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109248);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_001094F8);
+extern void func_00109248();
+
+void func_001094F8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
+    func_00109248(a0, a1, a2, a3, 0xFFFFFF, a4, a5, a6, a7);
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
 
@@ -928,7 +932,17 @@ void func_0010AD28(u32 arg0, s32 arg1) {
     func_002CE208(4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010AD58);
+extern void func_002D0A90();
+
+s32 func_0010AD58(void) {
+    func_002CE750();
+    func_002CE758();
+    if (func_002CE920() == 0) {
+        return -1;
+    }
+    func_002D0A90();
+    return 0;
+}
 
 u8 func_0010AD98(void) {
     s64 temp_v0;
@@ -991,7 +1005,18 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B7B8);
 void func_0010B8D0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B8D8);
+extern void func_0010B7B8(void);
+extern void func_0010B8D0(void);
+extern s32 D_00438E68;
+extern char D_004113B8[]; /* "DebugTimeGrph" */
+
+void func_0010B8D8(s8 mode) {
+    if (mode == 1) {
+        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, func_0010B7B8, func_0010B8D0, NULL);
+    } else if (mode == 0) {
+        kwlnTaskDestroyWithHierarchy((void *)D_00438E68, 0);
+    }
+}
 
 void evtUnkB728Link(B728Work *node) {
     B728Work *tail = D_00435D68;

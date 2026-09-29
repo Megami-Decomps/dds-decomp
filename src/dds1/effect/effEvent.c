@@ -33,7 +33,9 @@ void func_00190238(FileRecordHeader *destination, const FileRecordHeader *source
     *destination = *source;
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_001902A0);
+void func_001902A0(const FileRecordHeader *source, FileRecordHeader *destination) {
+    *destination = *source;
+}
 
 void func_00190308(EffEventWork *work) {
     func_00161588(work->effect);

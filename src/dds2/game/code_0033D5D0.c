@@ -54,13 +54,18 @@ typedef struct SemaEntry {
     u8 pad4[20]; /* 0x4 */
 } SemaEntry;
 
+typedef struct ThreadEntry {
+    s32 threadId;
+    u8 pad4[20];
+} ThreadEntry;
+
 extern SemaEntry D_0040BA14[];
 
 extern s32 SignalSema(s32 sema);
 
 extern s32 D_00438B20;
 
-extern SemaEntry D_0040BA10[];
+extern ThreadEntry D_0040BA10[];
 
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
@@ -466,7 +471,7 @@ s32 func_0033FCE0(DevState *arg0) {
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FD30);
 
 DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
-                        void (*context)(DevState *, s32, s32, s32, s32), s32 callback) {
+                        void (*completion)(DevState *, s32, s32, s32, s32), s32 completionContext) {
     void *resource;
     s32 id = func_0033F898(path, &resource);
     DevState *state;
@@ -474,7 +479,7 @@ DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
     if (id < 0) {
         return NULL;
     }
-    state = func_0033F9D0(resource, id, 8, context, callback);
+    state = func_0033F9D0(resource, id, 8, completion, completionContext);
     state->unk1C = extra;
     state->unk20 = data;
     state->unk18 = 0;
@@ -483,8 +488,8 @@ DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
 }
 
 DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
-                        void (*context)(DevState *, s32, s32, s32, s32),
-                        s32 callback, s32 options) {
+                        void (*completion)(DevState *, s32, s32, s32, s32),
+                        s32 completionContext, s32 options) {
     void *resource;
     s32 id = func_0033F898(path, &resource);
     DevState *state;
@@ -492,7 +497,7 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
     if (id < 0) {
         return NULL;
     }
-    state = func_0033F9D0(resource, id, 9, context, callback);
+    state = func_0033F9D0(resource, id, 9, completion, completionContext);
     state->unk1C = extra;
     state->unk20 = data;
     state->options = options != 0 ? options : D_00438B24;
@@ -501,22 +506,22 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
     return state;
 }
 
-void sdfSetThreadPriorities(s32 arg0) {
-    SemaEntry *p;
+void sdfSetThreadPriorities(s32 priority) {
+    ThreadEntry *thread;
     u32 i;
 
-    if (D_00438B20 == arg0) {
+    if (D_00438B20 == priority) {
         return;
     }
-    D_00438B20 = arg0;
-    p = D_0040BA10;
+    D_00438B20 = priority;
+    thread = D_0040BA10;
     i = 0;
     do {
-        s32 tid = p->sema;
+        s32 tid = thread->threadId;
 
-        p++;
+        thread++;
         if (tid >= 0) {
-            ChangeThreadPriority(tid, arg0);
+            ChangeThreadPriority(tid, priority);
         }
         i++;
     } while (i < 4);

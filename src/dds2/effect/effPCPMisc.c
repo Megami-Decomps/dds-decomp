@@ -1,5 +1,12 @@
 #include "common.h"
 #include "pcp_vu0.h"
+extern u32 effMiscRand(void *state);
+#include "pcp_vu0.h"
+/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
+#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 extern void func_0016A620(u32);
 extern void func_00157658(u32);
 
@@ -2456,7 +2463,20 @@ void func_00186B28(EffPCPRotateWork *work, void *src) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186B88);
+EffPCPSpinWork *func_00186B88(void *src) {
+    EffPCPSpinWork *work = func_00328D68(0x64);
+
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = (void *)effParamCreateFromTable(src, 0);
+    PCP_UNIT_MATRIX(work->matrix);
+    work->angle = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
+    if (effMiscRand(D_003AA868) & 1) {
+        work->angle += 3.14159265f;
+    }
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186C60);
 
@@ -2526,9 +2546,31 @@ void effCopyMatrix(EffPCPWork *work, void *src) {
         : : "r"(&work->unk10) : "memory");
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effSpinEffectCreateFromTable);
+EffPCPSpinWork *effSpinEffectCreateFromTable(void *table) {
+    EffPCPSpinWork *work = func_00328D68(0x68);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effSpinEffectClone);
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = (void *)effParamCreateFromTable(table, 0);
+    work->handle1 = (void *)effParamCreateFromTable(table, 1);
+    PCP_UNIT_MATRIX(work->matrix);
+    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    return work;
+}
+
+EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
+    EffPCPSpinWork *work = func_00328D68(0x68);
+
+    work->scale = 1.0f;
+    work->frame = 0;
+    work->color = 0x80808080;
+    work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
+    work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
+    PCP_UNIT_MATRIX(work->matrix);
+    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    return work;
+}
 
 void func_00186FE0(u32 arg0) {
     func_0016A620(*(u32 *)((s32)arg0 + 100));
@@ -2569,9 +2611,31 @@ void func_00187138(EffPCPWork *work, void *src) {
         : : "r"(&work->unk10) : "memory");
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187168);
+EffPCPSpinWork *func_00187168(void *table) {
+    EffPCPSpinWork *work = func_00328D68(0x68);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187228);
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = (void *)effParamCreateFromTable(table, 0);
+    work->handle1 = (void *)effParamCreateFromTable(table, 1);
+    PCP_UNIT_MATRIX(work->matrix);
+    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    return work;
+}
+
+EffPCPSpinWork *func_00187228(EffPCPSpinWork *src) {
+    EffPCPSpinWork *work = func_00328D68(0x68);
+
+    work->scale = 1.0f;
+    work->frame = 0;
+    work->color = 0x80808080;
+    work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
+    work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
+    PCP_UNIT_MATRIX(work->matrix);
+    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    return work;
+}
 
 void func_001872E0(u32 arg0) {
     func_0016A620(*(u32 *)((s32)arg0 + 100));
@@ -3107,7 +3171,39 @@ u8 *func_00189190(u8 *work) {
     return copy;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001892A8);
+void func_001892A8(u8 *work) {
+    u32 i = 0;
+    u32 count = *(u32 *)(work + 0x58);
+    u32 *entry = *(u32 **)(work + 0x164);
+    u32 *list;
+    u32 *p;
+
+    if (count != 0) {
+        do {
+            u32 handle = *entry;
+            entry += 6;
+            i++;
+            func_0016D228(handle);
+        } while (i < count);
+    }
+    list = *(u32 **)(work + 0x174);
+    count = count * 4;
+    if (list != NULL) {
+        p = list;
+        i = 0;
+        if (count != 0) {
+            do {
+                u32 handle = *p++;
+                if (handle != 0) {
+                    func_0016A620(handle);
+                }
+                i++;
+            } while (i < count);
+        }
+        func_003297C8(*(u32 *)(work + 0x178));
+    }
+    func_003297C8(*(u32 *)(work + 0x17C));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189360);
 

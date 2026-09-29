@@ -117,11 +117,11 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A220);
 
-u8 func_0011A288(s32 arg0) {
-    if ((*(u16 *)arg0 & 0x20) == 0) {
+u8 func_0011A288(Entry1A4 *entry) {
+    if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return *(u8 *)(D_00435DEC + *(u16 *)(arg0 + 4) * 76 + 4);
+    return *(u8 *)(D_00435DEC + entry->rosterIndex * 76 + 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", dds3FindEntryIndex);

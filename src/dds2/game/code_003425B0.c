@@ -137,14 +137,14 @@ void func_00342690(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003426B8);
 
-void sdfSoundSetChannelCount(u32 arg0) {
-    if (0x10 < arg0) {
-        arg0 = 0x10;
+void sdfSoundSetChannelCount(u32 channels) {
+    if (0x10 < channels) {
+        channels = 0x10;
     }
-    if (arg0 == 0) {
-        arg0 = 1;
+    if (channels == 0) {
+        channels = 1;
     }
-    func_003417A8((arg0 - 1) | 0x1d0, 0, 0, 0);
+    func_003417A8((channels - 1) | 0x1d0, 0, 0, 0);
 }
 
 u32 func_00342728(u32 command) {

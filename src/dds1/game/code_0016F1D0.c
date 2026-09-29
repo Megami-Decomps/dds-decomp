@@ -24,6 +24,8 @@ typedef struct {
 
 extern u64 effParamTableGetBlock(u64, u64);
 
+extern void func_001705A0();
+
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F1D0);
 
 void func_0016F420(u64 arg0) {
@@ -137,7 +139,9 @@ s32 func_00170548(EffectRecordGroup *group, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170558);
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_001705A0);
+void func_001705A0(u32 id) {
+    func_0016FC28(id);
+}
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_001705B8);
 
