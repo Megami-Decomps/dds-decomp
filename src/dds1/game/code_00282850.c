@@ -967,7 +967,7 @@ u32 func_002866C8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002866D0);
+INCLUDE_ASM(const s32, "game/code_00282850", skillApplyFieldUseEffect);
 
 u8 func_002868C0(u32 arg0) {
     return *(s8 *)((arg0 & 0xffff) * 2 + D_003BAA4C) == '\x01';
@@ -1069,9 +1069,9 @@ u16 func_00286AD0(s32 arg0) {
 extern u16 D_0037CE00[];
 INCLUDE_ASM(const s32, "game/code_00282850", func_00286AD8);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286B48);
+INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyPermanentBonus);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286D20);
+INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyDirectEffect);
 
 s32 mnuGetSelectionFromFlags(s32 entry) {
     u16 flags = *(u16 *)(entry + 0xe);

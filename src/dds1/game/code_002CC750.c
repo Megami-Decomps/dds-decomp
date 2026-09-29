@@ -345,7 +345,7 @@ s32 scrSetFlag(ScrVmOperand *work, u16 index) {
     return 1;
 }
 
-void func_002CD888(u32 id) {
+void scrSetGlobalSeenBit(u32 id) {
     u16 bit;
     u32 *word;
     s32 offset;
@@ -358,7 +358,7 @@ void func_002CD888(u32 id) {
     *word |= 1U << (bit & 31);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD8E8);
+INCLUDE_ASM(const s32, "game/code_002CC750", scrTestGlobalSeenBit);
 
 void scrSetSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;

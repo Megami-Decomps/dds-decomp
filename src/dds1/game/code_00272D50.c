@@ -87,8 +87,8 @@ s64 mnuStaffRunPanel2b(u64 request) {
     return menuRunPanel(state, 2, request);
 }
 
-extern s32 func_00286D20(s32, s32, s32, s32);
-extern s32 func_002866D0(s32, s32, s32, s32);
+extern s32 battleItemApplyDirectEffect(s32, s32, s32, s32);
+extern s32 skillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 func_0011A568(s32);
 extern void func_00119900(s32, s32);
 extern void initPartyPanelSlots(s32);
@@ -101,13 +101,13 @@ extern void func_00280048(s32);
 s32 func_00273750(s32 item, s32 context) {
     s32 panel = context + 0x15C;
     s32 unit = D_003BAA00 + *(s32 *)(*(s32 *)(*(s32 *)(context + 0x7D8) + 0x1C)) * 0x1A4 + 0xA60;
-    s32 result = func_00286D20(panel, item & 0xFFFF, unit, unit);
+    s32 result = battleItemApplyDirectEffect(panel, item & 0xFFFF, unit, unit);
 
     if (result != 1) {
         if (result == 2) {
             return 0;
         }
-        if (func_002866D0(panel, func_0011A568(item) & 0xFFFF, unit, unit) == 0) {
+        if (skillApplyFieldUseEffect(panel, func_0011A568(item) & 0xFFFF, unit, unit) == 0) {
             return 0;
         }
     }

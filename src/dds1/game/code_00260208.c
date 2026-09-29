@@ -414,7 +414,7 @@ s32 mnuStaffPickRoll(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262C08);
+INCLUDE_ASM(const s32, "game/code_00260208", brsSelectLevelBonusMode);
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsSelectNextUnit);
 

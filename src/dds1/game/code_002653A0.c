@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00265E68(u32, s32);
+extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -75,7 +75,7 @@ u32 func_00265598(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002655A0);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", brsCalcApGain);
 
@@ -147,9 +147,9 @@ s32 btlAddBaseStats(u8 *src, u8 *obj) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C90);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyAccumulateStatGains);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265E68);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyBuildProfileCapSkillList);
 
 void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);
@@ -159,7 +159,7 @@ void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fo
     state[3] = fourth;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00266048);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildUnitProgressRow);
 
 void func_00266130(u32 fontContext) {
     func_001953D8(fontContext, 0xc, 0x10);
@@ -173,7 +173,7 @@ u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     return func_002C1630(0x80808080, 0x80808000, blend);
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002661A8);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildActiveUnitProgressRows);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);
 

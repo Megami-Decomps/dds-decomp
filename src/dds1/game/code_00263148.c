@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00265E68(u32, s32);
+extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -70,7 +70,7 @@ u32 mnuProcessItemSelection(u32 arg0) {
     s32 temp_v1;
 
     temp_v1 = (s32)arg0;
-    temp_v0 = func_00265E68(**(u32 **)(temp_v1 + 0x98), temp_v1 + 0x4c4);
+    temp_v0 = ptyBuildProfileCapSkillList(**(u32 **)(temp_v1 + 0x98), temp_v1 + 0x4c4);
     *(u32 *)(temp_v1 + 0x244) = temp_v0;
     kwlnItemApplySelection(arg0);
     return 1;
