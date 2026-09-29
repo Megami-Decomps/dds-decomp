@@ -31,7 +31,7 @@ extern u32 D_0040B308[];
 
 extern SdfResource *D_004389F8;
 
-void sdfPrependPacketList(s32 arg0, s32 arg1);
+void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
 void func_0032D218();
 
@@ -232,35 +232,35 @@ void func_0032CFD0(SdfListHead *list, u32 packet) {
     list->last = packet + 0x10;
 }
 
-void sdfPrependPacketList(s32 list, s32 item) {
-    s32 head;
+void sdfPrependPacketList(SdfListHead *list, SdfListHead *item) {
+    SdfListHead *head;
 
-    if (*(s32 *)(item + 8) == 0) {
+    if (item->last == 0) {
         return;
     }
-    head = *(s32 *)(list + 4);
-    if (head == 0) {
-        *(s32 *)(list + 8) = item;
+    head = (SdfListHead *)list->first;
+    if (head == NULL) {
+        list->last = (u32)item;
     } else {
         func_0032D218(item, head);
     }
-    *(s32 *)item = head;
-    *(s32 *)(list + 4) = item;
+    item->unk0 = (u32)head;
+    list->first = (u32)item;
 }
 
-void sdfAppendPacketList(s32 arg0, s32 arg1) {
-    s32 *piVar1;
+void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
+    u32 *last;
 
-    if (*(s32 *)(arg1 + 4) != 0) {
-        piVar1 = *(s32 **)(arg0 + 8);
-        if (piVar1 == (s32 *)0x0) {
-            *(s32 *)(arg0 + 4) = arg1;
+    if (item->first != 0) {
+        last = (u32 *)list->last;
+        if (last == NULL) {
+            list->first = (u32)item;
         }
         else {
-            *piVar1 = arg1;
-            func_0032D218(piVar1);
+            *last = (u32)item;
+            func_0032D218(last);
         }
-        *(s32 *)(arg0 + 8) = arg1;
+        list->last = (u32)item;
     }
 }
 

@@ -12,7 +12,7 @@ typedef struct {
     u8    pad1C[4];     /* 0x1C */
     u32  *unk20;        /* 0x20 table written by func_00189B90 */
     u8    pad24[0x10];  /* 0x24 */
-    void *unk34;        /* 0x34 released by func_001893C0 */
+    void *resource;   /* 0x34: freed during cleanup */
 } EffMagatuhiWork; /* 0x38 */
 
 extern void *effGetHandlerArg(void *arg);
@@ -37,8 +37,31 @@ typedef struct EffMagatuhiDst {
     f32 f50;
 } EffMagatuhiDst; /* 0x54 */
 
+typedef struct EffMagatuhiResourceSet {
+    u8 pad00[0x120];
+    u32 firstResource;   /* 0x120 */
+    u32 secondResource;  /* 0x124 */
+    u32 buffer;          /* 0x128 */
+    u32 extraBuffer;     /* 0x12C */
+} EffMagatuhiResourceSet;
+
+typedef struct EffMagatuhiWideFirst {
+    u8 pad00[0x180];
+    u32 mathResource; /* 0x180 */
+    u8 pad184[8];
+    u32 managedResource; /* 0x18C */
+    u32 buffer; /* 0x190 */
+} EffMagatuhiWideFirst;
+
+typedef struct EffMagatuhiWideSecond {
+    u8 pad00[0x184];
+    u32 mathResource; /* 0x184 */
+    u32 managedResource; /* 0x188 */
+    u32 buffer; /* 0x18C */
+} EffMagatuhiWideSecond;
+
 void effMagatuhiReleaseResource(EffMagatuhiWork *work) {
-    func_003297C8(work->unk34);
+    func_003297C8(work->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
@@ -57,10 +80,10 @@ void func_001918B8(void) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001918D0);
 
-void func_00191A98(s32 arg0) {
-    effMathReleaseWorkResource(*(u32 *)(arg0 + 0x180));
-    func_00190DB0(*(u32 *)(arg0 + 0x18c));
-    func_003297C8(*(u32 *)(arg0 + 400));
+void func_00191A98(EffMagatuhiWideFirst *work) {
+    effMathReleaseWorkResource(work->mathResource);
+    func_00190DB0(work->managedResource);
+    func_003297C8(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191AD0);
@@ -82,10 +105,10 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001922B0);
 
-void func_00192438(s32 arg0) {
-    effMathReleaseWorkResource(*(u32 *)(arg0 + 0x184));
-    func_00190DB0(*(u32 *)(arg0 + 0x188));
-    func_003297C8(*(u32 *)(arg0 + 0x18c));
+void func_00192438(EffMagatuhiWideSecond *work) {
+    effMathReleaseWorkResource(work->mathResource);
+    func_00190DB0(work->managedResource);
+    func_003297C8(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192470);
@@ -98,9 +121,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192A10);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192C20);
 
-void func_00192E08(s32 arg0) {
-    func_00190DB0(*(u32 *)(arg0 + 0x120));
-    func_003297C8(*(u32 *)(arg0 + 0x128));
+void func_00192E08(EffMagatuhiResourceSet *work) {
+    func_00190DB0(work->firstResource);
+    func_003297C8(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192E38);
@@ -109,8 +132,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192F80);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193238);
 
-void func_00193250(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x124) = arg1;
+void func_00193250(EffMagatuhiResourceSet *work, u32 value) {
+    work->secondResource = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs);
@@ -119,9 +142,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193280);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193488);
 
-void func_00193638(s32 arg0) {
-    func_00190DB0(*(u32 *)(arg0 + 0x124));
-    func_003297C8(*(u32 *)(arg0 + 300));
+void func_00193638(EffMagatuhiResourceSet *work) {
+    func_00190DB0(work->secondResource);
+    func_003297C8(work->extraBuffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193668);
@@ -130,8 +153,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001937C0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193A88);
 
-void func_00193AA0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x128) = arg1;
+void func_00193AA0(EffMagatuhiResourceSet *work, u32 value) {
+    work->buffer = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs2);
@@ -140,9 +163,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AD0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193CF8);
 
-void func_00193EE0(s32 arg0) {
-    func_00190DB0(*(u32 *)(arg0 + 0x124));
-    func_003297C8(*(u32 *)(arg0 + 0x128));
+void func_00193EE0(EffMagatuhiResourceSet *work) {
+    func_00190DB0(work->secondResource);
+    func_003297C8(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193F10);
@@ -151,8 +174,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001943E0);
 
-void func_001943F8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x120) = arg1;
+void func_001943F8(EffMagatuhiResourceSet *work, u32 value) {
+    work->firstResource = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs3);

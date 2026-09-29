@@ -972,7 +972,42 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D4590);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D46A8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D4820);
+extern s32 func_00202F80(s32);
+extern s32 func_002046A0(s32);
+extern void sndFreeResourceNode(s32);
+extern void sndFreeListNode(s32);
+extern s32 func_001E97C0(u8 *);
+extern void func_001E9860(void);
+extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksByKind(s32);
+
+s32 func_001D4820(u8 *actor) {
+    if (*(s32 *)(actor + 0x318) != 0) {
+        if (func_00202F80(*(s32 *)(actor + 0x318)) != 0) {
+            return 0;
+        }
+        sndFreeResourceNode(*(s32 *)(actor + 0x318));
+        *(s32 *)(actor + 0x318) = 0;
+    }
+    if (*(s32 *)(actor + 0x324) != 0) {
+        if (func_002046A0(*(s32 *)(actor + 0x324)) != 0) {
+            return 0;
+        }
+        sndFreeListNode(*(s32 *)(actor + 0x324));
+        *(s32 *)(actor + 0x324) = 0;
+    }
+    if (*(s32 *)(actor + 0x334) != 0) {
+        return 0;
+    }
+    if (func_001E97C0(actor) != 0) {
+        func_001E9860();
+        return 0;
+    }
+    if (btlCountTasksForOwner(*(s64 *)(actor + 0x108)) != 0) {
+        return 0;
+    }
+    return btlCountTasksByKind(0x2E) == 0;
+}
 
 void func_001D48E0(void) {
 }

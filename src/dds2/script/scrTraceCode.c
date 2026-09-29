@@ -72,13 +72,12 @@ u32 scrJumpProcedure(ScrData *scr) {
 
 u32 scrCallProcedure(u32 arg0) {
     s32 temp_v0;
+    ScrData *scr;
 
     temp_v0 = (s32)arg0;
-    scrPushTypeFourValue(arg0, *(u32 *)(temp_v0 + 0x18));
-    *(u32 *)(temp_v0 + 0x18) =
-              *(u32 *)
-                (*(s16 *)(*(s32 *)(temp_v0 + 0x18) * 4 + *(s32 *)(temp_v0 + 0xbc) + 2) * 0x20 +
-                  *(s32 *)(temp_v0 + 0xb4) + 0x18);
+    scr = (ScrData *)temp_v0;
+    scrPushTypeFourValue(arg0, scr->pc);
+    scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
@@ -94,27 +93,27 @@ u32 scrJumpLabel(ScrData *scr) {
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CBD0);
 
-u32 func_0010D0B8(u32 arg0) {
-    func_0010CBD0(arg0, 0);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D0B8(ScrData *scr) {
+    func_0010CBD0(scr, 0);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D0F0(u32 arg0) {
-    func_0010CBD0(arg0, 1);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D0F0(ScrData *scr) {
+    func_0010CBD0(scr, 1);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D128(u32 arg0) {
-    func_0010CBD0(arg0, 2);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D128(ScrData *scr) {
+    func_0010CBD0(scr, 2);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D160(u32 arg0) {
-    func_0010CBD0(arg0, 3);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D160(ScrData *scr) {
+    func_0010CBD0(scr, 3);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
@@ -122,51 +121,51 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D198);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D280);
 
-u32 func_0010D328(u32 arg0) {
-    func_0010CBD0(arg0, 4);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D328(ScrData *scr) {
+    func_0010CBD0(scr, 4);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D360(u32 arg0) {
-    func_0010CBD0(arg0, 5);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D360(ScrData *scr) {
+    func_0010CBD0(scr, 5);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D398(u32 arg0) {
-    func_0010CBD0(arg0, 6);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D398(ScrData *scr) {
+    func_0010CBD0(scr, 6);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D3D0(u32 arg0) {
-    func_0010CBD0(arg0, 7);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D3D0(ScrData *scr) {
+    func_0010CBD0(scr, 7);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D408(u32 arg0) {
-    func_0010CBD0(arg0, 8);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D408(ScrData *scr) {
+    func_0010CBD0(scr, 8);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D440(u32 arg0) {
-    func_0010CBD0(arg0, 9);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D440(ScrData *scr) {
+    func_0010CBD0(scr, 9);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D478(u32 arg0) {
-    func_0010CBD0(arg0, 10);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D478(ScrData *scr) {
+    func_0010CBD0(scr, 10);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D4B0(u32 arg0) {
-    func_0010CBD0(arg0, 0xb);
-    *(s32 *)((s32)arg0 + 0x18) = *(s32 *)((s32)arg0 + 0x18) + 1;
+u32 func_0010D4B0(ScrData *scr) {
+    func_0010CBD0(scr, 0xb);
+    scr->pc = scr->pc + 1;
     return 1;
 }
 

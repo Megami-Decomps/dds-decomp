@@ -9,6 +9,17 @@ typedef struct PolyTransform {
     f32 scaleDC;
 } PolyTransform;
 
+typedef struct PolyEntryPool {
+    u8 pad00[0x10];
+    u32 entryCount; /* 0x10 */
+    u32 sentinel; /* 0x14 */
+    u8 pad18[0x50];
+    u32 stateA; /* 0x68 */
+    u32 stateB; /* 0x6C */
+    u8 pad70[0x88];
+    s32 *records; /* 0xF8: entries have five 32-bit words */
+} PolyEntryPool;
+
 void func_001655D0(u32 arg0) {
     func_001634A8(*(u32 *)((s32)arg0 + 0xdc));
     func_00328E48(arg0);
@@ -97,17 +108,17 @@ void func_00166EA0(float factor, PolyTransform *transform) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);
 
-void polyResetEntries(s32 pool) {
+void polyResetEntries(PolyEntryPool *pool) {
     u32 entryCount;
     s32 *record;
     u32 index;
 
-    entryCount = *(u32 *)(pool + 0x10);
+    entryCount = pool->entryCount;
     index = 0;
-    *(u32 *)(pool + 0x14) = 0xfffffff;
-    *(u32 *)(pool + 0x6c) = 0;
-    *(u32 *)(pool + 0x68) = 0;
-    record = *(s32 **)(pool + 0xf8);
+    pool->sentinel = 0xfffffff;
+    pool->stateB = 0;
+    pool->stateA = 0;
+    record = pool->records;
     if (entryCount != 0) {
         do {
             if (*record != -0xffffff) {

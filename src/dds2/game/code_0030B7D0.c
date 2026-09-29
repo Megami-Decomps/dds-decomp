@@ -1,25 +1,43 @@
 #include "common.h"
+
 extern s32 func_003292A8(s32);
+
 extern void *sdfMemoryGetBlockAddress(u32);
+
 extern void func_00313BA8();
+
 extern u64 func_0019D550(u64, u64, u64);
+
 extern u64 frFontMeasureGlyphChain(u64);
+
 extern s32 D_004388B4;
+
 extern u8 D_00400970[];
+
 extern u8 D_00400980[];
+
 extern void effObjSetInnerFirstVec(s32, void *);
+
 extern void effObjSetInnerSecondVec(s32, void *);
+
 extern s32 func_003297C8(u32);
+
 extern void func_00328E48();
+
 extern void sdfClearTaskList();
+
 #include "fpu.h"
-extern float func_003532B8(float);
-extern float fldNormalizedVectorDot();
+
 extern s32 func_0030DE08(f32, f32);
+
 extern void func_003154A0();
+
 extern s32 func_0030C5D8();
+
 extern s32 func_00312B10();
+
 extern s32 fileResolvePrimaryBuffer();
+
 extern void func_002DEB80();
 
 extern s32 D_00435E50;
@@ -130,7 +148,7 @@ extern void sdfCounterTickCountdown(void);
 
 extern void mnuTickMapTimers(void);
 
-extern void func_0030D438(void);
+extern s32 func_0030D438(void);
 
 extern u32 func_00312A48(u32 *);
 
@@ -145,6 +163,39 @@ extern s32 func_0030BD10();
 extern s32 func_003139D8();
 
 s32 func_003298C0(u32 sprite);
+
+typedef struct MapResource {
+    u32 image;
+    u32 handle;
+    u32 descriptor;
+    u32 unkC;
+} MapResource;
+
+extern MapResource D_00401280[10];
+
+extern MapResource D_00401260;
+
+extern MapResource D_00401270;
+
+extern u32 fldReleaseMapResource(s32 *);
+
+extern f32 sdfQuatDot(f32 *, f32 *);
+
+extern f32 func_00353140(f32);
+
+extern f32 func_003532B8(f32);
+
+extern f32 func_003406A0(f32);
+
+extern f32 func_003407A0(f32);
+
+extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
+
+extern f32 fldNormalizedVectorDot(f32 *, f32 *);
+
+extern void func_00313A58(u8 *);
+
+extern s32 func_00314990(s32, u16);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030B7D0);
 
@@ -233,7 +284,11 @@ s64 func_0030C640(void) {
     return func_0030C5D8(D_004388C4);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030C660);
+s64 func_0030C660(void) {
+    sdfCounterTickCountdown();
+    mnuTickMapTimers();
+    return func_0030D438();
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030C690);
 
@@ -445,7 +500,18 @@ s64 func_0030E010(f32 x) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030E030);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", fldReleaseLocalMapResources);
+s32 fldReleaseLocalMapResources(void) {
+    s32 i = 9;
+    MapResource *item = D_00401280;
+    do {
+        fldReleaseMapResource((s32 *)item);
+        item++;
+        --i;
+    } while (i >= 0);
+    fldReleaseMapResource((s32 *)&D_00401260);
+    fldReleaseMapResource((s32 *)&D_00401270);
+    return 1;
+}
 
 void func_0030E130(void) {
     s32 temp_v0;
@@ -620,7 +686,14 @@ float fldVectorLength(float *v) {
     return fsqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", fldNormalizedVectorDot);
+float fldNormalizedVectorDot(float *left, float *right) {
+    struct Vector4 { float x, y, z, w; } a, b;
+    a = *(struct Vector4 *)left;
+    b = *(struct Vector4 *)right;
+    func_0030F8D0(&a.x);
+    func_0030F8D0(&b.x);
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
 float fldVec3AngleBetween(a, b)
 float *a;
@@ -702,9 +775,23 @@ float quaternionMagnitude(float *quaternion) {
     return fsqrtf(mdlQuaternionLengthSquared(quaternion));
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionInverse);
+void quaternionInverse(float *values) {
+    float lengthSquared = mdlQuaternionLengthSquared(values);
+    if (lengthSquared != 0.0f) {
+        values[0] = -values[0] / lengthSquared;
+        values[1] = -values[1] / lengthSquared;
+        values[2] = -values[2] / lengthSquared;
+        values[3] = values[3] / lengthSquared;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionNormalize);
+void quaternionNormalize(float *values) {
+    float length = quaternionMagnitude(values);
+    values[0] /= length;
+    values[1] /= length;
+    values[2] /= length;
+    values[3] /= length;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310D28);
 
@@ -722,17 +809,74 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatBlendAngular);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatSquad);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatLog);
+void sdfQuatLog(f32 *out, f32 *in) {
+    f32 angle = func_003532B8(in[3]);
+    f32 sine = func_003406A0(angle);
+    out[3] = 0.0f;
+    if (out[3] < sine) {
+        out[0] = angle * in[0] / sine;
+        out[1] = angle * in[1] / sine;
+        out[2] = angle * in[2] / sine;
+    } else {
+        out[0] = out[1] = out[2] = out[3];
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatExp);
+void sdfQuatExp(f32 *out, f32 *in) {
+    f32 x = in[0], y = in[1], z = in[2];
+    f32 length = fsqrtf(x * x + y * y + z * z);
+    f32 sine = func_003406A0(length);
+    out[3] = func_003407A0(length);
+    if (length > 0.0f) {
+        out[0] = sine * in[0] / length;
+        out[1] = sine * in[1] / length;
+        out[2] = sine * in[2] / length;
+    } else {
+        out[0] = out[1] = out[2] = 0.0f;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatSquadControl);
+void sdfQuatSquadControl(f32 *out, f32 *from, f32 *rotation, f32 *to) {
+    f32 first[4], second[4], middle[4];
+    out[0] = -rotation[0];
+    out[1] = -rotation[1];
+    out[2] = -rotation[2];
+    out[3] = rotation[3];
+    sdfQuatMultiply(first, out, from);
+    sdfQuatLog(first, first);
+    sdfQuatMultiply(second, out, to);
+    sdfQuatLog(second, second);
+    middle[0] = (first[0] + second[0]) * -0.25f;
+    middle[1] = (first[1] + second[1]) * -0.25f;
+    middle[2] = (first[2] + second[2]) * -0.25f;
+    middle[3] = (first[3] + second[3]) * -0.25f;
+    sdfQuatExp(middle, middle);
+    sdfQuatMultiply(out, rotation, middle);
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatForwardVector);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311888);
+f32 func_00311888(f32 *direction, f32 *target) {
+    f32 quaternion[4];
+    memset(quaternion, 0, sizeof(quaternion));
+    quaternion[2] = 1.0f;
+    sdfQuatForwardVector(direction, quaternion);
+    return fldNormalizedVectorDot(quaternion, target);
+}
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003118E8);
+f32 func_003118E8(f32 *direction, f32 *target) {
+    f32 quaternion[4];
+    f32 projection;
+    f32 component;
+    memset(quaternion, 0, sizeof(quaternion));
+    quaternion[1] = 1.0f;
+    projection = func_00311888(target, quaternion);
+    component = direction[1];
+    if (component < 0.0f) {
+        return -component / projection;
+    }
+    return component / projection;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311978);
 
@@ -903,7 +1047,29 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312810);
 
 INCLUDE_RODATA(const s32, "game/code_0030B7D0", D_0042D418);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312850);
+void func_00312850(void *list, s32 key, u32 mode) {
+    u32 *item = func_003127E8(list, key);
+    if (item == NULL) {
+        return;
+    }
+    switch (mode) {
+    case 3:
+        *item = (*(u16 *)item & ~1) | 0x10002;
+        break;
+    case 4:
+        *item = (*(u16 *)item & ~2) | 0x10001;
+        break;
+    case 2:
+        *item = *(u16 *)item | 0x20000;
+        break;
+    case 1:
+        *item = *(u16 *)item | 0x100000;
+        break;
+    case 0:
+        *item = *(u16 *)item | 0x10003;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312910);
 
@@ -992,7 +1158,18 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313100);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313158);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003131B0);
+u8 *func_003131B0(u8 *grid) {
+    u8 *cell = *(u8 **)(grid + 8);
+    u32 width = *(u32 *)(grid + 0x14);
+    u32 index = *(u32 *)cell;
+    cell += 8;
+    if (index % width == width - 1) {
+        return NULL;
+    }
+    *(u8 **)(grid + 8) = cell;
+    func_00313A58(grid);
+    return cell;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313210);
 
@@ -1174,8 +1351,6 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314990);
 
 extern u32 func_00315FC8(u16);
 
-extern s32 func_00314990(u8 *, u16);
-
 s32 func_00314A08(u8 *work) {
     u32 index;
     for (index = 0; index < 0xB0; index++) {
@@ -1338,7 +1513,12 @@ s32 scrFindSlot(u8 *work, u16 key) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315118);
+u16 func_00315118(u8 *work, u32 index) {
+    if (index >= 24) {
+        return 0;
+    }
+    return *(u16 *)(work + 0x22 + index * 2);
+}
 
 u32 func_00315138(u8 *work) {
     u16 *entries = (u16 *)(work + 0x22);
@@ -1439,13 +1619,68 @@ u32 func_00315640(u8 *work) {
     return 8;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315680);
+s32 func_00315680(s32 state, u8 *operand) {
+    s32 index = 0;
+    s32 count = func_00315640(operand);
+    if (count > 0) {
+        u8 *slots = operand + 0xc;
+        do {
+            if (func_00314990(state, slots[index++]) == 0) {
+                return 0;
+            }
+        } while (index < count);
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315700);
+s32 func_00315700(s32 state, u8 *operand) {
+    u32 matched = 0;
+    s32 index = 0;
+    s32 count = func_00315640(operand);
+    if (count > 0) {
+        u8 *slots = operand + 0xc;
+        do {
+            if (func_00314990(state, slots[index++]) != 0) {
+                matched++;
+            }
+        } while (index < count);
+    }
+    if (matched < *(u32 *)(operand + 8)) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003157A0);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315838);
+s32 func_00315838(u8 *operand) {
+    s32 index = 0;
+    s32 count = func_00315640(operand);
+    if (count > 0) {
+        u8 *slots = operand + 0xc;
+        do {
+            s32 present = 0;
+            s32 selected = slots[index];
+            s32 offset = 0;
+            s32 remaining = 4;
+            do {
+                u8 *entry = (u8 *)D_00435DD0 + 0xa60 + offset;
+                offset += 0x1c4;
+                if ((*(u16 *)entry & 1) != 0) {
+                    if (func_00314990((s32)entry, (u16)selected) != 0) {
+                        present = 1;
+                    }
+                }
+                remaining--;
+            } while (remaining >= 0);
+            if (present == 0) {
+                return 0;
+            }
+            index++;
+        } while (index < count);
+    }
+    return 1;
+}
 
 s32 func_00315920(u8 *a, u8 *b) {
     if (*(u16 *)(a + 0x14) < b[4]) {
@@ -1652,4 +1887,3 @@ INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438908);
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438910);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438918);
-

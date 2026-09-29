@@ -126,9 +126,27 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0718);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuCreatePanelState);
 
+typedef struct MenuPoint {
+    s32 x;
+    s32 y;
+} MenuPoint;
+
 typedef struct MenuPanelState {
-    u8 pad00[0x88];
-    u32 resourceHandle;
+    u8 pad00[0x14];
+    u32 state; /* 0x14 */
+    u32 firstValueA; /* 0x18 */
+    u32 firstValueB; /* 0x1C */
+    MenuPoint firstPosition; /* 0x20 */
+    u8 pad28[0x38];
+    MenuPoint secondPosition; /* 0x60 */
+    u32 secondValueA; /* 0x68 */
+    u32 secondValueB; /* 0x6C */
+    MenuPoint thirdPosition; /* 0x70 */
+    u32 thirdValueA; /* 0x78 */
+    u32 thirdValueB; /* 0x7C */
+    u32 thirdValueC; /* 0x80 */
+    u8 pad84[4];
+    u32 resourceHandle; /* 0x88 */
 } MenuPanelState;
 
 void func_002C07A0(MenuPanelState *panel) {
@@ -141,11 +159,11 @@ void func_002C07A0(MenuPanelState *panel) {
     func_00328E48(panel);
 }
 
-void func_002C07D8(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4) {
-    *(u32 *)(arg0 + 0x18) = arg1;
-    *(u32 *)(arg0 + 0x1c) = arg2;
-    func_00307388(arg0 + 0x20, arg3, arg4);
+void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
+                                    u32 y) {
+    panel->firstValueA = valueA;
+    panel->firstValueB = valueB;
+    func_00307388(&panel->firstPosition, x, y);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0800);
@@ -157,23 +175,23 @@ void func_002C08B0(MenuPanelState *panel) {
     panel->resourceHandle = resourceHandle;
 }
 
-void func_002C08E0(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4) {
-    *(u32 *)(arg0 + 0x68) = arg1;
-    *(u32 *)(arg0 + 0x6c) = arg2;
-    func_00307388(arg0 + 0x60, arg3, arg4);
+void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
+                                    u32 y) {
+    panel->secondValueA = valueA;
+    panel->secondValueB = valueB;
+    func_00307388(&panel->secondPosition, x, y);
 }
 
-void func_002C0908(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4) {
-    *(u32 *)(arg0 + 0x78) = arg1;
-    *(u32 *)(arg0 + 0x7c) = arg2;
-    func_00307388(arg0 + 0x70, arg3, 0);
-    *(u32 *)(arg0 + 0x80) = arg4;
+void func_002C0908(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
+                                    u32 additionalValue) {
+    panel->thirdValueA = valueA;
+    panel->thirdValueB = valueB;
+    func_00307388(&panel->thirdPosition, x, 0);
+    panel->thirdValueC = additionalValue;
 }
 
-void func_002C0950(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1;
+void func_002C0950(MenuPanelState *panel, u32 state) {
+    panel->state = state;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
@@ -182,11 +200,19 @@ extern s32 func_002C2680(void);
 
 extern void func_002C26D8(s32, s32, s32, s32, s32);
 
-extern void func_002C0D00(s32);
+typedef struct MenuPanelGroup {
+    u8 pad00[0x0C];
+    s32 texture;       /* 0x0C */
+    s32 entries[5];    /* 0x10 */
+    u32 selection;     /* 0x24 */
+    s32 initialValue;  /* 0x28: initialized to 0x100 */
+} MenuPanelGroup;
+
+extern void func_002C0D00(MenuPanelGroup *);
 
 s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
-    s32 group = func_00328D68(0x2C);
-    s32 *slot = (s32 *)(group + 0x10);
+    MenuPanelGroup *group = (MenuPanelGroup *)func_00328D68(0x2C);
+    s32 *slot = group->entries;
     s32 index;
     for (index = 0; index < 5; index++) {
         s32 entry = func_002C2680();
@@ -194,52 +220,53 @@ s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
         *slot++ = entry;
     }
     func_002C0D00(group);
-    *(s32 *)(group + 0xC) = texture;
-    *(s32 *)(group + 0x28) = 0x100;
-    return group;
+    group->texture = texture;
+    group->initialValue = 0x100;
+    return (s32)group;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDestroyPanelGroup);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuUpdateFiveListEntries);
 
-void func_002C0CF8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+void func_002C0CF8(MenuPanelGroup *group, u32 selection) {
+    group->selection = selection;
 }
 
-void func_002C0D00(s32 arg0) {
-    *(u32 *)(arg0 + 0x24) = 0xffffffff;
+void func_002C0D00(MenuPanelGroup *group) {
+    group->selection = 0xffffffff;
 }
 
-u32 func_002C0D10(s32 arg0) {
-    return *(u32 *)(arg0 + 0x24);
+u32 func_002C0D10(MenuPanelGroup *group) {
+    return group->selection;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
 
-void mnuSetGroupSelection(u32 *group, s32 index, s32 selected, u32 flags) {
+void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selected, u32 flags) {
+    /* Required to match: retain byte-offset indexing for the child slot. */
     s32 offset = index * 4 + 0x10;
     u32 *entry = (u32 *)((u8 *)group + offset);
     func_002C2AB0(*entry, selected);
     func_002C2AC8(*entry, flags);
 }
 
-void func_002C0F48(s32 arg0, s32 arg1, u32 arg2) {
-    func_002C2AA0(*(u32 *)(arg1 * 4 + arg0 + 0x10), arg2);
+void func_002C0F48(MenuPanelGroup *group, s32 index, u32 value) {
+    func_002C2AA0(group->entries[index], value);
 }
 
-void func_002C0F70(s32 arg0, u64 arg1) {
+void func_002C0F70(MenuPanelGroup *group, u64 value) {
     u32 temp_v0;
     u64 temp_v1;
     s32 temp_v2;
     u32 *puVar5;
     s32 temp_v3;
 
-    puVar5 = (u32 *)(arg0 + 0x10);
+    puVar5 = (u32 *)group->entries;
     temp_v3 = 0;
     do {
         temp_v2 = temp_v3 + 1;
-        temp_v1 = func_0011D360(arg1, temp_v3);
+        temp_v1 = func_0011D360(value, temp_v3);
         temp_v0 = *puVar5;
         puVar5 = puVar5 + 1;
         func_002C2AA0(temp_v0, temp_v1);
@@ -247,13 +274,21 @@ void func_002C0F70(s32 arg0, u64 arg1) {
     } while (temp_v2 < 5);
 }
 
+typedef struct MenuSpriteState {
+    u8 pad00[0x10];
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 initialValue; /* 0x1C: initialized to 0x100 */
+} MenuSpriteState;
+
 void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
-    u8 *item = func_00328D68(0x20);
+    MenuSpriteState *item = func_00328D68(0x20);
     memset(item, 0, 0x20);
-    *(s32 *)(item + 0x10) = x;
-    *(s32 *)(item + 0x14) = y;
-    *(s32 *)(item + 0x18) = z;
-    *(s32 *)(item + 0x1C) = 0x100;
+    item->x = x;
+    item->y = y;
+    item->z = z;
+    item->initialValue = 0x100;
     return item;
 }
 
@@ -272,12 +307,12 @@ void func_002C1068(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
 
 void *func_002C1660(s32 x, s32 y, s32 z) {
-    u8 *item = func_00328D68(0x20);
+    MenuSpriteState *item = func_00328D68(0x20);
     memset(item, 0, 0x20);
-    *(s32 *)(item + 0x10) = x;
-    *(s32 *)(item + 0x14) = y;
-    *(s32 *)(item + 0x18) = z;
-    *(s32 *)(item + 0x1C) = 0x100;
+    item->x = x;
+    item->y = y;
+    item->z = z;
+    item->initialValue = 0x100;
     return item;
 }
 

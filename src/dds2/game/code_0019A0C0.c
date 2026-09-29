@@ -28,30 +28,30 @@ typedef struct EffPrim {
     f32 cursorPosition; /* 0x24: channel-B interpolation position */
     f32 cursorStep; /* 0x28: channel-B position increment */
     u8 unk2C[0x18];   /* 0x2C */
-    u32 unk44;        /* 0x44: rand count for func_00192C00 */
-    u32 unk48;        /* 0x48: rand modulus for func_00192C00 */
+    u32 randomCount;        /* 0x44: number of random records */
+    u32 randomModulus;      /* 0x48: modulus for each random slot */
     u8 unk4C[0x11C];  /* 0x4C */
-    struct EffCntRec *unk168; /* 0x168: counter records */
+    struct EffCntRec *counterRecords; /* 0x168 */
     s32 *unk16C;      /* 0x16C: base for func_0018E200 */
 } EffPrim;
 
-/* 8-byte counter record at EffPrim.unk168. */
+/* 8-byte counter record at EffPrim.counterRecords. */
 typedef struct EffCntRec {
-    s32 unk0; /* 0x0: rand slot advanced by func_00192C00 */
+    s32 randomIndex; /* 0x0: advanced by effFillRandRecords */
     u32 unk4; /* 0x4: id released by func_00192638 */
 } EffCntRec;
 
-/* 0x38-byte keyframe record addressed by func_0018E200. */
+/* 0x38-byte keyframe record addressed by func_00195E38. */
 typedef struct EffRec38 {
     u8 unk0[0x30]; /* 0x0 */
-    f32 unk30;     /* 0x30: scaled by func_00192C00 */
-    f32 unk34;     /* 0x34: read by func_00192C00 */
+    f32 scaledRandomValue; /* 0x30 */
+    f32 randomScale;       /* 0x34 */
 } EffRec38;
 
-/* Emitter handle for func_00192C00: target primitive at +0x8. */
+/* Emitter handle for effFillRandRecords: target primitive at +0x8. */
 typedef struct EffEmit {
     u8 unk0[8];    /* 0x0 */
-    EffPrim *unk8; /* 0x8: target primitive */
+    EffPrim *primitive; /* 0x8: target primitive */
 } EffEmit;
 
 extern u32 effMiscRand(void *state);
@@ -117,30 +117,30 @@ void effCopyVertRows(EffChan *channel, f32 *source) {
     } while (index < 4);
 }
 
-void effFillRandRecords(EffEmit *arg0) {
-    EffPrim *e = arg0->unk8;
-    u32 mod = e->unk48;
-    u32 count = e->unk44;
-    EffCntRec *r = e->unk168;
-    u32 i = 0;
-    EffRec38 *rec;
-    s32 t;
-    f32 f;
+void effFillRandRecords(EffEmit *emitter) {
+    EffPrim *primitive = emitter->primitive;
+    u32 modulus = primitive->randomModulus;
+    u32 count = primitive->randomCount;
+    EffCntRec *record = primitive->counterRecords;
+    u32 index = 0;
+    EffRec38 *keyframe;
+    s32 randomIndex;
+    f32 scale;
 
     if (count == 0) {
         return;
     }
     do {
-        func_0019A2E0(e, i);
-        r->unk0 = effMiscRand(&D_003AA868) % mod;
-        rec = (EffRec38 *)func_00195E38(e->unk16C, i);
-        i++;
-        t = r->unk0;
-        f = rec->unk34;
-        r->unk0 = t + 1;
-        r++;
-        rec->unk30 = f * (f32)t;
-    } while (i < count);
+        func_0019A2E0(primitive, index);
+        record->randomIndex = effMiscRand(&D_003AA868) % modulus;
+        keyframe = (EffRec38 *)func_00195E38(primitive->unk16C, index);
+        index++;
+        randomIndex = record->randomIndex;
+        scale = keyframe->randomScale;
+        record->randomIndex = randomIndex + 1;
+        record++;
+        keyframe->scaledRandomValue = scale * (f32)randomIndex;
+    } while (index < count);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A900);

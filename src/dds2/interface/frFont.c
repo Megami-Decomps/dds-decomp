@@ -123,10 +123,10 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019C490);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C4D0);
 
-s32 func_0019C5B0(FrFontGlyph *arg0) {
+s32 func_0019C5B0(FrFontGlyph *glyph) {
     FrFontGlyph **slot = &D_004528B4[func_00100400() & 0xFF];
 
-    *slot = frFontLinkGlyph(*slot, arg0, 0);
+    *slot = frFontLinkGlyph(*slot, glyph, 0);
     return 0;
 }
 
@@ -339,28 +339,28 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DEE0);
 
 INCLUDE_ASM(const s32, "interface/frFont", frFontCreateContext);
 
-void func_0019E0A0(u32 *arg0) {
-    s8 temp_v0;
+void func_0019E0A0(FrFontCtx *ctx) {
+    s8 flag;
 
-    if (arg0[5] == 0) {
-        temp_v0 = *(s8 *)(arg0 + 7);
+    if (ctx->u14.ptr == NULL) {
+        flag = ctx->flag1C;
     }
     else {
-        if (*(s32 *)(arg0[5] + 0x1c) == 0) {
-            *(u8 *)(arg0 + 7) = 0;
+        if (*(s32 *)((u8 *)ctx->u14.ptr + 0x1c) == 0) {
+            ctx->flag1C = 0;
         }
-        temp_v0 = *(s8 *)(arg0 + 7);
+        flag = ctx->flag1C;
     }
-    if (temp_v0 == '\0') {
-        temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
+    if (flag == '\0') {
+        flag = ctx->flag1D;
     }
     else {
         frFontCreateContext();
-        temp_v0 = *(s8 *)((s32)arg0 + 0x1d);
+        flag = ctx->flag1D;
     }
-    if (temp_v0 != '\0') {
-        func_0019D100(arg0[5], *arg0, arg0[1]);
-        *(u8 *)((s32)arg0 + 0x1d) = 0;
+    if (flag != '\0') {
+        func_0019D100(ctx->u14.ptr, ctx->u0.word, ctx->unk4);
+        ctx->flag1D = 0;
     }
 }
 

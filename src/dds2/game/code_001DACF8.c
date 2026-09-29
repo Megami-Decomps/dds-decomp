@@ -37,31 +37,31 @@ typedef struct BtlWork {
     u8 pad0[0x208];
     s32 unk208;
     u8 pad20C[0xC];
-    u32 flags218;
+    u32 battleFlags;
     u32 flags21C;
     u8 pad220[8];
     s32 unk228;
     u8 pad22C[0x1C];
     BtlUnit *head;
-    BtlUnit *list24C;
+    BtlUnit *actorList;
     struct SoundTask *taskList250;
     struct SoundTask *taskList254;
     struct SoundResourceNode *resourceList258;
     struct ActiveSoundNode *soundList;
-    struct SoundSlotOwner *list260;
+    struct SoundSlotOwner *soundSlotOwners;
     u8 pad264[0x14];
     s32 unk278;
     u8 pad27C[0x6C];
-    s32 unk2E8;
+    s32 moneyEarned;
     u8 pad2EC[8];
-    s32 unk2F4;
+    s32 experienceEarned;
     u8 pad2F8[0x1CC];
     s8 unk4C4;
     u8 pad4C5[3];
     f32 unk4C8;
     u8 pad4CC[0xE4];
-    s32 unk5B0;
-    s32 unk5B4;
+    s32 primaryBuffer;
+    s32 secondaryBuffer;
     u8 pad5B8[0x38];
     s32 (*hook5F0)(BtlUnit *, s32);
     u8 pad5F4[0x5C];
@@ -84,9 +84,9 @@ struct BtlUnit {
     u8 pad0[0x18];
     BtlUnit *link18;
     u8 pad1C[0x38];
-    u32 unk54;
+    u32 baseColor;
     u8 pad58[0x2C];
-    u32 unk84;
+    u32 overlayColor;
     f32 unk88;
     u8 pad8C[0x40];
     u8 unkCC;
@@ -118,12 +118,12 @@ struct BtlUnit {
     struct SoundLink *link320;
     struct ActiveSoundNode *node324;
     s32 unk328;
-    void *unk32C;
+    void *gunResource;
     u16 unk330;
     u8 pad332[2];
     s32 unk334;
     u8 pad338[4];
-    s32 unk33C;
+    s32 effectObject;
     BtlUnitExt *ext;
     s32 unk344;
     u8 pad348[4];
@@ -131,8 +131,8 @@ struct BtlUnit {
     s32 unk350;
     u8 pad354[8];
     u32 handle35C;
-    BtlUnit *link360;
-    BtlUnit *link364;
+    BtlUnit *previousActor;
+    BtlUnit *nextActor;
 };
 
 typedef struct BtlStateHandler {
@@ -387,9 +387,9 @@ void func_001DC278(BtlUnit *unit) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     work->unk278 = work->unk278 + 1;
     if (func_001B2AF8(unit->link18) != 0) {
-        work->flags218 |= 0x2000;
+        work->battleFlags |= 0x2000;
     } else {
-        work->flags218 |= 0x1000;
+        work->battleFlags |= 0x1000;
     }
 }
 
@@ -632,7 +632,7 @@ u32 func_001DFD58(void *arg) {
     s32 *args = arg;
     BtlWork *work = (BtlWork *)func_001AA6F8();
     BtlUnit *unit = (BtlUnit *)args[0];
-    if (!(work->flags218 & 0x80)) {
+    if (!(work->battleFlags & 0x80)) {
         return 1;
     }
     func_001AA850((u8 *)unit + 0x120, args[1]);
@@ -773,8 +773,8 @@ u32 func_001E07E8(s32 arg0) {
     if ((*(BtlUnit **)arg0)->flags & 0x400) {
         return 1;
     }
-    work->unk2F4 += ((s32 *)arg0)[1];
-    func_0020D128("btl:epall=%d[%d](packet)\n", work->unk2F4, ((s32 *)arg0)[1]);
+    work->experienceEarned += ((s32 *)arg0)[1];
+    func_0020D128("btl:epall=%d[%d](packet)\n", work->experienceEarned, ((s32 *)arg0)[1]);
     return 1;
 }
 
@@ -803,8 +803,8 @@ u32 func_001E08E0(s32 arg0) {
     if ((*(BtlUnit **)arg0)->flags & 0x400) {
         return 1;
     }
-    work->unk2E8 += ((s32 *)arg0)[1];
-    func_0020D128("btl:money=%d[%d](packet)\n", work->unk2E8, ((s32 *)arg0)[1]);
+    work->moneyEarned += ((s32 *)arg0)[1];
+    func_0020D128("btl:money=%d[%d](packet)\n", work->moneyEarned, ((s32 *)arg0)[1]);
     return 1;
 }
 
@@ -1269,7 +1269,7 @@ void func_001E3088(BtlUnit *unit, f32 *vec) {
                          : : "r"(work), "r"(pos));
         if (unit->flags & 2) {
             pos[2] += unit->unk88;
-            effObjSetInnerFirstVec(unit->unk33C, pos);
+            effObjSetInnerFirstVec(unit->effectObject, pos);
         }
     }
 }
@@ -1371,7 +1371,7 @@ void func_001E3448(BtlUnit *unit, s128 *quat) {
         effMiscQuatMultiplyVU();
         __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(result));
         if (unit->flags & 2) {
-            effObjSetInnerSecondVec(unit->unk33C, result);
+            effObjSetInnerSecondVec(unit->effectObject, result);
         }
     }
 }
@@ -1385,7 +1385,7 @@ extern void func_0023C978(BtlUnitExt *, s32, u32);
 void func_001E34F0(BtlUnit *unit, u32 color, s32 mode) {
     if (unit->flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
-        unit->unk54 = (unit->unk54 & 0xFF000000) | (color & 0xFFFFFF);
+        unit->baseColor = (unit->baseColor & 0xFF000000) | (color & 0xFFFFFF);
         func_0023C978(unit->ext, mode, color);
     }
 }
@@ -1395,9 +1395,9 @@ void func_001E3560(BtlUnit *unit, u32 color, s32 mode) {
     u32 blended;
     if (unit->flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
-        base = (unit->unk54 & 0xFFFFFF) | 0x80000000;
+        base = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
-        unit->unk84 = (unit->unk84 & 0xFF000000) | (color & 0xFFFFFF);
+        unit->overlayColor = (unit->overlayColor & 0xFF000000) | (color & 0xFFFFFF);
         func_0023C978(unit->ext, mode, blended);
     }
 }
@@ -1416,9 +1416,9 @@ void func_001E3628(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
         return;
     }
-    effObjFetchInnerFirstVec(unit->unk33C);
+    effObjFetchInnerFirstVec(unit->effectObject);
     func_00232AA0(unit->ext->info);
-    effObjFetchInnerSecondVecNorm(unit->unk33C);
+    effObjFetchInnerSecondVecNorm(unit->effectObject);
     func_00232AD0(unit->ext->info);
     func_00331B18(unit->ext->info->unk18);
 }
@@ -1804,7 +1804,7 @@ u32 func_001E7068(s32 arg) {
         return 0;
     }
     func_0020D128("btl:gun & finish load end[%p]\n", args->handle);
-    unit->unk32C = sdfResourceRetainAddress(func_002C8108(args->handle));
+    unit->gunResource = sdfResourceRetainAddress(func_002C8108(args->handle));
     func_002C7D00(args->handle);
     unit->unk118 = (unit->unk118 & ~4) | 8;
     return 1;
@@ -1933,21 +1933,21 @@ BtlUnit *func_001E7B58(void) {
     unit->unk118 = 0;
     unit->unk334 = 0;
     unit->node318 = 0;
-    unit->unk32C = 0;
-    unit->unk33C = 0;
+    unit->gunResource = 0;
+    unit->effectObject = 0;
     unit->ext = 0;
     func_001E1918((BtlFx *)unit);
     func_001E1958((BtlFxLights *)unit);
     resetBattleUnitLinks(unit);
     work = (BtlWork *)func_001AA6F8();
-    unit->link360 = 0;
-    if (work->list24C != 0) {
-        work->list24C->link360 = unit;
-        unit->link364 = work->list24C;
+    unit->previousActor = 0;
+    if (work->actorList != 0) {
+        work->actorList->previousActor = unit;
+        unit->nextActor = work->actorList;
     } else {
-        unit->link364 = 0;
+        unit->nextActor = 0;
     }
-    work->list24C = unit;
+    work->actorList = unit;
     func_0020D128("btl:unit create[%p]\n", unit);
     return unit;
 }
@@ -1974,9 +1974,9 @@ void func_001E7C48(BtlUnit *unit) {
         sndFreeLink(unit->link320);
         unit->link320 = 0;
     }
-    if (unit->unk32C != 0) {
-        func_00328420(unit->unk32C);
-        unit->unk32C = 0;
+    if (unit->gunResource != 0) {
+        func_00328420(unit->gunResource);
+        unit->gunResource = 0;
         unit->unk118 &= ~4;
         unit->unk118 &= ~8;
     }
@@ -1997,13 +1997,13 @@ extern void func_003297C8(u32);
 void func_001E7D30(BtlUnit *unit) {
     func_0020D128("btl:unit delete[%p]\n", unit);
     func_001E7C48(unit);
-    if (unit->link364 != 0) {
-        unit->link364->link360 = unit->link360;
+    if (unit->nextActor != 0) {
+        unit->nextActor->previousActor = unit->previousActor;
     }
-    if (unit->link360 != 0) {
-        unit->link360->link364 = unit->link364;
+    if (unit->previousActor != 0) {
+        unit->previousActor->nextActor = unit->nextActor;
     } else {
-        ((BtlWork *)func_001AA6F8())->list24C = unit->link364;
+        ((BtlWork *)func_001AA6F8())->actorList = unit->nextActor;
     }
     func_003297C8(unit->handle35C);
 }
@@ -2011,8 +2011,8 @@ void func_001E7D30(BtlUnit *unit) {
 void func_001E7DB0(void) {
     BtlUnit *unit;
     BtlUnit *next;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = next) {
-        next = unit->link364;
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = next) {
+        next = unit->nextActor;
         func_001E7D30(unit);
     }
 }
@@ -2031,7 +2031,7 @@ void btlRemoveActorsWithFlags(u32 mask) {
 
 BtlUnit *btlFindActorForOwner(u64 owner) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->owner == owner) {
             return unit;
         }
@@ -2041,7 +2041,7 @@ BtlUnit *btlFindActorForOwner(u64 owner) {
 
 s32 btlIsActiveActor(BtlUnit *actor) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit == actor) {
             return 1;
         }
@@ -2051,7 +2051,7 @@ s32 btlIsActiveActor(BtlUnit *actor) {
 
 BtlUnit *func_001E7F08(s32 mode) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (!(unit->unk120 & 0x20) && unit->mode == mode) {
             return unit;
         }
@@ -2061,7 +2061,7 @@ BtlUnit *func_001E7F08(s32 mode) {
 
 BtlUnit *func_001E7F70(s32 mode) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if ((unit->unk120 & 0x20) && unit->mode == mode) {
             return unit;
         }
@@ -2450,7 +2450,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E99C0);
 
 s32 func_001E9A18(void) {
     WorldMotionData *data;
-    if (!(((BtlWork *)func_001AA6F8())->flags218 & 2)) {
+    if (!(((BtlWork *)func_001AA6F8())->battleFlags & 2)) {
         return 0;
     }
     data = func_00110C18(dds3GetWorldObject());
@@ -3195,7 +3195,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FD400);
 
 BtlUnit *func_001FDCA8(s32 id) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (!(unit->flags & 0xC0)) {
                 if (unit->flags & 0x200) {
@@ -3226,7 +3226,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF0F8);
 s32 func_001FF570(u32 mask) {
     BtlUnit *unit;
     s32 count = 0;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
             if (!(unit->flags & 0x20)) {
                 count++;
@@ -3302,8 +3302,8 @@ void func_001FFFF8(void) {
 
 s32 func_00200038(void) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
-    if (work->unk5B0 != 0) {
-        if (work->unk5B4 != 0) {
+    if (work->primaryBuffer != 0) {
+        if (work->secondaryBuffer != 0) {
             return 1;
         }
     }
@@ -3312,13 +3312,13 @@ s32 func_00200038(void) {
 
 void releaseBattleWorkBuffers(void) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
-    if (work->unk5B4 != 0) {
-        func_00328470(work->unk5B4);
-        work->unk5B4 = 0;
+    if (work->secondaryBuffer != 0) {
+        func_00328470(work->secondaryBuffer);
+        work->secondaryBuffer = 0;
     }
-    if (work->unk5B0 != 0) {
-        func_00328470(work->unk5B0);
-        work->unk5B0 = 0;
+    if (work->primaryBuffer != 0) {
+        func_00328470(work->primaryBuffer);
+        work->primaryBuffer = 0;
     }
 }
 
@@ -3349,7 +3349,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200290);
 
 s32 func_00200490(s32 index) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
-    if (work->flags218 & 0x30000000) {
+    if (work->battleFlags & 0x30000000) {
         return work->unk724;
     }
     return *(s32 *)((index << 5) + D_00435E30 + 0x18);
@@ -3564,7 +3564,7 @@ SoundTask *func_00201540(void) {
 
 s32 func_00201578(u32 *arg0) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
-    if (!(work->flags218 & 0x20000000)) {
+    if (!(work->battleFlags & 0x20000000)) {
         func_002006B0(arg0[0], *(u16 *)(arg0 + 1));
     }
     D_00436AD8++;
@@ -3823,10 +3823,10 @@ SoundTask *func_00202648(s32 arg0, char *name) {
 u32 func_002026E8(void) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     BtlUnit *unit;
-    if (work->flags218 & 0x40000000) {
+    if (work->battleFlags & 0x40000000) {
         return 1;
     }
-    for (unit = work->list24C; unit != 0; unit = unit->link364) {
+    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
     }
     return 1;
 }
@@ -3847,12 +3847,12 @@ u32 func_002027B8(arg0)
     s32 *arg0;
 {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 2) {
                 if (unit->ext != 0) {
                     if (!(unit->flags & 0xE0)) {
-                        func_001E3560(unit, unit->unk54, *arg0);
+                        func_001E3560(unit, unit->baseColor, *arg0);
                     }
                 }
             }
@@ -4012,7 +4012,7 @@ s32 func_00202F80(s32 arg0) {
 
 s32 sndHasActiveActor(void) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->node318 != 0 && func_00202F80((s32)unit->node318) != 0) {
             return 1;
         }
@@ -4572,13 +4572,13 @@ SoundSlotOwner *func_00204B00(s32 category, s32 id) {
     owner->refCount = 1;
     work = (BtlWork *)func_001AA6F8();
     owner->prev = 0;
-    if (work->list260 != 0) {
-        work->list260->prev = owner;
-        owner->next = work->list260;
+    if (work->soundSlotOwners != 0) {
+        work->soundSlotOwners->prev = owner;
+        owner->next = work->soundSlotOwners;
     } else {
         owner->next = 0;
     }
-    work->list260 = owner;
+    work->soundSlotOwners = owner;
     if (mdlFlagTest(0xC0F) == 0) {
         func_00204958(owner);
     }
@@ -4605,7 +4605,7 @@ void func_00204BD0(SoundSlotOwner *owner) {
         if (owner->prev != 0) {
             owner->prev->next = owner->next;
         } else {
-            ((BtlWork *)func_001AA6F8())->list260 = owner->next;
+            ((BtlWork *)func_001AA6F8())->soundSlotOwners = owner->next;
         }
         func_00328E48(owner);
     }
@@ -4614,7 +4614,7 @@ void func_00204BD0(SoundSlotOwner *owner) {
 void func_00204CC8(void) {
     SoundSlotOwner *owner;
     SoundSlotOwner *next;
-    for (owner = ((BtlWork *)func_001AA6F8())->list260; owner != 0; owner = next) {
+    for (owner = ((BtlWork *)func_001AA6F8())->soundSlotOwners; owner != 0; owner = next) {
         next = owner->next;
         func_00204BD0(owner);
     }
@@ -4673,7 +4673,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_00205160);
 s32 sndHasOccupiedNodeSlots(void) {
     SoundSlotOwner *owner;
     u32 i;
-    for (owner = ((BtlWork *)func_001AA6F8())->list260; owner != 0; owner = owner->next) {
+    for (owner = ((BtlWork *)func_001AA6F8())->soundSlotOwners; owner != 0; owner = owner->next) {
         if (!(owner->flags & 2)) {
             for (i = 0; i < 0x1D; i++) {
                 if (owner->slot[i] != 0) {

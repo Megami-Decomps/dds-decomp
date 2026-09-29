@@ -19,16 +19,16 @@ void *sdfTexGetSecondaryResourceWord(void *arg0);
 
 void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 
-s32 func_0032B8D8(s32 arg0, s32 arg1, s32 arg2) {
-    s32 v1 = (arg1 == 0) ? 4 : 2;
-    s32 v2;
+s32 func_0032B8D8(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
+    s32 bytesPerColor = (paletteFormat == 0) ? 4 : 2;
+    s32 colorsPerPalette;
 
-    if ((arg0 == 0x13) || (arg0 == 0x1B)) {
-        v2 = 0x100;
+    if ((textureFormat == 0x13) || (textureFormat == 0x1B)) {
+        colorsPerPalette = 0x100;
     } else {
-        v2 = 0x10;
+        colorsPerPalette = 0x10;
     }
-    return v2 * v1 * arg2;
+    return colorsPerPalette * bytesPerColor * paletteCount;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B908);
@@ -83,12 +83,12 @@ void *func_0032BD60(SdfTex *texture, s32 variant) {
     return packet;
 }
 
-void func_0032BE00(SdfTex *arg0) {
-    arg0->unk28 = func_0032BD60(arg0, 0);
+void func_0032BE00(SdfTex *texture) {
+    texture->unk28 = func_0032BD60(texture, 0);
 }
 
-void func_0032BE30(SdfTex *arg0) {
-    arg0->unk2C = func_0032BD60(arg0, 1);
+void func_0032BE30(SdfTex *texture) {
+    texture->unk2C = func_0032BD60(texture, 1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);

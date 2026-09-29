@@ -33,30 +33,39 @@ typedef struct {
 typedef struct {
     u128 quad00;      /* 0x00 copied as one quadword on spawn */
     u8 pad10[0x08];   /* 0x10 */
-    s32 unk18;      /* 0x18 element count */
+    s32 elementCount; /* 0x18: thunder element count */
     u8 unk1C[0x08]; /* 0x1C */
-    u32 unk24;      /* 0x24 random modulus */
-    u32 unk28;      /* 0x28 random modulus */
-    u8 unk2C[0x04]; /* 0x2C */
-    u32 unk30;      /* 0x30 random modulus */
-    u32 unk34;      /* 0x34 random modulus */
+    u32 cellModulusA; /* 0x24 */
+    u32 cellModulusB; /* 0x28 */
+    u8 unk2C[0x04];   /* 0x2C */
+    u32 fragmentModulusA; /* 0x30 */
+    u32 fragmentModulusB; /* 0x34 */
     u8 unk38[0x08]; /* 0x38 */
     u32 unk40;      /* 0x40 */
     u8 unk44[0x04]; /* 0x44 */
-    EffThunderCell *unk48; /* 0x48 thunder element array */
+    EffThunderCell *cells; /* 0x48: thunder element array */
     u32 unk4C;      /* 0x4C settable param */
     u32 unk50;      /* 0x50 settable param */
-    u32 unk54;      /* 0x54 fragment array base */
+    u32 fragmentBase; /* 0x54: fragment array base */
     u32 unk58;      /* 0x58 settable param */
     u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
     u32 unk60;      /* 0x60 handle released by func_0015B8B8/func_002D0918 */
     u32 unk64;      /* 0x64 handle released by func_002D0918 */
-    s32 unk68;      /* 0x68 sub-element count */
+    s32 subElementCount; /* 0x68 */
     u8 pad6C[0x38]; /* 0x6C */
-    EffThunderSub *unkA4; /* 0xA4 sub-element array */
+    EffThunderSub *subElements; /* 0xA4 */
     u32 unkA8;      /* 0xA8 settable param */
     u32 unkAC;      /* 0xAC handle released by func_002D0918 */
 } EffPCPThunderWorkB;
+
+typedef struct EffThunderScale {
+    u8 pad00[0x1C];
+    f32 scaledA; /* 0x1C */
+    f32 scaledB; /* 0x20 */
+    u8 pad24[0x30];
+    f32 sourceA; /* 0x54 */
+    f32 sourceB; /* 0x58 */
+} EffThunderScale;
 
 extern f32 func_00341240(void *state);
 
@@ -82,9 +91,9 @@ void func_0016B170(EffPCPThunderWorkB *work, u32 value) {
     work->unk50 = value;
 }
 
-void func_0016B178(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x1c) = *(float *)(arg1 + 0x54) * arg0;
-    *(float *)(arg1 + 0x20) = *(float *)(arg1 + 0x58) * arg0;
+void func_0016B178(float scale, EffThunderScale *work) {
+    work->scaledA = work->sourceA * scale;
+    work->scaledB = work->sourceB * scale;
 }
 
 u32 func_0016B198(u32 arg0) {
@@ -123,9 +132,9 @@ void func_0016BCA0(EffPCPThunderWorkB *work, u32 value) {
     work->unk50 = value;
 }
 
-void func_0016BCA8(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x1c) = *(float *)(arg1 + 0x54) * arg0;
-    *(float *)(arg1 + 0x20) = *(float *)(arg1 + 0x58) * arg0;
+void func_0016BCA8(float scale, EffThunderScale *work) {
+    work->scaledA = work->sourceA * scale;
+    work->scaledB = work->sourceB * scale;
 }
 
 u32 func_0016BCC8(u32 arg0) {
@@ -158,15 +167,15 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016CD68);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D070);
 
-void func_0016D228(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0x60));
-    func_003297C8(*(u32 *)(arg0 + 100));
+void func_0016D228(EffPCPThunderWorkB *work) {
+    func_001634A8(work->unk60);
+    func_003297C8(work->unk64);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D258);
 
-void func_0016D288(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x58) = arg1;
+void func_0016D288(EffPCPThunderWorkB *work, u32 value) {
+    work->unk58 = value;
 }
 
 u32 func_0016D290(u32 arg0) {
@@ -189,10 +198,10 @@ void func_0016D2E8(s32 arg0) {
 }
 
 void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
+    EffThunderFrag *frag = (EffThunderFrag *)(work->fragmentBase + index * 12);
 
-    frag->unk00 = effMiscRand(&D_003AA868) % work->unk30;
-    frag->unk04 = effMiscRand(&D_003AA868) % work->unk34 + 1;
+    frag->unk00 = effMiscRand(&D_003AA868) % work->fragmentModulusA;
+    frag->unk04 = effMiscRand(&D_003AA868) % work->fragmentModulusB + 1;
     frag->color08 = 0x80808080;
 }
 
@@ -202,23 +211,23 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D9D8);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DB28);
 
-void func_0016DD20(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0x5c));
-    func_001634A8(*(u32 *)(arg0 + 0x60));
-    func_003297C8(*(u32 *)(arg0 + 100));
+void func_0016DD20(EffPCPThunderWorkB *work) {
+    func_001634A8(work->unk5C);
+    func_001634A8(work->unk60);
+    func_003297C8(work->unk64);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DD58);
 
-void func_0016DD88(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x58) = arg1;
+void func_0016DD88(EffPCPThunderWorkB *work, u32 value) {
+    work->unk58 = value;
 }
 
 void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderFrag *frag = (EffThunderFrag *)(work->unk54 + index * 12);
+    EffThunderFrag *frag = (EffThunderFrag *)(work->fragmentBase + index * 12);
 
-    frag->unk00 = effMiscRand(&D_003AA868) % work->unk30;
-    frag->unk04 = effMiscRand(&D_003AA868) % work->unk34 + 1;
+    frag->unk00 = effMiscRand(&D_003AA868) % work->fragmentModulusA;
+    frag->unk04 = effMiscRand(&D_003AA868) % work->fragmentModulusB + 1;
     frag->color08 = 0x80808080;
 }
 
@@ -240,7 +249,7 @@ void func_0016E788(s32 arg0, u32 arg1) {
 }
 
 void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderCell *cell = work->unk48 + index;
+    EffThunderCell *cell = work->cells + index;
     f32 v;
 
     v = func_00341240(&D_003AA868) - 0.5f;
@@ -249,8 +258,8 @@ void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
     cell->f04 = v + v;
     v = func_00341240(&D_003AA868) - 0.5f;
     cell->f08 = v + v;
-    cell->cnt0C = effMiscRand(&D_003AA868) % work->unk24;
-    cell->cnt10 = effMiscRand(&D_003AA868) % work->unk28 + 1;
+    cell->cnt0C = effMiscRand(&D_003AA868) % work->cellModulusA;
+    cell->cnt10 = effMiscRand(&D_003AA868) % work->cellModulusB + 1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E870);

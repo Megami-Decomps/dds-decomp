@@ -71,12 +71,48 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233DD8);
 
-u32 func_00233E30(s32 arg0) {
-    return *(u32 *)(arg0 + 8);
+typedef struct MdlRecord {
+    s32 kind;       /* 0x00: 0xFFFF terminates the record chain */
+    s32 nextOffset; /* 0x04: relative byte offset to next record */
+    u32 value08;    /* 0x08 */
+    u16 value0C;    /* 0x0C */
+    u16 field0E;    /* 0x0E */
+    u16 field10;    /* 0x10 */
+} MdlRecord;
+
+typedef struct MdlPartEntry {
+    s32 kind;
+    s32 state;
+    s32 object;
+    u8 pad0C[4];
+} MdlPartEntry;
+
+typedef struct MdlPartList {
+    u8 pad00[4];
+    s16 count;
+    u8 pad06[6];
+    MdlPartEntry *entries; /* 0x0C */
+} MdlPartList;
+
+typedef struct MdlResourceItem {
+    struct MdlResourceItem *next; /* 0x00 */
+    u16 type;                     /* 0x04 */
+    s16 subtype;                  /* 0x06 */
+    s32 resource;                 /* 0x08 */
+    u8 pad0C[0x14];
+} MdlResourceItem;
+
+typedef struct MdlResourceOwner {
+    u8 pad00[0x14];
+    MdlResourceItem *first; /* 0x14 */
+} MdlResourceOwner;
+
+u32 func_00233E30(MdlRecord *record) {
+    return record->value08;
 }
 
-u16 func_00233E38(s32 arg0) {
-    return *(u16 *)(arg0 + 0xc);
+u16 func_00233E38(MdlRecord *record) {
+    return record->value0C;
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233E40);
@@ -121,12 +157,12 @@ u8 func_00233F48(s32 *arg0, s32 arg1) {
     return *arg0 == arg1;
 }
 
-u16 func_00233F58(s32 arg0) {
-    return *(u16 *)(arg0 + 0xe);
+u16 func_00233F58(MdlRecord *record) {
+    return record->field0E;
 }
 
-u16 func_00233F60(s32 arg0) {
-    return *(u16 *)(arg0 + 0x10);
+u16 func_00233F60(MdlRecord *record) {
+    return record->field10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233F68);
@@ -135,22 +171,22 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00234100);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234448);
 
-void func_00234668(s32 arg0, s32 arg1) {
-    s32 entry = *(s32 *)(arg0 + 0xc) + (*(s16 *)(arg0 + 4) << 4);
+void func_00234668(MdlPartList *list, s32 index) {
+    MdlPartEntry *entry = &list->entries[list->count];
 
-    *(s32 *)(entry + 4) = 0;
-    *(s32 *)(entry + 0) = 0;
-    *(s32 *)(entry + 8) = billCreateIndexed(1, arg1);
-    *(s16 *)(arg0 + 4) += 1;
+    entry->state = 0;
+    entry->kind = 0;
+    entry->object = billCreateIndexed(1, index);
+    list->count += 1;
 }
 
-void func_002346C0(s32 arg0, s32 arg1) {
-    s32 entry = *(s32 *)(arg0 + 0xc) + (*(s16 *)(arg0 + 4) << 4);
+void func_002346C0(MdlPartList *list, s32 index) {
+    MdlPartEntry *entry = &list->entries[list->count];
 
-    *(s32 *)(entry + 0) = 1;
-    *(s32 *)(entry + 4) = 0;
-    *(s32 *)(entry + 8) = func_001578C0(arg1);
-    *(s16 *)(arg0 + 4) += 1;
+    entry->kind = 1;
+    entry->state = 0;
+    entry->object = func_001578C0(index);
+    list->count += 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234720);
@@ -218,18 +254,18 @@ void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlDestroyResourceItem);
 
-void mdlRemoveResourceSubtype(s32 object, s32 subtype) {
-    s32 *link = (s32 *)(object + 0x14);
-    s32 item = *link;
+void mdlRemoveResourceSubtype(MdlResourceOwner *object, s32 subtype) {
+    MdlResourceItem **link = &object->first;
+    MdlResourceItem *item = *link;
     while (item != 0) {
-        if (*(s16 *)(item + 6) == subtype) {
-            s32 next = *(s32 *)item;
+        if (item->subtype == subtype) {
+            MdlResourceItem *next = item->next;
             mdlDestroyResourceItem(item);
             *link = next;
             item = next;
         } else {
-            link = (s32 *)item;
-            item = *(s32 *)item;
+            link = &item->next;
+            item = item->next;
         }
     }
 }

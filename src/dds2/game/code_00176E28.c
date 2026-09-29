@@ -15,6 +15,17 @@ typedef struct EffVectorWork {
     EffVectorPart *parts;
 } EffVectorWork;
 
+typedef struct EffRecordPool {
+    u8 pad00[0x50];
+    u32 settingA;  /* 0x50 */
+    u32 settingB;  /* 0x54 */
+    u8 pad58[8];
+    s32 records;    /* 0x60 */
+    s32 auxRecords; /* 0x64 */
+    u32 resource;   /* 0x68: released by func_00333918 */
+    u32 buffer;     /* 0x6C: freed by func_003297C8 */
+} EffRecordPool;
+
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00176E28);
 
 void func_00177078(u64 arg0) {
@@ -58,63 +69,63 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_00177408);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177760);
 
-void func_00177880(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x68));
-    func_003297C8(*(u32 *)(arg0 + 0x6c));
+void func_00177880(EffRecordPool *pool) {
+    func_00333918(pool->resource);
+    func_003297C8(pool->buffer);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001778B0);
 
-s32 func_00177B60(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 0x60) + arg1 * 0x50;
+s32 func_00177B60(EffRecordPool *pool, s32 index) {
+    return pool->records + index * 0x50;
 }
 
-s32 func_00177B78(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 100) + arg1 * 0x14;
+s32 func_00177B78(EffRecordPool *pool, s32 index) {
+    return pool->auxRecords + index * 0x14;
 }
 
-void func_00177B90(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x50) = arg1;
+void func_00177B90(EffRecordPool *pool, u32 value) {
+    pool->settingA = value;
 }
 
-void func_00177B98(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+void func_00177B98(EffRecordPool *pool, u32 value) {
+    pool->settingB = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA0);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA8);
 
-void func_00177CA0(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x68));
-    func_003297C8(*(u32 *)(arg0 + 0x6c));
+void func_00177CA0(EffRecordPool *pool) {
+    func_00333918(pool->resource);
+    func_003297C8(pool->buffer);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177CD0);
 
-s32 func_00177E78(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 0x60) + arg1 * 0x30;
+s32 func_00177E78(EffRecordPool *pool, s32 index) {
+    return pool->records + index * 0x30;
 }
 
-s32 func_00177E90(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 100) + arg1 * 0xc;
+s32 func_00177E90(EffRecordPool *pool, s32 index) {
+    return pool->auxRecords + index * 0xc;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177EA8);
 
-void func_00177FA8(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x68));
-    func_003297C8(*(u32 *)(arg0 + 0x6c));
+void func_00177FA8(EffRecordPool *pool) {
+    func_00333918(pool->resource);
+    func_003297C8(pool->buffer);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177FD8);
 
-s32 func_00178190(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 0x60) + arg1 * 0x40;
+s32 func_00178190(EffRecordPool *pool, s32 index) {
+    return pool->records + index * 0x40;
 }
 
-s32 func_001781A0(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 100) + arg1 * 0x10;
+s32 func_001781A0(EffRecordPool *pool, s32 index) {
+    return pool->auxRecords + index * 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001781B0);
@@ -123,20 +134,20 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_001781F8);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00178210);
 
-s32 func_001784B0(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 0x60) + arg1 * 0x50;
+s32 func_001784B0(EffRecordPool *pool, s32 index) {
+    return pool->records + index * 0x50;
 }
 
-s32 func_001784C8(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 100) + arg1 * 0x14;
+s32 func_001784C8(EffRecordPool *pool, s32 index) {
+    return pool->auxRecords + index * 0x14;
 }
 
-void func_001784E0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x50) = arg1;
+void func_001784E0(EffRecordPool *pool, u32 value) {
+    pool->settingA = value;
 }
 
-void func_001784E8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+void func_001784E8(EffRecordPool *pool, u32 value) {
+    pool->settingB = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001784F0);

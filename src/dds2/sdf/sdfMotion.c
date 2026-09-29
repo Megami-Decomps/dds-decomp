@@ -21,6 +21,28 @@ typedef struct {
     u8 previousMode;
 } MotionState;
 
+typedef struct SdfMotionTrack {
+    u8 pad00[0x10];
+    u32 value10;
+    union {
+        u32 word;
+        u16 flags;
+    } value14;
+    u8 pad18[8];
+    u32 value20;
+    u8 pad24[4];
+    u32 value28;
+} SdfMotionTrack;
+
+typedef struct SdfMotionBinding {
+    u8 pad00[0x0C];
+    SdfMotionTrack *track;
+    union {
+        u32 word;
+        u8 lowByte;
+    } current;
+} SdfMotionBinding;
+
 typedef struct KeyOut {
     f32 *firstKey;
     f32 *secondKey;
@@ -123,8 +145,8 @@ void func_00334658(void) {
     func_00328E48();
 }
 
-void func_00334670(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 8) = arg1;
+void func_00334670(Dst360 *dst, u32 value) {
+    dst->unk8 = value;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334678);
@@ -180,8 +202,8 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003350B0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335108);
 
-void func_00335160(s32 arg0) {
-    *(u8 *)(arg0 + 0x10) = ((u8)(*(u16 *)(*(s32 *)(arg0 + 0xc) + 0x14) >> 4) ^ 1) & 1;
+void func_00335160(SdfMotionBinding *binding) {
+    binding->current.lowByte = ((u8)(binding->track->value14.flags >> 4) ^ 1) & 1;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335180);
@@ -208,8 +230,8 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003352C8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335308);
 
-void func_003353B8(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x14);
+void func_003353B8(SdfMotionBinding *binding) {
+    binding->current.word = binding->track->value14.word;
 }
 
 void *func_003353C8(void *source, s32 unused, s32 options) {
@@ -224,8 +246,8 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335428);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335468);
 
-void func_00335518(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x10);
+void func_00335518(SdfMotionBinding *binding) {
+    binding->current.word = binding->track->value10;
 }
 
 void *func_00335528(void *source, s32 unused, s32 options) {
@@ -240,8 +262,8 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335588);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003355C8);
 
-void func_00335678(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x20);
+void func_00335678(SdfMotionBinding *binding) {
+    binding->current.word = binding->track->value20;
 }
 
 void *func_00335688(void *source, s32 unused, s32 options) {
@@ -256,8 +278,8 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003356E8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335728);
 
-void func_003357D8(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x28);
+void func_003357D8(SdfMotionBinding *binding) {
+    binding->current.word = binding->track->value28;
 }
 
 void *func_003357E8(void *source, s32 unused, s32 options) {

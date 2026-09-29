@@ -23,7 +23,6 @@ extern void func_002C1B68(s32, s32);
 extern s32 movAreTitleEffectsReady(s32, s32);
 extern void func_002B2818(s32);
 extern s32 D_00435DD0;
-extern s32 func_00266F70(s32, s32);
 extern s32 func_003292A8(s32);
 extern s32 sdfResourceRetainAddress(s32);
 extern s32 func_00303D00(s32);
@@ -64,9 +63,47 @@ typedef struct MenuProgressNode {
     u32 flags;
     u8 pad4C[0xC];
     struct MenuProgressNode *next;
-    u8 pad5C[8];
+    u8 pad5C[4];
+    s32 entryId;
     u32 requiredAmount;
+    u8 pad68[8];
+    s32 childPanel;
 } MenuProgressNode;
+
+typedef struct MenuProgressList {
+    u8 pad00[0x10];
+    MenuProgressNode *head;
+    u8 pad14[8];
+    MenuProgressNode *selected;
+    s32 busy;
+    u8 pad24[8];
+    s32 updateCallback;
+    s32 callback;
+    u8 pad34[8];
+    s32 visible;
+} MenuProgressList;
+
+typedef struct MenuTitleResource {
+    u8 pad00[6];
+    u16 firstA;
+    u16 firstB;
+    u16 secondA;
+    u16 secondB;
+} MenuTitleResource;
+
+typedef struct MenuProgressHost {
+    s32 heapHandle;
+    s32 titleEffectHandle;
+    u8 pad08[0x64];
+    s32 loadState;
+    u8 pad70[8];
+    s32 menuList;
+    MenuProgressList *progressList;
+    MenuProgressList *secondaryList;
+    s32 state;
+    u8 pad88[0x64];
+    s32 panelStyle;
+} MenuProgressHost;
 
 void func_002665B0(s32 arg0) {
     effDestroyPackedBatch(*(u32 *)(arg0 + 0x3c));
@@ -139,14 +176,14 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
-s32 func_00266F70(s32 resource, s32 context) {
+s32 func_00266F70(MenuTitleResource *resource, MenuProgressHost *host) {
     s32 panel = func_00328D68(0xa0);
     func_002C2128(panel, 0, 0, 0x1e,
-        func_002BC460(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
-        *(s32 *)(context + 0xec));
+        func_002BC460(resource->firstA, resource->firstB),
+        host->panelStyle);
     func_002C2128(panel + 0x50, 1, 0, 0x1e,
-        func_002BC460(*(u16 *)(resource + 0xa), *(u16 *)(resource + 0xc)),
-        *(s32 *)(context + 0xec));
+        func_002BC460(resource->secondA, resource->secondB),
+        host->panelStyle);
     return panel;
 }
 
@@ -159,34 +196,33 @@ void func_00267008(s32 arg0) {
     }
 }
 
-void func_00267050(s32 object) {
-    s32 node = *(s32 *)(*(s32 *)(object + 0x7c) + 0x10);
+void func_00267050(MenuProgressHost *host) {
+    MenuProgressNode *node = host->progressList->head;
     while (node != 0) {
-        s32 id = *(s32 *)(node + 0x60);
-        *(s32 *)(node + 0x70) =
-            func_00266F70(D_00435DD0 + id * 0x1c4 + 0xa60, object);
-        node = *(s32 *)(node + 0x58);
+        s32 id = node->entryId;
+        node->childPanel =
+            func_00266F70((MenuTitleResource *)(D_00435DD0 + id * 0x1c4 + 0xa60), host);
+        node = node->next;
     }
 }
 
-void func_002670C8(s32 arg0) {
-    s32 temp_v0;
+void func_002670C8(MenuProgressHost *host) {
+    MenuProgressNode *node;
 
-    for (temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0x7c) + 0x10); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x58)
-            ) {
-        func_00267008(*(u32 *)(temp_v0 + 0x70));
+    for (node = host->progressList->head; node != 0; node = node->next) {
+        func_00267008(node->childPanel);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267110);
 
-void func_002671E8(s32 arg0) {
-    func_002B81C8(*(u32 *)(arg0 + 0x7c));
+void func_002671E8(MenuProgressHost *host) {
+    func_002B81C8((s32)host->progressList);
 }
 
-void func_00267200(s32 arg0) {
-    func_00267008(*(u32 *)(*(s32 *)(*(s32 *)(arg0 + 0x7c) + 0x1c) + 0x70));
-    func_002B86E8(*(u32 *)(arg0 + 0x7c));
+void func_00267200(MenuProgressHost *host) {
+    func_00267008(host->progressList->selected->childPanel);
+    func_002B86E8((u32)host->progressList);
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267238);
@@ -202,36 +238,36 @@ u32 func_002674F8(void) {
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267500);
 
 s32 func_002675C8(s32 *items, s32 count, s32 excluded, s32 callback) {
-    s32 list = func_002B8158(0, count, 0x16, callback);
+    MenuProgressList *list = (MenuProgressList *)func_002B8158(0, count, 0x16, callback);
     s32 i;
-    *(s32 *)(list + 0x30) = callback;
-    *(s32 *)(list + 0x2c) = (s32)func_00267500;
-    *(s32 *)(list + 0x3c) = 0;
+    list->callback = callback;
+    list->updateCallback = (s32)func_00267500;
+    list->visible = 0;
     for (i = 0; i < count; i++) {
         if (i != excluded) {
-            s32 node = mnuListAppendNode(list, (s32)D_00437870);
-            *(s32 *)(node + 0x60) = items[i];
+            MenuProgressNode *node = (MenuProgressNode *)mnuListAppendNode((s32)list, (s32)D_00437870);
+            node->entryId = items[i];
         }
     }
-    return list;
+    return (s32)list;
 }
 
-void func_00267680(s32 object) {
-    s32 state = *(s32 *)(object + 0x84);
+void func_00267680(MenuProgressHost *host) {
+    s32 state = host->state;
     if (state < 2) {
         if (state < 0) {
             return;
         }
-        if (*(s32 *)(*(s32 *)(object + 0x80) + 0x20) == 0) {
-            s32 selected = mnuWalkNodeList(2 - func_002674F8(),
-                                              *(s32 *)(object + 0x78));
-            *(u32 *)(selected + 0x48) |= 1;
+        if (host->secondaryList->busy == 0) {
+            MenuProgressNode *selected = (MenuProgressNode *)mnuWalkNodeList(2 - func_002674F8(),
+                                              host->menuList);
+            selected->flags |= 1;
         }
     }
 }
 
-void func_002676F0(s32 object) {
-    s32 state = *(s32 *)(object + 0x84);
+void func_002676F0(MenuProgressHost *host) {
+    s32 state = host->state;
     s32 selectedIndex;
     if (state != 0) {
         if (state != 2) {
@@ -241,9 +277,9 @@ void func_002676F0(s32 object) {
     } else {
         selectedIndex = 3 - func_002674F8();
     }
-    if (*(s32 *)(*(s32 *)(object + 0x7c) + 0x20) == 0) {
-        s32 node = mnuWalkNodeList(selectedIndex, *(s32 *)(object + 0x78));
-        *(u32 *)(node + 0x48) |= 1;
+    if (host->progressList->busy == 0) {
+        MenuProgressNode *node = (MenuProgressNode *)mnuWalkNodeList(selectedIndex, host->menuList);
+        node->flags |= 1;
     }
 }
 
@@ -257,14 +293,14 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002679E8);
 
 s32 func_00267A00(void) {
     s32 heap = func_003292A8(0xa82c);
-    s32 object = sdfResourceRetainAddress(heap);
-    memset((void *)object, 0, 0xa82c);
-    *(s32 *)object = heap;
-    *(s32 *)(object + 4) = func_00303D00(1);
-    initPartyPanelSlots(object + 0x70);
-    func_002A9640(*(s32 *)(object + 4), object + 8);
-    *(s32 *)(object + 0x6c) = 1;
-    return object;
+    MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
+    memset((void *)host, 0, 0xa82c);
+    host->heapHandle = heap;
+    host->titleEffectHandle = func_00303D00(1);
+    initPartyPanelSlots((s32)host + 0x70);
+    func_002A9640(host->titleEffectHandle, (s32)host + 8);
+    host->loadState = 1;
+    return (s32)host;
 }
 
 void func_00267A80(u32 *arg0) {
@@ -274,19 +310,19 @@ void func_00267A80(u32 *arg0) {
     func_003297C8(*arg0);
 }
 
-s32 func_00267AC8(s32 object) {
-    s32 state = *(s32 *)(object + 0x6c);
+s32 func_00267AC8(MenuProgressHost *host) {
+    s32 state = host->loadState;
     if (state == 0) {
         return 1;
     }
     if (state == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady(*(s32 *)(object + 4), object + 8) == 0) {
+    if (movAreTitleEffectsReady(host->titleEffectHandle, (s32)host + 8) == 0) {
         return 1;
     }
-    func_002B2818(object + 8);
-    *(s32 *)(object + 0x6c) = 2;
+    func_002B2818((s32)host + 8);
+    host->loadState = 2;
     return 0;
 }
 

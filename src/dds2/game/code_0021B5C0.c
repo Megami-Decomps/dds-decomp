@@ -24,7 +24,7 @@ typedef struct BtlWork {
     u8 pad0[0x208];
     s32 unk208;
     u8 pad20C[0x40];
-    BtlUnit *unitList;
+    BtlUnit *actorList;
     u8 pad250[0x18];
     u16 unk268;
     u8 pad26A[0x36];
@@ -166,7 +166,7 @@ f32 func_0021B6C0(BtlUnit *unit, BtlUnit *target) {
     f32 scale = 1.0f;
     if (unit->flags & 0x200) {
         if (target->mode == 0x110) {
-            for (other = func_001AA6F8()->unitList; other != 0; other = other->next) {
+            for (other = func_001AA6F8()->actorList; other != 0; other = other->next) {
                 if (other->flags & 1) {
                     if (other->flags & 0x400) {
                         if (!(other->flags & 0xE0)) {
@@ -183,13 +183,13 @@ f32 func_0021B6C0(BtlUnit *unit, BtlUnit *target) {
     return scale;
 }
 
-void func_0021B788(BtlSkillTask *task, s32 arg1, s32 arg2, s32 arg3) {
+void func_0021B788(BtlSkillTask *task, s32 arg1, s32 arg2, s32 skillId) {
     s32 percent = 100;
-    if (arg3 >= 0x1AB && arg3 < 0x220) {
-        percent *= func_001AB9F0(task->unit, arg3);
+    if (skillId >= 0x1AB && skillId < 0x220) {
+        percent *= func_001AB9F0(task->unit, skillId);
     }
-    task->unk48 = func_001B3610(task->unit, arg1, arg2, percent, arg3);
-    task->unk4C = func_001B36B8(arg1, arg2, arg3);
+    task->unk48 = func_001B3610(task->unit, arg1, arg2, percent, skillId);
+    task->unk4C = func_001B36B8(arg1, arg2, skillId);
 }
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021B828);
@@ -365,7 +365,7 @@ BtlUnit *findBattleUnitByMode(void) {
     if (sub->b.active == 0) {
         return 0;
     }
-    for (unit = work->unitList; unit != 0; unit = unit->next) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x200) {
                 if (sub->targetMode == unit->mode) {
@@ -378,12 +378,12 @@ BtlUnit *findBattleUnitByMode(void) {
 }
 
 u64 func_0021EDD8(u64 value) {
-    s32 work;
+    BtlWork *work;
     u64 result;
 
-    work = (s32)func_001AA6F8();
+    work = func_001AA6F8();
     result = 0;
-    if (*(s8 *)(*(s32 *)(work + 0x718) + 2) != '\0') {
+    if (work->sub->b.active != '\0') {
         result = value;
     }
     return result;

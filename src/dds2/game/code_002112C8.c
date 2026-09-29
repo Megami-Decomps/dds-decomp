@@ -47,12 +47,16 @@ typedef struct BattleCtx {
 
 typedef struct BattleSub {
     s32 task;
-    s32 unk4;
+    s32 targetMode;
+    u8 pad08[4];
+    u8 controlEnabled;
 } BattleSub;
+
+typedef struct BattleUnit BattleUnit;
 
 typedef struct BattleWork {
     u8 pad0[0x24C];
-    s32 unitList;
+    BattleUnit *actorList;
     u8 pad250[0x1C];
     u16 phase;
     u8 pad26E[6];
@@ -63,13 +67,15 @@ typedef struct BattleWork {
     struct BattleSub *sub;
 } BattleWork;
 
-typedef struct BattleUnit {
+struct BattleUnit {
     u8 pad0[0x110];
     u32 flags;
     u32 stateFlags;
     u8 pad118[0xC];
     u16 mode;
-} BattleUnit;
+    u8 pad126[0x23E];
+    BattleUnit *nextActor;
+};
 
 extern BattleCtx **D_00436CB8;
 extern u8 *D_00435DF4;
@@ -174,8 +180,8 @@ INCLUDE_RODATA(const s32, "game/code_002112C8", D_00419A88);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00211F38);
 
-s32 func_002122D8(u8 *unit, s32 multiplier) {
-    u8 *stats = unit + 0x120;
+s32 func_002122D8(BattleUnit *unit, s32 multiplier) {
+    u8 *stats = (u8 *)unit + 0x120;
     s32 current = func_001AA700(stats);
     s32 maximum = func_001AA740(stats);
     if ((u32)(maximum * multiplier) < (u32)(current * 100)) {
@@ -188,7 +194,7 @@ s32 func_00212340(s32 unused, s32 multiplier) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
     for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
         if ((*(u64 *)(battler + 0x110) & 0x401) == 0x401 &&
-            func_002122D8((u8 *)battler, multiplier)) {
+            func_002122D8((BattleUnit *)battler, multiplier)) {
             return 1;
         }
     }
@@ -284,11 +290,11 @@ s32 btlValidateItemStillAvailable(s32 item) {
     return 0;
 }
 
-s32 func_002126C8(s32 battler) {
-    if (*(u32 *)(battler + 0x114) & 0x10000) {
+s32 func_002126C8(BattleUnit *unit) {
+    if (unit->stateFlags & 0x10000) {
         return 0;
     }
-    if (*(u32 *)(battler + 0x110) & 0x200) {
+    if (unit->flags & 0x200) {
         if (*(s32 *)(D_00435DD0 + 0x3c) < 2) {
             return 0;
         }
@@ -1229,18 +1235,18 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002180F8);
 
 s32 func_00218150(void) {
     BattleWork *work = (BattleWork *)func_001AA6F8();
-    s32 battler;
+    BattleUnit *battler;
     s32 count;
     if (*(u16 *)((u8 *)work + 0x270) != 1) {
         return -1;
     }
     count = 0;
-    for (battler = work->unitList; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        u32 flags = *(u32 *)(battler + 0x110);
+    for (battler = work->actorList; battler != 0; battler = battler->nextActor) {
+        u32 flags = battler->flags;
         if (flags & 1) {
             if (flags & 0x200) {
                 if (!(flags & 0xE0)) {
-                    if (!(*(u16 *)(battler + 0x12e) & 0x2000)) {
+                    if (!(*(u16 *)((u8 *)battler + 0x12e) & 0x2000)) {
                         return -1;
                     }
                     count++;
@@ -1447,16 +1453,16 @@ void func_00219278(void) {
 }
 
 s32 func_00219290(void) {
-    s32 context = func_001AA6F8();
-    u32 *value;
-    if (*(u32 *)(context + 0x2a0) != 0x306) {
+    BattleWork *work = (BattleWork *)func_001AA6F8();
+    BattleSub *sub;
+    if (work->mode != 0x306) {
         return 0;
     }
-    value = *(u32 **)(context + 0x718);
-    if (value == 0) {
+    sub = work->sub;
+    if (sub == 0) {
         return 0;
     }
-    return *value != 0;
+    return sub->task != 0;
 }
 
 u32 func_002192D8(void) {
@@ -1467,28 +1473,28 @@ u32 func_002192D8(void) {
     if (work->sub == 0) {
         return 0;
     }
-    return work->sub->unk4;
+    return work->sub->targetMode;
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219318);
 
 void func_002193B8(void) {
-    s32 temp_v0;
+    BattleWork *work;
 
-    temp_v0 = func_001AA6F8();
-    **(u32 **)(temp_v0 + 0x718) = 0;
+    work = (BattleWork *)func_001AA6F8();
+    work->sub->task = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002193E0);
 
 s32 func_00219488(s32 unused, s32 ignored, s32 action) {
-    s32 record = *(s32 *)(func_001AA6F8() + 0x718);
+    BattleSub *sub = ((BattleWork *)func_001AA6F8())->sub;
     switch (action) {
     case 0x129:
-        *(u8 *)(record + 0xc) = 1;
+        sub->controlEnabled = 1;
         break;
     case 0x12a:
-        *(u8 *)(record + 0xc) = 0;
+        sub->controlEnabled = 0;
         break;
     }
     return 0;

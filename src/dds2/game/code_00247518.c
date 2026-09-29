@@ -8,8 +8,6 @@ s32 func_002467B8(s32 arg0);
 
 void func_00249088(s32 arg0, void *arg1);
 
-u16 func_0024ABA0(s32 arg0);
-
 void func_0024AB38(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 extern void *func_00101958(void);
@@ -29,9 +27,24 @@ void func_00137818(void);
 void func_00246D80(u64 arg0);
 
 typedef struct EventViewerState {
-    u8 pad0[0x23C0];
+    u8 pad0[0x223C];
+    struct {
+        u16 id;
+        u8 pad2[6];
+    } history[8];
+    s32 historyCount;
+    u32 currentId;
+    u8 pad2284[0x13C];
     s32 updateCount;
+    u8 pad23C4;
+    u8 windowActive;
+    u8 pad23C6[0x2A];
+    s32 glyphTickCount;
+    u8 pad23F4[0x1C];
+    u32 glyph;
 } EventViewerState;
+
+u16 func_0024ABA0(EventViewerState *viewer);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247518);
 
@@ -93,16 +106,16 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024A400);
 void func_0024A5F8(void) {
 }
 
-void func_0024A600(s32 arg0) {
-    s32 temp_v0;
+void func_0024A600(EventViewerState *viewer) {
+    s32 nextTick;
 
-    if ((*(s32 *)(arg0 + 0x18) < *(s32 *)(arg0 + 0x14) - 3) && (0 < *(s32 *)(arg0 + 0x23f0)))
+    if ((*(s32 *)((u8 *)viewer + 0x18) < *(s32 *)((u8 *)viewer + 0x14) - 3) && (0 < viewer->glyphTickCount))
     {
-        func_0019D518(*(u32 *)(arg0 + 0x2410));
-        temp_v0 = *(s32 *)(arg0 + 0x23f0) + 1;
-        *(s32 *)(arg0 + 0x23f0) = temp_v0;
-        if (0x1d < temp_v0) {
-            *(u32 *)(arg0 + 0x23f0) = 0;
+        func_0019D518(viewer->glyph);
+        nextTick = viewer->glyphTickCount + 1;
+        viewer->glyphTickCount = nextTick;
+        if (0x1d < nextTick) {
+            viewer->glyphTickCount = 0;
         }
     }
 }
@@ -131,19 +144,19 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024AAB8);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024AB38);
 
-u16 func_0024ABA0(s32 arg0) {
-    u16 temp_v0;
-    s32 temp_v1;
+u16 func_0024ABA0(EventViewerState *viewer) {
+    u16 id;
+    s32 index;
 
-    temp_v1 = *(s32 *)(arg0 + 0x227c) - 1;
-    if (*(s32 *)(arg0 + 0x227c) == 0) {
-        *(u32 *)(arg0 + 0x2280) = 0;
+    index = viewer->historyCount - 1;
+    if (viewer->historyCount == 0) {
+        viewer->currentId = 0;
         return 0;
     }
-    *(s32 *)(arg0 + 0x227c) = temp_v1;
-    temp_v0 = *(u16 *)(temp_v1 * 8 + arg0 + 0x223c);
-    *(u32 *)(arg0 + 0x2280) = (u32)temp_v0;
-    return temp_v0;
+    viewer->historyCount = index;
+    id = viewer->history[index].id;
+    viewer->currentId = (u32)id;
+    return id;
 }
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024ABD0);
@@ -167,16 +180,16 @@ void func_0024ACC0(s32 arg0) {
     itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
     v0 = *(s32 *)(arg0 + 8);
     itfMesResetWindow(*(s32 *)(v0 + 0x104));
-    *(u8 *)(arg0 + 0x23c5) = 0;
+    ((EventViewerState *)arg0)->windowActive = 0;
     *(u8 *)(arg0 + 0x23c4) = 0;
 }
 
-void func_0024AD30(s32 arg0) {
-    *(u8 *)(arg0 + 0x23c5) = 1;
+void func_0024AD30(EventViewerState *viewer) {
+    viewer->windowActive = 1;
 }
 
-void func_0024AD40(s32 arg0) {
-    *(u8 *)(arg0 + 0x23c5) = 0;
+void func_0024AD40(EventViewerState *viewer) {
+    viewer->windowActive = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024AD48);
@@ -273,7 +286,7 @@ u32 func_0024C9D8(u32 arg0, u32 arg1, u32 arg2) {
     if (p != 0) {
         *(s32 *)(p + 0xc) = *(s32 *)(arg2 + 0x2310);
         func_00249088(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        func_0024ABA0(arg2);
+        func_0024ABA0((EventViewerState *)arg2);
         return 0;
     }
 }
@@ -295,7 +308,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
             dst++;
         } while (index >= 0);
         func_00249088(*(s32 *)(scene + 0x18), scene);
-        func_0024ABA0((s32)scene);
+        func_0024ABA0((EventViewerState *)scene);
         return 0;
     }
     return (u32)record;
@@ -304,7 +317,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CBA0);
 
 u32 func_0024CC08(u32 arg0, u32 arg1, u32 arg2) {
-    func_0024ABA0(arg2);
+    func_0024ABA0((EventViewerState *)arg2);
     return 0;
 }
 

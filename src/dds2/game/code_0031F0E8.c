@@ -16,6 +16,23 @@ extern void func_00320C88(u32);
 extern u32 func_0035A828(s32 bytes);
 extern void func_003211F0(void);
 
+typedef struct DdsNamedRecord {
+    const char *name; /* 0x00: up to 0x40 bytes */
+    u32 value;        /* 0x04: packed offset or resolved address */
+} DdsNamedRecord;
+
+typedef struct DdsNamedNode {
+    u8 pad00[8];
+    struct DdsNamedNode *next; /* 0x08 */
+    u8 pad0C[4];
+    DdsNamedRecord *record;    /* 0x10 */
+} DdsNamedNode;
+
+typedef struct DdsNamedList {
+    u8 pad00[4];
+    DdsNamedNode *first; /* 0x04 */
+} DdsNamedList;
+
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F0E8);
 
 void func_0031F138(u32 node) {
@@ -88,13 +105,13 @@ void func_0031F4D8(u32 context, const char *name) {
 
 
 u32 dds3FindNamedRecord(u32 context, const char *name) {
-    u32 node = *(u32 *)(context + 4);
+    DdsNamedNode *node = ((DdsNamedList *)context)->first;
     while (node) {
-        u32 data = *(u32 *)(node + 0x10);
-        if (strncmp(*(char **)data, name, 0x40) == 0) {
-            return data;
+        DdsNamedRecord *record = node->record;
+        if (strncmp(record->name, name, 0x40) == 0) {
+            return (u32)record;
         }
-        node = *(u32 *)(node + 8);
+        node = node->next;
     }
     return 0;
 }
@@ -111,45 +128,45 @@ u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
 }
 
 s32 dds3ApplyNamedRelocations(u32 *object) {
-    u32 node = *(u32 *)(object[3] + 4);
-    if (node != 0) {
+    DdsNamedNode *node = ((DdsNamedList *)object[3])->first;
+    if (node != NULL) {
         do {
-            u32 record = *(u32 *)(node + 0x10);
-            u32 found = dds3FindNamedRecord(object[2], *(const char **)record);
+            DdsNamedRecord *record = node->record;
+            u32 found = dds3FindNamedRecord(object[2], record->name);
             u32 address;
             u32 replacement;
             if (found == 0) {
                 return 0;
             }
-            address = dds3ResolvePackedOffset(object, *(u32 *)(record + 4));
-            replacement = *(u32 *)(found + 4);
-            node = *(u32 *)(node + 8);
+            address = dds3ResolvePackedOffset(object, record->value);
+            replacement = ((DdsNamedRecord *)found)->value;
+            node = node->next;
             *(u32 *)address = replacement;
-        } while (node != 0);
+        } while (node != NULL);
     }
     return 1;
 }
 
 u32 func_0031F6A0(u32 object) {
-    u32 node = *(u32 *)(*(u32 *)(object + 0xc) + 4);
+    DdsNamedNode *node = ((DdsNamedList *)*(u32 *)(object + 0xc))->first;
     u32 destination;
-    if (node == 0) {
+    if (node == NULL) {
         return 0;
     }
     destination = func_0031F280(object);
     do {
-        func_0031F410(destination, *(u32 *)(*(u32 *)(node + 0x10) + 4), 4);
-        node = *(u32 *)(node + 8);
-    } while (node != 0);
+        func_0031F410(destination, node->record->value, 4);
+        node = node->next;
+    } while (node != NULL);
     return destination;
 }
 
 u32 func_0031F708(u32 *object, u32 extra) {
-    u32 node = *(u32 *)(object[1] + 4);
+    DdsNamedNode *node = ((DdsNamedList *)object[1])->first;
     while (node) {
-        u32 value = *(u32 *)(node + 0x10);
-        func_0035A648(*(u32 *)(value + 4), *(u32 *)value, 1, extra);
-        node = *(u32 *)(node + 8);
+        DdsNamedRecord *record = node->record;
+        func_0035A648(record->value, (u32)record->name, 1, extra);
+        node = node->next;
     }
     return object[0];
 }

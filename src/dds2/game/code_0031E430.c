@@ -183,70 +183,73 @@ void func_0031ED68(FadeEntry *entry, u32 frame) {
 }
 
 void mnuDrawFadeSequenceThree(u32 arg0) {
+    FadeEntry *entry = (FadeEntry *)arg0;
     if (itfIsFadeActive() != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x1a, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x1b, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1b, 0x54);
         {
-            s32 frame = *(s32 *)(arg0 + 0x18);
+            s32 frame = entry->frame;
             if (frame < 0) {
                 frame = 0;
-                *(s32 *)(arg0 + 0x18) = frame;
+                entry->frame = frame;
             }
             if (frame >= 3) {
-                *(s32 *)(arg0 + 0x18) = 2;
+                entry->frame = 2;
                 frame = 2;
             }
-            mnuDrawIndexedFadeGlyph(0, frame * 144, *(u32 *)(arg0 + 0x14), 0x1d, 0x54);
+            mnuDrawIndexedFadeGlyph(0, frame * 144, entry->extent, 0x1d, 0x54);
         }
         itfUpdateFade(arg0);
     }
 }
 
-void func_0031EE28(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031EE28(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 void mnuDrawFadeSequenceTwo(u32 arg0) {
+    FadeEntry *entry = (FadeEntry *)arg0;
     if (itfIsFadeActive() != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x1a, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x1c, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1c, 0x54);
         {
-            s32 frame = *(s32 *)(arg0 + 0x18);
+            s32 frame = entry->frame;
             if (frame < 0) {
                 frame = 0;
-                *(s32 *)(arg0 + 0x18) = frame;
+                entry->frame = frame;
             }
             if (frame >= 2) {
-                *(s32 *)(arg0 + 0x18) = 1;
+                entry->frame = 1;
                 frame = 1;
             }
-            mnuDrawIndexedFadeGlyph(0, frame * 144, *(u32 *)(arg0 + 0x14), 0x1d, 0x54);
+            mnuDrawIndexedFadeGlyph(0, frame * 144, entry->extent, 0x1d, 0x54);
         }
         itfUpdateFade(arg0);
     }
 }
 
-void func_0031EEE8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031EEE8(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 void mnuDrawFadeSequenceOffset(u32 arg0) {
+    FadeEntry *entry = (FadeEntry *)arg0;
     if (itfIsFadeActive() != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x1a, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x1e, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1e, 0x54);
         {
-            s32 frame = *(s32 *)(arg0 + 0x18);
+            s32 frame = entry->frame;
             if (frame <= 0) {
-                *(s32 *)(arg0 + 0x18) = 1;
+                entry->frame = 1;
                 frame = 1;
             }
             if (frame >= 4) {
-                *(s32 *)(arg0 + 0x18) = 3;
+                entry->frame = 3;
                 frame = 3;
             }
-            mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), frame + 0x1e, 0x54);
+            mnuDrawIndexedFadeGlyph(0, 0, entry->extent, frame + 0x1e, 0x54);
         }
-        mnuDrawIndexedFadeGlyph(0, 0, *(u32 *)(arg0 + 0x14), 0x22, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x22, 0x54);
         itfUpdateFade(arg0);
     }
 }
@@ -266,8 +269,8 @@ void func_0031EFB8(u32 arg0) {
     }
 }
 
-void func_0031F040(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x18) = arg1;
+void func_0031F040(FadeEntry *entry, u32 frame) {
+    entry->frame = frame;
 }
 
 void func_0031F048(u32 arg0) {
