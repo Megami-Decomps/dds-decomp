@@ -70,10 +70,12 @@ typedef struct BattleWork {
 typedef struct BattleNamedResource BattleNamedResource;
 
 struct BattleUnit {
-    u8 pad0[0x110];
+    u8 pad0[0x108];
+    u64 unitId;
     u32 flags;
     u32 stateFlags;
-    u8 pad118[0xC];
+    u8 pad118[8];
+    u8 stats[4]; /* +0x120: shared HP/MP/status accessor base */
     u16 mode;
     u8 pad126[8];
     u16 conditionFlags;
@@ -293,7 +295,7 @@ INCLUDE_RODATA(const s32, "game/code_002112C8", D_00419A88);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00211F38);
 
 s32 btlIsUnitAtOrBelowHealthRate(BattleUnit *unit, s32 multiplier) {
-    u8 *stats = (u8 *)unit + 0x120;
+    u8 *stats = unit->stats;
     s32 current = func_001AA700(stats);
     s32 maximum = func_001AA740(stats);
     if ((u32)(maximum * multiplier) < (u32)(current * 100)) {
@@ -303,10 +305,10 @@ s32 btlIsUnitAtOrBelowHealthRate(BattleUnit *unit, s32 multiplier) {
 }
 
 s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 multiplier) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x401) == 0x401 &&
-            btlIsUnitAtOrBelowHealthRate((BattleUnit *)battler, multiplier)) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x401) == 0x401 &&
+            btlIsUnitAtOrBelowHealthRate(unit, multiplier)) {
             return 1;
         }
     }
@@ -314,10 +316,10 @@ s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 multiplier) {
 }
 
 s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201) {
-            u8 *stats = (u8 *)(battler + 0x120);
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
+            u8 *stats = unit->stats;
             s32 current = func_001AA700(stats);
             s32 maximum = func_001AA740(stats);
             if ((u32)(maximum * multiplier) >= (u32)(current * 100)) {
@@ -329,10 +331,10 @@ s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
 }
 
 s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201) {
-            u8 *stats = (u8 *)(battler + 0x120);
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
+            u8 *stats = unit->stats;
             s32 current = func_001AA700(stats);
             s32 maximum = func_001AA740(stats);
             if ((u32)(current * 100) >= (u32)(maximum * multiplier)) {
@@ -351,11 +353,12 @@ s32 func_00212520() {
     return 0;
 }
 
+/* Count group 0x400 units that are active and not marked 0x20. */
 s32 func_00212550(s32 unused, u32 limit) {
     u32 count = 0;
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
             count++;
         }
     }
@@ -365,12 +368,13 @@ s32 func_00212550(s32 unused, u32 limit) {
     return 1;
 }
 
+/* Count eligible group 0x200 units without condition 0x800. */
 s32 func_002125B0(s32 unused, u32 limit) {
     u32 count = 0;
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201) {
-            if (!(*(u16 *)(battler + 0x12e) & 0x800)) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
+            if (!(unit->conditionFlags & 0x800)) {
                 count++;
             }
         }
@@ -414,11 +418,12 @@ s32 func_002126C8(BattleUnit *unit) {
     return mdlFlagTest(0x290) != 0;
 }
 
+/* Test whether the count of active group 0x200 units fits within limit. */
 s32 func_00212728(s32 unused, u32 limit) {
     u32 count = 0;
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
             count++;
         }
     }
@@ -428,15 +433,16 @@ s32 func_00212728(s32 unused, u32 limit) {
     return 1;
 }
 
-s32 func_00212788(s32 arg0, s32 arg1) {
-    return (func_001AA840(arg0 + 0x120, arg1) & arg1) != 0;
+/* Intersect a unit's stat mask with the requested condition bits. */
+s32 func_00212788(s32 actor, s32 mask) {
+    return (func_001AA840(((BattleUnit *)actor)->stats, mask) & mask) != 0;
 }
 
-s32 func_002127B8(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x401) == 0x401 &&
-            func_00212788(battler, arg)) {
+s32 func_002127B8(s32 unused, s32 mask) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x401) == 0x401 &&
+            func_00212788((s32)unit, mask)) {
             return 1;
         }
     }
@@ -446,44 +452,47 @@ s32 func_002127B8(s32 unused, s32 arg) {
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00212838);
 
 s32 func_00212948(s32 unused, s32 mask) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x201) == 0x201 &&
-            func_00212788(battler, mask)) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x201) == 0x201 &&
+            func_00212788((s32)unit, mask)) {
             return 1;
         }
     }
     return 0;
 }
 
+/* Require every eligible group 0x200 unit to have a requested condition bit. */
 s32 func_002129C8(s32 unused, s32 mask) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            !func_00212788(battler, mask)) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x221) == 0x201 &&
+            !func_00212788((s32)unit, mask)) {
             return 0;
         }
     }
     return 1;
 }
 
+/* Look for an active group 0x200 unit in the requested mode. */
 s32 func_00212A40(s32 unused, s32 mode) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            *(u16 *)(battler + 0x124) == mode) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x221) == 0x201 &&
+            unit->mode == mode) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_00212AB0(s32 unit, s32 mode) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            *(u16 *)(battler + 0x124) == mode &&
-            *(u64 *)(battler + 0x108) != *(u64 *)(unit + 0x108)) {
+/* Exclude the supplied unit ID while checking group 0x400 in this mode. */
+s32 func_00212AB0(s32 excludedUnit, s32 mode) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; unit != 0; unit = unit->nextActor) {
+        if ((*(u64 *)&unit->flags & 0x421) == 0x401 &&
+            unit->mode == mode &&
+            unit->unitId != ((BattleUnit *)excludedUnit)->unitId) {
             return 1;
         }
     }

@@ -497,7 +497,9 @@ u32 func_0027B368(u32 arg0) {
 struct MenuListNode {
     s32 index;
     s32 value;
-    u8 pad8[0x50];
+    u8 pad8[0x48];
+    s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
+    u8 pad54[4];
     struct MenuListNode *next;
     struct MenuListNode *prev;
     u32 sortKeyPrimary;   /* 0x60 */
@@ -652,29 +654,30 @@ s32 mnuSeekListNode(s32 index, MenuList *list) {
     return 1;
 }
 
-void func_0027BB08(u32 arg0) {
-    mnuSeekListNode(0, arg0);
+void func_0027BB08(MenuList *list) {
+    mnuSeekListNode(0, list);
 }
 
-void func_0027BB28(s32 *arg0) {
-    mnuSeekListNode(arg0[8] - 1, arg0);
+void func_0027BB28(MenuList *list) {
+    mnuSeekListNode(list->count - 1, list);
 }
 
-s32 func_0027BB48(s32 *arg0) {
-    s32 temp_1C = arg0[7];
-    s32 temp_14 = arg0[5];
-    s32 *temp_18 = (s32 *)arg0[6];
+/* Advance the visible head when a prior window offset can be reduced. */
+s32 func_0027BB48(MenuList *list) {
+    MenuListNode *cursor = list->cursor;
+    MenuListNode *last = list->last;
+    MenuListNode *head = list->head;
 
-    if (temp_1C == temp_14) {
-        return temp_1C;
+    if (cursor == last) {
+        return (s32)cursor;
     }
-    temp_18 = (s32 *)temp_18[22];
-    if (temp_18 == NULL) {
-        return temp_1C;
+    head = head->next;
+    if (head == NULL) {
+        return (s32)cursor;
     }
-    arg0[6] = (s32)temp_18;
-    arg0[9]--;
-    return temp_1C;
+    list->head = head;
+    list->windowOffset--;
+    return (s32)cursor;
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BB80);
@@ -704,32 +707,34 @@ s32 func_0027BF00(s32 arg0) {
     return *(s32 *)(arg0 + 0x28) * *(s32 *)(arg0 + 0xc);
 }
 
-void func_0027BF10(s32 arg0) {
-    s32 temp_v0;
+/* Cancel the pending animation on every node in this list. */
+void func_0027BF10(MenuList *list) {
+    MenuListNode *node;
 
-    temp_v0 = *(s32 *)(arg0 + 0x10);
-    if (temp_v0 != 0) {
-        *(u32 *)(temp_v0 + 0x50) = 0;
-        while (temp_v0 = *(s32 *)(temp_v0 + 0x58), temp_v0 != 0) {
-            *(u32 *)(temp_v0 + 0x50) = 0;
+    node = list->first;
+    if (node != 0) {
+        node->animationTimer = 0;
+        while (node = node->next, node != 0) {
+            node->animationTimer = 0;
         }
     }
 }
 
-void func_0027BF48(u8 *menu) {
-    u8 *node = *(u8 **)(menu + 0x10);
+/* Tick every node's animation down in units of 16, clamping at zero. */
+void func_0027BF48(MenuList *list) {
+    MenuListNode *node = list->first;
     if (node != NULL) {
         do {
-            s32 timer = *(s32 *)(node + 0x50);
+            s32 timer = node->animationTimer;
             s32 reduced = timer - 0x10;
             if (timer > 0) {
-                *(s32 *)(node + 0x50) = reduced;
+                node->animationTimer = reduced;
                 timer = reduced;
             }
             if (timer < 0) {
-                *(s32 *)(node + 0x50) = 0;
+                node->animationTimer = 0;
             }
-            node = *(u8 **)(node + 0x58);
+            node = node->next;
         } while (node != NULL);
     }
 }
@@ -1079,53 +1084,56 @@ void menuHideWindowHandles(u32 obj) {
     }
 }
 
-void func_0027DE60(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+/* Rebuild the first-node pointer by walking backward from the cursor. */
+void func_0027DE60(MenuList *list) {
+    MenuListNode *node;
+    MenuListNode *first;
+    MenuListNode *previous;
 
-    temp_v2 = *(s32 *)(arg0 + 0x1c);
-    temp_v1 = *(s32 *)(arg0 + 0x1c);
-    while (temp_v0 = temp_v2, temp_v0 != 0) {
-        temp_v1 = temp_v0;
-        temp_v2 = *(s32 *)(temp_v0 + 0x5c);
+    previous = list->cursor;
+    first = list->cursor;
+    while (node = previous, node != 0) {
+        first = node;
+        previous = node->prev;
     }
-    *(s32 *)(arg0 + 0x10) = temp_v1;
+    list->first = first;
 }
 
-void func_0027DE98(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+/* Rebuild the last-node pointer by walking forward from the cursor. */
+void func_0027DE98(MenuList *list) {
+    MenuListNode *node;
+    MenuListNode *last;
+    MenuListNode *next;
 
-    temp_v2 = *(s32 *)(arg0 + 0x1c);
-    temp_v1 = *(s32 *)(arg0 + 0x1c);
-    while (temp_v0 = temp_v2, temp_v0 != 0) {
-        temp_v1 = temp_v0;
-        temp_v2 = *(s32 *)(temp_v0 + 0x58);
+    next = list->cursor;
+    last = list->cursor;
+    while (node = next, node != 0) {
+        last = node;
+        next = node->next;
     }
-    *(s32 *)(arg0 + 0x14) = temp_v1;
+    list->last = last;
 }
 
-void func_0027DED0(s32 *menu, s32 reset) {
-    s32 initial;
-    s32 last;
-    menu[9] = 0;
-    initial = menu[4];
-    last = menu[7];
-    menu[6] = initial;
-    menu[7] = initial;
-    if (reset == 1) {
-        s32 *node = (s32 *)initial;
+/* Reset the cursor to the beginning, optionally replaying its old position. */
+void func_0027DED0(MenuList *list, s32 restoreOffset) {
+    MenuListNode *first;
+    MenuListNode *oldCursor;
+    list->windowOffset = 0;
+    first = list->first;
+    oldCursor = list->cursor;
+    list->head = first;
+    list->cursor = first;
+    if (restoreOffset == 1) {
+        MenuListNode *node = first;
         if (node == NULL) {
             return;
         }
         do {
-            if ((s32)node == last) {
+            if (node == oldCursor) {
                 return;
             }
-            func_0027BE90(menu);
-            node = (s32 *)node[22];
+            func_0027BE90((u32)list);
+            node = node->next;
         } while (node != NULL);
     }
 }
