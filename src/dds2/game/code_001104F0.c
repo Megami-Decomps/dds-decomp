@@ -36,6 +36,7 @@ INCLUDE_ASM(const s32, "game/code_001104F0", func_00110640);
 
 INCLUDE_ASM(const s32, "game/code_001104F0", func_00110680);
 
+/* Signed comparison via complement-and-shift: zero counts as nonnegative. */
 u32 func_001106B8(s16 *values) {
     values[2] = *values;
     return (u32)~(s32)*values >> 0x1f;

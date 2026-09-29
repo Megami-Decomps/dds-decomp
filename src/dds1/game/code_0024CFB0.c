@@ -263,21 +263,21 @@ s8 func_0024DB40(void) {
     return D_003BC415;
 }
 
-u32 func_0024DB48(s32 arg0) {
-    u32 temp_v0;
+u32 func_0024DB48(s32 notify) {
+    u32 result;
 
-    temp_v0 = 0;
+    result = 0;
     if (-1 < D_003BC408) {
         itfPanelSetStatus(D_003BC408, 0);
-        if (arg0 != 0) {
+        if (notify != 0) {
             func_0019B4A0(D_003BC408);
         }
         itfMesCleanupWindow(D_003BC408, 0);
         func_0024DDC0(1);
         D_003BC40C = 0;
-        temp_v0 = 1;
+        result = 1;
     }
-    return temp_v0;
+    return result;
 }
 
 void func_0024DBB0(void) {

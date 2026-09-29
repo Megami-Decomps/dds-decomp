@@ -31,7 +31,7 @@ typedef struct MdlInner {
     u8 unkC[8];  /* 0xC */
     MdlNode *list; /* 0x14: intrusive list walked by func_00218320/368 */
     u8 unk18[4]; /* 0x18 */
-    u32 unk1C;   /* 0x1C */
+    u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
     u8 pad20[0x30];
     u128 vector50; /* 0x50 */
     u128 vector60; /* 0x60 */
@@ -77,7 +77,7 @@ typedef struct MdlNode {
     f32 unk1C;            /* 0x1C: read as int by mdlGetNodeInt1C */
     f32 value;             /* 0x20: float slot of mdlGetNodeFloat20/F40 */
     u8 pad24[4];           /* 0x24 */
-    s16 id;                /* 0x28: search id */
+    s16 searchId;          /* 0x28: identifies a node in list lookups */
     s16 slotIndex;         /* 0x2A: slot index used by mdlClearSlotAndRelease */
     u16 unk2C;            /* 0x2C */
     u16 unk2E;            /* 0x2E */
@@ -105,8 +105,8 @@ extern u32 D_003BD878;
 extern void *btlFindGroupedEntity();
 
 void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
-    s32 off = node->slotIndex * 4 + 0x20;
-    void **slot = (void **)((u8 *)ctx + off);
+    s32 offset = node->slotIndex * 4 + 0x20;
+    void **slot = (void **)((u8 *)ctx + offset);
 
     if (*slot == node) {
         *slot = NULL;
@@ -118,7 +118,7 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     MdlNode *node = ctx->inner->list;
 
     while (node != NULL) {
-        if (node->id == id) {
+        if (node->searchId == id) {
             mdlClearSlotAndRelease(ctx, node);
             break;
         }
@@ -128,12 +128,12 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216C00);
 
-void func_00216CC8(void *arg0, void *arg1, void *arg2) {
-    void *handle;
+void func_00216CC8(void *unused0, void *unused1, void *command) {
+    void *entity;
 
-    /* arg0/arg1 are ignored. */
-    handle = btlFindGroupedEntity();
-    func_00216C00(handle, arg2);
+    /* Only the grouped entity and command are forwarded to the worker. */
+    entity = btlFindGroupedEntity();
+    func_00216C00(entity, command);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216CF8);
@@ -284,7 +284,7 @@ MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
-        if (node->id == id) {
+        if (node->searchId == id) {
             return node;
         }
     }
@@ -400,25 +400,25 @@ void mdlStoreTertiaryVectorVU(MdlCtx *ctx) {
 }
 
 u32 mdlGetBroadcastValue(MdlCtx *ctx) {
-    return ctx->inner->unk1C;
+    return ctx->inner->broadcastValue;
 }
 
-void mdlSetAllResourceFrames(MdlCtx *ctx, u32 arg1) {
+void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
     u32 *node;
 
     for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
-        mdlSetResourceFrame(ctx, node, arg1);
+        mdlSetResourceFrame(ctx, node, value);
     }
 }
 
-void mdlBroadcastMasked(MdlCtx *ctx, u32 arg1) {
-    ctx->inner->unk1C = arg1;
-    mdlSetAllResourceFrames(ctx, (arg1 & 0xFF000000) | 0x808080);
+void mdlBroadcastMasked(MdlCtx *ctx, u32 value) {
+    ctx->inner->broadcastValue = value;
+    mdlSetAllResourceFrames(ctx, (value & 0xFF000000) | 0x808080);
 }
 
-void mdlBroadcastValue(MdlCtx *ctx, u32 arg1) {
-    ctx->inner->unk1C = arg1;
-    mdlSetAllResourceFrames(ctx, arg1);
+void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
+    ctx->inner->broadcastValue = value;
+    mdlSetAllResourceFrames(ctx, value);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218100);

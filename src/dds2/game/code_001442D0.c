@@ -235,12 +235,12 @@ extern u8 D_00436208[];
 extern s32 D_0043621C;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
+    s32 flags;
+    s32 soundId;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
 } FldClear18; /* 0x18 bytes */
 
 extern FldClear18 D_0044F730[];
@@ -614,23 +614,23 @@ s32 fldFieldTaskUpdate(void) {
     return 0;
 }
 
-void *func_00144498(s32 arg0) {
-    s32 *temp_v0;
+void *func_00144498(s32 task) {
+    s32 *work;
 
-    temp_v0 = func_00328D68(0x10);
-    temp_v0[0] = 0;
-    temp_v0[1] = 0;
-    temp_v0[2] = 0;
-    temp_v0[3] = 0;
-    func_00101950(arg0, temp_v0);
+    work = func_00328D68(0x10);
+    work[0] = 0;
+    work[1] = 0;
+    work[2] = 0;
+    work[3] = 0;
+    func_00101950(task, work);
     return fldFieldTaskUpdate;
 }
 
 void func_001444E8(void) {
-    u64 temp_v0;
+    u64 work;
 
-    temp_v0 = func_00101958();
-    func_00328E48(temp_v0);
+    work = func_00101958();
+    func_00328E48(work);
     D_00436200 = 0;
 }
 
@@ -652,9 +652,9 @@ void func_00144598(void) {
 
     do {
         temp_v1 -= 1;
-        temp_v0->unk0 = 0;
-        temp_v0->unk8 = 0;
-        temp_v0->unk4 = 0;
+        temp_v0->flags = 0;
+        temp_v0->x = 0;
+        temp_v0->soundId = 0;
         temp_v0 += 1;
     } while (temp_v1 >= 0);
     D_0043621C = 0;
@@ -667,12 +667,12 @@ void func_001445D0(s32 id, f32 x, f32 y, f32 z, f32 w) {
     if (D_00389770[4] == 0x17 && D_00389770[5] == 7 && (mdlFlagTest(0x4C5) == 0 || mdlFlagTest(0x1C) != 0)) {
         return;
     }
-    D_0044F730[D_0043621C].unk0 = 0;
-    D_0044F730[D_0043621C].unk4 = id;
-    D_0044F730[D_0043621C].unk8 = x;
-    D_0044F730[D_0043621C].unkC = y;
-    D_0044F730[D_0043621C].unk10 = z;
-    D_0044F730[D_0043621C].unk14 = w;
+    D_0044F730[D_0043621C].flags = 0;
+    D_0044F730[D_0043621C].soundId = id;
+    D_0044F730[D_0043621C].x = x;
+    D_0044F730[D_0043621C].y = y;
+    D_0044F730[D_0043621C].z = z;
+    D_0044F730[D_0043621C].w = w;
     D_0043621C++;
 }
 
@@ -685,9 +685,9 @@ void fldPlayPendingSounds(void) {
         stage = mdlFlagTest(0x13) != 0 ? 2 : stage;
     }
     for (i = 0; i < D_0043621C; i++) {
-        if (D_0044F730[i].unk0 & 1) {
-            D_0044F730[i].unk0 &= ~1;
-            func_00341C78(D_00399FF0[stage] + D_0044F730[i].unk4);
+        if (D_0044F730[i].flags & 1) {
+            D_0044F730[i].flags &= ~1;
+            func_00341C78(D_00399FF0[stage] + D_0044F730[i].soundId);
         }
     }
 }

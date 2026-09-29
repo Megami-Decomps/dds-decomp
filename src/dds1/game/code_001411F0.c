@@ -158,12 +158,12 @@ extern u8 D_003BAE78[];
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
+    s32 flags;
+    s32 soundId;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
 } FldClear18; /* 0x18 bytes */
 extern FldClear18 D_003D3FE0[];
 
@@ -207,23 +207,23 @@ s32 func_00141320(void) {
 }
 
 
-void *func_001413A8(s32 arg0) {
-    s32 *temp_v0;
+void *func_001413A8(s32 task) {
+    s32 *work;
 
-    temp_v0 = func_002CFEB8(0x10);
-    temp_v0[0] = 0;
-    temp_v0[1] = 0;
-    temp_v0[2] = 0;
-    temp_v0[3] = 0;
-    func_00101A68(arg0, temp_v0);
+    work = func_002CFEB8(0x10);
+    work[0] = 0;
+    work[1] = 0;
+    work[2] = 0;
+    work[3] = 0;
+    func_00101A68(task, work);
     return func_00141320;
 }
 
 void func_001413F8(void) {
-    u64 temp_v0;
+    u64 work;
 
-    temp_v0 = func_00101A70();
-    func_002CFF98(temp_v0);
+    work = func_00101A70();
+    func_002CFF98(work);
     D_003BAE70 = 0;
 }
 
@@ -243,28 +243,28 @@ void fldDestroyTask(void) {
 
 
 void func_001414A8(void) {
-    FldClear18 *temp_v0 = D_003D3FE0;
-    s32 temp_v1 = 7;
+    FldClear18 *entry = D_003D3FE0;
+    s32 remaining = 7;
 
     do {
-        temp_v1 -= 1;
-        temp_v0->unk0 = 0;
-        temp_v0->unk8 = 0;
-        temp_v0->unk4 = 0;
-        temp_v0 += 1;
-    } while (temp_v1 >= 0);
+        remaining -= 1;
+        entry->flags = 0;
+        entry->x = 0;
+        entry->soundId = 0;
+        entry += 1;
+    } while (remaining >= 0);
     D_003BAE8C = 0;
 }
 
 void fldAppendClearEntry(s32 id, f32 x, f32 y, f32 z, f32 w) {
     s32 i = D_003BAE8C;
 
-    D_003D3FE0[i].unk0 = 0;
-    D_003D3FE0[i].unk4 = id;
-    D_003D3FE0[i].unk8 = x;
-    D_003D3FE0[i].unkC = y;
-    D_003D3FE0[i].unk10 = z;
-    D_003D3FE0[i].unk14 = w;
+    D_003D3FE0[i].flags = 0;
+    D_003D3FE0[i].soundId = id;
+    D_003D3FE0[i].x = x;
+    D_003D3FE0[i].y = y;
+    D_003D3FE0[i].z = z;
+    D_003D3FE0[i].w = w;
     D_003BAE8C = i + 1;
 }
 
@@ -281,9 +281,9 @@ void fldPlayPendingSounds(void) {
         stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
     }
     for (i = 0; i < D_003BAE8C; i++) {
-        if (D_003D3FE0[i].unk0 & 1) {
-            D_003D3FE0[i].unk0 &= ~1;
-            func_002E8DD0(D_0033EAB0[stage] + D_003D3FE0[i].unk4);
+        if (D_003D3FE0[i].flags & 1) {
+            D_003D3FE0[i].flags &= ~1;
+            func_002E8DD0(D_0033EAB0[stage] + D_003D3FE0[i].soundId);
         }
     }
 }
@@ -394,38 +394,38 @@ void func_00141D98(void) {
     D_0032E3D8[0] = 0;
 }
 
-void fldPlayFieldSeVolumePan(s32 arg0) {
-    if (D_0032E3C0[0] < 50 && arg0 >= 16) {
-        if (arg0 == 0x80) {
+void fldPlayFieldSeVolumePan(s32 soundId) {
+    if (D_0032E3C0[0] < 50 && soundId >= 16) {
+        if (soundId == 0x80) {
             sndSetSequenceVolumePan(0x6C0060, 0x7F, 0x3F);
-        } else if (arg0 == 0x81) {
+        } else if (soundId == 0x81) {
             sndSetSequenceVolumePan(0x6C0061, 0x7F, 0x3F);
-        } else if (arg0 == 0x82) {
+        } else if (soundId == 0x82) {
             sndSetSequenceVolumePan(0x6C0064, 0x7F, 0x3F);
         } else {
-            sndSetSequenceVolumePan(D_003BAE84 + arg0, 0x7F, 0x3F);
+            sndSetSequenceVolumePan(D_003BAE84 + soundId, 0x7F, 0x3F);
         }
     }
 }
 
-void fldPlayFieldSe(s32 arg0) {
+void fldPlayFieldSe(s32 soundId) {
     if (D_0032E3C0[0] < 50) {
-        if (arg0 == 0x100) {
+        if (soundId == 0x100) {
             func_002E8DD0(0x6C0060);
-        } else if (arg0 == 0x101) {
+        } else if (soundId == 0x101) {
             func_002E8DD0(0x6C0061);
-        } else if (arg0 == 0x102) {
+        } else if (soundId == 0x102) {
             func_002E8DD0(0x6C0064);
         } else {
-            func_002E8DD0(D_003BAE84 + arg0);
+            func_002E8DD0(D_003BAE84 + soundId);
         }
     }
 }
 
 
-void fldSetSequenceVolume(s32 arg0, s32 arg1) {
+void fldSetSequenceVolume(s32 category, s32 volume) {
     if (D_0032E3C0[0] < 0x32) {
-        sndSetSequenceVolumePan(D_003BAE84 + arg0, arg1, 0x3F);
+        sndSetSequenceVolumePan(D_003BAE84 + category, volume, 0x3F);
     }
 }
 

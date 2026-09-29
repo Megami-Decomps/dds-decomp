@@ -3,16 +3,16 @@
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 volume;
-    /* 0xA */ u16 pan;
+    /* 0x8 */ u16 setting;
+    /* 0xA */ u16 unkA;
     /* 0xC */ u32 unkC;
 } CmdPacket;
 
-u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
 
-void func_003421E8(s32 arg0);
+void func_003421E8(s32 trackId);
 
-u32 func_003417A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_00341650);
 
@@ -31,15 +31,19 @@ INCLUDE_ASM(const s32, "game/code_00341650", func_00341A00);
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_00341AD8);
 
+/* Starts a track with the default 0x7f setting after preparing its identifier. */
+
 void func_00341BB8(s32 trackId) {
     CmdPacket packet;
 
     func_003421E8(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
-    packet.volume = 0x7F;
+    packet.setting = 0x7F;
     func_00341650(0x20, 0, &packet, 0x10);
 }
+
+/* Sends a single-word command payload in a 16-byte packet. */
 
 void func_00341C00(u32 value) {
     u32 packet[4];
@@ -48,12 +52,14 @@ void func_00341C00(u32 value) {
     func_00341650(0x30, 0, packet, 0x10);
 }
 
+/* Starts the alternate track command, leaving the other packet fields untouched. */
+
 void func_00341C30(s32 trackId) {
     CmdPacket packet;
 
     func_003421E8(trackId);
     packet.trackId = trackId;
-    packet.volume = 0x7F;
+    packet.setting = 0x7F;
     func_00341650(0x130, 0, &packet, 0x10);
 }
 

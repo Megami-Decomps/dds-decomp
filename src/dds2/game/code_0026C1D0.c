@@ -44,11 +44,12 @@ typedef struct {
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 dds3GetWorldObjectValue(u64);
 extern void func_0023AA30(s32, s32);
-void func_0026C1D0(s32 arg0, s32 arg1) {
-    s32 packed = (arg0 << 16) + arg1;
+/* Updates the secondary world selector only when the packed pair changes. */
+void func_0026C1D0(s32 first, s32 second) {
+    s32 packed = (first << 16) + second;
 
     if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != packed) {
-        func_0023AA30(arg0, arg1);
+        func_0023AA30(first, second);
     }
 }
 
@@ -86,13 +87,13 @@ s32 func_0026C2D8(s32 task) {
 }
 
 extern s32 scrCreateTaskForProcessId();
-s32 func_0026C318(s32 arg0, s32 arg1, s32 *taskSlot) {
+s32 func_0026C318(s32 first, s32 second, s32 *taskSlot) {
     s32 task;
 
     if (taskSlot != NULL) {
         func_0026C2D8(*taskSlot);
     }
-    task = scrCreateTaskForProcessId(0x7D0, arg0, arg1);
+    task = scrCreateTaskForProcessId(0x7D0, first, second);
     evtClearActiveFlag(0);
     if (taskSlot != NULL) {
         *taskSlot = task;
@@ -100,13 +101,14 @@ s32 func_0026C318(s32 arg0, s32 arg1, s32 *taskSlot) {
     return task;
 }
 
+/* Collects indexes of the active entries into the caller's list. */
 void func_0026C388(ActiveList *list) {
-    s32 i;
+    s32 index;
     list->count = 0;
-    for (i = 1; i < 0x100; i++) {
-        if (*(u8 *)(i + D_00435DD0 + 0x1340) != 0) {
+    for (index = 1; index < 0x100; index++) {
+        if (*(u8 *)(index + D_00435DD0 + 0x1340) != 0) {
             s32 count = list->count++;
-            list->indices[count] = i;
+            list->indices[count] = index;
         }
     }
 }
@@ -135,20 +137,21 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 }
 
 extern u32 effMiscRand();
+/* Swaps randomly selected elements the requested number of times (not a Fisher-Yates shuffle). */
 void func_0026C458(u8 *buffer, u32 length, s32 count) {
-    u8 *a;
-    u8 *b;
+    u8 *first;
+    u8 *second;
     u8 value;
 
     if (count > 0) {
         s32 remaining = count;
         do {
             remaining--;
-            a = buffer + effMiscRand(0) % length;
-            b = buffer + effMiscRand(0) % length;
-            value = *a;
-            *a = *b;
-            *b = value;
+            first = buffer + effMiscRand(0) % length;
+            second = buffer + effMiscRand(0) % length;
+            value = *first;
+            *first = *second;
+            *second = value;
         } while (remaining != 0);
     }
 }
@@ -214,21 +217,21 @@ s8 func_0026C6A0(void) {
     return D_0043788D;
 }
 
-u32 func_0026C6A8(s32 arg0) {
-    u32 temp_v0;
+u32 func_0026C6A8(s32 notify) {
+    u32 result;
 
-    temp_v0 = 0;
+    result = 0;
     if (-1 < D_00437880) {
         itfPanelSetStatus(D_00437880, 0);
-        if (arg0 != 0) {
+        if (notify != 0) {
             func_001A34D0(D_00437880);
         }
         itfMesCleanupWindow(D_00437880, 0);
         func_0026C948(1);
         D_00437884 = 0;
-        temp_v0 = 1;
+        result = 1;
     }
-    return temp_v0;
+    return result;
 }
 
 void func_0026C710(void) {

@@ -11,6 +11,20 @@ typedef struct SoundSlotPool {
     s32 count;
 } SoundSlotPool;
 
+/* Nodes passed to the menu model helpers are 0x50-byte records. */
+typedef struct MnuModelNode {
+    u8 pad00[0x30];
+    f32 x;           /* 0x30 */
+    f32 y;           /* 0x34 */
+    f32 z;           /* 0x38 */
+    u32 positionFlag; /* 0x3C */
+    u32 *model;      /* 0x40 */
+    u32 flags;       /* 0x44 */
+    u16 value48;     /* 0x48 */
+    u16 value4A;     /* 0x4A */
+    f32 modelZ;      /* 0x4C */
+} MnuModelNode;
+
 extern void mdlBroadcastMasked(u32 sprite);
 
 extern u32 *D_00438940;
@@ -53,6 +67,7 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B290);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B2E0);
 
+/* Returns occupied sound slots to their default volume and pan when they expire. */
 void dds3UpdateSoundSlots(void) {
     SoundSlotPool *pool = (SoundSlotPool *)D_00438940;
     if (pool != 0) {
@@ -130,6 +145,8 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
     func_002D46A0(*(u32 *)node);
 }
 
+/* Resolves a model from a resource and releases its temporary resource data. */
+
 u32 func_0031BBB0(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
@@ -201,18 +218,20 @@ void func_0031C208(s32 *list) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C280);
 
+/* Claims the first inactive node whose model pointer is already populated. */
 u8 *mnuAcquireUnusedModelNode(u32 *group) {
     s32 index = 0;
     u8 *node = (u8 *)group[0];
     if ((s32)group[1] > 0) {
         do {
-            if ((*(u32 *)(node + 0x44) & 1) == 0) {
-                u32 *model = *(u32 **)(node + 0x40);
+            MnuModelNode *entry = (MnuModelNode *)node;
+            if ((entry->flags & 1) == 0) {
+                u32 *model = entry->model;
                 if (model != 0) {
                     *model &= ~1U;
-                    *(u16 *)(node + 0x48) = 0;
-                    *(u16 *)(node + 0x4a) = 0;
-                    *(u32 *)(node + 0x44) = 1;
+                    entry->value48 = 0;
+                    entry->value4A = 0;
+                    entry->flags = 1;
                     return node;
                 }
                 return 0;
@@ -232,30 +251,31 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C4A0);
 
 void mnuCreateNodeModelEntry(u8 *node, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
     u8 *model = func_00232198(first, second);
-    *(u8 **)(node + 0x40) = model;
+    ((MnuModelNode *)node)->model = (u32 *)model;
     if (flag != -1) {
         *(f32 *)(*(u8 **)(model + 0x1c) + 0x20) = z;
-        *(f32 *)(node + 0x4c) = z;
+        ((MnuModelNode *)node)->modelZ = z;
         mdlAddEntryFlaggedEx(model, 0, flag, x, y);
     }
 }
 
 void func_0031C578(s32 arg0) {
-    *(u32 *)(arg0 + 0x44) = 0;
-    **(u32 **)(arg0 + 0x40) = **(u32 **)(arg0 + 0x40) | 1;
+    MnuModelNode *node = (MnuModelNode *)arg0;
+    node->flags = 0;
+    *node->model = *node->model | 1;
 }
 
-void func_0031C590(u8 *model, s32 value) {
+void func_0031C590(u8 *node, s32 value) {
     value &= 0xFFFF;
-    *(u16 *)(model + 0x48) = value;
-    *(u16 *)(model + 0x4A) = value;
+    ((MnuModelNode *)node)->value48 = value;
+    ((MnuModelNode *)node)->value4A = value;
 }
 
-void func_0031C5A0(u8 *model, f32 x, f32 y, f32 z) {
-    *(f32 *)(model + 0x30) = x;
-    *(f32 *)(model + 0x34) = y;
-    *(f32 *)(model + 0x38) = z;
-    *(u32 *)(model + 0x3C) = 0;
+void func_0031C5A0(u8 *node, f32 x, f32 y, f32 z) {
+    ((MnuModelNode *)node)->x = x;
+    ((MnuModelNode *)node)->y = y;
+    ((MnuModelNode *)node)->z = z;
+    ((MnuModelNode *)node)->positionFlag = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C5B8);
@@ -268,8 +288,8 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C850);
 
-void func_0031C888(u8 *model) {
-    mdlBroadcastMasked(*(u32 *)(model + 0x40));
+void func_0031C888(u8 *node) {
+    mdlBroadcastMasked((u32)((MnuModelNode *)node)->model);
 }
 
 
@@ -278,11 +298,12 @@ void func_0031C8A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C8B0);
 
-void func_0031C900(u8 *model, s8 selector) {
+void func_0031C900(u8 *node, s8 selector) {
+    MnuModelNode *entry = (MnuModelNode *)node;
     if (selector == 1) {
-        **(u32 **)(model + 0x40) &= ~1U;
+        *entry->model &= ~1U;
     } else {
-        **(u32 **)(model + 0x40) |= 1U;
+        *entry->model |= 1U;
     }
 }
 

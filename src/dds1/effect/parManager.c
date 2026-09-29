@@ -16,18 +16,18 @@ typedef struct {
 
 typedef struct {
     u8 pad[0xC]; /* 0x0 */
-    void *unkC;  /* 0xC released by func_00159CD8 */
+    void *resource;  /* 0xC released by func_00159CD8 */
 } ParNode;
 
 typedef struct {
     u8 pad[4];   /* 0x0 */
-    u16 unk4;    /* 0x4 cleared by parClearSlotFlag */
+    u16 flag;    /* 0x4 cleared by parClearSlotFlag */
     u8 pad6[10]; /* 0x6 */
 } ParSlot; /* 0x10 bytes */
 
 typedef struct {
     u8 pad[4];     /* 0x0 */
-    ParSlot *unk4; /* 0x4 */
+    ParSlot *slots; /* 0x4 */
 } ParTable;
 
 
@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00159AB8);
 INCLUDE_ASM(const s32, "effect/parManager", func_00159C08);
 
 void func_00159CD8(ParNode *node) {
-    func_002D0918(node->unkC);
+    func_002D0918(node->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159CF0);
@@ -76,7 +76,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00159D68);
 INCLUDE_ASM(const s32, "effect/parManager", func_00159E20);
 
 void parClearSlotFlag(ParTable *table, s32 index) {
-    table->unk4[index].unk4 = 0;
+    table->slots[index].flag = 0;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159F48);
@@ -120,6 +120,8 @@ void parCloneKind(ParObj *obj) {
     newobj = D_0034E250[obj->dispatchIndex].func();
     newobj->dispatchIndex = obj->dispatchIndex;
 }
+
+/* Reissues the dispatch callback and arms the restart flag. */
 
 void parRestartKind(ParObj *obj) {
     D_0034E2F0[obj->dispatchIndex]();

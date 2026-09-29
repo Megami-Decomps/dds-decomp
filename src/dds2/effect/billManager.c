@@ -2,6 +2,31 @@
 #include "ee_mmi.h"
 #include "eff.h"
 
+/* The entry offset is relative to the table's record base. */
+typedef struct {
+    s32 offset;
+    u8 pad4[0x10];
+} BillEntry; /* 0x14 bytes */
+
+typedef struct {
+    u8 pad00[0x12];
+    s16 value;
+} BillRecord;
+
+typedef struct {
+    u8 pad[4];
+    s32 base;
+    BillEntry *entries;
+} BillTable;
+
+typedef struct {
+    s32 unk0;
+    u32 unk4;
+    s32 recordValue;
+    BillEntry *entry;
+    s32 recordAddress;
+} BillOut;
+
 extern u64 billCreateIndexed(u64, u32);
 
 extern u64 func_00343ED0(u64, u32 *, u64);
@@ -119,21 +144,22 @@ u32 func_00159158(u32 colorA, u32 colorB) {
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001591D8);
 
-void billResolveEntry(s32 table, s32 index, s32 output) {
+/* Resolves an indexed billboard record and caches its signed +0x12 value. */
+void billResolveEntry(BillTable *table, s32 index, BillOut *out) {
     s16 kind;
-    s32 data;
-    s32 *entry;
+    s32 offset;
+    BillEntry *entry;
     s32 base;
 
-    base = *(s32 *)(table + 4);
-    entry = (s32 *)(*(s32 *)(table + 8) + index * 0x14);
-    data = *entry;
-    *(s32 **)(output + 0xc) = entry;
-    base = base + data;
-    *(u32 *)(output + 4) = 0;
-    kind = *(s16 *)(base + 0x12);
-    *(s32 *)(output + 0x10) = base;
-    *(s32 *)(output + 8) = (s32)kind;
+    base = table->base;
+    entry = table->entries + index;
+    offset = entry->offset;
+    out->entry = entry;
+    base = base + offset;
+    out->unk4 = 0;
+    kind = ((BillRecord *)base)->value;
+    out->recordAddress = base;
+    out->recordValue = (s32)kind;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001594C8);

@@ -3,7 +3,7 @@
 #include "ee_mmi.h"
 
 typedef struct {
-    s32 unk0;      /* 0x0 offset added to the table base */
+    s32 offset;    /* 0x0 offset added to the table base */
     u8 pad4[0x10]; /* 0x4 */
 } BillEntry; /* 0x14 bytes */
 
@@ -14,16 +14,16 @@ typedef struct {
 
 typedef struct {
     u8 pad[4];       /* 0x0 */
-    s32 unk4;        /* 0x4 base added to the entry offset */
-    BillEntry *unk8; /* 0x8 */
+    s32 base;        /* 0x4 base added to the entry offset */
+    BillEntry *entries; /* 0x8 */
 } BillTable;
 
 typedef struct {
     s32 unk0;       /* 0x0 */
     u32 unk4;       /* 0x4 cleared on setup */
-    s32 unk8;       /* 0x8 filled from the s16 at unk10 + 0x12 */
-    BillEntry *unkC; /* 0xC */
-    s32 unk10;      /* 0x10 table base + entry offset */
+    s32 recordValue; /* 0x8 read from the s16 at recordAddress + 0x12 */
+    BillEntry *entry; /* 0xC */
+    s32 recordAddress; /* 0x10 table base + entry offset */
 } BillOut;
 
 extern BillDispatch D_0034E060[];
@@ -140,21 +140,22 @@ u32 func_00151568(u32 colorA, u32 colorB) {
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001515E8);
 
+/* Resolves an indexed billboard record and caches its signed +0x12 value. */
 void billResolveEntry(BillTable *table, s32 index, BillOut *out) {
     s32 base;
     BillEntry *entry;
     s32 offset;
-    s16 val;
+    s16 value;
 
-    base = table->unk4;
-    entry = table->unk8 + index;
-    offset = entry->unk0;
-    out->unkC = entry;
+    base = table->base;
+    entry = table->entries + index;
+    offset = entry->offset;
+    out->entry = entry;
     base = base + offset;
     out->unk4 = 0;
-    val = ((BillRecord *)base)->value;
-    out->unk10 = base;
-    out->unk8 = val;
+    value = ((BillRecord *)base)->value;
+    out->recordAddress = base;
+    out->recordValue = value;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001518D8);
@@ -175,15 +176,15 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     return newobj;
 }
 
-void *billCreateFromResource(s32 arg0, s32 arg1) {
-    void *tmp;
-    void *res;
-    u32 buf[4];
+void *billCreateFromResource(s32 kind, s32 resource) {
+    void *allocation;
+    void *billboard;
+    u32 header[4];
 
-    tmp = func_002EB028(arg1, buf, 0);
-    res = billCreateIndexed(arg0, buf[0]);
-    func_002D0918(tmp);
-    return res;
+    allocation = func_002EB028(resource, header, 0);
+    billboard = billCreateIndexed(kind, header[0]);
+    func_002D0918(allocation);
+    return billboard;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151E60);

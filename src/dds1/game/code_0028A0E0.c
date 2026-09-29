@@ -538,6 +538,8 @@ void fileWriteBegin(s32 request, u32 first, u32 second) {
 
 extern s32 func_002F6858(s32, s32 *, s32 *);
 
+/* Poll the memory-card write: busy is 0, success 1, and the card's
+ * -4 status is translated to the menu's -2 error. */
 s32 fileWriteWait(void) {
     s32 cmdId;
     s32 status;
@@ -579,13 +581,16 @@ void fileReqGetSlotCode(void) {
     D_003BC864 = D_003DC803[slot * 0x30];
 }
 
+/* Size of the persistent main save block copied during a reload. */
+#define FILE_MAIN_BLOB_SIZE 0x33600
+
 u32 fileMainBlobSize(void) {
-    return 0x33600;
+    return FILE_MAIN_BLOB_SIZE;
 }
 
 void fileReloadSaveBuffer(void) {
     s32 saved = *(s32 *)(D_003BAA00 + 0x30);
-    s32 size = 0x33600;
+    s32 size = FILE_MAIN_BLOB_SIZE;
     memcpy((void *)D_003BAA00, (void *)D_003BD924, size);
     *(s32 *)(D_003BAA00 + 0x30) = saved;
 }
@@ -616,18 +621,19 @@ void func_0028A2D0(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
     func_00195548(0x54);
 }
 
-void func_0028A388(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+void func_0028A388(s32 x, s32 y, u64 first, u64 second) {
+    u64 imageHandle;
 
-    temp_v0 = func_001978E8(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_00195880(temp_v0, 1);
-    func_00194920(temp_v0);
+    imageHandle = func_001978E8(x << 4, y << 3, 0, first, second, 0);
+    func_00195880(imageHandle, 1);
+    func_00194920(imageHandle);
 }
 
 extern f32 D_003BC88C;
 extern f32 func_002E77F8(f32);
 extern s32 itfMesGetGlobalWindowValue(void);
 
+/* Animate the save-window highlight's alpha with a sinusoidal phase. */
 void func_0028A3D8(void) {
     s32 angle;
     f32 wave;
