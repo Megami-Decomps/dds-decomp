@@ -1911,7 +1911,7 @@ FileJob *fileJobCreate(void) {
     return job;
 }
 
-void func_002D4120(void) {
+void func_002D4120(FileJob *job) {
     func_00328E48();
 }
 
@@ -1923,7 +1923,19 @@ void func_002D4380(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4398);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4548);
+/* DDS2 twin of DDS1 func_002944D8: destroy every queued file job. */
+void func_002D4548(FileQueue *queue) {
+    FileJob *job = queue->first;
+    while (job != NULL) {
+        FileJob *next = job->next;
+        if ((job->flags & 1) == 0) {
+            fileJobDestroy(*(FileJob **)((u8 *)job + 0x90));
+        }
+        func_002D4120(job);
+        job = next;
+    }
+    func_00328E48(queue);
+}
 
 FileQueue *fileQueueClone(FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
