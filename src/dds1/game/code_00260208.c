@@ -166,14 +166,14 @@ void func_00262038(s32 arg0) {
     func_001198B8(*(u32 *)(arg0 + 0xc));
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262050);
+INCLUDE_ASM(const s32, "game/code_00260208", ptyClampExp);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262148);
+INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
 void func_002622B0(u32 arg0, u32 arg1, u32 arg2) {
     func_00261FD8(arg1);
     func_00262038(arg1);
-    func_00262148(arg0, arg2);
+    brsApplyPartyRewards(arg0, arg2);
 }
 
 extern void func_002762D8(s32 *);
@@ -270,11 +270,11 @@ s32 func_002624C0(s32 work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262570);
+INCLUDE_ASM(const s32, "game/code_00260208", brsMarkPartyRows);
 
 void func_00262600(u32 arg0, u32 arg1, u32 arg2) {
-    func_00262570(arg0, arg1, 2);
-    func_00262570(arg0, arg2, 1);
+    brsMarkPartyRows(arg0, arg1, 2);
+    brsMarkPartyRows(arg0, arg2, 1);
 }
 
 void func_00262640(s32 arg0) {
@@ -289,7 +289,7 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262660);
+INCLUDE_ASM(const s32, "game/code_00260208", brsCreateTaskContext);
 
 extern void func_00285600(s32, s32);
 extern s32 func_002624C0(s32);
@@ -317,17 +317,17 @@ void func_00262790(s32 arg0) {
 extern char D_003BC530[];
 extern char D_003AFAB8[];
 extern char D_003AFAC8[];
-extern void func_00262EB8(void);
+extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
 extern void mnuStaffRunPanel2(void);
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-extern void *func_00262660(void);
+extern void *brsCreateTaskContext(void);
 
 s32 mnuStaffCreateTasks(void) {
     s32 result;
-    void *work = func_00262660();
+    void *work = brsCreateTaskContext();
 
-    kwlnTaskCreate(D_003BC530, 0x405, 1, 0, func_00262EB8, 0, work);
+    kwlnTaskCreate(D_003BC530, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
     result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, func_00262790, work);
     D_003BC528 = 1;
@@ -416,7 +416,7 @@ s32 mnuStaffPickRoll(void) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262C08);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262CE8);
+INCLUDE_ASM(const s32, "game/code_00260208", brsSelectNextUnit);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAB8);
 

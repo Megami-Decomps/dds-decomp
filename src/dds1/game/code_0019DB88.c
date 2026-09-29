@@ -846,7 +846,7 @@ s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
 }
 
 void func_001A29B8(void) {
-    func_00119300();
+    ptyGetProfileStat();
 }
 
 void func_001A29D0(void) {
@@ -4144,9 +4144,9 @@ u32 func_001D0EA8(u8 *actor, u8 *argument) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D0F98);
+INCLUDE_ASM(const s32, "game/code_0019DB88", brsSelectEntryCode);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D1118);
+INCLUDE_ASM(const s32, "game/code_0019DB88", brsShouldForceFallback);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D1218);
 

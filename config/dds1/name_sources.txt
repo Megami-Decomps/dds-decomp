@@ -204,15 +204,23 @@
 0x00119000	sdfSetPackedValuePreservingFlag	inferred	Replaces the low fifteen bits of a packed halfword while preserving its high flag bit.
 0x001192B0	datMoveCursorX	inferred	Adds the supplied delta to cursor x and clamps to zero through xMax.
 0x001192D8	datMoveCursorY	inferred	Adds the supplied delta to cursor y and clamps to zero through yMax.
+0x00119300	ptyGetProfileStat	inferred	legacy PartyUnit_GetCurrentProfileStatByIndex_1to99: current-profile stat value for a unit, clamped to 1..99
 0x001199B0	evtCheckValueThreshold	inferred	evt event state and dispatch in game/code_00119900.c
 0x00119AA8	dds3FindEntryIndex	inferred	counts entries until +4 == arg0 with flag set; returns count or -1 (max 5)
+0x00119E00	ptyRecoverAllUnits	inferred	legacy Party_RecoverAllActiveUnits: restores HP/MP of every present active party row
 0x0011A038	evtUpdateFlaggedStats	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011A0C0	evtHasMatchingFlaggedEntry	inferred	evt event state and dispatch in game/code_00119900.c
+0x0011A238	ptyInitRuntime	inferred	legacy Party_InitRuntimeState: initialises the serialized active-party runtime rows
 0x0011A580	dds3Clamp99	inferred	clamps u16 at +0x14 to max 99 via movz
 0x0011A598	dds3FindEntry	inferred	finds Entry1A4 with +4 == arg0 and flag set; returns pointer or NULL
+0x0011A5E8	ptyRebalanceFrontline	inferred	legacy Party_RebalanceFrontlineBitAfterRemoval: rebalances the frontline bit after a party removal
 0x0011A988	dds3EntryMax	inferred	max of +0x14 over flag-set Entry1A4 entries (5 iters, stride 0x1A4)
+0x0011A9C8	ptyGetAverageLevel	inferred	legacy Party_GetActiveAverageLevelCeil: ceil of the average level across present active rows
+0x0011AA28	ptyAddUnit	inferred	legacy Party_AddUnitById: adds a unit to the active party from the stock row
+0x0011AE78	ptyRemoveUnit	inferred	legacy Party_RemoveUnitById: removes a unit from the active party back to stock
 0x0011B438	evtUpdateFlaggedEntries	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011B4C8	dds3ForEachEntry	inferred	calls 00119900(unk0, unk2) for non-zero-flag entries of 2-entry table D_0032AEE8
+0x0011B528	ptyMergeStockSkills	inferred	legacy PartyUnit_MergeStockSkillBitsAndRefresh: OR-merges stock skill nibble words and refreshes the row
 0x0011B640	dds3ForEachFlagged	inferred	calls 0011B528(p) for flag-set Entry1A4 entries (5 iters)
 0x0011B878	evtRunContext	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011B908	dds3WorkInit	inferred	stores 0010BCA0 result to D_003BAAB4 then memsets 0x18 bytes at D_003C2E70
@@ -717,6 +725,8 @@
 0x001C4100	btlFadeStaleSceneSlots	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C7230	btlSetScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C72A8	btlUpdateScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D0F98	brsSelectEntryCode	inferred	legacy BattleResult_SelectEntryCode: per-target result entry code selector
+0x001D1118	brsShouldForceFallback	inferred	legacy BattleResult_ShouldForceFallbackDisplayTuple: predicate forcing the fallback display tuple
 0x001D44A8	btlFindTaskByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D4558	btlCountTasksForOwner	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D45A8	btlCountTasksByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
@@ -1294,6 +1304,21 @@
 0x00265478	mnuRefreshPanelLayer	inferred	redraws panel pieces then calls func_002653A0
 0x002656C0	mnuIsTitleEntryAvailable	inferred	mnu menu, title, shop, or movie UI in game/code_002653A0.c
 0x00265968	mnuCountAdvancingTitleAnimations	inferred	Counts the five title entries whose animation advance helper reports a positive step.
+0x00262050	ptyClampExp	inferred	legacy PartyUnit_ClampExpToLevel99Cap: clamps a unit's accumulated EXP to the level-99 cap
+0x00262148	brsApplyPartyRewards	inferred	legacy BattleResult_ApplyPartyRewardDeltas: applies EXP/level/profile deltas to a party row
+0x00262570	brsMarkPartyRows	inferred	legacy BattleResult_MarkPartyRowsFromDeltaList: marks party rows from a delta list payload
+0x00262660	brsCreateTaskContext	inferred	legacy BattleResultTask_CreateContextAndBuildRows: allocates the result task context and builds its rows
+0x00262CE8	brsSelectNextUnit	inferred	legacy BattleResult_SelectNextPendingUnitAndSetupPanels: picks the next pending unit and sets up its panels
+0x00262EB8	brsMessageInputStep	inferred	legacy BattleResultTask_MessageAndInputStep: message/input step of the result task
+0x00263260	prfCapPresentMessages	inferred	legacy ProfileCapReward_PresentStatusMessages: presents the profile-cap reward status messages
+0x00263408	prfCapTaskStep	inferred	legacy ProfileCapReward_TaskStep: profile-cap reward task step
+0x00265088	brsStepAnimDecay	inferred	legacy BattleResultUi_StepSharedAnimCounterDecay: decays the shared result animation counter
+0x00265610	brsCalcApGain	inferred	legacy BattleResult_CalcUnitApGainWithBonus: AP gain for a unit with its bonus, or 0 when ineligible
+0x00265648	brsCalcExpGain	inferred	legacy BattleResult_CalcUnitExpGainWithPassives: EXP gain for a unit with passive-skill modifiers
+0x00265700	brsBuildRewardRows	inferred	legacy BattleResult_BuildPartyRewardRows: builds the per-unit reward rows from the result summary
+0x002658B8	ptyCalcLevelUps	inferred	legacy PartyUnit_CalcPendingLevelUpsFromExp: pending level-ups from the saved EXP/level pair
+0x002659C8	brsBuildLevelUpList	inferred	legacy BattleResult_BuildLevelUpUnitList: builds the list of units that levelled up
+0x00265AB8	brsBuildProfileCapList	inferred	legacy BattleResult_BuildProfileCapReadyUnitList: builds the list of units ready for a profile cap
 0x00265BE0	mnuAdvanceTitleEntryAnimation	inferred	mnu menu, title, shop, or movie UI in game/code_002653A0.c
 0x00265C28	btlAddBaseStats	inferred	adds five signed stat bytes with cap 99
 0x00265FD8	mnuInitTitleParameters	inferred	Clears and initializes the four input words for a title-screen parameter group.

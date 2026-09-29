@@ -52,7 +52,7 @@ void func_00265078(void) {
 void func_00265080(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_00265088);
+INCLUDE_ASM(const s32, "game/code_002649B0", brsStepAnimDecay);
 
 typedef struct {
     u8 pad00[0x1574];

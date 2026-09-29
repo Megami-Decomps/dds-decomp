@@ -1,7 +1,7 @@
 #include "common.h"
 extern u16 D_00393AE0[][96];
 extern u16 D_00393AF0[][96];
-extern void func_0011B528(u8 *);
+extern void ptyMergeStockSkills(u8 *);
 
 extern void (*D_003BD2D4)(void);
 
@@ -165,7 +165,7 @@ void func_002CCC18(u8 *work) {
         index++;
     } while (index < 40);
     if (mdlFlagTest(0xB90)) {
-        func_0011B528(work);
+        ptyMergeStockSkills(work);
     }
 }
 

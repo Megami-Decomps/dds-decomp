@@ -6,7 +6,7 @@ extern u64 func_0011B140(u64, u64);
 extern u32 D_003BD7A8;
 
 u32 func_0011CEB8(void) {
-    func_0010D5F0(func_0011AE78(func_0010D428(0)) == 1);
+    func_0010D5F0(ptyRemoveUnit(func_0010D428(0)) == 1);
     return 1;
 }
 

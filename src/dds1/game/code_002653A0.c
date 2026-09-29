@@ -39,7 +39,7 @@ typedef struct {
 } TitleEntry;
 
 void func_002654E8(s32 arg0) {
-    func_00265088(arg0);
+    brsStepAnimDecay(arg0);
 }
 
 u8 func_00265500(s32 value) {
@@ -77,9 +77,9 @@ u32 func_00265598(void) {
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002655A0);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265610);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsCalcApGain);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265648);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsCalcExpGain);
 
 s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
     if (mdlFlagTest(0x902) == 0 && entry->kind == 4) {
@@ -88,9 +88,9 @@ s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265700);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002658B8);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
 extern s32 D_003BAA00;
 
@@ -99,19 +99,19 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = func_002658B8(D_003BAA00 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(D_003BAA00 + 0xa60 + offset);
         count += step > 0;
         offset += 0x1a4;
     } while (--remaining >= 0);
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002659C8);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265AB8);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
 
 s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
-    s32 step = func_002658B8(entry);
+    s32 step = ptyCalcLevelUps(entry);
     entry->animation += step;
     func_002CD0C0(entry);
     return step;

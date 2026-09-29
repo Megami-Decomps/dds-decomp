@@ -114,7 +114,7 @@ void func_001177A8(void) {
     scrClearProcessGlobals();
     func_0021F4B8();
     ((SdfRuntime *)D_003BAA00)->updateMode = 8;
-    func_0011A238();
+    ptyInitRuntime();
     func_00120C08(0);
     func_002CC7D8();
     ptyRebuildAllProfiles();

@@ -76,7 +76,7 @@ u32 mnuProcessItemSelection(u32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263260);
+INCLUDE_ASM(const s32, "game/code_00263148", prfCapPresentMessages);
 
 s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
     if (scene->overlayFlags & 1) {
@@ -98,7 +98,7 @@ u32 func_002633D8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263408);
+INCLUDE_ASM(const s32, "game/code_00263148", prfCapTaskStep);
 
 static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
