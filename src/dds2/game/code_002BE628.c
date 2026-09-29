@@ -20,29 +20,24 @@ extern s32 D_00435E1C;
 
 extern void func_002C42B0(s32, s32);
 
-extern u8 D_00457EBC[];
-
-extern u32 D_00457EB8[];
-
-extern u32 D_00457ED0[];
-
 extern f32 D_0037F5E0[];
 
+extern s8 D_003E7970[];
+extern u8 D_003E7978[];
+
+extern void func_002C7508(u32, f32, f32);
+extern void func_002C76A8(s32);
+extern void func_002C7168(void);
+extern void func_00203E18(s32);
+extern void func_00232390(s32, s32);
+extern s32 skillApplyFieldUseEffect(s32, s32, s32, s32);
+extern u32 ptyGetSkillNibbleState(s32, u16);
+
 extern void func_002C6A20(void);
-
-extern u32 D_00457EB4[];
-
-extern u32 D_00457EB0[];
 
 extern u8 D_003E7940[];
 
 extern u8 D_003E7950[];
-
-extern u32 D_00457EE0[];
-
-extern u32 D_00457F1C[];
-
-extern u32 D_00457F18[];
 
 extern s32 func_00328D68(u32);
 
@@ -98,8 +93,6 @@ extern StageCameraTarget *func_0023B018(f32 *, f32 *);
 
 extern u8 D_00437CB0[];
 
-extern void func_002C0330(s32, s32, s32, s32, s32, s32);
-
 extern void func_002C2AD0();
 
 extern void func_00328E48();
@@ -110,15 +103,68 @@ extern u8 *D_00435DD0;
 
 extern u16 D_003E78D8[];
 
-extern u8 *D_00457EC0[];
+typedef struct StageTestEntry {
+    u8 modelId;      /* 0x00 */
+    u8 motionIndex;  /* 0x01 */
+    u8 column[2][8]; /* 0x02: per-column flag bytes (0x02.. and 0x0A..) */
+    u8 pad12[6];
+    f32 frame;       /* 0x18 */
+    f32 position[3]; /* 0x1C */
+    f32 pad28;
+    f32 rotation[3]; /* 0x2C */
+    f32 pad38;
+} StageTestEntry;
 
-extern u32 D_00457EC8[];
+typedef struct StageTestSlot {
+    s32 entryIndex; /* 0x00 */
+    s32 unk04;
+    s32 modelId;    /* 0x08 */
+    s32 unk0C;
+    s32 unk10;
+    u32 flags;      /* 0x14: bit 0 cleared by func_002C7428 case 1 */
+    s32 state;      /* 0x18 */
+    s32 index;      /* 0x1C */
+    s32 unk20;
+    s32 unk24;
+} StageTestSlot;
+
+/* Battle stage test viewer state. Retail addresses it partly through
+ * D_00457EC8 (= &D_00457EB0.slot[0], hence the negative offsets), so the
+ * D_00457EB4..D_00457F1C symbols are all interior fields of this one object. */
+typedef struct StageTestState {
+    s32 mode;                /* 0x00 */
+    s32 unk04;
+    s32 model;               /* 0x08 */
+    s8 flag;                 /* 0x0C */
+    StageTestEntry *entries; /* 0x10 */
+    u32 flags;               /* 0x14 */
+    StageTestSlot slot[2];   /* 0x18 */
+    s32 effect;              /* 0x68 */
+    s32 pendingEffect;       /* 0x6C */
+    s32 unk70;               /* 0x70: DDS2 only, cleared together with model */
+} StageTestState;
+
+extern StageTestState D_00457EB0;
 
 extern void func_00340DC8(f32, f32, f32);
 
 extern char D_0042B610[];
 
-extern void func_002C7A60();
+typedef struct StageGraphicsCallback {
+    u8 unknown[0x10];
+    void (*invoke)(void *, void *);
+} StageGraphicsCallback;
+
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfResetPacketList(void *);
+extern void sdfAppendPacket(void *, s32);
+extern void func_00103790(void *, s32, s32, s32, s32);
+extern s32 func_0033D810();
+extern void func_0023AA30(s32, s32);
+extern s32 D_00437CB8;
+extern s32 D_00437CBC;
+extern StageGraphicsCallback D_00380708;
+extern s8 D_0037F510[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
@@ -173,24 +219,17 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF830);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BFEA0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0330);
-
-typedef struct MenuSpacing {
-    s32 step;
-    s32 gap;
-    s32 tail;
-} MenuSpacing;
-
 typedef struct MenuListNode {
     u8 pad00[0xC];
     s32 overrideValue;
 } MenuListNode;
 
 typedef struct MenuListPanel {
-    u8 pad00[4];
+    s32 mode;        /* 0x00 */
     u32 layoutFlags; /* 0x04: bit 0x40 forces the regular list spacing */
     u8 pad08[0xD4];
     MenuListNode *node;
+    u8 padE0[0x2058];
 } MenuListPanel;
 
 typedef struct MenuListState {
@@ -201,6 +240,35 @@ typedef struct MenuListState {
     s32 selectedPanel; /* 0xA698 */
     s32 scrollOffset; /* 0xA69C */
 } MenuListState;
+
+extern void func_002BF830(s32, s32, s32, MenuListState *, s32, s32);
+extern void func_002BFEA0(s32, s32, s32, MenuListState *, s32, s32);
+
+void func_002C0330(s32 x, s32 y, s32 z, MenuListState *menu, s32 panelIndex, s32 param) {
+    MenuListPanel *panel = (MenuListPanel *)((u8 *)menu + 0x78) + panelIndex;
+    s32 mode = panel->mode;
+
+    if (menu->selectedPanel >= 0) {
+        mode = 1;
+    }
+    if (panel->layoutFlags & 0x40) {
+        mode = 1;
+    }
+    switch (mode) {
+    case 1:
+        func_002BF830(x, y, z, menu, panelIndex, param);
+        return;
+    case 2:
+        func_002BFEA0(x, y, z, menu, panelIndex, param);
+        break;
+    }
+}
+
+typedef struct MenuSpacing {
+    s32 step;
+    s32 gap;
+    s32 tail;
+} MenuSpacing;
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B118);
 
@@ -924,7 +992,45 @@ void mnuPlayInputSound(s32 arg0, s32 buttons, s32 *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C49F0);
+void func_002C49F0(s32 buttons, s8 kind) {
+    if (buttons & 0x8000) {
+        sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
+        return;
+    }
+    if (buttons != 0) {
+        if (buttons & 0x4000) {
+            sndSetSequenceVolumePan(0xC, 0x7F, 0x3F);
+        }
+        if (buttons & 1) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (buttons & 2) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+        }
+        if (buttons & 0x1000) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (buttons & 0x2000) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (buttons & 0xF0FF0) {
+            switch (kind) {
+            case 1:
+                sndSetSequenceVolumePan(6, 0x7F, 0x3F);
+                break;
+            case 2:
+                sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+                break;
+            case 3:
+                sndSetSequenceVolumePan(0x15, 0x7F, 0x3F);
+                break;
+            default:
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                break;
+            }
+        }
+    }
+}
 
 void func_002C4B40(u32 arg0) {
     func_002C49F0(arg0, 0);
@@ -1020,7 +1126,17 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     return base;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4E58);
+s32 func_002C4E58(s32 arg0) {
+    s32 index = arg0 & 0xFFFF;
+    RangeEntry *record = (RangeEntry *)(index * 0x38 + D_00435E20);
+    s32 scale = record->value;
+    s32 addition = record->addition;
+
+    if (func_002C4DB0(index) == 1) {
+        return scale + addition;
+    }
+    return scale;
+}
 
 s32 func_002C4EB8(u16 id, s32 item) {
     u16 minimum = ((RangeEntry *)D_00435E20)[id].value;
@@ -1196,7 +1312,13 @@ s32 func_002C54B0(s32 arg0) {
 
 typedef struct MenuPanelEntry {
     u16 flags;
-    u8 unknown02[0x12];
+    u8 unknown02[2];
+    u16 tableIndex; /* 0x04 */
+    u8 unknown06[4];
+    u16 weight;     /* 0x0A */
+    u8 unknown0C[2];
+    u16 state;      /* 0x0E */
+    u8 unknown10[4];
     u16 marker;
     u8 unknown16[0x19C];
     u16 currentId;
@@ -1379,11 +1501,83 @@ s32 func_002C5CD0(s32 amount, s32 divisor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5D20);
+MenuPanelEntry *func_002C5D20(u32 *table) {
+    MenuPanelEntry *best = NULL;
+    MenuPanelEntry *entry;
+    s32 pass;
+    s32 bestWeight;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5DE0);
+    for (pass = 0; pass < 2; pass++) {
+        bestWeight = 0;
+        entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60);
+        for (i = 0; i < 5; i++, entry++) {
+            if ((entry->flags & 1) && table[entry->tableIndex] == 0) {
+                s32 usable = 0;
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5EA8);
+                if (!(entry->state & 0x10)) {
+                    if (pass == 0) {
+                        if (!(entry->flags & 2)) {
+                            usable = 1;
+                        }
+                    } else if (entry->flags & 2) {
+                        usable = 1;
+                    }
+                }
+
+                if (usable && bestWeight < entry->weight) {
+                    bestWeight = entry->weight;
+                    best = entry;
+                }
+            }
+        }
+        if (best != NULL) {
+            return best;
+        }
+    }
+    return 0;
+}
+
+MenuPanelEntry *func_002C5DE0(s32 *out) {
+    u16 table[5][2] = {{0x400, 0xD4}, {0x100, 0xCF}, {0x80, 0xA9}, {0x40, 0xCE}, {0x10, 0xA8}};
+    u32 i;
+
+    for (i = 0; i < 5; i++) {
+        MenuPanelEntry *entry;
+        s32 j;
+
+        for (j = 0, entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60); j < 5; j++, entry++) {
+            if ((entry->flags & 1) && entry->state == table[i][0]) {
+                *out = table[i][1];
+                return entry;
+            }
+        }
+    }
+    return 0;
+}
+
+s32 func_002C5EA8(s32 partyPanel, s32 skill, s32 target, s32 commit) {
+    s32 id;
+    MenuPanelEntry *entry = func_002C5DE0(&id);
+
+    if (entry == 0) {
+        return 3;
+    }
+    if (ptyGetSkillNibbleState(target, id) != 0) {
+        if (func_002C4FB8(id, target) != 0) {
+            return 0;
+        }
+        if (commit != 0) {
+            skillApplyFieldUseEffect(skill, id & 0xFFFF, target, (s32)entry);
+            func_002C5030(id & 0xFFFF, (u8 *)target);
+            mnuInitPartyPanelSlots((PartyPanel *)partyPanel);
+            func_002BCA98(skill);
+            func_002BCAB0(skill);
+        }
+        return 2;
+    }
+    return 1;
+}
 
 /* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
  * field-6/field-8 ratios without converting to floating point. */
@@ -1414,18 +1608,18 @@ u8 func_002C6480(void) {
 
 void func_002C6490(s32 arg0) {
     if (arg0 == 0) {
-        D_00457EBC[0] = 0;
+        D_00457EB0.flag = 0;
     } else {
-        D_00457EBC[0] = 1;
+        D_00457EB0.flag = 1;
     }
 }
 
 u32 func_002C64B8(void) {
-    return D_00457EB8[0];
+    return D_00457EB0.model;
 }
 
 u32 func_002C64C8(void) {
-    return D_00457ED0[0];
+    return D_00457EB0.slot[0].modelId;
 }
 
 void evtStageTestSetEntryIndex(s32 arg0, s32 value) {
@@ -1434,73 +1628,67 @@ void evtStageTestSetEntryIndex(s32 arg0, s32 value) {
     if (value < 0) {
         value = 0;
     }
-    if (D_00457EB0[2] != 0 && value >= mdlGetNodeRefHalf(D_00457EB0[2], 0)) {
-        value = mdlGetNodeRefHalf(D_00457EB0[2], 0) - 1;
+    if (D_00457EB0.model != 0 && value >= mdlGetNodeRefHalf(D_00457EB0.model, 0)) {
+        value = mdlGetNodeRefHalf(D_00457EB0.model, 0) - 1;
     }
-    *(s8 *)(index * 60 + D_00457EB0[4] + 1) = value;
+    D_00457EB0.entries[index].motionIndex = value;
     func_002C6E20(-1);
 }
 
 void evtStageTestAddEntryValue(s32 arg0, f32 delta) {
     s32 index = arg0 & 0xFFFF;
-    f32 *entry;
+    StageTestEntry *entry;
 
-    if (delta < 0.0f && ((f32 *)(index * 60 + D_00457EB0[4]))[6] - delta < 0.0f) {
+    if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)D_00457EB0.entries))->frame - delta < 0.0f) {
         return;
     }
-    entry = (f32 *)(index * 60 + D_00457EB0[4]);
-    entry[6] += delta;
+    entry = (StageTestEntry *)(index * 60 + (s32)D_00457EB0.entries);
+    entry->frame += delta;
     func_002C6E20(-1);
 }
 
 void func_002C6610(s32 index, s32 dx, s32 dy, s32 dz) {
-    s32 offset = (index & 0xFFFF) * 60;
-    f32 *position = (f32 *)(offset + (s32)D_00457EC0[0]);
-    f32 x = position[7] + (f32)dx;
-    f32 y = position[8] + (f32)dy;
-    f32 z = position[9] + (f32)dz;
+    s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
+    f32 x = entry->position[0] + (f32)dx;
+    f32 y = entry->position[1] + (f32)dy;
+    f32 z = entry->position[2] + (f32)dz;
 
-    position[7] = x;
-    position[8] = y;
-    position[9] = z;
+    entry->position[0] = x;
+    entry->position[1] = y;
+    entry->position[2] = z;
 }
 
 void func_002C6670(s32 index, s32 dx, s32 dy, s32 dz) {
-    s32 offset = (index & 0xFFFF) * 60;
-    f32 *position = (f32 *)(offset + (s32)D_00457EC0[0]);
-    f32 x = position[11] + (f32)dx;
-    f32 y = position[12] + (f32)dy;
-    f32 z = position[13] + (f32)dz;
+    s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
+    f32 x = entry->rotation[0] + (f32)dx;
+    f32 y = entry->rotation[1] + (f32)dy;
+    f32 z = entry->rotation[2] + (f32)dz;
 
-    position[11] = x;
-    position[12] = y;
-    position[13] = z;
+    entry->rotation[0] = x;
+    entry->rotation[1] = y;
+    entry->rotation[2] = z;
 }
 
 u8 func_002C66D0(u16 index) {
-    return D_00457EC0[0][index * 60 + 1];
+    return D_00457EB0.entries[index].motionIndex;
 }
 
 f32 func_002C66F8(u16 index) {
-    return *(f32 *)(D_00457EC0[0] + index * 60 + 0x18);
+    return D_00457EB0.entries[index].frame;
 }
 
 void func_002C6720(s32 index, f32 *out) {
-    s32 offset = (index & 0xFFFF) * 60;
-    f32 *position = (f32 *)(offset + (s32)D_00457EC0[0]);
-
-    out[0] = position[7];
-    out[1] = position[8];
-    out[2] = position[9];
+    out[0] = D_00457EB0.entries[index & 0xFFFF].position[0];
+    out[1] = D_00457EB0.entries[index & 0xFFFF].position[1];
+    out[2] = D_00457EB0.entries[index & 0xFFFF].position[2];
 }
 
 void func_002C6758(s32 index, f32 *out) {
-    s32 offset = (index & 0xFFFF) * 60;
-    f32 *position = (f32 *)(offset + (s32)D_00457EC0[0]);
-
-    out[0] = position[11];
-    out[1] = position[12];
-    out[2] = position[13];
+    out[0] = D_00457EB0.entries[index & 0xFFFF].rotation[0];
+    out[1] = D_00457EB0.entries[index & 0xFFFF].rotation[1];
+    out[2] = D_00457EB0.entries[index & 0xFFFF].rotation[2];
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6790);
@@ -1511,21 +1699,48 @@ void func_002C6958(f32 value) {
     func_002C6790();
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6988);
+void func_002C6988(s32 mode) {
+    f32 offset;
+    s32 i;
+    s32 value;
+
+    D_00457EB0.mode = mode;
+    D_00457EB0.unk04 = 0;
+    D_00457EB0.model = 0;
+    D_00457EB0.flag = 0;
+    D_00457EB0.unk70 = 0;
+    if (mode == 0) {
+        D_00457EB0.entries = (StageTestEntry *)D_003E7978;
+        offset = -140.0f;
+    } else {
+        D_00457EB0.entries = NULL;
+        offset = 140.0f;
+    }
+    value = D_003E7970[mode];
+    D_00457EB0.flags = 0;
+    for (i = 0; i < 2; i++) {
+        D_00457EB0.slot[i].unk04 = value;
+        D_00457EB0.slot[i].modelId = -1;
+        D_00457EB0.slot[i].unk0C = 0;
+        D_00457EB0.slot[i].flags = 0;
+    }
+    func_002C6958(offset);
+}
 
 void func_002C6A20(void) {
-    u32 *state = D_00457EB0;
-    if (state[0] == 1) {
+    StageTestState *state = &D_00457EB0;
+
+    if (state->mode == 1) {
         return;
     }
-    state[27] = -1;
-    if (state[26] != 0) {
+    state->pendingEffect = -1;
+    if (state->effect != 0) {
         func_002C76F0();
     }
-    if (state[2] != 0) {
-        func_002322E8(state[2]);
-        state[2] = 0;
-        state[28] = 0;
+    if (state->model != 0) {
+        func_002322E8(state->model);
+        state->model = 0;
+        state->unk70 = 0;
     }
 }
 
@@ -1536,21 +1751,34 @@ void mnuResetWorkFloats(void) {
 }
 
 void func_002C6AC0(s32 arg0, s32 arg1, s32 arg2) {
-    D_00457EB4[0] = func_00231B80();
+    D_00457EB0.unk04 = func_00231B80();
 }
 
 void mnuForwardTableByte(s32 arg0) {
-    func_002C6AC0(D_00457EC8[1], *(u8 *)(D_00457EC8[-2] + (arg0 & 0xffff) * 60), 0);
+    StageTestSlot *slot = D_00457EB0.slot;
+
+    func_002C6AC0(slot->unk04, D_00457EB0.entries[arg0 & 0xffff].modelId, 0);
 }
 
 u32 func_002C6B28(u32 *arg0) {
     return *arg0 & 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6B38);
+typedef struct MenuBlock40 {
+    u32 word[10];
+} MenuBlock40;
+
+s32 func_002C6B38(u8 *object) {
+    if (!(*(u32 *)object & 1)) {
+        return 0;
+    }
+    *(MenuBlock40 *)(object + 4) = *(MenuBlock40 *)(object + 0x2C);
+    *(u32 *)object &= ~1;
+    return 1;
+}
 
 void func_002C6BB8(void) {
-    D_00457EB0[5] &= ~1;
+    D_00457EB0.flags &= ~1;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6BD8);
@@ -1573,7 +1801,7 @@ f32 mnuSetModelScaleVector(s32 arg0, s32 useTable) {
     f32 vec[4];
 
     if (useTable != 0) {
-        scale = *(f32 *)(D_00435DF0 + D_00457ED0[0] * 0x270 + 0x10);
+        scale = *(f32 *)(D_00435DF0 + D_00457EB0.slot[0].modelId * 0x270 + 0x10);
     }
     vec[0] = scale;
     vec[1] = scale;
@@ -1597,59 +1825,129 @@ extern void mdlStorePrimaryVectorVU(s32);
 
 void mnuApplyModelCamera(s32 arg0) {
     f32 vec[4];
-    u8 *entry;
+    StageTestEntry *entry;
     f32 scale;
 
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
-    entry = (u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
-    vec[0] = *(f32 *)(entry + 0x1C);
-    vec[1] = *(f32 *)(entry + 0x20);
-    if (*(s8 *)((u8 *)D_00457EB0 + 0xC) != 1) {
+    entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
+    vec[0] = entry->position[0];
+    vec[1] = entry->position[1];
+    if (D_00457EB0.flag != 1) {
         mnuSetModelScaleVector(arg0, 0);
-        vec[2] = *(f32 *)((u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]) + 0x24);
+        vec[2] = ((StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries))->position[2];
         mnuResetWorkPair();
     } else {
         scale = mnuSetModelScaleVector(arg0, 1);
-        entry = (u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
-        vec[0] -= *(f32 *)(entry + 0x1C) - *(f32 *)(entry + 0x1C) * scale;
-        vec[1] -= *(f32 *)(entry + 0x20) - *(f32 *)(entry + 0x20) * scale;
+        entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
+        vec[0] -= entry->position[0] - entry->position[0] * scale;
+        vec[1] -= entry->position[1] - entry->position[1] * scale;
         vec[2] = 0.0f;
-        *(f32 *)(D_003E7950 + 8) = (-400.0f - *(f32 *)(entry + 0x24)) * scale;
+        *(f32 *)(D_003E7950 + 8) = (-400.0f - entry->position[2]) * scale;
     }
     VU_LOAD10(vec);
     mdlStorePrimaryVectorVU(arg0);
 }
 
 void evtStageTestApplyEntryRotation(s32 arg0) {
-    f32 *entry = (f32 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
+    StageTestEntry *entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
 
-    func_00340DC8(entry[11] * 3.14159265f / 180.0f, entry[12] * 3.14159265f / 180.0f,
-                  entry[13] * 3.14159265f / 180.0f);
+    func_00340DC8(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
+                  entry->rotation[2] * 3.14159265f / 180.0f);
     func_00232AD0(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7168);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C72E0);
+s8 func_002C72E0(s32 arg0) {
+    s8 result = func_002C6CE8();
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C73C0);
+    if (result == 1) {
+        return 1;
+    }
+    if (D_00457EB0.mode != 1) {
+        if (D_00457EB0.model != 0) {
+            mnuApplyModelCamera(D_00457EB0.model);
+            evtStageTestApplyEntryRotation(D_00457EB0.model);
+            func_002C7168();
+            if (D_00457EB0.unk70 == 0) {
+                D_00457EB0.unk70 = 1;
+            } else {
+                if (D_00457EB0.pendingEffect >= 0) {
+                    func_002C76A8(D_00457EB0.pendingEffect);
+                    D_00457EB0.pendingEffect = -1;
+                }
+                if (D_00457EB0.effect != 0) {
+                    func_00203E18(D_00457EB0.effect);
+                }
+                func_00232390(D_00457EB0.model, arg0);
+                func_002C7568();
+            }
+        }
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7428);
+s32 func_002C73C0(s32 mode) {
+    StageTestSlot *slot = D_00457EB0.slot;
+    s32 index = slot->entryIndex;
+    s32 count = 0;
+    u32 i;
+
+    for (i = 0; i < 8; i++) {
+        u8 flag;
+
+        if (mode == 0) {
+            flag = *(D_00457EB0.entries[index].column[0] + i);
+        } else {
+            flag = *(D_00457EB0.entries[index].column[1] + i);
+        }
+        if (flag) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void func_002C7428(s32 kind, u32 index) {
+    StageTestSlot *slot = D_00457EB0.slot;
+    f32 start = 0.0f;
+    s32 value;
+
+    if (index < 8) {
+        switch (kind) {
+        default:
+            start = 15.0f;
+            value = *(D_00457EB0.entries[slot->entryIndex].column[0] + index);
+            break;
+        case 1:
+            value = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
+            slot->flags &= ~1;
+            break;
+        case 2:
+            value = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
+            slot->flags |= 1;
+            break;
+        }
+        func_002C7508(value, start, 15.0f);
+    }
+}
 
 void func_002C7508(u32 menuId, f32 x, f32 y) {
-    D_00457EC8[6] = 1;
-    D_00457EC8[7] = menuId;
-    D_00457EC8[8] = (s32)x;
-    D_00457EC8[9] = (s32)y;
+    StageTestSlot *slot = D_00457EB0.slot;
+
+    slot->state = 1;
+    slot->index = menuId;
+    slot->unk20 = (s32)x;
+    slot->unk24 = (s32)y;
 }
 
 void func_002C7530(void) {
-    D_00457EE0[0] = 4;
+    D_00457EB0.slot[0].state = 4;
 }
 
 s32 func_002C7540(void) {
-    s32 temp_v0 = D_00457EE0[0];
+    s32 temp_v0 = D_00457EB0.slot[0].state;
 
     if ((temp_v0 == 0) || (temp_v0 == 3)) {
         return 0;
@@ -1658,55 +1956,54 @@ s32 func_002C7540(void) {
 }
 
 void func_002C7568(void) {
+    StageTestSlot *slot = D_00457EB0.slot;
     s32 index;
     s32 node;
 
-    if (D_00457EC8[6] != 0 && D_00457EC8[6] != 3 && (node = func_002C64B8()) != 0) {
-        if (D_00457EC8[6] == 1) {
-            index = D_00457EC8[7];
+    if (slot->state != 0 && slot->state != 3 && (node = func_002C64B8()) != 0) {
+        if (slot->state == 1) {
+            index = slot->index;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
-                mdlAddEntryPlainEx(node, 0, index, (s32)D_00457EC8[8], (s32)D_00457EC8[9]);
-                D_00457EC8[6] = 2;
+                mdlAddEntryPlainEx(node, 0, index, (s32)slot->unk20, (s32)slot->unk24);
+                slot->state = 2;
             }
-        } else if (!(D_00457EC8[5] & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || D_00457EC8[6] == 4)) {
-            index = *(u8 *)(D_00457EC8[0] * 0x3C + D_00457EC8[-2] + 1);
+        } else if (!(slot->flags & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || slot->state == 4)) {
+            index = D_00457EB0.entries[slot->entryIndex].motionIndex;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
-                mdlAddEntryFlaggedEx(node, 0, index, (s32)D_00457EC8[8], (s32)D_00457EC8[9]);
-                D_00457EC8[6] = 3;
+                mdlAddEntryFlaggedEx(node, 0, index, (s32)slot->unk20, (s32)slot->unk24);
+                slot->state = 3;
             }
         }
     }
 }
 
-void func_002C76A8(void) {
-    if (D_00457EB0[26] != 0) {
+void func_002C76A8(s32 arg0) {
+    if (D_00457EB0.effect != 0) {
         func_002C76F0();
     }
-    D_00457EB0[26] = func_00203DA8(D_00457EB0[2], 0x30);
+    D_00457EB0.effect = func_00203DA8(D_00457EB0.model, 0x30);
 }
 
 void func_002C76F0(void) {
-    u32 *temp_v0 = D_00457EB0;
-    u32 temp_v1 = temp_v0[26];
+    StageTestState *temp_v0 = &D_00457EB0;
+    u32 temp_v1 = temp_v0->effect;
 
     if (temp_v1 == 0) {
         return;
     }
     func_00203E90(temp_v1);
-    temp_v0[26] = 0;
+    temp_v0->effect = 0;
 }
 
 void func_002C7730(u32 arg0) {
-    D_00457F1C[0] = arg0;
+    D_00457EB0.pendingEffect = arg0;
 }
 
 s32 func_002C7740(void) {
-    return D_00457F18[0] != 0;
+    return D_00457EB0.effect != 0;
 }
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B500);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);
 
@@ -1734,7 +2031,34 @@ void *evtCreateBattleStageTestCamera(void) {
     return func_002C79B8;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7A60);
+void *func_002C7A60(void) {
+    void *packets = sdfAllocPacketAligned(0x20);
+
+    sdfResetPacketList(packets);
+    func_00103790(packets, 0x84, 0x46, 0x14, 9);
+    sdfAppendPacket(packets, func_0033D810(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfAppendPacket(packets, func_0033D810(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
+    sdfAppendPacket(packets, func_0033D810(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfAppendPacket(packets, func_0033D810(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    D_00380708.invoke(&D_00380708, packets);
+    if (D_0037F510[0x21] < 0) {
+        func_0023AA30(D_00437CB8, D_00437CBC);
+        return evtCreateBattleStageTestCamera;
+    }
+    if (D_0037F510[0x25] & 2) {
+        D_00437CB8++;
+    }
+    if (D_0037F510[0x24] & 2) {
+        D_00437CB8--;
+    }
+    if (D_0037F510[0x2A] & 2) {
+        D_00437CBC++;
+    }
+    if (D_0037F510[0x28] & 2) {
+        D_00437CBC--;
+    }
+    return 0;
+}
 
 void func_002C7C00(void) {
     evtDestroyWorldSecondaryNode();
