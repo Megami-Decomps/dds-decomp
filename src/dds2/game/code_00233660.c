@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 extern s32 func_0033D810();
+extern void func_00328E48();
 extern s32 D_003C88C0[];
 extern s32 D_003C88C8[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
@@ -19,12 +20,13 @@ typedef struct MdlViewState {
     s32 unk00;
     s32 viewerTask;
     s8 unk08;
-    u8 pad09;
+    s8 unk09;
     s8 unk0A;
     s8 unk0B;
     u8 pad0C[3];
     u8 unk0F;
-    u8 pad10[6];
+    u8 pad10[4];
+    s16 unk14;
     s16 resourceCount;
     s16 unk18;
     s16 unk1A;
@@ -70,6 +72,18 @@ typedef struct MdlLoaded {
     MdlLoadedInfo *info; /* 0x18 */
     s32 flags1C;         /* 0x1C */
 } MdlLoaded;
+
+extern void *memset(void *dst, s32 value, u32 size);
+extern s32 dds3AdvanceWorldCounter();
+extern s32 dds3SpawnCameraSlotObj5(s32 world, f32 *pos, f32 *rot);
+extern void dds3SetObjectFlags(s32 obj, u32 flags);
+extern void effObjSetInnerFloat(s32 obj, f32 value);
+extern void func_00112058(s32 obj, s32 a, s32 b);
+extern MdlLoaded *dds3GetUnk0C(s32 obj);
+extern void func_001129C8(s32 obj, s32 a);
+
+extern s32 dds3GetWorldSecondaryObject();
+
 
 
 extern s8 D_00453560[];
@@ -175,12 +189,6 @@ void func_00233700(void) {
     func_00328E48();
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00233718);
-
-INCLUDE_ASM(const s32, "game/code_00233660", func_002337C0);
-
-INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
-
 typedef struct MdlSlotEntry {
     s32 a;
     s32 b;
@@ -193,6 +201,40 @@ typedef struct MdlSlotTable {
 } MdlSlotTable;
 
 extern MdlSlotTable D_003C6588[];
+
+extern MdlSlotTable D_003C86B0[];
+extern s32 D_00436FAC;
+extern s32 D_00436FB0;
+extern void sdfReleaseMemorySlot(s32 *slot);
+
+void func_00233718(void) {
+    MdlSlotEntry *entry;
+    s32 count;
+    s32 i;
+
+    count = D_003C6588[5].count;
+    if (count > 0) {
+        entry = D_003C6588[5].entries;
+        i = 0;
+        do {
+            i++;
+            func_00328E48(entry->b);
+            func_00328E48(entry->a);
+            func_00328E48(entry->c);
+            entry++;
+        } while (i < count);
+    }
+    D_003C86B0[5].entries = NULL;
+    D_003C86B0[5].count = 0;
+    D_003C6588[5].entries = NULL;
+    D_003C6588[5].count = 0;
+    sdfReleaseMemorySlot(&D_00436FAC);
+    sdfReleaseMemorySlot(&D_00436FB0);
+}
+
+INCLUDE_ASM(const s32, "game/code_00233660", func_002337C0);
+
+INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
 
 s32 func_00233DD8(s32 table, s32 slot, s32 a, s32 b, s32 c) {
     MdlSlotEntry *entries = D_003C6588[table].entries;
@@ -460,7 +502,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00234A48);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234B48);
 
-void func_00234BF8(u32 arg0, s32 arg1) {
+s32 func_00234BF8(u32 arg0, s32 arg1) {
     func_00231E28(arg0, *(u16 *)(arg1 + 8), *(u16 *)(arg1 + 10),
                                 *(u32 *)(arg1 + 0xc), *(u32 *)(arg1 + 0x10));
 }
@@ -479,7 +521,24 @@ void mdlCondInitEntry(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlDispatchResourceEntry);
+extern s32 func_00234A48(s32 object, s32 *record, s32 option, s32 type, void (*advance)());
+extern s32 func_00234C20(s32 object, s32 *record, s32 option);
+
+s32 mdlDispatchResourceEntry(s32 object, s32 *record, s32 option) {
+    switch (*record) {
+    case 1:
+        return func_00234A48(object, record, option, 0, mdlAdvanceBillboardPart);
+    case 2:
+        return func_00234A48(object, record, option, 1, mdlAdvanceEffectPart);
+    case 3:
+        return func_00234B48(object, record, option);
+    case 4:
+        return func_00234BF8(object, record);
+    case 5:
+        func_00234C20(object, record, option);
+        break;
+    }
+}
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
     s32 *block = func_00233E40(object, id);
@@ -1044,17 +1103,114 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421518);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_0023A1A0);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_0023A5E8);
+extern s32 func_00112E30(s32 world, f32 *pos, f32 *rot);
+extern void dds3EnsureSlotData(s32 obj);
+extern void func_00110BE0(s32 world, s32 obj);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_0023A6A0);
+s32 func_0023A5E8(void) {
+    f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
+    f32 rot[4];
+    s32 obj;
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_0023A7A0);
+    memset(rot, 0, 0x10);
+    rot[3] = 1.0f;
+    obj = func_00112E30(dds3AdvanceWorldCounter(), pos, rot);
+    effObjSetInnerFloat(obj, 10.0f);
+    dds3EnsureSlotData(obj);
+    func_00110BE0(dds3GetWorldSecondaryObject(), obj);
+    func_001129C8(obj, 0);
+}
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_0023A8C0);
+s32 func_0023A6A0(s32 arg0, s32 arg1) {
+    f32 pos[4];
+    f32 rot[4];
+    s32 world;
+    s32 obj;
 
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421558);
+    memset(pos, 0, 0x10);
+    pos[3] = 1.0f;
+    memset(rot, 0, 0x10);
+    rot[3] = 1.0f;
+    world = dds3AdvanceWorldCounter();
+    obj = dds3SpawnCameraSlotObj5(world, pos, rot);
+    dds3SetObjectFlags(obj, 0x20);
+    effObjSetInnerFloat(obj, 10.0f);
+    func_00112058(obj, arg0, arg1);
+    if (dds3GetUnk0C(obj)->flags1C != 0) {
+        mdlAddEntryFlagged(dds3GetUnk0C(obj), 0, 0);
+    }
+    func_001129C8(obj, 0);
+    return world;
+}
 
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421568);
+extern s32 func_00110C70(s32 world, s32 a, s32 b);
+extern void dds3SetSlotByKind(s32 obj, s32 slot);
+extern void dds3InvokeSlot5Handler(s32 obj);
+
+s32 func_0023A7A0(s32 arg0, s32 arg1) {
+    f32 pos[4];
+    f32 rot[4];
+    s32 world;
+    s32 obj;
+
+    memset(pos, 0, 0x10);
+    pos[3] = 1.0f;
+    memset(rot, 0, 0x10);
+    rot[3] = 1.0f;
+    world = dds3AdvanceWorldCounter();
+    obj = dds3SpawnCameraSlotObj5(world, pos, rot);
+    dds3SetObjectFlags(obj, 0x20);
+    effObjSetInnerFloat(obj, 10.0f);
+    func_00112058(obj, arg0, arg1);
+    mdlAddEntryFlagged(dds3GetUnk0C(obj), 0, 0);
+    dds3SetSlotByKind(obj, func_00110C70(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3InvokeSlot5Handler(obj);
+    func_001129C8(obj, 0);
+    dds3SetObjectFlags(obj, 0x400);
+    return world;
+}
+
+typedef struct MdlAimSrc {
+    u8 pad00[0x18];
+    u8 *vecs;  /* 0x18 */
+} MdlAimSrc;
+
+typedef struct MdlAimObj {
+    u8 pad00[0x1C];
+    u8 *inner; /* 0x1C */
+} MdlAimObj;
+
+extern s32 func_00110C70(s32 world, s32 id, s32 kind);
+extern void effObjSetInnerFirstVec(MdlAimObj *obj, u8 *vec);
+extern void effObjSetInnerSecondVec(MdlAimObj *obj, f32 *vec);
+extern void effObjFetchInnerFirstVec(MdlAimObj *obj);
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuatMultiplyVU();
+
+void func_0023A8C0(s32 firstId, s32 secondId) {
+    f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+    MdlAimObj *obj;
+    MdlAimSrc *src;
+    u8 *vec;
+
+    obj = (MdlAimObj *)func_00110C70(dds3GetWorldSecondaryObject(), firstId, 5);
+    if (obj != NULL) {
+        src = (MdlAimSrc *)func_00110C70(dds3GetWorldSecondaryObject(), secondId, 0x11);
+        if (src != NULL) {
+            vec = src->vecs;
+            effObjSetInnerFirstVec(obj, vec);
+            __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(axis));
+            effMiscAxisAngleToQuaternionVU(3.14159265f);
+            vec += 0x10;
+            __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(vec));
+            effMiscQuatMultiplyVU();
+            __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(axis) : "memory");
+            effObjSetInnerSecondVec(obj, axis);
+            effObjFetchInnerFirstVec(obj);
+            __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(obj->inner + 0x70) : "memory");
+        }
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_00436FAC);
 

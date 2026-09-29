@@ -319,21 +319,7 @@ s32 func_00250508(s32 arg0, s32 arg1, s32 arg2) {
     return 2;
 }
 
-s32 func_00250558(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
-    switch (index) {
-    case 0:
-        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, "     %.1f", ctx->fvalue));
-    case 2:
-        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " L,R = VALUE-+0.1"));
-    case 3:
-        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " U,D = VALUE-+1.0"));
-    case 4:
-        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004233F0));
-    case 5:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423400));
-        break;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250718);
 
@@ -876,6 +862,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00254CE0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254F80);
 
+extern char D_00424090[]; /* "UNIT ALL" */
 extern char D_004376E8[]; /* "ALL" */
 extern char D_004376F0[]; /* "DISABLE" */
 
@@ -893,7 +880,7 @@ s32 func_00255360(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     } else if (index == 1) {
         return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376E8));
     } else if (index == 2) {
-        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, "UNIT ALL"));
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_00424090));
     }
     n = 3;
     for (group = ctx->groups; group != NULL; group = group->next) {
