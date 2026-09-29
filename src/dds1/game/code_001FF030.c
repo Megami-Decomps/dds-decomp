@@ -2720,7 +2720,7 @@ s32 func_0020ABE0(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->unk_124 != 0x11B) {
-                                func_001D4860(func_001D8DE8(unit, 6, 0xA));
+                                startBattleTask(func_001D8DE8(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
@@ -2982,7 +2982,7 @@ s32 func_0020D6D8(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->unk_124 != 0x13C) {
-                                func_001D4860(func_001D8DE8(unit, 6, 0xA));
+                                startBattleTask(func_001D8DE8(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
