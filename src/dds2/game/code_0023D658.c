@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u32 D_004371EC;
 
@@ -145,7 +146,19 @@ extern f32 func_00240640(s32);
 
 extern void func_00197F40(void *, f32);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023D658);
+void func_0023D658(EvtUnit *work, s128 *vec, s32 count) {
+    s128 *dst = &work->unk70;
+
+    if ((u32)(count - 1) < 100) {
+        work->sourceUnit = NULL;
+        work->unkAC = 3;
+        PCP_COPY_VECTOR(dst, vec);
+        work->unkB4 = count;
+        work->unkB6 = 0;
+        work->unk94 = 0;
+        work->unkB2 = 0;
+    }
+}
 
 void func_0023D698(EvtUnit *work, s32 arg1, s32 arg2) {
     void *unit;
@@ -157,7 +170,19 @@ void func_0023D698(EvtUnit *work, s32 arg1, s32 arg2) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023D708);
+void func_0023D708(EvtUnit *work, s32 arg1, s128 *vec, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    s128 *dst = &work->unk70;
+
+    work->unkB0 = arg1;
+    work->unkAC = 1;
+    work->unkAE = 0;
+    work->sourceUnit = NULL;
+    PCP_COPY_VECTOR(dst, vec);
+    work->unkB4 = arg4;
+    work->unkB6 = arg5;
+    work->unk94 = arg6;
+    work->unkB2 = 0;
+}
 
 void func_0023D740(EvtUnit *work, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     void *unit;
