@@ -113,6 +113,7 @@ s32 func_00307160(s32 object, s32 key) {
 }
 
 extern void func_00304B18();
+/* Store grid bounds in the renderer's fixed-point coordinate units. */
 void func_003071D0(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
     s32 record = func_00304AD8(object, index);
@@ -124,6 +125,7 @@ void func_003071D0(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width,
     func_00304B18(object, index, record);
 }
 
+/* Copy the quantized bounds into the corresponding render entry as four words. */
 void itfGridSetQuantizedBounds(GridEntryStorage *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
@@ -140,6 +142,7 @@ void itfGridSetQuantizedBounds(GridEntryStorage *object, s32 index, s32 x, s32 y
     } while (--remaining >= 0);
 }
 
+/* Set the unquantized bounds of the selected grid widget. */
 void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     GridWidget *widget = (GridWidget *)func_00304AD8(a, b);
     widget->x = x;
@@ -148,6 +151,7 @@ void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     widget->height = height;
 }
 
+/* Copy four words from a render entry's +0x84 data to its +0x14 data. */
 void itfGridCopyEntryQuad(s32 object, s32 index) {
     u32 *destination;
     s32 remaining;
@@ -171,10 +175,12 @@ void func_00307398(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
     sdfCreateDescriptorPacket(arg4, arg0, 0, 0, arg1, arg2, arg3, 0);
 }
 
+/* The overlay packet is present only when this work flag is set. */
 u8 func_003073D0(GridDrawWork *work) {
     return work->overlayEnabled;
 }
 
+/* Two overlay kinds use a 16x16 region; other kinds use 8x2. */
 void func_003073D8(GridDrawWork *work, s32 x, s32 y) {
     s32 width;
     s32 height;
@@ -198,6 +204,7 @@ extern RenderCallbackEntry D_0037FB48[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfResetPacketList(s32);
 
+/* Build the optional overlay and main packet, then dispatch their draw callback. */
 GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
     s32 context = sdfAllocPacketAligned(0x20);
     u8 *cursor;
@@ -217,11 +224,12 @@ GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003074F0);
 
-void func_003075A0(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+/* Set the selected descriptor word's high control bits. */
+void func_003075A0(s32 object, s32 index) {
+    s32 descriptor;
 
-    temp_v0 = *(s32 *)(*(s32 *)(arg1 * 4 + *(s32 *)(arg0 + 0x24)) + 0x28);
-    *(u64 *)(temp_v0 + 0x20) = (*(u64 *)(temp_v0 + 0x20) & 0x1fffffffffffffff) | 0x4000000000000000;
+    descriptor = *(s32 *)(*(s32 *)(index * 4 + *(s32 *)(object + 0x24)) + 0x28);
+    *(u64 *)(descriptor + 0x20) = (*(u64 *)(descriptor + 0x20) & 0x1fffffffffffffff) | 0x4000000000000000;
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003075D8);
@@ -240,6 +248,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00307D70);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
 
+/* Unpack four 8-bit channels into the low and high halves of two 64-bit words. */
 void func_00308020(u64 *channels, u32 color) {
     u64 green;
     channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
@@ -391,6 +400,7 @@ void func_003089B8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 colors, u32 h) {
     func_00308828(a, b, c, d, e, colors, 0, h);
 }
 
+/* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
 void func_003089D8(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
     func_00308AC8(x, y, z, x + width, y, z, color, context);
     func_00308AC8(x, y, z, x, y + height, z, color, context);

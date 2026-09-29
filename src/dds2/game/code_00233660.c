@@ -182,6 +182,7 @@ extern char D_00436FF0[];
 
 extern char D_00436FF8[];
 
+/* Assemble the resource request in a temporary buffer before loading it. */
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
@@ -294,6 +295,9 @@ typedef struct MdlPartList {
     MdlPartEntry *entries; /* 0x0C */
 } MdlPartList;
 
+#define MDL_PART_BILLBOARD 0
+#define MDL_PART_EFFECT 1
+
 typedef struct MdlItemCfg {
     u8 pad0;
     u8 enabled; /* 0x01 */
@@ -318,6 +322,7 @@ typedef struct MdlResourceOwner {
     MdlResourceItem *first; /* 0x14 */
 } MdlResourceOwner;
 
+/* Read the model record's payload word without advancing its relative link. */
 u32 func_00233E30(MdlRecord *record) {
     return record->value08;
 }
@@ -326,6 +331,7 @@ u16 func_00233E38(MdlRecord *record) {
     return record->value0C;
 }
 
+/* Follow relative links in the resource's record table to find an ID. */
 s32 *func_00233E40(s32 arg0, s32 key) {
     s32 *list = *(s32 **)(*(s32 *)(arg0 + 0xC) + 0xA4);
     s32 *entry;
@@ -368,14 +374,15 @@ s32 * mdlGetNextRecord(s32 record) {
     return (s32 *)next;
 }
 
-s32 mdlCountRecords(s32 arg0) {
+/* Count relative-offset records until the 0xffff sentinel. */
+s32 mdlCountRecords(s32 address) {
     s32 count;
     s32 *node;
 
-    if (arg0 == 0) {
+    if (address == 0) {
         return 0;
     }
-    node = mdlGetFirstRecord(arg0);
+    node = mdlGetFirstRecord(address);
     count = 0;
     while (node != NULL) {
         count++;
@@ -384,8 +391,8 @@ s32 mdlCountRecords(s32 arg0) {
     return count;
 }
 
-u8 func_00233F48(s32 *arg0, s32 arg1) {
-    return *arg0 == arg1;
+u8 func_00233F48(s32 *recordId, s32 wantedId) {
+    return *recordId == wantedId;
 }
 
 u16 func_00233F58(MdlRecord *record) {
@@ -398,6 +405,7 @@ u16 func_00233F60(MdlRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233F68);
 
+/* Draw labeled marker fields and each of four packed color channels. */
 void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
     s32 boxY = y + 0x300;
     s32 labelX = x + 0xC0;
@@ -434,7 +442,7 @@ void mdlAddBillboardPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
     entry->state = 0;
-    entry->kind = 0;
+    entry->kind = MDL_PART_BILLBOARD;
     entry->object = billCreateIndexed(1, index);
     list->count += 1;
 }
@@ -442,7 +450,7 @@ void mdlAddBillboardPart(MdlPartList *list, s32 index) {
 void mdlAddEffectPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
-    entry->kind = 1;
+    entry->kind = MDL_PART_EFFECT;
     entry->state = 0;
     entry->object = func_001578C0(index);
     list->count += 1;

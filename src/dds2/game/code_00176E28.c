@@ -27,6 +27,9 @@ typedef struct EffRecordPool {
     u32 buffer;     /* 0x6C: freed by func_003297C8 */
 } EffRecordPool;
 
+#define EFFECT_RING_START_ANGLE (-1.5707963f)
+#define EFFECT_RING_FULL_TURN (6.2831853f)
+
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
  * `count` vertices spread evenly around the circle from -pi/2. */
 typedef struct EffectRingVertex {
@@ -66,6 +69,7 @@ extern u8 *func_001781B0(u32);
 extern s32 effMiscRand(void *);
 extern u8 D_003AA868[];
 
+/* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
 /* K&R: func_00177078 passes the table block as the raw 64-bit value. */
 EffectRing *func_00176E28(source)
 EffectRing *source;
@@ -91,11 +95,11 @@ EffectRing *source;
     if (ring->spread == 0) {
         ring->spread = 1;
     }
-    angle = -1.5707963f;
+    angle = EFFECT_RING_START_ANGLE;
     ring->matrix = func_001781B0(ring->count);
     *(f32 *)(ring->matrix + 0x5C) = 1.0f;
     *(u32 *)(ring->matrix + 0x50) = ring->unk54;
-    step = 6.2831853f / ring->count;
+    step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
         ring->vertices[i].offset = -(effMiscRand(D_003AA868) % spread);
@@ -105,38 +109,39 @@ EffectRing *source;
     return ring;
 }
 
-void func_00177078(u64 arg0) {
-    u64 temp_v0;
+/* Create a ring from the first parameter-table block. */
+void func_00177078(u64 params) {
+    u64 block;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00176E28(temp_v0);
+    block = effParamTableGetBlock(params, 0);
+    func_00176E28(block);
 }
-
 void func_00177098(void) {
     func_00176E28();
 }
 
-void func_001770B0(s32 arg0) {
-    func_001781F8(*(u32 *)(arg0 + 0x7c));
-    func_003297C8(*(u32 *)(arg0 + 0x78));
+/* Release both the ring's matrix work and its backing allocation. */
+void func_001770B0(EffectRing *ring) {
+    func_001781F8(ring->matrix);
+    func_003297C8(ring->handle);
 }
 
 void func_001770E0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_001770F0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x60) = arg1;
+void func_001770F0(EffectRing *ring, u32 color) {
+    ring->color = color;
 }
 
-void func_001770F8(u8 *work, f32 value) {
-    *(f32 *)(work + 0x64) = value;
+void func_001770F8(EffectRing *ring, f32 scale) {
+    ring->scale = scale;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void func_00177100(void *work, void *src) {
+void func_00177100(EffectRing *ring, void *src) {
     VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
+    VU0_STORE_MATRIX(ring->matrix);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177130);

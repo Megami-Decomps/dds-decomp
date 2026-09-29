@@ -186,23 +186,25 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00194E00);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194E80);
 
-void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s8 arg5) {
-    arg0->u14.b[1] = arg2;
-    arg0->u14.b[0] = arg3;
-    arg0->u14.b[2] = arg5;
-    arg0->u0.h = arg1;
-    arg0->unk10 = arg4 & ~0xFF;
-    arg0->u14.b[3] = D_003BB174;
-    arg0->x = 0;
-    arg0->y = 0;
-    arg0->advance = 0;
-    arg0->unk2 = 0;
-    arg0->firstChild = NULL;
-    arg0->unk20 = NULL;
-    arg0->previous = NULL;
-    arg0->next = NULL;
+/* Initialize a glyph record while retaining only the high bits of its flags. */
+void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 flags, s8 byte2) {
+    glyph->u14.b[1] = byte1;
+    glyph->u14.b[0] = byte0;
+    glyph->u14.b[2] = byte2;
+    glyph->u0.h = glyphId;
+    glyph->unk10 = flags & ~0xFF;
+    glyph->u14.b[3] = D_003BB174;
+    glyph->x = 0;
+    glyph->y = 0;
+    glyph->advance = 0;
+    glyph->unk2 = 0;
+    glyph->firstChild = NULL;
+    glyph->unk20 = NULL;
+    glyph->previous = NULL;
+    glyph->next = NULL;
 }
 
+/* Reset a glyph as a standalone chain head (0x80 is the empty glyph sentinel). */
 void frFontInitGlyph(FrFontGlyph *arg0) {
     arg0->u0.b.b0 = -0x80;
     arg0->x = 0;
@@ -304,6 +306,7 @@ void func_00195880(FrFontGlyph *arg0, s8 arg1) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001958A0);
 
+/* Advance one of two cached glyph slots, chosen by the current font index. */
 s32 frFontAdvanceSelectedGlyphSlot(void) {
     s32 selection = (func_00100518() & 0xFF) == 0;
     u8 *base = (u8 *)&D_003D6C80;
@@ -317,6 +320,7 @@ FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1) 
     return frFontLinkGlyph(arg0, arg1, 1);
 }
 
+/* Splice chains; optionally place the new head after the previous glyph's advance. */
 FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext) {
     if (previous == NULL) {
         return next;
@@ -342,6 +346,7 @@ void func_00195BF8(void) {
     frFontFreeEntry(8);
 }
 
+/* Count single-byte characters and two-byte lead/trail sequences. */
 s32 frFontCountChars(s8 *str) {
     s32 count = 0;
 
@@ -356,18 +361,19 @@ s32 frFontCountChars(s8 *str) {
     return count;
 }
 
+/* Sum child advances, including one spacing value per child (even the last). */
 u32 frFontMeasureGlyphChain(void *arg0) {
     FrFontGlyph *glyph = arg0;
     FrFontGlyph *node = glyph->firstChild;
     s32 total = 0;
 
     if (node != NULL) {
-        s8 b1 = glyph->u0.b.b1;
+        s8 spacing = glyph->u0.b.b1;
 
         do {
             total += node->advance;
             node = node->next;
-            total += b1;
+            total += spacing;
         } while (node != NULL);
     }
     return total;
