@@ -11,9 +11,9 @@ extern u32 D_00438918;
 /* 0xAARRGGBB color split into RGB and alpha fields. */
 typedef struct RgbAlpha {
     u8 pad_0x00[0x18]; // 0x00
-    u32 rgb18;         // 0x18
+    u32 rgb;           // 0x18
     u8 pad_0x1C[0x1C]; // 0x1C
-    u32 alpha38;       // 0x38
+    u32 alpha;         // 0x38
     u32 x3C;           // 0x3C
     u8 pad_0x40[0x10]; // 0x40
     float f50;         // 0x50
@@ -22,9 +22,9 @@ typedef struct RgbAlpha {
 /* Copy source for func_002CF3F8 (layout inferred from field accesses). */
 typedef struct CfSrc {
     u8 pad_0x00[0x04]; // 0x00
-    u32 x04;           // 0x04
+    u32 rgb;           // 0x04
     u8 pad_0x08[0x1C]; // 0x08
-    u32 x24;           // 0x24
+    u32 alpha;         // 0x24
     u32 x28;           // 0x28
     u8 pad_0x2C[0x10]; // 0x2C
     float f3C;         // 0x3C
@@ -36,9 +36,9 @@ extern s32 func_00101740(const char *arg0);
 
 void func_00316FA8(u32 sprite);
 
-void itfSetPackedRgbAlpha(RgbAlpha *p, u32 color) {
-    p->rgb18 = color & 0xFFFFFF;
-    p->alpha38 = color >> 24;
+void itfSetPackedRgbAlpha(RgbAlpha *entry, u32 color) {
+    entry->rgb = color & 0xFFFFFF;
+    entry->alpha = color >> 24;
 }
 
 u32 func_00316E28(RgbAlpha *entry) {
@@ -50,9 +50,9 @@ void func_00316E30(RgbAlpha *entry, u32 value) {
 }
 
 void itfCopyColorFields(RgbAlpha *dst, CfSrc *src) {
-    dst->rgb18 = src->x04;
+    dst->rgb = src->rgb;
     dst->f50 = src->f3C;
-    dst->alpha38 = src->x24;
+    dst->alpha = src->alpha;
     dst->x3C = src->x28;
 }
 

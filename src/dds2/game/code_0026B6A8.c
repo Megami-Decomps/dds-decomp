@@ -64,13 +64,14 @@ extern s32 kwlnFadeIsActive(void);
 extern void func_002C42C0(s32 *, char *);
 extern char D_003CE998[];
 
+/* When the current panel is idle and no fade is running, start its queued step. */
 s64 func_0026BAF8(u64 request) {
     s32 state = func_00101958();
-    s32 *dispatch = (s32 *)(state + 0x54);
-    s64 result = func_002C4038(state + 8, dispatch, 0, request);
+    s32 *panelState = (s32 *)(state + 0x54);
+    s64 result = func_002C4038(state + 8, panelState, 0, request);
     if (result == 0) {
-        if (*dispatch == 0 && kwlnFadeIsActive() == 0) {
-            func_002C42C0(dispatch, D_003CE998);
+        if (*panelState == 0 && kwlnFadeIsActive() == 0) {
+            func_002C42C0(panelState, D_003CE998);
         }
         result = 0;
     }

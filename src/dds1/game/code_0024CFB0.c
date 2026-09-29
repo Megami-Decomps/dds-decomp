@@ -50,10 +50,10 @@ void func_0024CFB0(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024CFD8);
 
 s32 func_0024D220(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
+    s32 *state = (s32 *)func_00101A70();
 
-    func_00249DD0(temp_v0);
-    func_0024B358(0, temp_v0);
+    func_00249DD0(state);
+    func_0024B358(0, state);
     return 1;
 }
 
@@ -80,10 +80,10 @@ s64 func_0024D350(s32 request) {
 }
 
 u32 func_0024D398(void) {
-    s32 temp_v0;
+    s32 state;
 
-    temp_v0 = func_00101A70();
-    if (*(s32 *)(temp_v0 + 0xdc) == 0) {
+    state = func_00101A70();
+    if (*(s32 *)(state + 0xdc) == 0) {
         evtClearActiveFlag();
         func_0024DEF8(0, 1);
         func_0024DEF8(1, 0);
@@ -95,9 +95,9 @@ u32 func_0024D398(void) {
 }
 
 s32 func_0024D400(void) {
-    s32 temp_v0 = func_00101A70();
+    s32 state = func_00101A70();
 
-    func_0024B358(1, temp_v0);
+    func_0024B358(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
@@ -117,18 +117,18 @@ s64 func_0024D550(s32 request) {
 }
 
 u32 func_0024D588(void) {
-    s32 temp_v0;
+    s32 state;
 
-    temp_v0 = func_00101A70();
-    *(u32 *)(temp_v0 + 0x90) = 0;
+    state = func_00101A70();
+    *(u32 *)(state + 0x90) = 0;
     return 1;
 }
 
 s32 func_0024D5B0(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
+    s32 *state = (s32 *)func_00101A70();
 
-    mnuReleaseWorkResources(temp_v0);
-    func_00249498(temp_v0);
+    mnuReleaseWorkResources(state);
+    func_00249498(state);
     return 1;
 }
 

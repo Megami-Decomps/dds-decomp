@@ -12,9 +12,10 @@ s32 func_00335EF0(void *object, s32 command) {
     return D_0040B510[(u16)command](object, command);
 }
 
-void func_00335F20(s32 destination, s32 source, u32 unused, s32 index) {
+/* Select a 16-byte entry from the source object's motion pointer table. */
+void func_00335F20(s32 destination, s32 source, u32 unused, s32 entryIndex) {
     sdfSetMotionPointerPair();
-    *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + index * 0x10;
+    *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00335F78);

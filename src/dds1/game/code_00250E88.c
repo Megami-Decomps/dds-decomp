@@ -1,5 +1,7 @@
 #include "common.h"
 
+#define MNU_SCENE_WORK_SIZE 0x5B0
+
 extern void func_002512F0(s32, s32);
 
 extern void mnuReleaseListNodes(s32);
@@ -54,11 +56,12 @@ extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 extern u8 *D_003BAA00;
 
+/* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
-    s32 handle = func_002D03F8(0x5B0);
+    s32 handle = func_002D03F8(MNU_SCENE_WORK_SIZE);
     u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
 
-    memset(work, 0, 0x5B0);
+    memset(work, 0, MNU_SCENE_WORK_SIZE);
     *(s32 *)work = handle;
     func_00250978((s32)work);
     *(s32 *)(work + 0x540) = 0;
@@ -148,6 +151,7 @@ typedef struct {
     u16 entryY; /* 0x59E */
 } SceneMetadataContext;
 
+/* Copy the active scene entry coordinates selected by the grid metadata. */
 void fldUpdateSceneEntryMetadata(s32 context) {
     SceneMetadataNode *node = ((SceneMetadataContext *)context)->grid->slot->node;
     u16 index = node->entryIndex;
