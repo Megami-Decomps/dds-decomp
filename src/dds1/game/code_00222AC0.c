@@ -125,26 +125,26 @@ extern void func_00222310(u32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222AC0);
 
-void func_00222B00(EvtUnit *work, s32 arg1, s32 arg2) {
-    void *unit;
+void func_00222B00(EvtUnit *work, s32 objectId, s32 arg2) {
+    void *worldUnit;
 
-    unit = func_00110A48(dds3GetWorldSecondaryObject(), arg1, 0x11);
-    if (unit != NULL) {
-        func_00222AC0(work, (s128 *)(*(u32 *)((u8 *)unit + 0x18) + 0x10), arg2);
-        work->linkedUnit = unit;
+    worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    if (worldUnit != NULL) {
+        func_00222AC0(work, (s128 *)(*(u32 *)((u8 *)worldUnit + 0x18) + 0x10), arg2);
+        work->linkedUnit = worldUnit;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222B70);
 
-void func_00222BA8(EvtUnit *work, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    void *unit;
+void func_00222BA8(EvtUnit *work, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    void *worldUnit;
 
-    unit = func_00110A48(dds3GetWorldSecondaryObject(), arg2, 0x11);
-    if (unit != NULL) {
-        func_00222B70(work, arg1, (s128 *)(*(u32 *)((u8 *)unit + 0x18)), arg3, arg4, arg5, arg6, arg7);
+    worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    if (worldUnit != NULL) {
+        func_00222B70(work, arg1, (s128 *)(*(u32 *)((u8 *)worldUnit + 0x18)), arg3, arg4, arg5, arg6, arg7);
         work->unkAE = 1;
-        work->linkedUnit = unit;
+        work->linkedUnit = worldUnit;
     }
 }
 

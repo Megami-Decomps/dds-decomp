@@ -187,7 +187,21 @@ u32 func_00210DB0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210DC8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210E48);
+extern s8 D_00436CAC;
+
+void func_00210E48(void) {
+    u8 *node = *(u8 **)(func_001AA6F8() + 0x248);
+    if (node != 0) {
+        do {
+            if (*(s32 *)(node + 0x18) != 0) {
+                node[0x14E] = 0;
+                *(s32 *)(node + 0x170) = 0;
+            }
+            node = *(u8 **)(node + 0x178);
+        } while (node != 0);
+    }
+    D_00436CAC = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210EA0);
 

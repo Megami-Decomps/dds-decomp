@@ -65,8 +65,14 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD170);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD3C0);
 
-s32 func_001FD5B0(s32 arg0, s32 arg1) {
-    return arg1 + (((*(s32 *)(arg0 + 0x110) >> 9) ^ 1U) & 1);
+typedef struct BtlEffOwner {
+    u8 pad00[0x108];
+    u64 ownerData;    /* 0x108: copied to the effect object */
+    s32 flags;        /* 0x110: bit 9 controls the returned offset */
+} BtlEffOwner;
+
+s32 func_001FD5B0(BtlEffOwner *owner, s32 base) {
+    return base + (((owner->flags >> 9) ^ 1U) & 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD5C8);
@@ -126,7 +132,7 @@ extern BtlObjLink *func_001D47D8(BtlEffObj *);
 
 extern void func_001FDF98();
 
-BtlEffObj *func_001FE088(u8 *owner, s32 arg) {
+BtlEffObj *func_001FE088(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0xC);
     BtlObjLink *link;
 
@@ -134,7 +140,7 @@ BtlEffObj *func_001FE088(u8 *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x40;
-    obj->ownerData = *(u64 *)(owner + 0x108);
+    obj->ownerData = owner->ownerData;
     obj->update = func_001FDF98;
     link = func_001D47D8(obj);
     link->owner = owner;
@@ -147,7 +153,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE118);
 
 extern void func_001FE118();
 
-BtlEffObj *func_001FE198(u8 *owner, s32 arg) {
+BtlEffObj *func_001FE198(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0xC);
     BtlObjLink *link;
 
@@ -155,7 +161,7 @@ BtlEffObj *func_001FE198(u8 *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x41;
-    obj->ownerData = *(u64 *)(owner + 0x108);
+    obj->ownerData = owner->ownerData;
     obj->update = func_001FE118;
     link = func_001D47D8(obj);
     link->owner = owner;
@@ -168,7 +174,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE228);
 
 extern void func_001FE228();
 
-BtlEffObj *func_001FE320(u8 *owner, s32 arg) {
+BtlEffObj *func_001FE320(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0xC);
     BtlObjLink *link;
 
@@ -177,7 +183,7 @@ BtlEffObj *func_001FE320(u8 *owner, s32 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = *(u64 *)(owner + 0x108);
+        obj->ownerData = owner->ownerData;
     }
     obj->update = func_001FE228;
     link = func_001D47D8(obj);
@@ -191,7 +197,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE3B8);
 
 extern void func_001FE3B8();
 
-BtlEffObj *func_001FE468(u8 *owner, s32 arg) {
+BtlEffObj *func_001FE468(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0xC);
     BtlObjLink *link;
 
@@ -200,7 +206,7 @@ BtlEffObj *func_001FE468(u8 *owner, s32 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = *(u64 *)(owner + 0x108);
+        obj->ownerData = owner->ownerData;
     }
     obj->update = func_001FE3B8;
     link = func_001D47D8(obj);
@@ -214,7 +220,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE500);
 
 extern void func_001FE500();
 
-BtlEffObj *func_001FE5C0(u8 *owner, s32 arg) {
+BtlEffObj *func_001FE5C0(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0xC);
     BtlObjLink *link;
 
@@ -223,7 +229,7 @@ BtlEffObj *func_001FE5C0(u8 *owner, s32 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = *(u64 *)(owner + 0x108);
+        obj->ownerData = owner->ownerData;
     }
     obj->update = func_001FE500;
     link = func_001D47D8(obj);
@@ -243,7 +249,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE6F0);
 
 extern void func_001FE6F0();
 
-BtlEffObj *func_001FE790(u8 *owner, s32 arg) {
+BtlEffObj *func_001FE790(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0xC);
     BtlObjLink *link;
 
@@ -251,7 +257,7 @@ BtlEffObj *func_001FE790(u8 *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x3F;
-    obj->ownerData = *(u64 *)(owner + 0x108);
+    obj->ownerData = owner->ownerData;
     obj->update = func_001FE6F0;
     link = func_001D47D8(obj);
     link->owner = owner;

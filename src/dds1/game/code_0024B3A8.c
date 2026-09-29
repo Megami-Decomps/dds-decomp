@@ -300,12 +300,12 @@ extern void func_0024DAB8(s32);
 u32 func_0024C670(void) {
     s32 state = func_00101A70();
     s32 owner = *(s32 *)(state + 0x78);
-    s32 *slot = (s32 *)(*(s32 *)(owner + 0x1C) + 0x60);
+    s32 *selectionIndex = (s32 *)(*(s32 *)(owner + 0x1C) + 0x60);
 
     if (*(s32 *)(owner + 0x20) == 1) {
         func_0027BB08(owner);
     }
-    func_0024DD90(0, &D_00347C68[*slot]);
+    func_0024DD90(0, &D_00347C68[*selectionIndex]);
     func_0024DDC0(1);
     func_0024DA58(0);
     func_0024DAE8(1);
@@ -356,19 +356,19 @@ u32 func_0024C8A0(void) {
 
 s64 func_0024C918(u64 input) {
     s32 context;
-    s64 result;
+    s64 dispatchResult;
     s32 *dispatchState;
 
     context = func_00101A70();
     dispatchState = (s32 *)(context + 0x54);
-    result = func_00285670(context + 8, dispatchState, 0, input);
-    if (result == 0) {
-        if ((*dispatchState == 0) && (result = func_0024DC08(), result == 0)) {
+    dispatchResult = func_00285670(context + 8, dispatchState, 0, input);
+    if (dispatchResult == 0) {
+        if ((*dispatchState == 0) && (dispatchResult = func_0024DC08(), dispatchResult == 0)) {
             func_002858E8(dispatchState, *(u32 *)(context + 0x58));
         }
-        result = 0;
+        dispatchResult = 0;
     }
-    return result;
+    return dispatchResult;
 }
 
 void func_0024C9A0(s32 item) {

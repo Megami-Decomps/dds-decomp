@@ -23,9 +23,41 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_002219F8);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221A80);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221BE0);
+void func_00221BE0(EvtUnit *unit, s32 arg1, s32 arg2) {
+    u8 *work = (u8 *)unit;
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221C50);
+    unit->flags |= 0x40000;
+    *(s32 *)(work + 0x88) = *(s32 *)(work + 0x84);
+    *(s32 *)(work + 0x84) = arg1;
+    if (arg2 == 0) {
+        *(s32 *)(work + 0x88) = 0;
+        *(s16 *)(work + 0x15C) = 0;
+        *(s16 *)(work + 0x15E) = 0;
+        unit->flags &= ~0x180000;
+    } else {
+        unit->flags |= 0x80000;
+        unit->flags &= ~0x100000;
+        *(s16 *)(work + 0x15E) = arg2;
+        *(s16 *)(work + 0x15C) = 0;
+    }
+}
+
+void func_00221C50(EvtUnit *unit, s32 arg1) {
+    u8 *work = (u8 *)unit;
+
+    if (*(s32 *)(work + 0x84) != 0) {
+        if (arg1 == 0) {
+            unit->flags &= ~0x40000;
+            unit->flags &= ~0x180000;
+            *(s32 *)(work + 0x84) = 0;
+        } else {
+            unit->flags &= ~0x80000;
+            *(s16 *)(work + 0x15E) = arg1;
+            unit->flags |= 0x100000;
+            *(s16 *)(work + 0x15C) = 0;
+        }
+    }
+}
 
 void evtSetUnitValueAndFlag(EvtUnit *unit, u32 value)
 {
@@ -33,7 +65,10 @@ void evtSetUnitValueAndFlag(EvtUnit *unit, u32 value)
     unit->flags = unit->flags | 0x20000;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221CD0);
+void func_00221CD0(EvtUnit *unit) {
+    unit->flags = unit->flags & ~0x20000;
+    func_00221A80(unit);
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221D00);
 
@@ -55,7 +90,14 @@ void evtSetUnitStatusFlags(EvtUnit *unit)
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221FF8);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222090);
+s32 func_00222090(s32 id) {
+    u8 *obj = (u8 *)func_00110A48(dds3GetWorldObject(), id, 5);
+
+    if (obj != NULL) {
+        return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+    }
+    return (s32)obj;
+}
 
 s32 func_002220D8(u8 *obj) {
     if (obj == NULL) {
@@ -66,7 +108,25 @@ s32 func_002220D8(u8 *obj) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_002220F0);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222200);
+s32 func_00222200(u8 *work) {
+    s32 handle;
+
+    if (work == NULL) {
+        return 1;
+    }
+    handle = *(s32 *)(work + 0x68);
+    *(s32 *)(*(u8 **)(*(u8 **)(work + 0x8C) + 0x18) + 0x80) = 0;
+    if (handle != 0) {
+        func_002CFF98(handle);
+        *(s32 *)(work + 0x68) = 0;
+    }
+    if (*(s32 *)(work + 0xA0) != 0) {
+        func_00116F08(*(s32 *)(work + 0xA0));
+        *(s32 *)(work + 0xA0) = 0;
+    }
+    func_002CFF98(work);
+    return 1;
+}
 
 s32 func_00222270(u8 *work) {
     return *(s16 *)(work + 0xAC);
@@ -93,7 +153,9 @@ void func_00222300(u8 *work, s32 a, s32 b) {
     *(s8 *)(work + 0xD1) = b;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222310);
+void func_00222310(u8 *work) {
+    func_00222340(work, *(s8 *)(work + 0xD0), *(s8 *)(work + 0xD1), 0, 0, 2);
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222340);
 

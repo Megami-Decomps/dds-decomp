@@ -186,8 +186,9 @@ typedef struct DspListNode {
 } DspListNode;
 
 typedef struct {
-    u32 pad00[2];
-    DspListNode *first; /* 0x08 */
+    s32 frameCount;        /* 0x00 */
+    u32 pad04;            /* 0x04 */
+    DspListNode *first;   /* 0x08 */
 } DspListHead;
 
 DspListNode *mnuAllocateDisplayListNode(void) {
@@ -231,9 +232,8 @@ void mnuReleaseDisplayListNodes(DspListHead *head) {
 extern s32 func_00256400(s32);
 extern s32 func_00256540(DspListNode *, s32, s32);
 
-s32 func_00256C58(s32 arg0, s32 arg1, s32 arg2) {
-    s32 *counter = (s32 *)arg0;
-    DspListHead *head = (DspListHead *)arg0;
+s32 func_00256C58(DspListHead *head, s32 arg1, s32 arg2) {
+    s32 *counter = &head->frameCount;
     DspListNode *node = head->first;
     s32 index = 0;
 

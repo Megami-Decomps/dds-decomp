@@ -43,7 +43,9 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
 INCLUDE_ASM(const s32, "game/code_00162348", parInstantiateKind);
 
-INCLUDE_ASM(const s32, "game/code_00162348", parObjDispatch);
+void parObjDispatch(u8 *object) {
+    D_003AAB88[*(u16 *)(object + 0x140)].func();
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162590);
 
@@ -90,7 +92,14 @@ u32 func_00162E10(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", parSysReset);
+extern u8 D_00451F50[];
+extern void func_00341348();
+
+void parSysReset(void) {
+    D_00436400 = 0;
+    parControlInit();
+    func_00341348(D_00451F50);
+}
 
 void func_00162E40(void) {
 }
@@ -114,7 +123,12 @@ void func_00163238(s32 arg0) {
     func_003332E8(*(u32 *)(arg0 + 0x40));
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", parControlInit);
+extern u8 D_00451F60[];
+
+void parControlInit(void) {
+    memset(D_00451F60, 0, 0x2C);
+    *(s16 *)(D_00451F60 + 4) = 0x4000;
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163290);
 
@@ -142,7 +156,32 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163780);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00163B68);
+void func_00163B68(u8 *system, s32 arg1, s32 arg2) {
+    s32 count = *(s32 *)(system + 4);
+    s32 perCell = *(s32 *)(system + 8) >> 1;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    s32 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = *(u8 **)(system + 0x14) + 4;
+        do {
+            vertex = *(s32 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    vertex[0] = arg1;
+                    vertex[1] = arg2;
+                    vertex += 2;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163BC8);
 
@@ -160,7 +199,34 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164390);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001644B0);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00164630);
+void func_00164630(u8 *system, s32 arg1, s32 arg2) {
+    s32 count = *(s32 *)(system + 4);
+    s32 perCell = *(s32 *)(system + 8) >> 2;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = *(u8 **)(system + 0x14) + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    *(s32 *)(vertex + 0x8) = arg1;
+                    *(s32 *)(vertex + 0x4) = arg1;
+                    *(s32 *)(vertex + 0xC) = arg2;
+                    *(s32 *)(vertex + 0x0) = arg2;
+                    vertex += 0x10;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164690);
 

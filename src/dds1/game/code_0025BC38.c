@@ -36,24 +36,33 @@ void func_0025BCA0(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
     func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, D_0036C698[0], 0x25, param);
 }
 
+typedef struct MovieCueNode {
+    u8 pad00[8];
+    s32 framesLeft;       /* 0x08 */
+    s32 duration;         /* 0x0C */
+    u8 pad10;
+    s8 cueIndex;          /* 0x11 */
+    u8 enabled;           /* 0x12 */
+} MovieCueNode;
+
 extern void func_0025BA20(s32, s32, u8 *, s32);
 extern u8 *func_002CAF78(s32, u8 *);
 
 s32 func_0025BD18(s32 owner, s32 group) {
     u8 *list = *(u8 **)(group + 8);
-    u8 *node;
+    MovieCueNode *node;
 
     if (list == NULL) {
         sdfDestroyTaskWork(group);
         return 0;
     }
     do {
-        node = *(u8 **)(list + 0x10);
-        *(s32 *)(node + 8) = *(s32 *)(node + 8) - 1;
-        if (*(s32 *)(node + 8) == *(s32 *)(node + 0xC) - 5 && *(u8 *)(node + 0x12) != 0) {
-            func_0025BA20(owner, group, node, *(s8 *)(node + 0x11));
+        node = *(MovieCueNode **)(list + 0x10);
+        node->framesLeft = node->framesLeft - 1;
+        if (node->framesLeft == node->duration - 5 && node->enabled != 0) {
+            func_0025BA20(owner, group, (u8 *)node, node->cueIndex);
         }
-        if (*(s32 *)(node + 8) == 0) {
+        if (node->framesLeft == 0) {
             list = func_002CAF78(group, list);
         } else {
             list = *(u8 **)(list + 8);

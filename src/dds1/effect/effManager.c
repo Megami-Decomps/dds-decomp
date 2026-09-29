@@ -34,17 +34,17 @@ u32 func_0014FA28(void) {
 
 typedef struct EffTypeOps {
     s32 (*create)(s32, s32); /* 0x00 */
-    void (*update)();        /* 0x04 */
-    void (*destroy)();       /* 0x08 */
-    void (*fn0C)();          /* 0x0C */
+    void (*update)(s32);     /* 0x04 */
+    void (*destroy)(s32);    /* 0x08 */
+    void (*fn0C)(s32);       /* 0x0C */
     s32 (*fn10)();           /* 0x10: returns 1 when absent */
     void (*fn14)();          /* 0x14 */
-    void (*fn18)();          /* 0x18 */
-    void (*fn1C)();          /* 0x1C */
+    void (*fn18)(s32);       /* 0x18 */
+    void (*fn1C)(s32);       /* 0x1C */
     void (*fn20)();          /* 0x20 */
     s32 (*fn24)();           /* 0x24: returns 1 when absent */
     void (*fn28)();          /* 0x28 */
-    void (*fn2C)();          /* 0x2C */
+    void (*fn2C)(s32);       /* 0x2C */
 } EffTypeOps;
 
 typedef struct EffNode {

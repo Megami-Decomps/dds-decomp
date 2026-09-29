@@ -34,9 +34,13 @@ extern char D_003B1AC8[];
 
 extern s32 func_00101A70();
 
+typedef struct MovieListNode {
+    struct MovieListNode *next;
+} MovieListNode;
+
 typedef struct MovieListState {
     u32 task;
-    u32 *head;
+    MovieListNode *head;
     s16 unk08;
     s16 remaining;
     s16 unk0C;
@@ -366,11 +370,11 @@ u8 func_00270218(void) {
 }
 
 void func_00270240(void) {
-    u32 *node = D_003DC560.head;
+    MovieListNode *node = D_003DC560.head;
 
     if (node != NULL) {
         do {
-            u32 *next = (u32 *)*node;
+            MovieListNode *next = node->next;
 
             func_002CFF98(node);
             node = next;
@@ -385,15 +389,15 @@ void func_00270240(void) {
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002702A0);
 
 u32 func_00270508(void) {
-    u32 entry = (u32)D_003DC560.head;
+    MovieListNode *entry = D_003DC560.head;
     s32 remaining = D_003DC560.remaining;
     if (entry != 0 && remaining > 0) {
         do {
-            entry = *(u32 *)entry;
+            entry = entry->next;
             remaining--;
         } while (entry != 0 && remaining > 0);
     }
-    return entry;
+    return (u32)entry;
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270558);

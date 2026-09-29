@@ -47,10 +47,13 @@ typedef struct DevState {
     s32 callbackContext; /* 0x3C */
 } DevState;
 
-typedef struct SemaEntry {
-    s32 sema; /* 0x0 */
-    u8 pad4[20]; /* 0x4 */
-} SemaEntry;
+#define SDF_DEV_STATE_ACTIVE 7
+#define SDF_DEV_STATE_INACTIVE 9
+
+typedef struct DevWorkerEntry {
+    s32 handle; /* 0x00: thread ID at D_00398860, semaphore ID at D_00398864 */
+    u8 pad04[20];
+} DevWorkerEntry;
 
 extern u8 D_003BD42F;
 extern u8 D_003BD42E;
@@ -79,8 +82,8 @@ extern u32 D_003BDA44;
 
 extern u32 D_003987E0[];
 extern char D_00398820[];
-extern SemaEntry D_00398860[];
-extern SemaEntry D_00398864[];
+extern DevWorkerEntry D_00398860[];
+extern DevWorkerEntry D_00398864[];
 extern u8 D_003BD408[];
 
 extern s32 SignalSema(s32 sema);
@@ -426,7 +429,7 @@ void sdfDevRelease(DevState *arg0) {
 
 void sdfDevDeactivate(DevState *arg0, s32 arg1) {
     arg0->result = arg1;
-    arg0->state = 9;
+    arg0->state = SDF_DEV_STATE_INACTIVE;
     sdfDevRelease(arg0);
     if (arg0->callback != NULL) {
         arg0->callback(arg0, 0, 0, 0, arg0->callbackContext);
@@ -473,22 +476,22 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
 }
 
 s32 sdfDevQueueOperation(DevState *arg0, s32 arg1, s32 arg2) {
-    if (arg0->state != 7) {
+    if (arg0->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
     arg0->operationArg = arg1;
     arg0->options = arg2;
     arg0->operation = 3;
-    SignalSema(D_00398864[arg0->workerIndex].sema);
+    SignalSema(D_00398864[arg0->workerIndex].handle);
     return 0;
 }
 
 s32 func_002E6CF0(DevState *arg0) {
-    if (arg0->state != 7) {
+    if (arg0->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
     arg0->operation = 4;
-    SignalSema(D_00398864[arg0->workerIndex].sema);
+    SignalSema(D_00398864[arg0->workerIndex].handle);
     return 0;
 }
 
@@ -497,22 +500,22 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6D48);
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E6DA8);
 
 s32 sdfDevActivate(DevState *arg0) {
-    if (arg0->state != 9) {
+    if (arg0->state != SDF_DEV_STATE_INACTIVE) {
         return -1;
     }
     arg0->result = 0;
-    arg0->state = 7;
+    arg0->state = SDF_DEV_STATE_ACTIVE;
     return 0;
 }
 
 s32 func_002E6E38(DevState *arg0) {
     s8 state = arg0->state;
 
-    if (state != 7) {
+    if (state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
     arg0->operation = state;
-    SignalSema(D_00398864[arg0->workerIndex].sema);
+    SignalSema(D_00398864[arg0->workerIndex].handle);
     return 0;
 }
 
@@ -554,25 +557,25 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
     return state;
 }
 
-void sdfSetThreadPriorities(s32 arg0) {
-    SemaEntry *p;
-    u32 i;
+void sdfSetThreadPriorities(s32 priority) {
+    DevWorkerEntry *worker;
+    u32 index;
 
-    if (D_003BD430 == arg0) {
+    if (D_003BD430 == priority) {
         return;
     }
-    D_003BD430 = arg0;
-    p = D_00398860;
-    i = 0;
+    D_003BD430 = priority;
+    worker = D_00398860;
+    index = 0;
     do {
-        s32 tid = p->sema;
+        s32 threadId = worker->handle;
 
-        p++;
-        if (tid >= 0) {
-            ChangeThreadPriority(tid, arg0);
+        worker++;
+        if (threadId >= 0) {
+            ChangeThreadPriority(threadId, priority);
         }
-        i++;
-    } while (i < 4);
+        index++;
+    } while (index < 4);
 }
 
 void sdfRaiseDeviceThreadPriority(void) {
@@ -639,18 +642,18 @@ INCLUDE_ASM(const s32, "game/code_002E4720", func_002E73F0);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7480);
 
-char *sdfStrDup(const char *arg0) {
-    u32 len;
-    char *buf;
+char *sdfStrDup(const char *text) {
+    u32 length;
+    char *copy;
 
-    if (arg0 == NULL) {
+    if (text == NULL) {
         return NULL;
     }
-    len = strlen(arg0);
-    buf = func_002CFEB8(len + 1);
-    memcpy(buf, arg0, len);
-    buf[len] = 0;
-    return buf;
+    length = strlen(text);
+    copy = func_002CFEB8(length + 1);
+    memcpy(copy, text, length);
+    copy[length] = 0;
+    return copy;
 }
 
 s32 sdfBcdStrToInt(s32 arg0) {
@@ -695,9 +698,9 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     return request;
 }
 
-void sdfDestroyDevRequest(s32 *arg0) {
-    func_002D0918(*arg0);
-    func_002CFF98(arg0);
+void sdfDestroyDevRequest(DevRequest *request) {
+    func_002D0918(request->handle);
+    func_002CFF98(request);
 }
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E76B0);

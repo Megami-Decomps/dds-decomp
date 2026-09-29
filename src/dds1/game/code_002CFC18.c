@@ -60,7 +60,7 @@ void sdfAdvanceNodeCursor(SdfNodeCursor *cursor) {
 
 typedef struct SdfCursorNode {
     u8 unk0[8];
-    struct SdfCursorNode *link;
+    struct SdfCursorNode *next;
 } SdfCursorNode;
 
 typedef struct SdfCursorState {
@@ -72,15 +72,15 @@ typedef struct SdfCursorState {
 typedef struct SdfCursorWalk {
     u8 unk0[0x10];
     SdfCursorNode *node;
-    s16 count;
+    s16 visited;
 } SdfCursorWalk;
 
 SdfCursorNode *func_002CFDA0(SdfCursorState *state, SdfCursorWalk *walk) {
     SdfCursorNode *node = walk->node;
 
-    walk->count++;
-    walk->node = node->link;
-    if (walk->count == state->limit) {
+    walk->visited++;
+    walk->node = node->next;
+    if (walk->visited == state->limit) {
         sdfAdvanceNodeCursor(&state->cursor);
     }
     return node;
@@ -91,7 +91,7 @@ INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFDF0);
 typedef struct SdfCursorSlot {
     struct SdfCursorSlot *next;
     u8 unk4[4];
-    void *handler;
+    SdfCursorNode *(*handler)();
     struct SdfCursorOwner *owner;
     SdfCursorNode *node;
     s16 count;

@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include "eff.h"
+
 /* Parameter blocks copied by the setters below. Sizes are exact: the 0x18
  * pair (D_00355930/D_00355F88), the 0x24 block (D_00356088), the 0x2C triple
  * (D_00355AF8/D_00355C70/D_003561C8) and the 0x30 quad
@@ -105,8 +107,8 @@ extern void func_00187C08(Work18 *arg);
 extern void func_00188068(BDWork24 *arg);
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E218);
 
-void func_0018E2A8(s32 arg0) {
-    func_002D0918(*(u32 *)(arg0 + 8));
+void func_0018E2A8(EffArrHdr *header) {
+    func_002D0918((u32)header->unk8);
 }
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E2C0);

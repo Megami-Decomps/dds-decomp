@@ -309,29 +309,37 @@ s32 func_002CAA20(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, u3
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAAC8);
 
-void *func_002CAC60(u32 arg0) {
+typedef struct SdfTaskHeader {
+    u32 allocation;                     /* 0x00 */
+    u8 pad04[0x0C];
+    u32 userData;                       /* 0x10 */
+    u32 callback14;                     /* 0x14: installed separately */
+    void (*onDestroy)(s32, u32);       /* 0x18 */
+} SdfTaskHeader;
+
+void *func_002CAC60(u32 userData) {
     s32 allocation = func_002D03F8(0x1C);
-    u32 *obj = sdfMemoryGetBlockAddress(allocation);
+    SdfTaskHeader *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, 0x1C);
-    obj[0] = allocation;
-    obj[4] = arg0;
-    obj[5] = (u32)func_002CC740;
-    obj[6] = (u32)func_002CC740;
+    obj->allocation = allocation;
+    obj->userData = userData;
+    obj->callback14 = (u32)func_002CC740;
+    obj->onDestroy = (void (*)(s32, u32))func_002CC740;
     return obj;
 }
 
-void sdfDestroyTaskWork(u8 *work) {
+void sdfDestroyTaskWork(SdfTaskHeader *work) {
     if (work != NULL) {
         sdfClearTaskList();
-        (*(void (**)(s32, u32))(work + 0x18))(-1, *(u32 *)(work + 0x10));
-        func_002D0918(*(u32 *)work);
+        work->onDestroy(-1, work->userData);
+        func_002D0918(work->allocation);
     }
 }
 
-void func_002CAD20(s32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *(s32 *)(arg0 + 0x18) = (s32)arg1;
+void func_002CAD20(SdfTaskHeader *work, s32 callback) {
+    if (callback != 0) {
+        work->onDestroy = (void (*)(s32, u32))callback;
     }
 }
 
@@ -339,9 +347,9 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAD30);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CADD0);
 
-void func_002CAEB8(s32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *(s32 *)(arg0 + 0x14) = (s32)arg1;
+void func_002CAEB8(SdfTaskHeader *work, s32 callback) {
+    if (callback != 0) {
+        work->callback14 = callback;
     }
 }
 
@@ -490,7 +498,7 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB4B8);
 
 void func_002CB5A8(u8 *work) {
     if (work != NULL) {
-        sdfDestroyTaskWork(*(u8 **)(work + 0x0C));
+        sdfDestroyTaskWork(*(SdfTaskHeader **)(work + 0x0C));
         func_002CFF98(*(void **)(work + 4));
         func_002CFF98(*(void **)(work + 8));
         func_002D0918(*(u32 *)work);
@@ -564,11 +572,46 @@ void func_002CBC10(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBC48);
+u8 *func_002CBC48(u8 *grid) {
+    u8 *cell = *(u8 **)(grid + 8);
+    u32 width = *(u32 *)(grid + 0x14);
+    u32 index = *(u32 *)cell;
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBC98);
+    cell -= width * 8;
+    if (index < width) {
+        return NULL;
+    }
+    *(u8 **)(grid + 8) = cell;
+    func_002CC5F0(grid);
+    return cell;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBCF0);
+u8 *func_002CBC98(u8 *grid) {
+    u8 *cell = *(u8 **)(grid + 8);
+    u32 width = *(u32 *)(grid + 0x14);
+
+    if (*(u32 *)cell >= *(u32 *)(grid + 0x10) - width) {
+        return NULL;
+    }
+    cell += width * 8;
+    *(u8 **)(grid + 8) = cell;
+    func_002CC5F0(grid);
+    return cell;
+}
+
+u8 *func_002CBCF0(u8 *grid) {
+    u8 *cell = *(u8 **)(grid + 8);
+    u32 width = *(u32 *)(grid + 0x14);
+    u32 index = *(u32 *)cell;
+
+    cell -= 8;
+    if (index % width == 0) {
+        return NULL;
+    }
+    *(u8 **)(grid + 8) = cell;
+    func_002CC5F0(grid);
+    return cell;
+}
 
 u8 *func_002CBD48(u8 *grid) {
     u8 *cell = *(u8 **)(grid + 8);

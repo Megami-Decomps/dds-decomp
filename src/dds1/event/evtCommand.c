@@ -43,16 +43,20 @@ s32 func_00121650(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern u32 D_0032E3B0[];
 extern u32 D_003BA904;
 s32 func_00126200(s32 arg0);
-void func_00220228(void);
-void func_00220260(void);
+void func_00220228();
+void func_00220260();
 void func_00220300(void *arg0, s32 arg1);
 void func_00220458(void *arg0, s32 arg1);
 u32 func_00123DE0(void);
 void func_001109B8(s32 arg0, u32 arg1);
-s32 func_0010D6A0(s32 arg0);
+s32 func_0010D6A0(void);
 s32 evtFindTaskById(s32 arg0);
 s32 func_00241B80(s32 arg0);
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
+extern char D_003AC978[];
+extern char D_003AC988[]; /* "del BE (%d)..\n" */
+extern char D_003ACA40[]; /* "LIGHT_PATH_MOVE error!\n" */
+extern char D_003ACA58[]; /* "error: LIGHT_PATH_MOVE.\n" */
 void func_002E4C28(const char *msg);
 void func_00241F78(s32 arg0, s32 arg1);
 extern s32 D_0032E3C0[];
@@ -61,6 +65,8 @@ extern u32 D_003BBDA8;
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002260C0);
 
+extern char D_003AC700[];
+extern char D_003AC728[];
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226180);
 
 s32 func_002262A0(void)
@@ -77,7 +83,25 @@ s32 func_002262A0(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002262F8);
+s32 func_002262F8(void) {
+    void *path = func_00223AA0(7, func_0010D428(0));
+    s32 found;
+    s32 i;
+
+    if (path == NULL) {
+        return 1;
+    }
+    i = 4;
+    do {
+        found = (s32)func_00223AA0(i, func_0010D428(1));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        return 1;
+    }
+    func_00115BB8(path, found);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226388);
 
@@ -108,7 +132,22 @@ s32 func_00226470(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002264B0);
+s32 func_002264B0(void) {
+    void *path = func_00223AA0(7, func_0010D428(0));
+    void *target;
+
+    if (path == NULL) {
+        func_0010AC10(D_003AC700);
+        return 1;
+    }
+    target = func_00223AA0(0x10, func_0010D428(1));
+    if (target == NULL) {
+        func_0010AC10(D_003AC728);
+        return 1;
+    }
+    func_00220340(target, path);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226540);
 
@@ -369,7 +408,21 @@ s32 func_00226D50(void)
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226D98);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00226E10);
+s32 func_00226E10(void) {
+    void *unit;
+
+    if (func_0010D428(0) < 0) {
+        unit = (void *)func_00123DE0();
+    } else {
+        unit = func_00223AA0(4, func_0010D428(0));
+        *(u32 *)(*(u8 **)((u8 *)unit + 0x18) + 0x88) |= 1;
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    func_001109B8(dds3GetWorldObject(), (u32)unit);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226E98);
 
@@ -443,11 +496,48 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_002277C0);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC968);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002278A0);
+s32 func_002278A0(void) {
+    s32 id = func_0010D428(0);
+    u8 *work = (u8 *)func_0010D6A0();
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227920);
+    if (work == NULL) {
+        return 1;
+    }
+    if (evtFindTaskById(id) != 0) {
+        return 1;
+    }
+    func_0010AC10(D_003AC978, id);
+    func_00101A80(*(s32 *)(work + 0xE4), mnuCampCreateTask(id));
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002279A0);
+s32 func_00227920(void) {
+    s32 id = func_0010D428(0);
+    s32 ok;
+
+    if (func_0010D6A0() != 0 && evtFindTaskById(id) != 0 && func_00241B80(id) == 2) {
+        func_0010AC10(D_003AC968, id);
+        ok = 1;
+    } else {
+        ok = 0;
+    }
+    func_0010D5F0(ok);
+    return 1;
+}
+
+s32 func_002279A0(void) {
+    s32 id = func_0010D428(0);
+
+    if (func_0010D6A0() == 0) {
+        return 1;
+    }
+    if (evtFindTaskById(id) == 0) {
+        return 1;
+    }
+    func_0010AC10(D_003AC988, id);
+    campDestroyTaskById(id);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC998);
 
@@ -465,9 +555,41 @@ s32 func_00227AD8(void)
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227B18);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227BB8);
+s32 func_00227BB8(void) {
+    s32 found;
+    s32 i = 4;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227C38);
+    do {
+        found = (s32)func_00223AA0(i, func_0010D428(0));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        found = func_00126200(func_0010D428(0));
+        if (found == 0) {
+            return 1;
+        }
+    }
+    func_00220228(found);
+    return 1;
+}
+
+s32 func_00227C38(void) {
+    s32 found;
+    s32 i = 4;
+
+    do {
+        found = (s32)func_00223AA0(i, func_0010D428(0));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        found = func_00126200(func_0010D428(0));
+        if (found == 0) {
+            return 1;
+        }
+    }
+    func_00220260(found);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227CB8);
 
@@ -515,6 +637,15 @@ s32 func_00227F60(void)
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC9F8);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227FE0);
+s32 func_00227FE0(void) {
+    void *path = func_00223AA0(9, func_0010D428(0));
+
+    if (func_00220340(func_00223AA0(0x10, func_0010D428(1)), path) != 0) {
+        return 1;
+    }
+    func_003003F0(D_003ACA40);
+    func_0010AC10(D_003ACA58);
+    return 1;
+}
 
 
