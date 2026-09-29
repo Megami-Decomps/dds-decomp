@@ -7426,7 +7426,27 @@ u8 *func_001F03A0(u32 soundId, u32 variant) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F0430);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F0580);
+extern u32 func_001F0430(u32 *);
+
+void *func_001F0580(u8 *source, u32 value) {
+    u8 *task = func_001D4748(0x34);
+    u8 *arguments;
+
+    task[0] = 1;
+    task[0x10] = 0;
+    *(u16 *)(task + 0x20) = 3;
+    *(u16 *)(task + 0x24) |= 2;
+    *(void **)(task + 0x4C) = func_001F0430;
+    *(u32 *)(task + 0x48) = 0;
+    arguments = (u8 *)func_001D47D8((s32)task);
+    *(u32 *)(arguments + 0x30) = value;
+    if (source != 0) {
+        memcpy(arguments, source, 0x30);
+    } else {
+        memcpy(arguments, (u8 *)func_001A17F0() + 0x10, 0x30);
+    }
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F06E0);
 
@@ -8051,7 +8071,46 @@ void sndFreeResourceNode(SoundResourceNode *node) {
     func_002CFF98(node);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F24A8);
+void func_001F24A8(void) {
+    s32 context = func_001A17F0();
+    s32 *node;
+
+    for (node = *(s32 **)(context + 0x234); node != 0; node = (s32 *)node[7]) {
+        if (node[1] == 0) {
+            node[3] = 0;
+        } else if (node[3] > 0) {
+            node[3] = node[3] - 1;
+        }
+    }
+    if ((u32)(func_001DC470() - 9) < 2 || *(s32 *)(context + 0x2A4) != 0 || *(s32 *)(context + 0x208) == 8) {
+        *(u8 *)(context + 0x584) = 0;
+    } else {
+        *(u8 *)(context + 0x584) = 1;
+    }
+    switch (*(u8 *)(context + 0x584)) {
+    case 0: {
+        u32 color = *(u32 *)(context + 0x588);
+
+        if (color <= 0x8080807F) {
+            *(u32 *)(context + 0x588) = color + 0x10000000;
+        } else {
+            *(u32 *)(context + 0x588) = 0x80808080;
+        }
+        break;
+    }
+    case 1: {
+        u32 color = *(u32 *)(context + 0x588);
+
+        if (color > 0x808080) {
+            *(u32 *)(context + 0x588) = color - 0x10000000;
+        } else {
+            *(u32 *)(context + 0x588) = 0x808080;
+        }
+        break;
+    }
+    }
+    func_002B3EC8();
+}
 
 void func_001F25C8(void) {
     func_0029B1D8();
@@ -8079,7 +8138,44 @@ void sndClearResourceNodes(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F2688);
+s32 func_001F2688(u32 mask) {
+    switch (mask & 0x7FFF) {
+    case 0:
+        return 0;
+    case 0x0001:
+        return 0xE;
+    case 0x0002:
+        return 0xB;
+    case 0x0004:
+        return 0xA;
+    case 0x0008:
+        return 8;
+    case 0x0010:
+        return 6;
+    case 0x0020:
+        return 7;
+    case 0x0040:
+        return 9;
+    case 0x0080:
+        return 5;
+    case 0x0100:
+        return 0xD;
+    case 0x0200:
+        return 4;
+    case 0x0400:
+        return 3;
+    case 0x0800:
+        return 0xC;
+    case 0x1000:
+        return 2;
+    case 0x2000:
+        return 1;
+    case 0x4000:
+        return 0x10;
+    default:
+        return 0;
+    }
+}
 
 SoundResourceLink *sndAllocResourceLink(void *owner) {
     SoundResourceLink *node = func_002CFF68(sizeof(SoundResourceLink));
