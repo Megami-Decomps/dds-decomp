@@ -326,7 +326,24 @@ s32 func_0010D428(s32 idx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfWaitReadArgFloat);
+f32 bfWaitReadArgFloat(s32 idx)
+{
+    ScrData *scr = D_003BD78C;
+    s32 stackIndex = scr->sp - idx - 1;
+
+    switch (scr->stackTypes[stackIndex]) {
+    case 0:
+    case 4:
+        return (f32)scr->stackValues[stackIndex].i;
+    case 1:
+        return scr->stackValues[stackIndex].f;
+    case 2:
+        return (f32)D_003BAA00->ints[scr->stackValues[stackIndex].i];
+    case 3:
+        return D_003BAA00->floats[scr->stackValues[stackIndex].i];
+    }
+    return 0.0f;
+}
 
 /* Return a string parameter only when its VM stack tag is STRING. */
 char *func_0010D5A8(s32 paramIdx)
