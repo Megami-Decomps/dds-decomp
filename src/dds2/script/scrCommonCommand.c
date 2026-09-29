@@ -27,6 +27,10 @@ s32 kwlnDrawSetDc8Second(s32 arg0);
 extern char D_004126D0[];
 
 s32 kwlnDrawSetE08Fifth(s32 arg0);
+/* Declared floats-first: gcc 2.96 emits the outgoing register moves in
+ * parameter order and schedules the last one into the jal delay slot, so
+ * retail moves the kind argument ($16) last, in the delay slot. */
+s32 kwlnDrawSetC70FloatTriple(f32 arg0, f32 arg1, s32 arg2);
 
 extern char D_004126F0[];
 
@@ -172,11 +176,22 @@ s32 func_0010DD18(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412648);
+extern char D_00412668[];
+s32 func_001063A8(f32 arg0);
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
+s32 func_0010DD70(void)
+{
+    f32 fovy;
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DD70);
+    fovy = bfWaitReadArgFloat(0) * 0.017453293f;
+    if (fovy <= 5.0f || fovy >= 180.0f)
+    {
+        func_0010AE38(D_00412668, fovy);
+        return 1;
+    }
+    func_001063A8(fovy);
+    return 1;
+}
 
 typedef struct BfSectionTable {
     u8 unk0[8];
@@ -300,6 +315,12 @@ s32 func_0010E020(void)
     return 1;
 }
 
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412648);
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
+
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E098);
 
 s32 func_0010E148(void)
@@ -350,7 +371,32 @@ s32 func_0010E3A0(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E3F8);
+s32 func_0010E3F8(void)
+{
+    s32 p2;
+    s32 mode;
+    f32 first;
+    f32 second;
+
+    p2 = func_0010D650(2);
+    switch (p2)
+    {
+    case 1:
+        mode = 0x48;
+        break;
+    case 2:
+        mode = 0x42;
+        break;
+    case 0:
+    default:
+        mode = 0x44;
+        break;
+    }
+    first = bfWaitReadArgFloat(0);
+    second = bfWaitReadArgFloat(1);
+    kwlnDrawSetC70FloatTriple(first, second, mode);
+    return 1;
+}
 
 s32 func_0010E480(void)
 {
