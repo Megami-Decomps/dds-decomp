@@ -134,6 +134,31 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   `if (g() == 1) { f(1); return 1; } f(0); return 1;` (`fldSetFlagFromWorld1`).
 - A loop that retail closes with `bne` against a hoisted `li $rN,K` is written
   with `!=` (`i != 2`); a `<` test becomes a count-down loop.
+- A `return;` inside a nested block disables the sibcall `j`; write the
+  condition as one `if (a != -1 || b < 0x32) { ... }` or an else-if chain.
+- `f32 pos[4] = {0, 0, 0, 1.0f};` is the source of retail's `memset` plus a
+  single `1.0f` store.
+- Declare every prototype before its first caller. A later `extern void`
+  leaves earlier calls implicitly `int` and moves values between `$2`/`$3`.
+  Keep new externs in the declaration block at the top of the unit; externs
+  added mid-file can flip other functions to CONTEXT.
+- Whether reorg annuls a branch after a call (`bnel` vs `bne`) can depend on
+  whether the callee is visible as C earlier in the unit. A function that
+  matches only with its callee opaque hints at a translation-unit boundary.
+- A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
+  across it; retail's code has none.
+- `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.
+
+## Rodata order
+
+The build links the unit's `.rodata` at retail's address, in source order:
+each `INCLUDE_RODATA` and each function's string literals (every distinct
+literal once per unit, at its first use). Converting the first user of a
+shared string to C moves that string ahead of or behind the included items
+around it. Keep the string's `INCLUDE_RODATA` and use an `extern` while any asm
+still references it, and don't write a literal whose bytes an `INCLUDE_RODATA`
+item still supplies. `check_unit` reports `RODATA` when the full unit's
+`.rodata` differs from retail.
 
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 

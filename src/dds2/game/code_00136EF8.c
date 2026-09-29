@@ -3,6 +3,14 @@
 
 extern u64 dds3GetWorldObject(void);
 
+extern s32 mdlFlagTest(s32);
+extern int strcmp(const char *, const char *);
+
+extern void func_001089A0();
+extern void func_001089A8();
+extern void func_00108BD8();
+extern void func_00108EC0();
+
 extern s32 D_004360F8;
 
 extern u32 D_004360FC;
@@ -157,15 +165,25 @@ extern FldRoomPlanes D_00444BC0[];
 extern f32 fldDotVector(f32 *, f32 *);
 
 typedef struct FldRoomState {
-    u8 pad0[0x120];
+    f32 corner[8][4]; /* 0x00 */
+    f32 center[4];    /* 0x80 */
+    f32 plane[6][4];  /* 0x90 */
+    f32 limit[6];     /* 0xF0 */
+    s32 unk108;
+    s32 unk10C;
+    s32 unk110;
+    s32 unk114;
+    s32 unk118;
+    s32 unk11C;
     s32 unk120;
-    u8 pad124[0xE];
+    u8 pad124[0xC];
+    s16 unk130;
     s16 roomId; /* 0x132: returned by fldFindRoomByTask */
-    u8 pad134[2];
+    s16 unk134;
     s16 mode;
     s16 unk138;
     s16 axisMode;
-    u8 pad13C[4];
+    s32 unk13C;
 } FldRoomState; /* 0x140 bytes */
 
 extern FldRoomState D_00444B30[];
@@ -228,7 +246,10 @@ typedef struct FldActorEntry {
     /* 0x31 */ u8 pad31;
     /* 0x32 */ s16 warpArea;
     /* 0x34 */ s16 warpEntry;
-    /* 0x36 */ u8 pad36[0x36];
+    /* 0x36 */ u8 pad36[0xE];
+    /* 0x44 */ s8 linkKind;
+    /* 0x45 */ u8 pad45;
+    /* 0x46 */ u8 linkName[0x26];
 } FldActorEntry; /* 0x6C bytes */
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
@@ -447,7 +468,14 @@ void fldResetTaskSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldPushDisplayValue);
+extern s32 D_004361B8;
+
+s32 fldPushDisplayValue(u32 value) {
+    s32 index = D_004361B8;
+    D_00444A30[index] = value;
+    D_004361B8 = index + 1;
+    return index;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BAB8);
 
@@ -604,7 +632,23 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013ED20);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EEA0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldCheckEntryActive);
+extern s32 D_004361C0;
+
+s32 fldCheckEntryActive(s32 value) {
+    s32 blocked = D_004361C0;
+    s32 index = D_004361AC;
+
+    if (blocked != 0) {
+        return 1;
+    }
+    if (index == -1) {
+        return 0;
+    }
+    if (D_00444B30[index].mode == 1 && D_00444B30[index].unk138 == value) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 fldHasActiveTasks(void) {
     s32 i;
@@ -943,7 +987,13 @@ void fldLoadActorWaypointTable(s32 field) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldCopyActorWaypointTable);
+typedef struct FldWaypointBlock {
+    u32 word[0x6D00 / 4];
+} FldWaypointBlock;
+
+void fldCopyActorWaypointTable(FldWaypointBlock *src) {
+    *(FldWaypointBlock *)D_003931A0 = *src;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142B70);
 
@@ -960,12 +1010,28 @@ extern void func_00155D48(s32, s32, void *, s32);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143C98);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143D90);
+extern s32 D_00399F90[];
 
-extern void func_001089A0();
-extern void func_001089A8();
-extern void func_00108BD8();
-extern void func_00108EC0();
+void func_00143D90(s32 mode) {
+    func_001089A0(0x53);
+    func_00108BD8(0);
+    func_001089A8(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_00108EC0(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                  D_00389770[0x7F]);
+    func_00108EC0(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                  D_00389770[0x7F]);
+    func_00108EC0(0x12F, 0x128, 0x3A, 0x24, 0x3B, 2, -0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                  D_00389770[0x7F]);
+    if (mode < 0x18) {
+        func_00108BD8(1);
+        func_00108EC0(0xA0, 0x12B, 0x22, 0x24, 1, 0x21, 0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
+                      D_00399F90[mode], D_00399F90[mode], D_00389770[0x7F]);
+        func_00108EC0(0x13E, 0x12B, 0x22, 0x24, 0x23, 0x21, -0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
+                      D_00399F90[mode], D_00399F90[mode], D_00389770[0x7F]);
+        func_00108BD8(0);
+    }
+}
+
 extern s32 D_00389978[];
 
 void func_00143F78(s32 arg0, s32 arg1) {

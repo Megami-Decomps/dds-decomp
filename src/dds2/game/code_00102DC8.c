@@ -86,7 +86,18 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103EF8);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103F58);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104020);
+extern u8 D_00438D90[2];
+extern u32 D_00438DA0[2];
+extern void sdfDevConsSetEntryPair(s32, s32, s32);
+
+void func_00104020(void) {
+    D_00438D90[0] = 0;
+    D_00438D90[1] = 0;
+    D_00438DA0[0] = 0;
+    D_00438DA0[1] = 0;
+    sdfDevConsSetEntryPair(0, 0, 0);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104058);
 
@@ -165,7 +176,26 @@ s32 kwlnEnsureDefaultResource(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105070);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105240);
+extern void sdfGraphSetDisplayMode(s32);
+extern void func_0033A5C8(void *);
+extern void func_00105070(s32);
+extern void func_001057B0(void);
+extern u8 D_0037F5E0[];
+extern u8 D_0037F980[];
+extern u8 D_00435BC8;
+extern void evtUnk8A48Ensure(void);
+
+void func_00105240(void) {
+    sdfGraphSetDisplayMode(1);
+    func_0033A5C8(D_0037F5E0);
+    func_0033A5C8(D_0037F980);
+    func_00105070(0);
+    func_00105070(1);
+    func_001057B0();
+    D_00435BC8 = 0;
+    evtUnk8A48Ensure();
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105290);
 
