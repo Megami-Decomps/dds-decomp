@@ -1614,7 +1614,16 @@ void func_00126110(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00126140);
+s32 func_00126140(s32 *out1, s32 *out2) {
+    if (D_0032E3B0[0x3C] == -1 && D_0032E3B0[0x3D] == -1) {
+        return 0;
+    }
+    *out1 = D_0032E3B0[0x3C] + 0xC8;
+    *out2 = D_0032E3B0[0x3D];
+    D_0032E3B0[0x3C] = -1;
+    D_0032E3B0[0x3D] = -1;
+    return 1;
+}
 
 void *fldCreateDummyMatter(void) {
     u32 args[8];
