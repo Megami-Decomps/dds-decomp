@@ -13,4 +13,42 @@
     ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
     : : "r" (dst), "r" (src) : "$2", "memory")
 
+/*
+ * 64-byte (4-quadword) copy through vf28-vf31, as the field/effect matrix
+ * setters do. COP2 has no plain-C form; .set noreorder keeps ee-as from
+ * moving the sqc2 into a delay slot.
+ */
+#define VU0_COPY_MATRIX(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%1)\n\t" \
+    "lqc2 vf29, 16(%1)\n\t" \
+    "lqc2 vf30, 32(%1)\n\t" \
+    "lqc2 vf31, 48(%1)\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst), "r" (src) : "memory")
+
+/* Load the same four quadwords into vf28-vf31 (no store). */
+#define VU0_LOAD_MATRIX(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%0)\n\t" \
+    "lqc2 vf29, 16(%0)\n\t" \
+    "lqc2 vf30, 32(%0)\n\t" \
+    "lqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src))
+
+/* Store vf28-vf31 to four quadwords (pairs with VU0_LOAD_MATRIX). */
+#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "memory")
+
 #endif
