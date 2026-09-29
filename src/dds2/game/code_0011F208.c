@@ -237,9 +237,9 @@ extern void func_00118598(s32);
 
 extern s32 fileLoadStateChanged(void);
 
-extern void func_002D0EB0(void);
+extern void fileCacheSlotFlagsFromState(void);
 
-extern void func_002D0EC8(void);
+extern void fileRestoreSlotFlagsToState(void);
 
 void fldSetDeferredFieldCommand(u32, u32);
 
@@ -1184,9 +1184,9 @@ void func_00124CC8(void) {
         func_00118598(0);
     }
     if (fileLoadStateChanged() == 0) {
-        func_002D0EB0();
+        fileCacheSlotFlagsFromState();
     } else {
-        func_002D0EC8();
+        fileRestoreSlotFlagsToState();
     }
     mdlFlagSet(0xc0f);
     {

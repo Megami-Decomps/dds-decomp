@@ -14,7 +14,7 @@ extern u32 D_003BA958;
 
 extern s32 func_002913B8(void);
 
-extern s32 func_00262938(void);
+extern s32 brsTaskConsumeDone(void);
 
 extern s32 mnuAcknowledgeCampState(void);
 
@@ -458,7 +458,7 @@ u32 func_0010A210(void) {
 }
 
 void func_0010A218(void) {
-    func_0028F0E0(3);
+    fileEnterMcPackScene(3);
 }
 
 u32 func_0010A230(void) {
@@ -500,7 +500,7 @@ u32 func_0010A2D8(void) {
 }
 
 void func_0010A2E0(void) {
-    func_0028F0E0(1);
+    fileEnterMcPackScene(1);
 }
 
 s32 evtUnkA2F8Check(void) {
@@ -534,7 +534,7 @@ u32 func_0010A390(void) {
 }
 
 void func_0010A398(void) {
-    func_0028F0E0(2);
+    fileEnterMcPackScene(2);
 }
 
 u32 func_0010A3B0(void) {
@@ -673,7 +673,7 @@ u32 func_0010A5E8(void) {
 u8 func_0010A610(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00262938();
+    temp_v0 = brsTaskConsumeDone();
     return temp_v0 == 0;
 }
 
@@ -854,7 +854,7 @@ u32 func_0010A9D0(void) {
 u8 func_0010A9F0(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00262938();
+    temp_v0 = brsTaskConsumeDone();
     return temp_v0 == 0;
 }
 
@@ -1062,3 +1062,4 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA990);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA994);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA998);
+
