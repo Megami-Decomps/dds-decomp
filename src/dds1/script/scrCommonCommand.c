@@ -61,9 +61,51 @@ s32 func_0010D838(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", bfWaitCbScreenFadeA);
+s32 bfWaitCbScreenFadeA(void)
+{
+    s32 mode;
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", bfWaitCbScreenFadeB);
+    if (scrGetCommandTimer() == 0)
+    {
+        mode = func_0010D428(0);
+        switch (mode)
+        {
+        case 0:
+            kwlnFadeOutStart(0, 0, 0, func_0010D428(1));
+            break;
+        case 1:
+            kwlnFadeOutStart(0xFF, 0xFF, 0xFF, func_0010D428(1));
+            break;
+        default:
+            return 1;
+        }
+        return 0;
+    }
+    return 1;
+}
+
+s32 bfWaitCbScreenFadeB(void)
+{
+    s32 mode;
+
+    if (scrGetCommandTimer() == 0)
+    {
+        mode = func_0010D428(0);
+        switch (mode)
+        {
+        case 0:
+            kwlnFadeInStart(0, 0, 0, func_0010D428(1));
+            break;
+        case 1:
+            kwlnFadeInStart(0xFF, 0xFF, 0xFF, func_0010D428(1));
+            break;
+        default:
+            return 1;
+        }
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_0010D9A8(void)
 {
@@ -129,7 +171,50 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DB48);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", bfWaitCbCreateTask);
+typedef struct BfSectionTable {
+    u8 unk0[8];
+    s32 count; /* 0x8 */
+} BfSectionTable;
+
+typedef struct BfTaskRecord {
+    u8 unk0[0x20];
+    s32 basePriority; /* 0x20 */
+} BfTaskRecord;
+
+/* BF wait context: the shared ScrData plus the owning task record at +0xE4. */
+typedef struct BfWaitContext {
+    ScrData base;         /* 0x00 */
+    BfTaskRecord *record; /* 0xE4 */
+} BfWaitContext;
+
+s32 func_0010D6A0(void);
+s32 func_0010BCB8(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
+
+s32 bfWaitCbCreateTask(void)
+{
+    s32 index;
+    BfWaitContext *ctx;
+
+    index = func_0010D428(0);
+    ctx = (BfWaitContext *)func_0010D6A0();
+    if (ctx == NULL)
+    {
+        return 1;
+    }
+    if (ctx->record == NULL)
+    {
+        return 1;
+    }
+    if (index < 0 || index >= ((BfSectionTable *)ctx->base.unkB0)->count)
+    {
+        return 1;
+    }
+    func_0010D5F0(func_0010BCB8(
+        ctx->record->basePriority + func_0010D428(1), ctx->base.unkAC,
+        ctx->base.unkB0, ctx->base.procedures, ctx->base.labels,
+        ctx->base.instructions, ctx->base.unkC0, ctx->base.strings, index));
+    return 1;
+}
 
 s32 func_0010DC80(void)
 {
