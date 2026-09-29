@@ -1,4 +1,5 @@
 #include "common.h"
+extern s8 D_0043643D;
 
 #include "eff.h"
 
@@ -209,7 +210,9 @@ void func_00194A58(void) {
 void func_00194A60(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00194A68);
+s32 func_00194A68(s32 arg0) {
+    return arg0;
+}
 
 void func_00194A70(void) {
 }
@@ -225,12 +228,16 @@ u32 func_00194A80(void) {
 void func_00194A88(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00194A90);
+s32 func_00194A90(void) {
+    return 0;
+}
 
 void func_00194A98(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00194AA0);
+s8 func_00194AA0(void) {
+    return D_0043643D;
+}
 
 s32 effOpenDataDir(void *arg0) {
     u8 buf[0x70];

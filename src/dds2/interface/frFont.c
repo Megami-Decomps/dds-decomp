@@ -29,7 +29,7 @@ typedef struct FrFontGlyph {
     struct FrFontGlyph *unk20; /* 0x20 */
     struct FrFontGlyph *previous; /* 0x24: back-link in the glyph chain */
     struct FrFontGlyph *next; /* 0x28: next glyph in chain */
-    struct FrFontGlyph *chainEnd; /* 0x2C: chain endpoint */
+    struct FrFontGlyph *chainHead; /* 0x2C: first glyph in the linked chain */
     u32 unk30;        /* 0x30 */
     u32 unk34;        /* 0x34 */
     u32 unk38;        /* 0x38 */
@@ -204,7 +204,7 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
     glyph->u14.w = 0;
     glyph->previous = NULL;
     glyph->next = NULL;
-    glyph->chainEnd = glyph;
+    glyph->chainHead = glyph;
     glyph->firstChild = NULL;
     glyph->unk20 = NULL;
     glyph->unk18.w = 0;
@@ -309,9 +309,9 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
     if (arg1 == NULL) {
         return arg0;
     }
-    arg0->next = arg1->chainEnd;
-    arg1->chainEnd->previous = arg0;
-    arg1->chainEnd = arg0->chainEnd;
+    arg0->next = arg1->chainHead;
+    arg1->chainHead->previous = arg0;
+    arg1->chainHead = arg0->chainHead;
     if (arg2 == 1) {
         arg1->unk4 = arg0->unk4 + (arg0->unkC << 4);
         arg1->unk8 = arg0->unk8;

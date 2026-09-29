@@ -46,23 +46,23 @@ void func_0033CF80(DevConsState *console, s32 character, s32 attribute) {
 }
 
 s32 func_0033CF98(DevConsState *console, const char *fmt, ...) {
-    char buf[0x200];
-    __builtin_va_list ap;
-    char *p;
-    s32 i = 0;
-    s32 c;
-    __builtin_stdarg_start(ap, fmt);
-    func_00360E78(buf, fmt, ap);
-    c = buf[0];
-    if (c != 0) {
+    char text[0x200];
+    __builtin_va_list args;
+    char *cursor;
+    s32 written = 0;
+    s32 character;
+    __builtin_stdarg_start(args, fmt);
+    func_00360E78(text, fmt, args);
+    character = text[0];
+    if (character != 0) {
         do {
-            i++;
-            func_0033CE08(console, c, console->charAttribute);
-            p = buf + i;
-            c = *p;
-        } while (c != 0);
+            written++;
+            func_0033CE08(console, character, console->charAttribute);
+            cursor = text + written;
+            character = *cursor;
+        } while (character != 0);
     }
-    return i;
+    return written;
 }
 
 void func_0033D040(DevConsState *console, s16 column, s16 row) {
@@ -74,12 +74,12 @@ void func_0033D050(DevConsState *console, u8 attribute) {
     console->charAttribute = attribute;
 }
 
-u8 func_0033D058(DevConsState *arg0) {
-    return arg0->unk14;
+u8 func_0033D058(DevConsState *console) {
+    return console->unk14;
 }
 
-void func_0033D060(DevConsState *arg0, u8 arg1) {
-    arg0->unk14 = arg1;
+void func_0033D060(DevConsState *console, u8 value) {
+    console->unk14 = value;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D068);

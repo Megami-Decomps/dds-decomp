@@ -7,7 +7,7 @@ extern s32 func_00161858(void);
 /* Flag word read by the two wrappers below. */
 typedef struct {
     u8  pad_0x000[0x110]; /* 0x00 */
-    u32 unk110;           /* 0x110 */
+    u32 flags;            /* 0x110: selected by mask 0xE00 */
 } EffBattleMiscCtx; /* 0x114 */
 
 typedef struct {
@@ -49,14 +49,14 @@ void func_00162028(u32 unused, u32 value) {
     EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)func_00161858();
 
     (void)unused;
-    func_00161E48(ctx->unk110 & 0xE00, value);
+    func_00161E48(ctx->flags & 0xE00, value);
 }
 
 void func_00162058(u32 unused, u32 value) {
     EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)func_00161860();
 
     (void)unused;
-    func_00161E48(ctx->unk110 & 0xE00, value);
+    func_00161E48(ctx->flags & 0xE00, value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00162088);

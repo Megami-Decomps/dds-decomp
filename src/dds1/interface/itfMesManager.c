@@ -26,16 +26,16 @@ typedef struct FrFontGlyph FrFontGlyph;
 
 /* Block at ItfMesState +0x14. */
 typedef struct ItfMesBlk14 {
-    u32 unk0;            /* +0x0 */
-    u32 unk4;            /* +0x4 */
+    u32 x;               /* +0x0 */
+    u32 y;               /* +0x4 */
     FrFontGlyph *unk8;   /* +0x8 */
     u32 unkC;            /* +0xC */
 } ItfMesBlk14;
 
 /* Block at ItfMesState +0x24. */
 typedef struct ItfMesBlk24 {
-    u32 unk0;            /* +0x0 */
-    u8 unk4[4];          /* +0x4 */
+    u32 x;               /* +0x0 */
+    u32 y;               /* +0x4 */
     ItfMesTable *unk8;   /* +0x8 */
     FrFontGlyph *unkC;   /* +0xC */
     u32 unk10;           /* +0x10 */
@@ -43,8 +43,8 @@ typedef struct ItfMesBlk24 {
 
 /* Block at ItfMesState +0x40. */
 typedef struct ItfMesBlk40 {
-    u32 unk0;            /* +0x0 */
-    u32 unk4;            /* +0x4 */
+    u32 x;               /* +0x0 */
+    u32 y;               /* +0x4 */
     FrFontGlyph *unk8;   /* +0x8 */
     u32 unkC;            /* +0xC */
     u16 unk10;           /* +0x10 */
@@ -446,14 +446,14 @@ void func_0019C0E8(s32 window, s32 x, s32 y) {
     ItfMesBlk14 *blk = &D_003D6ECC[window].mes->blk14;
     s32 delta[2];
 
-    delta[0] = x - blk->unk0;
-    delta[1] = y - blk->unk4;
+    delta[0] = x - blk->x;
+    delta[1] = y - blk->y;
     if (delta[0] == 0 && delta[1] == 0) {
         return;
     }
     func_0019D8E8((ItfMesNode *)blk->unk8, delta[0], delta[1]);
-    blk->unk0 = x;
-    blk->unk4 = y;
+    blk->x = x;
+    blk->y = y;
 }
 
 extern void func_0019D8E8(ItfMesNode *, s32, s32);
@@ -462,52 +462,52 @@ void func_0019C178(s32 window, s32 dx, s32 dy) {
     ItfMesBlk14 *blk = &D_003D6ECC[window].mes->blk14;
 
     func_0019D8E8((ItfMesNode *)blk->unk8, dx, dy);
-    blk->unk0 += dx;
-    blk->unk4 += dy;
+    blk->x += dx;
+    blk->y += dy;
 }
 
 void func_0019C1E8(s32 window, s32 x, s32 y) {
     ItfMesBlk24 *blk = &D_003D6ECC[window].mes->blk24;
     s32 delta[2];
 
-    delta[0] = x - blk->unk0;
-    delta[1] = y - *(u32 *)blk->unk4;
+    delta[0] = x - blk->x;
+    delta[1] = y - blk->y;
     if (delta[0] == 0 && delta[1] == 0) {
         return;
     }
     func_0019D8E8((ItfMesNode *)blk->unkC, delta[0], delta[1]);
-    blk->unk0 = x;
-    *(u32 *)blk->unk4 = y;
+    blk->x = x;
+    blk->y = y;
 }
 
 void func_0019C278(s32 window, s32 dx, s32 dy) {
     ItfMesBlk24 *blk = &D_003D6ECC[window].mes->blk24;
 
     func_0019D8E8((ItfMesNode *)blk->unkC, dx, dy);
-    blk->unk0 += dx;
-    *(u32 *)blk->unk4 += dy;
+    blk->x += dx;
+    blk->y += dy;
 }
 
 void func_0019C2E8(s32 window, s32 x, s32 y) {
     ItfMesBlk40 *blk = &D_003D6ECC[window].mes->blk40;
     s32 delta[2];
 
-    delta[0] = x - blk->unk0;
-    delta[1] = y - blk->unk4;
+    delta[0] = x - blk->x;
+    delta[1] = y - blk->y;
     if (delta[0] == 0 && delta[1] == 0) {
         return;
     }
     func_0019D8E8((ItfMesNode *)blk->unk8, delta[0], delta[1]);
-    blk->unk0 = x;
-    blk->unk4 = y;
+    blk->x = x;
+    blk->y = y;
 }
 
 void func_0019C378(s32 window, s32 dx, s32 dy) {
     ItfMesBlk40 *blk = &D_003D6ECC[window].mes->blk40;
 
     func_0019D8E8((ItfMesNode *)blk->unk8, dx, dy);
-    blk->unk0 += dx;
-    blk->unk4 += dy;
+    blk->x += dx;
+    blk->y += dy;
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C3E8);

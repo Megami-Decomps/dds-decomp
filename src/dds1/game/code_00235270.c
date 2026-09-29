@@ -65,7 +65,20 @@ typedef struct EvtRuntimeGroup {
 
 typedef struct EvtRuntime {
     u8 pad00[0x2034];
-    EvtRuntimeGroup *groups;
+    EvtRuntimeGroup *groups; /* 0x2034 */
+    u8 pad2038[0x248];
+    s32 actionMode; /* 0x2280 */
+    u8 pad2284[8];
+    s32 controlState; /* 0x228C */
+    u8 pad2290[0x78];
+    s32 *tableRowIndex; /* 0x2308 */
+    u8 pad230C[0xBC];
+    s32 tableColumn; /* 0x23C8 */
+    u8 pad23CC[0x14];
+    s32 selectedEntry; /* 0x23E0 */
+    s32 commandFirst; /* 0x23E4 */
+    s32 commandSecond; /* 0x23E8 */
+    s32 commandThird; /* 0x23EC */
 } EvtRuntime;
 
 typedef struct {
@@ -88,12 +101,17 @@ void evtCreateTask(s32 taskId, s32 value) {
     kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, (void *)data);
 }
 
-void func_002352E0(s32 taskId, s32 value) {
-    s32 data;
+typedef struct EvtTaskData {
+    u32 pad00;
+    s32 value; /* 0x04 */
+} EvtTaskData;
 
-    data = func_002350F8();
-    *(s32 *)(data + 4) = value;
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, (void *)data);
+void func_002352E0(s32 taskId, s32 value) {
+    EvtTaskData *data;
+
+    data = (EvtTaskData *)func_002350F8();
+    data->value = value;
+    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, data);
 }
 
 void evtSetSkyOverlayEnabled(u32 arg0) {
@@ -338,8 +356,8 @@ s32 func_00239770(s32 *arg0) {
     return D_00368950[*arg0].unk0 != 0;
 }
 
-s32 func_00239798(s32 arg0) {
-    return D_00368952[*(s32 *)(arg0 + 0x23C8) + *(s32 *)(*(s32 *)(arg0 + 0x2308)) * 10];
+s32 func_00239798(EvtRuntime *runtime) {
+    return D_00368952[runtime->tableColumn + *runtime->tableRowIndex * 10];
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002397C8);
@@ -379,10 +397,10 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023B848);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023B8F8);
 
-void func_0023B9D8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    *(s32 *)(arg0 + 0x23E4) = arg1;
-    *(s32 *)(arg0 + 0x23E8) = arg2;
-    *(s32 *)(arg0 + 0x23EC) = arg3;
+void func_0023B9D8(EvtRuntime *runtime, s32 first, s32 second, s32 third) {
+    runtime->commandFirst = first;
+    runtime->commandSecond = second;
+    runtime->commandThird = third;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB90);
@@ -399,37 +417,42 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023BE40);
 
 extern s32 func_0018FEB0();
 extern s32 kwlnTaskGetTimer(s32 task);
-extern u8 *D_003BB128;
+typedef struct EvtSelectionCache {
+    u8 pad00[0x24];
+    s32 selectedEntry; /* 0x24 */
+} EvtSelectionCache;
+
+extern EvtSelectionCache *D_003BB128;
 extern s32 D_003BD8A0;
 
 s32 evtSynchronizeSelectedEntry(s32 task) {
-    u8 *runtime = func_00101A70();
+    EvtRuntime *runtime = func_00101A70();
     if (func_0018FEB0() == 0) {
-        *(s32 *)(runtime + 0x228C) = 0;
+        runtime->controlState = 0;
         return -1;
     }
     if (kwlnTaskGetTimer(task) == 0) {
-        s32 selected = *(s32 *)(runtime + 0x23E0);
+        s32 selected = runtime->selectedEntry;
         D_003BD8A0 = selected;
         if (selected != 0) {
-            *(s32 *)(D_003BB128 + 0x24) = selected;
+            D_003BB128->selectedEntry = selected;
         }
     }
-    if (*(s32 *)(D_003BB128 + 0x24) != *(s32 *)(runtime + 0x23E0)) {
-        s32 selected = *(s32 *)(runtime + 0x23E0);
+    if (D_003BB128->selectedEntry != runtime->selectedEntry) {
+        s32 selected = runtime->selectedEntry;
         if (selected != 0) {
-            *(s32 *)(D_003BB128 + 0x24) = selected;
+            D_003BB128->selectedEntry = selected;
         }
     }
     return 0;
 }
 
 s32 func_0023C208(void) {
-    void *temp_v0;
+    EvtRuntime *runtime;
 
-    temp_v0 = func_00101A70();
+    runtime = func_00101A70();
     if (func_0018FDA8() == 0) {
-        *(s32 *)((u8 *)temp_v0 + 0x228C) = 0;
+        runtime->controlState = 0;
         return -1;
     }
     return 0;
@@ -449,8 +472,8 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023D420);
 
 extern s32 (*D_00368B48[])(s32, s32, void *);
 
-s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, void *runtime) {
-    s32 mode = *(s32 *)((u8 *)runtime + 0x2280);
+s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
+    s32 mode = runtime->actionMode;
     if (mode == 11 && index != mode) {
         return 0;
     }

@@ -261,15 +261,26 @@ s32 fldLoadAreaResource(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001279A0);
 
+typedef struct FldAreaResourceNode {
+    struct FldAreaResourceNode *next; /* 0x00 */
+    u32 pad04;
+    u32 resourceHandle; /* 0x08 */
+} FldAreaResourceNode;
+
+typedef struct FldAreaResource {
+    u8 pad00[0x60];
+    FldAreaResourceNode *nodes; /* 0x60 */
+} FldAreaResource;
+
 void fldFreeDisplayObjects(void) {
     if (D_003BAC3C != 0) {
-        u32 node = *(u32 *)(D_003BAC3C + 0x60);
+        FldAreaResourceNode *node = ((FldAreaResource *)D_003BAC3C)->nodes;
 
-        if (node != 0) {
+        if (node != NULL) {
             do {
-                func_002D0A10(*(u32 *)(node + 8));
-                node = *(u32 *)node;
-            } while (node != 0);
+                func_002D0A10(node->resourceHandle);
+                node = node->next;
+            } while (node != NULL);
         }
         func_00288788(D_003BAC3C);
         D_003BAC3C = 0;
@@ -387,15 +398,15 @@ u8 func_00127FD0(void) {
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128000);
 
 void func_00128188(void) {
-    u32 temp_v0 = D_003BAC48;
+    u32 resourceHandle = D_003BAC48;
 
-    if (temp_v0 != 0) {
-        func_002D0A10(temp_v0);
+    if (resourceHandle != 0) {
+        func_002D0A10(resourceHandle);
         D_003BAC48 = 0;
     }
-    temp_v0 = D_003BAC34;
-    if (temp_v0 != 0) {
-        func_00288788(temp_v0);
+    resourceHandle = D_003BAC34;
+    if (resourceHandle != 0) {
+        func_00288788(resourceHandle);
         D_003BAC34 = 0;
     }
     D_003C9200[0] = D_003BAC90[0];

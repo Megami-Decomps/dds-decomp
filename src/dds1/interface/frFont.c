@@ -58,9 +58,9 @@ typedef struct FrFontGlyph {
     } unk18;
     struct FrFontGlyph *firstChild; /* 0x1C: chain traversed by frFontMeasureGlyphChain */
     struct FrFontGlyph *unk20; /* 0x20 */
-    struct FrFontGlyph *unk24; /* 0x24 */
+    struct FrFontGlyph *previous; /* 0x24: backward link through the glyph chain */
     struct FrFontGlyph *next; /* 0x28: next glyph in chain */
-    struct FrFontGlyph *unk2C; /* 0x2C */
+    struct FrFontGlyph *chainHead; /* 0x2C: first glyph in the linked chain */
     u32 unk30;        /* 0x30 */
     u32 unk34;        /* 0x34 */
     u32 unk38;        /* 0x38 */
@@ -199,7 +199,7 @@ void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s
     arg0->unk2 = 0;
     arg0->firstChild = NULL;
     arg0->unk20 = NULL;
-    arg0->unk24 = NULL;
+    arg0->previous = NULL;
     arg0->next = NULL;
 }
 
@@ -210,9 +210,9 @@ void frFontInitGlyph(FrFontGlyph *arg0) {
     arg0->u0.b.b1 = 0;
     arg0->advance = 0;
     arg0->u14.w = 0;
-    arg0->unk24 = NULL;
+    arg0->previous = NULL;
     arg0->next = NULL;
-    arg0->unk2C = arg0;
+    arg0->chainHead = arg0;
     arg0->firstChild = NULL;
     arg0->unk20 = NULL;
     arg0->unk18.w = 0;
@@ -263,7 +263,7 @@ void func_00195460(FrFontCtx *ctx, u32 value) {
 void func_00195470(FrFontGlyph *glyph, u8 value) {
     FrFontGlyph *child;
 
-    for (; glyph != NULL; glyph = glyph->unk24) {
+    for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
             child->u14.b[0] = value;
         }
@@ -324,9 +324,9 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
     if (next == NULL) {
         return previous;
     }
-    previous->next = next->unk2C;
-    next->unk2C->unk24 = previous;
-    next->unk2C = previous->unk2C;
+    previous->next = next->chainHead;
+    next->chainHead->previous = previous;
+    next->chainHead = previous->chainHead;
     if (positionNext == 1) {
         next->x = previous->x + (previous->advance << 4);
         next->y = previous->y;
@@ -378,7 +378,7 @@ u32 func_00195C88(FrFontGlyph *glyph) {
     FrFontGlyph *node;
     s32 total = 0;
 
-    for (line = glyph->unk2C; line != NULL; line = line->next) {
+    for (line = glyph->chainHead; line != NULL; line = line->next) {
         node = line->firstChild;
         if (node != NULL) {
             s8 b1 = line->u0.b.b1;
@@ -419,7 +419,7 @@ void func_00196038(s32 x, s32 y, FrFontGlyph *glyph) {
     s32 dy;
 
     if (glyph != NULL) {
-        node = glyph->unk2C;
+        node = glyph->chainHead;
         dx = x - node->x;
         dy = y - node->y;
         for (; node != NULL; node = node->next) {

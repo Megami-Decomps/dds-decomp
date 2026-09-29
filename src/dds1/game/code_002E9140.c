@@ -35,7 +35,7 @@ extern FE250Entry D_003FE250[];
 
 extern FE0C0 D_003FE0C0;
 
-u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_002E8900();
 
 u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 

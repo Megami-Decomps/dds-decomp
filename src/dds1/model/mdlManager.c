@@ -21,13 +21,15 @@ typedef struct MdlEntryTable {
     MdlEntry **items;  /* 0xC */
 } MdlEntryTable;
 
+typedef struct MdlNode MdlNode;
+
 /* Record behind MdlCtx.inner. */
 typedef struct MdlInner {
     MdlEntryTable *entries; /* 0x0 */
     u8 unk4[4];  /* 0x4 */
     u32 resourceHandle; /* 0x8: released through func_002DA1B0 */
     u8 unkC[8];  /* 0xC */
-    u32 *list;   /* 0x14: intrusive list walked by func_00218320/368 */
+    MdlNode *list; /* 0x14: intrusive list walked by func_00218320/368 */
     u8 unk18[4]; /* 0x18 */
     u32 unk1C;   /* 0x1C */
     u8 pad20[0x30];
@@ -113,7 +115,7 @@ void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
-    MdlNode *node = (MdlNode *)ctx->inner->list;
+    MdlNode *node = ctx->inner->list;
 
     while (node != NULL) {
         if (node->id == id) {
@@ -281,7 +283,7 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
 MdlNode *func_00217E10(MdlCtx *ctx, s32 id) {
     MdlNode *node;
 
-    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->list; node != NULL; node = node->next) {
         if (node->id == id) {
             return node;
         }
@@ -428,7 +430,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00218228);
 void func_00218320(MdlCtx *ctx) {
     MdlNode *node;
 
-    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->list; node != NULL; node = node->next) {
         func_002DB768(node);
     }
 }
@@ -436,7 +438,7 @@ void func_00218320(MdlCtx *ctx) {
 void func_00218368(MdlCtx *ctx) {
     MdlNode *node;
 
-    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->list; node != NULL; node = node->next) {
         func_002DB788(node);
     }
 }

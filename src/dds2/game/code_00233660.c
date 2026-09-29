@@ -21,7 +21,8 @@ typedef struct MdlViewState {
     s8 unk08;
     u8 pad09;
     s8 unk0A;
-    u8 pad0B[11];
+    s8 unk0B;
+    u8 pad0C[10];
     s16 unk16;
     s16 unk18;
     s16 unk1A;

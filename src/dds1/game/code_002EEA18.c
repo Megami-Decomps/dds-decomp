@@ -97,6 +97,8 @@ INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF958);
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFA58);
 
+#define SDF_POOL_FREE_KIND 0xFFFF
+
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next;
     s32 unk4;
@@ -116,7 +118,7 @@ extern void func_002EFC68();
 
 void func_002EFB30(SdfPool *pool, SdfPoolNode *node) {
     if (node->unk4 != 0) {
-        if (node->kind == 0xFFFF) {
+        if (node->kind == SDF_POOL_FREE_KIND) {
             node->next = pool->free;
             pool->free = node;
         } else {

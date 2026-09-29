@@ -25,8 +25,8 @@ typedef struct {
     u8 pad00[0x30];
     MenuCommand *command; /* 0x30 */
     u8 pad34[0x74];
-    u32 elapsed;          /* 0xA8 */
-    u32 duration;         /* 0xAC */
+    s32 frames;           /* 0xA8 */
+    s32 mode;             /* 0xAC: command phase, 0–3 */
 } MenuCommandWork;
 
 void func_00260530(MenuCommandWork *work, u32 value) {
@@ -69,18 +69,18 @@ void func_00260590(MenuCommandWork *work, u32 value) {
     }
 }
 
-void func_002605B0(MenuCommandWork *work, u32 duration) {
-    work->duration = duration;
-    work->elapsed = 0;
+void func_002605B0(MenuCommandWork *work, u32 mode) {
+    work->mode = mode;
+    work->frames = 0;
 }
 
-s32 func_002605C0(u8 *work) {
+s32 func_002605C0(MenuCommandWork *work) {
     s32 count;
 
-    switch (*(s32 *)(work + 0xAC)) {
+    switch (work->mode) {
     case 0:
-        count = *(s32 *)(work + 0xA8) + 1;
-        *(s32 *)(work + 0xA8) = count;
+        count = work->frames + 1;
+        work->frames = count;
         if ((f32)count > 10.0f) {
             return 0;
         }
@@ -88,8 +88,8 @@ s32 func_002605C0(u8 *work) {
     case 1:
         return 1;
     case 2:
-        count = *(s32 *)(work + 0xA8) + 1;
-        *(s32 *)(work + 0xA8) = count;
+        count = work->frames + 1;
+        work->frames = count;
         if ((f32)count > 10.0f) {
             return 2;
         }

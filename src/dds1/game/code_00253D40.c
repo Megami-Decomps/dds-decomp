@@ -1,3 +1,57 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_00253D40", func_00253D40);
+typedef struct MnuTransRec {
+    u8 unk0[4];   /* 0x0 */
+    s32 startId;  /* 0x4 */
+    s32 endId;    /* 0x8 */
+    s16 mode;     /* 0xC */
+} MnuTransRec;
+
+typedef struct MnuTransHead {
+    u8 unk0[8];         /* 0x0 */
+    MnuTransRec *first; /* 0x8 */
+} MnuTransHead;
+
+typedef struct MnuTransWork {
+    u8 unk0[0x550];       /* 0x0 */
+    s32 state;            /* 0x550: |state| > 5 triggers a resource reset */
+    u8 unk554[0x30];      /* 0x554 */
+    MnuTransHead list584; /* 0x584 */
+    MnuTransHead list590; /* 0x590 */
+} MnuTransWork;
+
+extern MnuTransRec *func_0025DAD0(MnuTransHead *head);
+extern u32 *func_0024FA18(void);
+extern void mnuStopResourceAnimation(void);
+extern void mnuResetResourceAnimation(void);
+extern void func_00253558(MnuTransWork *work);
+
+void func_00253D40(MnuTransWork *work, s32 mode) {
+    MnuTransRec *rec = func_0025DAD0(&work->list590);
+
+    if (rec != NULL) {
+        if (work->state >= 6) {
+            mnuStopResourceAnimation();
+            func_00253558(work);
+        } else if (work->state < -5) {
+            mnuResetResourceAnimation();
+            func_00253558(work);
+        }
+        rec->mode = mode;
+        if (mode == 1) {
+            work->state = 10;
+            rec->startId = *func_0024FA18();
+            mnuStopResourceAnimation();
+            rec->endId = *func_0024FA18();
+            mnuResetResourceAnimation();
+            return;
+        }
+        if (mode == 2) {
+            work->state = -10;
+            rec->startId = *func_0024FA18();
+            mnuResetResourceAnimation();
+            rec->endId = *func_0024FA18();
+            mnuStopResourceAnimation();
+        }
+    }
+}
