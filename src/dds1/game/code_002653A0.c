@@ -79,7 +79,22 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002655A0);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", brsCalcApGain);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsCalcExpGain);
+s32 brsCalcExpGain(u8 *unit, s32 exp, s32 a2) {
+    s32 result;
+
+    if ((*(u16 *)unit & 2) != 0) {
+        result = exp;
+    } else {
+        result = 0;
+        if (func_002CDB00(unit, 0x21F) != 0) {
+            result = exp / 2;
+        }
+        if (func_002CDB00(unit, 0x220) != 0) {
+            result = exp;
+        }
+    }
+    return result;
+}
 
 s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
     if (mdlFlagTest(0x902) == 0 && entry->kind == 4) {
