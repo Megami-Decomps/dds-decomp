@@ -9,33 +9,46 @@ extern void func_002DA3F0(void *, u32);
 #include "eff.h"
 
 typedef struct EffTemplatePacketList {
-    u8 pad00[0x20];
+    u8 pad00[0x10];
+    f32 x; /* 0x10 */
+    f32 y; /* 0x14 */
+    f32 z; /* 0x18 */
+    u8 pad1C[4];
     u32 packetCount;
-    u8 pad24[0xD4];
+    u8 pad24[0xC];
+    u16 kind; /* 0x30: resource type */
+    u8 pad32[2];
+    u16 subrecordCount; /* 0x34: subrecords per packet */
+    u8 pad36[0x6A];
+    s32 templateSize; /* 0xA0: prefix copied before the appended tail */
+    u8 padA4[0x54];
     EffectBufferTail *buffer;
     u8 padFC[0x58];
-    s32 tagStep;
+    s32 decayStep; /* 0x154: subtraction from each later packet tag */
     f32 recordScale;
-    u32 period;
-    u32 period2;
+    union {
+        f32 tailValues[4];
+        u32 tailWords[4];
+    };
+    s32 recordList; /* 0x16C: start of the three-word packet records */
+    s32 recordsPerPacket; /* 0x170 */
+    s32 listAllocation; /* 0x174 */
+    void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
+    s32 auxiliaryAllocation; /* 0x17C */
 } EffTemplatePacketList;
 
-typedef struct EffParticle {
+/* Particle record stored at the beginning of the effect's resource buffer. */
+typedef struct EffParticleRecord {
     f32 x;
     f32 y;
     f32 z;
-    u8 pad0C[4];
-    f32 unk10;
-    u8 pad14[0xC];
+    u8 pad0C[0x14];
     s32 unk20;
-    s32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-} EffParticle;
+    u32 unk24;
+    f32 speed;
+    f32 angle;
+    u8 pad30[0x10];
+} EffParticleRecord;
 
 extern u8 D_0034DF38[];
 extern f32 func_002E8398(void *);
@@ -115,6 +128,21 @@ void effCopyPosition(BillObj *effect, const void *position) {
         memcpy((void *)((s32)effect->unk30 + 0xc), position, 16);
     }
 }
+
+/* The billboard entry points to frame data whose period wraps playback. */
+typedef struct EffBillFrame {
+    u8 pad00[0x0C];
+    u32 period;
+    u32 flags;
+} EffBillFrame;
+
+typedef struct EffBillEntry {
+    u8 pad00[4];
+    u32 frame;
+    s32 mode;
+    EffBillFrame *data;
+    u8 pad10[4];
+} EffBillEntry; /* 0x14 */
 
 void effBillSetMode(BillObj *effect, s32 mode) {
     s32 count;
@@ -214,15 +242,17 @@ u16 billGetVariantValue(BillObj *effect) {
     }
 }
 
-void billSetKind1Entry(s32 arg0, s32 arg1) {
-    if ((*(u16 *)(arg0 + 0x2c) == 1) && (*(s32 *)(arg0 + 0x58) != arg1)) {
-        func_001518D8(arg0, arg1);
+/* Replace the selected list entry only when its index changes. */
+void billSetKind1Entry(BillObj *effect, u32 value) {
+    if (effect->unk2C == 1 && effect->unk58 != value) {
+        func_001518D8(effect, value);
     }
 }
 
-s32 billGetKindOneEntry(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(arg0 + 0x58);
+/* Read the selected entry for list billboards; other kinds have none. */
+s32 billGetKindOneEntry(BillObj *effect) {
+    if (effect->unk2C == 1) {
+        return effect->unk58;
     }
     return 0;
 }
@@ -234,56 +264,60 @@ s32 func_00152260(s32 arg0) {
     return 0;
 }
 
-void func_00152288(s32 arg0, u32 arg1) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        s32 n = *(s32 *)(arg0 + 0x5c);
+/* Start every entry's animation at the requested frame, with mode zero. */
+void func_00152288(BillObj *effect, u32 time) {
+    if (effect->unk2C == 1) {
+        s32 count = effect->entryCount;
 
-        if (n > 0) {
-            s32 p = *(s32 *)(arg0 + 0x60);
-            s32 i = n;
+        if (count > 0) {
+            EffBillEntry *entry = (EffBillEntry *)effect->unk60;
+            s32 remaining = count;
 
             do {
-                s32 q = *(s32 *)(p + 0xc);
-                u32 r = arg1 % *(u32 *)(q + 0xc);
-                i -= 1;
-                *(s32 *)(p + 8) = 0;
-                *(u32 *)(p + 4) = r;
-                p += 0x14;
-            } while (i != 0);
+                EffBillFrame *frameData = entry->data;
+                u32 frame = time % frameData->period;
+                remaining -= 1;
+                entry->mode = 0;
+                entry->frame = frame;
+                entry++;
+            } while (remaining != 0);
         }
     }
 }
 
-void func_001522E8(s32 arg0, u32 arg1) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        s32 n = *(s32 *)(arg0 + 0x5c);
+/* Start every entry's animation at the requested frame, with mode one. */
+void func_001522E8(BillObj *effect, u32 time) {
+    if (effect->unk2C == 1) {
+        s32 count = effect->entryCount;
 
-        if (n > 0) {
-            s32 p = *(s32 *)(arg0 + 0x60);
-            s32 i = n;
+        if (count > 0) {
+            EffBillEntry *entry = (EffBillEntry *)effect->unk60;
+            s32 remaining = count;
 
             do {
-                s32 q = *(s32 *)(p + 0xc);
-                u32 r = arg1 % *(u32 *)(q + 0xc);
-                i -= 1;
-                *(s32 *)(p + 8) = 1;
-                *(u32 *)(p + 4) = r;
-                p += 0x14;
-            } while (i != 0);
+                EffBillFrame *frameData = entry->data;
+                u32 frame = time % frameData->period;
+                remaining -= 1;
+                entry->mode = 1;
+                entry->frame = frame;
+                entry++;
+            } while (remaining != 0);
         }
     }
 }
 
-s32 billGetFirstEntryFramePeriod(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x60) + 0xc) + 0xc);
+/* Read the animation modulus of the first entry, if this is a list billboard. */
+s32 billGetFirstEntryFramePeriod(BillObj *effect) {
+    if (effect->unk2C == 1) {
+        return ((EffBillEntry *)effect->unk60)->data->period;
     }
     return 0;
 }
 
-u16 func_00152370(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(u16 *)(arg0 + 0x50);
+/* Read the kind-one billboard's halfword at +0x50. */
+u16 func_00152370(BillObj *effect) {
+    if (effect->unk2C == 1) {
+        return effect->unk50;
     }
     return 0;
 }
@@ -460,30 +494,32 @@ void func_001539D0(EffTemplatePacketList *effect) {
             record->unk20 = tag;
             next = i + 1;
             record = record + 1;
-            if (next % effect->period == 0) {
-                tag = tag - effect->tagStep;
+            if (next % effect->tailWords[0] == 0) {
+                tag = tag - effect->decayStep;
             }
             i = next;
         } while (i < effect->packetCount);
     }
 }
 
-void func_00153A40(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+/* Scale the position, record scale, and this variant's two tail floats. */
+void func_00153A40(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_00153A90(s32 arg0) {
+/* Clone the template prefix and appended tail, then allocate its packet records. */
+s32 func_00153A90(EffTemplatePacketList *source) {
     s32 obj = (s32)func_002CFEB8(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)obj, 0, 0x180);
-    memcpy((void *)obj, (void *)arg0, *(s32 *)(arg0 + 0xa0));
-    memcpy((void *)(obj + 0x150), (void *)(arg0 + *(s32 *)(arg0 + 0xa0)), tailLen);
+    memcpy((void *)obj, source, source->templateSize);
+    memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(obj);
     func_001539D0(obj);
     return obj;
@@ -513,22 +549,23 @@ void func_00154048(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00154090(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+/* Scale template position, record scale, and this variant's two tail values. */
+void func_00154090(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 effCloneTemplate(s32 source) {
+s32 effCloneTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00154048(copy);
     return copy;
@@ -558,22 +595,23 @@ void func_00154698(EffTemplatePacketList *effect) {
     }
 }
 
-void func_001546E0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+/* Scale the position and three variant-specific tail values. */
+void func_001546E0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_00154730(s32 source) {
+s32 func_00154730(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00154698(copy);
     return copy;
@@ -603,28 +641,29 @@ void func_00155200(EffTemplatePacketList *effect) {
             record->unk20 = tag;
             next = i + 1;
             record = record + 1;
-            if (next % effect->period == 0) {
-                tag = tag - effect->tagStep;
+            if (next % effect->tailWords[0] == 0) {
+                tag = tag - effect->decayStep;
             }
             i = next;
         } while (i < effect->packetCount);
     }
 }
 
-void func_001552A0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+/* Scale position and the third variant-specific tail value. */
+void func_001552A0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_001552D8(s32 source) {
+s32 func_001552D8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00155200(copy);
     return copy;
@@ -654,21 +693,22 @@ void func_00155830(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00155878(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
+/* Scale position, record scale, and the second tail value. */
+void func_00155878(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_001558B8(s32 source) {
+s32 func_001558B8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00155830(copy);
     return copy;
@@ -698,22 +738,23 @@ void func_00155F30(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00155F78(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+/* Scale template position, record scale, and this variant's tail values. */
+void func_00155F78(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_00155FC8(s32 source) {
+s32 func_00155FC8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00155F30(copy);
     return copy;
@@ -742,28 +783,29 @@ void func_001565E0(EffTemplatePacketList *effect) {
             record->unk20 = tag;
             next = i + 1;
             record = record + 1;
-            if (next % effect->period2 == 0) {
-                tag = tag - effect->tagStep;
+            if (next % effect->tailWords[1] == 0) {
+                tag = tag - effect->decayStep;
             }
             i = next;
         } while (i < effect->packetCount);
     }
 }
 
-void func_00156650(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
+/* Scale the position and record scale of a short template. */
+void func_00156650(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
 }
 
-s32 billCloneTemplateSmall(s32 source) {
+s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xA0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xA0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_001565E0(copy);
     return copy;
@@ -793,22 +835,23 @@ void func_00156B98(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00156BE0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+/* Scale template position and three variant-specific tail values. */
+void func_00156BE0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_00156C30(s32 source) {
+s32 func_00156C30(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00156B98(copy);
     return copy;
@@ -836,22 +879,23 @@ void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00157188(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
+/* Scale the position, record scale, and first two tail values. */
+void func_00157188(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_001571D8(s32 source) {
+s32 func_001571D8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     effApplyTemplateScaleToRecords(copy);
     return copy;
@@ -870,20 +914,22 @@ void func_00157970(void) {
     func_00157A58();
 }
 
-void func_00157988(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
+/* Apply a uniform scale to the particle template's position. */
+void func_00157988(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
 }
 
-s32 func_001579B0(s32 source) {
+/* Clone the prefix without tail bytes; the zero-length copy is retained for matching. */
+s32 func_001579B0(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x150);
     s32 tailLen = 0;
 
     memset((void *)copy, 0, 0x150);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
-    *(s32 *)(copy + 0x20) = 1;
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
+    ((EffTemplatePacketList *)copy)->packetCount = 1;
     *(s32 *)(copy + 0x24) = 0;
     func_00153740(copy);
     return copy;
@@ -894,7 +940,7 @@ void func_00157A30(u32 arg0) {
     func_002CFF98(arg0);
 }
 
-typedef struct EffParticleSource {
+typedef struct EffParticle {
     f32 x;
     f32 y;
     f32 z;
@@ -915,14 +961,15 @@ typedef struct EffParticleSource {
     u32 unkF0; /* 0xF0 */
     u8 padF4[4];
     EffectBufferTail *buffer; /* 0xF8 */
-} EffParticleSource;
+} EffParticle;
 
 
 
+/* Initialize a particle record, applying random speed and angle jitter. */
 void func_00157A58(effect)
-    EffParticleSource *effect;
+    EffParticle *effect;
 {
-    EffParticle *particle = (EffParticle *)effect->buffer->records;
+    EffParticleRecord *particle = (EffParticleRecord *)effect->buffer->records;
     f32 jitter;
     u32 color;
 
@@ -932,23 +979,23 @@ void func_00157A58(effect)
     particle->y = effect->y;
     particle->unk24 = color;
     particle->z = effect->z;
-    particle->unk28 = 1.0f;
-    particle->unk2C = 0;
+    particle->speed = 1.0f;
+    particle->angle = 0;
     effect->lastSpeed = effect->speed;
     jitter = effect->speedJitter;
-    particle->unk28 = effect->speed * (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter));
+    particle->speed = effect->speed * (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter));
     jitter = effect->angleJitter;
     if (jitter != 0) {
-        particle->unk2C = (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        particle->angle = (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
-        particle->unk2C = 0;
+        particle->angle = 0;
     }
 }
 
 extern u32 func_0015A2F8(u32, u32);
 
-void func_00157B58(EffParticleSource *effect) {
-    EffParticle *particle = (EffParticle *)effect->buffer->records;
+void func_00157B58(EffParticle *effect) {
+    EffParticleRecord *particle = (EffParticleRecord *)effect->buffer->records;
     s32 count = particle->unk20;
     u32 color;
 
@@ -981,22 +1028,23 @@ void func_00157BE8(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00157C30(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+/* Scale the position and three variant-specific tail values. */
+void func_00157C30(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_00157C80(s32 source) {
+s32 func_00157C80(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x190);
     s32 tailLen = 0x40;
 
     memset((void *)copy, 0, 0x190);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     func_00157BE8(copy);
     return copy;
@@ -1026,31 +1074,34 @@ void func_00158718(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00158760(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+/* Scale position, record scale, and two tail values. */
+void func_00158760(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_001587B0(s32 source) {
+s32 func_001587B0(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x200);
     s32 tailLen = 0xB0;
 
     memset((void *)copy, 0, 0x200);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
-    *(s32 *)(copy + 0x17C) = func_002D03F8(*(s32 *)(copy + 0x20) << 4);
-    *(s32 *)(copy + 0x178) = (s32)sdfResourceRetainAddress(*(s32 *)(copy + 0x17C));
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
+    ((EffTemplatePacketList *)copy)->auxiliaryAllocation =
+        func_002D03F8(((EffTemplatePacketList *)copy)->packetCount << 4);
+    ((EffTemplatePacketList *)copy)->auxiliaryData =
+        sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->auxiliaryAllocation);
     func_00153740(copy);
     func_00158718(copy);
     return copy;
 }
 
 void func_00158848(u32 arg0) {
-    func_002D0918(*(u32 *)(arg0 + 0x17c));
+    func_002D0918(((EffTemplatePacketList *)arg0)->auxiliaryAllocation);
     effDestroyResources(arg0);
     func_002CFF98(arg0);
 }
@@ -1074,15 +1125,17 @@ void func_00158D88(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00158DD0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
+/* Scale template position, record scale, and the second tail value. */
+void func_00158DD0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_00158E10(s32 source) {
+/* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
+s32 func_00158E10(EffTemplatePacketList *source) {
     s32 copy = (s32)func_002CFEB8(0x190);
     s32 tailLen = 0x40;
     s32 count;
@@ -1095,33 +1148,34 @@ s32 func_00158E10(s32 source) {
     s32 i;
 
     memset((void *)copy, 0, 0x190);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_00153740(copy);
     perRecord = 0;
-    if (*(u16 *)(copy + 0x30) != 0) {
-        count = *(s32 *)(copy + 0x20);
-        switch (*(u16 *)(copy + 0x30)) {
+    if (((EffTemplatePacketList *)copy)->kind != 0) {
+        count = ((EffTemplatePacketList *)copy)->packetCount;
+        /* All four supported resource kinds use the same subrecord count. */
+        switch (((EffTemplatePacketList *)copy)->kind) {
         case 1:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         case 2:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         case 3:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         case 4:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         }
         listBytes = count * 12;
-        *(s32 *)(copy + 0x170) = perRecord;
-        *(s32 *)(copy + 0x174) = func_002D03F8(listBytes + perRecord * count * 16);
-        addr = (s32 *)sdfResourceRetainAddress(*(s32 *)(copy + 0x174));
+        ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
+        ((EffTemplatePacketList *)copy)->listAllocation = func_002D03F8(listBytes + perRecord * count * 16);
+        addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
         i = 0;
         base = (s32)addr;
-        *(s32 *)(copy + 0x16C) = base;
+        ((EffTemplatePacketList *)copy)->recordList = base;
         base = base + listBytes;
         if (count > 0) {
             step = perRecord * 16;
@@ -1136,7 +1190,7 @@ s32 func_00158E10(s32 source) {
             } while (i < count);
         }
     } else {
-        *(s32 *)(copy + 0x174) = 0;
+        ((EffTemplatePacketList *)copy)->listAllocation = 0;
     }
     func_00158D88(copy);
     return copy;

@@ -36,18 +36,18 @@ typedef struct EffParticle {
     f32 y;              /* 0x04 */
     f32 z;              /* 0x08 */
     u8 pad0C[4];
-    f32 unk10;          /* 0x10 */
+    f32 speed;          /* 0x10 */
     u8 pad14[0x10];
     u32 unk24;          /* 0x24 */
     u8 pad28[0x24];
-    u32 unk4C;          /* 0x4C */
+    u32 color;          /* 0x4C */
     u8 pad50[8];
-    u32 unk58;          /* 0x58 */
+    u32 alpha;          /* 0x58 */
     u8 pad5C[0x30];
-    f32 unk8C;          /* 0x8C */
+    f32 lastSpeed;      /* 0x8C */
     u8 pad90[4];
-    f32 unk94;          /* 0x94 */
-    f32 unk98;          /* 0x98 */
+    f32 speedJitter;    /* 0x94 */
+    f32 angleJitter;    /* 0x98 */
     u8 pad9C[0x54];
     u32 unkF0;          /* 0xF0 */
     u8 padF4[4];
@@ -61,8 +61,8 @@ typedef struct EffParticleRecord {
     u8 pad0C[0x14];
     s32 unk20;
     u32 unk24;
-    f32 unk28;
-    f32 unk2C;
+    f32 speed;
+    f32 angle;
     u8 pad30[0x10];
 } EffParticleRecord;
 
@@ -75,7 +75,11 @@ typedef struct EffTemplatePacketList {
     f32 z; /* 0x18 */
     u8 pad1C[4];
     u32 packetCount; /* 0x20 */
-    u8 pad24[0x7C];
+    u8 pad24[0xC];
+    u16 kind; /* 0x30: resource type */
+    u8 pad32[2];
+    u16 subrecordCount; /* 0x34: subrecords per packet */
+    u8 pad36[0x6A];
     s32 templateSize; /* 0xA0: prefix copied before appending tail bytes */
     u8 padA4[0x54];
     EffectBufferTail *buffer; /* 0xF8 */
@@ -86,6 +90,11 @@ typedef struct EffTemplatePacketList {
         f32 tailValues[4]; /* 0x15C-0x168: variant-specific scaled values */
         u32 tailWords[4];
     };
+    s32 recordList; /* 0x16C: start of the three-word packet records */
+    s32 recordsPerPacket; /* 0x170 */
+    s32 listAllocation; /* 0x174 */
+    void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
+    s32 auxiliaryAllocation; /* 0x17C */
 } EffTemplatePacketList;
 
 typedef struct EffInstance {
@@ -292,12 +301,14 @@ u16 billGetVariantValue(BillObj *effect) {
     }
 }
 
+/* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 value) {
     if (effect->unk2C == 1 && effect->unk58 != value) {
         func_001594C8(effect, value);
     }
 }
 
+/* Read the selected entry for list billboards; other kinds have none. */
 s32 billGetKindOneEntry(BillObj *effect) {
     if (effect->unk2C == 1) {
         return effect->unk58;
@@ -312,6 +323,7 @@ s32 func_00159E50(s32 arg0) {
     return 0;
 }
 
+/* Start every entry's animation at the requested frame, with mode zero. */
 void func_00159E78(BillObj *effect, u32 time) {
     if (effect->unk2C == 1) {
         s32 count = effect->entryCount;
@@ -332,6 +344,7 @@ void func_00159E78(BillObj *effect, u32 time) {
     }
 }
 
+/* Start every entry's animation at the requested frame, with mode one. */
 void func_00159ED8(BillObj *effect, u32 time) {
     if (effect->unk2C == 1) {
         s32 count = effect->entryCount;
@@ -352,6 +365,7 @@ void func_00159ED8(BillObj *effect, u32 time) {
     }
 }
 
+/* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     if (effect->unk2C == 1) {
         return ((EffBillEntry *)effect->unk60)->data->period;
@@ -976,6 +990,7 @@ void func_0015F620(u32 arg0) {
 extern u8 D_003AA868[];
 extern f32 func_00341240(void *);
 
+/* Initialize a particle record, applying random speed and angle jitter. */
 void func_0015F648(effect)
     EffParticle *effect;
 {
@@ -983,22 +998,22 @@ void func_0015F648(effect)
     f32 jitter;
     u32 color;
 
-    color = effect->unk4C | (effect->unk58 << 24);
+    color = effect->color | (effect->alpha << 24);
     particle->x = effect->x;
     particle->unk20 = -1;
     particle->y = effect->y;
     particle->unk24 = color;
     particle->z = effect->z;
-    particle->unk28 = 1.0f;
-    particle->unk2C = 0;
-    effect->unk8C = effect->unk10;
-    jitter = effect->unk94;
-    particle->unk28 = effect->unk10 * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
-    jitter = effect->unk98;
+    particle->speed = 1.0f;
+    particle->angle = 0;
+    effect->lastSpeed = effect->speed;
+    jitter = effect->speedJitter;
+    particle->speed = effect->speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = effect->angleJitter;
     if (jitter != 0) {
-        particle->unk2C = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        particle->angle = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
-        particle->unk2C = 0;
+        particle->angle = 0;
     }
 }
 
@@ -1012,7 +1027,7 @@ void func_0015F748(EffParticle *effect) {
     record->unk20 = record->unk20 + 1;
     record->x = effect->x;
     record->y = effect->y;
-    color = effect->unk4C | (effect->unk58 << 24);
+    color = effect->color | (effect->alpha << 24);
     effect->unk24 = record->unk20 + 1;
     record->unk24 = color;
     record->z = effect->z;
@@ -1097,15 +1112,15 @@ void *func_001603A0(EffTemplatePacketList *source) {
     memcpy(copy, source, source->templateSize);
     memcpy((u8 *)copy + 0x150, (u8 *)source + source->templateSize, tailLen);
     allocation = func_003292A8(copy->packetCount * 0x10);
-    *(s32 *)((u8 *)copy + 0x17C) = allocation;
-    *(void **)((u8 *)copy + 0x178) = sdfResourceRetainAddress(allocation);
+    copy->auxiliaryAllocation = allocation;
+    copy->auxiliaryData = sdfResourceRetainAddress(allocation);
     func_0015B330((s32)copy);
     func_00160308(copy);
     return copy;
 }
 
 void func_00160438(u32 arg0) {
-    func_003297C8(*(u32 *)((s32)arg0 + 0x17c));
+    func_003297C8(((EffTemplatePacketList *)arg0)->auxiliaryAllocation);
     effDestroyResources(arg0);
     func_00328E48(arg0);
 }
@@ -1137,7 +1152,8 @@ void func_001609C0(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_00160A00(s32 source) {
+/* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
+s32 func_00160A00(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x190);
     s32 tailLen = 0x40;
     s32 count;
@@ -1150,33 +1166,34 @@ s32 func_00160A00(s32 source) {
     s32 i;
 
     memset((void *)copy, 0, 0x190);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     perRecord = 0;
-    if (*(u16 *)(copy + 0x30) != 0) {
-        count = *(s32 *)(copy + 0x20);
-        switch (*(u16 *)(copy + 0x30)) {
+    if (((EffTemplatePacketList *)copy)->kind != 0) {
+        count = ((EffTemplatePacketList *)copy)->packetCount;
+        /* All four supported resource kinds use the same subrecord count. */
+        switch (((EffTemplatePacketList *)copy)->kind) {
         case 1:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         case 2:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         case 3:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         case 4:
-            perRecord = *(u16 *)(copy + 0x34);
+            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
             break;
         }
         listBytes = count * 12;
-        *(s32 *)(copy + 0x170) = perRecord;
-        *(s32 *)(copy + 0x174) = func_003292A8(listBytes + perRecord * count * 16);
-        addr = (s32 *)sdfResourceRetainAddress(*(s32 *)(copy + 0x174));
+        ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
+        ((EffTemplatePacketList *)copy)->listAllocation = func_003292A8(listBytes + perRecord * count * 16);
+        addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
         i = 0;
         base = (s32)addr;
-        *(s32 *)(copy + 0x16C) = base;
+        ((EffTemplatePacketList *)copy)->recordList = base;
         base = base + listBytes;
         if (count > 0) {
             step = perRecord * 16;
@@ -1191,7 +1208,7 @@ s32 func_00160A00(s32 source) {
             } while (i < count);
         }
     } else {
-        *(s32 *)(copy + 0x174) = 0;
+        ((EffTemplatePacketList *)copy)->listAllocation = 0;
     }
     func_00160978((EffTemplatePacketList *)copy);
     return copy;

@@ -26,8 +26,8 @@ typedef struct EventViewerState {
     u32 flags;
     s32 unk8;
     u8 padC[8];
-    s32 unk14;
-    s32 mesh; /* 0x18 */
+    s32 glyphAdvanceLimit;    /* 0x14 */
+    s32 glyphAdvancePosition; /* 0x18 */
     u8 pad1C[0x2008];
     s32 selectedEntry;
     u8 pad2028[4];
@@ -42,13 +42,18 @@ typedef struct EventViewerState {
     s32 historyCount;
     u32 currentId;
     u8 pad2284[0x24];
-    s32 unk22A8;
+    s32 selectionMode; /* 0x22A8: command mode zero, one or two */
     s32 unk22AC;
     u8 pad22B0[4];
     s32 unk22B4;
     u8 pad22B8[0x50];
     struct EvtViewSel *sel; /* 0x2308 */
-    u8 pad230C[0xB4];
+    u8 pad230C[4];
+    u32 commandValue; /* 0x2310: value of the active command */
+    u8 pad2314[0x94];
+    f32 commandX; /* 0x23A8 */
+    f32 commandY; /* 0x23AC */
+    u8 pad23B0[0x10];
     s32 updateCount;
     u8 pad23C4;
     u8 windowActive;
@@ -57,7 +62,9 @@ typedef struct EventViewerState {
     s32 glyphTickCount; /* 0x23F0 */
     u8 pad23F4[0x1C];
     u32 glyph; /* 0x2410: FrFontGlyph passed to func_00195868 */
-    u8 pad2414[0xC];
+    s32 timedActive; /* 0x2414: gated time interval */
+    s32 timedStart;  /* 0x2418 */
+    s32 timedEnd;    /* 0x241C: negative is an open endpoint */
     u8 slotType; /* 0x2420 */
     u8 slotFlag; /* 0x2421 */
     u8 pad2422[2];
@@ -65,10 +72,28 @@ typedef struct EventViewerState {
 } EventViewerState;
 
 typedef struct EvtViewSel {
-    u8 pad00[0x1E];
+    s32 fieldSelector; /* 0x00: one-based selector for command parameter field */
+    u8 pad04[0x1A];
     s8 mode;  /* 0x1E */
     s8 index; /* 0x1F */
 } EvtViewSel;
+
+/* Script-command parameter slots have byte, halfword, word and float views. */
+typedef union EvtViewParam {
+    f32 f;
+    s32 i;
+    u16 h[2];
+    u8 b[4];
+} EvtViewParam;
+
+typedef struct EvtViewEntry {
+    u8 pad00[8];
+    EvtViewParam p08;
+    EvtViewParam p0C;
+    EvtViewParam p10;
+    EvtViewParam p14;
+} EvtViewEntry;
+
 
 u16 evtViewerPopHistory(EventViewerState *viewer);
 
@@ -275,10 +300,11 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 void func_0022F9F0(void) {
 }
 
+/* Tick the current glyph while text is advancing; wrap after thirty ticks. */
 void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
     s32 nextTick;
 
-    if ((*(s32 *)((u8 *)viewer + 0x18) < *(s32 *)((u8 *)viewer + 0x14) - 3) && (0 < viewer->glyphTickCount))
+    if ((viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 3) && (0 < viewer->glyphTickCount))
     {
         func_00195868(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;
@@ -314,15 +340,16 @@ EvtViewGlyph *func_0022FA68(EvtViewNode *group, s32 position, s32 channel) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FB30);
 
-void func_0022FDE8(u32 arg0) {
-    s32 temp_v0;
+/* Dispatch one of two viewer modes based on its lowest flag bit. */
+void func_0022FDE8(u32 viewerAddr) {
+    s32 viewer;
 
-    temp_v0 = (s32)arg0;
-    if ((*(u32 *)(temp_v0 + 4) & 1) != 0) {
-        func_0022FB30(0, *(u32 *)(temp_v0 + 0x18), arg0);
+    viewer = (s32)viewerAddr;
+    if ((*(u32 *)(viewer + 4) & 1) != 0) {
+        func_0022FB30(0, *(u32 *)(viewer + 0x18), viewerAddr);
         return;
     }
-    func_0022FB30(1, *(u32 *)(temp_v0 + 0x18), arg0);
+    func_0022FB30(1, *(u32 *)(viewer + 0x18), viewerAddr);
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewFindNextGlyph);
@@ -448,35 +475,36 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetValue);
 
-u32 func_00231C18(u32 arg0, u32 arg1, u32 arg2) {
-    s32 p;
-    u32 v;
-    s32 idx;
+/* Store the command value in the selected halfword of a viewer entry. */
+u32 func_00231C18(u32 unused0, u32 unused1, EventViewerState *viewer) {
+    EvtViewEntry *entry;
+    u32 value;
+    s32 slot;
 
-    v = *(u32 *)(arg2 + 0x2310);
-    p = func_0022BE40(arg2);
-    if (p != 0) {
-        idx = *(s32 *)(*(s32 *)(arg2 + 0x2308)) - 1;
-        if ((u32)idx < 0x11u) {
-            switch (idx) {
+    value = viewer->commandValue;
+    entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    if (entry != 0) {
+        slot = viewer->sel->fieldSelector - 1;
+        if ((u32)slot < 0x11u) {
+            switch (slot) {
             case 3:
-                *(u16 *)(p + 0xa) = v;
+                entry->p08.h[1] = value;
                 break;
             case 1:
-                *(u16 *)(p + 0xc) = v;
+                entry->p0C.h[0] = value;
                 break;
             case 0:
-                *(u16 *)(p + 0x10) = v;
+                entry->p10.h[0] = value;
                 break;
             case 11:
             case 15:
             case 16:
-                *(u16 *)(p + 0x14) = v;
+                entry->p14.h[0] = value;
                 break;
             }
         }
-        func_0022E5A0(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        evtViewerPopHistory((EventViewerState *)arg2);
+        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+        evtViewerPopHistory(viewer);
         return 0;
     }
 }
@@ -485,14 +513,15 @@ u32 func_00231CC0(void) {
     return 0;
 }
 
-u32 func_00231CC8(u32 arg0, u32 arg1, u32 arg2) {
-    s32 p;
+/* Copy the current command word into the selected script entry. */
+u32 func_00231CC8(u32 unused0, u32 unused1, EventViewerState *viewer) {
+    EvtViewEntry *entry;
 
-    p = func_0022BE40(arg2);
-    if (p != 0) {
-        *(s32 *)(p + 0xc) = *(s32 *)(arg2 + 0x2310);
-        func_0022E5A0(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        evtViewerPopHistory((EventViewerState *)arg2);
+    entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    if (entry != 0) {
+        entry->p0C.i = viewer->commandValue;
+        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+        evtViewerPopHistory(viewer);
         return 0;
     }
 }
@@ -538,19 +567,20 @@ extern void func_003014F0();
 extern void func_0023E7F8(s32 slot, EventViewerState *viewer);
 extern void func_002416E0(s32 slot, EventViewerState *viewer);
 
+/* Apply one of three viewer selection modes to the selected slots. */
 s32 evtViewCmdSelectMode(u32 arg0, u32 arg1, EventViewerState *viewer) {
     s32 applied = 0;
-    s32 mode = viewer->unk22A8;
+    s32 mode = viewer->selectionMode;
 
     if (mode < 3) {
         if (mode >= 0) {
             func_003014F0((u8 *)viewer + 0x22E8, D_003ADA98, D_003BBE78, D_003BBE7A);
-            if (viewer->unk22A8 == 0) {
+            if (viewer->selectionMode == 0) {
                 func_0023E7F8(0, viewer);
                 func_0023E7F8(1, viewer);
-            } else if (viewer->unk22A8 == 1) {
+            } else if (viewer->selectionMode == 1) {
                 func_002416E0(0, viewer);
-            } else if (viewer->unk22A8 == 2) {
+            } else if (viewer->selectionMode == 2) {
                 func_002416E0(1, viewer);
             }
             applied = 1;
@@ -578,22 +608,24 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_002326F8);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232720);
 
-void *func_002329A0(s32 arg0) {
-    void *temp_v0;
+/* Update the active viewer, then switch to its frame-variable task. */
+void *func_002329A0(s32 task) {
+    void *viewer;
 
-    temp_v0 = func_00101A70();
-    func_0022E5A0(*(s32 *)((u8 *)temp_v0 + 0x18), temp_v0);
-    func_00101A80(arg0, evtCreateFrameVariableTask());
+    viewer = func_00101A70();
+    func_0022E5A0(*(s32 *)((u8 *)viewer + 0x18), viewer);
+    func_00101A80(task, evtCreateFrameVariableTask());
     D_003BA904 |= 0x2000000;
     return (void *)func_00232720;
 }
 
+/* Initialize the active viewer and schedule its next update callback. */
 void *func_00232A00(void) {
-    u64 temp_v0;
+    u64 viewer;
 
-    temp_v0 = func_00101A70();
+    viewer = func_00101A70();
     func_00134C68();
-    func_0022C408(temp_v0);
+    func_0022C408(viewer);
     D_003BA904 |= 0x2000000;
     return (void *)func_002329A0;
 }
@@ -661,18 +693,20 @@ void func_00232BC0(viewer)
     D_003BA904 |= 0x2000000;
 }
 
+/* Destroy the currently active event viewer. */
 void func_00232D08(void) {
-    u64 temp_v0;
+    u64 viewer;
 
-    temp_v0 = func_00101A70();
-    func_00232BC0(temp_v0);
+    viewer = func_00101A70();
+    func_00232BC0(viewer);
 }
 
+/* Alternate destroy callback for the same active viewer. */
 void func_00232D28(void) {
-    u64 temp_v0;
+    u64 viewer;
 
-    temp_v0 = func_00101A70();
-    func_00232BC0(temp_v0);
+    viewer = func_00101A70();
+    func_00232BC0(viewer);
 }
 
 void func_00232D48(void *unused) {
