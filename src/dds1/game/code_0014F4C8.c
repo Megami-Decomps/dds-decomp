@@ -12,9 +12,57 @@ u32 func_0014F4C8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F4F0);
+extern s32 D_0032E3B0[];
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F5E8);
+extern s32 func_0010D428(s32);
+
+s32 func_0014F4F0(void) {
+    s32 changed = 0;
+    switch (func_0010D428(0)) {
+    case 0:
+        if (D_0032E3B0[3] & 1) {
+            D_0032E3B0[3] &= ~1;
+            changed = 1;
+        }
+        break;
+    case 1:
+        if (D_0032E3B0[3] & 2) {
+            D_0032E3B0[3] &= ~2;
+            changed = 1;
+        }
+        break;
+    case 2:
+        if (D_0032E3B0[3] & 4) {
+            D_0032E3B0[3] &= ~4;
+            changed = 1;
+        }
+        break;
+    case 3:
+        if (D_0032E3B0[3] & 8) {
+            D_0032E3B0[3] &= ~8;
+            changed = 1;
+        }
+        break;
+    }
+    func_0010D5F0(changed);
+    return 1;
+}
+
+extern s32 effMiscRandMod(s32, s32);
+
+extern s32 evtGetMirroredSolarPhase(void);
+
+extern s32 D_0034DDF0[];
+
+s32 func_0014F5E8(void) {
+    s32 threshold = D_0034DDF0[evtGetMirroredSolarPhase()];
+    if (threshold >= effMiscRandMod(0, 100)) {
+        func_0010D5F0(1);
+    } else {
+        func_0010D5F0(0);
+    }
+    return 1;
+}
 
 s32 func_0014F658(void) {
     s32 commandName;
@@ -39,7 +87,20 @@ u32 func_0014F6C8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F6F0);
+extern s32 D_0032E3C0[];
+
+extern s32 func_0010D428(s32);
+
+extern void func_00121DE0(s32, s32, s32, s32, s32, s32);
+
+s32 func_0014F6F0(void) {
+    s32 first = func_0010D428(0);
+    s32 second = func_0010D428(1);
+    s32 third = func_0010D428(2);
+    s32 fourth = func_0010D428(3);
+    func_00121DE0(D_0032E3C0[0], first, second, third, fourth, func_0010D428(4));
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F780);
 

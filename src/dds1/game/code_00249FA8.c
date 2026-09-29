@@ -104,7 +104,18 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A570);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A610);
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A6C0);
+extern s32 func_0024A6C0(s32);
+
+s32 func_0024A6C0(s32 object) {
+    switch (*(s32 *)(object + 0xdc)) {
+    case 1:
+        return 0x32;
+    case 2:
+        return 0x36;
+    default:
+        return 0;
+    }
+}
 
 typedef struct {
     u8 pad00[0x14];

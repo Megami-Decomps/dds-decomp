@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Scheduler task links and callbacks; identical in DDS1 and DDS2. */
+/* Scheduler task links, callbacks and hierarchy (0x50); DDS1/2 kernel/dds3KernelCore.c and game task units. */
 typedef struct KwlnTask KwlnTask;
 typedef s32 (*TaskUpdate)(KwlnTask *task);
 typedef void (*TaskDestroy)(KwlnTask *task);

@@ -112,7 +112,20 @@ s32 *mnuAllocateDisplayListNode(void) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00256B78);
+u32 func_00256B78(u32 state) {
+    u32 node = *(u32 *)(state + 8);
+    if (node == 0) {
+        node = (u32)mnuAllocateDisplayListNode();
+        *(u32 *)(state + 8) = node;
+    } else {
+        while (*(u32 *)(node + 0x10) != 0) {
+            node = *(u32 *)(node + 0x10);
+        }
+        *(u32 *)(node + 0x10) = (u32)mnuAllocateDisplayListNode();
+        node = *(u32 *)(node + 0x10);
+    }
+    return node;
+}
 
 u32 func_00256C00(DspListNode *node) {
     u32 next;

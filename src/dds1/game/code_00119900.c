@@ -294,7 +294,32 @@ void func_0011B7B8(s32 arg0) {
     *(s32 *)(arg0 + 0x194) = 0x12 - temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011B7F0);
+extern s32 D_003BAA00;
+
+extern s32 effMiscRandMod(u32 arg0, u32 arg1);
+
+s32 func_0011B7F0(void) {
+    s32 changed = 0;
+    s32 remaining;
+    s32 entry;
+    if (effMiscRandMod(0, 100) >= 51) {
+        return 0;
+    }
+    remaining = 4;
+    entry = D_003BAA00 + 0xA60;
+    do {
+        if ((*(u16 *)entry & 1) != 0 && *(u16 *)(entry + 6) != 0) {
+            u16 flags = *(u16 *)(entry + 0xE);
+            if ((flags & 0x5D0) != 0) {
+                *(u16 *)(entry + 0xE) = flags & ~0x5D0;
+                changed = 1;
+            }
+        }
+        remaining--;
+        entry += 0x1A4;
+    } while (remaining >= 0);
+    return changed;
+}
 
 extern void func_0010BE30(u32, s32);
 extern void func_0010C0B0(u32);

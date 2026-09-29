@@ -27,10 +27,10 @@ typedef struct PacExtensionHeader {
 } PacExtensionHeader;
 
 typedef struct PacWork {
-    struct PacWork *unk0; /* 0x0 */
-    struct PacState *unk4; /* 0x4 */
-    s32 unk8; /* 0x8 */
-    u8 *unkC; /* 0xC */
+    struct PacWork *next; /* 0x0 */
+    struct PacState *owner; /* 0x4 */
+    s32 resourceHandle; /* 0x8 */
+    u8 *dataCursor; /* 0xC */
     u8 packet[1]; /* 0x10: copied header and packet data */
 } PacWork;
 
@@ -42,10 +42,10 @@ typedef struct PacAlloc {
 } PacAlloc;
 
 typedef struct PacBuf {
-    s32 unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-    u8 *unk8; /* 0x8 */
-    s32 unkC; /* 0xC */
+    s32 result; /* 0x0 */
+    s32 resourceSlot; /* 0x4 */
+    u8 *cursor; /* 0x8 */
+    s32 remaining; /* 0xC */
 } PacBuf;
 
 typedef struct PacState {
@@ -54,17 +54,17 @@ typedef struct PacState {
     u8 pad2[2]; /* 0x2 */
     s32 unk4; /* 0x4 */
     void (*unk8)(struct PacState *); /* 0x8 */
-    void (*unkC)(struct PacState *); /* 0xC */
-    u8 *unk10; /* 0x10 */
-    s32 unk14; /* 0x14 */
+    void (*onComplete)(struct PacState *); /* 0xC */
+    u8 *inputCursor; /* 0x10 */
+    s32 inputAvailable; /* 0x14 */
     s32 unk18; /* 0x18 */
-    u8 *unk1C; /* 0x1C */
-    s32 unk20; /* 0x20 */
-    PacBuf *unk24; /* 0x24 */
-    PacBuf *unk28; /* 0x28 */
+    u8 *outputCursor; /* 0x1C */
+    s32 pendingBytes; /* 0x20 */
+    PacBuf *decoder; /* 0x24 */
+    PacBuf *buffer; /* 0x28 */
     PacAlloc *unk2C; /* 0x2C */
-    PacWork *unk30; /* 0x30 */
-    PacWork *unk34; /* 0x34 */
+    PacWork *queueHead; /* 0x30 */
+    PacWork *queueTail; /* 0x34 */
 } PacState;
 
 void func_002EE2C0(PacState *arg0, PacHead *arg1);
@@ -104,34 +104,34 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EDE48);
 PacWork *func_002EDF60(PacState *arg0, PacHead *arg1) {
     s32 size = arg1->unk1 & 0xF0;
     PacWork *node = func_002CFF68(size + 0x20);
-    node->unk4 = arg0;
+    node->owner = arg0;
     memcpy(node->packet, arg1, size + 0x10);
-    if (arg0->unk34 == NULL) {
-        arg0->unk30 = node;
+    if (arg0->queueTail == NULL) {
+        arg0->queueHead = node;
     } else {
-        arg0->unk34->unk0 = node;
+        arg0->queueTail->next = node;
     }
-    arg0->unk34 = node;
+    arg0->queueTail = node;
     return node;
 }
 
 PacWork *func_002EDFE8(PacWork *arg0) {
-    PacState *state = arg0->unk4;
-    PacWork *link = (PacWork *)&state->unk30;
-    PacWork *cur = state->unk30;
+    PacState *state = arg0->owner;
+    PacWork *link = (PacWork *)&state->queueHead;
+    PacWork *cur = state->queueHead;
     PacWork *prev = NULL;
     PacWork *next;
     if (cur != arg0) {
         do {
             prev = cur;
-            cur = prev->unk0;
+            cur = prev->next;
             link = prev;
         } while (cur != arg0);
     }
-    next = arg0->unk0;
-    link->unk0 = next;
-    if (state->unk34 == arg0) {
-        state->unk34 = prev;
+    next = arg0->next;
+    link->next = next;
+    if (state->queueTail == arg0) {
+        state->queueTail = prev;
     }
     func_002CFF98(arg0);
     return next;
@@ -172,52 +172,52 @@ void *sdfPacGetExtensionData(PacExtensionHeader *header) {
 }
 
 void func_002EE158(PacState *arg0) {
-    s32 n = arg0->unk20;
-    s32 t = arg0->unk14;
+    s32 n = arg0->pendingBytes;
+    s32 t = arg0->inputAvailable;
     if (t < n) {
         n = t;
     }
     if (n != 0) {
-        memcpy(arg0->unk1C, arg0->unk10, n);
+        memcpy(arg0->outputCursor, arg0->inputCursor, n);
         sdfPacAdvanceInput(arg0, n);
-        arg0->unk1C += n;
+        arg0->outputCursor += n;
         {
-            s32 r = arg0->unk20 - n;
-            arg0->unk20 = r;
+            s32 r = arg0->pendingBytes - n;
+            arg0->pendingBytes = r;
             if (r != 0) {
                 return;
             }
         }
-        arg0->unkC(arg0);
+        arg0->onComplete(arg0);
     }
 }
 
 void func_002EE1E0(PacState *arg0) {
-    s32 n = arg0->unk14;
-    s32 r = func_002EEAE0(arg0->unk24, arg0->unk10, n);
-    sdfPacAdvanceInput(arg0, n - arg0->unk24->unkC);
+    s32 n = arg0->inputAvailable;
+    s32 r = func_002EEAE0(arg0->decoder, arg0->inputCursor, n);
+    sdfPacAdvanceInput(arg0, n - arg0->decoder->remaining);
     if (r == 0) {
         return;
     }
-    func_002CFF98(arg0->unk24);
-    arg0->unkC(arg0);
+    func_002CFF98(arg0->decoder);
+    arg0->onComplete(arg0);
 }
 
 void func_002EE258(PacState *arg0) {
-    s32 n = arg0->unk20;
-    if (arg0->unk14 < n) {
-        n = arg0->unk14;
+    s32 n = arg0->pendingBytes;
+    if (arg0->inputAvailable < n) {
+        n = arg0->inputAvailable;
     }
     if (n != 0) {
         sdfPacAdvanceInput(arg0, n);
         {
-            s32 r = arg0->unk20 - n;
-            arg0->unk20 = r;
+            s32 r = arg0->pendingBytes - n;
+            arg0->pendingBytes = r;
             if (r != 0) {
                 return;
             }
         }
-        arg0->unkC(arg0);
+        arg0->onComplete(arg0);
     }
 }
 
@@ -228,26 +228,26 @@ void func_002EE2C0(PacState *arg0, PacHead *arg1) {
     }
     if (arg0->unk1 & 1) {
         PacWork *node = func_002EDF60(arg0, arg1);
-        node->unkC = arg1->payload;
+        node->dataCursor = arg1->payload;
         arg0->unk8 = func_002EE258;
     } else {
         PacWork *node;
         arg0->unk0 = 2;
         node = func_002EDF60(arg0, arg1);
         if (arg0->unk1 & 2) {
-            node->unk8 = func_002D0518(v);
+            node->resourceHandle = func_002D0518(v);
         } else {
-            node->unk8 = func_002D03F8(v);
+            node->resourceHandle = func_002D03F8(v);
         }
-        arg0->unk1C = node->unkC = (u8 *)sdfResourceRetainAddress(node->unk8);
+        arg0->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
         switch (arg1->unk1 & 0xF) {
         case 0:
             arg0->unk8 = func_002EE158;
             break;
         case 1: {
             PacBuf *tmp = func_002CFEB8(0x20);
-            arg0->unk24 = tmp;
-            func_002EEE98(tmp, arg0->unk1C);
+            arg0->decoder = tmp;
+            func_002EEE98(tmp, arg0->outputCursor);
             arg0->unk8 = func_002EE1E0;
             break;
         }
@@ -259,15 +259,15 @@ void func_002EE2C0(PacState *arg0, PacHead *arg1) {
 
 void func_002EE3E8(PacState *arg0, PacHead *arg1) {
     func_002EE2C0(arg0, arg1);
-    arg0->unkC = func_002EDD98;
+    arg0->onComplete = func_002EDD98;
 }
 
 void func_002EE418(PacState *state) {
-    PacWork *work = state->unk34;
-    PacReloc *record = (PacReloc *)work->unkC;
+    PacWork *work = state->queueTail;
+    PacReloc *record = (PacReloc *)work->dataCursor;
     u8 *payload = record->payload;
     s32 count = record->count;
-    work->unkC = payload;
+    work->dataCursor = payload;
     if (count != 0) {
         func_002EB278(payload, payload, payload + record->offset, count);
         record->count = 0;
@@ -277,15 +277,15 @@ void func_002EE418(PacState *state) {
 
 void func_002EE478(PacState *arg0, PacHead *arg1) {
     func_002EE2C0(arg0, arg1);
-    arg0->unkC = func_002EE418;
+    arg0->onComplete = func_002EE418;
 }
 
 void func_002EE4A8(PacState *state) {
-    PacWork *work = state->unk34;
-    PacReloc *record = (PacReloc *)work->unkC;
+    PacWork *work = state->queueTail;
+    PacReloc *record = (PacReloc *)work->dataCursor;
     u8 *payload = record->payload;
     s32 count = record->count;
-    work->unkC = payload;
+    work->dataCursor = payload;
     if (count != 0) {
         func_002EB278(payload, payload, payload + record->offset, count);
         record->count = 0;
@@ -295,65 +295,65 @@ void func_002EE4A8(PacState *state) {
 
 void func_002EE508(PacState *arg0, PacHead *arg1) {
     func_002EE2C0(arg0, arg1);
-    arg0->unkC = func_002EE4A8;
+    arg0->onComplete = func_002EE4A8;
 }
 
 void func_002EE538(PacState *arg0) {
-    PacBuf *s = arg0->unk28;
-    s32 n = s->unkC;
-    if (arg0->unk14 < n) {
-        n = arg0->unk14;
+    PacBuf *s = arg0->buffer;
+    s32 n = s->remaining;
+    if (arg0->inputAvailable < n) {
+        n = arg0->inputAvailable;
     }
     if (n != 0) {
-        memcpy(s->unk8, arg0->unk10, n);
+        memcpy(s->cursor, arg0->inputCursor, n);
         sdfPacAdvanceInput(arg0, n);
-        s->unk8 += n;
+        s->cursor += n;
         {
-            s32 r = s->unkC - n;
-            s->unkC = r;
+            s32 r = s->remaining - n;
+            s->remaining = r;
             if (r != 0) {
                 return;
             }
         }
-        s->unk0 = func_002D3288(sdfResourceRetainAddress(s->unk4));
-        sdfReleaseMemorySlot(&s->unk4);
-        arg0->unkC(arg0);
+        s->result = func_002D3288(sdfResourceRetainAddress(s->resourceSlot));
+        sdfReleaseMemorySlot(&s->resourceSlot);
+        arg0->onComplete(arg0);
     }
 }
 
 void func_002EE5E0(PacState *arg0) {
-    s32 n = arg0->unk20;
-    s32 r = func_002EEAE0(arg0->unk24, arg0->unk10, n);
-    sdfPacAdvanceInput(arg0, n - arg0->unk24->unkC);
+    s32 n = arg0->pendingBytes;
+    s32 r = func_002EEAE0(arg0->decoder, arg0->inputCursor, n);
+    sdfPacAdvanceInput(arg0, n - arg0->decoder->remaining);
     if (r == 0) {
         return;
     }
     {
-        PacBuf *s = arg0->unk28;
-        s->unk0 = func_002D3288(sdfResourceRetainAddress(s->unk4));
-        sdfReleaseMemorySlot(&s->unk4);
+        PacBuf *s = arg0->buffer;
+        s->result = func_002D3288(sdfResourceRetainAddress(s->resourceSlot));
+        sdfReleaseMemorySlot(&s->resourceSlot);
     }
-    func_002CFF98(arg0->unk24);
-    arg0->unkC(arg0);
+    func_002CFF98(arg0->decoder);
+    arg0->onComplete(arg0);
 }
 
 void func_002EE678(PacState *arg0) {
-    PacBuf *s = arg0->unk28;
-    s32 n = s->unkC;
-    if (arg0->unk14 < n) {
-        n = arg0->unk14;
+    PacBuf *s = arg0->buffer;
+    s32 n = s->remaining;
+    if (arg0->inputAvailable < n) {
+        n = arg0->inputAvailable;
     }
     if (n != 0) {
         sdfPacAdvanceInput(arg0, n);
         {
-            s32 r = s->unkC - n;
-            s->unkC = r;
+            s32 r = s->remaining - n;
+            s->remaining = r;
             if (r != 0) {
                 return;
             }
         }
-        s->unk0 = func_002D32A0(s->unk8);
-        arg0->unkC(arg0);
+        s->result = func_002D32A0(s->cursor);
+        arg0->onComplete(arg0);
     }
 }
 
@@ -368,13 +368,13 @@ void func_002EE868(PacState *arg0, PacHead *arg1) {
         arg0->unk2C = (PacAlloc *)p;
         func_002EE6F8(arg0, arg1, p);
     }
-    arg0->unkC = func_002EE828;
+    arg0->onComplete = func_002EE828;
 }
 
 
 void func_002EE8C0(PacState *arg0) {
     func_002EE6F8(arg0, (u8 *)arg0->unk2C + 0x10, (u8 *)arg0->unk2C + 0x20);
-    arg0->unkC = func_002EE930;
+    arg0->onComplete = func_002EE930;
 }
 
 
@@ -382,7 +382,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE900);
 
 void func_002EE930(PacState *arg0) {
     PacAlloc *p = arg0->unk2C;
-    func_002DA058(arg0->unk34->unk8, p->unk20);
+    func_002DA058(arg0->queueTail->resourceHandle, p->unk20);
     {
         s32 c = p->unk4 + 1;
         p->unk4 = c;
@@ -396,14 +396,14 @@ void func_002EE930(PacState *arg0) {
 }
 
 void func_002EE9A8(PacState *state) {
-    s32 available = state->unk14;
-    if (state->unk20 < available) {
-        available = state->unk20;
+    s32 available = state->inputAvailable;
+    if (state->pendingBytes < available) {
+        available = state->pendingBytes;
     }
     sdfPacAdvanceInput(state, available);
     {
-        s32 remaining = state->unk20 - available;
-        state->unk20 = remaining;
+        s32 remaining = state->pendingBytes - available;
+        state->pendingBytes = remaining;
         if (remaining != 0) {
             return;
         }

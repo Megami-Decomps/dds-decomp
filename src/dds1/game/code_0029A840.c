@@ -6056,7 +6056,59 @@ INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3BA0);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BC140);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BC328);
+typedef struct EffectFileHeader {
+    u8 unk_00[8];
+    u16 mode;
+    u8 unk_0A[2];
+    u32 start;
+    u32 length;
+} EffectFileHeader;
+
+extern u8 D_003DF9A0[];
+extern u32 D_003BD064;
+extern void func_002BC510(void);
+extern EffectFileHeader D_0038DC08;
+
+u32 func_002BC328(void) {
+    u8 fileInfo[0x110];
+    u8 *job;
+    u8 *entry;
+    u8 *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    func_002B8EA8(D_003B3B88, 2, fileInfo);
+    status = *(s32 *)(fileInfo + 0x100);
+    result = 0x600001;
+    if (status == 2) {
+        result = 0x400000;
+    } else if (status == 1) {
+        job = (u8 *)fileCreateJob(0x16);
+        func_002937E0(job, D_0038DC08.start, D_0038DC08.length,
+                      D_0038DC08.mode);
+        func_00293A00(job, fileInfo, func_002BC538(*(u32 *)(fileInfo + 0xFC)));
+        entry = (u8 *)fileAppendJob(D_003BD060, job);
+        D_003BD070 = (s32)entry;
+        memcpy(D_003DF9A0, entry, 0x80);
+        D_003BD068 = *(u32 *)(entry + 0x90);
+        resource = (u8 *)effFindAssetData(entry);
+        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        fileData = fileResolvePrimaryBuffer(D_003BD068);
+        memcpy(*(void **)(resource + 0xC), fileData,
+               *(u32 *)(resource + 0x10));
+        D_003BD064 = func_002B5390(resource);
+        D_003BD09C = effFindAssetObject(entry);
+        *(u8 **)(D_003BD09C + 0x34) = (u8 *)D_0038F2F0;
+        func_002BC510();
+        if (D_003BD06C != 0) {
+            fileJobDestroy(D_003BD06C);
+            D_003BD06C = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
 
 void func_002BC510(void) {
     D_003BD11C = 0;
@@ -6488,7 +6540,35 @@ u32 func_002BD988(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BD9C0);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BDBC0);
+extern void func_002BD640(u32, u32);
+
+u32 *func_002BDBC0(u32 *source, u32 slot, u32 count) {
+    u32 *effect = (u32 *)func_002CFEB8(0x30);
+    u32 index = 0;
+    effect[1] = 1;
+    {
+        u32 mode = source[7];
+        u32 size = source[9];
+        effect[7] = mode;
+        effect[9] = size;
+    }
+    effect[0] = 0;
+    effect[8] = 0;
+    effect[2] = count;
+    effect[3] = (u32)func_002D03F8(count * 0x80);
+    effect[4] = sdfResourceRetainAddress(effect[3]);
+    effect[5] = (u32)func_002D03F8(effect[2] * 0xA0);
+    effect[6] = sdfResourceRetainAddress(effect[5]);
+    if (effect[2] != 0) {
+        do {
+            memcpy((void *)(effect[4] + index * 0x80),
+                   (void *)(source[4] + slot * 0x80), 0x80);
+            func_002BD640((u32)effect, index);
+            index++;
+        } while (index < effect[2]);
+    }
+    return effect;
+}
 
 u32 func_002BDD60(u32 arg0) {
     s32 *piVar1;

@@ -399,7 +399,22 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1A30);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1B30);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1CC8);
+void func_002C1CC8(u8 *widget, u8 *node, const char *text) {
+    s32 length;
+    s32 allocation;
+    char *copy;
+
+    func_002CFF98(*(u32 *)node);
+    length = strlen(text);
+    allocation = length + 1;
+    copy = (char *)func_002CFEB8(allocation);
+    *(u16 *)(node + 4) = allocation;
+    *(char **)node = copy;
+    memcpy(copy, text, allocation);
+    if (widget != NULL) {
+        expandWidgetColumnWidth(length, widget);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1D78);
 
@@ -500,7 +515,34 @@ s32 func_002C2540(u32 key, u32 head) {
     return n;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C2568);
+s32 func_002C2568(s32 index, void *w) {
+    u8 *widget = (u8 *)w;
+    s16 count = *(s16 *)(widget + 0xA);
+    u16 width;
+    u8 *first;
+
+    if (index >= count) {
+        return 0;
+    }
+    first = *(u8 **)(widget + 0x14);
+    *(u16 *)(widget + 8) = 0;
+    *(u8 **)(widget + 0x10) = first;
+    *(u8 **)(widget + 0x18) = first;
+    if (index > 0) {
+        width = *(u16 *)(widget + 6);
+        do {
+            u8 *current = *(u8 **)(widget + 0x10);
+            if (width >= count - *(u16 *)(current + 6)) {
+                (*(u16 *)(widget + 8))++;
+            } else {
+                *(u8 **)(widget + 0x10) = *(u8 **)(current + 0x1C);
+            }
+            current = *(u8 **)(widget + 0x18);
+            *(u8 **)(widget + 0x18) = *(u8 **)(current + 0x1C);
+        } while (--index != 0);
+    }
+    return 1;
+}
 
 void func_002C25E0(u32 arg0) {
     func_002C2568(0, arg0);

@@ -586,7 +586,23 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_002712A0);
+extern void func_002BD870(u32);
+
+void func_002712A0(kind, work)
+s32 kind;
+u8 *work;
+{
+    s32 count;
+    s32 i = 0;
+    u8 *buffer = func_00271100(kind, &count, work);
+
+    if (count > 0) {
+        u32 *handles = (u32 *)buffer;
+        do {
+            func_002BD870(*handles++);
+        } while (++i < count);
+    }
+}
 
 void mnuSetStaffDisplayMode(s32 next, u8 *context) {
     s32 previous = *(s32 *)(context + 0x910);
@@ -667,7 +683,30 @@ void func_00271DF8(u8 *display) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271E58);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271F18);
+extern s32 func_00101A70();
+
+extern s8 D_003BC6B4;
+
+extern void func_002D0918(u32);
+
+void func_00271F18(u32 task) {
+    u8 *work = (u8 *)func_00101A70(task);
+    if (work == NULL) {
+        return;
+    }
+    func_00285600(work + 8, task);
+    func_00271DF8(work);
+    func_0027E690(*(u32 *)(work + 0x138));
+    mnuShutdownContext(work + 0x15C);
+    func_0024DBC8();
+    mnuReleaseAssets(work + 0x13C);
+    func_00271948(work);
+    mnuReleaseStaffSpriteHandles(work);
+    func_002BC618(*(u32 *)(work + 0x5c));
+    func_002D0918(*(u32 *)work);
+    D_003BC6B4 = 2;
+    func_002E9730();
+}
 
 u32 func_00271FC8(void) {
     s32 temp_v0;
@@ -714,7 +753,14 @@ u8 func_00272260(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00272280);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00272350);
+extern u32 D_0037B988[];
+
+void func_00272350(s32 index) {
+    u32 *object = (u32 *)func_00197760(0x2F0, 0x1E0, 0, 0xa09dc35a,
+                                      D_0037B988[index], 0);
+    func_001958A0(object, 1, 0x54);
+    func_00194920(object);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002723B0);
 

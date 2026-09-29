@@ -84,7 +84,42 @@ char *func_00269450(char *arg0, char *arg1) {
     return strcat(arg0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269480);
+extern s8 D_003BC58C;
+
+extern char D_00377318[];
+
+extern char D_00377338[];
+
+extern s32 D_00370D10[];
+
+extern s32 D_003BC5A8;
+
+extern s16 D_003BD8B0;
+
+extern s32 D_003BC5AC;
+
+extern void func_002E8C30(char *, s32, char *, s32);
+
+extern void func_002E9340(s32);
+
+extern void func_0026A248(void);
+
+extern void func_00269558(void);
+
+void func_00269480(void) {
+    if (D_003BC58C != 0) {
+        func_002E8E50();
+        return;
+    }
+    D_003BC58C = 1;
+    func_002E8C30(D_00377318, 4, D_00377338, 4);
+    func_002E9340(D_00370D10[0]);
+    D_003BC5A8 = 4;
+    D_003BD8B0 = -1;
+    D_003BC5AC = 0;
+    func_0026A248();
+    func_00269558();
+}
 
 u32 func_002694F8(void) {
     return 0x599;
@@ -281,13 +316,34 @@ void func_0026A1C8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A1F8);
+extern u32 D_003BD8D0;
+
+extern s32 D_003BD8C8;
+
+extern u8 D_003DB1C0[];
+
+void func_0026A1F8(void) {
+    D_003BD8D0 = sdfCreateSemaphore(1, 0xff, 0);
+    func_002CFA68(&D_003BD8C8, func_0026A1C8, D_003DB1C0,
+                  0x1000, 0x45, 0);
+    func_002CFD50();
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A248);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A340);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A390);
+extern u32 D_003BD8D0;
+
+extern u32 D_003D9140[];
+
+void func_0026A390(u32 *values) {
+    WaitSema(D_003BD8D0);
+    D_003D9140[0] = values[0];
+    D_003D9140[1] = values[1];
+    D_003D9140[3] = values[2];
+    SignalSema(D_003BD8D0);
+}
 
 void func_0026A3E0(char *filePath, u32 *work) {
     void *fileData;
@@ -349,7 +405,17 @@ void mnuAdvanceTitleStateUnderSemaphore(void) {
     SignalSema(D_003BD8D0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A8A0);
+extern u32 D_003BC5C8;
+
+void func_0026A8A0(void) {
+    WaitSema(D_003BD8D0);
+    if (D_003D9140[4] == 1 && D_003D9140[9] == 3) {
+        D_003BC5C8 = D_003D9140[9];
+        D_003D9140[9] = 4;
+        *(u32 *)D_003D9178 = 0;
+    }
+    SignalSema(D_003BD8D0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A900);
 

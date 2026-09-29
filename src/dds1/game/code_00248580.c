@@ -83,7 +83,24 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248BA0);
+extern s32 func_00248BA0(s32, s32);
+
+extern s32 func_002CFEB8(s32);
+
+extern s32 func_0027FA70(u16, u16);
+
+extern void func_00284258(s32, s32, s32, s32, s32, s32);
+
+s32 func_00248BA0(s32 resource, s32 context) {
+    s32 panel = func_002CFEB8(0xa8);
+    func_00284258(panel, 0, 0, 0x1e,
+        func_0027FA70(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
+        *(s32 *)(context + 0xe0));
+    func_00284258(panel + 0x54, 1, 0, 0x1e,
+        func_0027FA70(*(u16 *)(resource + 0xa), *(u16 *)(resource + 0xc)),
+        *(s32 *)(context + 0xe0));
+    return panel;
+}
 
 void func_00248C38(s32 arg0) {
     if (arg0 != 0) {
@@ -130,11 +147,63 @@ u8 func_00249198(void) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002492F8);
+extern s32 func_0027B2F8(s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002493B0);
+extern s32 mnuListAppendNode(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249420);
+extern void func_002491B8(void);
+
+extern u8 D_003BC3F8[];
+
+s32 func_002492F8(s32 *items, s32 count, s32 excluded, s32 callback) {
+    s32 list = func_0027B2F8(0, count, 0x15, callback);
+    s32 i;
+    *(s32 *)(list + 0x30) = callback;
+    *(s32 *)(list + 0x2c) = (s32)func_002491B8;
+    *(s32 *)(list + 0x3c) = 0;
+    for (i = 0; i < count; i++) {
+        if (i != excluded) {
+            s32 node = mnuListAppendNode(list, (s32)D_003BC3F8);
+            *(s32 *)(node + 0x60) = items[i];
+        }
+    }
+    return list;
+}
+
+extern s32 mnuWalkNodeList(s32, s32);
+
+void func_002493B0(s32 object) {
+    s32 state = *(s32 *)(object + 0x7C);
+    if (state < 2) {
+        if (state < 0) {
+            return;
+        }
+        if (*(s32 *)(*(s32 *)(object + 0x78) + 0x20) == 0) {
+            s32 selected = mnuWalkNodeList(2 - func_00249198(),
+                                              *(s32 *)(object + 0x70));
+            *(u32 *)(selected + 0x48) |= 1;
+        }
+    }
+}
+
+extern s32 mnuWalkNodeList(s32, s32);
+
+void func_00249420(s32 object) {
+    s32 state = *(s32 *)(object + 0x7C);
+    s32 selectedIndex;
+    if (state != 0) {
+        if (state != 2) {
+            return;
+        }
+        selectedIndex = 0;
+    } else {
+        selectedIndex = 3 - func_00249198();
+    }
+    if (*(s32 *)(*(s32 *)(object + 0x74) + 0x20) == 0) {
+        s32 node = mnuWalkNodeList(selectedIndex, *(s32 *)(object + 0x70));
+        *(u32 *)(node + 0x48) |= 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249498);
 

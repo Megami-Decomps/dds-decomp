@@ -3,12 +3,14 @@
 
 #include "common.h"
 
+/* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via ScrData. */
 typedef union ScrStackValue {
     s32 i;
     f32 f;
     char *s;
 } ScrStackValue;
 
+/* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via ScrData. */
 typedef union ScrInstr {
     struct {
         s16 opCode;
@@ -18,13 +20,14 @@ typedef union ScrInstr {
     f32 fOperand;
 } ScrInstr;
 
+/* Named script label/procedure and address (0x20); DDS1/2 script/scrTraceCode.c. */
 typedef struct ScrLabel {
     char name[24];
     s32 addr;              /* 0x18 */
     s32 unk1C;
 } ScrLabel;
 
-/* Per-script interpreter state and operand stack. */
+/* Interpreter state, operands and stack (0xE4); DDS1/2 script/scrTraceCode.c. */
 typedef struct ScrData {
     char name[24];
     s32 pc;
@@ -47,23 +50,27 @@ typedef struct ScrData {
     f32 *localFloat;
 } ScrData;
 
+/* Integer/float VM registers (0x840); DDS1/2 script/scrTraceCode.c. */
 typedef struct ScrVM {
     u8 unk00[0x40];
     s32 ints[256];
     f32 floats[256];
 } ScrVM;
 
+/* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {
     u32 (*func)(void);
     s32 paramCount;
 } ScrCommand;
 
+/* Shared script integer/float globals (0x840); DDS1/2 script/scrScriptProcess.c. */
 typedef struct {
     u8 pad0[0x40];
     s32 integers[256];
     s32 floatBits[256];
 } ScrProcGlobals;
 
+/* Script process handle and scheduler task ID (0xE8); DDS1/2 script/scrScriptProcess.c. */
 typedef struct {
     u8 pad0[0xB4];
     s32 unkB4;
@@ -75,11 +82,13 @@ typedef struct {
     s32 taskId;            /* 0xE4 */
 } ScrProcTask;
 
+/* Common-command global state (0x38C); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {
     u8 pad[0x388];
     s32 unk388;
 } ScrComGlobals;
 
+/* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {
     f32 x;
     f32 y;
@@ -87,6 +96,7 @@ typedef struct {
     s32 w;
 } ScrVecW;
 
+/* Four-float vector operand (0x10); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {
     f32 x;
     f32 y;

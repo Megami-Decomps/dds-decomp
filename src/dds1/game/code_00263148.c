@@ -79,9 +79,21 @@ u32 func_002633D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263408);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263570);
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_002635C0);
+s64 func_00263570(s32 request) {
+    s32 context = func_00101A70();
+    func_00265478(context);
+    return menuRunPanel(context, 1, request);
+}
+
+s64 func_002635C0(s32 request) {
+    s32 context = func_00101A70();
+    func_0024DD78();
+    return menuRunPanel(context, 2, request);
+}
 
 s32 func_00263608(void) {
     s32 *temp_v0 = (s32 *)func_00101A70();

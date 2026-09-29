@@ -1,6 +1,15 @@
 #include "common.h"
 #include "eff.h"
 
+typedef struct EffTemplatePacketList {
+    u8 pad00[0x20];
+    u32 packetCount;
+    u8 pad24[0xD4];
+    EffectBufferTail *buffer;
+    u8 padFC[0x5C];
+    f32 recordScale;
+} EffTemplatePacketList;
+
 extern EffectConfig D_0034DF54[];
 
 s32 billCreateIndexed(s32 arg0, s32 arg1);
@@ -377,18 +386,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00153B38);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00153D98);
 
-void func_00154048(s32 arg0) {
-    s32 p;
+void func_00154048(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -422,18 +431,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00154188);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00154430);
 
-void func_00154698(s32 arg0) {
-    s32 p;
+void func_00154698(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -497,18 +506,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00155380);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00155618);
 
-void func_00155830(s32 arg0) {
-    s32 p;
+void func_00155830(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -541,18 +550,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00155960);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00155CC0);
 
-void func_00155F30(s32 arg0) {
-    s32 p;
+void func_00155F30(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -616,18 +625,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00156730);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00156920);
 
-void func_00156B98(s32 arg0) {
-    s32 p;
+void func_00156B98(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -661,16 +670,16 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00156CD8);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00156F30);
 
-void func_00157140(s32 effect) {
+void func_00157140(EffTemplatePacketList *effect) {
     s32 i = 0;
-    s32 node = *(s32 *)(*(s32 *)(effect + 0xf8) + 4);
-    if (*(s32 *)(effect + 0x20) != 0) {
+    EffectBufferRecord *record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(node + 0x20) = 0xf0000001;
-            *(float *)(node + 0x34) = *(float *)(effect + 0x158);
+            record->unk20 = 0xf0000001;
+            *(f32 *)((u8 *)record + 0x34) = effect->recordScale;
             i++;
-            node += 0x40;
-        } while ((u32)i < *(u32 *)(effect + 0x20));
+            record++;
+        } while ((u32)i < effect->packetCount);
     }
 }
 
@@ -725,18 +734,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00157A58);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00157B58);
 
-void func_00157BE8(s32 arg0) {
-    s32 p;
+void func_00157BE8(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -770,18 +779,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00157D28);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_001584B8);
 
-void func_00158718(s32 arg0) {
-    s32 p;
+void func_00158718(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 
@@ -806,18 +815,18 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00158880);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00158B10);
 
-void func_00158D88(s32 arg0) {
-    s32 p;
+void func_00158D88(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
     u32 i;
 
     i = 0;
-    p = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(p + 0x20) = 0xf0000001;
+            record->unk20 = 0xf0000001;
             i = i + 1;
-            p = p + 0x40;
-        } while (i < *(u32 *)(arg0 + 0x20));
+            record = record + 1;
+        } while (i < effect->packetCount);
     }
 }
 

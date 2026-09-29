@@ -365,7 +365,45 @@ f32 btlGetExtremeUnitY(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6E28);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F70C8);
+BtlUnit *func_001F70C8(u32 mask, BtlUnit *target) {
+    BtlState *state = (BtlState *)func_001A17F0();
+    BtlUnit *unit;
+    BtlUnit *nearest;
+    s32 first;
+    f32 best;
+    f32 dist;
+    BtlVec4 pos;
+    btlUnitGetMuzzlePosVU(target);
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(&pos) : "memory");
+    unit = state->units;
+    nearest = NULL;
+    first = 1;
+    best = 0.0f;
+    while (unit != NULL) {
+        if (unit->flags & 1) {
+            if (!(unit->flags & 0xC0)) {
+                if (target != unit) {
+                    if (unit->flags & mask) {
+                        btlUnitGetMuzzlePosVU(unit);
+                                        __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" : : "f"(pos.f[1]) : "$2");
+                        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(&pos));
+                        __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmul.xyz $vf2, $vf10, $vf10\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tvsqrt Q, $vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(dist) : : "$2");
+                        if (first) {
+                            best = dist;
+                            nearest = unit;
+                            first = 0;
+                        } else if (dist < best) {
+                            best = dist;
+                            nearest = unit;
+                        }
+                    }
+                }
+            }
+        }
+        unit = unit->next;
+    }
+    return nearest;
+}
 
 BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
@@ -547,7 +585,21 @@ s32 func_001F7770(s32 mask) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F77D8);
+extern void func_002E7F20(f32, f32, f32);
+extern f32 func_002FA1F0(f32, f32);
+extern u128 D_0035F9E0;
+
+s32 func_001F77D8(f32 *from, f32 *to) {
+    f32 delta[4];
+    delta[0] = to[0] - from[0];
+    delta[2] = to[2] - from[2];
+    if (delta[0] != 0.0f || delta[2] != 0.0f) {
+        func_002E7F20(0.0f, func_002FA1F0(delta[0], delta[2]), 0.0f);
+        return 1;
+    }
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&D_0035F9E0));
+    return 0;
+}
 
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7868);
@@ -584,7 +636,18 @@ void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F79A0);
+f32 func_001F79A0(f32 *a, f32 *b, f32 *c) {
+    f32 normal[4];
+    f32 dot;
+    btlTriangleNormalVU(a, b, c);
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(normal) : "memory");
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(a));
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(c));
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmove.xyzw $vf11, $vf10\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(normal));
+    __asm__ volatile(".set noreorder\n\tvmul.xyz $vf2, $vf10, $vf11\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tqmfc2.ni $2, $vf2\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(dot) : : "$2");
+    return dot;
+}
 
 void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
     f32 dist = func_001F79A0(a, b, c);

@@ -346,9 +346,50 @@ void evtSetupDispatchSyncG(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_002478F8);
+typedef struct EvtStateTableContext {
+    u8 pad00[0x58];
+    s32 stateTable;
+    u8 pad5C[0x28];
+    s32 dispatchMode;
+} EvtStateTableContext;
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00247970);
+extern void func_0024DA58();
+
+s32 func_002478F8(void) {
+    s32 context = func_00101A70();
+    func_0024DDC0(1);
+    switch (((EvtStateTableContext *)context)->dispatchMode) {
+    case 1:
+        func_0024DA58(5);
+        break;
+    case 2:
+        func_0024DA58(6);
+        break;
+    }
+    return 1;
+}
+
+extern s32 func_00101A70();
+
+extern u8 D_0036AA68[];
+
+extern void func_002605B0(s32, u32);
+
+s32 func_00247970(void) {
+    s32 context = func_00101A70();
+    switch (((EvtStateTableContext *)context)->dispatchMode) {
+    case 1:
+        func_002605B0(context, 6);
+        break;
+    case 2:
+        if (((EvtStateTableContext *)context)->stateTable != (s32)D_0036AA68) {
+            func_002605B0(context, 5);
+        }
+        break;
+    }
+    ((EvtStateTableContext *)context)->dispatchMode = 0;
+    return 1;
+}
 
 s64 func_002479F0(u64 arg0) {
     s32 temp_v0;

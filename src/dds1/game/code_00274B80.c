@@ -237,7 +237,13 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00276018);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002761C0);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276250);
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
+
+s64 func_00276250(s32 callback) {
+    return menuRunPanel(func_00101A70(), 2, callback);
+}
 
 u8 func_00276288(void) {
     s64 temp_v0;
@@ -304,10 +310,6 @@ extern void func_002723B0();
 extern void func_00272668();
 extern void func_0027CDD0();
 
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
-
 s64 func_002765E8(s32 arg0) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90C);
@@ -332,7 +334,9 @@ s64 func_002765E8(s32 arg0) {
     return menuRunPanel(context, 1, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_002766E8);
+s64 func_002766E8(s32 callback) {
+    return menuRunPanel(func_00101A70(), 2, callback);
+}
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276720);
 
@@ -627,7 +631,9 @@ s64 campMenuDrawSlotLabel(s32 param) {
     return menuRunPanel(context, 1, param);
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00278B90);
+s64 func_00278B90(s32 callback) {
+    return menuRunPanel(func_00101A70(), 2, callback);
+}
 
 void func_00278BC8(void) {
     s32 temp_v0;

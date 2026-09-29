@@ -63,9 +63,21 @@ u32 func_0024D260(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D268);
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D300);
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D350);
+s64 func_0024D300(s32 request) {
+    s32 state = func_00101A70();
+    func_0024A2D8(state);
+    return menuRunPanel(state, 1, request);
+}
+
+s64 func_0024D350(s32 request) {
+    s32 state = func_00101A70();
+    func_0024DD78();
+    return menuRunPanel(state, 2, request);
+}
 
 u32 func_0024D398(void) {
     s32 temp_v0;
@@ -92,7 +104,11 @@ s32 func_0024D400(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D440);
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D500);
+s64 func_0024D500(s32 request) {
+    s32 state = func_00101A70();
+    func_0024A2D8(state);
+    return menuRunPanel(state, 1, request);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D550);
 

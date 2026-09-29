@@ -20,7 +20,6 @@ s32 dds3GetWorldObject(void);
 void func_001109B8(s32 arg0, u32 arg1);
 f32 func_00112ED8(s32 arg0);
 s32 func_00106488(f32 arg0);
-u16 func_0022FF98(s32 arg0);
 
 typedef struct EventViewerState {
     u8 pad0[4];
@@ -29,13 +28,24 @@ typedef struct EventViewerState {
     s32 selectedEntry;
     u8 pad2028[4];
     s32 fallbackEntry;
-    u8 pad2030[0x390];
+    u8 pad2030[0x20C];
+    struct {
+        u16 id;
+        u8 pad2[6];
+    } history[8];
+    s32 historyCount;
+    u32 currentId;
+    u8 pad2284[0x13C];
     s32 updateCount;
-    u8 pad23C4[0x2C];
+    u8 pad23C4;
+    u8 windowActive;
+    u8 pad23C6[0x2A];
     s32 glyphTickCount; /* 0x23F0 */
     u8 pad23F4[0x1C];
     u32 glyph; /* 0x2410: FrFontGlyph passed to func_00195868 */
 } EventViewerState;
+
+u16 func_0022FF98(EventViewerState *viewer);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CBA0);
 
@@ -111,16 +121,15 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 void func_0022F9F0(void) {
 }
 
-void func_0022F9F8(s32 arg0) {
-    s32 temp_v0;
-    EventViewerState *viewer = (EventViewerState *)arg0;
+void func_0022F9F8(EventViewerState *viewer) {
+    s32 nextTick;
 
-    if ((*(s32 *)(arg0 + 0x18) < *(s32 *)(arg0 + 0x14) - 3) && (0 < viewer->glyphTickCount))
+    if ((*(s32 *)((u8 *)viewer + 0x18) < *(s32 *)((u8 *)viewer + 0x14) - 3) && (0 < viewer->glyphTickCount))
     {
         func_00195868(viewer->glyph);
-        temp_v0 = viewer->glyphTickCount + 1;
-        viewer->glyphTickCount = temp_v0;
-        if (0x1d < temp_v0) {
+        nextTick = viewer->glyphTickCount + 1;
+        viewer->glyphTickCount = nextTick;
+        if (0x1d < nextTick) {
             viewer->glyphTickCount = 0;
         }
     }
@@ -150,19 +159,19 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FEB0);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FF30);
 
-u16 func_0022FF98(s32 arg0) {
-    u16 temp_v0;
-    s32 temp_v1;
+u16 func_0022FF98(EventViewerState *viewer) {
+    u16 id;
+    s32 index;
 
-    temp_v1 = *(s32 *)(arg0 + 0x227c) - 1;
-    if (*(s32 *)(arg0 + 0x227c) == 0) {
-        *(u32 *)(arg0 + 0x2280) = 0;
+    index = viewer->historyCount - 1;
+    if (viewer->historyCount == 0) {
+        viewer->currentId = 0;
         return 0;
     }
-    *(s32 *)(arg0 + 0x227c) = temp_v1;
-    temp_v0 = *(u16 *)(temp_v1 * 8 + arg0 + 0x223c);
-    *(u32 *)(arg0 + 0x2280) = (u32)temp_v0;
-    return temp_v0;
+    viewer->historyCount = index;
+    id = viewer->history[index].id;
+    viewer->currentId = (u32)id;
+    return id;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FFC8);
@@ -186,16 +195,16 @@ void func_002300B8(s32 arg0) {
     itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
     v0 = *(s32 *)(arg0 + 8);
     itfMesResetWindow(*(s32 *)(v0 + 0x104));
-    *(u8 *)(arg0 + 0x23c5) = 0;
+    ((EventViewerState *)arg0)->windowActive = 0;
     *(u8 *)(arg0 + 0x23c4) = 0;
 }
 
-void func_00230128(s32 arg0) {
-    *(u8 *)(arg0 + 0x23c5) = 1;
+void func_00230128(EventViewerState *viewer) {
+    viewer->windowActive = 1;
 }
 
-void func_00230138(s32 arg0) {
-    *(u8 *)(arg0 + 0x23c5) = 0;
+void func_00230138(EventViewerState *viewer) {
+    viewer->windowActive = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230140);
@@ -295,7 +304,7 @@ u32 func_00231C18(u32 arg0, u32 arg1, u32 arg2) {
             }
         }
         func_0022E5A0(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        func_0022FF98(arg2);
+        func_0022FF98((EventViewerState *)arg2);
         return 0;
     }
 }
@@ -311,7 +320,7 @@ u32 func_00231CC8(u32 arg0, u32 arg1, u32 arg2) {
     if (p != 0) {
         *(s32 *)(p + 0xc) = *(s32 *)(arg2 + 0x2310);
         func_0022E5A0(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        func_0022FF98(arg2);
+        func_0022FF98((EventViewerState *)arg2);
         return 0;
     }
 }
@@ -333,7 +342,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
             dst++;
         } while (index >= 0);
         func_0022E5A0(*(s32 *)(scene + 0x18), scene);
-        func_0022FF98((s32)scene);
+        func_0022FF98((EventViewerState *)scene);
         return 0;
     }
     return (u32)record;
@@ -342,7 +351,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231E90);
 
 u32 func_00231EF8(u32 arg0, u32 arg1, u32 arg2) {
-    func_0022FF98(arg2);
+    func_0022FF98((EventViewerState *)arg2);
     return 0;
 }
 

@@ -85,7 +85,9 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279D68);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279F88);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A0A8);
+s64 func_0027A0A8(s32 callback) {
+    return menuRunPanel(func_00101A70(), 2, callback);
+}
 
 void mnuDrawSelectionLabel(s32 selection) {
     s32 item = func_00197E08(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
@@ -199,7 +201,9 @@ void campMenuDrawStatus(s32 param) {
     menuRunPanel(context, 1, param);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AC00);
+s64 func_0027AC00(s32 callback) {
+    return menuRunPanel(func_00101A70(), 2, callback);
+}
 
 void func_0027AC38(s32 arg0) {
     s32 temp_v0;
@@ -1241,7 +1245,36 @@ void func_0027F198(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     *(s32 *)(temp_v0 + 0xBC) = 0x100;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", menuSetPageParams);
+typedef struct MenuPageMotion {
+    u8 unk0[0x40];
+    s32 field40;
+    s32 field44;
+    s32 field48;
+    s32 field4C;
+} MenuPageMotion;
+
+void menuSetPageParams(MenuPageMotion *page, s32 mode) {
+    switch (mode) {
+    case 0:
+        page->field44 = 0;
+        page->field40 = 0;
+        page->field48 = 0x40;
+        page->field4C = 0x100;
+        break;
+    case 1:
+        page->field44 = 1;
+        page->field40 = 0x100;
+        page->field48 = 0;
+        page->field4C = 0x1000;
+        break;
+    default:
+        page->field44 = 0;
+        page->field40 = 0x100;
+        page->field48 = 0;
+        page->field4C = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F230);
 

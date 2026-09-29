@@ -64,7 +64,19 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00265700);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002658B8);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265968);
+extern s32 D_003BAA00;
+
+s32 func_00265968(void) {
+    s32 offset = 0;
+    s32 count = 0;
+    s32 remaining = 4;
+    do {
+        s32 step = func_002658B8(D_003BAA00 + 0xa60 + offset);
+        count += step > 0;
+        offset += 0x1a4;
+    } while (--remaining >= 0);
+    return count;
+}
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002659C8);
 
@@ -98,7 +110,12 @@ void func_00266130(u32 fontContext) {
     func_001953A8(fontContext, 0xfffffffffffffffc);
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00266168);
+extern u32 func_002C1630(u32, u32, s32);
+
+u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
+    func_002CD7B8(*(u32 *)(resource + 8));
+    return func_002C1630(0x80808080, 0x80808000, blend);
+}
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002661A8);
 

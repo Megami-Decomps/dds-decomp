@@ -110,40 +110,40 @@ void effCopyVertRows(EffChan *dst, f32 *src) {
     } while (i < 4);
 }
 
-void effFillRandRecords(EffEmit *arg0) {
-    EffPrim *e = arg0->primitive;
-    u32 mod = e->randomModulus;
-    u32 count = e->randomCount;
-    EffCntRec *r = e->counterRecords;
-    u32 i = 0;
-    EffRec38 *rec;
-    s32 t;
-    f32 f;
+void effFillRandRecords(EffEmit *emitter) {
+    EffPrim *primitive = emitter->primitive;
+    u32 modulus = primitive->randomModulus;
+    u32 count = primitive->randomCount;
+    EffCntRec *record = primitive->counterRecords;
+    u32 index = 0;
+    EffRec38 *keyframe;
+    s32 randomIndex;
+    f32 scale;
 
     if (count == 0) {
         return;
     }
     do {
-        func_001926A8(e, i);
-        r->randomIndex = effMiscRand(&D_0034DF38) % mod;
-        rec = (EffRec38 *)func_0018E200(e->unk16C, i);
-        i++;
-        t = r->randomIndex;
-        f = rec->randomScale;
-        r->randomIndex = t + 1;
-        r++;
-        rec->scaledRandomValue = f * (f32)t;
-    } while (i < count);
+        func_001926A8(primitive, index);
+        record->randomIndex = effMiscRand(&D_0034DF38) % modulus;
+        keyframe = (EffRec38 *)func_0018E200(primitive->unk16C, index);
+        index++;
+        randomIndex = record->randomIndex;
+        scale = keyframe->randomScale;
+        record->randomIndex = randomIndex + 1;
+        record++;
+        keyframe->scaledRandomValue = scale * (f32)randomIndex;
+    } while (index < count);
 }
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00192CC8);
 
-void effFreeBuffers(EffPrim *arg0) {
-    if (arg0 != NULL) {
-        if (arg0->unk14 != NULL) {
-            func_002D0918(arg0->unk4);
+void effFreeBuffers(EffPrim *primitive) {
+    if (primitive != NULL) {
+        if (primitive->unk14 != NULL) {
+            func_002D0918(primitive->unk4);
         }
-        func_002D0918(arg0->unk0);
+        func_002D0918(primitive->unk0);
     }
 }
 
@@ -172,13 +172,13 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_00192ED0);
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00193000);
 
-void func_00193130(EffPrim *arg0) {
-    arg0->cursorIndex = 0;
-    arg0->cursorPosition = 0;
+void func_00193130(EffPrim *primitive) {
+    primitive->cursorIndex = 0;
+    primitive->cursorPosition = 0;
 }
 
-void func_00193140(EffPrim *arg0, f32 arg1) {
-    arg0->cursorStep = arg1;
+void func_00193140(EffPrim *primitive, f32 step) {
+    primitive->cursorStep = step;
 }
 
 void effBuildAndDispatch(EffPrim *arg0, s32 arg1) {

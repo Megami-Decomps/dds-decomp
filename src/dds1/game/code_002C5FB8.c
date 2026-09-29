@@ -87,17 +87,18 @@ void fldDecrementSelectionCount(MapSelection *selection) {
     }
 }
 
-s32 func_002C60F8(void *p) {
-    void *n;
+/* Collect the 1-based selection ids in the linked map nodes into a bitmask. */
+s32 func_002C60F8(void *context) {
+    void *node;
     s32 mask;
 
-    n = *(void **)((s32)p + 0x10);
+    node = *(void **)((s32)context + 0x10);
     mask = 0;
     do {
-        void *m = *(void **)((s32)n + 0x70);
-        n = *(void **)((s32)n + 0x58);
-        mask |= 1 << (*(s16 *)((s32)m + 8) - 1);
-    } while (n != NULL);
+        void *selection = *(void **)((s32)node + 0x70);
+        node = *(void **)((s32)node + 0x58);
+        mask |= 1 << (*(s16 *)((s32)selection + 8) - 1);
+    } while (node != NULL);
     return mask;
 }
 
@@ -254,22 +255,22 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8040);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C80D8);
 
-void sdfVec3AddInPlace(float *arg0, float *arg1) {
-    *arg0 = *arg0 + *arg1;
-    arg0[1] = arg0[1] + arg1[1];
-    arg0[2] = arg0[2] + arg1[2];
+void sdfVec3AddInPlace(float *dst, float *src) {
+    *dst = *dst + *src;
+    dst[1] = dst[1] + src[1];
+    dst[2] = dst[2] + src[2];
 }
 
-void sdfVec3SubtractInPlace(float *arg0, float *arg1) {
-    *arg0 = *arg0 - *arg1;
-    arg0[1] = arg0[1] - arg1[1];
-    arg0[2] = arg0[2] - arg1[2];
+void sdfVec3SubtractInPlace(float *dst, float *src) {
+    *dst = *dst - *src;
+    dst[1] = dst[1] - src[1];
+    dst[2] = dst[2] - src[2];
 }
 
-void sdfVec3AddComponents(float arg0, float arg1, float arg2, float *arg3) {
-    *arg3 = *arg3 + arg0;
-    arg3[1] = arg3[1] + arg1;
-    arg3[2] = arg3[2] + arg2;
+void sdfVec3AddComponents(float x, float y, float z, float *dst) {
+    *dst = *dst + x;
+    dst[1] = dst[1] + y;
+    dst[2] = dst[2] + z;
 }
 
 void func_002C84B8(Vec3 *v, float x, float y, float z) {
@@ -278,10 +279,10 @@ void func_002C84B8(Vec3 *v, float x, float y, float z) {
     v->z = z;
 }
 
-void sdfVec3ScaleInPlace(float arg0, float *arg1) {
-    *arg1 = *arg1 * arg0;
-    arg1[1] = arg1[1] * arg0;
-    arg1[2] = arg1[2] * arg0;
+void sdfVec3ScaleInPlace(float scale, float *dst) {
+    *dst = *dst * scale;
+    dst[1] = dst[1] * scale;
+    dst[2] = dst[2] * scale;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C84F0);
@@ -335,27 +336,27 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C9268);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C94A8);
 
-void sdfVec4Add(float *arg0, float *arg1, float *arg2) {
-    *arg0 = *arg1 + *arg2;
-    arg0[1] = arg1[1] + arg2[1];
-    arg0[2] = arg1[2] + arg2[2];
-    arg0[3] = arg1[3] + arg2[3];
+void sdfVec4Add(float *dst, float *lhs, float *rhs) {
+    *dst = *lhs + *rhs;
+    dst[1] = lhs[1] + rhs[1];
+    dst[2] = lhs[2] + rhs[2];
+    dst[3] = lhs[3] + rhs[3];
 }
 
-void sdfQuatMultiply(float *arg0, float *arg1, float *arg2) {
-    *arg0 = (arg1[3] * *arg2 + *arg1 * arg2[3] + arg1[1] * arg2[2]) -
-                          arg1[2] * arg2[1];
-    arg0[1] = (arg1[3] * arg2[1] + arg1[1] * arg2[3] + arg1[2] * *arg2) -
-                              *arg1 * arg2[2];
-    arg0[2] = (arg1[3] * arg2[2] + arg1[2] * arg2[3] + *arg1 * arg2[1]) -
-                              arg1[1] * *arg2;
-    arg0[3] = ((arg1[3] * arg2[3] - *arg1 * *arg2) - arg1[1] * arg2[1]) -
-                              arg1[2] * arg2[2];
+void sdfQuatMultiply(float *dst, float *lhs, float *rhs) {
+    *dst = (lhs[3] * *rhs + *lhs * rhs[3] + lhs[1] * rhs[2]) -
+                          lhs[2] * rhs[1];
+    dst[1] = (lhs[3] * rhs[1] + lhs[1] * rhs[3] + lhs[2] * *rhs) -
+                              *lhs * rhs[2];
+    dst[2] = (lhs[3] * rhs[2] + lhs[2] * rhs[3] + *lhs * rhs[1]) -
+                              lhs[1] * *rhs;
+    dst[3] = ((lhs[3] * rhs[3] - *lhs * *rhs) - lhs[1] * rhs[1]) -
+                              lhs[2] * rhs[2];
 }
 
-float sdfQuatDot(float *arg0, float *arg1) {
-    return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2] +
-                  arg0[3] * arg1[3];
+float sdfQuatDot(float *lhs, float *rhs) {
+    return *lhs * *rhs + lhs[1] * rhs[1] + lhs[2] * rhs[2] +
+                  lhs[3] * rhs[3];
 }
 
 float func_002C9780(float *arg0, float *arg1) {
