@@ -513,9 +513,9 @@ s64 func_00268588(s32 callback) {
 }
 
 s32 func_002685C0(void) {
-    s32 temp_v0 = kwlnFadeIsActive();
+    s32 fadeActive = kwlnFadeIsActive();
 
-    if (temp_v0 != 0) {
+    if (fadeActive != 0) {
         return 0;
     }
     return func_0026C768() == 0;
@@ -547,8 +547,14 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002686F0);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
 
-s32 fldClassifyRemainingFrames(s32 timer) {
-    s32 frames = *(s32 *)(timer + 0xA4);
+/* The sequel stores this countdown eight bytes later than DDS1. */
+typedef struct {
+    u8 pad00[0xA4];
+    s32 remainingFrames; /* 0xA4 */
+} SceneTimerView;
+
+s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
+    s32 frames = timer->remainingFrames;
     if (frames == 0) {
         return 0;
     }
@@ -579,6 +585,7 @@ typedef struct {
     s32 mode; /* 0xE4 */
 } SceneFrameOwner;
 
+/* Scene modes 1 and 2 select different entries from the same frame table. */
 s32 func_00268BE0(s32 object) {
     switch (((SceneFrameOwner *)object)->mode) {
     case 1:

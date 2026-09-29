@@ -57,9 +57,9 @@ u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
     u8 *table = (u8 *)D_00370D08;
     s32 i = 2;
     u8 *limit = table + 4;
-    s32 end = position + increment;
+    s32 nextPosition = position + increment;
     do {
-        if (position < *limit && end >= *limit) {
+        if (position < *limit && nextPosition >= *limit) {
             return limit[1];
         }
         limit -= 2;
@@ -79,6 +79,11 @@ extern u8 D_0036F40C[];
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 
+#define BRS_ACTIVE_PARTY_FLAG 2
+#define BRS_AP_BLOCKED_FLAG 0x40
+#define BRS_HALF_EXP_SKILL 0x21F
+#define BRS_FULL_EXP_SKILL 0x220
+
 /* Party-unit flags and AP restriction shared by reward calculations. */
 typedef struct BrsExpUnit {
     u16 flags;          /* 0x00: bit 1 means active party member */
@@ -88,12 +93,12 @@ typedef struct BrsExpUnit {
 
 s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
     s32 gain;
-    if (((BrsExpUnit *)unit)->apStatus & 0x40) {
+    if (((BrsExpUnit *)unit)->apStatus & BRS_AP_BLOCKED_FLAG) {
         return 0;
     }
     gain = baseApTotal;
     gain += perUnitBonus;
-    if ((((BrsExpUnit *)unit)->flags & 2) == 0) {
+    if ((((BrsExpUnit *)unit)->flags & BRS_ACTIVE_PARTY_FLAG) == 0) {
         gain = perUnitBonus;
         gain += baseApTotal;
     }
@@ -105,14 +110,14 @@ s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
 s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
     s32 result;
 
-    if ((((BrsExpUnit *)unit)->flags & 2) != 0) {
+    if ((((BrsExpUnit *)unit)->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
         result = exp;
     } else {
         result = 0;
-        if (ptyHasSkill(unit, 0x21F) != 0) {
+        if (ptyHasSkill(unit, BRS_HALF_EXP_SKILL) != 0) {
             result = exp / 2;
         }
-        if (ptyHasSkill(unit, 0x220) != 0) {
+        if (ptyHasSkill(unit, BRS_FULL_EXP_SKILL) != 0) {
             result = exp;
         }
     }
@@ -155,11 +160,17 @@ s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
     return step;
 }
 
+/* Five contiguous signed base stats begin at offset 0x16 in the party unit. */
+typedef struct {
+    u8 pad00[0x16];
+    s8 baseStats[5];
+} BrsStatUnit;
+
 s32 btlAddBaseStats(u8 *src, u8 *obj) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        s8 *stat = (s8 *)(obj + 0x16 + i);
+        s8 *stat = &((BrsStatUnit *)obj)->baseStats[i];
 
         *stat += src[i * 4];
         if (*stat >= 100) {

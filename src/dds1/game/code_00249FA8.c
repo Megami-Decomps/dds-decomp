@@ -101,8 +101,14 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A2D8);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A340);
 
-s32 fldClassifyRemainingFrames(s32 timer) {
-    s32 frames = *(s32 *)(timer + 0x9C);
+/* View of the frame countdown; the preceding scene state is not known here. */
+typedef struct {
+    u8 pad00[0x9C];
+    s32 remainingFrames; /* 0x9C */
+} SceneTimerView;
+
+s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
+    s32 frames = timer->remainingFrames;
     if (frames == 0) {
         return 0;
     }
@@ -134,6 +140,7 @@ typedef struct {
 } SceneFrameOwner;
 extern s32 func_0024A6C0(SceneFrameOwner *);
 
+/* Scene modes 1 and 2 select different entries from the same frame table. */
 s32 func_0024A6C0(SceneFrameOwner *scene) {
     switch (scene->mode) {
     case 1:

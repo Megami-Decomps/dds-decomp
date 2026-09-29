@@ -1,16 +1,24 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+/* Partial view of the two offsets accessed here; the full layout is unknown. */
+typedef struct {
+    u8 pad00[0x2C];
+    f32 scalar;   /* 0x2C */
+    u8 pad30[0xC];
+    u32 word3C;  /* 0x3C */
+} WorkSlots;
+
 void func_00184420(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00184430(u8 *work, f32 value) {
-    *(f32 *)(work + 0x2C) = value;
+void func_00184430(WorkSlots *work, f32 value) {
+    work->scalar = value;
 }
 
-void func_00184438(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x3c) = arg1;
+void func_00184438(WorkSlots *work, u32 value) {
+    work->word3C = value;
 }
 
 u32 func_00184440(void) {

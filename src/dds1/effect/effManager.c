@@ -32,6 +32,7 @@ u32 func_0014FA28(void) {
     return 1;
 }
 
+/* Per-effect-type operations act on the instance returned by create. */
 typedef struct EffTypeOps {
     s32 (*create)(s32, s32); /* 0x00 */
     void (*update)(s32);     /* 0x04 */
@@ -50,7 +51,7 @@ typedef struct EffTypeOps {
 typedef struct EffNode {
     s32 type;
     s32 arg;
-    s32 data;
+    s32 instance;
     f32 unkC;
 } EffNode;
 
@@ -62,49 +63,49 @@ EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
     node->type = type;
     node->unkC = 1.03f;
     node->arg = arg;
-    node->data = D_0034DE18[type].create(arg, param);
+    node->instance = D_0034DE18[type].create(arg, param);
     return node;
 }
 
 void effDestroyNode(EffNode *node) {
-    D_0034DE18[node->type].destroy(node->data);
+    D_0034DE18[node->type].destroy(node->instance);
     func_002CFF98(node);
 }
 
 void effUpdateNode(EffNode *node) {
-    D_0034DE18[node->type].update(node->data);
+    D_0034DE18[node->type].update(node->instance);
 }
 
 void func_0014FB38(EffNode *node) {
-    D_0034DE18[node->type].fn0C(node->data);
+    D_0034DE18[node->type].fn0C(node->instance);
 }
 
 void func_0014FB70(EffNode *node) {
-    D_0034DE18[node->type].fn2C(node->data);
+    D_0034DE18[node->type].fn2C(node->instance);
 }
 
 s32 func_0014FBA8(EffNode *node) {
     if (D_0034DE18[node->type].fn10 == NULL) {
         return 1;
     }
-    return D_0034DE18[node->type].fn10(node->data);
+    return D_0034DE18[node->type].fn10(node->instance);
 }
 
 void func_0014FBF0(EffNode *node) {
-    D_0034DE18[node->type].fn14(node->data);
+    D_0034DE18[node->type].fn14(node->instance);
 }
 
 void func_0014FC28(EffNode *node) {
-    D_0034DE18[node->type].fn18(node->data);
+    D_0034DE18[node->type].fn18(node->instance);
 }
 
 void func_0014FC60(EffNode *node) {
-    D_0034DE18[node->type].fn1C(node->data);
+    D_0034DE18[node->type].fn1C(node->instance);
 }
 
 void func_0014FC98(EffNode *node, u8 flag) {
     if (D_0034DE18[node->type].fn20 != NULL) {
-        D_0034DE18[node->type].fn20(node->data, flag);
+        D_0034DE18[node->type].fn20(node->instance, flag);
     }
 }
 
@@ -112,13 +113,13 @@ s32 func_0014FCD8(EffNode *node) {
     if (D_0034DE18[node->type].fn24 == NULL) {
         return 1;
     }
-    return D_0034DE18[node->type].fn24(node->data);
+    return D_0034DE18[node->type].fn24(node->instance);
 }
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FD20);
 
-void func_0014FE28(u32 arg0) {
-    effCreateNode(5, 0, arg0);
+void func_0014FE28(u32 parameter) {
+    effCreateNode(5, 0, parameter);
 }
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FE48);

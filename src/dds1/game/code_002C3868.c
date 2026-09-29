@@ -21,8 +21,8 @@ typedef struct {
     s16 countdown;     /* 0x04 */
     s16 mode;          /* 0x06 */
     s16 pad08[2];
-    s16 mapTimerFirst; /* 0x0C */
-    s16 mapTimerSecond; /* 0x0E */
+    s16 mapTimerPrimary;   /* 0x0C */
+    s16 mapTimerSecondary; /* 0x0E */
 } SdfCounterTimer;
 
 typedef struct {
@@ -81,9 +81,10 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3AC8);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3C48);
 
-void func_002C3CD0(u32 arg0) {
+/* Reset the current selection before installing the requested index. */
+void func_002C3CD0(u32 index) {
     func_002C3C48();
-    D_003BD268 = arg0;
+    D_003BD268 = index;
 }
 
 void sdfCycleForward(void) {
@@ -96,6 +97,7 @@ void sdfCycleForward(void) {
     }
 }
 
+/* Cycle through the same bounded selection in the opposite direction. */
 void func_002C3D48(void) {
     if (D_003BD268 != 0) {
         func_002C3C48();
@@ -196,36 +198,38 @@ void sdfCounterTickCountdown(void) {
     }
 }
 
+/* Enabling a stopped timer starts it at one; disabling clears it. */
 void mnuSetMapTimerFlags(s32 flags) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
     if ((flags & 1) != 0) {
-        if (timer->mapTimerFirst == 0) {
-            timer->mapTimerFirst = 1;
+        if (timer->mapTimerPrimary == 0) {
+            timer->mapTimerPrimary = 1;
         }
     } else {
-        timer->mapTimerFirst = 0;
+        timer->mapTimerPrimary = 0;
     }
     if ((flags & 2) != 0) {
-        if (timer->mapTimerSecond == 0) {
-            timer->mapTimerSecond = 1;
+        if (timer->mapTimerSecondary == 0) {
+            timer->mapTimerSecondary = 1;
         }
     } else {
-        timer->mapTimerSecond = 0;
+        timer->mapTimerSecondary = 0;
     }
 }
 
+/* Active timers repeat every 60 ticks rather than stopping at zero. */
 void mnuTickMapTimers(void) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
-    if (timer->mapTimerFirst > 0) {
-        timer->mapTimerFirst--;
-        if (timer->mapTimerFirst == 0) {
-            timer->mapTimerFirst = 60;
+    if (timer->mapTimerPrimary > 0) {
+        timer->mapTimerPrimary--;
+        if (timer->mapTimerPrimary == 0) {
+            timer->mapTimerPrimary = 60;
         }
     }
-    if (timer->mapTimerSecond > 0) {
-        timer->mapTimerSecond--;
-        if (timer->mapTimerSecond == 0) {
-            timer->mapTimerSecond = 60;
+    if (timer->mapTimerSecondary > 0) {
+        timer->mapTimerSecondary--;
+        if (timer->mapTimerSecondary == 0) {
+            timer->mapTimerSecondary = 60;
         }
     }
 }

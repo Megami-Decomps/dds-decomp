@@ -16,7 +16,8 @@ typedef struct {
     s32 pad20;
     s32 transitionOffset; /* 0x24 */
     s32 mode;             /* 0x28 */
-    s32 pad2C[2];
+    u32 linkedState;       /* 0x2C: passed to the func_0027Bxxx helpers */
+    s32 pad30;
     s32 word34;
     s32 word38;
 } MenuState;
@@ -30,19 +31,19 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BD80);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BE38);
 
 s64 func_0026BEB0(void) {
-    return func_0027B368(*(u32 *)(D_003BC5D0 + 0x2C));
+    return func_0027B368(((MenuState *)D_003BC5D0)->linkedState);
 }
 
 u32 func_0026BED0(void) {
-    return **(u32 **)(*(s32 *)(D_003BC5D0 + 0x2c) + 0x1c);
+    return **(u32 **)(((MenuState *)D_003BC5D0)->linkedState + 0x1c);
 }
 
 void func_0026BEE8(s32 advanceCount) {
-    func_0027BB08(*(u32 *)(D_003BC5D0 + 0x2c));
+    func_0027BB08(((MenuState *)D_003BC5D0)->linkedState);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            func_0027BE90(*(u32 *)(D_003BC5D0 + 0x2c));
+            func_0027BE90(((MenuState *)D_003BC5D0)->linkedState);
         } while (advanceCount != 0);
     }
 }
@@ -93,30 +94,31 @@ void mnuReleaseSpriteHandle(void) {
 
 extern s32 func_0026BD80(s32, s32, s32, s32, s32, s32, s32);
 
-s64 mnuStartMovieMenuSfx16(s32 arg0) {
-    return func_0026BD80(0, 0, 0, arg0, 0, 0x16, 0x53);
+/* These entry points differ only in the selected menu sound identifier. */
+s64 mnuStartMovieMenuSfx16(s32 parameter) {
+    return func_0026BD80(0, 0, 0, parameter, 0, 0x16, 0x53);
 }
 
-s64 func_0026C188(s32 arg0) {
-    return func_0026BD80(0, 0, 0, arg0, 0, 0x17, 0x53);
+s64 func_0026C188(s32 parameter) {
+    return func_0026BD80(0, 0, 0, parameter, 0, 0x17, 0x53);
 }
 
-s64 func_0026C1C0(s32 arg0) {
-    return func_0026BD80(0, 0, 0, arg0, 0, 0x18, 0x53);
+s64 func_0026C1C0(s32 parameter) {
+    return func_0026BD80(0, 0, 0, parameter, 0, 0x18, 0x53);
 }
 
-s64 func_0026C1F8(s32 arg0) {
-    return func_0026BD80(0, 0, 0, arg0, 0, 0x1A, 0x53);
+s64 func_0026C1F8(s32 parameter) {
+    return func_0026BD80(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
 extern void func_002C0A48(s32, s32);
 extern void func_002C0950(s32, s32);
 extern s32 func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
 
-s64 func_0026C230(s32 arg0) {
+s64 func_0026C230(s32 parameter) {
     func_002C0A48(0x44, 0x3E);
     func_002C0950(0x3000D, 0x3E);
-    return func_002C0DD8(0, 0, 0, 0x2000, 0xE00, arg0, 0x3E);
+    return func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C290);

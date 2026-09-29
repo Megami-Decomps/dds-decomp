@@ -3,9 +3,9 @@
 typedef struct BattleEffect {
     u8 pad0[0x10];
     u32 value10;
-    u32 value14;
-    u32 value18;
-    u16 value1C;
+    u32 inputValue;    /* 0x14 */
+    u32 selectedValue; /* 0x18 */
+    u16 mode;          /* 0x1C: 1 keeps the smaller selected value */
     u8 pad1E[0xFA];
     u32 value118;
     u32 value11C;
@@ -15,15 +15,15 @@ typedef struct BattleEffect {
 INCLUDE_ASM(const s32, "effect/effBattle", func_001686F0);
 
 u16 func_00168780(BattleEffect *effect) {
-    return effect->value1C;
+    return effect->mode;
 }
 
 u32 func_00168788(BattleEffect *effect) {
     return effect->value10;
 }
 
-u32 func_00168790(u32 *arg0) {
-    return *arg0;
+u32 func_00168790(u32 *value) {
+    return *value;
 }
 
 void func_00168798(BattleEffect *effect, u32 value) {
@@ -37,29 +37,29 @@ void func_001687A0(BattleEffect *effect, u32 value) {
 INCLUDE_ASM(const s32, "effect/effBattle", func_001687A8);
 
 void func_001687B8(BattleEffect *effect, s32 value) {
-    effect->value14 = value;
-    if (effect->value1C == 0) {
-        effect->value18 = value;
+    effect->inputValue = value;
+    if (effect->mode == 0) {
+        effect->selectedValue = value;
     }
 }
 
 u32 func_001687D0(BattleEffect *effect) {
-    return effect->value14;
+    return effect->inputValue;
 }
 
 /* Mode 1 keeps the lowest value seen; other modes replace it outright. */
 void func_001687D8(BattleEffect *effect, u32 value) {
-    if (effect->value1C == 1) {
-        if (value < effect->value18) {
-            effect->value18 = value;
+    if (effect->mode == 1) {
+        if (value < effect->selectedValue) {
+            effect->selectedValue = value;
         }
         return;
     }
-    effect->value18 = value;
+    effect->selectedValue = value;
 }
 
 u32 func_00168808(BattleEffect *effect) {
-    return effect->value18;
+    return effect->selectedValue;
 }
 
 void func_00168810(BattleEffect *effect, u32 value) {

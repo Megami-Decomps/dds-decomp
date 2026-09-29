@@ -83,9 +83,9 @@ u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
     u8 *table = D_003D9D58;
     s32 i = 2;
     u8 *limit = table + 4;
-    s32 end = position + increment;
+    s32 nextPosition = position + increment;
     do {
-        if (position < *limit && end >= *limit) {
+        if (position < *limit && nextPosition >= *limit) {
             return limit[1];
         }
         limit -= 2;
@@ -105,6 +105,10 @@ INCLUDE_ASM(const s32, "game/code_0029CC90", ptyComputeTotalExp);
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029CF00);
 
+#define BRS_ACTIVE_PARTY_FLAG 2
+#define BRS_HALF_EXP_SKILL 0x23F
+#define BRS_FULL_EXP_SKILL 0x240
+
 /* Same party-unit reward header layout as DDS1, including AP status. */
 typedef struct BrsExpUnit {
     u16 flags;          /* 0x00: bit 1 means active party member */
@@ -117,14 +121,14 @@ typedef struct BrsExpUnit {
 s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
     s32 result;
 
-    if ((((BrsExpUnit *)unit)->flags & 2) != 0) {
+    if ((((BrsExpUnit *)unit)->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
         result = exp;
     } else {
         result = 0;
-        if (ptyHasSkill(unit, 0x23F) != 0) {
+        if (ptyHasSkill(unit, BRS_HALF_EXP_SKILL) != 0) {
             result = exp / 2;
         }
-        if (ptyHasSkill(unit, 0x240) != 0) {
+        if (ptyHasSkill(unit, BRS_FULL_EXP_SKILL) != 0) {
             result = exp;
         }
     }

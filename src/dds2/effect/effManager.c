@@ -56,8 +56,8 @@ INCLUDE_ASM(const s32, "effect/effManager", func_00157878);
 
 INCLUDE_ASM(const s32, "effect/effManager", func_001578C0);
 
-void func_001579C8(u32 arg0) {
-    effCreateNode(5, 0, arg0);
+void func_001579C8(u32 parameter) {
+    effCreateNode(5, 0, parameter);
 }
 
 INCLUDE_ASM(const s32, "effect/effManager", func_001579E8);
