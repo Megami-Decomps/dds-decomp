@@ -52,7 +52,10 @@ void func_00265078(void) {
 void func_00265080(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002649B0", brsStepAnimDecay);
+/* Scales the value at +0x1574 down by 1.2. */
+void brsStepAnimDecay(u8 *work) {
+    *(s32 *)(work + 0x1574) = (s32)((f32)*(s32 *)(work + 0x1574) / 1.2f);
+}
 
 typedef struct {
     u8 pad00[0x1574];

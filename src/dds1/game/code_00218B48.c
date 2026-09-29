@@ -7,9 +7,14 @@ typedef struct MdlViewState {
     s8 unk08;
     s8 unk09;
     s8 unk0A;
-    u8 pad0B[4];
+    s8 unk0B;
+    s8 unk0C;
+    s8 unk0D;
+    s8 unk0E;
     s8 unk0F;
-    u8 pad10[6];
+    s8 unk10;
+    u8 pad11[3];
+    s16 unk14;
     s16 resourceCount;
     s16 unk18;
     s16 unk1A;
@@ -27,14 +32,21 @@ typedef struct MdlViewState {
     u8 pad32[2];
     s16 unk34;
     s16 unk36;
-    u8 pad38[2];
+    s16 unk38;
     s16 unk3A;
     u8 pad3C[4];
     s16 unk40;
     s16 unk42;
     s16 unk44;
     s16 unk46;
-    u8 pad48[0x44];
+    s16 unk48;
+    s16 unk4A;
+    s16 unk4C;
+    s16 unk4E;
+    s16 unk50;
+    s16 unk52;
+    f32 unk54;
+    u8 pad58[0x34];
     s32 slotBeforeResources[1]; /* One element before resources[] for rightward rotation. */
     s32 resources[1];
 } MdlViewState;
@@ -51,7 +63,25 @@ extern MdlCtrlState D_003D7B50;
 extern s32 D_003BAA00;
 extern s32 D_003D7B10[];
 extern s8 D_003D7A60[];
-extern s8 D_00367A40[];
+typedef struct MdlViewerTaskDef {
+    const char *name;
+    void *update;
+    s32 data;
+} MdlViewerTaskDef;
+
+extern MdlViewerTaskDef D_00367A40[];
+
+typedef struct MdlSystemTask {
+    const char *name;
+    s32 arg;
+} MdlSystemTask;
+
+extern MdlSystemTask D_00367AE0[3];
+extern char D_003ABF78[]; /* "modelViewer" */
+extern char D_003ABF88[]; /* "modelViewerEnd" */
+
+extern void mdlViewer();
+extern void mdlViewerEnd();
 
 s32 func_0011D3E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_0011E080(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -67,7 +97,7 @@ void sdfAppendPacket(s32 arg0, s32 arg1);
 void func_002EC780(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, s32 data);
 void func_00102A18(void);
 void func_00101A80(s32 arg0, s32 arg1);
 void func_0021E3C0(MdlViewState *arg0);
@@ -117,7 +147,25 @@ u16 func_002192C8(MdlRecord *record) {
     return record->value0C;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_002192D0);
+s32 *func_002192D0(s32 resource, s32 id) {
+    s32 *table = *(s32 **)(*(s32 *)(resource + 0xC) + 0xA4);
+    s32 *record;
+    s32 remaining;
+
+    if (table == NULL) {
+        return NULL;
+    }
+    record = table;
+    remaining = func_002192C8((MdlRecord *)record);
+    do {
+        remaining--;
+        record = (s32 *)((s32)record + record[1]);
+        if (remaining == -1) {
+            return NULL;
+        }
+    } while (*record != id);
+    return record;
+}
 
 s32 * mdlGetFirstRecord(s32 address) {
     s32 *record = (s32 *)(address + 8);
@@ -218,7 +266,7 @@ void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002198D8);
 
 typedef struct MdlPartEntry {
-    s32 kind;     /* 0x00: billboard or effect */
+    u32 kind;     /* 0x00: billboard or effect */
     s32 state;    /* 0x04 */
     s32 object;   /* 0x08 */
     u8 pad0C[4];
@@ -249,12 +297,33 @@ void mdlAddEffectPart(MdlPartList *list, s32 index) {
     list->count += 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219BB0);
+extern void *func_002CFF68(s32 size);
+
+typedef struct MdlHandlerNode {
+    s32 a;      /* 0x00 */
+    void *b;    /* 0x04 */
+    u8 pad08[8];
+    s32 c;      /* 0x10 */
+    u8 pad14[0x98];
+} MdlHandlerNode;
+
+void func_00219BB0(MdlPartList *list, s32 a, void *b, s32 c) {
+    MdlHandlerNode *node = func_002CFF68(0xAC);
+    MdlPartEntry *entry = &list->entries[list->count];
+
+    node->c = c;
+    node->a = a;
+    node->b = b;
+    entry->kind = 3;
+    entry->state = 0;
+    entry->object = (s32)node;
+    list->count += 1;
+}
 
 typedef struct MdlObj {
     s32 unk0;             /* 0x00 */
     s32 handle;           /* 0x04 */
-    u8 pad08;
+    u8 inUse;             /* 0x08: set when an item claims the object */
     u8 initialized;       /* 0x09 */
     u8 pad0A[6];
     s32 unk10;            /* 0x10 */
@@ -281,7 +350,28 @@ void func_00219CC8(u32 arg0) {
     sdfDevCreateBufferedRequest(arg0, 0x10, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219CE8);
+void func_00219CE8(MdlPartList *list) {
+    s32 i;
+
+    if (list != NULL) {
+        for (i = 0; i < list->count; i++) {
+            MdlPartEntry *entry = &list->entries[i];
+
+            switch (entry->kind) {
+            case 0:
+                billDispatchByKind(entry->object);
+                break;
+            case 1:
+                effDestroyNode(entry->object);
+                break;
+            case 3:
+                mdlObjDestroy((MdlObj *)entry->object);
+                break;
+            }
+        }
+        sdfDestroyDevRequest(list);
+    }
+}
 
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next; /* 0x00 */
@@ -294,6 +384,7 @@ typedef struct MdlResourceItem {
 typedef struct {
     u8 pad00[0x14];
     MdlResourceItem *first; /* 0x14 */
+    void *chunk;            /* 0x18 */
 } MdlResourceOwner;
 
 MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 subtype) {
@@ -330,16 +421,160 @@ s32 func_00219EA0(s32 arg0, s32 arg1) {
     return *(s32 *)(tmp + 0xc) + arg1 * 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219ED8);
+typedef struct MdlPartRec {
+    u8 pad00[4];
+    u32 size;       /* 0x04 */
+    s32 firstId;    /* 0x08 */
+    u16 count;      /* 0x0C */
+    u16 partIndex;  /* 0x0E */
+    f32 value;      /* 0x10 */
+} MdlPartRec;
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00219FD8);
+typedef struct MdlPartItem {
+    u8 pad00[8];
+    s32 handle;          /* 0x08 */
+    MdlPartEntry *part;  /* 0x0C */
+    void *record;        /* 0x10 */
+    f32 value;           /* 0x14 */
+} MdlPartItem;
+
+extern void *sdfChunkFindRecordById(void *chunk, s32 id);
+
+void func_00219ED8(MdlResourceOwner *owner, MdlPartRec *rec, s32 option, s32 type, s32 (*create)(MdlPartEntry *)) {
+    MdlPartEntry *part = (MdlPartEntry *)func_00219EA0((s32)owner, rec->partIndex);
+
+    if (part != NULL) {
+        void *chunk = owner->chunk;
+        s32 id = rec->firstId;
+        s32 count = rec->count;
+        f32 value = 0.0f;
+
+        if (rec->size >= 0x11) {
+            value = rec->value;
+        }
+        do {
+            void *record = sdfChunkFindRecordById(chunk, id++);
+
+            if (record != NULL) {
+                MdlPartItem *item = (MdlPartItem *)mdlInsertResourceItem(owner, type, option);
+
+                item->handle = create(part);
+                item->part = part;
+                item->record = record;
+                item->value = value;
+            }
+        } while (--count != 0);
+    }
+}
+
+typedef struct MdlEffectRec {
+    u8 pad00[8];
+    s32 effectId;    /* 0x08 */
+    s32 param0C;     /* 0x0C */
+    u16 scaleX;      /* 0x10 */
+    u16 scaleY;      /* 0x12 */
+    u16 value14;     /* 0x14 */
+    u8 value16;      /* 0x16 */
+    u8 value17;      /* 0x17 */
+    s32 value18;     /* 0x18 */
+    s32 value1C;     /* 0x1C */
+    s32 value20;     /* 0x20 */
+    s32 value24;     /* 0x24 */
+} MdlEffectRec;
+
+typedef struct MdlEffectParams {
+    MdlResourceOwner *owner; /* 0x00 */
+    s32 effectId;            /* 0x04 */
+    s32 param0C;             /* 0x08 */
+    f32 scaleX;              /* 0x0C */
+    f32 scaleY;              /* 0x10 */
+    s32 value14;             /* 0x14 */
+    s32 value16;             /* 0x18 */
+    s32 mode;                /* 0x1C */
+    s32 value17;             /* 0x20 */
+    s32 value18;             /* 0x24 */
+    s32 value1C;             /* 0x28 */
+    s32 value20;             /* 0x2C */
+    s32 value24;             /* 0x30 */
+} MdlEffectParams;
+
+extern s32 func_00188150(MdlEffectParams *params);
+
+void func_00219FD8(MdlResourceOwner *owner, MdlEffectRec *rec, s32 option) {
+    MdlEffectParams params;
+    MdlResourceItem *item;
+
+    params.owner = owner;
+    params.effectId = rec->effectId;
+    params.param0C = rec->param0C;
+    params.scaleX = rec->scaleX;
+    params.scaleY = rec->scaleY;
+    params.value14 = rec->value14;
+    params.value16 = rec->value16;
+    params.mode = 3;
+    params.value17 = rec->value17;
+    params.value18 = rec->value18;
+    params.value1C = rec->value1C;
+    params.value20 = rec->value20;
+    params.value24 = rec->value24;
+    item = mdlInsertResourceItem(owner, 2, option);
+    item->resource = func_00188150(&params);
+}
 
 void func_0021A088(u32 arg0, s32 arg1) {
     func_00217310(arg0, *(u16 *)(arg1 + 8), *(u16 *)(arg1 + 10),
                                 *(u32 *)(arg1 + 0xc), *(u32 *)(arg1 + 0x10));
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A0B0);
+typedef struct MdlObjItem {
+    u8 pad00[8];
+    MdlResourceOwner *owner; /* 0x08 */
+    s32 obj;                 /* 0x0C */
+    s32 data;                /* 0x10 */
+    s32 param;               /* 0x14 */
+    u8 attr[8];              /* 0x18 */
+} MdlObjItem;
+
+typedef struct MdlEntryRec {
+    u8 pad00[8];
+    s32 dataId;   /* 0x08 */
+    s32 param;    /* 0x0C */
+    u8 flagB;     /* 0x10 */
+    u8 flagA;     /* 0x11 */
+    u16 index;    /* 0x12 */
+} MdlEntryRec;
+
+typedef struct MdlSlotRec {
+    u8 pad00[8];
+    MdlObj *obj; /* 0x08 */
+} MdlSlotRec;
+
+extern void *sdfFindResourceById(s32 id);
+
+void func_0021A0B0(MdlResourceOwner *owner, MdlEntryRec *entry, s32 option) {
+    MdlSlotRec *slot = (MdlSlotRec *)func_00219EA0((s32)owner, entry->index);
+
+    if (slot != 0) {
+        MdlObj *obj = slot->obj;
+        if (obj->inUse == 0) {
+            s32 data = (s32)sdfFindResourceById(entry->dataId);
+            if (data != 0) {
+                MdlObjItem *item;
+                u8 *attr;
+                obj->inUse = 1;
+                item = (MdlObjItem *)mdlInsertResourceItem(owner, 3, option);
+                item->owner = owner;
+                item->obj = (s32)obj;
+                attr = item->attr;
+                item->data = data;
+                item->param = entry->param;
+                attr[1] = 1;
+                attr[2] = entry->flagA;
+                attr[3] = entry->flagB;
+            }
+        }
+    }
+}
 
 void mdlCondInitEntry(s32 arg0) {
     s32 v = *(s32 *)(arg0 + 0xC);
@@ -353,7 +588,29 @@ void mdlCondInitEntry(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", mdlDispatchResourceEntry);
+typedef struct MdlRecordHeader {
+    s32 kind; /* 0x00 */
+} MdlRecordHeader;
+
+void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecordHeader *record, s32 option) {
+    switch (record->kind) {
+    case 1:
+        func_00219ED8(owner, (MdlPartRec *)record, option, 0, mdlAdvanceBillboardPart);
+        return;
+    case 2:
+        func_00219ED8(owner, (MdlPartRec *)record, option, 1, mdlAdvanceEffectPart);
+        return;
+    case 3:
+        func_00219FD8(owner, (MdlEffectRec *)record, option);
+        return;
+    case 4:
+        func_0021A088((u32)owner, (s32)record);
+        return;
+    case 5:
+        func_0021A0B0(owner, (MdlEntryRec *)record, option);
+        break;
+    }
+}
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
     s32 *block = func_002192D0(object, id);
@@ -397,9 +654,71 @@ void mdlRemoveResourceSubtype(MdlResourceOwner *object, s32 subtype) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A3D8);
+typedef struct MdlNodeInfo {
+    s32 id;       /* 0x00 */
+    u8 pad04[0xC];
+    f32 pos[4];   /* 0x10 */
+} MdlNodeInfo;
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A490);
+typedef struct MdlAnchorRec {
+    u8 pad00[4];
+    u16 type;          /* 0x04 */
+    u8 pad06[2];
+    s32 handle;        /* 0x08 */
+    u8 pad0C[4];
+    MdlNodeInfo *info; /* 0x10 */
+    f32 scale;         /* 0x14 */
+} MdlAnchorRec;
+
+extern u8 D_00324690[];
+extern u8 *func_002D7D68(void *chunk, s32 id);
+
+void func_0021A3D8(void *chunk, MdlAnchorRec *rec, f32 *out) {
+    MdlNodeInfo *info = rec->info;
+    u8 *matrix = func_002D7D68(chunk, info->id);
+    f32 scale = rec->scale;
+
+    __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(matrix + 0xC0));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(info->pos));
+    __asm__ volatile(".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\tvmaddw.xyzw vf10, vf31, vf0w\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw vf10, vf10, vf12\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\tvmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\tvwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(scale));
+    __asm__ volatile(".set noreorder\n\tvmulx.xyzw vf10, vf10, vf2x\n\tvadd.xyzw vf10, vf10, vf11\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(out));
+}
+
+extern void effCopyVector(s32 handle, f32 *src);
+extern void billInvokeCallback(s32 handle);
+extern void func_0014FBF0(s32 handle, f32 *pos);
+extern void effUpdateNode(s32 handle);
+extern void func_00188318(s32 handle);
+
+void func_0021A490(MdlResourceOwner *owner, MdlAnchorRec *rec) {
+    void *chunk = owner->chunk;
+    f32 position[4];
+    s32 handle;
+
+    switch (rec->type) {
+    case 0:
+        func_0021A3D8(chunk, rec, position);
+        handle = rec->handle;
+        effCopyVector(handle, position);
+        billInvokeCallback(handle);
+        break;
+    case 1:
+        func_0021A3D8(chunk, rec, position);
+        handle = rec->handle;
+        func_0014FBF0(handle, position);
+        effUpdateNode(handle);
+        break;
+    case 2:
+        func_00188318(rec->handle);
+        break;
+    case 3:
+        mdlCondInitEntry((s32)rec);
+        break;
+    }
+}
 
 void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
@@ -434,11 +753,142 @@ void func_0021A628(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     sdfAppendPacket(tmp, func_0021A608(arg0, arg1, arg2, arg3, arg4));
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A660);
+extern s8 D_00398628[];
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A718);
+s32 func_0021A660(s16 *cursor, s32 count) {
+    s32 max = count - 1;
+    s32 v = *cursor;
+    s32 changed = 0;
+    if (D_00398628[5] < 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        } else {
+            v = 0;
+            changed = 1;
+        }
+    } else if (((u8)D_00398628[5] & 2) != 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        }
+    } else if (D_00398628[4] < 0) {
+        if (v > 0) {
+            v -= 1;
+            changed = 1;
+        } else {
+            v = max;
+            changed = 1;
+        }
+    } else if ((((u8)D_00398628[4] & 2) != 0) && (v > 0)) {
+        v -= 1;
+        changed = 1;
+    }
+    if (changed != 0) {
+        *cursor = v;
+        D_003D7A50.unk09 = 0;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A880);
+s32 func_0021A718(s16 *cursor, s32 count, s32 step) {
+    s32 max = count - 1;
+    s32 v = *cursor;
+    s32 changed = 0;
+    if (D_00398628[7] < 0) {
+        if (v < max) {
+            v += 1;
+        } else {
+            v = 0;
+        }
+        changed = 1;
+    } else if (((u8)D_00398628[7] & 2) != 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        }
+    } else if (D_00398628[6] < 0) {
+        if (v > 0) {
+            v -= 1;
+        } else {
+            v = max;
+        }
+        changed = 1;
+    } else if (((u8)D_00398628[6] & 2) != 0) {
+        if (v > 0) {
+            v -= 1;
+            changed = 1;
+        }
+    } else if (step != 0) {
+        if (D_00398628[11] < 0) {
+            if (v < max) {
+                v += step;
+                if (v > max) {
+                    v = max;
+                }
+            } else {
+                v = 0;
+            }
+            changed = 1;
+        } else if (((u8)D_00398628[11] & 2) != 0) {
+            if (v < max) {
+                v += step;
+                if (v > max) {
+                    v = max;
+                }
+                changed = 1;
+            }
+        } else if (D_00398628[10] < 0) {
+            if (v > 0) {
+                v -= step;
+                if (v < 0) {
+                    v = 0;
+                }
+            } else {
+                v = max;
+            }
+            changed = 1;
+        } else if ((((u8)D_00398628[10] & 2) != 0) && (v > 0)) {
+            v -= step;
+            if (v < 0) {
+                v = 0;
+            }
+            changed = 1;
+        }
+    }
+    if (changed != 0) {
+        *cursor = v;
+        D_003D7A50.unk09 = 0;
+        return 1;
+    }
+    return 0;
+}
+
+typedef struct MdlResource {
+    u8 pad00[0x18];
+    u8 *chunk;      /* 0x18 */
+    s32 hasEntries; /* 0x1C */
+} MdlResource;
+
+extern MdlResource *func_00217680(s16 arg0, s16 arg1);
+extern void mdlAddEntryFlagged(void *arg0, s32 arg1, s32 arg2);
+
+void func_0021A880(void) {
+    MdlResource *resource = func_00217680(D_003D7A50.unk18, D_003D7A50.unk1A);
+
+    *(MdlResource **)&D_003D7A50.resources[0] = resource;
+    D_003D7A50.unk22 = 0;
+    D_003D7A50.unk24 = 0;
+    D_003D7A50.unk26 = 0;
+    D_003D7A50.unk28 = 0;
+    D_003D7A50.unk2A = 0;
+    D_003D7A50.unk2C = 0;
+    if (resource->hasEntries != 0) {
+        mdlAddEntryFlagged(resource, 0, 0);
+    }
+    D_003D7A50.unk3A = 0;
+}
 
 extern u128 D_003D7B20;
 extern u128 D_003D7B30;
@@ -598,7 +1048,48 @@ s32 func_0021BE50(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021BE88);
+extern s8 D_00324510[];
+
+void func_0021BE88(void) {
+    s32 value = (s32)(D_003D7A50.unk54 * 100.0f + 0.5f);
+
+    if (D_00324510[0x27] & 2) {
+        if (value < 0x32) {
+            value += 1;
+        } else if (value < 0x1F4) {
+            value += 10;
+        } else {
+            value += 100;
+            if (value >= 0x7D1) {
+                value = 0x7D0;
+            }
+        }
+        D_003D7A50.unk54 = value * 0.01f;
+    } else if (D_00324510[0x26] & 2) {
+        if (value < 0x33) {
+            value -= 1;
+            if (value < 5) {
+                value = 5;
+            }
+        } else if (value < 0x1F5) {
+            value -= 10;
+        } else {
+            value -= 100;
+        }
+        D_003D7A50.unk54 = value * 0.01f;
+    }
+    if (D_00324510[0x23] < 0) {
+        D_003D7A50.unk0C ^= 1;
+    }
+    D_003D7A50.unk0D = 0;
+    if (D_003D7A50.unk0C != 0) {
+        if (D_00324510[0x25] != 0) {
+            D_003D7A50.unk0D = 1;
+        } else if (D_00324510[0x24] != 0) {
+            D_003D7A50.unk0D = -1;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021BFB0);
 
@@ -707,9 +1198,53 @@ u32 func_0021D568(void) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D590);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D5D0);
+typedef struct MdlDrawDevice {
+    u8 pad00[0x10];
+    void (*submit)(struct MdlDrawDevice *device, s32 list); /* 0x10 */
+} MdlDrawDevice;
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D668);
+extern MdlDrawDevice D_00325048;
+extern u8 D_00367B80[];
+extern u8 D_00367BE0[];
+extern s32 sdfCreateInitializedPacketList(void);
+extern s32 func_002EF2E0(void *arg0, void *arg1, s32 arg2, s32 arg3);
+
+void func_0021D5D0(void) {
+    s32 list;
+
+    if (D_003D7A50.unk0A < 4) {
+        if (D_003D7A50.unk0A >= 2) {
+            list = sdfCreateInitializedPacketList();
+            __asm__ volatile(".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\tvmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder");
+            sdfAppendPacket(list, func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80));
+            D_00325048.submit(&D_00325048, list);
+        }
+    }
+}
+
+extern u8 D_00367C00[];
+extern u8 D_00367C40[];
+extern s32 D_003BBCB8;
+extern void func_002EA2E0(s32 packet, s32 arg);
+
+void func_0021D668(void) {
+    s32 list;
+    s32 packet;
+    MdlResource *resource;
+
+    if (D_003D7A50.unk0A == 3) {
+        list = sdfCreateInitializedPacketList();
+        resource = *(MdlResource **)&D_003D7A50.resources[0];
+        __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(resource->chunk + 0x20));
+        packet = func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
+        if ((D_00398628[13] < 0) & (D_003BBCB8 == 0)) {
+            D_003BBCB8 = 1;
+            func_002EA2E0(packet, 0x100);
+        }
+        sdfAppendPacket(list, packet);
+        D_00325048.submit(&D_00325048, list);
+    }
+}
 
 void mdlViewerTaskDestroy(void) {
     if (D_003D7A50.viewerTask != 0) {
@@ -718,11 +1253,37 @@ void mdlViewerTaskDestroy(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D780);
+void func_0021D780(void) {
+    mdlViewerTaskDestroy();
+    D_003D7A50.viewerTask = kwlnTaskCreate(D_00367A40[D_003D7A50.unk0A - 1].name, 0x2B00, 1, 0, D_00367A40[D_003D7A50.unk0A - 1].update, 0, D_00367A40[D_003D7A50.unk0A - 1].data);
+    func_00101A80(D_003D7A50.unk00, D_003D7A50.viewerTask);
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", mdlViewer);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021DAE0);
+extern u8 D_00367C50[];
+extern u8 D_00367CB0[];
+extern s32 sdfCountMapPositionRecords(void *chunk);
+extern u8 *sdfChunkFindByTag(void *chunk, s32 tag);
+extern void func_002D9D00(void *chunk, u8 *record);
+
+void func_0021DAE0(MdlResource *resource) {
+    s32 count = sdfCountMapPositionRecords(resource->chunk);
+    s32 i;
+    s32 list;
+    u8 *record;
+
+    if (count > 0) {
+        list = sdfCreateInitializedPacketList();
+        record = sdfChunkFindByTag(resource->chunk, 0x534F504D) + 0x10;
+        for (i = 0; i != count; i++) {
+            func_002D9D00(resource->chunk, record);
+            record += 0x40;
+            sdfAppendPacket(list, func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80));
+        }
+        D_00325048.submit(&D_00325048, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", mdlViewerEnd);
 
@@ -745,7 +1306,21 @@ void mdlFreeViewResources(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E3C0);
+extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 flag);
+extern void func_00103498(const char *name, s32 arg, s32 arg2, s32 arg3);
+
+void func_0021E3C0(MdlViewState *view) {
+    s32 i;
+
+    mdlFreeViewResources();
+    kwlnTaskDestroyWithHierarchyByName(D_003ABF78, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003ABF88, 0);
+    for (i = 0; i != 3; i++) {
+        if (kwlnTaskGetTaskByName((void *)D_00367AE0[i].name) == 0) {
+            func_00103498(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E450);
 
@@ -824,13 +1399,124 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FA78);
+extern s32 dds3AdvanceWorldCounter(void);
+extern s32 func_00112C08(s32 counter, f32 *position, f32 *rotation);
+extern void effObjSetInnerFloat(s32 object, f32 value);
+extern void dds3EnsureSlotData();
+extern s32 dds3GetWorldSecondaryObject(void);
+extern void func_001109B8(s32 world, s32 object);
+extern void func_001127A0(s32 object, s32 arg);
+extern void *memset(void *dst, s32 value, u32 size);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FB30);
+void func_0021FA78(void) {
+    f32 position[4] = { 0.0f, -100.0f, -600.0f, 0.0f };
+    f32 rotation[4];
+    s32 object;
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FC30);
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
+    object = func_00112C08(dds3AdvanceWorldCounter(), position, rotation);
+    effObjSetInnerFloat(object, 10.0f);
+    dds3EnsureSlotData(object);
+    func_001109B8(dds3GetWorldSecondaryObject(), object);
+    func_001127A0(object, 0);
+}
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FD50);
+extern void func_00111E30(s32 object, s32 arg1, s32 arg2);
+extern s32 dds3SpawnCameraSlotObj5(s32 counter, f32 *position, f32 *rotation);
+extern void dds3SetObjectFlags(s32 object, s32 flags);
+extern s32 *dds3GetUnk0C(s32 object);
+
+s32 func_0021FB30(s32 arg0, s32 arg1) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 counter;
+    s32 object;
+
+    memset(position, 0, 0x10);
+    position[3] = 1.0f;
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
+    counter = dds3AdvanceWorldCounter();
+    object = dds3SpawnCameraSlotObj5(counter, position, rotation);
+    dds3SetObjectFlags(object, 0x20);
+    effObjSetInnerFloat(object, 10.0f);
+    func_00111E30(object, arg0, arg1);
+    if (dds3GetUnk0C(object)[7] != 0) {
+        mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
+    }
+    func_001127A0(object, 0);
+    return counter;
+}
+
+extern void *func_00110A48(s32 world, s32 id, s32 kind);
+extern void dds3SetSlotByKind(s32 object, s32 slot);
+extern void dds3InvokeSlot5Handler(s32 object);
+
+s32 func_0021FC30(s32 arg0, s32 arg1) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 counter;
+    s32 object;
+
+    memset(position, 0, 0x10);
+    position[3] = 1.0f;
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
+    counter = dds3AdvanceWorldCounter();
+    object = dds3SpawnCameraSlotObj5(counter, position, rotation);
+    dds3SetObjectFlags(object, 0x20);
+    effObjSetInnerFloat(object, 10.0f);
+    func_00111E30(object, arg0, arg1);
+    mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
+    dds3SetSlotByKind(object, (s32)func_00110A48(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3InvokeSlot5Handler(object);
+    func_001127A0(object, 0);
+    dds3SetObjectFlags(object, 0x400);
+    return counter;
+}
+
+typedef struct MdlAttachSlot {
+    u8 pad00[0x18];
+    u8 *firstVec; /* 0x18 */
+    u8 pad1C[4];
+} MdlAttachSlot;
+
+typedef struct MdlAttachObj {
+    u8 pad00[0x1C];
+    u8 *inner; /* 0x1C */
+} MdlAttachObj;
+
+extern void effObjSetInnerFirstVec();
+extern void effObjSetInnerSecondVec();
+extern void effObjFetchInnerFirstVec();
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuatMultiplyVU(void);
+
+void func_0021FD50(s32 targetId, s32 sourceId) {
+    f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+    MdlAttachObj *target;
+    MdlAttachSlot *source;
+    u8 *base;
+
+    target = (MdlAttachObj *)func_00110A48(dds3GetWorldSecondaryObject(), targetId, 5);
+    if (target != NULL) {
+        source = (MdlAttachSlot *)func_00110A48(dds3GetWorldSecondaryObject(), sourceId, 0x11);
+        if (source != NULL) {
+            base = source->firstVec;
+            effObjSetInnerFirstVec(target, base);
+            __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(quaternion));
+            effMiscAxisAngleToQuaternionVU(3.14159265f);
+            base += 0x10;
+            __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(base));
+            effMiscQuatMultiplyVU();
+            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(quaternion));
+            effObjSetInnerSecondVec(target, quaternion);
+            effObjFetchInnerFirstVec(target);
+            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(target->inner + 0x70));
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFE8);
 

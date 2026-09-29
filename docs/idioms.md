@@ -128,6 +128,12 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   tests: `if (m < 0xE) { if (m >= 0xC) ... }`.
 - Adjacent independent stores come out roughly reversed. Retail's order
   usually comes from writing the fields in ascending offset order.
+- One shared `jal` with its argument chosen by a branch (`bne; daddu $4,$0`
+  in the slot, then `li $4,1`) instead of `xori`/`sltiu` comes from a
+  `return` in both arms, which cross-jumping merges:
+  `if (g() == 1) { f(1); return 1; } f(0); return 1;` (`fldSetFlagFromWorld1`).
+- A loop that retail closes with `bne` against a hoisted `li $rN,K` is written
+  with `!=` (`i != 2`); a `<` test becomes a count-down loop.
 
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 
@@ -288,6 +294,10 @@ b; nop`, never `b; cvt.s.w`. The 2.96 as swaps it, and no as option or other
 ee assembler reproduces the retail rule without changing other code, so
 `tools/as_coproc_delay.py` applies it to cc1 output before `as` (in the build
 and in `tools/cc.sh`). It changes nothing that already matched.
+
+The same holds after `cvt.w.s`/`trunc.w.s` (no `cvt.w.s $fN; jr; swc1 $fN` in
+either retail ELF), and retail never moves the closing `addu` of an indexed
+`la $rd,sym($rs)` into a following `jr`'s slot; the pre-pass handles both.
 
 ## Not allowed
 

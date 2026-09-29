@@ -1378,14 +1378,112 @@ void func_00180910(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x10) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180918);
+/* Shared scratch parameter block handed to the particle spawner (D_003B1670)
+ * and the shared spawn origin vector at +0x10 (D_003B1680, separate symbol). */
+typedef struct EffSpawnParams {
+    f32 pos[4];
+    f32 vel[4];
+    u8 pad20[0x0C];
+    f32 unk2C;
+    u8 pad30[0x08];
+    s16 unk38;
+    u8 pad3A[0x0A];
+    f32 unk44;
+    u8 pad48[0x04];
+    f32 unk4C;
+} EffSpawnParams;
 
-u64 func_00180BD8(void) {
-    u64 temp_v0;
+typedef struct EffSpawnGroup {
+    u8 pad00[0x1C];
+    u32 handles[30];
+} EffSpawnGroup;
 
-    temp_v0 = func_00328D68(0x4c);
-    func_00180918(temp_v0);
-    return temp_v0;
+#define EFF_DEG2RAD 0.017453292f
+
+extern EffSpawnParams D_003B1670[];
+extern u8 D_003B1680[];
+extern f32 func_003406A0(f32);
+extern f32 func_003407A0(f32);
+extern void func_00336768(f32 *axis, f32 angle);
+
+/* Spawns 12 particles in a ring: every second particle advances the ring angle
+ * (60 degrees). Direction is normalised on the VU, scaled per axis and offset
+ * by the origin vector; short-reach particles get a shorter life. */
+void func_00180918(EffSpawnGroup *group) {
+    s32 i;
+    u32 *out;
+    f32 angle = 0.0f;
+    f32 cosv = 0.0f;
+    f32 sinv = 0.0f;
+    f32 dir[4];
+    f32 scale[4];
+    f32 spread;
+    f32 radius;
+    f32 reach;
+    f32 speed;
+    s16 life;
+
+    i = 0;
+    out = group->handles;
+    do {
+        if ((i & 1) == 0) {
+            sinv = func_003407A0(angle);
+            cosv = func_003406A0(angle);
+            angle += 60.0f * EFF_DEG2RAD;
+        }
+        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        D_003B1670->unk44 = spread * 1.25f;
+        D_003B1670->unk4C = spread * 12.5f;
+        radius = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 100.0f;
+        D_003B1670->vel[1] = 0;
+        D_003B1670->vel[0] = sinv * radius;
+        D_003B1670->vel[2] = cosv * radius;
+        dir[0] = sinv;
+        dir[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f + 2.0f;
+        dir[2] = cosv;
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir));
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "vmul.xyz $vf2, $vf10, $vf10\n\t"
+            "vmulax.w ACC, $vf0, $vf2x\n\t"
+            "vmadday.w ACC, $vf0, $vf2y\n\t"
+            "vmaddz.w $vf2, $vf0, $vf2z\n\t"
+            "vrsqrt Q, $vf0w, $vf2w\n\t"
+            "vwaitq\n\t"
+            "vmulq.xyz $vf10, $vf10, Q\n\t"
+            ".set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir) : "memory");
+        reach = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 350.0f;
+        scale[2] = reach;
+        scale[0] = reach;
+        scale[1] = -reach;
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir));
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(scale));
+        __asm__ volatile(".set noreorder\n\tvmul.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003B1680));
+        __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1670) : "memory");
+        if (scale[0] < 250.0f) {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(D_003AA868) % 5 + 5;
+        } else {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(D_003AA868) % 6 + 15;
+        }
+        D_003B1670->unk38 = life;
+        D_003B1670->unk2C = speed;
+        *out = func_0016D070(D_003B1670);
+        out++;
+        i++;
+    } while (i < 12);
+}
+
+void *func_00180BD8(void) {
+    void *work;
+
+    work = func_00328D68(0x4c);
+    func_00180918(work);
+    return work;
 }
 
 typedef struct MenuPanelChildren1C {
@@ -1401,12 +1499,12 @@ void func_00180C10(MenuPanelChildren1C *group) {
     func_00328E48(group);
 }
 
-u64 func_00180C68(void) {
-    u64 temp_v0;
+void *func_00180C68(void) {
+    void *work;
 
-    temp_v0 = func_00328D68(0x4c);
-    func_00180918(temp_v0);
-    return temp_v0;
+    work = func_00328D68(0x4c);
+    func_00180918(work);
+    return work;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180CA0);
@@ -1423,14 +1521,74 @@ void func_00180DA8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x18) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180DB0);
+extern EffSpawnParams D_003B16D0[];
 
-u64 func_00181050(void) {
-    u64 temp_v0;
+/* 12-piece spread on a cone around a random axis (rotation matrix built by
+ * func_00336768 into the VU0 matrix registers). */
+void func_00180DB0(EffSpawnGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 radius;
+    f32 height;
+    f32 speed;
+    s32 life;
 
-    temp_v0 = func_00328D68(0x4c);
-    func_00180DB0(temp_v0);
-    return temp_v0;
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = func_003407A0(angle);
+            cosv = func_003406A0(angle);
+            angle += 60.0f * EFF_DEG2RAD;
+        }
+        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        D_003B16D0->unk44 = spread * 1.25f;
+        D_003B16D0->unk4C = spread * 12.5f;
+        radius = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 100.0f;
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        D_003B16D0->vel[1] = 0;
+        D_003B16D0->vel[0] = sinv * radius;
+        D_003B16D0->vel[2] = cosv * radius;
+        func_00336768(axis, -(func_00341240(D_003AA868) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        D_003B16D0->pos[0] = 0;
+        D_003B16D0->pos[2] = 0;
+        D_003B16D0->pos[1] = -height;
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B16D0->pos));
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
+            "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
+            "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
+            ".set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B16D0->pos) : "memory");
+        D_003B16D0->pos[0] += D_003B16D0->vel[0];
+        D_003B16D0->pos[2] += D_003B16D0->vel[2];
+        if (height < 300.0f) {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(D_003AA868) % 5 + 5;
+        } else {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(D_003AA868) % 6 + 15;
+        }
+        D_003B16D0->unk38 = life;
+        D_003B16D0->unk2C = speed;
+        group->handles[i] = func_0016D070(D_003B16D0);
+        i++;
+    } while (i < 12);
+}
+
+void *func_00181050(void) {
+    void *work;
+
+    work = func_00328D68(0x4c);
+    func_00180DB0(work);
+    return work;
 }
 
 void func_00181088(MenuPanelChildren1C *group) {
@@ -1441,12 +1599,12 @@ void func_00181088(MenuPanelChildren1C *group) {
     func_00328E48(group);
 }
 
-u64 func_001810E0(void) {
-    u64 temp_v0;
+void *func_001810E0(void) {
+    void *work;
 
-    temp_v0 = func_00328D68(0x4c);
-    func_00180DB0(temp_v0);
-    return temp_v0;
+    work = func_00328D68(0x4c);
+    func_00180DB0(work);
+    return work;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181118);
@@ -1463,14 +1621,72 @@ void func_00181220(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x18) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181228);
+extern EffSpawnParams D_003B1730[];
 
-u64 func_001814E8(void) {
-    u64 temp_v0;
+/* 30-piece spread: pieces are placed on a cone around a random axis (rotation
+ * matrix built by func_00336768 into the VU0 matrix registers). */
+void func_00181228(EffSpawnGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 height;
+    f32 speed;
+    s16 life;
 
-    temp_v0 = func_00328D68(0x94);
-    func_00181228(temp_v0);
-    return temp_v0;
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = func_003407A0(angle);
+            cosv = func_003406A0(angle);
+            angle += 24.0f * EFF_DEG2RAD;
+        }
+        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        D_003B1730->unk44 = spread * 1.25f;
+        D_003B1730->unk4C = spread * 12.5f;
+        D_003B1730->vel[1] = 0;
+        D_003B1730->vel[0] = sinv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 500.0f);
+        D_003B1730->vel[2] = cosv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 250.0f);
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        func_00336768(axis, -(func_00341240(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        D_003B1730->pos[0] = 0;
+        D_003B1730->pos[2] = 0;
+        D_003B1730->pos[1] = -height;
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1730->pos));
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
+            "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
+            "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
+            ".set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1730->pos) : "memory");
+        D_003B1730->pos[0] += D_003B1730->vel[0];
+        D_003B1730->pos[2] += D_003B1730->vel[2];
+        if (height < 300.0f) {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(D_003AA868) % 5 + 5;
+        } else {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(D_003AA868) % 6 + 15;
+        }
+        D_003B1730->unk38 = life;
+        D_003B1730->unk2C = speed;
+        group->handles[i] = func_0016D070(D_003B1730);
+        i++;
+    } while (i < 30);
+}
+
+void *func_001814E8(void) {
+    void *work;
+
+    work = func_00328D68(0x94);
+    func_00181228(work);
+    return work;
 }
 
 void func_00181520(MenuPanelChildren1C *group) {
@@ -1481,12 +1697,12 @@ void func_00181520(MenuPanelChildren1C *group) {
     func_00328E48(group);
 }
 
-u64 func_00181578(void) {
-    u64 temp_v0;
+void *func_00181578(void) {
+    void *work;
 
-    temp_v0 = func_00328D68(0x94);
-    func_00181228(temp_v0);
-    return temp_v0;
+    work = func_00328D68(0x94);
+    func_00181228(work);
+    return work;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001815B0);
@@ -1503,14 +1719,73 @@ void func_001816B8(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x18) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001816C0);
+extern EffSpawnParams D_003B1790[];
 
-u64 func_00181960(void) {
-    u64 temp_v0;
+/* Same spread as func_00180DB0 with a wider cone and its own parameter block. */
+void func_001816C0(EffSpawnGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 radius;
+    f32 height;
+    f32 speed;
+    s32 life;
 
-    temp_v0 = func_00328D68(0x4c);
-    func_001816C0(temp_v0);
-    return temp_v0;
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = func_003407A0(angle);
+            cosv = func_003406A0(angle);
+            angle += 60.0f * EFF_DEG2RAD;
+        }
+        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        D_003B1790->unk44 = spread * 1.25f;
+        D_003B1790->unk4C = spread * 12.5f;
+        radius = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 100.0f;
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        D_003B1790->vel[1] = 0;
+        D_003B1790->vel[0] = sinv * radius;
+        D_003B1790->vel[2] = cosv * radius;
+        func_00336768(axis, -(func_00341240(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        D_003B1790->pos[0] = 0;
+        D_003B1790->pos[2] = 0;
+        D_003B1790->pos[1] = -height;
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1790->pos));
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
+            "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
+            "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
+            ".set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1790->pos) : "memory");
+        D_003B1790->pos[0] += D_003B1790->vel[0];
+        D_003B1790->pos[2] += D_003B1790->vel[2];
+        if (height < 300.0f) {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(D_003AA868) % 5 + 5;
+        } else {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(D_003AA868) % 6 + 15;
+        }
+        D_003B1790->unk38 = life;
+        D_003B1790->unk2C = speed;
+        group->handles[i] = func_0016D070(D_003B1790);
+        i++;
+    } while (i < 12);
+}
+
+void *func_00181960(void) {
+    void *work;
+
+    work = func_00328D68(0x4c);
+    func_001816C0(work);
+    return work;
 }
 
 void func_00181998(MenuPanelChildren1C *group) {
@@ -1521,12 +1796,12 @@ void func_00181998(MenuPanelChildren1C *group) {
     func_00328E48(group);
 }
 
-u64 func_001819F0(void) {
-    u64 temp_v0;
+void *func_001819F0(void) {
+    void *work;
 
-    temp_v0 = func_00328D68(0x4c);
-    func_001816C0(temp_v0);
-    return temp_v0;
+    work = func_00328D68(0x4c);
+    func_001816C0(work);
+    return work;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181A28);
@@ -1666,14 +1941,71 @@ void func_00182460(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182468);
+extern EffSpawnParams D_003B1990[];
 
-u64 func_00182728(void) {
-    u64 temp_v0;
+/* Same spread as func_00181228 with its own parameter block. */
+void func_00182468(EffSpawnGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 height;
+    f32 speed;
+    s16 life;
 
-    temp_v0 = func_00328D68(0x94);
-    func_00182468(temp_v0);
-    return temp_v0;
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = func_003407A0(angle);
+            cosv = func_003406A0(angle);
+            angle += 24.0f * EFF_DEG2RAD;
+        }
+        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        D_003B1990->unk44 = spread * 1.25f;
+        D_003B1990->unk4C = spread * 12.5f;
+        D_003B1990->vel[1] = 0;
+        D_003B1990->vel[0] = sinv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 500.0f);
+        D_003B1990->vel[2] = cosv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 250.0f);
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        func_00336768(axis, -(func_00341240(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        D_003B1990->pos[0] = 0;
+        D_003B1990->pos[2] = 0;
+        D_003B1990->pos[1] = -height;
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1990->pos));
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
+            "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
+            "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
+            ".set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1990->pos) : "memory");
+        D_003B1990->pos[0] += D_003B1990->vel[0];
+        D_003B1990->pos[2] += D_003B1990->vel[2];
+        if (height < 300.0f) {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(D_003AA868) % 5 + 5;
+        } else {
+            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(D_003AA868) % 6 + 15;
+        }
+        D_003B1990->unk38 = life;
+        D_003B1990->unk2C = speed;
+        group->handles[i] = func_0016D070(D_003B1990);
+        i++;
+    } while (i < 30);
+}
+
+void *func_00182728(void) {
+    void *work;
+
+    work = func_00328D68(0x94);
+    func_00182468(work);
+    return work;
 }
 
 void func_00182760(MenuPanelChildren1C *group) {
@@ -1684,12 +2016,12 @@ void func_00182760(MenuPanelChildren1C *group) {
     func_00328E48(group);
 }
 
-u64 func_001827B8(void) {
-    u64 temp_v0;
+void *func_001827B8(void) {
+    void *work;
 
-    temp_v0 = func_00328D68(0x94);
-    func_00182468(temp_v0);
-    return temp_v0;
+    work = func_00328D68(0x94);
+    func_00182468(work);
+    return work;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001827F0);

@@ -673,7 +673,9 @@ void sdfSetAllFlagsFromTable(void) {
     } while (index++ >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE9E0);
+Entry84W *func_002CE9E0(u16 index) {
+    return &D_00391230[index];
+}
 
 void func_002CEA10(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     u32 handle = func_00197C40(x, y, first, width, (u32)D_00394680, 0);

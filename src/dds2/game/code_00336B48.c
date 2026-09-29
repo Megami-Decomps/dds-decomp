@@ -25,15 +25,32 @@ typedef struct VuBlendNode {
 extern f32 D_00439190;
 
 typedef struct F9B00Entry {
-    /* 0x00 */ u8 unk0[5];
+    /* 0x00 */ u8 port;
+    /* 0x01 */ u8 slot;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 pad03;
+    /* 0x04 */ u8 unk4;
     /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 pad06[0x1A];
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u8 pad0A[0x16];
     /* 0x20 */ u16 unk20;
     /* 0x22 */ u16 unk22;
     /* 0x24 */ u8 pad24[4];
 } F9B00Entry;
 
 extern F9B00Entry D_00476480[];
+
+extern u8 D_00476280[];
+extern u8 D_00438A88[4];
+extern u8 D_00438A8C;
+extern u8 D_00438A98[8];
+extern u8 D_0040B7D8[];
+extern u8 D_0040B7F8[];
+extern void func_0034AAF8(s32);
+extern s32 scePadPortOpen(s32, s32, void *);
+
+extern void func_0033C478(F9B00Entry *);
 
 extern u32 D_00438AB4;
 
@@ -64,7 +81,9 @@ extern void *func_00328D68(s32 size);
 
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 
-extern void func_00336D38(void *, s32);
+extern void sdfSetPacketCursorAligned(s32);
+extern s32 sdfGetPacketCursor(void);
+
 
 extern s16 D_00439184;
 
@@ -75,9 +94,18 @@ typedef struct {
     u32 selectedFlags;     /* 0x44 */
     u32 nextParam;         /* 0x48 */
     u32 flags;             /* 0x4C */
-    u8 pad50[0x30];
+    u8 pad50[0x14];
+    u32 ringSrc;           /* 0x64 */
+    u32 ringDst;           /* 0x68 */
+    u32 ringWrap;          /* 0x6C */
+    u32 ringWrapCount;     /* 0x70 */
+    u32 ringCount;         /* 0x74 */
+    u8 pad78[4];
+    u32 ringEnd;           /* 0x7C */
     u32 state;             /* 0x80 */
-    u8 pad84[0x0C];
+    u32 header;            /* 0x84 */
+    u8 *dataStart;         /* 0x88 */
+    u8 *cursor;            /* 0x8C */
     u8 *payload;           /* 0x90 */
 } VuWork;
 
@@ -127,8 +155,6 @@ extern u64 func_0032B328(void *);
 extern u64 func_0032B338(void *);
 
 extern void *sdfAllocPacketAligned(s32);
-
-extern void *func_0033A2D8(void *, s32, s32, s64, s32);
 
 typedef struct DmaPacketHeader {
     u16 quadwords;
@@ -325,7 +351,29 @@ void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
 void func_00336D30(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336D38);
+void func_00336D38(VuWork *work, s32 n) {
+    u32 end = (u32)work + 0x78;
+    if (n < 0x80) {
+        work->ringWrapCount = 0x80 - n;
+        work->ringWrap = D_00439180;
+        work->ringDst = 0x70001000 + n * 0x60;
+        work->ringCount = 0x2000;
+        work->ringSrc = 0x70001000;
+    } else if (n == 0x80) {
+        work->ringSrc = 0x70001000;
+        work->ringDst = D_00439180;
+        work->ringWrapCount = 0x2000;
+        work->ringWrap = 0;
+        work->ringCount = 0;
+    } else {
+        work->ringSrc = D_00439180;
+        work->ringDst = 0x70001000;
+        work->ringWrapCount = 0x80;
+        work->ringWrap = D_00439180 + n * 0x60;
+        work->ringCount = 0x2000 - n;
+    }
+    work->ringEnd = end;
+}
 
 void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
     u8 *payload = (u8 *)(params + 4);
@@ -598,6 +646,8 @@ s32 func_0033A2D0(s32 arg0) {
     return arg0 + 0x20;
 }
 
+extern void *func_0033A2D8(void *, s32, s32, s64, s32);
+
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A2D8);
 
 void *sdfConsAllocateColumnPacket(s32 height) {
@@ -622,7 +672,52 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A5C8);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A7E8);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AAA0);
+typedef struct SdfProjParams {
+    f32 rangeMin;
+    f32 rangeMax;
+    f32 near;
+    f32 far;
+    u32 count;
+} SdfProjParams;
+
+typedef struct SdfProjPacket {
+    u64 header;
+    u64 vifCode;
+    f32 rangeMax;
+    f32 rangeMin;
+    f32 offset;
+    f32 scale;
+    u64 giftag;
+    u64 giftagReg;
+    u64 count;
+    u64 unk38;
+    u32 unk40;
+    u32 unk44;
+    u32 unk48;
+    u32 unk4C;
+} SdfProjPacket;
+
+void func_0033AAA0(SdfProjPacket *packet, SdfProjParams *params) {
+    f32 rangeMax = params->rangeMax;
+    f32 rangeMin = params->rangeMin;
+    f32 near = params->near;
+    f32 far = params->far;
+    u32 count = params->count;
+    packet->header = 0x20000004;
+    packet->vifCode = 0x6C03C00013000000ULL;
+    packet->rangeMax = rangeMax;
+    packet->rangeMin = rangeMin;
+    packet->offset = (((rangeMax - rangeMin) * (far + near)) / (far - near) + (rangeMax + rangeMin)) * 0.5f;
+    packet->scale = ((far * near) * (rangeMin - rangeMax)) / (far - near);
+    packet->giftag = 0x1000000000008001ULL;
+    packet->giftagReg = 0xE;
+    packet->count = count;
+    packet->unk38 = 0x3D;
+    packet->unk40 = 0x14000014;
+    packet->unk44 = 0;
+    packet->unk48 = 0;
+    packet->unk4C = 0;
+}
 
 void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
     s32 qwc = (size + 15) >> 4;
@@ -635,7 +730,18 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) 
     packet->unused1C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033ABB8);
+extern u8 D_0037F330[];
+
+void func_0033ABB8(s32 list, DmaPacketHeader *packet) {
+    packet->address = (u32)D_0037B610 & 0x0FFFFFFF;
+    packet->quadwords = (D_0037F330 - D_0037B610) >> 4;
+    packet->tag = 0;
+    packet->command = 0;
+    packet->unused10 = 0;
+    packet->unused18 = 0;
+    packet->unused1C = 0;
+    sdfAppendReferencePacket(list, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
 
@@ -729,7 +835,12 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C240);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C478);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C820);
+void func_0033C820(void) {
+    s32 i;
+    for (i = 0; i != 2; i++) {
+        func_0033C478(&D_00476480[i]);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C878);
 

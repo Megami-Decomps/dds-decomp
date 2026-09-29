@@ -145,6 +145,7 @@ def main():
         # as the build compiles it, relocated fields masked.
         context = {}
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
+        ro_diff = None    # first retail address where the full unit's .rodata differs
         full = Path(tmp) / "full.o"
         rf = subprocess.run([str(ROOT / "tools/cc.sh"), *extra,
                              str(args.source.resolve() if args.source else unit), "-o", str(full)],
@@ -177,6 +178,23 @@ def main():
                             as_built.add(name)
                         else:
                             context[name] = (fsize, size)
+            # The build links the full unit's .rodata at the retail start of the
+            # unit's .rodata subsegment: its bytes (relocated words masked) must be
+            # retail's, in retail order. Catches string literals and
+            # INCLUDE_RODATA items that come out in a different order.
+            fdata, fsecs = sections(full)
+            fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+            ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
+                                 (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
+            if fro_size and ro_start:
+                mine = bytearray(fdata[fro_off:fro_off + fro_size])
+                roff = int(ro_start.group(1), 16)
+                want = bytearray(retail[roff:roff + fro_size])
+                for off in relocations(full)[".rodata"]:
+                    mine[off:off + 4] = want[off:off + 4] = b"\0\0\0\0"
+                if mine != want:
+                    first = next(i for i in range(fro_size) if mine[i] != want[i])
+                    ro_diff = f"0x{roff + 0xFF000 + first:08X}"
         else:
             # Usually an INCLUDE_ASM whose asm file splat has not written yet
             # (run configure.py --force-split). Unverifiable is not clean.
@@ -194,6 +212,10 @@ def main():
             bad += 1
             print(f"CONTEXT {name}: compiles differently inside the full unit ({fsize} vs {size} bytes "
                   "alone); the build uses the full-unit code, so this function does not match there")
+    if ro_diff and not args.func:
+        bad += 1
+        print(f"RODATA the full unit's .rodata differs from retail at {ro_diff} (string literal "
+              "or INCLUDE_RODATA order/content); the build links it there")
     tables = []  # (offset in our .rodata, retail address, function)
     small = []   # the same for .sdata
     for off, size, name in sorted(funcs):

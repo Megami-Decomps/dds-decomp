@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -26,7 +27,83 @@ typedef struct EffRecordPool {
     u32 buffer;     /* 0x6C: freed by func_003297C8 */
 } EffRecordPool;
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00176E28);
+/* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
+ * `count` vertices spread evenly around the circle from -pi/2. */
+typedef struct EffectRingVertex {
+    s32 pad0;
+    s32 offset;
+    f32 angle;
+    s32 padC;
+} EffectRingVertex;
+
+typedef struct EffectRing {
+    u8 pad00[0x10];
+    u32 count;
+    u8 pad14[8];
+    s32 spread;
+    u8 pad20[0x10];
+    f32 param30;
+    f32 param34;
+    f32 param38;
+    u8 pad3C[0x14];
+    u32 unk50;
+    u32 unk54;
+    EffectRingVertex *vertices;
+    s32 unk5C;
+    u32 color;
+    f32 scale;
+    f32 unk68;
+    u8 pad6C[4];
+    f32 unk70;
+    f32 unk74;
+    u32 handle;
+    u8 *matrix;
+} EffectRing;
+
+extern u32 func_003292A8(s32);
+extern u32 sdfResourceRetainAddress(u32);
+extern u8 *func_001781B0(u32);
+extern s32 effMiscRand(void *);
+extern u8 D_003AA868[];
+
+/* K&R: func_00177078 passes the table block as the raw 64-bit value. */
+EffectRing *func_00176E28(source)
+EffectRing *source;
+{
+    u32 handle;
+    EffectRing *ring;
+    f32 angle;
+    f32 step;
+    u32 spread;
+    u32 i;
+
+    handle = func_003292A8(source->count * 16 + 0x80);
+    ring = (EffectRing *)sdfResourceRetainAddress(handle);
+    memcpy(ring, source, 0x58);
+    ring->vertices = (EffectRingVertex *)((u8 *)ring + 0x80);
+    ring->handle = handle;
+    ring->color = 0x80808080;
+    ring->unk68 = ring->param38;
+    ring->unk70 = ring->param30;
+    ring->unk74 = ring->param34;
+    ring->unk5C = 0;
+    ring->scale = 1.0f;
+    if (ring->spread == 0) {
+        ring->spread = 1;
+    }
+    angle = -1.5707963f;
+    ring->matrix = func_001781B0(ring->count);
+    *(f32 *)(ring->matrix + 0x5C) = 1.0f;
+    *(u32 *)(ring->matrix + 0x50) = ring->unk54;
+    step = 6.2831853f / ring->count;
+    spread = ring->spread;
+    for (i = 0; i < ring->count; i++) {
+        ring->vertices[i].offset = -(effMiscRand(D_003AA868) % spread);
+        ring->vertices[i].angle = angle;
+        angle += step;
+    }
+    return ring;
+}
 
 void func_00177078(u64 arg0) {
     u64 temp_v0;
@@ -44,7 +121,9 @@ void func_001770B0(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x78));
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001770E0);
+void func_001770E0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_001770F0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x60) = arg1;
@@ -54,7 +133,10 @@ void func_001770F8(u8 *work, f32 value) {
     *(f32 *)(work + 0x64) = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177100);
+void func_00177100(void *work, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
+}
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177130);
 
@@ -134,7 +216,9 @@ s32 func_001781A0(EffRecordPool *pool, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001781B0);
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001781F8);
+void func_001781F8(void *work) {
+    func_00177880(work);
+}
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00178210);
 
