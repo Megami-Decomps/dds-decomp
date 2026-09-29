@@ -479,6 +479,7 @@ def declared_name(decl):
         m = re.match(r"(?:typedef\s+)?(?:struct|union|enum)\s+(\w+)", code)
         return m.group(1) if m else None
     head = code.split("(", 1)[0] if "(" in code else code.rsplit(";", 1)[0]
+    head = re.sub(r"\[[^\]]*\]|=.*", "", head, flags=re.S)  # `D_X[0x18]`, `x = {...}`
     names = re.findall(r"[A-Za-z_]\w*", head)
     return names[-1] if names else None
 
