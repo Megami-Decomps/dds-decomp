@@ -289,18 +289,20 @@ s64 func_002B0A18(s32 callback) {
     return menuSetHandler(context, 2, callback);
 }
 
+/* Clear a selected party record's five-byte stat group and companion flag,
+ * then recalculate the party's maximum HP and MP. */
 void func_002B0A60(u32 context, s32 selection) {
-    s32 offset;
-    s32 i;
+    s32 recordOffset;
+    s32 bytesRemaining;
     if (selection == 0) {
         return;
     }
     selection -= 0xc0;
-    offset = 0x1e670 + selection * 5;
-    i = 4;
+    recordOffset = 0x1e670 + selection * 5;
+    bytesRemaining = 4;
     do {
-        ((u8 *)D_00435DD0)[offset++] = 0;
-    } while (--i >= 0);
+        ((u8 *)D_00435DD0)[recordOffset++] = 0;
+    } while (--bytesRemaining >= 0);
     ((u8 *)(selection + D_00435DD0))[0x1e7b0] = 0;
     ptyRecomputeMaxHpMp(context);
 }
@@ -308,10 +310,10 @@ void func_002B0A60(u32 context, s32 selection) {
 u32 mnuEnterSlotLabel(void) {
     s32 context = func_00101958();
     s32 slot = D_00435DD0 + **(s32 **)(*(s32 *)(context + 0xa914) + 0x1c) * 0x1c4 + 0xa60;
-    s32 sel;
+    s32 selectedEntry;
     func_002C1B68(context + 0xaa50, 1);
-    sel = func_002C55C0(slot);
-    func_0026C918(0, D_00435E5C + sel * 0x19);
+    selectedEntry = func_002C55C0(slot);
+    func_0026C918(0, D_00435E5C + selectedEntry * 0x19);
     func_0026C5B8(0xd);
     func_0026C648(0);
     func_0026C618(0xf);
@@ -358,13 +360,15 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0FA0);
 
-void func_002B1150(s32 arg0) {
-    func_002B9520(*(u32 *)(*(s32 *)(arg0 + 0xaa48) + 8));
+void func_002B1150(s32 context) {
+    func_002B9520(*(u32 *)(*(s32 *)(context + 0xaa48) + 8));
 }
 
 typedef struct PartyEntryCopy {
-    u32 word[0x71];
-} PartyEntryCopy;
+    u16 flags;
+    u16 pad02;
+    u32 word[0x70];
+} PartyEntryCopy; /* 0x1C4 bytes, versus 0x1A4 in DDS1 */
 
 typedef struct PartyMenuData {
     u8 pad00[0x8E0];
@@ -379,20 +383,20 @@ void menuCopyPartyEntries(context)
 s32 context;
 {
     PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0xAA48);
-    PartyEntryCopy *to = menu->current;
+    PartyEntryCopy *destination = menu->current;
     s32 i;
-    s32 test = 0xA60;
-    s32 offset = 0;
+    s32 flagOffset = 0xA60;
+    s32 copyOffset = 0;
 
     menu->activeCount = 0;
     for (i = 0; i < 5; i++) {
-        *to = *(PartyEntryCopy *)(offset + D_00435DD0 + 0xA60);
-        if (*(u16 *)(D_00435DD0 + test) & 1) {
+        *destination = *(PartyEntryCopy *)(copyOffset + D_00435DD0 + 0xA60);
+        if (((PartyEntryCopy *)(D_00435DD0 + flagOffset))->flags & 1) {
             menu->activeCount = menu->activeCount + 1;
         }
-        test += 0x1C4;
-        to++;
-        offset += 0x1C4;
+        flagOffset += 0x1C4;
+        destination++;
+        copyOffset += 0x1C4;
     }
     if (menu->activeCount >= 4) {
         menu->activeCount = 3;
@@ -407,10 +411,10 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B15F8);
 s32 mnuCountActiveSlots(void) {
     s32 count = 0;
     s32 i;
-    u16 *slot = (u16 *)(D_00435DD0 + 0xa60);
+    u16 *slotFlags = (u16 *)(D_00435DD0 + 0xa60);
     for (i = 4; i >= 0; i--) {
-        count += *slot & 1;
-        slot += 0xe2;
+        count += *slotFlags & 1;
+        slotFlags += 0xe2;
     }
     if (count > 3) {
         count = 3;
