@@ -47,7 +47,18 @@ typedef struct PanelEntry {
     u8 unk4[0x10];  /* 0x4 */
 } PanelEntry;
 
+typedef struct PanelHold {
+    s32 window;
+    s16 unk4;
+    s16 unk6;
+    s32 unk8;
+} PanelHold;
+
+extern PanelHold D_003B4780;
+
 extern PanelEntry D_0045296C[];
+
+extern void func_001A19C8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 void itfPanelDispatchHandler(PanelObj *panel) {
     D_003B4448[panel->handlerIndex](panel);
@@ -59,13 +70,42 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1BB0);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1D20);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1E68);
+typedef struct PanelVert {
+    s32 x;
+    s32 y;
+} PanelVert;
+
+void func_001A1E68(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+    PanelVert *p;
+    v->x = x0;
+    v->y = y0;
+    p = &v[1];
+    p->y = y0;
+    p->x = x1;
+    p = &v[2];
+    p->x = x1;
+    p->y = y1;
+    p = &v[3];
+    p->x = x0;
+    p->y = y1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1E98);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1F08);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1F80);
+void func_001A1F80(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
+    PanelVert *p = &v[8];
+    p->x = a;
+    p->y = b;
+    p[1].x = c;
+    p[1].y = 0;
+    p = &v[10];
+    p->x = a;
+    p->y = b;
+    p[1].x = c;
+    p[1].y = d;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1FB0);
 
@@ -73,11 +113,39 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2010);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2070);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2100);
+void func_001A2100(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+    PanelVert *p = &v[4];
+    p->x = x0;
+    p->y = y0;
+    p[1].x = x1;
+    p[1].y = y1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2118);
+void func_001A2118(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
+    PanelVert *p = &v[6];
+    p->x = a;
+    p->y = b;
+    p[1].x = c;
+    p[1].y = 0;
+    p = &v[8];
+    p->x = a;
+    p->y = b;
+    p[1].x = c;
+    p[1].y = d;
+}
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2148);
+void func_001A2148(s32 *rect) {
+    s32 *c = rect + 0x11;
+    c[0] = 0x73;
+    c[1] = 0x87;
+    c[2] = 0xFF;
+    c[3] = 0;
+    c = rect + 0x15;
+    c[0] = 0x73;
+    c[1] = 0x87;
+    c[2] = 0xFF;
+    c[3] = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2180);
 
@@ -103,13 +171,17 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2D10);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2D80);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", itfPanelEmitRecord);
+void itfPanelEmitRecord(s32 index, s32 value) {
+    func_001A19C8(D_0045296C[index].ptr->unkA8, 0, value, 0, 0, 0);
+}
 
 s8 itfPanelGetStatus(s32 index) {
     return D_0045296C[index].ptr->sub24.unk10;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", itfPanelSetStatus);
+void itfPanelSetStatus(s32 index, s8 value) {
+    D_0045296C[index].ptr->sub24.unk10 = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2EA8);
 
@@ -127,7 +199,9 @@ s16 itfPanelGetPairFirst(s32 index) {
     return D_0045296C[index].ptr->unk50;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", itfPanelSetPairFirst);
+void itfPanelSetPairFirst(s32 index, s16 value) {
+    D_0045296C[index].ptr->unk50 = value;
+}
 
 s16 itfPanelGetPairSecond(s32 index) {
     return D_0045296C[index].ptr->unk52;

@@ -38,6 +38,16 @@ extern SdfSemaObj D_004681F8;
 
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
+extern s8 D_004389F0[2];
+
+extern volatile s8 D_004389F2;
+
+extern vu8 D_004389DA;
+
+extern void func_0033A0C8(void);
+
+extern void func_0032B3F8();
+
 void func_00329F60(u32 arg0, u32 arg1) {
     D_004389E4 = arg0;
     D_004389E8 = arg1;
@@ -46,9 +56,25 @@ void func_00329F60(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_00329F78);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", sdfSwapBufferSlots);
+void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
+    if (D_004389F0[0] == oldBuffer) {
+        D_004389F0[0] = oldBuffer ^ 1;
+    }
+    if (D_004389F0[1] == oldBuffer) {
+        D_004389F0[1] = oldBuffer ^ 1;
+    }
+    D_004389F2 = nextBuffer;
+}
 
-INCLUDE_ASM(const s32, "game/code_00329F60", sdfSetBufferSlot);
+void sdfSetBufferSlot(s32 singleBuffer, s32 value, s32 index) {
+    if (singleBuffer == 0) {
+        D_004389F0[0] = value;
+        D_004389F0[1] = value;
+    } else {
+        D_004389F0[index] = value;
+    }
+    D_004389F2 = -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A230);
 
@@ -56,13 +82,35 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A378);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A440);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", sdfWaitAndSelectBuffer);
+void sdfWaitAndSelectBuffer(void) {
+    s8 buffer = D_004389DA ^ 1;
+
+    /* Do not select a buffer while its index is the busy-buffer status. */
+    while (D_004389F2 == buffer) {
+    }
+    D_004389DA = buffer;
+    sdfSelectDoubleBuffer((s8)D_004389DA);
+    func_0033A0C8();
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A5A0);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A5F0);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", sdfTexListContains);
+s32 sdfTexListContains(SdfTex *target) {
+    SdfTex *node = (SdfTex *)D_00439140;
+
+    if (node == NULL) {
+        return 0;
+    }
+    do {
+        if (node == target) {
+            return 1;
+        }
+        node = node->prev;
+    } while (node != NULL);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A688);
 
@@ -135,7 +183,14 @@ u32 sdfTexGetPrimaryBuffer(s32 arg0) {
     return *(u32 *)(arg0 + 0x28);
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B1B8);
+s32 func_0032B1B8(SdfTex *tex) {
+    SdfTexBuf *buf = tex->unk28;
+
+    if (buf == NULL) {
+        return 0;
+    }
+    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+}
 
 s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buffer;
@@ -200,9 +255,25 @@ void func_0032B3E0(SdfTex *texture, u8 value) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B3F8);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B500);
+void func_0032B500(SdfTex *tex, s32 arg1, u8 *arg2, s32 arg3) {
+    s32 width;
+    s32 height;
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B558);
+    if (tex->unk1A == 0x13 || tex->unk1A == 0x1B) {
+        width = 0x10;
+        height = 0x10;
+    } else {
+        width = 8;
+        height = 2;
+    }
+    func_0032B3F8(arg1, width, height, tex->unk19, arg2, arg3);
+}
+
+void func_0032B558(SdfTex *tex) {
+    if (tex->secondaryResource != NULL) {
+        func_0032B500(tex, sdfTexGetSecondaryResourceWord(tex), tex->data, 0);
+    }
+}
 
 void sdfTexListInsert(SdfTex *arg0) {
     arg0->next = NULL;

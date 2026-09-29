@@ -751,7 +751,64 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 index) {
     return table->items[index];
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A52B8);
+extern s32 func_0019DB30();
+extern void func_0019DD48();
+extern s32 func_0019E800();
+extern s8 func_0019E8E0();
+extern s32 func_0019E908();
+extern s32 func_0019E910();
+extern void func_0023F010();
+extern void func_001A58B8();
+extern void func_001A5B70();
+
+void func_001A52B8(ItfMesState *mes) {
+    u8 *m = (u8 *)mes;
+    u8 *blk = m + 0x24;
+    s32 glyph;
+    s32 handle;
+    s32 helper;
+    s8 flags;
+    void (*hook)();
+
+    handle = *(s32 *)(blk + 0xC);
+    if (handle != 0) {
+        func_0019C5B0((FrFontGlyph *)handle);
+        *(s32 *)(blk + 0xC) = 0;
+    }
+    glyph = func_0019E800(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
+                          itfMesGetTableItem(*(ItfMesTable **)(blk + 8), *(s16 *)(blk + 0x18)), 0);
+    if (*(s16 *)(m + 0x12) == 3) {
+        if (func_0019DB30(glyph) == 1) {
+            func_0019DD48(0x1000, 0xC60, glyph);
+        } else {
+            func_0019DD48(0x1000, 0xBF8, glyph);
+        }
+    }
+    if (!(*(u32 *)m & 0x400000) && (D_00452940.flags & 1)) {
+        func_001A5B70(glyph);
+    }
+    func_001A58B8(glyph, blk);
+    flags = func_0019E8E0(3);
+    blk[0x11] = flags;
+    if (flags & 2) {
+        *(u32 *)m |= 0x10000;
+    } else {
+        *(u32 *)m &= 0xFFFEFFFF;
+    }
+    if (func_0019E8E0(4) != 0) {
+        hook = *(void (**)())(m + 0x1DC);
+        if (hook != NULL) {
+            hook();
+        }
+    }
+    if (func_0019E8E0(8) != 0) {
+        helper = func_0019E908();
+        func_0023F010(helper, func_0019E910());
+    }
+    func_001A5950((ItfMesNode *)glyph, *(s32 *)(m + 0xC));
+    *(s16 *)(blk + 0x16) = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
+    *(s32 *)(blk + 0xC) = glyph;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5480);
 

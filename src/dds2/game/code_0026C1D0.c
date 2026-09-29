@@ -33,6 +33,14 @@ typedef struct EvtResourcePair {
     u32 input;
 } EvtResourcePair;
 
+extern s32 D_00435DD0;
+
+typedef struct {
+    u8 count;
+    u8 pad;
+    u16 indices[0];
+} ActiveList;
+
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C1D0);
 
 void func_0026C240(void) {
@@ -57,7 +65,16 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C2D8);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C318);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C388);
+void func_0026C388(ActiveList *list) {
+    s32 i;
+    list->count = 0;
+    for (i = 1; i < 0x100; i++) {
+        if (*(u8 *)(i + D_00435DD0 + 0x1340) != 0) {
+            s32 count = list->count++;
+            list->indices[count] = i;
+        }
+    }
+}
 
 s32 evtCompareBytesAscending(u8 *left, u8 *right) {
     u8 leftValue = *left;
@@ -282,7 +299,11 @@ s32 func_0026D098(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D0B0);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D148);
+s64 func_0026D148(u32 *p) {
+    if (p != NULL) {
+        func_003297C8((void *)*p);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
