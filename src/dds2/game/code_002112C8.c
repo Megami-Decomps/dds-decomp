@@ -1421,7 +1421,24 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00218FD0);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002190A0);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00219170);
+extern u8 *sndCreateStationedSeTask(s32);
+
+void func_00219170(u8 *fx, u64 owner, s32 arg2) {
+    u8 *unit;
+    u8 *task;
+    if (*(u32 *)(fx + 8) & 8) {
+        unit = *(u8 **)(fx + 0x18);
+        if (*(u32 *)(unit + 0x110) & 0x400) {
+            if (*(u16 *)(unit + 0x124) == 0x108) {
+                task = sndCreateStationedSeTask(*(s32 *)(func_001AA6F8() + 0x208) + 6);
+                *(u64 *)(task + 8) = owner;
+                task[0] = 4;
+                *(s32 *)(task + 0x28) = arg2 + 0x28;
+                startBattleTask(task);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219210);
 

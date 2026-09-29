@@ -39,7 +39,9 @@ typedef struct BtlWork {
     u8 pad20C[0xC];
     u32 flags218;
     u32 flags21C;
-    u8 pad220[0x28];
+    u8 pad220[8];
+    s32 unk228;
+    u8 pad22C[0x1C];
     BtlUnit *head;
     BtlUnit *list24C;
     struct SoundTask *taskList250;
@@ -241,7 +243,7 @@ typedef struct SoundTask {
         u32 (*poll)(void);
         u32 (*commandArgs)(u32 *);
     } callback;
-    void (*onFinish)(u32);
+    void (*onFinish)(u32 *);
     void *args;
     struct SoundTask *next;
     struct SoundTask *nextActive;
@@ -975,7 +977,7 @@ extern void func_00328E48(void *);
 void func_001E1500(SoundTask *task) {
     BtlWork *work;
     if (task->onFinish != 0) {
-        task->onFinish((u32)task->args);
+        task->onFinish((u32 *)task->args);
     }
     work = (BtlWork *)func_001AA6F8();
     if (task->nextActive != 0) {
@@ -1685,7 +1687,26 @@ void func_001E65C0(u32 *arguments) {
     *(u32 *)(arguments[0] + 0x110) |= 0x40;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E6620);
+extern u32 func_001E64B0(s32);
+
+SoundTask *func_001E6620(BtlUnit *unit) {
+    SoundTask *task = func_001E1468(0x14);
+    SoundTaskArgs *args;
+    task->enabled = 1;
+    task->status = 0;
+    task->taskId = 0x16;
+    task->flags |= 2;
+    task->owner = unit->owner;
+    task->callback.command = func_001E64B0;
+    task->onFinish = func_001E65C0;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = unit;
+    args->unk_08 = 0;
+    args->unk_10 = 0;
+    args->unk_0C = 0;
+    return task;
+}
 
 u32 func_001E66B8(void) {
     func_00208F78();
@@ -3760,9 +3781,44 @@ void func_00202518(EffectLoadArgs *args) {
     func_0020D128("btl:effect load start[%s]\n", args->name);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_002025A0);
+u32 func_002025A0(s32 arg) {
+    EffectLoadArgs *args = (EffectLoadArgs *)arg;
+    SoundEffectNode *effect = args->effect;
+    s32 resource;
+    if (effect->flags & 2) {
+        return 1;
+    }
+    if (func_002C8128((s32)args->loadHandle) == 0) {
+        return 0;
+    }
+    func_0020D128("btl:effect load end[%s]\n", args->name);
+    resource = func_002C8108((s32)args->loadHandle);
+    effect->handle = func_001682B0(sdfResourceRetainAddress(resource));
+    func_003297C8(resource);
+    func_002C7D00((s32)args->loadHandle);
+    effect->flags = (effect->flags & ~1) | 2;
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00202648);
+extern u32 func_002025A0(s32);
+
+SoundTask *func_00202648(s32 arg0, char *name) {
+    SoundTask *task = func_001E1468(strlen(name) + 0xC);
+    SoundTaskArgs *args;
+    char *copy;
+    task->enabled = 1;
+    task->taskId = 0x32;
+    task->flags &= ~1;
+    task->onStart = (void (*)(u32))func_00202518;
+    task->callback.command = func_002025A0;
+    task->status = 0;
+    args = func_001E14F8((s32)task);
+    copy = (char *)args + 0xC;
+    args->value = arg0;
+    args->unk_08 = (u32)copy;
+    strcpy(copy, name);
+    return task;
+}
 
 u32 func_002026E8(void) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
@@ -3943,8 +3999,8 @@ void func_00202F40(s32 arg0, u16 arg1) {
     func_001684A8(*(u32 *)(arg0 + 0x10), arg1);
 }
 
-void func_00202F60(s32 arg0, u16 arg1) {
-    func_00168448(*(u32 *)(arg0 + 0x10), arg1);
+s32 func_00202F60(s32 arg0, u16 arg1) {
+    return func_00168448(*(u32 *)(arg0 + 0x10), arg1);
 }
 
 s32 func_00202F80(s32 arg0) {
@@ -4351,7 +4407,27 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_00204358);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_002043C0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00204508);
+extern void func_00204358(u32);
+extern u32 func_002043C0(s32);
+
+SoundTask *func_00204508(s32 arg0, s32 arg1, char *name) {
+    SoundTask *task = func_001E1468(strlen(name) + 0x14);
+    SoundTaskArgs *args;
+    char *copy;
+    task->enabled = 1;
+    task->taskId = 0x58;
+    task->flags &= ~1;
+    task->onStart = func_00204358;
+    task->callback.command = func_002043C0;
+    task->status = 0;
+    args = func_001E14F8((s32)task);
+    copy = (char *)args + 0x14;
+    args->value = arg0;
+    args->unk_0C = arg1;
+    args->unk_10 = (u32)copy;
+    strcpy(copy, name);
+    return task;
+}
 
 s32 sndLoadDataFile(s32 *data) {
     char filename[0x70];
