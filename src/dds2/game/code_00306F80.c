@@ -225,7 +225,10 @@ void func_003082A8(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308380(u32 arg0, u32 arg1) {
+void func_00308380(arg0, arg1)
+    u32 arg0;
+    u32 arg1;
+{
     func_003082A8(arg0, 0, arg1);
 }
 
@@ -308,7 +311,13 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F78);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308FE8);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309050);
+extern void func_00308E60();
+
+void func_00309050(s32 context) {
+    func_00308E60();
+    func_00308380(0x5001BL, context);
+    func_00308478(0x44, context);
+}
 
 void func_00309090(u32 arg0) {
     func_00308380(0x30000, arg0);
