@@ -561,16 +561,16 @@ void func_002DC260(s32 arg0) {
     func_002322E8();
 }
 
-void *func_002DC280(void *arg0) {
-    s32 a;
-    s32 b;
-    void *work;
+void *func_002DC280(void *sourceModel) {
+    s32 group;
+    s32 id;
+    void *model;
 
-    a = func_00232EE8(arg0);
-    b = func_00232EF8(arg0);
-    work = func_00232198(a, b);
-    effInitModelVUState(work);
-    return work;
+    group = func_00232EE8(sourceModel);
+    id = func_00232EF8(sourceModel);
+    model = func_00232198(group, id);
+    effInitModelVUState(model);
+    return model;
 }
 
 EffModelOwner *effCreateModelOwner(u8 *source) {
@@ -609,16 +609,16 @@ EffModelOwner *effDuplicateEffectHeader(EffModelOwner *source) {
 }
 
 void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
-    s32 a;
-    s32 b;
+    s32 group;
+    s32 id;
     void *model;
 
     if (owner->model != 0) {
         func_002DC260(owner->model);
     }
-    a = func_00232EE8((void *)source->model);
-    b = func_00232EF8((void *)source->model);
-    model = func_00232198(a, b);
+    group = func_00232EE8((void *)source->model);
+    id = func_00232EF8((void *)source->model);
+    model = func_00232198(group, id);
     effInitModelVUState(model);
     __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder");
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2");
@@ -663,14 +663,15 @@ void func_002DC578(s32 arg0, float scale) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC5B0);
 
+/* Track floor models only while battle is active and the current actor is not fully marked. */
 EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     EffModelOwner *owner;
-    s64 temp_v1;
+    s64 battleActive;
 
     owner = effCreateModelOwner(source);
     func_002DC5B0(owner);
-    temp_v1 = func_001AA308();
-    if ((temp_v1 != 0) && (temp_v1 = btlIsCurrentActorFullyMarked(), temp_v1 == 0)) {
+    battleActive = func_001AA308();
+    if ((battleActive != 0) && (battleActive = btlIsCurrentActorFullyMarked(), battleActive == 0)) {
         effFloorModelListPush(owner);
     }
     return owner;
@@ -958,19 +959,28 @@ RefObj *effRetainSharedReference(RefObj *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDD60);
 
+/* Each 0x10-byte entry contributes itself plus the number stored in its first word. */
+typedef struct EffExpandedList {
+    u8 pad0[4];
+    u32 count;
+    u8 pad8[8];
+    u8 *entries;
+} EffExpandedList;
+
 s32 effCountExpandedEntries(void *work) {
-    u32 count = *(u32 *)((u8 *)work + 4);
+    EffExpandedList *list = work;
+    u32 count = list->count;
     u32 i = 0;
     s32 total = 0;
 
     if (count != 0) {
-        u8 *entries = *(u8 **)((u8 *)work + 0x10);
+        u8 *entries = list->entries;
         do {
-            s32 value = *(s32 *)entries;
+            s32 additionalCount = *(s32 *)entries;
             entries += 0x10;
             i++;
             total++;
-            total += value;
+            total += additionalCount;
         } while (i < count);
     }
     return total;

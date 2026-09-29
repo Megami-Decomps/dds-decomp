@@ -147,7 +147,7 @@ extern u32 D_0038F2FC[];
 /* Reference-counted object header (layout inferred from field accesses). */
 typedef struct RefObj {
     u8 pad_0x00[0x14]; // 0x00
-    s32 cnt14;         // 0x14
+    s32 refCount;      // 0x14 incremented with the global reference count
     s32 unk18;         // 0x18
     s32 cnt1C;         // 0x1C
 } RefObj; // 0x20
@@ -494,15 +494,15 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
     return owner;
 }
 
-void effDestroyModelOwner(void *p) {
-    void *q = *(void **)((s32)p + 8);
-    if (q != NULL) {
-        func_002CFF98(q);
+void effDestroyModelOwner(EffModelOwner *owner) {
+    void *buffer = owner->ownedBuffer;
+    if (buffer != NULL) {
+        func_002CFF98(buffer);
     }
-    if (*(s32 *)((s32)p + 4) != 0) {
-        func_0029A938(*(s32 *)((s32)p + 4));
+    if (owner->model != 0) {
+        func_0029A938(owner->model);
     }
-    func_002CFF98(p);
+    func_002CFF98(owner);
 }
 
 u32 *effDuplicateEffectHeader(u32 *source) {
@@ -513,12 +513,14 @@ u32 *effDuplicateEffectHeader(u32 *source) {
 }
 
 void recreateEffectModelFromSource(u32 *work, u8 *source) {
+    EffModelOwner *owner = (EffModelOwner *)work;
+    EffModelOwner *original = (EffModelOwner *)source;
     void *model;
 
-    if (work[1] != 0) {
-        func_0029A938(work[1]);
+    if (owner->model != 0) {
+        func_0029A938(owner->model);
     }
-    model = func_00217680(func_002183D0(*(u32 *)(source + 4)), func_002183E0(*(u32 *)(source + 4)));
+    model = func_00217680(func_002183D0(original->model), func_002183E0(original->model));
     effInitModelVUState(model);
     __asm__ volatile (".set noreorder\nvaddw.xyz vf10, vf0, vf0w\nvmulx.w vf10, vf0, vf0x\n.set reorder");
     __asm__ volatile (
@@ -527,9 +529,9 @@ void recreateEffectModelFromSource(u32 *work, u8 *source) {
         "qmtc2.ni $2, vf2\n"
         "vmulx.xyzw vf10, vf10, vf2x\n"
         ".set reorder"
-        : : "f"(*(f32 *)work) : "$2", "memory");
+        : : "f"(owner->scale) : "$2", "memory");
     mdlStoreTertiaryVectorVU(model);
-    work[1] = (u32)model;
+    owner->model = (u32)model;
 }
 
 void func_0029AB28(s32 arg0) {
@@ -580,14 +582,15 @@ void func_0029ABF8(s32 arg0, float scale) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AC30);
 
+/* Track floor models only while battle is active and the current actor is not fully marked. */
 EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     EffModelOwner *owner;
-    s64 temp_v1;
+    s64 battleActive;
 
     owner = effCreateModelOwner(source);
     func_0029AC30(owner);
-    temp_v1 = func_001A1438();
-    if ((temp_v1 != 0) && (temp_v1 = btlIsCurrentActorFullyMarked(), temp_v1 == 0)) {
+    battleActive = func_001A1438();
+    if ((battleActive != 0) && (battleActive = btlIsCurrentActorFullyMarked(), battleActive == 0)) {
         effFloorModelListPush((EffectObjectFlag *)owner);
     }
     return owner;
@@ -603,16 +606,16 @@ void func_0029ADC8(u8 *work) {
 
 extern void recreateEffectModelFromSource(u32 *, u8 *);
 
-u32 *func_0029AE08(u8 *work) {
-    u32 *effect = (u32 *)effCreateModelOwner(0);
+u32 *func_0029AE08(u8 *source) {
+    u32 *owner = (u32 *)effCreateModelOwner(0);
 
-    effect[0] = *(u32 *)work;
-    recreateEffectModelFromSource(effect, work);
-    func_0029AC30(effect);
+    owner[0] = *(u32 *)source;
+    recreateEffectModelFromSource(owner, source);
+    func_0029AC30(owner);
     if (func_001A1438() != 0 && btlIsCurrentActorFullyMarked() == 0) {
-        effFloorModelListPush(effect);
+        effFloorModelListPush(owner);
     }
-    return effect;
+    return owner;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AE88);
@@ -759,19 +762,28 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B368);
 
 extern void func_002944D8(u32);
 
-void effDestroyResourceOwner(u8 *object) {
+/* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload. */
+typedef struct EffResourceOwner {
+    u32 count;
+    u8 pad_04[0x40];
+    s32 *entries;
+    u32 buffer;
+    u32 model;
+} EffResourceOwner;
+
+void effDestroyResourceOwner(EffResourceOwner *owner) {
     u32 i;
 
-    if (*(u32 *)(object + 0x4C) != 0) {
-        func_0029A938(*(s32 *)(object + 0x4C));
+    if (owner->model != 0) {
+        func_0029A938(owner->model);
     }
-    if (*(u32 *)(object + 0x48) != 0) {
-        for (i = 0; i < *(u32 *)object; i++) {
-            func_002944D8((*(u32 **)(object + 0x44))[i]);
+    if (owner->buffer != 0) {
+        for (i = 0; i < owner->count; i++) {
+            func_002944D8(owner->entries[i]);
         }
-        func_002D0918(*(u32 *)(object + 0x48));
+        func_002D0918(owner->buffer);
     }
-    func_002CFF98(object);
+    func_002CFF98(owner);
 }
 
 typedef struct {
@@ -858,33 +870,42 @@ void effReleaseSharedReference(RefObj *obj) {
         D_003BC950 = -1;
         sdfTexReleaseReference(graphics);
     }
-    obj->cnt14--;
-    if (obj->cnt14 == 0) {
+    obj->refCount--;
+    if (obj->refCount == 0) {
         func_002D0918(obj->cnt1C);
     }
 }
 
 RefObj *effRetainSharedReference(RefObj *obj) {
-    obj->cnt14++;
+    obj->refCount++;
     D_003BC94C++;
     return obj;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C048);
 
+/* Each 0x10-byte entry contributes itself plus the number stored in its first word. */
+typedef struct EffExpandedList {
+    u8 pad0[4];
+    u32 count;
+    u8 pad8[8];
+    u8 *entries;
+} EffExpandedList;
+
 s32 effCountExpandedEntries(void *work) {
-    u32 count = *(u32 *)((u8 *)work + 4);
+    EffExpandedList *list = work;
+    u32 count = list->count;
     u32 i = 0;
     s32 total = 0;
 
     if (count != 0) {
-        u8 *entries = *(u8 **)((u8 *)work + 0x10);
+        u8 *entries = list->entries;
         do {
-            s32 value = *(s32 *)entries;
+            s32 additionalCount = *(s32 *)entries;
             entries += 0x10;
             i++;
             total++;
-            total += value;
+            total += additionalCount;
         } while (i < count);
     }
     return total;
