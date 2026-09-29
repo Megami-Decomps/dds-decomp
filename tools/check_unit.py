@@ -444,7 +444,11 @@ def main():
             if item != theirs:
                 bad += 1
                 print(f"DIFF rodata of {name} (retail 0x{retail_addr:08X}): {item[:40]!r} vs {theirs[:40]!r}")
-            elif (pad := retail_padding(retail_addr, len(item))):
+            elif (pad := retail_padding(retail_addr, len(item))) and \
+                    rodata[table_off + len(item):end][:pad + ((len(item) + 7) & ~7) - len(item)] \
+                    != retail[va_to_off(segs, retail_addr) + len(item):][:pad + ((len(item) + 7) & ~7) - len(item)]:
+                # (An array whose last elements are zero loses them to rstrip above;
+                # when the object emits exactly retail's following bytes, it is complete.)
                 # The retail symbol runs on past the literal (unreferenced data
                 # after it); a compiled literal would drop those bytes.
                 bad += 1
