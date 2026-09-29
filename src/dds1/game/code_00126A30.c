@@ -2765,10 +2765,6 @@ void func_0013D598(const void *source) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
 
-INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
-
-INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
-
 extern s32 mdlFlagTest(s32);
 typedef struct FldAreaState {
     u8 pad0[0x14];
@@ -2786,6 +2782,10 @@ extern u8 D_00336A30[];
 extern u8 D_00336A40[];
 extern u8 D_00336A50[];
 extern s32 D_003BAE6C;
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
+
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
+
 u8 *func_0013D6D0(const char *name) {
     s32 i = 0;
     u8 *entry;
