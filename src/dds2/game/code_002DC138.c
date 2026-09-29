@@ -292,6 +292,21 @@ extern u128 D_0037F780[];
 
 extern u8 D_00437E94;
 
+typedef struct EffectResourceSizeEntry {
+    u32 resourceSize;
+    u8 pad_04[0x18];
+} EffectResourceSizeEntry;
+
+extern EffectResourceSizeEntry D_003E9968[];
+
+extern u8 *func_002E56A8(u16, void *);
+
+extern EffectResourceSizeEntry D_003E9E78[];
+
+extern u8 *allocateEffectBlockWithModel(u16, void *);
+
+extern u32 func_002F5358(u16, void *, void *, u32);
+
 void effInitModelVUState(void *model) {
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
     func_00232AA0(model);
@@ -527,12 +542,12 @@ void func_002DDA98(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDAA8);
 
-u32 func_002DDCA0(u32 arg0, u32 arg1) {
-    void *p;
+u32 func_002DDCA0(u32 source, u32 value) {
+    RefObj *copy;
 
-    p = func_002DDAA8((void *)arg0);
-    *(u32 *)((s32)p + 0x18) = arg1;
-    return (u32)p;
+    copy = (RefObj *)func_002DDAA8((void *)source);
+    copy->unk18 = value;
+    return (u32)copy;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseSharedReference);
@@ -1472,11 +1487,36 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4E80);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5540);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E56A8);
+u8 *func_002E56A8(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = D_003E9968[kind].resourceSize;
+    u8 *effect = func_00328D68(size + headerSize);
+    *(u8 **)(effect + 0x34) = effect + headerSize;
+    *(u32 *)(effect + 0x24) = 0x80808080;
+    *(float *)(effect + 0x20) = 1.0f;
+    *(u32 *)(effect + 0x2C) = kind;
+    *(u32 *)(effect + 0x28) = 0;
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
+    memcpy(*(void **)(effect + 0x34), source, size);
+    return effect;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5760);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5800);
+u8 *func_002E5800(u8 *work) {
+    u32 *secondary = fileResolveSecondaryBuffer(work);
+    void *source;
+    switch (*(u16 *)(work + 0x1C)) {
+    case 1:
+        break;
+    case 4:
+        secondary = NULL;
+        break;
+    }
+    source = fileResolvePrimaryBuffer(work);
+    return func_002E5760(*(u16 *)(work + 0xC), source, (u32)secondary);
+}
 
 extern EffOp28 D_003E9958[];
 
@@ -1887,7 +1927,19 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9B20);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9BC8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9E48);
+s32 func_002E9E48(const Matrix4 *matrix) {
+    void *work = sdfAllocPacketAligned(0x20);
+    D_00437E68 = (u32)work;
+    sdfResetPacketList(work);
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 $vf28, 0(%0)\n\t"
+        "lqc2 $vf29, 16(%0)\n\t"
+        "lqc2 $vf30, 32(%0)\n\t"
+        "lqc2 $vf31, 48(%0)\n\t"
+        ".set reorder" :: "r"(matrix) : "memory");
+    return func_0033AF38(D_00437E68, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9E98);
 
@@ -2570,7 +2622,20 @@ void func_002F3780(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F37F8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", allocateEffectBlockWithModel);
+u8 *allocateEffectBlockWithModel(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = D_003E9E78[kind].resourceSize;
+    u8 *effect = func_00328D68(size + headerSize);
+    *(u8 **)(effect + 0x34) = effect + headerSize;
+    *(u32 *)(effect + 0x24) = 0x80808080;
+    *(float *)(effect + 0x20) = 1.0f;
+    *(u32 *)(effect + 0x2C) = kind;
+    *(u32 *)(effect + 0x28) = 0;
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
+    memcpy(*(void **)(effect + 0x34), source, size);
+    return effect;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F3A40);
 
@@ -2685,7 +2750,11 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5168);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5358);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5488);
+u32 func_002F5488(u8 *work) {
+    void *first = fileResolvePrimaryBuffer();
+    void *second = fileResolveSecondaryBuffer(work);
+    return func_002F5358(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F54D0);
 

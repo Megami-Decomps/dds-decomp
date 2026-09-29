@@ -66,6 +66,12 @@ extern s32 D_00435E00;
 
 extern void *D_003B4E88[];
 
+typedef struct ActorEntrySlot {
+    s16 code;
+    s16 unk02;
+    s16 countdown;
+} ActorEntrySlot;
+
 typedef struct UiObject {
     u8 unk_00[0x110];
     u32 flags;
@@ -78,9 +84,11 @@ typedef struct UiObject {
     u8 unk_12A[4];
     u16 statusFlags;
     u16 conditionFlags;
-    u8 pad_130[0x1B4];
+    u8 pad_132[0x1B2];
     u8 kind;
-    u8 pad_2E5[0x2B];
+    u8 pad_2E5;
+    ActorEntrySlot entrySlots[7];
+    u8 pad_310[4];
     u32 marker;
     u8 pad_318[0x4C];
     struct UiObject *next;
@@ -1186,8 +1194,8 @@ typedef struct EntryPair {
 
 extern EntryPair D_003B4DF0[];
 
-s32 func_001ADCD0(s32 base, s32 index) {
-    s16 value = *(s16 *)(base + index * 6 + 0x2E6);
+s32 func_001ADCD0(UiObject *unit, s32 index) {
+    s16 value = unit->entrySlots[index].code;
     if (D_003B4DF0[index].first != 0) {
         if (D_003B4DF0[index].first == value) {
             return 1;
@@ -1203,14 +1211,14 @@ s32 func_001ADCD0(s32 base, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADD30);
 
-void func_001ADDB8(s32 arg0, s32 arg1, u16 arg2) {
-    *(u16 *)(arg1 * 6 + arg0 + 0x2e6) = arg2;
+void func_001ADDB8(UiObject *unit, s32 index, u16 code) {
+    unit->entrySlots[index].code = code;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADDD0);
 
-s16 func_001ADE00(s32 base, s32 index) {
-    return *(s16 *)(base + index * 6 + 0x2E6);
+s16 func_001ADE00(UiObject *unit, s32 index) {
+    return unit->entrySlots[index].code;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADE18);
@@ -1219,8 +1227,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADFE0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE2C0);
 
-void func_001AE358(s32 base) {
-    s16 *entry = (s16 *)(base + 0x2EA);
+void func_001AE358(UiObject *unit) {
+    s16 *entry = &unit->entrySlots[0].countdown;
     u32 i;
     for (i = 0; i < 7; i++) {
         if (*entry >= 0) {
