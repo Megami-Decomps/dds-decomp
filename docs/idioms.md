@@ -142,9 +142,20 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   leaves earlier calls implicitly `int` and moves values between `$2`/`$3`.
   Keep new externs in the declaration block at the top of the unit; externs
   added mid-file can flip other functions to CONTEXT.
-- Whether reorg annuls a branch after a call (`bnel` vs `bne`) can depend on
-  whether the callee is visible as C earlier in the unit. A function that
-  matches only with its callee opaque hints at a translation-unit boundary.
+- A call to a function already compiled earlier in the same file differs from
+  a call to an extern. Without `-fexceptions`, `rest_of_compilation` marks
+  every compiled function `TREE_NOTHROW`, and later calls to it get a
+  `REG_EH_REGION 0` note. In reorg (`find_dead_or_set_registers`), the scan of
+  a branch target's live registers stops at a call that can throw (an extern)
+  but runs past a nothrow call. That changes which delay slots get filled:
+  `bne` against `bnel`, or a lone `nop`. So when a caller matches only with its
+  callee opaque, retail compiled the callee in a *different* file: a
+  translation-unit boundary lies between the callee and the caller. When a
+  caller matches only with the callee visible, both were in one file. Record
+  such cases as boundary evidence and split the unit; a block-scope `extern`
+  in the caller reproduces the bytes, but it is a codegen lever, not the
+  source. The definition form of the callee (`static`, return type,
+  prototype) makes no difference.
 - A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
   across it; retail's code has none.
 - `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.
