@@ -10,7 +10,7 @@ extern s32 D_003BAA6C;
 extern s32 D_003BAAB8;
 
 typedef struct TableEntry32 {
-    u16 unk0; /* 0x0 */
+    u16 value; /* 0x0: copied to active roster entry */
     u16 unk2; /* 0x2 */
 } TableEntry32;
 
@@ -29,8 +29,23 @@ typedef struct Entry1A4 {
     u16 unkE; /* 0xE */
     u8 pad10[4]; /* 0x10 */
     u16 unk14; /* 0x14 */
-    u8 pad16[398]; /* 0x16 */
+    u8 pad16[0x3C];      /* 0x016 */
+    u16 tableValue;       /* 0x052 */
+    u8 pad54[0x140];
+    s32 randomizedValue;  /* 0x194 */
+    u8 pad198[0xC];
 } Entry1A4;
+
+typedef struct EvtScriptContext {
+    u16 stateFlags;      /* 0x00 */
+    u16 pad02;
+    s32 third;           /* 0x04 */
+    s32 first;           /* 0x08 */
+    s32 second;          /* 0x0C */
+    s32 result;          /* 0x10 */
+    u16 options;         /* 0x14 */
+    u8 pad16[2];
+} EvtScriptContext;
 
 extern TableEntry32 D_0032AEA8[];
 extern Entry4 D_0032AEE8[];
@@ -230,7 +245,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B308);
 
 void func_0011B418(s32 arg0) {
-    *(u16 *)(arg0 + 0x52) = D_0032AEA8[*(u16 *)(arg0 + 4)].unk0;
+    ((Entry1A4 *)arg0)->tableValue = D_0032AEA8[((Entry1A4 *)arg0)->rosterIndex].value;
 }
 
 void evtUpdateFlaggedEntries(void) {
@@ -288,10 +303,10 @@ void dds3ForEachFlagged(void) {
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B6A8);
 
 void func_0011B7B8(s32 arg0) {
-    s32 temp_v0;
+    s32 randomOffset;
 
-    temp_v0 = effMiscRandMod(0, 4);
-    *(s32 *)(arg0 + 0x194) = 0x12 - temp_v0;
+    randomOffset = effMiscRandMod(0, 4);
+    ((Entry1A4 *)arg0)->randomizedValue = 0x12 - randomOffset;
 }
 
 extern s32 D_003BAA00;
@@ -326,13 +341,13 @@ extern void func_0010C0B0(u32);
 
 s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     func_0010BE30(D_003BAAB4, script);
-    D_003C2E70[1] = third;
-    D_003C2E70[2] = first;
-    D_003C2E70[3] = second;
-    *(u16 *)((u8 *)D_003C2E70 + 0x14) = flags;
-    *(u16 *)D_003C2E70 &= 0xFFFE;
+    ((EvtScriptContext *)D_003C2E70)->third = third;
+    ((EvtScriptContext *)D_003C2E70)->first = first;
+    ((EvtScriptContext *)D_003C2E70)->second = second;
+    ((EvtScriptContext *)D_003C2E70)->options = flags;
+    ((EvtScriptContext *)D_003C2E70)->stateFlags &= 0xFFFE;
     func_0010C0B0(D_003BAAB4);
-    return D_003C2E70[4];
+    return ((EvtScriptContext *)D_003C2E70)->result;
 }
 
 void dds3WorkInit(void) {
@@ -402,11 +417,11 @@ s32 func_0011BD40(void) {
 }
 
 s32 func_0011BD78(void) {
-    s32 *work = D_003C2E70;
-    s32 index = work[1];
+    EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
+    s32 index = work->third;
     s32 value;
     if (*(s8 *)(D_003BAA4C + index * 2 + 1) == 5) {
-        value = *(u8 *)(D_003BAA18 + *(u16 *)(work[2] + 4) * 20 + 2);
+        value = *(u8 *)(D_003BAA18 + ((Entry1A4 *)work->first)->rosterIndex * 20 + 2);
     } else {
         value = *(u8 *)(D_003BAA50 + index * 56 + 0x11);
     }
@@ -415,11 +430,11 @@ s32 func_0011BD78(void) {
 }
 
 s32 func_0011BE00(void) {
-    s32 *work = D_003C2E70;
-    s32 index = work[1];
+    EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
+    s32 index = work->third;
     s32 value = *(u8 *)(D_003BAA50 + index * 56 + 0x25);
     if (*(s8 *)(D_003BAA4C + index * 2 + 1) == 5) {
-        f32 scale = *(f32 *)(D_003BAA18 + *(u16 *)(work[2] + 4) * 20 + 4);
+        f32 scale = *(f32 *)(D_003BAA18 + ((Entry1A4 *)work->first)->rosterIndex * 20 + 4);
         value = (s32)((f32)value * scale);
     }
     func_0010D5F0(value);
@@ -436,11 +451,11 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011BED0);
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011BF50);
 
 s32 func_0011BFE8(void) {
-    s32 *work = D_003C2E70;
-    s32 index = work[1];
+    EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
+    s32 index = work->third;
     s32 value;
     if (*(s8 *)(D_003BAA4C + index * 2 + 1) == 5) {
-        value = *(u8 *)(D_003BAA18 + *(u16 *)(work[2] + 4) * 20 + 3);
+        value = *(u8 *)(D_003BAA18 + ((Entry1A4 *)work->first)->rosterIndex * 20 + 3);
     } else {
         value = *(s16 *)(D_003BAA50 + index * 56 + 0x34);
     }
@@ -454,10 +469,10 @@ s32 func_0011C070(void) {
 }
 
 s32 func_0011C0B0(void) {
-    u16 bits = *(u16 *)D_003C2E70 | 1;
+    u16 bits = ((EvtScriptContext *)D_003C2E70)->stateFlags | 1;
 
-    *(u16 *)D_003C2E70 = bits;
-    D_003C2E70[4] = func_0010D428(0);
+    ((EvtScriptContext *)D_003C2E70)->stateFlags = bits;
+    ((EvtScriptContext *)D_003C2E70)->result = func_0010D428(0);
     return 1;
 }
 
@@ -556,8 +571,8 @@ void func_0011C3C0(void) {
 extern s32 func_001190B0(s32);
 
 void evtSelectStatGrade(void) {
-    s32 total = func_001190B0(D_003C2E70[3]);
-    s32 current = *(u16 *)(D_003C2E70[3] + 6);
+    s32 total = func_001190B0(((EvtScriptContext *)D_003C2E70)->second);
+    s32 current = *(u16 *)(((EvtScriptContext *)D_003C2E70)->second + 6);
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;
 
@@ -617,8 +632,8 @@ void func_0011C5D8(void) {
 }
 
 void evtSelectFineStatGrade(void) {
-    s32 total = func_001190B0(D_003C2E70[3]);
-    s32 current = *(u16 *)(D_003C2E70[3] + 6);
+    s32 total = func_001190B0(((EvtScriptContext *)D_003C2E70)->second);
+    s32 current = *(u16 *)(((EvtScriptContext *)D_003C2E70)->second + 6);
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;
 

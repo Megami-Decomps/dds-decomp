@@ -350,17 +350,43 @@ typedef struct PcpScatterParams {
     u8 pad00[0x10];
     f32 matrix[16];
     u32 unk50;
-    u8 pad54[0x08];
+    u8 pad54[0x04];
+    s32 unk58;
     u32 particleCount;
     u32 unk60;
     u32 unk64;
-    u8 pad68[0xD0];
+    u8 pad68[0x08];
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+    f32 unk7C;
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    u8 pad8C[0x08];
+    f32 unk94;
+    u8 pad98[0x04];
+    f32 unk9C;
+    f32 unkA0;
+    f32 unkA4;
+    f32 unkA8;
+    u8 padAC[0x04];
+    u32 unkB0;
+    u32 unkB4;
+    u8 padB8[0x80];
 } PcpScatterParams;
 
 typedef struct PcpScatterParticle {
-    u8 pad00[0x08];
+    f32 unk00;
+    f32 unk04;
     s32 unk08;
-    u8 pad0C[0x1C];
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
 } PcpScatterParticle;
 
 typedef struct PcpScatterInstance {

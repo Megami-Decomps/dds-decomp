@@ -44,7 +44,7 @@ typedef struct SoundResourceNode {
     u32 flags;
     u32 unk_04;
     u32 unk_08;
-    u32 unk_0C;
+    s32 fadeCountdown;
     u32 resourceHandle;
     u32 unk_14;
     struct SoundResourceNode *previous;
@@ -8034,7 +8034,7 @@ SoundResourceNode *sndAllocResourceNode(void) {
     SoundResourceNode *first;
     node->unk_04 = 0;
     node->unk_08 = 0;
-    node->unk_0C = 0;
+    node->fadeCountdown = 0;
     node->resourceHandle = 0;
     state = (u8 *)func_001A17F0();
     node->previous = 0;
@@ -8073,13 +8073,13 @@ void sndFreeResourceNode(SoundResourceNode *node) {
 
 void btlUpdateFadeColor(void) {
     s32 context = func_001A17F0();
-    s32 *node;
+    SoundResourceNode *node;
 
-    for (node = *(s32 **)(context + 0x234); node != 0; node = (s32 *)node[7]) {
-        if (node[1] == 0) {
-            node[3] = 0;
-        } else if (node[3] > 0) {
-            node[3] = node[3] - 1;
+    for (node = *(SoundResourceNode **)(context + 0x234); node != 0; node = node->next) {
+        if (node->unk_04 == 0) {
+            node->fadeCountdown = 0;
+        } else if (node->fadeCountdown > 0) {
+            node->fadeCountdown = node->fadeCountdown - 1;
         }
     }
     if ((u32)(func_001DC470() - 9) < 2 || *(s32 *)(context + 0x2A4) != 0 || *(s32 *)(context + 0x208) == 8) {
@@ -8089,20 +8089,21 @@ void btlUpdateFadeColor(void) {
     }
     switch (*(u8 *)(context + 0x584)) {
     case 0: {
-        u32 color = *(u32 *)(context + 0x588);
+        u32 packedColor = *(u32 *)(context + 0x588);
 
-        if (color <= 0x8080807F) {
-            *(u32 *)(context + 0x588) = color + 0x10000000;
+        /* The high byte rises by 0x10 per frame, capped at the opaque gray tint. */
+        if (packedColor <= 0x8080807F) {
+            *(u32 *)(context + 0x588) = packedColor + 0x10000000;
         } else {
             *(u32 *)(context + 0x588) = 0x80808080;
         }
         break;
     }
     case 1: {
-        u32 color = *(u32 *)(context + 0x588);
+        u32 packedColor = *(u32 *)(context + 0x588);
 
-        if (color > 0x808080) {
-            *(u32 *)(context + 0x588) = color - 0x10000000;
+        if (packedColor > 0x808080) {
+            *(u32 *)(context + 0x588) = packedColor - 0x10000000;
         } else {
             *(u32 *)(context + 0x588) = 0x808080;
         }
@@ -8511,7 +8512,7 @@ typedef struct SoundLoadNode {
 typedef struct SoundFileRequest {
     SoundLoadNode *node;
     void *handle;
-    u32 unk_08;
+    u32 resourceHandle;
     u32 blockIndex;
     const char *name;
 } SoundFileRequest;
@@ -8532,41 +8533,42 @@ extern char D_003A5110[];
 extern char D_003A5138[];
 extern void func_002E9450(s32, s32);
 
-u32 func_001F3778(u32 *arguments) {
-    u8 *sound = (u8 *)arguments[0];
+u32 func_001F3778(SoundFileRequest *request) {
+    SoundLoadNode *node = request->node;
     if (sndHasActiveFileLoad()) {
         func_001FB0A8(D_003A50D8);
         return 0;
     }
-    if ((*(u32 *)sound & 2) == 0) {
-        if (func_00288BA8(arguments[1])) {
+    if ((node->flags & 2) == 0) {
+        if (func_00288BA8(request->handle)) {
             s32 size;
             s32 data;
-            func_001FB0A8(D_003A50F0, arguments[4]);
-            arguments[2] = fileGetResourceHandle(arguments[1]);
-            size = fileGetResourceSize(arguments[1]);
-            data = sdfResourceRetainAddress(arguments[2]);
-            if (func_002E92C0(*(u32 *)(sound + 8)) == 0) {
+            func_001FB0A8(D_003A50F0, request->name);
+            request->resourceHandle = fileGetResourceHandle(request->handle);
+            size = fileGetResourceSize(request->handle);
+            data = sdfResourceRetainAddress(request->resourceHandle);
+            if (func_002E92C0(node->position) == 0) {
                 func_002E9450(data, size);
-                *(u32 *)sound |= 8;
-                func_001FB0A8(D_003A5110, *(u16 *)(sound + 0xA), size);
+                node->flags |= 8;
+                /* The packed position stores the sound block number in its upper halfword. */
+                func_001FB0A8(D_003A5110, *(u16 *)((u8 *)node + 0xA), size);
             }
-            *(u32 *)sound = (*(u32 *)sound & ~1) | 2;
+            node->flags = (node->flags & ~1) | 2;
         }
-    } else if (func_002E92C0(*(u32 *)(sound + 8)) != 0) {
-        func_001FB0A8(D_003A5138, *(u16 *)(sound + 0xA));
-        func_002D0918(arguments[2]);
-        func_002887A0(arguments[1]);
-        *(u32 *)sound = (*(u32 *)sound & ~8) | 0x10;
+    } else if (func_002E92C0(node->position) != 0) {
+        func_001FB0A8(D_003A5138, *(u16 *)((u8 *)node + 0xA));
+        func_002D0918(request->resourceHandle);
+        func_002887A0(request->handle);
+        node->flags = (node->flags & ~8) | 0x10;
         return 1;
     }
     return 0;
 }
 
 
-u8 *sndCreateFileLoadTask(u32 soundId, u32 variant, const char *filename) {
+u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename) {
     u8 *task = btlAllocTask(strlen(filename) + 20);
-    u8 *arguments;
+    SoundFileRequest *request;
     char *name;
 
     task[0] = 1;
@@ -8575,11 +8577,11 @@ u8 *sndCreateFileLoadTask(u32 soundId, u32 variant, const char *filename) {
     *(void **)(task + 0x48) = sndStartFileLoad;
     *(void **)(task + 0x4C) = func_001F3778;
     task[0x10] = 0;
-    arguments = func_001D47D8((s32)task);
-    name = (char *)(arguments + 20);
-    *(u32 *)arguments = soundId;
-    *(u32 *)(arguments + 12) = variant;
-    *(char **)(arguments + 16) = name;
+    request = (SoundFileRequest *)func_001D47D8((s32)task);
+    name = (char *)(request + 1);
+    request->node = node;
+    request->blockIndex = variant;
+    request->name = name;
     strcpy(name, filename);
     return task;
 }

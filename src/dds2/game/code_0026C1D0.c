@@ -322,7 +322,11 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DA90);
 void func_0026DB20(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB28);
+extern s32 scrClearEntryFlag();
+
+s64 func_0026DB28(u32 context, u32 entry) {
+    return scrClearEntryFlag(context, entry & 0xFF, 0xF);
+}
 
 void func_0026DB48(u32 arg0, u8 arg1) {
     scrTestEntryFlag(arg0, arg1, 0xf);
@@ -331,7 +335,9 @@ void func_0026DB48(u32 arg0, u8 arg1) {
 void func_0026DB68(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB70);
+s64 func_0026DB70(u32 context) {
+    return scrClearEntryFlag(context, 0, 0);
+}
 
 void func_0026DB90(u32 arg0) {
     scrTestEntryFlag(arg0, 0, 0);
@@ -340,7 +346,9 @@ void func_0026DB90(u32 arg0) {
 void func_0026DBB0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DBB8);
+s64 func_0026DBB8(u32 context) {
+    return scrClearEntryFlag(context, 0, 1);
+}
 
 void func_0026DBD8(u32 arg0) {
     scrTestEntryFlag(arg0, 0, 1);

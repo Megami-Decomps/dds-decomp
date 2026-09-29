@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Small work area: type id and count, an id block, a result table plus an
  * object released on cleanup. */
@@ -130,13 +131,17 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192E38);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192F80);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193238);
+void func_00193238(u8 *work, void *src) {
+    PCP_COPY_VECTOR(work + 0x40, src);
+}
 
 void effMagatuhiSetSecondResource(EffMagatuhiResourceSet *work, u32 value) {
     work->secondResource = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs);
+void effMagatuhiCopyVecs(void *dst, void *src) {
+    VU0_COPY_MATRIX(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193280);
 
@@ -151,13 +156,17 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193668);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001937C0);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193A88);
+void func_00193A88(u8 *work, void *src) {
+    PCP_COPY_VECTOR(work + 0x40, src);
+}
 
 void func_00193AA0(EffMagatuhiResourceSet *work, u32 value) {
     work->buffer = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs2);
+void effMagatuhiCopyVecs2(void *dst, void *src) {
+    VU0_COPY_MATRIX(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AD0);
 
@@ -172,13 +181,17 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193F10);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001943E0);
+void func_001943E0(u8 *work, void *src) {
+    PCP_COPY_VECTOR(work + 0x40, src);
+}
 
 void effMagatuhiSetFirstResource(EffMagatuhiResourceSet *work, u32 value) {
     work->firstResource = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiCopyVecs3);
+void effMagatuhiCopyVecs3(void *dst, void *src) {
+    VU0_COPY_MATRIX(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194428);
 

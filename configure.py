@@ -178,6 +178,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
         f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags $in -o $out.s && "
+        f"{sys.executable} tools/as_coproc_delay.py $out.s $out.s && "
         f"{prefix}{EE_AS} {EE_AS_FLAGS} -o $out $out.s",
         description="cc $in",
         depfile="$out.d",
@@ -222,7 +223,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     eeasm.append(str(out))
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
                 flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
-                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt"],
+                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt",
+                                                                      "tools/as_coproc_delay.py"],
                         variables={"cdefs": cdefs, "cflags": flags})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")

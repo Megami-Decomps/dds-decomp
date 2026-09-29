@@ -104,13 +104,27 @@ typedef struct {
     u16 unkE;
 } TitleSeq;
 
+typedef struct TitleMenuWork {
+    u8 pad00[0x9C];
+    TitleSeq **sequence;      /* 0x009C */
+    u8 padA0[0xAE08];
+    s8 opacityReady;          /* 0xAEA8 */
+    u8 padAEA9[7];
+    s32 iconResource;         /* 0xAEB0 */
+    u32 opacity;              /* 0xAEB4 */
+    u8 padAEB8[0x828];
+    s32 fadeProgress;         /* 0xB6E0 */
+    u8 padB6E4[0x10];
+    s32 sequenceMode;         /* 0xB6F4 */
+} TitleMenuWork;
+
 extern void func_00299A38(TitleSeq *, u8 *);
 
 extern void btlAddBaseStats(u8 *, TitleSeq *);
 
 void mnuTitleApplySequenceState(u8 *work) {
-    s32 state = *(s32 *)(work + 0xB6F4);
-    TitleSeq *seq = **(TitleSeq ***)(work + 0x9C);
+    s32 state = ((TitleMenuWork *)work)->sequenceMode;
+    TitleSeq *seq = *((TitleMenuWork *)work)->sequence;
 
     switch (state) {
     case 5:
@@ -155,15 +169,15 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C3F0);
 extern u32 func_00309138(u32, u32, s32);
 
 void func_0029C450(u8 *work) {
-    s32 remaining = 0x100 - *(s32 *)(work + 0xB6E0);
+    s32 remaining = 0x100 - ((TitleMenuWork *)work)->fadeProgress;
     u32 opacity;
-    if (*(s8 *)(work + 0xAEA8) != 0) {
+    if (((TitleMenuWork *)work)->opacityReady != 0) {
         return;
     }
     opacity = func_00309138(0x80808080, 0x80808000, remaining) & 0xFF;
-    *(u32 *)(work + 0xAEB4) = opacity;
+    ((TitleMenuWork *)work)->opacity = opacity;
     if (opacity >= 0x80) {
-        *(s8 *)(work + 0xAEA8) = 1;
+        ((TitleMenuWork *)work)->opacityReady = 1;
     }
 }
 
@@ -226,7 +240,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5,
     color[1] = alpha;
     color[2] = alpha;
     color[3] = alpha;
-    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, *(s32 *)(work + 0xAEB0), 0x1B, 0x53);
+    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, ((TitleMenuWork *)work)->iconResource, 0x1B, 0x53);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CB70);
@@ -241,7 +255,7 @@ extern void func_0029C880(s32, s32, s32, u32, u8 *, s32, u8 *);
 
 void mnuTitleDrawFadeMenuEntries(u8 *work) {
     u8 *res = work + 0x5C;
-    u32 color = func_00309138(0xFFF06480, 0xFFF06400, 0x100 - *(s32 *)(work + 0xB6E0));
+    u32 color = func_00309138(0xFFF06480, 0xFFF06400, 0x100 - ((TitleMenuWork *)work)->fadeProgress);
 
     mnuCampDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
     func_0029CB70(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
@@ -249,7 +263,7 @@ void mnuTitleDrawFadeMenuEntries(u8 *work) {
 }
 
 void mnuTitleRenderFadeAndPanels(u8 *work) {
-    s32 remaining = 0x100 - *(s32 *)(work + 0xB6E0);
+    s32 remaining = 0x100 - ((TitleMenuWork *)work)->fadeProgress;
 
     func_0029C450(work);
     func_0029C618(work);
@@ -2602,6 +2616,15 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9A40);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9AB8);
 
+typedef struct StaffResourceHeader {
+    u8 pad00[0x64];
+    s32 resourceSource;         /* 0x064 */
+    u8 pad68[0x8C];
+    u32 baseHandles[3];        /* 0x0F4 */
+    s32 resourceOptions;        /* 0x100 */
+    u32 resourceLists[3];      /* 0x104 */
+} StaffResourceHeader;
+
 void func_002A9BC8(s32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4,
                                     u32 arg5) {
     func_00306F80(arg0 + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(arg3 + 0x30) + 100), 10,
@@ -2626,18 +2649,18 @@ void mnuStaffInitResourceLists(u8 *work) {
     u8 *ctx = work + 0xB10C;
     s32 list;
 
-    *(s32 *)(work + 0xF4) = func_002B9FF8(0, *(s32 *)(work + 0x64), *(s32 *)(work + 0x100));
-    *(s32 *)(work + 0xF8) = func_002B9FF8(1, *(s32 *)(work + 0x64), *(s32 *)(work + 0x100));
-    *(s32 *)(work + 0xFC) = func_002B9FF8(3, *(s32 *)(work + 0x64), *(s32 *)(work + 0x100));
-    *(s32 *)(work + 0x104) = func_002A9BF8(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
+    ((StaffResourceHeader *)work)->baseHandles[0] = func_002B9FF8(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[1] = func_002B9FF8(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[2] = func_002B9FF8(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->resourceLists[0] = func_002A9BF8(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
     list = func_002A9BF8(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
-    *(s32 *)(work + 0x108) = list;
+    ((StaffResourceHeader *)work)->resourceLists[1] = list;
     func_002B9568(list, 0x100);
     list = func_002A9BF8(D_003E5708, 2, 0x1C0, 0x10, work, 0);
-    *(s32 *)(work + 0x10C) = list;
+    ((StaffResourceHeader *)work)->resourceLists[2] = list;
     func_002B9568(list, 0x100);
     func_002BAF10(ctx);
-    func_002BAF50(*(s32 *)(work + 0x104), ctx);
+    func_002BAF50(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
 extern void func_002B9520(u32);
@@ -2645,15 +2668,15 @@ extern void func_002B9520(u32);
 extern void mnuReleaseResourceList(u32);
 
 void func_002A9F08(u8 *work) {
-    u32 *handles = (u32 *)(work + 0x104);
+    u32 *handles = ((StaffResourceHeader *)work)->resourceLists;
     u32 i;
 
     for (i = 0; i < 3; i++) {
         func_002B9520(*handles++);
     }
-    mnuReleaseResourceList(*(u32 *)(work + 0xF4));
-    mnuReleaseResourceList(*(u32 *)(work + 0xF8));
-    mnuReleaseResourceList(*(u32 *)(work + 0xFC));
+    mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[0]);
+    mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[1]);
+    mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[2]);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9F78);

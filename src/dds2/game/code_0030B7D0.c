@@ -61,21 +61,27 @@ typedef struct {
 } SdfCounterDisplay;
 
 typedef struct {
-    s32 value;         /* 0x00 */
-    s16 countdown;     /* 0x04 */
-    s16 mode;          /* 0x06 */
+    s32 value;            /* 0x00 */
+    s16 countdown;        /* 0x04 */
+    s16 mode;             /* 0x06 */
+    u8 pad08[4];
+    s16 mapTimerPrimary;  /* 0x0C */
+    s16 mapTimerSecondary; /* 0x0E */
 } SdfCounterTimer;
-
-typedef struct {
-    u8 pad00[0x70];
-    SdfCounterDisplay *display; /* 0x70 */
+typedef struct SdfCounterChannel {
+    u8 pad00[0x58];
+    struct SdfCounterChannel *next; /* 0x58 */
+    u8 pad5C[0x14];
+    SdfCounterDisplay *display;     /* 0x70 */
 } SdfCounterChannel;
 
 typedef struct {
-    u8 pad00[0x1C];
-    SdfCounterChannel *channel; /* 0x1C */
+    u8 pad00[0x10];
+    SdfCounterChannel *first;       /* 0x10 */
+    u8 pad14[8];
+    SdfCounterChannel *channel;     /* 0x1C */
     u8 pad20[0x10];
-    SdfCounterTimer *timer;     /* 0x30 */
+    SdfCounterTimer *timer;         /* 0x30 */
 } SdfCounterRuntime;
 
 extern u32 D_00439098;
@@ -138,6 +144,16 @@ typedef struct ScrVmOperand {
     u8 unk54;          // 0x54
     s8 s55;            // 0x55
 } ScrVmOperand; // 0x56
+
+/* Script flag storage overlaps the other VM operand view near 0x50. */
+typedef struct ScriptFlagWork {
+    u8 pad00[0x22];
+    u16 slotIds[24];       /* 0x22 */
+    u8 pad52[3];
+    u8 scriptId;           /* 0x55 */
+    u8 pad56[2];
+    u32 flagWords[0x55];   /* 0x58, three bits per packed flag */
+} ScriptFlagWork;
 
 typedef struct ScriptFlagEntry {
     u32 unknown;
@@ -303,14 +319,14 @@ s32 func_0030C9B8(void) {
 }
 
 s16 func_0030C9D0(s32 remaining) {
-    s32 task = *(s32 *)(D_004388C4 + 0x10);
+    SdfCounterChannel *task = ((SdfCounterRuntime *)D_004388C4)->first;
     if (remaining > 0) {
         do {
             remaining--;
-            task = *(s32 *)(task + 0x58);
+            task = task->next;
         } while (remaining != 0);
     }
-    return *(s16 *)(*(s32 *)(task + 0x70) + 8);
+    return task->display->value;
 }
 
 float sdfCounterGetScaledValue(void) {
@@ -362,35 +378,35 @@ void sdfCounterTickCountdown(void) {
 }
 
 void mnuSetMapTimerFlags(s32 flags) {
-    s16 *timers = *(s16 **)(D_004388C4 + 0x30);
+    SdfCounterTimer *timers = ((SdfCounterRuntime *)D_004388C4)->timer;
     if ((flags & 1) != 0) {
-        if (timers[6] == 0) {
-            timers[6] = 1;
+        if (timers->mapTimerPrimary == 0) {
+            timers->mapTimerPrimary = 1;
         }
     } else {
-        timers[6] = 0;
+        timers->mapTimerPrimary = 0;
     }
     if ((flags & 2) != 0) {
-        if (timers[7] == 0) {
-            timers[7] = 1;
+        if (timers->mapTimerSecondary == 0) {
+            timers->mapTimerSecondary = 1;
         }
     } else {
-        timers[7] = 0;
+        timers->mapTimerSecondary = 0;
     }
 }
 
 void mnuTickMapTimers(void) {
-    s16 *timers = *(s16 **)(D_004388C4 + 0x30);
-    if (timers[6] > 0) {
-        timers[6]--;
-        if (timers[6] == 0) {
-            timers[6] = 60;
+    SdfCounterTimer *timers = ((SdfCounterRuntime *)D_004388C4)->timer;
+    if (timers->mapTimerPrimary > 0) {
+        timers->mapTimerPrimary--;
+        if (timers->mapTimerPrimary == 0) {
+            timers->mapTimerPrimary = 60;
         }
     }
-    if (timers[7] > 0) {
-        timers[7]--;
-        if (timers[7] == 0) {
-            timers[7] = 60;
+    if (timers->mapTimerSecondary > 0) {
+        timers->mapTimerSecondary--;
+        if (timers->mapTimerSecondary == 0) {
+            timers->mapTimerSecondary = 60;
         }
     }
 }
@@ -1218,7 +1234,7 @@ extern u16 D_004052E8[][80];
 
 void func_00313F88(u8 *work) {
     u16 *source = D_004052E8[*(u16 *)(work + 4)];
-    u16 *slots = (u16 *)(work + 0x22);
+    u16 *slots = ((ScriptFlagWork *)work)->slotIds;
     u32 index;
     index = 0;
     do {
@@ -1300,7 +1316,7 @@ u32 func_00314728(u8 *work, u32 amount) {
     u8 scriptId;
     if (func_00314C10((s32)work) == 0) return 0;
     total = func_00314BE0((s32)work);
-    scriptId = work[0x55];
+    scriptId = ((ScriptFlagWork *)work)->scriptId;
     *total += amount;
     limit = func_00314690(scriptId);
     if (limit < *total) {
@@ -1367,7 +1383,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314A80);
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314B00);
 
 u8 func_00314B78(s32 arg0) {
-    return *(u8 *)(arg0 + 0x55);
+    return ((ScriptFlagWork *)arg0)->scriptId;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314B80);
@@ -1382,13 +1398,13 @@ u32 func_00314BC0(u32 arg0, u16 arg1) {
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314BE0);
 
 u8 func_00314C10(s32 arg0) {
-    return *(u8 *)(arg0 + 0x55);
+    return ((ScriptFlagWork *)arg0)->scriptId;
 }
 
 u8 func_00314C18(u8 *context, u32 entryId) {
-    context[0x55] = entryId;
+    ((ScriptFlagWork *)context)->scriptId = entryId;
     func_00314A80(context, (u16)entryId);
-    return context[0x55];
+    return ((ScriptFlagWork *)context)->scriptId;
 }
 
 void scrDecodePackedFlagIndex(s32 unused, u32 v, u32 *a, u32 *b) {
@@ -1402,13 +1418,13 @@ void scrDecodePackedFlagIndex(s32 unused, u32 v, u32 *a, u32 *b) {
 }
 
 void func_00314C68(s32 arg0) {
-    memset(arg0 + 0x58, 0, 0x154);
+    memset(((ScriptFlagWork *)arg0)->flagWords, 0, 0x154);
 }
 
 s32 scrSetFlag(u8 *work, u16 index) {
     u32 word, shift;
     scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    *(u32 *)(work + 0x58 + word * 4) |= 1U << shift;
+    ((ScriptFlagWork *)work)->flagWords[word] |= 1U << shift;
     return 1;
 }
 
@@ -1417,7 +1433,7 @@ void func_00314CE8(u8 *work, u16 id) {
     u32 status = func_00315030(work, id);
     if (status == 1) {
         scrDecodePackedFlagIndex((s32)work, id, &word, &shift);
-        *(u32 *)(work + 0x58 + word * 4) &= ~(status << shift);
+        ((ScriptFlagWork *)work)->flagWords[word] &= ~(status << shift);
         if (scrFindSlot(work, id) >= 0) {
             scrRemoveSlot(work, id);
         }
@@ -1454,13 +1470,13 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314E80);
 void scrSetSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
     scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    *(u32 *)(work + 0x58 + word * 4) |= 4U << shift;
+    ((ScriptFlagWork *)work)->flagWords[word] |= 4U << shift;
 }
 
 void scrClearSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
     scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    *(u32 *)(work + 0x58 + word * 4) &= ~(4U << shift);
+    ((ScriptFlagWork *)work)->flagWords[word] &= ~(4U << shift);
 }
 
 void func_00314F90(u8 *work) {
@@ -1474,14 +1490,14 @@ void func_00314F90(u8 *work) {
 u32 scrGetSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
     scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    return *(u32 *)(work + 0x58 + word * 4) & (4U << shift);
+    return ((ScriptFlagWork *)work)->flagWords[word] & (4U << shift);
 }
 
 u32 func_00315030(u8 *work, u16 index) {
     u32 word, shift;
     u32 mask;
     scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    mask = *(u32 *)(work + 0x58 + word * 4);
+    mask = ((ScriptFlagWork *)work)->flagWords[word];
     if (mask & (2U << shift)) {
         return 2;
     }
@@ -1490,7 +1506,7 @@ u32 func_00315030(u8 *work, u16 index) {
 
 s32 func_00315098(s32 arg0, s32 arg1) {
     u32 key = arg1 & 0xFFFF;
-    u16 *p = (u16 *)(arg0 + 0x22);
+    u16 *p = ((ScriptFlagWork *)arg0)->slotIds;
     u32 i = 0;
 
     do {
@@ -1504,7 +1520,7 @@ s32 func_00315098(s32 arg0, s32 arg1) {
 
 s32 scrFindSlot(u8 *work, u16 key) {
     u32 index;
-    u16 *entries = (u16 *)(work + 0x22);
+    u16 *entries = ((ScriptFlagWork *)work)->slotIds;
     for (index = 0; index < 24; index++) {
         if (entries[index] == key) {
             return index;
@@ -1517,11 +1533,11 @@ u16 func_00315118(u8 *work, u32 index) {
     if (index >= 24) {
         return 0;
     }
-    return *(u16 *)(work + 0x22 + index * 2);
+    return ((ScriptFlagWork *)work)->slotIds[index];
 }
 
 u32 func_00315138(u8 *work) {
-    u16 *entries = (u16 *)(work + 0x22);
+    u16 *entries = ((ScriptFlagWork *)work)->slotIds;
     u32 count = 0;
     u32 index;
     for (index = 0; index < 24; index++) {
@@ -1536,6 +1552,7 @@ u16 func_00315170(s32 arg0, s32 arg1, u16 arg2) {
     u16 temp_v0;
     u16 *puVar2;
 
+    /* Required to match: offset-first address calculation for slotIds[arg1]. */
     puVar2 = (u16 *)(arg1 * 2 + arg0 + 0x22);
     temp_v0 = *puVar2;
     *puVar2 = arg2;
@@ -1545,7 +1562,7 @@ u16 func_00315170(s32 arg0, s32 arg1, u16 arg2) {
 s32 scrRemoveSlot(u8 *work, u16 key) {
     s32 index = scrFindSlot(work, key);
     if (index >= 0) {
-        *(u16 *)(work + 0x22 + index * 2) = 0;
+        ((ScriptFlagWork *)work)->slotIds[index] = 0;
         return 1;
     }
     return 0;

@@ -1579,41 +1579,41 @@ void func_002B8D10(u32 arg0) {
     func_002B8BA8(arg0, 0, 0);
 }
 
-s32 mnuScrollListToEnd(u32 *list) {
+s32 mnuScrollListToEnd(MenuList *list) {
     s32 i;
 
-    if (list[7] == 0) {
+    if (list->cursor == NULL) {
         return 0;
     }
     i = 0;
-    while (i < (s32)list[3]) {
-        if (mnuListContainsFinalNode((MenuList *)list)) {
+    while (i < list->visibleCount) {
+        if (mnuListContainsFinalNode(list)) {
             if (i == 0) {
-                if (list[7] == list[5]) {
+                if (list->cursor == list->last) {
                     return 0;
                 }
-                list[7] = list[5];
-                list[9] = list[3] - 1;
-                return list[5];
+                list->cursor = list->last;
+                list->windowOffset = list->visibleCount - 1;
+                return (s32)list->last;
             }
             break;
         }
-        func_002B89A8((s32 *)list);
+        func_002B89A8(list);
         i++;
-        list[7] = *(u32 *)(list[7] + 0x58);
-        list[9] += 1;
+        list->cursor = list->cursor->next;
+        list->windowOffset += 1;
     }
-    if (mnuListContainsFinalNode((MenuList *)list)) {
-        list[9] = list[3] - 1;
-        list[7] = list[5];
-        return list[5];
+    if (mnuListContainsFinalNode(list)) {
+        list->windowOffset = list->visibleCount - 1;
+        list->cursor = list->last;
+        return (s32)list->last;
     }
-    if (list[7] == list[6]) {
-        list[7] = *(u32 *)(list[7] + 0x58);
-        list[9] = 1;
+    if (list->cursor == list->head) {
+        list->cursor = list->cursor->next;
+        list->windowOffset = 1;
     }
     mnuUpdateListScrollFlags((u8 *)list);
-    return list[7];
+    return (s32)list->cursor;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8E30);

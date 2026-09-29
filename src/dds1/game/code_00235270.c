@@ -104,6 +104,8 @@ void evtCreateTask(s32 taskId, s32 value) {
 typedef struct EvtTaskData {
     u32 pad00;
     s32 value; /* 0x04 */
+    u8 pad08[0x30];
+    s32 effectHandle; /* 0x38: released before an updated effect is installed */
 } EvtTaskData;
 
 void evtCreateTaskWithValue(s32 taskId, s32 value) {
@@ -642,18 +644,24 @@ void evtWriteRuntimeHeaderValues(s32 output, s32 *state) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023DFA8);
 
-void evtWriteFixedSizeEntries(s32 output, s32 table) {
+typedef struct EvtFixedEntryTable {
+    u8 pad00[0x20];
+    s32 count;                 /* 0x20 */
+    u8 firstEntry[0x20];      /* 0x24: 0x20-byte records follow */
+} EvtFixedEntryTable;
+
+void evtWriteFixedSizeEntries(s32 output, EvtFixedEntryTable *table) {
     void *entry;
     s32 index;
 
     index = 0;
-    if (0 < *(s32 *)(table + 0x20)) {
-        entry = (void *)(table + 0x24);
+    if (0 < table->count) {
+        entry = table->firstEntry;
         do {
             func_0023D5B0(output, entry, 0x20);
             index = index + 1;
             entry = (void *)((s32)entry + 0x20);
-        } while (index < *(s32 *)(table + 0x20));
+        } while (index < table->count);
     }
 }
 
@@ -954,25 +962,25 @@ s32 evtFindTaskById(u32 arg0) {
     return kwlnTaskGetTaskByName(temp_v0);
 }
 
-s32 evtGetTaskValueWord(u32 arg0) {
+s32 evtGetTaskValueWord(u32 taskId) {
     s32 task;
 
-    task = evtFindTaskById(arg0);
+    task = evtFindTaskById(taskId);
     if (task != 0) {
-        return *(s32 *)(func_00101A70(task) + 4);
+        return ((EvtTaskData *)func_00101A70(task))->value;
     } else {
         return -1;
     }
 }
 
-s32 evtGetTaskData(u32 arg0) {
+EvtTaskData *evtGetTaskData(u32 taskId) {
     s32 task;
 
-    task = evtFindTaskById(arg0);
+    task = evtFindTaskById(taskId);
     if (task != 0) {
-        return (s32)func_00101A70(task);
+        return func_00101A70(task);
     }
-    return task;
+    return (EvtTaskData *)task;
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00241BF0);
@@ -982,18 +990,18 @@ extern void func_002D2D00(s32 arg0);
 extern s32 func_002D3288(s32 arg0);
 extern void effSetCh72Id(s32 arg0);
 
-void evtRefreshTaskData(s32 arg0, s32 arg1) {
-    s32 data = evtGetTaskData(arg0);
-    s32 v = func_00241BF0(arg0, arg1);
-    if (v != 0) {
-        s32 old = *(s32 *)(data + 0x38);
+void evtRefreshTaskData(s32 taskId, s32 arg1) {
+    EvtTaskData *data = evtGetTaskData(taskId);
+    s32 resource = func_00241BF0(taskId, arg1);
+    if (resource != 0) {
+        s32 old = data->effectHandle;
         if (old != 0) {
             func_002D2D00(old);
-            *(s32 *)(data + 0x38) = 0;
+            data->effectHandle = 0;
         }
-        v = func_002D3288(v);
-        effSetCh72Id(v);
-        *(s32 *)(data + 0x38) = v;
+        resource = func_002D3288(resource);
+        effSetCh72Id(resource);
+        data->effectHandle = resource;
     }
 }
 

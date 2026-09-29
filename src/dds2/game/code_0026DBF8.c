@@ -92,6 +92,15 @@ typedef struct MantraDrawPool {
     s32 count;
 } MantraDrawPool;
 
+typedef struct MantraFadeData {
+    u8 *iconList;
+    u16 state;
+    u16 elapsed;
+    f32 scale;
+    s16 x;
+    s16 y;
+} MantraFadeData;
+
 typedef struct MantraEffectResource {
     u8 pad00[0x6C];
     u32 handle;
@@ -1489,7 +1498,8 @@ typedef struct MantraIconEntry {
     u32 leaving : 1;
     u32 shortLoop : 1;
     u32 unk_bits : 25;
-    /* 0x4 */ s32 unk4;
+    /* 0x4 */ s16 x;
+    s16 y;
     /* 0x8 */ s32 timer;
 } MantraIconEntry;
 
@@ -1577,28 +1587,28 @@ s32 mnuUpdateMantraIconList(u8 *list) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002758B8);
 
-s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *object) {
+s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 depth, s32 amount, s32 unused, MantraIconEntry *icon) {
     s32 count;
     f32 ratio;
 
-    switch ((*(u32 *)object >> 1) & 0xF) {
+    switch (icon->state) {
     case 1:
     case 5:
-        count = *(s32 *)(object + 8);
+        count = icon->timer;
         if (count < 5) {
             ratio = (f32)count / 5.0f;
         } else {
             ratio = 1.0f;
         }
         amount = (f32)amount * ratio;
-        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10B, 0, 0x53);
+        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
         break;
     case 2:
-        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10B, 0, 0x53);
+        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
         break;
     case 3:
     case 6:
-        count = *(s32 *)(object + 8);
+        count = icon->timer;
         if (count < 5) {
             ratio = (f32)count / 5.0f;
         } else {
@@ -1606,7 +1616,7 @@ s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *obje
         }
         ratio = 1.0f - ratio;
         amount = (f32)amount * ratio;
-        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10B, 0, 0x53);
+        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
         break;
     case 4:
     case 7:
@@ -1617,28 +1627,28 @@ s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *obje
     return 0;
 }
 
-s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *object) {
+s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 depth, s32 amount, s32 unused, MantraIconEntry *icon) {
     s32 count;
     f32 ratio;
 
-    switch ((*(u32 *)object >> 1) & 0xF) {
+    switch (icon->state) {
     case 1:
     case 5:
-        count = *(s32 *)(object + 8);
+        count = icon->timer;
         if (count < 5) {
             ratio = (f32)count / 5.0f;
         } else {
             ratio = 1.0f;
         }
         amount = (f32)amount * ratio;
-        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10C, 0, 0x53);
+        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
         break;
     case 2:
-        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10C, 0, 0x53);
+        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
         break;
     case 3:
     case 6:
-        count = *(s32 *)(object + 8);
+        count = icon->timer;
         if (count < 5) {
             ratio = (f32)count / 5.0f;
         } else {
@@ -1646,7 +1656,7 @@ s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *obj
         }
         ratio = 1.0f - ratio;
         amount = (f32)amount * ratio;
-        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10C, 0, 0x53);
+        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
         break;
     case 4:
     case 7:
@@ -1671,16 +1681,16 @@ u32 func_00278D80(u32 arg0, u32 arg1) {
 void func_00278DC8(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
-        *(u16 *)((u8 *)item->data + 4) = 3;
+        ((MantraFadeData *)item->data)->state = 3;
     }
 }
 
 void func_00278DF8(s16 x, s16 y, u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
-        u8 *data = (u8 *)item->data;
-        *(s16 *)(data + 0xc) = x;
-        *(s16 *)(data + 0xe) = y;
+        MantraFadeData *fade = (MantraFadeData *)item->data;
+        fade->x = x;
+        fade->y = y;
     }
 }
 
@@ -1774,55 +1784,55 @@ void func_00279148(u32 arg0) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279180);
 
 void func_002792D8(s32 obj) {
-    u32 *data = *(u32 **)(obj + 0x20);
-    func_00275598((u32 *)*data);
-    func_00328E48(data);
+    MantraFadeData *fade = (MantraFadeData *)((MantraDrawItem *)obj)->data;
+    func_00275598((u32 *)fade->iconList);
+    func_00328E48(fade);
 }
 
-s32 mnuUpdateMantraFadeA(s32 arg0, s32 arg1) {
-    u8 *fade = *(u8 **)(arg1 + 0x20);
+s32 mnuUpdateMantraFadeA(s32 unused, s32 arg1) {
+    MantraFadeData *fade = (MantraFadeData *)((MantraDrawItem *)arg1)->data;
 
-    mnuUpdateMantraIconList(*(s32 *)fade);
-    switch (*(u16 *)(fade + 4)) {
+    mnuUpdateMantraIconList(fade->iconList);
+    switch (fade->state) {
     case 1:
     case 6:
-        *(f32 *)(fade + 8) = (f32)*(u16 *)(fade + 6) / 20.0f;
-        *(u16 *)(fade + 6) += 1;
-        if (*(u16 *)(fade + 6) >= 20) {
-            *(u16 *)(fade + 4) = 2;
-            *(f32 *)(fade + 8) = 1.0f;
-            *(u16 *)(fade + 6) = 0;
+        fade->scale = (f32)fade->elapsed / 20.0f;
+        fade->elapsed += 1;
+        if (fade->elapsed >= 20) {
+            fade->state = 2;
+            fade->scale = 1.0f;
+            fade->elapsed = 0;
         }
         break;
     case 2:
-        *(f32 *)(fade + 8) = 1.0f;
+        fade->scale = 1.0f;
         break;
     case 3:
     case 5:
-        *(f32 *)(fade + 8) = 1.0f - (f32)*(u16 *)(fade + 6) / 10.0f;
-        *(u16 *)(fade + 6) += 1;
-        if (*(u16 *)(fade + 6) >= 10) {
-            *(u16 *)(fade + 6) = 0;
-            *(f32 *)(fade + 8) = 0.0f;
-            if (*(u16 *)(fade + 4) == 5) {
-                *(u16 *)(fade + 4) = 4;
+        fade->scale = 1.0f - (f32)fade->elapsed / 10.0f;
+        fade->elapsed += 1;
+        if (fade->elapsed >= 10) {
+            fade->elapsed = 0;
+            fade->scale = 0.0f;
+            if (fade->state == 5) {
+                fade->state = 4;
             } else {
                 return 1;
             }
         }
         break;
     case 4:
-        *(f32 *)(fade + 8) = 0.0f;
+        fade->scale = 0.0f;
         break;
     }
     return 0;
 }
 
 u32 func_00279440(u32 unused, u32 obj) {
-    u32 data = *(u32 *)(obj + 0x20);
-    s32 scale = (s32)(*(f32 *)(data + 8) * 128.0f);
-    func_002758B8(*(s16 *)(data + 0xc), *(s16 *)(data + 0xe), 0, scale,
-                  *(u32 *)data);
+    u32 data = (u32)((MantraDrawItem *)obj)->data;
+    s32 scale = (s32)(((MantraFadeData *)data)->scale * 128.0f);
+    func_002758B8(((MantraFadeData *)data)->x, ((MantraFadeData *)data)->y, 0,
+                  scale, *(u32 *)data);
     return 0;
 }
 
@@ -1843,16 +1853,16 @@ u32 func_00279778(u32 arg0, u32 arg1) {
 void func_002797C0(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
-        *(u16 *)((u8 *)item->data + 4) = 3;
+        ((MantraFadeData *)item->data)->state = 3;
     }
 }
 
 void func_002797F0(s16 x, s16 y, u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
-        u8 *data = (u8 *)item->data;
-        *(s16 *)(data + 0xc) = x;
-        *(s16 *)(data + 0xe) = y;
+        MantraFadeData *fade = (MantraFadeData *)item->data;
+        fade->x = x;
+        fade->y = y;
     }
 }
 
@@ -1910,36 +1920,55 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279C58);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279DC8);
 
-void func_00279F30(s32 obj, s32 dx, s32 dy, u32 a, u32 b, u32 c, u8 d, u8 e) {
-    dx = (s16)dx + *(u16 *)(obj + 0xc);
-    dy = (s16)dy + *(u16 *)(obj + 0xe);
-    *(u16 *)(obj + 0xc) = dx;
-    *(u16 *)(obj + 0xe) = dy;
-    *(u32 *)(obj + 0x10) = a;
-    *(u32 *)(obj + 0x14) = b;
-    *(u32 *)(obj + 0x18) = c;
-    *(u8 *)(obj + 0x1c) = d;
-    *(u8 *)(obj + 0x1d) = e;
+typedef struct MantraPanelAnimation {
+    u32 flags;
+    u8 pad4[8];
+    u16 x;
+    u16 y;
+    u32 visualParameters[3];
+    u8 byte1C;
+    u8 byte1D;
+    u16 frame;
+    u8 pad20[0xE];
+    s16 transitionDelay;
+} MantraPanelAnimation;
+
+void func_00279F30(MantraPanelAnimation *panel, s32 dx, s32 dy, u32 a, u32 b, u32 c, u8 d, u8 e) {
+    dx = (s16)dx + panel->x;
+    dy = (s16)dy + panel->y;
+    panel->x = dx;
+    panel->y = dy;
+    panel->visualParameters[0] = a;
+    panel->visualParameters[1] = b;
+    panel->visualParameters[2] = c;
+    panel->byte1C = d;
+    panel->byte1D = e;
 }
 
-void func_00279F70(u32 *arg0) {
-    *arg0 = (*arg0 & 0xfffc03ff) | 0x800;
+void func_00279F70(MantraPanelAnimation *panel) {
+    panel->flags = (panel->flags & 0xfffc03ff) | 0x800;
 }
 
-void func_00279F90(MantraDrawPool *pool, s32 mode) {
+typedef struct MantraPanelPool {
+    u32 handle;
+    MantraPanelAnimation *items;
+    s32 count;
+} MantraPanelPool;
+
+void func_00279F90(MantraPanelPool *pool, s32 mode) {
     s32 i;
     u32 *item = (u32 *)pool->items;
 
     for (i = 0; i < pool->count; i++, item += 12) {
-        if ((item[0] >> 8) & 1) {
-            if (((item[0] >> 19) & 0xF) == 2) {
-                func_0027A798((u8 *)item, 5, 0);
+        if ((((MantraPanelAnimation *)item)->flags >> 8) & 1) {
+            if (((((MantraPanelAnimation *)item)->flags >> 19) & 0xF) == 2) {
+                func_0027A798((MantraPanelAnimation *)item, 5, 0);
             } else if (mode == 1) {
-                func_0027A798((u8 *)item, 7, 0);
+                func_0027A798((MantraPanelAnimation *)item, 7, 0);
             } else if (mode == 0) {
-                func_0027A798((u8 *)item, 9, 0);
+                func_0027A798((MantraPanelAnimation *)item, 9, 0);
             } else {
-                func_00279F70(item);
+                func_00279F70((MantraPanelAnimation *)item);
             }
         }
     }
@@ -1951,18 +1980,18 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004258F0);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425928);
 
-s32 mnuAdvanceMantraPanelAnim(s32 arg0, u8 *object) {
+s32 mnuAdvanceMantraPanelAnim(s32 unused, MantraPanelAnimation *panel) {
     s32 result;
 
-    if (*(s16 *)(object + 0x2E) > 0) {
-        *(s16 *)(object + 0x2E) -= 1;
-        if (*(s16 *)(object + 0x2E) == 0) {
-            *(u16 *)(object + 0x1E) = 0;
-            *(u32 *)object = (*(u32 *)object & 0xFF87FFFF) | (((*(u32 *)object >> 23) & 0xF) << 19);
+    if (panel->transitionDelay > 0) {
+        panel->transitionDelay -= 1;
+        if (panel->transitionDelay == 0) {
+            panel->frame = 0;
+            panel->flags = (panel->flags & 0xFF87FFFF) | (((panel->flags >> 23) & 0xF) << 19);
         }
     }
     result = 0;
-    switch ((*(u32 *)object >> 19) & 0xF) {
+    switch ((panel->flags >> 19) & 0xF) {
     case 0:
         break;
     case 1:
@@ -1976,28 +2005,28 @@ s32 mnuAdvanceMantraPanelAnim(s32 arg0, u8 *object) {
     case 5:
         break;
     case 6:
-        *(u16 *)(object + 0x1E) += 1;
-        if ((s16)*(u16 *)(object + 0x1E) >= 4) {
-            *(u16 *)(object + 0x1E) = 0;
-            *(u32 *)object = *(u32 *)object & 0xFF87FFFF;
+        panel->frame += 1;
+        if ((s16)panel->frame >= 4) {
+            panel->frame = 0;
+            panel->flags = panel->flags & 0xFF87FFFF;
         }
         break;
     case 8:
-        *(u16 *)(object + 0x1E) += 1;
-        if ((s16)*(u16 *)(object + 0x1E) >= 10) {
-            *(u16 *)(object + 0x1E) = 0;
-            *(u32 *)object = *(u32 *)object & 0xFF87FFFF;
+        panel->frame += 1;
+        if ((s16)panel->frame >= 10) {
+            panel->frame = 0;
+            panel->flags = panel->flags & 0xFF87FFFF;
         }
         break;
     case 7:
-        *(u16 *)(object + 0x1E) += 1;
-        if ((s16)*(u16 *)(object + 0x1E) >= 4) {
+        panel->frame += 1;
+        if ((s16)panel->frame >= 4) {
             result = 1;
         }
         break;
     case 9:
-        *(u16 *)(object + 0x1E) += 1;
-        result = (s16)*(u16 *)(object + 0x1E) > 9;
+        panel->frame += 1;
+        result = (s16)panel->frame > 9;
         break;
     }
     return result;
@@ -2009,13 +2038,13 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A4C0);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A628);
 
-u32 func_0027A798(u8 *obj, u32 bits, s16 length) {
-    u32 flags = (*(u32 *)obj & 0xF87FFFFF) | ((bits & 0xF) << 23);
-    *(s16 *)(obj + 0x2E) = length;
-    *(u32 *)obj = flags;
+u32 func_0027A798(MantraPanelAnimation *panel, u32 bits, s16 length) {
+    u32 flags = (panel->flags & 0xF87FFFFF) | ((bits & 0xF) << 23);
+    panel->transitionDelay = length;
+    panel->flags = flags;
     if (length == 0) {
-        *(s16 *)(obj + 0x1E) = 0;
-        *(u32 *)obj = (flags & 0xFF87FFFF) | ((bits & 0xF) << 19);
+        panel->frame = 0;
+        panel->flags = (flags & 0xFF87FFFF) | ((bits & 0xF) << 19);
     }
     return 0;
 }

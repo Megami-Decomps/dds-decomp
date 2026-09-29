@@ -43,7 +43,8 @@ typedef struct BtlWork {
     u32 flags21C;
     u8 pad220[8];
     s32 unk228;
-    u8 pad22C[0x1C];
+    s32 unk22C;
+    u8 pad230[0x18];
     BtlUnit *head;
     BtlUnit *actorList;
     struct SoundTask *taskList250;
@@ -53,7 +54,9 @@ typedef struct BtlWork {
     struct SoundSlotOwner *soundSlotOwners;
     u8 pad264[0x14];
     s32 unk278;
-    u8 pad27C[0x6C];
+    u8 pad27C[0x50];
+    s32 unk2CC;
+    u8 pad2D0[0x18];
     s32 moneyEarned;
     u8 pad2EC[8];
     s32 experienceEarned;
@@ -64,7 +67,10 @@ typedef struct BtlWork {
     u8 pad4CC[0xE4];
     s32 primaryBuffer;
     s32 secondaryBuffer;
-    u8 pad5B8[0x38];
+    u8 fadeEnabled;
+    u8 pad5B9[3];
+    u32 fadeColor;
+    u8 pad5C0[0x30];
     s32 (*hook5F0)(BtlUnit *, s32);
     u8 pad5F4[0x5C];
     s32 (*hook650)(BtlUnit *);
@@ -265,7 +271,7 @@ typedef struct SoundResourceNode {
     u32 flags;
     u32 unk_04;
     u32 unk_08;
-    u32 unk_0C;
+    s32 fadeCountdown;
     u32 resourceHandle;
     u32 unk_14;
     struct SoundResourceNode *previous;
@@ -1252,17 +1258,17 @@ void btlInitFxLights(BtlFxLights *fx) {
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E19C8);
 
 s32 btlHasMatchingModel(s32 effect, s32 model) {
-    s32 context = func_001AA6F8();
-    s32 node = *(s32 *)(context + 0x24C);
-    while (node != 0) {
-        if ((*(u32 *)(node + 0x110) & 2) != 0 &&
-            *(s32 *)(node + 0x340) != 0 &&
-            *(s32 *)(node + 0x328) != 0 &&
-            func_00232EE8(*(s32 *)(*(s32 *)(node + 0x340) + 0x8C)) == effect &&
-            func_00232EF8(*(s32 *)(*(s32 *)(node + 0x340) + 0x8C)) == model) {
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    BtlUnit *unit = work->actorList;
+    while (unit != NULL) {
+        if ((unit->flags & 2) != 0 &&
+            unit->ext != NULL &&
+            unit->unk328 != 0 &&
+            func_00232EE8((s32)unit->ext->info) == effect &&
+            func_00232EF8((s32)unit->ext->info) == model) {
             return 1;
         }
-        node = *(s32 *)(node + 0x364);
+        unit = unit->nextActor;
     }
     return 0;
 }
@@ -1420,7 +1426,7 @@ u16 func_001E2F50(BtlUnit *unit) {
     return unit->ext->info->data->s2E;
 }
 
-extern void func_003343E8(BtlUnitData *, f32);
+extern s32 func_003343E8(BtlUnitData *, f32);
 
 void func_001E2F78(BtlUnit *unit) {
     if (unit->flags & 2) {
@@ -1428,7 +1434,19 @@ void func_001E2F78(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2FB0);
+extern u32 effMiscRandMod(s32, s32);
+
+s64 func_001E2FB0(BtlUnit *unit) {
+    s32 count;
+    f32 amount;
+    if (unit->flags & 2) {
+        count = func_001E2F50(unit);
+        if (count > 0) {
+            amount = effMiscRandMod(0, count);
+            return func_003343E8(unit->ext->info->data, amount);
+        }
+    }
+}
 
 s32 func_001E3040(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
@@ -2886,18 +2904,18 @@ s32 btlHasMarkedEntry10(s32 actor) {
 extern f32 btlUnitGetTopY(s32);
 
 s32 btlCheckActorDistanceLimit(void) {
-    s32 actor = *(s32 *)(func_001AA6F8() + 0x24C);
+    BtlUnit *unit = ((BtlWork *)func_001AA6F8())->actorList;
 
-    while (actor != 0) {
-        u32 flags = *(u32 *)(actor + 0x110);
+    while (unit != NULL) {
+        u32 flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x400) {
-                if (btlUnitGetTopY(actor) > 400.0f) {
+                if (btlUnitGetTopY((s32)unit) > 400.0f) {
                     return 0;
                 }
             }
         }
-        actor = *(s32 *)(actor + 0x364);
+        unit = unit->nextActor;
     }
     return 1;
 }
@@ -4395,7 +4413,7 @@ SoundResourceNode *sndAllocResourceNode(void) {
     BtlWork *work;
     node->unk_04 = 0;
     node->unk_08 = 0;
-    node->unk_0C = 0;
+    node->fadeCountdown = 0;
     node->resourceHandle = 0;
     work = (BtlWork *)func_001AA6F8();
     node->previous = 0;
@@ -4436,39 +4454,40 @@ void sndFreeResourceNode(SoundResourceNode *node) {
 }
 
 void btlUpdateFadeColor(void) {
-    s32 context = func_001AA6F8();
-    s32 *node;
+    BtlWork *context = (BtlWork *)func_001AA6F8();
+    SoundResourceNode *node;
 
-    for (node = *(s32 **)(context + 0x258); node != 0; node = (s32 *)node[7]) {
-        if (node[1] == 0) {
-            node[3] = 0;
-        } else if (node[3] > 0) {
-            node[3] = node[3] - 1;
+    for (node = context->resourceList258; node != 0; node = node->next) {
+        if (node->unk_04 == 0) {
+            node->fadeCountdown = 0;
+        } else if (node->fadeCountdown > 0) {
+            node->fadeCountdown = node->fadeCountdown - 1;
         }
     }
-    if ((u32)(func_001E9798() - 9) < 2 || *(s32 *)(context + 0x2CC) != 0 || *(s32 *)(context + 0x22C) == 8) {
-        *(u8 *)(context + 0x5B8) = 0;
+    if ((u32)(func_001E9798() - 9) < 2 || context->unk2CC != 0 || context->unk22C == 8) {
+        context->fadeEnabled = 0;
     } else {
-        *(u8 *)(context + 0x5B8) = 1;
+        context->fadeEnabled = 1;
     }
-    switch (*(u8 *)(context + 0x5B8)) {
+    switch (context->fadeEnabled) {
     case 0: {
-        u32 color = *(u32 *)(context + 0x5BC);
+        u32 packedColor = context->fadeColor;
 
-        if (color <= 0x8080807F) {
-            *(u32 *)(context + 0x5BC) = color + 0x10000000;
+        /* The high byte rises by 0x10 per frame, capped at the opaque gray tint. */
+        if (packedColor <= 0x8080807F) {
+            context->fadeColor = packedColor + 0x10000000;
         } else {
-            *(u32 *)(context + 0x5BC) = 0x80808080;
+            context->fadeColor = 0x80808080;
         }
         break;
     }
     case 1: {
-        u32 color = *(u32 *)(context + 0x5BC);
+        u32 packedColor = context->fadeColor;
 
-        if (color > 0x808080) {
-            *(u32 *)(context + 0x5BC) = color - 0x10000000;
+        if (packedColor > 0x808080) {
+            context->fadeColor = packedColor - 0x10000000;
         } else {
-            *(u32 *)(context + 0x5BC) = 0x808080;
+            context->fadeColor = 0x808080;
         }
         break;
     }

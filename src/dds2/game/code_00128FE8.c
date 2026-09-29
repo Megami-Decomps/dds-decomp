@@ -377,6 +377,24 @@ typedef struct {
     s32 unk178;
 } FldCamState;
 
+typedef struct FldCameraOverrides {
+    u8 pad00[0x174];
+    f32 currentHeading;      /* 0x174 */
+    u8 pad178[0x1C];
+    u32 xyPending;           /* 0x194 */
+    f32 xyValue0;            /* 0x198 */
+    f32 xyValue1;            /* 0x19C */
+    u32 headingPending;      /* 0x1A0 */
+    f32 targetHeading;       /* 0x1A4 */
+} FldCameraOverrides;
+
+typedef struct FldAreaResourceState {
+    s32 pad00[30];
+    s32 resourceFlag;     /* 0x78 */
+    s32 area;             /* 0x7C */
+    s32 room;             /* 0x80 */
+} FldAreaResourceState;
+
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001295E0);
@@ -427,12 +445,12 @@ s32 fldLoadAreaResource(void) {
 
     if (area != 0 || floor != 0) {
         fldFreeDisplayObjects();
-        D_00389770[31] = area;
-        D_00389770[32] = floor;
+        ((FldAreaResourceState *)D_00389770)->area = area;
+        ((FldAreaResourceState *)D_00389770)->room = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_0035C860(path, D_004130D8, directory, area, floor);
         D_00435FCC = func_002C7FF0(path);
-        D_00389770[30] = 1;
+        ((FldAreaResourceState *)D_00389770)->resourceFlag = 1;
         return 1;
     }
     return 0;
@@ -466,18 +484,18 @@ void fldFreeDisplayObjects(void) {
     }
     D_00436014 = 0;
     D_00436018 = 0;
-    D_00389770[31] = 0;
-    D_00389770[32] = 0;
-    D_00389770[30] = 0;
+    ((FldAreaResourceState *)D_00389770)->area = 0;
+    ((FldAreaResourceState *)D_00389770)->room = 0;
+    ((FldAreaResourceState *)D_00389770)->resourceFlag = 0;
 }
 
 u32 fldPollAreaResourceLoad(void) {
-    u32 temp_v1 = D_00389770[0x1E];
+    u32 temp_v1 = ((FldAreaResourceState *)D_00389770)->resourceFlag;
 
     if (temp_v1 != 0) {
         if (temp_v1 == 1) {
             if (fileRequestIsReady(D_00435FCC) != 0) {
-                D_00389770[0x1E] = 0;
+                ((FldAreaResourceState *)D_00389770)->resourceFlag = 0;
                 D_00435BB4 = 0;
             }
         }
@@ -499,18 +517,20 @@ u8 fldIsAreaResourceReady(void) {
 }
 
 s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
-    if (D_00389770[31] != area || D_00389770[32] != room) {
+    if (((FldAreaResourceState *)D_00389770)->area != area || ((FldAreaResourceState *)D_00389770)->room != room) {
         return 0;
     }
     if (D_00435FCC != 0 && fileRequestIsReady(D_00435FCC) != 0) {
         return 1;
     }
-    return D_00389770[30] != 0;
+    return ((FldAreaResourceState *)D_00389770)->resourceFlag != 0;
 }
 
 void *func_0012A1F8(void **destination, s32 area, s32 room) {
-    if (D_00389770[31] == area) {
-        if (D_00389770[32] == room) {
+    FldAreaResourceState *state = (FldAreaResourceState *)D_00389770;
+
+    if (state->area == area) {
+        if (state->room == room) {
             void *buffer = func_003292A8(D_00436000);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
@@ -522,8 +542,10 @@ void *func_0012A1F8(void **destination, s32 area, s32 room) {
 }
 
 void *func_0012A270(void **destination, s32 area, s32 room) {
-    if (D_00389770[31] == area) {
-        if (D_00389770[32] == room) {
+    FldAreaResourceState *state = (FldAreaResourceState *)D_00389770;
+
+    if (state->area == area) {
+        if (state->room == room) {
             void *buffer = func_003292A8(D_00436004);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
@@ -535,8 +557,10 @@ void *func_0012A270(void **destination, s32 area, s32 room) {
 }
 
 void *func_0012A2E8(void **destination, s32 area, s32 room) {
-    if (D_00389770[31] == area) {
-        if (D_00389770[32] == room) {
+    FldAreaResourceState *state = (FldAreaResourceState *)D_00389770;
+
+    if (state->area == area) {
+        if (state->room == room) {
             void *buffer = func_003292A8(D_00436008);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
@@ -548,8 +572,10 @@ void *func_0012A2E8(void **destination, s32 area, s32 room) {
 }
 
 void *func_0012A360(void **destination, s32 area, s32 room) {
-    if (D_00389770[31] == area) {
-        if (D_00389770[32] == room) {
+    FldAreaResourceState *state = (FldAreaResourceState *)D_00389770;
+
+    if (state->area == area) {
+        if (state->room == room) {
             void *buffer = func_003292A8(D_0043600C);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
@@ -1679,33 +1705,33 @@ void func_00133DC8(void) {
     D_00389910[0] = 0;
 }
 
-void func_00133DD8(f32 arg0, f32 arg1) {
-    u8 *temp_v0 = (u8 *)D_00389770;
+void func_00133DD8(f32 first, f32 second) {
+    FldCameraOverrides *camera = (FldCameraOverrides *)D_00389770;
 
-    *(f32 *)(temp_v0 + 0x198) = arg0;
-    *(f32 *)(temp_v0 + 0x19C) = arg1;
-    *(u32 *)(temp_v0 + 0x194) = 1;
+    camera->xyValue0 = first;
+    camera->xyValue1 = second;
+    camera->xyPending = 1;
 }
 
-void func_00133DF8(f32 arg0, f32 arg1, f32 arg2) {
-    u8 *temp_v0;
-    f32 temp_f0;
+void func_00133DF8(f32 x, f32 unusedY, f32 z) {
+    FldCameraOverrides *camera;
+    f32 angle;
 
-    temp_f0 = sdfAtan2(arg0, arg2);
-    temp_v0 = (u8 *)D_00389770;
-    temp_f0 *= 180.0f / 3.14f;
-    *(u32 *)(temp_v0 + 0x1A0) = 1;
-    *(f32 *)(temp_v0 + 0x1A4) = -temp_f0;
+    angle = sdfAtan2(x, z);
+    camera = (FldCameraOverrides *)D_00389770;
+    angle *= 180.0f / 3.14f;
+    camera->headingPending = 1;
+    camera->targetHeading = -angle;
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133E38);
 
 void func_00133EE0(void) {
-    u8 *temp_v0 = (u8 *)D_00389770;
+    FldCameraOverrides *camera = (FldCameraOverrides *)D_00389770;
 
-    if (*(u32 *)(temp_v0 + 0x1A0) != 0) {
-        *(u32 *)(temp_v0 + 0x1A0) = 2;
-        *(f32 *)(temp_v0 + 0x174) = *(f32 *)(temp_v0 + 0x1A4);
+    if (camera->headingPending != 0) {
+        camera->headingPending = 2;
+        camera->currentHeading = camera->targetHeading;
     }
 }
 

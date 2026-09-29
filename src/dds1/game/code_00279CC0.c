@@ -236,29 +236,39 @@ s64 func_0027AC00(s32 callback) {
     return menuRunPanel(func_00101A70(), 2, callback);
 }
 
-void func_0027AC38(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
-    s32 temp_v2;
+typedef struct MenuEffectPayload {
+    u8 pad0[8];
+    u8 *data;
+} MenuEffectPayload;
 
-    temp_v1 = effCreatePayload(2);
-    *(u32 *)(arg0 + 0x18) = temp_v1;
-    temp_v2 = effCreatePayload(2);
-    temp_v0 = *(s32 *)(temp_v2 + 8);
-    *(s32 *)(arg0 + 0x1c) = temp_v2;
-    func_002BDE18(temp_v0 + 0x28, *(u32 *)(arg0 + 0x14), 0, 0xc);
-    func_002BDE18(*(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x94, *(u32 *)(arg0 + 0x14), 1, 0xc)
-    ;
-    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 0, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
-    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 1, 0, *(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x6c);
-    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 2, 0, *(s32 *)(*(s32 *)(arg0 + 0x1c) + 8) + 0x6c);
-    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 3, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
-    effSetMaterialSlots(*(u32 *)(arg0 + 0x10), 4, 0, *(u32 *)(*(s32 *)(arg0 + 0x1c) + 8));
-    func_002BDE18(*(s32 *)(*(s32 *)(arg0 + 0x18) + 8) + 0x28, *(u32 *)(arg0 + 0x14), 2, 0xd)
-    ;
-    func_002BE0C0(*(u32 *)(arg0 + 4), 0, *(u32 *)(*(s32 *)(arg0 + 0x18) + 8));
-    func_002BE258(*(u32 *)(arg0 + 8), 0, *(u32 *)(arg0 + 0x14), 3, 4);
-    func_002BE258(*(u32 *)(arg0 + 0xc), 0, *(u32 *)(arg0 + 0x14), 4, 4);
+typedef struct MenuAssets {
+    u32 sprites[5];
+    u32 material;
+    MenuEffectPayload *layerA;
+    MenuEffectPayload *layerB;
+} MenuAssets;
+
+void func_0027AC38(MenuAssets *assets) {
+    s32 packet;
+    MenuEffectPayload *first;
+    MenuEffectPayload *second;
+
+    first = (MenuEffectPayload *)effCreatePayload(2);
+    assets->layerA = first;
+    second = (MenuEffectPayload *)effCreatePayload(2);
+    packet = (s32)second->data;
+    assets->layerB = second;
+    func_002BDE18(packet + 0x28, assets->material, 0, 0xc);
+    func_002BDE18((s32)assets->layerB->data + 0x94, assets->material, 1, 0xc);
+    effSetMaterialSlots(assets->sprites[4], 0, 0, (u32)assets->layerB->data);
+    effSetMaterialSlots(assets->sprites[4], 1, 0, (s32)assets->layerB->data + 0x6c);
+    effSetMaterialSlots(assets->sprites[4], 2, 0, (s32)assets->layerB->data + 0x6c);
+    effSetMaterialSlots(assets->sprites[4], 3, 0, (u32)assets->layerB->data);
+    effSetMaterialSlots(assets->sprites[4], 4, 0, (u32)assets->layerB->data);
+    func_002BDE18((s32)assets->layerA->data + 0x28, assets->material, 2, 0xd);
+    func_002BE0C0(assets->sprites[1], 0, (u32)assets->layerA->data);
+    func_002BE258(assets->sprites[2], 0, assets->material, 3, 4);
+    func_002BE258(assets->sprites[3], 0, assets->material, 4, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AD80);
@@ -271,23 +281,23 @@ extern u32 D_0037CD18[];
 
 extern u32 D_0037CD20[];
 
-void func_0027AEA8(u8 *assets) {
-    effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0, assets);
-    effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0, assets + 0x10);
-    effRequestMappedResource(D_003B2348, D_0037CD20[0], assets + 0x14);
+void func_0027AEA8(MenuAssets *assets) {
+    effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0, &assets->sprites[0]);
+    effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0, &assets->sprites[4]);
+    effRequestMappedResource(D_003B2348, D_0037CD20[0], &assets->material);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AF28);
 
-void mnuReleaseAssets(s32 *assets) {
+void mnuReleaseAssets(MenuAssets *assets) {
     u32 i;
     for (i = 0; i < 4; i++) {
-        func_002BDD60(assets[i]);
+        func_002BDD60(assets->sprites[i]);
     }
-    func_002BDD60(assets[4]);
-    effDestroyPackedBatch(assets[5]);
-    func_002BD988(assets[6]);
-    func_002BD988(assets[7]);
+    func_002BDD60(assets->sprites[4]);
+    effDestroyPackedBatch(assets->material);
+    func_002BD988(assets->layerA);
+    func_002BD988(assets->layerB);
 }
 
 void func_0027B088(s32 arg0, u32 arg1) {
@@ -745,51 +755,57 @@ extern s32 *sdfResourceRetainAddress(s32);
 
 extern void func_0027CF28(s32 *, u32, u32, u32, u32);
 
-u32 mnuCreateWindowState(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    s32 handle = func_002D03F8(0x28);
-    s32 *obj = sdfResourceRetainAddress(handle);
+typedef struct MenuWindowSpriteGroup {
+    s32 resourceHandle;
+    u8 pad4[8];
+    s32 sprites[7];
+} MenuWindowSpriteGroup;
 
-    memset(obj, 0, 0x28);
-    *obj = handle;
-    func_0027CF28(obj, arg0, arg1, arg2, arg3);
-    return (u32)obj;
+u32 mnuCreateWindowState(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+    s32 handle = func_002D03F8(sizeof(MenuWindowSpriteGroup));
+    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(handle);
+
+    memset(group, 0, sizeof(MenuWindowSpriteGroup));
+    group->resourceHandle = handle;
+    func_0027CF28((s32 *)group, arg0, arg1, arg2, arg3);
+    return (u32)group;
 }
 
-void mnuReleaseWindowTextures(s32 *object) {
+void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     u32 i;
     for (i = 0; i < 7; i++) {
-        func_002BDD60(object[i + 3]);
+        func_002BDD60(group->sprites[i]);
     }
-    func_002D0918(object[0]);
+    func_002D0918(group->resourceHandle);
 }
 
-void func_0027D248(s32 arg0, u32 arg1) {
-    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x10), 0, arg1, 0, 0x14, 0xc);
-    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x14), 0, arg1, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x18), 0, arg1, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x1c), 0, arg1, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x20), 0, arg1, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(*(u32 *)(arg0 + 0x24), 0, arg1, 0, 0x14, 0xc);
+void func_0027D248(MenuWindowSpriteGroup *group, u32 arg1) {
+    effConfigureWithDefaultSetting(group->sprites[1], 0, arg1, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[2], 0, arg1, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[3], 0, arg1, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[4], 0, arg1, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[5], 0, arg1, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[6], 0, arg1, 0, 0x14, 0xc);
 }
 
-void func_0027D318(s32 x, s32 y, s32 z, s32 mask, s32 obj, s32 param) {
-    func_002BF790(x, y, z, 0, *(s32 *)(obj + 0xC), 0, param);
+void func_0027D318(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
+    func_002BF790(x, y, z, 0, group->sprites[0], 0, param);
     if (mask & 1) {
-        func_002BF790(x, y, z, 0, *(s32 *)(obj + 0x10), 0, param);
-        func_002BF790(x, y, z, 0, *(s32 *)(obj + 0x14), 0, param);
-        func_002BF790(x, y, z, 0, *(s32 *)(obj + 0x18), 0, param);
+        func_002BF790(x, y, z, 0, group->sprites[1], 0, param);
+        func_002BF790(x, y, z, 0, group->sprites[2], 0, param);
+        func_002BF790(x, y, z, 0, group->sprites[3], 0, param);
     }
     if (mask & 2) {
-        func_002BF790(x, y, z, 0, *(s32 *)(obj + 0x1C), 0, param);
-        func_002BF790(x, y, z, 0, *(s32 *)(obj + 0x20), 0, param);
-        func_002BF790(x, y, z, 0, *(s32 *)(obj + 0x24), 0, param);
+        func_002BF790(x, y, z, 0, group->sprites[4], 0, param);
+        func_002BF790(x, y, z, 0, group->sprites[5], 0, param);
+        func_002BF790(x, y, z, 0, group->sprites[6], 0, param);
     }
-    func_002BF970(*(s32 *)(obj + 0x10), 0);
-    func_002BF970(*(s32 *)(obj + 0x14), 0);
-    func_002BF970(*(s32 *)(obj + 0x18), 0);
-    func_002BF970(*(s32 *)(obj + 0x1C), 0);
-    func_002BF970(*(s32 *)(obj + 0x20), 0);
-    func_002BF970(*(s32 *)(obj + 0x24), 0);
+    func_002BF970(group->sprites[1], 0);
+    func_002BF970(group->sprites[2], 0);
+    func_002BF970(group->sprites[3], 0);
+    func_002BF970(group->sprites[4], 0);
+    func_002BF970(group->sprites[5], 0);
+    func_002BF970(group->sprites[6], 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027D4A0);
@@ -1385,37 +1401,44 @@ void mnuReleaseFourResourceList(s32 *list) {
     func_002CFF98(list);
 }
 
-void func_0027F898(s32 x, s32 y, s32 z, s32 arg3, s32 obj, s32 param) {
+typedef struct MenuFadeSpriteSet {
+    u8 pad0[0xC];
+    s32 sprites[4];
+    s32 alpha;
+    s32 fadeOut;
+} MenuFadeSpriteSet;
+
+void func_0027F898(s32 x, s32 y, s32 z, s32 unused, MenuFadeSpriteSet *sprites, s32 param) {
     s32 px = x + 0x120;
     s32 py = y + 0x30;
-    s32 alpha = *(s32 *)(obj + 0x1C);
+    s32 alpha = sprites->alpha;
     s32 fade;
-    s32 next;
-    s32 lower;
+    s32 nextAlpha;
+    s32 lowerAlpha;
 
-    func_002BF4E0(px, py, z, alpha, 0, *(s32 *)(obj + 0xC), 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, *(s32 *)(obj + 0x10), 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, *(s32 *)(obj + 0x14), 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, *(s32 *)(obj + 0x18), 0, param);
-    if (*(s32 *)(obj + 0x20) == 0) {
-        fade = *(s32 *)(obj + 0x1C);
-        next = fade + 0x10;
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprites[0], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprites[1], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprites[2], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprites[3], 0, param);
+    if (sprites->fadeOut == 0) {
+        fade = sprites->alpha;
+        nextAlpha = fade + 0x10;
         if (fade < 0x100) {
-            *(s32 *)(obj + 0x1C) = next;
-            fade = next;
+            sprites->alpha = nextAlpha;
+            fade = nextAlpha;
         }
         if (fade >= 0x101) {
-            *(s32 *)(obj + 0x1C) = 0x100;
+            sprites->alpha = 0x100;
         }
     } else {
-        fade = *(s32 *)(obj + 0x1C);
-        lower = fade - 0x10;
+        fade = sprites->alpha;
+        lowerAlpha = fade - 0x10;
         if (fade > 0) {
-            *(s32 *)(obj + 0x1C) = lower;
-            fade = lower;
+            sprites->alpha = lowerAlpha;
+            fade = lowerAlpha;
         }
         if (fade < 0) {
-            *(s32 *)(obj + 0x1C) = 0;
+            sprites->alpha = 0;
         }
     }
 }
