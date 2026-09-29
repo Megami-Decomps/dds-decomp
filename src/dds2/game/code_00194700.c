@@ -46,13 +46,13 @@ EffResult *effAllocDispatch(s32 kind, s32 input) {
     return result;
 }
 
-void effTypeDispatch(EffWork *arg0) {
-    D_003B2064[arg0->type].handler(arg0->unk4);
+void effTypeDispatch(EffWork *work) {
+    D_003B2064[work->type].handler(work->unk4);
 }
 
-void effTypeDispatchFree(EffWork *arg0) {
-    D_003B2068[arg0->type].handler(arg0->unk4);
-    func_00328E48(arg0);
+void effTypeDispatchFree(EffWork *work) {
+    D_003B2068[work->type].handler(work->unk4);
+    func_00328E48(work);
 }
 
 u32 effGetHandlerArg(EffWork *work) {
@@ -70,27 +70,27 @@ u32 func_00194808(void) {
     return 1;
 }
 
-void effTypeDispatchGuardedA(EffWork *arg0) {
-    void (*handler)(void *) = D_003B206C[arg0->type].handler;
+void effTypeDispatchGuardedA(EffWork *work) {
+    void (*handler)(void *) = D_003B206C[work->type].handler;
 
     if (handler != NULL) {
-        handler(arg0->unk4);
+        handler(work->unk4);
     }
 }
 
-void effTypeDispatchGuardedB(EffWork *arg0) {
-    void (*handler)(void *) = D_003B2074[arg0->type].handler;
+void effTypeDispatchGuardedB(EffWork *work) {
+    void (*handler)(void *) = D_003B2074[work->type].handler;
 
     if (handler != NULL) {
-        handler(arg0->unk4);
+        handler(work->unk4);
     }
 }
 
-void effTypeDispatchGuardedC(EffWork *arg0) {
-    void (*handler)(void *) = D_003B2070[arg0->type].handler;
+void effTypeDispatchGuardedC(EffWork *work) {
+    void (*handler)(void *) = D_003B2070[work->type].handler;
 
     if (handler != NULL) {
-        handler(arg0->unk4);
+        handler(work->unk4);
     }
 }
 
@@ -239,12 +239,14 @@ s8 func_00194AA0(void) {
     return D_0043643D;
 }
 
-s32 effOpenDataDir(void *arg0) {
-    u8 buf[0x70];
+/* An enabled disc directory uses sceDopen; otherwise iteration uses
+ * the built-in name table and starts over at entry zero. */
+s32 effOpenDataDir(void *name) {
+    u8 path[0x70];
 
     if (D_00438B66 != 0) {
-        func_0035C860(buf, D_00436448, arg0);
-        return sceDopen(buf);
+        func_0035C860(path, D_00436448, name);
+        return sceDopen(path);
     } else {
         D_00438F08 = 0;
         return 0;
@@ -261,18 +263,18 @@ INCLUDE_ASM(const s32, "game/code_00194700", effNextDataDirEntry);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194BD0);
 
-void effFreeWorkList(EffWork *arg0) {
-    EffWork *p = (EffWork *)arg0->unk8;
+void effFreeWorkList(EffWork *root) {
+    EffWork *node = (EffWork *)root->unk8;
 
-    if (p != NULL) {
+    if (node != NULL) {
         do {
-            EffWork *next = p->unk38;
-            func_00328E48(p);
-            p = next;
-        } while (p != NULL);
+            EffWork *next = node->unk38;
+            func_00328E48(node);
+            node = next;
+        } while (node != NULL);
     }
-    func_00328E48(arg0->unk4);
-    func_00328E48(arg0);
+    func_00328E48(root->unk4);
+    func_00328E48(root);
 }
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195060);
@@ -290,9 +292,9 @@ void effFreeWork(EffWork *work) {
     func_00328E48(work);
 }
 
-void effSetMsgHeader(EffMsg *arg0, s32 arg1, s32 arg2) {
-    arg0->unk0 = arg1;
-    arg0->unk4 = arg2;
+void effSetMsgHeader(EffMsg *message, s32 first, s32 second) {
+    message->unk0 = first;
+    message->unk4 = second;
 }
 
 u32 effGetWorkParam(EffWork *work) {
@@ -303,9 +305,9 @@ u32 effGetWorkLink(EffWork *work) {
     return work->unk8;
 }
 
-u32 effFormatMsgNames(EffMsg *arg0, void *arg1) {
-    func_0035C860(arg1, D_00436450, arg0->unk40[1], arg0->unk34 + 1);
-    return *arg0->unk34;
+u32 effFormatMsgNames(EffMsg *message, void *destination) {
+    func_0035C860(destination, D_00436450, message->unk40[1], message->unk34 + 1);
+    return *message->unk34;
 }
 
 void effSetWorkFirst(EffWork *work, u32 value) {

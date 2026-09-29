@@ -45,8 +45,8 @@ typedef struct F9B00Entry {
     /* 0x14 */ u8 pressure[12];
     /* 0x20 */ s16 smallMotor;
     /* 0x22 */ s16 largeMotor;
-    /* 0x24 */ s16 lastActuatorX;
-    /* 0x26 */ s16 lastActuatorY;
+    /* 0x24 */ s16 lastSmallMotor;
+    /* 0x26 */ s16 lastLargeMotor;
 } F9B00Entry;
 
 extern ConsNode *D_003BD3C0;
@@ -1187,8 +1187,8 @@ void func_002E35C8(F9B00Entry *entry) {
     switch (entry->state) {
     case 0:
         if (padState == 2 || padState == 6) {
-            entry->lastActuatorX = -1;
-            entry->lastActuatorY = -1;
+            entry->lastSmallMotor = -1;
+            entry->lastLargeMotor = -1;
             mode = entry->mode = entry->requestedMode;
             switch (mode) {
             case 0:
@@ -1261,9 +1261,9 @@ void func_002E35C8(F9B00Entry *entry) {
             func_002F2200(port, slot, data);
             small = entry->smallMotor;
             large = entry->largeMotor;
-            if (small != entry->lastActuatorX || large != entry->lastActuatorY) {
-                entry->lastActuatorX = small;
-                entry->lastActuatorY = large;
+            if (small != entry->lastSmallMotor || large != entry->lastLargeMotor) {
+                entry->lastSmallMotor = small;
+                entry->lastLargeMotor = large;
                 act[0] = small;
                 act[1] = large;
                 func_002F2850(port, slot, act);
@@ -1271,6 +1271,8 @@ void func_002E35C8(F9B00Entry *entry) {
         }
         break;
     }
+    /* Pad reply IDs: digital, analog-stick, and pressure-sensitive modes.
+     * Missing channels are normalized before consumers see this port. */
     hasAnalog = 0;
     hasPressure = 0;
     hasButtons = 0;
@@ -1333,6 +1335,8 @@ extern u16 D_00398600[16];
 extern u8 D_00398628[0x20];
 extern u8 D_00398648[0x18];
 
+/* Build per-button held/repeat/new-press flags for both controller ports.
+ * Repeat starts after 15 ticks, then recurs every four ticks. */
 void func_002E39C8(void) {
     s32 now = D_003BD2D8;
     s32 i;
@@ -1376,16 +1380,16 @@ void func_002E39C8(void) {
 }
 
 
-void func_002E3B40(s32 arg0, u8 arg1) {
-    D_003F9B00[arg0].requestedMode = arg1;
+void func_002E3B40(s32 padIndex, u8 mode) {
+    D_003F9B00[padIndex].requestedMode = mode;
 }
 
-void func_002E3B60(s32 arg0, u16 arg1) {
-    D_003F9B00[arg0].smallMotor = arg1;
+void func_002E3B60(s32 padIndex, u16 strength) {
+    D_003F9B00[padIndex].smallMotor = strength;
 }
 
-void func_002E3B80(s32 arg0, u8 arg1) {
-    D_003F9B00[arg0].largeMotor = arg1;
+void func_002E3B80(s32 padIndex, u8 strength) {
+    D_003F9B00[padIndex].largeMotor = strength;
 }
 
 void sdfDevConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {

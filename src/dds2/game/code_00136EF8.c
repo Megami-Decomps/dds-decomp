@@ -294,18 +294,20 @@ void func_001378E8(FldSaveHeader *dst) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001379C0);
 
+/* Keep both the resource handles and retained addresses: callers use the
+ * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *buffer = func_003292A8(0x72000);
+    u8 *storage = func_003292A8(0x72000);
 
-    D_00436190 = (u32)buffer;
-    buffer = sdfResourceRetainAddress(buffer);
-    D_00436180 = (u32)buffer;
-    memset(buffer, 0, 0x72000);
-    buffer = func_003292A8(0x4A00);
-    D_0043618C = (u32)buffer;
-    buffer = sdfResourceRetainAddress(buffer);
-    D_00436178 = (u32)buffer;
-    memset(buffer, 0, 0x4A00);
+    D_00436190 = (u32)storage;
+    storage = sdfResourceRetainAddress(storage);
+    D_00436180 = (u32)storage;
+    memset(storage, 0, 0x72000);
+    storage = func_003292A8(0x4A00);
+    D_0043618C = (u32)storage;
+    storage = sdfResourceRetainAddress(storage);
+    D_00436178 = (u32)storage;
+    memset(storage, 0, 0x4A00);
 }
 
 void func_00137BC8(void) {

@@ -1183,32 +1183,32 @@ void func_0012B818(void) {
     }
 }
 
-void func_0012B890(arg0, arg1, arg2, arg3)
-s32 arg0;
-s32 arg1;
-u64 arg2;
-u64 arg3;
+void func_0012B890(x, y, first, second)
+s32 x;
+s32 y;
+u64 first;
+u64 second;
 {
-    u64 temp_v0;
+    u64 object;
 
-    temp_v0 = func_00197760(arg0 << 4, arg1 << 4, 0, arg2, arg3, 0);
-    func_00195868(temp_v0);
-    func_00194920(temp_v0);
+    object = func_00197760(x << 4, y << 4, 0, first, second, 0);
+    func_00195868(object);
+    func_00194920(object);
 }
 
 void fldAdvanceQuadRow(s32 arg0) {
     *(s32 *)(arg0 + 0x20) = *(s32 *)(arg0 + 0x20) + 0x60;
 }
 
-void fldStartQuadPacketList(s32 arg0) {
-    u64 temp_v0;
-    u32 temp_v1;
+void fldStartQuadPacketList(s32 quadState) {
+    u64 packet;
+    u32 packetList;
 
-    temp_v1 = sdfCreateInitializedPacketList();
-    *(u32 *)(arg0 + 0x28) = temp_v1;
-    temp_v0 = sdfAllocPacketAligned(0x40);
-    func_002D5608(temp_v0);
-    sdfAppendPacket(*(s32 *)(arg0 + 0x28), temp_v0);
+    packetList = sdfCreateInitializedPacketList();
+    *(u32 *)(quadState + 0x28) = packetList;
+    packet = sdfAllocPacketAligned(0x40);
+    func_002D5608(packet);
+    sdfAppendPacket(*(s32 *)(quadState + 0x28), packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B940);
@@ -1494,6 +1494,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012DB70);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012DD70);
 
+/* Suppress the world object's current entry when it is already selected. */
 s64 func_0012E488(void) {
     u64 temp_v0;
     s64 temp_v1;
@@ -1835,6 +1836,8 @@ void func_00131590(void) {
     D_0032E544[0] = 0;
 }
 
+/* Camera facing requests share the field-work block. Both request states
+ * advance from 1 to 2 when their new angle is installed. */
 void func_001315A0(f32 arg0, f32 arg1) {
     u8 *temp_v0 = (u8 *)D_0032E3B0;
 
@@ -2068,11 +2071,11 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00133640);
 INCLUDE_ASM(const s32, "game/code_00126A30", fldSetDisplayState);
 
 void fldInitializeDisplayPointerTable(void) {
-    u32 *temp_v0 = D_00330738;
+    u32 *displayPointers = D_00330738;
 
-    memset(temp_v0, 0, 0x14);
-    temp_v0[0] = (u32)D_003306B0;
-    temp_v0[1] = (u32)D_003306C0;
+    memset(displayPointers, 0, 0x14);
+    displayPointers[0] = (u32)D_003306B0;
+    displayPointers[1] = (u32)D_003306C0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
@@ -2392,18 +2395,20 @@ void func_00134E10(FldCameraSetting *setting) {
 }
 
 
+/* Keep both the resource handles and retained addresses: callers use the
+ * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *temp_v0 = func_002D03F8(0x72000);
+    u8 *storage = func_002D03F8(0x72000);
 
-    D_003BAE00 = (u32)temp_v0;
-    temp_v0 = sdfResourceRetainAddress(temp_v0);
-    D_003BADF0 = (u32)temp_v0;
-    memset(temp_v0, 0, 0x72000);
-    temp_v0 = func_002D03F8(0x4A00);
-    D_003BADFC = (u32)temp_v0;
-    temp_v0 = sdfResourceRetainAddress(temp_v0);
-    D_003BADE8 = (u32)temp_v0;
-    memset(temp_v0, 0, 0x4A00);
+    D_003BAE00 = (u32)storage;
+    storage = sdfResourceRetainAddress(storage);
+    D_003BADF0 = (u32)storage;
+    memset(storage, 0, 0x72000);
+    storage = func_002D03F8(0x4A00);
+    D_003BADFC = (u32)storage;
+    storage = sdfResourceRetainAddress(storage);
+    D_003BADE8 = (u32)storage;
+    memset(storage, 0, 0x4A00);
 }
 
 void func_00135018(void) {
@@ -2591,13 +2596,13 @@ s32 func_0013B088(u32 flag, u32 slot) {
     return -1;
 }
 
-u32 fldDestroyTaskSlot(u32 arg0) {
-    u32 *temp_v0 = &D_003308B0[arg0];
+u32 fldDestroyTaskSlot(u32 slot) {
+    u32 *task = &D_003308B0[slot];
 
-    if (kwlnTaskIsRegistered(*temp_v0) != 0) {
-        kwlnTaskDestroyWithHierarchy(*temp_v0, 0);
+    if (kwlnTaskIsRegistered(*task) != 0) {
+        kwlnTaskDestroyWithHierarchy(*task, 0);
     }
-    *temp_v0 = 0;
+    *task = 0;
     return 0;
 }
 

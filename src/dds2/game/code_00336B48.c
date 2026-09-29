@@ -30,12 +30,12 @@ typedef struct F9B00Entry {
     /* 0x02 */ u8 unk2;
     /* 0x03 */ u8 pad03;
     /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
+    /* 0x05 */ u8 requestedMode;
     /* 0x06 */ u16 unk6;
     /* 0x08 */ u16 unk8;
     /* 0x0A */ u8 pad0A[0x16];
-    /* 0x20 */ u16 unk20;
-    /* 0x22 */ u16 unk22;
+    /* 0x20 */ u16 smallMotor;
+    /* 0x22 */ u16 largeMotor;
     /* 0x24 */ u8 pad24[4];
 } F9B00Entry;
 
@@ -56,8 +56,8 @@ typedef struct ConsNode {
     /* 0x0A */ u16 unkA;
     /* 0x0C */ s16 width;
     /* 0x0E */ s16 height;
-    /* 0x10 */ u16 unk10;
-    /* 0x12 */ u16 unk12;
+    /* 0x10 */ u16 cursorColumn;
+    /* 0x12 */ u16 cursorRow;
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 pad15;
     /* 0x16 */ u8 unk16;
@@ -1140,22 +1140,22 @@ void func_0033C820(void) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C878);
 
-void func_0033C9F0(s32 arg0, u8 arg1) {
-    D_00476480[arg0].unk5 = arg1;
+void func_0033C9F0(s32 padIndex, u8 mode) {
+    D_00476480[padIndex].requestedMode = mode;
 }
 
-void func_0033CA10(s32 arg0, u16 arg1) {
-    D_00476480[arg0].unk20 = arg1;
+void func_0033CA10(s32 padIndex, u16 strength) {
+    D_00476480[padIndex].smallMotor = strength;
 }
 
-void func_0033CA30(s32 arg0, u8 arg1) {
-    D_00476480[arg0].unk22 = arg1;
+void func_0033CA30(s32 padIndex, u8 strength) {
+    D_00476480[padIndex].largeMotor = strength;
 }
 
-void sdfDevConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
+void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
     F9B00Entry *entry = &D_00476480[index];
-    entry->unk20 = arg1 & 0xFF;
-    D_00476480[index].unk22 = arg2 & 0xFF;
+    entry->smallMotor = small & 0xFF;
+    D_00476480[index].largeMotor = large & 0xFF;
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA88);
@@ -1176,15 +1176,15 @@ u32 *func_0033CBE8(void) {
     return D_0040B810;
 }
 
-void sdfDevConsListInsert(ConsNode *arg0) {
+void sdfDevConsListInsert(ConsNode *node) {
     ConsNode *head = D_00438AB0;
 
-    arg0->next = NULL;
-    arg0->prev = head;
+    node->next = NULL;
+    node->prev = head;
     if (head != NULL) {
-        head->next = arg0;
+        head->next = node;
     }
-    D_00438AB0 = arg0;
+    D_00438AB0 = node;
 }
 
 void sdfDevConsListRemove(node)
@@ -1209,13 +1209,13 @@ void sdfDevConsNodeDestroy(ConsNode *node) {
 }
 
 void sdfDevConsNodeClear(ConsNode *node) {
-    node->unk10 = 0;
-    node->unk12 = 0;
+    node->cursorColumn = 0;
+    node->cursorRow = 0;
     memset(node->pixels, 0, node->width * node->height * 2);
 }
 
-void sdfDevConsResetNode(ConsNode *arg0) {
-    sdfDevConsNodeClear(arg0);
+void sdfDevConsResetNode(ConsNode *node) {
+    sdfDevConsNodeClear(node);
 }
 
 ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {

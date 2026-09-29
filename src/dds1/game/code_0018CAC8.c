@@ -308,6 +308,8 @@ s32 func_0018CE68(void) {
     return D_003BB04D;
 }
 
+/* An enabled disc directory uses sceDopen; otherwise iteration uses
+ * the built-in name table and starts over at entry zero. */
 s32 effOpenDataDir(void *name) {
     u8 path[0x70];
 
@@ -327,6 +329,8 @@ void effRunIfEnabled(void) {
     }
 }
 
+/* In built-in mode the name table supplies entries instead of the
+ * directory iterator; clearing 0x1000 marks a synthesized entry. */
 s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
     if (D_003BD476 != 0) {
         return func_00310320();
@@ -361,31 +365,31 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D428);
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
-void effFreeWork(EffWork *arg0) {
-    if (arg0->unk3C != 0) {
-        func_002D2D00(arg0->unk3C);
-        arg0->unk3C = 0;
+void effFreeWork(EffWork *work) {
+    if (work->unk3C != 0) {
+        func_002D2D00(work->unk3C);
+        work->unk3C = 0;
     }
-    func_002CFF98(arg0);
+    func_002CFF98(work);
 }
 
-void effSetMsgHeader(EffMsg *arg0, s32 arg1, s32 arg2) {
-    arg0->unk0 = arg1;
-    arg0->unk4 = arg2;
+void effSetMsgHeader(EffMsg *message, s32 first, s32 second) {
+    message->unk0 = first;
+    message->unk4 = second;
 }
 
 
-u32 effGetWorkParam(EffWork *arg0) {
-    return arg0->unk14;
+u32 effGetWorkParam(EffWork *work) {
+    return work->unk14;
 }
 
-u32 effGetWorkLink(EffWork *arg0) {
-    return arg0->unk8;
+u32 effGetWorkLink(EffWork *work) {
+    return work->unk8;
 }
 
-u32 effFormatMsgNames(EffMsg *arg0, void *arg1) {
-    func_003014F0(arg1, D_003BB060, arg0->unk40[1], arg0->unk34 + 1);
-    return *arg0->unk34;
+u32 effFormatMsgNames(EffMsg *message, void *destination) {
+    func_003014F0(destination, D_003BB060, message->unk40[1], message->unk34 + 1);
+    return *message->unk34;
 }
 
 void effSetWorkFirst(EffWork *arg0, u32 arg1) {
