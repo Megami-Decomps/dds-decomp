@@ -148,8 +148,8 @@ s8 brsTaskHasPendingRows(void) {
     return D_00437989;
 }
 
-s8 func_00298E80(s32 arg0) {
-    if (*(s32 *)(arg0 + 0xAEB0) != 0) {
+s8 func_00298E80(s32 context) {
+    if (*(s32 *)(context + 0xAEB0) != 0) {
         D_0043798B = 0;
     }
     return D_0043798B ? 0 : D_0043798A;
@@ -189,10 +189,10 @@ void ptyClampExp(u32 *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299018);
 
-void brsApplyRewardBundle(u32 arg0, u32 arg1, u32 arg2) {
-    gstApplyCounterDeltaTable(arg1);
-    gstApplyBundleMacca(arg1);
-    func_00299018(arg0, arg2);
+void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) {
+    gstApplyCounterDeltaTable(batch->icons);
+    gstApplyBundleMacca(batch);
+    func_00299018(partyWork, rewardState);
 }
 
 extern void func_002B2818(s32);
@@ -201,7 +201,7 @@ extern s32 func_002C0B80(s32, s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void func_002C6988(s32);
 
-void func_002991D0(s32 work) {
+void brsOpenSkillPackagePanel(s32 work) {
     s32 *group = (s32 *)(work + 0x51C);
     s32 panel;
 
@@ -249,13 +249,13 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
     }
 }
 
-void func_00299518(u32 arg0, u32 arg1, u32 arg2) {
+void brsMarkPartyRowsFromLists(u32 arg0, u32 arg1, u32 arg2) {
     brsMarkPartyRows(arg0, arg1, 2);
     brsMarkPartyRows(arg0, arg2, 1);
 }
 
-void brsTaskLatchPendingRows(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x368) == 0) {
+void brsTaskLatchPendingRows(s32 context) {
+    if (*(s32 *)(context + 0x368) == 0) {
         D_00437989 = 0;
     } else {
         D_00437989 = 1;

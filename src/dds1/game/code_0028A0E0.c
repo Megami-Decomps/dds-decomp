@@ -381,7 +381,7 @@ extern s32 func_0028B3B0(void);
 
 extern u32 D_003BC834;
 
-extern s32 fileBeginPromptDialog(void *arg0, void *arg1, s32 arg2);
+extern s32 fileBeginPromptDialog(void *start, void *finish, s32 mode);
 
 extern void func_0028BAC0(void);
 extern void fileLoadMainBlobBegin(void);

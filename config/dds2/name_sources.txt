@@ -584,6 +584,8 @@
 0x00298E78	brsTaskHasPendingRows	inferred	DDS2 twin of DDS1 brsTaskHasPendingRows @ 0x261FB0 (reads D_00437989)
 0x00298EA8	gstApplyCounterDeltaTable	inferred	byte-identical twin of DDS1 gstApplyCounterDeltaTable @ 0x261FD8 (walks three MenuIconRefs and calls the progress-counter adjuster)
 0x00298F08	gstApplyBundleMacca	inferred	DDS2 twin of DDS1 gstApplyBundleMacca @ 0x262038: adds the reward bundle's macca field at +0xC through the macca adder
+0x002991D0	brsOpenSkillPackagePanel	inferred	DDS2 twin of DDS1 brsOpenSkillPackagePanel @ 0x262300: opens the skill-package panel group (DDS2 work struct is larger: group at +0x51C, handles at +0xAD34/+0xAD38)
+0x00299518	brsMarkPartyRowsFromLists	inferred	DDS2 twin of DDS1 brsMarkPartyRowsFromLists @ 0x262600: marks the party rows from two reward lists (flags 2 then 1)
 0x002996B8	brsStaffTaskDestroy	inferred	DDS2 twin of DDS1 brsStaffTaskDestroy @ 0x262790: mnuStaffRunPanel2 destroy callback, leaves the task state at 2
 0x00299868	brsTaskConsumeDone	inferred	DDS2 twin of DDS1 brsTaskConsumeDone @ 0x262938: D_00437988==1 -> busy, ==2 -> reset to 0
 0x002998A0	brsTaskTryDestroy	inferred	DDS2 twin of DDS1 brsTaskTryDestroy @ 0x262970
@@ -698,6 +700,7 @@
 0x002CAD08	mcdEnterSelectedFileFlow	inferred	Sets D_00437D34 then returns func_002D09C8 or submits file task mode 2.
 0x002CB678	mcdFinishFileDetection	inferred	On a detected file status, resets flow state and invokes the queued continuation or beginFileWait(-1).
 0x002CC9F0	mcdHandleSaveSetupDone	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mcd for the already-described handleSaveSetupDone behavior.
+0x002CEE70	fileBeginPromptDialog	inferred	DDS2 twin of DDS1 fileBeginPromptDialog @ 0x28FB48 (legacy FileMenu_BeginPromptDialog): latches the start/finish callbacks and mode, resets the counter and begins the request unless the step is 4 or 8
 0x002D02D0	mcdFinishFileDetectionWithAudio	inferred	On a detected file status, resets flow mode, sets sequence volume and invokes the queued continuation.
 0x002D08A0	fileResetPendingRequest	inferred	Resets file request state globals to -1 and zero and submits mode 3 when global bit 2 is clear
 0x002D0968	mcdContinueLoadSelection	inferred	Chooses the next save/load callback from the file-state result; on state 2 clears the selection index, updates display model flags and starts sequence 8.
