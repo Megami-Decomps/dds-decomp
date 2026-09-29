@@ -265,7 +265,16 @@ void func_0029CDD8(void) {
 
 extern u8 D_003D9D58[];
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CDF0);
+u8 func_0029CDF0(s32 value) {
+    s32 i;
+
+    for (i = 2; i >= 0; i--) {
+        if (value >= D_003D9D58[i * 2]) {
+            return D_003D9D58[i * 2 + 1];
+        }
+    }
+    return D_003D9D58[1];
+}
 
 u8 func_0029CE30(s32 position, s32 increment) {
     u8 *table = D_003D9D58;
@@ -2255,7 +2264,17 @@ void func_002A8B90(void) {
     func_002A8B78();
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8BC8);
+/* DDS2 twin of DDS1 func_00270B10. */
+void func_002A8BC8(void) {
+    u8 *state = D_00457E60;
+
+    if (state[2] != 0) {
+        *(s32 *)(state + 0xC) = **(s32 **)(state + 4);
+    }
+    if (state[3] != 0) {
+        memcpy(state + 0x10, *(void **)(state + 8), 0x40);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042A418);
 
