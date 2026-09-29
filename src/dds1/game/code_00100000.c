@@ -46,8 +46,8 @@ void func_00100538(void) {
     D_003BA714 = 0;
 }
 
-void func_00100548(u32 arg0) {
-    D_003BA710 = arg0;
+void func_00100548(u32 value) {
+    D_003BA710 = value;
     D_003BA70C = 1;
     D_003BA714 = 0;
 }

@@ -135,13 +135,13 @@ void func_002622B0(u32 arg0, u32 arg1, u32 arg2) {
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262300);
 
 void func_00262398(s32 arg0) {
-    s32 temp_v0;
+    s32 panelContext;
 
-    temp_v0 = arg0 + 0x680;
+    panelContext = arg0 + 0x680;
     func_002BDD60(*(u32 *)(arg0 + 0x90));
-    mnuClearEntries(temp_v0);
-    func_0027FA20(temp_v0);
-    mnuShutdownContext(temp_v0);
+    mnuClearEntries(panelContext);
+    func_0027FA20(panelContext);
+    mnuShutdownContext(panelContext);
     mnuDestroyPanelGroup(*(u32 *)(arg0 + 0xd10));
     func_002832F8(*(u32 *)(arg0 + 0xd14));
     mnuReleaseAssets(arg0 + 0xd1c);
@@ -206,10 +206,10 @@ s32 func_00262A88(void) {
     return func_002877A8() != 1;
 }
 
-void func_00262AC0(u32 arg0, s32 arg1) {
-    initPartyPanelSlots(arg1 + 0x574);
-    menuUpdateHandleStates(arg1 + 0x680);
-    func_00280048(arg1 + 0x680);
+void func_00262AC0(u32 arg0, s32 menu) {
+    initPartyPanelSlots(menu + 0x574);
+    menuUpdateHandleStates(menu + 0x680);
+    func_00280048(menu + 0x680);
 }
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262AF8);

@@ -53,11 +53,11 @@ void func_00248C38(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248C80);
 
-void func_00248CF8(s32 arg0) {
-    s32 node;
+void func_00248CF8(s32 owner) {
+    s32 entry;
 
-    for (node = *(s32 *)(*(s32 *)(arg0 + 0x74) + 0x10); node != 0; node = *(s32 *)(node + 0x58)) {
-        func_00248C38(*(u32 *)(node + 0x70));
+    for (entry = *(s32 *)(*(s32 *)(owner + 0x74) + 0x10); entry != 0; entry = *(s32 *)(entry + 0x58)) {
+        func_00248C38(*(u32 *)(entry + 0x70));
     }
 }
 
@@ -79,10 +79,10 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249010);
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249058);
 
 u8 func_00249198(void) {
-    s64 temp_v0;
+    s64 flagSet;
 
-    temp_v0 = mdlFlagTest(0x902);
-    return temp_v0 == 0;
+    flagSet = mdlFlagTest(0x902);
+    return flagSet == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);

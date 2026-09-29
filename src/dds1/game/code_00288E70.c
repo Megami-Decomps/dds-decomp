@@ -4,7 +4,7 @@
 typedef struct FileReqEntry {
     u32 unk0;      /* 0x00 */
     u32 unk4;      /* 0x04 */
-    u32 unk8;      /* 0x08 */
+    u32 sizeKiB;   /* 0x08: converted to bytes by fileReqGetSize */
     u32 unkC;      /* 0x0C */
     u8 unk10;      /* 0x10 */
     u8 unk11;      /* 0x11 */
@@ -42,7 +42,7 @@ typedef struct FileJob {
     u32 unk4;     /* 0x04 */
     u8 unk8[4];   /* 0x08 */
     u32 unkC;     /* 0x0C */
-    s32 unk10;    /* 0x10 */
+    s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
     u8 unk14[0x14]; /* 0x14 */
     u32 unk28;    /* 0x28 */
 } FileJob;
@@ -87,7 +87,7 @@ void func_00289030(FileJob *job) {
     }
     job->state = 4;
     SignalSema(D_003DC658.sema);
-    func_002E6D48(job->unkC, job->unk28, job->unk10 <= 0x8000 ? job->unk10 : 0x8000);
+    func_002E6D48(job->unkC, job->unk28, job->transferBytes <= 0x8000 ? job->transferBytes : 0x8000);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_002890B8);
@@ -100,7 +100,7 @@ void func_002892F8(FileJob *job) {
     }
     job->state = 4;
     SignalSema(D_003DC658.sema);
-    func_002E6DA8(job->unkC, job->unk28, job->unk10 <= 0x8000 ? job->unk10 : 0x8000);
+    func_002E6DA8(job->unkC, job->unk28, job->transferBytes <= 0x8000 ? job->transferBytes : 0x8000);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);
@@ -140,7 +140,7 @@ u8 func_00289B98(s32 arg0) {
 }
 
 s32 fileReqGetSize(s32 arg0) {
-    return D_003DC698[arg0].unk8 << 10;
+    return D_003DC698[arg0].sizeKiB << 10;
 }
 
 u8 func_00289BE8(s32 arg0) {

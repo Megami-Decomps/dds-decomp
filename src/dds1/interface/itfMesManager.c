@@ -91,9 +91,9 @@ typedef struct ItfMesItem {
 /* Window chain node walked by func_0019D920/DA50/DB40. */
 typedef struct ItfMesNode {
     u8 unk0[4];        /* 0x0 */
-    s32 unk4;          /* 0x4: adjusted by func_0019D8E8 */
-    s32 unk8;          /* 0x8: adjusted by func_0019D8E8 */
-    s32 unkC;          /* 0xC: summed over adjacent nodes sharing unk8 */
+    s32 x;            /* 0x4: adjusted with horizontal node offsets */
+    s32 y;            /* 0x8: groups nodes on the same row */
+    s32 advance;      /* 0xC: accumulated within a row */
     u8 unk10[4];       /* 0x10 */
     s32 unk14;         /* 0x14: set by func_0019D920 */
     u8 unk18[4];       /* 0x18 */
@@ -661,8 +661,8 @@ void func_0019D8E8(ItfMesNode *node, s32 arg1, s32 arg2) {
         return;
     }
     do {
-        node->unk4 += arg1;
-        node->unk8 += arg2;
+        node->x += arg1;
+        node->y += arg2;
         node = node->next;
     } while (node != NULL);
 }
@@ -694,13 +694,13 @@ s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     s32 best = 0;
 
     while (node != NULL) {
-        s32 key = node->unk8;
+        s32 key = node->y;
         s32 total = 0;
 
         do {
-            total += node->unkC;
+            total += node->advance;
             node = node->next;
-        } while (node != NULL && key == node->unk8);
+        } while (node != NULL && key == node->y);
         if (total > best) {
             best = total;
         }

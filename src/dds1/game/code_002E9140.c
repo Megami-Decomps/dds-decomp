@@ -111,9 +111,9 @@ FE250Entry *func_002E9600(void) {
     return D_003FE250;
 }
 
-u32 func_002E9610(u32 *arg0) {
-    if (arg0 != NULL) {
-        *arg0 = D_003FE0C0.unk20C;
+u32 func_002E9610(u32 *outSecondaryValue) {
+    if (outSecondaryValue != NULL) {
+        *outSecondaryValue = D_003FE0C0.unk20C;
     }
     return D_003FE0C0.unk208;
 }
@@ -130,11 +130,11 @@ void func_002E9690(s32 id) {
     func_002E87A8(0x20, 0, &packet, 0x10);
 }
 
-void func_002E96D8(u32 arg0) {
-    u32 temp_v0 [4];
+void func_002E96D8(u32 value) {
+    u32 packet[4];
 
-    temp_v0[0] = arg0;
-    func_002E87A8(0xd0, 0, temp_v0, 0x10);
+    packet[0] = value;
+    func_002E87A8(0xd0, 0, packet, 0x10);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002E9140", D_003BD490);

@@ -44,9 +44,9 @@ typedef struct FrFontGlyph {
         struct { s8 b0; s8 b1; } b;   /* 0x0: byte views */
     } u0;
     s16 unk2;         /* 0x2 */
-    s32 unk4;         /* 0x4 */
-    s32 unk8;         /* 0x8 */
-    s32 unkC;         /* 0xC */
+    s32 x;            /* 0x4: horizontal position */
+    s32 y;            /* 0x8: vertical position */
+    s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
     u32 unk10;        /* 0x10 */
     union {
         u32 w;        /* 0x14: word view */
@@ -193,9 +193,9 @@ void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s
     arg0->u0.h = arg1;
     arg0->unk10 = arg4 & ~0xFF;
     arg0->u14.b[3] = D_003BB174;
-    arg0->unk4 = 0;
-    arg0->unk8 = 0;
-    arg0->unkC = 0;
+    arg0->x = 0;
+    arg0->y = 0;
+    arg0->advance = 0;
     arg0->unk2 = 0;
     arg0->firstChild = NULL;
     arg0->unk20 = NULL;
@@ -205,10 +205,10 @@ void frFontSetupGlyph(FrFontGlyph *arg0, s16 arg1, s8 arg2, s8 arg3, s32 arg4, s
 
 void frFontInitGlyph(FrFontGlyph *arg0) {
     arg0->u0.b.b0 = -0x80;
-    arg0->unk4 = 0;
-    arg0->unk8 = 0;
+    arg0->x = 0;
+    arg0->y = 0;
     arg0->u0.b.b1 = 0;
-    arg0->unkC = 0;
+    arg0->advance = 0;
     arg0->u14.w = 0;
     arg0->unk24 = NULL;
     arg0->next = NULL;
@@ -320,8 +320,8 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
     next->unk2C->unk24 = previous;
     next->unk2C = previous->unk2C;
     if (positionNext == 1) {
-        next->unk4 = previous->unk4 + (previous->unkC << 4);
-        next->unk8 = previous->unk8;
+        next->x = previous->x + (previous->advance << 4);
+        next->y = previous->y;
     }
     return next;
 }
@@ -345,7 +345,7 @@ u32 frFontMeasureGlyphChain(void *arg0) {
         s8 b1 = glyph->u0.b.b1;
 
         do {
-            total += node->unkC;
+            total += node->advance;
             node = node->next;
             total += b1;
         } while (node != NULL);

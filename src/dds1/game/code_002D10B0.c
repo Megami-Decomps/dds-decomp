@@ -123,37 +123,37 @@ void sdfTexInitializeSemaphore(void) {
     func_002D2128(obj);
 }
 
-u32 func_002D2300(SdfTex *arg0) {
-    return (u32)arg0->unk28;
+u32 func_002D2300(SdfTex *texture) {
+    return (u32)texture->unk28;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2308);
 
-s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *arg0) {
+s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buf;
 
-    buf = arg0->unk2C;
+    buf = texture->unk2C;
     if (buf == NULL) {
         func_002D2F80();
-        buf = arg0->unk2C;
+        buf = texture->unk2C;
     }
     return (s32)buf;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2368);
 
-u8 func_002D2390(SdfTex *arg0) {
-    return arg0->unk18;
+u8 func_002D2390(SdfTex *texture) {
+    return texture->unk18;
 }
 
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture) {
-    u32 val;
+    u32 word;
 
-    val = 0;
+    word = 0;
     if (texture->secondaryResource != NULL) {
-        val = texture->secondaryResource->word;
+        word = texture->secondaryResource->word;
     }
-    return val;
+    return word;
 }
 
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
@@ -164,29 +164,29 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D23C0);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2410);
 
-u64 func_002D2468(SdfTex *arg0) {
-    return arg0->unk28->unk20;
+u64 func_002D2468(SdfTex *texture) {
+    return texture->unk28->unk20;
 }
 
-u64 func_002D2478(SdfTex *arg0) {
-    return arg0->unk28->unk10;
+u64 func_002D2478(SdfTex *texture) {
+    return texture->unk28->unk10;
 }
 
-u64 func_002D2488(SdfTex *arg0) {
-    return arg0->unk28->unk30;
+u64 func_002D2488(SdfTex *texture) {
+    return texture->unk28->unk30;
 }
 
-void func_002D2498(SdfTex *arg0, s32 arg1, s32 arg2) {
+void func_002D2498(SdfTex *texture, s32 arg1, s32 arg2) {
     SdfTexBuf *buf;
 
-    buf = arg0->unk28;
+    buf = texture->unk28;
     buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D24C0);
 
-void func_002D2530(SdfTex *arg0, u8 arg1) {
-    arg0->unk1F = arg1;
+void func_002D2530(SdfTex *texture, u8 value) {
+    texture->unk1F = value;
     func_002D2FB0();
 }
 

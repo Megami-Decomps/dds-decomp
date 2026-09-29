@@ -106,10 +106,10 @@ typedef struct {
 } DspListHead;
 
 s32 *mnuAllocateDisplayListNode(void) {
-    s32 *temp_v0 = (s32 *)func_002CFEB8(0x14);
+    s32 *node = (s32 *)func_002CFEB8(0x14);
 
-    memset(temp_v0, 0, 0x14);
-    return temp_v0;
+    memset(node, 0, 0x14);
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256B78);

@@ -62,26 +62,26 @@ u32 func_0010D6A8(void) {
 INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6B8);
 
 u32 func_0010D6E8(void) {
-    u64 temp_v0;
+    u64 flagValue;
 
-    temp_v0 = func_0010D428(0);
-    temp_v0 = mdlFlagTest(temp_v0);
-    func_0010D5F0(temp_v0);
+    flagValue = func_0010D428(0);
+    flagValue = mdlFlagTest(flagValue);
+    func_0010D5F0(flagValue);
     return 1;
 }
 
 u32 func_0010D718(void) {
-    u64 temp_v0;
+    u64 flagId;
 
-    temp_v0 = func_0010D428(0);
-    mdlFlagSet(temp_v0);
+    flagId = func_0010D428(0);
+    mdlFlagSet(flagId);
     return 1;
 }
 
 u32 func_0010D740(void) {
-    u64 temp_v0;
+    u64 flagId;
 
-    temp_v0 = func_0010D428(0);
-    mdlFlagClear(temp_v0);
+    flagId = func_0010D428(0);
+    mdlFlagClear(flagId);
     return 1;
 }

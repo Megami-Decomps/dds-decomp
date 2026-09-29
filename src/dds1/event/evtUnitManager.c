@@ -3,7 +3,7 @@
 /* Event unit: flag bits at 0xa8 drive status queries below. */
 typedef struct EvtUnit {
     u8 pad[0x6c];      /* 0x0 */
-    u32 unk6C;         /* 0x6c */
+    u32 value;         /* 0x6c: changed by evtSetUnitValueAndFlag */
     u8 pad2[0x38];     /* 0x70 */
     u32 flags;         /* 0xa8 */
     u8 pad3[0x10];     /* 0xac */
@@ -28,7 +28,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221C50);
 
 void evtSetUnitValueAndFlag(EvtUnit *unit, u32 value)
 {
-    unit->unk6C = value;
+    unit->value = value;
     unit->flags = unit->flags | 0x20000;
 }
 

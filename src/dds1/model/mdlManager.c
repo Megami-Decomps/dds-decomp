@@ -10,7 +10,7 @@ typedef struct MdlSub {
 /* Record behind MdlCtx.inner. */
 typedef struct MdlInner {
     u8 unk0[8];  /* 0x0 */
-    u32 unk8;    /* 0x8: freed through func_002DA1B0 */
+    u32 resourceHandle; /* 0x8: released through func_002DA1B0 */
     u8 unkC[8];  /* 0xC */
     u32 *list;   /* 0x14: intrusive list walked by func_00218320/368 */
     u8 unk18[4]; /* 0x18 */
@@ -42,7 +42,7 @@ typedef struct MdlPacket {
 /* Load request touched by func_00216F18. */
 typedef struct MdlLoadReq {
     u8 unk0[0xC]; /* 0x0 */
-    u32 unkC;     /* 0xC */
+    u32 size;      /* 0xC: size read from the current file resource */
 } MdlLoadReq;
 
 /* Resource released by func_002189D8. */
@@ -139,7 +139,7 @@ void func_00216F18(void *arg0, MdlLoadReq *req) {
 
     handle = func_00288B90();
     size = func_002EB090(handle);
-    req->unkC = size;
+    req->size = size;
     handle = func_00288B88(arg0);
     func_002D0918(handle);
     func_002887A0(arg0);
@@ -383,7 +383,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
 }
 
 void func_00218440(MdlCtx *ctx) {
-    func_002DA1B0(ctx->inner->unk8);
+    func_002DA1B0(ctx->inner->resourceHandle);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218460);

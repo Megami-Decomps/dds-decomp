@@ -18,6 +18,9 @@ INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD1B8);
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD348);
 
+/* Matrix registers: vf28-vf31 are the primary matrix, vf24-vf27 its
+ * alternate bank, and vf20-vf23 a third bank copied between the two. */
+
 void func_002DD378(void *matrix) {
     __asm__ volatile (
         ".set noreorder\n"

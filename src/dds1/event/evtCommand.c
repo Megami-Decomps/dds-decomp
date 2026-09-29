@@ -288,17 +288,17 @@ s32 func_00226B10(void)
 
 s32 func_00226B68(void)
 {
-    s32 p0;
-    s32 p1;
-    s32 combined;
+    s32 highPart;
+    s32 lowPart;
+    s32 targetKey;
 
-    p0 = func_0010D428(0);
-    p1 = func_0010D428(1);
-    combined = (p0 << 16) + p1;
-    if (func_00110EB8(dds3GetWorldSecondaryObject()) != combined) {
-        p0 = func_0010D428(0);
-        p1 = func_0010D428(1);
-        func_0021FEC0(p0, p1);
+    highPart = func_0010D428(0);
+    lowPart = func_0010D428(1);
+    targetKey = (highPart << 16) + lowPart;
+    if (func_00110EB8(dds3GetWorldSecondaryObject()) != targetKey) {
+        highPart = func_0010D428(0);
+        lowPart = func_0010D428(1);
+        func_0021FEC0(highPart, lowPart);
     }
     return 1;
 }

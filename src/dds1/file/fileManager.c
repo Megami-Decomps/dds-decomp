@@ -10,10 +10,10 @@ typedef struct FileNode {
 typedef struct FileWork {
     u8 unk0[0x10];   /* 0x0 */
     u32 unk10;       /* 0x10 */
-    u32 unk14;       /* 0x14 */
+    u32 size;        /* 0x14: loaded resource size */
     FileNode *head;  /* 0x18 */
     u8 unk1C[4];     /* 0x1C */
-    u32 unk20;       /* 0x20 */
+    u32 resourceHandle; /* 0x20: released with func_002D0918 */
     u32 unk24;       /* 0x24 */
 } FileWork;
 
@@ -53,7 +53,7 @@ void func_00288B68(u32 arg0) {
 }
 
 u32 func_00288B88(FileWork *work) {
-    return work->unk20;
+    return work->resourceHandle;
 }
 
 u32 func_00288B90(FileWork *work) {
@@ -61,7 +61,7 @@ u32 func_00288B90(FileWork *work) {
 }
 
 u32 func_00288B98(FileWork *work) {
-    return work->unk14;
+    return work->size;
 }
 
 u32 func_00288BA0(FileWork *work) {

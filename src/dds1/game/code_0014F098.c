@@ -147,10 +147,10 @@ s32 func_0014F398(void) {
 }
 
 s32 func_0014F3E0(void) {
-    s32 temp_v0;
+    s32 value;
 
-    temp_v0 = func_0010D428(0);
-    D_0032E48C[0] = temp_v0;
+    value = func_0010D428(0);
+    D_0032E48C[0] = value;
     return 1;
 }
 

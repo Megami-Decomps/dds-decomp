@@ -63,27 +63,27 @@ s32 func_0022AAF0(void) {
     return D_003BD88C != 0;
 }
 
-void func_0022AB00(s32 arg0) {
-    if (arg0 == 0) {
+void func_0022AB00(s32 value) {
+    if (value == 0) {
         D_003BD88C = 0;
         D_003BD890 = 0;
         D_003BD894 = 0;
         return;
     }
-    D_003BD894 = (s32)arg0;
+    D_003BD894 = (s32)value;
     D_003BD88C = 3;
     D_003BD890 = 0;
 }
 
-void func_0022AB28(s32 arg0) {
-    if (arg0 == 0) {
+void func_0022AB28(s32 value) {
+    if (value == 0) {
         D_003BD88C = 5;
         D_003BD894 = 1;
         D_003BD890 = 0;
     } else {
-        D_003BD890 = arg0;
+        D_003BD890 = value;
         D_003BD88C = 5;
-        D_003BD894 = arg0;
+        D_003BD894 = value;
     }
 }
 

@@ -100,7 +100,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4680);
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4850);
 
 u32 func_002C49F8(void) {
-    return **(u32 **)(*(s32 *)(D_003BD274 + 0x1c) + 0x70);
+    return (u32)((SdfCounterRuntime *)D_003BD274)->channel->display->word;
 }
 
 s32 func_002C4A10(void) {
@@ -121,20 +121,20 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5338);
 
 void sdfCounterIncrease(void) {
-    s32 temp_v0;
+    s32 currentValue;
 
-    temp_v0 = ((SdfCounterRuntime *)D_003BD274)->timer->value;
-    if (temp_v0 < 10) {
-        ((SdfCounterRuntime *)D_003BD274)->timer->value = temp_v0 + 1;
+    currentValue = ((SdfCounterRuntime *)D_003BD274)->timer->value;
+    if (currentValue < 10) {
+        ((SdfCounterRuntime *)D_003BD274)->timer->value = currentValue + 1;
     }
 }
 
 void sdfCounterDecrease(void) {
-    s32 temp_v0;
+    s32 currentValue;
 
-    temp_v0 = ((SdfCounterRuntime *)D_003BD274)->timer->value;
-    if (temp_v0 != 0) {
-        ((SdfCounterRuntime *)D_003BD274)->timer->value = temp_v0 - 1;
+    currentValue = ((SdfCounterRuntime *)D_003BD274)->timer->value;
+    if (currentValue != 0) {
+        ((SdfCounterRuntime *)D_003BD274)->timer->value = currentValue - 1;
     }
 }
 
