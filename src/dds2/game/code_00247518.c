@@ -10,7 +10,7 @@ extern void func_00110BE0(void *, s32);
 extern f32 dds3GetCameraValue(s32);
 extern void func_001063A8(f32);
 
-extern s32 evtViewerHasUpdateFlag(void);
+extern s32 evtViewerHasUpdateFlag(s32);
 
 extern s32 D_00435DD0;
 
@@ -59,7 +59,9 @@ typedef struct EventViewerState {
     u8 pad2038[0x204];
     struct {
         u16 id;
-        u8 pad2[6];
+        u16 a;
+        u16 b;
+        u16 pad6;
     } history[8];
     s32 historyCount;
     u32 currentId;
@@ -95,6 +97,31 @@ u16 evtViewerPopHistory(EventViewerState *viewer);
 extern char D_004230D0[]; /* "EventViewer" */
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
+
+typedef struct EvtViewGlyph {
+    u16 id;       /* 0x00 */
+    u8 pad02[6];
+    s8 kind;      /* 0x08 */
+    u8 pad09[3];
+    s8 channel;   /* 0x0C */
+    u8 pad0D[3];
+    s16 condition; /* 0x10 */
+    u8 pad12[0x1E];
+    struct EvtViewGlyph *next; /* 0x30 */
+} EvtViewGlyph;
+
+typedef struct EvtViewNode {
+    s32 kind;                 /* 0x00 */
+    u8 pad04[0xC];
+    u32 owner;                /* 0x10 */
+    u8 pad14[8];
+    s16 time;                 /* 0x1C */
+    u8 pad1E[0x32];
+    s32 hasGlyphs;            /* 0x50 */
+    EvtViewGlyph *glyphs;     /* 0x54 */
+    u8 pad58[0x24];
+    struct EvtViewNode *next; /* 0x7C */
+} EvtViewNode;
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247518);
 
@@ -165,7 +192,28 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_00249598);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002496B0);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249A98);
+void func_00249A98(u32 arg0, EventViewerState *viewer) {
+    u8 *list;
+    EvtViewNode *node;
+    EvtViewNode *found;
+
+    if (dds3GetWorldObject() != 0) {
+        list = *(u8 **)(*(s32 *)(*(s32 *)((u8 *)dds3GetWorldObject() + 0x18) + 8) + 0x40);
+        while (list != 0) {
+            found = 0;
+            for (node = (EvtViewNode *)viewer->groups; node != 0; node = node->next) {
+                if (node->owner == (u32)list) {
+                    found = node;
+                    break;
+                }
+            }
+            if (found != 0) {
+                func_002496B0(arg0, list, node, viewer, 0);
+            }
+            list = *(u8 **)(list + 0x20);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249B40);
 
@@ -176,7 +224,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_00249DC8);
 void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;
 
-    active = evtViewerHasUpdateFlag();
+    active = evtViewerHasUpdateFlag((s32)viewer);
     if (active != 0) {
         viewer->updateCount = viewer->updateCount + 1;
     }
@@ -184,13 +232,34 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249EE8);
 
-INCLUDE_ASM(const s32, "game/code_00247518", evtViewerHasUpdateFlag);
+s32 evtViewerHasUpdateFlag(s32 arg0) {
+    return (*(s32 *)(arg0 + 4) & 0x10) > 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A020);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A158);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024A380);
+extern void func_002A8008(void);
+extern void func_002A7FD0(void);
+s32 func_0024A380(u8 *viewer) {
+    if (*(s32 *)(viewer + 0x2414) == 1) {
+        if (*(s32 *)(viewer + 0x18) < *(s32 *)(viewer + 0x2418)) {
+            func_002A7FD0();
+            *(s32 *)(viewer + 0x2414) = 0;
+            *(s32 *)(viewer + 0x2418) = 0;
+            *(s32 *)(viewer + 0x241C) = 0;
+        } else if (*(s32 *)(viewer + 0x241C) < 0) {
+            func_002A8008();
+        } else if (*(s32 *)(viewer + 0x18) >= *(s32 *)(viewer + 0x241C)) {
+            func_002A7FD0();
+            *(s32 *)(viewer + 0x2414) = 0;
+            *(s32 *)(viewer + 0x2418) = 0;
+            *(s32 *)(viewer + 0x241C) = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A400);
 
@@ -214,7 +283,23 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
 void func_0024A668(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024A670);
+EvtViewGlyph *func_0024A670(EvtViewNode *group, s32 position, s32 channel) {
+    s32 bestId = -1;
+    EvtViewGlyph *best = NULL;
+    EvtViewGlyph *glyph = group->glyphs;
+
+    if (glyph != NULL) {
+        do {
+            if (position >= glyph->id && bestId < glyph->id && glyph->kind == 5 &&
+                glyph->channel == channel && func_0024B040(glyph->condition) == 1) {
+                bestId = glyph->id;
+                best = glyph;
+            }
+            glyph = glyph->next;
+        } while (glyph != NULL);
+    }
+    return best;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A738);
 
@@ -289,7 +374,26 @@ s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
     return (s32)result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024AB38);
+void func_0024AB38(s32 mode, s32 arg1, s32 arg2, s32 viewerAddr) {
+    EventViewerState *viewer = (EventViewerState *)viewerAddr;
+    s32 count = viewer->historyCount + 1;
+
+    viewer->currentId = mode;
+    viewer->historyCount = count;
+    viewer->history[count].id = mode;
+    viewer->history[count].a = arg1;
+    viewer->history[count].b = arg2;
+    if (mode > 0) {
+        if (mode >= 3) {
+            if (mode == 3) {
+                *(s32 *)((u8 *)viewer + 0x22CC) = 0;
+                *(s32 *)((u8 *)viewer + 0x22D0) = 0;
+                *(u8 *)((u8 *)viewer + 0x22D4) = 0;
+                *(u8 *)((u8 *)viewer + 0x22E0) = 0;
+            }
+        }
+    }
+}
 
 u16 evtViewerPopHistory(EventViewerState *viewer) {
     u16 id;
@@ -606,11 +710,29 @@ void func_0024DAC0(void) {
     func_0024D918(temp_v0);
 }
 
-void func_0024DAE0(void) {
+void func_0024DAE0() {
     mnuCampInitFontResource();
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024DAF8);
+extern u32 D_00435CBC;
+extern s32 func_003292A8(s32 size);
+extern u32 *sdfResourceRetainAddress(s32 handle);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+void func_0024DAF8(void) {
+    u32 *state;
+    s32 handle;
+    void *task;
+
+    D_00435CBC = 0x80000000;
+    handle = func_003292A8(0x24BC);
+    state = sdfResourceRetainAddress(handle);
+    memset(state, 0, 0x24BC);
+    *state = handle;
+    task = kwlnTaskCreate(D_004230D0, 0x3EB, 1, 1, func_0024D710, func_0024DAA0, state);
+    func_00101968((s32)task, evtCreateSkyTask());
+    func_0024DAE0(state);
+}
 
 void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(D_004230D0, 1);

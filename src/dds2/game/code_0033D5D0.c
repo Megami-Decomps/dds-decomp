@@ -32,7 +32,8 @@ extern char D_0040B9D0[];
 typedef struct DevState {
     struct DevState *unk0; /* 0x0 */
     struct DevState *unk4; /* 0x4 */
-    u8 pad8[8]; /* 0x8 */
+    struct DevState *workerNext; /* 0x8 */
+    struct DevState *workerPrev; /* 0xC */
     void *resource; /* 0x10 */
     u8 workerIndex; /* 0x14 */
     u8 operation; /* 0x15 */
@@ -40,7 +41,7 @@ typedef struct DevState {
     u8 pad17; /* 0x17 */
     s32 unk18; /* 0x18 */
     s32 requestExtra; /* 0x1C */
-    s32 requestData; /* 0x20 */
+    void *requestData; /* 0x20 */
     s32 options; /* 0x24 */
     s32 resourceId; /* 0x28 */
     s32 result; /* 0x2C */
@@ -56,7 +57,10 @@ typedef struct SemaEntry {
 
 typedef struct ThreadEntry {
     s32 threadId;
-    u8 pad4[20];
+    s32 sema;               /* 0x4 */
+    DevState *first;        /* 0x8 */
+    DevState *last;         /* 0xC */
+    u8 pad10[8];
 } ThreadEntry;
 
 extern SemaEntry D_0040BA14[];
@@ -88,7 +92,7 @@ typedef struct DevRequest {
     s16 flags;
     u16 count;
     s16 stride;
-    u16 mode;
+    s16 mode;
     s32 buffer;
 } DevRequest;
 
@@ -150,13 +154,52 @@ extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
 extern void func_0035B6E0(const char *);
 
-extern void func_003406A0(f32 arg0);
+extern f32 func_003406A0(f32 arg0);
+
+extern void func_00328520(const char *arg0, ...) __attribute__((noreturn));
+
+extern char D_0042E288[];
+
+extern u32 D_0043919C;
+
+extern u32 D_004391A0;
+
+extern s32 sceSifAllocIopHeap(s32);
+
+extern void func_0034D400(s32, s32, s32);
+
+extern void func_0033E550(s32);
+
+typedef struct Bytes7 {
+    s8 b[7];
+} Bytes7;
+
+extern Bytes7 D_00438AF0[];
+
+extern char *strcpy(char *, char *);
+
+extern char *strcat(char *, char *);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D7B8);
+extern void func_0033D5D0(void *packet, const char *fmt, void *args);
+void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D810);
+void func_0033D7B8(void *packet, const char *fmt, ...) {
+    __builtin_va_list args;
+
+    __builtin_stdarg_start(args, fmt);
+    func_0033D5D0(packet, fmt, args);
+}
+
+void func_0033D810(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
+    SifCommand packet;
+    __builtin_va_list args;
+
+    sdfPktInit(&packet, source, end, argument, index);
+    __builtin_stdarg_start(args, fmt);
+    func_0033D5D0(&packet, fmt, args);
+}
 
 void sdfPktSetCmd(SifCommand *packet, s32 index) {
     packet->command = D_0040B990[index];
@@ -191,7 +234,19 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D990);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DA30);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DAD8);
+extern s32 func_00360E78(char *dst, const char *fmt, void *args);
+extern void func_0033DA30(const char *text);
+
+s32 func_0033DAD8(const char *fmt, ...) {
+    char buffer[0x100];
+    __builtin_va_list args;
+    s32 length;
+
+    __builtin_stdarg_start(args, fmt);
+    length = func_00360E78(buffer, fmt, args);
+    func_0033DA30(buffer);
+    return length;
+}
 
 u32 func_0033DB58(void) {
     return D_004391A4;
@@ -219,7 +274,38 @@ void sdfDevWaitForDisc(void) {
     SignalSema(D_004391B8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DBF8);
+extern u8 D_004391C0;
+extern s32 D_004391BC;
+extern s32 func_0034D430(s32 arg, u8 *options);
+extern s32 sceCdStatus(void);
+
+void func_0033DBF8(s32 arg0) {
+    u8 options[4];
+    s32 ready;
+
+    options[0] = 0;
+    if (D_004391C0 == 1) {
+        options[1] = 0;
+    } else {
+        options[1] = 1;
+    }
+    options[2] = 0;
+    options[3] = 0;
+    for (;;) {
+        WaitSema(D_004391B8);
+        ready = func_0034D430(arg0, options);
+        SignalSema(D_004391B8);
+        if (ready != 0) {
+            break;
+        }
+        if (sceCdStatus() == 1) {
+            sdfDevWaitForDisc();
+        } else {
+            sdfSleepWithAlarm(100);
+        }
+    }
+    D_004391BC = arg0;
+}
 
 void sdfDevSignalPendingSemaphore(void) {
     if (D_00438AC8 != 0) {
@@ -228,15 +314,89 @@ void sdfDevSignalPendingSemaphore(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DCD0);
+void func_0033DCD0(s32 arg0) {
+    u8 options[4];
+    s32 ready;
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DD90);
+    options[0] = 0;
+    if (D_004391C0 == 1) {
+        options[1] = 0;
+    } else {
+        options[1] = 1;
+    }
+    options[2] = 0;
+    options[3] = 0;
+    for (;;) {
+        WaitSema(D_004391B8);
+        D_00438AC8 = 1;
+        WaitSema(D_004391C4);
+        ready = func_0034D430(arg0, options);
+        SignalSema(D_004391B8);
+        if (ready != 0) {
+            break;
+        }
+        if (sceCdStatus() == 1) {
+            sdfDevWaitForDisc();
+        } else {
+            sdfSleepWithAlarm(100);
+        }
+    }
+    D_004391BC = arg0;
+}
+
+extern s32 func_0034D500(s32 size, s32 buffer, s32 count, s32 *status);
+
+void func_0033DD90(s32 size, s32 buffer) {
+    s32 status;
+    s32 result;
+
+    for (;;) {
+        WaitSema(D_004391B8);
+        result = func_0034D500(size, buffer, 1, &status);
+        SignalSema(D_004391B8);
+        if (status == 0 && result == size) {
+            break;
+        }
+        if (sceCdStatus() == 1) {
+            sdfDevWaitForDisc();
+            func_0033DBF8(D_004391BC);
+        } else {
+            WaitSema(D_004391B8);
+            func_0034D4C8();
+            SignalSema(D_004391B8);
+            func_0033DBF8(D_004391BC);
+        }
+    }
+    D_004391BC += size;
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DE60);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E008);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E1C0);
+extern s32 D_004391AC;
+extern s32 D_004391B4;
+
+s32 func_0033E1C0(const char *name) {
+    s32 result;
+    s32 request[4];
+    s32 file;
+
+    file = func_0033E008((u32)name, (u8 *)request, (u32)&D_004391C0);
+    result = -1;
+    if (file != 0) {
+        D_004391AC = *(s32 *)(file + 8);
+        D_004391A8 = file;
+        D_004391B4 = 0;
+        if (name[1] == 0x76 || name[1] == 0x56) {
+            func_0033DCD0(request[0]);
+        } else {
+            func_0033DBF8(request[0]);
+        }
+        result = *(s32 *)(file + 8);
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E248);
 
@@ -270,11 +430,29 @@ s32 sdfPktQuery(u32 index) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevGetFileSize);
+s32 sdfDevGetFileSize(void) {
+    if (D_004391A8 == 0) {
+        func_00328520("file didn't open.");
+    }
+    return *(s32 *)(D_004391A8 + 8);
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E550);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevStartLoad);
+void sdfDevStartLoad(s32 name, s32 mode) {
+    u32 file[12];
+    s32 heap;
+
+    D_00439198 = name;
+    func_0033E550(mode);
+    if (sceCdSearchFile(file, name) == 0) {
+        func_00328520(D_0042E288, name);
+    }
+    D_004391A0 = file[0];
+    heap = sceSifAllocIopHeap(0x28010);
+    D_0043919C = heap;
+    func_0034D400(0x50, 5, (heap + 15) & -16);
+}
 
 void sdfInitDeviceSemaphores(void) {
     D_004391B8 = sdfCreateSemaphore(1, 0xff, 0);
@@ -284,11 +462,48 @@ void sdfInitDeviceSemaphores(void) {
     func_0034D038(D_00438AD8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E6B0);
+extern char D_00438AE8[];
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevBuildPath);
+void func_0033E6B0(char *dst, char *src) {
+    s32 c;
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPathPrefixCat);
+    memcpy(dst, D_00438AE8, 8);
+    dst += 7;
+    c = *src++;
+    while (c != 0) {
+        if (c == '/') {
+            c = '\\';
+        }
+        if (c >= 'a' && c <= 'z') {
+            c -= 0x20;
+        }
+        *dst++ = c;
+        c = *src++;
+    }
+    dst[0] = ';';
+    dst[1] = '1';
+    dst[2] = 0;
+}
+
+char *sdfDevBuildPath(char *dst, char *src) {
+    if (*src == 0x2F) {
+        strcpy(dst, D_0040B9D0);
+        return strcat(dst, src);
+    }
+    *(Bytes7 *)dst = D_00438AF0[0];
+    return strcat(dst, src);
+}
+
+typedef struct Bytes6 {
+    s8 b[6];
+} Bytes6;
+
+extern Bytes6 D_00438AF8[];
+
+void sdfPathPrefixCat(char *dst, char *src) {
+    *(Bytes6 *)dst = D_00438AF8[0];
+    strcat(dst, src);
+}
 
 u32 func_0033E800(void) {
     return 0;
@@ -372,7 +587,38 @@ void func_0033EC40(s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EC48);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033ED38);
+extern s64 func_0036DE70(void);
+extern void EIntr(void);
+extern void func_00328E48(void *ptr);
+extern DevState *D_00438B14;
+extern DevState *D_00438B18;
+extern s16 D_00438B10;
+
+void func_0033ED38(DevState *state) {
+    DevState *prev;
+    DevState *next;
+    s64 interrupts;
+
+    interrupts = func_0036DE70();
+    prev = state->unk4;
+    next = state->unk0;
+    if (prev == NULL) {
+        D_00438B14 = next;
+    } else {
+        prev->unk0 = next;
+    }
+    if (next == NULL) {
+        D_00438B18 = prev;
+    } else {
+        next->unk4 = prev;
+    }
+    D_00438B10 -= 1;
+    if (interrupts != 0) {
+        EIntr();
+    }
+    func_00328E48(state->resource);
+    func_00328E48(state);
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EDB0);
 
@@ -466,9 +712,27 @@ s32 func_0033FB98(DevState *arg0) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FBF0);
+s32 func_0033FBF0(DevState *state, void *data, s32 extra) {
+    if (state->state != 7) {
+        return -1;
+    }
+    state->requestExtra = extra;
+    state->operation = 5;
+    state->requestData = data;
+    SignalSema(D_0040BA14[state->workerIndex].sema);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FC50);
+s32 func_0033FC50(DevState *state, void *data, s32 extra) {
+    if (state->state != 7) {
+        return -1;
+    }
+    state->requestExtra = extra;
+    state->operation = 6;
+    state->requestData = data;
+    SignalSema(D_0040BA14[state->workerIndex].sema);
+    return 0;
+}
 
 s32 sdfDevReactivate(DevState *arg0) {
     if (arg0->state != 9) {
@@ -492,7 +756,7 @@ s32 sdfDevQueueActiveOperation(DevState *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FD30);
 
-DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
+DevState *sdfDevCreateRequest(s32 path, void *data, s32 extra,
                         void (*completion)(DevState *, s32, s32, s32, s32), s32 completionContext) {
     void *resource;
     s32 id = func_0033F898(path, &resource);
@@ -509,7 +773,7 @@ DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
     return state;
 }
 
-DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
+DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
                         void (*completion)(DevState *, s32, s32, s32, s32),
                         s32 completionContext, s32 options) {
     void *resource;
@@ -676,9 +940,61 @@ void sdfDestroyDevRequest(DevRequest *request) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340558);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003405D8);
+extern void func_00329910(s32 handle);
+extern void func_00329600(s32 handle, s32 size);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003406A0);
+void func_003405D8(DevRequest *request, s32 count) {
+    if (request->handle == 0) {
+        if (count > 0) {
+            request->count = count;
+            request->handle = func_003292A8(request->stride * count);
+            request->buffer = sdfResourceRetainAddress(request->handle);
+        }
+    } else if (count <= 0) {
+        func_003297C8(request->handle);
+        request->handle = 0;
+        request->flags = 0;
+        request->count = 0;
+        request->buffer = 0;
+    } else {
+        func_00329910(request->handle);
+        request->count = count;
+        func_00329600(request->handle, request->stride * count);
+        request->buffer = sdfResourceRetainAddress(request->handle);
+        if (count < request->flags) {
+            request->flags = count;
+        }
+    }
+}
+
+f32 func_003406A0(f32 angle) {
+    f32 x = angle * 0.15915494f;
+    f32 t;
+    f32 t2;
+    f32 t3;
+    f32 t5;
+    f32 t7;
+    f32 t9;
+
+    x -= (s32)x;
+    if (x > 0.5f) {
+        x -= 1.0f;
+    } else if (x < -0.5f) {
+        x += 1.0f;
+    }
+    if (x > 0.25f) {
+        x = 0.5f - x;
+    } else if (x < -0.25f) {
+        x = -0.5f - x;
+    }
+    t = x * 3.9999996f;
+    t2 = t * t;
+    t3 = t2 * t;
+    t5 = t3 * t2;
+    t7 = t5 * t2;
+    t9 = t7 * t2;
+    return t * 1.5707963f + t3 * -0.64596367f + t5 * 0.07968968f + t7 * -0.0046737656f + t9 * 0.00015148419f;
+}
 
 void func_003407A0(f32 arg0) {
     func_003406A0(arg0 + 1.5707963f);

@@ -35,8 +35,22 @@ typedef struct SdfTextParam {
     u8 pad48[0x40]; /* 0x48 */
     f32 overrideFirst; /* 0x88 */
     f32 overrideSecond; /* 0x8C */
-    void *resourceChunk; /* 0x90: resource chunk searched by tag */
+    void *chunkTable; /* 0x90: resource chunk searched by tag */
 } SdfTextParam;
+
+typedef struct SdfChunk {
+    u32 id;   /* 0x0: entry id, 0 terminates the list */
+    u32 size; /* 0x4: byte offset to the next entry */
+} SdfChunk;
+
+typedef struct SdfMapPositionRecord {
+    u32 unk00;
+    s32 id;
+    u8 pad08[0x38];
+} SdfMapPositionRecord;
+
+#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
+
 
 extern f32 D_00438A48;
 
@@ -96,23 +110,80 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332860);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332920);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfChunkFindById);
+void *sdfChunkFindById(SdfChunk *chunk, s32 id) {
+    u32 currentId;
 
-void sdfChunkFindByTag(SdfTextParam *param) {
-    sdfChunkFindById(param->resourceChunk);
+    if (chunk == NULL) {
+        return NULL;
+    }
+    currentId = chunk->id;
+    while (currentId != 0) {
+        if (currentId == id) {
+            return (void *)chunk;
+        }
+        chunk = (SdfChunk *)((u8 *)chunk + chunk->size);
+        currentId = chunk->id;
+    }
+    return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfNamedChunkFindId);
+void *sdfChunkFindByTag(SdfTextParam *param, s32 tag) {
+    return sdfChunkFindById(param->chunkTable, tag);
+}
+
+s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
+    SdfChunk *chunk = sdfChunkFindByTag(param, 0x4D4E444E);
+    u8 *entry;
+    u8 *end;
+    u32 length;
+    if (chunk == NULL) {
+        return -1;
+    }
+    entry = (u8 *)chunk + 8;
+    end = (u8 *)chunk + chunk->size;
+    length = strlen(name);
+    do {
+        u32 entryLength = strlen((char *)entry);
+        u8 *next = (u8 *)(((u32)(entry + entryLength + 4)) & ~3U);
+        if (entryLength == length && memcmp(entry, name, length) == 0) {
+            return *(s32 *)next;
+        }
+        entry = next + 4;
+    } while (entry < end);
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332AD8);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfCountMapPositionRecords);
+u32 sdfCountMapPositionRecords(SdfTextParam *param) {
+    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+    if (chunk != NULL) {
+        return (chunk->size - 0x10) >> 6;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332BB0);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332C30);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfChunkFindRecordById);
+void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
+    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionRecord *entry;
+    u8 *end;
+    if (chunk == NULL) {
+        return NULL;
+    }
+    entry = (SdfMapPositionRecord *)((u8 *)chunk + 0x10);
+    end = (u8 *)chunk + chunk->size;
+    while ((u8 *)entry < end) {
+        if (entry->id == id) {
+            return entry;
+        }
+        entry++;
+    }
+    return NULL;
+}
 
 s32 func_00332D08(SdfTextParam *param, s32 id) {
     void *resource = sdfChunkFindRecordById(param, id);
@@ -132,9 +203,21 @@ s32 func_00332D48(SdfTextParam *param, s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetUniqueChunkValue);
+u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
+    SdfChunk *chunk = sdfChunkFindByTag(param, 0x51494e55);
+    if (chunk != NULL) {
+        return *(u32 *)((u8 *)chunk + 8);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetLodChunkValue);
+u32 sdfGetLodChunkValue(SdfTextParam *param) {
+    SdfChunk *chunk = sdfChunkFindByTag(param, 0x43444f4c);
+    if (chunk != NULL) {
+        return *(u32 *)((u8 *)chunk + 8);
+    }
+    return 0;
+}
 
 void sdfTextParamSetOverrides(SdfTextParam *param, f32 first, f32 second) {
     param->overrideFirst = first;
@@ -164,6 +247,7 @@ void func_00332E50(u32 arg0) {
     D_00438A3C = arg0;
 }
 
+void *sdfDevCreateBufferedRequest(s32, s32, s32);
 void func_00332E58(u32 arg0) {
     sdfDevCreateBufferedRequest(arg0, 4, 4);
 }
@@ -207,8 +291,8 @@ void sdfRegisterResourceQueueCallbacks(void) {
     sdfInitializeSynchronizedRequest(&D_00439178, sdfAssetRelease);
 }
 
-void sdfCreateResourceList(u32 arg0) {
-    sdfDevCreateBufferedRequest(arg0, 4, 8);
+SdfResourceList *sdfCreateResourceList(s32 capacity) {
+    return sdfDevCreateBufferedRequest(capacity, 4, 8);
 }
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333140);
@@ -404,7 +488,21 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333CB0);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfAssetListParse);
+SdfAsset *func_003335E0(void);
+u8 *func_003336E0(SdfAsset *, SdfTextParam *, u8 *);
+void func_00333208(SdfResourceList *, SdfAsset *);
+SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
+    u32 count = *data;
+    u8 *cursor = (u8 *)(data + 1);
+    SdfResourceList *list = sdfCreateResourceList(count >= 0x20 ? count : 0x20);
+    while (count != 0) {
+        SdfAsset *asset = func_003335E0();
+        cursor = func_003336E0(asset, param, cursor);
+        func_00333208(list, asset);
+        count--;
+    }
+    return list;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333E38);
 

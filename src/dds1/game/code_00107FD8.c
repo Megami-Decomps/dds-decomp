@@ -32,8 +32,6 @@ extern u32 D_003BA8E8;
 
 extern u32 D_003BA904;
 
-extern s32 kwlnTaskCreate(const char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
-
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
@@ -149,6 +147,20 @@ extern void *D_003BD764;
 
 extern void func_00109108();
 
+typedef struct KwlnResourceNode {
+    s32 unk0;
+    struct KwlnResourceNode *next;
+    s32 *ready;
+} KwlnResourceNode;
+
+extern s32 D_003BD3C8;
+
+extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
+
+extern void func_0010B590(void);
+
+extern void *D_003BD768;
+
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001080D8);
@@ -222,9 +234,13 @@ typedef struct EvtDrawSurface {
 } EvtDrawSurface;
 
 extern EvtDrawSurface D_00324B48[];
+
 extern void *sdfAllocPacketAligned(s32);
+
 extern void sdfInitPacketList(void *);
+
 extern void sdfAppendPacket(void *, void *);
+
 extern u8 *func_002E13E0(void *, s32);
 
 void func_00108A88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
@@ -278,8 +294,11 @@ void evtSubmitTexturePacket(s32 value) {
 }
 
 extern s32 func_00100518(void);
+
 extern u8 D_00326ED0[];
+
 extern void func_002D4C80(const void *, void *, s32);
+
 extern void func_002D40E8(void *, void *);
 
 void func_00108E60(void) {
@@ -325,7 +344,9 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109640);
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109810);
 
 extern f32 D_003245B0[];
+
 extern u32 D_003245D0[];
+
 extern void *func_002EF2B0(const void *, const void *, s32, s32);
 
 void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
@@ -1041,4 +1062,3 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA990);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA994);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA998);
-

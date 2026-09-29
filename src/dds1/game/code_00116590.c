@@ -14,6 +14,13 @@ typedef struct {
     UnitObjectData *data;
 } UnitObject;
 
+extern void *func_002CFEB8(s32 size);
+
+typedef struct ObjWithWork {
+    u8 unk0[0x18];
+    u32 *work;
+} ObjWithWork;
+
 u32 func_00116590(void) {
     return 1;
 }
@@ -30,6 +37,7 @@ typedef struct ActionObj {
 } ActionObj;
 
 extern ActionObj *func_00110880();
+
 extern void dds3EnsureSlotData();
 
 ActionObj *evtSpawnActionObj9(s32 value) {

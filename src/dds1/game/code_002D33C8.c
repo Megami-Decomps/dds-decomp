@@ -44,6 +44,22 @@ void func_002D4DD0();
 s32 sdfAllocPacketAligned(s32 size);
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
 
+typedef struct SdfSynchronizedRequest {
+    u32 value;
+    u32 state;
+} SdfSynchronizedRequest;
+
+extern void sdfReleaseQueuedResource(s32, s32);
+
+extern void func_002D3C30(void *, void *);
+
+typedef struct SdfDevSlot {
+    u32 request;
+    u8 pad04[8];
+    s32 resource;
+    void *device;
+} SdfDevSlot;
+
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
 
 SdfResource *sdfFindResourceById(s32 id) {
@@ -723,9 +739,22 @@ void func_002D5C90(SdfBigPacket *arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5CD0);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", sdfBuildPacket116);
+void sdfBuildPacket116(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+    u64 *packet = (u64 *)address;
+    u64 hi = (u64)k << 32;
 
-void func_002D5EB0(s32 list, s64 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+    packet[0] = 0x6400000000008001ULL;
+    packet[1] = 0x535310;
+    packet[2] = (u32)(b | 0x116);
+    packet[3] = (u32)a | ((u64)0xFE00 << 46);
+    packet[4] = (e & 0xFFFF) | (f << 16);
+    packet[5] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
+    packet[6] = (i & 0xFFFF) | (j << 16);
+    packet[7] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
+}
+
+
+void func_002D5EB0(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -756,7 +785,19 @@ void sdfBuildTrianglePacket(s32 dstAddr, s32 a, s32 b, s32 c, s32 d, s32 e, s32 
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6080);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", sdfBuildPacket104x4);
+void sdfBuildPacket104x4(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+    u64 *packet = (u64 *)address;
+    u64 hi = (u64)k << 32;
+
+    packet[0] = 0x6400000000008001ULL;
+    packet[1] = 0x555510;
+    packet[2] = (u32)(b | 0x104);
+    packet[3] = (u32)a | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
+    packet[5] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
+    packet[6] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
+    packet[7] = (u32)((i & 0xFFFF) | (j << 16)) | hi;
+}
 
 extern void sdfBuildPacket104x4(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -773,7 +814,20 @@ void sdfBuildPacketE(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f
     sdfAppendPacket(list, buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", sdfBuildPacket10C);
+void sdfBuildPacket10C(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+    u64 *packet = (u64 *)address;
+    u64 hi = (u64)k << 32;
+
+    packet[0] = 0x8400000000008001ULL;
+    packet[1] = 0xFFFFFFFFF5151510ULL;
+    packet[2] = (u32)(a | 0x10C);
+    packet[3] = (u32)d | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((b & 0xFFFF) | (c << 16)) | hi;
+    packet[5] = (u32)g | ((u64)0xFE00 << 46);
+    packet[6] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
+    packet[7] = (u32)j | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((h & 0xFFFF) | (i << 16)) | hi;
+}
 
 extern void sdfBuildPacket10C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -794,7 +848,21 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6578);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6690);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", sdfBuildPacket114);
+void sdfBuildPacket114(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o) {
+    u64 *packet = (u64 *)address;
+    u64 hi = (u64)o << 32;
+
+    packet[0] = 0x8400000000008001ULL;
+    packet[1] = 0x53535310;
+    packet[2] = (u32)(b | 0x114);
+    packet[3] = (u32)a | ((u64)0xFE00 << 46);
+    packet[4] = (e & 0xFFFF) | (f << 16);
+    packet[5] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
+    packet[6] = (i & 0xFFFF) | (j << 16);
+    packet[7] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
+    packet[8] = (m & 0xFFFF) | (n << 16);
+    packet[9] = (u32)((k & 0xFFFF) | (l << 16)) | hi;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D68D8);
 
@@ -978,7 +1046,23 @@ void sdfDestroyObjectList(SdfObjectList **owner) {
     func_002CFF98(owner);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", sdfReleaseDevSlot);
+void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
+    if (slot == NULL) {
+        return;
+    }
+    if (release != 0) {
+        sdfReleaseQueuedResource(slot->resource, 1);
+    }
+    if (slot->device != NULL) {
+        sdfDestroyDevRequest(slot->device);
+    }
+    if (recycle != 0) {
+        func_002D3C30(&D_003BDA08, slot);
+    } else {
+        sdfDestroyDevRequest((void *)slot->request);
+        func_002CFF98(slot);
+    }
+}
 
 void func_002D7B50(u32 *arg0) {
     func_002E7730(*arg0);

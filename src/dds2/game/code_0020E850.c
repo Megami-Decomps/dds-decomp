@@ -18,6 +18,8 @@ extern s32 func_00210EA0(s32 context, s32 actor, u32 mask);
 
 extern s32 D_00436CB8;
 
+extern s32 btlDispatchPackedEffectAction(s32 arg0, u32 arg1);
+
 extern s32 func_00213818(s32, s32);
 
 extern s32 func_00328E18(s32);
@@ -60,6 +62,71 @@ typedef struct EffCounterOwner {
     u8 pad18[8];
     EffChildCounters *child;
 } EffCounterOwner;
+
+extern s8 D_0037F510[];
+
+typedef struct BtlWaitTask {
+    s32 value;
+    u32 ticks;
+} BtlWaitTask;
+
+extern s32 (*D_003BF4A0[])(s32, u32);
+
+typedef struct BtlEffLink {
+    s32 actor;  /* 0x00 */
+    s32 arg;    /* 0x04 */
+    s32 unk08;  /* 0x08 */
+} BtlEffLink;
+
+typedef struct BtlEffTask {
+    u8 kind;           /* 0x00 */
+    u8 pad01[0xF];
+    u8 unk10;          /* 0x10 */
+    u8 pad11[0xF];
+    u16 id;            /* 0x20 */
+    u8 pad22[2];
+    u16 flags;         /* 0x24 */
+    u8 pad26[0x1A];
+    u64 unk40;         /* 0x40 */
+    u8 pad48[4];
+    s32 (*callback)(); /* 0x4C */
+} BtlEffTask;
+
+typedef struct BtlEffActor {
+    u8 pad00[0x108];
+    u64 unk108;        /* 0x108 */
+} BtlEffActor;
+
+extern BtlEffTask *btlAllocTask(s32 size);
+extern BtlEffLink *func_001E14F8();
+
+typedef struct BtlHistActor {
+    u8 pad00[0x2D0];
+    s16 unk2D0; /* 0x2D0 */
+} BtlHistActor;
+
+typedef struct BtlHistObj {
+    u8 pad00[0x18];
+    BtlHistActor *actor; /* 0x18 */
+    u8 pad1C[4];
+    s32 mode;            /* 0x20 */
+    s32 unk24;           /* 0x24 */
+    u8 pad28[0x126];
+    u8 counter;          /* 0x14E */
+    u8 pad14F;
+    s32 hist[8];         /* 0x150 */
+} BtlHistObj;
+
+extern void func_00211018(BtlHistObj *obj, s8 flag);
+extern u8 D_00436CAC;
+
+typedef struct BtlPackedCtx {
+    s32 context;
+    s32 unk4;
+} BtlPackedCtx;
+extern s32 func_00210258();
+extern s32 func_0020FFB8();
+
 
 void func_0020E850(EffCounterOwner *owner, u32 value) {
     owner->value14 = value;
@@ -150,7 +217,24 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_00210850);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_002108E8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210980);
+s32 func_00210980(BtlWaitTask *task) {
+    if (task->ticks == 0) {
+        func_001B7E40(task->value, 0);
+        func_001C7DB8(0, 8);
+    }
+    if (task->ticks >= 0x11) {
+        if (func_001B8000() == 1) {
+            if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0) {
+                func_001C7DB8(1, 8);
+                func_001B8038();
+                return 1;
+            }
+        }
+    } else {
+        task->ticks += 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210A28);
 
@@ -158,14 +242,53 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_00210AA8);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210B78);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210C10);
+extern s32 func_0010D650(s32 index);
+extern BtlEffActor *btlFindUnitByModeClear(s32 id);
+extern BtlEffActor *btlFindUnitByModeFlagged(s32 id);
+extern BtlEffTask *btlCreateEffObjB(BtlEffActor *actor, s32 arg);
+extern void btlStartTask(BtlEffTask *task);
+extern s64 func_001A9920();
+
+s32 func_00210C10(void) {
+    s32 mode;
+    s32 unitId;
+    s32 arg;
+    BtlEffActor *unit;
+    BtlEffTask *task;
+
+    mode = func_0010D650(0);
+    unitId = func_0010D650(1);
+    arg = func_0010D650(2);
+    if (mode == 0) {
+        unit = btlFindUnitByModeClear(unitId);
+    } else {
+        unit = btlFindUnitByModeFlagged(unitId);
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    task = btlCreateEffObjB(unit, arg);
+    task->unk40 = func_001A9920();
+    btlStartTask(task);
+    return 1;
+}
 
 u32 btlRandomBelow(u32 limit) {
     D_00436CB0 = D_00436CB0 * 0x41c64e6d + 0x3039;
     return (D_00436CB0 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210CE0);
+s32 func_00210CE0(s32 a, s32 b) {
+    s32 tmp;
+
+    if (b < a) {
+        tmp = b;
+        b = a;
+        a = tmp;
+    }
+    b = b - a + 1;
+    return (s32)btlRandomBelow(0xFFFF) % b + a;
+}
 
 s32 btlAllocAndCheck(s32 object) {
     s32 allocation = func_00328E18(0x10);
@@ -189,7 +312,6 @@ u32 func_00210DB0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210DC8);
 
-extern s8 D_00436CAC;
 
 void func_00210E48(void) {
     u8 *node = *(u8 **)(func_001AA6F8() + 0x248);
@@ -207,11 +329,35 @@ void func_00210E48(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210EA0);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlDispatchPackedEffectAction);
+s32 btlDispatchPackedEffectAction(s32 arg0, u32 arg1) {
+    u32 type = arg1 >> 22;
+    s32 result = 0;
+
+    arg1 &= 0x3FFFFF;
+    if (type != 0) {
+        result = D_003BF4A0[type](arg0, arg1) != 0;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210F58);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00211018);
+void func_00211018(BtlHistObj *obj, s8 flag) {
+    s32 i;
+
+    for (i = 6; i >= 0; i--) {
+        obj->hist[i + 1] = obj->hist[i];
+    }
+    if ((u32)(obj->mode - 1) < 4) {
+        if (flag == 0) {
+            obj->hist[0] = obj->unk24;
+        } else {
+            obj->hist[0] = obj->actor->unk2D0;
+        }
+    } else {
+        obj->hist[0] = 0;
+    }
+}
 
 void btlCmdWithArgA(s32 arg0) {
     func_002152D8(arg0, 0);

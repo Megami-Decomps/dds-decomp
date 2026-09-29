@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "pcp_vu0.h"
 
 typedef struct {
@@ -42,6 +43,17 @@ struct EEF0Node {
     f32 unkC4;        /* 0xC4 */
     u32 unkC8;        /* 0xC8 */
 };
+
+typedef struct ActionObj {
+    u8 unk0[4];   /* 0x0 */
+    s32 unk4;     /* 0x4 */
+    u8 unk8[0x14]; /* 0x8 */
+    s32 unk1C;    /* 0x1C */
+} ActionObj;
+
+extern ActionObj *func_00110880();
+
+extern void dds3EnsureSlotData();
 
 void dds3DestroyCameraData(CameraObject *camera) {
     CameraData *data;
@@ -112,4 +124,3 @@ INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112EE8);
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F6F8);
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F708);
-

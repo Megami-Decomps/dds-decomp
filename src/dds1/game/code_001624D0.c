@@ -38,43 +38,91 @@ typedef struct EffInitWork {
 } EffInitWork; /* 0x20 */
 
 extern EffDispatchEntry D_00353710[];
-extern EffDispatchEntry D_00353714[];
+
 extern EffDispatchEntry D_00353718[];
+
 extern EffDispatchEntry D_0035371C[];
+
 extern EffDispatchEntry D_00353720[];
+
 extern EffDispatchEntry D_00353724[];
+
 extern EffDispatchEntry D_00353728[];
+
 extern EffDispatchEntry D_0035372C[];
+
 extern EffDispatchEntry D_00353730[];
+
 extern EffDispatchEntry D_00353734[];
+
 extern EffDispatchEntry D_00353880[];
+
 extern EffDispatchEntry D_00353884[];
+
 extern EffDispatchEntry D_00353888[];
+
 extern EffDispatchEntry D_00353890[];
+
 extern EffDispatchEntry D_00353894[];
+
 extern EffDispatchEntry D_00353898[];
+
 extern EffDispatchEntry D_0035389C[];
+
 extern EffDispatchEntry D_003538A0[];
+
 extern EffDispatchEntry D_003538A4[];
+
 extern u8 D_00353850[];
+
 extern u8 D_00353860[];
+
 extern u8 D_00353870[];
+
 extern u8 D_00325828[];
+
 extern u16 D_003BB044;
 
 extern void *func_002CFEB8(s32 size);
+
 extern void func_002CFF98(void *p);
+
 extern void mdlBroadcastMasked();
+
 extern void func_00152000(f32 arg0, f32 arg1);
+
 extern void func_00217878(void *arg0, void *arg1);
+
 extern void mdlStorePrimaryVectorVU(void *work);
+
 extern void func_00217FB8(void *work);
+
 extern void mdlStoreTertiaryVectorVU(void *work);
+
 extern void mdlAddEntryFlagged(void *work, s32 arg1, s32 arg2);
+
 extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
+
 extern void *func_00217680(void *arg0, void *arg1);
+
 extern void *func_002183D0(void *arg);
+
 extern void *func_002183E0(void *arg);
+
+/* Callback table at D_0037E14C (0x28 bytes per entry). */
+typedef struct Cb3714C {
+    void (*cb)(void *arg);    /* 0x00 */
+    u8 pad4[8];               /* 0x04 */
+    void (*cbC)(void *, void *); /* 0x0C */
+    void (*cb10)(void *arg);  /* 0x10 */
+    void (*cb14)(void *arg);  /* 0x14 */
+    void (*cb18)(void *arg, void *extra);  /* 0x18 */
+    void (*cb1C)(void *arg);  /* 0x1C */
+    void (*cb20)(void *arg);  /* 0x20 */
+    u32 unk24;                /* 0x24 */
+} Cb3714C;
+
+extern Cb3714C D_00353714[];
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001624D0);
 
@@ -355,4 +403,3 @@ EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001632E0);
 
 INCLUDE_SDATA(const s32, "game/code_001624D0", D_003BB044);
-

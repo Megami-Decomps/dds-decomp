@@ -76,9 +76,16 @@ void sdfDestroyObjectList();
 
 extern void func_00328E48(void *allocation);
 
+typedef struct SdfFreeNode {
+    struct SdfFreeNode *next;
+    u8 pad04[8];
+    s32 allocation;
+} SdfFreeNode;
+
 typedef struct SdfFreeRoot {
-    u8 pad00[0x30];
-    void *workspace;
+    u8 pad00[0x28];
+    SdfFreeNode *lists[2]; /* 0x28 */
+    void *workspace;       /* 0x30 */
 } SdfFreeRoot;
 
 typedef struct SdfObjectList {
@@ -391,7 +398,11 @@ void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", sdfPrependIfMode1);
+s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
+    if (mode == 1) {
+        sdfPrependPacketList(list, packet);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D0F0);
 
@@ -1011,10 +1022,29 @@ void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", sdfFreeNodeLists);
+void sdfFreeNodeLists(SdfFreeRoot *root) {
+    SdfFreeNode **lists = root->lists;
+    s32 i = 0;
+    s32 end = 2;
+    do {
+        SdfFreeNode *node = *lists;
+        while (node != NULL) {
+            SdfFreeNode *next = node->next;
+            if (node->allocation != 0) {
+                func_003297C8(node->allocation);
+            } else {
+                func_00328E48(node);
+            }
+            node = next;
+        }
+        i++;
+        lists++;
+    } while (i != end);
+}
+
 
 void sdfReleaseFreeRoot(SdfFreeRoot *root) {
-    sdfFreeNodeLists();
+    sdfFreeNodeLists(root);
     func_00328E48(root->workspace);
     root->workspace = NULL;
     func_00328E48(root);

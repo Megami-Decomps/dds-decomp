@@ -219,9 +219,26 @@ s32 func_00292B90(s32 object) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292BB0);
+extern MenuPanelSelector *func_0026D098(s32);
+extern void func_00278F60(u32);
+extern void func_002790F0(s32, s32, u32);
+extern void func_00278E50(s32, s32, u32);
+void func_00292BB0(MenuPanelObject *object) {
+    s16 *record;
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292C58);
+    record = (s16 *)func_0026D098(8);
+    func_00278F60(object->selectionController);
+    func_002790F0((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
+}
+
+void func_00292C58(MenuPanelObject *object) {
+    u8 *base = (u8 *)object + 0x240;
+    s16 *record;
+
+    record = (s16 *)func_0026D098(0x71);
+    *(s16 **)(base + 0x560) = record;
+    func_00278E50((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);
 
@@ -268,7 +285,23 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293FD0);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294420);
+extern s32 func_003292A8(s32);
+extern void *sdfMemoryGetBlockAddress(s32);
+extern void *memset(void *, s32, u32);
+void func_00294420(void) {
+    s32 handle;
+    MenuPanelEntryPool *pool;
+
+    if (D_00437960 == 0) {
+        handle = func_003292A8(0xAC);
+        D_00437960 = sdfMemoryGetBlockAddress(handle);
+        memset(D_00437960, 0, 0xAC);
+        pool = (MenuPanelEntryPool *)D_00437960;
+        pool->entries = (MenuPanelEntry *)((u8 *)pool + 0xC);
+        pool->count = 0x14;
+        pool->allocation = handle;
+    }
+}
 
 void mnuReleasePanelEntryPool(void) {
     if (D_00437960 != (u32 *)0x0) {
@@ -277,7 +310,23 @@ void mnuReleasePanelEntryPool(void) {
     D_00437960 = (u32 *)0x0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002944B0);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+void func_002944B0(void) {
+    s32 i;
+    MenuPanelEntry *entry = ((MenuPanelEntryPool *)D_00437960)->entries;
+
+    for (i = 0; i < ((MenuPanelEntryPool *)D_00437960)->count; i++, entry++) {
+        if (entry->first != 0) {
+            if (entry->second == 0) {
+                sndSetSequenceVolumePan(entry->first, 0x7F, 0x3F);
+                entry->first = 0;
+            }
+            if (entry->second > 0) {
+                entry->second--;
+            }
+        }
+    }
+}
 
 MenuPanelEntry *mnuFindFreePanelEntry(void) {
     MenuPanelEntryPool *pool = (MenuPanelEntryPool *)D_00437960;

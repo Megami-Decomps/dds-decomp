@@ -336,7 +336,6 @@ INCLUDE_RODATA(const s32, "game/code_00250010", jtbl_00423410);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423428);
 
-
 s32 func_002508D0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
@@ -563,14 +562,14 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002514C8);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002515C8);
 
+extern u16 D_004372B0;
+extern u16 D_004372B2;
+
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423668);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423678);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423688);
-
-extern u16 D_004372B0;
-extern u16 D_004372B2;
 
 s32 func_002517E0(s32 list, s32 x, s32 y) {
     char text[32];
@@ -954,9 +953,9 @@ void evtSetRuntimeCommandValues(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     *(s32 *)(arg0 + 0x23EC) = arg3;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004241A0);
-
 extern char D_00437768[]; /* "CURRENT" */
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_004241A0);
 
 s32 func_00256898(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;

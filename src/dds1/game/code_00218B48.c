@@ -1518,10 +1518,6 @@ void func_0021FD50(s32 targetId, s32 sourceId) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFE8);
-
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFF8);
-
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB6C);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB70);

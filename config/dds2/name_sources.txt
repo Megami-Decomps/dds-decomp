@@ -924,4 +924,13 @@
 0x00347488	sdfPacDecodeResourceChunk	inferred	Incrementally decodes compressed input into the resource buffer and finalizes the resource slot when complete.
 0x00347520	sdfPacSkipResourceChunk	inferred	Consumes pending input without copying it, then checks the resource buffer and calls completion.
 0x00347D40	sdfActivateRequest	inferred	Stores a request word at offset four and sets its active byte at offset zero.
+0x00352B50	cos	inferred	fdlibm s_cos: |x|<=pi/4 calls __kernel_cos, quadrant switch after __ieee754_rem_pio2
+0x00352C78	sin	inferred	fdlibm s_sin: |x|<=pi/4 calls __kernel_sin(x,0,0)
+0x00353300	__ieee754_rem_pio2	inferred	argument reduction called by sin/cos for |x|>pi/4
+0x00354A00	__kernel_cos	inferred	two-argument kernel called by sin/cos
+0x00355828	__kernel_sin	inferred	three-argument kernel (iy in $6) called by sin/cos
 0x00356F90	fptodp	evidence	libgcc soft-float single-to-double helper; cc1 emits calls to it for float varargs (func_0021EC60 printf)
+0x00357230	dpadd	inferred	ee-gcc soft-double add libcall, beside fptodp/dptofp
+0x00357288	dpsub	inferred	soft-double subtract; fdlibm sin/cos return x-x through it for Inf/NaN
+0x003572F0	dpmul	inferred	soft-double multiply libcall
+0x00357890	dptofp	inferred	libgcc fp-bit double->float, follows fptodp; func_003269F0 wraps a double sqrt in it

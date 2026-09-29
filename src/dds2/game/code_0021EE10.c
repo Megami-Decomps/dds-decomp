@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 extern void *func_001E5DA8(void *, s32, s32);
 extern s64 btlStartTask(void *);
 
@@ -108,7 +109,36 @@ typedef struct BattleActionFlagState {
     u16 phase; /* 0x02 */
 } BattleActionFlagState;
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021EE10);
+extern void func_001E2758(ActionUnit *);
+extern void func_001E22D8(ActionUnit *, s32, s32, f32);
+void func_0021EE10(void) {
+    BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
+    u8 *state = scene->state;
+    ActionUnit *unit;
+
+    if (*(s8 *)(state + 1) != *(s8 *)state) {
+        state[1] = state[0];
+        unit = scene->units;
+        if (unit != 0) {
+            while (unit != 0) {
+                if (unit->flags & 1) {
+                    if (unit->flags & 0x400) {
+                        if (unit->mode == 0x115) {
+                            break;
+                        }
+                    }
+                }
+                unit = unit->next;
+            }
+            if (unit != 0) {
+                func_001E2758(unit);
+                *(s16 *)((u8 *)unit + 0xF8) = 0;
+                *(s16 *)((u8 *)unit + 0xFA) = 0;
+                func_001E22D8(unit, *(s32 *)((u8 *)unit + 0xFC), *(s32 *)((u8 *)unit + 0x100), *(f32 *)((u8 *)unit + 0x104));
+            }
+        }
+    }
+}
 
 void func_0021EEF8(u32 unused, u32 actor) {
     u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
@@ -144,9 +174,74 @@ s32 func_0021EFD8(ActionUnit *unit) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F040);
+extern u8 *D_00435E30;
+extern char D_0041AAC8[]; /* format string */
+extern char D_00436CF0[];
+extern s32 func_0035C860(char *, const char *, ...);
+void func_0021F040(s32 unit, u32 action, char *buffer) {
+    u32 value;
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F0E8);
+    if (action == 0x196) {
+        switch (*(s32 *)(unit + 0x38)) {
+        case 0x12A:
+            value = 1;
+            break;
+        case 0x12B:
+            value = 2;
+            break;
+        case 0x12C:
+            value = 5;
+            break;
+        case 0x12D:
+            value = 6;
+            break;
+        default:
+            return;
+        }
+        func_0035C860(buffer, D_0041AAC8, D_00436CF0, *(u16 *)(D_00435E30 + action * 32 + 4), value);
+    }
+}
+
+extern void func_001E3108(ActionUnit *, void *);
+extern void btlSetUnitPosition(ActionUnit *, void *);
+void func_0021F0E8(void) {
+    BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
+    ActionUnit *unit;
+    ActionUnit *lead = 0;
+    f32 shift;
+    f32 pos[4];
+
+    for (unit = scene->units; unit != 0; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->mode == 0x115) {
+                    lead = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (lead != 0) {
+        func_001E3108(lead, pos);
+        pos[2] = 200.0f;
+        shift = -pos[0];
+        pos[0] = 0;
+        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
+        btlSetUnitPosition(lead, pos);
+        for (unit = scene->units; unit != 0; unit = unit->next) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit != lead) {
+                        func_001E3108(unit, pos);
+                        pos[0] = pos[0] + shift;
+                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
+                        btlSetUnitPosition(unit, pos);
+                    }
+                }
+            }
+        }
+    }
+}
 
 s32 btlStartOtherMarkedUnitTasks(void) {
     ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
@@ -247,7 +342,34 @@ u32 func_0021F808(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F848);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220368);
+void func_00220368(void) {
+    BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
+    u8 *state = scene->state;
+    ActionUnit *unit;
+
+    if (state[1] != state[0]) {
+        state[1] = state[0];
+        unit = scene->units;
+        if (unit != 0) {
+            while (unit != 0) {
+                if (unit->flags & 1) {
+                    if (unit->flags & 0x400) {
+                        if (unit->mode == 0x11B) {
+                            break;
+                        }
+                    }
+                }
+                unit = unit->next;
+            }
+            if (unit != 0) {
+                func_001E2758(unit);
+                *(s16 *)((u8 *)unit + 0xF8) = 0;
+                *(s16 *)((u8 *)unit + 0xFA) = 0;
+                func_001E22D8(unit, *(s32 *)((u8 *)unit + 0xFC), *(s32 *)((u8 *)unit + 0x100), *(f32 *)((u8 *)unit + 0x104));
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220450);
 
@@ -265,7 +387,40 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002205C0);
+s32 func_002205C0(ActionUnit *unit, s32 action) {
+    u32 flags = unit->flags;
+
+    if ((flags & 0x400) == 0) {
+        return action;
+    }
+    if ((flags & 2) == 0) {
+        return action;
+    }
+    if (action == 1) {
+        if (func_00220918() == 1) {
+            return 0x11;
+        }
+    }
+    if (action == 0) {
+        if (func_00220918() == 1) {
+            return 0x10;
+        }
+    }
+    if (action == 0xA) {
+        if (func_00220918() == 1) {
+            return 0x12;
+        }
+    }
+    if (action == 0xD) {
+        return -1;
+    }
+    if (action < 0x15) {
+        if (action >= 0x13) {
+            return func_00220918() != 0 ? 0x14 : 0x13;
+        }
+    }
+    return action;
+}
 
 s32 btlIsSupportedActorAction(ActionUnit *actor, s32 action) {
     if ((actor->flags & 0x400) == 0) {
@@ -347,11 +502,48 @@ u32 btlTickAction19A(ActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220A78);
+extern s32 func_001B2430(ActionUnit *, s32);
+extern void func_001B5288(ActionUnit *, u32 *);
+s32 func_00220A78(ActionUnit *unit, u32 *entry) {
+    ActionUnit **state;
+
+    if (unit->flags & 0x400) {
+        state = (ActionUnit **)((BattleActionScene *)func_001AA6F8())->state;
+        entry[0x28 / 4] &= ~1;
+        entry[0x28 / 4] &= ~2;
+        if (func_001B2430(unit, 0)) {
+            if (*state != 0 && *state != unit) {
+                func_001B5288(unit, entry);
+            } else {
+                *state = unit;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220B20);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220C38);
+extern u8 *btlCreateScriptResourceTask(ActionUnit *, s32);
+extern u8 *sndCreateStationedSeTask(s32);
+void func_00220C38(ActionUnit *unit) {
+    BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
+    ActionUnit **slot = (ActionUnit **)scene->state;
+    u8 *task;
+    u8 *sound;
+
+    if (*slot != 0) {
+        task = btlCreateScriptResourceTask(*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
+        *(u64 *)(task + 0x40) = *(u64 *)(*(s32 *)((u8 *)unit + 0x18) + 0x108);
+        *(s32 *)(task + 0x28) = 0xE;
+        btlStartTask(task);
+        sound = sndCreateStationedSeTask(*(s32 *)((u8 *)scene + 0x208) + ((*slot)->mode == 0x10E ? 3 : 2));
+        sound[0] = 5;
+        *(u64 *)(sound + 8) = *(u64 *)(task + 0x38);
+        btlStartTask(sound);
+        *slot = 0;
+        *(u32 *)((u8 *)unit + 0xC) &= ~8;
+    }
+}
 
 u32 btlGetSelectedActorAction(void) {
     BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
@@ -402,7 +594,38 @@ f32 btlGetActionScaleFactor(ActionUnit *unit, ActionUnit *other) {
     return 1.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220F68);
+s32 func_00220F68(ActionUnit *unit) {
+    BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
+    ActionUnit *found;
+
+    if (unit == 0) {
+        found = scene->units;
+        if (found == 0) {
+            return -1;
+        }
+        while (found != 0) {
+            if (found->flags & 1) {
+                if (found->flags & 0x400) {
+                    if (found->mode == 0x116) {
+                        break;
+                    }
+                }
+            }
+            found = found->next;
+        }
+        if (found == 0) {
+            return -1;
+        }
+        return *(s32 *)((u8 *)found + 0xEC) == 0x10 ? 0x10 : -1;
+    }
+    if ((unit->flags & 0x400) == 0) {
+        return -1;
+    }
+    if (unit->mode != 0x116) {
+        return -1;
+    }
+    return *scene->state != 0 ? 0x10 : -1;
+}
 
 u32 func_00221060(ActionUnit *unit, u32 command) {
     if ((unit->flags & 0x400) == 0) {
@@ -554,7 +777,25 @@ void btlMarkSpecialActionUnit(ActionUnit *actor) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002218C8);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221988);
+extern void func_0020D128(const char *, ...);
+s32 func_00221988(ActionUnit *unit) {
+    f32 *state;
+    u8 *table;
+
+    if (*(u32 *)((u8 *)unit + 8) & 8) {
+        if (*(u32 *)(*(s32 *)((u8 *)unit + 0x18) + 0x110) & 0x400) {
+            state = (f32 *)((BattleActionScene *)func_001AA6F8())->state;
+            if (*(s32 *)((u8 *)unit + 0x24) == 0x19F) {
+                table = D_00435E44;
+                state[1] = state[1] * *(f32 *)(table + 0xC04);
+                if (*(f32 *)(table + 0xC08) < state[1]) {
+                    state[1] = *(f32 *)(table + 0xC08);
+                }
+                func_0020D128("btl:boss BRAHMA ratio = %f\n", state[1]);
+            }
+        }
+    }
+}
 
 f32 func_00221A30(ActionUnit *unit, u32 actor, u32 action, u32 mode) {
     f32 factor = 1.0f;
@@ -625,7 +866,21 @@ void func_00221E28(ActionUnit *unit, u32 group, f32 opacity) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221EA0);
+void func_00221EA0(ActionUnit *unit, u32 *entry) {
+    u8 *state;
+
+    if (unit->flags & 0x400) {
+        if (unit->mode != 0x121) {
+            state = ((BattleActionScene *)func_001AA6F8())->state;
+            entry[0x28 / 4] &= ~1;
+            entry[0x28 / 4] &= ~2;
+            if (func_001B2430(unit, 0)) {
+                func_001B5288(unit, entry);
+                state[8] = 1;
+            }
+        }
+    }
+}
 
 u32 func_00221F40(u32 unit, u32 actor, u32 action) {
     switch (action) {
@@ -652,7 +907,45 @@ u32 func_00221FE8(u32 unit, u32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222028);
+extern s32 btlFindUnitByActor(ActionUnit *);
+extern void fldAppendSceneGroupHandle(s32);
+extern void func_001E8030(s32, u32);
+s32 func_00222028(void) {
+    BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
+    ActionUnit *unit;
+    ActionUnit *found;
+    s32 handle;
+    s32 mode;
+
+    if (*(s8 *)(scene->state + 8) == 0) {
+        return -1;
+    }
+    found = 0;
+    for (unit = scene->units; unit != 0 && found == 0; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                mode = unit->mode;
+                if (mode < 0x122) {
+                    if (mode >= 0x11D) {
+                        found = unit;
+                    }
+                }
+            }
+        }
+    }
+    if (found == 0) {
+        return -1;
+    }
+    if (found->flags & 0xE0) {
+        return -1;
+    }
+    handle = btlFindUnitByActor(found);
+    fldAppendSceneGroupHandle(handle);
+    *(s32 *)(handle + 0x20) = 0x11;
+    *(u32 *)(handle + 0xC) |= 8;
+    func_001E8030(*(s32 *)(handle + 0x60), *(u32 *)(handle + 0x18));
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222100);
 
@@ -711,13 +1004,45 @@ void btlUnitSetCameraOffset(u32 unit) {
     *(u32 *)(unit + 0x110) |= 0x41;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222768);
+extern s32 effMiscRandMod(s32, s32);
+extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
+extern char D_0041ACC0[];
+extern void func_001E96C8(u32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+void func_00222768(u32 unit) {
+    switch (effMiscRandMod(0, 2)) {
+    case 0:
+        func_0020D128(D_0041ACA8);
+        func_001E9A88();
+        func_001E96C8(unit, -1823.5f, -270.6f, -1359.2f, -0.137f, -0.247f, 0.027f, 0.95f, -1302.8f,
+                      -42.7f, -2059.2f, -0.123f, -0.148f, 0.011f, 0.972f, 40.0f, 30.0f);
+        break;
+    case 1:
+        func_0020D128(D_0041ACC0);
+        func_001E9A88();
+        func_001E96C8(unit, 149.7f, -65.4f, -1514.7f, -0.168f, 0.02f, -0.011f, 0.976f, 1438.0f,
+                      -482.6f, -1234.3f, -0.099f, 0.195f, -0.027f, 0.966f, 40.0f, 30.0f);
+        break;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0021EE10", D_0041ACA8);
 
 INCLUDE_RODATA(const s32, "game/code_0021EE10", D_0041ACC0);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002228C0);
+void func_002228C0(u32 unit) {
+    switch (effMiscRandMod(0, 2)) {
+    case 0:
+        func_0020D128("BRAHMA:ALL-0 ++++\n");
+        func_001E96C8(unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
+                      -17.3f, -1980.7f, 0.098f, -0.114f, 0.02f, -0.979f, 40.0f, 30.0f);
+        break;
+    case 1:
+        func_0020D128("BRAHMA:ALL-1 ++++\n");
+        func_001E96C8(unit, -803.2f, -117.2f, -1426.5f, -0.072f, -0.187f, 0.001f, 0.971f, -738.1f,
+                      -78.6f, -1749.6f, -0.1f, -0.138f, 0.001f, 0.977f, 40.0f, 20.0f);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222A08);
 
@@ -739,9 +1064,48 @@ u32 func_00222D18(ActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222DA8);
+extern void func_00217378(s32, s32);
+s32 func_00222DA8(s32 object) {
+    s32 state = *(s32 *)(object + 0x114);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222E58);
+    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
+        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
+            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
+            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
+                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217378(object, object);
+                return 1;
+            }
+        }
+    } else {
+        func_001E9A88();
+        func_002228C0(object);
+        return 1;
+    }
+    return 0;
+}
+
+extern void func_00217470(s32, s32, f32, f32, f32);
+s32 func_00222E58(s32 object) {
+    s32 state = *(s32 *)(object + 0x114);
+
+    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
+        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
+            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
+            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
+                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217470(object, object, -0.8f, 0.5f, 35.0f);
+                *(f32 *)(object + 0x20) += 500.0f;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222F18);
 
@@ -751,11 +1115,71 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223350);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223BD8);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223D10);
+s32 func_00223D10(ActionUnit *unit) {
+    u32 flags = *(u16 *)(D_00435E30 + unit->action * 32 + 0x1C);
+
+    if (flags & 0x1000) {
+        func_001E9A88();
+        /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
+        if ((flags & 0x10) == 0) {
+            func_002228C0((u32)unit);
+        } else {
+            func_002228C0((u32)unit);
+        }
+        return 1;
+    }
+    if (flags & 0x2000) {
+        if (func_001E8058(*(u32 *)(unit->stateFlags + 0x60)) == 1) {
+            func_001E9A88();
+            btlUnitSetCameraOffset((u32)unit);
+            return 1;
+        }
+        func_001E9A88();
+        func_002228C0((u32)unit);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223DD8);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223ED0);
+extern u8 *btlCreateEffObjB(s32, s32);
+extern u8 *btlCreateEffObjD(s32, s32);
+extern s64 func_001A9920(void);
+void func_00223ED0(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
+    s32 *state;
+    u8 *task;
+    s32 kind;
+    s64 value;
+
+    if (action == 0x19F) {
+        state = *(s32 **)((u8 *)func_001AA6F8() + 0x718);
+        switch (state[3]) {
+        case 0:
+            kind = 0xF8;
+            break;
+        case 1:
+            kind = 0xFA;
+            break;
+        default:
+            kind = 0xFC;
+            break;
+        }
+        task = btlCreateEffObjB(*(s32 *)((u8 *)unit + 0x18), kind);
+        task[0] = 4;
+        *(u64 *)(task + 8) = owner;
+        *(s64 *)(task + 0x40) = func_001A9920();
+        btlStartTask(task);
+        task = btlCreateEffObjD(*(s32 *)((u8 *)unit + 0x18), 0x19F);
+        task[0] = 4;
+        *(u64 *)(task + 8) = owner;
+        value = func_001A9920();
+        *(s32 *)(task + 0x28) = 0x26;
+        *(s64 *)(task + 0x40) = value;
+        btlStartTask(task);
+        state[3] += 1;
+    }
+}
 
 u32 func_00223FB0(ActionUnit *unit) {
     if (unit->action == 0x10b) {
@@ -816,9 +1240,47 @@ u32 func_002240F8(ActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224188);
+s32 func_00224188(s32 object) {
+    s32 state = *(s32 *)(object + 0x114);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224238);
+    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
+        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
+            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
+            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
+                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217378(object, object);
+                return 1;
+            }
+        }
+    } else {
+        func_001E9A88();
+        func_002240C0(object);
+        return 1;
+    }
+    return 0;
+}
+
+s32 func_00224238(s32 object) {
+    s32 state = *(s32 *)(object + 0x114);
+
+    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
+        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
+            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
+            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
+                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217470(object, object, -0.8f, 0.225f, 35.0f);
+                *(f32 *)(object + 0x20) += 500.0f;
+                func_001E88A8(object);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002242F8);
 
@@ -832,7 +1294,31 @@ s64 btlUnitWrapB(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002247D0);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224D28);
+s32 func_00224D28(ActionUnit *unit) {
+    u32 flags = *(u16 *)(D_00435E30 + unit->action * 32 + 0x1C);
+
+    if (flags & 0x1000) {
+        func_001E9A88();
+        /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
+        if ((flags & 0x10) == 0) {
+            func_002240C0((u32)unit);
+        } else {
+            func_002240C0((u32)unit);
+        }
+        return 1;
+    }
+    if (flags & 0x2000) {
+        if (func_001E8058(*(u32 *)(unit->stateFlags + 0x60)) == 1) {
+            func_001E9A88();
+            func_00224020((u32)unit);
+            return 1;
+        }
+        func_001E9A88();
+        func_002240C0((u32)unit);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224DF0);
 

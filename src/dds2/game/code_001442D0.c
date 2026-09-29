@@ -694,13 +694,13 @@ void fldPlayPendingSounds(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001447A0);
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_004136C0);
-
 extern s32 D_0039A0BC[];
 extern s32 D_0039A0C0[];
 extern s32 D_0039A0C4[];
 extern s32 D_0039A0C8[];
 extern s32 D_0039A0D0[];
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_004136C0);
 
 s32 func_00144B50(s32 id) {
     s32 result;
@@ -1624,16 +1624,6 @@ void func_0014B9E0(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413800);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413818);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413830);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
-
 extern void *func_002C7FF0(const char *);
 extern void func_002C81D0(void *);
 extern void func_002C7CE8(void *);
@@ -1649,6 +1639,16 @@ typedef struct FldLbFile {
     u8 unk00[0x60];
     FldLbNode *nodes; /* 0x60 */
 } FldLbFile;
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413800);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413818);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413830);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
 void func_0014BA60(void) {
     FldLbFile *lb;
@@ -1985,13 +1985,13 @@ void func_0014F138(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
-
 extern s32 D_003898B4[];
 extern s32 D_00436378;
 extern void func_0014EDB8(void);
 extern void func_0014F138(void);
 extern void func_003297C8(s32);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 
 void func_0014F168(s32 id) {
     char path[0x20];
@@ -3389,8 +3389,6 @@ s32 fldSetFlagFromWorld2(void) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
-
 typedef struct FldSceneParamRow {
     s32 unk0;
     s16 unk4;
@@ -3400,6 +3398,8 @@ typedef struct FldSceneParamRow {
 } FldSceneParamRow; /* 0x10 bytes */
 
 extern FldSceneParamRow D_003A8EB0[];
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
 
 s32 fldCmdPushSceneParam(void) {
     s32 room;

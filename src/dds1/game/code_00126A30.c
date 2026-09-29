@@ -2,6 +2,19 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
+extern u8 D_00337D00[];
+typedef struct FldNpcMotion {
+    s32 unk0;
+    u8 unk4[0x10];
+    u8 unk14[0x10];
+    u8 unk24[0x10];
+    u8 unk34[0x10];
+    s32 unk44;
+} FldNpcMotion; /* 0x48 bytes */
+extern FldNpcMotion D_00336A60[];
+extern void *D_003BAE44;
+extern void *D_003BAE48;
+
 typedef struct {
     u32 unk0[4];
     void (*open)(void *, u32);
@@ -19,6 +32,14 @@ static inline s32 fldTestBits(u32 flags, u32 mask) {
 }
 
 extern void func_00127028(u32, u32);
+extern s32 func_001462D0(void);
+extern s32 D_0032E400[];
+extern void func_00131218(void);
+extern void func_0012FC20(void);
+extern void func_0012F578(void);
+extern void func_0012EEA0(s16, s16);
+extern void func_0012FF48(void);
+extern void func_0012EA50(s16, s32, f32);
 extern s32 *func_00123DD0();
 extern void dds3SetCameraValue(s32, f32);
 extern void fldToggleWorldNodeState(s32);
@@ -1682,7 +1703,37 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FE30);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FF48);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131098);
+s32 func_00131098(void) {
+    s16 node;
+
+    if (D_0032E570[0] != 0) {
+        return 0;
+    }
+    if (func_001462D0() != 0) {
+        return 0;
+    }
+    if (func_00125DF8(0x40) == 0) {
+        if (D_0032E3B0[20] == 1 || D_0032E3B0[20] == 3) {
+            func_00131218();
+        }
+        func_0012FC20();
+        fldUpdateCameraTarget();
+        func_0012F578();
+        node = *(s16 *)(D_003BAB38 + 0x12);
+        func_0012EEA0(node, node);
+        if (D_0032E3B0[70] == 1) {
+            func_0012EA50(0, 0, 6.0f);
+        }
+        return 0;
+    }
+    if (D_0032E400[0] == 1) {
+        func_00131218();
+        func_0012FF48();
+    } else {
+        func_0012FF48();
+    }
+    return 0;
+}
 
 u8 func_001311A0(void) {
     if (D_0032E3B0[0x5F] == 0) {
@@ -2026,11 +2077,234 @@ void fldInitializeDisplayPointerTable(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00133CA0);
+typedef struct {
+    u8 type;
+    u8 pad1[3];
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 pad10[0xC];
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+    f32 unk7C;
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    u8 pad8C[0x54];
+} FldLightSet; /* 0xE0 bytes */
+extern void *D_003BAD60;
+extern s32 func_001082D8(s32, void *);
+extern s32 func_00107FD8(s32, s32, void *);
+extern s32 func_00108218(s32, void *);
+extern s32 func_001080D8(s32, s32, void *);
+extern s32 evtUnk8360SetVec(s32, f32, f32, f32, f32);
+extern void func_00132B60(u32);
+void func_00133CA0(void) {
+    FldLightSet *light = &((FldLightSet *)D_003BAD60)[D_003BAD98];
+    f32 vec[4];
+    f32 dir[4];
+    s32 area;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00133EC0);
+    area = light->type;
+    D_0032E570[13] = area;
+    D_0032E570[14] = light->unk4;
+    value = light->unk8;
+    D_0032E570[15] = value;
+    D_0032E570[16] = light->unkC;
+    fldSetFadeTarget(area, value, 0);
+    func_00132B60(D_0032E570[16]);
+    vec[0] = light->unk2C * 0.00390625f;
+    vec[1] = light->unk30 * 0.00390625f;
+    vec[2] = light->unk34 * 0.00390625f;
+    vec[3] = 0;
+    func_001082D8(0, vec);
+    evtUnk8360SetVec(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    dir[0] = light->unk44;
+    dir[1] = light->unk48;
+    dir[2] = light->unk4C;
+    dir[3] = 0;
+    func_001080D8(0, 0, dir);
+    vec[0] = light->unk38;
+    vec[1] = light->unk3C;
+    vec[2] = light->unk40;
+    vec[3] = 0;
+    func_00107FD8(0, 0, vec);
+    dir[0] = light->unk5C;
+    dir[1] = light->unk60;
+    dir[2] = light->unk64;
+    dir[3] = 0;
+    func_001080D8(0, 1, dir);
+    vec[0] = light->unk50;
+    vec[1] = light->unk54;
+    vec[2] = light->unk58;
+    vec[3] = 0;
+    func_00107FD8(0, 1, vec);
+    dir[0] = light->unk74;
+    dir[1] = light->unk78;
+    dir[2] = light->unk7C;
+    dir[3] = 0;
+    func_001080D8(0, 2, dir);
+    vec[0] = light->unk68;
+    vec[1] = light->unk6C;
+    vec[2] = light->unk70;
+    vec[3] = 0;
+    func_00107FD8(0, 2, vec);
+    vec[0] = light->unk80;
+    vec[1] = light->unk84;
+    vec[2] = light->unk88;
+    vec[3] = 1.0f;
+    func_00108218(0, vec);
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001340E0);
+void func_00133EC0(s32 index) {
+    FldLightSet *light = &((FldLightSet *)D_003BAD5C)[index];
+    f32 vec[4];
+    f32 dir[4];
+    s32 area;
+    s32 value;
+
+    D_003BAD98 = index;
+    area = light->type;
+    D_0032E570[13] = area;
+    D_0032E570[14] = light->unk4;
+    value = light->unk8;
+    D_0032E570[15] = value;
+    D_0032E570[16] = light->unkC;
+    fldSetFadeTarget(area, value, 0);
+    func_00132B60(D_0032E570[16]);
+    vec[0] = light->unk2C * 0.00390625f;
+    vec[1] = light->unk30 * 0.00390625f;
+    vec[2] = light->unk34 * 0.00390625f;
+    vec[3] = 0;
+    func_001082D8(0, vec);
+    evtUnk8360SetVec(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    dir[0] = light->unk44;
+    dir[1] = light->unk48;
+    dir[2] = light->unk4C;
+    dir[3] = 0;
+    func_001080D8(0, 0, dir);
+    vec[0] = light->unk38;
+    vec[1] = light->unk3C;
+    vec[2] = light->unk40;
+    vec[3] = 0;
+    func_00107FD8(0, 0, vec);
+    dir[0] = light->unk5C;
+    dir[1] = light->unk60;
+    dir[2] = light->unk64;
+    dir[3] = 0;
+    func_001080D8(0, 1, dir);
+    vec[0] = light->unk50;
+    vec[1] = light->unk54;
+    vec[2] = light->unk58;
+    vec[3] = 0;
+    func_00107FD8(0, 1, vec);
+    dir[0] = light->unk74;
+    dir[1] = light->unk78;
+    dir[2] = light->unk7C;
+    dir[3] = 0;
+    func_001080D8(0, 2, dir);
+    vec[0] = light->unk68;
+    vec[1] = light->unk6C;
+    vec[2] = light->unk70;
+    vec[3] = 0;
+    func_00107FD8(0, 2, vec);
+    vec[0] = light->unk80;
+    vec[1] = light->unk84;
+    vec[2] = light->unk88;
+    vec[3] = 1.0f;
+    func_00108218(0, vec);
+}
+
+typedef struct FldColorParams {
+    s32 enabled;
+    s32 unk4;
+    s32 mode;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 unk18;
+    s32 unk1C;
+} FldColorParams;
+typedef struct FldCameraSetting {
+    s32 unk0;
+    FldColorParams color;
+    u8 pad24[0x30];
+} FldCameraSetting; /* 0x54 bytes */
+typedef struct FldFadeColor {
+    u8 pad0[4];
+    s32 colorA;
+    s32 colorB;
+    u8 padC[0x18];
+    s32 unk24;
+    s32 unk28;
+    u8 pad2C[0xC];
+    s32 unk38;
+    f32 unk3C;
+} FldFadeColor;
+extern FldFadeColor D_003C9240[];
+extern FldCameraSetting *D_003BAD64;
+extern FldCameraSetting D_003C9280[];
+extern u32 func_0029CE50(const void *);
+extern void func_0029CE80(s32);
+void func_001340E0(s32 enable) {
+    FldCameraSetting *setting;
+    FldColorParams *color;
+
+    if (D_003BAD6C == 0 && enable != 0) {
+        if (D_003BAD68 != 0) {
+            func_0029CE80(D_003BAD68);
+        }
+        setting = D_003BAD64;
+        D_003BAD68 = 0;
+        color = &setting->color;
+        if (color->enabled != 0) {
+            D_003C9240->colorB = D_003C9240->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            D_003C9240->unk24 = color->unk18;
+            switch (color->mode) {
+            case 0:
+                D_003C9240->unk28 = 1;
+                break;
+            case 1:
+                D_003C9240->unk28 = 2;
+                break;
+            default:
+                D_003C9240->unk28 = 3;
+                break;
+            }
+            D_003C9240->unk38 = color->unk4;
+            D_003C9240->unk3C = color->unk1C;
+            D_003BAD68 = func_0029CE50(D_003C9240);
+            setting = D_003BAD64;
+        }
+    } else {
+        setting = D_003BAD64;
+    }
+    *D_003C9280 = *setting;
+    D_003BAD6C = enable;
+}
 
 extern s32 D_003BADE0;
 s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
@@ -2057,11 +2331,8 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 
 extern char D_003A0100[];
 extern u32 D_003BD7C8;
-extern u32 D_003BAD64;
-extern u8 D_003C9240[];
 extern u32 func_002EB028(const char *, u32 *, s32);
-extern u32 func_0029CE50(const void *);
-extern void func_00134E10(u32);
+extern void func_00134E10(FldCameraSetting *);
 
 void func_00134C68(void) {
     D_003BD7C4 = func_002EB028(D_003A0100, &D_003BD7C8, 0);
@@ -2091,9 +2362,35 @@ void func_00134CF0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00134D38);
+void func_00134D38(FldCameraSetting *destination) {
+    *destination = *D_003C9280;
+}
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00134E10);
+extern void itfCopyColorFields(s32, void *);
+void func_00134E10(FldCameraSetting *setting) {
+    FldColorParams *color = &setting->color;
+
+    if (color->enabled != 0) {
+        D_003C9240->colorB = D_003C9240->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+        D_003C9240->unk24 = color->unk18;
+        switch (color->mode) {
+        case 0:
+            D_003C9240->unk28 = 1;
+            break;
+        case 1:
+            D_003C9240->unk28 = 2;
+            break;
+        default:
+            D_003C9240->unk28 = 3;
+            break;
+        }
+        D_003C9240->unk38 = color->unk4;
+        D_003C9240->unk3C = color->unk1C;
+        itfCopyColorFields(D_003BAD68, D_003C9240);
+    }
+    *D_003C9280 = *setting;
+}
+
 
 void fldAllocateRecordStorage(void) {
     u8 *temp_v0 = func_002D03F8(0x72000);
@@ -2472,13 +2769,141 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D6D0);
+extern s32 mdlFlagTest(s32);
+typedef struct FldAreaState {
+    u8 pad0[0x14];
+    s32 unk14;
+    u8 pad18[0xEC];
+    s16 unk104;
+} FldAreaState;
+extern u8 D_003369B0[];
+extern u8 D_003369C0[];
+extern u8 D_003369D0[];
+extern u8 D_003369E0[];
+extern u8 D_00336A00[];
+extern u8 D_00336A10[];
+extern u8 D_00336A30[];
+extern u8 D_00336A40[];
+extern u8 D_00336A50[];
+extern s32 D_003BAE6C;
+u8 *func_0013D6D0(const char *name) {
+    s32 i = 0;
+    u8 *entry;
+    s16 flag;
+    s16 sub;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D8D8);
+    if (name == 0) {
+        return 0;
+    }
+    do {
+        entry = D_00337D00 + i * 108;
+        flag = *(s16 *)(entry + 2);
+        if ((flag == 0 || mdlFlagTest(flag) != 0)
+            && (((FldAreaState *)D_0032E3B0)->unk104 == 0 || !(entry[0x31] & 4))
+            && *(s16 *)(entry + 4) == ((FldAreaState *)D_0032E3B0)->unk14 + 1
+            && strcmp(name, (char *)(entry + 6)) == 0) {
+            switch (*(s8 *)entry) {
+            case 1:
+                if (*(s8 *)(entry + 0x30) == 0) {
+                    sub = *(s16 *)(entry + 0x32);
+                    if (sub != 0) {
+                        if (sub == 1) {
+                            D_003BAE6C = 6;
+                            return D_00336A10;
+                        }
+                    }
+                }
+                D_003BAE6C = 0;
+                return D_003369B0;
+            case 2:
+                D_003BAE6C = 1;
+                return D_003369C0;
+            case 3:
+                D_003BAE6C = 2;
+                return D_003369D0;
+            case 4:
+                D_003BAE6C = 3;
+                return D_003369E0;
+            case 5:
+                D_003BAE6C = 5;
+                return D_00336A00;
+            case 10:
+                D_003BAE6C = 8;
+                return D_00336A30;
+            case 11:
+                D_003BAE6C = 9;
+                return D_00336A40;
+            case 12:
+                D_003BAE6C = 10;
+                return D_00336A50;
+            }
+        }
+        i++;
+    } while (i < 0x100);
+    D_003BAE6C = -1;
+    return 0;
+}
+
+u8 *func_0013D8D8(const char *name) {
+    s32 i = 0;
+    u8 *entry;
+    s16 flag;
+    s16 sub;
+
+    if (name == 0) {
+        return 0;
+    }
+    do {
+        entry = D_00337D00 + i * 108;
+        flag = *(s16 *)(entry + 2);
+        if ((flag == 0 || mdlFlagTest(flag) != 0)
+            && (((FldAreaState *)D_0032E3B0)->unk104 == 0 || !(entry[0x31] & 4))
+            && *(s16 *)(entry + 4) == ((FldAreaState *)D_0032E3B0)->unk14 + 1
+            && strcmp(name, (char *)(entry + 6)) == 0) {
+            D_003BAE64 = i;
+            switch (*(s8 *)entry) {
+            case 1:
+                if (*(s8 *)(entry + 0x30) == 0) {
+                    sub = *(s16 *)(entry + 0x32);
+                    if (sub != 0) {
+                        if (sub == 1) {
+                            D_003BAE68 = 6;
+                            return D_00336A10;
+                        }
+                    }
+                }
+                D_003BAE68 = 0;
+                return D_003369B0;
+            case 2:
+                D_003BAE68 = 1;
+                return D_003369C0;
+            case 3:
+                D_003BAE68 = 2;
+                return D_003369D0;
+            case 4:
+                D_003BAE68 = 3;
+                return D_003369E0;
+            case 5:
+                D_003BAE68 = 5;
+                return D_00336A00;
+            case 10:
+                D_003BAE68 = 0;
+                return D_00336A30;
+            case 11:
+                D_003BAE68 = 0;
+                return D_00336A40;
+            case 12:
+                D_003BAE68 = 0;
+                return D_00336A50;
+            }
+        }
+        i++;
+    } while (i < 0x100);
+    return 0;
+}
 
 extern s32 D_003BAB40;
 extern s32 D_0032E3C4[];
-extern u8 D_00337D00[];
 extern u8 D_00336A30[];
 u8 *func_0013DAC0(void) {
     s32 index = D_003BAB40;
@@ -2512,7 +2937,64 @@ s32 func_0013DB58(s32 arg0) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DC08);
+extern s32 func_0010D6A0(void);
+extern void fldPlayFieldSeVolumePan(s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeSetRGB(s32, s32, s32);
+extern void func_00140AB8(s32);
+extern u32 D_003CE3E0[][23];
+extern s32 D_0032E530[];
+void func_0013DC08(s32 arg0) {
+    s32 index;
+    s32 kind;
+    s32 record;
+    u8 *entry;
+
+    if (arg0 != 0) {
+        record = fldGetTaskRecordValue(*(u32 *)(func_0010D6A0() + 0xE4));
+        if (record == 0) {
+            return;
+        }
+        if (func_0013D8D8((const char *)record) == 0) {
+            return;
+        }
+    }
+    index = D_003BAE64;
+    entry = D_00337D00 + index * 108;
+    kind = *(s8 *)entry;
+    if (kind == 1) {
+        if (*(s16 *)(entry + 4) == D_0032E3C4[0] + 1) {
+            fldPlayFieldSeVolumePan(*(s16 *)(entry + 0x16));
+            func_00140AB8(D_003CE3E0[index][1]);
+            return;
+        }
+    } else if (kind == 2) {
+        if (*(s16 *)(entry + 4) == D_0032E3B0[5] + 1) {
+            D_0032E3B0[94] = 1;
+            *(f32 *)&D_0032E3B0[93] = *(f32 *)&D_003CE3E0[index][11];
+            if (*(s16 *)(entry + 0x12) == 1) {
+                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
+                return;
+            }
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            return;
+        }
+    } else if (kind == 3) {
+        kwlnFadeSetRGB(0, 0, 0);
+        return;
+    } else if (kind == 5) {
+        if (*(s16 *)(entry + 0x12) == 0) {
+            D_0032E530[0] = 0x64;
+        } else {
+            D_0032E530[0] = -0x64;
+        }
+    } else if (kind == 10) {
+    } else if (kind == 11) {
+    } else if (kind == 12) {
+    } else if (kind == 4) {
+        func_00131660();
+    }
+}
 
 extern s32 func_00110ED0(u64, s32, void *);
 extern void func_001109B8(u64, s32);
@@ -2626,17 +3108,6 @@ s32 fldGetActorStat1(u32 kind) {
     return 0;
 }
 
-typedef struct FldNpcMotion {
-    s32 unk0;
-    u8 unk4[0x10];
-    u8 unk14[0x10];
-    u8 unk24[0x10];
-    u8 unk34[0x10];
-    s32 unk44;
-} FldNpcMotion; /* 0x48 bytes */
-extern FldNpcMotion D_00336A60[];
-extern void *D_003BAE44;
-extern void *D_003BAE48;
 s32 fldGetActorMotionEntry(u32 kind) {
     u8 *entry = D_00337D00 + D_003BAE64 * 108;
     s16 index = *(s16 *)(entry + 0x12);

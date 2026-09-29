@@ -419,7 +419,31 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00268090);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002680E0);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268128);
+typedef struct MenuFadeHost {
+    u8 pad00[0x84];
+    s32 reduced;      /* 0x84 */
+    u8 pad88[0xCC];
+    s32 fadeColor;    /* 0x154 */
+} MenuFadeHost;
+
+extern void func_00342538(s32);
+extern void func_003425B0(void);
+extern void func_00342580(s32);
+extern void func_003425D8(void);
+
+void func_00268128(s32 mode, MenuFadeHost *host) {
+    if (mode == 0) {
+        if (host->reduced == 0) {
+            func_00342538(host->fadeColor);
+        } else {
+            func_003425B0();
+        }
+    } else if (host->reduced == 0) {
+        func_00342580(host->fadeColor);
+    } else {
+        func_003425D8();
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E98);
 
@@ -467,11 +491,24 @@ s32 fldPollSceneState(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002684F0);
+static inline s64 menuSetHandler(s32 context, u64 mode, s32 callback) {
+    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
+}
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268550);
+s64 func_002684F0(s32 callback) {
+    s32 context = func_00101958();
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268588);
+    func_002C42B0((s32 *)(context + 0x54), D_003CE944);
+    return menuSetHandler(context, 0, callback);
+}
+
+s64 func_00268550(s32 callback) {
+    return menuSetHandler(func_00101958(), 1, callback);
+}
+
+s64 func_00268588(s32 callback) {
+    return menuSetHandler(func_00101958(), 2, callback);
+}
 
 s32 func_002685C0(void) {
     s32 temp_v0 = kwlnFadeIsActive();
@@ -558,7 +595,27 @@ u8 func_00268C08(SceneFrameOwner *scene) {
     return scene->frameTable->records[index].unk14;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268C48);
+typedef struct MenuEffHost {
+    u8 pad00[0x64];
+    s32 batch;        /* 0x64 */
+    u8 pad68[0x40];
+    s32 effectA;      /* 0xA8 */
+    u8 padAC[8];
+    s32 effectB;      /* 0xB4 */
+} MenuEffHost;
+
+extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
+
+void func_00268C48(s32 mode, MenuEffHost *host) {
+    switch (mode) {
+    case 1:
+        effConfigureWithDefaultSetting(host->batch, 6, host->effectA, 0, 0, 2);
+        return;
+    case 2:
+        effConfigureWithDefaultSetting(host->batch, 6, host->effectB, 0, 0, 2);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268CC0);
 

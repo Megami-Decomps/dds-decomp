@@ -32,3 +32,4 @@ game/code_0028FD30  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no
 game/code_0031B188  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_0031F0E8  -fno-optimize-sibling-calls  # 8 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_00321500  -fno-optimize-sibling-calls  # 10 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
+game/code_003283E0  -fno-optimize-sibling-calls  # twin of DDS1 game/code_002CF530 (same flag); sdfFreeMemoryFromEitherHeap, func_00328470, sdfFreeMemorySlotFromEitherHeap, func_003283E0 match only with it (check_unit --cflags)

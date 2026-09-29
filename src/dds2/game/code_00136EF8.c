@@ -817,11 +817,11 @@ s32 fldGetActorStat0(s32 mode) {
     return 0;
 }
 
+extern s32 D_003897C0[];
+
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
-
-extern s32 D_003897C0[];
 
 s32 func_001421C0(u32 mode) {
     FldActorEntry *actor = (FldActorEntry *)D_003932A0 + D_004361F4;

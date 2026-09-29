@@ -110,6 +110,36 @@ extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void func_002CF7B8(s32);
 extern s32 func_0030B5D0(s32);
+extern u64 func_002EAF70(u64, u32 *, u64, u64);
+
+extern s32 func_002D9FA8(s32);
+
+extern void func_002DA058(s32, u64);
+
+typedef struct SdfStreamNode {
+    struct SdfStreamNode *prev;
+    struct SdfStreamNode *next;
+    u8 pad8[5];
+    u8 queued;
+} SdfStreamNode;
+
+extern SdfStreamNode *D_003BDAAC;
+
+extern SdfStreamNode *D_003BDAB0;
+
+extern void func_002D1FF0(s32, s32);
+
+extern void func_002EB650();
+
+typedef struct SdfStreamParams {
+    u8 mode;
+    u8 param1;
+    u8 param2;
+    u8 param3;
+} SdfStreamParams;
+
+extern s32 sdfTexGetPrimaryResourceWord();
+
 void func_002E9708(void) {
     func_002E87A8(0x180, 0, 0, 0);
 }
@@ -414,7 +444,9 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAEB8);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAF70);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB028);
+u64 func_002EB028(u64 arg0, u32 *info, u64 arg2) {
+    return func_002EAF70(arg0, info, arg2, 0);
+}
 
 u64 func_002EB040(u64 name) {
     u64 handle;
@@ -427,7 +459,21 @@ u64 func_002EB040(u64 name) {
     return resource;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB090);
+u64 func_002EB090(u32 resource) {
+    s32 i = 0;
+    s32 count = *(s32 *)(resource + 0x10);
+    s32 handle = func_002D9FA8(count);
+    s32 *entry;
+    if (count != i) {
+        entry = (s32 *)(resource + 0x14);
+        do {
+            i++;
+            func_002DA058(handle, func_002D3288(resource + *entry));
+            entry++;
+        } while (i != count);
+    }
+    return handle;
+}
 
 u64 func_002EB118(u64 name) {
     u64 handle;
@@ -472,9 +518,54 @@ u64 func_002EB230(u64 arg0, s32 *out) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", sdfRelocatePackedResourceWords);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB360);
+void func_002EB360(SdfStreamNode *node, s32 inInterrupt) {
+    s32 interruptsEnabled = 0;
+    SdfStreamNode *prev;
+    SdfStreamNode *next;
+    if (inInterrupt == 0) {
+        interruptsEnabled = func_00312C08();
+    }
+    if (node->queued != 0) {
+        prev = node->prev;
+        next = node->next;
+        if (prev == 0) {
+            D_003BDAAC = next;
+        } else {
+            prev->next = next;
+        }
+        if (next == 0) {
+            D_003BDAB0 = prev;
+        } else {
+            next->prev = prev;
+        }
+        node->queued = 0;
+    }
+    if (inInterrupt == 0 && interruptsEnabled != 0) {
+        EIntr();
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB3F0);
+void func_002EB3F0(SdfStreamNode *node, s32 inInterrupt) {
+    s32 interruptsEnabled = 0;
+    if (inInterrupt == 0) {
+        interruptsEnabled = func_00312C08();
+    }
+    if (node->queued != 0) {
+        func_002EB360(node, 1);
+    }
+    node->queued = 1;
+    if (D_003BDAB0 == 0) {
+        D_003BDAAC = node;
+    } else {
+        D_003BDAB0->next = node;
+    }
+    node->prev = D_003BDAB0;
+    node->next = 0;
+    D_003BDAB0 = node;
+    if (inInterrupt == 0 && interruptsEnabled != 0) {
+        EIntr();
+    }
+}
 
 void sdfSoundAppendNode(SoundNode *node) {
     SoundNode **tail = &D_003BDA98;
@@ -624,7 +715,20 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
     func_002EC230(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", sdfSubmitBufferedPlayback);
+s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
+    u32 *selectedBuffer;
+    if (state->pending == 0) {
+        return 0;
+    }
+    /* Equivalent to &state->buffers[state->bufferIndex]; index-first arithmetic matches retail. */
+    selectedBuffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
+    if (*selectedBuffer == 0) {
+        func_002EB650();
+    }
+    func_002D1FF0(*selectedBuffer, *selectedBuffer + state->bufferSize - 0x10);
+    sdfAdvanceBufferedPlayback(state);
+    return 1;
+}
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
 
 void sdfSoundInitAndAppendNode(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s32 value) {
@@ -633,7 +737,18 @@ void sdfSoundInitAndAppendNode(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s3
     sdfSoundAppendNode(node);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC780);
+void func_002EC780(s32 arg0, SdfStreamParams *params, s32 arg2, s32 arg3, u8 *source) {
+    SdfStreamParams local = *params;
+    switch (source[0x1A]) {
+    case 0:
+        local.mode = 0;
+        break;
+    case 2:
+        local.mode = 1;
+        break;
+    }
+    sdfSoundInitAndAppendNode(arg0, &local, arg2, arg3, sdfTexGetPrimaryResourceWord(source));
+}
 
 void sdfSoundInitFormattedAndAppendNode(SoundNode *node, SoundFormat *format, s32 arg2, s32 arg3, s32 value) {
     sdfSoundInitFormattedNode(node, format, arg2, arg3);

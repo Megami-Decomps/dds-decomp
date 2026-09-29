@@ -127,6 +127,8 @@ extern void func_0035B6E0(const char *);
 
 extern char D_00414C50[]; /* "Camp process halted.\n", followed by padding no C emits */
 
+extern u16 D_003B2F58[];
+
 u32 itfReadEncodedTextLead(TextStream *stream) {
     s32 *position = &stream->offset;
     u8 *byte = stream->bytes + *position;
@@ -228,7 +230,15 @@ void mnuUnloadStaffFonts(void) {
     frFontFreeEntry(5);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F098);
+u32 func_0019F098(u32 value) {
+    s32 adjusted = (value & 0xffff) + 0xffff7f80;
+    s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
+
+    if ((u32)index < 0xA10) {
+        return D_003B2F58[index];
+    }
+    return 0xffff;
+}
 
 void itfConvertText(u8 *output, const char *input) {
     s32 i;
@@ -307,9 +317,42 @@ void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F940);
+s32 func_0019F940(char *text) {
+    s32 count = 0;
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F990);
+    while (*text != 0) {
+        if ((*(u8 *)text & 0xF0) == 0xF0) {
+            if (text[1] == 0xF) {
+                count++;
+            }
+            text++;
+        }
+        text++;
+    }
+    return count;
+}
+
+void func_0019F990(char *src, char *dst, s32 segment) {
+    s32 current = 0;
+
+    while (*src != 0) {
+        if ((*(u8 *)src & 0xF0) == 0xF0) {
+            if (src[1] == 0xF) {
+                current++;
+            } else {
+                dst[0] = *(u8 *)src;
+                dst[1] = src[1];
+                dst += 2;
+            }
+            src++;
+        } else if (current == segment) {
+            *dst = *(u8 *)src;
+            dst++;
+        }
+        src++;
+    }
+    *dst = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
 
@@ -329,9 +372,14 @@ void func_001A0040(void) {
 void func_001A0048(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0050);
+s32 func_001A0050(s32 arg0, s32 arg1, s32 arg2) {
+    return arg2;
+}
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0058);
+extern s32 D_00438F20;
+s32 func_001A0058(void) {
+    return D_00438F20;
+}
 
 u32 func_001A0060(u32 arg0) {
     return arg0;

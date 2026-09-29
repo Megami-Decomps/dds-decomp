@@ -1,5 +1,15 @@
 #include "common.h"
 
+typedef struct SdfVec4 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} SdfVec4;
+
+extern f32 func_00326978();
+
+
 extern u64 func_003283E0(u64);
 
 extern u64 func_0035A828(u64);
@@ -10,27 +20,11 @@ extern u64 func_00325AB8(u64, u32);
 
 extern u64 func_00325790(u64, u32);
 
-extern s32 CancelWakeupThread(u64);
-
-extern u64 GetThreadId(void);
-
 extern s32 CreateSema(void *);
-
-extern u32 D_004389BC;
-
-extern u8 D_00438A8C;
 
 extern void (*D_004389C4)(void);
 
-extern void sdfSleepThreadCount(s32);
-
-extern void func_0033C820(void);
-
-extern void func_0033C878(void);
-
-extern void sdfTickThreadPriorityOverride(void);
-
-extern f32 func_00326A40(u32);
+extern f32 func_00326A40(void *, void *);
 
 extern f32 func_003532B8(f32);
 
@@ -47,7 +41,7 @@ typedef struct ResourceList {
     ResourceNode *first;
 } ResourceList;
 
-u32 func_00320F68(u32 list, u32 node);
+s32 func_00320F68(u32 list, u32 node);
 
 ResourceNode *mnuFindResourceNodeById();
 
@@ -74,7 +68,12 @@ void func_00324E80(u32 *pair, u32 key) {
     func_00320F68(pair[0], node);
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324EF0);
+extern s32 func_00321018(u32);
+
+s64 func_00324EF0(u32 *pair) {
+    func_00321018(pair[0]);
+    return func_00321018(pair[1]);
+}
 
 void func_00324F20(ResourceList **list) {
     mnuFindResourceNodeByHandle(*list);
@@ -92,7 +91,9 @@ u64 func_00324F50(s32 arg0, u64 arg1) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324F98);
+s64 func_00324F98(u32 *pair) {
+    return func_00320F68(pair[1], mnuFindResourceNodeByHandle(pair[1]));
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324FD0);
 
@@ -150,14 +151,33 @@ void sdfVectorScale(float factor, float *vector) {
     vector[2] = vector[2] * factor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326978);
+extern f32 func_003269F0();
+
+f32 func_00326978(f32 *vec) {
+    f32 length = func_003269F0();
+
+    if (length == 0.0f) {
+        return 0.0f;
+    }
+    vec[0] = vec[0] / length;
+    vec[1] = vec[1] / length;
+    vec[2] = vec[2] / length;
+    return length;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003269F0);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326A40);
+f32 func_00326A40(void *a, void *b) {
+    SdfVec4 va = *(SdfVec4 *)a;
+    SdfVec4 vb = *(SdfVec4 *)b;
 
-f32 func_00326AE0(u32 entry) {
-    return func_003532B8(func_00326A40(entry));
+    func_00326978(&va);
+    func_00326978(&vb);
+    return va.x * vb.x + va.y * vb.y + va.z * vb.z;
+}
+
+f32 func_00326AE0(void *a, void *b) {
+    return func_003532B8(func_00326A40(a, b));
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326B00);
@@ -170,7 +190,20 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_003275C8);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00327AC8);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00327BD8);
+extern void *memcpy(void *, const void *, u32);
+
+f32 *func_00327BD8(f32 *vec, f32 *mat) {
+    f32 out[4];
+    f32 x = vec[0];
+    f32 y = vec[1];
+    f32 z = vec[2];
+
+    out[0] = x * mat[0] + y * mat[4] + z * mat[8];
+    out[1] = x * mat[1] + y * mat[5] + z * mat[9];
+    out[2] = x * mat[2] + y * mat[6] + z * mat[10];
+    memcpy(vec, out, 16);
+    return vec;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00327C80);
 
@@ -205,74 +238,6 @@ void func_00328390(u64 arg0, u64 arg1, u64 arg2) {
     func_00328318(arg0, temp_v0, arg1, arg2);
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003283E0);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", sdfFreeMemoryFromEitherHeap);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328470);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", sdfFreeMemorySlotFromEitherHeap);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328520);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", sdfAddHandler);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328668);
-
-void sdfDrainPendingHandlers(void) {
-    u32 current;
-    while ((current = D_004389BC) != 0) {
-        func_00328668(current);
-    }
-}
-
-void sdfWakeAlarmThread(u32 unused0, u32 unused1, u32 threadId) {
-    iWakeupThread(threadId);
-}
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", sdfSleepWithAlarm);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003287E0);
-
-u32 sdfGetElapsedTimerTicks(u32 base) {
-    u32 now;
-
-    now = *(volatile u32 *)0x10000000;
-    return (now - base) & 0xFFFF;
-}
-
-void sdfRunTickWorkerThread(void) {
-    for (;;) {
-        sdfSleepThreadCount(1);
-        func_0033C820();
-        if (!D_00438A8C) {
-            func_0033C878();
-        }
-        sdfTickThreadPriorityOverride();
-        if (D_004389C4 != NULL) {
-            D_004389C4();
-        }
-    }
-}
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328858);
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328918);
-
-void sdfSleepThreadCount(s32 count) {
-    u64 threadId;
-    s32 cancelledWakeup;
-
-    threadId = GetThreadId();
-    cancelledWakeup = CancelWakeupThread(threadId);
-    count = count - cancelledWakeup;
-    do {
-        count = count - 1;
-        SleepThread();
-    } while (0 < count);
-}
-
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003289C8);
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);

@@ -28,9 +28,21 @@ extern void (*D_003AAF10[])(void *, void *, void *);
 
 extern BillDispatch D_003AAB88[];
 
-extern void parGetRestartFlag();
+extern s32 parGetRestartFlag();
 
 extern u8 parObjGetMode();
+
+extern void func_001618E0(s32);
+
+extern void func_00162B60(s32);
+
+extern void func_00162C48(s32);
+
+extern void func_00162D38(s32);
+
+extern void parClearSlotFlag(s32);
+
+extern void func_00190148(s32);
 
 void func_00162348(ParObj *work, u32 value) {
     work->unkF0 = value;
@@ -79,9 +91,42 @@ u8 parObjGetMode(u8 *object) {
     }
 }
 
+typedef struct ParKindObj {
+    u8 pad00[0x10];
+    f32 unk10;
+    f32 unk14;
+    u8 pad18[0x10];
+    s32 unk28;
+    s16 unk2C;
+    u8 pad2E[0xC6];
+    s32 billId; /* 0xF4 */
+    u8 padF8[0x48];
+    u16 kind;   /* 0x140 */
+} ParKindObj;
+
+extern BillDispatch D_003AAB80[];
+extern s32 func_00159A50(s32 id);
+extern void func_00159BF0(s32 id, f32 a, f32 b);
+extern void billSetBillboardMode(s32 id, s16 mode);
+extern void func_00159FA0(s32 id);
+
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
-INCLUDE_ASM(const s32, "game/code_00162348", parInstantiateKind);
+ParKindObj *parInstantiateKind(ParKindObj *src) {
+    ParKindObj *obj;
+    s32 bill;
+
+    obj = D_003AAB80[src->kind].func();
+    obj->kind = src->kind;
+    if (src->unk28 == -1) {
+        bill = func_00159A50(src->billId);
+        func_00159BF0(bill, obj->unk10, obj->unk14);
+        billSetBillboardMode(bill, obj->unk2C);
+        func_00159FA0(bill);
+        obj->billId = bill;
+    }
+    return obj;
+}
 
 void parObjDispatch(u8 *object) {
     D_003AAB88[*(u16 *)(object + 0x140)].func();
@@ -98,7 +143,9 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C = work->scale8C * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00162938);
+s64 func_00162938(void) {
+    return parGetRestartFlag();
+}
 
 void func_00162958(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -120,9 +167,39 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001629C0);
 
-INCLUDE_ASM(const s32, "game/code_00162348", parDispatchKindUpdate);
+void parDispatchKindUpdate(void *work) {
+    switch (*(u16 *)work) {
+    case 1:
+        func_001618E0(*(s32 *)((u8 *)work + 8));
+        return;
+    case 2:
+        func_00162B60(*(s32 *)((u8 *)work + 0x10));
+        return;
+    case 3:
+        func_00162C48(*(s32 *)((u8 *)work + 0x14));
+        return;
+    case 4:
+        func_00162D38(*(s32 *)((u8 *)work + 0x14));
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00162348", parDispatchKindInit);
+void parDispatchKindInit(void *work, s32 index) {
+    switch (*(u16 *)work) {
+    case 1:
+        parClearSlotFlag(*(s32 *)((u8 *)work + 8));
+        return;
+    case 2:
+        parCellInit((void *)*(s32 *)((u8 *)work + 0x10), index);
+        return;
+    case 3:
+        parCellInit((void *)*(s32 *)((u8 *)work + 0x14), index);
+        return;
+    case 4:
+        func_00190148(*(s32 *)((u8 *)work + 0x14));
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162B60);
 
@@ -193,7 +270,29 @@ void func_001634A8(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x10));
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", parCellInit);
+typedef struct ParCell {
+    u8 pad00[4];
+    void *vertices; /* 0x04 */
+    s32 unk08;
+    s32 unk0C;
+    u32 unk10;
+} ParCell;
+
+typedef struct ParSystem {
+    u8 pad00[4];
+    s32 cellCount;       /* 0x04 */
+    s32 vertexWordCount; /* 0x08 */
+    u8 pad0C[8];
+    ParCell *cells;      /* 0x14 */
+} ParSystem;
+
+void parCellInit(ParSystem *system, s32 index) {
+    ParCell *cell = (ParCell *)(index * sizeof(ParCell) + (s32)system->cells);
+
+    cell->unk10 = 0x80808080;
+    cell->unk0C = 0;
+    cell->unk08 = 0;
+}
 
 void func_00163508(ParCellNode *node) {
     node->next = D_00436404;
@@ -211,20 +310,6 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001636F0);
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163780);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
-
-typedef struct ParCell {
-    u8 pad00[4];
-    void *vertices; /* 0x04 */
-    u8 pad08[0xC];
-} ParCell;
-
-typedef struct ParSystem {
-    u8 pad00[4];
-    s32 cellCount;       /* 0x04 */
-    s32 vertexWordCount; /* 0x08 */
-    u8 pad0C[8];
-    ParCell *cells;      /* 0x14 */
-} ParSystem;
 
 void func_00163B68(ParSystem *system, s32 arg1, s32 arg2) {
     s32 count = system->cellCount;

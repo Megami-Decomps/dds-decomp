@@ -62,6 +62,14 @@ extern u8 D_003D64C0[];
 
 extern s32 parGetRestartFlag();
 
+typedef struct ParSystem {
+    u8 pad00[4];
+    s32 cellCount;       /* 0x04 */
+    s32 vertexWordCount; /* 0x08 */
+    u8 pad0C[8];
+    ParCell *cells;      /* 0x14 */
+} ParSystem;
+
 void func_0015A758(ParObj *work, u32 value) {
     work->unkF0 = value;
 }
@@ -283,7 +291,33 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BB90);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BCE8);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BF78);
+void func_0015BF78(ParSystem *system, s32 arg1, s32 arg2) {
+    s32 count = system->cellCount;
+    s32 perCell = system->vertexWordCount >> 1;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    s32 *vertex;
+    if (count > 0) {
+        i = count;
+        /* Required to match: advance a byte cursor based at ParCell.vertices. */
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(s32 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    vertex[0] = arg1;
+                    vertex[1] = arg2;
+                    vertex += 2;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BFD8);
 
@@ -301,7 +335,35 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C7A0);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C8C0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", parFillCellVertexQuads);
+void parFillCellVertexQuads(ParSystem *system, s32 arg1, s32 arg2) {
+    s32 count = system->cellCount;
+    s32 perCell = system->vertexWordCount >> 2;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        /* Required to match: use the same offset-four cell cursor as the paired fill. */
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    *(s32 *)(vertex + 0x8) = arg1;
+                    *(s32 *)(vertex + 0x4) = arg1;
+                    *(s32 *)(vertex + 0xC) = arg2;
+                    *(s32 *)(vertex + 0x0) = arg2;
+                    vertex += 0x10;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CAA0);
 
