@@ -68,10 +68,10 @@ struct EffTransformNode {
     : "=r" (dst) : "r" (base), "i" (off) : "memory")
 
 u32 func_0010EEF0(void) {
-    u64 temp_v0;
+    u64 context;
 
-    temp_v0 = func_0010D428(0);
-    func_00119B08(temp_v0);
+    context = func_0010D428(0);
+    func_00119B08(context);
     return 1;
 }
 
@@ -81,11 +81,11 @@ u32 func_0010EF18(void) {
 }
 
 u32 func_0010EF38(void) {
-    u64 temp_v0;
+    u64 context;
 
-    temp_v0 = func_0010D428(0);
-    temp_v0 = func_00119AF8(temp_v0);
-    func_0010D5F0(temp_v0);
+    context = func_0010D428(0);
+    context = func_00119AF8(context);
+    func_0010D5F0(context);
     return 1;
 }
 
@@ -97,27 +97,28 @@ INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F2F0);
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F418);
 
-void effObjNodeDestroy(EffTransformNode *arg0) {
+/* Notify the owner before unlinking and freeing this transform node. */
+void effObjNodeDestroy(EffTransformNode *node) {
     EffTransformOwner *owner;
     EffTransformNode *next;
     EffTransformNode *prev;
 
-    if (arg0 != NULL) {
-        owner = arg0->owner;
+    if (node != NULL) {
+        owner = node->owner;
         if (owner != NULL) {
             if (owner->notify != NULL) {
-                owner->notify(arg0);
+                owner->notify(node);
             }
         }
-        next = arg0->next;
+        next = node->next;
         if (next != NULL) {
-            next->prev = arg0->prev;
+            next->prev = node->prev;
         }
-        prev = arg0->prev;
+        prev = node->prev;
         if (prev != NULL) {
-            prev->next = arg0->next;
+            prev->next = node->next;
         }
-        func_002CFF98(arg0);
+        func_002CFF98(node);
     }
 }
 

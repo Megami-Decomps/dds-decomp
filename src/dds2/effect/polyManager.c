@@ -17,7 +17,7 @@ typedef struct PolyEntryPool {
     u32 stateA; /* 0x68 */
     u32 stateB; /* 0x6C */
     u8 pad70[0x88];
-    s32 *records; /* 0xF8: entries have five 32-bit words */
+    s32 *records; /* 0xF8: five words per entry; -0xFFFFFF marks inactive */
 } PolyEntryPool;
 
 void effPolyDestroyWork(u32 work) {
@@ -108,6 +108,7 @@ void func_00166EA0(float factor, PolyTransform *transform) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);
 
+/* Reset active records but leave inactive sentinel entries untouched. */
 void polyResetEntries(PolyEntryPool *pool) {
     u32 entryCount;
     s32 *record;

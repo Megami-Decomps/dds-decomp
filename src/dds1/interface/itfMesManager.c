@@ -728,13 +728,14 @@ s32 itfMesCountSpanSteps(ItfMesSpan *arg0, ItfMesSpan *arg1) {
     return ((arg1->unk8 - arg0->unk8) >> 3) / arg1->unk12 + 1;
 }
 
-void itfMesOffsetNodeChain(ItfMesNode *node, s32 arg1, s32 arg2) {
+/* Translate every node in a linked row without disturbing its advance. */
+void itfMesOffsetNodeChain(ItfMesNode *node, s32 dx, s32 dy) {
     if (node == NULL) {
         return;
     }
     do {
-        node->x += arg1;
-        node->y += arg2;
+        node->x += dx;
+        node->y += dy;
         node = node->next;
     } while (node != NULL);
 }
@@ -770,6 +771,7 @@ void itfMesRecolorNodeChildren(ItfMesNode *node, u32 color) {
     }
 }
 
+/* Find the widest contiguous row, scaling the accumulated advance by 16. */
 s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     s32 best = 0;
 

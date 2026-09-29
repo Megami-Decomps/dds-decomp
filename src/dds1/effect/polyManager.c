@@ -44,7 +44,7 @@ typedef struct {
 } PolyNodeF4;
 
 typedef struct {
-    s32 unk0;  /* 0x0 reset to 0xFFFFFF0 by polyResetEntries */
+    s32 value; /* 0x0: inactive sentinel -0xFFFFFF is preserved on reset */
     s32 unk4;  /* 0x4 */
     s32 unk8;  /* 0x8 */
     s32 unkC;  /* 0xC */
@@ -163,6 +163,7 @@ void func_0015F2B0(f32 scale, PolyNode *obj) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015F2D0);
 
+/* Reset active records but leave inactive sentinel entries untouched. */
 void polyResetEntries(PolyList *obj) {
     u32 count;
     PolyEntry *entry;
@@ -176,8 +177,8 @@ void polyResetEntries(PolyList *obj) {
     entry = obj->entries;
     if (count != 0) {
         do {
-            if (entry->unk0 != -0xFFFFFF) {
-                entry->unk0 = 0xFFFFFF0;
+            if (entry->value != -0xFFFFFF) {
+                entry->value = 0xFFFFFF0;
             }
             i++;
             entry++;

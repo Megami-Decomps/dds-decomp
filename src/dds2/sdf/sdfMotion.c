@@ -230,6 +230,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003343E8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334510);
 
+/* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionSuspend(MotionState *state) {
     u8 mode;
 
@@ -256,6 +257,7 @@ void sdfSetMotionOutputValue(SdfMotionOutput *output, u32 value) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334678);
 
+/* Blend two sampled scalar keys; preserve this expression order for matching. */
 f32 sdfInterpolateMotionKeys(KeyOut *output) {
     f32 first;
     f32 weight;

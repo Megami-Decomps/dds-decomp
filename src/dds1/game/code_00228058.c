@@ -247,6 +247,7 @@ struct SolarWorldState {
 #define SOLAR_PHASE_ADVANCE_FLAG 1
 #define SOLAR_ALPHA_ENABLED_FLAG 2
 
+/* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
@@ -316,6 +317,7 @@ void evtFreeSolarOverlayWork(void) {
     D_003BBDC0 = 0;
 }
 
+/* One scheduler task owns the overlay; a second start leaves its state intact. */
 void evtStartSolarOverlay(void) {
     if (D_003BBDC0 != 0) {
         return;

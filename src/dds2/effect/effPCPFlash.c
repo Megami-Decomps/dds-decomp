@@ -420,6 +420,7 @@ void func_00171E80(PcpFlashWork1 *work, f32 value)
     work->unk3C = value;
 }
 
+/* Two vertices inherit color B, while the third receives color A with full alpha. */
 void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
 {
     PcpFlashColorSlot *slot;
@@ -573,6 +574,7 @@ typedef struct PcpFlashColorSlot5 {
     s32 color[5];
 } PcpFlashColorSlot5;
 
+/* Alternate the center alpha arrangement for successive streak vertices. */
 void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 flag, s32 param) {
     PcpFlashColorSlot5 *slot;
     s32 colorA;
