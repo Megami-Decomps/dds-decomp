@@ -79,7 +79,7 @@ u32 func_00125F38(void);
 
 void func_00110BE0(s32 arg0, u32 arg1);
 
-f32 func_0010D718(s32 idx);
+f32 bfWaitReadArgFloat(s32 idx);
 
 s32 func_0010D8C8(void);
 
@@ -226,7 +226,26 @@ s32 func_00241110(void) {
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002411A0);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241218);
+typedef struct EvtIdNode {
+    u8 pad00[4];
+    s32 value; /* 0x04 */
+} EvtIdNode;
+
+extern EvtIdNode *func_001111A8(s32 world, char *id);
+
+s32 func_00241218(void) {
+    EvtIdNode *node;
+
+    node = func_001111A8(dds3GetWorldSecondaryObject(), func_0010D7D0(0));
+    if (node == NULL) {
+        func_0035B6E0("ID : id not found!! <%s>\n", func_0010D7D0(0));
+        func_0010AE38("WARNING: ID not found! <%s>\n", func_0010D7D0(0));
+        func_0010D818(0);
+    } else {
+        func_0010D818(node->value);
+    }
+    return 1;
+}
 
 u32 func_002412B0(void) {
     func_001027D8(2, 0, 0, 0);
@@ -571,9 +590,9 @@ s32 func_00241CF0(void) {
     if (unit == NULL) {
         return 1;
     }
-    vec[0] = func_0010D718(1);
-    vec[1] = func_0010D718(2);
-    vec[2] = func_0010D718(3);
+    vec[0] = bfWaitReadArgFloat(1);
+    vec[1] = bfWaitReadArgFloat(2);
+    vec[2] = bfWaitReadArgFloat(3);
     effObjSetInnerFirstVec(unit, vec);
     return 1;
 }
@@ -592,10 +611,10 @@ s32 func_00241E70(void) {
     if (unit == NULL) {
         return 1;
     }
-    vec[0] = func_0010D718(1);
-    vec[1] = func_0010D718(2);
-    vec[2] = func_0010D718(3);
-    vec[3] = func_0010D718(4);
+    vec[0] = bfWaitReadArgFloat(1);
+    vec[1] = bfWaitReadArgFloat(2);
+    vec[2] = bfWaitReadArgFloat(3);
+    vec[3] = bfWaitReadArgFloat(4);
     effObjSetInnerSecondVec(unit, vec);
     return 1;
 }
@@ -644,9 +663,9 @@ u32 evtCommandSetSolarPhase(void) {
 
 INCLUDE_ASM(const s32, "event/evtCommand", evtCommandWaitForCampTask);
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
-
 extern s32 mnuCampCreateTask(s32 id);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
 s32 evtCommandStartCampTaskIfAbsent(void) {
     s32 id = func_0010D650(0);
@@ -780,14 +799,14 @@ s32 func_00242918(void) {
             return 1;
         }
     }
-    func_0023AE08(unit, func_0010D718(1));
+    func_0023AE08(unit, bfWaitReadArgFloat(1));
     owner = *(char **)(unit + 8);
     if (owner == 0) {
         return 1;
     }
     count = func_00154FA0(owner);
     if (count > 0) {
-        if (func_0010D718(1) > 0.5f) {
+        if (bfWaitReadArgFloat(1) > 0.5f) {
             func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
         } else {
             func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 0);
@@ -868,8 +887,6 @@ s32 func_00242BC0(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
-
 s32 func_00242C40(void) {
     void *path = evtFindWorldObjectByIdAndKind(9, func_0010D650(0));
 
@@ -881,5 +898,9 @@ s32 func_00242C40(void) {
     return 1;
 }
 
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FB0);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FC8);
 
