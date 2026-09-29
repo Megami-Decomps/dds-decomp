@@ -4,7 +4,12 @@ extern u32 func_00265E68(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
-extern u8 D_00370D08[];
+typedef struct LevelStep {
+    u8 threshold;
+    u8 value;
+} LevelStep;
+
+extern LevelStep D_00370D08[];
 
 extern s32 D_003BAA00;
 
@@ -37,10 +42,19 @@ void func_002654E8(s32 arg0) {
     func_00265088(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265500);
+u8 func_00265500(s32 value) {
+    s32 i;
+
+    for (i = 2; i >= 0; i--) {
+        if (value >= D_00370D08[i].threshold) {
+            return D_00370D08[i].value;
+        }
+    }
+    return D_00370D08[0].value;
+}
 
 u8 func_00265540(s32 position, s32 increment) {
-    u8 *table = D_00370D08;
+    u8 *table = (u8 *)D_00370D08;
     s32 i = 2;
     u8 *limit = table + 4;
     s32 end = position + increment;
