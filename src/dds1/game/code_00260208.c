@@ -270,7 +270,33 @@ s32 func_002624C0(s32 work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", brsMarkPartyRows);
+extern s32 D_003BAA00;
+
+extern s32 D_003BAA00;
+
+void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
+    s32 i;
+
+    for (i = 0; i < *(s32 *)(state + 0x78); i++) {
+        u8 *d = dst;
+        u8 *unit = *(u8 **)&D_003BAA00 + 0xA60;
+        s32 j;
+
+        for (j = 4; j >= 0; j--) {
+            if ((*(u16 *)unit & 1) != 0) {
+                s32 *row = (s32 *)(state + i * 24);
+                if (*row == (s32)unit) {
+                    *(s32 *)d |= flags;
+                    if (flags & 2) {
+                        *(s32 *)(d + 4) = row[1];
+                    }
+                }
+            }
+            d += 0x2C;
+            unit += 0x1A4;
+        }
+    }
+}
 
 void func_00262600(u32 arg0, u32 arg1, u32 arg2) {
     brsMarkPartyRows(arg0, arg1, 2);
@@ -376,6 +402,13 @@ u32 func_00262970(void) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
 
+/* func_00262A30 @ 0x00262A30, 88 bytes.
+ * Near-miss 12/13 words: retail materialises several base+offset pointers
+ * (`base+0x14`, `base+0x20`, `off+0xEF0`, `off+0x1230`) and writes through
+ * them; ee-gcc folds everything to `base+off` plus constant displacements.
+ * Writes: base+off+{0xF10=a3, 0xF0C=a2(u16), 0x1250=a4, 0x124C=a2(u16),
+ * 0xF14=a5, 0x1254=a6} with off = index*104.
+ */
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
 s32 func_00262A88(void) {
