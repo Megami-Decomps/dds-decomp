@@ -283,7 +283,10 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC4C8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC520);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC540);
+void func_002DC540(u8 *work, u8 *vec) {
+    __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(vec) : "memory");
+    func_00232AD0(*(void **)(work + 4));
+}
 
 void func_002DC560(s32 arg0) {
     mdlBroadcastMasked(*(u32 *)(arg0 + 4));
@@ -432,7 +435,22 @@ void func_002DDA50(s32 arg0) {
     mdlBroadcastMasked(*(u32 *)(arg0 + 0xc0));
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDA68);
+void func_002DDA68(u8 *work, float scale) {
+    u32 bits;
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vaddw.xyz vf10, vf0, vf0w\n\t"
+        "vmulx.w vf10, vf0, vf0x\n\t"
+        ".set reorder" ::: "memory");
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "mfc1 %0, %1\n\t"
+        "qmtc2.ni %0, $vf2\n\t"
+        "vmulx.xyzw vf10, vf10, $vf2x\n\t"
+        ".set reorder"
+        : "=&r"(bits) : "f"(scale) : "memory");
+    func_00232B40(*(void **)(work + 0xC0));
+}
 
 void func_002DDA98(void) {
     D_00437E3C = 0;
@@ -2546,7 +2564,25 @@ s32 *func_002F6C30(s32 arg0) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseTargetSlots);
+extern void func_00117170();
+extern void func_00110B50();
+
+void effReleaseTargetSlots(u32 *obj) {
+    u32 *tails = obj + 0x10 / 4;
+    u32 *heads = obj + 0x24 / 4;
+    u32 i;
+    for (i = 0; i < 5; i++) {
+        if (*heads != 0) {
+            func_00117170(*heads);
+        }
+        heads++;
+        if (*tails != 0) {
+            func_00110B50(*tails);
+        }
+        tails++;
+    }
+    func_003297C8(obj[0x38 / 4]);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6D00);
 
@@ -3016,12 +3052,28 @@ void func_002F96D0(s32 *source) {
                   *(u16 *)((u8 *)source + 0x1C), secondary, source[0x24 / 4]);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effDestroyResourceInstance);
+extern FnTbl28 D_003EA020[];
+
+void effDestroyResourceInstance(u32 *obj) {
+    if (func_001AA308()) {
+        if (D_003EA020[obj[0x2C / 4]].fn != NULL) {
+            D_003EA020[obj[0x2C / 4]].fn(obj[0x30 / 4]);
+        }
+    }
+    func_00328E48(obj);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9780);
 
 extern FnTbl28 D_003EA018[];
-INCLUDE_ASM(const s32, "game/code_002DC138", effClearCallbackFrame);
+void effClearCallbackFrame(u32 *obj) {
+    if (func_001AA308()) {
+        if (D_003EA018[obj[0x2C / 4]].fn != NULL) {
+            D_003EA018[obj[0x2C / 4]].fn(obj);
+        }
+        obj[0x28 / 4] = 0;
+    }
+}
 
 void effAdvanceCallbackFrame(work)
 u8 *work;

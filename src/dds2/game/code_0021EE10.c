@@ -62,9 +62,9 @@ extern void func_001E3448(u32, const u8 *);
 
 extern void func_002218C8(void);
 
-extern void func_00222450();
+extern s32 func_00222450();
 
-extern void func_00224598();
+extern s32 func_00224598();
 
 typedef struct ActionUnit {
     u8 pad0[0x110];
@@ -639,9 +639,18 @@ u32 func_002223D8(u32 unit, u32 base) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222450);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002226D0);
+s64 func_002226D0(void) {
+    return func_00222450();
+}
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002226F0);
+void func_002226F0(u32 unit) {
+    func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
+                  0.8f, -0.65f, 0.5f);
+    *(f32 *)(unit + 0x50) += 650.0f;
+    *(f32 *)(unit + 0xe0) += 650.0f;
+    *(f32 *)(unit + 0x154) = 30.0f;
+    *(u32 *)(unit + 0x110) |= 0x41;
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222768);
 
@@ -759,7 +768,9 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224500);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224598);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_002247B0);
+s64 func_002247B0(void) {
+    return func_00224598();
+}
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002247D0);
 
