@@ -1541,9 +1541,7 @@ u8 func_003151D0(u16 scriptId) {
     return D_00401324[scriptId * 36];
 }
 
-u16 func_003151F8(u16 scriptId) {
-    return *(u16 *)((u8 *)D_00401326 + scriptId * 36);
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003151F8);
 
 u8 func_00315220(u16 scriptId) {
     return D_00401325[scriptId * 36];
@@ -1682,20 +1680,9 @@ extern u8 D_0045C828[];
 
 extern u32 *func_0026CF70(s16);
 
-s32 func_00315BF8(s16 id) {
-    u32 *info = func_0026CF70(id);
-    if (info == 0) {
-        return 0;
-    }
-    return D_0045C828[(s32)(*info << 24) >> 28] != 0;
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315BF8);
 
-s32 func_00315C40(u32 index) {
-    if (index >= 17) {
-        return 0;
-    }
-    return D_0045C828[index] != 0;
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315C40);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315C68);
 
@@ -1705,9 +1692,7 @@ void func_00315FA0(u32 arg0, u32 arg1, u16 arg2) {
 
 extern u8 D_00401320[][36];
 
-u32 func_00315FC8(u16 index) {
-    return *(u32 *)D_00401320[index];
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315FC8);
 
 typedef struct ScriptEntry44 {
     u32 state;
@@ -1716,9 +1701,7 @@ typedef struct ScriptEntry44 {
 
 extern ScriptEntry44 D_00402BE0[];
 
-u32 func_00315FF0(u16 index) {
-    return D_00402BE0[index].state;
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315FF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316020);
 
@@ -1865,3 +1848,4 @@ INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438908);
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438910);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438918);
+
