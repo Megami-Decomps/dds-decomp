@@ -38,7 +38,11 @@ def main():
     start, end = int(args.start, 16), int(args.end, 16) if args.end else None
     names = {n: int(a, 16) for n, a in ROW.findall((ROOT / "config" / args.version / "symbol_addrs.txt").read_text())}
     src = ROOT / "src" / args.version / f"{args.unit}.c"
-    head, pieces, pending, includes = [], [], [], []  # pieces: (address, [blocks])
+    # Declarations before the first function form the unit's head. Later ones
+    # travel with the function after them, like INCLUDE_RODATA lines: where a
+    # declaration sits decides whether earlier calls saw it (an undeclared
+    # callee is implicitly `int`, which changes codegen).
+    head, pieces, pending, includes = [], [], [], []  # pieces: (address, [blocks], [declarations])
     for b in blocks(src.read_text()):
         inc = INCLUDE.search(b)
         m = DEF.search(b) if "{" in b and not inc else None
@@ -47,49 +51,56 @@ def main():
             pending.append(b)
         elif name:
             addr = names.get(name) or int(name[-8:], 16)
-            pieces.append((addr, pending + [b]))
+            pieces.append((addr, pending + [b], [d for d in pending if not INCLUDE.search(d)]))
             pending = []
         elif b.startswith("#include"):
             # Every part keeps the unit's headers (fpu.h's fsqrtf would otherwise
             # become an undefined external call).
             includes += [line for line in b.split("\n") if line.startswith("#include") and line not in includes]
+        elif pieces:
+            pending.append(b)
         else:
             head.append(b)
     if pending:
         pieces[-1][1].extend(pending)
     groups = {"head": [], "mid": [], "tail": []}
-    for addr, bs in pieces:
+    for i, (addr, _, _) in enumerate(pieces):
         key = "head" if addr < start else ("mid" if end is None or addr < end else "tail")
-        groups[key].append(bs)
+        groups[key].append(i)
     new = {"mid": f"game/code_{start:08X}", "tail": f"game/code_{end:08X}" if end else None}
 
-    # Prototypes for the unit's C functions: a function the other part defines
-    # (and this one only calls or takes the address of) needs one once they
-    # are separate files.
-    protos = {}
-    for _, bs in pieces:
-        for b in bs:
-            if "{" in b and not INCLUDE.search(b) and (m := DEF.search(b)):
-                header = b[:b.index("{")].strip()
-                if re.search(r"\)\s*$", header):  # prototype-style definition
-                    protos[m.group(1)] = re.sub(r"\s+", " ", header) + ";"
-                else:  # K&R: parameters declared between header and body
-                    protos[m.group(1)] = re.sub(r"\(.*", "();", header.split("\n")[0])
+    # A function an earlier part defines is declared by its definition in the
+    # original; once separate, it needs a prototype. (A later part's function
+    # was undeclared at the call, so it stays that way.)
+    def prototype(b):
+        header = b[:b.index("{")].strip()
+        if re.search(r"\)\s*$", header):  # prototype-style definition
+            return re.sub(r"\s+", " ", header) + ";"
+        return re.sub(r"\(.*", "();", header.split("\n")[0])  # K&R
 
-    def write(unit, groups_blocks, old_unit):
-        body = [b.replace(f'"{old_unit}"', f'"{unit}"') for bs in groups_blocks for b in bs]
+    def write(unit, indices, old_unit):
+        body = [b.replace(f'"{old_unit}"', f'"{unit}"') for i in indices for b in pieces[i][1]]
+        first = indices[0] if indices else len(pieces)
+        # Declarations the original placed before this part: the head, and the
+        # ones travelling with earlier parts' functions.
+        pool = head + [d for i in range(first) for d in pieces[i][2]]
         used = set(TOKENS.findall("\n".join(body)))
         defined = {m.group(1) for b in body if "{" in b and (m := DEF.search(b))}
         chosen, changed = set(), True
         while changed:
             changed = False
-            for i, d in enumerate(head):
+            for i, d in enumerate(pool):
                 if i not in chosen and declared_name(d) in used:
                     chosen.add(i)
                     used |= set(TOKENS.findall(d))
                     changed = True
-        decls = [head[i] for i in sorted(chosen)]
-        declared = {declared_name(d) for d in decls}
+        decls = [pool[i] for i in sorted(chosen)]
+        declared = {declared_name(d) for d in decls} | {declared_name(b) for b in body if "{" not in b}
+        protos = {}
+        for i in range(first):
+            for b in pieces[i][1]:
+                if "{" in b and not INCLUDE.search(b) and (m := DEF.search(b)):
+                    protos[m.group(1)] = prototype(b)
         decls += [protos[n] for n in sorted(used & set(protos)) if n not in defined and n not in declared]
         path = ROOT / "src" / args.version / f"{unit}.c"
         path.parent.mkdir(parents=True, exist_ok=True)

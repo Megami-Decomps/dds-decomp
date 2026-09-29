@@ -26,6 +26,25 @@ CVTWS = re.compile(r"\s+(?:cvt|trunc)\.w\.s\s+(\$f\d+),")
 # `la $rd,sym($rs)` expands to lui/addiu/addu; retail (5 sequences in DDS1/DDS2)
 # never puts the closing addu in a following `jr`'s delay slot.
 LA_INDEXED = re.compile(r"\s+la\s+\$\w+,[^\s(]+\(\$\w+\)\s*$")
+# The same holds for a load or store whose base+offset needs lui/addu/op (a
+# symbol or an offset outside 16 bits on a base register): retail has 653
+# `lui; addu; lw|sw..; branch; nop` sequences and 4 with the access in the slot.
+MEM_INDEXED = re.compile(r"\s+(?:l[bhwdq]u?|s[bhwdq]|lwc1|swc1)\s+\$f?\w+,([^\s(]+)\(\$\w+\)\s*$")
+
+
+def expands_indexed(line):
+    m = MEM_INDEXED.match(line)
+    if not m:
+        return False
+    offset = m.group(1)
+    if offset.startswith("%"):
+        return False  # %lo()/%gp_rel(): one instruction
+    try:
+        return not -0x8000 <= int(offset, 0) <= 0x7FFF
+    except ValueError:
+        return True  # symbolic offset on a base register
+
+
 # Retail never fills a branch delay slot with mfhi/mflo (DDS1 135 and DDS2 101
 # `mfhi|mflo; branch` sequences, none with the move in the slot).
 HILO = re.compile(r"\s+(mfhi|mflo)\s")
@@ -61,7 +80,7 @@ def main(src, dst):
             j += 1
         hilo_before_branch = reorder and j < len(lines) and HILO.match(line) and BRANCH.match(lines[j])
         if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
-                next_is_branch and LA_INDEXED.match(line)) or hilo_before_branch:
+                next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line))) or hilo_before_branch:
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
             out.append(line)
