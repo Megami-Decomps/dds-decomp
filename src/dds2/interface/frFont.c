@@ -119,7 +119,16 @@ FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1);
 
 void func_0019D530(FrFontGlyph *arg0, s8 arg1);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C2A8);
+extern s32 func_0019D550(FrFontGlyph *arg0, s8 arg1, u32 arg2);
+
+extern void func_0019BE20();
+
+void func_0019C2A8(void) {
+    func_0019BE20(0, "/font/font0.fnt");
+    func_0019BE20(1, "/font/font1.fnt");
+    func_0019BE20(2, "/font/font2.fnt");
+    func_0019BE20(3, "/font/font3.fnt");
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2F8);
 
@@ -255,7 +264,15 @@ void func_0019D110(FrFontCtx *ctx, u32 value) {
     ctx->u14.shifted = value >> 4;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", frFontSetChainFlag);
+void frFontSetChainFlag(FrFontGlyph *glyph, u8 value) {
+    FrFontGlyph *child;
+
+    for (; glyph != NULL; glyph = glyph->previous) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
+            child->u14.b[0] = value;
+        }
+    }
+}
 
 void frFontSetChildColors(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
@@ -285,7 +302,9 @@ void func_0019D518(FrFontGlyph *arg0) {
     func_0019D530(arg0, 0);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D530);
+void func_0019D530(FrFontGlyph *arg0, s8 arg1) {
+    func_0019D550(arg0, arg1, D_00436568);
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D550);
 
@@ -327,7 +346,19 @@ void func_0019D8C8(void) {
     frFontFreeEntry(8);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", frFontCountChars);
+s32 frFontCountChars(s8 *str) {
+    s32 count = 0;
+
+    while (*str != 0) {
+        if (*str >= 0) {
+            str++;
+        } else {
+            str += 2;
+        }
+        count++;
+    }
+    return count;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", frFontMeasureGlyphChain);
 
