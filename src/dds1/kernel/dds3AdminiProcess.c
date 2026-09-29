@@ -8,8 +8,8 @@ struct AdminWork {
     s8 unk09;
     u8 historyIndex;
     u8 pad0B;
-    s8 unk0C[8];
-    u8 unk14[8];
+    s8 signedHistory[8];
+    u8 unsignedHistory[8];
     void* unk1C;
     u8 unk20;
     u8 unk21;
@@ -28,6 +28,7 @@ extern void* D_003297D4[];
 extern void* D_003297D8[];
 extern u8 D_003BA848[];
 
+/* Configure administrative state from three caller-supplied parameters. */
 void func_001029E8(s32 a0, s32 a1, s32 a2)
 {
     AdminWork* work;
@@ -37,6 +38,7 @@ void func_001029E8(s32 a0, s32 a1, s32 a2)
     work->flags |= 8;
 }
 
+/* Mark the admin state with its second independent control flag. */
 void func_00102A18(void)
 {
     AdminWork* work;
@@ -55,20 +57,22 @@ s8 func_00102A60(void)
     return func_001028A0()->unk09;
 }
 
+/* Read the signed sample immediately before the ring buffer's write index. */
 s8 func_00102A80(void)
 {
     AdminWork* work;
 
     work = func_001028A0();
-    return work->unk0C[(work->historyIndex + 7) & 7];
+    return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
+/* Read the corresponding unsigned sample from the previous ring slot. */
 u8 func_00102AB0(void)
 {
     AdminWork* work;
 
     work = func_001028A0();
-    return work->unk14[(work->historyIndex + 7) & 7];
+    return work->unsignedHistory[(work->historyIndex + 7) & 7];
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102AE0);

@@ -21,6 +21,7 @@ extern AdminWork* func_00102790(void);
 
 extern void func_001027D8(s32 a0, s32 a1, s32 a2, s32 a3);
 
+/* Configure administrative state from three caller-supplied parameters. */
 void func_001028D8(s32 a0, s32 a1, s32 a2)
 {
     AdminWork* work;
@@ -30,6 +31,7 @@ void func_001028D8(s32 a0, s32 a1, s32 a2)
     work->flags |= 8;
 }
 
+/* Mark the admin state with its second independent control flag. */
 void func_00102908(void)
 {
     AdminWork* work;
@@ -48,6 +50,7 @@ s8 func_00102950(void)
     return func_00102790()->unk09;
 }
 
+/* Read the signed sample immediately before the ring buffer's write index. */
 s8 func_00102970(void)
 {
     AdminWork* work;
@@ -56,6 +59,7 @@ s8 func_00102970(void)
     return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
+/* Read the corresponding unsigned sample from the previous ring slot. */
 u8 func_001029A0(void)
 {
     AdminWork* work;

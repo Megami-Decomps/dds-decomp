@@ -18,6 +18,7 @@ extern s32 D_0032E3B0[];
 
 extern s32 func_0010D428(s32);
 
+/* Clear the selected flag only if it was set, and report whether it changed. */
 s32 func_0014F4F0(void) {
     s32 changed = 0;
     switch (func_0010D428(0)) {
@@ -56,9 +57,10 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 D_0034DDF0[];
 
+/* Roll against the threshold associated with the mirrored solar phase. */
 s32 func_0014F5E8(void) {
-    s32 threshold = D_0034DDF0[evtGetMirroredSolarPhase()];
-    if (threshold >= effMiscRandMod(0, 100)) {
+    s32 solarPhaseThreshold = D_0034DDF0[evtGetMirroredSolarPhase()];
+    if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -66,6 +68,7 @@ s32 func_0014F5E8(void) {
     return 1;
 }
 
+/* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
     s32 commandName;
     commandName = func_0010D5A8(0);
@@ -81,6 +84,7 @@ u32 fldCommandSendSoundControl(void) {
     return 1;
 }
 
+/* Return sound-command busy state to the field script interpreter. */
 u32 fldCommandIsSoundBusy(void) {
     u64 busy;
 
@@ -95,6 +99,7 @@ extern s32 func_0010D428(s32);
 
 extern void func_00121DE0(s32, s32, s32, s32, s32, s32);
 
+/* Pass five field-script arguments to the underlying handler. */
 s32 func_0014F6F0(void) {
     s32 first = func_0010D428(0);
     s32 second = func_0010D428(1);

@@ -5,16 +5,18 @@ extern u32 func_00151FC8(u32);
 /* Work area shared by both blur-filter variants in this TU. */
 typedef struct {
     u8   pad_0x00[0x2C]; /* 0x00 */
-    u32  setting;        /* 0x2C: blur source/mode set by the setters below */
+    u32  setting;        /* 0x2C: source handle/setting used by both variants */
     void *resource;      /* 0x30: object released by the free helpers */
 } EffBlurWork; /* 0x34 */
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186DC8);
 
-void effBlurSetSetting(EffBlurWork *work, u32 value) {
-    work->setting = value;
+/* Supply a source handle for the first blur variant. */
+void effBlurSetSetting(EffBlurWork *work, u32 setting) {
+    work->setting = setting;
 }
 
+/* Acquire the first variant's source handle from the effect manager. */
 void effBlurAcquireHandle(EffBlurWork *work) {
     work->setting = func_00151FC8(2);
 }
@@ -23,6 +25,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186E60);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186F90);
 
+/* Release the first variant's owned effect resource. */
 void func_00187080(EffBlurWork *work) {
     func_002D0918(work->resource);
 }
@@ -31,8 +34,9 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00187098);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_001872A0);
 
-void func_00187308(EffBlurWork *work, u32 value) {
-    work->setting = value;
+/* The second variant uses the same work layout but separate callbacks. */
+void func_00187308(EffBlurWork *work, u32 setting) {
+    work->setting = setting;
 }
 
 void func_00187310(EffBlurWork *work) {
@@ -47,6 +51,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_001873E0);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00187460);
 
+/* Release the second variant's owned effect resource. */
 void func_00187580(EffBlurWork *work) {
     func_002D0918(work->resource);
 }
