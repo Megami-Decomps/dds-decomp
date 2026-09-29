@@ -357,7 +357,27 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
     state[3] = fourth;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D970);
+extern s32 func_0029D1C8(u8 *);
+extern s32 func_0029CE90(u8 *, s32);
+extern u32 func_00314728(u8 *, u32);
+extern s32 func_00314C10(s32);
+extern u32 func_00314690(u16);
+
+/* DDS2 twin of DDS1 brsBuildUnitProgressRow. */
+void func_0029D970(u8 *state, u8 *entry) {
+    s32 levelDelta;
+    s32 profilePoints;
+
+    memset(state, 0, 0x2C);
+    *(u32 *)(state + 0x8) = (u32)entry;
+    levelDelta = func_0029D1C8(entry);
+    mnuTitleInitFourParameters((u32 *)(state + 0xC), 0x6E0, 0x50,
+        *(s32 *)(entry + 0x10) - func_0029CE90(entry, levelDelta),
+        func_0029CE90(entry, levelDelta + 1) - func_0029CE90(entry, levelDelta));
+    profilePoints = func_00314728(entry, 0);
+    mnuTitleInitFourParameters((u32 *)(state + 0x1C), 0x3C0, 0x50, profilePoints,
+        func_00314690(func_00314C10((s32)entry) & 0xFFFF));
+}
 
 u32 func_0029DA58(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     func_00314C10(*(u32 *)(resource + 8));
