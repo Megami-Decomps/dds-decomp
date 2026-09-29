@@ -38,7 +38,7 @@ typedef struct {
     u8 pad_0x1A[0x06]; /* 0x1A */
     u8 transformStart; /* 0x20: COP2 reads four vectors across following fields */
     u8 pad_0x21[0x0F];
-    s32 unk30;         /* 0x30 */
+    s32 packetAddressBase; /* 0x30: base of 128-byte indexed address packets */
     u8 pad_0x34[0x04]; /* 0x34 */
     s32 unk38;         /* 0x38 */
     u8 pad_0x3C[0x34];
@@ -104,8 +104,9 @@ extern vu8 D_004389DA;
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330C18);
 
+/* Emit the model's indexed address and fixed packet command words. */
 SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
-    u32 address = (model->unk30 + (index << 7)) & 0x0FFFFFFF;
+    u32 address = (model->packetAddressBase + (index << 7)) & 0x0FFFFFFF;
 
     packet->u0.q = ((s64)address << 32) | 0x30000008;
     packet->u8.p.wC = 0x6C07C000;
@@ -113,6 +114,7 @@ SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 in
     return packet + 1;
 }
 
+/* Append a zeroed packet with its fixed first command word. */
 SdfPacket *func_00330CE8(SdfPacket *packet) {
     packet->u8.q = 0;
     packet->u0.q = 0x60000000;
@@ -129,6 +131,7 @@ typedef struct SdfChunk {
     SdfAssetTable *assets;
 } SdfChunk;
 
+/* Find a resource word by index in the chunk's asset table. */
 void sdfModelWriteIndexedAssetPacket(SdfChunk *chunk, s32 index, u32 packet, u32 frame) {
     sdfInitNodeHeaderFromWords(chunk->assets->entries[index], packet, frame);
 }
@@ -151,6 +154,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331500);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331590);
 
+/* Reset the node lists and initialize both per-model slots. */
 void func_003316B0(SdfModel *model, s32 arg1, s32 arg2) {
     s32 i = 0;
     s32 j = 0;
@@ -173,6 +177,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331740);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003317C8);
 
+/* Attach each 0x50-byte item to the corresponding model draw node. */
 SdfModel *func_003318B8(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
     SdfModel *model = func_003317C8(data, listRef);
@@ -190,6 +195,7 @@ SdfModel *func_003318B8(void *data, SdfItemListRef *listRef) {
     return model;
 }
 
+/* Attach each item using the alternate draw-node setup path. */
 SdfModel *func_00331940(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
     SdfModel *model = func_003317C8(data, listRef);
@@ -211,6 +217,7 @@ SdfModel *func_00331940(void *data, SdfItemListRef *listRef) {
     return model;
 }
 
+/* Compose each draw node's VU transform and visit its circular child list. */
 void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
     u8 *xAxis = drawNode->vectors[2];
     u8 *yAxis;
@@ -278,10 +285,11 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     } while (child != drawNode->children);
 }
 
+/* Scale the root transform and propagate it into the first draw node. */
 void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
-    u128 buf[4];
-    u8 *b1 = &model->transformStart;
-    u8 *b2;
+    u128 rootMatrix[4];
+    u8 *transform = &model->transformStart;
+    u8 *scale;
     SdfList *list;
 
     __asm__ volatile (
@@ -292,14 +300,14 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
         "lqc2 vf31, 48(%0)       \n"
         ".set reorder"
         :
-        : "r" (b1)
+        : "r" (transform)
         : "memory"
     );
-    b2 = model->scaleVector;
+    scale = model->scaleVector;
     __asm__ volatile (
         "lqc2 vf10, 0(%0)"
         :
-        : "r" (b2)
+        : "r" (scale)
         : "memory"
     );
     __asm__ volatile (
@@ -320,17 +328,19 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
         "sqc2 vf31, %3           \n"
         ".set reorder"
         :
-        : "m" (buf[0]), "m" (buf[1]), "m" (buf[2]), "m" (buf[3])
+        : "m" (rootMatrix[0]), "m" (rootMatrix[1]), "m" (rootMatrix[2]), "m" (rootMatrix[3])
         : "memory"
     );
     list = model->list;
-    sdfModelUpdateDrawNodeTransforms(list->entries[0], buf, frame);
+    sdfModelUpdateDrawNodeTransforms(list->entries[0], rootMatrix, frame);
 }
 
+/* Update the model with the engine's current signed frame index. */
 void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
     sdfModelUpdateRootTransforms(model, (s8)D_004389DA);
 }
 
+/* Store four message words, then notify the consumer of the second word. */
 void func_00331B38(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4) {
     arg0[3] = arg4;
@@ -346,6 +356,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331C80);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003320E8);
 
+/* Copy the destination's declared number of 16-byte object entries. */
 void sdfModelCopyData(SdfObj *destination, SdfObj *source) {
     s16 count;
 

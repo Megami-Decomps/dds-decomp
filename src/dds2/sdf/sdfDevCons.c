@@ -11,7 +11,7 @@ typedef struct DevConsState {
     s16 cursorRow; /* 0x12 */
     u8 unk14; /* 0x14 */
     u8 pad15; /* 0x15 */
-    u8 charAttribute; /* 0x16: passed with each printed character */
+    u8 textAttribute; /* 0x16: passed with each printed character */
     u8 unk17; /* 0x17 */
     u8 pad18[4]; /* 0x18 */
     u8 *cells; /* 0x1C: two bytes per character cell */
@@ -25,6 +25,7 @@ void func_0033CE08(DevConsState *arg0, s32 arg1, s32 arg2);
 
 void func_00360E78(void *arg0, const char *arg1, void *arg2);
 
+/* Scroll the two-byte cell grid at its last row, or advance the cursor. */
 void sdfAdvanceConsoleRow(DevConsState *console) {
     if (console->cursorRow == console->rows - 1) {
         s32 rowBytes = console->columns * 2;
@@ -41,10 +42,12 @@ void sdfAdvanceConsoleRow(DevConsState *console) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033CE08);
 
+/* Forward a character and explicit attribute to the console renderer. */
 void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {
     func_0033CE08(console, character, attribute);
 }
 
+/* Format text into a fixed-size scratch buffer, then emit each character. */
 s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     char text[0x200];
     __builtin_va_list args;
@@ -57,7 +60,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     if (character != 0) {
         do {
             written++;
-            func_0033CE08(console, character, console->charAttribute);
+            func_0033CE08(console, character, console->textAttribute);
             cursor = text + written;
             character = *cursor;
         } while (character != 0);
@@ -65,15 +68,18 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     return written;
 }
 
+/* Set the cell coordinates of the next character. */
 void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
 }
 
+/* Select the attribute passed to each subsequently printed character. */
 void sdfDevConsSetCharacterAttribute(DevConsState *console, u8 attribute) {
-    console->charAttribute = attribute;
+    console->textAttribute = attribute;
 }
 
+/* Read or write the console's unidentified byte at offset 0x14. */
 u8 func_0033D058(DevConsState *console) {
     return console->unk14;
 }
