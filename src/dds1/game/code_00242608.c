@@ -688,9 +688,9 @@ void mnuShopDestroyScene(s32 arg) {
 }
 
 extern u8 *func_002448D0(void);
-extern s64 func_00244B30(u64 request);
-extern s64 func_00244B90(u64 request);
-extern s64 func_00244BC8(u64 request);
+extern s64 mnuCampRunPanel0(u64 request);
+extern s64 mnuCampRunPanel1(u64 request);
+extern s64 mnuCampRunPanel2(u64 request);
 
 /* Create the shop message-menu context and its three tasks (shop, shop_draw,
  * shop_update), forwarding an optional selection word into the context. */
@@ -701,9 +701,9 @@ s32 func_002449F0(s32 *arg0) {
     if (arg0 != 0) {
         *(s32 *)(ctx + 0x7C) = *arg0;
     }
-    kwlnTaskCreate(D_003BC3A0, 0x402, 1, 1, func_00244B30, 0, ctx);
-    kwlnTaskCreate(D_003AF418, 0x2B12, 1, 1, func_00244B90, 0, ctx);
-    result = kwlnTaskCreate(D_003AF428, 0x520E, 1, 1, func_00244BC8, func_00244970, ctx);
+    kwlnTaskCreate(D_003BC3A0, 0x402, 1, 1, mnuCampRunPanel0, 0, ctx);
+    kwlnTaskCreate(D_003AF418, 0x2B12, 1, 1, mnuCampRunPanel1, 0, ctx);
+    result = kwlnTaskCreate(D_003AF428, 0x520E, 1, 1, mnuCampRunPanel2, mnuShopDestroyScene, ctx);
     D_003BC39C = 1;
     return result;
 }

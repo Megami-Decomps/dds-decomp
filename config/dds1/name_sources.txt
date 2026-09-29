@@ -80,8 +80,6 @@
 0x0010AB90	evtUnkAB90Ensure	inferred	allocates D_003BA960 chain via 2E3E18/2E41B0/2E41A0 if null; parked on call arg-setup order
 0x0010B728	evtLinkWorkNode	inferred	Appends a work node to the doubly linked event list and increments its count.
 0x0010B768	evtUnlinkWorkNode	inferred	Unlinks a work node from the doubly linked event list and decrements its count.
-0x0010B728	evtUnkB728Link	inferred	splices node into D_003BA998 list with per-path tails and bumps D_003BA990
-0x0010B768	evtUnkB768Unlink	inferred	removes node from D_003BA994/998 list, clears links, decrements D_003BA990
 0x0010B7C0	bfContextCreate	inferred	legacy BFContext_Create: allocates and initialises a BF/FLW0 script context (0xF4)
 0x0010BA18	bfParseFLW0	inferred	legacy BF_ParseFLW0: validates the FLW0 magic and builds the script section tables
 0x0010BB88	scrProcCreateTask	inferred	wraps kwlnTaskCreate for a script-proc task; stores id at +0xE4
@@ -223,7 +221,6 @@
 0x00119000	sdfSetPackedValuePreservingFlag	inferred	Replaces the low fifteen bits of a packed halfword while preserving its high flag bit.
 0x001192B0	datMoveCursorX	inferred	Adds the supplied delta to cursor x and clamps to zero through xMax.
 0x001192D8	datMoveCursorY	inferred	Adds the supplied delta to cursor y and clamps to zero through yMax.
-0x00119300	ptyGetProfileStat	inferred	legacy PartyUnit_GetCurrentProfileStatByIndex_1to99: current-profile stat value for a unit, clamped to 1..99
 0x001199B0	evtCheckValueThreshold	inferred	evt event state and dispatch in game/code_00119900.c
 0x00119AA8	dds3FindEntryIndex	inferred	counts entries until +4 == arg0 with flag set; returns count or -1 (max 5)
 0x00119E00	ptyRecoverAllUnits	inferred	legacy Party_RecoverAllActiveUnits: restores HP/MP of every present active party row
@@ -744,8 +741,6 @@
 0x001C4100	btlFadeStaleSceneSlots	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C7230	btlSetScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C72A8	btlUpdateScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001D0F98	brsSelectEntryCode	inferred	legacy BattleResult_SelectEntryCode: per-target result entry code selector
-0x001D1118	brsShouldForceFallback	inferred	legacy BattleResult_ShouldForceFallbackDisplayTuple: predicate forcing the fallback display tuple
 0x001D44A8	btlFindTaskByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D4558	btlCountTasksForOwner	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D45A8	btlCountTasksByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c

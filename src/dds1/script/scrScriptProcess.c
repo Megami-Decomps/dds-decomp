@@ -81,7 +81,7 @@ extern void func_0010AC10(char *, u32);
 extern void func_002CFF98(void *);
 extern void func_0019B9A0(s32);
 extern void func_002D0918(void *);
-extern void evtUnkB768Unlink(void *);
+extern void evtUnlinkWorkNode(void *);
 
 void func_0010BD20(u8 *ctx) {
     func_0010AC10("end <%s>\n", *(u32 *)(ctx + 0xB4) + (*(u32 *)(ctx + 0xC8) << 5));
@@ -97,7 +97,7 @@ void func_0010BD20(u8 *ctx) {
     if (*(u32 *)(ctx + 0xD8) != 0) {
         func_002D0918((void *)*(u32 *)(ctx + 0xD8));
     }
-    evtUnkB768Unlink(ctx);
+    evtUnlinkWorkNode(ctx);
     func_002CFF98(ctx);
 }
 

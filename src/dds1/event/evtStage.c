@@ -23,12 +23,12 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0021FEC0);
 INCLUDE_ASM(const s32, "event/evtStage", func_0021FFE8);
 
 extern void func_003014F0(char *, char *, s32, s32, s32);
-extern void func_0010BC18(s32, void *, s32);
+extern void scrCreateProcessTaskFromResource(s32, void *, s32);
 extern char D_003D7B98[];
 
 void func_00220110(s32 eventId) {
     func_003014F0(D_003D7B98, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
-    func_0010BC18(0x3EB, D_003D7B98, 0);
+    scrCreateProcessTaskFromResource(0x3EB, D_003D7B98, 0);
 }
 
 INCLUDE_ASM(const s32, "event/evtStage", func_00220178);

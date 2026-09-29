@@ -54,15 +54,15 @@ void datMoveCursorY(DatCalcCursor *cursor, s32 delta) {
     cursor->y = (s16)value;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", ptyGetProfileStat);
+INCLUDE_ASM(const s32, "newdata/datCalc", func_00119300);
 
-extern s32 ptyGetProfileStat(u8 *, s32);
+extern s32 func_00119300(u8 *, s32);
 
 s32 func_00119368(u8 *unit, s32 statIndex) {
     if ((*(u16 *)(unit + 0xE) & 0x7FFF) == 0x1000) {
         return 1;
     }
-    return ptyGetProfileStat(unit, statIndex);
+    return func_00119300(unit, statIndex);
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001193A0);
