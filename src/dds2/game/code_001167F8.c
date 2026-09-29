@@ -2,11 +2,11 @@
 
 typedef struct WorldUnitState {
     u8 pad00[8];
-    u32 unit;
+    u32 unit; /* 0x08: passed to the unit value transition helpers */
     u8 pad0C[0x58];
     u32 flags;
     u8 pad68[0xC];
-    u32 value74;
+    u32 value74; /* Meaning unknown; exposed by func_00116800. */
 } WorldUnitState;
 
 typedef struct WorldUnitOwner {

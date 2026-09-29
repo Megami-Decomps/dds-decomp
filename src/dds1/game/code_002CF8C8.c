@@ -20,15 +20,18 @@ void sdfWakeAlarmThread(u32 unused0, u32 unused1, u32 threadId) {
     iWakeupThread(threadId);
 }
 
+/* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfSleepWithAlarm(u32 delay) {
-    u64 thread = GetThreadId();
-    CancelWakeupThread(thread);
-    SetAlarm(delay & 0xFFFF, sdfWakeAlarmThread, thread);
+    u64 threadId = GetThreadId();
+    CancelWakeupThread(threadId);
+    SetAlarm(delay & 0xFFFF, sdfWakeAlarmThread, threadId);
     SleepThread();
 }
 
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CF930);
 
+/* EE timer 0 count register; subtraction is reduced modulo 2^16 so
+ * wraparound does not make short elapsed intervals negative. */
 u32 sdfGetElapsedTimerTicks(u32 previous) {
     u32 current;
 
@@ -54,6 +57,7 @@ INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CF9A8);
 
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CFA68);
 
+/* A previously queued wakeup counts toward the requested sleep count. */
 void sdfSleepThreadCount(s32 count) {
     u64 threadId;
     s32 cancelledWakeup;

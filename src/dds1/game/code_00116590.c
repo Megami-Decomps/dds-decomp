@@ -1,18 +1,18 @@
 #include "common.h"
 
-typedef struct {
-    u8 pad0[8];
-    u32 unitHandle;
-    u8 padC[0x58];
+typedef struct WorldUnitState {
+    u8 pad00[8];
+    u32 unit; /* 0x08: passed to the unit value transition helpers */
+    u8 pad0C[0x58];
     u32 flags;
     u8 pad68[0xC];
-    u32 value74;
-} UnitObjectData;
+    u32 value74; /* Meaning unknown; exposed by func_00116598. */
+} WorldUnitState;
 
-typedef struct {
-    u8 pad0[0x18];
-    UnitObjectData *data;
-} UnitObject;
+typedef struct WorldUnitOwner {
+    u8 pad00[0x18];
+    WorldUnitState *state;
+} WorldUnitOwner;
 
 extern void *func_002CFEB8(s32 size);
 
@@ -25,8 +25,8 @@ u32 func_00116590(void) {
     return 1;
 }
 
-u32 func_00116598(UnitObject *obj) {
-    return obj->data->value74;
+u32 func_00116598(WorldUnitOwner *object) {
+    return object->state->value74;
 }
 
 typedef struct ActionObj {
@@ -54,16 +54,16 @@ void func_001165F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_00116608);
 
-void dds3ClearUnitObjectLowFlags(UnitObject *obj) {
-    obj->data->flags = obj->data->flags & 0xfffffffc;
+void dds3ClearUnitObjectLowFlags(WorldUnitOwner *object) {
+    object->state->flags = object->state->flags & 0xfffffffc;
 }
 
-void func_001166D0(u32 value, UnitObject *obj) {
-    evtSetUnitValueTransition(obj->data->unitHandle, value);
+void func_001166D0(u32 value, WorldUnitOwner *object) {
+    evtSetUnitValueTransition(object->state->unit, value);
 }
 
-void func_001166F0(UnitObject *obj) {
-    evtEndUnitValueTransition(obj->data->unitHandle);
+void func_001166F0(WorldUnitOwner *object) {
+    evtEndUnitValueTransition(object->state->unit);
 }
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_00116710);

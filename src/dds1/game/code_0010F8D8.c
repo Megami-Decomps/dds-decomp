@@ -2,7 +2,7 @@
 
 typedef struct {
     u8 pad0[8];
-    u32 value;
+    u32 callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
 } WorldEntry;
 
 typedef struct {
@@ -22,24 +22,25 @@ INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FA00);
 
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FA40);
 
+/* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
 void dds3AdvanceWorldCounter(void) {
     D_003BA9B8 = (D_003BA9B8 + 1) & 0xffff;
 }
 
-void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, u32 value) {
+void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, u32 callbackTarget) {
     if (entry != NULL) {
-        entry->value = value;
+        entry->callbackTarget = callbackTarget;
     }
 }
 
 u32 dds3GetWorldEntryCallbackTarget(WorldEntry *entry) {
-    u32 value;
+    u32 callbackTarget;
 
-    value = 0;
+    callbackTarget = 0;
     if (entry != NULL) {
-        value = entry->value;
+        callbackTarget = entry->callbackTarget;
     }
-    return value;
+    return callbackTarget;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FAC0);
@@ -47,21 +48,21 @@ INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FAC0);
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FB30);
 
 u32 func_0010FBC8(WorldObject *obj) {
-    s32 value;
+    s32 callbackTarget;
 
-    value = obj->entry->value;
-    if (value != 0) {
-        func_0010FA00(value);
+    callbackTarget = obj->entry->callbackTarget;
+    if (callbackTarget != 0) {
+        func_0010FA00(callbackTarget);
     }
     return 1;
 }
 
 u32 func_0010FBF8(WorldObject *obj) {
-    s32 value;
+    s32 callbackTarget;
 
-    value = obj->entry->value;
-    if (value != 0) {
-        func_0010FA40(value);
+    callbackTarget = obj->entry->callbackTarget;
+    if (callbackTarget != 0) {
+        func_0010FA40(callbackTarget);
     }
     return 1;
 }

@@ -7,7 +7,7 @@ extern u32 func_001A0710(u32);
 extern u32 func_00328D68(u32);
 
 typedef struct {
-    u32 flags; /* 0x00 */
+    u32 flags; /* 0x00: bit 0 toggled without disturbing the other bits */
     u32 value; /* 0x04 */
 } EventContext;
 
@@ -37,11 +37,13 @@ void evtDestroyTaskHierarchy(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
+/* The owner argument is part of the allocator callback signature; the
+ * returned context starts with both words clear. */
 EventContext *func_0024FE98(s32 *owner) {
-    EventContext *work = (EventContext *)func_00328D68(8);
-    work->flags = 0;
-    work->value = 0;
-    return work;
+    EventContext *context = (EventContext *)func_00328D68(8);
+    context->flags = 0;
+    context->value = 0;
+    return context;
 }
 
 void func_0024FEC0(EventContext *context, u32 value) {

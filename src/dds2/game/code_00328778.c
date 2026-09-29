@@ -32,20 +32,23 @@ void sdfWakeAlarmThread(u32 unused0, u32 unused1, u32 threadId) {
     iWakeupThread(threadId);
 }
 
+/* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfSleepWithAlarm(u32 delay) {
-    u64 thread = GetThreadId();
-    CancelWakeupThread(thread);
-    SetAlarm(delay & 0xFFFF, sdfWakeAlarmThread, thread);
+    u64 threadId = GetThreadId();
+    CancelWakeupThread(threadId);
+    SetAlarm(delay & 0xFFFF, sdfWakeAlarmThread, threadId);
     SleepThread();
 }
 
 INCLUDE_ASM(const s32, "game/code_00328778", func_003287E0);
 
-u32 sdfGetElapsedTimerTicks(u32 base) {
-    u32 now;
+/* EE timer 0 count register; subtraction is reduced modulo 2^16 so
+ * wraparound does not make short elapsed intervals negative. */
+u32 sdfGetElapsedTimerTicks(u32 previous) {
+    u32 current;
 
-    now = *(volatile u32 *)0x10000000;
-    return (now - base) & 0xFFFF;
+    current = *(volatile u32 *)0x10000000;
+    return (current - previous) & 0xFFFF;
 }
 
 void sdfRunTickWorkerThread(void) {
@@ -64,6 +67,7 @@ void sdfRunTickWorkerThread(void) {
 
 INCLUDE_ASM(const s32, "game/code_00328778", func_00328858);
 
+/* Register the thread under the list semaphore before starting it. */
 void func_00328918(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
     node->threadId = func_00328318(entry, stack, stackSize, priority);
     WaitSema(D_004390F8);
@@ -73,6 +77,7 @@ void func_00328918(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32
     _StartThread(node->threadId, arg);
 }
 
+/* A previously queued wakeup counts toward the requested sleep count. */
 void sdfSleepThreadCount(s32 count) {
     u64 threadId;
     s32 cancelledWakeup;
