@@ -4,4 +4,6 @@
 compiler_type = "gcc"
 compiler_command = "tools/cc.sh -Iinclude -Isrc"
 assembler_command = "tools/bin/mips-ps2-decompals-as -EL -march=r5900 -mabi=eabi -G8 -Iinclude"
+# The permuter looks for mips-linux-gnu-objdump on PATH; use the vendored one.
+objdump_command = "tools/bin/mips-ps2-decompals-objdump -d"
 asm_prelude_file = "tools/permuter_prelude.inc"
