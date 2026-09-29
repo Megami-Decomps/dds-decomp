@@ -450,7 +450,14 @@ void func_002C1B68(u32 *arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1B70);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1C20);
+void func_002C1C20(u8 *object, s32 arg1, s32 arg2, s32 arg3, s32 count, s32 arg5, s32 arg6, s32 arg7) {
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        func_00306CD0(object, arg1, arg2, arg3, 1, arg5, arg6, arg7);
+        object += 0xA0;
+    }
+}
 
 void func_002C1CD0(s32 object) {
     s32 first = *(s32 *)(object + 0x38);

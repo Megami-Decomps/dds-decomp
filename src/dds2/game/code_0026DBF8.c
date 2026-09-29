@@ -22,7 +22,7 @@ u32 func_002850B8(void);
 extern void func_00286270();
 u32 func_0026F700(u32);
 u32 func_0026F778(u32);
-extern u32 func_0026FC88(u32, u32, void (*)(), void (*)(), u32 (*)(), void (*)(), u32, u32, u32);
+extern u32 func_0026FC88(u32, u32, void (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
 extern void func_00279308(void);
 extern u32 func_00279440(u32, u32);
 extern u32 func_00279180();
@@ -40,7 +40,7 @@ extern void func_00270848();
 extern u32 func_00270160();
 extern void func_002701D0();
 extern void func_00270DD8();
-extern void func_00270F10();
+extern s32 func_00270F10();
 extern u32 func_00270D60();
 extern void func_00270DB0();
 extern void func_00272DA8();
@@ -130,7 +130,20 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DE08);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DF48);
+void func_0026DF48(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u16 arg4, u32 arg5) {
+    u8 buffer[0x20];
+    u32 flags = (arg3 & 0xFF) | 0xA09DC300;
+
+    func_0026E788(arg0, arg1, arg2, arg3, 0x4C, 0, arg5);
+    if (arg4 != 0) {
+        memset(buffer, 0, 0x20);
+        func_00314500(arg4, 1, buffer);
+        func_00311C50(arg0 + 0x27, arg1 + 0x146, arg2, flags, 4, buffer, 0x101, arg5);
+        func_0026E788(arg0, arg1, arg2, arg3, 0x50, 0, arg5);
+    } else {
+        func_0026E788(arg0, arg1, arg2, arg3, 0x54, 0, arg5);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E060);
 
@@ -160,7 +173,17 @@ void func_0026E508(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E560);
+void func_0026E560(void) {
+    s32 slots[2] = {2, 3};
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (D_00453D00[slots[i]] != 0) {
+            func_003054E8(D_00453D00[slots[i]]);
+        }
+        D_00453D00[slots[i]] = 0;
+    }
+}
 
 void func_0026E5F8(void) {
     if (D_00453D00[4] == 0) {
@@ -374,7 +397,36 @@ s32 mnuFindFreeMantraDrawItem(s32 address) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026FC88);
+u32 func_0026FC88(u32 pool, u32 kind, void (*update)(), void (*draw)(), u32 (*poll)(), void (*release)(), s16 arg6, s16 arg7, u32 data) {
+    u32 *item = (u32 *)mnuFindFreeMantraDrawItem(pool);
+
+    memset(item, 0, 0x24);
+    item[1] |= 1;
+    item[0] = kind;
+    item[7] = data;
+    *(s16 *)((u8 *)item + 0x1A) = arg7;
+    *(s16 *)((u8 *)item + 0x18) = arg6;
+    item[2] = (u32)poll;
+    if (update != 0) {
+        item[4] = (u32)update;
+    } else {
+        item[4] = (u32)func_0026FAB8;
+    }
+    if (draw != 0) {
+        item[5] = (u32)draw;
+    } else {
+        item[5] = (u32)func_0026FAB8;
+    }
+    item[3] = (u32)release;
+    if (arg6 > 0) {
+        item[1] = (item[1] & 0xFFFFF807) | 8;
+    } else if (poll != 0) {
+        item[1] = (item[1] & 0xFFFFF807) | 0x18;
+    } else {
+        item[1] = (item[1] & 0xFFFFF807) | 0x20;
+    }
+    return (u32)item;
+}
 
 s32 mnuFindMantraDrawItemByKind(u32 address, u32 kind) {
     MantraDrawPool *pool = (MantraDrawPool *)address;
@@ -513,7 +565,17 @@ void func_00270DB0(u32 obj) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270DD8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270F10);
+extern f32 func_003406A0(f32);
+extern void func_00270390(s32, s32, f32);
+
+s32 func_00270F10(s32 arg0, s32 arg1) {
+    u8 *data = *(u8 **)(arg1 + 0x20);
+    s32 amount = *(f32 *)(data + 8) * 128.0f;
+    f32 wave = func_003406A0((f32)*(s16 *)(data + 4) / 120.0f * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f));
+
+    func_00270390(amount, 0x53, (wave + 1.0f) * 0.5f);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270FA8);
 
@@ -952,7 +1014,49 @@ void func_00275598(u32 *sprite) {
     func_003297C8(*sprite);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002755B8);
+u32 func_002755B8(u32 *pool, u32 flags) {
+    s32 i;
+    u32 *item;
+    u32 *tail;
+    u32 header;
+
+    if (flags & 0x20) {
+        if (pool[3] != 0) {
+            return pool[3];
+        }
+    }
+    if (flags & 0xF) {
+        if (pool[1] == 0) {
+            return 0;
+        }
+        return pool[2];
+    }
+    item = (u32 *)pool[1];
+    for (i = 0; i < (s32)pool[4]; i++, item += 3) {
+        if ((item[0] & 1) == 0) {
+            memset(item, 0, 0xC);
+            header = item[0] | 1;
+            item[0] = header;
+            if (flags & 0x10) {
+                tail = (u32 *)pool[2];
+                if (tail != 0) {
+                    if (((tail[0] >> 1) & 0xF) == 9) {
+                        tail[0] = (tail[0] & 0xFFFFFFE1) | 8;
+                    } else {
+                        tail[0] = (tail[0] & 0xFFFFFFE1) | 6;
+                    }
+                    tail[2] = 0;
+                }
+                pool[2] = (u32)item;
+            } else {
+                pool[3] = (u32)item;
+                item[0] = header | 0x40;
+            }
+            return (u32)item;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002756E0);
 
@@ -1194,7 +1298,24 @@ void func_00279F70(u32 *arg0) {
     *arg0 = (*arg0 & 0xfffc03ff) | 0x800;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279F90);
+void func_00279F90(MantraDrawPool *pool, s32 mode) {
+    s32 i;
+    u32 *item = (u32 *)pool->items;
+
+    for (i = 0; i < pool->count; i++, item += 12) {
+        if ((item[0] >> 8) & 1) {
+            if (((item[0] >> 19) & 0xF) == 2) {
+                func_0027A798((u8 *)item, 5, 0);
+            } else if (mode == 1) {
+                func_0027A798((u8 *)item, 7, 0);
+            } else if (mode == 0) {
+                func_0027A798((u8 *)item, 9, 0);
+            } else {
+                func_00279F70(item);
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004258B8);
 
@@ -1237,7 +1358,17 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A30);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A800);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027AF40);
+extern f32 func_00341240(void *state);
+
+void func_0027AF40(s32 arg0, u8 *object) {
+    u8 table[4] = {0, 20, 40, 60};
+    u8 index;
+
+    object[0x20] = 0;
+    object[0x21] = 0;
+    index = func_00341240(0) * 3.0f;
+    object[0x22] = table[index];
+}
 
 void func_0027AFD8(void) {
 }
@@ -1252,7 +1383,13 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425AC8);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027B678);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C078);
+void func_0027C078(s32 arg0, u8 *object) {
+    u8 table[4] = {0, 10, 20, 30};
+    u8 index;
+
+    index = func_00341240(0) * 3.0f;
+    object[0x20] = table[index];
+}
 
 void func_0027C108(void) {
 }
@@ -1528,11 +1665,33 @@ void func_00285758(MantraEffectResource *resource) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285788);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285800);
+void func_00285800(s32 *state) {
+    u8 *particle;
+    s32 value;
+    s32 i;
+
+    state[0] = state[0] - 1;
+    if (state[0] < 0) {
+        value = func_00341240(0) * 60.0f + 60.0f;
+        state[1] = value;
+        state[0] = value;
+        *(f32 *)(state + 2) = func_00341240(0) * 0.20000005f + 0.4f;
+    }
+    particle = (u8 *)state + 0xC;
+    for (i = 7; i >= 0; i--) {
+        func_002858A0(particle);
+        particle += 0xC;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002858A0);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285A60);
+
+void func_00285A60(u8 *object) {
+    if (*(s8 *)(object + 0xA) != 0) {
+        func_003406A0((1.0f - (f32)*(s16 *)(object + 4) / (f32)*(s16 *)(object + 6)) * 3.14159265f);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285AC0);
 
