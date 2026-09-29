@@ -107,7 +107,113 @@ void func_00242708(ScrollOwner *owner, s32 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242780);
+typedef struct FxChild {
+    u16 offset;           /* 0x00 */
+    u8 pad02[6];
+    s16 fadeA;            /* 0x08 */
+    s16 fadeB;            /* 0x0A */
+    u8 pad0C[0x24];
+    struct FxChild *next; /* 0x30 */
+} FxChild;
+
+typedef struct FxNode {
+    s32 kind;             /* 0x00 */
+    u8 pad04[0x18];
+    s16 base;             /* 0x1C */
+    u8 pad1E[0x36];
+    FxChild *children;    /* 0x54 */
+    u8 pad58[0x24];
+    struct FxNode *next;  /* 0x7C */
+} FxNode;
+
+typedef struct FxWorld {
+    u8 pad00[0xC];
+    union {
+        s32 whole;
+        u16 low;
+    } limitv;             /* 0x0C */
+    u8 pad10[4];
+    s32 unk14;            /* 0x14 */
+    s32 unk18;            /* 0x18 */
+    s32 unk1C;            /* 0x1C */
+    u8 pad20[0x2010];
+    s32 count;            /* 0x2030 */
+    FxNode *nodes;        /* 0x2034 */
+} FxWorld;
+
+void func_00242780(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
+    FxNode *node;
+    FxChild *child;
+    s32 total;
+
+    if (world->count <= 0) {
+        return;
+    }
+    if (world->unk14 + delta < 0) {
+        world->unk14 = 10;
+    } else {
+        world->unk14 += delta;
+    }
+    if (world->limitv.whole + delta < 0) {
+        world->limitv.whole = 10;
+    } else {
+        world->limitv.whole += delta;
+    }
+    if (world->unk18 > world->limitv.whole) {
+        world->unk18 = world->limitv.whole;
+    }
+    node = world->nodes;
+    while (node != NULL) {
+        for (child = node->children; child != NULL; child = child->next) {
+            offset = child->offset;
+            base = node->base;
+            ubase = (u16)node->base;
+            total = offset + base;
+            if (total < threshold) {
+                continue;
+            }
+            total += delta;
+            if (total < base) {
+                child->offset = 0;
+            } else if (world->limitv.whole < total) {
+                child->offset = world->limitv.low - ubase - 1;
+            } else {
+                child->offset = offset + delta;
+            }
+            switch (node->kind) {
+            case 0x12:
+                if (child->fadeA != 0) {
+                    child->fadeA += delta;
+                    if (child->fadeA < 0) {
+                        child->fadeA = 0;
+                    }
+                    if (world->limitv.whole < child->fadeA + delta) {
+                        child->fadeA = world->limitv.whole - 1;
+                    }
+                }
+                break;
+            case 3:
+            case 0x14:
+            case 0x15:
+            case 0x1A:
+                if (child->fadeB != 0) {
+                    child->fadeB += delta;
+                    if (child->fadeB < 0) {
+                        child->fadeB = 0;
+                    }
+                    if (world->limitv.whole < child->fadeB + delta) {
+                        child->fadeB = world->limitv.whole - 1;
+                    }
+                }
+                break;
+            }
+        }
+        node = node->next;
+    }
+    world->unk1C -= 1;
+    func_002300B8(world, delta, threshold, base, offset, ubase, node);
+    func_0022FDE8(world);
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242950);
 
