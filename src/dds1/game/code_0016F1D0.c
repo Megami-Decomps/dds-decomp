@@ -27,17 +27,98 @@ extern u64 effParamTableGetBlock(u64, u64);
 extern void func_001705A0();
 
 extern s32 func_0018DDF8(s32 color, s32 param);
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F1D0);
 
-void func_0016F420(u64 arg0) {
-    u64 temp_v0;
+/* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
+ * `count` vertices spread evenly around the circle from -pi/2. */
+typedef struct EffectRingHeader {
+    u8 head[0x58];
+} EffectRingHeader;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_0016F1D0(temp_v0);
+typedef struct EffectRingVertex {
+    s32 pad0;
+    s32 offset;
+    f32 angle;
+    s32 padC;
+} EffectRingVertex;
+
+typedef struct EffectRing {
+    u8 pad00[0x10];
+    u32 count;
+    u8 pad14[8];
+    s32 spread;
+    u8 pad20[0x10];
+    f32 param30;
+    f32 param34;
+    f32 param38;
+    u8 pad3C[0x14];
+    u32 unk50;
+    u32 unk54;
+    EffectRingVertex *vertices;
+    s32 unk5C;
+    u32 color;
+    f32 scale;
+    f32 unk68;
+    u8 pad6C[4];
+    f32 unk70;
+    f32 unk74;
+    u32 handle;
+    u8 *matrix;
+} EffectRing;
+
+extern u32 func_002D03F8(s32);
+extern u32 sdfResourceRetainAddress(u32);
+extern u8 *func_00170558(u32);
+extern s32 effMiscRand(void *);
+extern u8 D_0034DF38[];
+
+/* K&R: func_0016F420 passes the table block as the raw 64-bit value. */
+EffectRing *func_0016F1D0(source)
+EffectRing *source;
+{
+    u32 handle;
+    EffectRing *ring;
+    f32 angle;
+    f32 step;
+    u32 spread;
+    u32 i;
+
+    handle = func_002D03F8(source->count * 16 + 0x80);
+    ring = (EffectRing *)sdfResourceRetainAddress(handle);
+    memcpy(ring, source, 0x58);
+    ring->vertices = (EffectRingVertex *)((u8 *)ring + 0x80);
+    ring->handle = handle;
+    ring->color = 0x80808080;
+    ring->unk68 = ring->param38;
+    ring->unk70 = ring->param30;
+    ring->unk74 = ring->param34;
+    ring->unk5C = 0;
+    ring->scale = 1.0f;
+    if (ring->spread == 0) {
+        ring->spread = 1;
+    }
+    angle = -1.5707963f;
+    ring->matrix = func_00170558(ring->count);
+    *(f32 *)(ring->matrix + 0x5C) = 1.0f;
+    *(u32 *)(ring->matrix + 0x50) = ring->unk54;
+    step = 6.2831853f / ring->count;
+    spread = ring->spread;
+    for (i = 0; i < ring->count; i++) {
+        ring->vertices[i].offset = -(effMiscRand(D_0034DF38) % spread);
+        ring->vertices[i].angle = angle;
+        angle += step;
+    }
+    return ring;
 }
 
-void func_0016F440(void) {
-    func_0016F1D0();
+void func_0016F420(u64 table) {
+    u64 block;
+
+    block = effParamTableGetBlock(table, 0);
+    func_0016F1D0(block);
+}
+
+void func_0016F440(EffectRing *ring) {
+    func_0016F1D0(ring);
 }
 
 void func_0016F458(EffectRecordGroup *group) {

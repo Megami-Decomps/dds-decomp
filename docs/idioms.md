@@ -282,6 +282,13 @@ the retail assembler: building everything with it changes both ELFs in
 thousands of places, and the text size too. Treat those functions as
 unmatched. Don't switch assemblers per file.
 
+Retail's assembler also never fills a branch delay slot with the instruction
+that reads the FPR the preceding `mtc1` wrote: `mtc1 $4,$f1; cvt.s.w $f1,$f1;
+b; nop`, never `b; cvt.s.w`. The 2.96 as swaps it, and no as option or other
+ee assembler reproduces the retail rule without changing other code, so
+`tools/as_coproc_delay.py` applies it to cc1 output before `as` (in the build
+and in `tools/cc.sh`). It changes nothing that already matched.
+
 ## Not allowed
 
 These are fakes, and check_unit reports them as `TRICK`:

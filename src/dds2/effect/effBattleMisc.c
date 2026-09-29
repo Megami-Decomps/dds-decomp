@@ -8,12 +8,12 @@ extern u32 D_003AB050[];
 
 extern u32 func_00169448(void);
 
-extern void D_001697D0();
+extern void func_001697D0();
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001696D0);
 
 void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
-    D_001697D0(func_00169448(), arg);
+    func_001697D0(func_00169448(), arg);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169740);

@@ -263,8 +263,8 @@ void func_00185BA8(void *work) {
     func_001855B8(work);
 }
 
-void func_00185BC0(void) {
-    D_001855C8();
+void func_00185BC0(u8 *work, s32 value) {
+    func_001855C8(work, value);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185BD8);

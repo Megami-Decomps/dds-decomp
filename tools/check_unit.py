@@ -138,11 +138,13 @@ def main():
             parts = line.split()
             if len(parts) == 4 and parts[2] in "Tt":
                 funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
+        undefined = {l.split()[-1] for l in run(str(BIN / "mips-ps2-decompals-nm"), "-u", str(obj)).splitlines() if l.strip()}
         # The build compiles the unit with its asm included, not with SKIP_ASM.
         # ee-gcc 2.96's CSE hashes symbol-name addresses, so the preprocessed
         # text around a function can change its code: compare each C function
         # as the build compiles it, relocated fields masked.
         context = {}
+        as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         full = Path(tmp) / "full.o"
         rf = subprocess.run([str(ROOT / "tools/cc.sh"), *extra,
                              str(args.source.resolve() if args.source else unit), "-o", str(full)],
@@ -166,7 +168,15 @@ def main():
                     foff, fsize = fsyms[name]
                     if fsize != size or masked(ftext[foff:foff + fsize], foff, frel) != \
                             masked(text[off:off + size], off, relocs):
-                        context[name] = (fsize, size)
+                        # The build links the full-unit code: if that matches retail
+                        # (relocated fields masked), only the SKIP_ASM compile differs.
+                        addr = address(name, syms)
+                        roff = va_to_off(segs, addr) if addr is not None else None
+                        if roff is not None and masked(ftext[foff:foff + fsize], foff, frel) == \
+                                masked(retail[roff:roff + fsize], foff, frel):
+                            as_built.add(name)
+                        else:
+                            context[name] = (fsize, size)
         else:
             # Usually an INCLUDE_ASM whose asm file splat has not written yet
             # (run configure.py --force-split). Unverifiable is not clean.
@@ -193,6 +203,10 @@ def main():
         if addr is None:
             print(f"?    {name}: no address (add it to symbol_addrs.txt or use func_XXXXXXXX)")
             bad += 1
+            continue
+        if name in as_built:
+            ok += 1
+            print(f"OK   {name} @ 0x{addr:08X} (as built in the full unit; the SKIP_ASM compile differs)")
             continue
         roff = va_to_off(segs, addr)
         diffs = []
@@ -497,6 +511,25 @@ def main():
     for old in sorted(set(re.findall(r"\bfunc_[0-9A-F]{8}\b", unit.read_text())) & renamed.keys()):
         bad += 1
         print(f"STALE {old}: symbol_addrs names it {renamed[old]}; use that name")
+    # An auto-named symbol the C references but nothing defines (symbol_addrs, the
+    # undefined_*_auto lists, a splat label, or C in this game's tree) links only
+    # against a stale build tree.
+    known = set(syms) | set(re.findall(r"^(\w+)\s*=", "".join(
+        p.read_text() for p in (ROOT / "config" / version).glob("undefined_*_auto.txt")), re.M))
+    wanted = {n for n in undefined - known if AUTO.match(n)}
+    if wanted:
+        alt = "|".join(sorted(wanted))
+        wanted -= set(subprocess.run(["grep", "-rhoE", rf"^\s*(glabel|dlabel|jlabel|nonmatching) ({alt})\b",
+                                      str(ROOT / "asm" / version)], capture_output=True, text=True).stdout.split()[1::2])
+    if wanted:
+        for path in subprocess.run(["grep", "-rlwE", "|".join(sorted(wanted)), str(ROOT / "src" / version)],
+                                   capture_output=True, text=True).stdout.splitlines():
+            source = Path(path).read_text()
+            wanted = {n for n in wanted if not re.search(
+                rf"^(?!extern\b)[A-Za-z_][^;\n]*\b{n}\s*(\([^;]*$|(\[[^\]]*\])*\s*[=;])", source, re.M)}
+        for name in sorted(wanted):
+            bad += 1
+            print(f"UNDEF {name}: nothing defines it (symbol_addrs, splat label or C); a fresh link fails")
     print(f"{ok} match, {bad} differ")
     sys.exit(1 if bad else 0)
 
