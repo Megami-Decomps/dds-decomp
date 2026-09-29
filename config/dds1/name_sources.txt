@@ -1305,6 +1305,7 @@
 0x00261F88	brsTaskAllowUpdate	inferred	sets D_003BC52A=1 (the companion of the blocked latch) and reports success
 0x00261F98	brsTaskPollDone	inferred	polls the battle-result task state machine (wraps func_00262938)
 0x00261FB0	brsTaskHasPendingRows	inferred	reads D_003BC529, latched by brsTaskLatchPendingRows from context+0x344
+0x00261FD8	gstApplyCounterDeltaTable	inferred	byte-identical twin of DDS2 gstApplyCounterDeltaTable @ 0x298EA8: walks three MenuIconRef entries and applies each non-zero id/param through the progress-counter adjuster
 0x00262038	gstApplyBundleMacca	inferred	adds the u32 macca field at +0xC of the reward bundle whose first 0x10 bytes gstApplyCounterDeltaTable walks as three MenuIconRefs
 0x00262050	ptyClampExp	inferred	legacy PartyUnit_ClampExpToLevel99Cap: clamps a unit's accumulated EXP to the level-99 cap
 0x00262148	brsApplyPartyRewards	inferred	legacy BattleResult_ApplyPartyRewardDeltas: applies EXP/level/profile deltas to a party row

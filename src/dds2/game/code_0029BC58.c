@@ -280,7 +280,7 @@ void func_0029CDD8(void) {
 extern u8 D_003D9D58[];
 
 /* Read the value paired with the highest of three thresholds not above input. */
-u8 func_0029CDF0(s32 value) {
+u8 brsGetLevelStepForValue(s32 value) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
@@ -291,7 +291,7 @@ u8 func_0029CDF0(s32 value) {
     return D_003D9D58[1];
 }
 
-u8 func_0029CE30(s32 position, s32 increment) {
+u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
     u8 *table = D_003D9D58;
     s32 i = 2;
     u8 *limit = table + 4;
