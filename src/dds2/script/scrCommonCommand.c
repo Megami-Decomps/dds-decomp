@@ -623,7 +623,7 @@ s32 func_0010EA58(void)
     f32 first;
     f32 second;
 
-    mode = func_0010D650(2);
+    mode = scrReadIntParameter(2);
     switch (mode)
     {
     case 1:
