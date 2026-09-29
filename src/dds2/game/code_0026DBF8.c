@@ -111,7 +111,20 @@ void func_003054E8(u32);
 extern u32 func_003292A8(u32);
 extern u32 sdfMemoryGetBlockAddress(u32);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DBF8);
+s32 func_0026DBF8(void) {
+    s32 result = 0;
+
+    if (mdlFlagTest(0x920)) {
+        result = 1;
+    }
+    if (mdlFlagTest(0x921)) {
+        result = 2;
+    }
+    if (mdlFlagTest(0x922)) {
+        result = 3;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
 
