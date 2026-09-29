@@ -3,24 +3,28 @@
 extern s32 func_00101958(void);
 
 typedef struct ScriptCommandBuffer {
-    u8 pad0[0x1C];
-    s32 count;
+    u8 pad0[0x18];
+    s32 pc; /* 0x18 */
+    s32 count; /* 0x1C */
     u8 kinds[0x1C];
     u32 values[0x20];
+    u32 *instructions; /* 0xBC */
+    u8 padC0[0x30];
+    void *actor; /* 0xF0: battle actor bound to the active script */
 } ScriptCommandBuffer;
 
-void func_0010C250(u32 unused, u32 value) {
-    s32 context;
+void func_0010C250(u32 unused, u32 actor) {
+    ScriptCommandBuffer *context;
 
-    context = func_00101958();
-    *(u32 *)(context + 0xf0) = value;
+    context = (ScriptCommandBuffer *)func_00101958();
+    context->actor = (void *)actor;
 }
 
 u32 func_0010C278(void) {
-    s32 context;
+    ScriptCommandBuffer *context;
 
-    context = func_00101958();
-    return *(u32 *)(context + 0xf0);
+    context = (ScriptCommandBuffer *)func_00101958();
+    return (u32)context->actor;
 }
 
 void func_0010C298(u32 task) {
@@ -63,14 +67,14 @@ INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C408);
 
 INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C4E0);
 
-u32 scrPushNextInstructionValue(u32 address) {
-    s32 instruction;
-    s32 context;
+u32 scrPushNextInstructionValue(ScriptCommandBuffer *script) {
+    s32 nextPc;
+    ScriptCommandBuffer *context;
 
-    context = (s32)address;
-    instruction = *(s32 *)(context + 0x18) + 1;
-    *(s32 *)(context + 0x18) = instruction;
-    scrPushInteger(address, *(u32 *)(instruction * 4 + *(s32 *)(context + 0xbc)));
-    *(s32 *)(context + 0x18) = *(s32 *)(context + 0x18) + 1;
+    context = script;
+    nextPc = context->pc + 1;
+    context->pc = nextPc;
+    scrPushInteger(script, context->instructions[nextPc]);
+    context->pc = context->pc + 1;
     return 1;
 }

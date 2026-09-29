@@ -396,15 +396,24 @@ s32 func_002685C0(void) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002685F0);
 
-void func_002686D0(s32 arg0) {
-    u16 temp_E = *(u16 *)(arg0 + 0xe);
-    u16 temp_8 = *(u16 *)(arg0 + 8);
-    u16 temp_C = *(u16 *)(arg0 + 0xc);
-    u16 temp_M = temp_E & 0xfa2f;
+typedef struct {
+    u8 pad00[6];
+    u16 previousA; /* 0x06 */
+    u16 currentA; /* 0x08 */
+    u16 previousB; /* 0x0A */
+    u16 currentB; /* 0x0C */
+    u16 flags; /* 0x0E */
+} SceneOptionRecord;
 
-    *(u16 *)(arg0 + 6) = temp_8;
-    *(u16 *)(arg0 + 0xa) = temp_C;
-    *(u16 *)(arg0 + 0xe) = temp_M;
+void func_002686D0(SceneOptionRecord *option) {
+    u16 flags = option->flags;
+    u16 currentA = option->currentA;
+    u16 currentB = option->currentB;
+    u16 retainedFlags = flags & 0xfa2f;
+
+    option->previousA = currentA;
+    option->previousB = currentB;
+    option->flags = retainedFlags;
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002686F0);
@@ -419,8 +428,26 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00268AA0);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268B48);
 
+typedef struct {
+    u8 pad00[0x14];
+    u8 unk14;
+    u8 pad15[0x8B];
+} SceneFrameRecord;
+
+typedef struct {
+    u8 pad00[0x18];
+    SceneFrameRecord *records;
+} SceneFrameTable;
+
+typedef struct {
+    u8 pad00[0x64];
+    SceneFrameTable *frameTable;
+    u8 pad68[0x7C];
+    s32 mode; /* 0xE4 */
+} SceneFrameOwner;
+
 s32 func_00268BE0(s32 object) {
-    switch (*(s32 *)(object + 0xe4)) {
+    switch (((SceneFrameOwner *)object)->mode) {
     case 1:
         return 0x32;
     case 2:
@@ -430,11 +457,11 @@ s32 func_00268BE0(s32 object) {
     }
 }
 
-u8 func_00268C08(s32 arg0) {
-    s32 temp_v0;
+u8 func_00268C08(SceneFrameOwner *scene) {
+    s32 index;
 
-    temp_v0 = func_00268BE0(arg0);
-    return *(u8 *)(temp_v0 * 0xa0 + *(s32 *)(*(s32 *)(arg0 + 100) + 0x18) + 0x14);
+    index = func_00268BE0((s32)scene);
+    return scene->frameTable->records[index].unk14;
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268C48);

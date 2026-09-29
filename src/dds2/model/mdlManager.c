@@ -22,11 +22,15 @@ typedef struct MdlSub {
 /* Record behind MdlCtx.inner. */
 typedef struct MdlInner {
     u8 unk0[8];  /* 0x0 */
-    u32 unk8;    /* 0x8: freed through func_002DA1B0 */
+    u32 resourceHandle; /* 0x8: released by func_00232F58 */
     u8 unkC[8];  /* 0xC */
-    u32 *list;   /* 0x14: intrusive list walked by func_00218320/368 */
+    u32 *list;   /* 0x14: intrusive list walked by func_00232E38/80 */
     u8 unk18[4]; /* 0x18 */
     u32 unk1C;   /* 0x1C */
+    u8 pad20[0x30];
+    u128 vector50; /* 0x50 */
+    u128 vector60; /* 0x60 */
+    u128 vector70; /* 0x70 */
 } MdlInner;
 
 /* Context shared by the matched mdlManager helpers. */
@@ -34,7 +38,7 @@ typedef struct MdlCtx {
     u8 unk0[0xC];      /* 0x0 */
     MdlSub *sub;       /* 0xC */
     u32 unk10;         /* 0x10 */
-    u32 *list14;       /* 0x14: intrusive list walked by func_00218050 */
+    u32 *list14;       /* 0x14: intrusive list walked by func_00232B68 */
     MdlInner *inner;   /* 0x18 */
 } MdlCtx;
 
@@ -166,7 +170,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", mdlSetNodeFloat20);
 
 /* These shims transfer vectors between model state and VU0 registers. */
 void func_00232A88(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x50;
+    void *vec = &ctx->inner->vector50;
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -181,7 +185,7 @@ void func_00232AA0(MdlCtx *ctx) {
         "vmove.w vf10, vf0\n"
         ".set reorder"
         : : : "memory");
-    vec = (u8 *)ctx->inner + 0x50;
+    vec = &ctx->inner->vector50;
     __asm__ volatile (
         ".set noreorder\n"
         "sqc2 vf10, 0(%0)\n"
@@ -190,7 +194,7 @@ void func_00232AA0(MdlCtx *ctx) {
 }
 
 void func_00232AB8(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x60;
+    void *vec = &ctx->inner->vector60;
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -201,7 +205,7 @@ void func_00232AB8(MdlCtx *ctx) {
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232AD0);
 
 void func_00232B28(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x70;
+    void *vec = &ctx->inner->vector70;
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -210,7 +214,7 @@ void func_00232B28(MdlCtx *ctx) {
 }
 
 void func_00232B40(MdlCtx *ctx) {
-    void *vec = (u8 *)ctx->inner + 0x70;
+    void *vec = &ctx->inner->vector70;
     __asm__ volatile (
         ".set noreorder\n"
         "sqc2 vf10, 0(%0)\n"
@@ -218,16 +222,15 @@ void func_00232B40(MdlCtx *ctx) {
         : : "r"(vec) : "memory");
 }
 
-u32 func_00232B58(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x1c);
+u32 func_00232B58(MdlCtx *ctx) {
+    return ctx->inner->unk1C;
 }
 
-void func_00232B68(u32 arg0, u32 arg1) {
-    u32 *puVar1;
+void func_00232B68(MdlCtx *ctx, u32 value) {
+    u32 *node;
 
-    for (puVar1 = *(u32 **)((s32)arg0 + 0x14); puVar1 != (u32 *)0x0;
-            puVar1 = (u32 *)*puVar1) {
-        mdlSetResourceFrame(arg0, puVar1, arg1);
+    for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
+        mdlSetResourceFrame(ctx, node, value);
     }
 }
 
@@ -241,21 +244,19 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00232C70);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232D40);
 
-void func_00232E38(s32 arg0) {
-    u32 *puVar1;
+void func_00232E38(MdlCtx *ctx) {
+    MdlNode *node;
 
-    for (puVar1 = *(u32 **)(*(s32 *)(arg0 + 0x18) + 0x14); puVar1 != (u32 *)0x0;
-            puVar1 = (u32 *)*puVar1) {
-        func_00334618(puVar1);
+    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+        func_00334618(node);
     }
 }
 
-void func_00232E80(s32 arg0) {
-    u32 *puVar1;
+void func_00232E80(MdlCtx *ctx) {
+    MdlNode *node;
 
-    for (puVar1 = *(u32 **)(*(s32 *)(arg0 + 0x18) + 0x14); puVar1 != (u32 *)0x0;
-            puVar1 = (u32 *)*puVar1) {
-        func_00334638(puVar1);
+    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+        func_00334638(node);
     }
 }
 
@@ -284,8 +285,8 @@ u32 mdlGetTableWord(s32 idx) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlGetNodeRefHalf);
 
-void func_00232F58(s32 arg0) {
-    func_00333060(*(u32 *)(*(s32 *)(arg0 + 0x18) + 8));
+void func_00232F58(MdlCtx *ctx) {
+    func_00333060(ctx->inner->resourceHandle);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232F78);

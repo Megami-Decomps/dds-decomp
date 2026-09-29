@@ -2,15 +2,22 @@
 
 extern s32 func_002C8128(u32);
 
+/* Intrusive list node threaded through +0x4. */
 typedef struct FileNode {
-    u8 pad0[4];
-    struct FileNode *next;
+    u32 unk0;              /* 0x0 */
+    struct FileNode *next; /* 0x4 */
 } FileNode;
 
-typedef struct FileOwner {
-    u8 pad0[0x18];
-    FileNode *first;
-} FileOwner;
+/* Work record behind the fileManager getters below. */
+typedef struct FileWork {
+    u8 unk0[0x10];   /* 0x0 */
+    u32 unk10;       /* 0x10 */
+    u32 size;        /* 0x14: loaded resource size */
+    FileNode *head;  /* 0x18 */
+    u8 unk1C[4];     /* 0x1C */
+    u32 resourceHandle; /* 0x20 */
+    u32 unk24;       /* 0x24 */
+} FileWork;
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7D00);
 
@@ -18,9 +25,9 @@ INCLUDE_ASM(const s32, "file/fileManager", func_002C7D78);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7E28);
 
-void filePrependNode(FileOwner *owner, FileNode *node) {
-    node->next = owner->first;
-    owner->first = node;
+void filePrependNode(FileWork *list, FileNode *node) {
+    node->next = list->head;
+    list->head = node;
 }
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7EF8);
@@ -45,20 +52,20 @@ void func_002C80E8(u32 arg0) {
     func_002C8040(arg0, 1, 0, 0);
 }
 
-u32 func_002C8108(s32 arg0) {
-    return *(u32 *)(arg0 + 0x20);
+u32 func_002C8108(FileWork *work) {
+    return work->resourceHandle;
 }
 
-u32 func_002C8110(s32 arg0) {
-    return *(u32 *)(arg0 + 0x24);
+u32 func_002C8110(FileWork *work) {
+    return work->unk24;
 }
 
-u32 func_002C8118(s32 arg0) {
-    return *(u32 *)(arg0 + 0x14);
+u32 func_002C8118(FileWork *work) {
+    return work->size;
 }
 
-u32 func_002C8120(s32 arg0) {
-    return *(u32 *)(arg0 + 0x10);
+u32 func_002C8120(FileWork *work) {
+    return work->unk10;
 }
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8128);

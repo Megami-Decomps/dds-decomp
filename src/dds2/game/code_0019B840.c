@@ -35,11 +35,11 @@ extern FntList D_00452360;
 
 /* 0x24-byte table entry in the D_003D6C80 font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
-    void *unk0;  /* 0x0: buffer released by func_001945A8 */
+    void *buffer; /* 0x0: released by frFontFreeEntry */
     void *unk4;  /* 0x4: value record (u16 pair read via D_003D6C84 view) */
     u32 unk8;    /* 0x8 */
     u32 unkC;    /* 0xC */
-    u8 *unk10;   /* 0x10: flag bytes set by func_00193C38 */
+    u8 *flagBytes; /* 0x10: first byte enables entry, second stores value + 1 */
     void *unk14; /* 0x14 */
     void *unk18; /* 0x18 */
     void *unk1C; /* 0x1C */
@@ -57,8 +57,7 @@ typedef struct FrFontSysLocal {
     void *unk158;           /* 0x158: passed to func_002D1B90 by func_00194440 */
     void *unk15C;           /* 0x15C: passed to func_002D1B90 by func_00194440 */
     u8 unk160[0x34];        /* 0x160 */
-    void *unk194;           /* 0x194: glyph slot */
-    void *unk198;           /* 0x198: glyph slot */
+    void *glyphSlots[2]; /* 0x194: glyph chain slots */
 } FrFontSysLocal;
 
 extern FrFontSysLocal D_00452720;
@@ -106,8 +105,8 @@ void func_0019B8B0(s32 value) {
 void frFontSetEntryFlag(s32 index, s32 flag) {
     FrFontEntry *entry = &D_00452720.entries[index & 0xFF];
 
-    entry->unk10[0] = 1;
-    entry->unk10[1] = flag + 1;
+    entry->flagBytes[0] = 1;
+    entry->flagBytes[1] = flag + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B900);
@@ -141,8 +140,8 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BEB8);
 
 void frFontReleaseAll(void) {
     func_0019C2F8();
-    func_0019C4D0(D_00452720.unk194);
-    func_0019C4D0(D_00452720.unk198);
+    func_0019C4D0(D_00452720.glyphSlots[0]);
+    func_0019C4D0(D_00452720.glyphSlots[1]);
     func_001A02D0(D_00452720.unk150);
     func_001A02D0(D_00452720.unk154);
     func_0019B7A8();
@@ -161,8 +160,8 @@ void frFontFreeEntry(s32 index) {
     }
     D_003B2F30[slot] = 0;
     entry = &D_00452720.entries[slot];
-    if (entry->unk0 != NULL) {
-        func_003297C8(entry->unk0);
+    if (entry->buffer != NULL) {
+        func_003297C8(entry->buffer);
         entry->unk1C = NULL;
     }
     entry->unk18 = NULL;

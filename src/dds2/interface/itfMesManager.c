@@ -110,31 +110,31 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 
 u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
 
-/* Item chained off a window node (+0x28); recolored by func_0019DA50. */
+/* Item chained off a window node (+0x28); recolored by func_001A5A80. */
 typedef struct ItfMesItem {
     u8 unk0[0x10];         /* 0x0 */
     u32 word10;            /* 0x10: low byte is the color */
     u8 unk14[2];           /* 0x14 */
-    u8 flag16;             /* 0x16: tested by func_0019DB40 */
+    u8 flag16;             /* 0x16: tested by func_001A5B70 */
     u8 unk17[0x11];        /* 0x17 */
     struct ItfMesItem *next; /* 0x28 */
 } ItfMesItem;
 
-/* Window chain node walked by frFontMeasureGlyphChain/DA50/DB40. */
+/* Window chain node shared by positioning and child-formatting helpers. */
 typedef struct ItfMesNode {
     u8 unk0[4];        /* 0x0 */
-    s32 unk4;          /* 0x4: adjusted by func_0019D8E8 */
-    s32 unk8;          /* 0x8: adjusted by func_0019D8E8 */
-    s32 unkC;          /* 0xC: summed over adjacent nodes sharing unk8 */
+    s32 x;             /* 0x4: adjusted with horizontal node offsets */
+    s32 y;             /* 0x8: groups nodes on the same row */
+    s32 advance;       /* 0xC: accumulated within a row */
     u8 unk10[4];       /* 0x10 */
-    s32 unk14;         /* 0x14: set by frFontMeasureGlyphChain */
+    s32 unk14;         /* 0x14: set by func_001A5950 */
     u8 unk18[4];       /* 0x18 */
     ItfMesItem *child; /* 0x1C */
     u8 unk20[4];       /* 0x20 */
     struct ItfMesNode *next; /* 0x24 */
 } ItfMesNode;
 
-/* Operands of func_0019D8B8: word at +0x8, divisor at +0x12. */
+/* Operands of func_001A58E8: word at +0x8, divisor at +0x12. */
 typedef struct ItfMesSpan {
     u8 unk0[8]; /* 0x0 */
     s32 unk8;   /* 0x8 */
@@ -560,23 +560,22 @@ s32 func_001A58E8(ItfMesSpan *arg0, ItfMesSpan *arg1) {
     return ((arg1->unk8 - arg0->unk8) >> 3) / arg1->unk12 + 1;
 }
 
-void func_001A5918(ItfMesNode *node, s32 arg1, s32 arg2) {
+void func_001A5918(ItfMesNode *node, s32 dx, s32 dy) {
     if (node == NULL) {
         return;
     }
     do {
-        node->unk4 += arg1;
-        node->unk8 += arg2;
+        node->x += dx;
+        node->y += dy;
         node = node->next;
     } while (node != NULL);
 }
 
 /* Persona 4 func_0027a340 @ 0027A340 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5950(u8 *arg0, int arg1)
-{
-    while (arg0 != ((void*)0)) {
-        *(int *)(arg0 + 0x14) = arg1;
-        arg0 = *(u8 **)(arg0 + 0x24);
+void func_001A5950(ItfMesNode *node, s32 value) {
+    while (node != NULL) {
+        node->unk14 = value;
+        node = node->next;
     }
 }
 
@@ -585,28 +584,27 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5988);
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5A28);
 
 /* Persona 4 func_0027a4d0 @ 0027A4D0 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5A80(int param_1,u32 param_2)
-{
-  int iVar1;
-  for (; param_1 != 0; param_1 = *(int *)(param_1 + 0x24)) {
-    for (iVar1 = *(int *)(param_1 + 0x1c); iVar1 != 0; iVar1 = *(int *)(iVar1 + 0x28)) {
-      *(u32 *)(iVar1 + 0x10) = *(u32 *)(iVar1 + 0x10) & 0xffffff00 | param_2;
+void func_001A5A80(ItfMesNode *node, u32 color) {
+    ItfMesItem *item;
+
+    for (; node != NULL; node = node->next) {
+        for (item = node->child; item != NULL; item = item->next) {
+            item->word10 = item->word10 & 0xffffff00 | color;
+        }
     }
-  }
-  return;
 }
 
 s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     s32 best = 0;
 
     while (node != NULL) {
-        s32 key = node->unk8;
+        s32 key = node->y;
         s32 total = 0;
 
         do {
-            total += node->unkC;
+            total += node->advance;
             node = node->next;
-        } while (node != NULL && key == node->unk8);
+        } while (node != NULL && key == node->y);
         if (total > best) {
             best = total;
         }
@@ -617,14 +615,12 @@ s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5B20);
 
 /* Persona 4 func_0027a580 @ 0027A580 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5B70(int param_1)
-{
-  for (; param_1 != 0; param_1 = *(int *)(param_1 + 0x24)) {
-    if (*(u8 *)(*(int *)(param_1 + 0x1c) + 0x16) == '\0') {
-      func_0019D038(param_1);
+void func_001A5B70(ItfMesNode *node) {
+    for (; node != NULL; node = node->next) {
+        if (node->child->flag16 == 0) {
+            func_0019D038(node);
+        }
     }
-  }
-  return;
 }
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365E8);

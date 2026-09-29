@@ -226,8 +226,8 @@ void sdfDrainPendingHandlers(void) {
     }
 }
 
-void sdfWakeAlarmThread(u32 arg0, u32 arg1, u32 arg2) {
-    iWakeupThread(arg2);
+void sdfWakeAlarmThread(u32 unused0, u32 unused1, u32 threadId) {
+    iWakeupThread(threadId);
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", sdfSleepWithAlarm);
@@ -259,17 +259,17 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328858);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328918);
 
-void sdfSleepThreadCount(s32 arg0) {
-    u64 temp_v0;
-    s32 temp_v1;
+void sdfSleepThreadCount(s32 count) {
+    u64 threadId;
+    s32 cancelledWakeup;
 
-    temp_v0 = GetThreadId();
-    temp_v1 = CancelWakeupThread(temp_v0);
-    arg0 = arg0 - temp_v1;
+    threadId = GetThreadId();
+    cancelledWakeup = CancelWakeupThread(threadId);
+    count = count - cancelledWakeup;
     do {
-        arg0 = arg0 - 1;
+        count = count - 1;
         SleepThread();
-    } while (0 < arg0);
+    } while (0 < count);
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003289C8);

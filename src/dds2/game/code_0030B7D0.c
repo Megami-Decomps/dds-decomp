@@ -14,6 +14,30 @@ extern u32 D_004388B8;
 
 extern s32 D_004388C4;
 
+typedef struct {
+    u32 *word;         /* 0x00 */
+    u8 pad04[4];
+    s16 value;         /* 0x08 */
+} SdfCounterDisplay;
+
+typedef struct {
+    s32 value;         /* 0x00 */
+    s16 countdown;     /* 0x04 */
+    s16 mode;          /* 0x06 */
+} SdfCounterTimer;
+
+typedef struct {
+    u8 pad00[0x70];
+    SdfCounterDisplay *display; /* 0x70 */
+} SdfCounterChannel;
+
+typedef struct {
+    u8 pad00[0x1C];
+    SdfCounterChannel *channel; /* 0x1C */
+    u8 pad20[0x10];
+    SdfCounterTimer *timer;     /* 0x30 */
+} SdfCounterRuntime;
+
 extern u32 D_00439098;
 
 extern s32 D_0043909C;
@@ -168,11 +192,11 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030C690);
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030C8E8);
 
 u32 func_0030C9A0(void) {
-    return **(u32 **)(*(s32 *)(D_004388C4 + 0x1c) + 0x70);
+    return (u32)((SdfCounterRuntime *)D_004388C4)->channel->display->word;
 }
 
 s32 func_0030C9B8(void) {
-    return *(s16 *)(*(s32 *)(*(s32 *)(D_004388C4 + 0x1c) + 0x70) + 8);
+    return ((SdfCounterRuntime *)D_004388C4)->channel->display->value;
 }
 
 s16 func_0030C9D0(s32 remaining) {
@@ -187,10 +211,10 @@ s16 func_0030C9D0(s32 remaining) {
 }
 
 float sdfCounterGetScaledValue(void) {
-    s32 p;
+    SdfCounterTimer *timer;
 
-    p = *(s32 *)(D_004388C4 + 0x30);
-    return (float)(*(s32 *)p) / 10.0f;
+    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    return (float)timer->value / 10.0f;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CA38);
@@ -200,37 +224,37 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CC68);
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030CEF0);
 
 void sdfCounterIncrease(void) {
-    s32 count;
+    s32 currentValue;
 
-    count = **(s32 **)(D_004388C4 + 0x30);
-    if (count < 10) {
-        **(s32 **)(D_004388C4 + 0x30) = count + 1;
+    currentValue = ((SdfCounterRuntime *)D_004388C4)->timer->value;
+    if (currentValue < 10) {
+        ((SdfCounterRuntime *)D_004388C4)->timer->value = currentValue + 1;
     }
 }
 
 void sdfCounterDecrease(void) {
-    s32 count;
+    s32 currentValue;
 
-    count = **(s32 **)(D_004388C4 + 0x30);
-    if (count != 0) {
-        **(s32 **)(D_004388C4 + 0x30) = count - 1;
+    currentValue = ((SdfCounterRuntime *)D_004388C4)->timer->value;
+    if (currentValue != 0) {
+        ((SdfCounterRuntime *)D_004388C4)->timer->value = currentValue - 1;
     }
 }
 
-void sdfCounterSetMode(s32 arg0) {
-    s32 ptr;
+void sdfCounterSetMode(s32 mode) {
+    SdfCounterTimer *timer;
 
-    ptr = *(s32 *)(D_004388C4 + 0x30);
-    *(s16 *)(ptr + 6) = arg0;
-    *(s16 *)(ptr + 4) = 8;
+    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    timer->mode = mode;
+    timer->countdown = 8;
 }
 
 void sdfCounterTickCountdown(void) {
-    s32 temp_v0;
+    SdfCounterTimer *timer;
 
-    temp_v0 = *(s32 *)(D_004388C4 + 0x30);
-    if (0 < *(s16 *)(temp_v0 + 4)) {
-        *(s16 *)(temp_v0 + 4) = *(s16 *)(temp_v0 + 4) - 1;
+    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    if (0 < timer->countdown) {
+        timer->countdown = timer->countdown - 1;
     }
 }
 
@@ -291,20 +315,20 @@ u64 func_0030D780(u64 arg0) {
     return temp_v1;
 }
 
-s32 func_0030D7E0(s32 x, s32 n) {
-    s32 i = 0;
-    s32 cnt = 0;
-    s32 ni;
+s32 func_0030D7E0(s32 mask, s32 ordinal) {
+    s32 bitIndex = 0;
+    s32 count = 0;
+    s32 nextIndex;
 
     do {
-        ni = i + 1;
-        if (n == ni) {
+        nextIndex = bitIndex + 1;
+        if (ordinal == nextIndex) {
             break;
         }
-        cnt += (x >> i) & 1;
-        i = ni;
-    } while (i < 0x1F);
-    return cnt;
+        count += (mask >> bitIndex) & 1;
+        bitIndex = nextIndex;
+    } while (bitIndex < 0x1F);
+    return count;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030D818);
@@ -691,17 +715,42 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfClearTaskList);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003124B0);
 
-void *sdfFindTaskListNodeByKey(void *head, s32 key) {
-    void *n;
+typedef struct TaskListNode {
+    u32 handle; /* 0x00 */
+    s32 key;    /* 0x04 */
+    struct TaskListNode *next; /* 0x08 */
+    u8 pad0C[4];
+    u32 value;  /* 0x10 */
+} TaskListNode;
 
-    n = *(void **)((s32)head + 8);
-    while (*(s32 *)((s32)n + 4) != key) {
-        n = *(void **)((s32)n + 8);
-        if (n == NULL) {
+typedef struct {
+    u32 pad00;
+    u32 tail;  /* 0x04 */
+    TaskListNode *head; /* 0x08 */
+    u32 count; /* 0x0C */
+    u32 pad10;
+    void (*onRemove)(u32, u32); /* 0x14 */
+} TaskList;
+
+typedef struct TaskWork {
+    u32 handle;
+    char *primaryTaskName;
+    char *secondaryTaskName;
+    TaskList *list;
+    u32 firstItemHandle;
+} TaskWork;
+
+void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
+    TaskListNode *node;
+
+    node = list->head;
+    while (node->key != key) {
+        node = node->next;
+        if (node == NULL) {
             break;
         }
     }
-    return n;
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312578);
@@ -710,37 +759,37 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312620);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003126D0);
 
-u8 func_00312710(s32 arg0) {
-    u8 temp_v0;
-    s64 temp_v1;
+u8 func_00312710(TaskWork *work) {
+    u8 exists;
+    s64 task;
 
-    temp_v0 = 0;
-    if (arg0 != 0) {
-        temp_v1 = func_00101740(*(u32 *)((s32)arg0 + 4));
-        temp_v0 = temp_v1 != 0;
+    exists = 0;
+    if (work != NULL) {
+        task = func_00101740((u32)work->primaryTaskName);
+        exists = task != 0;
     }
-    return temp_v0;
+    return exists;
 }
 
 s32 kwlnTaskExists(u32 name) {
     return func_00101740(name) != 0;
 }
 
-void sdfAttachTaskItem(u8 *work, u32 *item) {
-    u32 result = func_00312188(*(u32 *)(work + 0xc), *item, func_00312A48(item));
-    if (*(u32 *)(work + 0x10) == 0) {
-        *(u32 *)(work + 0x10) = result;
+void sdfAttachTaskItem(TaskWork *work, u32 *item) {
+    u32 result = func_00312188((u32)work->list, *item, func_00312A48(item));
+    if (work->firstItemHandle == 0) {
+        work->firstItemHandle = result;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfRemoveTaskItem);
 
-s32 func_003127E8(void *p, s32 key) {
-    void *r;
+s32 func_003127E8(TaskWork *work, s32 key) {
+    TaskListNode *item;
 
-    r = sdfFindTaskListNodeByKey(*(void **)((s32)p + 0xC), key);
-    if (r != NULL) {
-        return *(s32 *)((s32)r + 0x10);
+    item = sdfFindTaskListNodeByKey(work->list, key);
+    if (item != NULL) {
+        return item->value;
     }
     return 0;
 }

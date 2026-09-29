@@ -3,8 +3,8 @@
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u16 unkA;
+    /* 0x8 */ u16 volume;
+    /* 0xA */ u16 pan;
     /* 0xC */ u32 unkC;
 } CmdPacket;
 
@@ -37,7 +37,7 @@ void func_00341BB8(s32 trackId) {
     func_003421E8(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
-    packet.unk8 = 0x7F;
+    packet.volume = 0x7F;
     func_00341650(0x20, 0, &packet, 0x10);
 }
 
@@ -53,7 +53,7 @@ void func_00341C30(s32 trackId) {
 
     func_003421E8(trackId);
     packet.trackId = trackId;
-    packet.unk8 = 0x7F;
+    packet.volume = 0x7F;
     func_00341650(0x130, 0, &packet, 0x10);
 }
 

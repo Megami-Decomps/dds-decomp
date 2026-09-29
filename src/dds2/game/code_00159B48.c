@@ -1,6 +1,13 @@
 #include "common.h"
 #include "eff.h"
 
+typedef struct EffTemplatePacketList {
+    u8 pad00[0x20];
+    u32 packetCount;
+    u8 pad24[0xD4];
+    EffectBufferTail *buffer;
+} EffTemplatePacketList;
+
 extern s32 D_00451EE0[];
 
 s32 sdfAllocPacketAligned(s32 arg0);
@@ -80,25 +87,25 @@ u16 func_00159D80(BillObj *effect) {
     return effect->unk2C;
 }
 
-void func_00159D88(s32 arg0, s32 arg1) {
-    s32 v = arg1 & 0xffff;
+void func_00159D88(BillObj *effect, s32 value) {
+    s32 v = value & 0xffff;
 
-    switch (*(u16 *)(arg0 + 0x2c)) {
+    switch (effect->unk2C) {
     case 0:
-        *(s16 *)(*(s32 *)(arg0 + 0x30) + 4) = v;
+        *(s16 *)((u8 *)effect->unk30 + 4) = v;
         break;
     case 1:
-        *(s16 *)(arg0 + 0x3c) = v;
+        effect->unk3C = v;
         break;
     }
 }
 
-u16 func_00159DC0(s32 arg0) {
-    switch (*(u16 *)(arg0 + 0x2c)) {
+u16 func_00159DC0(BillObj *effect) {
+    switch (effect->unk2C) {
     case 0:
-        return *(u16 *)(*(s32 *)(arg0 + 0x30) + 4);
+        return *(u16 *)((u8 *)effect->unk30 + 4);
     case 1:
-        return *(u16 *)(arg0 + 0x3c);
+        return effect->unk3C;
     default:
         return 0;
     }
@@ -310,18 +317,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B728);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B988);
 
-void func_0015BC38(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0015BC38(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -355,18 +362,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015BD78);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015C020);
 
-void func_0015C288(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0015C288(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -430,18 +437,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CF70);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015D208);
 
-void func_0015D420(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0015D420(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -474,18 +481,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015D550);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015D8B0);
 
-void func_0015DB20(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0015DB20(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -539,18 +546,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E320);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E510);
 
-void func_0015E788(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0015E788(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -648,18 +655,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F648);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F748);
 
-void func_0015F7D8(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_0015F7D8(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -693,18 +700,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F918);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_001600A8);
 
-void func_00160308(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_00160308(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
@@ -729,18 +736,18 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_00160470);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00160700);
 
-void func_00160978(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
+void func_00160978(EffTemplatePacketList *effect) {
+    EffectBufferRecord *record;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0xf8) + 4);
-    if (*(s32 *)(arg0 + 0x20) != 0) {
+    index = 0;
+    record = effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(temp_v0 + 0x20) = 0xf0000001;
-            temp_v1 = temp_v1 + 1;
-            temp_v0 = temp_v0 + 0x40;
-        } while (temp_v1 < *(u32 *)(arg0 + 0x20));
+            record->unk20 = 0xf0000001;
+            index = index + 1;
+            record = record + 1;
+        } while (index < effect->packetCount);
     }
 }
 
