@@ -646,7 +646,6 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002091C8);
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 
 /* Unit normal of the triangle (a, b, c); result in vf10 (VU register convention). */
-/* vu0 routine: unit normal of triangle (a, b, c) into vf10 */
 void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -877,12 +876,13 @@ extern void func_00330068();
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfResetPacketList(void *);
 
-void func_002099C0(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s32 c3, s32 button) {
+/* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
+void func_002099C0(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     BtnUv *uv;
-    s32 tex;
-    void *list;
-    s32 px;
-    s32 py;
+    s32 texture;
+    void *packet;
+    s32 xFixed;
+    s32 yFixed;
 
     button &= 0x7FFF;
     if (button != 0) {
@@ -904,19 +904,19 @@ void func_002099C0(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s3
         case 0x4000: uv = D_003BE1A0; break;
         default: uv = 0; break;
         }
-        tex = func_002DDD60(surface, *(s32 *)(func_001AA6F8() + 0x4E8));
-        list = sdfAllocPacketAligned(0x20);
-        sdfResetPacketList(list);
-        sdfConsCreateDrawPacket(list, tex, 0);
-        px = x * 0x10;
-        py = y * 8;
-        func_00330068(list, 0x40,
-                      px + 0x7000, py + 0x7900, uv->u * 0x10, uv->v * 0x10, c0,
-                      px + 0x7200, py + 0x7900, uv->u * 0x10 + 0x200, uv->v * 0x10, c1,
-                      px + 0x7000, py + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, c2,
-                      px + 0x7200, py + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, c3,
+        texture = func_002DDD60(surface, ((BtlState *)func_001AA6F8())->buttonTextureHandle);
+        packet = sdfAllocPacketAligned(0x20);
+        sdfResetPacketList(packet);
+        sdfConsCreateDrawPacket(packet, texture, 0);
+        xFixed = x * 0x10;
+        yFixed = y * 8;
+        func_00330068(packet, 0x40,
+                      xFixed + 0x7000, yFixed + 0x7900, uv->u * 0x10, uv->v * 0x10, topLeftColor,
+                      xFixed + 0x7200, yFixed + 0x7900, uv->u * 0x10 + 0x200, uv->v * 0x10, topRightColor,
+                      xFixed + 0x7000, yFixed + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, bottomLeftColor,
+                      xFixed + 0x7200, yFixed + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, bottomRightColor,
                       0xFF0000, 0);
-        surface->submit(surface, list);
+        surface->submit(surface, packet);
     }
 }
 

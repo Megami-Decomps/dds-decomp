@@ -91,20 +91,20 @@ void menuCopyPartyEntries(context)
     s32 context;
 {
     PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0x90C);
-    PartyEntryCopy *to = menu->current;
+    PartyEntryCopy *destination = menu->current;
     s32 i;
-    s32 test = 0xA60;
-    s32 offset = 0;
+    s32 flagsOffset = 0xA60;
+    s32 sourceOffset = 0;
 
     menu->activeCount = 0;
     for (i = 0; i < 5; i++) {
-        *to = *(PartyEntryCopy *)(offset + D_003BAA00 + 0xA60);
-        if (((PartyEntryCopy *)(D_003BAA00 + test))->flags & 1) {
+        *destination = *(PartyEntryCopy *)(sourceOffset + D_003BAA00 + 0xA60);
+        if (((PartyEntryCopy *)(D_003BAA00 + flagsOffset))->flags & 1) {
             menu->activeCount = menu->activeCount + 1;
         }
-        test += 0x1A4;
-        to++;
-        offset += 0x1A4;
+        flagsOffset += 0x1A4;
+        destination++;
+        sourceOffset += 0x1A4;
     }
     if (menu->activeCount >= 4) {
         menu->activeCount = 3;
@@ -120,7 +120,7 @@ void func_00275328(context)
     PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0x90C);
     u16 *entry = (u16 *)menu->current;
     s32 i;
-    s32 offset;
+    s32 backupOffset;
     s32 panel;
 
     for (i = 0; i < 5; i++) {
@@ -129,11 +129,11 @@ void func_00275328(context)
         }
         entry += 0x1A4 / 2;
     }
-    offset = 0;
+    backupOffset = 0;
     for (i = 4; i >= 0; i--) {
         /* Required to match: offset-first arithmetic into menu->backup. */
-        *(PartyEntryCopy *)(offset + D_003BAA00 + 0xA60) = *(PartyEntryCopy *)(offset + (s32)menu + 0x1078);
-        offset += 0x1A4;
+        *(PartyEntryCopy *)(backupOffset + D_003BAA00 + 0xA60) = *(PartyEntryCopy *)(backupOffset + (s32)menu + 0x1078);
+        backupOffset += 0x1A4;
     }
     panel = context + 0x15C;
     func_0027F0D8(panel);
@@ -466,17 +466,26 @@ extern s32 func_00287FE0();
 extern u32 func_00287E60(s32);
 extern void func_00287EC8(s32, u32);
 
-void mnuIdleVoiceTimer(s32 timer, s32 panel) {
-    u32 count;
+typedef struct MenuIdleVoiceState {
+    u8 pad00[0x28];
+    s32 idleTicks;
+    s32 voiceState; /* -1 permits a new random voice */
+} MenuIdleVoiceState;
 
-    if (*(s32 *)(timer + 0x2C) == -1 && func_002877A8() != 1) {
+#define MENU_IDLE_VOICE_TICKS 0x12D
+
+/* Pick another idle voice after MENU_IDLE_VOICE_TICKS eligible ticks. */
+void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer, s32 panel) {
+    u32 voiceCount;
+
+    if (voiceTimer->voiceState == -1 && func_002877A8() != 1) {
         if (func_00287FE0() == 0) {
-            *(s32 *)(timer + 0x28) = *(s32 *)(timer + 0x28) + 1;
+            voiceTimer->idleTicks = voiceTimer->idleTicks + 1;
         }
-        if (*(s32 *)(timer + 0x28) >= 0x12D) {
-            count = func_00287E60(0);
-            func_00287EC8(0, effMiscRand(0) % count);
-            *(s32 *)(timer + 0x28) = 0;
+        if (voiceTimer->idleTicks >= MENU_IDLE_VOICE_TICKS) {
+            voiceCount = func_00287E60(0);
+            func_00287EC8(0, effMiscRand(0) % voiceCount);
+            voiceTimer->idleTicks = 0;
         }
     }
 }

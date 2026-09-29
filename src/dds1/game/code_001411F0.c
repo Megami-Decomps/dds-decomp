@@ -888,48 +888,51 @@ typedef struct FldAreaFlagsView {
 
 extern s32 D_0032C900[];
 
+/* The area's last two digits map to a save-table row; floor and bit are zero-based. */
 s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 id = D_0032C900[area % 100];
-    if (id == -1) return 0;
-    return (((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][floor] >> bit) & 1;
+    s32 areaIndex = D_0032C900[area % 100];
+    if (areaIndex == -1) return 0;
+    return (((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
-void fldSetFlagAndFindRecord(s32 arg0) {
-    s32 id;
+/* Set a one-based flag on the current floor, and retain the associated record. */
+void fldSetFlagAndFindRecord(s32 flagNumber) {
+    s32 areaIndex;
     s32 bit;
 
-    if (arg0 > 0) {
-        id = D_0032C900[D_003BAEB0 % 100];
-        if (id != -1) {
-            bit = arg0 - 1;
+    if (flagNumber > 0) {
+        areaIndex = D_0032C900[D_003BAEB0 % 100];
+        if (areaIndex != -1) {
+            bit = flagNumber - 1;
             D_0032E3B0[6] = bit;
-            D_0032E3B0[0x2F] = arg0;
-            ((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][D_0032E3B0[5]] |= 1ULL << bit;
+            D_0032E3B0[0x2F] = flagNumber;
+            ((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][D_0032E3B0[5]] |= 1ULL << bit;
             D_0032E3B0[0x30] = fldFindRecordItem(D_0032E3B0[5], bit);
         }
     }
 }
 
 
+/* The public setters take one-based floor and flag numbers. */
 void fldSetFlagBit(s32 area, s32 floor, s32 bit) {
-    s32 id;
+    s32 areaIndex;
 
     floor--;
     bit--;
-    id = D_0032C900[area % 100];
-    if (id != -1) {
-        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][floor] |= 1ULL << bit;
+    areaIndex = D_0032C900[area % 100];
+    if (areaIndex != -1) {
+        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][floor] |= 1ULL << bit;
     }
 }
 
 void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 id;
+    s32 areaIndex;
 
     floor--;
     bit--;
-    id = D_0032C900[area % 100];
-    if (id != -1) {
-        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][floor] &= ~(1ULL << bit);
+    areaIndex = D_0032C900[area % 100];
+    if (areaIndex != -1) {
+        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
     }
 }
 

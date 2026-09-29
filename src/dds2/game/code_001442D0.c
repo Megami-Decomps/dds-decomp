@@ -1283,46 +1283,50 @@ void func_0014A9F0(s32 arg0, s32 arg1, s32 arg2) {
 
 extern s32 D_00387CE0[];
 
+/* The area number's last two digits map to a save-table row; floor and bit are zero-based. */
 s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 index = D_00387CE0[area % 100];
+    s32 areaIndex = D_00387CE0[area % 100];
 
-    if (index == -1) {
+    if (areaIndex == -1) {
         return 0;
     }
-    return (((FldAreaFlagsView *)D_00435DD0)->areaFlags[index][floor] >> bit) & 1;
+    return (((FldAreaFlagsView *)D_00435DD0)->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
-void fldSetCurrentFloorFlag(s32 bit) {
-    s32 index;
+/* Set a one-based flag on the current floor, and retain the associated record. */
+void fldSetCurrentFloorFlag(s32 flagNumber) {
+    s32 areaIndex;
     s32 floor;
     s32 bitIndex;
 
-    if (bit <= 0) {
+    if (flagNumber <= 0) {
         return;
     }
-    index = D_00387CE0[D_00436244 % 100];
-    if (index == -1) {
+    areaIndex = D_00387CE0[D_00436244 % 100];
+    if (areaIndex == -1) {
         return;
     }
     floor = D_00389770[5];
-    bitIndex = bit - 1;
+    bitIndex = flagNumber - 1;
     {
-        s32 byteOffset = 0xFCD0 + (index * 64 + floor) * 8;
+        /* Keep byte-offset arithmetic: direct array indexing changes ee-gcc's codegen. */
+        s32 byteOffset = 0xFCD0 + (areaIndex * 64 + floor) * 8;
         u64 mask = (u64)1 << bitIndex;
         u64 *flags = (u64 *)(D_00435DD0 + byteOffset);
         D_00389770[6] = bitIndex;
-        D_00389770[47] = bit;
+        D_00389770[47] = flagNumber;
         *flags |= mask;
     }
     D_00389770[48] = fldFindRecordItem(floor, bitIndex);
 }
 
+/* The public setters take one-based floor and flag numbers. */
 void fldSetFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 index = D_00387CE0[area % 100];
+    s32 areaIndex = D_00387CE0[area % 100];
     floor--;
     bit--;
-    if (index != -1) {
-        s32 byteOffset = 0xFCD0 + ((index * 64 + floor) * 8);
+    if (areaIndex != -1) {
+        s32 byteOffset = 0xFCD0 + ((areaIndex * 64 + floor) * 8);
         u64 mask = (u64)1 << bit;
         u64 *flags = (u64 *)(D_00435DD0 + byteOffset);
         *flags |= mask;
@@ -1330,11 +1334,11 @@ void fldSetFloorFlag(s32 area, s32 floor, s32 bit) {
 }
 
 void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 index = D_00387CE0[area % 100];
+    s32 areaIndex = D_00387CE0[area % 100];
     floor--;
     bit--;
-    if (index != -1) {
-        s32 byteOffset = 0xFCD0 + ((index * 64 + floor) * 8);
+    if (areaIndex != -1) {
+        s32 byteOffset = 0xFCD0 + ((areaIndex * 64 + floor) * 8);
         u64 mask = (u64)1 << bit;
         u64 *flags = (u64 *)(D_00435DD0 + byteOffset);
         *flags &= ~mask;
