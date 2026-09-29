@@ -144,21 +144,21 @@ void func_00269530(void) {
 }
 
 void func_00269558(void) {
-    u32 *data = (u32 *)func_002CFEB8(8);
+    TitleEffectState *state = (TitleEffectState *)func_002CFEB8(8);
     u32 task = kwlnTaskCreate(D_003BC5A0, 0x5214, 1, 1,
                               func_00269500, func_00269530, 0);
     D_003BC588 = task;
-    func_00101A68(task, data);
-    data[0] = 0;
-    data[1] = 0;
+    func_00101A68(task, state);
+    state->unk00 = 0;
+    state->frameCounter = 0;
 }
 
-void mnuResetTitleEffectState(s32 effect) {
+void mnuResetTitleEffectState(s32 command) {
     TitleEffectState *state = (TitleEffectState *)func_00101A70(D_003BC588);
     if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
-    sdfSoundSendNamedCommand(effect, 0x7f);
+    sdfSoundSendNamedCommand(command, 0x7f);
     state->frameCounter = 0;
 }
 

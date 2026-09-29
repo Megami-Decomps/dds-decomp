@@ -223,7 +223,11 @@ void *effCreateChannel(void *arg0, u32 arg1) {
     return buf;
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_00193720);
+s64 func_00193720(u32 *p) {
+    if (p != NULL) {
+        func_002D0918((void *)*p);
+    }
+}
 
 s32 effAdvanceChanCursor(void *arg0, EffChan *arg1) {
     s32 ret = 1;

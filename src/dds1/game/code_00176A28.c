@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad00[0x10];
@@ -40,14 +41,26 @@ void func_00177048(s32 work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00176A28", func_00177078);
+void func_00177078(u8 *obj, s32 index, f32 *vec) {
+    f32 *dst = (f32 *)(index * 0x14 + *(s32 *)(obj + 0x40));
+    dst[0] = vec[0];
+    dst[1] = vec[1];
+    dst[2] = vec[2];
+}
 
-INCLUDE_ASM(const s32, "game/code_00176A28", func_001770A8);
+void func_001770A8(u8 *obj, s32 index, f32 *vec) {
+    f32 *src = (f32 *)(index * 0x14 + *(s32 *)(obj + 0x40));
+    vec[0] = src[0];
+    vec[1] = src[1];
+    vec[2] = src[2];
+}
 
 void func_001770D8(s32 work, s32 index, u32 value) {
     ((EffResourceWork *)work)->entries[index].value = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176A28", func_001770F8);
+void func_001770F8(void *dst, void *src) {
+    VU0_COPY_MATRIX(dst, src);
+}
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_00177120);

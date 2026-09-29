@@ -628,8 +628,7 @@ typedef struct StaffSpriteHandles {
     u32 extraImages[2];
 } StaffSpriteHandles;
 
-void mnuReleaseStaffSpriteHandles(u8 *display) {
-    StaffSpriteHandles *handles = (StaffSpriteHandles *)display;
+void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
     u32 *image = handles->extraImages;
     u32 index = 0;
     effDestroyPackedBatch(handles->primaryImage);
@@ -671,8 +670,7 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271B50);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271D30);
 
-void func_00271DF8(u8 *display) {
-    StaffSpriteHandles *handles = (StaffSpriteHandles *)display;
+void func_00271DF8(StaffSpriteHandles *handles) {
     u32 *image = handles->images;
     u32 index = 0;
     do {
@@ -695,13 +693,13 @@ void func_00271F18(u32 task) {
         return;
     }
     func_00285600(work + 8, task);
-    func_00271DF8(work);
+    func_00271DF8((StaffSpriteHandles *)work);
     func_0027E690(*(u32 *)(work + 0x138));
     mnuShutdownContext(work + 0x15C);
     func_0024DBC8();
     mnuReleaseAssets(work + 0x13C);
     func_00271948(work);
-    mnuReleaseStaffSpriteHandles(work);
+    mnuReleaseStaffSpriteHandles((StaffSpriteHandles *)work);
     func_002BC618(*(u32 *)(work + 0x5c));
     func_002D0918(*(u32 *)work);
     D_003BC6B4 = 2;

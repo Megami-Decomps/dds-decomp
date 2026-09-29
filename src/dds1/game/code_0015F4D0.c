@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 #include "eff.h"
 
 extern BillDispatch D_0034E658[];
@@ -21,7 +22,9 @@ u16 func_0015F670(s32 arg0) {
     return *(u16 *)(arg0 + 0xb2);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F678);
+void func_0015F678(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F688);
 
@@ -29,7 +32,12 @@ void func_0015F6E8(BillObj *effect, void *value) {
     effect->unk60 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F6F0);
+void func_0015F6F0(u8 *work, u8 value) {
+    if (*(u16 *)(work + 0xB0) == 0) {
+        *(u8 *)(work + 0xC0) = value;
+    }
+    *(u8 *)(work + 0x64) = value;
+}
 
 u8 func_0015F708(s32 arg0) {
     return *(u8 *)(arg0 + 100);

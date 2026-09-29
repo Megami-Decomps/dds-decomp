@@ -87,7 +87,13 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199FE0);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A040);
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A0D0);
+void func_0019A0D0(u8 *base, s32 a, s32 b, s32 c, s32 d) {
+    u32 *p = (u32 *)(base + 0x20);
+    p[0] = a;
+    p[1] = b;
+    p[2] = c;
+    p[3] = d;
+}
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A0E8);
 

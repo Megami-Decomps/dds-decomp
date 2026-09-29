@@ -95,40 +95,40 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00256400);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256540);
 
-typedef struct {
+typedef struct DspListNode {
     u8 pad00[0x10];
-    u32 next; /* 0x10 */
+    struct DspListNode *next; /* 0x10 */
 } DspListNode;
 
 typedef struct {
     u32 pad00[2];
-    s32 first; /* 0x08 */
+    DspListNode *first; /* 0x08 */
 } DspListHead;
 
-s32 *mnuAllocateDisplayListNode(void) {
-    s32 *node = (s32 *)func_002CFEB8(0x14);
+DspListNode *mnuAllocateDisplayListNode(void) {
+    DspListNode *node = (DspListNode *)func_002CFEB8(0x14);
 
     memset(node, 0, 0x14);
     return node;
 }
 
-u32 func_00256B78(u32 state) {
-    u32 node = *(u32 *)(state + 8);
-    if (node == 0) {
-        node = (u32)mnuAllocateDisplayListNode();
-        *(u32 *)(state + 8) = node;
+DspListNode *func_00256B78(DspListHead *head) {
+    DspListNode *node = head->first;
+    if (node == NULL) {
+        node = mnuAllocateDisplayListNode();
+        head->first = node;
     } else {
-        while (*(u32 *)(node + 0x10) != 0) {
-            node = *(u32 *)(node + 0x10);
+        while (node->next != NULL) {
+            node = node->next;
         }
-        *(u32 *)(node + 0x10) = (u32)mnuAllocateDisplayListNode();
-        node = *(u32 *)(node + 0x10);
+        node->next = mnuAllocateDisplayListNode();
+        node = node->next;
     }
     return node;
 }
 
-u32 func_00256C00(DspListNode *node) {
-    u32 next;
+DspListNode *func_00256C00(DspListNode *node) {
+    DspListNode *next;
 
     next = node->next;
     func_002CFF98();
@@ -136,7 +136,7 @@ u32 func_00256C00(DspListNode *node) {
 }
 
 void mnuReleaseDisplayListNodes(DspListHead *head) {
-    s32 node = head->first;
+    DspListNode *node = head->first;
 
     while (node != NULL) {
         node = func_00256C00(node);

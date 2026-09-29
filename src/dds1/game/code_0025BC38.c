@@ -4,7 +4,30 @@ extern s32 func_002CFEB8(u32);
 
 void func_002BDD60(u32);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BC38);
+typedef struct DspListNode {
+    u8 pad00[0x10];
+    struct DspListNode *next; /* 0x10 */
+} DspListNode;
+
+typedef struct {
+    u32 pad00[2];
+    DspListNode *first; /* 0x08 */
+} DspListHead;
+
+typedef struct {
+    s32 allocation;
+    s32 tasks[10];
+} MovieResourceGroup;
+
+void func_0025BC38(MovieResourceGroup *resources) {
+    s32 i;
+    for (i = 0; i < 10; i++) {
+        if (resources->tasks[i] != 0) {
+            sdfDestroyTaskWork(resources->tasks[i]);
+        }
+    }
+    func_002D0918(resources->allocation);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BCA0);
 
@@ -14,11 +37,16 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BDD0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BF18);
 
+typedef struct {
+    u8 pad00[0x6C];
+    u32 resourceHandle; /* 0x6C */
+} MenuResourceWork;
+
 u32 func_0025C030(u32 ctx, u32 config) {
-    u32 data = func_002CFEB8(0x70);
-    memset((void *)data, 0, 0x70);
-    effRequestResourceByMode(ctx, config, 0, data + 0x6c);
-    return data;
+    MenuResourceWork *work = (MenuResourceWork *)func_002CFEB8(0x70);
+    memset(work, 0, 0x70);
+    effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
+    return (u32)work;
 }
 
 typedef struct MenuListNode {
@@ -31,13 +59,13 @@ typedef struct {
     MenuListNode *first; /* 0x08 */
 } MenuListHead;
 
-u8 func_0025C098(s32 arg0) {
-    return *(s32 *)(arg0 + 0x6c) != 0;
+u8 func_0025C098(MenuResourceWork *work) {
+    return work->resourceHandle != 0;
 }
 
-void func_0025C0A8(u32 obj) {
-    func_002BDD60(*(u32 *)(obj + 0x6c));
-    func_002CFF98(obj);
+void func_0025C0A8(MenuResourceWork *work) {
+    func_002BDD60(work->resourceHandle);
+    func_002CFF98(work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
@@ -93,7 +121,20 @@ MenuListNode *mnuAllocateMenuListNode(void) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DAD0);
+DspListNode *func_0025DAD0(DspListHead *head) {
+    DspListNode *node = head->first;
+    if (node == NULL) {
+        node = mnuAllocateMenuListNode();
+        head->first = node;
+    } else {
+        while (node->next != NULL) {
+            node = node->next;
+        }
+        node->next = mnuAllocateMenuListNode();
+        node = node->next;
+    }
+    return node;
+}
 
 MenuListNode *func_0025DB58(MenuListNode *node) {
     MenuListNode *next;

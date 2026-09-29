@@ -112,7 +112,9 @@ void func_00112750(void *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001127A0);
+s64 func_001127A0(void) {
+    return dds3InvokeSlot1Handler();
+}
 
 s32 dds3InvokeSlot1Handler(void *obj, void *context) {
     void *handler;

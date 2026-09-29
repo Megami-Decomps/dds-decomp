@@ -55,7 +55,13 @@ INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFC68);
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFCD0);
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFD30);
+extern void func_002EFB30();
+extern void func_002EFCD0();
+
+void func_002EFD30(u32 *work) {
+    work[4] = (u32)func_002EFB30;
+    work[5] = (u32)func_002EFCD0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50C0);
 

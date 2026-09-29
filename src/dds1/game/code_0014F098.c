@@ -71,7 +71,7 @@ u32 func_0014F0C8(void) {
     if (func_0013DF18()) {
         scene = 0;
     } else {
-        scene = func_0013BE30(*(s32 *)(func_0010D6A0() + 0xE4));
+        scene = func_0013BE30(((EffCmdWork *)func_0010D6A0())->key);
     }
     func_0013DC08(scene);
     return 1;

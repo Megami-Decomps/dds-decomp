@@ -35,9 +35,16 @@ void func_00160BB0(EffBattleWork *work, u32 value) {
     work->unk11C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BB8);
+s32 func_00160BB8(u8 *obj) {
+    return *(s32 *)(*(u8 **)(obj + 0x24) + 0x48);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BC8);
+void func_00160BC8(u8 *work, s32 value) {
+    *(s32 *)(work + 0x14) = value;
+    if (*(u16 *)(work + 0x1C) == 0) {
+        *(s32 *)(work + 0x18) = value;
+    }
+}
 
 u32 func_00160BE0(EffBattleWork *work) {
     return work->unk14;

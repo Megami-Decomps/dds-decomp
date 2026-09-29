@@ -37,11 +37,11 @@ void func_002350E0(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
-s32 *func_002350F8(s32 *owner) {
-    s32 *work = (s32 *)func_002CFEB8(8);
-    work[0] = 0;
-    work[1] = 0;
-    return work;
+EventContext *func_002350F8(s32 *owner) {
+    EventContext *context = (EventContext *)func_002CFEB8(8);
+    context->flags = 0;
+    context->value = 0;
+    return context;
 }
 
 void func_00235120(EventContext *context, u32 value) {

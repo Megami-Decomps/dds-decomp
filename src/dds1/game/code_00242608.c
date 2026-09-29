@@ -10,7 +10,7 @@ extern s32 kwlnTaskFindByPriority(u32);
 
 extern s64 evtFindTaskById(void);
 
-void func_002BDD60(u32 sprite);
+s32 func_002BDD60(u32 sprite);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
@@ -133,6 +133,14 @@ typedef struct {
     u8 pad2038[0x3D4];
     u32 state; /* 0x240C */
     u32 fontResource; /* 0x2410: returned by func_001951C8 */
+    u8 pad2414[0x1C];
+    s32 menuState; /* 0x2430 */
+    u8 pad2434[4];
+    u32 auxResource; /* 0x2438 */
+    u32 options; /* 0x243C: two two-bit fields */
+    u8 pad2440[4];
+    s32 registeredCount; /* 0x2444 */
+    s32 registeredIds[10]; /* 0x2448 */
 } CampScene;
 
 s32 campFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
@@ -206,9 +214,9 @@ void func_00243AA8(CampScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243AD8);
 
-void func_00243B00(s32 arg0) {
-    if ((*(s32 *)(arg0 + 0x2430) == 0) || (*(s32 *)(arg0 + 0x2430) == 5)) {
-        *(u32 *)(arg0 + 0x2430) = 1;
+void func_00243B00(CampScene *scene) {
+    if ((scene->menuState == 0) || (scene->menuState == 5)) {
+        scene->menuState = 1;
     }
 }
 
@@ -220,27 +228,27 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243CC8);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243D48);
 
-void func_00243EC8(s32 arg0) {
-    func_00243D48(*(u32 *)(arg0 + 0x2438));
+void func_00243EC8(CampScene *scene) {
+    func_00243D48(scene->auxResource);
 }
 
 void func_00243EE0(void) {
 }
 
-void func_00243EE8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x243c) = (*(u32 *)(arg0 + 0x243c) & 0xfffffffc) | (arg1 & 3);
+void func_00243EE8(CampScene *scene, u32 value) {
+    scene->options = (scene->options & 0xfffffffc) | (value & 3);
 }
 
-u32 func_00243F08(s32 arg0) {
-    return *(u32 *)(arg0 + 0x243c) & 3;
+u32 func_00243F08(CampScene *scene) {
+    return scene->options & 3;
 }
 
-void func_00243F18(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x243c) = (*(u32 *)(arg0 + 0x243c) & 0xfffffff3) | ((arg1 & 3) << 2);
+void func_00243F18(CampScene *scene, u32 value) {
+    scene->options = (scene->options & 0xfffffff3) | ((value & 3) << 2);
 }
 
-u32 func_00243F38(s32 arg0) {
-    return (*(u32 *)(arg0 + 0x243c) & 0xc) >> 2;
+u32 func_00243F38(CampScene *scene) {
+    return (scene->options & 0xc) >> 2;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243F48);
@@ -290,11 +298,11 @@ void mnuShopRestoreTransform(u8 *scene) {
     }
 }
 
-void mnuShopRegisterSceneObject(u8 *scene, s32 identifier) {
-    s32 count = *(s32 *)(scene + 0x2444);
+void mnuShopRegisterSceneObject(CampScene *scene, s32 identifier) {
+    s32 count = scene->registeredCount;
     s32 i = 0;
     if (count > 0) {
-        s32 *entry = (s32 *)(scene + 0x2448);
+        s32 *entry = scene->registeredIds;
         do {
             if (*entry == identifier) {
                 return;
@@ -304,23 +312,23 @@ void mnuShopRegisterSceneObject(u8 *scene, s32 identifier) {
         } while (i < count);
     }
     if (count < 10) {
-        *(s32 *)(scene + 0x2448 + count * 4) = identifier;
-        (*(s32 *)(scene + 0x2444))++;
+        scene->registeredIds[count] = identifier;
+        scene->registeredCount++;
     }
 }
 
-void func_002441E8(u8 *scene) {
+void func_002441E8(CampScene *scene) {
     extern s32 func_00241A50(s32, s32);
     s32 count = 0;
-    if (*(s32 *)(scene + 0x2444) > 0) {
-        s32 *entry = (s32 *)(scene + 0x2448);
+    if (scene->registeredCount > 0) {
+        s32 *entry = scene->registeredIds;
         do {
             s32 identifier = *entry++;
             count++;
-            func_00241A50(*(s32 *)(*(u8 **)(scene + 8) + 0x10c), identifier);
-        } while (count < *(s32 *)(scene + 0x2444));
+            func_00241A50(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
+        } while (count < scene->registeredCount);
     }
-    *(s32 *)(scene + 0x2444) = 0;
+    scene->registeredCount = 0;
 }
 
 void func_00244258(u8 *scene) {
@@ -367,7 +375,9 @@ void mnuShopLoadSpriteAssets(u8 *scene) {
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244360);
+s64 func_00244360(u8 *work) {
+    return func_002BDD60(*(u32 *)(work + 0x64));
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244380);
 

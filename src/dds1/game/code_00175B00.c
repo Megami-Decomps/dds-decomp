@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad0[0x5C];
@@ -19,15 +20,21 @@ extern u32 effPcpScatterResAddRef(u32);
 
 extern u32 effPcpScatterResCreate(u32);
 
-INCLUDE_ASM(const s32, "game/code_00175B00", func_00175B00);
+void func_00175B00(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_00175B00", func_00175B18);
+void func_00175B18(u8 *work, f32 value) {
+    *(f32 *)(work + 0x12C) = value;
+}
 
 void func_00175B20(ScatterObject *object, u32 value) {
     object->value130 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00175B00", func_00175B28);
+void func_00175B28(void *dst, void *src) {
+    VU0_COPY_MATRIX(dst, src);
+}
 
 INCLUDE_ASM(const s32, "game/code_00175B00", func_00175B50);
 
@@ -71,6 +78,9 @@ u32 func_001760B0(ScatterObject *object, s32 index) {
     return object->entries[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_00175B00", func_001760C8);
+void func_001760C8(void *work, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX((u8 *)work + 0x10);
+}
 
 INCLUDE_ASM(const s32, "game/code_00175B00", func_001760F8);

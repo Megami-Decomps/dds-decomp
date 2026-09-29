@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -36,7 +37,9 @@ void func_00176410(void *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_00176428);
 
-INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_00176A00);
+void func_00176A00(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00176A10(EffPCPNeedleWork *work) {
     func_001770F8(work->resource6C);

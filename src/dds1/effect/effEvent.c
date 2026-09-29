@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 D_003BB140;
 
@@ -82,7 +83,9 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001914E0);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00192018);
+void func_00192018(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00192028(EffEventWork *work, u8 value) {
     work->unk80 = value;

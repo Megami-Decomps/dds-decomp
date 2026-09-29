@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Event unit: flag bits at 0xa8 drive status queries below. */
 typedef struct EvtUnit {
@@ -56,26 +57,41 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221FF8);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222090);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_002220D8);
+s32 func_002220D8(u8 *obj) {
+    if (obj == NULL) {
+        return 0;
+    }
+    return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_002220F0);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222200);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222270);
+s32 func_00222270(u8 *work) {
+    return *(s16 *)(work + 0xAC);
+}
 
 void func_00222278(EvtUnit *unit, u16 value)
 {
     unit->unkBC = value;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222280);
+void func_00222280(u8 *work, f32 value) {
+    *(f32 *)(work + 0xB8) = value;
+}
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222288);
+void func_00222288(u8 *work, s32 a, s32 b) {
+    *(s16 *)(work + 0xBE) = a;
+    *(s16 *)(work + 0xC0) = b;
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222298);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222300);
+void func_00222300(u8 *work, s32 a, s32 b) {
+    *(s8 *)(work + 0xD0) = a;
+    *(s8 *)(work + 0xD1) = b;
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222310);
 
@@ -99,4 +115,6 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_002227C8);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222A20);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222AA8);
+void func_00222AA8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x70, src);
+}

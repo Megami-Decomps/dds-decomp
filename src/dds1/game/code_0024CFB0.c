@@ -206,15 +206,15 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D8F8);
 
-void func_0024D990(u32 arg0, u32 *arg1) {
-    u32 temp_v0;
+void func_0024D990(u32 resourceId, u32 *record) {
+    u32 handle;
 
-    temp_v0 = func_002EB028(arg0, arg1 + 1, 0);
-    *arg1 = temp_v0;
+    handle = func_002EB028(resourceId, record + 1, 0);
+    *record = handle;
 }
 
-void func_0024D9C0(u32 *arg0) {
-    func_002D0918(*arg0);
+void func_0024D9C0(u32 *record) {
+    func_002D0918(*record);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D9D8);
@@ -323,12 +323,12 @@ s32 evtIsTaskInActiveStates(s32 task) {
     return func_00101818(task) == 3;
 }
 
-void func_0024DED8(s32 arg0) {
-    D_003BD8A0.flags[arg0] = 0;
+void func_0024DED8(s32 flagIndex) {
+    D_003BD8A0.flags[flagIndex] = 0;
 }
 
-s32 func_0024DEE8(s32 arg0) {
-    return D_003BD8A0.flags[arg0] != 0;
+s32 func_0024DEE8(s32 flagIndex) {
+    return D_003BD8A0.flags[flagIndex] != 0;
 }
 
 s32 func_0024DEF8(s32 index, s32 value) {
@@ -339,9 +339,9 @@ s32 func_0024DEF8(s32 index, s32 value) {
     return 1;
 }
 
-u32 func_0024DF20(s32 arg0) {
-    arg0 = (arg0 < 0x10) ? arg0 : 0xf;
-    return D_003D8100[arg0];
+u32 func_0024DF20(s32 index) {
+    index = (index < 0x10) ? index : 0xf;
+    return D_003D8100[index];
 }
 
 s32 func_0024DF48(void) {

@@ -38,8 +38,11 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 extern s32 func_00101A70();
 
 typedef struct EvtDispatchState {
-    u8 pad00[0x84];
-    s32 mode;
+    u8 pad00[0x54];
+    s32 dispatchState; /* 0x54 */
+    s32 stateTable;    /* 0x58 */
+    u8 pad5C[0x28];
+    s32 mode;          /* 0x84 */
     u8 pad88[0x1C];
     s32 progressTicks; /* 0xA4 */
     u8 padA8[4];
@@ -56,10 +59,10 @@ s32 evtIsFadeDispatchIdle(void) {
     return func_0024DC08() == 0;
 }
 
-void evtInstallStateTable(s32 arg0) {
-    if (((EvtDispatchState *)arg0)->mode == 2) {
-        *(s32 *)(arg0 + 0x58) = (s32)D_0036AA68;
-        func_002858E8(arg0 + 0x54, (s32)D_0036AA68 + 0xC4);
+void evtInstallStateTable(EvtDispatchState *state) {
+    if (state->mode == 2) {
+        state->stateTable = (s32)D_0036AA68;
+        func_002858E8((s32)&state->dispatchState, (s32)D_0036AA68 + 0xC4);
     }
 }
 
@@ -90,10 +93,10 @@ void evtSetupDispatchSync(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-void evtInstallStateTableB(s32 arg0) {
-    if (((EvtDispatchState *)arg0)->mode == 1) {
-        *(s32 *)(arg0 + 0x58) = (s32)D_0036AA84;
-        func_002858E8(arg0 + 0x54, (s32)D_0036AA84 + 0xA8);
+void evtInstallStateTableB(EvtDispatchState *state) {
+    if (state->mode == 1) {
+        state->stateTable = (s32)D_0036AA84;
+        func_002858E8((s32)&state->dispatchState, (s32)D_0036AA84 + 0xA8);
     }
 }
 
@@ -140,10 +143,10 @@ void evtSetupDispatchSyncB(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-void evtInstallStateTableC(s32 arg0) {
-    if (((EvtDispatchState *)arg0)->mode == 1) {
-        *(s32 *)(arg0 + 0x58) = (s32)D_0036AAA0;
-        func_002858E8(arg0 + 0x54, (s32)D_0036AAA0 + 0x8C);
+void evtInstallStateTableC(EvtDispatchState *state) {
+    if (state->mode == 1) {
+        state->stateTable = (s32)D_0036AAA0;
+        func_002858E8((s32)&state->dispatchState, (s32)D_0036AAA0 + 0x8C);
     }
 }
 
@@ -190,10 +193,10 @@ void evtSetupDispatchSyncC(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-void evtInstallStateTableD(s32 arg0) {
-    if (((EvtDispatchState *)arg0)->mode == 2) {
-        *(s32 *)(arg0 + 0x58) = (s32)D_0036AABC;
-        func_002858E8(arg0 + 0x54, (s32)D_0036AABC + 0x70);
+void evtInstallStateTableD(EvtDispatchState *state) {
+    if (state->mode == 2) {
+        state->stateTable = (s32)D_0036AABC;
+        func_002858E8((s32)&state->dispatchState, (s32)D_0036AABC + 0x70);
     }
 }
 
@@ -244,7 +247,7 @@ u32 func_00246C80(void) {
     s32 temp_v0;
 
     temp_v0 = func_00101A70();
-    *(u32 *)(temp_v0 + 0xa4) = 0;
+    ((EvtDispatchState *)temp_v0)->progressTicks = 0;
     func_0027BB28(*(u32 *)(*(s32 *)(temp_v0 + 0x6c) + 0x14));
     return 1;
 }
@@ -254,13 +257,13 @@ s64 evtQueryStateProgress(u64 arg0) {
     s64 temp_v1 = func_00285670(temp_v0 + 8, temp_v0 + 0x54, 0, arg0);
 
     if (temp_v1 == 0) {
-        if ((*(s32 *)(temp_v0 + 0x54) == 0) && (func_0024DC08() == 0)) {
+        if ((((EvtDispatchState *)temp_v0)->dispatchState == 0) && (func_0024DC08() == 0)) {
             s32 temp_v2 = ((EvtDispatchState *)temp_v0)->progressTicks;
 
             if ((f32)temp_v2 < 20.0f) {
                 ((EvtDispatchState *)temp_v0)->progressTicks = temp_v2 + 1;
             } else {
-                func_002858E8(temp_v0 + 0x54, (s32)D_0036AB64);
+                func_002858E8((s32)&((EvtDispatchState *)temp_v0)->dispatchState, (s32)D_0036AB64);
             }
         }
         temp_v1 = 0;
@@ -271,7 +274,7 @@ s64 evtQueryStateProgress(u64 arg0) {
 void evtFetchDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
 
-    func_0025E108(temp_v0, *(s32 *)(temp_v0 + 0xA4));
+    func_0025E108(temp_v0, ((EvtDispatchState *)temp_v0)->progressTicks);
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
 }
 
@@ -346,19 +349,12 @@ void evtSetupDispatchSyncG(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-typedef struct EvtStateTableContext {
-    u8 pad00[0x58];
-    s32 stateTable;
-    u8 pad5C[0x28];
-    s32 dispatchMode;
-} EvtStateTableContext;
-
 extern void func_0024DA58();
 
 s32 func_002478F8(void) {
-    s32 context = func_00101A70();
+    EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
     func_0024DDC0(1);
-    switch (((EvtStateTableContext *)context)->dispatchMode) {
+    switch (state->mode) {
     case 1:
         func_0024DA58(5);
         break;
@@ -376,18 +372,18 @@ extern u8 D_0036AA68[];
 extern void func_002605B0(s32, u32);
 
 s32 func_00247970(void) {
-    s32 context = func_00101A70();
-    switch (((EvtStateTableContext *)context)->dispatchMode) {
+    EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
+    switch (state->mode) {
     case 1:
-        func_002605B0(context, 6);
+        func_002605B0((s32)state, 6);
         break;
     case 2:
-        if (((EvtStateTableContext *)context)->stateTable != (s32)D_0036AA68) {
-            func_002605B0(context, 5);
+        if (state->stateTable != (s32)D_0036AA68) {
+            func_002605B0((s32)state, 5);
         }
         break;
     }
-    ((EvtStateTableContext *)context)->dispatchMode = 0;
+    state->mode = 0;
     return 1;
 }
 
@@ -436,7 +432,7 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247D58);
 
 void evtRefreshDispatchStart(s32 arg0) {
     s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = *(s32 *)(temp_v0 + 0xA4);
+    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->progressTicks;
 
     if (temp_v1 != 0) {
         func_0025DF68(temp_v0, temp_v1);

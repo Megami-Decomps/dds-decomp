@@ -1,4 +1,7 @@
 #include "common.h"
+extern u16 D_00393AE0[][96];
+extern u16 D_00393AF0[][96];
+extern void func_0011B528(u8 *);
 
 extern void (*D_003BD2D4)(void);
 
@@ -135,9 +138,36 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CC808);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CC9C0);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CCB80);
+void func_002CCB80(u8 *work) {
+    u16 *source = D_00393AE0[*(u16 *)(work + 4)];
+    u16 *slots = (u16 *)(work + 0x22);
+    u32 index;
+    index = 0;
+    do {
+        u16 id = *source++;
+        if (id != 0) {
+            scrSetFlag(work, id);
+            *slots = id;
+        }
+        slots++;
+        index++;
+    } while (index < 8);
+}
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CCC18);
+void func_002CCC18(u8 *work) {
+    u16 *source = D_00393AF0[*(u16 *)(work + 4)];
+    u32 index = 0;
+    do {
+        u16 id = *source++;
+        if (id != 0) {
+            scrSetFlag(work, id);
+        }
+        index++;
+    } while (index < 40);
+    if (mdlFlagTest(0xB90)) {
+        func_0011B528(work);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CCCC0);
 
@@ -196,7 +226,27 @@ void func_002CD398(u32 v, u32 *a, u32 *b) {
     *b = lo << 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD3B8);
+typedef struct ScriptFlagSlot {
+    u8 id;             /* 0x00 */
+    u8 pad01[3];
+    u32 flag;          /* 0x04 */
+} ScriptFlagSlot;
+
+extern ScriptFlagSlot D_00393280[];
+
+u32 func_002CD3B8(u8 *work, u32 id) {
+    ScriptFlagSlot *slot = (ScriptFlagSlot *)((u8 *)D_00393280 + (*(u16 *)(work + 4) << 7));
+    u32 i;
+
+    for (i = 0; i < 16; i++, slot++) {
+        if (slot->id != 0 && slot->id == id) {
+            u32 flag = slot->flag;
+            mdlFlagSet(flag);
+            return flag;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD428);
 
@@ -275,7 +325,18 @@ s32 scrSetFlag(ScrVmOperand *work, u16 index) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD888);
+void func_002CD888(u32 id) {
+    u16 bit;
+    u32 *word;
+    s32 offset;
+    id &= 0xffff;
+    if (id < 0x1ab) return;
+    if (id >= 0x200) return;
+    bit = id + 0xfe55;
+    offset = 0x2e9d0 + (bit >> 5) * 4;
+    word = (u32 *)(D_003BAA00 + offset);
+    *word |= 1U << (bit & 31);
+}
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD8E8);
 

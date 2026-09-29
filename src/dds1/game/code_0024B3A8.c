@@ -36,11 +36,11 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B478);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B6C0);
 
-void evtBSetupDispatchSync(s32 arg0) {
+void evtBSetupDispatchSync(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 s32 evtBClearAndReset(void) {
@@ -57,17 +57,17 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B7E8);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B868);
 
-void evtBDispatchStart(s32 arg0) {
+void evtBDispatchStart(s32 request) {
     s32 context = func_00101A70();
 
-    func_00285670(context + 8, context + 0x54, 1, arg0);
+    func_00285670(context + 8, context + 0x54, 1, request);
 }
 
-void evtBSetupDispatchSyncB(s32 arg0) {
+void evtBSetupDispatchSyncB(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B9D8);
@@ -86,11 +86,11 @@ void func_0024BC18(s32 item) {
     func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
 }
 
-void evtBSetupDispatchSyncC(s32 arg0) {
+void evtBSetupDispatchSyncC(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BCD0);
@@ -103,18 +103,18 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BF48);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C028);
 
-void evtBSetupDispatchSyncD(s32 arg0) {
+void evtBSetupDispatchSyncD(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 u32 func_0024C0F8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101A70();
-    func_0027BB28(*(u32 *)(temp_v0 + 0x70));
+    context = func_00101A70();
+    func_0027BB28(*(u32 *)(context + 0x70));
     return 1;
 }
 
@@ -122,11 +122,11 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C120);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C1B8);
 
-void evtBSetupDispatchSyncE(s32 arg0) {
+void evtBSetupDispatchSyncE(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C2E0);
@@ -137,10 +137,10 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C3F8);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C578);
 
-void evtBDispatchSync(s32 arg0) {
+void evtBDispatchSync(s32 request) {
     s32 context = func_00101A70();
 
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C670);
@@ -161,11 +161,11 @@ void func_0024C7E8(s32 item) {
     func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
 }
 
-void evtBSetupDispatchSyncF(s32 arg0) {
+void evtBSetupDispatchSyncF(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C8A0);
@@ -197,11 +197,11 @@ void func_0024C9A0(s32 item) {
     func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
 }
 
-void evtBSetupDispatchSyncG(s32 arg0) {
+void evtBSetupDispatchSyncG(s32 request) {
     s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CA58);
@@ -212,10 +212,10 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CB80);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CCD8);
 
-void evtBDispatchSyncB(s32 arg0) {
+void evtBDispatchSyncB(s32 request) {
     s32 context = func_00101A70();
 
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CDB0);
@@ -226,17 +226,17 @@ u32 func_0024CE20(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CE28);
 
-void evtBLateDispatchStart(s32 arg0) {
+void evtBLateDispatchStart(s32 request) {
     s32 context = func_00101A70();
 
     func_0024A2D8(context);
-    func_00285670(context + 8, context + 0x54, 1, arg0);
+    func_00285670(context + 8, context + 0x54, 1, request);
 }
 
-void evtBDispatchSyncC(s32 arg0) {
+void evtBDispatchSyncC(s32 request) {
     s32 context = func_00101A70();
 
-    func_00285670(context + 8, context + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024B3A8", D_003AF710);

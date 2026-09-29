@@ -24,6 +24,25 @@ typedef struct GridWidget {
     s32 height;
 } GridWidget;
 
+typedef struct GridTextWidget {
+    char *text;          /* 0x00 */
+    u16 textLength;      /* 0x04 */
+    s16 rows;            /* 0x06 */
+    u16 unk08;
+    u16 unk0A;
+    u32 flags;           /* 0x0C */
+    void *unk10;
+    void *unk14;
+    void *children;      /* 0x18 */
+    void *unk1C;
+    s32 x;               /* 0x20 */
+    s32 y;               /* 0x24 */
+    s32 width;           /* 0x28 */
+    s32 height;          /* 0x2C */
+    u32 reference;       /* 0x30 */
+    u8 pad34[0xC];
+} GridTextWidget;
+
 extern s32 func_002C2568(s32, void *);
 
 typedef struct GridQuantizedEntry {
@@ -308,78 +327,78 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     return 1;
 }
 
-u8 *func_002C1770(const char *text, s32 x, s32 y, s32 columns, s32 rows,
-                  u32 reference) {
-    u8 *widget = (u8 *)func_002CFEB8(0x40);
+GridTextWidget *func_002C1770(const char *text, s32 x, s32 y, s32 columns, s32 rows,
+                               u32 reference) {
+    GridTextWidget *widget = (GridTextWidget *)func_002CFEB8(0x40);
     u32 length;
     char *copy;
 
     memset(widget, 0, 0x40);
     length = strlen(text) + 1;
     copy = (char *)func_002CFEB8(length);
-    *(u16 *)(widget + 4) = length;
-    *(char **)widget = copy;
+    widget->textLength = length;
+    widget->text = copy;
     memcpy(copy, text, length);
-    *(u32 *)(widget + 0x10) = 0;
-    *(s32 *)(widget + 0x20) = x << 4;
-    *(s32 *)(widget + 0x24) = y << 3;
-    *(u32 *)(widget + 0x30) = reference;
-    *(s16 *)(widget + 6) = rows;
-    *(s32 *)(widget + 0x28) = columns * 12 + 6;
-    *(s32 *)(widget + 0x2C) = rows * 14 + 6;
-    *(u32 *)(widget + 0x14) = 0;
-    *(u32 *)(widget + 0x18) = 0;
-    *(u32 *)(widget + 0x1C) = 0;
-    *(u32 *)(widget + 0xC) = 0;
-    *(u16 *)(widget + 8) = 0;
-    *(u16 *)(widget + 0xA) = 0;
+    widget->unk10 = NULL;
+    widget->x = x << 4;
+    widget->y = y << 3;
+    widget->reference = reference;
+    widget->rows = rows;
+    widget->width = columns * 12 + 6;
+    widget->height = rows * 14 + 6;
+    widget->unk14 = NULL;
+    widget->children = NULL;
+    widget->unk1C = NULL;
+    widget->flags = 0;
+    widget->unk08 = 0;
+    widget->unk0A = 0;
     return widget;
 }
 
-void itfSetGridDimensions(u8 *work, s32 columns, s32 rows) {
+void itfSetGridDimensions(GridTextWidget *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 
     if (columns != 0) {
-        *(s32 *)(work + 0x28) = columnWidth;
+        work->width = columnWidth;
     }
     if (rows != 0) {
-        *(s32 *)(work + 0x2c) = rowHeight;
-        *(s16 *)(work + 6) = rows;
+        work->height = rowHeight;
+        work->rows = rows;
     }
 }
 
-u32 func_002C18C8(u32 arg0) {
-    s64 temp_v0;
+u32 func_002C18C8(GridTextWidget *widget) {
+    s64 next;
 
-    func_002CFF98(*(u32 *)arg0);
+    func_002CFF98(widget->text);
     do {
-        temp_v0 = func_002C1B30(arg0);
-    } while (temp_v0 != 0);
-    func_002CFF98(arg0);
+        next = func_002C1B30(widget);
+    } while (next != 0);
+    func_002CFF98(widget);
     return 1;
 }
 
-u32 func_002C1910(u32 work) {
+u32 func_002C1910(GridTextWidget *widget) {
     u32 list;
 
-    func_002CFF98(*(u32 *)work);
-    list = *(u32 *)(work + 0x18);
+    func_002CFF98(widget->text);
+    list = (u32)widget->children;
     if (list != 0) {
         do {
             u32 child = *(u32 *)(list + 0x20);
             if (child != 0) {
-                func_002C1910(child);
+                func_002C1910((GridTextWidget *)child);
             }
-            list = func_002C1B30(work);
+            list = func_002C1B30(widget);
         } while (list != 0);
     }
-    func_002CFF98(work);
+    func_002CFF98(widget);
     return 1;
 }
 
-void expandWidgetColumnWidth(s32 columns, u8 *work) {
-    s32 flags = *(s32 *)(work + 0xc);
+void expandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
+    s32 flags = work->flags;
     s32 width;
     if (flags & 0x100) {
         columns += 4;
@@ -388,8 +407,8 @@ void expandWidgetColumnWidth(s32 columns, u8 *work) {
         }
     }
     width = columns * 12 + 6;
-    if (*(s32 *)(work + 0x28) < width) {
-        *(s32 *)(work + 0x28) = width;
+    if (work->width < width) {
+        work->width = width;
     }
 }
 
@@ -399,7 +418,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1A30);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1B30);
 
-void func_002C1CC8(u8 *widget, u8 *node, const char *text) {
+void func_002C1CC8(GridTextWidget *widget, u8 *node, const char *text) {
     s32 length;
     s32 allocation;
     char *copy;

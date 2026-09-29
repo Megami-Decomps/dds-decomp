@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad0[0x70];
@@ -16,7 +17,9 @@ void effFreePairedResources(EffectPair *pair) {
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00185E50);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186030);
+void func_00186030(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00186040(EffectPair *pair, u32 value) {
     pair->value7C = value;

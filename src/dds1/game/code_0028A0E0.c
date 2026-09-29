@@ -2754,13 +2754,21 @@ void fileAcquireRecord(FileRecordSlots *record) {
     record->references++;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A7B0);
+void func_0029A7B0(void *record, u128 *out) {
+    PCP_COPY_VECTOR(out, *(u128 **)((u8 *)record + 0x20));
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A7C8);
+void func_0029A7C8(void *record, const u128 *value) {
+    PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20), value);
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A7E0);
+void func_0029A7E0(void *record, u128 *out) {
+    PCP_COPY_VECTOR(out, *(u128 **)((u8 *)record + 0x20) + 1);
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A7F8);
+void func_0029A7F8(void *record, const u128 *value) {
+    PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20) + 1, value);
+}
 
 INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7E8);
 

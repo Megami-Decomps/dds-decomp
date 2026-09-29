@@ -149,7 +149,31 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108218);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001082D8);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", evtUnk8360SetVec);
+void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
+    if (mode == 0) {
+        D_003BA904 &= ~0x400;
+        D_00324790.x = x;
+        D_00324790.y = y;
+        D_00324790.z = z;
+        D_00324790.w = w;
+    } else {
+        f32 b0 = D_00324790.x;
+        f32 b1 = D_00324790.y;
+        f32 b2 = D_00324790.z;
+        f32 b3 = D_00324790.w;
+        D_003BA904 |= 0x400;
+        D_003BD6FA = mode;
+        D_003C2C20.x = b0;
+        D_003C2C20.y = b1;
+        D_003C2C20.z = b2;
+        D_003C2C20.w = b3;
+        D_003C2C30.x = x;
+        D_003C2C30.y = y;
+        D_003C2C30.z = z;
+        D_003C2C30.w = w;
+        D_003BD6F8 = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001083F8);
 
@@ -189,11 +213,66 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108BA0);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108CB8);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108DC0);
+typedef struct EvtDrawSurface {
+    u8 unk_00[0x10];
+    void (*submit)(struct EvtDrawSurface *, void *);
+    u8 unk_14[0xC];
+} EvtDrawSurface;
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108E60);
+extern EvtDrawSurface D_00324B48[];
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern u8 *func_002E13E0(void *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108F00);
+void func_00108DC0(s32 value) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    u8 *command;
+    sdfInitPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = func_002E13E0(packet, 0x30);
+    *(u64 *)(command + 0x20) = ((u64)value << 32) | 0x64;
+    *(u64 *)(command + 0x28) = 0x42;
+    sdfAppendPacket(list, packet);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
+
+extern s32 func_00100518(void);
+extern u8 D_00326ED0[];
+extern void func_002D4C80(const void *, void *, s32);
+extern void func_002D40E8(void *, void *);
+
+void func_00108E60(void) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfInitPacketList(list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D40E8(list, texture);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
+
+extern void func_002D4CC8(const void *, void *, s32);
+
+void func_00108F00(void) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfInitPacketList(list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D40E8(list, texture);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108FA0);
 
@@ -207,7 +286,28 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109640);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109810);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109A40);
+extern f32 D_003245B0[];
+extern u32 D_003245D0[];
+extern void *func_002EF2B0(const void *, const void *, s32, s32);
+
+void func_00109A40(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+    void *list;
+    D_003245B0[0] = x;
+    D_003245B0[1] = y;
+    D_003245B0[2] = z;
+    D_003245B0[4] = u;
+    D_003245B0[5] = v;
+    D_003245B0[6] = w;
+    D_003245D0[1] = second;
+    D_003245D0[0] = first;
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, func_002EF2B0(D_003245B0, D_003245D0, 2, 0x80));
+    {
+        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109AF0);
 
@@ -219,9 +319,56 @@ void func_00109BC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_00194920(temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109C10);
+typedef struct EvtSelState {
+    u8 unk_00[4];
+    s32 limit;
+    s32 unk_08;
+    s32 unk_0C;
+    s16 unk_10;
+    s16 unk_12;
+    s16 unk_14;
+    u8 unk_16[2];
+    s32 count;
+} EvtSelState;
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", evtUnk9CC0Check);
+s32 func_00109C10(s32 limit, s16 frames, s32 arg2, s32 arg3) {
+    EvtSelState *node;
+    if (frames == 0) {
+        return 0;
+    }
+    if (D_003BA948 != 0) {
+        func_0010A170();
+    }
+    node = func_002CFF68(0x28);
+    D_003BD760 = node;
+    if (limit == 0) {
+        node->limit = -1;
+    } else {
+        node->limit = limit;
+    }
+    ((EvtSelState *)D_003BD760)->unk_08 = arg2;
+    ((EvtSelState *)D_003BD760)->unk_0C = arg3;
+    ((EvtSelState *)D_003BD760)->unk_10 = frames;
+    ((EvtSelState *)D_003BD760)->unk_12 = frames;
+    ((EvtSelState *)D_003BD760)->unk_14 = frames;
+    D_003BA948 = 1;
+    return 1;
+}
+
+u32 evtUnk9CC0Check(void) {
+    EvtSelState *sel;
+    if (D_003BA948 == 0) {
+        return 0;
+    }
+    sel = D_003BD760;
+    if (sel->limit > sel->count || sel->limit == -1) {
+        func_00109D20();
+    } else {
+        func_0010A170();
+        return 1;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109D20);
 
@@ -229,7 +376,14 @@ void func_0010A158(void) {
     func_0010A170();
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010A170);
+void func_0010A170(void) {
+    if (D_003BA948 != 0) {
+        func_002CFF98(D_003BD760);
+        D_003BA948 = 0;
+        __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324590) : "memory");
+    }
+}
 
 s32 evtStartSelCreate(void) {
     return kwlnTaskCreate(D_0039E1F0, 0x2AF9, 0, 0, (s32)func_00104260, 0, 0);
@@ -530,7 +684,15 @@ void func_0010A788(void) {
     evtCreateSkyTask();
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", evtUnkA7A8Init);
+extern void func_001060C8();
+
+u32 evtUnkA7A8Init(void) {
+    D_003BA730 = 1;
+    func_001060C8(0);
+    evtStopTestTasks();
+    evtDestroySkyTask();
+    return 1;
+}
 
 u32 func_0010A7E0(void) {
     return 0;
@@ -720,7 +882,14 @@ u8 func_0010AB70(void) {
     return temp_v0 == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", evtUnkAB90Ensure);
+u32 evtUnkAB90Ensure(void) {
+    if (D_003BA960 == 0) {
+        D_003BA960 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
+        func_002E41B0(D_003BA960, 2);
+        func_002E41A0(D_003BA960, 7);
+    }
+    return 0;
+}
 
 void func_0010ABE0(void) {
     if (D_003BA960 != 0) {

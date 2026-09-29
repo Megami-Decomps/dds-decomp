@@ -2,8 +2,6 @@
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s32 func_0024A6C0(s32);
-
 extern s8 D_003BC3E0;
 
 extern s64 func_0024DC08(void);
@@ -104,19 +102,6 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A570);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A610);
 
-extern s32 func_0024A6C0(s32);
-
-s32 func_0024A6C0(s32 object) {
-    switch (*(s32 *)(object + 0xdc)) {
-    case 1:
-        return 0x32;
-    case 2:
-        return 0x36;
-    default:
-        return 0;
-    }
-}
-
 typedef struct {
     u8 pad00[0x14];
     u8 unk14;
@@ -130,13 +115,27 @@ typedef struct {
 
 typedef struct {
     u8 pad00[0x64];
-    SceneFrameTable *frameTable;
+    SceneFrameTable *frameTable; /* 0x64 */
+    u8 pad68[0x74];
+    s32 mode; /* 0xDC */
 } SceneFrameOwner;
+extern s32 func_0024A6C0(SceneFrameOwner *);
+
+s32 func_0024A6C0(SceneFrameOwner *scene) {
+    switch (scene->mode) {
+    case 1:
+        return 0x32;
+    case 2:
+        return 0x36;
+    default:
+        return 0;
+    }
+}
 
 u8 func_0024A6E8(SceneFrameOwner *scene) {
     s32 index;
 
-    index = func_0024A6C0((s32)scene);
+    index = func_0024A6C0(scene);
     return scene->frameTable->records[index].unk14;
 }
 

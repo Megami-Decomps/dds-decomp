@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad[0xA4];    /* 0x0 */
@@ -115,6 +116,8 @@ u16 func_0015A6E0(ParObj *obj) {
     return obj->restartFlag;
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_0015A6E8);
+void func_0015A6E8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A6F8);

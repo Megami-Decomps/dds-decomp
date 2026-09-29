@@ -505,7 +505,25 @@ u32 func_00224B98(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224C08);
+f32 func_00224C08(f32 a, f32 b) {
+    f32 diff;
+
+    if (a < 0.0f || b < 0.0f) {
+        a += 360.0f;
+        b += 360.0f;
+    }
+    a = (s32)a % 360;
+    b = (s32)b % 360;
+    diff = a - b;
+    if (diff > 180.0f || diff < -180.0f) {
+        if (a < b) {
+            a += 360.0f;
+        } else {
+            b += 360.0f;
+        }
+    }
+    return b - a;
+}
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224CD8);
 

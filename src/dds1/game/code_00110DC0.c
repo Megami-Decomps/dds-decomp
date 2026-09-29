@@ -10,7 +10,12 @@ void func_00110EA0(s32 object, u32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110EB8);
+s32 func_00110EB8(u8 *obj) {
+    if (obj == NULL) {
+        return -1;
+    }
+    return **(s32 **)(obj + 0x18);
+}
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110ED0);
 

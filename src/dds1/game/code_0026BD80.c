@@ -5,9 +5,11 @@ extern s32 D_003BC5D0;
 extern void func_0026C7E0();
 
 typedef struct {
-    s32 pad00[2];
+    s32 pad00;
+    u32 firstResource;    /* 0x04: released by func_0026C048 */
     s32 spriteHandle;     /* 0x08: released through func_002BDD60 */
-    s32 pad0C[2];
+    u32 secondResource;   /* 0x0C: released by func_0026C048 */
+    s32 pad10;
     s32 word14;
     s32 pad18;
     s32 word1C;
@@ -27,7 +29,9 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BD80);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BE38);
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BEB0);
+s64 func_0026BEB0(void) {
+    return func_0027B368(*(u32 *)(D_003BC5D0 + 0x2C));
+}
 
 u32 func_0026BED0(void) {
     return **(u32 **)(*(s32 *)(D_003BC5D0 + 0x2c) + 0x1c);
@@ -61,16 +65,16 @@ u32 func_0026C040(void) {
 }
 
 void func_0026C048(void) {
-    u32 *state = (u32 *)D_003BC5D0;
-    if (state[1] != 0) {
-        func_002BDD60(state[1]);
-        state = (u32 *)D_003BC5D0;
-        state[1] = 0;
+    MenuState *state = (MenuState *)D_003BC5D0;
+    if (state->firstResource != 0) {
+        func_002BDD60(state->firstResource);
+        state = (MenuState *)D_003BC5D0;
+        state->firstResource = 0;
     }
-    if (state[3] != 0) {
-        func_002BDD60(state[3]);
-        state = (u32 *)D_003BC5D0;
-        state[3] = 0;
+    if (state->secondResource != 0) {
+        func_002BDD60(state->secondResource);
+        state = (MenuState *)D_003BC5D0;
+        state->secondResource = 0;
     }
 }
 

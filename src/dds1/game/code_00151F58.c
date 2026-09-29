@@ -1,4 +1,15 @@
 #include "common.h"
+#include "pcp_vu0.h"
+/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
+#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+extern void *func_002DA730();
+extern void func_002DA420(void *, f32);
+extern void func_002DA3D8(void *, u32);
+extern void func_002DA3C0(void *, u32);
+extern void func_002DA3F0(void *, u32);
 #include "eff.h"
 
 typedef struct EffTemplatePacketList {
@@ -61,7 +72,9 @@ s32 func_00151FC8(s32 arg0) {
     return *(s32 *)(*(s32 *)(D_003D6438[arg0] + 0x30));
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00151FE8);
+void func_00151FE8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00151FF8(BillObj *effect, float scale) {
     effect->unk20 = scale;
@@ -249,9 +262,29 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00152408);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001525C8);
+u8 *func_001525C8(s32 arg0) {
+    u8 *obj = func_002CFEB8(0x88);
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152650);
+    *(s32 *)(obj + 0x80) = billCreateIndexed(1, arg0);
+    *(void **)(obj + 0x84) = func_002DA730();
+    func_002DA420(*(void **)(obj + 0x84), 1.0f);
+    PCP_UNIT_MATRIX(obj + 0x40);
+    return obj;
+}
+
+u8 *func_00152650(u8 *src) {
+    u8 *obj = func_002CFEB8(0x88);
+
+    *(s32 *)(obj + 0x80) = func_00151E60(*(s32 *)(src + 0x80));
+    *(void **)(obj + 0x84) = func_002DA730();
+    func_002DA420(*(void **)(obj + 0x84), 1.0f);
+    func_002DA3D8(*(void **)(obj + 0x84), 0x80808080);
+    func_002DA3C0(*(void **)(obj + 0x84), 0x80808080);
+    func_002DA3F0(*(void **)(obj + 0x84), 0x80808080);
+    PCP_UNIT_MATRIX(obj + 0x40);
+    PCP_UNIT_MATRIX(obj);
+    return obj;
+}
 
 void effDestroy(u32 arg0) {
     func_002DAA68(*(u32 *)(arg0 + 0x84));
@@ -267,13 +300,42 @@ void func_00152770(s32 arg0, float arg1) {
     func_00152000(*(s32 *)(arg0 + 0x80), arg1, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152790);
+void func_00152790(u8 *dst, void *src) {
+    __asm__ volatile(
+        "lqc2 $vf28, 0x0(%0)\n\t"
+        "lqc2 $vf29, 0x10(%0)\n\t"
+        "lqc2 $vf30, 0x20(%0)\n\t"
+        "lqc2 $vf31, 0x30(%0)"
+        : : "r"(src) : "memory");
+    dst += 0x40;
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "sqc2 $vf28, 0x0(%0)\n\t"
+        "sqc2 $vf29, 0x10(%0)\n\t"
+        "sqc2 $vf30, 0x20(%0)\n\t"
+        "sqc2 $vf31, 0x30(%0)\n\t"
+        ".set reorder"
+        : : "r"(dst) : "memory");
+}
 
 void func_001527C0(s32 arg0, u32 arg1) {
     func_00152010(*(s32 *)(arg0 + 0x80), arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001527D8);
+void func_001527D8(void *dst, void *src) {
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 $vf28, 0x0(%1)\n\t"
+        "lqc2 $vf29, 0x10(%1)\n\t"
+        "lqc2 $vf30, 0x20(%1)\n\t"
+        "lqc2 $vf31, 0x30(%1)\n\t"
+        "sqc2 $vf28, 0x0(%0)\n\t"
+        "sqc2 $vf29, 0x10(%0)\n\t"
+        "sqc2 $vf30, 0x20(%0)\n\t"
+        "sqc2 $vf31, 0x30(%0)\n\t"
+        ".set reorder"
+        : : "r"(dst), "r"(src) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00152800);
 

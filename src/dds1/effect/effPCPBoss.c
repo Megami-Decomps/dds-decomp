@@ -1,11 +1,12 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_00184890(void *work0, void *work1);
 extern void func_00184B30(void *work);
 extern void func_00184BC8(void *work);
-extern void func_001855B8(void *work);
+extern void func_001855B8();
 extern void func_001855D0(void *work0, void *work1, void *work2);
 extern void func_00185A50(void *work0, void *work1);
 extern void func_00185BD8(void *work);
@@ -42,9 +43,16 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184B30);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184BC8);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001855B8);
+void func_001855B8(dst, src)
+void *dst;
+void *src;
+{
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001855C8);
+void func_001855C8(u8 *work, s32 value) {
+    *(s32 *)(work + 0xA0) = value;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001855D0);
 
@@ -69,7 +77,9 @@ void effPCPBossFree(EffPCPBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185790);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001858C8);
+void func_001858C8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+}
 
 void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
     work->unk24 = value;
@@ -209,9 +219,13 @@ u32 func_00185A20(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185A28);
+s32 func_00185A28(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185A30);
+s32 func_00185A30(void) {
+    return 0;
+}
 
 void func_00185A38(void) {
 }

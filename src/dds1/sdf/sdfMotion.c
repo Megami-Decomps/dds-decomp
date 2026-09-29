@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     void *unk0;
@@ -459,11 +460,17 @@ void func_002DC2B0(CmdB *a0) {
     a0->res = (s8)(((a0->sub->u14 >> 4) ^ 1) & 1);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC2D0);
+void func_002DC2D0(void *work) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x60);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC2F0);
+void func_002DC2F0(void *work) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x50);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC310);
+void func_002DC310(void *work) {
+    PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x70);
+}
 
 s32 func_002DC330(void *a0, s32 a1) {
     return D_00398248[(u16)a1](a0, a1);

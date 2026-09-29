@@ -20,7 +20,8 @@ extern void func_00194920(s32);
 
 extern s32 D_003BAA00;
 
-extern void func_00300508(s32 **, s32, s32, s32 (*)(s32 *, s32 *));
+typedef struct MenuListNode MenuListNode;
+extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 extern s32 func_00101A70();
 
@@ -51,13 +52,6 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
 }
 
 extern void func_0027FCA0(s32, s32, s32);
-
-typedef struct MenuListItem {
-    s32 index;
-    u8 pad4[0x54];
-    struct MenuListItem *next;
-    struct MenuListItem *prev;
-} MenuListItem;
 
 extern void func_0027CDD0(s32, s32, s32, s32, s32);
 
@@ -323,14 +317,17 @@ u32 func_0027B368(u32 arg0) {
     return 1;
 }
 
-typedef struct MenuListNode {
+struct MenuListNode {
     s32 index;
     s32 value;
     u8 pad8[0x50];
     struct MenuListNode *next;
     struct MenuListNode *prev;
-    u8 pad60[0x14];
-} MenuListNode;
+    u32 sortKeyPrimary;   /* 0x60 */
+    u32 sortKeySecondary; /* 0x64 */
+    u32 sortKeyTertiary;  /* 0x68 */
+    u8 pad6C[8];
+};
 
 typedef struct MenuList {
     u32 unk0;
@@ -381,21 +378,21 @@ MenuListNode *mnuListAppendNode(list, value)
     return node;
 }
 
-s32 mnuListContainsFinalNode(u32 *menu) {
-    u8 *node = (u8 *)menu[6];
+s32 mnuListContainsFinalNode(MenuList *list) {
+    MenuListNode *node = list->head;
     s32 index = 0;
-    if (node != 0) {
-        s32 count = menu[3];
+    if (node != NULL) {
+        s32 count = list->visibleCount;
         do {
             if (index >= count) {
                 return 0;
             }
-            if (node == (u8 *)menu[5]) {
+            if (node == list->last) {
                 return 1;
             }
-            node = *(u8 **)(node + 0x58);
+            node = node->next;
             index++;
-        } while (node != 0);
+        } while (node != NULL);
     }
     return 0;
 }
@@ -874,7 +871,7 @@ void func_0027DED0(s32 *menu, s32 reset) {
     }
 }
 
-void menuLinkItemList(MenuListItem **items, s32 count) {
+void menuLinkItemList(MenuListNode **items, s32 count) {
     s32 i;
 
     items[0]->prev = NULL;
@@ -890,64 +887,64 @@ void menuLinkItemList(MenuListItem **items, s32 count) {
     }
 }
 
-s32 func_0027DFF8(s32 *arg0, s32 *arg1) {
-    u32 temp_A = *(u32 *)(*arg0 + 0x60);
-    u32 temp_B = *(u32 *)(*arg1 + 0x60);
+s32 func_0027DFF8(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyPrimary;
+    u32 rightKey = (*right)->sortKeyPrimary;
 
-    if (temp_B < temp_A) {
+    if (rightKey < leftKey) {
         return -1;
     }
-    return temp_A < temp_B;
+    return leftKey < rightKey;
 }
 
-s32 func_0027E020(s32 *arg0, s32 *arg1) {
-    u32 temp_A = *(u32 *)(*arg0 + 0x60);
-    u32 temp_B = *(u32 *)(*arg1 + 0x60);
+s32 func_0027E020(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyPrimary;
+    u32 rightKey = (*right)->sortKeyPrimary;
 
-    if (temp_B < temp_A) {
+    if (rightKey < leftKey) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (leftKey < rightKey) ? -1 : 0;
 }
 
-s32 func_0027E050(s32 *arg0, s32 *arg1) {
-    u32 temp_A = *(u32 *)(*arg0 + 0x64);
-    u32 temp_B = *(u32 *)(*arg1 + 0x64);
+s32 func_0027E050(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeySecondary;
+    u32 rightKey = (*right)->sortKeySecondary;
 
-    if (temp_B < temp_A) {
+    if (rightKey < leftKey) {
         return -1;
     }
-    return temp_A < temp_B;
+    return leftKey < rightKey;
 }
 
-s32 func_0027E078(s32 *arg0, s32 *arg1) {
-    u32 temp_A = *(u32 *)(*arg0 + 0x64);
-    u32 temp_B = *(u32 *)(*arg1 + 0x64);
+s32 func_0027E078(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeySecondary;
+    u32 rightKey = (*right)->sortKeySecondary;
 
-    if (temp_B < temp_A) {
+    if (rightKey < leftKey) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (leftKey < rightKey) ? -1 : 0;
 }
 
-s32 func_0027E0A8(s32 *arg0, s32 *arg1) {
-    u32 temp_A = *(u32 *)(*arg0 + 0x68);
-    u32 temp_B = *(u32 *)(*arg1 + 0x68);
+s32 func_0027E0A8(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyTertiary;
+    u32 rightKey = (*right)->sortKeyTertiary;
 
-    if (temp_B < temp_A) {
+    if (rightKey < leftKey) {
         return -1;
     }
-    return temp_A < temp_B;
+    return leftKey < rightKey;
 }
 
-s32 func_0027E0D0(s32 *arg0, s32 *arg1) {
-    u32 temp_A = *(u32 *)(*arg0 + 0x68);
-    u32 temp_B = *(u32 *)(*arg1 + 0x68);
+s32 func_0027E0D0(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyTertiary;
+    u32 rightKey = (*right)->sortKeyTertiary;
 
-    if (temp_B < temp_A) {
+    if (rightKey < leftKey) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (leftKey < rightKey) ? -1 : 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
@@ -963,15 +960,17 @@ INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2380);
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
 
 void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
-    s32 (*comparators[6])(s32 *, s32 *) = {func_0027DFF8, func_0027E050, func_0027E0A8,
-                                             func_0027E020, func_0027E078, func_0027E0D0};
+    s32 (*comparators[6])(MenuListNode **, MenuListNode **) = {
+        func_0027DFF8, func_0027E050, func_0027E0A8,
+        func_0027E020, func_0027E078, func_0027E0D0
+    };
     s32 count = 0;
-    s32 handle = func_002D03F8(*(s32 *)(menu + 0x20) * 4);
-    s32 **items = (s32 **)sdfResourceRetainAddress(handle);
-    s32 **out = items;
-    s32 *node;
+    s32 handle = func_002D03F8(((MenuList *)menu)->count * 4);
+    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(handle);
+    MenuListNode **out = items;
+    MenuListNode *node;
 
-    for (node = *(s32 **)(menu + 0x10); node != NULL; node = (s32 *)node[0x58 / 4]) {
+    for (node = ((MenuList *)menu)->first; node != NULL; node = node->next) {
         *out++ = node;
         count++;
     }
@@ -979,7 +978,7 @@ void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
         sortKey += 3;
     }
     func_00300508(items, count, 4, comparators[sortKey]);
-    menuLinkItemList((MenuListItem **)items, count);
+    menuLinkItemList(items, count);
     func_0027DE60(menu);
     func_0027DE98(menu);
     func_0027DED0((s32 *)menu, 0);

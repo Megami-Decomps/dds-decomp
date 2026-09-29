@@ -160,22 +160,36 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_00219590);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002198D8);
 
-void func_00219AF8(s32 arg0, s32 arg1) {
-    s32 entry = *(s32 *)(arg0 + 0xc) + (*(s16 *)(arg0 + 4) << 4);
+typedef struct MdlPartEntry {
+    s32 kind;     /* 0x00: billboard or effect */
+    s32 state;    /* 0x04 */
+    s32 object;   /* 0x08 */
+    u8 pad0C[4];
+} MdlPartEntry;
 
-    *(s32 *)(entry + 4) = 0;
-    *(s32 *)(entry + 0) = 0;
-    *(s32 *)(entry + 8) = billCreateIndexed(1, arg1);
-    *(s16 *)(arg0 + 4) += 1;
+typedef struct MdlPartList {
+    u8 pad00[4];
+    s16 count;    /* 0x04 */
+    u8 pad06[6];
+    MdlPartEntry *entries; /* 0x0C */
+} MdlPartList;
+
+void func_00219AF8(MdlPartList *list, s32 index) {
+    MdlPartEntry *entry = &list->entries[list->count];
+
+    entry->state = 0;
+    entry->kind = 0;
+    entry->object = billCreateIndexed(1, index);
+    list->count += 1;
 }
 
-void func_00219B50(s32 arg0, s32 arg1) {
-    s32 entry = *(s32 *)(arg0 + 0xc) + (*(s16 *)(arg0 + 4) << 4);
+void func_00219B50(MdlPartList *list, s32 index) {
+    MdlPartEntry *entry = &list->entries[list->count];
 
-    *(s32 *)(entry + 0) = 1;
-    *(s32 *)(entry + 4) = 0;
-    *(s32 *)(entry + 8) = func_0014FD20(arg1);
-    *(s16 *)(arg0 + 4) += 1;
+    entry->kind = 1;
+    entry->state = 0;
+    entry->object = func_0014FD20(index);
+    list->count += 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00219BB0);

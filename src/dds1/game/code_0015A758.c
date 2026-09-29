@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 D_003BB014;
 
@@ -59,7 +60,7 @@ extern u8 D_003D64B0[];
 
 extern u8 D_003D64C0[];
 
-extern void func_0015A6E0();
+extern s32 func_0015A6E0();
 
 void func_0015A758(ParObj *work, u32 value) {
     work->unkF0 = value;
@@ -141,9 +142,13 @@ void func_0015AD08(float scale, ParObj *work) {
     work->unk8C *= scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AD48);
+s64 func_0015AD48(void) {
+    return func_0015A6E0();
+}
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AD68);
+void func_0015AD68(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0015AD78(void) {
     func_0015A6F8();

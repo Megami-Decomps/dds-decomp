@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad0[8];
@@ -41,15 +42,22 @@ void func_0016F458(EffectRecordGroup *group) {
     func_002D0918(group->handle78);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F488);
+void func_0016F488(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016F498(EffectRecordGroup *group, u32 records) {
     group->records = (u8 *)records;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F4A0);
+void func_0016F4A0(u8 *work, f32 value) {
+    *(f32 *)(work + 0x64) = value;
+}
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F4A8);
+void func_0016F4A8(void *work, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
+}
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F4D8);
 
@@ -89,7 +97,9 @@ void func_0016FF40(EffectRecordGroup *group, u32 value) {
     group->value54 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FF48);
+void func_0016FF48(u8 *work, f32 value) {
+    *(f32 *)(work + 0x5C) = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FF50);
 
@@ -147,6 +157,8 @@ void func_00170890(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x54) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170898);
+void func_00170898(u8 *work, f32 value) {
+    *(f32 *)(work + 0x5C) = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_001708A0);

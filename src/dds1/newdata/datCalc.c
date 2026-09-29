@@ -20,7 +20,9 @@ typedef struct UiObject {
     u16 statusFlags;
 } UiObject;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119098);
+void func_00119098(u8 *work, s32 mask) {
+    *(u16 *)(work + 0xE) &= ~mask;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001190B0);
 
@@ -62,9 +64,13 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_00119448);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119520);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119708);
+u32 func_00119708(void) {
+    return (u16)func_00119520();
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119728);
+u32 func_00119728(void) {
+    return func_00119520() & 0xFFFF0000;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119750);
 
@@ -72,7 +78,14 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_00119880);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001198B8);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_001198E8);
+extern s32 D_003BAA00;
+
+s32 func_001198E8(s32 value) {
+    if (*(s32 *)(D_003BAA00 + 0x3C) < value) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA08);
 

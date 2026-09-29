@@ -3031,7 +3031,22 @@ void func_001C2E60(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001C2E90);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", fldSetSceneSlotRange);
+extern s32 D_003BD83C;
+
+void fldSetSceneSlotRange(s32 index) {
+    u8 *scene = (u8 *)D_003BD83C;
+    if (*(s8 *)(scene + 0x20) < index) {
+        s32 i;
+        for (i = 0; i <= index; i++) {
+            s32 offset = i * 2;
+            scene = (u8 *)D_003BD83C;
+            *(s32 *)(scene + (offset + *(s32 *)(scene + 4)) * 4 + 0x38) = 0x80;
+            *(u8 *)((*(s32 *)(scene + 4) + offset) + (s32)scene + 0x22) = 3;
+        }
+        ((u8 *)D_003BD83C)[0x21] = index;
+    }
+    ((u8 *)D_003BD83C)[0x20] = index;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001C3040);
 
@@ -4066,7 +4081,20 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D09B8);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D0BA0);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D0DD8);
+s32 func_001D0DD8(s32 *state) {
+    switch (*state) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 s32 func_001D0E18(u8 *actor, s32 *argument) {
     switch (argument[0]) {
@@ -6402,7 +6430,26 @@ u32 btlHasMarkedEntry10(u8 *object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", btlCheckActorDistanceLimit);
+extern s32 func_001A17F0(void);
+
+extern f32 btlUnitGetTopY(s32);
+
+s32 btlCheckActorDistanceLimit(void) {
+    s32 actor = *(s32 *)(func_001A17F0() + 0x228);
+
+    while (actor != 0) {
+        u32 flags = *(u32 *)(actor + 0x110);
+        if (flags & 1) {
+            if (flags & 0x400) {
+                if (btlUnitGetTopY(actor) > 400.0f) {
+                    return 0;
+                }
+            }
+        }
+        actor = *(s32 *)(actor + 0x344);
+    }
+    return 1;
+}
 
 extern f32 func_001F66D8(s32, s32, s32);
 
@@ -6500,7 +6547,28 @@ s32 btlHasActorCategoryFlag40(s32 actor) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", btlMatchLinkedActorFlags);
+s32 btlMatchLinkedActorFlags(s32 actor) {
+    s32 linked;
+    s32 entry;
+
+    switch (*(u32 *)(actor + 0x104)) {
+    case 4:
+    case 5:
+    case 6:
+        break;
+    default:
+        return 0;
+    }
+    linked = *(s32 *)(actor + 0xF4);
+    if (linked == 0) {
+        return 0;
+    }
+    if (func_001DAE48(*(s32 *)(linked + 0x60)) >= 2) {
+        return 0;
+    }
+    entry = func_001DAE50(*(s32 *)(linked + 0x60), 0);
+    return ((*(u32 *)(*(s32 *)(linked + 0x18) + 0x110) ^ *(u32 *)(entry + 0x110)) & 0x600) == 0;
+}
 
 s32 btlHasFirstLinkedCategoryFlag1000(u8 *node) {
     u8 *resource = *(u8 **)(node + 0xF4);

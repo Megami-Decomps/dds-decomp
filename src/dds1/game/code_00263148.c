@@ -96,9 +96,9 @@ s64 func_002635C0(s32 request) {
 }
 
 s32 func_00263608(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
-    temp_v0[144] = 0;
-    temp_v0[241] = 0;
+    s32 *scene = (s32 *)func_00101A70();
+    scene[144] = 0;
+    scene[241] = 0;
     return 1;
 }
 
@@ -112,8 +112,8 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263728);
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263838);
 
-void func_002639E0(s32 arg0) {
-    mnuDrawBackdrop(arg0 + 0xd1c, 0x20);
+void func_002639E0(s32 scene) {
+    mnuDrawBackdrop(scene + 0xd1c, 0x20);
 }
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);

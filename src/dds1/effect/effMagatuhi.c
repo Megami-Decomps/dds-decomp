@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Small work area: type id and count, an id block, a result table plus an
  * object released on cleanup. */
@@ -142,7 +143,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B200);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B348);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B600);
+void func_0018B600(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
 void func_0018B618(EffMagatuhiMidWork *work, void *value) {
     work->unk124 = value;
@@ -165,7 +168,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BA30);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BB88);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE50);
+void func_0018BE50(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
 void func_0018BE68(EffMagatuhiMidWork *work, void *value) {
     work->unk128 = value;
@@ -188,7 +193,9 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C2D8);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C4C8);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C7A8);
+void func_0018C7A8(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+}
 
 void func_0018C7C0(EffMagatuhiMidWork *work, void *value) {
     work->unk120 = value;

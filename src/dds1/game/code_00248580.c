@@ -29,6 +29,11 @@ typedef struct MenuProgressNode {
     u32 requiredAmount;
 } MenuProgressNode;
 
+typedef struct {
+    u8 pad00[0x10];
+    MenuProgressNode *firstProgressNode;
+} MenuProgressOwner;
+
 extern s32 func_00248BA0(s32, s32);
 
 extern s32 func_002CFEB8(s32);
@@ -61,8 +66,8 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248658);
 
-void func_00248700(s32 object) {
-    MenuProgressNode *node = *(MenuProgressNode **)(object + 0x10);
+void func_00248700(MenuProgressOwner *owner) {
+    MenuProgressNode *node = owner->firstProgressNode;
     if (node != 0) {
         s32 base = D_003BAA00;
         do {
@@ -211,7 +216,11 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002495F8);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249668);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002496D8);
+void func_002496D8(u8 *work) {
+    u8 *owner = *(u8 **)(work + 0x78);
+    *(s32 *)(work + 0x7C) = 0;
+    *(s32 *)(work + 0x80) = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002496F0);
 
@@ -243,20 +252,20 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249998);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249A60);
 
-void func_00249C08(s8 arg0) {
-    s64 temp_v0;
+void func_00249C08(s8 enabled) {
+    s64 worldObject;
 
-    if (arg0 == '\x01') {
-        temp_v0 = dds3GetWorldObject();
-        if (temp_v0 != 0) {
-            func_00110860(temp_v0, 1);
+    if (enabled == '\x01') {
+        worldObject = dds3GetWorldObject();
+        if (worldObject != 0) {
+            func_00110860(worldObject, 1);
         }
         D_003BC3E1 = 1;
     }
     else {
-        temp_v0 = dds3GetWorldObject();
-        if (temp_v0 != 0) {
-            func_00110860(temp_v0, 0);
+        worldObject = dds3GetWorldObject();
+        if (worldObject != 0) {
+            func_00110860(worldObject, 0);
         }
         D_003BC3E1 = 0;
     }

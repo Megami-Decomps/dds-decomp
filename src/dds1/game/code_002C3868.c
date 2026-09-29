@@ -18,6 +18,9 @@ typedef struct {
     s32 value;         /* 0x00 */
     s16 countdown;     /* 0x04 */
     s16 mode;          /* 0x06 */
+    s16 pad08[2];
+    s16 mapTimerFirst; /* 0x0C */
+    s16 mapTimerSecond; /* 0x0E */
 } SdfCounterTimer;
 
 typedef struct {
@@ -156,35 +159,35 @@ void sdfCounterTickCountdown(void) {
 }
 
 void mnuSetMapTimerFlags(s32 flags) {
-    s16 *timers = *(s16 **)(D_003BD274 + 0x30);
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
     if ((flags & 1) != 0) {
-        if (timers[6] == 0) {
-            timers[6] = 1;
+        if (timer->mapTimerFirst == 0) {
+            timer->mapTimerFirst = 1;
         }
     } else {
-        timers[6] = 0;
+        timer->mapTimerFirst = 0;
     }
     if ((flags & 2) != 0) {
-        if (timers[7] == 0) {
-            timers[7] = 1;
+        if (timer->mapTimerSecond == 0) {
+            timer->mapTimerSecond = 1;
         }
     } else {
-        timers[7] = 0;
+        timer->mapTimerSecond = 0;
     }
 }
 
 void mnuTickMapTimers(void) {
-    s16 *timers = *(s16 **)(D_003BD274 + 0x30);
-    if (timers[6] > 0) {
-        timers[6]--;
-        if (timers[6] == 0) {
-            timers[6] = 60;
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    if (timer->mapTimerFirst > 0) {
+        timer->mapTimerFirst--;
+        if (timer->mapTimerFirst == 0) {
+            timer->mapTimerFirst = 60;
         }
     }
-    if (timers[7] > 0) {
-        timers[7]--;
-        if (timers[7] == 0) {
-            timers[7] = 60;
+    if (timer->mapTimerSecond > 0) {
+        timer->mapTimerSecond--;
+        if (timer->mapTimerSecond == 0) {
+            timer->mapTimerSecond = 60;
         }
     }
 }
