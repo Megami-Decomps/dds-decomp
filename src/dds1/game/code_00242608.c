@@ -67,7 +67,45 @@ void campDestroyAllTasks(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242708);
+typedef struct ScrollNode {
+    u16 pos;                  /* 0x0 */
+    u8 unk2[0x2E];            /* 0x2 */
+    struct ScrollNode *next;  /* 0x30 */
+} ScrollNode;
+
+typedef struct ScrollList {
+    u8 unk0[0x1C];
+    s16 base;                 /* 0x1C */
+    u8 unk1E[0x36];
+    ScrollNode *nodes;        /* 0x54 */
+} ScrollList;
+
+typedef struct ScrollOwner {
+    u8 unk0[0xC];
+    s32 limit;                /* 0xC */
+    u8 unk10[0x22F8];
+    ScrollList *list;         /* 0x2308 */
+} ScrollOwner;
+
+void func_00242708(ScrollOwner *owner, s32 delta) {
+    ScrollList *list = owner->list;
+    ScrollNode *node;
+    s32 next;
+
+    if (list == NULL) {
+        return;
+    }
+    for (node = list->nodes; node != NULL; node = node->next) {
+        next = node->pos + list->base + delta;
+        if (next < list->base) {
+            node->pos = 0;
+        } else if (owner->limit < next) {
+            node->pos = (u16)owner->limit - (u16)list->base - 1;
+        } else {
+            node->pos = node->pos + delta;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242780);
 
@@ -224,7 +262,26 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243B28);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243BF0);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243CC8);
+extern s32 D_003BA8F8;
+extern s32 func_002D5510();
+extern void sdfCreateDescriptorPacket();
+
+typedef struct BufferDescriptor {
+    u8 unk0[0x10];
+    void (*open)(struct BufferDescriptor *, s32);
+} BufferDescriptor;
+
+extern BufferDescriptor D_00325708;
+
+void func_00243CC8(u8 *work) {
+    s32 packet;
+
+    if (*(s32 *)(work + 0x2428) != 0) {
+        packet = func_002D5510(0);
+        sdfCreateDescriptorPacket(packet, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0x200, 0xE0, *(s32 *)(work + 0x2428), 0);
+        D_00325708.open(&D_00325708, packet);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243D48);
 
@@ -379,7 +436,30 @@ s64 func_00244360(u8 *work) {
     return func_002BDD60(*(u32 *)(work + 0x64));
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244380);
+extern s32 D_003BAA00;
+extern u8 *D_003BAA68;
+
+s32 func_00244380(void) {
+    u8 *flags = (u8 *)(D_003BAA00 + 0x12A0);
+    u8 *entry = D_003BAA68;
+    s32 found = 0;
+    s32 i;
+
+    for (i = 0; i < 0xC0; flags++, i++) {
+        if ((u32)(i - 0xA0) >= 0x20 && *flags != 0) {
+            if ((*entry & 3) != 0) {
+                found = 1;
+                break;
+            }
+            if ((u32)(i - 0x60) < 0x20) {
+                found = 1;
+                break;
+            }
+        }
+        entry += 8;
+    }
+    return found;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002443F8);
 
@@ -405,7 +485,38 @@ s32 func_002445E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244658);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244740);
+typedef struct ShopBuf {
+    u8 unk0[0x30];
+    void *buffer;    /* 0x30 */
+} ShopBuf;
+
+typedef struct ShopSprite {
+    u8 unk0[0x14];
+    ShopBuf *data;   /* 0x14 */
+} ShopSprite;
+
+extern void func_0027C430();
+extern void func_002CFF98();
+
+void func_00244740(u8 *scene) {
+    ShopSprite **slot = (ShopSprite **)(scene + 0x6C);
+    u32 i;
+
+    for (i = 0; i < 1; i++) {
+        ShopSprite *sprite = *slot;
+
+        if (sprite->data->buffer != NULL) {
+            func_002CFF98(sprite->data->buffer);
+            sprite = *slot;
+            sprite->data->buffer = NULL;
+        }
+        func_0027C430(sprite);
+        slot++;
+    }
+    if (*(s32 *)(scene + 0x70) != 0) {
+        func_0027C430(*(s32 *)(scene + 0x70));
+    }
+}
 
 s32 func_002447D8(void) {
     s32 result = 0;
@@ -449,7 +560,26 @@ s32 func_00244898(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002448D0);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244970);
+extern s32 func_00101A70();
+extern void func_00285600();
+extern void func_0024DBC8();
+extern void func_0024D9C0();
+extern void func_002D0918();
+
+void func_00244970(s32 arg) {
+    u8 *scene = (u8 *)func_00101A70();
+
+    if (scene != NULL) {
+        func_00244740(scene);
+        func_00244360(scene);
+        mnuShopReleaseSceneObjects(scene);
+        func_00285600(scene + 8, arg);
+        func_0024DBC8();
+        func_0024D9C0(scene + 0x5C);
+        func_002D0918(*(s32 *)scene);
+        D_003BC39C = 2;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002449F0);
 

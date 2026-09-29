@@ -353,7 +353,18 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB8C0);
+void func_002EB8C0(SoundNode *node, SoundFormat *format) {
+    memset(node, 0, 0x8C);
+    if (format->hasAudio == 0) {
+        node->twoChannel = 0;
+    } else if (format->stereo == 0) {
+        node->twoChannel = 1;
+    } else {
+        node->twoChannel = 2;
+    }
+    node->loopMode = format->loopMode;
+    node->playbackMode = format->playbackMode;
+}
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB930);
 
 void func_002EB9C8(SoundNode *node, SoundFormat *format, s32 callback, s32 context) {

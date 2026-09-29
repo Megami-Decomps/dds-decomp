@@ -10,7 +10,21 @@ extern s32 D_003BAA00;
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002653A0);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265478);
+extern void func_00264E90();
+extern void func_00264EF0();
+extern void func_00264B08();
+extern void func_00264D90();
+
+void func_00265478(u8 *work) {
+    s32 y = 0x100 - *(s32 *)(work + 0x1574);
+
+    func_00264E90(work);
+    func_00264EF0(work);
+    func_00264B08(work);
+    func_00264D90(work);
+    func_00266250(0x2C0, 0x3D8, 0, y, work + 0x3E4, 0x53);
+    func_002653A0(work);
+}
 
 typedef struct {
     u8 pad00[4];
@@ -89,7 +103,20 @@ s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
     return step;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C28);
+s32 func_00265C28(u8 *src, u8 *obj) {
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        s8 *stat = (s8 *)(obj + 0x16 + i);
+
+        *stat += src[i * 4];
+        if (*stat >= 100) {
+            *stat = 99;
+        }
+    }
+    func_002CD0C0(obj);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C90);
 

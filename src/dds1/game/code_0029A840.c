@@ -5480,7 +5480,18 @@ s32 func_002B8618(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8648);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8948);
+u32 func_002B8948(void) {
+    u8 *file = fileQueueGetAt(D_003BD060, func_002B5990());
+    u32 result;
+
+    memcpy(D_003DF840, file, 0x90);
+    result = func_002B7E60(D_003DF840, 1);
+    memcpy(file, D_003DF840, 0x90);
+    if (result & 1) {
+        result |= 0x800000;
+    }
+    return result;
+}
 
 typedef struct EffectStateSnapshot {
     s128 vectors[8];
@@ -6147,7 +6158,48 @@ INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3B88);
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3BA0);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BC140);
+extern EffectFileHeader D_0038D470;
+
+u32 func_002BC140(void) {
+    u8 fileInfo[0x110];
+    u8 *job;
+    u8 *entry;
+    u8 *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    func_002B8EA8("/tool/effect/f2/", 0x80, fileInfo);
+    status = *(s32 *)(fileInfo + 0x100);
+    result = 0x600001;
+    if (status == 2) {
+        result = 0x400000;
+    } else if (status == 1) {
+        job = (u8 *)fileCreateJob(0x14);
+        func_002937E0(job, D_0038D470.start, D_0038D470.length,
+                      D_0038D470.mode);
+        func_00293A00(job, fileInfo, func_002BC538(*(u32 *)(fileInfo + 0xFC)));
+        entry = (u8 *)fileAppendJob(D_003BD060, job);
+        D_003BD070 = (s32)entry;
+        memcpy(D_003DF9A0, entry, 0x80);
+        D_003BD068 = *(u32 *)(entry + 0x90);
+        resource = (u8 *)effFindAssetData(entry);
+        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        fileData = fileResolvePrimaryBuffer(D_003BD068);
+        memcpy(*(void **)(resource + 0xC), fileData,
+               *(u32 *)(resource + 0x10));
+        D_003BD064 = func_002B5390(resource);
+        D_003BD09C = effFindAssetObject(entry);
+        *(u8 **)(D_003BD09C + 0x34) = (u8 *)D_0038F2F0;
+        func_002BC510();
+        if (D_003BD06C != 0) {
+            fileJobDestroy(D_003BD06C);
+            D_003BD06C = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
 
 
 u32 func_002BC328(void) {

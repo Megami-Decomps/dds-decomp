@@ -303,7 +303,33 @@ void func_00269C10(u32 source) {
     func_002F5990(1, 0x80e0, 0, 2, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269CA0);
+typedef struct MixSource {
+    u8 unk0[0x18];
+    s16 *samples;   /* 0x18 */
+} MixSource;
+
+void func_00269CA0(s16 *dst, MixSource *first, MixSource *second) {
+    s16 *out = dst;
+    s16 *in = second->samples;
+    s32 i;
+
+    for (i = 0; i < 0x800; i++) {
+        *out++ = *in++;
+    }
+    in = first->samples;
+    out -= 0x800;
+    for (i = 0; i < 0x800; i++) {
+        s32 sample = *out + *in++;
+
+        if (sample > 0x7FFF) {
+            sample = 0x7FFF;
+        }
+        if (sample < -0x7FFF) {
+            sample = -0x7FFF;
+        }
+        *out++ = sample;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269D18);
 
