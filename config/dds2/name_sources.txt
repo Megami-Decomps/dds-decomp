@@ -577,7 +577,17 @@
 0x00294488	mnuReleasePanelEntryPool	inferred	Frees the panel entry pool's allocation and clears the global pool pointer.
 0x00294538	mnuFindFreePanelEntry	inferred	Returns the first two-word panel entry whose first field is zero, or null when the pool is full.
 0x00294580	mnuStorePanelEntry	inferred	Obtains a free panel entry and assigns its two values.
+0x00298E20	brsTaskStart	inferred	DDS2 twin of DDS1 brsTaskStart @ 0x261F58: calls mnuStaffCreateTasks, clears D_0043798A and sets D_0043798B
+0x00298E48	brsTaskIsUpdateBlocked	inferred	DDS2 twin of DDS1 brsTaskIsUpdateBlocked @ 0x261F80 (reads D_0043798B)
+0x00298E50	brsTaskAllowUpdate	inferred	DDS2 twin of DDS1 brsTaskAllowUpdate @ 0x261F88 (sets D_0043798A=1, returns 1)
+0x00298E60	brsTaskPollDone	inferred	DDS2 twin of DDS1 brsTaskPollDone @ 0x261F98 (wraps brsTaskConsumeDone)
+0x00298E78	brsTaskHasPendingRows	inferred	DDS2 twin of DDS1 brsTaskHasPendingRows @ 0x261FB0 (reads D_00437989)
 0x00298EA8	gstApplyCounterDeltaTable	inferred	byte-identical twin of DDS1 gstApplyCounterDeltaTable @ 0x261FD8 (walks three MenuIconRefs and calls the progress-counter adjuster)
+0x00298F08	gstApplyBundleMacca	inferred	DDS2 twin of DDS1 gstApplyBundleMacca @ 0x262038: adds the reward bundle's macca field at +0xC through the macca adder
+0x002996B8	brsStaffTaskDestroy	inferred	DDS2 twin of DDS1 brsStaffTaskDestroy @ 0x262790: mnuStaffRunPanel2 destroy callback, leaves the task state at 2
+0x00299868	brsTaskConsumeDone	inferred	DDS2 twin of DDS1 brsTaskConsumeDone @ 0x262938: D_00437988==1 -> busy, ==2 -> reset to 0
+0x002998A0	brsTaskTryDestroy	inferred	DDS2 twin of DDS1 brsTaskTryDestroy @ 0x262970
+0x00299A00	brsTaskIsFadeIdle	inferred	DDS2 twin of DDS1 brsTaskIsFadeIdle @ 0x262A88
 0x0029AE70	mnuResetSelectionWidthsFromConfig	inferred	Computes clamped selection width from configuration and five signed bytes, clears layout widths and refreshes an active resource.
 0x0029AF48	mnuClearSelectionWidths	inferred	Clears the layout margin and all five width entries of a menu context.
 0x0029BEB8	mnuTitleApplySequenceState	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleApplySequenceState behavior.
