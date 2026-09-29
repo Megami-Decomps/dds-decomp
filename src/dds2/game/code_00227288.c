@@ -665,19 +665,19 @@ u32 func_00229278(void) {
 }
 
 s32 func_00229280(void) {
-    s32 temp_v0 = -1;
-    s32 temp_v1;
+    s32 result = -1;
+    s32 state;
 
-    temp_v1 = *(s32 *)(func_001AA6F8() + 0x718);
-    if (*(s8 *)(temp_v1 + 0) != 0) {
-        if (*(s8 *)(temp_v1 + 1) != 0) {
-            *(u8 *)(temp_v1 + 1) = 0;
+    state = *(s32 *)(func_001AA6F8() + 0x718);
+    if (*(s8 *)(state + 0) != 0) {
+        if (*(s8 *)(state + 1) != 0) {
+            *(u8 *)(state + 1) = 0;
             return btlFindScriptResource(D_00436CF8);
         }
-        *(u8 *)(temp_v1 + 0) = 0;
+        *(u8 *)(state + 0) = 0;
         return -1;
     }
-    return temp_v0;
+    return result;
 }
 
 void func_002292D8(void) {
@@ -1005,10 +1005,10 @@ s32 func_0022B510(void) {
 }
 
 u8 func_0022B5E0(void) {
-    s64 temp_v0;
+    s64 taskCount;
 
-    temp_v0 = btlCountTasksByKind(0x1a);
-    return temp_v0 == 0;
+    taskCount = btlCountTasksByKind(0x1a);
+    return taskCount == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B600);
@@ -1038,22 +1038,22 @@ u32 func_0022B8E0(void) {
 }
 
 u32 func_0022B928(void) {
-    s64 temp_v0;
-    s32 temp_v1;
-    u32 temp_v2;
-    s32 temp_v3;
+    s64 isSet;
+    s32 flag;
+    u32 index;
+    s32 count;
 
-    temp_v2 = 0;
-    temp_v3 = 0;
+    index = 0;
+    count = 0;
     do {
-        temp_v1 = 0x8ff - temp_v2;
-        temp_v2 = temp_v2 + 1;
-        temp_v0 = mdlFlagTest(temp_v1);
-        if (temp_v0 != 0) {
-            temp_v3 = temp_v3 + 1;
+        flag = 0x8ff - index;
+        index = index + 1;
+        isSet = mdlFlagTest(flag);
+        if (isSet != 0) {
+            count = count + 1;
         }
-    } while (temp_v2 < 100);
-    func_0010D818(temp_v3);
+    } while (index < 100);
+    func_0010D818(count);
     return 1;
 }
 
@@ -1219,11 +1219,11 @@ void func_0022CA48(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022CA60);
 
 void func_0022CB68(void) {
-    s64 temp_v0;
+    s64 entry;
 
-    temp_v0 = btlFindModelEntry();
-    if (temp_v0 != 0) {
-        btlReleaseModelEntry(temp_v0);
+    entry = btlFindModelEntry();
+    if (entry != 0) {
+        btlReleaseModelEntry(entry);
         return;
     }
 }
@@ -1607,25 +1607,25 @@ void btlAddGroupId(s32 group, s32 id) {
     *head = node;
 }
 
-void func_002312F8(s32 arg0, s32 arg1) {
-    s32 *temp_v0;
-    s32 *temp_v1;
+void func_002312F8(s32 group, s32 id) {
+    s32 *link;
+    s32 *node;
 
-    temp_v0 = &D_003C8710[arg0];
-    temp_v1 = (s32 *)*temp_v0;
-    if (temp_v1 == 0) {
+    link = &D_003C8710[group];
+    node = (s32 *)*link;
+    if (node == 0) {
         return;
     }
     do {
-        if (*(temp_v1 + 1) == arg1) {
-            *temp_v0 = *temp_v1;
-            func_00328E48(temp_v1);
+        if (*(node + 1) == id) {
+            *link = *node;
+            func_00328E48(node);
             break;
         } else {
-            temp_v0 = temp_v1;
-            temp_v1 = (s32 *)*temp_v1;
+            link = node;
+            node = (s32 *)*node;
         }
-    } while (temp_v1 != 0);
+    } while (node != 0);
 }
 
 void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s32 arg5) {
@@ -1700,10 +1700,10 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
 }
 
 void func_00231588(void) {
-    s32 *temp_v0;
+    s32 *node;
 
-    temp_v0 = btlFindGroupedEntity();
-    btlDestroyGroupNode((BattleGroupNode *)temp_v0);
+    node = btlFindGroupedEntity();
+    btlDestroyGroupNode((BattleGroupNode *)node);
 }
 
 void btlReleaseAllEntities(void) {

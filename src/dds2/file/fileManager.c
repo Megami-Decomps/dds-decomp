@@ -85,6 +85,7 @@ s32 fileRequestIsReady(FileRequest *file) {
     return result;
 }
 
+/* Keep the device scheduler and file manager running while a request finishes. */
 void fileWaitReady(u32 request) {
     s64 status;
 

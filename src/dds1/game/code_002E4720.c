@@ -151,11 +151,11 @@ extern s32 sceCdStatus(void);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
-void func_002E4908(s32 arg0, s32 arg1, ...) {
+void func_002E4908(s32 packet, s32 format, ...) {
     __builtin_va_list args;
 
-    __builtin_stdarg_start(args, arg1);
-    func_002E4720(arg0, arg1, args);
+    __builtin_stdarg_start(args, format);
+    func_002E4720(packet, format, args);
 }
 
 void func_002E4960(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
@@ -321,19 +321,19 @@ void func_002E55E0(void) {
     }
 }
 
-u8 sdfPacketExists(u32 arg0) {
-    u8 buf[16];
+u8 sdfPacketExists(u32 request) {
+    u8 buffer[16];
 
-    return func_002E5158(arg0, buf, 0) != 0;
+    return func_002E5158(request, buffer, 0) != 0;
 }
 
-s32 sdfPktQuery(u32 arg0) {
-    u8 buf[16];
-    s32 pkt;
+s32 sdfPktQuery(u32 request) {
+    u8 buffer[16];
+    s32 packet;
 
-    pkt = func_002E5158(arg0, buf, 0);
-    if (pkt != 0) {
-        return *(s32 *)(pkt + 8);
+    packet = func_002E5158(request, buffer, 0);
+    if (packet != 0) {
+        return *(s32 *)(packet + 8);
     }
     return -1;
 }
@@ -402,6 +402,7 @@ void sdfInitDeviceSemaphores(void) {
 
 extern char D_003BD3F8[];
 
+/* Convert a relative disc path to the drive's uppercase backslash form with ;1 suffix. */
 void func_002E5808(char *dst, char *src) {
     s32 c;
     memcpy(dst, D_003BD3F8, 8);
@@ -440,9 +441,9 @@ char *sdfDevBuildPath(char *dst, char *src) {
     return strcat(dst, src);
 }
 
-void sdfPathPrefixCat(char *arg0, char *arg1) {
-    memcpy(arg0, D_003BD408, 6);
-    strcat(arg0, arg1);
+void sdfPathPrefixCat(char *destination, char *path) {
+    memcpy(destination, D_003BD408, 6);
+    strcat(destination, path);
 }
 
 u32 func_002E5958(void) {
@@ -553,22 +554,22 @@ void func_002E5E90(DevState *state) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5F08);
 
-void sdfDevRelease(DevState *arg0) {
-    s32 id = arg0->resourceId;
+void sdfDevRelease(DevState *state) {
+    s32 id = state->resourceId;
 
-    arg0->resourceId = -1;
+    state->resourceId = -1;
     if (id >= 0) {
         func_0030EB78(id);
     }
-    func_002E5F08(arg0);
+    func_002E5F08(state);
 }
 
-void sdfDevDeactivate(DevState *arg0, s32 arg1) {
-    arg0->result = arg1;
-    arg0->state = SDF_DEV_STATE_INACTIVE;
-    sdfDevRelease(arg0);
-    if (arg0->callback != NULL) {
-        arg0->callback(arg0, 0, 0, 0, arg0->callbackContext);
+void sdfDevDeactivate(DevState *state, s32 result) {
+    state->result = result;
+    state->state = SDF_DEV_STATE_INACTIVE;
+    sdfDevRelease(state);
+    if (state->callback != NULL) {
+        state->callback(state, 0, 0, 0, state->callbackContext);
     }
 }
 

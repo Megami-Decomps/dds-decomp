@@ -53,6 +53,8 @@ typedef struct SdfMapPositionRecord {
 } SdfMapPositionRecord;
 
 #define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
+#define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
+#define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
 
 typedef struct SdfResourceList {
     u32 unk0;
@@ -192,7 +194,7 @@ s32 func_002D9E98(SdfTextParam *param, s32 id) {
 }
 
 u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, 0x51494e55);
+    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
         return *(u32 *)((u8 *)chunk + 8);
     }
@@ -200,7 +202,7 @@ u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
 }
 
 u32 sdfGetLodChunkValue(SdfTextParam *param) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, 0x43444f4c);
+    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
         return *(u32 *)((u8 *)chunk + 8);
     }
@@ -483,9 +485,9 @@ void func_002DAC68(SdfAsset *asset, u8 *entry) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DAC88);
 
-void func_002DAD18(SdfAsset *arg0, SdfTextParam *arg1) {
-    arg1->unk28 = arg0->unk40;
-    arg1->unk2C = arg0->unk44;
+void func_002DAD18(SdfAsset *asset, SdfTextParam *param) {
+    param->unk28 = asset->unk40;
+    param->unk2C = asset->unk44;
 }
 
 void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {

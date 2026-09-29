@@ -81,6 +81,7 @@ void *dds3AppendWorldNode(void) {
     return node;
 }
 
+/* Clear world-owned references before destroying a node that may also be selected. */
 void dds3DestroyWorldNode(NodeA *node) {
     WorldInfo *info;
 
@@ -167,34 +168,34 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110018);
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110120);
 
-s32 dds3IterateWorldEntries(void *arg0, void *arg1, s32 arg2) {
-    s32 ret;
+s32 dds3IterateWorldEntries(void *iterator, void *target, s32 repeat) {
+    s32 found;
 
-    ret = 0;
-    if (func_00110400(arg0, arg1, arg2) != NULL) {
-        func_00110490(arg0);
+    found = 0;
+    if (func_00110400(iterator, target, repeat) != NULL) {
+        func_00110490(iterator);
         do {
-            if (dds3FindWorldEntry(arg0, arg1) != 1) {
+            if (dds3FindWorldEntry(iterator, target) != 1) {
                 break;
             }
-            func_00110018(arg0);
-            ret = 1;
-        } while (arg2 != 0);
+            func_00110018(iterator);
+            found = 1;
+        } while (repeat != 0);
     }
-    return ret;
+    return found;
 }
 
-s32 dds3FindWorldEntry(void *arg0, void *arg1) {
-    void *res;
+s32 dds3FindWorldEntry(void *iterator, void *target) {
+    void *candidate;
 
     do {
-        res = func_00110458(arg0);
-        if (res == NULL) {
+        candidate = func_00110458(iterator);
+        if (candidate == NULL) {
             return 0;
         }
-        if (arg1 == res) {
+        if (target == candidate) {
             return 1;
         }
-    } while (func_001104B0(arg0) != 0);
+    } while (func_001104B0(iterator) != 0);
     return 0;
 }

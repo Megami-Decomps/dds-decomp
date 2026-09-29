@@ -1196,14 +1196,14 @@ u32 func_00223FE0(ActionUnit *unit) {
     }
     return 0;
 }
-u32 func_00224010(u32 arg0, s32 arg1) {
-    u32 temp_v0;
+u32 func_00224010(u32 unused, s32 motion) {
+    u32 result;
 
-    temp_v0 = 0xe0;
-    if (arg1 != 0x12d) {
-        temp_v0 = 0;
+    result = 0xe0;
+    if (motion != 0x12d) {
+        result = 0;
     }
-    return temp_v0;
+    return result;
 }
 
 void func_00224020(u32 unit) {

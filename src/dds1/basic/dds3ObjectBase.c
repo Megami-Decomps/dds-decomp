@@ -85,14 +85,14 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111F40);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112008);
 
-s32 dds3InvokeSlot5Handler(void *obj) {
+s32 dds3InvokeSlot5Handler(void *object) {
     void *handler;
 
-    handler = dds3GetSlot(obj, 5);
+    handler = dds3GetSlot(object, 5);
     if (handler == NULL) {
         return 0;
     }
-    func_001111C8(handler, obj);
+    func_001111C8(handler, object);
     return 1;
 }
 
@@ -100,14 +100,14 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112100);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001122F0);
 
-void dds3EnsureSlotData(void *obj) {
+void dds3EnsureSlotData(void *object) {
     void *existing;
     void *data;
 
-    existing = dds3GetSlot(obj, 1);
+    existing = dds3GetSlot(object, 1);
     if (existing == NULL) {
-        data = dds3SpawnSlotRingObj3(obj);
-        dds3SetSlotByKind(obj, data);
+        data = dds3SpawnSlotRingObj3(object);
+        dds3SetSlotByKind(object, data);
         return;
     }
 }

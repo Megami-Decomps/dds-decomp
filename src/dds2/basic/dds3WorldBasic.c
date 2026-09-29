@@ -93,6 +93,7 @@ void *dds3AppendWorldNode(void) {
     return node;
 }
 
+/* Clear world-owned references before destroying a node that may also be selected. */
 void dds3DestroyWorldNode(NodeA *node) {
     WorldInfo *info;
 
