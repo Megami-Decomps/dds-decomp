@@ -1719,8 +1719,18 @@
 0x002CBC98	sdfGridCursorDown	inferred	moves grid cursor forward one row
 0x002CBCF0	sdfGridCursorLeft	inferred	moves grid cursor back one column
 0x002CBD48	sdfGridCursorRight	inferred	Advances one eight-byte grid cell unless the current index is in the final column.
+0x002CC808	ptySelectProfileStage	inferred	party/profile lane; legacy PartyUnit_SelectProfileStageAndInitCurrent: writes unit.current_profile from the 4-row stage table and initialises current_profile-related state
+0x002CC9C0	ptyApplyProfilePreset	inferred	legacy PartyUnit_ApplyProfilePresetForMode: scores the 4 static 12-profile preset rows and applies the best for the mode
+0x002CCCC0	ptyRebuildProfileSkills	inferred	legacy PartyUnit_RebuildProfileAndSkillState: full profile/skill rebuild (preset apply, profile flag store, skill list)
+0x002CCDC8	ptyRebuildAllProfiles	inferred	legacy Party_RebuildAllActiveProfileAndSkillState: runs ptyRebuildProfileSkills for every present active row
+0x002CCE60	ptyRecomputeMaxVitals	inferred	legacy PartyUnit_RecomputeEffectiveMaxVitalsAndRescaleCurrent: recompute effective max HP/MP then rescale current
+0x002CD428	ptyApplyProfile	inferred	legacy PartyUnit_ApplyProfileById: completed-profile writer; sets profile flags/skill state for the given profile id
+0x002CD548	ptyTestProfileFlag0	inferred	legacy PartyUnit_TestProfileFlagBit0: tests profile flag bit0 in the g_GameState1+0x2E9F0 map
 0x002CD5B8	scrCheckStateBits	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CD630	ptySetProfileFlag1	inferred	legacy PartyUnit_SetProfileFlagBit1: sets profile flag bit1 in the g_GameState1+0x2E9F0 map
+0x002CD6B0	ptyTestProfileFlag1	inferred	legacy PartyUnit_TestProfileFlagBit1: tests profile flag bit1; drives profile-menu status/overlay
 0x002CD728	scrGetSelectedOperandIndex	inferred	Returns the VM operand's currently selected signed index.
+0x002CD730	ptyGetProfileRecord	inferred	legacy PartyUnitProfileRecord_Get: returns the 8-byte per-unit per-profile save sidecar record
 0x002CD7C0	scrSelectOperandIndex	inferred	Stores the selected VM operand index and updates its associated operand.
 0x002CD808	scrDecodePackedFlagIndex	inferred	Splits a script flag index into its packed word index and four-bit-slot shift.
 0x002CD828	scrSetFlag	inferred	scr script flags and VM helpers in game/code_002CC750.c
@@ -1728,10 +1738,18 @@
 0x002CD998	scrClearSecondaryScriptFlag	inferred	Clears bit two of the selected four-bit script flag slot.
 0x002CD9F8	scrClearFlags	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDA48	scrGetSecondaryScriptFlag	inferred	Returns the bit-two mask for the selected script flag slot.
+0x002CDB40	ptyRemoveProfileSkills	inferred	legacy PartyUnit_RemoveProfileSkillsState1: iterates the profile skill list and prunes skills whose nibble state is 1
 0x002CDC40	scrFindSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
 0x002CF3C8	scrSetRgbAndAlpha	inferred	Splits a packed AARRGGBB color into its lower RGB word and upper alpha byte.
+0x002CDED0	prfBuildRawSkillList	inferred	legacy ProfileId_BuildRawSkillList: builds up to 8 nonzero raw skill ids for a profile id
+0x002CDFE8	prfBuildSkillList	inferred	legacy ProfileId_BuildSkillListForUnit: builds the effective skill list for a unit's current profile
+0x002CE2E8	ptyProfileCountAtLeast	inferred	legacy PartyUnit_IsGlobalProfileCountAtLeastByClassGate: counts profile ids meeting a unit threshold with a class gate
+0x002CE498	prfReqEvaluateRules	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks: profile requirement rule evaluator, opcode dispatch via the 0x3B3F20 jump table
+0x002CE710	prfReqCheckWithFallback	inferred	legacy ProfileReq_CheckWithFallbackFlagTable: requirement gate with the fallback req->flag table at 0x3931B0
+0x002CE800	prfReqSelectGroup	inferred	legacy ProfileReq_SelectGroupIndexByPartyCounters: selects the first valid requirement-group index from party counters
+0x002CE910	prfReqGetPair	inferred	legacy ProfileReq18_GetPairByGroupAndIndex: fetches a pair from the requirement table row (group, index)
 0x002CF440	sdfCreateSemaphore	inferred	sdf system, device, DMA, or task infrastructure in game/code_002CC750.c
 0x002CF570	sdfFreeMemoryFromEitherHeap	inferred	Frees a pointer through the chip or other heap according to its address range.
 0x002CF618	sdfFreeMemorySlotFromEitherHeap	inferred	Nulls a pointer slot before freeing its contents through the matching heap.

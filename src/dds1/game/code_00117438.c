@@ -117,7 +117,7 @@ void func_001177A8(void) {
     func_0011A238();
     func_00120C08(0);
     func_002CC7D8();
-    func_002CCDC8();
+    ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     func_001ACCF0();

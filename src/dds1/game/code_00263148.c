@@ -14,9 +14,9 @@ extern s32 func_002CD788(void *);
 
 extern s32 func_002CD2A8(u16);
 
-extern s32 func_002CD548(void *, u16);
+extern s32 ptyTestProfileFlag0(void *, u16);
 
-extern void func_002CD428(void *, u16);
+extern void ptyApplyProfile(void *, u16);
 
 extern void mdlFlagSet(s32);
 
@@ -53,8 +53,8 @@ void kwlnItemApplySelection(MenuItemScene *scene) {
     s32 *data = (s32 *)func_002CD788(item);
     s8 selection = item->selection;
     if (selection != 0 && func_002CD2A8((u16)selection) == *data &&
-        func_002CD548(item, (u16)(s8)item->selection) == 0) {
-        func_002CD428(item, (u16)(s8)item->selection);
+        ptyTestProfileFlag0(item, (u16)(s8)item->selection) == 0) {
+        ptyApplyProfile(item, (u16)(s8)item->selection);
         scene->selectionApplied = 1;
         if (mdlFlagTest(0x910) == 0) {
             scene->overlayFlags |= 1;
@@ -222,7 +222,7 @@ void mnuClearItemSelectionSlots(MenuItemScene *scene) {
 }
 
 void func_00263E70(u32 arg0, u32 arg1) {
-    func_002CCE60(arg0, (s32)arg1 + 0x3d0);
+    ptyRecomputeMaxVitals(arg0, (s32)arg1 + 0x3d0);
     func_00262AC0(arg0, arg1);
 }
 

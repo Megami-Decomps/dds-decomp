@@ -541,7 +541,7 @@ typedef struct SkillInfo {
 } SkillInfo;
 
 extern s32 func_002CFEB8(s32);
-extern void func_002CDED0(u32, SkillInfo *);
+extern void prfBuildRawSkillList(u32, SkillInfo *);
 
 s32 mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
@@ -552,7 +552,7 @@ s32 mnuBuildSkillCodeBitset(void) {
     for (id = 0; id < 0x60; id++) {
         u32 i;
 
-        func_002CDED0(id & 0xFFFF, &info);
+        prfBuildRawSkillList(id & 0xFFFF, &info);
         for (i = 0; i < info.count; i++) {
             u16 code = info.codes[i];
 

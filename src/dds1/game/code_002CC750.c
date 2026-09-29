@@ -13,11 +13,11 @@ extern u32 func_002CD2A8(u16);
 
 extern u32 func_002CE6B8(u16);
 
-extern u32 func_002CD730(u32, u16);
+extern u32 ptyGetProfileRecord(u32, u16);
 
 extern s32 D_003BAA00;
 
-/* Operand block used by the script VM helpers near func_002CD730 (layout inferred from field accesses). */
+/* Operand block used by the script VM helpers near ptyGetProfileRecord (layout inferred from field accesses). */
 typedef struct ScrVmOperand {
     u8 pad_0x00[0x04]; // 0x00
     u16 h04;           // 0x04
@@ -67,7 +67,7 @@ typedef struct Entry84W {
     u8 pad_0x04[0x50]; // 0x04
 } Entry84W; // 0x54
 
-extern void func_002CD630(void *, s32);
+extern void ptySetProfileFlag1(void *, s32);
 
 extern Entry84W D_00391230[];
 
@@ -118,7 +118,7 @@ extern void func_001958A0(u32, s32, s32);
 extern void func_00194920(u32);
 extern u32 fileResolvePrimaryBuffer(void);
 extern void func_0029CE50(u32);
-extern s32 func_002CD548(s32, u16);
+extern s32 ptyTestProfileFlag0(s32, u16);
 extern u16 D_003907BC[];
 u32 func_002CD788(ScrVmOperand *);
 s8 func_002CD7B8(ScrVmOperand *);
@@ -134,9 +134,9 @@ void func_002CC7D8(void) {
     memset(D_003BAA00 + 0x2ebb0, 0, 0x3000);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CC808);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CC9C0);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
 
 void func_002CCB80(u8 *work) {
     u16 *source = D_00393AE0[*(u16 *)(work + 4)];
@@ -169,14 +169,14 @@ void func_002CCC18(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CCCC0);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyRebuildProfileSkills);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CCDC8);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyRebuildAllProfiles);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CCE60);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyRecomputeMaxVitals);
 
 void func_002CD0C0(u32 arg0) {
-    func_002CCE60(arg0, 0);
+    ptyRecomputeMaxVitals(arg0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD0D8);
@@ -191,7 +191,7 @@ void func_002CD2D0(u32 arg0, u16 arg1) {
     u32 *puVar1;
     u32 temp_v0;
 
-    puVar1 = (u32 *)func_002CD730(arg0, arg1);
+    puVar1 = (u32 *)ptyGetProfileRecord(arg0, arg1);
     temp_v0 = func_002CD2A8(arg1);
     *puVar1 = temp_v0;
 }
@@ -248,9 +248,9 @@ u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD428);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD548);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyTestProfileFlag0);
 
 s32 scrCheckStateBits(ScrVmOperand *work) {
     u32 index = 0;
@@ -258,32 +258,32 @@ s32 scrCheckStateBits(ScrVmOperand *work) {
         u16 id = index;
         index++;
         if ((func_002CE6B8(id) & 1) == 0 &&
-            !func_002CD548(work, id)) {
+            !ptyTestProfileFlag0(work, id)) {
             return 0;
         }
     } while (index < 0x60);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD630);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptySetProfileFlag1);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD6B0);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyTestProfileFlag1);
 
 s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
     return op->selectedIndex;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD730);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyGetProfileRecord);
 
 u32 func_002CD768(u32 arg0, u16 arg1) {
     u32 *puVar1;
 
-    puVar1 = (u32 *)func_002CD730(arg0, arg1);
+    puVar1 = (u32 *)ptyGetProfileRecord(arg0, arg1);
     return *puVar1;
 }
 
 u32 func_002CD788(ScrVmOperand *p) {
-    return func_002CD730((u32)p, scrGetSelectedOperandIndex(p) & 0xFFFF);
+    return ptyGetProfileRecord((u32)p, scrGetSelectedOperandIndex(p) & 0xFFFF);
 }
 
 s8 func_002CD7B8(ScrVmOperand *op) {
@@ -292,7 +292,7 @@ s8 func_002CD7B8(ScrVmOperand *op) {
 
 s8 scrSelectOperandIndex(ScrVmOperand *p, s32 v) {
     p->selectedIndex = v;
-    func_002CD630(p, v & 0xFFFF);
+    ptySetProfileFlag1(p, v & 0xFFFF);
     return p->selectedIndex;
 }
 
@@ -390,7 +390,7 @@ s32 func_002CDB00(s32 arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CDB40);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyRemoveProfileSkills);
 
 s32 scrFindSlot(u8 *work, u16 key) {
     u32 index;
@@ -492,12 +492,12 @@ u8 func_002CDEB8(s32 arg0, u32 arg1) {
     return (s64)*(s8 *)(arg0 + 0x55) == (arg1 & 0xffff);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CDED0);
+INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildRawSkillList);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CDFE8);
+INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildSkillList);
 
 u32 func_002CE170(u32 arg0, u32 arg1, u32 arg2) {
-    return func_002CDFE8(arg0, arg1, arg2, 0);
+    return prfBuildSkillList(arg0, arg1, arg2, 0);
 }
 
 u32 func_002CE188(u8 *work) {
@@ -517,7 +517,7 @@ s32 func_002CE1C8(s32 state, u8 *operand) {
     if (count > 0) {
         u8 *slots = operand + 0xc;
         do {
-            if (func_002CD548(state, slots[index++]) == 0) {
+            if (ptyTestProfileFlag0(state, slots[index++]) == 0) {
                 return 0;
             }
         } while (index < count);
@@ -532,7 +532,7 @@ s32 func_002CE248(s32 state, u8 *operand) {
     if (count > 0) {
         u8 *slots = operand + 0xc;
         do {
-            if (func_002CD548(state, slots[index++]) != 0) {
+            if (ptyTestProfileFlag0(state, slots[index++]) != 0) {
                 matched++;
             }
         } while (index < count);
@@ -543,7 +543,7 @@ s32 func_002CE248(s32 state, u8 *operand) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE2E8);
+INCLUDE_ASM(const s32, "game/code_002CC750", ptyProfileCountAtLeast);
 
 s32 func_002CE380(u8 *operand) {
     s32 index = 0;
@@ -559,7 +559,7 @@ s32 func_002CE380(u8 *operand) {
                 u8 *entry = (u8 *)D_003BAA00 + 0xa60 + offset;
                 offset += 0x1a4;
                 if ((*(u16 *)entry & 1) != 0) {
-                    if (func_002CD548((s32)entry, (u16)selected) != 0) {
+                    if (ptyTestProfileFlag0((s32)entry, (u16)selected) != 0) {
                         present = 1;
                     }
                 }
@@ -588,10 +588,10 @@ u32 func_002CE480(u8 *operand) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE498);
+INCLUDE_ASM(const s32, "game/code_002CC750", prfReqEvaluateRules);
 
 void func_002CE698(u32 arg0, u32 arg1, u16 arg2) {
-    func_002CE498(arg0, arg1, arg2, 0);
+    prfReqEvaluateRules(arg0, arg1, arg2, 0);
 }
 
 u32 func_002CE6B8(u16 i) {
@@ -602,15 +602,15 @@ u32 func_002CE6E0(u16 i) {
     return D_00391230[i].v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE710);
+INCLUDE_ASM(const s32, "game/code_002CC750", prfReqCheckWithFallback);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE800);
+INCLUDE_ASM(const s32, "game/code_002CC750", prfReqSelectGroup);
 
 u8 func_002CE8F0(s32 i) {
     return D_00393220[i].v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE910);
+INCLUDE_ASM(const s32, "game/code_002CC750", prfReqGetPair);
 u32 func_002CE968(s32 i) {
     return D_00393234[i].v0;
 }
@@ -618,7 +618,7 @@ u32 func_002CE968(s32 i) {
 void sdfSetAllFlagsFromTable(void) {
     s32 index = 0;
     do {
-        index = func_002CE800(index);
+        index = prfReqSelectGroup(index);
         if (index >= 0) {
             u32 name = func_002CE968(index);
             if (name != 0) {
