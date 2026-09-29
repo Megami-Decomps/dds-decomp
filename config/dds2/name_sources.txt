@@ -683,9 +683,12 @@
 0x002C8108	fileGetResourceHandle	inferred	Byte-identical DDS1 counterpart: Returns the file work's resource handle, released by callers through the file resource release routine.
 0x002C8118	fileGetResourceSize	inferred	Byte-identical DDS1 counterpart: Returns the file work's loaded resource size used by sound buffer transfer.
 0x002C8168	fileRequestIsReady	inferred	Returns true only when the file request has a nonzero marker at offset 0x68 and its status byte is 6; field area-loading callers use it as their readiness test.
+0x002C95A0	fileWriteWait	inferred	DDS2 twin of DDS1 fileWriteWait @ 0x28A0F8: polls the file-write command and maps -4 to -2, other errors to -1
+0x002C9660	fileWriteBegin	inferred	DDS2 twin of DDS1 fileWriteBegin @ 0x28A0E0 (unit base; forwards to the file-write start helper), legacy Save_FileWrite_Begin
 0x002C9710	mcdFormatSaveSlotName	inferred	Formats BASLUS save-slot name and chooses/stores the variant title ID based on D_00437D7C.
 0x002C9860	mcdCreateConfiguredDrawHandle	inferred	Creates a coordinate-scaled draw handle in D_00439008 and configures modes three and one.
 0x002CA638	fileClearAllSlotFlags	inferred	DDS2 twin of DDS1 fileClearAllSlotFlags @ 0x28AE68: marks the selected request's slot metadata dirty and clears slot flags 0..9
+0x002CA828	fileReadSlotPreviewWait	inferred	DDS2 twin of DDS1 fileReadSlotPreviewWait @ 0x28B058, legacy Save_ReadSlotPreview_Wait
 0x002CAC80	fileAbortSlotFlow	inferred	DDS2 twin of DDS1 fileAbortSlotFlow @ 0x28B4B0: clears the pending-mode latch and the two slot-flow flags and returns -1
 0x002CACA8	mcdEnterDefaultFileFlow	inferred	Returns func_002D09C8 when the mode flag is set; otherwise submits file task mode 0.
 0x002CAD08	mcdEnterSelectedFileFlow	inferred	Sets D_00437D34 then returns func_002D09C8 or submits file task mode 2.
@@ -694,6 +697,8 @@
 0x002D02D0	mcdFinishFileDetectionWithAudio	inferred	On a detected file status, resets flow mode, sets sequence volume and invokes the queued continuation.
 0x002D08A0	fileResetPendingRequest	inferred	Resets file request state globals to -1 and zero and submits mode 3 when global bit 2 is clear
 0x002D0968	mcdContinueLoadSelection	inferred	Chooses the next save/load callback from the file-state result; on state 2 clears the selection index, updates display model flags and starts sequence 8.
+0x002D0EB0	fileCacheSlotFlagsFromState	inferred	DDS2 twin of DDS1 fileCacheSlotFlagsFromState @ 0x290E38 (legacy ShadowRowSlotFlags_CacheFromGameState): shadows the +0xA54 slot-flag word
+0x002D0EC8	fileRestoreSlotFlagsToState	inferred	DDS2 twin of DDS1 fileRestoreSlotFlagsToState @ 0x290E50 (legacy ShadowRowSlotFlags_RestoreToGameState)
 0x002D1300	mnuCreateConfigTasks	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior.
 0x002D4548	fileQueueDestroy	inferred	destroys child jobs, jobs, then the queue
 0x002D4A98	fileReadVector40	inferred	vector read from work+0x40 into dst
