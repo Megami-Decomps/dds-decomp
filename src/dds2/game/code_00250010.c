@@ -22,7 +22,7 @@ extern void func_0012BC38(s32 arg0);
 
 extern void func_0012D3E0(void);
 
-extern s32 sdfAppendPacket(s32 arg0, s32 arg1);
+extern sdfAppendPacket();
 
 extern s32 func_0033D810();
 
@@ -41,23 +41,37 @@ extern void *func_00101958();
 extern s32 func_001979E0(void);
 
 typedef struct EvtRuntimeChild {
-    u8 pad00[2];
+    u16 unk00;
     u16 unk02;
-    u8 pad04[6];
-    u16 unk0A;
-    u8 pad0C[6];
-    u16 unk12;
-    u8 pad14[0x18];
+    u16 unk04;
+    u8 pad06[2];
+    union {
+        s32 words[8];
+        struct {
+            u8 pad00[2];
+            u16 unk0A;
+            u8 pad04[6];
+            u16 unk12;
+        } f;
+    } body; /* 0x08 */
+    u8 pad28[4];
     void *payload; /* 0x2C: serialized child data */
     struct EvtRuntimeChild *next; /* 0x30 */
 } EvtRuntimeChild;
+
+typedef struct EvtGroupInfo {
+    u8 pad00[8];
+    char *name; /* 0x08 */
+} EvtGroupInfo;
 
 typedef struct EvtRuntimeGroup {
     s32 type;
     u8 value04;
     u8 pad05[3];
     s32 value08;
-    u8 pad0C[0x10];
+    u8 pad0C[4];
+    struct EvtGroupInfo *info; /* 0x10 */
+    u8 pad14[8];
     u16 value1C;
     u8 value1E;
     u8 value1F;
@@ -80,7 +94,9 @@ typedef struct EvtFrameList {
 } EvtFrameList;
 
 typedef struct EvtRuntime {
-    u8 pad0000[0x20];
+    u8 pad0000[0x18];
+    s32 curFrame; /* 0x18 */
+    u8 pad001C[0x4];
     s32 entryTotal; /* 0x20 */
     char entryName[256][32]; /* 0x24 */
     u8 pad2024[0xC];
@@ -109,11 +125,25 @@ typedef struct EvtRuntime {
     s32 frameFirst; /* 0x2300 */
     s32 frameCursor; /* 0x2304 */
     EvtFrameList *frameList; /* 0x2308 */
-    u8 pad230C[0xD4];
+    u8 pad230C[0x4];
+    s32 value; /* 0x2310 */
+    s32 valueMin; /* 0x2314 */
+    s32 valueMax; /* 0x2318 */
+    f32 fvalue; /* 0x231C */
+    f32 fvalueMin; /* 0x2320 */
+    f32 fvalueMax; /* 0x2324 */
+    u8 pad2328[0x6C];
+    s32 cutSel; /* 0x2394 */
+    u8 pad2398[0x48];
     s32 selected; /* 0x23E0 */
     s32 frames; /* 0x23E4 */
     char *text0; /* 0x23E8 */
     char *text1; /* 0x23EC */
+    u8 pad23F0[0x30];
+    u8 shadowMode; /* 0x2420 */
+    u8 shadowAlpha; /* 0x2421 */
+    u8 pad2422[0x2];
+    f32 shadowY; /* 0x2424 */
 } EvtRuntime;
 
 typedef struct GsSurface {
@@ -124,7 +154,29 @@ typedef struct GsSurface {
 typedef s32 (*EvtMenuHeaderFn)(s32 list, s32 x, s32 y, EvtRuntime *ctx);
 typedef s32 (*EvtMenuRowFn)(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
+typedef struct EvtPad {
+    u8 pad00[0x20];
+    s8 syncKey; /* 0x20 */
+    s8 confirm; /* 0x21 */
+    u8 pad22;
+    s8 cancel;  /* 0x23 */
+    u8 decOne;  /* 0x24 */
+    u8 incOne;  /* 0x25 */
+    u8 decTen;  /* 0x26 */
+    u8 incTen;  /* 0x27 */
+    u8 decHun;  /* 0x28 */
+    u8 pad29;
+    u8 incHun;  /* 0x2A */
+    u8 pad2B;
+    s8 apply;   /* 0x2C */
+} EvtPad;
+
+extern EvtPad D_0037F510;
 extern GsSurface D_00380748;
+extern char D_004233F0[]; /* " RR  = ENTER" */
+extern char D_00423400[]; /* " RD  = CANCEL" */
+extern char D_00423428[]; /* " L,R = VALUE-+" */
+extern char D_004374A0[]; /* "     %d" */
 extern s32 sdfCreateResetPacketList(void);
 extern void func_00250338(s32 list, s32 x, s32 y, s32 col, s32 rows, s32 first, s32 total, EvtRuntime *ctx,
                           EvtMenuHeaderFn header, EvtMenuRowFn row);
@@ -267,7 +319,21 @@ s32 func_00250508(s32 arg0, s32 arg1, s32 arg2) {
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
+s32 func_00250558(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    switch (index) {
+    case 0:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, "     %.1f", ctx->fvalue));
+    case 2:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " L,R = VALUE-+0.1"));
+    case 3:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " U,D = VALUE-+1.0"));
+    case 4:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004233F0));
+    case 5:
+        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423400));
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250718);
 
@@ -284,18 +350,149 @@ INCLUDE_RODATA(const s32, "game/code_00250010", jtbl_00423410);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423428);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002508D0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250A08);
+s32 func_002508D0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    switch (index) {
+    case 0:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
+    case 2:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423428));
+    case 3:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
+    case 4:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004233F0));
+    case 5:
+        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423400));
+        break;
+    }
+}
+
+extern s32 func_00250880(s32 list, s32 x, s32 y);
+extern s32 func_002508D0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
+
+s32 func_00250A08(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 step;
+
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 0x16, 9, 0, 1, ctx, func_00250880, func_002508D0);
+    D_00380748.submit(&D_00380748, list);
+    if (ctx->mode != 7) {
+        return 0;
+    }
+    if (D_0037F510.confirm < 0) {
+        return 1;
+    }
+    if (D_0037F510.cancel < 0) {
+        return -1;
+    }
+    if (D_0037F510.decOne & 2) {
+        step = -1;
+    } else if (D_0037F510.incOne & 2) {
+        step = 1;
+    } else {
+        step = 0;
+    }
+    if (D_0037F510.decTen & 2) {
+        step = -10;
+    } else if (D_0037F510.incTen & 2) {
+        step = 10;
+    }
+    ctx->value += step;
+    if (ctx->value < ctx->valueMin) {
+        ctx->value = ctx->valueMin;
+    }
+    if (ctx->value >= ctx->valueMax) {
+        ctx->value = ctx->valueMax;
+    }
+    return 0;
+}
 
 s32 mnuDrawFrameChangeLabel(s32 target, s32 x, s32 y) {
     sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250BA0);
+s32 func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    switch (index) {
+    case 0:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
+    case 2:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
+    case 3:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
+    case 4:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
+    case 5:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004233F0));
+    case 6:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423400));
+    case 7:
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
+    case 8:
+        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
+        break;
+    case 9:
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250D68);
+extern void func_0024A9F0();
+extern void func_00249088();
+extern s32 func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
+
+s32 func_00250D68(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 step;
+
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 0x16, 0xB, 0, 1, ctx, mnuDrawFrameChangeLabel, func_00250BA0);
+    D_00380748.submit(&D_00380748, list);
+    if (ctx->mode != 6) {
+        return 0;
+    }
+    if (D_0037F510.confirm < 0) {
+        return 1;
+    }
+    if (D_0037F510.cancel < 0) {
+        return -1;
+    }
+    if (D_0037F510.decOne & 2) {
+        step = -1;
+    } else if (D_0037F510.incOne & 2) {
+        step = 1;
+    } else {
+        step = 0;
+    }
+    if (D_0037F510.decTen & 2) {
+        step = -10;
+    } else if (D_0037F510.incTen & 2) {
+        step = 10;
+    }
+    if (D_0037F510.decHun & 2) {
+        step = -100;
+    } else if (D_0037F510.incHun & 2) {
+        step = 100;
+    }
+    if (D_0037F510.syncKey < 0) {
+        step = ctx->curFrame - ctx->value;
+    }
+    ctx->value += step;
+    if (ctx->value < ctx->valueMin) {
+        ctx->value = ctx->valueMin;
+    }
+    if (ctx->value >= ctx->valueMax) {
+        ctx->value = ctx->valueMax;
+    }
+    if (D_0037F510.apply != 0) {
+        if (ctx->curFrame != ctx->value) {
+            ctx->curFrame = ctx->value;
+            func_0024A9F0(ctx, step, &D_0037F510);
+            func_00249088(ctx->curFrame, ctx);
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250F20);
 
@@ -495,13 +692,91 @@ s32 func_002534B0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00253590);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002537A8);
+typedef struct EvtWorldNode {
+    u8 pad00[8];
+    char *name; /* 0x08 */
+    u8 pad0C[0x14];
+    struct EvtWorldNode *next; /* 0x20 */
+} EvtWorldNode;
+
+typedef struct EvtWorldSlot {
+    u8 pad00[4];
+    EvtWorldNode *head; /* 0x04 */
+    u8 pad08[4];
+} EvtWorldSlot; /* 0xC bytes */
+
+typedef struct EvtWorldTable {
+    u8 pad00[8];
+    EvtWorldSlot *slots; /* 0x08 */
+} EvtWorldTable;
+
+typedef struct EvtWorldObject {
+    u8 pad00[0x18];
+    EvtWorldTable *table; /* 0x18 */
+} EvtWorldObject;
+
+extern EvtWorldObject *dds3GetWorldObject();
+extern char D_004374D8[]; /* " %s" */
+
+s32 func_002537A8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    s32 color;
+    s32 count;
+    s32 i;
+    EvtWorldNode *node;
+
+    color = 4;
+    if (ctx->groupFirst + ctx->groupCursor != index) {
+        color = 0;
+    }
+    if (index == 0) {
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, " -----------------------"));
+    }
+    count = 0;
+    for (i = 0; i < 0x12; i++) {
+        if (i != 3) {
+            for (node = dds3GetWorldObject()->table->slots[i].head; node != NULL; node = node->next) {
+                if (node->name != NULL) {
+                    count++;
+                    if (count == index) {
+                        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D8, node->name));
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00253938);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00253A98);
+extern char D_004376A8[]; /* "P%d:" */
+extern char D_004376B0[]; /* "   %s" */
+extern s32 func_002467B8();
+extern EvtWorldNode *func_001111A8(EvtWorldObject *world, char *name);
 
-extern s32 func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
+void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    EvtWorldNode *node;
+    s32 color;
+    s32 slot;
+
+    node = NULL;
+    color = 4;
+    if (ctx->inputB != index) {
+        color = 0;
+    }
+    slot = *(s8 *)(index + func_002467B8(ctx) + 0xC);
+    if (slot >= 0) {
+        node = func_001111A8(dds3GetWorldObject(), ctx->entryName[slot]);
+    }
+    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0xE, D_004376A8, index));
+    if (node != NULL) {
+        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376B0, node->name));
+    } else {
+        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, "   -----------------------"));
+    }
+}
+
+extern void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
 s32 func_00253C08(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
@@ -601,7 +876,36 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00254CE0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254F80);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00255360);
+extern char D_004376E8[]; /* "ALL" */
+extern char D_004376F0[]; /* "DISABLE" */
+
+s32 func_00255360(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    EvtRuntimeGroup *group;
+    s32 color;
+    s32 n;
+
+    color = 4;
+    if (ctx->groupFirst + ctx->groupCursor != index) {
+        color = 0;
+    }
+    if (index == 0) {
+        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376F0));
+    } else if (index == 1) {
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376E8));
+    } else if (index == 2) {
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, "UNIT ALL"));
+    }
+    n = 3;
+    for (group = ctx->groups; group != NULL; group = group->next) {
+        if (group->type == 1) {
+            if (n == index) {
+                sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D0, group->info->name));
+                return;
+            }
+            n++;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00255538);
 
@@ -632,7 +936,6 @@ s32 func_002566F8(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
     }
 }
 
-extern s8 D_0037F510[];
 extern s32 func_002566F8(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx);
 
 s32 func_002567A8(s32 x, s32 y, EvtRuntime *ctx) {
@@ -649,10 +952,10 @@ s32 func_002567A8(s32 x, s32 y, EvtRuntime *ctx) {
     } else if (ctx->frames == 0) {
         return -1;
     }
-    if (D_0037F510[0x21] < 0) {
+    if (D_0037F510.confirm < 0) {
         return 1;
     }
-    if (D_0037F510[0x23] >= 0) {
+    if (D_0037F510.cancel >= 0) {
         return 0;
     }
     return -1;
@@ -666,7 +969,34 @@ void evtSetRuntimeCommandValues(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_004241A0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00256898);
+extern char D_00437768[]; /* "CURRENT" */
+
+s32 func_00256898(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    EvtRuntimeGroup *group;
+    s32 color;
+    s32 n;
+
+    color = 4;
+    if (ctx->groupFirst + ctx->groupCursor != index) {
+        color = 0;
+    }
+    if (index == 0) {
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_00437768));
+    }
+    if (index == 1) {
+        return sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, "DEFFAULT"));
+    }
+    n = 2;
+    for (group = ctx->groups; group != NULL; group = group->next) {
+        if (group->type == 0x18) {
+            if (n == index) {
+                sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D0, ctx->entryName[group->value08]));
+                return;
+            }
+            n++;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002569D0);
 
@@ -722,7 +1052,7 @@ s32 func_002588B8(EvtRuntime *runtime) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk12 = index++;
+                child->body.f.unk12 = index++;
             }
         }
     }
@@ -750,7 +1080,7 @@ s32 func_00258988(EvtRuntime *runtime) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -764,7 +1094,7 @@ s32 func_002589F0(EvtRuntime *runtime) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -778,7 +1108,7 @@ s32 func_00258A58(EvtRuntime *runtime) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -792,7 +1122,7 @@ s32 func_00258AC0(EvtRuntime *runtime) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -806,7 +1136,7 @@ s32 func_00258B28(EvtRuntime *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -820,7 +1150,7 @@ s32 func_00258B90(EvtRuntime *runtime) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -834,7 +1164,7 @@ s32 func_00258BF8(EvtRuntime *runtime) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }
@@ -848,7 +1178,7 @@ s32 func_00258C60(EvtRuntime *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->body.f.unk0A = index++;
             }
         }
     }

@@ -1,6 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
-extern s32 func_0033D810(s32, s32, s32, s32, s32);
+extern s32 func_0033D810();
 extern s32 D_003C88C0[];
 extern s32 D_003C88C8[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
@@ -44,14 +44,33 @@ typedef struct MdlViewState {
     s16 unk36;
     u8 pad38[2];
     s16 unk3A;
-    u8 pad3C[0x50];
+    u8 pad3C[6];
+    s16 unk42;
+    u8 pad44[0x48];
     s32 slotBeforeResources[1];
-    s32 resources[1];
+    void *resources[1];
     u8 pad94[0x2C];
     s32 unkC0;
 } MdlViewState;
 
 extern MdlViewState D_00453550;
+
+typedef struct MdlCountNode {
+    u8 pad00[4];
+    s16 count; /* 0x04 */
+} MdlCountNode;
+
+typedef struct MdlLoadedInfo {
+    u8 pad00[8];
+    MdlCountNode *first; /* 0x08 */
+} MdlLoadedInfo;
+
+typedef struct MdlLoaded {
+    u8 pad00[0x18];
+    MdlLoadedInfo *info; /* 0x18 */
+    s32 flags1C;         /* 0x1C */
+} MdlLoaded;
+
 
 extern s8 D_00453560[];
 
@@ -118,6 +137,28 @@ void func_0011FEE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 void mdlFlagClear(s32 arg0);
 
+typedef struct EffMarkParams {
+    u8 unk0[8];
+    s32 mark0;       /* 0x08 */
+    s32 mark1;       /* 0x0C */
+    u16 start;       /* 0x10 */
+    u16 end;         /* 0x12 */
+    u16 interval;    /* 0x14 */
+    u8 face;         /* 0x16 */
+    u8 blend;        /* 0x17 */
+    u32 colors[4];   /* 0x18 */
+} EffMarkParams;
+
+extern char *D_003C8768[];
+
+extern u8 D_003C8760[];
+
+extern u16 D_003C8730[];
+
+extern char D_00436FF0[];
+
+extern char D_00436FF8[];
+
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
@@ -177,6 +218,17 @@ typedef struct MdlRecord {
     u16 field10;    /* 0x10 */
 } MdlRecord;
 
+typedef struct MdlObj {
+    s32 unk0;             /* 0x00 */
+    s32 handle;           /* 0x04 */
+    u8 claimed;           /* 0x08 */
+    u8 initialized;       /* 0x09 */
+    u8 pad0A[6];
+    s32 unk10;            /* 0x10 */
+    u8 pad14[0xC];
+    u8 data[1];           /* 0x20 */
+} MdlObj;
+
 typedef struct MdlPartEntry {
     s32 kind;
     s32 state;
@@ -191,12 +243,23 @@ typedef struct MdlPartList {
     MdlPartEntry *entries; /* 0x0C */
 } MdlPartList;
 
+typedef struct MdlItemCfg {
+    u8 pad0;
+    u8 enabled; /* 0x01 */
+    u8 unk2;
+    u8 unk3;
+} MdlItemCfg;
+
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next; /* 0x00 */
     u16 type;                     /* 0x04 */
     s16 subtype;                  /* 0x06 */
     s32 resource;                 /* 0x08 */
-    u8 pad0C[0x14];
+    MdlObj *obj;                  /* 0x0C */
+    s32 sdfResource;              /* 0x10 */
+    s32 count;                    /* 0x14 */
+    MdlItemCfg cfg;               /* 0x18 */
+    u8 pad1C[4];
 } MdlResourceItem;
 
 typedef struct MdlResourceOwner {
@@ -284,7 +347,35 @@ u16 func_00233F60(MdlRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233F68);
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlDrawMarkParamsPanel);
+void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
+    s32 boxY = y + 0x300;
+    s32 labelX = x + 0xC0;
+    u32 color;
+    s32 row;
+    s32 col;
+
+    sdfAppendPacket(list, func_0033D810(labelX, y, z, 0, "MARK0:%d", params->mark0));
+    sdfAppendPacket(list, func_0033D810(labelX, y + 0x60, z, 0, "MARK1:%d", params->mark1));
+    sdfAppendPacket(list, func_0033D810(labelX, y + 0xC0, z, 0, "START:%d", params->start));
+    sdfAppendPacket(list, func_0033D810(labelX, y + 0x120, z, 0, "END  :%d", params->end));
+    sdfAppendPacket(list, func_0033D810(labelX, y + 0x180, z, 0, "ITRVL:%d", params->interval));
+    sdfAppendPacket(list, func_0033D810(labelX, y + 0x1E0, z, 0, "FACE :%d", params->face));
+    sdfAppendPacket(list, func_0033D810(labelX, y + 0x240, z, 0, "BLEND:%d", params->blend));
+    for (row = 0; row != 4; row++) {
+        color = params->colors[row];
+        sdfAppendPacket(list, func_0011F250(x + 0x480, boxY, z, 0x300, 0x180, (color & 0xFFFFFF) | 0x80000000, 0x60404040));
+        for (col = 0; col != 4; col++) {
+            sdfAppendPacket(list, func_0033D810(labelX, boxY, z, D_003C8760[col], D_003C8768[col]));
+            sdfAppendPacket(list, func_0033D810(x + 0x240, boxY, z, 0, D_00436FF0, color & 0xFF));
+            color >>= 8;
+            boxY += 0x60;
+        }
+        boxY += 0x60;
+    }
+    if (selected >= 0) {
+        sdfAppendPacket(list, func_0033D810(x, y + D_003C8730[selected], z, 0, D_00436FF8));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234448);
 
@@ -308,16 +399,7 @@ void mdlAddEffectPart(MdlPartList *list, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234720);
 
-typedef struct MdlObj {
-    s32 unk0;             /* 0x00 */
-    s32 handle;           /* 0x04 */
-    u8 pad08;
-    u8 initialized;       /* 0x09 */
-    u8 pad0A[6];
-    s32 unk10;            /* 0x10 */
-    u8 pad14[0xC];
-    u8 data[1];           /* 0x20 */
-} MdlObj;
+
 
 void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
@@ -482,7 +564,25 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_002351D0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235288);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002353F0);
+extern MdlLoaded *func_00232198(s16 a, s16 b);
+extern void mdlAddEntryFlagged(MdlLoaded *loaded, s32 a, s32 b);
+
+void func_002353F0(void) {
+    MdlLoaded *loaded;
+
+    loaded = func_00232198(D_00453550.unk18, D_00453550.unk1A);
+    D_00453550.resources[0] = loaded;
+    D_00453550.unk22 = 0;
+    D_00453550.unk24 = 0;
+    D_00453550.unk26 = 0;
+    D_00453550.unk28 = 0;
+    D_00453550.unk2A = 0;
+    D_00453550.unk2C = 0;
+    if (loaded->flags1C != 0) {
+        mdlAddEntryFlagged(loaded, 0, 0);
+    }
+    D_00453550.unk3A = 0;
+}
 
 void func_00235460(void) {
     PCP_COPY_VECTOR(&D_00453620, &D_003C87C0);
@@ -662,7 +762,16 @@ u32 func_002371E8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00237210);
+void func_00237210(void) {
+    MdlCountNode *node;
+
+    node = ((MdlLoaded *)D_00453550.resources[0])->info->first;
+    if (node != NULL) {
+        if (node->count > 0) {
+            func_002351D0(&D_00453550.unk3A, node->count);
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004212C8);
 
@@ -728,7 +837,16 @@ u32 func_002380D8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238100);
+extern void func_00102908();
+
+s32 func_00238100(void) {
+    if (D_00453550.unk08 == 0) {
+        D_00453550.unk08 = 1;
+        func_00238F30();
+        func_00102908();
+    }
+    return 0;
+}
 
 typedef struct MdlDrawSurface {
     u8 pad00[0x10];

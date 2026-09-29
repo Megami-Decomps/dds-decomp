@@ -10,7 +10,7 @@ typedef struct MdlViewState {
     s8 unk0B;
     s8 unk0C;
     s8 unk0D;
-    u8 pad0E;
+    s8 unk0E;
     s8 unk0F;
     s8 unk10;
     u8 pad11[3];
@@ -32,7 +32,7 @@ typedef struct MdlViewState {
     u8 pad32[2];
     s16 unk34;
     s16 unk36;
-    u8 pad38[2];
+    s16 unk38;
     s16 unk3A;
     u8 pad3C[4];
     s16 unk40;
@@ -64,12 +64,24 @@ extern s32 D_003BAA00;
 extern s32 D_003D7B10[];
 extern s8 D_003D7A60[];
 typedef struct MdlViewerTaskDef {
-    s32 name;
-    s32 arg4;
-    s32 arg6;
+    const char *name;
+    void *update;
+    s32 data;
 } MdlViewerTaskDef;
 
 extern MdlViewerTaskDef D_00367A40[];
+
+typedef struct MdlSystemTask {
+    const char *name;
+    s32 arg;
+} MdlSystemTask;
+
+extern MdlSystemTask D_00367AE0[3];
+extern char D_003ABF78[]; /* "modelViewer" */
+extern char D_003ABF88[]; /* "modelViewerEnd" */
+
+extern void mdlViewer();
+extern void mdlViewerEnd();
 
 s32 func_0011D3E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_0011E080(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -85,7 +97,7 @@ void sdfAppendPacket(s32 arg0, s32 arg1);
 void func_002EC780(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, s32 data);
 void func_00102A18(void);
 void func_00101A80(s32 arg0, s32 arg1);
 void func_0021E3C0(MdlViewState *arg0);
@@ -1243,7 +1255,7 @@ void mdlViewerTaskDestroy(void) {
 
 void func_0021D780(void) {
     mdlViewerTaskDestroy();
-    D_003D7A50.viewerTask = kwlnTaskCreate(D_00367A40[D_003D7A50.unk0A - 1].name, 0x2B00, 1, 0, D_00367A40[D_003D7A50.unk0A - 1].arg4, 0, D_00367A40[D_003D7A50.unk0A - 1].arg6);
+    D_003D7A50.viewerTask = kwlnTaskCreate(D_00367A40[D_003D7A50.unk0A - 1].name, 0x2B00, 1, 0, D_00367A40[D_003D7A50.unk0A - 1].update, 0, D_00367A40[D_003D7A50.unk0A - 1].data);
     func_00101A80(D_003D7A50.unk00, D_003D7A50.viewerTask);
 }
 
@@ -1294,14 +1306,6 @@ void mdlFreeViewResources(void) {
     }
 }
 
-typedef struct MdlSystemTask {
-    const char *name;
-    s32 arg;
-} MdlSystemTask;
-
-extern MdlSystemTask D_00367AE0[3];
-extern char D_003ABF78[]; /* "modelViewer" */
-extern char D_003ABF88[]; /* "modelViewerEnd" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 flag);
 extern void func_00103498(const char *name, s32 arg, s32 arg2, s32 arg3);
 
