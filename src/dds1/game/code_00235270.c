@@ -97,6 +97,7 @@ extern void func_001038A0(s32 list, s32 x, s32 y, s32 w, s32 h);
 
 extern char D_003BC0C8[]; /* "NAME:" */
 
+/* Create a task with an initialized event payload. */
 void evtCreateTask(s32 taskId, s32 value) {
     s32 data;
 
@@ -120,10 +121,11 @@ void evtCreateTaskWithValue(s32 taskId, s32 value) {
     kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, data);
 }
 
-void evtSetSkyOverlayEnabled(u32 arg0) {
-    D_003BBF8C = arg0;
+void evtSetSkyOverlayEnabled(u32 enabled) {
+    D_003BBF8C = enabled;
 }
 
+/* Either set the sky parameter immediately or interpolate from its current value. */
 void evtBeginSkyParameterTransition(s32 duration, s32 target) {
     s16 current;
 
@@ -1022,15 +1024,15 @@ s32 func_00241AE8(s32 id, s32 fade) {
     return sound;
 }
 
-void evtFormatTaskName(s32 arg0, void *arg1) {
-    func_003014F0(arg1, D_003BC360, arg0);
+void evtFormatTaskName(s32 taskId, void *buffer) {
+    func_003014F0(buffer, D_003BC360, taskId);
 }
 
-s32 evtFindTaskById(u32 arg0) {
-    u8 temp_v0[32];
+s32 evtFindTaskById(u32 taskId) {
+    u8 taskName[32];
 
-    evtFormatTaskName(arg0, temp_v0);
-    return kwlnTaskGetTaskByName(temp_v0);
+    evtFormatTaskName(taskId, taskName);
+    return kwlnTaskGetTaskByName(taskName);
 }
 
 s32 evtGetTaskValueWord(u32 taskId) {
@@ -1061,9 +1063,9 @@ extern void func_002D2D00(s32 arg0);
 extern s32 func_002D3288(s32 arg0);
 extern void effSetCh72Id(s32 arg0);
 
-void evtRefreshTaskData(s32 taskId, s32 arg1) {
+void evtRefreshTaskData(s32 taskId, s32 key) {
     EvtTaskData *data = evtGetTaskData(taskId);
-    s32 resource = func_00241BF0(taskId, arg1);
+    s32 resource = func_00241BF0(taskId, key);
     if (resource != 0) {
         s32 old = data->effectHandle;
         if (old != 0) {

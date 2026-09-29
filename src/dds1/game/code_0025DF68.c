@@ -40,13 +40,26 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F138);
 extern void func_0025F408(s32, s32, s32, u8 *, s32);
 extern void func_0025F4E0(s32, s32, s32, s32, u8 *, s32);
 
-void mnuDrawIfActive(s32 a, s32 b, s32 c, u8 *obj, s32 d) {
-    u8 *inner = *(u8 **)(obj + 0x14);
+typedef struct MenuDrawInner {
+    u8 pad00[0x20];
+    s32 active;
+} MenuDrawInner;
 
-    if (*(s32 *)(inner + 0x20) != 0) {
-        func_0025F408(a, b, c, inner, d);
-        func_0025F4E0(a, b, c, 0, obj, d);
-        *(u32 *)(obj + 4) |= 4;
+typedef struct MenuDrawObject {
+    u8 pad00[4];
+    u32 flags;
+    u8 pad08[0xC];
+    MenuDrawInner *inner; /* 0x14 */
+} MenuDrawObject;
+
+/* Draw the child and its container only while the child is active. */
+void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuDrawObject *object, s32 drawArg) {
+    MenuDrawInner *inner = object->inner;
+
+    if (inner->active != 0) {
+        func_0025F408(x, y, z, (u8 *)inner, drawArg);
+        func_0025F4E0(x, y, z, 0, (u8 *)object, drawArg);
+        object->flags |= 4;
     }
 }
 

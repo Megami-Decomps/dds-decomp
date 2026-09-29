@@ -8,21 +8,28 @@ extern s32 D_003BB010;
 /* Particle object (layout mirrors effect/parManager.c ParObj, which owns
  * the type; only the fields this TU touches are named here). */
 typedef struct ParObj {
-    u8 pad00[0x8C];   /* 0x00 */
-    f32 unk8C;        /* 0x8C scaled by effParScaleComponent */
-    u8 pad90[0x14];   /* 0x90 */
-    u32 unkA4;        /* 0xA4 */
-    u8 padA8[0x48];   /* 0xA8 */
-    u32 unkF0;        /* 0xF0 settable param */
-    u8 padF4[0x08];   /* 0xF4 */
-    void *unkFC;      /* 0xFC */
-    u8 pad100[0x40];  /* 0x100 */
+    u8 pad00[0x10];    /* 0x00 */
+    f32 unk10;          /* 0x10 */
+    f32 unk14;          /* 0x14 */
+    u8 pad18[0x10];    /* 0x18 */
+    s32 unk28;          /* 0x28 */
+    s16 unk2C;          /* 0x2C */
+    u8 pad2E[0x5E];    /* 0x2E */
+    f32 scale8C;       /* 0x8C scaled by effParScaleComponent */
+    u8 pad90[0x14];    /* 0x90 */
+    u32 unkA4;         /* 0xA4 */
+    u8 padA8[0x48];    /* 0xA8 */
+    u32 valueF0;       /* 0xF0 settable param */
+    s32 billId;         /* 0xF4 */
+    u8 padF8[4];       /* 0xF8 */
+    void *unkFC;       /* 0xFC */
+    u8 pad100[0x40];   /* 0x100 */
     u16 dispatchIndex; /* 0x140: particle dispatch table index */
     u16 restartFlag;   /* 0x142 set to 1 after mode changes */
-    u8 pad144[0x0C];  /* 0x144 */
-    u8 mode150;       /* 0x150 mode byte for some kinds */
-    u8 mode151;       /* 0x151 mode byte for the other kinds */
-    u8 pad152[0x22];  /* 0x152 */
+    u8 pad144[0x0C];   /* 0x144 */
+    u8 mode150;        /* 0x150 mode byte for some kinds */
+    u8 mode151;        /* 0x151 mode byte for the other kinds */
+    u8 pad152[0x22];   /* 0x152 */
     void *child;       /* 0x174 */
 } ParObj;
 
@@ -35,11 +42,11 @@ typedef struct ParDispatch {
 
 /* 20-byte cell initialized by parCellInit (grey plus zeros). */
 typedef struct ParCell {
-    u128 *vertices; /* 0x00 */
-    u8 pad04[4];   /* 0x04 */
-    s32 unk08;     /* 0x08 cleared */
-    s32 unk0C;     /* 0x0C cleared */
-    u32 color10;   /* 0x10 set to grey 0x80808080 */
+    u128 *history;   /* 0x00 */
+    void *vertices;  /* 0x04 */
+    s32 vertexCount; /* 0x08: processed in groups of three */
+    s32 unk0C;       /* 0x0C cleared */
+    u32 color;       /* 0x10 set to grey 0x80808080 */
 } ParCell; /* 0x14 */
 
 extern ParDispatch D_0034E250[];
@@ -72,7 +79,7 @@ typedef struct ParSystem {
 } ParSystem;
 
 void func_0015A758(ParObj *work, u32 value) {
-    work->unkF0 = value;
+    work->valueF0 = value;
 }
 
 void parObjSetMode(ParObj *work, s32 value) {
@@ -126,12 +133,12 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 ParObj *parInstantiateKind(ParObj *work) {
     ParObj *particle = D_0034E250[work->dispatchIndex].func();
     particle->dispatchIndex = work->dispatchIndex;
-    if (*(s32 *)((u8 *)work + 0x28) == -1) {
-        s32 transform = func_00151E60(*(s32 *)((u8 *)work + 0xF4));
-        func_00152000(transform, *(f32 *)((u8 *)particle + 0x10), *(f32 *)((u8 *)particle + 0x14));
-        effBillSetMode(transform, *(s16 *)((u8 *)particle + 0x2C));
+    if (work->unk28 == -1) {
+        s32 transform = func_00151E60(work->billId);
+        func_00152000(transform, particle->unk10, particle->unk14);
+        effBillSetMode(transform, particle->unk2C);
         func_001523B0(transform);
-        *(s32 *)((u8 *)particle + 0xF4) = transform;
+        particle->billId = transform;
     }
     return particle;
 }
@@ -148,7 +155,7 @@ void func_0015ACF0(void) {
 
 void effParScaleComponent(float scale, ParObj *work) {
     func_0015A658();
-    work->unk8C *= scale;
+    work->scale8C *= scale;
 }
 
 s64 func_0015AD48(void) {
@@ -164,7 +171,7 @@ void func_0015AD78(void) {
 }
 
 void func_0015AD90(ParObj *work, u32 value) {
-    work->unkF0 = value;
+    work->valueF0 = value;
 }
 
 void func_0015AD98(ParObj *work, u8 value) {
@@ -371,9 +378,9 @@ void func_0015B8B8(s32 arg0) {
 void parCellInit(void *work, s32 index) {
     ParCell *cell = (ParCell *)(index * 20 + *(u32 *)((u8 *)work + 0x14));
 
-    cell->color10 = 0x80808080;
+    cell->color = 0x80808080;
     cell->unk0C = 0;
-    cell->unk08 = 0;
+    cell->vertexCount = 0;
 }
 
 void func_0015B918(s32 arg0) {
@@ -410,7 +417,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BA38);
 
 void func_0015BB00(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
-    s32 count = cell->unk08 / 3;
+    s32 count = cell->vertexCount / 3;
     u8 *vertex = *(u8 **)cell;
     s32 i;
     __asm__ volatile (

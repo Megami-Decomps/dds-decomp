@@ -12,6 +12,7 @@ s32 GetThreadId(void);
 void WaitSema(s32 arg0);
 void SignalSema(s32 arg0);
 
+/* A negative ID means the calling thread; search under the list semaphore. */
 SdfThreadNode *sdfFindThreadById(s32 threadId) {
     SdfThreadNode *node;
 
