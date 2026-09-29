@@ -743,7 +743,37 @@ s32 func_00227CB8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227DD0);
+s32 func_00227DD0(void) {
+    u8 *unit;
+    s32 count;
+    char *owner;
+    s32 i = 4;
+
+    do {
+        unit = (u8 *)func_00223AA0(i, func_0010D428(0));
+        i++;
+    } while (i < 10 && unit == NULL);
+    if (unit == NULL) {
+        unit = (u8 *)func_00126200(func_0010D428(0));
+        if (unit == NULL) {
+            return 1;
+        }
+    }
+    func_00220300(unit, func_0010D428(1));
+    owner = *(char **)(unit + 8);
+    if (owner == 0) {
+        return 1;
+    }
+    count = func_0014DB78(owner);
+    if (count > 0) {
+        if (func_0010D428(1) == 0) {
+            func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 1);
+        } else {
+            func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 0);
+        }
+    }
+    return 1;
+}
 
 s32 func_00227EE0(void)
 {
