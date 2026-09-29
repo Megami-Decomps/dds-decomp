@@ -195,7 +195,7 @@ typedef struct MenuList {
 
 extern MenuListNode *func_00328E18(s32);
 
-extern void func_003144E8();
+extern void ptyRecomputeMaxHpMp();
 
 extern void scrClearSecondaryScriptFlag();
 
@@ -301,7 +301,7 @@ void func_002B0A60(u32 context, s32 selection) {
         ((u8 *)D_00435DD0)[offset++] = 0;
     } while (--i >= 0);
     ((u8 *)(selection + D_00435DD0))[0x1e7b0] = 0;
-    func_003144E8(context);
+    ptyRecomputeMaxHpMp(context);
 }
 
 u32 mnuEnterSlotLabel(void) {
@@ -899,16 +899,16 @@ u32 func_002B5358(void) {
 void func_002B53B8(s32 obj, s32 id, s32 slot) {
     u16 code = id;
 
-    if (func_00315098(obj, code) == 0) {
+    if (ptyHasSkill(obj, code) == 0) {
         *(u16 *)(obj + slot * 2 + 0x22) = code;
-        func_003144E8(obj);
+        ptyRecomputeMaxHpMp(obj);
         scrClearSecondaryScriptFlag(obj, code);
     }
 }
 
 void func_002B5430(s32 arg0, s32 arg1) {
     *(u16 *)(arg1 * 2 + arg0 + 0x22) = 0;
-    func_003144E8();
+    ptyRecomputeMaxHpMp();
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5450);

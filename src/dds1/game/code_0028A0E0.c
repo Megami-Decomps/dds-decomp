@@ -536,7 +536,24 @@ void func_0028A0E0(s32 request, u32 first, u32 second) {
     func_002F6670();
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A0F8);
+extern s32 func_002F6858(s32, s32 *, s32 *);
+
+s32 func_0028A0F8(void) {
+    s32 cmdId;
+    s32 status;
+    s32 result = func_002F6858(1, &cmdId, &status);
+
+    if (result == 1) {
+        if (status >= 0) {
+            return result;
+        }
+        if (status == -4) {
+            return -2;
+        }
+        return -1;
+    }
+    return 0;
+}
 
 void func_0028A150(void) {
     if (D_003BC7F0 != 0) {

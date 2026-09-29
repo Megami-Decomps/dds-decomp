@@ -5,7 +5,12 @@ extern u64 func_0011B140(u64, u64);
 
 extern u32 D_003BD7A8;
 
-INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CEB8);
+/* Remove the party unit specified by script operand 0 and return success to
+ * the script VM, while writing whether a unit was actually removed. */
+u32 func_0011CEB8(void) {
+    func_0010D5F0(ptyRemoveUnit(func_0010D428(0)) == 1);
+    return 1;
+}
 
 u32 func_0011CEF0(void) {
     u64 value;

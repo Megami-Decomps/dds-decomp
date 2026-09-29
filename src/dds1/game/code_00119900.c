@@ -64,7 +64,7 @@ extern s32 func_0010D5F0(s32 arg0);
 extern void func_0010D608(f32 arg0);
 extern Entry1A4 *dds3FindEntry(s32 arg0);
 extern void func_00119900(s32 arg0, s32 arg1);
-extern void func_0011B528(Entry1A4 *arg0);
+extern void ptyMergeStockSkills(Entry1A4 *unit);
 extern s32 func_00119368(s32 arg0, s32 arg1);
 extern u8 func_001A1438(void);
 extern f32 func_001A4598(void);
@@ -121,7 +121,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_00119B08);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119CF0);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119E00);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyRecoverAllUnits);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119E88);
 
@@ -169,7 +169,7 @@ s32 evtHasMatchingFlaggedEntry(s32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011A158);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011A238);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyInitRuntime);
 
 u16 func_0011A568(s32 arg0) {
     return *(u16 *)(arg0 * 8 + D_003BAA68 + 2);
@@ -199,7 +199,7 @@ Entry1A4 *dds3FindEntry(s32 rosterIndex) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011A5E8);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyRebalanceFrontline);
 
 u8 func_0011A968(s32 arg0) {
     return dds3FindEntry(arg0) != 0;
@@ -222,11 +222,11 @@ s32 dds3EntryMax(void) {
     return maximum;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011A9C8);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyGetAverageLevel);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011AA28);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyAddUnit);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011AE78);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyRemoveUnit);
 
 u32 func_0011B140(void) {
     return 0;
@@ -283,7 +283,7 @@ void dds3ForEachEntry(void) {
     } while (i < 2);
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011B528);
+INCLUDE_ASM(const s32, "game/code_00119900", ptyMergeStockSkills);
 
 void dds3ForEachFlagged(void) {
     s32 off = 0;
@@ -293,7 +293,7 @@ void dds3ForEachFlagged(void) {
         Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + off + 0xa60);
 
         if (p->flags & 1) {
-            func_0011B528(p);
+            ptyMergeStockSkills(p);
         }
         off += 0x1a4;
         n--;
@@ -360,7 +360,7 @@ u32 func_0011B938(void) {
 }
 
 void func_0011B940(void) {
-    func_0010BD20(D_003BAAB4);
+    scrProcDestroyTask(D_003BAAB4);
     D_003BAAB4 = 0;
 }
 

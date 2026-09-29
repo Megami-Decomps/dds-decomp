@@ -507,7 +507,7 @@ INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22C0);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277A50);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuBuildEquippedSlots);
 
 u32 func_00277C80() {
     s32 temp_v0;
@@ -521,7 +521,7 @@ u32 func_00277C80() {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00277CB8);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277D38);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuRebuildAfterMutation);
 
 void func_00277DD0(u32 arg0) {
     mnuSetStaffDisplayMode(1, arg0);
@@ -530,9 +530,9 @@ void func_00277DD0(u32 arg0) {
 void func_00277DF0(s32 context) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277DF8);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_002780D0);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuRefreshEntries);
 
 typedef struct SkillInfo {
     u8 pad0[0x20];
@@ -541,7 +541,7 @@ typedef struct SkillInfo {
 } SkillInfo;
 
 extern s32 func_002CFEB8(s32);
-extern void func_002CDED0(u32, SkillInfo *);
+extern void prfBuildRawSkillList(u32, SkillInfo *);
 
 s32 mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
@@ -552,7 +552,7 @@ s32 mnuBuildSkillCodeBitset(void) {
     for (id = 0; id < 0x60; id++) {
         u32 i;
 
-        func_002CDED0(id & 0xFFFF, &info);
+        prfBuildRawSkillList(id & 0xFFFF, &info);
         for (i = 0; i < info.count; i++) {
             u16 code = info.codes[i];
 
@@ -574,7 +574,7 @@ s32 mnuIsSkillCodeInBitset(s32 arg0, u32 *arg1) {
     return (arg1[temp_v0 >> 5] & (1 << arg0)) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00278330);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuInitPages);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002786E8);
 
@@ -619,7 +619,7 @@ s32 func_00278868(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_002788D0);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuShellUpdate);
 
 s64 campMenuDrawSlotLabel(s32 param) {
     s32 context = func_00101A70();
@@ -683,22 +683,22 @@ u32 func_00278D68(void) {
     return 1;
 }
 
-extern void func_002CD0C0();
+extern void ptyRecomputeMaxHpMp();
 extern void scrClearSecondaryScriptFlag();
 
 void func_00278D90(s32 obj, s32 id, s32 slot) {
     u16 code = id;
 
-    if (func_002CDB00(obj, code) == 0) {
+    if (ptyHasSkill(obj, code) == 0) {
         *(u16 *)(obj + slot * 2 + 0x22) = code;
-        func_002CD0C0(obj);
+        ptyRecomputeMaxHpMp(obj);
         scrClearSecondaryScriptFlag(obj, code);
     }
 }
 
 void func_00278E08(s32 arg0, s32 arg1) {
     *(u16 *)(arg1 * 2 + arg0 + 0x22) = 0;
-    func_002CD0C0();
+    ptyRecomputeMaxHpMp();
 }
 
 void campMenuHandleInput(void) {
@@ -737,7 +737,7 @@ void campMenuHandleInput(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00278F50);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuHandleSelection);
 
 void func_00279130(s32 arg0, s32 arg1, s32 arg2) {
     u8 *temp_v0 = (u8 *)(arg0 + 2);
@@ -750,7 +750,7 @@ void func_00279130(s32 arg0, s32 arg1, s32 arg2) {
     *(u16 *)(temp_v0 + temp_v2) = temp_v3;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00279160);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuHandleSlotReorder);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22F0);
 

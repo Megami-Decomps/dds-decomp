@@ -6,7 +6,7 @@ extern s32 func_00101A70();
 extern void func_00285B20(s32);
 extern void func_00285670(s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00262EB8", func_00262EB8);
+INCLUDE_ASM(const s32, "game/code_00262EB8", brsMessageInputStep);
 
 extern s32 func_00261FB8(s32);
 

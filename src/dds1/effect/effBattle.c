@@ -50,7 +50,16 @@ u32 func_00160BE0(EffBattleWork *work) {
     return work->unk14;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160BE8);
+/* In mode 1 keep the lowest value seen; other modes replace it outright. */
+void func_00160BE8(EffBattleWork *work, u32 value) {
+    if (work->unk1C == 1) {
+        if (value < work->unk18) {
+            work->unk18 = value;
+        }
+        return;
+    }
+    work->unk18 = value;
+}
 
 u32 func_00160C18(EffBattleWork *work) {
     return work->unk18;

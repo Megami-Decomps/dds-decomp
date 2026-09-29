@@ -47,7 +47,16 @@ u32 func_001687D0(BattleEffect *effect) {
     return effect->value14;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_001687D8);
+/* Mode 1 keeps the lowest value seen; other modes replace it outright. */
+void func_001687D8(BattleEffect *effect, u32 value) {
+    if (effect->value1C == 1) {
+        if (value < effect->value18) {
+            effect->value18 = value;
+        }
+        return;
+    }
+    effect->value18 = value;
+}
 
 u32 func_00168808(BattleEffect *effect) {
     return effect->value18;

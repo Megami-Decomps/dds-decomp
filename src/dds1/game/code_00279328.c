@@ -7,7 +7,7 @@ extern s32 func_00101A70();
 
 INCLUDE_ASM(const s32, "game/code_00279328", func_00279328);
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_002793D0);
+INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuCopyPageState);
 
 INCLUDE_ASM(const s32, "game/code_00279328", func_00279568);
 
@@ -16,7 +16,7 @@ void func_00279728(s32 selection) {
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279760);
+INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuUseSelectedInField);
 
 INCLUDE_ASM(const s32, "game/code_00279328", func_00279860);
 
@@ -29,7 +29,31 @@ void func_00279AF8(s32 selection) {
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279B30);
+extern void func_002806E8(void *, u32);
+extern void ptySkillMenuBuildEquippedSlots(s32, s32);
+extern void ptySkillMenuInitPages(void *);
+
+/* Selected party slot is reached through the menu's list at +0x7D8. */
+typedef struct SkillMenuSelection {
+    u8 pad00[0x1C];
+    u32 *index;          /* 0x1C */
+} SkillMenuSelection;
+
+typedef struct SkillMenuContext {
+    u8 pad00[0x7D8];
+    SkillMenuSelection *selection; /* 0x7D8 */
+} SkillMenuContext;
+
+s32 func_00279B30(s32 menu) {
+    u8 *ctx = (u8 *)func_00101A70();
+    u32 *panel = (u32 *)(ctx + 0x15C);
+
+    func_002806E8(panel, *((SkillMenuContext *)ctx)->selection->index);
+    *panel |= 0x400;
+    ptySkillMenuBuildEquippedSlots(0, menu);
+    ptySkillMenuInitPages(ctx);
+    return 1;
+}
 
 s32 func_00279BA8(s32 selection) {
     s32 context = func_00101A70();
@@ -39,4 +63,4 @@ s32 func_00279BA8(s32 selection) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279BF8);
+INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuHandlePageSwitch);

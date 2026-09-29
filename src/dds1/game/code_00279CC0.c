@@ -6,7 +6,7 @@ extern void func_0027C140();
 
 extern void func_0027D318();
 
-extern s32 func_002CD7B8(s32);
+extern s32 ptyGetCurrentProfileId(s32);
 
 extern s32 func_002CD240(s32, s32 *);
 
@@ -93,7 +93,7 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279CC0);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279D68);
+INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279F88);
 
@@ -112,7 +112,31 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A140);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A468);
+typedef struct PtyFrontlineSlot {
+    u16 flags;          /* 0x00: bit 0 present, bit 1 frontline */
+} PtyFrontlineSlot;
+
+/* Collect up to max pointers to occupied, frontline party slots. */
+void func_0027A468(s32 **out, s32 max) {
+    s32 count = 0;
+    s32 i = 0;
+
+    while (count < max) {
+        s32 entry = D_003BAA00 + i * 0x1A4 + 0xA60;
+
+        *out = 0;
+        if ((((PtyFrontlineSlot *)entry)->flags & 1) != 0 &&
+            (((PtyFrontlineSlot *)entry)->flags & 2) != 0) {
+            *out = (s32 *)entry;
+            out++;
+            count++;
+        }
+        i++;
+        if (i >= 5) {
+            break;
+        }
+    }
+}
 
 s32 mnuHasAvailableSlotResource(s32 id) {
     MenuSlot *entry;
@@ -130,7 +154,7 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A540);
+INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBuildLinkageSkills);
 
 u32 func_0027A778() {
     s32 temp_v0;
@@ -148,7 +172,7 @@ s32 mnuResetSelection(s32 selection) {
     campMenuInit();
     context = func_00101A70(selection);
     menu = *(s32 *)(context + 0x90C);
-    func_0027A540(selection);
+    ptySkillMenuBuildLinkageSkills(selection);
     mnuFlagActiveWindows(context + 0x15C);
     *(s32 *)(menu + 0x2C) = 0;
     return 1;
@@ -1680,7 +1704,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 
 void func_002811D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = func_002CD7B8(D_003BAA00 + partyIndex * 0x1A4 + 0xA60);
+    s32 cost = ptyGetCurrentProfileId(D_003BAA00 + partyIndex * 0x1A4 + 0xA60);
     s32 code;
     s32 texture;
     s32 item;

@@ -4764,7 +4764,7 @@ void func_00203E18(s32 *args) {
 }
 
 void func_00203E90(u32 arg0) {
-    func_002D4548(*(u32 *)arg0);
+    fileQueueDestroy(*(u32 *)arg0);
     func_00328E48(arg0);
 }
 

@@ -585,8 +585,8 @@ u32 func_0026BD38(void) {
 
 void func_0026BD58(void) {
     evtDestroySecondaryWorldNode();
-    func_00117730();
-    func_001176A0();
+    sdfDestroyRuntimeTask();
+    sdfCreateRuntimeTask();
 }
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC588);

@@ -15,6 +15,7 @@
 0x00108280	evtSetDrawVectorTarget	inferred	Directly stores the event draw vector in mode zero or retains its previous value and sets a new target in other modes.
 0x0010BD50	scrOpenProcessFromResource	inferred	Obtains a resource handle, constructs script process from its ID, and stores the resource handle on the process.
 0x0010BE08	scrClearProcessGlobals	inferred	Clears all 256 integer and float-bit global VM slots; mirrors DDS1 scrClearProcessGlobals.
+0x0010BF48	scrProcDestroyTask	inferred	twin of DDS1 scrProcDestroyTask
 0x0010C250	scrSetCurrentActor	inferred	Battle action callback binds its actor through the active script's +0xF0 pointer.
 0x0010C278	scrGetCurrentActor	inferred	Returns the active script actor pointer stored at +0xF0.
 0x0010C760	scrPushLocalInteger	inferred	Reads the indexed script-local integer and pushes it to VM stack; matches DDS1 scrPushLocalInteger.
@@ -477,6 +478,8 @@
 0x00259428	evtWriteFixedSizeEntries	inferred	Byte-identical DDS1 counterpart: Copies each 0x20-byte table entry to the event output using the table's count.
 0x0025CC90	evtEncodeBgmSoundCode	inferred	Maps an event BGM identifier into the high halfword and adds the second argument as a low-word value for playback and preload.
 0x0025CF98	evtGetTaskValueWord	inferred	Reads a task's data word at offset four by ID or returns minus one if the task is missing.
+0x0025D6B0	evtCreateMotionSeTask	inferred	twin of DDS1 evtCreateMotionSeTask
+0x0025D928	evtReleaseEventPackResources	inferred	twin of DDS1 evtReleaseEventPackResources
 0x0025DAB0	mnuCampDestroyTaskById	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyTaskById behavior.
 0x0025DAE8	mnuCampDestroyAllTasks	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyAllTasks behavior.
 0x0025E7D8	mnuCampFindMatchingEntryIndex	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campFindMatchingEntryIndex behavior.
@@ -677,6 +680,7 @@
 0x002D08A0	fileResetPendingRequest	inferred	Resets file request state globals to -1 and zero and submits mode 3 when global bit 2 is clear
 0x002D0968	mcdContinueLoadSelection	inferred	Chooses the next save/load callback from the file-state result; on state 2 clears the selection index, updates display model flags and starts sequence 8.
 0x002D1300	mnuCreateConfigTasks	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior.
+0x002D4548	fileQueueDestroy	inferred	destroys child jobs, jobs, then the queue
 0x002D4A98	fileReadVector40	inferred	vector read from work+0x40 into dst
 0x002D5D90	fileQueueCountLinkedJobs	inferred	Traverses FileQueue.first and next links to count queued jobs.
 0x002D6900	fileReplaceReferenceHolder	inferred	Releases an existing loader reference holder at DDS2 offset 0x48 and replaces it using the supplied resource.

@@ -185,7 +185,7 @@ void func_0019C1E8(s32 window, s32 arg1, s32 arg2);
 void itfMesSetWindowHighFlags(s32 window, u32 value);
 void itfMesClearWindowHighFlags(s32 window, u32 value);
 void func_0019C968(s32 window, s32 arg1, s32 arg2);
-void func_0019B4A0(s32 window, s32 arg1, s32 arg2);
+void func_0019B4A0(s32 window);
 void itfMesCleanupWindow(s32 window, s32 arg1);
 void itfMesResetWindow(s32 window);
 ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 index);
@@ -231,9 +231,24 @@ s32 itfMesScriptActivatePanel(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019B428);
+s32 func_0019B428(void) {
+    s32 window = scrGetWindow();
+    ItfMesState *mes;
+    u32 state;
 
-void func_0019B4A0(s32 window, s32 arg1, s32 arg2) {
+    if (window < 0) {
+        return 1;
+    }
+    mes = D_003D6ECC[window].mes;
+    state = mes->flags & 0x300;
+    if (state == 0x100 || state == 0x200) {
+        func_0019B4A0(window);
+        func_0014DAF0(3);
+    }
+    return state < 1;
+}
+
+void func_0019B4A0(s32 window) {
     ItfMesState *mes = D_003D6ECC[window].mes;
     u32 flags = mes->flags;
 

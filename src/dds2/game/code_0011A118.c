@@ -134,7 +134,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A510);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A700);
+INCLUDE_ASM(const s32, "game/code_0011A118", ptyRecoverAllUnits);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A788);
 
@@ -432,7 +432,7 @@ u32 func_0011D588(void) {
 }
 
 void func_0011D590(void) {
-    func_0010BF48(D_00435E88);
+    scrProcDestroyTask(D_00435E88);
     D_00435E88 = 0;
 }
 

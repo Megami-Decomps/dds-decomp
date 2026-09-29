@@ -805,7 +805,7 @@ s32 btlFindScriptResource(char *name) {
         return -1;
     }
     func_0035C860(path, D_0041B650, battle->scriptGroup, name);
-    return func_0010C158(battle->resourceHandle, path);
+    return bfFindScriptIndexByName(battle->resourceHandle, path);
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022A908);

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00265E68(u32, s32);
+extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -38,8 +38,8 @@ typedef struct {
     u16 animation;  /* 0x14 */
 } TitleEntry;
 
-void func_002654E8(s32 arg0) {
-    func_00265088(arg0);
+void func_002654E8(s32 animationState) {
+    brsStepAnimDecay(animationState);
 }
 
 u8 func_00265500(s32 value) {
@@ -75,11 +75,49 @@ u32 func_00265598(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002655A0);
+extern u8 D_0036F40C[];
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265610);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265648);
+/* Party-unit flags and AP restriction shared by reward calculations. */
+typedef struct BrsExpUnit {
+    u16 flags;          /* 0x00: bit 1 means active party member */
+    u8 pad02[0xC];
+    u16 apStatus;       /* 0x0E: bit 6 prevents AP gain */
+} BrsExpUnit;
+
+s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
+    s32 gain;
+    if (((BrsExpUnit *)unit)->apStatus & 0x40) {
+        return 0;
+    }
+    gain = baseApTotal;
+    gain += perUnitBonus;
+    if ((((BrsExpUnit *)unit)->flags & 2) == 0) {
+        gain = perUnitBonus;
+        gain += baseApTotal;
+    }
+    return gain;
+}
+
+/* Active party members take full EXP; benched members need the half/full
+ * EXP skills (0x21F/0x220 respectively). The third caller arg is unused. */
+s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
+    s32 result;
+
+    if ((((BrsExpUnit *)unit)->flags & 2) != 0) {
+        result = exp;
+    } else {
+        result = 0;
+        if (ptyHasSkill(unit, 0x21F) != 0) {
+            result = exp / 2;
+        }
+        if (ptyHasSkill(unit, 0x220) != 0) {
+            result = exp;
+        }
+    }
+    return result;
+}
 
 s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
     if (mdlFlagTest(0x902) == 0 && entry->kind == 4) {
@@ -88,9 +126,9 @@ s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265700);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002658B8);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
 extern s32 D_003BAA00;
 
@@ -99,21 +137,21 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = func_002658B8(D_003BAA00 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(D_003BAA00 + 0xa60 + offset);
         count += step > 0;
         offset += 0x1a4;
     } while (--remaining >= 0);
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002659C8);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265AB8);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
 
 s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
-    s32 step = func_002658B8(entry);
+    s32 step = ptyCalcLevelUps(entry);
     entry->animation += step;
-    func_002CD0C0(entry);
+    ptyRecomputeMaxHpMp(entry);
     return step;
 }
 
@@ -128,13 +166,13 @@ s32 btlAddBaseStats(u8 *src, u8 *obj) {
             *stat = 99;
         }
     }
-    func_002CD0C0(obj);
+    ptyRecomputeMaxHpMp(obj);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C90);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyAccumulateStatGains);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265E68);
+INCLUDE_ASM(const s32, "game/code_002653A0", ptyBuildProfileCapSkillList);
 
 void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);
@@ -144,7 +182,40 @@ void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fo
     state[3] = fourth;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00266048);
+extern s32 ptyCalcLevelUps(u8 *);
+extern s32 ptyComputeTotalExp(u8 *, s32);
+extern s32 ptyAddProfilePoints(u8 *, s32);
+extern s8 ptyGetCurrentProfileId(u8 *);
+extern u32 prfGetCapValue(u16);
+extern void mnuInitTitleParameters(u32 *, u32, u32, u32, u32);
+
+typedef struct BrsUnitExp {
+    u8 pad00[0x10];
+    s32 totalExp;        /* 0x10 */
+} BrsUnitExp;
+
+typedef struct BrsProgressRow {
+    u8 pad00[8];
+    u32 unit;            /* 0x08 */
+    u32 levelProgress[4]; /* 0x0C */
+    u32 profileProgress[4]; /* 0x1C */
+} BrsProgressRow;
+
+/* Set up the level and profile progress bars for one party member. */
+void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
+    s32 levelDelta;
+    s32 profilePoints;
+
+    memset(state, 0, 0x2C);
+    ((BrsProgressRow *)state)->unit = (u32)entry;
+    levelDelta = ptyCalcLevelUps(entry);
+    mnuInitTitleParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
+        ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
+        ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
+    profilePoints = ptyAddProfilePoints(entry, 0);
+    mnuInitTitleParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
+        prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
+}
 
 void func_00266130(u32 fontContext) {
     func_001953D8(fontContext, 0xc, 0x10);
@@ -154,11 +225,11 @@ void func_00266130(u32 fontContext) {
 extern u32 func_002C1630(u32, u32, s32);
 
 u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
-    func_002CD7B8(*(u32 *)(resource + 8));
+    ptyGetCurrentProfileId(*(u32 *)(resource + 8));
     return func_002C1630(0x80808080, 0x80808000, blend);
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002661A8);
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildActiveUnitProgressRows);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);
 

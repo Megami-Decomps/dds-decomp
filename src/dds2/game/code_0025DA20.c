@@ -52,7 +52,7 @@ extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *updat
 
 extern void func_0025D8C8(void);
 
-extern void func_0025D928(void);
+extern void evtReleaseEventPackResources(void);
 
 typedef struct CampTaskData {
     s32 taskId;
@@ -72,7 +72,7 @@ void mnuCampCreateTask(s32 taskId) {
         memset(data, 0, 0x48);
         data->taskId = taskId;
         data->unk4 = 0;
-        kwlnTaskCreate(name, 0x3EC, 1, 1, func_0025D8C8, func_0025D928, data);
+        kwlnTaskCreate(name, 0x3EC, 1, 1, func_0025D8C8, evtReleaseEventPackResources, data);
     }
 }
 

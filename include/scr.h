@@ -76,10 +76,12 @@ typedef struct {
     s32 unkB4;
     u8 padB8[0x10];
     s32 unkC8;
-    u8 padCC[0xC];
-    void *scriptHandle;    /* 0xD8 */
-    u8 padDC[8];
-    s32 taskId;            /* 0xE4 */
+    s32 resourceIndex;      /* 0xCC: released unless negative */
+    u8 padD0[8];
+    void *scriptHandle;     /* 0xD8 */
+    u32 workBuffer;         /* 0xDC */
+    u32 auxBuffer;          /* 0xE0 */
+    s32 taskId;             /* 0xE4 */
 } ScrProcTask;
 
 /* Common-command global state (0x38C); DDS1/2 script/scrCommonCommand.c. */

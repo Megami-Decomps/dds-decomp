@@ -168,11 +168,11 @@ void func_00298F08(MenuIconBatch *batch) {
     func_0011A0D0(batch->resource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00298F20);
+INCLUDE_ASM(const s32, "game/code_00296E98", ptyClampExp);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299018);
 
-void func_00299180(u32 arg0, u32 arg1, u32 arg2) {
+void brsApplyRewardBundle(u32 arg0, u32 arg1, u32 arg2) {
     func_00298EA8(arg1);
     func_00298F08(arg1);
     func_00299018(arg0, arg2);
@@ -188,14 +188,14 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00299320);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_002993D0);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299488);
+INCLUDE_ASM(const s32, "game/code_00296E98", brsMarkPartyRows);
 
 void func_00299518(u32 arg0, u32 arg1, u32 arg2) {
-    func_00299488(arg0, arg1, 2);
-    func_00299488(arg0, arg2, 1);
+    brsMarkPartyRows(arg0, arg1, 2);
+    brsMarkPartyRows(arg0, arg2, 1);
 }
 
-void func_00299558(s32 arg0) {
+void brsTaskLatchPendingRows(s32 arg0) {
     if (*(s32 *)(arg0 + 0x368) == 0) {
         D_00437989 = 0;
     } else {
@@ -255,7 +255,7 @@ s32 func_00299A00(void) {
     return func_002C6CE8() != 1;
 }
 
-void func_00299A38(u32 arg0, s32 arg1) {
+void mnuRefreshSelectedUnitPanels(u32 arg0, s32 arg1) {
     mnuInitPartyPanelSlots(arg1 + 0x584);
     func_002BCA98(arg1 + 0x690);
     func_002BCAB0(arg1 + 0x690);

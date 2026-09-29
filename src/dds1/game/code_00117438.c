@@ -6,6 +6,9 @@ extern void func_0011B940(void);
 extern u32 D_003BAAAC;
 
 extern s32 D_003BAA00;
+extern s32 D_003BAA1C;
+extern s32 D_003BAA4C;
+extern u8 *D_003BAA50;
 typedef struct EvtScaledValue {
     u32 unk0;
     u32 flags;
@@ -16,11 +19,12 @@ typedef struct EvtScaledValue {
 } EvtScaledValue;
 
 typedef struct SdfRuntime {
-    u8 pad00[0x34];
-    u32 firstTick;
-    u32 secondTick;
+    u8 pad00[0x30];
+    s32 backingAllocation; /* 0x30: handle returned by scene allocator */
+    u32 firstTick;          /* 0x34 */
+    u32 secondTick;         /* 0x38 */
     u8 pad3C[0xA20];
-    u32 updateMode;
+    u32 updateMode;         /* 0xA5C */
 } SdfRuntime;
 
 typedef struct SdfPackedValue {
@@ -28,8 +32,42 @@ typedef struct SdfPackedValue {
     u16 flagsAndValue;
 } SdfPackedValue;
 
+/* Party-unit header used for HP/MP script dispatch. Full stride: 0x1A4. */
+typedef struct SdfPartyUnit {
+    u16 flags;          /* 0x00 */
+    u8 pad02[2];
+    u16 unitId;         /* 0x04 */
+    u8 pad06[0x16];
+    u16 hpBonus;        /* 0x1C */
+    u16 mpBonus;        /* 0x1E */
+} SdfPartyUnit;
 
-void func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
+typedef struct SdfEnemyVitals {
+    u8 pad00[8];
+    u16 maxHp;          /* 0x08 */
+    u8 pad0A[2];
+    u16 maxMp;          /* 0x0C */
+} SdfEnemyVitals;
+
+/* Two-byte runtime-mode entries; the signed second byte selects script 0x18. */
+typedef struct SdfUnitMode {
+    u8 pad00;           /* 0x00 */
+    s8 mode;            /* 0x01 */
+} SdfUnitMode;
+
+extern u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed);
+extern char D_003BA9E0[];
+extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
+extern s32 func_002D0A60(s32 allocation);
+extern s32 func_002D0918(s32 allocation);
+void func_00117808(void);
+s32 sdfBumpTickCounters(void);
+void func_001177A8(void);
+extern void *func_002D03F8(s32 size);
+extern void *sdfResourceRetainAddress(void *resource);
+extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
+
+s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
@@ -93,13 +131,61 @@ u32 func_00117650(EvtScaledValue *value) {
     return value->value18;
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117658);
+/* Load the vector at the scaled value's +0x18 pointer into VF10. */
+void func_00117658(EvtScaledValue *value) {
+    void *vec = (void *)func_00117650(value);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117678);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_001176A0);
+/* Same, from the second quadword at +0x18. */
+void func_00117678(EvtScaledValue *value) {
+    void *vec = (void *)((u8 *)func_00117650(value) + 0x10);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117730);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
+
+/* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
+ * and register the "GBWK" tick task that owns it. */
+void sdfCreateRuntimeTask(void) {
+    void *mem = func_002D03F8(0x33600);
+    u8 *state = (u8 *)sdfResourceRetainAddress(mem);
+
+    memset(state, 0, 0x33600);
+    ((SdfRuntime *)state)->backingAllocation = (s32)mem;
+    ((SdfRuntime *)state)->firstTick = 0;
+    ((SdfRuntime *)state)->secondTick = 0;
+    kwlnTaskCreate(D_003BA9E0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
+    D_003BAA00 = (s32)state;
+    func_001177A8();
+}
+
+/* Tear down the "GBWK" task hierarchy, clear the backing scene allocation
+ * owned by the game state, and release the global state handle. */
+void sdfDestroyRuntimeTask(void) {
+    s32 handle;
+
+    kwlnTaskDestroyWithHierarchyByName(D_003BA9E0, 0);
+    func_00117808();
+    handle = ((SdfRuntime *)D_003BAA00)->backingAllocation;
+    func_002D0A60(handle);
+    func_002D0918(handle);
+    D_003BAA00 = 0;
+}
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;
@@ -114,10 +200,10 @@ void func_001177A8(void) {
     scrClearProcessGlobals();
     func_0021F4B8();
     ((SdfRuntime *)D_003BAA00)->updateMode = 8;
-    func_0011A238();
+    ptyInitRuntime();
     func_00120C08(0);
-    func_002CC7D8();
-    func_002CCDC8();
+    ptyClearProfileRecords();
+    ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     func_001ACCF0();
@@ -170,17 +256,84 @@ void sdfResetChannels(void) {
     func_001180F8();
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118368);
+/* Enemy vitals use a 76-byte base table; party vitals come from a script,
+ * a unit-specific bonus, and a maximum of 999. */
+s32 ptyComputeMaxHp(s32 unit) {
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118408);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) != 0) {
+        return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
+    }
+    result = evtRunContext(1, unit, 0, 0, 0);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) == 0) {
+        result += ((SdfPartyUnit *)unit)->hpBonus;
+        if (result >= 1000) {
+            result = 999;
+        }
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_001184A8);
+/* Compute the matching MP value from the base table or the MP script. */
+s32 ptyComputeMaxMp(s32 unit) {
+    s32 result;
+
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) != 0) {
+        return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
+    }
+    result = evtRunContext(2, unit, 0, 0, 0);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) == 0) {
+        result += ((SdfPartyUnit *)unit)->mpBonus;
+        if (result >= 1000) {
+            result = 999;
+        }
+    }
+    return result;
+}
+
+/* Sdf dispatch: pick the script id from the unit's runtime flag byte and run
+ * it against the given entry index. 0x40/0x80 select the alternate scripts. */
+s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    s32 result;
+    u8 flags;
+
+    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].mode == 5) {
+        result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
+    } else {
+        flags = D_003BAA50[unitIndex * 0x38];
+        if (flags & 0x40) {
+            result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
+        } else if (flags & 0x80) {
+            result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
+        } else {
+            result = evtRunContext(5, scriptArg, contextArg, unitIndex, mode);
+        }
+    }
+    return result;
+}
 
 void sdfDispatchCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_001184A8(arg0, arg1, arg2, (u8)arg3);
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118570);
+s32 func_00118570(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    s32 result;
+    u8 flags;
+
+    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].mode == 5) {
+        result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
+    } else {
+        flags = D_003BAA50[unitIndex * 0x38];
+        if (flags & 0x40) {
+            result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
+        } else if (flags & 0x80) {
+            result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
+        } else {
+            result = evtRunContext(9, scriptArg, contextArg, unitIndex, mode);
+        }
+    }
+    return result;
+}
 
 void func_00118620(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
     evtRunContext(10, arg1, arg2, arg0, arg3);
@@ -199,9 +352,6 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 INCLUDE_ASM(const s32, "game/code_00117438", func_001189A0);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118D70);
-
-extern u8 *D_003BAA50;
-extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
 
 u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
     u32 result;
