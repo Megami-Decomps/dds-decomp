@@ -26,7 +26,16 @@ s32 mnuCheckTableSums(s32 bytes, s32 table) {
 
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_00263EF8);
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_002641E0);
+extern void func_002639E0(s32);
+extern void func_00263B78(s32, s32);
+
+void func_002641E0(s32 request) {
+    s32 context = func_00101A70();
+
+    func_002639E0(context);
+    func_00263B78(context, 1);
+    func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
+}
 
 void func_00264238(s32 input) {
     s32 context = func_00101A70();
@@ -52,7 +61,13 @@ u32 func_002642C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_002642D0);
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264498);
+void func_00264498(s32 request) {
+    s32 context = func_00101A70();
+
+    func_002639E0(context);
+    func_00263B78(context, 1);
+    func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
+}
 
 void func_002644F0(s32 input) {
     s32 context = func_00101A70();
@@ -67,9 +82,34 @@ u32 func_00264608(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264610);
+extern s32 func_00287C20(void);
+extern s64 func_0024DC08(void);
+extern void func_002858F8(s32 *, char *);
+extern char D_0036D478[];
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_002646A0);
+s64 func_00264610(u64 request) {
+    s32 context = func_00101A70();
+    s32 *state = (s32 *)(context + 0x54);
+    s64 result;
+
+    func_00287C20();
+    result = func_00285670(context + 8, state, 0, request);
+    if (result == 0) {
+        if ((*state == 0) && (result = func_0024DC08(), result == 0)) {
+            func_002858F8(state, D_0036D478);
+        }
+        result = 0;
+    }
+    return result;
+}
+
+void func_002646A0(s32 request) {
+    s32 context = func_00101A70();
+
+    func_002639E0(context);
+    func_00263B78(context, 0);
+    func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
+}
 
 void func_002646F8(s32 input) {
     s32 context = func_00101A70();

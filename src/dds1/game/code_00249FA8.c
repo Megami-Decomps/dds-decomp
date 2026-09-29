@@ -43,7 +43,16 @@ s32 fldPollSceneState(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A0D8);
+extern char D_0036ADF4[];
+extern void func_002858E8(s32 *, char *);
+
+void func_0024A0D8(s32 value) {
+    s32 context = func_00101A70();
+    s32 *state = (s32 *)(context + 0x54);
+
+    func_002858E8(state, D_0036ADF4);
+    func_00285670(context + 8, state, 0, value);
+}
 
 void func_0024A138(s32 value) {
     s32 context = func_00101A70();
@@ -51,7 +60,11 @@ void func_0024A138(s32 value) {
     func_00285670(context + 8, context + 0x54, 1, value);
 }
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A170);
+void func_0024A170(s32 value) {
+    s32 context = func_00101A70();
+
+    func_00285670(context + 8, context + 0x54, 2, value);
+}
 
 s32 func_0024A1A8(void) {
     s32 fadeActive = kwlnFadeIsActive();

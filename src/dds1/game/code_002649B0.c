@@ -2,15 +2,47 @@
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002649B0);
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_00264A60);
+extern void func_002639E0(s32);
+extern void func_00263B78(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_00264AB8);
+s64 func_00264A60(u64 request) {
+    s32 context = func_00101A70();
+
+    func_002639E0(context);
+    func_00263B78(context, 0);
+    return func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
+}
+
+extern s32 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00101A70();
+
+extern void func_0024DC98(s32);
+
+s64 func_00264AB8(u64 request) {
+    s32 context = func_00101A70();
+
+    func_0024DC98(0);
+    return func_00285670(context + 8, (s32 *)(context + 0x54), 2, request);
+}
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264D90);
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_00264E90);
+extern u32 func_002C1630(u32, u32, s32);
+
+void func_00264E90(u8 *work) {
+    s32 remaining = 0x100 - *(s32 *)(work + 0x1574);
+
+    if (*(s8 *)(work + 0xD3C) == 0) {
+        u32 color = func_002C1630(0x80808080, 0x80808000, remaining) & 0xFF;
+
+        *(u32 *)(work + 0xD48) = color;
+        if (color >= 0x80) {
+            *(s8 *)(work + 0xD3C) = 1;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264EF0);
 

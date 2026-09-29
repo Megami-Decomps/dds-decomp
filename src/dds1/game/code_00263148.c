@@ -25,22 +25,43 @@ extern void func_00265478(s32 arg0);
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
+typedef struct MenuItem {
+    u8 pad00[0x55];
+    s8 selection;
+} MenuItem;
 
-void kwlnItemApplySelection(u32 address) {
-    u8 *scene = (u8 *)address;
-    u8 *item = **(u8 ***)(scene + 0x98);
+typedef struct MenuItemScene {
+    u8 pad00[4];
+    u32 overlayFlags;
+    u8 pad08[0x90];
+    MenuItem **items;
+    u8 pad9C[0x1A4];
+    u32 resetStateA;
+    u32 selectedAction;
+    u8 pad248[4];
+    s32 selectionApplied;
+    u8 pad250[0x174];
+    u32 resetStateB;
+    s32 selectedExtent;
+    u32 activeSlot;
+    u32 slots[5];
+} MenuItemScene;
+
+
+void kwlnItemApplySelection(MenuItemScene *scene) {
+    MenuItem *item = *scene->items;
     s32 *data = (s32 *)func_002CD788(item);
-    s8 selection = item[0x55];
+    s8 selection = item->selection;
     if (selection != 0 && func_002CD2A8((u16)selection) == *data &&
-        func_002CD548(item, (u16)(s8)item[0x55]) == 0) {
-        func_002CD428(item, (u16)(s8)item[0x55]);
-        *(s32 *)(scene + 0x24C) = 1;
+        func_002CD548(item, (u16)(s8)item->selection) == 0) {
+        func_002CD428(item, (u16)(s8)item->selection);
+        scene->selectionApplied = 1;
         if (mdlFlagTest(0x910) == 0) {
-            *(s32 *)(scene + 4) |= 1;
+            scene->overlayFlags |= 1;
             mdlFlagSet(0x910);
         }
     } else {
-        *(s32 *)(scene + 0x24C) = 0;
+        scene->selectionApplied = 0;
     }
 }
 
@@ -57,11 +78,11 @@ u32 func_00263220(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263260);
 
-s32 kwlnItemDismissOverlay(u32 *state) {
-    if (state[1] & 1) {
+s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
+    if (scene->overlayFlags & 1) {
         func_0024DDC0(1);
         func_0024DA58(1);
-        state[1] &= ~1;
+        scene->overlayFlags &= ~1;
         return 1;
     }
     return 0;
@@ -96,9 +117,9 @@ s64 func_002635C0(s32 request) {
 }
 
 s32 func_00263608(void) {
-    s32 *scene = (s32 *)func_00101A70();
-    scene[144] = 0;
-    scene[241] = 0;
+    MenuItemScene *scene = (MenuItemScene *)func_00101A70();
+    scene->resetStateA = 0;
+    scene->resetStateB = 0;
     return 1;
 }
 
@@ -120,44 +141,64 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263B78);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263C98);
+extern s32 func_002624C0(s32);
+extern void func_00263B78(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263D10);
+s64 func_00263C98(s32 request) {
+    s32 context = func_00101A70();
+
+    if (func_002624C0(context) != 0) {
+        return 0;
+    }
+    func_002639E0(context);
+    func_00263B78(context, 0);
+    return menuRunPanel(context, 1, request);
+}
+
+s64 func_00263D10(s32 request) {
+    s32 context = func_00101A70();
+
+    if (func_002624C0(context) != 0) {
+        return 0;
+    }
+    func_0024DD78();
+    return menuRunPanel(context, 2, request);
+}
 
 u32 func_00263D70(void) {
     s8 component;
-    s32 scene;
+    MenuItemScene *scene;
     u32 *slot;
     s8 *byteCursor;
     s32 remaining;
     s32 extent;
     s32 sum;
 
-    scene = func_00101A70();
+    scene = (MenuItemScene *)func_00101A70();
     sum = 0;
     remaining = 4;
-    extent = (*(s32 **)(scene + 0x98))[1] * 3;
-    byteCursor = (s8 *)(**(s32 **)(scene + 0x98) + 0x16);
+    extent = (*(s32 **)((s32)scene + 0x98))[1] * 3;
+    byteCursor = (s8 *)(**(s32 **)((s32)scene + 0x98) + 0x16);
     do {
         component = *byteCursor;
         byteCursor = byteCursor + 1;
         remaining = remaining - 1;
         sum = sum + component;
     } while (-1 < remaining);
-    *(u32 *)(scene + 0x3cc) = 0;
+    scene->activeSlot = 0;
     remaining = 4;
-    slot = (u32 *)(scene + 0x3e0);
+    slot = &scene->slots[4];
     if (0x1ef - sum < extent) {
         extent = 0x1ef - sum;
     }
-    *(s32 *)(scene + 0x3c8) = extent;
+    scene->selectedExtent = extent;
     do {
         remaining = remaining - 1;
         *slot = 0;
         slot = slot + -1;
     } while (-1 < remaining);
-    if (*(s32 *)(scene + 0x1578) != 0) {
-        func_002830F0(*(u32 *)(scene + 0xd10), 0);
+    if (*(s32 *)((s32)scene + 0x1578) != 0) {
+        func_002830F0(*(u32 *)((s32)scene + 0xd10), 0);
     }
     return 1;
 }
@@ -166,12 +207,12 @@ u32 func_00263E30(void) {
     return 1;
 }
 
-void func_00263E38(s32 scene) {
+void func_00263E38(MenuItemScene *scene) {
     s32 remaining;
     u32 *slot;
 
-    *(u32 *)(scene + 0x3cc) = 0;
-    slot = (u32 *)(scene + 0x3e0);
+    scene->activeSlot = 0;
+    slot = &scene->slots[4];
     remaining = 4;
     do {
         remaining = remaining - 1;

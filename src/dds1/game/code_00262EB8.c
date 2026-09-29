@@ -8,9 +8,27 @@ extern void func_00285670(s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00262EB8", func_00262EB8);
 
-INCLUDE_ASM(const s32, "game/code_00262EB8", func_00262F90);
+extern s32 func_00261FB8(s32);
 
-INCLUDE_ASM(const s32, "game/code_00262EB8", func_00262FF0);
+void func_00262F90(s32 input) {
+    s32 context = func_00101A70();
+
+    if (func_00261FB8(context) != 0) {
+        func_00265478(context);
+        func_00285670(context + 8, context + 0x54, 1, input);
+    }
+}
+
+extern void func_002654E8(s32);
+
+void func_00262FF0(s32 input) {
+    s32 context = func_00101A70();
+
+    if (func_00261FB8(context) != 0) {
+        func_002654E8(context);
+        func_00285670(context + 8, context + 0x54, 2, input);
+    }
+}
 
 u32 func_00263050(void) {
     return 1;

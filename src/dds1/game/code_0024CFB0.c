@@ -110,7 +110,11 @@ s64 func_0024D500(s32 request) {
     return menuRunPanel(state, 1, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D550);
+s64 func_0024D550(s32 request) {
+    s32 context = func_00101A70();
+
+    return menuRunPanel(context, 2, request);
+}
 
 u32 func_0024D588(void) {
     s32 temp_v0;

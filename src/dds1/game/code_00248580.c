@@ -116,7 +116,14 @@ void func_00248C38(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248C80);
+void func_00248C80(u8 *scene) {
+    u8 *node = *(u8 **)(*(u8 **)(scene + 0x74) + 0x10);
+
+    while (node != NULL) {
+        *(s32 *)(node + 0x70) = func_00248BA0(D_003BAA00 + *(s32 *)(node + 0x60) * 420 + 0xA60, (s32)scene);
+        node = *(u8 **)(node + 0x58);
+    }
+}
 
 void func_00248CF8(s32 owner) {
     s32 entry;
@@ -212,9 +219,45 @@ void func_00249420(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249498);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002495F8);
+extern void func_0027B368(u32);
+extern void mnuReleaseStaffImageHandles(u8 *);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249668);
+void func_002495F8(u8 *work) {
+    u32 i;
+
+    for (i = 0; i < 1; i++) {
+        func_0027B368(*(u32 *)(work + 0x70 + i * 4));
+    }
+    func_00248CF8((s32)work);
+    mnuReleaseStaffImageHandles(work + 0xE0);
+    func_00248E18((s32)work);
+    func_0027B368(*(u32 *)(work + 0x78));
+}
+
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void func_00220110(s32);
+extern void func_0024DED8(s32);
+extern void func_0024DEF8(s32, s32);
+
+void func_00249668(s32 skip, u8 *work) {
+    if (skip == 0) {
+        s32 mode = *(s32 *)(work + 0x7C);
+
+        if (mode < 3) {
+            if (mode > 0) {
+                kwlnFadeOutStart(0, 0, 0, 15);
+            } else {
+                func_00220110(0x322);
+            }
+        } else {
+            func_00220110(0x322);
+        }
+    } else {
+        func_00220110(0x322);
+    }
+    func_0024DED8(0);
+    func_0024DEF8(1, 1);
+}
 
 void func_002496D8(u8 *work) {
     u8 *owner = *(u8 **)(work + 0x78);
@@ -222,7 +265,25 @@ void func_002496D8(u8 *work) {
     *(s32 *)(work + 0x80) = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002496F0);
+extern s32 func_002D03F8(s32);
+extern s32 sdfResourceRetainAddress(s32);
+extern void *memset(void *, s32, u32);
+extern s32 func_002BC5C0(s32);
+extern void initPartyPanelSlots(s32);
+extern void func_00271500(s32, s32);
+
+u8 *func_002496F0(void) {
+    s32 handle = func_002D03F8(0x82C);
+    u8 *work = (u8 *)sdfResourceRetainAddress(handle);
+
+    memset(work, 0, 0x82C);
+    *(s32 *)work = handle;
+    *(s32 *)(work + 4) = func_002BC5C0(1);
+    initPartyPanelSlots((s32)(work + 0x84));
+    func_00271500(*(s32 *)(work + 4), (s32)(work + 8));
+    *(s32 *)(work + 0x80) = 1;
+    return work;
+}
 
 void func_00249770(u32 *arg0) {
     mnuShutdownContext(arg0 + 100);
@@ -232,7 +293,29 @@ void func_00249770(u32 *arg0) {
     func_002D0918(*arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002497C0);
+extern s32 func_002716E8(s32, s32 *);
+extern void func_002762D8(s32 *);
+extern void func_00271480(s32, s32 *, s32, s32);
+
+s32 func_002497C0(u8 *work) {
+    s32 state = *(s32 *)(work + 0x80);
+    s32 *group;
+
+    if (state == 0) {
+        return 1;
+    }
+    if (state == 2) {
+        return 0;
+    }
+    group = (s32 *)(work + 8);
+    if (func_002716E8(*(s32 *)(work + 4), group) == 0) {
+        return 1;
+    }
+    func_002762D8(group);
+    func_00271480((s32)(work + 0x190), group, 0, (s32)(work + 0x84));
+    *(s32 *)(work + 0x80) = 2;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 
