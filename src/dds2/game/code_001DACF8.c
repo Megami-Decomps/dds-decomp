@@ -7,15 +7,22 @@ extern void func_001EC868(void *, f32 *, f32);
 typedef struct BtlUnitData {
     u8 pad0[0x1C];
     f32 f1C;
-    s32 unk20;
+    union {
+        s32 unk20;
+        f32 f20;
+    };
     u8 pad24[10];
     u16 s2E;
     u8 b30;
 } BtlUnitData;
 
 typedef struct BtlUnitInfo {
-    u8 b0;
-    u8 pad1[0x1B];
+    union {
+        u8 b0;
+        u32 flags;
+    };
+    u8 pad1[0x14];
+    s32 unk18;
     BtlUnitData *data;
 } BtlUnitInfo;
 
@@ -34,18 +41,32 @@ typedef struct BtlWork {
     BtlUnit *list24C;
     struct SoundTask *taskList250;
     struct SoundTask *taskList254;
-    void *resourceList258;
+    struct SoundResourceNode *resourceList258;
     struct ActiveSoundNode *soundList;
-    u8 pad260[0x18];
+    struct SoundSlotOwner *list260;
+    u8 pad264[0x14];
     s32 unk278;
-    u8 pad27C[0x334];
+    u8 pad27C[0x78];
+    s32 unk2F4;
+    u8 pad2F8[0x1CC];
+    s8 unk4C4;
+    u8 pad4C5[3];
+    f32 unk4C8;
+    u8 pad4CC[0xE4];
     s32 unk5B0;
     s32 unk5B4;
-    u8 pad5B8[0x98];
+    u8 pad5B8[0x38];
+    s32 (*hook5F0)(BtlUnit *, s32);
+    u8 pad5F4[0x5C];
     s32 (*hook650)(BtlUnit *);
     u8 pad654[4];
     s32 (*hook658)(BtlUnit *);
-    u8 pad65C[0x4C];
+    u8 pad65C[0x28];
+    s32 (*hook684)(s32, s32);
+    u8 pad688[0x14];
+    s32 (*hook69C)(BtlUnit *);
+    s32 (*hook6A0)(BtlUnit *);
+    u8 pad6A4[4];
     void (*hook)(BtlUnit *);
     u8 pad6AC[0x78];
     s32 unk724;
@@ -54,35 +75,55 @@ typedef struct BtlWork {
 struct BtlUnit {
     u8 pad0[0x18];
     BtlUnit *link18;
-    u8 pad1C[0xB0];
+    u8 pad1C[0x38];
+    u32 unk54;
+    u8 pad58[0x2C];
+    u32 unk84;
+    f32 unk88;
+    u8 pad8C[0x40];
     u8 unkCC;
     u8 padCD[0x1B];
     u32 unkE8;
     u8 padEC[4];
     s32 unkF0;
-    u8 padF4[0x1C];
+    f32 fF4;
+    u8 padF8[0x10];
+    u64 owner;
     u32 flags;
     u32 stateFlags;
     s32 unk118;
-    u8 pad11C[8];
+    u8 unk11C;
+    u8 pad11D[3];
+    u16 unk120;
+    u8 pad122[2];
     u16 mode;
-    u8 pad126[0x52];
+    u8 pad126[0x4E];
+    BtlUnit *prev;
     BtlUnit *next;
-    u8 pad17C[0x194];
+    u8 pad17C[0x168];
+    u8 unk2E4;
+    u8 pad2E5[0x2B];
     s32 unk310;
     s32 unk314;
-    u8 pad318[4];
+    struct SoundResourceNode *node318;
     struct SoundResourceLink *link31C;
     struct SoundLink *link320;
-    u8 pad324[4];
+    struct ActiveSoundNode *node324;
     s32 unk328;
-    u8 pad32C[4];
+    s32 unk32C;
     u16 unk330;
-    u8 pad332[10];
+    u8 pad332[2];
+    s32 unk334;
+    u8 pad338[4];
     s32 unk33C;
     BtlUnitExt *ext;
     s32 unk344;
-    u8 pad348[0x1C];
+    u8 pad348[4];
+    s32 unk34C;
+    s32 unk350;
+    u8 pad354[8];
+    u32 handle35C;
+    BtlUnit *link360;
     BtlUnit *link364;
 };
 
@@ -151,7 +192,7 @@ extern u64 func_0010FCA8(void);
 
 extern u32 func_00116810(u64);
 
-extern s32 func_001E3168(void);
+extern s8 func_001E3168(BtlUnit *, s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -161,9 +202,9 @@ extern u64 fldCreateSceneGroupAction(u64, u64, u64);
 
 extern s32 func_001AA6F8(void);
 
-extern u32 D_00436A1C;
+extern struct SoundTask *D_00436A1C;
 
-extern u32 D_00436A20;
+extern struct SoundTask *D_00436A20;
 
 extern s32 func_0032CD98(void);
 
@@ -194,12 +235,12 @@ typedef struct SoundTask {
         u32 (*poll)(void);
         u32 (*commandArgs)(u32 *);
     } callback;
-    u32 unk_50;
-    u32 unk_54;
+    void (*onFinish)(u32);
+    void *args;
     struct SoundTask *next;
     struct SoundTask *nextActive;
-    u32 unk_60;
-    u32 unk_64;
+    struct SoundTask *deferNext;
+    struct SoundTask *deferPrev;
 } SoundTask;
 
 extern s64 func_00201520(void);
@@ -283,11 +324,29 @@ typedef struct SoundTransition {
     u16 queuedId;
 } SoundTransition;
 
-extern char D_00418CC0[]; /* "btl:rain exit\n" */
 
 extern s32 func_00201578(u32 *);
 
 extern u32 D_00436AD8;
+
+typedef struct {
+    union {
+        void *actor;
+        s32 value;
+    };
+    union {
+        s32 option;
+        u16 optionId;
+    };
+    u32 unk_08;
+    u32 unk_0C;
+    u32 unk_10;
+    u32 unk_14;
+} SoundTaskArgs;
+
+extern SoundTask *func_001E1468(s32);
+
+extern SoundTaskArgs *func_001E14F8(s32);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DACF8);
 
@@ -428,7 +487,19 @@ INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417548);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DCF58);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DCFE0);
+void func_001DCFE0(BtlUnit *unit) {
+    func_0020D128("btl:action seq delete[%p]\n", unit);
+    releaseBattleObjectBuffers((s32 *)((u8 *)unit + 0x20));
+    if (unit->next != 0) {
+        unit->next->prev = unit->prev;
+    }
+    if (unit->prev != 0) {
+        unit->prev->next = unit->next;
+    } else {
+        ((BtlWork *)func_001AA6F8())->head = unit->next;
+    }
+    func_00328E48(unit);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DD060);
 
@@ -537,7 +608,20 @@ u32 func_001DFD58(void *arg) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DFDC0);
+SoundTask *func_001DFDC0(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x4B;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001DFD58;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DFE48);
 
@@ -573,7 +657,22 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0238);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E02A8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E05B8);
+extern u32 func_001E02A8(s32);
+
+SoundTask *func_001E05B8(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x50;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E02A8;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 typedef struct {
     u32 unk0;
@@ -598,22 +697,89 @@ s32 func_001E0640(BattleVoiceWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E06B0);
+SoundTask *func_001E06B0(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x51;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E0640;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 u32 func_001E0738(s32 arg0) {
     func_0011A118(*(u16 *)(arg0 + 4), 1);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0760);
+SoundTask *func_001E0760(void *actor, u16 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x52;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E0738;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->optionId = option;
+    return task;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E07E8);
+u32 func_001E07E8(s32 arg0) {
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    if (((s32 *)arg0)[1] == 0) {
+        return 1;
+    }
+    if ((*(BtlUnit **)arg0)->flags & 0x400) {
+        return 1;
+    }
+    work->unk2F4 += ((s32 *)arg0)[1];
+    func_0020D128("btl:epall=%d[%d](packet)\n", work->unk2F4, ((s32 *)arg0)[1]);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0858);
+extern u32 func_001E07E8(s32);
+
+SoundTask *func_001E0858(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x53;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E07E8;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E08E0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E0950);
+extern u32 func_001E08E0(s32);
+
+SoundTask *func_001E0950(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0x54;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E08E0;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E09D8);
 
@@ -633,21 +799,6 @@ u32 func_001E0B50(s32 arg0) {
     func_0011A0D0(*(u32 *)(arg0 + 4));
     return 1;
 }
-
-typedef struct {
-    union {
-        void *actor;
-        s32 value;
-    };
-    s32 option;
-    u32 unk_08;
-    u32 unk_0C;
-    u32 unk_10;
-} SoundTaskArgs;
-
-extern SoundTask *func_001E1468(s32);
-
-extern SoundTaskArgs *func_001E14F8(s32);
 
 SoundTask *func_001E0B70(void *actor, s32 option) {
     SoundTask *task = func_001E1468(8);
@@ -691,7 +842,15 @@ SoundTask *findBattleTaskByOwner(u64 owner) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", btlFindTaskByKind);
+SoundTask *btlFindTaskByKind(u16 kind) {
+    SoundTask *task;
+    for (task = ((BtlWork *)func_001AA6F8())->taskList254; task != 0; task = task->next) {
+        if (task->taskId == kind) {
+            return task;
+        }
+    }
+    return 0;
+}
 
 s32 func_001E1228(void) {
     s32 temp_v0;
@@ -741,13 +900,54 @@ void flagBattleTasksForUpdate(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1368);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1468);
+extern void *func_00328E18(s32);
+
+SoundTask *func_001E1468(s32 size) {
+    SoundTask *task = func_00328E18(size + 0x70);
+    BtlWork *work;
+    if (size > 0) {
+        task->args = (u8 *)task + 0x70;
+    } else {
+        task->args = 0;
+    }
+    work = (BtlWork *)func_001AA6F8();
+    task->next = 0;
+    if (work->taskList250 != 0) {
+        work->taskList250->next = task;
+        task->nextActive = work->taskList250;
+    } else {
+        work->taskList254 = task;
+        task->nextActive = 0;
+    }
+    work->taskList250 = task;
+    task->flags |= 1;
+    return task;
+}
 
 SoundTaskArgs *func_001E14F8(s32 arg0) {
     return *(SoundTaskArgs **)(arg0 + 0x54);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1500);
+extern void func_00328E48(void *);
+
+void func_001E1500(SoundTask *task) {
+    BtlWork *work;
+    if (task->onFinish != 0) {
+        task->onFinish((u32)task->args);
+    }
+    work = (BtlWork *)func_001AA6F8();
+    if (task->nextActive != 0) {
+        task->nextActive->next = task->next;
+    } else {
+        work->taskList254 = task->next;
+    }
+    if (task->next != 0) {
+        task->next->nextActive = task->nextActive;
+    } else {
+        work->taskList250 = task->nextActive;
+    }
+    func_00328E48(task);
+}
 
 u64 startBattleTask(task)
     SoundTask *task;
@@ -757,10 +957,10 @@ u64 startBattleTask(task)
     task->unk_30 = 0;
     task->unk_34 = 0;
     task->unk_22 = 0;
-    task->unk_60 = 0;
-    task->unk_64 = 0;
+    task->deferNext = 0;
+    task->deferPrev = 0;
     if (task->onStart != 0) {
-        task->onStart(task->unk_54);
+        task->onStart((u32)task->args);
     }
     return task->unk_38;
 }
@@ -772,13 +972,32 @@ void func_001E15E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E15F0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1730);
+void func_001E1730(void) {
+    SoundTask *task;
+    SoundTask *next;
+    for (task = ((BtlWork *)func_001AA6F8())->taskList254; task != 0; task = next) {
+        next = task->next;
+        if (!(task->flags & 2)) {
+            func_001E15F0((s32)task);
+        } else {
+            task->deferNext = 0;
+            if (D_00436A1C != 0) {
+                D_00436A1C->deferNext = task;
+                task->deferPrev = D_00436A1C;
+            } else {
+                D_00436A20 = task;
+                task->deferPrev = 0;
+            }
+            D_00436A1C = task;
+        }
+    }
+}
 
 void btlClearDeferredTasks(void) {
-    s32 node = D_00436A20;
+    SoundTask *node = D_00436A20;
     while (node != 0) {
-        s32 next = *(s32 *)(node + 0x60);
-        func_001E15F0(node);
+        SoundTask *next = node->deferNext;
+        func_001E15F0((s32)node);
         node = next;
     }
     D_00436A1C = 0;
@@ -810,7 +1029,35 @@ void func_001E1918(BtlFx *fx) {
     fx->fC0 = 75.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E1958);
+extern s128 D_003B6B90;
+extern s128 D_003B6BA0;
+
+typedef struct BtlFxLight {
+    s128 vecA;
+    s128 vecB;
+    f32 intensity;
+    u32 color;
+    u32 unk8;
+} BtlFxLight;
+
+typedef struct BtlFxLights {
+    u8 pad0[0x30];
+    BtlFxLight light0;
+    BtlFxLight light1;
+} BtlFxLights;
+
+void func_001E1958(BtlFxLights *fx) {
+    PCP_COPY_VECTOR(&fx->light0.vecA, &D_003B6B90);
+    PCP_COPY_VECTOR(&fx->light0.vecB, &D_003B6BA0);
+    fx->light0.unk8 = 0;
+    fx->light0.intensity = 1.0f;
+    fx->light0.color = 0x80808080;
+    PCP_COPY_VECTOR(&fx->light1.vecA, &D_003B6B90);
+    PCP_COPY_VECTOR(&fx->light1.vecB, &D_003B6BA0);
+    fx->light1.intensity = 1.0f;
+    fx->light1.color = 0x80808080;
+    fx->light1.unk8 = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E19C8);
 
@@ -845,9 +1092,29 @@ void func_001E20B8(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2110);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E21A0);
+void func_001E21A0(BtlUnit *unit) {
+    s32 (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook69C;
+    if (hook == 0 || hook(unit) != 0) {
+        unit->flags |= 4;
+        if (!(unit->flags & 0x8000000)) {
+            unit->flags |= 8;
+            if (unit->flags & 2) {
+                unit->ext->info->flags &= ~1;
+            }
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2220);
+void func_001E2220(BtlUnit *unit) {
+    s32 (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook6A0;
+    if (hook == 0 || hook(unit) != 0) {
+        unit->flags &= ~4;
+        unit->flags &= ~8;
+        if (unit->flags & 2) {
+            unit->ext->info->flags |= 1;
+        }
+    }
+}
 
 u32 func_001E2298(BtlUnit *unit) {
     if (unit->flags & 0x8000000) {
@@ -870,7 +1137,13 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2758);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2B60);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2C00);
+extern s32 func_001ABFD8(s32, s32);
+extern void func_001E22D8(u8 *, s32, s32, f32);
+
+void func_001E2C00(u8 *unit, s32 index, s32 arg2, f32 scale) {
+    u8 *table = (u8 *)func_001ABFD8(*(s32 *)(unit + 0xC4), *(s32 *)(unit + 0xC8));
+    func_001E22D8(unit, index, arg2, *(f32 *)(table + index * 0x14 + 0x34) * scale);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2C78);
 
@@ -929,23 +1202,59 @@ s32 func_001E3040(BtlUnit *unit) {
     return unit->ext->info->data->b30 == 5;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3088);
+extern void effObjSetInnerFirstVec(s32, f32 *);
+
+void func_001E3088(BtlUnit *unit, f32 *vec) {
+    f32 pos[4];
+    if (!(unit->stateFlags & 0x80)) {
+        u8 *work = (u8 *)func_001AA6F8();
+        __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(vec));
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"((u8 *)unit + 0x60));
+        __asm__ volatile("lqc2 vf11, 0(%0)\n\t"
+                         "vadd.xyzw vf10, vf10, vf11\n\t"
+                         "sqc2 vf10, 0(%1)"
+                         : : "r"(work), "r"(pos));
+        if (unit->flags & 2) {
+            pos[2] += unit->unk88;
+            effObjSetInnerFirstVec(unit->unk33C, pos);
+        }
+    }
+}
 
 void func_001E3108(u8 *unit, s128 *dst) {
     PCP_COPY_VECTOR(dst, unit + 0x60);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3120);
+void func_001E3120(u8 *unit, s128 *dst) {
+    u8 *work = (u8 *)func_001AA6F8();
+    __asm__ volatile(".set noreorder\n\t"
+                     "lqc2 vf10, 0(%0)\n\t"
+                     "lqc2 vf11, 0(%1)\n\t"
+                     "vadd.xyzw vf10, vf10, vf11\n\t"
+                     "sqc2 vf10, 0(%2)\n\t"
+                     ".set reorder"
+                     : : "r"(unit + 0x60), "r"(work), "r"(dst) : "memory");
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3168);
+extern s32 func_00332D48(s32, s32);
+extern void func_001E3628(BtlUnit *);
 
-void func_001E31F0(u32 arg0) {
-    s64 temp_v0;
+s8 func_001E3168(BtlUnit *unit, s32 mode) {
+    s32 (*hook)(BtlUnit *, s32);
+    if (!(unit->flags & 2)) {
+        return 0;
+    }
+    hook = ((BtlWork *)func_001AA6F8())->hook5F0;
+    if (hook != 0) {
+        mode = hook(unit, mode);
+    }
+    func_001E3628(unit);
+    return func_00332D48(unit->ext->info->unk18, mode);
+}
 
-    temp_v0 = func_001E3168();
-    if (temp_v0 == 0) {
+void func_001E31F0(BtlUnit *arg0, s32 mode) {
+    if (func_001E3168(arg0, mode) == 0) {
         btlUnitGetMuzzlePosVU(arg0);
-        return;
     }
 }
 
@@ -976,23 +1285,94 @@ s32 func_001E33E0(u8 *object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3448);
+extern u8 D_004179E0[];
+extern void effMiscQuatMultiplyVU(void);
+extern void effObjSetInnerSecondVec(s32, f32 *);
+
+void func_001E3448(BtlUnit *unit, s128 *quat) {
+    f32 result[4];
+    if (!(unit->stateFlags & 0x100)) {
+        __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(quat));
+        if (unit->flags & 0x10) {
+            __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(D_004179E0));
+            effMiscQuatMultiplyVU();
+        }
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"((u8 *)unit + 0x70));
+        __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(D_004179E0));
+        effMiscQuatMultiplyVU();
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(result));
+        if (unit->flags & 2) {
+            effObjSetInnerSecondVec(unit->unk33C, result);
+        }
+    }
+}
 
 void func_001E34D8(u8 *unit, s128 *dst) {
     PCP_COPY_VECTOR(dst, unit + 0x70);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E34F0);
+extern void func_0023C978(BtlUnitExt *, s32, u32);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3560);
+void func_001E34F0(BtlUnit *unit, u32 color, s32 mode) {
+    if (unit->flags & 2) {
+        color = (color & 0xFFFFFF) | 0x80000000;
+        unit->unk54 = (unit->unk54 & 0xFF000000) | (color & 0xFFFFFF);
+        func_0023C978(unit->ext, mode, color);
+    }
+}
+
+void func_001E3560(BtlUnit *unit, u32 color, s32 mode) {
+    u32 base;
+    u32 blended;
+    if (unit->flags & 2) {
+        color = (color & 0xFFFFFF) | 0x80000000;
+        base = (unit->unk54 & 0xFFFFFF) | 0x80000000;
+        blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
+        unit->unk84 = (unit->unk84 & 0xFF000000) | (color & 0xFFFFFF);
+        func_0023C978(unit->ext, mode, blended);
+    }
+}
 
 void func_001E35F8(BtlUnit *unit, u32 value) {
     func_00232F58(unit->ext->info, (value & 0xFFFFFF) | 0x80000000);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3628);
+extern void effObjFetchInnerFirstVec(s32);
+extern void effObjFetchInnerSecondVecNorm(s32);
+extern void func_00232AA0(BtlUnitInfo *);
+extern void func_00232AD0(BtlUnitInfo *);
+extern void func_00331B18(s32);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E36A0);
+void func_001E3628(BtlUnit *unit) {
+    if (!(unit->flags & 2)) {
+        return;
+    }
+    effObjFetchInnerFirstVec(unit->unk33C);
+    func_00232AA0(unit->ext->info);
+    effObjFetchInnerSecondVecNorm(unit->unk33C);
+    func_00232AD0(unit->ext->info);
+    func_00331B18(unit->ext->info->unk18);
+}
+
+extern s32 func_002091C8(s128 *, s128 *);
+extern void btlUnitGetBodyPosVU(BtlUnit *);
+extern void func_001E3448(BtlUnit *, s128 *);
+
+void func_001E36A0(BtlUnit *unit, BtlUnit *target) {
+    s128 from;
+    s128 to;
+    s128 hit;
+    if (unit->flags & 0x80000) {
+        btlUnitGetBodyPosVU(unit);
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
+        btlUnitGetBodyPosVU(target);
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
+        if (func_002091C8(&from, &to) != 0) {
+            __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&hit));
+            func_001E3448(unit, &hit);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3720);
 
@@ -1058,7 +1438,22 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E45A8);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E4618);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", btlScheduleThresholdTask);
+extern u32 func_001E4618(s32);
+
+SoundTask *btlScheduleThresholdTask(void *actor, s32 option) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->status = 0;
+    task->enabled = 1;
+    task->taskId = 0xB;
+    task->owner = *(u64 *)((u8 *)actor + 0x108);
+    task->callback.command = func_001E4618;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->actor = actor;
+    args->option = option;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E4700);
 
@@ -1182,7 +1577,16 @@ u32 func_001E6720(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E6740);
+SoundTask *func_001E6740(void) {
+    SoundTask *task = func_001E1468(0);
+    task->enabled = 1;
+    task->taskId = 0x1C;
+    task->flags |= 2;
+    task->status = 0;
+    task->onStart = 0;
+    task->callback.update = func_001E6720;
+    return task;
+}
 
 u32 func_001E6790(void) {
     return 1;
@@ -1278,9 +1682,20 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E72B0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7378);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7438);
-
-extern u32 func_001E7438(s32);
+u32 func_001E7438(s32 arg0) {
+    s128 hit[1];
+    s128 from;
+    s128 to;
+    btlUnitGetBodyPosVU(*(BtlUnit **)arg0);
+    __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
+    btlUnitGetBodyPosVU(*(BtlUnit **)(arg0 + 4));
+    __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
+    if (func_002091C8(&from, &to) != 0) {
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(hit));
+        func_001E3448(*(BtlUnit **)arg0, hit);
+    }
+    return 1;
+}
 
 SoundTask *func_001E74A0(void *actor, s32 option) {
     SoundTask *task = func_001E1468(8);
@@ -1327,11 +1742,97 @@ void resetBattleUnitLinks(BtlUnit *unit) {
     unit->link320 = sndAllocLink(unit);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7B58);
+extern s64 func_001A9920(void);
+extern void *memset(void *, s32, u32);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7C48);
+BtlUnit *func_001E7B58(void) {
+    u32 handle = func_003292A8(0x368);
+    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(handle);
+    BtlWork *work;
+    memset(unit, 0, 0x368);
+    unit->handle35C = handle;
+    unit->owner = func_001A9920();
+    unit->flags = 0;
+    unit->stateFlags = 0;
+    unit->unk11C = unit->unk310 = -1;
+    unit->unk2E4 = 6;
+    unit->unk118 = 0;
+    unit->unk334 = 0;
+    unit->node318 = 0;
+    unit->unk32C = 0;
+    unit->unk33C = 0;
+    unit->ext = 0;
+    func_001E1918((BtlFx *)unit);
+    func_001E1958((BtlFxLights *)unit);
+    resetBattleUnitLinks(unit);
+    work = (BtlWork *)func_001AA6F8();
+    unit->link360 = 0;
+    if (work->list24C != 0) {
+        work->list24C->link360 = unit;
+        unit->link364 = work->list24C;
+    } else {
+        unit->link364 = 0;
+    }
+    work->list24C = unit;
+    func_0020D128("btl:unit create[%p]\n", unit);
+    return unit;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7D30);
+extern void sndFreeResourceNode(struct SoundResourceNode *);
+extern void sndFreeResourceLink(struct SoundResourceLink *);
+extern void sndFreeLink(struct SoundLink *);
+extern void func_00328420(s32);
+extern void func_003298C0(s32);
+extern void func_001E1F98(BtlUnit *);
+extern void sndFreeListNode(struct ActiveSoundNode *);
+
+void func_001E7C48(BtlUnit *unit) {
+    func_0020D128("btl:unit data free[%p]\n", unit);
+    if (unit->node318 != 0) {
+        sndFreeResourceNode(unit->node318);
+        unit->node318 = 0;
+    }
+    if (unit->link31C != 0) {
+        sndFreeResourceLink(unit->link31C);
+        unit->link31C = 0;
+    }
+    if (unit->link320 != 0) {
+        sndFreeLink(unit->link320);
+        unit->link320 = 0;
+    }
+    if (unit->unk32C != 0) {
+        func_00328420(unit->unk32C);
+        unit->unk32C = 0;
+        unit->unk118 &= ~4;
+        unit->unk118 &= ~8;
+    }
+    if (unit->node324 != 0) {
+        sndFreeListNode(unit->node324);
+        unit->node324 = 0;
+    }
+    func_001E1F98(unit);
+    if (unit->unk350 != 0) {
+        func_003298C0(unit->unk350);
+        unit->unk350 = 0;
+        unit->unk34C = 0;
+    }
+}
+
+extern void func_003297C8(u32);
+
+void func_001E7D30(BtlUnit *unit) {
+    func_0020D128("btl:unit delete[%p]\n", unit);
+    func_001E7C48(unit);
+    if (unit->link364 != 0) {
+        unit->link364->link360 = unit->link360;
+    }
+    if (unit->link360 != 0) {
+        unit->link360->link364 = unit->link364;
+    } else {
+        ((BtlWork *)func_001AA6F8())->list24C = unit->link364;
+    }
+    func_003297C8(unit->handle35C);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7DB0);
 
@@ -1347,7 +1848,15 @@ void btlRemoveActorsWithFlags(u32 mask) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", btlFindActorForOwner);
+BtlUnit *btlFindActorForOwner(u64 owner) {
+    BtlUnit *unit;
+    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+        if (unit->owner == owner) {
+            return unit;
+        }
+    }
+    return 0;
+}
 
 s32 btlIsActiveActor(BtlUnit *actor) {
     BtlUnit *unit;
@@ -1359,9 +1868,25 @@ s32 btlIsActiveActor(BtlUnit *actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7F08);
+BtlUnit *func_001E7F08(s32 mode) {
+    BtlUnit *unit;
+    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+        if (!(unit->unk120 & 0x20) && unit->mode == mode) {
+            return unit;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E7F70);
+BtlUnit *func_001E7F70(s32 mode) {
+    BtlUnit *unit;
+    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+        if ((unit->unk120 & 0x20) && unit->mode == mode) {
+            return unit;
+        }
+    }
+    return 0;
+}
 
 void *btlAllocateIndexList(s32 capacity) {
     u8 *list = func_00328E18(capacity * 4 + 12);
@@ -1421,7 +1946,16 @@ void func_001E80F8(s32 arg0, s32 arg1, s32 arg2) {
     temp_v0[arg2] = temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8128);
+u32 func_001E8128(s32 arg0, s32 value) {
+    u32 count = func_001E8058(arg0);
+    u32 i;
+    for (i = 0; i < count; i++) {
+        if (value == func_001E8060(arg0, i)) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E81A8);
 
@@ -1453,11 +1987,71 @@ u32 func_001E8578(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8580);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8650);
+extern void func_001E8580(XformData *, XformData *, XformData *, f32);
+extern void func_00209720(u8 *, f32);
+extern f32 func_00209770(f32);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8708);
+s32 func_001E8650(u8 *fx) {
+    f32 t;
+    if (*(s32 *)(fx + 0x130) == 0) {
+        *(s32 *)(fx + 0x14C) = 0;
+        func_00209720(fx + 0x160, (f32)(*(s32 *)(fx + 0x150) * 2));
+        func_001E9598((XformData *)fx, (XformData *)(fx + 0x30));
+        return 0;
+    }
+    t = func_00209770(1.0f);
+    if (t > 0.5f) {
+        t = 0.5f;
+    }
+    func_001E8580((XformData *)fx, (XformData *)(fx + 0x30), (XformData *)(fx + 0xC0), t + t);
+    *(f32 *)(fx + 0x14C) = t;
+    if (0.5f <= t) {
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E87A0);
+extern void func_002096B8(u8 *, f32);
+extern f32 func_002096C8(u8 *);
+extern void func_001E8580(XformData *, XformData *, XformData *, f32);
+
+s32 func_001E8708(u8 *fx) {
+    u8 *timer = fx + 0x158;
+    u8 *pose = fx + 0x30;
+    f32 t;
+    if (*(s32 *)(fx + 0x130) == 0) {
+        func_002096B8(timer, *(f32 *)(fx + 0x154));
+        func_001E9598((XformData *)fx, (XformData *)pose);
+    }
+    t = func_002096C8(timer);
+    func_001E8580((XformData *)fx, (XformData *)pose, (XformData *)(fx + 0xC0), t);
+    *(f32 *)(fx + 0x14C) = t;
+    if (0.999999f <= t) {
+        return 1;
+    }
+    return 0;
+}
+
+extern void func_001E8580(XformData *, XformData *, XformData *, f32);
+extern void func_00209720(u8 *, f32);
+extern f32 func_00209770(f32);
+
+s32 func_001E87A0(u8 *fx) {
+    f32 t;
+    if (*(s32 *)(fx + 0x130) == 0) {
+        *(s32 *)(fx + 0x14C) = 0;
+        func_00209720(fx + 0x160, (f32)*(s32 *)(fx + 0x150));
+        func_001E9598((XformData *)fx, (XformData *)(fx + 0x30));
+        return 0;
+    }
+    t = func_00209770(1.0f);
+    func_001E8580((XformData *)fx, (XformData *)(fx + 0x30), (XformData *)(fx + 0xC0), t);
+    *(f32 *)(fx + 0x14C) = t;
+    if (0.999999f <= t) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8840);
 
@@ -1645,9 +2239,30 @@ u32 func_001E98E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9918);
 
+extern s32 D_00436A9C;
+extern s32 D_00436AA0;
+
+typedef struct WorldMotionData {
+    u8 pad0[8];
+    s32 unk8;
+} WorldMotionData;
+
+extern void *dds3GetWorldObject(void);
+extern WorldMotionData *func_00110C18(void *);
+
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E99C0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9A18);
+s32 func_001E9A18(void) {
+    WorldMotionData *data;
+    if (!(((BtlWork *)func_001AA6F8())->flags218 & 2)) {
+        return 0;
+    }
+    data = func_00110C18(dds3GetWorldObject());
+    if (data == 0) {
+        return 0;
+    }
+    return data->unk8 == 0;
+}
 
 s32 func_001E9A68(void) {
     s32 temp_v0;
@@ -2128,7 +2743,18 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ECCB0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED008);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED300);
+extern void func_001E88A8(u8 *);
+
+void func_001ED300(u8 *fx) {
+    BtlUnit *unit = *(BtlUnit **)(*(u8 **)(fx + 0x114) + 0x18);
+    if (unit->flags & 2) {
+        if (func_001E3168(unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU(unit);
+        }
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(fx + 0xC0));
+        func_001E88A8(fx + 0xC0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED380);
 
@@ -2306,7 +2932,21 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5320);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5780);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F5810);
+void func_001F5810(u32 unit, u8 mode) {
+    s128 pos;
+    switch (mode) {
+    case 1:
+        func_001E31F0(unit, 1);
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&pos) : "memory");
+        break;
+    case 0:
+    default:
+        btlUnitGetMuzzlePosVU(unit);
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&pos) : "memory");
+        break;
+    }
+    __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(&pos) : "memory");
+}
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004184D8);
 
@@ -2324,7 +2964,21 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FC5E0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FD400);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FDCA8);
+BtlUnit *func_001FDCA8(s32 id) {
+    BtlUnit *unit;
+    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+        if (unit->flags & 1) {
+            if (!(unit->flags & 0xC0)) {
+                if (unit->flags & 0x200) {
+                    if (unit->unk11C == id) {
+                        return unit;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FDD20);
 
@@ -2340,7 +2994,18 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FEC00);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF0F8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF570);
+s32 func_001FF570(u32 mask) {
+    BtlUnit *unit;
+    s32 count = 0;
+    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+        if ((unit->flags & 1) && (unit->flags & mask)) {
+            if (!(unit->flags & 0x20)) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF5D8);
 
@@ -2365,7 +3030,19 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFD30);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFDD0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFF68);
+extern void func_001F5868(s32, s32, s32, s32);
+extern void func_001F5320(s32, s32, s32, s32);
+extern s32 func_001FB908(s32, s32, s32, s32);
+
+s32 func_001FFF68(s32 arg0, s32 arg1) {
+    s32 result;
+    memset(D_003BD7D0, 0, 0x130);
+    func_001F5868(arg0, arg1, 2, 6);
+    func_001F5320(arg0, arg1, 0, 0);
+    result = func_001FB908(arg0, arg1, 0, 1);
+    *(u16 *)(D_003BD7D0 + 0xC) = 2;
+    return result;
+}
 
 void func_001FFFF8(void) {
     u64 temp_v0;
@@ -2499,7 +3176,19 @@ void func_002006F0(u16 soundId) {
     transition->queuedId = soundId;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200730);
+extern u32 btlBlendColor(u32, u32, f32);
+
+void func_00200730(void) {
+    SoundTransition *transition = (SoundTransition *)D_003BDCA0;
+    if (transition->soundId != 0) {
+        transition->currentResource = btlBlendColor(transition->queuedResource, transition->previousResource,
+                                                    (f32)transition->soundId / (f32)transition->queuedId);
+        transition->soundId += 0xFFFF;
+    } else {
+        transition->currentResource = transition->queuedResource;
+    }
+    func_002005F0();
+}
 
 void func_002007B0(void) {
     SoundTransition *transition = (SoundTransition *)D_003BDCA0;
@@ -2543,7 +3232,14 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_002009E0);
 void func_00200AD8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200AE0);
+void func_00200AE0(void) {
+    u8 *work = (u8 *)func_001AA6F8();
+    if (*(s32 *)(work + 0x5C0) != 0) {
+        func_0020D128("btl:rain exit\n");
+        func_002DEBB0(*(s32 *)(work + 0x5C0));
+        *(s32 *)(work + 0x5C0) = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200B30);
 
@@ -2551,7 +3247,24 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200D00);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200DA0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200F28);
+extern u32 func_00200DA0(void);
+
+SoundTask *func_00200F28(s32 arg0, s32 arg1) {
+    SoundTask *task = func_001E1468(0x14);
+    SoundTaskArgs *args;
+    task->enabled = 1;
+    task->taskId = 2;
+    task->flags &= ~1;
+    task->callback.poll = func_00200DA0;
+    task->status = 0;
+    args = func_001E14F8((s32)task);
+    args->unk_08 = arg0;
+    args->unk_0C = arg1;
+    args->value = 0;
+    args->option = 0;
+    args->unk_10 = 0;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200FB8);
 
@@ -2582,7 +3295,19 @@ s32 func_00201578(u32 *arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndCreateAcquireTask);
+SoundTask *sndCreateAcquireTask(s32 arg0, s32 arg1) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->enabled = 1;
+    task->taskId = 5;
+    task->callback.playSound = func_00201578;
+    task->status = 0;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->value = arg0;
+    args->option = arg1;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00201650);
 
@@ -2636,11 +3361,32 @@ u32 sndGetResourceStatus(u32 *sound) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndLookupResourceType);
+s32 sndLookupResourceType(s32 arg0, s32 arg1) {
+    s32 (*hook)(s32, s32) = ((BtlWork *)func_001AA6F8())->hook684;
+    s32 type;
+    if (hook != 0) {
+        type = hook(arg0, arg1);
+        if (type != -1) {
+            return type;
+        }
+    }
+    return *(u8 *)((arg1 << 5) + D_00435E30 + 3);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00201828);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndCreateSystemEffect);
+extern s32 func_001682B0(s32);
+
+void sndCreateSystemEffect(u32 *effect) {
+    if (effect[0] & 8) {
+        if (effect[4] == 0) {
+            if (effect[1] == 0) {
+                effect[4] = func_001682B0(effect[5]);
+                func_0020D128("btl:system effect create[%p]\n", effect[4]);
+            }
+        }
+    }
+}
 
 void sndDeleteSystemEffect(u32 *effect) {
     if ((effect[0] & 8) && effect[4] && !effect[1]) {
@@ -2650,17 +3396,60 @@ void sndDeleteSystemEffect(u32 *effect) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndAddEffectReferences);
+void sndAddEffectReferences(s32 *arg0) {
+    s32 *effect;
+    s32 *target;
+    s32 *source;
+    arg0[2] = 0;
+    sndCreateSystemEffect(arg0[0]);
+    effect = (s32 *)arg0[0];
+    target = (s32 *)arg0[6];
+    source = (s32 *)arg0[3];
+    effect[1] = effect[1] + 1;
+    source[0x334 / 4] = source[0x334 / 4] + 1;
+    target[0x334 / 4] = target[0x334 / 4] + 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00201C98);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndReleaseEffectReferences);
+void sndReleaseEffectReferences(s32 *arg0) {
+    s32 *effect;
+    s32 *target;
+    s32 *source;
+    if (arg0[2] != 0) {
+        func_001686F0(arg0[2]);
+    }
+    effect = (s32 *)arg0[0];
+    target = (s32 *)arg0[6];
+    source = (s32 *)arg0[3];
+    effect[1] = effect[1] - 1;
+    source[0x334 / 4] = source[0x334 / 4] - 1;
+    target[0x334 / 4] = target[0x334 / 4] - 1;
+    sndDeleteSystemEffect((u32 *)effect);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00201F08);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndCreateEffectWithTargets);
+extern s32 func_00201F08(s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndStartEffectTask);
+s32 sndCreateEffectWithTargets(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 effect = func_00201F08(arg0, arg1, arg4, arg5 & 0xFFFF);
+    SoundTaskArgs *args = func_001E14F8(effect);
+    args->unk_10 = arg2;
+    args->unk_14 = arg3;
+    return effect;
+}
+
+void sndStartEffectTask(s32 *arg0) {
+    s32 *effect;
+    s32 *unit;
+    arg0[1] = 0;
+    sndCreateSystemEffect(arg0[0]);
+    effect = (s32 *)arg0[0];
+    unit = (s32 *)arg0[2];
+    effect[1] = effect[1] + 1;
+    unit[0x334 / 4] = unit[0x334 / 4] + 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00202100);
 
@@ -2694,9 +3483,16 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_002025A0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00202648);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_002026E8);
-
-extern u32 func_002026E8(void);
+u32 func_002026E8(void) {
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    BtlUnit *unit;
+    if (work->flags218 & 0x40000000) {
+        return 1;
+    }
+    for (unit = work->list24C; unit != 0; unit = unit->link364) {
+    }
+    return 1;
+}
 
 SoundTask *func_00202750(u32 value) {
     SoundTask *task = func_001E1468(4);
@@ -2792,7 +3588,21 @@ u32 func_00202CF8(u8 *arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndCreateCustomTask);
+extern u32 func_00202CF8(u8 *);
+
+SoundTask *sndCreateCustomTask(s32 arg0, s32 arg1) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->enabled = 1;
+    task->taskId = 0x39;
+    task->callback.commandArgs = func_00202CF8;
+    task->status = 0;
+    task->onStart = 0;
+    args = func_001E14F8((s32)task);
+    args->value = arg0;
+    args->option = arg1;
+    return task;
+}
 
 u32 func_00202DA8(void) {
     s32 temp_v0;
@@ -2849,9 +3659,34 @@ s32 func_00202F80(s32 arg0) {
     return *(u32 *)(arg0 + 8) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndHasActiveActor);
+s32 sndHasActiveActor(void) {
+    BtlUnit *unit;
+    for (unit = ((BtlWork *)func_001AA6F8())->list24C; unit != 0; unit = unit->link364) {
+        if (unit->node318 != 0 && func_00202F80((s32)unit->node318) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndAllocResourceNode);
+SoundResourceNode *sndAllocResourceNode(void) {
+    SoundResourceNode *node = func_00328E18(0x20);
+    BtlWork *work;
+    node->unk_04 = 0;
+    node->unk_08 = 0;
+    node->unk_0C = 0;
+    node->resourceHandle = 0;
+    work = (BtlWork *)func_001AA6F8();
+    node->previous = 0;
+    if (work->resourceList258 != 0) {
+        work->resourceList258->previous = node;
+        node->next = work->resourceList258;
+    } else {
+        node->next = 0;
+    }
+    work->resourceList258 = node;
+    return node;
+}
 
 SoundResourceNode *sndCreateResourceNode(u32 soundId) {
     SoundResourceNode *node = (SoundResourceNode *)sndAllocResourceNode();
@@ -2860,7 +3695,23 @@ SoundResourceNode *sndCreateResourceNode(u32 soundId) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndFreeResourceNode);
+extern void func_001683F0(u32);
+extern void func_00328E48(void *);
+
+void sndFreeResourceNode(SoundResourceNode *node) {
+    if (node->resourceHandle != 0) {
+        func_001683F0(node->resourceHandle);
+    }
+    if (node->next != 0) {
+        node->next->previous = node->previous;
+    }
+    if (node->previous != 0) {
+        node->previous->next = node->next;
+    } else {
+        ((BtlWork *)func_001AA6F8())->resourceList258 = node->next;
+    }
+    func_00328E48(node);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00203138);
 
@@ -3043,7 +3894,16 @@ void refreshBattleSoundEntries(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00203CD8);
+void func_00203CD8(void) {
+    SoundResourceNode **slots = (SoundResourceNode **)((u8 *)func_001AA6F8() + 0x4EC);
+    u32 i;
+    for (i = 0; i < 0x31; i++) {
+        if (D_003BDE18[i].unk4 != 0) {
+            sndFreeResourceNode(slots[i]);
+            slots[i] = 0;
+        }
+    }
+}
 
 void func_00203D48(s32 arg0, u32 arg1) {
     u32 temp_v0;
@@ -3060,7 +3920,22 @@ void func_00203D48(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00203DA8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00203E18);
+extern void func_00232A88(s32);
+extern void func_002D46F0(s32, f32 *);
+extern void func_002D4398(s32);
+
+void func_00203E18(s32 *args) {
+    f32 pos[4];
+    if (func_00332D48(*(s32 *)(args[1] + 0x18), 1) == 0) {
+        func_00232A88(args[1]);
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(pos) : "memory");
+        pos[1] -= 150.0f;
+    } else {
+        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(pos) : "memory");
+    }
+    func_002D46F0(args[0], pos);
+    func_002D4398(args[0]);
+}
 
 void func_00203E90(u32 arg0) {
     func_002D4548(*(u32 *)arg0);
@@ -3157,7 +4032,18 @@ s32 func_00204190(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_002041E8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndCreateSkillSeTask);
+SoundTask *sndCreateSkillSeTask(s32 *arg0, u16 arg1) {
+    SoundTask *task = func_001E1468(8);
+    SoundTaskArgs *args;
+    task->enabled = 1;
+    task->taskId = 0x57;
+    task->callback.commandArgs = func_002041E8;
+    task->status = 0;
+    args = func_001E14F8((s32)task);
+    args->value = arg0[2];
+    args->optionId = arg1;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00204358);
 
@@ -3201,9 +4087,31 @@ void func_002046F0(s32 unit, s32 output) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00204718);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndAllocListNode);
+ActiveSoundNode *sndAllocListNode(void) {
+    ActiveSoundNode *node = func_00328E18(0x14);
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    node->previous = 0;
+    if (work->soundList != 0) {
+        work->soundList->previous = node;
+        node->next = work->soundList;
+    } else {
+        node->next = 0;
+    }
+    work->soundList = node;
+    return node;
+}
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndFreeListNode);
+void sndFreeListNode(ActiveSoundNode *node) {
+    if (node->next != 0) {
+        node->next->previous = node->previous;
+    }
+    if (node->previous != 0) {
+        node->previous->next = node->next;
+    } else {
+        ((BtlWork *)func_001AA6F8())->soundList = node->next;
+    }
+    func_00328E48(node);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", sndClearList);
 
@@ -3288,7 +4196,28 @@ INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00419408);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00205160);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndHasOccupiedNodeSlots);
+typedef struct SoundSlotOwner {
+    u32 flags;
+    u8 pad4[0x14];
+    s32 slot[0x1D];
+    u8 pad8C[0x78];
+    struct SoundSlotOwner *next;
+} SoundSlotOwner;
+
+s32 sndHasOccupiedNodeSlots(void) {
+    SoundSlotOwner *owner;
+    u32 i;
+    for (owner = ((BtlWork *)func_001AA6F8())->list260; owner != 0; owner = owner->next) {
+        if (!(owner->flags & 2)) {
+            for (i = 0; i < 0x1D; i++) {
+                if (owner->slot[i] != 0) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 u32 func_00205438(void) {
     u32 temp_v0;
@@ -3319,13 +4248,34 @@ SoundTask *sndCreateEarringTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_002054B8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_002055E0);
+extern u32 func_002054B8(void);
+
+SoundTask *func_002055E0(s32 arg0) {
+    SoundTask *task = func_001E1468(0xC);
+    SoundTaskArgs *args;
+    task->enabled = 1;
+    task->taskId = 0x5D;
+    task->flags &= ~1;
+    task->callback.poll = func_002054B8;
+    task->status = 0;
+    args = func_001E14F8((s32)task);
+    args->unk_08 = arg0;
+    args->option = 0;
+    args->value = 0;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00205660);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00205758);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", sndFinishEarringPlaybackTask);
+void sndFinishEarringPlaybackTask(s32 *arg0) {
+    u8 *work = (u8 *)func_001AA6F8();
+    if (arg0[2] != 0) {
+        func_003297C8(arg0[2]);
+    }
+    *(u16 *)(work + 0x284) += 0xFFFF;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00205890);
 

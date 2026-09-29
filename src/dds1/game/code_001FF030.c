@@ -1877,7 +1877,7 @@ s32 btlSetLinkFlagOn(BtlUnit *arg) {
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002072F0);
 
 extern void *func_001D8DE8(void *, s32, s32);
-extern void startBattleTask(void *);
+extern s64 startBattleTask(void *);
 
 s32 func_00207640(u8 *unit) {
     u8 *battle = (u8 *)func_001A17F0();
