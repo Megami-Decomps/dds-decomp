@@ -577,6 +577,7 @@
 0x00294488	mnuReleasePanelEntryPool	inferred	Frees the panel entry pool's allocation and clears the global pool pointer.
 0x00294538	mnuFindFreePanelEntry	inferred	Returns the first two-word panel entry whose first field is zero, or null when the pool is full.
 0x00294580	mnuStorePanelEntry	inferred	Obtains a free panel entry and assigns its two values.
+0x00298EA8	gstApplyCounterDeltaTable	inferred	byte-identical twin of DDS1 gstApplyCounterDeltaTable @ 0x261FD8 (walks three MenuIconRefs and calls the progress-counter adjuster)
 0x0029AE70	mnuResetSelectionWidthsFromConfig	inferred	Computes clamped selection width from configuration and five signed bytes, clears layout widths and refreshes an active resource.
 0x0029AF48	mnuClearSelectionWidths	inferred	Clears the layout margin and all five width entries of a menu context.
 0x0029BEB8	mnuTitleApplySequenceState	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleApplySequenceState behavior.
@@ -779,6 +780,8 @@
 0x00312A00	sdfFreeTaskWork	inferred	sdfDestroyTaskWork + frees name strings + handle
 0x003147C8	sdfSetFlagBySlotId	inferred	scans 16 slots for id, mdlFlagSet(flag)
 0x00314E20	scrSetGlobalBitFlag	inferred	Sets one global bit for IDs in the 0x1AB–0x21F range.
+0x00315098	ptyHasSkill	inferred	byte-identical twin of DDS1 ptyHasSkill @ 0x2CDB00 (24-entry u16 skill-slot list scan at +0x22)
+0x00315640	prfCountProfileList	inferred	byte-identical twin of DDS1 prfCountProfileList @ 0x2CE188
 0x00316280	sdfSetAllFlagsFromTable	inferred	loop func_00316118/00316260 then mdlFlagSet
 0x00316308	scrSetEntryFlag	inferred	Sets one of the low sixteen flag bits on the script entry addressed by context and entry ID.
 0x00316350	scrClearEntryFlag	inferred	Clears one of the low sixteen flag bits on the script entry addressed by context and entry ID.

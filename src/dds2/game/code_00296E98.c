@@ -173,7 +173,7 @@ void func_00298F08(MenuIconBatch *batch) {
     func_0011A0D0(batch->resource);
 }
 
-extern s32 func_0029CE90(u8 *, s32);
+extern s32 ptyComputeTotalExp(u8 *, s32);
 
 void ptyClampExp(u32 *unit) {
     u8 buf[0x1C4];
@@ -181,7 +181,7 @@ void ptyClampExp(u32 *unit) {
 
     memcpy(buf, unit, 0x1C4);
     *(u16 *)(buf + 0x14) = 0x63;
-    exp = func_0029CE90(buf, 0);
+    exp = ptyComputeTotalExp(buf, 0);
     if (exp < unit[4]) {
         unit[4] = exp;
     }
@@ -189,8 +189,8 @@ void ptyClampExp(u32 *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299018);
 
-void func_00299180(u32 arg0, u32 arg1, u32 arg2) {
-    func_00298EA8(arg1);
+void brsApplyRewardBundle(u32 arg0, u32 arg1, u32 arg2) {
+    gstApplyCounterDeltaTable(arg1);
     func_00298F08(arg1);
     func_00299018(arg0, arg2);
 }
@@ -291,7 +291,7 @@ void func_002996B8(s32 arg0) {
 
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern void *func_00299578(void);
-extern void func_00299D58(void);
+extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
 extern void mnuStaffRunPanel2(void);
 extern void func_002996B8(s32);
@@ -300,7 +300,7 @@ s32 mnuStaffCreateTasks(void) {
     s32 result;
     void *work = func_00299578();
 
-    kwlnTaskCreate(D_00437990, 0x405, 1, 0, func_00299D58, 0, work);
+    kwlnTaskCreate(D_00437990, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(D_00428388, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
     result = kwlnTaskCreate(D_00428398, 0x5211, 1, 0, mnuStaffRunPanel2, func_002996B8, work);
     D_00437988 = 1;
