@@ -462,13 +462,64 @@ void func_002E1218(void) {
     D_003BDA2C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1228);
+extern u8 D_003200A0[];
+extern u8 D_00320630[];
+extern s32 D_003BD350;
+extern s32 D_003BDA20;
+extern void *sceDmaGetChan(s32);
+extern void sceDmaSendN(void *, void *, s32);
+extern s32 sceDmaSync(void *, s32, s32);
+extern void sdfReleaseMemorySlot(void *);
+extern s32 func_002D03F8(s32);
+extern s32 sdfResourceRetainAddress(s32);
+
+void func_002E1228(s32 size) {
+    u32 *chan = sceDmaGetChan(0);
+    *chan &= ~0x40;
+    sceDmaSendN(chan, D_003200A0, (D_00320630 - D_003200A0) >> 4);
+    sceDmaSync(chan, 0, 0);
+    sdfReleaseMemorySlot(&D_003BD350);
+    D_003BD350 = func_002D03F8(size);
+    D_003BDA20 = sdfResourceRetainAddress(D_003BD350);
+}
 
 u32 func_002E12C0(s32 width) {
     return 0x50;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E12C8);
+typedef struct SdfDrawPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 unk8;
+    u32 command;
+    u64 unk10;
+    u64 unk18;
+    u64 unk20;
+    u64 unk28;
+    u64 unk30;
+    u64 unk38;
+    u64 unk40;
+    u64 unk48;
+} SdfDrawPacket;
+
+extern u64 func_002D2468(void *);
+extern u64 func_002D2478(void *);
+extern u64 func_002D2488(void *);
+
+SdfDrawPacket *func_002E12C8(SdfDrawPacket *p, void *tex, s32 data) {
+    p->quadwords = 4;
+    p->unk10 = 0x1000000000008003ULL;
+    p->command = 0x50000004;
+    p->unk8 = 0;
+    p->unk18 = 0xE;
+    p->unk20 = func_002D2478(tex);
+    p->unk28 = data + 0x14;
+    p->unk30 = func_002D2468(tex);
+    p->unk38 = data + 6;
+    p->unk40 = func_002D2488(tex);
+    p->unk48 = data + 8;
+    return p;
+}
 
 s32 sdfConsCreateDrawPacket(s32 owner, s32 width, s32 height) {
     s32 size = func_002E12C0(width);
@@ -546,13 +597,53 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1D60);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1EB8);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1F78);
+extern u8 D_00398580[];
+extern void func_002D40A8(s32, void *);
+
+void func_002E1F78(s32 list, s32 (*alloc)(s32)) {
+    u64 *packet;
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    packet = (u64 *)alloc(0x20);
+    packet[0] = ((u64)((u32)D_00398580 & 0x0FFFFFFF) << 32) | 0x30000008;
+    packet[1] = 0x6C07C000ULL << 32;
+    *(u128 *)&packet[2] = 0;
+    func_002D40A8(list, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1FF8);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2088);
+extern void func_002E1FF8(void *);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2110);
+void func_002E2088(s32 list, s32 (*alloc)(s32)) {
+    u64 *packet;
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    packet = (u64 *)alloc(0x90);
+    packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
+    packet[1] = 0x6C07C000ULL << 32;
+    func_002E1FF8(packet + 2);
+    sdfAppendPacket(list, (u32)packet);
+}
+
+extern vu8 D_003BD2EA;
+extern void sdfAssetApplyEntryChanges(void *, s32);
+extern void func_002DAAA0(void *, void *, s32);
+extern void func_002D40A8(s32, void *);
+
+void func_002E2110(s32 list, void *asset, s32 (*alloc)(s32)) {
+    u64 *packet;
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    sdfAssetApplyEntryChanges(asset, (s8)D_003BD2EA);
+    packet = (u64 *)alloc(0x20);
+    func_002DAAA0(asset, packet, (s8)D_003BD2EA);
+    *(u128 *)&packet[2] = 0;
+    func_002D40A8(list, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E21A0);
 

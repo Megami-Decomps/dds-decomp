@@ -12,7 +12,7 @@ extern s64 evtFindTaskById(void);
 
 s32 func_002BDD60(u32 sprite);
 
-extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 func_00101A70();
 
@@ -389,13 +389,43 @@ void func_002444D0(s32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244508);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002445E0);
+extern u8 D_00369A88[];
+
+s32 func_002445E0(void) {
+    s32 i;
+    u8 *base = D_00369A88;
+    s16 *p = (s16 *)(base + 0x410);
+    for (i = 4; i >= 0; i--, p = (s16 *)((u8 *)p - 0x104)) {
+        if (*p > 0 && mdlFlagTest(*p)) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244658);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244740);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002447D8);
+s32 func_002447D8(void) {
+    s32 result = 0;
+    if (mdlFlagTest(0x970)) {
+        result = 1;
+    }
+    if (mdlFlagTest(0x971)) {
+        result = 2;
+    }
+    if (mdlFlagTest(0x972)) {
+        result = 3;
+    }
+    if (mdlFlagTest(0x973)) {
+        result = 4;
+    }
+    if (mdlFlagTest(0x974)) {
+        result = 5;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244848);
 
@@ -443,11 +473,29 @@ s32 mnuPollTaskState(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244B30);
+extern void func_002858E8(s32 *, void *);
+extern u8 D_0036AB48[];
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244B90);
+s64 func_00244B30(u64 request) {
+    s32 state = func_00101A70();
+    s32 *panel = (s32 *)(state + 0x54);
+    func_002858E8(panel, D_0036AB48);
+    return func_00285670(state + 8, panel, 0, request);
+}
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244BC8);
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
+
+s64 func_00244B90(u64 request) {
+    s32 state = func_00101A70();
+    return menuRunPanel(state, 1, request);
+}
+
+s64 func_00244BC8(u64 request) {
+    s32 state = func_00101A70();
+    return menuRunPanel(state, 2, request);
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244C00);
 

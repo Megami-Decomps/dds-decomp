@@ -377,7 +377,16 @@ void func_002D45B0(SdfPacket *arg0, s32 arg1) {
     arg0->unk18 = 0xE;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D45F0);
+void func_002D45F0(u64 *packet, u32 address, s32 count) {
+    packet[0] = 0x10000001;
+    packet[1] = 0x5000000110000000ULL;
+    packet[2] = (u64)count | 0x1000000000008000ULL;
+    packet[3] = 0xE;
+    packet[4] = (u32)((count & 0xFFFF) | 0x30000000) | ((u64)(address & 0x0FFFFFFF) << 32);
+    packet[5] = 0x5000000100000000ULL;
+    packet[6] = 0x20000000;
+    packet[7] = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4678);
 
@@ -397,7 +406,16 @@ void func_002D4730(u64 *packet, s32 x, s32 y) {
     packet[9] = 5;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D47B8);
+void func_002D47B8(u64 *packet) {
+    packet[0] = 1;
+    packet[1] = 0x1A;
+    packet[2] = 1;
+    packet[3] = 0x46;
+    packet[4] = 0;
+    packet[5] = 0x45;
+    packet[6] = 0x4000000080ULL;
+    packet[7] = 0x3B;
+}
 
 extern void func_002D4678(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -774,7 +792,22 @@ void func_002D7988(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D79C0);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7A50);
+typedef struct SdfObjectList {
+    u8 pad00[4];
+    s16 count;
+    u8 pad06[6];
+    s32 *elements;
+} SdfObjectList;
+extern void sdfDestroyDevRequest(void *);
+
+void func_002D7A50(SdfObjectList **owner) {
+    s32 i;
+    for (i = 0; i < (*owner)->count; i++) {
+        func_002D7988((*owner)->elements[i]);
+    }
+    sdfDestroyDevRequest(*owner);
+    func_002CFF98(owner);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7AC8);
 
