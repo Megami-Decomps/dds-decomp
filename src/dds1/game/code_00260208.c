@@ -148,7 +148,7 @@ typedef struct MenuIconRef {
 
 extern void func_00119900(s32, s32);
 
-void func_00261FD8(MenuIconRef *refs) {
+void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     u32 i;
 
     for (i = 0; i < 3; i++) {
@@ -191,7 +191,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
 /* Apply item/icon rewards before awarding the party's accumulated gains. */
 void brsApplyRewardBundle(u32 partyWork, u32 rewardWork, u32 rewardState) {
-    func_00261FD8(rewardWork);
+    gstApplyCounterDeltaTable(rewardWork);
     gstApplyBundleMacca(rewardWork);
     brsApplyPartyRewards(partyWork, rewardState);
 }

@@ -585,6 +585,8 @@
 0x0029CA68	mnuCampDrawMenuIconLayer	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described campDrawMenuIconLayer behavior.
 0x0029CC90	mnuTitleDrawFadeMenuEntries	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleDrawFadeMenuEntries behavior.
 0x0029CD60	mnuTitleRenderFadeAndPanels	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleRenderFadeAndPanels behavior.
+0x0029CDF0	brsGetLevelStepForValue	inferred	byte-identical twin of DDS1 brsGetLevelStepForValue @ 0x265500: maps a value to the battle-result LevelStep whose threshold it reaches
+0x0029CE30	brsGetLevelStepCrossedBy	inferred	byte-identical twin of DDS1 brsGetLevelStepCrossedBy @ 0x265540: returns the LevelStep value whose threshold lies within (position, position+increment]
 0x0029D900	mnuTitleInitFourParameters	inferred	DDS1 has the same unprefixed symbol; game/code_0029BC58 uses mnu for the already-described titleInitFourParameters behavior.
 0x002A1480	movCheckStartupSoundState	inferred	Starts movie sound if idle; otherwise checks whether sound startup has completed.
 0x002A29D8	mnuResetSoundBuffer	inferred	Resets stream state fields D_00455D70[1,4] then releases the active buffer through func_002A2A00.
