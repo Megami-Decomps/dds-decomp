@@ -1295,11 +1295,15 @@
 0x002605C0	mnuStaffTickState	inferred	mnu 4-state counter returning next state
 0x00262050	ptyClampExp	inferred	legacy PartyUnit_ClampExpToLevel99Cap: clamps a unit's accumulated EXP to the level-99 cap
 0x00262148	brsApplyPartyRewards	inferred	legacy BattleResult_ApplyPartyRewardDeltas: applies EXP/level/profile deltas to a party row
+0x002622B0	brsApplyRewardBundle	inferred	legacy BattleResult_ApplyRewardBundle: applies the 3-entry counter-table helper, the row-macca helper, then brsApplyPartyRewards
+0x00262300	brsOpenSkillPackagePanel	inferred	legacy ProfileCapReward_OpenPendingSkillPackagePanel: builds the panel group/list entries and forwards the current row's profile-cap table byte
 0x00262418	mnuStaffInitPanel	inferred	mnu loads nr_sta01.spr resources and fades in
 0x00262570	brsMarkPartyRows	inferred	legacy BattleResult_MarkPartyRowsFromDeltaList: marks party rows from a delta list payload
+0x00262640	brsTaskLatchPendingRows	inferred	legacy BattleResultTask_LatchHasPendingFollowupRows: latches data_3bc529 from ctx+0x344
 0x00262660	brsCreateTaskContext	inferred	legacy BattleResultTask_CreateContextAndBuildRows: allocates the result task context and builds its rows
 0x00262818	mnuStaffCreateTasks	inferred	mnu creates the three staff roll tasks (405/2B15/5211 priorities)
 0x002628C8	mnuStaffDestroyTasks	inferred	mnu destroys the three staff roll tasks and marks state 1
+0x00262AC0	mnuRefreshSelectedUnitPanels	inferred	legacy LevelUpMenu_RefreshSelectedUnitPanels: refreshes the selected-unit stat/vital panel slots after a preview/restore change
 0x00262AF8	mnuStaffCopyPanelBlock	inferred	mnu copies a 0x1A4 byte panel block into work+0x9C
 0x00262BA8	mnuStaffPickRoll	inferred	mnu picks a table entry by a random byte
 0x00262C08	brsSelectLevelBonusMode	inferred	legacy LevelUpReward_SelectPostLevelBonusMode: writes ctx+0x1588 reward mode and ctx+0x158C random stat index

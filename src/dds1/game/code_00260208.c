@@ -182,7 +182,7 @@ void ptyClampExp(u32 *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
-void func_002622B0(u32 arg0, u32 arg1, u32 arg2) {
+void brsApplyRewardBundle(u32 arg0, u32 arg1, u32 arg2) {
     func_00261FD8(arg1);
     func_00262038(arg1);
     brsApplyPartyRewards(arg0, arg2);
@@ -196,7 +196,7 @@ extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void func_00287450(s32);
 extern void mnuForwardTableByte(s32);
 
-void func_00262300(s32 work) {
+void brsOpenSkillPackagePanel(s32 work) {
     s32 *group = (s32 *)(work + 0x4F8);
     s32 panel;
 
@@ -252,7 +252,7 @@ s32 mnuStaffInitPanel(s32 work) {
 
 extern s32 func_002716E8(s32, s32);
 extern s32 func_0027AF28(s32);
-extern void func_00262300(s32);
+extern void brsOpenSkillPackagePanel(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 func_002624C0(s32 work) {
@@ -276,7 +276,7 @@ s32 func_002624C0(s32 work) {
     if (func_0027AF28(work + 0xD1C) == 0) {
         return 1;
     }
-    func_00262300(work);
+    brsOpenSkillPackagePanel(work);
     *(s32 *)(work + 0x570) = 2;
     kwlnFadeOutStart(0, 0, 0, 15);
     return 0;
@@ -315,7 +315,7 @@ void func_00262600(u32 arg0, u32 arg1, u32 arg2) {
     brsMarkPartyRows(arg0, arg2, 1);
 }
 
-void func_00262640(s32 arg0) {
+void brsTaskLatchPendingRows(s32 arg0) {
     if (*(s32 *)(arg0 + 0x344) == 0) {
         D_003BC529 = 0;
     } else {
@@ -430,7 +430,7 @@ s32 func_00262A88(void) {
     return func_002877A8() != 1;
 }
 
-void func_00262AC0(u32 arg0, s32 menu) {
+void mnuRefreshSelectedUnitPanels(u32 arg0, s32 menu) {
     initPartyPanelSlots(menu + 0x574);
     menuUpdateHandleStates(menu + 0x680);
     func_00280048(menu + 0x680);

@@ -223,7 +223,7 @@ void mnuClearItemSelectionSlots(MenuItemScene *scene) {
 
 void func_00263E70(u32 arg0, u32 arg1) {
     ptyRecomputeMaxVitals(arg0, (s32)arg1 + 0x3d0);
-    func_00262AC0(arg0, arg1);
+    mnuRefreshSelectedUnitPanels(arg0, arg1);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);

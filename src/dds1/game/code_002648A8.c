@@ -18,7 +18,7 @@ typedef struct {
 
 extern void btlAddBaseStats(void *, SceneItem *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
-extern void func_00262AC0(SceneItem *, void *);
+extern void mnuRefreshSelectedUnitPanels(SceneItem *, void *);
 
 void kwlnItemUpdateDisplay(TitleItemScene *scene) {
     SceneItem *item = *scene->itemSlot;
@@ -42,5 +42,5 @@ void kwlnItemUpdateDisplay(TitleItemScene *scene) {
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     }
-    func_00262AC0(item, scene);
+    mnuRefreshSelectedUnitPanels(item, scene);
 }
