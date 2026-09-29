@@ -277,7 +277,32 @@ u32 func_0010D288(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpJumpIfFalse);
+u32 bfOpJumpIfFalse(ScrData *scr)
+{
+    s32 result;
+
+    switch (scr->stackTypes[scr->sp - 1]) {
+    case 0:
+    case 2:
+        result = bfStackPopInt(scr);
+        break;
+    case 1:
+    case 3:
+        result = (bfStackPopFloat(scr) != 0.0f);
+        break;
+    case 4:
+        result = 0;
+        break;
+    default:
+        result = 0;
+        break;
+    }
+    if (result != 0)
+        scr->pc++;
+    else
+        scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
 
