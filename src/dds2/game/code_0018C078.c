@@ -1,6 +1,9 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C078);
+void func_0018C078(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0018C088(u8 *work, f32 value) {
     *(f32 *)(work + 0x2C) = value;
@@ -65,9 +68,13 @@ void func_0018C108(void) {
 void func_0018C110(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C118);
+u32 func_0018C118(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C120);
+u32 func_0018C120(void) {
+    return 0;
+}
 
 void func_0018C128(void) {
 }
@@ -75,9 +82,13 @@ void func_0018C128(void) {
 void func_0018C130(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C138);
+u32 func_0018C138(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C140);
+u32 func_0018C140(void) {
+    return 0;
+}
 
 void func_0018C148(void) {
 }
@@ -91,9 +102,13 @@ void func_0018C158(void) {
 void func_0018C160(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C168);
+u32 func_0018C168(void) {
+    return 0x18;
+}
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C170);
+u32 func_0018C170(void) {
+    return 0;
+}
 
 void func_0018C178(void) {
 }
@@ -101,4 +116,6 @@ void func_0018C178(void) {
 void func_0018C180(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C188);
+u32 func_0018C188(void) {
+    return 0;
+}

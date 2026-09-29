@@ -26,6 +26,21 @@ typedef struct TextStream {
     s32 offset;      /* 0x18: current byte position */
 } TextStream;
 
+typedef struct SndReq {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    u8 unkC;
+    u8 unkD;
+    u8 unkE;
+    u8 unkF;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+} SndReq;
+
 s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
 extern u32 D_004528C0[];
@@ -136,7 +151,14 @@ void func_0019E800(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E848);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E8A0);
+extern s8 D_00436550;
+
+void func_0019E8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    s8 saved = D_00436550;
+    D_00436550 = 0;
+    func_0019E848(arg0, arg1, arg2, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6 & 0xFF, arg7, 0);
+    D_00436550 = saved;
+}
 
 u32 func_0019E8E0(u32 arg0) {
     return D_0043654C & arg0;
@@ -160,7 +182,24 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EC00);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EEE8);
+extern void func_0019EDC0();
+
+void func_0019EEE8(s32 arg0, s32 arg1) {
+    SndReq req;
+    req.unk0 = 0;
+    req.unk4 = 0;
+    req.unk8 = 0;
+    req.unkC = 0;
+    req.unkD = 0;
+    req.unkE = 0;
+    req.unkF = 0;
+    req.unk10 = arg0;
+    req.unk14 = arg1;
+    req.unk18 = 0;
+    req.unk1C = 1;
+    req.unk1D = 1;
+    func_0019EDC0(&req);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EF38);
 
@@ -213,7 +252,20 @@ void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F280);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F408);
+extern s32 func_0019F280();
+
+s32 func_0019F408(arg0, arg1, arg2, arg3, arg4, arg5)
+    s32 arg0;
+    s32 arg1;
+    s32 arg2;
+    s32 arg3;
+    s32 arg4;
+    s32 arg5;
+{
+    s32 handle = func_0019F280(arg0, arg1, arg2, arg3, arg4, 1, 0, arg5);
+    func_0019D058(handle, 3);
+    return handle;
+}
 
 void func_0019F448(void) {
     func_0019F408();
@@ -286,7 +338,32 @@ u32 func_001A0098(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A00B8);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A01D8);
+extern s32 func_003292A8(s32);
+extern u8 *sdfResourceRetainAddress(s32);
+extern void *memcpy(void *, const void *, u32);
+
+u8 *func_001A01D8(s32 payload, s32 count) {
+    s32 handle = func_003292A8((payload + 8) * (count + 1) + 4);
+    u8 *list = sdfResourceRetainAddress(handle);
+    u8 *node;
+    u8 *next;
+    s32 i = 0;
+    memcpy(list, &handle, 4);
+    list += 4;
+    node = list;
+    if (count > 0) {
+        do {
+            *(s32 *)node = i;
+            i++;
+            next = node + payload + 8;
+            *(u8 **)(node + 4) = next;
+            node = next;
+        } while (i < count);
+    }
+    *(s32 *)node = count;
+    *(u8 **)(node + 4) = list;
+    return list;
+}
 
 void *func_001A0278(MemNode *queue) {
     MemNode *head = queue->next;
@@ -329,7 +406,27 @@ void func_001A0338(void) {
     func_0032BB68(D_00438F24);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0350);
+extern s32 func_00305C40();
+
+void func_001A0350(void) {
+    s32 origin[4];
+    s32 color[4];
+    s16 width;
+    s16 height;
+    if (D_00438F24 != 0) {
+        width = *(s16 *)(D_00438F24 + 0xC);
+        height = *(s16 *)(D_00438F24 + 0xE);
+        origin[0] = 0;
+        origin[1] = 0;
+        origin[2] = width;
+        origin[3] = height;
+        color[0] = 0x80808080;
+        color[1] = 0x80808080;
+        color[2] = 0x80808080;
+        color[3] = 0x80808080;
+        func_00305C40(0, 0, 0, width * 0x10, height * 8, origin, color, 0, 0, 1, D_00438F24, 0x52);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A03D8);
 
@@ -506,9 +603,31 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1200);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1348);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1490);
+extern void *sdfAllocPacketAligned(s32);
+extern u8 *func_0033A290(void *, s32);
+extern void sdfAppendPacket();
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1508);
+void func_001A1490(void *list, s64 value, s32 flag) {
+    void *packet = sdfAllocPacketAligned(0x30);
+    u8 *command = func_0033A290(packet, 0x30);
+    *(s64 *)(command + 0x20) = value;
+    *(s64 *)(command + 0x28) = flag != 0 ? 0x48 : 0x47;
+    sdfAppendPacket(list, packet);
+}
+
+extern void *sdfAllocPacketAligned(s32);
+extern u8 *func_0033A290(void *, s32);
+extern void sdfAppendPacket();
+extern s64 D_003B4390[];
+
+void func_001A1508(void *list, s32 index, s32 flag) {
+    void *packet = sdfAllocPacketAligned(0x30);
+    u8 *command = func_0033A290(packet, 0x30);
+    s64 value = D_003B4390[index];
+    *(s64 *)(command + 0x20) = value;
+    *(s64 *)(command + 0x28) = flag != 0 ? 0x43 : 0x42;
+    sdfAppendPacket(list, packet, value);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1590);
 
