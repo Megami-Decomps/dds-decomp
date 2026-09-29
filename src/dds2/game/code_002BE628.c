@@ -1606,8 +1606,8 @@ u8 func_002C6480(void) {
     return D_00437C9C != 0;
 }
 
-void func_002C6490(s32 arg0) {
-    if (arg0 == 0) {
+void func_002C6490(s32 enabled) {
+    if (enabled == 0) {
         D_00457EB0.flag = 0;
     } else {
         D_00457EB0.flag = 1;
@@ -1622,8 +1622,9 @@ u32 func_002C64C8(void) {
     return D_00457EB0.slot[0].modelId;
 }
 
-void evtStageTestSetEntryIndex(s32 arg0, s32 value) {
-    s32 index = arg0 & 0xFFFF;
+/* Clamp the motion selector to the loaded model's available motions. */
+void evtStageTestSetEntryIndex(s32 encodedIndex, s32 value) {
+    s32 index = encodedIndex & 0xFFFF;
 
     if (value < 0) {
         value = 0;
@@ -1635,8 +1636,9 @@ void evtStageTestSetEntryIndex(s32 arg0, s32 value) {
     func_002C6E20(-1);
 }
 
-void evtStageTestAddEntryValue(s32 arg0, f32 delta) {
-    s32 index = arg0 & 0xFFFF;
+/* Advance the selected entry's animation frame and request a stage refresh. */
+void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
+    s32 index = encodedIndex & 0xFFFF;
     StageTestEntry *entry;
 
     if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)D_00457EB0.entries))->frame - delta < 0.0f) {

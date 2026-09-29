@@ -443,17 +443,18 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129940);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129B40);
 
-void func_00129CC0(u32 *args) {
+/* Handle a field request, creating the player only in non-special scene states. */
+void func_00129CC0(u32 *request) {
     s32 state;
-    func_001295E0((FldActionSpawn *)args[4], args[3]);
+    func_001295E0((FldActionSpawn *)request[4], request[3]);
     state = D_00389770[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    func_00128FE8(args[1], args[0], 0);
-    D_00389770[1] = ((u32 *)args[2])[1];
+    func_00128FE8(request[1], request[0], 0);
+    D_00389770[1] = ((u32 *)request[2])[1];
 }
 
-void func_00129D40(u32 *arg0) {
-    func_00128FE8(arg0[1], *arg0, 1);
+void func_00129D40(u32 *request) {
+    func_00128FE8(request[1], *request, 1);
 }
 
 s32 func_00129D60(s32 arg0) {
@@ -487,6 +488,7 @@ void func_00129D68(u32 *table, u32 base, u8 *data, s32 size) {
     }
 }
 
+/* Relocate the words described by this packed-resource transfer chunk. */
 void func_00129E50(u32 buffer, FldTransferChunk *chunk) {
     sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }

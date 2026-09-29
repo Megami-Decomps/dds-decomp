@@ -242,13 +242,14 @@ void func_001C80C0(void) {
 void func_001C80C8(void) {
 }
 
-void func_001C80D0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+/* Submit a scene object at fixed-point screen coordinates and retire its handle. */
+void func_001C80D0(s32 x, s32 y, u64 first, u64 second) {
+    u64 handle;
 
     func_0019B8B0(0x13);
-    temp_v0 = func_0019F5E8(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_0019D550(temp_v0, 1, 0x53);
-    func_0019C5B0(temp_v0);
+    handle = func_0019F5E8(x << 4, y << 3, 0, first, second, 0);
+    func_0019D550(handle, 1, 0x53);
+    func_0019C5B0(handle);
     func_0019B8B0(0xffffffffffffffff);
 }
 
@@ -286,6 +287,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8518);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8768);
 
+/* Pack available roster IDs and their values into consecutive byte pairs. */
 void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     u8 *roster;
     RosterAvailability *availability;
@@ -310,13 +312,14 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     *count = found;
 }
 
-char *func_001C8A28(s32 object, s16 *value) {
-    s32 cached = D_004367C0;
-    if (cached == 0) {
-        cached = func_001AC750(*(s32 *)(*(s32 *)(object + 0x2C) + 0x18), D_003B5D10);
-        D_004367C0 = cached;
+/* Cache the resolved entry ID while returning the shared name buffer. */
+char *func_001C8A28(s32 object, s16 *outId) {
+    s32 cachedId = D_004367C0;
+    if (cachedId == 0) {
+        cachedId = func_001AC750(*(s32 *)(*(s32 *)(object + 0x2C) + 0x18), D_003B5D10);
+        D_004367C0 = cachedId;
     }
-    *value = cached;
+    *outId = cachedId;
     return D_003B5D10;
 }
 

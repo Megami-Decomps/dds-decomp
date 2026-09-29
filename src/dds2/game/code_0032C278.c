@@ -295,19 +295,20 @@ s32 sdfGetPacketCursor(void) {
     return D_00438A10;
 }
 
-void sdfSetPacketCursorAligned(s32 arg0) {
-    D_00438A10 = (arg0 + 0xF) & ~0xF;
+void sdfSetPacketCursorAligned(s32 cursor) {
+    D_00438A10 = (cursor + 0xF) & ~0xF;
 }
 
-void sdfResetPacketList(SdfListHead *arg0) {
-    arg0->unkC = 0xFFFF;
-    arg0->unk0 = 0;
-    arg0->first = 0;
-    arg0->last = 0;
-    arg0->unk10 = 0;
-    arg0->unk14 = 0;
-    arg0->unk18 = 0;
-    arg0->unk1C = 0;
+/* Clear all links and metadata before building a new packet list. */
+void sdfResetPacketList(SdfListHead *list) {
+    list->unkC = 0xFFFF;
+    list->unk0 = 0;
+    list->first = 0;
+    list->last = 0;
+    list->unk10 = 0;
+    list->unk14 = 0;
+    list->unk18 = 0;
+    list->unk1C = 0;
 }
 
 /* Link the previous DMA packet to this packet with a NEXT tag. */
@@ -426,19 +427,20 @@ s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D0F0);
 
-u32 func_0032D168(u32 arg0) {
-    SdfDmaNode *temp = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
-    SdfDmaSrc *src = (SdfDmaSrc *)arg0;
-    u64 id = src->unk0;
-    u32 addr = ((u32)src + 0x10) & 0x0FFFFFFF;
-    s64 shifted = (s64)addr << 32;
+/* Make a REF DMA node for the payload following the source tag. */
+u32 func_0032D168(u32 source) {
+    SdfDmaNode *node = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    SdfDmaSrc *src = (SdfDmaSrc *)source;
+    u64 tag = src->unk0;
+    u32 address = ((u32)src + 0x10) & 0x0FFFFFFF;
+    s64 shifted = (s64)address << 32;
 
-    id |= 0x30000000;
-    id |= shifted;
-    temp->unk0 = id;
-    temp->unk10 = 0;
-    temp->unk8 = src->unk8;
-    return (u32)temp;
+    tag |= 0x30000000;
+    tag |= shifted;
+    node->unk0 = tag;
+    node->unk10 = 0;
+    node->unk8 = src->unk8;
+    return (u32)node;
 }
 
 /* Create a reference node and patch the preceding DMA NEXT tag to point at it. */

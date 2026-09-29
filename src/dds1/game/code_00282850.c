@@ -1254,8 +1254,8 @@ u8 func_00286F48(void) {
     return D_003BC7B4 != 0;
 }
 
-void func_00286F58(s32 arg0) {
-    if (arg0 == 0) {
+void func_00286F58(s32 enabled) {
+    if (enabled == 0) {
         D_003DC5E8.flag = 0;
     } else {
         D_003DC5E8.flag = 1;
@@ -1270,9 +1270,9 @@ u32 func_00286F90(void) {
     return D_003DC5E8.slot[0].modelId;
 }
 
-void stageTestSetEntryIndex(s32 arg0, s32 value) {
-    s32 index = arg0 & 0xFFFF;
-
+/* Clamp the motion selector to the loaded model's available motions. */
+void stageTestSetEntryIndex(s32 encodedIndex, s32 value) {
+    s32 index = encodedIndex & 0xFFFF;
     if (value < 0) {
         value = 0;
     }
@@ -1283,8 +1283,9 @@ void stageTestSetEntryIndex(s32 arg0, s32 value) {
     func_002878D8(-1);
 }
 
-void stageTestAddEntryValue(s32 arg0, f32 delta) {
-    s32 index = arg0 & 0xFFFF;
+/* Advance the selected entry's animation frame and request a stage refresh. */
+void stageTestAddEntryValue(s32 encodedIndex, f32 delta) {
+    s32 index = encodedIndex & 0xFFFF;
     StageTestEntry *entry;
 
     if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)D_003DC5E8.entries))->frame - delta < 0.0f) {
@@ -1317,24 +1318,24 @@ void func_00287138(s32 index, s32 dx, s32 dy, s32 dz) {
     entry->rotation[2] = z;
 }
 
-u8 func_00287198(s32 arg0) {
-    return D_003DC5E8.entries[arg0 & 0xffff].motionIndex;
+u8 func_00287198(s32 encodedIndex) {
+    return D_003DC5E8.entries[encodedIndex & 0xffff].motionIndex;
 }
 
-f32 func_002871C0(s32 arg0) {
-    return D_003DC5E8.entries[arg0 & 0xffff].frame;
+f32 func_002871C0(s32 encodedIndex) {
+    return D_003DC5E8.entries[encodedIndex & 0xffff].frame;
 }
 
-void func_002871E8(s32 arg0, f32 *arg1) {
-    arg1[0] = D_003DC5E8.entries[arg0 & 0xffff].position[0];
-    arg1[1] = D_003DC5E8.entries[arg0 & 0xffff].position[1];
-    arg1[2] = D_003DC5E8.entries[arg0 & 0xffff].position[2];
+void func_002871E8(s32 encodedIndex, f32 *out) {
+    out[0] = D_003DC5E8.entries[encodedIndex & 0xffff].position[0];
+    out[1] = D_003DC5E8.entries[encodedIndex & 0xffff].position[1];
+    out[2] = D_003DC5E8.entries[encodedIndex & 0xffff].position[2];
 }
 
-void func_00287220(s32 arg0, f32 *arg1) {
-    arg1[0] = D_003DC5E8.entries[arg0 & 0xffff].rotation[0];
-    arg1[1] = D_003DC5E8.entries[arg0 & 0xffff].rotation[1];
-    arg1[2] = D_003DC5E8.entries[arg0 & 0xffff].rotation[2];
+void func_00287220(s32 encodedIndex, f32 *out) {
+    out[0] = D_003DC5E8.entries[encodedIndex & 0xffff].rotation[0];
+    out[1] = D_003DC5E8.entries[encodedIndex & 0xffff].rotation[1];
+    out[2] = D_003DC5E8.entries[encodedIndex & 0xffff].rotation[2];
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287258);
