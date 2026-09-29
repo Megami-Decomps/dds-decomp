@@ -103,7 +103,7 @@ u32 func_00269C48(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269C50);
 
-s64 func_00269E98(u64 item) {
+s64 func_00269E98(u64 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
@@ -116,7 +116,7 @@ s64 func_00269E98(u64 item) {
     func_00268EC8(state);
     func_00268B48(state);
     return func_002C4038((s32)dispatchState->dispatchWork,
-                         &dispatchState->dispatchStatus, 1, item);
+                         &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBSetupDispatchSync(s32 request) {
@@ -179,7 +179,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A258);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A2E0);
 
-void func_0026A3F8(s32 item) {
+void func_0026A3F8(s32 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -188,7 +188,7 @@ void func_0026A3F8(s32 item) {
     func_00268EC8(state);
     func_00268B48(state);
     func_002C4038((s32)dispatchState->dispatchWork,
-                  &dispatchState->dispatchStatus, 1, item);
+                  &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBSetupDispatchSyncC(s32 request) {
@@ -206,7 +206,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A598);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A728);
 
-void func_0026A808(s32 item) {
+void func_0026A808(s32 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -218,7 +218,7 @@ void func_0026A808(s32 item) {
         func_0026A728(1, state);
     }
     func_002C4038((s32)dispatchState->dispatchWork,
-                  &dispatchState->dispatchStatus, 1, item);
+                  &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBSetupDispatchSyncD(s32 request) {
@@ -295,6 +295,8 @@ extern char D_003CE848[];
 
 extern void func_002680E0(s32);
 
+/* Dispatch completion waits for the fade and pending resource/graph work;
+ * keep the request outstanding until that barrier has drained. */
 s64 evtPollDispatchAfterFade(u64 request) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
     s32 *dispatch = &state->dispatchStatus;
@@ -326,7 +328,7 @@ extern void func_00268EC8(s32);
 
 extern void func_00268B48(s32);
 
-void func_0026AC90(s32 item) {
+void func_0026AC90(s32 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -335,7 +337,7 @@ void func_0026AC90(s32 item) {
     func_00268EC8(state);
     func_00268B48(state);
     func_002C4038((s32)dispatchState->dispatchWork,
-                  &dispatchState->dispatchStatus, 1, item);
+                  &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBDispatchSync(s32 request) {
@@ -366,7 +368,7 @@ u32 func_0026ADC0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026ADC8);
 
-void func_0026AEB0(s32 item) {
+void func_0026AEB0(s32 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -375,7 +377,7 @@ void func_0026AEB0(s32 item) {
     func_00268EC8(state);
     func_00268B48(state);
     func_002C4038((s32)dispatchState->dispatchWork,
-                  &dispatchState->dispatchStatus, 1, item);
+                  &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBSetupDispatchSyncF(s32 request) {
@@ -417,7 +419,7 @@ s64 evtPollDispatchStatus(u64 request) {
     return result;
 }
 
-void func_0026B068(s32 item) {
+void func_0026B068(s32 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -426,7 +428,7 @@ void func_0026B068(s32 item) {
     func_00268EC8(state);
     func_00268B48(state);
     func_002C4038((s32)dispatchState->dispatchWork,
-                  &dispatchState->dispatchStatus, 1, item);
+                  &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBSetupDispatchSyncG(s32 request) {
@@ -456,7 +458,7 @@ s32 func_0026B1C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B260);
 
-void evtBDispatchSyncD2(s32 item) {
+void evtBDispatchSyncD2(s32 request) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
@@ -472,7 +474,7 @@ void evtBDispatchSyncD2(s32 item) {
     }
     func_00268B48(state);
     func_002C4038((s32)dispatchState->dispatchWork,
-                  &dispatchState->dispatchStatus, 1, item);
+                  &dispatchState->dispatchStatus, 1, request);
 }
 
 void evtBDispatchSyncB(s32 request) {

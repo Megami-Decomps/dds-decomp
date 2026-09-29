@@ -1009,24 +1009,24 @@ u32 func_0020A070(void) {
 }
 
 u32 func_0020A0A0(void) {
-    u16 temp_v0;
-    s32 temp_v1;
+    u16 value;
+    s32 context;
 
-    temp_v1 = func_0010D8D0();
-    temp_v0 = func_0010D650(0);
-    *(u16 *)(*(s32 *)(temp_v1 + 0x18) + 0x122) = temp_v0;
+    context = func_0010D8D0();
+    value = func_0010D650(0);
+    *(u16 *)(*(s32 *)(context + 0x18) + 0x122) = value;
     return 1;
 }
 
 u32 func_0020A0E0(void) {
-    s32 temp_v0;
-    s16 temp_v1;
+    s32 battle;
+    s16 value;
 
-    temp_v0 = func_001AA6F8();
+    battle = func_001AA6F8();
     func_0010D8D0();
-    temp_v1 = func_0010D650(0);
-    *(u8 *)(temp_v0 + 0x282) = 4;
-    *(s32 *)(temp_v0 + 0x2A4) = temp_v1;
+    value = func_0010D650(0);
+    *(u8 *)(battle + 0x282) = 4;
+    *(s32 *)(battle + 0x2A4) = value;
     return 1;
 }
 
@@ -1417,10 +1417,10 @@ s32 func_0020B020(void) {
 }
 
 u32 func_0020B0B0(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, *(s32 *)(temp_v0 + 0x18), 0x8800000) != 0) {
+    context = func_0010D8D0();
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0x8800000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1429,10 +1429,10 @@ u32 func_0020B0B0(void) {
 }
 
 u32 func_0020B100(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, *(s32 *)(temp_v0 + 0x18), 0xB000000) != 0) {
+    context = func_0010D8D0();
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0xB000000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1441,10 +1441,10 @@ u32 func_0020B100(void) {
 }
 
 u32 func_0020B150(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, *(s32 *)(temp_v0 + 0x18), 0xB800000) != 0) {
+    context = func_0010D8D0();
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0xB800000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1949,26 +1949,26 @@ s32 func_0020C4A0(void) {
 }
 
 u32 func_0020C4E0(void) {
-    u64 temp_v0;
+    u64 result;
 
-    temp_v0 = func_001B76F0();
-    func_0010D818(temp_v0);
+    result = func_001B76F0();
+    func_0010D818(result);
     return 1;
 }
 
 u32 func_0020C508(void) {
-    s32 temp_v0;
+    s32 battle;
 
-    temp_v0 = func_001AA6F8();
-    func_0010D818(*(u32 *)(temp_v0 + 0x274));
+    battle = func_001AA6F8();
+    func_0010D818(*(u32 *)(battle + 0x274));
     return 1;
 }
 
 u32 func_0020C530(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    func_0010D818(*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 0x134));
+    context = func_0010D8D0();
+    func_0010D818(*(u16 *)(*(s32 *)(context + 0x18) + 0x134));
     return 1;
 }
 
@@ -1981,42 +1981,42 @@ u32 func_0020C568(void) {
 }
 
 u32 func_0020C570(void) {
-    u32 temp_v0;
+    u32 active;
 
-    temp_v0 = btlGetEffectActive();
-    func_0010D818(temp_v0);
+    active = btlGetEffectActive();
+    func_0010D818(active);
     return 1;
 }
 
 u32 func_0020C598(void) {
-    u64 temp_v0;
+    u64 result;
 
-    temp_v0 = func_00220958();
-    func_0010D818(temp_v0);
+    result = func_00220958();
+    func_0010D818(result);
     return 1;
 }
 
 u32 func_0020C5C0(void) {
-    s32 temp_v0;
+    s32 battle;
 
-    temp_v0 = func_001AA6F8();
-    func_0010D818(*(u16 *)(temp_v0 + 0x280));
+    battle = func_001AA6F8();
+    func_0010D818(*(u16 *)(battle + 0x280));
     return 1;
 }
 
 u32 func_0020C5E8(void) {
-    u32 temp_v0;
+    u32 value;
 
-    temp_v0 = btlGetEffectValue();
-    func_0010D818(temp_v0);
+    value = btlGetEffectValue();
+    func_0010D818(value);
     return 1;
 }
 
 u32 func_0020C610(void) {
-    u32 temp_v0;
+    u32 mode;
 
-    temp_v0 = btlGetSubtaskTargetMode();
-    func_0010D818(temp_v0);
+    mode = btlGetSubtaskTargetMode();
+    func_0010D818(mode);
     return 1;
 }
 

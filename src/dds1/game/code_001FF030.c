@@ -160,7 +160,7 @@ typedef struct BtlState {
     BtlTask *tasks;
     BtlUnit *units;
     u8 unk_22C[0x20];
-    u16 unk_24C;
+    u16 mode;
     u8 unk_24E[0x446];
     struct BattleEffectState *effect;
     u8 unk_698[0xC];
@@ -1317,22 +1317,22 @@ void func_00204BA8(u8 *unit, u8 *command) {
 }
 
 s32 func_00204C88(void) {
-    u8 *battle = (u8 *)func_001A17F0();
-    u8 *unit;
-    if (*(u16 *)(battle + 0x24c) != 2) {
+    BtlState *battle = (BtlState *)func_001A17F0();
+    BtlUnit *unit;
+    if (battle->mode != 2) {
         return -1;
     }
-    unit = *(u8 **)(battle + 0x228);
+    unit = battle->units;
     while (unit != 0) {
-        if (*(u32 *)(unit + 0x110) & 1) {
-            if (*(u16 *)(unit + 0x124) == 0x104) {
-                u16 status = *(u16 *)(unit + 0x120);
-                if (status & 0x2000) {
-                    *(u16 *)(unit + 0x120) = status & ~0x2000;
+        if (unit->flags & 1) {
+            if (unit->mode == 0x104) {
+                u16 entryFlags = unit->unk_120;
+                if (entryFlags & 0x2000) {
+                    unit->unk_120 = entryFlags & ~0x2000;
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = unit->next;
     }
     return -1;
 }

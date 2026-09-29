@@ -4362,10 +4362,10 @@ void effPcpPairedEventGroupRelease(EffPCPEventPairGroup *work) {
 
 typedef struct EffPCPSlot20 {
     u8 pad00[0xC];
-    f32 unk0C;
-    f32 unk10;
+    f32 phase;
+    f32 speed;
     u32 unk14;
-    f32 unk18;
+    f32 spin;
     u8 pad1C[4];
 } EffPCPSlot20;
 
@@ -4373,9 +4373,9 @@ typedef struct EffPCPSlotWork {
     u8 pad00[0x18];
     u32 count;
     u8 pad1C[0xC];
-    f32 unk28;
+    f32 baseSpeed;
     f32 spreadA;
-    f32 unk30;
+    f32 baseSpin;
     f32 spreadB;
     u8 pad38[0x54];
     EffPCPSlot20 *slots;
@@ -4388,15 +4388,15 @@ void func_00182FC8(EffPCPSlotWork *work, s32 index) {
     f32 spread;
 
     slot = &work->slots[index];
-    slot->unk0C = (3.14159265f * 2.0f) / work->count * index;
+    slot->phase = (3.14159265f * 2.0f) / work->count * index;
     spread = work->spreadA;
-    slot->unk10 = work->unk28 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
+    slot->speed = work->baseSpeed * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
     spread = work->spreadB;
     slot->unk14 = 0;
     if (effMiscRand(D_0034DF38) & 1) {
-        slot->unk18 = work->unk30 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
+        slot->spin = work->baseSpin * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
     } else {
-        slot->unk18 = -work->unk30 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
+        slot->spin = -work->baseSpin * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
     }
 }
 

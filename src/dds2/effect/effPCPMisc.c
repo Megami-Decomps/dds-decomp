@@ -4403,10 +4403,10 @@ void effPcpPairedEventGroupRelease(EffPCPEventPairGroup *work) {
 
 typedef struct EffPCPSlot20 {
     u8 pad00[0xC];
-    f32 unk0C;
-    f32 unk10;
+    f32 phase;
+    f32 speed;
     u32 unk14;
-    f32 unk18;
+    f32 spin;
     u8 pad1C[4];
 } EffPCPSlot20;
 
@@ -4414,9 +4414,9 @@ typedef struct EffPCPSlotWork {
     u8 pad00[0x18];
     u32 count;
     u8 pad1C[0xC];
-    f32 unk28;
+    f32 baseSpeed;
     f32 spreadA;
-    f32 unk30;
+    f32 baseSpin;
     f32 spreadB;
     u8 pad38[0x54];
     EffPCPSlot20 *slots;
@@ -4429,15 +4429,15 @@ void func_0018AC20(EffPCPSlotWork *work, s32 index) {
     f32 spread;
 
     slot = &work->slots[index];
-    slot->unk0C = (3.14159265f * 2.0f) / work->count * index;
+    slot->phase = (3.14159265f * 2.0f) / work->count * index;
     spread = work->spreadA;
-    slot->unk10 = work->unk28 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    slot->speed = work->baseSpeed * (func_00341240(D_003AA868) * spread + (1.0f - spread));
     spread = work->spreadB;
     slot->unk14 = 0;
     if (effMiscRand(D_003AA868) & 1) {
-        slot->unk18 = work->unk30 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+        slot->spin = work->baseSpin * (func_00341240(D_003AA868) * spread + (1.0f - spread));
     } else {
-        slot->unk18 = -work->unk30 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+        slot->spin = -work->baseSpin * (func_00341240(D_003AA868) * spread + (1.0f - spread));
     }
 }
 
@@ -4530,28 +4530,44 @@ void func_0018BC28(void *data) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BC90);
 
-void effDestroyParticleEvents(u8 *work) {
+/* Fixed-stride event entries retained by the particle effect work. */
+typedef struct {
+    u8 pad00[0x1C];
+    void *event;
+} EffPCPEventEntry32;
+
+typedef struct {
+    u8 pad00[0x1C];
+    EffPCPEventEntry32 *entries;
+    u32 handle;
+    EffPCPEventOwner *owner;
+    u32 resource;
+    u8 pad2C[0xC];
+    u32 count;
+} EffPCPEventWork32;
+
+void effDestroyParticleEvents(EffPCPEventWork32 *work) {
     u32 i = 0;
     u32 count;
-    u8 *entry;
+    EffPCPEventEntry32 *entry;
 
-    func_0016A620(*(u32 *)(work + 0x28));
-    count = *(u32 *)(work + 0x38);
-    entry = *(u8 **)(work + 0x1C);
+    func_0016A620(work->resource);
+    count = work->count;
+    entry = work->entries;
     if (count != 0) {
         do {
-            u32 event = *(u32 *)(entry + 0x1C);
-            entry += 0x20;
+            u32 event = (u32)entry->event;
+            entry++;
             if (event != 0) {
                 effEventReleaseNode((void *)event);
             }
             i++;
         } while (i < count);
     }
-    if (((EffPCPEventOwner *)*(u32 *)(work + 0x24))->active == 0) {
-        func_00197D50(*(u32 *)(work + 0x24));
+    if (work->owner->active == 0) {
+        func_00197D50(work->owner);
     }
-    func_003297C8(*(u32 *)(work + 0x20));
+    func_003297C8(work->handle);
     func_00328E48(work);
 }
 

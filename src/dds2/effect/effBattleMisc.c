@@ -1,5 +1,16 @@
 #include "common.h"
 
+/* The effect's owner selects one of the battle flag groups at offset 0x110. */
+typedef struct {
+    u8 pad00[0x110];
+    u32 flags;
+} EffBattleMiscCtx;
+
+typedef struct {
+    u8 pad00;
+    u8 value;
+} EffBattleMiscParam;
+
 extern s32 func_00169440(void);
 
 extern s32 func_00169438(void);
@@ -27,23 +38,21 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001697D0);
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169A78);
 
 void func_00169C58(u32 unused, u32 value) {
-    s32 actor;
+    EffBattleMiscCtx *owner = (EffBattleMiscCtx *)func_00169438();
 
-    actor = func_00169438();
-    func_00169A78(*(u32 *)(actor + 0x110) & 0xe00, value);
+    func_00169A78(owner->flags & 0xe00, value);
 }
 
 void func_00169C88(u32 unused, u32 value) {
-    s32 actor;
+    EffBattleMiscCtx *owner = (EffBattleMiscCtx *)func_00169440();
 
-    actor = func_00169440();
-    func_00169A78(*(u32 *)(actor + 0x110) & 0xe00, value);
+    func_00169A78(owner->flags & 0xe00, value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169CB8);
 
-void effBattleMiscApplyParamByte(u32 arg0, s32 arg1) {
-    func_001E31F0(arg0, *(u8 *)(arg1 + 1));
+void effBattleMiscApplyParamByte(u32 owner, EffBattleMiscParam *param) {
+    func_001E31F0(owner, param->value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169EA0);
@@ -52,6 +61,6 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169F68);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169FF0);
 
-u32 effBattleMiscGetTableEntry(s32 arg0) {
-    return D_003AB050[arg0];
+u32 effBattleMiscGetTableEntry(s32 index) {
+    return D_003AB050[index];
 }
