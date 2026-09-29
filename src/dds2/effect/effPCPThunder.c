@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -25,7 +26,13 @@ typedef struct {
 
 /* 0x20-byte sub-element holding a handle released by func_0015B8B8. */
 typedef struct {
-    u8 pad00[0x1C]; /* 0x00 */
+    u8 pad00[0x04]; /* 0x00 */
+    f32 f04;        /* 0x04 */
+    f32 f08;        /* 0x08 */
+    f32 f0C;        /* 0x0C */
+    f32 f10;        /* 0x10 */
+    f32 f14;        /* 0x14 */
+    f32 f18;        /* 0x18 */
     u32 handle1C;   /* 0x1C released by func_0015B8B8 */
 } EffThunderSub; /* 0x20 */
 
@@ -52,7 +59,16 @@ typedef struct {
     u32 unk60;      /* 0x60 handle released by func_0015B8B8/func_002D0918 */
     u32 unk64;      /* 0x64 handle released by func_002D0918 */
     s32 subElementCount; /* 0x68 */
-    u8 pad6C[0x38]; /* 0x6C */
+    u8 pad6C[0x14]; /* 0x6C */
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    f32 unk8C;
+    f32 unk90;
+    u8 pad94[0x04];
+    f32 unk98;
+    f32 unk9C;
+    u8 padA0[0x04];
     EffThunderSub *subElements; /* 0xA4 */
     u32 unkA8;      /* 0xA8 settable param */
     u32 unkAC;      /* 0xAC handle released by func_002D0918 */
@@ -85,7 +101,9 @@ void func_0016B130(EffPCPThunderWorkB *work) {
     func_003297C8(work->unk60);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B160);
+void func_0016B160(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016B170(EffPCPThunderWorkB *work, u32 value) {
     work->unk50 = value;
@@ -126,7 +144,9 @@ void func_0016BC78(void) {
     func_0016BA68();
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016BC90);
+void func_0016BC90(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016BCA0(EffPCPThunderWorkB *work, u32 value) {
     work->unk50 = value;
@@ -153,7 +173,9 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C490);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", effThunderDestroySubs);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C6F0);
+void func_0016C6F0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016C700(EffPCPThunderWorkB *work, u32 value) {
     work->unkA8 = value;
@@ -255,7 +277,9 @@ void func_0016E748(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x54));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E778);
+void func_0016E778(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0016E788(EffPCPThunderWorkB *work, u32 value) {
     work->unk4C = value;

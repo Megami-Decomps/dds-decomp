@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 D_00436530;
 
@@ -15,6 +16,10 @@ typedef struct EffEventNode {
     u32 state;
     u32 resource;
 } EffEventNode;
+
+extern void func_00198710();
+
+extern u8 D_003B2D20[];
 
 void effEventReleaseNode(EffEventNode *node) {
     func_001686F0(node->resource);
@@ -75,7 +80,9 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00198D00);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00199118);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00199C50);
+void func_00199C50(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00199C60(s32 context, u8 flag) {
     *(u8 *)(context + 0x80) = flag;
@@ -85,7 +92,9 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00199C68);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00199D48);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00199E68);
+void func_00199E68(void) {
+    func_00198710(D_003B2D20);
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00199E88);
 

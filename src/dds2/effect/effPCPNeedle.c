@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -28,7 +29,9 @@ void func_0017E068(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_0017E080);
 
-INCLUDE_ASM(const s32, "effect/effPCPNeedle", effPCPNeedleCopyVector);
+void effPCPNeedleCopyVector(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0017E668(EffPCPNeedleWork *work) {
     func_0017ED50(work->resource6C);

@@ -75,7 +75,9 @@ struct BattleUnit {
     u32 stateFlags;
     u8 pad118[0xC];
     u16 mode;
-    u8 pad126[0x21A];
+    u8 pad126[8];
+    u16 conditionFlags;
+    u8 pad130[0x210];
     BattleNamedResource *namedResource;
     u8 pad344[0x20];
     BattleUnit *nextActor;
@@ -1498,9 +1500,9 @@ s32 func_00218980(s32 battler, s32 action, s32 defaultValue) {
 extern s32 func_001B24C0(u8 *);
 
 s32 btlIsUnitListReady(void) {
-    u8 *unit;
-    for (unit = *(u8 **)(func_001AA6F8() + 0x24C); unit != 0; unit = *(u8 **)(unit + 0x364)) {
-        u32 flags = *(u32 *)(unit + 0x110);
+    BattleUnit *unit;
+    for (unit = ((BattleWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
+        u32 flags = unit->flags;
         if (!(flags & 1)) {
             continue;
         }
@@ -1510,15 +1512,15 @@ s32 btlIsUnitListReady(void) {
         if (flags & 0xE0) {
             continue;
         }
-        if (*(u16 *)(unit + 0x12E) != 0) {
+        if (unit->conditionFlags != 0) {
             continue;
         }
         if (!(flags & 0x1000)) {
-            if (func_001B24C0(unit) != 0) {
+            if (func_001B24C0((u8 *)unit) != 0) {
                 continue;
             }
         }
-        if (*(u16 *)(unit + 0x124) == 1) {
+        if (unit->mode == 1) {
             break;
         }
     }
@@ -1542,11 +1544,18 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00218BA8);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218D00);
 
-s32 func_00218D88(s32 record) {
-    if ((*(u32 *)(record + 8) & 8) == 0) {
+typedef struct BattleActionRecord {
+    u8 pad0[8];
+    u32 flags;
+    u8 padC[0xC];
+    BattleUnit *unit;
+} BattleActionRecord;
+
+s32 func_00218D88(BattleActionRecord *record) {
+    if ((record->flags & 8) == 0) {
         return -1;
     }
-    return **(u32 **)(func_001AA6F8() + 0x718) == *(u32 *)(record + 0x18) ? 12 : -1;
+    return **(u32 **)(func_001AA6F8() + 0x718) == (u32)record->unit ? 12 : -1;
 }
 
 extern u8 *func_001E66D8(void);
@@ -1559,19 +1568,19 @@ extern u8 *btlCreateEffObjB(s32, s32);
 
 extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
-s32 func_00218DE0(u8 *arg0) {
+s32 func_00218DE0(BattleActionRecord *record) {
     u8 *task;
-    if (!(*(u32 *)(arg0 + 8) & 8)) {
+    if (!(record->flags & 8)) {
         return -1;
     }
-    if (**(s32 **)(func_001AA6F8() + 0x718) != *(s32 *)(arg0 + 0x18)) {
+    if (**(s32 **)(func_001AA6F8() + 0x718) != (s32)record->unit) {
         return -1;
     }
     btlStartTask(func_001E66D8());
     btlStartTask(func_001E6740());
-    btlStartTask(btlCreateCommandSoundTask(arg0, 9));
-    btlStartTask(btlCreateEffObjB(*(s32 *)(arg0 + 0x18), 0xD8));
-    task = fldCreateSceneGroupAction(arg0, 0x64, 1);
+    btlStartTask(btlCreateCommandSoundTask((u8 *)record, 9));
+    btlStartTask(btlCreateEffObjB((s32)record->unit, 0xD8));
+    task = fldCreateSceneGroupAction((u8 *)record, 0x64, 1);
     *(s32 *)(task + 0x28) = 0x16;
     btlStartTask(task);
     return 0x1B;
@@ -1609,13 +1618,13 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002190A0);
 
 extern u8 *sndCreateStationedSeTask(s32);
 
-void func_00219170(u8 *fx, u64 owner, s32 arg2) {
-    u8 *unit;
+void func_00219170(BattleActionRecord *record, u64 owner, s32 arg2) {
+    BattleUnit *unit;
     u8 *task;
-    if (*(u32 *)(fx + 8) & 8) {
-        unit = *(u8 **)(fx + 0x18);
-        if (*(u32 *)(unit + 0x110) & 0x400) {
-            if (*(u16 *)(unit + 0x124) == 0x108) {
+    if (record->flags & 8) {
+        unit = record->unit;
+        if (unit->flags & 0x400) {
+            if (unit->mode == 0x108) {
                 task = sndCreateStationedSeTask(*(s32 *)(func_001AA6F8() + 0x208) + 6);
                 *(u64 *)(task + 8) = owner;
                 task[0] = 4;

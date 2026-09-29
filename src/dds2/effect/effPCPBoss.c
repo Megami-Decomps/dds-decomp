@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -32,9 +33,19 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C788);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C820);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D210);
+void func_0018D210(dst, src)
+    void *dst;
+    void *src;
+{
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D220);
+void func_0018D220(arg0, arg1)
+    s32 arg0;
+    u32 arg1;
+{
+    *(u32 *)(arg0 + 0xA0) = arg1;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D228);
 
@@ -59,7 +70,9 @@ void effPCPBossFree(EffPCPBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D3E8);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossSetParameterVector);
+void effPCPBossSetParameterVector(u8 *work, void *src) {
+    PCP_COPY_VECTOR(work + 0x10, src);
+}
 
 void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
     work->unk24 = value;
@@ -204,9 +217,13 @@ u32 func_0018D678(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D680);
+s32 func_0018D680(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D688);
+s32 func_0018D688(void) {
+    return 0;
+}
 
 void func_0018D690(void) {
 }
@@ -242,7 +259,9 @@ void func_0018D800(void) {
     func_0018D210();
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D818);
+void func_0018D818(void) {
+    func_0018D220();
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D830);
 
