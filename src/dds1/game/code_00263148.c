@@ -91,11 +91,12 @@ s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
     return 0;
 }
 
+/* Record the first visit to the item-selection scene. */
 u32 func_002633D8(void) {
-    s64 temp_v0;
+    s64 alreadyVisited;
 
-    temp_v0 = mdlFlagTest(0x911);
-    if (temp_v0 == 0) {
+    alreadyVisited = mdlFlagTest(0x911);
+    if (alreadyVisited == 0) {
         mdlFlagSet(0x911);
     }
     return 0;
@@ -168,6 +169,7 @@ s64 func_00263D10(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
+/* Bound the selection extent by the remaining capacity after five components. */
 u32 mnuInitializeItemSelectionExtent(void) {
     s8 component;
     MenuItemScene *scene;

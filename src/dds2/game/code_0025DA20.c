@@ -54,6 +54,8 @@ extern void func_0025D8C8(void);
 
 extern void evtReleaseEventPackResources(void);
 
+#define CAMP_TASK_PRIORITY 0x3EC
+
 typedef struct CampTaskData {
     s32 taskId;
     s32 unk4;
@@ -62,6 +64,7 @@ typedef struct CampTaskData {
 
 extern u8 D_003CBB70[];
 
+/* Schedule the camp task only if no task currently owns this event ID. */
 void mnuCampCreateTask(s32 taskId) {
     char name[0x20];
     CampTaskData *data;
@@ -72,7 +75,7 @@ void mnuCampCreateTask(s32 taskId) {
         memset(data, 0, 0x48);
         data->taskId = taskId;
         data->unk4 = 0;
-        kwlnTaskCreate(name, 0x3EC, 1, 1, func_0025D8C8, evtReleaseEventPackResources, data);
+        kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, func_0025D8C8, evtReleaseEventPackResources, data);
     }
 }
 
@@ -86,10 +89,11 @@ void mnuCampDestroyTaskById(void) {
     }
 }
 
+/* Drain every camp task at the scheduler priority used during creation. */
 void mnuCampDestroyAllTasks(void) {
     s64 task;
 
-    while (task = func_00101820(0x3ec), task != 0) {
+    while (task = func_00101820(CAMP_TASK_PRIORITY), task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
     }
 }

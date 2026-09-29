@@ -1298,6 +1298,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD5B0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD698);
 
+/* Readiness requires each active actor to have cleared transient action flags. */
 s32 btlAllActiveUnitsReady(void) {
     UiObject *unit;
     u32 flags;
@@ -1322,10 +1323,10 @@ s32 btlAllActiveUnitsReady(void) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD978);
 
 u32 func_001ADA10(void) {
-    s32 temp_v0;
+    s32 controller;
 
-    temp_v0 = func_001AA6F8();
-    return *(u32 *)(temp_v0 + 0x278);
+    controller = func_001AA6F8();
+    return *(u32 *)(controller + 0x278);
 }
 
 extern u32 effMiscRandMod(s32, s32);
@@ -1376,6 +1377,7 @@ s32 btlCountAvailableUnits(void) {
     return count;
 }
 
+/* Count ready scene actors plus eligible party entries stored in script state. */
 s32 btlCountAvailableParticipants(void) {
     UiObject *unit;
     u8 *entry;

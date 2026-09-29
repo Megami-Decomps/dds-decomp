@@ -855,14 +855,15 @@ ItfMesNode *itfMesGetLastNode(ItfMesNode *node) {
     return node;
 }
 
-void func_001A58B8(u8 *arg0, s32 arg1) {
-    s32 temp_v0;
+/* Copy glyph shade components into the current message block's color bytes. */
+void func_001A58B8(u8 *glyph, s32 block) {
+    s32 shadeAddress;
 
-    temp_v0 = *(s32 *)(arg0 + 0x20);
-    *(u8 *)(arg1 + 0x15) = *arg0 >> 1;
-    *(u8 *)(arg1 + 0x12) = *(u8 *)(temp_v0 + 0x15);
-    *(u8 *)(arg1 + 0x13) = *(u8 *)(temp_v0 + 0x14);
-    *(u8 *)(arg1 + 0x14) = *(u8 *)(temp_v0 + 0x16);
+    shadeAddress = *(s32 *)(glyph + 0x20);
+    *(u8 *)(block + 0x15) = *glyph >> 1;
+    *(u8 *)(block + 0x12) = *(u8 *)(shadeAddress + 0x15);
+    *(u8 *)(block + 0x13) = *(u8 *)(shadeAddress + 0x14);
+    *(u8 *)(block + 0x14) = *(u8 *)(shadeAddress + 0x16);
 }
 
 s32 itfMesCountSpanSteps(ItfMesSpan *arg0, ItfMesSpan *arg1) {
@@ -911,6 +912,7 @@ void itfMesRecolorNodeChildren(ItfMesNode *node, u32 color) {
     }
 }
 
+/* Find the widest contiguous row, scaling the accumulated advance by 16. */
 s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     s32 best = 0;
 

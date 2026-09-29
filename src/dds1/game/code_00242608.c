@@ -29,41 +29,45 @@ extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *
 extern void func_002424B0(void);
 extern void evtReleaseEventPackResources(void);
 
+#define CAMP_TASK_PRIORITY 0x3EC
+
 typedef struct CampTaskData {
     s32 taskId;
     s32 unk4;
     u8 pad08[0x40];
 } CampTaskData;
 
-void mnuCampCreateTask(s32 arg0) {
+/* Schedule the camp task only if no task currently owns this event ID. */
+void mnuCampCreateTask(s32 taskId) {
     char name[0x20];
     CampTaskData *data;
 
     if (evtFindTaskById() == 0) {
-        evtFormatTaskName(arg0, name);
+        evtFormatTaskName(taskId, name);
         data = func_002CFEB8(0x48);
         memset(data, 0, 0x48);
-        data->taskId = arg0;
+        data->taskId = taskId;
         data->unk4 = 0;
-        kwlnTaskCreate(name, 0x3EC, 1, 1, func_002424B0, evtReleaseEventPackResources, data);
+        kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, func_002424B0, evtReleaseEventPackResources, data);
     }
 }
 
 void campDestroyTaskById(void) {
-    s64 temp_v0;
+    s64 task;
 
-    temp_v0 = evtFindTaskById();
-    if (temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(temp_v0, 0);
+    task = evtFindTaskById();
+    if (task != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
         return;
     }
 }
 
+/* Drain every camp task at the scheduler priority used during creation. */
 void campDestroyAllTasks(void) {
-    s64 temp_v0;
+    s64 task;
 
-    while (temp_v0 = kwlnTaskFindByPriority(0x3ec), temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(temp_v0, 0);
+    while (task = kwlnTaskFindByPriority(CAMP_TASK_PRIORITY), task != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
     }
 }
 

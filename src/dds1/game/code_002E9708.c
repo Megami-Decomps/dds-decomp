@@ -74,7 +74,7 @@ typedef struct SoundNode {
     struct SoundNode *next;
     u8 active;
     u8 pad0D[7];
-    u8 twoChannel;
+    u8 audioMode; /* 0=no audio, 1=mono, 2=stereo */
     u8 loopMode;
     u8 playbackMode;
     u8 pad17[5];
@@ -621,7 +621,7 @@ void sdfSoundRemoveNode(SoundNode *node) {
 void sdfAllocateStreamFrameBuffers(SoundNode *node) {
     s32 channels = 4;
     s32 size;
-    if (node->twoChannel != 0) {
+    if (node->audioMode != 0) {
         channels = 2;
     }
     size = node->width * node->height;
@@ -637,11 +637,11 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 void sdfSoundInitNodeFromFormat(SoundNode *node, SoundFormat *format) {
     memset(node, 0, 0x8C);
     if (format->hasAudio == 0) {
-        node->twoChannel = 0;
+        node->audioMode = 0;
     } else if (format->stereo == 0) {
-        node->twoChannel = 1;
+        node->audioMode = 1;
     } else {
-        node->twoChannel = 2;
+        node->audioMode = 2;
     }
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;

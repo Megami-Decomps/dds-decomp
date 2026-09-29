@@ -16,19 +16,20 @@ s32 bfParseFLW0(s32 arg0, s32 arg1);
 
 s32 bfContextCreate(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 
+/* Load a script resource, create its VM process and retain its resource handle. */
 s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 {
-    u32 buf[4];
+    u32 resourceInfo[4];
     void *handle;
-    s32 id;
+    s32 processId;
     ScrProcTask *task;
-    handle = func_00343ED0(scriptId, buf, 0);
-    id = buf[0];
-    if (id == 0)
+    handle = func_00343ED0(scriptId, resourceInfo, 0);
+    processId = resourceInfo[0];
+    if (processId == 0)
     {
         return 0;
     }
-    task = (ScrProcTask *)bfParseFLW0(id, option);
+    task = (ScrProcTask *)bfParseFLW0(processId, option);
     if (task != NULL)
     {
         task->scriptHandle = handle;
@@ -39,7 +40,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
     s32 taskId;
-    taskId = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, bfTaskUpdate, func_0010C298, (s32)task);
+    taskId = kwlnTaskCreate(task->nameTableBase + (task->nameIndex << 5), priority, 1, 1, bfTaskUpdate, func_0010C298, (s32)task);
     task->taskId = taskId;
     return taskId;
 }
@@ -64,9 +65,9 @@ void scrCreateProcessWithDefaultOption(u32 scriptId) {
     scrOpenProcessFromResource(scriptId, 0);
 }
 
-void scrCreateTaskForProcessId(s32 priority, s32 taskId, s32 option)
+void scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option)
 {
-    scrProcCreateTask(priority, bfParseFLW0(taskId, option));
+    scrProcCreateTask(priority, bfParseFLW0(processId, option));
 }
 
 void scrCreateTaskWithDefaultOption(u32 processId) {
@@ -91,7 +92,7 @@ extern void evtUnlinkWorkNode(void *);
 
 /* DDS2 process teardown follows the same layout as DDS1's ScrProcTask. */
 void scrProcDestroyTask(ScrProcTask *process) {
-    func_0010AE38("end <%s>\n", process->unkB4 + (process->unkC8 << 5));
+    func_0010AE38("end <%s>\n", process->nameTableBase + (process->nameIndex << 5));
     if (process->workBuffer != 0) {
         func_00328E48((void *)process->workBuffer);
     }

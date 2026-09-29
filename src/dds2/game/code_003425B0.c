@@ -204,6 +204,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_003427C0);
 extern void FlushCache(s32);
 extern s32 SignalSema(s32);
 
+/* Event 5 invalidates the EE cache before waking the waiting sound thread. */
 s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     switch (event) {
     case 5:
@@ -481,8 +482,10 @@ void sdfSoundRemoveNode(SoundNode *node) {
 
 typedef struct SdfStreamFrameNode {
     u8 pad00[0x14];
-    u8 twoChannel;    /* 0x14 */
-    u8 pad15[7];
+    u8 audioMode;     /* 0x14: 0=none, 1=mono, 2=stereo */
+    u8 loopMode;      /* 0x15 */
+    u8 playbackMode;  /* 0x16 */
+    u8 pad17[5];
     s32 bufferSize;   /* 0x1C */
     s32 buffers[2];   /* 0x20 */
     u8 pad28[0x14];
@@ -496,7 +499,7 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     s32 channels = 4;
     s32 size;
 
-    if (node->twoChannel != 0) {
+    if (node->audioMode != 0) {
         channels = 2;
     }
     size = node->width * node->height;
@@ -510,21 +513,29 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003444F8);
 
+/* The four bytes used to initialize the stream node; matches the DDS1 format. */
+typedef struct SoundFormat {
+    u8 hasAudio;
+    u8 stereo;
+    u8 loopMode;
+    u8 playbackMode;
+} SoundFormat;
+
 extern void *memset(void *, s32, u32);
 
 void sdfSoundInitNodeFromFormat(u8 *dst, u8 *src) {
     memset(dst, 0, 0x8C);
-    if (src[0] == 0) {
-        dst[0x14] = 0;
+    if (((SoundFormat *)src)->hasAudio == 0) {
+        ((SdfStreamFrameNode *)dst)->audioMode = 0;
     } else {
-        if (src[1] == 0) {
-            dst[0x14] = 1;
+        if (((SoundFormat *)src)->stereo == 0) {
+            ((SdfStreamFrameNode *)dst)->audioMode = 1;
         } else {
-            dst[0x14] = 2;
+            ((SdfStreamFrameNode *)dst)->audioMode = 2;
         }
     }
-    dst[0x15] = src[2];
-    dst[0x16] = src[3];
+    ((SdfStreamFrameNode *)dst)->loopMode = ((SoundFormat *)src)->loopMode;
+    ((SdfStreamFrameNode *)dst)->playbackMode = ((SoundFormat *)src)->playbackMode;
 }
 
 extern void func_00344420();

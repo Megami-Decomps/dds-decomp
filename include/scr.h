@@ -70,12 +70,13 @@ typedef struct {
     s32 floatBits[256];
 } ScrProcGlobals;
 
-/* Script process handle and scheduler task ID (0xE8); DDS1/2 script/scrScriptProcess.c. */
+/* Script process handle and scheduler task ID (0xE8); DDS1/2 script/scrScriptProcess.c.
+ * The task name is a 32-byte entry indexed from nameTableBase. */
 typedef struct {
     u8 pad0[0xB4];
-    s32 unkB4;
+    s32 nameTableBase;      /* 0xB4: address of process names */
     u8 padB8[0x10];
-    s32 unkC8;
+    s32 nameIndex;          /* 0xC8: 32-byte name entry */
     s32 resourceIndex;      /* 0xCC: released unless negative */
     u8 padD0[8];
     void *scriptHandle;     /* 0xD8 */

@@ -20,11 +20,11 @@ typedef struct {
 } BlendArg;
 
 typedef struct VTab {
-    void (*fn)(void);
+    void (*invoke)(void);
 } VTab;
 
 typedef struct VObj {
-    VTab *unk0;
+    VTab *vtable;
 } VObj;
 
 typedef struct KeyOut {
@@ -289,8 +289,8 @@ extern void *D_00398318[];
 extern void *D_00398330[];
 extern void *D_00398348[];
 
-void sdfInvokeMotionObjectCallback(VObj *a0) {
-    a0->unk0->fn();
+void sdfInvokeMotionObjectCallback(VObj *object) {
+    object->vtable->invoke();
 }
 
 void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2) {
@@ -311,6 +311,7 @@ void func_002DB518(void *a0, s32 a1, s32 a2) {
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB538);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB660);
+/* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionSuspend(Motion *motion) {
     u8 previous;
 

@@ -69,6 +69,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248658);
 
+/* Mark entries whose required amount exceeds the current profile amount. */
 void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     MenuProgressNode *node = owner->firstProgressNode;
     if (node != 0) {
@@ -171,6 +172,7 @@ extern void func_002491B8(void);
 
 extern u8 D_003BC3F8[];
 
+/* Omit the selected entry when building the progress list. */
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
     s32 list = func_0027B2F8(0, count, 0x15, callback);
     s32 i;

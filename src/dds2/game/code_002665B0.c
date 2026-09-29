@@ -148,10 +148,10 @@ void func_002665B0(s32 arg0) {
 }
 
 u8 func_002665C8(void) {
-    s64 temp_v0;
+    s64 unlocked;
 
-    temp_v0 = mdlFlagTest(0x31);
-    return temp_v0 != 0;
+    unlocked = mdlFlagTest(0x31);
+    return unlocked != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002665E8);
@@ -192,6 +192,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002669C8);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266A48);
 
+/* Mark entries whose required amount exceeds the current profile amount. */
 void mnuRefreshThresholdNodeFlags(MenuProgressList *list) {
     MenuProgressNode *node = list->head;
     if (node != 0) {
@@ -275,6 +276,7 @@ u32 func_002674F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267500);
 
+/* Omit the selected entry when building the progress list. */
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
     MenuProgressList *list = (MenuProgressList *)func_002B8158(0, count, 0x16, callback);
     s32 i;

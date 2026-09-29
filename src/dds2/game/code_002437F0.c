@@ -76,6 +76,7 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_00243EE8);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00243FD8);
 
+/* Draw the selected solar-noise layer; intermediate layers also receive layer 9. */
 void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
     func_00243958(x, y, z, width, layer, 0, context, color);
     if (layer != 0 && layer != 4 && layer != 8) {
@@ -83,6 +84,7 @@ void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 contex
     }
 }
 
+/* Layer lifetimes differ, but both reset their activation byte on expiry. */
 s32 evtAdvanceSolarShortLayerTimer(SolarLayerTimer *timer) {
     s32 nextAge;
 
@@ -121,6 +123,7 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_002449E0);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244A38);
 
+/* Each active point restarts with a randomized duration near 120-150 frames. */
 void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
     SolarPoint *point = overlay->points;
     s32 i;

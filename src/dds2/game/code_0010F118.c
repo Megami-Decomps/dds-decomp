@@ -70,27 +70,28 @@ INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F518);
 
 INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F640);
 
-void effObjNodeDestroy(EffTransformNode *arg0) {
+/* Notify the owner before unlinking and freeing this transform node. */
+void effObjNodeDestroy(EffTransformNode *node) {
     EffTransformOwner *owner;
     EffTransformNode *next;
     EffTransformNode *prev;
 
-    if (arg0 != NULL) {
-        owner = arg0->owner;
+    if (node != NULL) {
+        owner = node->owner;
         if (owner != NULL) {
             if (owner->notify != NULL) {
-                owner->notify(arg0);
+                owner->notify(node);
             }
         }
-        next = arg0->next;
+        next = node->next;
         if (next != NULL) {
-            next->prev = arg0->prev;
+            next->prev = node->prev;
         }
-        prev = arg0->prev;
+        prev = node->prev;
         if (prev != NULL) {
-            prev->next = arg0->next;
+            prev->next = node->next;
         }
-        func_00328E48(arg0);
+        func_00328E48(node);
     }
 }
 
