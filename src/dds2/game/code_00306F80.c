@@ -83,6 +83,14 @@ typedef struct GridDrawWork {
 extern s32 func_00304AD8();
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
+extern s32 func_00100400(void);
+
+extern u8 D_00381ED0[];
+
+extern void func_0032DB30(const void *, void *, s32);
+
+extern void func_0032CF98(void *, void *);
+
 void func_00306F80(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
     u32 record = func_00304AD8(e, f);
     func_00306BF0(a, b, c, d, e, f, record, context);
@@ -310,9 +318,39 @@ void func_00308478(u32 arg0, u32 arg1) {
     func_003083A0(arg0, 0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308498);
+void func_00308498(s32 data, s32 kind) {
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308550);
+    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor[1] = 0x49;
+    descriptor[0] = data;
+    context = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_0037FB48[kind];
+    entry->draw(entry, context);
+}
+
+void func_00308550(s32 data, s32 kind) {
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor[1] = 0x14;
+    descriptor[0] = data;
+    context = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_0037FB48[kind];
+    entry->draw(entry, context);
+}
 
 void func_00308608(QuadU32 *q, u32 value) {
     q->x = value;
@@ -354,17 +392,50 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00308AF0);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308C58);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308DB0);
+void func_00308DB0(s32 surfaceIndex) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfResetPacketList((s32)list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032CF98(list, texture);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (surfaceIndex << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308E60);
+extern void func_0032DB78(void *, void *, s32);
+void func_00308E60(surfaceIndex)
+    s32 surfaceIndex;
+{
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfResetPacketList((s32)list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032CF98(list, texture);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (surfaceIndex << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F10);
+void func_00308F10(u32 context) {
+    func_00308380(0x30000, context);
+    func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, context);
+    func_00308380(0x3000DL, context);
+    func_00308DB0(context);
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F78);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308FE8);
-
-extern void func_00308E60();
+void func_00308FE8(u32 context) {
+    func_00308380(0x30000, context);
+    func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, context);
+    func_00308380(0x3001BL, context);
+    func_00308DB0(context);
+}
 
 void func_00309050(s32 context) {
     func_00308E60();

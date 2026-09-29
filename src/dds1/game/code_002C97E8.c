@@ -392,7 +392,48 @@ void sdfClearTaskList(TaskList *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB058);
+typedef struct SdfLink {
+    u8 pad00[8];
+    struct SdfLink *prev;
+    struct SdfLink *next;
+} SdfLink;
+void func_002CB058(SdfLink *list, SdfLink *a, SdfLink *b) {
+    SdfLink *tmpNext;
+    SdfLink *tmpPrev;
+
+    if (a != NULL && b != NULL) {
+        if (a->prev != NULL) {
+            a->prev->next = b;
+        }
+        if (a->next != NULL) {
+            a->next->prev = b;
+        }
+        if (b->prev != NULL) {
+            b->prev->next = a;
+        }
+        if (b->next != NULL) {
+            b->next->prev = a;
+        }
+        tmpNext = a->next;
+        a->next = b->next;
+        tmpPrev = a->prev;
+        a->prev = b->prev;
+        b->next = tmpNext;
+        b->prev = tmpPrev;
+        if (a->next == NULL) {
+            list->prev = a;
+        }
+        if (a->prev == NULL) {
+            list->next = a;
+        }
+        if (b->next == NULL) {
+            list->prev = b;
+        }
+        if (b->prev == NULL) {
+            list->next = b;
+        }
+    }
+}
 
 void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
     TaskListNode *node;
@@ -569,8 +610,6 @@ void func_002CBB48(void) {
     func_002CC570();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBB68);
-
 typedef struct SdfGridCell {
     u32 index;
     u32 value;
@@ -583,7 +622,12 @@ typedef struct SdfGrid {
     u32 pad0C;
     u32 cellCount;         /* 0x10 */
     u32 width;             /* 0x14 */
+    u32 pad18;
+    void (*releaseCell)(u32, u32); /* 0x1C */
 } SdfGrid;
+
+INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBB68);
+
 
 void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *mod, u32 *div) {
     SdfGridCell *cell = grid->cursor;
@@ -670,7 +714,25 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC3A8);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC430);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC570);
+void func_002CC570(SdfGrid *grid) {
+    u32 i = 0;
+    SdfGridCell *cells = grid->cells;
+    SdfGridCell *cell;
+
+    if (grid->cellCount != 0) {
+        cell = cells;
+        do {
+            u32 value = cell->value;
+            cell->index = i;
+            if (value != 0) {
+                grid->releaseCell(i, value);
+                cell->value = 0;
+            }
+            i++;
+            cell++;
+        } while (i < grid->cellCount);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC5F0);
 

@@ -138,7 +138,36 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0038);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0178);
+typedef struct GridAngleTable {
+    s32 divisor;  /* 0x00 */
+    s32 mirrored; /* 0x04 */
+} GridAngleTable;
+
+typedef struct GridAngleSlot {
+    u8 pad00[0x20];
+    GridAngleTable *table; /* 0x20 */
+} GridAngleSlot;
+
+typedef struct GridAngleOwner {
+    u8 pad00[4];
+    s32 angle; /* 0x04 */
+    u8 pad08[8];
+    GridAngleSlot *slot; /* 0x10 */
+} GridAngleOwner;
+
+s32 func_002C0178(s32 unused, u8 *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 i = 3;
+
+    do {
+        if (table->mirrored == 0) {
+            *(f32 *)(out + 0x24) = 360.0f - (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
+        } else {
+            *(f32 *)(out + 0x24) = (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
+        }
+    } while (--i >= 0);
+    return 0x10000 / table->divisor;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0200);
 
@@ -231,9 +260,39 @@ void func_002C0A48(u32 arg0, u32 arg1) {
     func_002C0970(arg0, 0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0A68);
+void func_002C0A68(s32 data, s32 kind) {
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0B20);
+    func_002E1428(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_002E1420(packet);
+    descriptor[1] = 0x49;
+    descriptor[0] = data;
+    context = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_00324B48[kind];
+    entry->draw(entry, context);
+}
+
+void func_002C0B20(s32 data, s32 kind) {
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_002E1428(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_002E1420(packet);
+    descriptor[1] = 0x14;
+    descriptor[0] = data;
+    context = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_00324B48[kind];
+    entry->draw(entry, context);
+}
 
 void func_002C0BD8(QuadU32 *q, u32 value) {
     q->x = value;

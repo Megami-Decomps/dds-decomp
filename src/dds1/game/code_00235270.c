@@ -93,6 +93,10 @@ extern u16 D_003BBF88;
 
 extern u32 D_003BBF8C;
 
+extern void func_001038A0(s32 list, s32 x, s32 y, s32 w, s32 h);
+
+extern char D_003BC0C8[]; /* "NAME:" */
+
 void evtCreateTask(s32 taskId, s32 value) {
     s32 data;
 
@@ -277,7 +281,14 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00236AC8);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236D80);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00237048);
+void func_00237048(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
+    x += 0x6C0;
+    func_001038A0(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
+    sdfAppendPacket(list, func_002E4960(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
+    if (sel[2] >= 0) {
+        sdfAppendPacket(list, func_002E4960(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088, base + sel[2] * 32 + 0x24));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 

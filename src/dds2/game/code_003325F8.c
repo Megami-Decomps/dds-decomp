@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 #include "sdf.h"
 
@@ -206,9 +207,61 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332BB0);
+extern void func_00336C10(void *);
+void func_00332BB0(SdfTextParam *param, void *resource) {
+    u8 *matrix = func_00330C18(param, *(u32 *)resource);
+    u8 *p;
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332C30);
+    p = (u8 *)resource + 0x20;
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        "vmove.xyzw vf30, vf10\n\t"
+        "vmove.xyzw vf11, vf10\n\t"
+        ".set reorder"
+        : : "r"(p));
+    p = (u8 *)resource + 0x30;
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        "vsub.xyz vf10, vf0, vf10\n\t"
+        "vmove.xyzw vf29, vf10\n\t"
+        "vopmula.xyz ACC, vf10, vf11\n\t"
+        "vopmsub.xyz vf10, vf11, vf10\n\t"
+        "vmul.xyz vf2, vf10, vf10\n\t"
+        "vmulax.w ACC, vf0, vf2x\n\t"
+        "vmadday.w ACC, vf0, vf2y\n\t"
+        "vmaddz.w vf2, vf0, vf2z\n\t"
+        "vrsqrt Q, vf0w, vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz vf10, vf10, Q\n\t"
+        "vmove.xyzw vf28, vf10\n\t"
+        ".set reorder"
+        : : "r"(p));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf31, 0(%0)\n\t"
+        "vmove.w vf31, vf0\n\t"
+        ".set reorder"
+        : : "r"((u8 *)resource + 0x10));
+    func_00336C10(matrix + 0xC0);
+}
+
+extern u8 *func_00330C18(SdfTextParam *, u32);
+void func_00332C30(SdfTextParam *param, void *resource) {
+    u8 *matrix = func_00330C18(param, *(u32 *)resource) + 0xC0;
+
+    VU0_LOAD_MATRIX(matrix);
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        "vmulax.xyzw ACC, vf28, vf10x\n\t"
+        "vmadday.xyzw ACC, vf29, vf10y\n\t"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
+        "vmaddw.xyzw vf10, vf31, vf0w\n\t"
+        ".set reorder"
+        : : "r"((u8 *)resource + 0x10));
+}
 
 void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
     SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
@@ -526,7 +579,63 @@ SdfAsset *func_003335E0(void) {
     return asset;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003336E0);
+u8 *func_003336E0(SdfTextParam *param, SdfTextParam *lookup, u8 *data) {
+    u32 flags;
+    u8 *cursor;
+    u32 packed;
+
+    *(u32 *)param = *(u32 *)data;
+    *(u16 *)((u8 *)param + 4) = *(u16 *)(data + 4);
+    flags = *(u16 *)(data + 6);
+    cursor = data + 8;
+    if (flags & 0x1) {
+        func_00333270(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x2) {
+        func_00333288(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x4) {
+        func_003332E8(param, ((SdfResourceList *)lookup)->items[*(u16 *)cursor]);
+        cursor += 4;
+    }
+    if (flags & 0x8) {
+        func_00333378(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
+        cursor += 0x14;
+    }
+    if (flags & 0x10) {
+        func_00333460(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x20) {
+        packed = *(u32 *)cursor;
+        cursor += 4;
+        func_00333490(param, ((SdfResourceList *)lookup)->items[packed & 0xFFFF]);
+        func_00333478(param, packed >> 16);
+    }
+    if (flags & 0x40) {
+        func_003334E0(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
+        cursor += 0x14;
+    }
+    if (flags & 0x80) {
+        func_003332A0(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x100) {
+        func_003332B8(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x200) {
+        func_003332D0(param, *(f32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x400) {
+        func_003335C8(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1]);
+        cursor += 8;
+    }
+    return cursor;
+}
 
 void sdfAssetRelease(SdfAsset *asset) {
     if (asset == NULL) {
@@ -646,7 +755,7 @@ void func_00333CB0(SdfAsset *asset, s32 index) {
 }
 
 SdfAsset *func_003335E0(void);
-u8 *func_003336E0(SdfAsset *, SdfTextParam *, u8 *);
+u8 *func_003336E0(SdfTextParam *, SdfTextParam *, u8 *);
 void func_00333208(SdfResourceList *, SdfAsset *);
 SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     u32 count = *data;
@@ -654,7 +763,7 @@ SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     SdfResourceList *list = sdfCreateResourceList(count >= 0x20 ? count : 0x20);
     while (count != 0) {
         SdfAsset *asset = func_003335E0();
-        cursor = func_003336E0(asset, param, cursor);
+        cursor = func_003336E0((SdfTextParam *)asset, param, cursor);
         func_00333208(list, asset);
         count--;
     }

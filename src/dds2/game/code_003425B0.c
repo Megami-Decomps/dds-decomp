@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern s32 D_00439204;
+
 extern u32 D_00438B88;
 
 extern u32 D_00438B8C;
@@ -477,7 +479,32 @@ void sdfSoundRemoveNode(SoundNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfAllocateStreamFrameBuffers);
+typedef struct SdfStreamFrameNode {
+    u8 pad00[0x14];
+    u8 twoChannel;    /* 0x14 */
+    u8 pad15[7];
+    s32 bufferSize;   /* 0x1C */
+    s32 buffers[2];   /* 0x20 */
+    u8 pad28[0x14];
+    u16 width;        /* 0x3C */
+    u16 height;       /* 0x3E */
+} SdfStreamFrameNode;
+
+extern s32 func_003283E0(s32);
+
+void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
+    s32 channels = 4;
+    s32 size;
+
+    if (node->twoChannel != 0) {
+        channels = 2;
+    }
+    size = node->width * node->height;
+    size *= channels;
+    node->bufferSize = size;
+    node->buffers[0] = func_003283E0(size);
+    node->buffers[1] = func_003283E0(size);
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
 
@@ -662,7 +689,6 @@ void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 arg1, s32 arg2, s32 arg3,
 
 extern s32 D_004391FC;
 extern s32 D_00439200;
-extern s32 D_00439204;
 extern s32 D_00439214;
 extern u8 D_0047B480[];
 extern s32 sdfAddHandler();

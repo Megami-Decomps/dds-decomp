@@ -83,6 +83,26 @@ def relocations(obj):
     return out
 
 
+def inline_asm_share(text):
+    """{function: (inline asm instructions, all instructions)} from cc1 output
+    (asm statements sit between `#APP` and `#NO_APP`)."""
+    share, cur, app, asm, total = {}, None, False, 0, 0
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith(".ent\t") or s.startswith(".ent "):
+            cur, asm, total = s.split()[1], 0, 0
+        elif s.startswith(".end\t") or s.startswith(".end "):
+            if cur:
+                share[cur] = (asm, total)
+            cur = None
+        elif s in ("#APP", "#NO_APP"):
+            app = s == "#APP"
+        elif cur and re.match(r"[a-z]", s) and not s.endswith(":"):
+            total += 1
+            asm += app
+    return share
+
+
 def owns_rodata(version, unit, section="rodata"):
     yaml = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
     return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
@@ -113,10 +133,13 @@ def main():
         obj = Path(tmp) / "unit.o"
         # cc.sh compiles under the unit's own path (and flags) even for --source.
         env = dict(os.environ, DDS_VERSION=version, DDS_AS_UNIT=str(unit.relative_to(ROOT)))
+        asm_text = Path(tmp) / "unit.s"
+        env_s = dict(env, DDS_KEEP_S=str(asm_text))
         extra = args.cflags.split()
         r = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", *extra,
                             str(args.source.resolve() if args.source else unit), "-o", str(obj)],
-                           capture_output=True, text=True, env=env)
+                           capture_output=True, text=True, env=env_s)
+        asm_share = inline_asm_share(asm_text.read_text()) if asm_text.exists() else {}
         if r.returncode:
             sys.stderr.write(r.stderr)
             sys.exit(f"compile failed: {args.unit}")
@@ -503,6 +526,20 @@ def main():
         for m in re.finditer(pattern, source_text):
             bad += 1
             print(f"TRICK line {source_text.count(chr(10), 0, m.start()) + 1}: {why}")
+    # A C function whose code is mostly inline asm may be handwritten code in
+    # disguise. Two kinds are real C: copies of SDK routines that Sony wrote as C
+    # with an asm body (`/* libvu0: sceVu0Name */` above the definition), and VU0
+    # routines in the same style, whose asm takes its values from C operands and
+    # has no branches (`/* vu0 routine: ... */`). Anything else is reported;
+    # it is not a difference, but progress must not count it as C.
+    for name, (asm, total) in sorted(asm_share.items()):
+        if (args.func and name != args.func) or asm < 8 or asm * 2 <= total:
+            continue
+        if re.search(rf"(?:libvu0|vu0 routine):[^\n]*\n(?:[^\n]*\n){{0,2}}[^\n]*\b{re.escape(name)}\s*\(",
+                     unit.read_text()):
+            continue
+        print(f"ASMBODY {name}: {asm} of {total} instructions are inline asm; mark it as an SDK copy "
+              "or VU0 routine, or keep it as INCLUDE_ASM (docs/idioms.md, Inline asm)")
     # C functions must keep retail order (the object's text is laid out in source order).
     order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^[A-Za-z_][^;\n=]*?\b(\w+)\s*\([^;\n]*\)\s*\{?\s*$',
                        unit.read_text(), re.M)
