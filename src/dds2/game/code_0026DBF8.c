@@ -102,7 +102,11 @@ typedef struct MenuRecord {
 } MenuRecord;
 
 typedef struct MantraDisplayNode {
-    u8 pad00[0x10];
+    u8 pad00[4];
+    u32 fromValue;
+    u32 toValue;
+    u16 transitionKind;
+    u8 pad0E[2];
     struct MantraDisplayNode *next;
 } MantraDisplayNode;
 
@@ -238,11 +242,12 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
 
 extern char D_004378A0[]; /* "%7d" */
 
-void func_0026DE08(u32 arg0, u32 arg1, u32 arg2, u32 arg3, MantraCountState *state, u32 arg5) {
+/* Interpolate the panel's numeric value over 20 updates, playing a sound on each changed step. */
+void func_0026DE08(u32 x, u32 y, u32 depth, u32 fade, MantraCountState *state, u32 drawArg) {
     char text[16];
-    u32 flags = arg3 | 0xA09DC300;
+    u32 flags = fade | 0xA09DC300;
 
-    func_0026E788(arg0, arg1, arg2, arg3, 0x2E, 0, arg5);
+    func_0026E788(x, y, depth, fade, 0x2E, 0, drawArg);
     if (*(s32 *)(D_00435DD0 + 0x3C) != state->shown) {
         s32 steps = 20;
 
@@ -256,59 +261,62 @@ void func_0026DE08(u32 arg0, u32 arg1, u32 arg2, u32 arg3, MantraCountState *sta
     } else {
         func_0035C860(text, D_004378A0, *(s32 *)(D_00435DD0 + 0x3C));
     }
-    func_00311D00(arg0 + 0x193, arg1 + 0x26, arg2, flags, 0, text, 0, arg5);
+    func_00311D00(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
 
-void func_0026DF48(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u16 arg4, u32 arg5) {
+/* Draw a label for a nonzero entry, otherwise use the empty-entry panel art. */
+void func_0026DF48(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, u32 drawArg) {
     u8 buffer[0x20];
-    u32 flags = (arg3 & 0xFF) | 0xA09DC300;
+    u32 flags = (fade & 0xFF) | 0xA09DC300;
 
-    func_0026E788(arg0, arg1, arg2, arg3, 0x4C, 0, arg5);
-    if (arg4 != 0) {
+    func_0026E788(x, y, depth, fade, 0x4C, 0, drawArg);
+    if (entryId != 0) {
         memset(buffer, 0, 0x20);
-        func_00314500(arg4, 1, buffer);
-        func_00311C50(arg0 + 0x27, arg1 + 0x146, arg2, flags, 4, buffer, 0x101, arg5);
-        func_0026E788(arg0, arg1, arg2, arg3, 0x50, 0, arg5);
+        func_00314500(entryId, 1, buffer);
+        func_00311C50(x + 0x27, y + 0x146, depth, flags, 4, buffer, 0x101, drawArg);
+        func_0026E788(x, y, depth, fade, 0x50, 0, drawArg);
     } else {
-        func_0026E788(arg0, arg1, arg2, arg3, 0x54, 0, arg5);
+        func_0026E788(x, y, depth, fade, 0x54, 0, drawArg);
     }
 }
 
 extern u8 *func_003164C0(void);
 
-void func_0026E060(u32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4, u32 arg5) {
+/* Render a panel icon when it has an ID, or the corresponding empty art. */
+void func_0026E060(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 drawArg) {
     u8 *handle = func_003164C0();
-    u32 flags = (u32)(arg3 * 0.6f) | 0xA09D7D00;
+    u32 flags = (u32)(fade * 0.6f) | 0xA09D7D00;
 
-    func_0026E788(arg0, arg1, arg2, arg3, 0x4D, 0, arg5);
-    if (arg4 != 0) {
-        func_00311E60(arg0 + 0x2A, arg1 + 0x160, arg2, flags, 0, arg4 & 0xFFFF, handle, 0, 0, arg5);
+    func_0026E788(x, y, depth, fade, 0x4D, 0, drawArg);
+    if (iconId != 0) {
+        func_00311E60(x + 0x2A, y + 0x160, depth, flags, 0, iconId & 0xFFFF, handle, 0, 0, drawArg);
     } else {
-        func_0026E788(arg0, arg1, arg2, arg3, 0x55, 0, arg5);
+        func_0026E788(x, y, depth, fade, 0x55, 0, drawArg);
     }
 }
 
 extern u32 func_003151D0(u16);
 
-void func_0026E198(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4, u32 arg5) {
+/* Print the entry's count and draw one repeated marker per count unit. */
+void func_0026E198(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 drawArg) {
     char text[0x20];
-    u32 flags = arg3 | 0xA09D7D00;
+    u32 flags = fade | 0xA09D7D00;
     u32 count;
     u32 i;
 
-    func_0026E788(arg0, arg1, arg2, arg3, 0x4E, 0, arg5);
-    if (arg4 != 0) {
-        count = func_003151D0(arg4);
+    func_0026E788(x, y, depth, fade, 0x4E, 0, drawArg);
+    if (entryId != 0) {
+        count = func_003151D0(entryId);
         if (count != 0) {
             func_0035C860(text, D_004378A8, count);
-            func_00311DB0(arg0 + 0x82, arg1 + 0x17C, arg2, flags, 4, text, 0, arg5);
+            func_00311DB0(x + 0x82, y + 0x17C, depth, flags, 4, text, 0, drawArg);
             for (i = 0; i < count; i++) {
-                func_0026E788(arg0, arg1, arg2, arg3, 0x51, 0, arg5);
-                arg0 += 0xF;
+                func_0026E788(x, y, depth, fade, 0x51, 0, drawArg);
+                x += 0xF;
             }
         }
     } else {
-        func_0026E788(arg0, arg1, arg2, arg3, 0x56, 0, arg5);
+        func_0026E788(x, y, depth, fade, 0x56, 0, drawArg);
     }
 }
 
@@ -442,33 +450,42 @@ s32 func_0026EEE8(u32 arg0, u32 arg1, u32 arg2, s32 frame, s32 amount, u32 arg5)
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250D8);
 
-void mnuDrawMantraCostBadge(s32 arg0, s32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
+/* Shared by the badge and its two marker renderers; only observed fields are named. */
+typedef struct MantraCostRecord {
+    u8 pad00[4];
+    u16 iconIndex;
+    u8 pad06[0xE];
+    u16 cost;
+} MantraCostRecord;
+
+/* Draw a button marker and a variable-width cost, shifting one-digit values right. */
+void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 fade, s32 drawArg) {
     char buttons[9] = {0, 'n', 's', 'o', 'q', 'p', 'r', 't', 'u'};
     char text[8];
-    s32 color = arg4 | 0xA09DC300;
+    s32 drawFlags = fade | 0xA09DC300;
 
-    func_0026E788(arg0, arg1, arg2, arg4, buttons[*(u16 *)(arg3 + 4)], 0, arg5);
-    func_0026E788(arg0, arg1, arg2, arg4, 0x76, 0, arg5);
+    func_0026E788(x, y, depth, fade, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
+    func_0026E788(x, y, depth, fade, 0x76, 0, drawArg);
     memset(text, 0, sizeof(text));
-    func_0035C860(text, D_004378A8, *(u16 *)(arg3 + 0x14));
+    func_0035C860(text, D_004378A8, ((MantraCostRecord *)record)->cost);
     if (strlen(text) > 1) {
-        func_00311DB0(arg0 + 0x1E0, arg1 + 0x173, arg2, color, 0, text, 0, arg5);
+        func_00311DB0(x + 0x1E0, y + 0x173, depth, drawFlags, 0, text, 0, drawArg);
     } else {
-        func_00311DB0(arg0 + 0x1E4, arg1 + 0x173, arg2, color, 0, text, 0, arg5);
+        func_00311DB0(x + 0x1E4, y + 0x173, depth, drawFlags, 0, text, 0, drawArg);
     }
 }
 
 void func_0026F138(u32 unused1, u32 unused2, u32 third, u32 record,
                    u32 position, u32 packet) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
-    u16 index = *(u16 *)(record + 4);
+    u16 index = ((MantraCostRecord *)record)->iconIndex;
     func_0026E788(0, 0, third, position, markers[index], 0, packet);
 }
 
 void func_0026F190(u32 unused1, u32 unused2, u32 third, u32 record,
                    u32 position, u32 packet) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
-    u16 index = *(u16 *)(record + 4);
+    u16 index = ((MantraCostRecord *)record)->iconIndex;
     func_0026E788(0, 0, third, position, markers[index] + 8, 0, packet);
 }
 
@@ -506,45 +523,48 @@ void func_0026F5D8(MantraListState *list, u32 *entries, s32 count, s32 index) {
     func_0010AE38("[MaxNum %d][CurrentIndex %d]\n", n, index);
 }
 
+/* Queue a display-list transition from the previous selection to the chosen one.
+ * A repeat selection needs no node and returns zero. */
 u32 func_0026F680(u32 state, s8 selection) {
     u32 item;
     u32 *entries;
-    if (*(s16 *)(state + 0x2a) == selection) {
+    if (((MantraListState *)state)->index == selection) {
         return 0;
     }
     item = mnuAppendDisplayListNode(state);
     if (item != 0) {
         u32 *selected;
         u32 *previous;
-        entries = (u32 *)(state + 8);
-        *(u16 *)(item + 0xc) = 2;
+        entries = ((MantraListState *)state)->entries;
+        ((MantraDisplayNode *)item)->transitionKind = 2;
         selected = entries + selection;
-        previous = entries + *(s16 *)(state + 0x2a);
-        *(s16 *)(state + 0x2a) = selection;
-        *(u32 *)(item + 4) = *previous;
-        *(u32 *)(item + 8) = *selected;
+        previous = entries + ((MantraListState *)state)->index;
+        ((MantraListState *)state)->index = selection;
+        ((MantraDisplayNode *)item)->fromValue = *previous;
+        ((MantraDisplayNode *)item)->toValue = *selected;
     }
     return item;
 }
 
+/* Queue the next selection, wrapping to the first list entry at the end. */
 u32 func_0026F700(u32 state) {
     u32 item = mnuAppendDisplayListNode(state);
-    u32 *entries = (u32 *)(state + 8);
+    u32 *entries = ((MantraListState *)state)->entries;
     if (item != 0) {
-        s16 index = *(s16 *)(state + 0x2a);
-        s16 count = *(s16 *)(state + 0x28);
+        s16 index = ((MantraListState *)state)->index;
+        s16 count = ((MantraListState *)state)->count;
         s32 next = index + 1;
         u32 *current;
         u32 *upcoming;
-        *(u16 *)(item + 0xc) = 2;
+        ((MantraDisplayNode *)item)->transitionKind = 2;
         if (index >= count - 1) {
             next = 0;
         }
-        current = entries + *(s16 *)(state + 0x2a);
+        current = entries + ((MantraListState *)state)->index;
         upcoming = entries + next;
-        *(s16 *)(state + 0x2a) = next;
-        *(u32 *)(item + 4) = *current;
-        *(u32 *)(item + 8) = *upcoming;
+        ((MantraListState *)state)->index = next;
+        ((MantraDisplayNode *)item)->fromValue = *current;
+        ((MantraDisplayNode *)item)->toValue = *upcoming;
     }
     return item;
 }

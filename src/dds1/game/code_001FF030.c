@@ -119,7 +119,8 @@ typedef struct BtlUnit {
     u32 species;
     u8 unk_CC[0x20];
     s32 unk_EC;
-    u8 unk_F0[0x20];
+    u8 unk_F0[0x18];
+    u64 identity; /* 0x108: compared to exclude the current actor */
     u32 flags;
     u32 unk_114;
     u8 unk_118[8];
@@ -363,11 +364,12 @@ s32 func_002004B8(s32 unused, s32 action) {
     return 1;
 }
 
+/* Find an active unit on the 0x200 side with the requested unit mode. */
 s32 func_00200530(s32 unused, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
-            if (*(u16 *)(unit + 0x124) == kind) {
+            if (((BtlUnit *)unit)->mode == kind) {
                 return 1;
             }
         }
@@ -376,12 +378,13 @@ s32 func_00200530(s32 unused, s32 kind) {
     return 0;
 }
 
+/* Check the opposing side for another unit of the same mode but a different identity. */
 s32 func_002005A0(u8 *actor, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
-            if (*(u16 *)(unit + 0x124) == kind) {
-                if (*(u64 *)(unit + 0x108) != *(u64 *)(actor + 0x108)) {
+            if (((BtlUnit *)unit)->mode == kind) {
+                if (((BtlUnit *)unit)->identity != ((BtlUnit *)actor)->identity) {
                     return 1;
                 }
             }
@@ -601,11 +604,13 @@ s32 btlIsReadyWithoutTurns(void) {
 extern s32 func_001A1800(void *);
 extern s32 func_001A1850(void *);
 
-s32 func_00201070(u8 *unit, s32 count) {
-    void *flags = unit + 0x120;
-    u32 amount = func_001A1800(flags);
-    u32 total = func_001A1850(flags) * count;
-    if (total < amount * 100) {
+/* Compare a unit stat with a percentage of its maximum.
+ * The stat's identity is not established by these two accessors. */
+s32 func_00201070(u8 *unit, s32 percentage) {
+    void *stats = unit + 0x120;
+    u32 current = func_001A1800(stats);
+    u32 scaledMaximum = func_001A1850(stats) * percentage;
+    if (scaledMaximum < current * 100) {
         return 0;
     }
     return 1;
@@ -742,7 +747,7 @@ s32 func_002015E8(s32 unused, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
-            if (*(u16 *)(unit + 0x124) != kind) {
+            if (((BtlUnit *)unit)->mode != kind) {
                 return 1;
             }
         }
@@ -755,8 +760,8 @@ s32 func_00201658(u8 *actor, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
-            if (*(u16 *)(unit + 0x124) != kind) {
-                if (*(u64 *)(unit + 0x108) != *(u64 *)(actor + 0x108)) {
+            if (((BtlUnit *)unit)->mode != kind) {
+                if (((BtlUnit *)unit)->identity != ((BtlUnit *)actor)->identity) {
                     return 1;
                 }
             }
