@@ -3,20 +3,30 @@
 #include "pcp_vu0.h"
 
 typedef struct FldCamPose {
-    u8 pad0[0x14];
+    u8 pad0[0x10];
+    s32 world; /* 0x10 */
     s32 stage;
-    u8 pad18[0x38];
+    u8 pad18[0x18];
+    f32 focusPos[3]; /* 0x30 */
+    u8 pad3C[0x14];
     s32 unk50;
     u8 pad54[0x10];
     f32 negatedAngle;
     u8 pad68[0x58];
     s32 unkC0;
-    u8 padC4[0x7C];
+    u8 padC4[0x66];
+    s16 unk12A;
+    u8 pad12C[0x14];
     f32 x;
     f32 y;
     f32 z;
     u8 pad14C[0x18];
     f32 angle;
+    u8 pad168[0x34];
+    struct {
+        s32 value; /* fldmix.LB node value */
+        s32 block; /* sdfMemoryGetBlockAddress(value) */
+    } fldmix[4]; /* 0x19C */
 } FldCamPose;
 typedef struct FldVec3 {
     f32 x;
@@ -292,7 +302,52 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_001415F8);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0470);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001419A8);
+extern s32 D_0033EB7C[];
+extern s32 D_0033EB80[];
+extern s32 D_0033EB84[];
+extern s32 D_0033EB88[];
+extern s32 D_0033EB90[];
+
+s32 func_001419A8(s32 id) {
+    s32 result;
+
+    switch (id) {
+    case 0x80:
+        result = D_0033EB78[0] + 1;
+        break;
+    case 0x81:
+        result = D_0033EB7C[0] + 1;
+        break;
+    case 0x82:
+        result = D_0033EB80[0] + 1;
+        break;
+    case 0x83:
+        result = D_0033EB7C[0] + 2;
+        break;
+    case 0x84:
+        result = D_0033EB84[0] + 1;
+        break;
+    case 0x85:
+        result = D_0033EB84[0] + 2;
+        break;
+    case 0x86:
+        result = D_0033EB88[0] + 1;
+        break;
+    case 0x87:
+        result = D_0033EB90[0] + 1;
+        break;
+    case 0x88:
+        result = D_0033EB90[0] + 2;
+        break;
+    case 0x89:
+        result = D_0033EB90[0] + 3;
+        break;
+    default:
+        result = -1;
+        break;
+    }
+    return result;
+}
 
 typedef struct {
     s16 id;
@@ -677,9 +732,16 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00142800);
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001428C0);
 
 typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} FldPoint;
+
+typedef struct {
     u8 pad0[0x10];
     s32 value;
-    u8 pad14[8];
+    FldPoint *pointA; /* 0x14 */
+    FldPoint *pointB; /* 0x18 */
 } FldItem; /* 0x1C bytes */
 
 typedef struct {
@@ -958,7 +1020,66 @@ void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
     *z = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00146EE8);
+extern s32 D_003BAEAC;
+
+void func_00146EE8(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
+    s32 room;
+    u32 i;
+    FldSceneRecord *rec;
+    FldItem *item;
+    FldPoint *a;
+    s32 visible;
+    FldPoint *b;
+
+    room = 0;
+    *minX = 0.0f;
+    *maxZ = 0.0f;
+    *maxX = 0.0f;
+    *minZ = 0.0f;
+    rec = (FldSceneRecord *)D_003BAEDC;
+    for (; room < D_003BAEE0; room++, rec++) {
+        item = rec->items;
+        for (i = 0; i < rec->count; i++, item++) {
+            visible = 0;
+            if (fldGetFloorFlag(D_003BAEB0, room, i) != 0) {
+                visible = 1;
+            }
+            if (D_003BAEAC != 0) {
+                visible = 1;
+            }
+            if (visible != 0) {
+                a = item->pointA;
+                if (a != NULL) {
+                    if (*minX > a->x) {
+                        *minX = a->x;
+                    }
+                    b = item->pointB;
+                    if (*minX > b->x) {
+                        *minX = b->x;
+                    }
+                    if (*maxX < a->x) {
+                        *maxX = a->x;
+                    }
+                    if (*maxX < b->x) {
+                        *maxX = b->x;
+                    }
+                    if (*maxZ < a->z) {
+                        *maxZ = a->z;
+                    }
+                    if (*maxZ < b->z) {
+                        *maxZ = b->z;
+                    }
+                    if (a->z < *minZ) {
+                        *minZ = a->z;
+                    }
+                    if (b->z < *minZ) {
+                        *minZ = b->z;
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_001411F0", fldCheckSceneReady);
@@ -1121,7 +1242,113 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0698);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A06B0);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001479B8);
+extern void *func_00288A80(const char *);
+extern void func_00288C50(void *);
+extern void func_00288788(void *);
+extern s32 sdfMemoryGetBlockAddress(s32);
+extern s32 D_003BD7EC, D_003BD7F0, D_003BAF68, D_003BAF6C, D_003BAF50, D_003BAF54;
+extern s32 D_003BAF74, D_003BAF78, D_003BAF5C, D_003BAF60, D_003BAF84, D_003BAF88;
+extern s32 D_003BAF44, D_003BAF48, D_003BD7D4, D_003BD7D8, D_003BD7DC, D_003BD7E0;
+extern s32 D_003BD7E4, D_003BD7E8;
+
+typedef struct FldLbNode {
+    struct FldLbNode *next; /* 0x00 */
+    u8 unk04[4];
+    s32 value;              /* 0x08 */
+} FldLbNode;
+
+typedef struct FldLbFile {
+    u8 unk00[0x60];
+    FldLbNode *nodes; /* 0x60 */
+} FldLbFile;
+
+#define FLD_WORK ((FldCamPose *)D_0032E3B0)
+
+void func_001479B8(void) {
+    FldLbFile *lb;
+    FldLbNode *node;
+    u32 index;
+    s32 value;
+
+    index = 0;
+    lb = func_00288A80("/fld/f/bin/fldmix.LB");
+    func_00288C50(lb);
+    for (node = lb->nodes; node != NULL; node = node->next, index++) {
+        switch (index) {
+        case 0:
+            value = node->value;
+            D_003BD7EC = value;
+            D_003BD7F0 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 1:
+            value = node->value;
+            D_003BAF68 = value;
+            D_003BAF6C = sdfMemoryGetBlockAddress(value);
+            break;
+        case 2:
+            value = node->value;
+            D_003BAF50 = value;
+            D_003BAF54 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 3:
+            value = node->value;
+            D_003BAF74 = value;
+            D_003BAF78 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 4:
+            value = node->value;
+            D_003BAF5C = value;
+            D_003BAF60 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 5:
+            value = node->value;
+            D_003BAF84 = value;
+            D_003BAF88 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 6:
+            value = node->value;
+            D_003BAF44 = value;
+            D_003BAF48 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 7:
+            value = node->value;
+            D_003BD7D4 = value;
+            D_003BD7D8 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 8:
+            value = node->value;
+            D_003BD7DC = value;
+            D_003BD7E0 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 9:
+            value = node->value;
+            D_003BD7E4 = value;
+            D_003BD7E8 = sdfMemoryGetBlockAddress(value);
+            break;
+        case 10:
+            value = node->value;
+            FLD_WORK->fldmix[0].value = value;
+            FLD_WORK->fldmix[0].block = sdfMemoryGetBlockAddress(value);
+            break;
+        case 11:
+            value = node->value;
+            FLD_WORK->fldmix[1].value = value;
+            FLD_WORK->fldmix[1].block = sdfMemoryGetBlockAddress(value);
+            break;
+        case 12:
+            value = node->value;
+            FLD_WORK->fldmix[2].value = value;
+            FLD_WORK->fldmix[2].block = sdfMemoryGetBlockAddress(value);
+            break;
+        case 13:
+            value = node->value;
+            FLD_WORK->fldmix[3].value = value;
+            FLD_WORK->fldmix[3].block = sdfMemoryGetBlockAddress(value);
+            break;
+        }
+    }
+    func_00288788(lb);
+}
 
 extern s32 D_003BAF48, D_003BAF4C, D_003BAF40, D_003BAF3C;
 extern s32 D_003BAF30, D_003BAF34, D_003BAF38;
@@ -1982,8 +2209,35 @@ u32 func_0014D478(void) {
     return 1;
 }
 
-extern void func_0012DB70(s32 *);
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D498);
+typedef struct FldObjModel {
+    u8 unk00[0x40];
+    f32 pos[3]; /* 0x40 */
+} FldObjModel;
+
+typedef struct FldObj {
+    u8 unk00[0x1C];
+    FldObjModel *model; /* 0x1C */
+} FldObj;
+
+extern void func_0012DB70(void);
+
+s32 func_0014D498(void) {
+    FldCamPose *work;
+    FldObj *obj;
+    u64 world = dds3GetWorldSecondaryObject();
+
+    obj = func_00110A48(world, func_0010D428(0), 4);
+    if (obj == NULL) {
+        return 1;
+    }
+    work = (FldCamPose *)D_0032E3B0;
+    work->unk50 = 1;
+    work->focusPos[0] = obj->model->pos[0];
+    work->focusPos[1] = obj->model->pos[1];
+    work->focusPos[2] = obj->model->pos[2];
+    func_0012DB70();
+    return 1;
+}
 
 extern FldVec3 D_00330610;
 extern FldVec3 D_00330620;
@@ -2507,7 +2761,28 @@ s32 func_0014E748(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014E7D0);
+extern void fldSetMapSlotByte(s32, s32, s32, s32);
+
+s32 func_0014E7D0(void) {
+    s32 world;
+    s32 stage;
+    s32 slot;
+
+    world = func_0010D428(0);
+    if (world == 0) {
+        world = D_0032E3C0[0];
+    }
+    stage = func_0010D428(1);
+    if (stage == 0) {
+        stage = D_0032E3C4[0] + 1;
+    }
+    slot = func_0010D428(2);
+    if (slot == 0) {
+        return 1;
+    }
+    fldSetMapSlotByte(world, stage, slot, func_0010D428(3));
+    return 1;
+}
 
 extern void fldSetFlagBit(s32, s32, s32);
 s32 func_0014E870(void) {

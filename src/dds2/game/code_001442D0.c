@@ -14,8 +14,16 @@ typedef struct FldWorkView {
     f32 focusPos[3];      /* 0x30 */
     u8 unk3C[0x14];
     s32 focusActive;      /* 0x50 */
-    u8 unk54[0xB0];
+    u8 unk54[0x10];
+    f32 negatedAngle;     /* 0x64 */
+    u8 unk68[0x9C];
     s16 eventActive;      /* 0x104 */
+    u8 unk106[0x46];
+    f32 x;                /* 0x14C */
+    f32 y;
+    f32 z;
+    u8 unk158[0x18];
+    f32 angle;            /* 0x170 */
 } FldWorkView;
 
 typedef struct FldSlot0C {
@@ -1522,7 +1530,20 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_004137C8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B0F8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B440);
+extern s32 D_003A8E60[];
+extern s32 func_001579C8();
+extern char *D_00413860[4];
+void func_0014B440(void) {
+    char *names[4];
+    s32 i;
+
+    memcpy(names, D_00413860, sizeof(names));
+    for (i = 0; i < 4; i++) {
+        D_003A8E30[i] = func_00343ED0(names[i], &D_003A8E40[i], 0);
+        D_003A8E50[i] = func_001579C8(D_003A8E40[i]);
+        D_003A8E60[i] = 0;
+    }
+}
 
 void fldReleaseTextureSlots(void) {
     s32 i;
@@ -1587,7 +1608,23 @@ void mnuInitializeResourceEntries(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B860);
+extern s32 D_00436348;
+
+void func_0014B860(f32 x, f32 y, f32 z) {
+    f32 pos[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    s32 handle;
+
+    handle = D_003A8E70[D_00436348];
+    if (handle != 0) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        func_001576D8(handle);
+        func_00157790(D_003A8E70[D_00436348], pos);
+        D_003A8E80[D_00436348] = 1;
+        D_00436348 = (D_00436348 + 1) % 4;
+    }
+}
 
 void func_0014B940(f32 arg0, f32 arg1, f32 arg2) {
     D_00436340 = 1;
@@ -1903,13 +1940,36 @@ void fldFireRoomEffects(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014E3A8);
-
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 func_0033EB10(u32, void *, u32);
+extern void func_0033EAE0(u32);
 typedef struct FldNpcPalette {
     u32 word[0x80];
 } FldNpcPalette; /* 0x200 bytes */
 
 extern FldNpcPalette D_0044FD90;
+
+void func_0014E3A8(s32 field) {
+    char path[64];
+    char directory[32];
+    u32 command;
+
+    if (field < 100) {
+        fldFormatAreaDirectory(directory, field, 1);
+        if (field == 23 && mdlFlagTest(25) != 0) {
+            func_0035C860(path, "%sF033.NPL", directory);
+        } else if (field == 24 && mdlFlagTest(25) != 0) {
+            func_0035C860(path, "%sF034.NPL", directory);
+        } else if (field == 27 && mdlFlagTest(25) != 0) {
+            func_0035C860(path, "%sF037.NPL", directory);
+        } else {
+            func_0035C860(path, "%sF%03d.NPL", directory, field);
+        }
+        command = sdfDevCreateCommandState(path);
+        func_0033EB10(command, &D_0044FD90, 0x200);
+        func_0033EAE0(command);
+    }
+}
 
 void fldSetNpcPalette(FldNpcPalette *src) {
     D_0044FD90 = *src;
@@ -2737,9 +2797,76 @@ void func_00154540(f32 *x, f32 *y) {
     *y = D_004363E4;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154558);
+extern s32 func_0013D308(s32, void *);
+extern s32 func_0013D598(s32, void *);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154628);
+s32 func_00154558(void) {
+    s32 world = dds3GetWorldObject();
+    s32 unit = D_00435F0C;
+    void *entry;
+    s32 result;
+
+    if (unit == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    entry = func_00110C70(world, fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4)), 0x11);
+    if (entry == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    if (func_0013D308(unit, entry) == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    func_001442A0(func_0010D650(0));
+    func_00144270(1);
+    result = func_001442D0();
+    switch (result) {
+    case 1:
+        func_0010D818(1);
+        return 1;
+    case -1:
+        func_0010D818(-1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
+
+s32 func_00154628(void) {
+    s32 world = dds3GetWorldObject();
+    s32 unit = D_00435F0C;
+    void *entry;
+    s32 result;
+
+    if (unit == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    entry = func_00110C70(world, fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4)), 0x11);
+    if (entry == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    if (func_0013D598(unit, entry) == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    func_001442A0(func_0010D650(0));
+    func_00144270(1);
+    result = func_001442D0();
+    switch (result) {
+    case 1:
+        func_0010D818(1);
+        return 1;
+    case -1:
+        func_0010D818(-1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
 
 extern void func_001442A0(s32);
 extern void func_00144270(s32);
@@ -2762,7 +2889,27 @@ s32 func_001546F8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154758);
+s32 func_00154758(void) {
+    s32 world = dds3GetWorldObject();
+    s32 unit = D_00435F0C;
+    void *entry;
+
+    if (unit == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    entry = func_00110C70(world, fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4)), 0x11);
+    if (entry == 0) {
+        func_0010D818(0);
+        return 1;
+    }
+    if (func_0013D308(unit, entry) == 0) {
+        func_0010D818(0);
+    } else {
+        func_0010D818(1);
+    }
+    return 1;
+}
 
 extern void func_00133C18(void);
 
@@ -2835,7 +2982,41 @@ s32 func_001548C0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldUpdateLookAtSegment);
+typedef struct FldVec3 {
+    f32 x;
+    f32 y;
+    f32 z;
+} FldVec3;
+extern f32 D_0038BAB0[];
+extern f32 func_003406A0(f32);
+extern f32 func_003407A0(f32);
+extern s32 func_00133B10();
+extern void func_00133A00();
+extern void func_0012F078();
+s32 fldUpdateLookAtSegment(void) {
+    FldWorkView *cam = (FldWorkView *)D_00389770;
+    FldVec3 near;
+    FldVec3 far;
+
+    cam->focusActive = 0;
+    cam->negatedAngle = -cam->angle;
+    near.x = cam->x - func_003406A0((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.y = cam->y - 200.0f - 10.0f + 60.0f;
+    near.z = cam->z + func_003407A0((cam->angle + 180.0f) * 3.14f / 180.0f);
+    far.x = cam->x + func_003406A0(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.y = cam->y - 200.0f - 10.0f + 60.0f;
+    far.z = cam->z + func_003407A0(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    D_0038BAB0[0] = near.x;
+    D_0038BAB0[1] = near.y;
+    D_0038BAB0[2] = near.z;
+    D_0038BAC0[0] = far.x;
+    D_0038BAC0[1] = far.y;
+    D_0038BAC0[2] = far.z;
+    func_00133B10();
+    func_00133A00();
+    func_0012F078();
+    return 1;
+}
 
 s32 func_00154AE8(void) {
     D_003897C0[0] = 3;
@@ -2990,11 +3171,131 @@ s32 func_00155090(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00155108);
+extern void func_00122F38(s32, s32, s32, s32);
+extern s64 func_00110628(u64);
+extern s64 func_001106D8(u64);
+extern u64 func_00110CD8(u64, u64);
+extern void dds3DestroyWorldIndexNode(u64);
+extern s32 func_001106B8(u64);
+typedef struct FldWorldItem {
+    u8 pad0[0x18];
+    s32 *data;
+} FldWorldItem;
+extern FldWorldItem *func_00110680(u64);
+extern void func_00114048(FldWorldItem *, s32);
+
+s32 func_00155108(void) {
+    s32 world;
+    s32 stage;
+    s32 mode;
+    char *name;
+    s32 room;
+    u64 list;
+    FldWorldItem *item;
+
+    world = func_0010D650(0);
+    if (world == 0) {
+        world = D_00389770[4];
+    }
+    stage = func_0010D650(1);
+    if (stage == 0) {
+        stage = D_00389770[5] + 1;
+    }
+    mode = func_0010D650(3);
+    name = func_0010D7D0(2);
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            func_00122F38(world, stage, room, 0);
+        }
+    } else {
+        room = func_00154FA0(name);
+        func_00122F38(world, stage, room, 0);
+    }
+    if (world == D_00389770[4] && stage == D_00389770[5] + 1) {
+        list = func_00110CD8(dds3GetWorldSecondaryObject(), 6);
+        if (func_00110628(list) != 0) {
+            func_001106B8(list);
+            do {
+                item = func_00110680(list);
+                if (item->data[1] == room) {
+                    switch (mode) {
+                    case 0:
+                        func_00114048(item, 1);
+                        break;
+                    case 1:
+                        func_00114048(item, 5);
+                        break;
+                    case 2:
+                        func_00114048(item, 7);
+                        break;
+                    }
+                }
+            } while (func_001106D8(list) != 0);
+            dds3DestroyWorldIndexNode(list);
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001552E0);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00155498);
+extern char *D_004361D4;
+
+s32 func_00155498(void) {
+    s32 world;
+    s32 stage;
+    s32 mode;
+    char *name;
+    s32 room;
+    u64 list;
+    FldWorldItem *item;
+
+    world = func_0010D650(0);
+    if (world == 0) {
+        world = D_00389770[4];
+    }
+    stage = func_0010D650(1);
+    if (stage == 0) {
+        stage = D_00389770[5] + 1;
+    }
+    mode = func_0010D650(3);
+    name = func_0010D7D0(2);
+    if (strcmp(name, D_004363F0) == 0) {
+        name = D_004361D4;
+    }
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            func_00122F38(world, stage, room, 1);
+        }
+    } else {
+        room = func_00154FA0(name);
+        func_00122F38(world, stage, room, 1);
+    }
+    if (world == D_00389770[4] && stage == D_00389770[5] + 1) {
+        list = func_00110CD8(dds3GetWorldSecondaryObject(), 6);
+        if (func_00110628(list) != 0) {
+            func_001106B8(list);
+            do {
+                item = func_00110680(list);
+                if (item->data[1] == room) {
+                    switch (mode) {
+                    case 0:
+                        func_00114048(item, 2);
+                        break;
+                    case 1:
+                        func_00114048(item, 6);
+                        break;
+                    case 2:
+                        func_00114048(item, 8);
+                        break;
+                    }
+                }
+            } while (func_001106D8(list) != 0);
+            dds3DestroyWorldIndexNode(list);
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00155690);
 
