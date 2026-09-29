@@ -139,14 +139,14 @@ typedef struct EffKindDesc {
     u32 size;                     // 0x10
 } EffKindDesc; // 0x14
 
-/* Effect work created from a kind descriptor: 0x40-byte header followed by a copy of the source payload. */
+/* Effect work created from a kind descriptor: 0x30-byte header followed by a copy of the source payload. */
 typedef struct EffKindWork {
     u8 vec[0x10];     // 0x00
     s32 mode;         // 0x10
     u32 color;        // 0x14
     f32 scale;        // 0x18
     s32 kind;         // 0x1C
-    u8 pad_0x20[4];   // 0x20
+    u32 frame;       // 0x20, incremented by the kind callback dispatcher
     u32 handle;       // 0x24
     void *payload;    // 0x28
     void *target;     // 0x2C
@@ -1337,13 +1337,13 @@ s32 func_002DFED8(s32 *source) {
 }
 
 void func_002DFF78(s32 arg0) {
-    *(u32 *)(arg0 + 0x20) = 0;
+    ((EffKindWork *)arg0)->frame = 0;
 }
 
 void func_002DFF80(s32 *work) {
-    D_003E9818[work[0x1C / 4]].callback();
+    D_003E9818[((EffKindWork *)work)->kind].callback();
     if ((D_00437E08 & 2) == 0) {
-        work[0x20 / 4]++;
+        ((EffKindWork *)work)->frame++;
     }
 }
 
@@ -1433,15 +1433,15 @@ s32 func_002E0250(s32 *source) {
 }
 
 void func_002E02F0(s32 arg0) {
-    *(u32 *)(arg0 + 0x20) = 0;
+    ((EffKindWork *)arg0)->frame = 0;
 }
 
 extern Dispatch20 D_003E98A8[];
 
 void func_002E02F8(s32 *work) {
-    D_003E98A8[work[0x1C / 4]].callback();
+    D_003E98A8[((EffKindWork *)work)->kind].callback();
     if ((D_00437E08 & 2) == 0) {
-        work[0x20 / 4]++;
+        ((EffKindWork *)work)->frame++;
     }
 }
 
@@ -2053,7 +2053,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E3008);
 
 void func_002E35F0(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
@@ -2070,7 +2070,7 @@ void func_002E35F0(u8 *work) {
     }
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
     __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
@@ -2110,7 +2110,7 @@ void func_002E35F0(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002E5E88(out, mtx);
 }
 
@@ -2190,7 +2190,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E39B0);
 
 void func_002E4070(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
@@ -2207,7 +2207,7 @@ void func_002E4070(u8 *work) {
     }
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = ((BillCellDrawWork *)work)->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -2267,7 +2267,7 @@ void func_002E4070(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002E5E88(out, mtx);
 }
 
@@ -2299,7 +2299,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4320);
 
 void func_002E4AC8(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
@@ -2316,7 +2316,7 @@ void func_002E4AC8(u8 *work) {
     }
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = ((BillCellDrawWork *)work)->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -2376,7 +2376,7 @@ void func_002E4AC8(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002E5E88(out, mtx);
 }
 
@@ -2456,7 +2456,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4E80);
 
 void func_002E5540(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
@@ -2473,7 +2473,7 @@ void func_002E5540(u8 *work) {
     }
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = ((BillCellDrawWork *)work)->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -2533,7 +2533,7 @@ void func_002E5540(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002E5E88(out, mtx);
 }
 
@@ -3415,7 +3415,7 @@ extern s32 D_0037F550[4];
 extern s32 effMiscRand(s32 *);
 
 void effRandomizeParticleFields(s32 *work) {
-    u32 count = *(u32 *)(work[0x34 / 4] + 0x38);
+    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++, entry += 4) {
@@ -3429,7 +3429,7 @@ extern void func_002EE0A8(s32);
 
 void effFreeIndexedEntries(u8 *work) {
     u32 *header = *(u32 **)(work + 0x30);
-    u32 count = *(u32 *)(*(u8 **)(work + 0x34) + 0x38);
+    u32 count = ((EffBillConfig *)*(u8 **)(work + 0x34))->frames.count;
     u32 *entry = (u32 *)header[0];
     u32 i;
 
@@ -3447,7 +3447,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002EB728);
 extern void effResetDispatchCounter(u8 *);
 
 void func_002EB908(s32 *work) {
-    u32 count = *(u32 *)(work[0x34 / 4] + 0x38);
+    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++) {
@@ -3461,7 +3461,7 @@ extern void func_002EDE10(s32);
 
 void func_002EBB88(u8 *work) {
     u32 *header = *(u32 **)(work + 0x30);
-    u32 count = *(u32 *)(*(u8 **)(work + 0x34) + 0x38);
+    u32 count = ((EffBillConfig *)*(u8 **)(work + 0x34))->frames.count;
     u32 *entry = (u32 *)header[0];
     u32 i;
 
@@ -3474,7 +3474,7 @@ void func_002EBB88(u8 *work) {
 extern void func_002EDEC0();
 
 void effReleaseTrackEntriesA(u8 *work) {
-    u32 count = *(u32 *)(*(u8 **)(work + 0x34) + 0x38);
+    u32 count = ((EffBillConfig *)*(u8 **)(work + 0x34))->frames.count;
     u32 **entry = *(u32 ***)*(u8 **)(work + 0x30);
     u32 i;
 
@@ -3491,7 +3491,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002EBF40);
 
 void func_002EC300(u8 *work) {
     u32 *header = *(u32 **)(work + 0x30);
-    u32 count = *(u32 *)(*(u8 **)(work + 0x34) + 0x38);
+    u32 count = ((EffBillConfig *)*(u8 **)(work + 0x34))->frames.count;
     u32 *entry = (u32 *)header[0];
     u32 i;
 
@@ -3507,7 +3507,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002EC370);
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002ECD10);
 
 void func_002ECEF0(s32 *work) {
-    u32 count = *(u32 *)(work[0x34 / 4] + 0x38);
+    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++, entry += 3) {
@@ -3518,7 +3518,7 @@ void func_002ECEF0(s32 *work) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002ECF78);
 
 void func_002ED360(s32 *work) {
-    u32 count = *(u32 *)(work[0x34 / 4] + 0x38);
+    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
     s32 *entries = (s32 *)work[0x30 / 4];
     s32 *entry = (s32 *)*entries;
     u32 i;
@@ -3702,7 +3702,7 @@ void func_002EEDA8(u8 *p, f32 value) {
 void effResetBillTable(u8 *p) {
     u8 *a = *(u8 **)(p + 0x30);
     u8 *b = *(u8 **)(p + 0x34);
-    u32 n = *(u32 *)(b + 0x38);
+    u32 n = ((EffBillConfig *)b)->frames.count;
     u32 *counts = *(u32 **)(*(u8 **)(a + 4) + 0x1C);
     u8 *rec = *(u8 **)a;
     u32 i;
@@ -3818,7 +3818,7 @@ void func_002EEE88(u8 *node, u8 *config) {
 
 u32 *func_002EF0D0(u8 *p, u32 a1) {
     u32 *buf = (u32 *)func_002EEE18(p);
-    buf[1] = func_002F1740(*(u32 *)(p + 0x38), *(u32 *)(p + 0x8C), a1);
+    buf[1] = func_002F1740(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
     func_002EEE88(buf, p);
     return buf;
 }
@@ -3844,7 +3844,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002EF1C0);
 
 void func_002EF8C0(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
@@ -3861,7 +3861,7 @@ void func_002EF8C0(u8 *work) {
     }
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
     __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
@@ -3901,14 +3901,14 @@ void func_002EF8C0(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002F1888(out, mtx);
 }
 
 void func_002EFA28(u8 *p) {
     u8 *a = *(u8 **)(p + 0x30);
     u8 *b = *(u8 **)(p + 0x34);
-    u32 n = *(u32 *)(b + 0x38);
+    u32 n = ((EffBillConfig *)b)->frames.count;
     u32 *counts = *(u32 **)(*(u8 **)(a + 4) + 0x1C);
     u8 *rec = *(u8 **)a;
     u32 i;
@@ -4003,7 +4003,7 @@ void func_002EFAE8(u8 *node, u8 *config) {
 
 u32 *func_002EFD30(u8 *p, u32 a1) {
     u32 *buf = (u32 *)func_002EFA78(p);
-    buf[1] = func_002F1740(*(u32 *)(p + 0x38), *(u32 *)(p + 0x8C), a1);
+    buf[1] = func_002F1740(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
     func_002EFAE8(buf, p);
     return buf;
 }
@@ -4093,7 +4093,7 @@ void func_002F0530(BillCellDrawWork *work) {
 void func_002F0698(u8 *p) {
     u8 *a = *(u8 **)(p + 0x30);
     u8 *b = *(u8 **)(p + 0x34);
-    u32 n = *(u32 *)(b + 0x38);
+    u32 n = ((EffBillConfig *)b)->frames.count;
     u32 *counts = *(u32 **)(*(u8 **)(a + 4) + 0x1C);
     u8 *rec = *(u8 **)a;
     u32 i;
@@ -4188,7 +4188,7 @@ void func_002F0760(u8 *node, u8 *config) {
 
 u32 *func_002F09A8(u8 *p, u32 a1) {
     u32 *buf = (u32 *)func_002F06E8(p);
-    buf[1] = func_002F1740(*(u32 *)(p + 0x38), *(u32 *)(p + 0x8C), a1);
+    buf[1] = func_002F1740(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
     func_002F0760(buf, p);
     return buf;
 }
@@ -4214,7 +4214,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F0A98);
 
 void func_002F10C0(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
@@ -4231,7 +4231,7 @@ void func_002F10C0(u8 *work) {
     }
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
     __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
@@ -4281,7 +4281,7 @@ void func_002F10C0(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002F1888(out, mtx);
 }
 
@@ -4436,7 +4436,7 @@ u32 func_002F1CC8(void) {
 void func_002F1CD0(u8 *p) {
     u8 *a = *(u8 **)(p + 0x30);
     u8 *b = *(u8 **)(p + 0x34);
-    u32 n = *(u32 *)(b + 0x38);
+    u32 n = ((EffBillConfig *)b)->frames.count;
     u32 *counts = *(u32 **)(*(u8 **)(a + 4) + 0x18);
     u8 *rec = *(u8 **)a;
     u32 i;
@@ -4465,7 +4465,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F1D90);
 
 u32 *effPrepareTextureAnimation(u8 *src) {
     u32 *buf = (u32 *)effAllocateAnimationBuffer(src);
-    buf[1] = func_002F3ED8(*(u32 *)(src + 0x38), *(u32 *)(src + 0x8C));
+    buf[1] = func_002F3ED8(((EffBillConfig *)src)->frames.count, ((EffBillConfig *)src)->resourceId);
     func_002F1D90(buf, src);
     return buf;
 }
@@ -4827,21 +4827,21 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
 }
 
 void effResetModelResourceUpdateCount(u8 *work) {
-    D_003E9F08[*(s32 *)(work + 0x2c)].fn();
-    *(u32 *)(work + 0x28) = 0;
+    D_003E9F08[((EffModelResource *)work)->kind].fn();
+    ((EffModelResource *)work)->updateCount = 0;
 }
 
 void func_002F5638(work)
 s32 *work;
 {
     if ((D_00437E08 & 2) == 0) {
-        D_003E9F14[work[0x2C / 4]].fn();
-        work[0x28 / 4]++;
+        D_003E9F14[((EffModelResource *)work)->kind].fn();
+        ((EffModelResource *)work)->updateCount++;
     }
 }
 
 void func_002F5698(s32 arg0) {
-    D_003E9F18[*(s32 *)(arg0 + 0x2C)].fn((void *)arg0);
+    D_003E9F18[((EffModelResource *)arg0)->kind].fn((void *)arg0);
 }
 
 void effStepModelResourceCallbacks(u32 arg0) {
@@ -5624,19 +5624,19 @@ void effAdvanceCallbackFrame(work)
 u8 *work;
 {
     if (func_001AA308() != 0 && (D_00437E08 & 2) == 0) {
-        s32 kind = *(s32 *)(work + 0x2C);
+        s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
         FnTbl28 *entry = &D_003EA028[kind];
         void (*callback)(void *) = entry->fn;
         if (callback != NULL) {
             callback(work);
         }
-        (*(s32 *)(work + 0x28))++;
+        ((EffActiveResource *)work)->frame++;
     }
 }
 
 void effDispatchEnabledCallback(u8 *work) {
     if (func_001AA308() != 0) {
-        void (*callback)(void *) = D_003EA02C[*(s32 *)(work + 0x2C)].fn;
+        void (*callback)(void *) = D_003EA02C[((EffActiveResource *)work)->kind.signedIndex].fn;
         if (callback != NULL) {
             callback(work);
         }
@@ -6163,6 +6163,21 @@ typedef struct EffQueueRecord {
     u8 pad_68[8];
 } EffQueueRecord;
 
+/* Asset selection request and table entry use different ID offsets. */
+typedef struct EffAssetRequest {
+    u8 pad_00[4];
+    u16 type;       // 0x04
+    u8 pad_06[6];
+    u16 id;         // 0x0C
+} EffAssetRequest;
+
+typedef struct EffAssetIdentifier {
+    u8 pad_00[4];
+    u16 type;       // 0x04
+    u8 pad_06[2];
+    u16 id;         // 0x08
+} EffAssetIdentifier;
+
 s32 effPollPrimaryFile(void) {
     u8 request[0x70];
     char path[0x70];
@@ -6231,8 +6246,8 @@ s32 effPollAttachedFile(void) {
 
 u8 *func_002FC8F8(u8 *work) {
     u8 *requested = *(u8 **)(work + 0x90);
-    u16 type = *(u16 *)(requested + 4);
-    u16 id = *(u16 *)(requested + 0xC);
+    u16 type = ((EffAssetRequest *)requested)->type;
+    u16 id = ((EffAssetRequest *)requested)->id;
     u16 i;
     for (i = 0; i < 24; i++) {
         EffectAssetLink *links = D_003FF128[i];
@@ -6241,12 +6256,12 @@ u8 *func_002FC8F8(u8 *work) {
             if (current->asset != NULL) {
                 do {
                     u8 *asset = current->asset;
-                    if (*(u16 *)(asset + 4) != 6) {
-                        if (*(u16 *)(asset + 4) == type && *(u16 *)(asset + 8) == id) {
+                    if (((EffAssetIdentifier *)asset)->type != 6) {
+                        if (((EffAssetIdentifier *)asset)->type == type && ((EffAssetIdentifier *)asset)->id == id) {
                             return asset;
                         }
                     } else if (type == 6) {
-                        s32 index = *(u16 *)(asset + 8);
+                        s32 index = ((EffAssetIdentifier *)asset)->id;
                         if (index < 2) {
                             if (index >= 0) {
                                 return asset;
@@ -6263,8 +6278,8 @@ u8 *func_002FC8F8(u8 *work) {
 
 u32 func_002FC9B8(u8 *work) {
     u8 *requested = *(u8 **)(work + 0x90);
-    u16 type = *(u16 *)(requested + 4);
-    u16 id = *(u16 *)(requested + 0xC);
+    u16 type = ((EffAssetRequest *)requested)->type;
+    u16 id = ((EffAssetRequest *)requested)->id;
     u16 i;
     for (i = 0; i < 24; i++) {
         EffectAssetLink *links = D_003FF128[i];
@@ -6273,7 +6288,7 @@ u32 func_002FC9B8(u8 *work) {
             if (current->asset != NULL) {
                 do {
                     u8 *asset = current->asset;
-                    if (*(u16 *)(asset + 4) == type && *(u16 *)(asset + 8) == id) {
+                    if (((EffAssetIdentifier *)asset)->type == type && ((EffAssetIdentifier *)asset)->id == id) {
                         return current->object;
                     }
                     current++;
@@ -7133,6 +7148,27 @@ typedef struct EffMappingRequest {
     s32 object;          // 0x0C
 } EffMappingRequest;
 
+/* Parameters passed to the mapping dispatcher from distinct object channels. */
+typedef struct EffMappingObject {
+    u8 pad_00[0x34];
+    union { u32 bits; s32 signedValue; } value34; // 0x34
+    u32 value38;       // 0x38
+    u8 pad_3C[0x34];
+    u32 value70;       // 0x70
+    u8 pad_74[0x0C];
+    u32 value80;       // 0x80
+    u32 value84;       // 0x84
+    u8 pad_88[4];
+    s32 value8C;       // 0x8C
+    u8 pad_90[0x28];
+    union { u32 bits; s32 signedValue; } valueB8; // 0xB8
+    u8 pad_BC[0x18];
+    s32 valueD4;       // 0xD4
+    s32 valueD8;       // 0xD8
+    u8 pad_DC[0x18];
+    s32 valueF4;       // 0xF4
+} EffMappingObject;
+
 s32 func_003012B0(s32 arg0) {
     s32 result;
     s32 object = ((EffMappingRequest *)arg0)->object;
@@ -7151,17 +7187,17 @@ s32 func_00301318(s32 arg0) {
 
     D_00400018.table = D_003FFF58;
     D_00400018.count = 8;
-    result = func_00300578(object + 0x48, object + 0x6c, *(s32 *)(object + 0xd4));
+    result = func_00300578(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
     D_00400018.table = D_003FFDD8;
     D_00400018.count = 8;
     return result;
 }
 
 void func_00301380(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0xb8));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
 }
 
 extern u8 D_00459E30[] __attribute__((aligned(4)));
@@ -7176,31 +7212,31 @@ s32 func_003013C8(s32 arg0) {
 
     D_00400018.table = D_003FFF58;
     D_00400018.count = 8;
-    result = func_00300578(object, object + 0x24, *(s32 *)(object + 0x8c));
+    result = func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value8C);
     D_00400018.table = D_003FFDD8;
     D_00400018.count = 8;
     return result;
 }
 
 void func_00301428(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 void func_00301448(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x38));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value38);
 }
 
 void func_00301468(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 s32 func_00301488(s32 arg0) {
@@ -7216,17 +7252,17 @@ s32 func_00301488(s32 arg0) {
 }
 
 void func_003014E8(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 void func_00301508(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 s32 func_00301528(s32 arg0) {
@@ -7235,38 +7271,38 @@ s32 func_00301528(s32 arg0) {
 
     D_00400018.table = D_003FFF58;
     D_00400018.count = 8;
-    result = func_00300578(object + 0x4c, object + 0x70, *(s32 *)(object + 0xd8));
+    result = func_00300578(object + 0x4c, object + 0x70, ((EffMappingObject *)object)->valueD8);
     D_00400018.table = D_003FFDD8;
     D_00400018.count = 8;
     return result;
 }
 
 void func_00301590(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 void func_003015B0(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0 + 0x3c, temp_v0 + 0x60, *(u32 *)(temp_v0 + 0x80));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
 void func_003015D8(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 void func_003015F8(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0 + 0x3c, temp_v0 + 0x60, *(u32 *)(temp_v0 + 0x80));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
 s32 func_00301620(s32 arg0) {
@@ -7275,31 +7311,31 @@ s32 func_00301620(s32 arg0) {
 
     D_00400018.table = D_003FFF58;
     D_00400018.count = 8;
-    result = func_00300578(object + 0x68, object + 0x8c, *(s32 *)(object + 0xf4));
+    result = func_00300578(object + 0x68, object + 0x8c, ((EffMappingObject *)object)->valueF4);
     D_00400018.table = D_003FFDD8;
     D_00400018.count = 8;
     return result;
 }
 
 void func_00301688(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x70));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value70);
 }
 
 void func_003016A8(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0, temp_v0 + 0x24, *(u32 *)(temp_v0 + 0x34));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 void func_003016C8(s32 arg0) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = ((EffMappingRequest *)arg0)->object;
-    func_00300578(temp_v0 + 0x50, temp_v0 + 0x74, *(u32 *)(temp_v0 + 0x84));
+    object = ((EffMappingRequest *)arg0)->object;
+    func_00300578(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
 }
 
 s32 func_003016F0(s32 arg0) {
@@ -7308,7 +7344,7 @@ s32 func_003016F0(s32 arg0) {
 
     D_00400018.table = D_003FFE98;
     D_00400018.count = 8;
-    result = func_00300578(object, object + 0x24, *(s32 *)(object + 0x8c));
+    result = func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value8C);
     D_00400018.table = D_003FFDD8;
     D_00400018.count = 8;
     return result;
