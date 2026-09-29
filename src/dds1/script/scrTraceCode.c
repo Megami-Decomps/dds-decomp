@@ -181,9 +181,45 @@ u32 func_0010CF38(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNegate);
+u32 bfOpNegate(ScrData *scr) {
+    switch (scr->stackTypes[scr->sp - 1]) {
+    case 0:
+        scr->stackValues[scr->sp - 1].i = -scr->stackValues[scr->sp - 1].i;
+        break;
+    case 1:
+        scr->stackValues[scr->sp - 1].f = -scr->stackValues[scr->sp - 1].f;
+        break;
+    case 2:
+        D_003BAA00->ints[scr->stackValues[scr->sp - 1].i] =
+            -D_003BAA00->ints[scr->stackValues[scr->sp - 1].i];
+        break;
+    case 3:
+        D_003BAA00->floats[scr->stackValues[scr->sp - 1].i] =
+            -D_003BAA00->floats[scr->stackValues[scr->sp - 1].i];
+        break;
+    case 4:
+        break;
+    }
+    scr->pc++;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNot);
+u32 bfOpNot(ScrData *scr) {
+    switch (scr->stackTypes[scr->sp - 1]) {
+    case 0:
+    case 2:
+        scrPushInteger(scr, bfStackPopInt(scr) == 0);
+        break;
+    case 1:
+    case 3:
+        scrPushInteger(scr, bfStackPopFloat(scr) == 0.0f);
+        break;
+    case 4:
+        break;
+    }
+    scr->pc++;
+    return 1;
+}
 
 u32 func_0010D100(ScrData *scr)
 {
