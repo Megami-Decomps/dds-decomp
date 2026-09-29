@@ -14,7 +14,7 @@ extern u32 D_003BA958;
 
 extern s32 func_002913B8(void);
 
-extern s32 func_00262938(void);
+extern s32 brsTaskConsumeDone(void);
 
 extern s32 mnuAcknowledgeCampState(void);
 
@@ -673,7 +673,7 @@ u32 func_0010A5E8(void) {
 u8 func_0010A610(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00262938();
+    temp_v0 = brsTaskConsumeDone();
     return temp_v0 == 0;
 }
 
@@ -854,7 +854,7 @@ u32 func_0010A9D0(void) {
 u8 func_0010A9F0(void) {
     s64 temp_v0;
 
-    temp_v0 = func_00262938();
+    temp_v0 = brsTaskConsumeDone();
     return temp_v0 == 0;
 }
 

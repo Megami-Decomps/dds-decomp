@@ -1300,16 +1300,28 @@
 0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26
 0x002605B0	mnuSetCommandPhase	inferred	Stores a phase code in menu command work and resets its elapsed frame counter.
 0x002605C0	mnuStaffTickState	inferred	mnu 4-state counter returning next state
+0x00261F58	brsTaskStart	inferred	battle-result staff task entry: calls mnuStaffCreateTasks, clears the update-allowed latch D_003BC52A and sets the blocked latch D_003BC52B
+0x00261F80	brsTaskIsUpdateBlocked	inferred	reads D_003BC52B, the latch that brsTaskIsUiUpdateAllowed clears
+0x00261F88	brsTaskAllowUpdate	inferred	sets D_003BC52A=1 (the companion of the blocked latch) and reports success
+0x00261F98	brsTaskPollDone	inferred	polls the battle-result task state machine (wraps func_00262938)
+0x00261FB0	brsTaskHasPendingRows	inferred	reads D_003BC529, latched by brsTaskLatchPendingRows from context+0x344
+0x00262038	gstApplyBundleMacca	inferred	adds the u32 macca field at +0xC of the reward bundle whose first 0x10 bytes gstApplyCounterDeltaTable walks as three MenuIconRefs
 0x00262050	ptyClampExp	inferred	legacy PartyUnit_ClampExpToLevel99Cap: clamps a unit's accumulated EXP to the level-99 cap
 0x00262148	brsApplyPartyRewards	inferred	legacy BattleResult_ApplyPartyRewardDeltas: applies EXP/level/profile deltas to a party row
 0x002622B0	brsApplyRewardBundle	inferred	legacy BattleResult_ApplyRewardBundle: applies the 3-entry counter-table helper, the row-macca helper, then brsApplyPartyRewards
 0x00262300	brsOpenSkillPackagePanel	inferred	legacy ProfileCapReward_OpenPendingSkillPackagePanel: builds the panel group/list entries and forwards the current row's profile-cap table byte
+0x00262398	brsCloseSkillPackagePanel	inferred	mirror of brsOpenSkillPackagePanel: clears the entry list, shuts the context at +0x680, destroys the panel group at +0xD10 and the sprite state at +0xD14, releases assets at +0xD1C and the resource groups at +0x4F8, then resets work floats
 0x00262418	mnuStaffInitPanel	inferred	mnu loads nr_sta01.spr resources and fades in
+0x002624C0	brsAdvanceSkillPackagePanel	inferred	step function that opens the skill-package panel once the fade/assets/entry list are ready (sets the +0x570 state to 2 and fades out); returns 1 while it must still wait
 0x00262570	brsMarkPartyRows	inferred	legacy BattleResult_MarkPartyRowsFromDeltaList: marks party rows from a delta list payload
 0x00262640	brsTaskLatchPendingRows	inferred	legacy BattleResultTask_LatchHasPendingFollowupRows: latches data_3bc529 from ctx+0x344
 0x00262660	brsCreateTaskContext	inferred	legacy BattleResultTask_CreateContextAndBuildRows: allocates the result task context and builds its rows
+0x00262790	brsStaffTaskDestroy	inferred	mnuStaffRunPanel2 destroy callback: flushes the panel context, destroys it if brsAdvanceSkillPackagePanel never completed, releases the queue/effect handles and leaves D_003BC528 at 2
 0x00262818	mnuStaffCreateTasks	inferred	mnu creates the three staff roll tasks (405/2B15/5211 priorities)
 0x002628C8	mnuStaffDestroyTasks	inferred	mnu destroys the three staff roll tasks and marks state 1
+0x00262938	brsTaskConsumeDone	inferred	consumes the battle-result task done state: D_003BC528==1 -> busy, ==2 -> reset to 0
+0x00262970	brsTaskTryDestroy	inferred	destroys the battle-result tasks when D_003BC528==1
+0x00262A88	brsTaskIsFadeIdle	inferred	battle-result gate: false while the fade is active, otherwise true unless the title effect is still running (func_002877A8() != 1)
 0x00262AC0	mnuRefreshSelectedUnitPanels	inferred	legacy LevelUpMenu_RefreshSelectedUnitPanels: refreshes the selected-unit stat/vital panel slots after a preview/restore change
 0x00262AF8	mnuStaffCopyPanelBlock	inferred	mnu copies a 0x1A4 byte panel block into work+0x9C
 0x00262BA8	mnuStaffPickRoll	inferred	mnu picks a table entry by a random byte
@@ -1337,6 +1349,8 @@
 0x002650B8	mnuClearTitleState	inferred	Zeros the title work state at offset 0x1574.
 0x00265220	itfDrawCountText	inferred	itf formats count text and draws right aligned
 0x00265478	mnuRefreshPanelLayer	inferred	redraws panel pieces then calls func_002653A0
+0x00265500	brsGetLevelStepForValue	inferred	maps a value to the battle-result LevelStep whose threshold it reaches: scans D_00370D08 (LevelStep{threshold,value}) from the last entry down and falls back to entry 0
+0x00265540	brsGetLevelStepCrossedBy	inferred	returns the LevelStep value whose threshold lies within (position, position+increment]; zero if the delta crosses no threshold
 0x002655A0	ptyComputeTotalExp	inferred	legacy UnitGrowth_ComputeTotalExpForLevelDelta: sums the per-unit EXP step table at 0x36F40C + unit_id*0x190
 0x00265610	brsCalcApGain	inferred	legacy BattleResult_CalcUnitApGainWithBonus: AP gain for a unit with its bonus, or 0 when ineligible
 0x00265648	brsCalcExpGain	inferred	legacy BattleResult_CalcUnitExpGainWithPassives: EXP gain for a unit with passive-skill modifiers
@@ -1532,10 +1546,13 @@
 0x0028A208	fileReloadSaveBuffer	inferred	reloads the 0x33600-byte save buffer from D_003BD924 while preserving the word at +0x30
 0x0028A508	fileDrawSaveWindow	inferred	Draws two save-window frames with func_00108FA0 and bumps the frame counter.
 0x0028A5D8	fileIsLoadStepComplete	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028AE68	fileClearAllSlotFlags	inferred	marks the (selected) request's slot metadata dirty and clears slot flags 0..9 -- the same body as DDS2 func_002CA638, which calls fileReqSetSelectedSlot's request D_00437CD0
 0x0028AF00	fileBeginSlotOpen	inferred	builds '/<name>/<name>' path from formatSaveFilename and starts the slot request via func_00289F80
 0x0028B0B8	fileStoreSlotHeader	inferred	on completion copies the 0x30-byte slot header from D_003BD924 into the D_003DC800 table entry for the current slot
 0x0028B1F0	fileBeginWait	inferred	file file requests and records in game/code_0028A0E0.c
 0x0028B430	fileResetSelection	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028B4B0	fileAbortSlotFlow	inferred	aborts the current slot flow: clears the pending-mode latch and the two slot-flow flags and returns -1
+0x0028B4D8	mcdEnterDefaultFileFlow	inferred	same body and role as DDS2 mcdEnterDefaultFileFlow (0x2CACA8): issues the (2, buffer, 4, 0) memory-card request and returns 0; reached through func_0028B508 / DDS2 func_002CACF0
 0x0028B590	fileScanSlotStates	inferred	Fills D_003DC7C0[0..9] with 0/1/2 from per-slot button bits and starts a request.
 0x0028B890	fileCountSelectableFiles	inferred	file file requests and records in game/code_0028A0E0.c
 0x0028B930	fileSlotSelectPoll	inferred	Polls slot request result and dispatches to next state by result code.
@@ -1829,6 +1846,9 @@
 0x002CDB00	ptyHasSkill	inferred	legacy PartyUnit_HasSkillInSkillSlots: scans PartyUnitData.skill_ids_22[24] for skill_id
 0x002CDB40	ptyRemoveProfileSkills	inferred	legacy PartyUnit_RemoveProfileSkillsState1: iterates the profile skill list and prunes skills whose nibble state is 1
 0x002CDC40	scrFindSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CDC80	scrGetSlot	inferred	bounds-checked read of the 24-entry u16 skill-slot list at +0x22 (same table as scrFindSlot/scrRemoveSlot/ptyHasSkill)
+0x002CDCA0	scrCountSlots	inferred	counts the non-zero entries of the 24-entry u16 skill-slot list at +0x22
+0x002CDCD8	scrSetSlot	inferred	stores into the 24-entry u16 skill-slot list at index*2+0x22, returning the previous value
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDD38	prfGetParamWord7b4	inferred	legacy ProfileId_GetParamWord_7b4: profile row param word at +0x7B4
 0x002CDD60	prfGetParamWord7b6	inferred	legacy ProfileId_GetParamWord_7b6: profile row param word at +0x7B6
