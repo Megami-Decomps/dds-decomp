@@ -384,7 +384,13 @@ void *func_00335268(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003352C8);
+extern void func_00333288();
+
+void func_003352C8(u8 *motion) {
+    u8 buffer[16];
+    func_00334678(motion, buffer);
+    func_00333288(*(s32 *)(motion + 0xC), func_00334808(buffer));
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335308);
 
@@ -400,7 +406,13 @@ void *func_003353C8(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335428);
+extern void func_00333270();
+
+void func_00335428(u8 *motion) {
+    u8 buffer[16];
+    func_00334678(motion, buffer);
+    func_00333270(*(s32 *)(motion + 0xC), func_00334808(buffer));
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335468);
 
@@ -416,7 +428,13 @@ void *func_00335528(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335588);
+extern void func_003332A0();
+
+void func_00335588(u8 *motion) {
+    u8 buffer[16];
+    func_00334678(motion, buffer);
+    func_003332A0(*(s32 *)(motion + 0xC), func_00334808(buffer));
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003355C8);
 
@@ -432,7 +450,13 @@ void *func_00335688(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003356E8);
+extern void func_003332B8();
+
+void func_003356E8(u8 *motion) {
+    u8 buffer[16];
+    func_00334678(motion, buffer);
+    func_003332B8(*(s32 *)(motion + 0xC), func_00334808(buffer));
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335728);
 
@@ -448,9 +472,22 @@ void *func_003357E8(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335848);
+extern void func_003332D0(s32, f32);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335888);
+void func_00335848(u8 *motion) {
+    KeyOut sample;
+    func_00334678(motion, &sample);
+    func_003332D0(*(s32 *)(motion + 0xC), sdfInterpolateMotionKeys(&sample));
+}
+
+extern void func_003332D0(s32, f32);
+
+void func_00335888(u8 *motion, f32 unused, f32 scale) {
+    KeyOut sample;
+    func_00334678(motion, &sample);
+    func_003332D0(*(s32 *)(motion + 0xC),
+                  *(f32 *)(motion + 0x10) + sdfInterpolateMotionKeys(&sample) * scale - *(f32 *)(motion + 0x10) * scale);
+}
 
 void func_003358E0(CmdF *a0) {
     a0->res = a0->sub->f1C;
@@ -516,7 +553,13 @@ void *func_00335BE0(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C40);
+extern void func_00333460();
+
+void func_00335C40(u8 *motion) {
+    u8 buffer[16];
+    func_00334678(motion, buffer);
+    func_00333460(*(s32 *)(motion + 0xC), func_00334808(buffer));
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C80);
 
