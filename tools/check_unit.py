@@ -316,6 +316,15 @@ def main():
             return 0
         return nxt - end
 
+    included = set(re.findall(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);', unit.read_text(), re.M))
+    eeasm_dir = ROOT / "build" / "eeasm" / "asm" / version / "nonmatchings" / unit_name
+
+    def realigned(addr):
+        """The retail item at addr is an included asm blob that eeas_compat
+        16-aligns (`.align 4`), so the object supplies the padding before it."""
+        pat = re.compile(rf"^\.align 4\n(?:.*\n){{0,3}}dlabel (?:D|jtbl)_{addr:08X}\b", re.M)
+        return any(pat.search(p.read_text()) for p in (eeasm_dir / f"{n}.s" for n in included) if p.exists())
+
 
     # Rodata the C emits: jump tables (every entry must land on the retail case
     # label) and data items such as string literals (bytes must equal retail's).
@@ -377,14 +386,15 @@ def main():
             print(f"DIFF jump table of {name} (retail 0x{retail_addr:08X}): {wrong} of {k} entries differ")
         elif (pad := retail_padding(retail_addr, 4 * k)) and not next(
                 (k2 == "end" and a == (retail_addr + 4 * k + 15) & ~15
+                 or a == (retail_addr + 4 * k + 15) & ~15 and realigned(a)
                  for a, k2 in retail_labels if a > retail_addr), False):
             # Retail has bytes after the table before the next item of this
-            # unit (typically another file's 16-aligned .rodata); the C table
-            # drops them. Padding up to the unit's own end comes from the
-            # linker's section alignment and is fine.
+            # unit that nothing supplies once the table is C. Padding up to the
+            # unit's own end comes from the linker's section alignment, and
+            # padding before a 16-aligned asm blob from its `.align 4`.
             bad += 1
             print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
-                  "after it (likely a file boundary follows); keep the function as asm")
+                  "after it that no C or asm supplies; keep the function as asm")
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]

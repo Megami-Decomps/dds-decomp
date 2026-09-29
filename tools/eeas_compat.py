@@ -16,6 +16,13 @@ those units with INCLUDE_ASM, so their text must also be ee-as syntax:
     did. Needs the retail ELF and gp (config/versions.json) for the version.
   * Instructions ee-as rejects (spimdisasm's VU0 macro-mode spelling) become
     `.word` with the original text kept as a comment.
+  * A `.rodata` block that retail puts on a 16-byte boundary after zero
+    padding gets `.align 4` (splat writes `.align 3`). The original item was
+    16-aligned, e.g. a quadword vector or a 16-byte array. While the preceding
+    function is asm its own blob carries the padding, but once it is C (a
+    switch table, say) nothing else would supply it. Only done when the
+    unit's .rodata itself starts 16-aligned, so the object's placement can't
+    move.
 
 The other rewrites take the encoding from retail, so they are byte-exact; the
 cost is that those instructions carry no relocation, which is irrelevant for a
@@ -110,6 +117,40 @@ def convert_line(line: str, pool: Pool | None = None) -> str:
     return line
 
 
+DLABEL_ADDR = re.compile(r"^\s*/\*\s*[0-9A-F]+\s+([0-9A-F]{8})\b")
+
+
+def realign_rodata(text: str, pool: Pool, unit_rodata_start: int | None) -> str:
+    """`.align 3` -> `.align 4` for 16-aligned retail .rodata blocks after zero padding."""
+    if unit_rodata_start is None or unit_rodata_start % 16:
+        return text
+    lines = text.split("\n")
+    section = None
+    for i, line in enumerate(lines):
+        if line.startswith(".section"):
+            section = line.split()[1]
+        elif section == ".rodata" and line.strip() == ".align 3":
+            addr = next((int(m.group(1), 16) for l in lines[i + 1:i + 8] if (m := DLABEL_ADDR.match(l))), None)
+            if addr is not None and addr % 16 == 0 and addr > unit_rodata_start:
+                before = pool.elf[pool.va_to_off(pool.segs, addr - 8):][:8]
+                if before == bytes(8):
+                    lines[i] = ".align 4"
+    return "\n".join(lines)
+
+
+def unit_rodata_start(version: str, src: Path) -> int | None:
+    """Retail address of the .rodata subsegment of the unit an asm file belongs to."""
+    parts = src.resolve().parts
+    if "nonmatchings" not in parts:
+        return None
+    unit = "/".join(parts[parts.index("nonmatchings") + 1:-1])
+    root = Path(__file__).resolve().parent.parent
+    info = json.loads((root / "config/versions.json").read_text())[version]
+    yaml_text = (root / "config" / version / f"{info['serial']}.yaml").read_text()
+    m = re.search(rf"\[0x([0-9A-F]+), \.?rodata, {re.escape(unit)}\]", yaml_text)
+    return int(m.group(1), 16) + 0xFF000 if m else None
+
+
 def convert(text: str, pool: Pool | None = None) -> str:
     return "\n".join(convert_line(line, pool) for line in text.split("\n"))
 
@@ -120,7 +161,11 @@ def main() -> None:
     src, dst = Path(sys.argv[1]), Path(sys.argv[2])
     dst.parent.mkdir(parents=True, exist_ok=True)
     version = next((p for p in src.resolve().parts if p in ("dds1", "dds2")), None)
-    dst.write_text(convert(src.read_text(), Pool(version) if version else None))
+    pool = Pool(version) if version else None
+    text = convert(src.read_text(), pool)
+    if pool:
+        text = realign_rodata(text, pool, unit_rodata_start(version, src))
+    dst.write_text(text)
 
 
 if __name__ == "__main__":
