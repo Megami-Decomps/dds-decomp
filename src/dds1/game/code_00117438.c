@@ -6,6 +6,9 @@ extern void func_0011B940(void);
 extern u32 D_003BAAAC;
 
 extern s32 D_003BAA00;
+extern s32 D_003BAA1C;
+extern s32 D_003BAA4C;
+extern u8 *D_003BAA50;
 typedef struct EvtScaledValue {
     u32 unk0;
     u32 flags;
@@ -28,8 +31,9 @@ typedef struct SdfPackedValue {
     u16 flagsAndValue;
 } SdfPackedValue;
 
+extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
 
-void func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
+s32 func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
@@ -170,17 +174,83 @@ void sdfResetChannels(void) {
     func_001180F8();
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118368);
+/* EnemyData base table has a 76-byte stride; fields 0x08/0x0C are the base
+ * max HP / max MP, and unit offsets 0x1C/0x1E are the matching growth values. */
+s32 func_00118368(s32 unit) {
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118408);
+    if ((*(u16 *)unit & 0x20) != 0) {
+        return *(u16 *)(D_003BAA1C + *(u16 *)(unit + 4) * 76 + 8);
+    }
+    result = evtRunContext(1, unit, 0, 0, 0);
+    if ((*(u16 *)unit & 0x20) == 0) {
+        result += *(u16 *)(unit + 0x1C);
+        if (result >= 1000) {
+            result = 999;
+        }
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_001184A8);
+s32 func_00118408(s32 unit) {
+    s32 result;
+
+    if ((*(u16 *)unit & 0x20) != 0) {
+        return *(u16 *)(D_003BAA1C + *(u16 *)(unit + 4) * 76 + 0xC);
+    }
+    result = evtRunContext(2, unit, 0, 0, 0);
+    if ((*(u16 *)unit & 0x20) == 0) {
+        result += *(u16 *)(unit + 0x1E);
+        if (result >= 1000) {
+            result = 999;
+        }
+    }
+    return result;
+}
+
+/* Sdf dispatch: pick the script id from the unit's runtime flag byte and run
+ * it against the given entry index. 0x40/0x80 select the alternate scripts. */
+s32 func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
+    s32 result;
+    u8 flags;
+
+    if (*(s8 *)(D_003BAA4C + arg0 * 2 + 1) == 5) {
+        result = evtRunContext(0x18, arg1, arg2, arg0, arg3);
+    } else {
+        flags = D_003BAA50[arg0 * 0x38];
+        if (flags & 0x40) {
+            result = evtRunContext(0x1B, arg1, arg2, arg0, arg3);
+        } else if (flags & 0x80) {
+            result = evtRunContext(0x1C, arg1, arg2, arg0, arg3);
+        } else {
+            result = evtRunContext(5, arg1, arg2, arg0, arg3);
+        }
+    }
+    return result;
+}
 
 void sdfDispatchCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_001184A8(arg0, arg1, arg2, (u8)arg3);
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118570);
+s32 func_00118570(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
+    s32 result;
+    u8 flags;
+
+    if (*(s8 *)(D_003BAA4C + arg0 * 2 + 1) == 5) {
+        result = evtRunContext(0x18, arg1, arg2, arg0, arg3);
+    } else {
+        flags = D_003BAA50[arg0 * 0x38];
+        if (flags & 0x40) {
+            result = evtRunContext(0x1B, arg1, arg2, arg0, arg3);
+        } else if (flags & 0x80) {
+            result = evtRunContext(0x1C, arg1, arg2, arg0, arg3);
+        } else {
+            result = evtRunContext(9, arg1, arg2, arg0, arg3);
+        }
+    }
+    return result;
+}
 
 void func_00118620(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
     evtRunContext(10, arg1, arg2, arg0, arg3);
@@ -199,9 +269,6 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 INCLUDE_ASM(const s32, "game/code_00117438", func_001189A0);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118D70);
-
-extern u8 *D_003BAA50;
-extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
 
 u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
     u32 result;
