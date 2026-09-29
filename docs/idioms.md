@@ -91,6 +91,14 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - A ternary of two constants can pick the wrong `movn`/`movz` operands;
   `x = default; if (c) x = other;` gives retail's split.
 - `(w + 8) * 16` folds to `w * 16 + 128` unless `w + 8` is its own local.
+- A field that retail tests with `srl; andi` and rewrites with `and`/`ori`
+  on the whole word is a bitfield. Declare the struct with bitfields; raw
+  shifts and masks CSE differently. A test against an unshifted mask
+  (`andi $2,$4,0x1FE0000`) is plain mask code, not a bitfield.
+- `s16` counters (`x -= 1`) give `addiu -1; sll 16`. `u16` ones give
+  `li 0xFFFF; addu`.
+- Switch tables whose low cases do nothing still list them
+  (`case 0: ... case 5: break;`). Without them gcc builds a compare tree.
 - Stores through `void **`-typed pointers let gcc schedule `int` loads above
   them (type-based aliasing), and `s32` stores do not. Pick the pointer type
   the data really has.
