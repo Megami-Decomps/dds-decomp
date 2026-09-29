@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Emulate retail ee-as delay-slot filling after mtc1 (and cvt.w.s).
+"""Emulate retail ee-as delay-slot filling after mtc1 (and cvt.w.s / FP loads).
 
 Retail's assembler never moves an instruction that reads the FPR written by
 the immediately preceding `mtc1` (or `cvt.w.s`) into the delay slot of the
@@ -20,6 +20,10 @@ import sys
 BRANCH = re.compile(
     r"\s+(b|bal|j|jal|jr|jalr|beq|bne|beqz|bnez|blez|bgtz|bltz|bgez|bltzal|bgezal|bc1t|bc1f)\s")
 MTC1 = re.compile(r"\s+mtc1\s+\$\w+,(\$f\d+)\s*$")
+# Same rule after an FP load: retail has 248 (DDS1) / 284 (DDS2)
+# `lwc1 $fN,off(reg); <FP op reading $fN>; <branch>` sequences and never puts
+# the dependent op in the delay slot (DDS1 has no filled form at all).
+LWCF = re.compile(r"\s+(?:lwc1|l\.s)\s+(\$f\d+),")
 LABEL = re.compile(r"^\$?\.?L\w*:\s*$")
 # Same rule after a float->int conversion: retail has no `cvt.w.s $fN; jr; swc1 $fN`
 # in DDS1 or DDS2 (45 and 59 sequences with a dependent instruction, all unfilled).
@@ -73,7 +77,7 @@ def main(src, dst):
             reorder = True
         move = None
         if reorder and 0 < i < len(lines) - 1:
-            move = MTC1.match(lines[i - 1]) or CVTWS.match(lines[i - 1])
+            move = MTC1.match(lines[i - 1]) or CVTWS.match(lines[i - 1]) or LWCF.match(lines[i - 1])
         next_is_branch = reorder and i < len(lines) - 1 and BRANCH.match(lines[i + 1])
         # cc1 writes the hi/lo hazard filler as a `#nop` comment line after the move.
         j = i + 1
