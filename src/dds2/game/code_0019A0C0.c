@@ -106,6 +106,7 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A2E0);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A5D8);
 
+/* Copy four rows of three coordinates and their separate scalar values. */
 void effCopyVertRows(EffChan *channel, f32 *source) {
     f32 *row;
     u32 index;
@@ -157,34 +158,36 @@ void effFillRandRecords(EffEmit *emitter) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A900);
 
-void effFreeBuffers(EffPrim *arg0) {
-    if (arg0 != NULL) {
-        if (arg0->unk14 != NULL) {
-            func_003297C8(arg0->unk4);
+/* Release the primitive's owned buffers, if a primitive was supplied. */
+void effFreeBuffers(EffPrim *primitive) {
+    if (primitive != NULL) {
+        if (primitive->unk14 != NULL) {
+            func_003297C8(primitive->unk4);
         }
-        func_003297C8(arg0->unk0);
+        func_003297C8(primitive->unk0);
     }
 }
 
-s32 effAdvancePrimCursor(void *arg0, EffPrim *arg1) {
-    s32 ret = 1;
-    f32 pos = arg1->cursorPosition;
-    u32 idx = arg1->cursorIndex;
+/* Interpolate the current primitive record, then advance its wrapping cursor. */
+s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
+    s32 continuing = 1;
+    f32 position = primitive->cursorPosition;
+    u32 index = primitive->cursorIndex;
 
-    func_0019AB08(arg0, arg1, idx, pos);
-    pos += arg1->cursorStep;
-    if (pos > 1.0f) {
-        pos -= 1.0f;
-        idx += 1;
+    func_0019AB08(vertex, primitive, index, position);
+    position += primitive->cursorStep;
+    if (position > 1.0f) {
+        position -= 1.0f;
+        index += 1;
     }
-    if (idx >= arg1->recordCount - 1) {
-        pos = 0.0f;
-        idx = 0;
-        ret = 0;
+    if (index >= primitive->recordCount - 1) {
+        position = 0.0f;
+        index = 0;
+        continuing = 0;
     }
-    arg1->cursorIndex = idx;
-    arg1->cursorPosition = pos;
-    return ret;
+    primitive->cursorIndex = index;
+    primitive->cursorPosition = position;
+    return continuing;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AB08);
@@ -195,17 +198,18 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD68);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD78);
 
-void effBuildAndDispatch(EffPrim *arg0, s32 arg1) {
-    void *mem = func_003292A8(arg0->recordCount * 12);
-    void *buf = sdfResourceRetainAddress(mem);
+/* Build a temporary record array and dispatch it through the selected path. */
+void effBuildAndDispatch(EffPrim *primitive, s32 variant) {
+    void *allocation = func_003292A8(primitive->recordCount * 12);
+    void *records = sdfResourceRetainAddress(allocation);
 
-    func_0019AE18(buf, arg0->unk10, arg0->recordCount);
-    if (arg1 == 0) {
-        func_0019B120(arg0, buf);
+    func_0019AE18(records, primitive->unk10, primitive->recordCount);
+    if (variant == 0) {
+        func_0019B120(primitive, records);
     } else {
-        func_0019B1F0(arg0, buf);
+        func_0019B1F0(primitive, records);
     }
-    func_003297C8(mem);
+    func_003297C8(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
@@ -216,24 +220,25 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B120);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B1F0);
 
-void *effCreateChannel(void *arg0, u32 arg1) {
-    void *buf = NULL;
-    void *mem;
-    EffChan *p;
+/* Create a channel only when there are enough records for interpolation. */
+void *effCreateChannel(void *rows, u32 count) {
+    void *channel = NULL;
+    void *allocation;
+    EffChan *cursor;
 
-    if (arg1 < 4) {
-        return buf;
+    if (count < 4) {
+        return channel;
     }
-    mem = func_003292A8(0x18);
-    buf = sdfResourceRetainAddress(mem);
-    p = buf;
-    p->unk0 = mem;
-    p->cursorStep = 0.05f;
-    p->recordCount = arg1;
-    p->rows = arg0;
-    p->cursorPosition = 0;
-    p->cursorIndex = 0;
-    return buf;
+    allocation = func_003292A8(0x18);
+    channel = sdfResourceRetainAddress(allocation);
+    cursor = channel;
+    cursor->unk0 = allocation;
+    cursor->cursorStep = 0.05f;
+    cursor->recordCount = count;
+    cursor->rows = rows;
+    cursor->cursorPosition = 0;
+    cursor->cursorIndex = 0;
+    return channel;
 }
 
 s64 func_0019B358(u32 *p) {
@@ -242,25 +247,26 @@ s64 func_0019B358(u32 *p) {
     }
 }
 
-s32 effAdvanceChanCursor(void *arg0, EffChan *arg1) {
-    s32 ret = 1;
-    f32 pos = arg1->cursorPosition;
-    u32 idx = arg1->cursorIndex;
+/* Interpolate the channel; advance three records when its position wraps. */
+s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
+    s32 continuing = 1;
+    f32 position = channel->cursorPosition;
+    u32 index = channel->cursorIndex;
 
-    func_0019B418(arg0, arg1, idx, pos);
-    pos += arg1->cursorStep;
-    if (pos > 1.0f) {
-        pos -= 1.0f;
-        idx += 3;
+    func_0019B418(vertex, channel, index, position);
+    position += channel->cursorStep;
+    if (position > 1.0f) {
+        position -= 1.0f;
+        index += 3;
     }
-    if (idx >= arg1->recordCount - 1) {
-        pos = 0.0f;
-        idx = 0;
-        ret = 0;
+    if (index >= channel->recordCount - 1) {
+        position = 0.0f;
+        index = 0;
+        continuing = 0;
     }
-    arg1->cursorIndex = idx;
-    arg1->cursorPosition = pos;
-    return ret;
+    channel->cursorIndex = index;
+    channel->cursorPosition = position;
+    return continuing;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B418);

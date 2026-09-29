@@ -4,6 +4,11 @@ extern u32 D_0043895C;
 
 extern void (*D_004389C4)(void);
 
+/* Fade width is in half-pixels; the glyph renderer doubles it at draw time. */
+#define FADE_MAX_EXTENT 0x80
+#define FADE_MODE_OUT 0
+#define FADE_MODE_IN 1
+
 typedef struct FadeOffset {
     s32 unused;
     s32 x;
@@ -24,6 +29,7 @@ typedef struct FadeEntry {
 extern const FadeOffset D_0040B088[];
 extern s32 func_0031E410(s32 index);
 
+/* Draw the indexed glyph at its per-glyph origin with the current tint. */
 s32 mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 width, s32 index, s32 effect) {
     s32 texture = func_0031E410(index);
     return func_00306CD0(x + D_0040B088[index].x,
@@ -39,16 +45,17 @@ void itfFadeClearTint(void) {
     D_0043895C = 0;
 }
 
+/* Set a fade direction; a completed step snaps directly to its endpoint. */
 void itfSetFadeMode(FadeEntry *entry, s32 mode, s32 value) {
     switch (mode) {
-    case 0:
-        if (value >= 0x80) {
+    case FADE_MODE_OUT:
+        if (value >= FADE_MAX_EXTENT) {
             entry->extent = 0;
         }
         break;
-    case 1:
-        if (value >= 0x80) {
-            entry->extent = 0x80;
+    case FADE_MODE_IN:
+        if (value >= FADE_MAX_EXTENT) {
+            entry->extent = FADE_MAX_EXTENT;
         }
         break;
     }
@@ -56,6 +63,7 @@ void itfSetFadeMode(FadeEntry *entry, s32 mode, s32 value) {
     entry->step = value;
 }
 
+/* Queue a fade transition after the requested number of updates. */
 void itfQueueFadeMode(FadeEntry *entry, u32 mode, u32 step, u32 delay) {
     entry->queuedMode = mode + 1;
     entry->queuedStep = step;
@@ -66,7 +74,7 @@ u32 itfGetFadeExtent(FadeEntry *entry) {
     return entry->extent;
 }
 
-/* Keep the K&R signature: the matched drawing callbacks omit this argument. */
+/* K&R signature retained: matched drawing callbacks omit the argument. */
 s32 itfIsFadeActive(entry)
     FadeEntry *entry;
 {
@@ -78,6 +86,7 @@ s32 itfIsFadeActive(entry)
     return 1;
 }
 
+/* Process a queued transition and clamp the current fade extent each frame. */
 void itfUpdateFade(FadeEntry *entry) {
     if (entry->queuedMode > 0) {
         if (entry->delay == 0) {
@@ -88,15 +97,15 @@ void itfUpdateFade(FadeEntry *entry) {
         }
     }
     switch (entry->mode) {
-    case 1:
-        if (entry->extent < 0x80) {
+    case FADE_MODE_IN:
+        if (entry->extent < FADE_MAX_EXTENT) {
             entry->extent += entry->step;
         }
-        if (entry->extent > 0x80) {
-            entry->extent = 0x80;
+        if (entry->extent > FADE_MAX_EXTENT) {
+            entry->extent = FADE_MAX_EXTENT;
         }
         break;
-    case 0:
+    case FADE_MODE_OUT:
         if (entry->extent > 0) {
             entry->extent -= entry->step;
         }
@@ -107,6 +116,7 @@ void itfUpdateFade(FadeEntry *entry) {
     }
 }
 
+/* Draw the four-part strip only while the fade is visible or in progress. */
 void itfDrawFadeGlyphStrip(FadeEntry *entry) {
     s64 active;
 
@@ -175,6 +185,7 @@ void func_0031ED68(FadeEntry *entry, u32 frame) {
     entry->frame = frame;
 }
 
+/* Clamp the frame to three atlas rows and draw the three-part fade. */
 void mnuDrawFadeSequenceThree(FadeEntry *entry) {
     if (itfIsFadeActive() != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
@@ -199,6 +210,7 @@ void func_0031EE28(FadeEntry *entry, u32 frame) {
     entry->frame = frame;
 }
 
+/* Clamp the frame to two atlas rows and draw the three-part fade. */
 void mnuDrawFadeSequenceTwo(FadeEntry *entry) {
     if (itfIsFadeActive() != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
@@ -223,6 +235,7 @@ void func_0031EEE8(FadeEntry *entry, u32 frame) {
     entry->frame = frame;
 }
 
+/* Draw the offset atlas sequence, clamping frames to the valid 1..3 range. */
 void mnuDrawFadeSequenceOffset(FadeEntry *entry) {
     if (itfIsFadeActive() != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);

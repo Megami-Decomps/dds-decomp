@@ -11,6 +11,13 @@ extern s32 sdfResourceRetainAddress(s32);
 #define SDF_DMA_TAG_REF 0x30
 #define SDF_DMA_TAG_CALL 0x50
 
+/* DMA tag first word: upper byte selects the tag kind; second word is ADDR. */
+typedef struct SdfDmaTagHeader {
+    u8 pad00[3];
+    u8 kind;
+    u32 address;
+} SdfDmaTagHeader;
+
 extern s32 D_004389FC;
 
 extern s32 sdfCreateSemaphore(u32, u32, u32);
@@ -124,6 +131,7 @@ extern void sdfBuildPacket10C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, 
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
+/* Walk the resource chain until the requested numeric ID is found. */
 SdfResource *sdfFindResourceById(s32 id) {
     SdfResource *resource = D_004389F8;
 
@@ -145,16 +153,17 @@ void func_0032C448(void) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C468);
 
+/* Allocate a resource packet; append only its initialized 0xC0-byte payload. */
 void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0, s32 (*alloc)(s32)) {
-    s32 buffer;
+                   s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0, s32 (*allocate)(s32)) {
+    s32 packet;
 
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+    if (allocate == NULL) {
+        allocate = sdfAllocPacketAligned;
     }
-    buffer = alloc(0xf0);
-    func_0032C468(buffer, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
-    sdfAppendPacketRange(list, buffer, buffer + 0xc0);
+    packet = allocate(0xf0);
+    func_0032C468(packet, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
+    sdfAppendPacketRange(list, packet, packet + 0xc0);
 }
 
 void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
@@ -176,6 +185,7 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 
     sdfAppendPacketRange(list, block, block + 0x80);
 }
 
+/* Lazily create the shared semaphore and reset this request's state. */
 void sdfInitializeSynchronizedRequest(SdfSynchronizedRequest *request, u32 value) {
     if (D_004389FC < 0) {
         D_004389FC = sdfCreateSemaphore(1, 0x7f, 0);
@@ -191,6 +201,7 @@ typedef struct SdfLink {
     struct SdfLink *peer;
 } SdfLink;
 
+/* Detach the pending chain and clear each node's peer back-reference. */
 SdfLink *sdfDetachPendingList(void) {
     SdfLink *head = D_00439160;
     SdfLink *link;
@@ -210,6 +221,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CBF0);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CCC0);
 
+/* Test all three pending-work sources: flag, chain, and two slots. */
 u64 sdfGraphHasPendingWork(void) {
     u32 i;
     s32 *entry;
@@ -231,6 +243,7 @@ u64 sdfGraphHasPendingWork(void) {
     return 0;
 }
 
+/* Preserve interrupt state while querying pending work. */
 u64 sdfGraphHasPendingWorkInterruptSafe(void) {
     s64 interruptState;
     u64 pendingWork;
@@ -243,6 +256,7 @@ u64 sdfGraphHasPendingWorkInterruptSafe(void) {
     return pendingWork;
 }
 
+/* Reallocate two 0x80-aligned halves from one contiguous allocation. */
 void sdfResizeDoubleBuffer(s32 size) {
     s32 memory;
 
@@ -258,15 +272,17 @@ void sdfResizeDoubleBuffer(s32 size) {
     D_00438A08[1] = memory + size;
 }
 
-void sdfSelectDoubleBuffer(s32 arg0) {
-    D_00438A10 = D_00438A08[arg0];
-    D_00438A14 = D_00438A08[arg0] + D_00438A04;
+/* Select one half and expose its bounds to the packet allocator. */
+void sdfSelectDoubleBuffer(s32 index) {
+    D_00438A10 = D_00438A08[index];
+    D_00438A14 = D_00438A08[index] + D_00438A04;
 }
 
 s32 sdfGetBufferRemaining(void) {
     return D_00438A14 - D_00438A10;
 }
 
+/* Reserve packet space at a 16-byte boundary, returning the old cursor. */
 s32 sdfAllocPacketAligned(s32 size) {
     s32 address;
 
@@ -294,6 +310,7 @@ void sdfResetPacketList(SdfListHead *arg0) {
     arg0->unk1C = 0;
 }
 
+/* Link the previous DMA packet to this packet with a NEXT tag. */
 void sdfAppendPacket(SdfListHead *list, u32 packet) {
     s32 last;
 
@@ -302,12 +319,13 @@ void sdfAppendPacket(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet;
 }
 
+/* Like sdfAppendPacket, but the tail points to the end of a packet range. */
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
     s32 last;
 
@@ -316,23 +334,24 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = end;
 }
 
+/* Tag the new packet as REF and chain it into the DMA list. */
 void sdfAppendReferencePacket(SdfListHead *list, u32 packet) {
     s32 last;
 
-    *(u8 *)(packet + 3) = SDF_DMA_TAG_REF;
+    ((SdfDmaTagHeader *)packet)->kind = SDF_DMA_TAG_REF;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet + 0x10;
 }
@@ -345,23 +364,24 @@ void func_0032CF98(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet + 0x30;
 }
 
+/* Tag the new packet as CALL and chain it into the DMA list. */
 void sdfAppendCallPacket(SdfListHead *list, u32 packet) {
     s32 last;
 
-    *(u8 *)(packet + 3) = SDF_DMA_TAG_CALL;
+    ((SdfDmaTagHeader *)packet)->kind = SDF_DMA_TAG_CALL;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT;
-        *(u32 *)(last + 4) = packet & 0xfffffff;
+        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT;
+        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
     }
     list->last = packet + 0x10;
 }
@@ -421,13 +441,14 @@ u32 func_0032D168(u32 arg0) {
     return (u32)temp;
 }
 
-s32 func_0032D1D0(s32 arg0, u32 arg1) {
-    u32 temp_v0;
+/* Create a reference node and patch the preceding DMA NEXT tag to point at it. */
+s32 func_0032D1D0(s32 previous, u32 source) {
+    u32 node;
 
-    temp_v0 = func_0032D168(arg1);
-    *(u8 *)(arg0 + 3) = SDF_DMA_TAG_NEXT;
-    *(u32 *)(arg0 + 4) = temp_v0 & 0xfffffff;
-    return temp_v0 + 0x10;
+    node = func_0032D168(source);
+    ((SdfDmaTagHeader *)previous)->kind = SDF_DMA_TAG_NEXT;
+    ((SdfDmaTagHeader *)previous)->address = node & 0xfffffff;
+    return node + 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D218);
@@ -607,30 +628,31 @@ void sdfWaitSlotReady(void) {
     }
 }
 
-s32 sdfAllocatePacketList(s32 (*arg0)(s32)) {
-    s32 (*alloc)(s32) = arg0;
-    s32 mem;
+/* Allocate and initialize an empty packet list using the selected allocator. */
+s32 sdfAllocatePacketList(s32 (*allocate)(s32)) {
+    s32 (*allocator)(s32) = allocate;
+    s32 list;
 
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+    if (allocator == NULL) {
+        allocator = sdfAllocPacketAligned;
     }
-    mem = alloc(0x20);
-    sdfResetPacketList((SdfListHead *)mem);
-    return mem;
+    list = allocator(0x20);
+    sdfResetPacketList((SdfListHead *)list);
+    return list;
 }
 
-void sdfAppendInitializedPacket(s32 arg0, void (*arg1)(s32), s32 arg2, s32 (*arg3)(s32)) {
-    s32 (*alloc)(s32) = arg3;
-    s32 mem;
+/* Allocate a packet, initialize it with a callback, then append it. */
+void sdfAppendInitializedPacket(s32 list, void (*initialize)(s32), s32 size, s32 (*allocate)(s32)) {
+    s32 (*allocator)(s32) = allocate;
+    s32 packet;
 
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+    if (allocator == NULL) {
+        allocator = sdfAllocPacketAligned;
     }
-    mem = alloc(arg2);
-    arg1(mem);
-    sdfAppendPacket(arg0, mem);
+    packet = allocator(size);
+    initialize(packet);
+    sdfAppendPacket(list, packet);
 }
-
 void func_0032E468(SdfPacket *arg0) {
     arg0->unk0 = 0x717FB;
     arg0->unk8 = 0x47;
