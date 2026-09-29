@@ -1,11 +1,12 @@
 #include "common.h"
 
-typedef struct EventMovie {
-    u8 pad0[8];
+/* Global event state behind func_00101958; flag bits live at offset 0x8. */
+typedef struct EvtGlobal {
+    u8 pad[8];
     u32 *flags;
-} EventMovie;
+} EvtGlobal;
 
-extern EventMovie *func_00101958(void);
+extern EvtGlobal *func_00101958(void);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024DD20);
 
@@ -39,18 +40,19 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024ED50);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024EEB8);
 
+/* Apply a caller-provided mask to the event state's flag word. */
 void evtPolygonMovieSetFlagBits(u32 unused, u32 bits) {
-    EventMovie *movie;
+    EvtGlobal *state;
 
-    movie = func_00101958();
-    *movie->flags = *movie->flags | bits;
+    state = func_00101958();
+    *state->flags = *state->flags | bits;
 }
 
 void evtPolygonMovieClearFlagBits(u32 unused, u32 bits) {
-    EventMovie *movie;
+    EvtGlobal *state;
 
-    movie = func_00101958();
-    *movie->flags = *movie->flags & ~bits;
+    state = func_00101958();
+    *state->flags = *state->flags & ~bits;
 }
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024F090);

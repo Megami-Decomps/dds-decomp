@@ -27,7 +27,7 @@ extern void (*D_003B4448[])(PanelObj *);
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
 typedef struct PanelRecSub {
     u8 unk0[0x10]; /* 0x0 */
-    s8 unk10;      /* 0x10 */
+    s8 status;     /* 0x10: status read and written by itfPanelGet/SetStatus */
 } PanelRecSub;
 
 /* Payload record referenced by the D_003D6ECC table. */
@@ -35,8 +35,8 @@ typedef struct PanelRec {
     u8 unk0[0x24];     /* 0x0 */
     PanelRecSub sub24; /* 0x24 */
     u8 unk35[0x1B];    /* 0x35 */
-    s16 unk50;         /* 0x50 */
-    s16 unk52;         /* 0x52 */
+    s16 pairFirst;    /* 0x50 */
+    s16 pairSecond;   /* 0x52 */
     u8 unk54[0x54];    /* 0x54 */
     s32 unkA8;         /* 0xA8 */
 } PanelRec;
@@ -94,17 +94,18 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1E98);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1F08);
 
-void func_001A1F80(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
-    PanelVert *p = &v[8];
-    p->x = a;
-    p->y = b;
-    p[1].x = c;
-    p[1].y = 0;
-    p = &v[10];
-    p->x = a;
-    p->y = b;
-    p[1].x = c;
-    p[1].y = d;
+/* Populate two panel vertex pairs at slots 8 and 10. */
+void func_001A1F80(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+    PanelVert *pair = &vertices[8];
+    pair->x = x0;
+    pair->y = y0;
+    pair[1].x = x1;
+    pair[1].y = 0;
+    pair = &vertices[10];
+    pair->x = x0;
+    pair->y = y0;
+    pair[1].x = x1;
+    pair[1].y = y1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1FB0);
@@ -134,17 +135,18 @@ void func_001A2118(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
     p[1].y = d;
 }
 
+/* Set both panel colors to the same blue tint with zero alpha. */
 void func_001A2148(s32 *rect) {
-    s32 *c = rect + 0x11;
-    c[0] = 0x73;
-    c[1] = 0x87;
-    c[2] = 0xFF;
-    c[3] = 0;
-    c = rect + 0x15;
-    c[0] = 0x73;
-    c[1] = 0x87;
-    c[2] = 0xFF;
-    c[3] = 0;
+    s32 *color = rect + 0x11;
+    color[0] = 0x73;
+    color[1] = 0x87;
+    color[2] = 0xFF;
+    color[3] = 0;
+    color = rect + 0x15;
+    color[0] = 0x73;
+    color[1] = 0x87;
+    color[2] = 0xFF;
+    color[3] = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2180);
@@ -176,11 +178,11 @@ void itfPanelEmitRecord(s32 index, s32 value) {
 }
 
 s8 itfPanelGetStatus(s32 index) {
-    return D_0045296C[index].ptr->sub24.unk10;
+    return D_0045296C[index].ptr->sub24.status;
 }
 
 void itfPanelSetStatus(s32 index, s8 value) {
-    D_0045296C[index].ptr->sub24.unk10 = value;
+    D_0045296C[index].ptr->sub24.status = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2EA8);
@@ -196,15 +198,15 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3138);
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A31E0);
 
 s16 itfPanelGetPairFirst(s32 index) {
-    return D_0045296C[index].ptr->unk50;
+    return D_0045296C[index].ptr->pairFirst;
 }
 
 void itfPanelSetPairFirst(s32 index, s16 value) {
-    D_0045296C[index].ptr->unk50 = value;
+    D_0045296C[index].ptr->pairFirst = value;
 }
 
 s16 itfPanelGetPairSecond(s32 index) {
-    return D_0045296C[index].ptr->unk52;
+    return D_0045296C[index].ptr->pairSecond;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);

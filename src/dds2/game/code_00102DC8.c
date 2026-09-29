@@ -201,6 +201,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105290);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001053F0);
 
+/* Release the retained texture and clear its request/pending flags. */
 void func_001054E0(void) {
     if (D_00435CC8 != 0) {
         sdfTexReleaseReference(D_00435CC8);
@@ -211,10 +212,10 @@ void func_001054E0(void) {
 }
 
 s32 func_00105518(void) {
-    s32 ret = 0;
+    s32 result = 0;
 
     if (D_00435CC8 == 0) {
-        return ret;
+        return result;
     }
     D_00435CC0 = 1;
     return 1;
@@ -244,6 +245,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105910);
 
+/* The low two bits select the active fade direction; clearing cancels it. */
 void kwlnFadeClear(void) {
     D_00435CD4 &= ~3;
     D_00435CF0.r = 0;
@@ -272,6 +274,7 @@ void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnFadeOutStart);
 
+/* Enter the first fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartIn(s32 frames) {
     D_00435CF0.a = -0x80;
     if (frames == 0) {
@@ -286,6 +289,7 @@ void kwlnFadeStartIn(s32 frames) {
     D_00435CD4 = (D_00435CD4 | 1) & ~2;
 }
 
+/* Select the second fade direction using the specified RGB color. */
 void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 frames) {
     D_00435CF0.r = red;
     D_00435CF0.g = green;
@@ -303,6 +307,7 @@ void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 frames) {
     D_00435CD4 = (D_00435CD4 & ~1) | 2;
 }
 
+/* Enter the second fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartOut(s32 frames) {
     D_00435CF0.a = 0;
     if (frames == 0) {
@@ -327,6 +332,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105C20);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105CF8);
 
+/* Reset the background fade's color bytes and its two parameter words. */
 void kwlnFadeResetBackground(void) {
     D_00435CD4 &= 0xF3FFFFFF;
     D_00435CF8[0] = 0;

@@ -24,6 +24,7 @@ void effPCPNeedleFree(EffPCPNeedleWork *work) {
     func_002D0918(work->resource70);
 }
 
+/* The first parameter block supplies the effect's runtime work. */
 void effPCPNeedleCreate(void *data) {
     void *work;
 

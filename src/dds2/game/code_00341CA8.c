@@ -1,12 +1,12 @@
 #include "common.h"
 
-typedef struct CmdPacket {
+typedef struct SequenceVolumePanPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
     /* 0x8 */ u16 volume;
     /* 0xA */ u16 pan;
     /* 0xC */ u32 unkC;
-} CmdPacket;
+} SequenceVolumePanPacket;
 
 u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
@@ -26,10 +26,12 @@ void func_00341CF8(void) {
     func_00341650(0x40, 0, 0, 0);
 }
 
+/* Dispatch the command family selected by the caller, without a payload. */
 void func_00341D20(u32 command) {
     func_00341650(command | 0x50, 0, 0, 0);
 }
 
+/* Send a NUL-terminated command string; the transport excludes the terminator. */
 u32 func_00341D48(s32 command, char *text) {
     u32 length = strlen(text);
 
@@ -44,8 +46,9 @@ u32 func_00341D90(s32 command, char *text) {
 
 INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341DD8);
 
+/* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
 void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
-    CmdPacket packet;
+    SequenceVolumePanPacket packet;
     func_003421E8(trackId);
     packet.trackId = trackId;
     packet.volume = volume;

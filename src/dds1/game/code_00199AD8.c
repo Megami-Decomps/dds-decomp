@@ -86,6 +86,7 @@ static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alph
     vec[3] = alpha;
 }
 
+/* Write the same RGB at two offsets, with a transparent first color. */
 void func_00199F50(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x40);
 
@@ -101,13 +102,14 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199FE0);
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A040);
 
 void func_0019A0D0(u8 *base, s32 red, s32 green, s32 blue, s32 alpha) {
-    u32 *p = (u32 *)(base + 0x20);
-    p[0] = red;
-    p[1] = green;
-    p[2] = blue;
-    p[3] = alpha;
+    u32 *color = (u32 *)(base + 0x20);
+    color[0] = red;
+    color[1] = green;
+    color[2] = blue;
+    color[3] = alpha;
 }
 
+/* Two adjacent panel colors: the first is transparent. */
 void func_0019A0E8(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x30);
 
@@ -116,6 +118,7 @@ void func_0019A0E8(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     panelSetVec4(vec, red, green, blue, alpha);
 }
 
+/* Set both panel colors to the same blue tint with zero alpha. */
 void func_0019A118(u8 *base) {
     u32 *vec = (u32 *)(base + 0x44);
 

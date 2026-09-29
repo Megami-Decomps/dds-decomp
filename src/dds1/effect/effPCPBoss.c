@@ -19,7 +19,7 @@ typedef struct {
     u8 pad00[0x10];
     u128 parameterVector; /* 0x10 */
     u8 pad20[4];
-    u32 unk24;      /* 0x24 settable param */
+    u32 parameter;  /* 0x24 set by effPCPBossSetParameter */
     u32 resource28;  /* 0x28 released by func_001629F0 */
     u32 resource2C;  /* 0x2C released by func_001629F0 */
 } EffPCPBossWork;
@@ -30,13 +30,14 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184630);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184890);
 
+/* Apply the first two packed parameter blocks to the boss effect. */
 void func_001849C0(void *data) {
-    void *work0;
-    void *work1;
+    void *firstBlock;
+    void *secondBlock;
 
-    work0 = effParamTableGetBlock(data, 0);
-    work1 = effParamTableGetBlock(data, 1);
-    func_00184890(work0, work1);
+    firstBlock = effParamTableGetBlock(data, 0);
+    secondBlock = effParamTableGetBlock(data, 1);
+    func_00184890(firstBlock, secondBlock);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184A08);
@@ -58,15 +59,16 @@ void func_001855C8(u8 *work, s32 value) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001855D0);
 
+/* Apply three packed parameter blocks to the boss effect. */
 void func_00185670(void *data) {
-    void *work0;
-    void *work1;
-    void *work2;
+    void *firstBlock;
+    void *secondBlock;
+    void *thirdBlock;
 
-    work0 = effParamTableGetBlock(data, 0);
-    work1 = effParamTableGetBlock(data, 1);
-    work2 = effParamTableGetBlock(data, 2);
-    func_001855D0(work0, work1, work2);
+    firstBlock = effParamTableGetBlock(data, 0);
+    secondBlock = effParamTableGetBlock(data, 1);
+    thirdBlock = effParamTableGetBlock(data, 2);
+    func_001855D0(firstBlock, secondBlock, thirdBlock);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_001856D8);
@@ -84,7 +86,7 @@ void effPCPBossSetParameterVector(EffPCPBossWork *work, void *src) {
 }
 
 void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
-    work->unk24 = value;
+    work->parameter = value;
 }
 
 u32 func_001858E8(void) {

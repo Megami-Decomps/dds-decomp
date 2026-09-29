@@ -26,6 +26,7 @@ INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB1B0);
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB1E8);
 
+/* Switch the staff display to the alternate resource at context + 0x60. */
 u32 func_002AB240(void) {
     s32 context;
 

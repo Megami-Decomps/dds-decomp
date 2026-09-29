@@ -15,10 +15,11 @@ extern void effObjSetInnerFirstVec();
 extern void effObjSetInnerSecondVec();
 extern void effObjInnerVecBackup();
 
-ActionObj *dds3SpawnInnerVecObj8(s32 a, void *firstVector, void *secondVector) {
+/* Create an inner-vector object and snapshot its vector state after initialization. */
+ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
     ActionObj *obj = func_00110880(8);
 
-    obj->unk4 = a;
+    obj->unk4 = initialValue;
     effObjSetInnerFirstVec(obj, firstVector);
     effObjSetInnerSecondVec(obj, secondVector);
     effObjInnerVecBackup(obj->unk1C);

@@ -139,6 +139,7 @@ s32 evtCommandEnablePathUnit(void)
     return 1;
 }
 
+/* The path search covers the six object kinds 4 through 9. */
 s32 func_00240F58(void) {
     void *path = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
     s32 found;
@@ -287,13 +288,14 @@ s32 func_00241390(void) {
     return 1;
 }
 
+/* The event ID becomes a four-byte dispatch payload. */
 s32 evtCommandCallEvent(void)
 {
-    s32 p0;
+    s32 eventId;
 
-    p0 = func_0010D650(0);
-    func_0035B6E0("call_event:%d\n", p0);
-    func_001027D8(6, (s32)&p0, 4, 0);
+    eventId = func_0010D650(0);
+    func_0035B6E0("call_event:%d\n", eventId);
+    func_001027D8(6, (s32)&eventId, 4, 0);
     func_0010BFE0();
     return 1;
 }
@@ -323,10 +325,10 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
 
 s32 evtCommandSubmitEvent(void)
 {
-    s32 p0;
+    s32 eventId;
 
-    p0 = func_0010D650(0);
-    evtSubmitEventRequest(p0, 0);
+    eventId = func_0010D650(0);
+    evtSubmitEventRequest(eventId, 0);
     return 1;
 }
 
@@ -345,51 +347,52 @@ void evtSubmitEventRequestImmediate(s32 eventId)
 
 s32 evtCommandSubmitEventImmediate(void)
 {
-    s32 p0;
+    s32 eventId;
 
-    p0 = func_0010D650(0);
-    evtSubmitEventRequestImmediate(p0);
+    eventId = func_0010D650(0);
+    evtSubmitEventRequestImmediate(eventId);
     return 1;
 }
 
 s32 evtCommandSubmitEventWithMode(void)
 {
-    s32 p0;
-    s32 p1;
+    s32 eventId;
+    s32 mode;
 
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    evtSubmitEventRequest(p0, p1);
+    eventId = func_0010D650(0);
+    mode = func_0010D650(1);
+    evtSubmitEventRequest(eventId, mode);
     return 1;
 }
 
+/* A field-sequence request is a fixed 0xa0-byte VM message. */
 s32 func_002415E8(void)
 {
-    s32 p0;
-    s32 p1;
-    char *q;
-    u8 buf[0xa0];
+    s32 firstArg;
+    s32 secondArg;
+    char *textArg;
+    u8 request[0xa0];
 
     func_00144F08();
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    q = func_0010D7D0(2);
-    fldInitializeSequenceAndResetFlags((s32)buf, p0, p1, q);
-    func_001027D8(5, (s32)buf, 0xa0, 0);
+    firstArg = func_0010D650(0);
+    secondArg = func_0010D650(1);
+    textArg = func_0010D7D0(2);
+    fldInitializeSequenceAndResetFlags((s32)request, firstArg, secondArg, textArg);
+    func_001027D8(5, (s32)request, 0xa0, 0);
     func_0010BFE0();
     return 1;
 }
 
 s32 func_00241668(void)
 {
-    s32 p0;
-    char *q;
-    u8 buf[0xa0];
+    s32 firstArg;
+    char *textArg;
+    u8 request[0xa0];
 
-    p0 = func_0010D650(0);
-    q = func_0010D7D0(1);
-    fldInitializeSequenceAndResetFlags((s32)buf, D_00389780[0], p0, q);
-    func_001027D8(5, (s32)buf, 0xa0, 0);
+    firstArg = func_0010D650(0);
+    textArg = func_0010D7D0(1);
+    fldInitializeSequenceAndResetFlags((s32)request, D_00389780[0], firstArg, textArg);
+    func_001027D8(5, (s32)request, 0xa0, 0);
     func_0010BFE0();
     return 1;
 }
@@ -405,61 +408,61 @@ s32 func_002416D0(void)
 
 s32 func_00241708(void)
 {
-    s32 p0;
-    char *q;
-    u8 buf[0xa0];
+    s32 firstArg;
+    char *textArg;
+    u8 request[0xa0];
 
-    p0 = func_0010D650(0);
-    q = func_0010D7D0(1);
-    fldInitializeAlternateSequence((s32)buf, D_00389780[0], p0, q);
-    func_001027D8(5, (s32)buf, 0xa0, 0);
+    firstArg = func_0010D650(0);
+    textArg = func_0010D7D0(1);
+    fldInitializeAlternateSequence((s32)request, D_00389780[0], firstArg, textArg);
+    func_001027D8(5, (s32)request, 0xa0, 0);
     func_0010BFE0();
     return 1;
 }
 
 s32 evtCommandDispatchFieldBE(void)
 {
-    s32 p0;
-    s32 p1;
+    s32 firstArg;
+    s32 secondArg;
 
     func_0033DAD8("FIELD_BE start\n");
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    func_0025D390(p0, p1);
+    firstArg = func_0010D650(0);
+    secondArg = func_0010D650(1);
+    func_0025D390(firstArg, secondArg);
     func_0033DAD8("FIELD_BE end\n");
     return 1;
 }
 
 s32 func_002417C8(void)
 {
-    s32 p0;
-    s32 p1;
-    s32 combined;
+    s32 highPart;
+    s32 lowPart;
+    s32 targetKey;
 
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    combined = (p0 << 16) + p1;
-    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != combined) {
-        p0 = func_0010D650(0);
-        p1 = func_0010D650(1);
-        func_0023AA30(p0, p1);
+    highPart = func_0010D650(0);
+    lowPart = func_0010D650(1);
+    targetKey = (highPart << 16) + lowPart;
+    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != targetKey) {
+        highPart = func_0010D650(0);
+        lowPart = func_0010D650(1);
+        func_0023AA30(highPart, lowPart);
     }
     return 1;
 }
 
 u32 func_00241838(void) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = func_0010D650(0);
-    func_0023B0D0(0, temp_v0);
+    value = func_0010D650(0);
+    func_0023B0D0(0, value);
     return 1;
 }
 
 u32 func_00241868(void) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = func_0010D650(0);
-    func_0023B0D0(1, temp_v0);
+    value = func_0010D650(0);
+    func_0023B0D0(1, value);
     return 1;
 }
 
@@ -654,10 +657,10 @@ s32 evtCommandReadSolarPhase(void)
 }
 
 u32 evtCommandSetSolarPhase(void) {
-    u64 temp_v0;
+    u64 phase;
 
-    temp_v0 = func_0010D650(0);
-    evtSetSolarPhase(temp_v0);
+    phase = func_0010D650(0);
+    evtSetSolarPhase(phase);
     return 1;
 }
 
@@ -667,6 +670,7 @@ extern s32 mnuCampCreateTask(s32 id);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
+/* Start the camp task only if no task with this ID exists yet. */
 s32 evtCommandStartCampTaskIfAbsent(void) {
     s32 id = func_0010D650(0);
     EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
@@ -726,6 +730,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
     return 1;
 }
 
+/* Polygon movies use the active camp task's resource as their owner. */
 s32 evtCommandCreatePolygonMovie(void) {
     EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
     s32 a;
@@ -747,6 +752,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     return 1;
 }
 
+/* Look up a world unit across the six kinds before trying the fallback slot. */
 s32 func_00242818(void) {
     s32 found;
     s32 i = 4;

@@ -27,10 +27,11 @@ typedef struct EventVisualData {
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
 
+/* Seed both visual-value tables and cache the current raw solar phase. */
 void evtInitializeVisualData(s32 object) {
-    s32 state = evtGetRawSolarPhase(object);
+    s32 solarPhase = evtGetRawSolarPhase(object);
     s16 *values = ((EventVisualData *)object)->firstValues;
-    ((EventVisualData *)object)->solarPhase = state;
+    ((EventVisualData *)object)->solarPhase = solarPhase;
     values[0] = 0x39;
     values[1] = 0x33;
     values[2] = 0x1D;
@@ -54,27 +55,27 @@ s32 func_002457A8(void) {
     return D_00438FA4 != 0;
 }
 
-void func_002457B8(s32 arg0) {
-    if (arg0 == 0) {
+void func_002457B8(s32 value) {
+    if (value == 0) {
         D_00438FA4 = 0;
         D_00438FA8 = 0;
         D_00438FAC = 0;
         return;
     }
-    D_00438FAC = (s32)arg0;
+    D_00438FAC = (s32)value;
     D_00438FA4 = 3;
     D_00438FA8 = 0;
 }
 
-void func_002457E0(s32 arg0) {
-    if (arg0 == 0) {
+void func_002457E0(s32 value) {
+    if (value == 0) {
         D_00438FA4 = 5;
         D_00438FAC = 1;
         D_00438FA8 = 0;
     } else {
-        D_00438FA8 = arg0;
+        D_00438FA8 = value;
         D_00438FA4 = 5;
-        D_00438FAC = arg0;
+        D_00438FAC = value;
     }
 }
 
@@ -138,6 +139,7 @@ void evtUnlinkListNode(EventList *owner, EventListNode *node) {
     }
 }
 
+/* Walk the linked list and reinsert the first out-of-order successor. */
 void evtReorderListNodes(EventList *owner) {
     if (owner != 0) {
         EventListNode *current = owner->first;

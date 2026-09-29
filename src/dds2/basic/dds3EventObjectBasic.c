@@ -6,8 +6,8 @@ typedef struct {
 
 typedef struct {
     u8 pad[0x18];
-    EventData *unk18;
-    void *unk1C;
+    EventData *eventData;
+    void *node;
 } EventObj;
 
 s32 effObjTestNodeFlags(void *arg, s32 arg1);
@@ -16,22 +16,24 @@ void effObjClearNodeFlags(void *arg, s32 arg1);
 
 void effObjInnerVecBackup(void *arg);
 
+/* Release the event-data handle and its allocation after the inner object. */
 void dds3ReleaseEventData(EventObj *event) {
     EventData *data;
 
     effObjFreeInner();
-    data = event->unk18;
+    data = event->eventData;
     func_00111A68(data->handle);
     func_00328E48(data);
 }
 
-s32 func_001163F0(EventObj *arg) {
-    void *data;
+/* Snapshot the node's vectors once its pending flag is observed. */
+s32 func_001163F0(EventObj *event) {
+    void *node;
 
-    data = arg->unk1C;
-    if (effObjTestNodeFlags(data, 1) == 1) {
-        effObjClearNodeFlags(data, 1);
-        effObjInnerVecBackup(data);
+    node = event->node;
+    if (effObjTestNodeFlags(node, 1) == 1) {
+        effObjClearNodeFlags(node, 1);
+        effObjInnerVecBackup(node);
     }
     return 1;
 }

@@ -1,8 +1,10 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+/* Parameter block zero supplies the work passed to the needle initializer. */
 extern u64 effParamTableGetBlock(u64, u64);
 
+/* Resource handles released when the needle effect is torn down. */
 typedef struct {
     u8 pad00[0x68];
     u32 resource68;
@@ -16,11 +18,11 @@ void effPCPNeedleFree(EffPCPNeedleWork *work) {
     func_003297C8(work->resource70);
 }
 
-void effPCPNeedleCreate(u64 arg0) {
-    u64 temp_v0;
+void effPCPNeedleCreate(u64 parameters) {
+    u64 work;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_0017DD50(temp_v0);
+    work = effParamTableGetBlock(parameters, 0);
+    func_0017DD50(work);
 }
 
 void func_0017E068(void) {

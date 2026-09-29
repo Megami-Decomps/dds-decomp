@@ -20,6 +20,16 @@ void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 void evtDestroySecondaryWorldNode(void);
 s32 evtGetSolarPhase(s32 object);
 
+/* Same visual-value layout as the sequel: two 8-halfword tables and phase. */
+typedef struct EventVisualData {
+    u8 pad00[0x3C];
+    s16 firstValues[8];
+    u8 pad4C[0x50];
+    s16 secondValues[8];
+    u8 padAC[0x50];
+    u8 solarPhase;
+} EventVisualData;
+
 typedef struct EventListNode {
     u16 orderKey;
     u8 pad02[0x2E];
@@ -36,17 +46,18 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A248);
 
+/* Seed both visual-value tables and cache the current solar phase. */
 void evtInitializeVisualData(s32 object) {
-    s32 state = evtGetSolarPhase(object);
-    s16 *values = (s16 *)(object + 0x3C);
-    *(u8 *)(object + 0xFC) = state;
+    s32 solarPhase = evtGetSolarPhase(object);
+    s16 *values = ((EventVisualData *)object)->firstValues;
+    ((EventVisualData *)object)->solarPhase = solarPhase;
     values[0] = 0x39;
     values[1] = 0x33;
     values[2] = 0x1D;
     values[3] = 0x23;
     values[5] = 5;
     values[7] = 10;
-    values = (s16 *)(object + 0x9C);
+    values = ((EventVisualData *)object)->secondValues;
     values[0] = 0x37;
     values[1] = 0x32;
     values[2] = 15;
@@ -161,6 +172,7 @@ void evtUnlinkListNode(EventList *owner, EventListNode *node) {
     }
 }
 
+/* Walk the linked list and reinsert the first out-of-order successor. */
 void evtReorderListNodes(EventList *owner) {
     if (owner != 0) {
         EventListNode *current = owner->first;

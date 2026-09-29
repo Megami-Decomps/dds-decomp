@@ -20,6 +20,7 @@ import sys
 BRANCH = re.compile(
     r"\s+(b|bal|j|jal|jr|jalr|beq|bne|beqz|bnez|blez|bgtz|bltz|bgez|bltzal|bgezal|bc1t|bc1f)\s")
 MTC1 = re.compile(r"\s+mtc1\s+\$\w+,(\$f\d+)\s*$")
+LABEL = re.compile(r"^\$?\.?L\w*:\s*$")
 # Same rule after a float->int conversion: retail has no `cvt.w.s $fN; jr; swc1 $fN`
 # in DDS1 or DDS2 (45 and 59 sequences with a dependent instruction, all unfilled).
 CVTWS = re.compile(r"\s+(?:cvt|trunc)\.w\.s\s+(\$f\d+),")
@@ -79,8 +80,13 @@ def main(src, dst):
         while j < len(lines) and lines[j].strip().startswith("#"):
             j += 1
         hilo_before_branch = reorder and j < len(lines) and HILO.match(line) and BRANCH.match(lines[j])
+        # A branch target never moves: retail keeps `.L: insn; jr $31; nop` (21
+        # sequences, all swappable) where ee-as would pull the labelled insn into the slot.
+        labelled = i > 0 and LABEL.match(lines[i - 1]) and line.strip() and not line.strip().startswith((".", "#")) \
+            and not BRANCH.match(line)
         if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
-                next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line))) or hilo_before_branch:
+                next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line) or labelled)) \
+                or hilo_before_branch:
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
             out.append(line)

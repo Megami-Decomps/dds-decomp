@@ -1,11 +1,9 @@
 #include "common.h"
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
- * entry per table; the handler lives at +0x0. Slots are declared as separate
- * arrays (D_00353710/14/18/1C/20/24/28/2C/30/34 and D_00353880/84/88/90/94/
- * 98/9C/A0/A4). The family2 create table (D_00353880) additionally carries a
- * fallback selector at +0x0C: nonzero calls the entry handler directly,
- * zero falls back through D_003536A0.
+ * entry per table; its handler lives at +0x00. The first family uses tables
+ * D_003B0040/4C/50/54/58/5C/60/64 and the extended family uses tables
+ * D_003B01C0/C4/C8/CC/D0/D4.
  */
 typedef struct EffDispatchEntry {
     void *(*func)(void *); /* 0x00 handler, may be NULL */
@@ -39,7 +37,7 @@ extern EffDispatchEntry D_003B0060[];
 
 extern EffDispatchEntry D_003B0064[];
 
-/* Init work behind func_00162CB8: flag word plus an optional parameter
+/* Init work behind effParamInitWork: flag word plus an optional parameter
  * block whose +0x20 word is reset to 1.0f.
  */
 typedef struct EffInitWork {
@@ -94,7 +92,7 @@ extern EffDispatchEntry D_003B01CC[];
 
 extern EffDispatchEntry D_003B01D4[];
 
-/* Callback table at D_0037E14C (0x28 bytes per entry). */
+/* Callback table at D_003B0044 (0x28 bytes per entry). */
 typedef struct Cb3714C {
     void (*cb)(void *arg); /* 0x00 */
     u8 pad4[0x24];         /* 0x04 */
@@ -135,10 +133,11 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A620);
 
-void func_0016A668(u8 *work) {
-    u16 id = *(u16 *)work;
+/* Invoke the kind-specific callback on this parameter block. */
+void func_0016A668(EffParamWork *work) {
+    u16 id = work->id;
 
-    D_003B0044[id].cb(*(void **)(work + 4));
+    D_003B0044[id].cb(work->data);
 }
 
 EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
@@ -186,16 +185,16 @@ void effParamWorkCallback5(EffParamWork *work) {
     }
 }
 
-void func_0016A890(u32 arg0) {
-    billCreateIndexed(0, arg0);
+void func_0016A890(u32 index) {
+    billCreateIndexed(0, index);
 }
 
-void func_0016A8B0(u32 arg0) {
-    billCreateIndexed(1, arg0);
+void func_0016A8B0(u32 index) {
+    billCreateIndexed(1, index);
 }
 
-void effParamDispatchFloat(f32 arg0) {
-    func_00159BF0(arg0, arg0);
+void effParamDispatchFloat(f32 value) {
+    func_00159BF0(value, value);
 }
 
 void effParamInitWork(EffInitWork *work) {
@@ -215,45 +214,47 @@ void effParamInitWork(EffInitWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A990);
 
-void effParamInitFromGlobal(void *arg0) {
-    func_00232390(arg0, &D_00380828);
+void effParamInitFromGlobal(void *work) {
+    func_00232390(work, &D_00380828);
 }
 
 void func_0016AA38(void) {
     func_002322E8();
 }
 
-void *effParamAssembleWork(void *arg0) {
-    void *a;
-    void *b;
+/* Assemble a parameter work item from the two pieces extracted from source. */
+void *effParamAssembleWork(void *source) {
+    void *firstPart;
+    void *secondPart;
     void *work;
 
-    a = func_00232EE8(arg0);
-    b = func_00232EF8(arg0);
-    work = func_00232198(a, b);
+    firstPart = func_00232EE8(source);
+    secondPart = func_00232EF8(source);
+    work = func_00232198(firstPart, secondPart);
     effParamInitWork(work);
     return work;
 }
 
-void effParamForwardVector(void *arg0, void *vec) {
+void effParamForwardVector(void *work, void *vec) {
     __asm__ volatile (
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (vec) : "memory");
-    mdlStorePrimaryVectorVU(arg0);
+    mdlStorePrimaryVectorVU(work);
 }
 
-void effParamBuildVector(void *arg0, f32 x) {
+/* Broadcast one scalar into three components before loading VU0 vf10. */
+void effParamBuildVector(void *work, f32 scalar) {
     f32 v[3];
 
-    v[0] = v[1] = v[2] = x;
+    v[0] = v[1] = v[2] = scalar;
     __asm__ volatile (
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (v) : "memory");
-    mdlStoreTertiaryVectorVU(arg0);
+    mdlStoreTertiaryVectorVU(work);
 }
 
 void effParamScatterVectors(EffScatterWork *work, void *src) {
@@ -337,30 +338,33 @@ void effParamWorkExCallback5(EffParamWorkEx *work) {
     }
 }
 
-u32 func_0016AEA0(u32 *arg0) {
-    return *arg0;
+u32 func_0016AEA0(u32 *word) {
+    return *word;
 }
 
-u32 func_0016AEA8(s32 arg0) {
-    return *(u32 *)(arg0 + 4);
+u32 func_0016AEA8(s32 address) {
+    return *(u32 *)(address + 4);
 }
 
-void *effParamTableGetBlock(void *arg0, s32 index) {
-    u8 *data = (u8 *)arg0;
+/* Table records are 16 bytes apart after a 16-byte header; block offsets
+ * are relative to the start of the table, not to each record.
+ */
+void *effParamTableGetBlock(void *table, s32 index) {
+    u8 *data = (u8 *)table;
     u8 *row = data + index * 16;
 
     return data + *(s32 *)(row + 0x14);
 }
 
-u32 effParamTableGetWord(void *arg0, s32 index) {
-    u8 *data = (u8 *)arg0;
+u32 effParamTableGetWord(void *table, s32 index) {
+    u8 *data = (u8 *)table;
 
     data += index * 16;
     return *(u32 *)(data + 0x10);
 }
 
-u32 effParamTableGetWord2(void *arg0, s32 index) {
-    u8 *data = (u8 *)arg0;
+u32 effParamTableGetWord2(void *table, s32 index) {
+    u8 *data = (u8 *)table;
 
     data += index * 16;
     return *(u32 *)(data + 0x18);

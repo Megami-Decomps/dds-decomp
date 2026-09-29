@@ -71,6 +71,7 @@ void frFontSetEntryFlag(s32 index, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193C70);
 
+/* Return the one-based highest set bit, wrapped to a byte; zero stays zero. */
 s32 frFontHighestSetBitIndex(u32 value) {
     s32 count = 0;
 
@@ -112,14 +113,14 @@ void frFontReleaseAll(void) {
 INCLUDE_ASM(const s32, "game/code_00193C08", func_001944A0);
 
 void frFontFreeEntry(s32 index) {
-    u32 idx = index & 0xFF;
+    u32 slot = index & 0xFF;
     FrFontEntry *entry;
 
-    if (idx < 2) {
+    if (slot < 2) {
         return;
     }
-    D_003565F8[idx] = 0;
-    entry = &D_003D6C80.entries[idx];
+    D_003565F8[slot] = 0;
+    entry = &D_003D6C80.entries[slot];
     if (entry->buffer != NULL) {
         func_002D0918(entry->buffer);
         entry->unk1C = NULL;

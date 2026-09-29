@@ -169,6 +169,7 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108218);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001082D8);
 
+/* Either replace the draw vector immediately or interpolate from its prior value. */
 void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
     if (mode == 0) {
         D_003BA904 &= ~0x400;
@@ -197,21 +198,21 @@ void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001083F8);
 
-void evtUnk89F8SetState(s32 arg0, f32 farg0, f32 farg1) {
-    if (arg0 == 0) {
+void evtUnk89F8SetState(s32 frames, f32 first, f32 second) {
+    if (frames == 0) {
         D_003BA904 &= ~0x4000;
-        D_003BD358 = farg0;
-        D_003BD35C = farg1;
+        D_003BD358 = first;
+        D_003BD35C = second;
     }
     else {
-        f32 b0 = D_003BD358;
-        f32 b1 = D_003BD35C;
+        f32 previousFirst = D_003BD358;
+        f32 previousSecond = D_003BD35C;
         D_003BA904 |= 0x4000;
-        D_003BD706 = arg0;
-        D_003BD708 = b0;
-        D_003BD70C = farg0;
-        D_003BD710 = b1;
-        D_003BD714 = farg1;
+        D_003BD706 = frames;
+        D_003BD708 = previousFirst;
+        D_003BD70C = first;
+        D_003BD710 = previousSecond;
+        D_003BD714 = second;
         D_003BD704 = 0;
     }
 }
@@ -370,12 +371,12 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109AF0);
 
-void func_00109BC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+void func_00109BC0(s32 width, s32 height, u64 first, u64 second) {
+    u64 resource;
 
-    temp_v0 = func_00197748(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_00195868(temp_v0);
-    func_00194920(temp_v0);
+    resource = func_00197748(width << 4, height << 3, 0, first, second, 0);
+    func_00195868(resource);
+    func_00194920(resource);
 }
 
 typedef struct EvtSelState {
@@ -462,17 +463,17 @@ void func_0010A218(void) {
 }
 
 u32 func_0010A230(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 operationResult;
+    u32 status;
 
     func_0028F458();
     func_0028F460();
-    temp_v0 = func_0028F5F8();
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 0) {
-        temp_v1 = 0;
+    operationResult = func_0028F5F8();
+    status = 0xffffffff;
+    if (operationResult != 0) {
+        status = 0;
     }
-    return temp_v1;
+    return status;
 }
 
 u8 func_0010A268(void) {
@@ -538,17 +539,17 @@ void func_0010A398(void) {
 }
 
 u32 func_0010A3B0(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 operationResult;
+    u32 status;
 
     func_0028F458();
     func_0028F460();
-    temp_v0 = func_0028F5F8();
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 0) {
-        temp_v1 = 0;
+    operationResult = func_0028F5F8();
+    status = 0xffffffff;
+    if (operationResult != 0) {
+        status = 0;
     }
-    return temp_v1;
+    return status;
 }
 
 u8 func_0010A3E8(void) {
@@ -564,16 +565,16 @@ void func_0010A408(u32 arg0, u32 arg1) {
 }
 
 u32 func_0010A448(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 operationResult;
+    u32 status;
 
     fldCleanupFieldScene();
-    temp_v0 = func_00125FD0();
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 0) {
-        temp_v1 = 0;
+    operationResult = func_00125FD0();
+    status = 0xffffffff;
+    if (operationResult != 0) {
+        status = 0;
     }
-    return temp_v1;
+    return status;
 }
 
 u32 func_0010A478(void) {
@@ -592,23 +593,24 @@ u32 func_0010A4A0(void) {
     return 0;
 }
 
-void evtUnkA4A8Dispatch(s32 arg0, s32 *arg1) {
-    s32 v0 = 0;
+/* Source zero takes an explicit value; source one uses the pending event mode. */
+void evtUnkA4A8Dispatch(s32 source, s32 *params) {
+    s32 selection = 0;
 
     D_003BA730 = 0;
-    switch (arg0) {
+    switch (source) {
     case 0:
-        v0 = arg1[0];
+        selection = params[0];
         break;
     case 1:
-        v0 = D_003BBDA8;
+        selection = D_003BBDA8;
         break;
     }
-    if (v0 <= 0) {
+    if (selection <= 0) {
         return;
     }
     evtCreateSkyTask();
-    func_00220110(v0);
+    func_00220110(selection);
 }
 
 u32 func_0010A510(void) {
@@ -997,6 +999,7 @@ void func_0010B6A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B6B0);
 
+/* Append to the event-work doubly linked list, maintaining both endpoints. */
 void evtLinkWorkNode(B728Work *node) {
     B728Work *tail = D_003BA998;
 
@@ -1015,6 +1018,7 @@ void evtLinkWorkNode(B728Work *node) {
     D_003BA990++;
 }
 
+/* Detach from either end or the middle, and clear the old links. */
 void evtUnlinkWorkNode(B728Work *node) {
     if ((B728Work *)D_003BA994 == node) {
         D_003BA994 = node->next;

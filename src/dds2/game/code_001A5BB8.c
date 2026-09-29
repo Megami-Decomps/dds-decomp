@@ -2,6 +2,8 @@
 
 extern u32 D_004367F8;
 
+extern u32 D_004367CC;
+
 extern s32 dds3FindEntryIndex();
 
 extern s32 func_001AAA80(s32);
@@ -32,7 +34,7 @@ extern s32 D_00435E38;
 
 extern s32 func_001AA6F8(void);
 
-extern u32 D_004367FC;
+extern u8 *D_004367FC;
 
 extern s32 D_00435DD0;
 
@@ -973,7 +975,22 @@ s32 func_001AA350(void) {
     return *(u32 *)(state + 0x718) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA398);
+void func_001AA398(void) {
+    s32 context = D_004366E4;
+    s32 *entries = (s32 *)(D_00435DD0 + 0xC18);
+    u32 i;
+    *(s32 *)(context + 0x2E8) = 0;
+    *(s32 *)(context + 0x2EC) = 0;
+    *(s32 *)(context + 0x2F0) = 0;
+    *(s32 *)(context + 0x2F4) = 0;
+    *(s32 *)(context + 0x2F8) = 0;
+    *(u16 *)(context + 0x2FC) = 0;
+    for (i = 0; i < 5; i++) {
+        *entries = 0;
+        entries = (s32 *)((u8 *)entries + 0x1C4);
+    }
+    memset((void *)(D_004366E4 + 0x2DC), 0, 12);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA400);
 
@@ -1003,8 +1020,8 @@ s32 func_001AA740(void *stats) {
     return func_001197C0(stats);
 }
 
-void func_001AA758(void) {
-    func_001198C0();
+s32 func_001AA758() {
+    return func_001198C0();
 }
 
 void func_001AA770(void) {
@@ -1025,7 +1042,15 @@ u16 func_001AA7A0(s32 object) {
     return *(u16 *)(object + 6);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA7F0);
+u16 func_001AA7F0(s32 object) {
+    u16 maximum = func_001AA708(object);
+    u32 value = func_001AA758(object);
+    *(u16 *)(object + 12) = value;
+    if (value < maximum) {
+        *(u16 *)(object + 10) = value;
+    }
+    return *(u16 *)(object + 10);
+}
 
 u16 func_001AA840(s32 arg0) {
     return *(u16 *)(arg0 + 0xe) & 0x7fff;
@@ -1422,7 +1447,12 @@ void func_001ADC48(u32 arg0) {
     } while (temp_v0 < 7);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADC98);
+s32 func_001ADC98(UiObject *unit, s32 index) {
+    if (unit->entrySlots[index].code == 0) {
+        return 0;
+    }
+    return unit->entrySlots[index].countdown < 1;
+}
 
 typedef struct EntryPair {
     s16 first;
@@ -1453,7 +1483,11 @@ void btlSetActorEntryCode(UiObject *unit, s32 index, u16 code) {
     unit->entrySlots[index].code = code;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADDD0);
+void func_001ADDD0(UiObject *unit, s32 index) {
+    unit->entrySlots[index].code = 0;
+    unit->entrySlots[index].unk02 = -1;
+    unit->entrySlots[index].countdown = -1;
+}
 
 s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
     return unit->entrySlots[index].code;
@@ -1485,7 +1519,15 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE678);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE8C0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEAB8);
+s32 func_001AEAB8(s32 unit, u32 slot) {
+    if (((BattleController *)func_001AA6F8())->flags21C & 0x20000) {
+        return 0;
+    }
+    if (slot < 2 && btlCheckSpecialAbility(unit + 0x120, 0x274)) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_001AEB20(s32 unit, u32 slot) {
     if (((BattleController *)func_001AA6F8())->flags21C & 0x20000) {
@@ -1725,7 +1767,35 @@ s32 func_001B24F8(UiObject *object, s32 delta) {
     return value * 100 / object->maximumValue < 26;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2540);
+s32 func_001B2540(UiObject *unit) {
+    UiObject *actor;
+    s32 a;
+    s32 b;
+    if (func_001B2430((u8 *)unit, 0) != 0) {
+        return 0;
+    }
+    if (unit->flags & 0x60) {
+        return 0;
+    }
+    a = 0;
+    b = 0;
+    for (actor = ((BattleController *)func_001AA6F8())->actors; actor != 0; actor = actor->next) {
+        if (actor->flags & 1) {
+            if (!(actor->flags & 0xE0)) {
+                if (actor->flags & 0x200) {
+                    a++;
+                }
+                if (actor->flags & 0x400) {
+                    b++;
+                }
+            }
+        }
+    }
+    if (a != 0 && b != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_001B25F0(UiObject *object) {
     if ((object->flags & 0x400) != 0) {
@@ -2228,7 +2298,44 @@ s32 func_001B5510(s32 object) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5548);
+typedef struct BtlWeightEntry {
+    u16 id;
+    u8 weight;
+    u8 pad3;
+} BtlWeightEntry;
+
+typedef struct BtlWeightTable {
+    BtlWeightEntry entries[8];
+} BtlWeightTable;
+
+extern BtlWeightTable *D_00435E40;
+
+u32 func_001B5548(u16 index) {
+    u32 offset = index * sizeof(BtlWeightTable);
+    BtlWeightEntry *counted = (BtlWeightEntry *)(offset + (u32)D_00435E40);
+    BtlWeightEntry *entry;
+    s32 total = 0;
+    s32 sum;
+    s32 roll;
+    s32 i;
+    for (i = 7; i >= 0; i--, counted++) {
+        if (counted->id != 0) {
+            total += counted->weight;
+        }
+    }
+    roll = effMiscRandMod(0, total);
+    sum = 0;
+    entry = (BtlWeightEntry *)(offset + (u32)D_00435E40);
+    for (i = 0; i < 8; i++, entry++) {
+        if (entry->id != 0) {
+            if (roll < sum + entry->weight) {
+                return entry->id;
+            }
+            sum += entry->weight;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5600);
 
@@ -2315,6 +2422,29 @@ void func_001B7208(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
     *(u32 *)(arg0 + 0x24) = 0;
 }
 
+typedef struct BtlResBlock {
+    s32 unk0;
+    s32 nameA;
+    s32 nameB;
+    s32 nameC;
+    s32 resA;
+    s32 resB;
+    s32 resC;
+    s32 unk1C;
+} BtlResBlock;
+
+extern u8 D_00436800;
+
+extern u8 D_00436801;
+
+extern BtlResBlock *D_00436804;
+
+extern s32 func_003292A8(s32);
+
+extern BtlResBlock *sdfResourceRetainAddress(s32);
+
+extern s32 func_00343ED0(const char *, void *, s32);
+
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415B80);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415BA0);
@@ -2337,17 +2467,25 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CD8);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CE8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7238);
-
-typedef struct BtlResBlock {
-    s32 unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    s32 resA;
-    s32 resB;
-    s32 resC;
-} BtlResBlock;
+void func_001B7238(void) {
+    u8 params[16];
+    s32 handle;
+    BtlResBlock *block;
+    if (D_00436800 == 0) {
+        handle = func_003292A8(0x28);
+        block = sdfResourceRetainAddress(handle);
+        D_00436804 = block;
+        block->unk0 = handle;
+        block->resA = 0;
+        block->resB = 0;
+        block->unk1C = 0;
+        D_00436804->nameA = func_00343ED0("/battle/panel/batle_01.spr", params, 0);
+        D_00436804->nameB = func_00343ED0("/battle/panel/batle_02.spr", params, 0);
+        D_00436804->nameC = func_00343ED0("/battle/panel/battle_03.spr", params, 0);
+        D_00436801 = 0;
+    }
+    D_00436800 = 1;
+}
 
 typedef struct BtlWorkRes {
     u8 pad[0x4D8];
@@ -2355,10 +2493,6 @@ typedef struct BtlWorkRes {
     s32 resB;
     s32 resC;
 } BtlWorkRes;
-
-extern u8 D_00436801;
-
-extern BtlResBlock *D_00436804;
 
 extern s32 func_00305148();
 
@@ -2450,11 +2584,25 @@ void func_001B7900(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7940);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7A00);
+void func_001B7A00(void) {
+    s32 i;
+    for (i = 3; i >= 0; i--) {
+        D_003B6928[i] = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7A38);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7AE0);
+extern u32 D_004367B8;
+
+s64 func_001B7AE0(void) {
+    s64 task = func_00101740(D_004367B8);
+    if (task != 0) {
+        *(s32 *)func_00101958(task) = 2;
+        return 1;
+    }
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
 
@@ -2556,7 +2704,19 @@ u32 func_001B81E8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8230);
+extern u32 D_004367BC;
+
+typedef struct BtlPhaseTask {
+    s32 phase;
+} BtlPhaseTask;
+
+void func_001B8230(void) {
+    s64 task = func_00101740(D_004367BC);
+    if (task != 0) {
+        ((BtlPhaseTask *)func_00101958(task))->phase = 5;
+        *D_004367FC = 3;
+    }
+}
 
 void func_001B8278(s32 mode) {
     s32 task = func_001B88C8(7);
@@ -2992,9 +3152,40 @@ s32 func_001C0008(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0080);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0118);
+extern s32 func_001C0080(s32);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0158);
+s64 func_001C0118(void) {
+    s64 task = func_00101740(D_004367BC);
+    if (task != 0) {
+        s32 *state = *(s32 **)(func_00101958(task) + 0x2C);
+        return func_001C0080(state[6]);
+    }
+    return task;
+}
+
+typedef struct FlagEntry {
+    u32 unk0;
+    u16 id;
+    u8 pad6[6];
+} FlagEntry;
+
+extern FlagEntry *func_001C8A28(s32, u16 *);
+extern s32 func_001B7940(s32, s32);
+
+s64 func_001C0158(void) {
+    u16 count;
+    s64 task = func_00101740(D_004367BC);
+    FlagEntry *entries;
+    s32 i;
+    if (task != 0) {
+        entries = func_001C8A28(func_00101958(task), &count);
+        for (i = 0; i < count; i++) {
+            func_001B7940(entries[i].id, 0);
+        }
+        return 1;
+    }
+    return task;
+}
 
 extern u32 D_004367EC;
 
@@ -3046,9 +3237,40 @@ s64 func_001C0D78(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0DD0);
+void func_001C0DD0(s32 handle) {
+    BattleController *battle = (BattleController *)func_001AA6F8();
+    func_00328E48(func_00101958(handle));
+    func_001B88E0(0xD, 0);
+    battle->flags |= 0x100000;
+    *(u32 *)(D_004367F4 + 0x3C) &= ~0x100;
+    func_0026C710();
+}
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0E40);
+extern u8 D_004166F0[];
+
+void func_001C0E40(void) {
+    u8 initial[0x20];
+    u8 *allocated;
+    u32 *source;
+    u32 *destination;
+    s16 *state;
+    s32 i;
+    memcpy(initial, D_004166F0, sizeof(initial));
+    allocated = func_00328E18(0x30);
+    D_00438F48 = (u32)allocated;
+    state = (s16 *)(allocated + 2);
+    destination = (u32 *)(allocated + 0x10);
+    source = (u32 *)initial;
+    for (i = 3; i >= 0; i--) {
+        *state = 0;
+        state++;
+        destination[-1] = source[0];
+        destination[0] = source[1];
+        destination += 2;
+        source += 2;
+    }
+    func_001B88E0(2, 1);
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004166F0);
 
@@ -3108,15 +3330,35 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2450);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C26E0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2A50);
+typedef struct BtlSlot {
+    u8 pad0[4];
+    u8 state;
+    u8 pad5[0x28B];
+} BtlSlot;
+
+typedef struct BtlSlotBank {
+    u8 pad0[8];
+    s32 count;
+    u8 padC[0x7C4];
+    BtlSlot slots[1];
+} BtlSlotBank;
+
+void func_001C2A50(BtlSlotBank *bank) {
+    s32 i;
+    for (i = 0; i < bank->count; i++) {
+        BtlSlot *slot = &bank->slots[i];
+        s32 state = slot->state;
+        if (state == 1 || state == 2) {
+            slot->state = 4;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2A98);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
-
-extern u32 D_004367CC;
 
 void func_001C35B8(void) {
     func_003297C8(*(u32 *)(func_00101958(func_00101740(D_004367CC)) + 0x1200));

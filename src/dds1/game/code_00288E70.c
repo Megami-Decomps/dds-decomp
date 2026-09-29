@@ -115,6 +115,7 @@ INCLUDE_ASM(const s32, "game/code_00288E70", fileManDispatchDone);
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileManUpdate);
 
+/* Task callback driving asynchronous file work. */
 s32 fileMan(void) {
     fileManUpdate();
     return 0;
@@ -131,6 +132,7 @@ void fileManInit(void) {
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileReqInit);
 
+/* Select and reinitialize one file request, then clear its +0x10 byte. */
 void fileReqBegin(s32 request) {
     D_003BD8E8 = request;
     fileReqInit(request);
@@ -159,18 +161,21 @@ void fileReqMarkSlotMetadataDirty(s32 request) {
     D_003DC698[request].slotMetadataDirty = 1;
 }
 
+/* The flag-word alias advances by the full 0x64-byte request-entry stride. */
+#define FILE_REQ_WORDS_PER_ENTRY 0x19
+
 void fileReqClearSlotFlags(s32 request, s32 slot) {
-    slot += request * 0x19;
+    slot += request * FILE_REQ_WORDS_PER_ENTRY;
     D_003DC6AC[slot] = 0;
 }
 
 void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
-    slot += request * 0x19;
+    slot += request * FILE_REQ_WORDS_PER_ENTRY;
     D_003DC6AC[slot] |= mask;
 }
 
 u32 fileReqGetSlotFlags(s32 request, s32 slot) {
-    slot += request * 0x19;
+    slot += request * FILE_REQ_WORDS_PER_ENTRY;
     return D_003DC6AC[slot];
 }
 
