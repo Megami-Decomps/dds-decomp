@@ -1,15 +1,14 @@
 #include "common.h"
 extern char D_00425118[];
 extern char D_004378A8[]; /* "%d" */
+extern char D_004378B0[]; /* "---" */
+extern s32 func_0026E470(u16);
+extern f32 func_003406A0(f32);
 extern void func_00311DB0(s32, s32, s32, s32, s32, char *, s32, s32);
-
-extern u64 func_00279DC8(u32, u64, u64, u64, u64, u64);
-
-extern u64 func_0027A628(u32, u64, u64);
 
 extern u32 func_00284AE0(void);
 
-extern u32 func_002843C0(u32);
+extern u32 func_002843C0(s16);
 
 extern s32 mnuFindMantraDrawItemByKind(u32, u32);
 
@@ -92,6 +91,26 @@ typedef struct MantraDrawPool {
     s32 count;
 } MantraDrawPool;
 
+/* MantraDrawItem seen through its flag word: bits 12..19 hold the category. */
+typedef struct MantraDrawItemBits {
+    u32 kind;
+    u32 low : 12;
+    u32 category : 8;
+    u32 high : 12;
+} MantraDrawItemBits;
+
+typedef struct MantraCountState {
+    u8 pad00[0x4C];
+    s32 shown;
+    s32 step;
+} MantraCountState;
+
+typedef struct MantraCountStateB {
+    u8 pad00[0x10];
+    s32 shown;
+    s32 step;
+} MantraCountStateB;
+
 typedef struct MantraFadeData {
     u8 *iconList;
     u16 state;
@@ -141,7 +160,7 @@ typedef struct MantraListState {
 typedef struct MantraFileEntry {
     struct MantraFileEntry *next;
     u8 pad04[4];
-    u32 handle;
+    void *handle;
     u8 pad0C[4];
     u8 kind;
 } MantraFileEntry;
@@ -150,13 +169,16 @@ typedef struct MantraFileRequest {
     u8 pad00[0x60];
     MantraFileEntry *entries;
 } MantraFileRequest;
+extern s32 fileRequestIsReady(void *);
+extern void func_002C7CE8(void *);
+extern u32 func_00305148(void *, u32);
+extern u32 func_00101958(void);
 extern u32 func_002C7FF0(const char *);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
                             void (*)(), void *);
 s32 func_0026E6E0(void);
-extern u32 func_0026E788(u32, u32, u32, u32, u32, u32, u32);
+extern void func_0026E788(u32, u32, u32, u32, u32, u32, u32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
-extern void func_002758B8(s16, s16, u32, s32, u32);
 extern char D_004250D8[];
 extern s32 func_002748D0();
 extern void func_00274A70();
@@ -184,7 +206,28 @@ s32 func_0026DBF8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DE08);
+extern char D_004378A0[]; /* "%7d" */
+
+void func_0026DE08(u32 arg0, u32 arg1, u32 arg2, u32 arg3, MantraCountState *state, u32 arg5) {
+    char text[16];
+    u32 flags = arg3 | 0xA09DC300;
+
+    func_0026E788(arg0, arg1, arg2, arg3, 0x2E, 0, arg5);
+    if (*(s32 *)(D_00435DD0 + 0x3C) != state->shown) {
+        s32 steps = 20;
+
+        sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
+        state->step++;
+        func_0035C860(text, D_004378A0, state->shown + (*(s32 *)(D_00435DD0 + 0x3C) - state->shown) * state->step / steps);
+        if (state->step == steps) {
+            state->shown = *(s32 *)(D_00435DD0 + 0x3C);
+            state->step = 0;
+        }
+    } else {
+        func_0035C860(text, D_004378A0, *(s32 *)(D_00435DD0 + 0x3C));
+    }
+    func_00311D00(arg0 + 0x193, arg1 + 0x26, arg2, flags, 0, text, 0, arg5);
+}
 
 void func_0026DF48(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u16 arg4, u32 arg5) {
     u8 buffer[0x20];
@@ -201,11 +244,64 @@ void func_0026DF48(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u16 arg4, u32 arg5) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E060);
+extern u8 *func_003164C0(void);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E198);
+void func_0026E060(u32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4, u32 arg5) {
+    u8 *handle = func_003164C0();
+    u32 flags = (u32)(arg3 * 0.6f) | 0xA09D7D00;
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E2D8);
+    func_0026E788(arg0, arg1, arg2, arg3, 0x4D, 0, arg5);
+    if (arg4 != 0) {
+        func_00311E60(arg0 + 0x2A, arg1 + 0x160, arg2, flags, 0, arg4 & 0xFFFF, handle, 0, 0, arg5);
+    } else {
+        func_0026E788(arg0, arg1, arg2, arg3, 0x55, 0, arg5);
+    }
+}
+
+extern u32 func_003151D0(u16);
+
+void func_0026E198(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4, u32 arg5) {
+    char text[0x20];
+    u32 flags = arg3 | 0xA09D7D00;
+    u32 count;
+    u32 i;
+
+    func_0026E788(arg0, arg1, arg2, arg3, 0x4E, 0, arg5);
+    if (arg4 != 0) {
+        count = func_003151D0(arg4);
+        if (count != 0) {
+            func_0035C860(text, D_004378A8, count);
+            func_00311DB0(arg0 + 0x82, arg1 + 0x17C, arg2, flags, 4, text, 0, arg5);
+            for (i = 0; i < count; i++) {
+                func_0026E788(arg0, arg1, arg2, arg3, 0x51, 0, arg5);
+                arg0 += 0xF;
+            }
+        }
+    } else {
+        func_0026E788(arg0, arg1, arg2, arg3, 0x56, 0, arg5);
+    }
+}
+
+void func_0026E2D8(u32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4, u32 arg5, u32 arg6) {
+    char text[0x20];
+    u32 flags = arg3 | 0xA09DC300;
+
+    func_0026E788(arg0, arg1, arg2, arg3, 0x4F, 0, arg6);
+    if (arg4 != 0) {
+        func_0026E788(arg0, arg1, arg2, arg3, 0x53, 0, arg6);
+        if (arg5 != 0) {
+            func_0035C860(text, D_004378A8, func_0026E470(arg4));
+            func_00311DB0(arg0 + 0x9A, arg1 + 0x190, arg2, flags, 4, text, 0, arg6);
+        } else {
+            func_0035C860(text, D_004378B0);
+            func_00311C50(arg0 + 0xA2, arg1 + 0x18C, arg2, (u32)(arg3 * 0.5f) | 0xA09D7D00, 0, text, 0x80000000, arg6);
+        }
+    } else {
+        func_0026E788(arg0, arg1, arg2, arg3, 0x57, 0, arg6);
+    }
+}
+
+extern MantraSourceEntry *func_003162D8(u16);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E470);
 
@@ -273,7 +369,23 @@ void mnuReleaseMantraSpriteSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E6E0);
+s32 func_0026E6E0(void) {
+    MantraFileRequest *request = (MantraFileRequest *)func_00101958();
+    s32 result = fileRequestIsReady(request);
+    if (result != 0) {
+        MantraFileEntry *entry = request->entries;
+        s32 i;
+        for (i = 4; entry != 0; entry = entry->next, i++) {
+            if (entry->kind == 1) {
+                D_00453D00[i] = func_00305148(entry->handle, 0);
+                func_003297C8((u32)entry->handle);
+            }
+        }
+        func_002C7CE8(request);
+        result = -1;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E788);
 
@@ -283,7 +395,20 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EBA8);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EDB0);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EEE8);
+s32 func_0026EEE8(u32 arg0, u32 arg1, u32 arg2, s32 frame, s32 amount, u32 arg5) {
+    f32 wave = (f32)frame / 60.0f;
+    s32 shown;
+
+    wave = func_003406A0(wave * 3.14159265f);
+    func_0026E788(arg0, arg1, arg2, amount, 0x25, 0, arg5);
+    shown = (f32)amount * (wave * 0.5f + 0.5f);
+    func_0026E788(0, 0, arg2, shown, 0x26, 0, arg5);
+    func_0026E788(0, 0, arg2, shown, 0x28, 0, arg5);
+    if (frame < 60) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250D8);
 
@@ -303,19 +428,18 @@ void mnuDrawMantraCostBadge(s32 arg0, s32 arg1, s32 arg2, u8 *arg3, s32 arg4, s3
     }
 }
 
-u32 func_0026F138(u32 unused1, u32 unused2, u32 third, u32 record,
-                  u32 position, u32 packet) {
+void func_0026F138(u32 unused1, u32 unused2, u32 third, u32 record,
+                   u32 position, u32 packet) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
     u16 index = *(u16 *)(record + 4);
-    return func_0026E788(0, 0, third, position, markers[index], 0, packet);
+    func_0026E788(0, 0, third, position, markers[index], 0, packet);
 }
 
-u32 func_0026F190(u32 unused1, u32 unused2, u32 third, u32 record,
-                  u32 position, u32 packet) {
+void func_0026F190(u32 unused1, u32 unused2, u32 third, u32 record,
+                   u32 position, u32 packet) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
     u16 index = *(u16 *)(record + 4);
-    return func_0026E788(0, 0, third, position, markers[index] + 8, 0,
-                          packet);
+    func_0026E788(0, 0, third, position, markers[index] + 8, 0, packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F1F0);
@@ -734,7 +858,27 @@ s32 func_00270210(s32 arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270390);
+extern void func_0026EDB0(s32, s32, s32, s32, s32, s32, s32, f32);
+
+void func_00270390(s32 amount, s32 packet, f32 pulse) {
+    func_00308478(0x44, packet);
+    func_00308380(0x30000, packet);
+    func_00308808(0, 0, 0, 0x2000, 0xE00, 0, packet);
+    func_00308380(0x5100DL, packet);
+    func_00308380(0x3000DL, packet);
+    func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, packet);
+    func_00308DB0(packet);
+    func_0026E788(0, -15, 0, amount, 0x60, 0x20, packet);
+    func_0026E788(0, -15, 0, amount, 0x61, 0x20, packet);
+    func_0026E788(0, 0, 0, amount, 0x62, 0x20, packet);
+    func_0026E788(0, 0, 0, amount, 0x63, 0x20, packet);
+    func_00308E60(packet);
+    func_00308478(0x54, packet);
+    func_0026E788(0, 0, 0, amount, 0x58, 0x60, packet);
+    amount = amount * pulse * 0.5f;
+    func_0026E788(0, 0, 0, amount, 0x5A, 0, packet);
+    func_0026EDB0(0, 0x140, 0, amount, 0x5A, 0, packet, 180.0f);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270568);
 
@@ -832,9 +976,6 @@ s32 func_00270DD8(s32 arg0, s32 arg1) {
     return 0;
 }
 
-extern f32 func_003406A0(f32);
-extern void func_00270390(s32, s32, f32);
-
 s32 func_00270F10(s32 arg0, s32 arg1) {
     u8 *data = *(u8 **)(arg1 + 0x20);
     s32 amount = *(f32 *)(data + 8) * 128.0f;
@@ -844,7 +985,12 @@ s32 func_00270F10(s32 arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270FA8);
+u32 func_00270FA8(u32 list, u32 tag, u32 category) {
+    MantraDrawItemBits *item = (MantraDrawItemBits *)func_0026FC88(list, 1, func_00271368, func_00271510,
+                                                                    func_002712E0, func_00271348, 0, 0, tag);
+    item->category = category;
+    return (u32)item;
+}
 
 void func_00271020(u32 arg0) {
     s32 obj = mnuFindMantraDrawItemByKind(arg0, 1);
@@ -873,7 +1019,25 @@ void mnuHideMantraLimitLine(u32 pool) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002710D8);
+void func_002710D8(s32 pool, u16 kind, u16 delay) {
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 1);
+    MantraFadeState *fade;
+
+    if (item != 0) {
+        fade = item->data;
+        fade->queuedState = kind;
+        fade->delay = delay;
+        if (delay == 0) {
+            fade->state = kind;
+            if (fade->state == 6 || fade->state == 1) {
+                fade->timer = (1.0f - fade->value) * 20.0f;
+            } else if (fade->state == 5 || fade->state == 3) {
+                fade->timer = (1.0f - fade->value) * 5.0f;
+            }
+            fade->timer = 0;
+        }
+    }
+}
 
 void func_002711F8(s16 x, s16 y, u32 arg0) {
     s32 obj = mnuFindMantraDrawItemByKind(arg0, 1);
@@ -1474,7 +1638,26 @@ s32 func_00274EA8(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274FF8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275218);
+void func_00275218(u32 arg0, u32 arg1, u32 arg2, u32 arg3, MantraCountStateB *state, u32 arg5) {
+    char text[16];
+    u32 flags = arg3 | 0xA09DC300;
+
+    func_0026E788(arg0, arg1, arg2, arg3, 0x2E, 0, arg5);
+    if (*(s32 *)(D_00435DD0 + 0x3C) != state->shown) {
+        s32 steps = 20;
+
+        sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
+        state->step++;
+        func_0035C860(text, D_004378A0, state->shown + (*(s32 *)(D_00435DD0 + 0x3C) - state->shown) * state->step / steps);
+        if (state->step == steps) {
+            state->shown = *(s32 *)(D_00435DD0 + 0x3C);
+            state->step = 0;
+        }
+    } else {
+        func_0035C860(text, D_004378A0, *(s32 *)(D_00435DD0 + 0x3C));
+    }
+    func_00311D00(arg0 + 0x193, arg1 + 0x26, arg2, flags, 0, text, 0, arg5);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275358);
 
@@ -1542,11 +1725,24 @@ typedef struct MantraIconEntry {
     u32 state : 4;
     u32 leaving : 1;
     u32 shortLoop : 1;
-    u32 unk_bits : 25;
+    u32 unk7 : 1;
+    u32 variant : 1;
+    u32 unk_bits : 23;
     /* 0x4 */ s16 x;
     s16 y;
     /* 0x8 */ s32 timer;
 } MantraIconEntry;
+
+typedef struct MantraIconPool {
+    u32 unk0;
+    MantraIconEntry *entries;
+    u8 pad08[8];
+    s32 count;
+} MantraIconPool;
+extern u32 func_00275CE8();
+extern u32 func_00277F38();
+s32 mnuDrawMantraFadeIcon(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
+s32 mnuDrawMantraFadeIcon2(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
 
 s32 mnuUpdateMantraIconList(u8 *list) {
     MantraIconEntry *entry;
@@ -1630,9 +1826,34 @@ s32 mnuUpdateMantraIconList(u8 *list) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002758B8);
+s32 func_002758B8(s32 x, s32 y, u32 depth, s32 amount, MantraIconPool *pool) {
+    MantraIconEntry *icon = pool->entries;
+    s32 i;
 
-s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 depth, s32 amount, s32 unused, MantraIconEntry *icon) {
+    if (icon == 0) {
+        return 0;
+    }
+    for (i = 0; i < pool->count; i++, icon++) {
+        if (icon->active) {
+            if (icon->variant == 0) {
+                if (icon->shortLoop == 0) {
+                    func_00275CE8(x, y, depth, amount, pool, icon);
+                } else {
+                    func_00277F38(x, y, depth, amount, pool, icon);
+                }
+            } else {
+                if (icon->shortLoop == 0) {
+                    mnuDrawMantraFadeIcon(x, y, depth, amount, pool, icon);
+                } else {
+                    mnuDrawMantraFadeIcon2(x, y, depth, amount, pool, icon);
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {
     s32 count;
     f32 ratio;
 
@@ -1672,7 +1893,7 @@ s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 depth, s32 amount, s32 unused, Mantr
     return 0;
 }
 
-s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 depth, s32 amount, s32 unused, MantraIconEntry *icon) {
+s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {
     s32 count;
     f32 ratio;
 
@@ -1877,7 +2098,7 @@ u32 func_00279440(u32 unused, u32 obj) {
     u32 data = (u32)((MantraDrawItem *)obj)->data;
     s32 scale = (s32)(((MantraFadeData *)data)->scale * 128.0f);
     func_002758B8(((MantraFadeData *)data)->x, ((MantraFadeData *)data)->y, 0,
-                  scale, *(u32 *)data);
+                  scale, *(MantraIconPool **)data);
     return 0;
 }
 
@@ -1961,22 +2182,86 @@ void func_00279C38(u32 *sprite) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279C58);
-
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279DC8);
-
 typedef struct MantraPanelAnimation {
     u32 flags;
-    u8 pad4[8];
+    u16 unk4;
+    u16 unk6;
+    u32 unk8;
     u16 x;
     u16 y;
     u32 visualParameters[3];
     u8 byte1C;
     u8 byte1D;
     u16 frame;
-    u8 pad20[0xE];
+    u8 pad20[0xC];
+    s16 id;
     s16 transitionDelay;
 } MantraPanelAnimation;
+
+typedef struct MantraPanelPool {
+    u32 handle;
+    MantraPanelAnimation *items;
+    s32 count;
+} MantraPanelPool;
+
+typedef struct MantraNodePos {
+    u8 pad00[4];
+    s16 x;
+    s16 y;
+} MantraNodePos;
+extern MantraNodePos *func_0026CF70(s16);
+extern MantraNodePos *func_0026D098(s16);
+MantraPanelAnimation *func_0027A4C0(MantraPanelPool *, s8);
+
+MantraPanelAnimation *func_00279C58(MantraPanelPool *pool, s32 id, s8 kind, s16 x, s16 y, u32 w) {
+    MantraPanelAnimation *panel = func_0027A4C0(pool, kind);
+    MantraNodePos *pos;
+
+    if (panel == 0) {
+        return 0;
+    }
+    if ((panel->flags >> 8) & 1) {
+        return 0;
+    }
+    panel->flags = ((panel->flags | 0x08000100) & 0xFF87FFFF) | 0x300000;
+    *(s8 *)panel = kind;
+    panel->unk4 = x;
+    panel->unk6 = y;
+    panel->unk8 = w;
+    panel->flags = ((panel->flags & 0xFFFC03FF) | 0x400) & 0xEFFFFFFF;
+    panel->transitionDelay = 0;
+    panel->id = id;
+    panel->frame = 0;
+    pos = func_0026CF70(id);
+    panel->x = (s16)(pos->x / 10.0f * 40.0f);
+    panel->y = (s16)(pos->y / 10.0f * 39.0f);
+    return panel;
+}
+
+MantraPanelAnimation *func_00279DC8(MantraPanelPool *pool, s32 id, s8 kind, s16 x, s16 y, u32 w) {
+    MantraPanelAnimation *panel = func_0027A4C0(pool, kind);
+    MantraNodePos *pos;
+
+    if (panel == 0) {
+        return 0;
+    }
+    if ((panel->flags >> 8) & 1) {
+        return 0;
+    }
+    panel->flags = ((panel->flags | 0x08000100) & 0xFF87FFFF) | 0x300000;
+    *(s8 *)panel = kind;
+    panel->unk4 = x;
+    panel->unk6 = y;
+    panel->unk8 = w;
+    panel->flags = (panel->flags & 0xFFFC03FF) | 0x10000400;
+    panel->transitionDelay = 0;
+    panel->id = id;
+    panel->frame = 0;
+    pos = func_0026D098(id);
+    panel->x = (s16)(pos->x / 10.0f * 40.0f);
+    panel->y = (s16)(pos->y / 10.0f * 39.0f);
+    return panel;
+}
 
 void func_00279F30(MantraPanelAnimation *panel, s32 dx, s32 dy, u32 a, u32 b, u32 c, u8 d, u8 e) {
     dx = (s16)dx + panel->x;
@@ -1993,12 +2278,6 @@ void func_00279F30(MantraPanelAnimation *panel, s32 dx, s32 dy, u32 a, u32 b, u3
 void func_00279F70(MantraPanelAnimation *panel) {
     panel->flags = (panel->flags & 0xfffc03ff) | 0x800;
 }
-
-typedef struct MantraPanelPool {
-    u32 handle;
-    MantraPanelAnimation *items;
-    s32 count;
-} MantraPanelPool;
 
 void func_00279F90(MantraPanelPool *pool, s32 mode) {
     s32 i;
@@ -2079,9 +2358,33 @@ s32 mnuAdvanceMantraPanelAnim(s32 unused, MantraPanelAnimation *panel) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A198);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A4C0);
+MantraPanelAnimation *func_0027A4C0(MantraPanelPool *pool, s8 kind) {
+    s32 start[14] = {0, 0xB0, 0x160, 0x210, 0x238, 0x260, 0x288, 0x2B0, 0x2C4, 0x2E2, 0x300, 0x30A, 0x314, 0x31E};
+    s32 count[14] = {0xB0, 0xB0, 0xB0, 0x28, 0x28, 0x28, 0x28, 0x14, 0x1E, 0x1E, 0xA, 0xA, 0xA, 0xB0};
+    MantraPanelAnimation *panel = pool->items + start[kind];
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A628);
+    for (i = 0; i < count[kind]; i++, panel++) {
+        if (((panel->flags >> 8) & 1) == 0) {
+            return panel;
+        }
+    }
+    return 0;
+}
+
+MantraPanelAnimation *func_0027A628(MantraPanelPool *pool, s32 id, s8 kind) {
+    s32 start[14] = {0, 0xB0, 0x160, 0x210, 0x238, 0x260, 0x288, 0x2B0, 0x2C4, 0x2E2, 0x300, 0x30A, 0x314, 0x31E};
+    s32 count[14] = {0xB0, 0xB0, 0xB0, 0x28, 0x28, 0x28, 0x28, 0x14, 0x1E, 0x1E, 0xA, 0xA, 0xA, 0xB0};
+    MantraPanelAnimation *panel = pool->items + start[kind];
+    s32 i;
+
+    for (i = 0; i < count[kind]; i++, panel++) {
+        if (((panel->flags >> 8) & 1) && panel->id == id) {
+            return panel;
+        }
+    }
+    return 0;
+}
 
 u32 func_0027A798(MantraPanelAnimation *panel, u32 bits, s16 length) {
     u32 flags = (panel->flags & 0xF87FFFFF) | ((bits & 0xF) << 23);
@@ -2099,14 +2402,6 @@ void func_0027A7F0(void) {
 
 void func_0027A7F8(void) {
 }
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425988);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004259C0);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004259F8);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A30);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A800);
 
@@ -2152,7 +2447,26 @@ void func_0027C078(s32 arg0, u8 *object) {
 void func_0027C108(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C110);
+s32 func_0027C110(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    u8 table[4] = {0, 10, 20, 30};
+    f32 t;
+
+    object[0x20] += 1;
+    if (object[0x20] > 0x82) {
+        object[0x20] = table[(u8)(func_00341240(0) * 3.0f)];
+    }
+    t = 0.0f;
+    if (object[0x20] >= 0x32) {
+        if (object[0x20] < 0x78) {
+            t = (object[0x20] - 0x32) / 70.0f;
+        }
+    }
+    t = (func_003406A0(t * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+    func_0026E788(x, y, z, amount, 0x77, 0, packet);
+    func_0026E788(x, y, z, amount, 0x93, 0, packet);
+    func_0026E788(x, y, z, (s32)(amount * (t * 0.25f)), 0x94, 0, packet);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C2F0);
 
@@ -2352,7 +2666,38 @@ void func_00283FA0(void) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00283FA8);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284298);
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002843C0);
+typedef struct MantraSparkle {
+    s16 age;
+    s16 life;
+    u32 flags;
+    f32 vx;
+    f32 vy;
+} MantraSparkle;
+
+typedef struct MantraSparkleEmitter {
+    MantraSparkle sparkle[10];
+    s16 duration;
+    s16 kind;
+    s32 count;
+} MantraSparkleEmitter;
+
+MantraSparkle *func_00284818(MantraSparkleEmitter *);
+
+u32 func_002843C0(s16 kind) {
+    MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)func_00328D68(0xA8);
+    MantraSparkle *spark;
+
+    memset(emitter, 0, 0xA8);
+    emitter->duration = func_00341240(0) * 20.0f + 5.0f;
+    emitter->kind = kind;
+    spark = func_00284818(emitter);
+    spark->age = spark->life * func_00341240(0) + 0.0f;
+    spark = func_00284818(emitter);
+    spark->age = spark->life * func_00341240(0) + 0.0f;
+    spark = func_00284818(emitter);
+    spark->age = spark->life * func_00341240(0) + 0.0f;
+    return (u32)emitter;
+}
 
 
 void func_002844E8(u32 sprite) {
@@ -2383,7 +2728,57 @@ void func_00284B48(u32 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284B70);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284F00);
+typedef struct MantraBurstSlot {
+    f32 x;
+    f32 y;
+    union {
+        u32 flags;
+        s16 half[2];
+    } w;
+    u16 age;
+    s16 life;
+} MantraBurstSlot;
+
+typedef struct MantraBurstPool {
+    u32 unk0;
+    MantraBurstSlot *slots;
+    s32 count;
+    u16 tick;
+} MantraBurstPool;
+
+extern f32 func_003407A0(f32);
+
+MantraBurstSlot *func_00284F00(MantraBurstPool *pool, s8 wide, s8 side) {
+    s32 base = 0x7A;
+    s32 i;
+    MantraBurstSlot *slot;
+
+    if (wide == 0) {
+        base = 0;
+    }
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->w.flags & 1) == 0) {
+            memset(slot, 0, 0x10);
+            slot->w.flags = ((slot->w.flags | 1) & 0xFFFFFFF9) | ((side & 3) << 1);
+            if (wide) {
+                slot->w.half[1] = (s32)(func_00341240(0) * 10.0f) * 36;
+            } else {
+                slot->w.half[1] = (s32)(func_00341240(0) * 20.0f) * 18;
+            }
+            slot->life = 14;
+            if (side != 0) {
+                slot->x = (base + 39.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->y = (base + 39.0f) * func_003406A0(slot->w.half[1] * 0.017453293f);
+            } else {
+                slot->x = (base + 19.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->y = (base + 19.0f) * func_003406A0(slot->w.half[1] * 0.017453293f);
+            }
+            return slot;
+        }
+    }
+    return 0;
+}
 
 u32 func_002850B8(void) {
     u32 handle = func_003292A8(0x650);
@@ -2403,7 +2798,37 @@ void func_00285120(u32 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285148);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285500);
+MantraBurstSlot *func_00285500(MantraBurstPool *pool, s8 wide, s8 side) {
+    s32 base = 0x7A;
+    s32 i;
+    MantraBurstSlot *slot;
+
+    if (wide == 0) {
+        base = 100;
+    }
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->w.flags & 1) == 0) {
+            memset(slot, 0, 0x10);
+            slot->w.flags = ((slot->w.flags | 1) & 0xFFFFFFF9) | ((side & 3) << 1);
+            if (wide) {
+                slot->w.half[1] = (s32)(func_00341240(0) * 10.0f) * 36;
+            } else {
+                slot->w.half[1] = func_00341240(0) * 360.0f;
+            }
+            slot->life = 30;
+            if (side != 0) {
+                slot->x = (base + 50.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->y = (base + 25.0f) * func_003406A0(slot->w.half[1] * 0.017453293f);
+            } else {
+                slot->x = (base + 100.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->y = (base + 30.0f) * func_003406A0(slot->w.half[1] * 0.017453293f);
+            }
+            return slot;
+        }
+    }
+    return 0;
+}
 
 u32 mnuRequestEffectResource(u32 context, u32 config) {
     MantraEffectResource *resource = (MantraEffectResource *)func_00328D68(sizeof(MantraEffectResource));
@@ -2423,8 +2848,20 @@ void mnuReleaseEffectResource(MantraEffectResource *resource) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285788);
 
+typedef struct MantraSpark {
+    s16 x;
+    s16 y;
+    s16 timer;
+    s16 timerMax;
+    s16 z;
+    s8 phase;
+    u8 size;
+} MantraSpark;
+
+void func_002858A0(MantraSpark *);
+
 void func_00285800(s32 *state) {
-    u8 *particle;
+    MantraSpark *particle;
     s32 value;
     s32 i;
 
@@ -2435,14 +2872,31 @@ void func_00285800(s32 *state) {
         state[0] = value;
         *(f32 *)(state + 2) = func_00341240(0) * 0.20000005f + 0.4f;
     }
-    particle = (u8 *)state + 0xC;
+    particle = (MantraSpark *)(state + 3);
     for (i = 7; i >= 0; i--) {
         func_002858A0(particle);
-        particle += 0xC;
+        particle++;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002858A0);
+void func_002858A0(MantraSpark *spark) {
+    spark->timer -= 1;
+    if (spark->timer < 0) {
+        if (spark->phase != 0) {
+            spark->phase = 0;
+            spark->timer = spark->timerMax = func_00341240(0) * 30.0f + 1.0f;
+        } else if (func_00341240(0) > 0.7f) {
+            spark->timer = spark->timerMax = func_00341240(0) * 30.0f + 0.0f;
+        } else {
+            spark->phase = 1;
+            spark->timer = spark->timerMax = func_00341240(0) * 60.0f + 45.0f;
+            spark->z = (func_00341240(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = func_00341240(0) * 10.0f;
+            spark->x = func_00341240(0) * 512.0f + -256.0f;
+            spark->y = func_00341240(0) * 448.0f + -128.0f;
+        }
+    }
+}
 
 
 void func_00285A60(u8 *object) {
@@ -2475,8 +2929,6 @@ u32 func_00285BD8(u32 count) {
     *(u16 *)(block + 0xe) = 0;
     return block;
 }
-
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378E8);
 
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378F0);
 
