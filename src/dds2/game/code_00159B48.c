@@ -91,7 +91,36 @@ void func_00159C00(BillObj *effect, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", effCopyPosition);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00159C40);
+void func_00159C40(BillObj *effect, s32 mode) {
+    s32 count;
+    s32 remaining;
+    s32 entry;
+    mode = (s16)mode;
+    switch (effect->unk2C) {
+    case 0:
+    case 3:
+        effect->unk2E = mode;
+        break;
+    case 1:
+        count = effect->entryCount;
+        if (count > 0) {
+            remaining = count;
+            entry = (s32)effect->unk60 + 0xc;
+            do {
+                s32 node = *(s32 *)entry;
+                u32 flags = *(u32 *)(node + 0x10) & ~6;
+                *(u32 *)(node + 0x10) = flags;
+                if (mode == 2) {
+                    *(u32 *)(node + 0x10) = flags | 2;
+                } else if (mode == 3) {
+                    *(u32 *)(node + 0x10) = flags | 4;
+                }
+                entry += 0x14;
+            } while (--remaining != 0);
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00159CF0);
 

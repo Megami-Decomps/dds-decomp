@@ -1,4 +1,6 @@
 #include "common.h"
+extern void *func_001E5DA8(void *, s32, s32);
+extern s64 startBattleTask(void *);
 
 extern s32 func_001AA6F8(void);
 
@@ -74,14 +76,30 @@ typedef struct ActionUnit {
     u16 statusFlags;
     u8 pad122[2];
     u16 mode;
-    u8 pad126[0xE];
+    u8 pad126[0xA];
+    u32 pendingAction;
     u32 action;
+    u8 pad138[4];
+    s32 actionTimer;
+    u8 pad140[0x200];
+    u32 rendererHandle;
+    u8 pad344[0x20];
+    struct ActionUnit *next;
 } ActionUnit;
+
+typedef struct BattleActionScene {
+    u8 pad00[0x24C];
+    ActionUnit *units;
+    u8 pad250[0x50];
+    u32 mode;
+    u8 pad2A4[0x474];
+    u8 *state;
+} BattleActionScene;
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021EE10);
 
 void func_0021EEF8(u32 unused, u32 actor) {
-    u8 *state = *(u8 **)(func_001AA6F8() + 0x718);
+    u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
     if (*(u32 *)(actor + 0x28) & 0x8000) {
         if (*(s8 *)(state + 1) != 0) {
             *state = 0;
@@ -92,7 +110,7 @@ void func_0021EEF8(u32 unused, u32 actor) {
 }
 
 u32 func_0021EF48(ActionUnit *unit, ActionUnit *actor, u32 action) {
-    u8 *state = *(u8 **)(func_001AA6F8() + 0x718);
+    u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
     state[2] = action == 0x196;
     if ((unit->flags & 0x200) &&
         (actor->flags & 0x400) &&
@@ -118,7 +136,40 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F040);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F0E8);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F238);
+s32 func_0021F238(void) {
+    u8 *unit = *(u8 **)((u8 *)func_001AA6F8() + 0x24C);
+    u8 *head = unit;
+    s32 result = -1;
+    for (; unit != NULL; unit = *(u8 **)(unit + 0x364)) {
+        if (*(u32 *)(unit + 0x110) & 1) {
+            if (*(u32 *)(unit + 0x110) & 0x400) {
+                if (*(u16 *)(unit + 0x124) == 0x115) {
+                    if (*(u32 *)(unit + 0x110) & 0x20) {
+                        result = 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (result != -1) {
+        for (unit = head; unit != NULL; unit = *(u8 **)(unit + 0x364)) {
+            if (*(u32 *)(unit + 0x110) & 1) {
+                if (*(u32 *)(unit + 0x110) & 0x400) {
+                    if (*(u32 *)(unit + 0x110) & 2) {
+                        if (!(*(u32 *)(unit + 0x110) & 0xE0)) {
+                            if (*(u16 *)(unit + 0x124) != 0x115) {
+                                startBattleTask(func_001E5DA8(unit, 6, 0xA));
+                                *(u32 *)(unit + 0x110) &= ~1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
 
 s32 btlMapActorMotionId(u32 id) {
     switch (id) {
@@ -156,12 +207,12 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F3E8);
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F698);
 
 u32 func_0021F798(void) {
-    u32 node = *(u32 *)(func_001AA6F8() + 0x24c);
-    while (node != 0) {
-        u32 flags = *(u32 *)(node + 0x110);
+    ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
+    while (unit != 0) {
+        u32 flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x400) {
-                s32 action = *(u16 *)(node + 0x124);
+                s32 action = unit->mode;
                 if (action < 0x12e) {
                     if (action >= 0x12a) {
                         return 1;
@@ -169,17 +220,17 @@ u32 func_0021F798(void) {
                 }
             }
         }
-        node = *(u32 *)(node + 0x364);
+        unit = *(ActionUnit **)((s32)unit + 0x364);
     }
     return 0;
 }
 
 u32 func_0021F808(void) {
-    s32 battle = func_001AA6F8();
-    if (*(u32 *)(battle + 0x2a0) != 0x30e) {
+    BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+    if (battle->mode != 0x30e) {
         return 0;
     }
-    return *(s8 *)*(u32 *)(battle + 0x718) != 0;
+    return *(s8 *)battle->state != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F848);
@@ -189,7 +240,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220368);
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220450);
 
 u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
-    u8 *state = *(u8 **)(func_001AA6F8() + 0x718);
+    u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
     if (action >= 0x103) {
         if (action >= 0x105) {
             if (action == 0x19C) {
@@ -224,27 +275,27 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220700);
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220810);
 
 u32 func_00220918(void) {
-    s32 battle = func_001AA6F8();
-    u32 data;
-    if (*(u32 *)(battle + 0x2a0) != 0x314) {
+    BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+    u8 *data;
+    if (battle->mode != 0x314) {
         return 0;
     }
-    data = *(u32 *)(battle + 0x718);
+    data = battle->state;
     if (data != 0) {
-        return *(u8 *)(data + 1);
+        return data[1];
     }
     return 0;
 }
 
 u32 func_00220958(void) {
-    s32 battle = func_001AA6F8();
-    u32 data;
-    if (*(u32 *)(battle + 0x2a0) != 0x314) {
+    BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+    u8 *data;
+    if (battle->mode != 0x314) {
         return 0;
     }
-    data = *(u32 *)(battle + 0x718);
+    data = battle->state;
     if (data != 0) {
-        return *(u8 *)data;
+        return *data;
     }
     return 0;
 }
@@ -261,20 +312,20 @@ void func_002209B0(ActionUnit *unit) {
     }
 }
 
-u32 btlStartAction19A(u32 unit) {
-    u32 action = *(u32 *)(unit + 0x134);
+u32 btlStartAction19A(ActionUnit *unit) {
+    u32 action = unit->action;
     if (action < 0x19C) {
         if (action >= 0x19A) {
-            *(u32 *)(unit + 0x110) |= 0x800;
-            func_001E9F30(unit);
+            unit->flags |= 0x800;
+            func_001E9F30((u32)unit);
             return 1;
         }
     }
     return 0;
 }
 
-u32 btlTickAction19A(u32 unit) {
-    u32 action = *(u32 *)(unit + 0x134);
+u32 btlTickAction19A(ActionUnit *unit) {
+    u32 action = unit->action;
     if (action < 0x19C) {
         if (action >= 0x19A) {
             func_001E98C0(unit);
@@ -291,27 +342,27 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220B20);
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220C38);
 
 u32 func_00220D18(void) {
-    s32 battle = func_001AA6F8();
-    s32 unit = **(s32 **)(battle + 0x718);
+    BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+    s32 unit = *(s32 *)battle->state;
     if (unit == 0) {
         return 0x10e;
     }
     return *(u16 *)(unit + 0x124);
 }
 
-void func_00220D48(u32 unit, u32 state) {
-    if ((*(u32 *)(unit + 0x110) & 0x400) &&
-        *(u16 *)(unit + 0x124) == 0x116 &&
+void func_00220D48(ActionUnit *unit, u32 state) {
+    if ((unit->flags & 0x400) &&
+        unit->mode == 0x116 &&
         *(s32 *)state < 0) {
-        u8 *battleState = *(u8 **)(func_001AA6F8() + 0x718);
+        u8 *battleState = ((BattleActionScene *)func_001AA6F8())->state;
         battleState[0] = 0;
         *(u16 *)(battleState + 2) = 0;
     }
 }
 
 u32 func_00220D98(u32 unused1, u32 unused2, u32 action) {
-    s32 battle = func_001AA6F8();
-    u8 *target = *(u8 **)(battle + 0x718);
+    BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+    u8 *target = battle->state;
     if (action == 0x1a5) {
         *target = 1;
     }
@@ -320,19 +371,19 @@ u32 func_00220D98(u32 unused1, u32 unused2, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220DD8);
 
-f32 func_00220EE8(u32 unit, u32 other) {
+f32 func_00220EE8(ActionUnit *unit, ActionUnit *other) {
     f32 factor = 1.0f;
     u8 *state;
-    if ((*(u32 *)(unit + 0x110) & 0x200) == 0) {
+    if ((unit->flags & 0x200) == 0) {
         return factor;
     }
-    if ((*(u32 *)(other + 0x110) & 0x400) == 0) {
+    if ((other->flags & 0x400) == 0) {
         return factor;
     }
-    if (*(u16 *)(other + 0x124) != 0x116) {
+    if (other->mode != 0x116) {
         return factor;
     }
-    state = *(u8 **)(func_001AA6F8() + 0x718);
+    state = ((BattleActionScene *)func_001AA6F8())->state;
     if (state[0] != 0 && *(u16 *)(state + 2) < 4) {
         return *(f32 *)(D_00435E44 + 0xc00);
     }
@@ -341,65 +392,63 @@ f32 func_00220EE8(u32 unit, u32 other) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220F68);
 
-u32 func_00221060(u32 unit, u32 command) {
-    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+u32 func_00221060(ActionUnit *unit, u32 command) {
+    if ((unit->flags & 0x400) == 0) {
         return 0;
     }
-    if (*(u16 *)(unit + 0x124) != 0x116) {
+    if (unit->mode != 0x116) {
         return 0;
     }
     return command == 0x10;
 }
 
 u32 func_00221090(void) {
-    s32 battle = func_001AA6F8();
-    if (*(u32 *)(battle + 0x2a0) != 0x30f) {
+    BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+    if (battle->mode != 0x30f) {
         return 0;
     }
-    return *(u8 *)*(u32 *)(battle + 0x718) != 0;
+    return *(u8 *)battle->state != 0;
 }
 
-u32 func_002210D0(u32 unit) {
-    if (*(u32 *)(unit + 0x134) == 0x1a4) {
-        *(u32 *)(unit + 0x110) |= 0x800;
-        func_001E9F30(unit);
+u32 func_002210D0(ActionUnit *unit) {
+    if (unit->action == 0x1a4) {
+        unit->flags |= 0x800;
+        func_001E9F30((u32)unit);
         func_00208DA0();
-        func_001E21A0(*(u32 *)(*(u32 *)(unit + 0x114) + 0x18));
+        func_001E21A0(*(u32 *)(unit->stateFlags + 0x18));
         return 1;
     }
     return 0;
 }
 
-u32 func_00221128(u32 unit) {
-    if (*(u32 *)(unit + 0x134) == 0x1a4) {
+u32 func_00221128(ActionUnit *unit) {
+    if (unit->action == 0x1a4) {
         func_001E98C0(unit);
         return 1;
     }
     return 0;
 }
-
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221158);
 
-u32 func_00221390(u32 unit) {
-    if (*(u32 *)(unit + 0x134) == 0x6b) {
-        if (btlHasMarkedEntry14(unit)) {
-            *(s32 *)(unit + 0x13c) = 0;
+u32 func_00221390(ActionUnit *unit) {
+    if (unit->action == 0x6b) {
+        if (btlHasMarkedEntry14((u32)unit)) {
+            unit->actionTimer = 0;
         } else {
-            *(s32 *)(unit + 0x13c) = -1;
+            unit->actionTimer = -1;
         }
         return 1;
     }
     return 0;
 }
 
-u32 func_002213E0(u32 unit) {
-    if (*(u32 *)(unit + 0x134) == 0x6b) {
+u32 func_002213E0(ActionUnit *unit) {
+    if (unit->action == 0x6b) {
         func_001E98C0(unit);
         return 1;
     }
     return 0;
 }
-
 u32 btlTickAction6B(u32 unit) {
     if (*(u32 *)(unit + 0x134) != 0x6b) {
         return 0;
@@ -420,26 +469,25 @@ u32 btlTickAction6B(u32 unit) {
     return 1;
 }
 
-u32 func_00221498(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x134) == 0x6c) {
-        *(u32 *)(arg0 + 0x13c) = 0;
+u32 func_00221498(ActionUnit *unit) {
+    if (unit->action == 0x6c) {
+        unit->actionTimer = 0;
         return 0;
     }
     return 0;
 }
 
-u32 func_002214C0(u32 unit) {
-    if (*(u32 *)(unit + 0x134) != 0x6c) {
+u32 func_002214C0(ActionUnit *unit) {
+    if (unit->action != 0x6c) {
         return 0;
     }
-    if (btlHasMarkedEntry14(unit) && *(u32 *)(unit + 0x13c) == 0x25) {
+    if (btlHasMarkedEntry14((u32)unit) && unit->actionTimer == 0x25) {
         func_001E9890();
-        func_001EC868(unit, unit, 0.0f);
+        func_001EC868((u32)unit, (u32)unit, 0.0f);
     }
-    ++*(u32 *)(unit + 0x13c);
+    ++unit->actionTimer;
     return 1;
 }
-
 void func_00221538(void) {
     s32 battle = func_001AA6F8();
     s32 unit = *(s32 *)(battle + 0x718);
@@ -477,17 +525,17 @@ u32 func_00221858(u32 unit) {
     return 1;
 }
 
-void func_00221888(s32 actor) {
-    if ((*(u32 *)(actor + 0x110) & 0x400) == 0) {
+void func_00221888(ActionUnit *actor) {
+    if ((actor->flags & 0x400) == 0) {
         return;
     }
-    switch (*(u16 *)(actor + 0x124)) {
+    switch (actor->mode) {
     case 0x11D:
     case 0x11E:
     case 0x11F:
     case 0x120:
     case 0x121:
-        *(u32 *)(actor + 0x114) |= 0x20000;
+        actor->stateFlags |= 0x20000;
         break;
     }
 }
@@ -496,23 +544,22 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_002218C8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221988);
 
-f32 func_00221A30(u32 unit, u32 actor, u32 action, u32 mode) {
+f32 func_00221A30(ActionUnit *unit, u32 actor, u32 action, u32 mode) {
     f32 factor = 1.0f;
-    if (action == 0x19f && mode == 1 && (*(u32 *)(unit + 0x110) & 0x400)) {
-        u32 battle = func_001AA6F8();
-        factor = *(f32 *)(*(u32 *)(battle + 0x718) + 4);
+    if (action == 0x19f && mode == 1 && (unit->flags & 0x400)) {
+        BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
+        factor = *(f32 *)(battle->state + 4);
     }
     return factor;
 }
-
 s32 func_00221A80(void) {
-    u32 node = *(u32 *)(func_001AA6F8() + 0x24c);
+    ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
     s32 selected = -1;
-    while (node != 0 && selected == -1) {
-        u32 flags = *(u32 *)(node + 0x110);
+    while (unit != 0 && selected == -1) {
+        u32 flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x400) {
-                switch (*(u16 *)(node + 0x124)) {
+                switch (unit->mode) {
                 case 0x11d: selected = 0; break;
                 case 0x11e: selected = 1; break;
                 case 0x11f: selected = 2; break;
@@ -521,14 +568,14 @@ s32 func_00221A80(void) {
                 }
             }
         }
-        node = *(u32 *)(node + 0x364);
+        unit = *(ActionUnit **)((s32)unit + 0x364);
     }
     return selected;
 }
 
-u32 func_00221B28(u32 unit) {
+u32 func_00221B28(ActionUnit *unit) {
     u32 value = 0;
-    switch (*(u16 *)(unit + 0x124)) {
+    switch (unit->mode) {
     case 0x11d:
         value = 0;
         break;
@@ -548,21 +595,21 @@ u32 func_00221B28(u32 unit) {
     return value;
 }
 
-u32 func_00221B88(u32 unit, u32 group) {
+u32 func_00221B88(ActionUnit *unit, u32 group) {
     u32 action = func_00221B28(unit);
     return D_003BF6C0[group][action];
 }
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221BC8);
 
-void func_00221E28(u32 unit, u32 group, f32 opacity) {
-    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
-        func_0023CE10(*(u32 *)(unit + 0x340), group);
-        func_0023CE18(*(u32 *)(unit + 0x340), opacity);
+void func_00221E28(ActionUnit *unit, u32 group, f32 opacity) {
+    if ((unit->flags & 0x400) == 0) {
+        func_0023CE10(unit->rendererHandle, group);
+        func_0023CE18(unit->rendererHandle, opacity);
     } else {
         group = func_00221B88(unit, group);
-        func_0023CE10(*(u32 *)(unit + 0x340), group);
-        func_0023CE18(*(u32 *)(unit + 0x340), opacity);
+        func_0023CE10(unit->rendererHandle, group);
+        func_0023CE18(unit->rendererHandle, opacity);
     }
 }
 
@@ -600,34 +647,34 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222100);
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222298);
 
 void func_00222330(void) {
-    u32 node = *(u32 *)(func_001AA6F8() + 0x24c);
-    while (node != 0) {
-        u32 flags = *(u32 *)(node + 0x110);
+    ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
+    while (unit != 0) {
+        u32 flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x400) {
-                s32 action = *(u16 *)(node + 0x124);
+                s32 action = unit->mode;
                 if (action < 0x122) {
                     if (action >= 0x11d) {
-                        func_001E3448(node, D_003BF950);
-                        *(u32 *)(node + 0x110) &= ~0x80000;
+                        func_001E3448((u32)unit, D_003BF950);
+                        unit->flags &= ~0x80000;
                     }
                 }
             }
         }
-        node = *(u32 *)(node + 0x364);
+        unit = *(ActionUnit **)((s32)unit + 0x364);
     }
     func_002218C8();
 }
 
-u32 func_002223D8(u32 unit, u32 base) {
-    u32 flags = *(u32 *)(unit + 0x110);
+u32 func_002223D8(ActionUnit *unit, u32 base) {
+    u32 flags = unit->flags;
     if ((flags & 1) == 0) {
         return base;
     }
     if ((flags & 0x400) == 0) {
         return base;
     }
-    switch (*(u16 *)(unit + 0x124)) {
+    switch (unit->mode) {
     case 0x11d: return base;
     case 0x11e: return base + 100;
     case 0x11f: return base + 200;
@@ -662,8 +709,8 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_002228C0);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222A08);
 
-u32 func_00222D18(u32 unit) {
-    u32 actor = *(u32 *)(unit + 0x114);
+u32 func_00222D18(ActionUnit *unit) {
+    u32 actor = unit->stateFlags;
     u32 owner = *(u32 *)(actor + 0x18);
     if (*(u32 *)(owner + 0x110) & 0x200) {
         if (func_001E8058(*(u32 *)(actor + 0x60)) == 1) {
@@ -672,8 +719,8 @@ u32 func_00222D18(u32 unit) {
                 return 0;
             }
             func_001E9A88();
-            func_002226F0(unit);
-            *(u32 *)(unit + 0x130) = 0;
+            func_002226F0((u32)unit);
+            unit->pendingAction = 0;
             return 1;
         }
     }
@@ -698,22 +745,21 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223DD8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223ED0);
 
-u32 func_00223FB0(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x134) == 0x10b) {
-        *(u32 *)(arg0 + 0x110) = *(u32 *)(arg0 + 0x110) | 0x800;
+u32 func_00223FB0(ActionUnit *unit) {
+    if (unit->action == 0x10b) {
+        unit->flags = unit->flags | 0x800;
         return 1;
     }
     return 0;
 }
 
-u32 func_00223FE0(u32 unit) {
-    if (*(u32 *)(unit + 0x134) == 0x10b) {
+u32 func_00223FE0(ActionUnit *unit) {
+    if (unit->action == 0x10b) {
         func_001E98C0(unit);
         return 1;
     }
     return 0;
 }
-
 u32 func_00224010(u32 arg0, s32 arg1) {
     u32 temp_v0;
 
@@ -740,8 +786,8 @@ void func_002240C0(u32 unit) {
                     -0.141f, -0.004f, 0.979f, 40.0f);
 }
 
-u32 func_002240F8(u32 unit) {
-    u32 actor = *(u32 *)(unit + 0x114);
+u32 func_002240F8(ActionUnit *unit) {
+    u32 actor = unit->stateFlags;
     u32 owner = *(u32 *)(actor + 0x18);
     if (*(u32 *)(owner + 0x110) & 0x200) {
         if (func_001E8058(*(u32 *)(actor + 0x60)) == 1) {
@@ -750,8 +796,8 @@ u32 func_002240F8(u32 unit) {
                 return 0;
             }
             func_001E9A88();
-            func_00224020(unit);
-            *(u32 *)(unit + 0x130) = 0;
+            func_00224020((u32)unit);
+            unit->pendingAction = 0;
             return 1;
         }
     }

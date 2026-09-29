@@ -1,4 +1,5 @@
 #include "common.h"
+extern s32 func_002C4038();
 
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
@@ -119,7 +120,12 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C078);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C0D0);
+s64 func_0029C0D0(s32 arg0) {
+    s32 temp_v0 = func_00101958();
+
+    func_0026C8E8(0);
+    return func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C120);
 
@@ -1199,9 +1205,20 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A55B8);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5890);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A58C0);
+void func_002A58C0(void) {
+    u8 *state = (u8 *)D_00437A40;
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A58D8);
+    *(u32 *)(state + 0x28) = 0;
+    *(u32 *)(state + 0x14) = 0;
+    *(u32 *)(state + 0x1C) = 0;
+}
+
+void func_002A58D8(void) {
+    u8 *state = (u8 *)D_00437A40;
+
+    *(u32 *)(state + 0x28) = 0;
+    *(u32 *)(state + 0x14) = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A58E8);
 

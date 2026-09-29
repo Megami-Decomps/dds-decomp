@@ -50,7 +50,18 @@ extern s64 btlIsCurrentActorFullyMarked(void);
 
 extern u64 func_002DC2D8();
 
-extern s32 *D_00437E30;
+typedef struct EffectObjectFlag {
+    u8 pad00[0xC];
+    u32 flags;
+} EffectObjectFlag;
+
+typedef struct EffectObjectNode {
+    EffectObjectFlag *object;
+    u32 unk04;
+    struct EffectObjectNode *next;
+} EffectObjectNode;
+
+extern EffectObjectNode *D_00437E30;
 
 extern u32 D_00437E38;
 
@@ -106,7 +117,7 @@ extern u32 D_00438774;
 
 extern void func_00232B40(void *);
 
-extern void func_002DCAE8(s32 *);
+extern void func_002DCAE8(EffectObjectNode *);
 
 extern void *func_002DDAA8(void *);
 
@@ -232,6 +243,55 @@ extern u32 func_002F2950(u8 *);
 
 extern void func_002040A8(u32);
 
+extern u32 func_002E5C50(u32, u32, u32);
+
+extern u32 effRetainResource(u32);
+
+typedef struct EffectStripNode {
+    u32 percent;
+    u32 color;
+    f32 opacity;
+    u8 pad_0C[0x20];
+    u32 transform;
+    u32 resource;
+    u32 active;
+    u16 count;
+} EffectStripNode;
+
+typedef struct EffectNodeHeader {
+    u8 *entries;
+    u32 unk_04;
+    u8 *allocation;
+} EffectNodeHeader;
+
+extern u32 func_002F1740(u32, u32, u32);
+
+extern u8 *func_002F15F8(u32, u32);
+
+/* Battle/display work object (layout inferred from field accesses). */
+typedef struct BdWork {
+    s32 x0;            // 0x00
+    s32 x4;            // 0x04
+    u8 pad_0x08[0x58]; // 0x08
+    void *x60;         // 0x60
+    s32 x64;           // 0x64
+} BdWork; // 0x68
+
+typedef struct EffectMaterialSlot {
+    u32 value;
+    u8 unk_04[0x10];
+} EffectMaterialSlot;
+
+extern u128 *D_0037F770[];
+
+extern u128 D_00458460[];
+
+extern u128 D_004584A0[];
+
+extern u128 D_0037F780[];
+
+extern u8 D_00437E94;
+
 void effInitModelVUState(void *model) {
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
     func_00232AA0(model);
@@ -283,21 +343,21 @@ INCLUDE_ASM(const s32, "game/code_002DC138", effDuplicateEffectHeader);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", recreateEffectModelFromSource);
 
-void func_002DC4A8(s32 *obj) {
-    func_003343E8(*(s32 *)(obj[1] + 0x1c), 0.0f);
+void func_002DC4A8(EffModelOwner *owner) {
+    func_003343E8(*(s32 *)(owner->model + 0x1C), 0.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC4C8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC520);
 
-void func_002DC540(u8 *work, u8 *vec) {
+void func_002DC540(EffModelOwner *owner, u8 *vec) {
     __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(vec) : "memory");
-    func_00232AD0(*(void **)(work + 4));
+    func_00232AD0((void *)owner->model);
 }
 
-void func_002DC560(s32 arg0) {
-    mdlBroadcastMasked(*(u32 *)(arg0 + 4));
+void func_002DC560(EffModelOwner *owner) {
+    mdlBroadcastMasked(owner->model);
 }
 
 void func_002DC578(s32 arg0, float scale) {
@@ -345,60 +405,60 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCAE8);
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCB58);
 
 void mdlPropagateObjectFlag(void) {
-    s32 *node = D_00437E30;
-    s32 object;
+    EffectObjectNode *node = D_00437E30;
+    EffectObjectFlag *object;
     s32 flags;
 
     if (node != NULL) {
         do {
-            object = *node;
-            flags = *(s32 *)(object + 0xC);
+            object = node->object;
+            flags = object->flags;
             if ((flags & 2) != 0) {
-                *(s32 *)(object + 0xC) = flags | 8;
+                object->flags = flags | 8;
             }
-            node = *(s32 **)((s32)node + 8);
+            node = node->next;
         } while (node != NULL);
     }
 }
 
 void func_002DCC30(void) {
-    s32 object;
-    s32 *node;
+    EffectObjectFlag *object;
+    EffectObjectNode *node;
 
     node = D_00437E30;
-    while (node != (s32 *)0x0) {
-        object = *node;
-        node = (s32 *)node[2];
-        *(u32 *)(object + 0xc) = *(u32 *)(object + 0xc) & 0xffffffef;
+    while (node != NULL) {
+        object = node->object;
+        node = node->next;
+        object->flags = object->flags & 0xffffffef;
     }
 }
 
 void func_002DCC68(void) {
-    s32 object;
-    s32 *node;
+    EffectObjectFlag *object;
+    EffectObjectNode *node;
 
     node = D_00437E30;
-    while (node != (s32 *)0x0) {
-        object = *node;
-        node = (s32 *)node[2];
-        *(u32 *)(object + 0xc) = *(u32 *)(object + 0xc) | 0x10;
+    while (node != NULL) {
+        object = node->object;
+        node = node->next;
+        object->flags = object->flags | 0x10;
     }
 }
 
 void func_002DCCA0(void) {
-    s32 *node = D_00437E30;
-    s32 obj;
-    s32 *next;
-    s32 v;
+    EffectObjectNode *node = D_00437E30;
+    EffectObjectFlag *object;
+    EffectObjectNode *next;
+    s32 flags;
 
     if (node == NULL) {
         return;
     }
     do {
-        obj = *node;
-        next = *(s32 **)((s32)node + 8);
-        v = *(s32 *)(obj + 0xC) | 0xA;
-        *(s32 *)(obj + 0xC) = v;
+        object = node->object;
+        next = node->next;
+        flags = object->flags | 0xA;
+        object->flags = flags;
         func_002DCAE8(node);
         node = next;
     } while (node != NULL);
@@ -507,9 +567,9 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDF48);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseReferenceHolder);
 
-u32 func_002DE120(u32 arg0) {
-    *(s32 *)((s32)arg0 + 0x1c) = *(s32 *)((s32)arg0 + 0x1c) + 1;
-    return arg0;
+RefObj *func_002DE120(RefObj *obj) {
+    obj->cnt1C++;
+    return obj;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DE138);
@@ -1491,7 +1551,37 @@ void func_002E6408(s32 arg0) {
     *(u32 *)(**(s32 **)(arg0 + 0x30) + 4) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E6418);
+u32 *func_002E6418(u8 *work) {
+    u32 *handle = func_00328D68(4);
+    u32 kind = *(u32 *)(work + 0x38);
+    u8 *ring;
+    u32 *entry;
+    u32 groups;
+    u32 i;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    if (kind < 3) {
+        *(u32 *)(work + 0x38) = 3;
+        kind = 3;
+    }
+    ring = func_002E75C8(kind);
+    first = *(u32 *)(work + 0x44);
+    groups = *(s32 *)(ring + 8) / 4;
+    *handle = (u32)ring;
+    entry = *(u32 **)(ring + 0x14);
+    second = *(u32 *)(work + 0x48);
+    third = *(u32 *)(work + 0x4C);
+    for (i = 0; i < groups; i++) {
+        entry[0] = first;
+        entry[1] = second;
+        entry[2] = second;
+        entry[3] = third;
+        entry += 4;
+    }
+    return handle;
+}
 
 void func_002E64C0(u32 arg0) {
     func_002E7698(*(u32 *)arg0);
@@ -1981,7 +2071,17 @@ void func_002EE0A8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE0D8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE348);
+EffectStripNode *func_002EE348(u32 percent) {
+    EffectStripNode *node = func_00328E18(sizeof(EffectStripNode));
+    node->percent = percent;
+    node->color = 0x80808080;
+    node->opacity = 1.0f;
+    node->active = 0;
+    node->transform = func_002E5C50(percent * 4, 2, 0);
+    node->resource = effRetainResource(0);
+    node->count = 1;
+    return node;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE3C8);
 
@@ -2149,7 +2249,19 @@ void func_002F0698(u8 *p) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F06E8);
+u8 *func_002F06E8(u8 *config) {
+    u8 *base = func_003292A8(*(u32 *)(config + 0x38) * 0x2C + 0xC);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
+    u32 count = *(u32 *)(config + 0x8C);
+    u8 *entries = (u8 *)node + 0xC;
+
+    node->entries = entries;
+    node->allocation = base;
+    if (count < 3) {
+        *(u32 *)(config + 0x8C) = 3;
+    }
+    return (u8 *)node;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F0760);
 
@@ -2239,7 +2351,23 @@ void func_002F15F0(Matrix4 *mat, float value) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F15F8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F1740);
+u32 func_002F1740(u32 count, u32 repeat, u32 resource) {
+    u8 *node = func_002F15F8(count, repeat);
+
+    if (resource == 0) {
+        s32 references = D_00437E74;
+        *(u32 *)(node + 0x18) = 0;
+        if (references == 0) {
+            D_00437E78 = func_002DDCA0(D_00437E70, 0x300);
+            references = D_00437E74;
+        }
+        references++;
+        D_00437E74 = references;
+    } else {
+        *(void **)(node + 0x18) = func_002DDAA8((void *)resource);
+    }
+    return (u32)node;
+}
 
 void func_002F17B8(s32 arg0) {
     if (*(s32 *)(arg0 + 0x18) == 0) {
@@ -2282,7 +2410,19 @@ void func_002F1CD0(u8 *p) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effAllocateAnimationBuffer);
+u8 *effAllocateAnimationBuffer(u8 *config) {
+    u8 *base = func_003292A8(*(u32 *)(config + 0x38) * 0x30 + 0xC);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
+    u32 count = *(u32 *)(config + 0x8C);
+    u8 *entries = (u8 *)node + 0xC;
+
+    node->entries = entries;
+    node->allocation = base;
+    if (count < 3) {
+        *(u32 *)(config + 0x8C) = 3;
+    }
+    return (u8 *)node;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F1D90);
 
@@ -2635,7 +2775,16 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F64D8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F66F0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6790);
+void func_002F6790(void) {
+    u128 *dst = D_00458460;
+    u128 *src = D_0037F770[0];
+    PCP_COPY_VECTOR(dst, src);
+    dst++;
+    src++;
+    PCP_COPY_VECTOR(dst, src);
+    PCP_COPY_VECTOR(D_004584A0, D_0037F780);
+    D_00437E94 = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F67D8);
 
@@ -5489,7 +5638,20 @@ s32 func_00305848(u8 *effect, u32 slot, u32 material) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effSetMaterialSlots);
+u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
+    s32 offset = index * 0xA0;
+    u32 i;
+    EffectMaterialSlot *slots;
+    if (*(void **)(offset + *(s32 *)(work + 0x18) + 0x9C) == NULL) {
+        func_00304D60((void *)work, index, asset);
+    }
+    *(BdWork **)(offset + *(s32 *)(work + 0x18) + 0x9C) = asset;
+    slots = (EffectMaterialSlot *)((u8 *)asset + 0x30);
+    for (i = 0; i < 2; i++) {
+        slots[i].value = value;
+    }
+    return 1;
+}
 
 u32 func_00305950(s32 arg0, s32 arg1) {
     *(u32 *)(arg1 * 0xa0 + *(s32 *)(arg0 + 0x18) + 0x9c) = 0;

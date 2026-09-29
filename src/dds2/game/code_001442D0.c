@@ -1,4 +1,6 @@
 #include "common.h"
+#include "pcp_vu0.h"
+
 #include "fpu.h"
 
 /* DDS2 saves store the area flag table earlier than the DDS1 save layout. */
@@ -12,16 +14,17 @@ extern s32 D_004363C4;
 extern u32 D_00435F0C;
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
+
 extern void func_002433B0(void);
 
-extern u8 D_0044FF90[];
 extern s32 D_004362C8;
 
 extern u32 D_00436330[];
+
 extern s32 func_001578C0(u32);
 
 extern s32 D_00436320;
-extern u8 D_00450990[];
+
 extern s32 D_00436214;
 
 extern f32 sdfAtan2(f32, f32);
@@ -29,12 +32,17 @@ extern f32 sdfAtan2(f32, f32);
 extern f32 D_0038BAC0[];
 
 extern s32 D_003899D8[];
+
 extern s32 D_00436228;
+
 extern s32 D_0039A0B8[];
+
 extern s32 D_0039A028[];
 
 extern s32 func_0035C860(char *, const char *, ...);
+
 extern void fldFormatAreaDirectory(char *, s32, s32);
+
 extern s32 func_00343ED0(char *, void *, s32);
 
 extern u32 D_0044F7F0[];
@@ -99,8 +107,6 @@ extern u32 D_00436238;
 
 extern u32 D_00436270;
 
-extern u32 D_00436274;
-
 extern s32 D_00436278;
 
 extern u32 D_0043626C;
@@ -138,6 +144,7 @@ extern void func_00144F88(s32 param);
 extern void fldPlayFieldSe(s32 param);
 
 extern s32 fldLoadArchive(s32 param);
+
 extern void func_001453D0(s32 param0, s32 param1);
 
 extern void func_00145400(s32 param0, s32 param1);
@@ -194,6 +201,7 @@ extern s32 D_00389770[];
 extern void func_00342580(s32 arg0);
 
 extern s32 D_00389798[];
+
 extern void func_00341C78();
 
 extern void func_00129E50(u32 arg0, s32 arg1);
@@ -230,7 +238,8 @@ extern void func_001132F0(s32 arg0);
 
 typedef struct {
     s32 unk0;
-    u8 pad4[0x10];
+    s32 unk4;
+    u8 pad8[0xC];
 } FldEnt14; /* 0x14 bytes */
 
 extern FldEnt14 D_00451BE0[];
@@ -333,11 +342,173 @@ extern void fldSetFadeTarget(s32, s32, s32);
 
 extern void func_00135568(s32);
 
+extern s32 D_00399FF0[];
+
+extern s32 mdlFlagTest();
+
+typedef struct {
+    s16 id;
+    s16 flag;
+    s8 data[0x40];
+} FldEnt44; /* 0x44 bytes */
+
+extern FldEnt44 D_00389A70[32];
+
+extern s32 func_00144B50(s32);
+
+extern s32 func_00144B50(s32);
+
+extern s32 D_0043622C;
+
+extern s32 D_00436230;
+
+extern s32 func_00342168(s32);
+
+extern void func_003421E8(s32);
+
+extern s32 D_00436274;
+
+typedef struct {
+    u8 pad0[0x10];
+    s32 value;
+    u8 pad14[8];
+} FldItem; /* 0x1C bytes */
+
+typedef struct {
+    u8 pad0[4];
+    FldItem *items;
+    u32 count;
+    u8 padC[8];
+} FldSceneRecord; /* 0x14 bytes */
+
+extern s32 fldFindRecordItem(s32 scene, u32 index);
+
+extern s32 D_003A8E30[];
+
+extern s32 D_003A8E40[];
+
+extern s32 D_003A8E50[];
+
+extern s32 D_003A8E30[4];
+
+extern s32 D_003A8E40[4];
+
+extern s32 D_003A8E50[4];
+
+typedef struct {
+    s32 unk0, unk4, unk8, unkC;
+    u8 pad10[0x10];
+    s32 *unk20;
+    u8 pad24[8];
+    s32 unk2C, unk30, unk34, unk38;
+    s16 unk3C, unk3E;
+    char name[0x10];
+} FldTblEnt50; /* 0x50 bytes */
+
+extern FldTblEnt50 D_0044FF90[];
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 pad10[0x14];
+    s32 unk24;
+    u8 pad28[8];
+} FldObj30; /* 0x30 bytes */
+
+extern FldObj30 D_00450990[32];
+
+extern s32 D_00436300;
+
+extern s32 D_0043630C;
+
+extern s32 func_00123590();
+
+extern void dds3SetObjectFlags();
+
+extern void func_001576D8(s32 handle);
+
+extern void func_00157790(s32 handle, f32 *pos);
+
+typedef struct FieldPair48 {
+    f32 pos[4];
+    f32 vel[4];
+    s32 unk20;
+    s32 active;
+    s32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+} FieldPair48; /* 0x30 bytes */
+
+extern FieldPair48 D_00450F90[];
+
+extern u32 effMiscRand();
+
+extern s16 D_00389874[];
+
+typedef struct FldVec4 {
+    f32 v[4];
+} FldVec4;
+
+extern void effObjSetInnerFirstVec();
+
+extern s32 *dds3GetUnk0C();
+
+extern void dds3ClearObjectFlags();
+
+extern FldVec4 D_00413DE8;
+
+extern s32 D_00451B90[];
+
+extern void func_0014F5F0();
+
+extern void func_0014F980();
+
+extern s32 D_00451B90[];
+
+extern s32 D_00451B90[];
+
+extern s32 D_00451B90[];
+
+extern s32 dds3GetWorldObject(void);
+
+extern void *func_00110C70(s32, s32, s32);
+
+extern s32 func_00125F38(void);
+
+extern s32 func_00110BE0(s32, s32);
+
+extern void func_00113110(s32, f32 *, f32 *);
+
+extern void func_0012F770(void);
+
+extern f32 D_0038BAD0[];
+
+extern f32 D_0038BAE0[];
+
+extern s32 D_004360B4;
+
+extern s32 D_004360B8;
+
+extern void func_00123138(s32, s32, s32, s32);
+
+extern int strcmp(const char *, const char *);
+
+extern char D_004363F0[]; /* "BARIA" */
+
+extern char *D_004361D8;
+
+extern void func_001235E8(s32, s32, s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
 
 extern u8 func_00127398(void);
+
 extern u8 func_001275D0(void);
+
 extern s32 func_002CE928(void);
+
 extern s32 D_00435EE0;
 
 s32 func_00144400(void) {
@@ -408,7 +579,21 @@ void func_00144598(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001445D0);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldPlayPendingSounds);
+void fldPlayPendingSounds(void) {
+    s32 stage;
+    s32 i;
+
+    stage = D_00389780[0];
+    if (stage == 11) {
+        stage = mdlFlagTest(0x13) != 0 ? 2 : stage;
+    }
+    for (i = 0; i < D_0043621C; i++) {
+        if (D_0044F730[i].unk0 & 1) {
+            D_0044F730[i].unk0 &= ~1;
+            func_00341C78(D_00399FF0[stage] + D_0044F730[i].unk4);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001447A0);
 
@@ -416,7 +601,16 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_004136C0);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00144B50);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldFindSceneEntryData);
+s8 fldFindSceneEntryData(s32 id, s32 idx) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        if (D_00389A70[i].id == id && (D_00389A70[i].flag == 0 || mdlFlagTest(D_00389A70[i].flag) != 0)) {
+            return D_00389A70[i].data[idx];
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00144CB8);
 
@@ -503,15 +697,68 @@ void fldSelectBgmMode(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145228);
+void func_00145228(void) {
+    s32 handle = func_00144B50(D_00389770[10]);
+    s32 stage;
+    s32 idx;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001452D8);
+    if (handle == -1) {
+        if (D_00389770[4] >= 0x32) {
+            return;
+        }
+        stage = D_00389770[4];
+        if (stage == 11) {
+            stage = mdlFlagTest(0x13) != 0 ? 2 : stage;
+        }
+        idx = fldFindSceneEntryData(stage, D_00389770[5] + 1);
+        D_00436214 = D_00399FF0[stage];
+        D_00389770[10] = idx;
+        handle = D_00436214 + idx;
+    }
+    D_0043622C = handle;
+    D_00436230 = 0;
+}
+
+s32 func_001452D8(void) {
+    switch (D_00436230) {
+    case 0:
+        if (func_00342168(D_0043622C) == 0) {
+            func_003421E8(D_0043622C);
+            D_00436230 = D_00436230 + 1;
+        } else {
+            D_00436230 = D_00436230 + 2;
+        }
+        break;
+    case 1:
+        if (func_00342168(D_0043622C) == 1) {
+            D_00436230 = D_00436230 + 1;
+        }
+        break;
+    default:
+        D_00436230 = -1;
+        return 1;
+    }
+    return 0;
+}
 
 u32 func_00145358(void) {
     return D_00436234;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldLoadArchive);
+s32 fldLoadArchive(s32 id) {
+    s32 name = 0x30000000 + (id << 16);
+    s32 result = func_00342168(name);
+    if (result == 0) {
+        func_003421E8(name);
+        D_00436234 = 1;
+        return 0;
+    }
+    if (result == 1) {
+        D_00436234 = 0;
+        return 1;
+    }
+    return 0;
+}
 
 void func_001453D0(s32 arg0, s32 arg1) {
     sndSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
@@ -525,13 +772,53 @@ void func_00145428(void) {
     D_00436238 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145430);
+s32 func_00145430(void) {
+    switch (D_00436238) {
+    case 0:
+        if (func_00342168(0x680000) == 0) {
+            func_003421E8(0x680000);
+            D_00436238 = D_00436238 + 1;
+        } else {
+            D_00436238 = D_00436238 + 2;
+        }
+        break;
+    case 1:
+        if (func_00342168(0x680000) == 1) {
+            D_00436238 = D_00436238 + 1;
+        }
+        break;
+    default:
+        D_00436238 = -1;
+        return 1;
+    }
+    return 0;
+}
 
 void func_001454B8(void) {
     D_0043623C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001454C0);
+s32 func_001454C0(void) {
+    switch (D_0043623C) {
+    case 0:
+        if (func_00342168(0x690000) == 0) {
+            func_003421E8(0x690000);
+            D_0043623C = D_0043623C + 1;
+        } else {
+            D_0043623C = D_0043623C + 2;
+        }
+        break;
+    case 1:
+        if (func_00342168(0x690000) == 1) {
+            D_0043623C = D_0043623C + 1;
+        }
+        break;
+    default:
+        D_0043623C = -1;
+        return 1;
+    }
+    return 0;
+}
 
 u32 func_00145548(void) {
     return D_00436210;
@@ -586,11 +873,43 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145D48);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldFindRecordItem);
+s32 fldFindRecordItem(s32 scene, u32 index) {
+    s32 result = 1;
+    FldSceneRecord *rec = (FldSceneRecord *)D_00436270;
+    s32 i;
+    u32 j;
+    FldItem *item;
+
+    for (i = 0; i < (s32)D_00436274; i++, rec++) {
+        item = rec->items;
+        for (j = 0; j < rec->count; j++, item++) {
+            if (i == scene && j == index) {
+                result = item->value + 1;
+            }
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00146150);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldGetMaxItemValue);
+s32 fldGetMaxItemValue(void) {
+    s32 max = 0;
+    FldSceneRecord *rec = (FldSceneRecord *)D_00436270;
+    s32 i;
+    u32 j;
+    FldItem *item;
+
+    for (i = 0; i < (s32)D_00436274; i++, rec++) {
+        item = rec->items;
+        for (j = 0; j < rec->count; j++, item++) {
+            if (max < item->value) {
+                max = item->value;
+            }
+        }
+    }
+    return max + 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00146250);
 
@@ -663,8 +982,6 @@ s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     }
     return (((FldAreaFlagsView *)D_00435DD0)->areaFlags[index][floor] >> bit) & 1;
 }
-
-extern s32 fldFindRecordItem(s32 floor, s32 bit);
 
 void fldSetCurrentFloorFlag(s32 bit) {
     s32 index;
@@ -847,7 +1164,19 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B0F8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B440);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldReleaseTextureSlots);
+void fldReleaseTextureSlots(void) {
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        if (D_003A8E50[i] != 0) {
+            func_00157658(D_003A8E50[i]);
+            D_003A8E50[i] = 0;
+            func_003298C0(D_003A8E30[i]);
+            D_003A8E30[i] = 0;
+            D_003A8E40[i] = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B5D8);
 
@@ -875,8 +1204,6 @@ typedef struct {
     u8 unk00[0x14C];
     f32 position[3];
 } FieldPlacementState;
-
-extern void func_00157790(s32, const f32 *);
 
 void func_0014B788(void) {
     f32 position[4];
@@ -952,8 +1279,11 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BA60);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BD20);
 
 extern u32 D_004362DC;
+
 extern u32 D_004362E8;
+
 extern u32 D_004362F4;
+
 extern u32 D_004362CC;
 
 void func_0014BDE0(void) {
@@ -991,9 +1321,42 @@ void func_0014BDE0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldClearMenuEntries);
+void fldClearMenuEntries(void) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldResetObjectSlots);
+    for (i = 0; i < 32; i++) {
+        D_0044FF90[i].unk0 = 0;
+        D_0044FF90[i].unk4 = 0;
+        D_0044FF90[i].unk8 = 0;
+        D_0044FF90[i].unkC = 0;
+        D_0044FF90[i].unk20 = 0;
+        D_0044FF90[i].unk2C = 0;
+        D_0044FF90[i].unk30 = 0;
+        D_0044FF90[i].unk34 = 0;
+        D_0044FF90[i].unk38 = 0;
+        D_0044FF90[i].unk3C = 0;
+        D_0044FF90[i].unk3E = 0;
+    }
+    D_004362C8 = 0;
+}
+
+void fldResetObjectSlots(void) {
+    s32 i;
+
+    D_00436320 = 0;
+    for (i = 0; i < 32; i++) {
+        D_00450990[i].unk4 = -1;
+        D_00450990[i].unk0 = 0;
+        D_00450990[i].unk8 = 0;
+        D_00450990[i].unkC = 0;
+        if (D_00450990[i].unk24 != 0) {
+            func_00157658(D_00450990[i].unk24);
+        }
+        D_00450990[i].unk24 = 0;
+    }
+    D_00436300 = 0;
+    D_0043630C = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BF98);
 
@@ -1009,9 +1372,33 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B48);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014C9B0);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldActivateObjectById);
+void fldActivateObjectById(s32 id) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldReleaseObjectSlots);
+    for (i = 0; i < D_00436320; i++) {
+        if (D_00450990[i].unk4 == id && D_00450990[i].unk8 == 0) {
+            D_00450990[i].unkC = 1;
+        }
+    }
+}
+
+void fldReleaseObjectSlots(void) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        if (D_00450990[i].unk24 != 0) {
+            func_00157658(D_00450990[i].unk24);
+            D_00450990[i].unk24 = 0;
+        }
+    }
+    D_00436320 = 0;
+    for (i = 0; i < 32; i++) {
+        D_00450990[i].unk4 = -1;
+        D_00450990[i].unk0 = 0;
+        D_00450990[i].unk8 = 0;
+        D_00450990[i].unkC = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D0E8);
 
@@ -1031,7 +1418,18 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DDD8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DEA8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldFireRoomEffects);
+void fldFireRoomEffects(void) {
+    s32 i;
+
+    for (i = 0; i < D_004362C8; i++) {
+        s32 room = D_0044FF90[i].unk38;
+        if (room != 0 && func_00123590(D_00389770[4], D_00389770[5] + 1, room) != 0) {
+            if (D_0044FF90[i].unk20 != 0) {
+                dds3SetObjectFlags(D_0044FF90[i].unk20, 1);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014E3A8);
 
@@ -1136,7 +1534,28 @@ void func_0014F408(void) {
     D_00436394 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetWeatherEffectPos);
+void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
+    f32 pos[4];
+
+    memset(pos, 0, sizeof(pos));
+    pos[3] = 1.0f;
+    if (D_00436388 != 0) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        func_001576D8(D_00436388);
+        func_00157790(D_00436388, pos);
+        D_0043638C = 1;
+    }
+    if (D_00436398 != 0) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        func_001576D8(D_00436398);
+        func_00157790(D_00436398, pos);
+        D_0043639C = 1;
+    }
+}
 
 void func_0014F560(void) {
     if (D_00436388 != 0 && D_0043638C != 0) {
@@ -1188,21 +1607,95 @@ void func_0014F788(void) {
     } while (i >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldInitSparkTable);
+void fldInitSparkTable(void) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldResetSparkTable);
+    if (D_00389874[0] == 0) {
+        for (i = 0; i < 64; i++) {
+            D_00450F90[i].unk20 = 0;
+            D_00450F90[i].active = 0;
+            D_00450F90[i].unk28 = 0;
+            D_00450F90[i].unk2C = -1;
+            D_00450F90[i].unk2E = effMiscRand(0) % 60 + 15;
+        }
+    } else {
+        for (i = 0; i < 64; i++) {
+            D_00450F90[i].unk20 = 0;
+            D_00450F90[i].unk2C = -1;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetSparkVectors);
+void fldResetSparkTable(void) {
+    s32 i;
+
+    for (i = 0; i < 64; i++) {
+        D_00450F90[i].active = 0;
+        D_00450F90[i].unk28 = 0;
+        D_00450F90[i].unk2C = -1;
+        D_00450F90[i].unk2E = effMiscRand(0) % 60 + 15;
+    }
+}
+
+s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
+    PCP_COPY_VECTOR(D_00450F90[index].pos, pos);
+    PCP_COPY_VECTOR(D_00450F90[index].vel, vel);
+    D_00450F90[index].unk20 = 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014F980);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldFreeSparkSlot);
+void fldFreeSparkSlot(s32 index) {
+    FldVec4 vec;
+    s32 obj;
+    s32 *flags;
+    s16 slot;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldUpdateSparkSlots);
+    vec = D_00413DE8;
+    if (D_00450F90[index].unk20 == 1 && D_00450F90[index].active != 0 && D_00450F90[index].unk2C != -1) {
+        vec.v[0] = D_00450F90[index].pos[0];
+        vec.v[2] = D_00450F90[index].pos[2];
+        effObjSetInnerFirstVec(D_00451BE0[D_00450F90[index].unk2C].unk0, &vec);
+        obj = D_00451BE0[D_00450F90[index].unk2C].unk0;
+        flags = dds3GetUnk0C(obj);
+        *flags |= 1;
+        dds3ClearObjectFlags(obj, 0x400);
+        slot = D_00450F90[index].unk2C;
+        D_00450F90[index].unk2C = -1;
+        D_00451BE0[slot].unk4 = -1;
+    }
+}
+
+void fldUpdateSparkSlots(void) {
+    s32 i;
+
+    func_0014F5F0();
+    for (i = 0; i < 64 && i < D_00451B90[13]; i++) {
+        if (D_00450F90[i].unk20 != 0 && D_00450F90[i].active != 0) {
+            func_0014F980(i, D_00450F90[i].unk28);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014FD28);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldIsNearSpark);
+s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
+    s32 i;
+
+    for (i = 0; i < 64 && i < D_00451B90[13]; i++) {
+        if (D_00450F90[i].active == 1 && D_00450F90[i].unk2C != -1) {
+            f32 dx = x - D_00450F90[i].pos[0];
+            f32 dy = y - D_00450F90[i].pos[1];
+            f32 dz = z - D_00450F90[i].pos[2];
+
+            if (fsqrtf(dx * dx + dy * dy + dz * dz) < 50.0f) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150138);
 
@@ -1296,7 +1789,9 @@ void func_00151480(void) {
     func_0014F560();
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00151498);
+s32 func_00151498(void) {
+    return *(s16 *)((u8 *)D_00451B94[0] + 6);
+}
 
 s32 func_001514A8(void) {
     return D_00451B98[0];
@@ -1627,7 +2122,43 @@ s32 func_00154AE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00154B00);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154CE0);
+s32 func_00154CE0(void) {
+    f32 pos[4];
+    f32 rot[4];
+    s32 handle;
+    s32 object;
+    s32 world;
+
+    if (func_0010D650(0) == -1) {
+        handle = func_00125F38();
+        if (handle == 0) {
+            return 1;
+        }
+        object = func_00110BE0(dds3GetWorldObject(), handle);
+        if (object == 0) {
+            return 1;
+        }
+        func_00113110(object, pos, rot);
+        func_0012F770();
+        D_0038BAD0[0] = pos[0];
+        D_0038BAD0[1] = pos[1];
+        D_0038BAD0[2] = pos[2];
+        D_0038BAE0[0] = rot[0];
+        D_0038BAE0[1] = rot[1];
+        D_0038BAE0[2] = rot[2];
+        D_004360B4 = 0;
+        D_004360B8 = func_0010D650(1);
+        D_003897C0[0] = 4;
+    } else {
+        world = dds3GetWorldObject();
+        handle = (s32)func_00110C70(world, func_0010D650(0), 4);
+        if (handle == 0) {
+            return 1;
+        }
+        func_00110BE0(dds3GetWorldObject(), handle);
+    }
+    return 1;
+}
 
 s32 func_00154E08(void) {
     char *temp_v0;
@@ -1717,9 +2248,58 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00155BA8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00155D48);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldCmdSetSceneBits);
+s32 fldCmdSetSceneBits(void) {
+    s32 world;
+    s32 stage;
+    char *name;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00155F90);
+    world = func_0010D650(0);
+    if (world == 0) {
+        world = D_00389780[0];
+    }
+    stage = func_0010D650(1);
+    if (stage == 0) {
+        stage = D_00389784[0] + 1;
+    }
+    name = func_0010D7D0(2);
+    if (name == NULL) {
+        for (i = 0; i < 16; i++) {
+            func_00123138(world, stage, i, 0);
+        }
+    } else {
+        func_00123138(world, stage, func_00154FA0(name), 0);
+    }
+    return 1;
+}
+
+s32 func_00155F90(void) {
+    s32 world;
+    s32 stage;
+    char *name;
+    s32 i;
+
+    world = func_0010D650(0);
+    if (world == 0) {
+        world = D_00389780[0];
+    }
+    stage = func_0010D650(1);
+    if (stage == 0) {
+        stage = D_00389784[0] + 1;
+    }
+    name = func_0010D7D0(2);
+    if (strcmp(name, D_004363F0) == 0) {
+        name = D_004361D8;
+    }
+    if (name == NULL) {
+        for (i = 0; i < 16; i++) {
+            func_00123138(world, stage, i, 1);
+        }
+    } else {
+        func_00123138(world, stage, func_00154FA0(name), 1);
+    }
+    return 1;
+}
 
 s32 func_00156070(void) {
     s32 area = func_0010D650(0);
@@ -1799,7 +2379,29 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00156440);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00156538);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldCmdSetSceneBitsValue);
+s32 fldCmdSetSceneBitsValue(void) {
+    s32 world;
+    s32 stage;
+    s32 room;
+
+    world = func_0010D650(0);
+    if (world == 0) {
+        world = D_00389780[0];
+    }
+    stage = func_0010D650(1);
+    if (stage == 0) {
+        stage = D_00389784[0] + 1;
+    }
+    room = func_0010D650(2);
+    if (room == 0) {
+        for (; room < 16; room++) {
+            func_001235E8(world, stage, room, func_0010D650(3));
+        }
+    } else {
+        func_001235E8(world, stage, room, func_0010D650(3));
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", fldSetFlagFromWorld1);
 
@@ -2418,4 +3020,3 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E8);
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363F0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363F8);
-
