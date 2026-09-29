@@ -45,7 +45,7 @@ extern void *func_002CFEB8(s32 size);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
-    void *work;
+    u32 *work;
 } ObjWithWork;
 
 s32 func_00111400(ObjWithWork *obj) {
@@ -54,10 +54,10 @@ s32 func_00111400(ObjWithWork *obj) {
     return 1;
 }
 
-void func_00111440(s32 object) {
+void func_00111440(ObjWithWork *obj) {
     u32 *slot;
 
-    slot = *(u32 **)(object + 0x18);
+    slot = obj->work;
     dds3ReleaseSlotPath();
     dds3ExchangeSlot(*slot, 0, 1);
     func_002CFF98(slot);

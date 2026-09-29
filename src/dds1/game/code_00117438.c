@@ -34,12 +34,12 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
 
-void func_00117568(u32 *arg0, u32 arg1) {
-    *arg0 = arg1;
+void func_00117568(u32 *value, u32 newValue) {
+    *value = newValue;
 }
 
-u32 func_00117570(u32 *arg0) {
-    return *arg0;
+u32 func_00117570(u32 *value) {
+    return *value;
 }
 
 void func_00117578(float multiplier, EvtScaledValue *value) {
@@ -143,11 +143,11 @@ void sdfFirePendingCallback(void) {
     func_0011B940();
 }
 
-u8 func_00118140(s64 arg0) {
-    s64 temp_v0;
+u8 func_00118140(s64 expectedValue) {
+    s64 currentValue;
 
-    temp_v0 = func_0011B938();
-    return temp_v0 == arg0;
+    currentValue = func_0011B938();
+    return currentValue == expectedValue;
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118170);

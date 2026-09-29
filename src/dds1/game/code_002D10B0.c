@@ -38,18 +38,18 @@ void func_002D10B0(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D10C8);
 
-void func_002D1318(s32 buffer, s32 next) {
-    if (D_003BD300[0] == buffer) {
-        D_003BD300[0] = buffer ^ 1;
+void func_002D1318(s32 oldBuffer, s32 nextBuffer) {
+    if (D_003BD300[0] == oldBuffer) {
+        D_003BD300[0] = oldBuffer ^ 1;
     }
-    if (D_003BD300[1] == buffer) {
-        D_003BD300[1] = buffer ^ 1;
+    if (D_003BD300[1] == oldBuffer) {
+        D_003BD300[1] = oldBuffer ^ 1;
     }
-    D_003BD302 = next;
+    D_003BD302 = nextBuffer;
 }
 
-void func_002D1350(s32 both, s32 value, s32 index) {
-    if (both == 0) {
+void func_002D1350(s32 singleBuffer, s32 value, s32 index) {
+    if (singleBuffer == 0) {
         D_003BD300[0] = value;
         D_003BD300[1] = value;
     } else {
@@ -70,6 +70,7 @@ extern void func_002E1218(void);
 void func_002D1698(void) {
     s8 buffer = D_003BD2EA ^ 1;
 
+    /* Do not select a buffer while its index is the busy-buffer status. */
     while (D_003BD302 == buffer) {
     }
     D_003BD2EA = buffer;

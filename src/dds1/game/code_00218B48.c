@@ -3,7 +3,7 @@
 
 typedef struct MdlViewState {
     s32 unk00;
-    s32 unk04;
+    s32 viewerTask;
     s8 unk08;
     u8 pad09;
     s8 unk0A;
@@ -197,18 +197,29 @@ void func_00219B50(MdlPartList *list, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00219BB0);
 
-void mdlObjDestroy(s32 arg0) {
-    if (*(u8 *)(arg0 + 9) != 0) {
-        func_002EBB60((void *)(arg0 + 0x20));
+typedef struct MdlObj {
+    s32 unk0;             /* 0x00 */
+    s32 handle;           /* 0x04 */
+    u8 pad08;
+    u8 initialized;       /* 0x09 */
+    u8 pad0A[6];
+    s32 unk10;            /* 0x10 */
+    u8 pad14[0xC];
+    u8 data[1];           /* 0x20 */
+} MdlObj;
+
+void mdlObjDestroy(MdlObj *obj) {
+    if (obj->initialized != 0) {
+        func_002EBB60(obj->data);
     }
-    func_002D0918(*(s32 *)(arg0 + 4));
-    func_002CFF98((void *)arg0);
+    func_002D0918(obj->handle);
+    func_002CFF98(obj);
 }
 
-void mdlObjInit(s32 arg0, s32 arg1, s32 arg2) {
-    if (*(u8 *)(arg0 + 9) == 0) {
-        *(u8 *)(arg0 + 9) = 1;
-        func_002EC780(arg0 + 0x20, arg2, *(s32 *)(arg0 + 0), *(s32 *)(arg0 + 0x10), arg1);
+void mdlObjInit(MdlObj *obj, s32 arg1, s32 arg2) {
+    if (obj->initialized == 0) {
+        obj->initialized = 1;
+        func_002EC780((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
     }
 }
 
@@ -242,14 +253,14 @@ MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 s
     return item;
 }
 
-void func_00219E30(s32 arg0) {
-    func_00151E60(*(u32 *)(arg0 + 8));
-    *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 1;
+void func_00219E30(MdlPartEntry *entry) {
+    func_00151E60((u32)entry->object);
+    entry->state = entry->state + 1;
 }
 
-void func_00219E68(s32 arg0) {
-    func_0014FEB0(*(u32 *)(arg0 + 8));
-    *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 1;
+void func_00219E68(MdlPartEntry *entry) {
+    func_0014FEB0((u32)entry->object);
+    entry->state = entry->state + 1;
 }
 
 s32 func_00219EA0(s32 arg0, s32 arg1) {
@@ -647,9 +658,9 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D5D0);
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D668);
 
 void mdlViewerTaskDestroy(void) {
-    if (D_003D7A50.unk04 != 0) {
-        kwlnTaskDestroyWithHierarchy(D_003D7A50.unk04, 0);
-        D_003D7A50.unk04 = 0;
+    if (D_003D7A50.viewerTask != 0) {
+        kwlnTaskDestroyWithHierarchy(D_003D7A50.viewerTask, 0);
+        D_003D7A50.viewerTask = 0;
     }
 }
 
@@ -717,7 +728,7 @@ void mdlFlagClearAll(void) {
     } while (i >= 0);
 }
 
-void mdlFlagClear(s32 arg0);
+void mdlFlagClear(s32 flag);
 
 void mdlClearFlagRanges(void) {
     s32 i = 0;
@@ -730,22 +741,23 @@ void mdlClearFlagRanges(void) {
     } while (i < 0x1000);
 }
 
-void mdlFlagSet(s32 arg0) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
-    s32 off = (temp_v0 >> 5) * 4 + 0x840;
-    *(u32 *)(D_003BAA00 + off) |= 1 << arg0;
+/* Signed flag indices need a bias before arithmetic right shift divides by 32. */
+void mdlFlagSet(s32 flag) {
+    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
+    s32 byteOffset = (adjustedFlag >> 5) * 4 + 0x840;
+    *(u32 *)(D_003BAA00 + byteOffset) |= 1 << flag;
 }
 
-void mdlFlagClear(s32 arg0) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
-    s32 off = (temp_v0 >> 5) * 4 + 0x840;
-    *(u32 *)(D_003BAA00 + off) &= ~(1 << arg0);
+void mdlFlagClear(s32 flag) {
+    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
+    s32 byteOffset = (adjustedFlag >> 5) * 4 + 0x840;
+    *(u32 *)(D_003BAA00 + byteOffset) &= ~(1 << flag);
 }
 
-s32 mdlFlagTest(s32 arg0) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
-    s32 off = (temp_v0 >> 5) * 4 + 0x840;
-    return (*(s32 *)(D_003BAA00 + off) >> arg0) & 1;
+s32 mdlFlagTest(s32 flag) {
+    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
+    s32 byteOffset = (adjustedFlag >> 5) * 4 + 0x840;
+    return (*(s32 *)(D_003BAA00 + byteOffset) >> flag) & 1;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF78);

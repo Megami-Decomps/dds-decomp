@@ -48,14 +48,14 @@ extern s32 func_00111388();
 extern void dds3ExchangeSlot();
 extern void dds3InvokeSlot5Handler();
 
-ActionObj *func_00113018(s32 a, s32 b, s32 c) {
+ActionObj *func_00113018(s32 a, void *firstVector, void *secondVector) {
     ActionObj *obj = func_00110880(5);
 
     if (obj != NULL) {
         obj->unk4 = a;
         func_00112750(obj);
-        effObjSetInnerFirstVec(obj, b);
-        effObjSetInnerSecondVec(obj, c);
+        effObjSetInnerFirstVec(obj, firstVector);
+        effObjSetInnerSecondVec(obj, secondVector);
         effObjInnerVecBackup(obj->unk1C);
         obj->state->unk0 = -1;
         obj->state->unk4 = 0;

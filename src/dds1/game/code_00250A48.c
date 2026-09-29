@@ -27,9 +27,9 @@ extern void mnuResetResourceAnimation(void);
 extern void func_00253520(MnuTransWork *work);
 
 void func_00250A48(MnuTransWork *work, s32 mode) {
-    MnuTransRec *rec = func_00256B78(&work->list584);
+    MnuTransRec *transition = func_00256B78(&work->list584);
 
-    if (rec != NULL) {
+    if (transition != NULL) {
         if (work->state >= 6) {
             mnuStopResourceAnimation();
             func_00253520(work);
@@ -37,20 +37,20 @@ void func_00250A48(MnuTransWork *work, s32 mode) {
             mnuResetResourceAnimation();
             func_00253520(work);
         }
-        rec->mode = mode;
+        transition->mode = mode;
         if (mode == 1) {
             work->state = 10;
-            rec->startId = *func_0024FA18();
+            transition->startId = *func_0024FA18();
             mnuStopResourceAnimation();
-            rec->endId = *func_0024FA18();
+            transition->endId = *func_0024FA18();
             mnuResetResourceAnimation();
             return;
         }
         if (mode == 2) {
             work->state = -10;
-            rec->startId = *func_0024FA18();
+            transition->startId = *func_0024FA18();
             mnuResetResourceAnimation();
-            rec->endId = *func_0024FA18();
+            transition->endId = *func_0024FA18();
             mnuStopResourceAnimation();
         }
     }

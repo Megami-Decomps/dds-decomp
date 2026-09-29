@@ -456,22 +456,22 @@ void sdfRemoveTaskItem(TaskWork *work, s32 key) {
     }
 }
 
-s32 func_002CB390(TaskWork *work, s32 key) {
+u32 *func_002CB390(TaskWork *work, s32 key) {
     TaskListNode *item;
 
     item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
-        return item->value;
+        return (u32 *)item->value;
     }
-    return 0;
+    return NULL;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3B8);
 
 INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3EE0);
 
-void func_002CB3F8(void *list, s32 key, u32 mode) {
-    u32 *item = func_002CB390(list, key);
+void func_002CB3F8(TaskWork *work, s32 key, u32 mode) {
+    u32 *item = func_002CB390(work, key);
     if (item == NULL) {
         return;
     }
@@ -496,26 +496,42 @@ void func_002CB3F8(void *list, s32 key, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB4B8);
 
-void func_002CB5A8(u8 *work) {
+typedef struct SdfTaskResourceWork {
+    u32 allocation;            /* 0x00 */
+    void *firstBuffer;          /* 0x04 */
+    void *secondBuffer;         /* 0x08 */
+    SdfTaskHeader *taskWork;    /* 0x0C */
+} SdfTaskResourceWork;
+
+void func_002CB5A8(SdfTaskResourceWork *work) {
     if (work != NULL) {
-        sdfDestroyTaskWork(*(SdfTaskHeader **)(work + 0x0C));
-        func_002CFF98(*(void **)(work + 4));
-        func_002CFF98(*(void **)(work + 8));
-        func_002D0918(*(u32 *)work);
+        sdfDestroyTaskWork(work->taskWork);
+        func_002CFF98(work->firstBuffer);
+        func_002CFF98(work->secondBuffer);
+        func_002D0918(work->allocation);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB5F0);
 
-void func_002CB6B8(u8 *work) {
+typedef struct SdfCallbackWork {
+    u8 pad00[4];
+    u32 firstArg;                  /* 0x04 */
+    u8 pad08[4];
+    void (*destroy)(u32, u32);   /* 0x0C */
+    u8 pad10[8];
+    u32 secondArg;                 /* 0x18 */
+} SdfCallbackWork;
+
+void func_002CB6B8(SdfCallbackWork *work) {
     if (work != NULL) {
-        void (*destroy)(u32, u32) = *(void (**)(u32, u32))(work + 0x0C);
-        destroy(*(u32 *)(work + 4), *(u32 *)(work + 0x18));
+        void (*destroy)(u32, u32) = work->destroy;
+        destroy(work->firstArg, work->secondArg);
         func_002CFF98(work);
     }
 }
 
-void func_002CB6F8(u32 unused, u8 *work) {
+void func_002CB6F8(u32 unused, SdfCallbackWork *work) {
     func_002CB6B8(work);
 }
 
@@ -555,74 +571,88 @@ void func_002CBB48(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBB68);
 
-void func_002CBBA0(void *p, u32 *mod, u32 *div) {
-    u32 *t = *(u32 **)((s32)p + 8);
-    *mod = *t % *(u32 *)((s32)p + 0x14);
-    *div = *t / *(u32 *)((s32)p + 0x14);
+typedef struct SdfGridCell {
+    u32 index;
+    u32 value;
+} SdfGridCell;
+
+typedef struct SdfGrid {
+    u32 allocation;        /* 0x00 */
+    SdfGridCell *cells;    /* 0x04 */
+    SdfGridCell *cursor;   /* 0x08 */
+    u32 pad0C;
+    u32 cellCount;         /* 0x10 */
+    u32 width;             /* 0x14 */
+} SdfGrid;
+
+void func_002CBBA0(SdfGrid *grid, u32 *mod, u32 *div) {
+    SdfGridCell *cell = grid->cursor;
+    *mod = cell->index % grid->width;
+    *div = cell->index / grid->width;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBBD8);
 
-void func_002CBC10(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
-    u32 temp_v0;
+void func_002CBC10(SdfGrid *grid, s32 column, s32 row, u32 value) {
+    u32 cellIndex;
 
-    temp_v0 = arg2 * *(s32 *)(arg0 + 0x14) + arg1;
-    if (temp_v0 < *(u32 *)(arg0 + 0x10)) {
-        *(u32 *)(temp_v0 * 8 + *(s32 *)(arg0 + 4) + 4) = arg3;
+    cellIndex = row * grid->width + column;
+    if (cellIndex < grid->cellCount) {
+        grid->cells[cellIndex].value = value;
     }
 }
 
-u8 *func_002CBC48(u8 *grid) {
-    u8 *cell = *(u8 **)(grid + 8);
-    u32 width = *(u32 *)(grid + 0x14);
-    u32 index = *(u32 *)cell;
+SdfGridCell *func_002CBC48(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+    u32 index = cell->index;
 
-    cell -= width * 8;
+    cell -= width;
     if (index < width) {
         return NULL;
     }
-    *(u8 **)(grid + 8) = cell;
-    func_002CC5F0(grid);
+    grid->cursor = cell;
+    func_002CC5F0((u8 *)grid);
     return cell;
 }
 
-u8 *func_002CBC98(u8 *grid) {
-    u8 *cell = *(u8 **)(grid + 8);
-    u32 width = *(u32 *)(grid + 0x14);
+SdfGridCell *func_002CBC98(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
 
-    if (*(u32 *)cell >= *(u32 *)(grid + 0x10) - width) {
+    if (cell->index >= grid->cellCount - width) {
         return NULL;
     }
-    cell += width * 8;
-    *(u8 **)(grid + 8) = cell;
-    func_002CC5F0(grid);
+    cell += width;
+    grid->cursor = cell;
+    func_002CC5F0((u8 *)grid);
     return cell;
 }
 
-u8 *func_002CBCF0(u8 *grid) {
-    u8 *cell = *(u8 **)(grid + 8);
-    u32 width = *(u32 *)(grid + 0x14);
-    u32 index = *(u32 *)cell;
+SdfGridCell *func_002CBCF0(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+    u32 index = cell->index;
 
-    cell -= 8;
+    cell -= 1;
     if (index % width == 0) {
         return NULL;
     }
-    *(u8 **)(grid + 8) = cell;
-    func_002CC5F0(grid);
+    grid->cursor = cell;
+    func_002CC5F0((u8 *)grid);
     return cell;
 }
 
-u8 *func_002CBD48(u8 *grid) {
-    u8 *cell = *(u8 **)(grid + 8);
-    u32 width = *(u32 *)(grid + 0x14);
-    u32 index = *(u32 *)cell;
-    cell += 8;
+SdfGridCell *func_002CBD48(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+    u32 index = cell->index;
+    cell += 1;
     if (index % width == width - 1) {
         return NULL;
     }
-    *(u8 **)(grid + 8) = cell;
-    func_002CC5F0(grid);
+    grid->cursor = cell;
+    func_002CC5F0((u8 *)grid);
     return cell;
 }
 

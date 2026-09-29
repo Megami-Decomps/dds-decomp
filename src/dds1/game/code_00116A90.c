@@ -50,27 +50,27 @@ u32 func_00116AE8(u64 id) {
     return path->state->value;
 }
 
-ActionObj *func_00116B28(s32 a, s32 b, s32 c) {
+ActionObj *func_00116B28(s32 a, void *work, s32 c) {
     ActionObj *obj = func_00110880(0xD);
 
-    obj->unk18 = (void *)b;
+    obj->unk18 = work;
     obj->unk4 = a;
     obj->unk8 = c;
     return obj;
 }
 
-u32 func_00116B78(s32 path) {
-    return (u32)((PathObject *)path)->state;
+u32 func_00116B78(PathObject *path) {
+    return (u32)path->state;
 }
 
 INCLUDE_ASM(const s32, "game/code_00116A90", func_00116B80);
 
-ActionObj *func_00116CE8(s32 a, s32 b, s32 c) {
+ActionObj *func_00116CE8(s32 a, void *work, s32 c) {
     ActionObj *obj = func_00110880(0x10);
 
     obj->unk4 = a;
     obj->unk8 = c;
-    obj->unk18 = (void *)b;
+    obj->unk18 = work;
     return obj;
 }
 

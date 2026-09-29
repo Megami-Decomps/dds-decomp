@@ -1,6 +1,11 @@
 #include "common.h"
 #include "sdf.h"
 
+/* DMAC tag IDs occupy the high nibble of the header byte at offset three. */
+#define SDF_DMA_TAG_NEXT_BYTE 0x20
+#define SDF_DMA_TAG_REF_BYTE 0x30
+#define SDF_DMA_TAG_CALL_BYTE 0x50
+
 extern void *D_003BDA00;
 extern s8 D_003BDA04;
 extern s32 D_003BD9F8[2];
@@ -144,15 +149,15 @@ u64 sdfGraphHasPendingWork(void) {
 }
 
 u64 func_002D3EE8(void) {
-    s64 temp_v0;
-    u64 temp_v1;
+    s64 interruptState;
+    u64 pendingWork;
 
-    temp_v0 = func_00312C08();
-    temp_v1 = sdfGraphHasPendingWork();
-    if (temp_v0 != 0) {
+    interruptState = func_00312C08();
+    pendingWork = sdfGraphHasPendingWork();
+    if (interruptState != 0) {
         EIntr();
     }
-    return temp_v1;
+    return pendingWork;
 }
 
 extern s32 D_003BD310;
@@ -218,7 +223,7 @@ void sdfAppendPacket(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = 0x20;
+        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
         *(u32 *)(last + 4) = packet & 0xfffffff;
     }
     list->last = packet;
@@ -232,7 +237,7 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = 0x20;
+        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
         *(u32 *)(last + 4) = packet & 0xfffffff;
     }
     list->last = end;
@@ -241,13 +246,13 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
 void func_002D40A8(SdfListHead *list, u32 packet) {
     s32 last;
 
-    *(u8 *)(packet + 3) = 0x30;
+    *(u8 *)(packet + 3) = SDF_DMA_TAG_REF_BYTE;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = 0x20;
+        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
         *(u32 *)(last + 4) = packet & 0xfffffff;
     }
     list->last = packet + 0x10;
@@ -261,7 +266,7 @@ void func_002D40E8(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = 0x20;
+        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
         *(u32 *)(last + 4) = packet & 0xfffffff;
     }
     list->last = packet + 0x30;
@@ -270,13 +275,13 @@ void func_002D40E8(SdfListHead *list, u32 packet) {
 void func_002D4120(SdfListHead *list, u32 packet) {
     s32 last;
 
-    *(u8 *)(packet + 3) = 0x50;
+    *(u8 *)(packet + 3) = SDF_DMA_TAG_CALL_BYTE;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        *(u8 *)(last + 3) = 0x20;
+        *(u8 *)(last + 3) = SDF_DMA_TAG_NEXT_BYTE;
         *(u32 *)(last + 4) = packet & 0xfffffff;
     }
     list->last = packet + 0x10;
@@ -341,7 +346,7 @@ s32 func_002D4320(s32 arg0, u32 arg1) {
     u32 temp_v0;
 
     temp_v0 = func_002D42B8(arg1);
-    *(u8 *)(arg0 + 3) = 0x20;
+    *(u8 *)(arg0 + 3) = SDF_DMA_TAG_NEXT_BYTE;
     *(u32 *)(arg0 + 4) = temp_v0 & 0xfffffff;
     return temp_v0 + 0x10;
 }
@@ -359,15 +364,15 @@ void func_002D4540(SdfListHead *list) {
     list->unkC = 0;
 }
 
-void func_002D4558(s32 arg0, u32 *arg1) {
-    if (*(u32 **)(arg0 + 8) == (u32 *)0x0) {
-        *(u32 **)(arg0 + 4) = arg1;
+void func_002D4558(SdfListHead *list, u32 *node) {
+    if (list->last == 0) {
+        list->first = (u32)node;
     }
     else {
-        **(u32 **)(arg0 + 8) = arg1;
+        *(u32 *)list->last = (u32)node;
     }
-    *(u32 **)(arg0 + 8) = arg1;
-    *arg1 = 0;
+    list->last = (u32)node;
+    *node = 0;
 }
 
 void func_002D4578(SdfListHead *list) {
@@ -448,9 +453,9 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D49E8);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4BA0);
 
-void func_002D4C40(u32 arg0, u32 arg1, u32 arg2) {
-    func_002D4558(arg1, arg2);
-    sdfAppendPacket(arg0, (s32)arg2 + 0x10);
+void func_002D4C40(SdfListHead *list, SdfListHead *other, u32 *node) {
+    func_002D4558(other, node);
+    sdfAppendPacket(list, (s32)node + 0x10);
 }
 
 void func_002D4C80(s32 arg0, u32 arg1, s32 arg2) {
@@ -532,8 +537,7 @@ void func_002D5498(void) {
     }
 }
 
-s32 func_002D5510(s32 (*arg0)(s32)) {
-    s32 (*alloc)(s32) = arg0;
+s32 func_002D5510(s32 (*alloc)(s32)) {
     s32 mem;
 
     if (alloc == NULL) {
@@ -544,16 +548,15 @@ s32 func_002D5510(s32 (*arg0)(s32)) {
     return mem;
 }
 
-void func_002D5558(s32 arg0, void (*arg1)(s32), s32 arg2, s32 (*arg3)(s32)) {
-    s32 (*alloc)(s32) = arg3;
+void func_002D5558(s32 list, void (*initialize)(s32), s32 size, s32 (*alloc)(s32)) {
     s32 mem;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    mem = alloc(arg2);
-    arg1(mem);
-    sdfAppendPacket(arg0, mem);
+    mem = alloc(size);
+    initialize(mem);
+    sdfAppendPacket(list, mem);
 }
 
 void func_002D55B8(SdfPacket *arg0) {
@@ -905,26 +908,32 @@ void func_002D7810(void) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7830);
 
-void func_002D78B8(s32 arg0) {
-    u32 temp_v0;
-
-    if (*(s32 *)(arg0 + 0x30) == 0) {
-        temp_v0 = func_002CFEB8(0x100);
-        *(u32 *)(arg0 + 0x30) = temp_v0;
-    }
-}
-
 typedef struct SdfFreeNode {
     struct SdfFreeNode *next;
     u8 pad04[8];
     s32 allocation;
 } SdfFreeNode;
 
+typedef struct SdfFreeRoot {
+    u8 pad00[0x28];
+    SdfFreeNode *lists[2]; /* 0x28 */
+    void *workspace;       /* 0x30 */
+} SdfFreeRoot;
+
+void func_002D78B8(SdfFreeRoot *root) {
+    u32 temp_v0;
+
+    if (root->workspace == NULL) {
+        temp_v0 = func_002CFEB8(0x100);
+        root->workspace = (void *)temp_v0;
+    }
+}
+
 extern void func_002D0918(s32 allocation);
 extern void func_002CFF98(void *allocation);
 
-void sdfFreeNodeLists(s32 root) {
-    SdfFreeNode **lists = (SdfFreeNode **)(root + 0x28);
+void sdfFreeNodeLists(SdfFreeRoot *root) {
+    SdfFreeNode **lists = root->lists;
     s32 i = 0;
     s32 end = 2;
     do {
@@ -943,11 +952,11 @@ void sdfFreeNodeLists(s32 root) {
     } while (i != end);
 }
 
-void func_002D7988(u32 arg0) {
-    sdfFreeNodeLists(arg0);
-    func_002CFF98(*(u32 *)((s32)arg0 + 0x30));
-    *(u32 *)((s32)arg0 + 0x30) = 0;
-    func_002CFF98(arg0);
+void func_002D7988(SdfFreeRoot *root) {
+    sdfFreeNodeLists(root);
+    func_002CFF98(root->workspace);
+    root->workspace = NULL;
+    func_002CFF98(root);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D79C0);
@@ -956,7 +965,7 @@ typedef struct SdfObjectList {
     u8 pad00[4];
     s16 count;
     u8 pad06[6];
-    s32 *elements;
+    SdfFreeRoot **elements;
 } SdfObjectList;
 extern void sdfDestroyDevRequest(void *);
 
@@ -999,7 +1008,9 @@ void func_002D7BD8(s32 *arg0, u32 arg1, u32 arg2) {
 
 typedef struct SdfRouteNode SdfRouteNode;
 typedef struct SdfRouteOwner {
-    u8 pad00[0xC];
+    u8 pad00[4];
+    SdfRouteNode *first;
+    u8 pad08[4];
     SdfRouteNode *last;
 } SdfRouteOwner;
 
@@ -1015,8 +1026,8 @@ void sdfUnlinkRouteNode(SdfRouteNode *node) {
     SdfRouteOwner *owner = node->owner;
     if (owner == NULL) {
         SdfRouteOwner *root = node->root;
-        if (*(SdfRouteNode **)((u8 *)root + 4) == node) {
-            *(SdfRouteNode **)((u8 *)root + 4) = NULL;
+        if (root->first == node) {
+            root->first = NULL;
         }
         return;
     }
@@ -1042,9 +1053,9 @@ void sdfUnlinkRouteNode(SdfRouteNode *node) {
 void sdfLinkRouteNode(SdfRouteNode *node, SdfRouteOwner *owner) {
     if (owner == NULL) {
         SdfRouteOwner *root = node->root;
-        SdfRouteNode *first = *(SdfRouteNode **)((u8 *)root + 4);
+        SdfRouteNode *first = root->first;
         if (first != node) {
-            *(SdfRouteNode **)((u8 *)root + 4) = node;
+            root->first = node;
             if (first != NULL) {
                 first->owner = (SdfRouteOwner *)node;
                 node->unkC = first;

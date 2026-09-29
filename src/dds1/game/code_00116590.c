@@ -32,10 +32,10 @@ typedef struct ActionObj {
 extern ActionObj *func_00110880();
 extern void func_00112750();
 
-ActionObj *func_001165A8(s32 a) {
+ActionObj *func_001165A8(s32 value) {
     ActionObj *obj = func_00110880(9);
 
-    obj->unk4 = a;
+    obj->unk4 = value;
     func_00112750(obj);
     return obj;
 }
