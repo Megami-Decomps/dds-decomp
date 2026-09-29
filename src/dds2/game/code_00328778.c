@@ -1,5 +1,17 @@
 #include "common.h"
 
+typedef struct SdfThreadNode {
+    struct SdfThreadNode *next; /* 0x00 */
+    s32 threadId;               /* 0x04 */
+} SdfThreadNode;
+
+extern s32 func_00328318(s32 entry, s32 stack, s32 stackSize, s32 priority);
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern void _StartThread(s32, s32);
+extern s32 D_004390F8;
+extern SdfThreadNode *D_004390FC;
+
 extern s32 CancelWakeupThread(u64);
 
 extern u64 GetThreadId(void);
@@ -52,7 +64,14 @@ void sdfRunTickWorkerThread(void) {
 
 INCLUDE_ASM(const s32, "game/code_00328778", func_00328858);
 
-INCLUDE_ASM(const s32, "game/code_00328778", func_00328918);
+void func_00328918(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
+    node->threadId = func_00328318(entry, stack, stackSize, priority);
+    WaitSema(D_004390F8);
+    node->next = D_004390FC;
+    D_004390FC = node;
+    SignalSema(D_004390F8);
+    _StartThread(node->threadId, arg);
+}
 
 void sdfSleepThreadCount(s32 count) {
     u64 threadId;

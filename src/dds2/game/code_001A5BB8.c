@@ -236,15 +236,92 @@ extern void func_001A1508(s32 arg0, s32 arg1, s32 arg2);
 
 extern void func_001A0CA0(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
+typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 unk24; } UiSprite;
+typedef struct UiPanelPlacement {
+    UiSprite *frame;
+    UiSprite *sprite;
+    s32 pad8;
+    s32 offsetX;
+    s32 offsetY;
+    s32 rightX;
+    s32 bottomY;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+} UiPanelPlacement;
+typedef struct UiPos { s32 x; s32 y; } UiPos;
+typedef struct UiTexRef { u8 pad0[4]; s32 unk4; s32 unk8; s32 unkC; } UiTexRef;
+typedef struct UiPanelOrigin { s32 x; s32 y; UiTexRef *tex; } UiPanelOrigin;
+typedef struct UiPanel {
+    u32 flags;
+    u8 pad4[8];
+    s32 unkC;
+    u8 pad10[4];
+    UiPanelOrigin origin;
+    s32 pad20;
+    UiPos pos;
+    u8 pad2C[0x78];
+    UiPanelPlacement place;
+} UiPanel;
+extern s32 func_0019DBA8();
+extern UiSprite *func_001A1858();
+extern void func_001A1980();
+extern void func_001A1A50();
+
+typedef struct UiCursor {
+    s32 x;
+    s32 y;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    s8 unk15;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+} UiCursor;
+
 void func_001A5BB8(s32 arg0) {
     for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
         frFontEnableContextMode(arg0);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A5BF8);
+void func_001A5BF8(UiPanel *panel) {
+    UiPos *pos = &panel->pos;
+    UiPanelPlacement *place = &panel->place;
+    s32 top;
+    if (place->sprite == 0) {
+        place->sprite = func_001A1858(6, D_00452940.allocation);
+        if (place->frame != 0) {
+            place->sprite->unk20 = panel->origin.tex->unk4 + func_0019DBA8(0, panel->origin.tex);
+        }
+    }
+    top = pos->y + place->offsetY;
+    func_001A1980(place->sprite, pos->x + place->offsetX, top, pos->x + place->rightX, pos->y + place->bottomY, panel->unkC);
+    place->sprite->unk24 = top;
+    func_001A1A50(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
+    panel->flags = (panel->flags & ~0x300) | 0x100;
+}
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A5CE8);
+void func_001A5CE8(UiPanel *panel) {
+    UiPanelOrigin *origin = &panel->origin;
+    UiPanelPlacement *place = &panel->place;
+    if (origin->tex != 0 && !(panel->flags & 0x10000)) {
+        if (place->frame == 0) {
+            s32 width = origin->tex->unkC * 16;
+            place->frame = func_001A1858(7, D_00452940.allocation);
+            func_001A1980(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->unkC);
+            func_001A1A50(place->frame, 0x7F, 0x7F, 0x7F, 0);
+        }
+        panel->flags = (panel->flags & ~0x3000) | 0x1000;
+    } else if (place->frame != 0) {
+        panel->flags |= 0x3000;
+    }
+}
 
 void func_001A5DD8(u32 *arg0, s32 arg1) {
     if (arg1 != 0) {
@@ -255,7 +332,23 @@ void func_001A5DD8(u32 *arg0, s32 arg1) {
     *(u16 *)(arg0 + 3) = 0xffff;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A5E00);
+void func_001A5E00(UiCursor *cur, s32 resetPos) {
+    if (resetPos != 0) {
+        cur->x = 0x4B0;
+        cur->y = 0xAF8;
+    }
+    cur->unkC = 0;
+    cur->unk10 = 0;
+    cur->unk11 = 0;
+    cur->unk16 = 0;
+    cur->unk18 = 0;
+    cur->unk1A = 0;
+    cur->unk12 = 0;
+    cur->unk13 = 0;
+    cur->unk14 = 0;
+    cur->unk15 = -0x80;
+    cur->unk8 = 0;
+}
 
 void func_001A5E48(s32 object) {
     *(u32 *)(object + 0) = 0x560;
@@ -1609,7 +1702,33 @@ s32 func_001B33E8(s32 object) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3430);
+s32 func_001B3430(s32 object) {
+    s32 choices[24];
+    s32 count = 0;
+    u32 i;
+    u16 *ids = (u16 *)(object + 0x142);
+    for (i = 0; i < 24; i++) {
+        u32 id = *ids++;
+        if (id != 0) {
+            if (id < 0x2A0) {
+                s32 category = *(s8 *)(D_00435E1C + id * 2 + 1);
+                if (category != 2) {
+                    if (category != 4) {
+                        if ((*(u8 *)(D_00435E20 + id * 56 + 1) & 2) != 0) {
+                            if (id < 0xAB || (id >= 0xAD && id != 0xBF)) {
+                                choices[count++] = id;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (count == 0) {
+        return -1;
+    }
+    return choices[effMiscRandMod(0, count)];
+}
 
 f32 func_001B3510(s32 unit, s32 unused, s32 index) {
     s32 mode = *(u16 *)(index * 0x38 + D_00435E20 + 0x16);

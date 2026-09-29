@@ -267,12 +267,43 @@ into a delay slot where retail has a `nop`:
 __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p->sub->v));
 ```
 
-That gives retail's `lqc2; jr $31; nop` (`func_00217F70`). Only COP2 (and
-MMI, where a VU function needs it) goes inside the asm; everything around it
-is C. Vector copies retail does with lqc2/sqc2 are written the same way (see
-`EFF_COPY64` in `effect/effMagatuhi.c`). Values passed in vf registers across
-calls: `void f(void)` using the registers directly
-(`game/code_002E7C20.c`).
+That gives retail's `lqc2; jr $31; nop` (`func_00217F70`). Only COP2 and MMI
+go inside the asm (rules below); everything around it is C. Vector copies
+retail does with lqc2/sqc2 are written the same way (see `EFF_COPY64` in
+`effect/effMagatuhi.c`). Values passed in vf registers across calls:
+`void f(void)` using the registers directly (`game/code_002E7C20.c`).
+
+## Inline asm: COP2 and MMI
+
+gcc 2.96 emits almost no MMI (`pextlb`, `ppach`, `pcpyld`, `pmaddw`, …), so
+MMI in the middle of compiled retail code came from inline asm, usually
+Sony's libvu0/SDK macros (`sceVu0UnitMatrix` is `qmfc2` + `pextuw`). MMI is
+allowed on the same terms as COP2:
+
+1. **C first.** gcc does emit some 128-bit code itself (`lq`/`sq` for `u128`
+   copies, `por` for `u128` moves). An instruction that `u128` C reproduces
+   may not be written as asm; say in the macro comment or parked note which
+   C was tried.
+2. **Shared macros, not ad-hoc blocks.** MMI idioms live in `include/ee_mmi.h`
+   (COP2 ones in `include/pcp_vu0.h`), one idiom per macro, used in more than
+   one place or mirroring a known SDK macro; each macro comment names the
+   retail pattern it reproduces. Operands come from C (`"r"`), not hard-coded
+   registers, unless the SDK macro hard-codes them. A load or store of the
+   macro's own pointer operand is part of the idiom when retail round-trips
+   the value through memory.
+3. **Small asm, real C around it.** Loops, calls, control flow and addressing
+   are C; the asm covers only the COP2/MMI operations. A block that wraps most
+   of a function is handwritten code in disguise, except for:
+   - copies of SDK routines Sony wrote as C with an asm body (mark with
+     `/* libvu0: sceVu0Name */` above the definition);
+   - VU0 routines in the same style: the asm takes its values from C operands
+     and has no branches (mark with `/* vu0 routine: what it computes */`).
+
+   check_unit prints `ASMBODY` for any other function that is mostly inline
+   asm; those stay INCLUDE_ASM.
+4. **Handwritten functions stay asm.** Whole functions with `addi`, delay slots
+   no compiler fills that way, or `.set noreorder` bodies with branches were
+   `.s` files originally. Leave them as INCLUDE_ASM; they are not C matches.
 
 ## Float constants and strings
 
@@ -330,5 +361,6 @@ These are fakes, and check_unit reports them as `TRICK`:
 
 - computed gotos and label-address tables standing in for a switch;
 - `register x asm("$n")`;
-- asm used for anything but COP2 VU0 code;
+- asm used for anything but COP2/MMI under the rules in "Inline asm: COP2 and
+  MMI" (check_unit reports mostly-asm functions as `ASMBODY`);
 - dummy variables or `volatile` added only to steer codegen.

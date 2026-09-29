@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern s32 D_00435F14;
 
@@ -395,6 +396,22 @@ typedef struct FldAreaResourceState {
     s32 room;             /* 0x80 */
 } FldAreaResourceState;
 
+extern void func_0012B518(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
+
+extern void btlActivateRuntime(s32 mode);
+
+extern void func_00110A88(u64, s8);
+
+extern char D_00436098[];
+
+extern void func_0022E338(void);
+
+extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
+extern void func_00131000(s16, s32, f32);
+
+extern s32 fldGetLocationCoordinateValue(s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001295E0);
@@ -777,7 +794,9 @@ void fldInitDisplayObjects(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldGetDisplayTableRow);
+u32 *fldGetDisplayTableRow(void) {
+    return &D_0037FB48[D_00436060 * 8];
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B518);
 
@@ -951,7 +970,21 @@ void func_0012BC38(u32 arg0) {
     D_00436060 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BC40);
+void func_0012BC40(s32 lower, s32 bits, u64 upper) {
+    u64 command = sdfAllocPacketAligned(0x20);
+    u64 packet;
+    u64 *entry;
+    FieldBufferDescriptor *descriptor;
+
+    sdfResetPacketList(command);
+    packet = sdfAllocPacketAligned(0x30);
+    entry = func_0033A290(packet, 0x30);
+    entry[5] = 0x3B;
+    entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     u64 command = sdfAllocPacketAligned(0x20);
@@ -1255,7 +1288,13 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D9D0);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DAA0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DB68);
+void func_0012DB68(s32 x, s32 y, s32 width, s32 height) {
+    func_0012B518(x, y, 0x10, height, 0, 0, 0x10, 0x20, 0x60000040, D_00436080);
+    func_0012B518(x + 0x10, y, width - 0x20, height, 0x10, 0, 1, 0x20, 0x60000040, D_00436080);
+    func_0012B518(x + width - 0x10, y, 0x10, height, 0x10, 0, 0x10, 0x20, 0x60000040, D_00436080);
+    fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
+    func_0012BE18(0);
+}
 
 void func_0012DC70(void) {
     if (D_00436068 == 0) {
@@ -1508,15 +1547,37 @@ void func_0012EBF8(u32 arg0, s32 arg1) {
     func_0012EC80(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012EC80);
+s32 func_0012EC80(s32 mode) {
+    D_00436090 = mode;
+    D_0043608C = 0;
+    if (func_0012EB78() == 0) {
+        if (D_00436090 < 3) {
+            if (D_00436090 >= 0) {
+                btlActivateRuntime(D_00436090);
+                if (dds3GetWorldObject() != 0) {
+                    func_00110A88(dds3GetWorldObject(), 1);
+                }
+            }
+        }
+    }
+}
 
 void func_0012ECF0(void) {
     btlResetAsyncState();
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012ED08);
+void func_0012ED08(void) {
+    kwlnTaskCreate((s32)D_00436098, 0x2B0F, 0, 1, (s32)fldEncProc, (s32)func_0012ECF0, 0);
+    func_0022E338();
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012ED48);
+void func_0012ED48(void) {
+    f32 *distance = D_003897DC;
+    f32 dx = D_0038BAB0[0] - D_0038BAC0[0];
+    f32 dy = D_0038BAB0[1] - D_0038BAC0[1];
+    f32 dz = D_0038BAB0[2] - D_0038BAC0[2];
+    *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012EDB0);
 
@@ -1680,9 +1741,23 @@ void func_00133AE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133B10);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133C18);
+void func_00133C18(void) {
+    s16 node = *(s16 *)(D_00435F14 + 0x12);
+    if (fldGetLocationCoordinateValue(D_00389770[4], D_00389770[5] + 1) & 0x40) {
+        func_00131000(node, 0x12, 10.0f);
+        return;
+    }
+    func_00131000(node, 3, 10.0f);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133C90);
+void func_00133C90(void) {
+    s16 node = *(s16 *)(D_00435F14 + 0x12);
+    if (fldGetLocationCoordinateValue(D_00389770[4], D_00389770[5] + 1) & 0x40) {
+        func_00131000(node, 0x12, 0.0f);
+        return;
+    }
+    func_00131000(node, 3, 0.0f);
+}
 
 s32 func_00133CF8(s32 value) {
     s32 object = D_00435F14;

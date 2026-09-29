@@ -174,6 +174,7 @@ typedef struct {
 } EffPCPWork1C;
 
 extern void *func_00328D68(s32 size);
+extern void func_00328E48();
 
 extern u32 effParamCreateFromTable(void *data, s32 index);
 
@@ -2411,27 +2412,17 @@ void func_00182B40(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182B48);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpSharedWorkRelease);
+extern s32 D_00436438;
+extern void func_0018E8F0(u32 handle);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182C60);
-
-void func_00182DA0(void *work, void *src) {
-    PCP_COPY_VECTOR(D_00438F04, src);
-}
-
-void func_00182DB8(u32 unused, u32 val) {
-    D_00438F04->unk10 = val;
-}
-
-void effSetSharedScale(u32 unused, f32 value) {
-    ((EffPCPWorkF1C *)D_00438F04)->unk1C = value;
-}
-
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
-
-void func_00182E70(u32 arg0) {
-    func_0018E8F0(*(u32 *)((s32)arg0 + 0x34));
-    func_00328E48(arg0);
+void effPcpSharedWorkRelease(EffPCPWork *work)
+{
+    func_00328E48(work);
+    if (--D_00436438 != 0) {
+        return;
+    }
+    func_0018E8F0(D_00438F04->unk38);
+    func_00328E48(D_00438F04);
 }
 
 typedef struct EffPCPTrailObj {
@@ -2458,6 +2449,81 @@ typedef struct EffPCPTrailWork {
 extern s32 func_00195890(f32 value);
 extern u32 func_00195A30(u32 flags, u32 color);
 extern void func_0018E908(EffPCPTrailObj *obj);
+
+/* Shared-work variant of the trail update: every reference counts frames in its
+ * own word and only the reference that is in step with the shared frame
+ * counter advances the shared work. */
+typedef struct EffPCPSharedTrail {
+    f32 pos[4];
+    u32 flags;
+    u32 color;
+    u32 frame;
+    f32 unk1C;
+    u32 limit;
+    u32 unk24;
+    u32 colors[2];
+    f32 scale;
+    s32 minSize;
+    EffPCPTrailObj *obj;
+} EffPCPSharedTrail;
+
+#define EFF_SHARED_TRAIL ((EffPCPSharedTrail *)D_00438F04)
+
+void func_00182C60(ref)
+    u32 *ref;
+{
+    EffPCPSharedTrail *work;
+    EffPCPTrailObj *obj;
+    f32 pos[4];
+
+    if (*ref == 0) {
+        EFF_SHARED_TRAIL->frame &= 1;
+        if (EFF_SHARED_TRAIL->frame != 0) {
+            EFF_SHARED_TRAIL->limit = EFF_SHARED_TRAIL->unk24 + 1;
+        }
+        *ref = EFF_SHARED_TRAIL->frame;
+    }
+    work = EFF_SHARED_TRAIL;
+    if (*ref != work->frame) {
+        *ref = work->frame;
+        return;
+    }
+    obj = work->obj;
+    *ref = *ref + 1;
+    if (work->frame < work->limit) {
+        work->color = work->colors[work->frame & 1];
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(work));
+        obj->size = (s32)((f32)func_00195890(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+        obj->x = (s32)pos[0] - 0x800;
+        obj->y = ((s32)pos[1] - 0x800) << 1;
+        if (obj->size < EFF_SHARED_TRAIL->minSize) {
+            obj->size = EFF_SHARED_TRAIL->minSize;
+        }
+        obj->color = func_00195A30(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
+        func_0018E908(obj);
+        EFF_SHARED_TRAIL->frame++;
+    }
+}
+
+void func_00182DA0(void *work, void *src) {
+    PCP_COPY_VECTOR(D_00438F04, src);
+}
+
+void func_00182DB8(u32 unused, u32 val) {
+    D_00438F04->unk10 = val;
+}
+
+void effSetSharedScale(u32 unused, f32 value) {
+    ((EffPCPWorkF1C *)D_00438F04)->unk1C = value;
+}
+
+INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
+
+void func_00182E70(u32 arg0) {
+    func_0018E8F0(*(u32 *)((s32)arg0 + 0x34));
+    func_00328E48(arg0);
+}
 
 /* Per-frame update: places the trail object from the work position and
  * alternates its colour between two entries until the count runs out. */
@@ -4414,7 +4480,45 @@ void effPcpPairedEventGroupRelease(EffPCPEventPairGroup *work) {
     func_003297C8(work->handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018AC20);
+typedef struct EffPCPSlot20 {
+    u8 pad00[0xC];
+    f32 unk0C;
+    f32 unk10;
+    u32 unk14;
+    f32 unk18;
+    u8 pad1C[4];
+} EffPCPSlot20;
+
+typedef struct EffPCPSlotWork {
+    u8 pad00[0x18];
+    u32 count;
+    u8 pad1C[0xC];
+    f32 unk28;
+    f32 spreadA;
+    f32 unk30;
+    f32 spreadB;
+    u8 pad38[0x54];
+    EffPCPSlot20 *slots;
+} EffPCPSlotWork;
+
+/* Randomises slot `index`: phase spread evenly around a full turn, jittered
+ * speed, and a spin whose sign is picked at random. */
+void func_0018AC20(EffPCPSlotWork *work, s32 index) {
+    EffPCPSlot20 *slot;
+    f32 spread;
+
+    slot = &work->slots[index];
+    slot->unk0C = (3.14159265f * 2.0f) / work->count * index;
+    spread = work->spreadA;
+    slot->unk10 = work->unk28 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    spread = work->spreadB;
+    slot->unk14 = 0;
+    if (effMiscRand(D_003AA868) & 1) {
+        slot->unk18 = work->unk30 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    } else {
+        slot->unk18 = -work->unk30 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018AD50);
 
