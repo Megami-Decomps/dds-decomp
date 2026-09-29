@@ -2259,8 +2259,8 @@ void func_002A7FD0(void) {
     D_00437ACC = 0;
 }
 
-void func_002A8008(void) {
-    func_00346A60(D_003E5608);
+s32 func_002A8008(void) {
+    return func_00346A60(D_003E5608);
 }
 
 extern u8 D_003E563C[];
@@ -2342,7 +2342,24 @@ u32 mnuGetMovieListNodeAtOffset(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8610);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A87F0);
+typedef struct MovieStatus {
+    u8 pad00[0x64];
+    s32 total;
+    s32 pad68;
+    s32 current;
+} MovieStatus;
+extern s32 D_00457E58[];
+extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_0033D810(s32, s32, s32, s32, char *, s32, s32);
+extern void sdfAppendPacket(s32, s32);
+void func_002A87F0(void) {
+    s32 list;
+    if (func_002A8008() == 0) {
+        list = D_00457E58[0];
+        sdfAppendPacket(list, func_0011F250(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
+        sdfAppendPacket(list, func_0033D810(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_003E5608)->current, ((MovieStatus *)D_003E5608)->total));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A88A0);
 
