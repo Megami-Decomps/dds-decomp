@@ -5243,7 +5243,7 @@ void effInitializeResourceQueue(void) {
     D_00438764 = func_0020E300(D_004384E8);
     func_0020E7A0(D_00438764, 0xC2, 0xC8);
     func_0020E850(D_00438764, 9);
-    queueFile = queueFileQueueGetAt(D_004386B8, func_002FCA40());
+    queueFile = fileQueueGetAt(D_004386B8, func_002FCA40());
     func_0020E7B8(D_00438764, queueFile + 0x9C);
 }
 
