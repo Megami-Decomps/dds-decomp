@@ -34,7 +34,18 @@ void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
     func_0027C430(resources->secondWindow);
 }
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00273050);
+extern void func_0027C6A0(s32);
+
+/* Refresh the bullet-item row and report whether the target row still has
+ * remaining item count. */
+s32 func_00273050(s32 arg0, s32 arg1) {
+    u8 *ctx = *(u8 **)(arg1 + 0x90C);
+
+    if (*(u8 *)((arg0 & 0xFFFF) + D_003BAA00 + 0x12A0) == 0) {
+        func_0027C6A0(*(s32 *)(ctx + 8));
+    }
+    return *(u32 *)(*(s32 *)(*(s32 *)(ctx + 8) + 0x14) + 0x20) > 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002730A0);
 
