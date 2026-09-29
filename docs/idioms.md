@@ -128,6 +128,10 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   tests: `if (m < 0xE) { if (m >= 0xC) ... }`.
 - Adjacent independent stores come out roughly reversed. Retail's order
   usually comes from writing the fields in ascending offset order.
+- One shared `jal` with its argument chosen by a branch (`bne; daddu $4,$0`
+  in the slot, then `li $4,1`) instead of `xori`/`sltiu` comes from a
+  `return` in both arms, which cross-jumping merges:
+  `if (g() == 1) { f(1); return 1; } f(0); return 1;` (`fldSetFlagFromWorld1`).
 
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 

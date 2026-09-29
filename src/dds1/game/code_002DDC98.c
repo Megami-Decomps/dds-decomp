@@ -1,7 +1,8 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 
-extern u32 D_003BDA34;
+extern void *D_003BDA34;
 
 extern u32 D_003BD378;
 
@@ -28,13 +29,24 @@ typedef struct ConsNode {
     /* 0x1C */ u8 *cells;
 } ConsNode;
 
+/* Per-port pad state, D_003F9B00[2] (0x28 bytes each). */
 typedef struct F9B00Entry {
-    /* 0x00 */ u8 unk0[5];
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 pad06[0x1A];
-    /* 0x20 */ u16 unk20;
-    /* 0x22 */ u16 unk22;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ u8 port;
+    /* 0x01 */ u8 slot;
+    /* 0x02 */ u8 state;
+    /* 0x03 */ u8 pad03;
+    /* 0x04 */ u8 mode;
+    /* 0x05 */ u8 requestedMode;
+    /* 0x06 */ u16 buttons;
+    /* 0x08 */ u16 prevButtons;
+    /* 0x0A */ u8 pad0A[2];
+    /* 0x0C */ u32 repeatTime;
+    /* 0x10 */ u8 stick[4];
+    /* 0x14 */ u8 pressure[12];
+    /* 0x20 */ s16 smallMotor;
+    /* 0x22 */ s16 largeMotor;
+    /* 0x24 */ s16 lastActuatorX;
+    /* 0x26 */ s16 lastActuatorY;
 } F9B00Entry;
 
 extern ConsNode *D_003BD3C0;
@@ -46,12 +58,37 @@ extern u128 D_003F9890;
 extern f32 D_003BDA30;
 extern void *func_002CFEB8(s32 size);
 extern u8 D_003F98A0[];
+extern void *D_003BD37C;
+extern void *D_003BD380;
+extern void *D_003BD390;
+extern void *func_002D3288(void *);
+extern void *func_002D32A0(void *);
+extern void *func_002E1428(void *, s64, s64, s64, s32);
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 extern void *sdfAllocPacketAligned(s32);
-extern void *func_002E1428(void *, s64, s64, s64, s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
-extern void func_002DDE88(void *, s32);
 extern s16 D_003BDA24;
+extern s32 D_003BDA20;
+
+typedef struct {
+    u8 pad00[0x40];
+    u16 param0;            /* 0x40 */
+    u16 param1;            /* 0x42 */
+    u32 selectedFlags;     /* 0x44 */
+    u32 nextParam;         /* 0x48 */
+    u32 flags;             /* 0x4C */
+    u8 pad50[0x14];
+    u32 dmaBase;           /* 0x64 */
+    u32 dmaAddrA;          /* 0x68 */
+    u32 dmaAddrB;          /* 0x6C */
+    u32 dmaCountA;         /* 0x70 */
+    u32 dmaCountB;         /* 0x74 */
+    u8 pad78[4];
+    void *dmaEnd;          /* 0x7C */
+    u32 state;             /* 0x80 */
+    u8 pad84[0x0C];
+    u8 *payload;           /* 0x90 */
+} VuWork;
 
 typedef struct VuBlendNode {
     u8 pad00[0x30];
@@ -230,20 +267,31 @@ void sdfVuBuildLookAtBasis(void *arg0, void *arg1, void *arg2) {
 void func_002DDE80(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DDE88);
+void func_002DDE88(VuWork *work, s32 count) {
+    void *end = (u8 *)work + 0x78;
+    if (count < 0x80) {
+        work->dmaCountA = 0x80 - count;
+        work->dmaAddrB = D_003BDA20;
+        work->dmaAddrA = count * 96 + 0x70001000;
+        work->dmaCountB = 0x2000;
+        work->dmaBase = 0x70001000;
+    } else if (count == 0x80) {
+        work->dmaBase = 0x70001000;
+        work->dmaAddrA = D_003BDA20;
+        work->dmaCountA = 0x2000;
+        work->dmaAddrB = 0;
+        work->dmaCountB = 0;
+    } else {
+        work->dmaCountA = 0x80;
+        work->dmaBase = D_003BDA20;
+        work->dmaAddrA = 0x70001000;
+        work->dmaAddrB = D_003BDA20 + count * 96;
+        work->dmaCountB = 0x2000 - count;
+    }
+    work->dmaEnd = end;
+}
 
-typedef struct {
-    u8 pad00[0x40];
-    u16 param0;            /* 0x40 */
-    u16 param1;            /* 0x42 */
-    u32 selectedFlags;     /* 0x44 */
-    u32 nextParam;         /* 0x48 */
-    u32 flags;             /* 0x4C */
-    u8 pad50[0x30];
-    u32 state;             /* 0x80 */
-    u8 pad84[0x0C];
-    u8 *payload;           /* 0x90 */
-} VuWork;
+
 
 void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
     u8 *payload = (u8 *)(params + 4);
@@ -473,7 +521,13 @@ void func_002E11E0(u32 arg0) {
     D_003BDA28 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E11E8);
+void func_002E11E8(u8 *object) {
+    if (D_003BDA2C != (u32)object) {
+        D_003BDA2C = (u32)object;
+        PCP_COPY_VECTOR(&D_003F9890, object + 0x10);
+    }
+}
+
 
 void func_002E1210(f32 arg0) {
     D_003BDA30 = arg0;
@@ -516,7 +570,7 @@ typedef struct SdfDrawPacket {
     u32 command;
     u64 unk10;
     u64 unk18;
-    u64 unk20;
+    u64 smallMotor;
     u64 unk28;
     u64 unk30;
     u64 unk38;
@@ -534,7 +588,7 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 dat
     p->command = 0x50000004;
     p->unk8 = 0;
     p->unk18 = 0xE;
-    p->unk20 = func_002D2478(tex);
+    p->smallMotor = func_002D2478(tex);
     p->unk28 = data + 0x14;
     p->unk30 = func_002D2468(tex);
     p->unk38 = data + 6;
@@ -572,9 +626,73 @@ void *sdfConsAllocateColumnPacket(s32 height) {
     return packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E14D8);
+typedef struct ConsMatrixPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 unk8;
+    u32 command;
+    u8 matrixA[0x40];
+    u8 matrixB[0x40];
+    u8 vecC[0x10];
+    u8 vecD[0x10];
+    u8 vecE[0x10];
+    u32 word0;
+    u32 word4;
+    u32 word8;
+    u32 wordC;
+} ConsMatrixPacket;
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E15D0);
+#define VU0_LOAD_VF10(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(src) : "memory")
+#define VU0_STORE_VF10(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(dst) : "memory")
+
+void func_002E14D8(ConsMatrixPacket *packet, u8 *src, void *matrix) {
+    packet->quadwords = 0xC;
+    packet->command = 0x6C0BC000;
+    packet->unk8 = 0;
+    VU0_LOAD_MATRIX(matrix);
+    VU0_STORE_MATRIX(packet->matrixA);
+    func_002DDD60(src + 0x30);
+    VU0_STORE_MATRIX(packet->matrixB);
+    VU0_LOAD_VF10(src + 0x70);
+    VU0_STORE_VF10(packet->vecC);
+    VU0_LOAD_VF10(src + 0x80);
+    VU0_STORE_VF10(packet->vecD);
+    VU0_LOAD_MATRIX(matrix);
+    func_002DD520();
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder");
+    VU0_STORE_VF10(packet->vecE);
+    VU0_STORE_VF10(src + 0x90);
+    packet->word0 = 0x04000002;
+    packet->word4 = 0x14000000;
+    packet->word8 = 0;
+    packet->wordC = 0;
+}
+
+
+extern u8 D_003983D0[];
+extern u8 D_00398470[];
+extern u8 D_003984B0[];
+extern u8 D_003984F0[];
+
+void func_002E15D0(u8 *node, void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
+    VU0_STORE_MATRIX(D_003984B0);
+    func_002DDD60(node + 0x30);
+    VU0_LOAD_VF10(node + 0x90);
+    VU0_STORE_MATRIX(D_00398470);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        ".set reorder");
+    VU0_STORE_VF10(D_003984F0);
+    memcpy(D_003983D0, node, 0xA0);
+}
+
 
 void func_002E1708(u32 arg0) {
     D_003BD374 = arg0;
@@ -588,7 +706,54 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1718);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1938);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1BF0);
+typedef struct ConsFrustumParams {
+    f32 left;
+    f32 right;
+    f32 nearZ;
+    f32 farZ;
+    s32 mask;
+} ConsFrustumParams;
+
+typedef struct ConsFrustumPacket {
+    u64 unk0;
+    u64 unk8;
+    f32 right;
+    f32 left;
+    f32 mid;
+    f32 scale;
+    u64 smallMotor;
+    u64 unk28;
+    u64 unk30;
+    u64 unk38;
+    u32 unk40;
+    u32 unk44;
+    u32 unk48;
+    u32 unk4C;
+} ConsFrustumPacket;
+
+void func_002E1BF0(ConsFrustumPacket *packet, ConsFrustumParams *params) {
+    f32 right = params->right;
+    f32 left = params->left;
+    f32 nearZ = params->nearZ;
+    f32 farZ = params->farZ;
+    f32 range = farZ - nearZ;
+    s32 mask = params->mask;
+    packet->unk0 = 0x20000004;
+    packet->unk8 = 0x6C03C00013000000ULL;
+    packet->smallMotor = 0x1000000000008001ULL;
+    packet->unk28 = 0xE;
+    packet->unk30 = (u32)mask;
+    packet->unk38 = 0x3D;
+    packet->unk40 = 0x14000014;
+    packet->unk4C = 0;
+    packet->right = right;
+    packet->left = left;
+    packet->unk44 = 0;
+    packet->unk48 = 0;
+    packet->mid = (((right - left) * (farZ + nearZ)) / range + (right + left)) * 0.5f;
+    packet->scale = ((farZ * nearZ) * (left - right)) / range;
+}
+
 
 typedef struct DmaPacketHeader {
     u16 quadwords;
@@ -613,11 +778,65 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) 
     packet->unused1C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1D08);
+extern u8 D_00324350[];
+extern void sdfAppendReferencePacket(s32, void *);
+
+void func_002E1D08(s32 list, DmaPacketHeader *packet) {
+    packet->address = (u32)D_00320630 & 0x0FFFFFFF;
+    packet->quadwords = (D_00324350 - D_00320630) >> 4;
+    packet->tag = 0;
+    packet->command = 0;
+    packet->unused10 = 0;
+    packet->unused18 = 0;
+    packet->unused1C = 0;
+    sdfAppendReferencePacket(list, packet);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1D60);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1EB8);
+extern u64 D_003BD388;
+extern s32 D_003241D8[];
+extern s32 D_00324290[];
+extern s32 D_00324214[];
+extern u8 D_00317C20[];
+extern u8 D_0031BC60[];
+extern void func_002D7810(void);
+extern void sdfRegisterResourceQueueCallbacks(void);
+
+extern void func_002E1D60(void);
+extern void *D_003BD37C;
+extern void *D_003BD380;
+extern u64 D_003BD388;
+extern void *D_003BD390;
+extern s32 D_003241D8[];
+extern s32 D_00324290[];
+extern s32 D_00324214[];
+extern u8 D_00317C20[];
+extern u8 D_0031BC60[];
+extern void *func_002D32A0(void *);
+extern void func_002D7810(void);
+extern void sdfRegisterResourceQueueCallbacks(void);
+
+void func_002E1EB8(void) {
+    s64 value;
+    func_002E1D60();
+    value = func_002D2468(D_003BD380);
+    D_003BD388 = value;
+    D_003241D8[0] = value;
+    D_003241D8[1] = value >> 32;
+    D_003BD37C = func_002D32A0(D_00317C20);
+    value = func_002D2468(D_003BD37C);
+    D_00324290[0] = value;
+    D_00324290[1] = value >> 32;
+    D_003BD390 = func_002D32A0(D_0031BC60);
+    value = func_002D2468(D_003BD390);
+    D_00324214[0] = value;
+    D_00324214[1] = value >> 32;
+    func_002D7810();
+    sdfRegisterResourceQueueCallbacks();
+}
+
 
 extern u8 D_00398580[];
 extern void sdfAppendReferencePacket(s32, void *);
@@ -715,28 +934,238 @@ u32 func_002E3368(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3390);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E35C8);
+extern u8 D_00398620[];
+extern s32 func_002F2280(s32 port, s32 slot);
+extern s32 func_002F2200(s32 port, s32 slot, void *data);
+extern s32 func_002F2398(s32 port, s32 slot);
+extern s32 func_002F2420(s32 port, s32 slot, s32 actNo, s32 term);
+extern s32 func_002F2850(s32 port, s32 slot, void *actData);
+extern s32 scePadSetMainMode(s32 port, s32 slot, s32 offs, s32 lock);
+extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3970);
+void func_002E35C8(F9B00Entry *entry) {
+    u8 data[0x20];
+    u8 act[6];
+    s32 port = entry->port;
+    s32 slot = entry->slot;
+    s32 padState;
+    s32 hasButtons;
+    s32 hasAnalog;
+    s32 hasPressure;
+    s32 result;
+    s32 mode;
+    s32 small;
+    s32 large;
+    data[0] = -1;
+    padState = func_002F2280(port, slot);
+    switch (entry->state) {
+    case 0:
+        if (padState == 2 || padState == 6) {
+            entry->lastActuatorX = -1;
+            entry->lastActuatorY = -1;
+            mode = entry->mode = entry->requestedMode;
+            switch (mode) {
+            case 0:
+                entry->state = 3;
+                break;
+            case 1:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 0, 0) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            case 2:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 0, 3) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            case 3:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 1, 3) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            }
+        }
+        break;
+    case 1:
+        if (padState == 6) {
+            entry->state = 3;
+        } else if (padState != 5) {
+            entry->state = 0;
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        if (func_002F2420(port, slot, -1, 0) != 0) {
+            if (scePadSetActAlign(port, slot, D_00398620) != 0) {
+                entry->state = 4;
+            }
+        } else {
+            entry->state = 5;
+        }
+        break;
+    case 4:
+        result = func_002F2398(port, slot);
+        if (result != 0) {
+            if (result == 1) {
+                entry->state = 3;
+            }
+        } else {
+            entry->state = 5;
+        }
+        break;
+    case 5:
+        if (padState != 2 && padState != 6) {
+            entry->state = 0;
+        } else if (entry->mode != entry->requestedMode) {
+            entry->state = 0;
+        } else {
+            func_002F2200(port, slot, data);
+            small = entry->smallMotor;
+            large = entry->largeMotor;
+            if (small != entry->lastActuatorX || large != entry->lastActuatorY) {
+                entry->lastActuatorX = small;
+                entry->lastActuatorY = large;
+                act[0] = small;
+                act[1] = large;
+                func_002F2850(port, slot, act);
+            }
+        }
+        break;
+    }
+    hasAnalog = 0;
+    hasPressure = 0;
+    hasButtons = 0;
+    if (data[0] == 0) {
+        switch (data[1]) {
+        case 0x41:
+            hasButtons = 1;
+            break;
+        case 0x73:
+            hasButtons = 1;
+            hasAnalog = 1;
+            break;
+        case 0x79:
+            hasButtons = 1;
+            hasAnalog = 1;
+            hasPressure = 1;
+            break;
+        }
+    }
+    if (hasButtons) {
+        memset(entry->pressure, 0, 12);
+        entry->buttons = ~(data[3] | (data[2] << 8));
+    } else {
+        entry->buttons = 0;
+    }
+    if (hasAnalog) {
+        entry->stick[0] = data[4];
+        entry->stick[1] = data[5];
+        entry->stick[2] = data[6];
+        entry->stick[3] = data[7];
+    } else {
+        entry->stick[0] = 0x80;
+        entry->stick[1] = 0x80;
+        entry->stick[2] = 0x80;
+        entry->stick[3] = 0x80;
+    }
+    if (hasPressure) {
+        memcpy(entry->pressure, &data[8], 12);
+    } else {
+        memset(entry->pressure, 0, 12);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E39C8);
+
+extern void func_002E35C8(F9B00Entry *entry);
+
+void func_002E3970(void) {
+    s32 i;
+    for (i = 0; i != 2; i++) {
+        func_002E35C8(&D_003F9B00[i]);
+    }
+}
+
+
+
+extern s32 D_003BD2D8;
+extern u16 D_003BD3A0[4];
+extern u8 D_003BD3A8[8];
+extern u16 D_00398600[16];
+extern u8 D_00398628[0x20];
+extern u8 D_00398648[0x18];
+
+void func_002E39C8(void) {
+    s32 now = D_003BD2D8;
+    s32 i;
+    s32 bit;
+    for (i = 0; i != 2; i++) {
+        F9B00Entry *entry = &D_003F9B00[i];
+        s32 buttons = entry->buttons;
+        s32 prev = entry->prevButtons;
+        s32 pressed;
+        s32 repeat;
+        D_003BD3A0[i] = buttons;
+        entry->prevButtons = buttons;
+        pressed = (buttons ^ prev) & buttons;
+        if (buttons != prev) {
+            entry->repeatTime = now + 15;
+            repeat = pressed;
+        } else {
+            repeat = 0;
+            if (buttons != 0) {
+                s32 late = now - entry->repeatTime;
+                if (late >= 0) {
+                    repeat = buttons;
+                    entry->repeatTime = now + late + 4;
+                }
+            }
+        }
+        for (bit = 0; bit != 16; bit++) {
+            s32 mask = D_00398600[bit];
+            s32 state = (buttons & mask) != 0;
+            if (repeat & mask) {
+                state |= 2;
+            }
+            if (pressed & mask) {
+                state |= 0x80;
+            }
+            D_00398628[i * 0x10 + bit] = state;
+        }
+        memcpy(&D_003BD3A8[i * 4], entry->stick, 4);
+        memcpy(&D_00398648[i * 12], entry->pressure, 12);
+    }
+}
+
 
 void func_002E3B40(s32 arg0, u8 arg1) {
-    D_003F9B00[arg0].unk5 = arg1;
+    D_003F9B00[arg0].requestedMode = arg1;
 }
 
 void func_002E3B60(s32 arg0, u16 arg1) {
-    D_003F9B00[arg0].unk20 = arg1;
+    D_003F9B00[arg0].smallMotor = arg1;
 }
 
 void func_002E3B80(s32 arg0, u8 arg1) {
-    D_003F9B00[arg0].unk22 = arg1;
+    D_003F9B00[arg0].largeMotor = arg1;
 }
 
 void sdfDevConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
     F9B00Entry *entry = &D_003F9B00[index];
-    entry->unk20 = arg1 & 0xFF;
-    D_003F9B00[index].unk22 = arg2 & 0xFF;
+    entry->smallMotor = arg1 & 0xFF;
+    D_003F9B00[index].largeMotor = arg2 & 0xFF;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3BD8);
@@ -748,7 +1177,7 @@ void sdfDevConsInit(void) {
     }
 }
 
-u32 sdfDevConsGetResourceHandle(void) {
+void *sdfDevConsGetResourceHandle(void) {
     sdfDevConsInit();
     return D_003BDA34;
 }

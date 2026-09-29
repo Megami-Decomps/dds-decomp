@@ -92,6 +92,9 @@ extern void func_002E96D8(s32 arg0);
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 extern s32 dds3GetWorldObject(void);
 extern s32 func_00110A38(s32 arg0);
+extern void *func_00110A48(u64, s32, s32);
+extern s32 func_0013A720(s32, void *);
+extern s32 func_0013A9B0(s32, void *);
 extern void func_001313E0(void);
 extern void dds3InvokeSlot1Handler(s32 arg0, s32 arg1);
 extern void effUpdateNode(u32 arg0);
@@ -1021,7 +1024,24 @@ void mnuInitializeResourceEntries(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001477B8);
+extern void func_0014FB38(s32 handle);
+extern void func_0014FBF0(s32 handle, f32 *pos);
+extern s32 D_003BAF94;
+void func_001477B8(f32 x, f32 y, f32 z) {
+    f32 pos[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    s32 handle;
+
+    handle = D_0034C8B0[D_003BAF94];
+    if (handle != 0) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        func_0014FB38(handle);
+        func_0014FBF0(D_0034C8B0[D_003BAF94], pos);
+        D_0034C8C0[D_003BAF94] = 1;
+        D_003BAF94 = (D_003BAF94 + 1) % 4;
+    }
+}
 
 
 void func_00147898(f32 arg0, f32 arg1, f32 arg2) {
@@ -1473,9 +1493,6 @@ void func_0014B4D0(void) {
     D_003BAFDC = 0;
 }
 
-extern void func_0014FB38(s32 handle);
-extern void func_0014FBF0(s32 handle, f32 *pos);
-
 void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
     f32 pos[4];
 
@@ -1762,14 +1779,114 @@ s32 func_0014D100(void) {
     return *(s16 *)((u8 *)D_003D62A4[0] + 0xC);
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D110);
+s32 func_0014D110(void) {
+    s32 world = dds3GetWorldObject();
+    s32 unit = func_00110A38(world);
+    void *entry;
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D1E8);
+    if (unit == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    entry = func_00110A48(world, fldFindTaskRecordId(*(s32 *)(func_0010D6A0() + 0xE4)), 0x11);
+    if (entry == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    if (func_0013A720(unit, entry) == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    func_001411C0(func_0010D428(0));
+    func_00141190(1);
+    result = func_001411F0();
+    switch (result) {
+    case 1:
+        func_0010D5F0(1);
+        return 1;
+    case -1:
+        func_0010D5F0(-1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
+
+s32 func_0014D1E8(void) {
+    s32 world = dds3GetWorldObject();
+    s32 unit = func_00110A38(world);
+    void *entry;
+    s32 result;
+
+    if (unit == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    entry = func_00110A48(world, fldFindTaskRecordId(*(s32 *)(func_0010D6A0() + 0xE4)), 0x11);
+    if (entry == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    if (func_0013A9B0(unit, entry) == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    func_001411C0(func_0010D428(0));
+    func_00141190(1);
+    result = func_001411F0();
+    switch (result) {
+    case 1:
+        func_0010D5F0(1);
+        return 1;
+    case -1:
+        func_0010D5F0(-1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D2C0);
+s32 func_0014D2C0(void) {
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D320);
+    func_001411C0(func_0010D428(0));
+    func_00141190(1);
+    result = func_001411F0();
+    if (result == -1) {
+        func_0010D5F0(-1);
+        return 1;
+    }
+    if (result == 1) {
+        func_0010D5F0(1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
+
+s32 func_0014D320(void) {
+    s32 world = dds3GetWorldObject();
+    s32 unit = func_00110A38(world);
+    void *entry;
+
+    if (unit == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    entry = func_00110A48(world, fldFindTaskRecordId(*(s32 *)(func_0010D6A0() + 0xE4)), 0x11);
+    if (entry == 0) {
+        func_0010D5F0(0);
+        return 1;
+    }
+    if (func_0013A720(unit, entry) == 0) {
+        func_0010D5F0(0);
+    } else {
+        func_0010D5F0(1);
+    }
+    return 1;
+}
 
 
 s32 func_0014D3C0(void) {
@@ -1808,7 +1925,6 @@ u32 func_0014D478(void) {
     return 1;
 }
 
-extern void *func_00110A48(s32, s32, s32);
 extern void func_0012DB70(s32 *);
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D498);
 
@@ -1889,7 +2005,7 @@ s32 func_0014D8B8(void) {
         D_0032E400[0] = 4;
     } else {
         world = dds3GetWorldObject();
-        handle = (s32)func_00110A48(world, func_0010D428(0), 4);
+        handle = func_00110A48(world, func_0010D428(0), 4);
         if (handle == 0) {
             return 1;
         }
@@ -2188,16 +2304,44 @@ s32 fldCmdSetSceneBitsValue(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld1);
+s32 fldSetFlagFromWorld1(void) {
+    if (func_00123378() == 1) {
+        func_0010D5F0(1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld3);
+s32 fldSetFlagFromWorld3(void) {
+    if (func_00123378() == 3) {
+        func_0010D5F0(1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld4);
+s32 fldSetFlagFromWorld4(void) {
+    if (func_00123378() == 4) {
+        func_0010D5F0(1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldSetFlagFromWorld2);
+s32 fldSetFlagFromWorld2(void) {
+    if (func_00123378() == 2) {
+        func_0010D5F0(1);
+        return 1;
+    }
+    func_0010D5F0(0);
+    return 1;
+}
 
 typedef struct FldSceneParam {
     s32 unk_0;
@@ -2207,7 +2351,28 @@ typedef struct FldSceneParam {
     s32 unk_c;
 } FldSceneParam;
 extern FldSceneParam D_0034C8F0[];
-INCLUDE_ASM(const s32, "game/code_001411F0", fldCmdPushSceneParam);
+s32 fldCmdPushSceneParam(void) {
+    s32 room = fldFindRoomByTask(*(s32 *)(func_0010D6A0() + 0xE4));
+
+    switch (func_0010D428(0)) {
+    case 0:
+        func_0010D5F0(D_0034C8F0[room].unk_0);
+        break;
+    case 1:
+        func_0010D5F0(D_0034C8F0[room].unk_4);
+        break;
+    case 2:
+        func_0010D5F0(D_0034C8F0[room].unk_6);
+        break;
+    case 3:
+        func_0010D5F0(D_0034C8F0[room].unk_8);
+        break;
+    case 4:
+        func_0010D5F0(D_0034C8F0[room].unk_c);
+        break;
+    }
+    return 1;
+}
 
 u32 func_0014EE20(void) {
     s32 temp_v0;
