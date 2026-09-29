@@ -50,10 +50,11 @@ typedef struct EvtDispatchState {
     s16 substate;
 } EvtDispatchState;
 
+/* Wait until both the keyword fade and the dispatch callback are idle. */
 s32 evtIsFadeDispatchIdle(void) {
-    s32 temp_v0 = kwlnFadeIsActive();
+    s32 fading = kwlnFadeIsActive();
 
-    if (temp_v0 != 0) {
+    if (fading != 0) {
         return 0;
     }
     return func_0024DC08() == 0;
@@ -70,6 +71,7 @@ extern s32 func_00244658();
 extern void func_002444D0();
 extern s16 mnuShopHasPendingFlag();
 
+/* Prepare the active menu state and copy the selection into its window. */
 s32 func_00245D08(void) {
     s32 state = func_00101A70();
     s32 window;
@@ -89,11 +91,12 @@ s32 func_00245D08(void) {
     return 1;
 }
 
+/* Advance command phase when the current menu state is phase one. */
 s32 func_00245DA0(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
+    s32 *state = (s32 *)func_00101A70();
 
-    if (temp_v0[43] == 1) {
-        mnuSetCommandPhase((s32)temp_v0, 4);
+    if (state[43] == 1) {
+        mnuSetCommandPhase((s32)state, 4);
     }
     return 1;
 }
@@ -130,21 +133,22 @@ s32 func_00246160(void) {
     return 1;
 }
 
+/* Map actions five and seven to their menu phases, then reset substate. */
 s32 evtSelectStateAction(void) {
-    s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
+    s32 state = func_00101A70();
+    s32 action = ((EvtDispatchState *)state)->action;
 
-    if (temp_v1 == 5) {
-        mnuSetCommandPhase(temp_v0, 3);
-    } else if (temp_v1 == 7) {
-        s32 temp_v2;
+    if (action == 5) {
+        mnuSetCommandPhase(state, 3);
+    } else if (action == 7) {
+        s32 task;
 
-        mnuSetCommandPhase(temp_v0, 9);
-        temp_v2 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
-        *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
-        func_00260570(temp_v2, 10);
+        mnuSetCommandPhase(state, 9);
+        task = *(s32 *)(*(s32 *)(state + 0x70) + 0x14);
+        *(s32 *)(task + 0x2C) = (s32)func_0025F138;
+        func_00260570(task, 10);
     }
-    ((EvtDispatchState *)temp_v0)->substate = 0;
+    ((EvtDispatchState *)state)->substate = 0;
     return 1;
 }
 
@@ -273,23 +277,24 @@ u32 evtResetStateProgressTimer(void) {
     return 1;
 }
 
-s64 evtQueryStateProgress(u64 arg0) {
-    s32 temp_v0 = func_00101A70();
-    s64 temp_v1 = func_00285670(temp_v0 + 8, temp_v0 + 0x54, 0, arg0);
+/* Keep the dispatch query alive for 20 idle ticks before restarting its table. */
+s64 evtQueryStateProgress(u64 argument) {
+    s32 state = func_00101A70();
+    s64 result = func_00285670(state + 8, state + 0x54, 0, argument);
 
-    if (temp_v1 == 0) {
-        if ((((EvtDispatchState *)temp_v0)->dispatchState == 0) && (func_0024DC08() == 0)) {
-            s32 temp_v2 = ((EvtDispatchState *)temp_v0)->progressTicks;
+    if (result == 0) {
+        if ((((EvtDispatchState *)state)->dispatchState == 0) && (func_0024DC08() == 0)) {
+            s32 ticks = ((EvtDispatchState *)state)->progressTicks;
 
-            if ((f32)temp_v2 < 20.0f) {
-                ((EvtDispatchState *)temp_v0)->progressTicks = temp_v2 + 1;
+            if ((f32)ticks < 20.0f) {
+                ((EvtDispatchState *)state)->progressTicks = ticks + 1;
             } else {
-                func_002858E8((s32)&((EvtDispatchState *)temp_v0)->dispatchState, (s32)D_0036AB64);
+                func_002858E8((s32)&((EvtDispatchState *)state)->dispatchState, (s32)D_0036AB64);
             }
         }
-        temp_v1 = 0;
+        result = 0;
     }
-    return temp_v1;
+    return result;
 }
 
 void evtFetchDispatchStart(s32 arg0) {
@@ -408,21 +413,22 @@ s32 evtApplyDispatchModeState(void) {
     return 1;
 }
 
-s64 func_002479F0(u64 arg0) {
-    s32 temp_v0;
-    s64 temp_v1;
-    s32 *piVar3;
+/* After idle dispatch, resume the state table at its saved position. */
+s64 func_002479F0(u64 argument) {
+    s32 state;
+    s64 result;
+    s32 *dispatchState;
 
-    temp_v0 = func_00101A70();
-    piVar3 = (s32 *)(temp_v0 + 0x54);
-    temp_v1 = func_00285670(temp_v0 + 8, piVar3, 0, arg0);
-    if (temp_v1 == 0) {
-        if ((*piVar3 == 0) && (temp_v1 = func_0024DC08(), temp_v1 == 0)) {
-            func_002858F8(piVar3, *(u32 *)(temp_v0 + 0x58));
+    state = func_00101A70();
+    dispatchState = (s32 *)(state + 0x54);
+    result = func_00285670(state + 8, dispatchState, 0, argument);
+    if (result == 0) {
+        if ((*dispatchState == 0) && (result = func_0024DC08(), result == 0)) {
+            func_002858F8(dispatchState, *(u32 *)(state + 0x58));
         }
-        temp_v1 = 0;
+        result = 0;
     }
-    return temp_v1;
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247A78);
@@ -542,6 +548,7 @@ typedef struct FlagSource {
 extern FlagSource D_0036ABB8[];
 extern FlagPair D_0036ABF8[];
 
+/* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
     s32 handle = func_002D03F8(0x140);
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
@@ -562,6 +569,7 @@ s32 mnuCreateFlagEntries(void) {
     return handle;
 }
 
+/* Restore only those flags that were enabled in the saved snapshot. */
 void mnuApplyFlagEntries(s32 handle) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;

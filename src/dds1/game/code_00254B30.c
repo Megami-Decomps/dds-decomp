@@ -10,11 +10,12 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00254B30);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-void func_00254C30(s32 x, s32 y, s32 z, s32 value, s32 ctx, s32 param) {
-    s32 unit = *(s32 *)(ctx + 0xC);
+/* Store the selected value in the display unit and open its scaled window. */
+void func_00254C30(s32 x, s32 y, s32 z, s32 value, s32 context, s32 parameter) {
+    s32 unit = *(s32 *)(context + 0xC);
 
     **(s32 **)(unit + 0x30) = value;
-    mnuCallInitWide(x << 4, y << 3, z, unit, param);
+    mnuCallInitWide(x << 4, y << 3, z, unit, parameter);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00254C68);
@@ -23,14 +24,15 @@ extern void *memset(void *, s32, u32);
 extern void func_002CD0D8(u32, s32, void *);
 extern void func_002CA858(s32, s32, s32, u32, s32, void *, u32, s32);
 
-void func_00254E48(s32 a, s32 b, s32 c, u32 d, u32 e, s32 f) {
-    u32 tag = d | 0xA09DC300;
-    u32 id = e & 0xFFFF;
-    u8 buf[0x20];
+/* Fetch an indexed display record and draw it with the requested tag bits. */
+void func_00254E48(s32 x, s32 y, s32 layer, u32 attributes, u32 entry, s32 context) {
+    u32 tag = attributes | 0xA09DC300;
+    u32 id = entry & 0xFFFF;
+    u8 buffer[0x20];
 
-    memset(buf, 0, 0x20);
-    func_002CD0D8(id, 1, buf);
-    func_002CA858(a + 0x35, b + 0x136, c, tag, 4, buf, 0x80000000, f);
+    memset(buffer, 0, 0x20);
+    func_002CD0D8(id, 1, buffer);
+    func_002CA858(x + 0x35, y + 0x136, layer, tag, 4, buffer, 0x80000000, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00254EF0);
@@ -62,45 +64,48 @@ extern void func_0024DAE8(s32);
 extern void func_0024DA58(s32);
 extern void func_0024DAB8(s32);
 
+/* Populate four menu labels from the current selection and scene metadata. */
 void func_00255508(void) {
-    s32 *slot = (s32 *)func_0024FA18();
-    u8 *entry = (u8 *)fldGetSceneMetadataNode();
+    s32 *selection = (s32 *)func_0024FA18();
+    u8 *scene = (u8 *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)slot + 4)]);
-    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)slot + 4)]);
-    func_0024DD90(2, &D_003BAA78[*(u16 *)(entry + 0xC)]);
-    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(entry + 0xC)));
+    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)selection + 4)]);
+    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)selection + 4)]);
+    func_0024DD90(2, &D_003BAA78[*(u16 *)(scene + 0xC)]);
+    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(scene + 0xC)));
     func_0024DD90(3, text);
     func_0024DAE8(0);
     func_0024DA58(0);
     func_0024DAB8(8);
 }
 
+/* Populate the same menu labels, selecting the alternate display signal. */
 void func_002555E8(void) {
-    s32 *slot = (s32 *)func_0024FA18();
-    u8 *entry = (u8 *)fldGetSceneMetadataNode();
+    s32 *selection = (s32 *)func_0024FA18();
+    u8 *scene = (u8 *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)slot + 4)]);
-    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)slot + 4)]);
-    func_0024DD90(2, &D_003BAA78[*(u16 *)(entry + 0xC)]);
-    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(entry + 0xC)));
+    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)selection + 4)]);
+    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)selection + 4)]);
+    func_0024DD90(2, &D_003BAA78[*(u16 *)(scene + 0xC)]);
+    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(scene + 0xC)));
     func_0024DD90(3, text);
     func_0024DAE8(0);
     func_0024DA58(1);
     func_0024DAB8(8);
 }
 
+/* Populate menu labels for the third display signal. */
 void func_002556C8(void) {
-    s32 *slot = (s32 *)func_0024FA18();
-    u8 *entry = (u8 *)fldGetSceneMetadataNode();
+    s32 *selection = (s32 *)func_0024FA18();
+    u8 *scene = (u8 *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)slot + 4)]);
-    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)slot + 4)]);
-    func_0024DD90(2, &D_003BAA78[*(u16 *)(entry + 0xC)]);
-    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(entry + 0xC)));
+    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)selection + 4)]);
+    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)selection + 4)]);
+    func_0024DD90(2, &D_003BAA78[*(u16 *)(scene + 0xC)]);
+    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(scene + 0xC)));
     func_0024DD90(3, text);
     func_0024DA58(2);
 }
@@ -232,6 +237,7 @@ void mnuReleaseDisplayListNodes(DspListHead *head) {
 extern s32 func_00256400(s32);
 extern s32 func_00256540(DspListNode *, s32, s32);
 
+/* Advance the display list's timer and release completed nodes in order. */
 s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
     s32 *counter = &head->frameCount;
     DspListNode *node = head->first;
@@ -246,10 +252,10 @@ s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
         return 1;
     }
     do {
-        s32 hit = func_00256540(node, index, arg2);
+        s32 completed = func_00256540(node, index, arg2);
 
         index++;
-        if (hit != 0) {
+        if (completed != 0) {
             node = mnuFreeDisplayListNodeAndGetNext(node);
             head->first = node;
         } else {

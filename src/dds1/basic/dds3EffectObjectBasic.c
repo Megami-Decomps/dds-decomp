@@ -58,6 +58,7 @@ extern void *billCreateIndexed(s32 arg0, u32 arg1);
 
 extern void *func_00151E60(void *arg);
 
+/* Release the effect's dependent resources before clearing its data handle. */
 void func_00114570(EffectObj *obj) {
     EffectData *data;
 
@@ -81,6 +82,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114A78);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114B18);
 
+/* Resolve the object's billboard and forward its vector and extra argument. */
 void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
@@ -88,6 +90,7 @@ void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
     func_00114B18(handle, vec, extra);
 }
 
+/* Create an indexed billboard of kind one and dispatch it. */
 void func_00114C38(u32 billId, void *vec, s32 extra) {
     void *handle;
 
@@ -95,6 +98,7 @@ void func_00114C38(u32 billId, void *vec, s32 extra) {
     func_00114B18(handle, vec, extra);
 }
 
+/* Create a resource-backed billboard of kind one and dispatch it. */
 void func_00114C80(s32 billId, void *vec, s32 extra) {
     void *handle;
 
@@ -182,6 +186,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158B8);
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158F0);
 
+/* Return the object's scalar parameter as an integer when data is present. */
 s32 effObjGetIntParam(EffectObj *obj) {
     EffectParameters *parameters;
 
