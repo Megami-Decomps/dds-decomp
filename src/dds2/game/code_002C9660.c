@@ -646,7 +646,7 @@ void func_002CA1D8(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CA1F0);
 
-void func_002CA638(void) {
+void fileClearAllSlotFlags(void) {
     fileReqMarkSlotMetadataDirty(D_00437CD0);
     fileReqClearSlotFlags(D_00437CD0, 0);
     fileReqClearSlotFlags(D_00437CD0, 1);
@@ -787,7 +787,7 @@ s32 func_002CAB80(void) {
 }
 
 void *func_002CABC0(void) {
-    func_002CA638();
+    fileClearAllSlotFlags();
     func_002CA1D8(0);
     D_00437D3C = 1;
     D_00437D40 = 0;
@@ -796,7 +796,7 @@ void *func_002CABC0(void) {
 }
 
 void *fileResetSelection(void) {
-    func_002CA638();
+    fileClearAllSlotFlags();
     D_00458080[0] = 0;
     D_00458080[1] = 0;
     D_00458080[2] = 0;
@@ -818,7 +818,7 @@ extern void func_001027D8(s32, const s32 *, s32, s32);
 extern void func_002D09C8(void);
 
 
-u32 func_002CAC80(void) {
+u32 fileAbortSlotFlow(void) {
     func_002CA1D8(0);
     D_00437CF8 = 0;
     D_00437CF4 = 0;
@@ -849,7 +849,7 @@ void *mcdEnterSelectedFileFlow(void) {
 }
 
 void func_002CAD60(void) {
-    func_002CA638();
+    fileClearAllSlotFlags();
     func_002CA1D8(1);
     D_00437D3C = 0;
     D_00437CF8 = 0;
@@ -889,7 +889,7 @@ void func_002CAE58(void) {
         mcdEnterSelectedFileFlow();
     } else {
         func_002CA1D8(0);
-        fileBeginWait(&func_002CAC80);
+        fileBeginWait(&fileAbortSlotFlow);
     }
 }
 
@@ -1418,7 +1418,7 @@ s32 mnuSelectFileBranch(void) {
         return func_002CEE70(func_002CAA90, fileResetSelection, 1);
     }
     D_00437D1C = 7;
-    return func_002CEE70(func_002CAC80, fileResetSelection, 1);
+    return func_002CEE70(fileAbortSlotFlow, fileResetSelection, 1);
 }
 
 void *fileBeginSlotCreate(void) {
@@ -1546,7 +1546,7 @@ void func_002CE1A8(void) {
     D_00437D20 = 0;
     D_00437D44 = 0;
     D_00437D48 = 0;
-    func_002CA638();
+    fileClearAllSlotFlags();
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CE208);
