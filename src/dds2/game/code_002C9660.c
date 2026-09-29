@@ -361,8 +361,8 @@ typedef struct FileQueue {
     u8 unk0[0x80];
     s32 count;
     u32 unk84;
-    FileJob *head;
-    FileJob *tail;
+    FileJob *last;   /* 0x88: append end */
+    FileJob *first;  /* 0x8C: traversal start */
 } FileQueue;
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);
@@ -1838,14 +1838,14 @@ void func_002D3F80(u32 arg0) {
 
 void fileQueueAppend(FileQueue *queue, FileJob *job) {
     job->next = NULL;
-    if (queue->head != NULL) {
-        queue->head->next = job;
-        job->prev = queue->head;
+    if (queue->last != NULL) {
+        queue->last->next = job;
+        job->prev = queue->last;
     } else {
-        queue->tail = job;
+        queue->first = job;
         job->prev = NULL;
     }
-    queue->head = job;
+    queue->last = job;
     queue->count++;
 }
 
@@ -1855,7 +1855,7 @@ void fileQueueInsertAfter(FileQueue *queue, FileJob *after, FileJob *job) {
         job->next = after->next;
     } else {
         job->next = NULL;
-        queue->head = job;
+        queue->last = job;
     }
     after->next = job;
     job->prev = after;
@@ -1866,12 +1866,12 @@ void fileQueueRemove(FileQueue *queue, FileJob *job) {
     if (job->prev != NULL) {
         job->prev->next = job->next;
     } else {
-        queue->tail = job->next;
+        queue->first = job->next;
     }
     if (job->next != NULL) {
         job->next->prev = job->prev;
     } else {
-        queue->head = job->prev;
+        queue->last = job->prev;
     }
     queue->count--;
 }
@@ -1915,7 +1915,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
     *(f32 *)((u8 *)queue + 0x74) = *(f32 *)((u8 *)source + 0x74);
     *(u32 *)((u8 *)queue + 0x68) = *(u32 *)((u8 *)source + 0x68);
-    for (src = source->tail; src != NULL; src = src->next) {
+    for (src = source->first; src != NULL; src = src->next) {
         FileJob *job = fileJobCreate();
         job->id = (u32)fileJobCreateChild((FileJob *)src->id);
         fileJobCopyHeader(job, src);
@@ -2005,7 +2005,7 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D55B0);
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5AA8);
 
 FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if (job->id == id) {
             return job;
@@ -2016,7 +2016,7 @@ FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
 }
 
 FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if ((job->flags & 1) != 0 && job->id == id) {
             return job;
@@ -2027,7 +2027,7 @@ FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id) {
 }
 
 FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if ((job->flags & 3) == 2 && job->sector == sector) {
             return job;
@@ -2038,7 +2038,7 @@ FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector) {
 }
 
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if (index-- == 0) {
             return job;
@@ -2049,7 +2049,7 @@ FileJob *fileQueueGetAt(FileQueue *queue, s32 index) {
 }
 
 s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     s32 index = 0;
     while (job != NULL) {
         if (job == target) {
@@ -2066,7 +2066,7 @@ s32 func_002D5D90(FileQueue *queue) {
     s32 count;
 
     count = 0;
-    for (job = queue->tail; job != 0; job = job->next) {
+    for (job = queue->first; job != 0; job = job->next) {
         count = count + 1;
     }
     return count;

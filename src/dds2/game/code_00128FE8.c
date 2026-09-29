@@ -253,10 +253,10 @@ typedef struct {
     s32 unk10;
     s32 unk14;
     s32 unk18;
-    s32 unk1C;
-    s32 unk20;
+    s32 x;          /* 0x1C: quad origin X */
+    s32 y;          /* 0x20: quad origin Y */
     s32 unk24;
-    s32 unk28;
+    s32 packetList; /* 0x28 */
 } FldQuadState; /* 0x2C bytes */
 
 typedef struct {
@@ -1140,7 +1140,7 @@ void func_0012DDC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
 }
 
 void func_0012DE10(FldQuadState *quad) {
-    quad->unk20 = quad->unk20 + 0x60;
+    quad->y = quad->y + 0x60;
 }
 
 void func_0012DE20(FldQuadState *quad) {
@@ -1148,10 +1148,10 @@ void func_0012DE20(FldQuadState *quad) {
     u32 temp_v1;
 
     temp_v1 = func_0011F218();
-    quad->unk28 = temp_v1;
+    quad->packetList = temp_v1;
     temp_v0 = sdfAllocPacketAligned(0x40);
     func_0032E4B8(temp_v0);
-    sdfAppendPacket(quad->unk28, temp_v0);
+    sdfAppendPacket(quad->packetList, temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DE70);
@@ -1160,8 +1160,8 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x73C0;
-    quad.unk20 = 0x7CC0;
+    quad.x = 0x73C0;
+    quad.y = 0x7CC0;
     quad.unk24 = 0x0FFFFF7E;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1171,18 +1171,18 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, 0);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg2));
+    sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, 0);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg2));
     func_0012DE10(&quad);
-    D_00380748.invoke(&D_00380748, quad.unk28);
+    D_00380748.invoke(&D_00380748, quad.packetList);
 }
 
 void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x73C0;
-    quad.unk20 = 0x7CC0;
+    quad.x = 0x73C0;
+    quad.y = 0x7CC0;
     quad.unk24 = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1192,18 +1192,18 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, arg2);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg3));
+    sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, arg2);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg3));
     func_0012DE10(&quad);
-    D_00380708.invoke(&D_00380708, quad.unk28);
+    D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
 void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x7000;
-    quad.unk20 = 0x7900;
+    quad.x = 0x7000;
+    quad.y = 0x7900;
     quad.unk24 = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1213,18 +1213,18 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, D_00436070, arg2));
+    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436070, arg2));
     func_0012DE10(&quad);
-    D_00380708.invoke(&D_00380708, quad.unk28);
+    D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
 void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x7000;
-    quad.unk20 = 0x7900;
+    quad.x = 0x7000;
+    quad.y = 0x7900;
     quad.unk24 = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1234,18 +1234,18 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, D_00436078, arg2));
+    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436078, arg2));
     func_0012DE10(&quad);
-    D_00380708.invoke(&D_00380708, quad.unk28);
+    D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
 void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x7000;
-    quad.unk20 = 0x7900;
+    quad.x = 0x7000;
+    quad.y = 0x7900;
     quad.unk24 = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1255,18 +1255,18 @@ void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg2));
+    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg2));
     func_0012DE10(&quad);
-    D_00380708.invoke(&D_00380708, quad.unk28);
+    D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
 void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x7000;
-    quad.unk20 = 0x7900;
+    quad.x = 0x7000;
+    quad.y = 0x7900;
     quad.unk24 = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1276,18 +1276,18 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, arg2);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg3));
+    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, arg2);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg3));
     func_0012DE10(&quad);
-    D_00380708.invoke(&D_00380708, quad.unk28);
+    D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
 void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.unk1C = 0x7000;
-    quad.unk20 = 0x7900;
+    quad.x = 0x7000;
+    quad.y = 0x7900;
     quad.unk24 = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
@@ -1297,10 +1297,10 @@ void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     func_0012DE20(&quad);
-    sdfPktInit(packet, quad.unk1C + (s32)(x * 16.0f), quad.unk20 + (s32)(y * 8.0f), quad.unk24, arg0);
-    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg1));
+    sdfPktInit(packet, quad.x + (s32)(x * 16.0f), quad.y + (s32)(y * 8.0f), quad.unk24, arg0);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg1));
     func_0012DE10(&quad);
-    D_00380708.invoke(&D_00380708, quad.unk28);
+    D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E720);

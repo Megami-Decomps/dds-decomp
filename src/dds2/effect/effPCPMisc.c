@@ -117,7 +117,7 @@ typedef struct {
  * by resource handles and spawn parameters. Offsets below were recovered
  * from the matched C functions; fields the C code never touches are padding.
  */
-typedef struct {
+typedef struct EffPCPWork {
     u8 pad00[0x10];  /* 0x00 task header */
     u32 unk10;       /* 0x10 resource handle */
     u32 unk14;       /* 0x14 resource handle */
@@ -133,13 +133,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    struct EffPCPWork *nestedWork; /* 0x5C */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    struct EffPCPWork *linkedWork; /* 0x7C */
     u8 pad80[0x10];  /* 0x80 */
     f32 unk90;       /* 0x90 nested work parameter */
     u8 pad94[0x8];   /* 0x94 */
@@ -2986,7 +2986,7 @@ void func_00188778(void *dst, void *src) {
 }
 
 void effPcpNestedWorkSetFloat(EffPCPWork *work, f32 value) {
-    ((EffPCPWork *)work->unk5C)->unk90 = value;
+    work->nestedWork->unk90 = value;
 }
 
 void func_00188798(s32 arg0, u32 arg1) {
@@ -3009,7 +3009,7 @@ void func_001887A0(EffPCPWork *work, void *src) {
         "sqc2 vf30, 0x20(%0)\n"
         "sqc2 vf31, 0x30(%0)\n"
         ".set reorder"
-        : : "r"(&((EffPCPWork *)work->unk5C)->pad3C[4]) : "memory");
+        : : "r"(&work->nestedWork->pad3C[4]) : "memory");
 }
 
 void effRotateNested(EffPCPWork *work, void *src) {
@@ -3030,7 +3030,7 @@ void effRotateNested(EffPCPWork *work, void *src) {
         "sqc2 vf30, 0x20(%0)\n"
         "sqc2 vf31, 0x30(%0)\n"
         ".set reorder"
-        : : "r"((void *)work->unk5C) : "memory");
+        : : "r"((void *)work->nestedWork) : "memory");
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188828);
@@ -3105,7 +3105,7 @@ void func_00188E08(void *dst, void *src) {
 }
 
 void effPcpLinkedWorkSetFloat(EffPCPWork *work, f32 value) {
-    ((EffPCPWork *)work->unk7C)->unk90 = value;
+    work->linkedWork->unk90 = value;
 }
 
 void func_00188E28(s32 arg0, u32 arg1) {
@@ -3128,7 +3128,7 @@ void func_00188E30(EffPCPWork *work, void *src) {
         "sqc2 vf30, 0x20(%0)\n"
         "sqc2 vf31, 0x30(%0)\n"
         ".set reorder"
-        : : "r"(&((EffPCPWork *)work->unk7C)->pad3C[4]) : "memory");
+        : : "r"(&work->linkedWork->pad3C[4]) : "memory");
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E60);
