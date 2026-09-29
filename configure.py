@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import re
 import shlex
 import shutil
@@ -64,6 +65,19 @@ EE_AS_FLAGS = "-EL -G8 -Iinclude"
 def i386_prefix() -> str:
     """cc1/ee-as are 32-bit i386 binaries. Without a system /lib/ld-linux.so.2,
     point DDS_I386_LIBDIR at a directory holding ld-linux.so.2 + libc.so.6."""
+    return no_aslr_prefix() + i386_loader()
+
+
+def no_aslr_prefix() -> str:
+    """ee-gcc 2.96 hashes heap addresses in CSE, so under address-space
+    randomisation a fragile function compiles differently from run to run.
+    Build with a fixed layout (setarch -R) unless DDS_ALLOW_ASLR is set."""
+    if os.environ.get("DDS_ALLOW_ASLR") or not shutil.which("setarch"):
+        return ""
+    return f"setarch {platform.machine()} -R "
+
+
+def i386_loader() -> str:
     # The pinned glibc from tools/download_tools.py comes first: ee-gcc 2.96's
     # output depends on heap layout, so the system libc is only a fallback.
     libdir = os.environ.get("DDS_I386_LIBDIR")
