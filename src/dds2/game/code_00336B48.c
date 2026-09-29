@@ -41,15 +41,6 @@ typedef struct F9B00Entry {
 
 extern F9B00Entry D_00476480[];
 
-extern u8 D_00476280[];
-extern u8 D_00438A88[4];
-extern u8 D_00438A8C;
-extern u8 D_00438A98[8];
-extern u8 D_0040B7D8[];
-extern u8 D_0040B7F8[];
-extern void func_0034AAF8(s32);
-extern s32 scePadPortOpen(s32, s32, void *);
-
 extern void func_0033C478(F9B00Entry *);
 
 extern u32 D_00438AB4;
@@ -85,29 +76,64 @@ extern void sdfSetPacketCursorAligned(s32);
 extern s32 sdfGetPacketCursor(void);
 
 
-extern s16 D_00439184;
+extern u16 D_00439184;
+
+typedef struct VuAsset {
+    u8 pad00[4];
+    u32 unk4;              /* 0x04 */
+    u32 unk8;              /* 0x08 */
+    u32 unkC;              /* 0x0C */
+    u8 pad10[0xC];
+    f32 unk1C;             /* 0x1C */
+    u32 unk20;             /* 0x20 */
+    u32 kind;              /* 0x24 */
+    f32 unk28;             /* 0x28 */
+    f32 unk2C;             /* 0x2C */
+    u8 pad30[8];
+    u64 unk38;             /* 0x38 */
+    u64 unk40;             /* 0x40 */
+    u64 unk48;             /* 0x48 */
+    u64 unk50;             /* 0x50 */
+    u64 unk58;             /* 0x58 */
+    u64 unk60;             /* 0x60 */
+} VuAsset;
 
 typedef struct {
     u8 pad00[0x40];
     u16 param0;            /* 0x40 */
-    u16 param1;            /* 0x42 */
+    s16 param1;            /* 0x42 */
     u32 selectedFlags;     /* 0x44 */
     u32 nextParam;         /* 0x48 */
     u32 flags;             /* 0x4C */
-    u8 pad50[0x14];
+    s16 unk50;             /* 0x50 */
+    u8 pad52[2];
+    VuAsset *asset;        /* 0x54 */
+    u32 unk58;             /* 0x58 */
+    f32 unk5C;             /* 0x5C */
+    f32 unk60;             /* 0x60 */
     u32 ringSrc;           /* 0x64 */
     u32 ringDst;           /* 0x68 */
     u32 ringWrap;          /* 0x6C */
     u32 ringWrapCount;     /* 0x70 */
     u32 ringCount;         /* 0x74 */
-    u8 pad78[4];
+    VuBlendNode *blend;    /* 0x78 */
     u32 ringEnd;           /* 0x7C */
     u32 state;             /* 0x80 */
     u32 header;            /* 0x84 */
     u8 *dataStart;         /* 0x88 */
     u8 *cursor;            /* 0x8C */
     u8 *payload;           /* 0x90 */
+    u8 pad94[0x10];
+    u32 unkA4;             /* 0xA4 */
 } VuWork;
+
+typedef struct VuGeomRef {
+    u128 *a;
+    u128 *b;
+    u128 *c;
+} VuGeomRef;
+
+extern VuGeomRef D_00468210[];
 
 extern void func_00336EC0(void *, u32, void *, u32, u32, f32, f32, f32);
 
@@ -519,11 +545,192 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00337FD8);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003385C0);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00338B30);
+void func_00338B30(work)
+    VuWork *work;
+{
+    s32 remaining = work->unk50;
+    s32 chunk;
+    s32 first;
+    u32 *out;
+    VuGeomRef *ref;
+    VuAsset *asset;
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00338D78);
+    if (remaining != 0) {
+        out = (u32 *)work->cursor;
+        ref = D_00468210;
+        first = 1;
+        do {
+            chunk = remaining < 0x11 ? remaining : 0x10;
+            remaining -= chunk;
+            while (((u32)out & 0xC) != 4) {
+                *out++ = 0;
+            }
+            if (first) {
+                *out++ = 0x6501C000;
+                *out++ = 4;
+                *out++ = ((chunk * 9 + 5) << 16) | 0x6C00C001;
+                asset = work->asset;
+                *(u64 *)out = 0x1000000000000003ULL;
+                out += 2;
+                *(u64 *)out = 0xE;
+                out += 2;
+                first = 0;
+                *(u64 *)out = asset->unk38;
+                out += 2;
+                *(u64 *)out = 0x14;
+                out += 2;
+                *(u64 *)out = asset->unk40;
+                out += 2;
+                *(u64 *)out = 6;
+                out += 2;
+                *(u64 *)out = asset->unk48;
+                out += 2;
+                *(u64 *)out = 8;
+                out += 2;
+            } else {
+                *out++ = 0x6501C000;
+                *out++ = 0;
+                *out++ = ((chunk * 9 + 1) << 16) | 0x6C00C001;
+            }
+            *(u64 *)out = ((u64)(D_00439184 | 3) << 47) | (u64)(chunk * 3) | 0x3000400000008000ULL;
+            out += 2;
+            *(u64 *)out = 0x412;
+            out += 2;
+            do {
+                ((u128 *)out)[0] = ref->a[0];
+                ((u128 *)out)[1] = ref->a[3];
+                ((u128 *)out)[2] = ref->a[2];
+                ((u128 *)out)[3] = ref->b[0];
+                ((u128 *)out)[4] = ref->b[3];
+                ((u128 *)out)[5] = ref->b[2];
+                ((u128 *)out)[6] = ref->c[0];
+                ((u128 *)out)[7] = ref->c[3];
+                ((u128 *)out)[8] = ref->c[2];
+                ref++;
+                out += 36;
+                chunk--;
+            } while (chunk != 0);
+            *out++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = (u8 *)out;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00339000);
+void func_00338D78(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 mask) {
+    s32 remaining = work->unk50;
+    s32 chunk;
+    s32 first;
+    u32 *out;
+    VuGeomRef *ref;
+
+    if (remaining != 0) {
+        out = (u32 *)work->cursor;
+        ref = D_00468210;
+        first = 1;
+        do {
+            chunk = remaining < 0x11 ? remaining : 0x10;
+            remaining -= chunk;
+            while (((u32)out & 0xC) != 4) {
+                *out++ = 0;
+            }
+            if (first) {
+                *out++ = 0x6501C000;
+                *out++ = 6;
+                *out++ = ((chunk * 9 + 7) << 16) | 0x6C00C001;
+                *(u64 *)out = 0x1000000000000005ULL;
+                out += 2;
+                *(u64 *)out = 0xE;
+                out += 2;
+                *(u64 *)out = a;
+                out += 2;
+                *(u64 *)out = 0x15;
+                out += 2;
+                *(u64 *)out = b;
+                out += 2;
+                *(u64 *)out = 7;
+                out += 2;
+                *(u64 *)out = c;
+                out += 2;
+                *(u64 *)out = 9;
+                out += 2;
+                *(u64 *)out = 0x51801;
+                out += 2;
+                *(u64 *)out = 0x48;
+                out += 2;
+                *(u64 *)out = d;
+                out += 2;
+                first = 0;
+                *(u64 *)out = 0x43;
+                out += 2;
+            } else {
+                *out++ = 0x6501C000;
+                *out++ = 0;
+                *out++ = ((chunk * 9 + 1) << 16) | 0x6C00C001;
+            }
+            *(u64 *)out = ((u64)((D_00439184 & ~mask) | 0x203) << 47) | (u64)(chunk * 3) | 0x3000400000008000ULL;
+            out += 2;
+            *(u64 *)out = 0x412;
+            out += 2;
+            do {
+                ((u128 *)out)[0] = ref->a[0];
+                ((u128 *)out)[1] = ref->a[3];
+                ((u128 *)out)[2] = ref->a[2];
+                ((u128 *)out)[3] = ref->b[0];
+                ((u128 *)out)[4] = ref->b[3];
+                ((u128 *)out)[5] = ref->b[2];
+                ((u128 *)out)[6] = ref->c[0];
+                ((u128 *)out)[7] = ref->c[3];
+                ((u128 *)out)[8] = ref->c[2];
+                ref++;
+                out += 36;
+                chunk--;
+            } while (chunk != 0);
+            *out++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = (u8 *)out;
+    }
+}
+
+void func_00339000(work)
+    VuWork *work;
+{
+    s32 remaining = work->unk50;
+    s32 chunk;
+    u32 *out;
+    VuGeomRef *ref;
+
+    if (remaining != 0) {
+        out = (u32 *)work->cursor;
+        ref = D_00468210;
+        do {
+            chunk = remaining < 0x19 ? remaining : 0x18;
+            remaining -= chunk;
+            while (((u32)out & 0xC) != 4) {
+                *out++ = 0;
+            }
+            *out++ = 0x6501C000;
+            *out++ = 0x10000;
+            *out++ = ((chunk * 6 + 1) << 16) | 0x6C00C001;
+            *(u64 *)out = (u64)(chunk * 3) | ((u64)(D_00439184 | 3) << 47) | 0x2000400000008000ULL;
+            out += 2;
+            *(u64 *)out = 0x41;
+            out += 2;
+            do {
+                ((u128 *)out)[0] = ref->a[0];
+                ((u128 *)out)[1] = ref->a[2];
+                ((u128 *)out)[2] = ref->b[0];
+                ((u128 *)out)[3] = ref->b[2];
+                ((u128 *)out)[4] = ref->c[0];
+                ((u128 *)out)[5] = ref->c[2];
+                ref++;
+                out += 24;
+                chunk--;
+            } while (chunk != 0);
+            *out++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = (u8 *)out;
+    }
+}
 
 void func_00339160(s32 arg0) {
     if ((*(u32 *)(arg0 + 0x44) & 0x10) != 0) {
@@ -554,7 +761,44 @@ void func_00339390(u32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_003393F0);
+extern void func_00337FD8(VuWork *);
+extern void func_00337688(u32, s32);
+extern void func_003385C0(VuWork *);
+
+void func_003393F0(VuWork *work) {
+    u128 saved[3];
+    u32 cursor = sdfGetPacketCursor();
+    u32 base = (cursor + 0x3F) & ~0x3F;
+
+    work->state = cursor;
+    work->header = base + 0x30;
+    work->cursor = work->dataStart = (u8 *)(((base + 0x40) & 0x0FFFFFFF) | 0x30000000);
+    if (work->selectedFlags & 0x4000) {
+        __asm__ volatile(
+            ".set noreorder\n"
+            "sqc2 vf24, 0x0(%0)\n"
+            "sqc2 vf25, 0x10(%0)\n"
+            "sqc2 vf26, 0x20(%0)\n"
+            ".set reorder"
+            : : "r"(saved));
+        func_00337FD8(work);
+        func_00339390((u32)work);
+        func_00336D38(work, work->param1);
+        __asm__ volatile(
+            ".set noreorder\n"
+            "lqc2 vf24, 0x0(%0)\n"
+            "lqc2 vf25, 0x10(%0)\n"
+            "lqc2 vf26, 0x20(%0)\n"
+            ".set reorder"
+            : : "r"(saved));
+        func_00337688(work->ringSrc, work->param1);
+        func_003385C0(work);
+        func_00339390((u32)work);
+    } else {
+        func_00337FD8(work);
+        func_00339390((u32)work);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003394C8);
 
@@ -656,9 +900,70 @@ void *sdfConsAllocateColumnPacket(s32 height) {
     return packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A388);
+typedef struct SdfVuBonePacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 unk8;
+    u32 command;
+    u8 matrixA[0x40]; /* 0x10 */
+    u8 matrixB[0x40]; /* 0x50 */
+    u8 vecA[0x10];    /* 0x90 */
+    u8 vecB[0x10];    /* 0xA0 */
+    u8 vecC[0x10];    /* 0xB0 */
+    u32 unkC0;
+    u32 unkC4;
+    u32 unkC8;
+    u32 unkCC;
+} SdfVuBonePacket;
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A480);
+void func_0033A388(SdfVuBonePacket *packet, u8 *node, void *matrix) {
+    packet->quadwords = 0xC;
+    packet->command = 0x6C0BC000;
+    packet->unk8 = 0;
+    VU0_LOAD_MATRIX(matrix);
+    VU0_STORE_MATRIX(packet->matrixA);
+    func_00336C10(node + 0x30);
+    VU0_STORE_MATRIX(packet->matrixB);
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x70));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecA));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x80));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecB));
+    VU0_LOAD_MATRIX(matrix);
+    func_003363D0();
+    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecC));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x90));
+    packet->unkC4 = 0x14000000;
+    packet->unkC0 = 0x04000002;
+    packet->unkC8 = 0;
+    packet->unkCC = 0;
+}
+
+typedef struct SdfNodeBlock {
+    u32 word[0xA0 / 4];
+} SdfNodeBlock;
+
+extern u8 D_0040B660[];
+extern u8 D_0040B620[];
+extern u8 D_0040B6A0[];
+extern u8 D_0040B580[];
+
+void func_0033A480(u8 *node, void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
+    VU0_STORE_MATRIX(D_0040B660);
+    func_00336C10(node + 0x30);
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x90));
+    VU0_STORE_MATRIX(D_0040B620);
+    __asm__ volatile(
+        ".set noreorder\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        ".set reorder");
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(D_0040B6A0));
+    *(SdfNodeBlock *)D_0040B580 = *(SdfNodeBlock *)node;
+}
 
 void func_0033A5B8(u32 arg0) {
     D_00438A64 = arg0;

@@ -118,7 +118,11 @@ typedef struct FieldSequenceRecord {
 typedef struct FieldStageCoordinate {
     s16 x;
     s16 y;
-    u8 pad04[0xC];
+    f32 originX;
+    f32 originZ;
+    u8 cols;
+    u8 rows;
+    s16 cellSize;
 } FieldStageCoordinate;
 
 extern u32 D_00435F38;
@@ -157,15 +161,15 @@ extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
 
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 
-extern f32 func_001248E8();
+extern f32 func_001248E8(f32, f32, f32, f32);
 
 extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
 extern u8 D_0037F530[];
 
-extern void func_0011F928(u32, u32, u32, u32, u32, u32, u8 *);
+extern void func_0011F928(void *, s32, s64, s64, s64, s64, s8 *);
 
-extern void func_0011FAD8(u32 *arg0, s32 arg1, u8 *arg2);
+extern s32 func_0011FAD8(u32 *, s32, s8 *);
 
 extern s32 fldTestDrawUpdate(void);
 
@@ -387,19 +391,185 @@ void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigSte
     fldStepValueByPad(value, D_0037F530, min, max, step, bigStep);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F928);
-
-void func_0011FAB8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
-    func_0011F928(a, b, c, d, e, f, D_0037F530);
+void func_0011F928(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad) {
+    s64 value;
+    switch (type) {
+    case 1:
+        value = *(u8 *)ptr;
+        break;
+    case 2:
+        value = *(u16 *)ptr;
+        break;
+    case 4:
+        value = *(u32 *)ptr;
+        break;
+    case -1:
+        value = *(s8 *)ptr;
+        break;
+    case -2:
+        value = *(s16 *)ptr;
+        break;
+    case -4:
+        value = *(s32 *)ptr;
+        break;
+    default:
+        return;
+    }
+    if (pad[5] & 0x80) {
+        value += big;
+        if (max < value) {
+            value = min;
+        }
+    } else if (pad[5] & 2) {
+        value += big;
+        if (max < value) {
+            value = max;
+        }
+    } else if (pad[4] & 0x80) {
+        value -= big;
+        if (value < min) {
+            value = max;
+        }
+    } else if (pad[4] & 2) {
+        value -= big;
+        if (value < min) {
+            value = min;
+        }
+    } else if (pad[7] & 0x80) {
+        value += small;
+        if (max < value) {
+            value = min;
+        }
+    } else if (pad[7] & 2) {
+        value += small;
+        if (max < value) {
+            value = max;
+        }
+    } else if (pad[6] & 0x80) {
+        value -= small;
+        if (value < min) {
+            value = max;
+        }
+    } else if (pad[6] & 2) {
+        value -= small;
+        if (value < min) {
+            value = min;
+        }
+    } else {
+        return;
+    }
+    switch (type) {
+    case -1:
+    case 1:
+        *(u8 *)ptr = value;
+        break;
+    case -2:
+    case 2:
+        *(u16 *)ptr = value;
+        break;
+    case -4:
+    case 4:
+        *(u32 *)ptr = value;
+        break;
+    }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_0011FAD8);
+
+void func_0011FAB8(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
+    func_0011F928(ptr, type, min, max, step, bigStep, (s8 *)D_0037F530);
+}
+
+s32 func_0011FAD8(u32 *color, s32 channel, s8 *pad) {
+    s32 old = *color;
+    s32 byte = old;
+    s32 value;
+    switch (channel) {
+    case 0:
+        break;
+    case 1:
+        byte = old >> 8;
+        break;
+    case 2:
+        byte = old >> 16;
+        break;
+    case 3:
+        byte = old >> 24;
+        break;
+    }
+    byte &= 0xFF;
+    if (((pad[5] & 0x80) || (pad[7] & 0x80)) && byte == 0xFF) {
+        byte = 0;
+    } else if (pad[5] & 2) {
+        byte += 10;
+        if (byte >= 0x100) {
+            byte = 0xFF;
+        }
+    } else if (((pad[4] & 0x80) || (pad[6] & 0x80)) && byte == 0) {
+        byte = 0xFF;
+    } else if (pad[4] & 2) {
+        byte -= 10;
+        if (byte < 0) {
+            byte = 0;
+        }
+    } else if (pad[7] & 2) {
+        byte += 1;
+        if (byte >= 0x100) {
+            byte = 0xFF;
+        }
+    } else if (pad[6] & 2) {
+        byte -= 1;
+        if (byte < 0) {
+            byte = 0;
+        }
+    } else {
+        return 0;
+    }
+    switch (channel) {
+    case 0:
+        value = (old & 0xFFFFFF00) | byte;
+        break;
+    case 1:
+        value = (old & 0xFFFF00FF) | (byte << 8);
+        break;
+    case 2:
+        value = (old & 0xFF00FFFF) | (byte << 16);
+        break;
+    default:
+        value = (old & 0x00FFFFFF) | (byte << 24);
+        break;
+    }
+    *color = value;
+    return value != old;
+}
+
 
 void func_0011FC68(u32 *arg0, s32 arg1) {
-    func_0011FAD8(arg0, arg1, D_0037F530);
+    func_0011FAD8(arg0, arg1, (s8 *)D_0037F530);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_0011FC88);
+void func_0011FC88(f32 value, char *out) {
+    s32 whole;
+    s32 tenths;
+    s32 hundredths;
+    value += 0.005f;
+    whole = (s32)value;
+    if (whole >= 10) {
+        tenths = 9;
+        hundredths = 9;
+    } else {
+        value -= whole;
+        value *= 10.0f;
+        tenths = (s32)value;
+        value -= tenths;
+        hundredths = (s32)(value * 10.0f);
+    }
+    out[0] = whole + '0';
+    out[1] = '.';
+    out[2] = tenths + '0';
+    out[3] = hundredths + '0';
+    out[4] = 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_0011FD18);
 
@@ -731,7 +901,33 @@ u8 func_00123690(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldActivateFlaggedObject);
+typedef struct FieldActivationRecord {
+    s32 kind;
+    s16 parameter;
+    u8 pad06[0xA];
+} FieldActivationRecord;
+
+extern FieldActivationRecord D_003A8EB0[];
+extern void fldActivateObjectById(s32);
+extern void func_0011C6A0(s32);
+
+#define FIELD_ACTIVATION_FLAGS_OFFSET 0x110D0
+
+void fldActivateFlaggedObject(s32 flagIndex) {
+    s32 byteOffset = (flagIndex >> 3) + FIELD_ACTIVATION_FLAGS_OFFSET;
+    u8 *byte = (u8 *)(D_00435DD0 + byteOffset);
+    FieldActivationRecord *entry;
+    *byte |= 1 << (flagIndex & 7);
+    fldActivateObjectById(flagIndex);
+    if ((u32)(flagIndex - 0xF0) < 16) {
+        mdlFlagSet(flagIndex + 0x610);
+    }
+    entry = (FieldActivationRecord *)(flagIndex * 16 + (s32)D_003A8EB0);
+    if (entry->kind == 2) {
+        func_0011C6A0(entry->parameter);
+    }
+}
+
 
 u8 fldTestObjectActivationFlag(u32 arg0) {
     return (*(u8 *)(((s32)arg0 >> 3) + D_00435DD0 + 0x110d0) >> (arg0 & 7)) & 1;
@@ -817,7 +1013,24 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
     return index;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001239A8);
+extern u32 D_003899F0[];
+
+u32 func_001239A8(s32 x, s32 y) {
+    FieldStageCoordinate *table = (FieldStageCoordinate *)D_00389170;
+    s32 sum = 0;
+    s32 i = 0;
+    do {
+        if (table[i].x == x) {
+            if (table[i].y == y) {
+                return D_003899F0[x] + sum;
+            }
+            sum += table[i].rows;
+        }
+        i++;
+    } while (i < 0x280);
+    return 0;
+}
+
 
 s16 *fldFindStageCoordinateRecord(s32 x, s32 y) {
     FieldStageCoordinate *record = (FieldStageCoordinate *)D_00389170;
@@ -869,12 +1082,61 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CF0);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001244A8);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124720);
+extern f32 fldAngleDifference(f32, f32);
+
+f32 func_00124720(f32 angle) {
+    f32 best;
+    s32 index;
+    f32 diff;
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    best = 900.0f;
+    index = -1;
+    diff = fabsf(fldAngleDifference(0.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 0;
+    }
+    diff = fabsf(fldAngleDifference(90.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 2;
+    }
+    diff = fabsf(fldAngleDifference(180.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 4;
+    }
+    diff = fabsf(fldAngleDifference(270.0f, angle));
+    if (diff < best) {
+        index = 6;
+    }
+    switch (index) {
+    case 0:
+        angle = 0.0f;
+        break;
+    case 2:
+        angle = 90.0f;
+        break;
+    case 4:
+        angle = 180.0f;
+        break;
+    case 6:
+        angle = 270.0f;
+        break;
+    }
+    return angle;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001248E8);
 
-f32 func_001249B8(void) {
-    s32 angle = (s32)(360.0f - func_001248E8() + 90.0f);
+f32 func_001249B8(f32 ax, f32 ay, f32 bx, f32 by) {
+    s32 angle = (s32)(360.0f - func_001248E8(ax, ay, bx, by) + 90.0f);
     return (f32)(angle % 360);
 }
 
@@ -1026,7 +1288,31 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
     record->unk_90 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00125080);
+void func_00125080(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+                   s32 code, s32 link, const char *subname) {
+    if (func_00101740(D_00412D50) != NULL) {
+        if (D_00389770[4] == stage) {
+            D_00389770[8] = 1;
+        } else {
+            dds3WorkClear();
+        }
+    }
+    record->unk_30 = 0;
+    record->unk_3c = 0;
+    record->unk_38 = 0;
+    strcpy(record->name, name);
+    record->stage = stage;
+    record->kind = kind;
+    record->enabled = 1;
+    record->mode = 2;
+    record->code = code;
+    record->unk_62 = 0;
+    record->link = link;
+    strcpy(record->detail, subname);
+    memset(record->note, 0, sizeof(record->note));
+    record->unk_90 = 0;
+}
+
 
 void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, const char *subname) {
@@ -1136,7 +1422,39 @@ void fldReleaseResources(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00125E68);
+extern u32 D_00435F10;
+extern u32 D_00435F14;
+extern u32 D_00435F18;
+extern void effObjFetchInnerFirstVec(u32);
+extern void effObjFetchInnerSecondVecNorm(u32);
+
+void func_00125E68(void) {
+    u32 *buffer;
+    if (D_00435F0C != 0) {
+        if (dds3GetWorldSecondaryObject() != 0) {
+            buffer = D_0038A640;
+            effObjFetchInnerFirstVec(D_00435F0C);
+            __asm__ volatile(
+                ".set noreorder\n"
+                "sqc2 vf10, 0(%0)\n"
+                ".set reorder"
+                : : "r"(buffer) : "memory");
+            effObjFetchInnerSecondVecNorm(D_00435F0C);
+            __asm__ volatile(
+                ".set noreorder\n"
+                "sqc2 vf10, 0(%0)\n"
+                ".set reorder"
+                : : "r"(buffer + 4) : "memory");
+        }
+        D_00435F0C = 0;
+        D_00435F10 = 0;
+        D_00435F14 = 0;
+        D_00435F18 = 0;
+        *func_00125F28() = 0;
+        fldReleaseResources();
+    }
+}
+
 
 void func_00125EE8(void) {
     fldResetTaskSlots();
@@ -1214,9 +1532,35 @@ void func_001266E8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126730);
+extern void mdlFlagClear(s32);
+extern void evtClearSolarOverlayControl(void);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126778);
+void func_00126730(void) {
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~8;
+    D_00389770[3] &= ~1;
+    mdlFlagClear(0x818);
+    evtClearSolarOverlayControl();
+}
+
+
+extern void fldPlayMenuSound(s32);
+extern void func_001360B8(s16, s32);
+
+void func_00126778(void) {
+    u32 value;
+    if (D_00389770[0x4B] != 0) {
+        if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) == 0) {
+            fldPlayMenuSound(0x29);
+        }
+        mdlFlagSet(0x818);
+        value = func_001266E0();
+        ((s16 *)D_00389770)[0x94] = value;
+        ((FldWorkFlags *)D_00435DD0)->fieldFlags |= 8;
+        D_00389770[3] &= ~1;
+        func_001360B8(value, 0);
+    }
+}
+
 
 s32 fldGetSceneCommandState(void) {
     if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
@@ -1228,7 +1572,38 @@ s32 fldGetSceneCommandState(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126840);
+typedef struct FldSceneState {
+    u8 pad00[0xC];
+    s32 flags;               /* 0x0C */
+    u8 pad10[0x118];
+    s16 speed;               /* 0x128 */
+    u8 pad12A[2];
+    s32 commandActive;       /* 0x12C */
+} FldSceneState;
+
+void func_00126840(void) {
+    FldSceneState *scene = (FldSceneState *)D_00389770;
+    u32 value;
+    if (scene->commandActive == 0) {
+        if (scene->speed != 0) {
+            scene->speed = 0;
+            func_001360B8(0, 0);
+        }
+    } else if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
+        if (scene->speed == 0) {
+            value = func_001266E0();
+            scene->speed = value;
+            func_001360B8(value, 0x14);
+        }
+    } else if (scene->speed != 0) {
+        scene->speed = 0;
+        func_001360B8(0, 0x14);
+        fldPlayMenuSound(0x2A);
+        mdlFlagClear(0x818);
+        evtClearSolarOverlayControl();
+    }
+}
+
 
 void func_00126910(void) {
     if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 4) != 0) {
@@ -1237,7 +1612,14 @@ void func_00126910(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126958);
+extern void func_00243320(void);
+
+void func_00126958(void) {
+    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~4;
+    D_00389770[3] &= ~2;
+    func_00243320();
+}
+
 
 void func_00126998(void) {
     ((FldWorkFlags *)D_00435DD0)->fieldFlags |= 4;
