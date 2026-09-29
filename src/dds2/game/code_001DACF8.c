@@ -1095,22 +1095,29 @@ SoundTask *func_001E0760(void *actor, u16 option) {
     return task;
 }
 
-u32 btlAddEpFromPacket(s32 arg0) {
+/* Task payload shared by the experience and money reward callbacks. */
+typedef struct BattleRewardPacket {
+    BtlUnit *actor;
+    s32 amount;
+} BattleRewardPacket;
+
+u32 btlAddEpFromPacket(s32 packetAddress) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
-    if (((s32 *)arg0)[1] == 0) {
+    BattleRewardPacket *packet = (BattleRewardPacket *)packetAddress;
+    if (packet->amount == 0) {
         return 1;
     }
-    if ((*(BtlUnit **)arg0)->flags & 0x400) {
+    if (packet->actor->flags & 0x400) {
         return 1;
     }
-    work->experienceEarned += ((s32 *)arg0)[1];
-    func_0020D128("btl:epall=%d[%d](packet)\n", work->experienceEarned, ((s32 *)arg0)[1]);
+    work->experienceEarned += packet->amount;
+    func_0020D128("btl:epall=%d[%d](packet)\n", work->experienceEarned, packet->amount);
     return 1;
 }
 
 extern u32 btlAddEpFromPacket(s32);
 
-SoundTask *func_001E0858(void *actor, s32 option) {
+SoundTask *func_001E0858(void *actor, s32 amount) {
     SoundTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->status = 0;
@@ -1121,26 +1128,27 @@ SoundTask *func_001E0858(void *actor, s32 option) {
     task->onStart = 0;
     args = func_001E14F8((s32)task);
     args->actor = actor;
-    args->option = option;
+    args->option = amount;
     return task;
 }
 
-u32 btlAddMoneyFromPacket(s32 arg0) {
+u32 btlAddMoneyFromPacket(s32 packetAddress) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
-    if (((s32 *)arg0)[1] == 0) {
+    BattleRewardPacket *packet = (BattleRewardPacket *)packetAddress;
+    if (packet->amount == 0) {
         return 1;
     }
-    if ((*(BtlUnit **)arg0)->flags & 0x400) {
+    if (packet->actor->flags & 0x400) {
         return 1;
     }
-    work->moneyEarned += ((s32 *)arg0)[1];
-    func_0020D128("btl:money=%d[%d](packet)\n", work->moneyEarned, ((s32 *)arg0)[1]);
+    work->moneyEarned += packet->amount;
+    func_0020D128("btl:money=%d[%d](packet)\n", work->moneyEarned, packet->amount);
     return 1;
 }
 
 extern u32 btlAddMoneyFromPacket(s32);
 
-SoundTask *func_001E0950(void *actor, s32 option) {
+SoundTask *func_001E0950(void *actor, s32 amount) {
     SoundTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->status = 0;
@@ -1151,7 +1159,7 @@ SoundTask *func_001E0950(void *actor, s32 option) {
     task->onStart = 0;
     args = func_001E14F8((s32)task);
     args->actor = actor;
-    args->option = option;
+    args->option = amount;
     return task;
 }
 
