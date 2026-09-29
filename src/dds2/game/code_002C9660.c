@@ -1050,22 +1050,7 @@ void *func_002CC038(void) {
     return NULL;
 }
 
-void *func_002CC098(void) {
-    s32 t = func_002C94B0();
-
-    if (t == 0) {
-        return NULL;
-    }
-    if (t == 1) {
-        return mcChooseLoadPath();
-    }
-    if (t == -1) {
-        func_002CA1D8(0);
-        D_00437D3C = 4;
-        return func_002CB5A0;
-    }
-    return NULL;
-}
+INCLUDE_ASM(const s32, "game/code_002C9660", func_002CC098);
 
 void func_002CC0F8(void) {
     func_002C9218(D_00437CD0, D_00437D2C, 1);

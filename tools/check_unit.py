@@ -255,6 +255,16 @@ def main():
                     tables.append(((rodata_hi[0] << 16) + sext(mine & 0xFFFF),
                                    (rodata_hi[1] << 16) + sext(want & 0xFFFF), name))
                 continue
+            if base == ".text" and rtype == "R_MIPS_26":
+                # A call into this unit's own C: the field holds our offset.
+                # Map it to the function there and compare with retail's target.
+                tgt = (mine & 0x3FFFFFF) << 2
+                owner = next(((o, n) for o, s, n in funcs if o <= tgt < o + s), None)
+                where = address(owner[1], syms) if owner else None
+                if where is None or (want & 0x3FFFFFF) != ((where + tgt - owner[0]) >> 2) & 0x3FFFFFF:
+                    diffs.append((i, mine, want, f"{rtype} into {owner[1] if owner else '?'} "
+                                                 "(retail calls a different function)"))
+                continue
             if target is None:
                 continue  # other local section: masked
             addend = mine & 0x3FFFFFF if rtype == "R_MIPS_26" else ((mine & 0xFFFF) ^ 0x8000) - 0x8000
