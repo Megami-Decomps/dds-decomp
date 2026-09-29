@@ -26,4 +26,4 @@ u32 func_00113230(ObjectWithSubstate *object) {
     return object->substate->valueC;
 }
 
-INCLUDE_ASM(const s32, "game/code_00113208", func_00113240);
+INCLUDE_ASM(const s32, "game/code_00113208", dds3SpawnCameraSlotObj5);

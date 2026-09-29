@@ -8,10 +8,10 @@ typedef struct {
     f32 unkCC;    /* 0xCC scaled by func_0015DA80/func_0015F2B0/func_0015EBF8 */
     f32 unkD0;    /* 0xD0 scaled by func_0015DA80/func_0015F2B0 */
     u8 padD4[8];  /* 0xD4 */
-    u32 unkDC;    /* 0xDC handle released by func_0015D9E0/func_0015B918 */
+    u32 unkDC;    /* 0xDC handle released by effPolyDestroyWork/func_0015B918 */
 } PolyNode;
 
-/* Node of four f32s scaled together by func_0015E5A0. */
+/* Node of four f32s scaled together by effPolyScaleFourComponents. */
 typedef struct {
     u8 pad[0xC8]; /* 0x0 */
     f32 unkC8;    /* 0xC8 */
@@ -75,7 +75,7 @@ void func_0015DAA0(void);
 void func_002CFF98(void *arg);
 void func_002D0918(void *arg);
 
-void func_0015D9E0(PolyNode *obj) {
+void effPolyDestroyWork(PolyNode *obj) {
     func_0015B8B8(obj->unkDC);
     func_002CFF98(obj);
 }
@@ -115,7 +115,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015E238);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E3D8);
 
-void func_0015E5A0(f32 scale, PolyQuad *obj) {
+void effPolyScaleFourComponents(f32 scale, PolyQuad *obj) {
     obj->unkC8 = obj->unkC8 * scale;
     obj->unkDC = obj->unkDC * scale;
     obj->unkCC = obj->unkCC * scale;

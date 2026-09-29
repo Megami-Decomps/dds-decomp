@@ -47,7 +47,7 @@ void scrClearProcessGlobals(void)
     }
 }
 
-void func_0010BC18(s32 priority, s32 scriptId, s32 option)
+void scrCreateProcessTaskFromResource(s32 priority, s32 scriptId, s32 option)
 {
     scrProcCreateTask(priority, scrOpenProcessFromResource(scriptId, option));
 }
@@ -57,7 +57,7 @@ s32 scrCreateProcessWithDefaultOption(s32 scriptId)
     return scrOpenProcessFromResource(scriptId, 0);
 }
 
-void func_0010BC68(s32 priority, s32 taskId, s32 option)
+void scrCreateTaskForProcessId(s32 priority, s32 taskId, s32 option)
 {
     scrProcCreateTask(priority, func_0010BA18(taskId, option));
 }

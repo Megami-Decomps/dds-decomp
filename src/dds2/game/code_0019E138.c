@@ -16,7 +16,7 @@ extern u32 D_00436560;
 
 extern u32 D_00436590;
 
-extern s64 func_00101700(u32);
+extern s64 kwlnTaskGetRegisteredState(u32);
 
 /* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
 typedef struct TextSub {
@@ -127,7 +127,7 @@ extern void func_0035B6E0(const char *);
 
 extern char D_00414C50[]; /* "Camp process halted.\n", followed by padding no C emits */
 
-u32 func_0019E138(TextStream *stream) {
+u32 itfReadEncodedTextLead(TextStream *stream) {
     s32 *position = &stream->offset;
     u8 *byte = stream->bytes + *position;
     u32 value = *byte;
@@ -223,7 +223,7 @@ void mnuLoadStaffFonts(void) {
     func_0019BE20(5, "/font/staff2.fnt");
 }
 
-void func_0019F078(void) {
+void mnuUnloadStaffFonts(void) {
     frFontFreeEntry(4);
     frFontFreeEntry(5);
 }
@@ -260,8 +260,8 @@ void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     func_0019D088(temp_v0, 0x10, 0x12);
     func_0019D100(temp_v0, arg0, arg1);
     func_0019D110(temp_v0, arg2 << 4);
-    func_0019D178(temp_v0, arg3);
-    func_0019D058(temp_v0, 0xfffffffffffffffc);
+    frFontSetChildColors(temp_v0, arg3);
+    frFontSetFlagAndMeasureGlyphs(temp_v0, 0xfffffffffffffffc);
     frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
@@ -278,7 +278,7 @@ s32 func_0019F408(arg0, arg1, arg2, arg3, arg4, arg5)
     s32 arg5;
 {
     s32 handle = func_0019F280(arg0, arg1, arg2, arg3, arg4, 1, 0, arg5);
-    func_0019D058(handle, 3);
+    frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
 }
 
@@ -300,10 +300,10 @@ void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
 
     temp_v0 = func_0019CE78(arg4, 0, 0, 0, 0);
     func_0019D088(temp_v0, 0xc, 0x10);
-    func_0019D058(temp_v0, 0xfffffffffffffffd);
+    frFontSetFlagAndMeasureGlyphs(temp_v0, 0xfffffffffffffffd);
     func_0019D100(temp_v0, arg0, arg1);
     func_0019D110(temp_v0, arg2 << 4);
-    func_0019D178(temp_v0, arg3);
+    frFontSetChildColors(temp_v0, arg3);
     frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
@@ -337,7 +337,7 @@ u32 func_001A0060(u32 arg0) {
     return arg0;
 }
 
-void func_001A0068(MemBlock *block, MemOut *segments) {
+void itfSplitRelativeSegments(MemBlock *block, MemOut *segments) {
     s32 firstOffset = block->unk0;
     s32 secondOffset = firstOffset + block->unk4;
     s32 thirdOffset = secondOffset + block->unk18;
@@ -380,7 +380,7 @@ u8 *func_001A01D8(s32 payload, s32 count) {
     return list;
 }
 
-void *func_001A0278(MemNode *queue) {
+void *itfDequeueMemNode(MemNode *queue) {
     MemNode *head = queue->next;
 
     if (head->unk0 == 0) {
@@ -404,7 +404,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     return 1;
 }
 
-u32 func_001A02D0(s32 arg0) {
+u32 itfReleasePayloadAllocation(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 - 4));
     return 1;
 }
@@ -418,7 +418,7 @@ void itfLoadBackgroundSprite(void) {
 }
 
 void func_001A0338(void) {
-    func_0032BB68(D_00438F24);
+    sdfTexReleaseReference(D_00438F24);
 }
 
 extern s32 func_00305C40();
@@ -455,7 +455,7 @@ u32 func_001A0458(void) {
     u32 temp_v1;
 
     func_001A0350();
-    temp_v0 = func_00101700(D_00436590);
+    temp_v0 = kwlnTaskGetRegisteredState(D_00436590);
     temp_v1 = 0xffffffff;
     if (temp_v0 != 3) {
         temp_v1 = 0;
@@ -612,11 +612,11 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0E20);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0F88);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A10B0);
+INCLUDE_ASM(const s32, "game/code_0019E138", itfEmitQuadListWide);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1200);
+INCLUDE_ASM(const s32, "game/code_0019E138", itfEmitQuadListA);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1348);
+INCLUDE_ASM(const s32, "game/code_0019E138", itfEmitQuadListB);
 
 extern void *sdfAllocPacketAligned(s32);
 extern u8 *func_0033A290(void *, s32);
@@ -665,6 +665,8 @@ void mnuReportCampProcessHalted(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
 
+INCLUDE_RODATA(const s32, "game/code_0019E138", D_00414C50);
+
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436580);
 
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436584);
@@ -678,3 +680,4 @@ INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436590);
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436598);
 
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_004365A0);
+

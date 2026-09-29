@@ -33,7 +33,7 @@ extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
 extern void func_00288148(s32);
 extern void func_001F3188(s32);
 extern void func_00217878(s32, s32);
-extern void func_00287A50(s32);
+extern void mnuApplyModelCamera(s32);
 extern void stageTestApplyEntryRotation(s32);
 extern void func_00287C20(void);
 extern void func_00288008(void);
@@ -202,7 +202,7 @@ void *mnuCreatePanelState(s32 width, s32 height) {
     return panel;
 }
 
-void func_00282C70(MenuPanelState *panel) {
+void mnuDestroyPanelState(MenuPanelState *panel) {
     s32 resourceHandle;
 
     resourceHandle = panel->resourceHandle;
@@ -226,7 +226,7 @@ void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
     func_002BFB98(&panel->secondPosition, x, y);
 }
 
-void func_00282CF8(MenuPanelState *panel) {
+void mnuInitializePanelResource(MenuPanelState *panel) {
     u32 resourceHandle;
 
     resourceHandle = func_0027D4A0(2);
@@ -1196,7 +1196,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002877A8);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002878D8);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287998);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuSetModelScaleVector);
 
 void mnuResetWorkPair(void) {
     *(s32 *)(D_0037CE70 + 0) = 0;
@@ -1207,7 +1207,7 @@ void mnuResetWorkPair(void) {
     *(s32 *)(D_0037CE60 + 8) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287A50);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuApplyModelCamera);
 
 void stageTestApplyEntryRotation(s32 arg0) {
     f32 *entry = (f32 *)(D_003DC5E8[6] * 60 + D_003DC5E8[4]);
@@ -1227,7 +1227,7 @@ s8 stageTestUpdate(s32 arg0) {
     }
     if (D_003DC5E8[0] != 1) {
         if (D_003DC5E8[2] != 0) {
-            func_00287A50(D_003DC5E8[2]);
+            mnuApplyModelCamera(D_003DC5E8[2]);
             stageTestApplyEntryRotation(D_003DC5E8[2]);
             func_00287C20();
             if ((s32)D_003DC5E8[27] >= 0) {
@@ -1344,7 +1344,7 @@ void *createBattleStageTestCamera(void) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00288500);
 
 void func_002886A0(void) {
-    func_0021FE38();
+    evtDestroySecondaryWorldNode();
 }
 
 void func_002886B8(void) {

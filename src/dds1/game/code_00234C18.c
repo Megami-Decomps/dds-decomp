@@ -19,21 +19,21 @@ typedef struct {
     u32 value; /* 0x04 */
 } EventContext;
 
-void func_00235088(void) {
+void evtSetContextFlag(void) {
     EventContext *context;
 
     context = (EventContext *)func_00101A70();
     context->flags = context->flags | 1;
 }
 
-void func_002350B0(void) {
+void evtClearContextFlag(void) {
     EventContext *context;
 
     context = (EventContext *)func_00101A70();
     context->flags = context->flags & 0xfffffffe;
 }
 
-void func_002350E0(u32 task) {
+void evtDestroyTaskHierarchy(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
@@ -52,3 +52,4 @@ void func_00235120(EventContext *context, u32 value) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00234C18", D_003BBF78);
+

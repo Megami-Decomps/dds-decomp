@@ -54,7 +54,7 @@ typedef struct MenuSlot19 {
 extern MenuSlot17 *D_003BAA70;
 extern MenuSlot19 *D_003BAA78;
 extern char D_003BC468[];
-extern s32 func_00253608();
+extern s32 fldGetSceneMetadataNode();
 extern void func_0024DD90(s32, void *);
 extern s32 func_0024F800(s32);
 extern void func_003014F0(void *, void *, s32);
@@ -64,7 +64,7 @@ extern void func_0024DAB8(s32);
 
 void func_00255508(void) {
     s32 *slot = (s32 *)func_0024FA18();
-    u8 *entry = (u8 *)func_00253608();
+    u8 *entry = (u8 *)fldGetSceneMetadataNode();
     char text[16];
 
     func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)slot + 4)]);
@@ -79,7 +79,7 @@ void func_00255508(void) {
 
 void func_002555E8(void) {
     s32 *slot = (s32 *)func_0024FA18();
-    u8 *entry = (u8 *)func_00253608();
+    u8 *entry = (u8 *)fldGetSceneMetadataNode();
     char text[16];
 
     func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)slot + 4)]);
@@ -94,7 +94,7 @@ void func_002555E8(void) {
 
 void func_002556C8(void) {
     s32 *slot = (s32 *)func_0024FA18();
-    u8 *entry = (u8 *)func_00253608();
+    u8 *entry = (u8 *)fldGetSceneMetadataNode();
     char text[16];
 
     func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)slot + 4)]);
@@ -198,7 +198,7 @@ DspListNode *mnuAllocateDisplayListNode(void) {
     return node;
 }
 
-DspListNode *func_00256B78(DspListHead *head) {
+DspListNode *mnuAppendDisplayListNode(DspListHead *head) {
     DspListNode *node = head->first;
     if (node == NULL) {
         node = mnuAllocateDisplayListNode();
@@ -213,7 +213,7 @@ DspListNode *func_00256B78(DspListHead *head) {
     return node;
 }
 
-DspListNode *func_00256C00(DspListNode *node) {
+DspListNode *mnuFreeDisplayListNodeAndGetNext(DspListNode *node) {
     DspListNode *next;
 
     next = node->next;
@@ -225,14 +225,14 @@ void mnuReleaseDisplayListNodes(DspListHead *head) {
     DspListNode *node = head->first;
 
     while (node != NULL) {
-        node = func_00256C00(node);
+        node = mnuFreeDisplayListNodeAndGetNext(node);
     }
 }
 
 extern s32 func_00256400(s32);
 extern s32 func_00256540(DspListNode *, s32, s32);
 
-s32 func_00256C58(DspListHead *head, s32 arg1, s32 arg2) {
+s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
     s32 *counter = &head->frameCount;
     DspListNode *node = head->first;
     s32 index = 0;
@@ -250,7 +250,7 @@ s32 func_00256C58(DspListHead *head, s32 arg1, s32 arg2) {
 
         index++;
         if (hit != 0) {
-            node = func_00256C00(node);
+            node = mnuFreeDisplayListNodeAndGetNext(node);
             head->first = node;
         } else {
             node = node->next;

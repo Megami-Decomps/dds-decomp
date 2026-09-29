@@ -30,7 +30,7 @@ typedef struct ResourceList {
 u32 func_00320F68(u32 list, u32 node);
 
 u32 func_00320FD0(u32 list) {
-    u32 node = func_00321170(list);
+    u32 node = mnuFindResourceNodeById(list);
     if (node != 0) {
         return func_00320F68(list, node);
     }
@@ -41,7 +41,7 @@ INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321018);
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321090);
 
-ResourceNode *func_00321130(list, value)
+ResourceNode *mnuFindResourceNodeByValue(list, value)
     ResourceList *list;
     u32 value;
 {
@@ -58,7 +58,7 @@ ResourceNode *func_00321130(list, value)
     return node;
 }
 
-ResourceNode *func_00321170(list, id)
+ResourceNode *mnuFindResourceNodeById(list, id)
     ResourceList *list;
     u32 id;
 {
@@ -75,7 +75,7 @@ ResourceNode *func_00321170(list, id)
     return node;
 }
 
-ResourceNode *func_003211B0(list, handle)
+ResourceNode *mnuFindResourceNodeByHandle(list, handle)
     ResourceList *list;
     u32 handle;
 {

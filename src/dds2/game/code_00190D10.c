@@ -7,7 +7,7 @@ typedef struct MagatuhiEffectOwner {
 
 INCLUDE_ASM(const s32, "game/code_00190D10", func_00190D10);
 
-void func_00190DB0(MagatuhiEffectOwner *effect) {
+void effReleaseMagatuhiOwner(MagatuhiEffectOwner *effect) {
     effMagatuhiReleaseResource(effect->resource);
     func_00328E48(effect);
 }

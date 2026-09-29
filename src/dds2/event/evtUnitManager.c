@@ -35,16 +35,16 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C568);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C5F0);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C750);
+INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitValueTransition);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C7C0);
+INCLUDE_ASM(const s32, "event/evtUnitManager", evtEndUnitValueTransition);
 
 void evtUnitSetValueAndFlag(EventUnit *unit, u32 value) {
     unit->value6C = value;
     unit->flags = unit->flags | 0x20000;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C840);
+INCLUDE_ASM(const s32, "event/evtUnitManager", evtClearUnitValueChangeFlag);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C870);
 
@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CB68);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC00);
 
-s32 func_0023CC48(EventUnit *unit) {
+s32 evtUnitGetNestedValue(EventUnit *unit) {
     if (unit == NULL) {
         return 0;
     }

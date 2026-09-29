@@ -270,7 +270,7 @@ void func_0016A228(PcpFlashWork1 *work, f32 value)
     work->unk3C = value;
 }
 
-void func_0016A230(PcpFlashWork1 *work, s32 index, s32 param)
+void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
 {
     s32 slot;
     s32 rgb1;
@@ -286,7 +286,7 @@ void func_0016A230(PcpFlashWork1 *work, s32 index, s32 param)
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A2D0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A450);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork1);
 
 extern s32 func_002D03F8(s32 size);
 extern void *sdfResourceRetainAddress(s32 allocation);
@@ -328,7 +328,7 @@ void func_0016A8D8(PcpFlashWork2 *work, f32 value)
 
 extern s32 func_0016FF20(s32 handle, s32 index);
 
-void func_0016A8E0(PcpFlashWork2 *work, s32 index, s32 param)
+void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 index, s32 param)
 {
     s32 slot;
     s32 rgb1;
@@ -377,7 +377,7 @@ void effRotateFlashParticlePosition(void *work, s32 index, void *orientation)
     *(f32 *)(part + 0x18) = position[2];
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AD58);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateStreak);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AFF0);
 
@@ -443,7 +443,7 @@ void func_0016B570(PcpFlashWork3 *work, s32 index)
     part->unk10 += work->particleIncrement;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016B598);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork3);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016B800);
 
@@ -615,7 +615,7 @@ void func_0016CC38(PcpFlashWork6 *work, s32 index, s32 param)
 
 extern f32 func_002E8398(void *state);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016CD28);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashSpawnParticle6);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016CE00);
 
@@ -627,7 +627,7 @@ void func_0016CFC0(PcpFlashWork6 *work, s32 index)
     part->unk10 += part->unk08;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016CFE0);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork6);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D2A8);
 
@@ -677,7 +677,7 @@ void func_0016D468(PcpFlashWork7 *work, s32 index, s32 param)
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D508);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D6A0);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork7);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D940);
 
@@ -725,7 +725,7 @@ void func_0016DF90(PcpFlashWork8 *work, s32 index)
     part->unk18 += part->unk08;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DFB0);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork8);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016E290);
 
@@ -791,7 +791,7 @@ void func_0016E820(PcpFlashWork9 *work, s32 index)
     part->unk10 += work->unk48;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016E848);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork9);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016EB00);
 
@@ -841,4 +841,4 @@ void func_0016ECC8(PcpFlashWork10 *work, s32 index, s32 param)
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016ED68);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016EF00);
+INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashUpdateWork10);

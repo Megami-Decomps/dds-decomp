@@ -5,7 +5,7 @@ extern s32 scrGetCommandTimer(void);
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 func_0010D650(s32 idx);
 
-void *func_0023E6D8(s32 type, s32 id);
+void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
 void func_00115F40(void *unit);
 
@@ -33,11 +33,11 @@ void func_00144F08(void);
 
 char *func_0010D7D0(s32 idx);
 
-void func_00124EB8(s32 arg0, s32 arg1, s32 arg2, char *arg3);
+void fldInitializeSequenceAndResetFlags(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 
 extern s32 D_00389780[];
 
-void func_00124FA0(s32 arg0, s32 arg1, s32 arg2, char *arg3);
+void fldInitializeAlternateSequence(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 
 void func_0033DAD8(const char *msg);
 
@@ -45,7 +45,7 @@ void func_0025D390(s32 arg0, s32 arg1);
 
 s32 dds3GetWorldSecondaryObject(void);
 
-s32 func_001110E0(s32 arg0);
+s32 dds3GetWorldObjectValue(s32 arg0);
 
 void func_0023AA30(s32 arg0, s32 arg1);
 
@@ -53,9 +53,9 @@ void func_0010AE38(const char *fmt, ...);
 
 void func_0023A9E0(void);
 
-s32 func_0032CD98(void);
+s32 sdfGraphHasPendingWorkInterruptSafe(void);
 
-void func_0023A9A8(void);
+void evtDestroyWorldSecondaryNode(void);
 
 extern u32 D_00435CD4;
 
@@ -79,13 +79,13 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00240D20);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00240DE0);
 
-s32 func_00240F00(void)
+s32 evtCommandEnablePathUnit(void)
 {
     s32 id;
     void *unit;
 
     id = func_0010D650(0);
-    unit = func_0023E6D8(7, id);
+    unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
         func_0023B078(unit, 1);
         effObjSetFlags(unit, 1);
@@ -103,7 +103,7 @@ s32 func_00241090(void)
     void *unit;
 
     id = func_0010D650(0);
-    unit = func_0023E6D8(7, id);
+    unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit == NULL) {
         return 1;
     }
@@ -117,7 +117,7 @@ s32 func_002410D0(void)
     void *unit;
 
     id = func_0010D650(0);
-    unit = func_0023E6D8(7, id);
+    unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
         func_0023B078(unit, 0);
     }
@@ -192,7 +192,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
     func_0010BFE0();
 }
 
-s32 func_002414F8(void)
+s32 evtCommandSubmitEvent(void)
 {
     s32 p0;
 
@@ -214,7 +214,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
     func_0010BFE0();
 }
 
-s32 func_00241580(void)
+s32 evtCommandSubmitEventImmediate(void)
 {
     s32 p0;
 
@@ -223,7 +223,7 @@ s32 func_00241580(void)
     return 1;
 }
 
-s32 func_002415A8(void)
+s32 evtCommandSubmitEventWithMode(void)
 {
     s32 p0;
     s32 p1;
@@ -245,7 +245,7 @@ s32 func_002415E8(void)
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
     q = func_0010D7D0(2);
-    func_00124EB8((s32)buf, p0, p1, q);
+    fldInitializeSequenceAndResetFlags((s32)buf, p0, p1, q);
     func_001027D8(5, (s32)buf, 0xa0, 0);
     func_0010BFE0();
     return 1;
@@ -259,7 +259,7 @@ s32 func_00241668(void)
 
     p0 = func_0010D650(0);
     q = func_0010D7D0(1);
-    func_00124EB8((s32)buf, D_00389780[0], p0, q);
+    fldInitializeSequenceAndResetFlags((s32)buf, D_00389780[0], p0, q);
     func_001027D8(5, (s32)buf, 0xa0, 0);
     func_0010BFE0();
     return 1;
@@ -282,13 +282,13 @@ s32 func_00241708(void)
 
     p0 = func_0010D650(0);
     q = func_0010D7D0(1);
-    func_00124FA0((s32)buf, D_00389780[0], p0, q);
+    fldInitializeAlternateSequence((s32)buf, D_00389780[0], p0, q);
     func_001027D8(5, (s32)buf, 0xa0, 0);
     func_0010BFE0();
     return 1;
 }
 
-s32 func_00241770(void)
+s32 evtCommandDispatchFieldBE(void)
 {
     s32 p0;
     s32 p1;
@@ -310,7 +310,7 @@ s32 func_002417C8(void)
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
     combined = (p0 << 16) + p1;
-    if (func_001110E0(dds3GetWorldSecondaryObject()) != combined) {
+    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != combined) {
         p0 = func_0010D650(0);
         p1 = func_0010D650(1);
         func_0023AA30(p0, p1);
@@ -337,10 +337,10 @@ u32 func_00241868(void) {
 s32 evtCommandShutdownStage(void)
 {
     func_0023A9E0();
-    while (func_0032CD98()) {
+    while (sdfGraphHasPendingWorkInterruptSafe()) {
     }
-    func_0023A9A8();
-    while (func_0032CD98()) {
+    evtDestroyWorldSecondaryNode();
+    while (sdfGraphHasPendingWorkInterruptSafe()) {
     }
     D_00435CD4 |= 0x2000000;
     func_0035B6E0("event stage shutdown !!\n");
@@ -351,10 +351,10 @@ s32 evtCommandShutdownStage(void)
 s32 evtCommandShutdownStageAlternate(void)
 {
     func_0023A9E0();
-    while (func_0032CD98()) {
+    while (sdfGraphHasPendingWorkInterruptSafe()) {
     }
-    func_0023A9A8();
-    while (func_0032CD98()) {
+    evtDestroyWorldSecondaryNode();
+    while (sdfGraphHasPendingWorkInterruptSafe()) {
     }
     D_00435CD4 |= 0x2000000;
     func_0035B6E0("event stage shutdown2 !!\n");
@@ -373,7 +373,7 @@ s32 evtCommandClearAllUnits(void)
 s32 func_002419B0(void)
 {
     func_0023A9E0();
-    while (func_0032CD98()) {
+    while (sdfGraphHasPendingWorkInterruptSafe()) {
     }
     func_0035B6E0("unit all clear2 !!\n");
     func_0010AE38("unit all clear2.\n");
@@ -396,7 +396,7 @@ s32 func_00241CB0(void)
     void *unit;
 
     id = func_0010D650(0);
-    unit = func_0023E6D8(4, id);
+    unit = evtFindWorldObjectByIdAndKind(4, id);
     if (unit == NULL) {
         return 1;
     }
@@ -423,28 +423,28 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00242100);
 INCLUDE_ASM(const s32, "event/evtCommand", func_002422A8);
 
 u32 func_00242368(void) {
-    func_00243380();
+    evtEnableSolarPhaseAdvance();
     return 1;
 }
 
 u32 func_00242388(void) {
-    func_00243398();
+    evtDisableSolarPhaseAdvance();
     return 1;
 }
 
-s32 func_002423A8(void)
+s32 evtCommandReadMirroredSolarPhase(void)
 {
     func_0010D818(evtGetMirroredSolarPhase());
     return 1;
 }
 
-s32 func_002423D0(void)
+s32 evtCommandReadSolarPhase(void)
 {
     func_0010D818(evtGetRawSolarPhase());
     return 1;
 }
 
-u32 func_002423F8(void) {
+u32 evtCommandSetSolarPhase(void) {
     u64 temp_v0;
 
     temp_v0 = func_0010D650(0);
@@ -452,21 +452,21 @@ u32 func_002423F8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242420);
+INCLUDE_ASM(const s32, "event/evtCommand", evtCommandWaitForCampTask);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242500);
+INCLUDE_ASM(const s32, "event/evtCommand", evtCommandStartCampTaskIfAbsent);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242580);
+INCLUDE_ASM(const s32, "event/evtCommand", evtCommandTestCampTaskReady);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242600);
+INCLUDE_ASM(const s32, "event/evtCommand", evtCommandDestroyCampTask);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242660);
+INCLUDE_ASM(const s32, "event/evtCommand", evtCommandStartPolygonMovie);
 
-s32 func_00242738(void)
+s32 evtCommandClearPolygonMovieFlag(void)
 {
     s32 p0;
 
@@ -476,7 +476,7 @@ s32 func_00242738(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242778);
+INCLUDE_ASM(const s32, "event/evtCommand", evtCommandCreatePolygonMovie);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00242818);
 
@@ -493,7 +493,7 @@ s32 func_00242B40(void)
 
     i = 4;
     do {
-        unit = func_0023E6D8(i, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
         i++;
     } while (i < 10 && unit == NULL);
     if (unit == NULL) {
@@ -513,7 +513,7 @@ s32 func_00242BC0(void)
 
     i = 4;
     do {
-        unit = func_0023E6D8(i, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
         i++;
     } while (i < 10 && unit == NULL);
     if (unit == NULL) {

@@ -108,7 +108,7 @@ void itfUpdateFade(u32 address) {
     }
 }
 
-void func_0031E640(u32 address) {
+void itfDrawFadeGlyphStrip(u32 address) {
     s64 active;
     s32 entry;
 

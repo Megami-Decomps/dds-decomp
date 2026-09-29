@@ -55,7 +55,7 @@ extern void *func_002CFEB8(s32 arg0);
 extern void sdfInitPacketList(s32 arg0);
 extern void sdfConsCreateDrawPacket(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern void *func_002E1420(s32 arg0);
-extern s32 func_002E1478(s32 arg0);
+extern s32 sdfConsAllocateColumnPacket(s32 arg0);
 extern void sdfAppendPacket(s32 arg0, s32 arg1);
 
 /* Voice parameters read via EffWork.unk3C. */
@@ -326,7 +326,7 @@ void effRunIfEnabled(void) {
     }
 }
 
-s32 func_0018CEF0(s32 unused, EffDirEnt *entry) {
+s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
     if (D_003BD476 != 0) {
         return func_00310320();
     }
@@ -466,7 +466,7 @@ void func_0018DBD8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DC58);
 
-u32 func_0018DD40(u32 colorA, u32 colorB, f32 t) {
+u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];

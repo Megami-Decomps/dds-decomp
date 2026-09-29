@@ -20,14 +20,14 @@ typedef struct MnuTransWork {
     MnuTransHead list590; /* 0x590 */
 } MnuTransWork;
 
-extern MnuTransRec *func_00256B78(MnuTransHead *head);
+extern MnuTransRec *mnuAppendDisplayListNode(MnuTransHead *head);
 extern u32 *func_0024FA18(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
 extern void func_00253520(MnuTransWork *work);
 
-void func_00250A48(MnuTransWork *work, s32 mode) {
-    MnuTransRec *transition = func_00256B78(&work->list584);
+void mnuBeginTransition(MnuTransWork *work, s32 mode) {
+    MnuTransRec *transition = mnuAppendDisplayListNode(&work->list584);
 
     if (transition != NULL) {
         if (work->state >= 6) {

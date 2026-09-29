@@ -11,12 +11,12 @@ extern u8 D_0036AB64[];
 
 extern void func_0025E108(s32, s32);
 
-extern void func_002605B0(s32, u32);
+extern void mnuSetCommandPhase(s32, u32);
 extern void func_00260570(s32, u32);
 extern void func_00260AB0(s32);
 extern void func_0025F138();
 extern s32 func_00245A40(s32);
-extern void func_0024DED8(s32);
+extern void evtClearActiveFlag(s32);
 extern s32 func_0024DEF8(s32, s32);
 extern void func_002E96D8(s32);
 
@@ -72,7 +72,7 @@ s32 func_00245DA0(void) {
     s32 *temp_v0 = (s32 *)func_00101A70();
 
     if (temp_v0[43] == 1) {
-        func_002605B0((s32)temp_v0, 4);
+        mnuSetCommandPhase((s32)temp_v0, 4);
     }
     return 1;
 }
@@ -114,11 +114,11 @@ s32 evtSelectStateAction(void) {
     s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
 
     if (temp_v1 == 5) {
-        func_002605B0(temp_v0, 3);
+        mnuSetCommandPhase(temp_v0, 3);
     } else if (temp_v1 == 7) {
         s32 temp_v2;
 
-        func_002605B0(temp_v0, 9);
+        mnuSetCommandPhase(temp_v0, 9);
         temp_v2 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
         *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
         func_00260570(temp_v2, 10);
@@ -164,11 +164,11 @@ s32 evtSelectStateActionB(void) {
     s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
 
     if (temp_v1 == 5) {
-        func_002605B0(temp_v0, 3);
+        mnuSetCommandPhase(temp_v0, 3);
     } else if (temp_v1 == 7) {
         s32 temp_v2;
 
-        func_002605B0(temp_v0, 9);
+        mnuSetCommandPhase(temp_v0, 9);
         temp_v2 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
         *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
         func_00260570(temp_v2, 10);
@@ -214,11 +214,11 @@ s32 evtSelectStateActionC(void) {
     s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
 
     if (temp_v1 == 5) {
-        func_002605B0(temp_v0, 3);
+        mnuSetCommandPhase(temp_v0, 3);
     } else if (temp_v1 == 7) {
         s32 temp_v2;
 
-        func_002605B0(temp_v0, 9);
+        mnuSetCommandPhase(temp_v0, 9);
         temp_v2 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
         *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
         func_00260570(temp_v2, 10);
@@ -243,7 +243,7 @@ void evtSetupDispatchSyncD(s32 arg0) {
     func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
 }
 
-u32 func_00246C80(void) {
+u32 evtResetStateProgressTimer(void) {
     s32 temp_v0;
 
     temp_v0 = func_00101A70();
@@ -300,7 +300,7 @@ s32 evtAdvanceStateStage(void) {
         s32 temp_v1;
 
         ((EvtDispatchState *)temp_v0)->substate = 0xA;
-        func_002605B0(temp_v0, 6);
+        mnuSetCommandPhase(temp_v0, 6);
         temp_v1 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
         *(s32 *)(temp_v1 + 0x2C) = (s32)func_0025ECD0;
         func_00260530(temp_v1, 0);
@@ -351,7 +351,7 @@ void evtSetupDispatchSyncG(s32 arg0) {
 
 extern void func_0024DA58();
 
-s32 func_002478F8(void) {
+s32 evtPlayDispatchModeCue(void) {
     EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
     func_0024DDC0(1);
     switch (state->mode) {
@@ -369,17 +369,17 @@ extern s32 func_00101A70();
 
 extern u8 D_0036AA68[];
 
-extern void func_002605B0(s32, u32);
+extern void mnuSetCommandPhase(s32, u32);
 
-s32 func_00247970(void) {
+s32 evtApplyDispatchModeState(void) {
     EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
     switch (state->mode) {
     case 1:
-        func_002605B0((s32)state, 6);
+        mnuSetCommandPhase((s32)state, 6);
         break;
     case 2:
         if (state->stateTable != (s32)D_0036AA68) {
-            func_002605B0((s32)state, 5);
+            mnuSetCommandPhase((s32)state, 5);
         }
         break;
     }
@@ -416,7 +416,7 @@ void evtSetupDispatchSyncH(s32 arg0) {
 u32 func_00247CF8(void) {
     func_00220110(0x323);
     kwlnFadeOutStart(0, 0, 0, 0xf);
-    func_0024DED8(0);
+    evtClearActiveFlag(0);
     func_0024DEF8(0, 0);
     func_0024DEF8(1, 1);
     return 1;
@@ -448,14 +448,14 @@ void evtSetupDispatchSyncI(s32 arg0) {
 }
 
 u32 evtResetStateFlags(void) {
-    func_0024DED8(0);
+    evtClearActiveFlag(0);
     func_0024DEF8(0, 1);
     func_0024DEF8(1, 0);
     func_002E96D8(0x300000);
     return 1;
 }
 
-u32 func_00248170(void) {
+u32 evtStartFadeOut(void) {
     kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
@@ -521,7 +521,7 @@ typedef struct FlagSource {
 extern FlagSource D_0036ABB8[];
 extern FlagPair D_0036ABF8[];
 
-s32 func_002482D8(void) {
+s32 mnuCreateFlagEntries(void) {
     s32 handle = func_002D03F8(0x140);
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
@@ -541,7 +541,7 @@ s32 func_002482D8(void) {
     return handle;
 }
 
-void func_002483C0(s32 handle) {
+void mnuApplyFlagEntries(s32 handle) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -564,9 +564,9 @@ extern char D_003AF590[];
 extern s32 D_0036AC78[];
 extern u32 effLoadIndexedResource(char *, s32, s32);
 extern void effResolveAndReleaseResource(u32);
-extern u32 func_002BDBC0(u32, s32, s32);
+extern u32 effCreateResourceSlotSet(u32, s32, s32);
 
-void func_00248468(u32 *work) {
+void mnuLoadResourceHandles(u32 *work) {
     s32 i;
 
     for (i = 0; i < 2; i++) {
@@ -575,13 +575,13 @@ void func_00248468(u32 *work) {
         work[0x19 + i] = resource;
         effResolveAndReleaseResource(resource);
     }
-    work[0x1B] = func_002BDBC0(work[0x19], 7, 1);
+    work[0x1B] = effCreateResourceSlotSet(work[0x19], 7, 1);
 }
 
 extern void func_002BDD60(u32);
-extern void func_0025C0A8(u32);
+extern void mnuReleaseResourceWork(u32);
 
-void func_00248508(u32 *work) {
+void mnuReleaseResourceHandles(u32 *work) {
     s32 i;
 
     for (i = 0; i < 2; i++) {
@@ -589,7 +589,7 @@ void func_00248508(u32 *work) {
     }
     func_002BDD60(work[0x1B]);
     if (work[0x56] != 0) {
-        func_0025C0A8(work[0x56]);
+        mnuReleaseResourceWork(work[0x56]);
         work[0x56] = 0;
     }
 }

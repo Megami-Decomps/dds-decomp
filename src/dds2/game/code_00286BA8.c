@@ -23,7 +23,7 @@ void func_00286F90(void) {
     D_00437924 = func_00312620(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
 }
 
-s32 func_00286FD8(void) {
+s32 mnuCheckResourceTask(void) {
     if (kwlnTaskExists(D_00426060) != 0) {
         return 1;
     }
@@ -31,8 +31,8 @@ s32 func_00286FD8(void) {
     return 0;
 }
 
-void func_00287008(void) {
-    func_003126D0(D_00437924);
+void mnuStopResourceTask(void) {
+    sdfDestroyTaskPair(D_00437924);
     D_00437924 = 0;
 }
 

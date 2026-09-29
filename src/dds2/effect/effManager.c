@@ -32,11 +32,11 @@ u32 func_001575C8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_001575D0);
+INCLUDE_ASM(const s32, "effect/effManager", effCreateNode);
 
-INCLUDE_ASM(const s32, "effect/effManager", func_00157658);
+INCLUDE_ASM(const s32, "effect/effManager", effDestroyNode);
 
-INCLUDE_ASM(const s32, "effect/effManager", func_001576A0);
+INCLUDE_ASM(const s32, "effect/effManager", effUpdateNode);
 
 INCLUDE_ASM(const s32, "effect/effManager", func_001576D8);
 
@@ -57,7 +57,7 @@ INCLUDE_ASM(const s32, "effect/effManager", func_00157878);
 INCLUDE_ASM(const s32, "effect/effManager", func_001578C0);
 
 void func_001579C8(u32 arg0) {
-    func_001575D0(5, 0, arg0);
+    effCreateNode(5, 0, arg0);
 }
 
 INCLUDE_ASM(const s32, "effect/effManager", func_001579E8);

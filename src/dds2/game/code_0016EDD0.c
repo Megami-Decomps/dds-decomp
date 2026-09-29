@@ -56,12 +56,12 @@ void func_00171590(s32 work, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_00171598);
 
-void func_00171798(EffectResourceWork *work) {
-    func_00333918(work->resourceHandle);
+void effReleaseEffectResources(EffectResourceWork *work) {
+    sdfQueueAssetRelease(work->resourceHandle);
     func_003297C8(work->allocation);
 }
 
-void func_001717C8(EffectColorState *state) {
+void effInitializeColorState(EffectColorState *state) {
     state->mode = 3;
     state->color = 0x80808080;
     state->valueC = 0;

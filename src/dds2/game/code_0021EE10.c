@@ -1,6 +1,6 @@
 #include "common.h"
 extern void *func_001E5DA8(void *, s32, s32);
-extern s64 startBattleTask(void *);
+extern s64 btlStartTask(void *);
 
 extern s32 func_001AA6F8(void);
 
@@ -20,7 +20,7 @@ extern void func_001E9F30(u32);
 
 extern void func_00208DA0(void);
 
-extern void func_001E21A0(u32);
+extern void btlFlagUnitDefeatCandidate(u32);
 
 extern u32 func_0021F808(void);
 
@@ -36,7 +36,7 @@ extern u32 func_001E8060(u32, u32);
 
 extern void func_001E9A88(void);
 
-extern void func_002226F0(u32);
+extern void btlUnitSetCameraOffset(u32);
 
 extern void func_00224020(u32);
 
@@ -60,7 +60,7 @@ extern void func_00224F88(u32);
 
 extern void func_001ADFE0(u32, u32, u32);
 
-extern void func_001E3448(u32, const u8 *);
+extern void btlSetUnitRotation(u32, const u8 *);
 
 extern void func_002218C8(void);
 
@@ -148,7 +148,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F040);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F0E8);
 
-s32 func_0021F238(void) {
+s32 btlStartOtherMarkedUnitTasks(void) {
     ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
     ActionUnit *head = unit;
     s32 result = -1;
@@ -171,7 +171,7 @@ s32 func_0021F238(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->mode != 0x115) {
-                                startBattleTask(func_001E5DA8(unit, 6, 0xA));
+                                btlStartTask(func_001E5DA8(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
@@ -218,7 +218,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F3E8);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_0021F698);
 
-u32 func_0021F798(void) {
+u32 btlHasActiveSpecialMotionActor(void) {
     ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
     while (unit != 0) {
         u32 flags = unit->flags;
@@ -353,7 +353,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220B20);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220C38);
 
-u32 func_00220D18(void) {
+u32 btlGetSelectedActorAction(void) {
     BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
     ActionUnit *unit = *(ActionUnit **)battle->state;
     if (unit == NULL) {
@@ -383,7 +383,7 @@ u32 func_00220D98(u32 unused1, u32 unused2, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220DD8);
 
-f32 func_00220EE8(ActionUnit *unit, ActionUnit *other) {
+f32 btlGetActionScaleFactor(ActionUnit *unit, ActionUnit *other) {
     f32 factor = 1.0f;
     BattleActionFlagState *state;
     if ((unit->flags & 0x200) == 0) {
@@ -427,7 +427,7 @@ u32 func_002210D0(ActionUnit *unit) {
         unit->flags |= 0x800;
         func_001E9F30((u32)unit);
         func_00208DA0();
-        func_001E21A0(*(u32 *)(unit->stateFlags + 0x18));
+        btlFlagUnitDefeatCandidate(*(u32 *)(unit->stateFlags + 0x18));
         return 1;
     }
     return 0;
@@ -500,7 +500,7 @@ u32 func_002214C0(ActionUnit *unit) {
     ++unit->actionTimer;
     return 1;
 }
-void func_00221538(void) {
+void btlResetActionScale(void) {
     BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
     BattleActionState *state = (BattleActionState *)battle->state;
     state->scale = 1.0f;
@@ -510,7 +510,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221568);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221760);
 
-void func_002217E8(void) {
+void btlDestroyActionActor(void) {
     s32 *actorHandle;
     s32 actor;
 
@@ -518,7 +518,7 @@ void func_002217E8(void) {
     actorHandle = &((BattleActionState *)((BattleActionScene *)actor)->state)->actorHandle;
     actor = *actorHandle;
     if (actor != 0) {
-        func_001E7D30(actor);
+        btlDestroyUnit(actor);
         *actorHandle = 0;
     }
 }
@@ -537,7 +537,7 @@ u32 func_00221858(u32 unit) {
     return 1;
 }
 
-void func_00221888(ActionUnit *actor) {
+void btlMarkSpecialActionUnit(ActionUnit *actor) {
     if ((actor->flags & 0x400) == 0) {
         return;
     }
@@ -564,7 +564,7 @@ f32 func_00221A30(ActionUnit *unit, u32 actor, u32 action, u32 mode) {
     }
     return factor;
 }
-s32 func_00221A80(void) {
+s32 btlFindSpecialActionIndex(void) {
     ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
     s32 selected = -1;
     while (unit != 0 && selected == -1) {
@@ -585,7 +585,7 @@ s32 func_00221A80(void) {
     return selected;
 }
 
-u32 func_00221B28(ActionUnit *unit) {
+u32 btlGetSpecialActionIndex(ActionUnit *unit) {
     u32 value = 0;
     switch (unit->mode) {
     case 0x11d:
@@ -607,8 +607,8 @@ u32 func_00221B28(ActionUnit *unit) {
     return value;
 }
 
-u32 func_00221B88(ActionUnit *unit, u32 group) {
-    u32 action = func_00221B28(unit);
+u32 btlGetSpecialActionGroupEntry(ActionUnit *unit, u32 group) {
+    u32 action = btlGetSpecialActionIndex(unit);
     return D_003BF6C0[group][action];
 }
 
@@ -619,7 +619,7 @@ void func_00221E28(ActionUnit *unit, u32 group, f32 opacity) {
         func_0023CE10(unit->rendererHandle, group);
         func_0023CE18(unit->rendererHandle, opacity);
     } else {
-        group = func_00221B88(unit, group);
+        group = btlGetSpecialActionGroupEntry(unit, group);
         func_0023CE10(unit->rendererHandle, group);
         func_0023CE18(unit->rendererHandle, opacity);
     }
@@ -658,7 +658,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222100);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222298);
 
-void func_00222330(void) {
+void btlRefreshSpecialActionUnits(void) {
     ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
     while (unit != 0) {
         u32 flags = unit->flags;
@@ -667,7 +667,7 @@ void func_00222330(void) {
                 s32 action = unit->mode;
                 if (action < 0x122) {
                     if (action >= 0x11d) {
-                        func_001E3448((u32)unit, D_003BF950);
+                        btlSetUnitRotation((u32)unit, D_003BF950);
                         unit->flags &= ~0x80000;
                     }
                 }
@@ -678,7 +678,7 @@ void func_00222330(void) {
     func_002218C8();
 }
 
-u32 func_002223D8(ActionUnit *unit, u32 base) {
+u32 btlOffsetSpecialActionValue(ActionUnit *unit, u32 base) {
     u32 flags = unit->flags;
     if ((flags & 1) == 0) {
         return base;
@@ -698,11 +698,11 @@ u32 func_002223D8(ActionUnit *unit, u32 base) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222450);
 
-s64 func_002226D0(void) {
+s64 btlUnitWrapA(void) {
     return func_00222450();
 }
 
-void func_002226F0(u32 unit) {
+void btlUnitSetCameraOffset(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
                   0.8f, -0.65f, 0.5f);
     *(f32 *)(unit + 0x50) += 650.0f;
@@ -731,7 +731,7 @@ u32 func_00222D18(ActionUnit *unit) {
                 return 0;
             }
             func_001E9A88();
-            func_002226F0((u32)unit);
+            btlUnitSetCameraOffset((u32)unit);
             unit->pendingAction = 0;
             return 1;
         }
@@ -826,7 +826,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224500);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224598);
 
-s64 func_002247B0(void) {
+s64 btlUnitWrapB(void) {
     return func_00224598();
 }
 

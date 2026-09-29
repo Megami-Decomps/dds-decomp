@@ -83,7 +83,7 @@ void func_0031F300(u32 node) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F340);
 
-void func_0031F410(destination, datum, size)
+void dds3WritePackedValue(destination, datum, size)
     u32 destination;
     u32 datum;
     u32 size;
@@ -100,7 +100,7 @@ void func_0031F4D8(u32 context, const char *name) {
     strncpy((char *)*(u32 *)record, name, 0x40);
     func_00320CE0(*(u32 *)(context + 0xc), 0, record);
     *(u32 *)(record + 4) = *(u32 *)context;
-    func_0031F410(context, -1, 4);
+    dds3WritePackedValue(context, -1, 4);
 }
 
 
@@ -123,7 +123,7 @@ u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     if (packedOffset > object[0]) {
         return 0;
     }
-    segment = func_00321170(object[1], segmentIndex);
+    segment = mnuFindResourceNodeById(object[1], segmentIndex);
     return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
 }
 
@@ -155,7 +155,7 @@ u32 func_0031F6A0(u32 object) {
     }
     destination = func_0031F280(object);
     do {
-        func_0031F410(destination, node->record->value, 4);
+        dds3WritePackedValue(destination, node->record->value, 4);
         node = node->next;
     } while (node != NULL);
     return destination;

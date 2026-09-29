@@ -13,7 +13,7 @@ typedef struct {
     u16 state; /* 0x0C: 0 free, 1 used, 2 end marker */
 } SdfMemBlockPrefix;
 
-u16 func_002D0378(SdfMemBlockPrefix *block) {
+u16 sdfGetMemoryBlockState(SdfMemBlockPrefix *block) {
     return block->state;
 }
 

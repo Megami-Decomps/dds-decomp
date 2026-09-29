@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_00344120(int *param_1, int param_2, u8 *param_3, int param_4);
+void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
 extern u32 D_004365E8;
 
@@ -126,7 +126,7 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 
 u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
 
-/* Item chained off a window node (+0x28); recolored by func_001A5A80. */
+/* Item chained off a window node (+0x28); recolored by itfMesRecolorNodeChildren. */
 typedef struct ItfMesItem {
     u8 unk0[0x10];         /* 0x0 */
     u32 word10;            /* 0x10: low byte is the color */
@@ -150,7 +150,7 @@ typedef struct ItfMesNode {
     struct ItfMesNode *next; /* 0x24 */
 } ItfMesNode;
 
-/* Operands of func_001A58E8: word at +0x8, divisor at +0x12. */
+/* Operands of itfMesCountSpanSteps: word at +0x8, divisor at +0x12. */
 typedef struct ItfMesSpan {
     u8 unk0[8]; /* 0x0 */
     s32 unk8;   /* 0x8 */
@@ -358,7 +358,7 @@ s32 itfMesScriptSetMessageRange(void) {
     return 1;
 }
 
-u32 func_001A38A0(void) {
+u32 itfMesGetGlobalWindowValue(void) {
     return D_00452940.unk4;
 }
 
@@ -422,9 +422,9 @@ void func_001A4090(s32 window, u32 value) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A40B0);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4118);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesBlk14MoveTo);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A41A8);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesBlk14MoveBy);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4218);
 
@@ -436,11 +436,11 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A43A8);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4418);
 
-u32 func_001A4488(s32 window) {
+u32 itfMesGetWindowFlags(s32 window) {
     return D_0045296C[window].mes->flags;
 }
 
-void func_001A44A8(s32 window, u32 value) {
+void itfMesReplaceWindowHighFlags(s32 window, u32 value) {
     ItfMesState *mes;
 
     mes = D_0045296C[window].mes;
@@ -467,7 +467,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4558);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4578);
 
-u32 func_001A4598(s32 window, s32 index) {
+u32 itfMesGetWindowTableValue(s32 window, s32 index) {
     return D_0045296C[window].mes->tableD0[index];
 }
 
@@ -479,7 +479,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4888);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A48B8);
 
-u32 func_001A4940(s32 window, s32 entryIndex, s32 itemIndex) {
+u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(D_0045296C[window].mes, entryIndex)->table, itemIndex);
 }
 
@@ -521,7 +521,7 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D10);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4CF8);
 
-void func_001A50C0(void) {
+void itfMesClearGlobalWords(void) {
     D_003B4770.unk0 = 0;
     D_003B4770.unk4 = 0;
     D_003B4770.unk8 = 0;
@@ -540,7 +540,7 @@ void itfMesRelocate(ItfMesRelocResource *resource)
         base = (u8 *)resource + 0x20;
         fixups = (u8 *)resource + resource->fixupOffset;
         size = resource->fixupCount;
-        func_00344120((int *)base, (int)base, fixups, size);
+        sdfRelocatePackedResourceWords((int *)base, (int)base, fixups, size);
         resource->relocated = 1;
     }
 }
@@ -590,7 +590,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5480);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A55B0);
 
-u32 func_001A5600(ItfMesState *mes) {
+u32 itfMesGetNextEntrySelectedItem(ItfMesState *mes) {
     s32 *items;
 
     items = (s32 *)itfMesGetNextEntry(mes->sub);
@@ -634,11 +634,11 @@ void func_001A58B8(u8 *arg0, s32 arg1) {
     *(u8 *)(arg1 + 0x14) = *(u8 *)(temp_v0 + 0x16);
 }
 
-s32 func_001A58E8(ItfMesSpan *arg0, ItfMesSpan *arg1) {
+s32 itfMesCountSpanSteps(ItfMesSpan *arg0, ItfMesSpan *arg1) {
     return ((arg1->unk8 - arg0->unk8) >> 3) / arg1->unk12 + 1;
 }
 
-void func_001A5918(ItfMesNode *node, s32 dx, s32 dy) {
+void itfMesOffsetNodeChain(ItfMesNode *node, s32 dx, s32 dy) {
     if (node == NULL) {
         return;
     }
@@ -662,7 +662,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5988);
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5A28);
 
 /* Persona 4 func_0027a4d0 @ 0027A4D0 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5A80(ItfMesNode *node, u32 color) {
+void itfMesRecolorNodeChildren(ItfMesNode *node, u32 color) {
     ItfMesItem *item;
 
     for (; node != NULL; node = node->next) {
@@ -696,7 +696,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5B20);
 void func_001A5B70(ItfMesNode *node) {
     for (; node != NULL; node = node->next) {
         if (node->child->flag16 == 0) {
-            func_0019D038(node);
+            frFontEnableContextMode(node);
         }
     }
 }
@@ -716,3 +716,4 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436618);
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436620);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436628);
+

@@ -33,7 +33,7 @@ typedef struct PartyEntryCopy {
 } PartyEntryCopy;
 
 extern void mnuForwardDupArg(s32, s32, s32, s32, s32);
-extern void func_0027BA90(s32, s32);
+extern void mnuSeekListNode(s32, s32);
 
 extern u32 func_00285B20(u32);
 extern void func_002858E8();
@@ -61,7 +61,7 @@ void func_00274B80(u32 arg0) {
 void func_00274BA0(s32 context) {
 }
 
-s32 func_00274BA8(s32 index, s32 item) {
+s32 mnuIsFinalItemIndex(s32 index, s32 item) {
     if (index < (*(s32 *)(item + 0x20) - 1)) {
         return 0;
     }
@@ -130,7 +130,7 @@ void func_00275328(context)
     func_00280048(panel);
 }
 
-s32 menuCountActiveSlots(void) {
+s32 mnuCountActiveSlots(void) {
     s32 i;
     s32 temp_v0 = 0;
     u16 *temp_v1 = (u16 *)(D_003BAA00 + 0xa60);
@@ -153,7 +153,7 @@ void func_002754E0(s32 context) {
     *(s32 *)(menu + 0x18AC) = 0;
     memset((void *)(menu + 0x1078), 0, 0x834);
     *(s32 *)(context + 0x7EC) = 1;
-    *(s32 *)(context + 0x7F0) = menuCountActiveSlots() - 1;
+    *(s32 *)(context + 0x7F0) = mnuCountActiveSlots() - 1;
     menuUpdateHandleStates(context + 0x15C);
     for (i = 0; i < 5; i++) {
         *(u32 *)(context + 0x1D8 + i * 0x134) |= 0x80;
@@ -305,7 +305,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_002764D8);
 extern u8 D_0037C3A8[];
 extern s32 func_002BD8F8(s32);
 extern void func_00272688();
-extern void func_00272350();
+extern void mnuCreateStaffImageSprite();
 extern void func_002723B0();
 extern void func_00272668();
 extern void func_0027CDD0();
@@ -320,9 +320,9 @@ s64 func_002765E8(s32 arg0) {
         func_00272688(1, arg0);
     }
     if (*(s32 *)(menu + 0x14) == 0) {
-        func_00272350(0x12);
+        mnuCreateStaffImageSprite(0x12);
     } else {
-        func_00272350(0x11);
+        mnuCreateStaffImageSprite(0x11);
     }
     func_0027CDD0(0x1C0, 0x3D0, 0, *(s32 *)(context + 0x124), 0x53);
     func_002723B0(0, *(s32 *)(context + 0x78));
@@ -417,12 +417,12 @@ extern void func_00195520(s32);
 extern s32 func_00195160(s32, s32, s32, s32, s32);
 extern void func_00195450(s32, s32, s32);
 extern void func_00195460(s32, s32);
-extern void func_001954C8(s32, u32);
+extern void frFontSetChildColors(s32, u32);
 extern void func_00195530(s32);
 extern void func_001958A0(s32, s32, s32);
 extern void func_00194920(s32);
 
-void menuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
+void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
     s32 item;
     s32 top = y - 0x10;
 
@@ -430,7 +430,7 @@ void menuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 para
     item = func_00195160(textId, 0, 0, 0, 0);
     func_00195450(item, x, top);
     func_00195460(item, scale * 0x10);
-    func_001954C8(item, color);
+    frFontSetChildColors(item, color);
     func_00195530(1);
     func_001958A0(item, 1, param);
     func_00194920(item);
@@ -453,7 +453,7 @@ extern s32 func_00287FE0();
 extern u32 func_00287E60(s32);
 extern void func_00287EC8(s32, u32);
 
-void menuIdleVoiceTimer(s32 timer, s32 panel) {
+void mnuIdleVoiceTimer(s32 timer, s32 panel) {
     u32 count;
 
     if (*(s32 *)(timer + 0x2C) == -1 && func_002877A8() != 1) {
@@ -532,7 +532,7 @@ typedef struct SkillInfo {
 extern s32 func_002CFEB8(s32);
 extern void func_002CDED0(u32, SkillInfo *);
 
-s32 func_00278218(void) {
+s32 mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
     u32 *bits = (u32 *)func_002CFEB8(0x50);
     SkillInfo info;
@@ -557,7 +557,7 @@ void func_002782E0(void) {
     func_002CFF98();
 }
 
-s32 func_002782F8(s32 arg0, u32 *arg1) {
+s32 mnuIsSkillCodeInBitset(s32 arg0, u32 *arg1) {
     s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
 
     return (arg1[temp_v0 >> 5] & (1 << arg0)) != 0;
@@ -592,7 +592,7 @@ s32 campMenuInit(void) {
         func_0027E790(*(s32 *)(context + 0x138), *(s32 *)(context + 0xE0), 0x33, 0x34);
         break;
     }
-    func_0027BA90(0, *(s32 *)(*(s32 *)(context + 0x12C) + 0x14));
+    mnuSeekListNode(0, *(s32 *)(*(s32 *)(context + 0x12C) + 0x14));
     return 1;
 }
 
@@ -617,9 +617,9 @@ s64 campMenuDrawSlotLabel(s32 param) {
     func_00272778(param);
     slot = *(s32 **)(*(s32 *)(*(s32 *)(context + 0x124) + 0x14) + 0x1C);
     if (*slot == 0) {
-        func_00272350(1);
+        mnuCreateStaffImageSprite(1);
     } else {
-        func_00272350(0xA);
+        mnuCreateStaffImageSprite(0xA);
     }
     func_00272668(1, **(s32 **)(*(s32 *)(*(s32 *)(context + 0x124) + 0x14) + 0x1C), D_0037C3A8, context, 1, 0x53);
     if (**(s32 **)(*(s32 *)(*(s32 *)(context + 0x124) + 0x14) + 0x1C) == 0) {

@@ -10,7 +10,7 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_002AAE80(s32);
 
-extern void func_002AA740(s32);
+extern void mnuCreateStaffImageSprite(s32);
 
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
 
@@ -99,7 +99,7 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF00);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
 
-void func_002AD030(s32 index, s32 context) {
+void mnuApplyResourceSelection(s32 index, s32 context) {
     MenuResourceSet *resources;
     s64 active;
 

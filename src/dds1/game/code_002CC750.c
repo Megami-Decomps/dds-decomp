@@ -87,7 +87,7 @@ typedef struct Entry28H {
     u8 pad_0x02[0x1A]; // 0x02
 } Entry28H; // 0x1C
 
-/* Copy source for func_002CF3F8 (layout inferred from field accesses). */
+/* Copy source for itfCopyColorFields (layout inferred from field accesses). */
 typedef struct CfSrc {
     u8 pad_0x00[0x04]; // 0x00
     u32 x04;           // 0x04
@@ -113,7 +113,7 @@ extern void func_002FE360(s32);
 extern char D_003BD2B8[];
 extern char D_003BD2C0[];
 extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
-extern void func_001954C8(u32, u32);
+extern void frFontSetChildColors(u32, u32);
 extern void func_001958A0(u32, s32, s32);
 extern void func_00194920(u32);
 extern u32 fileResolvePrimaryBuffer(void);
@@ -234,7 +234,7 @@ typedef struct ScriptFlagSlot {
 
 extern ScriptFlagSlot D_00393280[];
 
-u32 func_002CD3B8(u8 *work, u32 id) {
+u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
     ScriptFlagSlot *slot = (ScriptFlagSlot *)((u8 *)D_00393280 + (*(u16 *)(work + 4) << 7));
     u32 i;
 
@@ -457,7 +457,7 @@ u32 func_002CDDB0() {
     return 0;
 }
 
-u32 func_002CDDB8(ScrVmOperand *operand, u32 value) {
+u32 scrCallIfOperandReady(ScrVmOperand *operand, u32 value) {
     s8 selected = func_002CD7B8(operand);
 
     if (func_002CD7B8(operand)) {
@@ -615,7 +615,7 @@ u32 func_002CE968(s32 i) {
     return D_00393234[i].v0;
 }
 
-void func_002CE988(void) {
+void sdfSetAllFlagsFromTable(void) {
     s32 index = 0;
     do {
         index = func_002CE800(index);
@@ -632,7 +632,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CE9E0);
 
 void func_002CEA10(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     u32 handle = func_00197C40(x, y, first, width, (u32)D_00394680, 0);
-    func_001954C8(handle, second);
+    frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
     func_00194920(handle);
 }
@@ -685,7 +685,7 @@ void func_002CF3A0(s32 arg0) {
     func_00296F58(arg0 + 0x14, arg0 + 0x38, 0, 0);
 }
 
-void func_002CF3C8(RgbAlpha *p, u32 color) {
+void scrSetRgbAndAlpha(RgbAlpha *p, u32 color) {
     p->rgb = color & 0xFFFFFF;
     p->alpha = color >> 24;
 }
@@ -698,7 +698,7 @@ void func_002CF3F0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x3c) = arg1;
 }
 
-void func_002CF3F8(RgbAlpha *dst, CfSrc *src) {
+void itfCopyColorFields(RgbAlpha *dst, CfSrc *src) {
     dst->rgb = src->x04;
     dst->f50 = src->f3C;
     dst->alpha = src->x24;

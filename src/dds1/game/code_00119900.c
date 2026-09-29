@@ -75,7 +75,7 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119A00);
 
-u8 func_00119A68(s32 arg0) {
+u8 evtGetFlaggedRosterValue(s32 arg0) {
     if ((*(u16 *)arg0 & 0x20) == 0) {
         return 0;
     }

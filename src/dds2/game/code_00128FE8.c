@@ -8,7 +8,7 @@ extern s32 D_00435F10;
 
 extern s32 D_00435E04;
 
-extern u32 func_0011F218(void);
+extern u32 sdfCreateResetPacketList(void);
 
 extern u64 sdfAllocPacketAligned(u64);
 
@@ -60,7 +60,7 @@ extern u32 D_00436108;
 
 extern u32 D_00435FCC;
 
-extern u32 func_002C8168(u32 arg0);
+extern u32 fileRequestIsReady(u32 arg0);
 
 extern u8 D_00435BB4;
 
@@ -225,9 +225,9 @@ typedef struct FldPrimDesc {
     u8 pad24[8];
 } FldPrimDesc; /* 0x2C bytes */
 
-extern void func_0033AE28(u64, s32);
+extern void sdfConsAppendClearPacket(u64, s32);
 
-extern void func_0033AFC0(u64, u32, s32);
+extern void sdfConsAppendAssetPacket(u64, u32, s32);
 
 extern u64 func_0033B050(FldPrimDesc *);
 
@@ -239,7 +239,7 @@ typedef struct {
 
 extern u32 D_0040B2A0[];
 
-extern u32 func_0032E3C0(s32);
+extern u32 sdfAllocatePacketList(s32);
 
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
@@ -342,13 +342,13 @@ extern u8 D_0037FA00[];
 
 extern u8 D_00384790[];
 
-extern s32 func_0032B1B0(s32);
+extern s32 sdfTexGetPrimaryBuffer(s32);
 
 extern s32 func_0032B1B8(s32);
 
 extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
 
-extern void func_0032CF58(u64, u64);
+extern void sdfAppendReferencePacket(u64, u64);
 
 extern void func_003365B8(f32);
 
@@ -407,14 +407,14 @@ s32 func_00129D60(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129D68);
 
 void func_00129E50(u32 buffer, FldTransferChunk *chunk) {
-    func_00344120(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
+    sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void func_00129E78(u32 buffer, FldTransferChunk *chunk) {
     func_00129D68(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
-void func_00129EA0(u32 arg0, u32 arg1) {
+void fldSetPendingAreaAndFloor(u32 arg0, u32 arg1) {
     D_00436014 = arg0;
     D_00436018 = arg1;
 }
@@ -471,12 +471,12 @@ void fldFreeDisplayObjects(void) {
     D_00389770[30] = 0;
 }
 
-u32 func_0012A0E8(void) {
+u32 fldPollAreaResourceLoad(void) {
     u32 temp_v1 = D_00389770[0x1E];
 
     if (temp_v1 != 0) {
         if (temp_v1 == 1) {
-            if (func_002C8168(D_00435FCC) != 0) {
+            if (fileRequestIsReady(D_00435FCC) != 0) {
                 D_00389770[0x1E] = 0;
                 D_00435BB4 = 0;
             }
@@ -485,24 +485,24 @@ u32 func_0012A0E8(void) {
     return 0;
 }
 
-u32 func_0012A140(void) {
+u32 fldGetResourceReadyFlag(void) {
     return D_003897E8[0];
 }
 
-u8 func_0012A150(void) {
+u8 fldIsAreaResourceReady(void) {
     if (D_00435FCC != 0) {
-        if (func_002C8168(D_00435FCC) != 0) {
+        if (fileRequestIsReady(D_00435FCC) != 0) {
             return 1;
         }
     }
     return D_003897E8[0] != 0;
 }
 
-s32 func_0012A190(s32 area, s32 room) {
+s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     if (D_00389770[31] != area || D_00389770[32] != room) {
         return 0;
     }
-    if (D_00435FCC != 0 && func_002C8168(D_00435FCC) != 0) {
+    if (D_00435FCC != 0 && fileRequestIsReady(D_00435FCC) != 0) {
         return 1;
     }
     return D_00389770[30] != 0;
@@ -573,7 +573,7 @@ u8 func_0012A4E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A510);
 
-void func_0012A698(void) {
+void fldReleaseAreaResourceCache(void) {
     u32 temp_v0 = D_00435FD8;
 
     if (temp_v0 != 0) {
@@ -987,8 +987,8 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
 
     sdfResetPacketList(command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader(header, func_0032B1B0(arg0), func_0032B1B8(arg0));
-    func_0032CF58(command, header);
+    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), func_0032B1B8(arg0));
+    sdfAppendReferencePacket(command, header);
     func_003365B8(*(f32 *)(arg1 + 0x44));
     __asm__ volatile(
         ".set noreorder\n"
@@ -1061,8 +1061,8 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
 
     command = sdfAllocPacketAligned(0x20);
     sdfResetPacketList(command);
-    func_0033AE28(command, 0);
-    func_0033AFC0(command, D_0043607C, 0);
+    sdfConsAppendClearPacket(command, 0);
+    sdfConsAppendAssetPacket(command, D_0043607C, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.kind = 1;
@@ -1113,7 +1113,7 @@ void func_0012DC98(void) {
 
 void func_0012DCC8(void) {
     if (D_00436068 != 0) {
-        u32 packet = func_0032E3C0(0);
+        u32 packet = sdfAllocatePacketList(0);
         FieldResourceDescriptor *descriptor;
         sdfCreateResourcePacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, D_00436068, 0, 0, 0);
         descriptor = (FieldResourceDescriptor *)&D_0037FB48[D_00436060 * 8];
@@ -1123,7 +1123,7 @@ void func_0012DCC8(void) {
 
 void func_0012DD48(void) {
     if (D_00436068 != 0) {
-        u32 packet = func_0032E3C0(0);
+        u32 packet = sdfAllocatePacketList(0);
         FieldResourceDescriptor *descriptor;
         sdfCreateDescriptorPacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, D_00436068, 0);
         descriptor = (FieldResourceDescriptor *)&D_0037FB48[D_00436060 * 8];
@@ -1139,15 +1139,15 @@ void func_0012DDC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_0019C5B0(temp_v0);
 }
 
-void func_0012DE10(FldQuadState *quad) {
+void fldAdvanceQuadRow(FldQuadState *quad) {
     quad->y = quad->y + 0x60;
 }
 
-void func_0012DE20(FldQuadState *quad) {
+void fldStartQuadPacketList(FldQuadState *quad) {
     u64 temp_v0;
     u32 temp_v1;
 
-    temp_v1 = func_0011F218();
+    temp_v1 = sdfCreateResetPacketList();
     quad->packetList = temp_v1;
     temp_v0 = sdfAllocPacketAligned(0x40);
     func_0032E4B8(temp_v0);
@@ -1170,10 +1170,10 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg2));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380748.invoke(&D_00380748, quad.packetList);
 }
 
@@ -1191,10 +1191,10 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, arg2);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg3));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
@@ -1212,10 +1212,10 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436070, arg2));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
@@ -1233,10 +1233,10 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436078, arg2));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
@@ -1254,10 +1254,10 @@ void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg2));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
@@ -1275,10 +1275,10 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, arg2);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg3));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
@@ -1296,10 +1296,10 @@ void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20(&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + (s32)(x * 16.0f), quad.y + (s32)(y * 8.0f), quad.unk24, arg0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg1));
-    func_0012DE10(&quad);
+    fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
@@ -1909,3 +1909,4 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_0043615C);
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436160);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436164);
+

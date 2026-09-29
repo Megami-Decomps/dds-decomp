@@ -97,7 +97,7 @@ u32 func_0026BC00(void) {
 s32 func_0026BC28(void) {
     s32 *state = (s32 *)func_00101958();
 
-    func_002678C8(state);
+    mnuReleaseWorkResources(state);
     func_00267768(state);
     return 1;
 }

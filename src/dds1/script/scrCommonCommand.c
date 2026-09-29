@@ -16,7 +16,7 @@ s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_00106488(f32 arg0);
 s32 evtUnk8360SetVec(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
-s32 func_002FC0E0(void);
+s32 fptodp(void);
 extern ScrComGlobals *D_003BAA00;
 extern s8 D_00398628[];
 extern char D_0039F4D8[];
@@ -244,7 +244,7 @@ s32 func_0010E178(void)
     s32 p1;
     p0 = func_0010D428(0);
     p1 = func_0010D428(1);
-    func_001068F0(p0, p1, func_0010D428(2));
+    kwlnDrawSetOffsetTransition(p0, p1, func_0010D428(2));
     return 1;
 }
 
@@ -560,7 +560,7 @@ s32 func_0010ED40(void)
 
 s32 func_0010ED68(void)
 {
-    func_001068F0(0, 0, 0);
+    kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawEnableD88(0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);

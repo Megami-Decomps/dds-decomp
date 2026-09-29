@@ -20,7 +20,7 @@ typedef struct PolyEntryPool {
     s32 *records; /* 0xF8: entries have five 32-bit words */
 } PolyEntryPool;
 
-void func_001655D0(u32 work) {
+void effPolyDestroyWork(u32 work) {
     func_001634A8(*(u32 *)((s32)work + 0xdc));
     func_00328E48(work);
 }
@@ -60,7 +60,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165E28);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165FC8);
 
-void func_00166190(float factor, PolyTransform *transform) {
+void effPolyScaleFourComponents(float factor, PolyTransform *transform) {
     transform->scaleC8 = transform->scaleC8 * factor;
     transform->scaleDC = transform->scaleDC * factor;
     transform->scaleCC = transform->scaleCC * factor;

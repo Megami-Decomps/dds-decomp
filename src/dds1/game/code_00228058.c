@@ -58,7 +58,7 @@ INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_002280B0);
 
-u32 func_00228180(void) {
+u32 evtOpcodeCreateTaskForCurrentWork(void) {
     EvtCommandWork *work;
     s32 task;
 
@@ -76,43 +76,43 @@ u32 func_00228180(void) {
     return 1;
 }
 
-u32 func_00228210(void) {
+u32 evtOpcodeEnableCurrentContextFlag(void) {
     u64 task;
     s64 registered;
 
     task = func_0010D428(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
-        func_00235088(task);
+        evtSetContextFlag(task);
     }
     return 1;
 }
 
-u32 func_00228258(void) {
+u32 evtOpcodeDisableCurrentContextFlag(void) {
     u64 task;
     s64 registered;
 
     task = func_0010D428(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
-        func_002350B0(task);
+        evtClearContextFlag(task);
     }
     return 1;
 }
 
-u32 func_002282A0(void) {
+u32 evtOpcodeDestroyRegisteredTask(void) {
     u64 task;
     s64 registered;
 
     task = func_0010D428(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
-        func_002350E0(task);
+        evtDestroyTaskHierarchy(task);
     }
     return 1;
 }
 
-u32 func_002282E8(void) {
+u32 evtOpcodeSetFieldFadeTarget(void) {
     u64 area;
     u64 target;
     u64 duration;
@@ -218,7 +218,7 @@ u32 func_002285B0(void) {
     return 1;
 }
 
-u32 func_002285F0(void) {
+u32 evtOpcodeRefreshTaskData(void) {
     u64 task;
     u64 value;
 
@@ -228,7 +228,7 @@ u32 func_002285F0(void) {
     return 1;
 }
 
-u32 func_00228630(void) {
+u32 evtOpcodeInitializeEffectSoundChannel(void) {
     effInitCh72Id();
     return 1;
 }
@@ -266,30 +266,30 @@ void evtSetSolarPhase(u8 phase) {
     D_003BAA00->phaseTimer = 0.0f;
 }
 
-void func_00228710(void) {
+void evtEnableSolarPhaseAdvance(void) {
     D_003BAA00->flags = D_003BAA00->flags | SOLAR_PHASE_ADVANCE_FLAG;
 }
 
-void func_00228728(void) {
+void evtDisableSolarPhaseAdvance(void) {
     D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_PHASE_ADVANCE_FLAG;
 }
 
-void func_00228740(void) {
+void evtSetSolarOverlayFullyVisible(void) {
     D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
     D_003BBDB8 = 1.0f;
     func_0022AB00(0);
 }
 
-void func_00228778(void) {
+void evtSetSolarOverlayFullyTransparent(void) {
     D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
     D_003BBDB8 = 0.0f;
 }
 
-void func_00228790(void) {
+void evtEnableSolarOverlayAlpha(void) {
     D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
 }
 
-void func_002287A8(void) {
+void evtDisableSolarOverlayAlpha(void) {
     D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
@@ -297,7 +297,7 @@ INCLUDE_ASM(const s32, "game/code_00228058", func_002287C0);
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228930);
 
-void *func_00228A00(s32 owner) {
+void *evtCreateSolarOverlayWork(s32 owner) {
     SolarOverlayWork *overlay;
 
     overlay = func_002CFEB8(0x104);
@@ -320,9 +320,9 @@ void evtStartSolarOverlay(void) {
     if (D_003BBDC0 != 0) {
         return;
     }
-    D_003BBDC0 = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)func_00228A00, (s32)evtFreeSolarOverlayWork, 0);
-    func_00228710();
-    func_00228778();
+    D_003BBDC0 = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)evtCreateSolarOverlayWork, (s32)evtFreeSolarOverlayWork, 0);
+    evtEnableSolarPhaseAdvance();
+    evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
     D_003BAA00->secondaryPhase = 0;
 }

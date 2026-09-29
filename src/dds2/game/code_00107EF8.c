@@ -145,7 +145,7 @@ extern s8 D_00435D18;
 
 extern void *D_00438E60;
 
-extern void func_0010A2B0(void);
+extern void evtSelStateDestroy(void);
 
 typedef struct EvtSelState {
     u8 unk_00[4];
@@ -183,7 +183,7 @@ extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 extern s32 func_0033D060(s32 arg0, s32 arg1);
 
-extern void func_0033D050(s32 arg0, s32 arg1);
+extern void sdfDevConsSetCharacterAttribute(s32 arg0, s32 arg1);
 
 extern void func_00102908(void);
 
@@ -203,7 +203,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108138);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_001081F8);
 
-void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
+void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
     if (mode == 0) {
         D_00435CD4 &= ~0x400;
         D_0037F790.x = x;
@@ -267,7 +267,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108AC0);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108BD8);
 
-void func_00108CE0(s32 value) {
+void evtSubmitTexturePacket(s32 value) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
     u8 *command;
@@ -327,7 +327,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109780);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109950);
 
-void func_00109B80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     void *list;
     D_0037F5B0[0] = x;
     D_0037F5B0[1] = y;
@@ -354,7 +354,7 @@ void func_00109C30(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *list;
     void *packet;
     u8 *surface;
-    list = (void *)func_0011F218();
+    list = (void *)sdfCreateResetPacketList();
     packet = sdfAllocPacketAligned(0x40);
     func_0032E4B8(packet);
     sdfAppendPacket(list, packet);
@@ -372,13 +372,13 @@ void func_00109D00(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_0019C5B0(temp_v0);
 }
 
-s32 func_00109D50(s32 limit, s16 frames, s32 arg2, s32 arg3) {
+s32 evtSelStateCreate(s32 limit, s16 frames, s32 arg2, s32 arg3) {
     EvtSelState *node;
     if (frames == 0) {
         return 0;
     }
     if (D_00435D18 != 0) {
-        func_0010A2B0();
+        evtSelStateDestroy();
     }
     node = func_00328E18(0x28);
     D_00438E60 = node;
@@ -405,7 +405,7 @@ u32 evtUnk9CC0Check(void) {
     if (sel->limit > sel->count || sel->limit == -1) {
         func_00109E60();
     } else {
-        func_0010A2B0();
+        evtSelStateDestroy();
         return 1;
     }
     return 1;
@@ -414,10 +414,10 @@ u32 evtUnk9CC0Check(void) {
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109E60);
 
 void func_0010A298(void) {
-    func_0010A2B0();
+    evtSelStateDestroy();
 }
 
-void func_0010A2B0(void) {
+void evtSelStateDestroy(void) {
     if (D_00435D18 != 0) {
         func_00328E48(D_00438E60);
         D_00435D18 = 0;
@@ -503,11 +503,11 @@ u8 func_0010A478(void) {
 }
 
 void func_0010A498(void) {
-    func_002A7A10();
+    mnuStartStaffMovieRequest();
 }
 
 u32 func_0010A4B0(void) {
-    func_002A7A30();
+    mnuStopStaffTasks();
     return 0;
 }
 
@@ -643,12 +643,12 @@ u32 func_0010A708(void) {
 }
 
 void func_0010A710(void) {
-    func_00299748();
+    mnuStaffCreateTasks();
 }
 
 u32 func_0010A728(void) {
     func_00128658();
-    func_002997F8();
+    mnuStaffDestroyTasks();
     return 0;
 }
 
@@ -660,7 +660,7 @@ u8 func_0010A750(void) {
 }
 
 void func_0010A770(void) {
-    configTasksCreate(1);
+    mnuCreateConfigTasks(1);
 }
 
 u32 func_0010A788(void) {
@@ -739,7 +739,7 @@ u32 func_0010A920(void) {
 
 void func_0010A928(void) {
     D_00435BB0 = 0;
-    func_0023A9A8();
+    evtDestroyWorldSecondaryNode();
     func_0024DAF8();
 }
 
@@ -811,7 +811,7 @@ void func_0010AA68(u32 arg0, s32 arg1) {
 
 u32 func_0010AAB0(void) {
     evtDestroySkyTask();
-    func_00268470();
+    fldStopSceneTasks();
     return 0;
 }
 
@@ -823,11 +823,11 @@ u8 func_0010AAD8(void) {
 }
 
 void func_0010AAF8(void) {
-    func_00299748();
+    mnuStaffCreateTasks();
 }
 
 u32 func_0010AB10(void) {
-    func_002997F8();
+    mnuStaffDestroyTasks();
     return 0;
 }
 
@@ -971,7 +971,7 @@ u32 evtUnkAB90Ensure(void) {
     if (D_00435D30 == 0) {
         D_00435D30 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
         func_0033D060(D_00435D30, 2);
-        func_0033D050(D_00435D30, 7);
+        sdfDevConsSetCharacterAttribute(D_00435D30, 7);
     }
     return 0;
 }
@@ -1034,7 +1034,7 @@ void func_0010B8D8(s8 mode) {
     }
 }
 
-void evtUnkB728Link(B728Work *node) {
+void evtLinkWorkNode(B728Work *node) {
     B728Work *tail = D_00435D68;
 
     if (tail == NULL) {
@@ -1052,7 +1052,7 @@ void evtUnkB728Link(B728Work *node) {
     D_00435D60++;
 }
 
-void evtUnkB768Unlink(B728Work *node) {
+void evtUnlinkWorkNode(B728Work *node) {
     if ((B728Work *)D_00435D64 == node) {
         D_00435D64 = node->next;
     }
@@ -1069,6 +1069,8 @@ void evtUnkB768Unlink(B728Work *node) {
     node->next = NULL;
     D_00435D60--;
 }
+
+INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B9E8);
 
@@ -1099,3 +1101,4 @@ INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D60);
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D64);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D68);
+

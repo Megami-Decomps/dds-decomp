@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_00265478(s32);
+extern void mnuRefreshPanelLayer(s32);
 
 extern s32 func_00101A70();
 extern void func_00285B20(s32);
@@ -10,18 +10,18 @@ INCLUDE_ASM(const s32, "game/code_00262EB8", func_00262EB8);
 
 extern s32 func_00261FB8(s32);
 
-void func_00262F90(s32 input) {
+void mnuStaffRunPanel1(s32 input) {
     s32 context = func_00101A70();
 
     if (func_00261FB8(context) != 0) {
-        func_00265478(context);
+        mnuRefreshPanelLayer(context);
         func_00285670(context + 8, context + 0x54, 1, input);
     }
 }
 
 extern void func_002654E8(s32);
 
-void func_00262FF0(s32 input) {
+void mnuStaffRunPanel2(s32 input) {
     s32 context = func_00101A70();
 
     if (func_00261FB8(context) != 0) {
@@ -46,7 +46,7 @@ void func_00263060(s32 input) {
 
 void func_002630B0(s32 input) {
     s32 context = func_00101A70();
-    func_00265478(context);
+    mnuRefreshPanelLayer(context);
     func_00285670(context + 8, context + 0x54, 1, input);
 }
 

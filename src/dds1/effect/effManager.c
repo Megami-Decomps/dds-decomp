@@ -56,7 +56,7 @@ typedef struct EffNode {
 
 extern EffTypeOps D_0034DE18[];
 
-EffNode *func_0014FA30(u16 type, u16 arg, s32 param) {
+EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
     EffNode *node = (EffNode *)func_002CFEB8(0x10);
 
     node->type = type;
@@ -66,12 +66,12 @@ EffNode *func_0014FA30(u16 type, u16 arg, s32 param) {
     return node;
 }
 
-void func_0014FAB8(EffNode *node) {
+void effDestroyNode(EffNode *node) {
     D_0034DE18[node->type].destroy(node->data);
     func_002CFF98(node);
 }
 
-void func_0014FB00(EffNode *node) {
+void effUpdateNode(EffNode *node) {
     D_0034DE18[node->type].update(node->data);
 }
 
@@ -118,7 +118,7 @@ s32 func_0014FCD8(EffNode *node) {
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FD20);
 
 void func_0014FE28(u32 arg0) {
-    func_0014FA30(5, 0, arg0);
+    effCreateNode(5, 0, arg0);
 }
 
 INCLUDE_ASM(const s32, "effect/effManager", func_0014FE48);

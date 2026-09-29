@@ -8,7 +8,7 @@ extern s32 func_00101958();
 
 extern void func_002C44E8(s32);
 
-extern void titleRenderFadeAndPanels(s32);
+extern void mnuTitleRenderFadeAndPanels(s32);
 
 extern void func_002C4038(s32, s32, s32, s32);
 
@@ -40,16 +40,16 @@ typedef struct MenuItemScene {
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_00299D58);
 
-void func_00299E30(s32 input) {
+void mnuStaffRunPanel1(s32 input) {
     s32 context = func_00101958();
 
     if (func_00298E80(context) != 0) {
-        titleRenderFadeAndPanels(context);
+        mnuTitleRenderFadeAndPanels(context);
         func_002C4038(context + 8, context + 0x54, 1, input);
     }
 }
 
-void func_00299E90(s32 input) {
+void mnuStaffRunPanel2(s32 input) {
     s32 context = func_00101958();
 
     if (func_00298E80(context) != 0) {
@@ -74,7 +74,7 @@ void func_00299F00(s32 input) {
 
 void func_00299F50(s32 input) {
     s32 context = func_00101958();
-    titleRenderFadeAndPanels(context);
+    mnuTitleRenderFadeAndPanels(context);
     func_002C4038(context + 8, context + 0x54, 1, input);
 }
 
@@ -93,7 +93,7 @@ u32 func_00299FE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_00299FE8);
 
-u32 func_0029A088(u32 address) {
+u32 mnuProcessItemSelection(u32 address) {
     u32 result;
     s32 context;
 
@@ -121,7 +121,7 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 void func_0029A588(s32 request) {
     s32 context = func_00101958();
 
-    titleRenderFadeAndPanels(context);
+    mnuTitleRenderFadeAndPanels(context);
     func_002C4038(context + 8, context + 0x54, 1, request);
 }
 
@@ -132,7 +132,7 @@ void func_0029A5D8(s32 request) {
     func_002C4038(context + 8, context + 0x54, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A620);
+INCLUDE_ASM(const s32, "game/code_00299D58", mnuResetItemSelectionMarkers);
 
 u32 func_0029A650(void) {
     return 1;
@@ -147,3 +147,4 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A768);
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A898);
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
+

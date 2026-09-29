@@ -56,7 +56,7 @@ INCLUDE_RODATA(const s32, "game/code_002C2620", D_003B3CA0);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2F40);
 
-void func_002C2FC0(void) {
+void fldInitializeLmapState(void) {
     s64 flagSet;
 
     D_003BD25C = 1;
@@ -80,7 +80,7 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3510);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C35C8);
 
-u32 func_002C3640(void) {
+u32 fldGetLmapStage(void) {
     s64 flagSet;
     u32 stage;
 

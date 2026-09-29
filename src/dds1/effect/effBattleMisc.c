@@ -23,7 +23,7 @@ extern u32 func_00161868(void);
 extern u32 func_00161870(void);
 extern void func_00161BA0();
 
-void func_00161AE0(u32 unused, void *arg) {
+void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
     func_00161BA0(func_00161868(), arg);
 }
 

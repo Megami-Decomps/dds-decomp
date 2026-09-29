@@ -22,17 +22,17 @@ INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC28);
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC68);
 
-void func_0010FCA8(void) {
+void dds3AdvanceWorldCounter(void) {
     D_00435D88 = (D_00435D88 + 1) & 0xffff;
 }
 
-void func_0010FCC0(WorldEntry *entry, void *callbackTarget) {
+void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, void *callbackTarget) {
     if (entry != NULL) {
         entry->callbackTarget = callbackTarget;
     }
 }
 
-void *func_0010FCD0(WorldEntry *entry) {
+void *dds3GetWorldEntryCallbackTarget(WorldEntry *entry) {
     void *callbackTarget;
 
     callbackTarget = NULL;

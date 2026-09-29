@@ -46,7 +46,7 @@ extern u8 D_00439170;
 
 extern u8 D_00439178;
 
-void func_0032CA90(void *arg0, void (*arg1)(void));
+void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
 
 void func_00333140(void);
 
@@ -136,24 +136,24 @@ INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetUniqueChunkValue);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetLodChunkValue);
 
-void func_00332DE8(SdfTextParam *param, f32 first, f32 second) {
+void sdfTextParamSetOverrides(SdfTextParam *param, f32 first, f32 second) {
     param->overrideFirst = first;
     param->overrideSecond = second;
     param->overrideFlags = param->overrideFlags | 2;
 }
 
-void func_00332E00(SdfTextParam *param) {
+void sdfTextParamClearOverrides(SdfTextParam *param) {
     param->overrideFlags = param->overrideFlags & 0xfd;
 }
 
-f32 func_00332E10(SdfTextParam *param) {
+f32 sdfTextParamGetFirstValue(SdfTextParam *param) {
     if ((param->overrideFlags & 2) != 0) {
         return param->overrideFirst;
     }
     return D_00438A48;
 }
 
-f32 func_00332E30(SdfTextParam *param) {
+f32 sdfTextParamGetSecondValue(SdfTextParam *param) {
     if ((param->overrideFlags & 2) != 0) {
         return param->overrideSecond;
     }
@@ -185,7 +185,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
 
-void func_00332F70(s32 arg0, s32 arg1, s32 arg2) {
+void sdfReduceResourceListCount(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_v0;
 
     if ((arg1 < *(s16 *)(arg0 + 4)) && (arg2 != 0)) {
@@ -202,12 +202,12 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332FC8);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333060);
 
-void func_003330F0(void) {
-    func_0032CA90(&D_00439170, func_00333140);
-    func_0032CA90(&D_00439178, sdfAssetRelease);
+void sdfRegisterResourceQueueCallbacks(void) {
+    sdfInitializeSynchronizedRequest(&D_00439170, func_00333140);
+    sdfInitializeSynchronizedRequest(&D_00439178, sdfAssetRelease);
 }
 
-void func_00333120(u32 arg0) {
+void sdfCreateResourceList(u32 arg0) {
     sdfDevCreateBufferedRequest(arg0, 4, 8);
 }
 
@@ -333,7 +333,7 @@ void sdfAssetRelease(SdfAsset *asset) {
     func_00328E48(asset);
 }
 
-void func_00333918(s32 arg0) {
+void sdfQueueAssetRelease(s32 arg0) {
     s32 id = arg0;
 
     if (id != 0) {
@@ -341,7 +341,7 @@ void func_00333918(s32 arg0) {
     }
 }
 
-void *func_00333950(u32 *arg0, SdfNode *arg1, s32 arg2) {
+void *sdfInitNodeHeaderFromWords(u32 *arg0, SdfNode *arg1, s32 arg2) {
     u32 *entry = arg0 + arg2;
 
     arg1->unk3 = 0x30;
@@ -419,3 +419,4 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00334078);
 INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A38);
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A3C);
+

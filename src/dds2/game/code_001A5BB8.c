@@ -235,7 +235,7 @@ extern void func_001A0CA0(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4
 
 void func_001A5BB8(s32 arg0) {
     for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
-        func_0019D038(arg0);
+        frFontEnableContextMode(arg0);
     }
 }
 
@@ -307,7 +307,7 @@ void func_001A5F08(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     *(s16 *)(arg0 + 6) = arg3;
 }
 
-void func_001A5F18(BattleEffect *effect) {
+void btlReleaseEffectResourceHandles(BattleEffect *effect) {
     u32 *handles = effect->resourceHandles;
     if (handles[0] != 0) {
         func_001A1930(handles[0]);
@@ -338,7 +338,7 @@ void func_001A5FA0(s32 *arg0) {
     } while (-1 < temp_v0);
 }
 
-u16 *func_001A5FF0(s32 value, u16 *out) {
+u16 *txtFormatNumberU16(s32 value, u16 *out) {
     s32 digits[10];
     s32 count = 0;
     s32 i;
@@ -360,7 +360,7 @@ void func_001A6128(u32 arg0) {
     func_001A6160();
     func_001A6350(arg0);
     func_001A6528(arg0);
-    func_001A6B48(arg0);
+    btlUpdateFadeIndicator(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6160);
@@ -416,7 +416,7 @@ typedef struct BtlFade {
     s16 timer;
 } BtlFade;
 
-void func_001A6B48(u8 *obj) {
+void btlUpdateFadeIndicator(u8 *obj) {
     BtlFade *fade = (BtlFade *)(obj + 0x1D0);
     s32 minimumAlpha;
     if (fade->kind != 0) {
@@ -515,19 +515,19 @@ extern s32 func_001A8848();
 
 extern u8 D_003B4A28[];
 
-extern s32 func_0010BE90();
+extern s32 scrCreateTaskForProcessId();
 
 extern void func_001A4BB8();
 
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
-    func_001A87E8();
-    func_001A4BB8(*(s32 *)(func_00101958(func_0010BE90(0x3E8, D_003B4A28, 0)) + 0xCC), func_001A8918);
+    sndCycleTestMessageResource();
+    func_001A4BB8(*(s32 *)(func_00101958(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)) + 0xCC), func_001A8918);
     kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, func_001A8848, 0, 0);
     kwlnTaskCreate((s32)"TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
 
-void func_001A87E8(void) {
+void sndCycleTestMessageResource(void) {
     if (D_00436644 != 0) {
         func_0032BBB0(D_00436644);
         D_00436644 = 0;
@@ -540,7 +540,7 @@ void func_001A87E8(void) {
 
 s32 func_001A8848(void) {
     if (D_0037F530[0] < 0) {
-        func_001A87E8();
+        sndCycleTestMessageResource();
     }
     return 0;
 }
@@ -558,13 +558,13 @@ s32 sndUpdateTestMsgTask(void) {
     return 0;
 }
 
+extern s32 func_0035B6E0();
+
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EB0);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EE0);
-
-extern s32 func_0035B6E0();
 
 void func_001A8918(void) {
     func_0035B6E0("********* AAAA ********\n");
@@ -602,7 +602,7 @@ void func_001A9910(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9920);
 
-void func_001A9948(void) {
+void btlClearModelFlagRange(void) {
     s32 temp_v0;
     s32 temp_v1;
 
@@ -614,7 +614,7 @@ void func_001A9948(void) {
     } while (temp_v0 < 0xc00);
 }
 
-extern s32 func_00203138(void);
+extern s32 btlUpdateFadeColor(void);
 
 extern s32 func_001E0BF8(void);
 
@@ -632,7 +632,7 @@ extern s32 func_001E7648(void);
 
 extern s32 func_0020D108(void);
 
-extern s32 func_001E1730(void);
+extern s32 btlSweepFinishedTasks(void);
 
 extern s32 func_001E9130(void);
 
@@ -643,7 +643,7 @@ s32 func_001A9988(void) {
         return 0;
     }
     if (((BattleController *)D_004366E4)->flags & 1) {
-        func_00203138();
+        btlUpdateFadeColor();
         func_001E0BF8();
         func_00200828();
         func_00205160();
@@ -652,7 +652,7 @@ s32 func_001A9988(void) {
         func_001DD060();
         func_001E7648();
         func_0020D108();
-        func_001E1730();
+        btlSweepFinishedTasks();
         func_001E9130();
         ((BattleController *)D_004366E4)->frame = ((BattleController *)D_004366E4)->frame + 1;
     } else {
@@ -706,7 +706,7 @@ extern s32 func_001A9A30();
 
 extern s32 func_001A9988();
 
-void func_001A9AB0(void) {
+void btlCreateDrawTasks(void) {
     BattleController *battle = (BattleController *)D_004366E4;
     s32 draw;
     draw = kwlnTaskCreate((s32)D_004366F0, 0x3F9, 0, 0, func_001A9988, func_001A9AA8, 0);
@@ -1194,7 +1194,7 @@ typedef struct EntryPair {
 
 extern EntryPair D_003B4DF0[];
 
-s32 func_001ADCD0(UiObject *unit, s32 index) {
+s32 btlMatchActorEntryCode(UiObject *unit, s32 index) {
     s16 value = unit->entrySlots[index].code;
     if (D_003B4DF0[index].first != 0) {
         if (D_003B4DF0[index].first == value) {
@@ -1211,13 +1211,13 @@ s32 func_001ADCD0(UiObject *unit, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADD30);
 
-void func_001ADDB8(UiObject *unit, s32 index, u16 code) {
+void btlSetActorEntryCode(UiObject *unit, s32 index, u16 code) {
     unit->entrySlots[index].code = code;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADDD0);
 
-s16 func_001ADE00(UiObject *unit, s32 index) {
+s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
@@ -1225,9 +1225,9 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADE18);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADFE0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE2C0);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlLowestSetPairIndex);
 
-void func_001AE358(UiObject *unit) {
+void btlTickActorEntryCountdowns(UiObject *unit) {
     s16 *entry = &unit->entrySlots[0].countdown;
     u32 i;
     for (i = 0; i < 7; i++) {
@@ -1347,6 +1347,8 @@ s32 func_001B0940(s32 unused, u8 *unit, s32 flagsA, s32 flagsB) {
     return func_00211DE0() < threshold;
 }
 
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415440);
+
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B09F0);
 
 f32 func_001B0B20(void) {
@@ -1396,7 +1398,7 @@ s32 func_001B1640(s32 first, s32 second, s32 other, s32 variant, s32 mode) {
     if (mode != 1) {
         return 0;
     }
-    flags = func_001194E8(other, first + 0x120, second + 0x120);
+    flags = sdfQueryChannelBits(other, first + 0x120, second + 0x120);
     if ((*(u16 *)(second + 0x12E) & 8) != 0 && variant == 2) {
         flags |= 8;
     }
@@ -1480,6 +1482,8 @@ s32 func_001B2620(UiObject *object) {
     }
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415638);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
 
@@ -1879,6 +1883,8 @@ s32 func_001B47E0(UiObject *object) {
     return (*(s32 *)(D_00435DEC + object->index * 76) & 0x100) > 0;
 }
 
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415840);
+
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4828);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4918);
@@ -1957,7 +1963,7 @@ s32 func_001B5758(void) {
     return 0;
 }
 
-s32 func_001B57B0(void) {
+s32 btlCountFlaggedSceneActors(void) {
     BattleController *controller = (BattleController *)func_001AA6F8();
     UiObject *unit;
     s32 count = 0;
@@ -3004,3 +3010,4 @@ INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436840);
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436848);
 
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436850);
+

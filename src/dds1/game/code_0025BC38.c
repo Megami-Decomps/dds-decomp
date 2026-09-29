@@ -32,7 +32,7 @@ void func_0025BC38(MovieResourceGroup *resources) {
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 D_0036C698[];
 
-void func_0025BCA0(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
+void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
     func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, D_0036C698[0], 0x25, param);
 }
 
@@ -48,7 +48,7 @@ typedef struct MovieCueNode {
 extern void func_0025BA20(s32, s32, u8 *, s32);
 extern u8 *func_002CAF78(s32, u8 *);
 
-s32 func_0025BD18(s32 owner, s32 group) {
+s32 mnuTickResourceGroup(s32 owner, s32 group) {
     u8 *list = *(u8 **)(group + 8);
     MovieCueNode *node;
 
@@ -80,7 +80,7 @@ typedef struct {
     u32 resourceHandle; /* 0x6C */
 } MenuResourceWork;
 
-u32 func_0025C030(u32 ctx, u32 config) {
+u32 mnuRequestResourceWork(u32 ctx, u32 config) {
     MenuResourceWork *work = (MenuResourceWork *)func_002CFEB8(0x70);
     memset(work, 0, 0x70);
     effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
@@ -97,11 +97,11 @@ typedef struct {
     MenuListNode *first; /* 0x08 */
 } MenuListHead;
 
-u8 func_0025C098(MenuResourceWork *work) {
+u8 mnuHasResourceHandle(MenuResourceWork *work) {
     return work->resourceHandle != 0;
 }
 
-void func_0025C0A8(MenuResourceWork *work) {
+void mnuReleaseResourceWork(MenuResourceWork *work) {
     func_002BDD60(work->resourceHandle);
     func_002CFF98(work);
 }
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C418);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C4C8);
 
-void func_0025C568(s32 *frame) {
+void mnuAdvanceLoopingFrame(s32 *frame) {
     s32 oldFrame;
 
     oldFrame = *frame;
@@ -175,7 +175,7 @@ extern void func_0025C830(s32, s32);
 
 void func_0025D2C0(s32 arg0, s32 arg1) {
     func_0025C830(arg1, arg0);
-    func_0025C568((s32 *)(arg0 + 0x490));
+    mnuAdvanceLoopingFrame((s32 *)(arg0 + 0x490));
 }
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D2F8);
@@ -219,7 +219,7 @@ DspListNode *func_0025DAD0(DspListHead *head) {
     return node;
 }
 
-MenuListNode *func_0025DB58(MenuListNode *node) {
+MenuListNode *mnuFreeMenuListNodeAndGetNext(MenuListNode *node) {
     MenuListNode *next;
 
     next = node->next;
@@ -231,7 +231,7 @@ void mnuReleaseListNodes(MenuListHead *head) {
     MenuListNode *node = head->first;
 
     while (node != NULL) {
-        node = func_0025DB58(node);
+        node = mnuFreeMenuListNodeAndGetNext(node);
     }
 }
 
@@ -240,7 +240,7 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DBB0);
 extern s32 func_0025DBB0(s32);
 extern s32 func_0025D7F8(MenuListNode *, s32, s32);
 
-s32 func_0025DCC8(s32 arg0, s32 arg1, s32 arg2) {
+s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
     s32 *counter = (s32 *)arg0;
     MenuListHead *head = (MenuListHead *)arg0;
     MenuListNode *node = head->first;
@@ -259,7 +259,7 @@ s32 func_0025DCC8(s32 arg0, s32 arg1, s32 arg2) {
 
         index++;
         if (hit != 0) {
-            node = func_0025DB58(node);
+            node = mnuFreeMenuListNodeAndGetNext(node);
             head->first = node;
         } else {
             node = node->next;
@@ -268,11 +268,11 @@ s32 func_0025DCC8(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-extern s32 func_0025DCC8(s32, s32, s32);
+extern s32 mnuAdvanceDisplayList(s32, s32, s32);
 extern void func_0025D798(s32, s32, s32, s32, s32, s32);
 
 void func_0025DD80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if (func_0025DCC8(arg1, arg2, arg3) != 0) {
+    if (mnuAdvanceDisplayList(arg1, arg2, arg3) != 0) {
         func_0025D798(0, 0, 0, arg0, arg2, arg3);
     }
 }
@@ -280,7 +280,7 @@ void func_0025DD80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 extern u16 D_0036C6D0[];
 extern s32 mdlFlagTest(s32);
 
-void func_0025DDF0(u8 *flags) {
+void mnuCollectFlagArray(u8 *flags) {
     u32 i;
 
     for (i = 0; i < 0x29; i++, flags++) {
@@ -293,7 +293,7 @@ void func_0025DDF0(u8 *flags) {
 extern u16 D_0036C6D0[];
 extern void mdlFlagSet(s32);
 
-void func_0025DE60(u8 *flags) {
+void mnuApplyFlagArray(u8 *flags) {
     u32 i;
 
     for (i = 0; i < 0x29; i++) {
@@ -314,3 +314,4 @@ INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D8);
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E0);
 
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E8);
+

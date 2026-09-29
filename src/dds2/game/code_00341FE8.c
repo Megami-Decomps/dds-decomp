@@ -31,7 +31,7 @@ extern s32 func_00342168(s32 id);
 
 extern s32 D_00438B80;
 
-void soundSendSpatialPosition(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
+void sndSendSpatialPosition(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
     u32 packet[8];
 
     packet[0] = arg0;
@@ -48,7 +48,7 @@ INCLUDE_ASM(const s32, "game/code_00341FE8", func_00342168);
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003421E8);
 
-u32 func_003422C0(char *filename) {
+u32 sndSendFilenameCommand(char *filename) {
     u32 length = strlen(filename);
     return func_003417A8(0xA0, 0, filename, length);
 }

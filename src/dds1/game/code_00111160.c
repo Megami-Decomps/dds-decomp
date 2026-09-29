@@ -21,7 +21,7 @@ typedef struct ActionObj {
 
 extern ActionObj *func_00110880();
 
-ActionObj *func_00111188(s32 a, s32 b) {
+ActionObj *evtSpawnActionObj2(s32 a, s32 b) {
     ActionObj *obj = func_00110880(2);
 
     obj->unk4 = a;
@@ -33,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00111160", func_001111C8);
 
 INCLUDE_ASM(const s32, "game/code_00111160", func_00111258);
 
-s32 func_001112A8(u8 *obj, s32 index) {
+s32 dds3GetWorldSlotValue(u8 *obj, s32 index) {
     return *(s32 *)(*(u8 **)(obj + 0x18) + (index << 2));
 }
 
@@ -54,7 +54,7 @@ s32 func_00111400(ObjWithWork *obj) {
     return 1;
 }
 
-void func_00111440(ObjWithWork *obj) {
+void dds3ReleaseWorldSlotResource(ObjWithWork *obj) {
     u32 *slot;
 
     slot = obj->work;

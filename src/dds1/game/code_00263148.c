@@ -20,7 +20,7 @@ extern void func_002CD428(void *, u16);
 
 extern void mdlFlagSet(s32);
 
-extern void func_00265478(s32 arg0);
+extern void mnuRefreshPanelLayer(s32 arg0);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
@@ -65,7 +65,7 @@ void kwlnItemApplySelection(MenuItemScene *scene) {
     }
 }
 
-u32 func_00263220(u32 arg0) {
+u32 mnuProcessItemSelection(u32 arg0) {
     u32 temp_v0;
     s32 temp_v1;
 
@@ -106,7 +106,7 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
 
 s64 func_00263570(s32 request) {
     s32 context = func_00101A70();
-    func_00265478(context);
+    mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, request);
 }
 
@@ -116,7 +116,7 @@ s64 func_002635C0(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-s32 func_00263608(void) {
+s32 mnuResetItemSelectionMarkers(void) {
     MenuItemScene *scene = (MenuItemScene *)func_00101A70();
     scene->resetStateA = 0;
     scene->resetStateB = 0;
@@ -133,7 +133,7 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263728);
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263838);
 
-void func_002639E0(s32 scene) {
+void mnuDrawItemPanelBackdrop(s32 scene) {
     mnuDrawBackdrop(scene + 0xd1c, 0x20);
 }
 
@@ -150,7 +150,7 @@ s64 func_00263C98(s32 request) {
     if (func_002624C0(context) != 0) {
         return 0;
     }
-    func_002639E0(context);
+    mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 0);
     return menuRunPanel(context, 1, request);
 }
@@ -165,7 +165,7 @@ s64 func_00263D10(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-u32 func_00263D70(void) {
+u32 mnuInitializeItemSelectionExtent(void) {
     s8 component;
     MenuItemScene *scene;
     u32 *slot;
@@ -207,7 +207,7 @@ u32 func_00263E30(void) {
     return 1;
 }
 
-void func_00263E38(MenuItemScene *scene) {
+void mnuClearItemSelectionSlots(MenuItemScene *scene) {
     s32 remaining;
     u32 *slot;
 

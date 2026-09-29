@@ -27,7 +27,7 @@ extern s32 func_00101A70();
 
 extern void func_00272778(s32);
 
-extern void func_00272350(s32);
+extern void mnuCreateStaffImageSprite(s32);
 
 extern void func_002723B0(s32, s32);
 
@@ -103,7 +103,7 @@ s64 func_0027A0A8(s32 callback) {
 
 void mnuDrawSelectionLabel(s32 selection) {
     s32 item = func_00197E08(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
-    func_001954C8(item, 0xA09DC366);
+    frFontSetChildColors(item, 0xA09DC366);
     func_001958A0(item, 1, 0x53);
     func_00194920(item);
 }
@@ -149,7 +149,7 @@ s32 mnuResetSelection(s32 selection) {
     context = func_00101A70(selection);
     menu = *(s32 *)(context + 0x90C);
     func_0027A540(selection);
-    menuFlagActiveWindows(context + 0x15C);
+    mnuFlagActiveWindows(context + 0x15C);
     *(s32 *)(menu + 0x2C) = 0;
     return 1;
 }
@@ -196,7 +196,7 @@ void campMenuDrawStatus(s32 param) {
 
     func_00272778(param);
     mnuDrawListFrames(context);
-    func_00272350(0x10);
+    mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
     func_0027CDD0(0x1C0, 0x3D0, 0, *(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20), 0x53);
     node = *(s32 *)(*(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20) + 0x14);
@@ -359,7 +359,7 @@ typedef struct MenuList {
     s32 count;
 } MenuList;
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B3A8);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuUpdateListScrollFlags);
 
 extern MenuListNode *func_002CFF68(s32);
 
@@ -387,7 +387,7 @@ MenuListNode *mnuListAppendNode(list, value)
     node->index = index;
     list->last = node;
     list->count++;
-    func_0027B3A8(list);
+    mnuUpdateListScrollFlags(list);
     if (list->visibleCount < 3) {
         if (list->visibleCount < list->count) {
             list->visibleCount = list->count;
@@ -434,14 +434,14 @@ void *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BA90);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuSeekListNode);
 
 void func_0027BB08(u32 arg0) {
-    func_0027BA90(0, arg0);
+    mnuSeekListNode(0, arg0);
 }
 
 void func_0027BB28(s32 *arg0) {
-    func_0027BA90(arg0[8] - 1, arg0);
+    mnuSeekListNode(arg0[8] - 1, arg0);
 }
 
 s32 func_0027BB48(s32 *arg0) {
@@ -905,7 +905,7 @@ void menuLinkItemList(MenuListNode **items, s32 count) {
     }
 }
 
-s32 func_0027DFF8(MenuListNode **left, MenuListNode **right) {
+s32 mnuComparePrimaryKeyDescending(MenuListNode **left, MenuListNode **right) {
     u32 leftKey = (*left)->sortKeyPrimary;
     u32 rightKey = (*right)->sortKeyPrimary;
 
@@ -915,7 +915,7 @@ s32 func_0027DFF8(MenuListNode **left, MenuListNode **right) {
     return leftKey < rightKey;
 }
 
-s32 func_0027E020(MenuListNode **left, MenuListNode **right) {
+s32 mnuComparePrimaryKeyAscending(MenuListNode **left, MenuListNode **right) {
     u32 leftKey = (*left)->sortKeyPrimary;
     u32 rightKey = (*right)->sortKeyPrimary;
 
@@ -925,7 +925,7 @@ s32 func_0027E020(MenuListNode **left, MenuListNode **right) {
     return (leftKey < rightKey) ? -1 : 0;
 }
 
-s32 func_0027E050(MenuListNode **left, MenuListNode **right) {
+s32 mnuCompareSecondaryKeyDescending(MenuListNode **left, MenuListNode **right) {
     u32 leftKey = (*left)->sortKeySecondary;
     u32 rightKey = (*right)->sortKeySecondary;
 
@@ -935,7 +935,7 @@ s32 func_0027E050(MenuListNode **left, MenuListNode **right) {
     return leftKey < rightKey;
 }
 
-s32 func_0027E078(MenuListNode **left, MenuListNode **right) {
+s32 mnuCompareSecondaryKeyAscending(MenuListNode **left, MenuListNode **right) {
     u32 leftKey = (*left)->sortKeySecondary;
     u32 rightKey = (*right)->sortKeySecondary;
 
@@ -945,7 +945,7 @@ s32 func_0027E078(MenuListNode **left, MenuListNode **right) {
     return (leftKey < rightKey) ? -1 : 0;
 }
 
-s32 func_0027E0A8(MenuListNode **left, MenuListNode **right) {
+s32 mnuCompareTertiaryKeyDescending(MenuListNode **left, MenuListNode **right) {
     u32 leftKey = (*left)->sortKeyTertiary;
     u32 rightKey = (*right)->sortKeyTertiary;
 
@@ -955,7 +955,7 @@ s32 func_0027E0A8(MenuListNode **left, MenuListNode **right) {
     return leftKey < rightKey;
 }
 
-s32 func_0027E0D0(MenuListNode **left, MenuListNode **right) {
+s32 mnuCompareTertiaryKeyAscending(MenuListNode **left, MenuListNode **right) {
     u32 leftKey = (*left)->sortKeyTertiary;
     u32 rightKey = (*right)->sortKeyTertiary;
 
@@ -979,8 +979,8 @@ INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
 
 void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
     s32 (*comparators[6])(MenuListNode **, MenuListNode **) = {
-        func_0027DFF8, func_0027E050, func_0027E0A8,
-        func_0027E020, func_0027E078, func_0027E0D0
+        mnuComparePrimaryKeyDescending, mnuCompareSecondaryKeyDescending, mnuCompareTertiaryKeyDescending,
+        mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 count = 0;
     s32 handle = func_002D03F8(((MenuList *)menu)->count * 4);
@@ -1054,7 +1054,7 @@ void mnuUpdateFade(s32 *list) {
     }
 }
 
-void func_0027E4E0(u8 *menu) {
+void mnuInitScrollHandles(u8 *menu) {
     ScrollHandle *handle;
 
     handle = func_002BD258(1);
@@ -1100,7 +1100,7 @@ s32 func_0027E5C0(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
         func_002BFB98(temp_v1 + 0x30, 0, 0);
         temp_v1 = temp_v1 + 8;
     } while (-1 < temp_v2);
-    func_0027E4E0(temp_v0);
+    mnuInitScrollHandles(temp_v0);
     return temp_v0;
 }
 
@@ -1164,16 +1164,16 @@ void *func_0027EAF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) 
     u8 *item = (u8 *)func_002CFEB8(0x3C);
 
     memset(item, 0, 0x3C);
-    *(s32 *)(item + 0xC) = func_002BDBC0(arg1, 0, 1);
-    *(s32 *)(item + 0x10) = func_002BDBC0(arg1, 1, 1);
-    *(s32 *)(item + 0x14) = func_002BDBC0(arg0, 2, 1);
-    *(s32 *)(item + 0x18) = func_002BDBC0(arg0, 5, 1);
-    *(s32 *)(item + 0x1C) = func_002BDBC0(arg0, 6, 1);
-    *(s32 *)(item + 0x20) = func_002BDBC0(arg0, 7, 1);
-    *(s32 *)(item + 0x24) = func_002BDBC0(arg0, 8, 1);
-    *(s32 *)(item + 0x28) = func_002BDBC0(arg0, 0xA, 1);
-    *(s32 *)(item + 0x30) = func_002BDBC0(arg2, arg3, 1);
-    *(s32 *)(item + 0x2C) = func_002BDBC0(arg4, arg5, 1);
+    *(s32 *)(item + 0xC) = effCreateResourceSlotSet(arg1, 0, 1);
+    *(s32 *)(item + 0x10) = effCreateResourceSlotSet(arg1, 1, 1);
+    *(s32 *)(item + 0x14) = effCreateResourceSlotSet(arg0, 2, 1);
+    *(s32 *)(item + 0x18) = effCreateResourceSlotSet(arg0, 5, 1);
+    *(s32 *)(item + 0x1C) = effCreateResourceSlotSet(arg0, 6, 1);
+    *(s32 *)(item + 0x20) = effCreateResourceSlotSet(arg0, 7, 1);
+    *(s32 *)(item + 0x24) = effCreateResourceSlotSet(arg0, 8, 1);
+    *(s32 *)(item + 0x28) = effCreateResourceSlotSet(arg0, 0xA, 1);
+    *(s32 *)(item + 0x30) = effCreateResourceSlotSet(arg2, arg3, 1);
+    *(s32 *)(item + 0x2C) = effCreateResourceSlotSet(arg4, arg5, 1);
     return item;
 }
 
@@ -1225,12 +1225,12 @@ void func_0027F050(s32 arg0, u32 arg1, u32 arg2, u32 arg3, s32 arg4
                                     ) {
     u32 temp_v0;
 
-    temp_v0 = func_002BDBC0(arg1, arg2, 1);
+    temp_v0 = effCreateResourceSlotSet(arg1, arg2, 1);
     *(u32 *)(arg0 + 0xe8) = temp_v0;
-    temp_v0 = func_002BDBC0(arg1, arg3, 1);
+    temp_v0 = effCreateResourceSlotSet(arg1, arg3, 1);
     *(u32 *)(arg0 + 0xec) = temp_v0;
     if (-1 < arg4) {
-        temp_v0 = func_002BDBC0(arg1, arg4, 1);
+        temp_v0 = effCreateResourceSlotSet(arg1, arg4, 1);
         *(u32 *)(arg0 + 0xf0) = temp_v0;
     }
 }
@@ -1288,7 +1288,7 @@ typedef struct MenuPageMotion {
     s32 field4C;
 } MenuPageMotion;
 
-void menuSetPageParams(MenuPageMotion *page, s32 mode) {
+void mnuSetPageParams(MenuPageMotion *page, s32 mode) {
     switch (mode) {
     case 0:
         page->field44 = 0;
@@ -1579,7 +1579,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_002806E8);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_002807E8);
 
-void menuFlagActiveWindows(u8 *menu) {
+void mnuFlagActiveWindows(u8 *menu) {
     u8 *kind = menu + 8;
     u8 *flags = menu + 12;
     u32 i = 0;
@@ -1608,7 +1608,7 @@ void func_002808A8(s32 arg0) {
 }
 
 void mnuClearListFlags(s32 which, s32 *menu) {
-    func_0027BA90(0, menu[0x67C / 4 + which]);
+    mnuSeekListNode(0, menu[0x67C / 4 + which]);
     if (which == 0) {
         *menu &= ~2;
         *menu &= ~4;
@@ -1648,7 +1648,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 
     func_002CD0D8(textId & 0xFFFF, 1, text);
     item = func_001951C8(text, 0, 0, 0, 0);
-    func_001954C8(item, color);
+    frFontSetChildColors(item, color);
     width = frFontMeasureGlyphChain(item) + 8;
     func_00195450(item, x - (width * 0x10 >> 1) + 0x5F0, y);
     func_001958A0(item, 1, param);

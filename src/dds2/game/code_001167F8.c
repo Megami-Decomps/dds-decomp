@@ -22,7 +22,7 @@ u32 func_00116800(WorldUnitOwner *object) {
     return object->state->value74;
 }
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116810);
+INCLUDE_ASM(const s32, "game/code_001167F8", evtSpawnActionObj9);
 
 void func_00116858(void) {
     func_00110B50();
@@ -35,11 +35,11 @@ void dds3ClearUnitObjectLowFlags(WorldUnitOwner *object) {
 }
 
 void func_00116938(u32 value, WorldUnitOwner *object) {
-    func_0023C750(object->state->unit, value);
+    evtSetUnitValueTransition(object->state->unit, value);
 }
 
 void func_00116958(WorldUnitOwner *object) {
-    func_0023C7C0(object->state->unit);
+    evtEndUnitValueTransition(object->state->unit);
 }
 
 INCLUDE_ASM(const s32, "game/code_001167F8", func_00116978);

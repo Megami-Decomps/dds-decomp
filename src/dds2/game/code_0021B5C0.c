@@ -110,7 +110,7 @@ extern BtlEntry *D_00435E30;
 extern BtlWork *func_001AA6F8(void);
 extern s32 func_0020D128(const char *, ...);
 extern BtlTask *func_001E5FF8(s32, s32);
-extern void startBattleTask(BtlTask *);
+extern void btlStartTask(BtlTask *);
 extern s32 func_001B2430(BtlUnit *, s32);
 extern BtlTask *sndCreateStationedSeTask(s32);
 extern s32 func_001AB9F0(BtlUnit *, s32);
@@ -128,14 +128,14 @@ extern void func_00336AA8(void);
 extern void func_001E96C8(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern s32 func_0021C5E0();
 
-void func_0021B5C0(void) {
+void btlCancelCurrentSubtask(void) {
     BtlSub718 *sub;
     s32 task;
 
     sub = func_001AA6F8()->sub;
     task = sub->task;
     if (task != 0) {
-        func_001E7D30(task);
+        btlDestroyUnit(task);
         sub->task = 0;
     }
 }
@@ -147,7 +147,7 @@ u64 func_0021B600(u64 arg) {
         task->kind = 4;
     }
     task->flags = 0x8000000000000003;
-    startBattleTask(task);
+    btlStartTask(task);
     return task->result;
 }
 
@@ -183,7 +183,7 @@ f32 func_0021B6C0(BtlUnit *unit, BtlUnit *target) {
     return scale;
 }
 
-void func_0021B788(BtlSkillTask *task, s32 arg1, s32 arg2, s32 skillId) {
+void btlSetSkillTaskResults(BtlSkillTask *task, s32 arg1, s32 arg2, s32 skillId) {
     s32 percent = 100;
     if (skillId >= 0x1AB && skillId < 0x220) {
         percent *= func_001AB9F0(task->unit, skillId);
@@ -215,7 +215,7 @@ void func_0021C428(BtlEffect *fx) {
     }
 }
 
-s32 func_0021C548(BtlEffect *fx) {
+s32 btlInitializeEffectVectors(BtlEffect *fx) {
     f32 *vec = fx->vec30;
     fx->vec10[0] = 1.0f;
     func_001EC868(fx, vec, 25.0f);
@@ -247,7 +247,7 @@ INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021E778);
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021E8C0);
 
-s32 func_0021EA38(BtlUnit *unit, s32 index) {
+s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
     if (!(unit->flags & 0x400)) {
         return -1;
     }
@@ -272,7 +272,7 @@ s32 func_0021EA38(BtlUnit *unit, s32 index) {
     }
 }
 
-s32 func_0021EAF8(BtlUnit *unit, s32 index) {
+s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
     if (!(unit->flags & 0x400)) {
         return -1;
     }
@@ -308,7 +308,7 @@ void func_0021EB78(BtlUnit *unit) {
             mode = unit->mode;
             if (mode < 0x113) {
                 if (mode >= 0x111) {
-                    startBattleTask(sndCreateStationedSeTask(func_001AA6F8()->unk208 + 1));
+                    btlStartTask(sndCreateStationedSeTask(func_001AA6F8()->unk208 + 1));
                 }
             }
         }
@@ -326,11 +326,11 @@ s32 func_0021EBF0(void) {
     return work->sub->b8;
 }
 
-void func_0021EC30(void) {
+void btlResetBossRatioScale(void) {
     func_001AA6F8()->sub->scale = 1.0f;
 }
 
-void func_0021EC60(BtlSkillTask *task) {
+void btlAccumulateBossRatioScale(BtlSkillTask *task) {
     f32 *ratio;
     BtlParams *params;
     if (task->flags & 8) {
@@ -348,7 +348,7 @@ void func_0021EC60(BtlSkillTask *task) {
     }
 }
 
-f32 func_0021ED08(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
+f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     f32 scale = 1.0f;
     if (kind == 0x1A9 && flag == 1) {
         if (unit->flags & 0x400) {
@@ -358,7 +358,7 @@ f32 func_0021ED08(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     return scale;
 }
 
-BtlUnit *findBattleUnitByMode(void) {
+BtlUnit *btlFindUnitByMode(void) {
     BtlWork *work = func_001AA6F8();
     BtlSub718 *sub = work->sub;
     BtlUnit *unit;
@@ -377,7 +377,7 @@ BtlUnit *findBattleUnitByMode(void) {
     return 0;
 }
 
-u64 func_0021EDD8(u64 value) {
+u64 btlMaskValueWhenSubtaskInactive(u64 value) {
     BtlWork *work;
     u64 result;
 

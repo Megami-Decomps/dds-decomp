@@ -68,11 +68,11 @@ extern void func_0032D528(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_0032E918(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28);
 
-extern void func_00330240(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildFillPacket106(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_003303B0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildFillPacket101(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_00330900();
+void sdfDestroyObjectList();
 
 extern void func_00328E48(void *allocation);
 
@@ -107,13 +107,13 @@ struct SdfRouteNode {
     SdfRouteOwner *root;
 };
 
-extern void func_00330520(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildQuadPacket102(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_0032ECA8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildPacket116(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_0032F038(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildPacket104x4(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_0032F230(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildPacket10C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
@@ -133,7 +133,7 @@ extern SdfSynchronizedRequest D_00439150;
 extern void sdfTexRelease();
 
 void func_0032C448(void) {
-    func_0032CA90(&D_00439150, (u32)sdfTexRelease);
+    sdfInitializeSynchronizedRequest(&D_00439150, (u32)sdfTexRelease);
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C468);
@@ -150,7 +150,7 @@ void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s3
     sdfAppendPacketRange(list, buffer, buffer + 0xc0);
 }
 
-void func_0032C730(SdfBigPacket *packet, s32 entryIndex) {
+void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(D_0040B298[entryIndex]->unk0C >> 6);
 }
 
@@ -169,7 +169,7 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 
     sdfAppendPacketRange(list, block, block + 0x80);
 }
 
-void func_0032CA90(SdfSynchronizedRequest *request, u32 value) {
+void sdfInitializeSynchronizedRequest(SdfSynchronizedRequest *request, u32 value) {
     if (D_004389FC < 0) {
         D_004389FC = sdfCreateSemaphore(1, 0x7f, 0);
     }
@@ -184,7 +184,7 @@ typedef struct SdfLink {
     struct SdfLink *peer;
 } SdfLink;
 
-SdfLink *func_0032CBB0(void) {
+SdfLink *sdfDetachPendingList(void) {
     SdfLink *head = D_00439160;
     SdfLink *link;
 
@@ -224,7 +224,7 @@ u64 sdfGraphHasPendingWork(void) {
     return 0;
 }
 
-u64 func_0032CD98(void) {
+u64 sdfGraphHasPendingWorkInterruptSafe(void) {
     s64 interruptState;
     u64 pendingWork;
 
@@ -268,11 +268,11 @@ s32 sdfAllocPacketAligned(s32 size) {
     return address;
 }
 
-s32 func_0032CEA0(void) {
+s32 sdfGetPacketCursor(void) {
     return D_00438A10;
 }
 
-void func_0032CEA8(s32 arg0) {
+void sdfSetPacketCursorAligned(s32 arg0) {
     D_00438A10 = (arg0 + 0xF) & ~0xF;
 }
 
@@ -315,7 +315,7 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
     list->last = end;
 }
 
-void func_0032CF58(SdfListHead *list, u32 packet) {
+void sdfAppendReferencePacket(SdfListHead *list, u32 packet) {
     s32 last;
 
     *(u8 *)(packet + 3) = SDF_DMA_TAG_REF;
@@ -344,7 +344,7 @@ void func_0032CF98(SdfListHead *list, u32 packet) {
     list->last = packet + 0x30;
 }
 
-void func_0032CFD0(SdfListHead *list, u32 packet) {
+void sdfAppendCallPacket(SdfListHead *list, u32 packet) {
     s32 last;
 
     *(u8 *)(packet + 3) = SDF_DMA_TAG_CALL;
@@ -391,7 +391,7 @@ void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D0C8);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfPrependIfMode1);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D0F0);
 
@@ -432,7 +432,7 @@ void func_0032D3F0(SdfListHead *arg0) {
     arg0->unkC = 0;
 }
 
-void func_0032D408(SdfListHead *list, u32 *node) {
+void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
     if (list->last == 0) {
         list->first = (u32)node;
     }
@@ -497,7 +497,7 @@ void func_0032D5E0(u64 *packet, s32 x, s32 y) {
     packet[9] = 5;
 }
 
-void func_0032D668(u64 *packet) {
+void sdfInitDrawPacket(u64 *packet) {
     packet[0] = 1;
     packet[1] = 0x1A;
     packet[2] = 1;
@@ -519,8 +519,8 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D898);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DA50);
 
-void func_0032DAF0(SdfListHead *list, SdfListHead *other, u32 *node) {
-    func_0032D408(other, node);
+void sdfAppendLinkedPacketPayload(SdfListHead *list, SdfListHead *other, u32 *node) {
+    sdfAppendLinkedPacketNode(other, node);
     sdfAppendPacket(list, (s32)node + 0x10);
 }
 
@@ -544,14 +544,14 @@ void sdfAppendDmaPrimary(s32 list, u32 source, SdfDmaNode *node) {
     node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->unk0 = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
     node->unk10 = 0;
-    func_0032CF58(list, (u32)node);
+    sdfAppendReferencePacket(list, (u32)node);
 }
 
 void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
     node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->unk0 = ((u64)((source + 0x1E0) & 0xfffffff) << 32) | 0x30000004;
     node->unk10 = 0;
-    func_0032CF58(list, (u32)node);
+    sdfAppendReferencePacket(list, (u32)node);
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DC80);
@@ -579,7 +579,7 @@ void func_0032DEB0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DEC8);
 
-void func_0032E348(void) {
+void sdfWaitSlotReady(void) {
     u8 *entry;
 
     while (1) {
@@ -596,7 +596,7 @@ void func_0032E348(void) {
     }
 }
 
-s32 func_0032E3C0(s32 (*arg0)(s32)) {
+s32 sdfAllocatePacketList(s32 (*arg0)(s32)) {
     s32 (*alloc)(s32) = arg0;
     s32 mem;
 
@@ -608,7 +608,7 @@ s32 func_0032E3C0(s32 (*arg0)(s32)) {
     return mem;
 }
 
-void func_0032E408(s32 arg0, void (*arg1)(s32), s32 arg2, s32 (*arg3)(s32)) {
+void sdfAppendInitializedPacket(s32 arg0, void (*arg1)(s32), s32 arg2, s32 (*arg3)(s32)) {
     s32 (*alloc)(s32) = arg3;
     s32 mem;
 
@@ -784,7 +784,7 @@ void func_0032EB40(SdfBigPacket *arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032EB80);
 
-void func_0032ECA8(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+void sdfBuildPacket116(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)k << 32;
 
@@ -807,11 +807,11 @@ void func_0032ED60(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x50);
     packet->unk0 = 0x20000004;
     packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    func_0032ECA8((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    sdfBuildPacket116((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void func_0032EE88(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i) {
+void sdfBuildTriPacket104(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)i << 32;
 
@@ -826,7 +826,7 @@ void func_0032EE88(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g,
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032EF30);
 
-void func_0032F038(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+void sdfBuildPacket104x4(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)k << 32;
 
@@ -840,7 +840,7 @@ void func_0032F038(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g,
     packet[7] = (u32)((i & 0xFFFF) | (j << 16)) | hi;
 }
 
-void func_0032F108(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+void sdfBuildPacketE(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -849,11 +849,11 @@ void func_0032F108(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x50);
     packet->unk0 = 0x20000004;
     packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    func_0032F038((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    sdfBuildPacket104x4((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void func_0032F230(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+void sdfBuildPacket10C(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)k << 32;
 
@@ -868,7 +868,7 @@ void func_0032F230(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g,
     packet[8] = (u32)((h & 0xFFFF) | (i << 16)) | hi;
 }
 
-void func_0032F300(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
+void sdfBuildPacketF(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -877,7 +877,7 @@ void func_0032F300(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x60);
     packet->unk0 = 0x20000005;
     packet->unk8 = (((u64)0x50000005 << 16) | 0x1000) << 16;
-    func_0032F230((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    sdfBuildPacket10C((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
     sdfAppendPacket(list, (s32)packet);
 }
 
@@ -885,7 +885,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032F428);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032F540);
 
-void func_0032F698(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o) {
+void sdfBuildPacket114(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)o << 32;
 
@@ -915,7 +915,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032FEB8);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_00330068);
 
-void func_00330240(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+void sdfBuildFillPacket106(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)g << 32;
 
@@ -927,7 +927,7 @@ void func_00330240(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
     packet[5] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
 }
 
-void func_003302C0(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 (*alloc)(s32)) {
+void sdfCreatePacketA(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
@@ -936,11 +936,11 @@ void func_003302C0(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     buffer = alloc(0x40);
     *(u64 *)buffer = 0x20000003ULL;
     *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    func_00330240(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildFillPacket106(buffer + 0x10, a, b, c, d, e, f, g);
     sdfAppendPacket(list, buffer);
 }
 
-void func_003303B0(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+void sdfBuildFillPacket101(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)g << 32;
 
@@ -961,11 +961,11 @@ void func_00330430(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     buffer = alloc(0x40);
     *(u64 *)buffer = 0x20000003ULL;
     *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    func_003303B0(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildFillPacket101(buffer + 0x10, a, b, c, d, e, f, g);
     sdfAppendPacket(list, buffer);
 }
 
-void func_00330520(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+void sdfBuildQuadPacket102(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)g << 32;
 
@@ -989,20 +989,20 @@ void func_003305D0(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     buffer = alloc(0x60);
     *(u64 *)buffer = 0x20000005ULL;
     *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
-    func_00330520(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildQuadPacket102(buffer + 0x10, a, b, c, d, e, f, g);
     sdfAppendPacket(list, buffer);
 }
 
 extern SdfSynchronizedRequest D_00439168;
-extern void func_00330900();
+extern void sdfDestroyObjectList();
 
 void func_003306C0(void) {
-    func_0032CA90(&D_00439168, (u32)func_00330900);
+    sdfInitializeSynchronizedRequest(&D_00439168, (u32)sdfDestroyObjectList);
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_003306E0);
 
-void func_00330768(SdfFreeRoot *root) {
+void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
     u32 temp_v0;
 
     if (root->workspace == NULL) {
@@ -1013,7 +1013,7 @@ void func_00330768(SdfFreeRoot *root) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfFreeNodeLists);
 
-void func_00330838(SdfFreeRoot *root) {
+void sdfReleaseFreeRoot(SdfFreeRoot *root) {
     sdfFreeNodeLists();
     func_00328E48(root->workspace);
     root->workspace = NULL;
@@ -1022,10 +1022,10 @@ void func_00330838(SdfFreeRoot *root) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_00330870);
 
-void func_00330900(SdfObjectList **owner) {
+void sdfDestroyObjectList(SdfObjectList **owner) {
     s32 i;
     for (i = 0; i < (*owner)->count; i++) {
-        func_00330838((*owner)->elements[i]);
+        sdfReleaseFreeRoot((*owner)->elements[i]);
     }
     sdfDestroyDevRequest(*owner);
     func_00328E48(owner);
@@ -1042,7 +1042,7 @@ typedef struct SdfDevSlot {
     void *device;
 } SdfDevSlot;
 
-void func_00330978(SdfDevSlot *slot, s32 recycle, s32 release) {
+void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
     if (slot == NULL) {
         return;
     }

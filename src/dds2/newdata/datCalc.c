@@ -97,3 +97,4 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DF8);
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DFC);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E00);
+

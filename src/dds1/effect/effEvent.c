@@ -12,8 +12,8 @@ extern u32 D_003BB148;
 /* Work area for the event-effect helpers in this TU. */
 typedef struct {
     u8   pad_0x00[0x04]; /* 0x00 */
-    void *owner;         /* 0x04: passed to func_00190238/func_00190328 */
-    u8   initBlock[0x28];/* 0x08: handed to func_00190238 */
+    void *owner;         /* 0x04: passed to effEventCopyFileRecordHeader/func_00190328 */
+    u8   initBlock[0x28];/* 0x08: handed to effEventCopyFileRecordHeader */
     u32  unk30;          /* 0x30 */
     void *effect;        /* 0x34 */
     u8   pad_0x38[0x48]; /* 0x38 */
@@ -31,7 +31,7 @@ void effEventReleaseNode(EffEventWork *work) {
     func_002CFF98(work);
 }
 
-void func_00190238(FileRecordHeader *destination, const FileRecordHeader *source) {
+void effEventCopyFileRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
     *destination = *source;
 }
 
@@ -63,7 +63,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00190828);
 
 void effEventBindEffect(EffEventWork *work, void *value) {
     work->effect = value;
-    func_00190238(work->owner, work->initBlock);
+    effEventCopyFileRecordHeader(work->owner, work->initBlock);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001908A0);
@@ -87,7 +87,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001914E0);
 
-void func_00192018(void *dst, void *src) {
+void effEventCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -114,3 +114,4 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
+

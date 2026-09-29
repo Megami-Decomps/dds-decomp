@@ -14,14 +14,14 @@ typedef struct {
 
 extern s32 func_00101A70(void);
 
-void func_0010C028(u32 unused, void *actor) {
+void scrSetCurrentActor(u32 unused, void *actor) {
     ScriptContext *context;
 
     context = (ScriptContext *)func_00101A70();
     context->actor = actor;
 }
 
-u32 func_0010C050(void) {
+u32 scrGetCurrentActor(void) {
     ScriptContext *context;
 
     context = (ScriptContext *)func_00101A70();

@@ -14,7 +14,7 @@ void func_001104F0(void *arg, s32 arg1);
 
 void func_00110240(IndexObj *arg);
 
-s32 func_00110498(void *arg0, void *arg1);
+s32 dds3SeekWorldNode(void *arg0, void *arg1);
 
 void *func_00110628(void *arg0, void *arg1, s32 arg2);
 
@@ -119,7 +119,7 @@ void dds3DestroyWorldNode(NodeA *node) {
 }
 
 /* Append a separate index entry to the world's doubly linked index list. */
-void *func_001100F0(s32 index) {
+void *dds3AppendWorldIndexNode(s32 index) {
     WorldInfo *info;
     NodeB *node;
 
@@ -152,7 +152,7 @@ void *func_001100F0(s32 index) {
     return node;
 }
 
-void func_001101A8(NodeB *node) {
+void dds3DestroyWorldIndexNode(NodeB *node) {
     WorldInfo *info;
 
     if (node == NULL) {
@@ -180,14 +180,14 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110240);
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110348);
 
-s32 func_00110408(void *iterator, void *target, s32 repeat) {
+s32 dds3ProcessMatchingWorldNodes(void *iterator, void *target, s32 repeat) {
     s32 found;
 
     found = 0;
     if (func_00110628(iterator, target, repeat) != NULL) {
         func_001106B8(iterator);
         do {
-            if (func_00110498(iterator, target) != 1) {
+            if (dds3SeekWorldNode(iterator, target) != 1) {
                 break;
             }
             func_00110240(iterator);
@@ -197,7 +197,7 @@ s32 func_00110408(void *iterator, void *target, s32 repeat) {
     return found;
 }
 
-s32 func_00110498(void *iterator, void *target) {
+s32 dds3SeekWorldNode(void *iterator, void *target) {
     void *candidate;
 
     do {

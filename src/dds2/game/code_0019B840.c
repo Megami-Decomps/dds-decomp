@@ -66,7 +66,7 @@ extern void func_0019C2F8(void);
 
 extern void *func_0019C4D0(void *arg0);
 
-extern u32 func_001A02D0(s32 arg0);
+extern u32 itfReleasePayloadAllocation(s32 arg0);
 
 extern void func_0019B7A8(void);
 
@@ -111,7 +111,7 @@ void frFontSetEntryFlag(s32 index, s32 flag) {
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B900);
 
-s32 frFontBitLength(u32 value) {
+s32 frFontHighestSetBitIndex(u32 value) {
     s32 count = 0;
 
     if (value == 0) {
@@ -142,8 +142,8 @@ void frFontReleaseAll(void) {
     func_0019C2F8();
     func_0019C4D0(D_00452720.glyphSlots[0]);
     func_0019C4D0(D_00452720.glyphSlots[1]);
-    func_001A02D0(D_00452720.unk150);
-    func_001A02D0(D_00452720.unk154);
+    itfReleasePayloadAllocation(D_00452720.unk150);
+    itfReleasePayloadAllocation(D_00452720.unk154);
     func_0019B7A8();
     func_0032AA40(D_00452720.unk158);
     func_0032AA40(D_00452720.unk15C);

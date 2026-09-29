@@ -107,7 +107,7 @@ s32 func_00159BB8(s32 arg0) {
     return *(s32 *)(*(s32 *)(D_00451EE0[arg0] + 0x30));
 }
 
-void func_00159BD8(dst, src)
+void effCopyVector(dst, src)
 void *dst;
 void *src;
 {
@@ -129,7 +129,7 @@ void func_00159C00(BillObj *effect, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", effCopyPosition);
 
-void func_00159C40(BillObj *effect, s32 mode) {
+void billSetBillboardMode(BillObj *effect, s32 mode) {
     s32 count;
     s32 remaining;
     s32 entry;
@@ -170,11 +170,11 @@ s32 func_00159D60(BillObj *effect) {
     return 0;
 }
 
-u16 func_00159D80(BillObj *effect) {
+u16 billGetKind(BillObj *effect) {
     return effect->unk2C;
 }
 
-void func_00159D88(BillObj *effect, s32 value) {
+void billSetVariantValue(BillObj *effect, s32 value) {
     s32 v = value & 0xffff;
 
     switch (effect->unk2C) {
@@ -187,7 +187,7 @@ void func_00159D88(BillObj *effect, s32 value) {
     }
 }
 
-u16 func_00159DC0(BillObj *effect) {
+u16 billGetVariantValue(BillObj *effect) {
     switch (effect->unk2C) {
     case 0:
         return *(u16 *)((u8 *)effect->unk30 + 4);
@@ -198,13 +198,13 @@ u16 func_00159DC0(BillObj *effect) {
     }
 }
 
-void func_00159DF0(BillObj *effect, u32 value) {
+void billSetKind1Entry(BillObj *effect, u32 value) {
     if (effect->unk2C == 1 && effect->unk58 != value) {
         func_001594C8(effect, value);
     }
 }
 
-s32 func_00159E30(BillObj *effect) {
+s32 billGetKindOneEntry(BillObj *effect) {
     if (effect->unk2C == 1) {
         return effect->unk58;
     }
@@ -258,7 +258,7 @@ void func_00159ED8(BillObj *effect, u32 time) {
     }
 }
 
-s32 func_00159F38(BillObj *effect) {
+s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     if (effect->unk2C == 1) {
         return ((EffBillEntry *)effect->unk60)->data->period;
     }
@@ -297,7 +297,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_00159FF8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
 
-u8 *func_0015A1B8(s32 index) {
+u8 *billCreateUnitObject(s32 index) {
     EffInstance *instance = func_00328D68(0x88);
 
     instance->billboard = (BillObj *)billCreateIndexed(1, index);
@@ -307,7 +307,7 @@ u8 *func_0015A1B8(s32 index) {
     return (u8 *)instance;
 }
 
-u8 *func_0015A240(EffInstance *source) {
+u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = func_00328D68(0x88);
 
     instance->billboard = (BillObj *)func_00159A50((s32)source->billboard);
@@ -322,20 +322,20 @@ u8 *func_0015A240(EffInstance *source) {
 }
 
 void effDestroy(EffInstance *instance) {
-    func_00333918((u32)instance->renderState);
+    sdfQueueAssetRelease((u32)instance->renderState);
     billDispatchByKind(instance->billboard);
     func_00328E48(instance);
 }
 
 void func_0015A348(EffInstance *instance) {
-    func_00159BD8((u32)instance->billboard);
+    effCopyVector((u32)instance->billboard);
 }
 
-void func_0015A360(EffInstance *instance, f32 scale) {
+void billSetChildScale2(EffInstance *instance, f32 scale) {
     func_00159BF0(instance->billboard, scale, scale);
 }
 
-void func_0015A380(EffInstance *instance, void *src) {
+void effCopyMatrixToNext(EffInstance *instance, void *src) {
     u8 *dst;
 
     __asm__ volatile(
@@ -355,7 +355,7 @@ void func_0015A380(EffInstance *instance, void *src) {
         : : "r"(dst) : "memory");
 }
 
-void func_0015A3B0(EffInstance *instance, u32 value) {
+void billSetChildValue(EffInstance *instance, u32 value) {
     func_00159C00(instance->billboard, value);
 }
 
@@ -683,7 +683,7 @@ void func_0015E240(float scale, EffTemplatePacketList *effect) {
     effect->recordScale = effect->recordScale * scale;
 }
 
-s32 func_0015E278(EffTemplatePacketList *source) {
+s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
     s32 obj = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
@@ -749,7 +749,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E8C8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EB20);
 
-void func_0015ED30(EffTemplatePacketList *effect) {
+void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     s32 i = 0;
     EffScaledRecord *record = (EffScaledRecord *)effect->buffer->records;
     if (effect->packetCount != 0) {
@@ -779,7 +779,7 @@ s32 func_0015EDC8(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015ED30(copy);
+    effApplyTemplateScaleToRecords(copy);
     return copy;
 }
 

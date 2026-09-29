@@ -51,7 +51,7 @@ s64 func_00266038(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266080);
 
-u32 func_002660D8(void) {
+u32 evtStartFadeOut(void) {
     kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
@@ -82,7 +82,7 @@ u32 func_00266230(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266238);
+INCLUDE_ASM(const s32, "game/code_00265AD8", mnuCreateFlagEntries);
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266320);
 

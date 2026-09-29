@@ -26,7 +26,7 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00272D50);
 
-void func_00273020(StaffDisplayContext *context) {
+void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
     StaffWindowResources *resources;
 
     resources = context->resources;
@@ -38,7 +38,7 @@ INCLUDE_ASM(const s32, "game/code_00272D50", func_00273050);
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002730A0);
 
-void func_00273200(StaffDisplayContext *context) {
+void mnuReleaseStaffExtraWindow(StaffDisplayContext *context) {
     func_0027C430(context->resources->thirdWindow);
 }
 
@@ -56,7 +56,7 @@ INCLUDE_ASM(const s32, "game/code_00272D50", func_002733B8);
 s32 freeStaffDisplayResources(void) {
     StaffDisplayContext *context = (StaffDisplayContext *)func_00101A70();
     StaffWindowResources *resources = context->resources;
-    func_00273020(context);
+    mnuReleaseStaffPrimaryWindows(context);
     func_002733B0(context);
     func_002D0918(resources->allocation);
     return 1;
@@ -70,7 +70,7 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
 
-s64 func_00273718(u64 request) {
+s64 mnuStaffRunPanel2b(u64 request) {
     s32 state = func_00101A70();
 
     return menuRunPanel(state, 2, request);

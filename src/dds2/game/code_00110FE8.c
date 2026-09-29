@@ -9,13 +9,13 @@ INCLUDE_ASM(const s32, "game/code_00110FE8", func_00110FE8);
 
 INCLUDE_ASM(const s32, "game/code_00110FE8", func_00111050);
 
-void func_001110C8(WorldObjectPointer *object, u32 value) {
+void dds3SetWorldObjectValue(WorldObjectPointer *object, u32 value) {
     if (object != NULL) {
         *object->value = value;
     }
 }
 
-s32 func_001110E0(WorldObjectPointer *object) {
+s32 dds3GetWorldObjectValue(WorldObjectPointer *object) {
     if (object == NULL) {
         return -1;
     }

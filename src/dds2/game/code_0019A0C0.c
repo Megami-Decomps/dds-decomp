@@ -47,7 +47,7 @@ typedef struct EffCntRec {
     u32 unk4; /* 0x4: id released by func_00192638 */
 } EffCntRec;
 
-/* 0x38-byte keyframe record addressed by func_00195E38. */
+/* 0x38-byte keyframe record addressed by effMathGetSlotAt. */
 typedef struct EffRec38 {
     u8 unk0[0x30]; /* 0x0 */
     f32 scaledRandomValue; /* 0x30 */
@@ -64,7 +64,7 @@ extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 
-extern s32 func_00195E38(s32 *arg0, s32 arg1);
+extern s32 effMathGetSlotAt(s32 *arg0, s32 arg1);
 
 extern void func_0019A2E0(EffPrim *arg0, u32 arg1);
 
@@ -145,7 +145,7 @@ void effFillRandRecords(EffEmit *emitter) {
     do {
         func_0019A2E0(primitive, index);
         record->randomIndex = effMiscRand(&D_003AA868) % modulus;
-        keyframe = (EffRec38 *)func_00195E38(primitive->unk16C, index);
+        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->unk16C, index);
         index++;
         randomIndex = record->randomIndex;
         scale = keyframe->randomScale;
@@ -287,3 +287,4 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B558);
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_00436540);
 
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_0043654C);
+

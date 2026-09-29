@@ -17,7 +17,7 @@ extern u32 D_003BA8EC;
 extern char D_003ACD18[]; /* "EventTest" */
 void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
 void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
-void func_0021FE38(void);
+void evtDestroySecondaryWorldNode(void);
 s32 evtGetSolarPhase(s32 object);
 
 typedef struct EventListNode {
@@ -115,7 +115,7 @@ INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);
 void evtStopTestTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ACD18, 1);
     kwlnTaskDestroyWithHierarchyByName("PolygonMovie", 0);
-    func_0021FE38();
+    evtDestroySecondaryWorldNode();
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD38);

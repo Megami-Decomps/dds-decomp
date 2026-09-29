@@ -7,7 +7,7 @@ extern void func_003003F0(const char *);
 extern u64 func_002EB028(const char *, u32 *, u64);
 
 extern u32 D_003BB190;
-extern s64 func_00101818(u32);
+extern s64 kwlnTaskGetRegisteredState(u32);
 
 extern u32 D_003BB18C;
 
@@ -27,7 +27,7 @@ void func_00194190(s32 id, const char *path);
 extern u16 D_00356620[];
 extern u32 strlen(const char *str);
 
-/* Byte stream read by func_00196478/itfReadEncodedCode: base at +0x10, position at +0x18. */
+/* Byte stream read by itfReadEncodedTextLead/itfReadEncodedCode: base at +0x10, position at +0x18. */
 typedef struct TextStream {
     u8 unk0[0x10]; /* 0x0 */
     u8 *bytes;       /* 0x10: encoded input base */
@@ -35,13 +35,13 @@ typedef struct TextStream {
     s32 offset;      /* 0x18: current byte position */
 } TextStream;
 
-/* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
+/* 8-byte node header; payload follows (itfDequeueMemNode/itfEnqueueMemNode). */
 typedef struct MemNode {
     u32 index;             /* 0x0 */
     struct MemNode *next;  /* 0x4 */
 } MemNode;
 
-/* Field block split by func_00198038. */
+/* Field block split by itfSplitRelativeSegments. */
 typedef struct MemBlock {
     s32 firstOffset; /* 0x0 */
     s32 secondDelta; /* 0x4 */
@@ -120,7 +120,7 @@ extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
 s32 func_00196B30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
-u32 func_00196478(TextStream *stream) {
+u32 itfReadEncodedTextLead(TextStream *stream) {
     s32 *position = &stream->offset;
     u8 *byte = stream->bytes + *position;
     u32 value = *byte;
@@ -225,7 +225,7 @@ void mnuLoadStaffFonts(void) {
     func_00194190(5, "/font/staff2.fnt");
 }
 
-void func_00197378(void) {
+void mnuUnloadStaffFonts(void) {
     frFontFreeEntry(4);
     frFontFreeEntry(5);
 }
@@ -270,8 +270,8 @@ void func_001974B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
     func_001953D8(temp_v0, 0x10, 0x12);
     func_00195450(temp_v0, arg0, arg1);
     func_00195460(temp_v0, arg2 << 4);
-    func_001954C8(temp_v0, arg3);
-    func_001953A8(temp_v0, 0xfffffffffffffffc);
+    frFontSetChildColors(temp_v0, arg3);
+    frFontSetFlagAndMeasureGlyphs(temp_v0, 0xfffffffffffffffc);
     frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
@@ -287,7 +287,7 @@ s32 arg5;
 {
     s32 handle = func_00197580(arg0, arg1, arg2, arg3, arg4, 1, 0, arg5);
 
-    func_001953A8(handle, 3);
+    frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
 }
 
@@ -309,10 +309,10 @@ void func_00197B78(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
 
     temp_v0 = func_001951C8(arg4, 0, 0, 0, 0);
     func_001953D8(temp_v0, 0xc, 0x10);
-    func_001953A8(temp_v0, 3);
+    frFontSetFlagAndMeasureGlyphs(temp_v0, 3);
     func_00195450(temp_v0, arg0, arg1);
     func_00195460(temp_v0, arg2 << 4);
-    func_001954C8(temp_v0, arg3);
+    frFontSetChildColors(temp_v0, arg3);
     frFontLinkGlyph(arg5, temp_v0, 0);
 }
 
@@ -358,7 +358,7 @@ u32 func_00198030(u32 arg0) {
     return arg0;
 }
 
-void func_00198038(MemBlock *block, MemOut *out) {
+void itfSplitRelativeSegments(MemBlock *block, MemOut *out) {
     s32 firstOffset = block->firstOffset;
     s32 secondOffset = firstOffset + block->secondDelta;
     s32 thirdOffset = secondOffset + block->thirdDelta;
@@ -398,7 +398,7 @@ u32 func_001981A8(s32 payloadBytes, s32 count) {
     return (u32)list;
 }
 
-void *func_00198248(MemNode *queue) {
+void *itfDequeueMemNode(MemNode *queue) {
     MemNode *head = queue->next;
 
     if (head->index == 0) {
@@ -422,7 +422,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     return 1;
 }
 
-u32 func_001982A0(s32 arg0) {
+u32 itfReleaseMemNodeBuffer(s32 arg0) {
     func_002D0918(*(u32 *)(arg0 - 4));
     return 1;
 }
@@ -436,7 +436,7 @@ void itfLoadBackgroundSprite(void) {
 }
 
 void func_00198308(void) {
-    func_002D2CB8(D_003BD81C);
+    sdfTexReleaseReference(D_003BD81C);
 }
 
 typedef struct TextBackgroundSprite {
@@ -478,7 +478,7 @@ u32 func_00198428(void) {
     u32 temp_v1;
 
     func_00198320();
-    temp_v0 = func_00101818(D_003BB190);
+    temp_v0 = kwlnTaskGetRegisteredState(D_003BB190);
     temp_v1 = 0xffffffff;
     if (temp_v0 != 3) {
         temp_v1 = 0;
@@ -717,7 +717,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00198DF0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198F58);
 
-void func_00199080(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
+void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
     u64 packet;
     u64 *dst;
     s32 half = count >> 1;
@@ -740,7 +740,7 @@ void func_00199080(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, 
     sdfAppendPacket(command, packet);
 }
 
-void func_001991D0(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
+void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
     u64 packet;
     u64 *dst;
     s32 i;
@@ -762,7 +762,7 @@ void func_001991D0(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, 
     sdfAppendPacket(command, packet);
 }
 
-void func_00199318(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
+void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
     u64 packet;
     u64 *dst;
     s32 i;

@@ -8,9 +8,9 @@ void *func_002CF530(s32 arg0);
 void *memcpy(void *arg0, void *arg1, u32 arg2);
 void func_002D1B90(void *arg0);
 void func_002CFF98(void *arg0);
-void func_002CF570(void *arg0);
+void sdfFreeMemoryFromEitherHeap(void *arg0);
 void func_002D3C30(void *arg0, void *arg1);
-void *func_002D2EB0(SdfTex *arg0, s32 arg1);
+void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 void *func_002D30C8(void *arg0, s32 arg1);
 void *func_002CFEB8(s32 arg0);
 void *sdfTexGetPrimaryResourceWord();
@@ -56,13 +56,13 @@ void sdfTexRelease(SdfTex *texture) {
     } else {
         D_003BD308 = prev;
     }
-    func_002CF570(texture->data);
-    func_002CF570(texture->unk3C);
+    sdfFreeMemoryFromEitherHeap(texture->data);
+    sdfFreeMemoryFromEitherHeap(texture->unk3C);
     func_002CFF98(texture->reference);
     func_002CFF98(texture);
 }
 
-void func_002D2CB8(SdfTex *texture) {
+void sdfTexReleaseReference(SdfTex *texture) {
     SdfTexRef *ref;
     s32 count;
 
@@ -94,7 +94,7 @@ void func_002D2D00(SdfTex *texture) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2D48);
 
-void *func_002D2EB0(SdfTex *texture, s32 variant) {
+void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     void *packet;
     void *primary;
     void *secondary;
@@ -106,12 +106,12 @@ void *func_002D2EB0(SdfTex *texture, s32 variant) {
     return packet;
 }
 
-void func_002D2F50(SdfTex *texture) {
-    texture->unk28 = func_002D2EB0(texture, 0);
+void sdfTexCreateFirstPacket(SdfTex *texture) {
+    texture->unk28 = sdfTexCreateResourcePacket(texture, 0);
 }
 
-void func_002D2F80(SdfTex *texture) {
-    texture->unk2C = func_002D2EB0(texture, 1);
+void sdfTexCreateSecondPacket(SdfTex *texture) {
+    texture->unk2C = sdfTexCreateResourcePacket(texture, 1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2FB0);

@@ -42,7 +42,7 @@ u32 func_0010D8D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010D848", func_0010D8E0);
 
-u32 func_0010D910(void) {
+u32 scrOpcodeTestModelFlag(void) {
     u64 flag;
 
     flag = func_0010D650(0);
@@ -51,7 +51,7 @@ u32 func_0010D910(void) {
     return 1;
 }
 
-u32 func_0010D940(void) {
+u32 scrOpcodeSetModelFlag(void) {
     u64 flag;
 
     flag = func_0010D650(0);
@@ -59,7 +59,7 @@ u32 func_0010D940(void) {
     return 1;
 }
 
-u32 func_0010D968(void) {
+u32 scrOpcodeClearModelFlag(void) {
     u64 flag;
 
     flag = func_0010D650(0);

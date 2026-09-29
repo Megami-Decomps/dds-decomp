@@ -221,7 +221,7 @@ void sdfDevWaitForDisc(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DBF8);
 
-void func_0033DCA8(void) {
+void sdfDevSignalPendingSemaphore(void) {
     if (D_00438AC8 != 0) {
         SignalSema(D_004391C4);
         D_00438AC8 = 0;
@@ -270,11 +270,11 @@ s32 sdfPktQuery(u32 index) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E520);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevGetFileSize);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E550);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E5E0);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevStartLoad);
 
 void sdfInitDeviceSemaphores(void) {
     D_004391B8 = sdfCreateSemaphore(1, 0xff, 0);
@@ -286,7 +286,7 @@ void sdfInitDeviceSemaphores(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E6B0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E728);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevBuildPath);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPathPrefixCat);
 
@@ -304,7 +304,7 @@ u32 func_0033E810(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E818);
 
-void func_0033E9B8(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
+void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
     if (event != 3) {
         if (event == 4) {
             D_004391C8 = value;
@@ -320,7 +320,7 @@ DevState *sdfDevCreateCommandState(s32 command) {
     if (D_00438AE4 < 0) {
         D_00438AE4 = sdfCreateSemaphore(0, 0x80, 0);
     }
-    state = sdfDevCreateCallbackState(command, func_0033E9B8, 0);
+    state = sdfDevCreateCallbackState(command, sdfDevCommandReplyCallback, 0);
     WaitSema(D_00438AE4);
     sdfDevReactivate(state);
     return state;
@@ -329,7 +329,7 @@ DevState *sdfDevCreateCommandState(s32 command) {
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EA60);
 
 void func_0033EAE0(u32 arg0) {
-    func_0033FCE0();
+    sdfDevQueueActiveOperation();
     WaitSema(D_00438AE4);
     func_0033FD30(arg0);
 }
@@ -479,7 +479,7 @@ s32 sdfDevReactivate(DevState *arg0) {
     return 0;
 }
 
-s32 func_0033FCE0(DevState *arg0) {
+s32 sdfDevQueueActiveOperation(DevState *arg0) {
     s8 state = arg0->state;
 
     if (state != 7) {
@@ -739,6 +739,8 @@ f32 sdfWrapAngle(f32 angle) {
     return angle;
 }
 
+INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E3A0);
+
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AB8);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AC0);
@@ -800,3 +802,4 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B60);
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B68);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B70);
+

@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_002818B8(s32 scene, s32 groupIndex) {
+void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     s32 remaining;
     s32 entry;
 

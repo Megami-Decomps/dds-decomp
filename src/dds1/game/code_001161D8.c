@@ -9,13 +9,13 @@ typedef struct ActionObj {
 } ActionObj;
 
 extern ActionObj *func_00110880();
-extern void func_00112750();
+extern void dds3EnsureSlotData();
 
 extern void effObjSetInnerFirstVec();
 extern void effObjSetInnerSecondVec();
 extern void effObjInnerVecBackup();
 
-ActionObj *func_001161D8(s32 a, void *firstVector, void *secondVector) {
+ActionObj *dds3SpawnInnerVecObj8(s32 a, void *firstVector, void *secondVector) {
     ActionObj *obj = func_00110880(8);
 
     obj->unk4 = a;
@@ -25,7 +25,7 @@ ActionObj *func_001161D8(s32 a, void *firstVector, void *secondVector) {
     return obj;
 }
 
-u32 func_00116250(ActionObj *object) {
+u32 dds3GetResourceOwnerHandle(ActionObj *object) {
     return *object->value;
 }
 

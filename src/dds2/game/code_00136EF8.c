@@ -136,7 +136,7 @@ typedef struct FldTaskInfo {
 
 extern s32 func_00110C70(u64, u32, s32);
 
-extern u32 func_00116DE0(s32);
+extern u32 dds3GetPathState(s32);
 
 typedef struct FldRoomPlanes {
     f32 plane[6][4];
@@ -146,7 +146,7 @@ typedef struct FldRoomPlanes {
 
 extern FldRoomPlanes D_00444BC0[];
 
-extern f32 func_00137C08(f32 *, f32 *);
+extern f32 fldDotVector(f32 *, f32 *);
 
 typedef struct FldRoomState {
     u8 pad0[0x120];
@@ -237,7 +237,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_001378E8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001379C0);
 
-void func_00137B60(void) {
+void fldAllocateRecordStorage(void) {
     u8 *buffer = func_003292A8(0x72000);
 
     D_00436190 = (u32)buffer;
@@ -260,7 +260,7 @@ void func_00137BC8(void) {
     D_00436178 = 0;
 }
 
-float func_00137C08(float *left, float *right) {
+float fldDotVector(float *left, float *right) {
     return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
@@ -270,7 +270,7 @@ f32 fldCalculateVectorLength(const f32 *vector) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C68);
 
-s32 func_00137E00(s32 key) {
+s32 fldGetRecordValueById(s32 key) {
     s32 i = 0;
 
     if (D_00436184 > 0) {
@@ -296,7 +296,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-void func_00137E90(void) {
+void fldResetRecordState(void) {
     s32 count = D_00436184;
     if (count > 0) {
         /* Required to match: advance a pointer to the value field, not the record base. */
@@ -370,7 +370,7 @@ void fldResetTaskSlots(void) {
         for (i = 0; i < D_004361A4; i++) {
             info = *(FldTaskInfo **)(D_0038BC50[i] + 8);
             if (info->slot >= 0) {
-                id = func_00116DE0(func_00110C70(world, *(u32 *)D_00444A30[info->slot], 0xD));
+                id = dds3GetPathState(func_00110C70(world, *(u32 *)D_00444A30[info->slot], 0xD));
                 if (func_0010C100(id) != 0) {
                     func_00110FB0(dds3GetWorldObject(), id);
                 }
@@ -395,7 +395,7 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (func_00137C08(direction, D_00444BC0[index].plane[i]) - D_00444BC0[index].limit[i] > 0.0f) {
+        if (fldDotVector(direction, D_00444BC0[index].plane[i]) - D_00444BC0[index].limit[i] > 0.0f) {
             return 0;
         }
     }
@@ -413,7 +413,7 @@ s32 func_0013DC70(u32 flag, u32 slot) {
     return -1;
 }
 
-u32 func_0013DCC8(u32 index) {
+u32 fldDestroyTaskSlot(u32 index) {
     u32 *taskSlot = &D_0038BD50[index];
 
     if (kwlnTaskIsRegistered(*taskSlot) != 0) {
@@ -461,7 +461,7 @@ void func_0013E958(void) {
     }
 }
 
-void func_0013E9B8(void) {
+void fldClearInactiveTaskSlots(void) {
     s32 count = D_004361A4;
     s32 i = 0;
     if (count > 0) {
@@ -476,7 +476,7 @@ void func_0013E9B8(void) {
     }
 }
 
-s32 func_0013EA18(u32 task) {
+s32 fldFindTaskRecordId(u32 task) {
     s32 i;
     for (i = 0; i < D_004361A4; i++) {
         if (D_0038BD50[i] == task) {
@@ -564,6 +564,8 @@ void fldLoadInfoTable(s32 field) {
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140180);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
+
+INCLUDE_RODATA(const s32, "game/code_00136EF8", D_00413448);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001402B8);
 
@@ -787,7 +789,7 @@ void fldResetActorSlots(void) {
     D_004361F4 = -1;
 }
 
-void func_00142A10(s32 field) {
+void fldLoadActorWaypointTable(s32 field) {
     char path[64];
     char directory[32];
     u32 command;
@@ -802,7 +804,7 @@ void func_00142A10(s32 field) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142AB8);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldCopyActorWaypointTable);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142B70);
 
@@ -920,3 +922,4 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436200);
+

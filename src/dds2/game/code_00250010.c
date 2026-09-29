@@ -108,7 +108,7 @@ extern void func_0024FF80();
 extern void func_0024FFC8();
 extern u8 *func_0024FE98();
 
-void func_00250080(s32 arg0, s32 arg1) {
+void evtCreateTaskWithValue(s32 arg0, s32 arg1) {
     u8 *data = func_0024FE98();
     *(s32 *)(data + 4) = arg1;
     kwlnTaskCreate(D_004373C0, arg0, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, (s32)data);
@@ -198,6 +198,8 @@ void evtCreateFrameVariableTask(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250338);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00423380);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423390);
 
@@ -330,6 +332,8 @@ s32 func_00253D08(s32 list, s32 x, s32 y, u8 *ctx) {
     return 2;
 }
 
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EC0);
+
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EE0);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EF0);
@@ -375,7 +379,7 @@ s32 func_00254620(s32 *arg0) {
     return D_003C9730[*arg0].unk0 != 0;
 }
 
-s32 func_00254648(s32 arg0) {
+s32 mnuGetSelectedTableValue(s32 arg0) {
     return D_003C9732[*(s32 *)(arg0 + 0x23C8) + *(s32 *)(*(s32 *)(arg0 + 0x2308)) * 10];
 }
 
@@ -416,7 +420,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_002566F8);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002567A8);
 
-void func_00256888(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+void evtSetRuntimeCommandValues(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     *(s32 *)(arg0 + 0x23E4) = arg1;
     *(s32 *)(arg0 + 0x23E8) = arg2;
     *(s32 *)(arg0 + 0x23EC) = arg3;
@@ -615,7 +619,7 @@ s32 func_00258C60(EvtRuntime *runtime) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00258CC8);
 
-void func_00259250(s32 arg0, u8 *arg1) {
+void evtWriteRuntimeHeaderValues(s32 arg0, u8 *arg1) {
     s32 buffer[4];
     buffer[0] = *(s32 *)(arg1 + 0x10);
     buffer[1] = *(s32 *)(arg1 + 0x14);
@@ -626,7 +630,7 @@ void func_00259250(s32 arg0, u8 *arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259298);
 
-void func_00259428(s32 arg0, u8 *arg1) {
+void evtWriteFixedSizeEntries(s32 arg0, u8 *arg1) {
     s32 i;
     u8 *entry;
     i = 0;
@@ -831,7 +835,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_0025A280);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025CAF8);
 
-s32 func_0025CC90(s32 arg0, s32 arg1) {
+s32 evtEncodeBgmSoundCode(s32 arg0, s32 arg1) {
     s32 temp_v0;
 
     temp_v0 = 0xC7;
@@ -849,7 +853,7 @@ s32 evtPreloadBgm(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_0025CC90(id, 0);
+    sound = evtEncodeBgmSoundCode(id, 0);
     func_003421E8(sound);
     return sound;
 }
@@ -858,7 +862,7 @@ s32 evtIsBgmLoaded(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 1;
     }
-    return func_00342168(func_0025CC90(id, 0)) == 1;
+    return func_00342168(evtEncodeBgmSoundCode(id, 0)) == 1;
 }
 
 s32 evtPlayBgm(s32 id, s32 fade) {
@@ -866,14 +870,14 @@ s32 evtPlayBgm(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_0025CC90(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_0035B6E0("Event BGM play :%08X\n", sound);
     func_00341BB8(sound);
     return sound;
 }
 
 extern char D_004247F8[]; /* "Event BGM trans :%08X\n" */
-extern s32 func_0025CC90();
+extern s32 evtEncodeBgmSoundCode();
 extern void func_00342600();
 
 void evtTransitionBgm(s32 id, s32 fade) {
@@ -881,19 +885,21 @@ void evtTransitionBgm(s32 id, s32 fade) {
     if ((u32)(id - 0x258) < 0x100U) {
         sound = -1;
         if (fade >= 0) {
-            sound = func_0025CC90(id, fade);
+            sound = evtEncodeBgmSoundCode(id, fade);
         }
         func_0035B6E0(D_004247F8, sound);
         func_00342600(sound);
     }
 }
 
+INCLUDE_RODATA(const s32, "game/code_00250010", D_004247F8);
+
 s32 evtFadeInBgm(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_0025CC90(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_0035B6E0("Event BGM fade in play :%08X\n", sound);
     func_00342538(sound);
     return sound;
@@ -904,7 +910,7 @@ s32 func_0025CE68(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_0025CC90(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_00342580(sound);
     return sound;
 }
@@ -914,7 +920,7 @@ s32 evtSetBgmVolumePan(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_0025CC90(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     sndSetSequenceVolumePan(sound, 0x7F, 0x3F);
     return sound;
 }
@@ -924,7 +930,7 @@ s32 func_0025CF00(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_0025CC90(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_00341C78(sound);
     return sound;
 }
@@ -942,7 +948,7 @@ s32 evtFindTaskById(u32 arg0) {
     return func_00101740(temp_v0);
 }
 
-s32 func_0025CF98(u32 id) {
+s32 evtGetTaskValueWord(u32 id) {
     s32 task = evtFindTaskById(id);
     if (task == 0) {
         return -1;

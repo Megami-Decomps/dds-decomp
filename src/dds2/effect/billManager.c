@@ -91,7 +91,7 @@ BillObj *billCloneList(BillObj *obj) {
     return newobj;
 }
 
-void func_00158F58(BillObj *obj) {
+void billReleaseList(BillObj *obj) {
     func_00159848(obj->unk30);
     func_00328E48(obj);
 }
@@ -129,7 +129,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_001598D8);
 
 INCLUDE_ASM(const s32, "effect/billManager", billCreateIndexed);
 
-u64 func_001599F8(u64 owner, u64 resource) {
+u64 billCreateFromResource(u64 owner, u64 resource) {
     u64 allocation;
     u64 billboard;
     u32 header[4];

@@ -234,7 +234,7 @@ s32 *func_00233E40(s32 arg0, s32 key) {
     }
 }
 
-s32 * func_00233EC0(s32 table) {
+s32 * mdlGetFirstRecord(s32 table) {
     MdlRecord *first;
 
     first = (MdlRecord *)(table + 8);
@@ -244,7 +244,7 @@ s32 * func_00233EC0(s32 table) {
     return (s32 *)first;
 }
 
-s32 * func_00233ED8(s32 record) {
+s32 * mdlGetNextRecord(s32 record) {
     MdlRecord *next;
 
     next = (MdlRecord *)(record + ((MdlRecord *)record)->nextOffset);
@@ -261,11 +261,11 @@ s32 mdlCountRecords(s32 arg0) {
     if (arg0 == 0) {
         return 0;
     }
-    node = func_00233EC0(arg0);
+    node = mdlGetFirstRecord(arg0);
     count = 0;
     while (node != NULL) {
         count++;
-        node = func_00233ED8((s32)node);
+        node = mdlGetNextRecord((s32)node);
     }
     return count;
 }
@@ -284,11 +284,11 @@ u16 func_00233F60(MdlRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233F68);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234100);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlDrawMarkParamsPanel);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234448);
 
-void func_00234668(MdlPartList *list, s32 index) {
+void mdlAddBillboardPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
     entry->state = 0;
@@ -297,7 +297,7 @@ void func_00234668(MdlPartList *list, s32 index) {
     list->count += 1;
 }
 
-void func_002346C0(MdlPartList *list, s32 index) {
+void mdlAddEffectPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
     entry->kind = 1;
@@ -351,12 +351,12 @@ MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 s
     return item;
 }
 
-void func_002349A0(MdlPartEntry *entry) {
+void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
     func_00159A50((u32)entry->object);
     entry->state = entry->state + 1;
 }
 
-void func_002349D8(MdlPartEntry *entry) {
+void mdlAdvanceEffectPart(MdlPartEntry *entry) {
     func_00157A50((u32)entry->object);
     entry->state = entry->state + 1;
 }
@@ -402,10 +402,10 @@ INCLUDE_ASM(const s32, "game/code_00233660", mdlDispatchResourceEntry);
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
     s32 *block = func_00233E40(object, id);
     if (block != NULL) {
-        s32 *entry = func_00233EC0((s32)block);
+        s32 *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
             mdlDispatchResourceEntry(object, entry, option);
-            entry = func_00233ED8((s32)entry);
+            entry = mdlGetNextRecord((s32)entry);
         }
     }
 }
@@ -416,7 +416,7 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
         billDispatchByKind(item->resource);
         break;
     case 1:
-        func_00157658(item->resource);
+        effDestroyNode(item->resource);
         break;
     case 2:
         effTrackPolyRelease(item->resource);
@@ -491,7 +491,7 @@ void func_00235460(void) {
     D_00453584[0] = 0;
 }
 
-void func_002354B8(void) {
+void mdlRotateViewResourcesRight(void) {
     s32 i = D_00453550.resourceCount - 1;
     s32 saved = D_00453550.resources[i];
 
@@ -549,7 +549,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_004211F0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235728);
 
-void func_00235860(void) {
+void mdlAddViewEntryFlagged(void) {
     MdlViewState *state = &D_00453550;
     f32 width;
     f32 height;
@@ -738,7 +738,7 @@ typedef struct MdlDrawSurface {
 extern MdlDrawSurface D_00380048;
 extern u8 D_003C8A00[];
 extern u8 D_003C8A60[];
-extern s32 func_0011F218(void);
+extern s32 sdfCreateResetPacketList(void);
 extern s32 func_00348188(void *, void *, s32, s32);
 extern s32 sdfCountMapPositionRecords(s32);
 extern s32 sdfChunkFindByTag(s32, s32);
@@ -752,7 +752,7 @@ void func_00238140(void) {
 
     if (D_00453550.unk0A < 4) {
         if (D_00453550.unk0A >= 2) {
-            list = func_0011F218();
+            list = sdfCreateResetPacketList();
             __asm__ volatile(
                 ".set noreorder\n\t"
                 "vsub.xyzw $vf28, $vf0, $vf0\n\t"
@@ -785,7 +785,7 @@ void func_00238650(u8 *obj) {
 
     if (count > 0) {
         s32 i = 0;
-        s32 list = func_0011F218();
+        s32 list = sdfCreateResetPacketList();
         s32 record = sdfChunkFindByTag(*(s32 *)(obj + 0x18), 0x534F504D) + 0x10;
 
         do {
@@ -870,8 +870,8 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00239C08);
 void func_0023A028(void) {
     mdlFlagClearAll();
     evtSetSolarPhase(0);
-    func_002433E8();
-    func_00243398();
+    evtSetSolarOverlayFullyTransparent();
+    evtDisableSolarPhaseAdvance();
 }
 
 void mdlFlagClearAll(void) {
@@ -1085,3 +1085,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E8);
+

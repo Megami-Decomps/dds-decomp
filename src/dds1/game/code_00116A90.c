@@ -28,7 +28,7 @@ typedef struct ActionSub {
 
 extern ActionObj *func_00110880();
 
-ActionObj *func_00116A90(s32 a, s32 b, s32 c, s32 d) {
+ActionObj *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
     ActionObj *obj = func_00110880(0xB);
 
     obj->unk8 = d;
@@ -37,11 +37,11 @@ ActionObj *func_00116A90(s32 a, s32 b, s32 c, s32 d) {
     return obj;
 }
 
-void func_00116AD8(PathObject *path, u32 value) {
+void dds3SetPathStateValue(PathObject *path, u32 value) {
     path->state->value = value;
 }
 
-u32 func_00116AE8(u64 id) {
+u32 dds3GetPathStateValueById(u64 id) {
     PathObject *path;
     u64 world;
 
@@ -50,7 +50,7 @@ u32 func_00116AE8(u64 id) {
     return path->state->value;
 }
 
-ActionObj *func_00116B28(s32 a, void *work, s32 c) {
+ActionObj *evtSpawnActionObjD(s32 a, void *work, s32 c) {
     ActionObj *obj = func_00110880(0xD);
 
     obj->unk18 = work;
@@ -59,13 +59,13 @@ ActionObj *func_00116B28(s32 a, void *work, s32 c) {
     return obj;
 }
 
-u32 func_00116B78(PathObject *path) {
+u32 dds3GetPathState(PathObject *path) {
     return (u32)path->state;
 }
 
 INCLUDE_ASM(const s32, "game/code_00116A90", func_00116B80);
 
-ActionObj *func_00116CE8(s32 a, void *work, s32 c) {
+ActionObj *evtSpawnActionObj10(s32 a, void *work, s32 c) {
     ActionObj *obj = func_00110880(0x10);
 
     obj->unk4 = a;

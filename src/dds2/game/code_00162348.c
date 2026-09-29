@@ -28,7 +28,7 @@ extern void (*D_003AAF10[])(void *, void *, void *);
 
 extern BillDispatch D_003AAB88[];
 
-extern void func_001622D0();
+extern void parGetRestartFlag();
 
 extern u8 parObjGetMode();
 
@@ -93,7 +93,7 @@ void func_001628E0(void) {
     parRestartKind();
 }
 
-void func_001628F8(float scale, ParObj *work) {
+void effParScaleComponent(float scale, ParObj *work) {
     func_00162248();
     work->scale8C = work->scale8C * scale;
 }
@@ -150,7 +150,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 
 void func_00162FC8(u16 *arg0) {
     *arg0 = 1;
-    func_00333918(*(u32 *)(arg0 + 0x20));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -189,7 +189,7 @@ void parControlInit(void) {
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163290);
 
 void func_001634A8(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x20));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
     func_003297C8(*(u32 *)(arg0 + 0x10));
 }
 
@@ -270,7 +270,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164390);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001644B0);
 
-void func_00164630(ParSystem *system, s32 arg1, s32 arg2) {
+void parFillCellVertexQuads(ParSystem *system, s32 arg1, s32 arg2) {
     s32 count = system->cellCount;
     s32 perCell = system->vertexWordCount >> 2;
     s32 i;
@@ -327,7 +327,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164CB0);
 INCLUDE_ASM(const s32, "game/code_00162348", func_00165300);
 
 void func_001653A8(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x10));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x10));
     func_003297C8(*(u32 *)(arg0 + 0x14));
 }
 

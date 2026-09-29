@@ -99,13 +99,13 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427668);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002906E0);
 
-u32 func_00290A70(MenuPanelObject *object) {
+u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
     return (u32)object->defaultSelector;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
 
-s32 func_00290B28(MenuPanelObject *object) {
+s32 mnuUpdateSelectedPanelSlot(MenuPanelObject *object) {
     s32 index = func_002890A8((s32)object);
     /* Required to match: typed &object->slots[index] changes two instructions. */
     MenuPanelSlot **slot = (MenuPanelSlot **)(index * 4 + (s32)object + 0x7ac);
@@ -118,7 +118,7 @@ s32 func_00290B28(MenuPanelObject *object) {
     return 1;
 }
 
-u16 func_00290B98(MenuPanelObject *object) {
+u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
     s32 values;
 
     values = (s32)object->slots[object->list->selected->index]->values;
@@ -128,7 +128,7 @@ u16 func_00290B98(MenuPanelObject *object) {
     return *(u16 *)(object->defaultSelector->index * 2 + values);
 }
 
-u16 func_00290BF0(MenuPanelObject *object, s32 index) {
+u16 mnuGetPanelValueAt(MenuPanelObject *object, s32 index) {
     return *(u16 *)
                     (((index << 0x10) >> 0xf) +
                     (s32)object->slots[object->list->selected->index]->values);
@@ -270,7 +270,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294420);
 
-void func_00294488(void) {
+void mnuReleasePanelEntryPool(void) {
     if (D_00437960 != (u32 *)0x0) {
         func_003297C8(((MenuPanelEntryPool *)D_00437960)->allocation);
     }
@@ -279,7 +279,7 @@ void func_00294488(void) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002944B0);
 
-MenuPanelEntry *func_00294538(void) {
+MenuPanelEntry *mnuFindFreePanelEntry(void) {
     MenuPanelEntryPool *pool = (MenuPanelEntryPool *)D_00437960;
     s32 count = pool->count;
     MenuPanelEntry *entry = pool->entries;
@@ -293,7 +293,7 @@ MenuPanelEntry *func_00294538(void) {
 }
 
 void mnuStorePanelEntry(s32 first, s32 second) {
-    MenuPanelEntry *entry = func_00294538();
+    MenuPanelEntry *entry = mnuFindFreePanelEntry();
     entry->first = first;
     entry->second = second;
 }

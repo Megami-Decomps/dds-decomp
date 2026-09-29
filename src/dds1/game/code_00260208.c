@@ -69,12 +69,12 @@ void func_00260590(MenuCommandWork *work, u32 value) {
     }
 }
 
-void func_002605B0(MenuCommandWork *work, u32 mode) {
+void mnuSetCommandPhase(MenuCommandWork *work, u32 mode) {
     work->mode = mode;
     work->frames = 0;
 }
 
-s32 func_002605C0(MenuCommandWork *work) {
+s32 mnuStaffTickState(MenuCommandWork *work) {
     s32 count;
 
     switch (work->mode) {
@@ -111,7 +111,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00261688);
 INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
 
 void func_00261F58(void) {
-    func_00262818();
+    mnuStaffCreateTasks();
     D_003BC52A = 0;
     D_003BC52B = 1;
 }
@@ -210,11 +210,9 @@ void func_00262398(s32 arg0) {
     func_002832F8(*(u32 *)(arg0 + 0xd14));
     mnuReleaseAssets(arg0 + 0xd1c);
     func_00276320(arg0 + 0x4f8);
-    func_00271648(arg0 + 0x4f8);
+    mnuReleaseStaffResourceGroups(arg0 + 0x4f8);
     mnuResetWorkFloats();
 }
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
 
 extern char D_003AFA88[];
 extern char D_003AFA98[];
@@ -225,7 +223,7 @@ extern void effRequestResourceByMode(char *, char *, s32, s32);
 extern void func_0027AEA8(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
-s32 func_00262418(s32 work) {
+s32 mnuStaffInitPanel(s32 work) {
     if (*(s32 *)(work + 0x570) != 0) {
         return 0;
     }
@@ -287,6 +285,10 @@ void func_00262640(s32 arg0) {
     }
 }
 
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
+
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262660);
 
 extern void func_00285600(s32, s32);
@@ -316,18 +318,18 @@ extern char D_003BC530[];
 extern char D_003AFAB8[];
 extern char D_003AFAC8[];
 extern void func_00262EB8(void);
-extern void func_00262F90(void);
-extern void func_00262FF0(void);
+extern void mnuStaffRunPanel1(void);
+extern void mnuStaffRunPanel2(void);
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern void *func_00262660(void);
 
-s32 func_00262818(void) {
+s32 mnuStaffCreateTasks(void) {
     s32 result;
     void *work = func_00262660();
 
     kwlnTaskCreate(D_003BC530, 0x405, 1, 0, func_00262EB8, 0, work);
-    kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, func_00262F90, 0, work);
-    result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, func_00262FF0, func_00262790, work);
+    kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
+    result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, func_00262790, work);
     D_003BC528 = 1;
     return result;
 }
@@ -337,7 +339,7 @@ extern char D_003AFAB8[];
 extern char D_003AFAC8[];
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-u32 func_002628C8(void) {
+u32 mnuStaffDestroyTasks(void) {
     s8 state = D_003BC528;
 
     if (state == 1) {
@@ -366,7 +368,7 @@ s32 func_00262938(void) {
 
 u32 func_00262970(void) {
     if (D_003BC528 == 1) {
-        func_002628C8();
+        mnuStaffDestroyTasks();
         return 1;
     }
     return 0;
@@ -393,14 +395,14 @@ typedef struct MenuPanelBlock {
     s32 data[0x69];
 } MenuPanelBlock;
 
-void func_00262AF8(MenuPanelBlock *src, u8 *base) {
+void mnuStaffCopyPanelBlock(MenuPanelBlock *src, u8 *base) {
     *(MenuPanelBlock *)(base + 0x9C) = *src;
 }
 
 extern s32 D_0036D3C0[];
 extern s32 effMiscRand(s32);
 
-s32 func_00262BA8(void) {
+s32 mnuStaffPickRoll(void) {
     u32 roll = effMiscRand(0) & 0xFF;
     u32 i;
 

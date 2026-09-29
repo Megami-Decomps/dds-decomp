@@ -30,7 +30,7 @@ void func_0031D928(u32 *sprite) {
     func_003297C8(*sprite);
 }
 
-u32 *func_0031D948(WideSlotPool *pool) {
+u32 *itfClaimFreeWideSlot(WideSlotPool *pool) {
     WideSlot *entry;
     s32 index;
 
@@ -63,7 +63,7 @@ void func_0031DF48(u32 *sprite) {
     func_003297C8(*sprite);
 }
 
-u32 *func_0031DF68(CompactSlotPool *pool) {
+u32 *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
     CompactSlot *entry;
     s32 index;
 

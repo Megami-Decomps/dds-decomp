@@ -68,7 +68,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191450);
 
-void func_001917C8(EffMagatuhiWork *work, s32 index, u32 value) {
+void effMagatuhiSetValue(EffMagatuhiWork *work, s32 index, u32 value) {
     work->values[index] = value;
 }
 
@@ -82,7 +82,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001918D0);
 
 void func_00191A98(EffMagatuhiWideFirst *work) {
     effMathReleaseWorkResource(work->mathResource);
-    func_00190DB0(work->managedResource);
+    effReleaseMagatuhiOwner(work->managedResource);
     func_003297C8(work->buffer);
 }
 
@@ -107,7 +107,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001922B0);
 
 void func_00192438(EffMagatuhiWideSecond *work) {
     effMathReleaseWorkResource(work->mathResource);
-    func_00190DB0(work->managedResource);
+    effReleaseMagatuhiOwner(work->managedResource);
     func_003297C8(work->buffer);
 }
 
@@ -122,7 +122,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192A10);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192C20);
 
 void func_00192E08(EffMagatuhiResourceSet *work) {
-    func_00190DB0(work->firstResource);
+    effReleaseMagatuhiOwner(work->firstResource);
     func_003297C8(work->buffer);
 }
 
@@ -132,7 +132,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192F80);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193238);
 
-void func_00193250(EffMagatuhiResourceSet *work, u32 value) {
+void effMagatuhiSetSecondResource(EffMagatuhiResourceSet *work, u32 value) {
     work->secondResource = value;
 }
 
@@ -143,7 +143,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193280);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193488);
 
 void func_00193638(EffMagatuhiResourceSet *work) {
-    func_00190DB0(work->secondResource);
+    effReleaseMagatuhiOwner(work->secondResource);
     func_003297C8(work->extraBuffer);
 }
 
@@ -164,7 +164,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AD0);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193CF8);
 
 void func_00193EE0(EffMagatuhiResourceSet *work) {
-    func_00190DB0(work->secondResource);
+    effReleaseMagatuhiOwner(work->secondResource);
     func_003297C8(work->buffer);
 }
 
@@ -174,7 +174,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001943E0);
 
-void func_001943F8(EffMagatuhiResourceSet *work, u32 value) {
+void effMagatuhiSetFirstResource(EffMagatuhiResourceSet *work, u32 value) {
     work->firstResource = value;
 }
 

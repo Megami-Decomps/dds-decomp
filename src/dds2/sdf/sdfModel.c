@@ -61,7 +61,7 @@ typedef struct SdfDrawNode {
 
 extern void sdfFreeNodeLists(void);
 
-extern void func_00330768(void *arg0);
+extern void sdfEnsureFreeRootWorkspace(void *arg0);
 
 extern void func_003314B0(void *arg0);
 
@@ -129,8 +129,8 @@ typedef struct SdfChunk {
     SdfAssetTable *assets;
 } SdfChunk;
 
-void func_00330D00(SdfChunk *chunk, s32 index, u32 packet, u32 frame) {
-    func_00333950(chunk->assets->entries[index], packet, frame);
+void sdfModelWriteIndexedAssetPacket(SdfChunk *chunk, s32 index, u32 packet, u32 frame) {
+    sdfInitNodeHeaderFromWords(chunk->assets->entries[index], packet, frame);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330D30);
@@ -157,7 +157,7 @@ void func_003316B0(SdfModel *model, s32 arg1, s32 arg2) {
 
     model->unk38 = arg1;
     sdfFreeNodeLists();
-    func_00330768(model);
+    sdfEnsureFreeRootWorkspace(model);
     func_003314B0(model);
     /* Required to match: reinitialize both loop counters after setting up the model. */
     i = 0;
@@ -211,7 +211,7 @@ SdfModel *func_00331940(void *data, SdfItemListRef *listRef) {
     return model;
 }
 
-void func_003319D0(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
+void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
     u8 *xAxis = drawNode->vectors[2];
     u8 *yAxis;
     u8 *zAxis;
@@ -273,12 +273,12 @@ void func_003319D0(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
         return;
     }
     do {
-        func_003319D0(child, transformed, frame);
+        sdfModelUpdateDrawNodeTransforms(child, transformed, frame);
         child = child->next;
     } while (child != drawNode->children);
 }
 
-void func_00331AB0(SdfModel *model, s32 frame) {
+void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     u128 buf[4];
     u8 *b1 = &model->transformStart;
     u8 *b2;
@@ -324,11 +324,11 @@ void func_00331AB0(SdfModel *model, s32 frame) {
         : "memory"
     );
     list = model->list;
-    func_003319D0(list->entries[0], buf, frame);
+    sdfModelUpdateDrawNodeTransforms(list->entries[0], buf, frame);
 }
 
-void func_00331B18(SdfModel *model) {
-    func_00331AB0(model, (s8)D_004389DA);
+void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
+    sdfModelUpdateRootTransforms(model, (s8)D_004389DA);
 }
 
 void func_00331B38(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,

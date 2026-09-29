@@ -97,13 +97,13 @@ void func_00112EA8(EEF0Node *arg0) {
     );
 }
 
-void func_00112EC0(u8 *obj, f32 value) {
+void dds3SetCameraValue(u8 *obj, f32 value) {
     u8 *state = *(u8 **)(obj + 0x18);
     *(f32 *)(state + 0x8C) = value;
     *(u32 *)(state + 0x88) |= 1;
 }
 
-f32 func_00112ED8(u8 *obj) {
+f32 dds3GetCameraValue(u8 *obj) {
     return *(f32 *)(*(u8 **)(obj + 0x18) + 0x8C);
 }
 

@@ -5,6 +5,8 @@
 0x00101858	kwlnTaskGetTaskByName	inferred	name from the Persona 3 FES/Persona 4 decomps (decompiler-chosen, not proven original); P4 sdkTask.c name of the lookup kwlnTaskDestroyWithHierarchyByName calls
 0x00101938	kwlnTaskFindByPriority	inferred	Searches all three task lists for a node whose priority matches the argument.
 0x001019C8	kwlnTaskIsRegistered	inferred	Scans all three task lists and returns whether the target task pointer is present.
+0x00101B78	dds3SetScopedObjectFlags	inferred	Passes set mode, object, mask and scope to the kernel dispatcher, which ORs the selected masked bits into object flags at offset 0x1C.
+0x00101BA8	dds3ClearScopedObjectFlags	inferred	Passes clear mode to the same dispatcher, which clears the selected masked bits from scoped object flags.
 0x00103970	kwlnDebugPulseColors	inferred	periodically writes two random debug color channels from task timer
 0x00104268	kwlnInitMagicState	inferred	passes a kernel state address and fixed magic constant to func_002E8430
 0x00104600	kwlnDebugGraphSetEnabled	inferred	creates or destroys the DebugTimeGrph task by mode
@@ -60,7 +62,11 @@
 0x00108360	evtUnk8360SetVec	inferred	float-vector block write with dirty 0x400; parked on FPU store scheduling
 0x001089F8	evtUnk89F8SetState	inferred	bool switch: nonzero loads saved floats, sets dirty 0x4000 and writes 6 fields; zero saves floats and clears dirty
 0x00108A48	evtUnk8A48Ensure	inferred	allocates D_003BD6B0 via 2DA730 if null and inits +0x1C float to 1.0
+0x00108DC0	evtSubmitTexturePacket	inferred	evt builds a 0x30-byte packet with command 0x42 and submits it on the active draw surface
+0x00109A40	evtSubmitViewParamPacket	inferred	evt copies view params to D_003245B0/D_003245D0 and submits func_002EF2B0 record (twin of func_0012AC80)
+0x00109C10	evtSelStateCreate	inferred	evt allocates the 0x28-byte selection state (limit/frames/callbacks) into D_003BD760
 0x00109CC0	evtUnk9CC0Check	inferred	checks BA948 flag and 760 fields to call 9D20 or A170; parked on branch-layout (bne vs beq sharing)
+0x0010A170	evtSelStateDestroy	inferred	evt frees D_003BD760 and clears the vector at D_00324590
 0x0010A1B0	evtStartSelCreate	inferred	creates StartSel kwln task via kwlnTaskCreate with update func_00104260; tail-calls
 0x0010A1E8	evtStartSelDestroy	inferred	destroys StartSel task hierarchy by name, returns 1
 0x0010A2F8	evtUnkA2F8Check	inferred	calls 28F458/460, returns -1 if 28F5F8==0 else calls 122D60 and returns 0
@@ -72,12 +78,16 @@
 0x0010AA60	evtTestFontCheck	inferred	returns whether test_font task is absent via kwlnTaskGetTaskByName
 0x0010AB08	evtUnkAB08Call	inferred	calls 2C2E38 with 0 or arg1[0] then stores 0x3E7 to D_0032E3C0[0]
 0x0010AB90	evtUnkAB90Ensure	inferred	allocates D_003BA960 chain via 2E3E18/2E41B0/2E41A0 if null; parked on call arg-setup order
-0x0010B728	evtUnkB728Link	inferred	splices node into D_003BA998 list with per-path tails and bumps D_003BA990
-0x0010B768	evtUnkB768Unlink	inferred	removes node from D_003BA994/998 list, clears links, decrements D_003BA990
+0x0010B728	evtLinkWorkNode	inferred	Appends a work node to the doubly linked event list and increments its count.
+0x0010B768	evtUnlinkWorkNode	inferred	Unlinks a work node from the doubly linked event list and decrements its count.
 0x0010BB88	scrProcCreateTask	inferred	wraps kwlnTaskCreate for a script-proc task; stores id at +0xE4
 0x0010BBE0	scrClearProcessGlobals	inferred	Clears both 256-element integer arrays of script process globals.
+0x0010BC18	scrCreateProcessTaskFromResource	inferred	Opens a script process from the supplied resource ID and option, then creates its scheduler task at the supplied priority.
 0x0010BC50	scrCreateProcessWithDefaultOption	inferred	Calls func_0010BB28 with its second argument zero.
+0x0010BC68	scrCreateTaskForProcessId	inferred	Creates a script process from the provided task identifier and option, then registers it with kwlnTaskCreate.
 0x0010BCA0	scrCreateTaskWithDefaultOption	inferred	Calls func_0010BA18 with its second argument zero.
+0x0010C028	scrSetCurrentActor	inferred	Battle caller passes its actor into active script offset 0xF0; other callers clear it.
+0x0010C050	scrGetCurrentActor	inferred	Reads the active script actor pointer stored at offset 0xF0.
 0x0010C120	scrPushInteger	inferred	Writes integer stack type 0 and the supplied value at the current script stack index, then increments it.
 0x0010C180	scrPushString	inferred	Writes string stack type 5 and the supplied value at the current script stack index, then increments it.
 0x0010C1B0	scrPushTypeFourValue	inferred	Writes stack type 4 and the supplied value at the current script stack index, then increments it.
@@ -104,6 +114,9 @@
 0x0010D670	scrGetTimer	inferred	Returns script state's timer at offset 0xD0.
 0x0010D680	scrGetCommandTimer	inferred	Returns script state's command timer at offset 0xD4.
 0x0010D690	scrGetWindow	inferred	Returns script state's window field at offset 0xCC, consumed as window index by message commands.
+0x0010D6E8	scrCommandTestModelFlag	inferred	Tests the script-supplied model flag and stores its result in the script VM.
+0x0010D718	scrCommandSetModelFlag	inferred	Sets the model flag identified by the script operand.
+0x0010D740	scrCommandClearModelFlag	inferred	Clears the model flag identified by the script operand.
 0x0010F4F0	effObjNodeDestroy	inferred	unlinks +0x20/+0x24 list, calls owner notify at +0x4 with the node, frees via func_002CFF98
 0x0010F570	effObjInnerCreate	inferred	allocates 0xD0 inner node, inits vectors/flags via func_0010F660, links at +0x1C; returns 1 on success; 27/29 words match, blocked on $2/$3 scratch choice for +0xB0 address
 0x0010F5E8	effObjFreeInner	inferred	Frees an effect node's inner allocation if present and clears its pointer.
@@ -130,9 +143,15 @@
 0x0010FDC0	dds3GetWorldSecondaryObject	inferred	Returns the world's info offset 0xC object or null if no world exists.
 0x0010FDE0	dds3AppendWorldNode	inferred	Allocates a node and appends it to the world's doubly linked list.
 0x0010FE48	dds3DestroyWorldNode	inferred	Clears world references to the supplied node and calls effObjNodeDestroy.
+0x0010FEC8	dds3AppendWorldIndex	inferred	Allocates and appends a doubly linked world index node if the supplied index is within the configured bound.
+0x0010FF80	dds3RemoveWorldIndex	inferred	Calls the index cleanup helper, unlinks the node from the world index list and frees it.
+0x001101E0	dds3IterateWorldEntries	inferred	Initializes iteration, compares each current entry against the requested object and processes matches.
+0x00110270	dds3FindWorldEntry	inferred	Advances through world entries until the supplied object matches or iteration ends.
 0x00110BB8	dds3ClearSceneObjectState	inferred	Reads scene object at offset 0x18 and clears its word at offset 0x14 after func_00128890.
 0x00111108	dds3ExchangeAreaSlot	inferred	Exchanges object slot 5 with null and returns success.
 0x00111130	dds3InvokeAreaCallback	inferred	Calls the callback at area subobject offset 0xC if present; otherwise returns success.
+0x00111188	evtSpawnActionObj2	inferred	constructor for type 2
+0x00111610	dds3SpawnSlotRingObj3	inferred	type 3 object taking next slot of 10-entry ring D_00329A68
 0x00111698	dds3SetSlotValue	inferred	Stores the supplied value in the slot data word at offset 8.
 0x001116A8	dds3SetSlotKey	inferred	Stores the supplied key in the slot data word at offset 0xC.
 0x001116B8	dds3ReloadSlotPath	inferred	Releases the old path if present, resolves the stored key and saves the resulting path handle.
@@ -156,14 +175,33 @@
 0x00112BB0	dds3GetCameraHandle	inferred	Returns the handle at camera data offset 0x80.
 0x00112FE0	dds3GetCameraMode	inferred	Returns camera data's word at offset 0x84, also written by the neighboring setter.
 0x00112FF0	dds3SetCameraMode	inferred	Stores the supplied mode at camera data offset 0x84 only when changed.
+0x00113018	dds3SpawnCameraSlotObj5	inferred	type 5 object; null-checked; falls off end returning obj
+0x00113CE8	dds3SpawnInnerVecObj6	inferred	type 6 object with identity first vector and copied vec
 0x00115930	effObjGetIntParam	inferred	returns float at +0x60 of vector base as s32, 0 when guard fails
 0x00116148	dds3ReleaseEventData	inferred	Releases the event data handle and frees the event data allocation.
+0x001161D8	dds3SpawnInnerVecObj8	inferred	type 8 object with first/second inner vectors
+0x001165A8	evtSpawnActionObj9	inferred	constructor for type 9 plus func_00112750
 0x001166B8	dds3ClearUnitObjectLowFlags	inferred	Clears the bottom two bits in the nested unit-object flags at offset 0x64.
+0x00116A10	dds3AllocateObjectWork	inferred	Allocates and zeroes the object work block at offset 0x18 before returning success.
 0x00116A50	dds3ReleaseModelRangeData	inferred	Releases the optional resource owned by model-range data and frees that data.
+0x00116A90	evtSpawnActionObjB	inferred	constructor: func_00110880(0xB) object, returns it
+0x00116AD8	dds3SetPathStateValue	inferred	Writes the word in the path object state record.
+0x00116AE8	dds3GetPathStateValueById	inferred	Looks up a path in the secondary world and reads its state word.
+0x00116B28	evtSpawnActionObjD	inferred	constructor for type 0xD
+0x00116B78	dds3GetPathState	inferred	Returns the path object state pointer at offset 0x18.
+0x00116CE8	evtSpawnActionObj10	inferred	constructor for type 0x10
+0x00116F08	dds3FreePathObject	inferred	Frees the path's associated buffer handle and then frees the path object allocation.
+0x00117050	dds3PreparePathVectorPair	inferred	When path flag bit one is set, selects adjacent 16-byte vector entries at the current path time and loads VU vf10/vf11 for interpolation.
+0x00117578	evtScaleValueByMultiplier	inferred	Stores the scaled float as a supplied multiplier times the object's base float.
+0x00117588	evtGetValueScaleFactor	inferred	Returns the scaled float divided by its base float.
+0x001175F8	evtSpawnActionObj11	inferred	constructor for type 0x11
 0x00117780	sdfBumpTickCounters	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x00118310	sdfResetChannels	inferred	resets the 8 channel entries
 0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x00118DD8	sdfQueryChannelBits	inferred	returns active channel bits masked by packed flags
+0x00119000	sdfSetPackedValuePreservingFlag	inferred	Replaces the low fifteen bits of a packed halfword while preserving its high flag bit.
 0x001192B0	datMoveCursorX	inferred	Adds the supplied delta to cursor x and clamps to zero through xMax.
 0x001192D8	datMoveCursorY	inferred	Adds the supplied delta to cursor y and clamps to zero through yMax.
 0x001199B0	evtCheckValueThreshold	inferred	evt event state and dispatch in game/code_00119900.c
@@ -183,26 +221,48 @@
 0x0011C610	evtSelectFineStatGrade	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011CE18	dds3WorkClear	inferred	zeroes s32 at +0x1360, s16 at +0x1364 of D_003BAA00 base and D_003BAAB8 flag
 0x0011CFC0	dds3AppendLinkedNode	inferred	Appends the supplied node to a two-pointer list using links located at the caller-supplied offset.
+0x0011D3B0	sdfCreateInitializedPacketList	inferred	Allocates an aligned 0x20-byte packet and immediately passes it to sdfInitPacketList before returning it.
 0x0011D998	fldStepValueByPad	inferred	adds/subtracts a step to *value per d-pad direction bytes 4..7 with wrap (0x80 bit) or clamp (0x02 bit) between min and max
+0x0011DAA0	fldStepValueByCurrentPad	inferred	Calls the named fldStepValueByPad with the field module's current pad buffer.
+0x0011E540	fldTestDrawUpdate	inferred	Draws the field test frame quads and associated scene resources; installed as the update callback by fldTestDrawCreate.
 0x0011E668	fldTestDrawCreate	inferred	creates the fldTestDraw task via kwlnTaskCreate with update func_0011E540
 0x0011E6A0	fldTestDrawDestroy	inferred	destroys the fldTestDraw task hierarchy by name via kwlnTaskDestroyWithHierarchyByName
 0x00120968	fldLoadFieldTables	inferred	loads /fld/f/bin/FLDALL.TBL into seventeen global tables with fixed sizes
+0x00121750	fldActivateFlaggedObject	inferred	Sets the indexed field object activation bit, calls fldActivateObjectById and conditionally dispatches the matching 16-byte activation record.
+0x001217F0	fldTestObjectActivationFlag	inferred	Returns the indexed activation bit from the field work bitset at offset 0x15970.
 0x00122030	fldAngleDifference	inferred	adds 360 to negative angles, reduces both mod 360 and returns the shortest signed difference b-a in degrees
 0x00122BB0	fldPointDistance	inferred	fld field scene and resources in game/code_0011D3A0.c
 0x00122D60	fldStartSequenceRecord	inferred	builds a FieldSequenceRecord and submits it via func_001028E8(5,...) unless a sequence is already active
+0x00122E08	fldInitializeDisplayAndTables	inferred	Initializes field display objects, render buffers, scene systems and the field tables in sequence while printing progress markers.
+0x00122F08	fldInitializeSequenceRecord	inferred	Populates a named field sequence record in mode two and resets current process flags and cached object data.
+0x001231D0	fldInitializeSequenceRecordWithNote	inferred	Initializes a field sequence record in mode two with a code and subname copied to its note field.
+0x001232C0	fldInitializeLinkedSequenceRecord	inferred	Fills a field sequence record with a code, link identifier and subname copied to the detail field.
 0x001238B8	fldLoadPlayerModel	inferred	selects player_a/player_b/player_l.PB from the model kind (and D_0032E3B0+0x118 flag) and loads it via func_002EB028
+0x00123990	fldUnloadPlayerModel	inferred	Releases the cached field player model handle and clears the associated model state.
 0x00123C30	fldPrepareResourceBuffer	inferred	fld field scene and resources in game/code_0011D3A0.c
 0x00123CC0	fldReleaseResources	inferred	fld field scene and resources in game/code_0011D3A0.c
+0x00123D20	fldReleasePlayerSceneResources	inferred	If the player object is active, saves its inner vectors, clears its handles and releases field scene resources.
+0x00123D98	fldCleanupFieldScene	inferred	Resets field task slots, destroys test draw work, releases active scene resources and cleans field tasks.
 0x00123EE8	fldCreatePlayerObject	inferred	creates the "PLAYER_UNIT" object at the origin (pos/rot vectors) and registers it with the secondary world object
+0x001243C8	fldSelectSceneCommand	inferred	Selects scene-command code 0x64, 0x65 or 0x66 using current map and scene variants.
 0x00124500	fldEnterSceneCommand	inferred	starts the scene command task (func_001243C8 code) and sets flag bit 8
+0x00124590	fldGetSceneCommandState	inferred	Returns one when the scene-command field flag is active, zero during a pending transition, or minus one otherwise.
 0x001245C0	fldUpdateSceneCommand	inferred	starts or stops the scene command task depending on flag bit 8 and D_0032E3B0+0x12C
 0x001248B8	fldIsFlagActive	inferred	fld field scene and resources in game/code_0011D3A0.c
 0x00124900	fldRollEncounter	inferred	scans up to 16 encounter entries for the stage, checks the optional mdl flag and rolls effMiscRand()%100 against the chance
+0x00124E18	fldAdvanceToNextScene	inferred	Stores the current area and scene plus one as the next scene then resets task slots and releases the current object.
 0x00125440	fldProcSequence	inferred	update proc of the task registered as "fldProcSequence" (a task label, not proof of the function's name)
 0x00125BF8	fldProcDraw	inferred	update proc of the task registered as "fldProcDraw" (a task label, not proof of the function's name)
+0x00126098	fldSetDeferredFieldCommand	inferred	Stores a command and argument pair for later dispatch by func_001260A8.
+0x001260A8	fldDispatchDeferredFieldCommand	inferred	Waits until the field command system is ready, invokes func_0013F100 with the stored pair and clears the pending command.
 0x00126198	fldCreateDummyMatter	inferred	fld field scene and resources in game/code_0011D3A0.c
+0x001278E8	fldSetAreaResourceRequest	inferred	Stores requested area and floor IDs in the pair read by fldLoadAreaResource to construct the fNNN_NNN.LB archive path.
 0x001278F8	fldLoadAreaResource	inferred	frees display objects and loads %sf%03d_%03d.LB for D_003BAC84/88
 0x00127AC0	fldFreeDisplayObjects	inferred	walks D_003BAC3C +0x60/next chain freeing nodes via func_002D0A10, releases head via func_00288788, zeroes display state words
+0x00127B30	fldPollAreaResourceLoad	inferred	While area scene state is pending, tests the resource handle and clears the pending flag and related field byte when loading completes.
+0x00127B98	fldIsAreaResourceReady	inferred	Tests the active area resource handle for completion and otherwise returns the field ready flag from D_0032E428[0].
+0x00127BD8	fldIsAreaResourceReadyFor	inferred	First checks requested area and room IDs against the loaded pair, then tests the handle or loaded flag.
+0x00128188	fldReleaseAreaResourceCache	inferred	Releases the two retained area handles, clears both globals and resets the first cached area-name byte.
 0x00128B50	fldFormatAreaDirectory	inferred	sprintf of /fld/f|b|e/f%03d/ by field number range
 0x00128F90	fldInitDisplayObjects	inferred	Initializes two display objects once, sets first object's float at +0x1C to 1.0 and registers D_0032F260.
 0x00128FE0	fldGetDisplayTableRow	inferred	returns &D_00324B48[D_003BACD0*8]; retail keeps addu out of jr delay slot, parked 2-word diff
@@ -233,6 +293,7 @@
 0x001342B0	fldComposeFadeColor	inferred	color | (alpha*D_003BADE0/100 scaled by the fade factor above 0xE0) << 24
 0x00135088	fldCalculateVectorLength	inferred	fld field scene and resources in game/code_00126A30.c
 0x00135298	fldSetRecordValueById	inferred	writes value into the 0xE4-byte record whose id matches
+0x001352E0	fldResetRecordState	inferred	Zeros all field record values, clears their count and related field state, then frees the record buffers.
 0x00138D88	fldResetTaskSlots	inferred	clears D_003308B0 task slots and re-registers HUNT_MDL_UNIT flag objects
 0x00138EB0	fldPushDisplayValue	inferred	appends arg to D_003C92E0[D_003BAE28++] bump-allocator array; parked regalloc ($5 vs $2) diff
 0x0013AF20	fldRoomContainsPoint	inferred	tests six plane dot products of a room record against its limits
@@ -247,6 +308,8 @@
 0x0013F848	fldGetRowValue	inferred	switch over D_00337C60 0x20-byte rows selected by D_003BAE4C
 0x0013F9E8	fldFindTableEntry	inferred	indexes 0x20-row s16 table D_00337C60 by D_003BAE4C row with count/index adjustment; parked regalloc diff, table struct kept in unit
 0x0013FCE0	fldResetActorSlots	inferred	clears the 256 0x5C-byte actor task records (kind/link fields set to -1) and D_003BAE64
+0x0013FD60	fldLoadActorWaypointTable	inferred	Formats the area FNNN.WAP path and loads its 0x6CA0-byte table into D_00337C60, or clears that table for fields numbered 100 and above.
+0x0013FE08	fldCopyActorWaypointTable	inferred	Copies the caller's entire 0x6CA0-byte field actor waypoint table into D_00337C60.
 0x001410E8	fldReleasePanelState	inferred	Frees the panel data from func_00101A70 and clears the panel state global.
 0x00141420	fldEnsureTask	inferred	creates kwln task when D_003BAE70 handle is null
 0x00141470	fldDestroyTask	inferred	destroys kwln task with hierarchy if handle set, leaves handle
@@ -256,7 +319,8 @@
 0x00141DC0	fldPlayFieldSeVolumePan	inferred	same mapping for ids 0x80-0x82 with volume 0x7F pan 0x3F
 0x00141E88	fldPlayFieldSe	inferred	maps ids 0x100-0x102 to fixed sound ids, else D_003BAE84+id
 0x00141F70	fldSetBgmMode	inferred	switch on -1/0/1/2 updating D_003BAE98 current bgm id
-0x00142160	fldLoadArchive	inferred	builds 0x30000000+(area<<16) archive id, starts it via func_002E9340 when func_002E92C0 reports idle, tracks state in D_003BAEA4, returns status
+0x00142160	fldPollArchiveLoad	inferred	fld polls func_002E92C0 for 0x3000xxxx and sets D_003BAEA4
+0x00142230	fldStepArchiveLoad	inferred	fld three-state archive loader on D_003BAEA8 (0x670000 id)
 0x00142758	fldSetEmitterPosition	inferred	builds (x,y,z,1) vector, stores via COP2 into emitter+0x50 and restarts it
 0x00142C00	fldFindRecordItem	inferred	scans D_003BAEDC 0x14-stride records/0x1C-stride items for (record, itemIndex), returns item+0x10 value +1 or 1
 0x00142D18	fldGetMaxItemValue	inferred	scans D_003BAEDC table for maximum item+0x10 value via movn update, returns max+1
@@ -264,6 +328,7 @@
 0x00145DB0	fldReleaseMenuSlots	inferred	frees the D_00348F30 slots and D_003D40A0[0..1] handles, clears D_003D40B0 and drains the task queue
 0x00146B10	fldSetFlagAndFindRecord	inferred	sets bit (arg-1) in the area/floor flag table like fldSetFlagBit and stores fldFindRecordItem() for it in the scene state
 0x00146BC0	fldSetFlagBit	inferred	sets bit (arg2-1) in u64 flag row ((D_003BAA00+0x13F70)[id*64+arg1-1]) for D_0032C900[arg0%100] bucket; set-twin of matched tester func_00146AA8
+0x00146C30	fldClearFloorFlag	inferred	fld counterpart of fldSetFlagBit that clears a bit in the area flag table
 0x00146CF8	fldFindPrevRecordItem	inferred	largest fldFindRecordItem value below limit across scenes
 0x00146DC8	fldFindNextRecordItem	inferred	smallest fldFindRecordItem value above limit across scenes
 0x00146E98	fldGetSceneEntryPosition	inferred	fld field scene and resources in game/code_001411F0.c
@@ -307,8 +372,18 @@
 0x0014ECB0	fldSetFlagFromWorld4	inferred	same family as func_0014EC40 with ==4 comparison constant
 0x0014ECE8	fldSetFlagFromWorld2	inferred	same family as func_0014EC40 with ==2 comparison constant
 0x0014ED20	fldCmdPushSceneParam	inferred	script command: pushes one field of the D_0034C8F0 per-scene table (selected by func_0010D428(0)) through func_0010D5F0
+0x0014F2A0	fldCommandPlaySeVolumePan	inferred	Passes the script operand to the field sound-effect volume-and-pan player.
+0x0014F2C8	fldCommandPlaySe	inferred	Passes the script operand to the field sound-effect player.
+0x0014F2F0	fldCommandLoadArchive	inferred	Returns whether loading the archive selected by the script operand succeeded.
+0x0014F498	fldCommandFindEffectByName	inferred	Looks up the effect named by the script operand and sets the VM command result.
+0x0014F658	fldCommandSendNamedSound	inferred	Reads the field script sound command name and sends it after handling a busy channel.
+0x0014F6A8	fldCommandSendSoundControl	inferred	Script opcode sends the sound control packet 0x100 through func_002E8900 and returns success.
+0x0014F6C8	fldCommandIsSoundBusy	inferred	Pushes the sound command busy predicate to the script VM.
 0x0014F838	effManagerInitializeSubsystems	inferred	Calls three effect subsystem setup functions in sequence.
 0x0014F9C8	effManagerUpdateAndDispatch	inferred	Calls five effect-manager functions followed by active-effect dispatch.
+0x0014FA30	effCreateNode	inferred	eff allocates node and calls the per-type create handler
+0x0014FAB8	effDestroyNode	inferred	eff calls per-type destroy handler then frees node
+0x0014FB00	effUpdateNode	inferred	Dispatches the active effect node's data to its type-specific update callback.
 0x001511C0	billAllocChild	inferred	allocates 0x34 child, links func_00150148 result when arg given
 0x00151260	billAllocList	inferred	allocates entry-list object from data, wires +0x30/+0x60/+0x50
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
@@ -318,6 +393,10 @@
 0x00151F38	billInvokeCallback	inferred	invokes instance unk28 callback
 0x00151F58	effRetainResource	inferred	eff effect resources and animation in game/code_00151F58.c
 0x00152018	effCopyPosition	inferred	eff effect resources and animation in game/code_00151F58.c
+0x00152050	effBillSetMode	inferred	Updates the billboard mode directly for child kinds or propagates mode bits across list entries.
+0x00152190	billGetKind	inferred	Returns the billboard object's kind discriminator at offset 0x2C.
+0x00152198	billSetVariantValue	inferred	Writes the chosen variant's halfword value to its variant-specific storage.
+0x001521D0	billGetVariantValue	inferred	Reads the halfword value from storage selected by the billboard object's kind.
 0x00152720	effDestroy	inferred	runs the +0x84/+0x80 sub-destroy callbacks then frees the object
 0x001536A8	effAllocateBuffer	inferred	eff effect resources and animation in game/code_00151F58.c
 0x00153920	effDestroyResources	inferred	eff effect resources and animation in game/code_00151F58.c
@@ -331,6 +410,7 @@
 0x0015A7A0	parObjGetMode	inferred	returns mode150, mode151 or 0 by kind id through a jump table
 0x0015A8C8	parInstantiateKind	inferred	Instantiates particle through type dispatch and prepares its transform.
 0x0015A968	parObjDispatch	inferred	dispatches the object through the D_0034E258 handler table by kind id
+0x0015AD08	effParScaleComponent	inferred	Multiplies the particle object's float at offset 0x8C by a supplied scale.
 0x0015AE40	parDispatchKindUpdate	inferred	Dispatches particle update function by kind.
 0x0015AED8	parDispatchKindInit	inferred	Dispatches kind-specific initialization including parCellInit.
 0x0015B228	parSysReset	inferred	clears the object list head, inits the control block, then notifies with D_003D64B0
@@ -338,7 +418,12 @@
 0x0015B8E8	parCellInit	inferred	fills a 20-byte cell with grey 0x80808080 and two zero words
 0x0015D080	parDispatchSub	inferred	calls the flat handler at kind-index times 3 plus sub-index with three args
 0x0015F468	polyResetEntries	inferred	Resets polygon-list bookkeeping and non-sentinel entry values across the list.
+0x0015F6F0	effBillSetWorkValue	inferred	Stores a value in the work's current byte and, if the pending count is zero, in its staged byte.
+0x0015F7F0	effBillSetEntryValue	inferred	Writes the supplied value into the last word of an indexed 0x14-byte billboard entry.
 0x00161898	effBTLFieldColorGetBaseColor	evidence	its message "effBTLFieldColorGetBaseColor:DummyColorLoad"
+0x00161A00	effBTLFieldColorClearFlags	inferred	Clears the supplied flag bits from the battle field color state.
+0x00161A18	effBTLFieldColorResetFlags	inferred	Zeros all flag bits in the battle field color state.
+0x00161AE0	effBattleMiscCallByOwnerA	inferred	forwards battle-owner A handle and arg to func_00161BA0
 0x00162258	effBattleMiscApplyParamByte	inferred	Passes byte 1 from the parameter record to func_001D63E8 with the supplied first argument.
 0x001624B8	effBattleMiscGetTableEntry	inferred	Returns the indexed word in the battle-misc table.
 0x00162980	effParamWorkCreate	inferred	allocs 8-byte work, stores kind id, builds data through the D_00353710 create slot
@@ -373,6 +458,7 @@
 0x00166B38	effThunderRandomizeCell	inferred	fills a 20-byte cell with three (rand-0.5)*2 floats and two rand-modulo values
 0x0016ACD0	effRotateFlashParticlePosition	inferred	eff effect resources and animation in effect/effPCPFlash.c
 0x0016F790	effAdvanceVectorRecord	inferred	Adds the group's float increment to the indexed sixteen-byte vector record's value at offset eight.
+0x0016FF38	effSetVectorIncrementBits	inferred	Stores raw float bit representation to the record group's increment field at offset 0x50.
 0x00170BF0	effPcpScatterSharedDuplicate	inferred	duplicate of the shared-particle effect: copies the child work, then re-creates the handle array via effParamWorkDuplicate
 0x00170CE0	effPcpScatterReleaseParticleGroup	inferred	releases each particle handle in the scatter work array then frees the array and child work resources
 0x00171848	effPcpScatterLinkedDuplicate	inferred	duplicate counterpart of the effect built by func_00171550
@@ -389,8 +475,13 @@
 0x00176050	effShareScatterResource	inferred	Increments a source object's scatter resource reference and stores the resulting handle.
 0x00176080	effGetScatterWideBlock	inferred	Computes base at offset 0x64 plus index times object stride times 16.
 0x00176098	effGetScatterNarrowBlock	inferred	Computes base at offset 0x68 plus index times object stride times 8.
+0x001760B0	effGetScatterEntry	inferred	Returns the indexed entry in a scatter effect resource array.
 0x001763B8	effPCPNeedleFree	inferred	releases work handles +0x68/+0x6C/+0x70
 0x001763F0	effPCPNeedleCreate	inferred	spawn wrapper: param-set block 0 + init func_001760F8
+0x00176A00	effPCPNeedleCopyVector	inferred	Copies one effect vector with PCP_COPY_VECTOR.
+0x00176B50	effReleaseResourceHandles	inferred	Releases the nested effect work handles at offsets 0x68, 0x6C and 0x70.
+0x00177048	effReleaseOptionalResource	inferred	Frees the nested effect resource at offset 0x68 only when present.
+0x001770D8	effSetResourceEntryValue	inferred	Stores a word in an indexed 0x14-byte effect resource record.
 0x00177418	effTwinEffectCreateFromTable	inferred	Builds the eight paired-handle slots from parameter-table entries.
 0x00177608	effTwinEffectClone	inferred	Duplicates the paired handles and shared handle for eight slots.
 0x00177990	effPcpStaggerCreate	inferred	allocates 0x98 work, creates the 8 handle pairs (first from the parameter table, rest duplicated) and calls func_00177870 per slot
@@ -422,9 +513,12 @@
 0x0017F210	effSpinEffectCreateFromTable	inferred	Allocates the 0x68-byte spin effect with two parameter handles from the table, an identity matrix and a random start angle.
 0x0017F2D0	effSpinEffectClone	inferred	Duplicates the two parameter handles of a spin effect into a fresh 0x68-byte work.
 0x0017FF30	effPcpScaledRespawn	inferred	rebuilds a params block (5 words + 0x4C-byte resource copy from func_00163540) and calls func_0017FE50
+0x00180338	effPcpReleaseNestedWork	inferred	Releases the nested work's two resource handles and frees its allocation.
 0x001806C8	effResetChild	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x001806F8	effBeamEffectClone	inferred	Copies a 0x50-byte beam work and rebuilds its ring entries from the clamped kind.
+0x001808C8	effPcpReleaseBeamClone	inferred	Releases the beam clone's nested work before freeing the owner.
 0x00180B30	effPcpNestedWorkSetFloat	inferred	sets the floating field at 0x90 in the work addressed through the 0x5C child handle
+0x00180B48	effPcpCopyNestedMatrix	inferred	Copies four VU matrix rows into the nested work's matrix at offset 0x40.
 0x00180B78	effRotateNested	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x00180E18	effPrepareAngles	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x00180E78	effBeamEffectCloneLarge	inferred	Larger beam work copy (0x5C-byte head) with the same ring-entry rebuild.
@@ -437,12 +531,14 @@
 0x00183950	effPcpEventBatchRelease	inferred	releases a batch of event objects then stops the associated owner and frees its handle
 0x00184090	effDestroyParticleEvents	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x00185758	effPCPBossFree	inferred	releases work handles +0x28/+0x2C then system free
+0x001858C8	effPCPBossSetParameterVector	inferred	Copies one quadword into the boss effect's parameterVector at offset 0x10.
 0x001858E0	effPCPBossSetParameter	inferred	Stores the supplied value in the boss-effect parameter field at offset 0x24.
 0x00185E18	effFreePairedResources	inferred	Releases both resource handles at offsets 0x74 and 0x70 before freeing the containing object.
 0x00186E28	effBlurSetSetting	inferred	Stores the supplied blur work setting at offset 0x2C.
 0x00188820	effTrackPolyFreeData	inferred	releases both sub-objects via free-like callees
 0x00188850	effTrackPolyInitData	inferred	initializes track-poly fields to default gray 0x80808080, mode 2, 0
 0x001889B8	effTrackPolyAdvancePosition	inferred	Updates the polygon position using step and period with wrap below 2.
+0x00189178	effReleaseSceneResource	inferred	Releases the scene resource handle then frees its owner.
 0x001893C0	effMagatuhiReleaseResource	inferred	Releases the resource at work offset 0x34.
 0x0018A610	effMagatuhiCopyFloatBlock	inferred	copies eight floats from the source block to the destination block with remapped offsets
 0x0018B620	effMagatuhiCopyVecs	inferred	64-byte COP2 copy shared identically with the BE70/C7C8 twins
@@ -460,6 +556,7 @@
 0x0018CD50	effAllocSubWork	inferred	switch on type picks +0x4 or +0x44 slot then dispatches by type
 0x0018CE70	effOpenDataDir	inferred	formats pfs0: path via func_003014F0 and opens with sceDopen, or clears handle
 0x0018CEC0	effRunIfEnabled	inferred	tail-calls func_003101B8 when byte D_003BD476 is set
+0x0018CEF0	effNextDataDirEntry	inferred	Enumerates one effect data directory entry: delegates to the directory reader when mounted, otherwise copies the next of 47 built-in names and clears bit 12.
 0x0018D3D0	effFreeWorkList	inferred	frees +0x38-linked nodes plus +0x4 buffer plus object
 0x0018D938	effFreeWork	inferred	releases +0x3C sound handle if set via func_002D2D00 then frees object
 0x0018D978	effSetMsgHeader	inferred	stores +0x0/+0x4 message header words
@@ -470,9 +567,12 @@
 0x0018D9E8	effSetWorkSecond	inferred	stores second word of +0x20/+0x24 pair
 0x0018D9F0	effSetMsgPair	inferred	stores +0x28/+0x2C message words
 0x0018DA00	effSetupWorkSound	inferred	rebuilds +0x3C sound handle from arg via func_002EB028/002D3288/002D0918
+0x0018DD40	effBlendColor	inferred	Interpolates the packed RGBA channels of two input colors with the VU, then packs the result into one 32-bit color.
 0x0018DF00	effAllocSlotArray	inferred	allocs n*0x38+0xC slot array with header, inits slots to 0 and 0.05f
 0x0018DF90	effMathReleaseWorkResource	inferred	Releases the handle at offset 8 in the math-effect work.
+0x0018E2A8	effReleaseArrayAllocation	inferred	Releases the allocation handle at offset eight of the shared EffArrHdr.
 0x0018E638	effInitSlotTail	inferred	resets 0x60-stride slot tail: reloads 0.05f at +0x5C, clears +0x54/+0x58
+0x0018E660	effGetSlotAtIndex	inferred	Returns the address of the requested fixed-stride effect slot.
 0x0018F418	effGetCh70Params	inferred	returns address of the 0x30-byte channel-70 param block D_00355880
 0x0018F440	effCopyCh71Common	inferred	copies 0x2C-byte common prefix into the channel-71 work D_003BD808
 0x0018F4A0	effGetCh71Work	inferred	returns the channel-71 work pointer D_003BD808
@@ -494,6 +594,7 @@
 0x0018F7C0	effInitCh75Id	inferred	sets channel-75 work id from func_00151FC8(0)
 0x0018F7E8	effInitWorks	inferred	creates the four channel works via 00186C18/00186F90/00187FC0/00187460, flags first word 4
 0x0018F848	effDispatchActive	inferred	calls per-channel handlers for each set flag D_003BB070-D_003BB076
+0x0018F8F8	effUpdateCh72Params	inferred	eff refreshes parameter block: getter + memcpy shadow + notify
 0x0018F9B0	effGetLoadDescA	inferred	returns address of the 0x30-byte load descriptor D_003559A0
 0x0018FAD8	effGetLoadDescB	inferred	returns address of the 0x2C-byte load descriptor D_00355AF8
 0x0018FC08	effGetLoadDescC	inferred	returns address of the 0x2C-byte load descriptor D_00355C70
@@ -501,7 +602,9 @@
 0x0018FE60	effGetLoadDescE	inferred	returns address of the 0x18-byte load descriptor D_00355F88
 0x0018FF68	effGetLoadDescF	inferred	returns address of the 0x24-byte load descriptor D_00356088
 0x00190088	effGetLoadDescG	inferred	returns address of the 0x2C-byte load descriptor D_003561C8
+0x00190238	effEventCopyFileRecordHeader	inferred	Copies the complete 0x30-byte file record header from source to destination.
 0x00190880	effEventBindEffect	inferred	Stores the effect pointer and calls the owner handler with the initialization block.
+0x00192018	effEventCopyVector	inferred	PCP_COPY_VECTOR transfers the supplied vector between the two pointers.
 0x00192BA0	effCopyVertRows	inferred	copies 4 xyz float rows plus 4 scalars between buffers, stride 0x10/4
 0x00192C00	effFillRandRecords	inferred	fills counter records with rand modulus plus scaled keyframes
 0x00192DE0	effFreeBuffers	inferred	frees +0x4 buffer if +0x14 word set, then frees +0x0
@@ -515,21 +618,31 @@
 0x00193910	effGetFontListCount	inferred	returns word at D_003D68D8, the +0x18 count of the font list
 0x00193C08	frFontListInsert	inferred	doubly-linked insert after D_003D68C0 head, bumps count at +0x18
 0x00193C38	frFontSetEntryFlag	inferred	sets flag bytes at table entry +0x10 pointer for index & 0xFF
-0x00193C98	frFontBitLength	inferred	returns index of highest set bit via shift loop, 0 for 0
+0x00193C98	frFontHighestSetBitIndex	inferred	Returns floor(log2(value)) for nonzero values and zero for zero, not bit length.
 0x00194440	frFontReleaseAll	inferred	releases font buffers/slots via helpers then syncs with func_002D1B90
 0x001945A8	frFontFreeEntry	inferred	frees indexed entry buffer if present, clears +0x18/+0x1C, skips idx < 2
 0x00194F78	frFontSetupGlyph	inferred	initializes glyph record fields from parameters
 0x00194FC0	frFontInitGlyph	inferred	zero-initializes glyph record with defaults and self link
+0x00195470	frFontSetChainFlag	inferred	sets byte flag on every glyph in chain
 0x00195B10	frFontAdvanceSelectedGlyphSlot	inferred	Advances one of the two font system glyph slots using func_00194840.
+0x00195B60	frFontLinkGlyphAfterPrevious	inferred	Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x00195B78	frFontLinkGlyph	inferred	splices a glyph record into another's list with optional pos copy
+0x00195C10	frFontCountChars	inferred	counts characters of a shift-jis string
 0x00195C50	frFontMeasureGlyphChain	inferred	Sums each linked glyph's offset-C width plus the parent glyph's byte-1 spacing.
+0x00195C88	frFontMeasureLines	inferred	sums advance and spacing over every line chain
+0x00196038	frFontMoveChainTo	inferred	moves glyph chain so first glyph sits at x,y
 0x00196390	frFontCreateContext	inferred	allocates a new font ctx via 95160 and attaches it
+0x00196478	itfReadEncodedTextLead	inferred	Reads and decodes the first byte of a two-byte text code, advancing by two.
 0x001964A0	itfReadEncodedCode	inferred	itf interface rendering and text in game/code_00196478.c
 0x00196B88	itfDrawColor	inferred	itf interface rendering and text in game/code_00196478.c
 0x00197348	mnuLoadStaffFonts	inferred	mnu menu, title, shop, or movie UI in game/code_00196478.c
+0x00197378	mnuUnloadStaffFonts	inferred	Releases staff1.fnt and staff2.fnt at font slots four and five, mirroring mnuLoadStaffFonts.
 0x00197398	itfDecodeGlyph	inferred	itf interface rendering and text in game/code_00196478.c
 0x001973E8	itfConvertText	inferred	itf interface rendering and text in game/code_00196478.c
+0x00198038	itfSplitRelativeSegments	inferred	Computes three output segment addresses from cumulative offsets within a memory block.
+0x00198248	itfDequeueMemNode	inferred	Detaches the first memory queue node and returns its payload after the node header.
 0x00198270	itfEnqueueMemNode	inferred	itf interface rendering and text in game/code_00196478.c
+0x001982A0	itfReleaseMemNodeBuffer	inferred	Releases the resource handle stored one word before a memory-node list's payload.
 0x001982C0	itfLoadBackgroundSprite	inferred	itf interface rendering and text in game/code_00196478.c
 0x00198460	itfInitPool	inferred	itf interface rendering and text in game/code_00196478.c
 0x001984C0	itfAcquirePoolNode	inferred	itf interface rendering and text in game/code_00196478.c
@@ -538,6 +651,9 @@
 0x00198600	itfSetStyleColor	inferred	itf interface rendering and text in game/code_00196478.c
 0x00198658	itfSetStyleColorBits	inferred	itf interface rendering and text in game/code_00196478.c
 0x001986A8	itfTranslateStyleEntries	inferred	itf interface rendering and text in game/code_00196478.c
+0x00199080	itfEmitQuadListWide	inferred	same, size (4, n/2), tag 0x4C/0x5151
+0x001991D0	itfEmitQuadListA	inferred	builds draw packet from vertex/color indices (tag 0x14A)
+0x00199318	itfEmitQuadListB	inferred	same with tag 0x49
 0x001997F0	mnuReportCampProcessHalted	inferred	mnu menu, title, shop, or movie UI in game/code_00196478.c
 0x00199AD8	itfPanelDispatchHandler	inferred	dispatches via D_00357A50 table by byte at +0x3C
 0x0019ADF0	itfPanelEmitRecord	inferred	calls itfPanel helper func_00199998 with record unkA8 plus args
@@ -561,6 +677,8 @@
 0x0019B890	itfMesClearFlags	inferred	AND-NOTs a bitmask out of the shared itfMes flags word D_003BB1E8
 0x0019BC98	itfMesCleanupWindow	inferred	releases window glyphs, resets flags, tears down blocks
 0x0019BFD8	itfMesResetWindow	inferred	releases window glyph, zeroes state block, clears status bits
+0x0019C0E8	itfMesBlk14MoveTo	inferred	itf moves message block 0x14 to position
+0x0019C178	itfMesBlk14MoveBy	inferred	itf moves message block 0x14 by delta
 0x0019C4A8	itfMesSetWindowHighFlags	inferred	Sets only high-16-bit flags in the selected message window.
 0x0019C4D8	itfMesClearWindowHighFlags	inferred	Clears only high-16-bit flags in the selected message window.
 0x0019CC90	itfMesSetGlobalFlags	inferred	Sets bits in the global 16-bit message flags word.
@@ -574,6 +692,8 @@
 0x0019D268	itfMesGetTableItem	inferred	Returns the indexed table word, or zero when the index is out of bounds.
 0x0019D610	itfMesCountZeroBits	inferred	counts unset bits among the low N bits of a value
 0x0019D850	itfMesGetLastNode	inferred	walks next-chain to tail and returns it
+0x0019D8E8	itfMesOffsetNodeChain	inferred	Adds two offsets to the horizontal and row positions of every linked message node.
+0x0019DA50	itfMesRecolorNodeChildren	inferred	Replaces the low color byte on every child item of each message node.
 0x0019DAA0	itfMesMaxGroupedExtent	inferred	returns the largest sum of consecutive same-key node extents scaled by sixteen
 0x0019E9D8	sndStepSequenceIndex	inferred	Steps a sequence cursor up/down with wraparound against a maximum, programs it through func_0019D958 twice, stores it back and resets sequence volume/pan.
 0x0019F660	sndVisitQueuedResources	inferred	snd sound tasks and playback in game/code_0019DB88.c
@@ -602,7 +722,13 @@
 0x001D45A8	btlCountTasksByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D4A98	btlClearDeferredTasks	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D4B78	btlDumpTaskQueue	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D4BF8	btlInitUnitFxDefaults	inferred	btl sets unit fx vector and scalar defaults (DDS2 twin func_001E1918)
+0x001D4C38	btlInitUnitFxLights	inferred	btl sets two light entries (DDS2 twin func_001E1958)
 0x001D4DB8	btlHasMatchingModel	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D5440	btlFlagUnitDefeatCandidate	inferred	btl sets unit flags 4/8 after hook (DDS2 twin func_001E21A0)
+0x001D66E8	btlSetUnitColorPrimary	inferred	btl sets unit color0 and notifies ext (DDS2 twin func_001E34F0)
+0x001D6758	btlBlendUnitColorSecondary	inferred	btl blends unit color1 with color0 (DDS2 twin func_001E3560)
+0x001D6820	btlRefreshUnitFxVectors	inferred	btl refreshes unit fx vectors (DDS2 twin func_001E3628)
 0x001D7748	btlScheduleThresholdTask	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D8088	btlScheduleRefreshTask	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D80F8	btlBeginModelChange	inferred	btl battle control and actor operations in game/code_0019DB88.c
@@ -614,9 +740,12 @@
 0x001DAE68	btlCopyIndexList	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001DBE20	btlScheduleContextReset	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001E6580	btlAdvanceCommandCursor	inferred	uses D_0035F100 cursor frame/mode/index tables then bumps frame
+0x001E6620	btlFindLinkedActorById	inferred	returns the actor among owner+0xF4->0x18, +0xF8, +0xFC whose byte at +0x11C equals id
+0x001ED550	btlFindActiveActorById	inferred	walks battle actor list (ctx+0x228, next at +0x344), returns first alive/playable actor with id byte +0x11C
 0x001EF560	btlFreeFieldBlocks	inferred	frees battle field buffers F1/F2 (strings "btl:free field F1/F2")
 0x001EFC10	sndResetTransition	inferred	clears sound state flags and SoundTransition current resource/soundId
 0x001F0A48	sndCreateAcquireTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F0AC8	sndTickFadeCounter	inferred	releaseSound callback: counts D_003BB698 down and restarts func_001EFB18 at zero
 0x001F0B28	sndCreateReleaseTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F0C00	sndGetResourceStatus	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F0C38	sndLookupResourceType	inferred	snd sound tasks and playback in game/code_0019DB88.c
@@ -626,6 +755,7 @@
 0x001F1280	sndReleaseEffectReferences	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F13C0	sndCreateEffectWithTargets	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F1420	sndStartEffectTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F1A58	btlWaitUnitListIdle	inferred	update callback: returns 1 immediately unless list at ctx+0x228 is non-empty (empty walk loop)
 0x001F1C78	sndAddSourceReferences	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2098	sndCreateCustomTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2150	sndCreateSetBattleFlagTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
@@ -634,21 +764,26 @@
 0x001F2378	sndAllocResourceNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F23E0	sndCreateResourceNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2430	sndFreeResourceNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F24A8	btlUpdateFadeColor	inferred	ages node counters (ctx+0x234 list) then steps ctx+0x588 colour by 0x10000000 toward 0x80808080 / 0x808080 depending on mode byte ctx+0x584
 0x001F2648	sndClearResourceNodes	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2688	btlButtonMaskToIndex	inferred	switch mapping single bits of a 15-bit mask (0x1..0x4000) to indices 0..0x10
 0x001F2788	sndAllocResourceLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F27C8	sndFreeResourceLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2B70	sndAllocLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2BB0	sndFreeLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2E48	sndCreateClearStateTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2EB8	sndCreateSetStateTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3048	sndFreeBattleSoundEntries	inferred	loops D_0035F748 entries and frees the matching ctx+0x4B8 resource nodes
 0x001F3498	sndPlayStationedSe	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F34E0	sndCreateStationedSeTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F3690	sndCreateSkillSeTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3710	sndStartFileLoad	inferred	prints "btl:sound file load start[%s]" and starts the file read for the request
 0x001F3978	sndLoadDataFile	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F3B38	sndAllocListNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F3B90	sndFreeListNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F3BF8	sndClearList	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F3DF8	sndFindListNodeForChannel	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F4038	sndFreeQueuedNodes	inferred	walks ctx+0x23C list (next at +0x104) calling func_001F3F40 on each node
 0x001F4098	sndHasActiveFileLoad	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F4458	sndLoadBattleBank	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F4720	sndHasOccupiedNodeSlots	inferred	snd sound tasks and playback in game/code_0019DB88.c
@@ -659,13 +794,17 @@
 0x001F6498	btlUnitGetMuzzlePosVU	inferred	VU0 transform of unit vec 0x70 by unit matrix, result in vf10
 0x001F6510	btlUnitGetBodyPosVU	inferred	same as 6498 with vec at 0xA0
 0x001F6588	btlUnitGetEffectPosVU	inferred	selects fetch inner vec or unit pos by flag 2
+0x001F6618	btlUnitGetMaxScaledExtent	inferred	Returns max(reach, height) multiplied by the battle unit's scale; both extents come from the unit's 0xB0-0xB4 layout.
 0x001F6640	btlUnitGetTopY	inferred	half height (B0*80*0.5) minus transformed y
 0x001F6688	btlUnitGetBottomY	inferred	negated transformed y minus half height
 0x001F6C08	btlGetMaxUnitTop	inferred	max of func_001F6640 over units matching flag mask
 0x001F6CB0	btlGetMaxUnitReach	inferred	max of unk_B4*unk_80 over units matching flag mask
 0x001F6D40	btlGetExtremeUnitY	inferred	max/min of unit pos.y +- extent by mask bit 0x200
+0x001F70C8	btlFindNearestUnit	inferred	Scans live units matching the mask, excludes the target and inactive units, then returns the closest unit to the target's muzzle position.
 0x001F71E8	btlFindFarthestUnit	inferred	farthest matching unit by horizontal distance from point
+0x001F7600	btlUpdateUnitActors	inferred	Advances each battle unit's actor state and effect timers, clears the transient effect flag and invokes the battle state update callback.
 0x001F76F0	btlRefreshUnitEffects	inferred	iterates units with flag 2 and effect flag 0x10, reloads effect vec
+0x001F7770	btlCountActiveUnitsWithFlags	inferred	Counts linked battle units having the requested flags and active bit while excluding units marked 0x20.
 0x001F7940	btlTriangleNormalVU	inferred	normalized cross product of (b-a)x(c-a) in vf10
 0x001F7A00	btlPointOffPlaneVU	inferred	point d moved along plane normal from func_001F79A0 distance
 0x001F7A70	btlProjectOnPlaneVU	inferred	a projected onto triangle plane via dot with normal
@@ -681,8 +820,17 @@
 0x001FB240	btlCountNonPartOpcodes	inferred	counts list entries whose opcode is outside 0x14-0x15
 0x001FB8C8	btlAppendEntry	inferred	allocs 0x44-byte entry, copies name, appends to doubly linked list
 0x001FBFC8	btlTrimResourceName	inferred	copies name then cuts at the first dot
+0x001FD5B0	effOffsetIfOwnerFlagClear	inferred	Adds one to the requested offset if bit nine of the owner's status word is clear.
+0x001FD990	effDecrementFirstCountdown	inferred	Decrements the first nonzero effect-child countdown at offset 0x318.
+0x001FDED8	effDecrementSecondCountdown	inferred	Decrements the second nonzero effect-child countdown at offset 0x319.
+0x001FE088	btlCreateEffObjD	inferred	btl creates effect object type 0x40 (no null owner check)
+0x001FE320	btlCreateEffObjA	inferred	btl creates effect object type 0x42 owned by unit and links owner/arg
+0x001FE468	btlCreateEffObjB	inferred	btl creates effect object type 0x3C
+0x001FE5C0	btlCreateEffObjC	inferred	btl creates effect object type 0x3D
+0x001FEA78	btlNextScaledRandom	inferred	Advances the battle LCG and scales the generated high halfword by the supplied low halfword.
 0x001FEB10	btlAllocAndCheck	inferred	allocates 0x10 work slot, runs func_002011C8 check, frees slot, returns result
 0x001FEC10	btlClearNodeFlags	inferred	walks +0x224 list clearing +0x146 where +0x18 set, then clears D_003BB870
+0x001FECD8	btlDispatchPackedEffectAction	inferred	Splits a packed action into high-bit callback index and low-bit argument, then calls the indexed effect callback.
 0x001FEE30	btlCmdWithArgA	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00202668
 0x001FEE50	btlCmdWithArgB	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00202F90
 0x001FEE70	btlCmdWithArgC	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00203248
@@ -699,11 +847,18 @@
 0x001FEFD0	btlCmdSimpleI	inferred	jal+epilogue passthrough wrapper of func_00203CA8
 0x001FEFF0	btlCmdWithArgF	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00204048
 0x001FF010	btlCmdSimpleJ	inferred	jal+epilogue passthrough wrapper of func_00204080
+0x00200F60	btlCheckCounterLimit	inferred	btl wrapper around btlCounterReachedLimit
 0x00200F80	btlCounterReachedLimit	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00201000	btlTurnReachedLimit	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00201030	btlIsReadyWithoutTurns	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00201300	btlElementToBitIndex	inferred	bit test of element mask against const table
+0x00201A40	btlAnyUnitHasActionInSlots	inferred	btl walks the battler list at battle+0x224 with flag mask and tests eight 16-bit action slots (node+0x148) against an action id
+0x00201B10	btlAnyGroup200HasAction	inferred	btl wrapper of func_00201A40 with side mask 0x200
+0x00201B30	btlAnyGroup400HasAction	inferred	btl wrapper of func_00201A40 with side mask 0x400
+0x00201EF0	btlAnyGroup400HasQuery	inferred	btl wrapper of func_00201F30 with side mask 0x400
+0x00201F10	btlAnyGroup200HasQuery	inferred	btl wrapper of func_00201F30 with side mask 0x200
 0x00202410	btlActionMatchesUnit	inferred	btl battle control and actor operations in game/code_001FF030.c
+0x00204430	btlGetTargetUnitForLink	inferred	btl returns the linked unit (unit+0xF8/0xFC) when exactly one is set and unflagged 0x1000, else the node's owner
 0x00204B48	btlFilterRestrictedCommand	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00204B88	btlSelectDisabledCommand	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00204D98	btlDisableNonBossUnits	inferred	if boss species 0x102-0x104 is flagged, disable others via func_001D8DE8
@@ -711,6 +866,7 @@
 0x002051B0	btlDisableUnitsIfSpeciesFlagged	inferred	species 0x105 twin of func_00204D98 (find flagged unit, disable others)
 0x002052F0	btlSelectSlotEntries	inferred	scans 5 slot entries, latches kind 1/3 entries, copies 0x30-byte block and clears data
 0x00205690	btlInitializeResources	inferred	btl battle control and actor operations in game/code_001FF030.c
+0x002056C0	btlInitResourcesWrap	inferred	btl wrapper around btlInitializeResources
 0x002058C8	btlResetEffectState	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00206128	btlIsEffectPhaseInRange	inferred	true when effect active==1 and value is 0x12/0x13
 0x002062B8	btlAdjustDamageKind	inferred	remaps command kind for special unit ids 0x107/0x108
@@ -718,12 +874,14 @@
 0x00207030	btlHasDifferentActiveTarget	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00207070	btlSetLinkFlagOff	inferred	mirror of func_002071B0
 0x002071B0	btlSetLinkFlagOn	inferred	sets/clears bit 1 in model flags for species 0x107 unit pair
+0x00207B00	btlIsSpecialActionKind	inferred	btl unit+0x114 action id equals 0x171 or 0x189
 0x00208248	battleAdjustSpeciesAnimation	inferred	Remaps animation by +100/+200/+300 for special species 0x12e/0x12f/0x10a when flags 0x401 are set.
 0x002082A0	btlMarkSpecialUnit	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x002082E8	btlGetReadyUnitForSpecies	inferred	returns effect actor if flag 2 set for species 0x10A/0x12E/0x12F
 0x002084B0	btlUpdateReadyUnits	inferred	moves flag 0x80 to 0x40 for units whose species check passes
 0x00208EC0	btlFindActiveMember	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00209780	btlCheckAttachedMember	inferred	btl battle control and actor operations in game/code_001FF030.c
+0x00209BF0	btlRemapBossAction	inferred	Remaps requested actions for flagged boss units with modes 0x119 or 0x11A.
 0x0020A720	btlMapCommandToSkill	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x0020AD80	btlMapSkillRange	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x0020D4B0	battleAllowsSpeciesCondition	inferred	Condition and unit flag 0x200 gate rejection of species 0x13d/0x13e.
@@ -735,7 +893,9 @@
 0x0020F840	btlReleaseBossData	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x0020F8E0	btlFindScriptResource	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x0020F9B8	btlReleaseScriptResource	inferred	btl battle control and actor operations in game/code_001FF030.c
+0x0020FB00	btlReleaseScriptResourceA	inferred	btl thin wrapper around btlReleaseScriptResource
 0x0020FB20	btlHasScriptResource	inferred	btl battle control and actor operations in game/code_001FF030.c
+0x0020FC28	btlReleaseScriptResourceB	inferred	btl second thin wrapper around btlReleaseScriptResource
 0x00210128	btlReleaseEventData	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00210710	btlCreateActionTask	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00210790	btlHasRestrictedUnit	inferred	btl battle control and actor operations in game/code_001FF030.c
@@ -743,6 +903,7 @@
 0x00210840	btlListCountersWithinLimits	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00210890	btlListSecondaryCountersWithinLimits	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x002108E0	btlListHasMatchingFlag	inferred	btl battle control and actor operations in game/code_001FF030.c
+0x00210D00	btlGetCommandBlockReason	inferred	Checks global battle state, the command record and eligible target units; returns 0 when allowed or a specific nonzero block reason.
 0x00211328	btlCreateModelEntry	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00211390	btlReleaseModelEntry	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00211450	btlReleaseAllModelEntries	inferred	btl battle control and actor operations in game/code_001FF030.c
@@ -768,11 +929,14 @@
 0x00216A90	btlReleaseAllEntities	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00216B78	mdlClearSlotAndRelease	inferred	clears table slot (base+idx*4+0x20) on pointer match, releases via func_002DB308
 0x00216BB0	mdlReleaseFirstMatch	inferred	walks inner list, releases first entry whose s16 id matches
+0x00216E68	mdlWaitGroupThenFind	inferred	pumps file manager while group contains id then looks up entity
 0x00217038	mdlBuildPrefixedString	inferred	copies 8-byte prefix from D_003BBB60 then strcat appends src
+0x00217C60	mdlEnableAllEntries	inferred	sets enabled flag on every entry of table
 0x00217DA0	mdlAddEntryFlagged	inferred	wraps func_00217CA8 with flag 1 and zeroed float pair
 0x00217DC0	mdlAddEntryPlain	inferred	wraps func_00217CA8 with flag 0 and zeroed float pair
 0x00217DE0	mdlAddEntryFlaggedEx	inferred	wraps func_00217CA8 with flag 1, passing float pair through
 0x00217DF8	mdlAddEntryPlainEx	inferred	wraps func_00217CA8 with flag 0, passing float pair through
+0x00217E10	mdlFindNodeById	inferred	walks node list for s16 id at +0x28
 0x00217E58	mdlGetNodeField2C	inferred	finds node by id, returns u16 at +0x2C or -1 when missing
 0x00217E88	mdlGetNodeField2E	inferred	finds node by id, returns u16 at +0x2E or 0 when missing
 0x00217EB0	mdlGetNodeInt1C	inferred	finds node by id, returns float at +0x1C converted to int, else 0
@@ -784,12 +948,20 @@
 0x002183B0	mdlHasNode	inferred	passes ctx/id through to func_00217E10, reports non-null
 0x002183F8	mdlGetTableWord	inferred	returns first word of 8-byte table entry D_00367904[idx]
 0x00218410	mdlGetNodeRefHalf	inferred	finds node by id, returns u16 behind its +0x8 pointer, else 0
+0x00218440	mdlReleaseInnerResourceHandle	inferred	Releases the inner model context's resource handle.
 0x00218580	mdlIsInnerSentinel	inferred	returns whether ctx+0x10 mode byte is 1 and inner pointer equals 0x30424950
 0x00218B48	mdlLoadViewerPackage	inferred	mdl model resources and viewer in game/code_00218B48.c
+0x00219350	mdlGetFirstRecord	inferred	Returns the first model record at header plus eight or NULL when its kind is the terminator.
+0x00219368	mdlGetNextRecord	inferred	Advances by the current record's nextOffset and returns NULL on the terminator.
 0x00219388	mdlCountRecords	inferred	mdl model resources and viewer in game/code_00218B48.c
+0x00219590	mdlDrawMarkParamsPanel	inferred	debug panel: MARK/START/END/ITRVL/FACE/BLEND text plus 4x4 colour byte grid
+0x00219AF8	mdlAddBillboardPart	inferred	Appends a kind-zero model part and creates its indexed billboard resource.
+0x00219B50	mdlAddEffectPart	inferred	Appends a kind-one model part using the associated effect resource creator.
 0x00219C38	mdlObjDestroy	inferred	conditional teardown plus free, inverse of func_00219C78
 0x00219C78	mdlObjInit	inferred	one-time init guarded by the flag at +9, forwards to func_002EC780
 0x00219DD8	mdlInsertResourceItem	inferred	Allocates a model resource item and inserts it at the owning object's list head.
+0x00219E30	mdlAdvanceBillboardPart	inferred	Calls the kind-zero billboard handler on its resource and increments the part state.
+0x00219E68	mdlAdvanceEffectPart	inferred	Calls the kind-one effect handler on its resource and increments the part state.
 0x0021A170	mdlCondInitEntry	inferred	calls mdlObjInit for entry when byte flag clear and float-derived count meets limit
 0x0021A1D0	mdlDispatchResourceEntry	inferred	Dispatches model resource entry kinds to update, billboard and animation handlers.
 0x0021A268	mdlApplyResourceEntries	inferred	mdl model resources and viewer in game/code_00218B48.c
@@ -797,7 +969,9 @@
 0x0021A368	mdlRemoveResourceSubtype	inferred	Unlinks and destroys each model resource item with the requested subtype.
 0x0021A560	mdlSetResourceFrame	inferred	Dispatches the requested frame to the matching model resource type.
 0x0021A5B8	mdlSetResourceAmount	inferred	Dispatches a floating-point amount to the billboard or effect resource selected by item type.
+0x0021A948	mdlRotateViewResourcesRight	inferred	Shifts the viewer resource slot list toward higher indices and wraps its last slot to the front.
 0x0021A998	mdlRotateViewList	inferred	mdl model resources and viewer in game/code_00218B48.c
+0x0021ACF0	mdlAddViewEntryFlagged	inferred	adds current view entry with min/low bounds
 0x0021C8F8	mdlIsDebugTimeGraph	inferred	returns nonzero while the DebugTimeGrph kwln task exists
 0x0021CE98	mdlCountActiveRecords	inferred	mdl model resources and viewer in game/code_00218B48.c
 0x0021D740	mdlViewerTaskDestroy	inferred	destroys the kwln task stored in MdlViewState.unk04 and clears the handle
@@ -809,27 +983,72 @@
 0x0021F580	mdlFlagSet	inferred	sets bit N in the D_003BAA00+0x840 flag table
 0x0021F5C0	mdlFlagClear	inferred	clears bit N in the D_003BAA00+0x840 flag table
 0x0021F600	mdlFlagTest	inferred	tests bit N in the D_003BAA00+0x840 flag table
+0x0021FE38	evtDestroySecondaryWorldNode	inferred	Obtains the secondary world object and destroys its node when it exists.
+0x00220228	evtSetWorldSlotStatusFlag	inferred	Sets the 0x8 status bit on slot-one world data when available.
+0x00220260	evtClearWorldSlotStatusFlag	inferred	Clears the 0x8 status bit on slot-one world data when available.
+0x00221BE0	evtSetUnitValueTransition	inferred	Saves the previous unit value, installs a new value, and sets elapsed/duration and transition flags.
+0x00221C50	evtEndUnitValueTransition	inferred	Clears the current unit transition immediately or switches to its timed ending mode.
 0x00221CB8	evtSetUnitValueAndFlag	inferred	Writes the supplied value to unit offset 0x6C and sets flag 0x20000.
+0x00221CD0	evtClearUnitValueChangeFlag	inferred	Clears the unit's value-change bit before updating the unit.
 0x00221FD8	evtTestUnitStatusFlags	inferred	Tests whether any of the unit's 0x7800 flag bits are set.
 0x00221FE8	evtSetUnitStatusFlags	inferred	Sets unit flag bits 0x300.
+0x00222B00	evtAttachSecondaryWorldUnit	inferred	Finds a secondary world unit by id and attaches it to the event unit after setup.
+0x002236E8	evtSetSlotVector	inferred	evt sets unk30[2..3] of slot
+0x00223AA0	evtFindWorldObjectByIdAndKind	inferred	Looks up the requested object ID and kind in the primary world object with func_00110A48.
+0x00223AE0	evtGetWorldObjectId	inferred	Gets the primary world object's ID at offset 0x04, uses -1 if absent and writes the result to the script command result.
+0x00224268	evtOpSetUnitParams5	inferred	evt script opcode fetching 4 operands and forwarding to func_002223D8 (unit setup)
+0x00224308	evtOpSetUnitParams6	inferred	evt script opcode fetching 5 operands and forwarding to func_00222340
+0x00224638	evtOpBeginWindowCallback	inferred	evt opcode remembering unit and hooking window via func_0019CB98
+0x00224A18	evtOpSetUnitTableEntry	inferred	evt script opcode writing unit->unkF0[index]
+0x00224C08	evtGetShortestAngleDelta	inferred	Wraps two input degree values to one turn, chooses the signed shortest angular separation and returns destination minus source.
 0x002250D8	evtUnitClearFlagBit	inferred	clears bit 0 of the flag word at unit+0x8C
 0x00225120	evtUnitSetFlagBit	inferred	sets bit 0 of the flag word at unit+0x8C
+0x002251D8	evtUnitHasNoStatusFlags	inferred	Looks up an event unit by script argument and returns true only when evtTestUnitStatusFlags reports no active status bits.
 0x00225960	evtUnitCheckModelCut	inferred	checks unit type 7 param against 3, warns with EFFBED_START string or forwards id
+0x002262A0	evtCommandEnablePathUnit	inferred	Looks up a type-seven path unit by script ID and enables both of its flag handlers.
 0x002267B0	evtCommandCallEvent	inferred	Logs call_event with the script-supplied event ID and submits request type 6 containing that ID.
 0x00226830	evtSubmitEventRequest	inferred	Submits request type 0xE for an event ID, preserving the supplied mode in D_003BBDA8.
+0x00226898	evtCommandSubmitEvent	inferred	Reads the script event identifier and submits the ordinary event request.
 0x002268C8	evtSubmitEventRequestImmediate	inferred	Submits request type 0xE for an event ID with immediate mode and zeroes D_003BBDA8.
+0x00226920	evtCommandSubmitEventImmediate	inferred	Reads the script event identifier and submits the immediate event request.
+0x00226948	evtCommandSubmitEventWithMode	inferred	Reads an event identifier and a mode from script operands and submits the request.
+0x00226B10	evtCommandDispatchFieldBE	inferred	Dispatches two script operands to the field BE handler between FIELD_BE debug messages.
 0x00226C38	evtCommandShutdownStage	inferred	Calls stage teardown, waits twice for func_002D3EE8 to clear, sets global flag 0x2000000 and logs stage shutdown.
 0x00226CA8	evtCommandShutdownStageAlternate	inferred	Same teardown and wait sequence as the neighboring shutdown command, with shutdown2 log strings.
 0x00226D18	evtCommandClearAllUnits	inferred	Calls func_0021FE70 and logs unit all clear.
+0x00227748	evtCommandReadMirroredSolarPhase	inferred	Places the mirrored solar phase in the script VM command result.
+0x00227770	evtCommandReadSolarPhase	inferred	Places the current solar phase in the script VM command result.
+0x00227798	evtCommandSetSolarPhase	inferred	Sets the solar phase from the current script operand.
+0x002277C0	evtCommandWaitForCampTask	inferred	Starts an absent camp task and waits for its state to become two.
+0x002278A0	evtCommandStartCampTaskIfAbsent	inferred	Creates and attaches the requested camp task only when it does not already exist.
+0x00227920	evtCommandTestCampTaskReady	inferred	Returns whether the requested camp task exists and reports state two.
+0x002279A0	evtCommandDestroyCampTask	inferred	Destroys the requested camp task when present.
+0x00227A00	evtCommandStartPolygonMovie	inferred	Creates a camp-owned movie, sets its polygon-movie flag and returns its ID to the script VM.
+0x00227AD8	evtCommandClearPolygonMovieFlag	inferred	Clears bit one from the requested polygon movie and returns its ID to the script VM.
+0x00227B18	evtCommandCreatePolygonMovie	inferred	Creates and attaches the movie using the same resource creator without setting its flag.
+0x00228180	evtOpcodeCreateTaskForCurrentWork	inferred	Uses the current event-command work's task key at offset 0xE4 to associate a newly created event task, then stores the task handle via func_0010D5F0.
+0x00228210	evtOpcodeEnableCurrentContextFlag	inferred	If the supplied task is registered, invokes func_00235088, which sets bit zero of the current event context's flags.
+0x00228258	evtOpcodeDisableCurrentContextFlag	inferred	If the supplied task is registered, invokes func_002350B0, which clears bit zero of the current event context's flags.
+0x002282A0	evtOpcodeDestroyRegisteredTask	inferred	Checks the event-supplied task handle for registration before destroying its task hierarchy.
+0x002282E8	evtOpcodeSetFieldFadeTarget	inferred	Reads three event operands as area, fade target and duration, then calls fldSetFadeTarget.
 0x00228350	evtSetSkyAlpha	inferred	Event opcode bounds its signed alpha argument to [-255,255], warns with SET_SKY_A strings, then calls sky-alpha setter.
 0x002283C8	evtShowSky	inferred	Event opcode calls the sky enable function with argument 1.
 0x002283E8	evtHideSky	inferred	Event opcode calls the sky enable function with argument 0.
 0x00228460	evtOpcodePlayBgm	inferred	Event opcode obtains two script arguments and passes them to evtPlayBgm.
 0x002284A0	evtOpcodeTransitionBgm	inferred	Event opcode obtains two script arguments and passes them to evtTransitionBgm.
 0x00228570	evtOpcodeSetBgmVolumePan	inferred	Event opcode obtains two script arguments and passes them to evtSetBgmVolumePan.
+0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards two event operands to the already-named evtRefreshTaskData.
+0x00228630	evtOpcodeInitializeEffectSoundChannel	inferred	Invokes effInitCh72Id and returns event opcode completion status one.
 0x002286C0	evtGetMirroredSolarPhase	inferred	Returns the raw phase below nine, otherwise folds the low three bits around eight.
 0x002286E8	evtGetSolarPhase	inferred	Returns the solar phase byte at world offset 0xA41.
 0x002286F8	evtSetSolarPhase	inferred	Stores the phase's low four bits and resets the phase counter.
+0x00228710	evtEnableSolarPhaseAdvance	inferred	Sets solar world flag bit zero, which gates the phase timer and phase increment in func_00228930.
+0x00228728	evtDisableSolarPhaseAdvance	inferred	Clears solar world flag bit zero, disabling periodic phase advances in func_00228930.
+0x00228740	evtSetSolarOverlayFullyVisible	inferred	Enables the solar alpha flag, sets overlay alpha to 1.0 and calls func_0022AB00(0).
+0x00228778	evtSetSolarOverlayFullyTransparent	inferred	Disables the solar alpha flag and sets the overlay alpha to 0.0.
+0x00228790	evtEnableSolarOverlayAlpha	inferred	Sets the solar alpha flag, making the solar callback interpolate alpha toward 1.0.
+0x002287A8	evtDisableSolarOverlayAlpha	inferred	Clears the solar alpha flag, making the solar callback interpolate alpha toward 0.0.
+0x00228A00	evtCreateSolarOverlayWork	inferred	Allocates solar overlay visual work, loads its noise sprite and installs it on the owner.
 0x00228A58	evtFreeSolarOverlayWork	inferred	Releases the solar noise sprite, frees overlay work and clears the task ID.
 0x00228A98	evtStartSolarOverlay	inferred	Creates the task named by D_003BBDC8, initializes the overlay flags and phase and stores its task ID.
 0x00228B00	evtStopSolarOverlay	inferred	Destroys the solar-overlay task by its stored ID when active.
@@ -854,12 +1073,20 @@
 0x0022C560	evtEventViewerFindNameIndex	inferred	linear search of 32-byte name slots, returns index or -1
 0x0022CA48	evtEventViewerFreeSlot	inferred	frees indexed pointer slot via free-like helper and NULLs it
 0x0022CB68	evtEventViewerFreeBuffer	inferred	frees the +0x2c buffer if non-null and NULLs it
+0x0022CE68	evtViewerApplySelectedEntry	inferred	Selects the active or fallback viewer entry and sends it to world and view state helpers.
+0x0022F408	evtViewerHasUpdateFlag	inferred	Tests bit 0x10 of the viewer state flags word used by its update counter.
+0x0022F9F8	evtViewerAdvanceGlyphTick	inferred	Resets the viewer font glyph while its tick count is active and stops after thirty ticks.
+0x0022FF98	evtViewerPopHistory	inferred	Removes the last eight-byte viewer history entry, saves its ID as current and returns it.
 0x00231E10	kwlnBattleCopyMatrix	inferred	copies three columns of four floats to battle record transform
 0x00232E00	evtEventViewerDestroyTask	inferred	destroys hierarchy of task named "EventViewer" via kwlnTaskDestroyWithHierarchyByName
 0x00234288	evtPolygonMovieSetFlagBits	inferred	ORs bits into the global flags word behind func_00101A70+8
 0x002342C0	evtPolygonMovieClearFlagBits	inferred	clears bits in the global flags word behind func_00101A70+8
 0x00234398	evtPolygonMovieClampTime	inferred	clamps end-start into [0,duration] and stores float position
+0x00235088	evtSetContextFlag	inferred	Sets bit zero in the active event context flags.
+0x002350B0	evtClearContextFlag	inferred	Clears bit zero in the active event context flags.
+0x002350E0	evtDestroyTaskHierarchy	inferred	Passes the event task handle to the hierarchical task destructor.
 0x00235270	evtCreateTask	inferred	allocates task data via 350F8/35120 then kwlnTaskCreate with Picture name
+0x002352E0	evtCreateTaskWithValue	inferred	Allocates event task work, writes the supplied value at offset 0x04 and registers the existing event update/destroy callbacks.
 0x00235340	evtSetSkyOverlayEnabled	inferred	Stores the flag used by the sky task to enable its optional overlay draw.
 0x00235348	evtBeginSkyParameterTransition	inferred	Starts a timed interpolation from the current sky-task parameter to its requested value.
 0x002353B0	evtIsSkyTransitionActive	inferred	Returns the flag marking an unfinished sky-task parameter interpolation.
@@ -872,9 +1099,13 @@
 0x00235DB0	mnuDrawFrameChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
 0x002364B0	evtDrawStringEntry	inferred	draws "%s" text via unk22C4 pointer when set, returns 2/0
 0x00239350	mnuDrawCutFlagLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
+0x00239798	mnuGetSelectedTableValue	inferred	Indexes the ten-column D_00368952 byte table by the runtime's selected row pointer and column field.
 0x00239DE0	mnuDrawMotionChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
+0x0023B9D8	evtSetRuntimeCommandValues	inferred	Stores the three supplied values in successive runtime command fields at offsets 0x23E4, 0x23E8 and 0x23EC.
 0x0023C178	evtSynchronizeSelectedEntry	inferred	Mirrors the event runtime selection into the active task and global slot.
 0x0023D560	evtDispatchActionByIndex	inferred	Calls indexed event action handler except when mode 11 requires a different index.
+0x0023DF60	evtWriteRuntimeHeaderValues	inferred	Copies four selected event state words into a contiguous serialized header.
+0x0023E138	evtWriteFixedSizeEntries	inferred	Copies each 0x20-byte table entry to the event output using the table's count.
 0x0023E1B0	evtWriteGroupHeader	inferred	evt event state and dispatch in game/code_00235270.c
 0x0023E6F0	evtWriteGroupMetadata	inferred	evt event state and dispatch in game/code_00235270.c
 0x002418B0	evtPreloadBgm	inferred	Maps event BGM ID and requests MIDI loading; func_002E9340 references MIDI%04X.SMG.
@@ -891,17 +1122,29 @@
 0x00242608	mnuCampCreateTask	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00242698	campDestroyTaskById	inferred	Finds the current camp task by ID and destroys it when present.
 0x002426D0	campDestroyAllTasks	inferred	Repeatedly destroys camp tasks registered under task identifier 0x3EC.
+0x00242708	mnuShopScrollList	inferred	clamps/wraps list node positions by delta
 0x00242E28	mnuCampInitDisplayDefaults	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00243460	campFindMatchingEntryIndex	inferred	Compares the requested entry name against linked camp entry names and returns the matching name index.
 0x002434E0	mnuCampFindEntryByName	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x002437E0	campResetEntryStatus	inferred	Clears the status of each linked camp entry and resets the scene state.
+0x00243A58	mnuCampInitFontResource	inferred	Creates and configures the camp scene font resource at offset 0x2410.
+0x00243AA8	mnuCampLinkFontGlyph	inferred	Passes the camp scene font resource to frFontGlyph list-linking and clears its slot.
+0x00243CC8	mnuShopSubmitDescriptor	inferred	creates descriptor packet and calls buffer open callback
 0x00244058	mnuShopSavePrimaryTransform	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x002440A8	mnuShopSaveFullTransform	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00244110	mnuShopRestoreTransform	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00244180	mnuShopRegisterSceneObject	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x002442D0	mnuShopReleaseSceneObjects	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00244320	mnuShopLoadSpriteAssets	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
+0x00244380	mnuShopHasPendingFlag	inferred	scans 0xC0 flag bytes for an active entry
+0x002445E0	mnuCampFindActiveSlot	inferred	mnu camp returns the highest slot index whose flag id is set
+0x00244740	mnuShopReleaseSprites	inferred	frees sprite buffers and releases sprite handles
+0x002447D8	mnuCampGetProgressStage	inferred	mnu camp returns highest set flag 0x970..0x974
+0x00244970	mnuShopDestroyScene	inferred	tears down the shop scene objects and marks state 2
 0x00244AF8	mnuPollTaskState	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
+0x00244B30	mnuCampRunPanel0	inferred	mnu camp inits panel then runs mode 0
+0x00244B90	mnuCampRunPanel1	inferred	mnu camp runs panel mode 1
+0x00244BC8	mnuCampRunPanel2	inferred	mnu camp runs panel mode 2
 0x00245190	mnuCampClampSceneCounter	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00245CC8	evtInstallStateTable	inferred	sets +0x58 to D_0036AA68 and applies +0xC4 entry when +0x84 == 2
 0x00246088	evtPrimeDispatchStart	inferred	calls func_00260670 on state then dispatches mode 1
@@ -933,7 +1176,17 @@
 0x00248130	evtResetStateFlags	inferred	sequences func_0024DED8, func_0024DEF8 pairs and func_002E96D8 setup, returns 1
 0x00248240	evtDispatchStart	inferred	plain mode 1 dispatch of state block with caller arg
 0x00248278	evtDispatchSync	inferred	plain mode 2 dispatch of state block with caller arg
+0x002482D8	mnuCreateFlagEntries	inferred	mnu allocates flag entry table filled from mdlFlagTest
+0x002483C0	mnuApplyFlagEntries	inferred	mnu sets mdl flags for enabled entries
+0x00248468	mnuLoadResourceHandles	inferred	mnu loads two indexed resources into work slots
+0x00248508	mnuReleaseResourceHandles	inferred	mnu releases two handles + sprite + optional resource
+0x00248C80	mnuUpdateGroupResources	inferred	mnu walks group list updating resource handles
+0x002495F8	mnuReleaseWorkResources	inferred	mnu releases work resources
+0x00249668	mnuFadeOrPlayCloseSfx	inferred	mnu fades out for modes 1-2 else plays sfx 0x322
+0x002496F0	mnuCreateWorkBlock	inferred	mnu allocates and initialises 0x82C work block
+0x002497C0	mnuTickInitState	inferred	mnu init state machine 0/1/2
 0x00249980	effUpdateAttached	inferred	eff effect resources and animation in game/code_00248580.c
+0x0024A058	fldStopSceneTasks	inferred	Destroys three named scene tasks and clears their shared active-state byte.
 0x0024A0A0	fldPollSceneState	inferred	fld field scene and resources in game/code_00249FA8.c
 0x0024A478	fldClassifyRemainingFrames	inferred	fld field scene and resources in game/code_00249FA8.c
 0x0024B750	evtBSetupDispatchSync	inferred	e802_main twin of evtSetupDispatchSync shape; calls func_0024DD78 then dispatches mode 2
@@ -941,20 +1194,29 @@
 0x0024B958	evtBDispatchStart	inferred	e802_main plain mode 1 dispatch of state block with caller arg
 0x0024B990	evtBSetupDispatchSyncB	inferred	identical body to evtBSetupDispatchSync; second occurrence in file order
 0x0024BC88	evtBSetupDispatchSyncC	inferred	identical body to evtBSetupDispatchSync; third occurrence in file order
+0x0024BD48	evtBEnterStateA	inferred	evt B handler: setup state A and register dispatch callback
 0x0024C0B0	evtBSetupDispatchSyncD	inferred	identical body to evtBSetupDispatchSync; fourth occurrence in file order
 0x0024C298	evtBSetupDispatchSyncE	inferred	identical body to evtBSetupDispatchSync; fifth occurrence in file order
 0x0024C638	evtBDispatchSync	inferred	e802_main plain mode 2 dispatch of state block with caller arg
 0x0024C858	evtBSetupDispatchSyncF	inferred	identical body to evtBSetupDispatchSync; sixth occurrence in file order
+0x0024C8A0	evtBCheckPanelMode	inferred	evt B handler switching on panel mode
+0x0024C918	evtBContinueDispatchOrRestoreTable	inferred	Polls event dispatch and reinstalls the context state table when dispatch and stage are idle.
 0x0024CA10	evtBSetupDispatchSyncG	inferred	identical body to evtBSetupDispatchSync; seventh occurrence in file order
+0x0024CCD8	evtBDispatchSyncD2	inferred	evt B dispatch sync variant with A6E8 test
 0x0024CD78	evtBDispatchSyncB	inferred	identical body to evtBDispatchSync; second occurrence in file order
 0x0024CF28	evtBLateDispatchStart	inferred	calls func_0024A2D8 on state then dispatches mode 1
 0x0024CF78	evtBDispatchSyncC	inferred	identical body to evtBDispatchSync; third occurrence in file order
 0x0024D828	evtCollectActiveGameIndices	inferred	evt event state and dispatch in game/code_0024CFB0.c
+0x0024D880	evtCompareByteValues	inferred	Returns negative, zero or positive based on the ascending ordering of two byte values.
 0x0024D8A8	evtCompactFilteredBytes	inferred	evt event state and dispatch in game/code_0024CFB0.c
 0x0024DB08	sndGetActiveMode	inferred	snd sound tasks and playback in game/code_0024CFB0.c
 0x0024DC50	sndUpdateActiveMode	inferred	snd sound tasks and playback in game/code_0024CFB0.c
 0x0024DE78	evtIsTaskInActiveStates	inferred	evt event state and dispatch in game/code_0024CFB0.c
+0x0024DED8	evtClearActiveFlag	inferred	Clears the byte at the requested index of the event active-flag table.
+0x0024DEE8	evtIsActiveFlagSet	inferred	Reports whether the requested byte of the event active-flag table is nonzero.
+0x0024DF48	evtSetCurrentActiveFlag	inferred	Reads the current script operand as an index and sets its event active-flag byte.
 0x0024DF78	evtActivateCurrentFlag	inferred	evt event state and dispatch in game/code_0024CFB0.c
+0x0024F4F0	mnuRequestMantraResources	inferred	mnu requests 14 mantra sprite resources
 0x0024F570	mnuAreResourceSlotsOccupied	inferred	Tests whether all fourteen resource slot handles are present.
 0x0024F5B0	mnuReleaseResourceSlots	inferred	Releases and clears each nonempty resource slot handle.
 0x0024F760	mnuCreateResourceTask	inferred	Creates the named menu resource task and stores its handle.
@@ -962,8 +1224,14 @@
 0x0024F7D8	mnuStopResourceTask	inferred	Destroys the stored resource task and clears its ID.
 0x0024FA48	mnuStopResourceAnimation	inferred	Sends the stop commands to the stored resource animation object.
 0x0024FA88	mnuResetResourceAnimation	inferred	Stops then resets the resource animation object.
+0x00250A48	mnuBeginTransition	inferred	menu transition: reset/stop resource animation by state, record ids
+0x002515C8	mnuFreeTaskData	inferred	Task callback releases a nonnull allocated data pointer.
+0x00251960	mnuCreateSceneWork	inferred	mnu allocates and initialises 0x5B0 scene work block
+0x002519E8	mnuReleaseSceneContext	inferred	Destroys scene grid work, display list, allocation and resettable work floats.
+0x00253608	fldGetSceneMetadataNode	inferred	Returns the node referenced by the current scene grid metadata chain.
 0x00253C78	fldUpdateSceneEntryMetadata	inferred	fld field scene and resources in game/code_00250E88.c
 0x00253CC8	fldResetSceneState	inferred	fld field scene and resources in game/code_00250E88.c
+0x00253D40	mnuBeginTransitionAlt	inferred	twin of func_00250A48 for the second list
 0x00255798	itfDspSignalA	inferred	itf interface rendering and text in game/code_00254B30.c
 0x002557B8	itfDspSignalB	inferred	itf interface rendering and text in game/code_00254B30.c
 0x002557D8	itfDspSignalC	inferred	itf interface rendering and text in game/code_00254B30.c
@@ -973,45 +1241,119 @@
 0x00255F78	itfDspDrawMarksB	inferred	itf interface rendering and text in game/code_00254B30.c
 0x002560B8	itfDspDrawStrip	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00256B38	mnuAllocateDisplayListNode	inferred	Allocates and clears a 0x14-byte display-list node.
+0x00256B78	mnuAppendDisplayListNode	inferred	Allocates and appends a node to the display list or installs its first node.
+0x00256C00	mnuFreeDisplayListNodeAndGetNext	inferred	Saves the display node's successor, frees the current node and returns that successor.
 0x00256C28	mnuReleaseDisplayListNodes	inferred	Follows the next pointers of the display list and releases every node.
+0x00256C58	itfAdvanceDisplayList	inferred	itf twin of mnuAdvanceDisplayList
 0x00256D10	itfDspDrawScaledA	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00256D90	itfDspDrawScaledB	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00256E10	itfDspDrawPair	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00257E78	mnuCopySceneCoordinates	inferred	Copies the signed scene-entry X/Y metadata into ten coordinate pairs.
+0x00257EB0	mnuAdvanceWrappingFrame	inferred	Increments a frame counter and wraps it to zero after frame 60.
 0x0025B7D8	mnuCreateSpriteResource	inferred	Allocates a 0x48-byte sprite record with owner, sprite, variant and randomized lifetime.
+0x0025BCA0	mnuDrawIconAlpha	inferred	mnu draws icon with alpha converted from s32 to u32
+0x0025BD18	mnuTickResourceGroup	inferred	mnu decrements node lifetimes and releases expired ones
+0x0025C030	mnuRequestResourceWork	inferred	Allocates menu resource work and requests a resource into its handle at offset 0x6C.
+0x0025C098	mnuHasResourceHandle	inferred	Reports whether the menu resource work has a nonzero handle at offset 0x6C.
+0x0025C0A8	mnuReleaseResourceWork	inferred	Releases the resource handle and frees the owning menu resource work.
+0x0025C568	mnuAdvanceLoopingFrame	inferred	Increments the frame counter and wraps to zero after frame 60.
 0x0025DA90	mnuAllocateMenuListNode	inferred	Allocates and clears a 0x14-byte menu-list node.
+0x0025DB58	mnuFreeMenuListNodeAndGetNext	inferred	Saves the menu node successor, frees the current node and returns that successor.
 0x0025DB80	mnuReleaseListNodes	inferred	Follows the next pointers of the head's list and releases every node.
+0x0025DCC8	mnuAdvanceDisplayList	inferred	mnu advances list counter then walks nodes releasing consumed ones
+0x0025DDF0	mnuCollectFlagArray	inferred	mnu collects 0x29 mdl flags into a byte array
+0x0025DE60	mnuApplyFlagArray	inferred	mnu sets 0x29 mdl flags from a byte array
+0x0025DEC8	itfEmitSelectedGlyph	inferred	If the selected font entry is active, constructs a glyph from its u16 code and glyph table, sets color/attributes, then links it into the font glyph list.
+0x0025E5D8	mnuDrawIconTriple	inferred	mnu draws icon entries 18,17,22
+0x0025F378	mnuDrawIfActive	inferred	mnu draws overlay when inner node active
+0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26
+0x002605B0	mnuSetCommandPhase	inferred	Stores a phase code in menu command work and resets its elapsed frame counter.
+0x002605C0	mnuStaffTickState	inferred	mnu 4-state counter returning next state
+0x00262418	mnuStaffInitPanel	inferred	mnu loads nr_sta01.spr resources and fades in
+0x00262818	mnuStaffCreateTasks	inferred	mnu creates the three staff roll tasks (405/2B15/5211 priorities)
+0x002628C8	mnuStaffDestroyTasks	inferred	mnu destroys the three staff roll tasks and marks state 1
+0x00262AF8	mnuStaffCopyPanelBlock	inferred	mnu copies a 0x1A4 byte panel block into work+0x9C
+0x00262BA8	mnuStaffPickRoll	inferred	mnu picks a table entry by a random byte
+0x00262F90	mnuStaffRunPanel1	inferred	mnu staff panel wrapper mode 1
+0x00262FF0	mnuStaffRunPanel2	inferred	mnu staff panel wrapper mode 2
 0x00263148	kwlnItemApplySelection	inferred	validates selected item and marks scene flag when resource 0x910 is absent
+0x00263220	mnuProcessItemSelection	inferred	Calculates the selected item's action output at scene offset 0x244 and applies the current item selection.
 0x00263378	kwlnItemDismissOverlay	inferred	calls paired overlay shutdown routines and clears scene bit zero
+0x00263608	mnuResetItemSelectionMarkers	inferred	Clears two menu scene markers at offsets 0x240 and 0x3C4.
+0x002639E0	mnuDrawItemPanelBackdrop	inferred	Draws the scene's embedded item panel backdrop using mnuDrawBackdrop.
+0x00263D70	mnuInitializeItemSelectionExtent	inferred	Computes a clamped extent from five signed item components, clears menu slots, and refreshes an existing resource.
+0x00263E38	mnuClearItemSelectionSlots	inferred	Clears the active slot and five adjacent item-selection slot words.
 0x00263EB0	mnuCheckTableSums	inferred	mnu menu, title, shop, or movie UI in game/code_00263EB0.c
 0x002648A8	kwlnItemUpdateDisplay	inferred	switches item screen coordinates and activation by scene mode
+0x00264A60	itfRunPanelMode1	inferred	itf panel wrapper mode 1
+0x00264AB8	itfRunPanelMode2	inferred	itf panel wrapper mode 2
+0x00264E90	itfUpdateFadeColor	inferred	itf updates colour fade
+0x002650B0	mnuGetTitleState	inferred	Returns the title work state at offset 0x1574.
+0x002650B8	mnuClearTitleState	inferred	Zeros the title work state at offset 0x1574.
+0x00265220	itfDrawCountText	inferred	itf formats count text and draws right aligned
+0x00265478	mnuRefreshPanelLayer	inferred	redraws panel pieces then calls func_002653A0
 0x002656C0	mnuIsTitleEntryAvailable	inferred	mnu menu, title, shop, or movie UI in game/code_002653A0.c
+0x00265968	mnuCountAdvancingTitleAnimations	inferred	Counts the five title entries whose animation advance helper reports a positive step.
 0x00265BE0	mnuAdvanceTitleEntryAnimation	inferred	mnu menu, title, shop, or movie UI in game/code_002653A0.c
+0x00265C28	btlAddBaseStats	inferred	adds five signed stat bytes with cap 99
+0x00265FD8	mnuInitTitleParameters	inferred	Clears and initializes the four input words for a title-screen parameter group.
+0x002693E0	mnuSetTitleSequenceVolumePan	inferred	Passes the sequence argument to sndSetSequenceVolumePan with volume 0x7F and pan 0x3F.
+0x00269500	mnuIncrementTitleEffectFrameCounter	inferred	Increments the frame counter at offset four in title effect state.
+0x00269530	mnuDestroyTitleEffectTask	inferred	Task destructor frees its bound TitleEffectState and clears the stored task handle.
+0x00269558	mnuCreateTitleEffectTask	inferred	Allocates TitleEffectState and creates the task with its tick and destructor callbacks.
 0x002695C8	mnuResetTitleEffectState	inferred	mnu menu, title, shop, or movie UI in game/code_00268AB8.c
+0x00269730	mnuGetTitleEffectFrameCounter	inferred	Returns the frame counter at offset four in title effect state.
 0x002697D0	mnuInitializeTitleEffects	inferred	mnu menu, title, shop, or movie UI in game/code_00268AB8.c
+0x00269CA0	sndMixSampleBuffers	inferred	copies 0x800 s16 samples then adds second buffer with clamp
 0x0026A460	mnuStoreTaskResult	inferred	mnu menu, title, shop, or movie UI in game/code_00268AB8.c
 0x0026A6E0	mnuUpdateTitleTransition	inferred	mnu menu, title, shop, or movie UI in game/code_00268AB8.c
 0x0026A840	mnuAdvanceTitleStateUnderSemaphore	inferred	mnu menu, title, shop, or movie UI in game/code_00268AB8.c
 0x0026AD98	mnuPrintTitleDebugBanner	inferred	mnu menu, title, shop, or movie UI in game/code_00268AB8.c
+0x0026AE10	mnuReleaseSoundBuffer	inferred	Frees and clears the title sound worker buffer handle when present.
+0x0026B020	mnuMovieShutdownA	inferred	mnu calls three shutdown helpers
+0x0026C108	mnuHasSpriteHandle	inferred	Tests whether the menu state owns a sprite handle at offset eight.
+0x0026C118	mnuReleaseSpriteHandle	inferred	Releases the menu state's sprite handle and clears its slot when present.
+0x0026C150	mnuStartMovieMenuSfx16	inferred	mnu forwards constant 0x16 to func_0026BD80
+0x0026CA18	mnuStartMovieMenuSfxGroup	inferred	mnu forwards constants 6,0xD,0xE,0xF to func_0026BD80
 0x0026CAD0	mnuSwapStateWords	inferred	mnu menu, title, shop, or movie UI in game/code_0026BD80.c
+0x0026E188	mnuTickMovieGroup	inferred	mnu twin of mnuTickResourceGroup for movie sprite groups
 0x0026E4F0	mnuCreateMovieSpriteResource	inferred	Allocates a 0x48-byte movie sprite record with owner, sprite, variant and randomized lifetime.
+0x0026E5A0	mnuReleaseMovieResourceGroup	inferred	Destroys ten owned movie tasks and releases their owning allocation.
 0x0026E8A0	mnuLoadMovieRollSprite	inferred	mnu menu, title, shop, or movie UI in game/code_0026E160.c
 0x0026FCD8	mnuStaffImageProc	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
+0x0026FE98	mnuMovieCreateTask	inferred	mnu allocates movie work and creates staffProc task
+0x0026FF18	mnuStartStaffMovieRequest	inferred	Starts the staff movie task and returns minus one as the request result.
+0x0026FF38	mnuStopStaffTasks	inferred	Destroys both staff image and staff processing tasks by their names.
 0x0026FF70	mnuMovieDraw	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x00270098	mnuSetFrameDivisor	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x002700D0	mnuCreateMovieManagerTask	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
+0x00270240	mnuClearMovieList	inferred	Frees every movie-list node and resets the head and list counters.
+0x00270508	mnuGetMovieListNodeAtOffset	inferred	Follows the movie-list next pointers up to the state's remaining count.
 0x002707E8	mnuMovieViewer	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x00270A30	mnuCreateMovieViewerTask	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x00270A80	mnuDestroyMovieViewerTask	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
+0x00270FB0	mnuLoadStaffImageHandles	inferred	Loads seven staff-image resources by indexed resource table entries.
+0x00271020	mnuResolveStaffImageHandles	inferred	Resolves each of seven staff-image handles and copies it to the output array.
 0x00271098	mnuReleaseStaffImageHandles	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
+0x00271100	mnuGetStaffCategoryEntries	inferred	Returns one of five staff-data subarrays and sets the corresponding entry count.
 0x00271308	mnuSetStaffDisplayMode	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x00271418	mnuReleaseStaffSpriteHandles	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
+0x00271648	mnuReleaseStaffResourceGroups	inferred	Releases the staff image handles and its three indexed groups of resource handles.
+0x00271F18	mnuDestroyStaffMenuTask	inferred	Frees the staff menu task's images, assets, context and resources and marks the camp state complete.
 0x002721E8	mnuDestroyCampTasks	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x00272228	mnuAcknowledgeCampState	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
+0x00272260	mnuIsFadeIdle	inferred	Returns true when the kernel fade task is inactive.
+0x00272350	mnuCreateStaffImageSprite	inferred	Creates and configures a drawable sprite from the indexed staff image resource.
 0x00272A00	mnuStartStaffDisplay	inferred	mnu menu, title, shop, or movie UI in game/code_00272798.c
+0x00273020	mnuReleaseStaffPrimaryWindows	inferred	Releases the first two window handles in staff display resources.
+0x00273200	mnuReleaseStaffExtraWindow	inferred	Releases the third window handle in staff display resources.
 0x00273470	freeStaffDisplayResources	inferred	Releases linked display resources and returns success
+0x00273718	mnuStaffRunPanel2b	inferred	mnu panel wrapper mode 2
+0x00274BA8	mnuIsFinalItemIndex	inferred	Tests whether an item index has reached the last index given the count at offset 0x20.
 0x00274F00	menuCopyPartyEntries	inferred	copies the five 0x1A4-byte party entries from the save data into the menu work (+0x840) and counts active ones (max 3)
 0x00275880	mnuShopReleaseResources	inferred	mnu menu, title, shop, or movie UI in game/code_00274B80.c
+0x00278218	mnuBuildSkillCodeBitset	inferred	Enumerates 96 skill records and sets a bit for every nonzero code in their code lists.
+0x002782F8	mnuIsSkillCodeInBitset	inferred	Checks whether the supplied code's bit is present in the skill-code bitset.
 0x00278760	campMenuInit	inferred	allocates 0x38-byte menu work at context+0x90C and selects the initial label pair from the node type
 0x00278A90	campMenuDrawSlotLabel	inferred	menu draw: label from selected slot, func_0027CDD0 backdrop, menuRunPanel tail
 0x00278E28	campMenuHandleInput	inferred	clears flag 8 on the cursor node, plays input sound and forwards to the node handlers
@@ -1037,6 +1379,12 @@
 0x0027D7E0	mnuReleaseResourceList	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027DDA0	menuHideWindowHandles	inferred	switch on window type calling func_002BF970(handle,0) for each handle group
 0x0027DF48	menuLinkItemList	inferred	links an array of items into a doubly linked list (+0x58 next, +0x5C prev) and numbers them
+0x0027DFF8	mnuComparePrimaryKeyDescending	inferred	Orders MenuListNode sortKeyPrimary at offset 0x60 from larger to smaller.
+0x0027E020	mnuComparePrimaryKeyAscending	inferred	Orders MenuListNode sortKeyPrimary at offset 0x60 from smaller to larger.
+0x0027E050	mnuCompareSecondaryKeyDescending	inferred	Orders MenuListNode sortKeySecondary at offset 0x64 from larger to smaller.
+0x0027E078	mnuCompareSecondaryKeyAscending	inferred	Orders MenuListNode sortKeySecondary at offset 0x64 from smaller to larger.
+0x0027E0A8	mnuCompareTertiaryKeyDescending	inferred	Orders MenuListNode sortKeyTertiary at offset 0x68 from larger to smaller.
+0x0027E0D0	mnuCompareTertiaryKeyAscending	inferred	Orders MenuListNode sortKeyTertiary at offset 0x68 from smaller to larger.
 0x0027E100	menuSortItems	inferred	collects list items into an array, qsorts with one of six comparators (+3 for descending), relinks and refreshes
 0x0027E228	mnuAllocateListEntries	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027E270	freeMenuListEntries	inferred	Frees four records allocated by func_0027E228; C candidate parked
@@ -1054,6 +1402,8 @@
 0x00281108	mnuDrawCenteredLabel	inferred	Formats text id, creates text item, centers it by width and draws it.
 0x002815F0	mnuBlendPanelSlots	inferred	Blends four panel slot values between two panels with func_002C1630.
 0x00282C10	mnuCreatePanelState	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
+0x00282C70	mnuDestroyPanelState	inferred	Releases a panel's resource list handle when present, then frees the panel.
+0x00282CF8	mnuInitializePanelResource	inferred	Obtains a resource-list handle for mode two and saves it in the panel state.
 0x00282F98	mnuCreatePanelGroup	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00283038	mnuDestroyPanelGroup	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00283090	mnuUpdateFiveListEntries	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
@@ -1081,6 +1431,8 @@
 0x00288478	createBattleStageTestCamera	inferred	builds position/orientation float4s and returns the next task state func_00288458
 0x002886E0	btlCreateStageTestTask	inferred	btl battle control and actor operations in game/code_00282850.c
 0x00288728	btlDestroyStageTask	inferred	btl battle control and actor operations in game/code_00282850.c
+0x00288B88	fileGetResourceHandle	inferred	Returns the file work's resource handle, released by callers through func_002D0918.
+0x00288B98	fileGetResourceSize	inferred	Returns the file work's loaded resource size used by sound buffer transfer.
 0x00288C08	fileWaitReady	inferred	spins until func_00288BA8 reports ready, pumping system tasks each pass
 0x00289738	fileManDispatchDone	inferred	drains work done-queue under sema, runs each node callback
 0x002897A0	fileManUpdate	inferred	fileMan task update; pumps pending jobs then completion queue
@@ -1089,7 +1441,17 @@
 0x00289A08	fileReqInit	inferred	initializes one file request entry via libmc helper
 0x00289A58	fileReqBegin	inferred	sets current request index and initializes that entry
 0x00289AA0	fileReqPoll	inferred	polls one request via libmc status call, advances its state machine
+0x00289B98	fileReqGetStatus	inferred	Returns the request's status byte at offset 0x11, switched over by memory-card file request polling.
 0x00289BC0	fileReqGetSize	inferred	returns entry size field shifted to bytes
+0x00289BE8	fileReqIsSlotMetadataDirty	inferred	Reads the request's slot metadata flag at offset 0x12, checked before rebuilding save-slot metadata.
+0x00289C10	fileReqClearSlotMetadataDirty	inferred	Clears the request's slot metadata dirty byte at offset 0x12.
+0x00289C38	fileReqMarkSlotMetadataDirty	inferred	Sets the slot metadata flag at offset 0x12 before directory updates and metadata clearing.
+0x00289C68	fileReqClearSlotFlags	inferred	Clears one selected slot's flag word in the 25-word-per-request array.
+0x00289C98	fileReqSetSlotFlags	inferred	ORs a supplied mask into the selected save slot's request flag word.
+0x00289CD0	fileReqGetSlotFlags	inferred	Returns the selected save slot's flag word, used by memory-card directory and save-slot scanning.
+0x00289D00	fileReqGetSelectedSlot	inferred	Returns the signed selected save slot at request offset 0x13, used to format save directory names.
+0x00289D28	fileReqSetSelectedSlot	inferred	Stores the selected save slot byte at request offset 0x13.
+0x00289DC8	mcPollSyncResult	inferred	mc polls sync result to 1/0/-1/-2
 0x00289E18	mcMakeDirectory	inferred	Passes the caller's arguments to sceMcMkdir with the second argument zero.
 0x0028A190	mcFormatSaveFilename	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028A1B8	fileReqGetSlotCode	inferred	reads current request index and signed slot code at stride 0x30
@@ -1167,12 +1529,17 @@
 0x002963B8	fileLoadObjectOpenNamedDevice	inferred	file file requests and records in game/code_0028A0E0.c
 0x00296430	fileLoadObjectOpenDevice	inferred	file file requests and records in game/code_0028A0E0.c
 0x002964B0	fileLoadObjectOpenAndStartDevice	inferred	file file requests and records in game/code_0028A0E0.c
+0x00296628	fileReplaceReferenceHolder	inferred	Releases an existing loader reference holder and replaces it using the supplied resource.
+0x00296678	fileClearLoadObjectReferences	inferred	Clears file record references through a loader's record-work pointer when present.
+0x002966A8	fileAcquireLoadObjectRecord	inferred	Acquires the loader's record-work object when one is present.
 0x00296F18	fileResetSlotStates	inferred	file file requests and records in game/code_0028A0E0.c
 0x00298CA0	loadObjScaleParamsA	inferred	Multiplies source entry floats (0x64,0x68,0x74..,0xC8,0xD0,0xD8,0xDC) by scale into destination entry.
 0x00299560	loadObjScaleParamsC	inferred	Same scale-copy with tail fields C8,CC,D4,E4,F0.
 0x0029A558	loadObjScaleParamsB	inferred	Same scale-copy as loadObjScaleParamsA with tail fields C8,D8,E0,E4.
 0x0029A748	fileClearRecordReferences	inferred	file file requests and records in game/code_0028A0E0.c
 0x0029A750	fileAcquireRecord	inferred	file file requests and records in game/code_0028A0E0.c
+0x0029A7B0	menuRecordGetVector	inferred	menu copies the vector at record+0x20 into out
+0x0029A7C8	menuRecordSetVector	inferred	menu copies value into the vector at record+0x20
 0x0029AA40	effDuplicateEffectHeader	inferred	Allocates an effect through func_0029A958, copies the leading word, and finishes initialization through func_0029AA90
 0x0029AA90	recreateEffectModelFromSource	inferred	Frees the old model, builds a new one from the source's model handle (size lookup + create) and applies the work's scale through the vu0 helper.
 0x0029BFB0	effReleaseSharedReference	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -1184,15 +1551,21 @@
 0x002A03C8	effClearAnimatedFrames	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A04B8	effInitializeAlternatingTransformRows	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A16F0	effClearStripFrames	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002A3798	effCreateFileResourceInstance	inferred	eff resolves primary/secondary file buffers by type at work+0x1C (1 or 4) then creates the resource via func_002A36F8
 0x002A3840	createActiveEffectResource	inferred	Builds an effect object for the work's kind and runs the kind's createActiveResource/fn table entries (delegates to func_002A36F8 when the kind has none).
 0x002A3CB0	releaseEffectResourceRefs	inferred	Drops the shared model/texture reference counters (types 3 and 4) or the object's own reference, then frees its two owned handles.
+0x002A4318	effLoadFlashTextures	inferred	eff loads /effect/flash00.tmx and flash01.tmx
 0x002A4DF8	createEffectRingHandle	inferred	Allocates a handle for a ring node sized by the work's count (minimum 3) and fills the ring's entries with the work's four parameter words.
 0x002A5B08	effInitializeSurfaceForKind	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002A74F0	effCopyRingFrameVectors	inferred	eff ring buffer of 3-vector frames: copies 3 quadwords for a frame index
 0x002A7DF8	effReleaseRenderResources	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A85E8	randomizeEffectParticleFields	inferred	Randomizes each particle's field from the shared effect random state
 0x002A8A20	effFreeIndexedEntries	inferred	Calls func_002AACD0 for each 0x10-byte entry in the pool and then frees the pool through func_002CFF98
 0x002AAAB0	effResetDispatchCounter	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002ADE48	allocateEffectBlock	inferred	Allocates an effect header plus the kind's resource size and memcpy's the source data behind it (payload pointer at +0x34).
+0x002ADF00	effCreateResourceInstanceB	inferred	eff twin of func_002A36F8 over table D_0037ED08
+0x002ADFA0	effCreateFileResourceInstanceB	inferred	eff twin of func_002A3798 over table D_0037ED08
+0x002AE048	effDuplicateActiveResourceB	inferred	eff twin of createActiveEffectResource over table D_0037ED08
 0x002AE8A8	effLoadWindTexture	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002AE930	effAllocateAnimationBuffer	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002AEB80	effPrepareTextureAnimation	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -1204,13 +1577,16 @@
 0x002AFDF0	effAllocateQuantizedBuffer	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B02B0	effPrepareQuantizedTexture	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B0300	effPrepareOwnedQuantizedTexture	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B0390	effOffsetNodeRowsVU	inferred	eff adds config+0x88 to the y lane of 4 vectors per row over cfg rows+1, for every list entry
 0x002B0598	allocateEffectBlockWithModel	inferred	Same allocation as func_002ADE48 using the D_0037EDA8 size table.
+0x002B0650	effCreateResourceInstanceC	inferred	eff twin of func_002ADF00 over table D_0037ED90 and allocateEffectBlockWithModel; one-argument createResource
 0x002B0758	effRecreateActiveByClass	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B0830	effAdvanceDispatchCounter	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B1170	effLoadScalyTexture	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B14E8	effReleaseParticleList	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B2120	createEffectModelResource	inferred	Allocates an effect object, creates its model from the source work (func_00217680 + func_0029A840) and runs the kind's createResource/fn table entries.
 0x002B26B0	getEffectWorldVector	inferred	Selects a request kind from the index (0..7), resolves a handle and returns the resulting vector in vf10 (zero vector for kind 0xB).
+0x002B3130	effResetDefaultColorTables	inferred	eff copies two quadwords from *D_00324770 and one from D_00324780 then clears D_003BC9AC
 0x002B3350	effResetObjectSlots	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B3588	effCreateInitializedObject	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B3608	effReleaseTargetSlots	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -1230,6 +1606,7 @@
 0x002B5130	btlInitializeEffectWork	inferred	btl battle control and actor operations in game/code_0029A840.c
 0x002B5160	btlUpdateEffectWork	inferred	btl battle control and actor operations in game/code_0029A840.c
 0x002B51D0	setBattleEffectOffset	inferred	Copies the caller's vector into D_003DF910, which func_002B51E8 adds to every battle effect position.
+0x002B5290	effMultiplyQuatWithFlag	inferred	eff loads node+0x50 quaternion, optionally via func_00295E00 when flags&0x60, and calls effMiscQuatMultiplyVU
 0x002B55E8	effPollPrimaryFile	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B56C8	effPollNamedFile	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B57B8	effPollAttachedFile	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -1242,6 +1619,8 @@
 0x002B7998	pollEpEffectFileJob	inferred	Polls the /tool/effect/ep/ request queue and, on completion, appends the file job and copies the asset name into it.
 0x002B7A28	pollNamedEffectFileJob	inferred	Polls the /tool/effect/ queue, replaces the current effect file job and snapshots the 0x80-byte state block into D_003DF920.
 0x002B7E28	effResetStaticState	inferred	Clears the four-word D_003DFA20 table and resets the D_003DF840 status bytes at 0x88, 0x89 and 0x8A
+0x002B8948	effLoadFileSlotAndPoll	inferred	copies queue record into work buffer, polls func_002B7E60, sets done flag (DDS2 func_002FFE48)
+0x002B8B48	effRunWithStateBackup	inferred	eff snapshots D_003DF920, backs up its first vector around func_002B7E60 and restores it
 0x002B8DF0	effResetFileResources	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B8F70	effInitializeResourceQueue	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B8FE0	effPollResourceQueue	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -1252,6 +1631,10 @@
 0x002BA4F8	btlResetEffectWork	inferred	btl battle control and actor operations in game/code_0029A840.c
 0x002BB770	pollEffectFileQueueRecord	inferred	Same polling protocol as func_002BB880 but resolves the target entry through fileQueueGetAt.
 0x002BB880	pollEffectFileRecord	inferred	Reads a queue record for the given path and reports 0x400000/0x400002/0x600001 depending on its state, feeding the finished data to the job.
+0x002BBA88	fileLoadEffectSlotA	inferred	same body as func_002BC328 with job 3 / header D_00383F18
+0x002BBF58	fileLoadEffectSlotB	inferred	same body as func_002BC328 with job 0x12 / header D_0038C758
+0x002BC140	effLoadFileSlotF2	inferred	twin of func_002BC328 for /tool/effect/f2/, job 0x14
+0x002BC328	effLoadMaterialFile	inferred	eff loads /tool/effect/mat/ file info, appends a file job and registers the material resource (DDS2 twin func_00303848)
 0x002BC638	effAppendListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BC6F0	effRemoveListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BCA18	effRequestResourceByMode	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -1262,18 +1645,27 @@
 0x002BCF90	effSumRecordStatuses	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BD2F8	effDestroyPackedBatch	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BD908	effCreatePayload	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002BDBC0	effCreateResourceSlotSet	inferred	eff allocates count 0x80/0xA0-byte slots and copies slot template from source (DDS2 twin func_00305348)
 0x002BE128	effSetMaterialSlots	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BE378	effConfigureWithDefaultSetting	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002BFB50	itfCopyGridEntryWords	inferred	Copies four grid-entry words at offset 0x84 into the same entry's words at offset 0x14.
 0x002C1728	itfSetWidgetFlagsAndActivateChild	inferred	itf interface rendering and text in game/code_002BF790.c
+0x002C1770	itfCreateGridTextWidget	inferred	Allocates a 0x40-byte GridTextWidget, copies text and initializes its grid dimensions.
 0x002C1888	itfSetGridDimensions	inferred	itf interface rendering and text in game/code_002BF790.c
-0x002C1978	expandWidgetColumnWidth	inferred	Computes columns times twelve plus six and raises width when necessary.
+0x002C18C8	itfDestroyGridTextWidget	inferred	Releases widget text, dequeues its child entries and frees the widget.
+0x002C1910	itfDestroyGridTextWidgetTree	inferred	Recursively destroys widgets attached to each child entry before freeing the owner widget.
+0x002C1978	itfExpandGridWidgetColumnWidth	inferred	Expands grid width to accommodate columns with optional flag-based padding.
 0x002C2EA0	fldStopLmapTask	inferred	Shuts down the Lmap worker then destroys the task with the LmapMain name.
 0x002C2ED0	fldLmapTaskExists	inferred	Tests whether a task with the LmapMain name is registered.
+0x002C2FC0	fldInitializeLmapState	inferred	Resets field map counters and sets a mode based on model flag 0x413.
+0x002C3640	fldGetLmapStage	inferred	Selects stage two, one or zero based on successive field map flags.
+0x002C49F8	sdfCounterGetDisplayWordPointer	inferred	Returns the word pointer in the active counter display reached through its runtime channel.
 0x002C4A28	sdfCounterGetScaledValue	inferred	Returns the timer's integer value scaled by one tenth.
 0x002C56C0	sdfCounterIncrease	inferred	Increments the counter value only while below ten.
 0x002C56E8	sdfCounterDecrease	inferred	Decrements the counter value only while nonzero.
 0x002C5708	sdfCounterSetMode	inferred	Stores the requested mode and initializes its countdown to eight.
 0x002C5720	sdfCounterTickCountdown	inferred	Decrements the timer's countdown when above zero.
+0x002C5FD8	fldCountMaskBitsBeforeOrdinal	inferred	Counts set bits before the one-based ordinal position in the lower 31 mask bits.
 0x002C6098	fldSetSelectionCount	inferred	Stores a nonzero selection count when it does not exceed the owner's limit.
 0x002C60B8	fldIncrementSelectionCount	inferred	Increments the selection count while below ten.
 0x002C60D8	fldDecrementSelectionCount	inferred	Decrements the selection count while above one.
@@ -1294,23 +1686,39 @@
 0x002C9740	sdfQuatDot	inferred	Returns the four-component dot product of two quaternions.
 0x002C97C8	fldVec4ArcCosDot	inferred	fld field scene and resources in game/code_002C5FB8.c
 0x002C97E8	sdfQuatLengthSquared	inferred	Sums the squares of all four quaternion components.
-0x002C9818	quaternionMagnitude	inferred	Computes square root of the four-component sum of squares using the verified fpu.h helper
-0x002C9838	quaternionInverse	inferred	Conjugates xyz and divides all four components by squared magnitude when nonzero
-0x002C98D0	quaternionNormalize	inferred	Divides each of the four components by its vector magnitude
-0x002C9D10	quaternionBlendNormalize	inferred	Interpolates four components and calls quaternionNormalize
+0x002C9818	sdfQuatMagnitude	inferred	Applies SDF module naming to the quaternion's four-component Euclidean norm.
+0x002C9838	sdfQuatInverse	inferred	Applies SDF module naming to in-place quaternion conjugation and squared-norm division.
+0x002C98D0	sdfQuatNormalize	inferred	Applies SDF module naming to in-place four-component magnitude normalization.
+0x002C9D10	sdfQuatBlendNormalize	inferred	Applies SDF module naming to quaternion interpolation followed by normalization.
 0x002C9F60	sdfQuatBlendAngular	inferred	Blends quaternion components with angular weights, falling back to normalized linear blending.
 0x002CA0C0	sdfQuatSquad	inferred	Blends two quaternion pairs and then blends those results with the squad interpolation fraction.
 0x002CA158	sdfQuatLog	inferred	Converts a quaternion into an angle-scaled three-component vector with zero scalar component.
 0x002CA210	sdfQuatExp	inferred	Uses sine of vector length and cosine as scalar to construct an exponential quaternion.
 0x002CA2F0	sdfQuatSquadControl	inferred	Computes a squad control quaternion using inverse rotation, neighboring log vectors and quaternion exp.
 0x002CA410	sdfQuatForwardVector	inferred	Transforms unit positive Z by a quaternion-derived matrix and normalizes the result.
+0x002CA4A8	sdfQuatForwardDot	inferred	Derives the quaternion's forward vector and returns its normalized dot product with the supplied target.
+0x002CAC60	sdfCreateTaskHeader	inferred	Allocates and initializes a 0x1C-byte task header with user data and default callbacks.
 0x002CACD8	sdfDestroyTaskWork	inferred	Drains and destroys a task work object's list, invokes its destroy callback and releases its handle.
+0x002CAD20	sdfSetTaskDestroyCallback	inferred	Installs a nonnull callback at task-header offset 0x18 used by sdfDestroyTaskWork.
+0x002CAEB8	sdfSetTaskSecondaryCallback	inferred	Installs a nonzero callback address in the task-header word at offset 0x14.
 0x002CAFE0	sdfClearTaskList	inferred	Invokes each task-list node's removal callback, frees nodes and resets list links and count.
 0x002CB0F8	sdfFindTaskListNodeByKey	inferred	Follows task-list node links until the requested key matches.
+0x002CB278	sdfDestroyTaskWorkerTasks	inferred	Destroys both tasks named by the task-work object's primary and secondary task names.
+0x002CB2B8	sdfIsPrimaryTaskRegistered	inferred	Returns whether a task with the task-work object's primary task name exists.
 0x002CB2E0	kwlnTaskExists	inferred	returns nonzero when kwlnTaskGetTaskByName finds the named task
 0x002CB300	sdfAttachTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB358	sdfRemoveTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
+0x002CB390	sdfFindTaskItemValueByKey	inferred	Returns the matching task-list item's stored value or zero if the key is absent.
+0x002CB3F8	sdfSetTaskItemMode	inferred	Selects one of five mode-dependent status bit updates on the task item's referenced word.
+0x002CB5A8	sdfDestroyTaskResourceWork	inferred	Destroys nested task work, frees two buffers, and releases its allocation.
+0x002CB6B8	sdfDestroyCallbackWork	inferred	Calls the work's destruction callback with stored arguments, then frees the work.
 0x002CBB00	sdfDestroyGridWork	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
+0x002CBBA0	sdfGridGetCursorCoordinates	inferred	Splits the current cell's linear index into column and row using the grid width.
+0x002CBC10	sdfGridSetCellValue	inferred	Writes a cell payload by row and column when its computed index is in range.
+0x002CBC48	sdfGridCursorUp	inferred	moves grid cursor back one row
+0x002CBC98	sdfGridCursorDown	inferred	moves grid cursor forward one row
+0x002CBCF0	sdfGridCursorLeft	inferred	moves grid cursor back one column
+0x002CBD48	sdfGridCursorRight	inferred	Advances one eight-byte grid cell unless the current index is in the final column.
 0x002CD5B8	scrCheckStateBits	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CD728	scrGetSelectedOperandIndex	inferred	Returns the VM operand's currently selected signed index.
 0x002CD7C0	scrSelectOperandIndex	inferred	Stores the selected VM operand index and updates its associated operand.
@@ -1322,16 +1730,25 @@
 0x002CDA48	scrGetSecondaryScriptFlag	inferred	Returns the bit-two mask for the selected script flag slot.
 0x002CDC40	scrFindSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
+0x002CF3C8	scrSetRgbAndAlpha	inferred	Splits a packed AARRGGBB color into its lower RGB word and upper alpha byte.
 0x002CF440	sdfCreateSemaphore	inferred	sdf system, device, DMA, or task infrastructure in game/code_002CC750.c
+0x002CF570	sdfFreeMemoryFromEitherHeap	inferred	Frees a pointer through the chip or other heap according to its address range.
+0x002CF618	sdfFreeMemorySlotFromEitherHeap	inferred	Nulls a pointer slot before freeing its contents through the matching heap.
 0x002CF6D0	sdfAddHandler	evidence	its message "sdfAddHandler : unknown type %d"
 0x002CF898	sdfDrainPendingHandlers	inferred	Repeatedly dispatches the pending-handler head until no pending handler remains.
 0x002CF8C8	sdfWakeAlarmThread	inferred	Alarm callback wakes the thread ID passed as its third argument.
 0x002CF8E0	sdfSleepWithAlarm	inferred	sdf system, device, DMA, or task infrastructure in game/code_002CF8C8.c
 0x002CF940	sdfGetElapsedTimerTicks	inferred	Subtracts a prior value from the memory-mapped EE timer and keeps its low sixteen bits.
+0x002CF958	sdfRunTickWorkerThread	inferred	Sleeps one tick per iteration, processes pending work and invokes the registered tick callback.
 0x002CFAD8	sdfSleepThreadCount	inferred	Subtracts canceled wakeups then sleeps the requested number of thread wakeups.
 0x002CFBB0	sdfFindThreadById	inferred	Gets the current thread ID for a negative argument and searches the semaphore-protected thread list for that ID.
+0x002CFD50	sdfThreadSleepSelf	inferred	stores own thread id, sets priority 0x7C and sleeps
 0x002CFD80	sdfAdvanceNodeCursor	inferred	Advances the cursor's next node to its successor and records the former next as current.
+0x002CFDA0	sdfAdvanceCursorWalk	inferred	Advances to the next cursor node, increments the visited count and advances the outer cursor at its limit.
+0x002CFE70	sdfCursorSlotAlloc	inferred	pops a cursor slot from free list and runs first step
 0x002D00D8	sdfChipIsInRange	inferred	Checks whether a value falls in the half-open range between two chip globals.
+0x002D0378	sdfGetMemoryBlockState	inferred	Returns the allocator block state halfword at offset 0x0C.
 0x002D0390	sdfMemoryNextBlock	inferred	Returns the next memory block unless that node is the end marker.
 0x002D03A8	sdfMemoryGetBlockSize	inferred	Subtracts the block address from its successor address, restoring interrupts if required.
 0x002D03F0	sdfMemoryGetBlockAddress	inferred	Returns the address stored in a memory block.
@@ -1339,31 +1756,60 @@
 0x002D0A48	sdfResourceRetainAddress	inferred	Increments a resource reference counter and returns its address field.
 0x002D0EC0	sdfGraphReleaseBuffers	inferred	Releases and clears three graph buffer pointers.
 0x002D0F08	sdfGraphRecreateBuffers	inferred	Releases existing graph buffers and allocates three using dimensions and modes from the graph.
+0x002D1318	sdfSwapBufferSlots	inferred	replaces buffer index in the two slot bytes with its complement
+0x002D1350	sdfSetBufferSlot	inferred	sets both or one slot byte and arms the vsync flag
+0x002D1698	sdfWaitAndSelectBuffer	inferred	spins on vsync flag D_003BD302 then selects the double buffer
+0x002D1798	sdfTexListContains	inferred	walks texture list to find node
 0x002D1C28	sdfTexInitializeLists	inferred	Allocates the 0x1C-byte texture list head, initializes it, and assigns the head to both globals.
+0x002D2128	sdfResetSemaphoreState	inferred	Clears three pointers and a status word in a semaphore-backed texture work object.
 0x002D22C0	sdfTexInitializeSemaphore	inferred	Creates the texture semaphore then resets the semaphore object's links and state.
+0x002D2300	sdfTexGetPrimaryBuffer	inferred	Returns the texture's primary buffer address.
 0x002D2330	sdfTexGetOrInitializeSecondaryBuffer	inferred	Returns the texture's secondary buffer, initializing it when the pointer is null.
 0x002D2398	sdfTexGetSecondaryResourceWord	inferred	Returns the secondary resource's word at offset 0xC, or zero when absent.
 0x002D23B0	sdfTexGetPrimaryResourceWord	inferred	Returns the primary resource's word at offset 0xC.
+0x002D2498	sdfTexSetPrimaryBufferModeBits	inferred	Updates the primary texture buffer's mode bits using two shifted arguments.
 0x002D2700	sdfTexListInsert	inferred	inserts tex node at head of global D_003BD308 list
 0x002D2C30	sdfTexRelease	inferred	Releases texture allocations, unlinks the texture, and frees its reference and record.
+0x002D2CB8	sdfTexReleaseReference	inferred	Decrements the texture reference count and releases its texture when it reaches zero.
+0x002D2EB0	sdfTexCreateResourcePacket	inferred	Allocates and initializes a texture resource packet from the primary and secondary resource words.
 0x002D3558	sdfFindResourceById	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D37A8	sdfCreateResourcePacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D3B28	sdfCreateDescriptorPacket	inferred	Allocates descriptor, initializes it, and queues its packet range.
+0x002D3D00	sdfDetachQueue	inferred	takes D_003BDA00 list, clears each node link, returns head
 0x002D3E88	sdfGraphHasPendingWork	inferred	checks pending graph list, active flag and available work slots
+0x002D3EE8	sdfCheckPendingWorkWithInterrupts	inferred	Tests graph work pending after querying interrupt state and re-enables interrupts if needed.
 0x002D3F30	sdfResizeDoubleBuffer	inferred	Allocates two aligned buffers and publishes both addresses.
 0x002D3FA0	sdfSelectDoubleBuffer	inferred	Sets allocation cursor and limit to the selected half of the double buffer.
 0x002D3FC0	sdfGetBufferRemaining	inferred	Returns bytes between the double-buffer allocation cursor and its limit.
 0x002D3FD0	sdfAllocPacketAligned	inferred	Returns the allocation cursor then advances it by the requested size rounded up to 16 bytes.
+0x002D3FF0	sdfGetPacketCursor	inferred	Returns the current SDF packet allocation cursor.
+0x002D3FF8	sdfSetPacketCursorAligned	inferred	Sets the SDF packet allocation cursor to the supplied address rounded up to a 16-byte boundary.
 0x002D4010	sdfInitPacketList	inferred	Clears the packet list and initializes its sentinel to 0xFFFF.
 0x002D4038	sdfAppendPacket	inferred	Links a DMA packet at the end of the list and updates its last-packet pointer.
 0x002D4070	sdfAppendPacketRange	inferred	Links a packet at the list end but records a separately supplied end pointer.
 0x002D4160	sdfPrependPacketList	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D41C0	sdfAppendPacketList	inferred	Connects the incoming nonempty packet list after the current tail.
+0x002D4218	sdfPrependIfMode1	inferred	sdf calls sdfPrependPacketList only when mode == 1
+0x002D4558	sdfAppendLinkedPacketNode	inferred	Appends a node to the list's first/last pointer chain and clears its next word.
+0x002D47B8	sdfInitDrawPacket	inferred	sdf writes constant tag doublewords 0..7 of a DMA packet
+0x002D4C40	sdfAppendLinkedPacketPayload	inferred	Links the supplied packet node in one list and appends its payload at offset 0x10 to another.
 0x002D4D10	sdfAppendDmaPrimary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D4D70	sdfAppendDmaSecondary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D4E70	sdfInitPacketBuilder	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
+0x002D5498	sdfWaitSlotReady	inferred	spins until slot table entry is ready
+0x002D5510	sdfAllocatePacketList	inferred	Allocates and initializes one packet list using a supplied or default allocator.
+0x002D5558	sdfAppendInitializedPacket	inferred	Allocates a packet, calls its initializer, and appends it to the packet list.
 0x002D5B70	sdfCreateExtendedPacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
+0x002D5FD8	sdfBuildTrianglePacket	inferred	three-point packet fill, kind 0x104
+0x002D6258	sdfBuildPacketE	inferred	0x50-byte packet builder around func_002D6188
+0x002D6450	sdfBuildPacketF	inferred	0x60-byte packet builder around func_002D6380
+0x002D7390	sdfBuildLinePacket	inferred	packet fill: tag 0x8001, kind 0x106, two packed pairs
+0x002D7410	sdfCreatePacketA	inferred	sdf builds 0x40-byte packet list node via func_002D7390
+0x002D7500	sdfBuildLinePacketB	inferred	same as 7390 with kind 0x101
+0x002D7670	sdfBuildQuadPacket	inferred	four-corner packet fill, kind 0x102
 0x002D78F0	sdfFreeNodeLists	inferred	Traverses two node lists and releases their allocations.
+0x002D7988	sdfFreeNodeRoot	inferred	Frees both root node lists, its workspace, then the owning root object.
+0x002D7A50	sdfDestroyObjectList	inferred	sdf frees each object in the list then the list and its owner
 0x002D7C68	sdfUnlinkRouteNode	inferred	Detaches a route node from its owner list.
 0x002D7CD0	sdfLinkRouteNode	inferred	Links a route node into its owner list.
 0x002D7DF0	sdfModelWriteAddressPacket	inferred	Writes a 16-byte packet containing a model address indexed in 128-byte steps.
@@ -1375,30 +1821,56 @@
 0x002D9DD8	sdfChunkFindRecordById	inferred	Scans fixed-size records in the MPOS chunk for a matching record ID
 0x002D9ED8	sdfGetUniqueChunkValue	inferred	Returns the first data word of the UNIQ chunk when it exists.
 0x002D9F08	sdfGetLodChunkValue	inferred	Returns the first data word of the LODC chunk when it exists.
+0x002D9F38	sdfSetTextFloatPairOverride	inferred	Sets two floating-point text parameters and enables their shared override flag.
+0x002D9F50	sdfClearTextFloatPairOverride	inferred	Clears only the flag enabling the floating-point text parameter pair override.
+0x002D9F60	sdfGetFirstTextOverrideOrDefault	inferred	Selects the first per-text override at offset 0x88 or the corresponding global default.
+0x002D9F80	sdfGetSecondTextOverrideOrDefault	inferred	Selects the second per-text override at offset 0x8C or the corresponding global default.
 0x002D9FC8	sdfResourceListRelease	inferred	Optionally releases every resource before freeing the list
+0x002DA0C0	sdfReduceResourceListCount	inferred	If enabled and the requested count is smaller, walks the excess indices and stores the new resource-list count; always calls func_002E7730 afterward.
+0x002DA240	sdfRegisterResourceQueueCallbacks	inferred	Registers callbacks on two SDF resource queues, the second using sdfAssetRelease.
+0x002DA270	sdfCreateResourceList	inferred	Returns a buffered resource-list request with caller-selected capacity and fixed 4 and 8 creation parameters.
 0x002DA2F8	sdfReleaseQueuedResource	inferred	Releases a resource immediately or through the registered disposal queue
 0x002DA450	sdfSubParamCreate	inferred	allocates and inits 0x18 sub-param block with defaults
 0x002DAA00	sdfAssetRelease	inferred	Releases four owned allocations and then the asset itself
+0x002DAA68	sdfQueueAssetRelease	inferred	Enqueues a non-null asset in the queue whose registered completion callback is sdfAssetRelease.
+0x002DAAA0	sdfInitNodeHeaderFromWords	inferred	Writes a 16-byte SdfNode header with type 0xA and payload from the third word at the selected source offset, returning the following payload address.
 0x002DAAE0	sdfAssetCopyTextureState	inferred	Copies resource and texture state into a selected asset entry
 0x002DAD30	sdfAssetApplyEntryChanges	inferred	Applies flag-selected changes to one of two asset entries
 0x002DAEE8	sdfAssetListParse	inferred	Allocates a list and parses successive serialized asset entries
 0x002DB9D8	sdfMotionBlendFiveFloats	inferred	Blends five float components with a weight and its complement.
+0x002DD468	sdfSetPrimaryIdentityMatrixVU	inferred	Builds a four-row identity matrix in vf28-vf31.
+0x002DD488	sdfSetAlternateIdentityMatrixVU	inferred	Builds a four-row identity matrix in vf24-vf27.
 0x002DDD88	sdfVuTransformVector	inferred	Multiplies a source vector by the matrix in VU registers and stores the result.
 0x002DDDA8	sdfVuDot3	inferred	Multiplies and sums the xyz lanes of two VU vectors.
 0x002DDDD0	sdfVuCross3	inferred	Uses VU outer-product instructions to produce a three-component cross product.
 0x002DDF58	sdfInitializeVuWorkParameters	inferred	Unpacks the parameter header, masks its flags, stores the payload pointer and clears work state.
+0x002DE8C8	sdfVuBlendNodeXY	inferred	For each linked blend node, interpolates the XY coordinates at source offset 0x30 and writes the blended vector to node offset 0x30.
+0x002DE918	sdfVuBlendNodeVectors	inferred	For each linked blend node, interpolates source vectors at offsets 0x30 and 0x20 into the corresponding node vectors using the VU.
+0x002E1168	sdfProcessReferencedObjects	inferred	Reads an object-reference count and indices from the command record and dispatches each indexed context object through func_002D78B8.
+0x002E1228	sdfConsUploadDmaProgram	inferred	sdf cons sends D_003200A0 range over the DMA chan and re-retains resource slot
+0x002E12C8	sdfConsInitTextureDrawPacket	inferred	sdf cons fills a draw packet from the texture (func_002D2468/2478/2488)
 0x002E1370	sdfConsCreateDrawPacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E1410	sdfConsCalculateDrawPacketSize	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
+0x002E1478	sdfConsAllocateColumnPacket	inferred	Allocates a console packet sized for five columns and the requested height, then initializes it with fixed 0x156/0x53531 packet parameters.
 0x002E1CC8	sdfConsInitDmaPacketHeader	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
+0x002E1F78	sdfConsAppendClearPacket	inferred	sdf cons allocates a 0x20 packet (default sdfAllocPacketAligned) and appends it
+0x002E2088	sdfConsAppendVuPacket	inferred	sdf cons allocates 0x90 packet then runs func_002E1FF8 VU setup
+0x002E2110	sdfConsAppendAssetPacket	inferred	sdf cons applies asset entry changes then appends packet
 0x002E2600	sdfInitGeometryDmaPacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E3BA8	sdfDevConsSetEntryPair	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E3CE0	sdfDevConsInit	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
+0x002E3D18	sdfDevConsGetResourceHandle	inferred	Initializes the developer console on demand and returns its cached resource handle D_003BDA34.
 0x002E3D48	sdfDevConsListInsert	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E3D68	sdfDevConsListRemove	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E3D98	sdfDevConsNodeDestroy	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E3DC8	sdfDevConsNodeClear	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
+0x002E3E00	sdfDevConsResetNode	inferred	Single-operation wrapper around sdfDevConsNodeClear that resets the cursor and clears the entire two-byte-per-cell buffer.
 0x002E3E18	sdfDevConsNodeCreate	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E3EC8	sdfDevConsAdvanceRow	inferred	Advances the console cursor or scrolls the character rows at the bottom.
+0x002E40D0	sdfDevConsWriteCharacterWithAttribute	inferred	Forwards a character and its attribute to the console's low-level character writer.
+0x002E40E8	sdfDevConsPrintf	inferred	Formats a varargs string and emits each resulting character with the current console attribute.
+0x002E4190	sdfDevConsSetCursor	inferred	Stores the supplied column and row as the developer console's cursor position.
+0x002E41A0	sdfDevConsSetTextAttribute	inferred	Sets the byte passed with each character emitted by the formatted-output helper.
 0x002E49E8	sdfPktSetCmd	inferred	sets packet +0xC from D_003987E0 table by index
 0x002E4A00	sdfPktInit	inferred	inits 4-word SIF command packet fields then table lookup for +0xC via 49E8
 0x002E4A28	sdfRpcBufHandler	inferred	SIF RPC handler: copies [unk0,unk4) bytes onto struct base, returns struct or NULL
@@ -1406,8 +1878,13 @@
 0x002E4CB0	sdfDevWaitForDisc	inferred	polls disc status until sceCdSearchFile succeeds
 0x002E5618	sdfPacketExists	inferred	Returns whether the packet lookup by identifier finds a packet.
 0x002E5640	sdfPktQuery	inferred	calls 5158 with stack buf, returns +8 field or -1 on NULL
+0x002E5670	sdfDevGetFileSize	inferred	sdf dev returns field 8 of the opened file record after fatal check
+0x002E56A0	sdfDevLoadWholeFile	inferred	sdf dev reads whole file to a new buffer
+0x002E5738	sdfDevStartLoad	inferred	sdf dev searches file on cd then allocates IOP heap
 0x002E57B8	sdfInitDeviceSemaphores	inferred	Creates the two device semaphores and resets their associated pending flag.
+0x002E5880	sdfDevBuildPath	inferred	sdf dev prepends cdrom prefix to a path
 0x002E5918	sdfPathPrefixCat	inferred	memcpys 6-byte D_003BD408 prefix then strcat arg1 (inlined 6-byte copy + tail strcat)
+0x002E5B10	sdfDevReportCommandResult	inferred	Device callback stores event 3/4 results into their respective globals and signals the command-completion semaphore.
 0x002E5B50	sdfDevCreateCommandState	inferred	creates command state and waits on device semaphore
 0x002E6020	sdfDevRelease	inferred	clears +0x28 id to -1, frees it via 0030EB78 if >= 0, then 5F08 destroy
 0x002E6060	sdfDevDeactivate	inferred	stores arg1 to +0x2C, sets state 9, runs 6020 destroy, then +0x38 callback with +0x3C if present
@@ -1434,6 +1911,7 @@
 0x002E83F8	effMiscRandMod	inferred	returns effMiscRand(state) modulo arg1; P4 effMisc family (effMiscRand at 002E8340)
 0x002E8F78	sndSetSequenceVolumePan	inferred	snd sound tasks and playback in game/code_002E8E00.c
 0x002E9140	soundSendSpatialPosition	inferred	Sends a sound command packet with X/Y/Z coordinates each scaled by one tenth.
+0x002E9418	sndSendFilenameCommand	inferred	Sends the filename and its byte length in a sound command packet.
 0x002E9540	sndReleaseMidiTrack	inferred	snd sound tasks and playback in game/code_002E9140.c
 0x002E9788	sdfSoundSendNamedCommand	inferred	copies command name into shared buffer and sends selected status command
 0x002E9840	sdfSoundSetChannelCount	inferred	Clamps a channel count to one through sixteen and sends its encoded sound command.
@@ -1443,14 +1921,32 @@
 0x002EB490	sdfSoundAppendNode	inferred	appends a node to the D_003BDA98 intrusive list
 0x002EB4D0	sdfSoundRemoveNode	inferred	unlinks a node from the D_003BDA98 intrusive list
 0x002EB510	sdfAllocateStreamFrameBuffers	inferred	Allocates two width-by-height frame buffers with two or four bytes per pixel depending on the node flag.
+0x002EB8C0	sdfSoundInitNodeFromFormat	inferred	memset node, translate hasAudio/stereo into twoChannel 0/1/2
+0x002EB9C8	sdfSoundInitFormattedNode	inferred	Initializes a sound node using format and callback values and allocates its sample buffer.
 0x002EBF88	sdfSoundQueueIpuBuffer	inferred	Writes the selected buffer address size and start command to IPU MMIO registers
 0x002EBFF0	sdfSoundSyncIpu	inferred	writes IPU command MMIO then synchronizes sceIpuSync
 0x002EC488	sdfMidiPreviousEntry	inferred	reads the prior entry slot while channel enabled
 0x002EC4B0	sndGetSelectedChannelEntry	inferred	snd sound tasks and playback in game/code_002E9708.c
 0x002EC4D8	sdfAdvanceBufferedPlayback	inferred	Consumes a pending buffer, flips its buffer index and advances the looping playback counter.
+0x002EC748	sdfSoundInitAndAppendNode	inferred	Initializes a sound node, stores the caller value, and appends it to the active-node list.
+0x002EC818	sdfSoundInitFormattedAndAppendNode	inferred	Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x002ED198	sdfMovieProcessPendingData	inferred	Checks movie buffer space and invokes the data handler with at most 0x4000 pending units.
 0x002EDC98	sdfPacAdvanceInput	inferred	Advances the PAC input pointer and adjusts available and consumed byte counts.
+0x002EDF60	sdfPacEnqueuePacket	inferred	Allocates and copies a PAC packet, then appends it to the decoder's packet queue.
+0x002EDFE8	sdfPacRemovePacket	inferred	Unlinks the selected PAC packet from its owner's queue, frees it and returns the next packet.
+0x002EE058	sdfPacDispatchPacket	inferred	Dispatches PAC packet command bytes to the corresponding handlers and returns distinct completion or unknown-command statuses.
 0x002EE138	sdfPacGetExtensionData	inferred	Returns the PAC data at header plus 0x20 when the extension-length bits are nonzero.
+0x002EE158	sdfPacCopyPendingBytes	inferred	Copies up to the available input into the output cursor and calls the completion callback when pending bytes reach zero.
+0x002EE1E0	sdfPacDecodePendingBytes	inferred	Feeds the available input into the incremental decoder, advances its cursor, and completes once decoding finishes.
+0x002EE258	sdfPacSkipPendingBytes	inferred	Advances over up to the available input without writing output and completes when pending bytes reach zero.
+0x002EE2C0	sdfPacStartPacketPayload	inferred	Queues the incoming PAC packet, selects output allocation by state flags, and sets copy, decode, or skip input handlers.
+0x002EE538	sdfPacCopyResourceChunk	inferred	Copies pending input into the resource buffer, finalizes its resource slot, and calls the completion handler.
+0x002EE5E0	sdfPacDecodeResourceChunk	inferred	Incrementally decodes compressed input into the resource buffer and finalizes the resource slot when complete.
+0x002EE678	sdfPacSkipResourceChunk	inferred	Consumes pending input without copying it, then checks the resource buffer and calls completion.
+0x002EE930	sdfPacAdvanceAllocationEntry	inferred	Associates the queued packet resource with the current allocation value, advances its entry index, and frees it at the final entry.
+0x002EEE98	sdfStoreWordAndSetState	inferred	Stores a word at offset four and marks its byte state as one.
+0x002EF3D0	sdfStreamSendChunk	inferred	clamps stream length to 0x4000 and forwards to send
+0x002EFB30	sdfReleasePoolNode	inferred	Returns nodes marked with the free sentinel to the pool free list and delegates other nodes to the pool callback.
 0x002F0034	sceGsDefDispEnv	evidence	string "sceGsDefDispEnv:Not support displaymode for 0x%x!!" (Sony libgraph)
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
 0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)

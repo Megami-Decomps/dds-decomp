@@ -107,7 +107,7 @@ extern void func_0024AF58(void);
 extern void func_0024AE18(s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_0024A570(s32, s32, s32);
-extern void func_0024DED8(s32);
+extern void evtClearActiveFlag(s32);
 
 extern void func_0024DEF8(s32, s32);
 
@@ -123,7 +123,7 @@ u32 func_0024B9D8(void) {
         func_0024A570(3, 1, context);
     }
     *(s32 *)(context + 0xD0) = 0;
-    func_0024DED8(0);
+    evtClearActiveFlag(0);
     func_0024DEF8(0, 3);
     return 1;
 }
@@ -168,7 +168,7 @@ void evtBSetupDispatchSyncC(s32 request) {
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
-extern void func_00248700(s32);
+extern void mnuRefreshThresholdNodeFlags(s32);
 extern void func_0027BB08(s32);
 extern void func_0024A570(s32, s32, s32);
 extern void func_0024B090(s32, s32);
@@ -178,7 +178,7 @@ extern void func_0024B168(void);
 u32 func_0024BCD0(void) {
     s32 context = func_00101A70();
 
-    func_00248700(*(s32 *)(context + 0x74));
+    mnuRefreshThresholdNodeFlags(*(s32 *)(context + 0x74));
     func_0027BB08(*(s32 *)(context + 0x74));
     func_0024A570(3, 2, context);
     func_0024B090(3, context);
@@ -193,7 +193,7 @@ extern void func_0024AB70(s32, s32);
 extern void func_0024ACD8(void);
 extern void func_00249420(s32);
 
-u32 func_0024BD48(void) {
+u32 evtBEnterStateA(void) {
     s32 context = func_00101A70();
 
     func_0024A570(3, 0, context);
@@ -230,7 +230,7 @@ void evtBSetupDispatchSyncD(s32 request) {
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
-u32 func_0024C0F8(void) {
+u32 evtSelectFinalVisualNode(void) {
     s32 context;
 
     context = func_00101A70();
@@ -297,7 +297,7 @@ extern void func_0024DA58(s32);
 extern void func_0024DAE8(s32);
 extern void func_0024DAB8(s32);
 
-u32 func_0024C670(void) {
+u32 evtPrepareSelectedMenuEntry(void) {
     s32 state = func_00101A70();
     s32 owner = *(s32 *)(state + 0x78);
     s32 *selectionIndex = (s32 *)(*(s32 *)(owner + 0x1C) + 0x60);
@@ -339,7 +339,7 @@ void evtBSetupDispatchSyncF(s32 request) {
 extern void func_0024DDC0(s32);
 extern void func_0024DA58(s32);
 
-u32 func_0024C8A0(void) {
+u32 evtBCheckPanelMode(void) {
     s32 context = func_00101A70();
 
     func_0024DDC0(1);
@@ -354,7 +354,7 @@ u32 func_0024C8A0(void) {
     return 1;
 }
 
-s64 func_0024C918(u64 input) {
+s64 evtBContinueDispatchOrRestoreTable(u64 input) {
     s32 context;
     s64 dispatchResult;
     s32 *dispatchState;
@@ -393,7 +393,7 @@ extern void func_0024A570(s32, s32, s32);
 extern void func_0024AE18(s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_002E96D8(u32);
-extern void func_0024DED8(s32);
+extern void evtClearActiveFlag(s32);
 
 u32 func_0024CA58(void) {
     s32 context = func_00101A70();
@@ -409,11 +409,11 @@ u32 func_0024CA58(void) {
     evtRememberDispatchCallback(0, context);
     *(s32 *)(context + 0xCC) = 1;
     func_002E96D8(*(u32 *)(context + 0x160));
-    func_0024DED8(0);
+    evtClearActiveFlag(0);
     return 1;
 }
 
-extern void func_002495F8(s32);
+extern void mnuReleaseWorkResources(s32);
 extern void func_00249498(s32);
 extern void func_0024A728(s32, s32);
 extern void func_0024A570(s32, s32, s32);
@@ -423,7 +423,7 @@ extern void func_0024ACD8(void);
 u32 func_0024CB00(void) {
     s32 context = func_00101A70();
 
-    func_002495F8(context);
+    mnuReleaseWorkResources(context);
     func_00249498(context);
     func_0024A728(1, context);
     func_0024A570(1, 0, context);
@@ -438,7 +438,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CB80);
 
 extern s32 func_0024A6E8(s32);
 
-void func_0024CCD8(s32 item) {
+void evtBDispatchSyncD2(s32 item) {
     s32 state = func_00101A70();
 
     func_0024A2D8(state);
@@ -483,3 +483,4 @@ void evtBDispatchSyncC(s32 request) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024B3A8", D_003AF710);
+

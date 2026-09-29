@@ -11,7 +11,7 @@ typedef struct {
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
     func_001634A8(work->resource68);
-    func_0017E7A8(work->resource6C);
+    effReleaseAttachedResources(work->resource6C);
     func_003297C8(work->resource70);
 }
 
@@ -28,7 +28,7 @@ void func_0017E068(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_0017E080);
 
-INCLUDE_ASM(const s32, "effect/effPCPNeedle", func_0017E658);
+INCLUDE_ASM(const s32, "effect/effPCPNeedle", effPCPNeedleCopyVector);
 
 void func_0017E668(EffPCPNeedleWork *work) {
     func_0017ED50(work->resource6C);

@@ -34,7 +34,7 @@ extern s32 sdfResourceRetainAddress(s32);
 
 extern s32 func_00303D00(s32);
 
-extern void initPartyPanelSlots(s32);
+extern void mnuInitPartyPanelSlots(s32);
 
 extern void func_002A9640(s32, s32);
 
@@ -158,7 +158,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002665E8);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
 
-void func_002668C0(s32 address) {
+void mnuReleaseResourceGroup(s32 address) {
     MenuResourceGroup *group = (MenuResourceGroup *)address;
     if (group->reducedMode == 0) {
         effResolveAndReleaseResource(group->primary);
@@ -192,7 +192,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002669C8);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266A48);
 
-void func_00266AF8(MenuProgressList *list) {
+void mnuRefreshThresholdNodeFlags(MenuProgressList *list) {
     MenuProgressNode *node = list->head;
     if (node != 0) {
         s32 base = D_00435DD0;
@@ -234,7 +234,7 @@ void func_00267008(s32 arg0) {
     }
 }
 
-void func_00267050(MenuProgressHost *host) {
+void mnuCreateThresholdNodePanels(MenuProgressHost *host) {
     MenuProgressNode *node = host->progressList->head;
     while (node != 0) {
         s32 id = node->entryId;
@@ -244,7 +244,7 @@ void func_00267050(MenuProgressHost *host) {
     }
 }
 
-void func_002670C8(MenuProgressHost *host) {
+void mnuDestroyThresholdNodePanels(MenuProgressHost *host) {
     MenuProgressNode *node;
 
     for (node = host->progressList->head; node != 0; node = node->next) {
@@ -275,7 +275,7 @@ u32 func_002674F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267500);
 
-s32 func_002675C8(s32 *items, s32 count, s32 excluded, s32 callback) {
+s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
     MenuProgressList *list = (MenuProgressList *)func_002B8158(0, count, 0x16, callback);
     s32 i;
     list->callback = callback;
@@ -323,13 +323,13 @@ void func_002676F0(MenuProgressHost *host) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267768);
 
-void func_002678C8(u8 *work) {
+void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
     for (i = 0; i < 1; i++) {
         func_002B81C8(*(u32 *)(work + 0x78 + i * 4));
     }
-    func_002670C8((s32)work);
+    mnuDestroyThresholdNodePanels((s32)work);
     func_002A9200(work + 0xE8);
     func_002671E8((s32)work);
     func_002B81C8(*(u32 *)(work + 0x80));
@@ -343,13 +343,13 @@ void func_002679E8(u8 *work) {
     *(s32 *)(work + 0x88) = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
 }
 
-s32 func_00267A00(void) {
+s32 mnuCreateProgressHost(void) {
     s32 heap = func_003292A8(0xa82c);
     MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
     memset((void *)host, 0, 0xa82c);
     host->heapHandle = heap;
     host->titleEffectHandle = func_00303D00(1);
-    initPartyPanelSlots((s32)host + 0x70);
+    mnuInitPartyPanelSlots((s32)host + 0x70);
     func_002A9640(host->titleEffectHandle, (s32)host + 8);
     host->loadState = 1;
     return (s32)host;
@@ -362,7 +362,7 @@ void func_00267A80(u32 *arg0) {
     func_003297C8(*arg0);
 }
 
-s32 func_00267AC8(MenuProgressHost *host) {
+s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     s32 state = host->loadState;
     if (state == 0) {
         return 1;
@@ -446,7 +446,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F20);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268380);
 
-void func_00268470(void) {
+void fldStopSceneTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00424F00, 0);
     kwlnTaskDestroyWithHierarchyByName(D_00424F10, 0);
     kwlnTaskDestroyWithHierarchyByName(D_00424F20, 0);
@@ -493,7 +493,7 @@ typedef struct {
     u16 flags; /* 0x0E */
 } SceneOptionRecord;
 
-void func_002686D0(SceneOptionRecord *option) {
+void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
     u16 flags = option->flags;
     u16 currentA = option->currentA;
     u16 currentB = option->currentB;
@@ -606,3 +606,4 @@ INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437868);
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437870);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437878);
+

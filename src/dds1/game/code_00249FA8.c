@@ -22,7 +22,7 @@ extern s32 D_003BC3E4;
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_00249FA8);
 
-void func_0024A058(void) {
+void fldStopSceneTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003AF658, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003AF668, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003AF678, 0);
@@ -86,7 +86,7 @@ typedef struct {
     u16 flags;     /* 0x0E */
 } SceneOptionRecord;
 
-void func_0024A2B8(SceneOptionRecord *option) {
+void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
     u16 flags = option->flags;
     u16 currentA = option->currentA;
     u16 currentB = option->currentB;
@@ -163,3 +163,4 @@ INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF6A0);
 
 INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
+

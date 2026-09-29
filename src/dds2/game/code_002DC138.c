@@ -24,7 +24,7 @@ extern u32 func_00304938(u32);
 
 extern u32 sdfResourceRetainAddress();
 
-extern u64 func_002C8108(void);
+extern u64 fileGetResourceHandle(void);
 
 extern u32 func_00305148();
 
@@ -115,7 +115,7 @@ extern u32 D_004387B0;
 
 extern u32 D_00438774;
 
-extern void func_00232B40(void *);
+extern void mdlStoreTertiaryVectorVU(void *);
 
 extern void func_002DCAE8(EffectObjectNode *);
 
@@ -303,17 +303,17 @@ extern u8 *func_002E56A8(u16, void *);
 
 extern EffectResourceSizeEntry D_003E9E78[];
 
-extern u8 *allocateEffectBlockWithModel(u16, void *);
+extern u8 *effAllocateBlockWithModel(u16, void *);
 
 extern u32 func_002F5358(u16, void *, void *, u32);
 
 void effInitModelVUState(void *model) {
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
-    func_00232AA0(model);
+    mdlStorePrimaryVectorVU(model);
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
     func_00232AD0(model);
     __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder");
-    func_00232B40(model);
+    mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
     if (*(void **)(model + 0x1C) != NULL) {
         mdlAddEntryPlain(model, 0, 0);
@@ -343,7 +343,7 @@ void *func_002DC280(void *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC2D8);
 
-void func_002DC370(EffModelOwner *owner) {
+void effDestroyModelOwner(EffModelOwner *owner) {
     void *buffer = owner->ownedBuffer;
     if (buffer != NULL) {
         func_00328E48(buffer);
@@ -356,7 +356,7 @@ void func_002DC370(EffModelOwner *owner) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effDuplicateEffectHeader);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", recreateEffectModelFromSource);
+INCLUDE_ASM(const s32, "game/code_002DC138", effRecreateModelFromSource);
 
 void func_002DC4A8(EffModelOwner *owner) {
     func_003343E8(*(s32 *)(owner->model + 0x1C), 0.0f);
@@ -366,12 +366,12 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC4C8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC520);
 
-void func_002DC540(EffModelOwner *owner, u8 *vec) {
+void effApplyModelVecB(EffModelOwner *owner, u8 *vec) {
     __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(vec) : "memory");
     func_00232AD0((void *)owner->model);
 }
 
-void func_002DC560(EffModelOwner *owner) {
+void effBroadcastModelMask(EffModelOwner *owner) {
     mdlBroadcastMasked(owner->model);
 }
 
@@ -382,7 +382,7 @@ void func_002DC578(s32 arg0, float scale) {
     t = *(float *)arg0 * scale;
     v[0] = v[1] = v[2] = t;
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (v));
-    func_00232B40(*(void **)(arg0 + 4));
+    mdlStoreTertiaryVectorVU(*(void **)(arg0 + 4));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC5B0);
@@ -403,7 +403,7 @@ u64 func_002DC6E8(void) {
 void func_002DC748(u32 *p) {
     p[3] |= 2;
     if (!(p[3] & 4)) {
-        func_002DC370(p);
+        effDestroyModelOwner(p);
     }
 }
 
@@ -436,7 +436,7 @@ void mdlPropagateObjectFlag(void) {
     }
 }
 
-void func_002DCC30(void) {
+void mdlClearListedObjectFlag(void) {
     EffectObjectFlag *object;
     EffectObjectNode *node;
 
@@ -448,7 +448,7 @@ void func_002DCC30(void) {
     }
 }
 
-void func_002DCC68(void) {
+void mdlSetListedObjectFlag(void) {
     EffectObjectFlag *object;
     EffectObjectNode *node;
 
@@ -460,7 +460,7 @@ void func_002DCC68(void) {
     }
 }
 
-void func_002DCCA0(void) {
+void mdlMarkAndProcessObjectNodes(void) {
     EffectObjectNode *node = D_00437E30;
     EffectObjectFlag *object;
     EffectObjectNode *next;
@@ -518,7 +518,7 @@ void func_002DDA50(s32 arg0) {
     mdlBroadcastMasked(*(u32 *)(arg0 + 0xc0));
 }
 
-void func_002DDA68(u8 *work, float scale) {
+void effScaleModelVec(u8 *work, float scale) {
     u32 bits;
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -532,7 +532,7 @@ void func_002DDA68(u8 *work, float scale) {
         "vmulx.xyzw vf10, vf10, $vf2x\n\t"
         ".set reorder"
         : "=&r"(bits) : "f"(scale) : "memory");
-    func_00232B40(*(void **)(work + 0xC0));
+    mdlStoreTertiaryVectorVU(*(void **)(work + 0xC0));
 }
 
 void func_002DDA98(void) {
@@ -552,7 +552,7 @@ u32 func_002DDCA0(u32 source, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseSharedReference);
 
-RefObj *func_002DDD40(RefObj *obj) {
+RefObj *effRetainSharedReference(RefObj *obj) {
     obj->refCount++;
     D_00437E34++;
     return obj;
@@ -560,7 +560,7 @@ RefObj *func_002DDD40(RefObj *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDD60);
 
-s32 func_002DDF08(void *work) {
+s32 effCountExpandedEntries(void *work) {
     u32 count = *(u32 *)((u8 *)work + 4);
     u32 i = 0;
     s32 total = 0;
@@ -757,7 +757,7 @@ void func_002DED38(s32 *arg0) {
 
     temp_v0 = *arg0;
     if (temp_v0 == 0) {
-        func_00109D50(arg0[1], (s16)arg0[2], arg0[3], arg0[4]);
+        evtSelStateCreate(arg0[1], (s16)arg0[2], arg0[3], arg0[4]);
         temp_v0 = *arg0;
     }
     *arg0 = temp_v0 + 1;
@@ -1079,7 +1079,7 @@ void effClearBillFrames(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0840);
 
 void func_002E08D0(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1107,7 +1107,7 @@ void billResetCellIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1110);
 
 void func_002E11A0(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1135,7 +1135,7 @@ void billResetParticleIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1AE8);
 
 void func_002E1B80(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1223,7 +1223,7 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
 }
 
 void func_002E2670(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1299,7 +1299,7 @@ u8 *billCloneEmitterTransform(u8 *owner) {
 }
 
 void func_002E2FD8(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1375,7 +1375,7 @@ u8 *billCloneStripTransform(u8 *owner) {
 }
 
 void func_002E3980(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1403,7 +1403,7 @@ void billResetTrailIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4250);
 
 void func_002E42F0(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1479,7 +1479,7 @@ u8 *billCloneQuadTransform(u8 *owner) {
 }
 
 void func_002E4E50(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 4));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 8));
 }
 
@@ -1504,7 +1504,7 @@ u8 *func_002E56A8(u16 kind, void *source) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5760);
 
-u8 *func_002E5800(u8 *work) {
+u8 *effCreateFileResourceInstance(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
     switch (*(u16 *)(work + 0x1C)) {
@@ -1520,13 +1520,13 @@ u8 *func_002E5800(u8 *work) {
 
 extern EffOp28 D_003E9958[];
 
-void func_002E5860(u32 *obj) {
+void effDispatchDestroyOp(u32 *obj) {
 
     D_003E9958[obj[0x2C / 4]].run(obj[0x30 / 4]);
     func_00328E48(obj);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", createActiveEffectResource);
+INCLUDE_ASM(const s32, "game/code_002DC138", effCreateActiveResource);
 
 void func_002E5978(u8 *work) {
     D_003E9950[*(s32 *)(work + 0x2c)].fn();
@@ -1535,14 +1535,7 @@ void func_002E5978(u8 *work) {
 
 extern FnTbl28 D_003E9960[];
 
-void func_002E59C0(work)
-s32 *work;
-{
-    if ((D_00437E08 & 2) == 0) {
-        D_003E9960[work[0x2C / 4]].fn();
-        work[0x28 / 4]++;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002DC138", func_002E59C0);
 
 void func_002E5A20(s32 arg0) {
     D_003E9964[*(s32 *)(arg0 + 0x2C)].fn((void *)arg0);
@@ -1575,13 +1568,13 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5AB8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5C50);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", releaseEffectResourceRefs);
+INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseResourceRefs);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5DE0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5E88);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E6390);
+INCLUDE_ASM(const s32, "game/code_002DC138", effLoadFlashTextures);
 
 u32 func_002E63F0(s32 arg0) {
     return (&D_00437E50)[arg0];
@@ -1643,7 +1636,7 @@ void func_002E68C8(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E68F0);
 
 void func_002E6B30(s32 arg0) {
-    releaseEffectResourceRefs(*(u32 *)(arg0 + 8));
+    effReleaseResourceRefs(*(u32 *)(arg0 + 8));
     func_002E7420(*(u32 *)(arg0 + 4));
     func_003297C8(*(u32 *)(arg0 + 0xc));
 }
@@ -1656,7 +1649,7 @@ void func_002E6E60(s32 arg0) {
     *(u32 *)(**(s32 **)(arg0 + 0x30) + 4) = 0;
 }
 
-u32 *createEffectRingHandle(u8 *work) {
+u32 *effCreateRingHandle(u8 *work) {
     u32 *handle = func_00328D68(4);
     u32 kind = *(u32 *)(work + 0x38);
     u8 *ring;
@@ -1708,11 +1701,7 @@ void func_002E73F0(s32 arg0) {
 
 extern EffOp24 D_003E9B88[];
 
-void func_002E7420(u32 *obj) {
-
-    D_003E9B88[obj[0x2C / 4]].run(obj[0x30 / 4]);
-    func_00328E48(obj);
-}
+INCLUDE_ASM(const s32, "game/code_002DC138", func_002E7420);
 
 void func_002E7468(s32 arg0) {
     func_002E7300(*(u16 *)(arg0 + 0x2c), *(u32 *)(arg0 + 0x34));
@@ -1762,7 +1751,7 @@ void func_002E75C0(Matrix4 *mat, float value) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E75C8);
 
 void func_002E7698(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x18));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x18));
     func_003297C8(*(u32 *)(arg0 + 0x1c));
 }
 
@@ -1778,13 +1767,13 @@ extern s32 func_002E7AE0(s32);
 
 extern void func_002E81B0(s32, s32, s32);
 
-extern void func_002E82F0(s32, s32, s32);
+extern void effReplaceResourceRef(s32, s32, s32);
 
 s32 func_002E7B90(u16 kind, s32 source) {
     s32 next = source + 0x1C;
     s32 object = func_002E7AE0(next);
     func_002E81B0(object, kind, source);
-    func_002E82F0(object, kind, next);
+    effReplaceResourceRef(object, kind, next);
     return object;
 }
 
@@ -1846,7 +1835,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E7F60);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E81B0);
 
-void func_002E82F0(s32 obj, s32 id, s32 arg) {
+void effReplaceResourceRef(s32 obj, s32 id, s32 arg) {
     u32 *p = (u32 *)obj;
     if (p[0x4C / 4] != 0) {
         func_002DC028(p[0x4C / 4]);
@@ -1891,7 +1880,7 @@ void func_002E9668(u32 arg0) {
 }
 
 void func_002E9690(s32 arg0) {
-    func_002DC0C0(*(u32 *)(arg0 + 0x4c));
+    menuRecordSetVector(*(u32 *)(arg0 + 0x4c));
 }
 
 void func_002E96A8(s32 arg0) {
@@ -1904,7 +1893,7 @@ void func_002E96C0(s32 arg0, u32 arg1) {
 
 void func_002E96C8(u8 *p, f32 value) {
     *(f32 *)(p + 8) = value;
-    func_002DC108(*(s32 *)(p + 0x4C));
+    dds3DispatchIndexedCallback(*(s32 *)(p + 0x4C));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E96E8);
@@ -1912,7 +1901,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E96E8);
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9840);
 
 void func_002E9A68(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x3c));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x3c));
     func_003297C8(*(u32 *)(arg0 + 0x48));
 }
 
@@ -1921,7 +1910,7 @@ void func_002E9A98(s32 arg0) {
     *(u32 *)(arg0 + 0x28) = 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9AA8);
+INCLUDE_ASM(const s32, "game/code_002DC138", effCopyRingFrameVectors);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9B20);
 
@@ -1938,7 +1927,7 @@ s32 func_002E9E48(const Matrix4 *matrix) {
         "lqc2 $vf30, 32(%0)\n\t"
         "lqc2 $vf31, 48(%0)\n\t"
         ".set reorder" :: "r"(matrix) : "memory");
-    return func_0033AF38(D_00437E68, 0);
+    return sdfConsAppendVuPacket(D_00437E68, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9E98);
@@ -1979,7 +1968,7 @@ void func_002EABA8(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", randomizeEffectParticleFields);
+INCLUDE_ASM(const s32, "game/code_002DC138", effRandomizeParticleFields);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EAC38);
 
@@ -2117,7 +2106,7 @@ void func_002EDFB0(Matrix4 *mat, float value) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EDFB8);
 
 void func_002EE0A8(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x18));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x18));
     func_003297C8(*(u32 *)(arg0 + 0x1c));
 }
 
@@ -2139,12 +2128,12 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE3C8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE400);
 
-void func_002EE4A8(u32 *p) {
+void effReleaseModelResources(u32 *p) {
     if (p[0x30 / 4] != 0) {
         billDispatchByKind(p[0x30 / 4]);
     }
     if (p[0x2C / 4] != 0) {
-        releaseEffectResourceRefs(p[0x2C / 4]);
+        effReleaseResourceRefs(p[0x2C / 4]);
     }
     if (p[0x34 / 4] != 0) {
         func_002DC028(p[0x34 / 4]);
@@ -2154,7 +2143,7 @@ void func_002EE4A8(u32 *p) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE508);
 
-void func_002EE5A8(s32 obj, s32 id, s32 arg) {
+void effReplaceFileResourceRef(s32 obj, s32 id, s32 arg) {
     u32 *p = (u32 *)obj;
     if (p[0x34 / 4] != 0) {
         func_002DC028(p[0x34 / 4]);
@@ -2179,7 +2168,7 @@ void func_002EED48(u32 arg0) {
 }
 
 void func_002EED70(s32 arg0) {
-    func_002DC0C0(*(u32 *)(arg0 + 0x34));
+    menuRecordSetVector(*(u32 *)(arg0 + 0x34));
 }
 
 void func_002EED88(s32 arg0) {
@@ -2192,10 +2181,10 @@ void func_002EEDA0(s32 arg0, u32 arg1) {
 
 void func_002EEDA8(u8 *p, f32 value) {
     *(f32 *)(p + 8) = value;
-    func_002DC108(*(s32 *)(p + 0x34));
+    dds3DispatchIndexedCallback(*(s32 *)(p + 0x34));
 }
 
-void func_002EEDC8(u8 *p) {
+void effResetBillTable(u8 *p) {
     u8 *a = *(u8 **)(p + 0x30);
     u8 *b = *(u8 **)(p + 0x34);
     u32 n = *(u32 *)(b + 0x38);
@@ -2345,11 +2334,11 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F0A98);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F10C0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", allocateEffectBlock);
+INCLUDE_ASM(const s32, "game/code_002DC138", effAllocateBlock);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F12E0);
+INCLUDE_ASM(const s32, "game/code_002DC138", effCreateResourceInstanceB);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F1380);
+INCLUDE_ASM(const s32, "game/code_002DC138", effCreateFileResourceInstanceB);
 
 extern EffOp28 D_003E9DE0[];
 
@@ -2358,7 +2347,7 @@ void func_002F13E0(u32 *obj) {
     func_00328E48(obj);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F1428);
+INCLUDE_ASM(const s32, "game/code_002DC138", effDuplicateActiveResourceB);
 
 void func_002F14B8(u8 *work) {
     D_003E9DD8[*(s32 *)(work + 0x2c)].fn();
@@ -2432,7 +2421,7 @@ void func_002F17B8(s32 arg0) {
     else {
         effReleaseSharedReference(*(s32 *)(arg0 + 0x18));
     }
-    func_00333918(*(u32 *)(arg0 + 0x2c));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x2c));
     func_003297C8(*(u32 *)(arg0 + 0x30));
 }
 
@@ -2596,7 +2585,7 @@ void func_002F3750(s32 arg0) {
     func_003297C8(*(u32 *)(temp_v0 + 8));
 }
 
-void func_002F3780(u8 *work) {
+void effOffsetNodeRowsVU(u8 *work) {
     s32 *list = *(s32 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
     s32 rows = *(s32 *)(config + 0x74) + 1;
@@ -2622,7 +2611,7 @@ void func_002F3780(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F37F8);
 
-u8 *allocateEffectBlockWithModel(u16 kind, void *source) {
+u8 *effAllocateBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_003E9E78[kind].resourceSize;
     u8 *effect = func_00328D68(size + headerSize);
@@ -2637,22 +2626,18 @@ u8 *allocateEffectBlockWithModel(u16 kind, void *source) {
     return effect;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F3A40);
+INCLUDE_ASM(const s32, "game/code_002DC138", effCreateResourceInstanceC);
 
 void func_002F3AD0(s32 arg0) {
     u64 temp_v0;
 
     temp_v0 = fileResolvePrimaryBuffer();
-    func_002F3A40(*(u16 *)(arg0 + 0xc), temp_v0);
+    effCreateResourceInstanceC(*(u16 *)(arg0 + 0xc), temp_v0);
 }
 
 extern EffOp28 D_003E9E68[];
 
-void func_002F3B00(u32 *obj) {
-
-    D_003E9E68[obj[0x2C / 4]].run();
-    func_00328E48(obj);
-}
+INCLUDE_ASM(const s32, "game/code_002DC138", effDispatchCleanupOp);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effRecreateActiveByClass);
 
@@ -2758,7 +2743,7 @@ u32 func_002F5488(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F54D0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", createEffectModelResource);
+INCLUDE_ASM(const s32, "game/code_002DC138", effCreateModelResource);
 
 void func_002F55F0(u8 *work) {
     D_003E9F08[*(s32 *)(work + 0x2c)].fn();
@@ -2802,13 +2787,13 @@ void func_002F5728(Matrix4 *mat, float value) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5730);
 
 void func_002F5820(s32 arg0) {
-    func_00333918(*(u32 *)(arg0 + 0x18));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x18));
     func_003297C8(*(u32 *)(arg0 + 0x1c));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5850);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", getEffectWorldVector);
+INCLUDE_ASM(const s32, "game/code_002DC138", effGetWorldVector);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5BC8);
 
@@ -2844,7 +2829,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F64D8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F66F0);
 
-void func_002F6790(void) {
+void effResetDefaultColorTables(void) {
     u128 *dst = D_00458460;
     u128 *src = D_0037F770[0];
     PCP_COPY_VECTOR(dst, src);
@@ -2894,7 +2879,7 @@ s32 *func_002F6C30(s32 arg0) {
     return work;
 }
 
-extern void func_00117170();
+extern void dds3FreePathObject();
 extern void func_00110B50();
 
 void effReleaseTargetSlots(u32 *obj) {
@@ -2903,7 +2888,7 @@ void effReleaseTargetSlots(u32 *obj) {
     u32 i;
     for (i = 0; i < 5; i++) {
         if (*heads != 0) {
-            func_00117170(*heads);
+            dds3FreePathObject(*heads);
         }
         heads++;
         if (*tails != 0) {
@@ -3280,7 +3265,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8378);
 
 extern u8 D_00380828[];
 extern void func_00232390(void *, const void *);
-extern void func_00232AA0(void *);
+extern void mdlStorePrimaryVectorVU(void *);
 extern void func_00232AD0(void *);
 
 /* The model helpers read vf10, following the SDK's VU0 macro-mode convention. */
@@ -3290,7 +3275,7 @@ void effApplyModelTransform(u8 *work) {
     u32 bits;
     float scale;
     __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(work) : "memory");
-    func_00232AA0(*(void **)(modelContext + 4));
+    mdlStorePrimaryVectorVU(*(void **)(modelContext + 4));
     __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(work + 0x10) : "memory");
     func_00232AD0(*(void **)(modelContext + 4));
     __asm__ volatile(
@@ -3306,7 +3291,7 @@ void effApplyModelTransform(u8 *work) {
         "vmulx.xyzw vf10, vf10, $vf2x\n\t"
         ".set reorder"
         : "=&r"(bits) : "f"(scale) : "memory");
-    func_00232B40(*(void **)(modelContext + 4));
+    mdlStoreTertiaryVectorVU(*(void **)(modelContext + 4));
     *(float *)(*(u8 **)(*(u8 **)(modelContext + 4) + 0x1C) + 0x20) =
         *(float *)(animation + 0x94);
     func_00232390(*(void **)(modelContext + 4), D_00380828);
@@ -3338,7 +3323,7 @@ void func_002F8608(u32 arg0) {
 
     temp_v0 = *(s32 *)((s32)arg0 + 4);
     if (temp_v0 != 0) {
-        func_00333918(temp_v0);
+        sdfQueueAssetRelease(temp_v0);
     }
     func_00328E48(arg0);
 }
@@ -3360,7 +3345,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9048);
 
 extern void func_00159FA0(s32);
 
-extern void func_00159C40(s32, s16);
+extern void billSetBillboardMode(s32, s16);
 
 s32 *func_002F9118(s32 *request) {
     s32 *source = (s32 *)request[0x30 / 4];
@@ -3368,7 +3353,7 @@ s32 *func_002F9118(s32 *request) {
     s32 *resource = func_002F8FB8(context);
     resource[0] = func_00159A50(*source);
     func_00159FA0(resource[0]);
-    func_00159C40(resource[0], *(s16 *)((u8 *)context + 0x4C));
+    billSetBillboardMode(resource[0], *(s16 *)((u8 *)context + 0x4C));
     return resource;
 }
 
@@ -3377,7 +3362,7 @@ void func_002F9180(s32 *work) {
         billDispatchByKind(work[0]);
     }
     if (work[1] != 0) {
-        func_00333918(work[1]);
+        sdfQueueAssetRelease(work[1]);
     }
     func_00328E48(work);
 }
@@ -3543,7 +3528,7 @@ void effDestroyOwnedResources(s32 *work) {
         func_002DC260(work[0x60 / 4]);
     }
     if (work[0x64 / 4] != 0) {
-        func_00330978(work[0x64 / 4], 1, 1);
+        sdfReleaseDevSlot(work[0x64 / 4], 1, 1);
     }
     if (work[0x6C / 4] != 0) {
         u32 count = ((s32 *)work[0x70 / 4])[2];
@@ -3611,7 +3596,7 @@ void func_002FABA8(s32 arg0, u32 arg1, u32 arg2) {
         *(u32 *)(arg0 + 0x60) = 0;
     }
     if (*(s32 *)(arg0 + 100) != 0) {
-        func_00330978(*(s32 *)(arg0 + 100), 1, 1);
+        sdfReleaseDevSlot(*(s32 *)(arg0 + 100), 1, 1);
         *(u32 *)(arg0 + 100) = 0;
     }
     temp_v1 = func_002DC1D0(arg1, arg2);
@@ -3640,7 +3625,7 @@ void func_002FB400(u32 arg0) {
 }
 
 void func_002FB428(s32 arg0) {
-    func_002DC0C0(*(u32 *)(arg0 + 0x70));
+    menuRecordSetVector(*(u32 *)(arg0 + 0x70));
 }
 
 void func_002FB440(s32 arg0) {
@@ -3651,11 +3636,11 @@ void func_002FB458(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 4) = arg1;
 }
 
-extern void func_002DC108(s32);
+extern void dds3DispatchIndexedCallback(s32);
 
 void func_002FB460(s32 *work, f32 value) {
     *(f32 *)((u8 *)work + 8) = value;
-    func_002DC108(work[0x70 / 4]);
+    dds3DispatchIndexedCallback(work[0x70 / 4]);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FB480);
@@ -3677,7 +3662,7 @@ void effReleaseSharedResourceReference(s32 *work) {
         }
         resource = (s32 *)work[0x478 / 4];
         if (resource[1] != 0) {
-            func_00330978(resource[1], 1, 1);
+            sdfReleaseDevSlot(resource[1], 1, 1);
         }
         resource = (s32 *)work[0x478 / 4];
         if (resource[0x1C / 4] != 0) {
@@ -3755,13 +3740,13 @@ void func_002FC160(void) {
     func_00303C50();
 }
 
-void setBattleEffectOffset(void *src) {
+void effSetBattleOffset(void *src) {
     PCP_COPY_VECTOR(D_0045C1E0, src);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC198);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC240);
+INCLUDE_ASM(const s32, "game/code_002DC138", effMultiplyQuatWithFlag);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC2B0);
 
@@ -4388,7 +4373,7 @@ s32 effPollPartResource(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", pollNamedEffectFileJob);
+INCLUDE_ASM(const s32, "game/code_002DC138", effPollNamedFileJob);
 
 INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042D030);
 
@@ -4427,9 +4412,9 @@ s32 func_002FF870(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FF8A0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FFBA0);
+INCLUDE_ASM(const s32, "game/code_002DC138", effLoadFileSlotAndPoll);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FFDA0);
+INCLUDE_ASM(const s32, "game/code_002DC138", effRunWithStateBackup);
 
 extern u32 func_002FF8A0(u8 *, s32);
 
@@ -4525,9 +4510,9 @@ void func_003003E0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", pollEffectResourceBank);
+INCLUDE_ASM(const s32, "game/code_002DC138", effPollResourceBank);
 
-void resetEffectMappingFlags(void) {
+void effResetMappingFlags(void) {
     D_0043876C = 0;
     D_00438778 = 0;
     D_00438770 = 0;
@@ -4822,7 +4807,7 @@ s32 effPollGeneralResource(s32 mode) {
     u8 *entry;
     s32 result = 0x600001;
 
-    pollEffectResourceBank(mode, status);
+    effPollResourceBank(mode, status);
     if (*(s32 *)(status + 0xCC) == 2) {
         result = 0x400000;
     } else if (*(s32 *)(status + 0xCC) == 1) {
@@ -4934,7 +4919,7 @@ void func_00302F28(void) {
     effPollNamedResource(D_0042D140, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00302F48);
+INCLUDE_ASM(const s32, "game/code_002DC138", fileLoadEffectSlotA);
 
 typedef struct EffectFileHeader {
     u8 unk_00[8];
@@ -5116,7 +5101,7 @@ u32 func_00303660(void) {
 
 extern EffectFileHeader D_003FD988;
 
-u32 func_00303848(void) {
+u32 effLoadMaterialFile(void) {
     u8 fileInfo[0x110];
     u8 *job;
     u8 *entry;
@@ -5307,7 +5292,7 @@ void func_003040B8(u64 arg0, u32 *arg1) {
     u64 temp_v0;
     u32 temp_v1;
 
-    temp_v0 = func_002C8108();
+    temp_v0 = fileGetResourceHandle();
     temp_v1 = func_00305148(temp_v0, 0);
     *arg1 = temp_v1;
     func_003297C8(temp_v0);
@@ -5318,7 +5303,7 @@ void func_00304110(u64 arg0, u32 *arg1) {
     u64 temp_v0;
     u32 temp_v1;
 
-    temp_v0 = func_002C8108();
+    temp_v0 = fileGetResourceHandle();
     temp_v1 = func_00305148(temp_v0, 1);
     *arg1 = temp_v1;
     func_002C7D00(arg0);
@@ -5352,7 +5337,7 @@ void func_00304258(u64 arg0, u32 *arg1) {
     u32 temp_v1;
     u32 temp_v2;
 
-    temp_v0 = func_002C8108();
+    temp_v0 = fileGetResourceHandle();
     temp_v1 = sdfResourceRetainAddress(temp_v0);
     temp_v2 = func_00304938(temp_v1);
     *arg1 = temp_v2;
@@ -5546,7 +5531,7 @@ void effResolveAndReleaseSelectedResource(u32 *owner, s32 mapping) {
     }
 }
 
-extern void func_0032BB68(s32, u32, u32);
+extern void sdfTexReleaseReference(s32, u32, u32);
 
 void func_00304FB0(u8 *owner, s32 preserve) {
     u32 i = 0;
@@ -5558,7 +5543,7 @@ void func_00304FB0(u8 *owner, s32 preserve) {
         do {
             if (resources[i] != 0) {
                 u32 *current;
-                func_0032BB68(resources[i], (u32)resources, count);
+                sdfTexReleaseReference(resources[i], (u32)resources, count);
                 current = *(u32 **)(owner + 0x24);
                 count = *(u32 *)(owner + 0x1C);
                 resources = current;
@@ -5599,7 +5584,7 @@ u32 func_00305110(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00305148);
 
-u32 *func_00305348(u32 *source, u32 slot, u32 count) {
+u32 *effCreateResourceSlotSet(u32 *source, u32 slot, u32 count) {
     u32 *effect = (u32 *)func_00328D68(0x30);
     u32 index = 0;
     effect[1] = 1;

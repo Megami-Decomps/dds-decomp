@@ -249,7 +249,7 @@ s32 func_0010E3A0(void)
     s32 p1;
     p0 = func_0010D650(0);
     p1 = func_0010D650(1);
-    func_00106810(p0, p1, func_0010D650(2));
+    kwlnDrawSetOffsetTransition(p0, p1, func_0010D650(2));
     return 1;
 }
 
@@ -565,7 +565,7 @@ s32 func_0010EF68(void)
 
 s32 func_0010EF90(void)
 {
-    func_00106810(0, 0, 0);
+    kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawEnableD88(0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);

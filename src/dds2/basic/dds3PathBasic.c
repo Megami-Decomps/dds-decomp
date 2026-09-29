@@ -45,14 +45,14 @@ void func_00116DE8(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
 
 void func_00341120(void *arg0, f32 arg1);
 
-void func_00117170(PathObj *path) {
+void dds3FreePathObject(PathObj *path) {
     effFreeBuffers(path->unk10);
     func_00328E48(path);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_001171A0);
 
-void func_001172B8(PathObj *arg) {
+void dds3PreparePathVectorPair(PathObj *arg) {
     s32 idx;
     f32 frac;
     PathData18 *data;

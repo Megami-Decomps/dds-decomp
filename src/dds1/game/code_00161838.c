@@ -65,11 +65,11 @@ void effBTLFieldColorSetFlags(u32 flags) {
     D_003BB024 = D_003BB024 | flags;
 }
 
-void func_00161A00(u32 flags) {
+void effBTLFieldColorClearFlags(u32 flags) {
     D_003BB024 = D_003BB024 & ~flags;
 }
 
-void func_00161A18(void) {
+void effBTLFieldColorResetFlags(void) {
     D_003BB024 = 0;
 }
 

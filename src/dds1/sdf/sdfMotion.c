@@ -264,7 +264,7 @@ void func_002DA5B0(void *a0, s32 a1);
 Blk *sdfEnsureSecondaryTextSubParam(void *a0);
 void func_002DA6B0(void *a0, void *a1);
 void sdfDestroyDevRequest(void *a0);
-void func_002DB220(Pair *a0, void *a1, void *a2);
+void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2);
 void func_002DB3D0(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
 f32 sdfInterpolateMotionKeys(KeyOut *a0);
 void func_002DB7C8(void *a0, KeyOut *out, f32 t);
@@ -289,11 +289,11 @@ extern void *D_00398318[];
 extern void *D_00398330[];
 extern void *D_00398348[];
 
-void func_002DB1F8(VObj *a0) {
+void sdfInvokeMotionObjectCallback(VObj *a0) {
     a0->unk0->fn();
 }
 
-void func_002DB220(Pair *a0, void *a1, void *a2) {
+void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2) {
     a0->unk0 = a2;
     a0->unk4 = a1;
 }
@@ -311,7 +311,7 @@ void func_002DB518(void *a0, s32 a1, s32 a2) {
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB538);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB660);
-void func_002DB768(Motion *motion) {
+void sdfMotionSuspend(Motion *motion) {
     u8 previous;
 
     previous = motion->state;
@@ -321,7 +321,7 @@ void func_002DB768(Motion *motion) {
     }
 }
 
-void func_002DB788(Motion *motion) {
+void sdfMotionResume(Motion *motion) {
     if (motion->state == 6) {
         motion->state = motion->previousState;
     }
@@ -331,7 +331,7 @@ void func_002DB7A8(void *a0) {
     func_002CFF98(a0);
 }
 
-void func_002DB7C0(Triple *a0, s32 a1) {
+void sdfSetMotionOutputValue(Triple *a0, s32 a1) {
     a0->unk8 = a1;
 }
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB7C8);
@@ -365,12 +365,12 @@ void func_002DBA28(KeyOut *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 func_002DBA50(void *a0, s32 a1) {
+s32 sdfDispatchMotionBySelector(void *a0, s32 a1) {
     return D_003981B8[(u16)a1](a0, a1);
 }
 
 void func_002DBA80(void *tmp, void *src, void *tbl, s32 x) {
-    func_002DB220(tmp, src, tbl);
+    sdfSetMotionPointerPair(tmp, src, tbl);
     ((TmpBuf *)tmp)->unkC = func_002D7D68(((HasPtr4 *)src)->unk4, x);
 }
 
@@ -472,12 +472,12 @@ void func_002DC310(void *work) {
     PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x70);
 }
 
-s32 func_002DC330(void *a0, s32 a1) {
+s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
     return D_00398248[(u16)a1](a0, a1);
 }
 
 void func_002DC360(Dst360 *a0, Src360 *a1, void *a2, s32 a3) {
-    func_002DB220(&a0->pair, a1, a2);
+    sdfSetMotionPointerPair(&a0->pair, a1, a2);
     a0->unkC = a1->unk4->unkC->arr[a3];
 }
 
@@ -498,7 +498,7 @@ void func_002DC418(HasSub *a0, f32 t) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC458);
 
-void func_002DC508(CmdI *a0) {
+void sdfCopyTrackStateToBinding(CmdI *a0) {
     a0->res = a0->sub->i14;
 }
 
@@ -678,7 +678,7 @@ void func_002DCD90(HasSub *a0, f32 t) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DCDD0);
 
-void func_002DCE80(CmdI *a0) {
+void sdfCopyMotionTargetValue(CmdI *a0) {
     a0->res = a0->sub->i18;
 }
 

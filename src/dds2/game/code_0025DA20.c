@@ -76,7 +76,7 @@ void mnuCampCreateTask(s32 taskId) {
     }
 }
 
-void campDestroyTaskById(void) {
+void mnuCampDestroyTaskById(void) {
     s64 task;
 
     task = evtFindTaskById();
@@ -86,7 +86,7 @@ void campDestroyTaskById(void) {
     }
 }
 
-void campDestroyAllTasks(void) {
+void mnuCampDestroyAllTasks(void) {
     s64 task;
 
     while (task = func_00101820(0x3ec), task != 0) {
@@ -94,7 +94,7 @@ void campDestroyAllTasks(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DB20);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopScrollList);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DB98);
 
@@ -124,7 +124,7 @@ u32 func_0025E7B0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E7B8);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", campFindMatchingEntryIndex);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindMatchingEntryIndex);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindEntryByName);
 
@@ -177,9 +177,9 @@ void func_0025EE00(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EE40);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampInitFontResource);
 
-void func_0025EE90(CampScene *scene) {
+void mnuCampReleaseEffectHandle(CampScene *scene) {
     func_0019C5B0(scene->effectHandle);
     scene->effectHandle = 0;
 }
@@ -196,7 +196,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EF10);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EFD8);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F0B0);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopSubmitDescriptor);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F130);
 
@@ -379,7 +379,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260020);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260138);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002601D8);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindActiveSlot);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
 
@@ -629,3 +629,4 @@ INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437828);
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437830);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437838);
+

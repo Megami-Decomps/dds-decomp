@@ -35,7 +35,7 @@ void func_00113100(BasicObject *obj, u32 value) {
     obj->data->value14 = value;
 }
 
-f32 func_00113110(f32 fromDegrees, f32 toDegrees) {
+f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     f32 diff;
 
     if (fromDegrees < 0.0f || toDegrees < 0.0f) {
@@ -130,12 +130,12 @@ typedef struct WorldObj {
 } WorldObj;
 
 extern WorldObj *func_00110880();
-extern void func_00112750();
+extern void dds3EnsureSlotData();
 extern void effObjSetInnerFirstVec();
 extern void effObjSetInnerSecondVec();
 extern void effObjInnerVecBackup();
 
-WorldObj *func_00113CE8(s32 a, f32 *vec, void *second) {
+WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     f32 zero[4];
     WorldObj *obj;
 
@@ -143,7 +143,7 @@ WorldObj *func_00113CE8(s32 a, f32 *vec, void *second) {
     zero[3] = 1.0f;
     obj = func_00110880(6);
     obj->unk4 = a;
-    func_00112750(obj);
+    dds3EnsureSlotData(obj);
     effObjSetInnerSecondVec(obj, second);
     effObjSetInnerFirstVec(obj, zero);
     effObjInnerVecBackup(obj->source);

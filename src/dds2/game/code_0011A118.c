@@ -117,7 +117,7 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A220);
 
-u8 func_0011A288(Entry1A4 *entry) {
+u8 evtGetFlaggedRosterValue(Entry1A4 *entry) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
@@ -786,3 +786,4 @@ INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E8C);
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E90);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E94);
+

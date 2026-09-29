@@ -115,7 +115,7 @@ extern s32 func_0019D200(FrFontGlyph *arg0);
 
 extern FrFontGlyph *func_0019C850(FrFontGlyph *arg0, s32 arg1);
 
-FrFontGlyph *func_0019D830(FrFontGlyph *arg0, FrFontGlyph *arg1);
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1);
 
 void func_0019D530(FrFontGlyph *arg0, s8 arg1);
 
@@ -169,7 +169,7 @@ FrFontGlyph *func_0019C980(FrFontGlyph *source, FrFontGlyph *destination) {
     if (glyph == NULL) {
         return destination;
     }
-    return func_0019D830(destination, glyph);
+    return frFontLinkGlyphAfterPrevious(destination, glyph);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
@@ -231,12 +231,12 @@ void func_0019D010(FrFontCtx *ctx, s32 value) {
     }
 }
 
-void func_0019D038(FrFontCtx *ctx) {
+void frFontEnableContextMode(FrFontCtx *ctx) {
     ctx->mode40 = 1;
     func_0019D010(ctx, 0x80);
 }
 
-void func_0019D058(FrFontCtx *ctx, u8 flag) {
+void frFontSetFlagAndMeasureGlyphs(FrFontCtx *ctx, u8 flag) {
     u32 measured;
 
     ctx->u0.bytes.flag1 = flag;
@@ -255,9 +255,9 @@ void func_0019D110(FrFontCtx *ctx, u32 value) {
     ctx->u14.shifted = value >> 4;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D120);
+INCLUDE_ASM(const s32, "interface/frFont", frFontSetChainFlag);
 
-void func_0019D178(TextStyleNode *entry, u32 color) {
+void frFontSetChildColors(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -298,7 +298,7 @@ s32 frFontAdvanceSelectedGlyphSlot(void) {
     return 0;
 }
 
-FrFontGlyph *func_0019D830(FrFontGlyph *arg0, FrFontGlyph *arg1) {
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1) {
     return frFontLinkGlyph(arg0, arg1, 1);
 }
 
@@ -327,11 +327,11 @@ void func_0019D8C8(void) {
     frFontFreeEntry(8);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D8E0);
+INCLUDE_ASM(const s32, "interface/frFont", frFontCountChars);
 
 INCLUDE_ASM(const s32, "interface/frFont", frFontMeasureGlyphChain);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D958);
+INCLUDE_ASM(const s32, "interface/frFont", frFontMeasureLines);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D9A8);
 
@@ -353,7 +353,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DBA8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DC68);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019DCF8);
+INCLUDE_ASM(const s32, "interface/frFont", frFontMoveChainTo);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DD48);
 
@@ -413,3 +413,4 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_0043656C);
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436570);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436578);
+

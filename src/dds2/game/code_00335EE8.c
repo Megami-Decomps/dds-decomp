@@ -12,7 +12,7 @@ s32 func_00335EF0(void *object, s32 command) {
 }
 
 void func_00335F20(s32 destination, s32 source, u32 unused, s32 index) {
-    func_003340D0();
+    sdfSetMotionPointerPair();
     *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + index * 0x10;
 }
 
@@ -62,7 +62,7 @@ INCLUDE_ASM(const s32, "game/code_00335EE8", func_003362E8);
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336300);
 
-void func_00336318(void) {
+void sdfSetPrimaryIdentityMatrixVU(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "vsub.xyzw vf28, vf0, vf0\n"
@@ -73,7 +73,7 @@ void func_00336318(void) {
         ".set reorder\n");
 }
 
-void func_00336338(void) {
+void sdfSetAlternateIdentityMatrixVU(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "vsub.xyzw vf24, vf0, vf0\n"

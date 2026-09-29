@@ -173,7 +173,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_001053F0);
 
 void func_001054E0(void) {
     if (D_00435CC8 != 0) {
-        func_0032BB68(D_00435CC8);
+        sdfTexReleaseReference(D_00435CC8);
     }
     D_00435CC8 = 0;
     D_00435CC4 = 0;
@@ -436,3 +436,4 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D04);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D08);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
+

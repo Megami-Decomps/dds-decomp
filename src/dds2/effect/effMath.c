@@ -23,6 +23,6 @@ INCLUDE_ASM(const s32, "effect/effMath", func_00195D00);
 
 INCLUDE_ASM(const s32, "effect/effMath", func_00195E10);
 
-s32 func_00195E38(EffMathSlotList *list, s32 index) {
+s32 effMathGetSlotAt(EffMathSlotList *list, s32 index) {
     return (s32)&list->slots[index];
 }

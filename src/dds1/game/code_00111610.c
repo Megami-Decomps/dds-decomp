@@ -27,14 +27,14 @@ typedef struct {
 } SlotObjectFull;
 
 extern SlotObjectFull *func_00110880();
-extern u32 func_0010FA80();
+extern u32 dds3AdvanceWorldCounter();
 extern SlotEntry D_00329A68[];
 extern s32 D_003BA9C0;
 
-SlotObjectFull *func_00111610(u32 arg0) {
+SlotObjectFull *dds3SpawnSlotRingObj3(u32 arg0) {
     SlotObjectFull *obj = func_00110880(3);
     SlotData *data = obj->data;
-    u32 hash = func_0010FA80();
+    u32 hash = dds3AdvanceWorldCounter();
     s32 slot;
 
     data->unk0 = arg0;
@@ -60,7 +60,7 @@ void dds3ReloadSlotPath(SlotObject *obj) {
 
     data = obj->data;
     if (data->path != 0) {
-        func_00116F08(data->path);
+        dds3FreePathObject(data->path);
     }
     path = func_00116D38(data->key);
     data->path = path;
@@ -73,7 +73,7 @@ void dds3ReleaseSlotPath(SlotObject *obj) {
     data = obj->data;
     path = data->path;
     if (path != 0) {
-        func_00116F08(path);
+        dds3FreePathObject(path);
         data->path = 0;
     }
 }

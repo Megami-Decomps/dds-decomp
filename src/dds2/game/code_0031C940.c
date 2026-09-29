@@ -13,7 +13,7 @@ typedef struct ModelInstance {
     u8 pad2C[8];
 } ModelInstance;
 
-void func_0031D508(ModelInstance *item);
+void itfDeactivateModelInstance(ModelInstance *item);
 
 typedef struct ModelInstanceList {
     ModelInstance *items;
@@ -40,7 +40,7 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D260);
 
-void func_0031D380(ModelInstanceList *list) {
+void itfClearModelInstances(ModelInstanceList *list) {
     ModelInstance *item;
     u32 index;
 
@@ -55,7 +55,7 @@ void func_0031D380(ModelInstanceList *list) {
     }
 }
 
-void func_0031D3F0(ModelInstanceList *list, u32 value) {
+void itfSetModelInstanceParameterBits(ModelInstanceList *list, u32 value) {
     ModelInstance *item;
     s32 index;
 
@@ -70,19 +70,19 @@ void func_0031D3F0(ModelInstanceList *list, u32 value) {
     }
 }
 
-void func_0031D440(ModelInstanceList *list) {
+void itfDeactivateModelInstances(ModelInstanceList *list) {
     ModelInstance *item = list->items;
     s32 index = 0;
     if (list->count > 0) {
         do {
-            func_0031D508(item);
+            itfDeactivateModelInstance(item);
             item += 1;
             index++;
         } while (index < list->count);
     }
 }
 
-s32 func_0031D4A8(ModelInstanceList *list) {
+s32 itfClaimFreeModelInstance(ModelInstanceList *list) {
     ModelInstance *item;
     s32 index;
 
@@ -105,11 +105,11 @@ s32 func_0031D4A8(ModelInstanceList *list) {
     return 0;
 }
 
-void func_0031D508(ModelInstance *item) {
+void itfDeactivateModelInstance(ModelInstance *item) {
     item->flags = item->flags & 0xfffffffe;
 }
 
-void func_0031D520(ModelInstance *model, s32 value) {
+void itfSetModelInstanceValuePair(ModelInstance *model, s32 value) {
     value &= 0xFFFF;
     model->firstValue = value;
     model->secondValue = value;

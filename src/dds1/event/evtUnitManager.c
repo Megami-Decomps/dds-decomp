@@ -29,7 +29,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_002219F8);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221A80);
 
-void func_00221BE0(EvtUnit *unit, s32 value, s32 duration) {
+void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
     unit->flags |= 0x40000;
     unit->previousTransitionValue = unit->currentTransitionValue;
     unit->currentTransitionValue = value;
@@ -46,7 +46,7 @@ void func_00221BE0(EvtUnit *unit, s32 value, s32 duration) {
     }
 }
 
-void func_00221C50(EvtUnit *unit, s32 duration) {
+void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
     if (unit->currentTransitionValue != 0) {
         if (duration == 0) {
             unit->flags &= ~0x40000;
@@ -67,7 +67,7 @@ void evtSetUnitValueAndFlag(EvtUnit *unit, u32 value)
     unit->flags = unit->flags | 0x20000;
 }
 
-void func_00221CD0(EvtUnit *unit) {
+void evtClearUnitValueChangeFlag(EvtUnit *unit) {
     unit->flags = unit->flags & ~0x20000;
     func_00221A80(unit);
 }
@@ -101,7 +101,7 @@ s32 func_00222090(s32 id) {
     return (s32)obj;
 }
 
-s32 func_002220D8(u8 *obj) {
+s32 evtUnitGetNestedValue(u8 *obj) {
     if (obj == NULL) {
         return 0;
     }
@@ -123,7 +123,7 @@ s32 func_00222200(u8 *work) {
         *(s32 *)(work + 0x68) = 0;
     }
     if (*(s32 *)(work + 0xA0) != 0) {
-        func_00116F08(*(s32 *)(work + 0xA0));
+        dds3FreePathObject(*(s32 *)(work + 0xA0));
         *(s32 *)(work + 0xA0) = 0;
     }
     func_002CFF98(work);

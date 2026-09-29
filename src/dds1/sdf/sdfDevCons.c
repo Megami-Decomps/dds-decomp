@@ -63,11 +63,11 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E3F58);
 
-void func_002E40D0(DevConsState *console, s32 character, s32 attribute) {
+void sdfDevConsWriteCharacterWithAttribute(DevConsState *console, s32 character, s32 attribute) {
     func_002E3F58(console, character, attribute);
 }
 
-s32 func_002E40E8(DevConsState *console, const char *fmt, ...) {
+s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     char buf[0x200];
     __builtin_va_list ap;
     char *cursor;
@@ -87,12 +87,12 @@ s32 func_002E40E8(DevConsState *console, const char *fmt, ...) {
     return length;
 }
 
-void func_002E4190(DevConsState *console, s16 column, s16 row) {
+void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
 }
 
-void func_002E41A0(DevConsState *console, u8 attribute) {
+void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute) {
     console->textAttribute = attribute;
 }
 

@@ -21,7 +21,7 @@ typedef struct EffPrim {
     u32 randomModulus; /* 0x48: modulus for each random slot */
     u8 unk4C[0x11C];  /* 0x4C */
     struct EffCntRec *counterRecords; /* 0x168 */
-    s32 *unk16C;      /* 0x16C: base for func_0018E200 */
+    s32 *unk16C;      /* 0x16C: base for effMathGetSlotAt */
 } EffPrim;
 
 /* Small channel object (0x18 bytes, created by effCreateChannel): float block
@@ -41,7 +41,7 @@ typedef struct EffCntRec {
     u32 unk4; /* 0x4: id released by func_00192638 */
 } EffCntRec;
 
-/* 0x38-byte keyframe record addressed by func_0018E200. */
+/* 0x38-byte keyframe record addressed by effMathGetSlotAt. */
 typedef struct EffRec38 {
     u8 unk0[0x30]; /* 0x0 */
     f32 scaledRandomValue; /* 0x30 */
@@ -73,7 +73,7 @@ extern void func_00192ED0(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 extern void func_001937E0(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
-extern s32 func_0018E200(s32 *arg0, s32 arg1);
+extern s32 effMathGetSlotAt(s32 *arg0, s32 arg1);
 extern void func_001926A8(EffPrim *arg0, u32 arg1);
 extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
 extern void func_001934E8(EffPrim *arg0, void *arg1);
@@ -126,7 +126,7 @@ void effFillRandRecords(EffEmit *emitter) {
     do {
         func_001926A8(primitive, index);
         record->randomIndex = effMiscRand(&D_0034DF38) % modulus;
-        keyframe = (EffRec38 *)func_0018E200(primitive->unk16C, index);
+        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->unk16C, index);
         index++;
         randomIndex = record->randomIndex;
         scale = keyframe->randomScale;

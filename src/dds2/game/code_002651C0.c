@@ -30,7 +30,7 @@ extern void func_0025FC08();
 extern s32 func_0026BC80();
 extern void func_0023AC80();
 extern void kwlnFadeOutStart();
-extern void func_0026CA60();
+extern void evtClearActiveFlag();
 extern void func_0026CA80();
 extern u32 D_003CE460[];
 extern s32 D_00435DD0;
@@ -133,7 +133,7 @@ s32 evtStartFadeByState(void) {
         kwlnFadeOutStart(0, 0, 0, 0xf);
         break;
     }
-    func_0026CA60(0);
+    evtClearActiveFlag(0);
     func_0026CA80(0, 0);
     func_0026CA80(1, 1);
     return 1;

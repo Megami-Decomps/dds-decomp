@@ -139,7 +139,7 @@ void fileReqBegin(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileReqPoll);
 
-u8 func_00289B98(s32 request) {
+u8 fileReqGetStatus(s32 request) {
     return D_003DC698[request].status;
 }
 
@@ -147,38 +147,38 @@ s32 fileReqGetSize(s32 request) {
     return D_003DC698[request].sizeKiB << 10;
 }
 
-u8 func_00289BE8(s32 request) {
+u8 fileReqIsSlotMetadataDirty(s32 request) {
     return D_003DC698[request].slotMetadataDirty;
 }
 
-void func_00289C10(s32 request) {
+void fileReqClearSlotMetadataDirty(s32 request) {
     D_003DC698[request].slotMetadataDirty = 0;
 }
 
-void func_00289C38(s32 request) {
+void fileReqMarkSlotMetadataDirty(s32 request) {
     D_003DC698[request].slotMetadataDirty = 1;
 }
 
-void func_00289C68(s32 request, s32 slot) {
+void fileReqClearSlotFlags(s32 request, s32 slot) {
     slot += request * 0x19;
     D_003DC6AC[slot] = 0;
 }
 
-void func_00289C98(s32 request, s32 slot, s32 mask) {
+void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
     slot += request * 0x19;
     D_003DC6AC[slot] |= mask;
 }
 
-u32 func_00289CD0(s32 request, s32 slot) {
+u32 fileReqGetSlotFlags(s32 request, s32 slot) {
     slot += request * 0x19;
     return D_003DC6AC[slot];
 }
 
-s8 func_00289D00(s32 request) {
+s8 fileReqGetSelectedSlot(s32 request) {
     return D_003DC698[request].selectedSlot;
 }
 
-void func_00289D28(s32 request, s8 selectedSlot) {
+void fileReqSetSelectedSlot(s32 request, s8 selectedSlot) {
     D_003DC698[request].selectedSlot = selectedSlot;
 }
 

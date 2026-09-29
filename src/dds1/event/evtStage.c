@@ -6,7 +6,7 @@ s32 dds3GetSlot1Data(void);
 void func_001175A8(s32 ctx);
 void func_001175B8(s32 ctx);
 
-void func_0021FE38(void)
+void evtDestroySecondaryWorldNode(void)
 {
     s32 node;
 
@@ -26,7 +26,7 @@ INCLUDE_ASM(const s32, "event/evtStage", func_00220110);
 
 INCLUDE_ASM(const s32, "event/evtStage", func_00220178);
 
-void func_00220228(void)
+void evtSetWorldSlotStatusFlag(void)
 {
     s32 slotData;
 
@@ -36,7 +36,7 @@ void func_00220228(void)
     }
 }
 
-void func_00220260(void)
+void evtClearWorldSlotStatusFlag(void)
 {
     s32 slotData;
 

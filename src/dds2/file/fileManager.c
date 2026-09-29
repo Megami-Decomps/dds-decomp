@@ -59,7 +59,7 @@ void func_002C80E8(u32 request) {
     func_002C8040(request, 1, 0, 0);
 }
 
-u32 func_002C8108(FileWork *work) {
+u32 fileGetResourceHandle(FileWork *work) {
     return work->resourceHandle;
 }
 
@@ -67,7 +67,7 @@ u32 func_002C8110(FileWork *work) {
     return work->unk24;
 }
 
-u32 func_002C8118(FileWork *work) {
+u32 fileGetResourceSize(FileWork *work) {
     return work->size;
 }
 
@@ -77,7 +77,7 @@ u32 func_002C8120(FileWork *work) {
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8128);
 
-s32 func_002C8168(FileRequest *file) {
+s32 fileRequestIsReady(FileRequest *file) {
     s32 result = 0;
     if (file->unk68 != 0) {
         result = file->state == 6;

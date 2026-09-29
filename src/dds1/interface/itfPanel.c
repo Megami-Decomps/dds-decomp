@@ -21,7 +21,7 @@ typedef struct EffPrim {
     u32 unk48;        /* 0x48: rand modulus for effFillRandRecords */
     u8 unk4C[0x11C];  /* 0x4C */
     struct EffCntRec *unk168; /* 0x168: counter records */
-    s32 *unk16C;      /* 0x16C: base for func_0018E200 */
+    s32 *unk16C;      /* 0x16C: base for effMathGetSlotAt */
 } EffPrim;
 
 /* 8-byte counter record at EffPrim.unk168. */

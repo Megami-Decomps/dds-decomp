@@ -70,7 +70,7 @@ void func_0011D1A8(s32 owner) {
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D1C0);
 
 void func_0011D258(s32 owner, u8 value) {
-    func_00195470(*(u32 *)(owner + 0x10), value);
+    frFontSetChainFlag(*(u32 *)(owner + 0x10), value);
 }
 
 void func_0011D278(void) {

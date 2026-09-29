@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 
-extern void *func_00111610(void *arg);
+extern void *dds3SpawnSlotRingObj3(void *arg);
 extern void *dds3GetSlot(void *arg0, s32 index);
 
 extern ObjBase *func_00112888(void *obj);
@@ -16,7 +16,7 @@ void dds3SetSlotKey(void *arg0, void *arg1);
 void dds3ReloadSlotPath(void *arg0);
 void func_002177D0(s32 arg0, s32 arg1);
 void func_00222200(u32 arg0);
-void func_002D7AC8(s32 arg0, s32 arg1, s32 arg2);
+void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void func_002DB308(void *arg);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111840);
@@ -100,13 +100,13 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112100);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001122F0);
 
-void func_00112750(void *obj) {
+void dds3EnsureSlotData(void *obj) {
     void *existing;
     void *data;
 
     existing = dds3GetSlot(obj, 1);
     if (existing == NULL) {
-        data = func_00111610(obj);
+        data = dds3SpawnSlotRingObj3(obj);
         dds3SetSlotByKind(obj, data);
         return;
     }

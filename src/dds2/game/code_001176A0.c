@@ -45,11 +45,11 @@ u32 func_001177D8(u32 *arg0) {
     return *arg0;
 }
 
-void func_001177E0(float value, WorldSlotData *slot) {
+void evtScaleValueByMultiplier(float value, WorldSlotData *slot) {
     slot->scaledValue = value * slot->scale;
 }
 
-float func_001177F0(WorldSlotData *slot) {
+float evtGetValueScaleFactor(WorldSlotData *slot) {
     return slot->scaledValue / slot->scale;
 }
 
@@ -69,7 +69,7 @@ void func_00117848(WorldSlotData *slot) {
     slot->flags = slot->flags & 0xffffffdf;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117860);
+INCLUDE_ASM(const s32, "game/code_001176A0", evtSpawnActionObj11);
 
 u32 func_001178B0(WorldSlotData *slot) {
     return slot->value18;
@@ -142,7 +142,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001186F8);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118798);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118898);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfResetChannels);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001188F0);
 
@@ -174,11 +174,11 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001190B0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119480);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001194E8);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfQueryChannelBits);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119548);
 
-void func_00119710(SdfPackedValue *item, u16 value) {
+void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
     item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
 
@@ -199,3 +199,4 @@ INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC5);
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD0);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD4);
+

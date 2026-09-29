@@ -35,7 +35,7 @@ void func_00113328(EffectObject *object, u32 value) {
     object->data->word14 = value;
 }
 
-f32 func_00113338(f32 a, f32 b) {
+f32 dds3ShortestAngleDelta(f32 a, f32 b) {
     f32 diff;
 
     if (a < 0.0f || b < 0.0f) {
@@ -116,7 +116,7 @@ u32 func_00113F00(EffectObject *object) {
     return object->data->handle;
 }
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00113F10);
+INCLUDE_ASM(const s32, "game/code_00113308", dds3SpawnInnerVecObj6);
 
 void func_00113FD0(void) {
     func_00110B50();

@@ -61,7 +61,7 @@ u32 func_0010D6A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6B8);
 
-u32 func_0010D6E8(void) {
+u32 scrCommandTestModelFlag(void) {
     u64 flagValue;
 
     flagValue = func_0010D428(0);
@@ -70,7 +70,7 @@ u32 func_0010D6E8(void) {
     return 1;
 }
 
-u32 func_0010D718(void) {
+u32 scrCommandSetModelFlag(void) {
     u64 flagId;
 
     flagId = func_0010D428(0);
@@ -78,7 +78,7 @@ u32 func_0010D718(void) {
     return 1;
 }
 
-u32 func_0010D740(void) {
+u32 scrCommandClearModelFlag(void) {
     u64 flagId;
 
     flagId = func_0010D428(0);

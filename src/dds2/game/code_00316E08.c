@@ -36,7 +36,7 @@ extern s32 func_00101740(const char *arg0);
 
 void func_00316FA8(u32 sprite);
 
-void func_00316E08(RgbAlpha *p, u32 color) {
+void itfSetPackedRgbAlpha(RgbAlpha *p, u32 color) {
     p->rgb18 = color & 0xFFFFFF;
     p->alpha38 = color >> 24;
 }
@@ -49,7 +49,7 @@ void func_00316E30(RgbAlpha *entry, u32 value) {
     entry->x3C = value;
 }
 
-void func_00316E38(RgbAlpha *dst, CfSrc *src) {
+void itfCopyColorFields(RgbAlpha *dst, CfSrc *src) {
     dst->rgb18 = src->x04;
     dst->f50 = src->f3C;
     dst->alpha38 = src->x24;

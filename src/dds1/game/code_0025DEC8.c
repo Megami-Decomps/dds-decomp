@@ -25,7 +25,7 @@ typedef struct ItfGlyphDisplayContext {
     ItfGlyphList *glyphList; /* 0x70 */
 } ItfGlyphDisplayContext;
 
-void func_0025DEC8(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
+void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
                    u64 color, u64 glyphAttribute) {
     ItfGlyphEntry *entry;
     u64 glyph;
@@ -34,7 +34,7 @@ void func_0025DEC8(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
     if (entry->active != 0) {
         glyph = func_00197C40(0x970, 0xb58, 1, entry->data->code, D_003BAA9C,
                               parentGlyph);
-        func_001954C8(glyph, color);
+        frFontSetChildColors(glyph, color);
         func_001958A0(glyph, 1, glyphAttribute);
         func_00194920(glyph);
         return;

@@ -84,7 +84,7 @@ u32 func_0024D398(void) {
 
     temp_v0 = func_00101A70();
     if (*(s32 *)(temp_v0 + 0xdc) == 0) {
-        func_0024DED8();
+        evtClearActiveFlag();
         func_0024DEF8(0, 1);
         func_0024DEF8(1, 0);
     }
@@ -127,7 +127,7 @@ u32 func_0024D588(void) {
 s32 func_0024D5B0(void) {
     s32 *temp_v0 = (s32 *)func_00101A70();
 
-    func_002495F8(temp_v0);
+    mnuReleaseWorkResources(temp_v0);
     func_00249498(temp_v0);
     return 1;
 }
@@ -153,7 +153,7 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D610);
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D670);
 
 void func_0024D6E0(void) {
-    func_001068F0(0, 0, 0);
+    kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
     func_0018F3B0();
@@ -185,7 +185,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     }
 }
 
-s32 func_0024D880(u8 *left, u8 *right) {
+s32 evtCompareByteValues(u8 *left, u8 *right) {
     u8 leftValue = *left;
     u8 rightValue = *right;
 
@@ -210,14 +210,14 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D8F8);
 
-void func_0024D990(u32 resourceId, u32 *record) {
+void evtLoadResourcePair(u32 resourceId, u32 *record) {
     u32 handle;
 
     handle = func_002EB028(resourceId, record + 1, 0);
     *record = handle;
 }
 
-void func_0024D9C0(u32 *record) {
+void evtReleaseResourcePairHandle(u32 *record) {
     func_002D0918(*record);
 }
 
@@ -318,20 +318,20 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DDC0);
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DE30);
 
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (func_00101818(task) == 1) {
+    if (kwlnTaskGetRegisteredState(task) == 1) {
         return 1;
     }
-    if (func_00101818(task) == 2) {
+    if (kwlnTaskGetRegisteredState(task) == 2) {
         return 1;
     }
-    return func_00101818(task) == 3;
+    return kwlnTaskGetRegisteredState(task) == 3;
 }
 
-void func_0024DED8(s32 flagIndex) {
+void evtClearActiveFlag(s32 flagIndex) {
     D_003BD8A0.flags[flagIndex] = 0;
 }
 
-s32 func_0024DEE8(s32 flagIndex) {
+s32 evtIsActiveFlagSet(s32 flagIndex) {
     return D_003BD8A0.flags[flagIndex] != 0;
 }
 
@@ -348,7 +348,7 @@ u32 func_0024DF20(s32 index) {
     return D_003D8100[index];
 }
 
-s32 func_0024DF48(void) {
+s32 evtSetCurrentActiveFlag(void) {
     s32 flagIndex = func_0010D428(0);
 
     D_003BD8A0.flags[flagIndex] = 1;

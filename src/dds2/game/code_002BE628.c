@@ -91,7 +91,7 @@ extern StageCameraTarget *func_0023B018(f32 *, f32 *);
 
 extern u8 D_00437CB0[];
 
-extern void func_002C03B0(s32 *, s32, s32);
+extern void mnuCalcListEntryOffset(s32 *, s32, s32);
 
 extern void func_002C0330(s32, s32, s32, s32, s32, s32);
 
@@ -141,7 +141,7 @@ void mnuClearSpriteRecord(u32 *entry) {
     entry[6] = 0;
 }
 
-void func_002BEFB0(s32 menu, s32 index) {
+void mnuClearPairedSpriteRecords(s32 menu, s32 index) {
     s32 record;
     s32 remaining;
 
@@ -176,7 +176,13 @@ typedef struct MenuSpacing {
     s32 tail;
 } MenuSpacing;
 
-void func_002C03B0(s32 *out, s32 menu, s32 index) {
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B118);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
+
+void mnuCalcListEntryOffset(s32 *out, s32 menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
     s32 count = **(s32 **)(menu + 8);
     s32 mode;
@@ -218,7 +224,7 @@ void func_002C04E0(s32 x, s32 y, s32 z, s32 arg3, s32 menu, s32 param) {
     s32 panel = menu + *(s32 *)(menu + 0xA698) * 0x2138 + 0x78;
     s32 node;
 
-    func_002C03B0(offset, menu, 0);
+    mnuCalcListEntryOffset(offset, menu, 0);
     node = *(s32 *)(panel + 0xDC);
     if (node != 0) {
         *(s32 *)(node + 0xC) = arg3;
@@ -274,7 +280,7 @@ typedef struct MenuPanelState {
     u32 resourceHandle; /* 0x88 */
 } MenuPanelState;
 
-void func_002C07A0(MenuPanelState *panel) {
+void mnuDestroyPanelState(MenuPanelState *panel) {
     s32 resourceHandle;
 
     resourceHandle = panel->resourceHandle;
@@ -306,7 +312,7 @@ void func_002C0800(u8 *panel, s32 x, s32 y, s32 arg3, s32 arg4, s32 arg5) {
     *(s32 *)(panel + 0x4C) = y + 0xF0;
 }
 
-void func_002C08B0(MenuPanelState *panel) {
+void mnuInitializePanelResource(MenuPanelState *panel) {
     u32 resourceHandle;
 
     resourceHandle = func_002B9FF8(5);
@@ -551,14 +557,6 @@ void func_002C1FA0(s32 *list) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1FF0);
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B118);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B150);
-
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B160);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B180);
@@ -796,7 +794,7 @@ typedef struct PartyPanel {
 
 extern void func_002C4328(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
 
-void initPartyPanelSlots(PartyPanel *panel) {
+void mnuInitPartyPanelSlots(PartyPanel *panel) {
     u32 i;
     u8 *entry;
     s32 offset = 0;
@@ -824,7 +822,7 @@ void func_002C48C8(u32 arg0, u32 arg1) {
     func_002C47C8(*(u32 *)((s32)arg0 + 0x90), arg0, arg1);
 }
 
-void menuPlayInputSound(s32 arg0, s32 buttons, s32 *state) {
+void mnuPlayInputSound(s32 arg0, s32 buttons, s32 *state) {
     if (buttons & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;
@@ -911,7 +909,7 @@ s32 mnuGetIndexedNonzeroEffect(s32 index) {
     return 0;
 }
 
-u16 lookupPartyTableValue(u32 count, s32 base, s32 which) {
+u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
     u32 i;
     s32 sum = 0;
 
@@ -1247,8 +1245,6 @@ s32 func_002C5758(u32 id, s32 mode) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B2E8);
-
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B300);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B350);
@@ -1355,7 +1351,7 @@ u32 func_002C64C8(void) {
     return D_00457ED0[0];
 }
 
-void stageTestSetEntryIndex(s32 arg0, s32 value) {
+void evtStageTestSetEntryIndex(s32 arg0, s32 value) {
     s32 index = arg0 & 0xFFFF;
 
     if (value < 0) {
@@ -1368,7 +1364,7 @@ void stageTestSetEntryIndex(s32 arg0, s32 value) {
     func_002C6E20(-1);
 }
 
-void stageTestAddEntryValue(s32 arg0, f32 delta) {
+void evtStageTestAddEntryValue(s32 arg0, f32 delta) {
     s32 index = arg0 & 0xFFFF;
     f32 *entry;
 
@@ -1493,9 +1489,9 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 #define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
 
 extern s32 D_00435DF0;
-extern void func_00232B40(s32);
+extern void mdlStoreTertiaryVectorVU(s32);
 
-f32 func_002C6EE0(s32 arg0, s32 useTable) {
+f32 mnuSetModelScaleVector(s32 arg0, s32 useTable) {
     f32 scale = 1.0f;
     f32 vec[4];
 
@@ -1507,7 +1503,7 @@ f32 func_002C6EE0(s32 arg0, s32 useTable) {
     vec[2] = scale;
     vec[3] = 1.0f;
     VU_LOAD10(vec);
-    func_00232B40(arg0);
+    mdlStoreTertiaryVectorVU(arg0);
     return scale;
 }
 
@@ -1520,9 +1516,9 @@ void mnuResetWorkPair(void) {
     *(s32 *)(D_003E7940 + 8) = 0;
 }
 
-extern void func_00232AA0(s32);
+extern void mdlStorePrimaryVectorVU(s32);
 
-void func_002C6F98(s32 arg0) {
+void mnuApplyModelCamera(s32 arg0) {
     f32 vec[4];
     u8 *entry;
     f32 scale;
@@ -1533,11 +1529,11 @@ void func_002C6F98(s32 arg0) {
     vec[0] = *(f32 *)(entry + 0x1C);
     vec[1] = *(f32 *)(entry + 0x20);
     if (*(s8 *)((u8 *)D_00457EB0 + 0xC) != 1) {
-        func_002C6EE0(arg0, 0);
+        mnuSetModelScaleVector(arg0, 0);
         vec[2] = *(f32 *)((u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]) + 0x24);
         mnuResetWorkPair();
     } else {
-        scale = func_002C6EE0(arg0, 1);
+        scale = mnuSetModelScaleVector(arg0, 1);
         entry = (u8 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
         vec[0] -= *(f32 *)(entry + 0x1C) - *(f32 *)(entry + 0x1C) * scale;
         vec[1] -= *(f32 *)(entry + 0x20) - *(f32 *)(entry + 0x20) * scale;
@@ -1545,10 +1541,10 @@ void func_002C6F98(s32 arg0) {
         *(f32 *)(D_003E7950 + 8) = (-400.0f - *(f32 *)(entry + 0x24)) * scale;
     }
     VU_LOAD10(vec);
-    func_00232AA0(arg0);
+    mdlStorePrimaryVectorVU(arg0);
 }
 
-void stageTestApplyEntryRotation(s32 arg0) {
+void evtStageTestApplyEntryRotation(s32 arg0) {
     f32 *entry = (f32 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
 
     func_00340DC8(entry[11] * 3.14159265f / 180.0f, entry[12] * 3.14159265f / 180.0f,
@@ -1652,7 +1648,7 @@ u32 func_002C79B8(void) {
     return 0;
 }
 
-void *createBattleStageTestCamera(void) {
+void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
     StageCameraTarget *target = func_0023B018(position, orientation);
@@ -1661,14 +1657,10 @@ void *createBattleStageTestCamera(void) {
     return func_002C79B8;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B5A8);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B5B8);
-
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7A60);
 
 void func_002C7C00(void) {
-    func_0023A9A8();
+    evtDestroyWorldSecondaryNode();
 }
 
 void func_002C7C18(void) {
@@ -1735,3 +1727,4 @@ INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB0);
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB8);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CBC);
+

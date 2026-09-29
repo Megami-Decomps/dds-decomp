@@ -27,7 +27,7 @@ extern char D_00437840[];
 extern s32 D_003C9A20[];
 extern void func_0026C918();
 extern s32 func_0035C860(char *, const char *, ...);
-extern void func_0026CA60();
+extern void evtClearActiveFlag();
 extern void func_0026CA80();
 extern void func_00260020();
 extern s32 func_0025FE70();
@@ -84,7 +84,7 @@ extern void func_00294930();
 extern void func_00298648();
 extern void func_002C42C0();
 
-extern void func_00297240(s32, u32);
+extern void mnuSetCommandPhase(s32, u32);
 
 extern void func_0026C900(void);
 
@@ -122,11 +122,11 @@ void evtInstallStateTable(s32 event) {
     }
 }
 
-s32 func_00261E80(void) {
+s32 evtInitializeSelectedSlot(void) {
     s32 context = func_00101958();
     s32 record;
     s32 slot;
-    func_0026CA60(0);
+    evtClearActiveFlag(0);
     func_0026CA80(0, 2);
     if (((EvtStateTableContext *)context)->primaryObject == 0) {
         func_00260020(context);
@@ -142,7 +142,7 @@ s32 func_00261E80(void) {
 s32 func_00261F08(void) {
     EvtStateTableContext *context = (EvtStateTableContext *)func_00101958();
     if (context->stateCode == 1) {
-        func_00297240((s32)context, 4);
+        mnuSetCommandPhase((s32)context, 4);
     }
     return 1;
 }
@@ -181,9 +181,9 @@ s32 evtSelectStateAction(void) {
     s32 context = func_00101958();
     s32 sceneNode;
     if (((EvtStateTableContext *)context)->stateCode == 5) {
-        func_00297240(context, 3);
+        mnuSetCommandPhase(context, 3);
     } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        func_00297240(context, 9);
+        mnuSetCommandPhase(context, 9);
         sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
         *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
         func_00297200(sceneNode, 0xa);
@@ -226,9 +226,9 @@ s32 evtSelectStateActionB(void) {
     s32 context = func_00101958();
     s32 sceneNode;
     if (((EvtStateTableContext *)context)->stateCode == 5) {
-        func_00297240(context, 3);
+        mnuSetCommandPhase(context, 3);
     } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        func_00297240(context, 9);
+        mnuSetCommandPhase(context, 9);
         sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
         *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
         func_00297200(sceneNode, 0xa);
@@ -271,9 +271,9 @@ s32 func_00262AC8(void) {
     s32 context = func_00101958();
     s32 sceneNode;
     if (((EvtStateTableContext *)context)->stateCode == 5) {
-        func_00297240(context, 3);
+        mnuSetCommandPhase(context, 3);
     } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        func_00297240(context, 9);
+        mnuSetCommandPhase(context, 9);
         sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
         *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
         func_00297200(sceneNode, 0xa);
@@ -316,9 +316,9 @@ s32 func_00262EF0(void) {
     s32 context = func_00101958();
     s32 sceneNode;
     if (((EvtStateTableContext *)context)->stateCode == 5) {
-        func_00297240(context, 3);
+        mnuSetCommandPhase(context, 3);
     } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        func_00297240(context, 9);
+        mnuSetCommandPhase(context, 9);
         sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
         *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
         func_00297200(sceneNode, 0xa);
@@ -342,7 +342,7 @@ s64 func_002631D8(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 func_00263220(u32 index) {
+s32 evtGetRemainingSlotThreshold(u32 index) {
     s32 threshold;
     s32 remaining;
     if (index >= 8) {
@@ -365,9 +365,9 @@ s32 evtShowResultText(void) {
     func_0035C860(text, D_00437840, *(s32 *)(D_00435DD0 + 0x1e654));
     func_0026C918(1, text);
     func_0026C918(2, D_003C9A20[*(s32 *)(D_00435DD0 + 0x1e658)]);
-    func_0035C860(text, D_00437840, func_00263220(*(s32 *)(D_00435DD0 + 0x1e658) + 1));
+    func_0035C860(text, D_00437840, evtGetRemainingSlotThreshold(*(s32 *)(D_00435DD0 + 0x1e658) + 1));
     func_0026C918(3, text);
-    if (func_00263220(*(s32 *)(D_00435DD0 + 0x1e658) + 1) >= 0) {
+    if (evtGetRemainingSlotThreshold(*(s32 *)(D_00435DD0 + 0x1e658) + 1) >= 0) {
         func_0026C5B8(*(s32 *)(D_00435DD0 + 0x1e658) + 0x1a);
     } else {
         func_0026C5B8(0x21);
@@ -437,7 +437,7 @@ s64 func_002636B0(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-u32 func_002636F8(void) {
+u32 evtResetStateProgressTimer(void) {
     EvtStateTableContext *context;
 
     context = (EvtStateTableContext *)func_00101958();
@@ -466,7 +466,7 @@ s64 evtQueryStateProgress(s32 callback) {
     return state;
 }
 
-s64 func_002637E0(s32 callback) {
+s64 evtDispatchProgressCallback(s32 callback) {
     s32 context = func_00101958();
     func_0025FD78(context);
     func_00294930(context, ((EvtStateTableContext *)context)->progressTimer);
@@ -491,7 +491,7 @@ s32 evtAdvanceStateStage(void) {
     s32 sceneNode;
     if (((EvtStateTableContext *)context)->stateCode == 0xa) {
         ((EvtStateTableContext *)context)->stateStep = 0xa;
-        func_00297240(context, 6);
+        mnuSetCommandPhase(context, 6);
         sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
         *(s32 *)(sceneNode + 0x2c) = (s32)func_002958B0;
         func_002971C0(sceneNode, 0);
@@ -545,7 +545,7 @@ s32 func_00263DD0(void) {
     case 5:
         return 0;
     case 8:
-        func_00297240(context, 6);
+        mnuSetCommandPhase(context, 6);
         sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
         *(s32 *)(sceneNode + 0x2c) = (s32)func_002958B0;
         func_002971C0(sceneNode, 0);
@@ -558,7 +558,7 @@ s32 func_00263DD0(void) {
 
 void func_00263E60(void) {
     s32 context = func_00101958();
-    func_00297240(context, 8);
+    mnuSetCommandPhase(context, 8);
     func_00297220(((EvtStateTableContext *)context)->secondaryObject->node, 10);
     *(u8 *)(context + 0x389) = 1;
 }
@@ -603,7 +603,7 @@ s64 func_002642B8(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 func_00264300(void) {
+s32 evtPlayDispatchModeCue(void) {
     s32 context = func_00101958();
     func_0026C948(1);
     switch (((EvtStateTableContext *)context)->dispatchMode) {
@@ -617,15 +617,15 @@ s32 func_00264300(void) {
     return 1;
 }
 
-s32 func_00264378(void) {
+s32 evtApplyDispatchModeState(void) {
     s32 context = func_00101958();
     switch (((EvtStateTableContext *)context)->dispatchMode) {
     case 1:
-        func_00297240(context, 6);
+        mnuSetCommandPhase(context, 6);
         break;
     case 2:
         if (((EvtStateTableContext *)context)->stateTable != (s32)D_003CE498) {
-            func_00297240(context, 5);
+            mnuSetCommandPhase(context, 5);
         }
         break;
     }
@@ -681,7 +681,7 @@ s64 func_00264B10(s32 callback) {
 
 s32 evtAdvanceSlotFlags(void) {
     s32 i = 0;
-    while (func_00263220(*(s32 *)(D_00435DD0 + 0x1e658) + i + 1) == 0) {
+    while (evtGetRemainingSlotThreshold(*(s32 *)(D_00435DD0 + 0x1e658) + i + 1) == 0) {
         mdlFlagSet(D_003CE14C[(*(s32 *)(D_00435DD0 + 0x1e658) + i) * 3 + 3]);
         i++;
     }
@@ -689,7 +689,7 @@ s32 evtAdvanceSlotFlags(void) {
     return i;
 }
 
-u32 func_00264C00(void) {
+u32 evtUpdateSlotAdvanceCount(void) {
     u8 advancedSlots;
     s32 context;
 
@@ -734,7 +734,7 @@ s64 func_00264D38(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 func_00264D80(s32 context) {
+s32 evtTriggerProgressFlagGate(s32 context) {
     EvtFlagGate *entry = (EvtFlagGate *)D_003CE400;
     u32 i;
     for (i = 0; i < 1; i++, entry++) {
@@ -757,7 +757,7 @@ s32 evtShowSlotText(void) {
         func_0035C860(text, D_00437840, D_003CE148[*(s32 *)(D_00435DD0 + 0x1e658) * 3]);
         func_0026C918(1, text);
         func_0026C918(2, D_003C9A20[*(s32 *)(D_00435DD0 + 0x1e658)]);
-        if (func_00263220(*(s32 *)(D_00435DD0 + 0x1e658) + 1) >= 0) {
+        if (evtGetRemainingSlotThreshold(*(s32 *)(D_00435DD0 + 0x1e658) + 1) >= 0) {
             func_0026C5B8(0x24);
         } else {
             func_0026C5B8(0x25);
@@ -777,7 +777,7 @@ s64 func_00264F00(s32 callback) {
     if (state == 0) {
         if (*window == 0) {
             if (func_0026C768() == 0) {
-                if (func_00264D80(context) == 0) {
+                if (evtTriggerProgressFlagGate(context) == 0) {
                     func_002C42C0(window, D_003CE620);
                 }
             }

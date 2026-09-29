@@ -49,16 +49,16 @@ typedef struct ResourceList {
 
 u32 func_00320F68(u32 list, u32 node);
 
-ResourceNode *func_00321170();
+ResourceNode *mnuFindResourceNodeById();
 
-ResourceNode *func_003211B0();
+ResourceNode *mnuFindResourceNodeByHandle();
 
 void func_00324DF8(u32 *arg0, u32 arg1) {
     func_00320CE0(*arg0, 0, arg1);
 }
 
 u32 func_00324E18(u32 *pair, u32 key, u32 value) {
-    u32 node = func_00321170(pair[0], key);
+    u32 node = mnuFindResourceNodeById(pair[0], key);
     if (node) {
         return func_00320D80(pair[0], node, 0, value);
     }
@@ -66,22 +66,22 @@ u32 func_00324E18(u32 *pair, u32 key, u32 value) {
 }
 
 void func_00324E80(u32 *pair, u32 key) {
-    u32 node = func_00321170(pair[0], key);
+    u32 node = mnuFindResourceNodeById(pair[0], key);
     if (node == 0) {
         return;
     }
-    func_00320F68(pair[1], func_003211B0(pair[1], *(u32 *)(node + 0x10)));
+    func_00320F68(pair[1], mnuFindResourceNodeByHandle(pair[1], *(u32 *)(node + 0x10)));
     func_00320F68(pair[0], node);
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324EF0);
 
 void func_00324F20(ResourceList **list) {
-    func_003211B0(*list);
+    mnuFindResourceNodeByHandle(*list);
 }
 
 void func_00324F38(ResourceList **list) {
-    func_00321170(*list);
+    mnuFindResourceNodeById(*list);
 }
 
 u64 func_00324F50(s32 arg0, u64 arg1) {
@@ -120,13 +120,13 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326158);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003262A8);
 
-void func_003268A8(float *vector, float *delta) {
+void sdfVectorAdd(float *vector, float *delta) {
     *vector = *vector + *delta;
     vector[1] = vector[1] + delta[1];
     vector[2] = vector[2] + delta[2];
 }
 
-void func_003268E0(float *vector, float *delta) {
+void sdfVectorSubtract(float *vector, float *delta) {
     *vector = *vector - *delta;
     vector[1] = vector[1] - delta[1];
     vector[2] = vector[2] - delta[2];
@@ -144,7 +144,7 @@ void func_00326940(float *vec, float x, float y, float z) {
     vec[2] = z;
 }
 
-void func_00326950(float factor, float *vector) {
+void sdfVectorScale(float factor, float *vector) {
     *vector = *vector * factor;
     vector[1] = vector[1] * factor;
     vector[2] = vector[2] * factor;
@@ -207,11 +207,11 @@ void func_00328390(u64 arg0, u64 arg1, u64 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003283E0);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328420);
+INCLUDE_ASM(const s32, "game/code_00324DF8", sdfFreeMemoryFromEitherHeap);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328470);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003284C8);
+INCLUDE_ASM(const s32, "game/code_00324DF8", sdfFreeMemorySlotFromEitherHeap);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328520);
 
@@ -241,7 +241,7 @@ u32 sdfGetElapsedTimerTicks(u32 base) {
     return (now - base) & 0xFFFF;
 }
 
-void func_00328808(void) {
+void sdfRunTickWorkerThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
         func_0033C820();

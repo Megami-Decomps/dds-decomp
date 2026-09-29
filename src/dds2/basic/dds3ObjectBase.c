@@ -16,7 +16,7 @@ void *dds3SetSlotByKind(ObjBase *object, ObjData *data);
 
 void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
 
-extern void *func_00111838(void *arg);
+extern void *dds3SpawnSlotRingObj3(void *arg);
 
 void dds3SetSlotKey(void *arg0, void *arg1);
 
@@ -94,13 +94,13 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112328);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);
 
-void func_00112978(void *obj) {
+void dds3EnsureSlotData(void *obj) {
     void *existing;
     void *data;
 
     existing = dds3GetSlot(obj, 1);
     if (existing == NULL) {
-        data = func_00111838(obj);
+        data = dds3SpawnSlotRingObj3(obj);
         dds3SetSlotByKind(obj, data);
         return;
     }
@@ -138,3 +138,4 @@ void dds3GetSlot1Data(void *obj) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
+

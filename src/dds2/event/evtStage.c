@@ -4,7 +4,7 @@ extern s32 dds3GetSlot1Data(void);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-void func_0023A9A8(void) {
+void evtDestroyWorldSecondaryNode(void) {
     s64 secondary;
 
     secondary = dds3GetWorldSecondaryObject();
@@ -23,7 +23,7 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0023AC80);
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023ACE8);
 
-void func_0023AD98(void) {
+void evtSetWorldSlotStatusFlag(void) {
     s64 slotData;
 
     slotData = dds3GetSlot1Data();
@@ -33,7 +33,7 @@ void func_0023AD98(void) {
     }
 }
 
-void func_0023ADD0(void) {
+void evtClearWorldSlotStatusFlag(void) {
     s64 slotData;
 
     slotData = dds3GetSlot1Data();

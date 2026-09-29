@@ -119,7 +119,7 @@ u16 func_002192C8(MdlRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002192D0);
 
-s32 * func_00219350(s32 address) {
+s32 * mdlGetFirstRecord(s32 address) {
     s32 *record = (s32 *)(address + 8);
 
     if (*record == 0xffff) {
@@ -128,7 +128,7 @@ s32 * func_00219350(s32 address) {
     return record;
 }
 
-s32 * func_00219368(MdlRecord *current) {
+s32 * mdlGetNextRecord(MdlRecord *current) {
     s32 *record = (s32 *)((s32)current + current->nextOffset);
 
     if (*record == 0xffff) {
@@ -144,11 +144,11 @@ s32 mdlCountRecords(s32 arg0) {
     if (arg0 == 0) {
         return 0;
     }
-    node = func_00219350(arg0);
+    node = mdlGetFirstRecord(arg0);
     count = 0;
     while (node != NULL) {
         count++;
-        node = func_00219368((s32)node);
+        node = mdlGetNextRecord((s32)node);
     }
     return count;
 }
@@ -185,7 +185,7 @@ extern u16 D_00367980[];
 extern char D_003BBBB0[];
 extern char D_003BBBB8[];
 
-void func_00219590(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
+void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
     s32 boxY = y + 0x300;
     s32 labelX = x + 0xC0;
     u32 color;
@@ -231,7 +231,7 @@ typedef struct MdlPartList {
     MdlPartEntry *entries; /* 0x0C */
 } MdlPartList;
 
-void func_00219AF8(MdlPartList *list, s32 index) {
+void mdlAddBillboardPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
     entry->state = 0;
@@ -240,7 +240,7 @@ void func_00219AF8(MdlPartList *list, s32 index) {
     list->count += 1;
 }
 
-void func_00219B50(MdlPartList *list, s32 index) {
+void mdlAddEffectPart(MdlPartList *list, s32 index) {
     MdlPartEntry *entry = &list->entries[list->count];
 
     entry->kind = 1;
@@ -307,12 +307,12 @@ MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 s
     return item;
 }
 
-void func_00219E30(MdlPartEntry *entry) {
+void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
     func_00151E60((u32)entry->object);
     entry->state = entry->state + 1;
 }
 
-void func_00219E68(MdlPartEntry *entry) {
+void mdlAdvanceEffectPart(MdlPartEntry *entry) {
     func_0014FEB0((u32)entry->object);
     entry->state = entry->state + 1;
 }
@@ -358,10 +358,10 @@ INCLUDE_ASM(const s32, "game/code_00218B48", mdlDispatchResourceEntry);
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
     s32 *block = func_002192D0(object, id);
     if (block != NULL) {
-        s32 *entry = func_00219350((s32)block);
+        s32 *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
             mdlDispatchResourceEntry(object, entry, option);
-            entry = func_00219368((s32)entry);
+            entry = mdlGetNextRecord((s32)entry);
         }
     }
 }
@@ -372,7 +372,7 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
         billDispatchByKind(item->resource);
         break;
     case 1:
-        func_0014FAB8(item->resource);
+        effDestroyNode(item->resource);
         break;
     case 2:
         effTrackPolyRelease(item->resource);
@@ -455,7 +455,7 @@ void func_0021A8F0(void) {
     D_003D7A84[0] = 0;
 }
 
-void func_0021A948(void) {
+void mdlRotateViewResourcesRight(void) {
     s32 i = D_003D7A50.resourceCount - 1;
     s32 saved = D_003D7A50.resources[i];
 
@@ -517,7 +517,7 @@ extern s32 mdlHasNode(s32 resource, s32 id);
 extern void mdlAddEntryFlaggedEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
 extern void mdlAddEntryPlainEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
 
-void func_0021ACF0(void) {
+void mdlAddViewEntryFlagged(void) {
     f32 low;
     f32 high;
     f32 first;
@@ -767,8 +767,8 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F098);
 void func_0021F4B8(void) {
     mdlFlagClearAll();
     evtSetSolarPhase(0);
-    func_00228778();
-    func_00228728();
+    evtSetSolarOverlayFullyTransparent();
+    evtDisableSolarPhaseAdvance();
 }
 
 void mdlFlagClearAll(void) {

@@ -79,7 +79,7 @@ void effPCPBossFree(EffPCPBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185790);
 
-void func_001858C8(EffPCPBossWork *work, void *src) {
+void effPCPBossSetParameterVector(EffPCPBossWork *work, void *src) {
     PCP_COPY_VECTOR(&work->parameterVector, src);
 }
 

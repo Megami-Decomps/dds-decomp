@@ -8,7 +8,7 @@ extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002C6CE8(void);
 
-extern void func_00297240(MenuActionOwner *, u32);
+extern void mnuSetCommandPhase(MenuActionOwner *, u32);
 
 extern void func_00297200(MenuActionOwner *, u32);
 
@@ -108,7 +108,7 @@ void func_00297220(MenuActionOwner *owner, u32 value) {
     }
 }
 
-void func_00297240(MenuActionOwner *owner, u32 value) {
+void mnuSetCommandPhase(MenuActionOwner *owner, u32 value) {
     owner->valueC0 = value;
     owner->counter = 0;
 }
@@ -126,7 +126,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00298570);
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00298648);
 
 void func_00298E20(void) {
-    func_00299748();
+    mnuStaffCreateTasks();
     D_0043798A = 0;
     D_0043798B = 1;
 }
@@ -207,9 +207,9 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_002996B8);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299748);
+INCLUDE_ASM(const s32, "game/code_00296E98", mnuStaffCreateTasks);
 
-u32 func_002997F8(void) {
+u32 mnuStaffDestroyTasks(void) {
     s8 state = D_00437988;
 
     if (state == 1) {
@@ -238,7 +238,7 @@ s32 func_00299868(void) {
 
 u32 func_002998A0(void) {
     if (D_00437988 == 1) {
-        func_002997F8();
+        mnuStaffDestroyTasks();
         return 1;
     }
     return 0;
@@ -256,12 +256,12 @@ s32 func_00299A00(void) {
 }
 
 void func_00299A38(u32 arg0, s32 arg1) {
-    initPartyPanelSlots(arg1 + 0x584);
+    mnuInitPartyPanelSlots(arg1 + 0x584);
     func_002BCA98(arg1 + 0x690);
     func_002BCAB0(arg1 + 0x690);
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299A70);
+INCLUDE_ASM(const s32, "game/code_00296E98", mnuStaffCopyPanelBlock);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299B20);
 
@@ -290,3 +290,4 @@ INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A8);
+

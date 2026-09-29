@@ -41,11 +41,11 @@ void sdfAdvanceConsoleRow(DevConsState *console) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033CE08);
 
-void func_0033CF80(DevConsState *console, s32 character, s32 attribute) {
+void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {
     func_0033CE08(console, character, attribute);
 }
 
-s32 func_0033CF98(DevConsState *console, const char *fmt, ...) {
+s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     char text[0x200];
     __builtin_va_list args;
     char *cursor;
@@ -65,12 +65,12 @@ s32 func_0033CF98(DevConsState *console, const char *fmt, ...) {
     return written;
 }
 
-void func_0033D040(DevConsState *console, s16 column, s16 row) {
+void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
 }
 
-void func_0033D050(DevConsState *console, u8 attribute) {
+void sdfDevConsSetCharacterAttribute(DevConsState *console, u8 attribute) {
     console->charAttribute = attribute;
 }
 

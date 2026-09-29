@@ -23,7 +23,7 @@ extern void sdfInitPacketList(u64);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void func_002E1428(u64, s32, s32, s32, s32);
 extern u64 *func_002E1420(u64);
-extern s32 func_002E1478(s32);
+extern s32 sdfConsAllocateColumnPacket(s32);
 extern void sdfConsCreateDrawPacket(u64, s32, s32);
 
 extern s32 D_0032E3C0[];
@@ -70,7 +70,7 @@ extern s32 D_003BAA34;
 
 extern u32 D_003BACF8;
 
-extern u32 func_0011D3B0(void);
+extern u32 sdfCreateInitializedPacketList(void);
 extern u64 sdfAllocPacketAligned(u64);
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
@@ -139,7 +139,7 @@ extern u32 D_00330738[];
 extern u32 D_003306B0[];
 extern u32 D_003306C0[];
 extern u32 D_003308B0[];
-extern u32 func_00288BE8(u32 arg0);
+extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *func_002CFEB8(s32 size);
 extern void func_00101A68(u32 arg0, void *arg1);
@@ -223,14 +223,14 @@ s32 func_001277A8(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001277B0);
 
 void func_00127898(u32 arg0, s32 arg1) {
-    func_002EB278(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
+    sdfRelocatePackedResourceWords(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
 }
 
 void func_001278C0(u32 arg0, s32 arg1) {
     func_001277B0(arg0, arg0, (s32)arg0 + *(s32 *)(arg1 + 4), *(u32 *)(arg1 + 8));
 }
 
-void func_001278E8(u32 arg0, u32 arg1) {
+void fldSetAreaResourceRequest(u32 arg0, u32 arg1) {
     D_003BAC84 = arg0;
     D_003BAC88 = arg1;
 }
@@ -292,12 +292,12 @@ void fldFreeDisplayObjects(void) {
     D_0032E3B0[30] = 0;
 }
 
-u32 func_00127B30(void) {
+u32 fldPollAreaResourceLoad(void) {
     u32 sceneState = D_0032E3B0[0x1E];
 
     if (sceneState != 0) {
         if (sceneState == 1) {
-            if (func_00288BE8(D_003BAC3C) != 0) {
+            if (fileRequestIsReady(D_003BAC3C) != 0) {
                 D_0032E3B0[0x1E] = 0;
                 D_003BA734 = 0;
             }
@@ -306,24 +306,24 @@ u32 func_00127B30(void) {
     return 0;
 }
 
-u32 func_00127B88(void) {
+u32 fldGetResourceReadyFlag(void) {
     return D_0032E428[0];
 }
 
-u8 func_00127B98(void) {
+u8 fldIsAreaResourceReady(void) {
     if (D_003BAC3C != 0) {
-        if (func_00288BE8(D_003BAC3C) != 0) {
+        if (fileRequestIsReady(D_003BAC3C) != 0) {
             return 1;
         }
     }
     return D_0032E428[0] != 0;
 }
 
-s32 func_00127BD8(s32 area, s32 room) {
+s32 fldIsAreaResourceReadyFor(s32 area, s32 room) {
     if (D_0032E3B0[31] != area || D_0032E3B0[32] != room) {
         return 0;
     }
-    if (D_003BAC3C != 0 && func_00288BE8(D_003BAC3C) != 0) {
+    if (D_003BAC3C != 0 && fileRequestIsReady(D_003BAC3C) != 0) {
         return 1;
     }
     return D_0032E3B0[30] != 0;
@@ -397,7 +397,7 @@ u8 func_00127FD0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128000);
 
-void func_00128188(void) {
+void fldReleaseAreaResourceCache(void) {
     u32 resourceHandle = D_003BAC48;
 
     if (resourceHandle != 0) {
@@ -902,10 +902,10 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     descriptor->open(descriptor, command);
 }
 
-extern s32 func_002D2300(s32);
+extern s32 sdfTexGetPrimaryBuffer(s32);
 extern s32 func_002D2308(s32);
 extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
-extern void func_002D40A8(u64, u64);
+extern void sdfAppendReferencePacket(u64, u64);
 extern void func_002DD708(f32);
 extern void sdfInitGeometryDmaPacket(u64, f32 *);
 extern void func_002E2680(u64, u8 *, s32, u8 *, u8 *);
@@ -919,8 +919,8 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
 
     sdfInitPacketList(command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader(header, func_002D2300(arg0), func_002D2308(arg0));
-    func_002D40A8(command, header);
+    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), func_002D2308(arg0));
+    sdfAppendReferencePacket(command, header);
     func_002DD708(*(f32 *)(arg1 + 0x44));
     __asm__ volatile(
         ".set noreorder\n"
@@ -1006,8 +1006,8 @@ typedef struct FldPrimDesc {
     s32 *indices;
     u8 pad24[8];
 } FldPrimDesc; /* 0x2C bytes */
-extern void func_002E1F78(u64, s32);
-extern void func_002E2110(u64, u32, s32);
+extern void sdfConsAppendClearPacket(u64, s32);
+extern void sdfConsAppendAssetPacket(u64, u32, s32);
 extern u64 func_002E21A0(FldPrimDesc *);
 void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
     FldPrimDesc desc;
@@ -1018,8 +1018,8 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
 
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
-    func_002E1F78(command, 0);
-    func_002E2110(command, D_003BACEC, 0);
+    sdfConsAppendClearPacket(command, 0);
+    sdfConsAppendAssetPacket(command, D_003BACEC, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.kind = 1;
@@ -1079,13 +1079,13 @@ void func_0012B768(void) {
 }
 
 extern u32 D_003980F0[];
-extern u32 func_002D5510(s32);
+extern u32 sdfAllocatePacketList(s32);
 extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
 void func_0012B798(void) {
     if (D_003BACD8 != 0) {
-        u32 packet = func_002D5510(0);
+        u32 packet = sdfAllocatePacketList(0);
         FieldResourceDescriptor *descriptor;
         sdfCreateResourcePacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, D_003BACD8, 0, 0, 0);
         descriptor = (FieldResourceDescriptor *)&D_00324B48[D_003BACD0 * 8];
@@ -1095,7 +1095,7 @@ void func_0012B798(void) {
 
 void func_0012B818(void) {
     if (D_003BACD8 != 0) {
-        u32 packet = func_002D5510(0);
+        u32 packet = sdfAllocatePacketList(0);
         FieldResourceDescriptor *descriptor;
         sdfCreateDescriptorPacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, D_003BACD8, 0);
         descriptor = (FieldResourceDescriptor *)&D_00324B48[D_003BACD0 * 8];
@@ -1111,15 +1111,15 @@ void func_0012B890(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_00194920(temp_v0);
 }
 
-void func_0012B8E0(s32 arg0) {
+void fldAdvanceQuadRow(s32 arg0) {
     *(s32 *)(arg0 + 0x20) = *(s32 *)(arg0 + 0x20) + 0x60;
 }
 
-void func_0012B8F0(s32 arg0) {
+void fldStartQuadPacketList(s32 arg0) {
     u64 temp_v0;
     u32 temp_v1;
 
-    temp_v1 = func_0011D3B0();
+    temp_v1 = sdfCreateInitializedPacketList();
     *(u32 *)(arg0 + 0x28) = temp_v1;
     temp_v0 = sdfAllocPacketAligned(0x40);
     func_002D5608(temp_v0);
@@ -1165,10 +1165,10 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, arg2));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325748.invoke(&D_00325748, quad.unk28);
 }
 
@@ -1186,10 +1186,10 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, arg2);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, arg3));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
@@ -1207,10 +1207,10 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, D_003BACE0, arg2));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
@@ -1228,10 +1228,10 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, D_003BACE8, arg2));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
@@ -1249,10 +1249,10 @@ void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, arg2));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
@@ -1270,10 +1270,10 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, arg2);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, arg3));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
@@ -1291,10 +1291,10 @@ void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012B8F0((s32)&quad);
+    fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.unk1C + (s32)(x * 16.0f), quad.unk20 + (s32)(y * 8.0f), quad.unk24, arg0);
     sdfAppendPacket(quad.unk28, func_002E4908(packet, arg1));
-    func_0012B8E0((s32)&quad);
+    fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.unk28);
 }
 
@@ -1561,12 +1561,12 @@ extern void func_001372D0(f32 *);
 extern void effObjClearNodeFlags(void *, s32);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
 
-extern s32 func_00121970(s32, s32);
+extern s32 fldGetLocationCoordinateValue(s32, s32);
 extern void func_0012EA50(s16, s32, f32);
 
 void func_001313E0(void) {
     s16 node = *(s16 *)(D_003BAB38 + 0x12);
-    if (func_00121970(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
+    if (fldGetLocationCoordinateValue(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
         func_0012EA50(node, 0x12, 10.0f);
         return;
     }
@@ -1575,7 +1575,7 @@ void func_001313E0(void) {
 
 void func_00131458(void) {
     s16 node = *(s16 *)(D_003BAB38 + 0x12);
-    if (func_00121970(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
+    if (fldGetLocationCoordinateValue(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
         func_0012EA50(node, 0x12, 0.0f);
         return;
     }
@@ -1840,7 +1840,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00133640);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", fldSetDisplayState);
 
-void func_00133910(void) {
+void fldInitializeDisplayPointerTable(void) {
     u32 *temp_v0 = D_00330738;
 
     memset(temp_v0, 0, 0x14);
@@ -1919,7 +1919,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00134D38);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00134E10);
 
-void func_00134FB0(void) {
+void fldAllocateRecordStorage(void) {
     u8 *temp_v0 = func_002D03F8(0x72000);
 
     D_003BAE00 = (u32)temp_v0;
@@ -1942,7 +1942,7 @@ void func_00135018(void) {
     D_003BADE8 = 0;
 }
 
-float func_00135058(float *arg0, float *arg1) {
+float fldDotVector(float *arg0, float *arg1) {
     return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
 }
 
@@ -1958,7 +1958,7 @@ typedef struct FldRecE4 {
     s32 value;
     u8 padD4[0x10];
 } FldRecE4; /* 0xE4 bytes */
-s32 func_00135250(s32 key) {
+s32 fldGetRecordValueById(s32 key) {
     s32 i = 0;
 
     if (D_003BADF4 > 0) {
@@ -1984,7 +1984,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-void func_001352E0(void) {
+void fldResetRecordState(void) {
     s32 count = D_003BADF4;
     if (count > 0) {
         /* Required to match: advance a pointer to the value field, not the record base. */
@@ -2050,7 +2050,7 @@ typedef struct FldTaskInfo {
     s32 slot;
 } FldTaskInfo;
 extern s32 func_00110A48(u64, u32, s32);
-extern u32 func_00116B78(s32);
+extern u32 dds3GetPathState(s32);
 void fldResetTaskSlots(void) {
     s32 i;
     u64 world;
@@ -2069,7 +2069,7 @@ void fldResetTaskSlots(void) {
         for (i = 0; i < D_003BAE14; i++) {
             info = *(FldTaskInfo **)(D_003307B0[i] + 8);
             if (info->slot >= 0) {
-                id = func_00116B78(func_00110A48(world, *(u32 *)D_003C92E0[info->slot], 0xD));
+                id = dds3GetPathState(func_00110A48(world, *(u32 *)D_003C92E0[info->slot], 0xD));
                 if (func_0010BED8(id) != 0) {
                     func_00110D88(dds3GetWorldObject(), id);
                 }
@@ -2095,12 +2095,12 @@ typedef struct FldRoomPlanes {
     u8 pad78[0x140 - 0x78];
 } FldRoomPlanes;
 extern FldRoomPlanes D_003C9470[];
-extern f32 func_00135058(f32 *, f32 *);
+extern f32 fldDotVector(f32 *, f32 *);
 s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (func_00135058(direction, D_003C9470[index].plane[i]) - D_003C9470[index].limit[i] > 0.0f) {
+        if (fldDotVector(direction, D_003C9470[index].plane[i]) - D_003C9470[index].limit[i] > 0.0f) {
             return 0;
         }
     }
@@ -2118,7 +2118,7 @@ s32 func_0013B088(u32 flag, u32 slot) {
     return -1;
 }
 
-u32 func_0013B0E0(u32 arg0) {
+u32 fldDestroyTaskSlot(u32 arg0) {
     u32 *temp_v0 = &D_003308B0[arg0];
 
     if (kwlnTaskIsRegistered(*temp_v0) != 0) {
@@ -2145,7 +2145,7 @@ void func_0013BD70(void) {
     }
 }
 
-void func_0013BDD0(void) {
+void fldClearInactiveTaskSlots(void) {
     s32 count = D_003BAE14;
     s32 i = 0;
     if (count > 0) {
@@ -2160,7 +2160,7 @@ void func_0013BDD0(void) {
     }
 }
 
-s32 func_0013BE30(u32 task) {
+s32 fldFindTaskRecordId(u32 task) {
     s32 i;
     for (i = 0; i < D_003BAE14; i++) {
         if (D_003308B0[i] == task) {
@@ -2555,7 +2555,7 @@ void fldResetActorSlots(void) {
     D_003BAE64 = -1;
 }
 
-void func_0013FD60(s32 field) {
+void fldLoadActorWaypointTable(s32 field) {
     char path[64];
     char directory[32];
     u32 command;
@@ -2570,7 +2570,7 @@ void func_0013FD60(s32 field) {
     }
 }
 
-void func_0013FE08(const void *source) {
+void fldCopyActorWaypointTable(const void *source) {
     memcpy(D_00337C60, source, 0x6CA0);
 }
 

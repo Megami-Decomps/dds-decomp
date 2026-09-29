@@ -67,9 +67,9 @@ extern void func_002CFF98(void *p);
 extern void mdlBroadcastMasked();
 extern void func_00152000(f32 arg0, f32 arg1);
 extern void func_00217878(void *arg0, void *arg1);
-extern void func_00217F88(void *work);
+extern void mdlStorePrimaryVectorVU(void *work);
 extern void func_00217FB8(void *work);
-extern void func_00218028(void *work);
+extern void mdlStoreTertiaryVectorVU(void *work);
 extern void mdlAddEntryFlagged(void *work, s32 arg1, s32 arg2);
 extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
 extern void *func_00217680(void *arg0, void *arg1);
@@ -84,11 +84,11 @@ void func_00162948(void) {
     func_001028E8(0, 0, 0, 0);
 }
 
-u32 func_00162970(s32 arg0) {
+u32 effParamWorkGetData(s32 arg0) {
     return *(u32 *)(arg0 + 4);
 }
 
-u16 func_00162978(u16 *arg0) {
+u16 effParamWorkGetId(u16 *arg0) {
     return *arg0;
 }
 
@@ -164,11 +164,11 @@ void effParamDispatchFloat(f32 arg0) {
 
 void effParamInitWork(EffInitWork *work) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_00353850));
-    func_00217F88(work);
+    mdlStorePrimaryVectorVU(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_00353860));
     func_00217FB8(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_00353870));
-    func_00218028(work);
+    mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);
     if (work->param != NULL) {
         mdlAddEntryFlagged(work, 0, 0);
@@ -213,7 +213,7 @@ void effParamForwardVector(void *arg0, void *vec) {
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (vec) : "memory");
-    func_00217F88(arg0);
+    mdlStorePrimaryVectorVU(arg0);
 }
 
 void effParamBuildVector(void *arg0, f32 x) {
@@ -225,7 +225,7 @@ void effParamBuildVector(void *arg0, f32 x) {
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (v) : "memory");
-    func_00218028(arg0);
+    mdlStoreTertiaryVectorVU(arg0);
 }
 
 void effParamScatterVectors(void *work, void *src) {

@@ -17,7 +17,7 @@ extern void (*D_003AAC20[])();
 
 extern BillDispatch D_003AAB88[];
 
-void func_00160B58(ParObj *obj) {
+void parReleaseObject(ParObj *obj) {
     s32 child;
 
     child = (s32)obj->unk174;
@@ -74,7 +74,7 @@ void parRestartKind(ParObj *obj) {
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00162248);
 
-u16 func_001622D0(ParObj *obj) {
+u16 parGetRestartFlag(ParObj *obj) {
     return obj->unk142;
 }
 

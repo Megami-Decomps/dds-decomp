@@ -37,7 +37,7 @@ void effMiscQuatMultiplyVU(void)
 }
 
 /* VU-register calling convention: vf10 is the quaternion input and result. */
-void func_00340AF8(void)
+void effMiscInvertQuaternionVU(void)
 {
     __asm__ volatile (
         ".set noreorder\n"
@@ -106,7 +106,7 @@ f32 func_00340B78(void)
     return result;
 }
 
-void func_00340BA0(f32 angle)
+void effMiscAxisAngleToQuaternionVU(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 sine = func_003406A0(halfAngle);

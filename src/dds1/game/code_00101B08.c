@@ -12,11 +12,11 @@ extern u32 D_003BA9BC;
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_00101B08);
 
-void func_00101B78(u32 object, u32 mask, u32 scope) {
+void dds3SetScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00101060(1, object, mask, scope);
 }
 
-void func_00101BA8(u32 object, u32 mask, u32 scope) {
+void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00101060(0, object, mask, scope);
 }
 

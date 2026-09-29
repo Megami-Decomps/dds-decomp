@@ -28,7 +28,7 @@ extern u16 D_003BA72C;
 
 extern u32 *D_003BC610;
 
-extern s32 func_002D3EE8(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern char D_003B1AC8[];
 
@@ -89,7 +89,7 @@ void func_0026F500(void) {
 }
 
 void func_0026F518(void) {
-    func_00197378();
+    mnuUnloadStaffFonts();
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F530);
@@ -117,7 +117,7 @@ void func_0026FD88(void) {
     func_0026A950();
     func_0026F518();
     do {
-        temp_v0 = func_002D3EE8();
+        temp_v0 = sdfCheckPendingWorkWithInterrupts();
     } while (temp_v0 != 0);
     func_002D0A10(*D_003BC610);
     D_003BC610 = (u32 *)0x0;
@@ -125,7 +125,7 @@ void func_0026FD88(void) {
 
 void func_0026FDD8(void) {
     func_002BDD60(D_003BC610[1]);
-    while (func_002D3EE8() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);
 }
@@ -141,7 +141,7 @@ extern void func_0026A5F0(s32);
 extern void func_0026F5E8(void);
 extern void func_0026FD88(void);
 
-void func_0026FE98(void) {
+void mnuMovieCreateTask(void) {
     s32 handle;
     u32 *movie;
 
@@ -157,12 +157,12 @@ void func_0026FE98(void) {
     kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, func_0026FD88, 0);
 }
 
-u32 func_0026FF18(void) {
-    func_0026FE98();
+u32 mnuStartStaffMovieRequest(void) {
+    mnuMovieCreateTask();
     return 0xffffffff;
 }
 
-s32 func_0026FF38(void) {
+s32 mnuStopStaffTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003B1140, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003B1168, 1);
     return 0;
@@ -170,6 +170,41 @@ s32 func_0026FF38(void) {
 
 s32 mnuMovieDraw(void) {
     func_002ECCF8(D_0037B888, D_003253C8);
+    return 0;
+}
+
+void func_0026FFA0(u32 resource, void *data) {
+    if (D_003BC62C == 0) {
+        func_002ED8D0(D_0037B888, data, resource);
+        D_003BC62C = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+    }
+}
+
+void func_0026FFF8(s32 arg0) {
+    u8 *temp_v0 = D_0037B168 + arg0 * 24;
+
+    func_0026FFA0(*(s32 *)temp_v0, (s32)(temp_v0 + 4));
+}
+
+void func_00270030(void) {
+    if (D_003BC62C == 0) {
+        return;
+    }
+    func_002EDAE0(D_0037B888);
+    kwlnTaskDestroyWithHierarchy(D_003BC62C, 0);
+    D_003BC62C = 0;
+}
+
+void func_00270068(void) {
+    func_002EDBB8(D_0037B888);
+}
+
+s32 func_00270088(void) {
+    return D_0037B8BC[0];
+}
+
+s32 mnuSetFrameDivisor(void) {
+    func_002EC5E0(0x3c / D_003BA72C);
     return 0;
 }
 
@@ -325,40 +360,7 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A38);
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A58);
 
-void func_0026FFA0(u32 resource, void *data) {
-    if (D_003BC62C == 0) {
-        func_002ED8D0(D_0037B888, data, resource);
-        D_003BC62C = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
-    }
-}
-
-void func_0026FFF8(s32 arg0) {
-    u8 *temp_v0 = D_0037B168 + arg0 * 24;
-
-    func_0026FFA0(*(s32 *)temp_v0, (s32)(temp_v0 + 4));
-}
-
-void func_00270030(void) {
-    if (D_003BC62C == 0) {
-        return;
-    }
-    func_002EDAE0(D_0037B888);
-    kwlnTaskDestroyWithHierarchy(D_003BC62C, 0);
-    D_003BC62C = 0;
-}
-
-void func_00270068(void) {
-    func_002EDBB8(D_0037B888);
-}
-
-s32 func_00270088(void) {
-    return D_0037B8BC[0];
-}
-
-s32 mnuSetFrameDivisor(void) {
-    func_002EC5E0(0x3c / D_003BA72C);
-    return 0;
-}
+INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A78);
 
 void mnuCreateMovieManagerTask(void) {
     func_002EC850();
@@ -390,7 +392,7 @@ u8 func_00270218(void) {
     return temp_v0 == 2;
 }
 
-void func_00270240(void) {
+void mnuClearMovieList(void) {
     MovieListNode *node = D_003DC560.head;
 
     if (node != NULL) {
@@ -409,7 +411,7 @@ void func_00270240(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002702A0);
 
-u32 func_00270508(void) {
+u32 mnuGetMovieListNodeAtOffset(void) {
     MovieListNode *entry = D_003DC560.head;
     s32 remaining = D_003DC560.remaining;
     if (entry != 0 && remaining > 0) {
@@ -439,7 +441,7 @@ void mnuDestroyMovieViewerTask(void) {
         D_003DC560.task = 0;
         func_00270030();
     }
-    func_00270240();
+    mnuClearMovieList();
 }
 
 void func_00270AC0(void) {
@@ -479,7 +481,7 @@ extern ResourceRef8 D_0037C210[];
 extern char D_003B2020[];
 extern u32 effLoadIndexedResource(char *, s32, s32);
 
-void func_00270FB0(void) {
+void mnuLoadStaffImageHandles(void) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
@@ -487,7 +489,7 @@ void func_00270FB0(void) {
     }
 }
 
-void func_00271020(u32 *dst) {
+void mnuResolveStaffImageHandles(u32 *dst) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
@@ -652,7 +654,7 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2010);
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B2020);
 
-void *func_00271100(s32 kind, s32 *count, u8 *data) {
+void *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *data) {
     switch (kind) {
     case 1:
         *count = 4;
@@ -695,7 +697,7 @@ void func_00271180(s32 list, s32 count, u8 *work) {
 
 void movReleaseCategoryModels(s32 kind, u8 *work) {
     s32 count;
-    s32 *entries = (s32 *)func_00271100(kind, &count, work);
+    s32 *entries = (s32 *)mnuGetStaffCategoryEntries(kind, &count, work);
     if (kind != 4) {
         s32 i;
         for (i = 0; i < count; i++) {
@@ -714,7 +716,7 @@ u8 *work;
 {
     s32 count;
     s32 i = 0;
-    u8 *buffer = func_00271100(kind, &count, work);
+    u8 *buffer = mnuGetStaffCategoryEntries(kind, &count, work);
 
     if (count > 0) {
         u32 *handles = (u32 *)buffer;
@@ -770,7 +772,7 @@ void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271500);
 
-void func_00271648(u32 *resources) {
+void mnuReleaseStaffResourceGroups(u32 *resources) {
     u32 *inner = resources + 1;
     s32 i;
 
@@ -825,7 +827,7 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_002717D8);
 s64 func_00271948(u32 *resources) {
     s32 i;
 
-    func_00271648(resources + 0x18);
+    mnuReleaseStaffResourceGroups(resources + 0x18);
     for (i = 0; i < 2; i++) {
         func_002BDD60(resources[54 + i]);
     }
@@ -875,7 +877,7 @@ extern s8 D_003BC6B4;
 
 extern void func_002D0918(u32);
 
-void func_00271F18(u32 task) {
+void mnuDestroyStaffMenuTask(u32 task) {
     u8 *work = (u8 *)func_00101A70(task);
     if (work == NULL) {
         return;
@@ -951,7 +953,7 @@ s32 mnuAcknowledgeCampState(void) {
     return 0;
 }
 
-u8 func_00272260(void) {
+u8 mnuIsFadeIdle(void) {
     s64 temp_v0;
 
     temp_v0 = kwlnFadeIsActive();
@@ -962,7 +964,7 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00272280);
 
 extern u32 D_0037B988[];
 
-void func_00272350(s32 index) {
+void mnuCreateStaffImageSprite(s32 index) {
     u32 *object = (u32 *)func_00197760(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[index], 0);
     func_001958A0(object, 1, 0x54);
@@ -1050,3 +1052,4 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B5);
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B8);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6C0);
+

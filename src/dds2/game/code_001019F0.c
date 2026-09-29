@@ -12,11 +12,11 @@ typedef struct AdminWork {
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_001019F0);
 
-void func_00101A60(u32 object, u32 mask, u32 scope) {
+void dds3SetScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00100F48(1, object, mask, scope);
 }
 
-void func_00101A90(u32 object, u32 mask, u32 scope) {
+void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00100F48(0, object, mask, scope);
 }
 

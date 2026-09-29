@@ -4,7 +4,7 @@ typedef struct {
     void *objectHandle; /* 0x0 passed to func_00111840, returned by effObjGetObjectHandle */
     u32 flags;   /* 0x4 effect flag bits */
     u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
-    void *bill;   /* 0xC passed to func_00151E60/func_00152200 */
+    void *bill;   /* 0xC passed to func_00151E60/billSetKind1Entry */
     u32 unk10;   /* 0x10 cleared by func_00115BB8 */
     u32 unk14;   /* 0x14 cleared by func_00115BB8 */
     void *unk18; /* 0x18 cleared by func_00115BB8 */
@@ -34,7 +34,7 @@ void func_002CFF98(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to func_00114A78. */
 void func_00114B18(void *arg0, void *vec, s32 arg2);
-void func_00152200(void *arg);
+void billSetKind1Entry(void *arg);
 void func_00114CE8(void *arg0, void *vec, s32 arg2);
 void func_00114E90(void *arg0, void *vec, s32 arg2);
 void func_00114FE0(void *arg0, void *vec, s32 arg2);
@@ -52,7 +52,7 @@ extern void *func_0014FE48(void);
 
 extern void *func_0014FD20(void);
 
-extern void *func_00151E08(s32 arg0, s32 arg1);
+extern void *billCreateFromResource(s32 arg0, s32 arg1);
 
 extern void *billCreateIndexed(s32 arg0, u32 arg1);
 
@@ -98,12 +98,12 @@ void func_00114C38(u32 billId, void *vec, s32 extra) {
 void func_00114C80(s32 billId, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E08(1, billId);
+    handle = billCreateFromResource(1, billId);
     func_00114B18(handle, vec, extra);
 }
 
 void func_00114CC8(EffectObj *obj) {
-    func_00152200(obj->data->bill);
+    billSetKind1Entry(obj->data->bill);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CE8);
@@ -125,7 +125,7 @@ void func_00114E00(u32 billId, void *vec, s32 extra) {
 void func_00114E48(s32 billId, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E08(0, billId);
+    handle = billCreateFromResource(0, billId);
     func_00114CE8(handle, vec, extra);
 }
 

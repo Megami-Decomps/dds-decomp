@@ -204,7 +204,7 @@ void sdfDevWaitForDisc(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4D48);
 
-void func_002E4DF8(void) {
+void sdfDevSignalPendingSemaphore(void) {
     if (D_003BD3D8 != 0) {
         SignalSema(D_003BDA64);
         D_003BD3D8 = 0;
@@ -249,7 +249,7 @@ s32 sdfPktQuery(u32 arg0) {
     return -1;
 }
 
-s32 func_002E5670(void) {
+s32 sdfDevGetFileSize(void) {
     if (D_003BDA48 == 0) {
         func_002CF670("file didn't open.");
     }
@@ -263,7 +263,7 @@ extern void func_0030EF30(s32, s32, s32);
 extern void FlushCache(s32);
 extern char D_003B4578[];
 
-void func_002E56A0(s32 name) {
+void sdfDevLoadWholeFile(s32 name) {
     s32 fd = func_0030E8F0(name, 1);
     s32 size;
     s32 buffer;
@@ -284,15 +284,15 @@ extern u32 D_003BDA3C;
 extern u32 D_003BDA40;
 extern s32 sceSifAllocIopHeap(s32);
 extern void func_002F4558(s32, s32, s32);
-extern void func_002E56A0(s32);
+extern void sdfDevLoadWholeFile(s32);
 extern char D_003B4578[];
 
-void func_002E5738(s32 name, s32 mode) {
+void sdfDevStartLoad(s32 name, s32 mode) {
     u32 file[12];
     s32 heap;
 
     D_003BDA38 = name;
-    func_002E56A0(mode);
+    sdfDevLoadWholeFile(mode);
     if (sceCdSearchFile(file, name) == 0) {
         func_002CF670(D_003B4578, name);
     }
@@ -320,7 +320,7 @@ extern Bytes7 D_003BD400[];
 extern char *strcpy(char *, char *);
 extern char *strcat(char *, char *);
 
-char *func_002E5880(char *dst, char *src) {
+char *sdfDevBuildPath(char *dst, char *src) {
     if (*src == 0x2F) {
         strcpy(dst, D_00398820);
         return strcat(dst, src);
@@ -348,7 +348,7 @@ u32 func_002E5968(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5970);
 
-void func_002E5B10(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
+void sdfDevReportCommandResult(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
     if (event != 3) {
         if (event == 4) {
             D_003BDA68 = value;
@@ -365,7 +365,7 @@ DevState *sdfDevCreateCommandState(s32 command) {
     if (D_003BD3F4 < 0) {
         D_003BD3F4 = sdfCreateSemaphore(0, 0x80, 0);
     }
-    state = sdfDevCreateCallbackState(command, func_002E5B10, 0);
+    state = sdfDevCreateCallbackState(command, sdfDevReportCommandResult, 0);
     WaitSema(D_003BD3F4);
     sdfDevActivate(state);
     return state;
@@ -374,7 +374,7 @@ DevState *sdfDevCreateCommandState(s32 command) {
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5BB8);
 
 void func_002E5C38(u32 arg0) {
-    func_002E6E38();
+    sdfDevQueueActiveOperation();
     WaitSema(D_003BD3F4);
     func_002E6E88(arg0);
 }
@@ -508,7 +508,7 @@ s32 sdfDevActivate(DevState *arg0) {
     return 0;
 }
 
-s32 func_002E6E38(DevState *arg0) {
+s32 sdfDevQueueActiveOperation(DevState *arg0) {
     s8 state = arg0->state;
 
     if (state != SDF_DEV_STATE_ACTIVE) {

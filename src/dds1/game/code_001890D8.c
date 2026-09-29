@@ -7,7 +7,7 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "game/code_001890D8", func_001890D8);
 
-void func_00189178(SceneResource *resource) {
+void effReleaseSceneResource(SceneResource *resource) {
     effMagatuhiReleaseResource(resource->handle);
     func_002CFF98(resource);
 }

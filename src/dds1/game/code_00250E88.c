@@ -39,7 +39,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00251260);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
 
-void func_002515C8(s32 unused, void *data) {
+void mnuFreeTaskData(s32 unused, void *data) {
     if (data != NULL) {
         func_002CFF98(data);
     }
@@ -54,7 +54,7 @@ extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 extern u8 *D_003BAA00;
 
-s32 func_00251960(void) {
+s32 mnuCreateSceneWork(void) {
     s32 handle = func_002D03F8(0x5B0);
     u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
 
@@ -68,7 +68,7 @@ s32 func_00251960(void) {
     return (s32)work;
 }
 
-void func_002519E8(s32 unused, s32 context) {
+void mnuReleaseSceneContext(s32 unused, s32 context) {
     func_002CB3B8(D_003BC4CC, -1);
     sdfDestroyGridWork(*(s32 *)(context + 0x484));
     mnuReleaseDisplayListNodes(context + 0x584);
@@ -108,7 +108,7 @@ void func_00253520(s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253558);
 
-s32 func_00253608(void) {
+s32 fldGetSceneMetadataNode(void) {
     s32 context = func_002CB3B8(D_003BC4CC, 1);
 
     if (context == 0) {

@@ -12,7 +12,7 @@ s32 func_002DD040(void *object, s32 command) {
 }
 
 void func_002DD070(s32 arg0, s32 arg1, u32 arg2, s32 arg3) {
-    func_002DB220();
+    sdfSetMotionPointerPair();
     *(s32 *)(arg0 + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(arg1 + 4) + 0x10) + 0xc) + arg3 * 0x10;
 }
 
@@ -131,7 +131,7 @@ void func_002DD450(void) {
         ".set reorder\n");
 }
 
-void func_002DD468(void) {
+void sdfSetPrimaryIdentityMatrixVU(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "vsub.xyzw vf28, vf0, vf0\n"
@@ -142,7 +142,7 @@ void func_002DD468(void) {
         ".set reorder\n");
 }
 
-void func_002DD488(void) {
+void sdfSetAlternateIdentityMatrixVU(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "vsub.xyzw vf24, vf0, vf0\n"

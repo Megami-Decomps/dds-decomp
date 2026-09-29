@@ -31,7 +31,7 @@ INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFC70);
 
 INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFCF0);
 
-s32 func_002CFD50(void) {
+s32 sdfThreadSleepSelf(void) {
     s32 thread = GetThreadId();
 
     D_003BD9A4 = thread;
@@ -75,7 +75,7 @@ typedef struct SdfCursorWalk {
     s16 visited;
 } SdfCursorWalk;
 
-SdfCursorNode *func_002CFDA0(SdfCursorState *state, SdfCursorWalk *walk) {
+SdfCursorNode *sdfAdvanceCursorWalk(SdfCursorState *state, SdfCursorWalk *walk) {
     SdfCursorNode *node = walk->node;
 
     walk->visited++;
@@ -107,7 +107,7 @@ typedef struct SdfCursorOwner {
 extern SdfCursorSlot *D_003BD9AC;
 extern SdfCursorNode *func_002CFDF0();
 
-SdfCursorNode *func_002CFE70(SdfCursorOwner *owner) {
+SdfCursorNode *sdfCursorSlotAlloc(SdfCursorOwner *owner) {
     SdfCursorSlot *slot = D_003BD9AC;
 
     D_003BD9AC = slot->next;

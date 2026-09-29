@@ -36,7 +36,7 @@ u32 sdfGetElapsedTimerTicks(u32 previous) {
     return (current - previous) & 0xFFFF;
 }
 
-void func_002CF958(void) {
+void sdfRunTickWorkerThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
         func_002E3970();

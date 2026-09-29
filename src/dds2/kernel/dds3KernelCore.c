@@ -10,17 +10,17 @@ extern void func_001005C8(KwlnTask* task);
 
 extern void func_00100740(KwlnTask* task);
 
-extern void func_00100980(KwlnTask* task);
+extern void kwlnTaskActivate(KwlnTask* task);
 
-extern void func_001009C8(void);
+extern void kwlnTaskAdvanceStartDelays(void);
 
 extern KwlnTask* D_00435BD0;
 
 extern void func_00100D50(KwlnTask* task);
 
-extern void func_00100DD8(KwlnTask* task);
+extern void kwlnTaskRequestDestroy(KwlnTask* task);
 
-extern void func_00100E50(void);
+extern void kwlnTaskAdvanceDestroyDelays(void);
 
 extern KwlnTask* D_00435BDC;
 
@@ -54,7 +54,7 @@ extern void func_00328E48(void* ptr);
 
 extern KwlnTask* func_00101740(const char* name);
 
-void func_00100980(KwlnTask* task)
+void kwlnTaskActivate(KwlnTask* task)
 {
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
@@ -63,7 +63,7 @@ void func_00100980(KwlnTask* task)
     task->timer = 0;
 }
 
-void func_001009C8(void)
+void kwlnTaskAdvanceStartDelays(void)
 {
     KwlnTask* node;
     KwlnTask* curr;
@@ -76,7 +76,7 @@ void func_001009C8(void)
         curr = node;
         node = node->listNext;
         if (curr->unk2C == 0) {
-            func_00100980(curr);
+            kwlnTaskActivate(curr);
         }
     }
 }
@@ -105,7 +105,7 @@ void func_00100D50(KwlnTask* task)
     func_00328E48(task);
 }
 
-void func_00100DD8(KwlnTask* task)
+void kwlnTaskRequestDestroy(KwlnTask* task)
 {
     u32 state;
 
@@ -124,7 +124,7 @@ void func_00100DD8(KwlnTask* task)
     }
 }
 
-void func_00100E50(void)
+void kwlnTaskAdvanceDestroyDelays(void)
 {
     KwlnTask* node;
     KwlnTask* curr;
@@ -146,7 +146,7 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100EB0);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
 
-void* func_001010A8(u32 state)
+void* kwlnTaskGetStateList(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case 1:
@@ -190,11 +190,11 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101250);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101328);
 
-s32 func_00101428(void)
+s32 kwlnTaskTickScheduler(void)
 {
-    func_001009C8();
+    kwlnTaskAdvanceStartDelays();
     func_00100C28();
-    func_00100E50();
+    kwlnTaskAdvanceDestroyDelays();
     return 1;
 }
 
@@ -223,7 +223,7 @@ void func_00101678(KwlnTask* task)
     func_00100740(task);
 }
 
-void func_001016E0(KwlnTask* task, s32 delayTicks)
+void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
 {
     u32 state;
 
@@ -236,7 +236,7 @@ void func_001016E0(KwlnTask* task, s32 delayTicks)
     }
 }
 
-s32 func_00101700(KwlnTask* task)
+s32 kwlnTaskGetRegisteredState(KwlnTask* task)
 {
     u32 state;
 
@@ -323,3 +323,4 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF4);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435C00);
+

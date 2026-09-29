@@ -1,14 +1,14 @@
 #include "common.h"
 
 /* Record shared by the matched helpers below; offsets are from retail.
- * func_00195388 receives the message-window node itself (itfMesManager
+ * frFontEnableContextMode receives the message-window node itself (itfMesManager
  * func_0019DB40 passes its chain node straight in). */
 typedef struct FrFontCtx {
     union {
         u32 word;            /* 0x0: whole word read by func_001963E0 */
         struct {
             u8 unk0;         /* 0x0 */
-            u8 flag1;        /* 0x1: set by func_001953A8 */
+            u8 flag1;        /* 0x1: set by frFontSetFlagAndMeasureGlyphs */
             u8 unk2[2];      /* 0x2 */
         } bytes;
     } u0;
@@ -17,7 +17,7 @@ typedef struct FrFontCtx {
     union {
         u32 w;                   /* 0xC: word view */
         struct { u8 pad; s8 bD; s8 bE; u8 bF; } b; /* 0xC: byte views */
-    } uC;                        /* 0xC: refreshed by func_001953A8 */
+    } uC;                        /* 0xC: refreshed by frFontSetFlagAndMeasureGlyphs */
     u32 unk10;               /* 0x10 */
     union {
         u32 shifted;         /* 0x14: value stored shifted by func_00195460 */
@@ -27,7 +27,7 @@ typedef struct FrFontCtx {
     s8 flag1C;               /* 0x1C */
     s8 flag1D;               /* 0x1D */
     u8 unk1E[0x22];          /* 0x1E */
-    u32 mode40;              /* 0x40: set by func_00195388 */
+    u32 mode40;              /* 0x40: set by frFontEnableContextMode */
 } FrFontCtx;
 
 /* Triple word block with one getter per word. */
@@ -112,7 +112,7 @@ extern FrFontCtx *func_00195160(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 ar
 
 void func_00195880(FrFontGlyph *arg0, s8 arg1);
 
-FrFontGlyph *func_00195B60(FrFontGlyph *arg0, FrFontGlyph *arg1);
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1);
 
 typedef struct TextStyleNode {
     u8 pad00[4];
@@ -177,7 +177,7 @@ FrFontGlyph *func_00194CD0(FrFontGlyph *source, FrFontGlyph *destination) {
     if (glyph == NULL) {
         return destination;
     }
-    return func_00195B60(destination, glyph);
+    return frFontLinkGlyphAfterPrevious(destination, glyph);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194D20);
@@ -239,12 +239,12 @@ void func_00195360(FrFontCtx *ctx, s32 arg1) {
     }
 }
 
-void func_00195388(FrFontCtx *ctx) {
+void frFontEnableContextMode(FrFontCtx *ctx) {
     ctx->mode40 = 1;
     func_00195360(ctx, 0x80);
 }
 
-void func_001953A8(FrFontCtx *ctx, u8 flag) {
+void frFontSetFlagAndMeasureGlyphs(FrFontCtx *ctx, u8 flag) {
     ctx->u0.bytes.flag1 = flag;
     ctx->uC.w = frFontMeasureGlyphChain(ctx);
 }
@@ -260,7 +260,7 @@ void func_00195460(FrFontCtx *ctx, u32 value) {
     ctx->u14.shifted = value >> 4;
 }
 
-void func_00195470(FrFontGlyph *glyph, u8 value) {
+void frFontSetChainFlag(FrFontGlyph *glyph, u8 value) {
     FrFontGlyph *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
@@ -270,7 +270,7 @@ void func_00195470(FrFontGlyph *glyph, u8 value) {
     }
 }
 
-void func_001954C8(TextStyleNode *entry, u32 color) {
+void frFontSetChildColors(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
         TextStyleNode *child;
         for (child = entry->firstChild; child != NULL; child = child->nextChild) {
@@ -313,7 +313,7 @@ s32 frFontAdvanceSelectedGlyphSlot(void) {
     return 0;
 }
 
-FrFontGlyph *func_00195B60(FrFontGlyph *arg0, FrFontGlyph *arg1) {
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1) {
     return frFontLinkGlyph(arg0, arg1, 1);
 }
 
@@ -342,7 +342,7 @@ void func_00195BF8(void) {
     frFontFreeEntry(8);
 }
 
-s32 func_00195C10(s8 *str) {
+s32 frFontCountChars(s8 *str) {
     s32 count = 0;
 
     while (*str != 0) {
@@ -373,7 +373,7 @@ u32 frFontMeasureGlyphChain(void *arg0) {
     return total;
 }
 
-u32 func_00195C88(FrFontGlyph *glyph) {
+u32 frFontMeasureLines(FrFontGlyph *glyph) {
     FrFontGlyph *line;
     FrFontGlyph *node;
     s32 total = 0;
@@ -413,7 +413,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00195ED8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195FA8);
 
-void func_00196038(s32 x, s32 y, FrFontGlyph *glyph) {
+void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyph) {
     FrFontGlyph *node;
     s32 dx;
     s32 dy;

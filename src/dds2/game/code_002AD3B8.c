@@ -6,7 +6,7 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_0026C900(void);
 extern void func_002AAE80(s32);
-extern void func_002AA740(s32);
+extern void mnuCreateStaffImageSprite(s32);
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
 extern void func_002BB0E8(s32, s32, s32, s32, s32);
 extern void func_002AA7A0(s32, s32);
@@ -51,7 +51,7 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD518);
 s64 func_002AD618(s32 callback) {
     s32 context = func_00101958();
     func_002AAE80(callback);
-    func_002AA740(7);
+    mnuCreateStaffImageSprite(7);
     func_002AAC98(0,
         *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
         (s32)D_003E7050, context, 1, 0x53);
@@ -78,7 +78,7 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD708);
 s64 func_002AD808(s32 callback) {
     s32 context = func_00101958();
     func_002AAE80(callback);
-    func_002AA740(9);
+    mnuCreateStaffImageSprite(9);
     func_002AAC98(0,
         *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
         (s32)D_003E7050, context, 1, 0x53);
@@ -105,7 +105,7 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD8F8);
 s64 func_002AD9F8(s32 callback) {
     s32 context = func_00101958();
     func_002AAE80(callback);
-    func_002AA740(11);
+    mnuCreateStaffImageSprite(11);
     func_002AAC98(0,
         *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
         (s32)D_003E7050, context, 1, 0x53);

@@ -58,7 +58,7 @@ typedef struct PacState {
     PacWork *queueTail; /* 0x34 */
 } PacState;
 
-PacWork *func_00346E08(PacState *arg0, PacHead *arg1);
+PacWork *sdfPacEnqueuePacket(PacState *arg0, PacHead *arg1);
 
 void *func_00328E18(s32 size);
 
@@ -80,7 +80,7 @@ void sdfPacAdvanceInput(PacState *arg0, s32 arg1);
 
 s32 func_00347988(void *arg0, void *arg1, s32 arg2);
 
-void func_00347168(PacState *arg0, PacHead *arg1);
+void sdfPacStartPacketPayload(PacState *arg0, PacHead *arg1);
 
 void func_00346C40(PacState *arg0);
 
@@ -102,13 +102,13 @@ void func_003475A0(PacState *arg0, PacHead *arg1, PacBuf *arg2);
 
 void func_003476D0(PacState *arg0);
 
-void func_003477D8(PacState *arg0);
+void sdfPacAdvanceAllocationEntry(PacState *arg0);
 
 void func_003477A8(PacState *arg0);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 
-PacWork *func_00346E08(PacState *state, PacHead *packet) {
+PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
     s32 extensionBytes = packet->flags & 0xF0;
     PacWork *node = func_00328E18(extensionBytes + 0x20);
     node->owner = state;
@@ -122,7 +122,7 @@ PacWork *func_00346E08(PacState *state, PacHead *packet) {
     return node;
 }
 
-PacWork *func_00346E90(PacWork *work) {
+PacWork *sdfPacRemovePacket(PacWork *work) {
     PacState *state = work->owner;
     /* Keep a node-shaped link so the queue head can be unlinked like any next pointer. */
     PacWork *link = (PacWork *)&state->queueHead;
@@ -145,7 +145,7 @@ PacWork *func_00346E90(PacWork *work) {
     return next;
 }
 
-s32 func_00346F00(PacState *state, s32 status, PacHead *packet) {
+s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     if (status == 0) {
         switch (packet->command) {
         case 1:
@@ -180,7 +180,7 @@ void *sdfPacGetExtensionData(PacExtensionHeader *header) {
     return header->data;
 }
 
-void func_00347000(PacState *state) {
+void sdfPacCopyPendingBytes(PacState *state) {
     s32 count = state->pendingBytes;
     s32 available = state->inputAvailable;
     if (available < count) {
@@ -201,7 +201,7 @@ void func_00347000(PacState *state) {
     }
 }
 
-void func_00347088(PacState *state) {
+void sdfPacDecodePendingBytes(PacState *state) {
     s32 available = state->inputAvailable;
     s32 finished = func_00347988(state->decoder, state->inputCursor, available);
     sdfPacAdvanceInput(state, available - state->decoder->remaining);
@@ -212,7 +212,7 @@ void func_00347088(PacState *state) {
     state->onComplete(state);
 }
 
-void func_00347100(PacState *state) {
+void sdfPacSkipPendingBytes(PacState *state) {
     s32 count = state->pendingBytes;
     if (state->inputAvailable < count) {
         count = state->inputAvailable;
@@ -230,28 +230,28 @@ void func_00347100(PacState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347168);
+INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacStartPacketPayload);
 
 void func_00347290(PacState *state, PacHead *packet) {
-    func_00347168(state, packet);
+    sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_00346C40;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003472C0);
 
 void func_00347320(PacState *state, PacHead *packet) {
-    func_00347168(state, packet);
+    sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_003472C0;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347350);
 
 void func_003473B0(PacState *state, PacHead *packet) {
-    func_00347168(state, packet);
+    sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_00347350;
 }
 
-void func_003473E0(PacState *state) {
+void sdfPacCopyResourceChunk(PacState *state) {
     PacBuf *buffer = state->buffer;
     s32 count = buffer->remaining;
     if (state->inputAvailable < count) {
@@ -274,7 +274,7 @@ void func_003473E0(PacState *state) {
     }
 }
 
-void func_00347488(PacState *state) {
+void sdfPacDecodeResourceChunk(PacState *state) {
     s32 count = state->pendingBytes;
     s32 finished = func_00347988(state->decoder, state->inputCursor, count);
     sdfPacAdvanceInput(state, count - state->decoder->remaining);
@@ -290,7 +290,7 @@ void func_00347488(PacState *state) {
     state->onComplete(state);
 }
 
-void func_00347520(PacState *state) {
+void sdfPacSkipResourceChunk(PacState *state) {
     PacBuf *buffer = state->buffer;
     s32 count = buffer->remaining;
     if (state->inputAvailable < count) {
@@ -315,7 +315,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003475A0);
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003476D0);
 
 void func_00347710(PacState *state, PacHead *packet) {
-    func_00346E08(state, packet);
+    sdfPacEnqueuePacket(state, packet);
     {
         void *allocation = func_00328D68(0x10);
         state->unk2C = (PacAlloc *)allocation;
@@ -326,12 +326,12 @@ void func_00347710(PacState *state, PacHead *packet) {
 
 void func_00347768(PacState *state) {
     func_003475A0(state, (u8 *)state->unk2C + 0x10, (u8 *)state->unk2C + 0x20);
-    state->onComplete = func_003477D8;
+    state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477A8);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477D8);
+INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacAdvanceAllocationEntry);
 
 void func_00347850(PacState *state) {
     s32 available = state->inputAvailable;

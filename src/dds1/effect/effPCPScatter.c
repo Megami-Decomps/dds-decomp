@@ -19,7 +19,7 @@ extern u32 *sdfResourceRetainAddress(u32 handle);
 extern void func_002CFF98(void *ptr);
 
 extern void effReleaseScatterObject(u32 res);
-extern void func_002DAA68(u32 res);
+extern void sdfQueueAssetRelease(u32 res);
 extern void func_002D0918(u32 res);
 extern u32 func_002D3288(u32 resId);
 extern void func_002D2D00(u32 res);
@@ -52,7 +52,7 @@ typedef struct PcpScatterWork6 PcpScatterWork6;
 typedef struct PcpScatterWork7 PcpScatterWork7;
 typedef struct PcpScatterWork8 PcpScatterWork8;
 
-extern void func_00172FB8(PcpScatterWork3 *work, PcpScatterWork3 *src);
+extern void effPcpScatterSharePoolResource(PcpScatterWork3 *work, PcpScatterWork3 *src);
 
 /* Pool: `first` words of slot data, then `second` words, then the 0x34-byte control block. */
 typedef struct {
@@ -69,12 +69,12 @@ typedef struct {
 } PcpScatterPool;
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
-extern void func_00172F88(PcpScatterWork3 *work, u32 resId);
+extern void effPcpScatterCreatePoolResource(PcpScatterWork3 *work, u32 resId);
 extern u32 effMiscRand(void *table);
 extern u32 effParamWorkCreate(s32 kind, void *params);
 extern u8 D_0034DF38[];
 
-extern void func_00172D70(PcpScatterWork3 *work);
+extern void effPcpScatterReleasePoolResources(PcpScatterWork3 *work);
 
 /* func_001708A0 */
 struct PcpScatterWork1 {
@@ -137,7 +137,7 @@ struct PcpScatterWork2 {
     u32 unk6C;
 };
 
-/* Resource-holding effect around func_00172F88 */
+/* Resource-holding effect around effPcpScatterCreatePoolResource */
 struct PcpScatterWork3 {
     u8 pad00[0x20];
     s32 unk20;
@@ -239,7 +239,7 @@ PcpScatterWork1 *effPcpScatterSharedDuplicate(src)
     u32 i;
 
     work = func_001708A0(src, 0, 0);
-    func_00172FB8(work->childWork, src->childWork);
+    effPcpScatterSharePoolResource(work->childWork, src->childWork);
     if (work->unk68 != 0) {
         work->duplicatedCount = work->unk20 / work->unk70;
         if (work->unk20 % work->unk70 != 0) {
@@ -273,7 +273,7 @@ void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work)
         }
         func_002D0918(work->duplicateAllocation);
     }
-    func_00172D70(work->childWork);
+    effPcpScatterReleasePoolResources(work->childWork);
     func_002D0918(work->ownedResource);
 }
 
@@ -314,7 +314,7 @@ PcpScatterWork8 *effPcpScatterLinkedDuplicate(src)
     u32 i;
 
     work = func_00171550(src, 0, 0);
-    func_00172FB8(work->childWork, src->childWork);
+    effPcpScatterSharePoolResource(work->childWork, src->childWork);
     if (work->unk58 != 0) {
         work->duplicatedCount = work->unk20 / work->unk60;
         if (work->unk20 % work->unk60 != 0) {
@@ -348,7 +348,7 @@ void effPcpScatterReleaseSharedParticles(PcpScatterWork8 *work)
         }
         func_002D0918(work->duplicateAllocation);
     }
-    func_00172D70(work->childWork);
+    effPcpScatterReleasePoolResources(work->childWork);
     func_002D0918(work->ownedResource);
 }
 
@@ -405,7 +405,7 @@ PcpScatterWork2Copy *effPcpScatterTableDuplicate(src)
     u32 i;
 
     work = func_00172158(src, 0, 0);
-    func_00172FB8(work->unk58, src->unk58);
+    effPcpScatterSharePoolResource(work->unk58, src->unk58);
     if (work->unk40 != 0) {
         if (work->unk48 == 0) {
             work->unk48 = 1;
@@ -442,7 +442,7 @@ void effPcpScatterReleaseLinkedParticles(PcpScatterWork2 *work)
         }
         func_002D0918(work->unk68);
     }
-    func_00172D70(work->unk58);
+    effPcpScatterReleasePoolResources(work->unk58);
     func_002D0918(work->unk5C);
 }
 
@@ -500,18 +500,18 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     return pool;
 }
 
-void func_00172D70(PcpScatterWork3 *work)
+void effPcpScatterReleasePoolResources(PcpScatterWork3 *work)
 {
     if (work->res != NULL) {
         effPcpScatterResRelease(work->res);
     }
-    func_002DAA68(work->unk28);
+    sdfQueueAssetRelease(work->unk28);
     func_002D0918(work->unk2C);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00172DB0);
 
-void func_00172F88(PcpScatterWork3 *work, u32 resId)
+void effPcpScatterCreatePoolResource(PcpScatterWork3 *work, u32 resId)
 {
     PcpScatterRes *res;
 
@@ -519,7 +519,7 @@ void func_00172F88(PcpScatterWork3 *work, u32 resId)
     work->res = res;
 }
 
-void func_00172FB8(PcpScatterWork3 *work, PcpScatterWork3 *src)
+void effPcpScatterSharePoolResource(PcpScatterWork3 *work, PcpScatterWork3 *src)
 {
     PcpScatterRes *res;
 
@@ -527,12 +527,12 @@ void func_00172FB8(PcpScatterWork3 *work, PcpScatterWork3 *src)
     work->res = res;
 }
 
-s32 func_00172FE8(PcpScatterWork3 *work, s32 index)
+s32 effPcpScatterGetRecordAddress(PcpScatterWork3 *work, s32 index)
 {
     return work->unk20 + index * 0x60;
 }
 
-s32 func_00173000(PcpScatterWork3 *work, s32 index)
+s32 effPcpScatterGetAuxRecordAddress(PcpScatterWork3 *work, s32 index)
 {
     return work->unk24 + index * 0x18;
 }
@@ -563,7 +563,7 @@ PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res)
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001730D0);
 
-void func_001732E8(void *data)
+void effScatterBlockDuplicate(void *data)
 {
     func_001730D0(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }

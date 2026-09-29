@@ -26,10 +26,10 @@ extern u32 D_003BD2F8;
 void *func_002CFEB8(s32 size);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 void func_002D1B90(void *arg0);
-void func_002D2F80(void);
+void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
 void func_002D3C30(void *arg0, s32 arg1);
-void func_002D3BE0(void *arg0, void (*arg1)(void *));
+void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void func_002D10B0(u32 arg0, u32 arg1) {
     D_003BD2F4 = arg0;
     D_003BD2F8 = arg1;
@@ -38,7 +38,7 @@ void func_002D10B0(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D10C8);
 
-void func_002D1318(s32 oldBuffer, s32 nextBuffer) {
+void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
     if (D_003BD300[0] == oldBuffer) {
         D_003BD300[0] = oldBuffer ^ 1;
     }
@@ -48,7 +48,7 @@ void func_002D1318(s32 oldBuffer, s32 nextBuffer) {
     D_003BD302 = nextBuffer;
 }
 
-void func_002D1350(s32 singleBuffer, s32 value, s32 index) {
+void sdfSetBufferSlot(s32 singleBuffer, s32 value, s32 index) {
     if (singleBuffer == 0) {
         D_003BD300[0] = value;
         D_003BD300[1] = value;
@@ -67,7 +67,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1590);
 extern vu8 D_003BD2EA;
 extern void func_002E1218(void);
 
-void func_002D1698(void) {
+void sdfWaitAndSelectBuffer(void) {
     s8 buffer = D_003BD2EA ^ 1;
 
     /* Do not select a buffer while its index is the busy-buffer status. */
@@ -82,7 +82,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D16F0);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1740);
 
-s32 func_002D1798(SdfTex *target) {
+s32 sdfTexListContains(SdfTex *target) {
     SdfTex *node = (SdfTex *)D_003BD9E0;
 
     if (node == NULL) {
@@ -124,7 +124,7 @@ void sdfTexInitializeLists(void) {
     head->unkC = NULL;
     D_003BD9E0 = head;
     D_003BD9E4 = head;
-    func_002D3BE0(&D_003BD9E8, func_002D1B90);
+    sdfInitializeSynchronizedRequest(&D_003BD9E8, func_002D1B90);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1C70);
@@ -145,7 +145,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1FF0);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2070);
 
-void func_002D2128(SdfSemaObj *arg0) {
+void sdfResetSemaphoreState(SdfSemaObj *arg0) {
     arg0->unk4 = NULL;
     arg0->unk8 = NULL;
     arg0->unkC = NULL;
@@ -161,10 +161,10 @@ void sdfTexInitializeSemaphore(void) {
 
     obj = &D_003EB848;
     obj->unk0 = sdfCreateSemaphore(1, 0x7F, 0);
-    func_002D2128(obj);
+    sdfResetSemaphoreState(obj);
 }
 
-u32 func_002D2300(SdfTex *texture) {
+u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
     return (u32)texture->unk28;
 }
 
@@ -182,7 +182,7 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
 
     buf = texture->unk2C;
     if (buf == NULL) {
-        func_002D2F80();
+        sdfTexCreateSecondPacket();
         buf = texture->unk2C;
     }
     return (s32)buf;
@@ -231,7 +231,7 @@ u64 func_002D2488(SdfTex *texture) {
     return texture->unk28->unk30;
 }
 
-void func_002D2498(SdfTex *texture, s32 arg1, s32 arg2) {
+void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 arg1, s32 arg2) {
     SdfTexBuf *buf;
 
     buf = texture->unk28;

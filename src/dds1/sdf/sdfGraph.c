@@ -19,7 +19,7 @@ void func_002D0E30(void *arg0, s32 arg1, s32 arg2);
 void func_002D1B90(void *arg0);
 void *func_002D1C70(s32 arg0, s32 arg1, s32 arg2);
 
-void func_002D0E88(s32 arg0) {
+void sdfGraphSetDisplayMode(s32 arg0) {
     D_003BD2E8 = (u8)arg0;
     func_002D0E30(D_003980E0, arg0, 0);
     D_003BD9DC = 1;

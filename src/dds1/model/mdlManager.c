@@ -7,7 +7,7 @@ typedef struct MdlSub {
     u16 unkA;   /* 0xA */
 } MdlSub;
 
-/* Entry enabled by func_00217C60. */
+/* Entry enabled by mdlEnableAllEntries. */
 typedef struct MdlEntry {
     u8 unk0[0x14]; /* 0x0 */
     s16 enabled;   /* 0x14 */
@@ -43,11 +43,11 @@ typedef struct MdlCtx {
     u8 unk0[0xC];      /* 0x0 */
     MdlSub *sub;       /* 0xC */
     u32 unk10;         /* 0x10 */
-    u32 *list14;       /* 0x14: intrusive list walked by func_00218050 */
+    u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
     MdlInner *inner;   /* 0x18 */
 } MdlCtx;
 
-/* Packet parsed by func_00216EC0. */
+/* Packet parsed by mdlExecuteAndFreeJob. */
 typedef struct MdlPacket {
     u16 unk0;     /* 0x0 */
     u16 unk2;     /* 0x2 */
@@ -67,7 +67,7 @@ typedef struct MdlRes {
     u8 unk0[8]; /* 0x0 */
     u32 unk8;   /* 0x8 */
 } MdlRes;
-/* Entry searched by func_00217E10/mdlReleaseFirstMatch on its s16 id at +0x28.
+/* Entry searched by mdlFindNodeById/mdlReleaseFirstMatch on its s16 id at +0x28.
  * Only the fields read by the matched helpers below are known. */
 typedef struct MdlNode {
     struct MdlNode *next; /* 0x0 */
@@ -94,7 +94,7 @@ extern u8 D_003BBB60[];
 extern void func_002DB308(void *arg);
 extern char *strcat(char *dst, const char *src);
 
-MdlNode *func_00217E10(MdlCtx *ctx, s32 id);
+MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void func_00217CA8(MdlCtx *ctx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 
 extern void *func_00288B90();
@@ -143,14 +143,14 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00216DB8);
 extern s32 btlGroupContainsId(s32 group, s32 id);
 extern s32 fileManUpdate(void);
 
-void *func_00216E68(s32 group, s32 id) {
+void *mdlWaitGroupThenFind(s32 group, s32 id) {
     while (btlGroupContainsId(group, id)) {
         fileManUpdate();
     }
     return btlFindGroupedEntity(group, id);
 }
 
-void func_00216EC0(MdlPacket *packet) {
+void mdlExecuteAndFreeJob(MdlPacket *packet) {
     func_00216DB8(packet->unk0, packet->unk2, packet->unk8, packet->extra);
     WaitSema(D_003BD878);
     func_002167E0(packet->unk0, packet->unk2);
@@ -165,7 +165,7 @@ void func_00216F18(void *arg0, MdlLoadReq *req) {
     handle = func_00288B90();
     size = func_002EB090(handle);
     req->size = size;
-    handle = func_00288B88(arg0);
+    handle = fileGetResourceHandle(arg0);
     func_002D0918(handle);
     func_002887A0(arg0);
 }
@@ -181,10 +181,10 @@ typedef struct MdlLoadJob {
 } MdlLoadJob;
 
 void func_00216FE0(s32 arg0, MdlLoadJob *job) {
-    job->handle = func_00288B88(arg0);
+    job->handle = fileGetResourceHandle(arg0);
     job->sizeWord = func_002EB1F0(func_00288B90(arg0));
     func_002887A0(arg0);
-    func_00216EC0((MdlPacket *)job);
+    mdlExecuteAndFreeJob((MdlPacket *)job);
 }
 
 char *mdlBuildPrefixedString(char *dst, const char *src) {
@@ -251,7 +251,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217878);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002179A8);
 
-void func_00217C60(MdlCtx *ctx) {
+void mdlEnableAllEntries(MdlCtx *ctx) {
     MdlEntryTable *table = ctx->inner->entries;
     s32 count = table->count;
     MdlEntry **items = table->items;
@@ -280,7 +280,7 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
     func_00217CA8(ctx, arg1, arg2, 0, arg4, arg5);
 }
 
-MdlNode *func_00217E10(MdlCtx *ctx, s32 id) {
+MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
@@ -292,7 +292,7 @@ MdlNode *func_00217E10(MdlCtx *ctx, s32 id) {
 }
 
 s32 mdlGetNodeField2C(MdlCtx *ctx, s32 id) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node == NULL) {
         return -1;
@@ -301,7 +301,7 @@ s32 mdlGetNodeField2C(MdlCtx *ctx, s32 id) {
 }
 
 s32 mdlGetNodeField2E(MdlCtx *ctx, s32 id) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node == NULL) {
         return 0;
@@ -310,7 +310,7 @@ s32 mdlGetNodeField2E(MdlCtx *ctx, s32 id) {
 }
 
 s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 id) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node == NULL) {
         return 0;
@@ -319,7 +319,7 @@ s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 id) {
 }
 
 s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 id) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node == NULL) {
         return 2;
@@ -328,7 +328,7 @@ s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 id) {
 }
 
 f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
     f32 r = 0.0f;
 
     if (node != NULL) {
@@ -338,7 +338,7 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
 }
 
 void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node != NULL) {
         node->value = value;
@@ -346,7 +346,7 @@ void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
 }
 
 /* These shims transfer vectors between model state and VU0 registers. */
-void func_00217F70(MdlCtx *ctx) {
+void mdlLoadPrimaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector50;
     __asm__ volatile (
         ".set noreorder\n"
@@ -355,7 +355,7 @@ void func_00217F70(MdlCtx *ctx) {
         : : "r"(vec) : "memory");
 }
 
-void func_00217F88(MdlCtx *ctx) {
+void mdlStorePrimaryVectorVU(MdlCtx *ctx) {
     void *vec;
     __asm__ volatile (
         ".set noreorder\n"
@@ -370,7 +370,7 @@ void func_00217F88(MdlCtx *ctx) {
         : : "r"(vec) : "memory");
 }
 
-void func_00217FA0(MdlCtx *ctx) {
+void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector60;
     __asm__ volatile (
         ".set noreorder\n"
@@ -381,7 +381,7 @@ void func_00217FA0(MdlCtx *ctx) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217FB8);
 
-void func_00218010(MdlCtx *ctx) {
+void mdlLoadTertiaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector70;
     __asm__ volatile (
         ".set noreorder\n"
@@ -390,7 +390,7 @@ void func_00218010(MdlCtx *ctx) {
         : : "r"(vec) : "memory");
 }
 
-void func_00218028(MdlCtx *ctx) {
+void mdlStoreTertiaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector70;
     __asm__ volatile (
         ".set noreorder\n"
@@ -399,11 +399,11 @@ void func_00218028(MdlCtx *ctx) {
         : : "r"(vec) : "memory");
 }
 
-u32 func_00218040(MdlCtx *ctx) {
+u32 mdlGetBroadcastValue(MdlCtx *ctx) {
     return ctx->inner->unk1C;
 }
 
-void func_00218050(MdlCtx *ctx, u32 arg1) {
+void mdlSetAllResourceFrames(MdlCtx *ctx, u32 arg1) {
     u32 *node;
 
     for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
@@ -413,12 +413,12 @@ void func_00218050(MdlCtx *ctx, u32 arg1) {
 
 void mdlBroadcastMasked(MdlCtx *ctx, u32 arg1) {
     ctx->inner->unk1C = arg1;
-    func_00218050(ctx, (arg1 & 0xFF000000) | 0x808080);
+    mdlSetAllResourceFrames(ctx, (arg1 & 0xFF000000) | 0x808080);
 }
 
 void mdlBroadcastValue(MdlCtx *ctx, u32 arg1) {
     ctx->inner->unk1C = arg1;
-    func_00218050(ctx, arg1);
+    mdlSetAllResourceFrames(ctx, arg1);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218100);
@@ -431,7 +431,7 @@ void func_00218320(MdlCtx *ctx) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
-        func_002DB768(node);
+        sdfMotionSuspend(node);
     }
 }
 
@@ -439,14 +439,14 @@ void func_00218368(MdlCtx *ctx) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
-        func_002DB788(node);
+        sdfMotionResume(node);
     }
 }
 
 u8 mdlHasNode(MdlCtx *ctx, s32 id) {
     MdlNode *found;
 
-    found = func_00217E10(ctx, id);
+    found = mdlFindNodeById(ctx, id);
     return found != NULL;
 }
 
@@ -467,7 +467,7 @@ u32 mdlGetTableWord(s32 idx) {
 }
 
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
-    MdlNode *node = func_00217E10(ctx, id);
+    MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node == NULL) {
         return 0;
@@ -475,7 +475,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
     return *(u16 *)node->unk8;
 }
 
-void func_00218440(MdlCtx *ctx) {
+void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
     func_002DA1B0(ctx->inner->resourceHandle);
 }
 

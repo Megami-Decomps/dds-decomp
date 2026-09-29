@@ -53,7 +53,7 @@ void func_002C5FB8(u32 arg0) {
     func_00195CD8(arg0, 1, 3);
 }
 
-s32 func_002C5FD8(s32 mask, s32 ordinal) {
+s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     s32 bitIndex = 0;
     s32 count = 0;
     s32 nextIndex;
@@ -388,3 +388,4 @@ INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E00);
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E40);
 
 INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
+

@@ -72,7 +72,7 @@ s32 func_00151FC8(s32 arg0) {
     return *(s32 *)(*(s32 *)(D_003D6438[arg0] + 0x30));
 }
 
-void func_00151FE8(void *dst, void *src) {
+void effCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -95,7 +95,7 @@ void effCopyPosition(BillObj *effect, const void *position) {
     }
 }
 
-void func_00152050(BillObj *effect, s32 mode) {
+void effBillSetMode(BillObj *effect, s32 mode) {
     s32 count;
     s32 remaining;
     s32 entry;
@@ -135,11 +135,11 @@ s32 func_00152170(BillObj *effect) {
     return 0;
 }
 
-u16 func_00152190(BillObj *effect) {
+u16 billGetKind(BillObj *effect) {
     return effect->unk2C;
 }
 
-void func_00152198(BillObj *effect, s32 value) {
+void billSetVariantValue(BillObj *effect, s32 value) {
     s32 v = value & 0xffff;
 
     switch (effect->unk2C) {
@@ -152,7 +152,7 @@ void func_00152198(BillObj *effect, s32 value) {
     }
 }
 
-u16 func_001521D0(BillObj *effect) {
+u16 billGetVariantValue(BillObj *effect) {
     switch (effect->unk2C) {
     case 0:
         return *(u16 *)((u8 *)effect->unk30 + 4);
@@ -163,13 +163,13 @@ u16 func_001521D0(BillObj *effect) {
     }
 }
 
-void func_00152200(s32 arg0, s32 arg1) {
+void billSetKind1Entry(s32 arg0, s32 arg1) {
     if ((*(u16 *)(arg0 + 0x2c) == 1) && (*(s32 *)(arg0 + 0x58) != arg1)) {
         func_001518D8(arg0, arg1);
     }
 }
 
-s32 func_00152240(s32 arg0) {
+s32 billGetKindOneEntry(s32 arg0) {
     if (*(u16 *)(arg0 + 0x2c) == 1) {
         return *(s32 *)(arg0 + 0x58);
     }
@@ -223,7 +223,7 @@ void func_001522E8(s32 arg0, u32 arg1) {
     }
 }
 
-s32 func_00152348(s32 arg0) {
+s32 billGetFirstEntryFramePeriod(s32 arg0) {
     if (*(u16 *)(arg0 + 0x2c) == 1) {
         return *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x60) + 0xc) + 0xc);
     }
@@ -262,7 +262,7 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00152408);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
 
-u8 *func_001525C8(s32 arg0) {
+u8 *billCreateUnitObject(s32 arg0) {
     u8 *obj = func_002CFEB8(0x88);
 
     *(s32 *)(obj + 0x80) = billCreateIndexed(1, arg0);
@@ -272,7 +272,7 @@ u8 *func_001525C8(s32 arg0) {
     return obj;
 }
 
-u8 *func_00152650(u8 *src) {
+u8 *billCloneUnitObject(u8 *src) {
     u8 *obj = func_002CFEB8(0x88);
 
     *(s32 *)(obj + 0x80) = func_00151E60(*(s32 *)(src + 0x80));
@@ -287,20 +287,20 @@ u8 *func_00152650(u8 *src) {
 }
 
 void effDestroy(u32 arg0) {
-    func_002DAA68(*(u32 *)(arg0 + 0x84));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x84));
     billDispatchByKind(*(u32 *)(arg0 + 0x80));
     func_002CFF98(arg0);
 }
 
 void func_00152758(s32 arg0, s128 *arg1) {
-    func_00151FE8(*(s128 **)(arg0 + 0x80), arg1);
+    effCopyVector(*(s128 **)(arg0 + 0x80), arg1);
 }
 
-void func_00152770(s32 arg0, float arg1) {
+void billSetChildScale2(s32 arg0, float arg1) {
     func_00152000(*(s32 *)(arg0 + 0x80), arg1, arg1);
 }
 
-void func_00152790(u8 *dst, void *src) {
+void effCopyMatrixToNext(u8 *dst, void *src) {
     __asm__ volatile(
         "lqc2 $vf28, 0x0(%0)\n\t"
         "lqc2 $vf29, 0x10(%0)\n\t"
@@ -318,7 +318,7 @@ void func_00152790(u8 *dst, void *src) {
         : : "r"(dst) : "memory");
 }
 
-void func_001527C0(s32 arg0, u32 arg1) {
+void billSetChildValue(s32 arg0, u32 arg1) {
     func_00152010(*(s32 *)(arg0 + 0x80), arg1);
 }
 
@@ -666,7 +666,7 @@ void func_00156650(float arg0, s32 arg1) {
     *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
 }
 
-s32 func_00156688(s32 source) {
+s32 billCloneTemplateSmall(s32 source) {
     s32 copy = (s32)func_002CFEB8(0x170);
     s32 tailLen = 0x20;
 
@@ -732,7 +732,7 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00156CD8);
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00156F30);
 
-void func_00157140(EffTemplatePacketList *effect) {
+void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     s32 i = 0;
     EffectBufferRecord *record = effect->buffer->records;
     if (effect->packetCount != 0) {
@@ -762,7 +762,7 @@ s32 func_001571D8(s32 source) {
     memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
     memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
     func_00153740(copy);
-    func_00157140(copy);
+    effApplyTemplateScaleToRecords(copy);
     return copy;
 }
 

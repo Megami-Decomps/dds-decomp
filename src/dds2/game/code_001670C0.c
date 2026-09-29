@@ -57,7 +57,7 @@ void func_001672D8(EffectDispatchState *effect, u32 value) {
     effect->value60 = value;
 }
 
-void func_001672E0(BillWork *work, u8 value) {
+void effBillSetWorkValue(BillWork *work, u8 value) {
     if (work->pendingCount == 0) {
         work->stagedValue = value;
     }
@@ -74,7 +74,7 @@ void func_00167300(EffectDispatchState *effect, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167308);
 
-void func_001673E0(EffectDispatchState *effect, s32 index, u32 value) {
+void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 
@@ -123,3 +123,4 @@ INCLUDE_SDATA(const s32, "game/code_001670C0", D_00436408);
 INCLUDE_SDATA(const s32, "game/code_001670C0", D_0043640C);
 
 INCLUDE_SDATA(const s32, "game/code_001670C0", D_00436410);
+

@@ -21,7 +21,7 @@ typedef struct Work2C {
 typedef struct Work30 {
     u8 data[0x30];
 } Work30;
-/* Slot addressed by func_0018E660/effInitSlotTail with a 0x60 stride. Only the
+/* Slot addressed by effGetSlotAtIndex/effInitSlotTail with a 0x60 stride. Only the
  * tail is known: two words cleared and a float reset to 0.05f. */
 typedef struct Slot60 {
     u8 pad[0x54];
@@ -107,7 +107,7 @@ extern void func_00187C08(Work18 *arg);
 extern void func_00188068(BDWork24 *arg);
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E218);
 
-void func_0018E2A8(EffArrHdr *header) {
+void effReleaseArrayAllocation(EffArrHdr *header) {
     func_002D0918((u32)header->unk8);
 }
 
@@ -124,7 +124,7 @@ void effInitSlotTail(SlotTab *tab, s32 idx) {
     slot->unk54 = slot->unk58 = 0;
 }
 
-s32 func_0018E660(SlotTab *table, s32 index) {
+s32 effGetSlotAtIndex(SlotTab *table, s32 index) {
     return (s32)&table->slots[index];
 }
 
@@ -336,7 +336,7 @@ extern void func_0018CDF8(void);
 extern void func_0018CDF0(void *);
 extern void func_0018CE00(void);
 
-s32 func_0018F8F8(void) {
+s32 effUpdateCh72Params(void) {
     u8 ready = D_003BB0BD;
 
     if (D_003BB0BD == 0) {

@@ -87,7 +87,7 @@ typedef struct SoundIpuBuffer {
 } SoundIpuBuffer;
 
 /* The relocation command stream begins at payload + relocationOffset.
- * Its byte-coded entries in func_00344120 add payload to selected words. */
+ * Its byte-coded entries in sdfRelocatePackedResourceWords add payload to selected words. */
 typedef struct SdfRelocResource {
     u8 pad00[0x10];
     s32 relocationOffset;
@@ -157,7 +157,7 @@ void sdfSoundSetChannelCount(u32 channels) {
     func_003417A8((channels - 1) | 0x1d0, 0, 0, 0);
 }
 
-u32 func_00342728(u32 command) {
+u32 sdfSoundTryQueueCommand(u32 command) {
     if (D_00438B8C != 0) {
         return 0;
     }
@@ -167,7 +167,7 @@ u32 func_00342728(u32 command) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342748);
 
-u32 func_00342790(void) {
+u32 sdfSoundGetCommandStatus(void) {
     return D_00438B8C;
 }
 
@@ -303,7 +303,7 @@ s32 func_00344010(SdfRelocResource *resource) {
 
     /* Required to match: integer address arithmetic, not &resource->payload. */
     payload = (s32)resource + 0x20;
-    func_00344120(payload, payload, payload + resource->relocationOffset, resource->relocationCount);
+    sdfRelocatePackedResourceWords(payload, payload, payload + resource->relocationOffset, resource->relocationCount);
     return payload;
 }
 
@@ -319,7 +319,7 @@ s32 func_00344098(SdfRelocResource *resource) {
 
     /* Required to match: the typed member address changes one instruction. */
     payload = (s32)resource + 0x20;
-    func_00344120(payload, payload, payload + resource->relocationOffset, resource->relocationCount);
+    sdfRelocatePackedResourceWords(payload, payload, payload + resource->relocationOffset, resource->relocationCount);
     return payload;
 }
 
@@ -330,7 +330,7 @@ u64 func_003440D8(u64 arg0, s32 *out) {
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344120);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfRelocatePackedResourceWords);
 
 void func_00344208(SdfStreamNode *node, s32 inInterrupt) {
     s32 interruptsEnabled = 0;
@@ -415,7 +415,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_003444F8);
 
 extern void *memset(void *, s32, u32);
 
-void func_00344768(u8 *dst, u8 *src) {
+void sdfSoundInitNodeFromFormat(u8 *dst, u8 *src) {
     memset(dst, 0, 0x8C);
     if (src[0] == 0) {
         dst[0x14] = 0;
@@ -434,7 +434,7 @@ extern void func_00344420();
 
 void func_003447D8(u8 *state, s32 arg1, u8 *src, s32 size) {
     s32 interruptsEnabled;
-    func_00344768(state, arg1);
+    sdfSoundInitNodeFromFormat(state, arg1);
     *(u16 *)(state + 0x3C) = *(u16 *)(src + 8);
     *(s32 *)(state + 0x40) = *(s32 *)(src + 0xC);
     *(u16 *)(state + 0x3E) = *(u16 *)(src + 0xA);
@@ -449,10 +449,10 @@ void func_003447D8(u8 *state, s32 arg1, u8 *src, s32 size) {
 }
 
 extern s32 func_003283E0(s32);
-extern void func_00344768();
+extern void sdfSoundInitNodeFromFormat();
 
-void func_00344870(u8 *state, s32 arg1, s32 arg2, s32 arg3) {
-    func_00344768(state, arg1);
+void sdfSoundInitFormattedNode(u8 *state, s32 arg1, s32 arg2, s32 arg3) {
+    sdfSoundInitNodeFromFormat(state, arg1);
     *(s32 *)(state + 0x5C) = arg2;
     *(s32 *)(state + 0x60) = arg3;
     state[0xC] = 1;
@@ -539,7 +539,7 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
 extern void func_0032AEA0(s32, s32);
 extern void func_003444F8();
 
-s32 func_00345408(MidiPlaybackState *state) {
+s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     u32 *selectedBuffer;
     if (state->pending == 0) {
         return 0;
@@ -556,7 +556,7 @@ s32 func_00345408(MidiPlaybackState *state) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345488);
 
-void func_003455F0(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void sdfSoundInitAndAppendNode(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_003447D8(state, arg1, arg2, arg3);
     *(s32 *)(state + 0x34) = arg4;
     sdfSoundAppendNode((SoundNode *)state);
@@ -581,11 +581,11 @@ void func_00345628(s32 arg0, SdfStreamParams *params, s32 arg2, s32 arg3, u8 *so
         local.mode = 1;
         break;
     }
-    func_003455F0(arg0, &local, arg2, arg3, sdfTexGetPrimaryResourceWord(source));
+    sdfSoundInitAndAppendNode(arg0, &local, arg2, arg3, sdfTexGetPrimaryResourceWord(source));
 }
 
-void func_003456C0(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_00344870(state, arg1, arg2, arg3);
+void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    sdfSoundInitFormattedNode(state, arg1, arg2, arg3);
     *(s32 *)(state + 0x34) = arg4;
     sdfSoundAppendNode((SoundNode *)state);
 }
@@ -776,3 +776,4 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D1C);
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D20);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D23);
+

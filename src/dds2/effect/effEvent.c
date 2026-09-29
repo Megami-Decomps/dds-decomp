@@ -21,7 +21,7 @@ void effEventReleaseNode(EffEventNode *node) {
     func_00328E48(node);
 }
 
-void func_00197E70(FileRecordHeader *destination, const FileRecordHeader *source) {
+void effEventCopyFileRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
     *destination = *source;
 }
 
@@ -51,7 +51,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00198460);
 
 void effEventBindEffect(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x34) = arg1;
-    func_00197E70(*(u32 *)(arg0 + 4), arg0 + 8);
+    effEventCopyFileRecordHeader(*(u32 *)(arg0 + 4), arg0 + 8);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001984D8);

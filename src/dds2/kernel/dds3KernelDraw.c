@@ -221,7 +221,7 @@ void kwlnDrawEnableE08(s32 mode) {
     }
 }
 
-void func_00106810(s32 transition, s32 x, s32 y) {
+void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     if (transition == 0) {
         D_00435CDA = (s16)x;
         D_00435CDC = (s16)y;

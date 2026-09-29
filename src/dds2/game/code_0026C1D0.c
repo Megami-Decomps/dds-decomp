@@ -36,7 +36,7 @@ typedef struct EvtResourcePair {
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C1D0);
 
 void func_0026C240(void) {
-    func_00106810(0, 0, 0);
+    kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
     func_00196FE8();
@@ -59,7 +59,7 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C318);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C388);
 
-s32 func_0026C3E0(u8 *left, u8 *right) {
+s32 evtCompareBytesAscending(u8 *left, u8 *right) {
     u8 leftValue = *left;
     u8 rightValue = *right;
 
@@ -84,14 +84,14 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C458);
 
-void func_0026C4F0(u32 resource, EvtResourcePair *record) {
+void evtLoadResourcePair(u32 resource, EvtResourcePair *record) {
     u32 value;
 
     value = func_00343ED0(resource, &record->input, 0);
     record->handle = value;
 }
 
-void func_0026C520(EvtResourcePair *record) {
+void evtReleaseResourcePairHandle(EvtResourcePair *record) {
     func_003297C8(record->handle);
 }
 
@@ -196,18 +196,18 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C948);
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C9B8);
 
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (func_00101700(task) == 1) {
+    if (kwlnTaskGetRegisteredState(task) == 1) {
         return 1;
     }
-    if (func_00101700(task) == 2) {
+    if (kwlnTaskGetRegisteredState(task) == 2) {
         return 1;
     }
-    return func_00101700(task) == 3;
+    return kwlnTaskGetRegisteredState(task) == 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CA60);
+INCLUDE_ASM(const s32, "game/code_0026C1D0", evtClearActiveFlag);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CA70);
+INCLUDE_ASM(const s32, "game/code_0026C1D0", evtIsActiveFlagSet);
 
 s32 func_0026CA80(s32 arg0, s32 arg1) {
     if (arg0 < 0x10) {
@@ -223,7 +223,7 @@ u32 func_0026CAA8(s32 arg0) {
     return D_00453CC0[arg0];
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CAD0);
+INCLUDE_ASM(const s32, "game/code_0026C1D0", evtSetCurrentActiveFlag);
 
 s32 evtActivateCurrentFlag(void) {
     s32 index = func_0010D650(0);

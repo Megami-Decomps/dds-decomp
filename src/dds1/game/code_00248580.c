@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248658);
 
-void func_00248700(MenuProgressOwner *owner) {
+void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     MenuProgressNode *node = owner->firstProgressNode;
     if (node != 0) {
         s32 base = D_003BAA00;
@@ -116,7 +116,7 @@ void func_00248C38(s32 arg0) {
     }
 }
 
-void func_00248C80(u8 *scene) {
+void mnuUpdateGroupResources(u8 *scene) {
     u8 *node = *(u8 **)(*(u8 **)(scene + 0x74) + 0x10);
 
     while (node != NULL) {
@@ -125,7 +125,7 @@ void func_00248C80(u8 *scene) {
     }
 }
 
-void func_00248CF8(s32 owner) {
+void mnuDestroyThresholdNodePanels(s32 owner) {
     s32 entry;
 
     for (entry = *(s32 *)(*(s32 *)(owner + 0x74) + 0x10); entry != 0; entry = *(s32 *)(entry + 0x58)) {
@@ -167,7 +167,7 @@ extern void func_002491B8(void);
 
 extern u8 D_003BC3F8[];
 
-s32 func_002492F8(s32 *items, s32 count, s32 excluded, s32 callback) {
+s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
     s32 list = func_0027B2F8(0, count, 0x15, callback);
     s32 i;
     *(s32 *)(list + 0x30) = callback;
@@ -222,13 +222,13 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249498);
 extern void func_0027B368(u32);
 extern void mnuReleaseStaffImageHandles(u8 *);
 
-void func_002495F8(u8 *work) {
+void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
     for (i = 0; i < 1; i++) {
         func_0027B368(*(u32 *)(work + 0x70 + i * 4));
     }
-    func_00248CF8((s32)work);
+    mnuDestroyThresholdNodePanels((s32)work);
     mnuReleaseStaffImageHandles(work + 0xE0);
     func_00248E18((s32)work);
     func_0027B368(*(u32 *)(work + 0x78));
@@ -236,10 +236,10 @@ void func_002495F8(u8 *work) {
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void func_00220110(s32);
-extern void func_0024DED8(s32);
+extern void evtClearActiveFlag(s32);
 extern void func_0024DEF8(s32, s32);
 
-void func_00249668(s32 skip, u8 *work) {
+void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
     if (skip == 0) {
         s32 mode = *(s32 *)(work + 0x7C);
 
@@ -255,7 +255,7 @@ void func_00249668(s32 skip, u8 *work) {
     } else {
         func_00220110(0x322);
     }
-    func_0024DED8(0);
+    evtClearActiveFlag(0);
     func_0024DEF8(1, 1);
 }
 
@@ -272,7 +272,7 @@ extern s32 func_002BC5C0(s32);
 extern void initPartyPanelSlots(s32);
 extern void func_00271500(s32, s32);
 
-u8 *func_002496F0(void) {
+u8 *mnuCreateWorkBlock(void) {
     s32 handle = func_002D03F8(0x82C);
     u8 *work = (u8 *)sdfResourceRetainAddress(handle);
 
@@ -288,7 +288,7 @@ u8 *func_002496F0(void) {
 void func_00249770(u32 *arg0) {
     mnuShutdownContext(arg0 + 100);
     func_00276320(arg0 + 2);
-    func_00271648(arg0 + 2);
+    mnuReleaseStaffResourceGroups(arg0 + 2);
     func_002BC618(arg0[1]);
     func_002D0918(*arg0);
 }
@@ -297,7 +297,7 @@ extern s32 func_002716E8(s32, s32 *);
 extern void func_002762D8(s32 *);
 extern void func_00271480(s32, s32 *, s32, s32);
 
-s32 func_002497C0(u8 *work) {
+s32 mnuTickInitState(u8 *work) {
     s32 state = *(s32 *)(work + 0x80);
     s32 *group;
 
@@ -379,3 +379,4 @@ INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E8);
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F0);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F8);
+

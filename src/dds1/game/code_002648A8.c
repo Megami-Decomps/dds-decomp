@@ -16,7 +16,7 @@ typedef struct {
     s32 displayState; /* 0x1588 */
 } TitleItemScene;
 
-extern void func_00265C28(void *, SceneItem *);
+extern void btlAddBaseStats(void *, SceneItem *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void func_00262AC0(SceneItem *, void *);
 
@@ -24,7 +24,7 @@ void kwlnItemUpdateDisplay(TitleItemScene *scene) {
     SceneItem *item = *scene->itemSlot;
     switch (scene->displayState) {
     case 4:
-        func_00265C28((u8 *)scene + 0x3D0, item);
+        btlAddBaseStats((u8 *)scene + 0x3D0, item);
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 1:

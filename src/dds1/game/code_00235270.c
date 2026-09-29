@@ -106,7 +106,7 @@ typedef struct EvtTaskData {
     s32 value; /* 0x04 */
 } EvtTaskData;
 
-void func_002352E0(s32 taskId, s32 value) {
+void evtCreateTaskWithValue(s32 taskId, s32 value) {
     EvtTaskData *data;
 
     data = (EvtTaskData *)func_002350F8();
@@ -356,7 +356,7 @@ s32 func_00239770(s32 *arg0) {
     return D_00368950[*arg0].unk0 != 0;
 }
 
-s32 func_00239798(EvtRuntime *runtime) {
+s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
     return D_00368952[runtime->tableColumn + *runtime->tableRowIndex * 10];
 }
 
@@ -397,7 +397,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023B848);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023B8F8);
 
-void func_0023B9D8(EvtRuntime *runtime, s32 first, s32 second, s32 third) {
+void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 first, s32 second, s32 third) {
     runtime->commandFirst = first;
     runtime->commandSecond = second;
     runtime->commandThird = third;
@@ -626,7 +626,7 @@ s32 func_0023D970(EvtRuntime *runtime) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023D9D8);
 
-void func_0023DF60(s32 output, s32 *state) {
+void evtWriteRuntimeHeaderValues(s32 output, s32 *state) {
     s32 first = state[4];
     s32 second = state[5];
     s32 third = state[3];
@@ -642,7 +642,7 @@ void func_0023DF60(s32 output, s32 *state) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023DFA8);
 
-void func_0023E138(s32 output, s32 table) {
+void evtWriteFixedSizeEntries(s32 output, s32 table) {
     void *entry;
     s32 index;
 
@@ -848,7 +848,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023EF90);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002416E0);
 
-s32 func_00241878(s32 eventId, s32 variation) {
+s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {
     s32 sequenceId;
 
     sequenceId = 0xC7;
@@ -866,7 +866,7 @@ s32 evtPreloadBgm(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_00241878(id, 0);
+    sound = evtEncodeBgmSoundCode(id, 0);
     func_002E9340(sound);
     return sound;
 }
@@ -875,7 +875,7 @@ s32 evtIsBgmLoaded(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 1;
     }
-    return func_002E92C0(func_00241878(id, 0)) == 1;
+    return func_002E92C0(evtEncodeBgmSoundCode(id, 0)) == 1;
 }
 
 s32 evtPlayBgm(s32 id, s32 fade) {
@@ -883,7 +883,7 @@ s32 evtPlayBgm(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_00241878(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_003003F0("Event BGM play :%08X\n", sound);
     func_002E8D10(sound);
     return sound;
@@ -896,7 +896,7 @@ void evtTransitionBgm(s32 id, s32 fade) {
     }
     sound = -1;
     if (fade >= 0) {
-        sound = func_00241878(id, fade);
+        sound = evtEncodeBgmSoundCode(id, fade);
     }
     func_003003F0("Event BGM trans :%08X\n", sound);
     func_002E9758(sound);
@@ -907,7 +907,7 @@ s32 evtFadeInBgm(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_00241878(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_003003F0("Event BGM fade in play :%08X\n", sound);
     func_002E9690(sound);
     return sound;
@@ -918,7 +918,7 @@ s32 func_00241A50(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_00241878(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_002E96D8(sound);
     return sound;
 }
@@ -928,7 +928,7 @@ s32 evtSetBgmVolumePan(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_00241878(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     sndSetSequenceVolumePan(sound, 0x7F, 0x3F);
     return sound;
 }
@@ -938,7 +938,7 @@ s32 func_00241AE8(s32 id, s32 fade) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
     }
-    sound = func_00241878(id, fade);
+    sound = evtEncodeBgmSoundCode(id, fade);
     func_002E8DD0(sound);
     return sound;
 }
@@ -954,7 +954,7 @@ s32 evtFindTaskById(u32 arg0) {
     return kwlnTaskGetTaskByName(temp_v0);
 }
 
-s32 func_00241B80(u32 arg0) {
+s32 evtGetTaskValueWord(u32 arg0) {
     s32 task;
 
     task = evtFindTaskById(arg0);

@@ -9,7 +9,7 @@ void func_00289DA8(u32 port, u32 request) {
 extern s32 func_002F6858(s32, s32 *, s32 *);
 
 /* Async SDK polling: 0 pending, 1 success, -2 for SDK result -4, -1 otherwise. */
-s32 func_00289DC8(void) {
+s32 mcPollSyncResult(void) {
     s32 command;
     s32 result;
 

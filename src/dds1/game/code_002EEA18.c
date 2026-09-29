@@ -9,12 +9,12 @@ typedef struct SdfAllocWork {
     void *buffer;
 } SdfAllocWork;
 
-extern void func_002EDF60(SdfAllocWork *);
+extern void sdfPacEnqueuePacket(SdfAllocWork *);
 extern void *func_002CFEB8(s32 size);
 extern void func_002EEA18();
 
 void func_002EEAA0(SdfAllocWork *work) {
-    func_002EDF60(work);
+    sdfPacEnqueuePacket(work);
     work->buffer = func_002CFEB8(0x30);
     work->handler = func_002EEA18;
 }
@@ -27,7 +27,7 @@ typedef struct {
     u32 value;   /* 0x04 */
 } SdfWordState;
 
-void func_002EEE98(SdfWordState *work, u32 value) {
+void sdfStoreWordAndSetState(SdfWordState *work, u32 value) {
     work->value = value;
     work->state = 1;
 }
@@ -57,7 +57,7 @@ extern SdfStreamCfg D_003FF340;
 extern u8 D_003FF4C0[];
 extern void func_002E6D48();
 
-void func_002EF3D0(void) {
+void sdfStreamSendChunk(void) {
     s32 length = D_003FF340.length;
 
     if (length > 0x4000) {
@@ -116,7 +116,7 @@ typedef struct SdfPool {
 extern void func_002EFA58();
 extern void func_002EFC68();
 
-void func_002EFB30(SdfPool *pool, SdfPoolNode *node) {
+void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
     if (node->unk4 != 0) {
         if (node->kind == SDF_POOL_FREE_KIND) {
             node->next = pool->free;
@@ -147,11 +147,11 @@ void func_002EFCD0(SdfPool *pool, s32 mode, SdfPoolNode *node) {
     }
 }
 
-extern void func_002EFB30();
+extern void sdfReleasePoolNode();
 extern void func_002EFCD0();
 
 void func_002EFD30(u32 *work) {
-    work[4] = (u32)func_002EFB30;
+    work[4] = (u32)sdfReleasePoolNode;
     work[5] = (u32)func_002EFCD0;
 }
 

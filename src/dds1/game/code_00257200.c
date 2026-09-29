@@ -45,7 +45,7 @@ void mnuCopySceneCoordinates(SceneCoordWork *work) {
     } while (remaining >= 0);
 }
 
-void func_00257EB0(s32 *frame) {
+void mnuAdvanceWrappingFrame(s32 *frame) {
     s32 previous;
 
     previous = *frame;

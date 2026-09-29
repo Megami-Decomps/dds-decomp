@@ -76,7 +76,7 @@ extern void func_00105890(void);
 
 extern void evtUnk8A48Ensure(void);
 
-extern void func_002D0E88(s32 arg0);
+extern void sdfGraphSetDisplayMode(s32 arg0);
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void func_00105010(void *, s32, s32);
@@ -256,7 +256,7 @@ s32 kwlnEnsureDefaultResource(void) {
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105150);
 
 void func_00105320(void) {
-    func_002D0E88(1);
+    sdfGraphSetDisplayMode(1);
     func_002E1718(&D_003245E0);
     func_002E1718(&D_00324980);
     func_00105150(0);
@@ -272,7 +272,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001054D0);
 
 void func_001055C0(void) {
     if (D_003BA8F8 != 0) {
-        func_002D2CB8(D_003BA8F8);
+        sdfTexReleaseReference(D_003BA8F8);
     }
     D_003BA8F8 = 0;
     D_003BA8F4 = 0;

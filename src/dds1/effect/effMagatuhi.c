@@ -11,7 +11,7 @@ typedef struct {
     u8    pad0C[0x0C];  /* 0x0C */
     u32  *out18;        /* 0x18 result table */
     u8    pad1C[4];     /* 0x1C */
-    u32  *unk20;        /* 0x20 table written by func_00189B90 */
+    u32  *unk20;        /* 0x20 table written by effMagatuhiSetValue */
     u8    pad24[0x10];  /* 0x24 */
     void *resource;     /* 0x34 released by effMagatuhiReleaseResource */
 } EffMagatuhiWork; /* 0x38 */
@@ -81,7 +81,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001893D8);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189818);
 
-void func_00189B90(EffMagatuhiWork *work, s32 index, u32 value) {
+void effMagatuhiSetValue(EffMagatuhiWork *work, s32 index, u32 value) {
     work->unk20[index] = value;
 }
 
@@ -95,7 +95,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189C98);
 
 void func_00189E60(EffMagatuhiBigWork *work) {
     effMathReleaseWorkResource(work->unk180);
-    func_00189178(work->unk18C);
+    effReleaseSceneResource(work->unk18C);
     func_002D0918(work->unk190);
 }
 
@@ -120,7 +120,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A678);
 
 void func_0018A800(EffMagatuhiBigWork *work) {
     effMathReleaseWorkResource(work->unk184);
-    func_00189178(work->unk188);
+    effReleaseSceneResource(work->unk188);
     func_002D0918(work->unk18C);
 }
 
@@ -135,7 +135,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018ADD8);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018AFE8);
 
 void func_0018B1D0(EffMagatuhiMidWork *work) {
-    func_00189178(work->unk120);
+    effReleaseSceneResource(work->unk120);
     func_002D0918(work->unk128);
 }
 
@@ -147,7 +147,7 @@ void func_0018B600(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_0018B618(EffMagatuhiMidWork *work, void *value) {
+void effMagatuhiSetSecondResource(EffMagatuhiMidWork *work, void *value) {
     work->unk124 = value;
 }
 
@@ -160,7 +160,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B648);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B850);
 
 void func_0018BA00(EffMagatuhiMidWork *work) {
-    func_00189178(work->unk124);
+    effReleaseSceneResource(work->unk124);
     func_002D0918(work->unk12C);
 }
 
@@ -185,7 +185,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE98);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C0C0);
 
 void func_0018C2A8(EffMagatuhiMidWork *work) {
-    func_00189178(work->unk124);
+    effReleaseSceneResource(work->unk124);
     func_002D0918(work->unk128);
 }
 
@@ -197,7 +197,7 @@ void func_0018C7A8(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_0018C7C0(EffMagatuhiMidWork *work, void *value) {
+void effMagatuhiSetFirstResource(EffMagatuhiMidWork *work, void *value) {
     work->unk120 = value;
 }
 

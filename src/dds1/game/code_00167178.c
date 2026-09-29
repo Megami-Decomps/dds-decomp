@@ -48,16 +48,16 @@ INCLUDE_ASM(const s32, "game/code_00167178", func_00169940);
 
 typedef struct EffFragmentResources {
     u8 pad00[0x20];
-    u32 resource; /* 0x20: released by func_002DAA68 */
+    u32 resource; /* 0x20: released by sdfQueueAssetRelease */
     u32 buffer;   /* 0x24: released by func_002D0918 */
 } EffFragmentResources;
 
-void func_00169B40(EffFragmentResources *work) {
-    func_002DAA68(work->resource);
+void effReleaseEffectResources(EffFragmentResources *work) {
+    sdfQueueAssetRelease(work->resource);
     func_002D0918(work->buffer);
 }
 
-void func_00169B70(u32 *arg0) {
+void effInitializeColorState(u32 *arg0) {
     arg0[4] = 3;
     *arg0 = 0x80808080;
     arg0[3] = 0;

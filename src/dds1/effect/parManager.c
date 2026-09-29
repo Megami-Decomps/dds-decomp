@@ -8,9 +8,9 @@ typedef struct {
     void *unkFC;     /* 0xFC */
     u8 pad100[0x40]; /* 0x100 */
     u16 dispatchIndex; /* 0x140 selects D_0034E250/D_0034E258/D_0034E2F0 */
-    u16 restartFlag; /* 0x142 read by func_0015A6E0, set to 1 by parRestartKind */
+    u16 restartFlag; /* 0x142 read by parGetRestartFlag, set to 1 by parRestartKind */
     u8 pad144[0x30]; /* 0x144 */
-    void *child;      /* 0x174 released by func_00158F68 */
+    void *child;      /* 0x174 released by parReleaseObject */
 } ParObj;
 
 typedef struct {
@@ -46,7 +46,7 @@ void func_002D0918(void *arg);
 void effDestroyResources(void *arg);
 void func_002CFF98(void *arg);
 
-void func_00158F68(ParObj *obj) {
+void parReleaseObject(ParObj *obj) {
     if (obj->child != NULL) {
         func_002D0918(obj->child);
     }
@@ -112,7 +112,7 @@ void parRestartKind(ParObj *obj) {
 
 INCLUDE_ASM(const s32, "effect/parManager", func_0015A658);
 
-u16 func_0015A6E0(ParObj *obj) {
+u16 parGetRestartFlag(ParObj *obj) {
     return obj->restartFlag;
 }
 

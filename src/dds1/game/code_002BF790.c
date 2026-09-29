@@ -88,7 +88,7 @@ s32 func_002BF970(s32 object, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
 
-void func_002BFA80(u8 *object, s32 index, s32 x, s32 y,
+void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
     u32 *destination = (u32 *)(*(u8 **)(object + 0x18) + index * 0xA0 + 0x6C);
@@ -112,7 +112,7 @@ void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     widget->height = height;
 }
 
-void func_002BFB50(s32 owner, s32 index) {
+void itfCopyGridEntryWords(s32 owner, s32 index) {
     u32 *destination;
     s32 remaining;
 
@@ -327,7 +327,7 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     return 1;
 }
 
-GridTextWidget *func_002C1770(const char *text, s32 x, s32 y, s32 columns, s32 rows,
+GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                u32 reference) {
     GridTextWidget *widget = (GridTextWidget *)func_002CFEB8(0x40);
     u32 length;
@@ -368,7 +368,7 @@ void itfSetGridDimensions(GridTextWidget *work, s32 columns, s32 rows) {
     }
 }
 
-u32 func_002C18C8(GridTextWidget *widget) {
+u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     s64 next;
 
     func_002CFF98(widget->text);
@@ -379,7 +379,7 @@ u32 func_002C18C8(GridTextWidget *widget) {
     return 1;
 }
 
-u32 func_002C1910(GridTextWidget *widget) {
+u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     u32 list;
 
     func_002CFF98(widget->text);
@@ -388,7 +388,7 @@ u32 func_002C1910(GridTextWidget *widget) {
         do {
             u32 child = *(u32 *)(list + 0x20);
             if (child != 0) {
-                func_002C1910((GridTextWidget *)child);
+                itfDestroyGridTextWidgetTree((GridTextWidget *)child);
             }
             list = func_002C1B30(widget);
         } while (list != 0);
@@ -397,7 +397,7 @@ u32 func_002C1910(GridTextWidget *widget) {
     return 1;
 }
 
-void expandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
+void itfExpandGridWidgetColumnWidth(s32 columns, GridTextWidget *work) {
     s32 flags = work->flags;
     s32 width;
     if (flags & 0x100) {
@@ -431,7 +431,7 @@ void func_002C1CC8(GridTextWidget *widget, u8 *node, const char *text) {
     *(char **)node = copy;
     memcpy(copy, text, allocation);
     if (widget != NULL) {
-        expandWidgetColumnWidth(length, widget);
+        itfExpandGridWidgetColumnWidth(length, widget);
     }
 }
 
@@ -578,3 +578,4 @@ INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD220);
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD228);
 
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD230);
+

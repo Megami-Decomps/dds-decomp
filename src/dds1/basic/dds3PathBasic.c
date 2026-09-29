@@ -61,14 +61,14 @@ void *memset(void *s, s32 c, u32 n);
 void effFreeBuffers(s32 arg);
 void func_002CFF98(void *arg);
 
-void func_00116F08(PathObj *path) {
+void dds3FreePathObject(PathObj *path) {
     effFreeBuffers(path->bufferHandle);
     func_002CFF98(path);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F38);
 
-void func_00117050(PathObj *path) {
+void dds3PreparePathVectorPair(PathObj *path) {
     s32 index;
     f32 fraction;
     PathData18 *vectorData;

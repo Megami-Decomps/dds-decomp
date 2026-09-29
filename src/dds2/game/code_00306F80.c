@@ -53,7 +53,7 @@ s32 func_00307160(s32 object, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003071D0);
 
-void func_00307270(u8 *object, s32 index, s32 x, s32 y,
+void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
     u32 *destination = (u32 *)(*(u8 **)(object + 0x18) + index * 0xA0 + 0x6C);
@@ -77,7 +77,7 @@ void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     widget->height = height;
 }
 
-void func_00307340(s32 object, s32 index) {
+void itfGridCopyEntryQuad(s32 object, s32 index) {
     u32 *destination;
     s32 remaining;
 
@@ -363,7 +363,7 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     return 1;
 }
 
-u8 *func_00309278(const char *text, s32 x, s32 y, s32 columns, s32 rows,
+u8 *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                   u32 reference) {
     u8 *widget = (u8 *)func_00328D68(0x40);
     u32 length;
@@ -404,7 +404,7 @@ void itfSetGridDimensions(u8 *work, s32 columns, s32 rows) {
     }
 }
 
-u32 func_003093D0(u32 arg0) {
+u32 itfDestroyGridTextWidget(u32 arg0) {
     s64 temp_v0;
 
     func_00328E48(*(u32 *)arg0);
@@ -415,7 +415,7 @@ u32 func_003093D0(u32 arg0) {
     return 1;
 }
 
-u32 func_00309418(u32 work) {
+u32 itfDestroyGridTextWidgetTree(u32 work) {
     u32 list;
 
     func_00328E48(*(u32 *)work);
@@ -424,7 +424,7 @@ u32 func_00309418(u32 work) {
         do {
             u32 child = *(u32 *)(list + 0x20);
             if (child != 0) {
-                func_00309418(child);
+                itfDestroyGridTextWidgetTree(child);
             }
             list = func_00309638(work);
         } while (list != 0);
@@ -433,7 +433,7 @@ u32 func_00309418(u32 work) {
     return 1;
 }
 
-void expandWidgetColumnWidth(s32 columns, u8 *work) {
+void itfExpandWidgetColumnWidth(s32 columns, u8 *work) {
     s32 flags = *(s32 *)(work + 0xc);
     s32 width;
     if (flags & 0x100) {
@@ -467,7 +467,7 @@ void func_003097D0(u8 *widget, u8 *node, const char *text) {
     *(char **)node = copy;
     memcpy(copy, text, allocation);
     if (widget != NULL) {
-        expandWidgetColumnWidth(length, widget);
+        itfExpandWidgetColumnWidth(length, widget);
     }
 }
 

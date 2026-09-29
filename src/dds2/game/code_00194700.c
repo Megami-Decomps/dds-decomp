@@ -257,7 +257,7 @@ void effRunIfEnabled(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00194B28);
+INCLUDE_ASM(const s32, "game/code_00194700", effNextDataDirEntry);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194BD0);
 
@@ -350,7 +350,7 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_00195810);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195890);
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00195978);
+INCLUDE_ASM(const s32, "game/code_00194700", effBlendColor);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195A30);
 
@@ -488,3 +488,4 @@ INCLUDE_SDATA(const s32, "game/code_00194700", D_00436440);
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436448);
 
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436450);
+

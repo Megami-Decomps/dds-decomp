@@ -23,7 +23,7 @@ extern void sdfDestroyTaskWork(s32);
 extern void func_0026DED0(s32, s32, u8 *, s32);
 extern u8 *func_002CAF78(s32, u8 *);
 
-s32 func_0026E188(s32 owner, s32 group) {
+s32 mnuTickMovieGroup(s32 owner, s32 group) {
     u8 *list = *(u8 **)(group + 8);
     u8 *node;
 
@@ -78,7 +78,7 @@ typedef struct {
     s32 tasks[10];
 } MovieResourceGroup;
 
-void func_0026E5A0(MovieResourceGroup *resources) {
+void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
         if (resources->tasks[i] != 0) {

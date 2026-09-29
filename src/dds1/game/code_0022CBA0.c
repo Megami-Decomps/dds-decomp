@@ -5,7 +5,7 @@ extern void *func_00101A70(void);
 extern s32 D_003BAA00;
 extern char D_003ADB20[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
-s32 func_0022F408(s32 arg0);
+s32 evtViewerHasUpdateFlag(s32 arg0);
 void func_00232720(void);
 void func_00134C68(void);
 void func_00101A80(s32 arg0, s32 arg1);
@@ -18,7 +18,7 @@ void func_0022E5A0(s32 arg0, void *arg1);
 void func_0022FF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 dds3GetWorldObject(void);
 void func_001109B8(s32 arg0, u32 arg1);
-f32 func_00112ED8(s32 arg0);
+f32 dds3GetCameraValue(s32 arg0);
 s32 func_00106488(f32 arg0);
 
 typedef struct EventViewerState {
@@ -45,7 +45,7 @@ typedef struct EventViewerState {
     u32 glyph; /* 0x2410: FrFontGlyph passed to func_00195868 */
 } EventViewerState;
 
-u16 func_0022FF98(EventViewerState *viewer);
+u16 evtViewerPopHistory(EventViewerState *viewer);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CBA0);
 
@@ -53,7 +53,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CC40);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CD30);
 
-void func_0022CE68(EventViewerState *viewer) {
+void evtViewerApplySelectedEntry(EventViewerState *viewer) {
     s32 entry;
     s32 selected;
 
@@ -67,7 +67,7 @@ void func_0022CE68(EventViewerState *viewer) {
         return;
     }
     func_001109B8(dds3GetWorldObject(), entry);
-    func_00106488(func_00112ED8(entry));
+    func_00106488(dds3GetCameraValue(entry));
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CED0);
@@ -97,7 +97,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F1C0);
 void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;
 
-    active = func_0022F408((s32)viewer);
+    active = evtViewerHasUpdateFlag((s32)viewer);
     if (active != 0) {
         viewer->updateCount = viewer->updateCount + 1;
     }
@@ -106,7 +106,7 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F2E0);
 
 /* Required to match: the signed raw load generates the original flag test. */
-s32 func_0022F408(s32 arg0) {
+s32 evtViewerHasUpdateFlag(s32 arg0) {
     return (*(s32 *)(arg0 + 4) & 0x10) > 0;
 }
 
@@ -121,7 +121,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 void func_0022F9F0(void) {
 }
 
-void func_0022F9F8(EventViewerState *viewer) {
+void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
     s32 nextTick;
 
     if ((*(s32 *)((u8 *)viewer + 0x18) < *(s32 *)((u8 *)viewer + 0x14) - 3) && (0 < viewer->glyphTickCount))
@@ -153,13 +153,13 @@ void func_0022FDE8(u32 arg0) {
     func_0022FB30(1, *(u32 *)(temp_v0 + 0x18), arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FE30);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewFindNextGlyph);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FEB0);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewFindPrevGlyph);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FF30);
 
-u16 func_0022FF98(EventViewerState *viewer) {
+u16 evtViewerPopHistory(EventViewerState *viewer) {
     u16 id;
     s32 index;
 
@@ -274,7 +274,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231840);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231BB0);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetValue);
 
 u32 func_00231C18(u32 arg0, u32 arg1, u32 arg2) {
     s32 p;
@@ -304,7 +304,7 @@ u32 func_00231C18(u32 arg0, u32 arg1, u32 arg2) {
             }
         }
         func_0022E5A0(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        func_0022FF98((EventViewerState *)arg2);
+        evtViewerPopHistory((EventViewerState *)arg2);
         return 0;
     }
 }
@@ -320,7 +320,7 @@ u32 func_00231CC8(u32 arg0, u32 arg1, u32 arg2) {
     if (p != 0) {
         *(s32 *)(p + 0xc) = *(s32 *)(arg2 + 0x2310);
         func_0022E5A0(*(s32 *)(arg2 + 0x18), (void *)arg2);
-        func_0022FF98((EventViewerState *)arg2);
+        evtViewerPopHistory((EventViewerState *)arg2);
         return 0;
     }
 }
@@ -342,24 +342,24 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
             dst++;
         } while (index >= 0);
         func_0022E5A0(*(s32 *)(scene + 0x18), scene);
-        func_0022FF98((EventViewerState *)scene);
+        evtViewerPopHistory((EventViewerState *)scene);
         return 0;
     }
     return (u32)record;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231E90);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetPosition);
 
 u32 func_00231EF8(u32 arg0, u32 arg1, u32 arg2) {
-    func_0022FF98((EventViewerState *)arg2);
+    evtViewerPopHistory((EventViewerState *)arg2);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231F18);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231FF0);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetSlot);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232048);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSelectMode);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232108);
 
@@ -421,7 +421,7 @@ void func_00232D28(void) {
 }
 
 void func_00232D48(void) {
-    func_00243A58();
+    mnuCampInitFontResource();
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232D60);

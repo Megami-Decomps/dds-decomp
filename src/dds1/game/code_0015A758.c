@@ -9,7 +9,7 @@ extern s32 D_003BB010;
  * the type; only the fields this TU touches are named here). */
 typedef struct ParObj {
     u8 pad00[0x8C];   /* 0x00 */
-    f32 unk8C;        /* 0x8C scaled by func_0015AD08 */
+    f32 unk8C;        /* 0x8C scaled by effParScaleComponent */
     u8 pad90[0x14];   /* 0x90 */
     u32 unkA4;        /* 0xA4 */
     u8 padA8[0x48];   /* 0xA8 */
@@ -44,7 +44,7 @@ typedef struct ParCell {
 extern ParDispatch D_0034E250[];
 extern s32 func_00151E60(s32);
 extern void func_00152000(s32, f32, f32);
-extern void func_00152050(s32, s16);
+extern void effBillSetMode(s32, s16);
 extern void func_001523B0(s32);
 extern ParDispatch D_0034E258[];
 
@@ -60,7 +60,7 @@ extern u8 D_003D64B0[];
 
 extern u8 D_003D64C0[];
 
-extern s32 func_0015A6E0();
+extern s32 parGetRestartFlag();
 
 void func_0015A758(ParObj *work, u32 value) {
     work->unkF0 = value;
@@ -120,7 +120,7 @@ ParObj *parInstantiateKind(ParObj *work) {
     if (*(s32 *)((u8 *)work + 0x28) == -1) {
         s32 transform = func_00151E60(*(s32 *)((u8 *)work + 0xF4));
         func_00152000(transform, *(f32 *)((u8 *)particle + 0x10), *(f32 *)((u8 *)particle + 0x14));
-        func_00152050(transform, *(s16 *)((u8 *)particle + 0x2C));
+        effBillSetMode(transform, *(s16 *)((u8 *)particle + 0x2C));
         func_001523B0(transform);
         *(s32 *)((u8 *)particle + 0xF4) = transform;
     }
@@ -137,13 +137,13 @@ void func_0015ACF0(void) {
     parRestartKind();
 }
 
-void func_0015AD08(float scale, ParObj *work) {
+void effParScaleComponent(float scale, ParObj *work) {
     func_0015A658();
     work->unk8C *= scale;
 }
 
 s64 func_0015AD48(void) {
-    return func_0015A6E0();
+    return parGetRestartFlag();
 }
 
 void func_0015AD68(void *dst, void *src) {
@@ -231,7 +231,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
 
 void func_0015B3D8(u16 *arg0) {
     *arg0 = 1;
-    func_002DAA68(*(u32 *)(arg0 + 0x20));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
     func_002D0918(*(u32 *)(arg0 + 8));
 }
 
@@ -254,7 +254,7 @@ void parControlInit(void) {
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B6A0);
 
 void func_0015B8B8(s32 arg0) {
-    func_002DAA68(*(u32 *)(arg0 + 0x20));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
     func_002D0918(*(u32 *)(arg0 + 0x10));
 }
 
@@ -301,7 +301,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C7A0);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C8C0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CA40);
+INCLUDE_ASM(const s32, "game/code_0015A758", parFillCellVertexQuads);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CAA0);
 
@@ -330,7 +330,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D0C0);
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D710);
 
 void func_0015D7B8(s32 arg0) {
-    func_002DAA68(*(u32 *)(arg0 + 0x10));
+    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x10));
     func_002D0918(*(u32 *)(arg0 + 0x14));
 }
 

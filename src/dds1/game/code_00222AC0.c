@@ -96,7 +96,7 @@ extern void func_002223D8(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 extern void func_00222340(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_003003F0();
 extern u8 D_003AC480[];
-extern void func_00221BE0(EvtUnit *unit, void *arg1, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, void *arg1, s32 arg2);
 extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void func_00115318(void *arg0, u32 arg1);
@@ -120,7 +120,7 @@ extern s32 func_0010D5F0(s32 arg0);
 extern void func_0021FD50(s32 arg0, s32 arg1);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
 extern void func_00221FF8(EvtUnit *unit, s32 arg1);
-extern void func_00221C50(EvtUnit *unit, s32 arg1);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 extern void func_00222310(u32 arg0);
 
 typedef struct EvtWorldUnitRef {
@@ -130,7 +130,7 @@ typedef struct EvtWorldUnitRef {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222AC0);
 
-void func_00222B00(EvtUnit *work, s32 objectId, s32 arg2) {
+void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 arg2) {
     EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
@@ -173,7 +173,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223540);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_002235E8);
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_002236E8);
+INCLUDE_ASM(const s32, "game/code_00222AC0", evtSetSlotVector);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223718);
 
@@ -181,14 +181,14 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223828);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223A10);
 
-void *func_00223AA0(s32 type, s32 id) {
+void *evtFindWorldObjectByIdAndKind(s32 type, s32 id) {
     void *ctx;
 
     ctx = dds3GetWorldObject();
     func_00110A48(ctx, id, type);
 }
 
-u32 func_00223AE0(void) {
+u32 evtGetWorldObjectId(void) {
     void *ctx;
     EvtUnit *obj;
     s32 value;
@@ -335,7 +335,7 @@ u32 func_00223E58(void) {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223EB0);
 
-u32 func_00223FB0(void) {
+u32 evtSetWorldUnitFirstVector(void) {
     f32 v[4];
     void *ctx;
     s32 id;
@@ -357,7 +357,7 @@ u32 func_00223FB0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224048);
 
-u32 func_00224130(void) {
+u32 evtSetWorldUnitThirdVector(void) {
     f32 v[4];
     void *ctx;
     s32 id;
@@ -380,7 +380,7 @@ u32 func_00224130(void) {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_002241D0);
 
-u32 func_00224268(void) {
+u32 evtOpSetUnitParams5(void) {
     EvtUnit *unit;
 
     unit = func_00222090(func_0010D428(0));
@@ -399,7 +399,7 @@ u32 func_00224268(void) {
 
 extern void func_00222340(EvtUnit *, s32, s32, s32, s32, s32);
 
-u32 func_00224308(void) {
+u32 evtOpSetUnitParams6(void) {
     EvtUnit *unit;
 
     unit = func_00222090(func_0010D428(0));
@@ -427,7 +427,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_002243D8);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224530);
 
-u32 func_00224638(void) {
+u32 evtOpBeginWindowCallback(void) {
     EvtUnit *unit;
 
     unit = func_00222090(func_0010D428(0));
@@ -566,7 +566,7 @@ u32 func_00224948(void) {
     return 1;
 }
 
-u32 func_00224A18(void) {
+u32 evtOpSetUnitTableEntry(void) {
     EvtUnit *unit;
 
     unit = func_00222090(func_0010D428(0));
@@ -581,7 +581,7 @@ u32 func_00224A18(void) {
     return 1;
 }
 
-u32 func_00224A80(void) {
+u32 evtCommandSetUnitValue(void) {
     s32 id;
     EvtUnit *unit;
 
@@ -636,11 +636,11 @@ u32 func_00224B98(void) {
     unit->unkB2 = 0;
     param1 = func_0010D428(1);
     param2 = func_0010D428(2);
-    func_00222B00(unit, param1, param2);
+    evtAttachSecondaryWorldUnit(unit, param1, param2);
     return 1;
 }
 
-f32 func_00224C08(f32 fromDegrees, f32 toDegrees) {
+f32 evtGetShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     f32 difference;
 
     if (fromDegrees < 0.0f || toDegrees < 0.0f) {
@@ -710,7 +710,7 @@ u32 func_00225190(void) {
     return 1;
 }
 
-u8 func_002251D8(void) {
+u8 evtUnitHasNoStatusFlags(void) {
     s32 id;
     EvtUnit *unit;
     u8 active;
@@ -738,11 +738,11 @@ u32 func_00225560(void) {
 
     id = func_0010D428(0);
     unit = func_00222090(id);
-    target = func_00223AA0(9, func_0010D428(2));
+    target = evtFindWorldObjectByIdAndKind(9, func_0010D428(2));
     if (target == NULL) {
         return 1;
     }
-    func_00221BE0(unit, target, func_0010D428(1));
+    evtSetUnitValueTransition(unit, target, func_0010D428(1));
     return 1;
 }
 
@@ -754,7 +754,7 @@ u32 func_002255D8(void) {
     id = func_0010D428(0);
     unit = func_00222090(id);
     param1 = func_0010D428(1);
-    func_00221C50(unit, param1);
+    evtEndUnitValueTransition(unit, param1);
     return 1;
 }
 
@@ -821,7 +821,7 @@ u32 evtUnitCheckModelCut(void) {
     u32 param1;
 
     id = func_0010D428(0);
-    unit = func_00223AA0(7, id);
+    unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
         param1 = func_0010D428(1);
         if (param1 >= 3U) {
@@ -842,7 +842,7 @@ extern void func_00190308(void *, f32);
 u32 func_00225A60(void) {
     void *unit;
 
-    unit = func_00223AA0(7, func_0010D428(0));
+    unit = evtFindWorldObjectByIdAndKind(7, func_0010D428(0));
     if (unit != NULL) {
         s32 mode = func_0010D428(1);
         s32 index;
@@ -912,7 +912,7 @@ u32 func_00225D80(void) {
     void *obj;
 
     id = func_0010D428(0);
-    obj = func_00223AA0(7, id);
+    obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00115970(obj);
     }
@@ -924,7 +924,7 @@ u32 func_00225DC0(void) {
     void *obj;
 
     id = func_0010D428(0);
-    obj = func_00223AA0(7, id);
+    obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00115970(obj);
     }
@@ -936,7 +936,7 @@ u32 func_00225E00(void) {
     void *obj;
 
     id = func_0010D428(0);
-    obj = func_00223AA0(7, id);
+    obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00110928(obj);
     }

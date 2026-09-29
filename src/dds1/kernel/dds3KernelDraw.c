@@ -286,7 +286,7 @@ void kwlnDrawEnableE08(s32 arg0) {
     }
 }
 
-void func_001068F0(s32 arg0, s32 arg1, s32 arg2) {
+void kwlnDrawSetOffsetTransition(s32 arg0, s32 arg1, s32 arg2) {
     if (arg0 == 0) {
         D_003BA90A = (s16)arg1;
         D_003BA90C = (s16)arg2;

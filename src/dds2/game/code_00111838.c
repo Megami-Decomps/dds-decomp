@@ -14,7 +14,7 @@ typedef struct ObjectWithResource {
     ObjectResource *resource;
 } ObjectWithResource;
 
-INCLUDE_ASM(const s32, "game/code_00111838", func_00111838);
+INCLUDE_ASM(const s32, "game/code_00111838", dds3SpawnSlotRingObj3);
 
 void dds3SetSlotValue(ObjectWithResource *object, u32 value) {
     object->resource->value8 = value;
@@ -30,7 +30,7 @@ void dds3ReplaceObjectResource(ObjectWithResource *object) {
 
     resource = object->resource;
     if (resource->handle != 0) {
-        func_00117170(resource->handle);
+        dds3FreePathObject(resource->handle);
     }
     handle = func_00116FA0(resource->resourceId);
     resource->handle = handle;
@@ -43,7 +43,7 @@ void dds3ReleaseObjectResource(ObjectWithResource *object) {
     resource = object->resource;
     handle = resource->handle;
     if (handle != 0) {
-        func_00117170(handle);
+        dds3FreePathObject(handle);
         resource->handle = 0;
     }
 }

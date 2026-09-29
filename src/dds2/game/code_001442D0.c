@@ -16,7 +16,7 @@ extern u32 D_00435F0C;
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 
-extern void func_002433B0(void);
+extern void evtSetSolarOverlayFullyVisible(void);
 
 extern s32 D_004362C8;
 
@@ -140,11 +140,11 @@ extern void func_00144F60(void);
 
 extern void func_00144F08(void);
 
-extern void func_00144F88(s32 param);
+extern void fldPlayMenuSound(s32 param);
 
 extern void fldPlayFieldSe(s32 param);
 
-extern s32 fldLoadArchive(s32 param);
+extern s32 fldPollArchiveLoad(s32 param);
 
 extern void func_001453D0(s32 param0, s32 param1);
 
@@ -178,7 +178,7 @@ extern void *func_00328D68(s32 size);
 
 extern void func_00101950(s32 arg0, void *arg1);
 
-extern s32 func_00144400(void);
+extern s32 fldFieldTaskUpdate(void);
 
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 
@@ -233,7 +233,7 @@ extern s32 func_00101740(void *name);
 
 extern char D_00413C80[]; /* "fldTitleMini" */
 
-extern void func_001576A0(u32 arg0);
+extern void effUpdateNode(u32 arg0);
 
 extern void func_001132F0(s32 arg0);
 
@@ -297,9 +297,9 @@ extern s32 func_00123238(s32, s32, s32, s32);
 
 extern s32 func_00123338(s32, s32, s32, s32);
 
-extern void func_0014ABA8(s32, s32, s32);
+extern void fldClearFloorFlag(s32, s32, s32);
 
-extern void func_0014AB38(s32, s32, s32);
+extern void fldSetFloorFlag(s32, s32, s32);
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 extern s32 func_0010D650(s32);
@@ -316,7 +316,7 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 D_003AA720[];
 
-extern void func_0032E348(void);
+extern void sdfWaitSlotReady(void);
 
 extern void func_00149CE0(void);
 
@@ -519,7 +519,7 @@ extern u8 D_00380838[];
 
 extern void func_003314B0();
 
-extern void func_00331B18();
+extern void sdfModelUpdateCurrentFrameTransforms();
 
 extern void func_003320E8();
 
@@ -535,7 +535,7 @@ extern s32 func_002CE928(void);
 
 extern s32 D_00435EE0;
 
-s32 func_00144400(void) {
+s32 fldFieldTaskUpdate(void) {
     if (func_00127398() != 0) {
         return 0;
     }
@@ -568,7 +568,7 @@ void *func_00144498(s32 arg0) {
     temp_v0[2] = 0;
     temp_v0[3] = 0;
     func_00101950(arg0, temp_v0);
-    return func_00144400;
+    return fldFieldTaskUpdate;
 }
 
 void func_001444E8(void) {
@@ -668,7 +668,7 @@ void func_00144F60(void) {
     D_00389798[0] = 0;
 }
 
-void func_00144F88(s32 id) {
+void fldPlayMenuSound(s32 id) {
     if (D_00389770[4] < 0x32) {
         if (id >= 0x10) {
             if (id == 0x80) {
@@ -773,7 +773,7 @@ u32 func_00145358(void) {
     return D_00436234;
 }
 
-s32 fldLoadArchive(s32 id) {
+s32 fldPollArchiveLoad(s32 id) {
     s32 name = 0x30000000 + (id << 16);
     s32 result = func_00342168(name);
     if (result == 0) {
@@ -800,7 +800,7 @@ void func_00145428(void) {
     D_00436238 = 0;
 }
 
-s32 func_00145430(void) {
+s32 fldStepArchiveLoad(void) {
     switch (D_00436238) {
     case 0:
         if (func_00342168(0x680000) == 0) {
@@ -907,7 +907,7 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     __asm__ volatile (".set noreorder\n\tvmove.w vf10, vf0\n\t.set reorder");
     __asm__ volatile (".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(emitter->pos) : "memory");
     func_003314B0(handle);
-    func_00331B18(emitter);
+    sdfModelUpdateCurrentFrameTransforms(emitter);
     func_003320E8(D_00380838, emitter);
 }
 
@@ -982,8 +982,8 @@ void fldReleaseResourceSlots(void) {
     D_0044F7F0[2] = 0;
     D_0044F7F0[3] = 0;
     D_0044F7F0[6] = 0;
-    while (func_0032CD98() != 0) {
-        func_0032E348();
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+        sdfWaitSlotReady();
     }
     D_0043626C = 0;
     func_0019D1F8(0x54);
@@ -996,8 +996,8 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00149E08);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00149FE8);
 
 void func_0014A228(void) {
-    func_0032E348();
-    func_0032E348();
+    sdfWaitSlotReady();
+    sdfWaitSlotReady();
     func_00149CE0();
 }
 
@@ -1052,7 +1052,7 @@ void fldSetCurrentFloorFlag(s32 bit) {
     D_00389770[48] = fldFindRecordItem(floor, bitIndex);
 }
 
-void func_0014AB38(s32 area, s32 floor, s32 bit) {
+void fldSetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 index = D_00387CE0[area % 100];
     floor--;
     bit--;
@@ -1064,7 +1064,7 @@ void func_0014AB38(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void func_0014ABA8(s32 area, s32 floor, s32 bit) {
+void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 index = D_00387CE0[area % 100];
     floor--;
     bit--;
@@ -1213,7 +1213,7 @@ void fldReleaseTextureSlots(void) {
 
     for (i = 0; i < 4; i++) {
         if (D_003A8E50[i] != 0) {
-            func_00157658(D_003A8E50[i]);
+            effDestroyNode(D_003A8E50[i]);
             D_003A8E50[i] = 0;
             func_003298C0(D_003A8E30[i]);
             D_003A8E30[i] = 0;
@@ -1236,7 +1236,7 @@ void fldLoadResourceByIndex(s32 index) {
 
 void func_0014B748(void) {
     if (D_0043632C != 0) {
-        func_00157658(D_0043632C);
+        effDestroyNode(D_0043632C);
         D_0043632C = 0;
         func_003298C0(D_00436324);
         D_00436324 = 0;
@@ -1259,7 +1259,7 @@ void func_0014B788(void) {
         position[1] = state->position[1];
         position[2] = state->position[2];
         func_00157790(D_0043632C, position);
-        func_001576A0(D_0043632C);
+        effUpdateNode(D_0043632C);
     }
 }
 
@@ -1293,7 +1293,7 @@ void mnuReleaseResourceEntries(void) {
     D_00436344 = 0;
     for (i = 0; i < 4; i++) {
         if (D_003A8E70[i] != 0) {
-            func_00157658(D_003A8E70[i]);
+            effDestroyNode(D_003A8E70[i]);
             D_003A8E70[i] = 0;
         }
     }
@@ -1303,7 +1303,7 @@ void func_0014B9E0(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
         if (D_003A8E70[i] != 0 && D_003A8E80[i] != 0) {
-            func_001576A0(D_003A8E70[i]);
+            effUpdateNode(D_003A8E70[i]);
         }
     }
 }
@@ -1330,7 +1330,7 @@ extern u32 D_004362F4;
 
 extern u32 D_004362CC;
 
-void func_0014BDE0(void) {
+void fldFreeSceneResources(void) {
     if (D_00389770[0x1F0 / 4] != 0) {
         func_0032BBB0(D_00389770[0x1F0 / 4]);
         D_00389770[0x1F0 / 4] = 0;
@@ -1348,19 +1348,19 @@ void func_0014BDE0(void) {
         D_00389770[0x214 / 4] = 0;
     }
     if (D_004362DC != 0) {
-        func_00157658(D_004362DC);
+        effDestroyNode(D_004362DC);
         D_004362DC = 0;
     }
     if (D_004362E8 != 0) {
-        func_00157658(D_004362E8);
+        effDestroyNode(D_004362E8);
         D_004362E8 = 0;
     }
     if (D_004362F4 != 0) {
-        func_00157658(D_004362F4);
+        effDestroyNode(D_004362F4);
         D_004362F4 = 0;
     }
     if (D_004362CC != 0) {
-        func_00157658(D_004362CC);
+        effDestroyNode(D_004362CC);
         D_004362CC = 0;
     }
 }
@@ -1394,7 +1394,7 @@ void fldResetObjectSlots(void) {
         D_00450990[i].unk8 = 0;
         D_00450990[i].unkC = 0;
         if (D_00450990[i].unk24 != 0) {
-            func_00157658(D_00450990[i].unk24);
+            effDestroyNode(D_00450990[i].unk24);
         }
         D_00450990[i].unk24 = 0;
     }
@@ -1431,7 +1431,7 @@ void fldReleaseObjectSlots(void) {
 
     for (i = 0; i < 32; i++) {
         if (D_00450990[i].unk24 != 0) {
-            func_00157658(D_00450990[i].unk24);
+            effDestroyNode(D_00450990[i].unk24);
             D_00450990[i].unk24 = 0;
         }
     }
@@ -1564,13 +1564,13 @@ void func_0014F408(void) {
         func_0032BBB0(D_004363B4);
         D_004363B4 = 0;
     }
-    func_00157658(D_00436388);
+    effDestroyNode(D_00436388);
     D_00436388 = 0;
     D_0043638C = 0;
     func_003298C0(D_00436380);
     D_00436380 = 0;
     D_00436384 = 0;
-    func_00157658(D_00436398);
+    effDestroyNode(D_00436398);
     D_00436398 = 0;
     D_0043639C = 0;
     func_003298C0(D_00436390);
@@ -1603,10 +1603,10 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
 
 void func_0014F560(void) {
     if (D_00436388 != 0 && D_0043638C != 0) {
-        func_001576A0(D_00436388);
+        effUpdateNode(D_00436388);
     }
     if (D_00436398 != 0 && D_0043639C != 0) {
-        func_001576A0(D_00436398);
+        effUpdateNode(D_00436398);
     }
 }
 
@@ -1800,7 +1800,7 @@ void fldResetAfterEvent(void) {
     *(s16 *)((u8 *)D_00389770 + 0x104) = 0;
     D_00451B9C[0] = 0;
     D_00389770[0x138 / 4] = 1;
-    func_002433B0();
+    evtSetSolarOverlayFullyVisible();
 }
 
 void func_001513C0(void) {
@@ -2403,7 +2403,7 @@ s32 func_00156330(void) {
     if (floor == 0) floor = D_00389784[0] + 1;
     target = func_0010D650(2);
     if (target == 0) return 1;
-    func_0014AB38(area, floor, target);
+    fldSetFloorFlag(area, floor, target);
     return 1;
 }
 
@@ -2415,7 +2415,7 @@ s32 func_001563B8(void) {
     if (floor == 0) floor = D_00389784[0] + 1;
     target = func_0010D650(2);
     if (target == 0) return 1;
-    func_0014ABA8(area, floor, target);
+    fldClearFloorFlag(area, floor, target);
     return 1;
 }
 
@@ -2465,12 +2465,12 @@ u32 func_001568E0(void) {
 
     temp_v0 = func_0010D8C8();
     temp_v1 = fldFindRoomByTask(*(u32 *)(temp_v0 + 0xe4));
-    func_001236E8(temp_v1);
+    fldActivateFlaggedObject(temp_v1);
     return 1;
 }
 
 u32 func_00156910(void) {
-    if (func_00123788(fldFindRoomByTask(*(s32 *)(func_0010D8C8() + 0xE4))) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomByTask(*(s32 *)(func_0010D8C8() + 0xE4))) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -2579,7 +2579,7 @@ u32 func_00156B88(void) {
     if (func_00140B80()) {
         scene = 0;
     } else {
-        scene = func_0013EA18(*(s32 *)(func_0010D8C8() + 0xE4));
+        scene = fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4));
     }
     func_00140830(scene);
     return 1;
@@ -2641,18 +2641,18 @@ s32 func_00156D58(void) {
     return 1;
 }
 
-s32 func_00156D78(void) {
-    func_00144F88(func_0010D650(0));
+s32 fldCommandPlaySeVolumePan(void) {
+    fldPlayMenuSound(func_0010D650(0));
     return 1;
 }
 
-s32 func_00156DA0(void) {
+s32 fldCommandPlaySe(void) {
     fldPlayFieldSe(func_0010D650(0));
     return 1;
 }
 
-u8 func_00156DC8(void) {
-    return fldLoadArchive(func_0010D650(0)) != 0;
+u8 fldCommandLoadArchive(void) {
+    return fldPollArchiveLoad(func_0010D650(0)) != 0;
 }
 
 s32 func_00156DF0(void) {
@@ -2708,7 +2708,7 @@ s32 func_00156F40(void) {
 }
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
-s32 func_00156F70(void) {
+s32 fldCommandFindEffectByName(void) {
     char *param = func_0010D7D0(0);
 
     func_0010D818(fldFindEffectByName(param));
@@ -2762,7 +2762,7 @@ s32 func_001570C0(void) {
     return 1;
 }
 
-s32 func_00157130(void) {
+s32 fldCommandSendNamedSound(void) {
     s32 value;
     value = func_0010D7D0(0);
     if (sdfSoundIsCommandBusy() != 0) {
@@ -2772,12 +2772,12 @@ s32 func_00157130(void) {
     return 1;
 }
 
-u32 func_00157180(void) {
+u32 fldCommandSendSoundControl(void) {
     func_00342690();
     return 1;
 }
 
-s32 func_001571A0(void) {
+s32 fldCommandIsSoundBusy(void) {
     func_0010D818(sdfSoundIsCommandBusy());
     return 1;
 }
@@ -3066,3 +3066,4 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E8);
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363F0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363F8);
+

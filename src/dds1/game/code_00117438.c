@@ -42,11 +42,11 @@ u32 func_00117570(u32 *value) {
     return *value;
 }
 
-void func_00117578(float multiplier, EvtScaledValue *value) {
+void evtScaleValueByMultiplier(float multiplier, EvtScaledValue *value) {
     value->scaled = multiplier * value->base;
 }
 
-float func_00117588(EvtScaledValue *value) {
+float evtGetValueScaleFactor(EvtScaledValue *value) {
     return value->scaled / value->base;
 }
 
@@ -76,7 +76,7 @@ typedef struct ActionObj {
 
 extern ActionObj *func_00110880();
 
-ActionObj *func_001175F8(s32 a, s32 b, s32 c) {
+ActionObj *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
     ActionObj *obj = func_00110880(0x11);
 
     obj->unk18 = (void *)b;
@@ -157,7 +157,7 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118210);
 extern u8 D_0032A6F0[];
 extern void func_00118210();
 
-void func_00118310(void) {
+void sdfResetChannels(void) {
     u8 *entry;
     u32 i;
 
@@ -203,7 +203,7 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118D70);
 extern u8 *D_003BAA50;
 extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
 
-u32 func_00118DD8(s32 index, s32 arg1, SdfPackedValue *packed) {
+u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
     u32 result;
 
     if (D_003BAA50[index * 0x38 + 0x24] != 2) {
@@ -218,7 +218,7 @@ u32 func_00118DD8(s32 index, s32 arg1, SdfPackedValue *packed) {
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118E38);
 
-void func_00119000(SdfPackedValue *item, u16 value) {
+void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
     item->flagsAndValue = (item->flagsAndValue & 0x8000) | (value & 0x7fff);
 }
 

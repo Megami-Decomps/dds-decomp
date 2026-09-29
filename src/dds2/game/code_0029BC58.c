@@ -25,7 +25,7 @@ extern u16 D_00435BAC;
 
 extern u32 *D_00437AB0;
 
-extern s32 func_0032CD98(void);
+extern s32 sdfGraphHasPendingWorkInterruptSafe(void);
 
 extern u32 D_00437AE8;
 
@@ -106,9 +106,9 @@ typedef struct {
 
 extern void func_00299A38(TitleSeq *, u8 *);
 
-extern void func_0029D550(u8 *, TitleSeq *);
+extern void btlAddBaseStats(u8 *, TitleSeq *);
 
-void titleApplySequenceState(u8 *work) {
+void mnuTitleApplySequenceState(u8 *work) {
     s32 state = *(s32 *)(work + 0xB6F4);
     TitleSeq *seq = **(TitleSeq ***)(work + 0x9C);
 
@@ -116,7 +116,7 @@ void titleApplySequenceState(u8 *work) {
     case 5:
         break;
     case 4:
-        func_0029D550(work + 0x3F4, seq);
+        btlAddBaseStats(work + 0x3F4, seq);
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 1:
@@ -139,9 +139,9 @@ void titleApplySequenceState(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C078);
+INCLUDE_ASM(const s32, "game/code_0029BC58", itfRunPanelMode1);
 
-s64 func_0029C0D0(s32 arg0) {
+s64 itfRunPanelMode2(s32 arg0) {
     s32 temp_v0 = func_00101958();
 
     func_0026C8E8(0);
@@ -175,7 +175,7 @@ extern BurstTable D_00428420;
 
 extern void func_00308620(BurstSprite *, u32 *, s32, s32, s32);
 
-void titleDrawBurstSprites(s32 arg0, s32 arg1) {
+void mnuTitleDrawBurstSprites(s32 arg0, s32 arg1) {
     BurstTable table = D_00428420;
     s32 scaled = arg0 * 0x13 / 256;
     u32 i;
@@ -210,7 +210,7 @@ extern s32 func_0019F6C8();
 
 extern void func_0035C860();
 
-void campDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
+void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
     char name[32];
     u32 color[4];
     s32 sprite;
@@ -219,7 +219,7 @@ void campDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8
     packed = (alpha & 0xFF) | 0xA09DC300;
     func_0035C860(name, D_004379C8, *(u32 *)(res + 0x10));
     sprite = func_0019F6C8(x, y, z, packed, name, 0);
-    func_0019D120(sprite, 3);
+    frFontSetChainFlag(sprite, 3);
     func_0019D550(sprite, 1, arg5);
     func_0019C5B0(sprite);
     color[0] = alpha;
@@ -233,22 +233,22 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CB70);
 
 extern struct { s32 v[6]; } D_003D6500;
 
-extern void campDrawMenuIconLayer(s32, s32, s32, u32, u8 *, s32, u8 *);
+extern void mnuCampDrawMenuIconLayer(s32, s32, s32, u32, u8 *, s32, u8 *);
 
 extern void func_0029CB70(s32, s32, s32, u32, u8 *, s32, u8 *);
 
 extern void func_0029C880(s32, s32, s32, u32, u8 *, s32, u8 *);
 
-void titleDrawFadeMenuEntries(u8 *work) {
+void mnuTitleDrawFadeMenuEntries(u8 *work) {
     u8 *res = work + 0x5C;
     u32 color = func_00309138(0xFFF06480, 0xFFF06400, 0x100 - *(s32 *)(work + 0xB6E0));
 
-    campDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
+    mnuCampDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
     func_0029CB70(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
     func_0029C880(D_003D6500.v[4], D_003D6500.v[5], 0, color, res, 0x53, work);
 }
 
-void titleRenderFadeAndPanels(u8 *work) {
+void mnuTitleRenderFadeAndPanels(u8 *work) {
     s32 remaining = 0x100 - *(s32 *)(work + 0xB6E0);
 
     func_0029C450(work);
@@ -256,7 +256,7 @@ void titleRenderFadeAndPanels(u8 *work) {
     func_0029C120(work);
     func_0029C3F0(work);
     func_0029DB58(0x1D0, 0x3B8, 0, remaining, work + 0x408, 0x53);
-    titleDrawFadeMenuEntries(work);
+    mnuTitleDrawFadeMenuEntries(work);
 }
 
 void func_0029CDD8(void) {
@@ -303,7 +303,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D008);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D1C8);
 
-s32 func_0029D278(void) {
+s32 mnuCountAdvancingTitleAnimations(void) {
     s32 offset = 0;
     s32 count = 0;
     s32 remaining = 4;
@@ -326,13 +326,13 @@ s32 mnuAdvanceTitleEntryAnimation(u8 *entry) {
     return step;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D550);
+INCLUDE_ASM(const s32, "game/code_0029BC58", btlAddBaseStats);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D5B8);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D790);
 
-void titleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
+void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);
     state[0] = first;
     state[1] = second;
@@ -393,7 +393,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A08D8);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A0EE8);
 
-void func_002A1000(u32 arg0) {
+void mnuSetTitleSequenceVolumePan(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
@@ -439,7 +439,7 @@ extern void func_003421E8(s32);
 
 extern void func_002A1E58(void);
 
-extern void func_002A1178(void);
+extern void mnuCreateTitleEffectTask(void);
 
 void func_002A10A0(void) {
     if (D_004379FC != 0) {
@@ -453,14 +453,14 @@ void func_002A10A0(void) {
     D_00438FCC = -1;
     D_00437A1C = 0;
     func_002A1E58();
-    func_002A1178();
+    mnuCreateTitleEffectTask();
 }
 
 u32 func_002A1118(void) {
     return 0x608;
 }
 
-u32 func_002A1120(void) {
+u32 mnuIncrementTitleEffectFrameCounter(void) {
     s32 temp_v0;
 
     temp_v0 = func_00101958();
@@ -468,17 +468,17 @@ u32 func_002A1120(void) {
     return 0;
 }
 
-void func_002A1150(void) {
+void mnuDestroyTitleEffectTask(void) {
     func_00328E48(func_00101958());
     D_004379F8 = 0;
 }
 
 extern u8 D_00437A10[];
 
-void func_002A1178(void) {
+void mnuCreateTitleEffectTask(void) {
     u32 *data = (u32 *)func_00328D68(8);
     u32 task = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
-                              func_002A1120, func_002A1150, 0);
+                              mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     D_004379F8 = task;
     func_00101950(task, data);
     data[0] = 0;
@@ -527,7 +527,7 @@ void func_002A1320(void) {
 void func_002A1338(void) {
 }
 
-s32 func_002A1340(void) {
+s32 mnuGetTitleEffectFrameCounter(void) {
     return *(s32 *)(func_00101958(D_004379F8) + 4);
 }
 
@@ -655,7 +655,7 @@ void func_002A1820(u32 source) {
     func_0034E820(1, 0x80e0, 0, 2, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A18B0);
+INCLUDE_ASM(const s32, "game/code_0029BC58", sndMixSampleBuffers);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1928);
 
@@ -676,7 +676,7 @@ void func_002A1E08(void) {
     D_00438FE8 = sdfCreateSemaphore(1, 0xff, 0);
     func_00328918(&D_00438FE0, func_002A1DD8, D_00456DB0,
                   0x1000, 0x45, 0);
-    func_00328C00();
+    sdfThreadSleepSelf();
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1E58);
@@ -841,15 +841,15 @@ void func_002A2998(void) {
     SignalSema(D_00438FE8);
 }
 
-void func_002A2A00(void);
+void mnuReleaseSoundBuffer(void);
 
 void mnuResetSoundBuffer(void) {
     D_00455D70[1] = 0;
     D_00455D70[4] = 2;
-    func_002A2A00();
+    mnuReleaseSoundBuffer();
 }
 
-void func_002A2A00(void) {
+void mnuReleaseSoundBuffer(void) {
     u32 *temp_v0 = D_00455D70;
     u32 temp_v1 = temp_v0[8];
 
@@ -868,7 +868,7 @@ void func_002A2A40(void) {
 
 void func_002A2A70(void) {
     WaitSema(D_00438FE8);
-    func_002A2A00();
+    mnuReleaseSoundBuffer();
     SignalSema(D_00438FE8);
 }
 
@@ -895,7 +895,7 @@ void func_002A2BD0(void) {
     func_002A5F40();
     func_003458E8(0);
     func_002A3DE8();
-    func_002A3EB8();
+    mnuReleaseSpriteHandle();
     func_002A3C58();
     func_003297C8(*(u32 *)D_00437A40);
     D_00437A40 = 0;
@@ -925,7 +925,7 @@ u32 func_002A3AA0(void) {
 }
 
 void func_002A3AC0(void) {
-    func_0023A9A8();
+    evtDestroyWorldSecondaryNode();
     func_00117998();
     func_00117908();
 }
@@ -993,18 +993,18 @@ void func_002A3DE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3E38);
 
-u8 func_002A3EA8(void) {
+u8 mnuHasSpriteHandle(void) {
     return *(s32 *)(D_00437A40 + 8) != 0;
 }
 
-void func_002A3EB8(void) {
+void mnuReleaseSpriteHandle(void) {
     if (*(s32 *)(D_00437A40 + 8) != 0) {
         func_003054E8(*(s32 *)(D_00437A40 + 8));
         *(u32 *)(D_00437A40 + 8) = 0;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3EF0);
+INCLUDE_ASM(const s32, "game/code_0029BC58", mnuStartMovieMenuSfx16);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3F28);
 
@@ -1038,7 +1038,7 @@ typedef struct PickList {
     PickEntry entry[32];
 } PickList;
 
-void func_002A4388(list)
+void titlePickRandomSlot(list)
     PickList *list;
 {
     u32 range = 0x20;
@@ -1128,7 +1128,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4A68);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4B70);
 
-extern void func_002A4388();
+extern void titlePickRandomSlot();
 
 extern void func_002A44C0(SlideBar *, s32);
 
@@ -1138,7 +1138,7 @@ extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
     if (bar->active != 0 || bar->pos != 0) {
-        func_002A4388();
+        titlePickRandomSlot();
         func_002A44C0(bar, arg1);
         func_002A3B28(0, 0, 0, bar->pos, 0, 0x16, arg1);
         func_002A4B70(bar, arg1);
@@ -1290,7 +1290,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5A78);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A5B08);
 
-void titleResetSequenceTimers(void) {
+void mnuTitleResetSequenceTimers(void) {
     u32 *title = (u32 *)D_00437A40;
     title[0x28 / 4] = 1;
     title[0x1C / 4] = title[0x14 / 4] = 0;
@@ -1785,7 +1785,7 @@ void func_002A6000(void) {
 }
 
 void func_002A6018(void) {
-    func_0019F078();
+    mnuUnloadStaffFonts();
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6030);
@@ -1832,7 +1832,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A6F88);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A7260);
 
-void titleSetPaletteTransition(u32 *state, s32 mode) {
+void mnuTitleSetPaletteTransition(u32 *state, s32 mode) {
     switch (mode) {
     case 2:
         state[1] = 0;
@@ -1864,7 +1864,7 @@ void func_002A78B0(void) {
     func_002A2550();
     func_002A6018();
     do {
-        temp_v0 = func_0032CD98();
+        temp_v0 = sdfGraphHasPendingWorkInterruptSafe();
     } while (temp_v0 != 0);
     func_003298C0(*D_00437AB0);
     D_00437AB0 = (u32 *)0x0;
@@ -1872,7 +1872,7 @@ void func_002A78B0(void) {
 
 void func_002A7900(void) {
     func_003054E8(D_00437AB0[1]);
-    while (func_0032CD98() != 0) {
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
     }
     func_003458E8(0);
 }
@@ -1891,12 +1891,12 @@ void func_002A7938(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A7980);
 
-u32 func_002A7A10(void) {
+u32 mnuStartStaffMovieRequest(void) {
     func_002A7980();
     return 0xffffffff;
 }
 
-s32 func_002A7A30(void) {
+s32 mnuStopStaffTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00429938, 0);
     kwlnTaskDestroyWithHierarchyByName(D_00429968, 1);
     return 0;
@@ -2176,11 +2176,11 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8120);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A81C8);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8208);
+INCLUDE_ASM(const s32, "game/code_0029BC58", mnuClearMovieList);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8268);
 
-u32 func_002A85C0(void) {
+u32 mnuGetMovieListNodeAtOffset(void) {
     u8 *state = (u8 *)D_00457E48;
     u32 entry = D_00457E48[1];
     s32 remaining = *(s16 *)(state + 0xA);
@@ -2401,7 +2401,7 @@ INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042A940);
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042A950);
 
-u8 *func_002A9258(s32 kind, s32 *count, u8 *work) {
+u8 *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *work) {
     switch (kind) {
     case 1:
         *count = 1;
@@ -2441,7 +2441,7 @@ void func_002A92D8(s32 list, s32 count, u8 *work) {
 
 void movReleaseCategoryModels(s32 kind, u8 *work) {
     s32 count;
-    s32 *entries = (s32 *)func_002A9258(kind, &count, work);
+    s32 *entries = (s32 *)mnuGetStaffCategoryEntries(kind, &count, work);
     if (kind != 4) {
         s32 i;
         for (i = 0; i < count; i++) {
@@ -2455,7 +2455,7 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
 void func_002A93F8(s32 kind, u8 *work) {
     s32 count;
     s32 i = 0;
-    u8 *buffer = func_002A9258(kind, &count, work);
+    u8 *buffer = mnuGetStaffCategoryEntries(kind, &count, work);
 
     if (count > 0) {
         u32 *handles = (u32 *)buffer;
@@ -2566,7 +2566,7 @@ extern void func_002BAF50(s32, u8 *);
 
 extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
 
-void staffInitResourceLists(u8 *work) {
+void mnuStaffInitResourceLists(u8 *work) {
     u8 *ctx = work + 0xB10C;
     s32 list;
 
@@ -2608,7 +2608,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002AA068);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002AA0D8);
 
-void func_002AA1C8(u32 task) {
+void mnuDestroyStaffMenuTask(u32 task) {
     u8 *work = (u8 *)func_00101958(task);
     if (work == NULL) {
         return;
@@ -2618,7 +2618,7 @@ void func_002AA1C8(u32 task) {
     func_002BB418(*(u32 *)(work + 0x118));
     mnuShutdownContext(work + 0x284);
     func_0026C728();
-    menuDestroyEffectResources(work + 0x11c);
+    mnuDestroyEffectResources(work + 0x11c);
     func_002A9A40(work);
     movReleaseTitleEffects(work);
     func_00303D58(*(u32 *)(work + 0x5c));
@@ -2663,7 +2663,7 @@ s32 mnuAcknowledgeCampState(void) {
     return 0;
 }
 
-u8 func_002AA510(void) {
+u8 mnuIsFadeIdle(void) {
     s64 temp_v0;
 
     temp_v0 = kwlnFadeIsActive();
@@ -2674,7 +2674,7 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002AA530);
 
 extern u32 D_003E5710[];
 
-void func_002AA740(s32 index) {
+void mnuCreateStaffImageSprite(s32 index) {
     u32 *object = (u32 *)func_0019F460(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[index], 0);
     func_0019D550(object, 1, 0x54);
@@ -2846,3 +2846,4 @@ INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437B73);
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437B78);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437B80);
+

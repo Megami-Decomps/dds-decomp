@@ -43,7 +43,7 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_002958B0);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00295D38);
 
-void func_00295F88(s32 a, s32 b, s32 c, u8 *obj, s32 d) {
+void mnuDrawIfActive(s32 a, s32 b, s32 c, u8 *obj, s32 d) {
     u8 *inner = *(u8 **)(obj + 0x18);
 
     if (*(s32 *)(inner + 0x20) != 0) {
@@ -82,3 +82,4 @@ INCLUDE_SDATA(const s32, "game/code_00294730", D_00437970);
 INCLUDE_SDATA(const s32, "game/code_00294730", D_00437978);
 
 INCLUDE_SDATA(const s32, "game/code_00294730", D_00437980);
+

@@ -111,7 +111,7 @@ extern u16 D_003BD6F8;
 
 extern void func_00109D20(void);
 
-extern void func_0010A170(void);
+extern void evtSelStateDestroy(void);
 
 extern s32 D_0032E3C0[];
 
@@ -121,7 +121,7 @@ extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 extern s32 func_002E41B0(s32 arg0, s32 arg1);
 
-extern void func_002E41A0(s32 arg0, s32 arg1);
+extern void sdfDevConsSetTextAttribute(s32 arg0, s32 arg1);
 
 extern void *D_003BA994;
 
@@ -261,7 +261,7 @@ void func_00108BA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108CB8);
 
-void func_00108DC0(s32 value) {
+void evtSubmitTexturePacket(s32 value) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
     u8 *command;
@@ -328,7 +328,7 @@ extern f32 D_003245B0[];
 extern u32 D_003245D0[];
 extern void *func_002EF2B0(const void *, const void *, s32, s32);
 
-void func_00109A40(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     void *list;
     D_003245B0[0] = x;
     D_003245B0[1] = y;
@@ -369,13 +369,13 @@ typedef struct EvtSelState {
     s32 count;
 } EvtSelState;
 
-s32 func_00109C10(s32 limit, s16 frames, s32 arg2, s32 arg3) {
+s32 evtSelStateCreate(s32 limit, s16 frames, s32 arg2, s32 arg3) {
     EvtSelState *node;
     if (frames == 0) {
         return 0;
     }
     if (D_003BA948 != 0) {
-        func_0010A170();
+        evtSelStateDestroy();
     }
     node = func_002CFF68(0x28);
     D_003BD760 = node;
@@ -402,7 +402,7 @@ u32 evtUnk9CC0Check(void) {
     if (sel->limit > sel->count || sel->limit == -1) {
         func_00109D20();
     } else {
-        func_0010A170();
+        evtSelStateDestroy();
         return 1;
     }
     return 1;
@@ -411,10 +411,10 @@ u32 evtUnk9CC0Check(void) {
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109D20);
 
 void func_0010A158(void) {
-    func_0010A170();
+    evtSelStateDestroy();
 }
 
-void func_0010A170(void) {
+void evtSelStateDestroy(void) {
     if (D_003BA948 != 0) {
         func_002CFF98(D_003BD760);
         D_003BA948 = 0;
@@ -500,11 +500,11 @@ u8 func_0010A338(void) {
 }
 
 void func_0010A358(void) {
-    func_0026FF18();
+    mnuStartStaffMovieRequest();
 }
 
 u32 func_0010A370(void) {
-    func_0026FF38();
+    mnuStopStaffTasks();
     return 0;
 }
 
@@ -546,7 +546,7 @@ u32 func_0010A448(void) {
     s64 temp_v0;
     u32 temp_v1;
 
-    func_00123D98();
+    fldCleanupFieldScene();
     temp_v0 = func_00125FD0();
     temp_v1 = 0xffffffff;
     if (temp_v0 != 0) {
@@ -593,7 +593,7 @@ void evtUnkA4A8Dispatch(s32 arg0, s32 *arg1) {
 u32 func_0010A510(void) {
     D_003BA730 = 1;
     evtDestroySkyTask();
-    func_001260A8();
+    fldDispatchDeferredFieldCommand();
     return 0;
 }
 
@@ -640,12 +640,12 @@ u32 func_0010A5C8(void) {
 }
 
 void func_0010A5D0(void) {
-    func_00262818();
+    mnuStaffCreateTasks();
 }
 
 u32 func_0010A5E8(void) {
-    func_001260A8();
-    func_002628C8();
+    fldDispatchDeferredFieldCommand();
+    mnuStaffDestroyTasks();
     return 0;
 }
 
@@ -683,7 +683,7 @@ void evtUnkA688Dispatch(s32 arg0, s32 *arg1) {
     }
     else {
         func_00102A18();
-        func_001260A8();
+        fldDispatchDeferredFieldCommand();
     }
 }
 
@@ -696,7 +696,7 @@ u32 evtUnkA6F8Ensure(void) {
         return 0;
     }
     if (kwlnTaskFindByPriority(0x3FA) == NULL) {
-        func_001260A8();
+        fldDispatchDeferredFieldCommand();
         return 1;
     }
     return 0;
@@ -738,7 +738,7 @@ u32 func_0010A7E0(void) {
 
 void func_0010A7E8(void) {
     D_003BA730 = 0;
-    func_0021FE38();
+    evtDestroySecondaryWorldNode();
     func_00232D60();
 }
 
@@ -810,7 +810,7 @@ void func_0010A928(u32 arg0, s32 arg1) {
 
 u32 func_0010A970(void) {
     evtDestroySkyTask();
-    func_0024A058();
+    fldStopSceneTasks();
     return 0;
 }
 
@@ -822,11 +822,11 @@ u8 func_0010A998(void) {
 }
 
 void func_0010A9B8(void) {
-    func_00262818();
+    mnuStaffCreateTasks();
 }
 
 u32 func_0010A9D0(void) {
-    func_002628C8();
+    mnuStaffDestroyTasks();
     return 0;
 }
 
@@ -924,7 +924,7 @@ u32 evtUnkAB90Ensure(void) {
     if (D_003BA960 == 0) {
         D_003BA960 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
         func_002E41B0(D_003BA960, 2);
-        func_002E41A0(D_003BA960, 7);
+        sdfDevConsSetTextAttribute(D_003BA960, 7);
     }
     return 0;
 }
@@ -976,7 +976,7 @@ void func_0010B6A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B6B0);
 
-void evtUnkB728Link(B728Work *node) {
+void evtLinkWorkNode(B728Work *node) {
     B728Work *tail = D_003BA998;
 
     if (tail == NULL) {
@@ -994,7 +994,7 @@ void evtUnkB728Link(B728Work *node) {
     D_003BA990++;
 }
 
-void evtUnkB768Unlink(B728Work *node) {
+void evtUnlinkWorkNode(B728Work *node) {
     if ((B728Work *)D_003BA994 == node) {
         D_003BA994 = node->next;
     }
@@ -1041,3 +1041,4 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA990);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA994);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA998);
+

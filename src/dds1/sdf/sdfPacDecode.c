@@ -67,13 +67,13 @@ typedef struct PacState {
     PacWork *queueTail; /* 0x34 */
 } PacState;
 
-void func_002EE2C0(PacState *arg0, PacHead *arg1);
+void sdfPacStartPacketPayload(PacState *arg0, PacHead *arg1);
 void func_002EDD98(PacState *arg0);
-void func_002EB278(void *arg0, void *arg1, void *arg2, s32 arg3);
+void sdfRelocatePackedResourceWords(void *arg0, void *arg1, void *arg2, s32 arg3);
 void func_002CFF98(void *arg0);
 void sdfPacAdvanceInput(PacState *arg0, s32 arg1);
 void func_002EDCC0(PacState *arg0);
-PacWork *func_002EDF60(PacState *arg0, PacHead *arg1);
+PacWork *sdfPacEnqueuePacket(PacState *arg0, PacHead *arg1);
 void *func_002CFF68(s32 size);
 void *func_002CFEB8(s32 size);
 void func_002EE6F8(PacState *arg0, PacHead *arg1, PacBuf *arg2);
@@ -81,7 +81,7 @@ void func_002EE418(PacState *arg0);
 void func_002EE4A8(PacState *arg0);
 void func_002EE828(PacState *arg0);
 void func_002EE900(PacState *arg0);
-void func_002EE930(PacState *arg0);
+void sdfPacAdvanceAllocationEntry(PacState *arg0);
 void func_002EE3E8(PacState *arg0, PacHead *arg1);
 void func_002EE478(PacState *arg0, PacHead *arg1);
 void func_002EE508(PacState *arg0, PacHead *arg1);
@@ -94,14 +94,14 @@ s32 func_002D3288(s32 arg0);
 s32 func_002D0518(s32 arg0);
 s32 func_002D03F8(s32 arg0);
 void sdfReleaseMemorySlot(void *arg0);
-void func_002EEE98(void *arg0, void *arg1);
+void sdfStoreWordAndSetState(void *arg0, void *arg1);
 s32 func_002EEAE0(void *arg0, void *arg1, s32 arg2);
 extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EDE48);
 
-PacWork *func_002EDF60(PacState *state, PacHead *packet) {
+PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
     s32 extensionBytes = packet->flags & 0xF0;
     PacWork *node = func_002CFF68(extensionBytes + 0x20);
     node->owner = state;
@@ -115,7 +115,7 @@ PacWork *func_002EDF60(PacState *state, PacHead *packet) {
     return node;
 }
 
-PacWork *func_002EDFE8(PacWork *work) {
+PacWork *sdfPacRemovePacket(PacWork *work) {
     PacState *state = work->owner;
     /* Keep a node-shaped link so the queue head can be unlinked like any next pointer. */
     PacWork *link = (PacWork *)&state->queueHead;
@@ -138,7 +138,7 @@ PacWork *func_002EDFE8(PacWork *work) {
     return next;
 }
 
-s32 func_002EE058(PacState *state, s32 status, PacHead *packet) {
+s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     if (status == 0) {
         switch (packet->command) {
         case 1:
@@ -172,7 +172,7 @@ void *sdfPacGetExtensionData(PacExtensionHeader *header) {
     return header->data;
 }
 
-void func_002EE158(PacState *state) {
+void sdfPacCopyPendingBytes(PacState *state) {
     s32 count = state->pendingBytes;
     s32 available = state->inputAvailable;
     if (available < count) {
@@ -193,7 +193,7 @@ void func_002EE158(PacState *state) {
     }
 }
 
-void func_002EE1E0(PacState *state) {
+void sdfPacDecodePendingBytes(PacState *state) {
     s32 available = state->inputAvailable;
     s32 finished = func_002EEAE0(state->decoder, state->inputCursor, available);
     sdfPacAdvanceInput(state, available - state->decoder->remaining);
@@ -204,7 +204,7 @@ void func_002EE1E0(PacState *state) {
     state->onComplete(state);
 }
 
-void func_002EE258(PacState *state) {
+void sdfPacSkipPendingBytes(PacState *state) {
     s32 count = state->pendingBytes;
     if (state->inputAvailable < count) {
         count = state->inputAvailable;
@@ -222,19 +222,19 @@ void func_002EE258(PacState *state) {
     }
 }
 
-void func_002EE2C0(PacState *state, PacHead *packet) {
+void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
     s32 allocationSize = packet->decodedSize;
     if (allocationSize == 0) {
         allocationSize = packet->payloadSize + (packet->flags & 0xF0) - 0x10;
     }
     if (state->flags & 1) {
-        PacWork *node = func_002EDF60(state, packet);
+        PacWork *node = sdfPacEnqueuePacket(state, packet);
         node->dataCursor = packet->payload;
-        state->onInput = func_002EE258;
+        state->onInput = sdfPacSkipPendingBytes;
     } else {
         PacWork *node;
         state->phase = 2;
-        node = func_002EDF60(state, packet);
+        node = sdfPacEnqueuePacket(state, packet);
         if (state->flags & 2) {
             node->resourceHandle = func_002D0518(allocationSize);
         } else {
@@ -243,13 +243,13 @@ void func_002EE2C0(PacState *state, PacHead *packet) {
         state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
         switch (packet->flags & 0xF) {
         case 0:
-            state->onInput = func_002EE158;
+            state->onInput = sdfPacCopyPendingBytes;
             break;
         case 1: {
             PacBuf *decoder = func_002CFEB8(0x20);
             state->decoder = decoder;
-            func_002EEE98(decoder, state->outputCursor);
-            state->onInput = func_002EE1E0;
+            sdfStoreWordAndSetState(decoder, state->outputCursor);
+            state->onInput = sdfPacDecodePendingBytes;
             break;
         }
         default:
@@ -259,7 +259,7 @@ void func_002EE2C0(PacState *state, PacHead *packet) {
 }
 
 void func_002EE3E8(PacState *state, PacHead *packet) {
-    func_002EE2C0(state, packet);
+    sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EDD98;
 }
 
@@ -270,14 +270,14 @@ void func_002EE418(PacState *state) {
     s32 count = record->count;
     work->dataCursor = payload;
     if (count != 0) {
-        func_002EB278(payload, payload, payload + record->offset, count);
+        sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
         record->count = 0;
     }
     func_002EDD98(state);
 }
 
 void func_002EE478(PacState *state, PacHead *packet) {
-    func_002EE2C0(state, packet);
+    sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EE418;
 }
 
@@ -288,18 +288,18 @@ void func_002EE4A8(PacState *state) {
     s32 count = record->count;
     work->dataCursor = payload;
     if (count != 0) {
-        func_002EB278(payload, payload, payload + record->offset, count);
+        sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
         record->count = 0;
     }
     func_002EDD98(state);
 }
 
 void func_002EE508(PacState *state, PacHead *packet) {
-    func_002EE2C0(state, packet);
+    sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EE4A8;
 }
 
-void func_002EE538(PacState *state) {
+void sdfPacCopyResourceChunk(PacState *state) {
     PacBuf *buffer = state->buffer;
     s32 count = buffer->remaining;
     if (state->inputAvailable < count) {
@@ -322,7 +322,7 @@ void func_002EE538(PacState *state) {
     }
 }
 
-void func_002EE5E0(PacState *state) {
+void sdfPacDecodeResourceChunk(PacState *state) {
     s32 count = state->pendingBytes;
     s32 finished = func_002EEAE0(state->decoder, state->inputCursor, count);
     sdfPacAdvanceInput(state, count - state->decoder->remaining);
@@ -338,7 +338,7 @@ void func_002EE5E0(PacState *state) {
     state->onComplete(state);
 }
 
-void func_002EE678(PacState *state) {
+void sdfPacSkipResourceChunk(PacState *state) {
     PacBuf *buffer = state->buffer;
     s32 count = buffer->remaining;
     if (state->inputAvailable < count) {
@@ -363,7 +363,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE6F8);
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE828);
 
 void func_002EE868(PacState *state, PacHead *packet) {
-    func_002EDF60(state, packet);
+    sdfPacEnqueuePacket(state, packet);
     {
         void *allocation = func_002CFEB8(0x10);
         state->unk2C = (PacAlloc *)allocation;
@@ -375,13 +375,13 @@ void func_002EE868(PacState *state, PacHead *packet) {
 
 void func_002EE8C0(PacState *state) {
     func_002EE6F8(state, (u8 *)state->unk2C + 0x10, (u8 *)state->unk2C + 0x20);
-    state->onComplete = func_002EE930;
+    state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE900);
 
-void func_002EE930(PacState *state) {
+void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacAlloc *allocation = state->unk2C;
     func_002DA058(state->queueTail->resourceHandle, allocation->unk20);
     {

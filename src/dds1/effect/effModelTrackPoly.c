@@ -68,7 +68,7 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001885C0);
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188738);
 
 void effTrackPolyFreeData(EffTrackPolyData *data) {
-    func_002DAA68(data->unk20);
+    sdfQueueAssetRelease(data->unk20);
     func_002D0918(data->unk24);
 }
 

@@ -8,7 +8,7 @@ extern u32 D_003AB050[];
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001696D0);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169710);
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBattleMiscCallByOwnerA);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169740);
 

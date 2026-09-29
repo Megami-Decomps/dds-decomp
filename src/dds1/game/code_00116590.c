@@ -30,13 +30,13 @@ typedef struct ActionObj {
 } ActionObj;
 
 extern ActionObj *func_00110880();
-extern void func_00112750();
+extern void dds3EnsureSlotData();
 
-ActionObj *func_001165A8(s32 value) {
+ActionObj *evtSpawnActionObj9(s32 value) {
     ActionObj *obj = func_00110880(9);
 
     obj->unk4 = value;
-    func_00112750(obj);
+    dds3EnsureSlotData(obj);
     return obj;
 }
 
@@ -51,11 +51,11 @@ void dds3ClearUnitObjectLowFlags(UnitObject *obj) {
 }
 
 void func_001166D0(u32 value, UnitObject *obj) {
-    func_00221BE0(obj->data->unitHandle, value);
+    evtSetUnitValueTransition(obj->data->unitHandle, value);
 }
 
 void func_001166F0(UnitObject *obj) {
-    func_00221C50(obj->data->unitHandle);
+    evtEndUnitValueTransition(obj->data->unitHandle);
 }
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_00116710);

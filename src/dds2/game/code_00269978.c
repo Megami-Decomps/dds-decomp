@@ -130,7 +130,7 @@ extern void func_00267EA0(s32, s32);
 
 extern void func_0026C710(void);
 
-s32 func_00269F70(void) {
+s32 evtClearDispatchVisualFlag(void) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
     evtRememberDispatchCallback(0, (s32)state);
     state->visualState->statusFlag = 0;
@@ -145,7 +145,7 @@ extern void func_00269230(void);
 
 extern void func_00268AA0(s32, s32, s32);
 
-extern void func_002668C0(s32);
+extern void mnuReleaseResourceGroup(s32);
 
 s32 func_00269FC8(void) {
     s32 state = func_00101958();
@@ -153,7 +153,7 @@ s32 func_00269FC8(void) {
     evtRememberDispatchCallback((u32)func_00269230, state);
     func_00268AA0(0, -2, state);
     func_00267EA0(1, 0);
-    func_002668C0(state);
+    mnuReleaseResourceGroup(state);
     kwlnFadeOutStart(0, 0, 0, 15);
     return 1;
 }
@@ -200,7 +200,7 @@ void evtBSetupDispatchSyncC(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A4B0);
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026A528);
+INCLUDE_ASM(const s32, "game/code_00269978", evtBEnterStateA);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A598);
 
@@ -228,7 +228,7 @@ void evtBSetupDispatchSyncD(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-u32 func_0026A8D8(void) {
+u32 evtSelectFinalVisualNode(void) {
     EventDispatchState *state;
 
     state = (EventDispatchState *)func_00101958();
@@ -285,9 +285,9 @@ extern s32 kwlnFadeIsActive(void);
 
 extern void func_00286F90(void);
 
-extern s32 func_00286FD8(void);
+extern s32 mnuCheckResourceTask(void);
 
-extern s32 func_0032CD98(void);
+extern s32 sdfGraphHasPendingWorkInterruptSafe(void);
 
 extern void func_002C42C0(s32 *, char *);
 
@@ -295,7 +295,7 @@ extern char D_003CE848[];
 
 extern void func_002680E0(s32);
 
-s64 func_0026ABB0(u64 request) {
+s64 evtPollDispatchAfterFade(u64 request) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
     s32 *dispatch = &state->dispatchStatus;
     s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
@@ -306,8 +306,8 @@ s64 func_0026ABB0(u64 request) {
                 func_00286F90();
             }
             if (*dispatch == 0 && state->fadeStarted == 1 &&
-                func_00286FD8() == 0) {
-                if (func_0032CD98() != 0) return 0;
+                mnuCheckResourceTask() == 0) {
+                if (sdfGraphHasPendingWorkInterruptSafe() != 0) return 0;
                 func_002680E0((s32)state);
                 state->fadeStarted = 0;
                 func_002C42C0(dispatch, D_003CE848);
@@ -344,7 +344,7 @@ void evtBDispatchSync(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-u32 func_0026AD38(void) {
+u32 evtPrepareSelectedMenuEntry(void) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
     EventMenuOwner *owner = state->menuOwner;
     s32 *slot = &owner->selection->entryIndex;
@@ -385,7 +385,7 @@ void evtBSetupDispatchSyncF(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-u32 func_0026AF68(void) {
+u32 evtQueueCueForDisplayMode(void) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C948(1);
@@ -400,7 +400,7 @@ u32 func_0026AF68(void) {
     return 1;
 }
 
-s64 func_0026AFE0(u64 request) {
+s64 evtPollDispatchStatus(u64 request) {
     EventDispatchState *state;
     s64 result;
     s32 *dispatch;
@@ -442,7 +442,7 @@ extern void func_00268CC0(s32, s32);
 
 s32 func_0026B1C8(void) {
     s32 state = func_00101958();
-    func_002678C8(state);
+    mnuReleaseWorkResources(state);
     func_00267768(state);
     func_00268CC0(1, state);
     func_00268AA0(1, 0, state);
@@ -456,7 +456,7 @@ s32 func_0026B1C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B260);
 
-void func_0026B358(s32 item) {
+void evtBDispatchSyncD2(s32 item) {
     s32 state = func_00101958();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
@@ -483,22 +483,22 @@ void evtBDispatchSyncB(s32 request) {
 
 extern void func_00267938(s32, s32);
 
-extern void func_0026CA60(s32);
+extern void evtClearActiveFlag(s32);
 
 extern void func_0026CA80(s32, s32);
 
-extern void func_0026E5F8(void);
+extern void mnuStartMantraSpriteLoad(void);
 
 s32 func_0026B430(void) {
     s32 state = func_00101958();
     s32 mode;
     func_00267938(0, state);
-    func_0026CA60(0);
+    evtClearActiveFlag(0);
     func_0026CA80(0, 0);
     mode = ((EventDispatchState *)state)->menuMode;
     if (mode < 2) {
         if (mode >= 0) {
-            func_0026E5F8();
+            mnuStartMantraSpriteLoad();
         }
     }
     return 1;

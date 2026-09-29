@@ -61,11 +61,11 @@ extern u8 D_003B01A0[];
 
 extern void mdlBroadcastMasked();
 
-extern void func_00232AA0(void *work);
+extern void mdlStorePrimaryVectorVU(void *work);
 
 extern void func_00232AD0(void *work);
 
-extern void func_00232B40(void *work);
+extern void mdlStoreTertiaryVectorVU(void *work);
 
 extern void mdlAddEntryFlagged(void *work, s32 arg1, s32 arg2);
 
@@ -116,11 +116,11 @@ void func_0016A578(void) {
     func_001027D8(0, 0, 0, 0);
 }
 
-u32 func_0016A5A0(EffParamWork *work) {
+u32 effParamWorkGetData(EffParamWork *work) {
     return (u32)work->data;
 }
 
-u16 func_0016A5A8(EffParamWork *work) {
+u16 effParamWorkGetId(EffParamWork *work) {
     return work->id;
 }
 
@@ -200,11 +200,11 @@ void effParamDispatchFloat(f32 arg0) {
 
 void effParamInitWork(EffInitWork *work) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0180));
-    func_00232AA0(work);
+    mdlStorePrimaryVectorVU(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0190));
     func_00232AD0(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B01A0));
-    func_00232B40(work);
+    mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);
     if (work->param != NULL) {
         mdlAddEntryFlagged(work, 0, 0);
@@ -241,7 +241,7 @@ void effParamForwardVector(void *arg0, void *vec) {
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (vec) : "memory");
-    func_00232AA0(arg0);
+    mdlStorePrimaryVectorVU(arg0);
 }
 
 void effParamBuildVector(void *arg0, f32 x) {
@@ -253,7 +253,7 @@ void effParamBuildVector(void *arg0, f32 x) {
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (v) : "memory");
-    func_00232B40(arg0);
+    mdlStoreTertiaryVectorVU(arg0);
 }
 
 void effParamScatterVectors(EffScatterWork *work, void *src) {
@@ -378,3 +378,4 @@ EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AF38);
 
 INCLUDE_SDATA(const s32, "game/code_0016A100", D_00436434);
+

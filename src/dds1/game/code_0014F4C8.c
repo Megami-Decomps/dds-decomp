@@ -66,7 +66,7 @@ s32 func_0014F5E8(void) {
     return 1;
 }
 
-s32 func_0014F658(void) {
+s32 fldCommandSendNamedSound(void) {
     s32 commandName;
     commandName = func_0010D5A8(0);
     if (sdfSoundIsCommandBusy() != 0) {
@@ -76,12 +76,12 @@ s32 func_0014F658(void) {
     return 1;
 }
 
-u32 func_0014F6A8(void) {
+u32 fldCommandSendSoundControl(void) {
     func_002E97E8();
     return 1;
 }
 
-u32 func_0014F6C8(void) {
+u32 fldCommandIsSoundBusy(void) {
     u64 busy;
 
     busy = sdfSoundIsCommandBusy();

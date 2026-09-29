@@ -62,7 +62,7 @@ extern ConsNode *D_00438AB0;
 
 extern void *func_00328D68(s32 size);
 
-extern void func_00330768(u32 object);
+extern void sdfEnsureFreeRootWorkspace(u32 object);
 
 extern void func_00336D38(void *, s32);
 
@@ -144,9 +144,9 @@ typedef struct DmaPacketHeader {
 
 extern u8 D_0040B730[];
 
-extern void func_0032CF58(s32, void *);
+extern void sdfAppendReferencePacket(s32, void *);
 
-extern void func_0032CF58(s32, void *);
+extern void sdfAppendReferencePacket(s32, void *);
 
 extern void func_0033AEA8(void *);
 
@@ -154,9 +154,9 @@ extern vu8 D_004389DA;
 
 extern void sdfAssetApplyEntryChanges(void *, s32);
 
-extern void func_00333950(void *, void *, s32);
+extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 
-void func_00336B48(void) {
+void sdfVuMultiplyPrimaryByScratch(void) {
     __asm__ volatile (
         ".set noreorder               \n"
         "vmulax.xyzw ACC, vf28, vf20x \n"
@@ -186,7 +186,7 @@ void func_00336B48(void) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_00336BA0(void) {
+void sdfVuMultiplyScratchByPrimary(void) {
     __asm__ volatile (
         ".set noreorder               \n"
         "vmulax.xyzw ACC, vf20, vf28x \n"
@@ -284,7 +284,7 @@ void sdfVuCross3(void *dst, void *src1, void *src2) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* Build a VU basis from the normalized target-origin direction and up vector. */
-void func_00336CA0(void *target, void *origin, void *up) {
+void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
     __asm__ volatile (
         ".set noreorder             \n"
         "lqc2 vf10, 0x0(%1)         \n"
@@ -415,7 +415,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00337688);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00337718);
 
-void func_00337778(VuBlendNode *node) {
+void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
         void *sourceB = node->sourceB;
@@ -434,7 +434,7 @@ void func_00337778(VuBlendNode *node) {
     }
 }
 
-void func_003377C8(VuBlendNode *node) {
+void sdfVuBlendNodeVectors(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
         void *sourceB = node->sourceB;
@@ -514,7 +514,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003395A0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003396D0);
 
-void func_0033A018(u8 **context, u8 *source) {
+void sdfProcessReferencedObjects(u8 **context, u8 *source) {
     u32 *objects = *(u32 **)(*context + 12);
     u16 *indices = (u16 *)(source + 24);
     if ((*(u16 *)(source + 22) & 0x800) != 0) {
@@ -522,7 +522,7 @@ void func_0033A018(u8 **context, u8 *source) {
         if (count != 0) {
             indices++;
             do {
-                func_00330768(objects[*indices++]);
+                sdfEnsureFreeRootWorkspace(objects[*indices++]);
             } while (--count != 0);
         }
     }
@@ -550,7 +550,7 @@ void func_0033A0C8(void) {
     D_0043918C = 0;
 }
 
-void func_0033A0D8(s32 size) {
+void sdfConsUploadDmaProgram(s32 size) {
     u32 *chan = sceDmaGetChan(0);
     *chan &= ~0x40;
     sceDmaSendN(chan, D_0037B080, (D_0037B610 - D_0037B080) >> 4);
@@ -564,7 +564,7 @@ u32 func_0033A170(s32 tex) {
     return 0x50;
 }
 
-SdfDrawPacket *func_0033A178(SdfDrawPacket *p, void *tex, s32 data) {
+SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 data) {
     p->quadwords = 4;
     p->unk10 = 0x1000000000008003ULL;
     p->command = 0x50000004;
@@ -580,7 +580,7 @@ SdfDrawPacket *func_0033A178(SdfDrawPacket *p, void *tex, s32 data) {
 }
 
 s32 sdfConsCreateDrawPacket(s32 list, s32 tex, s32 data) {
-    SdfDrawPacket *packet = func_0033A178(sdfAllocPacketAligned(func_0033A170(tex)), (void *)tex, data);
+    SdfDrawPacket *packet = sdfConsInitTextureDrawPacket(sdfAllocPacketAligned(func_0033A170(tex)), (void *)tex, data);
     sdfAppendPacket(list, (u32)packet);
     return (s32)packet;
 }
@@ -600,7 +600,7 @@ s32 func_0033A2D0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A2D8);
 
-void *func_0033A328(s32 height) {
+void *sdfConsAllocateColumnPacket(s32 height) {
     void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, height));
     func_0033A2D8(packet, 0x156, 5, 0x53531, height);
     return packet;
@@ -641,7 +641,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AD68);
 
-void func_0033AE28(s32 list, s32 (*alloc)(s32)) {
+void sdfConsAppendClearPacket(s32 list, s32 (*alloc)(s32)) {
     u64 *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -650,12 +650,12 @@ void func_0033AE28(s32 list, s32 (*alloc)(s32)) {
     packet[0] = ((u64)((u32)D_0040B730 & 0x0FFFFFFF) << 32) | 0x30000008;
     packet[1] = 0x6C07C000ULL << 32;
     *(u128 *)&packet[2] = 0;
-    func_0032CF58(list, packet);
+    sdfAppendReferencePacket(list, packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AEA8);
 
-void func_0033AF38(s32 list, s32 (*alloc)(s32)) {
+void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     u64 *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -667,16 +667,16 @@ void func_0033AF38(s32 list, s32 (*alloc)(s32)) {
     sdfAppendPacket(list, (u32)packet);
 }
 
-void func_0033AFC0(s32 list, void *asset, s32 (*alloc)(s32)) {
+void sdfConsAppendAssetPacket(s32 list, void *asset, s32 (*alloc)(s32)) {
     u64 *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
     sdfAssetApplyEntryChanges(asset, (s8)D_004389DA);
     packet = (u64 *)alloc(0x20);
-    func_00333950(asset, packet, (s8)D_004389DA);
+    sdfInitNodeHeaderFromWords(asset, packet, (s8)D_004389DA);
     *(u128 *)&packet[2] = 0;
-    func_0032CF58(list, packet);
+    sdfAppendReferencePacket(list, packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B050);
@@ -760,7 +760,7 @@ void sdfDevConsInit(void) {
     }
 }
 
-u32 func_0033CBC8(void) {
+u32 sdfDevConsGetResourceHandle(void) {
     sdfDevConsInit();
     return D_00439194;
 }
@@ -807,7 +807,7 @@ void sdfDevConsNodeClear(ConsNode *node) {
     memset(node->pixels, 0, node->width * node->height * 2);
 }
 
-void func_0033CCB0(ConsNode *arg0) {
+void sdfDevConsResetNode(ConsNode *arg0) {
     sdfDevConsNodeClear(arg0);
 }
 
@@ -873,3 +873,4 @@ INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A99);
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438AB0);
 
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438AB4);
+

@@ -38,9 +38,9 @@ extern void func_00134CF0(void);
 
 extern void func_002CF430(void);
 
-extern s32 func_0021FE38(void);
+extern s32 evtDestroySecondaryWorldNode(void);
 
-extern void func_00269558(void);
+extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
@@ -58,7 +58,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_002692E0);
 
-void func_002693E0(u32 arg0) {
+void mnuSetTitleSequenceVolumePan(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
@@ -104,7 +104,7 @@ extern void func_002E9340(s32);
 
 extern void func_0026A248(void);
 
-extern void func_00269558(void);
+extern void mnuCreateTitleEffectTask(void);
 
 void func_00269480(void) {
     if (D_003BC58C != 0) {
@@ -118,7 +118,7 @@ void func_00269480(void) {
     D_003BD8B0 = -1;
     D_003BC5AC = 0;
     func_0026A248();
-    func_00269558();
+    mnuCreateTitleEffectTask();
 }
 
 u32 func_002694F8(void) {
@@ -130,7 +130,7 @@ typedef struct TitleEffectState {
     s32 frameCounter;
 } TitleEffectState;
 
-u32 func_00269500(void) {
+u32 mnuIncrementTitleEffectFrameCounter(void) {
     TitleEffectState *state;
 
     state = (TitleEffectState *)func_00101A70();
@@ -138,15 +138,15 @@ u32 func_00269500(void) {
     return 0;
 }
 
-void func_00269530(void) {
+void mnuDestroyTitleEffectTask(void) {
     func_002CFF98(func_00101A70());
     D_003BC588 = 0;
 }
 
-void func_00269558(void) {
+void mnuCreateTitleEffectTask(void) {
     TitleEffectState *state = (TitleEffectState *)func_002CFEB8(8);
     u32 task = kwlnTaskCreate(D_003BC5A0, 0x5214, 1, 1,
-                              func_00269500, func_00269530, 0);
+                              mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     D_003BC588 = task;
     func_00101A68(task, state);
     state->unk00 = 0;
@@ -181,7 +181,7 @@ void func_00269710(void) {
 void func_00269728(void) {
 }
 
-s32 func_00269730(void) {
+s32 mnuGetTitleEffectFrameCounter(void) {
     return ((TitleEffectState *)func_00101A70(D_003BC588))->frameCounter;
 }
 
@@ -308,7 +308,7 @@ typedef struct MixSource {
     s16 *samples;   /* 0x18 */
 } MixSource;
 
-void func_00269CA0(s16 *dst, MixSource *first, MixSource *second) {
+void sndMixSampleBuffers(s16 *dst, MixSource *first, MixSource *second) {
     s16 *out = dst;
     s16 *in = second->samples;
     s32 i;
@@ -352,7 +352,7 @@ void func_0026A1F8(void) {
     D_003BD8D0 = sdfCreateSemaphore(1, 0xff, 0);
     func_002CFA68(&D_003BD8C8, func_0026A1C8, D_003DB1C0,
                   0x1000, 0x45, 0);
-    func_002CFD50();
+    sdfThreadSleepSelf();
 }
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A248);
@@ -498,10 +498,10 @@ void mnuPrintTitleDebugBanner(void) {
 void mnuResetSoundBuffer(void) {
     D_003DA180[1] = 0;
     D_003DA180[4] = 2;
-    func_0026AE10();
+    mnuReleaseSoundBuffer();
 }
 
-void func_0026AE10(void) {
+void mnuReleaseSoundBuffer(void) {
     u32 *temp_v0 = D_003DA180;
     u32 temp_v1 = temp_v0[8];
 
@@ -520,7 +520,7 @@ void func_0026AE50(void) {
 
 void func_0026AE80(void) {
     WaitSema(D_003BD8D0);
-    func_0026AE10();
+    mnuReleaseSoundBuffer();
     SignalSema(D_003BD8D0);
 }
 
@@ -546,10 +546,10 @@ s32 func_0026AF30(void) {
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AF78);
 
-s64 func_0026B020(void) {
+s64 mnuMovieShutdownA(void) {
     func_00134CF0();
     func_002CF430();
-    return func_0021FE38();
+    return evtDestroySecondaryWorldNode();
 }
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B050);
@@ -584,7 +584,7 @@ u32 func_0026BD38(void) {
 }
 
 void func_0026BD58(void) {
-    func_0021FE38();
+    evtDestroySecondaryWorldNode();
     func_00117730();
     func_001176A0();
 }
@@ -618,3 +618,4 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5D0);
+

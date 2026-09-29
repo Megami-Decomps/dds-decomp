@@ -80,7 +80,7 @@ typedef struct MenuCallbackNode {
 void func_003214D0(u32 arg0, s32 arg1);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
 
-u32 func_00321500(void) {
+u32 mnuCreateReleaseCallbackNode(void) {
     MenuCallbackNode *node = (MenuCallbackNode *)mnuCreateCallbackNode(0);
     node->callback = func_003214D0;
     return (u32)node;
@@ -401,7 +401,7 @@ void mnuInitializeEffectContext(u8 *context) {
     tag.kind = 2;
     tag.index = 0;
     memset(context, 0, 0x48);
-    *(u32 *)(context + 0x3c) = func_00321500();
+    *(u32 *)(context + 0x3c) = mnuCreateReleaseCallbackNode();
     func_00320CE0(*(u32 *)(context + 0x3c), 0,
                    (u32)mnuCreateNamedRecord((u8 *)&tag));
 }

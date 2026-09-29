@@ -26,13 +26,13 @@ s32 mnuCheckTableSums(s32 bytes, s32 table) {
 
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_00263EF8);
 
-extern void func_002639E0(s32);
+extern void mnuDrawItemPanelBackdrop(s32);
 extern void func_00263B78(s32, s32);
 
 void func_002641E0(s32 request) {
     s32 context = func_00101A70();
 
-    func_002639E0(context);
+    mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
     func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
 }
@@ -64,7 +64,7 @@ INCLUDE_ASM(const s32, "game/code_00263EB0", func_002642D0);
 void func_00264498(s32 request) {
     s32 context = func_00101A70();
 
-    func_002639E0(context);
+    mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
     func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
 }
@@ -106,7 +106,7 @@ s64 func_00264610(u64 request) {
 void func_002646A0(s32 request) {
     s32 context = func_00101A70();
 
-    func_002639E0(context);
+    mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 0);
     func_00285670(context + 8, (s32 *)(context + 0x54), 1, request);
 }

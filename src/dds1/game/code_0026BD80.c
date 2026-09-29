@@ -80,11 +80,11 @@ void func_0026C048(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C098);
 
-u8 func_0026C108(void) {
+u8 mnuHasSpriteHandle(void) {
     return ((MenuState *)D_003BC5D0)->spriteHandle != 0;
 }
 
-void func_0026C118(void) {
+void mnuReleaseSpriteHandle(void) {
     if (((MenuState *)D_003BC5D0)->spriteHandle != 0) {
         func_002BDD60(((MenuState *)D_003BC5D0)->spriteHandle);
         ((MenuState *)D_003BC5D0)->spriteHandle = 0;
@@ -93,7 +93,7 @@ void func_0026C118(void) {
 
 extern s32 func_0026BD80(s32, s32, s32, s32, s32, s32, s32);
 
-s64 func_0026C150(s32 arg0) {
+s64 mnuStartMovieMenuSfx16(s32 arg0) {
     return func_0026BD80(0, 0, 0, arg0, 0, 0x16, 0x53);
 }
 
@@ -134,7 +134,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C4B8);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C7E0);
 
-s64 func_0026CA18(void) {
+s64 mnuStartMovieMenuSfxGroup(void) {
     func_0026BD80(0, 0, 0, 0x80, 0, 6, 0x53);
     func_0026BD80(0, 0, 0, 0x80, 0, 0xD, 0x53);
     func_0026BD80(0, 0, 0, 0x80, 0, 0xE, 0x53);
@@ -202,3 +202,4 @@ INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5F8);
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC600);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC608);
+

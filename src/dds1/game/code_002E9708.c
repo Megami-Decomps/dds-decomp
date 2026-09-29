@@ -103,9 +103,9 @@ typedef struct SoundFormat {
 extern SoundNode *D_003BDA98;
 extern s32 sceIpuSync(s32, s32);
 extern u32 func_002CF530(s32);
-extern void func_002EB8C0(SoundNode *, SoundFormat *);
+extern void sdfSoundInitNodeFromFormat(SoundNode *, SoundFormat *);
 extern void func_002EB930(SoundNode *, s32, s32, s32);
-extern void func_002EB9C8(SoundNode *, SoundFormat *, s32, s32);
+extern void sdfSoundInitFormattedNode(SoundNode *, SoundFormat *, s32, s32);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void func_002CF7B8(s32);
@@ -151,7 +151,7 @@ void sdfSoundSetChannelCount(u32 channelCount) {
     func_002E8900((channelCount - 1) | 0x1d0, 0, 0, 0);
 }
 
-u32 func_002E9880(u32 arg0) {
+u32 sdfSoundTryQueueCommand(u32 arg0) {
     if (D_003BD49C != 0) {
         return 0;
     }
@@ -161,7 +161,7 @@ u32 func_002E9880(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002E98A0);
 
-u32 func_002E98E8(void) {
+u32 sdfSoundGetCommandStatus(void) {
     return D_003BD49C;
 }
 
@@ -380,7 +380,7 @@ s32 func_002EB168(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = arg0 + 0x20;
-    func_002EB278(temp_v0, temp_v0, temp_v0 + *(s32 *)(arg0 + 0x10), *(u32 *)(arg0 + 0x14));
+    sdfRelocatePackedResourceWords(temp_v0, temp_v0, temp_v0 + *(s32 *)(arg0 + 0x10), *(u32 *)(arg0 + 0x14));
     return temp_v0;
 }
 
@@ -395,7 +395,7 @@ s32 func_002EB1F0(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = arg0 + 0x20;
-    func_002EB278(temp_v0, temp_v0, temp_v0 + *(s32 *)(arg0 + 0x10), *(u32 *)(arg0 + 0x14));
+    sdfRelocatePackedResourceWords(temp_v0, temp_v0, temp_v0 + *(s32 *)(arg0 + 0x10), *(u32 *)(arg0 + 0x14));
     return temp_v0;
 }
 
@@ -406,7 +406,7 @@ u64 func_002EB230(u64 arg0, s32 *out) {
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB278);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfRelocatePackedResourceWords);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB360);
 
@@ -454,7 +454,7 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 
-void func_002EB8C0(SoundNode *node, SoundFormat *format) {
+void sdfSoundInitNodeFromFormat(SoundNode *node, SoundFormat *format) {
     memset(node, 0, 0x8C);
     if (format->hasAudio == 0) {
         node->twoChannel = 0;
@@ -468,8 +468,8 @@ void func_002EB8C0(SoundNode *node, SoundFormat *format) {
 }
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB930);
 
-void func_002EB9C8(SoundNode *node, SoundFormat *format, s32 callback, s32 context) {
-    func_002EB8C0(node, format);
+void sdfSoundInitFormattedNode(SoundNode *node, SoundFormat *format, s32 callback, s32 context) {
+    sdfSoundInitNodeFromFormat(node, format);
     node->callback = callback;
     node->callbackContext = context;
     node->active = 1;
@@ -560,10 +560,10 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
     func_002EC230(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC560);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfSubmitBufferedPlayback);
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
 
-void func_002EC748(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s32 value) {
+void sdfSoundInitAndAppendNode(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s32 value) {
     func_002EB930(node, arg1, arg2, arg3);
     node->userValue = value;
     sdfSoundAppendNode(node);
@@ -571,8 +571,8 @@ void func_002EC748(SoundNode *node, s32 arg1, s32 arg2, s32 arg3, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC780);
 
-void func_002EC818(SoundNode *node, SoundFormat *format, s32 arg2, s32 arg3, s32 value) {
-    func_002EB9C8(node, format, arg2, arg3);
+void sdfSoundInitFormattedAndAppendNode(SoundNode *node, SoundFormat *format, s32 arg2, s32 arg3, s32 value) {
+    sdfSoundInitFormattedNode(node, format, arg2, arg3);
     node->userValue = value;
     sdfSoundAppendNode(node);
 }

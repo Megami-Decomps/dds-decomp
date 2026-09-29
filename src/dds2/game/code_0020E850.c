@@ -88,13 +88,13 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F200);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F3B0);
 
-s32 func_0020F5C8(s32 arg0, s32 arg1) {
+s32 effOffsetIfOwnerFlagClear(s32 arg0, s32 arg1) {
     return arg1 + (((*(s32 *)(arg0 + 0x110) >> 9) ^ 1U) & 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F5E0);
 
-void func_0020F9B0(EffCounterOwner *owner) {
+void effDecrementFirstCountdown(EffCounterOwner *owner) {
     EffChildCounters *unit = owner->child;
     u8 count = unit->firstCountdown;
     if (count != 0) {
@@ -106,7 +106,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F9D0);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FA98);
 
-void func_0020FEF8(EffCounterOwner *owner) {
+void effDecrementSecondCountdown(EffCounterOwner *owner) {
     EffChildCounters *unit = owner->child;
     u8 count = unit->secondCountdown;
     if (count != 0) {
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FF18);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FFB8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_002100B8);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjD);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210148);
 
@@ -126,15 +126,15 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_002101C8);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210258);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210360);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjA);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_002103F8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210498);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjB);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210530);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_002105F0);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjC);
 
 u32 func_00210688(void) {
     return 1;
@@ -160,7 +160,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_00210B78);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210C10);
 
-u32 func_00210CB0(u32 limit) {
+u32 btlRandomBelow(u32 limit) {
     D_00436CB0 = D_00436CB0 * 0x41c64e6d + 0x3039;
     return (D_00436CB0 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
@@ -207,7 +207,7 @@ void func_00210E48(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210EA0);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210F10);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlDispatchPackedEffectAction);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210F58);
 
@@ -318,3 +318,4 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB0);
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB4);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB8);
+

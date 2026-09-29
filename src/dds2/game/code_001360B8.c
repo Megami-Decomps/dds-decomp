@@ -14,7 +14,7 @@ INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
 
-void func_00136388(void) {
+void fldInitializeDisplayPointerTable(void) {
     u32 *displayTable = D_0038BBD8;
 
     memset(displayTable, 0, 0x14);
@@ -57,3 +57,4 @@ INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436168);
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_0043616C);
 
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436170);
+

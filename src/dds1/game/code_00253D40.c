@@ -26,7 +26,7 @@ extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
 extern void func_00253558(MnuTransWork *work);
 
-void func_00253D40(MnuTransWork *work, s32 mode) {
+void mnuBeginTransitionAlt(MnuTransWork *work, s32 mode) {
     MnuTransRec *transition = func_0025DAD0(&work->list590);
 
     if (transition != NULL) {

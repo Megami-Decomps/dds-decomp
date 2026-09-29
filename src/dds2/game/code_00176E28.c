@@ -22,7 +22,7 @@ typedef struct EffRecordPool {
     u8 pad58[8];
     s32 recordBase;    /* 0x60: address of stride-dependent records */
     s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
-    u32 resource;   /* 0x68: released by func_00333918 */
+    u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
     u32 buffer;     /* 0x6C: freed by func_003297C8 */
 } EffRecordPool;
 
@@ -72,7 +72,7 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_00177408);
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177760);
 
 void func_00177880(EffRecordPool *pool) {
-    func_00333918(pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     func_003297C8(pool->buffer);
 }
 
@@ -86,7 +86,7 @@ s32 func_00177B78(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x14;
 }
 
-void func_00177B90(EffRecordPool *pool, u32 value) {
+void effSetVectorIncrementBits(EffRecordPool *pool, u32 value) {
     pool->settingA = value;
 }
 
@@ -101,7 +101,7 @@ void func_00177BA0(u8 *work, f32 value) {
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA8);
 
 void func_00177CA0(EffRecordPool *pool) {
-    func_00333918(pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     func_003297C8(pool->buffer);
 }
 
@@ -118,7 +118,7 @@ s32 func_00177E90(EffRecordPool *pool, s32 index) {
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177EA8);
 
 void func_00177FA8(EffRecordPool *pool) {
-    func_00333918(pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     func_003297C8(pool->buffer);
 }
 

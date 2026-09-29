@@ -32,7 +32,7 @@ void *func_00328D68(s32 size);
 
 void func_0032AA40(void *arg0);
 
-void func_0032CA90(void *arg0, void (*arg1)(void *));
+void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 
 extern SdfSemaObj D_004681F8;
 
@@ -46,9 +46,9 @@ void func_00329F60(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_00329F78);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A1C8);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfSwapBufferSlots);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A200);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfSetBufferSlot);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A230);
 
@@ -56,13 +56,13 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A378);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A440);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A548);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfWaitAndSelectBuffer);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A5A0);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A5F0);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A648);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfTexListContains);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A688);
 
@@ -91,7 +91,7 @@ void sdfTexInitializeLists(void) {
     head->unkC = NULL;
     D_00439140 = head;
     D_00439144 = head;
-    func_0032CA90(&D_00439148, func_0032AA40);
+    sdfInitializeSynchronizedRequest(&D_00439148, func_0032AA40);
 }
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AB20);
@@ -112,7 +112,7 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AEA0);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AF20);
 
-void func_0032AFD8(SdfSemaObj *semaphore) {
+void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
     semaphore->unk4 = NULL;
     semaphore->unk8 = NULL;
     semaphore->unkC = NULL;
@@ -128,10 +128,10 @@ void sdfTexInitializeSemaphore(void) {
 
     obj = &D_004681F8;
     obj->unk0 = sdfCreateSemaphore(1, 0x7F, 0);
-    func_0032AFD8(obj);
+    sdfResetSemaphoreState(obj);
 }
 
-u32 func_0032B1B0(s32 arg0) {
+u32 sdfTexGetPrimaryBuffer(s32 arg0) {
     return *(u32 *)(arg0 + 0x28);
 }
 
@@ -142,7 +142,7 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
 
     buffer = texture->unk2C;
     if (buffer == NULL) {
-        func_0032BE30();
+        sdfTexCreateSecondPacket();
         buffer = texture->unk2C;
     }
     return (s32)buffer;
@@ -184,7 +184,7 @@ u64 func_0032B338(SdfTex *texture) {
     return texture->unk28->unk30;
 }
 
-void func_0032B348(SdfTex *arg0, s32 arg1, s32 arg2) {
+void sdfTexSetPrimaryBufferModeBits(SdfTex *arg0, s32 arg1, s32 arg2) {
     SdfTexBuf *buf;
 
     buf = arg0->unk28;
@@ -238,3 +238,4 @@ INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F2);
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F4);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F8);
+

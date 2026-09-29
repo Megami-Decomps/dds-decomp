@@ -30,7 +30,7 @@ extern void fldPlayFieldSeVolumePan(s32 param);
 
 extern void fldPlayFieldSe(s32 param);
 
-extern s32 fldLoadArchive(s32 param);
+extern s32 fldPollArchiveLoad(s32 param);
 
 extern void func_001421D0(s32 param0, s32 param1);
 
@@ -71,7 +71,7 @@ u32 func_0014F0C8(void) {
     if (func_0013DF18()) {
         scene = 0;
     } else {
-        scene = func_0013BE30(((EffCmdWork *)func_0010D6A0())->key);
+        scene = fldFindTaskRecordId(((EffCmdWork *)func_0010D6A0())->key);
     }
     func_0013DC08(scene);
     return 1;
@@ -129,18 +129,18 @@ s32 func_0014F280(void) {
     return 1;
 }
 
-s32 func_0014F2A0(void) {
+s32 fldCommandPlaySeVolumePan(void) {
     fldPlayFieldSeVolumePan(func_0010D428(0));
     return 1;
 }
 
-s32 func_0014F2C8(void) {
+s32 fldCommandPlaySe(void) {
     fldPlayFieldSe(func_0010D428(0));
     return 1;
 }
 
-u8 func_0014F2F0(void) {
-    return fldLoadArchive(func_0010D428(0)) != 0;
+u8 fldCommandLoadArchive(void) {
+    return fldPollArchiveLoad(func_0010D428(0)) != 0;
 }
 
 s32 func_0014F318(void) {
@@ -196,7 +196,7 @@ s32 func_0014F468(void) {
 }
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
-s32 func_0014F498(void) {
+s32 fldCommandFindEffectByName(void) {
     char *param = func_0010D5A8(0);
 
     func_0010D5F0(fldFindEffectByName(param));

@@ -45,7 +45,7 @@ void effReleaseScatterObject(ScatterObject *object) {
     if (current->scatterResource != 0) {
         effPcpScatterResRelease(current->scatterResource);
     }
-    func_002DAA68(current->handle74);
+    sdfQueueAssetRelease(current->handle74);
     func_002D0918(current->handle78);
     func_002CFF98(object);
 }
@@ -74,7 +74,7 @@ s32 effGetScatterNarrowBlock(ScatterObject *object, s32 index) {
     return (s32)object->block68 + index * object->stride * 8;
 }
 
-u32 func_001760B0(ScatterObject *object, s32 index) {
+u32 effGetScatterEntry(ScatterObject *object, s32 index) {
     return object->entries[index];
 }
 

@@ -19,21 +19,21 @@ INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FB48);
 
 INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FCB8);
 
-void func_0024FE28(void) {
+void evtSetContextFlag(void) {
     EventContext *context;
 
     context = (EventContext *)func_00101958();
     context->flags = context->flags | 1;
 }
 
-void func_0024FE50(void) {
+void evtClearContextFlag(void) {
     EventContext *context;
 
     context = (EventContext *)func_00101958();
     context->flags = context->flags & 0xfffffffe;
 }
 
-void func_0024FE80(u32 task) {
+void evtDestroyTaskHierarchy(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 

@@ -58,7 +58,7 @@ INCLUDE_ASM(const s32, "game/code_002E9140", func_002E92C0);
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9340);
 
-u32 func_002E9418(char *filename) {
+u32 sndSendFilenameCommand(char *filename) {
     u32 length = strlen(filename);
     return func_002E8900(0xA0, 0, filename, length);
 }

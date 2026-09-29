@@ -30,6 +30,6 @@ void func_0018E1D8(EffMathSlots *table, s32 index) {
     slot->unk30 = 0;
 }
 
-s32 func_0018E200(s32 *base, s32 index) {
+s32 effMathGetSlotAt(s32 *base, s32 index) {
     return *base + index * 0x38;
 }

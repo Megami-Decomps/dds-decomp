@@ -69,7 +69,7 @@ typedef struct EffObjHeader {
 
 extern s32 func_002C45C8();
 
-void func_002C3868(void) {
+void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(D_003BD264, D_003900A0);
     effObjSetInnerSecondVec(D_003BD264, D_003900B0);
     ((EffObjHeader *)D_003BD264)->vtbl->refresh(D_003BD264);
@@ -86,7 +86,7 @@ void func_002C3CD0(u32 arg0) {
     D_003BD268 = arg0;
 }
 
-void func_002C3CF8(void) {
+void sdfCycleForward(void) {
     if ((s32)D_003BD268 < D_003BD26C - 1) {
         func_002C3C48();
         D_003BD268 = D_003BD268 + 1;
@@ -140,7 +140,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4680);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4850);
 
-u32 func_002C49F8(void) {
+u32 sdfCounterGetDisplayWordPointer(void) {
     return (u32)((SdfCounterRuntime *)D_003BD274)->channel->display->word;
 }
 
@@ -252,3 +252,4 @@ INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD270);
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD271);
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD274);
+

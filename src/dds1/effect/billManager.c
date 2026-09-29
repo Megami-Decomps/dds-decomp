@@ -112,7 +112,7 @@ BillObj *billCloneList(BillObj *obj) {
     return newobj;
 }
 
-void func_00151368(BillObj *obj) {
+void billReleaseList(BillObj *obj) {
     func_00151C58(obj->unk30);
     func_002CFF98(obj);
 }
@@ -158,7 +158,7 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     return newobj;
 }
 
-void *func_00151E08(s32 arg0, s32 arg1) {
+void *billCreateFromResource(s32 arg0, s32 arg1) {
     void *tmp;
     void *res;
     u32 buf[4];

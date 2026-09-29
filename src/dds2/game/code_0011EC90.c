@@ -80,7 +80,7 @@ void func_0011F010(GlyphOwner *owner) {
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011F028);
 
 void func_0011F0C0(GlyphOwner *owner, u8 flag) {
-    func_0019D120(owner->glyph, flag);
+    frFontSetChainFlag(owner->glyph, flag);
 }
 
 void func_0011F0E0(void) {
@@ -88,3 +88,4 @@ void func_0011F0E0(void) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0011EC90", D_00435EA8);
+

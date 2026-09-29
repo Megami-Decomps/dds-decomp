@@ -6,7 +6,7 @@ void func_002C9328(u32 arg0, u32 arg1) {
     func_0034FB90(arg0, 0, arg1, 0);
 }
 
-INCLUDE_ASM(const s32, "mc/mcManager", func_002C9348);
+INCLUDE_ASM(const s32, "mc/mcManager", mcPollSyncResult);
 
 void mcMakeDirectory(u32 arg0, u32 arg1) {
     sceMcMkdir(arg0, 0, arg1);

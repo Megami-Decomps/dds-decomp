@@ -52,7 +52,7 @@ void func_00288B68(u32 arg0) {
     func_00288AD0(arg0, 1, 0, 0);
 }
 
-u32 func_00288B88(FileWork *work) {
+u32 fileGetResourceHandle(FileWork *work) {
     return work->resourceHandle;
 }
 
@@ -60,7 +60,7 @@ u32 func_00288B90(FileWork *work) {
     return work->unk24;
 }
 
-u32 func_00288B98(FileWork *work) {
+u32 fileGetResourceSize(FileWork *work) {
     return work->size;
 }
 
@@ -70,7 +70,7 @@ u32 func_00288BA0(FileWork *work) {
 
 INCLUDE_ASM(const s32, "file/fileManager", func_00288BA8);
 
-s32 func_00288BE8(u8 *file) {
+s32 fileRequestIsReady(u8 *file) {
     s32 result = 0;
     if (*(u16 *)(file + 0x68) != 0) {
         result = *(u8 *)(file + 1) == 6;

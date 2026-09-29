@@ -415,7 +415,7 @@ void func_00171E80(PcpFlashWork1 *work, f32 value)
     work->unk3C = value;
 }
 
-void func_00171E88(PcpFlashWork1 *work, s32 index, s32 param)
+void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
 {
     PcpFlashColorSlot *slot;
     s32 colorA;
@@ -433,7 +433,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00171F28);
 
 extern u8 D_0037F680[];
 extern u8 D_0037F690[];
-extern s32 func_00195978(s32, s32, f32);
+extern s32 effBlendColor(s32, s32, f32);
 extern void func_00171F28();
 extern void func_00177CD0(void *);
 
@@ -444,7 +444,7 @@ typedef struct PcpFlashHandle1 {
     f32 unk5C;
 } PcpFlashHandle1;
 
-void func_001720A8(PcpFlashWork1 *work) {
+void effFlashUpdateWork1(PcpFlashWork1 *work) {
     f32 axis[4];
     s32 index;
     s32 lifetime;
@@ -486,7 +486,7 @@ void func_001720A8(PcpFlashWork1 *work) {
 
         if (part->age == 0) {
             func_00171F28(work, index, axis);
-            func_00171E88(work, index, 0);
+            effWriteFlashColorSlot(work, index, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
             } else {
@@ -499,7 +499,7 @@ void func_001720A8(PcpFlashWork1 *work) {
                     part->age = 0;
                 }
                 color = 0;
-                func_00171E88(work, index, color);
+                effWriteFlashColorSlot(work, index, color);
             } else if (part->age > 0) {
                 if (ramp == 0) {
                     part->scale = maxScale;
@@ -515,8 +515,8 @@ void func_001720A8(PcpFlashWork1 *work) {
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
-                color = func_00195A30(func_00195978(0, part->color, blend), fadeParam);
-                func_00171E88(work, index, color);
+                color = func_00195A30(effBlendColor(0, part->color, blend), fadeParam);
+                effWriteFlashColorSlot(work, index, color);
             }
         }
         part->age = part->age + 1;
@@ -567,7 +567,7 @@ typedef struct PcpFlashColorSlot5 {
     s32 color[5];
 } PcpFlashColorSlot5;
 
-void func_00172538(PcpFlashWork2 *work, s32 flag, s32 param) {
+void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 flag, s32 param) {
     PcpFlashColorSlot5 *slot;
     s32 colorA;
     s32 colorB;
@@ -618,7 +618,7 @@ void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void 
 extern u32 effMiscRand(void *);
 extern void func_00172628(void *, s32, void *);
 extern void func_001727A0(void *, s32, void *);
-extern s32 func_00195978(s32, s32, f32);
+extern s32 effBlendColor(s32, s32, f32);
 extern void func_001778B0(void *);
 extern u8 D_003AA868[];
 extern u8 D_0037F680[];
@@ -631,7 +631,7 @@ typedef struct PcpFlashHandle {
     f32 unk5C;
 } PcpFlashHandle;
 
-void func_001729B0(PcpFlashWork2 *work) {
+void effFlashUpdateStreak(PcpFlashWork2 *work) {
     s128 axis;
     s32 index;
     s32 lifetime;
@@ -666,7 +666,7 @@ void func_001729B0(PcpFlashWork2 *work) {
         if (part->age == 0) {
             func_00172628(work, index, &axis);
             func_001727A0(work, index, &axis);
-            func_00172538(work, index, 0);
+            effFlashColorSlot5Set(work, index, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
             } else {
@@ -679,7 +679,7 @@ void func_001729B0(PcpFlashWork2 *work) {
                     part->age = ~(effMiscRand(D_003AA868) % range);
                 }
                 color = 0;
-                func_00172538(work, index, color);
+                effFlashColorSlot5Set(work, index, color);
             } else if (part->age > 0) {
                 if (ramp == 0) {
                     part->scale = maxScale;
@@ -696,8 +696,8 @@ void func_001729B0(PcpFlashWork2 *work) {
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
-                color = func_00195A30(func_00195978(0, part->color, blend), fadeParam);
-                func_00172538(work, index, color);
+                color = func_00195A30(effBlendColor(0, part->color, blend), fadeParam);
+                effFlashColorSlot5Set(work, index, color);
             }
         }
         part->age = part->age + 1;
@@ -781,7 +781,7 @@ typedef struct PcpFlashHandle3 {
     f32 unk5C;
 } PcpFlashHandle3;
 
-void func_001731F0(PcpFlashWork3 *work) {
+void effFlashUpdateWork3(PcpFlashWork3 *work) {
     s32 index;
     s32 lifetime;
     s32 count;
@@ -841,7 +841,7 @@ void func_001731F0(PcpFlashWork3 *work) {
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
-                color = func_00195A30(func_00195978(0, part->color, blend), fadeParam);
+                color = func_00195A30(effBlendColor(0, part->color, blend), fadeParam);
                 func_00172EF0(work, index, color);
             }
         }
@@ -1018,7 +1018,7 @@ void func_00174890(PcpFlashWork6 *work, s32 flag, s32 param) {
 extern f32 func_00341240(void *state);
 extern u8 D_003AA868[];
 
-void func_00174980(PcpFlashWork6 *work, s32 index, void *orientation) {
+void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     PcpFlashPtc20A *part = work->parts + index;
     f32 v;
     f32 size;
@@ -1052,7 +1052,7 @@ typedef struct PcpFlashHandle6 {
     f32 unk5C;
 } PcpFlashHandle6;
 
-void func_00174C38(PcpFlashWork6 *work) {
+void effFlashUpdateWork6(PcpFlashWork6 *work) {
     s128 axis;
     s32 index;
     s32 lifetime;
@@ -1087,7 +1087,7 @@ void func_00174C38(PcpFlashWork6 *work) {
         f32 blend;
 
         if (part->age == 0) {
-            func_00174980(work, index, &axis);
+            effFlashSpawnParticle6(work, index, &axis);
             func_00174A58(work, index, &axis);
             func_00174890(work, index, 0);
             if (ramp == 0) {
@@ -1127,7 +1127,7 @@ void func_00174C38(PcpFlashWork6 *work) {
                         blend = 1.0f;
                     }
                 }
-                color = func_00195A30(func_00195978(0, part->color, blend), fadeParam);
+                color = func_00195A30(effBlendColor(0, part->color, blend), fadeParam);
                 func_00174890(work, index, color);
             }
         }
@@ -1199,7 +1199,7 @@ typedef struct PcpFlashHandle7 {
     f32 unk5C;
 } PcpFlashHandle7;
 
-void func_001752F8(PcpFlashWork7 *work) {
+void effFlashUpdateWork7(PcpFlashWork7 *work) {
     s128 axis;
     s32 restart;
     s32 fadeParam;
@@ -1271,7 +1271,7 @@ void func_001752F8(PcpFlashWork7 *work) {
                     }
                 }
                 active++;
-                func_001750C0(work, index, func_00195A30(func_00195978(0, part->color, blend), fadeParam));
+                func_001750C0(work, index, func_00195A30(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = 0;
@@ -1345,7 +1345,7 @@ typedef struct PcpFlashHandle8 {
     f32 unk5C;
 } PcpFlashHandle8;
 
-void func_00175C08(PcpFlashWork8 *work) {
+void effFlashUpdateWork8(PcpFlashWork8 *work) {
     s128 axis;
     s32 index;
     s32 count;
@@ -1412,7 +1412,7 @@ void func_00175C08(PcpFlashWork8 *work) {
                         blend = 1.0f;
                     }
                 }
-                func_001757F8(work, index, func_00195A30(func_00195978(0, part->color, blend), fadeParam));
+                func_001757F8(work, index, func_00195A30(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = ~(effMiscRand(D_003AA868) % range);
@@ -1501,7 +1501,7 @@ typedef struct PcpFlashHandle9 {
     f32 unk5C;
 } PcpFlashHandle9;
 
-void func_001764A0(PcpFlashWork9 *work) {
+void effFlashUpdateWork9(PcpFlashWork9 *work) {
     s32 restart;
     s32 fadeParam;
     s32 count;
@@ -1565,7 +1565,7 @@ void func_001764A0(PcpFlashWork9 *work) {
                         blend = 1.0f;
                     }
                 }
-                func_001761A0(work, index, func_00195A30(func_00195978(0, part->color, blend), fadeParam));
+                func_001761A0(work, index, func_00195A30(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = ~(effMiscRand(D_003AA868) % range);
@@ -1641,7 +1641,7 @@ typedef struct PcpFlashHandle10 {
     f32 unk5C;
 } PcpFlashHandle10;
 
-void func_00176B58(PcpFlashWork10 *work) {
+void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 axis[4];
     s32 restart;
     s32 fadeParam;
@@ -1714,7 +1714,7 @@ void func_00176B58(PcpFlashWork10 *work) {
                     }
                 }
                 active++;
-                func_00176920(work, index, func_00195A30(func_00195978(0, part->color, blend), fadeParam));
+                func_00176920(work, index, func_00195A30(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = 0;

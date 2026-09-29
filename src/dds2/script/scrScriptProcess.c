@@ -55,7 +55,7 @@ void scrClearProcessGlobals(void)
     }
 }
 
-void func_0010BE40(s32 priority, s32 scriptId, s32 option)
+void scrCreateProcessTaskFromResource(s32 priority, s32 scriptId, s32 option)
 {
     scrProcCreateTask(priority, scrOpenProcessFromResource(scriptId, option));
 }
@@ -64,7 +64,7 @@ void scrCreateProcessWithDefaultOption(u32 scriptId) {
     scrOpenProcessFromResource(scriptId, 0);
 }
 
-void func_0010BE90(s32 priority, s32 taskId, s32 option)
+void scrCreateTaskForProcessId(s32 priority, s32 taskId, s32 option)
 {
     scrProcCreateTask(priority, func_0010BC40(taskId, option));
 }
@@ -94,3 +94,4 @@ INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C100);
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C158);
 
 INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_00411408);
+

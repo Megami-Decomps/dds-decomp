@@ -34,7 +34,7 @@ extern void func_003154A0();
 
 extern s32 func_0030C5D8();
 
-extern s32 func_00312B10();
+extern s32 sdfDestroyCallbackWork();
 
 extern s32 fileResolvePrimaryBuffer();
 
@@ -46,7 +46,7 @@ extern s32 D_00435DD0;
 
 extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
 
-extern u64 func_0019D958(u64);
+extern u64 frFontMeasureLines(u64);
 
 extern u64 func_0019F448(u64, u64, u64, u64, u64, u64);
 
@@ -209,7 +209,7 @@ typedef struct EffObjHeader {
     EffObjVtbl *vtbl;           /* 0x10 */
 } EffObjHeader;
 
-void func_0030B838(void) {
+void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(D_004388B4, D_00400970);
     effObjSetInnerSecondVec(D_004388B4, D_00400980);
     ((EffObjHeader *)D_004388B4)->vtbl->refresh(D_004388B4);
@@ -226,7 +226,7 @@ void func_0030BC30(u32 arg0) {
     D_004388B8 = arg0;
 }
 
-void func_0030BC58(void) {
+void sdfCycleForward(void) {
     if ((s32)D_004388B8 < D_004388BC - 1) {
         func_0030BBA8();
         D_004388B8 = D_004388B8 + 1;
@@ -294,7 +294,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030C690);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030C8E8);
 
-u32 func_0030C9A0(void) {
+u32 sdfCounterGetDisplayWordPointer(void) {
     return (u32)((SdfCounterRuntime *)D_004388C4)->channel->display->word;
 }
 
@@ -413,12 +413,12 @@ u64 func_0030D780(u64 arg0) {
     u64 temp_v1;
 
     temp_v0 = func_0019F448(0, 0, 0, 0, arg0, 0);
-    temp_v1 = func_0019D958(temp_v0);
+    temp_v1 = frFontMeasureLines(temp_v0);
     func_0019C5B0(temp_v0);
     return temp_v1;
 }
 
-s32 func_0030D7E0(s32 mask, s32 ordinal) {
+s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     s32 bitIndex = 0;
     s32 count = 0;
     s32 nextIndex;
@@ -771,11 +771,11 @@ float mdlQuaternionLengthSquared(float *quaternion) {
                   quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3];
 }
 
-float quaternionMagnitude(float *quaternion) {
+float sdfQuaternionMagnitude(float *quaternion) {
     return fsqrtf(mdlQuaternionLengthSquared(quaternion));
 }
 
-void quaternionInverse(float *values) {
+void sdfQuaternionInverse(float *values) {
     float lengthSquared = mdlQuaternionLengthSquared(values);
     if (lengthSquared != 0.0f) {
         values[0] = -values[0] / lengthSquared;
@@ -785,8 +785,8 @@ void quaternionInverse(float *values) {
     }
 }
 
-void quaternionNormalize(float *values) {
-    float length = quaternionMagnitude(values);
+void sdfQuaternionNormalize(float *values) {
+    float length = sdfQuaternionMagnitude(values);
     values[0] /= length;
     values[1] /= length;
     values[2] /= length;
@@ -801,7 +801,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310EB0);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00310FD0);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", quaternionBlendNormalize);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuaternionBlendNormalize);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311178);
 
@@ -856,7 +856,7 @@ void sdfQuatSquadControl(f32 *out, f32 *from, f32 *rotation, f32 *to) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfQuatForwardVector);
 
-f32 func_00311888(f32 *direction, f32 *target) {
+f32 sdfQuatForwardDot(f32 *direction, f32 *target) {
     f32 quaternion[4];
     memset(quaternion, 0, sizeof(quaternion));
     quaternion[2] = 1.0f;
@@ -870,7 +870,7 @@ f32 func_003118E8(f32 *direction, f32 *target) {
     f32 component;
     memset(quaternion, 0, sizeof(quaternion));
     quaternion[1] = 1.0f;
-    projection = func_00311888(target, quaternion);
+    projection = sdfQuatForwardDot(target, quaternion);
     component = direction[1];
     if (component < 0.0f) {
         return -component / projection;
@@ -880,7 +880,7 @@ f32 func_003118E8(f32 *direction, f32 *target) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311978);
 
-s64 func_00311A90(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
+s64 sdfFontRegisterShort(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 temp_v0;
 
     temp_v0 = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
@@ -902,7 +902,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311E60);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00311F20);
 
-void *func_003120B8(u32 arg0) {
+void *sdfCreateCallbackNode(u32 arg0) {
     s32 allocation = func_003292A8(0x1C);
     u32 *obj = sdfMemoryGetBlockAddress(allocation);
 
@@ -930,7 +930,7 @@ s64 sdfDestroyTaskWork(SdfTaskOwner *owner) {
     }
 }
 
-void func_00312178(s32 arg0, s32 arg1) {
+void sdfSetTaskDestroyCallback(s32 arg0, s32 arg1) {
     if (arg1 != 0) {
         *(s32 *)(arg0 + 0x18) = (s32)arg1;
     }
@@ -940,7 +940,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312188);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312228);
 
-void func_00312310(s32 arg0, s32 arg1) {
+void sdfSetTaskSecondaryCallback(s32 arg0, s32 arg1) {
     if (arg1 != 0) {
         *(s32 *)(arg0 + 0x14) = (s32)arg1;
     }
@@ -996,14 +996,14 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312578);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312620);
 
-s64 func_003126D0(TaskWork *work) {
+s64 sdfDestroyTaskPair(TaskWork *work) {
     if (work != NULL) {
         kwlnTaskDestroyWithHierarchyByName(work->primaryTaskName, 1);
         return kwlnTaskDestroyWithHierarchyByName(work->secondaryTaskName, 0);
     }
 }
 
-u8 func_00312710(TaskWork *work) {
+u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     u8 exists;
     s64 task;
 
@@ -1033,7 +1033,7 @@ s64 sdfRemoveTaskItem(TaskWork *work, s32 key) {
     }
 }
 
-s32 func_003127E8(TaskWork *work, s32 key) {
+s32 sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
     TaskListNode *item;
 
     item = sdfFindTaskListNodeByKey(work->list, key);
@@ -1047,8 +1047,8 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312810);
 
 INCLUDE_RODATA(const s32, "game/code_0030B7D0", D_0042D418);
 
-void func_00312850(void *list, s32 key, u32 mode) {
-    u32 *item = func_003127E8(list, key);
+void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
+    u32 *item = sdfFindTaskItemValueByKey(list, key);
     if (item == NULL) {
         return;
     }
@@ -1073,7 +1073,7 @@ void func_00312850(void *list, s32 key, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312910);
 
-s64 func_00312A00(TaskWork *work) {
+s64 sdfFreeTaskWork(TaskWork *work) {
     if (work != NULL) {
         sdfDestroyTaskWork(work->list);
         func_00328E48(work->primaryTaskName);
@@ -1084,13 +1084,13 @@ s64 func_00312A00(TaskWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312A48);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312B10);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfDestroyCallbackWork);
 
 s64 func_00312B50(a, b)
 s32 a;
 s32 b;
 {
-    return func_00312B10(b);
+    return sdfDestroyCallbackWork(b);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312B70);
@@ -1135,7 +1135,7 @@ s64 func_00312FB0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312FD0);
 
-void func_00313008(void *p, u32 *mod, u32 *div) {
+void sdfGridGetCursorCoordinates(void *p, u32 *mod, u32 *div) {
     u32 *t = *(u32 **)((s32)p + 8);
     *mod = *t % *(u32 *)((s32)p + 0x14);
     *div = *t / *(u32 *)((s32)p + 0x14);
@@ -1143,7 +1143,7 @@ void func_00313008(void *p, u32 *mod, u32 *div) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313040);
 
-void func_00313078(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
+void sdfGridSetCellValue(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
     u32 temp_v0;
 
     temp_v0 = arg2 * *(s32 *)(arg0 + 0x14) + arg1;
@@ -1152,13 +1152,13 @@ void func_00313078(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003130B0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfGridCursorUp);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313100);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfGridCursorDown);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313158);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", sdfGridCursorLeft);
 
-u8 *func_003131B0(u8 *grid) {
+u8 *sdfGridCursorRight(u8 *grid) {
     u8 *cell = *(u8 **)(grid + 8);
     u32 width = *(u32 *)(grid + 0x14);
     u32 index = *(u32 *)cell;
@@ -1327,7 +1327,7 @@ typedef struct ScriptFlagSlot {
 
 extern ScriptFlagSlot D_00404AA8[];
 
-u32 func_003147C8(u8 *work, u32 id) {
+u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
     ScriptFlagSlot *slot = (ScriptFlagSlot *)((u8 *)D_00404AA8 + (*(u16 *)(work + 4) << 7));
     u32 i;
 
@@ -1575,7 +1575,7 @@ u8 func_00315248(u16 scriptId, s32 index) {
     return D_0040132C[scriptId][index];
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315270);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", scrCallIfOperandReady);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003152D8);
 
@@ -1756,7 +1756,7 @@ u32 func_00316260(s32 i) {
     return D_00404AA4[i].v0;
 }
 
-void func_00316280(void) {
+void sdfSetAllFlagsFromTable(void) {
     s32 index = 0;
 
     do {
@@ -1887,3 +1887,4 @@ INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438908);
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438910);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_00438918);
+

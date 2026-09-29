@@ -15,15 +15,15 @@ extern s32 D_003BAA00;
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002653A0);
 
-extern void func_00264E90();
+extern void itfUpdateFadeColor();
 extern void func_00264EF0();
 extern void func_00264B08();
 extern void func_00264D90();
 
-void func_00265478(u8 *work) {
+void mnuRefreshPanelLayer(u8 *work) {
     s32 y = 0x100 - *(s32 *)(work + 0x1574);
 
-    func_00264E90(work);
+    itfUpdateFadeColor(work);
     func_00264EF0(work);
     func_00264B08(work);
     func_00264D90(work);
@@ -94,7 +94,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002658B8);
 
 extern s32 D_003BAA00;
 
-s32 func_00265968(void) {
+s32 mnuCountAdvancingTitleAnimations(void) {
     s32 offset = 0;
     s32 count = 0;
     s32 remaining = 4;
@@ -117,7 +117,7 @@ s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
     return step;
 }
 
-s32 func_00265C28(u8 *src, u8 *obj) {
+s32 btlAddBaseStats(u8 *src, u8 *obj) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
@@ -136,7 +136,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C90);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265E68);
 
-void titleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
+void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);
     state[0] = first;
     state[1] = second;
@@ -148,7 +148,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00266048);
 
 void func_00266130(u32 fontContext) {
     func_001953D8(fontContext, 0xc, 0x10);
-    func_001953A8(fontContext, 0xfffffffffffffffc);
+    frFontSetFlagAndMeasureGlyphs(fontContext, 0xfffffffffffffffc);
 }
 
 extern u32 func_002C1630(u32, u32, s32);
@@ -163,3 +163,4 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002661A8);
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);
 
 INCLUDE_RODATA(const s32, "game/code_002653A0", D_003AFBA0);
+

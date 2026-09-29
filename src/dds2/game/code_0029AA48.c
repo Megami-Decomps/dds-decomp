@@ -34,7 +34,7 @@ INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AD98);
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AE10);
 
-u32 func_0029AE70(void) {
+u32 mnuResetSelectionWidthsFromConfig(void) {
     s8 current;
     MenuLayoutContext *context;
     u32 *destination;
@@ -76,7 +76,7 @@ u32 func_0029AF40(void) {
     return 1;
 }
 
-void func_0029AF48(MenuLayoutContext *context) {
+void mnuClearSelectionWidths(MenuLayoutContext *context) {
     s32 remaining;
     u32 *destination;
 

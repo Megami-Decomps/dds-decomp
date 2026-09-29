@@ -6,7 +6,7 @@ extern u64 func_001579E8(void);
 
 extern u64 func_001578C0(void);
 
-extern u64 func_001599F8(u64, u64);
+extern u64 billCreateFromResource(u64, u64);
 
 extern u64 billCreateIndexed(u64, u64);
 
@@ -78,12 +78,12 @@ void func_00114EA0(u64 arg0, u64 arg1, u64 arg2) {
 void func_00114EE8(u64 arg0, u64 arg1, u64 arg2) {
     u64 temp_v0;
 
-    temp_v0 = func_001599F8(1, arg0);
+    temp_v0 = billCreateFromResource(1, arg0);
     func_00114D80(temp_v0, arg1, arg2);
 }
 
 void func_00114F30(EffectObj *obj) {
-    func_00159DF0((u32)obj->data->bill);
+    billSetKind1Entry((u32)obj->data->bill);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114F50);
@@ -105,7 +105,7 @@ void func_00115068(u64 arg0, u64 arg1, u64 arg2) {
 void func_001150B0(u64 arg0, u64 arg1, u64 arg2) {
     u64 temp_v0;
 
-    temp_v0 = func_001599F8(0, arg0);
+    temp_v0 = billCreateFromResource(0, arg0);
     func_00114F50(temp_v0, arg1, arg2);
 }
 

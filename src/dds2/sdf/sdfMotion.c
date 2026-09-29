@@ -14,7 +14,7 @@ typedef struct {
     void *unk4;
 } Pair;
 
-void func_003340D0(Pair *a0, void *a1, void *a2);
+void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2);
 
 typedef struct {
     u8 pad[0x30];
@@ -207,11 +207,11 @@ Blk *sdfEnsurePrimaryTextSubParam(void *a0);
 
 Blk *sdfEnsureSecondaryTextSubParam(void *a0);
 
-void func_003340A8(VObj *object) {
+void sdfInvokeMotionObjectCallback(VObj *object) {
     object->vtable->invoke();
 }
 
-void func_003340D0(Pair *a0, void *a1, void *a2) {
+void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2) {
     a0->unk0 = a2;
     a0->unk4 = a1;
 }
@@ -230,7 +230,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003343E8);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334510);
 
-void func_00334618(MotionState *state) {
+void sdfMotionSuspend(MotionState *state) {
     u8 mode;
 
     mode = state->mode;
@@ -240,7 +240,7 @@ void func_00334618(MotionState *state) {
     }
 }
 
-void func_00334638(MotionState *state) {
+void sdfMotionResume(MotionState *state) {
     if (state->mode == 6) {
         state->mode = state->previousMode;
     }
@@ -250,7 +250,7 @@ void func_00334658(void) {
     func_00328E48();
 }
 
-void func_00334670(SdfMotionOutput *output, u32 value) {
+void sdfSetMotionOutputValue(SdfMotionOutput *output, u32 value) {
     output->value = value;
 }
 
@@ -285,12 +285,12 @@ void func_003348D8(KeyOut *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 func_00334900(void *object, s32 selector) {
+s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
     return D_0040B368[(u16)selector](object, selector);
 }
 
 void func_00334930(void *tmp, void *src, void *tbl, s32 x) {
-    func_003340D0(tmp, src, tbl);
+    sdfSetMotionPointerPair(tmp, src, tbl);
     ((TmpBuf *)tmp)->unkC = func_00330C18(((HasPtr4 *)src)->unk4, x);
 }
 
@@ -370,7 +370,7 @@ void func_003351C0(void *work) {
     PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x70);
 }
 
-s32 func_003351E0(void *a0, s32 a1) {
+s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
     return D_0040B3F8[(u16)a1](a0, a1);
 }
 
@@ -394,7 +394,7 @@ void func_003352C8(u8 *motion) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335308);
 
-void func_003353B8(SdfMotionBinding *binding) {
+void sdfCopyTrackStateToBinding(SdfMotionBinding *binding) {
     binding->current.word = binding->track->value14.word;
 }
 
@@ -563,7 +563,7 @@ void func_00335C40(u8 *motion) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C80);
 
-void func_00335D30(SdfMotionOutput *output) {
+void sdfCopyMotionTargetValue(SdfMotionOutput *output) {
     output->sampledValue = output->target->value;
 }
 

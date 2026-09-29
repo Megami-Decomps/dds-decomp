@@ -5,9 +5,9 @@ typedef struct WorldResourceOwner {
     u32 *resource;
 } WorldResourceOwner;
 
-INCLUDE_ASM(const s32, "game/code_00116440", func_00116440);
+INCLUDE_ASM(const s32, "game/code_00116440", dds3SpawnInnerVecObj8);
 
-u32 func_001164B8(WorldResourceOwner *object) {
+u32 dds3GetResourceOwnerHandle(WorldResourceOwner *object) {
     return *object->resource;
 }
 

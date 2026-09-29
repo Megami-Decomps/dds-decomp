@@ -14,7 +14,7 @@ extern char D_004221D8[]; /* "EventTest" */
 
 void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 
-void func_0023A9A8(void);
+void evtDestroyWorldSecondaryNode(void);
 
 typedef struct EventVisualData {
     u8 pad00[0x3C];
@@ -195,3 +195,4 @@ INCLUDE_SDATA(const s32, "game/code_00244F00", D_00437298);
 INCLUDE_SDATA(const s32, "game/code_00244F00", D_004372A0);
 
 INCLUDE_SDATA(const s32, "game/code_00244F00", D_004372A8);
+

@@ -54,25 +54,25 @@ void fileReqBegin(s32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqPoll);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9118);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetStatus);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSize);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9168);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqIsSlotMetadataDirty);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9190);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqClearSlotMetadataDirty);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C91B8);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqMarkSlotMetadataDirty);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C91E8);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqClearSlotFlags);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9218);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqSetSlotFlags);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9250);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSlotFlags);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C9280);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSelectedSlot);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C92A8);
+INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqSetSelectedSlot);
 
 void func_002C92D0(u32 arg0) {
     func_0034FCE0(arg0, 0);

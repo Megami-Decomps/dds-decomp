@@ -23,10 +23,10 @@ void func_0017E680(EffResourceWork *effect, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_0017E680", func_0017E688);
 
-void func_0017E7A8(u32 address) {
+void effReleaseAttachedResources(u32 address) {
     EffResourceWork *effect = (EffResourceWork *)address;
-    func_00333918(effect->graphics6C);
-    func_0017ECA0(address);
+    sdfQueueAssetRelease(effect->graphics6C);
+    effReleaseOptionalResource(address);
     func_003297C8(effect->resource70);
 }
 
@@ -34,7 +34,7 @@ INCLUDE_ASM(const s32, "game/code_0017E680", func_0017E7E0);
 
 INCLUDE_ASM(const s32, "game/code_0017E680", func_0017EA78);
 
-void func_0017ECA0(s32 address) {
+void effReleaseOptionalResource(s32 address) {
     EffResourceWork *effect = (EffResourceWork *)address;
     if (effect->resource68 != 0) {
         func_003297C8(effect->resource68);
@@ -42,21 +42,21 @@ void func_0017ECA0(s32 address) {
     }
 }
 
-void func_0017ECD0(EffResourceWork *effect, s32 index, f32 *vec) {
+void effSetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
     f32 *dst = (f32 *)(index * 0x14 + (s32)effect->entries);
     dst[0] = vec[0];
     dst[1] = vec[1];
     dst[2] = vec[2];
 }
 
-void func_0017ED00(EffResourceWork *effect, s32 index, f32 *vec) {
+void effGetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
     f32 *src = (f32 *)(index * 0x14 + (s32)effect->entries);
     vec[0] = src[0];
     vec[1] = src[1];
     vec[2] = src[2];
 }
 
-void func_0017ED30(EffResourceWork *effect, s32 index, u32 value) {
+void effSetResourceEntryValue(EffResourceWork *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 

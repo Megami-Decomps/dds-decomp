@@ -9,7 +9,7 @@ INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115D08);
 
 INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115E10);
 
-u32 func_001160F8(u32 object) {
+u32 dds3InitializeResourceOwner(u32 object) {
     u32 *valueSlot;
     u32 value;
 

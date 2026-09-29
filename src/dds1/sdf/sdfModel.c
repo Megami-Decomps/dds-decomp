@@ -1,12 +1,12 @@
 #include "common.h"
 
-extern void *func_002DAAA0(s32 arg0, s32 arg1, s32 arg2);
+extern void *sdfInitNodeHeaderFromWords(s32 arg0, s32 arg1, s32 arg2);
 extern void *func_002CFEB8(s32 arg0);
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void func_002EFD30(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(void);
-extern void func_002D78B8(void *arg0);
+extern void sdfEnsureFreeRootWorkspace(void *arg0);
 extern void func_002D8600(void *arg0);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
@@ -158,9 +158,9 @@ SdfPacket *func_002D7E38(SdfPacket *packet) {
     return packet + 1;
 }
 
-void *func_002D7E50(SdfChunk *arg0, s32 arg1, s32 arg2, s32 arg3) {
+void *sdfModelWriteIndexedAssetPacket(SdfChunk *arg0, s32 arg1, s32 arg2, s32 arg3) {
     SdfChunk *p = (SdfChunk *)arg0->unkC;
-    return func_002DAAA0(((s32 *)p->unkC)[arg1], arg2, arg3);
+    return sdfInitNodeHeaderFromWords(((s32 *)p->unkC)[arg1], arg2, arg3);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7E80);
@@ -187,7 +187,7 @@ void func_002D8800(SdfModel *model, s32 arg1, s32 arg2) {
 
     model->unk38 = arg1;
     sdfFreeNodeLists();
-    func_002D78B8(model);
+    sdfEnsureFreeRootWorkspace(model);
     func_002D8600(model);
     /* The re-initialization below is load-bearing for a byte-identical build. */
     i = 0;
@@ -241,7 +241,7 @@ SdfModel *func_002D8A90(void *data, SdfItemListRef *listRef) {
     return model;
 }
 
-void func_002D8B20(SdfDrawNode *drawNode, void *buf, s32 arg2) {
+void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *buf, s32 arg2) {
     u8 *b1 = drawNode->vectors[2];
     u8 *b2;
     u8 *b3;
@@ -303,12 +303,12 @@ void func_002D8B20(SdfDrawNode *drawNode, void *buf, s32 arg2) {
         return;
     }
     do {
-        func_002D8B20(node, dst, arg2);
+        sdfModelUpdateDrawNodeTransforms(node, dst, arg2);
         node = node->next;
     } while (node != drawNode->children);
 }
 
-void func_002D8C00(SdfModel *arg0, s32 arg1) {
+void sdfModelUpdateRootTransforms(SdfModel *arg0, s32 arg1) {
     u128 buf[4];
     u8 *b1 = &arg0->transformStart;
     u8 *b2;
@@ -354,11 +354,11 @@ void func_002D8C00(SdfModel *arg0, s32 arg1) {
         : "memory"
     );
     list = arg0->unk0;
-    func_002D8B20(list->unkC[0], buf, arg1);
+    sdfModelUpdateDrawNodeTransforms(list->unkC[0], buf, arg1);
 }
 
-void func_002D8C68(SdfModel *model) {
-    func_002D8C00(model, (s8)D_003BD2EA);
+void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
+    sdfModelUpdateRootTransforms(model, (s8)D_003BD2EA);
 }
 
 void func_002D8C88(SdfMsg *msg, s32 unk0, s32 unk4, s32 unk8, s32 unkC) {

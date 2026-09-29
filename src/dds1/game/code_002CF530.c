@@ -16,7 +16,7 @@ extern u32 D_003BD2CC;
 
 INCLUDE_ASM(const s32, "game/code_002CF530", func_002CF530);
 
-void func_002CF570(void *data) {
+void sdfFreeMemoryFromEitherHeap(void *data) {
     if (data != NULL) {
         if (sdfChipIsInRange(data)) {
             func_002CFF98(data);
@@ -38,7 +38,7 @@ void func_002CF5C0(void *data) {
 }
 
 
-void func_002CF618(void **slot) {
+void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     void *data = *slot;
     if (data != NULL) {
         *slot = NULL;

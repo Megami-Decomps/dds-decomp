@@ -41,14 +41,14 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F210);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F338);
 
+extern u8 D_0036C568[];
+extern void effRequestResourceByMode(char *, void *, s32, void *);
+
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF730);
 
-extern u8 D_0036C568[];
-extern void effRequestResourceByMode(char *, void *, s32, void *);
-
-void func_0024F4F0(void) {
+void mnuRequestMantraResources(void) {
     s32 i;
 
     for (i = 0; i < 14; i++) {
@@ -96,7 +96,7 @@ s32 mnuCheckResourceTask(void) {
 }
 
 void mnuStopResourceTask(void) {
-    func_002CB278(D_003BC4CC);
+    sdfDestroyTaskWorkerTasks(D_003BC4CC);
     D_003BC4CC = 0;
 }
 

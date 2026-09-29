@@ -4,7 +4,7 @@ extern void func_001D54C0(s32 actor);
 
 extern u32 func_001DAE48(s32 actor);
 extern s32 func_001DAE50(s32 actor, u32 index);
-extern void func_001D5440(s32 actor);
+extern void btlFlagUnitDefeatCandidate(s32 actor);
 
 extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
@@ -136,7 +136,7 @@ extern f32 func_0010D4F0(s32);
 extern s32 func_001A17F8(void *);
 extern s32 func_001A1838(void *);
 
-extern void func_001D6318(BtlUnit *, f32 *);
+extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void func_002E7D98(void);
 extern void effObjFetchInnerFirstVec(u32);
 
@@ -155,9 +155,9 @@ extern s32 D_003BB3D8;
 
 extern u32 func_0020A3F0(void);
 
-extern u32 battleGetEffectValue(void);
+extern u32 btlGetEffectValue(void);
 
-extern u32 battleGetEffectActive(void);
+extern u32 btlGetEffectActive(void);
 
 extern u32 func_002099A0(void);
 
@@ -177,7 +177,7 @@ extern s32 func_001A17F0(void);
 extern s32 func_001FEC68(s32 context, s32 actor, u32 mask);
 extern void func_0010D5F0();
 extern void btlCmdSimpleC(s32, u16);
-extern u8 *func_001D4748(s32);
+extern u8 *btlAllocTask(s32);
 extern void func_001F60E8(void);
 
 typedef struct BtlControlObject {
@@ -193,7 +193,7 @@ typedef struct BtlControlObject {
 
 u8 *btlCreateControlObject(void) {
     BtlControlObject *object;
-    object = (BtlControlObject *)func_001D4748(0);
+    object = (BtlControlObject *)btlAllocTask(0);
     object->enabled = 1;
     object->update = func_001F60E8;
     object->type = 0x60;
@@ -208,7 +208,7 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6300);
 
 void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
-    func_001D6318(unit, pos);
+    btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
     func_002E7D98();
@@ -231,7 +231,7 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
 
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
-    func_001D6318(unit, pos);
+    btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
     func_002E7D98();
@@ -279,7 +279,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
 }
 
 
-f32 func_001F6618(BtlUnit *unit) {
+f32 btlUnitGetMaxScaledExtent(BtlUnit *unit) {
     f32 reach;
     f32 height;
 
@@ -387,7 +387,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6E28);
 
-BtlUnit *func_001F70C8(u32 mask, BtlUnit *target) {
+BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     BtlState *state = (BtlState *)func_001A17F0();
     BtlUnit *unit;
     BtlUnit *nearest;
@@ -473,7 +473,7 @@ void func_001F73E0(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
-        func_001D5440((s32)unit);
+        btlFlagUnitDefeatCandidate((s32)unit);
     }
 }
 
@@ -492,7 +492,7 @@ void func_001F7470(s32 mask) {
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                func_001D5440((s32)unit);
+                btlFlagUnitDefeatCandidate((s32)unit);
             }
             unit = unit->next;
         } while (unit != NULL);
@@ -518,7 +518,7 @@ void func_001F7530(s32 actor) {
     u32 count = func_001DAE48(actor);
     if (count != 0) {
         do {
-            func_001D5440(func_001DAE50(actor, i));
+            btlFlagUnitDefeatCandidate(func_001DAE50(actor, i));
             i++;
         } while (i < count);
     }
@@ -538,18 +538,18 @@ void func_001F7598(s32 actor) {
 
 
 extern s32 func_001D5D58(s32);
-extern void func_001D6280(s32, s32);
-extern void func_001D6640(s32, s32);
+extern void btlSetUnitPosition(s32, s32);
+extern void btlSetUnitRotation(s32, s32);
 extern void func_001D5990(s32);
 extern void func_001D5578(s32, s32, s32, f32);
 
-void func_001F7600(void) {
+void btlUpdateUnitActors(void) {
     BtlState *state = (BtlState *)func_001A17F0();
     BtlUnit *actor = state->units;
     while (actor != NULL) {
-        func_001D5440((s32)actor);
-        func_001D6280((s32)actor, (s32)((u8 *)actor + 0x30));
-        func_001D6640((s32)actor, (s32)((u8 *)actor + 0x40));
+        btlFlagUnitDefeatCandidate((s32)actor);
+        btlSetUnitPosition((s32)actor, (s32)((u8 *)actor + 0x30));
+        btlSetUnitRotation((s32)actor, (s32)((u8 *)actor + 0x40));
         if ((func_001D5D58((s32)actor) == 0 && actor->effectState != 0) ||
             (actor->stateFlags & 2) != 0) {
             func_001D5990((s32)actor);
@@ -589,7 +589,7 @@ void btlRefreshUnitEffects(void) {
 }
 
 
-s32 func_001F7770(s32 mask) {
+s32 btlCountActiveUnitsWithFlags(s32 mask) {
     BtlUnit *unit;
     s32 count = 0;
     s32 flags;
@@ -1631,7 +1631,7 @@ u32 func_001FA0A0(void) {
 }
 
 u32 func_001FA0E0(void) {
-    if (battleHasEffectActor() != 0) {
+    if (btlHasEffectActor() != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1777,7 +1777,7 @@ u32 func_001FA558(void) {
 u32 func_001FA580(void) {
     u32 temp_v0;
 
-    temp_v0 = battleGetEffectActive();
+    temp_v0 = btlGetEffectActive();
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -1793,7 +1793,7 @@ u32 func_001FA5A8(void) {
 u32 func_001FA5D0(void) {
     u32 temp_v0;
 
-    temp_v0 = battleGetEffectValue();
+    temp_v0 = btlGetEffectValue();
     func_0010D5F0(temp_v0);
     return 1;
 }
@@ -1883,10 +1883,10 @@ u32 btlCmdCameraMove(void) {
     target[1] = func_0010D4F0(4);
     target[2] = func_0010D4F0(5);
     target[3] = func_0010D4F0(6);
-    startBattleTask(func_001D9718());
-    startBattleTask(func_001D9780());
-    startBattleTask(func_001DBAF0(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
-    startBattleTask(btlScheduleContextReset());
+    btlStartTask(func_001D9718());
+    btlStartTask(func_001D9780());
+    btlStartTask(func_001DBAF0(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
+    btlStartTask(btlScheduleContextReset());
     return 1;
 }
 
@@ -1895,11 +1895,11 @@ u32 func_001FA898(void) {
     u64 temp_v0;
 
     temp_v0 = func_001D9718();
-    startBattleTask(temp_v0);
+    btlStartTask(temp_v0);
     temp_v0 = func_001D9780();
-    startBattleTask(temp_v0);
+    btlStartTask(temp_v0);
     temp_v0 = btlCreateCommandSoundTask(func_0010D6A8(), 0x11);
-    startBattleTask(temp_v0);
+    btlStartTask(temp_v0);
     return 1;
 }
 
@@ -1907,11 +1907,11 @@ u32 func_001FA8F0(void) {
     u64 temp_v0;
 
     temp_v0 = func_001D9718();
-    startBattleTask(temp_v0);
+    btlStartTask(temp_v0);
     temp_v0 = func_001D9780();
-    startBattleTask(temp_v0);
+    btlStartTask(temp_v0);
     temp_v0 = btlCreateCommandSoundTask(0, 3);
-    startBattleTask(temp_v0);
+    btlStartTask(temp_v0);
     return 1;
 }
 
@@ -1945,12 +1945,12 @@ extern s32 func_001DBCB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, 
 u32 btlCmdCameraMoveBlend(void) {
     f32 timeA = func_0010D4F0(0);
     f32 timeB = func_0010D4F0(1);
-    startBattleTask(func_001D9718());
-    startBattleTask(func_001D9780());
-    startBattleTask(func_001DBCB0(0, D_003D74E0[0], D_003D74E0[1], D_003D74E0[2], D_003D7500[0], D_003D7500[1],
+    btlStartTask(func_001D9718());
+    btlStartTask(func_001D9780());
+    btlStartTask(func_001DBCB0(0, D_003D74E0[0], D_003D74E0[1], D_003D74E0[2], D_003D7500[0], D_003D7500[1],
                                 D_003D7500[2], D_003D7500[3], D_003D74E0[4], D_003D74E0[5], D_003D74E0[6],
                                 D_003D7500[4], D_003D7500[5], D_003D7500[6], D_003D7500[7], timeA, timeB));
-    startBattleTask(btlScheduleContextReset());
+    btlStartTask(btlScheduleContextReset());
     return 1;
 }
 
@@ -2017,9 +2017,9 @@ extern s32 D_003BAAA8;
 
 void btlBindActorSlot(BtlActor *actor, s32 arg1) {
     BtlState *state = (BtlState *)func_001A17F0();
-    s32 slot = func_0010BC68(state->list->count - 1, D_003BAAA8, arg1);
+    s32 slot = scrCreateTaskForProcessId(state->list->count - 1, D_003BAAA8, arg1);
     s32 handle;
-    func_0010C028(slot, actor);
+    scrSetCurrentActor(slot, actor);
     handle = *(s32 *)((u8 *)func_00101A70(slot) + 0xCC);
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;

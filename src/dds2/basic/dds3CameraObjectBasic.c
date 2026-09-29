@@ -52,13 +52,13 @@ INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_001130B8);
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_001130D0);
 
-void func_001130E8(CameraObject *camera, f32 value) {
+void dds3SetCameraValue(CameraObject *camera, f32 value) {
     CameraData *state = camera->data;
     state->value8C = value;
     state->flags |= 1;
 }
 
-f32 func_00113100(CameraObject *camera) {
+f32 dds3GetCameraValue(CameraObject *camera) {
     return camera->data->value8C;
 }
 

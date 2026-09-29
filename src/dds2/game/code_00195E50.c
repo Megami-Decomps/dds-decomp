@@ -157,7 +157,7 @@ SlotTab *func_00195E50(u32 count) {
     return table;
 }
 
-void func_00195EE0(EffArrHdr *header) {
+void effReleaseSlotArrayAllocation(EffArrHdr *header) {
     func_003297C8(header->unk8);
 }
 
@@ -174,7 +174,7 @@ void effInitSlotTail(SlotTab *tab, s32 idx) {
     slot->unk54 = slot->unk58 = 0;
 }
 
-s32 func_00196298(SlotTab *tab, s32 index) {
+s32 effGetSlotAt(SlotTab *tab, s32 index) {
     return (s32)&tab->slots[index];
 }
 
@@ -402,7 +402,7 @@ extern void func_00194A28();
 extern void func_00194A30();
 extern void func_00194A38();
 
-s8 func_00197530(void) {
+s8 effUpdateCh72Params(void) {
     if (D_004364AD == 0) {
         if (D_003B23E8.load != 0) {
             *D_003B23E8.result = D_003B23E8.load(D_003B23E8.source);

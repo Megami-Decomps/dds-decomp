@@ -425,7 +425,7 @@ extern void *func_002CFEB8(s32 size);
 
 extern EffPCPWork *func_0017CA60(void *param0, void *param1);
 extern u32 func_0014FEB0(u32 handle);
-extern void func_0014FAB8(s32 handle);
+extern void effDestroyNode(s32 handle);
 extern void func_00186CB8(u32 handle);
 extern u32 func_00187460(void *params);
 extern u32 func_00186F90(void *params);
@@ -444,7 +444,7 @@ extern u32 effParamWorkDuplicate(u32 param);
 extern void func_00177870(EffPCPWorkF14 *work, s32 index);
 extern void func_00178280(void *work, s32 index);
 extern void func_0017DBB0(s32 id);
-extern void func_0017E4A8(void *dst, void *src);
+extern void effPcpCopyVector60(void *dst, void *src);
 extern void func_0017E4C8(void *dst, void *src);
 extern void func_002DDBF8(void);
 extern void func_00180540(f32 value);
@@ -452,10 +452,10 @@ extern void func_002DD688(f32 scale);
 extern void func_002DD8E8(f32 angle);
 extern void func_00180BD0(f32 angle);
 
-extern void *func_00162970(u32 handle);
+extern void *effParamWorkGetData(u32 handle);
 extern void func_00162A38(u32 handle);
 extern void func_00217878(void *obj, void *table);
-extern void func_00217F88(void *obj);
+extern void mdlStorePrimaryVectorVU(void *obj);
 extern void func_002D9E98(u32 handle, s32 value);
 extern void effParamWorkCallback0(u32 handle, void *vec);
 extern void effParamWorkCallback3(u32 handle, u32 value);
@@ -689,8 +689,8 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
         if (work->delay[i] != 0) {
             work->delay[i]--;
         } else {
-            obj[0] = func_00162970(work->handle[i * 2]);
-            obj[1] = func_00162970(work->handle[i * 2 + 1]);
+            obj[0] = effParamWorkGetData(work->handle[i * 2]);
+            obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
             pos[0] = work->x;
             pos[2] = work->z;
             pos[1] = (work->y - work->offset[i] + 100.0f) * work->scale;
@@ -699,13 +699,13 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
                 "lqc2 vf10, 0(%0)\n"
                 ".set reorder"
                 : : "r"(pos));
-            func_00217F88(obj[0]);
+            mdlStorePrimaryVectorVU(obj[0]);
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->unk10);
             func_00217878(obj[0], D_00325828);
             func_002D9E98(((EffPCPWork *)obj[0])->unk18, 1);
-            func_00217F88(obj[1]);
+            mdlStorePrimaryVectorVU(obj[1]);
             func_00217878(obj[1], D_00325828);
         }
     }
@@ -747,7 +747,7 @@ EffPCPCrossWork *effCrossEffectCreateFromTable(void *src) {
     s32 j;
 
     work->base = effParamCreateFromTable(src, 0);
-    mdlAddEntryPlain(func_00162970(work->base), 0, 0);
+    mdlAddEntryPlain(effParamWorkGetData(work->base), 0, 0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (j == 0) {
@@ -775,7 +775,7 @@ EffPCPCrossWork *effCrossEffectClone(EffPCPCrossWork *src) {
     s32 j;
 
     work->base = effParamWorkDuplicate(src->base);
-    mdlAddEntryPlain(func_00162970(work->base), 0, 0);
+    mdlAddEntryPlain(effParamWorkGetData(work->base), 0, 0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             work->handle[i][j] = effParamWorkDuplicate(src->handle[i][0]);
@@ -880,14 +880,14 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
         if (work->delay[i] != 0) {
             work->delay[i]--;
         } else {
-            obj[0] = func_00162970(work->handle[i * 2]);
-            obj[1] = func_00162970(work->handle[i * 2 + 1]);
+            obj[0] = effParamWorkGetData(work->handle[i * 2]);
+            obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
             __asm__ volatile (
                 ".set noreorder\n"
                 "lqc2 vf10, 0(%0)\n"
                 ".set reorder"
                 : : "r"(work) : "memory");
-            func_00217F88(obj[0]);
+            mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->unk10);
             func_00217878(obj[0], D_00325828);
             func_002D9E98(((EffPCPWork *)obj[0])->unk18, 1);
@@ -896,7 +896,7 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
                 "sqc2 vf10, 0(%0)\n"
                 ".set reorder"
                 : : "r"(&vec));
-            func_00217F88(obj[1]);
+            mdlStorePrimaryVectorVU(obj[1]);
             func_00217878(obj[1], D_00325828);
         }
     }
@@ -959,7 +959,7 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00178790);
 
-void func_00178AF0(void *work, void *src) {
+void effPcpCopyVectorAF0(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0xAF0, src);
 }
 
@@ -1011,13 +1011,13 @@ void effPcpSpawnOnce(EffPCPWork *work) {
     void *obj;
     u128 vec;
 
-    obj = func_00162970(work->unk14);
+    obj = effParamWorkGetData(work->unk14);
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
         ".set reorder"
         : : "r"(work) : "memory");
-    func_00217F88(obj);
+    mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->unk18, work->unk10);
     func_00217878(obj, D_00325828);
     func_002D9E98(((EffPCPWork *)obj)->unk18, 1);
@@ -1978,7 +1978,7 @@ void effPcpReleaseOptionalHandle(EffPCPWork *work) {
 
     handle = work->optionalHandle;
     if (handle != 0) {
-        func_0014FAB8(handle);
+        effDestroyNode(handle);
     }
     func_002CFF98(work);
 }
@@ -2094,9 +2094,9 @@ void func_0017D288(EffPCPWork *work) {
 
     handle = (s32 *)&work->unk58;
     for (i = 0; i < 7; i++) {
-        func_0014FAB8(handle[14]);
-        func_0014FAB8(handle[7]);
-        func_0014FAB8(handle[0]);
+        effDestroyNode(handle[14]);
+        effDestroyNode(handle[7]);
+        effDestroyNode(handle[0]);
         handle++;
     }
     func_002CFF98(work);
@@ -2156,7 +2156,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017DBB0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017DCF8);
 
-void func_0017E4A8(void *work, void *src) {
+void effPcpCopyVector60(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x60, src);
 }
 
@@ -2259,7 +2259,7 @@ void func_0017EE10(EffPCPRotateWork *work, void *src) {
 
     id = work->ids;
     for (i = 0; i < 3; i++) {
-        func_0017E4A8((void *)id[i], src);
+        effPcpCopyVector60((void *)id[i], src);
     }
 }
 
@@ -2807,8 +2807,8 @@ void func_001801F0(EffPCPWork *work, f32 val) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001801F8);
 
-void func_00180338(EffPCPWork *work) {
-    func_002DAA68(work->unkA8);
+void effPcpReleaseNestedWork(EffPCPWork *work) {
+    sdfQueueAssetRelease(work->unkA8);
     func_002D0918(work->unkAC);
     func_002CFF98(work);
 }
@@ -2884,8 +2884,8 @@ void func_001808B0(void) {
     effBeamEffectClone();
 }
 
-void func_001808C8(EffPCPWork *work) {
-    func_00180338((EffPCPWork *)work->unk5C);
+void effPcpReleaseBeamClone(EffPCPWork *work) {
+    effPcpReleaseNestedWork((EffPCPWork *)work->unk5C);
     func_002CFF98(work);
 }
 
@@ -2903,7 +2903,7 @@ void func_00180B40(EffPCPWork *work, u32 val) {
     work->unk54 = val;
 }
 
-void func_00180B48(EffPCPWork *work, void *src) {
+void effPcpCopyNestedMatrix(EffPCPWork *work, void *src) {
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf28, 0(%0)\n"
@@ -3027,7 +3027,7 @@ void func_00181040(void) {
 }
 
 void func_00181058(EffPCPWork *work) {
-    func_00180338((EffPCPWork *)work->unk7C);
+    effPcpReleaseNestedWork((EffPCPWork *)work->unk7C);
     func_002CFF98(work);
 }
 

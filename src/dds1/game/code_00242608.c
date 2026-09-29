@@ -87,7 +87,7 @@ typedef struct ScrollOwner {
     ScrollList *list;         /* 0x2308 */
 } ScrollOwner;
 
-void func_00242708(ScrollOwner *owner, s32 delta) {
+void mnuShopScrollList(ScrollOwner *owner, s32 delta) {
     ScrollList *list = owner->list;
     ScrollNode *node;
     s32 next;
@@ -343,7 +343,7 @@ extern s32 D_00368BD8[];
 extern s32 func_001951C8(s32 *resources, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_00195450(s32 resource, s32 width, s32 height);
 
-void func_00243A58(CampScene *scene) {
+void mnuCampInitFontResource(CampScene *scene) {
     s32 resource;
     scene->fontResource = 0;
     resource = func_001951C8(D_00368BD8, 0, 0, 0, 0);
@@ -351,7 +351,7 @@ void func_00243A58(CampScene *scene) {
     func_00195450(resource, 0x960, 0x70);
 }
 
-void func_00243AA8(CampScene *scene) {
+void mnuCampLinkFontGlyph(CampScene *scene) {
     func_00194920(scene->fontResource);
     scene->fontResource = 0;
 }
@@ -369,7 +369,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243B28);
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243BF0);
 
 extern s32 D_003BA8F8;
-extern s32 func_002D5510();
+extern s32 sdfAllocatePacketList();
 extern void sdfCreateDescriptorPacket();
 
 typedef struct BufferDescriptor {
@@ -379,11 +379,11 @@ typedef struct BufferDescriptor {
 
 extern BufferDescriptor D_00325708;
 
-void func_00243CC8(u8 *work) {
+void mnuShopSubmitDescriptor(u8 *work) {
     s32 packet;
 
     if (*(s32 *)(work + 0x2428) != 0) {
-        packet = func_002D5510(0);
+        packet = sdfAllocatePacketList(0);
         sdfCreateDescriptorPacket(packet, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0x200, 0xE0, *(s32 *)(work + 0x2428), 0);
         D_00325708.open(&D_00325708, packet);
     }
@@ -545,7 +545,7 @@ s64 func_00244360(u8 *work) {
 extern s32 D_003BAA00;
 extern u8 *D_003BAA68;
 
-s32 func_00244380(void) {
+s32 mnuShopHasPendingFlag(void) {
     u8 *flags = (u8 *)(D_003BAA00 + 0x12A0);
     u8 *entry = D_003BAA68;
     s32 found = 0;
@@ -577,7 +577,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00244508);
 
 extern u8 D_00369A88[];
 
-s32 func_002445E0(void) {
+s32 mnuCampFindActiveSlot(void) {
     s32 i;
     u8 *base = D_00369A88;
     s16 *p = (s16 *)(base + 0x410);
@@ -604,7 +604,7 @@ typedef struct ShopSprite {
 extern void func_0027C430();
 extern void func_002CFF98();
 
-void func_00244740(u8 *scene) {
+void mnuShopReleaseSprites(u8 *scene) {
     ShopSprite **slot = (ShopSprite **)(scene + 0x6C);
     u32 i;
 
@@ -624,7 +624,7 @@ void func_00244740(u8 *scene) {
     }
 }
 
-s32 func_002447D8(void) {
+s32 mnuCampGetProgressStage(void) {
     s32 result = 0;
     if (mdlFlagTest(0x970)) {
         result = 1;
@@ -669,19 +669,19 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002448D0);
 extern s32 func_00101A70();
 extern void func_00285600();
 extern void func_0024DBC8();
-extern void func_0024D9C0();
+extern void evtReleaseResourcePairHandle();
 extern void func_002D0918();
 
-void func_00244970(s32 arg) {
+void mnuShopDestroyScene(s32 arg) {
     u8 *scene = (u8 *)func_00101A70();
 
     if (scene != NULL) {
-        func_00244740(scene);
+        mnuShopReleaseSprites(scene);
         func_00244360(scene);
         mnuShopReleaseSceneObjects(scene);
         func_00285600(scene + 8, arg);
         func_0024DBC8();
-        func_0024D9C0(scene + 0x5C);
+        evtReleaseResourcePairHandle(scene + 0x5C);
         func_002D0918(*(s32 *)scene);
         D_003BC39C = 2;
     }
@@ -712,7 +712,7 @@ s32 mnuPollTaskState(void) {
 extern void func_002858E8(s32 *, void *);
 extern u8 D_0036AB48[];
 
-s64 func_00244B30(u64 request) {
+s64 mnuCampRunPanel0(u64 request) {
     s32 state = func_00101A70();
     s32 *panel = (s32 *)(state + 0x54);
     func_002858E8(panel, D_0036AB48);
@@ -723,12 +723,12 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
 
-s64 func_00244B90(u64 request) {
+s64 mnuCampRunPanel1(u64 request) {
     s32 state = func_00101A70();
     return menuRunPanel(state, 1, request);
 }
 
-s64 func_00244BC8(u64 request) {
+s64 mnuCampRunPanel2(u64 request) {
     s32 state = func_00101A70();
     return menuRunPanel(state, 2, request);
 }

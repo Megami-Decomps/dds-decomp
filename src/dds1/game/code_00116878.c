@@ -15,7 +15,7 @@ typedef struct ObjWithWork {
     void *work;
 } ObjWithWork;
 
-s32 func_00116A10(ObjWithWork *obj) {
+s32 dds3AllocateObjectWork(ObjWithWork *obj) {
     obj->work = func_002CFEB8(0x18);
     memset(obj->work, 0, 0x18);
     return 1;

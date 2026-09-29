@@ -88,7 +88,7 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B3D0);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B4F0);
 
-void func_0031B5F8(s32 *list) {
+void mnuClearNodeRecords(s32 *list) {
     s32 record;
     u32 index;
 

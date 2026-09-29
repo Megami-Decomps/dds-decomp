@@ -104,9 +104,9 @@ extern void func_0023CB68(EvtUnit *unit, s32 arg1);
 
 extern u8 evtUnitHasStateBits(EvtUnit *unit);
 
-extern void func_0023C750(EvtUnit *unit, void *arg1, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, void *arg1, s32 arg2);
 
-extern void func_0023C7C0(EvtUnit *unit, s32 arg1);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 
 extern void func_0010AE38(const char *fmt, ...);
 
@@ -160,7 +160,7 @@ void func_0023D658(EvtUnit *work, s128 *vec, s32 count) {
     }
 }
 
-void func_0023D698(EvtUnit *work, s32 arg1, s32 arg2) {
+void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 arg1, s32 arg2) {
     void *unit;
 
     unit = func_00110C70(dds3GetWorldSecondaryObject(), arg1, 0x11);
@@ -223,14 +223,14 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E460);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E648);
 
-void *func_0023E6D8(s32 type, s32 id) {
+void *evtFindWorldObjectByIdAndKind(s32 type, s32 id) {
     void *ctx;
 
     ctx = dds3GetWorldObject();
     func_00110C70(ctx, id, type);
 }
 
-u32 func_0023E718(void) {
+u32 evtCommandGetSelectedUnitValue(void) {
     void *ctx;
     EvtUnit *obj;
     s32 value;
@@ -377,7 +377,7 @@ u32 func_0023EA90(void) {
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EAE8);
 
-u32 func_0023EBE8(void) {
+u32 evtSetWorldUnitFirstVector(void) {
     f32 vector[4];
     void *world;
     s32 id;
@@ -399,7 +399,7 @@ u32 func_0023EBE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EC80);
 
-u32 func_0023ED68(void) {
+u32 evtSetWorldUnitThirdVector(void) {
     f32 vector[4];
     void *world;
     s32 id;
@@ -422,7 +422,7 @@ u32 func_0023ED68(void) {
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EE08);
 
-u32 func_0023EEA0(void) {
+u32 evtOpSetUnitParams5(void) {
     EvtUnit *unit;
 
     unit = func_0023CC00(func_0010D650(0));
@@ -439,7 +439,7 @@ u32 func_0023EEA0(void) {
     return 1;
 }
 
-u32 func_0023EF40(void) {
+u32 evtOpSetUnitParams6(void) {
     EvtUnit *unit;
 
     unit = func_0023CC00(func_0010D650(0));
@@ -467,7 +467,7 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023F010);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023F168);
 
-u32 func_0023F270(void) {
+u32 evtOpBeginWindowCallback(void) {
     EvtUnit *unit;
 
     unit = func_0023CC00(func_0010D650(0));
@@ -604,7 +604,7 @@ u32 func_0023F580(void) {
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023F650);
 
-u32 func_0023F6E0(void) {
+u32 evtCommandSetUnitValue(void) {
     s32 id;
     EvtUnit *unit;
 
@@ -659,11 +659,11 @@ u32 func_0023F7F8(void) {
     unit->unkB2 = 0;
     param1 = func_0010D650(1);
     param2 = func_0010D650(2);
-    func_0023D698(unit, param1, param2);
+    evtAttachSecondaryWorldUnit(unit, param1, param2);
     return 1;
 }
 
-f32 func_0023F868(f32 a, f32 b) {
+f32 evtGetShortestAngleDelta(f32 a, f32 b) {
     f32 diff;
 
     if (a < 0.0f || b < 0.0f) {
@@ -733,7 +733,7 @@ u32 func_0023FDF0(void) {
     return 1;
 }
 
-u8 func_0023FE38(void) {
+u8 evtUnitHasNoStatusFlags(void) {
     s32 id;
     EvtUnit *unit;
     u8 active;
@@ -761,11 +761,11 @@ u32 func_002401C0(void) {
 
     id = func_0010D650(0);
     unit = func_0023CC00(id);
-    target = func_0023E6D8(9, func_0010D650(2));
+    target = evtFindWorldObjectByIdAndKind(9, func_0010D650(2));
     if (target == NULL) {
         return 1;
     }
-    func_0023C750(unit, target, func_0010D650(1));
+    evtSetUnitValueTransition(unit, target, func_0010D650(1));
     return 1;
 }
 
@@ -777,7 +777,7 @@ u32 func_00240238(void) {
     id = func_0010D650(0);
     unit = func_0023CC00(id);
     param1 = func_0010D650(1);
-    func_0023C7C0(unit, param1);
+    evtEndUnitValueTransition(unit, param1);
     return 1;
 }
 
@@ -844,7 +844,7 @@ u32 evtUnitCheckModelCut(void) {
     u32 param1;
 
     id = func_0010D650(0);
-    unit = func_0023E6D8(7, id);
+    unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
         param1 = func_0010D650(1);
         if (param1 >= 3U) {
@@ -862,7 +862,7 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_00240640);
 u32 func_002406C0(void) {
     void *unit;
 
-    unit = func_0023E6D8(7, func_0010D650(0));
+    unit = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
     if (unit != NULL) {
         s32 mode = func_0010D650(1);
         s32 index;
@@ -932,7 +932,7 @@ u32 func_002409E0(void) {
     void *obj;
 
     id = func_0010D650(0);
-    obj = func_0023E6D8(7, id);
+    obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00115BD8(obj);
     }
@@ -944,7 +944,7 @@ u32 func_00240A20(void) {
     void *obj;
 
     id = func_0010D650(0);
-    obj = func_0023E6D8(7, id);
+    obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00115BD8(obj);
     }
@@ -956,7 +956,7 @@ u32 func_00240A60(void) {
     void *obj;
 
     id = func_0010D650(0);
-    obj = func_0023E6D8(7, id);
+    obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00110B50(obj);
     }
@@ -972,3 +972,4 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_00240C48);
 INCLUDE_SDATA(const s32, "game/code_0023D658", D_004371EC);
 
 INCLUDE_SDATA(const s32, "game/code_0023D658", D_004371F0);
+

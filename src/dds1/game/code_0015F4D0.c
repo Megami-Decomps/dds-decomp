@@ -56,7 +56,7 @@ void func_0015F6E8(BillObj *effect, void *value) {
     effect->unk60 = value;
 }
 
-void func_0015F6F0(BillWork *work, u8 value) {
+void effBillSetWorkValue(BillWork *work, u8 value) {
     if (work->pendingCount == 0) {
         work->stagedValue = value;
     }
@@ -73,7 +73,7 @@ void func_0015F710(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F718);
 
-void func_0015F7F0(BillEntryOwner *owner, s32 index, u32 value) {
+void effBillSetEntryValue(BillEntryOwner *owner, s32 index, u32 value) {
     owner->entries[index].value = value;
 }
 

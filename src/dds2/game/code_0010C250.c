@@ -13,14 +13,14 @@ typedef struct ScriptCommandBuffer {
     void *actor; /* 0xF0: battle actor bound to the active script */
 } ScriptCommandBuffer;
 
-void func_0010C250(u32 unused, u32 actor) {
+void scrSetCurrentActor(u32 unused, u32 actor) {
     ScriptCommandBuffer *context;
 
     context = (ScriptCommandBuffer *)func_00101958();
     context->actor = (void *)actor;
 }
 
-u32 func_0010C278(void) {
+u32 scrGetCurrentActor(void) {
     ScriptCommandBuffer *context;
 
     context = (ScriptCommandBuffer *)func_00101958();

@@ -77,7 +77,7 @@ INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F7B0);
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FB08);
 
 void func_0016FC28(EffectRecordGroup *group) {
-    func_002DAA68(group->handle68);
+    sdfQueueAssetRelease(group->handle68);
     func_002D0918(group->handle6C);
 }
 
@@ -91,7 +91,7 @@ s32 func_0016FF20(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x14;
 }
 
-void func_0016FF38(EffectRecordGroup *group, u32 incrementBits) {
+void effSetVectorIncrementBits(EffectRecordGroup *group, u32 incrementBits) {
     *(u32 *)&group->increment = incrementBits;
 }
 
@@ -106,7 +106,7 @@ void func_0016FF48(u8 *work, f32 value) {
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FF50);
 
 void func_00170048(EffectRecordGroup *group) {
-    func_002DAA68(group->handle68);
+    sdfQueueAssetRelease(group->handle68);
     func_002D0918(group->handle6C);
 }
 
@@ -123,7 +123,7 @@ s32 func_00170238(EffectRecordGroup *group, s32 index) {
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170250);
 
 void func_00170350(EffectRecordGroup *group) {
-    func_002DAA68(group->handle68);
+    sdfQueueAssetRelease(group->handle68);
     func_002D0918(group->handle6C);
 }
 

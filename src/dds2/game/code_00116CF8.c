@@ -14,13 +14,13 @@ typedef struct {
     PathState *state;
 } PathObject;
 
-INCLUDE_ASM(const s32, "game/code_00116CF8", func_00116CF8);
+INCLUDE_ASM(const s32, "game/code_00116CF8", evtSpawnActionObjB);
 
-void func_00116D40(PathObject *path, u32 value) {
+void dds3SetPathStateValue(PathObject *path, u32 value) {
     path->state->value = value;
 }
 
-u32 func_00116D50(u64 id) {
+u32 dds3GetPathStateValueById(u64 id) {
     PathObject *path;
     u64 world;
 
@@ -29,14 +29,14 @@ u32 func_00116D50(u64 id) {
     return path->state->value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116CF8", func_00116D90);
+INCLUDE_ASM(const s32, "game/code_00116CF8", evtSpawnActionObjD);
 
-u32 func_00116DE0(s32 path) {
+u32 dds3GetPathState(s32 path) {
     return (u32)((PathObject *)path)->state;
 }
 
 INCLUDE_ASM(const s32, "game/code_00116CF8", func_00116DE8);
 
-INCLUDE_ASM(const s32, "game/code_00116CF8", func_00116F50);
+INCLUDE_ASM(const s32, "game/code_00116CF8", evtSpawnActionObj10);
 
 INCLUDE_ASM(const s32, "game/code_00116CF8", func_00116FA0);
