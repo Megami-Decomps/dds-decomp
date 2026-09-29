@@ -49,12 +49,33 @@ typedef struct EvtSlot {
     } sub[8];
 } EvtSlot;
 
+typedef struct EvtSceneObject {
+    u8 pad00[0x18];
+    s32 node;
+} EvtSceneObject;
+
 typedef struct EvtStateTableContext {
     u8 pad00[0x5C];
     s32 stateTable;
-    u8 pad60[0x34];
+    u8 pad60[0x1C];
+    EvtSceneObject *primaryObject;
+    EvtSceneObject *secondaryObject;
+    u8 pad84[0xC];
+    s32 entryMultiplier;
     s32 dispatchMode;
+    u8 pad98[0x20];
+    s32 progressTimer;
+    u8 padBC[4];
+    s32 stateCode;
+    u16 stateStep;
 } EvtStateTableContext;
+
+typedef struct EvtFlagGate {
+    s8 threshold;
+    u8 pad1;
+    u16 cue;
+    u32 flag;
+} EvtFlagGate;
 extern s32 func_002C5498();
 extern u8 D_003CE604[];
 extern u16 D_003CE3F8[];
@@ -107,10 +128,10 @@ s32 func_00261E80(void) {
     s32 slot;
     func_0026CA60(0);
     func_0026CA80(0, 2);
-    if (*(s32 *)(context + 0x7c) == 0) {
+    if (((EvtStateTableContext *)context)->primaryObject == 0) {
         func_00260020(context);
     }
-    record = *(s32 *)(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18) + 0x30);
+    record = *(s32 *)(((EvtStateTableContext *)context)->primaryObject->node + 0x30);
     slot = func_0025FE70(context);
     *(s32 *)(context + 0xb0) = *(s32 *)(D_00435DD0 + 0x3c);
     *(u16 *)(record + 0x12) = slot;
@@ -119,9 +140,9 @@ s32 func_00261E80(void) {
 }
 
 s32 func_00261F08(void) {
-    s32 context = func_00101958();
-    if (*(s32 *)(context + 0xc0) == 1) {
-        func_00297240(context, 4);
+    EvtStateTableContext *context = (EvtStateTableContext *)func_00101958();
+    if (context->stateCode == 1) {
+        func_00297240((s32)context, 4);
     }
     return 1;
 }
@@ -150,7 +171,7 @@ void evtInstallStateTableB(s32 event) {
 
 s32 func_00262270(void) {
     s32 context = func_00101958();
-    if (*(s32 *)(context + 0xc0) == 1) {
+    if (((EvtStateTableContext *)context)->stateCode == 1) {
         func_00261670(context);
     }
     return 1;
@@ -158,16 +179,16 @@ s32 func_00262270(void) {
 
 s32 evtSelectStateAction(void) {
     s32 context = func_00101958();
-    s32 list;
-    if (*(s32 *)(context + 0xc0) == 5) {
+    s32 sceneNode;
+    if (((EvtStateTableContext *)context)->stateCode == 5) {
         func_00297240(context, 3);
-    } else if (*(s32 *)(context + 0xc0) == 7) {
+    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
         func_00297240(context, 9);
-        list = *(s32 *)(*(s32 *)(context + 0x80) + 0x18);
-        *(s32 *)(list + 0x2c) = (s32)func_00295D38;
-        func_00297200(list, 0xa);
+        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
+        *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
+        func_00297200(sceneNode, 0xa);
     }
-    *(u16 *)(context + 0xc4) = 0;
+    ((EvtStateTableContext *)context)->stateStep = 0;
     return 1;
 }
 
@@ -195,7 +216,7 @@ void evtInstallStateTableC(s32 event) {
 
 s32 func_00262678(void) {
     s32 context = func_00101958();
-    if (*(s32 *)(context + 0xc0) == 1) {
+    if (((EvtStateTableContext *)context)->stateCode == 1) {
         func_002619A8(context, 1);
     }
     return 1;
@@ -203,16 +224,16 @@ s32 func_00262678(void) {
 
 s32 evtSelectStateActionB(void) {
     s32 context = func_00101958();
-    s32 list;
-    if (*(s32 *)(context + 0xc0) == 5) {
+    s32 sceneNode;
+    if (((EvtStateTableContext *)context)->stateCode == 5) {
         func_00297240(context, 3);
-    } else if (*(s32 *)(context + 0xc0) == 7) {
+    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
         func_00297240(context, 9);
-        list = *(s32 *)(*(s32 *)(context + 0x80) + 0x18);
-        *(s32 *)(list + 0x2c) = (s32)func_00295D38;
-        func_00297200(list, 0xa);
+        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
+        *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
+        func_00297200(sceneNode, 0xa);
     }
-    *(u16 *)(context + 0xc4) = 0;
+    ((EvtStateTableContext *)context)->stateStep = 0;
     return 1;
 }
 
@@ -240,7 +261,7 @@ void func_00262A48(s32 event) {
 
 s32 func_00262A88(void) {
     s32 context = func_00101958();
-    if (*(s32 *)(context + 0xc0) == 1) {
+    if (((EvtStateTableContext *)context)->stateCode == 1) {
         func_002619A8(context, 3);
     }
     return 1;
@@ -248,16 +269,16 @@ s32 func_00262A88(void) {
 
 s32 func_00262AC8(void) {
     s32 context = func_00101958();
-    s32 list;
-    if (*(s32 *)(context + 0xc0) == 5) {
+    s32 sceneNode;
+    if (((EvtStateTableContext *)context)->stateCode == 5) {
         func_00297240(context, 3);
-    } else if (*(s32 *)(context + 0xc0) == 7) {
+    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
         func_00297240(context, 9);
-        list = *(s32 *)(*(s32 *)(context + 0x80) + 0x18);
-        *(s32 *)(list + 0x2c) = (s32)func_00295D38;
-        func_00297200(list, 0xa);
+        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
+        *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
+        func_00297200(sceneNode, 0xa);
     }
-    *(u16 *)(context + 0xc4) = 0;
+    ((EvtStateTableContext *)context)->stateStep = 0;
     return 1;
 }
 
@@ -285,24 +306,24 @@ void evtInstallStateTableD(s32 event) {
 
 s32 evtEnableStateFlag(void) {
     s32 context = func_00101958();
-    if (*(s32 *)(context + 0xc0) == 1 && !func_00261B98(context)) {
-        *(s32 *)(context + 0x94) = 2;
+    if (((EvtStateTableContext *)context)->stateCode == 1 && !func_00261B98(context)) {
+        ((EvtStateTableContext *)context)->dispatchMode = 2;
     }
     return 1;
 }
 
 s32 func_00262EF0(void) {
     s32 context = func_00101958();
-    s32 list;
-    if (*(s32 *)(context + 0xc0) == 5) {
+    s32 sceneNode;
+    if (((EvtStateTableContext *)context)->stateCode == 5) {
         func_00297240(context, 3);
-    } else if (*(s32 *)(context + 0xc0) == 7) {
+    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
         func_00297240(context, 9);
-        list = *(s32 *)(*(s32 *)(context + 0x80) + 0x18);
-        *(s32 *)(list + 0x2c) = (s32)func_00295D38;
-        func_00297200(list, 0xa);
+        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
+        *(s32 *)(sceneNode + 0x2c) = (s32)func_00295D38;
+        func_00297200(sceneNode, 0xa);
     }
-    *(u16 *)(context + 0xc4) = 0;
+    ((EvtStateTableContext *)context)->stateStep = 0;
     return 1;
 }
 
@@ -322,18 +343,18 @@ s64 func_002631D8(s32 callback) {
 }
 
 s32 func_00263220(u32 index) {
-    s32 expected;
-    s32 delta;
+    s32 threshold;
+    s32 remaining;
     if (index >= 8) {
         return -1;
     }
-    expected = D_003CE148[index * 3];
-    if (expected == 0) {
+    threshold = D_003CE148[index * 3];
+    if (threshold == 0) {
         return -1;
     }
-    delta = expected - *(s32 *)(D_00435DD0 + 0x1e654);
-    if (delta > 0) {
-        return delta;
+    remaining = threshold - *(s32 *)(D_00435DD0 + 0x1e654);
+    if (remaining > 0) {
+        return remaining;
     }
     return 0;
 }
@@ -417,11 +438,11 @@ s64 func_002636B0(s32 callback) {
 }
 
 u32 func_002636F8(void) {
-    s32 temp_v0;
+    EvtStateTableContext *context;
 
-    temp_v0 = func_00101958();
-    *(u32 *)(temp_v0 + 0xb8) = 0;
-    func_002B8988(*(u32 *)(*(s32 *)(temp_v0 + 0x7c) + 0x18));
+    context = (EvtStateTableContext *)func_00101958();
+    context->progressTimer = 0;
+    func_002B8988(context->primaryObject->node);
     return 1;
 }
 
@@ -432,9 +453,9 @@ s64 evtQueryStateProgress(s32 callback) {
     if (state == 0) {
         if (*window == 0) {
             if (func_0026C768() == 0) {
-                s32 count = *(s32 *)(context + 0xb8);
+                s32 count = ((EvtStateTableContext *)context)->progressTimer;
                 if ((f32)count < 20.0f) {
-                    *(s32 *)(context + 0xb8) = count + 1;
+                    ((EvtStateTableContext *)context)->progressTimer = count + 1;
                 } else {
                     func_002C42B0(window, D_003CE690);
                 }
@@ -448,7 +469,7 @@ s64 evtQueryStateProgress(s32 callback) {
 s64 func_002637E0(s32 callback) {
     s32 context = func_00101958();
     func_0025FD78(context);
-    func_00294930(context, *(s32 *)(context + 0xb8));
+    func_00294930(context, ((EvtStateTableContext *)context)->progressTimer);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
@@ -459,21 +480,21 @@ s64 evtSetupDispatchSyncE(s32 callback) {
 }
 
 s32 func_00263880(void) {
-    s32 context = func_00101958();
-    *(s32 *)(context + 0x90) = 1;
-    func_00261480(-1, context);
+    EvtStateTableContext *context = (EvtStateTableContext *)func_00101958();
+    context->entryMultiplier = 1;
+    func_00261480(-1, (s32)context);
     return 1;
 }
 
 s32 evtAdvanceStateStage(void) {
     s32 context = func_00101958();
-    s32 list;
-    if (*(s32 *)(context + 0xc0) == 0xa) {
-        *(u16 *)(context + 0xc4) = 0xa;
+    s32 sceneNode;
+    if (((EvtStateTableContext *)context)->stateCode == 0xa) {
+        ((EvtStateTableContext *)context)->stateStep = 0xa;
         func_00297240(context, 6);
-        list = *(s32 *)(*(s32 *)(context + 0x80) + 0x18);
-        *(s32 *)(list + 0x2c) = (s32)func_002958B0;
-        func_002971C0(list, 0);
+        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
+        *(s32 *)(sceneNode + 0x2c) = (s32)func_002958B0;
+        func_002971C0(sceneNode, 0);
     }
     return 1;
 }
@@ -512,7 +533,7 @@ s32 func_00263D40(void) {
 
 s32 func_00263DD0(void) {
     s32 context = func_00101958();
-    s32 list;
+    s32 sceneNode;
     switch (func_00297898(context)) {
     case 6:
         return 1;
@@ -525,10 +546,10 @@ s32 func_00263DD0(void) {
         return 0;
     case 8:
         func_00297240(context, 6);
-        list = *(s32 *)(*(s32 *)(context + 0x80) + 0x18);
-        *(s32 *)(list + 0x2c) = (s32)func_002958B0;
-        func_002971C0(list, 0);
-        *(u16 *)(context + 0xc4) = 0xa;
+        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
+        *(s32 *)(sceneNode + 0x2c) = (s32)func_002958B0;
+        func_002971C0(sceneNode, 0);
+        ((EvtStateTableContext *)context)->stateStep = 0xa;
         return 0;
     default:
         return 0;
@@ -538,14 +559,14 @@ s32 func_00263DD0(void) {
 void func_00263E60(void) {
     s32 context = func_00101958();
     func_00297240(context, 8);
-    func_00297220(*(s32 *)(*(s32 *)(context + 0x80) + 0x18), 10);
+    func_00297220(((EvtStateTableContext *)context)->secondaryObject->node, 10);
     *(u8 *)(context + 0x389) = 1;
 }
 
-void func_00263EB0(s32 obj) {
-    s32 *record = (s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(obj + 0x80) + 0x18) + 0x1c) + 0x60);
-    if (func_002C5498(record[1])) {
-        *(s32 *)(D_00435DD0 + 0xa50) += record[0] * *(s32 *)(obj + 0x90);
+void func_00263EB0(EvtStateTableContext *context) {
+    s32 *entry = (s32 *)(*(s32 *)(context->secondaryObject->node + 0x1c) + 0x60);
+    if (func_002C5498(entry[1])) {
+        *(s32 *)(D_00435DD0 + 0xa50) += entry[0] * context->entryMultiplier;
     }
 }
 
@@ -585,7 +606,7 @@ s64 func_002642B8(s32 callback) {
 s32 func_00264300(void) {
     s32 context = func_00101958();
     func_0026C948(1);
-    switch (*(s32 *)(context + 0x94)) {
+    switch (((EvtStateTableContext *)context)->dispatchMode) {
     case 1:
         func_0026C5B8(5);
         break;
@@ -598,35 +619,35 @@ s32 func_00264300(void) {
 
 s32 func_00264378(void) {
     s32 context = func_00101958();
-    switch (*(s32 *)(context + 0x94)) {
+    switch (((EvtStateTableContext *)context)->dispatchMode) {
     case 1:
         func_00297240(context, 6);
         break;
     case 2:
-        if (*(s32 *)(context + 0x5c) != (s32)D_003CE498) {
+        if (((EvtStateTableContext *)context)->stateTable != (s32)D_003CE498) {
             func_00297240(context, 5);
         }
         break;
     }
-    *(s32 *)(context + 0x94) = 0;
+    ((EvtStateTableContext *)context)->dispatchMode = 0;
     return 1;
 }
 
-s64 func_002643F8(u64 arg0) {
-    s32 temp_v0;
-    s64 temp_v1;
-    s32 *piVar3;
+s64 func_002643F8(u64 callback) {
+    s32 context;
+    s64 state;
+    s32 *window;
 
-    temp_v0 = func_00101958();
-    piVar3 = (s32 *)(temp_v0 + 0x58);
-    temp_v1 = func_002C4038(temp_v0 + 0xc, piVar3, 0, arg0);
-    if (temp_v1 == 0) {
-        if ((*piVar3 == 0) && (temp_v1 = func_0026C768(), temp_v1 == 0)) {
-            func_002C42C0(piVar3, *(u32 *)(temp_v0 + 0x5c));
+    context = func_00101958();
+    window = (s32 *)(context + 0x58);
+    state = func_002C4038(context + 0xc, window, 0, callback);
+    if (state == 0) {
+        if ((*window == 0) && (state = func_0026C768(), state == 0)) {
+            func_002C42C0(window, ((EvtStateTableContext *)context)->stateTable);
         }
-        temp_v1 = 0;
+        state = 0;
     }
-    return temp_v1;
+    return state;
 }
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264480);
@@ -669,13 +690,13 @@ s32 evtAdvanceSlotFlags(void) {
 }
 
 u32 func_00264C00(void) {
-    u8 temp_v0;
-    s32 temp_v1;
+    u8 advancedSlots;
+    s32 context;
 
-    temp_v1 = func_00101958();
-    temp_v0 = evtAdvanceSlotFlags();
-    *(u8 *)(temp_v1 + 0xcc) = temp_v0;
-    if ((*(s32 *)(temp_v1 + 200) == 0) && (*(s8 *)(temp_v1 + 0xcd) == '\x01')) {
+    context = func_00101958();
+    advancedSlots = evtAdvanceSlotFlags();
+    *(u8 *)(context + 0xcc) = advancedSlots;
+    if ((*(s32 *)(context + 200) == 0) && (*(s8 *)(context + 0xcd) == '\x01')) {
         func_0026C5B8(0x22);
     }
     return 1;
@@ -714,14 +735,14 @@ s64 func_00264D38(s32 callback) {
 }
 
 s32 func_00264D80(s32 context) {
-    u8 *entry = D_003CE400;
+    EvtFlagGate *entry = (EvtFlagGate *)D_003CE400;
     u32 i;
-    for (i = 0; i < 1; i++, entry += 8) {
-        if ((u32)(*(s32 *)(D_00435DD0 + 0x1e658) + 1) >= (u32)*(s8 *)entry) {
-            u32 flag = *(u32 *)(entry + 4);
+    for (i = 0; i < 1; i++, entry++) {
+        if ((u32)(*(s32 *)(D_00435DD0 + 0x1e658) + 1) >= (u32)entry->threshold) {
+            u32 flag = entry->flag;
             if (mdlFlagTest(flag) == 0) {
                 mdlFlagSet(flag);
-                func_0026C5B8(*(u16 *)(entry + 2));
+                func_0026C5B8(entry->cue);
                 return 1;
             }
         }
@@ -781,15 +802,15 @@ s64 func_00264FF0(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00265038);
 
-s32 evtIsLastSlot(s32 count) {
-    s32 active = 0;
+s32 evtIsLastSlot(s32 slotIndex) {
+    s32 activeSlots = 0;
     u32 i;
     for (i = 0; i < 8; i++) {
         if (((EvtSlot *)D_003CE1A8)[i].flag != 0) {
-            active++;
+            activeSlots++;
         }
     }
-    return count + 1 == active;
+    return slotIndex + 1 == activeSlots;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00261E10", D_00424D08);
