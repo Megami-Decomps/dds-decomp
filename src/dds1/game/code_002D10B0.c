@@ -38,6 +38,8 @@ void func_002D10B0(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D10C8);
 
+/* Switch both references off the finished double-buffer slot before
+ * publishing the slot currently in use. */
 void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
     if (D_003BD300[0] == oldBuffer) {
         D_003BD300[0] = oldBuffer ^ 1;
@@ -67,6 +69,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1590);
 extern vu8 D_003BD2EA;
 extern void func_002E1218(void);
 
+/* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {
     s8 buffer = D_003BD2EA ^ 1;
 
@@ -168,6 +171,8 @@ u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
     return (u32)texture->unk28;
 }
 
+/* Size in bytes of a packed primary texture buffer: only the low 15 bits
+ * contribute to its 16-byte block count. */
 s32 func_002D2308(SdfTex *tex) {
     SdfTexBuf *buf = tex->unk28;
 
@@ -188,6 +193,7 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     return (s32)buf;
 }
 
+/* Mirror the primary-buffer size calculation for the secondary buffer. */
 s32 func_002D2368(SdfTex *tex) {
     SdfTexBuf *buf = tex->unk2C;
 
@@ -249,18 +255,18 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2548);
 
 extern void func_002D2548();
 
-void func_002D2650(SdfTex *tex, s32 arg1, u8 *arg2, s32 arg3) {
+void func_002D2650(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;
     s32 height;
 
-    if (tex->unk1A == 0x13 || tex->unk1A == 0x1B) {
+    if (texture->unk1A == 0x13 || texture->unk1A == 0x1B) {
         width = 0x10;
         height = 0x10;
     } else {
         width = 8;
         height = 2;
     }
-    func_002D2548(arg1, width, height, tex->unk19, arg2, arg3);
+    func_002D2548(resourceWord, width, height, texture->unk19, pixels, mode);
 }
 
 void func_002D26A8(SdfTex *tex) {

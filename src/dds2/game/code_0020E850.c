@@ -94,7 +94,8 @@ typedef struct BtlEffTask {
 
 typedef struct BtlEffActor {
     u8 pad00[0x108];
-    u64 unk108;        /* 0x108 */
+    u64 ownerData;    /* 0x108 */
+    s32 flags;        /* 0x110: bit 9 selects the one-step offset */
 } BtlEffActor;
 
 extern BtlEffTask *btlAllocTask(s32 size);
@@ -155,8 +156,9 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F200);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F3B0);
 
-s32 effOffsetIfOwnerFlagClear(s32 arg0, s32 arg1) {
-    return arg1 + (((*(s32 *)(arg0 + 0x110) >> 9) ^ 1U) & 1);
+/* Adds one to the base unless bit 9 of the owner's flags is set. */
+s32 effOffsetIfOwnerFlagClear(BtlEffActor *owner, s32 base) {
+    return base + (((owner->flags >> 9) ^ 1U) & 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F5E0);
@@ -217,6 +219,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_00210850);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_002108E8);
 
+/* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 s32 func_00210980(BtlWaitTask *task) {
     if (task->ticks == 0) {
         func_001B7E40(task->value, 0);
@@ -278,16 +281,17 @@ u32 btlRandomBelow(u32 limit) {
     return (D_00436CB0 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
 
-s32 func_00210CE0(s32 a, s32 b) {
-    s32 tmp;
+/* Inclusive random selection between either ordering of the endpoints. */
+s32 func_00210CE0(s32 lower, s32 upper) {
+    s32 swap;
 
-    if (b < a) {
-        tmp = b;
-        b = a;
-        a = tmp;
+    if (upper < lower) {
+        swap = upper;
+        upper = lower;
+        lower = swap;
     }
-    b = b - a + 1;
-    return (s32)btlRandomBelow(0xFFFF) % b + a;
+    upper = upper - lower + 1;
+    return (s32)btlRandomBelow(0xFFFF) % upper + lower;
 }
 
 s32 btlAllocAndCheck(s32 object) {
@@ -329,13 +333,14 @@ void func_00210E48(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210EA0);
 
-s32 btlDispatchPackedEffectAction(s32 arg0, u32 arg1) {
-    u32 type = arg1 >> 22;
+/* Top ten bits select the callback; the lower 22 bits are its argument. */
+s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
+    u32 type = packedAction >> 22;
     s32 result = 0;
 
-    arg1 &= 0x3FFFFF;
+    packedAction &= 0x3FFFFF;
     if (type != 0) {
-        result = D_003BF4A0[type](arg0, arg1) != 0;
+        result = D_003BF4A0[type](context, packedAction) != 0;
     }
     return result;
 }

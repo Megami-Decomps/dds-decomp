@@ -28,7 +28,7 @@ typedef struct Entry1A4 {
     u8 pad8[6]; /* 0x8 */
     u16 unkE; /* 0xE */
     u8 pad10[4]; /* 0x10 */
-    u16 unk14; /* 0x14 */
+    u16 level; /* 0x14: clamped at level 99 by dds3Clamp99 */
     u8 pad16[0x3C];      /* 0x016 */
     u16 tableValue;       /* 0x052 */
     u8 pad54[0x140];
@@ -175,10 +175,10 @@ u16 func_0011A568(s32 arg0) {
     return *(u16 *)(arg0 * 8 + D_003BAA68 + 2);
 }
 
-u16 dds3Clamp99(s32 arg0) {
-    s32 temp = *(u16 *)(arg0 + 0x14);
+u16 dds3Clamp99(s32 unit) {
+    s32 level = ((Entry1A4 *)unit)->level;
 
-    return temp < 100 ? temp : 99;
+    return level < 100 ? level : 99;
 }
 
 Entry1A4 *dds3FindEntry(s32 rosterIndex) {
@@ -212,8 +212,8 @@ s32 dds3EntryMax(void) {
 
     do {
         if (entry->flags & 1) {
-            if (maximum < entry->unk14) {
-                maximum = entry->unk14;
+            if (maximum < entry->level) {
+                maximum = entry->level;
             }
         }
         entry++;
@@ -313,6 +313,8 @@ extern s32 D_003BAA00;
 
 extern s32 effMiscRandMod(u32 arg0, u32 arg1);
 
+/* Clear a subset of per-unit status flags on occupied qualifying entries,
+ * gated by the event RNG; report whether any flags were cleared. */
 s32 func_0011B7F0(void) {
     s32 changed = 0;
     s32 remaining;
@@ -323,10 +325,10 @@ s32 func_0011B7F0(void) {
     remaining = 4;
     entry = D_003BAA00 + 0xA60;
     do {
-        if ((*(u16 *)entry & 1) != 0 && *(u16 *)(entry + 6) != 0) {
-            u16 flags = *(u16 *)(entry + 0xE);
+        if ((((Entry1A4 *)entry)->flags & 1) != 0 && ((Entry1A4 *)entry)->unk6 != 0) {
+            u16 flags = ((Entry1A4 *)entry)->unkE;
             if ((flags & 0x5D0) != 0) {
-                *(u16 *)(entry + 0xE) = flags & ~0x5D0;
+                ((Entry1A4 *)entry)->unkE = flags & ~0x5D0;
                 changed = 1;
             }
         }
@@ -486,11 +488,12 @@ s32 func_0011C118(void) {
     return 1;
 }
 
+/* Apply a random percentage offset around 1.0 to the active script value. */
 s32 func_0011C150(void) {
-    s32 v0 = func_0010D428(0);
-    s32 val = effMiscRandMod(0, v0 * 2);
+    s32 range = func_0010D428(0);
+    s32 roll = effMiscRandMod(0, range * 2);
 
-    func_0010D608((f32)(val - v0 + 100) / 100.0f);
+    func_0010D608((f32)(roll - range + 100) / 100.0f);
     return 1;
 }
 

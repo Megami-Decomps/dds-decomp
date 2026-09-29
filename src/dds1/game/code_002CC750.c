@@ -438,7 +438,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", ptyRemoveProfileSkills);
 
 s32 scrFindSlot(u8 *work, u16 key) {
     u32 index;
-    u16 *entries = (u16 *)(work + 0x22);
+    u16 *entries = ((PtyProfileUnit *)work)->skills;
     for (index = 0; index < 24; index++) {
         if (entries[index] == key) {
             return index;
@@ -451,11 +451,11 @@ u16 scrGetSlot(u8 *work, u32 index) {
     if (index >= 24) {
         return 0;
     }
-    return *(u16 *)(work + 0x22 + index * 2);
+    return ((PtyProfileUnit *)work)->skills[index];
 }
 
 u32 scrCountSlots(u8 *work) {
-    u16 *entries = (u16 *)(work + 0x22);
+    u16 *entries = ((PtyProfileUnit *)work)->skills;
     u32 count = 0;
     u32 index;
     for (index = 0; index < 24; index++) {
@@ -466,20 +466,21 @@ u32 scrCountSlots(u8 *work) {
     return count;
 }
 
-u16 scrSetSlot(s32 arg0, s32 arg1, u16 arg2) {
-    u16 temp_v0;
-    u16 *puVar2;
+/* Replace a skill slot and return its previous identifier. */
+u16 scrSetSlot(s32 unit, s32 index, u16 skillId) {
+    u16 previousSkillId;
+    u16 *slot;
 
-    puVar2 = (u16 *)(arg1 * 2 + arg0 + 0x22);
-    temp_v0 = *puVar2;
-    *puVar2 = arg2;
-    return temp_v0;
+    slot = (u16 *)(index * 2 + unit + 0x22);
+    previousSkillId = *slot;
+    *slot = skillId;
+    return previousSkillId;
 }
 
 s32 scrRemoveSlot(u8 *work, u16 key) {
     s32 index = scrFindSlot(work, key);
     if (index >= 0) {
-        *(u16 *)(work + 0x22 + index * 2) = 0;
+        ((PtyProfileUnit *)work)->skills[index] = 0;
         return 1;
     }
     return 0;
@@ -688,22 +689,34 @@ u8 *func_002CEA80(void) {
     return D_00394680;
 }
 
-void func_002CEA90(s32 arg0) {
-    u32 temp_v0;
-    u32 *puVar2;
-    u32 temp_v1;
+/* Interleaved mark words and an eight-byte-per-entry value block. */
+typedef struct SdfFlagListWork {
+    u8 pad00[8];
+    u32 *marks;               /* 0x08: first word of each pair */
+    u8 pad0C[4];
+    u32 *values;              /* 0x10 */
+    u8 pad14[0x38];
+    u32 count;                /* 0x4C */
+    u8 pad50[4];
+    u32 resource;             /* 0x54 */
+} SdfFlagListWork;
 
-    temp_v1 = 0;
-    temp_v0 = *(u32 *)(arg0 + 0x4c);
-    puVar2 = *(u32 **)(arg0 + 8);
-    if (temp_v0 != 0) {
+void func_002CEA90(s32 context) {
+    u32 count;
+    u32 *mark;
+    u32 index;
+
+    index = 0;
+    count = ((SdfFlagListWork *)context)->count;
+    mark = ((SdfFlagListWork *)context)->marks;
+    if (count != 0) {
         do {
-            temp_v1 = temp_v1 + 1;
-            *puVar2 = 0xffffffff;
-            puVar2 = puVar2 + 2;
-        } while (temp_v1 < temp_v0);
+            index = index + 1;
+            *mark = 0xffffffff;
+            mark = mark + 2;
+        } while (index < count);
     }
-    memset(*(u32 *)(arg0 + 0x10), 0, temp_v0 << 3);
+    memset(((SdfFlagListWork *)context)->values, 0, count << 3);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEAE8);
@@ -712,8 +725,8 @@ void func_002CEC08(void) {
     func_0029CE50(fileResolvePrimaryBuffer());
 }
 
-void func_002CEC28(s32 arg0) {
-    func_002D0918(*(u32 *)(arg0 + 0x54));
+void func_002CEC28(s32 context) {
+    func_002D0918(((SdfFlagListWork *)context)->resource);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEC40);
@@ -780,11 +793,11 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF468);
 
-void func_002CF4E0(u64 arg0, u64 arg1, u64 arg2) {
-    u64 temp_v0;
+void func_002CF4E0(u64 destination, u64 encoded, u64 option) {
+    u64 decoded;
 
-    temp_v0 = func_002CF530(arg1);
-    func_002CF468(arg0, temp_v0, arg1, arg2);
+    decoded = func_002CF530(encoded);
+    func_002CF468(destination, decoded, encoded, option);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2B8);

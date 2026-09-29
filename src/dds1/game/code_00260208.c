@@ -245,22 +245,22 @@ typedef struct BrsRowUnit {
 
 /* Create the group and sprite backing the skill-package panel for the
  * selected reward row, then forward its unit's ID to the menu. */
-void brsOpenSkillPackagePanel(s32 work) {
-    s32 *group = ((BrsSkillPackageWork *)work)->group;
+void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
+    s32 *group = work->group;
     s32 panel;
 
     func_002762D8(group);
-    func_00271480(work + 0x680, group, 0, work + 0x574);
-    panel = mnuCreatePanelGroup(((BrsSkillPackageWork *)work)->panelGroup);
-    ((BrsSkillPackageWork *)work)->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, ((BrsSkillPackageWork *)work)->unitHandle);
-    ((BrsSkillPackageWork *)work)->spriteHandle =
-        mnuCreateSpriteState(((BrsSkillPackageWork *)work)->spriteArg1,
-                             ((BrsSkillPackageWork *)work)->spriteArg0,
-                             ((BrsSkillPackageWork *)work)->panelGroup);
+    func_00271480((s32)work + 0x680, group, 0, (s32)work + 0x574);
+    panel = mnuCreatePanelGroup(work->panelGroup);
+    work->panelHandle = panel;
+    mnuUpdateFiveListEntries(panel, work->unitHandle);
+    work->spriteHandle =
+        mnuCreateSpriteState(work->spriteArg1,
+                             work->spriteArg0,
+                             work->panelGroup);
     func_00287450(0);
     mnuForwardTableByte(((BrsRowUnit *)
-        (((BrsSelectedRow *)(work + 0x2CC))[((BrsSkillPackageWork *)work)->selectedRow].unit))->unitId);
+        (((BrsSelectedRow *)((u8 *)work + 0x2CC))[work->selectedRow].unit))->unitId);
 }
 
 void brsCloseSkillPackagePanel(s32 work) {
@@ -305,7 +305,7 @@ s32 mnuStaffInitPanel(s32 work) {
 
 extern s32 func_002716E8(s32, s32);
 extern s32 func_0027AF28(s32);
-extern void brsOpenSkillPackagePanel(s32);
+extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 brsAdvanceSkillPackagePanel(s32 work) {
@@ -329,7 +329,7 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     if (func_0027AF28(work + 0xD1C) == 0) {
         return 1;
     }
-    brsOpenSkillPackagePanel(work);
+    brsOpenSkillPackagePanel(ctx);
     ctx->setupState = 2;
     kwlnFadeOutStart(0, 0, 0, 15);
     return 0;

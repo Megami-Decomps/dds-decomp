@@ -84,6 +84,8 @@ void func_00329F60(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_00329F78);
 
+/* Switch both references off the finished double-buffer slot before
+ * publishing the slot currently in use. */
 void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
     if (D_004389F0[0] == oldBuffer) {
         D_004389F0[0] = oldBuffer ^ 1;
@@ -110,6 +112,7 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A378);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A440);
 
+/* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {
     s8 buffer = D_004389DA ^ 1;
 
@@ -326,10 +329,12 @@ void sdfTexInitializeSemaphore(void) {
     sdfResetSemaphoreState(obj);
 }
 
-u32 sdfTexGetPrimaryBuffer(s32 arg0) {
-    return *(u32 *)(arg0 + 0x28);
+u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
+    return (u32)texture->unk28;
 }
 
+/* Size in bytes of a packed primary texture buffer: only the low 15 bits
+ * contribute to its 16-byte block count. */
 s32 func_0032B1B8(SdfTex *tex) {
     SdfTexBuf *buf = tex->unk28;
 
@@ -350,6 +355,7 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     return (s32)buffer;
 }
 
+/* Mirror the primary-buffer size calculation for the secondary buffer. */
 s32 func_0032B218(SdfTex *tex) {
     SdfTexBuf *buf = tex->unk2C;
 
@@ -432,18 +438,18 @@ void func_0032B3E0(SdfTex *texture, u8 value) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B3F8);
 
-void func_0032B500(SdfTex *tex, s32 arg1, u8 *arg2, s32 arg3) {
+void func_0032B500(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;
     s32 height;
 
-    if (tex->unk1A == 0x13 || tex->unk1A == 0x1B) {
+    if (texture->unk1A == 0x13 || texture->unk1A == 0x1B) {
         width = 0x10;
         height = 0x10;
     } else {
         width = 8;
         height = 2;
     }
-    func_0032B3F8(arg1, width, height, tex->unk19, arg2, arg3);
+    func_0032B3F8(resourceWord, width, height, texture->unk19, pixels, mode);
 }
 
 void func_0032B558(SdfTex *tex) {

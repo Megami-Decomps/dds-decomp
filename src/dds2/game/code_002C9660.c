@@ -496,6 +496,8 @@ void fileWriteBegin(s32 request, u32 first, u32 second) {
 
 extern s32 func_0034F680(s32, s32 *, s32 *);
 
+/* Poll the memory-card write: busy is 0, success 1, and the card's
+ * -4 status is translated to the menu's -2 error. */
 s32 func_002C9678(void) {
     u32 cmdId;
     s32 status;
@@ -542,13 +544,16 @@ void fileReqGetSlotCode(void) {
     D_00437D50 = D_004580C3[slot * 0x30];
 }
 
+/* Size of the persistent main save block copied during a reload. */
+#define FILE_MAIN_BLOB_SIZE 0x1E840
+
 u32 func_002C9788(void) {
-    return 0x1e840;
+    return FILE_MAIN_BLOB_SIZE;
 }
 
 void fileReloadSaveBuffer(void) {
     s32 saved = *(s32 *)(D_00435DD0 + 0x30);
-    s32 size = 0x1E840;
+    s32 size = FILE_MAIN_BLOB_SIZE;
     memcpy((void *)D_00435DD0, (void *)D_00439044, size);
     *(s32 *)(D_00435DD0 + 0x30) = saved;
 }
@@ -596,6 +601,7 @@ void func_002C9970(s32 x, s32 y, u64 width, u64 height) {
     func_0019C5B0(handle);
 }
 
+/* Animate the save-window highlight's alpha with a sinusoidal phase. */
 void func_002C99C0(void) {
     s32 angle;
     f32 wave;

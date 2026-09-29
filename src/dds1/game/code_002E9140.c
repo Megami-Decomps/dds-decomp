@@ -16,7 +16,7 @@ typedef struct FE250Entry {
 } FE250Entry;
 
 typedef struct CmdPacket {
-    /* 0x0 */ u32 id;
+    /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
     /* 0x8 */ u16 setting;
     /* 0xA */ u16 unkA;
@@ -37,15 +37,16 @@ extern FE0C0 D_003FE0C0;
 
 u32 func_002E8900();
 
-u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
 
-void func_002E9340(s32 arg0);
+void func_002E9340(s32 trackId);
 
-void soundSendSpatialPosition(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
+/* Converts world coordinates to the sound engine's one-tenth scale. */
+void soundSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
     u32 packet[8];
 
-    packet[0] = arg0;
-    packet[1] = arg1;
+    packet[0] = trackId;
+    packet[1] = parameter;
     packet[2] = (s32)(x * 0.1f);
     packet[3] = (s32)(y * 0.1f);
     packet[4] = (s32)(z * 0.1f);
@@ -85,22 +86,22 @@ void sndReleaseMidiTrack(s32 id) {
     }
 }
 
-u8 func_002E9598(s32 arg0) {
-    return D_003FE250[arg0].unk4;
+u8 func_002E9598(s32 index) {
+    return D_003FE250[index].unk4;
 }
 
-u8 func_002E95B0(s32 arg0) {
-    return D_003FE250[arg0].unk5;
+u8 func_002E95B0(s32 index) {
+    return D_003FE250[index].unk5;
 }
 
-s32 func_002E95C8(s32 arg0) {
-    FE250Entry *entry = &D_003FE250[arg0];
-    s32 diff = entry->unk4 - entry->unk5;
+s32 func_002E95C8(s32 index) {
+    FE250Entry *entry = &D_003FE250[index];
+    s32 difference = entry->unk4 - entry->unk5;
 
-    if (diff <= 0) {
-        diff = 0;
+    if (difference <= 0) {
+        difference = 0;
     }
-    return diff;
+    return difference;
 }
 
 FE250Entry *func_002E95F0(void) {
@@ -120,11 +121,12 @@ u32 func_002E9610(u32 *outSecondaryValue) {
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9630);
 
-void func_002E9690(s32 id) {
+/* Sends a prepared track identifier with the 0x17f setting. */
+void func_002E9690(s32 trackId) {
     CmdPacket packet;
 
-    func_002E9340(id);
-    packet.id = id;
+    func_002E9340(trackId);
+    packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x17F;
     func_002E87A8(0x20, 0, &packet, 0x10);

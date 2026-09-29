@@ -1,43 +1,64 @@
 #include "common.h"
 
-extern s32 D_00438E8C;
+/* Script label records are 0x20 bytes; the address lives at +0x18. */
+typedef struct {
+    u8 pad[0x18];
+    u32 address;
+    u8 pad1C[4];
+} ScriptLabel;
+
+typedef struct {
+    u8 pad0[0x18];
+    u32 programCounter;
+    u8 pad1C[0x98];
+    ScriptLabel *procedures;
+    ScriptLabel *labels;
+    u8 padBC[0x10];
+    u32 window;
+    u32 timer;
+    u32 commandTimer;
+    u8 padD8[0x18];
+    u32 unkF0;
+} ScriptState;
+
+extern ScriptState *D_00438E8C;
 
 extern u64 func_0010D650(u64);
 
 extern u64 mdlFlagTest(u64);
 
-u32 scrGetProcedureAddress(s32 arg0) {
-    return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_00438E8C + 0xb4) + 0x18);
+u32 scrGetProcedureAddress(s32 index) {
+    return D_00438E8C->procedures[index].address;
 }
 
-u32 scrGetLabelAddress(s32 arg0) {
-    return *(u32 *)(arg0 * 0x20 + *(s32 *)(D_00438E8C + 0xb8) + 0x18);
+u32 scrGetLabelAddress(s32 index) {
+    return D_00438E8C->labels[index].address;
 }
 
 u32 scrGetProgramCounter(void) {
-    return *(u32 *)(D_00438E8C + 0x18);
+    return D_00438E8C->programCounter;
 }
 
-void scrSetProgramCounter(u32 arg0) {
-    *(u32 *)(D_00438E8C + 0x18) = arg0;
+void scrSetProgramCounter(u32 address) {
+    D_00438E8C->programCounter = address;
 }
 
 u32 scrGetTimer(void) {
-    return *(u32 *)(D_00438E8C + 0xd0);
+    return D_00438E8C->timer;
 }
 
 u32 scrGetCommandTimer(void) {
-    return *(u32 *)(D_00438E8C + 0xd4);
+    return D_00438E8C->commandTimer;
 }
 
 u32 scrGetWindow(void) {
-    return *(u32 *)(D_00438E8C + 0xcc);
+    return D_00438E8C->window;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010D848", func_0010D8C8);
 
 u32 func_0010D8D0(void) {
-    return *(u32 *)(D_00438E8C + 0xf0);
+    return D_00438E8C->unkF0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010D848", func_0010D8E0);

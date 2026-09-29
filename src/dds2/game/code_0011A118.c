@@ -18,7 +18,7 @@ typedef struct Entry1A4 {
     u8 pad8[6]; /* 0x8 */
     u16 unkE; /* 0xE */
     u8 pad10[4]; /* 0x10 */
-    u16 unk14; /* 0x14 */
+    u16 level; /* 0x14: clamped at level 99 by dds3Clamp99 */
     u8 pad16[398]; /* 0x16 */
 } Entry1A4;
 
@@ -184,10 +184,10 @@ u16 func_0011AE60(s32 arg0) {
     return *(u16 *)(arg0 * 8 + D_00435E38 + 2);
 }
 
-u16 dds3Clamp99(s32 arg0) {
-    s32 temp = *(u16 *)(arg0 + 0x14);
+u16 dds3Clamp99(s32 unit) {
+    s32 level = ((Entry1A4 *)unit)->level;
 
-    return temp < 100 ? temp : 99;
+    return level < 100 ? level : 99;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", dds3FindEntry);
@@ -210,9 +210,9 @@ s32 func_0011B2C0(void) {
     s32 entry = D_00435DD0 + 0xA60;
     do {
         remaining--;
-        if ((*(u16 *)entry & 1) != 0) {
+        if ((((Entry1A4 *)entry)->flags & 1) != 0) {
             count++;
-            sum += *(u16 *)(entry + 0x14);
+            sum += ((Entry1A4 *)entry)->level;
         }
         entry += 0x1C4;
     } while (remaining >= 0);
@@ -331,13 +331,15 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D0D8);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D130);
 
-void func_0011D2A0(s32 arg0) {
-    s32 temp_v0;
+void func_0011D2A0(s32 unit) {
+    s32 randomOffset;
 
-    temp_v0 = effMiscRandMod(0, 4);
-    *(s32 *)(arg0 + 0x1b4) = 0x12 - temp_v0;
+    randomOffset = effMiscRandMod(0, 4);
+    *(s32 *)(unit + 0x1B4) = 0x12 - randomOffset;
 }
 
+/* Clear a subset of per-unit status flags on occupied qualifying entries,
+ * gated by the event RNG; report whether any flags were cleared. */
 s32 func_0011D2D8(void) {
     s32 changed = 0;
     s32 remaining;
@@ -348,10 +350,10 @@ s32 func_0011D2D8(void) {
     remaining = 4;
     entry = D_00435DD0 + 0xA60;
     do {
-        if ((*(u16 *)entry & 1) != 0 && *(u16 *)(entry + 6) != 0) {
-            u16 flags = *(u16 *)(entry + 0xE);
+        if ((((Entry1A4 *)entry)->flags & 1) != 0 && ((Entry1A4 *)entry)->unk6 != 0) {
+            u16 flags = ((Entry1A4 *)entry)->unkE;
             if ((flags & 0x5D0) != 0) {
-                *(u16 *)(entry + 0xE) = flags & ~0x5D0;
+                ((Entry1A4 *)entry)->unkE = flags & ~0x5D0;
                 changed = 1;
             }
         }
@@ -526,11 +528,12 @@ s32 func_0011DD68(void) {
     return 1;
 }
 
+/* Apply a random percentage offset around 1.0 to the active script value. */
 s32 func_0011DDA0(void) {
-    s32 v0 = func_0010D650(0);
-    s32 val = effMiscRandMod(0, v0 * 2);
+    s32 range = func_0010D650(0);
+    s32 roll = effMiscRandMod(0, range * 2);
 
-    func_0010D830((f32)(val - v0 + 100) / 100.0f);
+    func_0010D830((f32)(roll - range + 100) / 100.0f);
     return 1;
 }
 

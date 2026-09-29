@@ -26,7 +26,7 @@ typedef struct MdlInner {
     u8 unkC[8];  /* 0xC */
     struct MdlNode *list; /* 0x14: intrusive node list */
     u8 unk18[4]; /* 0x18 */
-    u32 unk1C;   /* 0x1C */
+    u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
     u8 pad20[0x30];
     u128 vector50; /* 0x50 */
     u128 vector60; /* 0x60 */
@@ -96,8 +96,8 @@ typedef struct MdlLink {
 extern void btlDestroyGroupNode();
 
 void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
-    s32 off = node->slotIndex * 4 + 0x20;
-    void **slot = (void **)((u8 *)ctx + off);
+    s32 offset = node->slotIndex * 4 + 0x20;
+    void **slot = (void **)((u8 *)ctx + offset);
 
     if (*slot == node) {
         *slot = NULL;
@@ -344,7 +344,7 @@ void mdlStoreTertiaryVectorVU(MdlCtx *ctx) {
 }
 
 u32 mdlGetBroadcastValue(MdlCtx *ctx) {
-    return ctx->inner->unk1C;
+    return ctx->inner->broadcastValue;
 }
 
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
@@ -355,14 +355,14 @@ void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
     }
 }
 
-void mdlBroadcastMasked(MdlCtx *ctx, u32 arg1) {
-    ctx->inner->unk1C = arg1;
-    mdlSetAllResourceFrames(ctx, (arg1 & 0xFF000000) | 0x808080);
+void mdlBroadcastMasked(MdlCtx *ctx, u32 value) {
+    ctx->inner->broadcastValue = value;
+    mdlSetAllResourceFrames(ctx, (value & 0xFF000000) | 0x808080);
 }
 
-void mdlBroadcastValue(MdlCtx *ctx, u32 arg1) {
-    ctx->inner->unk1C = arg1;
-    mdlSetAllResourceFrames(ctx, arg1);
+void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
+    ctx->inner->broadcastValue = value;
+    mdlSetAllResourceFrames(ctx, value);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00232C18);
@@ -388,10 +388,10 @@ void func_00232E80(MdlCtx *ctx) {
 }
 
 u8 mdlHasNode(MdlCtx *ctx, s32 id) {
-    s64 temp_v0;
+    s64 foundNode;
 
-    temp_v0 = mdlFindNodeById(ctx, id);
-    return temp_v0 != 0;
+    foundNode = mdlFindNodeById(ctx, id);
+    return foundNode != 0;
 }
 
 u16 func_00232EE8(MdlCtx *ctx) {

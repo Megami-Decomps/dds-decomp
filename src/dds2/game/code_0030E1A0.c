@@ -46,6 +46,27 @@ extern s32 D_004390B0;
 
 extern u32 D_004390A8;
 
+typedef struct SdfRingNode {
+    u8 pad00[0xC];
+    s32 f0C;                        /* 0x0C */
+    struct SdfRingNode *next;       /* 0x10 */
+    struct SdfRingNode *prev;       /* 0x14 */
+    u8 pad18[8];
+} SdfRingNode;
+
+typedef struct SdfRing {
+    s32 allocation;                 /* 0x00 */
+    SdfRingNode *head;              /* 0x04 */
+    SdfRingNode *cursor;            /* 0x08 */
+    SdfRingNode *last;              /* 0x0C */
+    s16 count;                      /* 0x10 */
+    s16 limit;                      /* 0x12 */
+    s16 pad14;                      /* 0x14 */
+} SdfRing;
+extern s32 func_003292A8(s32);
+extern void *sdfMemoryGetBlockAddress(u32);
+extern void *memset(void *, s32, u32);
+
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E1A0);
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E390);

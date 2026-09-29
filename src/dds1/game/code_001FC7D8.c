@@ -76,6 +76,8 @@ typedef struct BtlEffOwner {
     s32 flags;        /* 0x110: bit 9 controls the returned offset */
 } BtlEffOwner;
 
+/* Adds one to the base unless bit 9 of the owner's flags is set. */
+
 s32 effOffsetIfOwnerFlagClear(BtlEffOwner *owner, s32 base) {
     return base + (((owner->flags >> 9) ^ 1U) & 1);
 }
@@ -336,6 +338,8 @@ typedef struct BtlWaitTask {
     u32 ticks;
 } BtlWaitTask;
 
+/* Waits for the task startup delay, then finishes when its two actor slots are clear. */
+
 s32 func_001FE950(BtlWaitTask *task) {
     if (task->ticks == 0) {
         func_001AD230(task->value, 0);
@@ -371,20 +375,20 @@ BtlEffObj *func_001FE9F8(BtlEffOwner *owner) {
     return obj;
 }
 
-u32 btlNextScaledRandom(u32 arg0) {
+u32 btlNextScaledRandom(u32 limit) {
     D_003BB874 = D_003BB874 * 0x41c64e6d + 0x3039;
-    return (D_003BB874 >> 0x10) * (arg0 & 0xffff) >> 0x10;
+    return (D_003BB874 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEAA8);
 
-s32 btlAllocAndCheck(s32 arg0) {
-    s32 temp_v0 = func_002CFF68(0x10);
-    s32 temp_v1 = *(s32 *)(arg0 + 0x18);
+s32 btlAllocAndCheck(s32 object) {
+    s32 allocation = func_002CFF68(0x10);
+    s32 actor = *(s32 *)(object + 0x18);
 
-    D_003BB87C = temp_v0;
-    *(s32 *)temp_v0 = arg0;
-    if (func_002011C8(temp_v1, 0) != 0) {
+    D_003BB87C = allocation;
+    *(s32 *)allocation = object;
+    if (func_002011C8(actor, 0) != 0) {
         func_002CFF98(D_003BB87C);
         return 1;
     }
@@ -416,13 +420,14 @@ void btlClearNodeFlags(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEC68);
 
-s32 btlDispatchPackedEffectAction(s32 arg0, u32 arg1) {
-    u32 type = arg1 >> 22;
+/* Top ten bits select the callback; the lower 22 bits are its argument. */
+s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
+    u32 type = packedAction >> 22;
     s32 result = 0;
 
-    arg1 &= 0x3FFFFF;
+    packedAction &= 0x3FFFFF;
     if (type != 0) {
-        result = D_00360D10[type](arg0, arg1) != 0;
+        result = D_00360D10[type](context, packedAction) != 0;
     }
     return result;
 }

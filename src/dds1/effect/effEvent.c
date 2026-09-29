@@ -9,23 +9,24 @@ extern u32 D_003BB144;
 
 extern u32 D_003BB148;
 
-/* Work area for the event-effect helpers in this TU. */
+/* Event work shared by resource setup, teardown and state updates. */
 typedef struct {
     u8   pad_0x00[0x04]; /* 0x00 */
-    void *owner;         /* 0x04: passed to effEventCopyFileRecordHeader/func_00190328 */
-    u8   initBlock[0x28];/* 0x08: handed to effEventCopyFileRecordHeader */
-    u32  unk30;          /* 0x30 */
+    void *owner;         /* 0x04: file-record header destination */
+    u8   initBlock[0x28];/* 0x08: file-record header source */
+    u32  state;          /* 0x30 */
     void *effect;        /* 0x34 */
     u8   pad_0x38[0x48]; /* 0x38 */
-    u8   unk80;          /* 0x80 */
+    u8   flag;           /* 0x80 */
     u8   pad_0x81[0x03]; /* 0x81 */
-    void *resource;      /* 0x84: released by func_00190CD0 */
+    void *resource;      /* 0x84: released on teardown */
 } EffEventWork; /* 0x88 */
 
 typedef struct {
     u8 bytes[0x30];
 } __attribute__((packed)) FileRecordHeader;
 
+/* Release the attached effect before freeing the event work. */
 void effEventReleaseNode(EffEventWork *work) {
     func_00160B00(work->effect);
     func_002CFF98(work);
@@ -44,7 +45,7 @@ void func_00190308(EffEventWork *work) {
 }
 
 void effEventSetState(EffEventWork *work, u32 value) {
-    work->unk30 = value;
+    work->state = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
@@ -61,6 +62,7 @@ void func_00190810(EffEventWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190828);
 
+/* Attach the effect and copy the initial file-record header to its owner. */
 void effEventBindEffect(EffEventWork *work, void *value) {
     work->effect = value;
     effEventCopyFileRecordHeader(work->owner, work->initBlock);
@@ -92,7 +94,7 @@ void effEventCopyVector(void *dst, void *src) {
 }
 
 void func_00192028(EffEventWork *work, u8 value) {
-    work->unk80 = value;
+    work->flag = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192030);

@@ -3,16 +3,16 @@
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 unk8;
+    /* 0x8 */ u16 setting;
     /* 0xA */ u16 unkA;
     /* 0xC */ u32 unkC;
 } CmdPacket;
 
-u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
 
-void func_003421E8(s32 arg0);
+void func_003421E8(s32 trackId);
 
-u32 func_003417A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
 
 typedef struct FE250Entry {
     /* 0x0 */ u8 unk0;
@@ -31,11 +31,12 @@ extern s32 func_00342168(s32 id);
 
 extern s32 D_00438B80;
 
-void sndSendSpatialPosition(s32 arg0, s32 arg1, f32 x, f32 y, f32 z) {
+/* Converts world coordinates to the sound engine's one-tenth scale. */
+void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
     u32 packet[8];
 
-    packet[0] = arg0;
-    packet[1] = arg1;
+    packet[0] = trackId;
+    packet[1] = parameter;
     packet[2] = (s32)(x * 0.1f);
     packet[3] = (s32)(y * 0.1f);
     packet[4] = (s32)(z * 0.1f);
@@ -101,13 +102,15 @@ INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424B8);
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424D8);
 
+/* Sends a prepared track identifier with the 0x17f setting. */
+
 void func_00342538(s32 trackId) {
     CmdPacket packet;
 
     func_003421E8(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
-    packet.unk8 = 0x17F;
+    packet.setting = 0x17F;
     func_00341650(0x20, 0, &packet, 0x10);
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "fpu.h"
 
 extern s32 func_003292A8(s32);
@@ -26,6 +27,7 @@ typedef struct ShortPair2C {
 } ShortPair2C; // 0x30
 
 extern u32 func_00312A48(u32 *);
+
 
 extern u32 func_00312188(u32, u32, u32);
 
@@ -74,7 +76,7 @@ typedef struct {
     u32 tail;  /* 0x04 */
     TaskListNode *head; /* 0x08 */
     u32 count; /* 0x0C */
-    u32 pad10;
+    u32 current; /* 0x10 */
     void (*onRemove)(u32, u32); /* 0x14 */
 } TaskList;
 
@@ -93,6 +95,93 @@ typedef struct SdfGridOwner {
     u8 pad24[0xC];
     u32 destroyArg;    /* 0x30 */
 } SdfGridOwner;
+
+extern f32 sdfQuatDot(f32 *, f32 *);
+
+extern f32 func_00353140(f32);
+
+typedef struct SdfGridCell {
+    u32 index;
+    u32 value;
+} SdfGridCell;
+
+typedef struct SdfGrid {
+    u32 allocation;        /* 0x00 */
+    SdfGridCell *cells;    /* 0x04 */
+    SdfGridCell *cursor;   /* 0x08 */
+    u32 pad0C;
+    u32 cellCount;         /* 0x10 */
+    u32 width;             /* 0x14 */
+    u32 pad18;
+    void (*releaseCell)(u32, u32); /* 0x1C */
+    void (*onSelect)();    /* 0x20 */
+    s16 rows;              /* 0x24 */
+    s16 visibleX;          /* 0x26 */
+    s16 visibleY;          /* 0x28 */
+    s16 pageSize;          /* 0x2A */
+    s16 scrollX;           /* 0x2C */
+    s16 scrollY;           /* 0x2E */
+    u32 userData;          /* 0x30 */
+} SdfGrid;
+
+extern void func_00310888(f32 *, f32 *);
+extern void func_00310320(f32 *, f32 *);
+extern void func_0030F8D0(f32 *);
+
+extern void func_0019D550(u64, s32, s32);
+extern void frFontSetChildColors(u64, u64);
+extern u64 func_0019CE78(u64, u64, s32, u64, u64);
+extern void func_0019D100(u64, s32, s32);
+extern void func_0019D110(u64, u64);
+extern void frFontSetChainFlag(u64, u8);
+extern void frFontSetFlagAndMeasureGlyphs(u64, s32);
+
+extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
+extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
+extern u64 func_0019FC38(s32, s32, u64, u64, u64, u64);
+
+typedef struct SdfListNode {
+    u32 index;                  /* 0x00 */
+    s32 key;                    /* 0x04 */
+    struct SdfListNode *next;   /* 0x08 */
+    struct SdfListNode *prev;   /* 0x0C */
+    s32 value;                  /* 0x10 */
+} SdfListNode;
+
+typedef struct SdfList {
+    u32 pad00;
+    u32 count;                  /* 0x04 */
+    SdfListNode *head;          /* 0x08 */
+    SdfListNode *tail;          /* 0x0C */
+} SdfList;
+extern void *func_00328D68(s32);
+extern void *memset(void *, s32, u32);
+
+extern void func_00313BA8();
+
+extern u32 func_00313BA0(void);
+extern u32 func_00313BB0(void);
+
+extern s32 func_003292A8(s32);
+extern u32 strlen(const char *);
+extern void func_0035C860(char *, char *, ...);
+extern char D_004388D8[];
+extern char D_004388E0[];
+extern s64 func_00312B50();
+
+extern void func_00312D48();
+extern void func_00312DA0();
+extern void kwlnTaskCreate();
+extern TaskWork *func_00312910();
+
+extern void func_00312DF8(void);
+extern void func_00312D48();
+extern void func_00312DA0();
+extern void func_00312DF8(void);
+extern void kwlnTaskCreate();
+extern TaskWork *func_00312910();
+
+extern void func_00312E20(void);
 
 float mdlQuaternionLengthSquared(float *quaternion) {
     return *quaternion * *quaternion + quaternion[1] * quaternion[1] +
@@ -129,13 +218,39 @@ INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310EB0);
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310FD0);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfQuaternionBlendNormalize);
+void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fraction) {
+    float inv = 1.0f - fraction;
+    out[0] = from[0] * inv + to[0] * fraction;
+    out[1] = from[1] * inv + to[1] * fraction;
+    out[2] = from[2] * inv + to[2] * fraction;
+    out[3] = from[3] * inv + to[3] * fraction;
+    sdfQuaternionNormalize(out);
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311178);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfQuatBlendAngular);
+void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
+    f32 angle = sdfQuatDot(from, to);
+    if (-0.95f < angle && angle < 0.95f) {
+        f32 firstWeight = func_00353140(angle * (1.0f - fraction));
+        f32 secondWeight = func_00353140(angle * fraction);
+        f32 denominator = func_00353140(angle);
+        out[0] = (from[0] * firstWeight + to[0] * secondWeight) / denominator;
+        out[1] = (from[1] * firstWeight + to[1] * secondWeight) / denominator;
+        out[2] = (from[2] * firstWeight + to[2] * secondWeight) / denominator;
+        out[3] = (from[3] * firstWeight + to[3] * secondWeight) / denominator;
+    } else {
+        sdfQuaternionBlendNormalize(out, from, to, fraction);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfQuatSquad);
+void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f32 fraction) {
+    f32 firstBlend[4];
+    f32 secondBlend[4];
+    sdfQuatBlendAngular(firstBlend, first, fourth, fraction);
+    sdfQuatBlendAngular(secondBlend, second, third, fraction);
+    sdfQuatBlendAngular(out, firstBlend, secondBlend, (fraction + fraction) * (1.0f - fraction));
+}
 
 void sdfQuatLog(f32 *out, f32 *in) {
     f32 angle = func_003532B8(in[3]);
@@ -182,7 +297,16 @@ void sdfQuatSquadControl(f32 *out, f32 *from, f32 *rotation, f32 *to) {
     sdfQuatMultiply(out, rotation, middle);
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfQuatForwardVector);
+void sdfQuatForwardVector(f32 *rotation, f32 *out) {
+    f32 matrix[16];
+    f32 vector[4];
+    memset(vector, 0, sizeof(vector));
+    vector[2] = 1.0f;
+    func_00310888(matrix, rotation);
+    func_00310320(vector, matrix);
+    func_0030F8D0(vector);
+    memcpy(out, vector, sizeof(vector));
+}
 
 f32 sdfQuatForwardDot(f32 *direction, f32 *target) {
     f32 quaternion[4];
@@ -216,17 +340,91 @@ s64 sdfFontRegisterShort(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     return func_0019C5B0(temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311AE8);
+s32 func_00311AE8(s32 x, s32 y, u64 first, u64 second, u64 third, s32 option) {
+    u64 handle = func_0019F460(x << 4, y << 3, first, second, third, 0);
+    s32 result = frFontMeasureGlyphChain(handle);
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311B58);
+s32 func_00311B58(s32 x, s32 y, u64 first, u64 second, s8 type, u64 name, s32 flag, s32 option) {
+    u64 handle = func_0019CE78(name, 0, type, 0, 0);
+    s32 result = 0;
+    frFontSetChildColors(handle, second);
+    func_0019D100(handle, x << 4, y << 3);
+    func_0019D110(handle, first);
+    if (flag & 0x100) {
+        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+    }
+    if (flag < 0) {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311C50);
+s32 func_00311C50(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32 option) {
+    u64 handle = func_0019F460(x << 4, y << 3, z, w, style, 0);
+    s32 result = 0;
+    frFontSetChainFlag(handle, flags);
+    if (flag & 0x100) {
+        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+    }
+    if (flag < 0) {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311D00);
+s32 func_00311D00(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32 option) {
+    u64 handle = func_0019F798(x << 4, y << 3, z, w, style, 0);
+    s32 result = 0;
+    frFontSetChainFlag(handle, flags);
+    if (flag & 0x100) {
+        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+    }
+    if (flag < 0) {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311DB0);
+s32 func_00311DB0(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32 option) {
+    u64 handle = func_0019F5E8(x << 4, y << 3, z, w, style, 0);
+    s32 result = 0;
+    frFontSetChainFlag(handle, flags);
+    if (flag & 0x100) {
+        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+    }
+    if (flag < 0) {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311E60);
+s32 func_00311E60(s32 x, s32 y, u64 first, u64 second, u8 opacity, u16 width, u64 name, u64 extra, s32 flag, s32 option) {
+    u64 handle = func_0019FC38(x << 4, y << 3, first, width, name, extra);
+    s32 result = 0;
+    frFontSetChainFlag(handle, opacity);
+    frFontSetChildColors(handle, second);
+    if (flag & 0x100) {
+        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+    }
+    if (flag < 0) {
+        result = frFontMeasureGlyphChain(handle);
+    }
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311F20);
 
@@ -266,11 +464,55 @@ void sdfSetTaskSecondaryCallback(s32 arg0, s32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312320);
+SdfListNode *func_00312320(SdfList *list, SdfListNode *node) {
+    SdfListNode *it;
+
+    if (node == NULL) {
+        return NULL;
+    }
+    for (it = list->head; it != NULL; it = it->next) {
+        if (node->index < it->index) {
+            it->index = it->index - 1;
+        }
+    }
+    list->count = list->count - 1;
+    if (node->next != NULL) {
+        node->next->prev = node->prev;
+    }
+    if (node->prev != NULL) {
+        node->prev->next = node->next;
+    }
+    if (node == list->head) {
+        list->head = node->next;
+    }
+    if (node == list->tail) {
+        list->tail = node->prev;
+    }
+    if (node->next != NULL) {
+        return node->next;
+    }
+    return node->prev;
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_003123D0);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfClearTaskList);
+void sdfClearTaskList(TaskList *list) {
+    TaskListNode *node;
+    if (list != NULL) {
+        node = list->head;
+        if (node != NULL) {
+            do {
+                TaskListNode *current = node;
+                node = node->next;
+                list->onRemove(current->handle, current->value);
+                func_00328E48(current);
+            } while (node != NULL);
+        }
+        list->count = 0;
+        list->head = 0;
+        list->tail = 0;
+    }
+}
 
 void func_003124B0(SdfLink *list, SdfLink *a, SdfLink *b) {
     SdfLink *tmpNext;
@@ -325,7 +567,15 @@ void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312578);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312620);
+TaskWork *func_00312620(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
+    TaskWork *work;
+
+    work = func_00312910(name, destroyCallback, userData);
+    sdfAttachTaskItem(work, item);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, func_00312D48, func_00312DF8, work);
+    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, func_00312DA0, NULL, work);
+    return work;
+}
 
 s64 sdfDestroyTaskPair(TaskWork *work) {
     if (work != NULL) {
@@ -430,7 +680,9 @@ INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312D48);
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312DA0);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312DF8);
+void func_00312DF8(void) {
+    sdfFreeTaskWork(func_00101958());
+}
 
 void func_00312E20(void) {
 }
@@ -473,11 +725,46 @@ void sdfGridSetCellValue(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfGridCursorUp);
+SdfGridCell *sdfGridCursorUp(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+    u32 index = cell->index;
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfGridCursorDown);
+    cell -= width;
+    if (index < width) {
+        return NULL;
+    }
+    grid->cursor = cell;
+    func_00313A58((u8 *)grid);
+    return cell;
+}
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfGridCursorLeft);
+SdfGridCell *sdfGridCursorDown(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+
+    if (cell->index >= grid->cellCount - width) {
+        return NULL;
+    }
+    cell += width;
+    grid->cursor = cell;
+    func_00313A58((u8 *)grid);
+    return cell;
+}
+
+SdfGridCell *sdfGridCursorLeft(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+    u32 index = cell->index;
+
+    cell -= 1;
+    if (index % width == 0) {
+        return NULL;
+    }
+    grid->cursor = cell;
+    func_00313A58((u8 *)grid);
+    return cell;
+}
 
 u8 *sdfGridCursorRight(u8 *grid) {
     u8 *cell = *(u8 **)(grid + 8);

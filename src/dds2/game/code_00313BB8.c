@@ -104,6 +104,13 @@ typedef struct ScriptEntry44 {
 
 extern ScriptEntry44 D_00402BE0[];
 
+extern u8 D_0040132C[];
+extern u16 D_00401332[];
+typedef struct SdfScriptRef {
+    u8 pad00[4];
+    u16 script;     /* 0x04 */
+} SdfScriptRef;
+
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00313BB8);
 
 void ptyClearProfileRecords(void) {
@@ -248,7 +255,11 @@ u8 func_00314B78(s32 arg0) {
     return ((ScriptFlagWork *)arg0)->scriptId;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314B80);
+u32 func_00314B80(u32 ref, u16 index) {
+    u32 entry = D_00435DD0 + *(u16 *)(ref + 4) * 0x580;
+
+    return entry + (index << 3) + 0x17210;
+}
 
 u32 ptyGetProfileRecordValue(u32 arg0, u16 arg1) {
     u32 *puVar1;
@@ -442,7 +453,9 @@ u8 func_00315220(u16 scriptId) {
     return D_00401325[scriptId * 36];
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315248);
+u8 func_00315248(u16 id, s32 sub) {
+    return D_0040132C[sub + id * 36];
+}
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", scrCallIfOperandReady);
 
@@ -626,7 +639,9 @@ void sdfSetAllFlagsFromTable(void) {
     } while (index++ >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_003162D8);
+ScriptEntry44 *func_003162D8(u16 id) {
+    return &D_00402BE0[id];
+}
 
 void scrSetEntryFlag(u32 context, u16 entryId, u32 bit) {
     ScriptFlagEntry *entry;
