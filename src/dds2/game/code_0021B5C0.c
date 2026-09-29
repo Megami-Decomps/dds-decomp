@@ -52,6 +52,8 @@ typedef struct BtlSkillTask {
     u8 pad28[0x20];
     s32 unk48;
     s8 unk4C;
+    u8 pad4D[0x13];
+    s32 list60;
 } BtlSkillTask;
 
 typedef struct BtlEffect {
@@ -60,20 +62,27 @@ typedef struct BtlEffect {
     u8 pad20[0x10];
     f32 vec30[4];
     f32 vec40[4];
-    u8 pad50[0x70];
+    f32 f50;
+    u8 pad54[0x6C];
     f32 vecC0[4];
     f32 vecD0[4];
-    u8 padE0[0x30];
+    f32 fE0;
+    u8 padE4[0x2C];
     u32 flags;
     BtlSkillTask *task;
-    u8 pad118[0x3C];
+    u8 pad118[0x18];
+    s32 unk130;
+    s32 index134;
+    u8 pad138[0x1C];
     f32 unk154;
 } BtlEffect;
 
 typedef struct BtlEntry {
     u8 pad0[3];
     u8 b3;
-    u8 pad4[0x1C];
+    u8 pad4[0x18];
+    u16 flags1C;
+    u8 pad1E[2];
 } BtlEntry;
 
 typedef struct BtlParams {
@@ -110,7 +119,7 @@ extern s8 func_001B36B8(s32, s32, s32);
 extern void func_001EC868(void *, f32 *, f32);
 extern void func_001E9598(void *, f32 *);
 extern void func_00336538(f32);
-extern void func_001E9A88(u8 *);
+extern void func_001E9A88();
 extern void func_001E9660(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
 extern BtlUnit *func_002172B8(BtlEffect *);
 extern void func_003364B8(f32);

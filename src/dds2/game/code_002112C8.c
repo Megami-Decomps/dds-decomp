@@ -376,7 +376,18 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00212B38);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00212CB8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00212E60);
+extern s32 func_001B2900(void *, s32);
+
+s32 func_00212E60(s32 battler) {
+    u32 ids[10] = {2, 3, 4, 5, 6, 10, 11, 12, 13, 14};
+    s32 i;
+    for (i = 0; i < 10; i++) {
+        if (func_001B2900((void *)battler, ids[i]) == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 s32 func_00212F20(s32 unused, s32 arg) {
     s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
@@ -746,7 +757,37 @@ s32 func_00213EF8(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00213F58);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00214098);
+s32 func_00214098(mask, arg1)
+    s32 mask;
+    s32 arg1;
+{
+    u8 *actor;
+    u8 *owner;
+    u32 flags;
+    s32 i;
+    for (actor = *(u8 **)(func_001AA6F8() + 0x248); actor != 0; actor = *(u8 **)(actor + 0x178)) {
+        owner = *(u8 **)(actor + 0x18);
+        if (owner == 0) {
+            continue;
+        }
+        flags = *(u32 *)(owner + 0x110);
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (!(flags & mask)) {
+            continue;
+        }
+        if (flags & 0x20) {
+            continue;
+        }
+        for (i = 0; i < 8; i++) {
+            if (func_00213F58(arg1, *(s16 *)(actor + 0x150 + i * 4), 1) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 s64 func_00214168(void) {
     return func_00214098(0x200);
@@ -802,7 +843,43 @@ s32 func_00214330(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002143A0);
+extern s32 D_00435E1C;
+extern s32 D_00435E20;
+
+s32 func_002143A0(void) {
+    u8 *actor;
+    u8 *owner;
+    u8 *entry;
+    s16 id;
+    s32 i;
+    for (actor = *(u8 **)(func_001AA6F8() + 0x248); actor != 0; actor = *(u8 **)(actor + 0x178)) {
+        owner = *(u8 **)(actor + 0x18);
+        if (owner == 0) {
+            continue;
+        }
+        if ((*(u64 *)(owner + 0x110) & 0x221) != 0x201) {
+            continue;
+        }
+        for (i = 0; i < 8; i++) {
+            id = *(s16 *)(actor + 0x150 + i * 4);
+            if (id == 0) {
+                continue;
+            }
+            if ((u32)(*(u8 *)(D_00435E1C + id * 2) - 0x10) < 2U) {
+                continue;
+            }
+            entry = (u8 *)(id * 0x38 + D_00435E20);
+            if (entry[8] == 0) {
+                continue;
+            }
+            if (entry[9] != 2) {
+                continue;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 btlHasUnitWithStatusBit(s32 battler, s32 scanAll) {
     if (scanAll != 0) {
