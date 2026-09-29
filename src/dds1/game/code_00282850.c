@@ -20,6 +20,7 @@ typedef struct RangeEntry {
 
 extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
+extern void func_00287FA8(s32, f32, f32);
 
 
 
@@ -111,31 +112,90 @@ extern u8 D_0037CE70[];
 
 extern f32 D_003245E0[];
 
-extern u32 D_003DC5F0[];
+/* Battle stage test viewer state. Retail addresses it partly through
+ * D_003DC600 (= &D_003DC5E8.slot[0], hence the negative offsets), so the
+ * D_003DC5EC..D_003DC654 symbols are all interior fields of this one object. */
+typedef struct StageTestEntry {
+    u8 modelId;      /* 0x00 */
+    u8 motionIndex;  /* 0x01 */
+    u8 column[2][8]; /* 0x02: per-column flag bytes (0x02.. and 0x0A..) */
+    u8 pad12[6];
+    f32 frame;       /* 0x18 */
+    f32 position[3]; /* 0x1C */
+    f32 pad28;
+    f32 rotation[3]; /* 0x2C */
+    f32 pad38;
+} StageTestEntry;
 
-extern u32 D_003DC608[];
+typedef struct StageTestSlot {
+    s32 entryIndex; /* 0x00 */
+    s32 unk04;
+    s32 modelId;    /* 0x08 */
+    s32 unk0C;
+    s32 unk10;
+    u32 flags;      /* 0x14: bit 0 cleared by func_00287EC8 case 1 */
+    s32 state;      /* 0x18 */
+    s32 index;      /* 0x1C */
+    s32 unk20;
+    s32 unk24;
+} StageTestSlot;
 
-extern u32 D_003DC618[];
+typedef struct StageTestState {
+    s32 mode;                /* 0x00 */
+    s32 unk04;
+    s32 model;               /* 0x08 */
+    s8 flag;                 /* 0x0C */
+    StageTestEntry *entries; /* 0x10 */
+    u32 flags;               /* 0x14 */
+    StageTestSlot slot[2];   /* 0x18 */
+    s32 effect;              /* 0x68 */
+    s32 pendingEffect;       /* 0x6C */
+} StageTestState;
 
-extern u32 D_003DC650[];
-
-extern u32 D_003DC654[];
-
-extern u32 D_003DC5E8[];
-
-extern u32 D_003DC5F8[];
-
-extern u32 D_003DC600[];
-
-extern u8 D_003DC5F4[];
-
-extern u32 D_003DC5EC[];
+extern StageTestState D_003DC5E8;
 
 extern void btlStopStage(void);
 
-extern void func_00288500(void);
+extern void *func_00288500(void);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00282850);
+typedef struct MenuStageTestState {
+    u32 flags;
+    u8 pad04[0x680];
+    s32 selectedPanel; /* 0x684 */
+    s32 scrollOffset;  /* 0x688 */
+} MenuStageTestState;
+
+typedef struct MenuStagePanelHeader {
+    s32 mode;  /* 0x00 */
+    u32 flags; /* 0x04 */
+    u8 pad08[0x12C];
+} MenuStagePanelHeader; /* 0x134 */
+
+extern void func_00281D40(s32, s32, s32, MenuStageTestState *, s32, s32);
+extern void func_00282360(s32, s32, s32, MenuStageTestState *, s32, s32);
+
+void func_00282850(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 panelIndex, s32 param) {
+    MenuStagePanelHeader *panel = (MenuStagePanelHeader *)((u8 *)menu + 0x78) + panelIndex;
+    s32 mode = panel->mode;
+
+    if (menu->selectedPanel >= 0) {
+        x -= 0x270;
+        y += 0x20;
+        mode = 1;
+    }
+    if (panel->flags & 0x80) {
+        mode = 1;
+    }
+    switch (mode) {
+    case 1:
+        func_00281D40(x, y, z, menu, panelIndex, param);
+        return;
+    case 2:
+        func_00282360(x, y, z, menu, panelIndex, param);
+        break;
+    }
+}
+
 INCLUDE_ASM(const s32, "game/code_00282850", func_002828D0);
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
@@ -146,12 +206,6 @@ void func_002829C0(s32 arg0) {
 }
 
 
-typedef struct MenuStageTestState {
-    u32 flags;
-    u8 pad04[0x680];
-    s32 selectedPanel; /* 0x684 */
-    s32 scrollOffset;  /* 0x688 */
-} MenuStageTestState;
 
 typedef struct MenuStageNode {
     u8 pad00[0xC];
@@ -761,7 +815,45 @@ void menuPlayInputSound(s32 arg0, s32 buttons, s32 *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285F00);
+void func_00285F00(s32 buttons, s8 kind) {
+    if (buttons & 0x8000) {
+        sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
+        return;
+    }
+    if (buttons != 0) {
+        if (buttons & 0x4000) {
+            sndSetSequenceVolumePan(0xC, 0x7F, 0x3F);
+        }
+        if (buttons & 1) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (buttons & 2) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+        }
+        if (buttons & 0x1000) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (buttons & 0x2000) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (buttons & 0xF0FF0) {
+            switch (kind) {
+            case 1:
+                sndSetSequenceVolumePan(6, 0x7F, 0x3F);
+                break;
+            case 2:
+                sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+                break;
+            case 3:
+                sndSetSequenceVolumePan(0x15, 0x7F, 0x3F);
+                break;
+            default:
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                break;
+            }
+        }
+    }
+}
 
 void func_00286050(u32 arg0) {
     func_00285F00(arg0, 0);
@@ -1096,7 +1188,27 @@ u16 func_00286AD0(s32 arg0) {
 }
 
 extern u16 D_0037CE00[];
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286AD8);
+extern void func_0024DA58(s32);
+
+s32 func_00286AD8(u32 id, s32 mode) {
+    u16 *entry = D_0037CE00;
+    u32 i;
+
+    for (i = 0; i < 3; i++, entry += 3) {
+        if (id == entry[0]) {
+            if (mode != 0) {
+                id = entry[2];
+                id += 0x17;
+            } else {
+                id = entry[1];
+                id += 10;
+            }
+            func_0024DA58(id);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyPermanentBonus);
 
@@ -1144,18 +1256,18 @@ u8 func_00286F48(void) {
 
 void func_00286F58(s32 arg0) {
     if (arg0 == 0) {
-        D_003DC5F4[0] = 0;
+        D_003DC5E8.flag = 0;
     } else {
-        D_003DC5F4[0] = 1;
+        D_003DC5E8.flag = 1;
     }
 }
 
 u32 func_00286F80(void) {
-    return D_003DC5F0[0];
+    return D_003DC5E8.model;
 }
 
 u32 func_00286F90(void) {
-    return D_003DC608[0];
+    return D_003DC5E8.slot[0].modelId;
 }
 
 void stageTestSetEntryIndex(s32 arg0, s32 value) {
@@ -1164,67 +1276,65 @@ void stageTestSetEntryIndex(s32 arg0, s32 value) {
     if (value < 0) {
         value = 0;
     }
-    if (D_003DC5E8[2] != 0 && value >= mdlGetNodeRefHalf(D_003DC5E8[2], 0)) {
-        value = mdlGetNodeRefHalf(D_003DC5E8[2], 0) - 1;
+    if (D_003DC5E8.model != 0 && value >= mdlGetNodeRefHalf(D_003DC5E8.model, 0)) {
+        value = mdlGetNodeRefHalf(D_003DC5E8.model, 0) - 1;
     }
-    *(s8 *)(index * 60 + D_003DC5E8[4] + 1) = value;
+    D_003DC5E8.entries[index].motionIndex = value;
     func_002878D8(-1);
 }
 
 void stageTestAddEntryValue(s32 arg0, f32 delta) {
     s32 index = arg0 & 0xFFFF;
-    f32 *entry;
+    StageTestEntry *entry;
 
-    if (delta < 0.0f && ((f32 *)(index * 60 + D_003DC5E8[4]))[6] - delta < 0.0f) {
+    if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)D_003DC5E8.entries))->frame - delta < 0.0f) {
         return;
     }
-    entry = (f32 *)(index * 60 + D_003DC5E8[4]);
-    entry[6] += delta;
+    entry = (StageTestEntry *)(index * 60 + (s32)D_003DC5E8.entries);
+    entry->frame += delta;
     func_002878D8(-1);
 }
 
 void func_002870D8(s32 index, s32 dx, s32 dy, s32 dz) {
-    s32 offset = (index & 0xFFFF) * 60;
-    f32 *position = (f32 *)(offset + D_003DC5F8[0]);
-    f32 x = position[7] + (f32)dx;
-    f32 y = position[8] + (f32)dy;
-    f32 z = position[9] + (f32)dz;
-    position[7] = x;
-    position[8] = y;
-    position[9] = z;
+    s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_003DC5E8.entries);
+    f32 x = entry->position[0] + (f32)dx;
+    f32 y = entry->position[1] + (f32)dy;
+    f32 z = entry->position[2] + (f32)dz;
+    entry->position[0] = x;
+    entry->position[1] = y;
+    entry->position[2] = z;
 }
 
 void func_00287138(s32 index, s32 dx, s32 dy, s32 dz) {
-    s32 offset = (index & 0xFFFF) * 60;
-    f32 *position = (f32 *)(offset + D_003DC5F8[0]);
-    f32 x = position[11] + (f32)dx;
-    f32 y = position[12] + (f32)dy;
-    f32 z = position[13] + (f32)dz;
-    position[11] = x;
-    position[12] = y;
-    position[13] = z;
+    s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_003DC5E8.entries);
+    f32 x = entry->rotation[0] + (f32)dx;
+    f32 y = entry->rotation[1] + (f32)dy;
+    f32 z = entry->rotation[2] + (f32)dz;
+    entry->rotation[0] = x;
+    entry->rotation[1] = y;
+    entry->rotation[2] = z;
 }
 
 u8 func_00287198(s32 arg0) {
-    return *(u8 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 1);
+    return D_003DC5E8.entries[arg0 & 0xffff].motionIndex;
 }
 
 f32 func_002871C0(s32 arg0) {
-    return *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x18);
+    return D_003DC5E8.entries[arg0 & 0xffff].frame;
 }
 
-/* Keep these repeated byte offsets: sharing a typed base changes ee-gcc's
- * instruction sequence. Each 60-byte entry has vectors at +0x1C and +0x2C. */
 void func_002871E8(s32 arg0, f32 *arg1) {
-    arg1[0] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x1c);
-    arg1[1] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x20);
-    arg1[2] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x24);
+    arg1[0] = D_003DC5E8.entries[arg0 & 0xffff].position[0];
+    arg1[1] = D_003DC5E8.entries[arg0 & 0xffff].position[1];
+    arg1[2] = D_003DC5E8.entries[arg0 & 0xffff].position[2];
 }
 
 void func_00287220(s32 arg0, f32 *arg1) {
-    arg1[0] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x2c);
-    arg1[1] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x30);
-    arg1[2] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x34);
+    arg1[0] = D_003DC5E8.entries[arg0 & 0xffff].rotation[0];
+    arg1[1] = D_003DC5E8.entries[arg0 & 0xffff].rotation[1];
+    arg1[2] = D_003DC5E8.entries[arg0 & 0xffff].rotation[2];
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287258);
@@ -1243,37 +1353,37 @@ void func_00287450(s32 mode) {
     s32 i;
     s32 value;
 
-    D_003DC5E8[0] = mode;
-    D_003DC5E8[1] = 0;
-    D_003DC5E8[2] = 0;
-    *(u8 *)&D_003DC5E8[3] = 0;
+    D_003DC5E8.mode = mode;
+    D_003DC5E8.unk04 = 0;
+    D_003DC5E8.model = 0;
+    D_003DC5E8.flag = 0;
     if (mode == 0) {
-        D_003DC5E8[4] = (u32)D_0037CE98;
+        D_003DC5E8.entries = (StageTestEntry *)D_0037CE98;
         offset = -140.0f;
     } else {
-        D_003DC5E8[4] = 0;
+        D_003DC5E8.entries = NULL;
         offset = 140.0f;
     }
     value = D_0037CE90[mode];
-    D_003DC5E8[5] = 0;
+    D_003DC5E8.flags = 0;
     for (i = 0; i < 2; i++) {
-        D_003DC5E8[i * 10 + 7] = value;
-        D_003DC5E8[i * 10 + 8] = -1;
-        D_003DC5E8[i * 10 + 9] = 0;
-        D_003DC5E8[i * 10 + 11] = 0;
+        D_003DC5E8.slot[i].unk04 = value;
+        D_003DC5E8.slot[i].modelId = -1;
+        D_003DC5E8.slot[i].unk0C = 0;
+        D_003DC5E8.slot[i].flags = 0;
     }
     func_00287420(offset);
 }
 
 void btlStopStage(void) {
-    if (D_003DC5E8[0] != 1) {
-        D_003DC5E8[27] = -1;
-        if (D_003DC5E8[26] != 0) {
+    if (D_003DC5E8.mode != 1) {
+        D_003DC5E8.pendingEffect = -1;
+        if (D_003DC5E8.effect != 0) {
             func_00288190();
         }
-        if (D_003DC5E8[2] != 0) {
-            func_002177D0(D_003DC5E8[2]);
-            D_003DC5E8[2] = 0;
+        if (D_003DC5E8.model != 0) {
+            func_002177D0(D_003DC5E8.model);
+            D_003DC5E8.model = 0;
         }
     }
 }
@@ -1285,11 +1395,13 @@ void mnuResetWorkFloats(void) {
 }
 
 void func_00287580(s32 arg0, s32 arg1, s32 arg2) {
-    D_003DC5EC[0] = func_00217068();
+    D_003DC5E8.unk04 = func_00217068();
 }
 
 void mnuForwardTableByte(s32 arg0) {
-    func_00287580(D_003DC600[1], *(u8 *)(D_003DC600[-2] + (arg0 & 0xffff) * 60), 0);
+    StageTestSlot *slot = D_003DC5E8.slot;
+
+    func_00287580(slot->unk04, D_003DC5E8.entries[arg0 & 0xffff].modelId, 0);
 }
 
 u32 func_002875E8(u32 *arg0) {
@@ -1310,7 +1422,7 @@ s32 func_002875F8(u8 *object) {
 }
 
 void func_00287678(void) {
-    D_003DC5E8[5] &= ~1;
+    D_003DC5E8.flags &= ~1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287698);
@@ -1331,7 +1443,7 @@ f32 mnuSetModelScaleVector(void *model, s32 useTable) {
     f32 vector[4];
 
     if (useTable != 0) {
-        scale = *(f32 *)(D_003BAA20 + D_003DC608[0] * 624 + 0x10);
+        scale = *(f32 *)(D_003BAA20 + D_003DC5E8.slot[0].modelId * 624 + 0x10);
     }
     vector[0] = scale;
     vector[1] = scale;
@@ -1351,13 +1463,39 @@ void mnuResetWorkPair(void) {
     *(s32 *)(D_0037CE60 + 8) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuApplyModelCamera);
+extern void mdlStorePrimaryVectorVU(void *);
+
+void mnuApplyModelCamera(s32 arg0) {
+    f32 vec[4];
+    StageTestEntry *entry;
+    f32 scale;
+
+    memset(vec, 0, sizeof(vec));
+    vec[3] = 1.0f;
+    entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
+    vec[0] = entry->position[0];
+    vec[1] = entry->position[1];
+    if (D_003DC5E8.flag != 1) {
+        mnuSetModelScaleVector((void *)arg0, 0);
+        vec[2] = ((StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries))->position[2];
+        mnuResetWorkPair();
+    } else {
+        scale = mnuSetModelScaleVector((void *)arg0, 1);
+        entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
+        vec[0] -= entry->position[0] - entry->position[0] * scale;
+        vec[1] -= entry->position[1] - entry->position[1] * scale;
+        vec[2] = 0.0f;
+        *(f32 *)(D_0037CE70 + 8) = (-400.0f - entry->position[2]) * scale;
+    }
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(vec));
+    mdlStorePrimaryVectorVU((void *)arg0);
+}
 
 void stageTestApplyEntryRotation(s32 arg0) {
-    f32 *entry = (f32 *)(D_003DC5E8[6] * 60 + D_003DC5E8[4]);
+    StageTestEntry *entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
 
-    func_002E7F20(entry[11] * 3.14159265f / 180.0f, entry[12] * 3.14159265f / 180.0f,
-                  entry[13] * 3.14159265f / 180.0f);
+    func_002E7F20(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
+                  entry->rotation[2] * 3.14159265f / 180.0f);
     func_00217FB8(arg0);
 }
 
@@ -1369,42 +1507,85 @@ s8 stageTestUpdate(s32 arg0) {
     if (result == 1) {
         return 1;
     }
-    if (D_003DC5E8[0] != 1) {
-        if (D_003DC5E8[2] != 0) {
-            mnuApplyModelCamera(D_003DC5E8[2]);
-            stageTestApplyEntryRotation(D_003DC5E8[2]);
+    if (D_003DC5E8.mode != 1) {
+        if (D_003DC5E8.model != 0) {
+            mnuApplyModelCamera(D_003DC5E8.model);
+            stageTestApplyEntryRotation(D_003DC5E8.model);
             func_00287C20();
-            if ((s32)D_003DC5E8[27] >= 0) {
-                func_00288148(D_003DC5E8[27]);
-                D_003DC5E8[27] = -1;
+            if (D_003DC5E8.pendingEffect >= 0) {
+                func_00288148(D_003DC5E8.pendingEffect);
+                D_003DC5E8.pendingEffect = -1;
             }
-            if (D_003DC5E8[26] != 0) {
-                func_001F3188(D_003DC5E8[26]);
+            if (D_003DC5E8.effect != 0) {
+                func_001F3188(D_003DC5E8.effect);
             }
-            func_00217878(D_003DC5E8[2], arg0);
+            func_00217878(D_003DC5E8.model, arg0);
             func_00288008();
         }
     }
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287E60);
+s32 func_00287E60(s32 mode) {
+    StageTestSlot *slot = D_003DC5E8.slot;
+    s32 index = slot->entryIndex;
+    s32 count = 0;
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287EC8);
+    for (i = 0; i < 8; i++) {
+        u8 flag;
+
+        if (mode == 0) {
+            flag = *(D_003DC5E8.entries[index].column[0] + i);
+        } else {
+            flag = *(D_003DC5E8.entries[index].column[1] + i);
+        }
+        if (flag) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void func_00287EC8(s32 kind, u32 index) {
+    StageTestSlot *slot = D_003DC5E8.slot;
+    f32 start = 0.0f;
+    s32 value;
+
+    if (index < 8) {
+        switch (kind) {
+        default:
+            start = 15.0f;
+            value = *(D_003DC5E8.entries[slot->entryIndex].column[0] + index);
+            break;
+        case 1:
+            value = *(D_003DC5E8.entries[slot->entryIndex].column[1] + index);
+            slot->flags &= ~1;
+            break;
+        case 2:
+            value = *(D_003DC5E8.entries[slot->entryIndex].column[1] + index);
+            slot->flags |= 1;
+            break;
+        }
+        func_00287FA8(value, start, 15.0f);
+    }
+}
 
 void func_00287FA8(s32 arg0, f32 arg1, f32 arg2) {
-    D_003DC600[6] = 1;
-    D_003DC600[7] = arg0;
-    D_003DC600[8] = (s32)arg1;
-    D_003DC600[9] = (s32)arg2;
+    StageTestSlot *slot = D_003DC5E8.slot;
+
+    slot->state = 1;
+    slot->index = arg0;
+    slot->unk20 = (s32)arg1;
+    slot->unk24 = (s32)arg2;
 }
 
 void func_00287FD0(void) {
-    D_003DC618[0] = 4;
+    D_003DC5E8.slot[0].state = 4;
 }
 
 s32 func_00287FE0(void) {
-    s32 temp_v0 = D_003DC618[0];
+    s32 temp_v0 = D_003DC5E8.slot[0].state;
 
     if ((temp_v0 == 0) || (temp_v0 == 3)) {
         return 0;
@@ -1413,52 +1594,53 @@ s32 func_00287FE0(void) {
 }
 
 void func_00288008(void) {
+    StageTestSlot *slot = D_003DC5E8.slot;
     s32 index;
     s32 node;
 
-    if (D_003DC600[6] != 0 && D_003DC600[6] != 3 && (node = func_00286F80()) != 0) {
-        if (D_003DC600[6] == 1) {
-            index = D_003DC600[7];
+    if (slot->state != 0 && slot->state != 3 && (node = func_00286F80()) != 0) {
+        if (slot->state == 1) {
+            index = slot->index;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
-                mdlAddEntryPlainEx(node, 0, index, (s32)D_003DC600[8], (s32)D_003DC600[9]);
-                D_003DC600[6] = 2;
+                mdlAddEntryPlainEx(node, 0, index, (s32)slot->unk20, (s32)slot->unk24);
+                slot->state = 2;
             }
-        } else if (!(D_003DC600[5] & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || D_003DC600[6] == 4)) {
-            index = *(u8 *)(D_003DC600[0] * 0x3C + D_003DC600[-2] + 1);
+        } else if (!(slot->flags & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || slot->state == 4)) {
+            index = D_003DC5E8.entries[slot->entryIndex].motionIndex;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
-                mdlAddEntryFlaggedEx(node, 0, index, (s32)D_003DC600[8], (s32)D_003DC600[9]);
-                D_003DC600[6] = 3;
+                mdlAddEntryFlaggedEx(node, 0, index, (s32)slot->unk20, (s32)slot->unk24);
+                slot->state = 3;
             }
         }
     }
 }
 
 void func_00288148(s32 arg0) {
-    if (D_003DC5E8[26] != 0) {
+    if (D_003DC5E8.effect != 0) {
         func_00288190();
     }
-    D_003DC5E8[26] = func_001F3118(D_003DC5E8[2], 0x30);
+    D_003DC5E8.effect = func_001F3118(D_003DC5E8.model, 0x30);
 }
 
 void func_00288190(void) {
-    u32 *temp_v0 = D_003DC5E8;
-    u32 temp_v1 = temp_v0[26];
+    StageTestState *temp_v0 = &D_003DC5E8;
+    u32 temp_v1 = temp_v0->effect;
 
     if (temp_v1 == 0) {
         return;
     }
     func_001F3200(temp_v1);
-    temp_v0[26] = 0;
+    temp_v0->effect = 0;
 }
 
 void func_002881D0(u32 arg0) {
-    D_003DC654[0] = arg0;
+    D_003DC5E8.pendingEffect = arg0;
 }
 
 s32 func_002881E0(void) {
-    return D_003DC650[0] != 0;
+    return D_003DC5E8.effect != 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2520);
@@ -1485,7 +1667,49 @@ void *createBattleStageTestCamera(void) {
     return func_00288458;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00288500);
+typedef struct StageGraphicsCallback {
+    u8 unknown[0x10];
+    void (*invoke)(void *, void *);
+} StageGraphicsCallback;
+extern StageGraphicsCallback D_00325708;
+extern s8 D_00324510[];
+extern s32 D_003BC7D0;
+extern s32 D_003BC7D4;
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, s32);
+extern void func_001038A0(void *, s32, s32, s32, s32);
+extern s32 func_002E4960();
+extern void func_0021FEC0(s32, s32);
+
+void *func_00288500(void) {
+    void *packets = sdfAllocPacketAligned(0x20);
+
+    sdfInitPacketList(packets);
+    func_001038A0(packets, 0x84, 0x46, 0x14, 9);
+    sdfAppendPacket(packets, func_002E4960(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfAppendPacket(packets, func_002E4960(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
+    sdfAppendPacket(packets, func_002E4960(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfAppendPacket(packets, func_002E4960(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    D_00325708.invoke(&D_00325708, packets);
+    if (D_00324510[0x21] < 0) {
+        func_0021FEC0(D_003BC7D0, D_003BC7D4);
+        return createBattleStageTestCamera;
+    }
+    if (D_00324510[0x25] & 2) {
+        D_003BC7D0++;
+    }
+    if (D_00324510[0x24] & 2) {
+        D_003BC7D0--;
+    }
+    if (D_00324510[0x2A] & 2) {
+        D_003BC7D4++;
+    }
+    if (D_00324510[0x28] & 2) {
+        D_003BC7D4--;
+    }
+    return 0;
+}
 
 void func_002886A0(void) {
     evtDestroySecondaryWorldNode();
