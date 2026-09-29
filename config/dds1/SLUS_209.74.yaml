@@ -157,10 +157,12 @@ segments:
       - [0x9AAD8, c, game/code_00199AD8]
       - [0x9C340, c, interface/itfMesManager]  # Nocturne __FILE__ + P4 transfer
       - [0x9EB88, c, game/code_0019DB88]
+      - [0xA14C0, c, game/code_001A04C0]
       - [0xF70E8, c, game/code_001F60E8]  # P4 transfer
       - [0xF7110, c, game/code_001F6110]
       - [0xFD7D8, c, game/code_001FC7D8]
       - [0x100030, c, game/code_001FF030]
+      - [0x10FA40, c, game/code_0020EA40]
       - [0x117B78, c, model/mdlManager]  # Nocturne __FILE__
       - [0x119B48, c, game/code_00218B48]
       - [0x120E38, c, event/evtStage]  # Nocturne __FILE__
@@ -229,6 +231,7 @@ segments:
       - [0x18B0E0, c, game/code_0028A0E0]
       - [0x19B810, c, game/code_0029A810]  # P4 transfer
       - [0x19B840, c, game/code_0029A840]
+      - [0x1BD8F0, c, game/code_002BC8F0]
       - [0x1BFDC8, c, game/code_002BEDC8]
       - [0x1C0790, c, game/code_002BF790]
       - [0x1C3620, c, game/code_002C2620]
@@ -327,9 +330,11 @@ segments:
       - [0x2A2370, .rodata, game/code_00196478]
       - [0x2A2410, .rodata, interface/itfMesManager]
       - [0x2A24F0, .rodata, game/code_0019DB88]
+      - [0x2A25E0, .rodata, game/code_001A04C0]
       - [0x2A6430, .rodata, game/code_001F6110]
       - [0x2A6790, .rodata, game/code_001FC7D8]
       - [0x2A6950, .rodata, game/code_001FF030]
+      - [0x2A7580, .rodata, game/code_0020EA40]
       - [0x2ACA80, .rodata, game/code_00218B48]
       - [0x2AD008, .rodata, event/evtStage]
       - [0x2AD060, .rodata, event/evtUnitManager]
@@ -434,8 +439,10 @@ segments:
       - [0x2BA394, .lit4, effect/effEvent]
       - [0x2BA3A0, .lit4, game/code_00192488]
       - [0x2BA3A8, .lit4, game/code_0019DB88]
+      - [0x2BA3B4, .lit4, game/code_001A04C0]
       - [0x2BA644, .lit4, game/code_001F6110]
       - [0x2BA648, .lit4, game/code_001FF030]
+      - [0x2BB088, .lit4, game/code_0020EA40]
       - [0x2BB0CC, .lit4, model/mdlManager]
       - [0x2BB0D0, .lit4, game/code_00218B48]
       - [0x2BB128, .lit4, event/evtStage]
@@ -469,6 +476,7 @@ segments:
       - [0x2BB428, .lit4, game/code_00282850]
       - [0x2BB438, .lit4, game/code_0028A0E0]
       - [0x2BB4AC, .lit4, game/code_0029A840]
+      - [0x2BB59C, .lit4, game/code_002BC8F0]
       - [0x2BB5B0, .lit4, game/code_002C5FB8]
       - [0x2BB5E8, .lit4, game/code_002C97E8]
       - [0x2BB5F4, .lit4, game/code_002CC750]
