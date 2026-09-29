@@ -165,7 +165,7 @@ extern void *mcPrepareDirectory(void);
 
 extern void *fileSlotSelectPollClear(void);
 
-extern void *func_0028B280(void);
+extern void *fileBeginDirectoryScan(void);
 
 typedef struct LoadMirror {
     u32 current;
@@ -271,7 +271,7 @@ extern void func_002966D8(s32 arg0);
 
 extern void *fileResetSelection(void);
 
-extern void *func_0028B238(void);
+extern void *fileBeginSlotReset(void);
 
 extern s32 fileSlotSelectPoll(void);
 
@@ -555,7 +555,7 @@ s32 fileWriteWait(void) {
     return 0;
 }
 
-void func_0028A150(void) {
+void fileDestroyMenuTask(void) {
     if (D_003BC7F0 != 0) {
         kwlnTaskDestroyWithHierarchy(D_003BC7F0, 1);
         D_003BC7F0 = 0;
@@ -563,7 +563,7 @@ void func_0028A150(void) {
     }
 }
 
-s8 func_0028A180(void) {
+s8 fileMenuTaskIsAlive(void) {
     return D_003BC7EC;
 }
 
@@ -579,7 +579,7 @@ void fileReqGetSlotCode(void) {
     D_003BC864 = D_003DC803[slot * 0x30];
 }
 
-u32 func_0028A1F8(void) {
+u32 fileMainBlobSize(void) {
     return 0x33600;
 }
 
@@ -762,7 +762,7 @@ void *fileBeginWait(void *callback) {
     return fileUpdateWait;
 }
 
-void *func_0028B238(void) {
+void *fileBeginSlotReset(void) {
     D_003BC848 = 0;
     func_0028AB30(0);
     D_003BC854 = 0;
@@ -771,7 +771,7 @@ void *func_0028B238(void) {
     return (void *)fileBeginPromptDialog(&fileResetSelection, &func_0028B2C0, 0);
 }
 
-void *func_0028B280(void) {
+void *fileBeginDirectoryScan(void) {
     func_0028AB30(0);
     D_003BC854 = 0;
     D_003BC834 = 9;
@@ -783,7 +783,7 @@ void *func_0028B2C0(void) {
     D_003BC854 = 0;
     D_003BC834 = 8;
     D_003BC810 = 0;
-    return (void *)fileBeginPromptDialog(&func_0028B508, &func_0028B238, 1);
+    return (void *)fileBeginPromptDialog(&func_0028B508, &fileBeginSlotReset, 1);
 }
 
 void *func_0028B300(void) {
@@ -929,7 +929,7 @@ void func_0028B6D0(void) {
 void func_0028B6E8(void) {
     D_003BD910 = 0;
     D_003BC7F8 = func_00288B48(D_003B2668);
-    func_0028B238();
+    fileBeginSlotReset();
 }
 
 void func_0028B710(void) {
@@ -1368,7 +1368,7 @@ void fileOnAllWritten(void) {
 }
 
 void *fileWriteIconSysComplete(void) {
-    func_0028A150();
+    fileDestroyMenuTask();
     return fileOnAllWritten;
 }
 
@@ -1542,7 +1542,7 @@ void *handleSaveSetupDone(void) {
         fileReloadSaveBuffer();
         func_002D0918(D_003BD920);
         D_003BC7ED = 1;
-        func_0028A150();
+        fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
             fileCacheSlotFlagsFromState();
         } else {

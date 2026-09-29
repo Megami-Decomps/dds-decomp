@@ -1547,8 +1547,11 @@
 0x00289E18	mcMakeDirectory	inferred	Passes the caller's arguments to sceMcMkdir with the second argument zero.
 0x0028A0E0	fileWriteBegin	inferred	legacy Save_FileWrite_Begin (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028A0F8	fileWriteWait	inferred	legacy Save_FileWrite_Wait (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
+0x0028A150	fileDestroyMenuTask	inferred	destroys the file-menu task at D_003BC7F0 with its hierarchy and clears the alive flag D_003BC7EC
+0x0028A180	fileMenuTaskIsAlive	inferred	returns D_003BC7EC, the flag set while the file-menu task runs (cleared by fileDestroyMenuTask)
 0x0028A190	mcFormatSaveFilename	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
 0x0028A1B8	fileReqGetSlotCode	inferred	reads current request index and signed slot code at stride 0x30
+0x0028A1F8	fileMainBlobSize	inferred	returns 0x33600, the main save blob size allocated by fileLoadMainBlobBegin / written by fileBuildMainBlobAndWrite
 0x0028A208	fileReloadSaveBuffer	inferred	reloads the 0x33600-byte save buffer from D_003BD924 while preserving the word at +0x30
 0x0028A508	fileDrawSaveWindow	inferred	Draws two save-window frames with func_00108FA0 and bumps the frame counter.
 0x0028A5D8	fileIsLoadStepComplete	inferred	file file requests and records in game/code_0028A0E0.c
@@ -1559,6 +1562,8 @@
 0x0028B058	fileReadSlotPreviewWait	inferred	legacy Save_ReadSlotPreview_Wait (scratch/legacy_bridge.tsv): file/memory-card manager in game/code_0028A0E0
 0x0028B0B8	fileStoreSlotHeader	inferred	on completion copies the 0x30-byte slot header from D_003BD924 into the D_003DC800 table entry for the current slot
 0x0028B1F0	fileBeginWait	inferred	file file requests and records in game/code_0028A0E0.c
+0x0028B238	fileBeginSlotReset	inferred	file-flow step: clears the slot flags and pending mode, sets step 4, then chains fileResetSelection -> func_0028B2C0 (same shape as DDS2 func_002CAA08)
+0x0028B280	fileBeginDirectoryScan	inferred	file-flow step: sets step 9 and chains mcPrepareDirectory -> fileScanSlotStates (same shape as DDS2 func_002CAA50)
 0x0028B430	fileResetSelection	inferred	file file requests and records in game/code_0028A0E0.c
 0x0028B4B0	fileAbortSlotFlow	inferred	aborts the current slot flow: clears the pending-mode latch and the two slot-flow flags and returns -1
 0x0028B4D8	mcdEnterDefaultFileFlow	inferred	same body and role as DDS2 mcdEnterDefaultFileFlow (0x2CACA8): issues the (2, buffer, 4, 0) memory-card request and returns 0; reached through func_0028B508 / DDS2 func_002CACF0
