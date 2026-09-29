@@ -88,6 +88,7 @@ lines:
 | `SHARED` / `PAD` / `MERGED` | a literal can't be compiled from C yet; keep the `extern` |
 | `DATA` | the unit emits data nothing accounts for |
 | `MISSING` / `ORDER` / `TWICE` | a function was dropped, moved, or defined twice |
+| `STALE` | the unit uses an old `func_` name that symbol_addrs has since renamed; use the new name |
 | `TRICK` | computed goto, label table, or pinned register |
 
 Always check the whole unit after an edit. A changed declaration, or even a

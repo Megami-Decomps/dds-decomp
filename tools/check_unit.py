@@ -439,6 +439,14 @@ def main():
             if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[A-Za-z_][^;\n]*\b{name}\s*\([^;]*$", source, re.M):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
+    # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
+    # (a stale local asm tree still defines the old label, so the local build hides it).
+    renamed = {f"func_{int(a, 16):08X}": n for n, a in re.findall(
+        r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)
+        if not n.startswith("func_")}
+    for old in sorted(set(re.findall(r"\bfunc_[0-9A-F]{8}\b", unit.read_text())) & renamed.keys()):
+        bad += 1
+        print(f"STALE {old}: symbol_addrs names it {renamed[old]}; use that name")
     print(f"{ok} match, {bad} differ")
     sys.exit(1 if bad else 0)
 
