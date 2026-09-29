@@ -2,6 +2,43 @@
 
 extern s8 D_003CD8D8[34];
 
+extern void func_00246950();
+
+typedef struct CampFlagRow {
+    u8 pad00[4];
+    s16 flag[8];     /* 0x04 */
+    u8 value[9];     /* 0x14: [0] default, [i + 1] for flag[i] */
+    u8 pad1D[3];
+} CampFlagRow;
+
+extern CampFlagRow D_003C9A40[];
+
+extern s32 mdlFlagTest(u32);
+
+extern void func_002C42B0(s32 *, void *);
+
+extern u8 D_003CE658[];
+
+extern s32 D_00435CC8;
+
+extern s32 sdfAllocatePacketList();
+
+extern void sdfCreateDescriptorPacket();
+
+extern s32 func_0025CE68(s32, s32);
+
+extern s32 strcmp(const char *a, const char *b);
+
+extern s32 func_0019CE78(s32 *, s32, s32, s32, s32);
+
+extern void func_0019D100(s32, s32, s32);
+
+extern s32 D_003C99B8[];
+
+extern void func_0024ACC0();
+
+extern void func_0024A9F0();
+
 extern s64 evtFindTaskById(void);
 
 extern s32 func_00101820(u32);
@@ -23,6 +60,28 @@ extern s8 D_00437837;
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 func_00101958();
+
+extern void func_00260380();
+
+extern void func_00328E48();
+
+extern void func_002B9520();
+
+extern void func_0025FCD8();
+
+extern void func_002B99D8();
+
+extern void func_003054E8();
+
+extern s32 mnuShopReleaseSceneObjects(u8 *);
+
+extern void func_002C3FC8(s32, s32);
+
+extern void func_0026C728(void);
+
+extern void evtReleaseResourcePairHandle();
+
+extern void func_003297C8(s32);
 
 extern void func_002C1B70(s32, s32);
 
@@ -98,23 +157,252 @@ void mnuCampDestroyAllTasks(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopScrollList);
+typedef struct ScrollNode {
+    u16 pos;                  /* 0x0 */
+    u8 unk2[0x2E];            /* 0x2 */
+    struct ScrollNode *next;  /* 0x30 */
+} ScrollNode;
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DB98);
+typedef struct ScrollList {
+    u8 unk0[0x1C];
+    s16 base;                 /* 0x1C */
+    u8 unk1E[0x36];
+    ScrollNode *nodes;        /* 0x54 */
+} ScrollList;
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DD68);
+typedef struct ScrollOwner {
+    u8 unk0[0xC];
+    s32 limit;                /* 0xC */
+    u8 unk10[0x22F8];
+    ScrollList *list;         /* 0x2308 */
+} ScrollOwner;
+
+void mnuShopScrollList(ScrollOwner *owner, s32 delta) {
+    ScrollList *list = owner->list;
+    ScrollNode *node;
+    s32 next;
+
+    if (list == NULL) {
+        return;
+    }
+    for (node = list->nodes; node != NULL; node = node->next) {
+        next = node->pos + list->base + delta;
+        if (next < list->base) {
+            node->pos = 0;
+        } else if (owner->limit < next) {
+            node->pos = (u16)owner->limit - (u16)list->base - 1;
+        } else {
+            node->pos = node->pos + delta;
+        }
+    }
+}
+
+typedef struct FxChild {
+    u16 offset;           /* 0x00 */
+    u8 pad02[6];
+    s16 fadeA;            /* 0x08 */
+    s16 fadeB;            /* 0x0A */
+    u8 pad0C[0x24];
+    struct FxChild *next; /* 0x30 */
+} FxChild;
+
+typedef struct FxNode {
+    s32 kind;             /* 0x00 */
+    u8 pad04[0x18];
+    s16 base;             /* 0x1C */
+    u8 pad1E[0x36];
+    FxChild *children;    /* 0x54 */
+    u8 pad58[0x24];
+    struct FxNode *next;  /* 0x7C */
+} FxNode;
+
+typedef struct FxWorld {
+    u8 pad00[0xC];
+    union {
+        s32 whole;
+        u16 low;
+    } limitv;             /* 0x0C */
+    u8 pad10[4];
+    s32 unk14;            /* 0x14 */
+    s32 unk18;            /* 0x18 */
+    s32 unk1C;            /* 0x1C */
+    u8 pad20[0x2010];
+    s32 count;            /* 0x2030 */
+    FxNode *nodes;        /* 0x2034 */
+} FxWorld;
+
+void func_0025DB98(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
+    FxNode *node;
+    FxChild *child;
+    s32 total;
+
+    if (world->count <= 0) {
+        return;
+    }
+    if (world->unk14 + delta < 0) {
+        world->unk14 = 10;
+    } else {
+        world->unk14 += delta;
+    }
+    if (world->limitv.whole + delta < 0) {
+        world->limitv.whole = 10;
+    } else {
+        world->limitv.whole += delta;
+    }
+    if (world->unk18 > world->limitv.whole) {
+        world->unk18 = world->limitv.whole;
+    }
+    node = world->nodes;
+    while (node != NULL) {
+        for (child = node->children; child != NULL; child = child->next) {
+            offset = child->offset;
+            base = node->base;
+            ubase = (u16)node->base;
+            total = offset + base;
+            if (total < threshold) {
+                continue;
+            }
+            total += delta;
+            if (total < base) {
+                child->offset = 0;
+            } else if (world->limitv.whole < total) {
+                child->offset = world->limitv.low - ubase - 1;
+            } else {
+                child->offset = offset + delta;
+            }
+            switch (node->kind) {
+            case 0x12:
+                if (child->fadeA != 0) {
+                    child->fadeA += delta;
+                    if (child->fadeA < 0) {
+                        child->fadeA = 0;
+                    }
+                    if (world->limitv.whole < child->fadeA + delta) {
+                        child->fadeA = world->limitv.whole - 1;
+                    }
+                }
+                break;
+            case 3:
+            case 0x14:
+            case 0x15:
+            case 0x1A:
+                if (child->fadeB != 0) {
+                    child->fadeB += delta;
+                    if (child->fadeB < 0) {
+                        child->fadeB = 0;
+                    }
+                    if (world->limitv.whole < child->fadeB + delta) {
+                        child->fadeB = world->limitv.whole - 1;
+                    }
+                }
+                break;
+            }
+        }
+        node = node->next;
+    }
+    world->unk1C -= 1;
+    func_0024ACC0(world, delta, threshold, base, offset, ubase, node);
+    func_0024A9F0(world);
+}
+
+void func_0025DD68(FxWorld *world, s32 threshold) {
+    FxNode *node;
+    FxChild *child;
+
+    if (world->count <= 0) {
+        return;
+    }
+    for (node = world->nodes; node != NULL; node = node->next) {
+        child = node->children;
+        while (child != NULL) {
+            if (child->offset + node->base < threshold) {
+                child = child->next;
+            } else {
+                func_00246950(world, node, child);
+                child = node->children;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DE08);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DFE8);
+void func_0025DFE8(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e) {
+    a[0] = 0.7f;
+    a[1] = 0.7f;
+    a[2] = 0.7f;
+    a[3] = 0.0f;
+    b[0] = 0.65f;
+    b[1] = 0.39f;
+    b[2] = 0.65f;
+    b[3] = 0.0f;
+    c[0] = 0.2f;
+    c[1] = 0.2f;
+    c[2] = 0.2f;
+    c[3] = 1.0f;
+    *d = 7.0f;
+    *e = 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E048);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E240);
+typedef struct CampDisplayDefaults {
+    s32 width;
+    s32 height;
+    s8 color[4];
+    f32 scaleX;
+    f32 scaleY;
+    s32 enabled;
+    s32 variant;
+    s32 unk1C;
+} CampDisplayDefaults;
+
+void func_0025E240(CampDisplayDefaults *display) {
+    display->width = 0x100;
+    display->height = 0xE0;
+    display->color[0] = -0x80;
+    display->color[1] = -0x80;
+    display->color[2] = -0x80;
+    display->color[3] = -0x80;
+    display->scaleY = 1.0f;
+    display->scaleX = 1.0f;
+    display->enabled = 1;
+    display->variant = 0;
+    display->unk1C = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E288);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E338);
+typedef struct CampListLayout {
+    s32 width0;
+    s32 width1;
+    s32 width2;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    u8 pad18[8];
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+} CampListLayout;
+
+void func_0025E338(CampListLayout *layout) {
+    layout->width0 = 150;
+    layout->width1 = 150;
+    layout->unk10 = 80;
+    layout->width2 = 150;
+    layout->unkC = 30;
+    layout->unk14 = 1;
+    layout->unk20 = 7;
+    layout->unk24 = 4;
+    layout->unk28 = 10;
+    layout->unk2C = 32;
+    layout->unk30 = 16;
+    layout->unk34 = 16;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
 
@@ -126,15 +414,18 @@ u32 func_0025E7B0(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E7B8);
+typedef struct PackedPair {
+    u8 pad00[8];
+    union {
+        u32 word;
+        u16 half;
+    } packed;
+} PackedPair;
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindMatchingEntryIndex);
-
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindEntryByName);
-
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E8D0);
-
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E980);
+void func_0025E7B8(PackedPair *pair, s32 *low, s32 *high) {
+    *low = pair->packed.half & 0xFFF;
+    *high = pair->packed.half >> 12;
+}
 
 typedef struct CampEntryNode {
     u8 pad00[8];
@@ -155,6 +446,33 @@ typedef struct {
     s32 idCount; /* 0x2444 */
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
+
+s32 mnuCampFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
+    CampEntryNode *node = scene->entries;
+    while (node != NULL) {
+        if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24,
+                   (char *)*(u8 **)(entry + 0x7c) + (nameIndex << 5)) == 0) {
+            return node->nameIndex;
+        }
+        node = node->next;
+    }
+    return -1;
+}
+
+void *mnuCampFindEntryByName(CampScene *scene, const char *name) {
+    CampEntryNode *node = scene->entries;
+    while (node != NULL) {
+        if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24, name) == 0) {
+            return node;
+        }
+        node = node->next;
+    }
+    return NULL;
+}
+
+INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E8D0);
+
+INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E980);
 
 void fldResetCampSceneEntries(CampScene *scene) {
     CampEntryNode *node;
@@ -181,7 +499,13 @@ void func_0025EE00(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampInitFontResource);
+void mnuCampInitFontResource(CampScene *scene) {
+    s32 resource;
+    scene->effectHandle = 0;
+    resource = func_0019CE78(D_003C99B8, 0, 0, 0, 0);
+    scene->effectHandle = resource;
+    func_0019D100(resource, 0x960, 0x70);
+}
 
 void mnuCampReleaseEffectHandle(CampScene *scene) {
     func_0019C5B0(scene->effectHandle);
@@ -200,7 +524,22 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EF10);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EFD8);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopSubmitDescriptor);
+typedef struct BufferDescriptor {
+    u8 unk0[0x10];
+    void (*open)(struct BufferDescriptor *, s32);
+} BufferDescriptor;
+
+extern BufferDescriptor D_00380708;
+
+void mnuShopSubmitDescriptor(u8 *work) {
+    s32 packet;
+
+    if (*(s32 *)(work + 0x2428) != 0) {
+        packet = sdfAllocatePacketList(0);
+        sdfCreateDescriptorPacket(packet, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0x200, 0xE0, *(s32 *)(work + 0x2428), 0);
+        D_00380708.open(&D_00380708, packet);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F130);
 
@@ -298,7 +637,18 @@ void fldRegisterCampSceneId(CampScene *scene, s32 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F5D0);
+void func_0025F5D0(CampScene *scene) {
+    s32 count = 0;
+    if (scene->idCount > 0) {
+        s32 *entry = scene->registeredIds;
+        do {
+            s32 identifier = *entry++;
+            count++;
+            func_0025CE68(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
+        } while (count < scene->idCount);
+    }
+    scene->idCount = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
@@ -371,7 +721,28 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FC08);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FCD8);
+void func_0025FCD8(s32 scene) {
+    s32 i;
+    s32 *slot = (s32 *)(scene + 0x68);
+
+    func_002B99D8(*(s32 *)(scene + 0x378));
+    for (i = 1; i >= 0; i--) {
+        func_003054E8(*slot++);
+    }
+    func_003054E8(*(s32 *)(scene + 0x70));
+    func_003054E8(*(s32 *)(scene + 0x74));
+    switch (*(s32 *)(scene + 8)) {
+    case 1:
+    case 3:
+        func_0025FA10(scene + 0x210);
+        break;
+    case 0:
+    case 2:
+        break;
+    default:
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FD78);
 
@@ -381,13 +752,74 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FF18);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260020);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260138);
+s32 func_00260138(s32 row) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampFindActiveSlot);
+    for (i = 7; i >= 0; i--) {
+        if (D_003C9A40[row].flag[i] > 0 && mdlFlagTest(D_003C9A40[row].flag[i])) {
+            return D_003C9A40[row].value[i + 1];
+        }
+    }
+    return D_003C9A40[row].value[0];
+}
+
+s32 mnuCampFindActiveSlot(void) {
+    s32 i;
+    u8 *base = D_003CBB70;
+    s16 *p = (s16 *)(base + 0x1450);
+    for (i = 0x14; i >= 0; i--, p = (s16 *)((u8 *)p - 0x104)) {
+        if (*p > 0 && mdlFlagTest(*p)) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260380);
+typedef struct ShopBuf {
+    u8 unk0[0x30];
+    void *buffer;    /* 0x30 */
+} ShopBuf;
+
+typedef struct ShopSprite {
+    u8 unk0[0x18];
+    ShopBuf *data;   /* 0x18 */
+} ShopSprite;
+
+typedef struct ShopScene {
+    u8 unk0[0x7C];
+    ShopSprite *sprites[1]; /* 0x7C */
+    ShopSprite *extra;      /* 0x80 */
+} ShopScene;
+
+void func_00260380(s32 keepExtra, ShopScene *scene) {
+    ShopSprite **slot = scene->sprites;
+    ShopSprite *sprite;
+    u32 i;
+
+    for (i = 0; i < 1; i++) {
+        sprite = *slot;
+        if (sprite != NULL) {
+            if (sprite->data->buffer != NULL) {
+                func_00328E48(sprite->data->buffer);
+                sprite = *slot;
+                sprite->data->buffer = NULL;
+            }
+            func_002B9520(sprite);
+        }
+        slot++;
+    }
+    if (keepExtra == 0) {
+        if (scene->extra != NULL) {
+            if (scene->extra->data->buffer != NULL) {
+                func_00328E48(scene->extra->data->buffer);
+                scene->extra->data->buffer = NULL;
+            }
+            func_002B9520(scene->extra);
+        }
+    }
+}
 
 u32 func_00260458(void) {
     return 0;
@@ -434,7 +866,20 @@ void func_00260538(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260570);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260620);
+void func_00260620(s32 arg) {
+    s32 scene = func_00101958();
+
+    if (scene != 0) {
+        func_00260380(0, scene);
+        func_0025FCD8(scene);
+        mnuShopReleaseSceneObjects((u8 *)scene);
+        func_002C3FC8(scene + 0xC, arg);
+        func_0026C728();
+        evtReleaseResourcePairHandle(scene + 0x60);
+        func_003297C8(*(s32 *)scene);
+        D_00437837 = 2;
+    }
+}
 
 s32 func_002606A0(void) {
     s32 state = func_00101958() + 0x37C;
@@ -475,11 +920,23 @@ s32 func_00260848(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260880);
+static inline s64 campSetHandler(s32 context, u64 mode, s32 callback) {
+    return func_002C4038(context + 0xc, (s32 *)(context + 0x58), mode, callback);
+}
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002608E0);
+s64 func_00260880(s32 callback) {
+    s32 context = func_00101958();
+    func_002C42B0((s32 *)(context + 0x58), D_003CE658);
+    return campSetHandler(context, 0, callback);
+}
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260918);
+s64 func_002608E0(s32 callback) {
+    return campSetHandler(func_00101958(), 1, callback);
+}
+
+s64 func_00260918(s32 callback) {
+    return campSetHandler(func_00101958(), 2, callback);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260950);
 
