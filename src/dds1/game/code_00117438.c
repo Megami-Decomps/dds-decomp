@@ -66,7 +66,24 @@ void func_001175E0(EvtScaledValue *value) {
     value->flags = value->flags & 0xffffffdf;
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_001175F8);
+typedef struct ActionObj {
+    u8 unk0[4];   /* 0x0 */
+    s32 unk4;     /* 0x4 */
+    s32 unk8;     /* 0x8 */
+    u8 unkC[0xC]; /* 0xC */
+    void *unk18;  /* 0x18 */
+} ActionObj;
+
+extern ActionObj *func_00110880();
+
+ActionObj *func_001175F8(s32 a, s32 b, s32 c) {
+    ActionObj *obj = func_00110880(0x11);
+
+    obj->unk18 = (void *)b;
+    obj->unk4 = a;
+    obj->unk8 = c;
+    return obj;
+}
 
 u32 func_00117648(EvtScaledValue *value) {
     return value->value18;
@@ -137,7 +154,21 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118170);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118210);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118310);
+extern u8 D_0032A6F0[];
+extern void func_00118210();
+
+void func_00118310(void) {
+    u8 *entry;
+    u32 i;
+
+    sdfFirePendingCallback();
+    entry = D_0032A6F0;
+    for (i = 0; i < 8; i++) {
+        func_00118210(entry);
+        entry += 0xA4;
+    }
+    func_001180F8();
+}
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118368);
 
@@ -169,7 +200,21 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_001189A0);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118D70);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118DD8);
+extern u8 *D_003BAA50;
+extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
+
+u32 func_00118DD8(s32 index, s32 arg1, SdfPackedValue *packed) {
+    u32 result;
+
+    if (D_003BAA50[index * 0x38 + 0x24] != 2) {
+        return 0;
+    }
+    result = func_001189A0(index, arg1, packed);
+    if ((result & (packed->flagsAndValue & 0x7FFF)) == 0) {
+        result = 0;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118E38);
 

@@ -22,7 +22,23 @@ u32 func_00116598(UnitObject *obj) {
     return obj->data->value74;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116590", func_001165A8);
+typedef struct ActionObj {
+    u8 unk0[4];   /* 0x0 */
+    s32 unk4;     /* 0x4 */
+    u8 unk8[0x14]; /* 0x8 */
+    s32 unk1C;    /* 0x1C */
+} ActionObj;
+
+extern ActionObj *func_00110880();
+extern void func_00112750();
+
+ActionObj *func_001165A8(s32 a) {
+    ActionObj *obj = func_00110880(9);
+
+    obj->unk4 = a;
+    func_00112750(obj);
+    return obj;
+}
 
 void func_001165F0(void) {
     func_00110928();

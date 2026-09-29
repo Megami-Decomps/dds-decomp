@@ -211,16 +211,16 @@ void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
         D_0037F790.z = z;
         D_0037F790.w = w;
     } else {
-        f32 b0 = D_0037F790.x;
-        f32 b1 = D_0037F790.y;
-        f32 b2 = D_0037F790.z;
-        f32 b3 = D_0037F790.w;
+        f32 previousX = D_0037F790.x;
+        f32 previousY = D_0037F790.y;
+        f32 previousZ = D_0037F790.z;
+        f32 previousW = D_0037F790.w;
         D_00435CD4 |= 0x400;
         D_00438DFA = mode;
-        D_0043E3A0.x = b0;
-        D_0043E3A0.y = b1;
-        D_0043E3A0.z = b2;
-        D_0043E3A0.w = b3;
+        D_0043E3A0.x = previousX;
+        D_0043E3A0.y = previousY;
+        D_0043E3A0.z = previousZ;
+        D_0043E3A0.w = previousW;
         D_0043E3B0.x = x;
         D_0043E3B0.y = y;
         D_0043E3B0.z = z;

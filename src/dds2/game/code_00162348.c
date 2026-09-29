@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff.h"
+#include "pcp_vu0.h"
 
 /* Particle dispatch object; see the matching DDS1 game unit. */
 typedef struct ParObj {
@@ -29,15 +30,54 @@ extern BillDispatch D_003AAB88[];
 
 extern void func_001622D0();
 
-extern void parObjGetMode();
+extern u8 parObjGetMode();
 
 void func_00162348(ParObj *work, u32 value) {
     work->unkF0 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", parObjSetMode);
+void parObjSetMode(u8 *object, u8 mode) {
+    switch (*(u16 *)(object + 0x140)) {
+    case 1:
+    case 5:
+    case 11:
+        object[0x150] = mode;
+        break;
+    case 0:
+    case 2:
+    case 3:
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+    case 10:
+    case 12:
+        object[0x151] = mode;
+        break;
+    }
+    *(u16 *)(object + 0x142) = 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00162348", parObjGetMode);
+u8 parObjGetMode(u8 *object) {
+    switch (*(u16 *)(object + 0x140)) {
+    case 1:
+    case 5:
+    case 11:
+        return object[0x150];
+    case 0:
+    case 2:
+    case 3:
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+    case 10:
+    case 12:
+        return object[0x151];
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
@@ -60,7 +100,9 @@ void func_001628F8(float scale, ParObj *work) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162938);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00162958);
+void func_00162958(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00162968(void) {
     func_001622E8();

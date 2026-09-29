@@ -116,7 +116,43 @@ u32 func_00113CD8(BasicObject *obj) {
     return obj->data->handle;
 }
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_00113CE8);
+typedef struct WorldSubState {
+    u8 unk0[0x10];   /* 0x0 */
+    f32 vec[4];      /* 0x10 */
+} WorldSubState;
+
+typedef struct WorldObj {
+    u8 unk0[4];           /* 0x0 */
+    s32 unk4;             /* 0x4 */
+    u8 unk8[0x10];        /* 0x8 */
+    WorldSubState *state; /* 0x18 */
+    s32 unk1C;            /* 0x1C */
+} WorldObj;
+
+extern WorldObj *func_00110880();
+extern void func_00112750();
+extern void effObjSetInnerFirstVec();
+extern void effObjSetInnerSecondVec();
+extern void effObjInnerVecBackup();
+
+WorldObj *func_00113CE8(s32 a, f32 *vec, void *second) {
+    f32 zero[4];
+    WorldObj *obj;
+
+    memset(zero, 0, 0x10);
+    zero[3] = 1.0f;
+    obj = func_00110880(6);
+    obj->unk4 = a;
+    func_00112750(obj);
+    effObjSetInnerSecondVec(obj, second);
+    effObjSetInnerFirstVec(obj, zero);
+    effObjInnerVecBackup(obj->unk1C);
+    obj->state->vec[0] = vec[0];
+    obj->state->vec[1] = vec[1];
+    obj->state->vec[2] = vec[2];
+    obj->state->vec[3] = vec[3];
+    return obj;
+}
 
 void func_00113DA8(void) {
     func_00110928();
@@ -180,7 +216,21 @@ void func_001143B0(u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_001143D8);
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_00114508);
+extern void effObjInnerCreate();
+extern void *func_002CFEB8(s32 size);
+extern u32 func_001117A8();
+
+s32 func_00114508(BasicObject *obj) {
+    BasicObjectData *data;
+
+    effObjInnerCreate(obj);
+    obj->data = func_002CFEB8(0x50);
+    memset(obj->data, 0, 0x50);
+    data = obj->data;
+    data->handle = func_001117A8(obj);
+    dds3SetObjectFlags(obj, 0x60);
+    return 1;
+}
 
 INCLUDE_SDATA(const s32, "game/code_001130E0", D_003BA9D0);
 

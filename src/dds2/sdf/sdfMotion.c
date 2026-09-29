@@ -2,11 +2,11 @@
 #include "pcp_vu0.h"
 
 typedef struct VTab {
-    void (*fn)(void);
+    void (*invoke)(void);
 } VTab;
 
 typedef struct VObj {
-    VTab *unk0;
+    VTab *vtable;
 } VObj;
 
 typedef struct {
@@ -207,8 +207,8 @@ Blk *sdfEnsurePrimaryTextSubParam(void *a0);
 
 Blk *sdfEnsureSecondaryTextSubParam(void *a0);
 
-void func_003340A8(VObj *a0) {
-    a0->unk0->fn();
+void func_003340A8(VObj *object) {
+    object->vtable->invoke();
 }
 
 void func_003340D0(Pair *a0, void *a1, void *a2) {
@@ -285,8 +285,8 @@ void func_003348D8(KeyOut *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 func_00334900(void *a0, s32 a1) {
-    return D_0040B368[(u16)a1](a0, a1);
+s32 func_00334900(void *object, s32 selector) {
+    return D_0040B368[(u16)selector](object, selector);
 }
 
 void func_00334930(void *tmp, void *src, void *tbl, s32 x) {

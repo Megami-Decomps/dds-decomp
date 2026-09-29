@@ -238,17 +238,17 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_001378E8);
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001379C0);
 
 void func_00137B60(void) {
-    u8 *temp_v0 = func_003292A8(0x72000);
+    u8 *buffer = func_003292A8(0x72000);
 
-    D_00436190 = (u32)temp_v0;
-    temp_v0 = sdfResourceRetainAddress(temp_v0);
-    D_00436180 = (u32)temp_v0;
-    memset(temp_v0, 0, 0x72000);
-    temp_v0 = func_003292A8(0x4A00);
-    D_0043618C = (u32)temp_v0;
-    temp_v0 = sdfResourceRetainAddress(temp_v0);
-    D_00436178 = (u32)temp_v0;
-    memset(temp_v0, 0, 0x4A00);
+    D_00436190 = (u32)buffer;
+    buffer = sdfResourceRetainAddress(buffer);
+    D_00436180 = (u32)buffer;
+    memset(buffer, 0, 0x72000);
+    buffer = func_003292A8(0x4A00);
+    D_0043618C = (u32)buffer;
+    buffer = sdfResourceRetainAddress(buffer);
+    D_00436178 = (u32)buffer;
+    memset(buffer, 0, 0x4A00);
 }
 
 void func_00137BC8(void) {

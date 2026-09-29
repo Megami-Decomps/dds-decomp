@@ -254,7 +254,7 @@ typedef struct BattleGroupSlot {
     s32 unk_0;
     s32 unk_4;
     s32 unk_8;
-    s32 unk_C;
+    s32 resourceHandle;
 } BattleGroupSlot;
 
 typedef struct BattleGroupNode {
@@ -265,9 +265,9 @@ typedef struct BattleGroupNode {
     u8 flag;
     u8 unk_0D[3];
     s32 unk_10;
-    s32 unk_14;
+    s32 resourceList;
     s32 unk_18;
-    s32 unk_1C;
+    s32 ownedResource;
     BattleGroupSlot slots[8];
     s32 unk_A0;
     s32 unk_A4;
@@ -1604,15 +1604,15 @@ void battleCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s3
     node->next = head;
     node->group = group;
     node->type = type;
-    node->unk_14 = arg3;
+    node->resourceList = arg3;
     node->unk_18 = arg4;
-    node->unk_1C = arg5;
+    node->ownedResource = arg5;
     node->prev = NULL;
     node->unk_10 = 0;
     for (i = 0; i != 8; i++) {
         node->slots[i].unk_0 = 0;
         node->slots[i].unk_8 = 0;
-        node->slots[i].unk_C = 0;
+        node->slots[i].resourceHandle = 0;
     }
     node->flag = flag & 1;
     node->unk_A0 = 0;
@@ -1648,11 +1648,11 @@ void battleDestroyGroupNode(BattleGroupNode *node) {
         } while (node->unk_10 != 0);
     }
     if (flag != 0) {
-        sdfResourceListRelease((void *)node->unk_14, 1);
-        func_003298C0((void *)node->unk_1C);
+        sdfResourceListRelease((void *)node->resourceList, 1);
+        func_003298C0((void *)node->ownedResource);
         for (i = 0; i != 8; i++) {
-            if (node->slots[i].unk_C != 0) {
-                func_003297C8(node->slots[i].unk_C);
+            if (node->slots[i].resourceHandle != 0) {
+                func_003297C8(node->slots[i].resourceHandle);
             }
         }
     }

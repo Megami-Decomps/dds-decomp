@@ -283,7 +283,8 @@ void sdfVuCross3(void *dst, void *src1, void *src2) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_00336CA0(void *arg0, void *arg1, void *arg2) {
+/* Build a VU basis from the normalized target-origin direction and up vector. */
+void func_00336CA0(void *target, void *origin, void *up) {
     __asm__ volatile (
         ".set noreorder             \n"
         "lqc2 vf10, 0x0(%1)         \n"
@@ -317,7 +318,7 @@ void func_00336CA0(void *arg0, void *arg1, void *arg2) {
         "vopmsub.xyz vf10, vf11, vf10 \n"
         "vmove.xyzw vf29, vf10 \n"
         ".set reorder"
-        : : "r"(arg0), "r"(arg1), "r"(arg2) : "memory");
+        : : "r"(target), "r"(origin), "r"(up) : "memory");
     func_003363D0();
 }
 

@@ -1139,19 +1139,19 @@ void func_0012DDC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_0019C5B0(temp_v0);
 }
 
-void func_0012DE10(s32 arg0) {
-    *(s32 *)(arg0 + 0x20) = *(s32 *)(arg0 + 0x20) + 0x60;
+void func_0012DE10(FldQuadState *quad) {
+    quad->unk20 = quad->unk20 + 0x60;
 }
 
-void func_0012DE20(s32 arg0) {
+void func_0012DE20(FldQuadState *quad) {
     u64 temp_v0;
     u32 temp_v1;
 
     temp_v1 = func_0011F218();
-    *(u32 *)(arg0 + 0x28) = temp_v1;
+    quad->unk28 = temp_v1;
     temp_v0 = sdfAllocPacketAligned(0x40);
     func_0032E4B8(temp_v0);
-    sdfAppendPacket(*(s32 *)(arg0 + 0x28), temp_v0);
+    sdfAppendPacket(quad->unk28, temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DE70);
@@ -1170,10 +1170,10 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg2));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380748.invoke(&D_00380748, quad.unk28);
 }
 
@@ -1191,10 +1191,10 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, arg2);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg3));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380708.invoke(&D_00380708, quad.unk28);
 }
 
@@ -1212,10 +1212,10 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, D_00436070, arg2));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380708.invoke(&D_00380708, quad.unk28);
 }
 
@@ -1233,10 +1233,10 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, D_00436078, arg2));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380708.invoke(&D_00380708, quad.unk28);
 }
 
@@ -1254,10 +1254,10 @@ void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg2));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380708.invoke(&D_00380708, quad.unk28);
 }
 
@@ -1275,10 +1275,10 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, arg2);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg3));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380708.invoke(&D_00380708, quad.unk28);
 }
 
@@ -1296,10 +1296,10 @@ void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    func_0012DE20((s32)&quad);
+    func_0012DE20(&quad);
     sdfPktInit(packet, quad.unk1C + (s32)(x * 16.0f), quad.unk20 + (s32)(y * 8.0f), quad.unk24, arg0);
     sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg1));
-    func_0012DE10((s32)&quad);
+    func_0012DE10(&quad);
     D_00380708.invoke(&D_00380708, quad.unk28);
 }
 

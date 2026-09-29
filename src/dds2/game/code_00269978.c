@@ -12,10 +12,37 @@ extern void func_0026C900(void);
 
 extern void func_002686F0(s32);
 
+typedef struct EventMenuSelection {
+    u8 pad00[0x60];
+    s32 entryIndex; /* 0x60 */
+} EventMenuSelection;
+
+typedef struct EventMenuOwner {
+    u8 pad00[0x1C];
+    EventMenuSelection *selection; /* 0x1C */
+    s32 state; /* 0x20 */
+} EventMenuOwner;
+
 typedef struct EventDispatchState {
-    u8 pad0[0xCC];
-    u32 callback;
-    u32 previousCallback;
+    u8 pad00[8];
+    u8 dispatchWork[0x4C]; /* 0x08 */
+    s32 dispatchStatus; /* 0x54 */
+    u32 dispatchValue; /* 0x58 */
+    u8 pad5C[0x1C];
+    void *visualState; /* 0x78 */
+    u8 pad7C[4];
+    EventMenuOwner *menuOwner; /* 0x80 */
+    s32 menuMode; /* 0x84 */
+    u8 pad88[8];
+    s32 displayMode; /* 0x90 */
+    u8 pad94[0x0C];
+    s32 fadeStarted; /* 0xA0 */
+    u8 padA4[0x28];
+    u32 callback; /* 0xCC */
+    u32 previousCallback; /* 0xD0 */
+    s32 exitState; /* 0xD4 */
+    u8 padD8[0x74];
+    s32 stage; /* 0x14C */
 } EventDispatchState;
 
 extern s32 fldClassifyRemainingFrames(s32);
@@ -258,20 +285,20 @@ extern char D_003CE848[];
 extern void func_002680E0(s32);
 
 s64 func_0026ABB0(u64 request) {
-    s32 state = func_00101958();
-    s32 *dispatch = (s32 *)(state + 0x54);
-    s64 result = func_002C4038(state + 8, dispatch, 0, request);
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
+    s32 *dispatch = &state->dispatchStatus;
+    s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
     if (result == 0) {
         if (kwlnFadeIsActive() == 0) {
-            if (*(s32 *)(state + 0xA0) == 0) {
-                *(s32 *)(state + 0xA0) = 1;
+            if (state->fadeStarted == 0) {
+                state->fadeStarted = 1;
                 func_00286F90();
             }
-            if (*dispatch == 0 && *(s32 *)(state + 0xA0) == 1 &&
+            if (*dispatch == 0 && state->fadeStarted == 1 &&
                 func_00286FD8() == 0) {
                 if (func_0032CD98() != 0) return 0;
-                func_002680E0(state);
-                *(s32 *)(state + 0xA0) = 0;
+                func_002680E0((s32)state);
+                state->fadeStarted = 0;
                 func_002C42C0(dispatch, D_003CE848);
             }
         }
@@ -358,21 +385,21 @@ u32 func_0026AF68(void) {
     return 1;
 }
 
-s64 func_0026AFE0(u64 arg0) {
-    s32 temp_v0;
-    s64 temp_v1;
-    s32 *piVar3;
+s64 func_0026AFE0(u64 request) {
+    EventDispatchState *state;
+    s64 result;
+    s32 *dispatch;
 
-    temp_v0 = func_00101958();
-    piVar3 = (s32 *)(temp_v0 + 0x54);
-    temp_v1 = func_002C4038(temp_v0 + 8, piVar3, 0, arg0);
-    if (temp_v1 == 0) {
-        if ((*piVar3 == 0) && (temp_v1 = func_0026C768(), temp_v1 == 0)) {
-            func_002C42B0(piVar3, *(u32 *)(temp_v0 + 0x58));
+    state = (EventDispatchState *)func_00101958();
+    dispatch = &state->dispatchStatus;
+    result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+    if (result == 0) {
+        if ((*dispatch == 0) && (result = func_0026C768(), result == 0)) {
+            func_002C42B0(dispatch, state->dispatchValue);
         }
-        temp_v1 = 0;
+        result = 0;
     }
-    return temp_v1;
+    return result;
 }
 
 void func_0026B068(s32 item) {

@@ -2,12 +2,12 @@
 
 /* Event unit/work object shared by the setup helpers below and the
  * script opcodes. Field layout matches event/evtUnitManager's EvtUnit
- * where they overlap (unk6C, flags, unkBC). */
+ * where they overlap (value, flags, unkBC). */
 typedef struct EvtUnit {
     u8 pad00[0x04];     /* 0x00 */
-    s32 unk04;          /* 0x04 */
+    s32 objectId;       /* 0x04: returned to event scripts */
     u8 pad08[0x64];     /* 0x08 */
-    u32 unk6C;          /* 0x6C */
+    u32 value;          /* 0x6C: matches evtUnitManager */
     s128 unk70;          /* 0x70: 16-byte vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
     u32 *flagWord;       /* 0x8C: status opcodes update its first bit */
@@ -123,14 +123,19 @@ extern void func_00221FF8(EvtUnit *unit, s32 arg1);
 extern void func_00221C50(EvtUnit *unit, s32 arg1);
 extern void func_00222310(u32 arg0);
 
+typedef struct EvtWorldUnitRef {
+    u8 pad00[0x18];
+    s128 *transform; /* 0x18: first aligned vector */
+} EvtWorldUnitRef;
+
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222AC0);
 
 void func_00222B00(EvtUnit *work, s32 objectId, s32 arg2) {
-    void *worldUnit;
+    EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222AC0(work, (s128 *)(*(u32 *)((u8 *)worldUnit + 0x18) + 0x10), arg2);
+        func_00222AC0(work, worldUnit->transform + 1, arg2);
         work->linkedUnit = worldUnit;
     }
 }
@@ -138,11 +143,11 @@ void func_00222B00(EvtUnit *work, s32 objectId, s32 arg2) {
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222B70);
 
 void func_00222BA8(EvtUnit *work, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    void *worldUnit;
+    EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222B70(work, arg1, (s128 *)(*(u32 *)((u8 *)worldUnit + 0x18)), arg3, arg4, arg5, arg6, arg7);
+        func_00222B70(work, arg1, worldUnit->transform, arg3, arg4, arg5, arg6, arg7);
         work->unkAE = 1;
         work->linkedUnit = worldUnit;
     }
@@ -192,7 +197,7 @@ u32 func_00223AE0(void) {
     obj = func_00110A38(ctx);
     value = -1;
     if (obj != NULL) {
-        value = obj->unk04;
+        value = obj->objectId;
     }
     func_0010D5F0(value);
     return 1;
@@ -635,24 +640,24 @@ u32 func_00224B98(void) {
     return 1;
 }
 
-f32 func_00224C08(f32 a, f32 b) {
-    f32 diff;
+f32 func_00224C08(f32 fromDegrees, f32 toDegrees) {
+    f32 difference;
 
-    if (a < 0.0f || b < 0.0f) {
-        a += 360.0f;
-        b += 360.0f;
+    if (fromDegrees < 0.0f || toDegrees < 0.0f) {
+        fromDegrees += 360.0f;
+        toDegrees += 360.0f;
     }
-    a = (s32)a % 360;
-    b = (s32)b % 360;
-    diff = a - b;
-    if (diff > 180.0f || diff < -180.0f) {
-        if (a < b) {
-            a += 360.0f;
+    fromDegrees = (s32)fromDegrees % 360;
+    toDegrees = (s32)toDegrees % 360;
+    difference = fromDegrees - toDegrees;
+    if (difference > 180.0f || difference < -180.0f) {
+        if (fromDegrees < toDegrees) {
+            fromDegrees += 360.0f;
         } else {
-            b += 360.0f;
+            toDegrees += 360.0f;
         }
     }
-    return b - a;
+    return toDegrees - fromDegrees;
 }
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224CD8);
@@ -771,7 +776,7 @@ u32 func_00225708(void) {
         func_0010D5F0(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->unk04);
+        func_0010D5F0(unit->objectId);
     }
     return 1;
 }
@@ -793,7 +798,7 @@ u32 func_002257C0(void) {
         func_0010D5F0(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->unk04);
+        func_0010D5F0(unit->objectId);
     }
     return 1;
 }
@@ -870,7 +875,7 @@ u32 func_00225B10(void) {
         func_0010D5F0(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->unk04);
+        func_0010D5F0(unit->objectId);
     }
     return 1;
 }
@@ -893,7 +898,7 @@ u32 func_00225C48(void) {
         func_0010D5F0(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->unk04);
+        func_0010D5F0(unit->objectId);
     }
     return 1;
 }

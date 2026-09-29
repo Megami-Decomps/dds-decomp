@@ -101,9 +101,23 @@ typedef struct TextVector {
     s32 w;
 } TextVector;
 
+typedef struct TextDrawArgs {
+    s32 x;         /* 0x00 */
+    s32 y;         /* 0x04 */
+    s32 z;         /* 0x08 */
+    u8 color[4];   /* 0x0C */
+    s32 unk10;     /* 0x10 */
+    s32 unk14;     /* 0x14 */
+    s32 unk18;     /* 0x18 */
+    u8 unk1C;      /* 0x1C */
+    u8 unk1D;      /* 0x1D */
+} TextDrawArgs;
+
 extern u32 D_003BB15C;
 extern u32 D_003D6E20[];
 extern Unk6C84Rec D_003D6C84[];
+extern s32 D_003BAA98;
+extern s32 D_003BAA9C;
 s32 func_00196B30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
 u32 func_00196478(TextStream *stream) {
@@ -171,7 +185,23 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00196ED0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197190);
+void func_00197190(s32 arg0, s32 arg1) {
+    TextDrawArgs args;
+
+    args.x = 0;
+    args.y = 0;
+    args.z = 0;
+    args.color[0] = 0;
+    args.color[1] = 0;
+    args.color[2] = 0;
+    args.color[3] = 0;
+    args.unk10 = arg0;
+    args.unk14 = arg1;
+    args.unk18 = 0;
+    args.unk1C = 1;
+    args.unk1D = 1;
+    func_00197068(&args);
+}
 
 u16 func_001971E0(s32 arg0) {
     return D_003D6C84[arg0].unk0->unk10;
@@ -247,7 +277,19 @@ void func_001974B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197580);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197708);
+s32 func_00197708(arg0, arg1, arg2, arg3, arg4, arg5)
+s32 arg0;
+s32 arg1;
+s32 arg2;
+s32 arg3;
+s32 arg4;
+s32 arg5;
+{
+    s32 handle = func_00197580(arg0, arg1, arg2, arg3, arg4, 1, 0, arg5);
+
+    func_001953A8(handle, 3);
+    return handle;
+}
 
 void func_00197748(void) {
     func_00197708();
@@ -276,7 +318,21 @@ void func_00197B78(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197C40);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197E08);
+s32 func_00197E08(s32 arg0, s32 arg1, s32 arg2, s8 arg3, u16 arg4, s32 arg5) {
+    s32 result = 0;
+
+    func_00197220(0x13);
+    switch (arg3) {
+    case 0:
+        result = func_00197C40(arg0, arg1, arg2, arg4, D_003BAA98, arg5);
+        break;
+    case 1:
+        result = func_00197C40(arg0, arg1, arg2, arg4, D_003BAA9C, arg5);
+        break;
+    }
+    func_00197220(-1);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197EC8);
 
@@ -361,7 +417,26 @@ void func_00198308(void) {
     func_002D2CB8(D_003BD81C);
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198320);
+void func_00198320(void) {
+    s32 origin[4];
+    s32 color[4];
+    u8 *panel = (u8 *)D_003BD81C;
+
+    if (panel != NULL) {
+        s32 x = *(s16 *)(panel + 0xC);
+        s32 y = *(s16 *)(panel + 0xE);
+
+        origin[0] = 0;
+        origin[1] = 0;
+        origin[2] = x;
+        origin[3] = y;
+        color[0] = 0x80808080;
+        color[1] = 0x80808080;
+        color[2] = 0x80808080;
+        color[3] = 0x80808080;
+        func_002BE4B8(0, 0, 0, x << 4, y << 3, origin, color, 0, 0, 1, panel, 0x52);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001983A8);
 
@@ -537,6 +612,8 @@ extern u32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void func_002E1428(u64, s32, s32, s32, s32);
 extern u64 *func_002E1420(u64);
 extern void sdfAppendPacket(u64, u64);
+extern u64 *func_002E13E0(u64, s32);
+extern u64 D_00357998[];
 
 typedef struct DrawVertex {
     s32 x;
@@ -614,9 +691,23 @@ void func_00199318(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, 
     sdfAppendPacket(command, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00199460);
+void func_00199460(u64 command, u64 value, s32 flag) {
+    u64 packet = sdfAllocPacketAligned(0x30);
+    u64 *dst = func_002E13E0(packet, 0x30);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_001994D8);
+    dst[4] = value;
+    dst[5] = flag ? 0x48 : 0x47;
+    sdfAppendPacket(command, packet);
+}
+
+void func_001994D8(u64 command, s32 index, s32 flag) {
+    u64 packet = sdfAllocPacketAligned(0x30);
+    u64 *dst = func_002E13E0(packet, 0x30);
+
+    dst[4] = D_00357998[index];
+    dst[5] = flag ? 0x43 : 0x42;
+    sdfAppendPacket(command, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00199560);
 

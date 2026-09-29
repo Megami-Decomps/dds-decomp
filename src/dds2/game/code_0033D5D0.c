@@ -355,9 +355,18 @@ char *func_0033EC18(void) {
     return D_0040B9D0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EC28);
+extern s8 D_00438AE0;
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EC40);
+void func_0033EC28(s8 value) {
+    D_00438AE0 = value;
+    func_0033EC40();
+}
+
+extern s8 D_00438B1E;
+
+void func_0033EC40(s8 value) {
+    D_00438B1E = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EC48);
 

@@ -38,7 +38,7 @@ void func_0021FE38(void);
 s32 func_00220340(void *arg0, void *arg1);
 f32 func_0010D4F0(s32 idx);
 void func_00220298(s32 arg0, f32 arg1);
-s32 func_0014DB78(void);
+s32 func_0014DB78(char *name);
 s32 func_00121650(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern u32 D_0032E3B0[];
 extern u32 D_003BA904;
@@ -57,7 +57,7 @@ extern char D_003AC978[];
 extern char D_003AC988[]; /* "del BE (%d)..\n" */
 extern char D_003ACA40[]; /* "LIGHT_PATH_MOVE error!\n" */
 extern char D_003ACA58[]; /* "error: LIGHT_PATH_MOVE.\n" */
-void func_002E4C28(const char *msg);
+void func_002E4C28(const char *msg, ...);
 void func_00241F78(s32 arg0, s32 arg1);
 extern s32 D_0032E3C0[];
 void func_0012C6C8(u32 arg0, s32 arg1);
@@ -67,6 +67,10 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_002260C0);
 
 extern char D_003AC700[];
 extern char D_003AC728[];
+extern char D_003AC9F8[];
+extern char D_003AC998[];
+extern char D_003AC9E0[];
+extern char D_003AC958[];
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226180);
 
 s32 func_002262A0(void)
@@ -103,7 +107,25 @@ s32 func_002262F8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00226388);
+s32 func_00226388(void) {
+    void *path = func_00223AA0(7, func_0010D428(0));
+    s32 found;
+    s32 i;
+
+    if (path == NULL) {
+        return 1;
+    }
+    i = 4;
+    do {
+        found = (s32)func_00223AA0(i, func_0010D428(1));
+        i++;
+    } while (i < 10 && found == 0);
+    if (found == 0) {
+        return 1;
+    }
+    func_00115C80(path, found, func_0010D428(2));
+    return 1;
+}
 
 s32 func_00226430(void)
 {
@@ -444,11 +466,47 @@ s32 func_00227050(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227090);
+s32 func_00227090(void) {
+    void *unit;
+    f32 vec[4];
+
+    memset(vec, 0, sizeof(vec));
+    if (func_0010D428(0) < 0) {
+        unit = (void *)func_00123DE0();
+    } else {
+        unit = func_00223AA0(4, func_0010D428(0));
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    vec[0] = func_0010D4F0(1);
+    vec[1] = func_0010D4F0(2);
+    vec[2] = func_0010D4F0(3);
+    effObjSetInnerFirstVec(unit, vec);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227138);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227210);
+s32 func_00227210(void) {
+    void *unit;
+    f32 vec[4];
+
+    if (func_0010D428(0) < 0) {
+        unit = (void *)func_00123DE0();
+    } else {
+        unit = func_00223AA0(4, func_0010D428(0));
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    vec[0] = func_0010D4F0(1);
+    vec[1] = func_0010D4F0(2);
+    vec[2] = func_0010D4F0(3);
+    vec[3] = func_0010D4F0(4);
+    effObjSetInnerSecondVec(unit, vec);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002272B0);
 
@@ -492,7 +550,29 @@ s32 func_00227798(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002277C0);
+s32 func_002277C0(void) {
+    s32 id = func_0010D428(0);
+    u8 *work = (u8 *)func_0010D6A0();
+    char *msg;
+
+    if (work == NULL) {
+        return 1;
+    }
+    if (evtFindTaskById(id) == 0) {
+        msg = D_003AC958;
+        func_0010AC10(msg, id);
+        func_002E4C28(msg, id);
+        func_00101A80(*(s32 *)(work + 0xE4), mnuCampCreateTask(id));
+        return 0;
+    }
+    if (func_00241B80(id) == 2) {
+        msg = D_003AC968;
+        func_0010AC10(msg, id);
+        func_002E4C28(msg, id);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC968);
 
@@ -541,7 +621,28 @@ s32 func_002279A0(void) {
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC998);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227A00);
+s32 func_00227A00(void) {
+    u8 *work = (u8 *)func_0010D6A0();
+    s32 a;
+    s32 b;
+    s32 result;
+
+    if (work == NULL) {
+        return 1;
+    }
+    if (*(s32 *)(work + 0xE4) == 0) {
+        func_003003F0(D_003AC998);
+        return 1;
+    }
+    a = func_0010D428(0);
+    b = func_0010D428(1);
+    result = func_00234F18(*(s32 *)(*(u8 **)(work + 0xE4) + 0x20), a, b);
+    func_0010AC10(D_003AC9E0, func_0010D428(0), func_0010D428(1));
+    func_00101A80(*(s32 *)(work + 0xE4), result);
+    evtPolygonMovieSetFlagBits(result, 1);
+    func_0010D5F0(result);
+    return 1;
+}
 
 s32 func_00227AD8(void)
 {
@@ -553,7 +654,26 @@ s32 func_00227AD8(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227B18);
+s32 func_00227B18(void) {
+    u8 *work = (u8 *)func_0010D6A0();
+    s32 a;
+    s32 b;
+    s32 result;
+
+    if (work == NULL) {
+        return 1;
+    }
+    if (*(s32 *)(work + 0xE4) == 0) {
+        func_003003F0(D_003AC9F8);
+        return 1;
+    }
+    a = func_0010D428(0);
+    b = func_0010D428(1);
+    result = func_00234F18(*(s32 *)(*(u8 **)(work + 0xE4) + 0x20), a, b);
+    func_00101A80(*(s32 *)(work + 0xE4), result);
+    func_0010D5F0(result);
+    return 1;
+}
 
 s32 func_00227BB8(void) {
     s32 found;
@@ -591,7 +711,37 @@ s32 func_00227C38(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227CB8);
+s32 func_00227CB8(void) {
+    u8 *unit;
+    s32 count;
+    char *owner;
+    s32 i = 4;
+
+    do {
+        unit = (u8 *)func_00223AA0(i, func_0010D428(0));
+        i++;
+    } while (i < 10 && unit == NULL);
+    if (unit == NULL) {
+        unit = (u8 *)func_00126200(func_0010D428(0));
+        if (unit == NULL) {
+            return 1;
+        }
+    }
+    func_00220298(unit, func_0010D4F0(1));
+    owner = *(char **)(unit + 8);
+    if (owner == 0) {
+        return 1;
+    }
+    count = func_0014DB78(owner);
+    if (count > 0) {
+        if (func_0010D4F0(1) > 0.5f) {
+            func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 1);
+        } else {
+            func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 0);
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227DD0);
 

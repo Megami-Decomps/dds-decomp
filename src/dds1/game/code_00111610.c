@@ -14,7 +14,37 @@ typedef struct {
 
 extern u32 func_00116D38(u32);
 
-INCLUDE_ASM(const s32, "game/code_00111610", func_00111610);
+typedef struct {
+    u8 unk0[4];        /* 0x0 */
+    u32 unk4;          /* 0x4 */
+    void *unk8;        /* 0x8 */
+    u8 unkC[0xC];      /* 0xC */
+    SlotData *data;    /* 0x18 */
+} SlotObjectFull;
+
+typedef struct {
+    u8 unk0[0x10];
+} SlotEntry;
+
+extern SlotObjectFull *func_00110880();
+extern u32 func_0010FA80();
+extern SlotEntry D_00329A68[];
+extern s32 D_003BA9C0;
+
+SlotObjectFull *func_00111610(u32 arg0) {
+    SlotObjectFull *obj = func_00110880(3);
+    SlotData *data = obj->data;
+    u32 hash = func_0010FA80();
+    s32 slot;
+
+    data->unk0 = arg0;
+    slot = D_003BA9C0;
+    obj->unk4 = hash;
+    obj->unk8 = &D_00329A68[slot];
+    D_003BA9C0 = slot + 1;
+    D_003BA9C0 = D_003BA9C0 % 10;
+    return obj;
+}
 
 void dds3SetSlotValue(SlotObject *obj, u32 value) {
     obj->data->value = value;

@@ -159,7 +159,7 @@ extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 
 extern f32 func_001248E8();
 
-extern void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep);
+extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
 extern u8 D_0037F530[];
 
@@ -333,45 +333,46 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F3D8);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F518);
 
-void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep) {
+/* Press edge (0x80) wraps at the bounds; held input (0x02) clamps there. */
+void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep) {
     f32 v = *value;
 
-    if ((s8)pad[5] & 0x80) {
+    if ((s8)padState[5] & 0x80) {
         v += bigStep;
         if (max < v) {
             v = min;
         }
-    } else if (pad[5] & 2) {
+    } else if (padState[5] & 2) {
         v += bigStep;
         if (max < v) {
             v = max;
         }
-    } else if ((s8)pad[4] & 0x80) {
+    } else if ((s8)padState[4] & 0x80) {
         v -= bigStep;
         if (v < min) {
             v = max;
         }
-    } else if (pad[4] & 2) {
+    } else if (padState[4] & 2) {
         v -= bigStep;
         if (v < min) {
             v = min;
         }
-    } else if ((s8)pad[7] & 0x80) {
+    } else if ((s8)padState[7] & 0x80) {
         v += step;
         if (max < v) {
             v = min;
         }
-    } else if (pad[7] & 2) {
+    } else if (padState[7] & 2) {
         v += step;
         if (max < v) {
             v = max;
         }
-    } else if ((s8)pad[6] & 0x80) {
+    } else if ((s8)padState[6] & 0x80) {
         v -= step;
         if (v < min) {
             v = max;
         }
-    } else if (pad[6] & 2) {
+    } else if (padState[6] & 2) {
         v -= step;
         if (v < min) {
             v = min;
