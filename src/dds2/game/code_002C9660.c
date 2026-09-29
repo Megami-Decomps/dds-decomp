@@ -157,6 +157,8 @@ typedef struct LoadCtx374A0 {
     u8 unk10;   /* 0x10 */
     u8 pad11[3]; /* 0x11 */
     u32 unk14;  /* 0x14 */
+    u32 unk18;  /* 0x18 */
+    u32 unk1C;  /* 0x1C */
 } LoadCtx374A0;
 
 extern LoadCtx374A0 D_003E7FD8;
@@ -408,7 +410,7 @@ extern void *fileBeginSlotReset(void);
 
 extern s32 D_00437D30;
 
-extern s32 fileBeginPromptDialog(void *arg0, void *arg1, s32 arg2);
+extern s32 fileBeginPromptDialog(void *start, void *finish, s32 mode);
 
 extern void *fileBeginDirectoryScan(void);
 
@@ -1648,6 +1650,9 @@ INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B868);
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CFF38);
 
 void fileLoadSetMode(s8 mode) {
+    /* Raw stores on purpose: writing these through D_003E7FD8's fields tips
+       fileAcquireRecord's CSE in the full unit (check_unit reports CONTEXT),
+       so the pointer form is what the build needs here. */
     u8 *p = (u8 *)&D_003E7FD8;
 
     *(u32 *)(p + 0x14) = 0;
@@ -2555,21 +2560,39 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5EC0);
 
 extern void *func_00328E18(s32);
 
-void *func_002D5FB8(s32 arg0) {
-    u8 *p = (u8 *)func_00328E18(0x54);
+/* 0x54-byte loader record: same head as LoadObj (owner/colour/scale) but with a
+   u16 tail at 0x50, so it is a separate type rather than DDS2's 0x50 LoadObj. */
+typedef struct LoaderRecord {
+    s32 owner;   /* 0x00 */
+    u32 color;   /* 0x04 */
+    f32 scale;   /* 0x08 */
+    u8 pad0C[0x28];
+    s32 unk34;   /* 0x34 */
+    s32 unk38;   /* 0x38 */
+    s32 unk3C;   /* 0x3C */
+    s32 unk40;   /* 0x40 */
+    s32 unk44;   /* 0x44 */
+    u8 pad48[4];
+    s32 unk4C;   /* 0x4C */
+    u16 unk50;   /* 0x50 */
+    u8 pad52[2];
+} LoaderRecord;
+
+void *func_002D5FB8(s32 owner) {
+    LoaderRecord *rec = (LoaderRecord *)func_00328E18(0x54);
     u32 color = 0x80808080;
 
-    *(u32 *)(p + 0x0) = arg0;
-    *(u16 *)(p + 0x50) = 1;
-    *(u32 *)(p + 0x4) = color;
-    *(f32 *)(p + 0x8) = 1.0f;
-    *(u32 *)(p + 0x34) = 0;
-    *(u32 *)(p + 0x38) = 0;
-    *(u32 *)(p + 0x3C) = 0;
-    *(u32 *)(p + 0x40) = 0;
-    *(u32 *)(p + 0x44) = 0;
-    *(u32 *)(p + 0x4C) = 0;
-    return p;
+    rec->owner = owner;
+    rec->unk50 = 1;
+    rec->color = color;
+    rec->scale = 1.0f;
+    rec->unk34 = 0;
+    rec->unk38 = 0;
+    rec->unk3C = 0;
+    rec->unk40 = 0;
+    rec->unk44 = 0;
+    rec->unk4C = 0;
+    return rec;
 }
 
 /* DDS2 loader work has a longer prefix than the DDS1 LoadObj. */

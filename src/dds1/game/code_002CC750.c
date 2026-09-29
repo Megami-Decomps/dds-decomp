@@ -447,19 +447,19 @@ s32 scrFindSlot(u8 *work, u16 key) {
     return -1;
 }
 
-u16 scrGetSlot(u8 *work, u32 index) {
+u16 scrGetSlot(PtyProfileUnit *unit, u32 index) {
     if (index >= 24) {
         return 0;
     }
-    return ((PtyProfileUnit *)work)->skills[index];
+    return unit->skills[index];
 }
 
-u32 scrCountSlots(u8 *work) {
-    u16 *entries = ((PtyProfileUnit *)work)->skills;
+u32 scrCountSlots(PtyProfileUnit *unit) {
     u32 count = 0;
     u32 index;
+
     for (index = 0; index < 24; index++) {
-        if (entries[index] != 0) {
+        if (unit->skills[index] != 0) {
             count++;
         }
     }
@@ -467,14 +467,11 @@ u32 scrCountSlots(u8 *work) {
 }
 
 /* Replace a skill slot and return its previous identifier. */
-u16 scrSetSlot(s32 unit, s32 index, u16 skillId) {
-    u16 previousSkillId;
-    u16 *slot;
+u16 scrSetSlot(PtyProfileUnit *unit, s32 index, u16 skill) {
+    u16 previous = unit->skills[index];
 
-    slot = (u16 *)(index * 2 + unit + 0x22);
-    previousSkillId = *slot;
-    *slot = skillId;
-    return previousSkillId;
+    unit->skills[index] = skill;
+    return previous;
 }
 
 s32 scrRemoveSlot(u8 *work, u16 key) {

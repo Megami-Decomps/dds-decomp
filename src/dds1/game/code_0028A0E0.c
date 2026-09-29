@@ -1937,12 +1937,12 @@ void fileManagerResetSubsystems(void) {
     func_003003F0(D_003BC920);
 }
 
-void fileSetRenderFlag(u32 arg0) {
-    D_003BC8F8 = D_003BC8F8 | arg0;
+void fileSetRenderFlag(u32 bits) {
+    D_003BC8F8 |= bits;
 }
 
-void fileClearRenderFlag(u32 arg0) {
-    D_003BC8F8 = D_003BC8F8 & ~arg0;
+void fileClearRenderFlag(u32 bits) {
+    D_003BC8F8 &= ~bits;
 }
 
 void func_00292C40(void) {
