@@ -15,7 +15,7 @@ extern u32 D_004367BC;
 
 extern void func_001C35F0(s32, s32, s32);
 
-extern u32 func_00101958(s64);
+extern u32 func_00101958();
 
 extern void func_00230960(s32);
 
@@ -47,6 +47,12 @@ typedef struct SceneActor {
     u8 pad_130[0x234];
     struct SceneActor *next;
 } SceneActor;
+typedef struct SceneSlot {
+    u8 a;
+    u8 b;
+    u8 c;
+} SceneSlot;
+
 extern SceneInitializer D_003B6938[];
 
 extern u32 func_001B57B0(void);
@@ -201,7 +207,13 @@ INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A10);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA490);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA760);
+extern void func_001BD978(void);
+
+void func_001CA760(void) {
+    func_00328E48(func_00101958());
+    *(s32 *)(func_001AA6F8() + 0x2D0) = 0;
+    func_001BD978();
+}
 
 void fldInitializeSceneObject(u32 *state, u32 owner) {
     memset(state, 0, 0x30);
@@ -393,7 +405,18 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF0B0);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF500);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", btlFindSceneSlotById);
+s32 btlFindSceneSlotById(u8 *request) {
+    u8 *slot = (u8 *)(func_001AA6F8() + 0x2FE);
+    u8 id = request[2];
+    u32 i;
+    for (i = 0; i < 8; i++) {
+        if (slot[2] == id) {
+            return i;
+        }
+        slot += 3;
+    }
+    return -1;
+}
 
 u8 *fldFindSceneSlotRecord(s32 index) {
     u8 *scene = (u8 *)func_001AA6F8();
@@ -405,7 +428,24 @@ u8 *fldFindSceneSlotRecord(s32 index) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", btlFadeStaleSceneSlots);
+s32 btlFadeStaleSceneSlots(void) {
+    u32 i = 0;
+    s32 changed = 0;
+    s32 work = func_001AA6F8();
+    u8 *record = (u8 *)(work + 0x480);
+    u8 *slot = (u8 *)(work + 0x2FE);
+    for (; i < 8; i++, slot += 3, record += 8) {
+        if (record[2] != slot[2]) {
+            if (fldFindSceneSlotRecord(record) == 0) {
+                if (record[3] != 0) {
+                    record[3] = record[3] - 8;
+                    changed = 1;
+                }
+            }
+        }
+    }
+    return changed;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF720);
 
@@ -571,7 +611,13 @@ u32 func_001D2C40(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", btlSetScene);
+void btlSetScene(s32 scene) {
+    s32 work = func_001AA6F8();
+    *(s32 *)(work + 0x22C) = scene;
+    *(s32 *)(work + 0x234) = 0;
+    *(s32 *)(work + 0x238) = 0;
+    D_003B6938[scene].initialize(work);
+}
 
 void func_001D2CD0(u32 arg0) {
     s32 temp_v0;
@@ -580,7 +626,21 @@ void func_001D2CD0(u32 arg0) {
     *(u32 *)(temp_v0 + 0x230) = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", btlUpdateScene);
+void btlUpdateScene(void) {
+    s32 work = func_001AA6F8();
+    s32 next;
+    s32 event;
+    next = *(s32 *)(work + 0x230);
+    if (next != 0) {
+        btlSetScene(next);
+        *(s32 *)(work + 0x230) = 0;
+    }
+    event = D_003B6938[*(s32 *)(work + 0x22C)].update(work);
+    if (event != 0) {
+        func_001D2CD0(event);
+    }
+    *(s32 *)(work + 0x234) = *(s32 *)(work + 0x234) + 1;
+}
 
 void func_001D2D78(void) {
     s32 temp_v0;
@@ -684,7 +744,21 @@ s32 func_001D3098(u8 *object) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D30E0);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D34B8);
+void func_001D34B8(void) {
+    u8 *slot = (u8 *)(func_001AA6F8() + 0x2FE);
+    u32 i;
+    if (slot[1] == 0) {
+        for (i = 0; i < 7; i++) {
+            slot[0] = slot[3];
+            slot[1] = slot[4];
+            slot[2] = slot[5];
+            slot += 3;
+        }
+        slot[0] = 0;
+        slot[1] = 0;
+        slot[2] = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3520);
 
@@ -694,7 +768,22 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D37E8);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3898);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D38F0);
+s32 func_001D38F0(void) {
+    s32 work = func_001AA6F8();
+    u8 *slot;
+    u32 i;
+    if (*(u32 *)(work + 0x218) & 0x1000) {
+        return 1;
+    }
+    slot = (u8 *)(work + 0x2FE);
+    for (i = 0; i < 8; i++) {
+        if (*slot != 0) {
+            return 0;
+        }
+        slot += 3;
+    }
+    return 1;
+}
 
 void func_001D3978(void) {
     s32 temp_v0;
