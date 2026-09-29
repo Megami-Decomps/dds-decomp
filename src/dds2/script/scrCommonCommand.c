@@ -33,8 +33,10 @@ s32 kwlnDrawSetE08Fifth(s32 arg0);
  * parameter order and schedules the last one into the jal delay slot, so
  * retail moves the kind argument ($16) last, in the delay slot. */
 s32 kwlnDrawSetC70FloatTriple(f32 arg0, f32 arg1, s32 arg2);
+s32 kwlnDrawSetD88FloatTriple(f32 arg0, f32 arg1, s32 arg2);
 
 extern char D_004126F0[];
+extern char D_004126B0[];
 
 extern ScrComGlobals *D_00435DD0;
 
@@ -614,7 +616,35 @@ s32 func_0010EA30(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010EA58);
+s32 func_0010EA58(void)
+{
+    s32 mode;
+    s32 sel;
+    f32 first;
+    f32 second;
+
+    mode = func_0010D650(2);
+    switch (mode)
+    {
+    case 1:
+        sel = 0x48;
+        break;
+    case 2:
+        sel = 0x42;
+        break;
+    case 0:
+        sel = 0x44;
+        break;
+    default:
+        func_0010AE38(D_004126B0);
+        sel = 0x44;
+        break;
+    }
+    first = bfWaitReadArgFloat(0);
+    second = bfWaitReadArgFloat(1);
+    kwlnDrawSetD88FloatTriple(first, second, sel);
+    return 1;
+}
 
 s32 func_0010EAF8(void)
 {
@@ -857,6 +887,8 @@ u32 scrCommand_SCR_EXISTS()
     }
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126B0);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126D0);
 
