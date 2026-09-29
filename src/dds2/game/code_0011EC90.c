@@ -8,6 +8,11 @@ extern s32 func_0010D650(s32 idx);
 
 extern s32 func_0010D818(s32 arg0);
 
+typedef struct GlyphOwner {
+    u8 pad00[0x10];
+    u32 glyph;
+} GlyphOwner;
+
 s32 func_0011EC90(void) {
     s32 val = func_0010D650(0);
 
@@ -63,19 +68,19 @@ INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EF50);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EFA0);
 
-void func_0011EFE0(u32 glyphOwner) {
-    func_0019C5B0(*(u32 *)((s32)glyphOwner + 0x10));
-    func_00328E48(glyphOwner);
+void func_0011EFE0(GlyphOwner *owner) {
+    func_0019C5B0(owner->glyph);
+    func_00328E48(owner);
 }
 
-void func_0011F010(s32 glyphOwner) {
-    func_0019D518(*(u32 *)(glyphOwner + 0x10));
+void func_0011F010(GlyphOwner *owner) {
+    func_0019D518(owner->glyph);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011F028);
 
-void func_0011F0C0(s32 glyphOwner, u8 flag) {
-    func_0019D120(*(u32 *)(glyphOwner + 0x10), flag);
+void func_0011F0C0(GlyphOwner *owner, u8 flag) {
+    func_0019D120(owner->glyph, flag);
 }
 
 void func_0011F0E0(void) {

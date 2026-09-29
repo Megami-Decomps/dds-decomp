@@ -6,15 +6,23 @@ typedef struct SdfAllocation {
     u8 pad00[8];
     u32 address;
     u8 pad0C[2];
-    s16 referenceCount;
+    union {
+        s16 referenceCount;
+        u16 unsignedReferenceCount;
+    };
 } SdfAllocation;
+
+typedef struct SdfListNode {
+    struct SdfListNode *previous;
+    struct SdfListNode *next;
+} SdfListNode;
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329600);
 
-void func_003297B0(u8 *node) {
-    u8 *next = *(u8 **)(*(u8 **)(node + 4) + 4);
-    *(u8 **)next = node;
-    *(u8 **)(node + 4) = next;
+void func_003297B0(SdfListNode *node) {
+    SdfListNode *next = node->next->next;
+    next->previous = node;
+    node->next = next;
 }
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_003297C8);
@@ -43,10 +51,10 @@ u32 sdfResourceRetainAddress(SdfAllocation *allocation) {
     allocation->referenceCount = allocation->referenceCount + 1;
     return allocation->address;
 }
-void func_00329910(u8 *work) {
-    u16 value = *(u16 *)(work + 0xE);
+void func_00329910(SdfAllocation *allocation) {
+    u16 value = allocation->unsignedReferenceCount;
     if (value != 0) {
-        *(u16 *)(work + 0xE) = value - 1;
+        allocation->unsignedReferenceCount = value - 1;
     }
 }
 

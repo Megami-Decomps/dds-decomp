@@ -19,6 +19,13 @@ typedef struct FileWork {
     u32 unk24;       /* 0x24 */
 } FileWork;
 
+typedef struct FileRequest {
+    u8 pad00;
+    u8 state; /* 0x01: ready when 6 */
+    u8 pad02[0x66];
+    u16 unk68;
+} FileRequest;
+
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7D00);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7D78);
@@ -34,22 +41,22 @@ INCLUDE_ASM(const s32, "file/fileManager", func_002C7EF8);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7F38);
 
-void func_002C7FF0(u32 arg0) {
-    func_002C7F38(arg0, 0, 0, 0, 0);
+void func_002C7FF0(u32 request) {
+    func_002C7F38(request, 0, 0, 0, 0);
 }
 
-void func_002C8018(u32 arg0) {
-    func_002C7F38(arg0, 1, 0, 0, 0);
+void func_002C8018(u32 request) {
+    func_002C7F38(request, 1, 0, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8040);
 
-void func_002C80C8(u32 arg0) {
-    func_002C8040(arg0, 0, 0, 0);
+void func_002C80C8(u32 request) {
+    func_002C8040(request, 0, 0, 0);
 }
 
-void func_002C80E8(u32 arg0) {
-    func_002C8040(arg0, 1, 0, 0);
+void func_002C80E8(u32 request) {
+    func_002C8040(request, 1, 0, 0);
 }
 
 u32 func_002C8108(FileWork *work) {
@@ -70,18 +77,18 @@ u32 func_002C8120(FileWork *work) {
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8128);
 
-s32 func_002C8168(u8 *file) {
+s32 func_002C8168(FileRequest *file) {
     s32 result = 0;
-    if (*(u16 *)(file + 0x68) != 0) {
-        result = *(u8 *)(file + 1) == 6;
+    if (file->unk68 != 0) {
+        result = file->state == 6;
     }
     return result;
 }
 
-void fileWaitReady(u32 arg0) {
-    s64 temp_v0;
+void fileWaitReady(u32 request) {
+    s64 status;
 
-    while (temp_v0 = func_002C8128(arg0), temp_v0 == 0) {
+    while (status = func_002C8128(request), status == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }

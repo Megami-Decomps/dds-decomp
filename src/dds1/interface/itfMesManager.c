@@ -82,7 +82,8 @@ typedef struct ItfMesSlot {
 typedef struct ItfMesItem {
     u8 unk0[0x10];         /* 0x0 */
     u32 word10;            /* 0x10: low byte is the color */
-    u8 unk14[2];           /* 0x14 */
+    u8 flag14;             /* 0x14: byte set by func_0019D9F8 */
+    u8 unk15;              /* 0x15 */
     u8 flag16;             /* 0x16: tested by func_0019DB40 */
     u8 unk17[0x11];        /* 0x17 */
     struct ItfMesItem *next; /* 0x28 */
@@ -733,7 +734,15 @@ void func_0019D920(ItfMesNode *node, s32 value) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D958);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D9F8);
+void func_0019D9F8(ItfMesNode *node, u8 value) {
+    ItfMesItem *item;
+
+    for (; node != NULL; node = node->next) {
+        for (item = node->child; item != NULL; item = item->next) {
+            item->flag14 = value;
+        }
+    }
+}
 
 /* Persona 4 func_0027a4d0 @ 0027A4D0 (src/itfMesManager.c), recompiled unchanged */
 void func_0019DA50(ItfMesNode *node, u32 color) {

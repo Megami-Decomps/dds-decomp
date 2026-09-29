@@ -22,21 +22,31 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE240);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE438);
 
-void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
+typedef struct MenuBlendContext {
+    u8 pad00[0x14];
+    s32 result[4];
+    u8 pad24[0x60];
+    s32 source[4];
+} MenuBlendContext;
+
+typedef struct MenuBlendObject {
+    u8 pad00[0x18];
+    MenuBlendContext *context;
+} MenuBlendObject;
+
+void mnuBlendPanelSlots(MenuBlendObject *dst, MenuBlendObject *src, u32 amount) {
     s32 i;
-    s32 ctx = *(s32 *)(dst + 0x18);
+    s32 ctx = (s32)dst->context;
 
     for (i = 0; i < 4; i++) {
-        s32 off = i * 4 + 0x80;
-        s32 result = func_00309138(*(s32 *)(ctx + off + 4),
-                                   *(s32 *)(*(s32 *)(src + 0x18) + off + 4),
+        s32 result = func_00309138(((MenuBlendContext *)ctx)->source[i],
+                                   src->context->source[i],
                                    (s32)amount / 2 + 0x80, ctx);
-        s32 current = *(s32 *)(dst + 0x18);
+        s32 current = (s32)dst->context;
         ctx = current;
-        *(s32 *)(current + i * 4 + 0x14) = result;
+        ((MenuBlendContext *)current)->result[i] = result;
     }
 }
-
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B028);
 
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B048);

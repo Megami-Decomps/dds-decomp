@@ -1,5 +1,10 @@
 #include "common.h"
 #include "pcp_vu0.h"
+extern s32 func_0033D810(s32, s32, s32, s32, s32);
+extern s32 D_003C88C0[];
+extern s32 D_003C88C8[];
+extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
+extern void func_00103388(s32, s32, s32, s32);
 extern s32 mdlHasNode(s32, s16);
 extern void mdlAddEntryFlaggedEx(s32, s16, s16, f32, f32);
 extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
@@ -29,11 +34,16 @@ typedef struct MdlViewState {
     s16 unk2C;
     s16 unk2E;
     s16 unk30;
-    u8 pad32[8];
+    u8 pad32[2];
+    s16 unk34;
+    s16 unk36;
+    u8 pad38[2];
     s16 unk3A;
     u8 pad3C[0x50];
     s32 unk8C[1];
     s32 unk90[1];
+    u8 pad94[0x2C];
+    s32 unkC0;
 } MdlViewState;
 
 extern MdlViewState D_00453550;
@@ -197,7 +207,27 @@ u16 func_00233E38(MdlRecord *record) {
     return record->value0C;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00233E40);
+s32 *func_00233E40(s32 arg0, s32 key) {
+    s32 *list = *(s32 **)(*(s32 *)(arg0 + 0xC) + 0xA4);
+    s32 *entry;
+    s32 remaining;
+
+    if (list == NULL) {
+        return NULL;
+    }
+    entry = list;
+    remaining = func_00233E38((MdlRecord *)entry);
+    while (1) {
+        remaining--;
+        entry = (s32 *)((u8 *)entry + entry[1]);
+        if (remaining == -1) {
+            return NULL;
+        }
+        if (*entry == key) {
+            return entry;
+        }
+    }
+}
 
 s32 * func_00233EC0(s32 table) {
     MdlRecord *first;
@@ -425,7 +455,7 @@ s32 func_00235178(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return func_0011F250(arg0, arg1, arg2, arg3, arg4, 0x30000000, 0x60404040);
 }
 
-void func_00235198(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void func_00235198(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 tmp;
 
     tmp = D_00453610[0];
@@ -553,7 +583,13 @@ u32 func_00236058(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236080);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002364C0);
+void func_002364C0(void) {
+    s32 packets;
+
+    func_00235198(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
+    packets = D_00453550.unkC0;
+    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[D_00453550.unk34]));
+}
 
 u32 func_00236540(void) {
     func_00236080();
@@ -563,7 +599,13 @@ u32 func_00236540(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236568);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00236940);
+void func_00236940(void) {
+    s32 packets;
+
+    func_00235198(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
+    packets = D_00453550.unkC0;
+    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[D_00453550.unk36]));
+}
 
 s32 func_002369C0(void) {
     func_00236568();
@@ -672,7 +714,42 @@ u32 func_002380D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238100);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238140);
+typedef struct MdlDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct MdlDrawSurface *, s32);
+} MdlDrawSurface;
+
+extern MdlDrawSurface D_00380048;
+extern u8 D_003C8A00[];
+extern u8 D_003C8A60[];
+extern s32 func_0011F218(void);
+extern s32 func_00348188(void *, void *, s32, s32);
+extern s32 sdfCountMapPositionRecords(s32);
+extern s32 sdfChunkFindByTag(s32, s32);
+extern void func_00332BB0(s32, s32);
+
+extern u8 D_003C8930[];
+extern u8 D_003C8990[];
+
+void func_00238140(void) {
+    s32 list;
+
+    if (D_00453550.unk0A < 4) {
+        if (D_00453550.unk0A >= 2) {
+            list = func_0011F218();
+            __asm__ volatile(
+                ".set noreorder\n\t"
+                "vsub.xyzw $vf28, $vf0, $vf0\n\t"
+                "vmr32.xyzw $vf30, $vf0\n\t"
+                "vmove.xyzw $vf31, $vf0\n\t"
+                "vaddw.x $vf28, $vf28, $vf0w\n\t"
+                "vmr32.xyzw $vf29, $vf30\n\t"
+                ".set reorder" ::: "memory");
+            sdfAppendPacket(list, func_00348188(D_003C8930, D_003C8990, 6, 0x80));
+            D_00380048.submit(&D_00380048, list);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002381D8);
 
@@ -687,7 +764,25 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_002382F0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238650);
+void func_00238650(u8 *obj) {
+    s32 count = sdfCountMapPositionRecords(*(s32 *)(obj + 0x18));
+
+    if (count > 0) {
+        s32 i = 0;
+        s32 list = func_0011F218();
+        s32 record = sdfChunkFindByTag(*(s32 *)(obj + 0x18), 0x534F504D) + 0x10;
+
+        do {
+            s32 current = record;
+
+            i++;
+            record += 0x40;
+            func_00332BB0(*(s32 *)(obj + 0x18), current);
+            sdfAppendPacket(list, func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
+        } while (i != count);
+        D_00380048.submit(&D_00380048, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewerEnd);
 
@@ -713,7 +808,31 @@ void mdlFreeViewResources(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238F30);
+typedef struct MdlTaskDef {
+    s32 name;
+    s32 arg;
+} MdlTaskDef;
+
+extern MdlTaskDef D_003C8890[];
+extern char D_004214E8[];
+extern char D_004214F8[];
+
+void func_00238F30(void) {
+    MdlTaskDef *def;
+    s32 i = 0;
+
+    mdlFreeViewResources();
+    kwlnTaskDestroyWithHierarchyByName(D_004214E8, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_004214F8, 0);
+    def = D_003C8890;
+    do {
+        if (func_00101740((void *)def->name) == 0) {
+            func_00103388(def->name, def->arg, 0, 0);
+        }
+        i++;
+        def++;
+    } while (i != 3);
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238FC0);
 

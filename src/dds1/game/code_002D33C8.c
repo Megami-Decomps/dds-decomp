@@ -701,11 +701,37 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6080);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6188);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6258);
+extern void func_002D6188(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_002D6258(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 (*alloc)(s32)) {
+    s32 buffer;
+
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    buffer = alloc(0x50);
+    *(u64 *)buffer = 0x20000004ULL;
+    *(u64 *)(buffer + 8) = 0x5000000410000000ULL;
+    func_002D6188(buffer + 0x10, a, b, c, d, e, f, g, h, i, j, k);
+    sdfAppendPacket(list, buffer);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6380);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6450);
+extern void func_002D6380(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_002D6450(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 (*alloc)(s32)) {
+    s32 buffer;
+
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    buffer = alloc(0x60);
+    *(u64 *)buffer = 0x20000005ULL;
+    *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
+    func_002D6380(buffer + 0x10, a, b, c, d, e, f, g, h, i, j, k);
+    sdfAppendPacket(list, buffer);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D6578);
 

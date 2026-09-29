@@ -12,17 +12,24 @@ typedef struct SdfPacInput {
     s32 processed;
 } SdfPacInput;
 
+typedef struct SdfPacWork {
+    u8 pad00[0x33];
+    u8 status33;
+    u8 pad34[0xA];
+    u8 status3E;
+} SdfPacWork;
+
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346608);
 
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346778);
 
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346988);
 
-s32 func_00346A60(u8 *work) {
-    if (*(u8 *)(work + 0x33) == 0) {
+s32 func_00346A60(SdfPacWork *work) {
+    if (work->status33 == 0) {
         return 0;
     }
-    return *(u8 *)(work + 0x3E) == 0;
+    return work->status3E == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346A80);

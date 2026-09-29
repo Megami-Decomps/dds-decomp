@@ -40,20 +40,26 @@ INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00421FE8);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242D10);
 
+/* Same command work prefix used by the event opcode dispatcher. */
+typedef struct {
+    u8 unk00[0xE4];
+    u32 key; /* 0xE4: current field task key */
+} EffCmdWork;
+
 u32 func_00242DE0(void) {
-    s32 world;
+    EffCmdWork *work;
     s32 childTask;
 
-    world = func_0010D8C8();
-    if (world == 0) {
+    work = (EffCmdWork *)func_0010D8C8();
+    if (work == NULL) {
         return 1;
     }
-    if (*(s32 *)(world + 0xe4) == 0) {
+    if (work->key == 0) {
         func_0035B6E0(D_00422050);
         return 1;
     }
     childTask = evtCreateTask(0x2afe, func_0010D7D0(0));
-    func_00101968(*(s32 *)(world + 0xe4), childTask);
+    func_00101968(work->key, childTask);
     func_0010D818(childTask);
     return 1;
 }
@@ -179,12 +185,12 @@ u32 func_002431A0(void) {
 }
 
 u32 evtOpcodeSetBgmVolumePan(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 volume;
+    u64 pan;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    evtSetBgmVolumePan(temp_v0, temp_v1);
+    volume = func_0010D650(0);
+    pan = func_0010D650(1);
+    evtSetBgmVolumePan(volume, pan);
     return 1;
 }
 
@@ -280,22 +286,22 @@ INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243430);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243568);
 
-void *func_002436A8(s32 arg0) {
-    s32 p;
+void *func_002436A8(s32 task) {
+    s32 visualWork;
 
-    p = (s32)func_00328D68(0x104);
-    evtInitializeVisualData(p);
-    evtLoadSolarNoiseSprite((u32 *)p);
-    func_00101950(arg0, (void *)p);
+    visualWork = (s32)func_00328D68(0x104);
+    evtInitializeVisualData(visualWork);
+    evtLoadSolarNoiseSprite((u32 *)visualWork);
+    func_00101950(task, (void *)visualWork);
     return (void *)func_00243430;
 }
 
 void evtFreeSolarOverlayWork(void) {
-    u64 temp_v0;
+    u64 workHandle;
 
-    temp_v0 = func_00101958();
-    evtReleaseSolarNoiseSprite(temp_v0);
-    func_00328E48(temp_v0);
+    workHandle = func_00101958();
+    evtReleaseSolarNoiseSprite(workHandle);
+    func_00328E48(workHandle);
     D_00437200 = 0;
 }
 

@@ -118,6 +118,7 @@ void dds3DestroyWorldNode(NodeA *node) {
     effObjNodeDestroy(node);
 }
 
+/* Append a separate index entry to the world's doubly linked index list. */
 void *func_001100F0(s32 index) {
     WorldInfo *info;
     NodeB *node;

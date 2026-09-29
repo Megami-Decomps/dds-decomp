@@ -43,10 +43,10 @@ extern s8 D_00439164;
 
 extern s32 D_00439158[2];
 
-typedef struct SdfGraphRequest {
+typedef struct SdfSynchronizedRequest {
     u32 value;
     u32 state;
-} SdfGraphRequest;
+} SdfSynchronizedRequest;
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
@@ -78,7 +78,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C860);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfCreateDescriptorPacket);
 
-void func_0032CA90(SdfGraphRequest *request, u32 value) {
+void func_0032CA90(SdfSynchronizedRequest *request, u32 value) {
     if (D_004389FC < 0) {
         D_004389FC = sdfCreateSemaphore(1, 0x7f, 0);
     }
