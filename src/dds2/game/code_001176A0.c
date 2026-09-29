@@ -79,13 +79,37 @@ u32 func_001178B8(WorldSlotData *slot) {
     return slot->value18;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001178C0);
+/* Load the vector at the slot's +0x18 pointer into VF10. */
+void func_001178C0(WorldSlotData *slot) {
+    void *vec = (void *)func_001178B8(slot);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001178E0);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117908);
+/* Same, from the second quadword at +0x18. */
+void func_001178E0(WorldSlotData *slot) {
+    void *vec = (void *)((u8 *)func_001178B8(slot) + 0x10);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117998);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
+
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfCreateRuntimeTask);
+
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfDestroyRuntimeTask);
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;
@@ -102,9 +126,9 @@ void func_00117A10(void) {
     ((SdfRuntime *)D_00435DD0)->updateMode = 8;
     func_0011AB38();
     func_00122B58(0);
-    func_00313C40();
+    ptyClearProfileRecords();
     func_0026CE90();
-    func_00314200();
+    ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     func_0011D438();

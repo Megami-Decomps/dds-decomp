@@ -1072,9 +1072,9 @@ void evtUnlinkWorkNode(B728Work *node) {
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B9E8);
+INCLUDE_ASM(const s32, "game/code_00107EF8", bfContextCreate);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010BC40);
+INCLUDE_ASM(const s32, "game/code_00107EF8", bfParseFLW0);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D18);
 

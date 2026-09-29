@@ -1614,7 +1614,18 @@ void func_00126110(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00126140);
+/* Consume the pending pair of field-script values. -1 in both slots means
+ * no request; the first value is returned with its 200-entry base offset. */
+s32 func_00126140(s32 *outCode, s32 *outParameter) {
+    if (D_0032E3B0[0x3C] == -1 && D_0032E3B0[0x3D] == -1) {
+        return 0;
+    }
+    *outCode = D_0032E3B0[0x3C] + 0xC8;
+    *outParameter = D_0032E3B0[0x3D];
+    D_0032E3B0[0x3C] = -1;
+    D_0032E3B0[0x3D] = -1;
+    return 1;
+}
 
 void *fldCreateDummyMatter(void) {
     u32 args[8];

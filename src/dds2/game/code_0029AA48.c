@@ -92,5 +92,5 @@ void mnuClearSelectionWidths(MenuLayoutContext *context) {
 
 void func_0029AF80(u32 arg0, u32 arg1) {
     func_00314298(arg0, (s32)arg1 + 0x3f4);
-    func_00299A38(arg0, arg1);
+    mnuRefreshSelectedUnitPanels(arg0, arg1);
 }

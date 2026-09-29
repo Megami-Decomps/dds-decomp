@@ -89,7 +89,7 @@ extern void func_00113438(void *arg0, s32 arg1);
 extern s32 func_0010D6A0(void);
 extern void func_0010AC10(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
-extern s32 func_00242298(s32 arg0, s32 arg1, s32 arg2);
+extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 extern s32 evtFindTaskById(s32 arg0);
 extern void func_00101A80(s32 arg0, s32 arg1);
 extern void func_002223D8(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -101,7 +101,7 @@ extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void func_00115318(void *arg0, u32 arg1);
 extern void effObjSetInnerFirstVec(void *arg0, void *arg1);
-extern f32 func_0010D4F0(s32 idx);
+extern f32 bfWaitReadArgFloat(s32 idx);
 extern char D_003AC588[];
 extern u8 D_003AC2A0[];
 extern u8 D_003AC550[];
@@ -233,7 +233,7 @@ u32 func_00223B68(void) {
     }
     param0 = func_0010D428(0);
     rid = func_0010D428(1);
-    ret = func_00242298(model, param0, rid);
+    ret = evtCreateMotionSeTask(model, param0, rid);
     if (ret != 0) {
         func_00101A80(evtFindTaskById(func_0010D428(0)), ret);
     }
@@ -348,9 +348,9 @@ u32 evtSetWorldUnitFirstVector(void) {
     if (unit == NULL) {
         return 1;
     }
-    v[0] = func_0010D4F0(1);
-    v[1] = func_0010D4F0(2);
-    v[2] = func_0010D4F0(3);
+    v[0] = bfWaitReadArgFloat(1);
+    v[1] = bfWaitReadArgFloat(2);
+    v[2] = bfWaitReadArgFloat(3);
     effObjSetInnerFirstVec(unit, v);
     return 1;
 }
@@ -371,9 +371,9 @@ u32 evtSetWorldUnitThirdVector(void) {
     if (unit == NULL) {
         return 1;
     }
-    v[0] = func_0010D4F0(1);
-    v[1] = func_0010D4F0(2);
-    v[2] = func_0010D4F0(3);
+    v[0] = bfWaitReadArgFloat(1);
+    v[1] = bfWaitReadArgFloat(2);
+    v[2] = bfWaitReadArgFloat(3);
     effObjSetInnerThirdVec(unit, v);
     return 1;
 }

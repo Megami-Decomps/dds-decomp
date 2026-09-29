@@ -1222,7 +1222,7 @@ u32 func_00313BB0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00313BB8);
 
-void func_00313C40(void) {
+void ptyClearProfileRecords(void) {
     memset(D_00435DD0 + 0x17210, 0, 0x5800);
 }
 
@@ -1269,11 +1269,11 @@ void func_00314020(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003140C8);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314200);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", ptyRebuildAllProfiles);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314298);
 
-void func_003144E8(u32 arg0) {
+void ptyRecomputeMaxHpMp(u32 arg0) {
     func_00314298(arg0, 0);
 }
 
@@ -1297,7 +1297,7 @@ void func_003146B8(u32 arg0, u16 arg1, u32 arg2) {
     *puVar1 = arg2;
 }
 
-void func_003146E8(u32 arg0, u16 arg1) {
+void ptySetProfileRecordToCap(u32 arg0, u16 arg1) {
     u32 *puVar1;
     u32 temp_v0;
 
@@ -1308,14 +1308,14 @@ void func_003146E8(u32 arg0, u16 arg1) {
 
 extern u8 func_00314C10(s32);
 
-extern u32 *func_00314BE0(s32);
+extern u32 *ptyGetCurrentProfileRecord(s32);
 
 u32 func_00314728(u8 *work, u32 amount) {
     u32 *total;
     u32 limit;
     u8 scriptId;
     if (func_00314C10((s32)work) == 0) return 0;
-    total = func_00314BE0((s32)work);
+    total = ptyGetCurrentProfileRecord((s32)work);
     scriptId = ((ScriptFlagWork *)work)->scriptId;
     *total += amount;
     limit = func_00314690(scriptId);
@@ -1325,7 +1325,7 @@ u32 func_00314728(u8 *work, u32 amount) {
     return *total;
 }
 
-void func_003147A8(u32 v, u32 *a, u32 *b) {
+void prfDecodeFlagPair(u32 v, u32 *a, u32 *b) {
     u32 lo;
 
     v &= 0xFFFF;
@@ -1388,14 +1388,14 @@ u8 func_00314B78(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314B80);
 
-u32 func_00314BC0(u32 arg0, u16 arg1) {
+u32 ptyGetProfileRecordValue(u32 arg0, u16 arg1) {
     u32 *puVar1;
 
     puVar1 = (u32 *)func_00314B80(arg0, arg1);
     return *puVar1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00314BE0);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", ptyGetCurrentProfileRecord);
 
 u8 func_00314C10(s32 arg0) {
     return ((ScriptFlagWork *)arg0)->scriptId;
@@ -1430,7 +1430,7 @@ s32 scrSetFlag(u8 *work, u16 index) {
 
 void func_00314CE8(u8 *work, u16 id) {
     u32 word, shift;
-    u32 status = func_00315030(work, id);
+    u32 status = ptyGetSkillNibbleState(work, id);
     if (status == 1) {
         scrDecodePackedFlagIndex((s32)work, id, &word, &shift);
         ((ScriptFlagWork *)work)->flagWords[word] &= ~(status << shift);
@@ -1493,7 +1493,7 @@ u32 scrGetSecondaryScriptFlag(u8 *work, u16 index) {
     return ((ScriptFlagWork *)work)->flagWords[word] & (4U << shift);
 }
 
-u32 func_00315030(u8 *work, u16 index) {
+u32 ptyGetSkillNibbleState(u8 *work, u16 index) {
     u32 word, shift;
     u32 mask;
     scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
@@ -1504,7 +1504,7 @@ u32 func_00315030(u8 *work, u16 index) {
     return (mask & (1U << shift)) != 0;
 }
 
-s32 func_00315098(s32 arg0, s32 arg1) {
+s32 ptyHasSkill(s32 arg0, s32 arg1) {
     u32 key = arg1 & 0xFFFF;
     u16 *p = ((ScriptFlagWork *)arg0)->slotIds;
     u32 i = 0;
@@ -1574,8 +1574,6 @@ extern u8 D_00401325[];
 
 extern u16 D_00401326[];
 
-extern u8 D_0040132C[][36];
-
 u8 func_003151D0(u16 scriptId) {
     return D_00401324[scriptId * 36];
 }
@@ -1588,9 +1586,7 @@ u8 func_00315220(u16 scriptId) {
     return D_00401325[scriptId * 36];
 }
 
-u8 func_00315248(u16 scriptId, s32 index) {
-    return D_0040132C[scriptId][index];
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315248);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", scrCallIfOperandReady);
 
@@ -1600,7 +1596,7 @@ u32 func_00315318(void) {
     return 0;
 }
 
-s32 func_00315320(u8 *work, u16 scriptId) {
+s32 ptyCheckLevelAtLeastProfileParam7b6(u8 *work, u16 scriptId) {
     s32 current = *(u16 *)(work + 0x14);
     if (current < (s32)func_003151F8(scriptId)) return 0;
     return 1;
@@ -1618,7 +1614,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315388);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003154A0);
 
-void func_00315628(a, b, c)
+void prfBuildSkillListState0(a, b, c)
 s32 a;
 s32 b;
 s32 c;
@@ -1626,7 +1622,7 @@ s32 c;
     func_003154A0(a, b, c, 0);
 }
 
-u32 func_00315640(u8 *work) {
+u32 prfCountProfileList(u8 *work) {
     u8 *flags = work + 0xC;
     u32 index = 0;
     while (index < 8) {
@@ -1636,9 +1632,9 @@ u32 func_00315640(u8 *work) {
     return 8;
 }
 
-s32 func_00315680(s32 state, u8 *operand) {
+s32 ptyHasAllReqProfiles(s32 state, u8 *operand) {
     s32 index = 0;
-    s32 count = func_00315640(operand);
+    s32 count = prfCountProfileList(operand);
     if (count > 0) {
         u8 *slots = operand + 0xc;
         do {
@@ -1650,10 +1646,10 @@ s32 func_00315680(s32 state, u8 *operand) {
     return 1;
 }
 
-s32 func_00315700(s32 state, u8 *operand) {
+s32 ptyReqProfileCountAtLeast(s32 state, u8 *operand) {
     u32 matched = 0;
     s32 index = 0;
-    s32 count = func_00315640(operand);
+    s32 count = prfCountProfileList(operand);
     if (count > 0) {
         u8 *slots = operand + 0xc;
         do {
@@ -1670,9 +1666,9 @@ s32 func_00315700(s32 state, u8 *operand) {
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_003157A0);
 
-s32 func_00315838(u8 *operand) {
+s32 ptyAreReqProfilesInParty(u8 *operand) {
     s32 index = 0;
-    s32 count = func_00315640(operand);
+    s32 count = prfCountProfileList(operand);
     if (count > 0) {
         u8 *slots = operand + 0xc;
         do {
@@ -1699,14 +1695,14 @@ s32 func_00315838(u8 *operand) {
     return 1;
 }
 
-s32 func_00315920(u8 *a, u8 *b) {
+s32 prfReqCheckUnitLevel(u8 *a, u8 *b) {
     if (*(u16 *)(a + 0x14) < b[4]) {
         return 0;
     }
     return 1;
 }
 
-s32 func_00315938(u8 *a) {
+s32 prfReqCheckGlobalCounter(u8 *a) {
     if (*(u32 *)(D_00435DD0 + 0x3C) < *(u32 *)(a + 8)) {
         return 0;
     }
@@ -1763,13 +1759,13 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316020);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316118);
 
-u8 func_003161E8(s32 i) {
+u8 prfReq18GetWord3220(s32 i) {
     return D_00404A90[i].v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00316208);
+INCLUDE_ASM(const s32, "game/code_0030B7D0", prfReqGetPair);
 
-u32 func_00316260(s32 i) {
+u32 prfReq18GetWord3234(s32 i) {
     return D_00404AA4[i].v0;
 }
 
@@ -1779,7 +1775,7 @@ void sdfSetAllFlagsFromTable(void) {
     do {
         index = func_00316118(index);
         if (index >= 0) {
-            s32 flag = func_00316260(index);
+            s32 flag = prfReq18GetWord3234(index);
             if (flag != 0) {
                 mdlFlagSet(flag);
             }

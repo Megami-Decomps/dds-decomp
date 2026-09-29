@@ -36,7 +36,7 @@ s32 dds3GetWorldObjectValue(s32 arg0);
 void func_0021FEC0(s32 arg0, s32 arg1);
 void evtDestroySecondaryWorldNode(void);
 s32 func_00220340(void *arg0, void *arg1);
-f32 func_0010D4F0(s32 idx);
+f32 bfWaitReadArgFloat(s32 idx);
 void func_00220298(s32 arg0, f32 arg1);
 s32 func_0014DB78(char *name);
 s32 func_00121650(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -493,9 +493,9 @@ s32 func_00227090(void) {
     if (unit == NULL) {
         return 1;
     }
-    vec[0] = func_0010D4F0(1);
-    vec[1] = func_0010D4F0(2);
-    vec[2] = func_0010D4F0(3);
+    vec[0] = bfWaitReadArgFloat(1);
+    vec[1] = bfWaitReadArgFloat(2);
+    vec[2] = bfWaitReadArgFloat(3);
     effObjSetInnerFirstVec(unit, vec);
     return 1;
 }
@@ -514,10 +514,10 @@ s32 func_00227210(void) {
     if (unit == NULL) {
         return 1;
     }
-    vec[0] = func_0010D4F0(1);
-    vec[1] = func_0010D4F0(2);
-    vec[2] = func_0010D4F0(3);
-    vec[3] = func_0010D4F0(4);
+    vec[0] = bfWaitReadArgFloat(1);
+    vec[1] = bfWaitReadArgFloat(2);
+    vec[2] = bfWaitReadArgFloat(3);
+    vec[3] = bfWaitReadArgFloat(4);
     effObjSetInnerSecondVec(unit, vec);
     return 1;
 }
@@ -737,14 +737,14 @@ s32 func_00227CB8(void) {
             return 1;
         }
     }
-    func_00220298(unit, func_0010D4F0(1));
+    func_00220298(unit, bfWaitReadArgFloat(1));
     owner = *(char **)(unit + 8);
     if (owner == 0) {
         return 1;
     }
     count = func_0014DB78(owner);
     if (count > 0) {
-        if (func_0010D4F0(1) > 0.5f) {
+        if (bfWaitReadArgFloat(1) > 0.5f) {
             func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 1);
         } else {
             func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 0);

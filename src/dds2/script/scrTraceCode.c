@@ -1,7 +1,7 @@
 #include "common.h"
 #include "scr.h"
 
-extern u32 func_0010C408(void);
+extern u32 bfStackPopInt(void);
 
 #define SCR_STACK_TYPE_STRING 5
 
@@ -48,7 +48,7 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreGlobalFloat);
 u32 scrStoreLocalInteger(ScrData *scr) {
     u32 value;
 
-    value = func_0010C408();
+    value = bfStackPopInt();
     scr->localInt[scr->instructions[scr->pc].parts.sOperand] = value;
     scr->pc++;
     return 1;
@@ -61,7 +61,7 @@ u32 func_0010CA08(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CA20);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpWaitDispatch);
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CAC0);
 
@@ -91,87 +91,87 @@ u32 scrJumpLabel(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CBD0);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpBinaryEval);
 
 u32 func_0010D0B8(ScrData *scr) {
-    func_0010CBD0(scr, 0);
+    bfOpBinaryEval(scr, 0);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D0F0(ScrData *scr) {
-    func_0010CBD0(scr, 1);
+    bfOpBinaryEval(scr, 1);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D128(ScrData *scr) {
-    func_0010CBD0(scr, 2);
+    bfOpBinaryEval(scr, 2);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D160(ScrData *scr) {
-    func_0010CBD0(scr, 3);
+    bfOpBinaryEval(scr, 3);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D198);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNegate);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D280);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNot);
 
 u32 func_0010D328(ScrData *scr) {
-    func_0010CBD0(scr, 4);
+    bfOpBinaryEval(scr, 4);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D360(ScrData *scr) {
-    func_0010CBD0(scr, 5);
+    bfOpBinaryEval(scr, 5);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D398(ScrData *scr) {
-    func_0010CBD0(scr, 6);
+    bfOpBinaryEval(scr, 6);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D3D0(ScrData *scr) {
-    func_0010CBD0(scr, 7);
+    bfOpBinaryEval(scr, 7);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D408(ScrData *scr) {
-    func_0010CBD0(scr, 8);
+    bfOpBinaryEval(scr, 8);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D440(ScrData *scr) {
-    func_0010CBD0(scr, 9);
+    bfOpBinaryEval(scr, 9);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D478(ScrData *scr) {
-    func_0010CBD0(scr, 10);
+    bfOpBinaryEval(scr, 10);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
 u32 func_0010D4B0(ScrData *scr) {
-    func_0010CBD0(scr, 0xb);
+    bfOpBinaryEval(scr, 0xb);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D4E8);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpJumpIfFalse);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D5A8);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
 
 /* Script command parameter `idx` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
@@ -193,7 +193,7 @@ s32 func_0010D650(s32 idx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D718);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfWaitReadArgFloat);
 
 char *func_0010D7D0(s32 paramIdx)
 {

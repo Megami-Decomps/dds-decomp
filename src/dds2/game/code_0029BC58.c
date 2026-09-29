@@ -118,7 +118,7 @@ typedef struct TitleMenuWork {
     s32 sequenceMode;         /* 0xB6F4 */
 } TitleMenuWork;
 
-extern void func_00299A38(TitleSeq *, u8 *);
+extern void mnuRefreshSelectedUnitPanels(TitleSeq *, u8 *);
 
 extern void btlAddBaseStats(u8 *, TitleSeq *);
 
@@ -148,7 +148,7 @@ void mnuTitleApplySequenceState(u8 *work) {
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     }
-    func_00299A38(seq, work);
+    mnuRefreshSelectedUnitPanels(seq, work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
@@ -279,7 +279,17 @@ void func_0029CDD8(void) {
 
 extern u8 D_003D9D58[];
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CDF0);
+/* Read the value paired with the highest of three thresholds not above input. */
+u8 func_0029CDF0(s32 value) {
+    s32 i;
+
+    for (i = 2; i >= 0; i--) {
+        if (value >= D_003D9D58[i * 2]) {
+            return D_003D9D58[i * 2 + 1];
+        }
+    }
+    return D_003D9D58[1];
+}
 
 u8 func_0029CE30(s32 position, s32 increment) {
     u8 *table = D_003D9D58;
@@ -303,11 +313,35 @@ u32 func_0029CE88(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CE90);
+INCLUDE_ASM(const s32, "game/code_0029BC58", ptyComputeTotalExp);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CF00);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CF88);
+/* Same party-unit reward header layout as DDS1, including AP status. */
+typedef struct BrsExpUnit {
+    u16 flags;          /* 0x00: bit 1 means active party member */
+    u8 pad02[0xC];
+    u16 apStatus;       /* 0x0E */
+} BrsExpUnit;
+
+/* Active party members take full EXP; benched members need the half/full
+ * EXP skills (0x23F/0x240 respectively). The third caller arg is unused. */
+s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
+    s32 result;
+
+    if ((((BrsExpUnit *)unit)->flags & 2) != 0) {
+        result = exp;
+    } else {
+        result = 0;
+        if (ptyHasSkill(unit, 0x23F) != 0) {
+            result = exp / 2;
+        }
+        if (ptyHasSkill(unit, 0x240) != 0) {
+            result = exp;
+        }
+    }
+    return result;
+}
 
 u32 func_0029D000(void) {
     return 0;
@@ -315,14 +349,14 @@ u32 func_0029D000(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D008);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D1C8);
+INCLUDE_ASM(const s32, "game/code_0029BC58", ptyCalcLevelUps);
 
 s32 mnuCountAdvancingTitleAnimations(void) {
     s32 offset = 0;
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = func_0029D1C8(D_00435DD0 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(D_00435DD0 + 0xa60 + offset);
         count += step > 0;
         offset += 0x1c4;
     } while (--remaining >= 0);
@@ -334,15 +368,15 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D2D8);
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D3D8);
 
 s32 mnuAdvanceTitleEntryAnimation(u8 *entry) {
-    s32 step = func_0029D1C8(entry);
+    s32 step = ptyCalcLevelUps(entry);
     *(u16 *)(entry + 0x14) += step;
-    func_003144E8(entry);
+    ptyRecomputeMaxHpMp(entry);
     return step;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", btlAddBaseStats);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D5B8);
+INCLUDE_ASM(const s32, "game/code_0029BC58", ptyAccumulateStatGains);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D790);
 
@@ -354,7 +388,40 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
     state[3] = fourth;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D970);
+extern s32 ptyCalcLevelUps(u8 *);
+extern s32 ptyComputeTotalExp(u8 *, s32);
+extern u32 func_00314728(u8 *, u32);
+extern s32 func_00314C10(s32);
+extern u32 func_00314690(u16);
+
+/* Match the progress-row layout in DDS1 game/code_002653A0.c. */
+typedef struct BrsUnitExp {
+    u8 pad00[0x10];
+    s32 totalExp;           /* 0x10 */
+} BrsUnitExp;
+
+typedef struct BrsProgressRow {
+    u8 pad00[8];
+    u32 unit;               /* 0x08 */
+    u32 levelProgress[4];   /* 0x0C */
+    u32 profileProgress[4]; /* 0x1C */
+} BrsProgressRow;
+
+/* Set up the level and profile progress bars for one party member. */
+void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
+    s32 levelDelta;
+    s32 profilePoints;
+
+    memset(state, 0, 0x2C);
+    ((BrsProgressRow *)state)->unit = (u32)entry;
+    levelDelta = ptyCalcLevelUps(entry);
+    mnuTitleInitFourParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
+        ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
+        ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
+    profilePoints = func_00314728(entry, 0);
+    mnuTitleInitFourParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
+        func_00314690(func_00314C10((s32)entry) & 0xFFFF));
+}
 
 u32 func_0029DA58(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     func_00314C10(*(u32 *)(resource + 8));
@@ -940,8 +1007,8 @@ u32 func_002A3AA0(void) {
 
 void func_002A3AC0(void) {
     evtDestroyWorldSecondaryNode();
-    func_00117998();
-    func_00117908();
+    sdfDestroyRuntimeTask();
+    sdfCreateRuntimeTask();
 }
 
 extern s16 D_003E3792[];
@@ -2232,7 +2299,27 @@ void func_002A8B90(void) {
     func_002A8B78();
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8BC8);
+/* Copy a source word and a 0x40-byte block when their pending flags are set. */
+typedef struct MnuMovieTransfer {
+    u8 pad00[2];
+    u8 wordPending;      /* 0x02 */
+    u8 blockPending;     /* 0x03 */
+    s32 *wordSource;     /* 0x04 */
+    void *blockSource;   /* 0x08 */
+    s32 word;            /* 0x0C */
+    u8 block[0x40];      /* 0x10 */
+} MnuMovieTransfer;
+
+void func_002A8BC8(void) {
+    MnuMovieTransfer *state = (MnuMovieTransfer *)D_00457E60;
+
+    if (state->wordPending != 0) {
+        state->word = *state->wordSource;
+    }
+    if (state->blockPending != 0) {
+        memcpy(state->block, state->blockSource, 0x40);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042A418);
 
@@ -2658,7 +2745,38 @@ u32 func_002AA278(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002AA2A8);
+extern u32 func_002C44E8(s32);
+extern s32 func_002A9AB8(s32);
+extern s32 func_0026C768(void);
+extern s32 func_002C6CE8(void);
+extern s32 func_002D13F0(void);
+extern void mnuDestroyCampTasks(void);
+extern void mnuPlayInputSound();
+
+/* On button 8, exit the camp only when both nested guards permit it;
+ * otherwise play the alternate sound without destroying its tasks. */
+s32 func_002AA2A8(s32 menu) {
+    u32 buttons = func_002C44E8(8);
+    s32 result;
+
+    if (func_002A9AB8(menu) == 0) {
+        return 0;
+    }
+    result = 0;
+    if (func_0026C768() == 0) {
+        if (buttons & 8) {
+            if (func_002C6CE8() != 1) {
+                if (func_002D13F0() == 0) {
+                    mnuDestroyCampTasks();
+                    mnuPlayInputSound(0, 2, 0);
+                    return -1;
+                }
+            }
+            mnuPlayInputSound(0, 0x8000, 0);
+        }
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042AA08);
 

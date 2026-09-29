@@ -166,14 +166,34 @@ void func_00262038(s32 arg0) {
     func_001198B8(*(u32 *)(arg0 + 0xc));
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262050);
+extern s32 ptyComputeTotalExp(u8 *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262148);
+typedef struct BrsUnitExperience {
+    u8 pad00[0x10];
+    u32 totalExp;       /* 0x10 */
+    u16 level;          /* 0x14 */
+} BrsUnitExperience;
 
-void func_002622B0(u32 arg0, u32 arg1, u32 arg2) {
-    func_00261FD8(arg1);
-    func_00262038(arg1);
-    func_00262148(arg0, arg2);
+/* Cap stored EXP at the EXP required for level 99. */
+void ptyClampExp(u32 *unit) {
+    u8 buf[0x1A4];
+    s32 exp;
+
+    memcpy(buf, unit, 0x1A4);
+    ((BrsUnitExperience *)buf)->level = 0x63;
+    exp = ptyComputeTotalExp(buf, 0);
+    if (exp < ((BrsUnitExperience *)unit)->totalExp) {
+        ((BrsUnitExperience *)unit)->totalExp = exp;
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
+
+/* Apply item/icon rewards before awarding the party's accumulated gains. */
+void brsApplyRewardBundle(u32 partyWork, u32 rewardWork, u32 rewardState) {
+    func_00261FD8(rewardWork);
+    func_00262038(rewardWork);
+    brsApplyPartyRewards(partyWork, rewardState);
 }
 
 extern void func_002762D8(s32 *);
@@ -184,18 +204,52 @@ extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void func_00287450(s32);
 extern void mnuForwardTableByte(s32);
 
-void func_00262300(s32 work) {
-    s32 *group = (s32 *)(work + 0x4F8);
+/* Fields of the battle-result panel needed while opening its skill package. */
+typedef struct BrsSkillPackageWork {
+    u8 pad00[0x90];
+    s32 unitHandle;          /* 0x090 */
+    u8 pad94[0x1AC];
+    s32 selectedRow;         /* 0x240 */
+    u8 pad244[0x2B4];
+    s32 group[2];            /* 0x4F8 */
+    s32 spriteArg0;          /* 0x500 */
+    u8 pad504[8];
+    s32 spriteArg1;          /* 0x50C */
+    u8 pad510[4];
+    s32 panelGroup;          /* 0x514 */
+    u8 pad518[0x7F8];
+    s32 panelHandle;         /* 0xD10 */
+    s32 spriteHandle;        /* 0xD14 */
+} BrsSkillPackageWork;
+
+typedef struct BrsSelectedRow {
+    s32 unit;                 /* 0x00: pointer to a party unit */
+    u8 pad04[0x14];
+} BrsSelectedRow;            /* 0x18 */
+
+typedef struct BrsRowUnit {
+    u8 pad00[4];
+    u16 unitId;              /* 0x04 */
+} BrsRowUnit;
+
+/* Create the group and sprite backing the skill-package panel for the
+ * selected reward row, then forward its unit's ID to the menu. */
+void brsOpenSkillPackagePanel(s32 work) {
+    s32 *group = ((BrsSkillPackageWork *)work)->group;
     s32 panel;
 
     func_002762D8(group);
     func_00271480(work + 0x680, group, 0, work + 0x574);
-    panel = mnuCreatePanelGroup(*(s32 *)(work + 0x514));
-    *(s32 *)(work + 0xD10) = panel;
-    mnuUpdateFiveListEntries(panel, *(s32 *)(work + 0x90));
-    *(s32 *)(work + 0xD14) = mnuCreateSpriteState(*(s32 *)(work + 0x50C), *(s32 *)(work + 0x500), *(s32 *)(work + 0x514));
+    panel = mnuCreatePanelGroup(((BrsSkillPackageWork *)work)->panelGroup);
+    ((BrsSkillPackageWork *)work)->panelHandle = panel;
+    mnuUpdateFiveListEntries(panel, ((BrsSkillPackageWork *)work)->unitHandle);
+    ((BrsSkillPackageWork *)work)->spriteHandle =
+        mnuCreateSpriteState(((BrsSkillPackageWork *)work)->spriteArg1,
+                             ((BrsSkillPackageWork *)work)->spriteArg0,
+                             ((BrsSkillPackageWork *)work)->panelGroup);
     func_00287450(0);
-    mnuForwardTableByte(*(u16 *)(*(s32 *)(work + *(s32 *)(work + 0x240) * 24 + 0x2CC) + 4));
+    mnuForwardTableByte(((BrsRowUnit *)
+        (((BrsSelectedRow *)(work + 0x2CC))[((BrsSkillPackageWork *)work)->selectedRow].unit))->unitId);
 }
 
 void func_00262398(s32 arg0) {
@@ -240,7 +294,7 @@ s32 mnuStaffInitPanel(s32 work) {
 
 extern s32 func_002716E8(s32, s32);
 extern s32 func_0027AF28(s32);
-extern void func_00262300(s32);
+extern void brsOpenSkillPackagePanel(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 func_002624C0(s32 work) {
@@ -264,21 +318,74 @@ s32 func_002624C0(s32 work) {
     if (func_0027AF28(work + 0xD1C) == 0) {
         return 1;
     }
-    func_00262300(work);
+    brsOpenSkillPackagePanel(work);
     *(s32 *)(work + 0x570) = 2;
     kwlnFadeOutStart(0, 0, 0, 15);
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262570);
+extern s32 D_003BAA00;
 
-void func_00262600(u32 arg0, u32 arg1, u32 arg2) {
-    func_00262570(arg0, arg1, 2);
-    func_00262570(arg0, arg2, 1);
+/* Five party slots, followed by the number of reward rows in this batch. */
+typedef struct BrsRewardRow {
+    s32 unit;           /* 0x00 */
+    s32 amount;         /* 0x04 */
+    u8 pad08[0x10];
+} BrsRewardRow;
+
+typedef struct BrsRewardBatch {
+    BrsRewardRow rows[5]; /* 0x00 */
+    s32 count;            /* 0x78 */
+} BrsRewardBatch;
+
+typedef struct BrsPartyRow {
+    s32 flags;          /* 0x00 */
+    s32 amount;         /* 0x04 */
+    u8 pad08[0x24];
+} BrsPartyRow;
+
+typedef struct BrsRewardUnit {
+    u16 flags;          /* 0x00: bit 0 indicates an occupied party slot */
+} BrsRewardUnit;
+
+typedef struct BrsTaskState {
+    u8 pad00[0x344];
+    s32 pendingRows;    /* 0x344 */
+} BrsTaskState;
+
+/* Match each reward record to the five active party units and tag its row. */
+void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
+    s32 i;
+
+    for (i = 0; i < ((BrsRewardBatch *)state)->count; i++) {
+        u8 *d = dst;
+        u8 *unit = *(u8 **)&D_003BAA00 + 0xA60;
+        s32 j;
+
+        for (j = 4; j >= 0; j--) {
+            if ((((BrsRewardUnit *)unit)->flags & 1) != 0) {
+                BrsRewardRow *row = &((BrsRewardBatch *)state)->rows[i];
+                if (row->unit == (s32)unit) {
+                    ((BrsPartyRow *)d)->flags |= flags;
+                    if (flags & 2) {
+                        ((BrsPartyRow *)d)->amount = row->amount;
+                    }
+                }
+            }
+            d += 0x2C;
+            unit += 0x1A4;
+        }
+    }
 }
 
-void func_00262640(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x344) == 0) {
+void func_00262600(u32 partyRows, u32 primaryRewards, u32 secondaryRewards) {
+    brsMarkPartyRows(partyRows, primaryRewards, 2);
+    brsMarkPartyRows(partyRows, secondaryRewards, 1);
+}
+
+/* Latch whether the battle-result task still has pending reward rows. */
+void brsTaskLatchPendingRows(s32 task) {
+    if (((BrsTaskState *)task)->pendingRows == 0) {
         D_003BC529 = 0;
     } else {
         D_003BC529 = 1;
@@ -289,7 +396,7 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262660);
+INCLUDE_ASM(const s32, "game/code_00260208", brsCreateTaskContext);
 
 extern void func_00285600(s32, s32);
 extern s32 func_002624C0(s32);
@@ -317,17 +424,17 @@ void func_00262790(s32 arg0) {
 extern char D_003BC530[];
 extern char D_003AFAB8[];
 extern char D_003AFAC8[];
-extern void func_00262EB8(void);
+extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
 extern void mnuStaffRunPanel2(void);
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-extern void *func_00262660(void);
+extern void *brsCreateTaskContext(void);
 
 s32 mnuStaffCreateTasks(void) {
     s32 result;
-    void *work = func_00262660();
+    void *work = brsCreateTaskContext();
 
-    kwlnTaskCreate(D_003BC530, 0x405, 1, 0, func_00262EB8, 0, work);
+    kwlnTaskCreate(D_003BC530, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
     result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, func_00262790, work);
     D_003BC528 = 1;
@@ -376,6 +483,13 @@ u32 func_00262970(void) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
 
+/* func_00262A30 @ 0x00262A30, 88 bytes.
+ * Near-miss 12/13 words: retail materialises several base+offset pointers
+ * (`base+0x14`, `base+0x20`, `off+0xEF0`, `off+0x1230`) and writes through
+ * them; ee-gcc folds everything to `base+off` plus constant displacements.
+ * Writes: base+off+{0xF10=a3, 0xF0C=a2(u16), 0x1250=a4, 0x124C=a2(u16),
+ * 0xF14=a5, 0x1254=a6} with off = index*104.
+ */
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
 s32 func_00262A88(void) {
@@ -385,7 +499,7 @@ s32 func_00262A88(void) {
     return func_002877A8() != 1;
 }
 
-void func_00262AC0(u32 arg0, s32 menu) {
+void mnuRefreshSelectedUnitPanels(u32 unused, s32 menu) {
     initPartyPanelSlots(menu + 0x574);
     menuUpdateHandleStates(menu + 0x680);
     func_00280048(menu + 0x680);
@@ -414,9 +528,9 @@ s32 mnuStaffPickRoll(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262C08);
+INCLUDE_ASM(const s32, "game/code_00260208", brsSelectLevelBonusMode);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262CE8);
+INCLUDE_ASM(const s32, "game/code_00260208", brsSelectNextUnit);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAB8);
 

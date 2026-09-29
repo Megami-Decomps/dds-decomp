@@ -711,7 +711,7 @@ u32 *func_002C32B0(s32 source) {
 
     memset(item, 0, 0x48);
     first = func_00314B78(source);
-    second = func_00314BE0(source);
+    second = ptyGetCurrentProfileRecord(source);
     func_002C32A0(item, func_00314690((u16)first), *(u32 *)second);
     for (i = 0; i < 5; i++) {
         item[11 + i] = effMiscRand(0) % 0xC0 + 0x40;
@@ -1071,7 +1071,7 @@ u32 func_002C5140(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5148);
+INCLUDE_ASM(const s32, "game/code_002BE628", skillApplyFieldUseEffect);
 
 u8 func_002C5338(u32 arg0) {
     return *(s8 *)((arg0 & 0xffff) * 2 + D_00435E1C) == '\x01';
@@ -1187,7 +1187,7 @@ u16 func_002C5580(s32 arg0) {
 u32 func_002C5588(u32 arg0, u32 arg1) {
     *(s16 *)((s32)arg0 + 0x1b2) = (s16)arg1;
     mnuMarkEntryBlocked(arg1);
-    func_003144E8(arg0);
+    ptyRecomputeMaxHpMp(arg0);
     return 1;
 }
 
@@ -1287,7 +1287,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C57D8);
+INCLUDE_ASM(const s32, "game/code_002BE628", battleItemApplyPermanentBonus);
 
 s32 func_002C59B0(void) {
     if (func_0011B260(1)) return 1;

@@ -60,7 +60,7 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 extern void effObjSetInnerFirstVec(void *arg0, void *arg1);
 
-extern f32 func_0010D718(s32 idx);
+extern f32 bfWaitReadArgFloat(s32 idx);
 
 extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
 
@@ -120,7 +120,7 @@ extern s32 func_0010D8C8(void);
 
 extern s32 func_0025D230(s32 arg0, s32 arg1);
 
-extern s32 func_0025D6B0(s32 arg0, s32 arg1, s32 arg2);
+extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 
 extern s32 evtFindTaskById(s32 arg0);
 
@@ -275,7 +275,7 @@ u32 func_0023E7A0(void) {
     }
     param0 = func_0010D650(0);
     rid = func_0010D650(1);
-    ret = func_0025D6B0(model, param0, rid);
+    ret = evtCreateMotionSeTask(model, param0, rid);
     if (ret != 0) {
         func_00101968(evtFindTaskById(func_0010D650(0)), ret);
     }
@@ -390,9 +390,9 @@ u32 evtSetWorldUnitFirstVector(void) {
     if (unit == NULL) {
         return 1;
     }
-    vector[0] = func_0010D718(1);
-    vector[1] = func_0010D718(2);
-    vector[2] = func_0010D718(3);
+    vector[0] = bfWaitReadArgFloat(1);
+    vector[1] = bfWaitReadArgFloat(2);
+    vector[2] = bfWaitReadArgFloat(3);
     effObjSetInnerFirstVec(unit, vector);
     return 1;
 }
@@ -413,9 +413,9 @@ u32 evtSetWorldUnitThirdVector(void) {
     if (unit == NULL) {
         return 1;
     }
-    vector[0] = func_0010D718(1);
-    vector[1] = func_0010D718(2);
-    vector[2] = func_0010D718(3);
+    vector[0] = bfWaitReadArgFloat(1);
+    vector[1] = bfWaitReadArgFloat(2);
+    vector[2] = bfWaitReadArgFloat(3);
     effObjSetInnerThirdVec(unit, vector);
     return 1;
 }

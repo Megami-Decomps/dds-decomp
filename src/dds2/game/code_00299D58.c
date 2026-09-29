@@ -38,7 +38,7 @@ typedef struct MenuItemScene {
     u32 slots[5];
 } MenuItemScene;
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_00299D58);
+INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
 void mnuStaffRunPanel1(s32 input) {
     s32 context = func_00101958();
@@ -104,7 +104,7 @@ u32 mnuProcessItemSelection(u32 address) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A0C8);
+INCLUDE_ASM(const s32, "game/code_00299D58", prfCapPresentMessages);
 
 u32 func_0029A1E0(void) {
     return 0;

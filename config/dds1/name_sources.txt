@@ -80,17 +80,25 @@
 0x0010AB90	evtUnkAB90Ensure	inferred	allocates D_003BA960 chain via 2E3E18/2E41B0/2E41A0 if null; parked on call arg-setup order
 0x0010B728	evtLinkWorkNode	inferred	Appends a work node to the doubly linked event list and increments its count.
 0x0010B768	evtUnlinkWorkNode	inferred	Unlinks a work node from the doubly linked event list and decrements its count.
+0x0010B7C0	bfContextCreate	inferred	legacy BFContext_Create: allocates and initialises a BF/FLW0 script context (0xF4)
+0x0010BA18	bfParseFLW0	inferred	legacy BF_ParseFLW0: validates the FLW0 magic and builds the script section tables
 0x0010BB88	scrProcCreateTask	inferred	wraps kwlnTaskCreate for a script-proc task; stores id at +0xE4
 0x0010BBE0	scrClearProcessGlobals	inferred	Clears both 256-element integer arrays of script process globals.
 0x0010BC18	scrCreateProcessTaskFromResource	inferred	Opens a script process from the supplied resource ID and option, then creates its scheduler task at the supplied priority.
 0x0010BC50	scrCreateProcessWithDefaultOption	inferred	Calls func_0010BB28 with its second argument zero.
 0x0010BC68	scrCreateTaskForProcessId	inferred	Creates a script process from the provided task identifier and option, then registers it with kwlnTaskCreate.
 0x0010BCA0	scrCreateTaskWithDefaultOption	inferred	Calls func_0010BA18 with its second argument zero.
+0x0010BD20	scrProcDestroyTask	inferred	logs process completion and releases the process buffers
+0x0010BF30	bfFindScriptIndexByName	inferred	legacy BF_FindScriptIndexByName: searches the FLW0 script-name table for an exact name
 0x0010C028	scrSetCurrentActor	inferred	Battle caller passes its actor into active script offset 0xF0; other callers clear it.
 0x0010C050	scrGetCurrentActor	inferred	Reads the active script actor pointer stored at offset 0xF0.
+0x0010C0C8	bfTaskUpdate	inferred	legacy BFTask_Update: per-frame BF task step; returns 1 to continue, -1 to terminate
 0x0010C120	scrPushInteger	inferred	Writes integer stack type 0 and the supplied value at the current script stack index, then increments it.
+0x0010C150	bfStackPushFloat	inferred	legacy BFStack_PushFloat: pushes a float onto the BF evaluation stack
 0x0010C180	scrPushString	inferred	Writes string stack type 5 and the supplied value at the current script stack index, then increments it.
 0x0010C1B0	scrPushTypeFourValue	inferred	Writes stack type 4 and the supplied value at the current script stack index, then increments it.
+0x0010C1E0	bfStackPopInt	inferred	legacy BFStack_PopInt: pops the top BF stack value as an integer
+0x0010C2B8	bfStackPopFloat	inferred	legacy BFStack_PopFloat: pops the top BF stack value as a float
 0x0010C3A0	scrPushNextInstructionValue	inferred	Advances the script program counter, pushes the following instruction word, then advances again.
 0x0010C3F0	scrPushImmediateInteger	inferred	Pushes the current instruction's signed operand onto the script stack as an integer.
 0x0010C438	scrPushImmediateFloat	inferred	Advances past the opcode and pushes the following instruction's float operand.
@@ -104,9 +112,16 @@
 0x0010C6D8	scrStoreGlobalFloat	inferred	Pops a float and stores it at the instruction-indexed global float slot.
 0x0010C730	scrStoreLocalInteger	inferred	Pops an integer and stores it at the instruction-indexed local integer slot.
 0x0010C788	scrStoreLocalFloat	inferred	Pops a float and stores it at the instruction-indexed local float slot.
+0x0010C7F8	bfOpWaitDispatch	inferred	legacy BFOp_WaitDispatch: BF opcode 8 - dispatch the wait callback from g_BFWaitDispatchTable
 0x0010C8D8	scrJumpProcedure	inferred	Loads the program counter from the selected procedure address.
 0x0010C908	scrCallProcedure	inferred	Saves the current program counter and jumps to a procedure address.
 0x0010C978	scrJumpLabel	inferred	Loads the program counter from the selected label address.
+0x0010C9A8	bfOpBinaryEval	inferred	legacy BFOp_BinaryEval: binary-op dispatcher (add/sub/mul/div/or/and/ne/eq/lt/gt/le/ge)
+0x0010CF70	bfOpNegate	inferred	legacy BFOp_Negate: negates the top BF stack value (int/float/global variants)
+0x0010D058	bfOpNot	inferred	legacy BFOp_Not: logical-not of the top BF stack value
+0x0010D2C0	bfOpJumpIfFalse	inferred	legacy BFOp_JumpIfFalseViaTableB8: pops a condition and branches via the context's 0xB8 table
+0x0010D380	bfContextStep	inferred	legacy BFContext_Step: dispatches the current BF opcode handler from g_BFOpcodeHandlerTable
+0x0010D4F0	bfWaitReadArgFloat	inferred	legacy BFWait_ReadArgFloat: reads a float-like argument from the BF wait stack
 0x0010D620	scrGetProcedureAddress	inferred	Returns address word at offset 0x18 of indexed script procedure record.
 0x0010D638	scrGetLabelAddress	inferred	Returns address word at offset 0x18 of indexed script label record.
 0x0010D650	scrGetProgramCounter	inferred	Returns current script state's program counter at offset 0x18.
@@ -117,6 +132,9 @@
 0x0010D6E8	scrCommandTestModelFlag	inferred	Tests the script-supplied model flag and stores its result in the script VM.
 0x0010D718	scrCommandSetModelFlag	inferred	Sets the model flag identified by the script operand.
 0x0010D740	scrCommandClearModelFlag	inferred	Clears the model flag identified by the script operand.
+0x0010D868	bfWaitCbScreenFadeA	inferred	legacy BFWaitCb_ScreenFadeModeA: wait callback for screen-fade mode A
+0x0010D908	bfWaitCbScreenFadeB	inferred	legacy BFWaitCb_ScreenFadeModeB: wait callback for screen-fade mode B
+0x0010DBD0	bfWaitCbCreateTask	inferred	legacy BFWaitCb_CreateTaskFromSectionIndex: creates a BF task from a context section slot + index
 0x0010F4F0	effObjNodeDestroy	inferred	unlinks +0x20/+0x24 list, calls owner notify at +0x4 with the node, frees via func_002CFF98
 0x0010F570	effObjInnerCreate	inferred	allocates 0xD0 inner node, inits vectors/flags via func_0010F660, links at +0x1C; returns 1 on success; 27/29 words match, blocked on $2/$3 scratch choice for +0xB0 address
 0x0010F5E8	effObjFreeInner	inferred	Frees an effect node's inner allocation if present and clears its pointer.
@@ -195,9 +213,13 @@
 0x00117578	evtScaleValueByMultiplier	inferred	Stores the scaled float as a supplied multiplier times the object's base float.
 0x00117588	evtGetValueScaleFactor	inferred	Returns the scaled float divided by its base float.
 0x001175F8	evtSpawnActionObj11	inferred	constructor for type 0x11
+0x001176A0	sdfCreateRuntimeTask	inferred	allocates/zeroes the 0x33600 GBWK runtime and schedules its tick task
+0x00117730	sdfDestroyRuntimeTask	inferred	destroys the GBWK task hierarchy and frees the runtime allocation
 0x00117780	sdfBumpTickCounters	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118310	sdfResetChannels	inferred	resets the 8 channel entries
+0x00118368	ptyComputeMaxHp	inferred	enemy base max HP, or HP script result capped at 999 for party units
+0x00118408	ptyComputeMaxMp	inferred	MP counterpart of ptyComputeMaxHp
 0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118DD8	sdfQueryChannelBits	inferred	returns active channel bits masked by packed flags
@@ -206,13 +228,20 @@
 0x001192D8	datMoveCursorY	inferred	Adds the supplied delta to cursor y and clamps to zero through yMax.
 0x001199B0	evtCheckValueThreshold	inferred	evt event state and dispatch in game/code_00119900.c
 0x00119AA8	dds3FindEntryIndex	inferred	counts entries until +4 == arg0 with flag set; returns count or -1 (max 5)
+0x00119E00	ptyRecoverAllUnits	inferred	legacy Party_RecoverAllActiveUnits: restores HP/MP of every present active party row
 0x0011A038	evtUpdateFlaggedStats	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011A0C0	evtHasMatchingFlaggedEntry	inferred	evt event state and dispatch in game/code_00119900.c
+0x0011A238	ptyInitRuntime	inferred	legacy Party_InitRuntimeState: initialises the serialized active-party runtime rows
 0x0011A580	dds3Clamp99	inferred	clamps u16 at +0x14 to max 99 via movz
 0x0011A598	dds3FindEntry	inferred	finds Entry1A4 with +4 == arg0 and flag set; returns pointer or NULL
+0x0011A5E8	ptyRebalanceFrontline	inferred	legacy Party_RebalanceFrontlineBitAfterRemoval: rebalances the frontline bit after a party removal
 0x0011A988	dds3EntryMax	inferred	max of +0x14 over flag-set Entry1A4 entries (5 iters, stride 0x1A4)
+0x0011A9C8	ptyGetAverageLevel	inferred	legacy Party_GetActiveAverageLevelCeil: ceil of the average level across present active rows
+0x0011AA28	ptyAddUnit	inferred	legacy Party_AddUnitById: adds a unit to the active party from the stock row
+0x0011AE78	ptyRemoveUnit	inferred	legacy Party_RemoveUnitById: removes a unit from the active party back to stock
 0x0011B438	evtUpdateFlaggedEntries	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011B4C8	dds3ForEachEntry	inferred	calls 00119900(unk0, unk2) for non-zero-flag entries of 2-entry table D_0032AEE8
+0x0011B528	ptyMergeStockSkills	inferred	legacy PartyUnit_MergeStockSkillBitsAndRefresh: OR-merges stock skill nibble words and refreshes the row
 0x0011B640	dds3ForEachFlagged	inferred	calls 0011B528(p) for flag-set Entry1A4 entries (5 iters)
 0x0011B878	evtRunContext	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011B908	dds3WorkInit	inferred	stores 0010BCA0 result to D_003BAAB4 then memsets 0x18 bytes at D_003C2E70
@@ -1119,6 +1148,8 @@
 0x00241BB8	evtGetTaskData	inferred	finds task by id then returns its data pointer via 00101A70, or 0
 0x00241CA0	evtRefreshTaskData	inferred	rebuilds taskdata+0x38 via func_00241BF0/func_002D3288/effSetCh72Id, freeing old
 0x00242278	evtFreeEventPackState	inferred	Frees the state returned by func_00101A70.
+0x00242298	evtCreateMotionSeTask	inferred	creates the named mse task and retains its three arguments
+0x00242510	evtReleaseEventPackResources	inferred	frees effect handles, resources, then event pack storage
 0x00242608	mnuCampCreateTask	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00242698	campDestroyTaskById	inferred	Finds the current camp task by ID and destroys it when present.
 0x002426D0	campDestroyAllTasks	inferred	Repeatedly destroys camp tasks registered under task identifier 0x3EC.
@@ -1269,16 +1300,29 @@
 0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26
 0x002605B0	mnuSetCommandPhase	inferred	Stores a phase code in menu command work and resets its elapsed frame counter.
 0x002605C0	mnuStaffTickState	inferred	mnu 4-state counter returning next state
+0x00262050	ptyClampExp	inferred	legacy PartyUnit_ClampExpToLevel99Cap: clamps a unit's accumulated EXP to the level-99 cap
+0x00262148	brsApplyPartyRewards	inferred	legacy BattleResult_ApplyPartyRewardDeltas: applies EXP/level/profile deltas to a party row
+0x002622B0	brsApplyRewardBundle	inferred	legacy BattleResult_ApplyRewardBundle: applies the 3-entry counter-table helper, the row-macca helper, then brsApplyPartyRewards
+0x00262300	brsOpenSkillPackagePanel	inferred	legacy ProfileCapReward_OpenPendingSkillPackagePanel: builds the panel group/list entries and forwards the current row's profile-cap table byte
 0x00262418	mnuStaffInitPanel	inferred	mnu loads nr_sta01.spr resources and fades in
+0x00262570	brsMarkPartyRows	inferred	legacy BattleResult_MarkPartyRowsFromDeltaList: marks party rows from a delta list payload
+0x00262640	brsTaskLatchPendingRows	inferred	legacy BattleResultTask_LatchHasPendingFollowupRows: latches data_3bc529 from ctx+0x344
+0x00262660	brsCreateTaskContext	inferred	legacy BattleResultTask_CreateContextAndBuildRows: allocates the result task context and builds its rows
 0x00262818	mnuStaffCreateTasks	inferred	mnu creates the three staff roll tasks (405/2B15/5211 priorities)
 0x002628C8	mnuStaffDestroyTasks	inferred	mnu destroys the three staff roll tasks and marks state 1
+0x00262AC0	mnuRefreshSelectedUnitPanels	inferred	legacy LevelUpMenu_RefreshSelectedUnitPanels: refreshes the selected-unit stat/vital panel slots after a preview/restore change
 0x00262AF8	mnuStaffCopyPanelBlock	inferred	mnu copies a 0x1A4 byte panel block into work+0x9C
 0x00262BA8	mnuStaffPickRoll	inferred	mnu picks a table entry by a random byte
+0x00262C08	brsSelectLevelBonusMode	inferred	legacy LevelUpReward_SelectPostLevelBonusMode: writes ctx+0x1588 reward mode and ctx+0x158C random stat index
+0x00262CE8	brsSelectNextUnit	inferred	legacy BattleResult_SelectNextPendingUnitAndSetupPanels: picks the next pending unit and sets up its panels
+0x00262EB8	brsMessageInputStep	inferred	legacy BattleResultTask_MessageAndInputStep: message/input step of the result task
 0x00262F90	mnuStaffRunPanel1	inferred	mnu staff panel wrapper mode 1
 0x00262FF0	mnuStaffRunPanel2	inferred	mnu staff panel wrapper mode 2
 0x00263148	kwlnItemApplySelection	inferred	validates selected item and marks scene flag when resource 0x910 is absent
 0x00263220	mnuProcessItemSelection	inferred	Calculates the selected item's action output at scene offset 0x244 and applies the current item selection.
+0x00263260	prfCapPresentMessages	inferred	legacy ProfileCapReward_PresentStatusMessages: presents the profile-cap reward status messages
 0x00263378	kwlnItemDismissOverlay	inferred	calls paired overlay shutdown routines and clears scene bit zero
+0x00263408	prfCapTaskStep	inferred	legacy ProfileCapReward_TaskStep: profile-cap reward task step
 0x00263608	mnuResetItemSelectionMarkers	inferred	Clears two menu scene markers at offsets 0x240 and 0x3C4.
 0x002639E0	mnuDrawItemPanelBackdrop	inferred	Draws the scene's embedded item panel backdrop using mnuDrawBackdrop.
 0x00263D70	mnuInitializeItemSelectionExtent	inferred	Computes a clamped extent from five signed item components, clears menu slots, and refreshes an existing resource.
@@ -1288,15 +1332,27 @@
 0x00264A60	itfRunPanelMode1	inferred	itf panel wrapper mode 1
 0x00264AB8	itfRunPanelMode2	inferred	itf panel wrapper mode 2
 0x00264E90	itfUpdateFadeColor	inferred	itf updates colour fade
+0x00265088	brsStepAnimDecay	inferred	legacy BattleResultUi_StepSharedAnimCounterDecay: decays the shared result animation counter
 0x002650B0	mnuGetTitleState	inferred	Returns the title work state at offset 0x1574.
 0x002650B8	mnuClearTitleState	inferred	Zeros the title work state at offset 0x1574.
 0x00265220	itfDrawCountText	inferred	itf formats count text and draws right aligned
 0x00265478	mnuRefreshPanelLayer	inferred	redraws panel pieces then calls func_002653A0
+0x002655A0	ptyComputeTotalExp	inferred	legacy UnitGrowth_ComputeTotalExpForLevelDelta: sums the per-unit EXP step table at 0x36F40C + unit_id*0x190
+0x00265610	brsCalcApGain	inferred	legacy BattleResult_CalcUnitApGainWithBonus: AP gain for a unit with its bonus, or 0 when ineligible
+0x00265648	brsCalcExpGain	inferred	legacy BattleResult_CalcUnitExpGainWithPassives: EXP gain for a unit with passive-skill modifiers
 0x002656C0	mnuIsTitleEntryAvailable	inferred	mnu menu, title, shop, or movie UI in game/code_002653A0.c
+0x00265700	brsBuildRewardRows	inferred	legacy BattleResult_BuildPartyRewardRows: builds the per-unit reward rows from the result summary
+0x002658B8	ptyCalcLevelUps	inferred	legacy PartyUnit_CalcPendingLevelUpsFromExp: pending level-ups from the saved EXP/level pair
 0x00265968	mnuCountAdvancingTitleAnimations	inferred	Counts the five title entries whose animation advance helper reports a positive step.
+0x002659C8	brsBuildLevelUpList	inferred	legacy BattleResult_BuildLevelUpUnitList: builds the list of units that levelled up
+0x00265AB8	brsBuildProfileCapList	inferred	legacy BattleResult_BuildProfileCapReadyUnitList: builds the list of units ready for a profile cap
 0x00265BE0	mnuAdvanceTitleEntryAnimation	inferred	mnu menu, title, shop, or movie UI in game/code_002653A0.c
 0x00265C28	btlAddBaseStats	inferred	adds five signed stat bytes with cap 99
+0x00265C90	ptyAccumulateStatGains	inferred	legacy UnitGrowth_AccumulateStatGains: accumulates 5-stat growth deltas from 0x36D4C8 + unit_id*0x1F0
+0x00265E68	ptyBuildProfileCapSkillList	inferred	legacy PartyUnit_BuildNewState0SkillListAtProfileCap: cap-reward skill transition builder
 0x00265FD8	mnuInitTitleParameters	inferred	Clears and initializes the four input words for a title-screen parameter group.
+0x00266048	brsBuildUnitProgressRow	inferred	legacy BattleResult_BuildUnitExpAndProfileProgressRow: fills one battle-result unit summary row
+0x002661A8	brsBuildActiveUnitProgressRows	inferred	legacy BattleResult_BuildActiveUnitProgressRows: clears and appends one 0x2C row per present active unit
 0x002693E0	mnuSetTitleSequenceVolumePan	inferred	Passes the sequence argument to sndSetSequenceVolumePan with volume 0x7F and pan 0x3F.
 0x00269500	mnuIncrementTitleEffectFrameCounter	inferred	Increments the frame counter at offset four in title effect state.
 0x00269530	mnuDestroyTitleEffectTask	inferred	Task destructor frees its bound TitleEffectState and clears the stored task handle.
@@ -1349,15 +1405,29 @@
 0x00273200	mnuReleaseStaffExtraWindow	inferred	Releases the third window handle in staff display resources.
 0x00273470	freeStaffDisplayResources	inferred	Releases linked display resources and returns success
 0x00273718	mnuStaffRunPanel2b	inferred	mnu panel wrapper mode 2
+0x002744E0	mnuSwapEquippedBullet	inferred	updates previous/new equipped bullet IDs and inventory
 0x00274BA8	mnuIsFinalItemIndex	inferred	Tests whether an item index has reached the last index given the count at offset 0x20.
 0x00274F00	menuCopyPartyEntries	inferred	copies the five 0x1A4-byte party entries from the save data into the menu work (+0x840) and counts active ones (max 3)
 0x00275880	mnuShopReleaseResources	inferred	mnu menu, title, shop, or movie UI in game/code_00274B80.c
+0x00277A50	ptySkillMenuBuildEquippedSlots	inferred	legacy PartySkillMenu_BuildEquippedSlotList: builds the equipped-skill page for the selected unit, marking rows by current slot membership
+0x00277D38	ptySkillMenuRebuildAfterMutation	inferred	legacy PartySkillMenu_RebuildAfterMutation: rebuilds the equipped-skill list after an assign/remove, then rebinds selection and viewport defaults
+0x00277DF8	ptySkillMenuDrawEntry	inferred	legacy PartySkillMenu_DrawEntryCallback: per-row draw callback; handles placeholder rows and the nibble-bit2 marker visual
+0x002780D0	ptySkillMenuRefreshEntries	inferred	legacy PartySkillMenu_RefreshEntryStates: refreshes entry flags from PartyUnitData (equipped marker, nibble-bit2 page indicator)
 0x00278218	mnuBuildSkillCodeBitset	inferred	Enumerates 96 skill records and sets a bit for every nonzero code in their code lists.
 0x002782F8	mnuIsSkillCodeInBitset	inferred	Checks whether the supplied code's bit is present in the skill-code bitset.
+0x00278330	ptySkillMenuInitPages	inferred	legacy PartySkillMenu_InitAndBuildPages: initialises the 4-page skill menu and fills rows from nibble state + global profile bitset
 0x00278760	campMenuInit	inferred	allocates 0x38-byte menu work at context+0x90C and selects the initial label pair from the node type
+0x002788D0	ptySkillMenuShellUpdate	inferred	legacy PartySkillMenu_ShellTask_Update: shell task update for the party skill menu
 0x00278A90	campMenuDrawSlotLabel	inferred	menu draw: label from selected slot, func_0027CDD0 backdrop, menuRunPanel tail
 0x00278E28	campMenuHandleInput	inferred	clears flag 8 on the cursor node, plays input sound and forwards to the node handlers
+0x00278F50	ptySkillMenuHandleSelection	inferred	legacy PartySkillMenu_HandleSelectionInput: confirm/cancel/navigation; applies assign/remove and triggers rebuild + refresh
+0x00279160	ptySkillMenuHandleSlotReorder	inferred	legacy PartySkillMenu_HandleSlotReorderInput: handles slot reorder input in the party skill menu
+0x002793D0	ptySkillMenuCopyPageState	inferred	legacy PartySkillMenu_CopyCurrentPageViewStateToOverlay: copies the current page view state into the overlay buffer
+0x00279760	ptySkillMenuUseSelectedInField	inferred	legacy PartySkillMenu_TryUseSelectedSkillInField: tries to use the selected skill in the field
+0x00279BF8	ptySkillMenuHandlePageSwitch	inferred	legacy PartySkillMenu_HandlePageSwitchRebuild: rebuilds menu pages after a page switch
+0x00279D68	ptySkillMenuBrowseCandidatePages	inferred	legacy PartySkillMenu_BrowseCandidatePages: browses the candidate-skill pages
 0x0027A0E0	mnuDrawSelectionLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
+0x0027A540	ptySkillMenuBuildLinkageSkills	inferred	legacy PartySkillMenu_BuildAvailableLinkageSkillList: builds the list of available linkage skills
 0x0027A7B0	mnuResetSelection	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027AA68	mnuDrawListFrames	inferred	Draws up to three list frames from the current index, alternating x by row.
 0x0027AB10	campMenuDrawStatus	inferred	camp menu per-frame draw: label from selected slot, func_0027CDD0 backdrop, menuRunPanel tail
@@ -1418,7 +1488,11 @@
 0x00286170	mnuGetIndexedNonzeroEffect	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002861B8	lookupPartyTableValue	inferred	sums getIndexedNonzeroEffect over count entries then indexes D_0037CE42 (stride 3) into u16 tables D_0037CE18/1A
 0x002862E0	mnuGetAdjustedEntryValue	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
+0x002866D0	skillApplyFieldUseEffect	inferred	legacy SkillId_ApplyFieldUseEffectToEligiblePartyTargets
 0x002868E0	getAffinityKind	inferred	maps a 0x20000000-type affinity flag word of a 16-byte row at D_003BAA54 to a small enum (-1..7, -2 if 0x40000000)
+0x00286A18	ptyCountBulletItem	inferred	inventory quantity plus equipped instances across the party
+0x00286B48	battleItemApplyPermanentBonus	inferred	legacy BattleItemId_TryApplyPermanentBuildBonus: Noise items 0x50..0x56 stat bonuses
+0x00286D20	battleItemApplyDirectEffect	inferred	legacy BattleItem_TryApplyDirectItemEffect: pre-skill-use direct effect hook
 0x00286EA0	mnuGetMatchingPartyEntryMask	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00286FA0	stageTestSetEntryIndex	inferred	clamps a value to the model node's ref count and stores it in entry byte +1
 0x00287040	stageTestAddEntryValue	inferred	adds a float delta to entry field +0x18 (0x3C-byte entry table D_003DC5E8[4]) with lower clamp, then refreshes via func_002878D8
@@ -1719,18 +1793,69 @@
 0x002CBC98	sdfGridCursorDown	inferred	moves grid cursor forward one row
 0x002CBCF0	sdfGridCursorLeft	inferred	moves grid cursor back one column
 0x002CBD48	sdfGridCursorRight	inferred	Advances one eight-byte grid cell unless the current index is in the final column.
+0x002CC7D8	ptyClearProfileRecords	inferred	legacy PartyUnitProfileRecords_ClearAll: clears the save-backed profile-point sidecar block
+0x002CC808	ptySelectProfileStage	inferred	party/profile lane; legacy PartyUnit_SelectProfileStageAndInitCurrent: writes unit.current_profile from the 4-row stage table and initialises current_profile-related state
+0x002CC9C0	ptyApplyProfilePreset	inferred	legacy PartyUnit_ApplyProfilePresetForMode: scores the 4 static 12-profile preset rows and applies the best for the mode
+0x002CCB80	ptyLoadPresetSkillSlots	inferred	legacy PartyUnit_LoadPresetSkillSlots8AndMarkBit0: loads the 8 preset skill-slot ids and marks bit0
+0x002CCC18	ptyMarkPresetSkillPool	inferred	legacy PartyUnit_MarkPresetSkillPool40AndMaybeMergeStock: marks the 40-id preset skill pool and merges stock bits
+0x002CCCC0	ptyRebuildProfileSkills	inferred	legacy PartyUnit_RebuildProfileAndSkillState: full profile/skill rebuild (preset apply, profile flag store, skill list)
+0x002CCDC8	ptyRebuildAllProfiles	inferred	legacy Party_RebuildAllActiveProfileAndSkillState: runs ptyRebuildProfileSkills for every present active row
+0x002CCE60	ptyRecomputeMaxVitals	inferred	legacy PartyUnit_RecomputeEffectiveMaxVitalsAndRescaleCurrent: recompute effective max HP/MP then rescale current
+0x002CD0C0	ptyRecomputeMaxHpMp	inferred	legacy PartyUnit_RecomputeMaxHpMpAndClampCurrent: recompute effective max HP/MP and clamp current
+0x002CD2A8	prfGetCapValue	inferred	legacy ProfileId_GetCapValue: profile cap/target value from the profile table
+0x002CD2D0	ptySetProfileRecordToCap	inferred	legacy PartyUnitProfileRecord_SetToCap: sets the record's current profile points to the cap
+0x002CD310	ptyAddProfilePoints	inferred	legacy PartyUnit_AddCurrentProfilePointsClamped: adds clamped delta to the current-profile record points
+0x002CD398	prfDecodeFlagPair	inferred	legacy ProfileFlagPair_Decode: decodes profile_id into packed flag-pair coordinates
+0x002CD428	ptyApplyProfile	inferred	legacy PartyUnit_ApplyProfileById: completed-profile writer; sets profile flags/skill state for the given profile id
+0x002CD548	ptyTestProfileFlag0	inferred	legacy PartyUnit_TestProfileFlagBit0: tests profile flag bit0 in the g_GameState1+0x2E9F0 map
 0x002CD5B8	scrCheckStateBits	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CD630	ptySetProfileFlag1	inferred	legacy PartyUnit_SetProfileFlagBit1: sets profile flag bit1 in the g_GameState1+0x2E9F0 map
+0x002CD6B0	ptyTestProfileFlag1	inferred	legacy PartyUnit_TestProfileFlagBit1: tests profile flag bit1; drives profile-menu status/overlay
 0x002CD728	scrGetSelectedOperandIndex	inferred	Returns the VM operand's currently selected signed index.
+0x002CD730	ptyGetProfileRecord	inferred	legacy PartyUnitProfileRecord_Get: returns the 8-byte per-unit per-profile save sidecar record
+0x002CD768	ptyGetProfileRecordValue	inferred	legacy PartyUnitProfileRecord_GetValue: low dword of a profile record entry
+0x002CD788	ptyGetCurrentProfileRecord	inferred	legacy PartyUnitProfileRecord_GetCurrent: record pointer for unit.current_profile_id_55
+0x002CD7B8	ptyGetCurrentProfileId	inferred	legacy PartyUnit_GetCurrentProfileId: signed byte at PartyUnitData+0x55
 0x002CD7C0	scrSelectOperandIndex	inferred	Stores the selected VM operand index and updates its associated operand.
 0x002CD808	scrDecodePackedFlagIndex	inferred	Splits a script flag index into its packed word index and four-bit-slot shift.
 0x002CD828	scrSetFlag	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CD888	scrSetGlobalSeenBit	inferred	legacy SkillIdRange1AB_1FF_SetGlobalSeenBit: sets save-global seen bit at g_GameState1+0x2E9D0
+0x002CD8E8	scrTestGlobalSeenBit	inferred	legacy SkillIdRange1AB_1FF_TestGlobalSeenBit: tests save-global seen bit at g_GameState1+0x2E9D0
 0x002CD940	scrSetSecondaryScriptFlag	inferred	Sets bit two of the selected four-bit script flag slot.
 0x002CD998	scrClearSecondaryScriptFlag	inferred	Clears bit two of the selected four-bit script flag slot.
 0x002CD9F8	scrClearFlags	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDA48	scrGetSecondaryScriptFlag	inferred	Returns the bit-two mask for the selected script flag slot.
+0x002CDA98	ptyGetSkillNibbleState	inferred	legacy PartyUnitSkillNibble_GetState01: nibble state 2/1/0 from skill-slot nibble bits
+0x002CDB00	ptyHasSkill	inferred	legacy PartyUnit_HasSkillInSkillSlots: scans PartyUnitData.skill_ids_22[24] for skill_id
+0x002CDB40	ptyRemoveProfileSkills	inferred	legacy PartyUnit_RemoveProfileSkillsState1: iterates the profile skill list and prunes skills whose nibble state is 1
 0x002CDC40	scrFindSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CDD38	prfGetParamWord7b4	inferred	legacy ProfileId_GetParamWord_7b4: profile row param word at +0x7B4
+0x002CDD60	prfGetParamWord7b6	inferred	legacy ProfileId_GetParamWord_7b6: profile row param word at +0x7B6
+0x002CDD88	prfGetParamWord7b5	inferred	legacy ProfileId_GetParamWord_7b5: profile row param word at +0x7B5
 0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
+0x002CDE20	prfGetSkillAtIndex	inferred	legacy ProfileId_GetSkillAtIndex: profile skill id at index 0..7
+0x002CDE68	ptyCheckLevelAtLeastProfileParam7b6	inferred	legacy PartyUnit_CheckLevelAtLeastProfileParam7b6: unit level >= profile param word 0x7B6
+0x002CDEB8	ptyIsCurrentProfileId	inferred	legacy PartyUnit_IsCurrentProfileId: unit.current_profile_id_55 == profile_id
+0x002CDED0	prfBuildRawSkillList	inferred	legacy ProfileId_BuildRawSkillList: builds up to 8 nonzero raw skill ids for a profile id
+0x002CDFE8	prfBuildSkillList	inferred	legacy ProfileId_BuildSkillListForUnit: builds the effective skill list for a unit's current profile
+0x002CE170	prfBuildSkillListState0	inferred	legacy ProfileId_BuildSkillListForUnit_State0Only: wrapper calling the state0-only skill-list builder
+0x002CE188	prfCountProfileList	inferred	legacy ProfileIdList_CountUntilZeroOr8: counts nonzero req profile ids until zero or 8
+0x002CE1C8	ptyHasAllReqProfiles	inferred	legacy PartyUnit_AreAllProfilesInReqListFlagBit0: every req profile id holds flag bit0 on the unit
+0x002CE248	ptyReqProfileCountAtLeast	inferred	legacy PartyUnit_IsReqListFlagBit0CountAtLeast: count of req profiles with flag bit0 >= threshold
+0x002CE2E8	ptyProfileCountAtLeast	inferred	legacy PartyUnit_IsGlobalProfileCountAtLeastByClassGate: counts profile ids meeting a unit threshold with a class gate
+0x002CE380	ptyAreReqProfilesInParty	inferred	legacy Party_AreReqProfilesPresentInActiveParty: every req profile present on some active row
+0x002CE468	prfReqCheckUnitLevel	inferred	legacy ProfileReqEntry_CheckUnitLevelAtLeastByte4: requirement entry unit-level gate
+0x002CE480	prfReqCheckGlobalCounter	inferred	legacy ProfileReqEntry_CheckGlobalCounterAtLeastWord8: requirement entry global-counter gate
+0x002CE498	prfReqEvaluateRules	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks: profile requirement rule evaluator, opcode dispatch via the 0x3B3F20 jump table
+0x002CE698	prfReq54Evaluate	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks_NoFailOut: evaluates the two rule blocks without early failure
+0x002CE6B8	prfIsRequirementExcluded	inferred	legacy ProfileId_IsRequirementExcluded: profile id excluded from the requirement check
+0x002CE6E0	prfReq54GetWord1230	inferred	legacy ProfileReq54_GetWord_1230: requirement-54 param word at +0x1230
+0x002CE710	prfReqCheckWithFallback	inferred	legacy ProfileReq_CheckWithFallbackFlagTable: requirement gate with the fallback req->flag table at 0x3931B0
+0x002CE800	prfReqSelectGroup	inferred	legacy ProfileReq_SelectGroupIndexByPartyCounters: selects the first valid requirement-group index from party counters
+0x002CE8F0	prfReq18GetWord3220	inferred	legacy ProfileReq18_GetWord_3220: requirement-18 param word at +0x3220
+0x002CE910	prfReqGetPair	inferred	legacy ProfileReq18_GetPairByGroupAndIndex: fetches a pair from the requirement table row (group, index)
+0x002CE968	prfReq18GetWord3234	inferred	legacy ProfileReq18_GetWord_3234: requirement-18 param word at +0x3234
 0x002CF3C8	scrSetRgbAndAlpha	inferred	Splits a packed AARRGGBB color into its lower RGB word and upper alpha byte.
 0x002CF440	sdfCreateSemaphore	inferred	sdf system, device, DMA, or task infrastructure in game/code_002CC750.c
 0x002CF570	sdfFreeMemoryFromEitherHeap	inferred	Frees a pointer through the chip or other heap according to its address range.

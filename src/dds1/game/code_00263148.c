@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00265E68(u32, s32);
+extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -10,13 +10,13 @@ extern void func_0024DDC0(s32);
 
 extern void func_0024DA58(s32);
 
-extern s32 func_002CD788(void *);
+extern s32 ptyGetCurrentProfileRecord(void *);
 
-extern s32 func_002CD2A8(u16);
+extern s32 prfGetCapValue(u16);
 
-extern s32 func_002CD548(void *, u16);
+extern s32 ptyTestProfileFlag0(void *, u16);
 
-extern void func_002CD428(void *, u16);
+extern void ptyApplyProfile(void *, u16);
 
 extern void mdlFlagSet(s32);
 
@@ -50,11 +50,11 @@ typedef struct MenuItemScene {
 
 void kwlnItemApplySelection(MenuItemScene *scene) {
     MenuItem *item = *scene->items;
-    s32 *data = (s32 *)func_002CD788(item);
+    s32 *data = (s32 *)ptyGetCurrentProfileRecord(item);
     s8 selection = item->selection;
-    if (selection != 0 && func_002CD2A8((u16)selection) == *data &&
-        func_002CD548(item, (u16)(s8)item->selection) == 0) {
-        func_002CD428(item, (u16)(s8)item->selection);
+    if (selection != 0 && prfGetCapValue((u16)selection) == *data &&
+        ptyTestProfileFlag0(item, (u16)(s8)item->selection) == 0) {
+        ptyApplyProfile(item, (u16)(s8)item->selection);
         scene->selectionApplied = 1;
         if (mdlFlagTest(0x910) == 0) {
             scene->overlayFlags |= 1;
@@ -65,18 +65,21 @@ void kwlnItemApplySelection(MenuItemScene *scene) {
     }
 }
 
-u32 mnuProcessItemSelection(u32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
+/* Build the capped skill list for the currently selected menu entry. */
+u32 mnuProcessItemSelection(u32 context) {
+    u32 listState;
+    s32 scene;
 
-    temp_v1 = (s32)arg0;
-    temp_v0 = func_00265E68(**(u32 **)(temp_v1 + 0x98), temp_v1 + 0x4c4);
-    *(u32 *)(temp_v1 + 0x244) = temp_v0;
-    kwlnItemApplySelection(arg0);
+    scene = (s32)context;
+    /* Required to match: typed MenuItemScene field accesses change this
+     * compiler's alias scheduling and overrun the next retail function. */
+    listState = ptyBuildProfileCapSkillList(**(u32 **)(scene + 0x98), scene + 0x4c4);
+    *(u32 *)(scene + 0x244) = listState;
+    kwlnItemApplySelection(context);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263260);
+INCLUDE_ASM(const s32, "game/code_00263148", prfCapPresentMessages);
 
 s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
     if (scene->overlayFlags & 1) {
@@ -98,7 +101,7 @@ u32 func_002633D8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263408);
+INCLUDE_ASM(const s32, "game/code_00263148", prfCapTaskStep);
 
 static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
@@ -221,9 +224,9 @@ void mnuClearItemSelectionSlots(MenuItemScene *scene) {
     } while (-1 < remaining);
 }
 
-void func_00263E70(u32 arg0, u32 arg1) {
-    func_002CCE60(arg0, (s32)arg1 + 0x3d0);
-    func_00262AC0(arg0, arg1);
+void func_00263E70(u32 unit, u32 menu) {
+    ptyRecomputeMaxVitals(unit, (s32)menu + 0x3d0);
+    mnuRefreshSelectedUnitPanels(unit, menu);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);

@@ -49,7 +49,7 @@ u32 func_0010F118(void) {
 }
 
 u32 func_0010F140(void) {
-    func_0011A700();
+    ptyRecoverAllUnits();
     return 1;
 }
 

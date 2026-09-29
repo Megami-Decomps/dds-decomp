@@ -33,16 +33,16 @@ void func_0010C070(u32 task) {
 
     previousContext = func_00101A70();
     if (previousContext != 0) {
-        func_0010BD20(previousContext);
+        scrProcDestroyTask(previousContext);
     }
     func_00101A68(task, 0);
 }
 
 void func_0010C0B0(void) {
-    func_0010D380();
+    bfContextStep();
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", func_0010C0C8);
+INCLUDE_ASM(const s32, "game/code_0010C028", bfTaskUpdate);
 
 void scrPushInteger(ScriptContext *script, u32 value) {
     script->stackTypes[script->sp] = 0;
@@ -50,7 +50,7 @@ void scrPushInteger(ScriptContext *script, u32 value) {
     script->sp = script->sp + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", func_0010C150);
+INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPushFloat);
 
 void scrPushString(ScriptContext *script, u32 value) {
     script->stackTypes[script->sp] = 5;
@@ -64,9 +64,9 @@ void scrPushTypeFourValue(ScriptContext *script, u32 value) {
     script->sp = script->sp + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", func_0010C1E0);
+INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopInt);
 
-INCLUDE_ASM(const s32, "game/code_0010C028", func_0010C2B8);
+INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopFloat);
 
 u32 scrPushNextInstructionValue(ScriptContext *script) {
     s32 nextPc;

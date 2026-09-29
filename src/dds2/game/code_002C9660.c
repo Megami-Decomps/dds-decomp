@@ -470,7 +470,24 @@ void func_002C9660(void) {
     func_0034F490();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002C9678);
+extern s32 func_0034F680(s32, s32 *, s32 *);
+
+s32 func_002C9678(void) {
+    u32 cmdId;
+    s32 status;
+    s32 result = func_0034F680(1, &cmdId, &status);
+
+    if (result == 1) {
+        if (status >= 0) {
+            return result;
+        }
+        if (status == -4) {
+            return -2;
+        }
+        return -1;
+    }
+    return 0;
+}
 
 void func_002C96D0(void) {
     if (D_00437CD8 != 0) {
@@ -1894,7 +1911,7 @@ FileJob *fileJobCreate(void) {
     return job;
 }
 
-void func_002D4120(void) {
+void func_002D4120(FileJob *job) {
     func_00328E48();
 }
 
@@ -1906,7 +1923,20 @@ void func_002D4380(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4398);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4548);
+/* A queued job's +0x90 word is a child pointer when flag 1 is clear; it is
+ * an ID for other job kinds. Destroy children before their parent jobs. */
+void fileQueueDestroy(FileQueue *queue) {
+    FileJob *job = queue->first;
+    while (job != NULL) {
+        FileJob *next = job->next;
+        if ((job->flags & 1) == 0) {
+            fileJobDestroy((FileJob *)job->id);
+        }
+        func_002D4120(job);
+        job = next;
+    }
+    func_00328E48(queue);
+}
 
 FileQueue *fileQueueClone(FileQueue *source) {
     FileQueue *queue = fileQueueCreate();

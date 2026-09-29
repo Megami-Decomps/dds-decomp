@@ -53,7 +53,7 @@ void func_00265080(void) {
 }
 
 /* Scales the value at +0x1574 down by 1.2. */
-void func_00265088(u8 *work) {
+void brsStepAnimDecay(u8 *work) {
     *(s32 *)(work + 0x1574) = (s32)((f32)*(s32 *)(work + 0x1574) / 1.2f);
 }
 

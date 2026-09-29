@@ -593,8 +593,8 @@ u32 *func_002850D8(s32 source) {
     u32 second;
     memset(item, 0, 0x3c);
     first = scrGetSelectedOperandIndex(source);
-    second = func_002CD788(source);
-    func_002850C8(item, func_002CD2A8((u16)first), *(u32 *)second);
+    second = ptyGetCurrentProfileRecord(source);
+    func_002850C8(item, prfGetCapValue((u16)first), *(u32 *)second);
     item[14] = 0x100;
     return item;
 }
@@ -967,7 +967,7 @@ u32 func_002866C8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002866D0);
+INCLUDE_ASM(const s32, "game/code_00282850", skillApplyFieldUseEffect);
 
 u8 func_002868C0(u32 arg0) {
     return *(s8 *)((arg0 & 0xffff) * 2 + D_003BAA4C) == '\x01';
@@ -1034,7 +1034,33 @@ s32 func_00286A00(s32 arg0) {
     return arg0 < 0x7f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286A18);
+u16 func_00286AD0(s32 arg0);
+
+typedef struct PtyBulletInventory {
+    u8 pad00[0x12A0];
+    u8 itemCount[0xBF];      /* 0x12A0: indexed by item ID */
+} PtyBulletInventory;
+
+/* Count a bullet item in the active party: inventory plus one per unit
+ * that has the item equipped. Only IDs 0xA0..0xBE are bullet items. */
+s32 ptyCountBulletItem(s32 bulletId) {
+    s32 count;
+    s32 i;
+
+    if (bulletId < 0xA0) {
+        return 0;
+    }
+    if (bulletId >= 0xBF) {
+        return 0;
+    }
+    count = ((PtyBulletInventory *)D_003BAA00)->itemCount[bulletId];
+    for (i = 0; i < 5; i++) {
+        if (bulletId == func_00286AD0(D_003BAA00 + i * 0x1A4 + 0xA60)) {
+            count++;
+        }
+    }
+    return count;
+}
 
 u32 func_00286AC0(s32 arg0, u16 arg1) {
     *(u16 *)(arg0 + 0x52) = arg1;
@@ -1048,9 +1074,9 @@ u16 func_00286AD0(s32 arg0) {
 extern u16 D_0037CE00[];
 INCLUDE_ASM(const s32, "game/code_00282850", func_00286AD8);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286B48);
+INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyPermanentBonus);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286D20);
+INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyDirectEffect);
 
 s32 mnuGetSelectionFromFlags(s32 entry) {
     u16 flags = *(u16 *)(entry + 0xe);

@@ -19,7 +19,17 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0023AA30);
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023AB58);
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0023AC80);
+extern void func_0035C860(char *, char *, ...);
+extern char D_00453698[];
+extern char D_00421588[];
+
+/* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
+void func_0023AC80(s32 eventId) {
+    func_0035C860(D_00453698, D_00421588, eventId - eventId % 10, eventId, eventId);
+    scrCreateProcessTaskFromResource(0x3EB, D_00453698, 0);
+}
+
+INCLUDE_RODATA(const s32, "event/evtStage", D_00421588);
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023ACE8);
 
