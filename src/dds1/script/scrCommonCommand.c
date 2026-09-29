@@ -37,7 +37,15 @@ s32 func_0010D7A0(void)
     return scrGetCommandTimer() != 0;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D7C0);
+s32 func_0010D7C0(void) {
+    if (func_0010D428(0) <= 0) {
+        return 1;
+    }
+    if (scrGetCommandTimer() < func_0010D428(0)) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_0010D808(void)
 {
