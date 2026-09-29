@@ -34,37 +34,38 @@ INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AD98);
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AE10);
 
+/* The five signed config bytes reserve space before the selected entry width. */
 u32 mnuResetSelectionWidthsFromConfig(void) {
-    s8 current;
+    s8 widthByte;
     MenuLayoutContext *context;
-    u32 *destination;
-    s8 *source;
+    u32 *widthSlot;
+    s8 *configWidths;
     s32 remaining;
     s32 selectionWidth;
-    s32 totalWidth;
+    s32 reservedWidth;
 
     context = (MenuLayoutContext *)func_00101958();
-    totalWidth = 0;
+    reservedWidth = 0;
     remaining = 4;
     selectionWidth = context->config[1] * 3;
-    source = (s8 *)(*context->config + 0x16);
+    configWidths = (s8 *)(*context->config + 0x16);
     do {
-        current = *source;
-        source = source + 1;
+        widthByte = *configWidths;
+        configWidths = configWidths + 1;
         remaining = remaining - 1;
-        totalWidth = totalWidth + current;
+        reservedWidth = reservedWidth + widthByte;
     } while (-1 < remaining);
     context->margin = 0;
     remaining = 4;
-    destination = &context->widths[4];
-    if (0x1ef - totalWidth < selectionWidth) {
-        selectionWidth = 0x1ef - totalWidth;
+    widthSlot = &context->widths[4];
+    if (0x1ef - reservedWidth < selectionWidth) {
+        selectionWidth = 0x1ef - reservedWidth;
     }
     context->selectionWidth = selectionWidth;
     do {
         remaining = remaining - 1;
-        *destination = 0;
-        destination = destination + -1;
+        *widthSlot = 0;
+        widthSlot = widthSlot + -1;
     } while (-1 < remaining);
     if (context->visible != 0) {
         func_002C0CF8(context->resource, 0);

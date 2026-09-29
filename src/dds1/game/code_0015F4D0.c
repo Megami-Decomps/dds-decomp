@@ -24,6 +24,8 @@ typedef struct BillEntry {
 typedef struct BillEntryOwner {
     u8 pad00[0x14];
     BillEntry *entries;
+    u8 pad18[4];
+    u32 value1C; /* matches DDS2 EffectDispatchState at +0x1C */
 } BillEntryOwner;
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F4D0);
@@ -56,6 +58,7 @@ void func_0015F6E8(BillObj *effect, void *value) {
     effect->unk60 = value;
 }
 
+/* A value staged with no pending work is immediately mirrored to the active slot. */
 void effBillSetWorkValue(BillWork *work, u8 value) {
     if (work->pendingCount == 0) {
         work->stagedValue = value;
@@ -67,8 +70,8 @@ u8 func_0015F708(BillWork *work) {
     return work->currentValue;
 }
 
-void func_0015F710(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x1c) = arg1;
+void func_0015F710(BillEntryOwner *owner, u32 value) {
+    owner->value1C = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F718);

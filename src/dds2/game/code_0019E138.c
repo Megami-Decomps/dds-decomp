@@ -39,20 +39,17 @@ typedef struct TextStream {
     s8 unk1C;        /* 0x1C: set once an opcode has run */
 } TextStream;
 
-typedef struct SndReq {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-} SndReq;
+typedef struct TextDrawArgs {
+    s32 x;         /* 0x00 */
+    s32 y;         /* 0x04 */
+    s32 z;         /* 0x08 */
+    u8 color[4];   /* 0x0C */
+    s32 unk10;     /* 0x10 */
+    s32 unk14;     /* 0x14 */
+    s32 unk18;     /* 0x18 */
+    u8 unk1C;      /* 0x1C */
+    u8 unk1D;      /* 0x1D */
+} TextDrawArgs;
 
 s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
@@ -60,21 +57,21 @@ extern u32 D_004528C0[];
 
 /* Field block split by func_00198038. */
 typedef struct MemBlock {
-    s32 unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-    u8 unk8[0x10]; /* 0x8 */
-    s32 unk18; /* 0x18 */
+    s32 firstOffset; /* 0x0 */
+    s32 secondDelta; /* 0x4 */
+    u8 pad08[0x10]; /* 0x8 */
+    s32 thirdDelta; /* 0x18 */
 } MemBlock;
 
 typedef struct MemOut {
-    void *unk0; /* 0x0 */
-    void *unk4; /* 0x4 */
-    void *unk8; /* 0x8 */
+    void *first; /* 0x0 */
+    void *second; /* 0x4 */
+    void *third; /* 0x8 */
 } MemOut;
 
 /* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
 typedef struct MemNode {
-    u32 unk0;              /* 0x0 */
+    u32 index;             /* 0x0 */
     struct MemNode *next;  /* 0x4 */
 } MemNode;
 
@@ -202,20 +199,20 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 extern void func_0019EDC0();
 
 void func_0019EEE8(s32 arg0, s32 arg1) {
-    SndReq req;
-    req.unk0 = 0;
-    req.unk4 = 0;
-    req.unk8 = 0;
-    req.unkC = 0;
-    req.unkD = 0;
-    req.unkE = 0;
-    req.unkF = 0;
-    req.unk10 = arg0;
-    req.unk14 = arg1;
-    req.unk18 = 0;
-    req.unk1C = 1;
-    req.unk1D = 1;
-    func_0019EDC0(&req);
+    TextDrawArgs args;
+    args.x = 0;
+    args.y = 0;
+    args.z = 0;
+    args.color[0] = 0;
+    args.color[1] = 0;
+    args.color[2] = 0;
+    args.color[3] = 0;
+    args.unk10 = arg0;
+    args.unk14 = arg1;
+    args.unk18 = 0;
+    args.unk1C = 1;
+    args.unk1D = 1;
+    func_0019EDC0(&args);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EF38);
@@ -230,6 +227,7 @@ void mnuUnloadStaffFonts(void) {
     frFontFreeEntry(5);
 }
 
+/* DDS2 uses the larger 0xA10-entry glyph table; 0xFFFF is missing. */
 u32 func_0019F098(u32 value) {
     s32 adjusted = (value & 0xffff) + 0xffff7f80;
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
@@ -240,6 +238,7 @@ u32 func_0019F098(u32 value) {
     return 0xffff;
 }
 
+/* Preserve single-byte text and substitute 0x8080 for unmapped glyph pairs. */
 void itfConvertText(u8 *output, const char *input) {
     s32 i;
     s32 length = strlen(input);
@@ -262,17 +261,18 @@ void itfConvertText(u8 *output, const char *input) {
     }
 }
 
-void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
-                                    u64 arg4, u64 arg5) {
-    u64 temp_v0;
+/* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
+void func_0019F1B8(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+                                    u64 glyphSource, u64 parent) {
+    u64 glyph;
 
-    temp_v0 = func_0019CE10(arg4, 0, 0, 0, 0);
-    func_0019D088(temp_v0, 0x10, 0x12);
-    func_0019D100(temp_v0, arg0, arg1);
-    func_0019D110(temp_v0, arg2 << 4);
-    frFontSetChildColors(temp_v0, arg3);
-    frFontSetFlagAndMeasureGlyphs(temp_v0, 0xfffffffffffffffc);
-    frFontLinkGlyph(arg5, temp_v0, 0);
+    glyph = func_0019CE10(glyphSource, 0, 0, 0, 0);
+    func_0019D088(glyph, 0x10, 0x12);
+    func_0019D100(glyph, arg0, arg1);
+    func_0019D110(glyph, arg2 << 4);
+    frFontSetChildColors(glyph, colors);
+    frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
+    frFontLinkGlyph(parent, glyph, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F280);
@@ -304,48 +304,51 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F6C8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F798);
 
-void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
-                                    u64 arg4, u64 arg5) {
-    u64 temp_v0;
+/* The sequel uses the negative flag variant on its alternate 12x16 glyph. */
+void func_0019F878(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+                                    u64 glyphSource, u64 parent) {
+    u64 glyph;
 
-    temp_v0 = func_0019CE78(arg4, 0, 0, 0, 0);
-    func_0019D088(temp_v0, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs(temp_v0, 0xfffffffffffffffd);
-    func_0019D100(temp_v0, arg0, arg1);
-    func_0019D110(temp_v0, arg2 << 4);
-    frFontSetChildColors(temp_v0, arg3);
-    frFontLinkGlyph(arg5, temp_v0, 0);
+    glyph = func_0019CE78(glyphSource, 0, 0, 0, 0);
+    func_0019D088(glyph, 0xc, 0x10);
+    frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffd);
+    func_0019D100(glyph, arg0, arg1);
+    func_0019D110(glyph, arg2 << 4);
+    frFontSetChildColors(glyph, colors);
+    frFontLinkGlyph(parent, glyph, 0);
 }
 
+/* Count 0xFx0F separators in the packed text stream. */
 s32 func_0019F940(char *text) {
-    s32 count = 0;
+    s32 separatorCount = 0;
 
     while (*text != 0) {
         if ((*(u8 *)text & 0xF0) == 0xF0) {
             if (text[1] == 0xF) {
-                count++;
+                separatorCount++;
             }
             text++;
         }
         text++;
     }
-    return count;
+    return separatorCount;
 }
 
-void func_0019F990(char *src, char *dst, s32 segment) {
-    s32 current = 0;
+/* Copy one plain-text segment; other two-byte control codes pass through. */
+void func_0019F990(char *src, char *dst, s32 segmentIndex) {
+    s32 currentSegment = 0;
 
     while (*src != 0) {
         if ((*(u8 *)src & 0xF0) == 0xF0) {
             if (src[1] == 0xF) {
-                current++;
+                currentSegment++;
             } else {
                 dst[0] = *(u8 *)src;
                 dst[1] = src[1];
                 dst += 2;
             }
             src++;
-        } else if (current == segment) {
+        } else if (currentSegment == segmentIndex) {
             *dst = *(u8 *)src;
             dst++;
         }
@@ -386,13 +389,13 @@ u32 func_001A0060(u32 arg0) {
 }
 
 void itfSplitRelativeSegments(MemBlock *block, MemOut *segments) {
-    s32 firstOffset = block->unk0;
-    s32 secondOffset = firstOffset + block->unk4;
-    s32 thirdOffset = secondOffset + block->unk18;
+    s32 firstOffset = block->firstOffset;
+    s32 secondOffset = firstOffset + block->secondDelta;
+    s32 thirdOffset = secondOffset + block->thirdDelta;
 
-    segments->unk0 = (u8 *)block + firstOffset;
-    segments->unk4 = (u8 *)block + secondOffset;
-    segments->unk8 = (u8 *)block + thirdOffset;
+    segments->first = (u8 *)block + firstOffset;
+    segments->second = (u8 *)block + secondOffset;
+    segments->third = (u8 *)block + thirdOffset;
 }
 
 u32 func_001A0098(u32 arg0) {
@@ -405,33 +408,34 @@ extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void *memcpy(void *, const void *, u32);
 
+/* The header before each payload forms a circular free-node list. */
 u8 *func_001A01D8(s32 payload, s32 count) {
     s32 handle = func_003292A8((payload + 8) * (count + 1) + 4);
     u8 *list = sdfResourceRetainAddress(handle);
-    u8 *node;
-    u8 *next;
+    MemNode *node;
+    MemNode *next;
     s32 i = 0;
     memcpy(list, &handle, 4);
     list += 4;
-    node = list;
+    node = (MemNode *)list;
     if (count > 0) {
         do {
-            *(s32 *)node = i;
+            node->index = i;
             i++;
-            next = node + payload + 8;
-            *(u8 **)(node + 4) = next;
+            next = (MemNode *)((u8 *)node + payload + 8);
+            node->next = next;
             node = next;
         } while (i < count);
     }
-    *(s32 *)node = count;
-    *(u8 **)(node + 4) = list;
+    node->index = count;
+    node->next = (MemNode *)list;
     return list;
 }
 
 void *itfDequeueMemNode(MemNode *queue) {
     MemNode *head = queue->next;
 
-    if (head->unk0 == 0) {
+    if (head->index == 0) {
         return NULL;
     }
     queue->next = head->next;
@@ -471,14 +475,21 @@ void func_001A0338(void) {
 
 extern s32 func_00305C40();
 
+typedef struct TextBackgroundSprite {
+    u8 pad00[0xC];
+    s16 width;
+    s16 height;
+} TextBackgroundSprite;
+
 void func_001A0350(void) {
     s32 origin[4];
     s32 color[4];
     s16 width;
     s16 height;
-    if (D_00438F24 != 0) {
-        width = *(s16 *)(D_00438F24 + 0xC);
-        height = *(s16 *)(D_00438F24 + 0xE);
+    TextBackgroundSprite *panel = (TextBackgroundSprite *)D_00438F24;
+    if (panel != NULL) {
+        width = panel->width;
+        height = panel->height;
         origin[0] = 0;
         origin[1] = 0;
         origin[2] = width;
@@ -498,17 +509,18 @@ void func_001A0438(void) {
     func_001A0338();
 }
 
+/* Return an all-bits-set ready mask only while the registered task is in state 3. */
 u32 func_001A0458(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 taskState;
+    u32 readyMask;
 
     func_001A0350();
-    temp_v0 = kwlnTaskGetRegisteredState(D_00436590);
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 3) {
-        temp_v1 = 0;
+    taskState = kwlnTaskGetRegisteredState(D_00436590);
+    readyMask = 0xffffffff;
+    if (taskState != 3) {
+        readyMask = 0;
     }
-    return temp_v1;
+    return readyMask;
 }
 
 void itfInitPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
@@ -635,15 +647,16 @@ void itfTranslateStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
     }
 }
 
-u64 func_001A0710(const char *arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+/* Keep the sprite texture handle while releasing the temporary file allocation. */
+u64 func_001A0710(const char *path) {
+    u64 fileAllocation;
+    u64 textureHandle;
+    u32 assetInfo[4];
 
-    temp_v0 = func_00343ED0(arg0, temp_v2, 0);
-    temp_v1 = func_0032C138(temp_v2[0]);
-    func_003297C8(temp_v0);
-    return temp_v1;
+    fileAllocation = func_00343ED0(path, assetInfo, 0);
+    textureHandle = func_0032C138(assetInfo[0]);
+    func_003297C8(fileAllocation);
+    return textureHandle;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0760);
