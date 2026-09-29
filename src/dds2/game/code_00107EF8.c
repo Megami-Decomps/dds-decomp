@@ -346,7 +346,23 @@ void func_00109B80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109C30);
+extern void sdfPktInit();
+extern void *func_0033D7B8();
+
+void func_00109C30(s32 x, s32 y, s32 arg2, s32 arg3) {
+    u8 pkt[16];
+    void *list;
+    void *packet;
+    u8 *surface;
+    list = (void *)func_0011F218();
+    packet = sdfAllocPacketAligned(0x40);
+    func_0032E4B8(packet);
+    sdfAppendPacket(list, packet);
+    sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, arg2);
+    sdfAppendPacket(list, func_0033D7B8(pkt, arg3));
+    surface = D_00380748;
+    (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+}
 
 void func_00109D00(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 temp_v0;
