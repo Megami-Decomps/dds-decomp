@@ -126,9 +126,9 @@ void func_00117A10(void) {
     ((SdfRuntime *)D_00435DD0)->updateMode = 8;
     func_0011AB38();
     func_00122B58(0);
-    func_00313C40();
+    ptyClearProfileRecords();
     func_0026CE90();
-    func_00314200();
+    ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     func_0011D438();

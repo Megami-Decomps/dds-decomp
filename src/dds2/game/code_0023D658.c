@@ -60,7 +60,7 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 extern void effObjSetInnerFirstVec(void *arg0, void *arg1);
 
-extern f32 func_0010D718(s32 idx);
+extern f32 bfWaitReadArgFloat(s32 idx);
 
 extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
 
@@ -390,9 +390,9 @@ u32 evtSetWorldUnitFirstVector(void) {
     if (unit == NULL) {
         return 1;
     }
-    vector[0] = func_0010D718(1);
-    vector[1] = func_0010D718(2);
-    vector[2] = func_0010D718(3);
+    vector[0] = bfWaitReadArgFloat(1);
+    vector[1] = bfWaitReadArgFloat(2);
+    vector[2] = bfWaitReadArgFloat(3);
     effObjSetInnerFirstVec(unit, vector);
     return 1;
 }
@@ -413,9 +413,9 @@ u32 evtSetWorldUnitThirdVector(void) {
     if (unit == NULL) {
         return 1;
     }
-    vector[0] = func_0010D718(1);
-    vector[1] = func_0010D718(2);
-    vector[2] = func_0010D718(3);
+    vector[0] = bfWaitReadArgFloat(1);
+    vector[1] = bfWaitReadArgFloat(2);
+    vector[2] = bfWaitReadArgFloat(3);
     effObjSetInnerThirdVec(unit, vector);
     return 1;
 }

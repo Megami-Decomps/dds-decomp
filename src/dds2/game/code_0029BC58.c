@@ -118,7 +118,7 @@ typedef struct TitleMenuWork {
     s32 sequenceMode;         /* 0xB6F4 */
 } TitleMenuWork;
 
-extern void func_00299A38(TitleSeq *, u8 *);
+extern void mnuRefreshSelectedUnitPanels(TitleSeq *, u8 *);
 
 extern void btlAddBaseStats(u8 *, TitleSeq *);
 
@@ -148,7 +148,7 @@ void mnuTitleApplySequenceState(u8 *work) {
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     }
-    func_00299A38(seq, work);
+    mnuRefreshSelectedUnitPanels(seq, work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
@@ -312,23 +312,23 @@ u32 func_0029CE88(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CE90);
+INCLUDE_ASM(const s32, "game/code_0029BC58", ptyComputeTotalExp);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CF00);
 
 /* DDS2 twin of DDS1 brsCalcExpGain: enemy units (flag 2) keep exp; others
    start at 0, halve on reward flag 0x23F and restore on 0x240. */
-s32 func_0029CF88(u8 *unit, s32 exp, s32 a2) {
+s32 brsCalcExpGain(u8 *unit, s32 exp, s32 a2) {
     s32 result;
 
     if ((*(u16 *)unit & 2) != 0) {
         result = exp;
     } else {
         result = 0;
-        if (func_00315098(unit, 0x23F) != 0) {
+        if (ptyHasSkill(unit, 0x23F) != 0) {
             result = exp / 2;
         }
-        if (func_00315098(unit, 0x240) != 0) {
+        if (ptyHasSkill(unit, 0x240) != 0) {
             result = exp;
         }
     }
@@ -341,14 +341,14 @@ u32 func_0029D000(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D008);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D1C8);
+INCLUDE_ASM(const s32, "game/code_0029BC58", ptyCalcLevelUps);
 
 s32 mnuCountAdvancingTitleAnimations(void) {
     s32 offset = 0;
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = func_0029D1C8(D_00435DD0 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(D_00435DD0 + 0xa60 + offset);
         count += step > 0;
         offset += 0x1c4;
     } while (--remaining >= 0);
@@ -360,15 +360,15 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D2D8);
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D3D8);
 
 s32 mnuAdvanceTitleEntryAnimation(u8 *entry) {
-    s32 step = func_0029D1C8(entry);
+    s32 step = ptyCalcLevelUps(entry);
     *(u16 *)(entry + 0x14) += step;
-    func_003144E8(entry);
+    ptyRecomputeMaxHpMp(entry);
     return step;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", btlAddBaseStats);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D5B8);
+INCLUDE_ASM(const s32, "game/code_0029BC58", ptyAccumulateStatGains);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D790);
 
@@ -380,23 +380,23 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
     state[3] = fourth;
 }
 
-extern s32 func_0029D1C8(u8 *);
-extern s32 func_0029CE90(u8 *, s32);
+extern s32 ptyCalcLevelUps(u8 *);
+extern s32 ptyComputeTotalExp(u8 *, s32);
 extern u32 func_00314728(u8 *, u32);
 extern s32 func_00314C10(s32);
 extern u32 func_00314690(u16);
 
 /* DDS2 twin of DDS1 brsBuildUnitProgressRow. */
-void func_0029D970(u8 *state, u8 *entry) {
+void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
     s32 levelDelta;
     s32 profilePoints;
 
     memset(state, 0, 0x2C);
     *(u32 *)(state + 0x8) = (u32)entry;
-    levelDelta = func_0029D1C8(entry);
+    levelDelta = ptyCalcLevelUps(entry);
     mnuTitleInitFourParameters((u32 *)(state + 0xC), 0x6E0, 0x50,
-        *(s32 *)(entry + 0x10) - func_0029CE90(entry, levelDelta),
-        func_0029CE90(entry, levelDelta + 1) - func_0029CE90(entry, levelDelta));
+        *(s32 *)(entry + 0x10) - ptyComputeTotalExp(entry, levelDelta),
+        ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
     profilePoints = func_00314728(entry, 0);
     mnuTitleInitFourParameters((u32 *)(state + 0x1C), 0x3C0, 0x50, profilePoints,
         func_00314690(func_00314C10((s32)entry) & 0xFFFF));

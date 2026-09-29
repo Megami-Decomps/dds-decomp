@@ -38,10 +38,10 @@ void func_0010C298(u32 task) {
 }
 
 void func_0010C2D8(void) {
-    func_0010D5A8();
+    bfContextStep();
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C2F0);
+INCLUDE_ASM(const s32, "game/code_0010C250", bfTaskUpdate);
 
 void scrPushInteger(ScriptCommandBuffer *buffer, u32 value) {
     buffer->kinds[buffer->count] = 0;
@@ -49,7 +49,7 @@ void scrPushInteger(ScriptCommandBuffer *buffer, u32 value) {
     buffer->count = buffer->count + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C378);
+INCLUDE_ASM(const s32, "game/code_0010C250", bfStackPushFloat);
 
 void scrPushString(ScriptCommandBuffer *buffer, u32 value) {
     buffer->kinds[buffer->count] = 5;
@@ -63,9 +63,9 @@ void scrPushTypeFourValue(ScriptCommandBuffer *buffer, u32 value) {
     buffer->count = buffer->count + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C408);
+INCLUDE_ASM(const s32, "game/code_0010C250", bfStackPopInt);
 
-INCLUDE_ASM(const s32, "game/code_0010C250", func_0010C4E0);
+INCLUDE_ASM(const s32, "game/code_0010C250", bfStackPopFloat);
 
 u32 scrPushNextInstructionValue(ScriptCommandBuffer *script) {
     s32 nextPc;

@@ -134,7 +134,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A510);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A700);
+INCLUDE_ASM(const s32, "game/code_0011A118", ptyRecoverAllUnits);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A788);
 
