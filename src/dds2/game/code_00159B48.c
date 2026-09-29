@@ -1,4 +1,18 @@
 #include "common.h"
+#include "pcp_vu0.h"
+extern void func_00333288(void *, u32);
+extern void func_00333270(void *, u32);
+extern void func_003332A0(void *, u32);
+/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
+#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+extern void *func_003335E0();
+extern void func_003332D0(void *, f32);
+extern void func_001594C8();
+extern s32 D_00451F20[];
+extern void func_00341348();
 #include "eff.h"
 
 typedef struct EffTemplatePacketList {
@@ -55,7 +69,12 @@ s32 func_00159BB8(s32 arg0) {
     return *(s32 *)(*(s32 *)(D_00451EE0[arg0] + 0x30));
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00159BD8);
+void func_00159BD8(dst, src)
+void *dst;
+void *src;
+{
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00159BE8(BillObj *effect, float scale) {
     effect->unk20 = scale;
@@ -111,7 +130,11 @@ u16 func_00159DC0(BillObj *effect) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00159DF0);
+void func_00159DF0(BillObj *effect, u32 value) {
+    if (effect->unk2C == 1 && effect->unk58 != value) {
+        func_001594C8(effect, value);
+    }
+}
 
 s32 func_00159E30(s32 arg0) {
     if (*(u16 *)(arg0 + 0x2c) == 1) {
@@ -206,9 +229,29 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_00159FF8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A1B8);
+u8 *func_0015A1B8(s32 arg0) {
+    u8 *obj = func_00328D68(0x88);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A240);
+    *(s32 *)(obj + 0x80) = billCreateIndexed(1, arg0);
+    *(void **)(obj + 0x84) = func_003335E0();
+    func_003332D0(*(void **)(obj + 0x84), 1.0f);
+    PCP_UNIT_MATRIX(obj + 0x40);
+    return obj;
+}
+
+u8 *func_0015A240(u8 *src) {
+    u8 *obj = func_00328D68(0x88);
+
+    *(s32 *)(obj + 0x80) = func_00159A50(*(s32 *)(src + 0x80));
+    *(void **)(obj + 0x84) = func_003335E0();
+    func_003332D0(*(void **)(obj + 0x84), 1.0f);
+    func_00333288(*(void **)(obj + 0x84), 0x80808080);
+    func_00333270(*(void **)(obj + 0x84), 0x80808080);
+    func_003332A0(*(void **)(obj + 0x84), 0x80808080);
+    PCP_UNIT_MATRIX(obj + 0x40);
+    PCP_UNIT_MATRIX(obj);
+    return obj;
+}
 
 void effDestroy(u32 arg0) {
     func_00333918(*(u32 *)((s32)arg0 + 0x84));
@@ -220,13 +263,46 @@ void func_0015A348(s32 arg0) {
     func_00159BD8(*(u32 *)(arg0 + 0x80));
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A360);
+void func_0015A360(u8 *obj, f32 scale) {
+    func_00159BF0(*(BillObj **)(obj + 0x80), scale, scale);
+}
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A380);
+void func_0015A380(u8 *dst, void *src) {
+    __asm__ volatile(
+        "lqc2 $vf28, 0x0(%0)\n\t"
+        "lqc2 $vf29, 0x10(%0)\n\t"
+        "lqc2 $vf30, 0x20(%0)\n\t"
+        "lqc2 $vf31, 0x30(%0)"
+        : : "r"(src) : "memory");
+    dst += 0x40;
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "sqc2 $vf28, 0x0(%0)\n\t"
+        "sqc2 $vf29, 0x10(%0)\n\t"
+        "sqc2 $vf30, 0x20(%0)\n\t"
+        "sqc2 $vf31, 0x30(%0)\n\t"
+        ".set reorder"
+        : : "r"(dst) : "memory");
+}
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A3B0);
+void func_0015A3B0(u8 *obj, u32 value) {
+    func_00159C00(*(BillObj **)(obj + 0x80), value);
+}
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A3C8);
+void func_0015A3C8(void *dst, void *src) {
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "lqc2 $vf28, 0x0(%1)\n\t"
+        "lqc2 $vf29, 0x10(%1)\n\t"
+        "lqc2 $vf30, 0x20(%1)\n\t"
+        "lqc2 $vf31, 0x30(%1)\n\t"
+        "sqc2 $vf28, 0x0(%0)\n\t"
+        "sqc2 $vf29, 0x10(%0)\n\t"
+        "sqc2 $vf30, 0x20(%0)\n\t"
+        "sqc2 $vf31, 0x30(%0)\n\t"
+        ".set reorder"
+        : : "r"(dst), "r"(src) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A3F0);
 
@@ -252,7 +328,9 @@ void func_0015B208(s32 arg0, s32 arg1) {
     ((void (*)(s32, s32))*(s32 *)(arg0 + 0x10))(arg0, tmp);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B270);
+void func_0015B270(void) {
+    func_00341348(D_00451F20);
+}
 
 void func_0015B290(void) {
 }
