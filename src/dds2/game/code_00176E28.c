@@ -50,7 +50,9 @@ void func_001770F0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x60) = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001770F8);
+void func_001770F8(u8 *work, f32 value) {
+    *(f32 *)(work + 0x64) = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177100);
 
@@ -92,7 +94,9 @@ void func_00177B98(EffRecordPool *pool, u32 value) {
     pool->settingB = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA0);
+void func_00177BA0(u8 *work, f32 value) {
+    *(f32 *)(work + 0x5C) = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA8);
 
@@ -150,6 +154,8 @@ void func_001784E8(EffRecordPool *pool, u32 value) {
     pool->settingB = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001784F0);
+void func_001784F0(u8 *work, f32 value) {
+    *(f32 *)(work + 0x5C) = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001784F8);

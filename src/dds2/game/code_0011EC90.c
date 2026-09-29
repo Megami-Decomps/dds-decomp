@@ -2,14 +2,18 @@
 
 extern u32 func_002AB598(void);
 
-extern void func_0010D818(s32 value);
-
 extern s32 func_0011C0B0(s32 param0, s32 param1);
 
-/* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 func_0010D650(s32);
+extern s32 func_0010D650(s32 idx);
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EC90);
+extern s32 func_0010D818(s32 arg0);
+
+s32 func_0011EC90(void) {
+    s32 val = func_0010D650(0);
+
+    func_0010D818(func_0011C680(val) == 1);
+    return 1;
+}
 
 s32 func_0011ECC8(void) {
     s32 firstOperand = func_0010D650(0);
@@ -79,4 +83,3 @@ void func_0011F0E0(void) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0011EC90", D_00435EA8);
-

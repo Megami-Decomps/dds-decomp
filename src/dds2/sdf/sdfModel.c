@@ -76,6 +76,8 @@ typedef struct {
     void *unkC;
 } SdfObj;
 
+extern vu8 D_004389DA;
+
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330C18);
 
 SdfPacket *sdfModelWriteAddressPacket(SdfModel *arg0, SdfPacket *arg1, s32 arg2) {
@@ -293,7 +295,9 @@ void func_00331AB0(SdfModel *arg0, s32 arg1) {
     func_003319D0(list->entries[0], buf, arg1);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B18);
+void func_00331B18(SdfModel *model) {
+    func_00331AB0(model, (s8)D_004389DA);
+}
 
 void func_00331B38(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4) {

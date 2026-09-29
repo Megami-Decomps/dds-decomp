@@ -16,8 +16,6 @@ extern s32 func_0033E008(u32, u8 *, u32);
 
 extern u32 D_004391C8;
 
-extern u32 D_00438AE4;
-
 extern u32 D_004391CC;
 
 typedef struct SifCommand {
@@ -129,6 +127,26 @@ extern DevState *func_0033F9D0(void *, s32, s32,
 
 extern u16 D_00438B24;
 
+extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+
+extern void func_0034D038(u32 arg0);
+
+extern s32 D_00438AE4;
+
+s32 sdfDevReactivate(DevState *);
+
+extern char D_0042E3A0[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
+
+extern u8 D_00438B67;
+
+extern u8 D_00438B68;
+
+extern s32 func_0036D880(const char *, s32, void *, s32 *);
+
+extern void func_0035B6E0(const char *);
+
+extern void func_003406A0(f32 arg0);
+
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D7B8);
@@ -139,7 +157,12 @@ void sdfPktSetCmd(SifCommand *packet, s32 index) {
     packet->command = D_0040B990[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPktInit);
+void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
+    packet->source = source;
+    packet->end = end;
+    packet->argument = argument;
+    sdfPktSetCmd(packet, index);
+}
 
 void *sdfRpcBufHandler(s32 unused, SifCommand *packet) {
     s32 size = packet->end - packet->source;
@@ -246,7 +269,13 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E550);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E5E0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfInitDeviceSemaphores);
+void sdfInitDeviceSemaphores(void) {
+    D_004391B8 = sdfCreateSemaphore(1, 0xff, 0);
+    D_004391C4 = sdfCreateSemaphore(0, 0xff, 0);
+    D_00438AC8 = 0;
+    func_0034CB60(0);
+    func_0034D038(D_00438AD8);
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E6B0);
 
@@ -268,9 +297,27 @@ u32 func_0033E810(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E818);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E9B8);
+void func_0033E9B8(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
+    if (event != 3) {
+        if (event == 4) {
+            D_004391C8 = value;
+        }
+    } else {
+        D_004391CC = value;
+    }
+    SignalSema(D_00438AE4);
+}
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevCreateCommandState);
+DevState *sdfDevCreateCommandState(s32 command) {
+    DevState *state;
+    if (D_00438AE4 < 0) {
+        D_00438AE4 = sdfCreateSemaphore(0, 0x80, 0);
+    }
+    state = sdfDevCreateCallbackState(command, func_0033E9B8, 0);
+    WaitSema(D_00438AE4);
+    sdfDevReactivate(state);
+    return state;
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EA60);
 
@@ -484,7 +531,20 @@ void sdfRestoreDeviceThreadPriority(void) {
     sdfSetThreadPriorities(0x48);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfTickThreadPriorityOverride);
+void sdfTickThreadPriorityOverride(void) {
+    u8 val = D_00438B1F;
+    u8 next;
+
+    if (val == 0) {
+        return;
+    }
+    D_00438B1F = val - 1;
+    next = val - 1;
+    if (next != 0) {
+        return;
+    }
+    sdfRestoreDeviceThreadPriority();
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FF98);
 
@@ -505,7 +565,22 @@ void func_003400B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003400D0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfLoadDevModule);
+void sdfLoadDevModule(void) {
+    s32 resident;
+    if (D_00438B67 == 0) {
+        D_00438B68 = 0;
+        if (func_0036D880("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
+            func_0035B6E0("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
+            return;
+        }
+        if (resident != 0) {
+            func_0035B6E0(D_0042E3A0);
+            return;
+        }
+        D_00438B68 = 1;
+        D_00438B67 = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340298);
 
@@ -578,7 +653,9 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003405D8);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003406A0);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003407A0);
+void func_003407A0(f32 arg0) {
+    func_003406A0(arg0 + 1.5707963f);
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003407C0);
 
@@ -696,4 +773,3 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B60);
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B68);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B70);
-

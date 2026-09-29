@@ -440,14 +440,25 @@ s32 fldLoadAreaResource(void) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129F58);
 
+typedef struct FldDisplayNode {
+    struct FldDisplayNode *next;
+    u8 pad04[4];
+    u32 displayObject;
+} FldDisplayNode;
+
+typedef struct FldDisplayWork {
+    u8 pad00[0x60];
+    FldDisplayNode *objects;
+} FldDisplayWork;
+
 void fldFreeDisplayObjects(void) {
     if (D_00435FCC != 0) {
-        u32 node = *(u32 *)(D_00435FCC + 0x60);
+        FldDisplayNode *node = ((FldDisplayWork *)D_00435FCC)->objects;
 
         if (node != 0) {
             do {
-                func_003298C0(*(u32 *)(node + 8));
-                node = *(u32 *)node;
+                func_003298C0(node->displayObject);
+                node = node->next;
             } while (node != 0);
         }
         func_002C7CE8(D_00435FCC);

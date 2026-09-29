@@ -47,6 +47,47 @@ s32 mdlCountRecords(s32 arg0);
 
 s32 *func_00233E40(s32 arg0, s32 arg1);
 
+void func_00345628(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+void func_00157710(s32 arg0, float arg1);
+
+void func_00159BF0(s32 arg0, float arg1, float arg2);
+
+s32 func_0011F250(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
+s32 func_00235178(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+extern s32 D_00453610[];
+
+void sdfAppendPacket(s32 arg0, s32 arg1);
+
+extern u128 D_00453620;
+
+extern u128 D_00453630;
+
+extern u128 D_00453640;
+
+extern u128 D_003C87C0;
+
+extern u128 D_003C87D0;
+
+extern u128 D_003C87E0;
+
+extern s16 D_00453584[];
+
+typedef struct MdlCtrlState {
+    u8 pad00[4];
+    u8 unk04;
+    u8 pad05[3];
+    s32 unk08;
+} MdlCtrlState;
+
+extern MdlCtrlState D_00453650;
+
+void func_0011FEE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
+void mdlFlagClear(s32 arg0);
+
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
@@ -191,9 +232,20 @@ void func_002346C0(MdlPartList *list, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234720);
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlObjDestroy);
+void mdlObjDestroy(s32 arg0) {
+    if (*(u8 *)(arg0 + 9) != 0) {
+        func_00344A08((void *)(arg0 + 0x20));
+    }
+    func_003297C8(*(s32 *)(arg0 + 4));
+    func_00328E48((void *)arg0);
+}
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlObjInit);
+void mdlObjInit(s32 arg0, s32 arg1, s32 arg2) {
+    if (*(u8 *)(arg0 + 9) == 0) {
+        *(u8 *)(arg0 + 9) = 1;
+        func_00345628(arg0 + 0x20, arg2, *(s32 *)(arg0 + 0), *(s32 *)(arg0 + 0x10), arg1);
+    }
+}
 
 void func_00234838(u32 arg0) {
     sdfDevCreateBufferedRequest(arg0, 0x10, 4);
@@ -201,7 +253,16 @@ void func_00234838(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234858);
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlInsertResourceItem);
+MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 subtype) {
+    extern void *func_00328E18(s32 size);
+    MdlResourceItem *item = func_00328E18(0x20);
+    MdlResourceItem *previous = object->first;
+    item->type = type;
+    item->next = previous;
+    item->subtype = subtype;
+    object->first = item;
+    return item;
+}
 
 void func_002349A0(s32 arg0) {
     func_00159A50(*(u32 *)(arg0 + 8));
@@ -237,7 +298,17 @@ void func_00234BF8(u32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234C20);
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlCondInitEntry);
+void mdlCondInitEntry(s32 arg0) {
+    s32 v = *(s32 *)(arg0 + 0xC);
+    if (*(u8 *)(v + 9) == 0) {
+        s32 count = *(s32 *)(arg0 + 0x14);
+        f32 f = *(f32 *)(*(s32 *)(*(s32 *)(arg0 + 8) + 0x1C) + 0x1C);
+        if ((u32)(s32)f < (u32)count) {
+            return;
+        }
+        mdlObjInit(v, *(s32 *)(arg0 + 0x10), arg0 + 0x18);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlDispatchResourceEntry);
 
@@ -252,7 +323,20 @@ void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlDestroyResourceItem);
+void mdlDestroyResourceItem(MdlResourceItem *item) {
+    switch (item->type) {
+    case 0:
+        billDispatchByKind(item->resource);
+        break;
+    case 1:
+        func_00157658(item->resource);
+        break;
+    case 2:
+        effTrackPolyRelease(item->resource);
+        break;
+    }
+    func_00328E48((void *)item);
+}
 
 void mdlRemoveResourceSubtype(MdlResourceOwner *object, s32 subtype) {
     MdlResourceItem **link = &object->first;
@@ -274,13 +358,38 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00234F48);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235000);
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlSetResourceFrame);
+void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
+    switch (item->type) {
+    case 0:
+        func_00159C00(item->resource, frame);
+        return;
+    case 1:
+        func_00157800(item->resource, frame);
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlSetResourceAmount);
+void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
+    switch (item->type) {
+    case 0:
+        func_00159BF0(item->resource, amount, amount);
+        return;
+    case 1:
+        func_00157710(item->resource, amount);
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235178);
+s32 func_00235178(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    return func_0011F250(arg0, arg1, arg2, arg3, arg4, 0x30000000, 0x60404040);
+}
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235198);
+void func_00235198(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 tmp;
+
+    tmp = D_00453610[0];
+    sdfAppendPacket(tmp, func_00235178(arg0, arg1, arg2, arg3, arg4));
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002351D0);
 
@@ -520,7 +629,12 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00238FC0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00239188);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00239680);
+void func_00239680(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    s32 temp = arg2 & 0xffffff;
+
+    func_0011FEE8(D_00453650.unk08, arg0, arg1,
+                  (D_00453650.unk04 == 0) ? -1 : arg3, temp | 0x80000000, 1, temp);
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002396D0);
 
@@ -548,7 +662,16 @@ void mdlFlagClearAll(void) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlClearFlagRanges);
+void mdlClearFlagRanges(void) {
+    s32 i = 0;
+    do {
+        mdlFlagClear(i++);
+    } while (i < 0xC00);
+    i = 0xD00;
+    do {
+        mdlFlagClear(i++);
+    } while (i < 0x1000);
+}
 
 void mdlFlagSet(s32 arg0) {
     s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
@@ -737,4 +860,3 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E8);
-

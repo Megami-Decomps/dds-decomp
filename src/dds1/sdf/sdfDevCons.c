@@ -11,7 +11,7 @@ typedef struct DevConsState {
     s16 cursorRow; /* 0x12 */
     u8 unk14; /* 0x14 */
     u8 pad15; /* 0x15 */
-    u8 unk16; /* 0x16 */
+    u8 textAttribute; /* 0x16: passed with each formatted character */
     u8 unk17; /* 0x17 */
     u8 pad18[4]; /* 0x18 */
     u8 *cells; /* 0x1C: two bytes per character cell */
@@ -63,28 +63,28 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E3F58);
 
-void func_002E40D0(DevConsState *arg0, s32 arg1, s32 arg2) {
-    func_002E3F58(arg0, arg1, arg2);
+void func_002E40D0(DevConsState *console, s32 character, s32 attribute) {
+    func_002E3F58(console, character, attribute);
 }
 
-s32 func_002E40E8(DevConsState *arg0, const char *fmt, ...) {
+s32 func_002E40E8(DevConsState *console, const char *fmt, ...) {
     char buf[0x200];
     __builtin_va_list ap;
-    char *p;
-    s32 i = 0;
-    s32 c;
+    char *cursor;
+    s32 length = 0;
+    s32 character;
     __builtin_stdarg_start(ap, fmt);
     func_00305B08(buf, fmt, ap);
-    c = buf[0];
-    if (c != 0) {
+    character = buf[0];
+    if (character != 0) {
         do {
-            i++;
-            func_002E3F58(arg0, c, arg0->unk16);
-            p = buf + i;
-            c = *p;
-        } while (c != 0);
+            length++;
+            func_002E3F58(console, character, console->textAttribute);
+            cursor = buf + length;
+            character = *cursor;
+        } while (character != 0);
     }
-    return i;
+    return length;
 }
 
 void func_002E4190(DevConsState *console, s16 column, s16 row) {
@@ -92,8 +92,8 @@ void func_002E4190(DevConsState *console, s16 column, s16 row) {
     console->cursorRow = row;
 }
 
-void func_002E41A0(DevConsState *arg0, u8 arg1) {
-    arg0->unk16 = arg1;
+void func_002E41A0(DevConsState *console, u8 attribute) {
+    console->textAttribute = attribute;
 }
 
 u8 func_002E41A8(DevConsState *arg0) {

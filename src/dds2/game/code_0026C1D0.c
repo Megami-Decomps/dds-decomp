@@ -121,7 +121,12 @@ s8 func_0026C660(void) {
     return D_0043788C;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", sndGetActiveMode);
+s32 sndGetActiveMode(void) {
+    if (D_00437880 < 0) {
+        return -1;
+    }
+    return itfPanelGetPairSecond(D_00437880);
+}
 
 s8 func_0026C6A0(void) {
     return D_0043788D;
@@ -173,7 +178,9 @@ void func_0026C900(void) {
     func_0026C8E8(1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C918);
+void func_0026C918(s32 arg0, s32 arg1) {
+    func_001A4858(D_00437880, arg0, arg1);
+}
 
 s8 func_0026C940(void) {
     return D_00437885;

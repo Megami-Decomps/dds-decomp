@@ -97,6 +97,12 @@ typedef struct Cb3714C {
 
 extern Cb3714C D_003B0044[];
 
+extern void func_00159BF0(f32 arg0, f32 arg1);
+
+extern u8 D_00380828[];
+
+extern void func_00232390(void *arg0, void *arg1);
+
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A100);
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A438);
@@ -179,7 +185,9 @@ void func_0016A8B0(u32 arg0) {
     billCreateIndexed(1, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", effParamDispatchFloat);
+void effParamDispatchFloat(f32 arg0) {
+    func_00159BF0(arg0, arg0);
+}
 
 void effParamInitWork(EffInitWork *work) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0180));
@@ -198,7 +206,9 @@ void effParamInitWork(EffInitWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A990);
 
-INCLUDE_ASM(const s32, "game/code_0016A100", effParamInitFromGlobal);
+void effParamInitFromGlobal(void *arg0) {
+    func_00232390(arg0, &D_00380828);
+}
 
 void func_0016AA38(void) {
     func_002322E8();
@@ -216,7 +226,14 @@ void *effParamAssembleWork(void *arg0) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", effParamForwardVector);
+void effParamForwardVector(void *arg0, void *vec) {
+    __asm__ volatile (
+        ".set noreorder\n\t"
+        "lqc2 vf10, 0(%0)\n\t"
+        ".set reorder"
+        : : "r" (vec) : "memory");
+    func_00232AA0(arg0);
+}
 
 void effParamBuildVector(void *arg0, f32 x) {
     f32 v[3];
@@ -340,9 +357,15 @@ u32 effParamTableGetWord2(void *arg0, s32 index) {
     return *(u32 *)(data + 0x18);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", effParamCreateFromTable);
+EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
+    u16 id;
+    void *data;
+
+    id = (u16)effParamTableGetWord2(work, index);
+    data = effParamTableGetBlock(work, index);
+    return effParamWorkCreate(id, data);
+}
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AF38);
 
 INCLUDE_SDATA(const s32, "game/code_0016A100", D_00436434);
-

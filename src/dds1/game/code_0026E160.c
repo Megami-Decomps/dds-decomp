@@ -19,7 +19,32 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E188);
+extern void sdfDestroyTaskWork(s32);
+extern void func_0026DED0(s32, s32, u8 *, s32);
+extern u8 *func_002CAF78(s32, u8 *);
+
+s32 func_0026E188(s32 owner, s32 group) {
+    u8 *list = *(u8 **)(group + 8);
+    u8 *node;
+
+    if (list == NULL) {
+        sdfDestroyTaskWork(group);
+        return 0;
+    }
+    do {
+        node = *(u8 **)(list + 0x10);
+        *(s32 *)(node + 8) = *(s32 *)(node + 8) - 1;
+        if (*(s32 *)(node + 8) == *(s32 *)(node + 0xC) - 5 && *(u8 *)(node + 0x12) != 0) {
+            func_0026DED0(owner, group, node, *(s8 *)(node + 0x11));
+        }
+        if (*(s32 *)(node + 8) == 0) {
+            list = func_002CAF78(group, list);
+        } else {
+            list = *(u8 **)(list + 8);
+        }
+    } while (list != NULL);
+    return group;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E240);
 

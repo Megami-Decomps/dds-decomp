@@ -18,8 +18,6 @@ extern u32 D_00436190;
 
 extern s32 D_004361F8;
 
-extern u32 D_00389770[];
-
 extern void func_003298C0(u32 arg0);
 
 extern void *memset(void *s, s32 c, u32 n);
@@ -93,8 +91,6 @@ extern u32 func_002DEB80(const void *);
 
 extern void func_001379C0(u32);
 
-extern s16 D_003931A0[];
-
 extern s32 func_0035C860(char *, const char *, ...);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
@@ -104,6 +100,107 @@ extern u32 sdfDevCreateCommandState(const char *);
 extern u32 func_0033EB10(u32, void *, u32);
 
 extern void func_0033EAE0(u32);
+
+extern s32 D_00436184;
+
+typedef struct FldRecE4 {
+    u8 pad0[0xCC];
+    s32 id;
+    s32 value;
+    u8 padD4[0x10];
+} FldRecE4; /* 0xE4 bytes */
+
+extern s32 D_00436188;
+
+extern s32 D_0043617C;
+
+extern s32 D_00389770[];
+
+extern u32 D_00444A30[];
+
+extern s32 D_004361AC;
+
+extern u64 dds3GetWorldSecondaryObject(void);
+
+extern s32 D_004361A8;
+
+extern s32 D_004361B0;
+
+extern s32 D_004361BC;
+
+typedef struct FldTaskInfo {
+    s32 unk0;
+    s32 slot;
+} FldTaskInfo;
+
+extern s32 func_00110C70(u64, u32, s32);
+
+extern u32 func_00116DE0(s32);
+
+typedef struct FldRoomPlanes {
+    f32 plane[6][4];
+    f32 limit[6];
+    u8 pad78[0x140 - 0x78];
+} FldRoomPlanes;
+
+extern FldRoomPlanes D_00444BC0[];
+
+extern f32 func_00137C08(f32 *, f32 *);
+
+typedef struct FldRoomState {
+    u8 pad0[0x120];
+    s32 unk120;
+    u8 pad124[0xE];
+    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
+    u8 pad134[2];
+    s16 mode;
+    u8 pad138[8];
+} FldRoomState; /* 0x140 bytes */
+
+extern FldRoomState D_00444B30[];
+
+extern u8 D_0038E2D0[];
+
+extern u8 D_0038E2D0[];
+
+extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
+
+extern s32 *func_001111A8();
+
+typedef struct FldNpcMotion {
+    s32 unk0;
+    u8 unk4[0x10];
+    u8 unk14[0x10];
+    u8 unk24[0x10];
+    u8 unk34[0x10];
+    s32 unk44;
+} FldNpcMotion; /* 0x48 bytes */
+
+extern FldNpcMotion D_00391FA0[];
+
+extern void *D_004361D4;
+
+extern void *D_004361D8;
+
+extern u32 D_004361DC;
+
+extern s32 D_004361E0;
+
+typedef struct {
+    s16 data[12];
+} FldRowData; /* 0x18 bytes */
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 count;
+    FldRowData body;
+} FldS16Row; /* 0x20 bytes */
+
+extern FldS16Row D_003931A0[];
+
+extern u32 D_00449B30[][23];
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
@@ -170,11 +267,53 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", fldCalculateVectorLength);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C68);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137E00);
+s32 func_00137E00(s32 key) {
+    s32 i = 0;
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldSetRecordValueById);
+    if (D_00436184 > 0) {
+        FldRecE4 *record = (FldRecE4 *)D_00436180;
+        do {
+            if (record->id == key) {
+                return record->value;
+            }
+            i++;
+            record++;
+        } while (i < D_00436184);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137E90);
+void fldSetRecordValueById(s32 id, s32 value) {
+    s32 i;
+
+    for (i = 0; i < D_00436184; i++) {
+        if (((FldRecE4 *)D_00436180)[i].id == id) {
+            ((FldRecE4 *)D_00436180)[i].value = value;
+        }
+    }
+}
+
+void func_00137E90(void) {
+    s32 count = D_00436184;
+    if (count > 0) {
+        /* Required to match: advance a pointer to the value field, not the record base. */
+        u8 *record = (u8 *)D_00436180 + 0xd0;
+        do {
+            count--;
+            *(s32 *)record = 0;
+            record += 0xe4;
+        } while (count != 0);
+    }
+    D_00436184 = 0;
+    D_00389770[0x28] = -1;
+    D_00389770[0x29] = -1;
+    D_00389770[0x2b] = -1;
+    D_00436188 = 0;
+    D_0043617C = 0;
+    if (D_00436180 != 0) {
+        func_00137BC8();
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
 
@@ -210,7 +349,32 @@ void func_0013B810(void) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B818);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetTaskSlots);
+void fldResetTaskSlots(void) {
+    s32 i;
+    u64 world;
+    u32 id;
+    FldTaskInfo *info;
+
+    D_004361BC = 1;
+    for (i = 0; i < D_004361A4; i++) {
+        D_0038BD50[i] = 0;
+    }
+    D_004361A8 = -1;
+    D_004361AC = -1;
+    D_004361B0 = -1;
+    world = dds3GetWorldSecondaryObject();
+    if (world != 0) {
+        for (i = 0; i < D_004361A4; i++) {
+            info = *(FldTaskInfo **)(D_0038BC50[i] + 8);
+            if (info->slot >= 0) {
+                id = func_00116DE0(func_00110C70(world, *(u32 *)D_00444A30[info->slot], 0xD));
+                if (func_0010C100(id) != 0) {
+                    func_00110FB0(dds3GetWorldObject(), id);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldPushDisplayValue);
 
@@ -224,7 +388,16 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D7F8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DA10);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldRoomContainsPoint);
+s32 fldRoomContainsPoint(f32 *direction, s32 index) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (func_00137C08(direction, D_00444BC0[index].plane[i]) - D_00444BC0[index].limit[i] > 0.0f) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DBB0);
 
@@ -289,7 +462,16 @@ s32 func_0013EA18(u32 task) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldFindRoomByTask);
+s32 fldFindRoomByTask(u32 task) {
+    s32 i;
+
+    for (i = 0; i < D_004361A4; i++) {
+        if (D_0038BD50[i] == task) {
+            return D_00444B30[i].roomId;
+        }
+    }
+    return -1;
+}
 
 s32 fldGetTaskRecordValue(u32 task) {
     s32 i;
@@ -342,7 +524,18 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FA98);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FFF8);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldLoadInfoTable);
+void fldLoadInfoTable(s32 field) {
+    char path[64];
+    char directory[32];
+    u32 command;
+    if (field < 200) {
+        fldFormatAreaDirectory(directory, field, 1);
+        func_0035C860(path, D_00413448, directory, field);
+        command = sdfDevCreateCommandState(path);
+        func_0033EB10(command, D_0038E2D0, 0x3B80);
+        func_0033EAE0(command);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140180);
 
@@ -410,7 +603,33 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141CF0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetActorStat0);
+s32 fldGetActorStat0(s32 mode) {
+    u8 *actor = D_003932A0 + D_004361F4 * 108;
+    s32 *entry;
+    s32 flags;
+
+    switch (mode) {
+    case 0:
+        return *(s16 *)(actor + 0x12);
+    case 1:
+        entry = func_001111A8(dds3GetWorldObject(), actor + 0x18);
+        if (entry != NULL) {
+            return entry[1];
+        }
+    case 2:
+        entry = func_001111A8(dds3GetWorldObject(), actor + 0x24);
+        if (entry != NULL) {
+            return entry[1];
+        }
+    case 3:
+        flags = *(u16 *)(actor + 0x14);
+        if (flags & 1) {
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 
@@ -418,17 +637,129 @@ INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001421C0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetActorMotionEntry);
+s32 fldGetActorMotionEntry(u32 kind) {
+    u8 *entry = D_003932A0 + D_004361F4 * 108;
+    s16 index = *(s16 *)(entry + 0x12);
+    s32 *found;
+    s32 flags;
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetRowValue);
+    switch (kind) {
+    case 0:
+        return D_00391FA0[index].unk0;
+    case 1:
+        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].unk4);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 2:
+        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].unk14);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 3:
+        D_004361D4 = D_00391FA0[index].unk24;
+        return 0;
+    case 4:
+        D_004361D8 = D_00391FA0[index].unk34;
+        return 0;
+    case 5:
+        return D_00391FA0[index].unk44;
+    case 6:
+        flags = entry[0x64];
+        if (flags & 1) {
+            return *(s8 *)(entry + 0x67);
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 fldGetRowValue(u32 kind) {
+    s32 slot = D_004361DC;
+
+    switch (kind) {
+    case 0:
+        return D_003931A0[slot].count;
+    case 1:
+        return D_003931A0[slot].unk4;
+    case 2:
+        return D_003931A0[slot].body.data[0];
+    case 3:
+        return D_003931A0[slot].body.data[1];
+    case 4:
+        return D_003931A0[slot].body.data[2];
+    case 5:
+        return D_003931A0[slot].body.data[3];
+    case 6:
+        return D_003931A0[slot].body.data[4];
+    case 7:
+        return D_003931A0[slot].body.data[5];
+    case 8:
+        return D_003931A0[slot].body.data[6];
+    case 9:
+        return D_003931A0[slot].body.data[7];
+    case 10:
+        return D_003931A0[slot].body.data[8];
+    case 11:
+        return D_003931A0[slot].body.data[9];
+    case 12:
+        return D_003931A0[slot].body.data[10];
+    case 13:
+        return D_003931A0[slot].body.data[11];
+    case 14:
+        return D_003931A0[slot].count - D_004361E0 - 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldFindTableEntry);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142670);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetActorSlots);
+void fldResetActorSlots(void) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142A10);
+    for (i = 0; i < 256; i++) {
+        D_00449B30[i][0] = 0;
+        D_00449B30[i][1] = 0;
+        D_00449B30[i][2] = 0;
+        D_00449B30[i][3] = -1;
+        D_00449B30[i][4] = 0;
+        D_00449B30[i][5] = -1;
+        D_00449B30[i][6] = -1;
+        D_00449B30[i][7] = 0;
+        D_00449B30[i][8] = 0;
+        D_00449B30[i][9] = 0;
+        D_00449B30[i][11] = 0;
+        D_00449B30[i][12] = 0;
+        D_00449B30[i][13] = 0;
+        D_00449B30[i][14] = 0;
+        D_00449B30[i][15] = 0;
+        D_00449B30[i][16] = 0;
+        D_00449B30[i][17] = 0;
+        D_00449B30[i][18] = 0;
+        D_00449B30[i][19] = 0;
+        D_00449B30[i][20] = 0;
+        D_00449B30[i][21] = 0;
+        D_00449B30[i][22] = 0;
+    }
+    D_004361F4 = -1;
+}
+
+void func_00142A10(s32 field) {
+    char path[64];
+    char directory[32];
+    u32 command;
+    if (field >= 100) {
+        memset(D_003931A0, 0, 0x6D00);
+    } else {
+        fldFormatAreaDirectory(directory, field, 1);
+        func_0035C860(path, "%sF%03d.WAP", directory, field);
+        command = sdfDevCreateCommandState(path);
+        func_0033EB10(command, D_003931A0, 0x6D00);
+        func_0033EAE0(command);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142AB8);
 
@@ -524,4 +855,3 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436200);
-

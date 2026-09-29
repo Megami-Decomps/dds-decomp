@@ -30,6 +30,10 @@ void func_00101950(s32 arg0, void *arg1);
 
 void func_00243430(void);
 
+void func_002457B8(s32 arg0);
+
+extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
 
 INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00421FE8);
@@ -38,7 +42,7 @@ INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242D10);
 
 u32 func_00242DE0(void) {
     s32 world;
-    s32 task;
+    s32 childTask;
 
     world = func_0010D8C8();
     if (world == 0) {
@@ -48,44 +52,44 @@ u32 func_00242DE0(void) {
         func_0035B6E0(D_00422050);
         return 1;
     }
-    task = evtCreateTask(0x2afe, func_0010D7D0(0));
-    func_00101968(*(s32 *)(world + 0xe4), task);
-    func_0010D818(task);
+    childTask = evtCreateTask(0x2afe, func_0010D7D0(0));
+    func_00101968(*(s32 *)(world + 0xe4), childTask);
+    func_0010D818(childTask);
     return 1;
 }
 
 u32 func_00242E70(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 taskId;
+    s64 registered;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = kwlnTaskIsRegistered(temp_v0);
-    if (temp_v1 != 0) {
-        func_0024FE28(temp_v0);
+    taskId = func_0010D650(0);
+    registered = kwlnTaskIsRegistered(taskId);
+    if (registered != 0) {
+        func_0024FE28(taskId);
     }
     return 1;
 }
 
 u32 func_00242EB8(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 taskId;
+    s64 registered;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = kwlnTaskIsRegistered(temp_v0);
-    if (temp_v1 != 0) {
-        func_0024FE50(temp_v0);
+    taskId = func_0010D650(0);
+    registered = kwlnTaskIsRegistered(taskId);
+    if (registered != 0) {
+        func_0024FE50(taskId);
     }
     return 1;
 }
 
 u32 func_00242F00(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 taskId;
+    s64 registered;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = kwlnTaskIsRegistered(temp_v0);
-    if (temp_v1 != 0) {
-        func_0024FE80(temp_v0);
+    taskId = func_0010D650(0);
+    registered = kwlnTaskIsRegistered(taskId);
+    if (registered != 0) {
+        func_0024FE80(taskId);
     }
     return 1;
 }
@@ -252,7 +256,11 @@ void func_00243398(void) {
     ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfe;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_002433B0);
+void func_002433B0(void) {
+    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags | 2;
+    *(f32 *)&D_004371F8 = 1.0f;
+    func_002457B8(0);
+}
 
 void func_002433E8(void) {
     ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfd;
@@ -292,7 +300,11 @@ void evtFreeSolarOverlayWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243740);
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", evtStopSolarOverlay);
+void evtStopSolarOverlay(void) {
+    if (D_00437200 != 0) {
+        kwlnTaskDestroyWithHierarchy(D_00437200, 1);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_004371F8);
 
@@ -301,4 +313,3 @@ INCLUDE_SDATA(const s32, "game/code_00242CB8", D_004371FC);
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_00437200);
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_00437208);
-

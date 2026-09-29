@@ -1,6 +1,6 @@
 #include "common.h"
 
-u32 effLoadIndexedResource(void *arg0, const char *arg1, s32 arg2);
+u32 effLoadIndexedResource(void *resourceTable, const char *fileName, s32 index);
 
 extern u32 D_00437210[];
 
@@ -41,8 +41,8 @@ typedef struct SolarOverlayWork {
 
 f32 func_00341240(s32 seed);
 
-void evtLoadSolarNoiseSprite(u32 *arg0) {
-    *arg0 = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
+void evtLoadSolarNoiseSprite(u32 *sprite) {
+    *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
 }
 
 void evtReleaseSolarNoiseSprite(u32 *sprite) {

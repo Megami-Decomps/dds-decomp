@@ -8,6 +8,8 @@ extern u32 D_0038BB60[];
 
 extern void *memset(void *s, s32 c, u32 n);
 
+extern s32 D_00436170;
+
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
@@ -30,11 +32,28 @@ INCLUDE_ASM(const s32, "game/code_001360B8", func_00136A70);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_00136C90);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", fldComposeFadeColor);
+s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
+    s32 scaled;
+
+    if (fade < 0) {
+        fade = 0;
+    }
+    scaled = alpha * D_00436170 / 100;
+    if (fade < 0xE0) {
+        return color | (scaled << 24);
+    }
+    scaled = (1.0f - (f32)(fade - 0xE0) * 0.00390625f) * scaled;
+    if (scaled < 0) {
+        scaled = 0;
+    }
+    if (scaled > 0x80) {
+        scaled = 0x80;
+    }
+    return color | (scaled << 24);
+}
 
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436168);
 
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_0043616C);
 
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436170);
-

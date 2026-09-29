@@ -46,10 +46,6 @@ extern void func_0019D178();
 
 extern void func_0019D1E0();
 
-extern void func_0019D550();
-
-extern void func_0019C5B0();
-
 extern char D_003E7588[];
 
 extern char D_00380788[];
@@ -197,6 +193,20 @@ typedef struct MenuList {
 } MenuList;
 
 extern MenuListNode *func_00328E18(s32);
+
+extern void func_003144E8();
+
+extern void scrClearSecondaryScriptFlag();
+
+extern void func_0019D550(s32, s32, s32);
+
+extern void func_0019C5B0(s32);
+
+extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
+
+extern s32 func_003292A8(s32);
+
+extern s32 *sdfResourceRetainAddress(s32);
 
 static inline s64 menuSetHandler(s32 context, u64 mode, s32 callback) {
     return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
@@ -858,7 +868,15 @@ u32 func_002B5358(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B53B8);
+void func_002B53B8(s32 obj, s32 id, s32 slot) {
+    u16 code = id;
+
+    if (func_00315098(obj, code) == 0) {
+        *(u16 *)(obj + slot * 2 + 0x22) = code;
+        func_003144E8(obj);
+        scrClearSecondaryScriptFlag(obj, code);
+    }
+}
 
 void func_002B5430(s32 arg0, s32 arg1) {
     *(u16 *)(arg1 * 2 + arg0 + 0x22) = 0;
@@ -2008,7 +2026,31 @@ s32 func_002BAB00(s32 *arg0, s32 *arg1) {
     return (temp_A < temp_B) ? -1 : 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", menuSortItems);
+void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
+    s32 (*comparators[6])(MenuListNode **, MenuListNode **) = {
+        func_002BAA28, func_002BAA80, func_002BAAD8,
+        func_002BAA50, func_002BAAA8, func_002BAB00
+    };
+    s32 count = 0;
+    s32 handle = func_003292A8(((MenuList *)menu)->count * 4);
+    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(handle);
+    MenuListNode **out = items;
+    MenuListNode *node;
+
+    for (node = ((MenuList *)menu)->first; node != NULL; node = node->next) {
+        *out++ = node;
+        count++;
+    }
+    if (descending != 0) {
+        sortKey += 3;
+    }
+    func_0035B7F8(items, count, 4, comparators[sortKey]);
+    menuLinkItemList(items, count);
+    func_002BA890(menu);
+    func_002BA8C8(menu);
+    func_002BA900((s32 *)menu, 0);
+    func_003297C8(handle);
+}
 
 void mnuAllocateListEntries(s32 *list) {
     u32 i;

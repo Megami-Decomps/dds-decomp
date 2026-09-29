@@ -2,7 +2,9 @@
 
 INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C078);
 
-INCLUDE_ASM(const s32, "game/code_0018C078", func_0018C088);
+void func_0018C088(u8 *work, f32 value) {
+    *(f32 *)(work + 0x2C) = value;
+}
 
 void func_0018C090(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x3c) = arg1;

@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    PathEntry16 *unk4;
+    PathEntry16 *entries;
 } PathData18;
 
 typedef struct {
@@ -31,12 +31,12 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    s32 unk4;
+    s32 flags;
     s32 unk8;
-    f32 unkC;
-    s32 unk10;
+    f32 time;
+    s32 bufferHandle;
     PathData14 *unk14;
-    PathData18 *unk18;
+    PathData18 *vectorData;
     s32 unk1C;
     PathData20 *unk20;
 } PathObj;
@@ -62,7 +62,7 @@ void effFreeBuffers(s32 arg);
 void func_002CFF98(void *arg);
 
 void func_00116F08(PathObj *path) {
-    effFreeBuffers(path->unk10);
+    effFreeBuffers(path->bufferHandle);
     func_002CFF98(path);
 }
 
@@ -71,14 +71,14 @@ INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F38);
 void func_00117050(PathObj *path) {
     s32 index;
     f32 fraction;
-    PathData18 *data;
+    PathData18 *vectorData;
     PathEntry16 *entries;
     PathEntry16 *first;
     PathEntry16 *second;
-    if (path->unk4 & 2) {
-        data = path->unk18;
-        func_00116B80(&index, &fraction, data, path->unkC);
-        entries = data->unk4;
+    if (path->flags & 2) {
+        vectorData = path->vectorData;
+        func_00116B80(&index, &fraction, vectorData, path->time);
+        entries = vectorData->entries;
         first = &entries[index];
         __asm__ volatile (
             ".set noreorder\n"

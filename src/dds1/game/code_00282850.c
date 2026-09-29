@@ -400,7 +400,23 @@ s32 mnuRateByThreshold(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283D10);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283E60);
+void func_00283E60(s32 object) {
+    s32 *table;
+    s32 value;
+
+    func_00283D10(object);
+    func_00283CA8(object);
+    table = *(s32 **)(object + 0x14);
+    value = 0;
+    if (table != 0) {
+        value = table[*(s8 *)(object + 0x18)];
+    }
+    effConfigureWithDefaultSetting(*(s32 *)(object + 0x38), 0, *(s32 *)(object + 0x40), 0, value, 0);
+    *(u8 *)(object + 0x18) += 1;
+    if ((s8)*(u8 *)(object + 0x18) >= 4) {
+        *(u8 *)(object + 0x18) = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283EE0);
 
@@ -865,7 +881,27 @@ s32 func_00286540(u16 id, s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002865B8);
+s32 func_002865B8(s32 arg0, u8 *cursor) {
+    u8 *record = (u8 *)((arg0 & 0xFFFF) * 0x38 + D_003BAA50);
+    u16 amount = *(u16 *)(record + 4);
+
+    switch (record[3]) {
+    case 1:
+        if (*(u16 *)(cursor + 6) < amount) {
+            return 0;
+        }
+        datMoveCursorX(cursor, -amount);
+        return 1;
+    case 2:
+        if (*(u16 *)(cursor + 0xA) < amount) {
+            return 0;
+        }
+        datMoveCursorY(cursor, -amount);
+        return 1;
+    default:
+        return 1;
+    }
+}
 
 s32 func_00286648(u16 ability) {
     u8 value;

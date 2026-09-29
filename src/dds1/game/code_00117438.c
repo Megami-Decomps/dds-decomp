@@ -11,6 +11,8 @@ typedef struct EvtScaledValue {
     u32 flags;
     f32 base;
     f32 scaled;
+    u8 pad10[8];
+    u32 value18;
 } EvtScaledValue;
 
 typedef struct SdfRuntime {
@@ -66,12 +68,12 @@ void func_001175E0(EvtScaledValue *value) {
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001175F8);
 
-u32 func_00117648(s32 arg0) {
-    return *(u32 *)(arg0 + 0x18);
+u32 func_00117648(EvtScaledValue *value) {
+    return value->value18;
 }
 
-u32 func_00117650(s32 arg0) {
-    return *(u32 *)(arg0 + 0x18);
+u32 func_00117650(EvtScaledValue *value) {
+    return value->value18;
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117658);

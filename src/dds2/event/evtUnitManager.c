@@ -52,25 +52,40 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CB68);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC00);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC48);
+s32 func_0023CC48(u8 *obj) {
+    if (obj == NULL) {
+        return 0;
+    }
+    return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC60);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CD98);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CE08);
+s32 func_0023CE08(u8 *work) {
+    return *(s16 *)(work + 0xAC);
+}
 
 void func_0023CE10(EventUnit *unit, u16 value) {
     unit->valueBC = value;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CE18);
+void func_0023CE18(u8 *work, f32 value) {
+    *(f32 *)(work + 0xB8) = value;
+}
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CE20);
+void func_0023CE20(u8 *work, s32 a, s32 b) {
+    *(s16 *)(work + 0xBE) = a;
+    *(s16 *)(work + 0xC0) = b;
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CE30);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CE98);
+void func_0023CE98(u8 *work, s32 a, s32 b) {
+    *(s8 *)(work + 0xD0) = a;
+    *(s8 *)(work + 0xD1) = b;
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CEA8);
 

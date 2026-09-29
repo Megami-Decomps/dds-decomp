@@ -1,5 +1,7 @@
 #include "common.h"
 extern char D_00425118[];
+extern char D_004378A8[]; /* "%d" */
+extern void func_00311DB0(s32, s32, s32, s32, s32, char *, s32, s32);
 
 extern u64 func_00279DC8(u32, u64, u64, u64, u64, u64);
 
@@ -23,27 +25,27 @@ extern void func_00286270();
 u32 func_0026F700(u32);
 u32 func_0026F778(u32);
 extern u32 func_0026FC88(u32, u32, void (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
-extern void func_00279308(void);
+extern s32 func_00279308();
 extern u32 func_00279440(u32, u32);
 extern u32 func_00279180();
 extern u32 func_00279488();
 extern u32 func_00279628();
 extern void func_002792D8(s32);
-void func_00271368();
+s32 func_00271368();
 void func_00271510();
 u32 func_002712E0();
 void func_0026FBD8(u32);
 void func_00271348();
 void func_00275358(u32, u32, u32, u32);
-extern void func_00270210();
+extern s32 func_00270210();
 extern void func_00270848();
 extern u32 func_00270160();
 extern void func_002701D0();
-extern void func_00270DD8();
+extern s32 func_00270DD8();
 extern s32 func_00270F10();
 extern u32 func_00270D60();
 extern void func_00270DB0();
-extern void func_00272DA8();
+extern s32 func_00272DA8();
 extern void func_00272F08();
 extern u32 func_00272D20();
 extern void func_00272D80();
@@ -55,7 +57,7 @@ extern void func_002741D0();
 extern void func_002743B8();
 extern u32 func_00274158();
 extern void func_002741A8();
-extern void func_00274EA8();
+extern s32 func_00274EA8();
 extern void func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
 extern void func_00274E88();
@@ -102,7 +104,7 @@ extern u32 func_0026E788(u32, u32, u32, u32, u32, u32, u32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
 extern void func_002758B8(s16, s16, u32, s32, u32);
 extern char D_004250D8[];
-extern void func_002748D0();
+extern s32 func_002748D0();
 extern void func_00274A70();
 extern u32 func_00274820();
 extern void func_00274890();
@@ -223,7 +225,21 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EDB0);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EEE8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F008);
+void func_0026F008(s32 arg0, s32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
+    char buttons[9] = {0, 'n', 's', 'o', 'q', 'p', 'r', 't', 'u'};
+    char text[8];
+    s32 color = arg4 | 0xA09DC300;
+
+    func_0026E788(arg0, arg1, arg2, arg4, buttons[*(u16 *)(arg3 + 4)], 0, arg5);
+    func_0026E788(arg0, arg1, arg2, arg4, 0x76, 0, arg5);
+    memset(text, 0, sizeof(text));
+    func_0035C860(text, D_004378A8, *(u16 *)(arg3 + 0x14));
+    if (strlen(text) > 1) {
+        func_00311DB0(arg0 + 0x1E0, arg1 + 0x173, arg2, color, 0, text, 0, arg5);
+    } else {
+        func_00311DB0(arg0 + 0x1E4, arg1 + 0x173, arg2, color, 0, text, 0, arg5);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250D8);
 
@@ -441,7 +457,86 @@ s32 mnuFindMantraDrawItemByKind(u32 address, u32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026FE18);
+typedef struct DrawItem {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u32 active : 1;
+    u32 unk_bits : 2;
+    u32 state : 8;
+    u32 started : 1;
+    u32 unk_hi : 20;
+    /* 0x08 */ s32 (*onStart)(struct DrawItem *, s32);
+    /* 0x0C */ void (*onEnd)(struct DrawItem *);
+    /* 0x10 */ s32 (*isReady)(void *, struct DrawItem *);
+    /* 0x14 */ void (*update)(void *, struct DrawItem *);
+    /* 0x18 */ s16 timer0;
+    /* 0x1A */ s16 timer1;
+    /* 0x1C */ s32 arg;
+    /* 0x20 */ s32 result;
+} DrawItem;
+
+void func_0026FE18(u8 *pool) {
+    s32 i;
+    s32 ready = 0;
+    s32 count = *(s32 *)(pool + 8);
+    DrawItem *item = *(DrawItem **)(pool + 4);
+
+    for (i = 0; i < count; i++, item = (DrawItem *)((u8 *)item + 0x24)) {
+        if (!item->active) {
+            continue;
+        }
+        switch (item->state) {
+        case 1:
+            item->timer0 -= 1;
+            if (item->timer0 == 0) {
+                if (item->onStart != 0) {
+                    item->state = 3;
+                } else {
+                    item->state = 4;
+                }
+            }
+            break;
+        case 2:
+            item->timer1 -= 1;
+            if (item->timer1 == 0) {
+                if (item->onEnd != 0) {
+                    item->state = 5;
+                } else {
+                    item->state = 6;
+                }
+            }
+            break;
+        case 3:
+            item->state = 4;
+            item->result = item->onStart(pool, item->arg);
+            break;
+        case 4:
+            if (item->isReady(pool, item) == 1) {
+                ready = 1;
+            }
+            item->update(pool, item);
+            if (ready != 0) {
+                if (item->timer1 > 0) {
+                    item->state = 2;
+                } else {
+                    item->state = 5;
+                }
+            }
+            break;
+        case 5:
+            if (!item->started) {
+                item->onEnd(item);
+            }
+            item->started = 1;
+            item->active = 0;
+            break;
+        case 6:
+            item->active = 0;
+            break;
+        case 7:
+            break;
+        }
+    }
+}
 
 u32 func_00270008(u32 arg0) {
     return func_0026FC88(arg0, 0, func_00270210, func_00270848,
@@ -505,7 +600,67 @@ void func_002701D0(u32 obj) {
     func_0010AE38("BG Draw Release\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270210);
+typedef struct MantraCursorFade {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ u32 cur : 4;
+    u32 next : 4;
+    u32 unk4_hi : 24;
+    /* 0x08 */ u16 timer;
+    /* 0x0A */ u16 clock;
+    /* 0x0C */ f32 value;
+} MantraCursorFade;
+
+s32 func_00270210(s32 arg0, s32 arg1) {
+    MantraCursorFade *fade = *(MantraCursorFade **)(arg1 + 0x20);
+
+    fade->clock += 1;
+    if ((s16)fade->clock >= 0x79) {
+        fade->clock = 0;
+    }
+    if (*(s8 *)((u8 *)fade + 5) > 0) {
+        *(s8 *)((u8 *)fade + 5) -= 1;
+        if (*(s8 *)((u8 *)fade + 5) == 0) {
+            if (fade->cur != fade->next) {
+                fade->cur = fade->next;
+                *(s8 *)((u8 *)fade + 5) = 5;
+            }
+        }
+    }
+    switch (fade->state) {
+    case 1:
+    case 6:
+        fade->value = (f32)fade->timer / 22.0f;
+        fade->timer += 1;
+        if (fade->timer >= 22) {
+            fade->state = 2;
+            fade->value = 1.0f;
+            fade->timer = 0;
+        }
+        break;
+    case 2:
+        fade->value = 1.0f;
+        break;
+    case 3:
+    case 5:
+        fade->value = 1.0f - (f32)fade->timer / 10.0f;
+        fade->timer += 1;
+        if (fade->timer >= 10) {
+            fade->timer = 0;
+            fade->value = 0.0f;
+            if (fade->state == 5) {
+                fade->state = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        fade->value = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270390);
 
@@ -563,7 +718,47 @@ void func_00270DB0(u32 obj) {
     func_0010AE38("BGMask Draw Release\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270DD8);
+s32 func_00270DD8(s32 arg0, s32 arg1) {
+    u8 *fade = *(u8 **)(arg1 + 0x20);
+
+    *(u16 *)(fade + 4) += 1;
+    if ((s16)*(u16 *)(fade + 4) >= 0x79) {
+        *(u16 *)(fade + 4) = 0;
+    }
+    switch (*(u16 *)fade) {
+    case 1:
+    case 6:
+        *(f32 *)(fade + 8) = (f32)*(u16 *)(fade + 2) / 22.0f;
+        *(u16 *)(fade + 2) += 1;
+        if (*(u16 *)(fade + 2) >= 22) {
+            *(u16 *)fade = 2;
+            *(f32 *)(fade + 8) = 1.0f;
+            *(u16 *)(fade + 2) = 0;
+        }
+        break;
+    case 2:
+        *(f32 *)(fade + 8) = 1.0f;
+        break;
+    case 3:
+    case 5:
+        *(f32 *)(fade + 8) = 1.0f - (f32)*(u16 *)(fade + 2) / 10.0f;
+        *(u16 *)(fade + 2) += 1;
+        if (*(u16 *)(fade + 2) >= 10) {
+            *(u16 *)(fade + 2) = 0;
+            *(f32 *)(fade + 8) = 0.0f;
+            if (*(u16 *)fade == 5) {
+                *(u16 *)fade = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        *(f32 *)(fade + 8) = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 extern f32 func_003406A0(f32);
 extern void func_00270390(s32, s32, f32);
@@ -634,7 +829,77 @@ void func_00271348(u32 obj) {
     func_00328E48(*(u32 *)(obj + 0x20));
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00271368);
+typedef struct MantraFadeState {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 timer;
+    /* 0x04 */ u32 unk4;
+    /* 0x08 */ f32 value;
+    /* 0x0C */ u32 flagsC;
+    /* 0x10 */ u32 flags10;
+    /* 0x14 */ u32 armed : 1;
+    u32 countdown : 31;
+    /* 0x18 */ s32 clock;
+    /* 0x1C */ u16 queuedState;
+    /* 0x1E */ u16 delay;
+    /* 0x20 */ u32 queuedFlags;
+} MantraFadeState;
+
+s32 func_00271368(s32 arg0, s32 arg1) {
+    MantraFadeState *fade = *(MantraFadeState **)(arg1 + 0x20);
+
+    fade->clock += 1;
+    if (fade->clock >= 0x79) {
+        fade->clock = 0;
+    }
+    if (fade->delay != 0) {
+        fade->delay -= 1;
+        if (fade->delay == 0) {
+            fade->state = fade->queuedState;
+            fade->flagsC = fade->queuedFlags;
+        }
+    }
+    if (fade->armed) {
+        fade->countdown -= 1;
+        if (fade->countdown == 0) {
+            fade->armed = 0;
+            fade->flagsC |= fade->flags10;
+            fade->flags10 = 0;
+        }
+    }
+    switch (fade->state) {
+    case 1:
+    case 6:
+        fade->value = (f32)fade->timer / 20.0f;
+        fade->timer += 1;
+        if (fade->timer >= 20) {
+            fade->state = 2;
+            fade->value = 1.0f;
+            fade->timer = 0;
+        }
+        break;
+    case 2:
+        fade->value = 1.0f;
+        break;
+    case 3:
+    case 5:
+        fade->value = 1.0f - (f32)fade->timer / 5.0f;
+        fade->timer += 1;
+        if (fade->timer >= 5) {
+            fade->timer = 0;
+            fade->value = 0.0f;
+            if (fade->state == 5) {
+                fade->state = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        fade->value = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00271510);
 
@@ -722,7 +987,59 @@ void func_00272D80(u32 obj) {
     func_0010AE38("Title Draw Release\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00272DA8);
+typedef struct MantraBlinkState {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ s16 timer;
+    /* 0x06 */ s16 clock;
+    /* 0x08 */ f32 value;
+    /* 0x0C */ s16 delay;
+} MantraBlinkState;
+
+s32 func_00272DA8(s32 arg0, s32 arg1) {
+    MantraBlinkState *blink = *(MantraBlinkState **)(arg1 + 0x20);
+
+    blink->clock += 1;
+    if (blink->clock >= 0x25) {
+        blink->clock = 0;
+    }
+    if (blink->delay > 0) {
+        blink->delay -= 1;
+    }
+    switch (blink->state) {
+    case 1:
+    case 6:
+        blink->value = (f32)blink->timer / 20.0f;
+        blink->timer += 1;
+        if (blink->timer >= 20) {
+            blink->state = 2;
+            blink->value = 1.0f;
+            blink->timer = 0;
+        }
+        break;
+    case 2:
+        blink->value = 1.0f;
+        break;
+    case 3:
+    case 5:
+        blink->value = 1.0f - (f32)blink->timer / 10.0f;
+        blink->timer += 1;
+        if (blink->timer >= 10) {
+            blink->timer = 0;
+            blink->value = 0.0f;
+            if (blink->state == 5) {
+                blink->state = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        blink->value = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00272F08);
 
@@ -952,7 +1269,68 @@ void func_00274890(u32 obj) {
     func_0010AE38("UnitPanel Draw Release\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002748D0);
+typedef struct MantraLampState {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ u16 timer;
+    /* 0x06 */ u16 clock;
+    /* 0x08 */ f32 value;
+    /* 0x0C */ u8 unkC[0x30];
+    /* 0x3C */ u32 bits;
+} MantraLampState;
+
+s32 func_002748D0(s32 arg0, s32 arg1) {
+    MantraLampState *lamp = *(MantraLampState **)(arg1 + 0x20);
+    u32 bits;
+    u16 hold;
+
+    lamp->clock += 1;
+    if ((s16)lamp->clock >= 0x3D) {
+        lamp->clock = 0;
+    }
+    if (lamp->bits & 0xFFFE) {
+        hold = (lamp->bits >> 1) & 0x7FFF;
+        hold -= 1;
+        lamp->bits = (lamp->bits & 0xFFFF0001) | ((hold & 0x7FFF) << 1);
+    }
+    switch (lamp->state) {
+    case 1:
+    case 6:
+        lamp->value = (f32)lamp->timer / 20.0f;
+        lamp->timer += 1;
+        if (lamp->timer >= 20) {
+            bits = lamp->bits;
+            lamp->state = (bits & 1) ? 4 : 2;
+            lamp->value = 1.0f;
+            lamp->timer = 0;
+            lamp->bits = bits & ~1;
+        }
+        break;
+    case 2:
+        lamp->value = 1.0f;
+        break;
+    case 3:
+    case 5:
+        lamp->value = 1.0f - (f32)lamp->timer / 10.0f;
+        lamp->timer += 1;
+        if (lamp->timer >= 10) {
+            lamp->timer = 0;
+            lamp->value = 0.0f;
+            if (lamp->state == 5) {
+                bits = lamp->bits;
+                lamp->state = (bits & 1) ? 2 : 4;
+                lamp->bits = bits & ~1;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        lamp->value = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274A70);
 
@@ -991,7 +1369,50 @@ void func_00274E88(u32 obj) {
     func_00328E48(*(u32 *)(obj + 0x20));
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274EA8);
+s32 func_00274EA8(s32 arg0, s32 arg1) {
+    u8 *fade = *(u8 **)(arg1 + 0x20);
+
+    *(u16 *)(fade + 6) += 1;
+    if ((s16)*(u16 *)(fade + 6) >= 0x3D) {
+        *(u16 *)(fade + 6) = 0;
+    }
+    if (*(s32 *)(fade + 0xC) > 0) {
+        *(s32 *)(fade + 0xC) -= 1;
+    }
+    switch (*(u16 *)fade) {
+    case 1:
+    case 6:
+        *(f32 *)(fade + 8) = (f32)*(u16 *)(fade + 4) / 20.0f;
+        *(u16 *)(fade + 4) += 1;
+        if (*(u16 *)(fade + 4) >= 20) {
+            *(u16 *)fade = 2;
+            *(f32 *)(fade + 8) = 1.0f;
+            *(u16 *)(fade + 4) = 0;
+        }
+        break;
+    case 2:
+        *(f32 *)(fade + 8) = 1.0f;
+        break;
+    case 3:
+    case 5:
+        *(f32 *)(fade + 8) = 1.0f - (f32)*(u16 *)(fade + 4) / 10.0f;
+        *(u16 *)(fade + 4) += 1;
+        if (*(u16 *)(fade + 4) >= 10) {
+            *(u16 *)(fade + 4) = 0;
+            *(f32 *)(fade + 8) = 0.0f;
+            if (*(u16 *)fade == 5) {
+                *(u16 *)fade = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        *(f32 *)(fade + 8) = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274FF8);
 
@@ -1058,13 +1479,179 @@ u32 func_002755B8(u32 *pool, u32 flags) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002756E0);
+typedef struct MantraIconEntry {
+    /* 0x0 */ u32 active : 1;
+    u32 state : 4;
+    u32 leaving : 1;
+    u32 shortLoop : 1;
+    u32 unk_bits : 25;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ s32 timer;
+} MantraIconEntry;
+
+s32 func_002756E0(u8 *list) {
+    MantraIconEntry *entry;
+    s32 i;
+
+    entry = *(MantraIconEntry **)(list + 4);
+    if (entry == 0) {
+        return 0;
+    }
+    for (i = 0; i < *(s32 *)(list + 0x10); i++, entry++) {
+        if (!entry->active) {
+            continue;
+        }
+        switch (entry->state) {
+        case 1:
+        case 5:
+            entry->timer += 1;
+            if (entry->timer >= 11) {
+                entry->timer = 0;
+                if (entry->leaving) {
+                    entry->state = 3;
+                } else {
+                    entry->state = 2;
+                }
+            }
+            break;
+        case 2:
+            entry->timer += 1;
+            if (entry->shortLoop) {
+                if (entry->timer >= 26) {
+                    entry->timer = 0;
+                }
+            } else if (entry->timer >= 41) {
+                entry->timer = 0;
+            }
+            if (entry->leaving) {
+                entry->timer = 0;
+                entry->state = 3;
+            }
+            break;
+        case 3:
+        case 6:
+            entry->timer += 1;
+            if (entry->timer >= 6) {
+                entry->timer = 0;
+                if (entry->state == 6) {
+                    entry->state = 9;
+                } else {
+                    entry->state = 4;
+                }
+            }
+            break;
+        case 4:
+            entry->active = 0;
+            break;
+        case 7:
+        case 10:
+            entry->timer += 1;
+            if (entry->timer >= 31) {
+                entry->timer = 0;
+                if (entry->state == 10) {
+                    entry->state = 12;
+                } else {
+                    entry->state = 9;
+                }
+            }
+            break;
+        case 8:
+        case 11:
+            entry->timer += 1;
+            if (entry->timer >= 31) {
+                entry->timer = 0;
+                entry->state = 2;
+            }
+            break;
+        case 9:
+        case 12:
+            break;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002758B8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002759F8);
+s32 func_002759F8(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *object) {
+    s32 count;
+    f32 ratio;
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275B70);
+    switch ((*(u32 *)object >> 1) & 0xF) {
+    case 1:
+    case 5:
+        count = *(s32 *)(object + 8);
+        if (count < 5) {
+            ratio = (f32)count / 5.0f;
+        } else {
+            ratio = 1.0f;
+        }
+        amount = (f32)amount * ratio;
+        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10B, 0, 0x53);
+        break;
+    case 2:
+        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10B, 0, 0x53);
+        break;
+    case 3:
+    case 6:
+        count = *(s32 *)(object + 8);
+        if (count < 5) {
+            ratio = (f32)count / 5.0f;
+        } else {
+            ratio = 1.0f;
+        }
+        ratio = 1.0f - ratio;
+        amount = (f32)amount * ratio;
+        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10B, 0, 0x53);
+        break;
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+        break;
+    }
+    return 0;
+}
+
+s32 func_00275B70(s32 x, s32 y, s32 arg2, s32 amount, s32 arg4, u8 *object) {
+    s32 count;
+    f32 ratio;
+
+    switch ((*(u32 *)object >> 1) & 0xF) {
+    case 1:
+    case 5:
+        count = *(s32 *)(object + 8);
+        if (count < 5) {
+            ratio = (f32)count / 5.0f;
+        } else {
+            ratio = 1.0f;
+        }
+        amount = (f32)amount * ratio;
+        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10C, 0, 0x53);
+        break;
+    case 2:
+        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10C, 0, 0x53);
+        break;
+    case 3:
+    case 6:
+        count = *(s32 *)(object + 8);
+        if (count < 5) {
+            ratio = (f32)count / 5.0f;
+        } else {
+            ratio = 1.0f;
+        }
+        ratio = 1.0f - ratio;
+        amount = (f32)amount * ratio;
+        func_0026E788(x + *(s16 *)(object + 4), y + *(s16 *)(object + 6), arg2, amount, 0x10C, 0, 0x53);
+        break;
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425828);
 
@@ -1188,7 +1775,44 @@ void func_002792D8(s32 obj) {
     func_00328E48(data);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00279308);
+s32 func_00279308(s32 arg0, s32 arg1) {
+    u8 *fade = *(u8 **)(arg1 + 0x20);
+
+    func_002756E0(*(s32 *)fade);
+    switch (*(u16 *)(fade + 4)) {
+    case 1:
+    case 6:
+        *(f32 *)(fade + 8) = (f32)*(u16 *)(fade + 6) / 20.0f;
+        *(u16 *)(fade + 6) += 1;
+        if (*(u16 *)(fade + 6) >= 20) {
+            *(u16 *)(fade + 4) = 2;
+            *(f32 *)(fade + 8) = 1.0f;
+            *(u16 *)(fade + 6) = 0;
+        }
+        break;
+    case 2:
+        *(f32 *)(fade + 8) = 1.0f;
+        break;
+    case 3:
+    case 5:
+        *(f32 *)(fade + 8) = 1.0f - (f32)*(u16 *)(fade + 6) / 10.0f;
+        *(u16 *)(fade + 6) += 1;
+        if (*(u16 *)(fade + 6) >= 10) {
+            *(u16 *)(fade + 6) = 0;
+            *(f32 *)(fade + 8) = 0.0f;
+            if (*(u16 *)(fade + 4) == 5) {
+                *(u16 *)(fade + 4) = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        *(f32 *)(fade + 8) = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 u32 func_00279440(u32 unused, u32 obj) {
     u32 data = *(u32 *)(obj + 0x20);
@@ -1323,7 +1947,57 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004258F0);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425928);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A080);
+s32 func_0027A080(s32 arg0, u8 *object) {
+    s32 result;
+
+    if (*(s16 *)(object + 0x2E) > 0) {
+        *(s16 *)(object + 0x2E) -= 1;
+        if (*(s16 *)(object + 0x2E) == 0) {
+            *(u16 *)(object + 0x1E) = 0;
+            *(u32 *)object = (*(u32 *)object & 0xFF87FFFF) | (((*(u32 *)object >> 23) & 0xF) << 19);
+        }
+    }
+    result = 0;
+    switch ((*(u32 *)object >> 19) & 0xF) {
+    case 0:
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    case 4:
+        break;
+    case 5:
+        break;
+    case 6:
+        *(u16 *)(object + 0x1E) += 1;
+        if ((s16)*(u16 *)(object + 0x1E) >= 4) {
+            *(u16 *)(object + 0x1E) = 0;
+            *(u32 *)object = *(u32 *)object & 0xFF87FFFF;
+        }
+        break;
+    case 8:
+        *(u16 *)(object + 0x1E) += 1;
+        if ((s16)*(u16 *)(object + 0x1E) >= 10) {
+            *(u16 *)(object + 0x1E) = 0;
+            *(u32 *)object = *(u32 *)object & 0xFF87FFFF;
+        }
+        break;
+    case 7:
+        *(u16 *)(object + 0x1E) += 1;
+        if ((s16)*(u16 *)(object + 0x1E) >= 4) {
+            result = 1;
+        }
+        break;
+    case 9:
+        *(u16 *)(object + 0x1E) += 1;
+        result = (s16)*(u16 *)(object + 0x1E) > 9;
+        break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A198);
 

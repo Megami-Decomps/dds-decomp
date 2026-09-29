@@ -21,7 +21,9 @@ typedef struct ScatterObject {
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
 
-INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D770);
+void func_0017D770(u8 *work, f32 value) {
+    *(f32 *)(work + 0x12C) = value;
+}
 
 void func_0017D778(ScatterObject *object, u32 value) {
     object->value130 = value;

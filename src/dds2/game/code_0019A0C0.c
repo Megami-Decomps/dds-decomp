@@ -84,7 +84,13 @@ extern u8 D_00452360[];
 /* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
 extern s32 D_00452378[];
 
-void func_003297C8(u32 sprite);
+extern void func_003297C8(void *arg0);
+
+extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
+
+extern void func_0019B120(EffPrim *arg0, void *arg1);
+
+extern void func_0019B1F0(EffPrim *arg0, void *arg1);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A0C0);
 
@@ -183,7 +189,18 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD68);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD78);
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", effBuildAndDispatch);
+void effBuildAndDispatch(EffPrim *arg0, s32 arg1) {
+    void *mem = func_003292A8(arg0->recordCount * 12);
+    void *buf = sdfResourceRetainAddress(mem);
+
+    func_0019AE18(buf, arg0->unk10, arg0->recordCount);
+    if (arg1 == 0) {
+        func_0019B120(arg0, buf);
+    } else {
+        func_0019B1F0(arg0, buf);
+    }
+    func_003297C8(mem);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
 
@@ -213,7 +230,11 @@ void *effCreateChannel(void *arg0, u32 arg1) {
     return buf;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B358);
+s64 func_0019B358(u32 *p) {
+    if (p != NULL) {
+        func_003297C8((void *)*p);
+    }
+}
 
 s32 effAdvanceChanCursor(void *arg0, EffChan *arg1) {
     s32 ret = 1;
@@ -260,4 +281,3 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B558);
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_00436540);
 
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_0043654C);
-

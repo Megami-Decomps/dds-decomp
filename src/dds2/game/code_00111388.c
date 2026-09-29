@@ -8,7 +8,9 @@ INCLUDE_ASM(const s32, "game/code_00111388", func_001113F0);
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_00111480);
 
-INCLUDE_ASM(const s32, "game/code_00111388", func_001114D0);
+s32 func_001114D0(u8 *obj, s32 index) {
+    return *(s32 *)(*(u8 **)(obj + 0x18) + (index << 2));
+}
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_001114E8);
 

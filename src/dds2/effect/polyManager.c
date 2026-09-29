@@ -20,9 +20,9 @@ typedef struct PolyEntryPool {
     s32 *records; /* 0xF8: entries have five 32-bit words */
 } PolyEntryPool;
 
-void func_001655D0(u32 arg0) {
-    func_001634A8(*(u32 *)((s32)arg0 + 0xdc));
-    func_00328E48(arg0);
+void func_001655D0(u32 work) {
+    func_001634A8(*(u32 *)((s32)work + 0xdc));
+    func_00328E48(work);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165600);
@@ -34,9 +34,9 @@ void func_00165670(float factor, PolyTransform *transform) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
 
-void func_00165838(s32 arg0) {
+void func_00165838(s32 work) {
     func_00165690();
-    func_00163508(*(u32 *)(arg0 + 0xdc));
+    func_00163508(*(u32 *)(work + 0xdc));
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165860);
@@ -47,9 +47,9 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165A78);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165B98);
 
-void func_00165CC0(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0xf0));
-    func_003297C8(*(u32 *)(arg0 + 0xf8));
+void func_00165CC0(s32 work) {
+    func_001634A8(*(u32 *)(work + 0xf0));
+    func_003297C8(*(u32 *)(work + 0xf8));
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165CF0);
@@ -71,9 +71,9 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166350);
 
-void func_00166478(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0xe0));
-    func_003297C8(*(u32 *)(arg0 + 0xe8));
+void func_00166478(s32 work) {
+    func_001634A8(*(u32 *)(work + 0xe0));
+    func_003297C8(*(u32 *)(work + 0xe8));
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001664A8);
@@ -90,9 +90,9 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166980);
 
-void func_00166AB0(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0xf4));
-    func_003297C8(*(u32 *)(arg0 + 0xfc));
+void func_00166AB0(s32 work) {
+    func_001634A8(*(u32 *)(work + 0xf4));
+    func_003297C8(*(u32 *)(work + 0xfc));
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166AE0);

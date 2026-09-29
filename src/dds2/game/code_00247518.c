@@ -46,6 +46,10 @@ typedef struct EventViewerState {
 
 u16 func_0024ABA0(EventViewerState *viewer);
 
+extern char D_004230D0[]; /* "EventViewer" */
+
+extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
+
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247518);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002475C8);
@@ -398,7 +402,9 @@ void func_0024DAE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024DAF8);
 
-INCLUDE_ASM(const s32, "game/code_00247518", evtEventViewerDestroyTask);
+void evtEventViewerDestroyTask(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_004230D0, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024DBB8);
 
@@ -475,4 +481,3 @@ INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A0);
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A8);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373B0);
-

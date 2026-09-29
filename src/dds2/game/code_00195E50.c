@@ -1,19 +1,5 @@
 #include "common.h"
 
-extern u8 D_00436460;
-
-extern u8 D_00436461;
-
-extern u8 D_00436462;
-
-extern u8 D_00436466;
-
-extern u8 D_00436463;
-
-extern u8 D_00436464;
-
-extern u8 D_00436465;
-
 /* Slot addressed by func_0018E660/func_0018E638 with a 0x60 stride. Only the
  * tail is known: two words cleared and a float reset to 0.05f. */
 typedef struct Slot60 {
@@ -115,6 +101,34 @@ typedef struct Work24 {
 extern Work24 D_003B29B8;
 
 extern Work2C D_003B2AF8;
+
+extern s8 D_00436465;
+
+extern s8 D_00436464;
+
+extern s8 D_00436463;
+
+extern s8 D_00436466;
+
+extern s8 D_00436462;
+
+extern s8 D_00436461;
+
+extern s8 D_00436460;
+
+extern void func_0018E0D0(Work30 *arg);
+
+extern void func_0018E908(BDWork2C *arg);
+
+extern void func_0018ECD0(BDWork2C *arg);
+
+extern void func_0018F1D0(BDWork2C *arg);
+
+extern void func_0018F5C0(Work30 *arg);
+
+extern void func_0018F840(Work18 *arg);
+
+extern void func_0018FCA0(BDWork24 *arg);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00195E50);
 
@@ -303,7 +317,29 @@ void effInitWorks(void) {
     *(s32 *)effGetCh76Work() = 4;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", effDispatchActive);
+void effDispatchActive(void) {
+    if (D_00436460) {
+        func_0018E0D0(&D_003B21B0);
+    }
+    if (D_00436461) {
+        func_0018E908(D_00438F10);
+    }
+    if (D_00436462) {
+        func_0018ECD0(D_00438F0C);
+    }
+    if (D_00436466) {
+        func_0018F1D0(D_00438F18);
+    }
+    if (D_00436463) {
+        func_0018F5C0(&D_003B2238);
+    }
+    if (D_00436464) {
+        func_0018F840(&D_003B2260);
+    }
+    if (D_00436465) {
+        func_0018FCA0(D_00438F14);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00197530);
 
@@ -442,4 +478,3 @@ INCLUDE_SDATA(const s32, "game/code_00195E50", D_0043651C);
 INCLUDE_SDATA(const s32, "game/code_00195E50", D_00436520);
 
 INCLUDE_SDATA(const s32, "game/code_00195E50", D_00436528);
-

@@ -66,7 +66,15 @@ INCLUDE_ASM(const s32, "game/code_00272D50", func_002734C0);
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273670);
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00273718);
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
+
+s64 func_00273718(u64 request) {
+    s32 state = func_00101A70();
+
+    return menuRunPanel(state, 2, request);
+}
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273750);
 

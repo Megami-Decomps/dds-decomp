@@ -33,6 +33,32 @@ struct MenuActionOwner {
     u32 valueC0;
 };
 
+typedef struct MenuIconRef {
+    u16 id;
+    u8 param;
+    u8 pad3;
+} MenuIconRef;
+
+extern void func_0011A118(s32, s32);
+
+extern char D_00437990[];
+
+extern char D_00428388[];
+
+extern char D_00428398[];
+
+extern char D_00437990[];
+
+extern char D_00428388[];
+
+extern char D_00428398[];
+
+extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
+typedef struct MenuPanelBlock {
+    s32 data[0x69];
+} MenuPanelBlock;
+
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00296E98);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297000);
@@ -119,7 +145,19 @@ s8 func_00298E78(void) {
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00298E80);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00298EA8);
+void func_00298EA8(MenuIconRef *refs) {
+    u32 i;
+
+    for (i = 0; i < 3; i++) {
+        u16 id = refs->id;
+        u8 param = refs->param;
+
+        refs++;
+        if (id != 0) {
+            func_0011A118(id, param);
+        }
+    }
+}
 
 void func_00298F08(s32 arg0) {
     func_0011A0D0(*(u32 *)(arg0 + 0xc));
@@ -152,7 +190,13 @@ void func_00299518(u32 arg0, u32 arg1, u32 arg2) {
     func_00299488(arg0, arg2, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299558);
+void func_00299558(s32 arg0) {
+    if (*(s32 *)(arg0 + 0x368) == 0) {
+        D_00437989 = 0;
+    } else {
+        D_00437989 = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 
@@ -160,7 +204,18 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_002996B8);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299748);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_002997F8);
+u32 func_002997F8(void) {
+    s8 state = D_00437988;
+
+    if (state == 1) {
+        kwlnTaskDestroyWithHierarchyByName(D_00437990, 0);
+        kwlnTaskDestroyWithHierarchyByName(D_00428388, 0);
+        kwlnTaskDestroyWithHierarchyByName(D_00428398, 0);
+        D_0043798B = state;
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_00299868(void) {
     s32 state = D_00437988;
@@ -176,7 +231,13 @@ s32 func_00299868(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_002998A0);
+u32 func_002998A0(void) {
+    if (D_00437988 == 1) {
+        func_002997F8();
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_002998D8);
 
@@ -224,4 +285,3 @@ INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A8);
-

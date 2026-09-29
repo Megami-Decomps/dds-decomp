@@ -6,6 +6,10 @@ typedef struct SdfRequest {
     u32 value;
 } SdfRequest;
 
+extern void func_003489D8();
+
+extern void func_00348B78();
+
 INCLUDE_ASM(const s32, "game/code_003478C0", func_003478C0);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347948);
@@ -55,7 +59,10 @@ INCLUDE_ASM(const s32, "game/code_003478C0", func_00348B10);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348B78);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348BD8);
+void func_00348BD8(u32 *work) {
+    work[4] = (u32)func_003489D8;
+    work[5] = (u32)func_00348B78;
+}
 
 INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EDD0);
 
@@ -64,4 +71,3 @@ INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EDE0);
 INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EDF0);
 
 INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EE00);
-

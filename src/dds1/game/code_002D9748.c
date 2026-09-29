@@ -21,7 +21,7 @@ typedef struct SdfTextParam {
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
     u8 unk18; /* 0x18: func_002DA5B0 stores a u32 over 0x18-0x1B */
-    u8 overrideFlags; /* 0x19: bit 0x2 selects unk88/unk8C over defaults */
+    u8 overrideFlags; /* 0x19: bit 0x2 selects overrideFirst/overrideSecond over defaults */
     u8 unk1A; /* 0x1A */
     u8 unk1B; /* 0x1B */
     f32 unk1C; /* 0x1C */
@@ -36,8 +36,8 @@ typedef struct SdfTextParam {
     f32 unk40; /* 0x40 */
     f32 unk44; /* 0x44 */
     u8 pad48[0x40]; /* 0x48 */
-    f32 unk88; /* 0x88 */
-    f32 unk8C; /* 0x8C */
+    f32 overrideFirst; /* 0x88 */
+    f32 overrideSecond; /* 0x8C */
     void *chunkTable; /* 0x90: resource chunk searched by tag */
 } SdfTextParam;
 
@@ -45,6 +45,14 @@ typedef struct SdfChunk {
     u32 id;   /* 0x0: entry id, 0 terminates the list */
     u32 size; /* 0x4: byte offset to the next entry */
 } SdfChunk;
+
+typedef struct SdfMapPositionRecord {
+    u32 unk00;
+    s32 id;
+    u8 pad08[0x38];
+} SdfMapPositionRecord;
+
+#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
 
 typedef struct SdfResourceList {
     u32 unk0;
@@ -136,7 +144,7 @@ s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9C28);
 
 u32 sdfCountMapPositionRecords(SdfTextParam *param) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, 0x534f504d);
+    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
@@ -148,19 +156,19 @@ INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9D00);
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9D80);
 
 void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, 0x534F504D);
-    u8 *entry;
+    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionRecord *entry;
     u8 *end;
     if (chunk == NULL) {
         return NULL;
     }
-    entry = (u8 *)chunk + 0x10;
+    entry = (SdfMapPositionRecord *)((u8 *)chunk + 0x10);
     end = (u8 *)chunk + chunk->size;
-    while (entry < end) {
-        if (*(s32 *)(entry + 4) == id) {
+    while ((u8 *)entry < end) {
+        if (entry->id == id) {
             return entry;
         }
-        entry += 0x40;
+        entry++;
     }
     return NULL;
 }
@@ -200,36 +208,36 @@ u32 sdfGetLodChunkValue(SdfTextParam *param) {
 }
 
 
-void func_002D9F38(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
-    arg0->unk88 = fparg0;
-    arg0->unk8C = fparg1;
-    arg0->overrideFlags = arg0->overrideFlags | 2;
+void func_002D9F38(SdfTextParam *param, f32 first, f32 second) {
+    param->overrideFirst = first;
+    param->overrideSecond = second;
+    param->overrideFlags = param->overrideFlags | 2;
 }
 
-void func_002D9F50(SdfTextParam *arg0) {
-    arg0->overrideFlags = arg0->overrideFlags & ~2;
+void func_002D9F50(SdfTextParam *param) {
+    param->overrideFlags = param->overrideFlags & ~2;
 }
 
-f32 func_002D9F60(SdfTextParam *arg0) {
-    if ((arg0->overrideFlags & 2) != 0) {
-        return arg0->unk88;
+f32 func_002D9F60(SdfTextParam *param) {
+    if ((param->overrideFlags & 2) != 0) {
+        return param->overrideFirst;
     }
     return D_003BD358;
 }
 
-f32 func_002D9F80(SdfTextParam *arg0) {
-    if ((arg0->overrideFlags & 2) != 0) {
-        return arg0->unk8C;
+f32 func_002D9F80(SdfTextParam *param) {
+    if ((param->overrideFlags & 2) != 0) {
+        return param->overrideSecond;
     }
     return D_003BD35C;
 }
 
-void func_002D9FA0(u32 arg0) {
-    D_003BD34C = arg0;
+void func_002D9FA0(u32 value) {
+    D_003BD34C = value;
 }
 
-void func_002D9FA8(u32 arg0) {
-    sdfDevCreateBufferedRequest(arg0, 4, 4);
+void func_002D9FA8(u32 capacity) {
+    sdfDevCreateBufferedRequest(capacity, 4, 4);
 }
 
 void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
@@ -249,15 +257,15 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA058);
 
-void func_002DA0C0(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp_v0;
+void func_002DA0C0(SdfResourceList *list, s32 count, s32 enabled) {
+    s32 cursor;
 
-    if ((arg1 < *(s16 *)(arg0 + 4)) && (arg2 != 0)) {
-        temp_v0 = (s32)arg1;
+    if ((count < list->count) && (enabled != 0)) {
+        cursor = (s32)count;
         do {
-            temp_v0 = temp_v0 + 1;
-        } while ((s64)temp_v0 != (s64)*(s16 *)(arg0 + 4));
-        *(s16 *)(arg0 + 4) = (s16)arg1;
+            cursor = cursor + 1;
+        } while ((s64)cursor != (s64)list->count);
+        list->count = (s16)count;
     }
     func_002E7730();
 }
@@ -294,34 +302,34 @@ void func_002DA340(void) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA358);
 
-void func_002DA3C0(SdfTextParam *arg0, u32 arg1) {
-    arg0->unk10 = arg1;
-    arg0->dirtyFlags |= 3;
+void func_002DA3C0(SdfTextParam *param, u32 value) {
+    param->unk10 = value;
+    param->dirtyFlags |= 3;
 }
 
-void func_002DA3D8(SdfTextParam *arg0, u32 arg1) {
-    arg0->unk14 = arg1;
-    arg0->dirtyFlags |= 3;
+void func_002DA3D8(SdfTextParam *param, u32 value) {
+    param->unk14 = value;
+    param->dirtyFlags |= 3;
 }
 
-void func_002DA3F0(SdfTextParam *arg0, u32 arg1) {
-    arg0->unk20 = arg1;
-    arg0->dirtyFlags |= 3;
+void func_002DA3F0(SdfTextParam *param, u32 value) {
+    param->unk20 = value;
+    param->dirtyFlags |= 3;
 }
 
-void func_002DA408(SdfTextParam *arg0, u32 arg1) {
-    *(u32 *)&arg0->unk28 = arg1;
-    arg0->dirtyFlags |= 3;
+void func_002DA408(SdfTextParam *param, u32 bits) {
+    *(u32 *)&param->unk28 = bits;
+    param->dirtyFlags |= 3;
 }
 
-void func_002DA420(SdfTextParam *arg0, f32 fparg0) {
-    arg0->unk1C = fparg0;
-    arg0->dirtyFlags = arg0->dirtyFlags | 3;
+void func_002DA420(SdfTextParam *param, f32 value) {
+    param->unk1C = value;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
-void func_002DA438(SdfTextParam *arg0, u32 arg1) {
-    *(u32 *)&arg0->unk2C = arg1;
-    arg0->dirtyFlags |= 3;
+void func_002DA438(SdfTextParam *param, u32 bits) {
+    *(u32 *)&param->unk2C = bits;
+    param->dirtyFlags |= 3;
 }
 
 SdfSubParam *sdfSubParamCreate(void) {
@@ -363,19 +371,19 @@ void func_002DA548(SdfTextParam *param, const f32 *input) {
     param->dirtyFlags |= 0xc;
 }
 
-void func_002DA5B0(SdfTextParam *arg0, u32 arg1) {
-    *(u32 *)((u8 *)arg0 + 0x18) = arg1;
-    arg0->dirtyFlags |= 0x30;
+void func_002DA5B0(SdfTextParam *param, u32 bits) {
+    *(u32 *)((u8 *)param + 0x18) = bits;
+    param->dirtyFlags |= 0x30;
 }
 
-void func_002DA5C8(SdfTextParam *arg0, u32 arg1) {
-    arg0->unk34 = arg1;
-    arg0->dirtyFlags |= 0x30;
+void func_002DA5C8(SdfTextParam *param, u32 value) {
+    param->unk34 = value;
+    param->dirtyFlags |= 0x30;
 }
 
-void func_002DA5E0(SdfTextParam *arg0, u32 arg1) {
-    arg0->unk30 = arg1;
-    arg0->dirtyFlags |= 0x30;
+void func_002DA5E0(SdfTextParam *param, u32 value) {
+    param->unk30 = value;
+    param->dirtyFlags |= 0x30;
 }
 
 SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
@@ -407,10 +415,10 @@ void func_002DA6B0(SdfTextParam *param, const f32 *input) {
     param->dirtyFlags |= 0x30;
 }
 
-void func_002DA718(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
-    arg0->unk40 = fparg0;
-    arg0->unk44 = fparg1;
-    arg0->dirtyFlags = arg0->dirtyFlags | 0xC0;
+void func_002DA718(SdfTextParam *param, f32 first, f32 second) {
+    param->unk40 = first;
+    param->unk44 = second;
+    param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA730);
@@ -429,23 +437,23 @@ void sdfAssetRelease(SdfAsset *asset) {
     func_002CFF98(asset);
 }
 
-void func_002DAA68(s32 arg0) {
-    s32 id = arg0;
+void func_002DAA68(SdfAsset *asset) {
+    s32 id = (s32)asset;
 
     if (id != 0) {
         func_002D3C30(&D_003BDA18, id);
     }
 }
 
-void *func_002DAAA0(u32 *arg0, SdfNode *arg1, s32 arg2) {
-    u32 *entry = arg0 + arg2;
+void *func_002DAAA0(u32 *words, SdfNode *node, s32 offset) {
+    u32 *entry = words + offset;
 
-    arg1->unk3 = 0x30;
-    arg1->unk4 = entry[2] & 0x0FFFFFFF;
-    arg1->unk0 = 0xA;
-    arg1->unk8 = 0;
-    arg1->unkC = 0;
-    return (void *)((u8 *)arg1 + 0x10);
+    node->unk3 = 0x30;
+    node->unk4 = entry[2] & 0x0FFFFFFF;
+    node->unk0 = 0xA;
+    node->unk8 = 0;
+    node->unkC = 0;
+    return (void *)((u8 *)node + 0x10);
 }
 
 void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
@@ -482,12 +490,12 @@ void func_002DAD18(SdfAsset *arg0, SdfTextParam *arg1) {
 
 void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
     u8 flags = asset->pad00[6];
-    void *entry = asset->entries[index];
+    SdfAssetEntry *entry = asset->entries[index];
     if ((flags >> index) & 1) {
         sdfAssetCopyTextureState(asset, entry);
     }
     if (flags & (4 << index)) {
-        func_002DAC68(asset, entry);
+        func_002DAC68(asset, (u8 *)entry);
     }
     if (flags & (16 << index)) {
         func_002DAC88(asset, entry);

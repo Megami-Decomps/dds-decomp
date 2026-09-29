@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "eff.h"
 
 extern BillDispatch D_003AAF88[];
@@ -21,6 +22,16 @@ typedef struct EffectDispatchState {
     u8 pad65[0x4D];
     u16 valueB2;
 } EffectDispatchState;
+
+typedef struct BillWork {
+    u8 pad00[0x64];
+    u8 currentValue;
+    u8 pad65[0x4B];
+    u16 pendingCount;
+    u16 queuedCount;
+    u8 padB4[0xC];
+    u8 stagedValue;
+} BillWork;
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_001670C0);
 
@@ -46,7 +57,12 @@ void func_001672D8(EffectDispatchState *effect, u32 value) {
     effect->value60 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001672E0);
+void func_001672E0(BillWork *work, u8 value) {
+    if (work->pendingCount == 0) {
+        work->stagedValue = value;
+    }
+    work->currentValue = value;
+}
 
 u8 func_001672F8(EffectDispatchState *effect) {
     return effect->value64;
@@ -107,4 +123,3 @@ INCLUDE_SDATA(const s32, "game/code_001670C0", D_00436408);
 INCLUDE_SDATA(const s32, "game/code_001670C0", D_0043640C);
 
 INCLUDE_SDATA(const s32, "game/code_001670C0", D_00436410);
-

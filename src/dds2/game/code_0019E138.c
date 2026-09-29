@@ -91,6 +91,14 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
+extern s32 func_00102930(void);
+
+extern void func_00102908(void);
+
+extern void func_0035B6E0(const char *);
+
+extern char D_00414C50[]; /* "Camp process halted.\n", followed by padding no C emits */
+
 u32 func_0019E138(TextStream *stream) {
     s32 *position = &stream->offset;
     u8 *byte = stream->bytes + *position;
@@ -514,7 +522,12 @@ u32 func_001A1818(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", mnuReportCampProcessHalted);
+void mnuReportCampProcessHalted(void) {
+    if (func_00102930() != 5) {
+        func_00102908();
+    }
+    func_0035B6E0(D_00414C50);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
 
@@ -531,4 +544,3 @@ INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436590);
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436598);
 
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_004365A0);
-

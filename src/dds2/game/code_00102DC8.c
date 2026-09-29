@@ -47,6 +47,10 @@ extern s16 D_00435D00;
 
 extern s8 D_00435CF8[4];
 
+extern u8 D_0037F550[];
+
+extern void func_003412D8(void *data, u32 tag);
+
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00102DC8);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00102E88);
@@ -90,7 +94,9 @@ u32 func_00104150(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnInitMagicState);
+void kwlnInitMagicState(void) {
+    func_003412D8(D_0037F550, 0x12345678);
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104180);
 
@@ -406,4 +412,3 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D04);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D08);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
-

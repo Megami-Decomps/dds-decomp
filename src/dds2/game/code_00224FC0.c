@@ -30,10 +30,44 @@ typedef struct BattleEffectState {
     f32 speed;
 } BattleEffectState;
 
-typedef struct BattleActionUnit {
-    u8 pad0[0x110];
+typedef struct BattleActionUnit BattleActionUnit;
+
+typedef struct BattleActor {
+    u8 pad00[0x18];
+    BattleActionUnit *owner;
+    u8 pad1C[0x44];
+    u32 actionEntity;
+} BattleActor;
+
+struct BattleActionUnit {
+    u8 pad00[8];
+    u32 dispatchFlags;
+    u8 pad0C[0x104];
     u32 flags;
-} BattleActionUnit;
+    BattleActor *actor;
+    u8 pad118[8];
+    u16 entryFlags;
+    u8 pad122[2];
+    u16 kind;
+    u8 pad126[0xA];
+    u32 transitionState;
+    u32 type;
+    u8 pad138[4];
+    s32 frameCounter;
+    u8 pad140[0x224];
+    BattleActionUnit *next;
+};
+
+typedef struct BattleActionContext {
+    u8 pad00[0x21C];
+    u32 flags;
+    u8 pad220[0x2C];
+    BattleActionUnit *firstUnit;
+    u8 pad250[0x50];
+    s32 battleId;
+    u8 pad2A4[0x474];
+    BattleEffectState *effect;
+} BattleActionContext;
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00224FC0);
 
@@ -47,18 +81,18 @@ void func_00225778(u32 unit) {
     func_002254C8(unit);
 }
 
-u32 func_00225798(u32 unit) {
-    u32 actor = *(u32 *)(unit + 0x114);
-    u32 owner = *(u32 *)(actor + 0x18);
-    if (*(u32 *)(owner + 0x110) & 0x200) {
-        if (func_001E8058(*(u32 *)(actor + 0x60)) == 1) {
-            u32 target = func_001E8060(*(u32 *)(actor + 0x60), 0);
-            if ((*(u32 *)(target + 0x110) & 0x400) == 0) {
+u32 func_00225798(BattleActionUnit *unit) {
+    BattleActor *actor = unit->actor;
+    BattleActionUnit *owner = actor->owner;
+    if (owner->flags & 0x200) {
+        if (func_001E8058(actor->actionEntity) == 1) {
+            BattleActionUnit *target = (BattleActionUnit *)func_001E8060(actor->actionEntity, 0);
+            if ((target->flags & 0x400) == 0) {
                 return 0;
             }
             func_00208D58();
-            func_00224EE8(unit);
-            *(u32 *)(unit + 0x130) = 0;
+            func_00224EE8((u32)unit);
+            unit->transitionState = 0;
             return 1;
         }
     }
@@ -100,12 +134,12 @@ s32 btlFilterActionByUnitFlags(BattleActionUnit *unit, s32 action) {
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226308);
 
 u32 func_00226398(u32 unit, u32 actor, u32 action) {
-    u32 battle;
+    BattleActionContext *battle;
     if (action != 0x109) {
         return 0;
     }
-    battle = func_001AA6F8();
-    *(u32 *)(battle + 0x21c) |= 0x20000;
+    battle = (BattleActionContext *)func_001AA6F8();
+    battle->flags |= 0x20000;
     return 0;
 }
 
@@ -118,11 +152,11 @@ s32 func_00226540(u32 unused1, u32 unused2, s32 action) {
 }
 
 void func_00226558(u8 value) {
-    s32 battle;
+    BattleActionContext *battle;
 
-    battle = func_001AA6F8();
-    if (*(s32 *)(battle + 0x2a0) == 0x31b) {
-        **(u8 **)(battle + 0x718) = value;
+    battle = (BattleActionContext *)func_001AA6F8();
+    if (battle->battleId == 0x31b) {
+        *(u8 *)battle->effect = value;
     }
 }
 
@@ -132,9 +166,9 @@ u32 func_00226670(void) {
     return 0xffffffff;
 }
 
-s32 btlFilterRestrictedCommand(s32 battler, s32 command) {
+s32 btlFilterRestrictedCommand(BattleActionUnit *battler, s32 command) {
     if (command == 1 || command == 0x12) {
-        if ((*(u16 *)(battler + 0x120) & 0x2000) != 0) {
+        if ((battler->entryFlags & 0x2000) != 0) {
             return -1;
         }
     }
@@ -145,41 +179,60 @@ u8 func_002266A8(u32 arg0, s32 arg1) {
     return arg1 == 0xf;
 }
 
-s32 btlSelectDisabledCommand(s32 battler) {
+s32 btlSelectDisabledCommand(BattleActionUnit *battler) {
     if (battler == 0) {
         return 15;
     }
-    return (*(u16 *)(battler + 0x120) & 0x2000) ? 15 : -1;
+    return (battler->entryFlags & 0x2000) ? 15 : -1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002266D8);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002267A0);
+s32 func_002267A0(void) {
+    u8 *battle = (u8 *)func_001AA6F8();
+    u8 *unit;
+    if (*(u16 *)(battle + 0x270) != 2) {
+        return -1;
+    }
+    unit = *(u8 **)(battle + 0x24C);
+    while (unit != 0) {
+        if (*(u32 *)(unit + 0x110) & 1) {
+            if (*(u16 *)(unit + 0x124) == 0x118) {
+                u16 status = *(u16 *)(unit + 0x120);
+                if (status & 0x2000) {
+                    *(u16 *)(unit + 0x120) = status & ~0x2000;
+                }
+            }
+        }
+        unit = *(u8 **)(unit + 0x364);
+    }
+    return -1;
+}
 
-void func_00226820(u32 unit) {
-    if (*(u32 *)(unit + 8) & 8) {
+void func_00226820(BattleActionUnit *unit) {
+    if (unit->dispatchFlags & 8) {
         func_001AA6F8();
     }
 }
 
-u32 func_00226850(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x134) == 0x187) {
-        *(u32 *)(arg0 + 0x13c) = 0;
+u32 func_00226850(BattleActionUnit *unit) {
+    if (unit->type == 0x187) {
+        unit->frameCounter = 0;
     }
     return 0;
 }
 
-u32 func_00226868(u32 unit) {
-    if (*(u32 *)(unit + 0x134) != 0x187) {
+u32 func_00226868(BattleActionUnit *unit) {
+    if (unit->type != 0x187) {
         return 0;
     }
-    if (btlHasMarkedEntry14(unit)) {
-        if (*(s32 *)(unit + 0x13c) >= 0x34) {
+    if (btlHasMarkedEntry14((u32)unit)) {
+        if (unit->frameCounter >= 0x34) {
             func_001E9890();
-            func_001E9660(unit, 517.3f, -476.0f, -947.2f, 0.177f,
+            func_001E9660((u32)unit, 517.3f, -476.0f, -947.2f, 0.177f,
                            0.283f, 0.042f, 0.933f, 40.0f);
         }
-        ++*(s32 *)(unit + 0x13c);
+        ++unit->frameCounter;
     }
     return 1;
 }
@@ -187,16 +240,16 @@ u32 func_00226868(u32 unit) {
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226900);
 
 void func_002269E0(void) {
-    u32 node = *(u32 *)(func_001AA6F8() + 0x24c);
+    BattleActionUnit *node = ((BattleActionContext *)func_001AA6F8())->firstUnit;
     while (node != 0) {
-        u32 flags = *(u32 *)(node + 0x110);
+        u32 flags = node->flags;
         if (flags & 1) {
-            if ((flags & 0x400) && *(u16 *)(node + 0x124) == 0x118) {
-                *(u16 *)(node + 0x120) &= ~0x2000;
+            if ((flags & 0x400) && node->kind == 0x118) {
+                node->entryFlags &= ~0x2000;
                 func_001E2758(node);
             }
         }
-        node = *(u32 *)(node + 0x364);
+        node = node->next;
     }
 }
 
@@ -204,10 +257,27 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226A60);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226AB0);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226BB8);
+void func_00226BB8(void) {
+    u8 *effect = *(u8 **)((u8 *)func_001AA6F8() + 0x718);
+    u8 *actor = *(u8 **)effect;
+    if (actor != 0) {
+        u32 state = *(u32 *)(actor + 0x114);
+        u32 flags = *(u32 *)(actor + 0x110);
+        state &= ~0x80;
+        state &= ~0x100;
+        flags |= 0x100;
+        *(u8 **)effect = 0;
+        *(u32 *)(actor + 0x110) = flags;
+        *(u32 *)(actor + 0x114) = state;
+        func_001E2758(actor);
+        *(u32 *)(actor + 0x110) |= 8;
+        *(f32 *)(effect + 0x10) = -125.0f;
+        *(f32 *)(effect + 0x14) = 20.0f;
+    }
+}
 
 void btlResetEffectState(void) {
-    BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    BattleEffectState *state = ((BattleActionContext *)func_001AA6F8())->effect;
     state->active = 1;
     state->speed = 20.0f;
     state->flags = 0;

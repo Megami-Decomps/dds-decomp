@@ -4,7 +4,7 @@ extern u32 D_00435D88;
 
 typedef struct {
     u8 pad0[8];
-    u32 value;
+    void *callbackTarget;
 } WorldEntry;
 
 typedef struct {
@@ -26,20 +26,20 @@ void func_0010FCA8(void) {
     D_00435D88 = (D_00435D88 + 1) & 0xffff;
 }
 
-void func_0010FCC0(WorldEntry *entry, u32 value) {
+void func_0010FCC0(WorldEntry *entry, void *callbackTarget) {
     if (entry != NULL) {
-        entry->value = value;
+        entry->callbackTarget = callbackTarget;
     }
 }
 
-u32 func_0010FCD0(WorldEntry *entry) {
-    u32 value;
+void *func_0010FCD0(WorldEntry *entry) {
+    void *callbackTarget;
 
-    value = 0;
+    callbackTarget = NULL;
     if (entry != NULL) {
-        value = entry->value;
+        callbackTarget = entry->callbackTarget;
     }
-    return value;
+    return callbackTarget;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FCE8);
@@ -47,21 +47,21 @@ INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FCE8);
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FD58);
 
 u32 func_0010FDF0(WorldObject *obj) {
-    s32 value;
+    void *callbackTarget;
 
-    value = obj->entry->value;
-    if (value != 0) {
-        func_0010FC28(value);
+    callbackTarget = obj->entry->callbackTarget;
+    if (callbackTarget != NULL) {
+        func_0010FC28(callbackTarget);
     }
     return 1;
 }
 
 u32 func_0010FE20(WorldObject *obj) {
-    s32 value;
+    void *callbackTarget;
 
-    value = obj->entry->value;
-    if (value != 0) {
-        func_0010FC68(value);
+    callbackTarget = obj->entry->callbackTarget;
+    if (callbackTarget != NULL) {
+        func_0010FC68(callbackTarget);
     }
     return 1;
 }

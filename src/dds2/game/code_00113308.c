@@ -35,7 +35,25 @@ void func_00113328(EffectObject *object, u32 value) {
     object->data->word14 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00113338);
+f32 func_00113338(f32 a, f32 b) {
+    f32 diff;
+
+    if (a < 0.0f || b < 0.0f) {
+        a += 360.0f;
+        b += 360.0f;
+    }
+    a = (s32)a % 360;
+    b = (s32)b % 360;
+    diff = a - b;
+    if (diff > 180.0f || diff < -180.0f) {
+        if (a < b) {
+            a += 360.0f;
+        } else {
+            b += 360.0f;
+        }
+    }
+    return b - a;
+}
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113408);
 
@@ -152,7 +170,13 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_00114150);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114428);
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00114618);
+void func_00114618(u8 *obj) {
+    f32 *src = *(f32 **)(obj + 0x1C);
+    f32 *dst = *(f32 **)(obj + 0x18);
+    dst[4] = src[0x10];
+    dst[5] = src[0x11];
+    dst[6] = src[0x12];
+}
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114640);
 

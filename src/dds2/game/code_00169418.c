@@ -39,7 +39,11 @@ u32 func_00169450(void) {
     return D_00436424;
 }
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_00169458);
+void func_00169458(u32 unused, f32 *out) {
+    out[0] = -0.73f;
+    out[1] = 1.55f;
+    out[2] = 0.24f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);
 

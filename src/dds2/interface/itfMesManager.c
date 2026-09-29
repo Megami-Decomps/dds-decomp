@@ -23,6 +23,16 @@ typedef struct ItfMesGlobals {
 
 extern ItfMesGlobals D_00452940;
 
+typedef struct ItfMesRelocResource {
+    u8 pad00[0x10];
+    s32 fixupOffset;
+    s32 fixupCount;
+    u8 pad18[4];
+    u8 relocated;
+    u8 pad1D[3];
+    u8 payload[1];
+} ItfMesRelocResource;
+
 /* 3 words zeroed by func_0019D0A0. */
 typedef struct ItfMesZero {
     u32 unk0;
@@ -61,7 +71,8 @@ typedef struct ItfMesBlk14 {
     u32 unk0;            /* +0x0 */
     u32 unk4;            /* +0x4 */
     FrFontGlyph *unk8;   /* +0x8 */
-    u32 unkC;            /* +0xC */
+    u16 selectedIndex;   /* +0xC: chooses an item in the next entry */
+    u16 padE;
 } ItfMesBlk14;
 
 /* Block at ItfMesState +0x24. */
@@ -164,6 +175,20 @@ void func_001A4988(s32 window, s32 arg1, s32 arg2);
 
 void func_001A4A10(s32 window, s32 arg1, s32 arg2);
 
+void func_001A34D0(s32 window, s32 arg1, s32 arg2);
+
+void itfMesCleanupWindow(s32 window, s32 arg1);
+
+void itfMesResetWindow(s32 window);
+
+void func_001A50D8(s32 window);
+
+void func_0019C5B0(FrFontGlyph *arg0);
+
+void func_001A5E00(void *arg0, s32 arg1);
+
+void func_001A5DD8(void *arg0, s32 arg1);
+
 s32 itfMesScriptSetPanelValue(void) {
     s32 window = scrGetWindow();
 
@@ -197,7 +222,20 @@ s32 itfMesScriptActivatePanel(void) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3458);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A34D0);
+void func_001A34D0(s32 window, s32 arg1, s32 arg2) {
+    ItfMesState *mes = D_0045296C[window].mes;
+    u32 flags = mes->flags;
+
+    if (flags & 0x300) {
+        mes->flags = flags | 0x300;
+    }
+    if (flags & 0x3000) {
+        mes->flags = mes->flags | 0x3000;
+    }
+    itfMesCleanupWindow(window, 1);
+    itfMesResetWindow(window);
+    mes->flags &= 0xFFDFFFFF;
+}
 
 u32 func_001A3560(void) {
     return 1;
@@ -329,13 +367,43 @@ void itfMesClearFlags(u32 arg0) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A38D8);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A39D0);
+void func_001A39D0(s32 window) {
+    if (window >= 0 && D_0045296C[window].mes != NULL) {
+        func_001A50D8(window);
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3A18);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3C28);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesCleanupWindow);
+void itfMesCleanupWindow(s32 window, s32 arg1) {
+    ItfMesState *mes;
+    ItfMesBlk24 *blk24;
+    ItfMesBlk14 *blk14;
+
+    if (window < 0) {
+        return;
+    }
+    mes = D_0045296C[window].mes;
+    blk24 = &mes->blk24;
+    blk14 = &mes->blk14;
+    if (blk24->unkC != NULL) {
+        func_0019C5B0(blk24->unkC);
+        blk24->unkC = NULL;
+    }
+    func_001A5E00(blk24, 0);
+    mes->flags &= ~7;
+    mes->flags &= 0xFFFDFFFF;
+    if (arg1 == 0) {
+        return;
+    }
+    if (blk14->unk8 != NULL) {
+        func_0019C5B0(blk14->unk8);
+        blk14->unk8 = NULL;
+    }
+    func_001A5DD8(blk14, 0);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3DA8);
 
@@ -406,7 +474,9 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4888);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A48B8);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4940);
+u32 func_001A4940(s32 window, s32 arg1, s32 arg2) {
+    return itfMesGetTableItem(itfMesGetEntry(D_0045296C[window].mes, arg1)->table, arg2);
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4988);
 
@@ -455,17 +525,18 @@ void func_001A50C0(void) {
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A50D8);
 
 /* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
-void itfMesRelocate(u8 *arg0)
+void itfMesRelocate(ItfMesRelocResource *resource)
 {
     u8 *base;
     u8 *fixups;
     s32 size;
-    if (*(u8 *)(arg0 + 0x1C) == 0) {
-        base = arg0 + 0x20;
-        fixups = arg0 + *(s32 *)(arg0 + 0x10);
-        size = *(s32 *)(arg0 + 0x14);
+    if (resource->relocated == 0) {
+        // Keep the source's pointer-add expression: direct payload access changes ee-gcc codegen.
+        base = (u8 *)resource + 0x20;
+        fixups = (u8 *)resource + resource->fixupOffset;
+        size = resource->fixupCount;
         func_00344120((int *)base, (int)base, fixups, size);
-        *(u8 *)(arg0 + 0x1C) = 1;
+        resource->relocated = 1;
     }
 }
 
@@ -491,7 +562,9 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub) {
     return &entries[sub->entryCount];
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5228);
+u32 func_001A5228(s32 window, s32 index) {
+    return itfMesGetEntry(D_0045296C[window].mes, index)->unk0;
+}
 
 u32 itfMesGetEntryCount(s32 window) {
     return ((ItfMesState *)D_0045296C[window].mes)->sub->entryCount;
@@ -512,11 +585,11 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5480);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A55B0);
 
-u32 func_001A5600(s32 arg0) {
-    s32 *piVar1;
+u32 func_001A5600(ItfMesState *mes) {
+    s32 *items;
 
-    piVar1 = (s32 *)itfMesGetNextEntry(*(u32 *)(arg0 + 4));
-    return *(u32 *)((u32)*(u16 *)(arg0 + 0x20) * 4 + *piVar1);
+    items = (s32 *)itfMesGetNextEntry(mes->sub);
+    return *(u32 *)((u32)mes->blk14.selectedIndex * 4 + *items);
 }
 
 s32 itfMesCountZeroBits(s32 count, u32 bits) {
@@ -638,4 +711,3 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436618);
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436620);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436628);
-

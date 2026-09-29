@@ -92,6 +92,99 @@ extern s8 D_0037F53B[];
 
 extern void func_0010B650(void *arg0);
 
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} DrawVec4;
+
+extern DrawVec4 D_0037F790;
+
+extern DrawVec4 D_0043E3A0;
+
+extern DrawVec4 D_0043E3B0;
+
+extern u16 D_00438DFA;
+
+extern u16 D_00438DF8;
+
+typedef struct EvtDrawSurface {
+    u8 unk_00[0x10];
+    void (*submit)(struct EvtDrawSurface *, void *);
+    u8 unk_14[0xC];
+} EvtDrawSurface;
+
+extern EvtDrawSurface D_0037FB48[];
+
+extern void *sdfAllocPacketAligned(s32);
+
+extern void sdfResetPacketList(void *);
+
+extern void sdfAppendPacket(void *, void *);
+
+extern u8 *func_0033A290(void *, s32);
+
+extern s32 func_00100400(void);
+
+extern u8 D_00381ED0[];
+
+extern void func_0032DB30(const void *, void *, s32);
+
+extern void func_0032CF98(void *, void *);
+
+extern void func_0032DB78(const void *, void *, s32);
+
+extern f32 D_0037F5B0[];
+
+extern u32 D_0037F5D0[];
+
+extern void *func_00348158(const void *, const void *, s32, s32);
+
+extern s8 D_00435D18;
+
+extern void *D_00438E60;
+
+extern void func_0010A2B0(void);
+
+typedef struct EvtSelState {
+    u8 unk_00[4];
+    s32 limit;
+    s32 unk_08;
+    s32 unk_0C;
+    s16 unk_10;
+    s16 unk_12;
+    s16 unk_14;
+    u8 unk_16[2];
+    s32 count;
+} EvtSelState;
+
+extern void func_00109E60(void);
+
+extern u8 D_0037F590[];
+
+extern s32 kwlnTaskCreate(const char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
+
+extern u32 func_00104150(void);
+
+extern s32 D_004371E8;
+
+extern void func_0023AC80(s32 arg0);
+
+extern void evtCreateSkyTask(void);
+
+extern void evtStopTestTasks(void);
+
+extern void evtDestroySkyTask(void);
+
+extern void func_00105FE8();
+
+extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+
+extern s32 func_0033D060(s32 arg0, s32 arg1);
+
+extern void func_0033D050(s32 arg0, s32 arg1);
+
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00107EF8);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00107FF8);
@@ -100,7 +193,31 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108138);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_001081F8);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnk8360SetVec);
+void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
+    if (mode == 0) {
+        D_00435CD4 &= ~0x400;
+        D_0037F790.x = x;
+        D_0037F790.y = y;
+        D_0037F790.z = z;
+        D_0037F790.w = w;
+    } else {
+        f32 b0 = D_0037F790.x;
+        f32 b1 = D_0037F790.y;
+        f32 b2 = D_0037F790.z;
+        f32 b3 = D_0037F790.w;
+        D_00435CD4 |= 0x400;
+        D_00438DFA = mode;
+        D_0043E3A0.x = b0;
+        D_0043E3A0.y = b1;
+        D_0043E3A0.z = b2;
+        D_0043E3A0.w = b3;
+        D_0043E3B0.x = x;
+        D_0043E3B0.y = y;
+        D_0043E3B0.z = z;
+        D_0043E3B0.w = w;
+        D_00438DF8 = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108318);
 
@@ -140,11 +257,47 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108AC0);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108BD8);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108CE0);
+void func_00108CE0(s32 value) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    u8 *command;
+    sdfResetPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = func_0033A290(packet, 0x30);
+    *(u64 *)(command + 0x20) = ((u64)value << 32) | 0x64;
+    *(u64 *)(command + 0x28) = 0x42;
+    sdfAppendPacket(list, packet);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (D_00435CB8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108D80);
+void func_00108D80(void) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfResetPacketList(list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032CF98(list, texture);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (D_00435CB8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108E20);
+void func_00108E20(void) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *texture;
+    sdfResetPacketList(list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032CF98(list, texture);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (D_00435CB8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108EC0);
 
@@ -160,7 +313,24 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109780);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109950);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109B80);
+void func_00109B80(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+    void *list;
+    D_0037F5B0[0] = x;
+    D_0037F5B0[1] = y;
+    D_0037F5B0[2] = z;
+    D_0037F5B0[4] = u;
+    D_0037F5B0[5] = v;
+    D_0037F5B0[6] = w;
+    D_0037F5D0[1] = second;
+    D_0037F5D0[0] = first;
+    list = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(list);
+    sdfAppendPacket(list, func_00348158(D_0037F5B0, D_0037F5D0, 2, 0x80));
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (D_00435CB8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109C30);
 
@@ -172,9 +342,44 @@ void func_00109D00(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_0019C5B0(temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109D50);
+s32 func_00109D50(s32 limit, s16 frames, s32 arg2, s32 arg3) {
+    EvtSelState *node;
+    if (frames == 0) {
+        return 0;
+    }
+    if (D_00435D18 != 0) {
+        func_0010A2B0();
+    }
+    node = func_00328E18(0x28);
+    D_00438E60 = node;
+    if (limit == 0) {
+        node->limit = -1;
+    } else {
+        node->limit = limit;
+    }
+    ((EvtSelState *)D_00438E60)->unk_08 = arg2;
+    ((EvtSelState *)D_00438E60)->unk_0C = arg3;
+    ((EvtSelState *)D_00438E60)->unk_10 = frames;
+    ((EvtSelState *)D_00438E60)->unk_12 = frames;
+    ((EvtSelState *)D_00438E60)->unk_14 = frames;
+    D_00435D18 = 1;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnk9CC0Check);
+u32 evtUnk9CC0Check(void) {
+    EvtSelState *sel;
+    if (D_00435D18 == 0) {
+        return 0;
+    }
+    sel = D_00438E60;
+    if (sel->limit > sel->count || sel->limit == -1) {
+        func_00109E60();
+    } else {
+        func_0010A2B0();
+        return 1;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109E60);
 
@@ -182,9 +387,18 @@ void func_0010A298(void) {
     func_0010A2B0();
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010A2B0);
+void func_0010A2B0(void) {
+    if (D_00435D18 != 0) {
+        func_00328E48(D_00438E60);
+        D_00435D18 = 0;
+        __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
+        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F590) : "memory");
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtStartSelCreate);
+s32 evtStartSelCreate(void) {
+    return kwlnTaskCreate(D_00411370, 0x2AF9, 0, 0, (s32)func_00104150, 0, 0);
+}
 
 u32 evtStartSelDestroy(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00411370, 1);
@@ -330,7 +544,24 @@ u32 func_0010A5E0(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnkA4A8Dispatch);
+void evtUnkA4A8Dispatch(s32 arg0, s32 *arg1) {
+    s32 v0 = 0;
+
+    D_00435BB0 = 0;
+    switch (arg0) {
+    case 0:
+        v0 = arg1[0];
+        break;
+    case 1:
+        v0 = D_004371E8;
+        break;
+    }
+    if (v0 <= 0) {
+        return;
+    }
+    evtCreateSkyTask();
+    func_0023AC80(v0);
+}
 
 u32 func_0010A650(void) {
     D_00435BB0 = 1;
@@ -451,7 +682,13 @@ void func_0010A8C8(void) {
     evtCreateSkyTask();
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnkA7A8Init);
+u32 evtUnkA7A8Init(void) {
+    D_00435BB0 = 1;
+    func_00105FE8(0);
+    evtStopTestTasks();
+    evtDestroySkyTask();
+    return 1;
+}
 
 u32 func_0010A920(void) {
     return 0;
@@ -677,7 +914,14 @@ u8 func_0010AD98(void) {
     return temp_v0 == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtUnkAB90Ensure);
+u32 evtUnkAB90Ensure(void) {
+    if (D_00435D30 == 0) {
+        D_00435D30 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
+        func_0033D060(D_00435D30, 2);
+        func_0033D050(D_00435D30, 7);
+    }
+    return 0;
+}
 
 void func_0010AE08(void) {
     if (D_00435D30 != 0) {
@@ -785,4 +1029,3 @@ INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D60);
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D64);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D68);
-

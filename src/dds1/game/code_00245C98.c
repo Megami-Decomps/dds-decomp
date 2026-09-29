@@ -494,13 +494,105 @@ u32 func_002482D0(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_002482D8);
+typedef struct FlagEntry {
+    s32 firstFlag;
+    s32 firstOn;
+    s32 secondFlag;
+    s32 secondOn;
+} FlagEntry;
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_002483C0);
+extern s32 sdfResourceRetainAddress(s32);
+extern void mdlFlagSet(s32);
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00248468);
+extern s32 mdlFlagTest(s32);
+extern s32 func_002D03F8(s32);
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00248508);
+typedef struct FlagPair {
+    s32 first;
+    s32 second;
+} FlagPair;
+
+typedef struct FlagSource {
+    s32 first;
+    s32 second;
+    s32 pad[2];
+} FlagSource;
+
+extern FlagSource D_0036ABB8[];
+extern FlagPair D_0036ABF8[];
+
+s32 func_002482D8(void) {
+    s32 handle = func_002D03F8(0x140);
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    u32 i;
+
+    for (i = 0; i < 4; i++) {
+        entries[i].firstFlag = D_0036ABB8[i].first;
+        entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
+        entries[i].secondFlag = D_0036ABB8[i].second;
+        entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
+    }
+    for (i = 0; i < 16; i++) {
+        entries[4 + i].firstFlag = D_0036ABF8[i].first;
+        entries[4 + i].firstOn = mdlFlagTest(entries[4 + i].firstFlag);
+        entries[4 + i].secondFlag = D_0036ABF8[i].second;
+        entries[4 + i].secondOn = mdlFlagTest(entries[4 + i].secondFlag);
+    }
+    return handle;
+}
+
+void func_002483C0(s32 handle) {
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    u32 i;
+
+    for (i = 0; i < 4; i++) {
+        if (entries[i].secondOn != 0) {
+            mdlFlagSet(entries[i].secondFlag);
+        }
+    }
+    for (i = 0; i < 16; i++) {
+        if (entries[4 + i].firstOn != 0) {
+            mdlFlagSet(entries[4 + i].firstFlag);
+        }
+        if (entries[4 + i].secondOn != 0) {
+            mdlFlagSet(entries[4 + i].secondFlag);
+        }
+    }
+}
+
+extern char D_003AF590[];
+extern s32 D_0036AC78[];
+extern u32 effLoadIndexedResource(char *, s32, s32);
+extern void effResolveAndReleaseResource(u32);
+extern u32 func_002BDBC0(u32, s32, s32);
+
+void func_00248468(u32 *work) {
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        u32 resource = effLoadIndexedResource(D_003AF590, D_0036AC78[i], 1);
+
+        work[0x19 + i] = resource;
+        effResolveAndReleaseResource(resource);
+    }
+    work[0x1B] = func_002BDBC0(work[0x19], 7, 1);
+}
+
+extern void func_002BDD60(u32);
+extern void func_0025C0A8(u32);
+
+void func_00248508(u32 *work) {
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        func_002BDD60(work[0x19 + i]);
+    }
+    func_002BDD60(work[0x1B]);
+    if (work[0x56] != 0) {
+        func_0025C0A8(work[0x56]);
+        work[0x56] = 0;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF570);
 

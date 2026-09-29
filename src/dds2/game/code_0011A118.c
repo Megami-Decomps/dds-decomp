@@ -99,9 +99,21 @@ extern s32 func_001B3830(u32 arg0);
 
 extern s32 func_001B3A00(u32 arg0);
 
+extern s32 scrCreateTaskWithDefaultOption(void);
+
+extern void *memset(void *dst, s32 c, u32 n);
+
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A118);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", evtCheckValueThreshold);
+s32 evtCheckValueThreshold(s32 index, s32 limit) {
+    if ((u32)(index - 0x80) < 0x20) {
+        return mdlFlagTest(index + 0x980) != 0;
+    }
+    if (*(u8 *)(index + D_00435DD0 + 0x1340) < limit) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A220);
 
@@ -132,9 +144,37 @@ void func_0011A7F8(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A808);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", evtUpdateFlaggedStats);
+void evtUpdateFlaggedStats(void) {
+    s32 offset = 0;
+    s32 remaining = 4;
+    do {
+        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        offset += 0x1C4;
+        if (entry->flags & 1) {
+            if (entry->flags & 2) {
+                func_0011A808(entry, 0x24C);
+                func_0011A808(entry, 0x270);
+            }
+        }
+        remaining--;
+    } while (remaining >= 0);
+}
 
-INCLUDE_ASM(const s32, "game/code_0011A118", evtHasMatchingFlaggedEntry);
+s32 evtHasMatchingFlaggedEntry(s32 mask) {
+    s32 index = 0;
+    s32 offset = 0;
+    do {
+        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        offset += 0x1C4;
+        if ((entry->flags & 1) && (entry->flags & 2)) {
+            if (func_00119AF8(entry, mask)) {
+                return 1;
+            }
+        }
+        index++;
+    } while (index < 5);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AA58);
 
@@ -257,7 +297,20 @@ void dds3ForEachEntry(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011CA88);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", dds3ForEachFlagged);
+void dds3ForEachFlagged(void) {
+    s32 off = 0;
+    s32 n = 4;
+
+    do {
+        Entry1A4 *p = (Entry1A4 *)(D_00435DD0 + off + 0xa60);
+
+        if (p->flags & 1) {
+            func_0011CA88(p);
+        }
+        off += 0x1C4;
+        n--;
+    } while (n >= 0);
+}
 
 void func_0011D050(void) {
     s32 offset = 0;
@@ -369,7 +422,10 @@ s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     return D_0043E5C0[4];
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", dds3WorkInit);
+void dds3WorkInit(void) {
+    D_00435E88 = scrCreateTaskWithDefaultOption();
+    memset(D_0043E5C0, 0, 0x18);
+}
 
 u32 func_0011D588(void) {
     return D_00435E88;
@@ -627,7 +683,13 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E848);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E930);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", dds3WorkClear);
+void dds3WorkClear(void) {
+    s32 base = D_00435DD0;
+
+    *(s32 *)(base + 0x1440) = 0;
+    *(s16 *)(base + 0x1444) = 0;
+    D_00435E8C = 0;
+}
 
 void func_0011EBE0(void) {
 }
@@ -724,4 +786,3 @@ INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E8C);
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E90);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E94);
-

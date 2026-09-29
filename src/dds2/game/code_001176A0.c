@@ -15,6 +15,21 @@ typedef struct WorldSlotData {
     u32 value18;
 } WorldSlotData;
 
+typedef struct SdfRuntime {
+    u8 pad00[0x34];
+    u32 firstTick;
+    u32 secondTick;
+    u8 pad3C[0xA20];
+    u32 updateMode;
+} SdfRuntime;
+
+typedef struct SdfPackedValue {
+    u8 pad00[0xE];
+    u16 flagsAndValue;
+} SdfPackedValue;
+
+extern void func_0011D590(void);
+
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117728);
@@ -53,12 +68,12 @@ void func_00117848(WorldSlotData *slot) {
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117860);
 
-u32 func_001178B0(s32 arg0) {
-    return *(u32 *)(arg0 + 0x18);
+u32 func_001178B0(WorldSlotData *slot) {
+    return slot->value18;
 }
 
-u32 func_001178B8(s32 arg0) {
-    return *(u32 *)(arg0 + 0x18);
+u32 func_001178B8(WorldSlotData *slot) {
+    return slot->value18;
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001178C0);
@@ -70,18 +85,18 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00117908);
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117998);
 
 s32 sdfBumpTickCounters(void) {
-    s32 base;
+    SdfRuntime *runtime;
 
-    base = D_00435DD0;
-    *(u32 *)(base + 0x34) += 1;
-    *(u32 *)(base + 0x38) += 1;
+    runtime = (SdfRuntime *)D_00435DD0;
+    runtime->firstTick += 1;
+    runtime->secondTick += 1;
     return 0;
 }
 
 void func_00117A10(void) {
     scrClearProcessGlobals();
     func_0023A028();
-    *(u32 *)(D_00435DD0 + 0xa5c) = 8;
+    ((SdfRuntime *)D_00435DD0)->updateMode = 8;
     func_0011AB38();
     func_00122B58(0);
     func_00313C40();
@@ -106,7 +121,12 @@ void func_00118680(void) {
     dds3WorkInit(D_00435E80);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfFirePendingCallback);
+void sdfFirePendingCallback(void) {
+    if (D_00435E80 == 0) {
+        return;
+    }
+    func_0011D590();
+}
 
 u8 func_001186C8(s64 arg0) {
     s64 temp_v0;
@@ -139,7 +159,9 @@ void func_00118C80(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
     evtRunContext(7, arg1, arg2, arg0, arg3);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchSubCmd);
+void sdfDispatchSubCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+    func_00118C80(arg0, arg1, arg2, (u8)arg3);
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);
 
@@ -153,8 +175,8 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001194E8);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119548);
 
-void func_00119710(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 0xe) = (*(u16 *)(arg0 + 0xe) & 0x8000) | (arg1 & 0x7fff);
+void func_00119710(SdfPackedValue *item, u16 value) {
+    item->flagsAndValue = (item->flagsAndValue & 0x8000) | (value & 0x7fff);
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119728);
@@ -174,4 +196,3 @@ INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC5);
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD0);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD4);
-

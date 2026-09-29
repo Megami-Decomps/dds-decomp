@@ -49,7 +49,24 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002517C0);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00251960);
+extern s32 func_002D03F8(s32);
+extern s32 sdfMemoryGetBlockAddress(s32);
+extern void *memset(void *, s32, u32);
+extern u8 *D_003BAA00;
+
+s32 func_00251960(void) {
+    s32 handle = func_002D03F8(0x5B0);
+    u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
+
+    memset(work, 0, 0x5B0);
+    *(s32 *)work = handle;
+    func_00250978((s32)work);
+    *(s32 *)(work + 0x540) = 0;
+    *(s32 *)(work + 0x544) = 0;
+    *(s32 *)(func_002CB3B8(D_003BC4CC, -1) + 0x23C) = *(s32 *)(D_003BAA00 + 0x3C);
+    mnuCopySceneCoordinates((s32)work);
+    return (s32)work;
+}
 
 void func_002519E8(s32 unused, s32 context) {
     func_002CB3B8(D_003BC4CC, -1);

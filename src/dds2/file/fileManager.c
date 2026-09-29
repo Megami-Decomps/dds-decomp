@@ -70,7 +70,13 @@ u32 func_002C8120(FileWork *work) {
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8128);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C8168);
+s32 func_002C8168(u8 *file) {
+    s32 result = 0;
+    if (*(u16 *)(file + 0x68) != 0) {
+        result = *(u8 *)(file + 1) == 6;
+    }
+    return result;
+}
 
 void fileWaitReady(u32 arg0) {
     s64 temp_v0;
@@ -81,7 +87,9 @@ void fileWaitReady(u32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C81D0);
+void func_002C81D0(u32 id) {
+    fileWaitReady(id);
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C81E8);
 

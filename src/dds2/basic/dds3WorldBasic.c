@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "dds3obj.h"
 
 extern World *D_00435D8C;
@@ -22,6 +23,10 @@ void func_001106B8(void *arg);
 void *func_00110680(void *arg);
 
 s32 func_001106D8(void *arg);
+
+void func_00328E48(void *arg);
+
+void func_00110348(IndexObj *arg);
 
 void dds3DestroyWorld(void) {
     World *world;
@@ -88,9 +93,32 @@ void *dds3AppendWorldNode(void) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3DestroyWorldNode);
+void dds3DestroyWorldNode(NodeA *node) {
+    WorldInfo *info;
 
-void *func_001100F0(s32 arg) {
+    if (node == NULL) {
+        return;
+    }
+    if (D_00435D8C == NULL) {
+        return;
+    }
+    info = D_00435D8C->info;
+    if (info->firstNode == node) {
+        info->firstNode = node->next;
+    }
+    if (info->lastNode == node) {
+        info->lastNode = node->previous;
+    }
+    if (info->primaryObject == node) {
+        info->primaryObject = NULL;
+    }
+    if (info->secondaryObject == node) {
+        info->secondaryObject = NULL;
+    }
+    effObjNodeDestroy(node);
+}
+
+void *func_001100F0(s32 index) {
     WorldInfo *info;
     NodeB *node;
 
@@ -98,7 +126,7 @@ void *func_001100F0(s32 arg) {
         return NULL;
     }
     info = D_00435D8C->info;
-    if (info->unk1E < arg) {
+    if (info->unk1E < index) {
         return NULL;
     }
     node = func_00328D68(0x10);
@@ -119,44 +147,66 @@ void *func_001100F0(s32 arg) {
         node->previous = info->lastIndex;
         info->lastIndex = node;
     }
-    func_001104F0(node, arg);
+    func_001104F0(node, index);
     return node;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_001101A8);
+void func_001101A8(NodeB *node) {
+    WorldInfo *info;
+
+    if (node == NULL) {
+        return;
+    }
+    if (D_00435D8C == NULL) {
+        return;
+    }
+    info = D_00435D8C->info;
+    func_00110348(node);
+    if (node->previous == NULL) {
+        info->firstIndex = node->next;
+    } else {
+        node->previous->next = node->next;
+    }
+    if (node->next == NULL) {
+        info->lastIndex = node->previous;
+    } else {
+        node->next->previous = node->previous;
+    }
+    func_00328E48(node);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110240);
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110348);
 
-s32 func_00110408(void *arg0, void *arg1, s32 arg2) {
-    s32 ret;
+s32 func_00110408(void *iterator, void *target, s32 repeat) {
+    s32 found;
 
-    ret = 0;
-    if (func_00110628(arg0, arg1, arg2) != NULL) {
-        func_001106B8(arg0);
+    found = 0;
+    if (func_00110628(iterator, target, repeat) != NULL) {
+        func_001106B8(iterator);
         do {
-            if (func_00110498(arg0, arg1) != 1) {
+            if (func_00110498(iterator, target) != 1) {
                 break;
             }
-            func_00110240(arg0);
-            ret = 1;
-        } while (arg2 != 0);
+            func_00110240(iterator);
+            found = 1;
+        } while (repeat != 0);
     }
-    return ret;
+    return found;
 }
 
-s32 func_00110498(void *arg0, void *arg1) {
-    void *res;
+s32 func_00110498(void *iterator, void *target) {
+    void *candidate;
 
     do {
-        res = func_00110680(arg0);
-        if (res == NULL) {
+        candidate = func_00110680(iterator);
+        if (candidate == NULL) {
             return 0;
         }
-        if (arg1 == res) {
+        if (target == candidate) {
             return 1;
         }
-    } while (func_001106D8(arg0) != 0);
+    } while (func_001106D8(iterator) != 0);
     return 0;
 }

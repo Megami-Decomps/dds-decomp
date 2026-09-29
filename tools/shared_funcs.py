@@ -4,7 +4,7 @@
     python3 tools/shared_funcs.py map [--nocturne SLPM_652.42] [--us SLUS_209.11]
     python3 tools/shared_funcs.py names
     python3 tools/shared_funcs.py units [--write] [--from dds1]
-    python3 tools/shared_funcs.py port [--from dds1]
+    python3 tools/shared_funcs.py port [--from dds1] [--units U ...] [--keep-types] [--fix-immediates]
     python3 tools/shared_funcs.py clones dds1
 
 Pairs come from `romwright-cli diff dds2 --reference build/romwright --reference-name dds1
@@ -23,6 +23,19 @@ port   replaces the other version's INCLUDE_ASM with the source version's C for 
        decompiled function whose counterpart is identical. Symbol references are
        translated through the relocations of that pair, so the result rebuilds the same
        bytes even when romwright matched one of several identical copies.
+       --units U ...      only write the named destination units (file stems such as
+                          code_00207A38, or paths); everything else is left alone.
+       --keep-types       a type the destination unit already defines keeps its own
+                          definition instead of being replaced by the source's (layouts
+                          differ between the games).
+       --fix-immediates   the relocation-masked pairing ignores plain immediates, so a
+                          ported struct offset or flag constant can differ between games.
+                          The `mine X retail Y` words check_unit reports for each ported
+                          function are used to rewrite the matching hex literals in that
+                          function, until it matches or stops changing.
+       Callees and globals are translated through the function's own relocations first,
+       then through every identical pair. Strings inside __asm__ statements (COP2/VU code)
+       are kept verbatim.
 clones the same within one version: an INCLUDE_ASM function whose masked code equals
        a decompiled function of the same game gets that C with its own symbols.
 """
@@ -54,6 +67,10 @@ DEF = re.compile(r"^[A-Za-z_][\w\s\*]*?\b(\w+)\s*\([^;]*$", re.M)
 TYPE_DECL = re.compile(r"\s*(?:/\*.*?\*/\s*)*(?:typedef|struct|union|enum)\b", re.S)
 FIRST_BODY = re.compile(r"^(?:INCLUDE_ASM\(|[A-Za-z_][\w \t\*]*\b\w+\s*\([^;{]*\)\s*\{?[ \t]*$)", re.M)
 UNIT = re.compile(r"^(\s+- \[)0x([0-9A-Fa-f]+), (\w+), ([^\]]+)\](.*)$")
+
+
+OPTS = argparse.Namespace(units=None, keep_types=False, fix_immediates=False)
+FULL_PAIRS = []  # (source address, destination address) for every identical pair of a cross-version port
 
 
 class Game:
@@ -361,7 +378,27 @@ def c_escape(b):
     return "".join(out)
 
 
+ASM_STMT = re.compile(r"__asm__\s+volatile\s*\((?:[^;])*?\);", re.S)
+
+
 def translate_strings(body, src, dst, amap):
+    """translate_strings_raw for everything except __asm__ statements, whose string
+    operands are instructions, not data."""
+    kept = []
+
+    def hide(m):
+        kept.append(m.group(0))
+        return f"__ASM_STATEMENT_{len(kept) - 1}__();"
+
+    out = translate_strings_raw(ASM_STMT.sub(hide, body), src, dst, amap)
+    if out is None:
+        return None
+    for i, stmt in enumerate(kept):
+        out = out.replace(f"__ASM_STATEMENT_{i}__();", stmt)
+    return out
+
+
+def translate_strings_raw(body, src, dst, amap):
     """A string literal the function writes itself sits at some retail address the
     relocations pair with the counterpart's own string, which may differ (clones
     that print different messages). Returns the body with the counterpart's
@@ -446,14 +483,23 @@ ported_names = {}  # unit -> the functions this run gave C (the only ones finish
 originals = {}  # unit -> its text before this run
 
 
+def wanted_unit(path):
+    """--units filter: a destination unit is written only when named (stem or path)."""
+    if not OPTS.units:
+        return True
+    return any(path.stem == Path(u).stem or path.resolve() == (ROOT / u).resolve() for u in OPTS.units)
+
+
 def port(src, dst, pairs):
     """Replace dst's INCLUDE_ASM for each target in pairs[src address] with src's C."""
     dst_files, dst_defined = {}, set()
     for path in (ROOT / "src" / dst.version).rglob("*.c"):
         text = path.read_text()
-        for name in INCLUDE_ASM.findall(text):
-            dst_files[name] = path
+        if wanted_unit(path):
+            for name in INCLUDE_ASM.findall(text):
+                dst_files[name] = path
         dst_defined.update(m.group(1) for b in blocks(text) if "{" in b and (m := DEF.search(b)))
+    FULL_PAIRS[:] = [(a, b) for a, bs in pairs.items() for b in bs] if src is not dst else []
     ported, skipped = collections.Counter(), []
     for path in sorted((ROOT / "src" / src.version).rglob("*.c")):
         pre, funcs = [], []
@@ -488,6 +534,8 @@ def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defi
     amap = {}
     for x, y in address_pairs(src.build, addr, dst.build, target, src.gp, dst.gp):
         amap.setdefault(x, y)
+    for x, y in FULL_PAIRS:
+        amap.setdefault(x, y)
     amap[addr] = target
     new_body, missing = translate(body, src, dst, amap)
     new_body = translate_strings(new_body, src, dst, amap) if STRING.search(new_body) else new_body
@@ -504,8 +552,14 @@ def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defi
         for i in more:
             used |= set(TOKENS.findall(pre[i][1]))
     new_pre = []
+    dst_text = dpath.read_text()
     for i in sorted(chosen):
         tdecl, miss = translate(pre[i][1], src, dst, amap)
+        if OPTS.keep_types and TYPE_DECL.match(tdecl) and "{" in tdecl:
+            mine = next((b for b in blocks(dst_text) if TYPE_DECL.match(b) and "{" in b
+                         and declared_name(b) == declared_name(tdecl)), None)
+            if mine:
+                tdecl, miss = mine, []
         missing += miss
         new_pre.append(tdecl)
     if missing:
@@ -549,12 +603,64 @@ def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defi
     ported_names.setdefault(dpath.relative_to(ROOT), set()).add(dname)
 
 
+DIFF_LINE = re.compile(r"^(?:DIFF|OVER) (\w+) @")
+WORD_LINE = re.compile(r"^\s+\+0x[0-9A-F]+ mine ([0-9A-F]{8}) retail ([0-9A-F]{8})")
+HEX_LITERAL = re.compile(r"\b0[xX][0-9a-fA-F]+\b")
+
+
+def fix_immediates(path, names, rounds=4):
+    """Rewrite hex literals in the ported functions `names` that check_unit shows as an
+    immediate differing between mine and retail (same opcode and registers, only the low
+    16 bits of a lui/addiu/lw/sw... word differ). One value per literal: a literal that
+    would need two different retail values is left alone."""
+    for _ in range(rounds):
+        r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path), "-v"],
+                           capture_output=True, text=True)
+        maps, cur = {}, None
+        for line in r.stdout.split("\n"):
+            if m := DIFF_LINE.match(line):
+                cur = m.group(1)
+                maps[cur] = {}
+            elif (m := WORD_LINE.match(line)) and cur:
+                a, b = int(m.group(1), 16), int(m.group(2), 16)
+                if a >> 16 == b >> 16 and (a & 0xFFFF) != (b & 0xFFFF):
+                    k, v = a & 0xFFFF, b & 0xFFFF
+                    if a >> 26 == 0x0F:  # lui: the constant is the high half
+                        k, v = k << 16, v << 16
+                    if maps[cur].get(k, v) != v:
+                        maps[cur][k] = None
+                    else:
+                        maps[cur][k] = v
+        text = path.read_text()
+        changed = False
+        for blk in blocks(text):
+            if "{" not in blk or not (m := DEF.search(blk)) or m.group(1) not in names:
+                continue
+            table = maps.get(m.group(1))
+            if not table:
+                continue
+
+            def sub(mm, table=table):
+                v = table.get(int(mm.group(0), 16))
+                return f"0x{v:X}" if v is not None else mm.group(0)
+
+            new = HEX_LITERAL.sub(sub, blk)
+            if new != blk:
+                text = text.replace(blk, new, 1)
+                changed = True
+        if not changed:
+            return
+        path.write_text(text)
+
+
 def finish(dst, ported, skipped):
     """Check every unit that received C; revert whatever does not match."""
     # Relocation-masked pairing ignores plain immediates (li 0x15 vs li 0x19), so a
     # pair is not proof; every ported function must compile to its own retail bytes.
     for rel in sorted(ported):
         path = ROOT / rel
+        if OPTS.fix_immediates:
+            fix_immediates(path, ported_names.get(rel, ()))
         r = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path), "-v"],
                            capture_output=True, text=True)
         bad = re.findall(r"^(?:DIFF|OVER|CONTEXT|SHARED rodata of|PAD rodata of|TWICE) (\w+)\b", r.stdout, re.M)
@@ -608,7 +714,15 @@ def main():
         p.add_argument("--from", dest="src", choices=("dds1", "dds2"), default="dds1")
         if name == "units":
             p.add_argument("--write", action="store_true", help="split the other version's asm chunks")
+        else:
+            p.add_argument("--units", nargs="+", help="only write these destination units (stem or path)")
+            p.add_argument("--keep-types", action="store_true",
+                           help="a type the destination unit already defines keeps its definition")
+            p.add_argument("--fix-immediates", action="store_true",
+                           help="rewrite ported struct offsets and constants that check_unit shows differ")
     args = ap.parse_args()
+    if args.cmd == "port":
+        OPTS.units, OPTS.keep_types, OPTS.fix_immediates = args.units, args.keep_types, args.fix_immediates
     if not PAIR_DIFF.exists():
         sys.exit(f"{PAIR_DIFF.relative_to(ROOT)} missing; see the module docstring")
     {"map": cmd_map, "names": cmd_names, "units": cmd_units, "port": cmd_port,

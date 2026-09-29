@@ -16,6 +16,12 @@ typedef struct MenuLayoutContext {
     s32 visible;
 } MenuLayoutContext;
 
+extern s32 func_002993D0(s32);
+
+extern void func_0029AC20(s32, s32);
+
+extern void func_0026C900(void);
+
 void func_0029AA48(MenuLayoutContext *context) {
     func_002B7F80((s32)context->menuList, 0x20);
 }

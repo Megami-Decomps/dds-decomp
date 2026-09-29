@@ -30,10 +30,10 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 
 s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
-    s32 id;
-    id = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, func_0010C0C8, func_0010C070, (s32)task);
-    task->taskId = id;
-    return id;
+    s32 taskId;
+    taskId = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, func_0010C0C8, func_0010C070, (s32)task);
+    task->taskId = taskId;
+    return taskId;
 }
 
 void scrClearProcessGlobals(void)

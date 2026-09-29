@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "sdf.h"
 
 extern u32 D_00438A3C;
@@ -73,6 +74,22 @@ void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
 void func_00333B38(SdfAsset *, void *);
 
+void *sdfChunkFindRecordById(SdfTextParam *, s32);
+
+void func_00332BB0(SdfTextParam *param, void *resource);
+
+void func_00332C30(SdfTextParam *param, void *resource);
+
+typedef struct SdfResourceList {
+    u32 unk0;
+    s16 count;
+    s16 capacity;
+    u32 unk8;
+    u32 *items;
+} SdfResourceList;
+
+void func_0032BBB0(u32);
+
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332860);
@@ -97,9 +114,23 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332C30);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfChunkFindRecordById);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D08);
+s32 func_00332D08(SdfTextParam *param, s32 id) {
+    void *resource = sdfChunkFindRecordById(param, id);
+    if (resource != NULL) {
+        func_00332BB0(param, resource);
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332D48);
+s32 func_00332D48(SdfTextParam *param, s32 id) {
+    void *resource = sdfChunkFindRecordById(param, id);
+    if (resource != NULL) {
+        func_00332C30(param, resource);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfGetUniqueChunkValue);
 
@@ -137,7 +168,20 @@ void func_00332E58(u32 arg0) {
     sdfDevCreateBufferedRequest(arg0, 4, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfResourceListRelease);
+void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
+    s32 i;
+    s32 count;
+    if (list == NULL) {
+        return;
+    }
+    if (freeItems != 0) {
+        count = list->count;
+        for (i = 0; i < count; i++) {
+            func_0032BBB0(list->items[i]);
+        }
+    }
+    sdfDestroyDevRequest(list);
+}
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
 
@@ -289,7 +333,13 @@ void sdfAssetRelease(SdfAsset *asset) {
     func_00328E48(asset);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333918);
+void func_00333918(s32 arg0) {
+    s32 id = arg0;
+
+    if (id != 0) {
+        func_0032CAE0(&D_00439178, id);
+    }
+}
 
 void *func_00333950(u32 *arg0, SdfNode *arg1, s32 arg2) {
     u32 *entry = arg0 + arg2;
@@ -369,4 +419,3 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00334078);
 INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A38);
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A3C);
-

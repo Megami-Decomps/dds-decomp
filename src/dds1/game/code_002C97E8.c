@@ -1,27 +1,49 @@
 #include "common.h"
+
 #include "fpu.h"
 
 extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
+
 extern void func_00195880(u32, s32);
+
 extern void func_00194920(u32);
+
 extern s32 frFontMeasureGlyphChain(u32);
+
 extern void func_001958A0(u32, s32, s32);
+
 extern u32 func_001951C8(u32, u32, s32, u32, u32);
+
 extern void func_001954C8(u32, u32);
+
 extern void func_00195450(u32, s32, s32);
+
 extern void func_00195460(u32, u32);
+
 extern void func_00195470(u32, u8);
+
 extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
+
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
+
 extern f32 func_002FA1C0(f32);
+
 extern f32 func_002E77F8(f32);
+
 extern f32 func_002E78F8(f32);
+
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
+
 extern void func_002C94A8(f32 *, f32 *);
+
 extern void func_002C8F40(f32 *, f32 *);
+
 extern void func_002C84F0(f32 *);
+
 extern void func_002CC5F0(u8 *);
+
 extern f32 sdfQuatDot(f32 *, f32 *);
+
 extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
@@ -33,10 +55,18 @@ typedef struct ShortPair2C {
 } ShortPair2C; // 0x30
 
 extern void func_002CAF78(void *, void *);
+
 extern u32 func_002CB5F0(u32 *);
+
 extern u32 func_002CAD30(u32, u32, u32);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
+extern s32 func_002D03F8(s32);
+
+extern void *sdfMemoryGetBlockAddress(u32);
+
+extern void func_002CC740();
 
 float sdfQuatLengthSquared(float *arg0) {
     return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
@@ -236,7 +266,17 @@ s32 func_002CAA20(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, u3
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAAC8);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAC60);
+void *func_002CAC60(u32 arg0) {
+    s32 allocation = func_002D03F8(0x1C);
+    u32 *obj = sdfMemoryGetBlockAddress(allocation);
+
+    memset(obj, 0, 0x1C);
+    obj[0] = allocation;
+    obj[4] = arg0;
+    obj[5] = (u32)func_002CC740;
+    obj[6] = (u32)func_002CC740;
+    return obj;
+}
 
 void sdfDestroyTaskWork(u8 *work) {
     if (work != NULL) {
@@ -544,4 +584,3 @@ INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A0);
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A8);
 
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2B0);
-

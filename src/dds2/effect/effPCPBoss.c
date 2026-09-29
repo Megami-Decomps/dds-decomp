@@ -9,6 +9,8 @@ typedef struct {
     u32 resource2C;
 } EffPCPBossWork;
 
+extern void func_0018D210();
+
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C190);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C288);

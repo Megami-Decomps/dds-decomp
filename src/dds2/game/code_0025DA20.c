@@ -23,20 +23,58 @@ extern s8 D_00437837;
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 func_00101958();
+
 extern void func_002C1B70(s32, s32);
+
 extern void func_002C1B68(s32, s32);
+
 extern s32 func_0026C768(void);
+
 extern u8 D_003CD8D0[];
+
 extern s32 effMiscRand(s32);
+
 extern u8 D_003CDA8C[];
+
 extern u8 D_003CD8F8[];
 
 extern s32 evtGetMirroredSolarPhase(void);
+
 extern u8 D_003CD8DD[];
 
+extern void evtFormatTaskName(s32 arg0, void *arg1);
 
+extern void *func_00328D68(s32 size);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampCreateTask);
+extern void *memset(void *dst, s32 c, u32 n);
+
+extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+
+extern void func_0025D8C8(void);
+
+extern void func_0025D928(void);
+
+typedef struct CampTaskData {
+    s32 taskId;
+    s32 unk4;
+    u8 pad08[0x40];
+} CampTaskData;
+
+extern u8 D_003CBB70[];
+
+void mnuCampCreateTask(s32 arg0) {
+    char name[0x20];
+    CampTaskData *data;
+
+    if (evtFindTaskById() == 0) {
+        evtFormatTaskName(arg0, name);
+        data = func_00328D68(0x48);
+        memset(data, 0, 0x48);
+        data->taskId = arg0;
+        data->unk4 = 0;
+        kwlnTaskCreate(name, 0x3EC, 1, 1, func_0025D8C8, func_0025D928, data);
+    }
+}
 
 void campDestroyTaskById(void) {
     s64 temp_v0;
@@ -67,7 +105,6 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DE08);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DFE8);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E048);
-
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E240);
 
@@ -263,9 +300,40 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F7F0);
+void func_0025F7F0(u8 *scene) {
+    extern u8 *func_00304998(s32 kind);
+    u8 *object;
+    u8 *graphics;
+    s32 *params;
+    s32 defaultValue = 15;
+    *(s32 *)(scene + 0x78) = 0;
+    object = func_00304998(6);
+    graphics = *(u8 **)(object + 8);
+    *(u8 **)(scene + 0x84) = object;
+    params = *(s32 **)(graphics + 0x20);
+    params[0] = defaultValue;
+    params[1] = 0;
+    params[2] = 0;
+    params[3] = 0;
+    params[4] = 0;
+    object = func_00304998(1);
+    graphics = *(u8 **)(object + 8);
+    *(u8 **)(scene + 0x88) = object;
+    params = *(s32 **)(graphics + 0x20);
+    params[0] = defaultValue;
+    params[1] = 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopReleaseSceneObjects);
+s32 mnuShopReleaseSceneObjects(u8 *scene) {
+    extern s32 effDestroyPackedBatch(s32);
+    s32 *objects = (s32 *)(scene + 0x84);
+    s32 result;
+    u32 i;
+    for (i = 0; i < 2; i++) {
+        result = effDestroyPackedBatch(*objects++);
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A00);
 
@@ -514,7 +582,6 @@ u8 func_00261018(s32 row, s32 column) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261040);
 
-
 s32 func_002610C0(s32 row, s32 column) {
     return *(s32 *)(D_003CD8F8 + row * 0x44 + column * 8);
 }
@@ -562,4 +629,3 @@ INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437828);
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437830);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437838);
-

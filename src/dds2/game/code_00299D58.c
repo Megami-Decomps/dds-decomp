@@ -10,13 +10,53 @@ extern void func_002C44E8(s32);
 
 extern void titleRenderFadeAndPanels(s32);
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern void func_002C4038(s32, s32, s32, s32);
+
+extern s32 func_00298E80(s32);
+
+extern void func_0029CDD8(s32);
+
+typedef struct MenuItem {
+    u8 pad00[0x55];
+    s8 selection;
+} MenuItem;
+
+typedef struct MenuItemScene {
+    u8 pad00[4];
+    u32 overlayFlags;
+    u8 pad08[0x90];
+    MenuItem **items;
+    u8 pad9C[0x1A4];
+    u32 resetStateA;
+    u32 selectedAction;
+    u8 pad248[4];
+    s32 selectionApplied;
+    u8 pad250[0x174];
+    u32 resetStateB;
+    s32 selectedExtent;
+    u32 activeSlot;
+    u32 slots[5];
+} MenuItemScene;
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_00299D58);
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_00299E30);
+void func_00299E30(s32 input) {
+    s32 context = func_00101958();
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_00299E90);
+    if (func_00298E80(context) != 0) {
+        titleRenderFadeAndPanels(context);
+        func_002C4038(context + 8, context + 0x54, 1, input);
+    }
+}
+
+void func_00299E90(s32 input) {
+    s32 context = func_00101958();
+
+    if (func_00298E80(context) != 0) {
+        func_0029CDD8(context);
+        func_002C4038(context + 8, context + 0x54, 2, input);
+    }
+}
 
 u32 func_00299EF0(void) {
     return 1;
@@ -107,4 +147,3 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A768);
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A898);
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
-

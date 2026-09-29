@@ -172,7 +172,15 @@ void func_0016D228(EffPCPThunderWorkB *work) {
     func_003297C8(work->unk64);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D258);
+void func_0016D258(u8 *p, void *src) {
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p + 0x10));
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(src));
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(p + 0x10) : "memory");
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf11, $vf11, $vf10\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p));
+    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p) : "memory");
+}
 
 void func_0016D288(EffPCPThunderWorkB *work, u32 value) {
     work->unk58 = value;
@@ -217,7 +225,15 @@ void func_0016DD20(EffPCPThunderWorkB *work) {
     func_003297C8(work->unk64);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DD58);
+void func_0016DD58(u8 *p, void *src) {
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p + 0x10));
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(src));
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(p + 0x10) : "memory");
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf11, $vf11, $vf10\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p));
+    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p) : "memory");
+}
 
 void func_0016DD88(EffPCPThunderWorkB *work, u32 value) {
     work->unk58 = value;

@@ -3,14 +3,14 @@
 typedef struct BtlUnit {
     u8 unk_00[0x70];
     f32 unk_70[4];
-    f32 unk_80;
+    f32 sizeScale;
     u8 unk_84[4];
-    f32 unk_88;
+    f32 zOffset;
     u8 unk_8C[4];
-    f32 unk_90[4];
-    f32 unk_A0[4];
-    f32 unk_B0;
-    f32 unk_B4;
+    f32 muzzleOffset[4];
+    f32 bodyOffset[4];
+    f32 height;
+    f32 reach;
     u8 unk_B8[0x50];
     u64 unitId; /* 0x108: compared against the battle command's unit ID */
     u32 flags;
@@ -257,15 +257,26 @@ extern s32 func_001AA740(void *);
 
 extern s32 D_00435E7C;
 
-u8 *btlCreateControlObject(void) {
-    u8 *object;
-    object = func_001E1468(0);
-    object[0] = 1;
-    *(void (**)(void))(object + 0x4c) = func_00207A10;
-    *(u16 *)(object + 0x20) = 0x66;
-    *(s32 *)(object + 0x48) = 0;
-    object[0x10] = 0;
-    return object;
+typedef struct BattleScriptTask {
+    u8 active;
+    u8 pad01[0xF];
+    u8 startFlag;
+    u8 pad11[0xF];
+    u16 kind;
+    u8 pad22[0x26];
+    s32 work;
+    void (*callback)(void);
+} BattleScriptTask;
+
+BattleScriptTask *btlCreateControlObject(void) {
+    BattleScriptTask *task;
+    task = (BattleScriptTask *)func_001E1468(0);
+    task->active = 1;
+    task->callback = func_00207A10;
+    task->kind = 0x66;
+    task->work = 0;
+    task->startFlag = 0;
+    return task;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00207A80);
@@ -275,11 +286,11 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00207C28);
 void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     func_001E3120(unit, pos);
-    pos[2] += unit->unk_88;
+    pos[2] += unit->zOffset;
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
     func_00340C40();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_90));
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->muzzleOffset));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
     __asm__ volatile(
         ".set noreorder\n\t"
         "vmulx.xyzw vf10, vf10, vf2x\n\t"
@@ -297,11 +308,11 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     func_001E3120(unit, pos);
-    pos[2] += unit->unk_88;
+    pos[2] += unit->zOffset;
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
     func_00340C40();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_A0));
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->bodyOffset));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
     __asm__ volatile(
         ".set noreorder\n\t"
         "vmulx.xyzw vf10, vf10, vf2x\n\t"
@@ -322,26 +333,26 @@ f32 func_00207F40(BtlUnit *unit) {
     f32 second;
     f32 first;
 
-    second = unit->unk_B4;
-    first = unit->unk_B0;
+    second = unit->reach;
+    first = unit->height;
     if (first < second) {
-        return second * unit->unk_80;
+        return second * unit->sizeScale;
     }
-    return first * unit->unk_80;
+    return first * unit->sizeScale;
 }
 
 f32 btlUnitGetTopY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
-    return unit->unk_B0 * unit->unk_80 * 0.5f - pos[1];
+    return unit->height * unit->sizeScale * 0.5f - pos[1];
 }
 
 f32 btlUnitGetBottomY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
-    return -pos[1] - unit->unk_B0 * unit->unk_80 * 0.5f;
+    return -pos[1] - unit->height * unit->sizeScale * 0.5f;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208000);
@@ -373,7 +384,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
     s32 first = 1;
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
-            f32 value = unit->unk_B4 * unit->unk_80;
+            f32 value = unit->reach * unit->sizeScale;
             if (first) {
                 best = value;
                 first = 0;
@@ -397,7 +408,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
             btlUnitGetMuzzlePosVU(unit);
             __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
             if (mask & 0x200) {
-                value = pos[2] + unit->unk_B4 * unit->unk_80;
+                value = pos[2] + unit->reach * unit->sizeScale;
                 if (first) {
                     best = value;
                     first = 0;
@@ -405,7 +416,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
                     best = value;
                 }
             } else {
-                value = pos[2] - unit->unk_B4 * unit->unk_80;
+                value = pos[2] - unit->reach * unit->sizeScale;
                 if (first) {
                     best = value;
                     first = 0;

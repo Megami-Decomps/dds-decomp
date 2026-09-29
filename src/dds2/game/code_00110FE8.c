@@ -15,7 +15,12 @@ void func_001110C8(WorldObjectPointer *object, u32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00110FE8", func_001110E0);
+s32 func_001110E0(u8 *obj) {
+    if (obj == NULL) {
+        return -1;
+    }
+    return **(s32 **)(obj + 0x18);
+}
 
 INCLUDE_ASM(const s32, "game/code_00110FE8", func_001110F8);
 

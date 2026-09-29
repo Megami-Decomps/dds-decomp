@@ -1,16 +1,29 @@
 #include "common.h"
 
+/* Event-command work prefix; the +0xE4 key is also used by field task lookup. */
+typedef struct EvtCommandWork {
+    u8 pad00[0xE4];
+    s32 taskKey;
+} EvtCommandWork;
+
+/* The first word is the solarnoise.spr handle; the work allocation is 0x104 bytes. */
+typedef struct SolarOverlayWork {
+    u32 noiseSprite;
+    u8 pad04[0x100];
+} SolarOverlayWork;
+
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 void *func_002CFEB8(s32 size);
 
 void evtInitializeVisualData(s32 arg0);
+void evtLoadSolarNoiseSprite(u32 *sprite);
 
 void func_00101A68(s32 arg0, void *arg1);
 
 void func_00101A80(s32 arg0, s32 arg1);
 
-s32 func_0010D6A0(void);
+EvtCommandWork *func_0010D6A0(void);
 
 char *func_0010D5A8(s32 idx);
 
@@ -30,9 +43,10 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 extern u64 func_00101A70(void);
 
-extern u32 D_003BBDB8;
+extern f32 D_003BBDB8; /* solar overlay alpha, interpolated toward 0 or 1 */
 
-extern s32 D_003BAA00;
+typedef struct SolarWorldState SolarWorldState;
+extern SolarWorldState *D_003BAA00;
 
 extern s64 kwlnTaskIsRegistered(u64);
 
@@ -45,70 +59,70 @@ INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 INCLUDE_ASM(const s32, "game/code_00228058", func_002280B0);
 
 u32 func_00228180(void) {
-    s32 v0;
-    s32 v1;
+    EvtCommandWork *work;
+    s32 task;
 
-    v0 = func_0010D6A0();
-    if (v0 == 0) {
+    work = func_0010D6A0();
+    if (work == NULL) {
         return 1;
     }
-    if (*(s32 *)(v0 + 0xe4) == 0) {
+    if (work->taskKey == 0) {
         func_003003F0(D_003ACAE0);
         return 1;
     }
-    v1 = evtCreateTask(0x2afe, func_0010D5A8(0));
-    func_00101A80(*(s32 *)(v0 + 0xe4), v1);
-    func_0010D5F0(v1);
+    task = evtCreateTask(0x2afe, func_0010D5A8(0));
+    func_00101A80(work->taskKey, task);
+    func_0010D5F0(task);
     return 1;
 }
 
 u32 func_00228210(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 task;
+    s64 registered;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = kwlnTaskIsRegistered(temp_v0);
-    if (temp_v1 != 0) {
-        func_00235088(temp_v0);
+    task = func_0010D428(0);
+    registered = kwlnTaskIsRegistered(task);
+    if (registered != 0) {
+        func_00235088(task);
     }
     return 1;
 }
 
 u32 func_00228258(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 task;
+    s64 registered;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = kwlnTaskIsRegistered(temp_v0);
-    if (temp_v1 != 0) {
-        func_002350B0(temp_v0);
+    task = func_0010D428(0);
+    registered = kwlnTaskIsRegistered(task);
+    if (registered != 0) {
+        func_002350B0(task);
     }
     return 1;
 }
 
 u32 func_002282A0(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 task;
+    s64 registered;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = kwlnTaskIsRegistered(temp_v0);
-    if (temp_v1 != 0) {
-        func_002350E0(temp_v0);
+    task = func_0010D428(0);
+    registered = kwlnTaskIsRegistered(task);
+    if (registered != 0) {
+        func_002350E0(task);
     }
     return 1;
 }
 
 u32 func_002282E8(void) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
+    u64 area;
+    u64 target;
+    u64 duration;
 
     func_00132B60(0);
     func_00132B70(0x80);
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    temp_v2 = func_0010D428(2);
-    fldSetFadeTarget(temp_v0, temp_v1, temp_v2);
+    area = func_0010D428(0);
+    target = func_0010D428(1);
+    duration = func_0010D428(2);
+    fldSetFadeTarget(area, target, duration);
     return 1;
 }
 
@@ -143,32 +157,32 @@ u32 evtHideSky(void) {
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228408);
 
 u32 evtOpcodePlayBgm(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    evtPlayBgm(temp_v0, temp_v1);
+    id = func_0010D428(0);
+    fade = func_0010D428(1);
+    evtPlayBgm(id, fade);
     return 1;
 }
 
 u32 evtOpcodeTransitionBgm(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    evtTransitionBgm(temp_v0, temp_v1);
+    id = func_0010D428(0);
+    fade = func_0010D428(1);
+    evtTransitionBgm(id, fade);
     return 1;
 }
 
 u32 func_002284E0(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    func_00241A50(temp_v0, temp_v1);
+    id = func_0010D428(0);
+    fade = func_0010D428(1);
+    func_00241A50(id, fade);
     return 1;
 }
 
@@ -185,32 +199,32 @@ u32 func_00228548(void) {
 }
 
 u32 evtOpcodeSetBgmVolumePan(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    evtSetBgmVolumePan(temp_v0, temp_v1);
+    id = func_0010D428(0);
+    fade = func_0010D428(1);
+    evtSetBgmVolumePan(id, fade);
     return 1;
 }
 
 u32 func_002285B0(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    func_00241AE8(temp_v0, temp_v1);
+    id = func_0010D428(0);
+    fade = func_0010D428(1);
+    func_00241AE8(id, fade);
     return 1;
 }
 
 u32 func_002285F0(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 task;
+    u64 value;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    evtRefreshTaskData(temp_v0, temp_v1);
+    task = func_0010D428(0);
+    value = func_0010D428(1);
+    evtRefreshTaskData(task, value);
     return 1;
 }
 
@@ -221,19 +235,22 @@ u32 func_00228630(void) {
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228650);
 
-typedef struct {
+struct SolarWorldState {
     u8 pad00[0xA40];
     u8 flags;          /* 0xA40 */
     u8 phase;          /* 0xA41 */
     u8 secondaryPhase; /* 0xA42 */
     u8 padA43;
-    u32 phaseCounter;  /* 0xA44 */
-} SolarWorldState;
+    f32 phaseTimer;    /* 0xA44: elapsed phase time, advanced as float in func_00228930 */
+};
+
+#define SOLAR_PHASE_ADVANCE_FLAG 1
+#define SOLAR_ALPHA_ENABLED_FLAG 2
 
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = ((SolarWorldState *)D_003BAA00)->phase;
+    phase = D_003BAA00->phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -241,39 +258,39 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 u8 evtGetSolarPhase(void) {
-    return ((SolarWorldState *)D_003BAA00)->phase;
+    return D_003BAA00->phase;
 }
 
 void evtSetSolarPhase(u8 phase) {
-    ((SolarWorldState *)D_003BAA00)->phase = phase & 0xf;
-    ((SolarWorldState *)D_003BAA00)->phaseCounter = 0;
+    D_003BAA00->phase = phase & 0xf;
+    D_003BAA00->phaseTimer = 0.0f;
 }
 
 void func_00228710(void) {
-    ((SolarWorldState *)D_003BAA00)->flags = ((SolarWorldState *)D_003BAA00)->flags | 1;
+    D_003BAA00->flags = D_003BAA00->flags | SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void func_00228728(void) {
-    ((SolarWorldState *)D_003BAA00)->flags = ((SolarWorldState *)D_003BAA00)->flags & 0xfe;
+    D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void func_00228740(void) {
-    ((SolarWorldState *)D_003BAA00)->flags = ((SolarWorldState *)D_003BAA00)->flags | 2;
-    *(f32 *)&D_003BBDB8 = 1.0f;
+    D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
+    D_003BBDB8 = 1.0f;
     func_0022AB00(0);
 }
 
 void func_00228778(void) {
-    ((SolarWorldState *)D_003BAA00)->flags = ((SolarWorldState *)D_003BAA00)->flags & 0xfd;
-    D_003BBDB8 = 0;
+    D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
+    D_003BBDB8 = 0.0f;
 }
 
 void func_00228790(void) {
-    ((SolarWorldState *)D_003BAA00)->flags = ((SolarWorldState *)D_003BAA00)->flags | 2;
+    D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 void func_002287A8(void) {
-    ((SolarWorldState *)D_003BAA00)->flags = ((SolarWorldState *)D_003BAA00)->flags & 0xfd;
+    D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_002287C0);
@@ -281,12 +298,12 @@ INCLUDE_ASM(const s32, "game/code_00228058", func_002287C0);
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228930);
 
 void *func_00228A00(s32 owner) {
-    s32 overlay;
+    SolarOverlayWork *overlay;
 
-    overlay = (s32)func_002CFEB8(0x104);
-    evtInitializeVisualData(overlay);
-    evtLoadSolarNoiseSprite((u32 *)overlay);
-    func_00101A68(owner, (void *)overlay);
+    overlay = func_002CFEB8(0x104);
+    evtInitializeVisualData((s32)overlay);
+    evtLoadSolarNoiseSprite(&overlay->noiseSprite);
+    func_00101A68(owner, overlay);
     return (void *)func_002287C0;
 }
 
@@ -307,7 +324,7 @@ void evtStartSolarOverlay(void) {
     func_00228710();
     func_00228778();
     evtSetSolarPhase(0);
-    ((SolarWorldState *)D_003BAA00)->secondaryPhase = 0;
+    D_003BAA00->secondaryPhase = 0;
 }
 
 void evtStopSolarOverlay(void) {

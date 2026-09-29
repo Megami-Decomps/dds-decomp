@@ -23,6 +23,13 @@ extern s32 func_00177E90(s32 base, s32 index);
 
 extern s32 func_00195A30(s32 color, s32 param);
 
+/* Three consecutive packed colors returned by func_00177E90. */
+typedef struct PcpFlashColorSlot {
+    s32 first;
+    s32 second;
+    s32 third;
+} PcpFlashColorSlot;
+
 typedef struct PcpFlashWork2 PcpFlashWork2;
 
 /* func_0016A6C0 */
@@ -41,7 +48,7 @@ typedef struct PcpFlashPtc14 PcpFlashPtc14;
 
 struct PcpFlashPtc14 {
     u8 pad00[0x10];
-    f32 unk10;
+    f32 accumulator;
 };
 
 typedef struct PcpFlashWork3 PcpFlashWork3;
@@ -49,7 +56,7 @@ typedef struct PcpFlashWork3 PcpFlashWork3;
 /* func_0016AFF0 */
 struct PcpFlashWork3 {
     u8 pad00[0x40];
-    f32 unk40;
+    f32 increment;
     u32 unk44;
     PcpFlashPtc14 *parts;
     u32 unk4C;
@@ -63,7 +70,7 @@ typedef struct PcpFlashPtc1C PcpFlashPtc1C;
 
 struct PcpFlashPtc1C {
     u8 pad00[0x18];
-    f32 unk18;
+    f32 accumulator;
 };
 
 typedef struct PcpFlashWork4 PcpFlashWork4;
@@ -71,7 +78,7 @@ typedef struct PcpFlashWork4 PcpFlashWork4;
 /* func_0016B800 */
 struct PcpFlashWork4 {
     u8 pad00[0x44];
-    f32 unk44;
+    f32 increment;
     u32 unk48;
     u32 unk4C;
     PcpFlashPtc1C *parts;
@@ -88,7 +95,7 @@ typedef struct PcpFlashPtc10 PcpFlashPtc10;
 
 struct PcpFlashPtc10 {
     u8 pad00[0x08];
-    f32 unk08;
+    f32 accumulator;
     u8 pad0C[0x04];
 };
 
@@ -97,7 +104,7 @@ typedef struct PcpFlashWork5 PcpFlashWork5;
 /* func_0016C0E8 */
 struct PcpFlashWork5 {
     u8 pad00[0x50];
-    f32 unk50;
+    f32 increment;
     u32 unk54;
     PcpFlashPtc10 *parts;
     u32 unk5C;
@@ -112,9 +119,9 @@ typedef struct PcpFlashPtc20A PcpFlashPtc20A;
 
 struct PcpFlashPtc20A {
     u8 pad00[0x08];
-    f32 unk08;
+    f32 increment;
     u8 pad0C[0x04];
-    f32 unk10;
+    f32 accumulator;
     u8 pad14[0x0C];
 };
 
@@ -136,8 +143,8 @@ typedef struct PcpFlashWork7 PcpFlashWork7;
 /* func_0016D2A8 */
 struct PcpFlashWork7 {
     u8 pad00[0x24];
-    u32 unk24;
-    u32 unk28;
+    u32 colorA;
+    u32 colorB;
     u8 pad2C[0x18];
     u32 unk44;
     f32 unk48;
@@ -149,9 +156,9 @@ typedef struct PcpFlashPtc20B PcpFlashPtc20B;
 
 struct PcpFlashPtc20B {
     u8 pad00[0x08];
-    f32 unk08;
+    f32 increment;
     u8 pad0C[0x0C];
-    f32 unk18;
+    f32 accumulator;
     u8 pad1C[0x04];
 };
 
@@ -173,7 +180,7 @@ typedef struct PcpFlashWork9 PcpFlashWork9;
 /* func_0016E290 */
 struct PcpFlashWork9 {
     u8 pad00[0x48];
-    f32 unk48;
+    f32 increment;
     u32 unk4C;
     PcpFlashPtc14 *parts;
     u32 unk54;
@@ -188,14 +195,29 @@ typedef struct PcpFlashWork10 PcpFlashWork10;
 /* func_0016EB00 */
 struct PcpFlashWork10 {
     u8 pad00[0x24];
-    u32 unk24;
-    u32 unk28;
+    u32 colorA;
+    u32 colorB;
     u8 pad2C[0x1C];
     u32 unk48;
     f32 unk4C;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
+
+typedef struct PcpFlashRotatingParticle {
+    u8 pad00[8];
+    f32 angle;
+    u8 pad0C[4];
+    f32 position[3];
+    u8 pad1C[0x10];
+} PcpFlashRotatingParticle;
+
+typedef struct PcpFlashRotationWork {
+    u8 pad00[0x40];
+    PcpFlashRotatingParticle *parts;
+} PcpFlashRotationWork;
+
+extern void func_00336768(void *orientation, f32 angle);
 
 void func_00171E00(u64 arg0) {
     u64 temp_v0;
@@ -226,16 +248,16 @@ void func_00171E80(PcpFlashWork1 *work, f32 value)
 
 void func_00171E88(PcpFlashWork1 *work, s32 index, s32 param)
 {
-    s32 slot;
-    s32 rgb1;
-    s32 rgb2;
+    PcpFlashColorSlot *slot;
+    s32 colorA;
+    s32 colorB;
 
-    slot = func_00177E90(work->resourceHandle, index);
-    rgb1 = work->colorA & 0xFFFFFF;
-    rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_00195A30(rgb2, param);
-    *(s32 *)(slot + 4) = func_00195A30(rgb2, param);
-    *(s32 *)(slot + 8) = func_00195A30(rgb1 | 0xFF000000, param);
+    slot = (PcpFlashColorSlot *)func_00177E90(work->resourceHandle, index);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->first = func_00195A30(colorB, param);
+    slot->second = func_00195A30(colorB, param);
+    slot->third = func_00195A30(colorA | 0xFF000000, param);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00171F28);
@@ -277,7 +299,28 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172628);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001727A0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", effRotateFlashParticlePosition);
+void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void *orientation)
+{
+    PcpFlashRotatingParticle *part = &work->parts[index];
+    f32 position[4];
+
+    position[0] = part->position[0];
+    position[1] = part->position[1];
+    position[2] = part->position[2];
+    func_00336768(orientation, part->angle);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddz.xyzw vf10, vf30, vf10z\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(position) : "memory");
+    part->position[0] = position[0];
+    part->position[1] = position[1];
+    part->position[2] = position[2];
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001729B0);
 
@@ -318,7 +361,7 @@ void func_001731C8(PcpFlashWork3 *work, s32 index) {
     PcpFlashPtc14 *part;
 
     part = &work->parts[index];
-    part->unk10 += work->unk40;
+    part->accumulator += work->increment;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001731F0);
@@ -360,7 +403,7 @@ void func_00173A78(PcpFlashWork4 *work, s32 index) {
     PcpFlashPtc1C *part;
 
     part = &work->parts[index];
-    part->unk18 += work->unk44;
+    part->accumulator += work->increment;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173AA0);
@@ -402,7 +445,7 @@ void func_001742D0(PcpFlashWork5 *work, s32 index) {
     PcpFlashPtc10 *part;
 
     part = &work->parts[index];
-    part->unk08 += work->unk50;
+    part->accumulator += work->increment;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001742F0);
@@ -446,7 +489,7 @@ void func_00174C18(PcpFlashWork6 *work, s32 index) {
     PcpFlashPtc20A *part;
 
     part = &work->parts[index];
-    part->unk10 += part->unk08;
+    part->accumulator += part->increment;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174C38);
@@ -482,16 +525,16 @@ void func_001750B8(PcpFlashWork7 *work, f32 value)
 
 void func_001750C0(PcpFlashWork7 *work, s32 index, s32 param)
 {
-    s32 slot;
-    s32 rgb1;
-    s32 rgb2;
+    PcpFlashColorSlot *slot;
+    s32 colorA;
+    s32 colorB;
 
-    slot = func_00177E90(work->resourceHandle, index);
-    rgb1 = work->unk24 & 0xFFFFFF;
-    rgb2 = work->unk28 & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_00195A30(rgb2, param);
-    *(s32 *)(slot + 4) = func_00195A30(rgb2, param);
-    *(s32 *)(slot + 8) = func_00195A30(rgb1 | 0xFF000000, param);
+    slot = (PcpFlashColorSlot *)func_00177E90(work->resourceHandle, index);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->first = func_00195A30(colorB, param);
+    slot->second = func_00195A30(colorB, param);
+    slot->third = func_00195A30(colorA | 0xFF000000, param);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175160);
@@ -537,7 +580,7 @@ void func_00175BE8(PcpFlashWork8 *work, s32 index) {
     PcpFlashPtc20B *part;
 
     part = &work->parts[index];
-    part->unk18 += part->unk08;
+    part->accumulator += part->increment;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175C08);
@@ -579,7 +622,7 @@ void func_00176478(PcpFlashWork9 *work, s32 index) {
     PcpFlashPtc14 *part;
 
     part = &work->parts[index];
-    part->unk10 += work->unk48;
+    part->accumulator += work->increment;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001764A0);
@@ -615,16 +658,16 @@ void func_00176918(PcpFlashWork10 *work, f32 value)
 
 void func_00176920(PcpFlashWork10 *work, s32 index, s32 param)
 {
-    s32 slot;
-    s32 rgb1;
-    s32 rgb2;
+    PcpFlashColorSlot *slot;
+    s32 colorA;
+    s32 colorB;
 
-    slot = func_00177E90(work->resourceHandle, index);
-    rgb1 = work->unk24 & 0xFFFFFF;
-    rgb2 = work->unk28 & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_00195A30(rgb2, param);
-    *(s32 *)(slot + 4) = func_00195A30(rgb2, param);
-    *(s32 *)(slot + 8) = func_00195A30(rgb1 | 0xFF000000, param);
+    slot = (PcpFlashColorSlot *)func_00177E90(work->resourceHandle, index);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->first = func_00195A30(colorB, param);
+    slot->second = func_00195A30(colorB, param);
+    slot->third = func_00195A30(colorA | 0xFF000000, param);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001769C0);

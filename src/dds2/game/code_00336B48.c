@@ -63,6 +63,98 @@ extern void *func_00328D68(s32 size);
 
 extern void func_00330768(u32 object);
 
+extern void func_00336D38(void *, s32);
+
+extern s16 D_00439184;
+
+typedef struct {
+    u8 pad00[0x40];
+    u16 param0;            /* 0x40 */
+    u16 param1;            /* 0x42 */
+    u32 selectedFlags;     /* 0x44 */
+    u32 nextParam;         /* 0x48 */
+    u32 flags;             /* 0x4C */
+    u8 pad50[0x30];
+    u32 state;             /* 0x80 */
+    u8 pad84[0x0C];
+    u8 *payload;           /* 0x90 */
+} VuWork;
+
+extern void func_00336EC0(void *, u32, void *, u32, u32, f32, f32, f32);
+
+extern void func_00339160(s32 arg0);
+
+extern u8 D_0037B080[];
+
+extern u8 D_0037B610[];
+
+extern s32 D_00438A40;
+
+extern s32 D_00439180;
+
+extern void *sceDmaGetChan(s32);
+
+extern void sceDmaSendN(void *, void *, s32);
+
+extern s32 sceDmaSync(void *, s32, s32);
+
+extern void sdfReleaseMemorySlot(void *);
+
+extern s32 func_003292A8(s32);
+
+extern s32 sdfResourceRetainAddress(s32);
+
+typedef struct SdfDrawPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 unk8;
+    u32 command;
+    u64 unk10;
+    u64 unk18;
+    u64 unk20;
+    u64 unk28;
+    u64 unk30;
+    u64 unk38;
+    u64 unk40;
+    u64 unk48;
+} SdfDrawPacket;
+
+extern u64 func_0032B318(void *);
+
+extern u64 func_0032B328(void *);
+
+extern u64 func_0032B338(void *);
+
+extern void *sdfAllocPacketAligned(s32);
+
+extern void *func_0033A2D8(void *, s64, s64, s64, s32);
+
+typedef struct DmaPacketHeader {
+    u16 quadwords;
+    u16 pad02;
+    u32 address;
+    u32 tag;
+    u32 command;
+    u16 unused10;
+    u8 pad12[6];
+    u32 unused18;
+    u32 unused1C;
+} DmaPacketHeader;
+
+extern u8 D_0040B730[];
+
+extern void func_0032CF58(s32, void *);
+
+extern void func_0032CF58(s32, void *);
+
+extern void func_0033AEA8(void *);
+
+extern vu8 D_004389DA;
+
+extern void sdfAssetApplyEntryChanges(void *, s32);
+
+extern void func_00333950(void *, void *, s32);
+
 void func_00336B48(void) {
     __asm__ volatile (
         ".set noreorder               \n"
@@ -119,9 +211,31 @@ void func_00336BA0(void) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336BE8);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336BE8(void *arg0) {
+    __asm__ volatile (
+        ".set noreorder         \n"
+        "lqc2 vf24, 0x0(%0)    \n"
+        "lqc2 vf25, 0x10(%0)   \n"
+        "lqc2 vf26, 0x20(%0)   \n"
+        "lqc2 vf27, 0x30(%0)   \n"
+        ".set reorder"
+        : : "r"(arg0) : "memory");
+    func_00336AA8();
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336C10);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336C10(void *arg0) {
+    __asm__ volatile (
+        ".set noreorder         \n"
+        "lqc2 vf24, 0x0(%0)    \n"
+        "lqc2 vf25, 0x10(%0)   \n"
+        "lqc2 vf26, 0x20(%0)   \n"
+        "lqc2 vf27, 0x30(%0)   \n"
+        ".set reorder"
+        : : "r"(arg0) : "memory");
+    func_00336B00();
+}
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfVuTransformVector(void *dst, void *src) {
@@ -167,14 +281,70 @@ void sdfVuCross3(void *dst, void *src1, void *src2) {
         : : "r"(dst), "r"(src1), "r"(src2) : "memory");
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336CA0);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+void func_00336CA0(void *arg0, void *arg1, void *arg2) {
+    __asm__ volatile (
+        ".set noreorder             \n"
+        "lqc2 vf10, 0x0(%1)         \n"
+        "vmove.xyzw vf31, vf10     \n"
+        "vmove.xyzw vf11, vf10     \n"
+        "lqc2 vf10, 0x0(%0)         \n"
+        "vsub.xyzw vf10, vf10, vf11 \n"
+        "vmul.xyz vf2, vf10, vf10  \n"
+        "vmulax.w ACC, vf0, vf2x   \n"
+        "vmadday.w ACC, vf0, vf2y  \n"
+        "vmaddz.w vf2, vf0, vf2z   \n"
+        "vrsqrt Q, vf0w, vf2w      \n"
+        "vwaitq                    \n"
+        "vmulq.xyz vf10, vf10, Q   \n"
+        "vmove.xyzw vf30, vf10     \n"
+        "vmove.xyzw vf11, vf10     \n"
+        "lqc2 vf10, 0x0(%2)         \n"
+        "vopmula.xyz ACC, vf10, vf11 \n"
+        "vopmsub.xyz vf10, vf11, vf10 \n"
+        "vmul.xyz vf2, vf10, vf10  \n"
+        "vmulax.w ACC, vf0, vf2x   \n"
+        "vmadday.w ACC, vf0, vf2y  \n"
+        "vmaddz.w vf2, vf0, vf2z   \n"
+        "vrsqrt Q, vf0w, vf2w      \n"
+        "vwaitq                    \n"
+        "vmulq.xyz vf10, vf10, Q   \n"
+        "vmove.xyzw vf28, vf10     \n"
+        "vmove.xyzw vf11, vf10     \n"
+        "vmove.xyzw vf10, vf30     \n"
+        "vopmula.xyz ACC, vf10, vf11 \n"
+        "vopmsub.xyz vf10, vf11, vf10 \n"
+        "vmove.xyzw vf29, vf10 \n"
+        ".set reorder"
+        : : "r"(arg0), "r"(arg1), "r"(arg2) : "memory");
+    func_003363D0();
+}
 
 void func_00336D30(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336D38);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfInitializeVuWorkParameters);
+void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
+    u8 *payload = (u8 *)(params + 4);
+    u16 second;
+    u16 flags;
+    u16 next;
+    u16 selected;
+    work->param0 = params[0];
+    second = params[1];
+    work->param1 = second;
+    flags = params[2];
+    next = params[3];
+    selected = flags & mask;
+    work->flags = flags;
+    work->nextParam = next;
+    work->selectedFlags = selected;
+    D_00439184 = selected & 0x78;
+    work->payload = payload;
+    work->state = 0;
+    func_00336D38(work, second);
+}
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_00336E60(void *arg0) {
@@ -205,7 +375,13 @@ void func_00336E60(void *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336F88);
+void func_00336F88(void *out, u8 *work, void *reference, f32 deltaX, f32 deltaY) {
+    func_00336EC0(out, D_00439188, reference,
+                  *(u32 *)(work + 8), *(u32 *)(work + 4),
+                  *(f32 *)(work + 0x1c),
+                  *(f32 *)(work + 0x2c) + deltaX,
+                  *(f32 *)(work + 0x28) + deltaY);
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336FC8);
 
@@ -311,7 +487,22 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00339188);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00339270);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00339390);
+void func_00339390(u32 arg0) {
+    u32 temp_v0;
+    s32 temp_v1;
+
+    temp_v1 = (s32)arg0;
+    func_00339160(temp_v1);
+    temp_v0 = *(u32 *)(temp_v1 + 0x44);
+    if ((temp_v0 & 0x1000) != 0) {
+        func_00339188(arg0);
+        temp_v0 = *(u32 *)(temp_v1 + 0x44);
+    }
+    if ((temp_v0 & 1) != 0) {
+        func_00339270(arg0);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003393F0);
 
@@ -350,13 +541,34 @@ void func_0033A0C8(void) {
     D_0043918C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A0D8);
+void func_0033A0D8(s32 size) {
+    u32 *chan = sceDmaGetChan(0);
+    *chan &= ~0x40;
+    sceDmaSendN(chan, D_0037B080, (D_0037B610 - D_0037B080) >> 4);
+    sceDmaSync(chan, 0, 0);
+    sdfReleaseMemorySlot(&D_00438A40);
+    D_00438A40 = func_003292A8(size);
+    D_00439180 = sdfResourceRetainAddress(D_00438A40);
+}
 
 u32 func_0033A170(void) {
     return 0x50;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A178);
+SdfDrawPacket *func_0033A178(SdfDrawPacket *p, void *tex, s32 data) {
+    p->quadwords = 4;
+    p->unk10 = 0x1000000000008003ULL;
+    p->command = 0x50000004;
+    p->unk8 = 0;
+    p->unk18 = 0xE;
+    p->unk20 = func_0032B328(tex);
+    p->unk28 = data + 0x14;
+    p->unk30 = func_0032B318(tex);
+    p->unk38 = data + 6;
+    p->unk40 = func_0032B338(tex);
+    p->unk48 = data + 8;
+    return p;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", sdfConsCreateDrawPacket);
 
@@ -375,7 +587,11 @@ s32 func_0033A2D0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A2D8);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A328);
+void *func_0033A328(s32 height) {
+    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, height));
+    func_0033A2D8(packet, 0x156, 5, 0x53531, height);
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A388);
 
@@ -395,7 +611,16 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A7E8);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AAA0);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfConsInitDmaPacketHeader);
+void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
+    s32 qwc = (size + 15) >> 4;
+    packet->quadwords = qwc;
+    packet->address = address & 0x0FFFFFFF;
+    packet->tag = 0x13000000;
+    packet->command = qwc | 0x50000000;
+    packet->unused10 = 0;
+    packet->unused18 = 0;
+    packet->unused1C = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033ABB8);
 
@@ -403,17 +628,59 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AD68);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AE28);
+void func_0033AE28(s32 list, s32 (*alloc)(s32)) {
+    u64 *packet;
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    packet = (u64 *)alloc(0x20);
+    packet[0] = ((u64)((u32)D_0040B730 & 0x0FFFFFFF) << 32) | 0x30000008;
+    packet[1] = 0x6C07C000ULL << 32;
+    *(u128 *)&packet[2] = 0;
+    func_0032CF58(list, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AEA8);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AF38);
+void func_0033AF38(s32 list, s32 (*alloc)(s32)) {
+    u64 *packet;
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    packet = (u64 *)alloc(0x90);
+    packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
+    packet[1] = 0x6C07C000ULL << 32;
+    func_0033AEA8(packet + 2);
+    sdfAppendPacket(list, (u32)packet);
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AFC0);
+void func_0033AFC0(s32 list, void *asset, s32 (*alloc)(s32)) {
+    u64 *packet;
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    sdfAssetApplyEntryChanges(asset, (s8)D_004389DA);
+    packet = (u64 *)alloc(0x20);
+    func_00333950(asset, packet, (s8)D_004389DA);
+    *(u128 *)&packet[2] = 0;
+    func_0032CF58(list, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B050);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfInitGeometryDmaPacket);
+void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
+    *(u16 *)packet = 2;
+    *(u32 *)(packet + 8) = 0x6403C000;
+    *(f32 *)(packet + 12) = matrix[0];
+    *(f32 *)(packet + 16) = matrix[1];
+    *(f32 *)(packet + 20) = matrix[4];
+    *(f32 *)(packet + 24) = matrix[5];
+    *(f32 *)(packet + 28) = matrix[12];
+    *(f32 *)(packet + 32) = matrix[13];
+    *(u32 *)(packet + 36) = 0x04000000;
+    *(u32 *)(packet + 40) = 0x14000008;
+    memset(packet + 0x2C, 0, 12);
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B530);
 
@@ -463,7 +730,11 @@ void func_0033CA30(s32 arg0, u8 arg1) {
     D_00476480[arg0].unk22 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfDevConsSetEntryPair);
+void sdfDevConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
+    F9B00Entry *entry = &D_00476480[index];
+    entry->unk20 = arg1 & 0xFF;
+    D_00476480[index].unk22 = arg2 & 0xFF;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA88);
 
@@ -508,7 +779,9 @@ void sdfDevConsNodeClear(ConsNode *node) {
     memset(node->pixels, 0, node->width * node->height * 2);
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CCB0);
+void func_0033CCB0(ConsNode *arg0) {
+    sdfDevConsNodeClear(arg0);
+}
 
 ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
     ConsNode *node;
@@ -572,4 +845,3 @@ INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A99);
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438AB0);
 
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438AB4);
-

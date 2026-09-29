@@ -76,6 +76,36 @@ typedef struct SoundIpuBuffer {
     u32 buffers[2];
 } SoundIpuBuffer;
 
+/* The relocation command stream begins at payload + relocationOffset.
+ * Its byte-coded entries in func_00344120 add payload to selected words. */
+typedef struct SdfRelocResource {
+    u8 pad00[0x10];
+    s32 relocationOffset;
+    u32 relocationCount;
+    u8 payload[1];
+} SdfRelocResource;
+
+typedef struct MidiPlaybackState {
+    u8 pad00[0x13];
+    u8 completed;
+    u8 pad14;
+    u8 looping;
+    u8 pad16[3];
+    u8 bufferIndex;
+    u8 pending;
+    u8 pad1B[0xD];
+    u32 buffers[2];
+    u32 bufferSize;
+    u8 pad34[0xC];
+    s32 limit;
+    u8 pad44[4];
+    s32 processed;
+} MidiPlaybackState;
+
+extern s32 func_0036DE70(void);
+
+extern void func_003450D8(s32);
+
 void func_003425B0(void) {
     func_00341650(0x180, 0, 0, 0);
 }
@@ -220,12 +250,13 @@ u64 func_00343FC0(u64 arg0) {
     return temp_v1;
 }
 
-s32 func_00344010(s32 arg0) {
-    s32 temp_v0;
+s32 func_00344010(SdfRelocResource *resource) {
+    s32 payload;
 
-    temp_v0 = arg0 + 0x20;
-    func_00344120(temp_v0, temp_v0, temp_v0 + *(s32 *)(arg0 + 0x10), *(u32 *)(arg0 + 0x14));
-    return temp_v0;
+    /* Required to match: integer address arithmetic, not &resource->payload. */
+    payload = (s32)resource + 0x20;
+    func_00344120(payload, payload, payload + resource->relocationOffset, resource->relocationCount);
+    return payload;
 }
 
 u64 func_00344050(u64 arg0, s32 *out) {
@@ -235,12 +266,13 @@ u64 func_00344050(u64 arg0, s32 *out) {
     return buffer;
 }
 
-s32 func_00344098(s32 arg0) {
-    s32 temp_v0;
+s32 func_00344098(SdfRelocResource *resource) {
+    s32 payload;
 
-    temp_v0 = arg0 + 0x20;
-    func_00344120(temp_v0, temp_v0, temp_v0 + *(s32 *)(arg0 + 0x10), *(u32 *)(arg0 + 0x14));
-    return temp_v0;
+    /* Required to match: the typed member address changes one instruction. */
+    payload = (s32)resource + 0x20;
+    func_00344120(payload, payload, payload + resource->relocationOffset, resource->relocationCount);
+    return payload;
 }
 
 u64 func_003440D8(u64 arg0, s32 *out) {
@@ -352,7 +384,24 @@ u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfAdvanceBufferedPlayback);
+void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
+    s32 interruptsEnabled = func_0036DE70();
+    s32 pending = state->pending;
+    s32 remaining = pending - 1;
+    if (pending > 0) {
+        state->pending = remaining;
+        state->bufferIndex ^= 1;
+        state->completed++;
+    }
+    state->processed++;
+    if (state->processed == state->limit && state->looping != 0) {
+        state->processed = 0;
+    }
+    if (interruptsEnabled != 0) {
+        EIntr();
+    }
+    func_003450D8(0);
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345408);
 
@@ -509,4 +558,3 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D1C);
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D20);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D23);
-

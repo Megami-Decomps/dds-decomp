@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "fpu.h"
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
@@ -18,18 +19,24 @@ typedef struct Vec3 {
 } Vec3; // 0x0C
 
 extern float fldNormalizedVectorDot(float *, float *);
-extern void func_002D0A10(void *);
+
 typedef struct MapResource {
     u32 image;
     u32 handle;
     u32 descriptor;
     u32 unkC;
 } MapResource;
+
 extern MapResource D_00390710[10];
+
 extern MapResource D_003906F0;
+
 extern MapResource D_00390700;
+
 extern u32 fldReleaseMapResource(s32 *);
+
 extern u32 func_002EB028(const char *, void *, s32);
+
 extern u32 func_002D3288(u32);
 
 extern float func_002FA1C0(float);
@@ -39,6 +46,8 @@ extern u32 D_003BD984;
 extern u32 D_003DFED0[];
 
 extern u32 D_003DFEE0[];
+
+s32 func_002D0A10(u32 sprite);
 
 void func_002C5FB8(u32 arg0) {
     func_00195CD8(arg0, 1, 3);
@@ -171,7 +180,11 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7950);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7A60);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7B38);
+s64 func_002C7B38(u32 *sprite) {
+    if (sprite != NULL) {
+        return func_002D0A10(*sprite);
+    }
+}
 
 typedef struct MapRequestNode {
     u32 value;
@@ -214,7 +227,6 @@ void fldSetMapRequestInterval(MapRequestState *state, u16 interval) {
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7BB0);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7C58);
-
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
     u32 handle = func_002EB028(name, &record->descriptor, 0);
@@ -376,4 +388,3 @@ INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E00);
 INCLUDE_RODATA(const s32, "game/code_002C5FB8", D_003B3E40);
 
 INCLUDE_SDATA(const s32, "game/code_002C5FB8", D_003BD281);
-

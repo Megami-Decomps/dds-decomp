@@ -74,15 +74,21 @@ typedef struct {
     MidPtr *unk4;
 } Src360;
 
-typedef struct {
+typedef struct SdfMotionTarget {
+    u8 pad00[0x18];
+    u32 value;
+} SdfMotionTarget;
+
+typedef struct SdfMotionOutput {
     Pair pair;
-    s32 unk8;
-    s32 unkC;
-} Dst360;
+    u32 value;
+    SdfMotionTarget *target;
+    u32 sampledValue;
+} SdfMotionOutput;
 
 void *func_00328D68(s32 size);
 
-void func_00335210(Dst360 *a0, Src360 *a1, void *a2, s32 a3);
+void func_00335210(SdfMotionOutput *output, Src360 *source, void *dispatch, s32 options);
 
 extern void *D_0040B420[];
 
@@ -145,8 +151,8 @@ void func_00334658(void) {
     func_00328E48();
 }
 
-void func_00334670(Dst360 *dst, u32 value) {
-    dst->unk8 = value;
+void func_00334670(SdfMotionOutput *output, u32 value) {
+    output->value = value;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334678);
@@ -304,13 +310,13 @@ void *func_003358F0(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-void func_00335950(u32 arg0) {
-    u8 temp_v0 [16];
-    u8 temp_v1 [32];
+void func_00335950(SdfMotionOutput *output) {
+    u8 keys[16];
+    u8 interpolated[32];
 
-    func_00334678(arg0, temp_v0);
-    func_003348D8(temp_v0, temp_v1);
-    func_003333F8(*(u32 *)((s32)arg0 + 0xc), temp_v1);
+    func_00334678(output, keys);
+    func_003348D8(keys, interpolated);
+    func_003333F8(output->target, interpolated);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003359A0);
@@ -350,8 +356,8 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C40);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C80);
 
-void func_00335D30(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = *(u32 *)(*(s32 *)(arg0 + 0xc) + 0x18);
+void func_00335D30(SdfMotionOutput *output) {
+    output->sampledValue = output->target->value;
 }
 
 void *func_00335D40(void *source, s32 unused, s32 options) {

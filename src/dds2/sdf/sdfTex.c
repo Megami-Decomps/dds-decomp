@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "sdf.h"
 
 extern SdfTex *D_004389F8;
@@ -18,6 +19,10 @@ void *sdfTexGetPrimaryResourceWord();
 void *sdfTexGetSecondaryResourceWord(void *arg0);
 
 void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+
+extern u8 D_00439150;
+
+void func_0032CAE0(void *arg0, void *arg1);
 
 s32 func_0032B8D8(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == 0) ? 4 : 2;
@@ -65,9 +70,35 @@ void sdfTexRelease(SdfTex *texture) {
     func_00328E48(texture);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BB68);
+void func_0032BB68(SdfTex *texture) {
+    SdfTexRef *ref;
+    s32 count;
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBB0);
+    if (texture != NULL) {
+        ref = texture->reference;
+        count = ref->refCount - 1;
+        ref->refCount = count;
+        if (count == 0) {
+            texture->unk20 = 0;
+            sdfTexRelease(texture);
+        }
+    }
+}
+
+void func_0032BBB0(SdfTex *texture) {
+    SdfTexRef *ref;
+    s32 count;
+
+    if (texture != NULL) {
+        ref = texture->reference;
+        count = ref->refCount - 1;
+        ref->refCount = count;
+        if (count == 0) {
+            texture->unk20 = 0;
+            func_0032CAE0(&D_00439150, texture);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBF8);
 

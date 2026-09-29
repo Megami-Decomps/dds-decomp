@@ -97,6 +97,8 @@ void func_003476D0(PacState *arg0);
 
 void func_003477D8(PacState *arg0);
 
+void func_003477A8(PacState *arg0);
+
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 
 PacWork *func_00346E08(PacState *arg0, PacHead *arg1) {
@@ -323,4 +325,18 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477A8);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477D8);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347850);
+void func_00347850(PacState *state) {
+    s32 available = state->inputAvailable;
+    if (state->pendingBytes < available) {
+        available = state->pendingBytes;
+    }
+    sdfPacAdvanceInput(state, available);
+    {
+        s32 remaining = state->pendingBytes - available;
+        state->pendingBytes = remaining;
+        if (remaining != 0) {
+            return;
+        }
+    }
+    func_003477A8(state);
+}

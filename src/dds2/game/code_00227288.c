@@ -55,7 +55,9 @@ extern s32 btlReleaseScriptResource(void);
 extern s32 btlFindModelEntry();
 
 typedef struct BattleEffectState {
-    u32 actor, flags, value;
+    u32 actor;
+    struct BtlUnit *linkedUnit;
+    u32 value;
     u16 timer;
     u8 active, phase;
     u32 effect;
@@ -332,7 +334,7 @@ void func_00227288(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
-    BattleEffectState *effect = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    BattleEffectState *effect = ((BattleEffectContext *)func_001AA6F8())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -348,27 +350,27 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227528);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227660);
 
-u8 *func_00227748(s32 category, s32 species) {
-    u8 *unit;
+BtlUnit *func_00227748(s32 category, s32 species) {
+    BtlUnit *unit;
     if (category != 1) {
         return 0;
     }
     if (species != 0x119) {
         return 0;
     }
-    unit = *(u8 **)((u8 *)func_001AA6F8() + 0x24C);
+    unit = ((BtlState *)func_001AA6F8())->units;
     while (unit != 0) {
-        u32 flags = *(u32 *)(unit + 0x110);
+        u32 flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x400) {
                 if (flags & 2) {
-                    if (*(s32 *)(unit + 0xc8) == 0x119) {
+                    if (unit->species == 0x119) {
                         return unit;
                     }
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x364);
+        unit = unit->next;
     }
     return 0;
 }
@@ -379,13 +381,13 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227820);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002279F0);
 
-s32 func_00227C70(u8 *task) {
+s32 func_00227C70(BtlTask *task) {
     BattleEffectState *effect;
-    if ((*(u32 *)(task + 8) & 8) == 0) {
+    if ((task->flags & 8) == 0) {
         return -1;
     }
-    effect = *(BattleEffectState **)((u8 *)func_001AA6F8() + 0x718);
-    return effect->actor == *(u32 *)(task + 0x18) ? 12 : -1;
+    effect = ((BattleEffectContext *)func_001AA6F8())->effect;
+    return effect->actor == (u32)task->unit ? 12 : -1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227CC8);
@@ -514,23 +516,23 @@ s32 btlSetLinkFlagOn(BtlUnit *arg) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002286D8);
 
-s32 func_00228A30(u8 *unit) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    u8 *effect;
-    u8 *other;
-    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+s32 func_00228A30(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    BattleEffectState *effect;
+    BtlUnit *other;
+    if ((unit->flags & 0x400) == 0) {
         return 1;
     }
-    effect = *(u8 **)(battle + 0x718);
-    if (effect[0xe] != 0) {
+    effect = battle->effect;
+    if (effect->active != 0) {
         return 1;
     }
-    if (*(s32 *)(unit + 0xc8) == 0x119) {
+    if (unit->species == 0x119) {
         return 1;
     }
-    other = *(u8 **)(battle + 0x24C);
+    other = battle->units;
     while (other != 0) {
-        u32 flags = *(u32 *)(other + 0x110);
+        u32 flags = other->flags;
         if (flags & 1) {
             if (flags & 0x400) {
                 if (other != unit) {
@@ -540,10 +542,10 @@ s32 func_00228A30(u8 *unit) {
                 }
             }
         }
-        other = *(u8 **)(other + 0x364);
+        other = other->next;
     }
     startBattleTask(func_001E5DA8(unit, 8, 10));
-    *(u32 *)(unit + 0x110) &= ~0x100;
+    unit->flags &= ~0x100;
     return 1;
 }
 
@@ -603,23 +605,23 @@ u32 battleGetEffectActor(void) {
 }
 
 s32 func_002291C0(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    u8 *unit = *(u8 **)(battle + 0x24C);
-    u8 *effect = *(u8 **)(battle + 0x718);
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    BtlUnit *unit = battle->units;
+    BattleEffectState *effect = battle->effect;
     while (unit != 0) {
-        if ((*(u32 *)(unit + 0x110) & 0x400) &&
-            *(u16 *)(unit + 0x124) == 0x12F) {
+        if ((unit->flags & 0x400) &&
+            unit->mode == 0x12F) {
             break;
         }
-        unit = *(u8 **)(unit + 0x364);
+        unit = unit->next;
     }
     if (unit == 0) {
         return 1;
     }
-    if (!(*(u32 *)(unit + 0x110) & 0xe0)) {
+    if (!(unit->flags & 0xe0)) {
         return 0;
     }
-    return *(u8 **)(effect + 4) == unit;
+    return effect->linkedUnit == unit;
 }
 
 void func_00229248(void) {

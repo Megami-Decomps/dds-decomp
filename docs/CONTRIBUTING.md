@@ -136,8 +136,24 @@ python tools/shared_funcs.py clones <v>    # C for identical functions within on
 ```
 
 A port translates every symbol and string literal through the pair's
-relocations. It is compile-checked and then check_unit-checked, and anything
-that doesn't match is reverted.
+relocations (falling back to the full identical-pair map for callees and
+globals the function's own relocations do not name), and leaves the operands of
+`__asm__` statements alone. It is compile-checked and then check_unit-checked,
+and anything that doesn't match is reverted.
+
+```sh
+python tools/shared_funcs.py port --units code_00207A38 --keep-types --fix-immediates
+```
+
+`--units` writes only the named destination units (safe next to other people's
+edits). `--keep-types` keeps a type the destination unit already defines
+(layouts differ between the games). `--fix-immediates` rewrites the struct
+offsets and constants that the relocation-masked pairing cannot see: for each
+ported function it reads the `mine X retail Y` words check_unit reports and
+replaces the matching hex literals. Functions that still differ are reverted to
+INCLUDE_ASM; if a ported declaration changes how other functions in the unit
+compile, all of the unit's ports are undone (fix the layout by hand, then
+re-run).
 
 ## Build details
 

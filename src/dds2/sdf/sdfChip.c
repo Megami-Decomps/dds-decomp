@@ -6,6 +6,10 @@ extern s32 D_00439110;
 
 extern s32 D_00439114;
 
+extern u8 D_00439120;
+
+void func_0032CAE0(void *arg0, s32 arg1);
+
 void func_00328E18(s32 size) {
     u64 allocation;
 
@@ -15,7 +19,9 @@ void func_00328E18(s32 size) {
 
 INCLUDE_ASM(const s32, "sdf/sdfChip", func_00328E48);
 
-INCLUDE_ASM(const s32, "sdf/sdfChip", func_00328F68);
+void func_00328F68(s32 arg0) {
+    func_0032CAE0(&D_00439120, arg0);
+}
 
 s32 sdfChipIsInRange(s32 address) {
     s32 withinRange;

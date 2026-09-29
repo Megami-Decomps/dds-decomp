@@ -12,6 +12,10 @@ extern f32 func_003406A0(f32 angle);
 
 extern f32 func_003407A0(f32 angle);
 
+extern void sdfAtan2(f32 x, f32 y);
+
+extern f32 D_0040B530[4];
+
 void effMiscQuatMultiplyVU(void)
 {
     __asm__ volatile (
@@ -190,9 +194,65 @@ INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340EE0);
 
 INCLUDE_ASM(const s32, "game/code_00340AC8", func_00341028);
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00341120);
+void func_00341120(f32 amount)
+{
+    f32 dot;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vaddw.xyz vf1, vf0, vf0w\n"
+        "vmul.xyzw vf2, vf10, vf11\n"
+        "vadday.x ACC, vf2, vf2y\n"
+        "vmaddaz.x ACC, vf1, vf2z\n"
+        "vmaddw.x vf2, vf1, vf2w\n"
+        "qmfc2.ni $2, vf2\n"
+        "mtc1 $2, %0\n"
+        ".set reorder\n"
+        : "=f"(dot));
+    if (dot < 0.0f) {
+        __asm__ volatile (
+            ".set noreorder\n"
+            "vmulax.xyzw ACC, vf0, vf0x\n"
+            "vmsubw.xyzw vf12, vf11, vf0w\n"
+            ".set reorder\n");
+    } else {
+        __asm__ volatile ("vmove.xyzw vf12, vf11");
+    }
+    {
+        f32 remaining = 1.0f - amount;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "mfc1 $2, %0\n"
+            "mfc1 $3, %1\n"
+            "qmtc2.ni $2, vf2\n"
+            "qmtc2.ni $3, vf3\n"
+            "vmulax.xyzw ACC, vf10, vf2x\n"
+            "vmaddx.xyzw vf10, vf12, vf3x\n"
+            ".set reorder\n"
+            : : "f"(remaining), "f"(amount));
+    }
+    effMiscNormalizeVU();
+}
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_003411A0);
+void func_003411A0(void)
+{
+    f32 x;
+    f32 y;
+    func_00340C40();
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%2)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddz.xyzw vf10, vf30, vf10z\n"
+        "qmfc2.ni $2, vf10\n"
+        "pexew $2, $2\n"
+        "mtc1 $2, %0\n"
+        "qmfc2.ni $2, vf10\n"
+        "mtc1 $2, %1\n"
+        ".set reorder\n"
+        : "=f"(x), "=f"(y) : "r"(D_0040B530) : "memory");
+    sdfAtan2(x, y);
+}
 
 /* Persona 4 effMiscRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 u32 effMiscRand(EffRandState* state)

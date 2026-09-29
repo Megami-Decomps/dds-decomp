@@ -14,38 +14,66 @@ extern void func_002686F0(s32);
 
 extern s8 D_00437858;
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
-
 extern s32 func_00101958();
+
 extern s32 func_002C3E08(s32, s32, s32, s32);
+
 extern void func_002C1B70(s32, s32);
+
 extern void func_002C1B68(s32, s32);
+
 extern s32 movAreTitleEffectsReady(s32, s32);
+
 extern void func_002B2818(s32);
+
 extern s32 D_00435DD0;
+
 extern s32 func_003292A8(s32);
+
 extern s32 sdfResourceRetainAddress(s32);
+
 extern s32 func_00303D00(s32);
+
 extern void initPartyPanelSlots(s32);
+
 extern void func_002A9640(s32, s32);
+
 extern s32 func_002C32B0(void);
+
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
+
 extern void func_002C0630(s32, s32, s32, s32, s32, s32);
+
 extern void func_002C16F0(s32, s32, s32, s32, s32, s32, s32);
+
 extern s32 func_00267EA0(s8, s32);
+
 extern s32 mnuWalkNodeList(s32, s32);
+
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
+
 extern const char D_00424F00[];
+
 extern const char D_00424F10[];
+
 extern const char D_00424F20[];
+
 extern s32 D_0043785C;
+
 extern s32 func_002B8158(s32, s32, s32, s32);
+
 extern s32 mnuListAppendNode(s32, s32);
+
 extern void func_00267500(void);
+
 extern u8 D_00437870[];
+
 extern s32 func_00328D68(s32);
+
 extern s32 func_002BC460(u16, u16);
+
 extern void func_002C2128(s32, s32, s32, s32, s32, s32);
+
 extern void effDestroyPackedBatch(s32);
 
 typedef struct MenuResourceGroup {
@@ -104,6 +132,16 @@ typedef struct MenuProgressHost {
     u8 pad88[0x64];
     s32 panelStyle;
 } MenuProgressHost;
+
+extern void func_002C42B0(s32 *, void *);
+
+extern u8 D_003CE944[];
+
+extern void func_002B81C8(u32);
+
+extern void func_002A9200(u8 *);
+
+extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 void func_002665B0(s32 arg0) {
     effDestroyPackedBatch(*(u32 *)(arg0 + 0x3c));
@@ -285,11 +323,25 @@ void func_002676F0(MenuProgressHost *host) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267768);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002678C8);
+void func_002678C8(u8 *work) {
+    u32 i;
+
+    for (i = 0; i < 1; i++) {
+        func_002B81C8(*(u32 *)(work + 0x78 + i * 4));
+    }
+    func_002670C8((s32)work);
+    func_002A9200(work + 0xE8);
+    func_002671E8((s32)work);
+    func_002B81C8(*(u32 *)(work + 0x80));
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267938);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002679E8);
+void func_002679E8(u8 *work) {
+    u8 *owner = *(u8 **)(work + 0x80);
+    *(s32 *)(work + 0x84) = 0;
+    *(s32 *)(work + 0x88) = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
+}
 
 s32 func_00267A00(void) {
     s32 heap = func_003292A8(0xa82c);
@@ -456,7 +508,13 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_002686F0);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", fldClassifyRemainingFrames);
+s32 fldClassifyRemainingFrames(s32 timer) {
+    s32 frames = *(s32 *)(timer + 0xA4);
+    if (frames == 0) {
+        return 0;
+    }
+    return frames >= 60 ? 2 : 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002689D0);
 
@@ -548,4 +606,3 @@ INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437868);
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437870);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437878);
-

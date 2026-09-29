@@ -12,6 +12,8 @@ u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 void func_003421E8(s32 arg0);
 
+u32 func_003417A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+
 void func_00341CA8(void) {
     func_00341650(0x1a0, 0, 0, 0);
 }
@@ -28,9 +30,17 @@ void func_00341D20(u32 command) {
     func_00341650(command | 0x50, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341D48);
+u32 func_00341D48(s32 command, char *text) {
+    u32 length = strlen(text);
 
-INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341D90);
+    return func_003417A8(command | 0x70, 0, text, length);
+}
+
+u32 func_00341D90(s32 command, char *text) {
+    u32 length = strlen(text);
+
+    return func_003417A8(command | 0x60, 0, text, length);
+}
 
 INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341DD8);
 

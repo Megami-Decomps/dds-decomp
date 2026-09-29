@@ -18,7 +18,12 @@ INCLUDE_ASM(const s32, "game/code_00346608", func_00346778);
 
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346988);
 
-INCLUDE_ASM(const s32, "game/code_00346608", func_00346A60);
+s32 func_00346A60(u8 *work) {
+    if (*(u8 *)(work + 0x33) == 0) {
+        return 0;
+    }
+    return *(u8 *)(work + 0x3E) == 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346A80);
 

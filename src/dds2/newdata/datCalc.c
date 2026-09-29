@@ -9,7 +9,11 @@ typedef struct DatCalcCursor {
     u16 yMax;
 } DatCalcCursor;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_001197A8);
+extern s32 D_00435DD0;
+
+void func_001197A8(u8 *work, s32 mask) {
+    *(u16 *)(work + 0xE) &= ~mask;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001197C0);
 
@@ -51,9 +55,13 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_00119BA0);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119C78);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119F20);
+u32 func_00119F20(void) {
+    return (u16)func_00119C78();
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119F40);
+u32 func_00119F40(void) {
+    return func_00119C78() & 0xFFFF0000;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119F68);
 
@@ -61,7 +69,12 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A098);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A0D0);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011A100);
+s32 func_0011A100(s32 value) {
+    if (*(s32 *)(D_00435DD0 + 0x3C) < value) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DD8);
 
@@ -84,4 +97,3 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DF8);
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DFC);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E00);
-

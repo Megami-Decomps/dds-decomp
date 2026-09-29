@@ -41,7 +41,9 @@ void sdfAdvanceConsoleRow(DevConsState *console) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033CE08);
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033CF80);
+void func_0033CF80(DevConsState *console, s32 character, s32 attribute) {
+    func_0033CE08(console, character, attribute);
+}
 
 s32 func_0033CF98(DevConsState *console, const char *fmt, ...) {
     char buf[0x200];

@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "pcp_vu0.h"
 
 #include "fpu.h"
@@ -501,6 +502,29 @@ extern char *D_004361D8;
 
 extern void func_001235E8(s32, s32, s32, s32);
 
+extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+
+typedef struct {
+    u8 pad0[0xC];
+    s32 *unkC;
+} FldEmitterRes;
+
+typedef struct {
+    FldEmitterRes *res;
+    u8 pad4[0x4C];
+    f32 pos[4];
+} FldEmitter;
+
+extern u8 D_00380838[];
+
+extern void func_003314B0();
+
+extern void func_00331B18();
+
+extern void func_003320E8();
+
+extern s32 func_0013F790(s32 index);
+
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
 
 extern u8 func_00127398(void);
@@ -561,7 +585,11 @@ void fldEnsureTask(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldDestroyTask);
+void fldDestroyTask(void) {
+    if (D_00436200 != 0) {
+        kwlnTaskDestroyWithHierarchy(D_00436200, 1);
+    }
+}
 
 void func_00144598(void) {
     FldClear18 *temp_v0 = D_0044F730;
@@ -865,7 +893,23 @@ void func_001457E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145818);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetEmitterPosition);
+void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
+    f32 pos[4];
+    s32 handle;
+
+    memset(pos, 0, sizeof(pos));
+    pos[3] = 1.0f;
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    handle = *emitter->res->unkC;
+    __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    __asm__ volatile (".set noreorder\n\tvmove.w vf10, vf0\n\t.set reorder");
+    __asm__ volatile (".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(emitter->pos) : "memory");
+    func_003314B0(handle);
+    func_00331B18(emitter);
+    func_003320E8(D_00380838, emitter);
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145948);
 
@@ -2561,7 +2605,9 @@ s32 func_00156C30(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00156C78);
+void func_00156C78(void) {
+    func_0010D818(func_0013F790(1));
+}
 
 s32 func_00156C98(void) {
     func_00140238();

@@ -97,7 +97,7 @@ extern void func_003110C8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
 extern void EIntr(void);
 extern void sceCdPowerOff(void *arg0);
 extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-extern s32 func_002CF670(const char *arg0);
+extern void func_002CF670(const char *arg0, ...) __attribute__((noreturn));
 extern void *func_002CFEB8(s32 size);
 extern void func_002CFF98(void *ptr);
 extern void *func_002CFF68(s32 size);
@@ -246,11 +246,58 @@ s32 sdfPktQuery(u32 arg0) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5670);
+s32 func_002E5670(void) {
+    if (D_003BDA48 == 0) {
+        func_002CF670("file didn't open.");
+    }
+    return *(s32 *)(D_003BDA48 + 8);
+}
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E56A0);
+extern s32 func_0030E8F0(s32, s32);
+extern s32 func_0030ECF8(s32, s32, s32);
+extern s32 func_002FF538(s32);
+extern void func_0030EF30(s32, s32, s32);
+extern void FlushCache(s32);
+extern char D_003B4578[];
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5738);
+void func_002E56A0(s32 name) {
+    s32 fd = func_0030E8F0(name, 1);
+    s32 size;
+    s32 buffer;
+
+    if (fd < 0) {
+        func_002CF670(D_003B4578, name);
+    }
+    size = func_0030ECF8(fd, 0, 2);
+    func_0030ECF8(fd, 0, 0);
+    buffer = func_002FF538(size);
+    D_003BDA44 = buffer;
+    func_0030EF30(fd, buffer, size);
+    func_0030EB78(fd);
+    FlushCache(0);
+}
+
+extern u32 D_003BDA3C;
+extern u32 D_003BDA40;
+extern s32 sceSifAllocIopHeap(s32);
+extern void func_002F4558(s32, s32, s32);
+extern void func_002E56A0(s32);
+extern char D_003B4578[];
+
+void func_002E5738(s32 name, s32 mode) {
+    u32 file[12];
+    s32 heap;
+
+    D_003BDA38 = name;
+    func_002E56A0(mode);
+    if (sceCdSearchFile(file, name) == 0) {
+        func_002CF670(D_003B4578, name);
+    }
+    D_003BDA40 = file[0];
+    heap = sceSifAllocIopHeap(0x28010);
+    D_003BDA3C = heap;
+    func_002F4558(0x50, 5, (heap + 15) & -16);
+}
 
 void sdfInitDeviceSemaphores(void) {
     D_003BDA58 = sdfCreateSemaphore(1, 0xff, 0);
@@ -262,7 +309,22 @@ void sdfInitDeviceSemaphores(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5808);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5880);
+typedef struct Bytes7 {
+    s8 b[7];
+} Bytes7;
+
+extern Bytes7 D_003BD400[];
+extern char *strcpy(char *, char *);
+extern char *strcat(char *, char *);
+
+char *func_002E5880(char *dst, char *src) {
+    if (*src == 0x2F) {
+        strcpy(dst, D_00398820);
+        return strcat(dst, src);
+    }
+    *(Bytes7 *)dst = D_003BD400[0];
+    return strcat(dst, src);
+}
 
 void sdfPathPrefixCat(char *arg0, char *arg1) {
     memcpy(arg0, D_003BD408, 6);

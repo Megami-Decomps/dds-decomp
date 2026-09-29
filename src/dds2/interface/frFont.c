@@ -111,6 +111,14 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
+extern s32 func_0019D200(FrFontGlyph *arg0);
+
+extern FrFontGlyph *func_0019C850(FrFontGlyph *arg0, s32 arg1);
+
+FrFontGlyph *func_0019D830(FrFontGlyph *arg0, FrFontGlyph *arg1);
+
+void func_0019D530(FrFontGlyph *arg0, s8 arg1);
+
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2A8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C2F8);
@@ -119,7 +127,12 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019C358);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C418);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C490);
+FrFontGlyph *func_0019C490(FrFontGlyph *glyph) {
+    if (func_0019D200(glyph) != 0) {
+        return glyph;
+    }
+    return func_0019C4D0(glyph);
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C4D0);
 
@@ -150,7 +163,14 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019C640);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C850);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C980);
+FrFontGlyph *func_0019C980(FrFontGlyph *source, FrFontGlyph *destination) {
+    FrFontGlyph *glyph = func_0019C850(source, 0);
+
+    if (glyph == NULL) {
+        return destination;
+    }
+    return func_0019D830(destination, glyph);
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
 
@@ -261,7 +281,9 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D200);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D288);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D518);
+void func_0019D518(FrFontGlyph *arg0) {
+    func_0019D530(arg0, 0);
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D530);
 
@@ -276,7 +298,9 @@ s32 frFontAdvanceSelectedGlyphSlot(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D830);
+FrFontGlyph *func_0019D830(FrFontGlyph *arg0, FrFontGlyph *arg1) {
+    return frFontLinkGlyph(arg0, arg1, 1);
+}
 
 FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2) {
     if (arg0 == NULL) {
@@ -389,4 +413,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_0043656C);
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436570);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436578);
-

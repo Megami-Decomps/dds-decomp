@@ -48,6 +48,17 @@ extern void func_00216ED0(s32, s32);
 
 extern void func_00216D50();
 
+typedef struct EffChildCounters {
+    u8 pad00[0x318];
+    u8 firstCountdown;
+    u8 secondCountdown;
+} EffChildCounters;
+
+typedef struct EffCounterOwner {
+    u8 pad00[0x20];
+    EffChildCounters *child;
+} EffCounterOwner;
+
 void func_0020E850(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
 }
@@ -255,4 +266,3 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB0);
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB4);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB8);
-

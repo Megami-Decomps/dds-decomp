@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "eff.h"
 
 extern u32 func_0032C138(u32);
@@ -6,6 +7,7 @@ extern u32 func_0032C138(u32);
 extern u64 func_00343ED0(u64, u32 *, u64);
 
 extern void *func_00328D68(s32 arg0);
+
 extern EffHandler32 D_003B2060[];
 
 extern EffHandler D_003B2064[];
@@ -30,6 +32,10 @@ extern void func_00328E48(void *arg0);
 
 extern char D_00436450[];
 
+extern EffHandler D_003B2068[];
+
+extern void func_0036B420(void);
+
 EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
     EffResult *mem = func_00328D68(8);
     s32 ret = D_003B2060[arg0].handler(arg1);
@@ -43,10 +49,13 @@ void effTypeDispatch(EffWork *arg0) {
     D_003B2064[arg0->type].handler(arg0->unk4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", effTypeDispatchFree);
+void effTypeDispatchFree(EffWork *arg0) {
+    D_003B2068[arg0->type].handler(arg0->unk4);
+    func_00328E48(arg0);
+}
 
-u32 effGetHandlerArg(s32 arg0) {
-    return *(u32 *)(arg0 + 4);
+u32 effGetHandlerArg(EffWork *work) {
+    return (u32)work->unk4;
 }
 
 u32 func_001947F8(u32 *arg0) {
@@ -130,7 +139,31 @@ u32 effGetSubSlot(EffWork *arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", effAllocSubWork);
+void effAllocSubWork(EffWork *arg0) {
+    u32 t = arg0->type;
+    u32 v = 0;
+
+    switch (t) {
+    case 0:
+        v = arg0->unk4;
+        break;
+    case 1:
+        v = arg0->unk4;
+        break;
+    case 2:
+        v = arg0->unk4 + 0x40;
+        break;
+    case 3:
+        v = arg0->unk4 + 0x40;
+        break;
+    case 4:
+        v = arg0->unk4 + 0x40;
+        break;
+    default:
+        break;
+    }
+    effAllocDispatch((EffWork *)t, v);
+}
 
 void func_001949D8(void) {
 }
@@ -211,7 +244,11 @@ s32 effOpenDataDir(void *arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", effRunIfEnabled);
+void effRunIfEnabled(void) {
+    if (D_00438B66 != 0) {
+        func_0036B420();
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194B28);
 
@@ -235,15 +272,15 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_00195060);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_001950F0);
 
-void effFreeWork(u32 arg0) {
-    s32 temp_v0;
+void effFreeWork(EffWork *work) {
+    s32 soundHandle;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x3c);
-    if (temp_v0 != 0) {
-        func_0032BBB0(temp_v0);
-        *(u32 *)((s32)arg0 + 0x3c) = 0;
+    soundHandle = work->unk3C;
+    if (soundHandle != 0) {
+        func_0032BBB0(soundHandle);
+        work->unk3C = 0;
     }
-    func_00328E48(arg0);
+    func_00328E48(work);
 }
 
 void effSetMsgHeader(EffMsg *arg0, s32 arg1, s32 arg2) {
@@ -251,12 +288,12 @@ void effSetMsgHeader(EffMsg *arg0, s32 arg1, s32 arg2) {
     arg0->unk4 = arg2;
 }
 
-u32 effGetWorkParam(s32 arg0) {
-    return *(u32 *)(arg0 + 0x14);
+u32 effGetWorkParam(EffWork *work) {
+    return work->unk14;
 }
 
-u32 effGetWorkLink(s32 arg0) {
-    return *(u32 *)(arg0 + 8);
+u32 effGetWorkLink(EffWork *work) {
+    return work->unk8;
 }
 
 u32 effFormatMsgNames(EffMsg *arg0, void *arg1) {
@@ -264,12 +301,12 @@ u32 effFormatMsgNames(EffMsg *arg0, void *arg1) {
     return *arg0->unk34;
 }
 
-void effSetWorkFirst(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x20) = arg1;
+void effSetWorkFirst(EffWork *work, u32 value) {
+    work->unk20 = value;
 }
 
-void effSetWorkSecond(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+void effSetWorkSecond(EffWork *work, u32 value) {
+    work->unk24 = value;
 }
 
 void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
@@ -277,19 +314,19 @@ void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
     arg0->unk2C = arg2;
 }
 
-void effSetupWorkSound(s32 arg0, u64 arg1) {
-    u32 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+void effSetupWorkSound(EffWork *work, u64 resource) {
+    u32 soundHandle;
+    u64 allocation;
+    u32 resourceData[4];
 
-    if (*(s32 *)(arg0 + 0x3c) != 0) {
-        func_0032BBB0(*(s32 *)(arg0 + 0x3c));
-        *(u32 *)(arg0 + 0x3c) = 0;
+    if (work->unk3C != 0) {
+        func_0032BBB0(work->unk3C);
+        work->unk3C = 0;
     }
-    temp_v1 = func_00343ED0(arg1, temp_v2, 0);
-    temp_v0 = func_0032C138(temp_v2[0]);
-    *(u32 *)(arg0 + 0x3c) = temp_v0;
-    func_003297C8(temp_v1);
+    allocation = func_00343ED0(resource, resourceData, 0);
+    soundHandle = func_0032C138(resourceData[0]);
+    work->unk3C = soundHandle;
+    func_003297C8(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_001956A8);
@@ -444,4 +481,3 @@ INCLUDE_SDATA(const s32, "game/code_00194700", D_00436440);
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436448);
 
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436450);
-

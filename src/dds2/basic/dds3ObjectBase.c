@@ -1,7 +1,6 @@
 #include "common.h"
-#include "dds3obj.h"
 
-extern u64 func_00111838(u64);
+#include "dds3obj.h"
 
 extern void *dds3GetSlot(void *arg0, s32 index);
 
@@ -10,6 +9,18 @@ void func_001113F0(void *arg0, void *arg1);
 void dds3SetSlotValue(void *arg0, void *arg1);
 
 extern s32 func_00112AB0(void);
+
+s32 func_00111980(u8 arg);
+
+void *dds3SetSlotByKind(void *arg0, ObjData *arg1);
+
+void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
+
+extern void *func_00111838(void *arg);
+
+void dds3SetSlotKey(void *arg0, void *arg1);
+
+void dds3ReplaceObjectResource(void *arg0);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
@@ -38,7 +49,12 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetExtData);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3SetSlotByKind);
+void *dds3SetSlotByKind(void *obj, ObjData *data) {
+    if (data == NULL) {
+        return NULL;
+    }
+    return dds3ExchangeSlot(obj, data, func_00111980(data->kind));
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ExchangeSlot);
 
@@ -63,14 +79,14 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112168);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112230);
 
-s32 dds3InvokeSlot5Handler(void *arg0) {
-    void *v;
+s32 dds3InvokeSlot5Handler(void *object) {
+    void *slot;
 
-    v = dds3GetSlot(arg0, 5);
-    if (v == NULL) {
+    slot = dds3GetSlot(object, 5);
+    if (slot == NULL) {
         return 0;
     }
-    func_001113F0(v, arg0);
+    func_001113F0(slot, object);
     return 1;
 }
 
@@ -78,26 +94,47 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112328);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112978);
+void func_00112978(void *obj) {
+    void *existing;
+    void *data;
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001129C8);
+    existing = dds3GetSlot(obj, 1);
+    if (existing == NULL) {
+        data = func_00111838(obj);
+        dds3SetSlotByKind(obj, data);
+        return;
+    }
+}
 
-s32 dds3InvokeSlot1Handler(void *arg0, void *arg1) {
-    void *v;
+s64 func_001129C8(void) {
+    return dds3InvokeSlot1Handler();
+}
 
-    v = dds3GetSlot(arg0, 1);
-    if (v == NULL) {
+s32 dds3InvokeSlot1Handler(void *object, void *value) {
+    void *slot;
+
+    slot = dds3GetSlot(object, 1);
+    if (slot == NULL) {
         return 0;
     }
-    dds3SetSlotValue(v, arg1);
+    dds3SetSlotValue(slot, value);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3RunSlot1Handlers);
+void dds3RunSlot1Handlers(void *obj, void *context) {
+    void *handler;
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ReleaseSlot1Data);
+    handler = dds3GetSlot(obj, 1);
+    dds3SetSlotKey(handler, context);
+    dds3ReplaceObjectResource(obj);
+}
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetSlot1Data);
+void dds3ReleaseSlot1Data(void *obj) {
+    dds3ReleaseObjectResource(dds3GetSlot(obj, 1));
+}
+
+void dds3GetSlot1Data(void *obj) {
+    dds3GetObjectResourceHandle(dds3GetSlot(obj, 1));
+}
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
-

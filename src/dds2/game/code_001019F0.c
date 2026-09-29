@@ -4,14 +4,20 @@ extern u32 D_00435D8C;
 
 extern s32 func_00102790(void);
 
+/* Prefix of the administration record returned by func_00102790. */
+typedef struct AdminWork {
+    u32 flags;
+    u32 value;
+} AdminWork;
+
 INCLUDE_ASM(const s32, "game/code_001019F0", func_001019F0);
 
-void func_00101A60(u32 arg0, u32 arg1, u32 arg2) {
-    func_00100F48(1, arg0, arg1, arg2);
+void func_00101A60(u32 object, u32 mask, u32 scope) {
+    func_00100F48(1, object, mask, scope);
 }
 
-void func_00101A90(u32 arg0, u32 arg1, u32 arg2) {
-    func_00100F48(0, arg0, arg1, arg2);
+void func_00101A90(u32 object, u32 mask, u32 scope) {
+    func_00100F48(0, object, mask, scope);
 }
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_00101AC0);
@@ -35,12 +41,11 @@ u32 func_00102768(void) {
 INCLUDE_ASM(const s32, "game/code_001019F0", func_00102790);
 
 u32 func_001027B8(void) {
-    s32 state;
+    AdminWork *work;
 
-    state = func_00102790();
-    return *(u32 *)(state + 4);
+    work = (AdminWork *)func_00102790();
+    return work->value;
 }
-
 INCLUDE_ASM(const s32, "game/code_001019F0", func_001027D8);
 
 INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411198);

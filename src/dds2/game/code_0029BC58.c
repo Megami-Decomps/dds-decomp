@@ -1,10 +1,12 @@
 #include "common.h"
+
 extern s32 func_002C4038();
 
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
 
 extern s32 func_002A46C8(s32);
+
 extern u32 D_00438FE8;
 
 extern u32 func_0029D790();
@@ -26,7 +28,6 @@ extern u32 *D_00437AB0;
 extern s32 func_0032CD98(void);
 
 extern u32 D_00437AE8;
-
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -68,10 +69,29 @@ extern char D_0042AA08[]; /* "camp_draw" */
 
 extern char D_0042AA18[]; /* "camp_update" */
 
-
-
-
 extern s8 D_00437B72;
+
+typedef struct { u64 v; } __attribute__((packed)) u64p;
+
+extern u8 D_00437A00[];
+
+extern char *strcat(char *, char *);
+
+extern u8 D_00437A08[];
+
+typedef struct AtracInfo {
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+} AtracInfo;
+
+extern s32 WaitSema(u32);
+
+extern s32 SignalSema(u32);
+
+extern u8 *D_00435DD0;
+
+extern s8 D_00437B73;
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BC58);
 
@@ -85,6 +105,7 @@ typedef struct {
 } TitleSeq;
 
 extern void func_00299A38(TitleSeq *, u8 *);
+
 extern void func_0029D550(u8 *, TitleSeq *);
 
 void titleApplySequenceState(u8 *work) {
@@ -147,8 +168,11 @@ void func_0029C450(u8 *work) {
 }
 
 typedef struct { u32 word[6]; } BurstSprite;
+
 typedef struct { BurstSprite sprite[8]; } BurstTable;
+
 extern BurstTable D_00428420;
+
 extern void func_00308620(BurstSprite *, u32 *, s32, s32, s32);
 
 void titleDrawBurstSprites(s32 arg0, s32 arg1) {
@@ -181,7 +205,9 @@ void func_0029C878(void) {
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C880);
 
 extern u32 D_004379C8[];
+
 extern s32 func_0019F6C8();
+
 extern void func_0035C860();
 
 void campDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
@@ -206,8 +232,11 @@ void campDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CB70);
 
 extern struct { s32 v[6]; } D_003D6500;
+
 extern void campDrawMenuIconLayer(s32, s32, s32, u32, u8 *, s32, u8 *);
+
 extern void func_0029CB70(s32, s32, s32, u32, u8 *, s32, u8 *);
+
 extern void func_0029C880(s32, s32, s32, u32, u8 *, s32, u8 *);
 
 void titleDrawFadeMenuEntries(u8 *work) {
@@ -273,10 +302,6 @@ u32 func_0029D000(void) {
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D008);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029D1C8);
-
-extern s32 D_00435DD0;
-
-
 
 s32 func_0029D278(void) {
     s32 offset = 0;
@@ -384,20 +409,36 @@ void func_002A1030(void) {
 void func_002A1038(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1040);
+char *func_002A1040(char *arg0, char *arg1) {
+    *(u64p *)arg0 = *(u64p *)D_00437A00;
+    return strcat(arg0, arg1);
+}
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1070);
+char *func_002A1070(char *arg0, char *arg1) {
+    *(u64p *)arg0 = *(u64p *)D_00437A08;
+    return strcat(arg0, arg1);
+}
 
 extern s8 D_004379FC;
+
 extern char D_003E0B30[];
+
 extern char D_003E0B50[];
+
 extern s32 D_003D9D60[];
+
 extern s32 D_00437A18;
+
 extern s16 D_00438FCC;
+
 extern s32 D_00437A1C;
+
 extern void func_00341AD8(char *, s32, char *, s32);
+
 extern void func_003421E8(s32);
+
 extern void func_002A1E58(void);
+
 extern void func_002A1178(void);
 
 void func_002A10A0(void) {
@@ -458,6 +499,7 @@ void func_002A1248(s32 arg0) {
 }
 
 extern char D_00428610[];
+
 extern char D_00428628[];
 
 extern char D_003E09F0[];
@@ -598,7 +640,9 @@ void func_002A1760(u32 arg0) {
 }
 
 extern u32 D_00437A20[2];
+
 extern u32 D_00437A28;
+
 extern u64 func_0034E820();
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1790);
@@ -625,6 +669,7 @@ void func_002A1DD8(void) {
 }
 
 extern s32 D_00438FE0;
+
 extern u8 D_00456DB0[];
 
 void func_002A1E08(void) {
@@ -636,7 +681,13 @@ void func_002A1E08(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1E58);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1F50);
+void func_002A1F50(AtracInfo *out) {
+    WaitSema(D_00438FE8);
+    out->unk0 = D_00454D30[0];
+    out->unk4 = D_00454D30[1];
+    out->unk8 = D_00454D30[3];
+    SignalSema(D_00438FE8);
+}
 
 void func_002A1FA0(u32 *values) {
     WaitSema(D_00438FE8);
@@ -829,10 +880,15 @@ void func_002A2AA0(void) {
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A2AC0);
 
 extern void func_002A5F40(void);
+
 extern void func_003458E8(u32);
+
 extern void func_002A3DE8(void);
+
 extern void func_002A3C58(void);
+
 extern void func_003297C8(u32);
+
 extern u32 D_00435BB0;
 
 void func_002A2BD0(void) {
@@ -916,6 +972,7 @@ s32 func_002A3CE0(void) {
 }
 
 extern u8 D_00437A48[];
+
 extern u8 D_003E3760[];
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3D70);
@@ -1072,8 +1129,11 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4A68);
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4B70);
 
 extern void func_002A4388();
+
 extern void func_002A44C0(SlideBar *, s32);
+
 extern void func_002A4B70(SlideBar *, s32);
+
 extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
@@ -1099,7 +1159,9 @@ void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A4DF0);
 
 typedef struct { s32 active; s32 pos; s32 id; s32 timer; } SlideBarTimed;
+
 extern void func_002A4DF0(SlideBarTimed *, s32, s32);
+
 extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 arg1) {
@@ -1816,6 +1878,7 @@ void func_002A7900(void) {
 }
 
 extern u32 D_00437AB4;
+
 extern u32 D_00437AB8;
 
 void func_002A7938(void) {
@@ -1868,6 +1931,7 @@ s32 index;
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A7B28);
 
 extern char D_0042A348[];
+
 extern char D_0042A380[];
 
 extern u32 D_00437AD0;
@@ -2068,7 +2132,9 @@ void func_002A7FD0(void) {
     D_00437ACC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8008);
+void func_002A8008(void) {
+    func_00346A60(D_003E5608);
+}
 
 extern u8 D_003E563C[];
 
@@ -2085,7 +2151,10 @@ s32 mnuSetFrameDivisor(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", mnuCreateMovieManagerTask);
+void mnuCreateMovieManagerTask(void) {
+    func_003456F8();
+    kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
+}
 
 u32 func_002A80C0(void) {
     u64 temp_v0;
@@ -2158,9 +2227,13 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8C80);
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9068);
 
 extern u32 D_00438FF8[2];
+
 extern u32 D_003E6848[];
+
 extern char D_0042A950[];
+
 extern u32 effLoadIndexedResource(char *, u32, u32);
+
 void mnuLoadCampResources(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
@@ -2169,6 +2242,7 @@ void mnuLoadCampResources(void) {
 }
 
 extern void func_00305068(u32);
+
 extern void effResolveAndReleaseResource(u32);
 
 void func_002A91A0(u32 *destination) {
@@ -2350,7 +2424,20 @@ u8 *func_002A9258(s32 kind, s32 *count, u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A92D8);
+void func_002A92D8(s32 list, s32 count, u8 *work) {
+    s32 i;
+
+    effResolveAndReleaseResource(*(u32 *)list);
+    for (i = 0; i < 5; i++) {
+        u8 *slot = D_00435DD0 + 0xA60 + i * 0x1C4;
+
+        if ((*(u16 *)slot & 1) != 0) {
+            s32 index = *(u16 *)(slot + 4) + D_00437B73;
+
+            effResolveAndReleaseResource(*(u32 *)(list + index * 4 - 4));
+        }
+    }
+}
 
 void movReleaseCategoryModels(s32 kind, u8 *work) {
     s32 count;
@@ -2468,10 +2555,15 @@ void func_002A9BC8(s32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4,
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A9BF8);
 
 extern s32 func_002B9FF8(s32, s32, s32);
+
 extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
+
 extern void func_002B9568(s32, s32);
+
 extern void func_002BAF10(u8 *);
+
 extern void func_002BAF50(s32, u8 *);
+
 extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
 
 void staffInitResourceLists(u8 *work) {
@@ -2493,6 +2585,7 @@ void staffInitResourceLists(u8 *work) {
 }
 
 extern void func_002B9520(u32);
+
 extern void mnuReleaseResourceList(u32);
 
 void func_002A9F08(u8 *work) {
@@ -2753,4 +2846,3 @@ INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437B73);
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437B78);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437B80);
-

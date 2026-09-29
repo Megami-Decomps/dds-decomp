@@ -6,11 +6,45 @@ extern void func_0026C900(void);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", mnuCheckTableSums);
+extern void func_0029AA48(s32);
+
+extern void func_0029AC20(s32, s32);
+
+extern s32 func_002C7168(void);
+
+extern s64 func_0026C768(void);
+
+extern void func_002C42C0(s32 *, char *);
+
+extern char D_003D64C8[];
+
+s32 mnuCheckTableSums(s32 bytes, s32 table) {
+    s32 *tableValues = (s32 *)(table + 0x3F4);
+    s8 *byteValues = (s8 *)(bytes + 0x16);
+    s32 index = 0;
+
+    do {
+        s32 total = *byteValues + *tableValues;
+
+        byteValues++;
+        tableValues++;
+        if (total < 0x63) {
+            return 0;
+        }
+        index++;
+    } while (index < 5);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B008);
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B320);
+void func_0029B320(s32 request) {
+    s32 context = func_00101958();
+
+    func_0029AA48(context);
+    func_0029AC20(context, 1);
+    func_002C4038(context + 8, (s32 *)(context + 0x54), 1, request);
+}
 
 void func_0029B378(s32 request) {
     s32 context = func_00101958();
@@ -36,7 +70,13 @@ u32 func_0029B410(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B418);
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B600);
+void func_0029B600(s32 request) {
+    s32 context = func_00101958();
+
+    func_0029AA48(context);
+    func_0029AC20(context, 1);
+    func_002C4038(context + 8, (s32 *)(context + 0x54), 1, request);
+}
 
 void func_0029B658(s32 request) {
     s32 context = func_00101958();
@@ -51,9 +91,29 @@ u32 func_0029B778(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B780);
+s64 func_0029B780(u64 request) {
+    s32 context = func_00101958();
+    s32 *state = (s32 *)(context + 0x54);
+    s64 result;
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B810);
+    func_002C7168();
+    result = func_002C4038(context + 8, state, 0, request);
+    if (result == 0) {
+        if ((*state == 0) && (result = func_0026C768(), result == 0)) {
+            func_002C42C0(state, D_003D64C8);
+        }
+        result = 0;
+    }
+    return result;
+}
+
+void func_0029B810(s32 request) {
+    s32 context = func_00101958();
+
+    func_0029AA48(context);
+    func_0029AC20(context, 0);
+    func_002C4038(context + 8, (s32 *)(context + 0x54), 1, request);
+}
 
 void func_0029B868(s32 request) {
     s32 context = func_00101958();
@@ -76,4 +136,3 @@ u32 func_0029BBC0(void) {
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029BBE0);
 
 INCLUDE_SDATA(const s32, "game/code_0029AFC0", D_004379B8);
-

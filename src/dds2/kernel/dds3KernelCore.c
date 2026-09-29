@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "kwln.h"
 
 extern KwlnTask* D_00435BE8;
@@ -43,6 +44,14 @@ extern void func_00100C28(void);
 
 extern s32 kwlnTaskIsRegistered(void* target);
 
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
+
+extern void func_001019F0(KwlnTask* task);
+
+extern void func_00328E48(void* ptr);
+
+extern KwlnTask* func_00101740(const char* name);
+
 void func_00100980(KwlnTask* task)
 {
     func_001005C8(task);
@@ -74,7 +83,25 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100A28);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100C28);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100D50);
+void func_00100D50(KwlnTask* task)
+{
+    KwlnTask* child;
+    KwlnTask* next;
+
+    child = task->childList;
+    while (child != 0) {
+        next = child->next;
+        kwlnTaskDestroyWithHierarchy(child, 0);
+        child = next;
+    }
+    func_001005C8(task);
+    if (task->destroy != 0) {
+        task->destroy(task);
+    }
+    task->flags &= ~0xF;
+    func_001019F0(task);
+    func_00328E48(task);
+}
 
 void func_00100DD8(KwlnTask* task)
 {
@@ -171,11 +198,28 @@ s32 func_00101428(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchyByName);
+s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
+{
+    KwlnTask* task;
+
+    task = func_00101740(name);
+    if (task == 0) {
+        return 0;
+    }
+    return kwlnTaskDestroyWithHierarchy(task, arg1);
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101678);
+void func_00101678(KwlnTask* task)
+{
+    if ((task->flags & 0xF) != 2) {
+        return;
+    }
+    func_001005C8(task);
+    task->flags = (task->flags & ~0xF) | 3;
+    func_00100740(task);
+}
 
 void func_001016E0(KwlnTask* task, s32 arg1)
 {
@@ -277,4 +321,3 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF4);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435C00);
-
