@@ -59,6 +59,7 @@ s32 mnuTickResourceGroup(s32 owner, s32 group) {
     do {
         node = *(MovieCueNode **)(list + 0x10);
         node->framesLeft = node->framesLeft - 1;
+        /* Fire an enabled cue five frames before its node expires. */
         if (node->framesLeft == node->duration - 5 && node->enabled != 0) {
             func_0025BA20(owner, group, (u8 *)node, node->cueIndex);
         }
@@ -132,32 +133,32 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
 extern void func_00255FF8(s32 *, s32);
 
-void func_0025C7E0(s32 arg0, s32 arg1, u8 *arg2) {
-    s32 *counter = *(s32 **)(arg2 + 4);
+void func_0025C7E0(s32 animationContext, s32 unusedGrid, u8 *slot) {
+    s32 *counter = *(s32 **)(slot + 4);
     s32 value = *counter + 1;
 
     *counter = value;
     if ((f32)value > 60.0f) {
         *counter = 0;
     }
-    func_00255FF8(counter, arg0);
+    func_00255FF8(counter, animationContext);
 }
 
-typedef struct EntrySlot8 {
-    s32 a;
-    s32 b;
-} EntrySlot8;
+typedef struct MenuAnimationSlot {
+    s32 unk00;
+    s32 counterAddress; /* 0x04: address of the frame counter */
+} MenuAnimationSlot;
 
-void func_0025C830(s32 arg0, s32 arg1) {
-    u8 *grid = *(u8 **)(arg1 + 0x484);
+void func_0025C830(s32 animationContext, s32 owner) {
+    u8 *grid = *(u8 **)(owner + 0x484);
     s32 row;
     s32 col;
 
     for (row = 0; row < 0x11; row++) {
-        EntrySlot8 *slot = (EntrySlot8 *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * 8);
+        MenuAnimationSlot *slot = (MenuAnimationSlot *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * 8);
         for (col = 0; col < 15; col++) {
-            if (slot[col].b != 0) {
-                func_0025C7E0(arg0, (s32)grid, (u8 *)&slot[col]);
+            if (slot[col].counterAddress != 0) {
+                func_0025C7E0(animationContext, (s32)grid, (u8 *)&slot[col]);
             }
         }
     }

@@ -130,19 +130,20 @@ void evtInstallStateTable(s32 event) {
     }
 }
 
+/* Mirror the chosen slot into both the active scene record and dispatch state. */
 s32 evtInitializeSelectedSlot(void) {
     s32 context = func_00101958();
-    s32 record;
+    s32 selectionRecord;
     s32 slot;
     evtClearActiveFlag(0);
     func_0026CA80(0, 2);
     if (((EvtStateTableContext *)context)->primaryObject == 0) {
         func_00260020(context);
     }
-    record = *(s32 *)(((EvtStateTableContext *)context)->primaryObject->node + 0x30);
+    selectionRecord = *(s32 *)(((EvtStateTableContext *)context)->primaryObject->node + 0x30);
     slot = func_0025FE70(context);
     ((EvtStateTableContext *)context)->cachedSelection = *(s32 *)(D_00435DD0 + 0x3c);
-    *(u16 *)(record + 0x12) = slot;
+    *(u16 *)(selectionRecord + 0x12) = slot;
     ((EvtStateTableContext *)context)->selectedSlot = slot;
     return 1;
 }
@@ -350,13 +351,14 @@ s64 func_002631D8(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 evtGetRemainingSlotThreshold(u32 index) {
+/* Return a slot's remaining threshold, or -1 for an unavailable slot. */
+s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
     s32 threshold;
     s32 remaining;
-    if (index >= 8) {
+    if (slotIndex >= 8) {
         return -1;
     }
-    threshold = D_003CE148[index * 3];
+    threshold = D_003CE148[slotIndex * 3];
     if (threshold == 0) {
         return -1;
     }
@@ -454,6 +456,7 @@ u32 evtResetStateProgressTimer(void) {
     return 1;
 }
 
+/* Delay the next state table until dispatch is idle and 20 progress ticks elapse. */
 s64 evtQueryStateProgress(s32 callback) {
     s32 context = func_00101958();
     s32 *window = (s32 *)(context + 0x58);
@@ -461,9 +464,9 @@ s64 evtQueryStateProgress(s32 callback) {
     if (state == 0) {
         if (*window == 0) {
             if (func_0026C768() == 0) {
-                s32 count = ((EvtStateTableContext *)context)->progressTimer;
-                if ((f32)count < 20.0f) {
-                    ((EvtStateTableContext *)context)->progressTimer = count + 1;
+                s32 elapsedTicks = ((EvtStateTableContext *)context)->progressTimer;
+                if ((f32)elapsedTicks < 20.0f) {
+                    ((EvtStateTableContext *)context)->progressTimer = elapsedTicks + 1;
                 } else {
                     func_002C42B0(window, D_003CE690);
                 }
@@ -687,6 +690,7 @@ s64 func_00264B10(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
+/* Mark each newly completed slot and advance the persistent slot index. */
 s32 evtAdvanceSlotFlags(void) {
     s32 i = 0;
     while (evtGetRemainingSlotThreshold(*(s32 *)(D_00435DD0 + 0x1e658) + i + 1) == 0) {
@@ -742,7 +746,8 @@ s64 func_00264D38(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
 }
 
-s32 evtTriggerProgressFlagGate(s32 context) {
+/* Raise a gate's flag and play its cue only on the first threshold crossing. */
+s32 evtTriggerProgressFlagGate(s32 unusedContext) {
     EvtFlagGate *entry = (EvtFlagGate *)D_003CE400;
     u32 i;
     for (i = 0; i < 1; i++, entry++) {

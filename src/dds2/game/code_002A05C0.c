@@ -117,11 +117,16 @@ u32 func_002A1118(void) {
     return 0x608;
 }
 
-u32 mnuIncrementTitleEffectFrameCounter(void) {
-    s32 temp_v0;
+typedef struct TitleEffectState {
+    s32 soundNameIndex; /* Index into the five-byte sound-name entries. */
+    s32 frameCounter;
+} TitleEffectState;
 
-    temp_v0 = func_00101958();
-    *(s32 *)(temp_v0 + 4) = *(s32 *)(temp_v0 + 4) + 1;
+u32 mnuIncrementTitleEffectFrameCounter(void) {
+    TitleEffectState *state;
+
+    state = (TitleEffectState *)func_00101958();
+    state->frameCounter = state->frameCounter + 1;
     return 0;
 }
 
@@ -132,27 +137,28 @@ void mnuDestroyTitleEffectTask(void) {
 
 extern u8 D_00437A10[];
 
+/* The task owns a two-word title-effect state; its second word counts frames. */
 void mnuCreateTitleEffectTask(void) {
-    u32 *data = (u32 *)func_00328D68(8);
+    TitleEffectState *state = (TitleEffectState *)func_00328D68(8);
     u32 task = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     D_004379F8 = task;
-    func_00101950(task, data);
-    data[0] = 0;
-    data[1] = 0;
+    func_00101950(task, state);
+    state->soundNameIndex = 0;
+    state->frameCounter = 0;
 }
 
 void mnuResetTitleEffectState(s32 effect) {
-    s32 context = func_00101958(D_004379F8);
+    TitleEffectState *state = (TitleEffectState *)func_00101958(D_004379F8);
     if (sdfSoundIsCommandBusy() != 0) {
         func_00342690();
     }
     sdfSoundSendNamedCommand(effect, 0x7f);
-    *(s32 *)(context + 4) = 0;
+    state->frameCounter = 0;
 }
 
-void func_002A1248(s32 arg0) {
-    *(s32 *)func_00101958(D_004379F8) = arg0;
+void func_002A1248(s32 value) {
+    ((TitleEffectState *)func_00101958(D_004379F8))->soundNameIndex = value;
 }
 
 extern char D_00428610[];
@@ -163,14 +169,14 @@ extern char D_003E09F0[];
 
 void func_002A1278(char *filename) {
     char path[16];
-    u32 *state = (u32 *)func_00101958(D_004379F8);
+    TitleEffectState *state = (TitleEffectState *)func_00101958(D_004379F8);
     if (sdfSoundIsCommandBusy() != 0) {
         func_0035B6E0(D_00428610);
         func_00342690();
     }
-    func_0035C860(path, D_00428628, D_003E09F0 + 5 * state[0], filename);
+    func_0035C860(path, D_00428628, D_003E09F0 + 5 * state->soundNameIndex, filename);
     sdfSoundSendNamedCommand(path, 0x64);
-    state[1] = 0;
+    state->frameCounter = 0;
 }
 
 void func_002A1308(void) {
@@ -185,22 +191,22 @@ void func_002A1338(void) {
 }
 
 s32 mnuGetTitleEffectFrameCounter(void) {
-    return *(s32 *)(func_00101958(D_004379F8) + 4);
+    return ((TitleEffectState *)func_00101958(D_004379F8))->frameCounter;
 }
 
 u32 func_002A1368(void) {
-    u64 temp_v0;
+    u64 sequence;
 
-    temp_v0 = func_0010D650(0);
-    func_00341BB8(temp_v0);
+    sequence = func_0010D650(0);
+    func_00341BB8(sequence);
     return 1;
 }
 
 u32 func_002A1390(void) {
-    u64 temp_v0;
+    u64 sequence;
 
-    temp_v0 = func_0010D650(0);
-    sndSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
+    sequence = func_0010D650(0);
+    sndSetSequenceVolumePan(sequence, 0x7f, 0x3f);
     return 1;
 }
 
@@ -225,10 +231,10 @@ u32 func_002A1430(void) {
 }
 
 u32 func_002A1450(void) {
-    u64 temp_v0;
+    u64 soundBusy;
 
-    temp_v0 = sdfSoundIsCommandBusy();
-    func_0010D818(temp_v0);
+    soundBusy = sdfSoundIsCommandBusy();
+    func_0010D818(soundBusy);
     return 1;
 }
 
@@ -261,10 +267,10 @@ u32 func_002A1518(void) {
 }
 
 u8 func_002A1538(void) {
-    s64 temp_v0;
+    s64 soundState;
 
-    temp_v0 = func_002A2330();
-    return temp_v0 == 0;
+    soundState = func_002A2330();
+    return soundState == 0;
 }
 
 s32 func_002A1558(u32 source, u32 destination, u32 words) {

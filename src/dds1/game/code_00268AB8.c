@@ -126,7 +126,7 @@ u32 func_002694F8(void) {
 }
 
 typedef struct TitleEffectState {
-    s32 unk00;
+    s32 soundNameIndex; /* Selects a five-byte sound-name entry in the DDS2 twin. */
     s32 frameCounter;
 } TitleEffectState;
 
@@ -149,7 +149,7 @@ void mnuCreateTitleEffectTask(void) {
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     D_003BC588 = task;
     func_00101A68(task, state);
-    state->unk00 = 0;
+    state->soundNameIndex = 0;
     state->frameCounter = 0;
 }
 
@@ -163,7 +163,7 @@ void mnuResetTitleEffectState(s32 command) {
 }
 
 void func_00269628(s32 value) {
-    ((TitleEffectState *)func_00101A70(D_003BC588))->unk00 = value;
+    ((TitleEffectState *)func_00101A70(D_003BC588))->soundNameIndex = value;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFC80);
@@ -186,18 +186,18 @@ s32 mnuGetTitleEffectFrameCounter(void) {
 }
 
 u32 func_00269758(void) {
-    u64 temp_v0;
+    u64 sequence;
 
-    temp_v0 = func_0010D428(0);
-    func_002E8D10(temp_v0);
+    sequence = func_0010D428(0);
+    func_002E8D10(sequence);
     return 1;
 }
 
 u32 func_00269780(void) {
-    u64 temp_v0;
+    u64 sequence;
 
-    temp_v0 = func_0010D428(0);
-    sndSetSequenceVolumePan(temp_v0, 0x7f, 0x3f);
+    sequence = func_0010D428(0);
+    sndSetSequenceVolumePan(sequence, 0x7f, 0x3f);
     return 1;
 }
 
@@ -222,10 +222,10 @@ u32 func_00269820(void) {
 }
 
 u32 func_00269840(void) {
-    u64 temp_v0;
+    u64 soundBusy;
 
-    temp_v0 = sdfSoundIsCommandBusy();
-    func_0010D5F0(temp_v0);
+    soundBusy = sdfSoundIsCommandBusy();
+    func_0010D5F0(soundBusy);
     return 1;
 }
 
@@ -258,10 +258,10 @@ u32 func_00269908(void) {
 }
 
 u8 func_00269928(void) {
-    s64 temp_v0;
+    s64 soundState;
 
-    temp_v0 = func_0026A720();
-    return temp_v0 == 0;
+    soundState = func_0026A720();
+    return soundState == 0;
 }
 
 s32 func_00269948(u32 source, u32 destination, u32 words) {

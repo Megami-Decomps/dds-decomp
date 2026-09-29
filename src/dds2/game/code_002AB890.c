@@ -99,13 +99,14 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF00);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
 
+/* Record the choice only while the resource is active; the follow-up runs regardless. */
 void mnuApplyResourceSelection(s32 index, s32 context) {
     MenuResourceSet *resources;
-    s64 active;
+    s64 resourceActive;
 
     resources = ((MenuResourceOwner *)context)->resources;
-    active = func_002ACF38();
-    if (active != 0) {
+    resourceActive = func_002ACF38();
+    if (resourceActive != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->first + 0x18) + 0x1c) + 0x60) =
                   (u32)*(u8 *)(index + D_00435DD0 + 0x1340);
         resources->selection = index;
