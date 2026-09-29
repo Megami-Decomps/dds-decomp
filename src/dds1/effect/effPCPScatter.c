@@ -6,7 +6,7 @@
 typedef struct PcpScatterRes PcpScatterRes;
 
 struct PcpScatterRes {
-    u32 unk00;
+    u32 resourceHandle;
     s32 refCount;
 };
 
@@ -92,11 +92,11 @@ struct PcpScatterWork1 {
     u8 pad69[7];
     u32 unk70;
     u8 pad74[0xC];
-    PcpScatterWork3 *unk80;
-    u32 unk84;
-    u32 unk88;
-    u32 *unk8C;
-    u32 unk90;
+    PcpScatterWork3 *childWork;
+    u32 ownedResource;
+    u32 duplicatedCount;
+    u32 *duplicatedHandles;
+    u32 duplicateAllocation;
 };
 
 /* func_00171550: the handle at 0x80 is a resource, not a child work area. */
@@ -115,11 +115,11 @@ struct PcpScatterWork8 {
     u8 pad59[7];
     u32 unk60;
     u8 pad64[0xC];
-    PcpScatterWork3 *unk70;
-    u32 unk74;
-    u32 unk78;
-    u32 *unk7C;
-    u32 unk80;
+    PcpScatterWork3 *childWork;
+    u32 ownedResource;
+    u32 duplicatedCount;
+    u32 *duplicatedHandles;
+    u32 duplicateAllocation;
     u32 unk84;
 };
 
@@ -239,19 +239,19 @@ PcpScatterWork1 *effPcpScatterSharedDuplicate(src)
     u32 i;
 
     work = func_001708A0(src, 0, 0);
-    func_00172FB8(work->unk80, src->unk80);
+    func_00172FB8(work->childWork, src->childWork);
     if (work->unk68 != 0) {
-        work->unk88 = work->unk20 / work->unk70;
+        work->duplicatedCount = work->unk20 / work->unk70;
         if (work->unk20 % work->unk70 != 0) {
-            work->unk88 = work->unk88 + 1;
+            work->duplicatedCount = work->duplicatedCount + 1;
         }
-        count = work->unk88;
+        count = work->duplicatedCount;
         handle = func_002D03F8(count * 4);
         buf = sdfResourceRetainAddress(handle);
-        work->unk90 = handle;
-        work->unk8C = buf;
+        work->duplicateAllocation = handle;
+        work->duplicatedHandles = buf;
         for (i = 0; i < count; i++) {
-            work->unk8C[i] = effParamWorkDuplicate(*src->unk8C);
+            work->duplicatedHandles[i] = effParamWorkDuplicate(*src->duplicatedHandles);
         }
     }
     return work;
@@ -262,19 +262,19 @@ void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work)
     u32 i;
     u32 count;
 
-    if (work->unk90 != 0) {
-        count = work->unk88;
+    if (work->duplicateAllocation != 0) {
+        count = work->duplicatedCount;
         i = 0;
         if (count != 0) {
             do {
-                func_001629F0(work->unk8C[i]);
+                func_001629F0(work->duplicatedHandles[i]);
                 i++;
             } while (i < count);
         }
-        func_002D0918(work->unk90);
+        func_002D0918(work->duplicateAllocation);
     }
-    func_00172D70(work->unk80);
-    func_002D0918(work->unk84);
+    func_00172D70(work->childWork);
+    func_002D0918(work->ownedResource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170D68);
@@ -287,7 +287,7 @@ void func_00171510(void *dst, void *src) {
 
 void func_00171520(PcpScatterWork8 *work, u32 *values)
 {
-    work->unk7C = values;
+    work->duplicatedHandles = values;
 }
 
 void func_00171528(f32 scale, PcpScatterWork8 *work)
@@ -314,19 +314,19 @@ PcpScatterWork8 *effPcpScatterLinkedDuplicate(src)
     u32 i;
 
     work = func_00171550(src, 0, 0);
-    func_00172FB8(work->unk70, src->unk70);
+    func_00172FB8(work->childWork, src->childWork);
     if (work->unk58 != 0) {
-        work->unk78 = work->unk20 / work->unk60;
+        work->duplicatedCount = work->unk20 / work->unk60;
         if (work->unk20 % work->unk60 != 0) {
-            work->unk78 = work->unk78 + 1;
+            work->duplicatedCount = work->duplicatedCount + 1;
         }
-        count = work->unk78;
+        count = work->duplicatedCount;
         handle = func_002D03F8(count * 4);
         buf = sdfResourceRetainAddress(handle);
-        work->unk80 = handle;
-        work->unk7C = buf;
+        work->duplicateAllocation = handle;
+        work->duplicatedHandles = buf;
         for (i = 0; i < count; i++) {
-            work->unk7C[i] = effParamWorkDuplicate(*src->unk7C);
+            work->duplicatedHandles[i] = effParamWorkDuplicate(*src->duplicatedHandles);
         }
     }
     return work;
@@ -337,19 +337,19 @@ void effPcpScatterReleaseSharedParticles(PcpScatterWork8 *work)
     u32 i;
     u32 count;
 
-    if (work->unk80 != 0) {
-        count = work->unk78;
+    if (work->duplicateAllocation != 0) {
+        count = work->duplicatedCount;
         i = 0;
         if (count != 0) {
             do {
-                func_001629F0(work->unk7C[i]);
+                func_001629F0(work->duplicatedHandles[i]);
                 i++;
             } while (i < count);
         }
-        func_002D0918(work->unk80);
+        func_002D0918(work->duplicateAllocation);
     }
-    func_00172D70(work->unk70);
-    func_002D0918(work->unk74);
+    func_00172D70(work->childWork);
+    func_002D0918(work->ownedResource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001719C0);
@@ -542,7 +542,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = func_002CFEB8(8);
-    res->unk00 = func_002D3288(resId);
+    res->resourceHandle = func_002D3288(resId);
     res->refCount = 1;
     return res;
 }
@@ -550,7 +550,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 void effPcpScatterResRelease(PcpScatterRes *res)
 {
     if (--res->refCount == 0) {
-        func_002D2D00(res->unk00);
+        func_002D2D00(res->resourceHandle);
         func_002CFF98(res);
     }
 }

@@ -119,7 +119,7 @@ typedef struct BtlUnit {
     u8 unk_118[8];
     u16 unk_120;
     u8 unk_122[2];
-    u16 unk_124;
+    u16 mode;
     u8 unk_126[8];
     u16 unk_12E;
     u8 unk_130[0x1EC];
@@ -1306,7 +1306,7 @@ s32 btlDisableNonBossUnits(void) {
     for (; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                kind = unit->unk_124;
+                kind = unit->mode;
                 if (kind < 0x105) {
                     if (kind >= 0x102) {
                         if (unit->flags & 0x20) {
@@ -1324,7 +1324,7 @@ s32 btlDisableNonBossUnits(void) {
                 if (unit->flags & 0x400) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
-                            switch (unit->unk_124) {
+                            switch (unit->mode) {
                             case 0x102:
                             case 0x103:
                             case 0x104:
@@ -1404,7 +1404,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
     for (; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->unk_124 == 0x105) {
+                if (unit->mode == 0x105) {
                     if (unit->flags & 0x20) {
                         result = 1;
                         break;
@@ -1419,7 +1419,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
                 if (unit->flags & 0x400) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
-                            if (unit->unk_124 != 0x105) {
+                            if (unit->mode != 0x105) {
                                 startBattleTask(func_001D8DE8(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
@@ -1602,7 +1602,7 @@ s32 func_00205B18(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
     if (!(target->flags & 0x400)) {
         return 0;
     }
-    switch (target->unk_124) {
+    switch (target->mode) {
     case 0x107:
     case 0x108:
         break;
@@ -1659,7 +1659,7 @@ s32 btlAdjustDamageKind(BtlUnit *unit, s32 arg1) {
     if ((*(BattleEffectState **)(func_001A17F0() + 0x694))->active != 1) {
         return arg1;
     }
-    id = unit->unk_124;
+    id = unit->mode;
     if (id == 0x124) {
         return arg1;
     }
@@ -1805,7 +1805,7 @@ s32 btlSetLinkFlagOff(BtlUnit *arg) {
     for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->unk_124 == 0x107) {
+                if (unit->mode == 0x107) {
                     break;
                 }
             }
@@ -1845,7 +1845,7 @@ s32 btlSetLinkFlagOn(BtlUnit *arg) {
     for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->unk_124 == 0x107) {
+                if (unit->mode == 0x107) {
                     break;
                 }
             }
@@ -2599,15 +2599,15 @@ void func_00209BC8(void) {
 
 s32 func_00209BF0(BtlUnit *unit, s32 action, u8 option) {
     u32 flags = unit->flags;
-    u16 species;
+    u16 unitMode;
     if (!(flags & 0x400)) {
         return action;
     }
     if (!(flags & 1)) {
         return -1;
     }
-    species = unit->unk_124;
-    if ((u16)(species - 0x119) >= 2) {
+    unitMode = unit->mode;
+    if ((u16)(unitMode - 0x119) >= 2) {
         return -1;
     }
     func_001A17F0();
@@ -2615,7 +2615,7 @@ s32 func_00209BF0(BtlUnit *unit, s32 action, u8 option) {
         return 0;
     }
     if (action == 11) {
-        switch (unit->unk_124) {
+        switch (unit->mode) {
         case 0x11A:
             return option != 1;
         default:
@@ -2704,7 +2704,7 @@ s32 func_0020ABE0(void) {
     for (; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->unk_124 == 0x11B) {
+                if (unit->mode == 0x11B) {
                     if (unit->flags & 0x20) {
                         result = 1;
                         break;
@@ -2719,7 +2719,7 @@ s32 func_0020ABE0(void) {
                 if (unit->flags & 0x400) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
-                            if (unit->unk_124 != 0x11B) {
+                            if (unit->mode != 0x11B) {
                                 startBattleTask(func_001D8DE8(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
@@ -2966,7 +2966,7 @@ s32 func_0020D6D8(void) {
     for (; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->unk_124 == 0x13C) {
+                if (unit->mode == 0x13C) {
                     if (unit->flags & 0x20) {
                         result = 1;
                         break;
@@ -2981,7 +2981,7 @@ s32 func_0020D6D8(void) {
                 if (unit->flags & 0x400) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
-                            if (unit->unk_124 != 0x13C) {
+                            if (unit->mode != 0x13C) {
                                 startBattleTask(func_001D8DE8(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
@@ -3634,7 +3634,7 @@ s32 func_00210D00(u8 *actor, s32 command) {
     if (D_003BAA4C[command * 2 + 1] == 2) {
         owner = *(BtlUnit **)(actor + 0x18);
         if (owner->flags & 0x200) {
-            if (owner->unk_124 == 4) {
+            if (owner->mode == 4) {
                 if (mdlFlagTest(0x61) == 0) {
                     return 6;
                 }

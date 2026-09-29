@@ -16,7 +16,9 @@ extern void func_002CFF98(void *work);
 
 /* Boss effect work: settable param plus two handles released on free. */
 typedef struct {
-    u8 unk00[0x24]; /* 0x00 */
+    u8 pad00[0x10];
+    u128 parameterVector; /* 0x10 */
+    u8 pad20[4];
     u32 unk24;      /* 0x24 settable param */
     u32 resource28;  /* 0x28 released by func_001629F0 */
     u32 resource2C;  /* 0x2C released by func_001629F0 */
@@ -77,8 +79,8 @@ void effPCPBossFree(EffPCPBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185790);
 
-void func_001858C8(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+void func_001858C8(EffPCPBossWork *work, void *src) {
+    PCP_COPY_VECTOR(&work->parameterVector, src);
 }
 
 void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {

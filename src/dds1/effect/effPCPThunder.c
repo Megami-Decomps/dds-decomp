@@ -23,12 +23,12 @@ extern u8 D_0034DF38[];
 typedef struct {
     u128 quad00;      /* 0x00 copied as one quadword on spawn */
     u8 pad10[0x0C];   /* 0x10 */
-    f32 unk1C;      /* 0x1C scaled from unk54 */
-    f32 unk20;      /* 0x20 scaled from unk58 */
+    f32 scaledFirst; /* 0x1C scaled from baseFirst */
+    f32 scaledSecond; /* 0x20 scaled from baseSecond */
     u8 unk24[0x2C]; /* 0x24 */
     u32 unk50;      /* 0x50 settable param */
-    f32 unk54;      /* 0x54 scale source for unk1C */
-    f32 unk58;      /* 0x58 scale source for unk20 */
+    f32 baseFirst;   /* 0x54 */
+    f32 baseSecond;  /* 0x58 */
     u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
     u32 unk60;      /* 0x60 handle released by func_002D0918 */
 } EffPCPThunderWork;
@@ -43,9 +43,9 @@ typedef struct {
 /* 20-byte thunder element (see effThunderRandomizeCell/func_00167070): randomized on
  * setup (direction floats plus moduli), then counted down while active. */
 typedef struct {
-    f32 f00;      /* 0x00 (float rand - 0.5) * 2 */
-    f32 f04;      /* 0x04 */
-    f32 f08;      /* 0x08 */
+    f32 directionX; /* 0x00 randomized to [-1, 1] */
+    f32 directionY; /* 0x04 randomized to [-1, 1] */
+    f32 directionZ; /* 0x08 randomized to [-1, 1] */
     u32 cnt0C;    /* 0x0C random modulus, then decremented */
     u32 cnt10;    /* 0x10 random modulus + 1, then decremented */
 } EffThunderCell; /* 0x14 */
@@ -62,11 +62,11 @@ typedef struct {
     u8 pad10[0x08];   /* 0x10 */
     s32 elementCount; /* 0x18 */
     u8 unk1C[0x08]; /* 0x1C */
-    u32 unk24;      /* 0x24 random modulus */
-    u32 unk28;      /* 0x28 random modulus */
+    u32 cellFirstRange; /* 0x24 random modulus */
+    u32 cellSecondRange; /* 0x28 random modulus */
     u8 unk2C[0x04]; /* 0x2C */
-    u32 unk30;      /* 0x30 random modulus */
-    u32 unk34;      /* 0x34 random modulus */
+    u32 fragmentFirstRange; /* 0x30 random modulus */
+    u32 fragmentSecondRange; /* 0x34 random modulus */
     u8 unk38[0x08]; /* 0x38 */
     u32 unk40;      /* 0x40 */
     u8 unk44[0x04]; /* 0x44 */
@@ -112,8 +112,8 @@ void func_00163518(EffPCPThunderWork *work, u32 value) {
 }
 
 void func_00163520(f32 value, EffPCPThunderWork *work) {
-    work->unk1C = work->unk54 * value;
-    work->unk20 = work->unk58 * value;
+    work->scaledFirst = work->baseFirst * value;
+    work->scaledSecond = work->baseSecond * value;
 }
 
 u32 func_00163540(u32 arg0) {
@@ -155,8 +155,8 @@ void func_00164048(EffPCPThunderWork *work, u32 value) {
 }
 
 void func_00164050(f32 value, EffPCPThunderWork *work) {
-    work->unk1C = work->unk54 * value;
-    work->unk20 = work->unk58 * value;
+    work->scaledFirst = work->baseFirst * value;
+    work->scaledSecond = work->baseSecond * value;
 }
 
 u32 func_00164070(u32 arg0) {
@@ -240,8 +240,8 @@ void func_00165690(EffPCPThunderWorkB *work) {
 void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
-    frag->unk00 = effMiscRand(&D_0034DF38) % work->unk30;
-    frag->unk04 = effMiscRand(&D_0034DF38) % work->unk34 + 1;
+    frag->unk00 = effMiscRand(&D_0034DF38) % work->fragmentFirstRange;
+    frag->unk04 = effMiscRand(&D_0034DF38) % work->fragmentSecondRange + 1;
     frag->color08 = 0x80808080;
 }
 
@@ -274,8 +274,8 @@ void func_00166130(EffPCPThunderWorkB *work, u32 value) {
 void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
     EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
-    frag->unk00 = effMiscRand(&D_0034DF38) % work->unk30;
-    frag->unk04 = effMiscRand(&D_0034DF38) % work->unk34 + 1;
+    frag->unk00 = effMiscRand(&D_0034DF38) % work->fragmentFirstRange;
+    frag->unk04 = effMiscRand(&D_0034DF38) % work->fragmentSecondRange + 1;
     frag->color08 = 0x80808080;
 }
 
@@ -303,13 +303,13 @@ void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
     f32 v;
 
     v = func_002E8398(&D_0034DF38) - 0.5f;
-    cell->f00 = v + v;
+    cell->directionX = v + v;
     v = func_002E8398(&D_0034DF38) - 0.5f;
-    cell->f04 = v + v;
+    cell->directionY = v + v;
     v = func_002E8398(&D_0034DF38) - 0.5f;
-    cell->f08 = v + v;
-    cell->cnt0C = effMiscRand(&D_0034DF38) % work->unk24;
-    cell->cnt10 = effMiscRand(&D_0034DF38) % work->unk28 + 1;
+    cell->directionZ = v + v;
+    cell->cnt0C = effMiscRand(&D_0034DF38) % work->cellFirstRange;
+    cell->cnt10 = effMiscRand(&D_0034DF38) % work->cellSecondRange + 1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00166C18);

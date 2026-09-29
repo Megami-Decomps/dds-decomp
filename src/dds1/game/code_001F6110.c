@@ -76,7 +76,7 @@ typedef struct BtlUnit {
     u8 unk_118[8];
     u16 unk_120;
     u8 unk_122[2];
-    u16 unk_124;
+    u16 mode;
     u8 unk_126[0x1F6];
     u32 unk_31C;
     u32 unk_320;
@@ -2001,7 +2001,7 @@ void btlBindActorSlot(BtlActor *actor, s32 arg1) {
     handle = *(s32 *)((u8 *)func_00101A70(slot) + 0xCC);
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
-        func_0019C590(handle, 0, unit->unk_124, (unit->unk_120 & 0x20) ? 1 : 2);
+        func_0019C590(handle, 0, unit->mode, (unit->unk_120 & 0x20) ? 1 : 2);
     }
     func_00101A80(state->list, slot);
     state->slot = slot;

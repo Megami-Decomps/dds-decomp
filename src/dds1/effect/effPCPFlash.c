@@ -102,8 +102,8 @@ struct PcpFlashWork2 {
     u32 unk10;
     u8 pad14[0x0C];
     u32 unk20;
-    u32 unk24;
-    u32 unk28;
+    u32 colorA;
+    u32 colorB;
     u8 pad2C[0x10];
     u32 unk3C;
     u8 *unk40;
@@ -117,10 +117,10 @@ struct PcpFlashWork2 {
 /* func_0016AFF0 */
 struct PcpFlashWork3 {
     u8 pad00[0x24];
-    u32 unk24;
-    u32 unk28;
+    u32 colorA;
+    u32 colorB;
     u8 pad2C[0x14];
-    f32 unk40;
+    f32 particleIncrement;
     u32 unk44;
     PcpFlashPtc14 *parts;
     u32 unk4C;
@@ -150,8 +150,8 @@ struct PcpFlashWork4 {
 /* func_0016C0E8 */
 struct PcpFlashWork5 {
     u8 pad00[0x28];
-    u32 unk28;
-    u32 unk2C;
+    u32 colorA;
+    u32 colorB;
     u8 pad30[0x20];
     f32 unk50;
     u32 unk54;
@@ -167,8 +167,8 @@ struct PcpFlashWork5 {
 /* func_0016C9F0 */
 struct PcpFlashWork6 {
     u8 pad00[0x30];
-    u32 unk30;
-    u32 unk34;
+    u32 colorA;
+    u32 colorB;
     f32 unk38;
     f32 unk3C;
     f32 unk40;
@@ -185,8 +185,8 @@ struct PcpFlashWork6 {
 /* func_0016D2A8 */
 struct PcpFlashWork7 {
     u8 pad00[0x24];
-    u32 unk24;
-    u32 unk28;
+    u32 colorA;
+    u32 colorB;
     u8 pad2C[0x18];
     u32 unk44;
     f32 unk48;
@@ -215,8 +215,8 @@ struct PcpFlashWork8 {
 /* func_0016E290 */
 struct PcpFlashWork9 {
     u8 pad00[0x2C];
-    u32 unk2C;
-    u32 unk30;
+    u32 colorA;
+    u32 colorB;
     u8 pad34[0x14];
     f32 unk48;
     u32 unk4C;
@@ -231,8 +231,8 @@ struct PcpFlashWork9 {
 /* func_0016EB00 */
 struct PcpFlashWork10 {
     u8 pad00[0x24];
-    u32 unk24;
-    u32 unk28;
+    u32 colorA;
+    u32 colorB;
     u8 pad2C[0x1C];
     u32 unk48;
     f32 unk4C;
@@ -335,8 +335,8 @@ void func_0016A8E0(PcpFlashWork2 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_0016FF20(work->unk54, index);
-    rgb1 = work->unk24 & 0xFFFFFF;
-    rgb2 = work->unk28 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     if (index & 1) {
@@ -418,8 +418,8 @@ void func_0016B298(PcpFlashWork3 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_0016FF20(work->unk5C, index);
-    rgb1 = work->unk24 & 0xFFFFFF;
-    rgb2 = work->unk28 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     if (index & 1) {
@@ -440,7 +440,7 @@ void func_0016B570(PcpFlashWork3 *work, s32 index)
     PcpFlashPtc14 *part;
 
     part = &work->parts[index];
-    part->unk10 += work->unk40;
+    part->unk10 += work->particleIncrement;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016B598);
@@ -532,8 +532,8 @@ void func_0016C3C0(PcpFlashWork5 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_0016FF20(work->unk7C, index);
-    rgb1 = work->unk28 & 0xFFFFFF;
-    rgb2 = work->unk2C & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     if (index & 1) {
@@ -598,8 +598,8 @@ void func_0016CC38(PcpFlashWork6 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_0016FF20(work->unk60, index);
-    rgb1 = work->unk30 & 0xFFFFFF;
-    rgb2 = work->unk34 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     if (index & 1) {
@@ -668,8 +668,8 @@ void func_0016D468(PcpFlashWork7 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_00170238(work->unk50, index);
-    rgb1 = work->unk24 & 0xFFFFFF;
-    rgb2 = work->unk28 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 8) = func_0018DDF8(rgb1 | 0xFF000000, param);
@@ -766,8 +766,8 @@ void func_0016E548(PcpFlashWork9 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_0016FF20(work->unk64, index);
-    rgb1 = work->unk2C & 0xFFFFFF;
-    rgb2 = work->unk30 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     if (index & 1) {
@@ -832,8 +832,8 @@ void func_0016ECC8(PcpFlashWork10 *work, s32 index, s32 param)
     s32 rgb2;
 
     slot = func_00170238(work->unk54, index);
-    rgb1 = work->unk24 & 0xFFFFFF;
-    rgb2 = work->unk28 & 0xFFFFFF;
+    rgb1 = work->colorA & 0xFFFFFF;
+    rgb2 = work->colorB & 0xFFFFFF;
     *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
     *(s32 *)(slot + 8) = func_0018DDF8(rgb1 | 0xFF000000, param);
