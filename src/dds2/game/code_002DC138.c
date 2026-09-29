@@ -224,6 +224,14 @@ extern FnTbl28 D_003E9E70[];
 extern FnTbl24 D_003E9F14[];
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
+extern void *func_003292A8(u32);
+
+extern u8 *func_002E75C8(u32);
+
+extern u32 func_002F2950(u8 *);
+
+extern void func_002040A8(u32);
+
 void effInitModelVUState(void *model) {
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
     func_00232AA0(model);
@@ -1077,7 +1085,19 @@ void effClearAnimatedFrames(u8 *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E24A8);
+u8 *func_002E24A8(u8 *config) {
+    u32 headerSize = 0x10;
+    u8 *base = func_003292A8(*(u32 *)(config + 0x38) * 0x18 + headerSize);
+    u8 *node = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *entries = node + headerSize;
+
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = entries;
+    if (*(u32 *)(config + 0x70) == 0) {
+        *(u32 *)(config + 0x70) = 1;
+    }
+    return node;
+}
 
 void effInitializeAlternatingTransformRows(u8 *work, u8 *descriptor) {
     u32 count = *(u32 *)(descriptor + 0x38);
@@ -1506,7 +1526,37 @@ void func_002E6E60(s32 arg0) {
     *(u32 *)(**(s32 **)(arg0 + 0x30) + 4) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", createEffectRingHandle);
+u32 *createEffectRingHandle(u8 *work) {
+    u32 *handle = func_00328D68(4);
+    u32 kind = *(u32 *)(work + 0x38);
+    u8 *ring;
+    u32 *entry;
+    u32 groups;
+    u32 i;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    if (kind < 3) {
+        *(u32 *)(work + 0x38) = 3;
+        kind = 3;
+    }
+    ring = func_002E75C8(kind);
+    first = *(u32 *)(work + 0x44);
+    groups = *(s32 *)(ring + 8) / 4;
+    *handle = (u32)ring;
+    entry = *(u32 **)(ring + 0x14);
+    second = *(u32 *)(work + 0x48);
+    third = *(u32 *)(work + 0x4C);
+    for (i = 0; i < groups; i++) {
+        entry[0] = first;
+        entry[1] = second;
+        entry[2] = second;
+        entry[3] = third;
+        entry += 4;
+    }
+    return handle;
+}
 
 void func_002E6F18(u32 arg0) {
     func_002E7698(*(u32 *)arg0);
@@ -2268,9 +2318,27 @@ INCLUDE_ASM(const s32, "game/code_002DC138", effInitializeAnimationPositions);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F2950);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effCreateAnimationState);
+u32 *effCreateAnimationState(u32 unused, u32 count) {
+    u32 allocation = (u32)func_003292A8(count * 8 + 0x10);
+    u32 *state = (u32 *)sdfResourceRetainAddress(allocation);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effActivateAnimationState);
+    state[3] = allocation;
+    state[0] = (u32)(state + 4);
+    state[2] = 0;
+    state[1] = func_002F3D18();
+    return state;
+}
+
+u32 *effActivateAnimationState(s32 work) {
+    s32 owner = *(s32 *)(work + 0x30);
+    s32 resource = *(s32 *)(owner + 8);
+    u32 *state = effCreateAnimationState(*(u32 *)(work + 0x34), *(u32 *)(resource + 8));
+
+    resource = *(s32 *)(owner + 8);
+    state[2] = func_002DBED8(*(u16 *)resource, *(u32 *)(resource + 8),
+                               *(void **)(resource + 0x24));
+    return state;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F2A30);
 
@@ -2278,7 +2346,14 @@ INCLUDE_ASM(const s32, "game/code_002DC138", effSynchronizeFileTransform);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F2AE8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F3100);
+u32 *func_002F3100(u8 *work) {
+    u8 *mapping = work + 0x3C;
+    u32 count = func_002F2950(mapping);
+    u32 *state = effCreateAnimationState((u32)work, count);
+
+    state[2] = func_002DBED8(1, count, mapping);
+    return state;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F3168);
 
@@ -2286,7 +2361,22 @@ void func_002F31D0(s32 arg0) {
     *(u32 *)(*(s32 *)(*(s32 *)(arg0 + 0x30) + 4) + 8) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effAllocateQuantizedBuffer);
+u32 *effAllocateQuantizedBuffer(u8 *work) {
+    void *allocation = func_003292A8(0xC);
+    u32 *buffer = (u32 *)sdfResourceRetainAddress((u32)allocation);
+    u32 count = *(u32 *)(work + 0x74);
+
+    buffer[2] = (u32)allocation;
+    if (count < 4) {
+        *(u32 *)(work + 0x74) = 4;
+        count = 4;
+    }
+    buffer[0] = count >> 2;
+    if ((*(u32 *)(work + 0x74) & 3) != 0) {
+        buffer[0] = (count >> 2) + 1;
+    }
+    return buffer;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F3258);
 
@@ -2314,7 +2404,29 @@ void func_002F3750(s32 arg0) {
     func_003297C8(*(u32 *)(temp_v0 + 8));
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F3780);
+void func_002F3780(u8 *work) {
+    s32 *list = *(s32 **)(work + 0x30);
+    u8 *config = *(u8 **)(work + 0x34);
+    s32 rows = *(s32 *)(config + 0x74) + 1;
+    s32 count = list[0];
+    u8 *node = *(u8 **)&list[1];
+    u8 *entry = *(u8 **)(node + 0x24);
+    s32 i;
+    s32 j;
+    s32 k;
+    f32 *v;
+
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < rows; j++) {
+            v = (f32 *)entry + 1;
+            for (k = 0; k < 4; k++) {
+                *v += *(f32 *)(config + 0x88);
+                v += 2;
+            }
+            entry += 0x20;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F37F8);
 
@@ -2651,7 +2763,22 @@ void func_002F7128(EffAnimOwner *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effReportResourceStatus);
+void effReportResourceStatus(u8 *work) {
+    u32 status;
+
+    if (*(s32 *)(work + 0x28) > 0) {
+        return;
+    }
+    status = **(u32 **)(work + 0x38);
+    switch (status) {
+    case 0:
+        func_002040A8(0x1000A);
+        break;
+    case 1:
+        func_002040A8(0x1000B);
+        break;
+    }
+}
 
 void func_002F72D8(void) {
     s32 temp_v0;
@@ -3410,7 +3537,9 @@ void func_002FC160(void) {
     func_00303C50();
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", setBattleEffectOffset);
+void setBattleEffectOffset(void *src) {
+    PCP_COPY_VECTOR(D_0045C1E0, src);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC198);
 

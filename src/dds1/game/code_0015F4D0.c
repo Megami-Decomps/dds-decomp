@@ -6,6 +6,26 @@ extern BillDispatch D_0034E658[];
 
 extern BillDispatch D_0034E654[];
 
+typedef struct BillWork {
+    u8 pad00[0x64];
+    u8 currentValue;
+    u8 pad65[0x4B];
+    u16 pendingCount;
+    u16 queuedCount;
+    u8 padB4[0xC];
+    u8 stagedValue;
+} BillWork;
+
+typedef struct BillEntry {
+    u8 pad00[0x10];
+    u32 value;
+} BillEntry;
+
+typedef struct BillEntryOwner {
+    u8 pad00[0x14];
+    BillEntry *entries;
+} BillEntryOwner;
+
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F4D0);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F520);
@@ -18,8 +38,8 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F5E8);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F630);
 
-u16 func_0015F670(s32 arg0) {
-    return *(u16 *)(arg0 + 0xb2);
+u16 func_0015F670(BillWork *work) {
+    return work->queuedCount;
 }
 
 void func_0015F678(void *dst, void *src) {
@@ -32,15 +52,15 @@ void func_0015F6E8(BillObj *effect, void *value) {
     effect->unk60 = value;
 }
 
-void func_0015F6F0(u8 *work, u8 value) {
-    if (*(u16 *)(work + 0xB0) == 0) {
-        *(u8 *)(work + 0xC0) = value;
+void func_0015F6F0(BillWork *work, u8 value) {
+    if (work->pendingCount == 0) {
+        work->stagedValue = value;
     }
-    *(u8 *)(work + 0x64) = value;
+    work->currentValue = value;
 }
 
-u8 func_0015F708(s32 arg0) {
-    return *(u8 *)(arg0 + 100);
+u8 func_0015F708(BillWork *work) {
+    return work->currentValue;
 }
 
 void func_0015F710(s32 arg0, u32 arg1) {
@@ -49,8 +69,8 @@ void func_0015F710(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F718);
 
-void func_0015F7F0(s32 arg0, s32 arg1, u32 arg2) {
-    *(u32 *)(arg1 * 0x14 + *(s32 *)(arg0 + 0x14) + 0x10) = arg2;
+void func_0015F7F0(BillEntryOwner *owner, s32 index, u32 value) {
+    owner->entries[index].value = value;
 }
 
 s32 func_0015F810(s32 arg0) {

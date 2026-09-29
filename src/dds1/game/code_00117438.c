@@ -13,6 +13,19 @@ typedef struct EvtScaledValue {
     f32 scaled;
 } EvtScaledValue;
 
+typedef struct SdfRuntime {
+    u8 pad00[0x34];
+    u32 firstTick;
+    u32 secondTick;
+    u8 pad3C[0xA20];
+    u32 updateMode;
+} SdfRuntime;
+
+typedef struct SdfPackedValue {
+    u8 pad00[0xE];
+    u16 flagsAndValue;
+} SdfPackedValue;
+
 
 void func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
@@ -70,18 +83,18 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_001176A0);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117730);
 
 s32 sdfBumpTickCounters(void) {
-    s32 base;
+    SdfRuntime *runtime;
 
-    base = D_003BAA00;
-    *(u32 *)(base + 0x34) += 1;
-    *(u32 *)(base + 0x38) += 1;
+    runtime = (SdfRuntime *)D_003BAA00;
+    runtime->firstTick += 1;
+    runtime->secondTick += 1;
     return 0;
 }
 
 void func_001177A8(void) {
     scrClearProcessGlobals();
     func_0021F4B8();
-    *(u32 *)(D_003BAA00 + 0xa5c) = 8;
+    ((SdfRuntime *)D_003BAA00)->updateMode = 8;
     func_0011A238();
     func_00120C08(0);
     func_002CC7D8();
@@ -158,8 +171,8 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118DD8);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118E38);
 
-void func_00119000(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 0xe) = (*(u16 *)(arg0 + 0xe) & 0x8000) | (arg1 & 0x7fff);
+void func_00119000(SdfPackedValue *item, u16 value) {
+    item->flagsAndValue = (item->flagsAndValue & 0x8000) | (value & 0x7fff);
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00119018);

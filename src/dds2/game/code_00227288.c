@@ -64,6 +64,39 @@ typedef struct BattleEffectState {
     f32 speed;
 } BattleEffectState;
 
+typedef struct BattleEffectContext {
+    u8 pad00[0x2A0];
+    u32 battleId;
+    u8 pad2A4[0x24];
+    u32 targetObject;
+    u8 pad2CC[0x44C];
+    BattleEffectState *effect;
+} BattleEffectContext;
+
+typedef struct BattleEffectUnitNode {
+    u8 pad00[0x110];
+    u32 status;
+    u32 statusExtra;
+    u8 pad118[0x24C];
+    struct BattleEffectUnitNode *next;
+} BattleEffectUnitNode;
+
+typedef struct BattleScriptTask {
+    u8 active;
+    u8 pad01[0xF];
+    u8 startFlag;
+    u8 pad11[0xF];
+    u16 kind;
+    u8 pad22[0x2A];
+    void (*callback)(void);
+} BattleScriptTask;
+
+typedef struct BattleScriptTaskData {
+    u32 object;
+    u32 group;
+    u32 frames;
+} BattleScriptTaskData;
+
 extern void *func_001E5DA8(void *, s32, s32);
 
 extern void startBattleTask(void *);
@@ -138,7 +171,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227CC8);
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
 s32 battleIsEffectActor(u32 actor) {
-    BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    BattleEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
     u32 active = state->actor;
     if (active != 0) {
         return active == actor;
@@ -172,13 +205,13 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00228F20);
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
 
 u32 battleGetEffectActive(void) {
-    s32 battle = func_001AA6F8();
-    u32 battleId = *(u32 *)(battle + 0x2a0);
+    BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
+    u32 battleId = battle->battleId;
     BattleEffectState *state;
     if (battleId != 0x312) {
         return 0;
     }
-    state = *(BattleEffectState **)(battle + 0x718);
+    state = battle->effect;
     if (state != NULL) {
         return state->active;
     }
@@ -186,13 +219,13 @@ u32 battleGetEffectActive(void) {
 }
 
 s32 battleHasEffectActor(void) {
-    s32 battle = func_001AA6F8();
-    u32 battleId = *(u32 *)(battle + 0x2a0);
+    BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
+    u32 battleId = battle->battleId;
     BattleEffectState *state;
     if (battleId != 0x312) {
         return 0;
     }
-    state = *(BattleEffectState **)(battle + 0x718);
+    state = battle->effect;
     if (state == NULL) {
         return 0;
     }
@@ -200,13 +233,13 @@ s32 battleHasEffectActor(void) {
 }
 
 u32 battleGetEffectValue(void) {
-    s32 battle = func_001AA6F8();
-    u32 battleId = *(u32 *)(battle + 0x2a0);
+    BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
+    u32 battleId = battle->battleId;
     BattleEffectState *state;
     if (battleId != 0x312) {
         return 0;
     }
-    state = *(BattleEffectState **)(battle + 0x718);
+    state = battle->effect;
     if (state != NULL) {
         return state->value;
     }
@@ -214,7 +247,7 @@ u32 battleGetEffectValue(void) {
 }
 
 u32 battleGetEffectActor(void) {
-    BattleEffectState *state = *(BattleEffectState **)(func_001AA6F8() + 0x718);
+    BattleEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
     return state->actor;
 }
 
@@ -222,10 +255,10 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_002291C0);
 
 void func_00229248(void) {
     u8 *puVar1;
-    s32 temp_v0;
+    BattleEffectContext *battle;
 
-    temp_v0 = func_001AA6F8();
-    puVar1 = *(u8 **)(temp_v0 + 0x718);
+    battle = (BattleEffectContext *)func_001AA6F8();
+    puVar1 = (u8 *)battle->effect;
     puVar1[1] = 1;
     *puVar1 = 0;
 }
@@ -273,12 +306,12 @@ void func_002292D8(void) {
 }
 
 s32 func_00229378(void) {
-    u32 node = *(u32 *)(func_001AA6F8() + 0x24c);
+    BattleEffectUnitNode *node = *(BattleEffectUnitNode **)(func_001AA6F8() + 0x24c);
     while (node != 0) {
-        if (*(u32 *)(node + 0x110) & 1) {
-            *(u32 *)(node + 0x114) &= ~0x100000;
+        if (node->status & 1) {
+            node->statusExtra &= ~0x100000;
         }
-        node = *(u32 *)(node + 0x364);
+        node = node->next;
     }
     return -1;
 }
@@ -432,33 +465,33 @@ u32 func_0022B9D0(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022BA08);
 
 u32 func_0022BAA8(u32 object, u32 group) {
-    u32 task = func_001E1468(12);
-    u32 data;
-    *(u8 *)(task + 0) = 1;
-    *(u16 *)(task + 0x20) = 0x68;
-    *(void (**)(void))(task + 0x4c) = func_0022BA08;
-    *(u8 *)(task + 0x10) = 0;
-    data = func_001E14F8(task);
-    *(u32 *)(data + 0) = object;
-    *(u32 *)(data + 4) = group;
-    *(u32 *)(data + 8) = 0;
-    return task;
+    BattleScriptTask *task = (BattleScriptTask *)func_001E1468(12);
+    BattleScriptTaskData *data;
+    task->active = 1;
+    task->kind = 0x68;
+    task->callback = func_0022BA08;
+    task->startFlag = 0;
+    data = (BattleScriptTaskData *)func_001E14F8((u32)task);
+    data->object = object;
+    data->group = group;
+    data->frames = 0;
+    return (u32)task;
 }
 
-u32 func_0022BB28(u32 record) {
-    if (*(u32 *)(record + 8) == 0) {
-        u32 battle = func_001AA6F8();
+u32 func_0022BB28(BattleScriptTaskData *record) {
+    if (record->frames == 0) {
+        BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
         u32 object;
-        func_0022A908(*(u32 *)(record + 4));
-        object = *(u32 *)(battle + 0x2c8);
+        func_0022A908(record->group);
+        object = battle->targetObject;
         if (object != 0) {
-            func_0010C250(object, *(u32 *)record);
+            func_0010C250(object, record->object);
         }
     }
     if (btlReleaseScriptResource()) {
         return 1;
     }
-    ++*(u32 *)(record + 8);
+    ++record->frames;
     return 0;
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct MdlViewState {
     s32 unk00;
@@ -372,7 +373,20 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A718);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A880);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A8F0);
+extern u128 D_003D7B20;
+extern u128 D_003D7B30;
+extern u128 D_003D7B40;
+extern u128 D_00367A10;
+extern u128 D_00367A20;
+extern u128 D_00367A30;
+extern s16 D_003D7A84[];
+
+void func_0021A8F0(void) {
+    PCP_COPY_VECTOR(&D_003D7B20, &D_00367A10);
+    PCP_COPY_VECTOR(&D_003D7B30, &D_00367A20);
+    PCP_COPY_VECTOR(&D_003D7B40, &D_00367A30);
+    D_003D7A84[0] = 0;
+}
 
 void func_0021A948(void) {
     s32 i = D_003D7A50.resourceCount - 1;

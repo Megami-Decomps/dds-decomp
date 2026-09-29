@@ -50,8 +50,8 @@ typedef struct BtlSkillTask {
     u8 pad1C[8];
     s32 kind;
     u8 pad28[0x20];
-    s32 unk48;
-    s8 unk4C;
+    s32 adjustedValue;
+    s8 resultKind;
     u8 pad4D[0x13];
     s32 list60;
 } BtlSkillTask;
@@ -79,7 +79,7 @@ typedef struct BtlEffect {
 
 typedef struct BtlEntry {
     u8 pad0[3];
-    u8 b3;
+    u8 kind;
     u8 pad4[0x18];
     u16 flags1C;
     u8 pad1E[2];
@@ -188,8 +188,8 @@ void func_0021B788(BtlSkillTask *task, s32 arg1, s32 arg2, s32 skillId) {
     if (skillId >= 0x1AB && skillId < 0x220) {
         percent *= func_001AB9F0(task->unit, skillId);
     }
-    task->unk48 = func_001B3610(task->unit, arg1, arg2, percent, skillId);
-    task->unk4C = func_001B36B8(arg1, arg2, skillId);
+    task->adjustedValue = func_001B3610(task->unit, arg1, arg2, percent, skillId);
+    task->resultKind = func_001B36B8(arg1, arg2, skillId);
 }
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021B828);
@@ -251,13 +251,13 @@ s32 func_0021EA38(BtlUnit *unit, s32 index) {
     if (!(unit->flags & 0x400)) {
         return -1;
     }
-    if (D_00435E30[index].b3 == 0) {
+    if (D_00435E30[index].kind == 0) {
         return -1;
     }
-    if (D_00435E30[index].b3 >= 11 && D_00435E30[index].b3 < 26) {
+    if (D_00435E30[index].kind >= 11 && D_00435E30[index].kind < 26) {
         return -1;
     }
-    switch (D_00435E30[index].b3) {
+    switch (D_00435E30[index].kind) {
     case 1: return 0xC;
     case 2: return 0xD;
     case 3: return 0xE;
@@ -276,10 +276,10 @@ s32 func_0021EAF8(BtlUnit *unit, s32 index) {
     if (!(unit->flags & 0x400)) {
         return -1;
     }
-    if (D_00435E30[index].b3 == 0) {
+    if (D_00435E30[index].kind == 0) {
         return -1;
     }
-    return D_00435E30[index].b3;
+    return D_00435E30[index].kind;
 }
 
 s32 func_0021EB28(BtlUnit *unit, s32 value) {

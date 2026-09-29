@@ -481,7 +481,20 @@ u32 func_00142158(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldLoadArchive);
+s32 fldLoadArchive(s32 id) {
+    s32 name = 0x30000000 + (id << 16);
+    s32 result = func_002E92C0(name);
+    if (result == 0) {
+        func_002E9340(name);
+        D_003BAEA4 = 1;
+        return 0;
+    }
+    if (result == 1) {
+        D_003BAEA4 = 0;
+        return 1;
+    }
+    return 0;
+}
 
 void func_001421D0(s32 arg0, s32 arg1) {
     sndSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
@@ -495,7 +508,27 @@ void func_00142228(void) {
     D_003BAEA8 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142230);
+s32 func_00142230(void) {
+    switch (D_003BAEA8) {
+    case 0:
+        if (func_002E92C0(0x670000) == 0) {
+            func_002E9340(0x670000);
+            D_003BAEA8 = D_003BAEA8 + 1;
+        } else {
+            D_003BAEA8 = D_003BAEA8 + 2;
+        }
+        break;
+    case 1:
+        if (func_002E92C0(0x670000) == 1) {
+            D_003BAEA8 = D_003BAEA8 + 1;
+        }
+        break;
+    default:
+        D_003BAEA8 = -1;
+        return 1;
+    }
+    return 0;
+}
 
 u32 func_001422B8(void) {
     return D_003BAE80;
@@ -768,7 +801,16 @@ void fldSetFlagBit(s32 area, s32 floor, s32 bit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00146C30);
+void func_00146C30(s32 area, s32 floor, s32 bit) {
+    s32 id;
+
+    floor--;
+    bit--;
+    id = D_0032C900[area % 100];
+    if (id != -1) {
+        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[id][floor] &= ~(1ULL << bit);
+    }
+}
 
 
 void func_00146CA8(s32 arg0) {

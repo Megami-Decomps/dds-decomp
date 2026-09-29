@@ -25,6 +25,20 @@ typedef struct SolarPoint {
     u8 pad05;
 } SolarPoint;
 
+typedef struct SolarLayerTimer {
+    u8 pad00[4];
+    u16 age;
+    union {
+        u8 byte;
+        s8 signedByte;
+    } active;
+} SolarLayerTimer;
+
+typedef struct SolarOverlayWork {
+    u8 pad00[0xC];
+    SolarPoint points[8];
+} SolarOverlayWork;
+
 f32 func_00341240(s32 seed);
 
 void evtLoadSolarNoiseSprite(u32 *arg0) {
@@ -69,28 +83,28 @@ void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 contex
     }
 }
 
-s32 evtAdvanceSolarShortLayerTimer(s32 timer) {
+s32 evtAdvanceSolarShortLayerTimer(SolarLayerTimer *timer) {
     s32 nextAge;
 
-    nextAge = *(u16 *)(timer + 4) + 1;
-    *(u16 *)(timer + 4) = nextAge;
+    nextAge = timer->age + 1;
+    timer->age = nextAge;
     if ((f32)(s16)nextAge > 60.0f) {
-        *(u16 *)(timer + 4) = 0;
-        *(u8 *)(timer + 6) = 0;
+        timer->age = 0;
+        timer->active.byte = 0;
     }
-    return *(s8 *)(timer + 6);
+    return timer->active.signedByte;
 }
 
-s32 evtAdvanceSolarLongLayerTimer(s32 timer) {
+s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
     s32 nextAge;
 
-    nextAge = *(u16 *)(timer + 4) + 1;
-    *(u16 *)(timer + 4) = nextAge;
+    nextAge = timer->age + 1;
+    timer->age = nextAge;
     if ((f32)(s16)nextAge > 80.0f) {
-        *(u16 *)(timer + 4) = 0;
-        *(u8 *)(timer + 6) = 0;
+        timer->age = 0;
+        timer->active.byte = 0;
     }
-    return *(s8 *)(timer + 6);
+    return timer->active.signedByte;
 }
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_002441F8);
@@ -107,8 +121,8 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_002449E0);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244A38);
 
-void evtUpdateSolarPointTimers(s32 object) {
-    SolarPoint *point = (SolarPoint *)(object + 0xC);
+void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
+    SolarPoint *point = overlay->points;
     s32 i;
     for (i = 7; i >= 0; i--, point++) {
         if (point->active != 0) {

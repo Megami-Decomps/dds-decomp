@@ -87,7 +87,7 @@ struct BtlUnit {
     u32 baseColor;
     u8 pad58[0x2C];
     u32 overlayColor;
-    f32 unk88;
+    f32 positionZOffset;
     u8 pad8C[0x40];
     u8 unkCC;
     u8 padCD[0x1B];
@@ -99,8 +99,8 @@ struct BtlUnit {
     u64 owner;
     u32 flags;
     u32 stateFlags;
-    s32 unk118;
-    u8 unk11C;
+    s32 gunResourceFlags;
+    u8 lookupId;
     u8 pad11D[3];
     u16 unk120;
     u8 pad122[2];
@@ -1268,7 +1268,7 @@ void func_001E3088(BtlUnit *unit, f32 *vec) {
                          "sqc2 vf10, 0(%1)"
                          : : "r"(work), "r"(pos));
         if (unit->flags & 2) {
-            pos[2] += unit->unk88;
+            pos[2] += unit->positionZOffset;
             effObjSetInnerFirstVec(unit->effectObject, pos);
         }
     }
@@ -1806,7 +1806,7 @@ u32 func_001E7068(s32 arg) {
     func_0020D128("btl:gun & finish load end[%p]\n", args->handle);
     unit->gunResource = sdfResourceRetainAddress(func_002C8108(args->handle));
     func_002C7D00(args->handle);
-    unit->unk118 = (unit->unk118 & ~4) | 8;
+    unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
 
@@ -1909,7 +1909,7 @@ void resetBattleUnitLinks(BtlUnit *unit) {
     unit->unk314 = -1;
     unit->flags = 0;
     unit->stateFlags = 0;
-    unit->unk118 = 0;
+    unit->gunResourceFlags = 0;
     unit->unk330 = 0;
     func_001ADC48(unit);
     unit->link31C = sndAllocResourceLink(unit);
@@ -1928,9 +1928,9 @@ BtlUnit *func_001E7B58(void) {
     unit->owner = func_001A9920();
     unit->flags = 0;
     unit->stateFlags = 0;
-    unit->unk11C = unit->unk310 = -1;
+    unit->lookupId = unit->unk310 = -1;
     unit->unk2E4 = 6;
-    unit->unk118 = 0;
+    unit->gunResourceFlags = 0;
     unit->unk334 = 0;
     unit->node318 = 0;
     unit->gunResource = 0;
@@ -1977,8 +1977,8 @@ void func_001E7C48(BtlUnit *unit) {
     if (unit->gunResource != 0) {
         func_00328420(unit->gunResource);
         unit->gunResource = 0;
-        unit->unk118 &= ~4;
-        unit->unk118 &= ~8;
+        unit->gunResourceFlags &= ~4;
+        unit->gunResourceFlags &= ~8;
     }
     if (unit->node324 != 0) {
         sndFreeListNode(unit->node324);
@@ -3199,7 +3199,7 @@ BtlUnit *func_001FDCA8(s32 id) {
         if (unit->flags & 1) {
             if (!(unit->flags & 0xC0)) {
                 if (unit->flags & 0x200) {
-                    if (unit->unk11C == id) {
+                    if (unit->lookupId == id) {
                         return unit;
                     }
                 }
