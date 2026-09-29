@@ -45,7 +45,7 @@ struct PcpScatterWork4 {
     u32 ownedBuffer;
 };
 
-extern PcpScatterWork4 *func_0017AD28(u64 param0, u64 param1);
+extern PcpScatterWork4 *func_0017AD28();
 
 extern void effShareScatterResource(u32 param0, u32 param1);
 
@@ -346,7 +346,78 @@ u32 effPcpScatterResAddRef(u32 handle) {
     return handle;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AD28);
+typedef struct PcpScatterParams {
+    u8 pad00[0x10];
+    f32 matrix[16];
+    u32 unk50;
+    u8 pad54[0x08];
+    u32 particleCount;
+    u32 unk60;
+    u32 unk64;
+    u8 pad68[0xD0];
+} PcpScatterParams;
+
+typedef struct PcpScatterParticle {
+    u8 pad00[0x08];
+    s32 unk08;
+    u8 pad0C[0x1C];
+} PcpScatterParticle;
+
+typedef struct PcpScatterInstance {
+    f32 matrix[16];
+    PcpScatterParams params;
+    PcpScatterParticle *particles;
+    f32 unk17C;
+    u32 unk180;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterInstance;
+
+extern void *func_0017D7A8();
+extern u32 func_003292A8(s32 size);
+extern u32 sdfResourceRetainAddress(u32 allocation);
+extern void effCreateScatterResource(void *object, u32 resource);
+extern u32 effMiscRand(void *state);
+extern u8 D_003AA868[];
+
+PcpScatterWork4 *func_0017AD28(src, resource)
+    PcpScatterParams *src;
+    u32 resource;
+{
+    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x18C);
+    PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+
+    particle = (PcpScatterParticle *)((u8 *)inst + 0x18C);
+    inst->params = *src;
+    inst->unk180 = 0x80808080;
+    inst->unk17C = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_0017D7A8(src->particleCount, src->unk60);
+    unk50 = src->unk50;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    mod = inst->params.unk64;
+    count = inst->params.particleCount;
+    if ((s32)mod <= 0) {
+        mod = 1;
+    }
+    for (i = 0; i < count; i++) {
+        particle->unk08 = -(effMiscRand(D_003AA868) % mod);
+        particle++;
+    }
+    return (PcpScatterWork4 *)inst;
+}
 
 PcpScatterWork4 *effScatterBlockDuplicate(u64 arg0) {
     u64 first = effParamTableGetBlock(arg0, 0);
@@ -394,7 +465,70 @@ void effPcpScatterTransformMatrix(u8 *matrix, void *src) {
     VU0_STORE_MATRIX(matrix);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B7A0);
+typedef struct PcpScatterParamsB {
+    u8 pad00[0x10];
+    f32 matrix[16];
+    u32 unk50;
+    u8 pad54[0x08];
+    u32 particleCount;
+    u32 unk60;
+    u32 unk64;
+    u8 pad68[0xD4];
+} PcpScatterParamsB;
+
+typedef struct PcpScatterInstanceB {
+    f32 matrix[16];
+    PcpScatterParamsB params;
+    PcpScatterParticle *particles;
+    f32 unk180;
+    u32 unk184;
+    u32 unk188;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterInstanceB;
+
+void *func_0017B7A0(src, resource)
+    PcpScatterParamsB *src;
+    u32 resource;
+{
+    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x194);
+    PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+    s32 limit;
+
+    particle = (PcpScatterParticle *)((u8 *)inst + 0x194);
+    inst->params = *src;
+    inst->unk184 = 0x80808080;
+    inst->unk180 = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    inst->unk188 = 0;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_0017D7A8(src->particleCount, src->unk60);
+    unk50 = src->unk50;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    limit = inst->params.unk64;
+    if (limit <= 0) {
+        inst->params.unk64 = 1;
+        limit = 1;
+    }
+    mod = limit;
+    count = inst->params.particleCount;
+    for (i = 0; i < count; i++) {
+        particle->unk08 = -(effMiscRand(D_003AA868) % mod);
+        particle++;
+    }
+    return inst;
+}
 
 void func_0017B9D0(u64 arg0) {
     u64 temp_v0;
@@ -445,7 +579,70 @@ void func_0017C278(u8 *matrix, void *src) {
     VU0_STORE_MATRIX(matrix);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C2D8);
+typedef struct PcpScatterParamsC {
+    u8 pad00[0x10];
+    f32 matrix[16];
+    u32 unk50;
+    u8 pad54[0x08];
+    u32 particleCount;
+    u32 unk60;
+    u32 unk64;
+    u8 pad68[0xDC];
+} PcpScatterParamsC;
+
+typedef struct PcpScatterInstanceC {
+    f32 matrix[16];
+    PcpScatterParamsC params;
+    PcpScatterParticle *particles;
+    f32 unk188;
+    u32 unk18C;
+    u32 unk190;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterInstanceC;
+
+void *func_0017C2D8(src, resource)
+    PcpScatterParamsC *src;
+    u32 resource;
+{
+    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x19C);
+    PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+    s32 limit;
+
+    particle = (PcpScatterParticle *)((u8 *)inst + 0x19C);
+    inst->params = *src;
+    inst->unk18C = 0x80808080;
+    inst->unk188 = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    inst->unk190 = 0;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_0017D7A8(src->particleCount, src->unk60);
+    unk50 = src->unk50;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    limit = inst->params.unk64;
+    if (limit <= 0) {
+        inst->params.unk64 = 1;
+        limit = 1;
+    }
+    mod = limit;
+    count = inst->params.particleCount;
+    for (i = 0; i < count; i++) {
+        particle->unk08 = -(effMiscRand(D_003AA868) % mod);
+        particle++;
+    }
+    return inst;
+}
 
 void func_0017C4D8(u64 arg0) {
     u64 temp_v0;

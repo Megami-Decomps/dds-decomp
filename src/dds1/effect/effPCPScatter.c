@@ -160,7 +160,7 @@ struct PcpScatterWork4 {
     u32 unk188;
 };
 
-extern PcpScatterWork4 *func_001730D0(void *param0, void *param1);
+extern PcpScatterWork4 *func_001730D0();
 extern void effShareScatterResource(u32 param0, u32 param1);
 
 /* func_00173B48 */
@@ -561,7 +561,74 @@ PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res)
     return res;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001730D0);
+typedef struct PcpScatterParams {
+    u8 pad00[0x10];
+    f32 matrix[16];
+    u32 unk50;
+    u8 pad54[0x08];
+    u32 particleCount;
+    u32 unk60;
+    u32 unk64;
+    u8 pad68[0xD0];
+} PcpScatterParams;
+
+typedef struct PcpScatterParticle {
+    u8 pad00[0x08];
+    s32 unk08;
+    u8 pad0C[0x1C];
+} PcpScatterParticle;
+
+typedef struct PcpScatterInstance {
+    f32 matrix[16];
+    PcpScatterParams params;
+    PcpScatterParticle *particles;
+    f32 unk17C;
+    u32 unk180;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterInstance;
+
+extern void *func_00175B50();
+extern void effCreateScatterResource(void *object, u32 resource);
+
+PcpScatterWork4 *func_001730D0(src, resource)
+    PcpScatterParams *src;
+    u32 resource;
+{
+    u32 allocation = func_002D03F8(src->particleCount * 0x28 + 0x18C);
+    PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+
+    particle = (PcpScatterParticle *)((u8 *)inst + 0x18C);
+    inst->params = *src;
+    inst->unk180 = 0x80808080;
+    inst->unk17C = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_00175B50(src->particleCount, src->unk60);
+    unk50 = src->unk50;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    mod = inst->params.unk64;
+    count = inst->params.particleCount;
+    if ((s32)mod <= 0) {
+        mod = 1;
+    }
+    for (i = 0; i < count; i++) {
+        particle->unk08 = -(effMiscRand(D_0034DF38) % mod);
+        particle++;
+    }
+    return (PcpScatterWork4 *)inst;
+}
 
 void effScatterBlockDuplicate(void *data)
 {
@@ -610,7 +677,70 @@ void effPcpScatterTransformMatrix(PcpScatterWork4 *work, void *source)
     PCP_STORE_MATRIX(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00173B48);
+typedef struct PcpScatterParamsB {
+    u8 pad00[0x10];
+    f32 matrix[16];
+    u32 unk50;
+    u8 pad54[0x08];
+    u32 particleCount;
+    u32 unk60;
+    u32 unk64;
+    u8 pad68[0xD4];
+} PcpScatterParamsB;
+
+typedef struct PcpScatterInstanceB {
+    f32 matrix[16];
+    PcpScatterParamsB params;
+    PcpScatterParticle *particles;
+    f32 unk180;
+    u32 unk184;
+    u32 unk188;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterInstanceB;
+
+void *func_00173B48(src, resource)
+    PcpScatterParamsB *src;
+    u32 resource;
+{
+    u32 allocation = func_002D03F8(src->particleCount * 0x28 + 0x194);
+    PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+    s32 limit;
+
+    particle = (PcpScatterParticle *)((u8 *)inst + 0x194);
+    inst->params = *src;
+    inst->unk184 = 0x80808080;
+    inst->unk180 = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    inst->unk188 = 0;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_00175B50(src->particleCount, src->unk60);
+    unk50 = src->unk50;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    limit = inst->params.unk64;
+    if (limit <= 0) {
+        inst->params.unk64 = 1;
+        limit = 1;
+    }
+    mod = limit;
+    count = inst->params.particleCount;
+    for (i = 0; i < count; i++) {
+        particle->unk08 = -(effMiscRand(D_0034DF38) % mod);
+        particle++;
+    }
+    return inst;
+}
 
 void func_00173D78(void *data)
 {
@@ -660,7 +790,70 @@ void func_00174620(PcpScatterWork5 *work, void *source)
     PCP_STORE_MATRIX(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174680);
+typedef struct PcpScatterParamsC {
+    u8 pad00[0x10];
+    f32 matrix[16];
+    u32 unk50;
+    u8 pad54[0x08];
+    u32 particleCount;
+    u32 unk60;
+    u32 unk64;
+    u8 pad68[0xDC];
+} PcpScatterParamsC;
+
+typedef struct PcpScatterInstanceC {
+    f32 matrix[16];
+    PcpScatterParamsC params;
+    PcpScatterParticle *particles;
+    f32 unk188;
+    u32 unk18C;
+    u32 unk190;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterInstanceC;
+
+void *func_00174680(src, resource)
+    PcpScatterParamsC *src;
+    u32 resource;
+{
+    u32 allocation = func_002D03F8(src->particleCount * 0x28 + 0x19C);
+    PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+    s32 limit;
+
+    particle = (PcpScatterParticle *)((u8 *)inst + 0x19C);
+    inst->params = *src;
+    inst->unk18C = 0x80808080;
+    inst->unk188 = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    inst->unk190 = 0;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_00175B50(src->particleCount, src->unk60);
+    unk50 = src->unk50;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    limit = inst->params.unk64;
+    if (limit <= 0) {
+        inst->params.unk64 = 1;
+        limit = 1;
+    }
+    mod = limit;
+    count = inst->params.particleCount;
+    for (i = 0; i < count; i++) {
+        particle->unk08 = -(effMiscRand(D_0034DF38) % mod);
+        particle++;
+    }
+    return inst;
+}
 
 void func_00174880(void *data)
 {

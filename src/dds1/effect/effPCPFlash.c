@@ -394,13 +394,6 @@ typedef struct PcpFlashRotationWork {
     PcpFlashRotatingParticle *parts;
 } PcpFlashRotationWork;
 
-typedef struct PcpFlashHandle1 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle1;
-
 typedef struct PcpFlashColorSlot5 {
     s32 color[5];
 } PcpFlashColorSlot5;
@@ -411,48 +404,6 @@ typedef struct PcpFlashHandle {
     u8 pad4C[0x10];
     f32 unk5C;
 } PcpFlashHandle;
-
-typedef struct PcpFlashHandle3 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle3;
-
-typedef struct PcpFlashHandle6 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle6;
-
-typedef struct PcpFlashHandle7 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle7;
-
-typedef struct PcpFlashHandle8 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle8;
-
-typedef struct PcpFlashHandle9 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle9;
-
-typedef struct PcpFlashHandle10 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle10;
 
 extern u8 D_00324680[];
 
@@ -538,7 +489,7 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
     s32 restart;
     s32 fadeParam;
     PcpFlashParticle10 *part;
-    PcpFlashHandle1 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
@@ -604,7 +555,7 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashHandle1 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
@@ -680,16 +631,16 @@ extern u8 D_0034DF38[];
 
 void func_0016A9D0(PcpFlashWork2 *work, s32 index, void *orientation) {
     PcpFlashRotatingParticle *part = work->parts + index;
-    f32 v[4];
-    f32 r;
-    f32 size;
+    f32 direction[4];
+    f32 factor;
+    f32 scale;
 
-    v[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
-    v[1] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
-    v[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    direction[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    direction[1] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    direction[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
     __asm__ volatile(".set noreorder
 	lqc2 $vf10, 0(%0)
-	.set reorder" : : "r"(v));
+	.set reorder" : : "r"(direction));
     __asm__ volatile(".set noreorder
 	lqc2 $vf11, 0(%0)
 	.set reorder" : : "r"(orientation));
@@ -717,31 +668,31 @@ void func_0016A9D0(PcpFlashWork2 *work, s32 index, void *orientation) {
         ".set reorder");
     __asm__ volatile(".set noreorder
 	sqc2 $vf10, 0(%0)
-	.set reorder" : : "r"(v) : "memory");
-    part->position[0] = v[0];
-    part->position[1] = v[1];
-    part->position[2] = v[2];
-    r = func_002E8398(D_0034DF38) * 0.3f + 0.7f;
-    size = work->maxScale * r;
-    part->unk28 = size;
-    part->scale = size;
-    r = (func_002E8398(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
-    part->unk20 = work->unk2C * r;
-    part->unk24 = work->unk30 * r;
+	.set reorder" : : "r"(direction) : "memory");
+    part->position[0] = direction[0];
+    part->position[1] = direction[1];
+    part->position[2] = direction[2];
+    factor = func_002E8398(D_0034DF38) * 0.3f + 0.7f;
+    scale = work->maxScale * factor;
+    part->unk28 = scale;
+    part->scale = scale;
+    factor = (func_002E8398(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
+    part->unk20 = work->unk2C * factor;
+    part->unk24 = work->unk30 * factor;
     part->angle = work->unk38 * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016AB48);
 
-void effRotateFlashParticlePosition(void *work, s32 index, void *orientation)
+void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void *orientation)
 {
-    u8 *part = *(u8 **)((u8 *)work + 0x40) + index * 0x2C;
+    PcpFlashRotatingParticle *part = &work->parts[index];
     f32 position[4];
 
-    position[0] = *(f32 *)(part + 0x10);
-    position[1] = *(f32 *)(part + 0x14);
-    position[2] = *(f32 *)(part + 0x18);
-    func_002DD8B8(orientation, *(f32 *)(part + 0x08));
+    position[0] = part->position[0];
+    position[1] = part->position[1];
+    position[2] = part->position[2];
+    func_002DD8B8(orientation, part->angle);
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -751,9 +702,9 @@ void effRotateFlashParticlePosition(void *work, s32 index, void *orientation)
         "sqc2 vf10, 0(%0)\n"
         ".set reorder"
         : : "r"(position) : "memory");
-    *(f32 *)(part + 0x10) = position[0];
-    *(f32 *)(part + 0x14) = position[1];
-    *(f32 *)(part + 0x18) = position[2];
+    part->position[0] = position[0];
+    part->position[1] = position[1];
+    part->position[2] = position[2];
 }
 
 void effFlashUpdateStreak(PcpFlashWork2 *work) {
@@ -911,7 +862,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
     s32 fadeParam;
     u32 range;
     PcpFlashPtc14 *part;
-    PcpFlashHandle3 *handle;
+    PcpFlashHandle *handle;
 
     lifetime = work->lifetime;
     count = work->particleCount;
@@ -966,7 +917,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashHandle3 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk4C = work->unk4C + 1;
     handle->origin[1] = work->origin[1];
@@ -1147,17 +1098,17 @@ extern f32 func_002E8398(void *state);
 
 void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     PcpFlashPtc20A *part = work->parts + index;
-    f32 v;
-    f32 size;
+    f32 factor;
+    f32 scale;
 
     part->accumulator = func_002E8398(D_0034DF38) * 6.2831853f;
-    v = func_002E8398(D_0034DF38) * 0.3f + 0.7f;
-    size = work->unk40 * v;
-    part->unk1C = size;
-    part->unk0C = size;
-    v = (func_002E8398(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
-    part->unk14 = work->unk38 * v;
-    part->unk18 = work->unk3C * v;
+    factor = func_002E8398(D_0034DF38) * 0.3f + 0.7f;
+    scale = work->unk40 * factor;
+    part->unk1C = scale;
+    part->unk0C = scale;
+    factor = (func_002E8398(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
+    part->unk14 = work->unk38 * factor;
+    part->unk18 = work->unk3C * factor;
     part->increment = work->unk44 * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
 }
 
@@ -1186,7 +1137,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     s32 fadeParam;
     u32 range;
     PcpFlashPtc20A *part;
-    PcpFlashHandle6 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
@@ -1254,7 +1205,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashHandle6 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk50 = work->unk50 + 1;
     handle->origin[1] = work->origin[1];
@@ -1325,7 +1276,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     f32 startB;
     f32 decay;
     PcpFlashPtc10 *part;
-    PcpFlashHandle7 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
@@ -1392,7 +1343,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
             }
         }
     }
-    handle = (PcpFlashHandle7 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
@@ -1468,7 +1419,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
     u32 range;
     s32 fadeParam;
     PcpFlashPtc20B *part;
-    PcpFlashHandle8 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
@@ -1530,7 +1481,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
             }
         }
     }
-    handle = (PcpFlashHandle8 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unkD4 = work->unkD4 + 1;
     handle->origin[1] = work->origin[1];
@@ -1615,7 +1566,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
     f32 maxScale;
     u32 range;
     PcpFlashPtc14 *part;
-    PcpFlashHandle9 *handle;
+    PcpFlashHandle *handle;
 
     count = work->particleCount;
     part = work->parts;
@@ -1677,7 +1628,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
             }
         }
     }
-    handle = (PcpFlashHandle9 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk54 = work->unk54 + 1;
     handle->origin[1] = work->origin[1];
@@ -1749,7 +1700,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 decay;
     f32 scale;
     PcpFlashPtc10 *part;
-    PcpFlashHandle10 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
@@ -1817,7 +1768,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
         }
     }
     scale = work->unk38 * work->unk4C;
-    handle = (PcpFlashHandle10 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     work->updateCount = work->updateCount + 1;
     handle->origin[0] = work->origin[0] + axis[0] * scale;
     handle->origin[1] = work->origin[1] + axis[1] * scale;
