@@ -38,7 +38,7 @@ def main():
     start, end = int(args.start, 16), int(args.end, 16) if args.end else None
     names = {n: int(a, 16) for n, a in ROW.findall((ROOT / "config" / args.version / "symbol_addrs.txt").read_text())}
     src = ROOT / "src" / args.version / f"{args.unit}.c"
-    head, pieces, pending = [], [], []  # pieces: (address, [blocks])
+    head, pieces, pending, includes = [], [], [], []  # pieces: (address, [blocks])
     for b in blocks(src.read_text()):
         inc = INCLUDE.search(b)
         m = DEF.search(b) if "{" in b and not inc else None
@@ -50,7 +50,9 @@ def main():
             pieces.append((addr, pending + [b]))
             pending = []
         elif b.startswith("#include"):
-            continue
+            # Every part keeps the unit's headers (fpu.h's fsqrtf would otherwise
+            # become an undefined external call).
+            includes += [line for line in b.split("\n") if line.startswith("#include") and line not in includes]
         else:
             head.append(b)
     if pending:
@@ -91,7 +93,7 @@ def main():
         decls += [protos[n] for n in sorted(used & set(protos)) if n not in defined and n not in declared]
         path = ROOT / "src" / args.version / f"{unit}.c"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text('#include "common.h"\n\n' + "\n\n".join(decls + body) + "\n")
+        path.write_text("\n".join(includes or ['#include "common.h"']) + "\n\n" + "\n\n".join(decls + body) + "\n")
 
     write(args.unit, groups["head"], args.unit)
     write(new["mid"], groups["mid"], args.unit)

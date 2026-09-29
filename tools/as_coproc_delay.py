@@ -26,6 +26,9 @@ CVTWS = re.compile(r"\s+(?:cvt|trunc)\.w\.s\s+(\$f\d+),")
 # `la $rd,sym($rs)` expands to lui/addiu/addu; retail (5 sequences in DDS1/DDS2)
 # never puts the closing addu in a following `jr`'s delay slot.
 LA_INDEXED = re.compile(r"\s+la\s+\$\w+,[^\s(]+\(\$\w+\)\s*$")
+# Retail never fills a branch delay slot with mfhi/mflo (DDS1 135 and DDS2 101
+# `mfhi|mflo; branch` sequences, none with the move in the slot).
+HILO = re.compile(r"\s+(mfhi|mflo)\s")
 
 
 def reads_fpr(line, fpr):
@@ -52,8 +55,13 @@ def main(src, dst):
         if reorder and 0 < i < len(lines) - 1:
             move = MTC1.match(lines[i - 1]) or CVTWS.match(lines[i - 1])
         next_is_branch = reorder and i < len(lines) - 1 and BRANCH.match(lines[i + 1])
+        # cc1 writes the hi/lo hazard filler as a `#nop` comment line after the move.
+        j = i + 1
+        while j < len(lines) and lines[j].strip().startswith("#"):
+            j += 1
+        hilo_before_branch = reorder and j < len(lines) and HILO.match(line) and BRANCH.match(lines[j])
         if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
-                next_is_branch and LA_INDEXED.match(line)):
+                next_is_branch and LA_INDEXED.match(line)) or hilo_before_branch:
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
             out.append(line)
