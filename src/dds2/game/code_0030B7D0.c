@@ -1574,8 +1574,6 @@ extern u8 D_00401325[];
 
 extern u16 D_00401326[];
 
-extern u8 D_0040132C[][36];
-
 u8 func_003151D0(u16 scriptId) {
     return D_00401324[scriptId * 36];
 }
@@ -1588,9 +1586,7 @@ u8 func_00315220(u16 scriptId) {
     return D_00401325[scriptId * 36];
 }
 
-u8 func_00315248(u16 scriptId, s32 index) {
-    return D_0040132C[scriptId][index];
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00315248);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", scrCallIfOperandReady);
 
