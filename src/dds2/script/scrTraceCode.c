@@ -1,7 +1,10 @@
 #include "common.h"
 #include "scr.h"
 
-extern u32 bfStackPopInt(void);
+extern u32 bfStackPopInt();
+void scrPushInteger(ScrData *scr, s32 val);
+void bfStackPushFloat(ScrData *scr, f32 val);
+f32 bfStackPopFloat();
 
 #define SCR_STACK_TYPE_STRING 5
 
@@ -11,13 +14,30 @@ extern ScrData *D_00438E8C;
 
 extern ScrVM *D_00435DD0;
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushImmediateInteger);
+u32 scrPushImmediateInteger(ScrData *scr) {
+    scrPushInteger(scr, scr->instructions[scr->pc].parts.sOperand);
+    scr->pc++;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushImmediateFloat);
+u32 scrPushImmediateFloat(ScrData *scr) {
+    scr->pc++;
+    bfStackPushFloat(scr, scr->instructions[scr->pc].fOperand);
+    scr->pc++;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushGlobalInteger);
+u32 scrPushGlobalInteger(ScrData *scr) {
+    scrPushInteger(scr, D_00435DD0->ints[scr->instructions[scr->pc].parts.sOperand]);
+    scr->pc++;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushGlobalFloat);
+u32 scrPushGlobalFloat(ScrData *scr) {
+    bfStackPushFloat(scr, D_00435DD0->floats[scr->instructions[scr->pc].parts.sOperand]);
+    scr->pc++;
+    return 1;
+}
 
 u32 scrPushLocalInteger(ScrData *scr) {
     scrPushInteger(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
@@ -25,7 +45,11 @@ u32 scrPushLocalInteger(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrPushLocalFloat);
+u32 scrPushLocalFloat(ScrData *scr) {
+    bfStackPushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
+    scr->pc++;
+    return 1;
+}
 
 u32 scrPushStringLiteral(ScrData *scr) {
     scrPushString(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
@@ -42,9 +66,20 @@ u32 scrPushReturnValue(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreGlobalInteger);
+u32 scrStoreGlobalInteger(ScrData *scr) {
+    D_00435DD0->ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt();
+    scr->pc++;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreGlobalFloat);
+u32 scrStoreGlobalFloat(ScrData *scr) {
+    f32 value;
+
+    value = bfStackPopFloat();
+    D_00435DD0->floats[scr->instructions[scr->pc].parts.sOperand] = value;
+    scr->pc++;
+    return 1;
+}
 
 u32 scrStoreLocalInteger(ScrData *scr) {
     u32 value;
@@ -55,7 +90,11 @@ u32 scrStoreLocalInteger(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", scrStoreLocalFloat);
+u32 scrStoreLocalFloat(ScrData *scr) {
+    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = bfStackPopFloat();
+    scr->pc++;
+    return 1;
+}
 
 u32 func_0010CA08(ScrData *scr) {
     scr->pc++;
@@ -119,9 +158,45 @@ u32 func_0010D160(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNegate);
+u32 bfOpNegate(ScrData *scr) {
+    switch (scr->stackTypes[scr->sp - 1]) {
+    case 0:
+        scr->stackValues[scr->sp - 1].i = -scr->stackValues[scr->sp - 1].i;
+        break;
+    case 1:
+        scr->stackValues[scr->sp - 1].f = -scr->stackValues[scr->sp - 1].f;
+        break;
+    case 2:
+        D_00435DD0->ints[scr->stackValues[scr->sp - 1].i] =
+            -D_00435DD0->ints[scr->stackValues[scr->sp - 1].i];
+        break;
+    case 3:
+        D_00435DD0->floats[scr->stackValues[scr->sp - 1].i] =
+            -D_00435DD0->floats[scr->stackValues[scr->sp - 1].i];
+        break;
+    case 4:
+        break;
+    }
+    scr->pc++;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNot);
+u32 bfOpNot(ScrData *scr) {
+    switch (scr->stackTypes[scr->sp - 1]) {
+    case 0:
+    case 2:
+        scrPushInteger(scr, bfStackPopInt(scr) == 0);
+        break;
+    case 1:
+    case 3:
+        scrPushInteger(scr, bfStackPopFloat(scr) == 0.0f);
+        break;
+    case 4:
+        break;
+    }
+    scr->pc++;
+    return 1;
+}
 
 u32 func_0010D328(ScrData *scr) {
     bfOpBinaryEval(scr, 4);
@@ -171,7 +246,32 @@ u32 func_0010D4B0(ScrData *scr) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpJumpIfFalse);
+u32 bfOpJumpIfFalse(ScrData *scr)
+{
+    s32 result;
+
+    switch (scr->stackTypes[scr->sp - 1]) {
+    case 0:
+    case 2:
+        result = bfStackPopInt(scr);
+        break;
+    case 1:
+    case 3:
+        result = (bfStackPopFloat(scr) != 0.0f);
+        break;
+    case 4:
+        result = 0;
+        break;
+    default:
+        result = 0;
+        break;
+    }
+    if (result != 0)
+        scr->pc++;
+    else
+        scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
 
@@ -195,7 +295,24 @@ s32 scrReadIntParameter(s32 idx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfWaitReadArgFloat);
+f32 bfWaitReadArgFloat(s32 idx)
+{
+    ScrData *scr = D_00438E8C;
+    s32 stackIndex = scr->sp - idx - 1;
+
+    switch (scr->stackTypes[stackIndex]) {
+    case 0:
+    case 4:
+        return (f32)scr->stackValues[stackIndex].i;
+    case 1:
+        return scr->stackValues[stackIndex].f;
+    case 2:
+        return (f32)D_00435DD0->ints[scr->stackValues[stackIndex].i];
+    case 3:
+        return D_00435DD0->floats[scr->stackValues[stackIndex].i];
+    }
+    return 0.0f;
+}
 
 /* Return a string parameter only when its VM stack tag is STRING. */
 char *scrReadStringParameter(s32 paramIdx)
