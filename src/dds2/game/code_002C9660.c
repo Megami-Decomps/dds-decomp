@@ -408,7 +408,7 @@ extern void *fileBeginSlotReset(void);
 
 extern s32 D_00437D30;
 
-extern s32 func_002CEE70(void *arg0, void *arg1, s32 arg2);
+extern s32 fileBeginPromptDialog(void *arg0, void *arg1, s32 arg2);
 
 extern void *fileBeginDirectoryScan(void);
 
@@ -735,14 +735,14 @@ void *fileBeginSlotReset(void) {
     D_00437D3C = 0;
     D_00437D1C = 4;
     D_00437CF8 = 0;
-    return (void *)func_002CEE70(&fileResetSelection, &func_002CAA90, 0);
+    return (void *)fileBeginPromptDialog(&fileResetSelection, &func_002CAA90, 0);
 }
 
 void *fileBeginDirectoryScan(void) {
     func_002CA1D8(0);
     D_00437D3C = 0;
     D_00437D1C = 9;
-    return (void *)func_002CEE70(&mcPrepareDirectory, &fileScanSlotStates, 1);
+    return (void *)fileBeginPromptDialog(&mcPrepareDirectory, &fileScanSlotStates, 1);
 }
 
 extern void *func_002CACF0(void);
@@ -752,7 +752,7 @@ void *func_002CAA90(void) {
     D_00437D3C = 0;
     D_00437D1C = 8;
     D_00437CF8 = 0;
-    return (void *)func_002CEE70(&func_002CACF0, &fileBeginSlotReset, 1);
+    return (void *)fileBeginPromptDialog(&func_002CACF0, &fileBeginSlotReset, 1);
 }
 
 void *func_002CAAD0(void) {
@@ -774,7 +774,7 @@ s32 func_002CAB40(void) {
     D_00437CF4 = 1;
     func_002CA1D8(0);
     D_00437D1C = 5;
-    return func_002CEE70(&func_002CACF0, &func_002CAAF8, 1);
+    return fileBeginPromptDialog(&func_002CACF0, &func_002CAAF8, 1);
 }
 
 extern void *func_002CACF0(void);
@@ -783,7 +783,7 @@ s32 func_002CAB80(void) {
     D_00437CF4 = 1;
     func_002CA1D8(0);
     D_00437D1C = 6;
-    return func_002CEE70(&func_002CACF0, &func_002CAAF8, 1);
+    return fileBeginPromptDialog(&func_002CACF0, &func_002CAAF8, 1);
 }
 
 void *func_002CABC0(void) {
@@ -1415,10 +1415,10 @@ void *func_002CC760(void) {
 s32 mnuSelectFileBranch(void) {
     if (D_00437D0C != 0) {
         D_00437D1C = 7;
-        return func_002CEE70(func_002CAA90, fileResetSelection, 1);
+        return fileBeginPromptDialog(func_002CAA90, fileResetSelection, 1);
     }
     D_00437D1C = 7;
-    return func_002CEE70(fileAbortSlotFlow, fileResetSelection, 1);
+    return fileBeginPromptDialog(fileAbortSlotFlow, fileResetSelection, 1);
 }
 
 void *fileBeginSlotCreate(void) {
@@ -1578,10 +1578,10 @@ extern u32 D_00439024;
 extern u32 D_00439028;
 extern void *func_002CE958(void);
 
-s32 func_002CEE70(void *arg0, void *arg1, s32 arg2) {
-    D_00439024 = (u32)arg0;
-    D_00439028 = (u32)arg1;
-    D_00437D18 = (u32)arg2;
+s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
+    D_00439024 = (u32)start;
+    D_00439028 = (u32)finish;
+    D_00437D18 = (u32)mode;
     D_00437D20 = 0;
     if (D_00437D1C != 4 && D_00437D1C != 8) {
         fileReqBegin(D_00437CD0);
