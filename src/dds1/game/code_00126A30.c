@@ -19,6 +19,45 @@ static inline s32 fldTestBits(u32 flags, u32 mask) {
 }
 
 extern void func_00127028(u32, u32);
+extern s32 *func_00123DD0();
+extern void dds3SetCameraValue(s32, f32);
+extern void fldToggleWorldNodeState(s32);
+extern void func_0012C880(void);
+extern s32 func_00125DF8(s32);
+extern u8 *func_00112888(s32);
+extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
+extern void func_00131268(void);
+extern void func_00131290(void);
+extern void func_001312B0(void);
+typedef struct {
+    f32 dist;
+    f32 y;
+    f32 targetY;
+    f32 fov;
+    f32 unk10;
+    f32 unk14;
+} FldCamRow; /* 0x18 bytes */
+typedef struct {
+    u8 pad0[0x50];
+    s32 mode;
+    u8 pad54[4];
+    s32 rowIdx;
+    u8 pad5C[8];
+    f32 angle;
+    u8 pad68[4];
+    f32 dist;
+    u8 pad70[0xD0];
+    f32 x;
+    f32 y;
+    f32 z;
+} FldCamWork;
+extern FldCamRow D_0032FA10[];
+extern f32 D_00330650[];
+extern f32 D_00330660[];
+extern f32 func_002E77F8(f32);
+extern f32 func_002E78F8(f32);
+extern void btlActivateRuntime(s32 mode);
+extern void func_00110860(u64, s8);
 extern void sdfInitPacketList(u64);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void func_002E1428(u64, s32, s32, s32, s32);
@@ -27,8 +66,11 @@ extern s32 sdfConsAllocateColumnPacket(s32);
 extern void sdfConsCreateDrawPacket(u64, s32, s32);
 
 extern s32 D_0032E3C0[];
+extern s8 D_0032C9A0[];
 extern void func_00131D88(void);
 extern void fldCreatePlayerObject(void);
+extern u8 *func_0013DAC0(void);
+extern s32 func_00110D00(u64, u8 *);
 extern void func_00126A30(u32, u32, s32);
 
 extern s32 D_003BAE68;
@@ -54,6 +96,7 @@ extern s32 D_003BD7C4;
 extern s32 D_003BAB38;
 
 extern u32 D_003BAB34;
+extern u8 D_003BAB3C;
 
 extern u32 D_003BAD34;
 extern u32 D_003BAD38;
@@ -635,7 +678,21 @@ void func_00129720(u32 arg0) {
 
 
 extern void sdfInitPacketList(u64);
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129728);
+void func_00129728(s32 lower, s32 bits, u64 upper) {
+    u64 command = sdfAllocPacketAligned(0x20);
+    u64 packet;
+    u64 *entry;
+    FieldBufferDescriptor *descriptor;
+
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(0x30);
+    entry = func_002E13E0(packet, 0x30);
+    entry[5] = 0x3B;
+    entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 extern void sdfAppendPacket(u64, u64);
 void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
@@ -1105,7 +1162,12 @@ void func_0012B818(void) {
     }
 }
 
-void func_0012B890(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
+void func_0012B890(arg0, arg1, arg2, arg3)
+s32 arg0;
+s32 arg1;
+u64 arg2;
+u64 arg3;
+{
     u64 temp_v0;
 
     temp_v0 = func_00197760(arg0 << 4, arg1 << 4, 0, arg2, arg3, 0);
@@ -1346,7 +1408,20 @@ void func_0012C6C8(u32 arg0, s32 arg1) {
     func_0012C750(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C750);
+s32 func_0012C750(s32 mode) {
+    D_003BAD00 = mode;
+    D_003BACFC = 0;
+    if (func_0012C648() == 0) {
+        if (D_003BAD00 < 3) {
+            if (D_003BAD00 >= 0) {
+                btlActivateRuntime(D_003BAD00);
+                if (dds3GetWorldObject() != 0) {
+                    func_00110860(dds3GetWorldObject(), 1);
+                }
+            }
+        }
+    }
+}
 
 
 void func_0012C7C0(void) {
@@ -1375,7 +1450,20 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012CB48);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012CED0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D240);
+void func_0012D240(void) {
+    FldCamWork *cam = (FldCamWork *)D_0032E3B0;
+    f32 angle;
+
+    D_00330650[0] = cam->x - func_002E77F8(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_00330650[1] = cam->y + D_0032FA10[cam->rowIdx].y;
+    D_00330650[2] = cam->z - func_002E78F8(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_00330650[3] = 1.0f;
+    angle = cam->angle * 3.14f / 180.0f;
+    D_00330660[0] = cam->x + func_002E77F8(angle) * D_0032FA10[cam->rowIdx].dist;
+    D_00330660[1] = cam->y + D_0032FA10[cam->rowIdx].targetY;
+    D_00330660[2] = cam->z + func_002E78F8(angle) * D_0032FA10[cam->rowIdx].dist;
+    D_00330660[3] = 1.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D3D8);
 
@@ -1411,9 +1499,95 @@ void func_0012E6F0(void) {
     D_003BAD1C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E6F8);
+void func_0012E6F8(void) {
+    f32 vec[4];
+    s32 slot;
+    u8 *model;
+    u8 **modelRef;
+    u8 **matrices;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E878);
+    memset(vec, 0, sizeof(vec));
+    vec[3] = 1.0f;
+    if (fldGetLocationCoordinateValue(D_0032E3B0[4], D_0032E3B0[5] + 1) & 0x40) {
+        if (func_00125DF8(0x40) == 0) {
+            return;
+        }
+    }
+    slot = *(s32 *)(func_00112888(D_003BAB34) + 0x5C);
+    modelRef = *(u8 ***)(D_003BAB38 + 0x18);
+    if (slot >= 0) {
+        model = *modelRef;
+        matrices = *(u8 ***)(model + 0xC);
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf28, 0(%0)\n"
+            "lqc2 vf29, 0x10(%0)\n"
+            "lqc2 vf30, 0x20(%0)\n"
+            "lqc2 vf31, 0x30(%0)\n"
+            ".set reorder"
+            : : "r"(matrices[slot] + 0xC0));
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf10, 0(%0)\n"
+            "vmulax.xyzw ACC, vf28, vf10x\n"
+            "vmadday.xyzw ACC, vf29, vf10y\n"
+            "vmaddaz.xyzw ACC, vf30, vf10z\n"
+            "vmaddw.xyzw vf10, vf31, vf10w\n"
+            "sqc2 vf10, 0(%0)\n"
+            ".set reorder"
+            : : "r"(vec));
+        if (fldPointDistance(vec[0], vec[1], vec[2], D_00330620[0], D_00330620[1], D_00330620[2]) < 45.0f) {
+            func_00125DF8(0x40);
+            func_00131268();
+            func_001312B0();
+            func_00131218();
+        } else {
+            func_00131290();
+            if (((FldCamWork *)D_0032E3B0)->mode == 1 || ((FldCamWork *)D_0032E3B0)->mode == 3) {
+                func_00131218();
+            } else if (((FldCamWork *)D_0032E3B0)->dist < 100.0f) {
+                func_00131240();
+            } else {
+                func_00131218();
+            }
+        }
+    }
+}
+
+s32 func_0012E878(void) {
+    FldCamWork *cam;
+    s32 *obj = func_00123DD0();
+
+    if (*obj != 0 && D_003BAB34 != 0) {
+        func_00131278();
+        if (func_0012E488() != 0) {
+            fldToggleWorldNodeState(1);
+            func_0012E510();
+            func_00131218();
+            return 0;
+        } else {
+            func_0012C880();
+            cam = (FldCamWork *)D_0032E3B0;
+            dds3SetCameraValue(*obj, D_0032FA10[cam->rowIdx].fov * 3.14f / 180.0f);
+            switch (cam->mode) {
+            case 0:
+                func_0012D528();
+                if (cam->dist < 50.0f) {
+                    func_0012D528();
+                }
+                break;
+            case 1:
+                func_0012DD70();
+                break;
+            case 4:
+                func_0012D3D8();
+                break;
+            }
+            func_0012E6F8();
+        }
+    }
+    return 0;
+}
 
 void func_0012E9D0(void) {
     D_003BAD38 = 0;
@@ -2130,7 +2304,23 @@ u32 fldDestroyTaskSlot(u32 arg0) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013B130);
+s32 func_0013B130(void) {
+    u8 *object;
+    u32 state = D_003BAB3C;
+    if (!(state & 1)) {
+        return 0;
+    }
+    if ((state & 2) != 0 && D_0032C9A0[0] != 0) {
+        func_00110D88(dds3GetWorldObject(), (u32)D_0032C9A0);
+    }
+    D_0032C9A0[0] = 0;
+    D_003BAB3C = 0;
+    object = func_0013DAC0();
+    if (func_0010BED8((u32)object) == 0) {
+        func_00110D00(dds3GetWorldObject(), object);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013B1D8);
 
@@ -2596,7 +2786,46 @@ extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00140F70);
+s32 func_00140F70(u32 task) {
+    u16 *ticket;
+    u8 *label;
+    s32 width;
+    s32 x;
+
+    if (func_00124F08() != 0) {
+        return 0;
+    }
+    if (func_00125140() != 0) {
+        return 0;
+    }
+    if (func_0028F600() != 0) {
+        return 0;
+    }
+    if (func_00124E90() != 0) {
+        return 0;
+    }
+    if (func_00124EB8() != 0) {
+        return 0;
+    }
+    if (func_00124EE0() != 0) {
+        return 0;
+    }
+    if (func_0014D0D0() != 0) {
+        return 0;
+    }
+    ticket = func_00101A70(task);
+    if (ticket[2] != 0) {
+        label = D_0033E900 + ticket[1] * 32;
+        width = func_00195CD8(label, 1, 0x13);
+        x = 0xF6 - (width >> 1);
+        fldDrawGaugeBar(width);
+        fldDrawTitleBanner(x, 0x131);
+        func_0012B890(x + 0x14, 0x98, 0xA09DC380, (u64)(D_0033E900 + ticket[1] * 32));
+        ticket[0] = ticket[0] + 1;
+        ticket[2] = 0;
+    }
+    return 0;
+}
 
 void * func_00141098(u32 arg0) {
     u16 *temp_v0 = func_002CFEB8(8);
