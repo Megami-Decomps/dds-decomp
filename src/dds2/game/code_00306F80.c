@@ -112,7 +112,17 @@ s32 func_00307160(s32 object, s32 key) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003071D0);
+extern void func_00304B18();
+void func_003071D0(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
+    s32 record = func_00304AD8(object, index);
+
+    entry->x = x >> 4;
+    entry->y = y >> 3;
+    entry->width = width >> 4;
+    entry->height = height >> 3;
+    func_00304B18(object, index, record);
+}
 
 void itfGridSetQuantizedBounds(GridEntryStorage *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
@@ -381,11 +391,16 @@ void func_003089B8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 colors, u32 h) {
     func_00308828(a, b, c, d, e, colors, 0, h);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003089D8);
+void func_003089D8(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
+    func_00308AC8(x, y, z, x + width, y, z, color, context);
+    func_00308AC8(x, y, z, x, y + height, z, color, context);
+    func_00308AC8(x + width, y, z, x + width, y + height, z, color, context);
+    func_00308AC8(x, y + height, z, x + width + 0x10, y + height, z, color, context);
+}
 
-void func_00308AC8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value) {
+void func_00308AC8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value, u32 context) {
     u32 range[2] = {value, value};
-    func_00308AF0(a, b, c, d, e, f, range);
+    func_00308AF0(a, b, c, d, e, f, range, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308AF0);

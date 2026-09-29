@@ -55,7 +55,10 @@ struct EffTransformNode {
     : : "r" (dst), "r" (src) : "memory", "$2")
 
 /* Store vf10 to base+off, recomputing the address. The tied output (no
- * early clobber) lets gcc reuse the base register for the address.
+ * early clobber) lets gcc reuse the base register for the address. The
+ * `addiu` is part of the asm because the C form (`dst = base + off;` then a
+ * bare sqc2) was tried and picks other registers (retail addiu's into the
+ * base's register, effObjAddInnerFirstVec and effObjMulInnerThirdVec differ).
  */
 #define EEF0_STORE_V10(dst, base, off) __asm__ volatile ( \
     ".set noreorder    \n" \

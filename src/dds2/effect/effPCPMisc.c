@@ -2,11 +2,7 @@
 #include "pcp_vu0.h"
 extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
-/* libvu0 sceVu0UnitMatrix expansion: qmfc2 of vf0 (0,0,0,1), then MMI shuffles */
-#define PCP_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $5, $vf0\n\tpextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\tsq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+#include "ee_mmi.h"
 extern void func_0016A620(u32);
 extern void effDestroyNode(u32);
 
@@ -3238,7 +3234,7 @@ EffPCPBlockCloneWork *func_001856B0(EffPCPBlockCloneWork *src) {
     work->unkB0 = 0;
     work->color = 0x80808080;
     work->mode = 0;
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     func_00185500(work, src);
     work->source = NULL;
     return work;
@@ -3256,19 +3252,9 @@ void func_00186118(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0xb8) = arg1;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_00186120(void *dst, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%1)\n"
-        "lqc2 vf29, 0x10(%1)\n"
-        "lqc2 vf30, 0x20(%1)\n"
-        "lqc2 vf31, 0x30(%1)\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(dst), "r"(src) : "memory");
+    VU0_COPY_MATRIX(dst, src);
 }
 
 void func_00186148(void) {
@@ -3287,7 +3273,7 @@ EffPCPBlockCloneWork *func_00186170(EffPCPBlockCloneWork *src) {
     work->color = 0x80808080;
     work->mode = 1;
     work->unkB0 = 0;
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->source = src;
     return work;
 }
@@ -3308,7 +3294,7 @@ EffPCPBlockCloneWork *func_001862E8(EffPCPBlockCloneWork *src) {
     work->color = 0x80808080;
     work->mode = 2;
     work->unkB0 = 0;
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->source = src;
     return work;
 }
@@ -3389,7 +3375,7 @@ EffPCPRotateWork *func_00186708(EffPCPRotateWork *src) {
         sub->unkB0 = 0;
         sub->color = 0x80808080;
         sub->mode = 0;
-        PCP_UNIT_MATRIX(sub->matrix);
+        EE_MMI_UNIT_MATRIX(sub->matrix);
         sub->source = (void *)src->ids[i];
     }
     return work;
@@ -3453,7 +3439,7 @@ EffPCPSpinWork *func_00186B88(void *src) {
     work->scale = 1.0f;
     work->color = 0x80808080;
     work->handle0 = (void *)effParamCreateFromTable(src, 0);
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
     if (effMiscRand(D_003AA868) & 1) {
         work->angle += 3.14159265f;
@@ -3468,7 +3454,7 @@ EffPCPSpinWork *func_00186C60(EffPCPSpinWork *src) {
     work->frame = 0;
     work->scale = 1.0f;
     work->color = 0x80808080;
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
     if (effMiscRand(D_003AA868) & 1) {
         work->angle += 3.14159265f;
@@ -3524,23 +3510,10 @@ void func_00186E30(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effCopyMatrix(EffPCPWork *work, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(&work->unk10) : "memory");
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(&work->unk10);
 }
 
 EffPCPSpinWork *effSpinEffectCreateFromTable(void *table) {
@@ -3551,7 +3524,7 @@ EffPCPSpinWork *effSpinEffectCreateFromTable(void *table) {
     work->color = 0x80808080;
     work->handle0 = (void *)effParamCreateFromTable(table, 0);
     work->handle1 = (void *)effParamCreateFromTable(table, 1);
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
@@ -3564,7 +3537,7 @@ EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
     work->color = 0x80808080;
     work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
     work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
@@ -3615,23 +3588,10 @@ void func_00187130(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_00187138(EffPCPWork *work, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(&work->unk10) : "memory");
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(&work->unk10);
 }
 
 EffPCPSpinWork *func_00187168(void *table) {
@@ -3642,7 +3602,7 @@ EffPCPSpinWork *func_00187168(void *table) {
     work->color = 0x80808080;
     work->handle0 = (void *)effParamCreateFromTable(table, 0);
     work->handle1 = (void *)effParamCreateFromTable(table, 1);
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
@@ -3655,7 +3615,7 @@ EffPCPSpinWork *func_00187228(EffPCPSpinWork *src) {
     work->color = 0x80808080;
     work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
     work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
-    PCP_UNIT_MATRIX(work->matrix);
+    EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
@@ -3704,23 +3664,10 @@ void func_00187430(EffPCPWork *work, f32 val) {
     work->unk58 = val;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_00187438(EffPCPWork *work, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(&work->unk10) : "memory");
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(&work->unk10);
 }
 
 u32 func_00187468(void) {
@@ -4040,23 +3987,10 @@ void func_00188798(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x54) = arg1;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPcpCopyNestedMatrix(EffPCPWork *work, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(&work->nestedWork->pad3C[4]) : "memory");
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(&work->nestedWork->pad3C[4]);
 }
 
 void effRotateNested(EffPCPWork *work, void *src) {
@@ -4214,23 +4148,10 @@ void func_00188E28(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x60) = arg1;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_00188E30(EffPCPWork *work, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(&work->linkedWork->pad3C[4]) : "memory");
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX(&work->linkedWork->pad3C[4]);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E60);

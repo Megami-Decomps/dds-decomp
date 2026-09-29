@@ -673,6 +673,7 @@ typedef struct MdlAnchorRec {
 extern u8 D_00324690[];
 extern u8 *func_002D7D68(void *chunk, s32 id);
 
+/* vu0 routine: out = p + normalize(p - D_00324690) * scale, p = node position transformed by the node matrix */
 void func_0021A3D8(void *chunk, MdlAnchorRec *rec, f32 *out) {
     MdlNodeInfo *info = rec->info;
     u8 *matrix = func_002D7D68(chunk, info->id);

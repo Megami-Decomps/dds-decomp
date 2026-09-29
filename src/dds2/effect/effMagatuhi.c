@@ -139,6 +139,7 @@ void effMagatuhiSetSecondResource(EffMagatuhiResourceSet *work, u32 value) {
     work->secondResource = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effMagatuhiCopyVecs(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
@@ -164,6 +165,7 @@ void func_00193AA0(EffMagatuhiResourceSet *work, u32 value) {
     work->buffer = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effMagatuhiCopyVecs2(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
@@ -189,6 +191,7 @@ void effMagatuhiSetFirstResource(EffMagatuhiResourceSet *work, u32 value) {
     work->firstResource = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effMagatuhiCopyVecs3(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }

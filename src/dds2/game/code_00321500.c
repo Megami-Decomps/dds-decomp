@@ -1,5 +1,27 @@
 #include "common.h"
 
+typedef struct MenuWorkEntry {
+    u8 pad00[4];
+    u32 tag;        /* 0x04 */
+    s32 unk08;      /* 0x08 */
+    u8 pad0C[4];
+    f32 x0;         /* 0x10 */
+    f32 y0;         /* 0x14 */
+    f32 scale0;     /* 0x18 */
+    u8 pad1C[4];
+    f32 x1;         /* 0x20 */
+    f32 y1;         /* 0x24 */
+    f32 scale1;     /* 0x28 */
+    u8 pad2C[8];
+    u16 unk34;      /* 0x34 */
+    u16 unk36;      /* 0x36 */
+    u8 pad38[4];
+    u32 callback;   /* 0x3C */
+    u32 flags;      /* 0x40 */
+    u8 pad44[4];
+} MenuWorkEntry; /* 0x48 */
+
+
 /* Natural memset version exceeded 0x38-byte retail span; likely call-shape mismatch. */
 
 extern u32 D_004390D8;
@@ -16,7 +38,7 @@ extern u8 *D_004389A0;
 
 extern u32 D_004390C8;
 
-extern u32 D_004390CC;
+extern s32 D_004390CC;
 
 extern u32 D_004390E4;
 
@@ -42,7 +64,7 @@ extern void func_00321908(u32);
 extern u32 func_0035A828(s32 bytes);
 extern u8 *func_00321238(void);
 extern u8 *func_00321328(s32 index);
-extern u32 func_00322D50(void);
+extern MenuWorkEntry *func_00322D50(void);
 extern void func_00322E18(u32 node, u32 context, s32 mode, s32 x, s32 y,
                           f32 progress);
 
@@ -116,7 +138,21 @@ void func_00321908(u32 ptr) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321928);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003219F0);
+typedef struct MenuStateRecord {
+    u16 flags;      /* 0x00 */
+    u8 pad02[4];
+    s16 busy;       /* 0x06 */
+    s16 value;      /* 0x08 */
+    u8 pad0A[0xC];
+    s16 limit;      /* 0x16 */
+} MenuStateRecord;
+
+s32 func_003219F0(MenuStateRecord *rec) {
+    if (rec->busy == 0 && (!(rec->flags & 2) || rec->limit > rec->value)) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
 
@@ -198,7 +234,11 @@ void func_003224B8(void) {
 void func_003224C0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003224C8);
+extern u16 D_0040B248[];
+
+u16 *func_003224C8(s32 index) {
+    return &D_0040B248[index];
+}
 
 void func_003224E0(u32 arg0, u32 arg1) {
     D_004390D0 = arg0;
@@ -264,7 +304,29 @@ u32 func_00322610(u32 record) {
     return *(u32 *)(table + 0x10) + *(s16 *)(record + 0x2c) * 16;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322670);
+typedef struct ShortRecordList2 {
+    s32 count;         /* 0x00 */
+    u8 *records;       /* 0x04 */
+} ShortRecordList2;
+
+u8 *func_00322670(ShortRecordList2 *list) {
+    s32 i;
+    u8 *record;
+
+    if (list != NULL) {
+        record = list->records;
+        if (record == NULL) {
+            return NULL;
+        }
+        for (i = 0; i < list->count; i++) {
+            if ((*record & 0xF0) == 0x10) {
+                return record;
+            }
+            record += 8;
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003226D8);
 
@@ -280,7 +342,22 @@ void func_00322D18(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322D50);
+MenuWorkEntry *func_00322D50(void) {
+    s32 i = 0;
+    MenuWorkEntry *entry;
+
+    if (D_004390CC > 0) {
+        entry = (MenuWorkEntry *)D_004390C8;
+        do {
+            if (!(entry->flags & 1)) {
+                return entry;
+            }
+            entry++;
+            i++;
+        } while (i < D_004390CC);
+    }
+    return NULL;
+}
 
 u32 func_00322D98(void) {
     return D_004390C8;
@@ -409,7 +486,7 @@ void mnuInitializeEffectContext(u8 *context) {
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
 
 u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
-    u32 node = func_00322D50();
+    u32 node = (u32)func_00322D50();
     if (node != 0) {
         func_00322E18(node, context, 0, (s32)x, (s32)y, progress);
         *(u32 *)(node + 0x40) |= 0x10;

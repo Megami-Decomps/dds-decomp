@@ -41,7 +41,16 @@ typedef struct {
     u16 indices[0];
 } ActiveList;
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C1D0);
+extern u64 dds3GetWorldSecondaryObject(void);
+extern s32 dds3GetWorldObjectValue(u64);
+extern void func_0023AA30(s32, s32);
+void func_0026C1D0(s32 arg0, s32 arg1) {
+    s32 packed = (arg0 << 16) + arg1;
+
+    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != packed) {
+        func_0023AA30(arg0, arg1);
+    }
+}
 
 void func_0026C240(void) {
     kwlnDrawSetOffsetTransition(0, 0, 0);
@@ -59,11 +68,37 @@ void func_0026C298(void) {
     func_0026C240();
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C2B8);
+void func_0026C2B8(u32 a, u32 b, u32 c, s16 d, s16 e, u32 f, u32 *dst) {
+    dst[0] = a;
+    dst[1] = b;
+    dst[2] = c;
+    *(s16 *)&dst[3] = d;
+    *((s16 *)&dst[3] + 1) = e;
+    dst[4] = f;
+}
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C2D8);
+s32 func_0026C2D8(s32 task) {
+    if (task != 0) {
+        if (kwlnTaskGetRegisteredState(task) != 0) {
+            kwlnTaskDestroyWithHierarchy(task, 0);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C318);
+extern s32 scrCreateTaskForProcessId();
+s32 func_0026C318(s32 arg0, s32 arg1, s32 *taskSlot) {
+    s32 task;
+
+    if (taskSlot != NULL) {
+        func_0026C2D8(*taskSlot);
+    }
+    task = scrCreateTaskForProcessId(0x7D0, arg0, arg1);
+    evtClearActiveFlag(0);
+    if (taskSlot != NULL) {
+        *taskSlot = task;
+    }
+    return task;
+}
 
 void func_0026C388(ActiveList *list) {
     s32 i;
@@ -99,7 +134,24 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C458);
+extern u32 effMiscRand();
+void func_0026C458(u8 *buffer, u32 length, s32 count) {
+    u8 *a;
+    u8 *b;
+    u8 value;
+
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            remaining--;
+            a = buffer + effMiscRand(0) % length;
+            b = buffer + effMiscRand(0) % length;
+            value = *a;
+            *a = *b;
+            *b = value;
+        } while (remaining != 0);
+    }
+}
 
 void evtLoadResourcePair(u32 resource, EvtResourcePair *record) {
     u32 value;
@@ -112,7 +164,15 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
     func_003297C8(record->handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C538);
+extern s32 func_001A38D8(void);
+s32 func_0026C538(void) {
+    if (D_00437880 < 0) {
+        D_00437880 = func_001A38D8();
+        func_001A4988(D_00437880, 2, 0);
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_0026C580(s32 arg0) {
     if (D_00437880 < 0) {
@@ -210,7 +270,10 @@ s8 func_0026C940(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C948);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C9B8);
+void func_0026C9B8(s32 x, s32 y) {
+    func_001A4218(D_00437880, x * 16, y * 8);
+    itfPanelEmitRecord(D_00437880, -((0x15F - y) * 8));
+}
 
 s32 evtIsTaskInActiveStates(s32 task) {
     if (kwlnTaskGetRegisteredState(task) == 1) {
@@ -251,7 +314,17 @@ s32 evtActivateCurrentFlag(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CB48);
+extern s32 func_0032C138(u32);
+s32 func_0026CB48(u32 resource) {
+    u32 buffer[2];
+    u32 handle;
+    s32 result;
+
+    handle = func_00343ED0(resource, &buffer[0], (u32)&buffer[1]);
+    result = func_0032C138(buffer[0]);
+    func_003297C8(handle);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CB98);
 
@@ -272,7 +345,10 @@ void func_0026CF08(u32 arg0) {
     D_00437898 = func_0026CD50(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CF48);
+void func_0026CF48(void) {
+    func_003297C8(*(u32 *)D_00437898);
+    D_00437898 = 0;
+}
 
 s32 func_0026CF70(s32 arg0) {
     return *(s32 *)(D_00437898 + 4) + ((arg0 << 0x10) >> 0xb);
@@ -291,13 +367,37 @@ void func_0026D030(u32 arg0) {
     D_0043789C = func_0026CD50(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D070);
+void func_0026D070(void) {
+    func_003297C8(*(u32 *)D_0043789C);
+    D_0043789C = 0;
+}
 
 s32 func_0026D098(s32 arg0) {
     return *(s32 *)(D_0043789C + 4) + ((arg0 << 0x10) >> 0xb);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D0B0);
+extern u32 func_003292A8(u32);
+extern void *sdfMemoryGetBlockAddress(u32);
+extern void func_0026D168(void *, s32, s32);
+typedef struct EvtMantraWork {
+    u32 allocation;
+    u32 capacity;
+    void *entries;
+    u8 data[0x160];
+} EvtMantraWork; /* 0x16C bytes */
+EvtMantraWork *func_0026D0B0(s32 arg0, s32 arg1) {
+    u32 allocation = func_003292A8(0x16C);
+    EvtMantraWork *work = sdfMemoryGetBlockAddress(allocation);
+
+    memset(work, 0, 0x16C);
+    work->allocation = allocation;
+    work->capacity = 0xB0;
+    work->entries = work->data;
+    if (arg0 != 0) {
+        func_0026D168(work, arg0, arg1);
+    }
+    return work;
+}
 
 s64 func_0026D148(u32 *p) {
     if (p != NULL) {
@@ -317,7 +417,24 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D7E8);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D988);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DA90);
+extern s32 func_00315248(s32, s32);
+void func_0026DA90(s32 arg0, s32 *record) {
+    s32 i;
+    s32 value;
+
+    for (i = 0; i < 5; i++) {
+        value = func_00315248(arg0 & 0xFFFF, i);
+        if (value != 0) {
+            record[1] = value;
+            if (record[0] == 0) {
+                record[0] = i;
+            } else {
+                record[0] = 5;
+                return;
+            }
+        }
+    }
+}
 
 void func_0026DB20(void) {
 }

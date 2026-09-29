@@ -208,6 +208,7 @@ extern void sdfAssetApplyEntryChanges(void *, s32);
 
 extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 
+/* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
 void sdfVuMultiplyPrimaryByScratch(void) {
     __asm__ volatile (
         ".set noreorder               \n"
@@ -238,6 +239,7 @@ void sdfVuMultiplyPrimaryByScratch(void) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+/* vu0 routine: vf28-vf31 = vf28-vf31 * vf20-vf23 (4x4 product) */
 void sdfVuMultiplyScratchByPrimary(void) {
     __asm__ volatile (
         ".set noreorder               \n"
@@ -266,27 +268,13 @@ void sdfVuMultiplyScratchByPrimary(void) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_00336BE8(void *arg0) {
-    __asm__ volatile (
-        ".set noreorder         \n"
-        "lqc2 vf24, 0x0(%0)    \n"
-        "lqc2 vf25, 0x10(%0)   \n"
-        "lqc2 vf26, 0x20(%0)   \n"
-        "lqc2 vf27, 0x30(%0)   \n"
-        ".set reorder"
-        : : "r"(arg0) : "memory");
+    VU0_LOAD_MATRIX_B(arg0);
     func_00336AA8();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_00336C10(void *arg0) {
-    __asm__ volatile (
-        ".set noreorder         \n"
-        "lqc2 vf24, 0x0(%0)    \n"
-        "lqc2 vf25, 0x10(%0)   \n"
-        "lqc2 vf26, 0x20(%0)   \n"
-        "lqc2 vf27, 0x30(%0)   \n"
-        ".set reorder"
-        : : "r"(arg0) : "memory");
+    VU0_LOAD_MATRIX_B(arg0);
     func_00336B00();
 }
 
@@ -336,6 +324,7 @@ void sdfVuCross3(void *dst, void *src1, void *src2) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* Build a VU basis from the normalized target-origin direction and up vector. */
+/* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
 void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
     __asm__ volatile (
         ".set noreorder             \n"
@@ -423,6 +412,7 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
+/* vu0 routine: rotate the three vectors at arg0 + 0x40 by the 3x3 of the global matrix into vf24-vf26, store them */
 void func_00336E60(void *arg0) {
     void *m = (void *)D_00439188;
     __asm__ volatile (
@@ -508,6 +498,7 @@ void sdfVuBlendNodeXY(VuBlendNode *node) {
     }
 }
 
+/* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x40 */
 void sdfVuBlendNodeVectors(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
@@ -774,7 +765,7 @@ void func_003393F0(VuWork *work) {
     work->header = base + 0x30;
     work->cursor = work->dataStart = (u8 *)(((base + 0x40) & 0x0FFFFFFF) | 0x30000000);
     if (work->selectedFlags & 0x4000) {
-        __asm__ volatile(
+        __asm__ volatile (
             ".set noreorder\n"
             "sqc2 vf24, 0x0(%0)\n"
             "sqc2 vf25, 0x10(%0)\n"
@@ -784,7 +775,7 @@ void func_003393F0(VuWork *work) {
         func_00337FD8(work);
         func_00339390((u32)work);
         func_00336D38(work, work->param1);
-        __asm__ volatile(
+        __asm__ volatile (
             ".set noreorder\n"
             "lqc2 vf24, 0x0(%0)\n"
             "lqc2 vf25, 0x10(%0)\n"

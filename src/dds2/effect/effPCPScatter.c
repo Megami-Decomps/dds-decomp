@@ -2,16 +2,6 @@
 #include "pcp_vu0.h"
 extern void func_00336AA8(void);
 
-/* Load a 4x4 matrix into vf24-vf27 (the second operand of func_00336AA8). */
-#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf24, 0(%0)\n\t" \
-    "lqc2 vf25, 16(%0)\n\t" \
-    "lqc2 vf26, 32(%0)\n\t" \
-    "lqc2 vf27, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (src) : "memory")
-
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -484,6 +474,7 @@ void func_0017B738(PcpScatterWork4 *work, u32 value) {
     work->unk180 = value;
 }
 
+/* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
 void effPcpScatterTransformMatrix(u8 *matrix, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_LOAD_MATRIX_B(matrix + 0x50);
@@ -598,6 +589,7 @@ void func_0017C270(PcpScatterWork5 *work, u32 value) {
     work->unk184 = value;
 }
 
+/* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
 void func_0017C278(u8 *matrix, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_LOAD_MATRIX_B(matrix + 0x50);
@@ -712,6 +704,7 @@ void func_0017CE20(PcpScatterWork6 *work, u32 value) {
     work->unk18C = value;
 }
 
+/* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
 void func_0017CE28(u8 *matrix, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_LOAD_MATRIX_B(matrix + 0x50);

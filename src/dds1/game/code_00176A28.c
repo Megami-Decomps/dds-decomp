@@ -59,6 +59,7 @@ void effSetResourceEntryValue(s32 work, s32 index, u32 value) {
     ((EffResourceWork *)work)->entries[index].value = value;
 }
 
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void func_001770F8(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }

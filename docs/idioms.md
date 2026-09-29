@@ -269,8 +269,8 @@ __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p-
 
 That gives retail's `lqc2; jr $31; nop` (`func_00217F70`). Only COP2 and MMI
 go inside the asm (rules below); everything around it is C. Vector copies
-retail does with lqc2/sqc2 are written the same way (see `EFF_COPY64` in
-`effect/effMagatuhi.c`). Values passed in vf registers across calls:
+retail does with lqc2/sqc2 are written the same way (`VU0_COPY_MATRIX` and
+its siblings in `include/pcp_vu0.h`). Values passed in vf registers across calls:
 `void f(void)` using the registers directly (`game/code_002E7C20.c`).
 
 ## Inline asm: COP2 and MMI
@@ -304,6 +304,47 @@ allowed on the same terms as COP2:
 4. **Handwritten functions stay asm.** Whole functions with `addi`, delay slots
    no compiler fills that way, or `.set noreorder` bodies with branches were
    `.s` files originally. Leave them as INCLUDE_ASM; they are not C matches.
+
+### Macro list
+
+Each macro reproduces one retail instruction pattern; the header comment names
+the plain-C forms that were tried. Use these instead of writing the asm again.
+
+`include/ee_mmi.h` (MMI, with the COP2 moves they are fused with):
+
+| Macro | Retail pattern | Origin |
+|---|---|---|
+| `EE_MMI_UNIT_MATRIX(dst)` | `qmfc2.ni $5,vf0; pextuw $4,$0,$5; pextuw $2,$0,$4; pextuw $3,$4,$0; sq $2..$5` to `dst`, `+0x10`, `+0x20`, `+0x30` | libvu0 `sceVu0UnitMatrix` (scratch `$2`-`$5` hard-coded by the SDK) |
+| `EE_MMI_RGBA_UNPACK(src, unit)` | `lw $2,0(src); pextlb $2,$0,$2; pextlh $2,$0,$2; qmtc2.ni $2,vf10; vitof0 vf10,vf10; qmtc2.ni unit,vf2; vmulx vf10,vf10,vf2x` | RGBA8888 word to floats in vf10 (colour modulate/blend routines) |
+| `EE_MMI_RGBA_PACK(out)` | `mfc1 $3,128.0f; qmtc2.ni $3,vf2; vmulx vf10,vf10,vf2x; vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out` | vf10 floats back to an RGBA8888 word |
+
+`include/pcp_vu0.h` (COP2 and 128-bit copies):
+
+| Macro | Retail pattern |
+|---|---|
+| `PCP_COPY_VECTOR(dst, src)` | `lq $2,0(src); sq $2,0(dst); jr; nop` (libvu0 `sceVu0CopyVector` style) |
+| `VU0_COPY_MATRIX(dst, src)` | `lqc2 vf28..vf31` from `src`, `sqc2 vf28..vf31` to `dst` |
+| `VU0_LOAD_MATRIX(src)` / `VU0_STORE_MATRIX(dst)` | the two halves of the copy above (primary matrix bank vf28-vf31) |
+| `VU0_LOAD_MATRIX_B(src)` / `VU0_STORE_MATRIX_B(dst)` | same for the second bank vf24-vf27 |
+
+Uses: the colour-modulate function (`func_00151568` and copies in
+`billManager`, `parManager`, `code_0018CAC8`, `code_001FF030`, dds2 twins),
+`btlBlendColor`/`btlBlendColorVec` in `code_001F6110` / `code_00207A38`,
+`EE_MMI_UNIT_MATRIX` in the PCP effect and `code_00151F58`/`code_00159B48`
+setters, the matrix copy/transform setters in `effPCPMisc`, `effPCPScatter`,
+`effMagatuhi`.
+
+How the mostly-asm functions are marked (check_unit looks for the tag on the
+line above the definition):
+
+- `/* libvu0: sceVu0Name */`: copy of an SDK routine (the register-form
+  transpose `func_002DD4D8` / `func_00336388`);
+- `/* vu0 routine: <what it computes> */`: branch-free COP2 routine. Its values
+  come from C operands (`"r"`/`"f"`) or, for the sdf matrix library, from the
+  vf28-vf31 (primary), vf24-vf27 (second bank) and vf20-vf23 (scratch)
+  register convention documented in "VU0" above; hard-coded scratch registers
+  (`$2`, `$3`, and `$8`-`$15` in the transposes) are the ones the SDK code
+  uses. Loops, calls and address arithmetic stay C around it.
 
 ## Float constants and strings
 

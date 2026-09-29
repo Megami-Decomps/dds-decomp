@@ -208,6 +208,7 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
 }
 
 extern void func_00336C10(void *);
+/* vu0 routine: look-at basis rows in vf28-vf31 from the resource vectors (+0x10, +0x20, +0x30), then transform by the matrix */
 void func_00332BB0(SdfTextParam *param, void *resource) {
     u8 *matrix = func_00330C18(param, *(u32 *)resource);
     u8 *p;
