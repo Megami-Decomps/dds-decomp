@@ -1085,20 +1085,26 @@ void func_00145550(s32 world) {
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145698);
 
 void func_00145730(s32 arg0, s32 arg1) {
+    /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
+    typedef struct {
+        u8 pad00[4];
+        s32 rows; /* 0x04: first scene row */
+        s32 count; /* 0x08: number of scene rows */
+    } SceneHeader;
     if (D_00389780[0] < 0xC8) {
-        s32 temp_a0 = arg0;
-        s32 temp_a1 = arg1;
-        s32 temp_v0 = temp_a0 + 8;
+        s32 source = arg0;
+        s32 resource = arg1;
+        s32 transferStart = source + 8;
 
-        D_00436278 = temp_a1;
-        fldRelocatePackedTransferChunk(arg0, temp_v0);
+        D_00436278 = resource;
+        fldRelocatePackedTransferChunk(arg0, transferStart);
         {
-            s32 temp_v1 = func_00129D60(temp_v0);
-            s32 temp_4 = *(s32 *)(temp_v1 + 4);
-            s32 temp_8 = *(s32 *)(temp_v1 + 8);
+            s32 header = func_00129D60(transferStart);
+            s32 rows = ((SceneHeader *)header)->rows;
+            s32 count = ((SceneHeader *)header)->count;
 
-            D_00436274 = temp_8;
-            D_00436270 = temp_4;
+            D_00436274 = count;
+            D_00436270 = rows;
         }
     }
 }
@@ -1367,7 +1373,7 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
     s32 groupIndex = 0;
 
     for (groupIndex = 0; groupIndex < (s32)D_00436274; groupIndex++, group += 0x14) {
-        u32 entryCount = *(u32 *)(group + 8);
+        u32 entryCount = ((FldSceneRecord *)group)->count;
         u32 entryIndex;
 
         for (entryIndex = 0; entryIndex < entryCount;) {
@@ -1379,7 +1385,7 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
                 }
             }
             entryIndex++;
-            entryCount = *(u32 *)(group + 8);
+            entryCount = ((FldSceneRecord *)group)->count;
         }
     }
     if (best == -1) {
@@ -1394,7 +1400,7 @@ s32 fldFindNextMarkedValue(s32 limit) {
     s32 groupIndex = 0;
 
     for (groupIndex = 0; groupIndex < (s32)D_00436274; groupIndex++, group += 0x14) {
-        u32 entryCount = *(u32 *)(group + 8);
+        u32 entryCount = ((FldSceneRecord *)group)->count;
         u32 entryIndex;
 
         for (entryIndex = 0; entryIndex < entryCount;) {
@@ -1406,7 +1412,7 @@ s32 fldFindNextMarkedValue(s32 limit) {
                 }
             }
             entryIndex++;
-            entryCount = *(u32 *)(group + 8);
+            entryCount = ((FldSceneRecord *)group)->count;
         }
     }
     if (best == 999) {
@@ -2464,7 +2470,7 @@ void func_001512E8(void) {
     func_0014F408();
     func_00125F58();
     D_00389770[0x114 / 4] = 1;
-    *(s16 *)((u8 *)D_00389770 + 0x104) = 0;
+    ((FldWorkView *)D_00389770)->eventActive = 0;
     D_00451B9C[0] = 0;
     D_00389770[0x138 / 4] = 1;
 }
@@ -2478,7 +2484,7 @@ void fldResetAfterEvent(void) {
     func_0014F408();
     func_00144DF8();
     D_00389770[0x114 / 4] = 0;
-    *(s16 *)((u8 *)D_00389770 + 0x104) = 0;
+    ((FldWorkView *)D_00389770)->eventActive = 0;
     D_00451B9C[0] = 0;
     D_00389770[0x138 / 4] = 1;
     evtSetSolarOverlayFullyVisible();
@@ -2814,7 +2820,7 @@ s32 func_00154558(void) {
         func_0010D818(0);
         return 1;
     }
-    entry = func_00110C70(world, fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4)), 0x11);
+    entry = func_00110C70(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
     if (entry == 0) {
         func_0010D818(0);
         return 1;
@@ -2848,7 +2854,7 @@ s32 func_00154628(void) {
         func_0010D818(0);
         return 1;
     }
-    entry = func_00110C70(world, fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4)), 0x11);
+    entry = func_00110C70(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
     if (entry == 0) {
         func_0010D818(0);
         return 1;
@@ -2902,7 +2908,7 @@ s32 func_00154758(void) {
         func_0010D818(0);
         return 1;
     }
-    entry = func_00110C70(world, fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4)), 0x11);
+    entry = func_00110C70(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
     if (entry == 0) {
         func_0010D818(0);
         return 1;
@@ -3709,7 +3715,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
 s32 fldCmdPushSceneParam(void) {
     s32 room;
 
-    room = fldFindRoomByTask(*(u32 *)(func_0010D8C8() + 0xE4));
+    room = fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key);
     switch (scrReadIntParameter(0)) {
     case 0:
         func_0010D818(D_003A8EB0[room].unk0);
@@ -3735,13 +3741,13 @@ u32 func_001568E0(void) {
     u64 temp_v1;
 
     temp_v0 = func_0010D8C8();
-    temp_v1 = fldFindRoomByTask(*(u32 *)(temp_v0 + 0xe4));
+    temp_v1 = fldFindRoomByTask(((EffCmdWork *)temp_v0)->key);
     fldActivateFlaggedObject(temp_v1);
     return 1;
 }
 
 u32 func_00156910(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomByTask(*(s32 *)(func_0010D8C8() + 0xE4))) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key)) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -3756,7 +3762,7 @@ u32 func_00156960(void) {
         func_00140BC8(0);
         return 1;
     }
-    scene = fldGetTaskRecordValue(*(s32 *)(func_0010D8C8() + 0xE4));
+    scene = fldGetTaskRecordValue(((EffCmdWork *)func_0010D8C8())->key);
     if (scene) {
         func_00140BC8(scene);
     }
@@ -3850,7 +3856,7 @@ u32 func_00156B88(void) {
     if (func_00140B80()) {
         scene = 0;
     } else {
-        scene = fldFindTaskRecordId(*(s32 *)(func_0010D8C8() + 0xE4));
+        scene = fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key);
     }
     func_00140830(scene);
     return 1;

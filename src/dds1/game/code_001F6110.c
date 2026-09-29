@@ -1051,210 +1051,221 @@ u32 func_001F88F0(void) {
     return 1;
 }
 
+/* Script command selection: low/high flag words gate the stored choices. */
+typedef struct BtlCommandContext {
+    u8 pad00[0x18];
+    s32 actor; /* 0x18 */
+    u8 pad1C[0x74];
+    u32 selectionFlagsA; /* 0x90 */
+    u32 selectionFlagsB; /* 0x94 */
+    s32 choicesA[26]; /* 0x98..0xFC */
+    s32 choicesB[17]; /* 0x100..0x140 */
+} BtlCommandContext;
+
 u32 btlNbScriptCheckActorFlag(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 1;
-        *(s32 *)(context + 0x98) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 1;
+        ((BtlCommandContext *)context)->choicesA[0] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~1;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~1;
     }
     return 1;
 }
 
 u32 func_001F89B0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x6000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x6000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 2;
-        *(s32 *)(context + 0x9C) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 2;
+        ((BtlCommandContext *)context)->choicesA[1] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~2;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~2;
     }
     return 1;
 }
 
 u32 func_001F8A40(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 4;
-        *(s32 *)(context + 0xA0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 4;
+        ((BtlCommandContext *)context)->choicesA[2] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~4;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~4;
     }
     return 1;
 }
 u32 func_001F8AD0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x1400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x1400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 8;
-        *(s32 *)(context + 0xA4) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 8;
+        ((BtlCommandContext *)context)->choicesA[3] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~8;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~8;
     }
     return 1;
 }
 u32 func_001F8B60(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x1800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x1800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x10;
-        *(s32 *)(context + 0xA8) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x10;
+        ((BtlCommandContext *)context)->choicesA[4] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x10;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x10;
     }
     return 1;
 }
 u32 func_001F8BF0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x1C00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x1C00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x20;
-        *(s32 *)(context + 0xAC) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x20;
+        ((BtlCommandContext *)context)->choicesA[5] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x20;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x20;
     }
     return 1;
 }
 u32 func_001F8C80(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x2000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x40;
-        *(s32 *)(context + 0xB0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x40;
+        ((BtlCommandContext *)context)->choicesA[6] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x40;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x40;
     }
     return 1;
 }
 u32 func_001F8D10(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x2400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x80;
-        *(s32 *)(context + 0xB4) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x80;
+        ((BtlCommandContext *)context)->choicesA[7] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x80;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x80;
     }
     return 1;
 }
 u32 func_001F8DA0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x2800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x100;
-        *(s32 *)(context + 0xB8) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x100;
+        ((BtlCommandContext *)context)->choicesA[8] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x100;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x100;
     }
     return 1;
 }
 u32 func_001F8E30(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x2C00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2C00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x200;
-        *(s32 *)(context + 0xBC) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x200;
+        ((BtlCommandContext *)context)->choicesA[9] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x200;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x200;
     }
     return 1;
 }
 u32 func_001F8EC0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x3000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x3000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x400;
-        *(s32 *)(context + 0xC0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x400;
+        ((BtlCommandContext *)context)->choicesA[10] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x400;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x400;
     }
     return 1;
 }
 u32 func_001F8F50(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x3400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x3400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x800;
-        *(s32 *)(context + 0xC4) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x800;
+        ((BtlCommandContext *)context)->choicesA[11] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x800;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x800;
     }
     return 1;
 }
 u32 func_001F8FE0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x3800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x3800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x1000;
-        *(s32 *)(context + 0xC8) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x1000;
+        ((BtlCommandContext *)context)->choicesA[12] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x1000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x1000;
     }
     return 1;
 }
 
 u32 func_001F9070(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x4800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x4800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x2000;
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x2000;
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x2000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x2000;
     }
     return 1;
 }
 
 u32 func_001F90E8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x5C00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x5C00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x2000000;
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x2000000;
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x2000000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x2000000;
     }
     return 1;
 }
 
 u32 func_001F9168(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x4C00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x4C00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x4000;
-        *(s32 *)(context + 0xD0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x4000;
+        ((BtlCommandContext *)context)->choicesA[14] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x4000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x4000;
     }
     return 1;
 }
 u32 func_001F91F8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x5000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x5000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x4000;
-        *(s32 *)(context + 0xD0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x4000;
+        ((BtlCommandContext *)context)->choicesA[14] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x4000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x4000;
     }
     return 1;
 }
@@ -1263,7 +1274,7 @@ u32 func_001F9288(void) {
     s32 context;
 
     context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x6c00000) != 0) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x6c00000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1275,7 +1286,7 @@ u32 func_001F92D8(void) {
     s32 context;
 
     context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x9400000) != 0) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x9400000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1287,7 +1298,7 @@ u32 func_001F9328(void) {
     s32 context;
 
     context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x9c00000) != 0) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x9c00000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1297,32 +1308,32 @@ u32 func_001F9328(void) {
 
 u32 func_001F9378(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x8C00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x8C00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x40000;
-        *(s32 *)(context + 0xE0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x40000;
+        ((BtlCommandContext *)context)->choicesA[18] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x40000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x40000;
     }
     return 1;
 }
 u32 func_001F9410(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x9000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x9000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x80000;
-        *(s32 *)(context + 0xE4) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x80000;
+        ((BtlCommandContext *)context)->choicesA[19] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x80000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x80000;
     }
     return 1;
 }
 
 u32 func_001F94A8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x10400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x10400000)) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1332,7 +1343,7 @@ u32 func_001F94A8(void) {
 
 u32 func_001F9518(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x10800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x10800000)) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1342,153 +1353,153 @@ u32 func_001F9518(void) {
 
 u32 func_001F9588(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xA000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xA000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x100000;
-        *(s32 *)(context + 0xE8) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x100000;
+        ((BtlCommandContext *)context)->choicesA[20] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x100000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x100000;
     }
     return 1;
 }
 u32 func_001F9620(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xA400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xA400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x200000;
-        *(s32 *)(context + 0xEC) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x200000;
+        ((BtlCommandContext *)context)->choicesA[21] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x200000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x200000;
     }
     return 1;
 }
 u32 func_001F96B8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xA800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xA800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x400000;
-        *(s32 *)(context + 0xF0) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x400000;
+        ((BtlCommandContext *)context)->choicesA[22] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x400000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x400000;
     }
     return 1;
 }
 u32 func_001F9750(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xAC00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xAC00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x800000;
-        *(s32 *)(context + 0xF4) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x800000;
+        ((BtlCommandContext *)context)->choicesA[23] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x800000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x800000;
     }
     return 1;
 }
 
 u32 func_001F97E8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xB800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xB800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 1;
-        *(s32 *)(context + 0x104) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 1;
+        ((BtlCommandContext *)context)->choicesB[1] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~1;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~1;
     }
     return 1;
 }
 u32 func_001F9878(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xBC00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xBC00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 2;
-        *(s32 *)(context + 0x108) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 2;
+        ((BtlCommandContext *)context)->choicesB[2] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~2;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~2;
     }
     return 1;
 }
 u32 func_001F9908(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xC000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xC000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 4;
-        *(s32 *)(context + 0x10C) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 4;
+        ((BtlCommandContext *)context)->choicesB[3] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~4;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~4;
     }
     return 1;
 }
 u32 func_001F9998(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xC400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xC400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 8;
-        *(s32 *)(context + 0x110) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 8;
+        ((BtlCommandContext *)context)->choicesB[4] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~8;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~8;
     }
     return 1;
 }
 u32 func_001F9A28(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xC800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xC800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x10;
-        *(s32 *)(context + 0x114) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x10;
+        ((BtlCommandContext *)context)->choicesB[5] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x10;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x10;
     }
     return 1;
 }
 u32 func_001F9AB8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xCC00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xCC00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x20;
-        *(s32 *)(context + 0x118) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x20;
+        ((BtlCommandContext *)context)->choicesB[6] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x20;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x20;
     }
     return 1;
 }
 u32 func_001F9B48(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xD400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xD400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x400;
-        *(s32 *)(context + 0x12C) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x400;
+        ((BtlCommandContext *)context)->choicesB[11] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x400;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x400;
     }
     return 1;
 }
 u32 func_001F9BD8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xD800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xD800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x800;
-        *(s32 *)(context + 0x130) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x800;
+        ((BtlCommandContext *)context)->choicesB[12] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x800;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x800;
     }
     return 1;
 }
 
 u32 func_001F9C68(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x10C00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1498,7 +1509,7 @@ u32 func_001F9C68(void) {
 
 u32 func_001F9CD8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x11000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x11000000)) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1508,38 +1519,38 @@ u32 func_001F9CD8(void) {
 
 u32 func_001F9D48(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x9800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x9800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x40;
-        *(s32 *)(context + 0x11C) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x40;
+        ((BtlCommandContext *)context)->choicesB[7] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x40;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x40;
     }
     return 1;
 }
 u32 func_001F9DD8(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0xDC00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xDC00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x1000;
-        *(s32 *)(context + 0x134) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x1000;
+        ((BtlCommandContext *)context)->choicesB[13] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x1000;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x1000;
     }
     return 1;
 }
 
 u32 func_001F9E68(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0xD000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xD000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x80;
-        *(s32 *)(context + 0x120) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x80;
+        ((BtlCommandContext *)context)->choicesB[8] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x80;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x80;
     }
     return 1;
 }
@@ -1548,7 +1559,7 @@ u32 func_001F9EF0(void) {
     s32 context;
 
     context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0xe800000) != 0) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xe800000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1560,7 +1571,7 @@ u32 func_001F9F40(void) {
     s32 context;
 
     context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0xec00000) != 0) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xec00000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1570,10 +1581,10 @@ u32 func_001F9F40(void) {
 
 u32 func_001F9F90(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0xB000000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xB000000)) {
         func_0010D5F0(1);
         *(u32 *)(context + 0x90) |= 0x1000000;
-        *(s32 *)(context + 0xF8) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->choicesA[24] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
         *(u32 *)(context + 0x90) &= ~0x1000000;
@@ -1583,10 +1594,10 @@ u32 func_001F9F90(void) {
 
 u32 func_001FA018(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x0b400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x0b400000)) {
         func_0010D5F0(1);
         *(u32 *)(context + 0x90) |= 0x04000000;
-        *(s32 *)(context + 0x100) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->choicesB[0] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
         *(u32 *)(context + 0x90) &= ~0x04000000;
@@ -1658,39 +1669,39 @@ u32 func_001FA270(void) {
 
 u32 func_001FA2B0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x0f800000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x0f800000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x4000;
-        *(s32 *)(context + 0x13c) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x4000;
+        ((BtlCommandContext *)context)->choicesB[15] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x4000;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x4000;
     }
     return 1;
 }
 
 u32 func_001FA340(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x0fc00000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x0fc00000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x8000;
-        *(s32 *)(context + 0x140) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x8000;
+        ((BtlCommandContext *)context)->choicesB[16] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x8000;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x8000;
     }
     return 1;
 }
 
 u32 func_001FA3D0(void) {
     s32 context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x0f400000)) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x0f400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x94) |= 0x2000;
-        *(s32 *)(context + 0x138) = scrReadIntParameter(0);
+        ((BtlCommandContext *)context)->selectionFlagsB |= 0x2000;
+        ((BtlCommandContext *)context)->choicesB[14] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x94) &= ~0x2000;
+        ((BtlCommandContext *)context)->selectionFlagsB &= ~0x2000;
     }
     return 1;
 }

@@ -28,6 +28,7 @@ typedef struct FldCamPose {
         s32 block; /* sdfMemoryGetBlockAddress(value) */
     } fldmix[4]; /* 0x19C */
 } FldCamPose;
+
 typedef struct FldVec3 {
     f32 x;
     f32 y;
@@ -654,20 +655,26 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00142408);
 
 
 void func_001425F8(s32 arg0, s32 arg1) {
+    /* Descriptor from func_001277A8 precedes the 0x14-byte scene rows. */
+    typedef struct {
+        u8 pad00[4];
+        s32 rows; /* 0x04: first scene row */
+        s32 count; /* 0x08: number of scene rows */
+    } SceneHeader;
     if (D_0032E3C0[0] < 0xC8) {
-        s32 temp_a0 = arg0;
-        s32 temp_a1 = arg1;
-        s32 temp_v0 = temp_a0 + 8;
+        s32 source = arg0;
+        s32 resource = arg1;
+        s32 transferStart = source + 8;
 
-        D_003BAEE4 = temp_a1;
-        fldRelocatePackedTransferChunk(arg0, temp_v0);
+        D_003BAEE4 = resource;
+        fldRelocatePackedTransferChunk(arg0, transferStart);
         {
-            s32 temp_v1 = func_001277A8(temp_v0);
-            s32 temp_4 = *(s32 *)(temp_v1 + 4);
-            s32 temp_8 = *(s32 *)(temp_v1 + 8);
+            s32 header = func_001277A8(transferStart);
+            s32 rows = ((SceneHeader *)header)->rows;
+            s32 count = ((SceneHeader *)header)->count;
 
-            D_003BAEE0 = temp_8;
-            D_003BAEDC = temp_4;
+            D_003BAEE0 = count;
+            D_003BAEDC = rows;
         }
     }
 }
@@ -1982,17 +1989,22 @@ extern void func_0014B4D0(void);
 extern void func_00141C40(void);
 extern void func_00123E00(void);
 extern void evtSetSolarOverlayFullyVisible(void);
-void func_0014C5C8(void) {
-    u8 *state = (u8 *)D_0032E3B0;
+typedef struct FldResetWork {
+    u8 pad00[0x104];
+    s16 eventActive; /* 0x104 */
+} FldResetWork;
 
-    if (*(s16 *)(state + 0x104) != 0) {
+void func_0014C5C8(void) {
+    FldResetWork *state = (FldResetWork *)D_0032E3B0;
+
+    if (state->eventActive != 0) {
         D_0032E5C4[0] = 0;
         func_001239C8();
         func_0014B858();
         func_0014B4D0();
         func_00141C40();
         func_00123E00();
-        *(s16 *)(state + 0x104) = 0;
+        state->eventActive = 0;
         D_003D62A0[2] = 0;
         D_003D62A0[3] = 0;
         evtSetSolarOverlayFullyVisible();
@@ -2023,7 +2035,7 @@ void func_0014CFC0(void) {
     func_0014B4D0();
     func_00123E00();
     D_0032E3B0[0x45] = 1;
-    *(s16 *)((u8 *)D_0032E3B0 + 0x104) = 0;
+    ((FldResetWork *)D_0032E3B0)->eventActive = 0;
     D_003D62A8[0] = 0;
     D_0032E3B0[0x4E] = 1;
     evtSetSolarOverlayFullyVisible();
@@ -2914,19 +2926,26 @@ s32 fldCmdPushSceneParam(void) {
     return 1;
 }
 
+/* Script task's scene-record key, shared by the adjacent field commands. */
+typedef struct FldTaskWork {
+    u8 pad00[0xE4];
+    s32 recordKey; /* 0xE4 */
+} FldTaskWork;
+
+
 u32 func_0014EE20(void) {
     s32 temp_v0;
     u64 temp_v1;
 
     temp_v0 = func_0010D6A0();
-    temp_v1 = fldFindRoomByTask(*(u32 *)(temp_v0 + 0xe4));
+    temp_v1 = fldFindRoomByTask(((FldTaskWork *)temp_v0)->recordKey);
     fldActivateFlaggedObject(temp_v1);
     return 1;
 }
 
 
 u32 func_0014EE50(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomByTask(*(s32 *)(func_0010D6A0() + 0xE4))) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomByTask(((FldTaskWork *)func_0010D6A0())->recordKey)) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -2941,7 +2960,7 @@ u32 func_0014EEA0(void) {
         func_0013DF60(0);
         return 1;
     }
-    scene = fldGetTaskRecordValue(*(s32 *)(func_0010D6A0() + 0xE4));
+    scene = fldGetTaskRecordValue(((FldTaskWork *)func_0010D6A0())->recordKey);
     if (scene) {
         func_0013DF60(scene);
     }

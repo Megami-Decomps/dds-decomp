@@ -81,9 +81,11 @@ typedef struct BtlCommandCtx {
     u32 choiceD8;
     u8 padDC[0xC];
     u32 savedChoices[6]; /* 0xE8–0xFC */
-    u8 pad100[0xC];
+    u32 choice100; /* 0x100 */
+    u8 pad104[4];
+    u32 choice108; /* 0x108 */
     u32 choicesB[4];
-    u32 choicesC[9]; /* 0x11C–0x13C */
+    u32 choicesC[12]; /* 0x11C–0x148 */
 } BtlCommandCtx;
 
 extern s32 func_00211DE0(void);
@@ -1366,24 +1368,24 @@ s32 func_0020AE08(void) {
 
 u32 func_0020AE98(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0x5400000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x98) |= 0x2000;
+        ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x98) &= ~0x2000;
+        ((BtlCommandCtx *)context)->selectionFlagsA &= ~0x2000;
     }
     return 1;
 }
 
 u32 func_0020AF10(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0x6C00000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x98) |= 0x2000000;
+        ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x98) &= ~0x2000000;
+        ((BtlCommandCtx *)context)->selectionFlagsA &= ~0x2000000;
     }
     return 1;
 }
@@ -1420,7 +1422,7 @@ u32 func_0020B0B0(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0x8800000) != 0) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1432,7 +1434,7 @@ u32 func_0020B100(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0xB000000) != 0) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1444,7 +1446,7 @@ u32 func_0020B150(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0xB800000) != 0) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1482,7 +1484,7 @@ s32 func_0020B240(void) {
 
 u32 func_0020B2E0(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x12C00000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x12C00000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1492,7 +1494,7 @@ u32 func_0020B2E0(void) {
 
 u32 func_0020B350(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x13000000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13000000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1684,7 +1686,7 @@ s32 func_0020BAD0(void) {
 
 u32 func_0020BB60(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x13400000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13400000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1694,7 +1696,7 @@ u32 func_0020BB60(void) {
 
 s32 func_0020BBD0(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x13800000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13800000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1705,13 +1707,13 @@ s32 func_0020BBD0(void) {
 s32 func_0020BC40(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0xB400000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xB400000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x124) = choice;
-        *(u32 *)(context + 0x9C) |= 0x40;
+        ((BtlCommandCtx *)context)->choicesC[2] = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsB |= 0x40;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x9C) &= ~0x40U;
+        ((BtlCommandCtx *)context)->selectionFlagsB &= ~0x40U;
     }
     return 1;
 }
@@ -1719,13 +1721,13 @@ s32 func_0020BC40(void) {
 s32 func_0020BCD0(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0xFC00000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x13C) = choice;
-        *(u32 *)(context + 0x9C) |= 0x1000;
+        ((BtlCommandCtx *)context)->choicesC[8] = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsB |= 0x1000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x9C) &= ~0x1000U;
+        ((BtlCommandCtx *)context)->selectionFlagsB &= ~0x1000U;
     }
     return 1;
 }
@@ -1733,13 +1735,13 @@ s32 func_0020BCD0(void) {
 s32 func_0020BD60(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), 0xF000000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x128) = choice;
-        *(u32 *)(context + 0x9C) |= 0x80;
+        ((BtlCommandCtx *)context)->choicesC[3] = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsB |= 0x80;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x9C) &= ~0x80U;
+        ((BtlCommandCtx *)context)->selectionFlagsB &= ~0x80U;
     }
     return 1;
 }
@@ -1748,7 +1750,7 @@ u32 func_0020BDE8(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, *(s32 *)(temp_v0 + 0x18), 0x10800000) != 0) {
+    if (func_00210EA0(temp_v0, ((BtlCommandCtx *)temp_v0)->actor, 0x10800000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1758,7 +1760,7 @@ u32 func_0020BDE8(void) {
 
 u32 func_0020BE38(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x10C00000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1770,7 +1772,7 @@ u32 func_0020BEA8(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, *(s32 *)(temp_v0 + 0x18), 0x11000000) != 0) {
+    if (func_00210EA0(temp_v0, ((BtlCommandCtx *)temp_v0)->actor, 0x11000000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1782,7 +1784,7 @@ u32 func_0020BEF8(void) {
     s32 temp_v0;
 
     temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, *(s32 *)(temp_v0 + 0x18), 0x11400000) != 0) {
+    if (func_00210EA0(temp_v0, ((BtlCommandCtx *)temp_v0)->actor, 0x11400000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1793,13 +1795,13 @@ u32 func_0020BEF8(void) {
 s32 func_0020BF48(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), 0xD000000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x100) = choice;
-        *(u32 *)(context + 0x98) |= 0x1000000;
+        ((BtlCommandCtx *)context)->choice100 = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsA |= 0x1000000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x98) &= ~0x1000000U;
+        ((BtlCommandCtx *)context)->selectionFlagsA &= ~0x1000000U;
     }
     return 1;
 }
@@ -1807,13 +1809,13 @@ s32 func_0020BF48(void) {
 s32 func_0020BFE0(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), 0xD400000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x108) = choice;
-        *(u32 *)(context + 0x98) |= 0x4000000;
+        ((BtlCommandCtx *)context)->choice108 = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsA |= 0x4000000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x98) &= ~0x4000000U;
+        ((BtlCommandCtx *)context)->selectionFlagsA &= ~0x4000000U;
     }
     return 1;
 }
@@ -1890,13 +1892,13 @@ u32 func_0020C290(void) {
 s32 func_0020C298(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0x12000000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12000000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x144) = choice;
-        *(u32 *)(context + 0x9C) |= 0x4000;
+        ((BtlCommandCtx *)context)->choicesC[10] = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsB |= 0x4000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x9C) &= ~0x4000U;
+        ((BtlCommandCtx *)context)->selectionFlagsB &= ~0x4000U;
     }
     return 1;
 }
@@ -1904,13 +1906,13 @@ s32 func_0020C298(void) {
 s32 func_0020C328(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0x12400000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12400000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x148) = choice;
-        *(u32 *)(context + 0x9C) |= 0x8000;
+        ((BtlCommandCtx *)context)->choicesC[11] = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsB |= 0x8000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x9C) &= ~0x8000U;
+        ((BtlCommandCtx *)context)->selectionFlagsB &= ~0x8000U;
     }
     return 1;
 }
@@ -1918,20 +1920,20 @@ s32 func_0020C328(void) {
 s32 func_0020C3C0(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0x11C00000)) {
+    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x11C00000)) {
         func_0010D818(1);
-        *(u32 *)(context + 0x140) = choice;
-        *(u32 *)(context + 0x9C) |= 0x2000;
+        ((BtlCommandCtx *)context)->choicesC[9] = choice;
+        ((BtlCommandCtx *)context)->selectionFlagsB |= 0x2000;
     } else {
         func_0010D818(0);
-        *(u32 *)(context + 0x9C) &= ~0x2000U;
+        ((BtlCommandCtx *)context)->selectionFlagsB &= ~0x2000U;
     }
     return 1;
 }
 
 s32 func_0020C450(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), 0x12800000)) {
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x12800000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -2384,11 +2386,23 @@ void func_0020D268(void) {
 void func_0020D270(void) {
 }
 
+/* Script command table: 0x18-byte rows, with the command key at row +8. */
+typedef struct BtlCommandTable {
+    u8 pad00[0x14];
+    u8 *entries; /* 0x14 */
+    s32 count;   /* 0x18 */
+} BtlCommandTable;
+
+typedef struct BtlCommandEntryView {
+    u8 pad00[8];
+    s32 command; /* 0x08 */
+} BtlCommandEntryView;
+
 u8 *btlFindEntryByCommand(u8 *list, s32 command) {
     s32 i;
-    u8 *entry = *(u8 **)(list + 0x14);
-    for (i = 0; i < *(s32 *)(list + 0x18); i++) {
-        if (*(s32 *)(entry + 8) == command) {
+    u8 *entry = ((BtlCommandTable *)list)->entries;
+    for (i = 0; i < ((BtlCommandTable *)list)->count; i++) {
+        if (((BtlCommandEntryView *)entry)->command == command) {
             return entry;
         }
         entry += 0x18;
@@ -2404,11 +2418,11 @@ s32 btlCountNonPartOpcodes(u8 *list) {
     if (list == NULL) {
         return 0;
     }
-    count = *(u32 *)(list + 0x18);
+    count = ((BtlCommandTable *)list)->count;
     if (count == 0) {
         return 0;
     }
-    entry = *(u8 **)(list + 0x14);
+    entry = ((BtlCommandTable *)list)->entries;
     found = 0;
     for (i = 0; i < count; i++) {
         switch (entry[4]) {
@@ -2538,17 +2552,17 @@ s32 func_0020D3A0(s32 unused, BtlReader *reader) {
 INCLUDE_ASM(const s32, "game/code_00207A38", btlScanDirectory);
 
 void btlDestroyEntryList(s32 arg0) {
-    s32 temp_v0;
+    s32 entry;
 
-    if (*(s32 *)(arg0 + 8) != 0) {
-        temp_v0 = *(s32 *)(arg0 + 8);
+    if (((BtlEntryList *)arg0)->head != 0) {
+        entry = (s32)((BtlEntryList *)arg0)->head;
         do {
-            s32 temp_v1 = *(s32 *)(temp_v0 + 0x40);
-            func_00328E48(temp_v0);
-            temp_v0 = temp_v1;
-        } while (temp_v0 != 0);
+            s32 nextEntry = (s32)((BtlEntry *)entry)->next;
+            func_00328E48(entry);
+            entry = nextEntry;
+        } while (entry != 0);
     }
-    func_00328E48(*(s32 *)(arg0 + 4));
+    func_00328E48(((BtlEntryList *)arg0)->unk_04);
     func_00328E48(arg0);
 }
 
