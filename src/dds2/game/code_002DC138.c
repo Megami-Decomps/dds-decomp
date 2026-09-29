@@ -171,7 +171,10 @@ typedef struct Matrix4 {
 /* Function-pointer tables indexed by object fields (entry size inferred). */
 typedef struct FnTbl28 {
     void (*fn)();
-    u8 pad_0x04[0x18]; // 0x04
+    void *(*init)();
+    u8 pad_0x08[4]; // 0x08
+    void *(*duplicate)();
+    u8 pad_0x10[0xC]; // 0x10
 } FnTbl28; // 0x1C
 
 extern FnTbl28 D_003E9964[];
@@ -621,9 +624,44 @@ void mdlMarkAndProcessObjectNodes(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCCE8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD038);
+typedef struct EffResourceOwner {
+    u32 count;
+    u8 pad_04[0xB4];
+    s32 *entries;
+    u32 buffer;
+    u32 model;
+} EffResourceOwner;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD0C8);
+extern void fileQueueDestroy(s32);
+
+void func_002DD038(EffResourceOwner *owner) {
+    u32 i;
+
+    if (owner->model != 0) {
+        func_002DC260(owner->model);
+    }
+    if (owner->buffer != 0) {
+        for (i = 0; i < owner->count; i++) {
+            fileQueueDestroy(owner->entries[i]);
+        }
+        func_003297C8(owner->buffer);
+    }
+    func_00328E48(owner);
+}
+
+typedef struct { u32 word[0xF]; } EffectBlob3C;
+typedef struct { u32 word[0x1D]; } EffectBlob74;
+extern u8 *func_002DCCE8(s32);
+extern void func_002DD258(u8 *, u8 *);
+
+s32 func_002DD0C8(u8 *src) {
+    u8 *dst = func_002DCCE8(0);
+
+    *(EffectBlob3C *)(dst + 8) = *(EffectBlob3C *)(src + 8);
+    *(EffectBlob74 *)(dst + 0x44) = *(EffectBlob74 *)(src + 0x44);
+    func_002DD258(dst, src);
+    return (s32)dst;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD258);
 
@@ -1667,7 +1705,17 @@ u8 *func_002E56A8(u16 kind, void *source) {
     return effect;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5760);
+typedef struct EffInstance {
+    u8 pad_00[0x30];
+    void *resourceHandle;
+} EffInstance;
+
+u8 *func_002E5760(u16 kind, void *source, u32 extra) {
+    EffInstance *work = (EffInstance *)func_002E56A8(kind, source);
+    work->resourceHandle = D_003E9950[kind].init(source, extra);
+    D_003E9950[kind].fn(work);
+    return (u8 *)work;
+}
 
 u8 *effCreateFileResourceInstance(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
@@ -1691,7 +1739,25 @@ void effDispatchDestroyOp(u32 *obj) {
     func_00328E48(obj);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effCreateActiveResource);
+typedef struct EffActiveInstance {
+    u8 pad_00[0x2C];
+    s32 kind;
+    void *resource;
+    void *source;
+} EffActiveInstance;
+
+u8 *effCreateActiveResource(EffActiveInstance *obj) {
+    EffActiveInstance *work;
+
+    if (D_003E9950[obj->kind].duplicate == NULL) {
+        work = (EffActiveInstance *)func_002E5760((u16)obj->kind, obj->source, 0);
+    } else {
+        work = (EffActiveInstance *)func_002E56A8((u16)obj->kind, obj->source);
+        work->resource = D_003E9950[obj->kind].duplicate(obj);
+        D_003E9950[obj->kind].fn(work);
+    }
+    return (u8 *)work;
+}
 
 void func_002E5978(u8 *work) {
     D_003E9950[*(s32 *)(work + 0x2c)].fn();
@@ -1740,13 +1806,63 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5AB8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5C50);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effReleaseResourceRefs);
+typedef struct EffResourceRefs {
+    u8 pad_00[0xC];
+    u16 kind;
+    u8 pad_0E[0xA];
+    void *shared;
+    u8 pad_1C[4];
+    s32 owned;
+    u8 pad_24[4];
+    u32 asset;
+    u32 buffer;
+} EffResourceRefs;
+
+extern s32 D_00437E58[2];
+extern void *D_00437E60[2];
+
+void effReleaseResourceRefs(EffResourceRefs *work) {
+    s32 *count;
+    void **slot;
+
+    if (work->owned != 0) {
+        if (work->shared == 0) {
+            switch (work->kind) {
+            case 3:
+                count = &D_00437E58[0];
+                if (--*count == 0) {
+                    slot = &D_00437E60[0];
+                    effReleaseSharedReference(*slot);
+                    *slot = 0;
+                }
+                break;
+            case 4:
+                count = &D_00437E58[1];
+                if (--*count == 0) {
+                    slot = &D_00437E60[1];
+                    effReleaseSharedReference(*slot);
+                    *slot = 0;
+                }
+                break;
+            }
+        } else {
+            effReleaseSharedReference(work->shared);
+        }
+    }
+    sdfQueueAssetRelease(work->asset);
+    func_003297C8(work->buffer);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5DE0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E5E88);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effLoadFlashTextures);
+extern u32 D_00437E48[2];
+
+void effLoadFlashTextures(void) {
+    D_00437E48[0] = func_00343ED0("/effect/flash00.tmx", &D_00437E50, 0);
+    D_00437E48[1] = func_00343ED0("/effect/flash01.tmx", &D_00437E50 + 1, 0);
+}
 
 u32 func_002E63F0(s32 arg0) {
     return (&D_00437E50)[arg0];
@@ -2948,7 +3064,14 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F10C0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", effAllocateBlock);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effCreateResourceInstanceB);
+extern u8 *effAllocateBlock(u16, void *);
+
+u8 *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
+    u8 *work = effAllocateBlock(kind, source);
+    *(void **)(work + 0x30) = D_003E9DD8[kind].init(source, extra);
+    D_003E9DD8[kind].fn(work);
+    return work;
+}
 
 extern u8 *effCreateResourceInstanceB(u16, void *, u32);
 
@@ -2973,7 +3096,12 @@ void func_002F13E0(u32 *obj) {
     func_00328E48(obj);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effDuplicateActiveResourceB);
+u8 *effDuplicateActiveResourceB(u8 *obj) {
+    u8 *work = effAllocateBlock(*(u16 *)(obj + 0x2C), *(void **)(obj + 0x34));
+    *(void **)(work + 0x30) = D_003E9DD8[*(s32 *)(obj + 0x2C)].duplicate(obj);
+    D_003E9DD8[*(s32 *)(obj + 0x2C)].fn(work);
+    return work;
+}
 
 void func_002F14B8(u8 *work) {
     D_003E9DD8[*(s32 *)(work + 0x2c)].fn();
@@ -3291,13 +3419,18 @@ u8 *effAllocateBlockWithModel(u16 kind, void *source) {
     return effect;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effCreateResourceInstanceC);
+u8 *effCreateResourceInstanceC(u16 kind, void *source) {
+    u8 *work = effAllocateBlockWithModel(kind, source);
+    *(void **)(work + 0x30) = D_003E9E60[kind].init(source);
+    D_003E9E60[kind].fn(work);
+    return work;
+}
 
 void func_002F3AD0(s32 arg0) {
-    u64 temp_v0;
+    void *source;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    effCreateResourceInstanceC(*(u16 *)(arg0 + 0xc), temp_v0);
+    source = fileResolvePrimaryBuffer();
+    effCreateResourceInstanceC(*(u16 *)(arg0 + 0xc), source);
 }
 
 extern EffOp28 D_003E9E68[];
@@ -3307,7 +3440,12 @@ void effDispatchCleanupOp(u32 *obj) {
     func_00328E48(obj);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effRecreateActiveByClass);
+u8 *effRecreateActiveByClass(u8 *obj) {
+    u8 *work = effAllocateBlockWithModel(*(u16 *)(obj + 0x2C), *(void **)(obj + 0x34));
+    *(void **)(work + 0x30) = D_003E9E60[*(s32 *)(obj + 0x2C)].duplicate(obj);
+    D_003E9E60[*(s32 *)(obj + 0x2C)].fn(work);
+    return work;
+}
 
 void func_002F3BD8(u8 *work) {
     D_003E9E60[*(s32 *)(work + 0x2c)].fn();
@@ -3784,7 +3922,28 @@ void func_002F78A8(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7928);
+extern f32 D_00437E90;
+extern void func_001E95C8(s32, f32);
+
+void func_002F7928(u8 *work) {
+    s32 owner = func_001AA6F8();
+    f32 *keys = *(f32 **)(work + 0x38);
+    u32 total = *(u32 *)keys;
+    s32 frame;
+    f32 ratio;
+    f32 value;
+
+    if (total != 0) {
+        frame = *(u32 *)(work + 0x28);
+        if (total < frame) {
+            return;
+        }
+        ratio = (f32)frame / (f32)total;
+        value = ((keys[2] - keys[1]) * ratio + keys[1]) * 0.017453293f;
+        func_001E95C8(owner + 0x70, value);
+        D_00437E90 = value;
+    }
+}
 
 u32 *func_002F79E0(u32 owner) {
     u32 *work = (u32 *)func_00328D68(4);
@@ -4168,7 +4327,23 @@ void effReleaseParticleResources(u32 *p) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9C38);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effReplaceSharedResource);
+void effReplaceSharedResource(u8 *dst, u8 *src) {
+    u32 handle;
+
+    if (*(s32 *)(src + 0xA4) != 0) {
+        if (*(s32 *)(dst + 0xA4) != 0) {
+            billDispatchByKind(*(s32 *)(dst + 0xA4));
+        }
+        handle = func_00159A50(*(u32 *)(src + 0xA4));
+        *(u32 *)(dst + 0xA4) = handle;
+        func_00159FA0(handle);
+    } else {
+        if (*(s32 *)(dst + 0xA8) != 0) {
+            effReleaseReferenceHolder(*(u32 **)(dst + 0xA8));
+        }
+        *(RefObj **)(dst + 0xA8) = func_002DE120(*(RefObj **)(src + 0xA8));
+    }
+}
 
 void func_002F9DE8(s32 arg0) {
     *(u32 *)(arg0 + 8) = 0;
@@ -4566,21 +4741,81 @@ void func_002FC610(u32 arg0) {
     fileJobDestroy(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effPollPrimaryFile);
+extern char D_0042CF58[];
+extern char D_0042CF70[];
+extern char D_004386D0[];
+extern char D_004386D8[];
+extern void effUpdateResourceQueue(char *, char *, u8 *);
+extern void fileWriteToPfs(u32, char *);
+extern s32 func_0035C860(char *, char *, ...);
+extern void func_002D50D8(u32, char *);
+extern void func_002D55B0(u32, char *);
+
+s32 effPollPrimaryFile(void) {
+    u8 request[0x70];
+    char path[0x70];
+    s32 result = 0x400001;
+
+    effUpdateResourceQueue(D_0042CF58, D_004386D0, request);
+    if (*(s32 *)(request + 0x64) == 2) {
+        result = 0x400000;
+    } else if (*(s32 *)(request + 0x64) == 1) {
+        if (D_004386C0 != 0) {
+            func_0035C860(path, D_004386D8, D_0042CF58, request);
+            result = 0x400002;
+            fileWriteToPfs(D_004386C0, path);
+        }
+    }
+    return result;
+}
 
 void func_002FC718(void) {
     func_003002A8();
     effQueueResource(D_004386E0, D_0045C1A0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effPollNamedFile);
+s32 effPollNamedFile(void) {
+    u8 request[0x70];
+    char path[0x70];
+    s32 result = 0x400001;
+
+    effUpdateResourceQueue(D_0042CF70, D_004386E0, request);
+    if (*(s32 *)(request + 0x64) == 2) {
+        result = 0x400000;
+    } else if (*(s32 *)(request + 0x64) == 1) {
+        if (D_004386B8 != 0) {
+            strcpy((char *)D_0045C1A0, (char *)(request + 0x32));
+            func_0035C860(path, D_004386D8, D_0042CF70, request);
+            result = 0x400002;
+            func_002D50D8(D_004386B8, path);
+        }
+    }
+    return result;
+}
 
 void func_002FC808(void) {
     func_003002A8();
     effQueueResource(D_004386E8, D_0045C1A0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effPollAttachedFile);
+s32 effPollAttachedFile(void) {
+    u8 request[0x70];
+    char path[0x70];
+    s32 result = 0x400001;
+
+    effUpdateResourceQueue(D_0042CF70, D_004386E8, request);
+    if (*(s32 *)(request + 0x64) == 2) {
+        result = 0x400000;
+    } else if (*(s32 *)(request + 0x64) == 1) {
+        if (D_004386B8 != 0) {
+            strcpy((char *)D_0045C1A0, (char *)(request + 0x32));
+            func_0035C860(path, D_004386D8, D_0042CF70, request);
+            result = 0x400002;
+            func_002D55B0(D_004386B8, path);
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC8F8);
 
@@ -5290,7 +5525,44 @@ void func_003003E0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effPollResourceBank);
+typedef struct EffBankStatus {
+    u8 pad_00[0xC8];
+    s32 type;
+    s32 state;
+    s32 count;
+} EffBankStatus;
+
+extern void btlAppendEntry(s32, char *, s32, s32, s32);
+
+void effPollResourceBank(u32 mode, EffBankStatus *status) {
+    if (D_0043875C == 0) {
+        u32 i;
+        u32 count;
+        char name[0x70];
+
+        D_0043875C = func_0020D448(0, mode);
+        if (mode & 8) {
+            count = func_00159BB0();
+            for (i = 0; i < count; i++) {
+                func_0035C860(name, "GENERAL %d", i);
+                btlAppendEntry(D_0043875C, name, 8, i, 0);
+            }
+        }
+        D_00438760 = func_0020DA28(D_0043875C);
+        func_0020DFB0(D_00438760, 0xBA, 0x1C);
+    } else {
+        func_0020DAB8(D_00438760);
+        status->state = func_0020DFC8(D_00438760);
+        status->type = func_0020DFD0(D_00438760, status);
+        status->count = func_0020E0F8(D_00438760);
+        if (status->state == 1) {
+            func_0020DF68(D_00438760);
+            D_00438760 = 0;
+            func_0020D8F0(D_0043875C);
+            D_0043875C = 0;
+        }
+    }
+}
 
 void effResetMappingFlags(void) {
     D_0043876C = 0;
@@ -5587,7 +5859,7 @@ s32 effPollGeneralResource(s32 mode) {
     u8 *entry;
     s32 result = 0x600001;
 
-    effPollResourceBank(mode, status);
+    effPollResourceBank(mode, (EffBankStatus *)status);
     if (*(s32 *)(status + 0xCC) == 2) {
         result = 0x400000;
     } else if (*(s32 *)(status + 0xCC) == 1) {
@@ -6237,15 +6509,21 @@ u32 func_003045E8(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304618);
 
-extern u8 D_00400508[];
+typedef struct EffRecordBucket {
+    u8 pad_00[8];
+    u32 count;
+    u8 *records;
+} EffRecordBucket;
+
+extern EffRecordBucket D_00400508[];
 
 u32 effSumRecordStatuses(u8 *buffer) {
-    u8 *record = D_00400508 + *(u32 *)(buffer + 0x14) * 16;
+    EffRecordBucket *record = &D_00400508[*(u32 *)(buffer + 0x14)];
     u32 total = 0;
     u32 i;
 
-    for (i = 0; i < *(u32 *)(record + 8); i++) {
-        total += func_00304618(*(u8 **)(record + 0xC) + i * 0x18 + 4, 0, 0, 0);
+    for (i = 0; i < record->count; i++) {
+        total += func_00304618(record->records + i * 0x18 + 4, 0, 0, 0);
     }
     return total;
 }
@@ -6585,7 +6863,21 @@ u32 effConfigureWithDefaultSetting(u32 effect, u32 slot, u32 kind, u32 value, u3
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00305B28);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00305BD0);
+extern void func_00308478(u32, u32);
+
+void func_00305BD0(u32 kind, u32 arg) {
+    switch (kind) {
+    case 0:
+        func_00308478(0x44, arg);
+        return;
+    case 1:
+        func_00308478(0x48, arg);
+        return;
+    case 2:
+        func_00308478(0x42, arg);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00305C40);
 
