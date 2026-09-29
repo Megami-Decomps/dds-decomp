@@ -360,6 +360,8 @@ extern void func_00131590(void);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120EC8);
 
+/* Five adjacent halfword flag banks per 30-byte map slot; the bank
+ * offsets are data-layout offsets, not independent map indices. */
 void func_00120FA0(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
@@ -1015,25 +1017,27 @@ void fldInitializeLinkedSequenceRecord(FieldSequenceRecord *record, s32 stage, s
     record->options = 0;
 }
 
+/* Converts the field work's primary and secondary state words into a
+ * compact scene status, giving the primary state precedence. */
 u32 func_00123378(void) {
-    u32 *temp_v0 = D_0032F1A0;
+    u32 *sceneWork = D_0032F1A0;
 
-    if (temp_v0[0xD] == 1) {
+    if (sceneWork[0xD] == 1) {
         return 1;
     }
-    if (temp_v0[0x17] == 3) {
+    if (sceneWork[0x17] == 3) {
         return 3;
     }
-    if (temp_v0[0x17] == 4) {
+    if (sceneWork[0x17] == 4) {
         return 4;
     }
-    if (temp_v0[0x17] == 5) {
+    if (sceneWork[0x17] == 5) {
         return 5;
     }
-    if (temp_v0[0x17] == 6) {
+    if (sceneWork[0x17] == 6) {
         return 2;
     }
-    return temp_v0[0xD] != 0 ? 2 : 0;
+    return sceneWork[0xD] != 0 ? 2 : 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001233D0);
@@ -1454,8 +1458,10 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125170);
 
 extern void func_00110D00(u64, void *);
 extern void func_0014C468(void);
+/* Dispatch one pending field command, preferring the temporary override
+ * over the scene-work buffer and its saved fallback. */
 s32 func_00125348(void) {
-    u32 *buffer = D_0032F1A0;
+    u32 *sceneWork = D_0032F1A0;
     u32 flags;
 
     if (D_0032E3B0[64] == 1) {
@@ -1471,8 +1477,8 @@ s32 func_00125348(void) {
         }
         return 1;
     }
-    if (buffer[13] == 0 && *(s8 *)((u8 *)buffer + 0x80) != 0) {
-        func_00110D00(dds3GetWorldSecondaryObject(), (u8 *)buffer + 0x80);
+    if (sceneWork[13] == 0 && *(s8 *)((u8 *)sceneWork + 0x80) != 0) {
+        func_00110D00(dds3GetWorldSecondaryObject(), (u8 *)sceneWork + 0x80);
         return 1;
     }
     if (D_0032E3B0[1] != 0) {
@@ -1504,30 +1510,32 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcSequence);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcDraw);
 
-void func_00125D90(u32 arg0) {
+/* Independent flag words: D_003BABF8 and D_003BAC00 each have
+ * their own set, clear and test operations. */
+void func_00125D90(u32 mask) {
     u32 *flags = &D_003BABF8;
-    *flags |= arg0;
+    *flags |= mask;
 }
 
-void func_00125DA8(u32 arg0) {
+void func_00125DA8(u32 mask) {
     u32 *flags = &D_003BABF8;
-    *flags &= ~arg0;
+    *flags &= ~mask;
 }
 
-u8 func_00125DC0(u32 arg0) {
-    return (D_003BABF8 & arg0) != 0;
+u8 func_00125DC0(u32 mask) {
+    return (D_003BABF8 & mask) != 0;
 }
 
-void func_00125DD0(u32 arg0) {
-    D_003BAC00 = D_003BAC00 | arg0;
+void func_00125DD0(u32 mask) {
+    D_003BAC00 = D_003BAC00 | mask;
 }
 
-void func_00125DE0(u32 arg0) {
-    D_003BAC00 = D_003BAC00 & ~arg0;
+void func_00125DE0(u32 mask) {
+    D_003BAC00 = D_003BAC00 & ~mask;
 }
 
-u8 func_00125DF8(u32 arg0) {
-    return (D_003BAC00 & arg0) != 0;
+u8 func_00125DF8(u32 mask) {
+    return (D_003BAC00 & mask) != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125E08);
@@ -1587,9 +1595,9 @@ void func_00126068(void) {
     func_0013EC68();
 }
 
-void fldSetDeferredFieldCommand(u32 arg0, u32 arg1) {
-    D_003BABD8 = arg0;
-    D_003BABDC = arg1;
+void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
+    D_003BABD8 = command;
+    D_003BABDC = parameter;
 }
 
 void fldDispatchDeferredFieldCommand(void) {
@@ -1600,16 +1608,16 @@ void fldDispatchDeferredFieldCommand(void) {
     D_003BABD8 = 0;
 }
 
-void func_00126108(u32 arg0) {
-    D_003BABE0 = arg0;
+void func_00126108(u32 argument) {
+    D_003BABE0 = argument;
 }
 
 void func_00126110(void) {
-    u32 temp_v0;
+    u32 argument;
 
-    temp_v0 = D_003BABE0;
-    if (temp_v0 != 0) {
-        func_0013E5A8(temp_v0);
+    argument = D_003BABE0;
+    if (argument != 0) {
+        func_0013E5A8(argument);
         D_003BABE0 = 0;
     }
 }

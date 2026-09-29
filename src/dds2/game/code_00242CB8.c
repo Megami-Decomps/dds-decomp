@@ -40,95 +40,95 @@ INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00421FE8);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242D10);
 
-/* Same command work prefix used by the event opcode dispatcher. */
+/* Event-command work prefix; the +0xE4 key selects the parent field task. */
 typedef struct {
-    u8 unk00[0xE4];
-    u32 key; /* 0xE4: current field task key */
-} EffCmdWork;
+    u8 pad00[0xE4];
+    u32 taskKey;
+} EvtCommandWork;
 
 u32 evtOpcodeCreateWorldChildTask(void) {
-    EffCmdWork *work;
+    EvtCommandWork *work;
     s32 childTask;
 
-    work = (EffCmdWork *)func_0010D8C8();
+    work = (EvtCommandWork *)func_0010D8C8();
     if (work == NULL) {
         return 1;
     }
-    if (work->key == 0) {
+    if (work->taskKey == 0) {
         func_0035B6E0(D_00422050);
         return 1;
     }
     childTask = evtCreateTask(0x2afe, func_0010D7D0(0));
-    func_00101968(work->key, childTask);
+    func_00101968(work->taskKey, childTask);
     func_0010D818(childTask);
     return 1;
 }
 
 u32 evtOpcodeSetTaskContextFlag(void) {
-    u64 taskId;
+    u64 task;
     s64 registered;
 
-    taskId = func_0010D650(0);
-    registered = kwlnTaskIsRegistered(taskId);
+    task = func_0010D650(0);
+    registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
-        evtSetContextFlag(taskId);
+        evtSetContextFlag(task);
     }
     return 1;
 }
 
 u32 evtOpcodeClearTaskContextFlag(void) {
-    u64 taskId;
+    u64 task;
     s64 registered;
 
-    taskId = func_0010D650(0);
-    registered = kwlnTaskIsRegistered(taskId);
+    task = func_0010D650(0);
+    registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
-        evtClearContextFlag(taskId);
+        evtClearContextFlag(task);
     }
     return 1;
 }
 
 u32 evtOpcodeDestroyTask(void) {
-    u64 taskId;
+    u64 task;
     s64 registered;
 
-    taskId = func_0010D650(0);
-    registered = kwlnTaskIsRegistered(taskId);
+    task = func_0010D650(0);
+    registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
-        evtDestroyTaskHierarchy(taskId);
+        evtDestroyTaskHierarchy(task);
     }
     return 1;
 }
 
 u32 evtOpcodeSetFadeTarget(void) {
-    u64 first;
-    u64 second;
-    u64 third;
+    u64 area;
+    u64 target;
+    u64 duration;
 
     func_00135568(0);
     func_00135578(0x80);
-    first = func_0010D650(0);
-    second = func_0010D650(1);
-    third = func_0010D650(2);
-    fldSetFadeTarget(first, second, third);
+    area = func_0010D650(0);
+    target = func_0010D650(1);
+    duration = func_0010D650(2);
+    fldSetFadeTarget(area, target, duration);
     return 1;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422050);
 
 u32 evtSetSkyAlpha(void) {
-    s64 v;
+    s64 alpha;
 
-    v = func_0010D650(1);
-    if (v < -255) {
+    alpha = func_0010D650(1);
+    if (alpha < -255) {
         func_0010AE38("warning : SET_SKY_A alpha < -255\n");
-        v = -255;
+        alpha = -255;
     }
-    if (v > 255) {
+    if (alpha > 255) {
         func_0010AE38("warning : SET_SKY_A alpha > 255\n");
-        v = 255;
+        alpha = 255;
     }
-    evtStartSkyAlphaTransition(func_0010D650(0), v);
+    evtStartSkyAlphaTransition(func_0010D650(0), alpha);
     return 1;
 }
 
@@ -145,32 +145,32 @@ u32 evtHideSky(void) {
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243068);
 
 u32 evtOpcodePlayBgm(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    evtPlayBgm(temp_v0, temp_v1);
+    id = func_0010D650(0);
+    fade = func_0010D650(1);
+    evtPlayBgm(id, fade);
     return 1;
 }
 
 u32 evtOpcodeTransitionBgm(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 id;
+    u64 fade;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    evtTransitionBgm(temp_v0, temp_v1);
+    id = func_0010D650(0);
+    fade = func_0010D650(1);
+    evtTransitionBgm(id, fade);
     return 1;
 }
 
 u32 func_00243140(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 first;
+    u64 second;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    func_0025CE68(temp_v0, temp_v1);
+    first = func_0010D650(0);
+    second = func_0010D650(1);
+    func_0025CE68(first, second);
     return 1;
 }
 
@@ -195,22 +195,22 @@ u32 evtOpcodeSetBgmVolumePan(void) {
 }
 
 u32 func_00243200(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 first;
+    u64 second;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    func_0025CF00(temp_v0, temp_v1);
+    first = func_0010D650(0);
+    second = func_0010D650(1);
+    func_0025CF00(first, second);
     return 1;
 }
 
 u32 evtOpcodeRefreshTaskData(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 task;
+    u64 value;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
-    evtRefreshTaskData(temp_v0, temp_v1);
+    task = func_0010D650(0);
+    value = func_0010D650(1);
+    evtRefreshTaskData(task, value);
     return 1;
 }
 
@@ -227,7 +227,7 @@ typedef struct {
     u8 phase;          /* 0xA41 */
     u8 padA42;          /* 0xA42 */
     u8 overlayFlag;     /* 0xA43: cleared separately from solar phase */
-    u32 phaseCounter;  /* 0xA44 */
+    u32 phaseTimer;    /* 0xA44: cleared on phase change */
 } SolarWorldState;
 
 void evtClearSolarOverlayControl(void) {
@@ -236,14 +236,15 @@ void evtClearSolarOverlayControl(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243320);
 
+/* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
-    s32 v;
+    s32 phase;
 
-    v = ((SolarWorldState *)D_00435DD0)->phase;
-    if (v >= 9) {
-        v = 8 - (v & 7);
+    phase = ((SolarWorldState *)D_00435DD0)->phase;
+    if (phase >= 9) {
+        phase = 8 - (phase & 7);
     }
-    return v;
+    return phase;
 }
 
 u8 evtGetRawSolarPhase(void) {
@@ -252,7 +253,7 @@ u8 evtGetRawSolarPhase(void) {
 
 void evtSetSolarPhase(u8 phase) {
     ((SolarWorldState *)D_00435DD0)->phase = phase & 0xf;
-    ((SolarWorldState *)D_00435DD0)->phaseCounter = 0;
+    ((SolarWorldState *)D_00435DD0)->phaseTimer = 0;
 }
 
 void evtEnableSolarPhaseAdvance(void) {
@@ -286,22 +287,28 @@ INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243430);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243568);
 
-void *evtCreateSolarOverlayWork(s32 task) {
-    s32 visualWork;
+/* The first word holds the solar-noise sprite; total work size is 0x104. */
+typedef struct {
+    u32 noiseSprite;
+    u8 pad04[0x100];
+} SolarOverlayWork;
 
-    visualWork = (s32)func_00328D68(0x104);
-    evtInitializeVisualData(visualWork);
-    evtLoadSolarNoiseSprite((u32 *)visualWork);
-    func_00101950(task, (void *)visualWork);
+void *evtCreateSolarOverlayWork(s32 task) {
+    SolarOverlayWork *overlay;
+
+    overlay = func_00328D68(0x104);
+    evtInitializeVisualData((s32)overlay);
+    evtLoadSolarNoiseSprite(&overlay->noiseSprite);
+    func_00101950(task, overlay);
     return (void *)func_00243430;
 }
 
 void evtFreeSolarOverlayWork(void) {
-    u64 workHandle;
+    u64 overlay;
 
-    workHandle = func_00101958();
-    evtReleaseSolarNoiseSprite(workHandle);
-    func_00328E48(workHandle);
+    overlay = func_00101958();
+    evtReleaseSolarNoiseSprite(overlay);
+    func_00328E48(overlay);
     D_00437200 = 0;
 }
 
