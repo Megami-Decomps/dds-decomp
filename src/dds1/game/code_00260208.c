@@ -166,7 +166,19 @@ void func_00262038(s32 arg0) {
     func_001198B8(*(u32 *)(arg0 + 0xc));
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", ptyClampExp);
+extern s32 ptyComputeTotalExp(u8 *, s32);
+
+void ptyClampExp(u32 *unit) {
+    u8 buf[0x1A4];
+    s32 exp;
+
+    memcpy(buf, unit, 0x1A4);
+    *(u16 *)(buf + 0x14) = 0x63;
+    exp = ptyComputeTotalExp(buf, 0);
+    if (exp < unit[4]) {
+        unit[4] = exp;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
