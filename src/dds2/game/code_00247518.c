@@ -98,6 +98,10 @@ typedef struct EventViewerState {
     f32 slotValue;   /* 0x2424 */
 } EventViewerState;
 
+typedef struct EvtViewSel {
+    s32 fieldSelector; /* 0x00: one-based selector for command parameter field */
+} EvtViewSel;
+
 /* Script-command parameter slots hold a float, word, halfwords or bytes
  * depending on the command; only the accessed prefix is modeled here. */
 typedef union EvtViewParam {
@@ -127,7 +131,8 @@ typedef struct EvtViewGlyph {
     s8 kind;      /* 0x08 */
     u8 pad09[3];
     s8 channel;   /* 0x0C */
-    u8 pad0D[3];
+    u8 pad0D;
+    s16 param;    /* 0x0E */
     s16 condition; /* 0x10 */
     u8 pad12[0x1E];
     struct EvtViewGlyph *next; /* 0x30 */
@@ -212,7 +217,55 @@ s32 evtViewFindGlyphAtOrBefore(EventViewerState *viewer) {
     return (s32)result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249598);
+extern s32 dds3GetSlot(s32 owner, s32 kind);
+extern void func_0024F130(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
+
+void func_00249598(s32 arg0, EventViewerState *viewer) {
+    s32 scene;
+    s32 world;
+    s32 object;
+    EvtViewNode *node;
+    s32 time;
+    s32 extra;
+    EvtViewGlyph *glyph;
+
+    if (dds3GetWorldObject() != 0) {
+        scene = *(s32 *)((u8 *)dds3GetWorldObject() + 0x18);
+        if (scene != 0) {
+            world = *(s32 *)(scene + 8);
+            if (world != 0) {
+                object = *(s32 *)(world + 0x28);
+                if (object != 0) {
+                    do {
+                        node = (EvtViewNode *)viewer->groups;
+                        while (node != NULL) {
+                            if (node->owner != 0 && object == dds3GetSlot(node->owner, 1)) {
+                                if (node->kind == 2) {
+                                    time = 0;
+                                    if (node->hasGlyphs != 0) {
+                                        time = node->glyphs->id;
+                                    }
+                                    glyph = (EvtViewGlyph *)evtViewFindGlyphAtOrBefore(viewer);
+                                    extra = 0;
+                                    if (glyph != NULL) {
+                                        extra = glyph->param;
+                                    }
+                                } else {
+                                    time = node->time;
+                                    extra = 0;
+                                }
+                                func_0024F130(object, 0, time, arg0, extra);
+                                break;
+                            }
+                            node = node->next;
+                        }
+                        object = *(s32 *)(object + 0x20);
+                    } while (object != 0);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002496B0);
 
@@ -239,7 +292,43 @@ void func_00249A98(u32 arg0, EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249B40);
+extern s32 sdfGetLodChunkValue();
+
+void func_00249B40(s32 position, EventViewerState *viewer) {
+    EvtViewNode *node = (EvtViewNode *)viewer->groups;
+    EvtViewGlyph *glyph;
+    EvtViewGlyph *best;
+    s32 bestId;
+    u8 *lod;
+    s8 level;
+
+    while (node != NULL) {
+        if (node->kind == 1) {
+            glyph = node->glyphs;
+            bestId = -1;
+            best = NULL;
+            if (glyph != NULL) {
+                do {
+                    if (position >= glyph->id && bestId < glyph->id && glyph->kind == 6) {
+                        bestId = glyph->id;
+                        best = glyph;
+                    }
+                    glyph = glyph->next;
+                } while (glyph != NULL);
+            }
+            lod = *(u8 **)(*(s32 *)(*(s32 *)(*(s32 *)(node->owner + 0x18) + 0xC) + 0xC) + 0x18);
+            if (best == NULL) {
+                lod[0x98] = 0;
+            } else {
+                level = best->channel;
+                if (sdfGetLodChunkValue(lod) >= level) {
+                    lod[0x98] = best->channel;
+                }
+            }
+        }
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249C40);
 
@@ -565,7 +654,45 @@ s32 evtViewCmdSetValue(s32 arg0, s32 arg1, EventViewerState *viewer) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024C928);
+/* Store the command value in the selected halfword of a viewer entry. */
+u32 func_0024C928(u32 unused0, u32 unused1, EventViewerState *viewer) {
+    EvtViewEntry *entry;
+    u32 value;
+    s32 slot;
+
+    value = viewer->commandValue;
+    entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+    if (entry != 0) {
+        slot = viewer->sel->fieldSelector - 1;
+        if ((u32)slot < 0x13u) {
+            switch (slot) {
+            case 0:
+                entry->p10.h[0] = value;
+                break;
+            case 11:
+            case 15:
+            case 16:
+                entry->p14.h[0] = value;
+                break;
+            case 3:
+                entry->p08.h[1] = value;
+                break;
+            case 4:
+                entry->p08.h[1] = value;
+                break;
+            case 1:
+                entry->p0C.h[0] = value;
+                break;
+            case 18:
+                entry->p0C.h[0] = value;
+                break;
+            }
+        }
+        func_00249088(viewer->glyphAdvancePosition, viewer);
+        evtViewerPopHistory(viewer);
+        return 0;
+    }
+}
 
 u32 func_0024C9D0(void) {
     return 0;
@@ -725,7 +852,67 @@ u8 func_0024D908(s32 arg0) {
     return *(s32 *)(arg0 + 0x10c) == 0x263;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024D918);
+extern f32 D_0037F590[];
+extern void func_0023E178();
+extern void mnuCampReleaseEffectHandle();
+extern void func_0014E668();
+extern void func_001057A8();
+extern s32 sdfGraphHasPendingWorkInterruptSafe();
+extern void evtDestroyWorldSecondaryNode();
+extern void func_003298C0();
+extern void func_001054E0();
+extern void func_00246E68();
+extern void func_00246DF0();
+extern void func_003297C8();
+extern void func_001378A0();
+extern void func_00106160();
+extern void func_0025F5D0();
+void func_0024ACC0(s32 arg0);
+
+void func_0024D918(viewer)
+    EventViewerState *viewer;
+{
+    if (func_0024D908(*(s32 *)((u8 *)viewer + 8)) == 0) {
+        func_0025F5D0(viewer);
+    }
+    func_0023E178();
+    func_0024ACC0((s32)viewer);
+    mnuCampReleaseEffectHandle(viewer);
+    func_0014E668(0);
+    func_001057A8();
+    D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
+    if (viewer->timedActive == 1) {
+        if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag((s32)viewer) == 1) {
+            func_002A7FD0();
+        }
+        viewer->timedActive = 0;
+    }
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    }
+    evtDestroyWorldSecondaryNode();
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    }
+    if (*(s32 *)((u8 *)viewer + 0x242C) != 0) {
+        func_003298C0(*(s32 *)((u8 *)viewer + 0x242C));
+        *(s32 *)((u8 *)viewer + 0x242C) = 0;
+        *(s32 *)((u8 *)viewer + 0x2428) = 0;
+    }
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    }
+    func_001054E0();
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    }
+    func_00246E68(viewer);
+    func_00246DF0(viewer);
+    func_003297C8(*(s32 *)viewer);
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    }
+    func_001378A0();
+    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    }
+    func_00106160(0);
+    D_00435CD4 |= 0x2000000;
+}
 
 void func_0024DAA0(void) {
     u64 temp_v0;

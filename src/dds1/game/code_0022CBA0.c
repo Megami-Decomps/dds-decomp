@@ -20,6 +20,8 @@ s32 dds3GetWorldObject(void);
 void func_001109B8(s32 arg0, u32 arg1);
 f32 dds3GetCameraValue(s32 arg0);
 s32 func_00106488(f32 arg0);
+void func_00270030(void);
+void func_00270068(void);
 
 typedef struct EventViewerState {
     u8 pad0[4];
@@ -37,7 +39,9 @@ typedef struct EventViewerState {
     u8 pad2038[0x204];
     struct {
         u16 id;
-        u8 pad2[6];
+        u16 a;
+        u16 b;
+        u16 pad6;
     } history[8];
     s32 historyCount;
     u32 currentId;
@@ -293,7 +297,24 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F418);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F550);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F778);
+/* Advance or stop the timed viewer action according to the current position. */
+s32 func_0022F778(EventViewerState *viewer) {
+    if (viewer->timedActive == 1) {
+        if (viewer->glyphAdvancePosition < viewer->timedStart) {
+            func_00270030();
+            viewer->timedActive = 0;
+            viewer->timedStart = 0;
+            viewer->timedEnd = 0;
+        } else if (viewer->timedEnd == -1) {
+            func_00270068();
+        } else if (viewer->glyphAdvancePosition >= viewer->timedEnd) {
+            func_00270030();
+            viewer->timedActive = 0;
+            viewer->timedStart = 0;
+            viewer->timedEnd = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 
@@ -352,11 +373,86 @@ void func_0022FDE8(u32 viewerAddr) {
     func_0022FB30(1, *(u32 *)(viewer + 0x18), viewerAddr);
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewFindNextGlyph);
+s32 evtViewFindNextGlyph(EventViewerState *viewer) {
+    EvtViewGlyph *result = NULL;
+    s32 best = 99999;
+    EvtViewNode *node = viewer->nodes;
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewFindPrevGlyph);
+    while (node != NULL) {
+        if (node->kind == 2) {
+            EvtViewGlyph *glyph = node->glyphs;
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FF30);
+            if (glyph != NULL) {
+                do {
+                    s32 x = glyph->id;
+
+                    if (viewer->glyphAdvancePosition < x) {
+                        s32 distance = x - viewer->glyphAdvancePosition;
+
+                        if (distance < best) {
+                            best = distance;
+                            result = glyph;
+                        }
+                    }
+                    glyph = glyph->next;
+                } while (glyph != NULL);
+            }
+        }
+        node = node->next;
+    }
+    return (s32)result;
+}
+
+s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
+    EvtViewGlyph *result = NULL;
+    s32 best = 99999;
+    EvtViewNode *node = viewer->nodes;
+
+    while (node != NULL) {
+        if (node->kind == 2) {
+            EvtViewGlyph *glyph = node->glyphs;
+
+            if (glyph != NULL) {
+                do {
+                    s32 x = glyph->id;
+
+                    if (x < viewer->glyphAdvancePosition) {
+                        s32 distance = viewer->glyphAdvancePosition - x;
+
+                        if (distance < best) {
+                            best = distance;
+                            result = glyph;
+                        }
+                    }
+                    glyph = glyph->next;
+                } while (glyph != NULL);
+            }
+        }
+        node = node->next;
+    }
+    return (s32)result;
+}
+
+void func_0022FF30(s32 mode, s32 arg1, s32 arg2, s32 viewerAddr) {
+    EventViewerState *viewer = (EventViewerState *)viewerAddr;
+    s32 count = viewer->historyCount + 1;
+
+    viewer->currentId = mode;
+    viewer->historyCount = count;
+    viewer->history[count].id = mode;
+    viewer->history[count].a = arg1;
+    viewer->history[count].b = arg2;
+    if (mode > 0) {
+        if (mode >= 3) {
+            if (mode == 3) {
+                *(s32 *)((u8 *)viewer + 0x22CC) = 0;
+                *(s32 *)((u8 *)viewer + 0x22D0) = 0;
+                *(u8 *)((u8 *)viewer + 0x22D4) = 0;
+                *(u8 *)((u8 *)viewer + 0x22E0) = 0;
+            }
+        }
+    }
+}
 
 u16 evtViewerPopHistory(EventViewerState *viewer) {
     u16 id;
@@ -473,7 +569,22 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231840);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetValue);
+/* Store the command value as a halfword and clear its extra halfword when tagged. */
+s32 evtViewCmdSetValue(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    s32 value = viewer->commandValue;
+    EvtViewEntry *entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+
+    if (entry == NULL) {
+        return 0;
+    }
+    entry->p08.h[0] = value;
+    if (((u32)(value << 16) >> 28) != 0) {
+        entry->p08.h[1] = 0;
+    }
+    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
 
 /* Store the command value in the selected halfword of a viewer entry. */
 u32 func_00231C18(u32 unused0, u32 unused1, EventViewerState *viewer) {
@@ -549,7 +660,22 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
     return (u32)record;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetPosition);
+/* Transfer a selected two-component viewer position to the command entry. */
+s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    EvtViewEntry *entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+
+    if (entry == NULL) {
+        return 0;
+    }
+    if (viewer->sel == 0) {
+        return 0;
+    }
+    entry->p08.f = viewer->commandX;
+    entry->p0C.f = viewer->commandY;
+    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
 
 u32 func_00231EF8(u32 arg0, u32 arg1, u32 arg2) {
     evtViewerPopHistory((EventViewerState *)arg2);
@@ -558,7 +684,17 @@ u32 func_00231EF8(u32 arg0, u32 arg1, u32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231F18);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdSetSlot);
+/* Copy the selected slot descriptor and numeric value into the script entry. */
+s32 evtViewCmdSetSlot(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    EvtViewEntry *entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+
+    entry->p0C.b[0] = viewer->slotType;
+    entry->p0C.b[1] = viewer->slotFlag;
+    entry->p14.f = viewer->slotValue;
+    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
 
 extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
