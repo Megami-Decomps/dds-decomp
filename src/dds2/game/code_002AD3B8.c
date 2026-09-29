@@ -24,6 +24,11 @@ extern void func_002C1B68(s32, s32);
 extern void func_002B2860(s32);
 extern void func_002C2AA8(s32, s32);
 
+typedef struct MenuSceneConfig {
+    u8 pad00[0x10];
+    s32 entries[5];
+} MenuSceneConfig;
+
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD3B8);
 
 void func_002AD4C0(s32 request) {
@@ -181,11 +186,11 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE7C8);
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE888);
 
-void func_002AEA58(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_002AEA58(s32 callback) {
+    s32 context = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(context + 8, context + 0x54, 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AEAA0);
@@ -225,11 +230,11 @@ INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF5E0);
 
-void func_002AF898(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void func_002AF898(s32 callback) {
+    s32 context = func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038(context + 8, context + 0x54, 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF8E0);
@@ -265,10 +270,10 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AFE18);
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002B0170);
 
-void func_002B0228(s32 object) {
+void func_002B0228(MenuSceneConfig *object) {
     s32 i;
     for (i = 0; i < 5; i++) {
-        func_002C2AA8(*(s32 *)(object + 0x10 + i * 4), 0);
+        func_002C2AA8(object->entries[i], 0);
     }
 }
 

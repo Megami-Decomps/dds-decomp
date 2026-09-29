@@ -100,15 +100,15 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF00);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
 
 void func_002AD030(s32 index, s32 context) {
-    s32 resourceSet;
+    MenuResourceSet *resources;
     s64 active;
 
-    resourceSet = *(s32 *)(context + 0xaa48);
+    resources = ((MenuResourceOwner *)context)->resources;
     active = func_002ACF38();
     if (active != 0) {
-        *(u32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceSet + 8) + 0x18) + 0x1c) + 0x60) =
+        *(u32 *)(*(s32 *)(*(s32 *)(resources->first + 0x18) + 0x1c) + 0x60) =
                   (u32)*(u8 *)(index + D_00435DD0 + 0x1340);
-        *(s32 *)(resourceSet + 0x38) = index;
+        resources->selection = index;
     }
     func_002C1B68(context + 0xaa50, 1);
 }
@@ -117,7 +117,7 @@ u32 func_002AD0A8(void) {
     s32 context;
 
     context = func_00101958();
-    func_002BAF50(*(u32 *)(*(s32 *)(context + 0xaa48) + 8), context + 0xb10c);
+    func_002BAF50(((MenuResourceOwner *)context)->resources->first, context + 0xb10c);
     return 1;
 }
 
