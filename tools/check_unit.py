@@ -375,6 +375,16 @@ def main():
         if wrong:
             bad += 1
             print(f"DIFF jump table of {name} (retail 0x{retail_addr:08X}): {wrong} of {k} entries differ")
+        elif (pad := retail_padding(retail_addr, 4 * k)) and not next(
+                (k2 == "end" and a == (retail_addr + 4 * k + 15) & ~15
+                 for a, k2 in retail_labels if a > retail_addr), False):
+            # Retail has bytes after the table before the next item of this
+            # unit (typically another file's 16-aligned .rodata); the C table
+            # drops them. Padding up to the unit's own end comes from the
+            # linker's section alignment and is fine.
+            bad += 1
+            print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
+                  "after it (likely a file boundary follows); keep the function as asm")
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]
