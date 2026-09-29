@@ -1,4 +1,10 @@
 #include "common.h"
+extern u16 D_004372B0;
+extern u16 D_004372B2;
+extern u8 D_00423050[];
+extern void func_0035C860();
+extern void func_00259AE8();
+extern void func_0025CAF8();
 extern void *dds3GetWorldObject(void);
 extern void func_00110BE0(void *, s32);
 extern f32 func_00113100(s32);
@@ -489,7 +495,28 @@ s32 func_0024CD00(s32 arg0, s32 arg1, EventViewerState *viewer) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CD58);
+s32 func_0024CD58(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    u8 *ctx = (u8 *)viewer;
+    s32 handled = 0;
+    s32 mode = *(s32 *)(ctx + 0x22A8);
+
+    if (mode < 3) {
+        if (mode >= 0) {
+            func_0035C860(ctx + 0x22E8, D_00423050, D_004372B0, D_004372B2);
+            mode = *(s32 *)(ctx + 0x22A8);
+            if (mode == 0) {
+                func_00259AE8(0, viewer);
+                func_00259AE8(1, viewer);
+            } else if (mode == 1) {
+                func_0025CAF8(0, viewer);
+            } else if (mode == 2) {
+                func_0025CAF8(1, viewer);
+            }
+            handled = 1;
+        }
+    }
+    return handled ? -1 : 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CE18);
 

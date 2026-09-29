@@ -1,4 +1,17 @@
 #include "common.h"
+#include "pcp_vu0.h"
+extern void func_00336AA8(void);
+
+/* Load a 4x4 matrix into vf24-vf27 (the second operand of func_00336AA8). */
+#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src) : "memory")
+
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -32,7 +45,7 @@ struct PcpScatterWork4 {
     u32 ownedBuffer;
 };
 
-extern PcpScatterWork4 *func_0017AD28(void *param0, void *param1);
+extern PcpScatterWork4 *func_0017AD28(u64 param0, u64 param1);
 
 extern void effShareScatterResource(u32 param0, u32 param1);
 
@@ -100,7 +113,11 @@ typedef struct PcpScatterWork2 {
 } PcpScatterWork2;
 
 typedef struct PcpScatterPool {
-    u8 pad00[0x20];
+    u8 pad00[0x10];
+    s32 unk10;                /* 0x10: set to 1 on creation */
+    u32 color;                /* 0x14: 0x80808080 on creation */
+    s32 unk18;                /* 0x18: 6 * record count */
+    f32 scale;                /* 0x1C: 1.0f on creation */
     s32 recordBase;           /* 0x20: base of 0x60-byte records */
     s32 auxRecordBase;        /* 0x24: base of 0x18-byte records */
     u32 resource;             /* 0x28: released by func_00333918 */
@@ -121,13 +138,42 @@ void func_001787E0(u64 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterSharedDuplicate);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseParticleGroup);
+typedef struct PcpScatterParticles {
+    PcpScatterPool *pool;
+    u32 buffer;
+    u32 count;
+    u32 *items;
+    u32 itemBuffer;
+} PcpScatterParticles;
+
+extern void func_0016A620(u32 particle);
+
+typedef struct PcpScatterGroupWork {
+    u8 pad00[0x80];
+    PcpScatterParticles particles;
+} PcpScatterGroupWork;
+
+void effPcpScatterReleaseParticleGroup(PcpScatterGroupWork *work) {
+    if (work->particles.itemBuffer != 0) {
+        u32 count = work->particles.count;
+        u32 i;
+
+        for (i = 0; i < count; i++) {
+            func_0016A620(work->particles.items[i]);
+        }
+        func_003297C8(work->particles.itemBuffer);
+    }
+    func_0017A9C8(work->particles.pool);
+    func_003297C8(work->particles.buffer);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001789C0);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178B80);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179168);
+void func_00179168(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00179178(PcpScatterWork8 *work, u32 *values) {
     work->unk7C = values;
@@ -154,13 +200,32 @@ void func_00179438(u64 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterLinkedDuplicate);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseSharedParticles);
+typedef struct PcpScatterSharedWork {
+    u8 pad00[0x70];
+    PcpScatterParticles particles;
+} PcpScatterSharedWork;
+
+void effPcpScatterReleaseSharedParticles(PcpScatterSharedWork *work) {
+    if (work->particles.itemBuffer != 0) {
+        u32 count = work->particles.count;
+        u32 i;
+
+        for (i = 0; i < count; i++) {
+            func_0016A620(work->particles.items[i]);
+        }
+        func_003297C8(work->particles.itemBuffer);
+    }
+    func_0017A9C8(work->particles.pool);
+    func_003297C8(work->particles.buffer);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179618);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179780);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179D78);
+void func_00179D78(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00179D88(PcpScatterWork2 *work, u32 value) {
     work->unk6C = value;
@@ -186,13 +251,32 @@ void func_0017A058(u64 arg0) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterTableDuplicate);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterReleaseLinkedParticles);
+typedef struct PcpScatterLinkedWork {
+    u8 pad00[0x58];
+    PcpScatterParticles particles;
+} PcpScatterLinkedWork;
+
+void effPcpScatterReleaseLinkedParticles(PcpScatterLinkedWork *work) {
+    if (work->particles.itemBuffer != 0) {
+        u32 count = work->particles.count;
+        u32 i;
+
+        for (i = 0; i < count; i++) {
+            func_0016A620(work->particles.items[i]);
+        }
+        func_003297C8(work->particles.itemBuffer);
+    }
+    func_0017A9C8(work->particles.pool);
+    func_003297C8(work->particles.buffer);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A248);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A340);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A8A0);
+void func_0017A8A0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0017A8B0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x54) = arg1;
@@ -245,7 +329,16 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     return res;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterResRelease);
+extern void func_0032BBB0(u32);
+extern void func_00328E48(void *);
+
+void effPcpScatterResRelease(PcpScatterRes *res) {
+    res->refCount--;
+    if (res->refCount == 0) {
+        func_0032BBB0(res->unk00);
+        func_00328E48(res);
+    }
+}
 
 u32 effPcpScatterResAddRef(u32 handle) {
     PcpScatterRes *resource = (PcpScatterRes *)handle;
@@ -255,7 +348,12 @@ u32 effPcpScatterResAddRef(u32 handle) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AD28);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AF40);
+PcpScatterWork4 *func_0017AF40(u64 arg0) {
+    u64 first = effParamTableGetBlock(arg0, 0);
+    u64 second = effParamTableGetBlock(arg0, 1);
+
+    return func_0017AD28(first, second);
+}
 
 PcpScatterWork4 *func_0017AF88(PcpScatterWork4 *work) {
     PcpScatterWork4 *child;
@@ -276,7 +374,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B390);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B520);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B718);
+void func_0017B718(PcpScatterWork4 *work, void *src) {
+    PCP_COPY_VECTOR(&work->unk40, src);
+}
 
 void func_0017B730(PcpScatterWork4 *work, f32 value)
 {
@@ -287,7 +387,12 @@ void func_0017B738(PcpScatterWork4 *work, u32 value) {
     work->unk180 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterTransformMatrix);
+void effPcpScatterTransformMatrix(u8 *matrix, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_LOAD_MATRIX_B(matrix + 0x50);
+    func_00336AA8();
+    VU0_STORE_MATRIX(matrix);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B7A0);
 
@@ -320,7 +425,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BE08);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BFA8);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C250);
+void func_0017C250(PcpScatterWork5 *work, void *src) {
+    PCP_COPY_VECTOR(&work->unk40, src);
+}
 
 void func_0017C268(PcpScatterWork5 *work, f32 value)
 {
@@ -331,7 +438,12 @@ void func_0017C270(PcpScatterWork5 *work, u32 value) {
     work->unk184 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C278);
+void func_0017C278(u8 *matrix, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_LOAD_MATRIX_B(matrix + 0x50);
+    func_00336AA8();
+    VU0_STORE_MATRIX(matrix);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C2D8);
 
@@ -364,7 +476,9 @@ INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C988);
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CB28);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CE00);
+void func_0017CE00(PcpScatterWork6 *work, void *src) {
+    PCP_COPY_VECTOR(&work->unk40, src);
+}
 
 void func_0017CE18(PcpScatterWork6 *work, f32 value)
 {
@@ -375,7 +489,12 @@ void func_0017CE20(PcpScatterWork6 *work, u32 value) {
     work->unk18C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CE28);
+void func_0017CE28(u8 *matrix, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_LOAD_MATRIX_B(matrix + 0x50);
+    func_00336AA8();
+    VU0_STORE_MATRIX(matrix);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CE88);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -55,7 +56,10 @@ typedef struct PcpFlashWork3 PcpFlashWork3;
 
 /* func_0016AFF0 */
 struct PcpFlashWork3 {
-    u8 pad00[0x40];
+    u8 pad00[0x24];
+    u32 colorA;
+    u32 colorB;
+    u8 pad2C[0x14];
     f32 increment;
     u32 unk44;
     PcpFlashPtc14 *parts;
@@ -77,7 +81,10 @@ typedef struct PcpFlashWork4 PcpFlashWork4;
 
 /* func_0016B800 */
 struct PcpFlashWork4 {
-    u8 pad00[0x44];
+    u8 pad00[0x28];
+    u32 colorA;
+    u32 colorB;
+    u8 pad30[0x14];
     f32 increment;
     u32 unk48;
     u32 unk4C;
@@ -103,7 +110,10 @@ typedef struct PcpFlashWork5 PcpFlashWork5;
 
 /* func_0016C0E8 */
 struct PcpFlashWork5 {
-    u8 pad00[0x50];
+    u8 pad00[0x28];
+    u32 colorA;
+    u32 colorB;
+    u8 pad30[0x20];
     f32 increment;
     u32 unk54;
     PcpFlashPtc10 *parts;
@@ -129,7 +139,10 @@ typedef struct PcpFlashWork6 PcpFlashWork6;
 
 /* func_0016C9F0 */
 struct PcpFlashWork6 {
-    u8 pad00[0x4C];
+    u8 pad00[0x30];
+    u32 colorA;
+    u32 colorB;
+    u8 pad38[0x14];
     PcpFlashPtc20A *parts;
     u32 unk50;
     u32 unk54;
@@ -166,7 +179,10 @@ typedef struct PcpFlashWork8 PcpFlashWork8;
 
 /* func_0016D940 */
 struct PcpFlashWork8 {
-    u8 pad00[0xD0];
+    u8 pad00[0x28];
+    u32 colorA;
+    u32 colorB;
+    u8 pad30[0xA0];
     PcpFlashPtc20B *parts;
     u32 unkD4;
     u32 unkD8;
@@ -179,7 +195,10 @@ typedef struct PcpFlashWork9 PcpFlashWork9;
 
 /* func_0016E290 */
 struct PcpFlashWork9 {
-    u8 pad00[0x48];
+    u8 pad00[0x2C];
+    u32 colorA;
+    u32 colorB;
+    u8 pad34[0x14];
     f32 increment;
     u32 unk4C;
     PcpFlashPtc14 *parts;
@@ -235,7 +254,9 @@ void func_00171E38(PcpFlashWork1 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00171E68);
+void func_00171E68(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00171E78(PcpFlashWork1 *work, u32 value) {
     work->unk38 = value;
@@ -282,7 +303,9 @@ void func_001724E8(PcpFlashWork2 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172518);
+void func_00172518(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00172528(PcpFlashWork2 *work, u32 value) {
     work->unk48 = value;
@@ -293,7 +316,32 @@ void func_00172530(PcpFlashWork2 *work, f32 value)
     work->unk4C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172538);
+extern s32 func_00177B78(s32 base);
+
+typedef struct PcpFlashColorSlot5 {
+    s32 color[5];
+} PcpFlashColorSlot5;
+
+void func_00172538(PcpFlashWork2 *work, s32 flag, s32 param) {
+    PcpFlashColorSlot5 *slot;
+    s32 colorA;
+    s32 colorB;
+
+    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    colorA = work->unk24 & 0xFFFFFF;
+    colorB = work->unk28 & 0xFFFFFF;
+    slot->color[0] = func_00195A30(colorB, param);
+    slot->color[1] = func_00195A30(colorB, param);
+    if (flag & 1) {
+        slot->color[2] = func_00195A30(0x80000000, param);
+        slot->color[3] = func_00195A30(colorA | 0xFF000000, param);
+        slot->color[4] = func_00195A30(0x80000000, param);
+    } else {
+        slot->color[2] = func_00195A30(0xFF000000, param);
+        slot->color[3] = func_00195A30(colorA | 0x40000000, param);
+        slot->color[4] = func_00195A30(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172628);
 
@@ -342,7 +390,9 @@ void func_00172EA0(PcpFlashWork3 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172ED0);
+void func_00172ED0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00172EE0(PcpFlashWork3 *work, u32 value) {
     work->unk50 = value;
@@ -353,7 +403,26 @@ void func_00172EE8(PcpFlashWork3 *work, f32 value)
     work->unk54 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172EF0);
+void func_00172EF0(PcpFlashWork3 *work, s32 flag, s32 param) {
+    PcpFlashColorSlot5 *slot;
+    s32 colorA;
+    s32 colorB;
+
+    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->color[0] = func_00195A30(colorB, param);
+    slot->color[1] = func_00195A30(colorB, param);
+    if (flag & 1) {
+        slot->color[2] = func_00195A30(0x80000000, param);
+        slot->color[3] = func_00195A30(colorA | 0xFF000000, param);
+        slot->color[4] = func_00195A30(0x80000000, param);
+    } else {
+        slot->color[2] = func_00195A30(0xFF000000, param);
+        slot->color[3] = func_00195A30(colorA | 0x40000000, param);
+        slot->color[4] = func_00195A30(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172FE0);
 
@@ -384,7 +453,9 @@ void func_001736C8(PcpFlashWork4 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001736F8);
+void func_001736F8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00173708(PcpFlashWork4 *work, u32 value) {
     work->unk58 = value;
@@ -426,7 +497,9 @@ void func_00173FC8(PcpFlashWork5 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173FF8);
+void func_00173FF8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00174008(PcpFlashWork5 *work, u32 value) {
     work->unk60 = value;
@@ -437,7 +510,26 @@ void func_00174010(PcpFlashWork5 *work, f32 value)
     work->unk64 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174018);
+void func_00174018(PcpFlashWork5 *work, s32 flag, s32 param) {
+    PcpFlashColorSlot5 *slot;
+    s32 colorA;
+    s32 colorB;
+
+    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->color[0] = func_00195A30(colorB, param);
+    slot->color[1] = func_00195A30(colorB, param);
+    if (flag & 1) {
+        slot->color[2] = func_00195A30(0x80000000, param);
+        slot->color[3] = func_00195A30(colorA | 0xFF000000, param);
+        slot->color[4] = func_00195A30(0x80000000, param);
+    } else {
+        slot->color[2] = func_00195A30(0xFF000000, param);
+        slot->color[3] = func_00195A30(colorA | 0x40000000, param);
+        slot->color[4] = func_00195A30(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174108);
 
@@ -468,7 +560,9 @@ void func_00174840(PcpFlashWork6 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174870);
+void func_00174870(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00174880(PcpFlashWork6 *work, u32 value) {
     work->unk54 = value;
@@ -479,7 +573,26 @@ void func_00174888(PcpFlashWork6 *work, f32 value)
     work->unk58 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174890);
+void func_00174890(PcpFlashWork6 *work, s32 flag, s32 param) {
+    PcpFlashColorSlot5 *slot;
+    s32 colorA;
+    s32 colorB;
+
+    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->color[0] = func_00195A30(colorB, param);
+    slot->color[1] = func_00195A30(colorB, param);
+    if (flag & 1) {
+        slot->color[2] = func_00195A30(0x80000000, param);
+        slot->color[3] = func_00195A30(colorA | 0xFF000000, param);
+        slot->color[4] = func_00195A30(0x80000000, param);
+    } else {
+        slot->color[2] = func_00195A30(0xFF000000, param);
+        slot->color[3] = func_00195A30(colorA | 0x40000000, param);
+        slot->color[4] = func_00195A30(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174980);
 
@@ -512,7 +625,9 @@ void func_00175070(PcpFlashWork7 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001750A0);
+void func_001750A0(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_001750B0(PcpFlashWork7 *work, u32 value) {
     work->unk44 = value;
@@ -559,7 +674,9 @@ void func_001757A8(PcpFlashWork8 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001757D8);
+void func_001757D8(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_001757E8(PcpFlashWork8 *work, u32 value) {
     work->unkD8 = value;
@@ -603,7 +720,9 @@ void func_00176150(PcpFlashWork9 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176180);
+void func_00176180(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00176190(PcpFlashWork9 *work, u32 value) {
     work->unk58 = value;
@@ -614,7 +733,26 @@ void func_00176198(PcpFlashWork9 *work, f32 value)
     work->unk5C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001761A0);
+void func_001761A0(PcpFlashWork9 *work, s32 flag, s32 param) {
+    PcpFlashColorSlot5 *slot;
+    s32 colorA;
+    s32 colorB;
+
+    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    slot->color[0] = func_00195A30(colorB, param);
+    slot->color[1] = func_00195A30(colorB, param);
+    if (flag & 1) {
+        slot->color[2] = func_00195A30(0x80000000, param);
+        slot->color[3] = func_00195A30(colorA | 0xFF000000, param);
+        slot->color[4] = func_00195A30(0x80000000, param);
+    } else {
+        slot->color[2] = func_00195A30(0xFF000000, param);
+        slot->color[3] = func_00195A30(colorA | 0x40000000, param);
+        slot->color[4] = func_00195A30(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176290);
 
@@ -645,7 +783,9 @@ void func_001768D0(PcpFlashWork10 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176900);
+void func_00176900(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00176910(PcpFlashWork10 *work, u32 value) {
     work->unk48 = value;
