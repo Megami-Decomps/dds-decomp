@@ -63,6 +63,16 @@ extern s32 D_0032E3C0[];
 void func_0012C6C8(u32 arg0, s32 arg1);
 extern u32 D_003BBDA8;
 
+typedef struct EvtCampTask {
+    u8 pad00[0x20];
+    s32 resource;
+} EvtCampTask;
+
+typedef struct EvtCommandWork {
+    u8 pad00[0xE4];
+    EvtCampTask *campTask;
+} EvtCommandWork;
+
 INCLUDE_ASM(const s32, "event/evtCommand", func_002260C0);
 
 extern char D_003AC700[];
@@ -282,31 +292,31 @@ s32 func_00226948(void)
 
 s32 func_00226988(void)
 {
-    s32 p0;
-    s32 p1;
-    char *q;
-    u8 buf[0xa0];
+    s32 firstArg;
+    s32 secondArg;
+    char *textArg;
+    u8 request[0xa0];
 
     func_00141D40();
-    p0 = func_0010D428(0);
-    p1 = func_0010D428(1);
-    q = func_0010D5A8(2);
-    func_00122F08((s32)buf, p0, p1, q);
-    func_001028E8(5, (s32)buf, 0xa0, 0);
+    firstArg = func_0010D428(0);
+    secondArg = func_0010D428(1);
+    textArg = func_0010D5A8(2);
+    func_00122F08((s32)request, firstArg, secondArg, textArg);
+    func_001028E8(5, (s32)request, 0xa0, 0);
     func_0010BDB8();
     return 1;
 }
 
 s32 func_00226A08(void)
 {
-    s32 p0;
-    char *q;
-    u8 buf[0xa0];
+    s32 firstArg;
+    char *textArg;
+    u8 request[0xa0];
 
-    p0 = func_0010D428(0);
-    q = func_0010D5A8(1);
-    func_00122F08((s32)buf, D_0032E3C0[0], p0, q);
-    func_001028E8(5, (s32)buf, 0xa0, 0);
+    firstArg = func_0010D428(0);
+    textArg = func_0010D5A8(1);
+    func_00122F08((s32)request, D_0032E3C0[0], firstArg, textArg);
+    func_001028E8(5, (s32)request, 0xa0, 0);
     func_0010BDB8();
     return 1;
 }
@@ -322,27 +332,27 @@ s32 func_00226A70(void)
 
 s32 func_00226AA8(void)
 {
-    s32 p0;
-    char *q;
-    u8 buf[0xa0];
+    s32 firstArg;
+    char *textArg;
+    u8 request[0xa0];
 
-    p0 = func_0010D428(0);
-    q = func_0010D5A8(1);
-    func_00122FF0((s32)buf, D_0032E3C0[0], p0, q);
-    func_001028E8(5, (s32)buf, 0xa0, 0);
+    firstArg = func_0010D428(0);
+    textArg = func_0010D5A8(1);
+    func_00122FF0((s32)request, D_0032E3C0[0], firstArg, textArg);
+    func_001028E8(5, (s32)request, 0xa0, 0);
     func_0010BDB8();
     return 1;
 }
 
 s32 func_00226B10(void)
 {
-    s32 p0;
-    s32 p1;
+    s32 firstArg;
+    s32 secondArg;
 
     func_002E4C28("FIELD_BE start\n");
-    p0 = func_0010D428(0);
-    p1 = func_0010D428(1);
-    func_00241F78(p0, p1);
+    firstArg = func_0010D428(0);
+    secondArg = func_0010D428(1);
+    func_00241F78(firstArg, secondArg);
     func_002E4C28("FIELD_BE end\n");
     return 1;
 }
@@ -552,7 +562,7 @@ s32 func_00227798(void)
 
 s32 func_002277C0(void) {
     s32 id = func_0010D428(0);
-    u8 *work = (u8 *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
     char *msg;
 
     if (work == NULL) {
@@ -562,7 +572,7 @@ s32 func_002277C0(void) {
         msg = D_003AC958;
         func_0010AC10(msg, id);
         func_002E4C28(msg, id);
-        func_00101A80(*(s32 *)(work + 0xE4), mnuCampCreateTask(id));
+        func_00101A80((s32)work->campTask, mnuCampCreateTask(id));
         return 0;
     }
     if (func_00241B80(id) == 2) {
@@ -578,7 +588,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC968);
 
 s32 func_002278A0(void) {
     s32 id = func_0010D428(0);
-    u8 *work = (u8 *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
 
     if (work == NULL) {
         return 1;
@@ -587,7 +597,7 @@ s32 func_002278A0(void) {
         return 1;
     }
     func_0010AC10(D_003AC978, id);
-    func_00101A80(*(s32 *)(work + 0xE4), mnuCampCreateTask(id));
+    func_00101A80((s32)work->campTask, mnuCampCreateTask(id));
     return 1;
 }
 
@@ -622,7 +632,7 @@ s32 func_002279A0(void) {
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC998);
 
 s32 func_00227A00(void) {
-    u8 *work = (u8 *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
     s32 a;
     s32 b;
     s32 result;
@@ -630,15 +640,15 @@ s32 func_00227A00(void) {
     if (work == NULL) {
         return 1;
     }
-    if (*(s32 *)(work + 0xE4) == 0) {
+    if (work->campTask == 0) {
         func_003003F0(D_003AC998);
         return 1;
     }
     a = func_0010D428(0);
     b = func_0010D428(1);
-    result = func_00234F18(*(s32 *)(*(u8 **)(work + 0xE4) + 0x20), a, b);
+    result = func_00234F18(work->campTask->resource, a, b);
     func_0010AC10(D_003AC9E0, func_0010D428(0), func_0010D428(1));
-    func_00101A80(*(s32 *)(work + 0xE4), result);
+    func_00101A80((s32)work->campTask, result);
     evtPolygonMovieSetFlagBits(result, 1);
     func_0010D5F0(result);
     return 1;
@@ -655,7 +665,7 @@ s32 func_00227AD8(void)
 }
 
 s32 func_00227B18(void) {
-    u8 *work = (u8 *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
     s32 a;
     s32 b;
     s32 result;
@@ -663,14 +673,14 @@ s32 func_00227B18(void) {
     if (work == NULL) {
         return 1;
     }
-    if (*(s32 *)(work + 0xE4) == 0) {
+    if (work->campTask == 0) {
         func_003003F0(D_003AC9F8);
         return 1;
     }
     a = func_0010D428(0);
     b = func_0010D428(1);
-    result = func_00234F18(*(s32 *)(*(u8 **)(work + 0xE4) + 0x20), a, b);
-    func_00101A80(*(s32 *)(work + 0xE4), result);
+    result = func_00234F18(work->campTask->resource, a, b);
+    func_00101A80((s32)work->campTask, result);
     func_0010D5F0(result);
     return 1;
 }

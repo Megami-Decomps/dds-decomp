@@ -37,22 +37,22 @@ typedef struct TextStream {
 
 /* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
 typedef struct MemNode {
-    u32 unk0;              /* 0x0 */
+    u32 index;             /* 0x0 */
     struct MemNode *next;  /* 0x4 */
 } MemNode;
 
 /* Field block split by func_00198038. */
 typedef struct MemBlock {
-    s32 unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-    u8 unk8[0x10]; /* 0x8 */
-    s32 unk18; /* 0x18 */
+    s32 firstOffset; /* 0x0 */
+    s32 secondDelta; /* 0x4 */
+    u8 pad08[0x10]; /* 0x8 */
+    s32 thirdDelta; /* 0x18 */
 } MemBlock;
 
 typedef struct MemOut {
-    void *unk0; /* 0x0 */
-    void *unk4; /* 0x4 */
-    void *unk8; /* 0x8 */
+    void *first; /* 0x0 */
+    void *second; /* 0x4 */
+    void *third; /* 0x8 */
 } MemOut;
 
 /* Value with u16 pair read by func_001971E0/func_00197200. */
@@ -358,14 +358,14 @@ u32 func_00198030(u32 arg0) {
     return arg0;
 }
 
-void func_00198038(MemBlock *arg0, MemOut *arg1) {
-    s32 v0 = arg0->unk0;
-    s32 v1 = v0 + arg0->unk4;
-    s32 v2 = v1 + arg0->unk18;
+void func_00198038(MemBlock *block, MemOut *out) {
+    s32 firstOffset = block->firstOffset;
+    s32 secondOffset = firstOffset + block->secondDelta;
+    s32 thirdOffset = secondOffset + block->thirdDelta;
 
-    arg1->unk0 = (u8 *)arg0 + v0;
-    arg1->unk4 = (u8 *)arg0 + v1;
-    arg1->unk8 = (u8 *)arg0 + v2;
+    out->first = (u8 *)block + firstOffset;
+    out->second = (u8 *)block + secondOffset;
+    out->third = (u8 *)block + thirdOffset;
 }
 
 u32 func_00198068(u32 arg0) {
@@ -374,34 +374,34 @@ u32 func_00198068(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
 
-u32 func_001981A8(s32 header, s32 count) {
+u32 func_001981A8(s32 payloadBytes, s32 count) {
     u32 buffer;
     u8 *list;
-    u32 *cursor;
-    u32 *next;
+    MemNode *cursor;
+    MemNode *next;
     s32 i;
 
-    buffer = func_002D03F8((header + 8) * (count + 1) + 4);
+    buffer = func_002D03F8((payloadBytes + 8) * (count + 1) + 4);
     list = (u8 *)sdfResourceRetainAddress(buffer);
     i = 0;
     memcpy(list, &buffer, 4);
     list += 4;
-    cursor = (u32 *)list;
+    cursor = (MemNode *)list;
     for (; i < count; i++) {
-        next = (u32 *)((u8 *)cursor + header + 8);
-        cursor[0] = i;
-        cursor[1] = (u32)next;
+        next = (MemNode *)((u8 *)cursor + payloadBytes + 8);
+        cursor->index = i;
+        cursor->next = next;
         cursor = next;
     }
-    cursor[0] = count;
-    cursor[1] = (u32)list;
+    cursor->index = count;
+    cursor->next = (MemNode *)list;
     return (u32)list;
 }
 
 void *func_00198248(MemNode *queue) {
     MemNode *head = queue->next;
 
-    if (head->unk0 == 0) {
+    if (head->index == 0) {
         return NULL;
     }
     queue->next = head->next;
@@ -439,14 +439,20 @@ void func_00198308(void) {
     func_002D2CB8(D_003BD81C);
 }
 
+typedef struct TextBackgroundSprite {
+    u8 pad00[0xC];
+    s16 width;
+    s16 height;
+} TextBackgroundSprite;
+
 void func_00198320(void) {
     s32 origin[4];
     s32 color[4];
-    u8 *panel = (u8 *)D_003BD81C;
+    TextBackgroundSprite *panel = (TextBackgroundSprite *)D_003BD81C;
 
     if (panel != NULL) {
-        s32 x = *(s16 *)(panel + 0xC);
-        s32 y = *(s16 *)(panel + 0xE);
+        s32 x = panel->width;
+        s32 y = panel->height;
 
         origin[0] = 0;
         origin[1] = 0;
@@ -456,7 +462,7 @@ void func_00198320(void) {
         color[1] = 0x80808080;
         color[2] = 0x80808080;
         color[3] = 0x80808080;
-        func_002BE4B8(0, 0, 0, x << 4, y << 3, origin, color, 0, 0, 1, panel, 0x52);
+        func_002BE4B8(0, 0, 0, x << 4, y << 3, origin, color, 0, 0, 1, (u8 *)panel, 0x52);
     }
 }
 

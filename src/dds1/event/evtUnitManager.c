@@ -5,10 +5,16 @@
 typedef struct EvtUnit {
     u8 pad[0x6c];      /* 0x0 */
     u32 value;         /* 0x6c: changed by evtSetUnitValueAndFlag */
-    u8 pad2[0x38];     /* 0x70 */
+    u8 pad70[0x14];   /* 0x70 */
+    s32 currentTransitionValue; /* 0x84 */
+    s32 previousTransitionValue; /* 0x88 */
+    u8 pad8C[0x1C];   /* 0x8c */
     u32 flags;         /* 0xa8 */
-    u8 pad3[0x10];     /* 0xac */
+    u8 padAC[0x10];   /* 0xac */
     u16 unkBC;         /* 0xbc */
+    u8 padBE[0x9E];
+    s16 transitionElapsed; /* 0x15c */
+    s16 transitionDuration; /* 0x15e */
 } EvtUnit;
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00220830);
@@ -23,38 +29,34 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_002219F8);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221A80);
 
-void func_00221BE0(EvtUnit *unit, s32 arg1, s32 arg2) {
-    u8 *work = (u8 *)unit;
-
+void func_00221BE0(EvtUnit *unit, s32 value, s32 duration) {
     unit->flags |= 0x40000;
-    *(s32 *)(work + 0x88) = *(s32 *)(work + 0x84);
-    *(s32 *)(work + 0x84) = arg1;
-    if (arg2 == 0) {
-        *(s32 *)(work + 0x88) = 0;
-        *(s16 *)(work + 0x15C) = 0;
-        *(s16 *)(work + 0x15E) = 0;
+    unit->previousTransitionValue = unit->currentTransitionValue;
+    unit->currentTransitionValue = value;
+    if (duration == 0) {
+        unit->previousTransitionValue = 0;
+        unit->transitionElapsed = 0;
+        unit->transitionDuration = 0;
         unit->flags &= ~0x180000;
     } else {
         unit->flags |= 0x80000;
         unit->flags &= ~0x100000;
-        *(s16 *)(work + 0x15E) = arg2;
-        *(s16 *)(work + 0x15C) = 0;
+        unit->transitionDuration = duration;
+        unit->transitionElapsed = 0;
     }
 }
 
-void func_00221C50(EvtUnit *unit, s32 arg1) {
-    u8 *work = (u8 *)unit;
-
-    if (*(s32 *)(work + 0x84) != 0) {
-        if (arg1 == 0) {
+void func_00221C50(EvtUnit *unit, s32 duration) {
+    if (unit->currentTransitionValue != 0) {
+        if (duration == 0) {
             unit->flags &= ~0x40000;
             unit->flags &= ~0x180000;
-            *(s32 *)(work + 0x84) = 0;
+            unit->currentTransitionValue = 0;
         } else {
             unit->flags &= ~0x80000;
-            *(s16 *)(work + 0x15E) = arg1;
+            unit->transitionDuration = duration;
             unit->flags |= 0x100000;
-            *(s16 *)(work + 0x15C) = 0;
+            unit->transitionElapsed = 0;
         }
     }
 }

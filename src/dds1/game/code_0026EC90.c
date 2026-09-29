@@ -787,33 +787,33 @@ void func_00271648(u32 *resources) {
 }
 
 typedef struct StaffSlots {
-    u32 a[7];   /* 0x00 */
-    u32 b[2];   /* 0x1C */
-    u32 c[16];  /* 0x24 */
-    u32 d[5];   /* 0x64 */
+    u32 baseResources[7];    /* 0x00 */
+    u32 pairResources[2];    /* 0x1C */
+    u32 mainResources[16];   /* 0x24 */
+    u32 extraResources[5];   /* 0x64 */
 } StaffSlots;
 
-s32 func_002716E8(s32 arg0, StaffSlots *slots) {
+s32 func_002716E8(s32 unused, StaffSlots *slots) {
     s32 i;
 
     func_002BC748();
     for (i = 0; i < 7; i++) {
-        if (slots->a[i] == 0) {
+        if (slots->baseResources[i] == 0) {
             return 0;
         }
     }
     for (i = 0; i < 16; i++) {
-        if (slots->c[i] == 0) {
+        if (slots->mainResources[i] == 0) {
             return 0;
         }
     }
     for (i = 0; i < 5; i++) {
-        if (slots->d[i] == 0) {
+        if (slots->extraResources[i] == 0) {
             return 0;
         }
     }
     for (i = 0; i < 2; i++) {
-        if (slots->b[i] == 0) {
+        if (slots->pairResources[i] == 0) {
             return 0;
         }
     }
@@ -848,14 +848,14 @@ void func_00271B48(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271B50);
 
-void func_00271D30(u8 *menu) {
-    *(u32 *)(menu + 0x11C) = func_0027D4A0(0, *(u32 *)(menu + 0x6C), *(u32 *)(menu + 0x120));
-    *(u32 *)(menu + 0x124) = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
-    mnuForwardDupArg(*(u32 *)(menu + 0x124), *(u32 *)(menu + 0x74), 0, 0, 0);
-    *(u32 *)(menu + 0x128) = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
-    func_0027C478(*(u32 *)(menu + 0x128), 0x100);
-    *(u32 *)(menu + 0x12C) = func_00271B50(D_0037B980, 2, 0x200, menu, 0);
-    func_0027C478(*(u32 *)(menu + 0x12C), 0x100);
+void func_00271D30(StaffSpriteHandles *menu) {
+    menu->resourceList = func_0027D4A0(0, *(u32 *)((u8 *)menu + 0x6C), menu->secondaryImage);
+    menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
+    mnuForwardDupArg(menu->images[0], *(u32 *)((u8 *)menu + 0x74), 0, 0, 0);
+    menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
+    func_0027C478(menu->images[1], 0x100);
+    menu->images[2] = func_00271B50(D_0037B980, 2, 0x200, menu, 0);
+    func_0027C478(menu->images[2], 0x100);
 }
 
 void func_00271DF8(StaffSpriteHandles *handles) {

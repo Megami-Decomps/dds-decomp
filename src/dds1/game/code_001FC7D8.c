@@ -132,9 +132,16 @@ typedef struct BtlEffObj {
 extern BtlEffObj *func_001D4748(s32);
 extern BtlObjLink *func_001D47D8(BtlEffObj *);
 
+typedef struct BtlExtendedLink {
+    u8 pad00[0x20];
+    BtlEffOwner *owner; /* 0x20 */
+    s32 state;          /* 0x24 */
+    u8 parameter;       /* 0x28 */
+} BtlExtendedLink;
+
 BtlEffObj *func_001FDEF8(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = func_001D4748(0x2C);
-    u8 *link;
+    BtlExtendedLink *link;
 
     obj->kind = 1;
     obj->unk10 = 0;
@@ -143,10 +150,10 @@ BtlEffObj *func_001FDEF8(BtlEffOwner *owner, s32 arg) {
     obj->ownerData = owner->ownerData;
     obj->update = func_001FDA78;
     obj->destroy = func_001FDED8;
-    link = (u8 *)func_001D47D8(obj);
-    *(u8 *)(link + 0x28) = arg;
-    *(BtlEffOwner **)(link + 0x20) = owner;
-    *(s32 *)(link + 0x24) = 0;
+    link = (BtlExtendedLink *)func_001D47D8(obj);
+    link->parameter = arg;
+    link->owner = owner;
+    link->state = 0;
     return obj;
 }
 
@@ -324,12 +331,17 @@ BtlEffObj *func_001FE8B8(BtlEffOwner *owner, u16 arg) {
     return obj;
 }
 
-s32 func_001FE950(u8 *task) {
-    if (*(u32 *)(task + 4) == 0) {
-        func_001AD230(*(s32 *)task, 0);
+typedef struct BtlWaitTask {
+    s32 value;
+    u32 ticks;
+} BtlWaitTask;
+
+s32 func_001FE950(BtlWaitTask *task) {
+    if (task->ticks == 0) {
+        func_001AD230(task->value, 0);
         func_001BCB88(0, 8);
     }
-    if (*(u32 *)(task + 4) >= 0x11) {
+    if (task->ticks >= 0x11) {
         if (func_001AD3F0() == 1) {
             if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0) {
                 func_001BCB88(1, 8);
@@ -338,7 +350,7 @@ s32 func_001FE950(u8 *task) {
             }
         }
     } else {
-        *(u32 *)(task + 4) += 1;
+        task->ticks += 1;
     }
     return 0;
 }
