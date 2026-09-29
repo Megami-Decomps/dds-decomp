@@ -1,5 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
+extern u8 D_003563F0[];
+extern void func_00190AD8();
 
 extern s32 D_003BB140;
 
@@ -97,7 +99,9 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00192030);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192110);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00192230);
+void func_00192230(void) {
+    func_00190AD8(D_003563F0);
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192250);
 

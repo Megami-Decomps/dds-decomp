@@ -36,10 +36,10 @@ void func_001687A0(BattleEffect *effect, u32 value) {
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_001687A8);
 
-void func_001687B8(u8 *work, s32 value) {
-    *(s32 *)(work + 0x14) = value;
-    if (*(u16 *)(work + 0x1C) == 0) {
-        *(s32 *)(work + 0x18) = value;
+void func_001687B8(BattleEffect *effect, s32 value) {
+    effect->value14 = value;
+    if (effect->value1C == 0) {
+        effect->value18 = value;
     }
 }
 

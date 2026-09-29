@@ -147,6 +147,8 @@ extern void func_0010AC98(void);
 
 extern void *D_003BD764;
 
+extern void func_00109108();
+
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001080D8);
@@ -213,12 +215,6 @@ void func_00108A80(u32 arg0) {
     D_003BA8E8 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108A88);
-
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108BA0);
-
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108CB8);
-
 typedef struct EvtDrawSurface {
     u8 unk_00[0x10];
     void (*submit)(struct EvtDrawSurface *, void *);
@@ -230,6 +226,40 @@ extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
 extern u8 *func_002E13E0(void *, s32);
+
+void func_00108A88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    u8 *command;
+    sdfInitPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = func_002E13E0(packet, 0x30);
+    *(u64 *)(command + 0x20) = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    *(u64 *)(command + 0x28) = 0x47;
+    sdfAppendPacket(list, packet);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
+
+void func_00108BA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    u8 *command;
+    sdfInitPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = func_002E13E0(packet, 0x30);
+    *(u64 *)(command + 0x20) = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    *(u64 *)(command + 0x28) = 0x48;
+    sdfAppendPacket(list, packet);
+    {
+        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108CB8);
 
 void func_00108DC0(s32 value) {
     void *list = sdfAllocPacketAligned(0x20);
@@ -284,7 +314,9 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108FA0);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109108);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093B8);
+void func_001093B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
+    func_00109108(a0, a1, a2, a3, 0xFFFFFF, a4, a5, a6, a7);
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093F8);
 

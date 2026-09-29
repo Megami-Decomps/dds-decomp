@@ -61,7 +61,43 @@ void evtEventViewerProcessPending(s32 arg0)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C0E8);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C188);
+typedef struct EvtViewNode {
+    u8 pad00[0x7C];
+    struct EvtViewNode *next; /* 0x7C */
+    struct EvtViewNode *prev; /* 0x80 */
+} EvtViewNode;
+
+typedef struct {
+    u8 pad00[0x2030];
+    s32 count;             /* 0x2030 */
+    EvtViewNode *first;    /* 0x2034 */
+    EvtViewNode *last;     /* 0x2038 */
+} EvtViewList;
+
+void func_0022C188(EvtViewNode *node, EvtViewList *owner) {
+    EvtViewNode *next = node->next;
+    EvtViewNode *previous = node->prev;
+    if (previous == 0) {
+        owner->first = next;
+    } else {
+        previous->next = next;
+    }
+    {
+        EvtViewNode *earlier = node->prev;
+        EvtViewNode *later = node->next;
+        if (later == 0) {
+            owner->last = earlier;
+        } else {
+            later->prev = earlier;
+        }
+    }
+    {
+        s32 count = owner->count;
+        node->prev = 0;
+        node->next = 0;
+        owner->count = count - 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C1D8);
 

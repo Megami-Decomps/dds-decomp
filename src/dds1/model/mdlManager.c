@@ -7,9 +7,24 @@ typedef struct MdlSub {
     u16 unkA;   /* 0xA */
 } MdlSub;
 
+/* Entry enabled by func_00217C60. */
+typedef struct MdlEntry {
+    u8 unk0[0x14]; /* 0x0 */
+    s16 enabled;   /* 0x14 */
+} MdlEntry;
+
+/* Entry table pointed to by the first word of MdlInner. */
+typedef struct MdlEntryTable {
+    u8 unk0[4];        /* 0x0 */
+    s16 count;         /* 0x4 */
+    u8 unk6[6];        /* 0x6 */
+    MdlEntry **items;  /* 0xC */
+} MdlEntryTable;
+
 /* Record behind MdlCtx.inner. */
 typedef struct MdlInner {
-    u8 unk0[8];  /* 0x0 */
+    MdlEntryTable *entries; /* 0x0 */
+    u8 unk4[4];  /* 0x4 */
     u32 resourceHandle; /* 0x8: released through func_002DA1B0 */
     u8 unkC[8];  /* 0xC */
     u32 *list;   /* 0x14: intrusive list walked by func_00218320/368 */
@@ -80,12 +95,12 @@ extern char *strcat(char *dst, const char *src);
 MdlNode *func_00217E10(MdlCtx *ctx, s32 id);
 void func_00217CA8(MdlCtx *ctx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 
-extern void *func_00288B90(void);
+extern void *func_00288B90();
 extern u32 func_002EB090(void *);
 
 extern u32 D_003BD878;
 
-extern void *btlFindGroupedEntity(void);
+extern void *btlFindGroupedEntity();
 
 void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
     s32 off = node->slotIndex * 4 + 0x20;
@@ -123,7 +138,15 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00216CF8);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216DB8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00216E68);
+extern s32 btlGroupContainsId(s32 group, s32 id);
+extern s32 fileManUpdate(void);
+
+void *func_00216E68(s32 group, s32 id) {
+    while (btlGroupContainsId(group, id)) {
+        fileManUpdate();
+    }
+    return btlFindGroupedEntity(group, id);
+}
 
 void func_00216EC0(MdlPacket *packet) {
     func_00216DB8(packet->unk0, packet->unk2, packet->unk8, packet->extra);
@@ -147,7 +170,20 @@ void func_00216F18(void *arg0, MdlLoadReq *req) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216F68);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00216FE0);
+extern s32 func_002EB1F0();
+
+typedef struct MdlLoadJob {
+    u8 unk0[0x18]; /* 0x0 */
+    u32 sizeWord;  /* 0x18 */
+    u32 handle;    /* 0x1C */
+} MdlLoadJob;
+
+void func_00216FE0(s32 arg0, MdlLoadJob *job) {
+    job->handle = func_00288B88(arg0);
+    job->sizeWord = func_002EB1F0(func_00288B90(arg0));
+    func_002887A0(arg0);
+    func_00216EC0((MdlPacket *)job);
+}
 
 char *mdlBuildPrefixedString(char *dst, const char *src) {
     *(Hdr8 *)dst = *(Hdr8 *)D_003BBB60;
@@ -160,7 +196,44 @@ void func_00217298(u32 arg0, u32 arg1) {
     func_00217068(arg0, arg1, 1);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002172B0);
+typedef struct MdlGroup {
+    u8 unk0[0xC];
+    u8 flag;
+    u8 unkD[3];
+    struct MdlLink *tail;
+} MdlGroup;
+
+typedef struct MdlLink {
+    u8 unk0[4];
+    struct MdlLink *prev;
+    struct MdlLink *next;
+    MdlGroup *group;
+} MdlLink;
+
+extern void battleDestroyGroupNode();
+
+void func_002172B0(MdlLink *link) {
+    MdlLink *prev = link->prev;
+    MdlLink *next = link->next;
+    MdlGroup *group;
+
+    if (prev != NULL) {
+        prev->next = next;
+    }
+    if (next != NULL) {
+        next->prev = prev;
+    } else {
+        group = link->group;
+        if (prev != NULL) {
+            group->tail = prev;
+        } else {
+            group->tail = NULL;
+            if (group->flag != 0) {
+                battleDestroyGroupNode(group);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217310);
 
@@ -176,7 +249,16 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217878);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002179A8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217C60);
+void func_00217C60(MdlCtx *ctx) {
+    MdlEntryTable *table = ctx->inner->entries;
+    s32 count = table->count;
+    MdlEntry **items = table->items;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        items[i]->enabled = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217CA8);
 
@@ -196,7 +278,16 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
     func_00217CA8(ctx, arg1, arg2, 0, arg4, arg5);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217E10);
+MdlNode *func_00217E10(MdlCtx *ctx, s32 id) {
+    MdlNode *node;
+
+    for (node = (MdlNode *)ctx->inner->list; node != NULL; node = node->next) {
+        if (node->id == id) {
+            return node;
+        }
+    }
+    return NULL;
+}
 
 s32 mdlGetNodeField2C(MdlCtx *ctx, s32 id) {
     MdlNode *node = func_00217E10(ctx, id);

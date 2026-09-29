@@ -47,6 +47,24 @@ typedef struct MenuPageParams {
     s32 field70;
 } MenuPageParams;
 
+typedef struct ScrollParams {
+    s32 a;
+    s32 b;
+    s32 c;
+} ScrollParams;
+
+typedef struct ScrollInner {
+    u8 unk0[0x20];
+    ScrollParams *params;
+} ScrollInner;
+
+typedef struct ScrollHandle {
+    u8 unk0[8];
+    ScrollInner *inner;
+} ScrollHandle;
+
+extern ScrollHandle *func_002BD258(s32);
+
 static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
@@ -1036,7 +1054,25 @@ void mnuUpdateFade(s32 *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E4E0);
+void func_0027E4E0(u8 *menu) {
+    ScrollHandle *handle;
+
+    handle = func_002BD258(1);
+    *(ScrollHandle **)(menu + 0x40) = handle;
+    handle->inner->params->a = 10;
+    handle->inner->params->b = 0;
+
+    handle = func_002BD258(3);
+    *(ScrollHandle **)(menu + 0x44) = handle;
+    handle->inner->params->a = 8;
+    handle->inner->params->b = 4;
+    handle->inner->params->c = 8;
+
+    handle = func_002BD258(1);
+    *(ScrollHandle **)(menu + 0x48) = handle;
+    handle->inner->params->a = 10;
+    handle->inner->params->b = 0;
+}
 
 void func_0027E570(s32 *list) {
     u32 i;

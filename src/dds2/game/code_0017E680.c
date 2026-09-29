@@ -1,7 +1,8 @@
 #include "common.h"
 
 typedef struct EffResourceEntry {
-    u8 pad00[0x10];
+    f32 position[3];
+    u8 pad0C[4];
     u32 value;
 } EffResourceEntry;
 
@@ -41,15 +42,15 @@ void func_0017ECA0(s32 address) {
     }
 }
 
-void func_0017ECD0(u8 *obj, s32 index, f32 *vec) {
-    f32 *dst = (f32 *)(index * 0x14 + *(s32 *)(obj + 0x40));
+void func_0017ECD0(EffResourceWork *effect, s32 index, f32 *vec) {
+    f32 *dst = (f32 *)(index * 0x14 + (s32)effect->entries);
     dst[0] = vec[0];
     dst[1] = vec[1];
     dst[2] = vec[2];
 }
 
-void func_0017ED00(u8 *obj, s32 index, f32 *vec) {
-    f32 *src = (f32 *)(index * 0x14 + *(s32 *)(obj + 0x40));
+void func_0017ED00(EffResourceWork *effect, s32 index, f32 *vec) {
+    f32 *src = (f32 *)(index * 0x14 + (s32)effect->entries);
     vec[0] = src[0];
     vec[1] = src[1];
     vec[2] = src[2];

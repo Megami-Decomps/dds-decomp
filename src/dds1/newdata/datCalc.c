@@ -74,7 +74,9 @@ u32 func_00119728(void) {
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119750);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119880);
+s32 func_00119880(UiObject *object) {
+    return *(u16 *)((u8 *)object + 6) * 100 / *(u16 *)((u8 *)object + 8) < 25;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_001198B8);
 

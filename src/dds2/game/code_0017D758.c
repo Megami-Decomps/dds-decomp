@@ -15,14 +15,15 @@ typedef struct ScatterObject {
     u32 graphics;
     u32 allocation;
     u32 sharedResource;
-    u8 pad80[0xB0];
+    u8 pad80[0xAC];
+    f32 value12C;
     u32 value130;
 } ScatterObject;
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
 
-void func_0017D770(u8 *work, f32 value) {
-    *(f32 *)(work + 0x12C) = value;
+void func_0017D770(ScatterObject *object, f32 value) {
+    object->value12C = value;
 }
 
 void func_0017D778(ScatterObject *object, u32 value) {

@@ -6030,11 +6030,104 @@ s32 func_002BBA68(void) {
     return pollEffectFileRecord(D_003B3BA0, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BBA88);
+typedef struct EffectFileHeader {
+    u8 unk_00[8];
+    u16 mode;
+    u8 unk_0A[2];
+    u32 start;
+    u32 length;
+} EffectFileHeader;
+
+extern u8 D_003DF9A0[];
+extern u32 D_003BD064;
+extern void func_002BC510(void);
+extern EffectFileHeader D_0038DC08;
+extern EffectFileHeader D_00383F18;
+extern EffectFileHeader D_0038C758;
+
+u32 func_002BBA88(void) {
+    u8 fileInfo[0x110];
+    u8 *job;
+    u8 *entry;
+    u8 *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    func_002B8EA8(D_003B3B88, 4, fileInfo);
+    status = *(s32 *)(fileInfo + 0x100);
+    result = 0x600001;
+    if (status == 2) {
+        result = 0x400000;
+    } else if (status == 1) {
+        job = (u8 *)fileCreateJob(3);
+        func_002937E0(job, D_00383F18.start, D_00383F18.length,
+                      D_00383F18.mode);
+        func_00293A00(job, fileInfo, func_002BC538(*(u32 *)(fileInfo + 0xFC)));
+        entry = (u8 *)fileAppendJob(D_003BD060, job);
+        D_003BD070 = (s32)entry;
+        memcpy(D_003DF9A0, entry, 0x80);
+        D_003BD068 = *(u32 *)(entry + 0x90);
+        resource = (u8 *)effFindAssetData(entry);
+        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        fileData = fileResolvePrimaryBuffer(D_003BD068);
+        memcpy(*(void **)(resource + 0xC), fileData,
+               *(u32 *)(resource + 0x10));
+        D_003BD064 = func_002B5390(resource);
+        D_003BD09C = effFindAssetObject(entry);
+        *(u8 **)(D_003BD09C + 0x34) = (u8 *)D_0038F2F0;
+        func_002BC510();
+        if (D_003BD06C != 0) {
+            fileJobDestroy(D_003BD06C);
+            D_003BD06C = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BBC70);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BBF58);
+u32 func_002BBF58(void) {
+    u8 fileInfo[0x110];
+    u8 *job;
+    u8 *entry;
+    u8 *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    func_002B8EA8(D_003B3B88, 4, fileInfo);
+    status = *(s32 *)(fileInfo + 0x100);
+    result = 0x600001;
+    if (status == 2) {
+        result = 0x400000;
+    } else if (status == 1) {
+        job = (u8 *)fileCreateJob(18);
+        func_002937E0(job, D_0038C758.start, D_0038C758.length,
+                      D_0038C758.mode);
+        func_00293A00(job, fileInfo, func_002BC538(*(u32 *)(fileInfo + 0xFC)));
+        entry = (u8 *)fileAppendJob(D_003BD060, job);
+        D_003BD070 = (s32)entry;
+        memcpy(D_003DF9A0, entry, 0x80);
+        D_003BD068 = *(u32 *)(entry + 0x90);
+        resource = (u8 *)effFindAssetData(entry);
+        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        fileData = fileResolvePrimaryBuffer(D_003BD068);
+        memcpy(*(void **)(resource + 0xC), fileData,
+               *(u32 *)(resource + 0x10));
+        D_003BD064 = func_002B5390(resource);
+        D_003BD09C = effFindAssetObject(entry);
+        *(u8 **)(D_003BD09C + 0x34) = (u8 *)D_0038F2F0;
+        func_002BC510();
+        if (D_003BD06C != 0) {
+            fileJobDestroy(D_003BD06C);
+            D_003BD06C = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3B18);
 
@@ -6056,18 +6149,6 @@ INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B3BA0);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BC140);
 
-typedef struct EffectFileHeader {
-    u8 unk_00[8];
-    u16 mode;
-    u8 unk_0A[2];
-    u32 start;
-    u32 length;
-} EffectFileHeader;
-
-extern u8 D_003DF9A0[];
-extern u32 D_003BD064;
-extern void func_002BC510(void);
-extern EffectFileHeader D_0038DC08;
 
 u32 func_002BC328(void) {
     u8 fileInfo[0x110];

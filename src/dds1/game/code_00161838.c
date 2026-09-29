@@ -46,7 +46,16 @@ INCLUDE_ASM(const s32, "game/code_00161838", effBTLFieldColorGetBaseColor);
 
 INCLUDE_ASM(const s32, "game/code_00161838", func_001619A0);
 
-INCLUDE_ASM(const s32, "game/code_00161838", func_001619C8);
+typedef struct Entry20B {
+    u32 v0;
+    u8 pad_0x04[0x10];
+} Entry20B;
+
+extern Entry20B D_0034E740[];
+
+u32 func_001619C8(s32 i) {
+    return D_0034E740[i].v0;
+}
 
 u32 func_001619E8(void) {
     return 1;

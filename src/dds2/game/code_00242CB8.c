@@ -219,12 +219,13 @@ typedef struct {
     u8 pad00[0xA40];
     u8 flags;          /* 0xA40 */
     u8 phase;          /* 0xA41 */
-    u8 padA42[2];      /* DDS2 clears +0xA43, unlike the DDS1 phase byte. */
+    u8 padA42;          /* 0xA42 */
+    u8 overlayFlag;     /* 0xA43: cleared separately from solar phase */
     u32 phaseCounter;  /* 0xA44 */
 } SolarWorldState;
 
 void func_00243310(void) {
-    *(u8 *)(D_00435DD0 + 0xa43) = 0;
+    ((SolarWorldState *)D_00435DD0)->overlayFlag = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243320);

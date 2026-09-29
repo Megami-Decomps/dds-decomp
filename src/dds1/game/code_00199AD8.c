@@ -79,7 +79,20 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199E68);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199ED8);
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199F50);
+static inline void panelSetVec4(u32 *vec, u32 a, u32 b, u32 c, u32 d) {
+    vec[0] = a;
+    vec[1] = b;
+    vec[2] = c;
+    vec[3] = d;
+}
+
+void func_00199F50(u8 *base, u32 a, u32 b, u32 c, u32 d) {
+    u32 *vec = (u32 *)(base + 0x40);
+
+    panelSetVec4(vec, a, b, c, 0);
+    vec = (u32 *)(base + 0x50);
+    panelSetVec4(vec, a, b, c, d);
+}
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199F80);
 
@@ -95,9 +108,21 @@ void func_0019A0D0(u8 *base, s32 a, s32 b, s32 c, s32 d) {
     p[3] = d;
 }
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A0E8);
+void func_0019A0E8(u8 *base, u32 a, u32 b, u32 c, u32 d) {
+    u32 *vec = (u32 *)(base + 0x30);
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A118);
+    panelSetVec4(vec, a, b, c, 0);
+    vec = (u32 *)(base + 0x40);
+    panelSetVec4(vec, a, b, c, d);
+}
+
+void func_0019A118(u8 *base) {
+    u32 *vec = (u32 *)(base + 0x44);
+
+    panelSetVec4(vec, 0x73, 0x87, 0xFF, 0);
+    vec = (u32 *)(base + 0x54);
+    panelSetVec4(vec, 0x73, 0x87, 0xFF, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A150);
 

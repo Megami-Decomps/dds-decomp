@@ -48,6 +48,11 @@ typedef struct EffInitWork {
     void *param;    /* 0x1C optional block */
 } EffInitWork; /* 0x20 */
 
+typedef struct EffScatterWork {
+    u8 pad00[0x18];
+    u8 *destination;
+} EffScatterWork;
+
 extern u8 D_003B0180[];
 
 extern u8 D_003B0190[];
@@ -247,7 +252,7 @@ void effParamBuildVector(void *arg0, f32 x) {
     func_00232B40(arg0);
 }
 
-void effParamScatterVectors(void *work, void *src) {
+void effParamScatterVectors(EffScatterWork *work, void *src) {
     u8 *d0;
     u8 *d1;
     u8 *d2;
@@ -260,19 +265,19 @@ void effParamScatterVectors(void *work, void *src) {
         "lqc2 vf31, 48(%0)\n\t"
         ".set reorder"
         : : "r" (src) : "memory");
-    d0 = *(u8 **)((u8 *)work + 0x18) + 0x20;
+    d0 = work->destination + 0x20;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf28, 0(%0)\n\t"
         ".set reorder"
         : : "r" (d0) : "memory");
-    d1 = *(u8 **)((u8 *)work + 0x18) + 0x30;
+    d1 = work->destination + 0x30;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf29, 0(%0)\n\t"
         ".set reorder"
         : : "r" (d1) : "memory");
-    d2 = *(u8 **)((u8 *)work + 0x18) + 0x40;
+    d2 = work->destination + 0x40;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf30, 0(%0)\n\t"

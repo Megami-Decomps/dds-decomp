@@ -769,7 +769,7 @@ def greedy_finish(dst, ported, skipped):
                      if ("{" not in b or TYPE_DECL.match(b)) and b not in before and not b.startswith("#")
                      and declared_name(b)]
 
-        def needed(body, cur):
+        def needed(body, cur, supersede=False):
             used, chosen, changed = set(TOKENS.findall(body)), [], True
             while changed:
                 changed = False
@@ -781,11 +781,21 @@ def greedy_finish(dst, ported, skipped):
             have = {declared_name(b) for b in blocks(cur) if declared_name(b)}
             have |= {m.group(1) for b in blocks(cur) if "{" in b and (m := DEF.search(b))}
             chosen.sort(key=new_decls.index)
-            return [d for d in chosen if d not in cur and (TYPE_DECL.match(d) or declared_name(d) not in have)]
+            return [d for d in chosen if d not in cur
+                    and (TYPE_DECL.match(d) or supersede or declared_name(d) not in have)]
 
-        def install(cur, name, body):
+        def install(cur, name, body, supersede=False):
             text = re.sub(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{name}\);$', lambda _: body, cur, count=1, flags=re.M)
-            add = needed(body, cur)
+            add = needed(body, cur, supersede)
+            if supersede:
+                # the source's declaration replaces the destination's older one in place
+                # (a prototype with other argument types is what a near twin needs)
+                for d in [d for d in add if not TYPE_DECL.match(d) and "{" not in d]:
+                    old_decl = next((b for b in blocks(text) if "{" not in b and not TYPE_DECL.match(b)
+                                     and not b.startswith("#") and declared_name(b) == declared_name(d)), None)
+                    if old_decl:
+                        text = text.replace(old_decl, d, 1)
+                        add.remove(d)
             for token, header in NEEDS_HEADER.items():
                 if token in body and f'#include "{header}"' not in text:
                     first = re.search(r'^#include .*$', text, re.M)
@@ -803,13 +813,15 @@ def greedy_finish(dst, ported, skipped):
             if not m or m.group(1) not in names:
                 continue
             name = m.group(1)
-            trial = install(cur, name, blk)
-            path.write_text(trial)
-            if not unit_clean(path) and OPTS.fix_immediates and compiles(path, dst.version):
-                fix_immediates(path, {name})
-                trial = path.read_text()
-            if unit_clean(path):
-                cur, kept = path.read_text(), kept + 1
+            for supersede in (False, True):
+                trial = install(cur, name, blk, supersede)
+                path.write_text(trial)
+                if not unit_clean(path) and OPTS.fix_immediates and compiles(path, dst.version):
+                    fix_immediates(path, {name})
+                    trial = path.read_text()
+                if unit_clean(path):
+                    cur, kept = path.read_text(), kept + 1
+                    break
             else:
                 skipped.append(f"{rel}:{name}: does not leave the unit clean; not added")
         path.write_text(cur)

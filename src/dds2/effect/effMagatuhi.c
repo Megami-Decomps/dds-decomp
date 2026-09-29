@@ -10,7 +10,7 @@ typedef struct {
     u8    pad0C[0x0C];  /* 0x0C */
     u32  *out18;        /* 0x18 result table */
     u8    pad1C[4];     /* 0x1C */
-    u32  *unk20;        /* 0x20 table written by func_00189B90 */
+    u32  *values;       /* 0x20: indexed value table */
     u8    pad24[0x10];  /* 0x24 */
     void *resource;   /* 0x34: freed during cleanup */
 } EffMagatuhiWork; /* 0x38 */
@@ -69,7 +69,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191450);
 
 void func_001917C8(EffMagatuhiWork *work, s32 index, u32 value) {
-    work->unk20[index] = value;
+    work->values[index] = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001917E0);

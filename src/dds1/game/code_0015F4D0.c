@@ -30,9 +30,13 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F4D0);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F520);
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F578);
+void func_0015F578(BillObj *obj) {
+    D_0034E658[*(u16 *)((u8 *)obj + 0xB0)].func();
+}
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F5B0);
+void func_0015F5B0(BillObj *obj) {
+    D_0034E654[*(u16 *)((u8 *)obj + 0xB0)].func();
+}
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F5E8);
 

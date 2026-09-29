@@ -28,6 +28,11 @@ extern u32 D_00453CC0[];
 
 void func_003297C8(u32 sprite);
 
+typedef struct EvtResourcePair {
+    u32 handle;
+    u32 input;
+} EvtResourcePair;
+
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C1D0);
 
 void func_0026C240(void) {
@@ -79,15 +84,15 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C458);
 
-void func_0026C4F0(u32 resource, u32 *record) {
+void func_0026C4F0(u32 resource, EvtResourcePair *record) {
     u32 value;
 
-    value = func_00343ED0(resource, record + 1, 0);
-    *record = value;
+    value = func_00343ED0(resource, &record->input, 0);
+    record->handle = value;
 }
 
-void func_0026C520(u32 *arg0) {
-    func_003297C8(*arg0);
+void func_0026C520(EvtResourcePair *record) {
+    func_003297C8(record->handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C538);

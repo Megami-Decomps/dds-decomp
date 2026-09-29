@@ -60,26 +60,35 @@ extern u64 func_001D9718(void);
 
 typedef struct BtlUnit {
     u8 unk_00[0x70];
-    f32 unk_70[4];
-    f32 unk_80;
+    f32 rotation[4];
+    f32 scale;
     u8 unk_84[4];
-    f32 unk_88;
+    f32 zOffset;
     u8 unk_8C[4];
-    f32 unk_90[4];
-    f32 unk_A0[4];
-    f32 unk_B0;
-    f32 unk_B4;
-    u8 unk_B8[0x50];
+    f32 muzzleOffset[4];
+    f32 localBodyPosition[4];
+    f32 height;
+    f32 reach;
+    u8 unk_B8[0x30];
+    u32 stateFlags; /* 0xE8 */
+    u8 unk_EC[4];
+    s32 effectState; /* 0xF0 */
+    u8 unk_F4[4];
+    s16 effectTimerA; /* 0xF8 */
+    s16 effectTimerB; /* 0xFA */
+    s32 effectArgA; /* 0xFC */
+    s32 effectArgB; /* 0x100 */
+    f32 effectValue; /* 0x104 */
     u64 unitId; /* 0x108: compared against the battle command's unit ID */
     u32 flags;
-    u32 unk_114;
+    u32 effectFlags; /* 0x114 */
     u8 unk_118[8];
     u16 unk_120;
     u8 unk_122[2];
     u16 mode;
     u8 unk_126[0x1F6];
-    u32 unk_31C;
-    u32 unk_320;
+    u32 effectObject;
+    u32 statusEffectHandle;
     u8 unk_324[0x20];
     struct BtlUnit *next;
 } BtlUnit;
@@ -101,6 +110,8 @@ typedef struct BtlState {
     BtlList *list;
     u8 unk_2A0[4];
     s32 slot;
+    u8 unk_2A8[0x348];
+    void (*updateCallback)(void); /* 0x5F0 */
 } BtlState;
 
 typedef struct BtlCmdCtx {
@@ -169,15 +180,26 @@ extern void btlCmdSimpleC(s32, u16);
 extern u8 *func_001D4748(s32);
 extern void func_001F60E8(void);
 
+typedef struct BtlControlObject {
+    u8 enabled; /* 0x00 */
+    u8 pad01[0x0F];
+    u8 state; /* 0x10 */
+    u8 pad11[0x0F];
+    u16 type; /* 0x20 */
+    u8 pad22[0x26];
+    s32 status; /* 0x48 */
+    void (*update)(void); /* 0x4C */
+} BtlControlObject;
+
 u8 *btlCreateControlObject(void) {
-    u8 *object;
-    object = func_001D4748(0);
-    object[0] = 1;
-    *(void (**)(void))(object + 0x4c) = func_001F60E8;
-    *(u16 *)(object + 0x20) = 0x60;
-    *(s32 *)(object + 0x48) = 0;
-    object[0x10] = 0;
-    return object;
+    BtlControlObject *object;
+    object = (BtlControlObject *)func_001D4748(0);
+    object->enabled = 1;
+    object->update = func_001F60E8;
+    object->type = 0x60;
+    object->status = 0;
+    object->state = 0;
+    return (u8 *)object;
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6158);
@@ -187,11 +209,11 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6300);
 void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     func_001D6318(unit, pos);
-    pos[2] += unit->unk_88;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
+    pos[2] += unit->zOffset;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
     func_002E7D98();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_90));
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->muzzleOffset));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->scale));
     __asm__ volatile(
         ".set noreorder\n\t"
         "vmulx.xyzw vf10, vf10, vf2x\n\t"
@@ -210,11 +232,11 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     func_001D6318(unit, pos);
-    pos[2] += unit->unk_88;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
+    pos[2] += unit->zOffset;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
     func_002E7D98();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_A0));
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->localBodyPosition));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->scale));
     __asm__ volatile(
         ".set noreorder\n\t"
         "vmulx.xyzw vf10, vf10, vf2x\n\t"
@@ -236,12 +258,12 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
         btlUnitGetMuzzlePosVU(unit);
         return;
     }
-    effObjFetchInnerFirstVec(unit->unk_31C);
+    effObjFetchInnerFirstVec(unit->effectObject);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
     func_002E7D98();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_90));
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->unk_80));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->muzzleOffset));
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->scale));
     __asm__ volatile(
         ".set noreorder\n\t"
         "vmulx.xyzw vf10, vf10, vf2x\n\t"
@@ -257,23 +279,23 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
 }
 
 
-f32 func_001F6618(s32 arg0) {
-    f32 temp_f2;
-    f32 temp_f1;
+f32 func_001F6618(BtlUnit *unit) {
+    f32 reach;
+    f32 height;
 
-    temp_f2 = *(f32 *)(arg0 + 0xb4);
-    temp_f1 = *(f32 *)(arg0 + 0xb0);
-    if (temp_f1 < temp_f2) {
-        return temp_f2 * *(f32 *)(arg0 + 0x80);
+    reach = unit->reach;
+    height = unit->height;
+    if (height < reach) {
+        return reach * unit->scale;
     }
-    return temp_f1 * *(f32 *)(arg0 + 0x80);
+    return height * unit->scale;
 }
 
 f32 btlUnitGetTopY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
-    return unit->unk_B0 * unit->unk_80 * 0.5f - pos[1];
+    return unit->height * unit->scale * 0.5f - pos[1];
 }
 
 
@@ -281,7 +303,7 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
-    return -pos[1] - unit->unk_B0 * unit->unk_80 * 0.5f;
+    return -pos[1] - unit->height * unit->scale * 0.5f;
 }
 
 
@@ -316,7 +338,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
     s32 first = 1;
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
-            f32 value = unit->unk_B4 * unit->unk_80;
+            f32 value = unit->reach * unit->scale;
             if (first) {
                 best = value;
                 first = 0;
@@ -340,7 +362,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
             btlUnitGetMuzzlePosVU(unit);
             __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
             if (mask & 0x200) {
-                value = pos[2] + unit->unk_B4 * unit->unk_80;
+                value = pos[2] + unit->reach * unit->scale;
                 if (first) {
                     best = value;
                     first = 0;
@@ -348,7 +370,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
                     best = value;
                 }
             } else {
-                value = pos[2] - unit->unk_B4 * unit->unk_80;
+                value = pos[2] - unit->reach * unit->scale;
                 if (first) {
                     best = value;
                     first = 0;
@@ -522,25 +544,25 @@ extern void func_001D5990(s32);
 extern void func_001D5578(s32, s32, s32, f32);
 
 void func_001F7600(void) {
-    s32 state = func_001A17F0();
-    s32 actor = *(s32 *)(state + 0x228);
-    while (actor != 0) {
-        func_001D5440(actor);
-        func_001D6280(actor, actor + 0x30);
-        func_001D6640(actor, actor + 0x40);
-        if ((func_001D5D58(actor) == 0 && *(s32 *)(actor + 0xf0) != 0) ||
-            (*(u32 *)(actor + 0xe8) & 2) != 0) {
-            func_001D5990(actor);
-            *(s16 *)(actor + 0xf8) = 0;
-            *(s16 *)(actor + 0xfa) = 0;
-            func_001D5578(actor, *(s32 *)(actor + 0xfc), *(s32 *)(actor + 0x100),
-                          *(f32 *)(actor + 0x104));
+    BtlState *state = (BtlState *)func_001A17F0();
+    BtlUnit *actor = state->units;
+    while (actor != NULL) {
+        func_001D5440((s32)actor);
+        func_001D6280((s32)actor, (s32)((u8 *)actor + 0x30));
+        func_001D6640((s32)actor, (s32)((u8 *)actor + 0x40));
+        if ((func_001D5D58((s32)actor) == 0 && actor->effectState != 0) ||
+            (actor->stateFlags & 2) != 0) {
+            func_001D5990((s32)actor);
+            actor->effectTimerA = 0;
+            actor->effectTimerB = 0;
+            func_001D5578((s32)actor, actor->effectArgA, actor->effectArgB,
+                          actor->effectValue);
         }
-        *(u32 *)(actor + 0x114) &= ~0x8000;
-        actor = *(s32 *)(actor + 0x344);
+        actor->effectFlags &= ~0x8000;
+        actor = actor->next;
     }
     {
-        void (*callback)(void) = *(void (**)(void))(state + 0x5f0);
+        void (*callback)(void) = state->updateCallback;
         if (callback != 0) {
             callback();
         }
@@ -555,8 +577,8 @@ void btlRefreshUnitEffects(void) {
     u32 handle;
     while (unit != NULL) {
         if (unit->flags & 2) {
-            if (unit->unk_114 & 0x10) {
-                handle = unit->unk_320;
+            if (unit->effectFlags & 0x10) {
+                handle = unit->statusEffectHandle;
                 evtSetUnitStatusFlags(handle);
                 __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit));
                 func_00221D98(handle, 0);

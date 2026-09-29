@@ -39,10 +39,11 @@ void func_0026BA20(s32 request) {
 }
 
 u32 func_0026BA68(void) {
-    s32 temp_v0;
+    s32 state;
 
-    temp_v0 = func_00101958();
-    if (*(s32 *)(temp_v0 + 0xe4) == 0) {
+    state = func_00101958();
+    /* Keep both branches: this control-flow shape is required to match. */
+    if (*(s32 *)(state + 0xe4) == 0) {
         kwlnFadeInStart(0, 0, 0, 0xf);
     }
     else {

@@ -101,8 +101,8 @@ typedef struct PcpScatterWork2 {
 
 typedef struct PcpScatterPool {
     u8 pad00[0x20];
-    s32 records;              /* 0x20: elements of 0x60 bytes */
-    s32 auxRecords;           /* 0x24: elements of 0x18 bytes */
+    s32 recordBase;           /* 0x20: base of 0x60-byte records */
+    s32 auxRecordBase;        /* 0x24: base of 0x18-byte records */
     u32 resource;             /* 0x28: released by func_00333918 */
     u32 buffer;               /* 0x2C: freed by func_003297C8 */
     PcpScatterRes *sharedResource; /* 0x30: reference counted */
@@ -228,11 +228,11 @@ void func_0017AC10(PcpScatterPool *dst, PcpScatterPool *src) {
 }
 
 s32 func_0017AC40(PcpScatterPool *pool, s32 index) {
-    return pool->records + index * 0x60;
+    return pool->recordBase + index * 0x60;
 }
 
 s32 func_0017AC58(PcpScatterPool *pool, s32 index) {
-    return pool->auxRecords + index * 0x18;
+    return pool->auxRecordBase + index * 0x18;
 }
 
 PcpScatterRes *effPcpScatterResCreate(u32 resId)

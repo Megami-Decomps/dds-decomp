@@ -19,13 +19,27 @@ extern u32 D_0034E720[];
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161AA0);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161AE0);
+extern u32 func_00161868(void);
+extern u32 func_00161870(void);
+extern void func_00161BA0();
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161B10);
+void func_00161AE0(u32 unused, void *arg) {
+    func_00161BA0(func_00161868(), arg);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161B40);
+void func_00161B10(u32 unused, void *arg) {
+    func_00161BA0(func_00161870(), arg);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161B70);
+extern void func_001D63E8();
+
+void func_00161B40(u32 unused, EffBattleMiscParam *param) {
+    func_001D63E8(func_00161868(), param->value);
+}
+
+void func_00161B70(u32 unused, EffBattleMiscParam *param) {
+    func_001D63E8(func_00161870(), param->value);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161BA0);
 

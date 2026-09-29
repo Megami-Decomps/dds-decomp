@@ -16,19 +16,28 @@ void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 
 void func_0023A9A8(void);
 
+typedef struct EventVisualData {
+    u8 pad00[0x3C];
+    s16 firstValues[8];
+    u8 pad4C[0x50];
+    s16 secondValues[8];
+    u8 padAC[0x50];
+    u8 solarPhase;
+} EventVisualData;
+
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
 
 void evtInitializeVisualData(s32 object) {
     s32 state = evtGetRawSolarPhase(object);
-    s16 *values = (s16 *)(object + 0x3C);
-    *(u8 *)(object + 0xFC) = state;
+    s16 *values = ((EventVisualData *)object)->firstValues;
+    ((EventVisualData *)object)->solarPhase = state;
     values[0] = 0x39;
     values[1] = 0x33;
     values[2] = 0x1D;
     values[3] = 0x23;
     values[5] = 5;
     values[7] = 10;
-    values = (s16 *)(object + 0x9C);
+    values = ((EventVisualData *)object)->secondValues;
     values[0] = 0x37;
     values[1] = 0x32;
     values[2] = 15;

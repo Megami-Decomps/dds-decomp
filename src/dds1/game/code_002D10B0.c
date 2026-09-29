@@ -15,7 +15,7 @@ extern SdfTexHead *D_003BD9E4;
 extern SdfTexHead *D_003BD9E0;
 extern s8 D_003BD300[2];
 
-extern s8 D_003BD302;
+extern volatile s8 D_003BD302;
 extern SdfTex *D_003BD308;
 extern u8 D_003BD9E8;
 extern SdfSemaObj D_003EB848;
@@ -38,9 +38,25 @@ void func_002D10B0(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D10C8);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1318);
+void func_002D1318(s32 buffer, s32 next) {
+    if (D_003BD300[0] == buffer) {
+        D_003BD300[0] = buffer ^ 1;
+    }
+    if (D_003BD300[1] == buffer) {
+        D_003BD300[1] = buffer ^ 1;
+    }
+    D_003BD302 = next;
+}
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1350);
+void func_002D1350(s32 both, s32 value, s32 index) {
+    if (both == 0) {
+        D_003BD300[0] = value;
+        D_003BD300[1] = value;
+    } else {
+        D_003BD300[index] = value;
+    }
+    D_003BD302 = -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1380);
 
@@ -48,13 +64,37 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D14C8);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1590);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1698);
+extern vu8 D_003BD2EA;
+extern void func_002E1218(void);
+
+void func_002D1698(void) {
+    s8 buffer = D_003BD2EA ^ 1;
+
+    while (D_003BD302 == buffer) {
+    }
+    D_003BD2EA = buffer;
+    sdfSelectDoubleBuffer((s8)D_003BD2EA);
+    func_002E1218();
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D16F0);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1740);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1798);
+s32 func_002D1798(SdfTex *target) {
+    SdfTex *node = (SdfTex *)D_003BD9E0;
+
+    if (node == NULL) {
+        return 0;
+    }
+    do {
+        if (node == target) {
+            return 1;
+        }
+        node = node->prev;
+    } while (node != NULL);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D17D8);
 
@@ -127,7 +167,14 @@ u32 func_002D2300(SdfTex *texture) {
     return (u32)texture->unk28;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2308);
+s32 func_002D2308(SdfTex *tex) {
+    SdfTexBuf *buf = tex->unk28;
+
+    if (buf == NULL) {
+        return 0;
+    }
+    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+}
 
 s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buf;
@@ -140,7 +187,14 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     return (s32)buf;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2368);
+s32 func_002D2368(SdfTex *tex) {
+    SdfTexBuf *buf = tex->unk2C;
+
+    if (buf == NULL) {
+        return 0;
+    }
+    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+}
 
 u8 func_002D2390(SdfTex *texture) {
     return texture->unk18;
@@ -192,9 +246,27 @@ void func_002D2530(SdfTex *texture, u8 value) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2548);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2650);
+extern void func_002D2548();
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D26A8);
+void func_002D2650(SdfTex *tex, s32 arg1, u8 *arg2, s32 arg3) {
+    s32 width;
+    s32 height;
+
+    if (tex->unk1A == 0x13 || tex->unk1A == 0x1B) {
+        width = 0x10;
+        height = 0x10;
+    } else {
+        width = 8;
+        height = 2;
+    }
+    func_002D2548(arg1, width, height, tex->unk19, arg2, arg3);
+}
+
+void func_002D26A8(SdfTex *tex) {
+    if (tex->secondaryResource != NULL) {
+        func_002D2650(tex, sdfTexGetSecondaryResourceWord(tex), tex->data, 0);
+    }
+}
 
 void sdfTexListInsert(SdfTex *texture) {
     texture->next = NULL;

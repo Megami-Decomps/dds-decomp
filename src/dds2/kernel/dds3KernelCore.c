@@ -2,6 +2,8 @@
 
 #include "kwln.h"
 
+#define KWLN_TASK_STATE_MASK 0xF
+
 extern KwlnTask* D_00435BE8;
 
 extern void func_001005C8(KwlnTask* task);
@@ -55,7 +57,7 @@ extern KwlnTask* func_00101740(const char* name);
 void func_00100980(KwlnTask* task)
 {
     func_001005C8(task);
-    task->flags = (task->flags & ~0xF) | 2;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
     func_00100740(task);
     task->unk24 = 0;
     task->timer = 0;
@@ -98,7 +100,7 @@ void func_00100D50(KwlnTask* task)
     if (task->destroy != 0) {
         task->destroy(task);
     }
-    task->flags &= ~0xF;
+    task->flags &= ~KWLN_TASK_STATE_MASK;
     func_001019F0(task);
     func_00328E48(task);
 }
@@ -107,7 +109,7 @@ void func_00100DD8(KwlnTask* task)
 {
     u32 state;
 
-    state = task->flags & 0xF;
+    state = task->flags & KWLN_TASK_STATE_MASK;
     if (state >= 3) {
         return;
     }
@@ -115,7 +117,7 @@ void func_00100DD8(KwlnTask* task)
         return;
     }
     func_001005C8(task);
-    task->flags = (task->flags & ~0xF) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
     func_00100740(task);
     if (task->unk2E == 0) {
         func_00100D50(task);
@@ -146,7 +148,7 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
 
 void* func_001010A8(u32 state)
 {
-    switch (state & 0xF) {
+    switch (state & KWLN_TASK_STATE_MASK) {
     case 1:
         return D_00435BD8;
     case 2:
@@ -213,24 +215,24 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
 void func_00101678(KwlnTask* task)
 {
-    if ((task->flags & 0xF) != 2) {
+    if ((task->flags & KWLN_TASK_STATE_MASK) != 2) {
         return;
     }
     func_001005C8(task);
-    task->flags = (task->flags & ~0xF) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
     func_00100740(task);
 }
 
-void func_001016E0(KwlnTask* task, s32 arg1)
+void func_001016E0(KwlnTask* task, s32 delayTicks)
 {
     u32 state;
 
-    state = task->flags & 0xF;
+    state = task->flags & KWLN_TASK_STATE_MASK;
     if (state == 0) {
         return;
     }
     if (state < 4) {
-        task->unk2E = arg1;
+        task->unk2E = delayTicks;
     }
 }
 
@@ -241,7 +243,7 @@ s32 func_00101700(KwlnTask* task)
     if (kwlnTaskIsRegistered(task) == 0) {
         return 0;
     }
-    state = task->flags & 0xF;
+    state = task->flags & KWLN_TASK_STATE_MASK;
     return (state < 4) ? state : 0;
 }
 

@@ -1,5 +1,10 @@
 #include "common.h"
 
+typedef struct WorldSlotObject {
+    u8 pad00[0x18];
+    u32 *slots;
+} WorldSlotObject;
+
 INCLUDE_ASM(const s32, "game/code_00111388", func_00111388);
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_001113B0);
@@ -18,10 +23,10 @@ INCLUDE_ASM(const s32, "game/code_00111388", func_001115B0);
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_00111628);
 
-void func_00111668(s32 object) {
+void func_00111668(WorldSlotObject *object) {
     u32 *resource;
 
-    resource = *(u32 **)(object + 0x18);
+    resource = object->slots;
     dds3ReleaseObjectResource();
     dds3ExchangeSlot(*resource, 0, 1);
     func_00328E48(resource);

@@ -270,14 +270,14 @@ u32 func_001A0060(u32 arg0) {
     return arg0;
 }
 
-void func_001A0068(MemBlock *arg0, MemOut *arg1) {
-    s32 v0 = arg0->unk0;
-    s32 v1 = v0 + arg0->unk4;
-    s32 v2 = v1 + arg0->unk18;
+void func_001A0068(MemBlock *block, MemOut *segments) {
+    s32 firstOffset = block->unk0;
+    s32 secondOffset = firstOffset + block->unk4;
+    s32 thirdOffset = secondOffset + block->unk18;
 
-    arg1->unk0 = (u8 *)arg0 + v0;
-    arg1->unk4 = (u8 *)arg0 + v1;
-    arg1->unk8 = (u8 *)arg0 + v2;
+    segments->unk0 = (u8 *)block + firstOffset;
+    segments->unk4 = (u8 *)block + secondOffset;
+    segments->unk8 = (u8 *)block + thirdOffset;
 }
 
 u32 func_001A0098(u32 arg0) {

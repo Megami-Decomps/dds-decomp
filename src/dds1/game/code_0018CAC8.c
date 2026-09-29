@@ -23,11 +23,11 @@ typedef struct EffBig44 {
 } EffBig44;
 
 
-/* Directory entry filled by func_0018CEF0. */
+/* Directory entry filled by the effect data directory iterator. */
 typedef struct EffDirEnt {
-    u32 unk0;      /* 0x0: flags (bit 12 cleared) */
-    u8 unk4[0x3C]; /* 0x4 */
-    char unk40[1];  /* 0x40: name */
+    u32 flags;      /* 0x00: bit 12 cleared */
+    u8 pad04[0x3C]; /* 0x04 */
+    char name[0x40]; /* 0x40 */
 } EffDirEnt;
 
 extern EffHandler D_00355734[];
@@ -104,26 +104,27 @@ extern u8 D_00324660[];
 
 extern void func_002DDD60(void *);
 
-EffResult *effAllocDispatch(s32 arg0, s32 arg1) {
-    EffResult *mem = func_002CFEB8(8);
-    s32 ret = D_00355730[arg0].handler(arg1);
 
-    mem->unk0 = arg0;
-    mem->unk4 = ret;
-    return mem;
+EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
+    EffResult *result = func_002CFEB8(8);
+    s32 handlerResult = D_00355730[type].handler(handlerArg);
+
+    result->unk0 = type;
+    result->unk4 = handlerResult;
+    return result;
 }
 
-void effTypeDispatch(EffWork *arg0) {
-    D_00355734[arg0->type].handler(arg0->unk4);
+void effTypeDispatch(EffWork *work) {
+    D_00355734[work->type].handler(work->unk4);
 }
 
-void effTypeDispatchFree(EffWork *arg0) {
-    D_00355738[arg0->type].handler(arg0->unk4);
-    func_002CFF98(arg0);
+void effTypeDispatchFree(EffWork *work) {
+    D_00355738[work->type].handler(work->unk4);
+    func_002CFF98(work);
 }
 
-u32 effGetHandlerArg(EffWork *arg0) {
-    return (u32)arg0->unk4;
+u32 effGetHandlerArg(EffWork *work) {
+    return (u32)work->unk4;
 }
 
 u32 func_0018CBC0(u32 *arg0) {
@@ -137,27 +138,27 @@ u32 func_0018CBD0(void) {
     return 1;
 }
 
-void effTypeDispatchGuardedA(EffWork *arg0) {
-    void (*handler)(void *) = D_0035573C[arg0->type].handler;
+void effTypeDispatchGuardedA(EffWork *work) {
+    void (*handler)(void *) = D_0035573C[work->type].handler;
 
     if (handler != NULL) {
-        handler(arg0->unk4);
+        handler(work->unk4);
     }
 }
 
-void effTypeDispatchGuardedB(EffWork *arg0) {
-    void (*handler)(void *) = D_00355744[arg0->type].handler;
+void effTypeDispatchGuardedB(EffWork *work) {
+    void (*handler)(void *) = D_00355744[work->type].handler;
 
     if (handler != NULL) {
-        handler(arg0->unk4);
+        handler(work->unk4);
     }
 }
 
-void effTypeDispatchGuardedC(EffWork *arg0) {
-    void (*handler)(void *) = D_00355740[arg0->type].handler;
+void effTypeDispatchGuardedC(EffWork *work) {
+    void (*handler)(void *) = D_00355740[work->type].handler;
 
     if (handler != NULL) {
-        handler(arg0->unk4);
+        handler(work->unk4);
     }
 }
 
@@ -325,7 +326,18 @@ void effRunIfEnabled(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CEF0);
+s32 func_0018CEF0(s32 unused, EffDirEnt *entry) {
+    if (D_003BD476 != 0) {
+        return func_00310320();
+    }
+    if ((u32)D_003BD800 >= 0x2F) {
+        return 0;
+    }
+    strcpy(entry->name, D_003557A8[D_003BD800]);
+    entry->flags &= ~0x1000;
+    D_003BD800++;
+    return strlen(entry->name);
+}
 
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
@@ -388,19 +400,19 @@ void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
     arg0->unk2C = arg2;
 }
 
-void effSetupWorkSound(EffWork *arg0, u64 arg1) {
-    u32 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+void effSetupWorkSound(EffWork *work, u64 soundResource) {
+    u32 voiceHandle;
+    u64 loadedResource;
+    u32 resourceWords[4];
 
-    if (arg0->unk3C != 0) {
-        func_002D2D00(arg0->unk3C);
-        arg0->unk3C = 0;
+    if (work->unk3C != 0) {
+        func_002D2D00(work->unk3C);
+        work->unk3C = 0;
     }
-    temp_v1 = func_002EB028(arg1, temp_v2, 0);
-    temp_v0 = func_002D3288(temp_v2[0]);
-    arg0->unk3C = temp_v0;
-    func_002D0918(temp_v1);
+    loadedResource = func_002EB028(soundResource, resourceWords, 0);
+    voiceHandle = func_002D3288(resourceWords[0]);
+    work->unk3C = voiceHandle;
+    func_002D0918(loadedResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DA70);
@@ -524,25 +536,25 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DDF8);
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DE78);
 
-void *effAllocSlotArray(s32 n) {
-    void *mem1 = func_002D03F8(n * 0x38 + 0xC);
-    void *mem2 = sdfResourceRetainAddress(mem1);
-    u32 i = 0;
-    EffSlot38 *r = mem2;
-    u8 *end = (u8 *)r + n * 0x38;
+void *effAllocSlotArray(s32 count) {
+    void *allocation = func_002D03F8(count * 0x38 + 0xC);
+    void *retainedAddress = sdfResourceRetainAddress(allocation);
+    u32 index = 0;
+    EffSlot38 *slot = retainedAddress;
+    u8 *headerAddress = (u8 *)slot + count * 0x38;
 
-    ((EffArrHdr *)end)->unk8 = mem1;
-    ((EffArrHdr *)end)->unk0 = mem2;
-    ((EffArrHdr *)end)->unk4 = n;
-    if (n != 0) {
+    ((EffArrHdr *)headerAddress)->unk8 = allocation;
+    ((EffArrHdr *)headerAddress)->unk0 = retainedAddress;
+    ((EffArrHdr *)headerAddress)->unk4 = count;
+    if (count != 0) {
         do {
-            i++;
-            r->unk30 = 0;
-            r->unk34 = 0.05f;
-            r = (EffSlot38 *)((u8 *)r + 0x38);
-        } while (i < n);
+            index++;
+            slot->unk30 = 0;
+            slot->unk34 = 0.05f;
+            slot = (EffSlot38 *)((u8 *)slot + 0x38);
+        } while (index < count);
     }
-    return end;
+    return headerAddress;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F88);

@@ -423,7 +423,28 @@ u32 func_0013DCC8(u32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DD18);
+extern s8 D_00387D60[];
+extern u8 D_00435F24;
+extern u8 *func_001406E8(void);
+extern void func_00110F28();
+
+s32 func_0013DD18(void) {
+    u8 *object;
+    u32 state = D_00435F24;
+    if (!(state & 1)) {
+        return 0;
+    }
+    if ((state & 2) != 0 && D_00387D60[0] != 0) {
+        func_00110FB0(dds3GetWorldObject(), D_00387D60);
+    }
+    D_00387D60[0] = 0;
+    D_00435F24 = 0;
+    object = func_001406E8();
+    if (func_0010C100((u32)object) == 0) {
+        func_00110F28(dds3GetWorldObject(), object);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DDC0);
 
