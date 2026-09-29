@@ -360,7 +360,34 @@ void func_002B1150(s32 arg0) {
     func_002B9520(*(u32 *)(*(s32 *)(arg0 + 0xaa48) + 8));
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1178);
+typedef struct PartyEntryCopy {
+    u32 word[0x71];
+} PartyEntryCopy;
+
+void func_002B1178(context)
+s32 context;
+{
+    s32 menu = *(s32 *)(context + 0xAA48);
+    PartyEntryCopy *to = (PartyEntryCopy *)(menu + 0x8E0);
+    s32 i;
+    s32 test = 0xA60;
+    s32 offset = 0;
+
+    *(s32 *)(menu + 0x11B4) = 0;
+    for (i = 0; i < 5; i++) {
+        *to = *(PartyEntryCopy *)(offset + D_00435DD0 + 0xA60);
+        if (*(u16 *)(D_00435DD0 + test) & 1) {
+            *(s32 *)(menu + 0x11B4) = *(s32 *)(menu + 0x11B4) + 1;
+        }
+        test += 0x1C4;
+        to++;
+        offset += 0x1C4;
+    }
+    if (*(s32 *)(menu + 0x11B4) >= 4) {
+        *(s32 *)(menu + 0x11B4) = 3;
+    }
+    *(s32 *)(menu + 0x1A8C) = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B12B0);
 
@@ -1321,7 +1348,39 @@ void menuDestroyEffectResources(u8 *ctx) {
     effDestroyPackedBatch(*(u32 *)(ctx + 0x3c));
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7958);
+typedef struct MenuSparkSet {
+    u8 unk0[0x60];
+    /* 0x060 */ s32 direction[16];
+    /* 0x0A0 */ s32 velocity[16][2];
+    /* 0x120 */ s32 life[16];
+    /* 0x160 */ s32 count;
+} MenuSparkSet;
+
+void func_002B7958(MenuSparkSet *fx) {
+    s32 slot = -1;
+    s32 i;
+
+    if (fx->count >= 0x10) {
+        return;
+    }
+    for (i = 0; i < 0x10; i++) {
+        if (fx->direction[i] == 0) {
+            slot = i;
+            break;
+        }
+    }
+    if (slot >= 0) {
+        fx->direction[slot] = (effMiscRand(0) & 1) + 1;
+        fx->life[slot] = ((effMiscRand(0) & 3) + 4) << 4;
+        if (fx->direction[slot] == 1) {
+            fx->velocity[slot][0] = -0xFA0;
+        } else {
+            fx->velocity[slot][0] = 0x2FA0;
+        }
+        fx->velocity[slot][1] = ((s32)(effMiscRand(0) % 0x1C0) - 0x7D) << 3;
+        fx->count += 1;
+    }
+}
 
 void func_002B7A80(s32 arg0, s32 arg1) {
     *(u32 *)(arg1 * 4 + arg0 + 0x60) = 0;
@@ -1363,7 +1422,28 @@ u32 func_002B81C8(u32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8208);
+void func_002B8208(MenuList *list) {
+    MenuListNode *node = list->head;
+    s32 i;
+
+    if (node == NULL) {
+        list->flags = 0;
+        return;
+    }
+    if (node->prev != NULL) {
+        list->flags |= 1;
+    } else {
+        list->flags &= ~1;
+    }
+    for (i = 0; i < list->visibleCount; i++) {
+        node = node->next;
+        if (node == NULL) {
+            list->flags &= ~2;
+            return;
+        }
+    }
+    list->flags |= 2;
+}
 
 MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
@@ -1436,7 +1516,28 @@ void *mnuWalkNodeList(s32 arg0, void *arg1) {
     return temp_node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B88F0);
+s32 func_002B88F0(s32 index, u32 *list) {
+    s32 size = list[8];
+
+    if (index >= size) {
+        return 0;
+    }
+    list[9] = 0;
+    list[6] = list[4];
+    list[7] = list[4];
+    if (index > 0) {
+        do {
+            if (size - *(s32 *)list[6] <= (s32)list[3]) {
+                list[9] += 1;
+            } else {
+                list[6] = *(u32 *)(list[6] + 0x58);
+            }
+            list[7] = *(u32 *)(list[7] + 0x58);
+            index--;
+        } while (index != 0);
+    }
+    return 1;
+}
 
 void func_002B8968(u32 arg0) {
     func_002B88F0(0, arg0);
@@ -1477,7 +1578,42 @@ void func_002B8D10(u32 arg0) {
     func_002B8BA8(arg0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8D30);
+s32 func_002B8D30(u32 *list) {
+    s32 i;
+
+    if (list[7] == 0) {
+        return 0;
+    }
+    i = 0;
+    while (i < (s32)list[3]) {
+        if (mnuListContainsFinalNode(list)) {
+            if (i == 0) {
+                if (list[7] == list[5]) {
+                    return 0;
+                }
+                list[7] = list[5];
+                list[9] = list[3] - 1;
+                return list[5];
+            }
+            break;
+        }
+        func_002B89A8((s32 *)list);
+        i++;
+        list[7] = *(u32 *)(list[7] + 0x58);
+        list[9] += 1;
+    }
+    if (mnuListContainsFinalNode(list)) {
+        list[9] = list[3] - 1;
+        list[7] = list[5];
+        return list[5];
+    }
+    if (list[7] == list[6]) {
+        list[7] = *(u32 *)(list[7] + 0x58);
+        list[9] = 1;
+    }
+    func_002B8208((u8 *)list);
+    return list[7];
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8E30);
 
