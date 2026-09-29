@@ -325,7 +325,7 @@ def blocks(text):
     """Top-level items: each declaration, definition, INCLUDE_ASM or preprocessor line,
     with any comment lines directly above it. Several declarations on consecutive lines
     are separate items, so porting picks only the ones a function uses."""
-    out, cur, depth = [], [], 0
+    out, cur, depth, in_comment = [], [], 0, False
 
     def flush():
         if cur:
@@ -334,21 +334,39 @@ def blocks(text):
 
     for line in text.split("\n"):
         stripped = line.strip()
-        if depth == 0 and not stripped:
+        if depth == 0 and not in_comment and not stripped:
             flush()
             continue
-        if depth == 0 and stripped.startswith("#"):
+        if depth == 0 and not in_comment and stripped.startswith("#"):
             flush()
             out.append(line)
             continue
         cur.append(line)
-        depth += line.count("{") - line.count("}")
-        code = re.sub(r"\s*(/\*.*?\*/|//.*)$", "", stripped)  # a trailing comment
+        # The line's code outside comments; a block comment can span lines, and
+        # its text (`...permit it;`) must not end the item.
+        code, rest = "", stripped
+        while rest:
+            if in_comment:
+                end = rest.find("*/")
+                if end < 0:
+                    rest = ""
+                else:
+                    in_comment, rest = False, rest[end + 2:]
+            else:
+                start, line_comment = rest.find("/*"), rest.find("//")
+                if line_comment >= 0 and (start < 0 or line_comment < start):
+                    code, rest = code + rest[:line_comment], ""
+                elif start >= 0:
+                    code, in_comment, rest = code + rest[:start], True, rest[start + 2:]
+                else:
+                    code, rest = code + rest, ""
+        code = code.strip()
+        depth += code.count("{") - code.count("}")
         # An old-style (K&R) definition declares its parameters between the
         # header and the body: those `type name;` lines belong to the function.
         knr_params = depth == 0 and code.endswith(";") and KNR_HEADER.match(cur[0]) is not None \
             and "{" not in "".join(cur)
-        if depth == 0 and code.endswith((";", "}")) and not knr_params:
+        if depth == 0 and not in_comment and code.endswith((";", "}")) and not knr_params:
             flush()
     flush()
     return out
