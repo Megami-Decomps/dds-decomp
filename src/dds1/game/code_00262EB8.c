@@ -8,24 +8,24 @@ extern void func_00285670(s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00262EB8", brsMessageInputStep);
 
-extern s32 func_00261FB8(s32);
+extern s32 brsTaskIsUiUpdateAllowed(s32);
 
 void mnuStaffRunPanel1(s32 input) {
     s32 context = func_00101A70();
 
-    if (func_00261FB8(context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
         mnuRefreshPanelLayer(context);
         func_00285670(context + 8, context + 0x54, 1, input);
     }
 }
 
-extern void func_002654E8(s32);
+extern void brsDecaySharedAnimCounter(s32);
 
 void mnuStaffRunPanel2(s32 input) {
     s32 context = func_00101A70();
 
-    if (func_00261FB8(context) != 0) {
-        func_002654E8(context);
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
+        brsDecaySharedAnimCounter(context);
         func_00285670(context + 8, context + 0x54, 2, input);
     }
 }

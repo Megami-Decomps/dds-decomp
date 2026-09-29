@@ -110,31 +110,31 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00261688);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
 
-void func_00261F58(void) {
+void brsTaskStart(void) {
     mnuStaffCreateTasks();
     D_003BC52A = 0;
     D_003BC52B = 1;
 }
 
-s8 func_00261F80(void) {
+s8 brsTaskIsUpdateBlocked(void) {
     return D_003BC52B;
 }
 
-u32 func_00261F88(void) {
+u32 brsTaskAllowUpdate(void) {
     D_003BC52A = 1;
     return 1;
 }
 
-void func_00261F98(void) {
-    func_00262938();
+void brsTaskPollDone(void) {
+    brsTaskConsumeDone();
 }
 
-s8 func_00261FB0(void) {
+s8 brsTaskHasPendingRows(void) {
     return D_003BC529;
 }
 
-s8 func_00261FB8(s32 arg0) {
-    if (*(s32 *)(arg0 + 0xd44) != 0) {
+s8 brsTaskIsUiUpdateAllowed(s32 context) {
+    if (*(s32 *)(context + 0xd44) != 0) {
         D_003BC52B = 0;
     }
     return D_003BC52B ? 0 : D_003BC52A;
@@ -146,9 +146,15 @@ typedef struct MenuIconRef {
     u8 pad3;
 } MenuIconRef;
 
+/* Reward bundle: three icon/counter refs followed by the macca amount. */
+typedef struct MenuIconBatch {
+    MenuIconRef refs[3]; /* 0x00 */
+    u32 resource;        /* 0x0C */
+} MenuIconBatch;
+
 extern void func_00119900(s32, s32);
 
-void func_00261FD8(MenuIconRef *refs) {
+void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     u32 i;
 
     for (i = 0; i < 3; i++) {
@@ -162,8 +168,8 @@ void func_00261FD8(MenuIconRef *refs) {
     }
 }
 
-void func_00262038(s32 arg0) {
-    func_001198B8(*(u32 *)(arg0 + 0xc));
+void gstApplyBundleMacca(MenuIconBatch *batch) {
+    func_001198B8(batch->resource);
 }
 
 extern s32 ptyComputeTotalExp(u8 *, s32);
@@ -190,9 +196,9 @@ void ptyClampExp(u32 *unit) {
 INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
 /* Apply item/icon rewards before awarding the party's accumulated gains. */
-void brsApplyRewardBundle(u32 partyWork, u32 rewardWork, u32 rewardState) {
-    func_00261FD8(rewardWork);
-    func_00262038(rewardWork);
+void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) {
+    gstApplyCounterDeltaTable(batch->refs);
+    gstApplyBundleMacca(batch);
     brsApplyPartyRewards(partyWork, rewardState);
 }
 
@@ -206,7 +212,9 @@ extern void mnuForwardTableByte(s32);
 
 /* Fields of the battle-result panel needed while opening its skill package. */
 typedef struct BrsSkillPackageWork {
-    u8 pad00[0x90];
+    u8 pad00[0x58];
+    s32 fadeTarget;          /* 0x058 */
+    u8 pad5C[0x34];
     s32 unitHandle;          /* 0x090 */
     u8 pad94[0x1AC];
     s32 selectedRow;         /* 0x240 */
@@ -217,9 +225,12 @@ typedef struct BrsSkillPackageWork {
     s32 spriteArg1;          /* 0x50C */
     u8 pad510[4];
     s32 panelGroup;          /* 0x514 */
-    u8 pad518[0x7F8];
+    u8 pad518[0x58];
+    s32 setupState;          /* 0x570 */
+    u8 pad574[0x79C];
     s32 panelHandle;         /* 0xD10 */
     s32 spriteHandle;        /* 0xD14 */
+    u32 assets;              /* 0xD1C */
 } BrsSkillPackageWork;
 
 typedef struct BrsSelectedRow {
@@ -252,19 +263,19 @@ void brsOpenSkillPackagePanel(s32 work) {
         (((BrsSelectedRow *)(work + 0x2CC))[((BrsSkillPackageWork *)work)->selectedRow].unit))->unitId);
 }
 
-void func_00262398(s32 arg0) {
-    s32 panelContext;
+void brsCloseSkillPackagePanel(s32 work) {
+    BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
+    s32 panelContext = work + 0x680;
 
-    panelContext = arg0 + 0x680;
-    func_002BDD60(*(u32 *)(arg0 + 0x90));
+    func_002BDD60(ctx->unitHandle);
     mnuClearEntries(panelContext);
     func_0027FA20(panelContext);
     mnuShutdownContext(panelContext);
-    mnuDestroyPanelGroup(*(u32 *)(arg0 + 0xd10));
-    func_002832F8(*(u32 *)(arg0 + 0xd14));
-    mnuReleaseAssets(arg0 + 0xd1c);
-    func_00276320(arg0 + 0x4f8);
-    mnuReleaseStaffResourceGroups(arg0 + 0x4f8);
+    mnuDestroyPanelGroup(ctx->panelHandle);
+    func_002832F8(ctx->spriteHandle);
+    mnuReleaseAssets(work + 0xD1C);
+    func_00276320(work + 0x4F8);
+    mnuReleaseStaffResourceGroups(work + 0x4F8);
     mnuResetWorkFloats();
 }
 
@@ -297,29 +308,29 @@ extern s32 func_0027AF28(s32);
 extern void brsOpenSkillPackagePanel(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-s32 func_002624C0(s32 work) {
-    s32 state = *(s32 *)(work + 0x570);
+s32 brsAdvanceSkillPackagePanel(s32 work) {
+    BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
 
-    if (state == 0) {
+    if (ctx->setupState == 0) {
         return 1;
     }
-    if (state == 2) {
+    if (ctx->setupState == 2) {
         return 0;
     }
-    if (func_002716E8(*(s32 *)(work + 0x58), work + 0x4F8) == 0) {
+    if (func_002716E8(ctx->fadeTarget, work + 0x4F8) == 0) {
         return 1;
     }
     if (func_002877A8() == 1) {
         return 1;
     }
-    if (*(s32 *)(work + 0x90) == 0) {
+    if (ctx->unitHandle == 0) {
         return 1;
     }
     if (func_0027AF28(work + 0xD1C) == 0) {
         return 1;
     }
     brsOpenSkillPackagePanel(work);
-    *(s32 *)(work + 0x570) = 2;
+    ctx->setupState = 2;
     kwlnFadeOutStart(0, 0, 0, 15);
     return 0;
 }
@@ -378,7 +389,7 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
     }
 }
 
-void func_00262600(u32 partyRows, u32 primaryRewards, u32 secondaryRewards) {
+void brsMarkPartyRowsFromLists(u32 partyRows, u32 primaryRewards, u32 secondaryRewards) {
     brsMarkPartyRows(partyRows, primaryRewards, 2);
     brsMarkPartyRows(partyRows, secondaryRewards, 1);
 }
@@ -399,21 +410,21 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
 INCLUDE_ASM(const s32, "game/code_00260208", brsCreateTaskContext);
 
 extern void func_00285600(s32, s32);
-extern s32 func_002624C0(s32);
-extern void func_00262398(s32);
+extern s32 brsAdvanceSkillPackagePanel(s32);
+extern void brsCloseSkillPackagePanel(s32);
 extern void func_002BC618(s32);
 extern void func_0024DBC8(void);
 extern void func_002D0918(s32);
 
-void func_00262790(s32 arg0) {
+void brsStaffTaskDestroy(s32 arg0) {
     s32 context = func_00101A70();
 
     if (*(s32 *)(context + 0xD44) != 0) {
         func_002BDD60(*(s32 *)(context + 0xD44));
     }
     func_00285600(context + 8, arg0);
-    if (func_002624C0(context) == 0) {
-        func_00262398(context);
+    if (brsAdvanceSkillPackagePanel(context) == 0) {
+        brsCloseSkillPackagePanel(context);
     }
     func_002BC618(*(s32 *)(context + 0x58));
     func_0024DBC8();
@@ -436,7 +447,7 @@ s32 mnuStaffCreateTasks(void) {
 
     kwlnTaskCreate(D_003BC530, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
-    result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, func_00262790, work);
+    result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
     D_003BC528 = 1;
     return result;
 }
@@ -459,7 +470,7 @@ u32 mnuStaffDestroyTasks(void) {
     return 0;
 }
 
-s32 func_00262938(void) {
+s32 brsTaskConsumeDone(void) {
     s32 state = D_003BC528;
     if (state == 1) {
         return 1;
@@ -473,7 +484,7 @@ s32 func_00262938(void) {
     return 0;
 }
 
-u32 func_00262970(void) {
+u32 brsTaskTryDestroy(void) {
     if (D_003BC528 == 1) {
         mnuStaffDestroyTasks();
         return 1;
@@ -492,7 +503,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
  */
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
-s32 func_00262A88(void) {
+s32 brsTaskIsFadeIdle(void) {
     if (kwlnFadeIsActive() != 0) {
         return 0;
     }

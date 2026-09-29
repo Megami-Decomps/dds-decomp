@@ -577,6 +577,19 @@
 0x00294488	mnuReleasePanelEntryPool	inferred	Frees the panel entry pool's allocation and clears the global pool pointer.
 0x00294538	mnuFindFreePanelEntry	inferred	Returns the first two-word panel entry whose first field is zero, or null when the pool is full.
 0x00294580	mnuStorePanelEntry	inferred	Obtains a free panel entry and assigns its two values.
+0x00298E20	brsTaskStart	inferred	DDS2 twin of DDS1 brsTaskStart @ 0x261F58: calls mnuStaffCreateTasks, clears D_0043798A and sets D_0043798B
+0x00298E48	brsTaskIsUpdateBlocked	inferred	DDS2 twin of DDS1 brsTaskIsUpdateBlocked @ 0x261F80 (reads D_0043798B)
+0x00298E50	brsTaskAllowUpdate	inferred	DDS2 twin of DDS1 brsTaskAllowUpdate @ 0x261F88 (sets D_0043798A=1, returns 1)
+0x00298E60	brsTaskPollDone	inferred	DDS2 twin of DDS1 brsTaskPollDone @ 0x261F98 (wraps brsTaskConsumeDone)
+0x00298E78	brsTaskHasPendingRows	inferred	DDS2 twin of DDS1 brsTaskHasPendingRows @ 0x261FB0 (reads D_00437989)
+0x00298EA8	gstApplyCounterDeltaTable	inferred	byte-identical twin of DDS1 gstApplyCounterDeltaTable @ 0x261FD8 (walks three MenuIconRefs and calls the progress-counter adjuster)
+0x00298F08	gstApplyBundleMacca	inferred	DDS2 twin of DDS1 gstApplyBundleMacca @ 0x262038: adds the reward bundle's macca field at +0xC through the macca adder
+0x002991D0	brsOpenSkillPackagePanel	inferred	DDS2 twin of DDS1 brsOpenSkillPackagePanel @ 0x262300: opens the skill-package panel group (DDS2 work struct is larger: group at +0x51C, handles at +0xAD34/+0xAD38)
+0x00299518	brsMarkPartyRowsFromLists	inferred	DDS2 twin of DDS1 brsMarkPartyRowsFromLists @ 0x262600: marks the party rows from two reward lists (flags 2 then 1)
+0x002996B8	brsStaffTaskDestroy	inferred	DDS2 twin of DDS1 brsStaffTaskDestroy @ 0x262790: mnuStaffRunPanel2 destroy callback, leaves the task state at 2
+0x00299868	brsTaskConsumeDone	inferred	DDS2 twin of DDS1 brsTaskConsumeDone @ 0x262938: D_00437988==1 -> busy, ==2 -> reset to 0
+0x002998A0	brsTaskTryDestroy	inferred	DDS2 twin of DDS1 brsTaskTryDestroy @ 0x262970
+0x00299A00	brsTaskIsFadeIdle	inferred	DDS2 twin of DDS1 brsTaskIsFadeIdle @ 0x262A88
 0x0029AE70	mnuResetSelectionWidthsFromConfig	inferred	Computes clamped selection width from configuration and five signed bytes, clears layout widths and refreshes an active resource.
 0x0029AF48	mnuClearSelectionWidths	inferred	Clears the layout margin and all five width entries of a menu context.
 0x0029BEB8	mnuTitleApplySequenceState	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleApplySequenceState behavior.
@@ -584,6 +597,8 @@
 0x0029CA68	mnuCampDrawMenuIconLayer	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described campDrawMenuIconLayer behavior.
 0x0029CC90	mnuTitleDrawFadeMenuEntries	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleDrawFadeMenuEntries behavior.
 0x0029CD60	mnuTitleRenderFadeAndPanels	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleRenderFadeAndPanels behavior.
+0x0029CDF0	brsGetLevelStepForValue	inferred	byte-identical twin of DDS1 brsGetLevelStepForValue @ 0x265500: maps a value to the battle-result LevelStep whose threshold it reaches
+0x0029CE30	brsGetLevelStepCrossedBy	inferred	byte-identical twin of DDS1 brsGetLevelStepCrossedBy @ 0x265540: returns the LevelStep value whose threshold lies within (position, position+increment]
 0x0029D900	mnuTitleInitFourParameters	inferred	DDS1 has the same unprefixed symbol; game/code_0029BC58 uses mnu for the already-described titleInitFourParameters behavior.
 0x002A1480	movCheckStartupSoundState	inferred	Starts movie sound if idle; otherwise checks whether sound startup has completed.
 0x002A29D8	mnuResetSoundBuffer	inferred	Resets stream state fields D_00455D70[1,4] then releases the active buffer through func_002A2A00.
@@ -670,15 +685,27 @@
 0x002C8108	fileGetResourceHandle	inferred	Byte-identical DDS1 counterpart: Returns the file work's resource handle, released by callers through the file resource release routine.
 0x002C8118	fileGetResourceSize	inferred	Byte-identical DDS1 counterpart: Returns the file work's loaded resource size used by sound buffer transfer.
 0x002C8168	fileRequestIsReady	inferred	Returns true only when the file request has a nonzero marker at offset 0x68 and its status byte is 6; field area-loading callers use it as their readiness test.
+0x002C95A0	fileWriteWait	inferred	DDS2 twin of DDS1 fileWriteWait @ 0x28A0F8: polls the file-write command and maps -4 to -2, other errors to -1
+0x002C9660	fileWriteBegin	inferred	DDS2 twin of DDS1 fileWriteBegin @ 0x28A0E0 (unit base; forwards to the file-write start helper), legacy Save_FileWrite_Begin
+0x002C96D0	fileDestroyMenuTask	inferred	DDS2 twin of DDS1 fileDestroyMenuTask @ 0x28A150: destroys the file-menu task at D_00437CD8 and clears the alive flag D_00437CD4
+0x002C9700	fileMenuTaskIsAlive	inferred	DDS2 twin of DDS1 fileMenuTaskIsAlive @ 0x28A180 (returns D_00437CD4)
 0x002C9710	mcdFormatSaveSlotName	inferred	Formats BASLUS save-slot name and chooses/stores the variant title ID based on D_00437D7C.
 0x002C9860	mcdCreateConfiguredDrawHandle	inferred	Creates a coordinate-scaled draw handle in D_00439008 and configures modes three and one.
+0x002CA638	fileClearAllSlotFlags	inferred	DDS2 twin of DDS1 fileClearAllSlotFlags @ 0x28AE68: marks the selected request's slot metadata dirty and clears slot flags 0..9
+0x002CA828	fileReadSlotPreviewWait	inferred	DDS2 twin of DDS1 fileReadSlotPreviewWait @ 0x28B058, legacy Save_ReadSlotPreview_Wait
+0x002CAA08	fileBeginSlotReset	inferred	DDS2 twin of DDS1 fileBeginSlotReset @ 0x28B238: clears the slot flags/pending mode, sets step 4, chains fileResetSelection -> func_002CAA90
+0x002CAA50	fileBeginDirectoryScan	inferred	DDS2 twin of DDS1 fileBeginDirectoryScan @ 0x28B280: sets step 9 and chains mcPrepareDirectory -> fileScanSlotStates
+0x002CAC80	fileAbortSlotFlow	inferred	DDS2 twin of DDS1 fileAbortSlotFlow @ 0x28B4B0: clears the pending-mode latch and the two slot-flow flags and returns -1
 0x002CACA8	mcdEnterDefaultFileFlow	inferred	Returns func_002D09C8 when the mode flag is set; otherwise submits file task mode 0.
 0x002CAD08	mcdEnterSelectedFileFlow	inferred	Sets D_00437D34 then returns func_002D09C8 or submits file task mode 2.
 0x002CB678	mcdFinishFileDetection	inferred	On a detected file status, resets flow state and invokes the queued continuation or beginFileWait(-1).
 0x002CC9F0	mcdHandleSaveSetupDone	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mcd for the already-described handleSaveSetupDone behavior.
+0x002CEE70	fileBeginPromptDialog	inferred	DDS2 twin of DDS1 fileBeginPromptDialog @ 0x28FB48 (legacy FileMenu_BeginPromptDialog): latches the start/finish callbacks and mode, resets the counter and begins the request unless the step is 4 or 8
 0x002D02D0	mcdFinishFileDetectionWithAudio	inferred	On a detected file status, resets flow mode, sets sequence volume and invokes the queued continuation.
 0x002D08A0	fileResetPendingRequest	inferred	Resets file request state globals to -1 and zero and submits mode 3 when global bit 2 is clear
 0x002D0968	mcdContinueLoadSelection	inferred	Chooses the next save/load callback from the file-state result; on state 2 clears the selection index, updates display model flags and starts sequence 8.
+0x002D0EB0	fileCacheSlotFlagsFromState	inferred	DDS2 twin of DDS1 fileCacheSlotFlagsFromState @ 0x290E38 (legacy ShadowRowSlotFlags_CacheFromGameState): shadows the +0xA54 slot-flag word
+0x002D0EC8	fileRestoreSlotFlagsToState	inferred	DDS2 twin of DDS1 fileRestoreSlotFlagsToState @ 0x290E50 (legacy ShadowRowSlotFlags_RestoreToGameState)
 0x002D1300	mnuCreateConfigTasks	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior.
 0x002D4548	fileQueueDestroy	inferred	destroys child jobs, jobs, then the queue
 0x002D4A98	fileReadVector40	inferred	vector read from work+0x40 into dst
@@ -779,6 +806,8 @@
 0x00312A00	sdfFreeTaskWork	inferred	sdfDestroyTaskWork + frees name strings + handle
 0x003147C8	sdfSetFlagBySlotId	inferred	scans 16 slots for id, mdlFlagSet(flag)
 0x00314E20	scrSetGlobalBitFlag	inferred	Sets one global bit for IDs in the 0x1AB–0x21F range.
+0x00315098	ptyHasSkill	inferred	byte-identical twin of DDS1 ptyHasSkill @ 0x2CDB00 (24-entry u16 skill-slot list scan at +0x22)
+0x00315640	prfCountProfileList	inferred	byte-identical twin of DDS1 prfCountProfileList @ 0x2CE188
 0x00316280	sdfSetAllFlagsFromTable	inferred	loop func_00316118/00316260 then mdlFlagSet
 0x00316308	scrSetEntryFlag	inferred	Sets one of the low sixteen flag bits on the script entry addressed by context and entry ID.
 0x00316350	scrClearEntryFlag	inferred	Clears one of the low sixteen flag bits on the script entry addressed by context and entry ID.

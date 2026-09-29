@@ -145,13 +145,13 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263B78);
 
-extern s32 func_002624C0(s32);
+extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void func_00263B78(s32, s32);
 
 s64 func_00263C98(s32 request) {
     s32 context = func_00101A70();
 
-    if (func_002624C0(context) != 0) {
+    if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
     mnuDrawItemPanelBackdrop(context);
@@ -162,7 +162,7 @@ s64 func_00263C98(s32 request) {
 s64 func_00263D10(s32 request) {
     s32 context = func_00101A70();
 
-    if (func_002624C0(context) != 0) {
+    if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
     func_0024DD78();

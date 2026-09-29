@@ -447,14 +447,14 @@ s32 scrFindSlot(u8 *work, u16 key) {
     return -1;
 }
 
-u16 func_002CDC80(u8 *work, u32 index) {
+u16 scrGetSlot(u8 *work, u32 index) {
     if (index >= 24) {
         return 0;
     }
     return *(u16 *)(work + 0x22 + index * 2);
 }
 
-u32 func_002CDCA0(u8 *work) {
+u32 scrCountSlots(u8 *work) {
     u16 *entries = (u16 *)(work + 0x22);
     u32 count = 0;
     u32 index;
@@ -466,7 +466,7 @@ u32 func_002CDCA0(u8 *work) {
     return count;
 }
 
-u16 func_002CDCD8(s32 arg0, s32 arg1, u16 arg2) {
+u16 scrSetSlot(s32 arg0, s32 arg1, u16 arg2) {
     u16 temp_v0;
     u16 *puVar2;
 

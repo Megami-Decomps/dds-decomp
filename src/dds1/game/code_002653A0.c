@@ -38,11 +38,11 @@ typedef struct {
     u16 animation;  /* 0x14 */
 } TitleEntry;
 
-void func_002654E8(s32 animationState) {
+void brsDecaySharedAnimCounter(s32 animationState) {
     brsStepAnimDecay(animationState);
 }
 
-u8 func_00265500(s32 value) {
+u8 brsGetLevelStepForValue(s32 value) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
@@ -53,7 +53,7 @@ u8 func_00265500(s32 value) {
     return D_00370D08[0].value;
 }
 
-u8 func_00265540(s32 position, s32 increment) {
+u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
     u8 *table = (u8 *)D_00370D08;
     s32 i = 2;
     u8 *limit = table + 4;
