@@ -38,7 +38,7 @@ extern s32 D_00435DD0;
 
 extern u32 D_004367E4;
 
-extern s64 func_00101740(u32);
+extern s64 func_00101740();
 
 extern s64 kwlnTaskIsRegistered(s64);
 
@@ -96,7 +96,6 @@ extern s32 func_0020D128(const char *, ...);
 extern s8 D_0037F550[];
 
 extern void *D_003B4E40[];
-
 
 extern s32 D_003B4F78[];
 
@@ -247,7 +246,21 @@ void func_001A5FA0(s32 *arg0) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A5FF0);
+u16 *func_001A5FF0(s32 value, u16 *out) {
+    s32 digits[10];
+    s32 count = 0;
+    s32 i;
+    do {
+        digits[count] = value % 10;
+        value = value / 10;
+        count++;
+    } while (value > 0 && count < 10);
+    for (i = count - 1; i >= 0; i--) {
+        *out++ = (digits[i] << 8) - 0x6F80;
+    }
+    *out = 0;
+    return out;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 
@@ -268,7 +281,37 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A67E0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A68B8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", sndStepSequenceIndex);
+typedef struct SndSeqSelect {
+    u8 pad0[8];
+    s32 seq;
+    u8 padC[6];
+    s16 current;
+    s16 saved;
+    s16 count;
+} SndSeqSelect;
+
+extern void func_001A5988();
+extern void sndSetSequenceVolumePan();
+
+void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
+    s32 index = sel->current;
+    func_001A5988(sel->seq, index, sel->count, 0);
+    if (dir < 0) {
+        index--;
+        if (index < 0) {
+            index = sel->count - 1;
+        }
+    } else {
+        index++;
+        if (index >= sel->count) {
+            index = 0;
+        }
+    }
+    func_001A5988(sel->seq, index, sel->count, 1);
+    sel->current = index;
+    sel->saved = index;
+    sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6AB8);
 
@@ -359,7 +402,22 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A81F0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A85E0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", sndCreateTestMsgTasks);
+extern s32 D_00435CBC;
+extern s32 kwlnTaskCreate(s32 name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern void func_001A8918();
+extern s32 func_001A8848();
+extern u8 D_003B4A28[];
+extern s32 func_0010BE90();
+extern void func_001A4BB8();
+extern void sndUpdateTestMsgTask();
+
+void sndCreateTestMsgTasks(void) {
+    D_00435CBC = 0x80FFFFFF;
+    func_001A87E8();
+    func_001A4BB8(*(s32 *)(func_00101958(func_0010BE90(0x3E8, D_003B4A28, 0)) + 0xCC), func_001A8918);
+    kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, func_001A8848, 0, 0);
+    kwlnTaskCreate((s32)"TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
+}
 
 void func_001A87E8(void) {
     if (D_00436644 != 0) {
@@ -502,7 +560,6 @@ s32 func_001A9A30(void) {
 void func_001A9AA8(void) {
 }
 
-extern s32 kwlnTaskCreate(s32 name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern char D_004366F0[];
 extern void func_001A9AA8();
 extern s32 func_001A9A30();
@@ -814,7 +871,25 @@ s32 btlSelectActorAction(s32 state) {
     return selection;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD248);
+s32 func_001AD248(s32 arg) {
+    s32 id = arg & 0xFFFF;
+    switch (id) {
+    case 0x8A:
+        if (evtCheckValueThreshold(0x8A, 1) != 0 || evtCheckValueThreshold(0x93, 1) != 0) {
+            return 1;
+        }
+        break;
+    case 0x8B:
+        if (evtCheckValueThreshold(0x8B, 1) != 0 || evtCheckValueThreshold(0x94, 1) != 0) {
+            return 1;
+        }
+        break;
+    }
+    if ((u32)((id + 0xFF80) & 0xFFFF) < 0x20 && evtCheckValueThreshold(id, 1) != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD310);
 
@@ -1242,7 +1317,28 @@ s32 func_001B2620(UiObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B27E8);
+s32 func_001B27E8(s32 arg0, u8 *unit, s32 arg2) {
+    u32 kind;
+    s32 mask;
+    u32 power;
+    if (*(s32 *)(unit + 0x310) <= 0) {
+        return 0;
+    }
+    func_001AA6F8();
+    kind = func_001ABF00(arg0, arg2);
+    mask = func_001ACF68(kind);
+    power = *(u16 *)(*(s32 *)(unit + 0x310) * 0x38 + D_00435E20 + 0x2E);
+    if (power == 0) {
+        return 0;
+    }
+    if (kind >= 0x10 && (kind < 0x12 || kind == -1)) {
+        return 0;
+    }
+    if (power >= 0x21) {
+        return 0;
+    }
+    return (D_003B4F78[power * 3] & mask) != 0;
+}
 
 s32 func_001B28C8(s32 arg0) {
     u16 temp_v0;
@@ -1282,7 +1378,6 @@ s32 btlGetSelectedUnitProperty(u8 *state) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B29F0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2AF8);
-
 
 s32 func_001B2CC0(u8 *unit) {
     s32 work = func_001AA6F8();
@@ -1572,7 +1667,6 @@ s32 func_001B45C8(s32 object) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4600);
-
 
 s32 func_001B4738(u8 *unit) {
     s32 (*hook)(u8 *) = *(s32 (**)(u8 *))(func_001AA6F8() + 0x6A4);
@@ -2174,7 +2268,6 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB550);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB5C0);
 
-
 void func_001BB888(void) {
     u8 *window = (u8 *)func_00101958();
     itfMesCleanupWindow(*(s32 *)(window + 0x24), 0);
@@ -2329,8 +2422,6 @@ void func_001BF600(s32 handle) {
 }
 
 extern s8 D_0037F53D[];
-extern void mdlFlagClear(s32);
-extern void mdlFlagSet(s32);
 
 void func_001BF640(void) {
     if (D_0037F53D[0] < 0) {
@@ -2452,7 +2543,6 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0630);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0828);
 
 extern u32 D_004367F0;
-extern void func_0026C728(void);
 
 s64 func_001C0D78(void) {
     s64 result = func_00101740(D_004367F0);

@@ -1,6 +1,5 @@
 #include "common.h"
 
-
 extern s32 func_001AA6F8(void);
 
 extern s64 func_00101740(u32);
@@ -35,7 +34,6 @@ typedef struct RosterAvailability {
     u8 flags;
     u8 pad[7];
 } RosterAvailability;
-
 
 typedef struct SceneActor {
     u8 pad_00[0x110];
@@ -72,7 +70,6 @@ extern void func_001D3978(void);
 extern u32 D_00435E64;
 
 extern u32 D_00435E5C;
-
 
 extern s32 D_00438F54;
 extern s32 D_00435DD0;
@@ -274,7 +271,45 @@ s32 func_001CA9C0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CAA30);
+extern u8 *D_004367F4;
+extern s32 mdlFlagTest();
+extern s32 func_001C0118();
+extern s32 func_001CA8D8();
+
+s32 func_001CAA30(void) {
+    s32 flag = *(u8 *)(func_001AA6F8() + 0x26E) == 3;
+    if (mdlFlagTest(0x801) != 0) {
+        return 1;
+    }
+    if (mdlFlagTest(0x81D) == 0 && mdlFlagTest(0x801) == 0 && !(*(u32 *)(D_004367F4 + 0x3C) & 0x200)) {
+        if (func_001CA858() != 0) {
+            return 2;
+        }
+    }
+    if (mdlFlagTest(0x81A) == 0) {
+        if (flag != 0) {
+            return 6;
+        }
+    }
+    if (flag == 0) {
+        if (func_001C0118() != 0) {
+            return 5;
+        }
+    }
+    if (mdlFlagTest(0x805) == 0 && !(*(u32 *)(D_004367F4 + 0x3C) & 0x200)) {
+        if (func_001CA8D8() != 0 && func_001CA9C0() != 0) {
+            return 3;
+        }
+    }
+    if (mdlFlagTest(0x805) != 0) {
+        if (mdlFlagTest(0x806) == 0) {
+            if (func_001CA958() != 0) {
+                return 4;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CAB60);
 
@@ -308,7 +343,39 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC7C8);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416D28);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC8D0);
+extern s32 battleGetEffectActive();
+extern void func_001CC020();
+extern void func_001CC438();
+
+s32 func_001CC8D0(s32 handle) {
+    u8 *work = (u8 *)func_001AA6F8();
+    s32 *state;
+    s32 mode;
+    if (*(u32 *)(work + 0x218) & 0x04000000) {
+        return 0;
+    }
+    state = (s32 *)func_00101958(handle);
+    switch (*state) {
+    case 1:
+        *state = 2;
+        break;
+    case 2:
+        mode = 1;
+        if (*(s32 *)(work + 0x2A0) == 0x312) {
+            mode = battleGetEffectActive() == 1 ? 5 : 1;
+        }
+        func_001CC020(work, state, mode);
+        func_001CC438(state);
+        break;
+    case 3:
+    case 4:
+    case 5:
+        break;
+    case 6:
+        return -1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC9C0);
 
@@ -450,8 +517,6 @@ s32 btlFadeStaleSceneSlots(void) {
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF720);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF800);
-
-extern u8 *D_004367F4;
 
 s32 fldUpdateConditionalSceneCleanup(void) {
     u8 *scene = (u8 *)func_001AA6F8();
@@ -1083,7 +1148,28 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5D20);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5E50);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5EE8);
+extern s32 func_00210498();
+extern void startBattleTask();
+extern void func_00201828();
+extern void func_001DD390();
+
+void func_001D5EE8(u8 *task) {
+    u8 *arg = task + 0x20;
+    u8 *work = (u8 *)func_001AA6F8();
+    s32 owner = *(s32 *)(task + 0x18);
+    void (*hook)(u8 *);
+    if (func_001D46A8(owner) != 0) {
+        if (*(u16 *)(task + 0x50) == 2) {
+            startBattleTask(func_00210498(owner, *(s32 *)(task + 0x54)));
+        }
+        func_00201828(task, arg);
+        hook = *(void (**)(u8 *))(work + 0x634);
+        if (hook != 0) {
+            hook(task);
+        }
+        func_001DD390(task, arg);
+    }
+}
 
 void func_001D5FA8(void) {
 }
