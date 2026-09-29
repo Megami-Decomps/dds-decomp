@@ -35,24 +35,26 @@ void func_00113328(EffectObject *object, u32 value) {
     object->data->word14 = value;
 }
 
-f32 dds3ShortestAngleDelta(f32 a, f32 b) {
+/* Return the signed shortest turn from one degree angle to another.
+ * The cast before modulo intentionally discards fractional degrees. */
+f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     f32 diff;
 
-    if (a < 0.0f || b < 0.0f) {
-        a += 360.0f;
-        b += 360.0f;
+    if (fromDegrees < 0.0f || toDegrees < 0.0f) {
+        fromDegrees += 360.0f;
+        toDegrees += 360.0f;
     }
-    a = (s32)a % 360;
-    b = (s32)b % 360;
-    diff = a - b;
+    fromDegrees = (s32)fromDegrees % 360;
+    toDegrees = (s32)toDegrees % 360;
+    diff = fromDegrees - toDegrees;
     if (diff > 180.0f || diff < -180.0f) {
-        if (a < b) {
-            a += 360.0f;
+        if (fromDegrees < toDegrees) {
+            fromDegrees += 360.0f;
         } else {
-            b += 360.0f;
+            toDegrees += 360.0f;
         }
     }
-    return b - a;
+    return toDegrees - fromDegrees;
 }
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113408);
@@ -147,8 +149,8 @@ u32 func_00114058(EffectObject *object) {
     return object->data->word08;
 }
 
-void func_00114068(u32 arg0) {
-    D_00435DA0 = arg0;
+void func_00114068(u32 value) {
+    D_00435DA0 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114070);
@@ -170,12 +172,24 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_00114150);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114428);
 
-void func_00114618(u8 *obj) {
-    f32 *src = *(f32 **)(obj + 0x1C);
-    f32 *dst = *(f32 **)(obj + 0x18);
-    dst[4] = src[0x10];
-    dst[5] = src[0x11];
-    dst[6] = src[0x12];
+typedef struct WorldSubState {
+    u8 pad00[0x10];
+    f32 vec[4];
+} WorldSubState;
+
+typedef struct WorldObj {
+    u8 pad00[0x18];
+    WorldSubState *state;
+    f32 *source;
+} WorldObj;
+
+/* Refresh the object's stored xyz from the source vector. */
+void func_00114618(WorldObj *obj) {
+    f32 *src = obj->source;
+    WorldSubState *dst = obj->state;
+    dst->vec[0] = src[0x10];
+    dst->vec[1] = src[0x11];
+    dst->vec[2] = src[0x12];
 }
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114640);

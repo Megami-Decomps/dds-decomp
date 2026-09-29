@@ -1,21 +1,21 @@
 #include "common.h"
 
-typedef struct {
+typedef struct EffectObjectData {
     u32 handle;
-    u32 value4;
-    u32 value8;
-    u32 valueC;
-    u32 value10;
-    u32 value14;
-    u32 pad18;
-    u32 value1C;
+    u32 word04;
+    u32 word08;
+    u32 word0C;
+    s32 activeId;
+    u32 word14;
+    u32 word18;
+    u32 pendingValue;
     u32 timer;
-} BasicObjectData;
+} EffectObjectData;
 
-typedef struct {
-    u8 pad0[0x18];
-    BasicObjectData *data;
-} BasicObject;
+typedef struct EffectObject {
+    u8 pad00[0x18];
+    EffectObjectData *data;
+} EffectObject;
 
 extern u32 D_003BA9D0;
 
@@ -23,18 +23,20 @@ extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 func_00110A48(u64, u64, u64);
 
-u32 func_001130E0(BasicObject *obj) {
+u32 func_001130E0(EffectObject *obj) {
     return obj->data->handle;
 }
 
-u32 func_001130F0(BasicObject *obj) {
-    return obj->data->value8;
+u32 func_001130F0(EffectObject *obj) {
+    return obj->data->word08;
 }
 
-void func_00113100(BasicObject *obj, u32 value) {
-    obj->data->value14 = value;
+void func_00113100(EffectObject *obj, u32 value) {
+    obj->data->word14 = value;
 }
 
+/* Return the signed shortest turn from one degree angle to another.
+ * The cast before modulo intentionally discards fractional degrees. */
 f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     f32 diff;
 
@@ -59,27 +61,27 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_001131E0);
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113338);
 
-void func_00113438(BasicObject *obj, u32 value) {
-    BasicObjectData *data;
+void func_00113438(EffectObject *obj, u32 value) {
+    EffectObjectData *data;
 
     data = obj->data;
     dds3SetObjectFlags(obj, 0x2000);
-    data->value1C = value;
+    data->pendingValue = value;
     data->timer = 0;
 }
 
-void func_00113478(BasicObject *obj) {
-    BasicObjectData *data;
+void func_00113478(EffectObject *obj) {
+    EffectObjectData *data;
 
     data = obj->data;
     data->timer = 0x1e;
-    data->value1C = 0;
+    data->pendingValue = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113490);
 
-void func_00113538(BasicObject *obj) {
-    BasicObjectData *data;
+void func_00113538(EffectObject *obj) {
+    EffectObjectData *data;
 
     func_00113AA8();
     effObjFreeInner(obj);
@@ -87,12 +89,12 @@ void func_00113538(BasicObject *obj) {
     if (data->handle != -1) {
         data->handle = -1;
     }
-    if (data->value8 != 0) {
-        func_00222200(data->value8);
-        data->value8 = 0;
+    if (data->word08 != 0) {
+        func_00222200(data->word08);
+        data->word08 = 0;
     }
     func_00111B40(obj);
-    func_00111840(data->valueC);
+    func_00111840(data->word0C);
     func_002CFF98(obj->data);
 }
 
@@ -100,19 +102,19 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_001135B0);
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113888);
 
-void func_00113AA8(BasicObject *obj) {
-    BasicObjectData *data;
+void func_00113AA8(EffectObject *obj) {
+    EffectObjectData *data;
 
     data = obj->data;
-    if (data->value10 != -1) {
+    if (data->activeId != -1) {
         func_001166F0(obj, 10);
-        data->value10 = 0xffffffff;
+        data->activeId = 0xffffffff;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113AF0);
 
-u32 func_00113CD8(BasicObject *obj) {
+u32 func_00113CD8(EffectObject *obj) {
     return obj->data->handle;
 }
 
@@ -158,39 +160,39 @@ void func_00113DA8(void) {
     func_00110928();
 }
 
-void func_00113DC0(BasicObject *obj, u32 value) {
-    obj->data->valueC = value;
+void func_00113DC0(EffectObject *obj, u32 value) {
+    obj->data->word0C = value;
 }
 
-void func_00113DD0(BasicObject *obj, u32 value) {
-    obj->data->value4 = value;
+void func_00113DD0(EffectObject *obj, u32 value) {
+    obj->data->word04 = value;
 }
 
 u32 func_00113DE0(u64 id) {
-    BasicObject *obj;
+    EffectObject *obj;
     u64 world;
 
     world = dds3GetWorldSecondaryObject();
-    obj = (BasicObject *)func_00110A48(world, id, 6);
-    return obj->data->value4;
+    obj = (EffectObject *)func_00110A48(world, id, 6);
+    return obj->data->word04;
 }
 
-void func_00113E20(BasicObject *obj, u32 value) {
-    obj->data->value8 = value;
+void func_00113E20(EffectObject *obj, u32 value) {
+    obj->data->word08 = value;
 }
 
-u32 func_00113E30(BasicObject *obj) {
-    return obj->data->value8;
+u32 func_00113E30(EffectObject *obj) {
+    return obj->data->word08;
 }
 
-void func_00113E40(u32 arg0) {
-    D_003BA9D0 = arg0;
+void func_00113E40(u32 value) {
+    D_003BA9D0 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113E48);
 
-void func_00113EE8(BasicObject *obj) {
-    BasicObjectData *data;
+void func_00113EE8(EffectObject *obj) {
+    EffectObjectData *data;
 
     effObjFreeInner();
     data = obj->data;
@@ -206,6 +208,7 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_00113F28);
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_001141C0);
 
+/* Refresh the object's stored xyz from the source vector. */
 void func_001143B0(WorldObj *obj) {
     f32 *src = obj->source;
     WorldSubState *dst = obj->state;
@@ -220,8 +223,8 @@ extern void effObjInnerCreate();
 extern void *func_002CFEB8(s32 size);
 extern u32 func_001117A8();
 
-s32 func_00114508(BasicObject *obj) {
-    BasicObjectData *data;
+s32 func_00114508(EffectObject *obj) {
+    EffectObjectData *data;
 
     effObjInnerCreate(obj);
     obj->data = func_002CFEB8(0x50);

@@ -6,9 +6,23 @@ extern void func_0024DD78(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
+#define MENU_SUM_MINIMUM 99
+#define MENU_SUM_COUNT 5
+
+typedef struct MenuSumBytes {
+    u8 pad00[0x16];
+    s8 values[MENU_SUM_COUNT];
+} MenuSumBytes;
+
+typedef struct MenuSumTable {
+    u8 pad00[0x3D0];
+    s32 values[MENU_SUM_COUNT];
+} MenuSumTable;
+
+/* All five signed-byte plus table-word totals must meet the minimum. */
 s32 mnuCheckTableSums(s32 bytes, s32 table) {
-    s32 *tableValues = (s32 *)(table + 0x3d0);
-    s8 *byteValues = (s8 *)(bytes + 0x16);
+    s32 *tableValues = ((MenuSumTable *)table)->values;
+    s8 *byteValues = ((MenuSumBytes *)bytes)->values;
     s32 index = 0;
 
     do {
@@ -16,11 +30,11 @@ s32 mnuCheckTableSums(s32 bytes, s32 table) {
 
         byteValues++;
         tableValues++;
-        if (total < 0x63) {
+        if (total < MENU_SUM_MINIMUM) {
             return 0;
         }
         index++;
-    } while (index < 5);
+    } while (index < MENU_SUM_COUNT);
     return 1;
 }
 
@@ -87,16 +101,17 @@ extern s64 func_0024DC08(void);
 extern void func_002858F8(s32 *, char *);
 extern char D_0036D478[];
 
+/* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s64 func_00264610(u64 request) {
     s32 context = func_00101A70();
-    s32 *state = (s32 *)(context + 0x54);
+    s32 *panelState = (s32 *)(context + 0x54);
     s64 result;
 
     func_00287C20();
-    result = func_00285670(context + 8, state, 0, request);
+    result = func_00285670(context + 8, panelState, 0, request);
     if (result == 0) {
-        if ((*state == 0) && (result = func_0024DC08(), result == 0)) {
-            func_002858F8(state, D_0036D478);
+        if ((*panelState == 0) && (result = func_0024DC08(), result == 0)) {
+            func_002858F8(panelState, D_0036D478);
         }
         result = 0;
     }
