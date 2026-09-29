@@ -1,5 +1,6 @@
 #include "common.h"
 #include "scr.h"
+s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 
 typedef struct KwlnTask KwlnTask;
 f32 bfWaitReadArgFloat(s32 idx);
@@ -388,7 +389,40 @@ s32 func_0010E388(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E3B0);
+s32 func_0010E3B0(void)
+{
+    s32 p2;
+    s32 p1;
+    s32 p0;
+    s32 sel;
+    s32 kind;
+    f32 f4;
+    f32 f3;
+    f32 f5;
+
+    sel = func_0010D428(6);
+    switch (sel)
+    {
+    case 1:
+        kind = 0x48;
+        break;
+    case 2:
+        kind = 0x42;
+        break;
+    case 0:
+    default:
+        kind = 0x44;
+        break;
+    }
+    p0 = func_0010D428(0);
+    p1 = func_0010D428(1);
+    p2 = func_0010D428(2);
+    f3 = bfWaitReadArgFloat(3);
+    f4 = bfWaitReadArgFloat(4);
+    f5 = bfWaitReadArgFloat(5);
+    kwlnDrawSetCd0Clamped(p0, p1, p2, f3, f4, f5, kind);
+    return 1;
+}
 
 s32 func_0010E498(void)
 {
