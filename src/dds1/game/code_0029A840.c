@@ -2809,7 +2809,19 @@ void func_002A74E0(s32 arg0) {
     *(u32 *)(arg0 + 0x18) = 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A74F0);
+void func_002A74F0(u8 *work, u128 *destination, s32 frame) {
+    s32 index = *(s32 *)(work + 0x18) - 3 * (*(s32 *)(work + 0x1C) * (frame - 1) + frame);
+    u128 *source;
+    s32 i;
+
+    if (index < 3) {
+        index += *(s32 *)(work + 0x10) - 3;
+    }
+    source = *(u128 **)(work + 0x24) + index;
+    for (i = 0; i < 3; i++) {
+        PCP_COPY_VECTOR(destination + i, source + i);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A7568);
 
@@ -3994,7 +4006,29 @@ void func_002B0360(s32 arg0) {
     func_002D0918(*(u32 *)(temp_v0 + 8));
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0390);
+void func_002B0390(u8 *work) {
+    s32 *list = *(s32 **)(work + 0x30);
+    u8 *config = *(u8 **)(work + 0x34);
+    s32 rows = *(s32 *)(config + 0x74) + 1;
+    s32 count = list[0];
+    u8 *node = *(u8 **)&list[1];
+    u8 *entry = *(u8 **)(node + 0x24);
+    s32 i;
+    s32 j;
+    s32 k;
+    f32 *v;
+
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < rows; j++) {
+            v = (f32 *)entry + 1;
+            for (k = 0; k < 4; k++) {
+                *v += *(f32 *)(config + 0x88);
+                v += 2;
+            }
+            entry += 0x20;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0408);
 
@@ -4017,13 +4051,20 @@ u8 *allocateEffectBlockWithModel(u16 kind, void *source) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0650);
+extern u8 *allocateEffectBlockWithModel(u16, void *);
+
+u8 *func_002B0650(u16 kind, void *source) {
+    u8 *effect = allocateEffectBlockWithModel(kind, source);
+    *(u32 *)(effect + 0x30) = D_0037ED90[kind].createResource(source);
+    D_0037ED90[kind].fn(effect);
+    return effect;
+}
 
 void func_002B06E0(s32 arg0) {
-    u64 temp_v0;
+    void *source;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    func_002B0650(*(u16 *)(arg0 + 0xc), temp_v0);
+    source = fileResolvePrimaryBuffer();
+    func_002B0650(*(u16 *)(arg0 + 0xc), source);
 }
 
 void func_002B0710(u8 *work) {
@@ -4308,7 +4349,22 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B2F20);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3090);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3130);
+extern u128 *D_00324770[];
+extern u128 D_003DCB90[];
+extern u128 D_003DCBD0[];
+extern u128 D_00324780[];
+extern u8 D_003BC9AC;
+
+void func_002B3130(void) {
+    u128 *dst = D_003DCB90;
+    u128 *src = D_00324770[0];
+    PCP_COPY_VECTOR(dst, src);
+    dst++;
+    src++;
+    PCP_COPY_VECTOR(dst, src);
+    PCP_COPY_VECTOR(D_003DCBD0, D_00324780);
+    D_003BC9AC = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3178);
 
@@ -4716,7 +4772,23 @@ void setBattleEffectOffset(void *src) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B51E8);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5290);
+extern s32 D_003BD060;
+extern void func_00295E00(void *, void *);
+extern void effMiscQuatMultiplyVU(void);
+
+void func_002B5290(u8 *effect) {
+    if ((*(u32 *)(effect + 0x68) & 0x60) != 0) {
+        u128 quaternion;
+        func_00295E00(effect, &quaternion);
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)D_003BD060 + 0x50));
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(&quaternion));
+        effMiscQuatMultiplyVU();
+    } else {
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)D_003BD060 + 0x50));
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(effect + 0x50));
+        effMiscQuatMultiplyVU();
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5300);
 
@@ -5410,7 +5482,25 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8648);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8948);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8B48);
+typedef struct EffectStateSnapshot {
+    s128 vectors[8];
+} EffectStateSnapshot;
+
+extern s32 func_002B7E60(EffectStateSnapshot *, s32);
+
+s32 func_002B8B48(void) {
+    EffectStateSnapshot snapshot = *(EffectStateSnapshot *)&D_003DF920;
+    s128 *backup = &snapshot.vectors[4];
+    s32 result;
+
+    PCP_COPY_VECTOR(backup, &D_003DF920);
+    result = func_002B7E60(&snapshot, 0);
+    PCP_COPY_VECTOR(&D_003DF920, backup);
+    if (result & 1) {
+        result |= 0x800000;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8BF0);
 
