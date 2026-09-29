@@ -33,14 +33,14 @@ typedef struct DevState {
     struct DevState *unk0; /* 0x0 */
     struct DevState *unk4; /* 0x4 */
     u8 pad8[8]; /* 0x8 */
-    void *unk10; /* 0x10 */
+    void *resource; /* 0x10 */
     u8 workerIndex; /* 0x14 */
     u8 operation; /* 0x15 */
     s8 state; /* 0x16 */
     u8 pad17; /* 0x17 */
     s32 unk18; /* 0x18 */
-    s32 unk1C; /* 0x1C */
-    s32 unk20; /* 0x20 */
+    s32 requestExtra; /* 0x1C */
+    s32 requestData; /* 0x20 */
     s32 options; /* 0x24 */
     s32 resourceId; /* 0x28 */
     s32 result; /* 0x2C */
@@ -407,7 +407,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 DevState *func_0033F9D0(void *resource, s32 workerIndex, s32 operation,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 context) {
     DevState *state = (DevState *)func_00328E18(0x40);
-    state->unk10 = resource;
+    state->resource = resource;
     state->workerIndex = workerIndex;
     state->operation = operation;
     state->state = 0;
@@ -502,8 +502,8 @@ DevState *sdfDevCreateRequest(s32 path, s32 data, s32 extra,
         return NULL;
     }
     state = func_0033F9D0(resource, id, 8, completion, completionContext);
-    state->unk1C = extra;
-    state->unk20 = data;
+    state->requestExtra = extra;
+    state->requestData = data;
     state->unk18 = 0;
     func_0033EC48(state);
     return state;
@@ -520,8 +520,8 @@ DevState *sdfDevOpenRequest(s32 path, s32 data, s32 extra,
         return NULL;
     }
     state = func_0033F9D0(resource, id, 9, completion, completionContext);
-    state->unk1C = extra;
-    state->unk20 = data;
+    state->requestExtra = extra;
+    state->requestData = data;
     state->options = options != 0 ? options : D_00438B24;
     state->unk18 = 0;
     func_0033EC48(state);
@@ -669,9 +669,9 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     return request;
 }
 
-void sdfDestroyDevRequest(u32 arg0) {
-    func_003297C8(*(u32 *)arg0);
-    func_00328E48(arg0);
+void sdfDestroyDevRequest(DevRequest *request) {
+    func_003297C8(request->handle);
+    func_00328E48(request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340558);

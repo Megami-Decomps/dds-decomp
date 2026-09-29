@@ -36,11 +36,27 @@ void func_00137818(void);
 
 void func_00246D80(u64 arg0);
 
+typedef struct EvtViewerGlyph {
+    u16 x;
+    u8 pad02[0x2E];
+    struct EvtViewerGlyph *next;
+} EvtViewerGlyph;
+
+typedef struct EvtViewerGroup {
+    s32 type;
+    u8 pad04[0x50];
+    EvtViewerGlyph *glyphs;
+    u8 pad58[0x24];
+    struct EvtViewerGroup *next;
+} EvtViewerGroup;
+
 typedef struct EventViewerState {
     u8 pad0[0x14];
     s32 glyphAdvanceLimit;
     s32 glyphAdvancePosition;
-    u8 pad1C[0x2220];
+    u8 pad1C[0x2018];
+    EvtViewerGroup *groups;
+    u8 pad2038[0x204];
     struct {
         u16 id;
         u8 pad2[6];
@@ -116,17 +132,17 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_00248D70);
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249088);
 
 s32 func_00249518(EventViewerState *viewer) {
-    u8 *result = NULL;
+    EvtViewerGlyph *result = NULL;
     s32 best = 99999;
-    u8 *node = *(u8 **)((u8 *)viewer + 0x2034);
+    EvtViewerGroup *node = viewer->groups;
 
     while (node != NULL) {
-        if (*(s32 *)node == 2) {
-            u8 *glyph = *(u8 **)(node + 0x54);
+        if (node->type == 2) {
+            EvtViewerGlyph *glyph = node->glyphs;
 
             if (glyph != NULL) {
                 do {
-                    s32 x = *(u16 *)glyph;
+                    s32 x = glyph->x;
 
                     if (x <= viewer->glyphAdvancePosition) {
                         s32 distance = viewer->glyphAdvancePosition - x;
@@ -136,11 +152,11 @@ s32 func_00249518(EventViewerState *viewer) {
                             result = glyph;
                         }
                     }
-                    glyph = *(u8 **)(glyph + 0x30);
+                    glyph = glyph->next;
                 } while (glyph != NULL);
             }
         }
-        node = *(u8 **)(node + 0x7C);
+        node = node->next;
     }
     return (s32)result;
 }
@@ -214,17 +230,17 @@ void func_0024A9F0(u32 arg0) {
 }
 
 s32 func_0024AA38(EventViewerState *viewer) {
-    u8 *result = NULL;
+    EvtViewerGlyph *result = NULL;
     s32 best = 99999;
-    u8 *node = *(u8 **)((u8 *)viewer + 0x2034);
+    EvtViewerGroup *node = viewer->groups;
 
     while (node != NULL) {
-        if (*(s32 *)node == 2) {
-            u8 *glyph = *(u8 **)(node + 0x54);
+        if (node->type == 2) {
+            EvtViewerGlyph *glyph = node->glyphs;
 
             if (glyph != NULL) {
                 do {
-                    s32 x = *(u16 *)glyph;
+                    s32 x = glyph->x;
 
                     if (viewer->glyphAdvancePosition < x) {
                         s32 distance = x - viewer->glyphAdvancePosition;
@@ -234,27 +250,27 @@ s32 func_0024AA38(EventViewerState *viewer) {
                             result = glyph;
                         }
                     }
-                    glyph = *(u8 **)(glyph + 0x30);
+                    glyph = glyph->next;
                 } while (glyph != NULL);
             }
         }
-        node = *(u8 **)(node + 0x7C);
+        node = node->next;
     }
     return (s32)result;
 }
 
 s32 func_0024AAB8(EventViewerState *viewer) {
-    u8 *result = NULL;
+    EvtViewerGlyph *result = NULL;
     s32 best = 99999;
-    u8 *node = *(u8 **)((u8 *)viewer + 0x2034);
+    EvtViewerGroup *node = viewer->groups;
 
     while (node != NULL) {
-        if (*(s32 *)node == 2) {
-            u8 *glyph = *(u8 **)(node + 0x54);
+        if (node->type == 2) {
+            EvtViewerGlyph *glyph = node->glyphs;
 
             if (glyph != NULL) {
                 do {
-                    s32 x = *(u16 *)glyph;
+                    s32 x = glyph->x;
 
                     if (x < viewer->glyphAdvancePosition) {
                         s32 distance = viewer->glyphAdvancePosition - x;
@@ -264,11 +280,11 @@ s32 func_0024AAB8(EventViewerState *viewer) {
                             result = glyph;
                         }
                     }
-                    glyph = *(u8 **)(glyph + 0x30);
+                    glyph = glyph->next;
                 } while (glyph != NULL);
             }
         }
-        node = *(u8 **)(node + 0x7C);
+        node = node->next;
     }
     return (s32)result;
 }

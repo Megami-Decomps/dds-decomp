@@ -10,7 +10,7 @@ typedef struct EvtUnit {
     s32 unk04;          /* 0x04 */
     u8 pad08[0x64];     /* 0x08 */
     u32 value6C;        /* 0x6C */
-    s128 unk70;          /* 0x70: 16-byte vector copied by the setup helpers */
+    s128 vector;         /* 0x70: 16-byte vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
     u32 *modelNode;      /* 0x8C: node flag word updated by script opcodes */
     void *sourceUnit;    /* 0x90: matching secondary-world unit */
@@ -20,7 +20,7 @@ typedef struct EvtUnit {
     s32 unkA0;          /* 0xA0 */
     f32 unkA4;          /* 0xA4 */
     u32 flags;          /* 0xA8 */
-    s16 unkAC;          /* 0xAC */
+    s16 mode;            /* 0xAC */
     s16 unkAE;          /* 0xAE */
     s16 unkB0;          /* 0xB0 */
     s16 unkB2;          /* 0xB2 */
@@ -147,11 +147,11 @@ extern f32 func_00240640(s32);
 extern void func_00197F40(void *, f32);
 
 void func_0023D658(EvtUnit *work, s128 *vec, s32 count) {
-    s128 *dst = &work->unk70;
+    s128 *dst = &work->vector;
 
     if ((u32)(count - 1) < 100) {
         work->sourceUnit = NULL;
-        work->unkAC = 3;
+        work->mode = 3;
         PCP_COPY_VECTOR(dst, vec);
         work->unkB4 = count;
         work->unkB6 = 0;
@@ -171,10 +171,10 @@ void func_0023D698(EvtUnit *work, s32 arg1, s32 arg2) {
 }
 
 void func_0023D708(EvtUnit *work, s32 arg1, s128 *vec, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    s128 *dst = &work->unk70;
+    s128 *dst = &work->vector;
 
     work->unkB0 = arg1;
-    work->unkAC = 1;
+    work->mode = 1;
     work->unkAE = 0;
     work->sourceUnit = NULL;
     PCP_COPY_VECTOR(dst, vec);
@@ -203,7 +203,7 @@ s32 func_0023DA48(EvtUnit *work, s32 arg1) {
     if (arg1 != 0) {
         work->unk94 = arg1;
         work->unkB2 = 0;
-        work->unkAC = 4;
+        work->mode = 4;
         ret = 1;
     }
     return ret;

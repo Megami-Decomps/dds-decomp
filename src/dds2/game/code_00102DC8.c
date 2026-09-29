@@ -222,22 +222,22 @@ void kwlnFadeClear(void) {
     D_00435CF0.a = 0;
 }
 
-void kwlnFadeSetColor(s8 arg0, s8 arg1, s8 arg2, s8 arg3) {
+void kwlnFadeSetColor(s8 red, s8 green, s8 blue, s8 alpha) {
     D_00435CD4 &= ~3;
-    D_00435CF0.r = arg0;
-    D_00435CF0.g = arg1;
-    D_00435CF0.b = arg2;
-    D_00435CF0.a = arg3;
+    D_00435CF0.r = red;
+    D_00435CF0.g = green;
+    D_00435CF0.b = blue;
+    D_00435CF0.a = alpha;
 }
 
 void kwlnFadeGetColor(KwlnFadeColor **color) {
     *color = &D_00435CF0;
 }
 
-void kwlnFadeSetRGB(s8 arg0, s8 arg1, s8 arg2) {
-    D_00435CF0.r = arg0;
-    D_00435CF0.g = arg1;
-    D_00435CF0.b = arg2;
+void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
+    D_00435CF0.r = red;
+    D_00435CF0.g = green;
+    D_00435CF0.b = blue;
 }
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnFadeOutStart);
@@ -256,19 +256,19 @@ void kwlnFadeStartIn(s32 frames) {
     D_00435CD4 = (D_00435CD4 | 1) & ~2;
 }
 
-void kwlnFadeInStart(s8 arg0, s8 arg1, s8 arg2, s32 arg3) {
-    D_00435CF0.r = arg0;
-    D_00435CF0.g = arg1;
-    D_00435CF0.b = arg2;
+void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 frames) {
+    D_00435CF0.r = red;
+    D_00435CF0.g = green;
+    D_00435CF0.b = blue;
     D_00435CF0.a = 0;
-    if (arg3 == 0) {
+    if (frames == 0) {
         D_00438DC0 = 0;
         D_00438DC2 = 0;
         D_00435CF0.a = -0x80;
         D_00435CD4 &= ~3;
         return;
     }
-    D_00438DC2 = arg3;
+    D_00438DC2 = frames;
     D_00438DC0 = 0;
     D_00435CD4 = (D_00435CD4 & ~1) | 2;
 }

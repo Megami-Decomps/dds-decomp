@@ -20,9 +20,9 @@ typedef struct ParCellNode {
     struct ParCellNode *next;
 } ParCellNode;
 
-extern s32 D_00436400;
+extern ParListNode *D_00436400;
 
-extern s32 D_00436404;
+extern ParCellNode *D_00436404;
 
 extern void (*D_003AAF10[])(void *, void *, void *);
 
@@ -155,8 +155,8 @@ void func_00162FC8(u16 *arg0) {
 }
 
 void func_00163000(ParListNode *node) {
-    node->next = (ParListNode *)D_00436400;
-    D_00436400 = (s32)node;
+    node->next = D_00436400;
+    D_00436400 = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
@@ -182,8 +182,8 @@ void func_001634A8(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00162348", parCellInit);
 
 void func_00163508(ParCellNode *node) {
-    node->next = (ParCellNode *)D_00436404;
-    D_00436404 = (s32)node;
+    node->next = D_00436404;
+    D_00436404 = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163518);
@@ -198,16 +198,31 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163780);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
 
-void func_00163B68(u8 *system, s32 arg1, s32 arg2) {
-    s32 count = *(s32 *)(system + 4);
-    s32 perCell = *(s32 *)(system + 8) >> 1;
+typedef struct ParCell {
+    u8 pad00[4];
+    void *vertices; /* 0x04 */
+    u8 pad08[0xC];
+} ParCell;
+
+typedef struct ParSystem {
+    u8 pad00[4];
+    s32 cellCount;       /* 0x04 */
+    s32 vertexWordCount; /* 0x08 */
+    u8 pad0C[8];
+    ParCell *cells;      /* 0x14 */
+} ParSystem;
+
+void func_00163B68(ParSystem *system, s32 arg1, s32 arg2) {
+    s32 count = system->cellCount;
+    s32 perCell = system->vertexWordCount >> 1;
     s32 i;
     s32 j;
     u8 *cell;
     s32 *vertex;
     if (count > 0) {
         i = count;
-        cell = *(u8 **)(system + 0x14) + 4;
+        /* Required to match: advance a byte cursor based at ParCell.vertices. */
+        cell = (u8 *)system->cells + 4;
         do {
             vertex = *(s32 **)cell;
             if (perCell > 0) {
@@ -241,16 +256,17 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164390);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001644B0);
 
-void func_00164630(u8 *system, s32 arg1, s32 arg2) {
-    s32 count = *(s32 *)(system + 4);
-    s32 perCell = *(s32 *)(system + 8) >> 2;
+void func_00164630(ParSystem *system, s32 arg1, s32 arg2) {
+    s32 count = system->cellCount;
+    s32 perCell = system->vertexWordCount >> 2;
     s32 i;
     s32 j;
     u8 *cell;
     u8 *vertex;
     if (count > 0) {
         i = count;
-        cell = *(u8 **)(system + 0x14) + 4;
+        /* Required to match: use the same offset-four cell cursor as the paired fill. */
+        cell = (u8 *)system->cells + 4;
         do {
             vertex = *(u8 **)cell;
             if (perCell > 0) {

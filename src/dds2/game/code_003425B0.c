@@ -540,15 +540,16 @@ extern void func_0032AEA0(s32, s32);
 extern void func_003444F8();
 
 s32 func_00345408(MidiPlaybackState *state) {
-    u32 *buffer;
+    u32 *selectedBuffer;
     if (state->pending == 0) {
         return 0;
     }
-    buffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
-    if (*buffer == 0) {
+    /* Equivalent to &state->buffers[state->bufferIndex]; index-first arithmetic matches retail. */
+    selectedBuffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
+    if (*selectedBuffer == 0) {
         func_003444F8();
     }
-    func_0032AEA0(*buffer, *buffer + state->bufferSize - 0x10);
+    func_0032AEA0(*selectedBuffer, *selectedBuffer + state->bufferSize - 0x10);
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }

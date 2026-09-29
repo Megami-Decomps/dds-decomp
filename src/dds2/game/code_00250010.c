@@ -54,7 +54,14 @@ typedef struct EvtRuntimeChild {
 
 typedef struct EvtRuntimeGroup {
     s32 type;
-    u8 pad04[0x50];
+    u8 value04;
+    u8 pad05[3];
+    s32 value08;
+    u8 pad0C[0x10];
+    u16 value1C;
+    u8 value1E;
+    u8 value1F;
+    u8 pad20[0x34];
     EvtRuntimeChild *children;
     u8 pad58[0x24];
     struct EvtRuntimeGroup *next;
@@ -633,149 +640,149 @@ void func_00259428(s32 arg0, u8 *arg1) {
     }
 }
 
-void evtWriteGroupHeader(s32 arg0, u8 *arg1) {
-    u8 *task;
+void evtWriteGroupHeader(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
     s32 header[4];
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 2) {
-            header[0] = *(s32 *)(task + 8);
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 2) {
+            header[0] = group->value08;
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
-            func_002588A0(arg0, header, 0x10);
+            func_002588A0(output, header, 0x10);
         }
     }
 }
 
-void func_00259518(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0xA) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x30);
+void func_00259518(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0xA) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x30);
             }
         }
     }
 }
 
-void func_002595A0(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0xB) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x20);
+void func_002595A0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0xB) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x20);
             }
         }
     }
 }
 
-void func_00259628(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0xD) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x28);
+void func_00259628(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0xD) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x28);
             }
         }
     }
 }
 
-void func_002596B0(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0xE) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x2C);
+void func_002596B0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0xE) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x2C);
             }
         }
     }
 }
 
-void func_00259738(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0xF) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x2C);
+void func_00259738(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0xF) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x2C);
             }
         }
     }
 }
 
-void func_002597C0(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0x17) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x2C);
+void func_002597C0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0x17) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x2C);
             }
         }
     }
 }
 
-void func_00259848(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0x1B) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x28);
+void func_00259848(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0x1B) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x28);
             }
         }
     }
 }
 
-void func_002598D0(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0x10) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x18);
+void func_002598D0(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0x10) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x18);
             }
         }
     }
 }
 
-void func_00259958(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0x11) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x24);
+void func_00259958(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0x11) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x24);
             }
         }
     }
 }
 
-void evtWriteGroupMetadata(s32 arg0, u8 *arg1) {
-    u8 *task;
+void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
     u8 record[8];
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        record[0] = task[0];
-        record[1] = task[4];
-        *(u16 *)(record + 2) = *(u16 *)(task + 8);
-        *(u16 *)(record + 4) = *(u16 *)(task + 0x1C);
-        record[6] = task[0x1E];
-        record[7] = task[0x1F];
-        func_002588A0(arg0, record, 8);
+    for (group = runtime->groups; group != 0; group = group->next) {
+        record[0] = *(u8 *)&group->type;
+        record[1] = group->value04;
+        *(u16 *)(record + 2) = *(u16 *)&group->value08;
+        *(u16 *)(record + 4) = group->value1C;
+        record[6] = group->value1E;
+        record[7] = group->value1F;
+        func_002588A0(output, record, 8);
     }
 }
 
-void func_00259A60(s32 arg0, u8 *arg1) {
-    u8 *task;
-    u8 *item;
-    for (task = *(u8 **)(arg1 + 0x2034); task != 0; task = *(u8 **)(task + 0x7C)) {
-        if (*(s32 *)task == 0x19) {
-            for (item = *(u8 **)(task + 0x54); item != 0; item = *(u8 **)(item + 0x30)) {
-                func_002588A0(arg0, *(s32 *)(item + 0x2C), 0x40);
+void func_00259A60(s32 output, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    for (group = runtime->groups; group != 0; group = group->next) {
+        if (group->type == 0x19) {
+            for (child = group->children; child != 0; child = child->next) {
+                func_002588A0(output, (s32)child->payload, 0x40);
             }
         }
     }
