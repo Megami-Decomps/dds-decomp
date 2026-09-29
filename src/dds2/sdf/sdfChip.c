@@ -19,8 +19,8 @@ void func_00328E18(s32 size) {
 
 INCLUDE_ASM(const s32, "sdf/sdfChip", func_00328E48);
 
-void func_00328F68(s32 arg0) {
-    func_0032CAE0(&D_00439120, arg0);
+void func_00328F68(s32 value) {
+    func_0032CAE0(&D_00439120, value);
 }
 
 s32 sdfChipIsInRange(s32 address) {

@@ -223,25 +223,25 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E460);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E648);
 
-void *evtFindWorldObjectByIdAndKind(s32 type, s32 id) {
-    void *ctx;
+void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
+    void *world;
 
-    ctx = dds3GetWorldObject();
-    func_00110C70(ctx, id, type);
+    world = dds3GetWorldObject();
+    func_00110C70(world, id, kind);
 }
 
 u32 evtCommandGetSelectedUnitValue(void) {
-    void *ctx;
-    EvtUnit *obj;
-    s32 value;
+    void *world;
+    EvtUnit *object;
+    s32 id;
 
-    ctx = dds3GetWorldObject();
-    obj = func_00110C60(ctx);
-    value = -1;
-    if (obj != NULL) {
-        value = obj->unk04;
+    world = dds3GetWorldObject();
+    object = func_00110C60(world);
+    id = -1;
+    if (object != NULL) {
+        id = object->unk04;
     }
-    func_0010D818(value);
+    func_0010D818(id);
     return 1;
 }
 

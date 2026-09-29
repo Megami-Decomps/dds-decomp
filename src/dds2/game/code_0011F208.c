@@ -696,17 +696,17 @@ void func_00122F38(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00122FE0(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00122FE0(s32 map, u32 slot, u32 bit) {
+    s32 index;
+    u8 *entry;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_00435DD0;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1450);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        index = map % 100;
+        entry = (u8 *)(slot * 30 + index * 1920);
+        entry += D_00435DD0;
+        flags = *(u16 *)(entry + 0x1450);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -724,17 +724,17 @@ void func_00123038(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001230E0(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_001230E0(s32 map, u32 slot, u32 bit) {
+    s32 index;
+    u8 *entry;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_00435DD0;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1452);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        index = map % 100;
+        entry = (u8 *)(slot * 30 + index * 1920);
+        entry += D_00435DD0;
+        flags = *(u16 *)(entry + 0x1452);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -752,17 +752,17 @@ void func_00123138(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001231E0(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_001231E0(s32 map, u32 slot, u32 bit) {
+    s32 index;
+    u8 *entry;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_00435DD0;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1454);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        index = map % 100;
+        entry = (u8 *)(slot * 30 + index * 1920);
+        entry += D_00435DD0;
+        flags = *(u16 *)(entry + 0x1454);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -780,17 +780,17 @@ void func_00123238(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001232E0(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_001232E0(s32 map, u32 slot, u32 bit) {
+    s32 index;
+    u8 *entry;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_00435DD0;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1456);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        index = map % 100;
+        entry = (u8 *)(slot * 30 + index * 1920);
+        entry += D_00435DD0;
+        flags = *(u16 *)(entry + 0x1456);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -808,17 +808,17 @@ void func_00123338(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001233E0(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_001233E0(s32 map, u32 slot, u32 bit) {
+    s32 index;
+    u8 *entry;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_00435DD0;
-        temp_v2 = *(u16 *)(temp_v1 + 0x1458);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        index = map % 100;
+        entry = (u8 *)(slot * 30 + index * 1920);
+        entry += D_00435DD0;
+        flags = *(u16 *)(entry + 0x1458);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -858,17 +858,17 @@ void func_001234E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00123590(s32 arg0, u32 arg1, u32 arg2) {
-    s32 temp_v0;
-    u8 *temp_v1;
-    u32 temp_v2;
+u8 func_00123590(s32 map, u32 slot, u32 bit) {
+    s32 index;
+    u8 *entry;
+    u32 flags;
 
-    if (arg0 < 0x28) {
-        temp_v0 = arg0 % 100;
-        temp_v1 = (u8 *)(arg1 * 30 + temp_v0 * 1920);
-        temp_v1 += D_00435DD0;
-        temp_v2 = *(u16 *)(temp_v1 + 0x146A);
-        return (temp_v2 >> arg2) & 1;
+    if (map < 0x28) {
+        index = map % 100;
+        entry = (u8 *)(slot * 30 + index * 1920);
+        entry += D_00435DD0;
+        flags = *(u16 *)(entry + 0x146A);
+        return (flags >> bit) & 1;
     }
     return 0;
 }
@@ -1627,9 +1627,9 @@ void func_00126998(void) {
 }
 
 u8 func_001269C8(void) {
-    s32 temp_v0 = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
-    temp_v0 &= 4;
-    return temp_v0 != 0;
+    s32 flags = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
+    flags &= 4;
+    return flags != 0;
 }
 
 void func_001269E0(void) {
@@ -1650,9 +1650,9 @@ void func_00126A58(void) {
 }
 
 u8 func_00126A90(void) {
-    s32 temp_v0 = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
-    temp_v0 &= 2;
-    return temp_v0 != 0;
+    s32 flags = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
+    flags &= 2;
+    return flags != 0;
 }
 
 void func_00126AA8(void) {
@@ -1882,16 +1882,16 @@ void fldSetDeferredFieldCommand(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00128658);
 
-void func_001286C0(u32 arg0) {
-    D_00435F70 = arg0;
+void func_001286C0(u32 command) {
+    D_00435F70 = command;
 }
 
 void func_001286C8(void) {
-    u32 temp_v0;
+    u32 command;
 
-    temp_v0 = D_00435F70;
-    if (temp_v0 != 0) {
-        func_001411F8(temp_v0);
+    command = D_00435F70;
+    if (command != 0) {
+        func_001411F8(command);
         D_00435F70 = 0;
     }
 }

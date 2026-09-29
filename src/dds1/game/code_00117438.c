@@ -79,12 +79,12 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
 
-void func_00117568(u32 *value, u32 newValue) {
-    *value = newValue;
+void func_00117568(u32 *destination, u32 value) {
+    *destination = value;
 }
 
-u32 func_00117570(u32 *value) {
-    return *value;
+u32 func_00117570(u32 *source) {
+    return *source;
 }
 
 void evtScaleValueByMultiplier(float multiplier, EvtScaledValue *value) {

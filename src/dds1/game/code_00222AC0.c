@@ -181,25 +181,25 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223828);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223A10);
 
-void *evtFindWorldObjectByIdAndKind(s32 type, s32 id) {
-    void *ctx;
+void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
+    void *world;
 
-    ctx = dds3GetWorldObject();
-    func_00110A48(ctx, id, type);
+    world = dds3GetWorldObject();
+    func_00110A48(world, id, kind);
 }
 
 u32 evtGetWorldObjectId(void) {
-    void *ctx;
-    EvtUnit *obj;
-    s32 value;
+    void *world;
+    EvtUnit *object;
+    s32 id;
 
-    ctx = dds3GetWorldObject();
-    obj = func_00110A38(ctx);
-    value = -1;
-    if (obj != NULL) {
-        value = obj->objectId;
+    world = dds3GetWorldObject();
+    object = func_00110A38(world);
+    id = -1;
+    if (object != NULL) {
+        id = object->objectId;
     }
-    func_0010D5F0(value);
+    func_0010D5F0(id);
     return 1;
 }
 
@@ -490,17 +490,17 @@ u32 func_00224770(void) {
 u32 func_002247B0(void) {
     s32 id;
     EvtUnit *unit;
-    s32 off;
-    u32 ret = 1;
+    s32 offset;
+    u32 result = 1;
 
     id = func_0010D428(0);
     unit = func_00222090(id);
     if (unit == NULL) {
-        return ret;
+        return result;
     }
-    off = func_0010D428(1);
-    if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
-        return ret;
+    offset = func_0010D428(1);
+    if (((((u8 *)(offset + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
+        return result;
     }
     return mdlCheckNodeByte30(unit->flagWord, func_0010D428(1)) != 0;
 }

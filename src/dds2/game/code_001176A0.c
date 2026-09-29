@@ -6,14 +6,14 @@ extern s32 D_00435DD0;
 
 extern s64 func_0011D588(void);
 
-typedef struct WorldSlotData {
+typedef struct EvtScaledValue {
     u32 value;
     u32 flags;
-    f32 scale;
-    f32 scaledValue;
+    f32 base;
+    f32 scaled;
     u8 pad10[8];
     u32 value18;
-} WorldSlotData;
+} EvtScaledValue;
 
 typedef struct SdfRuntime {
     u8 pad00[0x34];
@@ -37,51 +37,51 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117728);
 
-void func_001177D0(u32 *arg0, u32 arg1) {
-    *arg0 = arg1;
+void func_001177D0(u32 *destination, u32 value) {
+    *destination = value;
 }
 
-u32 func_001177D8(u32 *arg0) {
-    return *arg0;
+u32 func_001177D8(u32 *source) {
+    return *source;
 }
 
-void evtScaleValueByMultiplier(float value, WorldSlotData *slot) {
-    slot->scaledValue = value * slot->scale;
+void evtScaleValueByMultiplier(float multiplier, EvtScaledValue *value) {
+    value->scaled = multiplier * value->base;
 }
 
-float evtGetValueScaleFactor(WorldSlotData *slot) {
-    return slot->scaledValue / slot->scale;
+float evtGetValueScaleFactor(EvtScaledValue *value) {
+    return value->scaled / value->base;
 }
 
-void func_00117810(WorldSlotData *slot) {
-    slot->flags = slot->flags | 8;
+void func_00117810(EvtScaledValue *value) {
+    value->flags = value->flags | 8;
 }
 
-void func_00117820(WorldSlotData *slot) {
-    slot->flags = slot->flags & 0xfffffff7;
+void func_00117820(EvtScaledValue *value) {
+    value->flags = value->flags & 0xfffffff7;
 }
 
-void func_00117838(WorldSlotData *slot) {
-    slot->flags = slot->flags | 0x20;
+void func_00117838(EvtScaledValue *value) {
+    value->flags = value->flags | 0x20;
 }
 
-void func_00117848(WorldSlotData *slot) {
-    slot->flags = slot->flags & 0xffffffdf;
+void func_00117848(EvtScaledValue *value) {
+    value->flags = value->flags & 0xffffffdf;
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", evtSpawnActionObj11);
 
-u32 func_001178B0(WorldSlotData *slot) {
-    return slot->value18;
+u32 func_001178B0(EvtScaledValue *value) {
+    return value->value18;
 }
 
-u32 func_001178B8(WorldSlotData *slot) {
-    return slot->value18;
+u32 func_001178B8(EvtScaledValue *value) {
+    return value->value18;
 }
 
 /* Load the vector at the slot's +0x18 pointer into VF10. */
-void func_001178C0(WorldSlotData *slot) {
-    void *vec = (void *)func_001178B8(slot);
+void func_001178C0(EvtScaledValue *value) {
+    void *vec = (void *)func_001178B8(value);
 
     __asm__ volatile (
         ".set noreorder\n"
@@ -94,8 +94,8 @@ void func_001178C0(WorldSlotData *slot) {
 }
 
 /* Same, from the second quadword at +0x18. */
-void func_001178E0(WorldSlotData *slot) {
-    void *vec = (void *)((u8 *)func_001178B8(slot) + 0x10);
+void func_001178E0(EvtScaledValue *value) {
+    void *vec = (void *)((u8 *)func_001178B8(value) + 0x10);
 
     __asm__ volatile (
         ".set noreorder\n"
@@ -155,11 +155,11 @@ void sdfFirePendingCallback(void) {
     func_0011D590();
 }
 
-u8 func_001186C8(s64 arg0) {
-    s64 temp_v0;
+u8 func_001186C8(s64 expected) {
+    s64 current;
 
-    temp_v0 = func_0011D588();
-    return temp_v0 == arg0;
+    current = func_0011D588();
+    return current == expected;
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001186F8);
@@ -178,16 +178,16 @@ INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchCmd);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118BA8);
 
-void func_00118C58(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
-    evtRunContext(10, arg1, arg2, arg0, arg3);
+void func_00118C58(u32 context, u32 first, u32 second, u8 flags) {
+    evtRunContext(10, first, second, context, flags);
 }
 
-void func_00118C80(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
-    evtRunContext(7, arg1, arg2, arg0, arg3);
+void func_00118C80(u32 context, u32 first, u32 second, u8 flags) {
+    evtRunContext(7, first, second, context, flags);
 }
 
-void sdfDispatchSubCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    func_00118C80(arg0, arg1, arg2, (u8)arg3);
+void sdfDispatchSubCmd(u32 context, u32 first, u32 second, u32 flags) {
+    func_00118C80(context, first, second, (u8)flags);
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);

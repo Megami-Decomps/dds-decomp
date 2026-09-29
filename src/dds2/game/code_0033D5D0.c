@@ -464,6 +464,7 @@ void sdfInitDeviceSemaphores(void) {
 
 extern char D_00438AE8[];
 
+/* Convert a relative disc path to the drive's uppercase backslash form with ;1 suffix. */
 void func_0033E6B0(char *dst, char *src) {
     s32 c;
 
