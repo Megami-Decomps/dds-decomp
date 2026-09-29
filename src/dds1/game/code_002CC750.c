@@ -171,7 +171,27 @@ void func_002CCC18(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyRebuildProfileSkills);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyRebuildAllProfiles);
+void ptyRebuildProfileSkills(s32 useCurrentProfile, u8 *unit);
+
+void ptyRebuildAllProfiles(void) {
+    s32 i;
+    s32 offset;
+
+    for (offset = 0, i = 4; i >= 0; i--) {
+        u8 *unit = (u8 *)D_003BAA00 + 0xA60 + offset;
+
+        if ((*(u16 *)unit & 1) != 0) {
+            s32 j;
+
+            for (j = 0; j < 0x10; j++) {
+                if (*(u16 *)(unit + 4) == j) {
+                    ptyRebuildProfileSkills(0, unit);
+                }
+            }
+        }
+        offset += 0x1A4;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyRecomputeMaxVitals);
 
