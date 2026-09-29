@@ -570,12 +570,13 @@ def main():
     for old in sorted(set(re.findall(r"\bfunc_[0-9A-F]{8}\b", unit.read_text())) & renamed.keys()):
         bad += 1
         print(f"STALE {old}: symbol_addrs names it {renamed[old]}; use that name")
-    # An auto-named symbol the C references but nothing defines (symbol_addrs, the
+    # A symbol the C references but nothing defines (symbol_addrs, the
     # undefined_*_auto lists, a splat label, or C in this game's tree) links only
-    # against a stale build tree.
+    # against a stale build tree. Real names count too: a mistyped or other-game
+    # name compiles and matches (relocations are compared by address) yet fails the link.
     known = set(syms) | set(re.findall(r"^(\w+)\s*=", "".join(
         p.read_text() for p in (ROOT / "config" / version).glob("undefined_*_auto.txt")), re.M))
-    wanted = {n for n in undefined - known if AUTO.match(n)}
+    wanted = undefined - known
     if wanted:
         alt = "|".join(sorted(wanted))
         wanted -= set(subprocess.run(["grep", "-rhoE", rf"^\s*(glabel|dlabel|jlabel|nonmatching) ({alt})\b",
