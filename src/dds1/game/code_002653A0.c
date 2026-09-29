@@ -75,9 +75,23 @@ u32 func_00265598(void) {
     return 0;
 }
 
+extern u8 D_0036F40C[];
+
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsCalcApGain);
+s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
+    s32 r;
+    if (*(u16 *)(unit + 0x0E) & 0x40) {
+        return 0;
+    }
+    r = baseApTotal;
+    r += perUnitBonus;
+    if ((*(u16 *)(unit + 0x0) & 2) == 0) {
+        r = perUnitBonus;
+        r += baseApTotal;
+    }
+    return r;
+}
 
 s32 brsCalcExpGain(u8 *unit, s32 exp, s32 a2) {
     s32 result;
@@ -159,7 +173,27 @@ void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fo
     state[3] = fourth;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildUnitProgressRow);
+extern s32 ptyCalcLevelUps(u8 *);
+extern s32 ptyComputeTotalExp(u8 *, s32);
+extern s32 func_002CD310(u8 *, s32);
+extern s8 func_002CD7B8(u8 *);
+extern u32 func_002CD2A8(u16);
+extern void mnuInitTitleParameters(u32 *, u32, u32, u32, u32);
+
+void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
+    s32 levelDelta;
+    s32 profilePoints;
+
+    memset(state, 0, 0x2C);
+    *(u32 *)(state + 0x8) = (u32)entry;
+    levelDelta = ptyCalcLevelUps(entry);
+    mnuInitTitleParameters((u32 *)(state + 0xC), 0x6E0, 0x50,
+        *(s32 *)(entry + 0x10) - ptyComputeTotalExp(entry, levelDelta),
+        ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
+    profilePoints = func_002CD310(entry, 0);
+    mnuInitTitleParameters((u32 *)(state + 0x1C), 0x3C0, 0x50, profilePoints,
+        func_002CD2A8(func_002CD7B8(entry) & 0xFFFF));
+}
 
 void func_00266130(u32 fontContext) {
     func_001953D8(fontContext, 0xc, 0x10);
