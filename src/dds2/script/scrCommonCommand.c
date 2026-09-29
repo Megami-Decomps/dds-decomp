@@ -1,6 +1,7 @@
 #include "common.h"
 #include "scr.h"
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
+s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
 typedef struct KwlnTask KwlnTask;
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -21,6 +22,7 @@ s32 func_00108138(s32 arg0, void *arg1);
 s32 func_001081F8(s32 arg0, void *arg1);
 
 s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
+s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 
 s32 kwlnDrawSetDc8Second(s32 arg0);
 
@@ -351,7 +353,22 @@ s32 func_0010E1B8(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E210);
+s32 func_0010E210(void)
+{
+    s32 p0;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+
+    p0 = func_0010D650(0);
+    x = (f32)(u32)func_0010D650(1);
+    y = (f32)(u32)func_0010D650(3);
+    z = (f32)(u32)func_0010D650(2);
+    w = (f32)(u32)func_0010D650(4);
+    evtSetDrawVectorTarget(p0, x, y, z, w);
+    return 1;
+}
 
 s32 func_0010E348(void)
 {
@@ -519,7 +536,40 @@ s32 func_0010E7F0(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E818);
+s32 func_0010E818(void)
+{
+    s32 p0;
+    s32 mode;
+    s32 sel;
+    f32 f1;
+    f32 f2;
+    f32 f3;
+    f32 f4;
+    f32 f5;
+
+    mode = func_0010D650(6);
+    switch (mode)
+    {
+    case 1:
+        sel = 0x48;
+        break;
+    case 2:
+        sel = 0x42;
+        break;
+    case 0:
+    default:
+        sel = 0x44;
+        break;
+    }
+    p0 = func_0010D650(0);
+    f1 = bfWaitReadArgFloat(1);
+    f2 = bfWaitReadArgFloat(2);
+    f3 = bfWaitReadArgFloat(3);
+    f4 = bfWaitReadArgFloat(4);
+    f5 = bfWaitReadArgFloat(5);
+    kwlnDrawSetD30Clamped(p0, f1, f2, f3, f4, f5, sel);
+    return 1;
+}
 
 s32 func_0010E900(void)
 {

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "scr.h"
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
+s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
 typedef struct KwlnTask KwlnTask;
 f32 bfWaitReadArgFloat(s32 idx);
@@ -341,7 +342,22 @@ s32 func_0010DF90(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DFE8);
+s32 func_0010DFE8(void)
+{
+    s32 p0;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+
+    p0 = func_0010D428(0);
+    x = (f32)(u32)func_0010D428(1);
+    y = (f32)(u32)func_0010D428(3);
+    z = (f32)(u32)func_0010D428(2);
+    w = (f32)(u32)func_0010D428(4);
+    evtUnk8360SetVec(p0, x, y, z, w);
+    return 1;
+}
 
 s32 func_0010E120(void)
 {
@@ -509,7 +525,40 @@ s32 func_0010E5C8(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E5F0);
+s32 func_0010E5F0(void)
+{
+    s32 p0;
+    s32 mode;
+    s32 sel;
+    f32 f1;
+    f32 f2;
+    f32 f3;
+    f32 f4;
+    f32 f5;
+
+    mode = func_0010D428(6);
+    switch (mode)
+    {
+    case 1:
+        sel = 0x48;
+        break;
+    case 2:
+        sel = 0x42;
+        break;
+    case 0:
+    default:
+        sel = 0x44;
+        break;
+    }
+    p0 = func_0010D428(0);
+    f1 = bfWaitReadArgFloat(1);
+    f2 = bfWaitReadArgFloat(2);
+    f3 = bfWaitReadArgFloat(3);
+    f4 = bfWaitReadArgFloat(4);
+    f5 = bfWaitReadArgFloat(5);
+    kwlnDrawSetD30Clamped(p0, f1, f2, f3, f4, f5, sel);
+    return 1;
+}
 
 s32 func_0010E6D8(void)
 {
