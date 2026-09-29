@@ -4160,7 +4160,39 @@ u8 *func_00181538(u8 *work) {
     return copy;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181650);
+void func_00181650(u8 *work) {
+    u32 i = 0;
+    u32 count = *(u32 *)(work + 0x58);
+    u32 *entry = *(u32 **)(work + 0x164);
+    u32 *list;
+    u32 *p;
+
+    if (count != 0) {
+        do {
+            u32 handle = *entry;
+            entry += 6;
+            i++;
+            effPCPThunderFree3(handle);
+        } while (i < count);
+    }
+    list = *(u32 **)(work + 0x174);
+    count = count * 4;
+    if (list != NULL) {
+        p = list;
+        i = 0;
+        if (count != 0) {
+            do {
+                u32 handle = *p++;
+                if (handle != 0) {
+                    func_001629F0(handle);
+                }
+                i++;
+            } while (i < count);
+        }
+        func_002D0918(*(u32 *)(work + 0x178));
+    }
+    func_002D0918(*(u32 *)(work + 0x17C));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181708);
 
@@ -4441,7 +4473,57 @@ void effPcpEventBatchRelease(EffPCPEventGroup *work) {
     func_002D0918(work->handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001839D0);
+typedef struct EffPCPSpawnSlot {
+    u8 pad00[4];
+    u32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} EffPCPSpawnSlot;
+
+typedef struct EffPCPSpawnRange {
+    u8 pad00[0x54];
+    s32 count;
+    u8 pad58[0x10];
+    f32 unk68;
+    f32 unk6C;
+    u8 pad70[4];
+    f32 unk74;
+    f32 unk78;
+    u8 pad7C[4];
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    f32 unk8C;
+    f32 unk90;
+    EffPCPSpawnSlot *slots;
+    u8 pad98[8];
+    f32 scale;
+} EffPCPSpawnRange;
+
+/* Randomises spawn slot `index` inside the ranges held by the work. */
+void func_001839D0(EffPCPSpawnRange *work, s32 index) {
+    EffPCPSpawnSlot *slot;
+    f32 spread;
+    f32 scale;
+
+    slot = &work->slots[index];
+    scale = work->scale;
+    slot->unk04 = 0;
+    slot->unk08 = -work->unk90 * func_002E8398(D_0034DF38);
+    spread = work->unk78;
+    slot->unk0C = work->unk74 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
+    slot->unk10 = func_002E8398(D_0034DF38) * (3.14159265f * 2.0f);
+    spread = work->unk6C;
+    slot->unk14 = work->unk68 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
+    spread = work->unk88;
+    slot->unk18 = work->unk80 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread)) * scale;
+    spread = work->unk8C;
+    slot->unk1C = (work->unk84 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread)) * scale - slot->unk18) / (f32)work->count;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183B20);
 
@@ -4456,6 +4538,29 @@ void func_00183DB0(EffPCPWork *work, f32 val) {
 void func_00183DB8(EffPCPWork *work, u32 val) {
     work->unkA4 = val;
 }
+
+typedef struct {
+    u8 pad00[0x10];
+    u8 unk10;
+    u8 pad11[3];
+    u32 unk14;
+    u32 unk18;
+    void *event;
+} EffPCPEventEntry32;
+
+typedef struct {
+    u8 pad00[0x18];
+    f32 unk18;
+    EffPCPEventEntry32 *entries;
+    u32 handle;
+    EffPCPEventOwner *owner;
+    u32 resource;
+    f32 scale;
+    u32 unk30;
+    u32 unk34;
+    u32 count;
+    u32 color;
+} EffPCPEventWork32;
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183DC0);
 
@@ -4472,22 +4577,15 @@ void func_00183FD0(void *args) {
     func_00183EE0(param0, param1, param2);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184038);
+EffPCPEventWork32 *func_00184038(EffPCPEventWork32 *src) {
+    EffPCPEventWork32 *work;
 
-typedef struct {
-    u8 pad00[0x1C];
-    void *event;
-} EffPCPEventEntry32;
-
-typedef struct {
-    u8 pad00[0x1C];
-    EffPCPEventEntry32 *entries;
-    u32 handle;
-    EffPCPEventOwner *owner;
-    u32 resource;
-    u8 pad2C[0xC];
-    u32 count;
-} EffPCPEventWork32;
+    work = func_00183EE0(src, 0, 0);
+    work->resource = effParamWorkDuplicate(src->resource);
+    work->owner = src->owner;
+    func_00183DC0(work);
+    return work;
+}
 
 void effDestroyParticleEvents(EffPCPEventWork32 *work) {
     u32 i;
