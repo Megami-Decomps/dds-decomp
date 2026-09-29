@@ -44,7 +44,7 @@ extern u8 D_00411078[];
 
 extern void func_00100C28(void);
 
-extern s32 kwlnTaskIsRegistered(void* target);
+extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
 
@@ -252,10 +252,10 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101740);
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101820);
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 kwlnTaskIsRegistered(void* target)
+s32 kwlnTaskIsRegistered(KwlnTask* target)
 {
     s32 idx;
-    void* node;
+    KwlnTask* node;
     node = 0;
     idx = 0;
     for (; idx < 3; idx++)
@@ -278,31 +278,31 @@ s32 kwlnTaskIsRegistered(void* target)
             {
                 return 1;
             }
-            node = *(void**)((u8*)node + 0x3C);
+            node = node->listNext;
         }
     }
     return 0;
 }
 
-u32 func_00101940(void* task)
+u32 func_00101940(KwlnTask* task)
 {
-    return *(u32*)((u8*)task + 0x24);
+    return task->unk24;
 }
 
 /* Persona 4 kwlnTaskGetTimer @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
-u32 kwlnTaskGetTimer(void* task)
+u32 kwlnTaskGetTimer(KwlnTask* task)
 {
-    return *(u32*)((u8*)task + 0x28);
+    return task->timer;
 }
 
-void func_00101950(void* task, u32 value)
+void func_00101950(KwlnTask* task, u32 value)
 {
-    *(u32*)((u8*)task + 0x38) = value;
+    task->unk38 = value;
 }
 
-u32 func_00101958(void* task)
+u32 func_00101958(KwlnTask* task)
 {
-    return *(u32*)((u8*)task + 0x38);
+    return task->unk38;
 }
 
 void func_00101960(void) {

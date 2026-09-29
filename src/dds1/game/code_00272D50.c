@@ -118,33 +118,33 @@ typedef struct StaffItemContext {
 /* Use a field item: resolve its direct effect (or field-use skill) against the
  * active unit row; on success consume one from the inventory and refresh the
  * party panels. Returns 1 when the item was consumed. */
-s32 func_00273750(s32 item, s32 context) {
-    s32 panel = context + 0x15C;
-    s32 unit = D_003BAA00 + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
-    s32 result = battleItemApplyDirectEffect(panel, item & 0xFFFF, unit, unit);
+s32 func_00273750(s32 itemId, s32 context) {
+    s32 partyPanel = context + 0x15C;
+    s32 targetUnit = D_003BAA00 + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
+    s32 result = battleItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
         if (result == 2) {
             return 0;
         }
-        if (skillApplyFieldUseEffect(panel, func_0011A568(item) & 0xFFFF, unit, unit) == 0) {
+        if (skillApplyFieldUseEffect(partyPanel, func_0011A568(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
             return 0;
         }
     }
-    func_00119900(item, -1);
+    func_00119900(itemId, -1);
     initPartyPanelSlots(context + 0x7EC);
-    menuUpdateHandleStates(panel);
-    func_00280048(panel);
+    menuUpdateHandleStates(partyPanel);
+    func_00280048(partyPanel);
     return 1;
 }
 
 void func_00273838(s32 selection, s32 context) {
     StaffWindowResources *resources;
-    s32 active;
+    s32 consumed;
 
     resources = ((StaffDisplayContext *)context)->resources;
-    active = func_00273750(selection, context);
-    if (active != 0) {
+    consumed = func_00273750(selection, context);
+    if (consumed != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->firstWindow + 0x14) + 0x1c) + 0x60) =
                   (u32)*(u8 *)(selection + D_003BAA00 + 0x12a0);
         resources->selection = selection;

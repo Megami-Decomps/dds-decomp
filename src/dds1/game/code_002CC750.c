@@ -102,9 +102,9 @@ typedef struct Entry28H {
 /* Copy source for itfCopyColorFields (layout inferred from field accesses). */
 typedef struct CfSrc {
     u8 pad_0x00[0x04]; // 0x00
-    u32 x04;           // 0x04
+    u32 rgb;           // 0x04
     u8 pad_0x08[0x1C]; // 0x08
-    u32 x24;           // 0x24
+    u32 alpha;         // 0x24
     u32 x28;           // 0x28
     u8 pad_0x2C[0x10]; // 0x2C
     float f3C;         // 0x3C
@@ -759,9 +759,9 @@ void func_002CF3F0(s32 arg0, u32 arg1) {
 }
 
 void itfCopyColorFields(RgbAlpha *dst, CfSrc *src) {
-    dst->rgb = src->x04;
+    dst->rgb = src->rgb;
     dst->f50 = src->f3C;
-    dst->alpha = src->x24;
+    dst->alpha = src->alpha;
     dst->x3C = src->x28;
 }
 

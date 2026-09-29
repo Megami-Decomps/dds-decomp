@@ -1,6 +1,9 @@
 #include "common.h"
 #include "kwln.h"
 
+/* Low four bits encode the scheduler list/state; upper bits are independent flags. */
+#define KWLN_TASK_STATE_MASK 0xF
+
 extern void func_001006E0(KwlnTask* task);
 
 extern void func_00100858(KwlnTask* task);
@@ -70,7 +73,7 @@ extern u8 D_0039DEF8[];
 void kwlnTaskActivate(KwlnTask* task)
 {
     func_001006E0(task);
-    task->flags = (task->flags & ~0xF) | 2;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
     func_00100858(task);
     task->unk24 = 0;
     task->timer = 0;
@@ -113,7 +116,7 @@ void func_00100E68(KwlnTask* task)
     if (task->destroy != 0) {
         task->destroy(task);
     }
-    task->flags &= ~0xF;
+    task->flags &= ~KWLN_TASK_STATE_MASK;
     func_00101B08(task);
     func_002CFF98(task);
 }
@@ -122,7 +125,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
 {
     u32 state;
 
-    state = task->flags & 0xF;
+    state = task->flags & KWLN_TASK_STATE_MASK;
     if (state >= 3) {
         return;
     }
@@ -130,7 +133,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
         return;
     }
     func_001006E0(task);
-    task->flags = (task->flags & ~0xF) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
     func_00100858(task);
     if (task->unk2E == 0) {
         func_00100E68(task);
@@ -159,9 +162,9 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100FC8);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101060);
 
-void* kwlnTaskGetStateList(u32 arg0)
+void* kwlnTaskGetStateList(u32 state)
 {
-    switch (arg0 & 0xF) {
+    switch (state & KWLN_TASK_STATE_MASK) {
     case 1:
         return D_003BA808;
     case 2:
@@ -228,24 +231,24 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
 void func_00101790(KwlnTask* task)
 {
-    if ((task->flags & 0xF) != 2) {
+    if ((task->flags & KWLN_TASK_STATE_MASK) != 2) {
         return;
     }
     func_001006E0(task);
-    task->flags = (task->flags & ~0xF) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
     func_00100858(task);
 }
 
-void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 arg1)
+void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
 {
     u32 state;
 
-    state = task->flags & 0xF;
+    state = task->flags & KWLN_TASK_STATE_MASK;
     if (state == 0) {
         return;
     }
     if (state < 4) {
-        task->unk2E = arg1;
+        task->unk2E = delayTicks;
     }
 }
 
@@ -256,7 +259,7 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
     if (kwlnTaskIsRegistered(task) == 0) {
         return 0;
     }
-    state = task->flags & 0xF;
+    state = task->flags & KWLN_TASK_STATE_MASK;
     return (state < 4) ? state : 0;
 }
 
