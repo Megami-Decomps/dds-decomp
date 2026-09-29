@@ -289,6 +289,10 @@ ee assembler reproduces the retail rule without changing other code, so
 `tools/as_coproc_delay.py` applies it to cc1 output before `as` (in the build
 and in `tools/cc.sh`). It changes nothing that already matched.
 
+The same holds after `cvt.w.s`/`trunc.w.s` (no `cvt.w.s $fN; jr; swc1 $fN` in
+either retail ELF), and retail never moves the closing `addu` of an indexed
+`la $rd,sym($rs)` into a following `jr`'s slot; the pre-pass handles both.
+
 ## Not allowed
 
 These are fakes, and check_unit reports them as `TRICK`:

@@ -736,10 +736,39 @@ typedef struct EffPCPCrossWork {
     u32 state[4][3];  /* 0xAC */
 } EffPCPCrossWork; /* 0xDC */
 
-extern void func_00177CF0(void *, s32, s32);
 extern void func_002DD708(f32 angle);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00177CF0);
+/* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
+void func_00177CF0(EffPCPCrossWork *work, u32 i, u32 j) {
+    u128 mtx[4];
+    f32 angle;
+
+    mdlAddEntryPlain(effParamWorkGetData(work->handle[i][j]), 0, 0);
+    angle = (f32)j * -1.0471974f;
+    if (i == 0) {
+        func_002DD688(angle);
+    } else if (i == 1) {
+        func_002DD688(-angle);
+    } else if (i == 2) {
+        func_002DD708(-angle);
+    } else {
+        func_002DD708(angle);
+    }
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 0x10(%0)\n"
+        "sqc2 vf30, 0x20(%0)\n"
+        "sqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(mtx) : "memory");
+    effParamWorkCallback2(work->handle[i][j], mtx);
+    if ((j + 1) & 1) {
+        work->state[i][j] = 0;
+    } else {
+        work->state[i][j] = 5;
+    }
+}
 
 EffPCPCrossWork *effCrossEffectCreateFromTable(void *src) {
     EffPCPCrossWork *work = func_002CFEB8(0xDC);
@@ -1893,7 +1922,54 @@ void *func_0017C5A8(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017C5E0);
+typedef struct EffPCPFadeTarget {
+    u8 pad00[0x1C];
+    f32 unk1C;
+    f32 unk20;
+} EffPCPFadeTarget;
+
+typedef struct EffPCPFadeWork {
+    u8 pad00[0x14];
+    u32 unk14;
+    u32 frame;
+    u32 handle;
+} EffPCPFadeWork;
+
+extern void func_00163518(u32 handle, u32 value);
+extern void func_00163508(u32 handle, void *work);
+extern void func_00163CD0(u32 handle);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+
+void func_0017C5E0(EffPCPFadeWork *work) {
+    EffPCPFadeTarget *target;
+    f32 phase;
+    f32 value;
+    u32 handle;
+
+    if (work->frame < 0x1F) {
+        target = func_00163540(work->handle);
+        phase = (f32)work->frame / 30.0f;
+        value = phase * 150.0f + 100.0f;
+        target->unk1C = value;
+        target->unk20 = value;
+    } else if (work->frame - 0x2D < 0x10) {
+        target = func_00163540(work->handle);
+        phase = (f32)(work->frame - 0x2D) / 15.0f;
+        value = phase * 150.0f + 250.0f;
+        target->unk1C = value;
+        target->unk20 = value;
+    }
+    if (work->frame >= 0x2D) {
+        phase = (f32)(work->frame - 0x2D) / 35.0f;
+        handle = effBlendColor(work->unk14, 0, phase);
+    } else {
+        handle = work->unk14;
+    }
+    func_00163518(work->handle, handle);
+    func_00163508(work->handle, work);
+    func_00163CD0(work->handle);
+    work->frame++;
+}
 
 void func_0017C798(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);

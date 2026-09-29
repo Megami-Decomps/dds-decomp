@@ -450,7 +450,9 @@ void fldInitDisplayObjects(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldGetDisplayTableRow);
+u32 *fldGetDisplayTableRow(void) {
+    return &D_00324B48[D_003BACD0 * 8];
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129000);
 

@@ -534,7 +534,32 @@ u32 func_001422B8(void) {
     return D_003BAE80;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001422C0);
+extern s32 func_00121818(s32, s32);
+extern s32 func_00121870(s32, s32);
+extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern s32 strlen(const char *);
+extern char D_0033F06C[][0x1C], D_0034286C[][0x1C], D_0034606C[][0x1C];
+extern char D_0033EC90[][0x18];
+extern s16 D_003D43B0[], D_003D4408[], D_003D4460[];
+extern s16 D_003BD7D0;
+void func_001422C0(s32 arg0) {
+    s32 i;
+
+    for (i = 0; i < 41; i++) {
+        D_003D43B0[i] = strlen(D_0033F06C[func_00121818(arg0, i)]);
+    }
+    for (i = 0; i < 24; i++) {
+        D_003D4460[i] = strlen(D_0034286C[func_00121870(arg0, i)]);
+    }
+    for (i = 0; i < 41; i++) {
+        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(arg0, i)]);
+    }
+    i = 0;
+    if (D_0032E3C0[0] < 100) {
+        i = D_0032E3C0[0];
+    }
+    D_003BD7D0 = strlen(D_0033EC90[i]);
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142408);
 

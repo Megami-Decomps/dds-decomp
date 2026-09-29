@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Emulate retail ee-as delay-slot filling after mtc1.
+"""Emulate retail ee-as delay-slot filling after mtc1 (and cvt.w.s).
 
 Retail's assembler never moves an instruction that reads the FPR written by
-the immediately preceding `mtc1` into the delay slot of the following branch
+the immediately preceding `mtc1` (or `cvt.w.s`) into the delay slot of the
+following branch
 (DDS1 alone has hundreds of `mtc1 $r,$fN; cvt.s.w $fN,$fN; b; nop` sequences
 and no swapped form). The ee-gcc 2.96 assembler treats the move as
 interlocked and swaps it. No `as` option reproduces the retail rule (`-O0`,
@@ -19,6 +20,12 @@ import sys
 BRANCH = re.compile(
     r"\s+(b|bal|j|jal|jr|jalr|beq|bne|beqz|bnez|blez|bgtz|bltz|bgez|bltzal|bgezal|bc1t|bc1f)\s")
 MTC1 = re.compile(r"\s+mtc1\s+\$\w+,(\$f\d+)\s*$")
+# Same rule after a float->int conversion: retail has no `cvt.w.s $fN; jr; swc1 $fN`
+# in DDS1 or DDS2 (45 and 59 sequences with a dependent instruction, all unfilled).
+CVTWS = re.compile(r"\s+(?:cvt|trunc)\.w\.s\s+(\$f\d+),")
+# `la $rd,sym($rs)` expands to lui/addiu/addu; retail (5 sequences in DDS1/DDS2)
+# never puts the closing addu in a following `jr`'s delay slot.
+LA_INDEXED = re.compile(r"\s+la\s+\$\w+,[^\s(]+\(\$\w+\)\s*$")
 
 
 def reads_fpr(line, fpr):
@@ -41,8 +48,12 @@ def main(src, dst):
             reorder = False
         elif directive == ".set\treorder":
             reorder = True
-        move = MTC1.match(lines[i - 1]) if reorder and 0 < i < len(lines) - 1 else None
-        if move and BRANCH.match(lines[i + 1]) and reads_fpr(line, move.group(1)):
+        move = None
+        if reorder and 0 < i < len(lines) - 1:
+            move = MTC1.match(lines[i - 1]) or CVTWS.match(lines[i - 1])
+        next_is_branch = reorder and i < len(lines) - 1 and BRANCH.match(lines[i + 1])
+        if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
+                next_is_branch and LA_INDEXED.match(line)):
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
             out.append(line)

@@ -607,7 +607,26 @@ void func_0028A388(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     func_00194920(temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A3D8);
+extern f32 D_003BC88C;
+extern f32 func_002E77F8(f32);
+extern s32 itfMesGetGlobalWindowValue(void);
+
+void func_0028A3D8(void) {
+    s32 angle;
+    f32 wave;
+
+    func_00108A80(0x56);
+    func_00108CB8(0);
+    D_003BC88C = D_003BC88C + 0.39999998f;
+    func_002E77F8(D_003BC88C);
+    angle = ((s32)D_0037D4D0[2] + 8) % 360;
+    D_0037D4D0[2] = angle;
+    wave = func_002E77F8((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
+    D_0037D4D0[3] = (s32)((wave + 1.0f) * 0.5f * 191.0f + 64.0f);
+    func_00108FA0(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_0037D4D0[3] << 24) | 0xAEC014,
+                  (D_0037D4D0[3] << 24) | 0xAEC014, (D_0037D4D0[3] << 24) | 0xAEC014,
+                  (D_0037D4D0[3] << 24) | 0xAEC014, itfMesGetGlobalWindowValue());
+}
 
 extern void func_00108A80(s32);
 extern void func_00108CB8(s32);

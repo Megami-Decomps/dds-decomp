@@ -3250,9 +3250,94 @@ u8 *func_002ABA38(u8 *config) {
     return (u8 *)node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002ABAA8);
+/* Ring fade tables of the ring effects: `segments + 1` entries of colors
+ * (4 words each) and radii (8 words each). The alpha fades in over the first
+ * fadeIn fraction of the entries and out from the fadeOut fraction; the table
+ * is then copied for every remaining layer. */
+typedef struct EffectFadeTable {
+    u8 pad00[0x24];
+    f32 *radii;
+    u32 *colors;
+} EffectFadeTable;
 
-extern void func_002ABAA8(u8 *, u8 *);
+typedef struct EffectFadeConfig {
+    u8 pad00[0x38];
+    u32 layers;
+    u8 pad3C[0x3C];
+    f32 fadeIn;
+    f32 fadeOut;
+    u8 pad80[0xC];
+    s32 segments;
+    f32 radius;
+} EffectFadeConfig;
+
+void func_002ABAA8(u8 *node, u8 *config) {
+    EffectFadeConfig *cfg = (EffectFadeConfig *)config;
+    EffectFadeTable *table;
+    u32 *colors;
+    f32 *radii;
+    u32 *colorsStart;
+    f32 *radiiStart;
+    u32 layers;
+    s32 segments;
+    s32 fadeInEnd;
+    s32 fadeOutStart;
+    u32 entries;
+    u32 words;
+    f32 radius;
+    f32 fadeIn;
+    f32 fadeOut;
+    f32 fade;
+    u32 alpha;
+    u32 color;
+    u32 i;
+
+    layers = cfg->layers;
+    if (layers == 0) {
+        return;
+    }
+    segments = cfg->segments;
+    entries = segments + 1;
+    words = entries * 4;
+    table = *(EffectFadeTable **)(node + 4);
+    colors = table->colors;
+    radii = table->radii;
+    colorsStart = colors;
+    radiiStart = radii;
+    fadeOut = cfg->fadeOut;
+    fadeIn = cfg->fadeIn;
+    fadeInEnd = (s32)(fadeIn * (f32)segments);
+    fadeOutStart = (s32)(fadeOut * (f32)segments);
+    radius = cfg->radius / 3.0f;
+    for (i = 0; i < entries; i++) {
+        if (i < fadeInEnd) {
+            fade = (f32)i / (f32)fadeInEnd;
+        } else {
+            fade = 1.0f;
+            if (fadeOutStart < i) {
+                fade = (f32)(segments - i) / (f32)(segments - fadeOutStart);
+            }
+        }
+        alpha = (u32)(fade * 128.0f);
+        color = (alpha << 24) | 0x808080;
+        colors[0] = 0x808080;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = 0x808080;
+        radii[0] = 0.0f;
+        radii[2] = radius;
+        radii[4] = radius * 2.0f;
+        radii[6] = radius * 3.0f;
+        colors += 4;
+        radii += 8;
+    }
+    for (i = 1; i < layers; i++) {
+        memcpy(colors, colorsStart, words * 4);
+        colors += words;
+        memcpy(radii, radiiStart, words * 8);
+        radii += words * 2;
+    }
+}
 extern u32 func_002AE350(u32, u32, u32);
 
 u8 *func_002ABCF0(u8 *config, u32 resource) {
@@ -3399,9 +3484,73 @@ u8 *func_002AC698(u8 *config) {
     return (u8 *)node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AC708);
+void func_002AC708(u8 *node, u8 *config) {
+    EffectFadeConfig *cfg = (EffectFadeConfig *)config;
+    EffectFadeTable *table;
+    u32 *colors;
+    f32 *radii;
+    u32 *colorsStart;
+    f32 *radiiStart;
+    u32 layers;
+    s32 segments;
+    s32 fadeInEnd;
+    s32 fadeOutStart;
+    u32 entries;
+    u32 words;
+    f32 radius;
+    f32 fadeIn;
+    f32 fadeOut;
+    f32 fade;
+    u32 alpha;
+    u32 color;
+    u32 i;
 
-extern void func_002AC708(u8 *, u8 *);
+    layers = cfg->layers;
+    if (layers == 0) {
+        return;
+    }
+    segments = cfg->segments;
+    entries = segments + 1;
+    words = entries * 4;
+    table = *(EffectFadeTable **)(node + 4);
+    colors = table->colors;
+    radii = table->radii;
+    colorsStart = colors;
+    radiiStart = radii;
+    fadeOut = cfg->fadeOut;
+    fadeIn = cfg->fadeIn;
+    fadeInEnd = (s32)(fadeIn * (f32)segments);
+    fadeOutStart = (s32)(fadeOut * (f32)segments);
+    radius = cfg->radius / 3.0f;
+    for (i = 0; i < entries; i++) {
+        if (i < fadeInEnd) {
+            fade = (f32)i / (f32)fadeInEnd;
+        } else {
+            fade = 1.0f;
+            if (fadeOutStart < i) {
+                fade = (f32)(segments - i) / (f32)(segments - fadeOutStart);
+            }
+        }
+        alpha = (u32)(fade * 128.0f);
+        color = (alpha << 24) | 0x808080;
+        colors[0] = 0x808080;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = 0x808080;
+        radii[0] = 0.0f;
+        radii[2] = radius;
+        radii[4] = radius * 2.0f;
+        radii[6] = radius * 3.0f;
+        colors += 4;
+        radii += 8;
+    }
+    for (i = 1; i < layers; i++) {
+        memcpy(colors, colorsStart, words * 4);
+        colors += words;
+        memcpy(radii, radiiStart, words * 8);
+        radii += words * 2;
+    }
+}
 
 u8 *func_002AC950(u8 *config, u32 resource) {
     u8 *node = func_002AC698(config);
@@ -3544,9 +3693,73 @@ u8 *func_002AD308(u8 *config) {
     return (u8 *)node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AD380);
+void func_002AD380(u8 *node, u8 *config) {
+    EffectFadeConfig *cfg = (EffectFadeConfig *)config;
+    EffectFadeTable *table;
+    u32 *colors;
+    f32 *radii;
+    u32 *colorsStart;
+    f32 *radiiStart;
+    u32 layers;
+    s32 segments;
+    s32 fadeInEnd;
+    s32 fadeOutStart;
+    u32 entries;
+    u32 words;
+    f32 radius;
+    f32 fadeIn;
+    f32 fadeOut;
+    f32 fade;
+    u32 alpha;
+    u32 color;
+    u32 i;
 
-extern void func_002AD380(u8 *, u8 *);
+    layers = cfg->layers;
+    if (layers == 0) {
+        return;
+    }
+    segments = cfg->segments;
+    entries = segments + 1;
+    words = entries * 4;
+    table = *(EffectFadeTable **)(node + 4);
+    colors = table->colors;
+    radii = table->radii;
+    colorsStart = colors;
+    radiiStart = radii;
+    fadeOut = cfg->fadeOut;
+    fadeIn = cfg->fadeIn;
+    fadeInEnd = (s32)(fadeIn * (f32)segments);
+    fadeOutStart = (s32)(fadeOut * (f32)segments);
+    radius = cfg->radius / 3.0f;
+    for (i = 0; i < entries; i++) {
+        if (i < fadeInEnd) {
+            fade = (f32)i / (f32)fadeInEnd;
+        } else {
+            fade = 1.0f;
+            if (fadeOutStart < i) {
+                fade = (f32)(segments - i) / (f32)(segments - fadeOutStart);
+            }
+        }
+        alpha = (u32)(fade * 128.0f);
+        color = (alpha << 24) | 0x808080;
+        colors[0] = 0x808080;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = 0x808080;
+        radii[0] = 0.0f;
+        radii[2] = radius;
+        radii[4] = radius * 2.0f;
+        radii[6] = radius * 3.0f;
+        colors += 4;
+        radii += 8;
+    }
+    for (i = 1; i < layers; i++) {
+        memcpy(colors, colorsStart, words * 4);
+        colors += words;
+        memcpy(radii, radiiStart, words * 8);
+        radii += words * 2;
+    }
+}
 
 u8 *func_002AD5C8(u8 *config, u32 resource) {
     u8 *node = func_002AD308(config);
@@ -4597,7 +4810,23 @@ void func_002B41D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B41F0);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B4270);
+extern f32 D_003BC9A8;
+extern void func_001DC2A0(u8 *, f32);
+
+/* Eases D_003BC9A8 (a rotation in radians) along the span's [start, end] degrees. */
+void func_002B4270(u8 *work) {
+    u8 *state = (u8 *)func_001A17F0();
+    f32 *span = *(f32 **)(work + 0x38);
+    u32 count = *(u32 *)span;
+    f32 value;
+
+    if (count != 0 && count >= *(u32 *)(work + 0x28)) {
+        f32 t = (f32)*(s32 *)(work + 0x28) / (f32)count;
+        value = ((span[2] - span[1]) * t + span[1]) * 0.017453293f;
+        func_001DC2A0(state + 0x70, value);
+        D_003BC9A8 = value;
+    }
+}
 
 
 extern EffectResourceSizeEntry D_0037EEF8[];
