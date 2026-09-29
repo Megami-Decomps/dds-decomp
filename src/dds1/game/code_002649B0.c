@@ -72,9 +72,35 @@ void func_002650C0(void) {
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002650C8);
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_00265220);
+extern char D_003BC568[];
+extern void func_003014F0(char *, char *, s32);
+extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
+extern s32 func_00195C88(u32);
+extern void func_00195450(u32, s32, s32);
+extern void func_001958A0(u32, s32, s32);
+extern void func_00194920(u32);
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_002652E0);
+void func_00265220(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
+    char text[32];
+    u32 handle;
+
+    func_003014F0(text, D_003BC568, *(s32 *)(info + 0x10));
+    handle = func_001979C8(x, y, z, w, text, 0);
+    func_00195450(handle, x + ((0xBE - func_00195C88(handle)) << 4), y);
+    func_001958A0(handle, 1, color);
+    func_00194920(handle);
+}
+
+void func_002652E0(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
+    char text[32];
+    u32 handle;
+
+    func_003014F0(text, D_003BC568, *(s32 *)(info + 0xC));
+    handle = func_001979C8(x, y, z, w, text, 0);
+    func_00195450(handle, x + ((0xBE - func_00195C88(handle)) << 4), y);
+    func_001958A0(handle, 1, color);
+    func_00194920(handle);
+}
 
 INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
 

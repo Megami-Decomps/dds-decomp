@@ -101,23 +101,137 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDEF8);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDF98);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE088);
+typedef struct BtlObjLink {
+    void *owner;
+    s32 arg;
+    s32 unk8;
+} BtlObjLink;
+
+typedef struct BtlEffObj {
+    u8 kind;          /* 0x00 */
+    u8 pad01[0xF];
+    u8 unk10;         /* 0x10 */
+    u8 pad11[0xF];
+    s16 id;           /* 0x20 */
+    u8 pad22[2];
+    u16 flags;        /* 0x24 */
+    u8 pad26[0x1A];
+    u64 ownerData;    /* 0x40 */
+    u8 pad48[4];
+    void (*update)(); /* 0x4C */
+} BtlEffObj;
+
+extern BtlEffObj *func_001D4748(s32);
+extern BtlObjLink *func_001D47D8(BtlEffObj *);
+
+extern void func_001FDF98();
+
+BtlEffObj *func_001FE088(u8 *owner, s32 arg) {
+    BtlEffObj *obj = func_001D4748(0xC);
+    BtlObjLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x40;
+    obj->ownerData = *(u64 *)(owner + 0x108);
+    obj->update = func_001FDF98;
+    link = func_001D47D8(obj);
+    link->owner = owner;
+    link->arg = arg;
+    link->unk8 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE118);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE198);
+extern void func_001FE118();
+
+BtlEffObj *func_001FE198(u8 *owner, s32 arg) {
+    BtlEffObj *obj = func_001D4748(0xC);
+    BtlObjLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x41;
+    obj->ownerData = *(u64 *)(owner + 0x108);
+    obj->update = func_001FE118;
+    link = func_001D47D8(obj);
+    link->owner = owner;
+    link->arg = arg;
+    link->unk8 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE228);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE320);
+extern void func_001FE228();
+
+BtlEffObj *func_001FE320(u8 *owner, s32 arg) {
+    BtlEffObj *obj = func_001D4748(0xC);
+    BtlObjLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x42;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->ownerData = *(u64 *)(owner + 0x108);
+    }
+    obj->update = func_001FE228;
+    link = func_001D47D8(obj);
+    link->owner = owner;
+    link->arg = arg;
+    link->unk8 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE3B8);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE468);
+extern void func_001FE3B8();
+
+BtlEffObj *func_001FE468(u8 *owner, s32 arg) {
+    BtlEffObj *obj = func_001D4748(0xC);
+    BtlObjLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x3C;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->ownerData = *(u64 *)(owner + 0x108);
+    }
+    obj->update = func_001FE3B8;
+    link = func_001D47D8(obj);
+    link->owner = owner;
+    link->arg = arg;
+    link->unk8 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE500);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE5C0);
+extern void func_001FE500();
+
+BtlEffObj *func_001FE5C0(u8 *owner, s32 arg) {
+    BtlEffObj *obj = func_001D4748(0xC);
+    BtlObjLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x3D;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->ownerData = *(u64 *)(owner + 0x108);
+    }
+    obj->update = func_001FE500;
+    link = func_001D47D8(obj);
+    link->owner = owner;
+    link->arg = arg;
+    link->unk8 = 0;
+    return obj;
+}
 
 u32 func_001FE658(void) {
     return 1;
@@ -127,7 +241,24 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE660);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE6F0);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE790);
+extern void func_001FE6F0();
+
+BtlEffObj *func_001FE790(u8 *owner, s32 arg) {
+    BtlEffObj *obj = func_001D4748(0xC);
+    BtlObjLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x3F;
+    obj->ownerData = *(u64 *)(owner + 0x108);
+    obj->update = func_001FE6F0;
+    link = func_001D47D8(obj);
+    link->owner = owner;
+    link->arg = arg;
+    link->unk8 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE820);
 

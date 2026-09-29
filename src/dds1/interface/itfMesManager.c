@@ -441,17 +441,73 @@ void func_0019C060(s32 window, u32 value) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C080);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C0E8);
+void func_0019C0E8(s32 window, s32 x, s32 y) {
+    ItfMesBlk14 *blk = &D_003D6ECC[window].mes->blk14;
+    s32 delta[2];
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C178);
+    delta[0] = x - blk->unk0;
+    delta[1] = y - blk->unk4;
+    if (delta[0] == 0 && delta[1] == 0) {
+        return;
+    }
+    func_0019D8E8((ItfMesNode *)blk->unk8, delta[0], delta[1]);
+    blk->unk0 = x;
+    blk->unk4 = y;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C1E8);
+extern void func_0019D8E8(ItfMesNode *, s32, s32);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C278);
+void func_0019C178(s32 window, s32 dx, s32 dy) {
+    ItfMesBlk14 *blk = &D_003D6ECC[window].mes->blk14;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C2E8);
+    func_0019D8E8((ItfMesNode *)blk->unk8, dx, dy);
+    blk->unk0 += dx;
+    blk->unk4 += dy;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C378);
+void func_0019C1E8(s32 window, s32 x, s32 y) {
+    ItfMesBlk24 *blk = &D_003D6ECC[window].mes->blk24;
+    s32 delta[2];
+
+    delta[0] = x - blk->unk0;
+    delta[1] = y - *(u32 *)blk->unk4;
+    if (delta[0] == 0 && delta[1] == 0) {
+        return;
+    }
+    func_0019D8E8((ItfMesNode *)blk->unkC, delta[0], delta[1]);
+    blk->unk0 = x;
+    *(u32 *)blk->unk4 = y;
+}
+
+void func_0019C278(s32 window, s32 dx, s32 dy) {
+    ItfMesBlk24 *blk = &D_003D6ECC[window].mes->blk24;
+
+    func_0019D8E8((ItfMesNode *)blk->unkC, dx, dy);
+    blk->unk0 += dx;
+    *(u32 *)blk->unk4 += dy;
+}
+
+void func_0019C2E8(s32 window, s32 x, s32 y) {
+    ItfMesBlk40 *blk = &D_003D6ECC[window].mes->blk40;
+    s32 delta[2];
+
+    delta[0] = x - blk->unk0;
+    delta[1] = y - blk->unk4;
+    if (delta[0] == 0 && delta[1] == 0) {
+        return;
+    }
+    func_0019D8E8((ItfMesNode *)blk->unk8, delta[0], delta[1]);
+    blk->unk0 = x;
+    blk->unk4 = y;
+}
+
+void func_0019C378(s32 window, s32 dx, s32 dy) {
+    ItfMesBlk40 *blk = &D_003D6ECC[window].mes->blk40;
+
+    func_0019D8E8((ItfMesNode *)blk->unk8, dx, dy);
+    blk->unk0 += dx;
+    blk->unk4 += dy;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C3E8);
 
