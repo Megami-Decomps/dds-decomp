@@ -112,7 +112,26 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A140);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A468);
+/* Collect up to max pointers to active frontline party rows into out. */
+void func_0027A468(s32 **out, s32 max) {
+    s32 count = 0;
+    s32 i = 0;
+
+    while (count < max) {
+        s32 entry = D_003BAA00 + i * 0x1A4 + 0xA60;
+
+        *out = 0;
+        if ((*(u16 *)entry & 1) != 0 && (*(u16 *)entry & 2) != 0) {
+            *out = (s32 *)entry;
+            out++;
+            count++;
+        }
+        i++;
+        if (i >= 5) {
+            break;
+        }
+    }
+}
 
 s32 mnuHasAvailableSlotResource(s32 id) {
     MenuSlot *entry;

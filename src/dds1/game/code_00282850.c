@@ -1034,7 +1034,28 @@ s32 func_00286A00(s32 arg0) {
     return arg0 < 0x7f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00286A18);
+u16 func_00286AD0(s32 arg0);
+
+/* Count a bullet item in the active party: the inventory byte plus one for each
+ * of the five party rows that has it equipped. */
+s32 func_00286A18(s32 arg0) {
+    s32 count;
+    s32 i;
+
+    if (arg0 < 0xA0) {
+        return 0;
+    }
+    if (arg0 >= 0xBF) {
+        return 0;
+    }
+    count = *(u8 *)(arg0 + D_003BAA00 + 0x12A0);
+    for (i = 0; i < 5; i++) {
+        if (arg0 == func_00286AD0(D_003BAA00 + i * 0x1A4 + 0xA60)) {
+            count++;
+        }
+    }
+    return count;
+}
 
 u32 func_00286AC0(s32 arg0, u16 arg1) {
     *(u16 *)(arg0 + 0x52) = arg1;
