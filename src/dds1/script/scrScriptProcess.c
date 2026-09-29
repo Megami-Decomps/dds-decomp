@@ -4,10 +4,10 @@ extern ScrProcGlobals *D_003BAA00;
 
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-s32 func_0010C0C8();
+s32 bfTaskUpdate();
 s32 func_0010C070();
-s32 func_0010B7C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
-s32 func_0010BA18(s32 arg0, s32 arg1);
+s32 bfContextCreate(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+s32 bfParseFLW0(s32 arg0, s32 arg1);
 s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 {
     u32 buf[4];
@@ -20,7 +20,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
     {
         return 0;
     }
-    task = (ScrProcTask *)func_0010BA18(id, option);
+    task = (ScrProcTask *)bfParseFLW0(id, option);
     if (task != NULL)
     {
         task->scriptHandle = handle;
@@ -31,7 +31,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
     s32 taskId;
-    taskId = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, func_0010C0C8, func_0010C070, (s32)task);
+    taskId = kwlnTaskCreate(task->unkB4 + (task->unkC8 << 5), priority, 1, 1, bfTaskUpdate, func_0010C070, (s32)task);
     task->taskId = taskId;
     return taskId;
 }
@@ -59,22 +59,22 @@ s32 scrCreateProcessWithDefaultOption(s32 scriptId)
 
 void scrCreateTaskForProcessId(s32 priority, s32 taskId, s32 option)
 {
-    scrProcCreateTask(priority, func_0010BA18(taskId, option));
+    scrProcCreateTask(priority, bfParseFLW0(taskId, option));
 }
 
 s32 scrCreateTaskWithDefaultOption(s32 taskId)
 {
-    return func_0010BA18(taskId, 0);
+    return bfParseFLW0(taskId, 0);
 }
 
 s32 func_0010BCB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
 {
-    return scrProcCreateTask(a0, func_0010B7C0(a1, a2, a3, a4, a5, a6, a7, a8));
+    return scrProcCreateTask(a0, bfContextCreate(a1, a2, a3, a4, a5, a6, a7, a8));
 }
 
 s32 func_0010BD08(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6)
 {
-    return func_0010B7C0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0);
+    return bfContextCreate(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0);
 }
 
 extern void func_0010AC10(char *, u32);
@@ -107,7 +107,7 @@ INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE30);
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BED8);
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BF30);
+INCLUDE_ASM(const s32, "script/scrScriptProcess", bfFindScriptIndexByName);
 
 INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_0039E288);
 

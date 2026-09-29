@@ -131,7 +131,7 @@ typedef struct BtlVec3 {
     f32 x, y, z;
 } BtlVec3;
 
-extern f32 func_0010D4F0(s32);
+extern f32 bfWaitReadArgFloat(s32);
 
 extern s32 func_001A17F8(void *);
 extern s32 func_001A1838(void *);
@@ -1876,13 +1876,13 @@ extern s32 btlScheduleContextReset(void);
 u32 btlCmdCameraMove(void) {
     f32 pos[3];
     f32 target[4];
-    pos[0] = func_0010D4F0(0);
-    pos[1] = func_0010D4F0(1);
-    pos[2] = func_0010D4F0(2);
-    target[0] = func_0010D4F0(3);
-    target[1] = func_0010D4F0(4);
-    target[2] = func_0010D4F0(5);
-    target[3] = func_0010D4F0(6);
+    pos[0] = bfWaitReadArgFloat(0);
+    pos[1] = bfWaitReadArgFloat(1);
+    pos[2] = bfWaitReadArgFloat(2);
+    target[0] = bfWaitReadArgFloat(3);
+    target[1] = bfWaitReadArgFloat(4);
+    target[2] = bfWaitReadArgFloat(5);
+    target[3] = bfWaitReadArgFloat(6);
     btlStartTask(func_001D9718());
     btlStartTask(func_001D9780());
     btlStartTask(func_001DBAF0(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
@@ -1919,32 +1919,32 @@ extern f32 D_003D74E0[];
 extern f32 D_003D7500[];
 
 s32 func_001FA940(void) {
-    D_003D74E0[0] = func_0010D4F0(0);
-    D_003D74E0[1] = func_0010D4F0(1);
-    D_003D74E0[2] = func_0010D4F0(2);
-    D_003D7500[0] = func_0010D4F0(3);
-    D_003D7500[1] = func_0010D4F0(4);
-    D_003D7500[2] = func_0010D4F0(5);
-    D_003D7500[3] = func_0010D4F0(6);
+    D_003D74E0[0] = bfWaitReadArgFloat(0);
+    D_003D74E0[1] = bfWaitReadArgFloat(1);
+    D_003D74E0[2] = bfWaitReadArgFloat(2);
+    D_003D7500[0] = bfWaitReadArgFloat(3);
+    D_003D7500[1] = bfWaitReadArgFloat(4);
+    D_003D7500[2] = bfWaitReadArgFloat(5);
+    D_003D7500[3] = bfWaitReadArgFloat(6);
     return 1;
 }
 
 s32 func_001FA9C8(void) {
-    D_003D74E0[4] = func_0010D4F0(0);
-    D_003D74E0[5] = func_0010D4F0(1);
-    D_003D74E0[6] = func_0010D4F0(2);
-    D_003D7500[4] = func_0010D4F0(3);
-    D_003D7500[5] = func_0010D4F0(4);
-    D_003D7500[6] = func_0010D4F0(5);
-    D_003D7500[7] = func_0010D4F0(6);
+    D_003D74E0[4] = bfWaitReadArgFloat(0);
+    D_003D74E0[5] = bfWaitReadArgFloat(1);
+    D_003D74E0[6] = bfWaitReadArgFloat(2);
+    D_003D7500[4] = bfWaitReadArgFloat(3);
+    D_003D7500[5] = bfWaitReadArgFloat(4);
+    D_003D7500[6] = bfWaitReadArgFloat(5);
+    D_003D7500[7] = bfWaitReadArgFloat(6);
     return 1;
 }
 
 extern s32 func_001DBCB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 u32 btlCmdCameraMoveBlend(void) {
-    f32 timeA = func_0010D4F0(0);
-    f32 timeB = func_0010D4F0(1);
+    f32 timeA = bfWaitReadArgFloat(0);
+    f32 timeB = bfWaitReadArgFloat(1);
     btlStartTask(func_001D9718());
     btlStartTask(func_001D9780());
     btlStartTask(func_001DBCB0(0, D_003D74E0[0], D_003D74E0[1], D_003D74E0[2], D_003D7500[0], D_003D7500[1],

@@ -80,6 +80,10 @@
 0x0010AB90	evtUnkAB90Ensure	inferred	allocates D_003BA960 chain via 2E3E18/2E41B0/2E41A0 if null; parked on call arg-setup order
 0x0010B728	evtLinkWorkNode	inferred	Appends a work node to the doubly linked event list and increments its count.
 0x0010B768	evtUnlinkWorkNode	inferred	Unlinks a work node from the doubly linked event list and decrements its count.
+0x0010B728	evtUnkB728Link	inferred	splices node into D_003BA998 list with per-path tails and bumps D_003BA990
+0x0010B768	evtUnkB768Unlink	inferred	removes node from D_003BA994/998 list, clears links, decrements D_003BA990
+0x0010B7C0	bfContextCreate	inferred	legacy BFContext_Create: allocates and initialises a BF/FLW0 script context (0xF4)
+0x0010BA18	bfParseFLW0	inferred	legacy BF_ParseFLW0: validates the FLW0 magic and builds the script section tables
 0x0010BB88	scrProcCreateTask	inferred	wraps kwlnTaskCreate for a script-proc task; stores id at +0xE4
 0x0010BBE0	scrClearProcessGlobals	inferred	Clears both 256-element integer arrays of script process globals.
 0x0010BC18	scrCreateProcessTaskFromResource	inferred	Opens a script process from the supplied resource ID and option, then creates its scheduler task at the supplied priority.
@@ -88,9 +92,14 @@
 0x0010BCA0	scrCreateTaskWithDefaultOption	inferred	Calls func_0010BA18 with its second argument zero.
 0x0010C028	scrSetCurrentActor	inferred	Battle caller passes its actor into active script offset 0xF0; other callers clear it.
 0x0010C050	scrGetCurrentActor	inferred	Reads the active script actor pointer stored at offset 0xF0.
+0x0010BF30	bfFindScriptIndexByName	inferred	legacy BF_FindScriptIndexByName: searches the FLW0 script-name table for an exact name
+0x0010C0C8	bfTaskUpdate	inferred	legacy BFTask_Update: per-frame BF task step; returns 1 to continue, -1 to terminate
 0x0010C120	scrPushInteger	inferred	Writes integer stack type 0 and the supplied value at the current script stack index, then increments it.
+0x0010C150	bfStackPushFloat	inferred	legacy BFStack_PushFloat: pushes a float onto the BF evaluation stack
 0x0010C180	scrPushString	inferred	Writes string stack type 5 and the supplied value at the current script stack index, then increments it.
 0x0010C1B0	scrPushTypeFourValue	inferred	Writes stack type 4 and the supplied value at the current script stack index, then increments it.
+0x0010C1E0	bfStackPopInt	inferred	legacy BFStack_PopInt: pops the top BF stack value as an integer
+0x0010C2B8	bfStackPopFloat	inferred	legacy BFStack_PopFloat: pops the top BF stack value as a float
 0x0010C3A0	scrPushNextInstructionValue	inferred	Advances the script program counter, pushes the following instruction word, then advances again.
 0x0010C3F0	scrPushImmediateInteger	inferred	Pushes the current instruction's signed operand onto the script stack as an integer.
 0x0010C438	scrPushImmediateFloat	inferred	Advances past the opcode and pushes the following instruction's float operand.
@@ -104,9 +113,16 @@
 0x0010C6D8	scrStoreGlobalFloat	inferred	Pops a float and stores it at the instruction-indexed global float slot.
 0x0010C730	scrStoreLocalInteger	inferred	Pops an integer and stores it at the instruction-indexed local integer slot.
 0x0010C788	scrStoreLocalFloat	inferred	Pops a float and stores it at the instruction-indexed local float slot.
+0x0010C7F8	bfOpWaitDispatch	inferred	legacy BFOp_WaitDispatch: BF opcode 8 - dispatch the wait callback from g_BFWaitDispatchTable
 0x0010C8D8	scrJumpProcedure	inferred	Loads the program counter from the selected procedure address.
 0x0010C908	scrCallProcedure	inferred	Saves the current program counter and jumps to a procedure address.
 0x0010C978	scrJumpLabel	inferred	Loads the program counter from the selected label address.
+0x0010C9A8	bfOpBinaryEval	inferred	legacy BFOp_BinaryEval: binary-op dispatcher (add/sub/mul/div/or/and/ne/eq/lt/gt/le/ge)
+0x0010CF70	bfOpNegate	inferred	legacy BFOp_Negate: negates the top BF stack value (int/float/global variants)
+0x0010D058	bfOpNot	inferred	legacy BFOp_Not: logical-not of the top BF stack value
+0x0010D2C0	bfOpJumpIfFalse	inferred	legacy BFOp_JumpIfFalseViaTableB8: pops a condition and branches via the context's 0xB8 table
+0x0010D380	bfContextStep	inferred	legacy BFContext_Step: dispatches the current BF opcode handler from g_BFOpcodeHandlerTable
+0x0010D4F0	bfWaitReadArgFloat	inferred	legacy BFWait_ReadArgFloat: reads a float-like argument from the BF wait stack
 0x0010D620	scrGetProcedureAddress	inferred	Returns address word at offset 0x18 of indexed script procedure record.
 0x0010D638	scrGetLabelAddress	inferred	Returns address word at offset 0x18 of indexed script label record.
 0x0010D650	scrGetProgramCounter	inferred	Returns current script state's program counter at offset 0x18.
@@ -117,6 +133,9 @@
 0x0010D6E8	scrCommandTestModelFlag	inferred	Tests the script-supplied model flag and stores its result in the script VM.
 0x0010D718	scrCommandSetModelFlag	inferred	Sets the model flag identified by the script operand.
 0x0010D740	scrCommandClearModelFlag	inferred	Clears the model flag identified by the script operand.
+0x0010D868	bfWaitCbScreenFadeA	inferred	legacy BFWaitCb_ScreenFadeModeA: wait callback for screen-fade mode A
+0x0010D908	bfWaitCbScreenFadeB	inferred	legacy BFWaitCb_ScreenFadeModeB: wait callback for screen-fade mode B
+0x0010DBD0	bfWaitCbCreateTask	inferred	legacy BFWaitCb_CreateTaskFromSectionIndex: creates a BF task from a context section slot + index
 0x0010F4F0	effObjNodeDestroy	inferred	unlinks +0x20/+0x24 list, calls owner notify at +0x4 with the node, frees via func_002CFF98
 0x0010F570	effObjInnerCreate	inferred	allocates 0xD0 inner node, inits vectors/flags via func_0010F660, links at +0x1C; returns 1 on success; 27/29 words match, blocked on $2/$3 scratch choice for +0xB0 address
 0x0010F5E8	effObjFreeInner	inferred	Frees an effect node's inner allocation if present and clears its pointer.

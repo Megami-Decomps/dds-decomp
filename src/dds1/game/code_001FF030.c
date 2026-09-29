@@ -3199,7 +3199,7 @@ s32 btlFindScriptResource(char *name) {
         return -1;
     }
     func_003014F0(path, D_003A66F0, *(s16 *)(battle + 0x1c0), name);
-    return func_0010BF30(*(s32 *)(battle + 0x1e8), path);
+    return bfFindScriptIndexByName(*(s32 *)(battle + 0x1e8), path);
 }
 
 void func_0020F940(s32 skill) {

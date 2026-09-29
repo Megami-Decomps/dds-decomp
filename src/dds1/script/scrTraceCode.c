@@ -10,12 +10,12 @@ extern ScrCommand D_0039E288[];
 extern u32 (*D_00329930[])(ScrData *scr);
 
 void scrPushInteger(ScrData *scr, s32 val);
-void func_0010C150(ScrData *scr, f32 val);
+void bfStackPushFloat(ScrData *scr, f32 val);
 void scrPushString(ScrData *scr, char *str);
 void scrPushTypeFourValue(ScrData *scr, s32 val);
-s32 func_0010C1E0(ScrData *scr);
-f32 func_0010C2B8(ScrData *scr);
-u32 func_0010C9A8(ScrData *scr, s32 op);
+s32 bfStackPopInt(ScrData *scr);
+f32 bfStackPopFloat(ScrData *scr);
+u32 bfOpBinaryEval(ScrData *scr, s32 op);
 
 u32 scrPushImmediateInteger(ScrData *scr)
 {
@@ -27,7 +27,7 @@ u32 scrPushImmediateInteger(ScrData *scr)
 u32 scrPushImmediateFloat(ScrData *scr)
 {
     scr->pc++;
-    func_0010C150(scr, scr->instructions[scr->pc].fOperand);
+    bfStackPushFloat(scr, scr->instructions[scr->pc].fOperand);
     scr->pc++;
     return 1;
 }
@@ -41,7 +41,7 @@ u32 scrPushGlobalInteger(ScrData *scr)
 
 u32 scrPushGlobalFloat(ScrData *scr)
 {
-    func_0010C150(scr, D_003BAA00->floats[scr->instructions[scr->pc].parts.sOperand]);
+    bfStackPushFloat(scr, D_003BAA00->floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
@@ -55,7 +55,7 @@ u32 scrPushLocalInteger(ScrData *scr)
 
 u32 scrPushLocalFloat(ScrData *scr)
 {
-    func_0010C150(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
+    bfStackPushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
@@ -78,7 +78,7 @@ u32 scrPushReturnValue(ScrData *scr)
 
 u32 scrStoreGlobalInteger(ScrData *scr)
 {
-    D_003BAA00->ints[scr->instructions[scr->pc].parts.sOperand] = func_0010C1E0(scr);
+    D_003BAA00->ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt(scr);
     scr->pc++;
     return 1;
 }
@@ -87,7 +87,7 @@ u32 scrStoreGlobalFloat(ScrData *scr)
 {
     f32 value;
 
-    value = func_0010C2B8(scr);
+    value = bfStackPopFloat(scr);
     D_003BAA00->floats[scr->instructions[scr->pc].parts.sOperand] = value;
     scr->pc++;
     return 1;
@@ -95,14 +95,14 @@ u32 scrStoreGlobalFloat(ScrData *scr)
 
 u32 scrStoreLocalInteger(ScrData *scr)
 {
-    scr->localInt[scr->instructions[scr->pc].parts.sOperand] = func_0010C1E0(scr);
+    scr->localInt[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt(scr);
     scr->pc++;
     return 1;
 }
 
 u32 scrStoreLocalFloat(ScrData *scr)
 {
-    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = func_0010C2B8(scr);
+    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = bfStackPopFloat(scr);
     scr->pc++;
     return 1;
 }
@@ -113,14 +113,14 @@ u32 func_0010C7E0(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C7F8);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpWaitDispatch);
 
 u32 func_0010C898(ScrData *scr)
 {
     if (scr->sp == 0) {
         return 0;
     }
-    scr->pc = func_0010C1E0(scr) + 1;
+    scr->pc = bfStackPopInt(scr) + 1;
     return 1;
 }
 
@@ -149,99 +149,99 @@ u32 scrJumpLabel(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010C9A8);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpBinaryEval);
 
 u32 func_0010CE90(ScrData *scr)
 {
-    func_0010C9A8(scr, 0);
+    bfOpBinaryEval(scr, 0);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010CEC8(ScrData *scr)
 {
-    func_0010C9A8(scr, 1);
+    bfOpBinaryEval(scr, 1);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010CF00(ScrData *scr)
 {
-    func_0010C9A8(scr, 2);
+    bfOpBinaryEval(scr, 2);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010CF38(ScrData *scr)
 {
-    func_0010C9A8(scr, 3);
+    bfOpBinaryEval(scr, 3);
     scr->pc++;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CF70);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNegate);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D058);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpNot);
 
 u32 func_0010D100(ScrData *scr)
 {
-    func_0010C9A8(scr, 4);
+    bfOpBinaryEval(scr, 4);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D138(ScrData *scr)
 {
-    func_0010C9A8(scr, 5);
+    bfOpBinaryEval(scr, 5);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D170(ScrData *scr)
 {
-    func_0010C9A8(scr, 6);
+    bfOpBinaryEval(scr, 6);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D1A8(ScrData *scr)
 {
-    func_0010C9A8(scr, 7);
+    bfOpBinaryEval(scr, 7);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D1E0(ScrData *scr)
 {
-    func_0010C9A8(scr, 8);
+    bfOpBinaryEval(scr, 8);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D218(ScrData *scr)
 {
-    func_0010C9A8(scr, 9);
+    bfOpBinaryEval(scr, 9);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D250(ScrData *scr)
 {
-    func_0010C9A8(scr, 10);
+    bfOpBinaryEval(scr, 10);
     scr->pc++;
     return 1;
 }
 
 u32 func_0010D288(ScrData *scr)
 {
-    func_0010C9A8(scr, 11);
+    bfOpBinaryEval(scr, 11);
     scr->pc++;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D2C0);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpJumpIfFalse);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D380);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
 
 /* Script command parameter `idx` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
@@ -263,7 +263,7 @@ s32 func_0010D428(s32 idx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010D4F0);
+INCLUDE_ASM(const s32, "script/scrTraceCode", bfWaitReadArgFloat);
 
 char *func_0010D5A8(s32 paramIdx)
 {

@@ -2,7 +2,7 @@
 #include "scr.h"
 
 typedef struct KwlnTask KwlnTask;
-f32 func_0010D4F0(s32 idx);
+f32 bfWaitReadArgFloat(s32 idx);
 s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
 s32 func_001082D8(s32 arg0, void *arg1);
 s32 kwlnDrawSetC70FloatTriple(s32 arg0, f32 arg1, f32 arg2);
@@ -59,9 +59,9 @@ s32 func_0010D838(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D868);
+INCLUDE_ASM(const s32, "script/scrCommonCommand", bfWaitCbScreenFadeA);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D908);
+INCLUDE_ASM(const s32, "script/scrCommonCommand", bfWaitCbScreenFadeB);
 
 s32 func_0010D9A8(void)
 {
@@ -127,7 +127,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DB48);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DBD0);
+INCLUDE_ASM(const s32, "script/scrCommonCommand", bfWaitCbCreateTask);
 
 s32 func_0010DC80(void)
 {
@@ -195,11 +195,11 @@ s32 func_0010DDF8(void)
     f32 x;
     f32 y;
     f32 z;
-    x = func_0010D4F0(1);
+    x = bfWaitReadArgFloat(1);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.x $vf10, $vf00, $vf02x" :: "r"(x));
-    y = func_0010D4F0(2);
+    y = bfWaitReadArgFloat(2);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.y $vf10, $vf00, $vf02x" :: "r"(y));
-    z = func_0010D4F0(3);
+    z = bfWaitReadArgFloat(3);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.z $vf10, $vf00, $vf02x" :: "r"(z));
     __asm__ volatile ("vmulx.w $vf10, $vf10, $vf00x\n\tsqc2 $vf10, %0" : "=m"(v));
     func_00107FD8(func_0010D428(0), 0, &v);
@@ -214,11 +214,11 @@ s32 func_0010DF20(void)
     f32 x;
     f32 y;
     f32 z;
-    x = func_0010D4F0(1);
+    x = bfWaitReadArgFloat(1);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.x $vf10, $vf00, $vf02x" :: "r"(x));
-    y = func_0010D4F0(2);
+    y = bfWaitReadArgFloat(2);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.y $vf10, $vf00, $vf02x" :: "r"(y));
-    z = func_0010D4F0(3);
+    z = bfWaitReadArgFloat(3);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.z $vf10, $vf00, $vf02x" :: "r"(z));
     __asm__ volatile ("vmove.w $vf10, $vf00\n\tsqc2 $vf10, %0" : "=m"(v));
     func_00108218(func_0010D428(0), &v);
@@ -228,9 +228,9 @@ s32 func_0010DF20(void)
 s32 func_0010DF90(void)
 {
     ScrVecW v;
-    v.x = func_0010D4F0(1);
-    v.y = func_0010D4F0(2);
-    v.z = func_0010D4F0(3);
+    v.x = bfWaitReadArgFloat(1);
+    v.y = bfWaitReadArgFloat(2);
+    v.z = bfWaitReadArgFloat(3);
     v.w = 0;
     func_001082D8(func_0010D428(0), &v);
     return 1;
@@ -242,7 +242,7 @@ s32 func_0010E120(void)
 {
     s32 p0;
     p0 = func_0010D428(0);
-    evtUnk89F8SetState(p0, func_0010D4F0(1), func_0010D4F0(2));
+    evtUnk89F8SetState(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
     return 1;
 }
 
