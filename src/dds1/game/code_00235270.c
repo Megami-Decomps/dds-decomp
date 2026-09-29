@@ -235,7 +235,25 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00235FC8);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236180);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002363E0);
+typedef struct MenuGfxCallback {
+    u8 unknown[0x10];
+    void (*invoke)(void *, void *);
+} MenuGfxCallback;
+extern MenuGfxCallback D_00325748;
+extern u32 sdfCreateInitializedPacketList(void);
+extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, s32, void *);
+extern void func_00236180();
+extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
+
+s32 func_002363E0(s32 arg0, s32 arg1, u8 *work) {
+    u32 packets = sdfCreateInitializedPacketList();
+    func_00235598(packets, arg0, arg1, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
+    D_00325748.invoke(&D_00325748, (void *)packets);
+    if (*(s32 *)(work + 0x2280) != 1) {
+        return 0;
+    }
+    return func_001037C0(0, 1, 0xB, 1, 0xB, 0, 0, 0, work + 0x22A8);
+}
 
 extern char D_003BC088[];
 
@@ -320,7 +338,28 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00238A88);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00238BE8);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00238D58);
+extern void func_00238BE8();
+
+s32 func_00238D58(s32 arg0, s32 arg1, u8 *work) {
+    u32 packets = sdfCreateInitializedPacketList();
+    s32 rows;
+    switch (**(s32 **)(work + 0x2308)) {
+    case 20:
+        rows = 2;
+        break;
+    case 21:
+        rows = 4;
+        break;
+    default:
+        return -1;
+    }
+    func_00235598(packets, arg0, arg1, 0x1C, rows, 0, rows, work, 0, func_00238BE8);
+    D_00325748.invoke(&D_00325748, (void *)packets);
+    if (*(s32 *)(work + 0x2280) != 0xC) {
+        return 0;
+    }
+    return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00238E58);
 
@@ -408,7 +447,28 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023B200);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023B848);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023B8F8);
+extern void func_0023B848();
+extern s8 D_00324510[];
+
+s32 func_0023B8F8(s32 arg0, s32 arg1, u8 *work) {
+    u32 packets = sdfCreateInitializedPacketList();
+    s32 count;
+    func_00235598(packets, arg0, arg1, 0x19, 2, 0, 1, work, 0, func_0023B848);
+    D_00325748.invoke(&D_00325748, (void *)packets);
+    if (*(s32 *)(work + 0x2280) != 0x14) {
+        return 0;
+    }
+    count = *(s32 *)(work + 0x23E4);
+    if (count > 0) {
+        *(s32 *)(work + 0x23E4) = count - 1;
+    } else if (count == 0) {
+        return -1;
+    }
+    if (D_00324510[0x21] < 0) {
+        return 1;
+    }
+    return D_00324510[0x23] >= 0 ? 0 : -1;
+}
 
 void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 first, s32 second, s32 third) {
     runtime->commandFirst = first;

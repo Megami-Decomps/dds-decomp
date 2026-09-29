@@ -43,7 +43,12 @@ typedef struct BattleRuntimeState {
     s8 active;
     u8 unk_09[3];
     u32 options;
-    u8 unk_10[0x18];
+    u32 color10;
+    u32 color14;
+    u32 color18;
+    u32 color1C;
+    u32 color20;
+    f32 unk_24;
     s32 gridWidth;
     s32 gridHeight;
     s32 cellWidth;
@@ -994,7 +999,42 @@ s32 func_00201F30(s32 unused, s32 query, u32 mask) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00201FE0);
+extern s32 func_001A55A8(void *, s32);
+extern s32 fldGetSelectedUnitStat();
+
+s32 func_00201FE0(s32 unit, s32 action, s32 mask) {
+    u32 flags = *(u32 *)(unit + 0x110);
+    s32 stat;
+    s32 value;
+    if (flags & 1) {
+        if (flags & mask) {
+            if (!(flags & 0x20)) {
+                stat = fldGetSelectedUnitStat();
+                if (action & 0x100000) {
+                    s32 i;
+                    for (i = 0; i < 19; i++) {
+                        s32 index = btlElementToBitIndex(action, i);
+                        if (index == 0x80) {
+                            continue;
+                        }
+                        value = func_001A2F50((void *)unit, index);
+                        if (func_001A55A8((void *)unit, index) != 0 || (value & 0x20000) ||
+                            (stat == 0x20000 && func_001A8448((void *)unit, index) != 0)) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                }
+                value = func_001A2F50((void *)unit, action);
+                if (func_001A55A8((void *)unit, action) != 0 || (value & 0x20000) ||
+                    (stat == 0x20000 && func_001A8448((void *)unit, action) != 0)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 s64 func_00202158(void) {
     return func_001A8CE0(0);
@@ -2400,7 +2440,49 @@ void func_00208FB0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00208FF0);
+extern s32 mdlGetNodeField2C(s32, s32);
+extern void func_00221EF0(void *, s32, s32);
+
+void func_00208FF0(void) {
+    BtlState *battle = (BtlState *)func_001A17F0();
+    u32 *slot;
+    BtlUnit *player;
+    BtlUnit *unit;
+    if (!(battle->unk_1F4 & 0x80000)) {
+        return;
+    }
+    slot = *(u32 **)((u8 *)battle + 0x694);
+    player = *(BtlUnit **)slot;
+    if (player == NULL) {
+        return;
+    }
+    if (!(player->flags & 2)) {
+        return;
+    }
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (*(u8 *)((u8 *)unit + 0x11C) == slot[3]) {
+                    break;
+                }
+            }
+        }
+    }
+    if (unit == NULL) {
+        return;
+    }
+    mdlGetNodeField2C(*(s32 *)((u8 *)player->model + 0x8C), 0);
+    if (slot[2] & 4) {
+        if ((slot[1] & 0xFF000000) != 0x80000000) {
+            slot[1] += 0x10000000;
+        }
+    } else {
+        if (slot[1] & 0xFF000000) {
+            slot[1] += 0xF0000000;
+        }
+    }
+    func_00221EF0(((BtlUnit *)*(u32 **)slot)->model, 0, slot[1]);
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209140);
 
@@ -2855,7 +2937,44 @@ u32 func_0020CB28(s32 arg0) {
     return temp_v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020CB38);
+extern void func_001DC760(void);
+extern void func_0020AFB8();
+extern void func_0020B190(u8 *, void *);
+extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_001DC568(void);
+
+s32 func_0020CB38(u8 *unit) {
+    u16 flags = *(u16 *)((u8 *)D_003BAA60 + *(s32 *)(unit + 0x114) * 32 + 0x1c);
+    if (flags & 0x4000) {
+        func_001DC760();
+        if (!(flags & 0x10)) {
+            func_0020AFB8(unit);
+        } else {
+            func_001DC3A0(unit, 59.2f, -700.6f, -1901.2f,
+                           0.092f, 0.023f, -0.009f, 0.987f,
+                           59.2f, -160.6f, -1901.2f, -0.106f,
+                           0.025f, -0.014f, 0.985f, 45.0f, 30.0f);
+        }
+        *(s32 *)(unit + 0x110) = 0;
+    } else if (flags & 0x8000) {
+        func_001DC760();
+        func_0020B348(unit, unit, 0);
+    } else if (flags & 8) {
+        if (func_001DAE48(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
+            void *other = (void *)func_001DAE50((void *)*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60), 0);
+            func_001DC760();
+            func_0020B190(unit, other);
+            *(s32 *)(unit + 0x110) = 0;
+        } else {
+            func_001DC760();
+            func_0020AFB8(unit);
+        }
+    } else {
+        return 0;
+    }
+    func_001DC568();
+    return 1;
+}
 
 void func_0020CCA8(void) {
     func_0020ADA8();
@@ -3928,9 +4047,47 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002127A8);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00212998);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002131F8);
+void func_002131F8(void) {
+    btlInitVisibilityGrid();
+    D_003D7580.color10 = 0x80808080;
+    if (D_003D7580.unk_06 < 2) {
+        D_003D7580.color1C = 0x20FFFFFF;
+        D_003D7580.color14 = 0x20FFFFFF;
+    } else {
+        D_003D7580.color1C = 0x00FFFFFF;
+        D_003D7580.color14 = 0x08FFFFFF;
+    }
+    D_003D7580.unk_24 = -0.045f;
+    D_003D7580.color18 = 0x00808080;
+    D_003D7580.color20 = 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00213280);
+typedef struct BattleGraphicsCallback {
+    u8 unknown[0x10];
+    void (*invoke)(void *, void *);
+} BattleGraphicsCallback;
+extern BattleGraphicsCallback D_00325708;
+extern u32 sdfCreateInitializedPacketList(void);
+extern void func_00212998(u32, u32, u32, u32, u32, s32);
+
+s32 func_00213280(void) {
+    u32 packets = sdfCreateInitializedPacketList();
+    if ((D_003D7580.color18 & 0xFF000000) != 0x80000000) {
+        D_003D7580.color18 += 0x10000000;
+    }
+    func_00212998(packets, D_003D7580.color14, D_003D7580.color1C, D_003D7580.color10, D_003D7580.color18, -0x100);
+    D_00325708.invoke(&D_00325708, (void *)packets);
+    if ((D_003D7580.color14 & 0xFF000000) > 0x08000000) {
+        D_003D7580.color14 -= 0x08000000;
+        D_003D7580.color1C -= 0x08000000;
+        return 0;
+    }
+    if (D_003D7580.color1C & 0xFF000000) {
+        D_003D7580.color1C -= 0x02000000;
+        return 0;
+    }
+    return 1;
+}
 
 void func_00213368(void) {
 }
@@ -3980,11 +4137,6 @@ extern void func_002D4540(void *);
 extern void func_002D38B8(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
 extern void func_002D4588(void *, void *);
 extern u8 D_00325860[];
-typedef struct BattleGraphicsCallback {
-    u8 unknown[0x10];
-    void (*invoke)(void *, void *);
-} BattleGraphicsCallback;
-extern BattleGraphicsCallback D_00325708;
 
 void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &D_003D7580;
@@ -4254,7 +4406,64 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6EF8);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00213BE0);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002142C0);
+typedef struct PadButtons {
+    s8 unk_0;
+    s8 stick;
+    u8 unk_2[2];
+    u8 b4, b5, b6, b7;
+} PadButtons;
+
+extern PadButtons D_00398628[];
+
+typedef struct MenuList {
+    u32 count;
+    u32 cursor;
+    u32 top;
+    u32 rows;
+} MenuList;
+
+s32 func_002142C0(MenuList *list) {
+    if (D_00398628->b6 & 2) {
+        if (list->cursor != 0) {
+            list->cursor--;
+            if (list->cursor == list->top && list->cursor != 0) {
+                list->top = list->cursor - 1;
+            }
+        } else {
+            list->cursor = list->count - 1;
+            list->top = list->count - list->rows;
+        }
+    } else if (D_00398628->b7 & 2) {
+        if (list->cursor >= list->count - 1) {
+            list->cursor = 0;
+            list->top = 0;
+        } else {
+            list->cursor++;
+            if (list->cursor == list->top + list->rows - 1 && list->top < list->count - list->rows) {
+                list->top++;
+            }
+        }
+    } else if (D_00398628->b5 & 2) {
+        if (list->top + list->rows * 2 < list->count) {
+            list->top += list->rows;
+            list->cursor += list->rows;
+        } else {
+            list->cursor = list->count - 1;
+            list->top = list->count - list->rows;
+        }
+    } else if (D_00398628->b4 & 2) {
+        if (list->top >= list->rows) {
+            list->top -= list->rows;
+            list->cursor -= list->rows;
+        } else {
+            list->cursor = 0;
+            list->top = 0;
+        }
+    } else if (D_00398628->stick < 0) {
+        return 1;
+    }
+    return 0;
+}
 
 extern void *func_00197748(s32, s32, u32, u32, s32, s32);
 extern void func_001958A0(void *, s32, s32);
