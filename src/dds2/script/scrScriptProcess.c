@@ -89,22 +89,23 @@ extern void func_001A39D0(s32);
 extern void func_003297C8(void *);
 extern void evtUnlinkWorkNode(void *);
 
-void func_0010BF48(u8 *ctx) {
-    func_0010AE38("end <%s>\n", *(u32 *)(ctx + 0xB4) + (*(u32 *)(ctx + 0xC8) << 5));
-    if (*(u32 *)(ctx + 0xDC) != 0) {
-        func_00328E48((void *)*(u32 *)(ctx + 0xDC));
+/* DDS2 process teardown follows the same layout as DDS1's ScrProcTask. */
+void scrProcDestroyTask(ScrProcTask *process) {
+    func_0010AE38("end <%s>\n", process->unkB4 + (process->unkC8 << 5));
+    if (process->workBuffer != 0) {
+        func_00328E48((void *)process->workBuffer);
     }
-    if (*(u32 *)(ctx + 0xE0) != 0) {
-        func_00328E48((void *)*(u32 *)(ctx + 0xE0));
+    if (process->auxBuffer != 0) {
+        func_00328E48((void *)process->auxBuffer);
     }
-    if (*(s32 *)(ctx + 0xCC) >= 0) {
-        func_001A39D0(*(s32 *)(ctx + 0xCC));
+    if (process->resourceIndex >= 0) {
+        func_001A39D0(process->resourceIndex);
     }
-    if (*(u32 *)(ctx + 0xD8) != 0) {
-        func_003297C8((void *)*(u32 *)(ctx + 0xD8));
+    if (process->scriptHandle != 0) {
+        func_003297C8(process->scriptHandle);
     }
-    evtUnlinkWorkNode(ctx);
-    func_00328E48(ctx);
+    evtUnlinkWorkNode(process);
+    func_00328E48(process);
 }
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BFE0);

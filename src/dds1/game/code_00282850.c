@@ -1036,21 +1036,26 @@ s32 func_00286A00(s32 arg0) {
 
 u16 func_00286AD0(s32 arg0);
 
-/* Count a bullet item in the active party: the inventory byte plus one for each
- * of the five party rows that has it equipped. */
-s32 func_00286A18(s32 arg0) {
+typedef struct PtyBulletInventory {
+    u8 pad00[0x12A0];
+    u8 itemCount[0xBF];      /* 0x12A0: indexed by item ID */
+} PtyBulletInventory;
+
+/* Count a bullet item in the active party: inventory plus one per unit
+ * that has the item equipped. Only IDs 0xA0..0xBE are bullet items. */
+s32 ptyCountBulletItem(s32 bulletId) {
     s32 count;
     s32 i;
 
-    if (arg0 < 0xA0) {
+    if (bulletId < 0xA0) {
         return 0;
     }
-    if (arg0 >= 0xBF) {
+    if (bulletId >= 0xBF) {
         return 0;
     }
-    count = *(u8 *)(arg0 + D_003BAA00 + 0x12A0);
+    count = ((PtyBulletInventory *)D_003BAA00)->itemCount[bulletId];
     for (i = 0; i < 5; i++) {
-        if (arg0 == func_00286AD0(D_003BAA00 + i * 0x1A4 + 0xA60)) {
+        if (bulletId == func_00286AD0(D_003BAA00 + i * 0x1A4 + 0xA60)) {
             count++;
         }
     }

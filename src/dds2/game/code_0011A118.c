@@ -432,7 +432,7 @@ u32 func_0011D588(void) {
 }
 
 void func_0011D590(void) {
-    func_0010BF48(D_00435E88);
+    scrProcDestroyTask(D_00435E88);
     D_00435E88 = 0;
 }
 

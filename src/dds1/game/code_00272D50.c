@@ -36,15 +36,25 @@ void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
 
 extern void func_0027C6A0(s32);
 
-/* Refresh the bullet-item row and report whether the target row still has
- * remaining item count. */
-s32 func_00273050(s32 arg0, s32 arg1) {
-    u8 *ctx = *(u8 **)(arg1 + 0x90C);
+typedef struct StaffWindowCounter {
+    u8 pad00[0x20];
+    u32 remaining;           /* 0x20 */
+} StaffWindowCounter;
 
-    if (*(u8 *)((arg0 & 0xFFFF) + D_003BAA00 + 0x12A0) == 0) {
-        func_0027C6A0(*(s32 *)(ctx + 8));
+typedef struct StaffWindowHeader {
+    u8 pad00[0x14];
+    StaffWindowCounter *data; /* 0x14 */
+} StaffWindowHeader;
+
+/* Refresh the bullet-item window if inventory is empty; return whether the
+ * window still has entries. */
+s32 func_00273050(s32 itemId, s32 context) {
+    StaffWindowResources *resources = ((StaffDisplayContext *)context)->resources;
+
+    if (*(u8 *)((itemId & 0xFFFF) + D_003BAA00 + 0x12A0) == 0) {
+        func_0027C6A0(resources->firstWindow);
     }
-    return *(u32 *)(*(s32 *)(*(s32 *)(ctx + 8) + 0x14) + 0x20) > 0;
+    return ((StaffWindowHeader *)resources->firstWindow)->data->remaining > 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002730A0);
@@ -95,12 +105,22 @@ extern void initPartyPanelSlots(s32);
 extern void menuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 
+typedef struct StaffSelectionList {
+    u8 pad00[0x1C];
+    s32 *selectedIndex;         /* 0x1C */
+} StaffSelectionList;
+
+typedef struct StaffItemContext {
+    u8 pad00[0x7D8];
+    StaffSelectionList *list;   /* 0x7D8 */
+} StaffItemContext;
+
 /* Use a field item: resolve its direct effect (or field-use skill) against the
  * active unit row; on success consume one from the inventory and refresh the
  * party panels. Returns 1 when the item was consumed. */
 s32 func_00273750(s32 item, s32 context) {
     s32 panel = context + 0x15C;
-    s32 unit = D_003BAA00 + *(s32 *)(*(s32 *)(*(s32 *)(context + 0x7D8) + 0x1C)) * 0x1A4 + 0xA60;
+    s32 unit = D_003BAA00 + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
     s32 result = battleItemApplyDirectEffect(panel, item & 0xFFFF, unit, unit);
 
     if (result != 1) {

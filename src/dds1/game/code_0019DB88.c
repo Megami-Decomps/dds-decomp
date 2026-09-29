@@ -722,11 +722,11 @@ u16 func_001A1800(s32 arg0) {
 }
 
 void func_001A1808(void) {
-    func_00118368();
+    ptyComputeMaxHp();
 }
 
 void func_001A1820(void) {
-    func_00118408();
+    ptyComputeMaxMp();
 }
 
 u32 func_001A1838(s32 object) {
@@ -8396,7 +8396,7 @@ void func_001F3188(s32 *args) {
 }
 
 void func_001F3200(u32 arg0) {
-    func_002944D8(*(u32 *)arg0);
+    fileQueueDestroy(*(u32 *)arg0);
     func_002CFF98(arg0);
 }
 

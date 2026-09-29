@@ -120,7 +120,7 @@ extern s32 func_0010D8C8(void);
 
 extern s32 func_0025D230(s32 arg0, s32 arg1);
 
-extern s32 func_0025D6B0(s32 arg0, s32 arg1, s32 arg2);
+extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 
 extern s32 evtFindTaskById(s32 arg0);
 
@@ -275,7 +275,7 @@ u32 func_0023E7A0(void) {
     }
     param0 = func_0010D650(0);
     rid = func_0010D650(1);
-    ret = func_0025D6B0(model, param0, rid);
+    ret = evtCreateMotionSeTask(model, param0, rid);
     if (ret != 0) {
         func_00101968(evtFindTaskById(func_0010D650(0)), ret);
     }

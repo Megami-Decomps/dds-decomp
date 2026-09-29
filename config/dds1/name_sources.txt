@@ -88,6 +88,7 @@
 0x0010BC50	scrCreateProcessWithDefaultOption	inferred	Calls func_0010BB28 with its second argument zero.
 0x0010BC68	scrCreateTaskForProcessId	inferred	Creates a script process from the provided task identifier and option, then registers it with kwlnTaskCreate.
 0x0010BCA0	scrCreateTaskWithDefaultOption	inferred	Calls func_0010BA18 with its second argument zero.
+0x0010BD20	scrProcDestroyTask	inferred	logs process completion and releases the process buffers
 0x0010BF30	bfFindScriptIndexByName	inferred	legacy BF_FindScriptIndexByName: searches the FLW0 script-name table for an exact name
 0x0010C028	scrSetCurrentActor	inferred	Battle caller passes its actor into active script offset 0xF0; other callers clear it.
 0x0010C050	scrGetCurrentActor	inferred	Reads the active script actor pointer stored at offset 0xF0.
@@ -212,9 +213,13 @@
 0x00117578	evtScaleValueByMultiplier	inferred	Stores the scaled float as a supplied multiplier times the object's base float.
 0x00117588	evtGetValueScaleFactor	inferred	Returns the scaled float divided by its base float.
 0x001175F8	evtSpawnActionObj11	inferred	constructor for type 0x11
+0x001176A0	sdfCreateRuntimeTask	inferred	allocates/zeroes the 0x33600 GBWK runtime and schedules its tick task
+0x00117730	sdfDestroyRuntimeTask	inferred	destroys the GBWK task hierarchy and frees the runtime allocation
 0x00117780	sdfBumpTickCounters	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118310	sdfResetChannels	inferred	resets the 8 channel entries
+0x00118368	ptyComputeMaxHp	inferred	enemy base max HP, or HP script result capped at 999 for party units
+0x00118408	ptyComputeMaxMp	inferred	MP counterpart of ptyComputeMaxHp
 0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118DD8	sdfQueryChannelBits	inferred	returns active channel bits masked by packed flags
@@ -1143,6 +1148,8 @@
 0x00241BB8	evtGetTaskData	inferred	finds task by id then returns its data pointer via 00101A70, or 0
 0x00241CA0	evtRefreshTaskData	inferred	rebuilds taskdata+0x38 via func_00241BF0/func_002D3288/effSetCh72Id, freeing old
 0x00242278	evtFreeEventPackState	inferred	Frees the state returned by func_00101A70.
+0x00242298	evtCreateMotionSeTask	inferred	creates the named mse task and retains its three arguments
+0x00242510	evtReleaseEventPackResources	inferred	frees effect handles, resources, then event pack storage
 0x00242608	mnuCampCreateTask	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00242698	campDestroyTaskById	inferred	Finds the current camp task by ID and destroys it when present.
 0x002426D0	campDestroyAllTasks	inferred	Repeatedly destroys camp tasks registered under task identifier 0x3EC.
@@ -1398,6 +1405,7 @@
 0x00273200	mnuReleaseStaffExtraWindow	inferred	Releases the third window handle in staff display resources.
 0x00273470	freeStaffDisplayResources	inferred	Releases linked display resources and returns success
 0x00273718	mnuStaffRunPanel2b	inferred	mnu panel wrapper mode 2
+0x002744E0	mnuSwapEquippedBullet	inferred	updates previous/new equipped bullet IDs and inventory
 0x00274BA8	mnuIsFinalItemIndex	inferred	Tests whether an item index has reached the last index given the count at offset 0x20.
 0x00274F00	menuCopyPartyEntries	inferred	copies the five 0x1A4-byte party entries from the save data into the menu work (+0x840) and counts active ones (max 3)
 0x00275880	mnuShopReleaseResources	inferred	mnu menu, title, shop, or movie UI in game/code_00274B80.c
@@ -1482,6 +1490,7 @@
 0x002862E0	mnuGetAdjustedEntryValue	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002866D0	skillApplyFieldUseEffect	inferred	legacy SkillId_ApplyFieldUseEffectToEligiblePartyTargets
 0x002868E0	getAffinityKind	inferred	maps a 0x20000000-type affinity flag word of a 16-byte row at D_003BAA54 to a small enum (-1..7, -2 if 0x40000000)
+0x00286A18	ptyCountBulletItem	inferred	inventory quantity plus equipped instances across the party
 0x00286B48	battleItemApplyPermanentBonus	inferred	legacy BattleItemId_TryApplyPermanentBuildBonus: Noise items 0x50..0x56 stat bonuses
 0x00286D20	battleItemApplyDirectEffect	inferred	legacy BattleItem_TryApplyDirectItemEffect: pre-skill-use direct effect hook
 0x00286EA0	mnuGetMatchingPartyEntryMask	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c

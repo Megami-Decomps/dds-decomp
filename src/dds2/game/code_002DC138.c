@@ -3520,7 +3520,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA5B8);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA5F0);
 
-extern void func_002D4548(s32);
+extern void fileQueueDestroy(s32);
 
 void effDestroyOwnedResources(s32 *work) {
     u32 i;
@@ -3533,7 +3533,7 @@ void effDestroyOwnedResources(s32 *work) {
     if (work[0x6C / 4] != 0) {
         u32 count = ((s32 *)work[0x70 / 4])[2];
         for (i = 0; i < count; i++) {
-            func_002D4548(((s32 *)work[0x68 / 4])[i]);
+            fileQueueDestroy(((s32 *)work[0x68 / 4])[i]);
         }
         func_003297C8(work[0x6C / 4]);
     }
@@ -3802,7 +3802,7 @@ void func_002FC5C8(u32 arg0) {
 
 void func_002FC610(u32 arg0) {
     if (D_004386B4 != 0) {
-        func_002D4548(D_004386B4);
+        fileQueueDestroy(D_004386B4);
         D_004386B4 = 0;
     }
     if (D_004386C4 != 0) {
@@ -4450,11 +4450,11 @@ void effResetFileResources(void) {
     D_00439074 = 0;
     D_004386B0 = 0;
     if (D_004386B8 != 0) {
-        func_002D4548(D_004386B8);
+        fileQueueDestroy(D_004386B8);
         D_004386B8 = 0;
     }
     if (D_004386B4 != 0) {
-        func_002D4548(D_004386B4);
+        fileQueueDestroy(D_004386B4);
         D_004386B4 = 0;
     }
     if (D_004386C4 != 0) {

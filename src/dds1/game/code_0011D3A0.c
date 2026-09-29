@@ -1614,12 +1614,14 @@ void func_00126110(void) {
     }
 }
 
-s32 func_00126140(s32 *out1, s32 *out2) {
+/* Consume the pending pair of field-script values. -1 in both slots means
+ * no request; the first value is returned with its 200-entry base offset. */
+s32 func_00126140(s32 *outCode, s32 *outParameter) {
     if (D_0032E3B0[0x3C] == -1 && D_0032E3B0[0x3D] == -1) {
         return 0;
     }
-    *out1 = D_0032E3B0[0x3C] + 0xC8;
-    *out2 = D_0032E3B0[0x3D];
+    *outCode = D_0032E3B0[0x3C] + 0xC8;
+    *outParameter = D_0032E3B0[0x3D];
     D_0032E3B0[0x3C] = -1;
     D_0032E3B0[0x3D] = -1;
     return 1;

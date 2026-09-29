@@ -32,7 +32,7 @@ void func_0010C298(u32 task) {
 
     context = func_00101958();
     if (context != 0) {
-        func_0010BF48(context);
+        scrProcDestroyTask(context);
     }
     func_00101950(task, 0);
 }

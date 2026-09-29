@@ -33,7 +33,7 @@ void func_0010C070(u32 task) {
 
     previousContext = func_00101A70();
     if (previousContext != 0) {
-        func_0010BD20(previousContext);
+        scrProcDestroyTask(previousContext);
     }
     func_00101A68(task, 0);
 }

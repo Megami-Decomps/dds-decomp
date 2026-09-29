@@ -3192,14 +3192,21 @@ void btlReleaseBossData(void) {
 
 extern char D_003A66F0[];
 
+typedef struct BtlScriptContext {
+    u8 pad00[0x1C0];
+    s16 scenarioId;      /* 0x1C0: used to format the script path */
+    u8 pad1C2[0x26];
+    s32 scriptHandle;    /* 0x1E8 */
+} BtlScriptContext;
+
 s32 btlFindScriptResource(char *name) {
     char path[128];
-    u8 *battle = (u8 *)func_001A17F0();
-    if (*(s32 *)(battle + 0x1e8) == 0) {
+    BtlScriptContext *battle = (BtlScriptContext *)func_001A17F0();
+    if (battle->scriptHandle == 0) {
         return -1;
     }
-    func_003014F0(path, D_003A66F0, *(s16 *)(battle + 0x1c0), name);
-    return bfFindScriptIndexByName(*(s32 *)(battle + 0x1e8), path);
+    func_003014F0(path, D_003A66F0, battle->scenarioId, name);
+    return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 
 void func_0020F940(s32 skill) {

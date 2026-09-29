@@ -19,11 +19,12 @@ typedef struct EvtScaledValue {
 } EvtScaledValue;
 
 typedef struct SdfRuntime {
-    u8 pad00[0x34];
-    u32 firstTick;
-    u32 secondTick;
+    u8 pad00[0x30];
+    s32 backingAllocation; /* 0x30: handle returned by scene allocator */
+    u32 firstTick;          /* 0x34 */
+    u32 secondTick;         /* 0x38 */
     u8 pad3C[0xA20];
-    u32 updateMode;
+    u32 updateMode;         /* 0xA5C */
 } SdfRuntime;
 
 typedef struct SdfPackedValue {
@@ -31,19 +32,42 @@ typedef struct SdfPackedValue {
     u16 flagsAndValue;
 } SdfPackedValue;
 
-extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
+/* Party-unit header used for HP/MP script dispatch. Full stride: 0x1A4. */
+typedef struct SdfPartyUnit {
+    u16 flags;          /* 0x00 */
+    u8 pad02[2];
+    u16 unitId;         /* 0x04 */
+    u8 pad06[0x16];
+    u16 hpBonus;        /* 0x1C */
+    u16 mpBonus;        /* 0x1E */
+} SdfPartyUnit;
+
+typedef struct SdfEnemyVitals {
+    u8 pad00[8];
+    u16 maxHp;          /* 0x08 */
+    u8 pad0A[2];
+    u16 maxMp;          /* 0x0C */
+} SdfEnemyVitals;
+
+/* Two-byte runtime-mode entries; the signed second byte selects script 0x18. */
+typedef struct SdfUnitMode {
+    u8 pad00;           /* 0x00 */
+    s8 mode;            /* 0x01 */
+} SdfUnitMode;
+
+extern u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char D_003BA9E0[];
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
-extern s32 func_002D0A60(s32 arg0);
-extern s32 func_002D0918(s32 arg0);
+extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
+extern s32 func_002D0A60(s32 allocation);
+extern s32 func_002D0918(s32 allocation);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
 void func_001177A8(void);
 extern void *func_002D03F8(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
-s32 func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
+s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
@@ -137,14 +161,14 @@ void func_00117678(EvtScaledValue *value) {
 
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
  * and register the "GBWK" tick task that owns it. */
-void func_001176A0(void) {
+void sdfCreateRuntimeTask(void) {
     void *mem = func_002D03F8(0x33600);
     u8 *state = (u8 *)sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x33600);
-    *(s32 *)(state + 0x30) = (s32)mem;
-    *(s32 *)(state + 0x34) = 0;
-    *(s32 *)(state + 0x38) = 0;
+    ((SdfRuntime *)state)->backingAllocation = (s32)mem;
+    ((SdfRuntime *)state)->firstTick = 0;
+    ((SdfRuntime *)state)->secondTick = 0;
     kwlnTaskCreate(D_003BA9E0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
     D_003BAA00 = (s32)state;
     func_001177A8();
@@ -152,12 +176,12 @@ void func_001176A0(void) {
 
 /* Tear down the "GBWK" task hierarchy, clear the backing scene allocation
  * owned by the game state, and release the global state handle. */
-void func_00117730(void) {
+void sdfDestroyRuntimeTask(void) {
     s32 handle;
 
     kwlnTaskDestroyWithHierarchyByName(D_003BA9E0, 0);
     func_00117808();
-    handle = *(s32 *)(D_003BAA00 + 0x30);
+    handle = ((SdfRuntime *)D_003BAA00)->backingAllocation;
     func_002D0A60(handle);
     func_002D0918(handle);
     D_003BAA00 = 0;
@@ -232,17 +256,17 @@ void sdfResetChannels(void) {
     func_001180F8();
 }
 
-/* EnemyData base table has a 76-byte stride; fields 0x08/0x0C are the base
- * max HP / max MP, and unit offsets 0x1C/0x1E are the matching growth values. */
-s32 func_00118368(s32 unit) {
+/* Enemy vitals use a 76-byte base table; party vitals come from a script,
+ * a unit-specific bonus, and a maximum of 999. */
+s32 ptyComputeMaxHp(s32 unit) {
     s32 result;
 
-    if ((*(u16 *)unit & 0x20) != 0) {
-        return *(u16 *)(D_003BAA1C + *(u16 *)(unit + 4) * 76 + 8);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) != 0) {
+        return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
     }
     result = evtRunContext(1, unit, 0, 0, 0);
-    if ((*(u16 *)unit & 0x20) == 0) {
-        result += *(u16 *)(unit + 0x1C);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) == 0) {
+        result += ((SdfPartyUnit *)unit)->hpBonus;
         if (result >= 1000) {
             result = 999;
         }
@@ -250,15 +274,16 @@ s32 func_00118368(s32 unit) {
     return result;
 }
 
-s32 func_00118408(s32 unit) {
+/* Compute the matching MP value from the base table or the MP script. */
+s32 ptyComputeMaxMp(s32 unit) {
     s32 result;
 
-    if ((*(u16 *)unit & 0x20) != 0) {
-        return *(u16 *)(D_003BAA1C + *(u16 *)(unit + 4) * 76 + 0xC);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) != 0) {
+        return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
     }
     result = evtRunContext(2, unit, 0, 0, 0);
-    if ((*(u16 *)unit & 0x20) == 0) {
-        result += *(u16 *)(unit + 0x1E);
+    if ((((SdfPartyUnit *)unit)->flags & 0x20) == 0) {
+        result += ((SdfPartyUnit *)unit)->mpBonus;
         if (result >= 1000) {
             result = 999;
         }
@@ -268,20 +293,20 @@ s32 func_00118408(s32 unit) {
 
 /* Sdf dispatch: pick the script id from the unit's runtime flag byte and run
  * it against the given entry index. 0x40/0x80 select the alternate scripts. */
-s32 func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
+s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;
     u8 flags;
 
-    if (*(s8 *)(D_003BAA4C + arg0 * 2 + 1) == 5) {
-        result = evtRunContext(0x18, arg1, arg2, arg0, arg3);
+    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].mode == 5) {
+        result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = D_003BAA50[arg0 * 0x38];
+        flags = D_003BAA50[unitIndex * 0x38];
         if (flags & 0x40) {
-            result = evtRunContext(0x1B, arg1, arg2, arg0, arg3);
+            result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
-            result = evtRunContext(0x1C, arg1, arg2, arg0, arg3);
+            result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
         } else {
-            result = evtRunContext(5, arg1, arg2, arg0, arg3);
+            result = evtRunContext(5, scriptArg, contextArg, unitIndex, mode);
         }
     }
     return result;
@@ -291,20 +316,20 @@ void sdfDispatchCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_001184A8(arg0, arg1, arg2, (u8)arg3);
 }
 
-s32 func_00118570(u32 arg0, u32 arg1, u32 arg2, u8 arg3) {
+s32 func_00118570(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;
     u8 flags;
 
-    if (*(s8 *)(D_003BAA4C + arg0 * 2 + 1) == 5) {
-        result = evtRunContext(0x18, arg1, arg2, arg0, arg3);
+    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].mode == 5) {
+        result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = D_003BAA50[arg0 * 0x38];
+        flags = D_003BAA50[unitIndex * 0x38];
         if (flags & 0x40) {
-            result = evtRunContext(0x1B, arg1, arg2, arg0, arg3);
+            result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
-            result = evtRunContext(0x1C, arg1, arg2, arg0, arg3);
+            result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
         } else {
-            result = evtRunContext(9, arg1, arg2, arg0, arg3);
+            result = evtRunContext(9, scriptArg, contextArg, unitIndex, mode);
         }
     }
     return result;

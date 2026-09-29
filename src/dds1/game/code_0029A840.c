@@ -656,7 +656,7 @@ void mdlMarkAndProcessObjectNodes(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B368);
 
-extern void func_002944D8(u32);
+extern void fileQueueDestroy(u32);
 
 void func_0029B528(u8 *object) {
     u32 i;
@@ -666,7 +666,7 @@ void func_0029B528(u8 *object) {
     }
     if (*(u32 *)(object + 0x48) != 0) {
         for (i = 0; i < *(u32 *)object; i++) {
-            func_002944D8((*(u32 **)(object + 0x44))[i]);
+            fileQueueDestroy((*(u32 **)(object + 0x44))[i]);
         }
         func_002D0918(*(u32 *)(object + 0x48));
     }
@@ -4878,7 +4878,7 @@ void func_002B5548(u32 arg0) {
 
 void func_002B5590(u32 arg0) {
     if (D_003BD05C != 0) {
-        func_002944D8(D_003BD05C);
+        fileQueueDestroy(D_003BD05C);
         D_003BD05C = 0;
     }
     if (D_003BD06C != 0) {
@@ -5300,7 +5300,7 @@ extern s32 fileQueueCreate(void);
 
 u32 effReinitializeFileQueue(void) {
     if (D_003BD06C != 0) {
-        func_002944D8(D_003BD05C);
+        fileQueueDestroy(D_003BD05C);
         D_003BD05C = 0;
     }
     if (D_003BD06C != 0) {
@@ -5308,7 +5308,7 @@ u32 effReinitializeFileQueue(void) {
         D_003BD06C = 0;
     }
     if (D_003BD060 != 0) {
-        func_002944D8(D_003BD060);
+        fileQueueDestroy(D_003BD060);
     }
     D_003BD060 = fileQueueCreate();
     D_0038EA6C[0] = 0;
@@ -5473,7 +5473,7 @@ u32 pollNamedEffectFileJob(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (D_003BD060 != 0) {
-            func_002944D8(D_003BD060);
+            fileQueueDestroy(D_003BD060);
         }
         strcpy((char *)D_003DF8D0, (char *)record + 0xC8);
         D_003BD060 = func_002959E8(record);
@@ -5566,11 +5566,11 @@ void effResetFileResources(void) {
     D_003BD954 = 0;
     D_003BD058 = 0;
     if (D_003BD060 != 0) {
-        func_002944D8(D_003BD060);
+        fileQueueDestroy(D_003BD060);
         D_003BD060 = 0;
     }
     if (D_003BD05C != 0) {
-        func_002944D8(D_003BD05C);
+        fileQueueDestroy(D_003BD05C);
         D_003BD05C = 0;
     }
     if (D_003BD06C != 0) {

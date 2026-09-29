@@ -107,9 +107,9 @@ void func_001178E0(WorldSlotData *slot) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117908);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfCreateRuntimeTask);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117998);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfDestroyRuntimeTask);
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;

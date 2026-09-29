@@ -31,6 +31,18 @@ typedef struct ScrVmOperand {
     u32 flags[0x4C];   // 0x58: eight 4-bit flag slots per word
 } ScrVmOperand;
 
+/* Profile prerequisite operands reuse +0x08 as the required threshold. */
+typedef struct PrfRequirementOperand {
+    u8 pad00[8];
+    u32 requiredValue;      /* 0x08 */
+    u8 profileIds[8];       /* 0x0C */
+} PrfRequirementOperand;
+
+typedef struct PtyGameCounter {
+    u8 pad00[0x3C];
+    u32 currency;           /* 0x3C */
+} PtyGameCounter;
+
 extern u8 D_00394680[];
 
 /* 24-byte table entries (full layout unknown; stride inferred from index math). */
@@ -122,6 +134,16 @@ extern s32 ptyTestProfileFlag0(s32, u16);
 extern u16 D_003907BC[];
 u32 ptyGetCurrentProfileRecord(ScrVmOperand *);
 s8 ptyGetCurrentProfileId(ScrVmOperand *);
+
+/* Party profile header; each party slot occupies 0x1A4 bytes in game state. */
+typedef struct PtyProfileUnit {
+    u16 flags;          /* 0x00: bit 0 indicates an occupied slot */
+    u8 pad02[2];
+    u16 unitId;         /* 0x04: profile preset table index */
+    u8 pad06[0x1C];
+    u16 skills[24];     /* 0x22 */
+} PtyProfileUnit;
+
 void func_002CC750(s32 left, s32 right) {
     s32 file = func_002FE950("debug.log", D_003BD2B8);
     if (file != 0) {
@@ -139,8 +161,8 @@ INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
 
 void ptyLoadPresetSkillSlots(u8 *work) {
-    u16 *source = D_00393AE0[*(u16 *)(work + 4)];
-    u16 *slots = (u16 *)(work + 0x22);
+    u16 *source = D_00393AE0[((PtyProfileUnit *)work)->unitId];
+    u16 *slots = ((PtyProfileUnit *)work)->skills;
     u32 index;
     index = 0;
     do {
@@ -155,7 +177,7 @@ void ptyLoadPresetSkillSlots(u8 *work) {
 }
 
 void ptyMarkPresetSkillPool(u8 *work) {
-    u16 *source = D_00393AF0[*(u16 *)(work + 4)];
+    u16 *source = D_00393AF0[((PtyProfileUnit *)work)->unitId];
     u32 index = 0;
     do {
         u16 id = *source++;
@@ -173,6 +195,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", ptyRebuildProfileSkills);
 
 void ptyRebuildProfileSkills(s32 useCurrentProfile, u8 *unit);
 
+/* Rebuild skill lists for the five occupied party slots. */
 void ptyRebuildAllProfiles(void) {
     s32 i;
     s32 offset;
@@ -180,11 +203,11 @@ void ptyRebuildAllProfiles(void) {
     for (offset = 0, i = 4; i >= 0; i--) {
         u8 *unit = (u8 *)D_003BAA00 + 0xA60 + offset;
 
-        if ((*(u16 *)unit & 1) != 0) {
+        if ((((PtyProfileUnit *)unit)->flags & 1) != 0) {
             s32 j;
 
             for (j = 0; j < 0x10; j++) {
-                if (*(u16 *)(unit + 4) == j) {
+                if (((PtyProfileUnit *)unit)->unitId == j) {
                     ptyRebuildProfileSkills(0, unit);
                 }
             }
@@ -195,8 +218,8 @@ void ptyRebuildAllProfiles(void) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyRecomputeMaxVitals);
 
-void ptyRecomputeMaxHpMp(u32 arg0) {
-    ptyRecomputeMaxVitals(arg0, 0);
+void ptyRecomputeMaxHpMp(u32 unit) {
+    ptyRecomputeMaxVitals(unit, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD0D8);
@@ -207,13 +230,14 @@ u32 prfGetCapValue(u16 i) {
     return D_003907B8[i].v0;
 }
 
-void ptySetProfileRecordToCap(u32 arg0, u16 arg1) {
-    u32 *puVar1;
-    u32 temp_v0;
+/* Clamp one profile record to its configured capacity. */
+void ptySetProfileRecordToCap(u32 unit, u16 profileId) {
+    u32 *record;
+    u32 cap;
 
-    puVar1 = (u32 *)ptyGetProfileRecord(arg0, arg1);
-    temp_v0 = prfGetCapValue(arg1);
-    *puVar1 = temp_v0;
+    record = (u32 *)ptyGetProfileRecord(unit, profileId);
+    cap = prfGetCapValue(profileId);
+    *record = cap;
 }
 
 u32 ptyAddProfilePoints(ScrVmOperand *work, s32 increment) {
@@ -295,11 +319,11 @@ s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyGetProfileRecord);
 
-u32 ptyGetProfileRecordValue(u32 arg0, u16 arg1) {
-    u32 *puVar1;
+u32 ptyGetProfileRecordValue(u32 unit, u16 profileId) {
+    u32 *record;
 
-    puVar1 = (u32 *)ptyGetProfileRecord(arg0, arg1);
-    return *puVar1;
+    record = (u32 *)ptyGetProfileRecord(unit, profileId);
+    return *record;
 }
 
 u32 ptyGetCurrentProfileRecord(ScrVmOperand *p) {
@@ -396,13 +420,13 @@ u32 ptyGetSkillNibbleState(ScrVmOperand *work, u16 index) {
     return (mask & (1U << shift)) != 0;
 }
 
-s32 ptyHasSkill(s32 arg0, s32 arg1) {
-    u32 key = arg1 & 0xFFFF;
-    u16 *p = (u16 *)(arg0 + 0x22);
+s32 ptyHasSkill(s32 unit, s32 skillId) {
+    u32 key = skillId & 0xFFFF;
+    u16 *skills = ((PtyProfileUnit *)unit)->skills;
     u32 i = 0;
 
     do {
-        if (*p++ == key) {
+        if (*skills++ == key) {
             return 1;
         }
         i++;
@@ -508,16 +532,16 @@ void func_002CDE98(u32 arg0, u32 arg1, u32 arg2) {
     memset(arg2, 0, 8);
 }
 
-u8 ptyIsCurrentProfileId(s32 arg0, u32 arg1) {
-    return (s64)*(s8 *)(arg0 + 0x55) == (arg1 & 0xffff);
+u8 ptyIsCurrentProfileId(s32 operand, u32 profileId) {
+    return (s64)((ScrVmOperand *)operand)->selectedIndex == (profileId & 0xffff);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildRawSkillList);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildSkillList);
 
-u32 prfBuildSkillListState0(u32 arg0, u32 arg1, u32 arg2) {
-    return prfBuildSkillList(arg0, arg1, arg2, 0);
+u32 prfBuildSkillListState0(u32 unit, u32 profile, u32 output) {
+    return prfBuildSkillList(unit, profile, output, 0);
 }
 
 u32 prfCountProfileList(u8 *work) {
@@ -557,7 +581,7 @@ s32 ptyReqProfileCountAtLeast(s32 state, u8 *operand) {
             }
         } while (index < count);
     }
-    if (matched < *(u32 *)(operand + 8)) {
+    if (matched < ((PrfRequirementOperand *)operand)->requiredValue) {
         return 0;
     }
     return 1;
@@ -578,7 +602,7 @@ s32 ptyAreReqProfilesInParty(u8 *operand) {
             do {
                 u8 *entry = (u8 *)D_003BAA00 + 0xa60 + offset;
                 offset += 0x1a4;
-                if ((*(u16 *)entry & 1) != 0) {
+                if ((((PtyProfileUnit *)entry)->flags & 1) != 0) {
                     if (ptyTestProfileFlag0((s32)entry, (u16)selected) != 0) {
                         present = 1;
                     }
@@ -601,8 +625,9 @@ u32 prfReqCheckUnitLevel(ScrVmOperand *operand, u8 *value) {
     return 1;
 }
 
+/* Test the global currency counter against a prerequisite threshold. */
 u32 prfReqCheckGlobalCounter(u8 *operand) {
-    if (*(u32 *)(D_003BAA00 + 0x3C) < *(u32 *)(operand + 8)) {
+    if (((PtyGameCounter *)D_003BAA00)->currency < ((PrfRequirementOperand *)operand)->requiredValue) {
         return 0;
     }
     return 1;
@@ -610,8 +635,8 @@ u32 prfReqCheckGlobalCounter(u8 *operand) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfReqEvaluateRules);
 
-void prfReq54Evaluate(u32 arg0, u32 arg1, u16 arg2) {
-    prfReqEvaluateRules(arg0, arg1, arg2, 0);
+void prfReq54Evaluate(u32 state, u32 operand, u16 requirementId) {
+    prfReqEvaluateRules(state, operand, requirementId, 0);
 }
 
 u32 prfIsRequirementExcluded(u16 i) {

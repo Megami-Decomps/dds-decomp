@@ -33,13 +33,24 @@ extern void func_002806E8(void *, u32);
 extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
-s32 func_00279B30(s32 arg0) {
-    u8 *ctx = (u8 *)func_00101A70();
-    u32 *p = (u32 *)(ctx + 0x15C);
+/* Selected party slot is reached through the menu's list at +0x7D8. */
+typedef struct SkillMenuSelection {
+    u8 pad00[0x1C];
+    u32 *index;          /* 0x1C */
+} SkillMenuSelection;
 
-    func_002806E8(p, *(u32 *)(*(u32 *)(*(u32 *)(ctx + 0x7D8) + 0x1C)));
-    *p |= 0x400;
-    ptySkillMenuBuildEquippedSlots(0, arg0);
+typedef struct SkillMenuContext {
+    u8 pad00[0x7D8];
+    SkillMenuSelection *selection; /* 0x7D8 */
+} SkillMenuContext;
+
+s32 func_00279B30(s32 menu) {
+    u8 *ctx = (u8 *)func_00101A70();
+    u32 *panel = (u32 *)(ctx + 0x15C);
+
+    func_002806E8(panel, *((SkillMenuContext *)ctx)->selection->index);
+    *panel |= 0x400;
+    ptySkillMenuBuildEquippedSlots(0, menu);
     ptySkillMenuInitPages(ctx);
     return 1;
 }

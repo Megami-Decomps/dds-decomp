@@ -1923,13 +1923,14 @@ void func_002D4380(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4398);
 
-/* DDS2 twin of DDS1 func_002944D8: destroy every queued file job. */
-void func_002D4548(FileQueue *queue) {
+/* A queued job's +0x90 word is a child pointer when flag 1 is clear; it is
+ * an ID for other job kinds. Destroy children before their parent jobs. */
+void fileQueueDestroy(FileQueue *queue) {
     FileJob *job = queue->first;
     while (job != NULL) {
         FileJob *next = job->next;
         if ((job->flags & 1) == 0) {
-            fileJobDestroy(*(FileJob **)((u8 *)job + 0x90));
+            fileJobDestroy((FileJob *)job->id);
         }
         func_002D4120(job);
         job = next;

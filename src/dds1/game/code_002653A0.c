@@ -38,8 +38,8 @@ typedef struct {
     u16 animation;  /* 0x14 */
 } TitleEntry;
 
-void func_002654E8(s32 arg0) {
-    brsStepAnimDecay(arg0);
+void func_002654E8(s32 animationState) {
+    brsStepAnimDecay(animationState);
 }
 
 u8 func_00265500(s32 value) {
@@ -79,24 +79,33 @@ extern u8 D_0036F40C[];
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 
+/* Party-unit flags and AP restriction shared by reward calculations. */
+typedef struct BrsExpUnit {
+    u16 flags;          /* 0x00: bit 1 means active party member */
+    u8 pad02[0xC];
+    u16 apStatus;       /* 0x0E: bit 6 prevents AP gain */
+} BrsExpUnit;
+
 s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
-    s32 r;
-    if (*(u16 *)(unit + 0x0E) & 0x40) {
+    s32 gain;
+    if (((BrsExpUnit *)unit)->apStatus & 0x40) {
         return 0;
     }
-    r = baseApTotal;
-    r += perUnitBonus;
-    if ((*(u16 *)(unit + 0x0) & 2) == 0) {
-        r = perUnitBonus;
-        r += baseApTotal;
+    gain = baseApTotal;
+    gain += perUnitBonus;
+    if ((((BrsExpUnit *)unit)->flags & 2) == 0) {
+        gain = perUnitBonus;
+        gain += baseApTotal;
     }
-    return r;
+    return gain;
 }
 
-s32 brsCalcExpGain(u8 *unit, s32 exp, s32 a2) {
+/* Active party members take full EXP; benched members need the half/full
+ * EXP skills (0x21F/0x220 respectively). The third caller arg is unused. */
+s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
     s32 result;
 
-    if ((*(u16 *)unit & 2) != 0) {
+    if ((((BrsExpUnit *)unit)->flags & 2) != 0) {
         result = exp;
     } else {
         result = 0;
@@ -180,18 +189,31 @@ extern s8 ptyGetCurrentProfileId(u8 *);
 extern u32 prfGetCapValue(u16);
 extern void mnuInitTitleParameters(u32 *, u32, u32, u32, u32);
 
+typedef struct BrsUnitExp {
+    u8 pad00[0x10];
+    s32 totalExp;        /* 0x10 */
+} BrsUnitExp;
+
+typedef struct BrsProgressRow {
+    u8 pad00[8];
+    u32 unit;            /* 0x08 */
+    u32 levelProgress[4]; /* 0x0C */
+    u32 profileProgress[4]; /* 0x1C */
+} BrsProgressRow;
+
+/* Set up the level and profile progress bars for one party member. */
 void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
     s32 levelDelta;
     s32 profilePoints;
 
     memset(state, 0, 0x2C);
-    *(u32 *)(state + 0x8) = (u32)entry;
+    ((BrsProgressRow *)state)->unit = (u32)entry;
     levelDelta = ptyCalcLevelUps(entry);
-    mnuInitTitleParameters((u32 *)(state + 0xC), 0x6E0, 0x50,
-        *(s32 *)(entry + 0x10) - ptyComputeTotalExp(entry, levelDelta),
+    mnuInitTitleParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
+        ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
     profilePoints = ptyAddProfilePoints(entry, 0);
-    mnuInitTitleParameters((u32 *)(state + 0x1C), 0x3C0, 0x50, profilePoints,
+    mnuInitTitleParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
         prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 

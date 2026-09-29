@@ -7,7 +7,7 @@ s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 s32 bfTaskUpdate();
 s32 func_0010C070();
 s32 bfContextCreate(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
-s32 bfParseFLW0(s32 arg0, s32 arg1);
+s32 bfParseFLW0(s32 processId, s32 option);
 s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 {
     u32 buf[4];
@@ -83,22 +83,23 @@ extern void func_0019B9A0(s32);
 extern void func_002D0918(void *);
 extern void evtUnlinkWorkNode(void *);
 
-void func_0010BD20(u8 *ctx) {
-    func_0010AC10("end <%s>\n", *(u32 *)(ctx + 0xB4) + (*(u32 *)(ctx + 0xC8) << 5));
-    if (*(u32 *)(ctx + 0xDC) != 0) {
-        func_002CFF98((void *)*(u32 *)(ctx + 0xDC));
+/* Log the process name, release its VM buffers and resource, then unlink and free it. */
+void scrProcDestroyTask(ScrProcTask *process) {
+    func_0010AC10("end <%s>\n", process->unkB4 + (process->unkC8 << 5));
+    if (process->workBuffer != 0) {
+        func_002CFF98((void *)process->workBuffer);
     }
-    if (*(u32 *)(ctx + 0xE0) != 0) {
-        func_002CFF98((void *)*(u32 *)(ctx + 0xE0));
+    if (process->auxBuffer != 0) {
+        func_002CFF98((void *)process->auxBuffer);
     }
-    if (*(s32 *)(ctx + 0xCC) >= 0) {
-        func_0019B9A0(*(s32 *)(ctx + 0xCC));
+    if (process->resourceIndex >= 0) {
+        func_0019B9A0(process->resourceIndex);
     }
-    if (*(u32 *)(ctx + 0xD8) != 0) {
-        func_002D0918((void *)*(u32 *)(ctx + 0xD8));
+    if (process->scriptHandle != 0) {
+        func_002D0918(process->scriptHandle);
     }
-    evtUnlinkWorkNode(ctx);
-    func_002CFF98(ctx);
+    evtUnlinkWorkNode(process);
+    func_002CFF98(process);
 }
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BDB8);

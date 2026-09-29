@@ -64,7 +64,7 @@ extern s32 func_0010D5F0(s32 arg0);
 extern void func_0010D608(f32 arg0);
 extern Entry1A4 *dds3FindEntry(s32 arg0);
 extern void func_00119900(s32 arg0, s32 arg1);
-extern void ptyMergeStockSkills(Entry1A4 *arg0);
+extern void ptyMergeStockSkills(Entry1A4 *unit);
 extern s32 func_00119368(s32 arg0, s32 arg1);
 extern u8 func_001A1438(void);
 extern f32 func_001A4598(void);
@@ -360,7 +360,7 @@ u32 func_0011B938(void) {
 }
 
 void func_0011B940(void) {
-    func_0010BD20(D_003BAAB4);
+    scrProcDestroyTask(D_003BAAB4);
     D_003BAAB4 = 0;
 }
 

@@ -2,6 +2,7 @@
 
 extern s32 func_0034F680(s32, s32 *, s32 *);
 
+/* Poll an asynchronous memory-card request: only status zero succeeds. */
 s32 func_002C92E8(void) {
     u32 cmdId;
     s32 status;
@@ -16,8 +17,8 @@ s32 func_002C92E8(void) {
     return -1;
 }
 
-void func_002C9328(u32 arg0, u32 arg1) {
-    func_0034FB90(arg0, 0, arg1, 0);
+void func_002C9328(u32 port, u32 request) {
+    func_0034FB90(port, 0, request, 0);
 }
 
 /* Async SDK polling: 0 pending, 1 success, -2 for SDK result -4, -1 otherwise. */
@@ -34,10 +35,11 @@ s32 mcPollSyncResult(void) {
     return 0;
 }
 
-void mcMakeDirectory(u32 arg0, u32 arg1) {
-    sceMcMkdir(arg0, 0, arg1);
+void mcMakeDirectory(u32 port, u32 path) {
+    sceMcMkdir(port, 0, path);
 }
 
+/* Treat SDK errors below -10 as a distinct memory-card failure. */
 s32 func_002C93B8(void) {
     u32 cmdId;
     s32 status;
@@ -55,10 +57,11 @@ s32 func_002C93B8(void) {
     return 0;
 }
 
-void func_002C9400(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    func_0034F9B0(arg0, 0, arg1, 0, arg3, arg2);
+void func_002C9400(u32 port, u32 path, u32 mode, u32 flags) {
+    func_0034F9B0(port, 0, path, 0, flags, mode);
 }
 
+/* Return a nonnegative SDK result through out; map -4 to -2. */
 s32 func_002C9430(s32 *out) {
     u32 cmdId;
     s32 status;
@@ -77,8 +80,8 @@ s32 func_002C9430(s32 *out) {
     return 0;
 }
 
-void func_002C9490(u32 arg0, u32 arg1) {
-    func_0034FDA8(arg0, 0, arg1);
+void func_002C9490(u32 port, u32 request) {
+    func_0034FDA8(port, 0, request);
 }
 
 s32 func_002C94B0(void) {
@@ -94,8 +97,8 @@ s32 func_002C94B0(void) {
     return 0;
 }
 
-void func_002C9500(u32 arg0, u32 arg1, u32 arg2) {
-    func_0034EFE0(arg0, 0, arg1, arg2);
+void func_002C9500(u32 port, u32 request, u32 buffer) {
+    func_0034EFE0(port, 0, request, buffer);
 }
 
 s32 func_002C9528(s32 *out) {
@@ -137,6 +140,7 @@ void func_002C95F0(void) {
     func_0034F370();
 }
 
+/* Like the result poll, but only report completion, not the SDK result. */
 s32 func_002C9608(void) {
     u32 cmdId;
     s32 status;

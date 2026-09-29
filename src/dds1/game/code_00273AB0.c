@@ -65,29 +65,45 @@ extern void func_00119900(s32, s32);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA84;
 
-/* Swap the equipped bullet item: update the actor/old/new message tokens and
- * queue the inventory delta, then latch the old/new ids in the context. */
-void func_002744E0(s32 arg0, u8 *arg1, s32 arg2) {
-    u8 *ctx = *(u8 **)(arg0 + 0x90C);
-    s32 equipped = func_00286AD0((s32)arg1);
+typedef struct MnuEquipUnit {
+    u8 pad00[4];
+    u16 unitId;              /* 0x04 */
+} MnuEquipUnit;
 
-    func_00283BF0(arg0 + 0x914, 1);
-    if (equipped != arg2) {
-        func_0024DD90(0, D_003BAA70 + *(u16 *)(arg1 + 4) * 17);
+typedef struct MnuEquipContext {
+    u8 pad00[0x1C];
+    s32 previousItem;        /* 0x1C */
+    s32 selectedItem;        /* 0x20 */
+} MnuEquipContext;
+
+typedef struct MnuEquipScene {
+    u8 pad00[0x90C];
+    MnuEquipContext *context; /* 0x90C */
+} MnuEquipScene;
+
+/* Swap the equipped bullet item: update the actor/old/new message tokens,
+ * adjust inventory counts, and latch the old/new IDs in the menu context. */
+void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
+    MnuEquipContext *ctx = ((MnuEquipScene *)scene)->context;
+    s32 equipped = func_00286AD0((s32)unit);
+
+    func_00283BF0(scene + 0x914, 1);
+    if (equipped != itemId) {
+        func_0024DD90(0, D_003BAA70 + ((MnuEquipUnit *)unit)->unitId * 17);
         func_0024DD90(1, D_003BAA84 + equipped * 25);
-        func_0024DD90(2, D_003BAA84 + arg2 * 25);
+        func_0024DD90(2, D_003BAA84 + itemId * 25);
         func_0024DA58(0);
         if (equipped != 0) {
             func_00119900(equipped, 1);
         }
-        func_00119900(arg2, -1);
-        *(s32 *)(ctx + 0x1C) = equipped;
-        *(s32 *)(ctx + 0x20) = arg2;
+        func_00119900(itemId, -1);
+        ctx->previousItem = equipped;
+        ctx->selectedItem = itemId;
     } else {
         func_0024DD90(0, D_003BAA84 + equipped * 25);
         func_0024DA58(1);
-        *(s32 *)(ctx + 0x1C) = 0;
-        *(s32 *)(ctx + 0x20) = 0;
+        ctx->previousItem = 0;
+        ctx->selectedItem = 0;
     }
 }
 

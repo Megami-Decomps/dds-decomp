@@ -47,6 +47,7 @@ u32 func_001687D0(BattleEffect *effect) {
     return effect->value14;
 }
 
+/* Mode 1 keeps the lowest value seen; other modes replace it outright. */
 void func_001687D8(BattleEffect *effect, u32 value) {
     if (effect->value1C == 1) {
         if (value < effect->value18) {

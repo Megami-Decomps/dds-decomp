@@ -65,14 +65,17 @@ void kwlnItemApplySelection(MenuItemScene *scene) {
     }
 }
 
-u32 mnuProcessItemSelection(u32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
+/* Build the capped skill list for the currently selected menu entry. */
+u32 mnuProcessItemSelection(u32 context) {
+    u32 listState;
+    s32 scene;
 
-    temp_v1 = (s32)arg0;
-    temp_v0 = ptyBuildProfileCapSkillList(**(u32 **)(temp_v1 + 0x98), temp_v1 + 0x4c4);
-    *(u32 *)(temp_v1 + 0x244) = temp_v0;
-    kwlnItemApplySelection(arg0);
+    scene = (s32)context;
+    /* Required to match: typed MenuItemScene field accesses change this
+     * compiler's alias scheduling and overrun the next retail function. */
+    listState = ptyBuildProfileCapSkillList(**(u32 **)(scene + 0x98), scene + 0x4c4);
+    *(u32 *)(scene + 0x244) = listState;
+    kwlnItemApplySelection(context);
     return 1;
 }
 
@@ -221,9 +224,9 @@ void mnuClearItemSelectionSlots(MenuItemScene *scene) {
     } while (-1 < remaining);
 }
 
-void func_00263E70(u32 arg0, u32 arg1) {
-    ptyRecomputeMaxVitals(arg0, (s32)arg1 + 0x3d0);
-    mnuRefreshSelectedUnitPanels(arg0, arg1);
+void func_00263E70(u32 unit, u32 menu) {
+    ptyRecomputeMaxVitals(unit, (s32)menu + 0x3d0);
+    mnuRefreshSelectedUnitPanels(unit, menu);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);

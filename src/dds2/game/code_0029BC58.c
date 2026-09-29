@@ -279,6 +279,7 @@ void func_0029CDD8(void) {
 
 extern u8 D_003D9D58[];
 
+/* Read the value paired with the highest of three thresholds not above input. */
 u8 func_0029CDF0(s32 value) {
     s32 i;
 
@@ -316,12 +317,19 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", ptyComputeTotalExp);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029CF00);
 
-/* DDS2 twin of DDS1 brsCalcExpGain: enemy units (flag 2) keep exp; others
-   start at 0, halve on reward flag 0x23F and restore on 0x240. */
-s32 brsCalcExpGain(u8 *unit, s32 exp, s32 a2) {
+/* Same party-unit reward header layout as DDS1, including AP status. */
+typedef struct BrsExpUnit {
+    u16 flags;          /* 0x00: bit 1 means active party member */
+    u8 pad02[0xC];
+    u16 apStatus;       /* 0x0E */
+} BrsExpUnit;
+
+/* Active party members take full EXP; benched members need the half/full
+ * EXP skills (0x23F/0x240 respectively). The third caller arg is unused. */
+s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
     s32 result;
 
-    if ((*(u16 *)unit & 2) != 0) {
+    if ((((BrsExpUnit *)unit)->flags & 2) != 0) {
         result = exp;
     } else {
         result = 0;
@@ -386,19 +394,32 @@ extern u32 func_00314728(u8 *, u32);
 extern s32 func_00314C10(s32);
 extern u32 func_00314690(u16);
 
-/* DDS2 twin of DDS1 brsBuildUnitProgressRow. */
+/* Match the progress-row layout in DDS1 game/code_002653A0.c. */
+typedef struct BrsUnitExp {
+    u8 pad00[0x10];
+    s32 totalExp;           /* 0x10 */
+} BrsUnitExp;
+
+typedef struct BrsProgressRow {
+    u8 pad00[8];
+    u32 unit;               /* 0x08 */
+    u32 levelProgress[4];   /* 0x0C */
+    u32 profileProgress[4]; /* 0x1C */
+} BrsProgressRow;
+
+/* Set up the level and profile progress bars for one party member. */
 void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
     s32 levelDelta;
     s32 profilePoints;
 
     memset(state, 0, 0x2C);
-    *(u32 *)(state + 0x8) = (u32)entry;
+    ((BrsProgressRow *)state)->unit = (u32)entry;
     levelDelta = ptyCalcLevelUps(entry);
-    mnuTitleInitFourParameters((u32 *)(state + 0xC), 0x6E0, 0x50,
-        *(s32 *)(entry + 0x10) - ptyComputeTotalExp(entry, levelDelta),
+    mnuTitleInitFourParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
+        ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
     profilePoints = func_00314728(entry, 0);
-    mnuTitleInitFourParameters((u32 *)(state + 0x1C), 0x3C0, 0x50, profilePoints,
+    mnuTitleInitFourParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
         func_00314690(func_00314C10((s32)entry) & 0xFFFF));
 }
 
@@ -986,8 +1007,8 @@ u32 func_002A3AA0(void) {
 
 void func_002A3AC0(void) {
     evtDestroyWorldSecondaryNode();
-    func_00117998();
-    func_00117908();
+    sdfDestroyRuntimeTask();
+    sdfCreateRuntimeTask();
 }
 
 extern s16 D_003E3792[];
@@ -2278,15 +2299,25 @@ void func_002A8B90(void) {
     func_002A8B78();
 }
 
-/* DDS2 twin of DDS1 func_00270B10. */
-void func_002A8BC8(void) {
-    u8 *state = D_00457E60;
+/* Copy a source word and a 0x40-byte block when their pending flags are set. */
+typedef struct MnuMovieTransfer {
+    u8 pad00[2];
+    u8 wordPending;      /* 0x02 */
+    u8 blockPending;     /* 0x03 */
+    s32 *wordSource;     /* 0x04 */
+    void *blockSource;   /* 0x08 */
+    s32 word;            /* 0x0C */
+    u8 block[0x40];      /* 0x10 */
+} MnuMovieTransfer;
 
-    if (state[2] != 0) {
-        *(s32 *)(state + 0xC) = **(s32 **)(state + 4);
+void func_002A8BC8(void) {
+    MnuMovieTransfer *state = (MnuMovieTransfer *)D_00457E60;
+
+    if (state->wordPending != 0) {
+        state->word = *state->wordSource;
     }
-    if (state[3] != 0) {
-        memcpy(state + 0x10, *(void **)(state + 8), 0x40);
+    if (state->blockPending != 0) {
+        memcpy(state->block, state->blockSource, 0x40);
     }
 }
 
@@ -2722,7 +2753,8 @@ extern s32 func_002D13F0(void);
 extern void mnuDestroyCampTasks(void);
 extern void mnuPlayInputSound();
 
-/* DDS2 twin of DDS1 func_00271FF8. */
+/* On button 8, exit the camp only when both nested guards permit it;
+ * otherwise play the alternate sound without destroying its tasks. */
 s32 func_002AA2A8(s32 menu) {
     u32 buttons = func_002C44E8(8);
     s32 result;

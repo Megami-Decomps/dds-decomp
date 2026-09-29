@@ -25,9 +25,9 @@ extern char D_003AF428[]; /* "camp_update" */
 extern void evtFormatTaskName(s32 arg0, void *arg1);
 extern void *func_002CFEB8(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 extern void func_002424B0(void);
-extern void func_00242510(void);
+extern void evtReleaseEventPackResources(void);
 
 typedef struct CampTaskData {
     s32 taskId;
@@ -45,7 +45,7 @@ void mnuCampCreateTask(s32 arg0) {
         memset(data, 0, 0x48);
         data->taskId = arg0;
         data->unk4 = 0;
-        kwlnTaskCreate(name, 0x3EC, 1, 1, func_002424B0, func_00242510, data);
+        kwlnTaskCreate(name, 0x3EC, 1, 1, func_002424B0, evtReleaseEventPackResources, data);
     }
 }
 
@@ -692,14 +692,19 @@ extern s64 mnuCampRunPanel0(u64 request);
 extern s64 mnuCampRunPanel1(u64 request);
 extern s64 mnuCampRunPanel2(u64 request);
 
-/* Create the shop message-menu context and its three tasks (shop, shop_draw,
- * shop_update), forwarding an optional selection word into the context. */
-s32 func_002449F0(s32 *arg0) {
+/* Create the camp context and its three scheduler tasks (main, draw, update).
+ * Optionally seed the initial selection from the caller. */
+typedef struct MnuCampStartContext {
+    u8 pad00[0x7C];
+    s32 initialSelection; /* 0x7C */
+} MnuCampStartContext;
+
+s32 func_002449F0(s32 *initialSelection) {
     u8 *ctx = func_002448D0();
     s32 result;
 
-    if (arg0 != 0) {
-        *(s32 *)(ctx + 0x7C) = *arg0;
+    if (initialSelection != 0) {
+        ((MnuCampStartContext *)ctx)->initialSelection = *initialSelection;
     }
     kwlnTaskCreate(D_003BC3A0, 0x402, 1, 1, mnuCampRunPanel0, 0, ctx);
     kwlnTaskCreate(D_003AF418, 0x2B12, 1, 1, mnuCampRunPanel1, 0, ctx);

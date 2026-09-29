@@ -21,19 +21,18 @@ extern void *func_00328D68(s32 size);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 extern char D_00424890[];
 
-/* DDS2 twin of DDS1 func_00242298: sprintf the motion-SE task name, alloc a
-   3-word param block, and spawn the task (update func_0025D4D0). */
-void func_0025D6B0(s32 a0, s32 a1, s32 a2) {
-    char buf[0x20];
-    s32 *obj;
+/* Allocate a three-word task parameter block and format its "mse_..." name. */
+void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
+    char taskName[0x20];
+    s32 *params;
 
-    func_0035C860(buf, D_00424890, a1, a2);
-    obj = func_00328D68(0xC);
-    memset(obj, 0, 0xC);
-    obj[0] = a0;
-    obj[1] = a1;
-    obj[2] = a2;
-    kwlnTaskCreate(buf, 0x3EC, 0, 0, func_0025D4D0, evtFreeEventPackState, obj);
+    func_0035C860(taskName, D_00424890, namePart1, namePart2);
+    params = func_00328D68(0xC);
+    memset(params, 0, 0xC);
+    params[0] = taskArg;
+    params[1] = namePart1;
+    params[2] = namePart2;
+    kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_0025D4D0, evtFreeEventPackState, params);
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_00424890);
@@ -55,40 +54,56 @@ extern void func_003298C0(s32);
 extern void func_003297C8(s32);
 extern void func_00328E48(s32);
 
-/* DDS2 twin of DDS1 func_00242510: release every effect/resource the battle-
-   event work holds, then free it. */
-void func_0025D928(void) {
+/* Keep this task resource layout identical to DDS1's EvtPackResources. */
+typedef struct EvtPackResources {
+    u8 pad00[8];
+    s32 objectHandle;        /* 0x08 */
+    s32 resourceHandle;      /* 0x0C */
+    u8 pad10[0x14];
+    s32 sceneAllocation1;    /* 0x24 */
+    u8 pad28[8];
+    s32 sceneAllocation2;    /* 0x30 */
+    u8 pad34[4];
+    s32 effect72;            /* 0x38 */
+    s32 effect71;            /* 0x3C */
+    s32 effect76;            /* 0x40 */
+    s32 effect75;            /* 0x44 */
+} EvtPackResources;
+
+/* Release the owned effect channels and handles before freeing the task. */
+void evtReleaseEventPackResources(void) {
     s32 obj = func_00101958();
+    EvtPackResources *resources = (EvtPackResources *)obj;
 
     func_002C81E8();
     if (obj != 0) {
-        if (*(s32 *)(obj + 0x38) != 0) {
+        if (resources->effect72 != 0) {
             effInitCh72Id();
-            func_0032BBB0(*(s32 *)(obj + 0x38));
+            func_0032BBB0(resources->effect72);
         }
-        if (*(s32 *)(obj + 0x3C) != 0) {
+        if (resources->effect71 != 0) {
             effInitCh71Id();
-            func_0032BBB0(*(s32 *)(obj + 0x3C));
+            func_0032BBB0(resources->effect71);
         }
-        if (*(s32 *)(obj + 0x40) != 0) {
+        if (resources->effect76 != 0) {
             effInitCh76Id();
-            func_0032BBB0(*(s32 *)(obj + 0x40));
+            func_0032BBB0(resources->effect76);
         }
-        if (*(s32 *)(obj + 0x44) != 0) {
+        if (resources->effect75 != 0) {
             effInitCh75Id();
-            func_0032BBB0(*(s32 *)(obj + 0x44));
+            func_0032BBB0(resources->effect75);
         }
-        if (*(s32 *)(obj + 8) != 0) {
-            func_002C7D00(*(s32 *)(obj + 8));
+        if (resources->objectHandle != 0) {
+            func_002C7D00(resources->objectHandle);
         }
-        if (*(s32 *)(obj + 0xC) != 0) {
-            func_003298C0(*(s32 *)(obj + 0xC));
+        if (resources->resourceHandle != 0) {
+            func_003298C0(resources->resourceHandle);
         }
-        if (*(s32 *)(obj + 0x24) != 0) {
-            func_003297C8(*(s32 *)(obj + 0x24));
+        if (resources->sceneAllocation1 != 0) {
+            func_003297C8(resources->sceneAllocation1);
         }
-        if (*(s32 *)(obj + 0x30) != 0) {
-            func_003297C8(*(s32 *)(obj + 0x30));
+        if (resources->sceneAllocation2 != 0) {
+            func_003297C8(resources->sceneAllocation2);
         }
     }
     func_00328E48(obj);

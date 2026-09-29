@@ -89,7 +89,7 @@ extern void func_00113438(void *arg0, s32 arg1);
 extern s32 func_0010D6A0(void);
 extern void func_0010AC10(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
-extern s32 func_00242298(s32 arg0, s32 arg1, s32 arg2);
+extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 extern s32 evtFindTaskById(s32 arg0);
 extern void func_00101A80(s32 arg0, s32 arg1);
 extern void func_002223D8(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -233,7 +233,7 @@ u32 func_00223B68(void) {
     }
     param0 = func_0010D428(0);
     rid = func_0010D428(1);
-    ret = func_00242298(model, param0, rid);
+    ret = evtCreateMotionSeTask(model, param0, rid);
     if (ret != 0) {
         func_00101A80(evtFindTaskById(func_0010D428(0)), ret);
     }

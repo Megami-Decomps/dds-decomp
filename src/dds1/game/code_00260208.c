@@ -168,24 +168,32 @@ void func_00262038(s32 arg0) {
 
 extern s32 ptyComputeTotalExp(u8 *, s32);
 
+typedef struct BrsUnitExperience {
+    u8 pad00[0x10];
+    u32 totalExp;       /* 0x10 */
+    u16 level;          /* 0x14 */
+} BrsUnitExperience;
+
+/* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(u32 *unit) {
     u8 buf[0x1A4];
     s32 exp;
 
     memcpy(buf, unit, 0x1A4);
-    *(u16 *)(buf + 0x14) = 0x63;
+    ((BrsUnitExperience *)buf)->level = 0x63;
     exp = ptyComputeTotalExp(buf, 0);
-    if (exp < unit[4]) {
-        unit[4] = exp;
+    if (exp < ((BrsUnitExperience *)unit)->totalExp) {
+        ((BrsUnitExperience *)unit)->totalExp = exp;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
-void brsApplyRewardBundle(u32 arg0, u32 arg1, u32 arg2) {
-    func_00261FD8(arg1);
-    func_00262038(arg1);
-    brsApplyPartyRewards(arg0, arg2);
+/* Apply item/icon rewards before awarding the party's accumulated gains. */
+void brsApplyRewardBundle(u32 partyWork, u32 rewardWork, u32 rewardState) {
+    func_00261FD8(rewardWork);
+    func_00262038(rewardWork);
+    brsApplyPartyRewards(partyWork, rewardState);
 }
 
 extern void func_002762D8(s32 *);
@@ -196,18 +204,52 @@ extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void func_00287450(s32);
 extern void mnuForwardTableByte(s32);
 
+/* Fields of the battle-result panel needed while opening its skill package. */
+typedef struct BrsSkillPackageWork {
+    u8 pad00[0x90];
+    s32 unitHandle;          /* 0x090 */
+    u8 pad94[0x1AC];
+    s32 selectedRow;         /* 0x240 */
+    u8 pad244[0x2B4];
+    s32 group[2];            /* 0x4F8 */
+    s32 spriteArg0;          /* 0x500 */
+    u8 pad504[8];
+    s32 spriteArg1;          /* 0x50C */
+    u8 pad510[4];
+    s32 panelGroup;          /* 0x514 */
+    u8 pad518[0x7F8];
+    s32 panelHandle;         /* 0xD10 */
+    s32 spriteHandle;        /* 0xD14 */
+} BrsSkillPackageWork;
+
+typedef struct BrsSelectedRow {
+    s32 unit;                 /* 0x00: pointer to a party unit */
+    u8 pad04[0x14];
+} BrsSelectedRow;            /* 0x18 */
+
+typedef struct BrsRowUnit {
+    u8 pad00[4];
+    u16 unitId;              /* 0x04 */
+} BrsRowUnit;
+
+/* Create the group and sprite backing the skill-package panel for the
+ * selected reward row, then forward its unit's ID to the menu. */
 void brsOpenSkillPackagePanel(s32 work) {
-    s32 *group = (s32 *)(work + 0x4F8);
+    s32 *group = ((BrsSkillPackageWork *)work)->group;
     s32 panel;
 
     func_002762D8(group);
     func_00271480(work + 0x680, group, 0, work + 0x574);
-    panel = mnuCreatePanelGroup(*(s32 *)(work + 0x514));
-    *(s32 *)(work + 0xD10) = panel;
-    mnuUpdateFiveListEntries(panel, *(s32 *)(work + 0x90));
-    *(s32 *)(work + 0xD14) = mnuCreateSpriteState(*(s32 *)(work + 0x50C), *(s32 *)(work + 0x500), *(s32 *)(work + 0x514));
+    panel = mnuCreatePanelGroup(((BrsSkillPackageWork *)work)->panelGroup);
+    ((BrsSkillPackageWork *)work)->panelHandle = panel;
+    mnuUpdateFiveListEntries(panel, ((BrsSkillPackageWork *)work)->unitHandle);
+    ((BrsSkillPackageWork *)work)->spriteHandle =
+        mnuCreateSpriteState(((BrsSkillPackageWork *)work)->spriteArg1,
+                             ((BrsSkillPackageWork *)work)->spriteArg0,
+                             ((BrsSkillPackageWork *)work)->panelGroup);
     func_00287450(0);
-    mnuForwardTableByte(*(u16 *)(*(s32 *)(work + *(s32 *)(work + 0x240) * 24 + 0x2CC) + 4));
+    mnuForwardTableByte(((BrsRowUnit *)
+        (((BrsSelectedRow *)(work + 0x2CC))[((BrsSkillPackageWork *)work)->selectedRow].unit))->unitId);
 }
 
 void func_00262398(s32 arg0) {
@@ -284,23 +326,49 @@ s32 func_002624C0(s32 work) {
 
 extern s32 D_003BAA00;
 
-extern s32 D_003BAA00;
+/* Five party slots, followed by the number of reward rows in this batch. */
+typedef struct BrsRewardRow {
+    s32 unit;           /* 0x00 */
+    s32 amount;         /* 0x04 */
+    u8 pad08[0x10];
+} BrsRewardRow;
 
+typedef struct BrsRewardBatch {
+    BrsRewardRow rows[5]; /* 0x00 */
+    s32 count;            /* 0x78 */
+} BrsRewardBatch;
+
+typedef struct BrsPartyRow {
+    s32 flags;          /* 0x00 */
+    s32 amount;         /* 0x04 */
+    u8 pad08[0x24];
+} BrsPartyRow;
+
+typedef struct BrsRewardUnit {
+    u16 flags;          /* 0x00: bit 0 indicates an occupied party slot */
+} BrsRewardUnit;
+
+typedef struct BrsTaskState {
+    u8 pad00[0x344];
+    s32 pendingRows;    /* 0x344 */
+} BrsTaskState;
+
+/* Match each reward record to the five active party units and tag its row. */
 void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
     s32 i;
 
-    for (i = 0; i < *(s32 *)(state + 0x78); i++) {
+    for (i = 0; i < ((BrsRewardBatch *)state)->count; i++) {
         u8 *d = dst;
         u8 *unit = *(u8 **)&D_003BAA00 + 0xA60;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
-            if ((*(u16 *)unit & 1) != 0) {
-                s32 *row = (s32 *)(state + i * 24);
-                if (*row == (s32)unit) {
-                    *(s32 *)d |= flags;
+            if ((((BrsRewardUnit *)unit)->flags & 1) != 0) {
+                BrsRewardRow *row = &((BrsRewardBatch *)state)->rows[i];
+                if (row->unit == (s32)unit) {
+                    ((BrsPartyRow *)d)->flags |= flags;
                     if (flags & 2) {
-                        *(s32 *)(d + 4) = row[1];
+                        ((BrsPartyRow *)d)->amount = row->amount;
                     }
                 }
             }
@@ -310,13 +378,14 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
     }
 }
 
-void func_00262600(u32 arg0, u32 arg1, u32 arg2) {
-    brsMarkPartyRows(arg0, arg1, 2);
-    brsMarkPartyRows(arg0, arg2, 1);
+void func_00262600(u32 partyRows, u32 primaryRewards, u32 secondaryRewards) {
+    brsMarkPartyRows(partyRows, primaryRewards, 2);
+    brsMarkPartyRows(partyRows, secondaryRewards, 1);
 }
 
-void brsTaskLatchPendingRows(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x344) == 0) {
+/* Latch whether the battle-result task still has pending reward rows. */
+void brsTaskLatchPendingRows(s32 task) {
+    if (((BrsTaskState *)task)->pendingRows == 0) {
         D_003BC529 = 0;
     } else {
         D_003BC529 = 1;
@@ -430,7 +499,7 @@ s32 func_00262A88(void) {
     return func_002877A8() != 1;
 }
 
-void mnuRefreshSelectedUnitPanels(u32 arg0, s32 menu) {
+void mnuRefreshSelectedUnitPanels(u32 unused, s32 menu) {
     initPartyPanelSlots(menu + 0x574);
     menuUpdateHandleStates(menu + 0x680);
     func_00280048(menu + 0x680);

@@ -58,8 +58,14 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_00119300);
 
 extern s32 func_00119300(u8 *, s32);
 
+typedef struct DatUnitStatus {
+    u8 pad00[0xE];
+    u16 status;          /* 0x0E */
+} DatUnitStatus;
+
+/* Units with the 0x1000 status bypass the normal stat eligibility test. */
 s32 func_00119368(u8 *unit, s32 statIndex) {
-    if ((*(u16 *)(unit + 0xE) & 0x7FFF) == 0x1000) {
+    if ((((DatUnitStatus *)unit)->status & 0x7FFF) == 0x1000) {
         return 1;
     }
     return func_00119300(unit, statIndex);
@@ -87,15 +93,21 @@ s32 func_00119880(UiObject *object) {
 
 extern s32 D_003BAA00;
 
+typedef struct DatGameCounters {
+    u8 pad00[0x3C];
+    s32 currency;        /* 0x3C: clamped to 0..9,999,999 */
+} DatGameCounters;
+
+/* Add to the party's currency counter, saturating at either bound. */
 s32 func_001198B8(s32 delta) {
-    s32 value = *(s32 *)(D_003BAA00 + 0x3C) + delta;
+    s32 value = ((DatGameCounters *)D_003BAA00)->currency + delta;
     if (value < 0) {
         value = 0;
     }
     if (value > 0x98967F) {
         value = 0x98967F;
     }
-    *(s32 *)(D_003BAA00 + 0x3C) = value;
+    ((DatGameCounters *)D_003BAA00)->currency = value;
     return value;
 }
 

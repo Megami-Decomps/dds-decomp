@@ -37,6 +37,8 @@ s32 func_0010D7A0(void)
     return scrGetCommandTimer() != 0;
 }
 
+/* Succeed when the command timer reaches the requested tick count; a
+ * nonpositive request completes immediately. */
 s32 func_0010D7C0(void) {
     if (func_0010D428(0) <= 0) {
         return 1;
