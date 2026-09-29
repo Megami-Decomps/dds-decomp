@@ -592,7 +592,140 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A6F0);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012AC90);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012ADA0);
+extern void fldClearMenuEntries();
+extern void fldDestroyTitleTask();
+extern void fldFreeSceneResources();
+extern void fldPlayPendingSounds();
+extern void fldReleaseObjectSlots();
+extern void fldReleaseResourceSlots();
+extern void fldReleaseTextureSlots();
+extern void fldResetObjectSlots();
+extern void fldResetRecordState();
+extern s32 fldTitleMiniIsActive();
+extern void func_0013B818();
+extern void func_00144598();
+extern void func_001457E0();
+extern void func_0014A228();
+extern void func_0014B748();
+extern void kwlnTaskDestroyWithHierarchyByName();
+extern void mnuReleaseResourceEntries();
+extern void sdfResourceListRelease();
+extern u32 D_00444930[];
+extern u32 D_00444940[];
+extern s32 D_00435FA0;
+extern s32 D_00435FA4;
+extern FldTransferChunk *D_00435FA8;
+extern u32 D_00435FAC;
+extern FldTransferChunk *D_00435FB0;
+extern u32 D_00435FB4;
+extern FldTransferChunk *D_00435FB8;
+extern u32 D_00435FBC;
+extern FldDisplayWork *D_00435FC8;
+extern s32 D_00435FDC;
+extern u32 D_00435FE0;
+extern u32 D_00435FE4;
+extern u32 D_00435FE8;
+extern u32 D_00435FEC;
+
+void func_0012ADA0(void) {
+    s32 i;
+    FldDisplayNode *node;
+
+    func_0012DC98();
+    fldPlayPendingSounds();
+    fldDestroyTitleTask();
+    if (fldTitleMiniIsActive() != 0) {
+        kwlnTaskDestroyWithHierarchyByName("fldTitleMini", 1);
+    }
+    fldReleaseObjectSlots();
+    fldResetObjectSlots();
+    if (D_00389770[4] < 0xC8) {
+        if (D_00389770[8] != 0) {
+            if ((u32)(D_00389770[4] - 0x1B) < 2U) {
+                fldReleaseResourceSlots(D_00389770);
+                func_0014A228();
+                func_001457E0();
+                fldReleaseAreaResourceCache();
+            }
+        } else {
+            fldReleaseResourceSlots(D_00389770);
+            func_0014A228();
+            func_001457E0();
+            fldFreeSceneResources();
+            fldReleaseAreaResourceCache();
+            func_00134790();
+        }
+        fldResetRecordState();
+        func_0013B818();
+        func_00144598();
+        fldClearMenuEntries();
+        mnuReleaseResourceEntries();
+        fldReleaseTextureSlots();
+        func_0014B748();
+    }
+    sdfResourceListRelease(D_00435FA4, 1);
+    D_00435FA4 = 0;
+    for (i = 0; i < 4; i++) {
+        if (D_00444930[i] != 0) {
+            func_003298C0(D_00444930[i]);
+            D_00444930[i] = 0;
+            D_00444940[i] = 0;
+        }
+    }
+    if (D_00435FC0 != 0) {
+        if (D_00435FA8 != 0) {
+            func_00129E78(D_00435FAC, D_00435FA8);
+            D_00435FA8 = 0;
+            D_00435FAC = 0;
+        }
+        if (D_00435FB0 != 0) {
+            func_00129E78(D_00435FB4, D_00435FB0);
+            D_00435FB0 = 0;
+            D_00435FB4 = 0;
+        }
+        if (D_00435FB8 != 0) {
+            func_00129E78(D_00435FBC, D_00435FB8);
+            D_00435FB8 = 0;
+            D_00435FBC = 0;
+        }
+    }
+    D_00435FA0 = 0;
+    D_00435FDC = 0;
+    if (D_00435FE0 != 0) {
+        func_003298C0(D_00435FE0);
+        D_00435FE0 = 0;
+    }
+    if (D_00435FE4 != 0) {
+        func_003298C0(D_00435FE4);
+        D_00435FE4 = 0;
+    }
+    if (D_00435FE8 != 0) {
+        func_003298C0(D_00435FE8);
+        D_00435FE8 = 0;
+    }
+    if (D_00435FEC != 0) {
+        func_003298C0(D_00435FEC);
+        D_00435FEC = 0;
+    }
+    if (D_00389770[4] < 0xC8 && D_00389770[7] != D_00389770[4]) {
+        D_00389770[7] = D_00389770[4];
+    }
+    if (D_00435FC8 != 0) {
+        node = D_00435FC8->objects;
+        i = 0;
+        if (node != 0) {
+            do {
+                if (i > 0) {
+                    func_003298C0(node->displayObject);
+                }
+                node = node->next;
+                i++;
+            } while (node != 0);
+        }
+        func_002C7CE8(D_00435FC8);
+        D_00435FC8 = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", fldFormatAreaDirectory);
 

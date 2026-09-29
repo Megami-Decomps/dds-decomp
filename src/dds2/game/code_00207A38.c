@@ -37,6 +37,16 @@ typedef struct BtlList {
     s32 count;
 } BtlList;
 
+typedef struct BtnUv {
+    s32 u;
+    s32 v;
+} BtnUv;
+
+typedef struct BtnSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct BtnSurface *, void *);
+} BtnSurface;
+
 typedef struct BtlState {
     u8 unk_000[0x24C];
     BtlUnit *units;
@@ -853,7 +863,68 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002097E8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209978);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002099C0);
+extern BtnUv D_003BE130[];
+extern BtnUv D_003BE138[];
+extern BtnUv D_003BE140[];
+extern BtnUv D_003BE148[];
+extern BtnUv D_003BE150[];
+extern BtnUv D_003BE158[];
+extern BtnUv D_003BE160[];
+extern BtnUv D_003BE168[];
+extern BtnUv D_003BE170[];
+extern BtnUv D_003BE178[];
+extern BtnUv D_003BE180[];
+extern BtnUv D_003BE188[];
+extern BtnUv D_003BE190[];
+extern BtnUv D_003BE198[];
+extern BtnUv D_003BE1A0[];
+extern s32 func_002DDD60();
+extern void func_00330068();
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfResetPacketList(void *);
+
+void func_002099C0(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s32 c3, s32 button) {
+    BtnUv *uv;
+    s32 tex;
+    void *list;
+    s32 px;
+    s32 py;
+
+    button &= 0x7FFF;
+    if (button != 0) {
+        switch (button) {
+        case 1: uv = D_003BE130; break;
+        case 2: uv = D_003BE138; break;
+        case 4: uv = D_003BE140; break;
+        case 8: uv = D_003BE148; break;
+        case 0x10: uv = D_003BE150; break;
+        case 0x20: uv = D_003BE158; break;
+        case 0x40: uv = D_003BE160; break;
+        case 0x80: uv = D_003BE168; break;
+        case 0x100: uv = D_003BE170; break;
+        case 0x200: uv = D_003BE178; break;
+        case 0x400: uv = D_003BE180; break;
+        case 0x800: uv = D_003BE188; break;
+        case 0x1000: uv = D_003BE190; break;
+        case 0x2000: uv = D_003BE198; break;
+        case 0x4000: uv = D_003BE1A0; break;
+        default: uv = 0; break;
+        }
+        tex = func_002DDD60(surface, *(s32 *)(func_001AA6F8() + 0x4E8));
+        list = sdfAllocPacketAligned(0x20);
+        sdfResetPacketList(list);
+        sdfConsCreateDrawPacket(list, tex, 0);
+        px = x * 0x10;
+        py = y * 8;
+        func_00330068(list, 0x40,
+                      px + 0x7000, py + 0x7900, uv->u * 0x10, uv->v * 0x10, c0,
+                      px + 0x7200, py + 0x7900, uv->u * 0x10 + 0x200, uv->v * 0x10, c1,
+                      px + 0x7000, py + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, c2,
+                      px + 0x7200, py + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, c3,
+                      0xFF0000, 0);
+        surface->submit(surface, list);
+    }
+}
 
 void func_00209CD0(void) {
     func_0020D128((s32)"btl:[%s]\n", D_00436AF0);
@@ -2450,7 +2521,7 @@ s32 func_0020D320(s32 arg0) {
     return 0;
 }
 
-void func_0020D370(void) {
+void func_0020D370(s32 dir) {
     if (D_00438B66 == 0) {
         return;
     }

@@ -346,6 +346,7 @@ typedef struct FileJob {
 extern FileJob *fileCreateJob(u16 type);
 
 extern void fileJobFreePrimaryBuffer(FileJob *job);
+extern void fileJobFreeSecondaryBuffer(FileJob *job);
 
 typedef struct FileTypeCallbacks {
     void *(*create)(void *, u16);
@@ -1684,7 +1685,15 @@ void *fileResolveSecondaryBuffer(FileJob *job) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D34B8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileJobDestroy);
+void fileJobDestroy(FileJob *job) {
+    void *data = job->data;
+    if (data != NULL) {
+        D_003E9168[job->type].destroy(data);
+    }
+    fileJobFreePrimaryBuffer(job);
+    fileJobFreeSecondaryBuffer(job);
+    func_00328E48(job);
+}
 
 void fileJobFreePrimaryBuffer(FileJob *job) {
     void *buffer = job->slots[0].allocation;
