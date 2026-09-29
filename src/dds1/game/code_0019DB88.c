@@ -1491,9 +1491,9 @@ f32 func_001A8FF0(s32 object, s32 unused, s32 index) {
 }
 
 f32 func_001A9068(s32 unused0, s32 unused1, s32 index) {
-    s32 tableClass = *(u16 *)(D_003BAA50 + index * 56 + 0x1A);
-    if (tableClass < 14) {
-        if (tableClass >= 12) {
+    s32 category = *(u16 *)(D_003BAA50 + index * 56 + 0x1A);
+    if (category < 14) {
+        if (category >= 12) {
             return 1.0f;
         }
     }
@@ -3352,10 +3352,10 @@ void func_001C7360(void) {
 }
 
 s32 fldGetSceneDescriptorProperty(void) {
-    s32 nextNode;
+    s32 temp_v0;
 
-    nextNode = *(s32 *)(func_001A17F0() + 0x208);
-    return D_00359A90[nextNode * 3];
+    temp_v0 = *(s32 *)(func_001A17F0() + 0x208);
+    return D_00359A90[temp_v0 * 3];
 }
 
 s32 *fldGetActorSceneGroupResource(s32 *object) {
@@ -4372,7 +4372,19 @@ u8 *func_001D3B10(u8 *arg0, u16 arg1) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D3B98);
+u32 func_001D3B98(s32 arg0) {
+    s32 context = func_001A17F0();
+
+    if (((s32 *)arg0)[1] == 0) {
+        return 1;
+    }
+    if (*(u32 *)(((s32 *)arg0)[0] + 0x110) & 0x400) {
+        return 1;
+    }
+    *(s32 *)(context + 0x2CC) += ((s32 *)arg0)[1];
+    func_001FB0A8("btl:epall=%d[%d](packet)\n", *(s32 *)(context + 0x2CC), ((s32 *)arg0)[1]);
+    return 1;
+}
 
 extern u32 func_001D3B98(s32);
 
@@ -4392,7 +4404,19 @@ u8 *func_001D3C08(u8 *owner, s32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001D3C90);
+u32 func_001D3C90(void *arg0) {
+    s32 context = func_001A17F0();
+
+    if (((s32 *)arg0)[1] == 0) {
+        return 1;
+    }
+    if (*(u32 *)(((s32 *)arg0)[0] + 0x110) & 0x400) {
+        return 1;
+    }
+    *(s32 *)(context + 0x2C0) += ((s32 *)arg0)[1];
+    func_001FB0A8("btl:money=%d[%d](packet)\n", *(s32 *)(context + 0x2C0), ((s32 *)arg0)[1]);
+    return 1;
+}
 
 extern u32 func_001D3C90(void *);
 
@@ -6836,8 +6860,8 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_001E4E50);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001E5198);
 
-void func_001E5460(u32 context) {
-    func_001E2878(context, context);
+void func_001E5460(u32 arg0) {
+    func_001E2878(arg0, arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001E5478);
@@ -7698,7 +7722,26 @@ u32 func_001F1728(u32 *args) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F17C0);
+void *func_001F17C0(u32 effect, u8 *actor, u16 frames, u32 channel, u32 volume) {
+    u8 *task = func_001D4748(24);
+    u32 *arguments;
+
+    task[0] = 1;
+    task[0x10] = 0;
+    *(u16 *)(task + 0x20) = 0x2E;
+    *(u64 *)(task + 0x40) = *(u64 *)(actor + 0x108);
+    *(void **)(task + 0x48) = func_001F1710;
+    *(void **)(task + 0x4C) = func_001F1728;
+    *(u32 *)(task + 0x50) = 0;
+    arguments = (u32 *)func_001D47D8((s32)task);
+    arguments[0] = effect;
+    arguments[2] = (u32)actor;
+    *(u16 *)(arguments + 1) = frames;
+    arguments[3] = channel;
+    arguments[4] = volume;
+    arguments[5] = 0;
+    return task;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F1888);
 
@@ -7747,7 +7790,17 @@ u8 *func_001F19B8(u32 soundId, const char *filename) {
 }
 
 extern u32 func_001F1A58(void);
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F1A58);
+u32 func_001F1A58(void) {
+    s32 context = func_001A17F0();
+    s32 unit;
+
+    if (*(u32 *)(context + 0x1F4) & 0x40000000) {
+        return 1;
+    }
+    for (unit = *(s32 *)(context + 0x228); unit != 0; unit = *(s32 *)(unit + 0x344)) {
+    }
+    return 1;
+}
 
 void *func_001F1AC0(u32 sound) {
     u8 *task = func_001D4748(4);
@@ -8231,7 +8284,19 @@ void *func_001F3118(s32 owner, s32 index) {
     return link;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_001F3188);
+void func_001F3188(s32 *args) {
+    f32 pos[4];
+
+    if (func_002D9E98(*(s32 *)(args[1] + 0x18), 1) == 0) {
+        func_00217F70(args[1]);
+        VU_STORE10(pos);
+        pos[1] -= 150.0f;
+    } else {
+        VU_STORE10(pos);
+    }
+    func_00294670(args[0], pos);
+    func_00294330(args[0]);
+}
 
 void func_001F3200(u32 arg0) {
     func_002944D8(*(u32 *)arg0);
