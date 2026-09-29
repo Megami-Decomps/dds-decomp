@@ -4,6 +4,7 @@
 typedef struct { s32 active; s32 pos; } SlideBar;
 
 extern s32 func_002A46C8(s32);
+extern s32 D_003E38A0[];
 
 extern s32 D_00437A40;
 
@@ -13,7 +14,16 @@ extern void func_002A3C58(void);
 
 extern s16 D_003E3792[];
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3AE8);
+/* Sprite table entry: graphic slot in the work area, draw parameter, offsets */
+typedef struct { s16 gfx; s16 unk2; s16 x; s16 y; } SprEntry;
+typedef struct { s32 unk0; s32 gfx[1]; } SprWork;
+
+extern SprEntry D_003E3790[];
+
+s32 func_002A3AE8(u32 index) {
+    SprWork *work = (SprWork *)D_00437A40;
+    return work->gfx[D_003E3790[index].gfx];
+}
 
 s16 func_002A3B10(u32 index) {
     return D_003E3792[index * 4];
@@ -43,7 +53,9 @@ void func_002A3BE0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3C58);
+void func_002A3C58(void) {
+    func_002B81C8(*(s32 *)(D_00437A40 + 0x24));
+}
 
 u32 func_002A3C78(void) {
     return **(u32 **)(*(s32 *)(D_00437A40 + 0x24) + 0x1c);
@@ -109,19 +121,49 @@ s64 mnuStartMovieMenuSfx16(s32 arg0) {
     return func_002A3B28(0, 0, 0, arg0, 0, 0x1F, 0x53);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3F28);
+void func_002A3F28(u32 work) {
+    func_002A3B28(0, 0, 0, work, 0, 0x20, 0x53);
+}
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3F60);
+void func_002A3F60(u32 work) {
+    func_002A3B28(0, 0, 0, work, 0, 0x21, 0x53);
+}
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3F98);
+void func_002A3F98(u32 *work, s32 state) {
+    switch (state) {
+    case 2:
+        work[1] = 0;
+        state = 0;
+        break;
+    case 3:
+        work[1] = 0x200;
+        state = 1;
+        break;
+    default:
+        break;
+    }
+    work[0] = state;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3FE0);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A40C8);
+void func_002A40C8(u32 *state, u32 mode) {
+    switch (mode) {
+    case 2: state[1] = 0; mode = 0; break;
+    case 3: mode = 1; state[1] = 0x200; break;
+    }
+    state[0] = mode;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4110);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A41C0);
+void func_002A41C0(u32 *state, u32 mode) {
+    switch (mode) {
+    case 2: state[2] = 0; mode = 0; break;
+    case 3: mode = 1; state[2] = 0x80; break;
+    }
+    state[0] = mode;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4208);
 
@@ -175,7 +217,25 @@ void titlePickRandomSlot(list)
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A44C0);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4670);
+void func_002A4670(u32 *work, s32 state) {
+    switch (state) {
+    case 2:
+        work[1] = 0;
+        work[0x1c] = 0;
+        work[0x1b] = 0;
+        state = 0;
+        break;
+    case 3:
+        work[1] = 0x80;
+        work[0x1b] = 0;
+        work[0x1c] = 0x80;
+        state = 1;
+        break;
+    default:
+        break;
+    }
+    work[0] = state;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A46C8);
 
@@ -223,7 +283,20 @@ s32 func_002A47E8(s32 position) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4870);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A48F0);
+void func_002A48F0(s32 position, s32 *outX, s32 *outY) {
+    s32 segment = func_002A47E8(position);
+    s32 start = func_002A4770(segment);
+    s32 end = func_002A4870(segment);
+    s32 x0 = D_003E38A0[segment + 8];
+    s32 y0 = D_003E38A0[segment + 12];
+    s32 dx = D_003E38A0[segment + 9] - x0;
+    s32 dy = D_003E38A0[segment + 13] - y0;
+    s32 offset = position - start;
+    s32 span = end - start;
+
+    *outX = x0 + dx * offset / span;
+    *outY = y0 + dy * offset / span;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A49C0);
 
@@ -259,11 +332,20 @@ void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4DF0);
-
 typedef struct { s32 active; s32 pos; s32 id; s32 timer; } SlideBarTimed;
 
-extern void func_002A4DF0(SlideBarTimed *, s32, s32);
+void func_002A4DF0(SlideBarTimed *bar, s32 mode, s32 timer) {
+    bar->timer = timer;
+    if (timer > 0) {
+        bar->id = mode;
+        return;
+    }
+    switch (mode) {
+    case 2: bar->pos = 0; mode = 0; break;
+    case 3: mode = 1; bar->pos = 0x200; break;
+    }
+    bar->active = mode;
+}
 
 extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
 
