@@ -132,6 +132,8 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   in the slot, then `li $4,1`) instead of `xori`/`sltiu` comes from a
   `return` in both arms, which cross-jumping merges:
   `if (g() == 1) { f(1); return 1; } f(0); return 1;` (`fldSetFlagFromWorld1`).
+- A loop that retail closes with `bne` against a hoisted `li $rN,K` is written
+  with `!=` (`i != 2`); a `<` test becomes a count-down loop.
 
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 

@@ -58,6 +58,7 @@ extern u128 D_003F9890;
 extern f32 D_003BDA30;
 extern void *func_002CFEB8(s32 size);
 extern u8 D_003F98A0[];
+extern u128 *D_003EB860[][3];
 extern void *D_003BD37C;
 extern void *D_003BD380;
 extern void *D_003BD390;
@@ -67,28 +68,9 @@ extern void *func_002E1428(void *, s64, s64, s64, s32);
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 extern void *sdfAllocPacketAligned(s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
-extern s16 D_003BDA24;
+extern s32 sdfGetPacketCursor(void);
+extern u16 D_003BDA24;
 extern s32 D_003BDA20;
-
-typedef struct {
-    u8 pad00[0x40];
-    u16 param0;            /* 0x40 */
-    u16 param1;            /* 0x42 */
-    u32 selectedFlags;     /* 0x44 */
-    u32 nextParam;         /* 0x48 */
-    u32 flags;             /* 0x4C */
-    u8 pad50[0x14];
-    u32 dmaBase;           /* 0x64 */
-    u32 dmaAddrA;          /* 0x68 */
-    u32 dmaAddrB;          /* 0x6C */
-    u32 dmaCountA;         /* 0x70 */
-    u32 dmaCountB;         /* 0x74 */
-    u8 pad78[4];
-    void *dmaEnd;          /* 0x7C */
-    u32 state;             /* 0x80 */
-    u8 pad84[0x0C];
-    u8 *payload;           /* 0x90 */
-} VuWork;
 
 typedef struct VuBlendNode {
     u8 pad00[0x30];
@@ -97,6 +79,55 @@ typedef struct VuBlendNode {
     void *sourceA;
     void *sourceB;
 } VuBlendNode;
+
+typedef struct VuTransformWork {
+    u8 pad00[4];
+    u32 param4;            /* 0x04 */
+    u32 param8;            /* 0x08 */
+    u32 paramC;            /* 0x0C */
+    u8 pad10[0xC];
+    f32 scale;             /* 0x1C */
+    u32 unk20;             /* 0x20 */
+    u32 mode;              /* 0x24 */
+    f32 y;                 /* 0x28 */
+    f32 x;                 /* 0x2C */
+    u8 pad30[8];
+    u64 unk38;             /* 0x38 */
+    u64 unk40;             /* 0x40 */
+    u64 unk48;             /* 0x48 */
+    u64 unk50;             /* 0x50 */
+    u64 unk58;             /* 0x58 */
+    u64 unk60;             /* 0x60 */
+} VuTransformWork;
+
+typedef struct {
+    u8 pad00[0x40];
+    u16 param0;            /* 0x40 */
+    s16 param1;            /* 0x42 */
+    u32 selectedFlags;     /* 0x44 */
+    u32 nextParam;         /* 0x48 */
+    u32 flags;             /* 0x4C */
+    s16 nodeCount;         /* 0x50 */
+    u8 pad52[2];
+    VuTransformWork *node; /* 0x54 */
+    void *reference;       /* 0x58 */
+    f32 offsetX;           /* 0x5C */
+    f32 offsetY;           /* 0x60 */
+    u32 dmaBase;           /* 0x64 */
+    u32 dmaAddrA;          /* 0x68 */
+    u32 dmaAddrB;          /* 0x6C */
+    u32 dmaCountA;         /* 0x70 */
+    u32 dmaCountB;         /* 0x74 */
+    VuBlendNode *blendList; /* 0x78 */
+    void *dmaEnd;          /* 0x7C */
+    u32 packetStart;       /* 0x80 */
+    u32 unk84;             /* 0x84 */
+    u32 *ringStart;        /* 0x88 */
+    u32 *cursor;           /* 0x8C */
+    u8 *payload;           /* 0x90 */
+    u8 pad94[0x10];
+    void *unkA4;           /* 0xA4 */
+} VuWork;
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfVuMultiplyPrimaryByScratch(void) {
@@ -310,7 +341,7 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
     work->selectedFlags = selected;
     D_003BDA24 = selected & 0x78;
     work->payload = payload;
-    work->state = 0;
+    work->packetStart = 0;
     func_002DDE88(work, second);
 }
 
@@ -342,17 +373,6 @@ void func_002DDFB0(void *arg0) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE010);
-
-typedef struct VuTransformWork {
-    u8 pad00[4];
-    u32 param4; /* 0x04 */
-    u32 param8; /* 0x08 */
-    u8 pad0C[0x10];
-    f32 scale; /* 0x1C */
-    u8 pad20[8];
-    f32 y; /* 0x28 */
-    f32 x; /* 0x2C */
-} VuTransformWork;
 
 void func_002DE0D8(void *out, VuTransformWork *work, void *reference, f32 deltaX, f32 deltaY) {
     func_002DE010(out, D_003BDA28, reference,
@@ -448,11 +468,187 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DF128);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DF710);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DFC80);
+void func_002DFC80(work)
+    VuWork *work;
+{
+    s32 remaining = work->nodeCount;
+    if (remaining != 0) {
+        u128 *(*nodes)[3] = D_003EB860;
+        u32 *cursor = work->cursor;
+        s32 first = 1;
+        do {
+            s32 chunk = (remaining <= 0x10) ? remaining : 0x10;
+            remaining -= chunk;
+            while (((u32)cursor & 0xC) != 4) {
+                *cursor++ = 0;
+            }
+            if (first) {
+                VuTransformWork *node;
+                *cursor++ = 0x6501C000;
+                *cursor++ = 4;
+                *cursor++ = ((chunk * 9 + 5) << 16) | 0x6C00C001;
+                node = work->node;
+                first = 0;
+                *(u64 *)cursor = 0x1000000000000003ULL;
+                cursor += 2;
+                *(u64 *)cursor = 0xE;
+                cursor += 2;
+                *(u64 *)cursor = node->unk38;
+                cursor += 2;
+                *(u64 *)cursor = 0x14;
+                cursor += 2;
+                *(u64 *)cursor = node->unk40;
+                cursor += 2;
+                *(u64 *)cursor = 6;
+                cursor += 2;
+                *(u64 *)cursor = node->unk48;
+                cursor += 2;
+                *(u64 *)cursor = 8;
+                cursor += 2;
+            } else {
+                *cursor++ = 0x6501C000;
+                *cursor++ = 0;
+                *cursor++ = ((chunk * 9 + 1) << 16) | 0x6C00C001;
+            }
+            *(u64 *)cursor = ((u64)(D_003BDA24 | 3) << 47) | (chunk * 3) | 0x3000400000008000ULL;
+            cursor += 2;
+            *(u64 *)cursor = 0x412;
+            cursor += 2;
+            do {
+                u128 *a = (*nodes)[0];
+                u128 *b = (*nodes)[1];
+                u128 *c = (*nodes)[2];
+                nodes++;
+                ((u128 *)cursor)[0] = a[0];
+                ((u128 *)cursor)[1] = a[3];
+                ((u128 *)cursor)[2] = a[2];
+                ((u128 *)cursor)[3] = b[0];
+                ((u128 *)cursor)[4] = b[3];
+                ((u128 *)cursor)[5] = b[2];
+                ((u128 *)cursor)[6] = c[0];
+                ((u128 *)cursor)[7] = c[3];
+                ((u128 *)cursor)[8] = c[2];
+                cursor += 0x24;
+            } while (--chunk != 0);
+            *cursor++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = cursor;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DFEC8);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0150);
+void func_002DFEC8(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 clearMask) {
+    s32 remaining = work->nodeCount;
+    if (remaining != 0) {
+        u128 *(*nodes)[3] = D_003EB860;
+        u32 *cursor = work->cursor;
+        s32 first = 1;
+        do {
+            s32 chunk = (remaining <= 0x10) ? remaining : 0x10;
+            remaining -= chunk;
+            while (((u32)cursor & 0xC) != 4) {
+                *cursor++ = 0;
+            }
+            if (first) {
+                *cursor++ = 0x6501C000;
+                *cursor++ = 6;
+                *cursor++ = ((chunk * 9 + 7) << 16) | 0x6C00C001;
+                first = 0;
+                *(u64 *)cursor = 0x1000000000000005ULL;
+                cursor += 2;
+                *(u64 *)cursor = 0xE;
+                cursor += 2;
+                *(u64 *)cursor = a;
+                cursor += 2;
+                *(u64 *)cursor = 0x15;
+                cursor += 2;
+                *(u64 *)cursor = b;
+                cursor += 2;
+                *(u64 *)cursor = 7;
+                cursor += 2;
+                *(u64 *)cursor = c;
+                cursor += 2;
+                *(u64 *)cursor = 9;
+                cursor += 2;
+                *(u64 *)cursor = 0x51801;
+                cursor += 2;
+                *(u64 *)cursor = 0x48;
+                cursor += 2;
+                *(u64 *)cursor = d;
+                cursor += 2;
+                *(u64 *)cursor = 0x43;
+                cursor += 2;
+            } else {
+                *cursor++ = 0x6501C000;
+                *cursor++ = 0;
+                *cursor++ = ((chunk * 9 + 1) << 16) | 0x6C00C001;
+            }
+            *(u64 *)cursor = ((u64)((D_003BDA24 & ~clearMask) | 0x203) << 47) | (chunk * 3) | 0x3000400000008000ULL;
+            cursor += 2;
+            *(u64 *)cursor = 0x412;
+            cursor += 2;
+            do {
+                u128 *a = (*nodes)[0];
+                u128 *b = (*nodes)[1];
+                u128 *c = (*nodes)[2];
+                nodes++;
+                ((u128 *)cursor)[0] = a[0];
+                ((u128 *)cursor)[1] = a[3];
+                ((u128 *)cursor)[2] = a[2];
+                ((u128 *)cursor)[3] = b[0];
+                ((u128 *)cursor)[4] = b[3];
+                ((u128 *)cursor)[5] = b[2];
+                ((u128 *)cursor)[6] = c[0];
+                ((u128 *)cursor)[7] = c[3];
+                ((u128 *)cursor)[8] = c[2];
+                cursor += 0x24;
+            } while (--chunk != 0);
+            *cursor++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = cursor;
+    }
+}
+
+
+void func_002E0150(work)
+    VuWork *work;
+{
+    s32 remaining = work->nodeCount;
+    if (remaining != 0) {
+        u128 *(*nodes)[3] = D_003EB860;
+        u32 *cursor = work->cursor;
+        do {
+            s32 chunk = (remaining <= 0x18) ? remaining : 0x18;
+            remaining -= chunk;
+            while (((u32)cursor & 0xC) != 4) {
+                *cursor++ = 0;
+            }
+            *cursor++ = 0x6501C000;
+            *cursor++ = 0x10000;
+            *cursor++ = ((chunk * 6 + 1) << 16) | 0x6C00C001;
+            *(u64 *)cursor = (chunk * 3) | ((u64)(D_003BDA24 | 3) << 47) | 0x2000400000008000ULL;
+            cursor += 2;
+            *(u64 *)cursor = 0x41;
+            cursor += 2;
+            do {
+                u128 *a = (*nodes)[0];
+                u128 *b = (*nodes)[1];
+                u128 *c = (*nodes)[2];
+                nodes++;
+                ((u128 *)cursor)[0] = a[0];
+                ((u128 *)cursor)[1] = a[2];
+                ((u128 *)cursor)[2] = b[0];
+                ((u128 *)cursor)[3] = b[2];
+                ((u128 *)cursor)[4] = c[0];
+                ((u128 *)cursor)[5] = c[2];
+                cursor += 0x18;
+            } while (--chunk != 0);
+            *cursor++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = cursor;
+    }
+}
+
 
 void func_002E02B0(VuWork *work) {
     if ((work->selectedFlags & 0x10) != 0) {
@@ -483,7 +679,46 @@ void func_002E04E0(u32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0540);
+extern void func_002DF128(VuWork *work);
+extern void func_002DF710(VuWork *work);
+extern void func_002DE7D8(u32 base, s32 count);
+
+void func_002E0540(VuWork *work) {
+    u32 cursor = sdfGetPacketCursor();
+    u32 aligned = (cursor + 0x3F) & ~0x3F;
+    u32 ring = ((aligned + 0x40) & 0x0FFFFFFF) | 0x30000000;
+    work->packetStart = cursor;
+    work->unk84 = aligned + 0x30;
+    work->ringStart = (u32 *)ring;
+    work->cursor = (u32 *)ring;
+    if ((work->selectedFlags & 0x4000) != 0) {
+        u8 saved[0x30];
+        __asm__ volatile (
+            ".set noreorder\n"
+            "sqc2 vf24, 0x0(%0)\n"
+            "sqc2 vf25, 0x10(%0)\n"
+            "sqc2 vf26, 0x20(%0)\n"
+            ".set reorder"
+            : : "r"(saved));
+        func_002DF128(work);
+        func_002E04E0((u32)work);
+        func_002DDE88(work, work->param1);
+        __asm__ volatile (
+            ".set noreorder\n"
+            "lqc2 vf24, 0x0(%0)\n"
+            "lqc2 vf25, 0x10(%0)\n"
+            "lqc2 vf26, 0x20(%0)\n"
+            ".set reorder"
+            : : "r"(saved));
+        func_002DE7D8(work->dmaBase, work->param1);
+        func_002DF710(work);
+        func_002E04E0((u32)work);
+    } else {
+        func_002DF128(work);
+        func_002E04E0((u32)work);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0618);
 
