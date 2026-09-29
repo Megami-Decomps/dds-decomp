@@ -11,6 +11,7 @@ typedef struct {
     LightData *data;
 } LightObject;
 
+/* Releases the light's buffer and resource before freeing the object itself. */
 void func_001165A0(LightObject *light) {
     LightData *data;
 

@@ -207,10 +207,18 @@ extern void func_0024FFC8();
 extern u8 *func_0024FE98();
 extern void func_0024FEC0();
 
-void evtCreateTask(s32 arg0, s32 arg1) {
-    s32 data = (s32)func_0024FE98();
-    func_0024FEC0(data, arg1);
-    kwlnTaskCreate(D_004373C0, arg0, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, data);
+typedef struct EvtTaskData {
+    u32 pad00;
+    s32 value; /* 0x04 */
+    u8 pad08[0x30];
+    s32 effectHandle; /* 0x38: released before an updated effect is installed */
+} EvtTaskData;
+
+/* Create a task with an initialized event payload. */
+void evtCreateTask(s32 taskId, s32 value) {
+    s32 taskData = (s32)func_0024FE98();
+    func_0024FEC0(taskData, value);
+    kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, taskData);
 }
 
 extern s32 kwlnTaskCreate(char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
@@ -219,16 +227,17 @@ extern void func_0024FF80();
 extern void func_0024FFC8();
 extern u8 *func_0024FE98();
 
-void evtCreateTaskWithValue(s32 arg0, s32 arg1) {
-    u8 *data = func_0024FE98();
-    *(s32 *)(data + 4) = arg1;
-    kwlnTaskCreate(D_004373C0, arg0, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, (s32)data);
+void evtCreateTaskWithValue(s32 taskId, s32 value) {
+    EvtTaskData *taskData = (EvtTaskData *)func_0024FE98();
+    taskData->value = value;
+    kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, (s32)taskData);
 }
 
-void evtSetSkyOverlayEnabled(u32 arg0) {
-    D_004373CC = arg0;
+void evtSetSkyOverlayEnabled(u32 enabled) {
+    D_004373CC = enabled;
 }
 
+/* Either set the sky alpha immediately or interpolate from its current value. */
 void evtStartSkyAlphaTransition(s32 duration, s32 target) {
     s16 current;
 
@@ -1529,23 +1538,23 @@ void evtFormatTaskName(s32 id, char *buffer) {
     func_0035C860(buffer, D_004377D0, id);
 }
 
-s32 evtFindTaskById(u32 arg0) {
-    u8 temp_v0 [32];
+s32 evtFindTaskById(u32 taskId) {
+    u8 taskName[32];
 
-    evtFormatTaskName(arg0, temp_v0);
-    return func_00101740(temp_v0);
+    evtFormatTaskName(taskId, taskName);
+    return func_00101740(taskName);
 }
 
-s32 evtGetTaskValueWord(u32 id) {
-    s32 task = evtFindTaskById(id);
+s32 evtGetTaskValueWord(u32 taskId) {
+    s32 task = evtFindTaskById(taskId);
     if (task == 0) {
         return -1;
     }
-    return *(s32 *)((u8 *)func_00101958(task) + 4);
+    return ((EvtTaskData *)func_00101958(task))->value;
 }
 
-void *evtGetTaskData(u32 id) {
-    s32 task = evtFindTaskById(id);
+void *evtGetTaskData(u32 taskId) {
+    s32 task = evtFindTaskById(taskId);
     if (task != 0) {
         return func_00101958(task);
     }
@@ -1596,18 +1605,18 @@ s32 func_0025D008(u32 id, s32 key) {
 
 extern void effSetCh72Id();
 
-void evtRefreshTaskData(s32 arg0, s32 arg1) {
-    u8 *task = evtGetTaskData(arg0);
-    s32 resource = func_0025D008(arg0, arg1);
+void evtRefreshTaskData(s32 taskId, s32 key) {
+    EvtTaskData *data = evtGetTaskData(taskId);
+    s32 resource = func_0025D008(taskId, key);
     s32 handle;
     if (resource != 0) {
-        if (*(s32 *)(task + 0x38) != 0) {
-            func_0032BBB0(*(s32 *)(task + 0x38));
-            *(s32 *)(task + 0x38) = 0;
+        if (data->effectHandle != 0) {
+            func_0032BBB0(data->effectHandle);
+            data->effectHandle = 0;
         }
         handle = func_0032C138(resource);
         effSetCh72Id(handle);
-        *(s32 *)(task + 0x38) = handle;
+        data->effectHandle = handle;
     }
 }
 

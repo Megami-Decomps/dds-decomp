@@ -7,7 +7,13 @@ typedef struct ParObj {
     u8 pad0[0x8C];
     f32 scale8C;
     u8 pad90[0x60];
-    u32 unkF0;
+    u32 valueF0; /* 0xF0 settable param */
+    u8 padF4[0x4C];
+    u16 dispatchIndex; /* 0x140: particle dispatch table index */
+    u16 restartFlag;   /* 0x142: set after mode changes */
+    u8 pad144[0x0C];
+    u8 mode150;
+    u8 mode151;
 } ParObj;
 
 typedef struct ParListNode {
@@ -45,15 +51,15 @@ extern void parClearSlotFlag(s32);
 extern void func_00190148(s32);
 
 void func_00162348(ParObj *work, u32 value) {
-    work->unkF0 = value;
+    work->valueF0 = value;
 }
 
-void parObjSetMode(u8 *object, u8 mode) {
-    switch (*(u16 *)(object + 0x140)) {
+void parObjSetMode(ParObj *object, u8 mode) {
+    switch (object->dispatchIndex) {
     case 1:
     case 5:
     case 11:
-        object[0x150] = mode;
+        object->mode150 = mode;
         break;
     case 0:
     case 2:
@@ -64,18 +70,18 @@ void parObjSetMode(u8 *object, u8 mode) {
     case 8:
     case 10:
     case 12:
-        object[0x151] = mode;
+        object->mode151 = mode;
         break;
     }
-    *(u16 *)(object + 0x142) = 1;
+    object->restartFlag = 1;
 }
 
-u8 parObjGetMode(u8 *object) {
-    switch (*(u16 *)(object + 0x140)) {
+u8 parObjGetMode(ParObj *object) {
+    switch (object->dispatchIndex) {
     case 1:
     case 5:
     case 11:
-        return object[0x150];
+        return object->mode150;
     case 0:
     case 2:
     case 3:
@@ -85,7 +91,7 @@ u8 parObjGetMode(u8 *object) {
     case 8:
     case 10:
     case 12:
-        return object[0x151];
+        return object->mode151;
     default:
         return 0;
     }
@@ -128,8 +134,8 @@ ParKindObj *parInstantiateKind(ParKindObj *src) {
     return obj;
 }
 
-void parObjDispatch(u8 *object) {
-    D_003AAB88[*(u16 *)(object + 0x140)].func();
+void parObjDispatch(ParObj *object) {
+    D_003AAB88[object->dispatchIndex].func();
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162590);
@@ -156,7 +162,7 @@ void func_00162968(void) {
 }
 
 void func_00162980(ParObj *work, u32 value) {
-    work->unkF0 = value;
+    work->valueF0 = value;
 }
 
 void func_00162988(u32 arg0, u8 arg1) {
@@ -273,9 +279,9 @@ void func_001634A8(s32 arg0) {
 typedef struct ParCell {
     u128 *history;  /* 0x00 */
     void *vertices; /* 0x04 */
-    s32 unk08;
+    s32 vertexCount; /* 0x08 */
     s32 unk0C;
-    u32 unk10;
+    u32 color;       /* 0x10 */
 } ParCell;
 
 typedef struct ParSystem {
@@ -290,9 +296,9 @@ typedef struct ParSystem {
 void parCellInit(ParSystem *system, s32 index) {
     ParCell *cell = (ParCell *)(index * sizeof(ParCell) + (s32)system->cells);
 
-    cell->unk10 = 0x80808080;
+    cell->color = 0x80808080;
     cell->unk0C = 0;
-    cell->unk08 = 0;
+    cell->vertexCount = 0;
 }
 
 void func_00163508(ParCellNode *node) {

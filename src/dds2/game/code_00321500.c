@@ -1,5 +1,9 @@
 #include "common.h"
 
+#define MNU_WORK_ACTIVE   1
+#define MNU_WORK_UPDATED  2
+#define MNU_WORK_FINISHED 4
+
 typedef struct MenuWorkEntry {
     u8 pad00[4];
     u32 tag;        /* 0x04 */
@@ -14,15 +18,12 @@ typedef struct MenuWorkEntry {
     f32 scale1;     /* 0x28 */
     u8 pad2C[8];
     u16 unk34;      /* 0x34 */
-    u16 unk36;      /* 0x36 */
+    u16 remaining;  /* 0x36: decreased until the completion flag is set */
     u8 pad38[4];
     u32 callback;   /* 0x3C */
     u32 flags;      /* 0x40 */
     u8 pad44[4];
 } MenuWorkEntry; /* 0x48 */
-
-
-/* Natural memset version exceeded 0x38-byte retail span; likely call-shape mismatch. */
 
 extern u32 D_004390D8;
 
@@ -118,6 +119,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003216A8);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321798);
 
+/* Allocate a zeroed 0x22-byte record with an eight-byte tag at offset 0xA. */
 u8 *mnuCreateNamedRecord(u8 *name) {
     u8 *record;
     if (name == 0) {
@@ -147,8 +149,8 @@ typedef struct MenuStateRecord {
     s16 limit;      /* 0x16 */
 } MenuStateRecord;
 
-s32 func_003219F0(MenuStateRecord *rec) {
-    if (rec->busy == 0 && (!(rec->flags & 2) || rec->limit > rec->value)) {
+s32 func_003219F0(MenuStateRecord *record) {
+    if (record->busy == 0 && (!(record->flags & 2) || record->limit > record->value)) {
         return 1;
     }
     return 0;
@@ -204,11 +206,13 @@ void func_00322418(void) {
 }
 
 
+/* Include the 0x10-byte header and both variable-length record blocks. */
 s32 dds3MeasureMenuRecord(MenuLengthData *data) {
     s32 length = dds3MeasureRecordBlock(data->firstRecords, data->firstCount) + 0x10;
     return length + dds3MeasureRecordBlock(data->secondRecords, data->secondCount);
 }
 
+/* Each entry has an eight-byte header followed by its eight-byte subentries. */
 s32 dds3MeasureRecordBlock(s32 *records, s32 count) {
     s32 entryCount;
     s32 length;
@@ -349,7 +353,7 @@ MenuWorkEntry *func_00322D50(void) {
     if (D_004390CC > 0) {
         entry = (MenuWorkEntry *)D_004390C8;
         do {
-            if (!(entry->flags & 1)) {
+            if (!(entry->flags & MNU_WORK_ACTIVE)) {
                 return entry;
             }
             entry++;
@@ -363,6 +367,7 @@ u32 func_00322D98(void) {
     return D_004390C8;
 }
 
+/* A flagged registry entry offsets its base value by the running clock. */
 f32 mnuEvaluateTimedValue(u8 *entry) {
     u8 *registry = func_003224F0(*(u32 *)(entry + 4));
     if ((**(u32 **)(registry + 0xc) & 1) != 0) {
@@ -376,11 +381,11 @@ f32 mnuEvaluateTimedValue(u8 *entry) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
 
-void func_00322F00(s32 arg0) {
-    *(u32 *)(arg0 + 0x40) = *(u32 *)(arg0 + 0x40) & 0xfffffffe;
-    if (*(s32 *)(arg0 + 0x3c) != 0) {
-        func_00320C88(*(s32 *)(arg0 + 0x3c));
-        *(u32 *)(arg0 + 0x3c) = 0;
+void func_00322F00(MenuWorkEntry *entry) {
+    entry->flags = entry->flags & 0xfffffffe;
+    if (entry->callback != 0) {
+        func_00320C88(entry->callback);
+        entry->callback = 0;
     }
 }
 
@@ -396,14 +401,15 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003236B0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
 
-void mnuVisitActiveRecords(s32 arg) {
+/* Walk allocated entries; only entries carrying the active bit are visited. */
+void mnuVisitActiveRecords(s32 context) {
     s32 index = 0;
     if ((s32)D_004390CC > 0) {
         s32 offset = 0;
         do {
-            u8 *record = (u8 *)(D_004390C8 + offset);
-            if ((*(u32 *)(record + 0x40) & 1) != 0) {
-                func_00323748(record, arg);
+            MenuWorkEntry *entry = (MenuWorkEntry *)(D_004390C8 + offset);
+            if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
+                func_00323748(entry, context);
             }
             index++;
             offset += 0x48;
@@ -431,14 +437,14 @@ void func_00323938(u8 *arg0) {
     D_004389B0 = arg0;
 }
 
-u32 func_00323940(s32 arg0, s32 arg1) {
-    if (*(s16 *)(arg0 + 0x36) - arg1 < 1) {
-        *(u16 *)(arg0 + 0x36) = 0;
-        *(u32 *)(arg0 + 0x40) = *(u32 *)(arg0 + 0x40) | 4;
+u32 func_00323940(MenuWorkEntry *entry, s32 elapsed) {
+    if ((s16)entry->remaining - elapsed < 1) {
+        entry->remaining = 0;
+        entry->flags = entry->flags | MNU_WORK_FINISHED;
         return 1;
     }
-    *(s16 *)(arg0 + 0x36) = *(s16 *)(arg0 + 0x36) - (s16)arg1;
-    *(u32 *)(arg0 + 0x40) = *(u32 *)(arg0 + 0x40) | 2;
+    entry->remaining = (s16)entry->remaining - (s16)elapsed;
+    entry->flags = entry->flags | MNU_WORK_UPDATED;
     return 0;
 }
 
@@ -470,7 +476,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324840);
 
-void mnuInitializeEffectContext(u8 *context) {
+void mnuInitializeEffectContext(MenuWorkEntry *context) {
     MenuInitialTag tag;
     /* Retail only initializes bytes 1 through 7 of this tag. */
     tag.flags = 0;
@@ -478,8 +484,8 @@ void mnuInitializeEffectContext(u8 *context) {
     tag.kind = 2;
     tag.index = 0;
     memset(context, 0, 0x48);
-    *(u32 *)(context + 0x3c) = mnuCreateReleaseCallbackNode();
-    func_00320CE0(*(u32 *)(context + 0x3c), 0,
+    context->callback = mnuCreateReleaseCallbackNode();
+    func_00320CE0(context->callback, 0,
                    (u32)mnuCreateNamedRecord((u8 *)&tag));
 }
 

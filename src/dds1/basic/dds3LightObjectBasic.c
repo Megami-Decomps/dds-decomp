@@ -10,14 +10,14 @@ typedef struct {
     s32 unk6C;
     u16 unk70;
     u16 unk72;
-    s32 unk74;
-    void *unk78;
+    s32 resource;
+    void *buffer;
 } LightData;
 
 typedef struct {
     u8 pad[0x18];
-    LightData *unk18;
-} LightObj;
+    LightData *data;
+} LightObject;
 
 void effObjFreeInner(void *arg);
 void func_00111840(s32 arg);
@@ -27,14 +27,15 @@ void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
 extern void *D_00324780[];
 
-void func_00116338(LightObj *light) {
+/* Releases the light's buffer and resource before freeing the object itself. */
+void func_00116338(LightObject *light) {
     LightData *data;
 
-    data = light->unk18;
-    func_002CFF98(data->unk78);
-    func_00111840(data->unk74);
-    func_002CFF98(light->unk18);
-    light->unk18 = NULL;
+    data = light->data;
+    func_002CFF98(data->buffer);
+    func_00111840(data->resource);
+    func_002CFF98(light->data);
+    light->data = NULL;
     effObjFreeInner(light);
 }
 
