@@ -1697,9 +1697,42 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00219760);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219848);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002198D8);
+extern char D_0041A378[]; /* "md_01all_02" */
+extern u64 dds3GetWorldSecondaryObject(void);
+extern s32 func_001110F8(u64, s32, char *);
+extern void func_00114048(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00219950);
+s32 func_002198D8(u8 *unit) {
+    s32 handle;
+    if (!(*(u32 *)(unit + 0x110) & 0x400)) {
+        return 1;
+    }
+    if (*(s32 *)(func_001AA6F8() + 0x22C) == 5) {
+        return 1;
+    }
+    handle = func_001110F8(dds3GetWorldSecondaryObject(), 6, D_0041A378);
+    if (handle == 0) {
+        return 1;
+    }
+    func_00114048(handle, 1);
+    return 1;
+}
+
+s32 func_00219950(u8 *unit) {
+    s32 handle;
+    if (!(*(u32 *)(unit + 0x110) & 0x400)) {
+        return 1;
+    }
+    if (*(s32 *)(func_001AA6F8() + 0x22C) == 5) {
+        return 1;
+    }
+    handle = func_001110F8(dds3GetWorldSecondaryObject(), 6, D_0041A378);
+    if (handle == 0) {
+        return 1;
+    }
+    func_00114048(handle, 2);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002199C8);
 
