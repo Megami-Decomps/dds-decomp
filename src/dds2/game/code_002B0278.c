@@ -190,6 +190,7 @@ typedef struct MenuList {
     MenuListNode *head;
     MenuListNode *cursor;
     s32 count;
+    s32 windowOffset;
 } MenuList;
 
 extern MenuListNode *func_00328E18(s32);
@@ -815,7 +816,7 @@ u32 func_002B4CC8(s32 callback) {
         func_002BB498(*(s32 *)(context + 0x118), *(s32 *)(context + 0xc8), 0xa, 0);
         break;
     }
-    func_002B88F0(0, *(s32 *)(*(s32 *)(context + 0x10c) + 0x18));
+    func_002B88F0(0, (MenuList *)*(s32 *)(*(s32 *)(context + 0x10c) + 0x18));
     return 1;
 }
 
@@ -1478,21 +1479,21 @@ MenuListNode *mnuListAppendNode(list, value)
     return node;
 }
 
-s32 mnuListContainsFinalNode(u32 *menu) {
-    u8 *node = (u8 *)menu[6];
+s32 mnuListContainsFinalNode(MenuList *list) {
+    MenuListNode *node = list->head;
     s32 index = 0;
-    if (node != 0) {
-        s32 count = menu[3];
+    if (node != NULL) {
+        s32 count = list->visibleCount;
         do {
             if (index >= count) {
                 return 0;
             }
-            if (node == (u8 *)menu[5]) {
+            if (node == list->last) {
                 return 1;
             }
-            node = *(u8 **)(node + 0x58);
+            node = node->next;
             index++;
-        } while (node != 0);
+        } while (node != NULL);
     }
     return 0;
 }
@@ -1503,65 +1504,65 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B86E8);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8860);
 
-void *mnuWalkNodeList(s32 arg0, void *arg1) {
-    void *temp_node = *(void **)((s32)arg1 + 0x10);
-    s32 temp_i = 0;
+void *mnuWalkNodeList(s32 index, MenuList *list) {
+    MenuListNode *node = list->first;
+    s32 currentIndex = 0;
 
-    if (temp_node != NULL && arg0 != temp_i) {
+    if (node != NULL && index != currentIndex) {
         do {
-            temp_node = *(void **)((s32)temp_node + 0x58);
-            temp_i++;
-        } while (temp_node != NULL && temp_i != arg0);
+            node = node->next;
+            currentIndex++;
+        } while (node != NULL && currentIndex != index);
     }
-    return temp_node;
+    return node;
 }
 
-s32 func_002B88F0(s32 index, u32 *list) {
-    s32 size = list[8];
+s32 func_002B88F0(s32 index, MenuList *list) {
+    s32 size = list->count;
 
     if (index >= size) {
         return 0;
     }
-    list[9] = 0;
-    list[6] = list[4];
-    list[7] = list[4];
+    list->windowOffset = 0;
+    list->head = list->first;
+    list->cursor = list->first;
     if (index > 0) {
         do {
-            if (size - *(s32 *)list[6] <= (s32)list[3]) {
-                list[9] += 1;
+            if (size - list->head->index <= list->visibleCount) {
+                list->windowOffset += 1;
             } else {
-                list[6] = *(u32 *)(list[6] + 0x58);
+                list->head = list->head->next;
             }
-            list[7] = *(u32 *)(list[7] + 0x58);
+            list->cursor = list->cursor->next;
             index--;
         } while (index != 0);
     }
     return 1;
 }
 
-void func_002B8968(u32 arg0) {
-    func_002B88F0(0, arg0);
+void func_002B8968(MenuList *list) {
+    func_002B88F0(0, list);
 }
 
-void func_002B8988(u32 *entry) {
-    func_002B88F0(entry[8] - 1, entry);
+void func_002B8988(MenuList *list) {
+    func_002B88F0(list->count - 1, list);
 }
 
-s32 func_002B89A8(s32 *arg0) {
-    s32 temp_1C = arg0[7];
-    s32 temp_14 = arg0[5];
-    s32 *temp_18 = (s32 *)arg0[6];
+s32 func_002B89A8(MenuList *list) {
+    s32 previousCursor = (s32)list->cursor;
+    s32 last = (s32)list->last;
+    MenuListNode *head = list->head;
 
-    if (temp_1C == temp_14) {
-        return temp_1C;
+    if (previousCursor == last) {
+        return previousCursor;
     }
-    temp_18 = (s32 *)temp_18[22];
-    if (temp_18 == NULL) {
-        return temp_1C;
+    head = head->next;
+    if (head == NULL) {
+        return previousCursor;
     }
-    arg0[6] = (s32)temp_18;
-    arg0[9]--;
-    return temp_1C;
+    list->head = head;
+    list->windowOffset--;
+    return previousCursor;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B89E0);
@@ -1586,7 +1587,7 @@ s32 func_002B8D30(u32 *list) {
     }
     i = 0;
     while (i < (s32)list[3]) {
-        if (mnuListContainsFinalNode(list)) {
+        if (mnuListContainsFinalNode((MenuList *)list)) {
             if (i == 0) {
                 if (list[7] == list[5]) {
                     return 0;
@@ -1602,7 +1603,7 @@ s32 func_002B8D30(u32 *list) {
         list[7] = *(u32 *)(list[7] + 0x58);
         list[9] += 1;
     }
-    if (mnuListContainsFinalNode(list)) {
+    if (mnuListContainsFinalNode((MenuList *)list)) {
         list[9] = list[3] - 1;
         list[7] = list[5];
         return list[5];
@@ -2882,7 +2883,7 @@ void func_002BD3A8(s32 arg0) {
 }
 
 void menuClearActionFlags(s32 kind, u8 *ctx) {
-    func_002B88F0(0, *(s32 *)(ctx + kind * 4 + 0xa690));
+    func_002B88F0(0, (MenuList *)*(s32 *)(ctx + kind * 4 + 0xa690));
     if (kind == 0) {
         *(u32 *)ctx &= ~2;
         *(u32 *)ctx &= ~4;

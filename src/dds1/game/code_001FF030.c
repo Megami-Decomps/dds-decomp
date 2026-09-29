@@ -3615,15 +3615,27 @@ u16 func_00210BA8(u8 **entries, s32 count, s32 unused, s32 command) {
 }
 
 
+typedef struct BtlCommandRecord {
+    u8 flags;
+    u8 unk_01[7];
+    u8 special;
+    u8 ruleFlags;
+    u8 unk_0A[2];
+    u16 restriction;
+    u8 unk_0E[0x16];
+    u32 attributeBits;
+    u8 unk_28[0x10];
+} BtlCommandRecord;
+
 extern s8 *D_003BAA4C;
 extern u8 *D_003BAA50;
 
-s32 func_00210D00(u8 *actor, s32 command) {
+s32 func_00210D00(BtlTask *task, s32 command) {
     BtlUnit *owner;
-    u8 *entry;
+    BtlCommandRecord *record;
     void *list;
     s32 count;
-    s32 marked;
+    s32 flaggedCount;
     s32 i;
     if (((BtlState *)func_001A17F0())->unk_1FC & 0x800) {
         return 0;
@@ -3632,7 +3644,7 @@ s32 func_00210D00(u8 *actor, s32 command) {
         return 0;
     }
     if (D_003BAA4C[command * 2 + 1] == 2) {
-        owner = *(BtlUnit **)(actor + 0x18);
+        owner = task->unit;
         if (owner->flags & 0x200) {
             if (owner->mode == 4) {
                 if (mdlFlagTest(0x61) == 0) {
@@ -3641,28 +3653,29 @@ s32 func_00210D00(u8 *actor, s32 command) {
             }
         }
     }
-    entry = (u8 *)(command * 0x38 + (s32)D_003BAA50);
-    if ((*(u32 *)(entry + 0x24) & 0x400000FF) == 0x40000002) {
-        if ((~*(u16 *)(entry + 0xC) & 0x7FFF) == 0x4000) {
+    record = (BtlCommandRecord *)(command * 0x38 + (s32)D_003BAA50);
+    if ((record->attributeBits & 0x400000FF) == 0x40000002) {
+        if ((~record->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
                 return 2;
             }
         }
     }
-    marked = 0;
+    flaggedCount = 0;
     list = btlAllocateIndexList(0xD);
-    func_001A3360((s32)actor, (s32)list, 0);
+    func_001A3360((s32)task, (s32)list, 0);
     count = func_001DAE48(list);
+    /* Keep this byte-table load separate from record for the matching address calculation. */
     if (D_003BAA50[command * 0x38] & 8) {
         for (i = 0; i < count; i++) {
             if (((BtlUnit *)func_001DAE50(list, i))->unk_12E & 0x800) {
-                marked++;
+                flaggedCount++;
             }
         }
     }
     func_001DAE08(list);
     if (count != 0) {
-        if (count != marked) {
+        if (count != flaggedCount) {
             return 0;
         }
     }

@@ -16,11 +16,49 @@ extern void func_00341348();
 #include "eff.h"
 
 typedef struct EffTemplatePacketList {
-    u8 pad00[0x20];
-    u32 packetCount;
-    u8 pad24[0xD4];
-    EffectBufferTail *buffer;
+    u8 pad00[0x10];
+    f32 x; /* 0x10 */
+    f32 y; /* 0x14 */
+    f32 z; /* 0x18 */
+    u8 pad1C[4];
+    u32 packetCount; /* 0x20 */
+    u8 pad24[0x7C];
+    s32 templateSize; /* 0xA0: prefix copied before appending tail bytes */
+    u8 padA4[0x54];
+    EffectBufferTail *buffer; /* 0xF8 */
+    u8 padFC[0x5C];
+    f32 recordScale; /* 0x158 */
+    f32 tailValues[4]; /* 0x15C-0x168: variant-specific scaled values */
 } EffTemplatePacketList;
+
+typedef struct EffInstance {
+    u8 localMatrix[0x40]; /* 0x00 */
+    u8 transform[0x40]; /* 0x40 */
+    BillObj *billboard; /* 0x80 */
+    void *renderState; /* 0x84 */
+} EffInstance;
+
+typedef struct EffScaledRecord {
+    u8 pad00[0x20];
+    u32 flags; /* 0x20 */
+    u8 pad24[0x10];
+    f32 scale; /* 0x34 */
+    u8 pad38[8];
+} EffScaledRecord; /* 0x40 */
+
+typedef struct EffBillFrame {
+    u8 pad00[0x0C];
+    u32 period; /* 0x0C: animation frame modulus */
+    u32 flags; /* 0x10 */
+} EffBillFrame;
+
+typedef struct EffBillEntry {
+    u8 pad00[4];
+    u32 frame; /* 0x04 */
+    s32 mode; /* 0x08 */
+    EffBillFrame *data; /* 0x0C */
+    u8 pad10[4];
+} EffBillEntry; /* 0x14 */
 
 extern s32 D_00451EE0[];
 
@@ -105,15 +143,16 @@ void func_00159C40(BillObj *effect, s32 mode) {
         count = effect->entryCount;
         if (count > 0) {
             remaining = count;
+            /* Required to match: induction points to each entry's frame slot at +0x0C. */
             entry = (s32)effect->unk60 + 0xc;
             do {
-                s32 node = *(s32 *)entry;
-                u32 flags = *(u32 *)(node + 0x10) & ~6;
-                *(u32 *)(node + 0x10) = flags;
+                EffBillFrame *node = (EffBillFrame *)*(s32 *)entry;
+                u32 flags = node->flags & ~6;
+                node->flags = flags;
                 if (mode == 2) {
-                    *(u32 *)(node + 0x10) = flags | 2;
+                    node->flags = flags | 2;
                 } else if (mode == 3) {
-                    *(u32 *)(node + 0x10) = flags | 4;
+                    node->flags = flags | 4;
                 }
                 entry += 0x14;
             } while (--remaining != 0);
@@ -165,9 +204,9 @@ void func_00159DF0(BillObj *effect, u32 value) {
     }
 }
 
-s32 func_00159E30(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(arg0 + 0x58);
+s32 func_00159E30(BillObj *effect) {
+    if (effect->unk2C == 1) {
+        return effect->unk58;
     }
     return 0;
 }
@@ -179,56 +218,56 @@ s32 func_00159E50(s32 arg0) {
     return 0;
 }
 
-void func_00159E78(s32 arg0, u32 arg1) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        s32 n = *(s32 *)(arg0 + 0x5c);
+void func_00159E78(BillObj *effect, u32 time) {
+    if (effect->unk2C == 1) {
+        s32 count = effect->entryCount;
 
-        if (n > 0) {
-            s32 p = *(s32 *)(arg0 + 0x60);
-            s32 i = n;
+        if (count > 0) {
+            EffBillEntry *entry = (EffBillEntry *)effect->unk60;
+            s32 remaining = count;
 
             do {
-                s32 q = *(s32 *)(p + 0xc);
-                u32 r = arg1 % *(u32 *)(q + 0xc);
-                i -= 1;
-                *(s32 *)(p + 8) = 0;
-                *(u32 *)(p + 4) = r;
-                p += 0x14;
-            } while (i != 0);
+                EffBillFrame *frameData = entry->data;
+                u32 frame = time % frameData->period;
+                remaining -= 1;
+                entry->mode = 0;
+                entry->frame = frame;
+                entry++;
+            } while (remaining != 0);
         }
     }
 }
 
-void func_00159ED8(s32 arg0, u32 arg1) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        s32 n = *(s32 *)(arg0 + 0x5c);
+void func_00159ED8(BillObj *effect, u32 time) {
+    if (effect->unk2C == 1) {
+        s32 count = effect->entryCount;
 
-        if (n > 0) {
-            s32 p = *(s32 *)(arg0 + 0x60);
-            s32 i = n;
+        if (count > 0) {
+            EffBillEntry *entry = (EffBillEntry *)effect->unk60;
+            s32 remaining = count;
 
             do {
-                s32 q = *(s32 *)(p + 0xc);
-                u32 r = arg1 % *(u32 *)(q + 0xc);
-                i -= 1;
-                *(s32 *)(p + 8) = 1;
-                *(u32 *)(p + 4) = r;
-                p += 0x14;
-            } while (i != 0);
+                EffBillFrame *frameData = entry->data;
+                u32 frame = time % frameData->period;
+                remaining -= 1;
+                entry->mode = 1;
+                entry->frame = frame;
+                entry++;
+            } while (remaining != 0);
         }
     }
 }
 
-s32 func_00159F38(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x60) + 0xc) + 0xc);
+s32 func_00159F38(BillObj *effect) {
+    if (effect->unk2C == 1) {
+        return ((EffBillEntry *)effect->unk60)->data->period;
     }
     return 0;
 }
 
-u16 func_00159F60(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(u16 *)(arg0 + 0x50);
+u16 func_00159F60(BillObj *effect) {
+    if (effect->unk2C == 1) {
+        return effect->unk50;
     }
     return 0;
 }
@@ -258,52 +297,54 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_00159FF8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
 
-u8 *func_0015A1B8(s32 arg0) {
-    u8 *obj = func_00328D68(0x88);
+u8 *func_0015A1B8(s32 index) {
+    EffInstance *instance = func_00328D68(0x88);
 
-    *(s32 *)(obj + 0x80) = billCreateIndexed(1, arg0);
-    *(void **)(obj + 0x84) = func_003335E0();
-    func_003332D0(*(void **)(obj + 0x84), 1.0f);
-    PCP_UNIT_MATRIX(obj + 0x40);
-    return obj;
+    instance->billboard = (BillObj *)billCreateIndexed(1, index);
+    instance->renderState = func_003335E0();
+    func_003332D0(instance->renderState, 1.0f);
+    PCP_UNIT_MATRIX(instance->transform);
+    return (u8 *)instance;
 }
 
-u8 *func_0015A240(u8 *src) {
-    u8 *obj = func_00328D68(0x88);
+u8 *func_0015A240(EffInstance *source) {
+    EffInstance *instance = func_00328D68(0x88);
 
-    *(s32 *)(obj + 0x80) = func_00159A50(*(s32 *)(src + 0x80));
-    *(void **)(obj + 0x84) = func_003335E0();
-    func_003332D0(*(void **)(obj + 0x84), 1.0f);
-    func_00333288(*(void **)(obj + 0x84), 0x80808080);
-    func_00333270(*(void **)(obj + 0x84), 0x80808080);
-    func_003332A0(*(void **)(obj + 0x84), 0x80808080);
-    PCP_UNIT_MATRIX(obj + 0x40);
-    PCP_UNIT_MATRIX(obj);
-    return obj;
+    instance->billboard = (BillObj *)func_00159A50((s32)source->billboard);
+    instance->renderState = func_003335E0();
+    func_003332D0(instance->renderState, 1.0f);
+    func_00333288(instance->renderState, 0x80808080);
+    func_00333270(instance->renderState, 0x80808080);
+    func_003332A0(instance->renderState, 0x80808080);
+    PCP_UNIT_MATRIX(instance->transform);
+    PCP_UNIT_MATRIX(instance->localMatrix);
+    return (u8 *)instance;
 }
 
-void effDestroy(u32 arg0) {
-    func_00333918(*(u32 *)((s32)arg0 + 0x84));
-    billDispatchByKind(*(u32 *)((s32)arg0 + 0x80));
-    func_00328E48(arg0);
+void effDestroy(EffInstance *instance) {
+    func_00333918((u32)instance->renderState);
+    billDispatchByKind(instance->billboard);
+    func_00328E48(instance);
 }
 
-void func_0015A348(s32 arg0) {
-    func_00159BD8(*(u32 *)(arg0 + 0x80));
+void func_0015A348(EffInstance *instance) {
+    func_00159BD8((u32)instance->billboard);
 }
 
-void func_0015A360(u8 *obj, f32 scale) {
-    func_00159BF0(*(BillObj **)(obj + 0x80), scale, scale);
+void func_0015A360(EffInstance *instance, f32 scale) {
+    func_00159BF0(instance->billboard, scale, scale);
 }
 
-void func_0015A380(u8 *dst, void *src) {
+void func_0015A380(EffInstance *instance, void *src) {
+    u8 *dst;
+
     __asm__ volatile(
         "lqc2 $vf28, 0x0(%0)\n\t"
         "lqc2 $vf29, 0x10(%0)\n\t"
         "lqc2 $vf30, 0x20(%0)\n\t"
         "lqc2 $vf31, 0x30(%0)"
         : : "r"(src) : "memory");
-    dst += 0x40;
+    dst = instance->transform;
     __asm__ volatile(
         ".set noreorder\n\t"
         "sqc2 $vf28, 0x0(%0)\n\t"
@@ -314,8 +355,8 @@ void func_0015A380(u8 *dst, void *src) {
         : : "r"(dst) : "memory");
 }
 
-void func_0015A3B0(u8 *obj, u32 value) {
-    func_00159C00(*(BillObj **)(obj + 0x80), value);
+void func_0015A3B0(EffInstance *instance, u32 value) {
+    func_00159C00(instance->billboard, value);
 }
 
 void func_0015A3C8(void *dst, void *src) {
@@ -394,22 +435,22 @@ INCLUDE_ASM(const s32, "game/code_00159B48", effDestroyResources);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B5C0);
 
-void func_0015B630(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+void func_0015B630(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015B680(s32 arg0) {
+s32 func_0015B680(EffTemplatePacketList *source) {
     s32 obj = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)obj, 0, 0x180);
-    memcpy((void *)obj, (void *)arg0, *(s32 *)(arg0 + 0xa0));
-    memcpy((void *)(obj + 0x150), (void *)(arg0 + *(s32 *)(arg0 + 0xa0)), tailLen);
+    memcpy((void *)obj, source, source->templateSize);
+    memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(obj);
     func_0015B5C0(obj);
     return obj;
@@ -439,22 +480,22 @@ void func_0015BC38(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015BC80(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+void func_0015BC80(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 effCloneTemplate(s32 source) {
+s32 effCloneTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015BC38(copy);
     return copy;
@@ -484,22 +525,22 @@ void func_0015C288(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015C2D0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+void func_0015C2D0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015C320(s32 source) {
+s32 func_0015C320(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015C288(copy);
     return copy;
@@ -516,20 +557,20 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CBC8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CDF0);
 
-void func_0015CE90(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+void func_0015CE90(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_0015CEC8(s32 source) {
+s32 func_0015CEC8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015CDF0(copy);
     return copy;
@@ -559,21 +600,21 @@ void func_0015D420(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015D468(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
+void func_0015D468(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_0015D4A8(s32 source) {
+s32 func_0015D4A8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015D420(copy);
     return copy;
@@ -603,22 +644,22 @@ void func_0015DB20(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015DB68(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+void func_0015DB68(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_0015DBB8(s32 source) {
+s32 func_0015DBB8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015DB20(copy);
     return copy;
@@ -635,20 +676,20 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015DF68);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E1D0);
 
-void func_0015E240(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
+void func_0015E240(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
 }
 
-s32 func_0015E278(s32 arg0) {
+s32 func_0015E278(EffTemplatePacketList *source) {
     s32 obj = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)obj, 0, 0x170);
-    memcpy((void *)obj, (void *)arg0, *(s32 *)(arg0 + 0xa0));
-    memcpy((void *)(obj + 0x150), (void *)(arg0 + *(s32 *)(arg0 + 0xa0)), tailLen);
+    memcpy((void *)obj, source, source->templateSize);
+    memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(obj);
     func_0015E1D0(obj);
     return obj;
@@ -678,22 +719,22 @@ void func_0015E788(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015E7D0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+void func_0015E7D0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015E820(s32 source) {
+s32 func_0015E820(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015E788(copy);
     return copy;
@@ -708,35 +749,35 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E8C8);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EB20);
 
-void func_0015ED30(s32 effect) {
+void func_0015ED30(EffTemplatePacketList *effect) {
     s32 i = 0;
-    s32 node = *(s32 *)(*(s32 *)(effect + 0xf8) + 4);
-    if (*(s32 *)(effect + 0x20) != 0) {
+    EffScaledRecord *record = (EffScaledRecord *)effect->buffer->records;
+    if (effect->packetCount != 0) {
         do {
-            *(u32 *)(node + 0x20) = 0xf0000001;
-            *(float *)(node + 0x34) = *(float *)(effect + 0x158);
+            record->flags = 0xf0000001;
+            record->scale = effect->recordScale;
             i++;
-            node += 0x40;
-        } while ((u32)i < *(u32 *)(effect + 0x20));
+            record++;
+        } while ((u32)i < effect->packetCount);
     }
 }
 
-void func_0015ED78(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
+void func_0015ED78(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_0015EDC8(s32 source) {
+s32 func_0015EDC8(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015ED30(copy);
     return copy;
@@ -755,10 +796,10 @@ void func_0015F560(void) {
     func_0015F648();
 }
 
-void func_0015F578(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
+void func_0015F578(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F5A0);
@@ -787,22 +828,22 @@ void func_0015F7D8(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015F820(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
-    *(float *)(arg1 + 0x168) = *(float *)(arg1 + 0x168) * arg0;
+void func_0015F820(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015F870(s32 source) {
+s32 func_0015F870(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x190);
     s32 tailLen = 0x40;
 
     memset((void *)copy, 0, 0x190);
-    memcpy((void *)copy, (void *)source, *(s32 *)(source + 0xa0));
-    memcpy((void *)(copy + 0x150), (void *)(source + *(s32 *)(source + 0xa0)), tailLen);
+    memcpy((void *)copy, source, source->templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     func_0015F7D8(copy);
     return copy;
@@ -832,13 +873,13 @@ void func_00160308(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00160350(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x15c) = *(float *)(arg1 + 0x15c) * arg0;
-    *(float *)(arg1 + 0x164) = *(float *)(arg1 + 0x164) * arg0;
+void func_00160350(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[0] = effect->tailValues[0] * scale;
+    effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_001603A0);
@@ -868,12 +909,12 @@ void func_00160978(EffTemplatePacketList *effect) {
     }
 }
 
-void func_001609C0(float arg0, s32 arg1) {
-    *(float *)(arg1 + 0x10) = *(float *)(arg1 + 0x10) * arg0;
-    *(float *)(arg1 + 0x14) = *(float *)(arg1 + 0x14) * arg0;
-    *(float *)(arg1 + 0x18) = *(float *)(arg1 + 0x18) * arg0;
-    *(float *)(arg1 + 0x158) = *(float *)(arg1 + 0x158) * arg0;
-    *(float *)(arg1 + 0x160) = *(float *)(arg1 + 0x160) * arg0;
+void func_001609C0(float scale, EffTemplatePacketList *effect) {
+    effect->x = effect->x * scale;
+    effect->y = effect->y * scale;
+    effect->z = effect->z * scale;
+    effect->recordScale = effect->recordScale * scale;
+    effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00160A00);

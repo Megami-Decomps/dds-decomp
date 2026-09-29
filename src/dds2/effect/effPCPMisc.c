@@ -2478,7 +2478,21 @@ EffPCPSpinWork *func_00186B88(void *src) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00186C60);
+/* Single-handle variant: allocation stops before handle1 (0x64 bytes). */
+EffPCPSpinWork *func_00186C60(EffPCPSpinWork *src) {
+    EffPCPSpinWork *work = func_00328D68(0x64);
+
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    PCP_UNIT_MATRIX(work->matrix);
+    work->angle = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
+    if (effMiscRand(D_003AA868) & 1) {
+        work->angle += 3.14159265f;
+    }
+    work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
+    return work;
+}
 
 void func_00186D40(u32 arg0) {
     func_0016A620(*(u32 *)((s32)arg0 + 0x60));

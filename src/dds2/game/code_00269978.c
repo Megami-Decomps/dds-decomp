@@ -23,13 +23,18 @@ typedef struct EventMenuOwner {
     s32 state; /* 0x20 */
 } EventMenuOwner;
 
+typedef struct EventVisualState {
+    u8 pad00[0x3C];
+    u32 statusFlag; /* 0x3C */
+} EventVisualState;
+
 typedef struct EventDispatchState {
     u8 pad00[8];
     u8 dispatchWork[0x4C]; /* 0x08 */
     s32 dispatchStatus; /* 0x54 */
     u32 dispatchValue; /* 0x58 */
     u8 pad5C[0x1C];
-    void *visualState; /* 0x78 */
+    EventVisualState *visualState; /* 0x78 */
     u8 pad7C[4];
     EventMenuOwner *menuOwner; /* 0x80 */
     s32 menuMode; /* 0x84 */
@@ -100,6 +105,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_00269C50);
 
 s64 func_00269E98(u64 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
 
     func_002686F0(state);
     func_00268838(0, state);
@@ -109,14 +115,15 @@ s64 func_00269E98(u64 item) {
     func_00269B08(state);
     func_00268EC8(state);
     func_00268B48(state);
-    return func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    return func_002C4038((s32)dispatchState->dispatchWork,
+                         &dispatchState->dispatchStatus, 1, item);
 }
 
 void evtBSetupDispatchSync(s32 request) {
-    s32 state = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(state + 8, state + 0x54, 2, request);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 extern void func_00267EA0(s32, s32);
@@ -124,9 +131,9 @@ extern void func_00267EA0(s32, s32);
 extern void func_0026C710(void);
 
 s32 func_00269F70(void) {
-    u8 *state = (u8 *)func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
     evtRememberDispatchCallback(0, (s32)state);
-    *(u32 *)(*(s32 *)(state + 0x78) + 0x3C) = 0;
+    state->visualState->statusFlag = 0;
     func_00267EA0(0, 0);
     func_0026C710();
     return 1;
@@ -154,16 +161,16 @@ s32 func_00269FC8(void) {
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A048);
 
 void evtBDispatchStart(s32 request) {
-    s32 state = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
-    func_002C4038(state + 8, state + 0x54, 1, request);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 1, request);
 }
 
 void evtBSetupDispatchSyncB(s32 request) {
-    s32 state = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(state + 8, state + 0x54, 2, request);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A1B8);
@@ -174,19 +181,21 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A2E0);
 
 void func_0026A3F8(s32 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
     func_00269B08(state);
     func_00268EC8(state);
     func_00268B48(state);
-    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    func_002C4038((s32)dispatchState->dispatchWork,
+                  &dispatchState->dispatchStatus, 1, item);
 }
 
 void evtBSetupDispatchSyncC(s32 request) {
-    s32 state = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(state + 8, state + 0x54, 2, request);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A4B0);
@@ -199,29 +208,31 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A728);
 
 void func_0026A808(s32 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
     func_00269B08(state);
     func_00268EC8(state);
     func_00268B48(state);
-    if (*(s32 *)(state + 0x84) == 0) {
+    if (dispatchState->menuMode == 0) {
         func_0026A728(1, state);
     }
-    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    func_002C4038((s32)dispatchState->dispatchWork,
+                  &dispatchState->dispatchStatus, 1, item);
 }
 
 void evtBSetupDispatchSyncD(s32 request) {
-    s32 state = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(state + 8, state + 0x54, 2, request);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 u32 func_0026A8D8(void) {
-    s32 temp_v0;
+    EventDispatchState *state;
 
-    temp_v0 = func_00101958();
-    func_002B8988(*(u32 *)(temp_v0 + 0x78));
+    state = (EventDispatchState *)func_00101958();
+    func_002B8988((u32)state->visualState);
     return 1;
 }
 
@@ -230,10 +241,10 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A900);
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A998);
 
 void evtBSetupDispatchSyncE(s32 request) {
-    s32 state = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(state + 8, state + 0x54, 2, request);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 extern void func_002A9200(s32);
@@ -317,27 +328,29 @@ extern void func_00268B48(s32);
 
 void func_0026AC90(s32 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
     func_00269B08(state);
     func_00268EC8(state);
     func_00268B48(state);
-    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    func_002C4038((s32)dispatchState->dispatchWork,
+                  &dispatchState->dispatchStatus, 1, item);
 }
 
-void evtBDispatchSync(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBDispatchSync(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 u32 func_0026AD38(void) {
-    s32 state = func_00101958();
-    s32 owner = *(s32 *)(state + 0x80);
-    s32 *slot = (s32 *)(*(s32 *)(owner + 0x1C) + 0x60);
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
+    EventMenuOwner *owner = state->menuOwner;
+    s32 *slot = &owner->selection->entryIndex;
 
-    if (*(s32 *)(owner + 0x20) == 1) {
-        func_002B8968(owner);
+    if (owner->state == 1) {
+        func_002B8968((s32)owner);
     }
     func_0026C918(0, &D_003A41A8[*slot]);
     func_0026C948(1);
@@ -355,26 +368,28 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026ADC8);
 
 void func_0026AEB0(s32 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
     func_00269B08(state);
     func_00268EC8(state);
     func_00268B48(state);
-    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    func_002C4038((s32)dispatchState->dispatchWork,
+                  &dispatchState->dispatchStatus, 1, item);
 }
 
-void evtBSetupDispatchSyncF(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSyncF(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 u32 func_0026AF68(void) {
-    s32 context = func_00101958();
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C948(1);
-    switch (*(s32 *)(context + 0x90)) {
+    switch (state->displayMode) {
     case 1:
         func_0026C5B8(1);
         break;
@@ -404,19 +419,21 @@ s64 func_0026AFE0(u64 request) {
 
 void func_0026B068(s32 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
     func_00269B08(state);
     func_00268EC8(state);
     func_00268B48(state);
-    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    func_002C4038((s32)dispatchState->dispatchWork,
+                  &dispatchState->dispatchStatus, 1, item);
 }
 
-void evtBSetupDispatchSyncG(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBSetupDispatchSyncG(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C900();
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B120);
@@ -431,8 +448,8 @@ s32 func_0026B1C8(void) {
     func_00268AA0(1, 0, state);
     func_002690A8(1, state);
     evtRememberDispatchCallback((u32)func_00269230, state);
-    *(s32 *)(state + 0x14C) = 1;
-    *(s32 *)(state + 0xD4) = 0;
+    ((EventDispatchState *)state)->stage = 1;
+    ((EventDispatchState *)state)->exitState = 0;
     kwlnFadeOutStart(0, 0, 0, 15);
     return 1;
 }
@@ -441,6 +458,7 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026B260);
 
 void func_0026B358(s32 item) {
     s32 state = func_00101958();
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
 
     func_002686F0(state);
     if (func_00268C08(state) == 0) {
@@ -449,17 +467,18 @@ void func_0026B358(s32 item) {
         func_00268838(0, state);
     }
     func_00269B08(state);
-    if (*(s32 *)(state + 0x14C) != 3) {
+    if (dispatchState->stage != 3) {
         func_00268EC8(state);
     }
     func_00268B48(state);
-    func_002C4038(state + 8, (s32 *)(state + 0x54), 1, item);
+    func_002C4038((s32)dispatchState->dispatchWork,
+                  &dispatchState->dispatchStatus, 1, item);
 }
 
-void evtBDispatchSyncB(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBDispatchSyncB(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
 extern void func_00267938(s32, s32);
@@ -476,7 +495,7 @@ s32 func_0026B430(void) {
     func_00267938(0, state);
     func_0026CA60(0);
     func_0026CA80(0, 0);
-    mode = *(s32 *)(state + 0x84);
+    mode = ((EventDispatchState *)state)->menuMode;
     if (mode < 2) {
         if (mode >= 0) {
             func_0026E5F8();
@@ -493,15 +512,15 @@ INCLUDE_RODATA(const s32, "game/code_00269978", D_00424FF8);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026B4A8);
 
-void evtBLateDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBLateDispatchStart(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
-    func_002686F0(temp_v0);
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_002686F0((s32)state);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 1, request);
 }
 
-void evtBDispatchSyncC(s32 arg0) {
-    s32 temp_v0 = func_00101958();
+void evtBDispatchSyncC(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)func_00101958();
 
-    func_002C4038(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
