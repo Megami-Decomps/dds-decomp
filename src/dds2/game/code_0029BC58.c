@@ -2691,7 +2691,37 @@ u32 func_002AA278(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002AA2A8);
+extern u32 func_002C44E8(s32);
+extern s32 func_002A9AB8(s32);
+extern s32 func_0026C768(void);
+extern s32 func_002C6CE8(void);
+extern s32 func_002D13F0(void);
+extern void mnuDestroyCampTasks(void);
+extern void mnuPlayInputSound();
+
+/* DDS2 twin of DDS1 func_00271FF8. */
+s32 func_002AA2A8(s32 menu) {
+    u32 buttons = func_002C44E8(8);
+    s32 result;
+
+    if (func_002A9AB8(menu) == 0) {
+        return 0;
+    }
+    result = 0;
+    if (func_0026C768() == 0) {
+        if (buttons & 8) {
+            if (func_002C6CE8() != 1) {
+                if (func_002D13F0() == 0) {
+                    mnuDestroyCampTasks();
+                    mnuPlayInputSound(0, 2, 0);
+                    return -1;
+                }
+            }
+            mnuPlayInputSound(0, 0x8000, 0);
+        }
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_0042AA08);
 
