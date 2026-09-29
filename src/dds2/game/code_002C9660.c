@@ -404,13 +404,13 @@ typedef struct ScaleOwner {
 
 extern void *func_002CAA90(void);
 
-extern void *func_002CAA08(void);
+extern void *fileBeginSlotReset(void);
 
 extern s32 D_00437D30;
 
 extern s32 func_002CEE70(void *arg0, void *arg1, s32 arg2);
 
-extern void *func_002CAA50(void);
+extern void *fileBeginDirectoryScan(void);
 
 extern char D_0042B698[];
 
@@ -513,7 +513,7 @@ s32 func_002C9678(void) {
     return 0;
 }
 
-void func_002C96D0(void) {
+void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {
         kwlnTaskDestroyWithHierarchy(D_00437CD8, 1);
         D_00437CD8 = 0;
@@ -521,7 +521,7 @@ void func_002C96D0(void) {
     }
 }
 
-s8 func_002C9700(void) {
+s8 fileMenuTaskIsAlive(void) {
     return D_00437CD4;
 }
 
@@ -729,7 +729,7 @@ void *fileBeginWait(s32 result) {
     return fileUpdateWait;
 }
 
-void *func_002CAA08(void) {
+void *fileBeginSlotReset(void) {
     D_00437D30 = 0;
     func_002CA1D8(0);
     D_00437D3C = 0;
@@ -738,7 +738,7 @@ void *func_002CAA08(void) {
     return (void *)func_002CEE70(&fileResetSelection, &func_002CAA90, 0);
 }
 
-void *func_002CAA50(void) {
+void *fileBeginDirectoryScan(void) {
     func_002CA1D8(0);
     D_00437D3C = 0;
     D_00437D1C = 9;
@@ -752,7 +752,7 @@ void *func_002CAA90(void) {
     D_00437D3C = 0;
     D_00437D1C = 8;
     D_00437CF8 = 0;
-    return (void *)func_002CEE70(&func_002CACF0, &func_002CAA08, 1);
+    return (void *)func_002CEE70(&func_002CACF0, &fileBeginSlotReset, 1);
 }
 
 void *func_002CAAD0(void) {
@@ -910,7 +910,7 @@ void func_002CAED0(void) {
 void func_002CAEE8(void) {
     D_00439030 = 0;
     D_00437CE0 = func_002C80C8(D_0042B6A8);
-    func_002CAA08();
+    fileBeginSlotReset();
 }
 
 void func_002CAF10(void) {
@@ -1279,7 +1279,7 @@ void func_002CC0F8(void) {
 }
 
 void *func_002CC140(void) {
-    func_002C96D0();
+    fileDestroyMenuTask();
     return func_002CC0F8;
 }
 
@@ -1474,7 +1474,7 @@ void *mcdHandleSaveSetupDone(void) {
         fileReloadSaveBuffer();
         func_003297C8(D_00439040);
         D_00437CD5 = 1;
-        func_002C96D0();
+        fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
             fileCacheSlotFlagsFromState();
         } else {
