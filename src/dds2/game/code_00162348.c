@@ -165,11 +165,25 @@ void func_00163238(s32 arg0) {
     func_003332E8(*(u32 *)(arg0 + 0x40));
 }
 
-extern u8 D_00451F60[];
+/* Draw parameter block filled per strip by func_00164CB0. */
+typedef struct ParDrawState {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    u8 pad6[2];
+    s32 unk8;
+    void *unkC;
+    s32 unk10;
+    u8 pad14[0xC];
+    s32 unk20;
+    u8 pad24[8];
+} ParDrawState;
+
+extern ParDrawState D_00451F60;
 
 void parControlInit(void) {
-    memset(D_00451F60, 0, 0x2C);
-    *(s16 *)(D_00451F60 + 4) = 0x4000;
+    memset(&D_00451F60, 0, 0x2C);
+    D_00451F60.unk4 = 0x4000;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163290);
