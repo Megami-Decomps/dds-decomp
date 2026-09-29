@@ -19,11 +19,24 @@ extern u32 D_00436590;
 extern s64 func_00101700(u32);
 
 /* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
+typedef struct TextSub {
+    u8 pad00[0x30];
+    s32 unk30;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+} TextSub;
+
 typedef struct TextStream {
-    u8 unk0[0x10]; /* 0x0 */
+    u8 unk0[0xC]; /* 0x0 */
+    s8 unkC;         /* 0xC: set by opcode 0xF206 */
+    s8 unkD;         /* 0xD: set by opcode 0xF202 */
+    s8 unkE;         /* 0xE: set by opcode 0xF209 */
+    s8 unkF;         /* 0xF: set by opcode 0xF207 */
     u8 *bytes;       /* 0x10: encoded input base */
-    u8 unk14[4];   /* 0x14 */
+    TextSub *sub;    /* 0x14 */
     s32 offset;      /* 0x18: current byte position */
+    s8 unk1C;        /* 0x1C: set once an opcode has run */
 } TextStream;
 
 typedef struct SndReq {
@@ -153,11 +166,13 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E848);
 
 extern s8 D_00436550;
 
-void func_0019E8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+s32 func_0019E8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     s8 saved = D_00436550;
+    s32 result;
     D_00436550 = 0;
-    func_0019E848(arg0, arg1, arg2, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6 & 0xFF, arg7, 0);
+    result = func_0019E848(arg0, arg1, arg2, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6 & 0xFF, arg7, 0);
     D_00436550 = saved;
+    return result;
 }
 
 u32 func_0019E8E0(u32 arg0) {
