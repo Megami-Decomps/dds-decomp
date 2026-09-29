@@ -20,6 +20,7 @@ void func_001D8C78(void) {
 
 INCLUDE_ASM(const s32, "game/code_001D7228", func_001D8C80);
 
+/* Four callbacks mark the linked visual state; bit 0x4000's meaning is unconfirmed. */
 void func_001DA1F8(BattleVisualObject *object) {
     object->visual->flags = object->visual->flags | 0x4000;
 }

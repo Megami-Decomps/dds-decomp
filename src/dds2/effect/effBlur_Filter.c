@@ -2,11 +2,12 @@
 
 extern u32 func_00159BB8(u32);
 
-typedef struct BlurFilter {
+/* Both blur variants store a setting at 0x2c and an owned resource at 0x30. */
+typedef struct EffBlurWork {
     u8 pad0[0x2C];
-    u32 texture;
+    u32 setting;
     u32 resource;
-} BlurFilter;
+} EffBlurWork;
 
 void func_0018E8F0(void) {
     func_00328E48();
@@ -18,38 +19,42 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E980);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA00);
 
-void effBlurSetHandle(BlurFilter *blur, u32 texture) {
-    blur->texture = texture;
+/* Select the source handle used by the first blur variant. */
+void effBlurSetHandle(EffBlurWork *work, u32 setting) {
+    work->setting = setting;
 }
 
-void effBlurAcquireHandle(BlurFilter *blur) {
-    u32 texture;
+/* Acquire the same handle through the effect resource manager. */
+void effBlurAcquireHandle(EffBlurWork *work) {
+    u32 setting;
 
-    texture = func_00159BB8(2);
-    blur->texture = texture;
+    setting = func_00159BB8(2);
+    work->setting = setting;
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA98);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EBC8);
 
-void func_0018ECB8(BlurFilter *blur) {
-    func_003297C8(blur->resource);
+/* Release the first variant's owned effect resource. */
+void func_0018ECB8(EffBlurWork *work) {
+    func_003297C8(work->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EED8);
 
-void func_0018EF40(BlurFilter *blur, u32 texture) {
-    blur->texture = texture;
+/* The second blur variant has its own setter for the same work layout. */
+void func_0018EF40(EffBlurWork *work, u32 setting) {
+    work->setting = setting;
 }
 
-void func_0018EF48(BlurFilter *blur) {
-    u32 texture;
+void func_0018EF48(EffBlurWork *work) {
+    u32 setting;
 
-    texture = func_00159BB8(2);
-    blur->texture = texture;
+    setting = func_00159BB8(2);
+    work->setting = setting;
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EF78);
@@ -60,8 +65,9 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F018);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F098);
 
-void func_0018F1B8(BlurFilter *blur) {
-    func_003297C8(blur->resource);
+/* Release the second variant's owned effect resource. */
+void func_0018F1B8(EffBlurWork *work) {
+    func_003297C8(work->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F1D0);

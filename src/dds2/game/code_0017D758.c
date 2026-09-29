@@ -22,6 +22,7 @@ typedef struct ScatterObject {
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
 
+/* Store the float parameter beside the scatter object's trailing control word. */
 void func_0017D770(ScatterObject *object, f32 value) {
     object->value12C = value;
 }
@@ -34,6 +35,7 @@ INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D780);
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D7A8);
 
+/* Release the shared scatter resource before the object's private assets. */
 void effReleaseScatterObject(ScatterObject *object) {
     if (object->sharedResource != 0) {
         effPcpScatterResRelease(object->sharedResource);
@@ -45,6 +47,7 @@ void effReleaseScatterObject(ScatterObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DA28);
 
+/* Give this object its own reference to a newly created scatter resource. */
 void effCreateScatterResource(ScatterObject *object, u32 resource) {
     u32 shared;
 
@@ -52,6 +55,7 @@ void effCreateScatterResource(ScatterObject *object, u32 resource) {
     object->sharedResource = shared;
 }
 
+/* Share another object's scatter resource while retaining a separate reference. */
 void effShareScatterResource(ScatterObject *object, ScatterObject *source) {
     u32 shared;
 
@@ -59,10 +63,12 @@ void effShareScatterResource(ScatterObject *object, ScatterObject *source) {
     object->sharedResource = shared;
 }
 
+/* Compute the address of a 16-byte-wide block within the stride. */
 s32 effGetScatterWideBlock(ScatterObject *object, s32 index) {
     return object->wideBlocks + index * object->stride * 0x10;
 }
 
+/* Compute the address of an 8-byte-wide block within the stride. */
 s32 effGetScatterNarrowBlock(ScatterObject *object, s32 index) {
     return object->narrowBlocks + index * object->stride * 8;
 }
