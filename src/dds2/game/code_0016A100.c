@@ -135,7 +135,11 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A620);
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A668);
+void func_0016A668(u8 *work) {
+    u16 id = *(u16 *)work;
+
+    D_003B0044[id].cb(*(void **)(work + 4));
+}
 
 EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
     EffParamWork *work;
