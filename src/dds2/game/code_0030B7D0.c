@@ -213,6 +213,10 @@ extern void func_00313A58(u8 *);
 
 extern s32 func_00314990(s32, u16);
 
+extern u32 func_00343ED0(const char *, void *, s32);
+
+extern u32 func_0032C138(u32);
+
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030B7D0);
 
 typedef struct EffObjVtbl {
@@ -638,7 +642,18 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030EF90);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_0030F038);
 
-INCLUDE_ASM(const s32, "game/code_0030B7D0", fldLoadMapResource);
+s32 fldLoadMapResource(const char *name, MapResource *record) {
+    u32 handle = func_00343ED0(name, &record->descriptor, 0);
+    u32 descriptor = record->descriptor;
+    record->handle = handle;
+    record->image = func_0032C138(descriptor);
+    if (record->handle != 0) {
+        func_003298C0((void *)record->handle);
+        record->handle = 0;
+        record->descriptor = 0;
+    }
+    return 1;
+}
 
 u32 fldReleaseMapResource(s32 *arg0) {
     if (*arg0 != 0) {
