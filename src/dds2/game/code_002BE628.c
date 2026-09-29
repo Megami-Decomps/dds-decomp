@@ -91,6 +91,30 @@ extern StageCameraTarget *func_0023B018(f32 *, f32 *);
 
 extern u8 D_00437CB0[];
 
+extern void func_002C03B0(s32 *, s32, s32);
+
+extern void func_002C0330(s32, s32, s32, s32, s32, s32);
+
+extern void func_002C2AD0();
+
+extern void func_00328E48();
+
+extern u32 effMiscRand(s32);
+
+extern u8 *D_00435DD0;
+
+extern u16 D_003E78D8[];
+
+extern u8 *D_00457EC0[];
+
+extern u32 D_00457EC8[];
+
+extern void func_00340DC8(f32, f32, f32);
+
+extern char D_0042B610[];
+
+extern void func_002C7A60();
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE6E8);
@@ -153,9 +177,6 @@ void func_002C04C0(s32 arg0) {
         *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 8;
     }
 }
-
-extern void func_002C03B0(s32 *, s32, s32);
-extern void func_002C0330(s32, s32, s32, s32, s32, s32);
 
 void func_002C04E0(s32 x, s32 y, s32 z, s32 arg3, s32 menu, s32 param) {
     s32 offset[2];
@@ -235,7 +256,20 @@ void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
     func_00307388(&panel->firstPosition, x, y);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0800);
+void func_002C0800(u8 *panel, s32 x, s32 y, s32 arg3, s32 arg4, s32 arg5) {
+    func_00307388(panel + 0x50, arg3, arg4);
+    func_00307388(panel + 0x58, arg3, arg5);
+    *(s32 *)(panel + 0x28) = x;
+    *(s32 *)(panel + 0x2C) = y;
+    *(s32 *)(panel + 0x30) = x + 0xC0;
+    *(s32 *)(panel + 0x34) = y - 0x20;
+    *(s32 *)(panel + 0x38) = x - 0x50;
+    *(s32 *)(panel + 0x3C) = y + 0x68;
+    *(s32 *)(panel + 0x40) = x + 0x1D0;
+    *(s32 *)(panel + 0x44) = y + 0x68;
+    *(s32 *)(panel + 0x48) = x + 0xC0;
+    *(s32 *)(panel + 0x4C) = y + 0xF0;
+}
 
 void func_002C08B0(MenuPanelState *panel) {
     u32 resourceHandle;
@@ -293,9 +327,6 @@ s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
     group->initialValue = 0x100;
     return (s32)group;
 }
-
-extern void func_002C2AD0();
-extern void func_00328E48();
 
 void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     s32 i;
@@ -602,8 +633,6 @@ void func_002C32A0(s32 arg0, s32 arg1, s32 arg2) {
     *(s32 *)(arg0 + 0x14) = arg2;
 }
 
-extern u32 effMiscRand(s32);
-
 u32 *func_002C32B0(s32 source) {
     u32 *item = (u32 *)func_00328D68(0x48);
     s32 first;
@@ -710,8 +739,6 @@ void func_002C42F0(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4328);
 
-extern u8 *D_00435DD0;
-
 typedef struct PartyPanelSlot {
     s32 unk0;
     s32 index;
@@ -788,8 +815,6 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C49F0);
 void func_002C4B40(u32 arg0) {
     func_002C49F0(arg0, 0);
 }
-
-extern u8 *D_00435DD0;
 
 s32 mnuFindMatchingPartyEntryIndex(s32 object) {
     s32 i;
@@ -1054,8 +1079,6 @@ s32 func_002C54B0(s32 arg0) {
     return arg0 < 0x100;
 }
 
-extern u8 *D_00435DD0;
-
 typedef struct MenuPanelEntry {
     u16 flags;
     u8 unknown02[0x12];
@@ -1154,8 +1177,6 @@ s32 func_002C5700(void) {
     }
     return 0;
 }
-
-extern u16 D_003E78D8[];
 
 s32 func_002C5758(u32 id, s32 mode) {
     u16 *entry = D_003E78D8;
@@ -1317,8 +1338,6 @@ void stageTestAddEntryValue(s32 arg0, f32 delta) {
     func_002C6E20(-1);
 }
 
-extern u8 *D_00457EC0[];
-
 void func_002C6610(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * 60;
     f32 *position = (f32 *)(offset + (s32)D_00457EC0[0]);
@@ -1342,8 +1361,6 @@ void func_002C6670(s32 index, s32 dx, s32 dy, s32 dz) {
     position[12] = y;
     position[13] = z;
 }
-
-extern u8 *D_00457EC0[];
 
 u8 func_002C66D0(u16 index) {
     return D_00457EC0[0][index * 60 + 1];
@@ -1407,8 +1424,6 @@ void func_002C6AC0(s32 arg0, s32 arg1, s32 arg2) {
     D_00457EB4[0] = func_00231B80();
 }
 
-extern u32 D_00457EC8[];
-
 void mnuForwardTableByte(s32 arg0) {
     func_002C6AC0(D_00457EC8[1], *(u8 *)(D_00457EC8[-2] + (arg0 & 0xffff) * 60), 0);
 }
@@ -1446,7 +1461,6 @@ void mnuResetWorkPair(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6F98);
 
-extern void func_00340DC8(f32, f32, f32);
 void stageTestApplyEntryRotation(s32 arg0) {
     f32 *entry = (f32 *)(D_00457EB0[6] * 60 + D_00457EB0[4]);
 
@@ -1462,8 +1476,6 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C72E0);
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C73C0);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7428);
-
-extern u32 D_00457EC8[];
 
 void func_002C7508(u32 menuId, f32 x, f32 y) {
     D_00457EC8[6] = 1;
@@ -1572,16 +1584,11 @@ void func_002C7C00(void) {
     func_0023A9A8();
 }
 
-extern char D_0042B610[];
-
 void func_002C7C18(void) {
     kwlnTaskDestroyWithHierarchyByName(D_0042B610, 1);
     kwlnDebugGraphSetEnabled(0);
 }
 
-extern char D_0042B610[];
-extern void func_002C7A60();
-extern void func_002C7C00();
 
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
