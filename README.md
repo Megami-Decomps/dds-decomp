@@ -2,11 +2,11 @@
 
 [![Build Status]][actions] [![dds1]][progress] [![dds2]][progress]
 
-[Build Status]: https://github.com/Raikaru/dds-decomp/actions/workflows/build.yml/badge.svg
-[actions]: https://github.com/Raikaru/dds-decomp/actions/workflows/build.yml
-[dds1]: https://decomp.dev/Raikaru/dds-decomp/dds1.svg?mode=shield&label=dds1
-[dds2]: https://decomp.dev/Raikaru/dds-decomp/dds2.svg?mode=shield&label=dds2
-[progress]: https://decomp.dev/Raikaru/dds-decomp
+[Build Status]: https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml/badge.svg
+[actions]: https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml
+[dds1]: https://decomp.dev/Megami-Decomps/dds-decomp/dds1.svg?mode=shield&label=dds1
+[dds2]: https://decomp.dev/Megami-Decomps/dds-decomp/dds2.svg?mode=shield&label=dds2
+[progress]: https://decomp.dev/Megami-Decomps/dds-decomp
 
 A work-in-progress **matching decompilation** of *Shin Megami Tensei: Digital
 Devil Saga* and *Digital Devil Saga 2* for the PlayStation 2. The goal is C
@@ -48,7 +48,7 @@ Requirements:
   layout: a different libc can compile some functions differently.
 
 ```sh
-git clone https://github.com/Raikaru/dds-decomp.git && cd dds-decomp
+git clone https://github.com/Megami-Decomps/dds-decomp.git && cd dds-decomp
 python -m pip install -r requirements.txt
 python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objdiff-cli
 # copy your disc image(s) into the repo root or orig/, then:
