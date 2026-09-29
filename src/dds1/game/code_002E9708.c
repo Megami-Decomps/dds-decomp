@@ -331,9 +331,73 @@ INCLUDE_RODATA(const s32, "game/code_002E9708", jtbl_003B4920);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EA5C0);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAC98);
+typedef struct GsMemBlock {
+    struct GsMemBlock *link0; /* 0x00 */
+    struct GsMemBlock *link4; /* 0x04 */
+    u32 type;                 /* 0x08 */
+    u32 unkC;                 /* 0x0C */
+    u32 unk10;                /* 0x10 */
+} GsMemBlock;
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAD88);
+extern char D_003B4DB8[]; /* " <<< GS memory information >>>..." */
+extern char D_003B4E30[]; /* " %08X : %08X %08X %8s %08X %d\n" */
+extern char D_003BD610[]; /* "%d" */
+extern char *D_00398A28[];
+extern GsMemBlock *func_002D1D10(void);
+extern char *D_00398A38[];
+extern GsMemBlock *func_002D1D18(void);
+
+void func_002EAC98(void) {
+    char buf[8];
+    GsMemBlock *head;
+    GsMemBlock *node;
+    GsMemBlock *walk;
+    char *name;
+
+    func_002E4C28(D_003B4DB8);
+    head = func_002D1D10();
+    node = head;
+    while (node != 0) {
+        if (node->type < 4) {
+            name = D_00398A28[node->type];
+        } else {
+            func_002E4C28(buf, D_003BD610, node->type);
+            name = buf;
+        }
+        func_002E4C28(D_003B4E30, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        walk = head;
+        while (walk != node) {
+            walk = walk->link4;
+        }
+        node = node->link4;
+    }
+}
+
+void func_002EAD88(void) {
+    char buf[8];
+    GsMemBlock *head;
+    GsMemBlock *node;
+    GsMemBlock *walk;
+    char *name;
+
+    func_002E4C28(D_003B4DB8);
+    head = func_002D1D18();
+    node = head;
+    while (node != 0) {
+        if (node->type < 4) {
+            name = D_00398A38[node->type];
+        } else {
+            func_002E4C28(buf, D_003BD610, node->type);
+            name = buf;
+        }
+        func_002E4C28(D_003B4E30, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        walk = head;
+        while (walk != node) {
+            walk = walk->link0;
+        }
+        node = node->link0;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B4DB8);
 
