@@ -360,7 +360,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
     D_00437988 = 2;
 }
 
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 kwlnTaskCreate(void *name, s32 flags, s32 prio, s32 stacked, void *update, void *destroy, void *data);
 extern void *func_00299578(void);
 extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
