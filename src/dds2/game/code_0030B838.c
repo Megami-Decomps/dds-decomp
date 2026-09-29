@@ -227,9 +227,10 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BA98);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BBA8);
 
-void func_0030BC30(u32 arg0) {
+/* Reset the current selection before installing the requested index. */
+void func_0030BC30(u32 index) {
     func_0030BBA8();
-    D_004388B8 = arg0;
+    D_004388B8 = index;
 }
 
 void sdfCycleForward(void) {
@@ -242,6 +243,7 @@ void sdfCycleForward(void) {
     }
 }
 
+/* Cycle through the same bounded selection in the opposite direction. */
 void func_0030BCA8(void) {
     if (D_004388B8 != 0) {
         func_0030BBA8();
@@ -424,6 +426,7 @@ void sdfCounterTickCountdown(void) {
     }
 }
 
+/* Enabling a stopped timer starts it at one; disabling clears it. */
 void mnuSetMapTimerFlags(s32 flags) {
     SdfCounterTimer *timers = ((SdfCounterRuntime *)D_004388C4)->timer;
     if ((flags & 1) != 0) {
@@ -442,6 +445,7 @@ void mnuSetMapTimerFlags(s32 flags) {
     }
 }
 
+/* Active timers repeat every 60 ticks rather than stopping at zero. */
 void mnuTickMapTimers(void) {
     SdfCounterTimer *timers = ((SdfCounterRuntime *)D_004388C4)->timer;
     if (timers->mapTimerPrimary > 0) {
