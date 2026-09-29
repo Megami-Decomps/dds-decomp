@@ -1,0 +1,4 @@
+# Addresses that keep their placeholder name in one version although their
+# twin in the other version is named; tools/shared_funcs.py names skips them.
+# <version> <address>  # reason
+dds1 0x002944D8  # DDS2 fileQueueDestroy: the name tips effAllocateResourcePayload, effDestroyResourceInstance and effDispatchIndexedCallback (code_0029A840) to CONTEXT

@@ -106,6 +106,11 @@ class Game:
                 self.by_addr.setdefault(addr, name)
                 if section == "curated" and not PLACEHOLDER.match(name):
                     self.curated[addr] = (name, rest.strip())
+        # Addresses that keep their placeholder name in this version although the
+        # twin is named (config/shared_names_exclude.txt: `<version> 0xADDR  # why`).
+        exclude = ROOT / "config" / "shared_names_exclude.txt"
+        self.unshared = {int(a, 16) for v, a in re.findall(r"^(\w+)\s+(0x[0-9A-Fa-f]+)", exclude.read_text(), re.M)
+                         if v == version} if exclude.exists() else set()
 
     def address_of(self, token):
         if token in self.by_name:
@@ -187,6 +192,8 @@ def cmd_names(_args):
                     conflicts.append(f"{name}: ambiguous data address in {dst.version}")
                     continue
             have = dst.curated.get(target, (None,))[0]
+            if target in dst.unshared:
+                continue
             if have == name:
                 continue
             if have:

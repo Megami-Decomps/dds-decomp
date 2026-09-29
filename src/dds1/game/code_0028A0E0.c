@@ -2290,7 +2290,7 @@ void func_00294318(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294330);
 
-void fileQueueDestroy(FileQueue *queue) {
+void func_002944D8(FileQueue *queue) {
     FileJob *job = queue->tail;
     while (job != NULL) {
         FileJob *next = job->next;
