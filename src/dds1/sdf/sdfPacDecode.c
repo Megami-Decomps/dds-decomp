@@ -1,5 +1,13 @@
 #include "common.h"
 
+enum {
+    PAC_COMMAND_PAYLOAD = 1,
+    PAC_COMMAND_ALLOCATION_LIST = 2,
+    PAC_COMMAND_END = 0xFF,
+    PAC_ENCODING_RAW = 0,
+    PAC_ENCODING_COMPRESSED = 1
+};
+
 typedef struct PacHead {
     u8 command; /* 0x0 */
     u8 flags; /* 0x1: high nibble extension length, low nibble encoding */
@@ -62,7 +70,7 @@ typedef struct PacState {
     s32 pendingBytes; /* 0x20 */
     PacBuf *decoder; /* 0x24 */
     PacBuf *buffer; /* 0x28 */
-    PacAlloc *unk2C; /* 0x2C */
+    PacAlloc *allocation; /* 0x2C: current allocation-entry list */
     PacWork *queueHead; /* 0x30 */
     PacWork *queueTail; /* 0x34 */
 } PacState;
@@ -101,6 +109,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EDE48);
 
+/* Queue a private copy of the packet header and any extension bytes. */
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
     s32 extensionBytes = packet->flags & 0xF0;
     PacWork *node = func_002CFF68(extensionBytes + 0x20);
@@ -115,6 +124,7 @@ PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
     return node;
 }
 
+/* Unlink a queued packet and return the following work item. */
 PacWork *sdfPacRemovePacket(PacWork *work) {
     PacState *state = work->owner;
     /* Keep a node-shaped link so the queue head can be unlinked like any next pointer. */
@@ -138,13 +148,14 @@ PacWork *sdfPacRemovePacket(PacWork *work) {
     return next;
 }
 
+/* Dispatch recognized PAC commands; one marks end-of-stream. */
 s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     if (status == 0) {
         switch (packet->command) {
-        case 1:
+        case PAC_COMMAND_PAYLOAD:
             func_002EE3E8(state, packet);
             return 0;
-        case 2:
+        case PAC_COMMAND_ALLOCATION_LIST:
             func_002EE868(state, packet);
             return 0;
         case 6:
@@ -156,7 +167,7 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
         case 9:
             func_002EEAA0(state, packet);
             return 0;
-        case 0xFF:
+        case PAC_COMMAND_END:
             return 1;
         default:
             return 3;
@@ -164,6 +175,7 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     }
     return 0;
 }
+/* Return the extension payload only when its high-nibble length is nonzero. */
 void *sdfPacGetExtensionData(PacExtensionHeader *header) {
     s32 extensionSize = header->extensionFlags & 0xF0;
     if (extensionSize <= 0) {
@@ -172,6 +184,7 @@ void *sdfPacGetExtensionData(PacExtensionHeader *header) {
     return header->data;
 }
 
+/* Incrementally copy raw payload bytes, invoking completion at zero remaining. */
 void sdfPacCopyPendingBytes(PacState *state) {
     s32 count = state->pendingBytes;
     s32 available = state->inputAvailable;
@@ -193,6 +206,7 @@ void sdfPacCopyPendingBytes(PacState *state) {
     }
 }
 
+/* Feed compressed input to the active decoder until it finishes. */
 void sdfPacDecodePendingBytes(PacState *state) {
     s32 available = state->inputAvailable;
     s32 finished = func_002EEAE0(state->decoder, state->inputCursor, available);
@@ -204,6 +218,7 @@ void sdfPacDecodePendingBytes(PacState *state) {
     state->onComplete(state);
 }
 
+/* Consume a packet's bytes without allocating its decoded payload. */
 void sdfPacSkipPendingBytes(PacState *state) {
     s32 count = state->pendingBytes;
     if (state->inputAvailable < count) {
@@ -222,6 +237,7 @@ void sdfPacSkipPendingBytes(PacState *state) {
     }
 }
 
+/* Allocate or skip a payload and select its raw/compressed input handler. */
 void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
     s32 allocationSize = packet->decodedSize;
     if (allocationSize == 0) {
@@ -242,10 +258,10 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
         }
         state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
         switch (packet->flags & 0xF) {
-        case 0:
+        case PAC_ENCODING_RAW:
             state->onInput = sdfPacCopyPendingBytes;
             break;
-        case 1: {
+        case PAC_ENCODING_COMPRESSED: {
             PacBuf *decoder = func_002CFEB8(0x20);
             state->decoder = decoder;
             sdfStoreWordAndSetState(decoder, state->outputCursor);
@@ -258,11 +274,13 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
     }
 }
 
+/* Begin a regular payload; completion is the normal packet finalizer. */
 void func_002EE3E8(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EDD98;
 }
 
+/* Apply the relocation record at the front of the queued payload. */
 void func_002EE418(PacState *state) {
     PacWork *work = state->queueTail;
     PacReloc *record = (PacReloc *)work->dataCursor;
@@ -276,11 +294,13 @@ void func_002EE418(PacState *state) {
     func_002EDD98(state);
 }
 
+/* Begin a payload that must be relocated before normal finalization. */
 void func_002EE478(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EE418;
 }
 
+/* Complete the second relocation-command variant with the same word fixups. */
 void func_002EE4A8(PacState *state) {
     PacWork *work = state->queueTail;
     PacReloc *record = (PacReloc *)work->dataCursor;
@@ -294,11 +314,13 @@ void func_002EE4A8(PacState *state) {
     func_002EDD98(state);
 }
 
+/* Begin the second relocation-command variant. */
 void func_002EE508(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_002EE4A8;
 }
 
+/* Incrementally copy a resource chunk before processing its resource slot. */
 void sdfPacCopyResourceChunk(PacState *state) {
     PacBuf *buffer = state->buffer;
     s32 count = buffer->remaining;
@@ -322,6 +344,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
     }
 }
 
+/* Decode a chunk before processing and releasing its resource slot. */
 void sdfPacDecodeResourceChunk(PacState *state) {
     s32 count = state->pendingBytes;
     s32 finished = func_002EEAE0(state->decoder, state->inputCursor, count);
@@ -338,6 +361,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     state->onComplete(state);
 }
 
+/* Skip the remaining resource chunk and process its existing cursor. */
 void sdfPacSkipResourceChunk(PacState *state) {
     PacBuf *buffer = state->buffer;
     s32 count = buffer->remaining;
@@ -362,27 +386,30 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE6F8);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE828);
 
+/* Allocate per-packet state for a list of allocation entries. */
 void func_002EE868(PacState *state, PacHead *packet) {
     sdfPacEnqueuePacket(state, packet);
     {
         void *allocation = func_002CFEB8(0x10);
-        state->unk2C = (PacAlloc *)allocation;
+        state->allocation = (PacAlloc *)allocation;
         func_002EE6F8(state, packet, allocation);
     }
     state->onComplete = func_002EE828;
 }
 
 
+/* Start the next allocation entry at its inline descriptor. */
 void func_002EE8C0(PacState *state) {
-    func_002EE6F8(state, (u8 *)state->unk2C + 0x10, (u8 *)state->unk2C + 0x20);
+    func_002EE6F8(state, (u8 *)state->allocation + 0x10, (u8 *)state->allocation + 0x20);
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE900);
 
+/* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
-    PacAlloc *allocation = state->unk2C;
+    PacAlloc *allocation = state->allocation;
     func_002DA058(state->queueTail->resourceHandle, allocation->unk20);
     {
         s32 nextIndex = allocation->entryIndex + 1;
@@ -396,6 +423,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
     }
 }
 
+/* Discard pending input until the next allocation entry can start. */
 void func_002EE9A8(PacState *state) {
     s32 available = state->inputAvailable;
     if (state->pendingBytes < available) {

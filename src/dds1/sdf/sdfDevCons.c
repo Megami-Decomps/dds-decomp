@@ -47,6 +47,7 @@ extern u32 D_003987E0[];
 extern void *memmove(void *dst, const void *src, u32 n);
 extern void *memset(void *dst, s32 c, u32 n);
 
+/* Scroll the two-byte cell grid at its last row, or advance the cursor. */
 void sdfDevConsAdvanceRow(DevConsState *console) {
     if (console->cursorRow == console->rows - 1) {
         s32 rowBytes = console->columns * 2;
@@ -63,10 +64,12 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E3F58);
 
+/* Forward a character and explicit attribute to the console renderer. */
 void sdfDevConsWriteCharacterWithAttribute(DevConsState *console, s32 character, s32 attribute) {
     func_002E3F58(console, character, attribute);
 }
 
+/* Format text into a fixed-size scratch buffer, then emit each character. */
 s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     char buf[0x200];
     __builtin_va_list ap;
@@ -87,21 +90,24 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
     return length;
 }
 
+/* Set the cell coordinates of the next character. */
 void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
 }
 
+/* Select the attribute passed to each subsequently printed character. */
 void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute) {
     console->textAttribute = attribute;
 }
 
-u8 func_002E41A8(DevConsState *arg0) {
-    return arg0->unk14;
+/* Read or write the console's unidentified byte at offset 0x14. */
+u8 func_002E41A8(DevConsState *console) {
+    return console->unk14;
 }
 
-void func_002E41B0(DevConsState *arg0, u8 arg1) {
-    arg0->unk14 = arg1;
+void func_002E41B0(DevConsState *console, u8 value) {
+    console->unk14 = value;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E41B8);

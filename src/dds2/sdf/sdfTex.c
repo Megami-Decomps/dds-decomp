@@ -2,6 +2,9 @@
 
 #include "sdf.h"
 
+/* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
+enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
+
 extern SdfTex *D_004389F8;
 
 void func_0032AA40(void *arg0);
@@ -24,11 +27,12 @@ extern u8 D_00439150;
 
 void func_0032CAE0(void *arg0, void *arg1);
 
+/* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 func_0032B8D8(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
-    s32 bytesPerColor = (paletteFormat == 0) ? 4 : 2;
+    s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
     s32 colorsPerPalette;
 
-    if ((textureFormat == 0x13) || (textureFormat == 0x1B)) {
+    if ((textureFormat == SDF_PSMT8) || (textureFormat == SDF_PSMT8H)) {
         colorsPerPalette = 0x100;
     } else {
         colorsPerPalette = 0x10;
@@ -38,12 +42,14 @@ s32 func_0032B8D8(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B908);
 
+/* Copy the texture's backing image without changing the resource metadata. */
 void func_0032B948(SdfTex *texture, void *source) {
     memcpy(texture->data, source, texture->dataSize);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B968);
 
+/* Release both GPU resources and unlink the texture from the active list. */
 void sdfTexRelease(SdfTex *texture) {
     SdfTex *next;
     SdfTex *prev;
@@ -70,6 +76,7 @@ void sdfTexRelease(SdfTex *texture) {
     func_00328E48(texture);
 }
 
+/* Release a texture when the final ordinary reference is dropped. */
 void sdfTexReleaseReference(SdfTex *texture) {
     SdfTexRef *ref;
     s32 count;
@@ -85,6 +92,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
     }
 }
 
+/* Hand the last reference to func_0032CAE0 rather than releasing it here. */
 void func_0032BBB0(SdfTex *texture) {
     SdfTexRef *ref;
     s32 count;
@@ -102,6 +110,7 @@ void func_0032BBB0(SdfTex *texture) {
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBF8);
 
+/* Allocate and populate one of the two resource packet variants. */
 void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     void *packet;
     void *primary;
@@ -114,10 +123,12 @@ void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     return packet;
 }
 
+/* Store the first packet on the texture. */
 void sdfTexCreateFirstPacket(SdfTex *texture) {
     texture->unk28 = sdfTexCreateResourcePacket(texture, 0);
 }
 
+/* Store the second packet on the texture. */
 void sdfTexCreateSecondPacket(SdfTex *texture) {
     texture->unk2C = sdfTexCreateResourcePacket(texture, 1);
 }
@@ -126,12 +137,14 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BF78);
 
-void func_0032C138(u32 arg0) {
-    func_0032BF78(arg0, 0);
+/* Process a resource address with packet variant zero. */
+void func_0032C138(u32 resourceAddress) {
+    func_0032BF78(resourceAddress, 0);
 }
 
-void func_0032C150(u32 arg0) {
-    func_0032BF78(arg0, 1);
+/* Process a resource address with packet variant one. */
+void func_0032C150(u32 resourceAddress) {
+    func_0032BF78(resourceAddress, 1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032C168);
