@@ -22,10 +22,10 @@ s32 mnuStartStaffDisplay(void) {
 }
 
 u32 func_00272A58(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101A70();
-    func_0027E790(*(u32 *)(temp_v0 + 0x138), *(u32 *)(temp_v0 + 0x6c), 0, 1);
+    context = func_00101A70();
+    func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x6c), 0, 1);
     return 1;
 }
 

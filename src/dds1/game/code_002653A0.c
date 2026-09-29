@@ -4,6 +4,10 @@ extern u32 func_00265E68(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
+extern u8 D_00370D08[];
+
+extern s32 D_003BAA00;
+
 INCLUDE_ASM(const s32, "game/code_002653A0", func_002653A0);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265478);
@@ -21,7 +25,19 @@ void func_002654E8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265500);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00265540);
+u8 func_00265540(s32 position, s32 increment) {
+    u8 *table = D_00370D08;
+    s32 i = 2;
+    u8 *limit = table + 4;
+    s32 end = position + increment;
+    do {
+        if (position < *limit && end >= *limit) {
+            return limit[1];
+        }
+        limit -= 2;
+    } while (--i >= 0);
+    return 0;
+}
 
 u32 func_00265590(void) {
     return 1;
@@ -67,13 +83,19 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_00265C90);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00265E68);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", titleInitFourParameters);
+void titleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
+    memset(state, 0, 0x10);
+    state[0] = first;
+    state[1] = second;
+    state[2] = third;
+    state[3] = fourth;
+}
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266048);
 
-void func_00266130(u32 arg0) {
-    func_001953D8(arg0, 0xc, 0x10);
-    func_001953A8(arg0, 0xfffffffffffffffc);
+void func_00266130(u32 fontContext) {
+    func_001953D8(fontContext, 0xc, 0x10);
+    func_001953A8(fontContext, 0xfffffffffffffffc);
 }
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266168);
@@ -83,4 +105,3 @@ INCLUDE_ASM(const s32, "game/code_002653A0", func_002661A8);
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);
 
 INCLUDE_RODATA(const s32, "game/code_002653A0", D_003AFBA0);
-

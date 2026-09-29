@@ -18,6 +18,35 @@ typedef struct {
     u32 effectResource;  /* 0x828 */
 } MenuVisualWork;
 
+extern s32 D_003BAA00;
+
+typedef struct MenuProgressNode {
+    u8 pad00[0x48];
+    u32 flags;
+    u8 pad4C[0xC];
+    struct MenuProgressNode *next;
+    u8 pad5C[8];
+    u32 requiredAmount;
+} MenuProgressNode;
+
+extern s32 func_00248BA0(s32, s32);
+
+extern s32 func_002CFEB8(s32);
+
+extern s32 func_0027FA70(u16, u16);
+
+extern void func_00284258(s32, s32, s32, s32, s32, s32);
+
+extern s32 func_0027B2F8(s32, s32, s32, s32);
+
+extern s32 mnuListAppendNode(s32, s32);
+
+extern void func_002491B8(void);
+
+extern u8 D_003BC3F8[];
+
+extern s32 mnuWalkNodeList(s32, s32);
+
 void func_00248580(MenuVisualWork *work) {
     effResolveAndReleaseResource(work->firstResource);
     effResolveAndReleaseResource(work->secondResource);
@@ -32,7 +61,21 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248658);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248700);
+void func_00248700(s32 object) {
+    MenuProgressNode *node = *(MenuProgressNode **)(object + 0x10);
+    if (node != 0) {
+        s32 base = D_003BAA00;
+        do {
+            u32 amount = *(u32 *)(base + 0x3c);
+            if (amount < node->requiredAmount) {
+                node->flags |= 1;
+            } else {
+                node->flags &= ~1u;
+            }
+            node = node->next;
+        } while (node != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248750);
 
@@ -175,4 +218,3 @@ INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E8);
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F0);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F8);
-

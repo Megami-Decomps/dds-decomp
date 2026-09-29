@@ -8,32 +8,34 @@ typedef struct {
     u32 stackValues[28];
     u8 padAC[0x10];
     u32 *instructions;
+    u8 padC0[0x30];
+    void *actor; /* 0xF0: battle actor associated with the active script */
 } ScriptContext;
 
 extern s32 func_00101A70(void);
 
-void func_0010C028(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_0010C028(u32 unused, void *actor) {
+    ScriptContext *context;
 
-    temp_v0 = func_00101A70();
-    *(u32 *)(temp_v0 + 0xf0) = arg1;
+    context = (ScriptContext *)func_00101A70();
+    context->actor = actor;
 }
 
 u32 func_0010C050(void) {
-    s32 temp_v0;
+    ScriptContext *context;
 
-    temp_v0 = func_00101A70();
-    return *(u32 *)(temp_v0 + 0xf0);
+    context = (ScriptContext *)func_00101A70();
+    return (u32)context->actor;
 }
 
-void func_0010C070(u32 arg0) {
-    s64 temp_v0;
+void func_0010C070(u32 task) {
+    s64 previousContext;
 
-    temp_v0 = func_00101A70();
-    if (temp_v0 != 0) {
-        func_0010BD20(temp_v0);
+    previousContext = func_00101A70();
+    if (previousContext != 0) {
+        func_0010BD20(previousContext);
     }
-    func_00101A68(arg0, 0);
+    func_00101A68(task, 0);
 }
 
 void func_0010C0B0(void) {

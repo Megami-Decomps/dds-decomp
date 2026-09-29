@@ -5,10 +5,10 @@ extern u64 sdfSoundIsCommandBusy(void);
 extern u64 func_0014A250(void);
 
 u32 func_0014F4C8(void) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = func_0014A250();
-    func_0010D5F0(temp_v0);
+    value = func_0014A250();
+    func_0010D5F0(value);
     return 1;
 }
 
@@ -17,12 +17,12 @@ INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F4F0);
 INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F5E8);
 
 s32 func_0014F658(void) {
-    s32 value;
-    value = func_0010D5A8(0);
+    s32 commandName;
+    commandName = func_0010D5A8(0);
     if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
-    sdfSoundSendNamedCommand(value, 0x7f);
+    sdfSoundSendNamedCommand(commandName, 0x7f);
     return 1;
 }
 
@@ -32,10 +32,10 @@ u32 func_0014F6A8(void) {
 }
 
 u32 func_0014F6C8(void) {
-    u64 temp_v0;
+    u64 busy;
 
-    temp_v0 = sdfSoundIsCommandBusy();
-    func_0010D5F0(temp_v0);
+    busy = sdfSoundIsCommandBusy();
+    func_0010D5F0(busy);
     return 1;
 }
 

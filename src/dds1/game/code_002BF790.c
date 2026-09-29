@@ -16,7 +16,6 @@ typedef struct QuadU32 {
     u32 w; // 0x0C
 } QuadU32; // 0x10
 
-
 typedef struct GridWidget {
     u8 pad0[0x50];
     s32 x;
@@ -24,7 +23,28 @@ typedef struct GridWidget {
     s32 width;
     s32 height;
 } GridWidget;
+
 extern s32 func_002C2568(s32, void *);
+
+typedef struct GridQuantizedEntry {
+    u8 pad0[0x44];
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+} GridQuantizedEntry;
+
+typedef struct RenderCallbackEntry {
+    u8 reserved[0x10];
+    void (*draw)(void *, s32);
+    u8 tail[0xC];
+} RenderCallbackEntry;
+
+extern RenderCallbackEntry D_00324B48[];
+
+extern s32 sdfAllocPacketAligned(s32);
+
+extern void sdfInitPacketList(s32);
 
 void func_002BF790(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
     s32 entry = func_002BD398(e, f);
@@ -49,7 +69,21 @@ s32 func_002BF970(s32 object, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFA80);
+void func_002BFA80(u8 *object, s32 index, s32 x, s32 y,
+                   s32 width, s32 height) {
+    GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
+    u32 *destination = (u32 *)(*(u8 **)(object + 0x18) + index * 0xA0 + 0x6C);
+    u32 *source;
+    s32 remaining = 3;
+    entry->x = x >> 4;
+    entry->y = y >> 3;
+    entry->width = width >> 4;
+    entry->height = height >> 3;
+    source = (u32 *)&entry->x;
+    do {
+        *destination++ = *source++;
+    } while (--remaining >= 0);
+}
 
 void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     GridWidget *widget = (GridWidget *)func_002BD398(a, b);
@@ -93,23 +127,86 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0340);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C04C8);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C05F0);
+void func_002C05F0(u64 *channels, u32 color) {
+    u64 green;
+    channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
+    green = color & 0xFF00;
+    channels[1] = (green >> 8) | ((u64)(color & 0xFF) << 32);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0628);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0778);
+void func_002C0778(u8 value, s32 alternate, s32 kind) {
+    u32 normalized = value != 0;
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_002E1428(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_002E1420(packet);
+    descriptor[0] = normalized;
+    if (!alternate) {
+        descriptor[1] = 0x4A;
+    } else {
+        descriptor[1] = 0x4B;
+    }
+    context = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_00324B48[kind];
+    entry->draw(entry, context);
+}
 
 void func_002C0858(u8 arg0, u32 arg1) {
     func_002C0778(arg0, 0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0878);
+void func_002C0878(s32 data, s32 alternate, s32 kind) {
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_002E1428(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_002E1420(packet);
+    descriptor[0] = data;
+    if (!alternate) {
+        descriptor[1] = 0x47;
+    } else {
+        descriptor[1] = 0x48;
+    }
+    context = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_00324B48[kind];
+    entry->draw(entry, context);
+}
 
 void func_002C0950(u32 arg0, u32 arg1) {
     func_002C0878(arg0, 0, arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0970);
+void func_002C0970(s32 data, s32 alternate, s32 kind) {
+    s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    u64 *descriptor;
+    s32 context;
+    RenderCallbackEntry *entry;
+
+    func_002E1428(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)func_002E1420(packet);
+    descriptor[0] = data;
+    if (!alternate) {
+        descriptor[1] = 0x42;
+    } else {
+        descriptor[1] = 0x43;
+    }
+    context = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(context);
+    sdfAppendPacket(context, packet);
+    entry = &D_00324B48[kind];
+    entry->draw(entry, context);
+}
 
 void func_002C0A48(u32 arg0, u32 arg1) {
     func_002C0970(arg0, 0, arg1);
@@ -211,7 +308,33 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1770);
+u8 *func_002C1770(const char *text, s32 x, s32 y, s32 columns, s32 rows,
+                  u32 reference) {
+    u8 *widget = (u8 *)func_002CFEB8(0x40);
+    u32 length;
+    char *copy;
+
+    memset(widget, 0, 0x40);
+    length = strlen(text) + 1;
+    copy = (char *)func_002CFEB8(length);
+    *(u16 *)(widget + 4) = length;
+    *(char **)widget = copy;
+    memcpy(copy, text, length);
+    *(u32 *)(widget + 0x10) = 0;
+    *(s32 *)(widget + 0x20) = x << 4;
+    *(s32 *)(widget + 0x24) = y << 3;
+    *(u32 *)(widget + 0x30) = reference;
+    *(s16 *)(widget + 6) = rows;
+    *(s32 *)(widget + 0x28) = columns * 12 + 6;
+    *(s32 *)(widget + 0x2C) = rows * 14 + 6;
+    *(u32 *)(widget + 0x14) = 0;
+    *(u32 *)(widget + 0x18) = 0;
+    *(u32 *)(widget + 0x1C) = 0;
+    *(u32 *)(widget + 0xC) = 0;
+    *(u16 *)(widget + 8) = 0;
+    *(u16 *)(widget + 0xA) = 0;
+    return widget;
+}
 
 void itfSetGridDimensions(u8 *work, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
@@ -237,7 +360,23 @@ u32 func_002C18C8(u32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1910);
+u32 func_002C1910(u32 work) {
+    u32 list;
+
+    func_002CFF98(*(u32 *)work);
+    list = *(u32 *)(work + 0x18);
+    if (list != 0) {
+        do {
+            u32 child = *(u32 *)(list + 0x20);
+            if (child != 0) {
+                func_002C1910(child);
+            }
+            list = func_002C1B30(work);
+        } while (list != 0);
+    }
+    func_002CFF98(work);
+    return 1;
+}
 
 void expandWidgetColumnWidth(s32 columns, u8 *work) {
     s32 flags = *(s32 *)(work + 0xc);
@@ -328,7 +467,24 @@ void func_002C2040(u32 arg0, u32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C2088);
+s32 func_002C2088(u8 *widget, u32 target) {
+    u32 flags = *(u32 *)(widget + 0xC);
+
+    if (flags & 2) {
+        if (target == *(u32 *)(widget + 0x18)) {
+            return (flags & 1) ? 6 : 4;
+        }
+        return 0;
+    }
+    if (flags & 0x80) {
+        if (target == *(u32 *)(widget + 0x18)) {
+            return 12;
+        }
+    } else if (target == *(u32 *)(widget + 0x18) && (flags & 1)) {
+        return 6;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C20F8);
 
@@ -361,4 +517,3 @@ INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD220);
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD228);
 
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD230);
-

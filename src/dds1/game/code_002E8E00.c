@@ -26,26 +26,26 @@ void func_002E8E50(void) {
     func_002E87A8(0x40, 0, 0, 0);
 }
 
-void func_002E8E78(u32 arg0) {
-    func_002E87A8(arg0 | 0x50, 0, 0, 0);
+void func_002E8E78(u32 command) {
+    func_002E87A8(command | 0x50, 0, 0, 0);
 }
 
-u32 func_002E8EA0(s32 arg0, char *arg1) {
-    u32 len = strlen(arg1);
+u32 func_002E8EA0(s32 command, char *text) {
+    u32 length = strlen(text);
 
-    return func_002E8900(arg0 | 0x70, 0, arg1, len);
+    return func_002E8900(command | 0x70, 0, text, length);
 }
 
-u32 func_002E8EE8(s32 arg0, char *arg1) {
-    u32 len = strlen(arg1);
+u32 func_002E8EE8(s32 command, char *text) {
+    u32 length = strlen(text);
 
-    return func_002E8900(arg0 | 0x60, 0, arg1, len);
+    return func_002E8900(command | 0x60, 0, text, length);
 }
 
-u32 func_002E8F30(s32 arg0, char *arg1) {
-    u32 len = strlen(arg1);
+u32 func_002E8F30(s32 command, char *text) {
+    u32 length = strlen(text);
 
-    return func_002E8900(arg0 | 0x80, 0, arg1, len);
+    return func_002E8900(command | 0x80, 0, text, length);
 }
 
 void sndSetSequenceVolumePan(s32 id, s32 volume, s32 pan) {

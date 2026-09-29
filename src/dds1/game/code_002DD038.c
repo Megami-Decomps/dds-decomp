@@ -1,9 +1,15 @@
 #include "common.h"
 
+extern s32 (*D_003982D0[])(void *a0, s32 a1);
+
+extern s32 (*D_00398360[])(void *a0, s32 a1);
+
 void func_002DD038(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD040);
+s32 func_002DD040(void *object, s32 command) {
+    return D_00398360[(u16)command](object, command);
+}
 
 void func_002DD070(s32 arg0, s32 arg1, u32 arg2, s32 arg3) {
     func_002DB220();

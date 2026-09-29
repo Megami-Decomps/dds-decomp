@@ -2,6 +2,8 @@
 
 extern s32 func_002CFEB8(u32);
 
+void func_002BDD60(u32);
+
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BC38);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BCA0);
@@ -12,23 +14,31 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BDD0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BF18);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C030);
+u32 func_0025C030(u32 ctx, u32 config) {
+    u32 data = func_002CFEB8(0x70);
+    memset((void *)data, 0, 0x70);
+    effRequestResourceByMode(ctx, config, 0, data + 0x6c);
+    return data;
+}
 
-typedef struct {
+typedef struct MenuListNode {
     u8 pad00[0x10];
-    u32 next; /* 0x10 */
+    struct MenuListNode *next; /* 0x10 */
 } MenuListNode;
 
 typedef struct {
     u32 pad00[2];
-    s32 first; /* 0x08 */
+    MenuListNode *first; /* 0x08 */
 } MenuListHead;
 
 u8 func_0025C098(s32 arg0) {
     return *(s32 *)(arg0 + 0x6c) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0A8);
+void func_0025C0A8(u32 obj) {
+    func_002BDD60(*(u32 *)(obj + 0x6c));
+    func_002CFF98(obj);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
 
@@ -76,17 +86,17 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D798);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D7F8);
 
-s32 *mnuAllocateMenuListNode(void) {
-    s32 *temp_v0 = (s32 *)func_002CFEB8(0x14);
+MenuListNode *mnuAllocateMenuListNode(void) {
+    MenuListNode *node = (MenuListNode *)func_002CFEB8(0x14);
 
-    memset(temp_v0, 0, 0x14);
-    return temp_v0;
+    memset(node, 0, 0x14);
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DAD0);
 
-u32 func_0025DB58(MenuListNode *node) {
-    u32 next;
+MenuListNode *func_0025DB58(MenuListNode *node) {
+    MenuListNode *next;
 
     next = node->next;
     func_002CFF98();
@@ -94,7 +104,7 @@ u32 func_0025DB58(MenuListNode *node) {
 }
 
 void mnuReleaseListNodes(MenuListHead *head) {
-    s32 node = head->first;
+    MenuListNode *node = head->first;
 
     while (node != NULL) {
         node = func_0025DB58(node);
@@ -122,4 +132,3 @@ INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D8);
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E0);
 
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E8);
-

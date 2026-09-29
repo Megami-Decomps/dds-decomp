@@ -22,8 +22,8 @@ extern u32 D_003BC4CC;
 
 typedef struct {
     u32 unk0;
-    u16 unk4;
-    u16 unk6;
+    u16 entryX;
+    u16 entryY;
     u32 unk8;
 } SceneEntry;
 
@@ -92,12 +92,12 @@ void func_00253520(s32 context) {
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253558);
 
 s32 func_00253608(void) {
-    s32 temp_v0 = func_002CB3B8(D_003BC4CC, 1);
+    s32 context = func_002CB3B8(D_003BC4CC, 1);
 
-    if (temp_v0 == 0) {
+    if (context == 0) {
         return 0;
     }
-    return *(s32 *)(*(s32 *)(*(s32 *)(temp_v0 + 0x484) + 8) + 4);
+    return *(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253640);
@@ -108,23 +108,35 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253830);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253AD0);
 
-typedef struct {
-    u8 pad00[0x59C];
-    u16 entryX; /* 0x59C */
-    u16 entryY; /* 0x59E */
-} SceneMetadataContext;
-
-typedef struct {
+typedef struct SceneMetadataNode {
     u8 pad00[0xC];
     u16 entryIndex; /* 0x0C */
 } SceneMetadataNode;
 
+typedef struct {
+    u8 pad00[4];
+    SceneMetadataNode *node; /* 0x04 */
+} SceneMetadataSlot;
+
+typedef struct {
+    u8 pad00[8];
+    SceneMetadataSlot *slot; /* 0x08 */
+} SceneMetadataGrid;
+
+typedef struct {
+    u8 pad00[0x484];
+    SceneMetadataGrid *grid; /* 0x484 */
+    u8 pad488[0x114];
+    u16 entryX; /* 0x59C */
+    u16 entryY; /* 0x59E */
+} SceneMetadataContext;
+
 void fldUpdateSceneEntryMetadata(s32 context) {
-    SceneMetadataNode *node = (SceneMetadataNode *)*(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
+    SceneMetadataNode *node = ((SceneMetadataContext *)context)->grid->slot->node;
     u16 index = node->entryIndex;
-    ((SceneMetadataContext *)context)->entryX = D_0036BE38[index].unk4;
+    ((SceneMetadataContext *)context)->entryX = D_0036BE38[index].entryX;
     index = node->entryIndex;
-    ((SceneMetadataContext *)context)->entryY = D_0036BE38[index].unk6;
+    ((SceneMetadataContext *)context)->entryY = D_0036BE38[index].entryY;
 }
 
 s32 fldResetSceneState(void) {

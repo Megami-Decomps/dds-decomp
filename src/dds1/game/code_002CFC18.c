@@ -3,10 +3,10 @@
 extern u64 sdfFindThreadById(u64);
 
 void func_002CFC18(void) {
-    u64 temp_v0;
+    u64 thread;
 
-    temp_v0 = sdfFindThreadById(0xffffffffffffffff);
-    func_002CFB18(temp_v0);
+    thread = sdfFindThreadById(0xffffffffffffffff);
+    func_002CFB18(thread);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFC38);

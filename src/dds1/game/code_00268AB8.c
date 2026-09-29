@@ -40,6 +40,18 @@ extern void func_002CF430(void);
 
 extern void func_0021FE38(void);
 
+extern void func_00269558(void);
+
+extern u8 D_003BC5A0[];
+
+extern u64 func_0010D428(u64);
+
+extern u32 D_003BC5B0[2];
+
+extern u32 D_003BC5B8;
+
+extern u64 func_002F5990();
+
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268AB8);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
@@ -96,7 +108,15 @@ void func_00269530(void) {
     D_003BC588 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269558);
+void func_00269558(void) {
+    u32 *data = (u32 *)func_002CFEB8(8);
+    u32 task = kwlnTaskCreate(D_003BC5A0, 0x5214, 1, 1,
+                              func_00269500, func_00269530, 0);
+    D_003BC588 = task;
+    func_00101A68(task, data);
+    data[0] = 0;
+    data[1] = 0;
+}
 
 void mnuResetTitleEffectState(s32 effect) {
     TitleEffectState *state = (TitleEffectState *)func_00101A70(D_003BC588);
@@ -178,7 +198,13 @@ u32 func_00269868(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", movCheckStartupSoundState);
+s32 movCheckStartupSoundState(void) {
+    if (func_0026A720() == 0) {
+        func_0026A5F0(func_0010D428(0));
+        return 0;
+    }
+    return func_0026A720() != 1;
+}
 
 u32 func_002698C0(void) {
     func_0026A778();
@@ -203,7 +229,24 @@ u8 func_00269928(void) {
     return temp_v0 == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269948);
+s32 func_00269948(u32 source, u32 destination, u32 words) {
+    struct {
+        u32 source;
+        u32 destination;
+        u32 size;
+        u32 attributes;
+    } transfer;
+    s32 request;
+    transfer.source = source;
+    transfer.destination = destination;
+    transfer.size = words * 4;
+    transfer.attributes = 0;
+    FlushCache(0);
+    request = sceSifSetDma(&transfer, 1);
+    while (sceSifDmaStat(request) >= 0) {
+    }
+    return request;
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_002699A0);
 
@@ -217,7 +260,13 @@ void func_00269B50(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269B80);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269C10);
+void func_00269C10(u32 source) {
+    func_00269948(D_003BC5B8, D_003BC5B0[0], source);
+    func_00269948(D_003BC5B8, D_003BC5B0[1], source);
+    func_002F5990(1, 0x8010, 0xf80, 0);
+    func_002F5990(1, 0x8010, 0x1080, 0);
+    func_002F5990(1, 0x80e0, 0, 2, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269CA0);
 
@@ -240,7 +289,17 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A340);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A390);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A3E0);
+void func_0026A3E0(char *filePath, u32 *work) {
+    void *fileData;
+    s32 frames;
+    u32 request = func_002EB028(filePath, &fileData, 0);
+    s32 bytes = sdfMemoryGetBlockSize(request);
+    memcpy((void *)work[5], fileData, bytes);
+    frames = bytes / (s32)work[2];
+    work[1] = 0;
+    work[0] = frames;
+    func_002D0A10(request);
+}
 
 void mnuStoreTaskResult(void) {
     D_003BD8D4 = func_00288B48();
@@ -260,7 +319,14 @@ u32 mnuUpdateTitleTransition(void) {
     return D_003D9140[9];
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A720);
+s32 func_0026A720(void) {
+    WaitSema(D_003BD8D0);
+    if (D_003D9140[9] == 1) {
+        func_0026A490(D_003D9140);
+    }
+    SignalSema(D_003BD8D0);
+    return D_003D9140[9];
+}
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
@@ -299,7 +365,19 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AA28);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026ABA8);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AD28);
+s32 func_0026AD28(void) {
+    WaitSema(D_003BD8D0);
+    if (D_003DA180[8] == 0) {
+        SignalSema(D_003BD8D0);
+        return 0;
+    }
+    if (D_003DA180[4] == 2) {
+        SignalSema(D_003BD8D0);
+        return 2;
+    }
+    SignalSema(D_003BD8D0);
+    return 3;
+}
 
 void mnuPrintTitleDebugBanner(void) {
     WaitSema(D_003BD8D0);
@@ -414,4 +492,3 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5D0);
-

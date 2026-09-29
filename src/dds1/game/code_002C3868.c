@@ -155,9 +155,39 @@ void sdfCounterTickCountdown(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", mnuSetMapTimerFlags);
+void mnuSetMapTimerFlags(s32 flags) {
+    s16 *timers = *(s16 **)(D_003BD274 + 0x30);
+    if ((flags & 1) != 0) {
+        if (timers[6] == 0) {
+            timers[6] = 1;
+        }
+    } else {
+        timers[6] = 0;
+    }
+    if ((flags & 2) != 0) {
+        if (timers[7] == 0) {
+            timers[7] = 1;
+        }
+    } else {
+        timers[7] = 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002C3868", mnuTickMapTimers);
+void mnuTickMapTimers(void) {
+    s16 *timers = *(s16 **)(D_003BD274 + 0x30);
+    if (timers[6] > 0) {
+        timers[6]--;
+        if (timers[6] == 0) {
+            timers[6] = 60;
+        }
+    }
+    if (timers[7] > 0) {
+        timers[7]--;
+        if (timers[7] == 0) {
+            timers[7] = 60;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C57F0);
 

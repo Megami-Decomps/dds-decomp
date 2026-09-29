@@ -1,12 +1,15 @@
 #include "common.h"
 
 extern void evtRememberDispatchCallback(s32, s32);
+
 extern void func_00249C08(s32);
+
 extern void func_0024DBB0(void);
 
 extern void func_0024A2D8(s32);
 
 extern void func_0024DD78(void);
+
 extern void func_002858E8(s32, s32);
 
 extern s64 func_0024DC08(void);
@@ -14,6 +17,14 @@ extern s64 func_0024DC08(void);
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 func_00101A70();
+
+extern void func_0024A340(s32, s32);
+
+extern void func_0024B2E0(s32);
+
+extern void func_0024A930(s32);
+
+extern void func_0024A610(s32);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B3A8);
 
@@ -65,7 +76,15 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BA78);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BB00);
 
-INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BC18);
+void func_0024BC18(s32 item) {
+    s32 state = func_00101A70();
+    func_0024A2D8(state);
+    func_0024A340(0, state);
+    func_0024B2E0(state);
+    func_0024A930(state);
+    func_0024A610(state);
+    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+}
 
 void evtBSetupDispatchSyncC(s32 arg0) {
     s32 context = func_00101A70();
@@ -132,7 +151,15 @@ u32 func_0024C6F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C700);
 
-INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C7E8);
+void func_0024C7E8(s32 item) {
+    s32 state = func_00101A70();
+    func_0024A2D8(state);
+    func_0024A340(0, state);
+    func_0024B2E0(state);
+    func_0024A930(state);
+    func_0024A610(state);
+    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+}
 
 void evtBSetupDispatchSyncF(s32 arg0) {
     s32 context = func_00101A70();
@@ -160,7 +187,15 @@ s64 func_0024C918(u64 input) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C9A0);
+void func_0024C9A0(s32 item) {
+    s32 state = func_00101A70();
+    func_0024A2D8(state);
+    func_0024A340(0, state);
+    func_0024B2E0(state);
+    func_0024A930(state);
+    func_0024A610(state);
+    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+}
 
 void evtBSetupDispatchSyncG(s32 arg0) {
     s32 context = func_00101A70();
@@ -205,4 +240,3 @@ void evtBDispatchSyncC(s32 arg0) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024B3A8", D_003AF710);
-

@@ -19,6 +19,10 @@ typedef struct {
     s32 word38;
 } MenuState;
 
+extern s8 D_00324510[];
+
+extern void func_0026C048(void);
+
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BD80);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BE38);
@@ -39,7 +43,16 @@ void func_0026BEE8(s32 advanceCount) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BF38);
+s32 func_0026BF38(void) {
+    if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0 ||
+        D_00324510[0x22] < 0 || D_00324510[0x20] < 0 ||
+        D_00324510[0x2a] < 0 || D_00324510[0x2b] < 0 ||
+        D_00324510[0x28] < 0 || D_00324510[0x29] < 0 ||
+        D_00324510[0x2d] < 0 || D_00324510[0x2c] < 0) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BFC8);
 
@@ -47,7 +60,19 @@ u32 func_0026C040(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C048);
+void func_0026C048(void) {
+    u32 *state = (u32 *)D_003BC5D0;
+    if (state[1] != 0) {
+        func_002BDD60(state[1]);
+        state = (u32 *)D_003BC5D0;
+        state[1] = 0;
+    }
+    if (state[3] != 0) {
+        func_002BDD60(state[3]);
+        state = (u32 *)D_003BC5D0;
+        state[3] = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C098);
 
@@ -150,4 +175,3 @@ INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5F8);
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC600);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC608);
-

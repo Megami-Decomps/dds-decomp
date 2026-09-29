@@ -48,14 +48,19 @@ void *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
     return resource;
 }
 
-void func_0026E5A0(s32 *resources) {
+typedef struct {
+    s32 allocation;
+    s32 tasks[10];
+} MovieResourceGroup;
+
+void func_0026E5A0(MovieResourceGroup *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
-        if (resources[i + 1] != 0) {
-            sdfDestroyTaskWork(resources[i + 1]);
+        if (resources->tasks[i] != 0) {
+            sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    func_002D0918(resources[0]);
+    func_002D0918(resources->allocation);
 }
 
 

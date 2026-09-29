@@ -1,7 +1,9 @@
 #include "common.h"
 
 extern s32 D_003BB140;
+
 extern u32 D_003BB144;
+
 extern u32 D_003BB148;
 
 /* Work area for the event-effect helpers in this TU. */
@@ -17,12 +19,18 @@ typedef struct {
     void *resource;      /* 0x84: released by func_00190CD0 */
 } EffEventWork; /* 0x88 */
 
+typedef struct {
+    u8 bytes[0x30];
+} __attribute__((packed)) FileRecordHeader;
+
 void effEventReleaseNode(EffEventWork *work) {
     func_00160B00(work->effect);
     func_002CFF98(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00190238);
+void func_00190238(FileRecordHeader *destination, const FileRecordHeader *source) {
+    *destination = *source;
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001902A0);
 
@@ -97,4 +105,3 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
-

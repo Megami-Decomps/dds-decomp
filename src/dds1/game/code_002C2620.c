@@ -57,13 +57,13 @@ INCLUDE_RODATA(const s32, "game/code_002C2620", D_003B3CA0);
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2F40);
 
 void func_002C2FC0(void) {
-    s64 temp_v0;
+    s64 flagSet;
 
     D_003BD25C = 1;
     D_003BD970 = 0;
     D_003BD974 = 0;
-    temp_v0 = mdlFlagTest(0x413);
-    D_003BD260 = (u32)(temp_v0 == 0);
+    flagSet = mdlFlagTest(0x413);
+    D_003BD260 = (u32)(flagSet == 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2FF8);
@@ -81,20 +81,20 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3510);
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C35C8);
 
 u32 func_002C3640(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 flagSet;
+    u32 stage;
 
-    temp_v0 = mdlFlagTest(0x412);
-    temp_v1 = 2;
-    if (temp_v0 == 0) {
-        temp_v0 = mdlFlagTest(0x411);
-        temp_v1 = 1;
-        if (temp_v0 == 0) {
+    flagSet = mdlFlagTest(0x412);
+    stage = 2;
+    if (flagSet == 0) {
+        flagSet = mdlFlagTest(0x411);
+        stage = 1;
+        if (flagSet == 0) {
             mdlFlagTest(0x410);
-            temp_v1 = 0;
+            stage = 0;
         }
     }
-    return temp_v1;
+    return stage;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3690);

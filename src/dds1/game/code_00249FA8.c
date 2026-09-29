@@ -12,9 +12,24 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 func_00101A70();
 
+extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
+
+extern const char D_003AF658[];
+
+extern const char D_003AF668[];
+
+extern const char D_003AF678[];
+
+extern s32 D_003BC3E4;
+
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_00249FA8);
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A058);
+void func_0024A058(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_003AF658, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003AF668, 0);
+    kwlnTaskDestroyWithHierarchyByName(D_003AF678, 0);
+    D_003BC3E4 = 0;
+}
 
 s32 fldPollSceneState(void) {
     s32 state = D_003BC3E0;
@@ -32,18 +47,18 @@ s32 fldPollSceneState(void) {
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A0D8);
 
-void func_0024A138(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+void func_0024A138(s32 value) {
+    s32 context = func_00101A70();
 
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00285670(context + 8, context + 0x54, 1, value);
 }
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A170);
 
 s32 func_0024A1A8(void) {
-    s32 temp_v0 = kwlnFadeIsActive();
+    s32 fadeActive = kwlnFadeIsActive();
 
-    if (temp_v0 != 0) {
+    if (fadeActive != 0) {
         return 0;
     }
     return func_0024DC08() == 0;
@@ -75,12 +90,12 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A2D8);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A340);
 
-s32 fldClassifyRemainingFrames(s32 arg0) {
-    s32 value = *(s32 *)(arg0 + 0x9C);
-    if (value == 0) {
+s32 fldClassifyRemainingFrames(s32 timer) {
+    s32 frames = *(s32 *)(timer + 0x9C);
+    if (frames == 0) {
         return 0;
     }
-    return value >= 60 ? 2 : 1;
+    return frames >= 60 ? 2 : 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A4A0);
@@ -91,11 +106,27 @@ INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A610);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A6C0);
 
-u8 func_0024A6E8(s32 arg0) {
-    s32 temp_v0;
+typedef struct {
+    u8 pad00[0x14];
+    u8 unk14;
+    u8 pad15[0x8B];
+} SceneFrameRecord;
 
-    temp_v0 = func_0024A6C0(arg0);
-    return *(u8 *)(temp_v0 * 0xa0 + *(s32 *)(*(s32 *)(arg0 + 100) + 0x18) + 0x14);
+typedef struct {
+    u8 pad00[0x18];
+    SceneFrameRecord *records;
+} SceneFrameTable;
+
+typedef struct {
+    u8 pad00[0x64];
+    SceneFrameTable *frameTable;
+} SceneFrameOwner;
+
+u8 func_0024A6E8(SceneFrameOwner *scene) {
+    s32 index;
+
+    index = func_0024A6C0((s32)scene);
+    return scene->frameTable->records[index].unk14;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF658);
@@ -109,4 +140,3 @@ INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
 INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF6A0);
 
 INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
-

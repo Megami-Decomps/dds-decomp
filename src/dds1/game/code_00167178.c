@@ -20,13 +20,13 @@ INCLUDE_ASM(const s32, "game/code_00167178", func_00167A78);
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167BF8);
 
-void func_00167E78(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
+void func_00167E78(u64 paramTable) {
+    u64 firstBlock;
+    u64 secondBlock;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    func_00167BF8(temp_v0, temp_v1);
+    firstBlock = effParamTableGetBlock(paramTable, 0);
+    secondBlock = effParamTableGetBlock(paramTable, 1);
+    func_00167BF8(firstBlock, secondBlock);
 }
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167EC0);

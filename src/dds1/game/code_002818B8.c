@@ -1,16 +1,16 @@
 #include "common.h"
 
-void func_002818B8(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-    s32 temp_v1;
+void func_002818B8(s32 scene, s32 groupIndex) {
+    s32 remaining;
+    s32 entry;
 
-    temp_v1 = 1;
-    temp_v0 = arg1 * 0x134 + arg0 + 0x16c;
+    remaining = 1;
+    entry = groupIndex * 0x134 + scene + 0x16c;
     do {
-        temp_v1 = temp_v1 - 1;
-        func_00281898(temp_v0);
-        temp_v0 = temp_v0 + 0x20;
-    } while (-1 < temp_v1);
+        remaining = remaining - 1;
+        func_00281898(entry);
+        entry = entry + 0x20;
+    } while (-1 < remaining);
 }
 
 INCLUDE_ASM(const s32, "game/code_002818B8", func_00281908);

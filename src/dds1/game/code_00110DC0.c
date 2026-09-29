@@ -4,9 +4,9 @@ INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110DC0);
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110E28);
 
-void func_00110EA0(s32 arg0, u32 arg1) {
-    if (arg0 != 0) {
-        **(u32 **)((s32)arg0 + 0x18) = arg1;
+void func_00110EA0(s32 object, u32 value) {
+    if (object != 0) {
+        **(u32 **)((s32)object + 0x18) = value;
     }
 }
 

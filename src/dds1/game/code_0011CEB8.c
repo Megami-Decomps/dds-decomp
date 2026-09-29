@@ -6,13 +6,13 @@ extern u64 func_0011B140(u64, u64);
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CEB8);
 
 u32 func_0011CEF0(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 value;
+    u64 otherValue;
 
-    temp_v0 = func_0010D428(0);
-    temp_v1 = func_0010D428(1);
-    temp_v0 = func_0011B140(temp_v0, temp_v1);
-    func_0010D5F0(temp_v0);
+    value = func_0010D428(0);
+    otherValue = func_0010D428(1);
+    value = func_0011B140(value, otherValue);
+    func_0010D5F0(value);
     return 1;
 }
 
@@ -43,27 +43,27 @@ INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D070);
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D0B0);
 
-void func_0011D0E0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 8) = arg1;
+void func_0011D0E0(s32 node, u32 value) {
+    *(u32 *)(node + 8) = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D0E8);
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D138);
 
-void func_0011D178(u32 arg0) {
-    func_00194920(*(u32 *)((s32)arg0 + 0x10));
-    func_002CFF98(arg0);
+void func_0011D178(u32 owner) {
+    func_00194920(*(u32 *)((s32)owner + 0x10));
+    func_002CFF98(owner);
 }
 
-void func_0011D1A8(s32 arg0) {
-    func_00195868(*(u32 *)(arg0 + 0x10));
+void func_0011D1A8(s32 owner) {
+    func_00195868(*(u32 *)(owner + 0x10));
 }
 
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011D1C0);
 
-void func_0011D258(s32 arg0, u8 arg1) {
-    func_00195470(*(u32 *)(arg0 + 0x10), arg1);
+void func_0011D258(s32 owner, u8 value) {
+    func_00195470(*(u32 *)(owner + 0x10), value);
 }
 
 void func_0011D278(void) {

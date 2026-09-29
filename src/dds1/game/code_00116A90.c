@@ -30,8 +30,8 @@ u32 func_00116AE8(u64 id) {
 
 INCLUDE_ASM(const s32, "game/code_00116A90", func_00116B28);
 
-u32 func_00116B78(s32 arg0) {
-    return *(u32 *)(arg0 + 0x18);
+u32 func_00116B78(s32 path) {
+    return (u32)((PathObject *)path)->state;
 }
 
 INCLUDE_ASM(const s32, "game/code_00116A90", func_00116B80);

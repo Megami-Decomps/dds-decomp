@@ -35,10 +35,10 @@ u32 func_00102878(void) {
 INCLUDE_ASM(const s32, "game/code_00101B08", func_001028A0);
 
 u32 func_001028C8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_001028A0();
-    return *(u32 *)(temp_v0 + 4);
+    context = func_001028A0();
+    return *(u32 *)(context + 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_001028E8);

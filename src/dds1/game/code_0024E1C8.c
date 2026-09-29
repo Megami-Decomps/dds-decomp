@@ -96,10 +96,10 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F858);
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F8D8);
 
 u32 func_0024FA18(void) {
-    s32 temp_v0;
+    s32 taskObject;
 
-    temp_v0 = func_002CB3B8(D_003BC4CC, 0);
-    return *(u32 *)(*(s32 *)(*(s32 *)(temp_v0 + 0xc) + 0x1c) + 0x70);
+    taskObject = func_002CB3B8(D_003BC4CC, 0);
+    return *(u32 *)(*(s32 *)(*(s32 *)(taskObject + 0xc) + 0x1c) + 0x70);
 }
 
 void mnuStopResourceAnimation(void) {

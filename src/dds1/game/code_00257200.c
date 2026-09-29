@@ -45,13 +45,13 @@ void mnuCopySceneCoordinates(SceneCoordWork *work) {
     } while (remaining >= 0);
 }
 
-void func_00257EB0(s32 *arg0) {
-    s32 temp_v0;
+void func_00257EB0(s32 *frame) {
+    s32 previous;
 
-    temp_v0 = *arg0;
-    *arg0 = temp_v0 + 1;
-    if (0x3c < temp_v0 + 1) {
-        *arg0 = 0;
+    previous = *frame;
+    *frame = previous + 1;
+    if (0x3c < previous + 1) {
+        *frame = 0;
     }
 }
 

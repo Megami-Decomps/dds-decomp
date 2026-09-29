@@ -4,6 +4,8 @@ extern u32 func_001986E0(u32);
 
 extern u32 func_00101A70(void);
 
+extern u32 func_002CFEB8(u32);
+
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234C18);
 
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234CA8);
@@ -31,11 +33,16 @@ void func_002350B0(void) {
     context->flags = context->flags & 0xfffffffe;
 }
 
-void func_002350E0(u32 arg0) {
-    kwlnTaskDestroyWithHierarchy(arg0, 1);
+void func_002350E0(u32 task) {
+    kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00234C18", func_002350F8);
+s32 *func_002350F8(s32 *owner) {
+    s32 *work = (s32 *)func_002CFEB8(8);
+    work[0] = 0;
+    work[1] = 0;
+    return work;
+}
 
 void func_00235120(EventContext *context, u32 value) {
     u32 result;
@@ -45,4 +52,3 @@ void func_00235120(EventContext *context, u32 value) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00234C18", D_003BBF78);
-

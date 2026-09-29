@@ -25,8 +25,8 @@ f32 func_002E8398(s32 seed);
 
 extern u32 D_003BBDD0[];
 
-void evtLoadSolarNoiseSprite(u32 *arg0) {
-    *arg0 = effLoadIndexedResource(D_003BBDD0, "solarnoise.spr", 0);
+void evtLoadSolarNoiseSprite(u32 *sprite) {
+    *sprite = effLoadIndexedResource(D_003BBDD0, "solarnoise.spr", 0);
 }
 
 void evtReleaseSolarNoiseSprite(u32 *sprite) {

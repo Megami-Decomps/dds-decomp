@@ -1,24 +1,41 @@
 #include "common.h"
 
-void func_00176A28(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x60) = arg1;
+typedef struct {
+    u8 pad00[0x10];
+    u32 value;
+} EffResourceEntry;
+
+/* Nested resource group released when its effect work is destroyed. */
+typedef struct {
+    u8 pad00[0x40];
+    EffResourceEntry *entries;
+    u8 pad44[0x1C];
+    u32 value60;
+    u8 pad64[4];
+    u32 resource68;
+    u32 resource6C;
+    u32 resource70;
+} EffResourceWork;
+
+void func_00176A28(s32 work, u32 value) {
+    ((EffResourceWork *)work)->value60 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_00176A30);
 
-void func_00176B50(u32 arg0) {
-    func_002DAA68(*(u32 *)((s32)arg0 + 0x6c));
-    func_00177048(arg0);
-    func_002D0918(*(u32 *)((s32)arg0 + 0x70));
+void func_00176B50(u32 work) {
+    func_002DAA68(((EffResourceWork *)work)->resource6C);
+    func_00177048(work);
+    func_002D0918(((EffResourceWork *)work)->resource70);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_00176B88);
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_00176E20);
 
-void func_00177048(s32 arg0) {
-    if (*(s32 *)(arg0 + 0x68) != 0) {
-        func_002D0918(*(s32 *)(arg0 + 0x68));
+void func_00177048(s32 work) {
+    if (((EffResourceWork *)work)->resource68 != 0) {
+        func_002D0918(((EffResourceWork *)work)->resource68);
         return;
     }
 }
@@ -27,8 +44,8 @@ INCLUDE_ASM(const s32, "game/code_00176A28", func_00177078);
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_001770A8);
 
-void func_001770D8(s32 arg0, s32 arg1, u32 arg2) {
-    *(u32 *)(arg1 * 0x14 + *(s32 *)(arg0 + 0x40) + 0x10) = arg2;
+void func_001770D8(s32 work, s32 index, u32 value) {
+    ((EffResourceWork *)work)->entries[index].value = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_001770F8);

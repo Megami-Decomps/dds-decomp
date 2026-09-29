@@ -30,8 +30,8 @@ void func_002EDC40(PacStatePrefix *state) {
 
 INCLUDE_ASM(const s32, "game/code_002ED760", func_002EDC50);
 
-void func_002EDC88(u8 *arg0) {
-    *arg0 = 0xff;
+void func_002EDC88(u8 *marker) {
+    *marker = 0xff;
 }
 
 void sdfPacAdvanceInput(PacStatePrefix *state, s32 count) {

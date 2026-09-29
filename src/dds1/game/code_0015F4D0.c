@@ -25,8 +25,8 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F678);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F688);
 
-void func_0015F6E8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x60) = arg1;
+void func_0015F6E8(BillObj *effect, void *value) {
+    effect->unk60 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F6F0);

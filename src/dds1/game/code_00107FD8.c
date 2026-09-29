@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "kwln.h"
 
 extern s32 D_003BA960;
@@ -32,37 +33,63 @@ extern u32 D_003BA8E8;
 extern u32 D_003BA904;
 
 extern s32 kwlnTaskCreate(const char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
+
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
+
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
+
 extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
+
 extern u32 func_00104260(void);
+
 extern void fldStartSequenceRecord(void);
+
 extern void func_00102A18(void);
+
 extern void func_001A11F0(s32 arg0, s32 arg1, s32 arg2);
+
 extern void evtEventViewerDestroyTask(void);
+
 extern void evtStopTestTasks(void);
+
 extern void evtDestroySkyTask(void);
+
 extern void *func_002DA730(void);
-extern char D_00325748[];
-extern s8 D_0032453B;
+
 extern s8 D_003BA948;
+
 extern void *D_003BD760;
+
 extern u8 D_00324590[];
+
 extern char D_003BA950[];
+
 extern void *D_003BD6B0;
+
 extern f32 D_003BD358;
+
 extern f32 D_003BD35C;
+
 extern u16 D_003BD706;
+
 extern f32 D_003BD708;
+
 extern f32 D_003BD70C;
+
 extern f32 D_003BD710;
+
 extern f32 D_003BD714;
+
 extern u16 D_003BD704;
 
 extern char D_0039E1F0[];
+
 extern char D_0039E200[];
+
 extern s32 D_003BBDA8;
+
 extern void func_00220110(s32 arg0);
+
 extern void evtCreateSkyTask(void);
 
 typedef struct {
@@ -73,20 +100,33 @@ typedef struct {
 } DrawVec4;
 
 extern DrawVec4 D_00324790;
+
 extern DrawVec4 D_003C2C20;
+
 extern DrawVec4 D_003C2C30;
+
 extern u16 D_003BD6FA;
+
 extern u16 D_003BD6F8;
+
 extern void func_00109D20(void);
 
 extern void func_0010A170(void);
+
 extern s32 D_0032E3C0[];
+
 extern void func_002C2E38(s32 arg0);
+
 extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+
 extern s32 func_002E41B0(s32 arg0, s32 arg1);
+
 extern void func_002E41A0(s32 arg0, s32 arg1);
+
 extern void *D_003BA994;
+
 extern void *D_003BA998;
+
 extern u32 D_003BA990;
 
 typedef struct B728Work {
@@ -94,6 +134,12 @@ typedef struct B728Work {
     struct B728Work *previous;
     struct B728Work *next;
 } B728Work;
+
+extern u8 D_00325748[];
+
+extern s8 D_0032453B[];
+
+extern void func_0010B428(void *arg0);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
 
@@ -702,7 +748,13 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B1B0);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B428);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B558);
+s32 func_0010B558(void) {
+    if (D_0032453B[0] != 0) {
+        return 0;
+    }
+    func_0010B428(D_00325748);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B590);
 
@@ -776,4 +828,3 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA990);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA994);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA998);
-

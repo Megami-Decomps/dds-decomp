@@ -1,38 +1,51 @@
 #include "common.h"
 
-
 extern void func_0027CA90();
+
 extern void func_0027C140();
+
 extern void func_0027D318();
 
-
-
-
-
-
-
-
 extern s32 func_002CD7B8(s32);
+
 extern s32 func_002CD240(s32, s32 *);
+
 extern s32 func_00197760(s32, s32, s32, s32, s32, s32);
+
 extern void func_00196088(s32, s32, s32);
+
 extern void func_001958A0(s32, s32, s32);
+
 extern void func_00194920(s32);
+
 extern s32 D_003BAA00;
-
-
-
-
-
-
-
 
 extern void func_00300508(s32 **, s32, s32, s32 (*)(s32 *, s32 *));
 
 extern s32 func_00101A70();
+
 extern void func_00272778(s32);
+
 extern void func_00272350(s32);
+
 extern void func_002723B0(s32, s32);
+
+typedef struct MenuSlot {
+    s32 resources[3];
+    u16 unused;
+    u16 flags;
+} MenuSlot;
+
+extern MenuSlot *D_003BAA54;
+
+typedef struct MenuPageParams {
+    u8 unk0[0x64];
+    s32 field64;
+    s32 field68;
+    s32 field6C;
+    s32 field70;
+} MenuPageParams;
+
 static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
@@ -87,7 +100,21 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A468);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuHasAvailableSlotResource);
+s32 mnuHasAvailableSlotResource(s32 id) {
+    MenuSlot *entry;
+    s32 i;
+    id -= 0x1ab;
+    entry = (MenuSlot *)((id << 4) + (s32)D_003BAA54);
+    if ((entry->flags & 2) != 0) {
+        return 0;
+    }
+    for (i = 0; i < 3; i++) {
+        if (entry->resources[i] != -1) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A540);
 
@@ -202,8 +229,11 @@ void func_0027AC38(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AD80);
 
 extern char D_003B2330[];
+
 extern char D_003B2348[];
+
 extern u32 D_0037CD18[];
+
 extern u32 D_0037CD20[];
 
 void func_0027AEA8(u8 *assets) {
@@ -347,7 +377,24 @@ MenuListNode *mnuListAppendNode(list, value)
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuListContainsFinalNode);
+s32 mnuListContainsFinalNode(u32 *menu) {
+    u8 *node = (u8 *)menu[6];
+    s32 index = 0;
+    if (node != 0) {
+        s32 count = menu[3];
+        do {
+            if (index >= count) {
+                return 0;
+            }
+            if (node == (u8 *)menu[5]) {
+                return 1;
+            }
+            node = *(u8 **)(node + 0x58);
+            index++;
+        } while (node != 0);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B540);
 
@@ -434,7 +481,23 @@ void func_0027BF10(s32 arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BF48);
+void func_0027BF48(u8 *menu) {
+    u8 *node = *(u8 **)(menu + 0x10);
+    if (node != NULL) {
+        do {
+            s32 timer = *(s32 *)(node + 0x50);
+            s32 reduced = timer - 0x10;
+            if (timer > 0) {
+                *(s32 *)(node + 0x50) = reduced;
+                timer = reduced;
+            }
+            if (timer < 0) {
+                *(s32 *)(node + 0x50) = 0;
+            }
+            node = *(u8 **)(node + 0x58);
+        } while (node != NULL);
+    }
+}
 
 void mnuDrawFourEntries(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 base8 = arg4 + 8;
@@ -639,7 +702,9 @@ void func_0027CEE8(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027CF28);
 
 extern s32 func_002D03F8(s32);
+
 extern s32 *sdfResourceRetainAddress(s32);
+
 extern void func_0027CF28(s32 *, u32, u32, u32, u32);
 
 u32 mnuCreateWindowState(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
@@ -955,7 +1020,6 @@ void func_0027E3D8(s32 image, s32 *list, s32 option) {
         func_0027CDD0(entry[2], entry[3], image, entry[4], option);
     }
 }
-
 
 void mnuUpdateFade(s32 *list) {
     u32 i;
@@ -1502,8 +1566,11 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280D98);
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280E08);
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
+
 extern s32 func_001951C8(char *text, s32, s32, s32, s32);
+
 extern s32 frFontMeasureGlyphChain(s32 item);
+
 extern void func_00195450(s32 item, s32 x, s32 y);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
@@ -1594,4 +1661,3 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00281780);
 void func_00281898(u32 arg0) {
     memset(arg0, 0, 0x20);
 }
-

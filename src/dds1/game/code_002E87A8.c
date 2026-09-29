@@ -19,11 +19,11 @@ INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E87A8);
 void func_002E88F8(u32 arg0) {
 }
 
-u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3) {
-    u32 ret = func_002E87A8(arg0, arg1, arg2, arg3);
+u32 func_002E8900(u32 command, u32 channel, void *packet, u32 size) {
+    u32 result = func_002E87A8(command, channel, packet, size);
 
-    func_002E88F8(ret);
-    return ret;
+    func_002E88F8(result);
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8938);
@@ -46,11 +46,11 @@ void func_002E8D10(s32 id) {
     func_002E87A8(0x20, 0, &packet, 0x10);
 }
 
-void func_002E8D58(u32 arg0) {
-    u32 temp_v0 [4];
+void func_002E8D58(u32 id) {
+    u32 packet[4];
 
-    temp_v0[0] = arg0;
-    func_002E87A8(0x30, 0, temp_v0, 0x10);
+    packet[0] = id;
+    func_002E87A8(0x30, 0, packet, 0x10);
 }
 
 void func_002E8D88(s32 id) {
@@ -62,9 +62,9 @@ void func_002E8D88(s32 id) {
     func_002E87A8(0x130, 0, &packet, 0x10);
 }
 
-void func_002E8DD0(u32 arg0) {
-    u32 temp_v0 [4];
+void func_002E8DD0(u32 id) {
+    u32 packet[4];
 
-    temp_v0[0] = arg0;
-    func_002E87A8(0x30, 0, temp_v0, 0x10);
+    packet[0] = id;
+    func_002E87A8(0x30, 0, packet, 0x10);
 }

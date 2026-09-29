@@ -48,6 +48,10 @@ extern char D_003B20D0[]; /* "camp_update" */
 
 extern s8 D_003BC6B4;
 
+extern char D_003B1A78[]; /* "mnuMovieDraw" */
+
+extern void effResolveAndReleaseResource(u32);
+
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F118);
@@ -265,7 +269,12 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A38);
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1A58);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026FFA0);
+void func_0026FFA0(u32 resource, void *data) {
+    if (D_003BC62C == 0) {
+        func_002ED8D0(D_0037B888, data, resource);
+        D_003BC62C = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+    }
+}
 
 void func_0026FFF8(s32 arg0) {
     u8 *temp_v0 = D_0037B168 + arg0 * 24;
@@ -329,7 +338,18 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270240);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002702A0);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270508);
+u32 func_00270508(void) {
+    u8 *state = (u8 *)D_003DC560;
+    u32 entry = D_003DC560[1];
+    s32 remaining = *(s16 *)(state + 0xA);
+    if (entry != 0 && remaining > 0) {
+        do {
+            entry = *(u32 *)entry;
+            remaining--;
+        } while (entry != 0 && remaining > 0);
+    }
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270558);
 
@@ -553,7 +573,18 @@ void *func_00271100(s32 kind, s32 *count, u8 *data) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271180);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", movReleaseCategoryModels);
+void movReleaseCategoryModels(s32 kind, u8 *work) {
+    s32 count;
+    s32 *entries = (s32 *)func_00271100(kind, &count, work);
+    if (kind != 4) {
+        s32 i;
+        for (i = 0; i < count; i++) {
+            effResolveAndReleaseResource(entries[i]);
+        }
+    } else {
+        func_00271180(entries, count, work);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002712A0);
 
@@ -752,4 +783,3 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B5);
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6B8);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC6C0);
-

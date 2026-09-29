@@ -25,7 +25,7 @@ typedef struct PanelObj {
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
 typedef struct PanelRecSub {
     u8 unk0[0x10]; /* 0x0 */
-    s8 unk10;      /* 0x10 */
+    s8 status;      /* 0x10 */
 } PanelRecSub;
 
 /* Payload record referenced by the D_003D6ECC table. */
@@ -33,8 +33,8 @@ typedef struct PanelRec {
     u8 unk0[0x24];     /* 0x0 */
     PanelRecSub sub24; /* 0x24 */
     u8 unk35[0x1B];    /* 0x35 */
-    s16 unk50;         /* 0x50 */
-    s16 unk52;         /* 0x52 */
+    s16 pairFirst;    /* 0x50 */
+    s16 pairSecond;   /* 0x52 */
     u8 unk54[0x54];    /* 0x54 */
     s32 unkA8;         /* 0xA8 */
 } PanelRec;
@@ -117,16 +117,16 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019ACE0);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AD50);
 
-void itfPanelEmitRecord(s32 arg0, s32 arg1) {
-    func_00199998(D_003D6ECC[arg0].ptr->unkA8, 0, arg1, 0, 0, 0);
+void itfPanelEmitRecord(s32 index, s32 value) {
+    func_00199998(D_003D6ECC[index].ptr->unkA8, 0, value, 0, 0, 0);
 }
 
-s8 itfPanelGetStatus(s32 arg0) {
-    return D_003D6ECC[arg0].ptr->sub24.unk10;
+s8 itfPanelGetStatus(s32 index) {
+    return D_003D6ECC[index].ptr->sub24.status;
 }
 
-void itfPanelSetStatus(s32 arg0, s8 arg1) {
-    D_003D6ECC[arg0].ptr->sub24.unk10 = arg1;
+void itfPanelSetStatus(s32 index, s8 status) {
+    D_003D6ECC[index].ptr->sub24.status = status;
 }
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AE78);
@@ -141,16 +141,16 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019B108);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019B1B0);
 
-s16 itfPanelGetPairFirst(s32 arg0) {
-    return D_003D6ECC[arg0].ptr->unk50;
+s16 itfPanelGetPairFirst(s32 index) {
+    return D_003D6ECC[index].ptr->pairFirst;
 }
 
-void itfPanelSetPairFirst(s32 arg0, s16 arg1) {
-    D_003D6ECC[arg0].ptr->unk50 = arg1;
+void itfPanelSetPairFirst(s32 index, s16 value) {
+    D_003D6ECC[index].ptr->pairFirst = value;
 }
 
-s16 itfPanelGetPairSecond(s32 arg0) {
-    return D_003D6ECC[arg0].ptr->unk52;
+s16 itfPanelGetPairSecond(s32 index) {
+    return D_003D6ECC[index].ptr->pairSecond;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1A8);
