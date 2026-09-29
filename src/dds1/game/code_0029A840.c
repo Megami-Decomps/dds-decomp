@@ -1243,11 +1243,22 @@ extern void func_002E7D98(void);
 extern u8 D_0037E0E0[];
 extern void func_002A3E10(u8 *, void *);
 
-void func_0029EEC8(u8 *work) {
-    u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+typedef struct BillCellDrawWork {
+    u8 pad0[0x10];
+    u8 transform[0x10];
+    f32 scale;
+    s32 baseColor;
+    u32 frameLimit;
+    u8 pad2C[4];
+    u32 *instances;
+    u8 *config;
+} BillCellDrawWork;
+
+void func_0029EEC8(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
-    u32 *list = *(u32 **)(work + 0x30);
+    u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
     s32 color1[4];
@@ -1262,7 +1273,7 @@ void func_0029EEC8(u8 *work) {
     }
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = work->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -1303,7 +1314,7 @@ void func_0029EEC8(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
     func_002E7D98();
     __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
     __asm__ volatile (
@@ -1322,7 +1333,7 @@ void func_0029EEC8(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002A3E10(out, mtx);
 }
 
@@ -1353,11 +1364,11 @@ void func_0029F138(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029F168);
 
-void func_0029F8A0(u8 *work) {
-    u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+void func_0029F8A0(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
-    u32 *list = *(u32 **)(work + 0x30);
+    u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
     s32 color1[4];
@@ -1372,7 +1383,7 @@ void func_0029F8A0(u8 *work) {
     }
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = work->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -1413,7 +1424,7 @@ void func_0029F8A0(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
     func_002E7D98();
     __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
     __asm__ volatile (
@@ -1432,7 +1443,7 @@ void func_0029F8A0(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002A3E10(out, mtx);
 }
 
@@ -1462,11 +1473,11 @@ void func_0029FB18(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029FB48);
 
-void func_002A0260(u8 *work) {
-    u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+void func_002A0260(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
-    u32 *list = *(u32 **)(work + 0x30);
+    u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
     s32 color1[4];
@@ -1481,7 +1492,7 @@ void func_002A0260(u8 *work) {
     }
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = work->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -1522,7 +1533,7 @@ void func_002A0260(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
     func_002E7D98();
     __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
     __asm__ volatile (
@@ -1541,7 +1552,7 @@ void func_002A0260(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002A3E10(out, mtx);
 }
 
@@ -1643,11 +1654,11 @@ void func_002A0608(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A0638);
 
-void func_002A0BE0(u8 *work) {
-    u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+void func_002A0BE0(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
-    u32 *list = *(u32 **)(work + 0x30);
+    u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
     s32 color1[4];
@@ -1662,7 +1673,7 @@ void func_002A0BE0(u8 *work) {
     }
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = work->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -1703,7 +1714,7 @@ void func_002A0BE0(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
     func_002E7D98();
     __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
     __asm__ volatile (
@@ -1722,7 +1733,7 @@ void func_002A0BE0(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002A3E10(out, mtx);
 }
 
@@ -3419,11 +3430,11 @@ void func_002ACA10(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002ACA40);
 
-void func_002AD150(u8 *work) {
-    u8 *config = *(u8 **)(work + 0x34);
-    u32 limit = *(u32 *)(work + 0x28);
+void func_002AD150(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
     u32 progress = *(u32 *)(config + 0x34);
-    u32 *list = *(u32 **)(work + 0x30);
+    u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
     s32 color1[4];
@@ -3438,7 +3449,7 @@ void func_002AD150(u8 *work) {
     }
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
-    color1[0] = *(s32 *)(work + 0x24);
+    color1[0] = work->baseColor;
     __asm__ volatile (
         ".set noreorder\n"
         "lw $2, 0(%1)\n"
@@ -3479,7 +3490,7 @@ void func_002AD150(u8 *work) {
     *(u32 *)(out + 8) = blended[0];
     *(u32 *)(out + 4) = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0xB9);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
     func_002E7D98();
     __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
     __asm__ volatile (
@@ -3498,7 +3509,7 @@ void func_002AD150(u8 *work) {
         "sqc2 vf30, 0x20(%2)\n"
         "sqc2 vf31, 0x30(%2)\n"
         ".set reorder"
-        : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
+        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
     func_002AE498(out, mtx);
 }
 
@@ -4193,43 +4204,63 @@ u32 func_002B2088(u8 *work) {
     return func_002B1F58(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
 }
 
-void func_002B20D0(s32 arg0) {
-    D_0037EE40[*(s32 *)(arg0 + 0x2C)].fn((void *)*(s32 *)(arg0 + 0x38));
-    func_0029A938(*(s32 *)(arg0 + 0x30));
-    func_002CFF98((void *)arg0);
+typedef struct EffModelResource {
+    u8 pad0[0x28];
+    s32 updateCount;
+    s32 kind;
+    void *model;
+    u32 attributes;
+    u32 childResource;
+    void *source;
+} EffModelResource;
+
+typedef struct EffModelCreateRequest {
+    u8 pad0[0x2C];
+    u16 kind;
+    u8 pad2E[2];
+    u32 assetId;
+    u32 attributes;
+    u8 pad38[4];
+    void *source;
+} EffModelCreateRequest;
+
+void func_002B20D0(EffModelResource *effect) {
+    D_0037EE40[effect->kind].fn((void *)effect->childResource);
+    func_0029A938((s32)effect->model);
+    func_002CFF98(effect);
 }
 
-u8 *createEffectModelResource(u8 *work) {
-    u8 *effect = (u8 *)func_002B1F58(*(u16 *)(work + 0x2C), *(s32 *)(work + 0x3C), 0, 0);
-    u32 x = func_002183D0(*(u32 *)(work + 0x30));
-    u32 y = func_002183E0(*(u32 *)(work + 0x30));
+EffModelResource *createEffectModelResource(EffModelCreateRequest *work) {
+    EffModelResource *effect = (EffModelResource *)func_002B1F58(work->kind, work->source, 0, 0);
+    u32 x = func_002183D0(work->assetId);
+    u32 y = func_002183E0(work->assetId);
     void *model = func_00217680(x, y);
 
-    *(void **)(effect + 0x30) = model;
+    effect->model = model;
     effInitModelVUState(model);
-    *(u32 *)(effect + 0x34) = *(u32 *)(work + 0x34);
-    *(u32 *)(effect + 0x38) = D_0037EE38[*(s32 *)(effect + 0x2C)].createResource(*(u32 *)(effect + 0x3C), *(u32 *)(effect + 0x30));
-    D_0037EE38[*(s32 *)(effect + 0x2C)].fn(effect);
+    effect->attributes = work->attributes;
+    effect->childResource = D_0037EE38[effect->kind].createResource(effect->source, effect->model);
+    D_0037EE38[effect->kind].fn(effect);
     return effect;
 }
 
-void func_002B21F0(u8 *work) {
-    D_0037EE38[*(s32 *)(work + 0x2c)].fn();
-    *(u32 *)(work + 0x28) = 0;
+void func_002B21F0(EffModelResource *effect) {
+    D_0037EE38[effect->kind].fn();
+    effect->updateCount = 0;
 }
 
-void func_002B2238(s32 arg0) {
-    D_0037EE44[*(s32 *)(arg0 + 0x2C)].fn((void *)arg0);
-    *(s32 *)(arg0 + 0x28) = *(s32 *)(arg0 + 0x28) + 1;
+void func_002B2238(EffModelResource *effect) {
+    D_0037EE44[effect->kind].fn(effect);
+    effect->updateCount = effect->updateCount + 1;
 }
 
-void func_002B2288(s32 arg0) {
-    D_0037EE48[*(s32 *)(arg0 + 0x2C)].fn((void *)arg0);
+void func_002B2288(EffModelResource *effect) {
+    D_0037EE48[effect->kind].fn(effect);
 }
 
-void func_002B22C0(u32 arg0) {
-    func_002B2238(arg0);
-    func_002B2288(arg0);
+void func_002B22C0(EffModelResource *effect) {
+    func_002B2238(effect);
+    func_002B2288(effect);
 }
 
 void func_002B22E8(void *dst, void *src) {
@@ -4800,21 +4831,34 @@ extern void func_002937E0(u32, void *, u32, u16);
 extern void func_00293A00(u32, u32, u32);
 extern void func_00293960(u32, void *, u32, u32);
 
-u32 effLoadFileJobPayload(u8 *request, u32 existingJob) {
+typedef struct EffFileJobRequest {
+    u8 pad0[4];
+    u16 fileKind;
+    u8 pad6[2];
+    u16 transferMode;
+    u8 padA[2];
+    void *output;
+    u32 size;
+    u8 pad14[4];
+    u16 resourceMode;
+    u8 pad1A[2];
+    u32 relatedResource;
+} EffFileJobRequest;
+
+u32 effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJob) {
     u32 job;
     if (existingJob != 0) {
         void *source;
         job = func_00293D90(existingJob);
         source = fileResolvePrimaryBuffer(job);
-        memcpy(*(void **)(request + 0xC), source, *(u32 *)(request + 0x10));
+        memcpy(request->output, source, request->size);
     } else {
-        job = fileCreateJob(*(u16 *)(request + 4));
-        if (*(void **)(request + 0xC) != NULL) {
-            func_002937E0(job, *(void **)(request + 0xC),
-                          *(u32 *)(request + 0x10), *(u16 *)(request + 8));
+        job = fileCreateJob(request->fileKind);
+        if (request->output != NULL) {
+            func_002937E0(job, request->output, request->size, request->transferMode);
         }
-        if (*(u32 *)(request + 0x1C) != 0) {
-            func_00293A00(job, *(u32 *)(request + 0x1C), *(u16 *)(request + 0x18));
+        if (request->relatedResource != 0) {
+            func_00293A00(job, request->relatedResource, request->resourceMode);
         } else {
             u32 value = 0;
             func_00293960(job, &value, 4, 4);

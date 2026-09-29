@@ -67,13 +67,17 @@ typedef struct BattleWork {
     struct BattleSub *sub;
 } BattleWork;
 
+typedef struct BattleNamedResource BattleNamedResource;
+
 struct BattleUnit {
     u8 pad0[0x110];
     u32 flags;
     u32 stateFlags;
     u8 pad118[0xC];
     u16 mode;
-    u8 pad126[0x23E];
+    u8 pad126[0x21A];
+    BattleNamedResource *namedResource;
+    u8 pad344[0x20];
     BattleUnit *nextActor;
 };
 
@@ -1396,7 +1400,15 @@ u32 func_00217FE8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218018);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002180F8);
+extern s32 func_001B5288();
+
+s64 func_002180F8(s32 battler, s32 resource) {
+    if (*(u32 *)(battler + 0x110) & 0x400) {
+        if (mdlFlagTest(0x82b)) {
+            return func_001B5288(battler, resource);
+        }
+    }
+}
 
 s32 func_00218150(void) {
     BattleWork *work = (BattleWork *)func_001AA6F8();
@@ -1754,58 +1766,90 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A098);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A1D8);
 
+typedef struct NamedChunkNode {
+    u8 pad0[4];
+    struct NamedChunkNode *next;
+    u8 pad8[4];
+    struct NamedChunkNode *firstChild;
+    u8 pad10[4];
+    u16 flags;
+    u8 pad16[6];
+    u32 color;
+} NamedChunkNode;
+
+typedef struct NamedChunkData {
+    u8 pad0[0xC];
+    NamedChunkNode **entries;
+} NamedChunkData;
+
+typedef struct NamedChunkDescriptor {
+    NamedChunkData *data;
+    u8 pad4[0x18];
+    s32 argument;
+} NamedChunkDescriptor;
+
+typedef struct NamedChunkHolder {
+    u8 pad0[0x18];
+    NamedChunkDescriptor *chunk;
+} NamedChunkHolder;
+
+struct BattleNamedResource {
+    u8 pad0[0x8C];
+    NamedChunkHolder *holder;
+};
+
 s8 func_0021A308(s32 name) {
-    s32 battler = **(s32 **)(func_001AA6F8() + 0x718);
-    s32 resource;
-    s32 chunk;
+    BattleUnit *battler = **(BattleUnit ***)(func_001AA6F8() + 0x718);
+    BattleNamedResource *resource;
+    NamedChunkDescriptor *chunk;
     s32 index;
-    s32 data;
-    s32 entries;
-    s32 node;
+    NamedChunkData *data;
+    NamedChunkNode **entries;
+    NamedChunkNode *node;
     if (battler == 0) {
         return 1;
     }
-    if (!(*(u32 *)(battler + 0x110) & 2)) {
+    if (!(battler->flags & 2)) {
         return 1;
     }
-    resource = *(s32 *)(battler + 0x340);
-    chunk = *(s32 *)(*(s32 *)(resource + 0x8c) + 0x18);
-    index = sdfNamedChunkFindId((void *)chunk, (void *)name);
+    resource = battler->namedResource;
+    chunk = resource->holder->chunk;
+    index = sdfNamedChunkFindId(chunk, (void *)name);
     if (index == -1) {
         return 1;
     }
-    data = *(s32 *)chunk;
-    entries = *(s32 *)(data + 0xc);
-    node = *(s32 *)(entries + index * 4);
+    data = chunk->data;
+    entries = data->entries;
+    node = entries[index];
     D_00438F84 = 1;
-    func_0021A1D8(node, *(s32 *)(chunk + 0x1C));
+    func_0021A1D8((s32)node, chunk->argument);
     return D_00438F84;
 }
 
-void func_0021A3A0(s32 arg0) {
-    s32 temp_v0;
+void func_0021A3A0(NamedChunkNode *node) {
+    NamedChunkNode *child;
 
-    *(u32 *)(arg0 + 0x1c) = 0x80808080;
-    temp_v0 = *(s32 *)(arg0 + 0xc);
-    *(u16 *)(arg0 + 0x14) = *(u16 *)(arg0 + 0x14) & 0xfffd;
-    if (temp_v0 != 0) {
+    node->color = 0x80808080;
+    child = node->firstChild;
+    node->flags = node->flags & 0xfffd;
+    if (child != 0) {
         do {
-            func_0021A3A0(temp_v0);
-            temp_v0 = *(s32 *)(temp_v0 + 4);
-        } while (temp_v0 != *(s32 *)(arg0 + 0xc));
+            func_0021A3A0(child);
+            child = child->next;
+        } while (child != node->firstChild);
     }
 }
 
 void btlClearNamedChunkFlags(s32 name) {
-    s32 battler = **(s32 **)(func_001AA6F8() + 0x718);
-    if (battler != 0 && (*(u32 *)(battler + 0x110) & 2) != 0) {
-        s32 resource = *(s32 *)(battler + 0x340);
-        s32 chunk = *(s32 *)(*(s32 *)(resource + 0x8c) + 0x18);
-        s32 index = sdfNamedChunkFindId((void *)chunk, (void *)name);
+    BattleUnit *battler = **(BattleUnit ***)(func_001AA6F8() + 0x718);
+    if (battler != 0 && (battler->flags & 2) != 0) {
+        BattleNamedResource *resource = battler->namedResource;
+        NamedChunkDescriptor *chunk = resource->holder->chunk;
+        s32 index = sdfNamedChunkFindId(chunk, (void *)name);
         if (index != -1) {
-            s32 data = *(s32 *)chunk;
-            s32 entries = *(s32 *)(data + 0xc);
-            func_0021A3A0(*(s32 *)(entries + index * 4));
+            NamedChunkData *data = chunk->data;
+            NamedChunkNode **entries = data->entries;
+            func_0021A3A0(entries[index]);
         }
     }
 }

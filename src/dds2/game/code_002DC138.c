@@ -3752,24 +3752,37 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC2B0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC340);
 
-s32 effLoadFileJobPayload(u8 *descriptor, s32 source) {
+typedef struct EffFileJobRequest {
+    u8 pad0[4];
+    u16 fileKind;
+    u8 pad6[2];
+    u16 transferMode;
+    u8 padA[2];
+    void *output;
+    u32 size;
+    u8 pad14[4];
+    u16 resourceMode;
+    u8 pad1A[2];
+    s32 relatedResource;
+} EffFileJobRequest;
+
+s32 effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
     s32 job;
 
     if (source != 0) {
         void *sourceBuffer;
         job = func_002D3DF8(source);
         sourceBuffer = fileResolvePrimaryBuffer((void *)job);
-        memcpy(*(void **)(descriptor + 0xC), sourceBuffer,
-               *(u32 *)(descriptor + 0x10));
+        memcpy(descriptor->output, sourceBuffer, descriptor->size);
     } else {
-        job = fileCreateJob(*(u16 *)(descriptor + 4));
-        if (*(s32 *)(descriptor + 0xC) != 0) {
-            func_002D3848(job, *(s32 *)(descriptor + 0xC),
-                          *(s32 *)(descriptor + 0x10), *(u16 *)(descriptor + 8));
+        job = fileCreateJob(descriptor->fileKind);
+        if (descriptor->output != NULL) {
+            func_002D3848(job, (s32)descriptor->output,
+                          (s32)descriptor->size, descriptor->transferMode);
         }
-        if (*(s32 *)(descriptor + 0x1C) != 0) {
-            func_002D3A68(job, *(s32 *)(descriptor + 0x1C),
-                          *(u16 *)(descriptor + 0x18));
+        if (descriptor->relatedResource != 0) {
+            func_002D3A68(job, descriptor->relatedResource,
+                          descriptor->resourceMode);
         } else {
             s32 zero = 0;
             func_002D39C8(job, &zero, 4, 4);
@@ -4936,21 +4949,45 @@ extern void func_00303C50(void);
 
 extern u8 D_003F0DA8[] __attribute__((aligned(4)));
 
+typedef struct EffFileQueryInfo {
+    u8 pad0[0xFC];
+    u32 resourceMask;
+    s32 status;
+    u8 pad104[0xC];
+} EffFileQueryInfo;
+
+typedef struct EffFileResourceRecord {
+    char *name;
+    u8 pad4[4];
+    u16 mode;
+    u8 padA[2];
+    u8 *buffer;
+    u32 size;
+    u32 allocationHandle;
+} EffFileResourceRecord;
+
+typedef struct EffFileJobEntry {
+    u8 pad0[0x90];
+    u32 fileHandle;
+    u8 pad94[8];
+    char filename[1];
+} EffFileJobEntry;
+
 u32 func_00303130(void) {
-    u8 fileInfo[0x110];
+    EffFileQueryInfo fileInfo;
     u32 result;
     s32 status;
     u8 *job;
-    u8 *entry;
-    u8 *resource;
+    EffFileJobEntry *entry;
+    EffFileResourceRecord *resource;
     u8 *buffer;
     u32 command;
     u32 totalLength;
     u32 dataLength;
     u32 allocation;
 
-    func_00300100(D_0042D140, 4, fileInfo);
-    status = *(s32 *)(fileInfo + 0x100);
+    func_00300100(D_0042D140, 4, &fileInfo);
+    status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
         result = 0x400000;
@@ -4959,7 +4996,7 @@ u32 func_00303130(void) {
         u32 oldAllocation;
         u32 queuedFile;
         job = (u8 *)fileCreateJob(6);
-        command = sdfDevCreateCommandState(fileInfo);
+        command = sdfDevCreateCommandState(&fileInfo);
         dataLength = func_0033EB30(command);
         totalLength = dataLength + headerBytes;
         allocation = func_003292A8(totalLength);
@@ -4968,21 +5005,21 @@ u32 func_00303130(void) {
         func_0033EB10(command, buffer + headerBytes, dataLength);
         func_0033EAE0(command);
         func_002D3848(job, buffer, totalLength, 1);
-        entry = (u8 *)fileAppendJob(D_004386B8, job);
+        entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
-        resource = (u8 *)func_002FC8F8(entry);
-        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        strcpy(entry->filename, resource->name);
         memcpy(D_0045C270, entry, 0x80);
-        queuedFile = *(u32 *)(entry + 0x90);
-        oldAllocation = *(u32 *)(resource + 0x14);
+        queuedFile = entry->fileHandle;
+        oldAllocation = resource->allocationHandle;
         D_004386C0 = queuedFile;
         if (oldAllocation != 0) {
             func_003297C8(oldAllocation);
         }
-        *(u32 *)(resource + 0x14) = allocation;
-        *(u8 **)(resource + 0xC) = buffer;
-        *(u32 *)(resource + 0x10) = dataLength + headerBytes;
-        *(u16 *)(resource + 8) = 1;
+        resource->allocationHandle = allocation;
+        resource->buffer = buffer;
+        resource->size = dataLength + headerBytes;
+        resource->mode = 1;
         memcpy(D_00459E30, D_003F0DA8, 0x74);
         D_004386BC = func_002FC340(resource);
         D_004386F4 = func_002FC9B8(entry);
@@ -5000,16 +5037,16 @@ u32 func_00303130(void) {
 extern EffectFileHeader D_003F9060;
 
 u32 func_00303478(void) {
-    u8 fileInfo[0x110];
+    EffFileQueryInfo fileInfo;
     u8 *job;
-    u8 *entry;
-    u8 *resource;
+    EffFileJobEntry *entry;
+    EffFileResourceRecord *resource;
     void *fileData;
     s32 status;
     u32 result;
 
-    func_00300100(D_0042D128, 4, fileInfo);
-    status = *(s32 *)(fileInfo + 0x100);
+    func_00300100(D_0042D128, 4, &fileInfo);
+    status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
         result = 0x400000;
@@ -5017,16 +5054,15 @@ u32 func_00303478(void) {
         job = (u8 *)fileCreateJob(0x12);
         func_002D3848(job, D_003F9060.start, D_003F9060.length,
                       D_003F9060.mode);
-        func_002D3A68(job, fileInfo, func_00303C78(*(u32 *)(fileInfo + 0xFC)));
-        entry = (u8 *)fileAppendJob(D_004386B8, job);
+        func_002D3A68(job, &fileInfo, func_00303C78(fileInfo.resourceMask));
+        entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        D_004386C0 = *(u32 *)(entry + 0x90);
-        resource = (u8 *)func_002FC8F8(entry);
-        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        D_004386C0 = entry->fileHandle;
+        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
-        memcpy(*(void **)(resource + 0xC), fileData,
-               *(u32 *)(resource + 0x10));
+        memcpy(resource->buffer, fileData, resource->size);
         D_004386BC = func_002FC340(resource);
         D_004386F4 = func_002FC9B8(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
@@ -5059,16 +5095,16 @@ INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042D128);
 INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042D140);
 
 u32 func_00303660(void) {
-    u8 fileInfo[0x110];
+    EffFileQueryInfo fileInfo;
     u8 *job;
-    u8 *entry;
-    u8 *resource;
+    EffFileJobEntry *entry;
+    EffFileResourceRecord *resource;
     void *fileData;
     s32 status;
     u32 result;
 
-    func_00300100("/tool/effect/f2/", 0x80, fileInfo);
-    status = *(s32 *)(fileInfo + 0x100);
+    func_00300100("/tool/effect/f2/", 0x80, &fileInfo);
+    status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
         result = 0x400000;
@@ -5076,16 +5112,15 @@ u32 func_00303660(void) {
         job = (u8 *)fileCreateJob(0x14);
         func_002D3848(job, D_003FB948.start, D_003FB948.length,
                       D_003FB948.mode);
-        func_002D3A68(job, fileInfo, func_00303C78(*(u32 *)(fileInfo + 0xFC)));
-        entry = (u8 *)fileAppendJob(D_004386B8, job);
+        func_002D3A68(job, &fileInfo, func_00303C78(fileInfo.resourceMask));
+        entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        D_004386C0 = *(u32 *)(entry + 0x90);
-        resource = (u8 *)func_002FC8F8(entry);
-        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        D_004386C0 = entry->fileHandle;
+        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
-        memcpy(*(void **)(resource + 0xC), fileData,
-               *(u32 *)(resource + 0x10));
+        memcpy(resource->buffer, fileData, resource->size);
         D_004386BC = func_002FC340(resource);
         D_004386F4 = func_002FC9B8(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
@@ -5102,16 +5137,16 @@ u32 func_00303660(void) {
 extern EffectFileHeader D_003FD988;
 
 u32 effLoadMaterialFile(void) {
-    u8 fileInfo[0x110];
+    EffFileQueryInfo fileInfo;
     u8 *job;
-    u8 *entry;
-    u8 *resource;
+    EffFileJobEntry *entry;
+    EffFileResourceRecord *resource;
     void *fileData;
     s32 status;
     u32 result;
 
-    func_00300100(D_0042D128, 2, fileInfo);
-    status = *(s32 *)(fileInfo + 0x100);
+    func_00300100(D_0042D128, 2, &fileInfo);
+    status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
         result = 0x400000;
@@ -5119,16 +5154,15 @@ u32 effLoadMaterialFile(void) {
         job = (u8 *)fileCreateJob(0x16);
         func_002D3848(job, D_003FD988.start, D_003FD988.length,
                       D_003FD988.mode);
-        func_002D3A68(job, fileInfo, func_00303C78(*(u32 *)(fileInfo + 0xFC)));
-        entry = (u8 *)fileAppendJob(D_004386B8, job);
+        func_002D3A68(job, &fileInfo, func_00303C78(fileInfo.resourceMask));
+        entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        D_004386C0 = *(u32 *)(entry + 0x90);
-        resource = (u8 *)func_002FC8F8(entry);
-        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        D_004386C0 = entry->fileHandle;
+        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
-        memcpy(*(void **)(resource + 0xC), fileData,
-               *(u32 *)(resource + 0x10));
+        memcpy(resource->buffer, fileData, resource->size);
         D_004386BC = func_002FC340(resource);
         D_004386F4 = func_002FC9B8(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
@@ -5145,18 +5179,18 @@ u32 effLoadMaterialFile(void) {
 extern EffectFileHeader D_003FE040;
 
 u32 func_00303A30(void) {
-    u8 fileInfo[0x110];
+    EffFileQueryInfo fileInfo;
     u8 *job;
-    u8 *entry;
-    u8 *resource;
+    EffFileJobEntry *entry;
+    EffFileResourceRecord *resource;
     void *fileData;
     s32 status;
     u32 result;
     u32 index;
     f32 *coordinates;
 
-    func_00300100(D_0042D128, 4, fileInfo);
-    status = *(s32 *)(fileInfo + 0x100);
+    func_00300100(D_0042D128, 4, &fileInfo);
+    status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
         result = 0x400000;
@@ -5168,16 +5202,15 @@ u32 func_00303A30(void) {
         }
         func_002D3848(job, D_003FE040.start, D_003FE040.length,
                       D_003FE040.mode);
-        func_002D3A68(job, fileInfo, func_00303C78(*(u32 *)(fileInfo + 0xFC)));
-        entry = (u8 *)fileAppendJob(D_004386B8, job);
+        func_002D3A68(job, &fileInfo, func_00303C78(fileInfo.resourceMask));
+        entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        D_004386C0 = *(u32 *)(entry + 0x90);
-        resource = (u8 *)func_002FC8F8(entry);
-        strcpy((char *)(entry + 0x9C), *(char **)resource);
+        D_004386C0 = entry->fileHandle;
+        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
-        memcpy(*(void **)(resource + 0xC), fileData,
-               *(u32 *)(resource + 0x10));
+        memcpy(resource->buffer, fileData, resource->size);
         D_004386BC = func_002FC340(resource);
         D_004386F4 = func_002FC9B8(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;

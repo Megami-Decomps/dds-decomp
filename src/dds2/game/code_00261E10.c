@@ -63,11 +63,19 @@ typedef struct EvtStateTableContext {
     u8 pad84[0xC];
     s32 entryMultiplier;
     s32 dispatchMode;
-    u8 pad98[0x20];
+    u8 pad98[0xE];
+    u16 selectedSlot;       /* 0xA6 */
+    u8 padA8[8];
+    s32 cachedSelection;    /* 0xB0 */
+    u8 padB4[4];
     s32 progressTimer;
     u8 padBC[4];
     s32 stateCode;
     u16 stateStep;
+    u8 padC6[2];
+    s32 unkC8;
+    u8 advancedSlots;       /* 0xCC */
+    s8 followupMode;        /* 0xCD */
 } EvtStateTableContext;
 
 typedef struct EvtFlagGate {
@@ -133,9 +141,9 @@ s32 evtInitializeSelectedSlot(void) {
     }
     record = *(s32 *)(((EvtStateTableContext *)context)->primaryObject->node + 0x30);
     slot = func_0025FE70(context);
-    *(s32 *)(context + 0xb0) = *(s32 *)(D_00435DD0 + 0x3c);
+    ((EvtStateTableContext *)context)->cachedSelection = *(s32 *)(D_00435DD0 + 0x3c);
     *(u16 *)(record + 0x12) = slot;
-    *(u16 *)(context + 0xa6) = slot;
+    ((EvtStateTableContext *)context)->selectedSlot = slot;
     return 1;
 }
 
@@ -695,8 +703,8 @@ u32 evtUpdateSlotAdvanceCount(void) {
 
     context = func_00101958();
     advancedSlots = evtAdvanceSlotFlags();
-    *(u8 *)(context + 0xcc) = advancedSlots;
-    if ((*(s32 *)(context + 200) == 0) && (*(s8 *)(context + 0xcd) == '\x01')) {
+    ((EvtStateTableContext *)context)->advancedSlots = advancedSlots;
+    if ((((EvtStateTableContext *)context)->unkC8 == 0) && (((EvtStateTableContext *)context)->followupMode == '\x01')) {
         func_0026C5B8(0x22);
     }
     return 1;

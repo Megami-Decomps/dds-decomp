@@ -77,18 +77,21 @@ typedef struct UiObject {
     u32 flags;
     u32 actionFlags;
     u8 unk_118[8];
-    u8 entryData[4];
+    u16 entryMask;
+    u8 entryDataTail[2];
     u16 index;
     u16 currentValue;
     u16 maximumValue;
     u8 unk_12A[4];
     u16 statusFlags;
     u16 conditionFlags;
-    u8 pad_132[0x1B2];
+    u8 pad_132[2];
+    u16 stat134;
+    u8 pad_136[0x1AE];
     u8 kind;
     u8 pad_2E5;
     ActorEntrySlot entrySlots[7];
-    u8 pad_310[4];
+    s32 selectedEntryIndex;
     u32 marker;
     u8 pad_318[0x4C];
     struct UiObject *next;
@@ -844,10 +847,10 @@ s32 func_001AAA08(UiObject *actor) {
     s32 entry;
 
     if ((actor->flags & 0x400) == 0) {
-        entry = func_001AAA80(*(u8 *)((s32)actor + 0x2E4));
+        entry = func_001AAA80(actor->kind);
         return entry;
     }
-    return (s32)actor + 0x120;
+    return (s32)&actor->entryMask;
 }
 
 s32 func_001AAA40(void) {
@@ -873,11 +876,11 @@ void func_001AABD8(void) {
 UiObject *func_001AABE0(s32 kind) {
     UiObject *unit;
     u32 flags;
-    for (unit = *(UiObject **)(func_001AA6F8() + 0x24C); unit != 0; unit = *(UiObject **)((s32)unit + 0x364)) {
-        flags = *(u32 *)((s32)unit + 0x110);
+    for (unit = ((BattleController *)func_001AA6F8())->actors; unit != 0; unit = unit->next) {
+        flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                if (kind == *(u8 *)((s32)unit + 0x2E4)) {
+                if (kind == unit->kind) {
                     return unit;
                 }
             }
@@ -1487,17 +1490,17 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415638);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
 
-s32 func_001B27E8(s32 arg0, u8 *unit, s32 arg2) {
+s32 func_001B27E8(s32 arg0, UiObject *unit, s32 arg2) {
     u32 kind;
     s32 mask;
     u32 power;
-    if (*(s32 *)(unit + 0x310) <= 0) {
+    if (unit->selectedEntryIndex <= 0) {
         return 0;
     }
     func_001AA6F8();
     kind = func_001ABF00(arg0, arg2);
     mask = func_001ACF68(kind);
-    power = *(u16 *)(*(s32 *)(unit + 0x310) * 0x38 + D_00435E20 + 0x2E);
+    power = *(u16 *)(unit->selectedEntryIndex * 0x38 + D_00435E20 + 0x2E);
     if (power == 0) {
         return 0;
     }
@@ -1517,8 +1520,8 @@ s32 func_001B28C8(s32 arg0) {
     return D_003B4F70[temp_v0 * 3];
 }
 
-s32 func_001B2900(u8 *unit, s32 arg) {
-    s32 index = *(s32 *)(unit + 0x310);
+s32 func_001B2900(UiObject *unit, s32 arg) {
+    s32 index = unit->selectedEntryIndex;
     u16 kind;
     if (index == -1) {
         return 0;
@@ -1527,16 +1530,16 @@ s32 func_001B2900(u8 *unit, s32 arg) {
     return (D_003B4F78[kind * 3] & func_001ACF68(arg)) != 0;
 }
 
-s32 fldGetSelectedUnitStat(u8 *state) {
-    s32 index = *(s32 *)(state + 0x310);
+s32 fldGetSelectedUnitStat(UiObject *unit) {
+    s32 index = unit->selectedEntryIndex;
     if (index == -1) {
         return 0;
     }
     return func_001B28C8(index);
 }
 
-s32 btlGetSelectedUnitProperty(u8 *state) {
-    s32 index = *(s32 *)(state + 0x310);
+s32 btlGetSelectedUnitProperty(UiObject *unit) {
+    s32 index = unit->selectedEntryIndex;
     u16 property;
     if (index == -1) {
         return 0;
@@ -1704,17 +1707,17 @@ s32 func_001B36B8(u32 flags, u32 otherFlags, s32 index) {
 }
 
 s32 func_001B3760(s32 mask, s8 skipDown) {
-    u8 *unit;
+    UiObject *unit;
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = *(u8 **)(func_001AA6F8() + 0x24C); unit != 0; unit = *(u8 **)(unit + 0x364)) {
-        flags = *(u32 *)(unit + 0x110);
+    for (unit = ((BattleController *)func_001AA6F8())->actors; unit != 0; unit = unit->next) {
+        flags = unit->flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
-                if (*(u16 *)(unit + 0x120) & mask) {
+                if (unit->entryMask & mask) {
                     count++;
-                    total += *(u16 *)(unit + 0x128);
+                    total += unit->maximumValue;
                 }
             }
         }
@@ -1734,17 +1737,17 @@ void func_001B3830(u32 arg0) {
 }
 
 s32 func_001B3848(s32 mask, s8 skipDown) {
-    u8 *unit;
+    UiObject *unit;
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = *(u8 **)(func_001AA6F8() + 0x24C); unit != 0; unit = *(u8 **)(unit + 0x364)) {
-        flags = *(u32 *)(unit + 0x110);
+    for (unit = ((BattleController *)func_001AA6F8())->actors; unit != 0; unit = unit->next) {
+        flags = unit->flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
-                if (*(u16 *)(unit + 0x120) & mask) {
+                if (unit->entryMask & mask) {
                     count++;
-                    total += *(u16 *)(unit + 0x126);
+                    total += unit->currentValue;
                 }
             }
         }
@@ -1764,17 +1767,17 @@ void func_001B3918(u32 arg0) {
 }
 
 s32 func_001B3930(s32 mask, s8 skipDown) {
-    u8 *unit;
+    UiObject *unit;
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = *(u8 **)(func_001AA6F8() + 0x24C); unit != 0; unit = *(u8 **)(unit + 0x364)) {
-        flags = *(u32 *)(unit + 0x110);
+    for (unit = ((BattleController *)func_001AA6F8())->actors; unit != 0; unit = unit->next) {
+        flags = unit->flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
-                if (*(u16 *)(unit + 0x120) & mask) {
+                if (unit->entryMask & mask) {
                     count++;
-                    total += *(u16 *)(unit + 0x134);
+                    total += unit->stat134;
                 }
             }
         }
@@ -1793,16 +1796,16 @@ void func_001B3A00(u32 arg0) {
     func_001B3930(arg0, 0);
 }
 
-s32 func_001B3A18(u32 mask, s32 attribute, s8 allowDisabled) {
+s32 func_001B3A18(u32 mask, s32 attribute, s8 skipDown) {
     s32 sum = 0;
     s32 count = 0;
-    s32 node = *(s32 *)(func_001AA6F8() + 0x24C);
-    for (; node != 0; node = *(s32 *)(node + 0x364)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    UiObject *unit = ((BattleController *)func_001AA6F8())->actors;
+    for (; unit != 0; unit = unit->next) {
+        u32 flags = unit->flags;
         if ((flags & 1) != 0) {
-            if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
-                    s32 value = func_00119A78(node + 0x120, attribute);
+            if (skipDown == 0 || (flags & 0x20) == 0) {
+                if ((unit->entryMask & mask) != 0) {
+                    s32 value = func_00119A78((s32)&unit->entryMask, attribute);
                     count++;
                     sum += value;
                 }
@@ -1836,14 +1839,14 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004157A0);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4210);
 
 void btlClearUnitStatusMask(void) {
-    u8 *unit;
+    UiObject *unit;
     u32 flags;
-    for (unit = *(u8 **)(func_001AA6F8() + 0x24C); unit != 0; unit = *(u8 **)(unit + 0x364)) {
-        flags = *(u32 *)(unit + 0x110);
+    for (unit = ((BattleController *)func_001AA6F8())->actors; unit != 0; unit = unit->next) {
+        flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                *(u32 *)(unit + 0x110) = flags & ~0x1000;
-                *(u16 *)(unit + 0x120) &= 0xEFFF;
+                unit->flags = flags & ~0x1000;
+                unit->entryMask &= 0xEFFF;
             }
         }
     }

@@ -66,7 +66,28 @@ void evtInstallStateTable(EvtDispatchState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00245D08);
+extern s32 func_00244658();
+extern void func_002444D0();
+extern s16 mnuShopHasPendingFlag();
+
+s32 func_00245D08(void) {
+    s32 state = func_00101A70();
+    s32 window;
+    s16 pending;
+
+    evtClearActiveFlag(0);
+    func_0024DEF8(0, 2);
+    if (*(s32 *)(state + 0x6C) == 0) {
+        *(s16 *)(state + 0x90) = func_00244658(state);
+        func_002444D0(state);
+    }
+    window = *(s32 *)(*(s32 *)(*(s32 *)(state + 0x6C) + 0x14) + 0x30);
+    pending = mnuShopHasPendingFlag(state);
+    *(s32 *)(state + 0x9C) = *(s32 *)(D_003BAA00 + 0x3C);
+    *(s16 *)(window + 0xE) = pending;
+    *(s16 *)(state + 0x92) = pending;
+    return 1;
+}
 
 s32 func_00245DA0(void) {
     s32 *temp_v0 = (s32 *)func_00101A70();

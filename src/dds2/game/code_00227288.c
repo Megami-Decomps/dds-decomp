@@ -243,6 +243,32 @@ extern void *func_00328D68(s32);
 
 extern void *func_00328D68(s32);
 
+/* Battle state fields used while locating and launching battle script resources. */
+typedef struct BattleScriptResources {
+    u8 pad00[0x1E4];
+    s16 scriptGroup;          /* 0x1E4: selects the resource path */
+    u8 pad1E6[2];
+    u32 startedFlags;         /* 0x1E8 */
+    u32 eventFlags;           /* 0x1EC */
+    s16 eventSubstate;        /* 0x1F0 */
+    u8 pad1F2[2];
+    s32 eventAction;          /* 0x1F4 */
+    s32 eventResult;          /* 0x1F8 */
+    void *eventAuxData;       /* 0x1FC */
+    void *eventData;          /* 0x200 */
+    BtlUnit *eventActor;      /* 0x204 */
+    s32 sequenceBaseHandle;   /* 0x208 */
+    s32 resourceHandle;       /* 0x20C */
+    void *assetData;          /* 0x210 */
+    u8 pad214[4];
+    u32 resourceFlags;        /* 0x218 */
+    u8 pad21C[0x60];
+    u8 encounterMode;         /* 0x27C */
+    u8 pad27D[0x47];
+    u8 *scriptOwner;          /* 0x2C4 */
+    s32 taskHandle;           /* 0x2C8 */
+} BattleScriptResources;
+
 typedef struct BattleGroupIdEntry {
     struct BattleGroupIdEntry *next;
     s32 id;
@@ -774,60 +800,60 @@ void btlReleaseBossData(void) {
 
 s32 btlFindScriptResource(char *name) {
     char path[128];
-    u8 *battle = (u8 *)func_001AA6F8();
-    if (*(s32 *)(battle + 0x20C) == 0) {
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    if (battle->resourceHandle == 0) {
         return -1;
     }
-    func_0035C860(path, D_0041B650, *(s16 *)(battle + 0x1E4), name);
-    return func_0010C158(*(s32 *)(battle + 0x20C), path);
+    func_0035C860(path, D_0041B650, battle->scriptGroup, name);
+    return func_0010C158(battle->resourceHandle, path);
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022A908);
 
 s32 btlReleaseScriptResource(void) {
     extern s32 kwlnTaskIsRegistered(s32);
-    u8 *battle = (u8 *)func_001AA6F8();
-    if (*(s16 *)(battle + 0x1E4) == -1) {
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    if (battle->scriptGroup == -1) {
         return 1;
     }
-    if (kwlnTaskIsRegistered(*(s32 *)(battle + 0x2C8)) == 0) {
-        *(s32 *)(battle + 0x2C8) = 0;
+    if (kwlnTaskIsRegistered(battle->taskHandle) == 0) {
+        battle->taskHandle = 0;
         return 1;
     }
     return 0;
 }
 
 s32 func_0022A9D0(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    if (*(s16 *)(battle + 0x1E4) == -1) {
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    if (battle->scriptGroup == -1) {
         return 0;
     }
-    if (*(u32 *)(battle + 0x1E8) & 1) {
+    if (battle->startedFlags & 1) {
         return 0;
     }
-    if (*(s32 *)(battle + 0x20C) == 0) {
+    if (battle->resourceHandle == 0) {
         return 0;
     }
     return btlFindScriptResource(D_00436D00) != -1;
 }
 
 void func_0022AA38(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    s32 skill;
-    s32 handle;
-    if (*(s16 *)(battle + 0x1E4) == -1) {
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    s32 scriptId;
+    s32 taskId;
+    if (battle->scriptGroup == -1) {
         return;
     }
-    skill = btlFindScriptResource(D_00436D00);
-    if (skill == -1) {
+    scriptId = btlFindScriptResource(D_00436D00);
+    if (scriptId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)(*(u8 **)(battle + 0x2C4) + 0x20) - 1,
-                            *(s32 *)(battle + 0x20C), skill);
-    scrSetCurrentActor(handle, 0);
-    func_00101968(*(s32 *)(battle + 0x2C4), handle);
-    *(s32 *)(battle + 0x2C8) = handle;
-    *(u32 *)(battle + 0x1E8) |= 1;
+    taskId = scrCreateTaskForProcessId(*(s32 *)(battle->scriptOwner + 0x20) - 1,
+                            battle->resourceHandle, scriptId);
+    scrSetCurrentActor(taskId, 0);
+    func_00101968((s32)battle->scriptOwner, taskId);
+    battle->taskHandle = taskId;
+    battle->startedFlags |= 1;
 }
 
 s64 btlReleaseScriptResourceA(void) {
@@ -835,37 +861,37 @@ s64 btlReleaseScriptResourceA(void) {
 }
 
 s32 btlHasScriptResource(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
 
-    if (*(s16 *)(battle + 0x1E4) == -1) {
+    if (battle->scriptGroup == -1) {
         return 0;
     }
-    if (*(s32 *)(battle + 0x20C) == 0) {
+    if (battle->resourceHandle == 0) {
         return 0;
     }
-    if ((*(s32 *)(battle + 0x218) & 0x800) == 0 || *(u8 *)(battle + 0x27C) != 1) {
+    if ((battle->resourceFlags & 0x800) == 0 || battle->encounterMode != 1) {
         return 0;
     }
     return btlFindScriptResource(D_00436D08) != -1;
 }
 
 void func_0022AB60(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    s32 skill;
-    s32 handle;
-    if (*(s16 *)(battle + 0x1E4) == -1) {
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    s32 scriptId;
+    s32 taskId;
+    if (battle->scriptGroup == -1) {
         return;
     }
-    skill = btlFindScriptResource(D_00436D08);
-    if (skill == -1) {
+    scriptId = btlFindScriptResource(D_00436D08);
+    if (scriptId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)(*(u8 **)(battle + 0x2C4) + 0x20) - 1,
-                            *(s32 *)(battle + 0x20C), skill);
-    scrSetCurrentActor(handle, 0);
-    func_00101968(*(s32 *)(battle + 0x2C4), handle);
-    *(s32 *)(battle + 0x2C8) = handle;
-    *(u32 *)(battle + 0x1E8) |= 2;
+    taskId = scrCreateTaskForProcessId(*(s32 *)(battle->scriptOwner + 0x20) - 1,
+                            battle->resourceHandle, scriptId);
+    scrSetCurrentActor(taskId, 0);
+    func_00101968((s32)battle->scriptOwner, taskId);
+    battle->taskHandle = taskId;
+    battle->startedFlags |= 2;
 }
 
 s64 btlReleaseScriptResourceB(void) {
@@ -885,24 +911,24 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022AF90);
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B108);
 
 void btlReleaseEventData(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     void *data;
-    if ((*(u32 *)(battle + 0x1EC) & 2) == 0) {
+    if ((battle->eventFlags & 2) == 0) {
         return;
     }
-    data = *(void **)(battle + 0x200);
+    data = battle->eventData;
     if (data != 0) {
         func_001686F0(data);
-        *(void **)(battle + 0x200) = 0;
+        battle->eventData = 0;
     }
-    data = *(void **)(battle + 0x1FC);
+    data = battle->eventAuxData;
     if (data != 0) {
         func_001683F0(data);
-        *(void **)(battle + 0x1FC) = 0;
+        battle->eventAuxData = 0;
     }
-    *(s16 *)(battle + 0x1F0) = 0;
-    *(s32 *)(battle + 0x1F4) = -1;
-    *(u32 *)(battle + 0x1EC) &= ~2;
+    battle->eventSubstate = 0;
+    battle->eventAction = -1;
+    battle->eventFlags &= ~2;
     func_0020D128(D_0041B768);
 }
 
@@ -911,44 +937,44 @@ INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B768);
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B288);
 
 void func_0022B348(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     void *data;
     btlReleaseEventData();
-    data = *(void **)(battle + 0x210);
+    data = battle->assetData;
     if (data != 0) {
         func_003297C8(data);
-        *(void **)(battle + 0x210) = 0;
+        battle->assetData = 0;
     }
     func_0020D128(D_0041B7D0);
 }
 
 s32 func_0022B398(void) {
-    s32 first = func_0010D650(0);
-    s32 second = func_0010D650(1);
+    s32 selector = func_0010D650(0);
+    s32 unitId = func_0010D650(1);
     s32 action = func_0010D650(2);
-    u8 *unit;
-    u8 *battle;
+    BtlUnit *unit;
+    BattleScriptResources *battle;
     s32 result;
-    if (first == 0) {
-        unit = (u8 *)btlFindUnitByModeClear(second);
+    if (selector == 0) {
+        unit = (BtlUnit *)btlFindUnitByModeClear(unitId);
     } else {
-        unit = (u8 *)btlFindUnitByModeFlagged(second);
+        unit = (BtlUnit *)btlFindUnitByModeFlagged(unitId);
     }
     if (unit == 0) {
         return 1;
     }
-    if ((*(u32 *)(unit + 0x110) & 2) == 0) {
+    if ((unit->flags & 2) == 0) {
         return 1;
     }
-    battle = (u8 *)func_001AA6F8();
-    result = func_0025D008(*(s16 *)(battle + 0x1E4), action);
+    battle = (BattleScriptResources *)func_001AA6F8();
+    result = func_0025D008(battle->scriptGroup, action);
     if (result == 0) {
         return 1;
     }
-    *(s32 *)(battle + 0x1F8) = result;
-    *(u8 **)(battle + 0x204) = unit;
-    *(s32 *)(battle + 0x1F4) = action;
-    *(s16 *)(battle + 0x1F0) = 1;
+    battle->eventResult = result;
+    battle->eventActor = unit;
+    battle->eventAction = action;
+    battle->eventSubstate = 1;
     return 1;
 }
 
@@ -988,11 +1014,11 @@ u8 func_0022B5E0(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B600);
 
 s32 func_0022B6E8(void) {
-    u8 *battle = (u8 *)func_001AA6F8();
+    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     s32 index = func_0010D650(0);
-    if (func_00342168(*(s32 *)(battle + 0x208)) != 0) {
-        sndSetSequenceVolumePan(*(s32 *)(battle + 0x208) + index, 0x7f, 0x3f);
-        func_0020D128(D_0041B7E0, *(s32 *)(battle + 0x208) + index);
+    if (func_00342168(battle->sequenceBaseHandle) != 0) {
+        sndSetSequenceVolumePan(battle->sequenceBaseHandle + index, 0x7f, 0x3f);
+        func_0020D128(D_0041B7E0, battle->sequenceBaseHandle + index);
     }
     return 1;
 }

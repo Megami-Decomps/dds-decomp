@@ -26,6 +26,7 @@ extern u64 effParamTableGetBlock(u64, u64);
 
 extern void func_001705A0();
 
+extern s32 func_0018DDF8(s32 color, s32 param);
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F1D0);
 
 void func_0016F420(u64 arg0) {
@@ -61,7 +62,26 @@ void func_0016F4A8(void *work, void *src) {
     VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F4D8);
+void func_0016F4D8(u8 *work, s32 index, s32 param) {
+    s32 slot;
+    s32 rgb1;
+    s32 rgb2;
+
+    slot = func_00170870(*(void **)(work + 0x7C), index);
+    rgb1 = *(u32 *)(work + 0x28) & 0xFFFFFF;
+    rgb2 = *(u32 *)(work + 0x2C) & 0xFFFFFF;
+    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
+    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    if (index & 1) {
+        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
+        *(s32 *)(slot + 0xC) = func_0018DDF8(rgb1 | 0xFF000000, param);
+        *(s32 *)(slot + 0x10) = func_0018DDF8(0x80000000, param);
+    } else {
+        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
+        *(s32 *)(slot + 0xC) = func_0018DDF8(rgb1 | 0x40000000, param);
+        *(s32 *)(slot + 0x10) = func_0018DDF8(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F5C8);
 

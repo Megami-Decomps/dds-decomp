@@ -2343,21 +2343,6 @@ s32 func_001FB320(s32 unused, BtlReader *reader) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB3C8);
 
-void func_001FB870(s32 arg0) {
-    s32 temp_v0;
-
-    if (*(s32 *)(arg0 + 8) != 0) {
-        temp_v0 = *(s32 *)(arg0 + 8);
-        do {
-            s32 temp_v1 = *(s32 *)(temp_v0 + 0x40);
-            func_002CFF98(temp_v0);
-            temp_v0 = temp_v1;
-        } while (temp_v0 != 0);
-    }
-    func_002CFF98(*(s32 *)(arg0 + 4));
-    func_002CFF98(arg0);
-}
-
 typedef struct BtlEntry {
     s32 category;
     s32 flags;
@@ -2372,6 +2357,21 @@ typedef struct BtlEntryList {
     s32 unk_04;
     BtlEntry *head;
 } BtlEntryList;
+
+void func_001FB870(BtlEntryList *list) {
+    BtlEntry *entry;
+
+    if (list->head != NULL) {
+        entry = list->head;
+        do {
+            BtlEntry *next = entry->next;
+            func_002CFF98(entry);
+            entry = next;
+        } while (entry != NULL);
+    }
+    func_002CFF98(list->unk_04);
+    func_002CFF98(list);
+}
 
 void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
     BtlEntry *entry = func_002CFEB8(0x44);
@@ -2401,9 +2401,30 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB9A8);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBA38);
 
-void func_001FBEE8(s32 resource) {
-    s32 handle = *(s32 *)(resource + 0x3c);
-    if (handle != 0 && *(s32 *)(resource + 0x40) == 1) {
+typedef struct BtlResourcePath {
+    s32 id;
+    u32 variant;
+    u8 pad8[4];
+    char name[1];
+} BtlResourcePath;
+
+typedef struct BtlResourceSelector {
+    s32 unk0;
+    s32 index;
+} BtlResourceSelector;
+
+typedef struct BtlResourceDescriptor {
+    u8 pad0[0x34];
+    BtlResourcePath *path;
+    u8 pad38[4];
+    s32 handle;
+    s32 ownsHandle;
+    BtlResourceSelector *selector;
+} BtlResourceDescriptor;
+
+void func_001FBEE8(BtlResourceDescriptor *resource) {
+    s32 handle = resource->handle;
+    if (handle != 0 && resource->ownsHandle == 1) {
         func_002D2D00(handle);
     }
     func_002CFF98(resource);
@@ -2422,45 +2443,45 @@ u32 func_001FBF48(s32 arg0) {
     return *(u32 *)(arg0 + 8);
 }
 
-s32 func_001FBF50(u8 *resource, s32 output) {
-    s32 index = *(s32 *)(*(s32 *)(resource + 0x44) + 4);
+s32 func_001FBF50(BtlResourceDescriptor *resource, char *output) {
+    s32 index = resource->selector->index;
     if (index != 0) {
-        func_003014F0(output, D_003BB818, index, *(s32 *)(resource + 0x34) + 0xc);
+        func_003014F0(output, D_003BB818, index, resource->path->name);
     } else {
-        func_003014F0(output, D_003BB820, *(s32 *)(resource + 0x34) + 0xc);
+        func_003014F0(output, D_003BB820, resource->path->name);
     }
-    return *(s32 *)(*(s32 *)(resource + 0x34));
+    return resource->path->id;
 }
 
-s32 btlTrimResourceName(u8 *resource, char *output) {
+s32 btlTrimResourceName(BtlResourceDescriptor *resource, char *output) {
     u32 length;
     u32 i;
-    func_003014F0(output, D_003BB820, *(s32 *)(resource + 0x34) + 0xC);
+    func_003014F0(output, D_003BB820, resource->path->name);
     length = strlen(output);
     for (i = 0; i < length && output[i] != '.'; i++) {
     }
     if (length != i) {
         output[i] = 0;
     }
-    return **(s32 **)(resource + 0x34);
+    return resource->path->id;
 }
 
 
-u32 func_001FC078(s32 arg0) {
-    return *(u32 *)(*(s32 *)(arg0 + 0x34) + 4);
+u32 func_001FC078(BtlResourceDescriptor *resource) {
+    return resource->path->variant;
 }
 
 extern void func_002D2D00(s32);
 extern void func_002D0918(s32);
-void func_001FC100(u8 *, s32);
+void func_001FC100(BtlResourceDescriptor *, s32);
 
-void func_001FC088(u8 *resource, s32 name) {
+void func_001FC088(BtlResourceDescriptor *resource, s32 name) {
     u32 loaded;
-    s32 handle = *(s32 *)(resource + 0x3c);
+    s32 handle = resource->handle;
     s32 buffer;
-    if (handle != 0 && *(s32 *)(resource + 0x40) == 1) {
+    if (handle != 0 && resource->ownsHandle == 1) {
         func_002D2D00(handle);
-        *(s32 *)(resource + 0x3c) = 0;
+        resource->handle = 0;
     }
     buffer = func_002EB028(name, &loaded, 0);
     func_001FC100(resource, loaded);
@@ -2469,13 +2490,13 @@ void func_001FC088(u8 *resource, s32 name) {
 
 extern s32 func_002D3288(s32);
 
-void func_001FC100(u8 *resource, s32 name) {
-    s32 handle = *(s32 *)(resource + 0x3c);
-    if (handle != 0 && *(s32 *)(resource + 0x40) == 1) {
+void func_001FC100(BtlResourceDescriptor *resource, s32 name) {
+    s32 handle = resource->handle;
+    if (handle != 0 && resource->ownsHandle == 1) {
         func_002D2D00(handle);
-        *(s32 *)(resource + 0x3c) = 0;
+        resource->handle = 0;
     }
-    *(s32 *)(resource + 0x3c) = func_002D3288(name);
+    resource->handle = func_002D3288(name);
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);
