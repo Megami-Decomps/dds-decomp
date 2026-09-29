@@ -217,6 +217,29 @@ extern s32 D_00438F54;
 extern s32 D_00435DD0;
 extern s32 D_00435E38;
 
+extern s32 func_00206090();
+extern void func_00206060();
+extern s32 func_001AC648();
+extern void func_001AEEA8();
+extern void func_00105FE8();
+extern void kwlnDrawSetOffsetTransition();
+extern void kwlnDrawEnableD88();
+extern void kwlnDrawEnableDc8();
+extern void kwlnDrawEnableE08();
+extern void kwlnDrawSetupC70B();
+extern void kwlnDrawEnableCd0();
+extern void kwlnDrawEnableD30();
+extern void func_0022E4C0();
+extern void kwlnFadeStartIn();
+extern s32 func_0012EB78();
+extern void func_0012EBB8();
+extern void evtSetSolarOverlayFullyVisible();
+extern void func_001AF060();
+extern void func_00204000();
+extern void func_001E9410();
+extern void func_001FFFF8();
+extern void func_002009E0();
+
 void fldInitializeBattleSceneFlow(void) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
     btlRandomBelow(7);
@@ -836,11 +859,79 @@ void fldMarkGridTiles(BattleSceneWork *scene) {
     btlStartTask(tile);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D0078);
+s32 func_001D0078(BattleSceneWork *scene) {
+    BattleEffectParams params;
+    f32 *origin;
+    if (btlCountTasksForOwner(0x8000000000000001LL) == 0) {
+        func_00204000();
+        func_001E9410();
+        func_001FFFF8();
+        func_002009E0(scene->tileX, scene->tileY);
+        if (scene->subFlags & 0x40000) {
+            params.rotation[0] = 0.19607843f;
+            params.rotation[1] = 0.19607843f;
+            params.rotation[2] = 0.19607843f;
+            params.scale[0] = 0.19607843f;
+            params.scale[1] = 0.19607843f;
+            params.scale[2] = 0.19607843f;
+            origin = D_0037F770[0];
+            params.position[0] = origin[4];
+            params.position[1] = origin[5];
+            params.position[2] = origin[6];
+            btlStartTask(func_00201108(&params, 0));
+        }
+        return 4;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D0140);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D0710);
+s32 func_001D0710(BattleSceneWork *scene) {
+    if (btlCountTasksForOwner(0x8000000000000002LL) == 0) {
+        func_00206090();
+        if (!(scene->flags & 0x4000)) {
+            func_00206060();
+        }
+        func_001AC648();
+        if (scene->subFlags & 0x80) {
+            func_001AEEA8();
+            scene->subFlags &= ~0x80;
+        }
+        if (!(scene->flags & 0x4000)) {
+            func_00105FE8(0);
+            kwlnDrawSetOffsetTransition(0, 0, 1);
+            kwlnDrawEnableD88(0);
+            kwlnDrawEnableDc8(0);
+            kwlnDrawEnableE08(0);
+            kwlnDrawSetupC70B(0);
+            kwlnDrawEnableCd0(0);
+            kwlnDrawEnableD30(0);
+            if (!(scene->subFlags & 0x100000)) {
+                func_0022E4C0();
+            }
+            if (!(scene->subFlags & 8)) {
+                kwlnFadeStartIn(0);
+            }
+            if (func_0012EB78() != 0) {
+                func_0012EBB8(1);
+            }
+            evtSetSolarOverlayFullyVisible();
+        }
+        if (scene->sceneStatus == 0) {
+            fldCreateSceneCleanupTask();
+            if (!(scene->subFlags & 0x2000)) {
+                scene->flags |= 0x100000;
+            } else {
+                scene->subFlags &= ~0x2000;
+                scene->flags &= 0xFFEFFFFF;
+            }
+        }
+        func_001AF060();
+        return 5;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D08A8);
 
