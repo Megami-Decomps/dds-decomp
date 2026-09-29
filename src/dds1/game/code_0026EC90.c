@@ -34,7 +34,15 @@ extern char D_003B1AC8[];
 
 extern s32 func_00101A70();
 
-extern u32 D_003DC560[];
+typedef struct MovieListState {
+    u32 task;
+    u32 *head;
+    s16 unk08;
+    s16 remaining;
+    s16 unk0C;
+} MovieListState;
+
+extern MovieListState D_003DC560;
 
 extern u32 D_003DC5C8[];
 
@@ -99,7 +107,30 @@ void func_0026FDD8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026FE10);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026FE98);
+extern u32 D_003BA8EC;
+extern u16 D_003BA72C;
+extern char D_003B1168[];
+extern s32 func_002D03F8(s32);
+extern s32 sdfResourceRetainAddress(s32);
+extern void func_0026A5F0(s32);
+extern void func_0026F5E8(void);
+extern void func_0026FD88(void);
+
+void func_0026FE98(void) {
+    s32 handle;
+    u32 *movie;
+
+    D_003BA8EC = 0x80000000;
+    handle = func_002D03F8(0x20);
+    movie = (u32 *)sdfResourceRetainAddress(handle);
+    D_003BC610 = movie;
+    movie[0] = handle;
+    movie[2] = 0;
+    movie[3] = 0;
+    func_0026A5F0(0x13);
+    D_003BA72C = 1;
+    kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, func_0026FD88, 0);
+}
 
 u32 func_0026FF18(void) {
     func_0026FE98();
@@ -334,14 +365,28 @@ u8 func_00270218(void) {
     return temp_v0 == 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270240);
+void func_00270240(void) {
+    u32 *node = D_003DC560.head;
+
+    if (node != NULL) {
+        do {
+            u32 *next = (u32 *)*node;
+
+            func_002CFF98(node);
+            node = next;
+        } while (node != NULL);
+        D_003DC560.head = NULL;
+        D_003DC560.unk08 = 0;
+        D_003DC560.remaining = 0;
+        D_003DC560.unk0C = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002702A0);
 
 u32 func_00270508(void) {
-    u8 *state = (u8 *)D_003DC560;
-    u32 entry = D_003DC560[1];
-    s32 remaining = *(s16 *)(state + 0xA);
+    u32 entry = (u32)D_003DC560.head;
+    s32 remaining = D_003DC560.remaining;
     if (entry != 0 && remaining > 0) {
         do {
             entry = *(u32 *)entry;
@@ -359,14 +404,14 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", mnuMovieViewer);
 
 void mnuCreateMovieViewerTask(void) {
     func_002702A0();
-    D_003DC560[0] = kwlnTaskCreate(D_003B1AC8, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
+    D_003DC560.task = kwlnTaskCreate(D_003B1AC8, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
 }
 
 void mnuDestroyMovieViewerTask(void) {
     s32 task = kwlnTaskGetTaskByName(D_003B1AC8);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
-        D_003DC560[0] = 0;
+        D_003DC560.task = 0;
         func_00270030();
     }
     func_00270240();
@@ -391,9 +436,34 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1AC8);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270BC8);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270FB0);
+typedef struct ResourceRef8 {
+    s32 index;
+    s32 pad;
+} ResourceRef8;
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271020);
+extern ResourceRef8 D_0037C210[];
+extern char D_003B2020[];
+extern u32 effLoadIndexedResource(char *, s32, s32);
+
+void func_00270FB0(void) {
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        D_003DC5C8[i] = effLoadIndexedResource(D_003B2020, D_0037C210[i].index, 1);
+    }
+}
+
+void func_00271020(u32 *dst) {
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        u32 *src = &D_003DC5C8[i];
+        u32 *out = &dst[i];
+
+        effResolveAndReleaseResource(*src);
+        *out = *src;
+    }
+}
 
 void mnuReleaseStaffImageHandles(u32 *resources) {
     s32 index;
@@ -571,7 +641,23 @@ void *func_00271100(s32 kind, s32 *count, u8 *data) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271180);
+extern u8 *D_003BAA00;
+extern s8 D_003BC6B5;
+
+void func_00271180(s32 list, s32 count, u8 *work) {
+    s32 i;
+
+    effResolveAndReleaseResource(*(u32 *)list);
+    for (i = 0; i < 5; i++) {
+        u8 *slot = D_003BAA00 + 0xA60 + i * 0x1A4;
+
+        if ((*(u16 *)slot & 1) != 0) {
+            s32 index = *(u16 *)(slot + 4) + D_003BC6B5;
+
+            effResolveAndReleaseResource(*(u32 *)(list + index * 4 - 4));
+        }
+    }
+}
 
 void movReleaseCategoryModels(s32 kind, u8 *work) {
     s32 count;
@@ -650,13 +736,41 @@ void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271500);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271648);
+void func_00271648(u32 *resources) {
+    u32 *inner = resources + 1;
+    s32 i;
+
+    mnuReleaseStaffImageHandles(resources);
+    for (i = 0; i < 16; i++) {
+        func_002BDD60(resources[9 + i]);
+    }
+    for (i = 0; i < 5; i++) {
+        func_002BDD60(inner[24 + i]);
+    }
+    for (i = 0; i < 2; i++) {
+        func_002BDD60(resources[7 + i]);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002716E8);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002717D8);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271948);
+s64 func_00271948(u32 *resources) {
+    s32 i;
+
+    func_00271648(resources + 0x18);
+    for (i = 0; i < 2; i++) {
+        func_002BDD60(resources[54 + i]);
+    }
+    for (i = 0; i < 4; i++) {
+        func_002BDD60(resources[56 + i]);
+    }
+    for (i = 0; i < 9; i++) {
+        func_002BDD60(resources[60 + i]);
+    }
+    return func_002BDD60(resources[69]);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002719F0);
 

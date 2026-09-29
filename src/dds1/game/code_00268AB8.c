@@ -38,7 +38,7 @@ extern void func_00134CF0(void);
 
 extern void func_002CF430(void);
 
-extern void func_0021FE38(void);
+extern s32 func_0021FE38(void);
 
 extern void func_00269558(void);
 
@@ -331,7 +331,22 @@ void func_0026A1F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A248);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A340);
+typedef struct AtracInfo {
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+} AtracInfo;
+
+extern s32 WaitSema(u32);
+extern s32 SignalSema(u32);
+
+void func_0026A340(AtracInfo *out) {
+    WaitSema(D_003BD8D0);
+    out->unk0 = D_003D9140[0];
+    out->unk4 = D_003D9140[1];
+    out->unk8 = D_003D9140[3];
+    SignalSema(D_003BD8D0);
+}
 
 extern u32 D_003BD8D0;
 
@@ -491,17 +506,36 @@ INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD48);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AEC8);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AF30);
+extern u8 D_003DC1C0[];
+extern u8 D_003DC1D0[];
+extern void *D_003BD8E0;
+extern void effObjSetInnerFirstVec(void *, void *);
+extern void effObjSetInnerSecondVec(void *, void *);
+
+s32 func_0026AF30(void) {
+    effObjSetInnerFirstVec(D_003BD8E0, D_003DC1C0);
+    effObjSetInnerSecondVec(D_003BD8E0, D_003DC1D0);
+    return (*(s32 (**)(void *))(*(s32 *)((u8 *)D_003BD8E0 + 0x10) + 8))(D_003BD8E0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AF78);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B020);
+s64 func_0026B020(void) {
+    func_00134CF0();
+    func_002CF430();
+    return func_0021FE38();
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B050);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B160);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B1C0);
+extern void func_0026CB10(void *, void *);
+
+s64 func_0026B1C0(void) {
+    func_0026CB10(D_003DC1C0, D_003DC1D0);
+    return func_0026AF30();
+}
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD80);
 

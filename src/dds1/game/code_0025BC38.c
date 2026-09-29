@@ -204,7 +204,36 @@ void mnuReleaseListNodes(MenuListHead *head) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DBB0);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DCC8);
+extern s32 func_0025DBB0(s32);
+extern s32 func_0025D7F8(MenuListNode *, s32, s32);
+
+s32 func_0025DCC8(s32 arg0, s32 arg1, s32 arg2) {
+    s32 *counter = (s32 *)arg0;
+    MenuListHead *head = (MenuListHead *)arg0;
+    MenuListNode *node = head->first;
+    s32 index = 0;
+
+    if (func_0025DBB0(*counter) != 0) {
+        *counter = 0;
+    } else {
+        *counter = *counter + 1;
+    }
+    if (node == NULL) {
+        return 1;
+    }
+    do {
+        s32 hit = func_0025D7F8(node, index, arg2);
+
+        index++;
+        if (hit != 0) {
+            node = func_0025DB58(node);
+            head->first = node;
+        } else {
+            node = node->next;
+        }
+    } while (node != NULL);
+    return 0;
+}
 
 extern s32 func_0025DCC8(s32, s32, s32);
 extern void func_0025D798(s32, s32, s32, s32, s32, s32);
