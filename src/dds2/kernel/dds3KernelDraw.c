@@ -172,18 +172,18 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawSetupDc8);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawEnableDc8);
 
-void kwlnDrawSetE08Fifth(u32 arg0) {
-    D_0043E588.unk10 = arg0;
+void kwlnDrawSetE08Fifth(u32 value) {
+    D_0043E588.unk10 = value;
 }
 
-void kwlnDrawSetE08Fourth(u32 arg0) {
-    D_0043E588.u0C.w = arg0;
+void kwlnDrawSetE08Fourth(u32 value) {
+    D_0043E588.u0C.w = value;
 }
 
-void kwlnDrawSetE08Triple(u32 arg0, u32 arg1, u32 arg2) {
-    D_0043E588.unk00 = arg0;
-    D_0043E588.unk04 = arg1;
-    D_0043E588.unk08 = arg2;
+void kwlnDrawSetE08Triple(u32 first, u32 second, u32 third) {
+    D_0043E588.unk00 = first;
+    D_0043E588.unk04 = second;
+    D_0043E588.unk08 = third;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106658);
@@ -221,6 +221,7 @@ void kwlnDrawEnableE08(s32 mode) {
     }
 }
 
+/* Apply an offset immediately, or stage an interpolated move from the old offset. */
 void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     if (transition == 0) {
         D_00435CDA = (s16)x;

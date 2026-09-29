@@ -67,6 +67,7 @@ u32 scrPushStringLiteral(ScrData *scr)
     return 1;
 }
 
+/* Copy the VM's reserved return slot back onto its active operand stack. */
 u32 scrPushReturnValue(ScrData *scr)
 {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
@@ -130,6 +131,7 @@ u32 scrJumpProcedure(ScrData *scr)
     return 1;
 }
 
+/* Save the return PC before transferring control to a procedure. */
 u32 scrCallProcedure(ScrData *scr)
 {
     scrPushTypeFourValue(scr, scr->pc);
@@ -265,6 +267,7 @@ s32 func_0010D428(s32 idx) {
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfWaitReadArgFloat);
 
+/* Return a string parameter only when its VM stack tag is STRING. */
 char *func_0010D5A8(s32 paramIdx)
 {
     ScrData *scr = D_003BD78C;

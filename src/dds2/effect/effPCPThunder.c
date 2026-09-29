@@ -7,21 +7,22 @@ extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 
-/* 12-byte randomized fragment (see func_001656B8). */
+#define EFF_THUNDER_FRAGMENT_GREY 0x80808080
+
+/* Two independently sampled ranges and a constant greyscale color. */
 typedef struct {
-    u32 unk00;    /* 0x00 random value modulo work param */
-    u32 unk04;    /* 0x04 random value modulo work param, plus 1 */
-    u32 color08;  /* 0x08 always grey 0x80808080 */
+    u32 firstRandom;  /* 0x00: modulo fragmentModulusA */
+    u32 secondRandom; /* 0x04: modulo fragmentModulusB, plus one */
+    u32 color08;      /* 0x08: 0x80808080 */
 } EffThunderFrag; /* 0x0C */
 
-/* 20-byte thunder element (see func_00166B38/func_00167070): randomized on
- * setup (direction floats plus moduli), then counted down while active. */
+/* Three randomized direction components and two active countdowns. */
 typedef struct {
-    f32 f00;      /* 0x00 (float rand - 0.5) * 2 */
-    f32 f04;      /* 0x04 */
-    f32 f08;      /* 0x08 */
-    u32 cnt0C;    /* 0x0C random modulus, then decremented */
-    u32 cnt10;    /* 0x10 random modulus + 1, then decremented */
+    f32 directionX; /* 0x00: random value in [-1, 1] */
+    f32 directionY; /* 0x04 */
+    f32 directionZ; /* 0x08 */
+    u32 cnt0C;      /* 0x0C random modulus, then decremented */
+    u32 cnt10;      /* 0x10 random modulus + 1, then decremented */
 } EffThunderCell; /* 0x14 */
 
 /* 0x20-byte sub-element holding a handle released by func_0015B8B8. */
@@ -53,7 +54,10 @@ typedef struct {
     EffThunderCell *cells; /* 0x48: thunder element array */
     u32 unk4C;      /* 0x4C settable param */
     u32 unk50;      /* 0x50 settable param */
-    u32 fragmentBase; /* 0x54: fragment array base */
+    union {
+        u32 resource;
+        EffThunderFrag *fragments;
+    } fragmentData; /* 0x54: array pointer / released handle */
     u32 unk58;      /* 0x58 settable param */
     u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
     u32 unk60;      /* 0x60 handle released by func_0015B8B8/func_002D0918 */
@@ -224,12 +228,13 @@ void func_0016D2E8(EffPCPThunderWorkB *work) {
     func_00164848(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
+/* Sample per-fragment timing values; the color is a fixed neutral grey. */
 void effThunderRandomizeFrag(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderFrag *frag = (EffThunderFrag *)(work->fragmentBase + index * 12);
+    EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
-    frag->unk00 = effMiscRand(&D_003AA868) % work->fragmentModulusA;
-    frag->unk04 = effMiscRand(&D_003AA868) % work->fragmentModulusB + 1;
-    frag->color08 = 0x80808080;
+    frag->firstRandom = effMiscRand(&D_003AA868) % work->fragmentModulusA;
+    frag->secondRandom = effMiscRand(&D_003AA868) % work->fragmentModulusB + 1;
+    frag->color08 = EFF_THUNDER_FRAGMENT_GREY;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D3B0);
@@ -259,11 +264,11 @@ void func_0016DD88(EffPCPThunderWorkB *work, u32 value) {
 }
 
 void effThunderRandomizeFrag2(EffPCPThunderWorkB *work, s32 index) {
-    EffThunderFrag *frag = (EffThunderFrag *)(work->fragmentBase + index * 12);
+    EffThunderFrag *frag = &work->fragmentData.fragments[index];
 
-    frag->unk00 = effMiscRand(&D_003AA868) % work->fragmentModulusA;
-    frag->unk04 = effMiscRand(&D_003AA868) % work->fragmentModulusB + 1;
-    frag->color08 = 0x80808080;
+    frag->firstRandom = effMiscRand(&D_003AA868) % work->fragmentModulusA;
+    frag->secondRandom = effMiscRand(&D_003AA868) % work->fragmentModulusB + 1;
+    frag->color08 = EFF_THUNDER_FRAGMENT_GREY;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016DE30);
@@ -272,9 +277,9 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E468);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016E5B8);
 
-void func_0016E748(s32 arg0) {
-    func_001634A8(*(u32 *)(arg0 + 0x50));
-    func_003297C8(*(u32 *)(arg0 + 0x54));
+void func_0016E748(EffPCPThunderWorkB *work) {
+    func_001634A8(work->unk50);
+    func_003297C8(work->fragmentData.resource);
 }
 
 void func_0016E778(void *dst, void *src) {
@@ -285,16 +290,17 @@ void func_0016E788(EffPCPThunderWorkB *work, u32 value) {
     work->unk4C = value;
 }
 
+/* Spread all three direction components over [-1, 1] before sampling lifetimes. */
 void effThunderRandomizeCell(EffPCPThunderWorkB *work, s32 index) {
     EffThunderCell *cell = work->cells + index;
     f32 v;
 
     v = func_00341240(&D_003AA868) - 0.5f;
-    cell->f00 = v + v;
+    cell->directionX = v + v;
     v = func_00341240(&D_003AA868) - 0.5f;
-    cell->f04 = v + v;
+    cell->directionY = v + v;
     v = func_00341240(&D_003AA868) - 0.5f;
-    cell->f08 = v + v;
+    cell->directionZ = v + v;
     cell->cnt0C = effMiscRand(&D_003AA868) % work->cellModulusA;
     cell->cnt10 = effMiscRand(&D_003AA868) % work->cellModulusB + 1;
 }

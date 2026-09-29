@@ -20,6 +20,9 @@ extern u32 D_00324770[4];
  * byte symbols (e.g. D_003C2DCB = block+3) are declared separately
  * because those functions address the byte directly.
  */
+#define DRAW_VIEWPORT_WIDTH 0x200
+#define DRAW_VIEWPORT_HEIGHT 0x1C0
+
 typedef struct {
     u32 x;
     u32 y;
@@ -186,9 +189,10 @@ void dds3DrawSetIndexedWord(u32 value, s32 index) {
     D_00324770[index] = value;
 }
 
+/* Default draw viewport is 512 by 448 pixels. */
 void kwlnDrawInitRect(DrawRect *rect) {
-    rect->w = 0x200;
-    rect->h = 0x1C0;
+    rect->w = DRAW_VIEWPORT_WIDTH;
+    rect->h = DRAW_VIEWPORT_HEIGHT;
     rect->y = 0;
     rect->x = 0;
 }
@@ -237,18 +241,18 @@ void kwlnDrawEnableDc8(s32 arg0) {
     }
 }
 
-void kwlnDrawSetE08Fifth(u32 arg0) {
-    D_003C2E08.unk10 = arg0;
+void kwlnDrawSetE08Fifth(u32 value) {
+    D_003C2E08.unk10 = value;
 }
 
-void kwlnDrawSetE08Fourth(u32 arg0) {
-    D_003C2E08.u0C.w = arg0;
+void kwlnDrawSetE08Fourth(u32 value) {
+    D_003C2E08.u0C.w = value;
 }
 
-void kwlnDrawSetE08Triple(u32 arg0, u32 arg1, u32 arg2) {
-    D_003C2E08.unk00 = arg0;
-    D_003C2E08.unk04 = arg1;
-    D_003C2E08.unk08 = arg2;
+void kwlnDrawSetE08Triple(u32 first, u32 second, u32 third) {
+    D_003C2E08.unk00 = first;
+    D_003C2E08.unk04 = second;
+    D_003C2E08.unk08 = third;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106738);
@@ -286,11 +290,12 @@ void kwlnDrawEnableE08(s32 arg0) {
     }
 }
 
-void kwlnDrawSetOffsetTransition(s32 arg0, s32 arg1, s32 arg2) {
-    if (arg0 == 0) {
-        D_003BA90A = (s16)arg1;
-        D_003BA90C = (s16)arg2;
-        if ((arg1 == 0) && (arg2 == 0)) {
+/* Apply an offset immediately, or stage an interpolated move from the old offset. */
+void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
+    if (transition == 0) {
+        D_003BA90A = (s16)x;
+        D_003BA90C = (s16)y;
+        if ((x == 0) && (y == 0)) {
             D_003BA908 = 0;
         }
         else {
@@ -301,9 +306,9 @@ void kwlnDrawSetOffsetTransition(s32 arg0, s32 arg1, s32 arg2) {
     }
     D_003BD6B8 = D_003BA90A;
     D_003BD6BA = D_003BA90C;
-    D_003BD6BC = (s16)arg1;
-    D_003BD6BE = (s16)arg2;
-    D_003BD6B6 = (s16)arg0;
+    D_003BD6BC = (s16)x;
+    D_003BD6BE = (s16)y;
+    D_003BD6B6 = (s16)transition;
     D_003BA904 = D_003BA904 | 0x800;
     D_003BD6B4 = 0;
 }

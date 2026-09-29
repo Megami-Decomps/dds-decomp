@@ -253,15 +253,16 @@ s64 func_002B05C8(s32 callback) {
     return menuSetHandler(context, 2, callback);
 }
 
+/* Initialize the menu display using a value from the resource chain. */
 u32 func_002B0610(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 resourceOwner;
+    s32 context;
 
-    temp_v1 = func_00101958();
-    temp_v0 = *(s32 *)(temp_v1 + 0xaa48);
-    func_002C1B68(temp_v1 + 0xaa50, 1);
+    context = func_00101958();
+    resourceOwner = *(s32 *)(context + 0xaa48);
+    func_002C1B68(context + 0xaa50, 1);
     func_0026C918(0, D_00435E5C +
-                                    *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(temp_v0 + 0x18) + 0x18) + 0x1c) + 100) * 0x19);
+                                    *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19);
     func_0026C5B8(8);
     func_0026C648(0);
     func_0026C618(0xf);
@@ -346,8 +347,8 @@ void func_002B0D50(u32 arg0) {
 void func_002B0D70(u32 callback) {
 }
 
-s32 mnuIsFinalItemIndex(s32 arg0, s32 arg1) {
-    if (arg0 < (*(s32 *)(arg1 + 0x20) - 1)) {
+s32 mnuIsFinalItemIndex(s32 index, s32 item) {
+    if (index < (*(s32 *)(item + 0x20) - 1)) {
         return 0;
     }
     return 1;
@@ -365,29 +366,38 @@ typedef struct PartyEntryCopy {
     u32 word[0x71];
 } PartyEntryCopy;
 
+typedef struct PartyMenuData {
+    u8 pad00[0x8E0];
+    PartyEntryCopy current[5];
+    s32 activeCount; /* 0x11B4 */
+    PartyEntryCopy backup[5];
+    s32 selection;   /* 0x1A8C */
+} PartyMenuData;
+
+/* Snapshot the five party entries and cap the menu's displayed slot count. */
 void menuCopyPartyEntries(context)
 s32 context;
 {
-    s32 menu = *(s32 *)(context + 0xAA48);
-    PartyEntryCopy *to = (PartyEntryCopy *)(menu + 0x8E0);
+    PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0xAA48);
+    PartyEntryCopy *to = menu->current;
     s32 i;
     s32 test = 0xA60;
     s32 offset = 0;
 
-    *(s32 *)(menu + 0x11B4) = 0;
+    menu->activeCount = 0;
     for (i = 0; i < 5; i++) {
         *to = *(PartyEntryCopy *)(offset + D_00435DD0 + 0xA60);
         if (*(u16 *)(D_00435DD0 + test) & 1) {
-            *(s32 *)(menu + 0x11B4) = *(s32 *)(menu + 0x11B4) + 1;
+            menu->activeCount = menu->activeCount + 1;
         }
         test += 0x1C4;
         to++;
         offset += 0x1C4;
     }
-    if (*(s32 *)(menu + 0x11B4) >= 4) {
-        *(s32 *)(menu + 0x11B4) = 3;
+    if (menu->activeCount >= 4) {
+        menu->activeCount = 3;
     }
-    *(s32 *)(menu + 0x1A8C) = 0;
+    menu->selection = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B12B0);

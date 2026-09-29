@@ -62,14 +62,14 @@ void func_002C9400(u32 port, u32 path, u32 mode, u32 flags) {
 }
 
 /* Return a nonnegative SDK result through out; map -4 to -2. */
-s32 func_002C9430(s32 *out) {
+s32 func_002C9430(s32 *resultOut) {
     u32 cmdId;
     s32 status;
     s32 result = func_0034F680(1, &cmdId, &status);
 
     if (result == 1) {
         if (status >= 0) {
-            *out = status;
+            *resultOut = status;
             return result;
         }
         if (status == -4) {
@@ -101,14 +101,14 @@ void func_002C9500(u32 port, u32 request, u32 buffer) {
     func_0034EFE0(port, 0, request, buffer);
 }
 
-s32 func_002C9528(s32 *out) {
+s32 func_002C9528(s32 *resultOut) {
     u32 cmdId;
     s32 status;
     s32 result = func_0034F680(1, &cmdId, &status);
 
     if (result == 1) {
         if (status >= 0) {
-            *out = status;
+            *resultOut = status;
             return result;
         }
         if (status == -4) {
