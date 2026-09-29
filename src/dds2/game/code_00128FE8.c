@@ -56,13 +56,7 @@ extern s32 D_00438ECC;
 
 extern u32 D_0043610C;
 
-extern u32 D_00436110;
-
-extern u32 D_00436114;
-
 extern u32 D_00436108;
-
-extern u32 D_00389770[];
 
 extern u32 D_00435FCC;
 
@@ -147,6 +141,242 @@ typedef struct FldTransferChunk {
 
 extern f32 D_003897DC[];
 
+extern s32 D_00389770[];
+
+extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
+
+extern s32 func_0035C860(char *, const char *, ...);
+
+extern u32 func_002C7FF0(char *);
+
+extern void fldFormatAreaDirectory(char *, s32, s32);
+
+extern s32 func_0035C860(char *, const char *, ...);
+
+extern s32 func_0035C860(char *, const char *, ...);
+
+extern void fldFormatAreaDirectory(char *, s32, s32);
+
+extern void fldFormatAreaDirectory(char *, s32, s32);
+
+extern s32 func_0035C860(char *, const char *, ...);
+
+extern void *func_003292A8(s32 size);
+
+extern void *sdfResourceRetainAddress(void *p);
+
+extern u32 D_00435FF0, D_00435FF4, D_00435FF8, D_00435FFC;
+
+extern u32 D_00436000, D_00436004, D_00436008, D_0043600C;
+
+typedef struct {
+    u32 unk0[4];
+    void (*open)(void *, u64);
+    u32 unk14[3];
+} FieldBufferDescriptor;
+
+extern void sdfResetPacketList(u64);
+
+extern u32 D_0037FB48[];
+
+extern void sdfResetPacketList(u64);
+
+extern void sdfAppendPacket(u64, u64);
+
+extern void sdfAppendPacket(u64, u64);
+
+extern void sdfAppendPacket(u64, u64);
+
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+
+extern void func_0033A2D8(u64, s32, s32, s32, s32);
+
+extern u64 *func_0033A2D0(u64);
+
+extern s32 func_00100400(void);
+
+extern u8 D_00381ED0[];
+
+extern void func_0032DB30(const void *, u64, s32);
+
+extern void func_0032CF98(u64, u64);
+
+extern void func_0032DB78(const void *, u64, s32);
+
+extern f32 D_0038A980[];
+
+extern u32 D_0038A9A0[];
+
+extern u64 func_00348158(const void *, const void *, s32, s32);
+
+extern void *memset(void *s, s32 c, u32 n);
+
+typedef struct FldPrimDesc {
+    s16 kind;
+    s16 count;
+    u8 pad4[4];
+    s32 color;
+    u8 padC[4];
+    f32 *verts;
+    u8 pad14[0xC];
+    s32 *indices;
+    u8 pad24[8];
+} FldPrimDesc; /* 0x2C bytes */
+
+extern void func_0033AE28(u64, s32);
+
+extern void func_0033AFC0(u64, u32, s32);
+
+extern u64 func_0033B050(FldPrimDesc *);
+
+typedef struct {
+    u32 unk0[4];
+    void (*open)(void *, u32);
+    u32 unk14[3];
+} FieldResourceDescriptor;
+
+extern u32 D_0040B2A0[];
+
+extern u32 func_0032E3C0(s32);
+
+extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
+
+extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} FldQuadState; /* 0x2C bytes */
+
+typedef struct {
+    u8 pad0[0x10];
+    void (*invoke)(void *, s32);
+} FldGfxCallback;
+
+extern FldGfxCallback D_00380748;
+
+extern void sdfPktInit(void *, s32, s32, s32, s32);
+
+extern s32 func_0033D7B8();
+
+extern FldGfxCallback D_00380708;
+
+extern u8 D_00436070[];
+
+extern u8 D_00436078[];
+
+extern s32 D_00436090;
+
+extern u32 D_0043608C;
+
+extern s32 func_0022E450(void);
+
+extern s32 fldEncProc(void);
+
+extern void func_0022E0E0(void);
+
+extern void mdlSetNodeFloat20(s32, s32, f32);
+
+extern void mdlAddEntryFlagged(s32, s32, s32);
+
+extern f32 D_00436110;
+
+extern s32 D_00436114;
+
+extern f32 func_003406A0(f32);
+
+extern s32 D_00389780[];
+
+extern s32 D_004360E8;
+
+extern s32 D_00436118, D_0043611C;
+
+extern s32 *D_00436104;
+
+extern f32 D_00436120, D_00436124;
+
+extern s32 D_00389780[];
+
+extern s32 D_004360E8;
+
+extern void func_00232E38(s32 arg0);
+
+extern void func_00232E80(s32 arg0);
+
+extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
+
+extern u32 D_0043612C;
+
+extern u32 D_00436130;
+
+extern u32 D_00436134;
+
+extern u32 D_003899B4[];
+
+extern void func_00135A68(u32 arg0, s32 arg1);
+
+extern u32 D_00436128;
+
+extern u32 D_00436158;
+
+extern s16 D_00389898[];
+
+extern u8 D_0037F650[];
+
+extern u8 D_0037F9B0[];
+
+extern u8 D_0037F9F0[];
+
+extern u8 D_0037FA00[];
+
+extern u8 D_00384790[];
+
+extern s32 func_0032B1B0(s32);
+
+extern s32 func_0032B1B8(s32);
+
+extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
+
+extern void func_0032CF58(u64, u64);
+
+extern void func_003365B8(f32);
+
+extern void sdfInitGeometryDmaPacket(u64, f32 *);
+
+extern void func_0033B530(u64, u8 *, s32, u8 *, u8 *);
+
+extern s32 D_00435F30;
+
+extern void func_00139950(f32 *);
+
+typedef struct {
+    u8 pad0[0x84];
+    s32 unk84;
+    u8 pad88[0xB8];
+    f32 unk140;
+    f32 unk144;
+    f32 unk148;
+    f32 unk14C;
+    f32 unk150;
+    f32 unk154;
+    f32 unk158;
+    f32 unk15C;
+    f32 unk160;
+    u8 pad164[0x14];
+    s32 unk178;
+} FldCamState;
+
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001295E0);
@@ -189,11 +419,46 @@ void func_00129EA0(u32 arg0, u32 arg1) {
     D_00436018 = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldLoadAreaResource);
+s32 fldLoadAreaResource(void) {
+    char directory[64];
+    char path[80];
+    u32 area = D_00436014;
+    u32 floor = D_00436018;
+
+    if (area != 0 || floor != 0) {
+        fldFreeDisplayObjects();
+        D_00389770[31] = area;
+        D_00389770[32] = floor;
+        fldFormatAreaDirectory(directory, area, 1);
+        func_0035C860(path, D_004130D8, directory, area, floor);
+        D_00435FCC = func_002C7FF0(path);
+        D_00389770[30] = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129F58);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldFreeDisplayObjects);
+void fldFreeDisplayObjects(void) {
+    if (D_00435FCC != 0) {
+        u32 node = *(u32 *)(D_00435FCC + 0x60);
+
+        if (node != 0) {
+            do {
+                func_003298C0(*(u32 *)(node + 8));
+                node = *(u32 *)node;
+            } while (node != 0);
+        }
+        func_002C7CE8(D_00435FCC);
+        D_00435FCC = 0;
+    }
+    D_00436014 = 0;
+    D_00436018 = 0;
+    D_00389770[31] = 0;
+    D_00389770[32] = 0;
+    D_00389770[30] = 0;
+}
 
 u32 func_0012A0E8(void) {
     u32 temp_v1 = D_00389770[0x1E];
@@ -222,15 +487,67 @@ u8 func_0012A150(void) {
     return D_003897E8[0] != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A190);
+s32 func_0012A190(s32 area, s32 room) {
+    if (D_00389770[31] != area || D_00389770[32] != room) {
+        return 0;
+    }
+    if (D_00435FCC != 0 && func_002C8168(D_00435FCC) != 0) {
+        return 1;
+    }
+    return D_00389770[30] != 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A1F8);
+void *func_0012A1F8(void **destination, s32 area, s32 room) {
+    if (D_00389770[31] == area) {
+        if (D_00389770[32] == room) {
+            void *buffer = func_003292A8(D_00436000);
+            void *data = sdfResourceRetainAddress(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_00435FF0, D_00436000);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A270);
+void *func_0012A270(void **destination, s32 area, s32 room) {
+    if (D_00389770[31] == area) {
+        if (D_00389770[32] == room) {
+            void *buffer = func_003292A8(D_00436004);
+            void *data = sdfResourceRetainAddress(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_00435FF4, D_00436004);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A2E8);
+void *func_0012A2E8(void **destination, s32 area, s32 room) {
+    if (D_00389770[31] == area) {
+        if (D_00389770[32] == room) {
+            void *buffer = func_003292A8(D_00436008);
+            void *data = sdfResourceRetainAddress(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_00435FF8, D_00436008);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A360);
+void *func_0012A360(void **destination, s32 area, s32 room) {
+    if (D_00389770[31] == area) {
+        if (D_00389770[32] == room) {
+            void *buffer = func_003292A8(D_0043600C);
+            void *data = sdfResourceRetainAddress(buffer);
+            *destination = data;
+            memcpy(data, (void *)D_00435FFC, D_0043600C);
+            return buffer;
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_004130D8);
 
@@ -298,9 +615,107 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B7F8);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldProjectPointSetup);
+void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+    f32 vec[4] = { x, y, z, 1.0f };
+    f32 result[4];
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldProjectPointSetupAlt);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_003846F0) : "memory");
+    func_00336C10(D_0037F610);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf28\n"
+        "vmove.xyzw vf25, vf29\n"
+        "vmove.xyzw vf26, vf30\n"
+        "vmove.xyzw vf27, vf31\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_0037F650) : "memory");
+    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_0037F660) : "memory");
+    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(result) : "memory");
+    *dstX = result[0];
+    *dstY = result[1];
+}
+
+void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+    f32 vec[4] = { x, y, z, 1.0f };
+    f32 result[4];
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_00384790) : "memory");
+    func_00336C10(D_0037F9B0);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf28\n"
+        "vmove.xyzw vf25, vf29\n"
+        "vmove.xyzw vf26, vf30\n"
+        "vmove.xyzw vf27, vf31\n"
+        "lqc2 vf10, 0(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : "r"(vec) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_0037F9F0) : "memory");
+    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        ".set reorder"
+        : : "r"(D_0037FA00) : "memory");
+    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(result) : "memory");
+    *dstX = result[0];
+    *dstY = result[1];
+}
 
 void func_0012BB68(void) {
     u8 *matrix;
@@ -368,19 +783,181 @@ void func_0012BC38(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BC40);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitFrameQuad);
+void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    u64 command = sdfAllocPacketAligned(0x20);
+    u64 packet;
+    u64 *data;
+    FieldBufferDescriptor *descriptor;
+
+    sdfResetPacketList(command);
+    packet = sdfAllocPacketAligned(0x30);
+    data = func_0033A290(packet, 0x30);
+    data[4] = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    data[5] = 0x47;
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BE18);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsLinesScaled);
+void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6) {
+    s32 coords[4];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsLines);
+    coords[0] = x0 * 16;
+    coords[1] = y0 * 16;
+    coords[2] = x1 * 16;
+    coords[3] = y1 * 16;
+    command = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
+    func_0033A2D8(packet, 0x49, 2, 0x41, 2);
+    dst = func_0033A2D0(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | (0x8000LL << 24);
+    pos = coords;
+    for (i = 0; i < 2; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsQuadTagged);
+void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6) {
+    u32 coords[4];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    FieldBufferDescriptor *descriptor;
+    u32 *pos;
+    u64 lo;
+    u64 hi;
+    s32 i;
+
+    coords[0] = x0;
+    coords[1] = y0;
+    coords[2] = x1;
+    coords[3] = y1;
+    command = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
+    func_0033A2D8(packet, 0x49, 2, 0x41, 2);
+    dst = func_0033A2D0(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | (0x8000LL << 24);
+    pos = coords;
+    for (i = 0; i < 2; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)pos[0] | ((u64)pos[1] << 32);
+        pos += 2;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
+
+void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+    s32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    func_0033A2D8(packet, 0x4D, 2, 0x41, 4);
+    dst = func_0033A2D0(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | ((u64)arg7 << 32);
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C360);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsRect);
+void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+    u32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    u32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x0;
+    coords[1] = y0;
+    coords[2] = x1;
+    coords[3] = y0;
+    coords[4] = x1;
+    coords[5] = y1;
+    coords[6] = x0;
+    coords[7] = y1;
+    command = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    func_0033A2D8(packet, 0x4D, 2, 0x41, 4);
+    dst = func_0033A2D0(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | ((u64)arg7 << 32);
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = 0xFFFFFFFFULL;
+        dst[0] = (u64)pos[0] | ((u64)pos[1] << 32);
+        pos += 2;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C650);
 
@@ -390,15 +967,113 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CB08);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CDC0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitModelPacket);
+void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
+    u64 command = sdfAllocPacketAligned(0x20);
+    u64 header;
+    u64 packet;
+    f32 mat[16];
+    FieldBufferDescriptor *descriptor;
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D070);
+    sdfResetPacketList(command);
+    header = sdfAllocPacketAligned(0x20);
+    sdfConsInitDmaPacketHeader(header, func_0032B1B0(arg0), func_0032B1B8(arg0));
+    func_0032CF58(command, header);
+    func_003365B8(*(f32 *)(arg1 + 0x44));
+    __asm__ volatile(
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        "sqc2 vf29, 16(%0)\n"
+        "sqc2 vf30, 32(%0)\n"
+        "sqc2 vf31, 48(%0)\n"
+        ".set reorder"
+        : : "r"(mat) : "memory");
+    packet = sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket(packet, mat);
+    sdfAppendPacket(command, packet);
+    packet = sdfAllocPacketAligned(0x80);
+    func_0033B530(packet, arg1, *(s32 *)(arg1 + 0x40), arg1 + 0x10, arg1 + 0x20);
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D110);
+void func_0012D070(void) {
+    u64 command = sdfAllocPacketAligned(0x20);
+    u64 texture;
+    FieldBufferDescriptor *descriptor;
+    sdfResetPacketList(command);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032CF98(command, texture);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D1B0);
+void func_0012D110(void) {
+    u64 command = sdfAllocPacketAligned(0x20);
+    u64 texture;
+    FieldBufferDescriptor *descriptor;
+    sdfResetPacketList(command);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032CF98(command, texture);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsTriangle);
+void func_0012D1B0(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+    u64 resource;
+    u64 record;
+    FieldBufferDescriptor *descriptor;
+    D_0038A980[0] = x;
+    D_0038A980[1] = y;
+    D_0038A980[2] = z;
+    D_0038A980[4] = u;
+    D_0038A980[5] = v;
+    D_0038A980[6] = w;
+    D_0038A9A0[1] = second;
+    D_0038A9A0[0] = first;
+    resource = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(resource);
+    record = func_00348158(D_0038A980, D_0038A9A0, 2, 0x80);
+    sdfAppendPacket(resource, record);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, resource);
+}
+
+void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
+    FldPrimDesc desc;
+    f32 verts[12];
+    s32 indices[3];
+    u64 command;
+    FieldBufferDescriptor *descriptor;
+
+    command = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(command);
+    func_0033AE28(command, 0);
+    func_0033AFC0(command, D_0043607C, 0);
+    memset(&desc, 0, 0x2C);
+    desc.color = 0x80808080;
+    desc.kind = 1;
+    desc.count = 3;
+    desc.verts = verts;
+    desc.indices = indices;
+    verts[0] = f0;
+    verts[1] = f1;
+    verts[2] = f2;
+    verts[4] = f3;
+    verts[5] = f4;
+    verts[6] = f5;
+    verts[8] = f6;
+    verts[9] = f7;
+    verts[10] = f8;
+    indices[0] = a0;
+    indices[1] = a1;
+    indices[2] = a2;
+    sdfAppendPacket(command, func_0033B050(&desc));
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D3E0);
 
@@ -425,9 +1100,25 @@ void func_0012DC98(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DCC8);
+void func_0012DCC8(void) {
+    if (D_00436068 != 0) {
+        u32 packet = func_0032E3C0(0);
+        FieldResourceDescriptor *descriptor;
+        sdfCreateResourcePacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, D_00436068, 0, 0, 0);
+        descriptor = (FieldResourceDescriptor *)&D_0037FB48[D_00436060 * 8];
+        descriptor->open(descriptor, packet);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DD48);
+void func_0012DD48(void) {
+    if (D_00436068 != 0) {
+        u32 packet = func_0032E3C0(0);
+        FieldResourceDescriptor *descriptor;
+        sdfCreateDescriptorPacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, D_00436068, 0);
+        descriptor = (FieldResourceDescriptor *)&D_0037FB48[D_00436060 * 8];
+        descriptor->open(descriptor, packet);
+    }
+}
 
 void func_0012DDC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 temp_v0;
@@ -449,36 +1140,192 @@ void func_0012DE20(s32 arg0) {
     *(u32 *)(arg0 + 0x28) = temp_v1;
     temp_v0 = sdfAllocPacketAligned(0x40);
     func_0032E4B8(temp_v0);
-    sdfAppendPacket(*(u32 *)(arg0 + 0x28), temp_v0);
+    sdfAppendPacket(*(s32 *)(arg0 + 0x28), temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DE70);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawFloorQuad);
+void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawFloorQuadA);
+    quad.unk1C = 0x73C0;
+    quad.unk20 = 0x7CC0;
+    quad.unk24 = 0x0FFFFF7E;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x7CC0;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7D;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, 0);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg2));
+    func_0012DE10((s32)&quad);
+    D_00380748.invoke(&D_00380748, quad.unk28);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadTiled);
+void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
+    FldQuadState quad;
+    u8 packet[16];
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadTiledAlt);
+    quad.unk1C = 0x73C0;
+    quad.unk20 = 0x7CC0;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x7CC0;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x, quad.unk20 + y, quad.unk24, arg2);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg3));
+    func_0012DE10((s32)&quad);
+    D_00380708.invoke(&D_00380708, quad.unk28);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuad);
+void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadPacket);
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, D_00436070, arg2));
+    func_0012DE10((s32)&quad);
+    D_00380708.invoke(&D_00380708, quad.unk28);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldDrawMapQuadScaled);
+void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, D_00436078, arg2));
+    func_0012DE10((s32)&quad);
+    D_00380708.invoke(&D_00380708, quad.unk28);
+}
+
+void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, 0);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg2));
+    func_0012DE10((s32)&quad);
+    D_00380708.invoke(&D_00380708, quad.unk28);
+}
+
+void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + x * 16, quad.unk20 + y * 8, quad.unk24, arg2);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg3));
+    func_0012DE10((s32)&quad);
+    D_00380708.invoke(&D_00380708, quad.unk28);
+}
+
+void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
+    FldQuadState quad;
+    u8 packet[16];
+
+    quad.unk1C = 0x7000;
+    quad.unk20 = 0x7900;
+    quad.unk24 = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    func_0012DE20((s32)&quad);
+    sdfPktInit(packet, quad.unk1C + (s32)(x * 16.0f), quad.unk20 + (s32)(y * 8.0f), quad.unk24, arg0);
+    sdfAppendPacket(quad.unk28, func_0033D7B8(packet, arg1));
+    func_0012DE10((s32)&quad);
+    D_00380708.invoke(&D_00380708, quad.unk28);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E720);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E958);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012EB78);
+s32 func_0012EB78(void) {
+    s32 state = D_00436090;
+    s32 result;
+
+    if (state < 3) {
+        if (state < 0) {
+            result = D_0043608C;
+        } else {
+            result = func_0022E450();
+        }
+    } else {
+        result = D_0043608C;
+    }
+    return result;
+}
 
 void func_0012EBB8(u32 arg0) {
     D_00436088 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldEncProc);
+s32 fldEncProc(void) {
+    s32 state = D_00436090;
+
+    if (state < 3) {
+        if (state >= 0) {
+            func_0022E0E0();
+        }
+    }
+    return 0;
+}
 
 void func_0012EBF8(u32 arg0, s32 arg1) {
     if ((arg1 < 0x400) && ((*(u16 *)((s32)arg1 * 0x28 + D_00435E04 + 0x20) & 0x8000) != 0))
@@ -556,7 +1403,17 @@ void func_00130F80(void) {
     D_004360D0 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130F98);
+void func_00130F98(u32 arg0) {
+    if (arg0 == 0) {
+        D_004360D0 = 0;
+        if (D_00435F14 != 0) {
+            func_00232E80(D_00435F14);
+        }
+    } else {
+        D_004360D0 = arg0;
+        func_00232E38(D_00435F14);
+    }
+}
 
 void func_00130FF0(u32 arg0, u32 arg1) {
     D_004360C4 = arg0;
@@ -581,7 +1438,16 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133840);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133950);
+u8 func_00133950(void) {
+    if (D_00389770[0x62] == 0) {
+        if (D_00389770[0x64] == 0) {
+            if (D_00389770[0x63] == 0) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 void func_00133988(void) {
     dds3SetObjectFlags(D_00435F0C, 1);
@@ -648,9 +1514,18 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133C18);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133C90);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133CF8);
+s32 func_00133CF8(s32 value) {
+    s32 object = D_00435F14;
+    *(f32 *)(*(s32 *)(object + 0x1C) + 0x20) = 1.0f;
+    return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
+}
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133D40);
+void func_00133D40(s32 first, s32 second) {
+    mdlSetNodeFloat20(D_00435F14, 0, 1.0f);
+    mdlSetNodeFloat20(D_00435F14, 1, 1.0f);
+    mdlAddEntryFlagged(D_00435F14, 0, first);
+    mdlAddEntryFlagged(D_00435F14, 1, second);
+}
 
 void func_00133DB8(void) {
     D_00389904[0] = 0;
@@ -660,13 +1535,35 @@ void func_00133DC8(void) {
     D_00389910[0] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133DD8);
+void func_00133DD8(f32 arg0, f32 arg1) {
+    u8 *temp_v0 = (u8 *)D_00389770;
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133DF8);
+    *(f32 *)(temp_v0 + 0x198) = arg0;
+    *(f32 *)(temp_v0 + 0x19C) = arg1;
+    *(u32 *)(temp_v0 + 0x194) = 1;
+}
+
+void func_00133DF8(f32 arg0, f32 arg1, f32 arg2) {
+    u8 *temp_v0;
+    f32 temp_f0;
+
+    temp_f0 = sdfAtan2(arg0, arg2);
+    temp_v0 = (u8 *)D_00389770;
+    temp_f0 *= 180.0f / 3.14f;
+    *(u32 *)(temp_v0 + 0x1A0) = 1;
+    *(f32 *)(temp_v0 + 0x1A4) = -temp_f0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133E38);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133EE0);
+void func_00133EE0(void) {
+    u8 *temp_v0 = (u8 *)D_00389770;
+
+    if (*(u32 *)(temp_v0 + 0x1A0) != 0) {
+        *(u32 *)(temp_v0 + 0x1A0) = 2;
+        *(f32 *)(temp_v0 + 0x174) = *(f32 *)(temp_v0 + 0x1A4);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133F08);
 
@@ -702,11 +1599,54 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", fldUploadSkyBuffer);
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413350);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldUpdateSwayOffset);
+void fldUpdateSwayOffset(void) {
+    D_00436114 = 0;
+    switch (D_0043610C) {
+    case 1:
+        D_00436110 += 0.1f;
+        D_00436114 = func_003406A0(D_00436110) * 32.0f;
+        break;
+    case 2:
+        D_00436110 += 0.2f;
+        D_00436114 = func_003406A0(D_00436110) * 32.0f;
+        break;
+    case 3:
+        D_00436110 += 0.05f;
+        D_00436114 = func_003406A0(D_00436110) * 32.0f;
+        break;
+    case 4:
+        D_00436110 += 0.1f;
+        D_00436114 = func_003406A0(D_00436110) * 48.0f;
+        break;
+    case 5:
+        D_00436110 += 0.2f;
+        D_00436114 = func_003406A0(D_00436110) * 48.0f;
+        break;
+    case 6:
+        D_00436110 += 0.05f;
+        D_00436114 = func_003406A0(D_00436110) * 48.0f;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00134A18);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldSetFadeTarget);
+void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
+    if (D_004360E8 == 0 && D_00389780[0] < 40) {
+        duration = 0;
+    }
+    if (duration == 0) {
+        D_0043611C = area;
+        D_00436120 = 1.0f;
+        D_00436124 = 1.0f;
+    } else {
+        D_00436120 = 0.0f;
+        D_0043611C = D_00436118;
+        D_00436124 = (f32)duration;
+    }
+    D_00436118 = area;
+    D_00436104[area * 73] = value;
+}
 
 void func_00135568(u32 arg0) {
     D_0043610C = arg0;
@@ -730,7 +1670,14 @@ u32 func_00135598(void) {
     return D_003899C0[0];
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_001355A8);
+void func_001355A8(u32 arg0) {
+    u32 temp_v0 = D_003899B4[0];
+
+    D_0043612C = arg0;
+    D_00436130 = 0;
+    D_00436134 = temp_v0;
+    func_00135A68(temp_v0, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001355D8);
 
@@ -738,7 +1685,17 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135840);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135A68);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135D18);
+void func_00135D18(s32 speed) {
+    if (D_004360E8 == 0 && D_00389780[0] < 40) {
+        speed = 0;
+    }
+    if (D_00436158 != 0 && D_00436128 != D_00436158) {
+        if (D_00389898[0] == 0) {
+            D_003899B4[0] = D_00436158;
+        }
+        func_00135A68(D_00436158, speed);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135D80);
 
@@ -941,4 +1898,3 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_0043615C);
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436160);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436164);
-
