@@ -1,4 +1,8 @@
 #include "common.h"
+extern void *dds3GetWorldObject(void);
+extern void func_00110BE0(void *, s32);
+extern f32 func_00113100(s32);
+extern void func_001063A8(f32);
 
 extern s32 func_0024A010(void);
 
@@ -59,7 +63,20 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_002475C8);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002476B8);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_002477F0);
+void func_002477F0(u8 *viewer) {
+    s32 unit;
+    s32 first = *(s32 *)(viewer + 0x2024);
+
+    if (first != 0) {
+        unit = first;
+    } else {
+        unit = *(s32 *)(viewer + 0x202C);
+    }
+    if (unit != 0) {
+        func_00110BE0(dds3GetWorldObject(), unit);
+        func_001063A8(func_00113100(unit));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247858);
 
@@ -373,7 +390,14 @@ void *func_0024D710(void) {
     return (void *)func_0024D6B0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024D760);
+s32 func_0024D760(u8 *ctx) {
+    s32 id = *(s32 *)(ctx + 0x10C);
+
+    if (id == 0x28B || id == 0x28E) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D788);
 

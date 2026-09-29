@@ -621,6 +621,10 @@ def port_one(src, dst, path, pre, fname, body, addr, target, dst_files, dst_defi
     pattern = re.compile(rf'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*{dname}\);$', re.M)
     text = pattern.sub(lambda _: new_body, text, count=1)
     add = [d for d in new_pre if d not in text]
+    # a function the destination unit already defines has its prototype there; the source's
+    # declaration (other argument types) would only conflict with it
+    defined_here = {m.group(1) for b in blocks(text) if "{" in b and (m := DEF.search(b))}
+    add = [d for d in add if TYPE_DECL.match(d) or "{" in d or declared_name(d) not in defined_here]
     # A changed type definition replaces the destination's old one in place, so
     # everything declared after it still sees it first.
     for d in [d for d in add if TYPE_DECL.match(d) and "{" in d]:

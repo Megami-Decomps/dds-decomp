@@ -1,4 +1,6 @@
 #include "common.h"
+extern volatile u8 D_00438A1D;
+extern void sdfSleepThreadCount(s32);
 extern s32 D_00438A00;
 extern s32 func_003297C8(s32);
 extern s32 func_003292A8(s32);
@@ -548,7 +550,22 @@ void func_0032DEB0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DEC8);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032E348);
+void func_0032E348(void) {
+    u8 *entry;
+
+    while (1) {
+        while (D_00438A1D != 0) {
+        }
+        entry = (u8 *)D_0040B308 + D_00438A28 * 16;
+        if (*(u32 *)entry == 0) {
+            return;
+        }
+        if (entry[8] >= 2) {
+            return;
+        }
+        sdfSleepThreadCount(0);
+    }
+}
 
 s32 func_0032E3C0(s32 (*arg0)(s32)) {
     s32 (*alloc)(s32) = arg0;
