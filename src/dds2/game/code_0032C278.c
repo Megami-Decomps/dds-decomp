@@ -43,6 +43,11 @@ extern s8 D_00439164;
 
 extern s32 D_00439158[2];
 
+typedef struct SdfGraphRequest {
+    u32 value;
+    u32 state;
+} SdfGraphRequest;
+
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
 SdfResource *sdfFindResourceById(s32 id) {
@@ -63,8 +68,8 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C468);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfCreateResourcePacket);
 
-void func_0032C730(SdfBigPacket *arg0, s32 arg1) {
-    arg0->unk80 = (arg0->unk80 & ~0x3FFF) | (u64)(u32)(D_0040B298[arg1]->unk0C >> 6);
+void func_0032C730(SdfBigPacket *packet, s32 entryIndex) {
+    packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(D_0040B298[entryIndex]->unk0C >> 6);
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C768);
@@ -73,12 +78,12 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C860);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfCreateDescriptorPacket);
 
-void func_0032CA90(u32 *arg0, u32 arg1) {
+void func_0032CA90(SdfGraphRequest *request, u32 value) {
     if (D_004389FC < 0) {
         D_004389FC = sdfCreateSemaphore(1, 0x7f, 0);
     }
-    *arg0 = arg1;
-    arg0[1] = 0;
+    request->value = value;
+    request->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CAE0);

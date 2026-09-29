@@ -1,6 +1,5 @@
 #include "common.h"
 
-extern void func_002E02B0(s32 arg0);
 
 extern u32 D_003BDA34;
 
@@ -296,12 +295,23 @@ void func_002DDFB0(void *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE010);
 
-void func_002DE0D8(void *out, u8 *work, void *reference, f32 deltaX, f32 deltaY) {
+typedef struct VuTransformWork {
+    u8 pad00[4];
+    u32 param4; /* 0x04 */
+    u32 param8; /* 0x08 */
+    u8 pad0C[0x10];
+    f32 scale; /* 0x1C */
+    u8 pad20[8];
+    f32 y; /* 0x28 */
+    f32 x; /* 0x2C */
+} VuTransformWork;
+
+void func_002DE0D8(void *out, VuTransformWork *work, void *reference, f32 deltaX, f32 deltaY) {
     func_002DE010(out, D_003BDA28, reference,
-                  *(u32 *)(work + 8), *(u32 *)(work + 4),
-                  *(f32 *)(work + 0x1c),
-                  *(f32 *)(work + 0x2c) + deltaX,
-                  *(f32 *)(work + 0x28) + deltaY);
+                  work->param8, work->param4,
+                  work->scale,
+                  work->x + deltaX,
+                  work->y + deltaY);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE118);
@@ -396,8 +406,8 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DFEC8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0150);
 
-void func_002E02B0(s32 arg0) {
-    if ((*(u32 *)(arg0 + 0x44) & 0x10) != 0) {
+void func_002E02B0(VuWork *work) {
+    if ((work->selectedFlags & 0x10) != 0) {
         func_002DFC80();
         return;
     }
@@ -409,17 +419,17 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E02D8);
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E03C0);
 
 void func_002E04E0(u32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
+    u32 flags;
+    s32 workAddress;
 
-    temp_v1 = (s32)arg0;
-    func_002E02B0(temp_v1);
-    temp_v0 = *(u32 *)(temp_v1 + 0x44);
-    if ((temp_v0 & 0x1000) != 0) {
+    workAddress = (s32)arg0;
+    func_002E02B0((VuWork *)workAddress);
+    flags = ((VuWork *)workAddress)->selectedFlags;
+    if ((flags & 0x1000) != 0) {
         func_002E02D8(arg0);
-        temp_v0 = *(u32 *)(temp_v1 + 0x44);
+        flags = ((VuWork *)workAddress)->selectedFlags;
     }
-    if ((temp_v0 & 1) != 0) {
+    if ((flags & 1) != 0) {
         func_002E03C0(arg0);
         return;
     }
@@ -433,10 +443,22 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E06F0);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0820);
 
-void func_002E1168(u8 **context, u8 *source) {
-    u32 *objects = *(u32 **)(*context + 12);
-    u16 *indices = (u16 *)(source + 24);
-    if ((*(u16 *)(source + 22) & 0x800) != 0) {
+typedef struct VuObjectContext {
+    u8 pad00[0x0C];
+    u32 *objects; /* 0x0C: indexed object handles */
+} VuObjectContext;
+
+typedef struct VuObjectRefCommand {
+    u8 pad00[0x16];
+    u16 flags; /* 0x16 */
+    u16 count; /* 0x18 */
+    u16 objectIndices[1]; /* 0x1A */
+} VuObjectRefCommand;
+
+void func_002E1168(VuObjectContext **context, VuObjectRefCommand *source) {
+    u32 *objects = (*context)->objects;
+    u16 *indices = &source->count;
+    if ((source->flags & 0x800) != 0) {
         s32 count = *indices;
         if (count != 0) {
             indices++;
@@ -735,20 +757,20 @@ u32 *func_002E3D38(void) {
     return D_00398660;
 }
 
-void sdfDevConsListInsert(ConsNode *arg0) {
+void sdfDevConsListInsert(ConsNode *node) {
     ConsNode *head = D_003BD3C0;
 
-    arg0->next = NULL;
-    arg0->prev = head;
+    node->next = NULL;
+    node->prev = head;
     if (head != NULL) {
-        head->next = arg0;
+        head->next = node;
     }
-    D_003BD3C0 = arg0;
+    D_003BD3C0 = node;
 }
 
-void sdfDevConsListRemove(ConsNode *arg0) {
-    ConsNode *next = arg0->next;
-    ConsNode *prev = arg0->prev;
+void sdfDevConsListRemove(ConsNode *node) {
+    ConsNode *next = node->next;
+    ConsNode *prev = node->prev;
 
     if (next != NULL) {
         next->prev = prev;
@@ -760,38 +782,38 @@ void sdfDevConsListRemove(ConsNode *arg0) {
     }
 }
 
-void sdfDevConsNodeDestroy(ConsNode *arg0) {
-    sdfDevConsListRemove(arg0);
-    func_002D0918(arg0->bufferHandle);
-    func_002CFF98(arg0);
+void sdfDevConsNodeDestroy(ConsNode *node) {
+    sdfDevConsListRemove(node);
+    func_002D0918(node->bufferHandle);
+    func_002CFF98(node);
 }
 
-void sdfDevConsNodeClear(ConsNode *arg0) {
-    arg0->cursorColumn = 0;
-    arg0->cursorRow = 0;
-    memset(arg0->cells, 0, arg0->columns * arg0->rows * 2);
+void sdfDevConsNodeClear(ConsNode *node) {
+    node->cursorColumn = 0;
+    node->cursorRow = 0;
+    memset(node->cells, 0, node->columns * node->rows * 2);
 }
 
-void func_002E3E00(ConsNode *arg0) {
-    sdfDevConsNodeClear(arg0);
+void func_002E3E00(ConsNode *node) {
+    sdfDevConsNodeClear(node);
 }
 
-ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
+ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 columns, s32 rows) {
     ConsNode *node;
-    u32 h;
+    u32 bufferHandle;
 
     sdfDevConsInit();
     node = func_002CFEB8(0x20);
     node->unk8 = arg0;
     node->unkA = arg1;
-    node->columns = arg2;
-    node->rows = arg3;
+    node->columns = columns;
+    node->rows = rows;
     node->unk17 = 8;
     node->unk14 = 0;
     node->unk16 = 0;
-    h = func_002D03F8((arg2 * arg3) * 2);
-    node->bufferHandle = h;
-    node->cells = (u8 *)sdfResourceRetainAddress(h);
+    bufferHandle = func_002D03F8((columns * rows) * 2);
+    node->bufferHandle = bufferHandle;
+    node->cells = (u8 *)sdfResourceRetainAddress(bufferHandle);
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

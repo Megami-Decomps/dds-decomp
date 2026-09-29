@@ -13,7 +13,7 @@ typedef struct SdfSubParam {
 
 typedef struct SdfTextParam {
     u8 pad00[6]; /* 0x00 */
-    u8 unk06; /* 0x06: dirty flags for the setters below */
+    u8 dirtyFlags; /* 0x06: set by parameter setters below */
     u8 pad07[9]; /* 0x07 */
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
@@ -28,14 +28,14 @@ typedef struct SdfTextParam {
     f32 unk2C; /* 0x2C */
     u32 unk30; /* 0x30 */
     u32 unk34; /* 0x34 */
-    SdfSubParam *unk38; /* 0x38 */
-    SdfSubParam *unk3C; /* 0x3C */
+    SdfSubParam *primarySubParam; /* 0x38 */
+    SdfSubParam *secondarySubParam; /* 0x3C */
     f32 unk40; /* 0x40 */
     f32 unk44; /* 0x44 */
     u8 pad48[0x40]; /* 0x48 */
     f32 overrideFirst; /* 0x88 */
     f32 overrideSecond; /* 0x8C */
-    void *unk90; /* 0x90: resource chunk searched by tag */
+    void *resourceChunk; /* 0x90: resource chunk searched by tag */
 } SdfTextParam;
 
 extern f32 D_00438A48;
@@ -99,7 +99,7 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00332920);
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfChunkFindById);
 
 void sdfChunkFindByTag(SdfTextParam *param) {
-    sdfChunkFindById(param->unk90);
+    sdfChunkFindById(param->resourceChunk);
 }
 
 INCLUDE_ASM(const s32, "game/code_003325F8", sdfNamedChunkFindId);
@@ -232,32 +232,32 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_00333208);
 
 void func_00333270(SdfTextParam *param, u32 value) {
     param->unk10 = value;
-    param->unk06 = param->unk06 | 3;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
 void func_00333288(SdfTextParam *param, u32 value) {
     param->unk14 = value;
-    param->unk06 = param->unk06 | 3;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
 void func_003332A0(SdfTextParam *param, u32 value) {
     param->unk20 = value;
-    param->unk06 = param->unk06 | 3;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
 void func_003332B8(SdfTextParam *param, u32 value) {
     *(u32 *)&param->unk28 = value;
-    param->unk06 = param->unk06 | 3;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
-void func_003332D0(SdfTextParam *arg0, f32 fparg0) {
-    arg0->unk1C = fparg0;
-    arg0->unk06 = arg0->unk06 | 3;
+void func_003332D0(SdfTextParam *param, f32 value) {
+    param->unk1C = value;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
 void func_003332E8(SdfTextParam *param, u32 value) {
     *(u32 *)&param->unk2C = value;
-    param->unk06 = param->unk06 | 3;
+    param->dirtyFlags = param->dirtyFlags | 3;
 }
 
 SdfSubParam *sdfSubParamCreate(void) {
@@ -273,9 +273,9 @@ SdfSubParam *sdfSubParamCreate(void) {
 void sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
     SdfSubParam *subParam;
 
-    if (param->unk38 == NULL) {
+    if (param->primarySubParam == NULL) {
         subParam = sdfSubParamCreate();
-        param->unk38 = subParam;
+        param->primarySubParam = subParam;
     }
 }
 
@@ -285,25 +285,25 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003333F8);
 
 void func_00333460(SdfTextParam *param, u32 value) {
     *(u32 *)&param->unk18 = value;
-    param->unk06 = param->unk06 | 0x30;
+    param->dirtyFlags = param->dirtyFlags | 0x30;
 }
 
 void func_00333478(SdfTextParam *param, u32 value) {
     param->unk34 = value;
-    param->unk06 = param->unk06 | 0x30;
+    param->dirtyFlags = param->dirtyFlags | 0x30;
 }
 
 void func_00333490(SdfTextParam *param, u32 value) {
     param->unk30 = value;
-    param->unk06 = param->unk06 | 0x30;
+    param->dirtyFlags = param->dirtyFlags | 0x30;
 }
 
 void sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
     SdfSubParam *subParam;
 
-    if (param->unk3C == NULL) {
+    if (param->secondarySubParam == NULL) {
         subParam = sdfSubParamCreate();
-        param->unk3C = subParam;
+        param->secondarySubParam = subParam;
     }
 }
 
@@ -311,10 +311,10 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003334E0);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333560);
 
-void func_003335C8(SdfTextParam *arg0, f32 fparg0, f32 fparg1) {
-    arg0->unk40 = fparg0;
-    arg0->unk44 = fparg1;
-    arg0->unk06 = arg0->unk06 | 0xC0;
+void func_003335C8(SdfTextParam *param, f32 first, f32 second) {
+    param->unk40 = first;
+    param->unk44 = second;
+    param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003335E0);

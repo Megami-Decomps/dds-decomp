@@ -20,8 +20,8 @@ typedef struct EffRecordPool {
     u32 settingA;  /* 0x50 */
     u32 settingB;  /* 0x54 */
     u8 pad58[8];
-    s32 records;    /* 0x60 */
-    s32 auxRecords; /* 0x64 */
+    s32 recordBase;    /* 0x60: address of stride-dependent records */
+    s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
     u32 resource;   /* 0x68: released by func_00333918 */
     u32 buffer;     /* 0x6C: freed by func_003297C8 */
 } EffRecordPool;
@@ -79,11 +79,11 @@ void func_00177880(EffRecordPool *pool) {
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001778B0);
 
 s32 func_00177B60(EffRecordPool *pool, s32 index) {
-    return pool->records + index * 0x50;
+    return pool->recordBase + index * 0x50;
 }
 
 s32 func_00177B78(EffRecordPool *pool, s32 index) {
-    return pool->auxRecords + index * 0x14;
+    return pool->auxRecordBase + index * 0x14;
 }
 
 void func_00177B90(EffRecordPool *pool, u32 value) {
@@ -108,11 +108,11 @@ void func_00177CA0(EffRecordPool *pool) {
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177CD0);
 
 s32 func_00177E78(EffRecordPool *pool, s32 index) {
-    return pool->records + index * 0x30;
+    return pool->recordBase + index * 0x30;
 }
 
 s32 func_00177E90(EffRecordPool *pool, s32 index) {
-    return pool->auxRecords + index * 0xc;
+    return pool->auxRecordBase + index * 0xc;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177EA8);
@@ -125,11 +125,11 @@ void func_00177FA8(EffRecordPool *pool) {
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177FD8);
 
 s32 func_00178190(EffRecordPool *pool, s32 index) {
-    return pool->records + index * 0x40;
+    return pool->recordBase + index * 0x40;
 }
 
 s32 func_001781A0(EffRecordPool *pool, s32 index) {
-    return pool->auxRecords + index * 0x10;
+    return pool->auxRecordBase + index * 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001781B0);
@@ -139,11 +139,11 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_001781F8);
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00178210);
 
 s32 func_001784B0(EffRecordPool *pool, s32 index) {
-    return pool->records + index * 0x50;
+    return pool->recordBase + index * 0x50;
 }
 
 s32 func_001784C8(EffRecordPool *pool, s32 index) {
-    return pool->auxRecords + index * 0x14;
+    return pool->auxRecordBase + index * 0x14;
 }
 
 void func_001784E0(EffRecordPool *pool, u32 value) {

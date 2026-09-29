@@ -10,9 +10,14 @@ extern s64 func_00101740(u32);
 
 extern s32 func_001AA6F8(void);
 
-extern s32 func_001AA6F8(void);
-
-extern s32 func_001AA6F8(void);
+typedef struct UiSceneNode {
+    u8 pad00[0x108];
+    s64 key;
+    u8 pad110[0xC];
+    u8 slot;
+    u8 pad11D[0x247];
+    struct UiSceneNode *next;
+} UiSceneNode;
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
 
@@ -20,16 +25,16 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3750);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3850);
 
-void func_001C3978(u8 *object) {
+void func_001C3978(UiSceneNode *object) {
     s32 count = 0;
     u8 slot = 0;
-    u8 *node = *(u8 **)(func_001AA6F8() + 0x24C);
+    UiSceneNode *node = *(UiSceneNode **)(func_001AA6F8() + 0x24C);
     u8 *entry;
     s32 offset;
-    for (; node != 0; node = *(u8 **)(node + 0x364)) {
+    for (; node != 0; node = node->next) {
         if (func_001BB970(node) != 0) {
-            slot = *(u8 *)(object + 0x11C);
-            if (*(s64 *)(object + 0x108) == *(s64 *)(node + 0x108)) {
+            slot = object->slot;
+            if (object->key == node->key) {
                 break;
             }
             count++;

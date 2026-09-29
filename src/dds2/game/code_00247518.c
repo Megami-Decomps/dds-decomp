@@ -27,7 +27,10 @@ void func_00137818(void);
 void func_00246D80(u64 arg0);
 
 typedef struct EventViewerState {
-    u8 pad0[0x223C];
+    u8 pad0[0x14];
+    s32 glyphAdvanceLimit;
+    s32 glyphAdvancePosition;
+    u8 pad1C[0x2220];
     struct {
         u16 id;
         u8 pad2[6];
@@ -113,7 +116,7 @@ void func_0024A5F8(void) {
 void func_0024A600(EventViewerState *viewer) {
     s32 nextTick;
 
-    if ((*(s32 *)((u8 *)viewer + 0x18) < *(s32 *)((u8 *)viewer + 0x14) - 3) && (0 < viewer->glyphTickCount))
+    if ((viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 3) && (0 < viewer->glyphTickCount))
     {
         func_0019D518(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;

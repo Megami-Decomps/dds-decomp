@@ -28,6 +28,9 @@ typedef struct SdfPackedValue {
     u16 flagsAndValue;
 } SdfPackedValue;
 
+#define SDF_PACKED_FLAG 0x8000
+#define SDF_PACKED_VALUE_MASK 0x7FFF
+
 extern void func_0011D590(void);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
@@ -176,7 +179,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001194E8);
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119548);
 
 void func_00119710(SdfPackedValue *item, u16 value) {
-    item->flagsAndValue = (item->flagsAndValue & 0x8000) | (value & 0x7fff);
+    item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119728);

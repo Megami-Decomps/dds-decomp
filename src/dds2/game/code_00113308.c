@@ -100,10 +100,10 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_001137D8);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113AB0);
 
-void func_00113CD0(s32 object) {
+void func_00113CD0(EffectObject *object) {
     EffectObjectData *data;
 
-    data = ((EffectObject *)object)->data;
+    data = object->data;
     if (data->activeId != -1) {
         func_00116958(object, 10);
         data->activeId = 0xffffffff;
@@ -112,8 +112,8 @@ void func_00113CD0(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113D18);
 
-u32 func_00113F00(s32 object) {
-    return ((EffectObject *)object)->data->handle;
+u32 func_00113F00(EffectObject *object) {
+    return object->data->handle;
 }
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113F10);
@@ -122,12 +122,12 @@ void func_00113FD0(void) {
     func_00110B50();
 }
 
-void func_00113FE8(s32 object, u32 value) {
-    ((EffectObject *)object)->data->word0C = value;
+void func_00113FE8(EffectObject *object, u32 value) {
+    object->data->word0C = value;
 }
 
-void func_00113FF8(s32 object, u32 value) {
-    ((EffectObject *)object)->data->word04 = value;
+void func_00113FF8(EffectObject *object, u32 value) {
+    object->data->word04 = value;
 }
 
 u32 func_00114008(u64 id) {
@@ -139,12 +139,12 @@ u32 func_00114008(u64 id) {
     return object->data->word04;
 }
 
-void func_00114048(s32 object, u32 value) {
-    ((EffectObject *)object)->data->word08 = value;
+void func_00114048(EffectObject *object, u32 value) {
+    object->data->word08 = value;
 }
 
-u32 func_00114058(s32 object) {
-    return ((EffectObject *)object)->data->word08;
+u32 func_00114058(EffectObject *object) {
+    return object->data->word08;
 }
 
 void func_00114068(u32 arg0) {
@@ -153,11 +153,11 @@ void func_00114068(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114070);
 
-void func_00114110(s32 object) {
+void func_00114110(EffectObject *object) {
     EffectObjectData *data;
 
     effObjFreeInner();
-    data = ((EffectObject *)object)->data;
+    data = object->data;
     func_00111A68(data->handle);
     func_00328E48(data);
 }

@@ -19,7 +19,9 @@ typedef struct MdlViewState {
     s16 unk28;
     s16 unk2A;
     s16 unk2C;
-    u8 pad2E[6];
+    s16 unk2E;
+    s16 unk30;
+    u8 pad32[2];
     s16 unk34;
     s16 unk36;
     u8 pad38[2];
@@ -446,9 +448,43 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC80);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ABB8);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ACF0);
+extern s32 mdlHasNode(s32 resource, s32 id);
+extern void mdlAddEntryFlaggedEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
+extern void mdlAddEntryPlainEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021AD78);
+void func_0021ACF0(void) {
+    f32 low;
+    f32 high;
+    f32 first;
+
+    if (mdlHasNode(D_003D7A50.resources[0], D_003D7A50.unk26)) {
+        low = D_003D7A50.unk2E;
+        high = D_003D7A50.unk30;
+        first = high;
+        if (low < high) {
+            first = low;
+        }
+        D_003D7A50.unk22 = D_003D7A50.unk24;
+        mdlAddEntryFlaggedEx(D_003D7A50.resources[0], D_003D7A50.unk26, D_003D7A50.unk24, first, low);
+    }
+}
+
+void func_0021AD78(void) {
+    f32 low;
+    f32 high;
+    f32 first;
+
+    if (mdlHasNode(D_003D7A50.resources[0], D_003D7A50.unk26)) {
+        low = D_003D7A50.unk2E;
+        high = D_003D7A50.unk30;
+        first = high;
+        if (low < high) {
+            first = low;
+        }
+        D_003D7A50.unk22 = D_003D7A50.unk24;
+        mdlAddEntryPlainEx(D_003D7A50.resources[0], D_003D7A50.unk26, D_003D7A50.unk24, first, low);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCC8);
 

@@ -62,35 +62,35 @@ typedef struct CampTaskData {
 
 extern u8 D_003CBB70[];
 
-void mnuCampCreateTask(s32 arg0) {
+void mnuCampCreateTask(s32 taskId) {
     char name[0x20];
     CampTaskData *data;
 
     if (evtFindTaskById() == 0) {
-        evtFormatTaskName(arg0, name);
+        evtFormatTaskName(taskId, name);
         data = func_00328D68(0x48);
         memset(data, 0, 0x48);
-        data->taskId = arg0;
+        data->taskId = taskId;
         data->unk4 = 0;
         kwlnTaskCreate(name, 0x3EC, 1, 1, func_0025D8C8, func_0025D928, data);
     }
 }
 
 void campDestroyTaskById(void) {
-    s64 temp_v0;
+    s64 task;
 
-    temp_v0 = evtFindTaskById();
-    if (temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(temp_v0, 0);
+    task = evtFindTaskById();
+    if (task != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
         return;
     }
 }
 
 void campDestroyAllTasks(void) {
-    s64 temp_v0;
+    s64 task;
 
-    while (temp_v0 = func_00101820(0x3ec), temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(temp_v0, 0);
+    while (task = func_00101820(0x3ec), task != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
     }
 }
 

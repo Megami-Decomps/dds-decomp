@@ -8,11 +8,16 @@ extern void func_00296018(s32, s32, s32, u8 *, s32);
 
 extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
 
-u32 func_00294730(s32 object) {
+typedef struct EventSpriteObject {
+    u8 pad00[8];
+    s32 type;
+} EventSpriteObject;
+
+u32 func_00294730(EventSpriteObject *object) {
     u32 result;
 
     result = 0;
-    if ((*(s32 *)(object + 8) == 1) || (*(s32 *)(object + 8) == 3)) {
+    if ((object->type == 1) || (object->type == 3)) {
         result = 0x3a;
     }
     return result;

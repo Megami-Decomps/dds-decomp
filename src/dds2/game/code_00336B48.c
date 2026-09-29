@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u32 D_00439188;
 
@@ -127,7 +128,7 @@ extern u64 func_0032B338(void *);
 
 extern void *sdfAllocPacketAligned(s32);
 
-extern void *func_0033A2D8(void *, s64, s64, s64, s32);
+extern void *func_0033A2D8(void *, s32, s32, s64, s32);
 
 typedef struct DmaPacketHeader {
     u16 quadwords;
@@ -530,7 +531,14 @@ void func_0033A090(u32 arg0) {
     D_00439188 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A098);
+extern u8 D_00476240[];
+
+void func_0033A098(u8 *object) {
+    if (D_0043918C != (u32)object) {
+        D_0043918C = (u32)object;
+        PCP_COPY_VECTOR(D_00476240, object + 0x10);
+    }
+}
 
 void func_0033A0C0(f32 arg0) {
     D_00439190 = arg0;

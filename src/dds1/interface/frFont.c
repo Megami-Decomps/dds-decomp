@@ -260,7 +260,15 @@ void func_00195460(FrFontCtx *ctx, u32 value) {
     ctx->u14.shifted = value >> 4;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195470);
+void func_00195470(FrFontGlyph *glyph, u8 value) {
+    FrFontGlyph *child;
+
+    for (; glyph != NULL; glyph = glyph->unk24) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
+            child->u14.b[0] = value;
+        }
+    }
+}
 
 void func_001954C8(TextStyleNode *entry, u32 color) {
     for (; entry != NULL; entry = entry->next) {
@@ -334,7 +342,19 @@ void func_00195BF8(void) {
     frFontFreeEntry(8);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195C10);
+s32 func_00195C10(s8 *str) {
+    s32 count = 0;
+
+    while (*str != 0) {
+        if (*str >= 0) {
+            str++;
+        } else {
+            str += 2;
+        }
+        count++;
+    }
+    return count;
+}
 
 u32 frFontMeasureGlyphChain(void *arg0) {
     FrFontGlyph *glyph = arg0;
@@ -353,7 +373,25 @@ u32 frFontMeasureGlyphChain(void *arg0) {
     return total;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195C88);
+u32 func_00195C88(FrFontGlyph *glyph) {
+    FrFontGlyph *line;
+    FrFontGlyph *node;
+    s32 total = 0;
+
+    for (line = glyph->unk2C; line != NULL; line = line->next) {
+        node = line->firstChild;
+        if (node != NULL) {
+            s8 b1 = line->u0.b.b1;
+
+            do {
+                total += node->advance;
+                node = node->next;
+                total += b1;
+            } while (node != NULL);
+        }
+    }
+    return total;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195CD8);
 
@@ -375,7 +413,21 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00195ED8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195FA8);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00196038);
+void func_00196038(s32 x, s32 y, FrFontGlyph *glyph) {
+    FrFontGlyph *node;
+    s32 dx;
+    s32 dy;
+
+    if (glyph != NULL) {
+        node = glyph->unk2C;
+        dx = x - node->x;
+        dy = y - node->y;
+        for (; node != NULL; node = node->next) {
+            node->x += dx;
+            node->y += dy;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00196088);
 

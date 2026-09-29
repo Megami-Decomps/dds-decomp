@@ -1,4 +1,8 @@
 #include "common.h"
+#include "pcp_vu0.h"
+extern s32 mdlHasNode(s32, s16);
+extern void mdlAddEntryFlaggedEx(s32, s16, s16, f32, f32);
+extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
 
 extern s32 D_00435DD0;
 
@@ -14,9 +18,20 @@ typedef struct MdlViewState {
     s8 unk0A;
     u8 pad0B[11];
     s16 unk16;
-    u8 pad18[10];
+    s16 unk18;
+    s16 unk1A;
+    u8 pad1C[6];
     s16 unk22;
-    u8 pad24[0x68];
+    u16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    u8 pad32[8];
+    s16 unk3A;
+    u8 pad3C[0x50];
     s32 unk8C[1];
     s32 unk90[1];
 } MdlViewState;
@@ -110,7 +125,33 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_002337C0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00233DD8);
+typedef struct MdlSlotEntry {
+    s32 a;
+    s32 b;
+    s32 c;
+} MdlSlotEntry;
+
+typedef struct MdlSlotTable {
+    MdlSlotEntry *entries;
+    s32 count;
+} MdlSlotTable;
+
+extern MdlSlotTable D_003C6588[];
+
+s32 func_00233DD8(s32 table, s32 slot, s32 a, s32 b, s32 c) {
+    MdlSlotEntry *entries = D_003C6588[table].entries;
+
+    if (entries == NULL) {
+        return 0;
+    }
+    if (slot >= D_003C6588[table].count) {
+        return 0;
+    }
+    entries[slot].a = a;
+    entries[slot].b = b;
+    entries[slot].c = c;
+    return 1;
+}
 
 typedef struct MdlRecord {
     s32 kind;       /* 0x00: 0xFFFF terminates the record chain */
@@ -397,7 +438,12 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00235288);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002353F0);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235460);
+void func_00235460(void) {
+    PCP_COPY_VECTOR(&D_00453620, &D_003C87C0);
+    PCP_COPY_VECTOR(&D_00453630, &D_003C87D0);
+    PCP_COPY_VECTOR(&D_00453640, &D_003C87E0);
+    D_00453584[0] = 0;
+}
 
 void func_002354B8(void) {
     s32 i = D_00453550.unk16 - 1;
@@ -457,9 +503,39 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_004211F0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235728);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235860);
+void func_00235860(void) {
+    MdlViewState *state = &D_00453550;
+    f32 width;
+    f32 height;
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002358E8);
+    if (mdlHasNode(state->unk90[0], state->unk26) == 0) {
+        return;
+    }
+    height = (f32)state->unk2E;
+    width = (f32)state->unk30;
+    if (height < width) {
+        width = height;
+    }
+    state->unk22 = state->unk24;
+    mdlAddEntryFlaggedEx(state->unk90[0], state->unk26, state->unk24, width, height);
+}
+
+void func_002358E8(void) {
+    MdlViewState *state = &D_00453550;
+    f32 width;
+    f32 height;
+
+    if (mdlHasNode(state->unk90[0], state->unk26) == 0) {
+        return;
+    }
+    height = (f32)state->unk2E;
+    width = (f32)state->unk30;
+    if (height < width) {
+        width = height;
+    }
+    state->unk22 = state->unk24;
+    mdlAddEntryPlainEx(state->unk90[0], state->unk26, state->unk24, width, height);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
 
@@ -621,7 +697,21 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00238BD8);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238D38);
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlFreeViewResources);
+void mdlFreeViewResources(void) {
+    MdlViewState *state = &D_00453550;
+    s32 *slot = state->unk90;
+    s32 i;
+
+    for (i = 0; i != 12; i++) {
+        s32 handle = *slot;
+
+        if (handle != 0) {
+            *slot = 0;
+            func_002322E8(handle);
+        }
+        slot++;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238F30);
 

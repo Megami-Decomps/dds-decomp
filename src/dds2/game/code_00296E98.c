@@ -39,6 +39,11 @@ typedef struct MenuIconRef {
     u8 pad3;
 } MenuIconRef;
 
+typedef struct MenuIconBatch {
+    MenuIconRef icons[3];
+    u32 resource;
+} MenuIconBatch;
+
 extern void func_0011A118(s32, s32);
 
 extern char D_00437990[];
@@ -159,8 +164,8 @@ void func_00298EA8(MenuIconRef *refs) {
     }
 }
 
-void func_00298F08(s32 arg0) {
-    func_0011A0D0(*(u32 *)(arg0 + 0xc));
+void func_00298F08(MenuIconBatch *batch) {
+    func_0011A0D0(batch->resource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00298F20);
