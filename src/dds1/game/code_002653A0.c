@@ -38,7 +38,7 @@ typedef struct {
     u16 animation;  /* 0x14 */
 } TitleEntry;
 
-void func_002654E8(s32 animationState) {
+void brsDecaySharedAnimCounter(s32 animationState) {
     brsStepAnimDecay(animationState);
 }
 

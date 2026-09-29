@@ -133,7 +133,7 @@ s8 brsTaskHasPendingRows(void) {
     return D_003BC529;
 }
 
-s8 func_00261FB8(s32 arg0) {
+s8 brsTaskIsUiUpdateAllowed(s32 arg0) {
     if (*(s32 *)(arg0 + 0xd44) != 0) {
         D_003BC52B = 0;
     }
@@ -378,7 +378,7 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
     }
 }
 
-void func_00262600(u32 partyRows, u32 primaryRewards, u32 secondaryRewards) {
+void brsMarkPartyRowsFromLists(u32 partyRows, u32 primaryRewards, u32 secondaryRewards) {
     brsMarkPartyRows(partyRows, primaryRewards, 2);
     brsMarkPartyRows(partyRows, secondaryRewards, 1);
 }

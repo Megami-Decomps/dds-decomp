@@ -1305,6 +1305,7 @@
 0x00261F88	brsTaskAllowUpdate	inferred	sets D_003BC52A=1 (the companion of the blocked latch) and reports success
 0x00261F98	brsTaskPollDone	inferred	polls the battle-result task state machine (wraps func_00262938)
 0x00261FB0	brsTaskHasPendingRows	inferred	reads D_003BC529, latched by brsTaskLatchPendingRows from context+0x344
+0x00261FB8	brsTaskIsUiUpdateAllowed	inferred	legacy BattleResultTask_IsUiUpdateAllowed: clears D_003BC52B from context+0xD44 and returns the ready gate (D_003BC52B ? 0 : D_003BC52A)
 0x00261FD8	gstApplyCounterDeltaTable	inferred	byte-identical twin of DDS2 gstApplyCounterDeltaTable @ 0x298EA8: walks three MenuIconRef entries and applies each non-zero id/param through the progress-counter adjuster
 0x00262038	gstApplyBundleMacca	inferred	adds the u32 macca field at +0xC of the reward bundle whose first 0x10 bytes gstApplyCounterDeltaTable walks as three MenuIconRefs
 0x00262050	ptyClampExp	inferred	legacy PartyUnit_ClampExpToLevel99Cap: clamps a unit's accumulated EXP to the level-99 cap
@@ -1315,6 +1316,7 @@
 0x00262418	mnuStaffInitPanel	inferred	mnu loads nr_sta01.spr resources and fades in
 0x002624C0	brsAdvanceSkillPackagePanel	inferred	step function that opens the skill-package panel once the fade/assets/entry list are ready (sets the +0x570 state to 2 and fades out); returns 1 while it must still wait
 0x00262570	brsMarkPartyRows	inferred	legacy BattleResult_MarkPartyRowsFromDeltaList: marks party rows from a delta list payload
+0x00262600	brsMarkPartyRowsFromLists	inferred	legacy BattleResult_MarkPartyRowsFromLevelAndProfileLists: marks the party rows from two reward lists (flags 2 then 1)
 0x00262640	brsTaskLatchPendingRows	inferred	legacy BattleResultTask_LatchHasPendingFollowupRows: latches data_3bc529 from ctx+0x344
 0x00262660	brsCreateTaskContext	inferred	legacy BattleResultTask_CreateContextAndBuildRows: allocates the result task context and builds its rows
 0x00262790	brsStaffTaskDestroy	inferred	mnuStaffRunPanel2 destroy callback: flushes the panel context, destroys it if brsAdvanceSkillPackagePanel never completed, releases the queue/effect handles and leaves D_003BC528 at 2
@@ -1350,6 +1352,7 @@
 0x002650B8	mnuClearTitleState	inferred	Zeros the title work state at offset 0x1574.
 0x00265220	itfDrawCountText	inferred	itf formats count text and draws right aligned
 0x00265478	mnuRefreshPanelLayer	inferred	redraws panel pieces then calls func_002653A0
+0x002654E8	brsDecaySharedAnimCounter	inferred	legacy BattleResultUi_DecaySharedAnimCounter: steps the shared battle-result animation counter down (wraps brsStepAnimDecay)
 0x00265500	brsGetLevelStepForValue	inferred	maps a value to the battle-result LevelStep whose threshold it reaches: scans D_00370D08 (LevelStep{threshold,value}) from the last entry down and falls back to entry 0
 0x00265540	brsGetLevelStepCrossedBy	inferred	returns the LevelStep value whose threshold lies within (position, position+increment]; zero if the delta crosses no threshold
 0x002655A0	ptyComputeTotalExp	inferred	legacy UnitGrowth_ComputeTotalExpForLevelDelta: sums the per-unit EXP step table at 0x36F40C + unit_id*0x190
