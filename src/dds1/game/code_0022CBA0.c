@@ -24,11 +24,17 @@ s32 func_00106488(f32 arg0);
 typedef struct EventViewerState {
     u8 pad0[4];
     u32 flags;
-    u8 pad8[0x201C];
+    s32 unk8;
+    u8 padC[8];
+    s32 unk14;
+    s32 mesh; /* 0x18 */
+    u8 pad1C[0x2008];
     s32 selectedEntry;
     u8 pad2028[4];
     s32 fallbackEntry;
-    u8 pad2030[0x20C];
+    u8 pad2030[4];
+    struct EvtViewNode *nodes; /* 0x2034 */
+    u8 pad2038[0x204];
     struct {
         u16 id;
         u8 pad2[6];
@@ -43,6 +49,11 @@ typedef struct EventViewerState {
     s32 glyphTickCount; /* 0x23F0 */
     u8 pad23F4[0x1C];
     u32 glyph; /* 0x2410: FrFontGlyph passed to func_00195868 */
+    u8 pad2414[0xC];
+    u8 slotType; /* 0x2420 */
+    u8 slotFlag; /* 0x2421 */
+    u8 pad2422[2];
+    f32 slotValue; /* 0x2424 */
 } EventViewerState;
 
 u16 evtViewerPopHistory(EventViewerState *viewer);
@@ -420,11 +431,31 @@ void func_00232D28(void) {
     func_00232BC0(temp_v0);
 }
 
-void func_00232D48(void) {
+void func_00232D48(void *unused) {
     mnuCampInitFontResource();
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232D60);
+extern u32 D_003BA8EC;
+extern s32 func_002D03F8(s32 size);
+extern u32 *sdfResourceRetainAddress(s32 handle);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 evtCreateSkyTask(void);
+
+void func_00232D60(void) {
+    s32 handle;
+    u32 *state;
+    void *task;
+
+    D_003BA8EC = 0x80000000;
+    handle = func_002D03F8(0x2490);
+    state = sdfResourceRetainAddress(handle);
+    memset(state, 0, 0x2490);
+    *state = handle;
+    task = kwlnTaskCreate(D_003ADB20, 0x3EB, 1, 1, func_00232A00, func_00232D08, state);
+    func_00101A80((s32)task, evtCreateSkyTask());
+    func_00232D48(state);
+}
 
 void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ADB20, 1);

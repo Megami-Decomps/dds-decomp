@@ -45,6 +45,10 @@ extern void func_0012D9D0(u32 value);
 
 extern s32 D_004361CC;
 
+extern s32 D_004361D0;
+
+extern u8 *func_001404E0(u32);
+
 extern s16 D_00444C68[];
 
 extern u32 D_004361F4;
@@ -127,6 +131,10 @@ extern s32 D_004361A8;
 
 extern s32 D_004361B0;
 
+extern s32 D_004361B4;
+
+extern s32 func_00110F28();
+
 extern s32 D_004361BC;
 
 typedef struct FldTaskInfo {
@@ -155,7 +163,9 @@ typedef struct FldRoomState {
     s16 roomId; /* 0x132: returned by fldFindRoomByTask */
     u8 pad134[2];
     s16 mode;
-    u8 pad138[8];
+    s16 unk138;
+    s16 axisMode;
+    u8 pad13C[4];
 } FldRoomState; /* 0x140 bytes */
 
 extern FldRoomState D_00444B30[];
@@ -203,6 +213,24 @@ extern FldS16Row D_003931A0[];
 
 extern u32 D_00449B30[][23];
 
+typedef struct FldActorEntry {
+    /* 0x00 */ u8 kind;
+    /* 0x01 */ u8 pad01;
+    /* 0x02 */ s16 modelId;
+    /* 0x04 */ s16 area;
+    /* 0x06 */ char name[0xC];
+    /* 0x12 */ s16 state;
+    /* 0x14 */ s16 state2;
+    /* 0x16 */ s16 state3;
+    /* 0x18 */ u8 name0[0xC];
+    /* 0x24 */ u8 name1[0xC];
+    /* 0x30 */ s8 locked;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 warpArea;
+    /* 0x34 */ s16 warpEntry;
+    /* 0x36 */ u8 pad36[0x36];
+} FldActorEntry; /* 0x6C bytes */
+
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
 void func_00137818(void) {
@@ -233,7 +261,15 @@ void func_001378A0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001378E8);
+typedef struct FldSaveHeader {
+    u32 word[0x54 / 4];
+} FldSaveHeader;
+
+extern u8 D_004449D0[];
+
+void func_001378E8(FldSaveHeader *dst) {
+    *dst = *(FldSaveHeader *)D_004449D0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001379C0);
 
@@ -268,7 +304,39 @@ f32 fldCalculateVectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137C68);
+void func_00137C68(f32 *points, f32 *nx, f32 *ny, f32 *nz, f32 *planeD) {
+    f32 p0[4];
+    f32 p1[4];
+    f32 p2[4];
+    f32 inv;
+
+    p0[0] = points[0];
+    p0[1] = points[1];
+    p0[2] = points[2];
+    p1[0] = points[4];
+    p1[1] = points[5];
+    p1[2] = points[6];
+    p2[0] = points[8];
+    p2[1] = points[9];
+    p2[2] = points[10];
+    *nx = (p1[1] - p0[1]) * (p2[2] - p1[2]) - (p1[2] - p0[2]) * (p2[1] - p1[1]);
+    *ny = (p1[2] - p0[2]) * (p2[0] - p1[0]) - (p1[0] - p0[0]) * (p2[2] - p1[2]);
+    *nz = (p1[0] - p0[0]) * (p2[1] - p1[1]) - (p1[1] - p0[1]) * (p2[0] - p1[0]);
+    inv = 1.0f / fsqrtf(*nx * *nx + *ny * *ny + *nz * *nz);
+    *nx = *nx * inv;
+    *ny = *ny * inv;
+    *nz = *nz * inv;
+    if (*nx > -0.0001f && *nx < 0.0001f) {
+        *nx = 0.0f;
+    }
+    if (*ny > -0.0001f && *ny < 0.0001f) {
+        *ny = 0.0f;
+    }
+    if (*nz > -0.0001f && *nz < 0.0001f) {
+        *nz = 0.0f;
+    }
+    *planeD = -(*nx * p2[0] + *ny * p2[1] + *nz * p2[2]);
+}
 
 s32 fldGetRecordValueById(s32 key) {
     s32 i = 0;
@@ -389,7 +457,31 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D598);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D7F8);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DA10);
+s32 func_0013DA10(f32 *direction, s32 index) {
+    f32 probe[3];
+    f32 planar[2];
+    s32 i;
+
+    if (D_00444B30[index].axisMode == 0) {
+        probe[0] = 0.0f;
+        probe[1] = direction[1];
+        probe[2] = direction[2];
+        planar[0] = direction[1];
+        planar[1] = direction[2];
+    } else {
+        probe[0] = direction[0];
+        probe[1] = direction[1];
+        probe[2] = 0.0f;
+        planar[0] = direction[0];
+        planar[1] = direction[1];
+    }
+    for (i = 0; i < 4; i++) {
+        if (fldDotVector(probe, D_00444BC0[index].plane[i + 1]) - D_00444BC0[index].limit[i + 1] < 0.0f) {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
@@ -426,7 +518,6 @@ u32 fldDestroyTaskSlot(u32 index) {
 extern s8 D_00387D60[];
 extern u8 D_00435F24;
 extern u8 *func_001406E8(void);
-extern void func_00110F28();
 
 s32 func_0013DD18(void) {
     u8 *object;
@@ -546,6 +637,8 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F790);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FA98);
 
+extern s32 D_004361C8;
+
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FFF8);
 
 void fldLoadInfoTable(s32 field) {
@@ -561,7 +654,13 @@ void fldLoadInfoTable(s32 field) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140180);
+typedef struct FldSaveBlock {
+    u32 word[0x3B80 / 4];
+} FldSaveBlock;
+
+void func_00140180(FldSaveBlock *src) {
+    *(FldSaveBlock *)D_0038E2D0 = *src;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
 
@@ -678,7 +777,47 @@ INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001421C0);
+extern s32 D_003897C0[];
+
+s32 func_001421C0(u32 mode) {
+    FldActorEntry *actor = (FldActorEntry *)D_003932A0 + D_004361F4;
+    s32 *entry;
+
+    switch (mode) {
+    case 0:
+        switch (actor->state) {
+        case 0:
+            return 0xC;
+        case 1:
+            return 0xF;
+        case 2:
+            return 0x10;
+        case 3:
+            return 0xD;
+        case 4:
+            return 0xE;
+        }
+        return 0;
+    case 1:
+        entry = func_001111A8(dds3GetWorldObject(), actor->name0);
+        if (entry != NULL) {
+            return entry[1];
+        }
+    case 2:
+        entry = func_001111A8(dds3GetWorldObject(), actor->name1);
+        if (entry != NULL) {
+            return entry[1];
+        }
+        return actor->state2;
+    case 3:
+        return actor->state2;
+    case 4:
+        return actor->state3;
+    case 5:
+        return D_003897C0[0] != 1;
+    }
+    return 0;
+}
 
 s32 fldGetActorMotionEntry(u32 kind) {
     u8 *entry = D_003932A0 + D_004361F4 * 108;
@@ -816,6 +955,8 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143910);
 
 void func_00143C90(void) {
 }
+
+extern void func_00155D48(s32, s32, void *, s32);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143C98);
 

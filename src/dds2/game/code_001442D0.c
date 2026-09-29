@@ -4,6 +4,22 @@
 
 #include "fpu.h"
 
+extern s32 func_00125328(void);
+extern void func_001442A0(s32);
+extern void func_00144270(s32);
+
+/* Field work area (D_00389770) fields reached through a pointer. */
+typedef struct FldWorkView {
+    u8 unk00[0x30];
+    f32 focusPos[3];      /* 0x30 */
+    u8 unk3C[0x14];
+    s32 focusActive;      /* 0x50 */
+    u8 unk54[0xB0];
+    s16 eventActive;      /* 0x104 */
+    u8 unk106[0x24];
+    s16 unk12A;           /* 0x12A */
+} FldWorkView;
+
 /* DDS2 saves store the area flag table earlier than the DDS1 save layout. */
 typedef struct FldAreaFlagsView {
     u8 pad00[0xFCD0];
@@ -474,7 +490,7 @@ extern s32 D_00451B90[];
 
 extern s32 dds3GetWorldObject(void);
 
-extern void *func_00110C70(s32, s32, s32);
+extern void *func_00110C70(u64, s32, s32);
 
 extern s32 func_00125F38(void);
 
@@ -627,7 +643,52 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001447A0);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_004136C0);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00144B50);
+extern s32 D_0039A0BC[];
+extern s32 D_0039A0C0[];
+extern s32 D_0039A0C4[];
+extern s32 D_0039A0C8[];
+extern s32 D_0039A0D0[];
+
+s32 func_00144B50(s32 id) {
+    s32 result;
+
+    switch (id) {
+    case 0x80:
+        result = D_0039A0B8[0] + 1;
+        break;
+    case 0x81:
+        result = D_0039A0BC[0] + 1;
+        break;
+    case 0x82:
+        result = D_0039A0C0[0] + 1;
+        break;
+    case 0x83:
+        result = D_0039A0BC[0] + 2;
+        break;
+    case 0x84:
+        result = D_0039A0C4[0] + 1;
+        break;
+    case 0x85:
+        result = D_0039A0C4[0] + 2;
+        break;
+    case 0x86:
+        result = D_0039A0C8[0] + 1;
+        break;
+    case 0x87:
+        result = D_0039A0D0[0] + 1;
+        break;
+    case 0x88:
+        result = D_0039A0D0[0] + 2;
+        break;
+    case 0x89:
+        result = D_0039A0D0[0] + 3;
+        break;
+    default:
+        result = -1;
+        break;
+    }
+    return result;
+}
 
 s8 fldFindSceneEntryData(s32 id, s32 idx) {
     s32 i;
@@ -642,7 +703,13 @@ s8 fldFindSceneEntryData(s32 id, s32 idx) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00144CB8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00144DB0);
+s32 func_00144DB0(void) {
+    if (D_003899D8[0] != 0) {
+        if (D_00389798[0] == 0x80) {
+            func_00341BB8(D_0039A0B8[0] + 1);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00144DF8);
 
@@ -686,7 +753,19 @@ void fldPlayMenuSound(s32 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldPlayFieldSe);
+void fldPlayFieldSe(s32 id) {
+    if (D_00389780[0] < 50) {
+        if (id == 0x100) {
+            func_00341C78(0x6D0060);
+        } else if (id == 0x101) {
+            func_00341C78(0x6D0061);
+        } else if (id == 0x102) {
+            func_00341C78(0x6D0064);
+        } else {
+            func_00341C78(D_00436214 + id);
+        }
+    }
+}
 
 void fldSetSequenceVolume(s32 category, s32 volume) {
     if (D_00389780[0] < 50) {
@@ -1452,7 +1531,22 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B78);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D380);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D7B8);
+extern void *memset(void *, s32, u32);
+extern s32 D_004362D0;
+
+s32 func_0014D7B8(f32 x, f32 y, f32 z) {
+    f32 pos[4];
+
+    memset(pos, 0, sizeof(pos));
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    pos[3] = 1.0f;
+    func_001576D8(D_004362CC);
+    func_00157790(D_004362CC, pos);
+    D_004362D0 = 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D838);
 
@@ -1477,9 +1571,28 @@ void fldFireRoomEffects(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014E3A8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetNpcPalette);
+typedef struct FldNpcPalette {
+    u32 word[0x80];
+} FldNpcPalette; /* 0x200 bytes */
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldFindEffectByName);
+extern FldNpcPalette D_0044FD90;
+
+void fldSetNpcPalette(FldNpcPalette *src) {
+    D_0044FD90 = *src;
+}
+
+extern s32 strcmp(const char *, const char *);
+
+s32 fldFindEffectByName(char *name) {
+    s32 i;
+
+    for (i = 0; i < D_004362C8; i++) {
+        if (D_0044FF90[i].unk0 != 999 && strcmp(D_0044FF90[i].name, name) == 0) {
+            return D_0044FF90[i].unk20[1];
+        }
+    }
+    return 0;
+}
 
 s32 func_0014E620(void) {
     s32 index = func_0013F1B8();
@@ -1745,7 +1858,25 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00150138);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150800);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001509E0);
+extern s32 D_003899E0[];
+extern void func_00125B10(void);
+
+void func_001509E0(void) {
+    FldWorkView *work = (FldWorkView *)D_00389770;
+
+    if (work->eventActive != 0) {
+        D_003899E0[0] = 0;
+        func_00125B10();
+        func_0014F788();
+        func_0014F408();
+        func_00144DF8();
+        func_00125F58();
+        work->eventActive = 0;
+        D_00451B90[3] = 0;
+        D_00451B90[4] = 0;
+        evtSetSolarOverlayFullyVisible();
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DE8);
 
@@ -2050,7 +2181,13 @@ extern char D_00413F78[];
 
 extern s32 D_00451D3C[];
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001533D0);
+s32 func_001533D0(void) {
+    if (D_00451D3C[0] != 1) {
+        if (func_00127398() != 0) {
+            func_0035B6E0(D_00413F78);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153410);
 
@@ -2095,7 +2232,15 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001540E8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001542D8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154528);
+extern s32 D_003898AC[];
+extern s32 D_004363DC;
+
+s32 func_00154528(void) {
+    if (D_003898AC[0] != 0) {
+        return D_004363DC;
+    }
+    return 0;
+}
 
 extern f32 D_004363E0;
 
@@ -2110,7 +2255,26 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00154558);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00154628);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001546F8);
+extern void func_001442A0(s32);
+extern void func_00144270(s32);
+
+s32 func_001546F8(void) {
+    s32 result;
+
+    func_001442A0(func_0010D650(0));
+    func_00144270(1);
+    result = func_001442D0();
+    if (result == -1) {
+        func_0010D818(-1);
+        return 1;
+    }
+    if (result == 1) {
+        func_0010D818(1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00154758);
 
@@ -2155,7 +2319,35 @@ u32 func_001548A0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001548C0);
+typedef struct FldObjModel {
+    u8 unk00[0x40];
+    f32 pos[3]; /* 0x40 */
+} FldObjModel;
+
+typedef struct FldObj {
+    u8 unk00[0x1C];
+    FldObjModel *model; /* 0x1C */
+} FldObj;
+
+extern void func_001300A0(void);
+
+s32 func_001548C0(void) {
+    FldWorkView *work;
+    FldObj *obj;
+    u64 world = dds3GetWorldSecondaryObject();
+
+    obj = func_00110C70(world, func_0010D650(0), 4);
+    if (obj == NULL) {
+        return 1;
+    }
+    work = (FldWorkView *)D_00389770;
+    work->focusActive = 1;
+    work->focusPos[0] = obj->model->pos[0];
+    work->focusPos[1] = obj->model->pos[1];
+    work->focusPos[2] = obj->model->pos[2];
+    func_001300A0();
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", fldUpdateLookAtSegment);
 
@@ -2213,7 +2405,43 @@ s32 func_00154E08(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154E48);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern void evtDisableSolarOverlayAlpha(void);
+extern void evtEnableSolarOverlayAlpha(void);
+
+s32 func_00154E48(void) {
+    s32 mode = func_0010D650(0);
+
+    D_00389770[0xCC / 4] = mode;
+    D_00389770[0xD0 / 4] = 0;
+    if (mode < 4) {
+        D_00389770[0xD4 / 4] = mode;
+    }
+    switch (D_00389770[0xCC / 4]) {
+    case 0:
+        evtSetSolarOverlayFullyTransparent();
+        break;
+    case 1:
+        evtSetSolarOverlayFullyVisible();
+        D_00389770[0x138 / 4] = 1;
+        break;
+    case 2:
+        evtDisableSolarOverlayAlpha();
+        D_00389770[0xD0 / 4] = 15;
+        break;
+    case 3:
+        evtEnableSolarOverlayAlpha();
+        D_00389770[0xD0 / 4] = 0;
+        D_00389770[0x138 / 4] = 1;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        break;
+    }
+    return 1;
+}
 
 void func_00154F18(void) {
 }
@@ -2393,7 +2621,28 @@ s32 func_00156208(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00156290);
+extern void fldSetMapSlotByte(s32, s32, s32, s32);
+
+s32 func_00156290(void) {
+    s32 world;
+    s32 stage;
+    s32 slot;
+
+    world = func_0010D650(0);
+    if (world == 0) {
+        world = D_00389780[0];
+    }
+    stage = func_0010D650(1);
+    if (stage == 0) {
+        stage = D_00389784[0] + 1;
+    }
+    slot = func_0010D650(2);
+    if (slot == 0) {
+        return 1;
+    }
+    fldSetMapSlotByte(world, stage, slot, func_0010D650(3));
+    return 1;
+}
 
 s32 func_00156330(void) {
     s32 area = func_0010D650(0);
@@ -2447,13 +2696,41 @@ s32 fldCmdSetSceneBitsValue(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetFlagFromWorld1);
+s32 fldSetFlagFromWorld1(void) {
+    if (func_00125328() == 1) {
+        func_0010D818(1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetFlagFromWorld3);
+s32 fldSetFlagFromWorld3(void) {
+    if (func_00125328() == 3) {
+        func_0010D818(1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetFlagFromWorld4);
+s32 fldSetFlagFromWorld4(void) {
+    if (func_00125328() == 4) {
+        func_0010D818(1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetFlagFromWorld2);
+s32 fldSetFlagFromWorld2(void) {
+    if (func_00125328() == 2) {
+        func_0010D818(1);
+        return 1;
+    }
+    func_0010D818(0);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
 
@@ -2798,9 +3075,22 @@ s32 func_00157258(void) {
     return 1;
 }
 
-extern u8 *D_00435F1C;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00157268);
+typedef struct FldSceneParam {
+    s32 unk0;
+    s32 value;
+} FldSceneParam;
+
+extern FldSceneParam *D_00435F1C;
+
+s32 func_00157268(void) {
+    if (D_00435F1C == NULL) {
+        func_0010D818(-1);
+        return 1;
+    }
+    func_0010D818(D_00435F1C->value);
+    return 1;
+}
 
 s32 func_001572A0(void) {
     if (func_0010D650(0) == 2) {
@@ -2821,7 +3111,32 @@ s32 func_00157308(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00157330);
+extern void func_00341348(void *);
+extern void func_002D2C50(void);
+extern void func_00157BE0(void);
+extern void parSysReset(void);
+extern void func_0015B270(void);
+extern void func_00194A70(void);
+extern void effInitWorks(void);
+extern void effBTLFieldColorResetFlags(void);
+extern void func_00157400(void);
+extern void effManagerUpdateAndDispatch(void);
+extern void effManagerInitializeSubsystems(void);
+extern u8 D_003AA868[];
+extern char D_004363F8[];
+
+void func_00157330(void) {
+    func_00341348(D_003AA868);
+    func_002D2C50();
+    func_00157BE0();
+    parSysReset();
+    func_0015B270();
+    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, func_00157400, NULL, 0);
+    kwlnTaskCreate(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
+    func_00194A70();
+    effInitWorks();
+    effBTLFieldColorResetFlags();
+}
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436208);
 

@@ -8,8 +8,9 @@ typedef struct MdlViewState {
     s8 unk09;
     s8 unk0A;
     s8 unk0B;
-    u8 unk0C;
-    u8 pad0D[2];
+    s8 unk0C;
+    s8 unk0D;
+    u8 pad0E;
     s8 unk0F;
     s8 unk10;
     u8 pad11[3];
@@ -44,7 +45,8 @@ typedef struct MdlViewState {
     s16 unk4E;
     s16 unk50;
     s16 unk52;
-    u8 pad54[0x38];
+    f32 unk54;
+    u8 pad58[0x34];
     s32 slotBeforeResources[1]; /* One element before resources[] for rightward rotation. */
     s32 resources[1];
 } MdlViewState;
@@ -778,7 +780,78 @@ s32 func_0021A660(s16 *cursor, s32 count) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A718);
+s32 func_0021A718(s16 *cursor, s32 count, s32 step) {
+    s32 max = count - 1;
+    s32 v = *cursor;
+    s32 changed = 0;
+    if (D_00398628[7] < 0) {
+        if (v < max) {
+            v += 1;
+        } else {
+            v = 0;
+        }
+        changed = 1;
+    } else if (((u8)D_00398628[7] & 2) != 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        }
+    } else if (D_00398628[6] < 0) {
+        if (v > 0) {
+            v -= 1;
+        } else {
+            v = max;
+        }
+        changed = 1;
+    } else if (((u8)D_00398628[6] & 2) != 0) {
+        if (v > 0) {
+            v -= 1;
+            changed = 1;
+        }
+    } else if (step != 0) {
+        if (D_00398628[11] < 0) {
+            if (v < max) {
+                v += step;
+                if (v > max) {
+                    v = max;
+                }
+            } else {
+                v = 0;
+            }
+            changed = 1;
+        } else if (((u8)D_00398628[11] & 2) != 0) {
+            if (v < max) {
+                v += step;
+                if (v > max) {
+                    v = max;
+                }
+                changed = 1;
+            }
+        } else if (D_00398628[10] < 0) {
+            if (v > 0) {
+                v -= step;
+                if (v < 0) {
+                    v = 0;
+                }
+            } else {
+                v = max;
+            }
+            changed = 1;
+        } else if ((((u8)D_00398628[10] & 2) != 0) && (v > 0)) {
+            v -= step;
+            if (v < 0) {
+                v = 0;
+            }
+            changed = 1;
+        }
+    }
+    if (changed != 0) {
+        *cursor = v;
+        D_003D7A50.unk09 = 0;
+        return 1;
+    }
+    return 0;
+}
 
 typedef struct MdlResource {
     u8 pad00[0x18];
@@ -963,7 +1036,48 @@ s32 func_0021BE50(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021BE88);
+extern s8 D_00324510[];
+
+void func_0021BE88(void) {
+    s32 value = (s32)(D_003D7A50.unk54 * 100.0f + 0.5f);
+
+    if (D_00324510[0x27] & 2) {
+        if (value < 0x32) {
+            value += 1;
+        } else if (value < 0x1F4) {
+            value += 10;
+        } else {
+            value += 100;
+            if (value >= 0x7D1) {
+                value = 0x7D0;
+            }
+        }
+        D_003D7A50.unk54 = value * 0.01f;
+    } else if (D_00324510[0x26] & 2) {
+        if (value < 0x33) {
+            value -= 1;
+            if (value < 5) {
+                value = 5;
+            }
+        } else if (value < 0x1F5) {
+            value -= 10;
+        } else {
+            value -= 100;
+        }
+        D_003D7A50.unk54 = value * 0.01f;
+    }
+    if (D_00324510[0x23] < 0) {
+        D_003D7A50.unk0C ^= 1;
+    }
+    D_003D7A50.unk0D = 0;
+    if (D_003D7A50.unk0C != 0) {
+        if (D_00324510[0x25] != 0) {
+            D_003D7A50.unk0D = 1;
+        } else if (D_00324510[0x24] != 0) {
+            D_003D7A50.unk0D = -1;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021BFB0);
 
@@ -1304,11 +1418,101 @@ void func_0021FA78(void) {
     func_001127A0(object, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FB30);
+extern void func_00111E30(s32 object, s32 arg1, s32 arg2);
+extern s32 dds3SpawnCameraSlotObj5(s32 counter, f32 *position, f32 *rotation);
+extern void dds3SetObjectFlags(s32 object, s32 flags);
+extern s32 *dds3GetUnk0C(s32 object);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FC30);
+s32 func_0021FB30(s32 arg0, s32 arg1) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 counter;
+    s32 object;
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021FD50);
+    memset(position, 0, 0x10);
+    position[3] = 1.0f;
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
+    counter = dds3AdvanceWorldCounter();
+    object = dds3SpawnCameraSlotObj5(counter, position, rotation);
+    dds3SetObjectFlags(object, 0x20);
+    effObjSetInnerFloat(object, 10.0f);
+    func_00111E30(object, arg0, arg1);
+    if (dds3GetUnk0C(object)[7] != 0) {
+        mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
+    }
+    func_001127A0(object, 0);
+    return counter;
+}
+
+extern void *func_00110A48(s32 world, s32 id, s32 kind);
+extern void dds3SetSlotByKind(s32 object, s32 slot);
+extern void dds3InvokeSlot5Handler(s32 object);
+
+s32 func_0021FC30(s32 arg0, s32 arg1) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 counter;
+    s32 object;
+
+    memset(position, 0, 0x10);
+    position[3] = 1.0f;
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
+    counter = dds3AdvanceWorldCounter();
+    object = dds3SpawnCameraSlotObj5(counter, position, rotation);
+    dds3SetObjectFlags(object, 0x20);
+    effObjSetInnerFloat(object, 10.0f);
+    func_00111E30(object, arg0, arg1);
+    mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
+    dds3SetSlotByKind(object, (s32)func_00110A48(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3InvokeSlot5Handler(object);
+    func_001127A0(object, 0);
+    dds3SetObjectFlags(object, 0x400);
+    return counter;
+}
+
+typedef struct MdlAttachSlot {
+    u8 pad00[0x18];
+    u8 *firstVec; /* 0x18 */
+    u8 pad1C[4];
+} MdlAttachSlot;
+
+typedef struct MdlAttachObj {
+    u8 pad00[0x1C];
+    u8 *inner; /* 0x1C */
+} MdlAttachObj;
+
+extern void effObjSetInnerFirstVec();
+extern void effObjSetInnerSecondVec();
+extern void effObjFetchInnerFirstVec();
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuatMultiplyVU(void);
+
+void func_0021FD50(s32 targetId, s32 sourceId) {
+    f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+    MdlAttachObj *target;
+    MdlAttachSlot *source;
+    u8 *base;
+
+    target = (MdlAttachObj *)func_00110A48(dds3GetWorldSecondaryObject(), targetId, 5);
+    if (target != NULL) {
+        source = (MdlAttachSlot *)func_00110A48(dds3GetWorldSecondaryObject(), sourceId, 0x11);
+        if (source != NULL) {
+            base = source->firstVec;
+            effObjSetInnerFirstVec(target, base);
+            __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(quaternion));
+            effMiscAxisAngleToQuaternionVU(3.14159265f);
+            base += 0x10;
+            __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(base));
+            effMiscQuatMultiplyVU();
+            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(quaternion));
+            effObjSetInnerSecondVec(target, quaternion);
+            effObjFetchInnerFirstVec(target);
+            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(target->inner + 0x70));
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFE8);
 
