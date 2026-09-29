@@ -16,17 +16,18 @@ extern char D_003CE6AC[];
 
 typedef struct EventCallbackContext {
     u8 pad00[0x58];
-    s32 dispatch;
+    s32 dispatch; /* +0x58: state passed to the callback dispatcher */
 } EventCallbackContext;
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265E78);
 
+/* Route the supplied callback through dispatch mode 2 after menu setup. */
 s64 func_00265EE8(s32 callback) {
-    s32 context = func_00101958();
+    s32 eventContext = func_00101958();
     func_0026C900();
-    return func_002C4038(context + 0xc, &((EventCallbackContext *)context)->dispatch, 2, callback);
+    return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
 }
 
 u32 func_00265F30(void) {
@@ -44,9 +45,9 @@ INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265F60);
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265FE8);
 
 s64 func_00266038(s32 callback) {
-    s32 context = func_00101958();
+    s32 eventContext = func_00101958();
     func_0026C900();
-    return func_002C4038(context + 0xc, &((EventCallbackContext *)context)->dispatch, 2, callback);
+    return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266080);

@@ -84,11 +84,12 @@ typedef struct MnuEquipScene {
 /* Swap the equipped bullet item: update the actor/old/new message tokens,
  * adjust inventory counts, and latch the old/new IDs in the menu context. */
 void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
-    MnuEquipContext *ctx = ((MnuEquipScene *)scene)->context;
+    MnuEquipContext *equipContext = ((MnuEquipScene *)scene)->context;
     s32 equipped = func_00286AD0((s32)unit);
 
     func_00283BF0(scene + 0x914, 1);
     if (equipped != itemId) {
+        /* Actor names use 17-byte records; item names use 25-byte records. */
         func_0024DD90(0, D_003BAA70 + ((MnuEquipUnit *)unit)->unitId * 17);
         func_0024DD90(1, D_003BAA84 + equipped * 25);
         func_0024DD90(2, D_003BAA84 + itemId * 25);
@@ -97,13 +98,13 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
             func_00119900(equipped, 1);
         }
         func_00119900(itemId, -1);
-        ctx->previousItem = equipped;
-        ctx->selectedItem = itemId;
+        equipContext->previousItem = equipped;
+        equipContext->selectedItem = itemId;
     } else {
         func_0024DD90(0, D_003BAA84 + equipped * 25);
         func_0024DA58(1);
-        ctx->previousItem = 0;
-        ctx->selectedItem = 0;
+        equipContext->previousItem = 0;
+        equipContext->selectedItem = 0;
     }
 }
 
