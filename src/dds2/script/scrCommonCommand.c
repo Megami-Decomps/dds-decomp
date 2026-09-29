@@ -40,7 +40,16 @@ s32 func_0010D9C8(void)
     return scrGetCommandTimer() != 0;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010D9E8);
+/* DDS2 twin of DDS1 func_0010D7C0: BF wait step-ticks-at-least callback. */
+s32 func_0010D9E8(void) {
+    if (func_0010D650(0) <= 0) {
+        return 1;
+    }
+    if (scrGetCommandTimer() < func_0010D650(0)) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_0010DA30(void)
 {
