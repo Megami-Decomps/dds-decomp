@@ -2711,7 +2711,22 @@ typedef struct ScaleOwner {
     ScaleSet *src;
 } ScaleOwner;
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", effScaleParameterSet);
+void effScaleParameterSet(ScaleOwner *owner, f32 scale) {
+    ScaleSet *src = owner->src;
+    ScaleSet *dst = owner->dst;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+    dst->unkC8 = src->unkC8 * scale;
+    dst->unkCC = src->unkCC * scale;
+    dst->unkD4 = src->unkD4 * scale;
+    dst->unkD8 = src->unkD8 * scale;
+    dst->unkE0 = src->unkE0 * scale;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002985D0);
 
