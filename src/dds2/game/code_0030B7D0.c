@@ -1047,29 +1047,7 @@ INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312810);
 
 INCLUDE_RODATA(const s32, "game/code_0030B7D0", D_0042D418);
 
-void func_00312850(void *list, s32 key, u32 mode) {
-    u32 *item = func_003127E8(list, key);
-    if (item == NULL) {
-        return;
-    }
-    switch (mode) {
-    case 3:
-        *item = (*(u16 *)item & ~1) | 0x10002;
-        break;
-    case 4:
-        *item = (*(u16 *)item & ~2) | 0x10001;
-        break;
-    case 2:
-        *item = *(u16 *)item | 0x20000;
-        break;
-    case 1:
-        *item = *(u16 *)item | 0x100000;
-        break;
-    case 0:
-        *item = *(u16 *)item | 0x10003;
-        break;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312850);
 
 INCLUDE_ASM(const s32, "game/code_0030B7D0", func_00312910);
 
