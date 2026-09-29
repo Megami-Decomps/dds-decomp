@@ -14,7 +14,10 @@ s32 kwlnDrawSetC70FloatTriple(f32 arg0, f32 arg1, s32 arg2);
 s32 func_00107FD8(s32 arg0, s32 arg1, void *arg2);
 s32 func_00108218(s32 arg0, void *arg1);
 s32 func_001080D8(s32 arg0, s32 arg1, void *arg2);
-s32 kwlnDrawSetD88FloatTriple(s32 arg0, f32 arg1, f32 arg2);
+/* Declared floats-first: gcc 2.96 emits the outgoing register moves in
+ * parameter order and schedules the last one into the jal delay slot, so
+ * retail moves the kind argument ($16) last, in the delay slot. */
+s32 kwlnDrawSetD88FloatTriple(f32 arg0, f32 arg1, s32 arg2);
 s32 kwlnDrawSetDc8Second(s32 arg0);
 s32 kwlnDrawSetE08Fifth(s32 arg0);
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -603,7 +606,35 @@ s32 func_0010E808(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E830);
+s32 func_0010E830(void)
+{
+    s32 mode;
+    s32 sel;
+    f32 first;
+    f32 second;
+
+    mode = func_0010D428(2);
+    switch (mode)
+    {
+    case 1:
+        sel = 0x48;
+        break;
+    case 2:
+        sel = 0x42;
+        break;
+    case 0:
+        sel = 0x44;
+        break;
+    default:
+        func_0010AC10(D_0039F530);
+        sel = 0x44;
+        break;
+    }
+    first = bfWaitReadArgFloat(0);
+    second = bfWaitReadArgFloat(1);
+    kwlnDrawSetD88FloatTriple(first, second, sel);
+    return 1;
+}
 
 s32 func_0010E8D0(void)
 {
@@ -846,6 +877,8 @@ u32 scrCommand_SCR_EXISTS()
     }
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F530);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F550);
 
