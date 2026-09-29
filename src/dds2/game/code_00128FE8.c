@@ -97,10 +97,6 @@ extern u32 D_00389910[];
 
 extern u32 D_003899C0[];
 
-extern void func_0012D9D0(u32 value);
-
-extern void func_001295E0(u32, u32);
-
 extern void fldCreatePlayerObject(void);
 
 extern void func_00128FE8(u32, u32, s32);
@@ -379,7 +375,11 @@ typedef struct {
 } FldCamState;
 
 typedef struct FldCameraOverrides {
-    u8 pad00[0x174];
+    u8 pad00[0x14C];
+    f32 currentX;            /* 0x14C */
+    u8 pad150[4];
+    f32 currentZ;            /* 0x154 */
+    u8 pad158[0x1C];
     f32 currentHeading;      /* 0x174 */
     u8 pad178[0x1C];
     u32 xyPending;           /* 0x194 */
@@ -414,7 +414,27 @@ extern s32 fldGetLocationCoordinateValue(s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_001295E0);
+extern s32 evtSpawnActionObj2(u32, u32);
+extern void *dds3GetWorldSecondaryObject(void);
+
+typedef struct FldActionSpawn {
+    u32 unk0;
+    u32 arg1;
+    u32 arg0;
+} FldActionSpawn;
+
+void func_001295E0(FldActionSpawn *list, u32 count) {
+    u32 i;
+    s32 handle;
+
+    dds3GetWorldSecondaryObject();
+    for (i = 0; i < count; i++, list++) {
+        handle = evtSpawnActionObj2(list->arg0, list->arg1);
+        if (i == 0) {
+            D_00389770[0] = handle;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129660);
 
@@ -424,7 +444,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129B40);
 
 void func_00129CC0(u32 *args) {
     s32 state;
-    func_001295E0(args[4], args[3]);
+    func_001295E0((FldActionSpawn *)args[4], args[3]);
     state = D_00389770[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
     func_00128FE8(args[1], args[0], 0);
@@ -439,14 +459,39 @@ s32 func_00129D60(s32 arg0) {
     return arg0 + 0xc;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129D68);
+void func_00129D68(u32 *table, u32 base, u8 *data, s32 size) {
+    u8 *p = data;
+    s32 code;
+    s32 i;
+
+    while (p - data < size) {
+        code = *p++;
+        if ((code & 1) == 0) {
+            code >>= 1;
+        } else if ((code & 2) == 0) {
+            code = (code | (*p++ << 8)) >> 2;
+        } else if ((code & 4) == 0) {
+            code = (code | (p[0] << 8) | (p[1] << 16)) >> 3;
+            p += 2;
+        } else {
+            code = (code >> 3) + 2;
+            for (i = 0; i < code; i++) {
+                table++;
+                *table -= base;
+            }
+            continue;
+        }
+        table += code;
+        *table -= base;
+    }
+}
 
 void func_00129E50(u32 buffer, FldTransferChunk *chunk) {
     sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void func_00129E78(u32 buffer, FldTransferChunk *chunk) {
-    func_00129D68(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
+    func_00129D68((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
 }
 
 void fldSetPendingAreaAndFloor(u32 arg0, u32 arg1) {
@@ -1284,9 +1329,76 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D5C0);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D7E0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D9D0);
+typedef struct FldMarkerPacket {
+    f32 pos[3];
+    s32 pad0C;
+    s16 rot[8];
+    f32 quad[8];
+    s32 color;
+    f32 scale;
+} FldMarkerPacket;
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DAA0);
+void func_0012D9D0(f32 *pos) {
+    FldMarkerPacket packet;
+    f32 half = 36.0f;
+
+    packet.rot[0] = 0;
+    packet.rot[1] = 0;
+    packet.rot[2] = 0x200;
+    packet.rot[3] = 0;
+    packet.rot[4] = 0x200;
+    packet.rot[5] = 0x200;
+    packet.rot[6] = 0;
+    packet.rot[7] = 0x200;
+    packet.quad[0] = -half;
+    packet.quad[1] = -half;
+    packet.quad[2] = half;
+    packet.quad[3] = -half;
+    packet.quad[4] = half;
+    packet.quad[5] = half;
+    packet.quad[6] = -half;
+    packet.quad[7] = half;
+    packet.color = 0x8080FF80;
+    packet.pos[0] = pos[0];
+    packet.pos[1] = pos[1];
+    packet.pos[2] = pos[2];
+    packet.scale = 0.0f;
+    func_0012BC38(0x39);
+    fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
+    func_0012BE18(0);
+    fldSubmitModelPacket(D_00436080, (u8 *)&packet);
+}
+
+void func_0012DAA0(f32 *pos, s32 color) {
+    FldMarkerPacket packet;
+    f32 half = 36.0f;
+
+    packet.rot[0] = 0;
+    packet.rot[1] = 0;
+    packet.rot[2] = 0x200;
+    packet.rot[3] = 0;
+    packet.rot[4] = 0x200;
+    packet.rot[5] = 0x200;
+    packet.rot[6] = 0;
+    packet.rot[7] = 0x200;
+    packet.quad[0] = -half;
+    packet.quad[1] = -half;
+    packet.quad[2] = half;
+    packet.quad[3] = -half;
+    packet.quad[4] = half;
+    packet.quad[5] = half;
+    packet.quad[6] = -half;
+    packet.quad[7] = half;
+    packet.color = color;
+    packet.pos[0] = pos[0];
+    packet.pos[1] = pos[1];
+    packet.pos[2] = pos[2];
+    packet.scale = 0.0f;
+    func_0012BC38(0x39);
+    fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
+    func_0012BE18(0);
+    fldSubmitModelPacket(D_00436080, (u8 *)&packet);
+}
 
 void func_0012DB68(s32 x, s32 y, s32 width, s32 height) {
     func_0012B518(x, y, 0x10, height, 0, 0, 0x10, 0x20, 0x60000040, D_00436080);
@@ -1625,7 +1737,22 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130C28);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130DE0);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130F38);
+s32 func_00130F38(void) {
+    s32 result;
+
+    if (D_00435F0C == 0) {
+        return 0;
+    }
+    if (D_00435F10 == 0) {
+        return 0;
+    }
+    result = dds3TestObjectFlags(D_00435F0C, 1);
+    if (result != 0) {
+        dds3SetObjectFlags(D_00435F10, 1);
+        result = 0;
+    }
+    return result;
+}
 
 void func_00130F80(void) {
     D_004360C8 = 0;
@@ -1799,7 +1926,20 @@ void func_00133DF8(f32 x, f32 unusedY, f32 z) {
     camera->targetHeading = -angle;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133E38);
+void func_00133E38(void) {
+    f32 dx;
+    f32 dz;
+
+    if (((FldCameraOverrides *)D_00389770)->xyPending != 0) {
+        dx = ((FldCameraOverrides *)D_00389770)->currentX - ((FldCameraOverrides *)D_00389770)->xyValue0;
+        dz = ((FldCameraOverrides *)D_00389770)->currentZ - ((FldCameraOverrides *)D_00389770)->xyValue1;
+        if (dx < 0.0001f && dx > -0.0001f && dz < 0.0001f && dz > -0.0001f) {
+            return;
+        }
+        ((FldCameraOverrides *)D_00389770)->currentHeading = -(sdfAtan2(dx, dz) * (180.0f / 3.14f));
+        ((FldCameraOverrides *)D_00389770)->xyPending = 2;
+    }
+}
 
 void func_00133EE0(void) {
     FldCameraOverrides *camera = (FldCameraOverrides *)D_00389770;
