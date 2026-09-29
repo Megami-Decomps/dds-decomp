@@ -628,7 +628,13 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6858);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6C28);
+void func_002A6C28(u32 *state, u32 mode) {
+    switch (mode) {
+    case 2: state[1] = 0; mode = 0; break;
+    case 3: mode = 1; state[1] = 0x200; break;
+    }
+    state[0] = mode;
+}
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -652,7 +658,13 @@ void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6D28);
+void func_002A6D28(u32 *state, u32 mode) {
+    switch (mode) {
+    case 2: state[1] = 0; mode = 0; break;
+    case 3: state[1] = 0; mode = 1; break;
+    }
+    state[0] = mode;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6D68);
 
@@ -678,7 +690,13 @@ void mnuTitleSetPaletteTransition(u32 *state, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A73C0);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7560);
+void func_002A7560(u32 *state, u32 mode) {
+    switch (mode) {
+    case 2: state[1] = 0; mode = 0; break;
+    case 3: mode = 1; state[1] = 0x200; break;
+    }
+    state[0] = mode;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A75A8);
 
@@ -717,7 +735,31 @@ void func_002A7938(void) {
     func_003458F0(0x80, 0x60, 0x180, 0x100, 0x80808080);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7980);
+extern u32 D_00435CBC;
+
+extern void func_002A6580();
+
+typedef struct {
+    u32 handle;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+} StaffTaskState;
+
+void func_002A7980(void) {
+    u32 handle;
+
+    D_00435CBC = 0x80000000;
+    handle = func_003292A8(0xD8);
+    D_00437AB0 = sdfResourceRetainAddress(handle);
+    memset(D_00437AB0, 0, 0xD8);
+    ((StaffTaskState *)D_00437AB0)->handle = handle;
+    ((StaffTaskState *)D_00437AB0)->unk8 = 0;
+    ((StaffTaskState *)D_00437AB0)->unkC = 0;
+    D_00435BAC = 1;
+    func_0019BD48();
+    kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, func_002A78B0, 0);
+}
 
 u32 mnuStartStaffMovieRequest(void) {
     func_002A7980();
@@ -1378,7 +1420,27 @@ void func_002A9460(s32 kind, u8 *work) {
     *(s32 *)(work + 0xAA4C) = kind;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A94D0);
+extern u32 D_003E6970[];
+
+typedef struct { u8 pad0[0x20]; s32 *data; } MotSub;
+typedef struct { u8 pad0[8]; MotSub *sub; } MotRes;
+
+void func_002A94D0(u8 *work) {
+    s32 *data;
+
+    *(u32 *)(work + 0x100) = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
+    *(MotRes **)(work + 0x110) = func_00304998(6);
+    data = (*(MotRes **)(work + 0x110))->sub->data;
+    data[0] = 0xF;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
+    data[4] = 0;
+    *(MotRes **)(work + 0x114) = func_00304998(1);
+    data = (*(MotRes **)(work + 0x114))->sub->data;
+    data[0] = 0xF;
+    data[1] = 0;
+}
 
 void movReleaseTitleEffects(u32 *state) {
     u32 *handles = state + 0x110 / 4;
