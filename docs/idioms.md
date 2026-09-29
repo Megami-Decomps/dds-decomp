@@ -94,6 +94,25 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - Stores through `void **`-typed pointers let gcc schedule `int` loads above
   them (type-based aliasing), and `s32` stores do not. Pick the pointer type
   the data really has.
+- Raw casts like `*(s32 *)(work + 0x4D8) = v` may alias a scalar global, so
+  gcc reloads the global afterwards. A store through a struct field
+  (`work->resA = v`) doesn't alias, and retail has no reload.
+- A loop that retail compiles with the epilogue `ld` in its delay slots calls
+  a function *defined in C earlier in the same unit*. While that callee is
+  still INCLUDE_ASM, gcc can't see it and never fills the slots. Match the
+  callee first (`sndClearList`, `func_00204CC8`).
+- Declaring an INCLUDE_ASM callee `s32` instead of `void` moves values loaded
+  after the call from `$2` to `$3`. Try this on near-misses that only differ
+  in `v0`/`v1`.
+- Callers that pass fewer arguments than the callee reads want the callee
+  unprototyped (K&R). A missing unused parameter is real too: m2c drops
+  parameters nothing reads, so check the callers.
+- Loops over parallel per-slot arrays (`set->handle[i]`, `set->active[i]`)
+  keep retail's count-up loop. A pointer walk becomes a count-down loop.
+- To keep two `slti` where C would fold a range test into `sltiu`, nest the
+  tests: `if (m < 0xE) { if (m >= 0xC) ... }`.
+- Adjacent independent stores come out roughly reversed. Retail's order
+  usually comes from writing the fields in ascending offset order.
 
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 
