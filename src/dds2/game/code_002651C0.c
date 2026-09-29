@@ -86,7 +86,7 @@ u32 func_002652D8(void) {
 }
 
 /* Poll the event window; when it closes, install the default window if needed. */
-s64 func_002652E0(s32 callback) {
+s64 evtMenuPollWindow(s32 callback) {
     s32 context = func_00101958();
     s32 *window = &((EvtMenuContext *)context)->window;
     s64 state = func_002C4038(context + 0xc, window, 0, callback);
@@ -117,7 +117,7 @@ s64 func_002653B8(s32 callback) {
 INCLUDE_ASM(const s32, "game/code_002651C0", func_00265408);
 
 /* Walk the list until its selected id is found, then persist the slot choice. */
-s32 func_00265500(void) {
+s32 evtMenuPersistSelectedSlot(void) {
     s32 context = func_00101958();
     s32 selectedId = ((EvtMenuContext *)context)->selection->list->selected->id;
     EvtSelectionNode *node;
@@ -179,7 +179,7 @@ u32 func_00265980(void) {
     return 1;
 }
 
-u32 func_00265988(s32 context) {
+u32 evtMenuSetProgressFlag(s32 context) {
     u32 changed;
     s64 flagSet;
 

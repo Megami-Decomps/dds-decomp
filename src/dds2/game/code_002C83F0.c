@@ -1,33 +1,115 @@
 #include "common.h"
 
-/* File request entries are 0x64 bytes each; fields mirror the DDS1 table. */
+/* File request entry: D_003DC698 table, 0x64 bytes per entry. */
 typedef struct FileReqEntry {
     u32 unk0;      /* 0x00 */
     u32 unk4;      /* 0x04 */
-    u32 sizeKiB;   /* 0x08: fileReqGetSize converts this to bytes */
+    u32 sizeKiB;   /* 0x08: converted to bytes by fileReqGetSize */
     u32 unkC;      /* 0x0C */
     u8 unk10;      /* 0x10 */
-    u8 status;     /* 0x11 */
-    u8 slotMetadataDirty; /* 0x12 */
-    s8 selectedSlot; /* 0x13 */
-    u32 slotFlags[20]; /* 0x14 */
+    u8 status;     /* 0x11: inspected by memory-card file request polling */
+    u8 slotMetadataDirty; /* 0x12: checked before rebuilding slot metadata */
+    s8 selectedSlot; /* 0x13: used to select a memory-card save directory */
+    u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by D_003DC6AC */
 } FileReqEntry;
 
 extern FileReqEntry D_00457F68[];
 
 extern s32 D_00439000;
 
-extern s32 (*D_00438BC0)(void);
-
 void fileReqInit(s32 request);
+
+/* Work area behind the fileMan task (D_003DC658, 0x40 bytes). */
+typedef struct FileManWork {
+    s32 sema;   /* 0x00 */
+    u8 unk4;    /* 0x04 */
+    u8 unk5;    /* 0x05 */
+    u8 unk6;    /* 0x06 */
+    u8 unk7;    /* 0x07 */
+    void *unk8; /* 0x08 */
+    u32 unkC;   /* 0x0C */
+    void *unk10; /* 0x10 */
+    void *unk14; /* 0x14 */
+    u32 unk18;  /* 0x18 */
+    s32 unk1C;  /* 0x1C */
+    u8 unk20[0x20]; /* 0x20 */
+} FileManWork;
+
+/* Async job handled by func_00288E70 and friends. */
+typedef struct FileJob {
+    u8 unk0;      /* 0x00 */
+    u8 state;     /* 0x01 */
+    u8 unk2[2];   /* 0x02 */
+    u32 unk4;     /* 0x04 */
+    u8 unk8[4];   /* 0x08 */
+    void *deviceRequest; /* 0x0C: transfer backend dereferences mode at +0x16 */
+    s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
+    u8 unk14[0x14]; /* 0x14 */
+    u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
+} FileJob;
+
+#define FILE_JOB_READY 3
+
+#define FILE_JOB_TRANSFERRING 4
+
+#define FILE_IO_MAX_CHUNK_BYTES 0x8000
+
+extern FileManWork D_00457F28;
+
+void WaitSema(s32 sema);
+
+void SignalSema(s32 sema);
+
+void sdfDevQueueRead(void *deviceRequest, u32 transferAddress, u32 byteCount);
+
+void sdfDevQueueWrite(void *deviceRequest, u32 transferAddress, u32 byteCount);
+
+extern char D_00437CC8[];
+
+extern s32 (*D_00438B98)(void);
+
+void *memset(void *dst, s32 val, u32 len);
+
+s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+
+s32 func_003292A8(s32 arg0);
+
+s32 sdfResourceRetainAddress(s32 arg0);
+
+s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
+s32 fileManUpdate(void);
+
+/* Flag words of the entry table: entry arg0 occupies 0x19 words. */
+extern u32 D_00457F7C[];
+
+#define FILE_REQ_WORDS_PER_ENTRY 0x19
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C85B0);
+void func_002C85B0(FileJob *job) {
+    WaitSema(D_00457F28.sema);
+    if (job->state != FILE_JOB_READY) {
+        SignalSema(D_00457F28.sema);
+        return;
+    }
+    job->state = FILE_JOB_TRANSFERRING;
+    SignalSema(D_00457F28.sema);
+    sdfDevQueueRead(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8638);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8878);
+void func_002C8878(FileJob *job) {
+    WaitSema(D_00457F28.sema);
+    if (job->state != FILE_JOB_READY) {
+        SignalSema(D_00457F28.sema);
+        return;
+    }
+    job->state = FILE_JOB_TRANSFERRING;
+    SignalSema(D_00457F28.sema);
+    sdfDevQueueWrite(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8900);
 
@@ -43,7 +125,14 @@ u32 fileMan(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileManInit);
+void fileManInit(void) {
+    memset(&D_00457F28, 0, 0x40);
+    D_00457F28.unk7 = 4;
+    D_00457F28.sema = sdfCreateSemaphore(1, 0x7F, 0);
+    D_00457F28.unk1C = sdfResourceRetainAddress(func_003292A8(0x40000));
+    kwlnTaskCreate((s32)&D_00437CC8, 0x384, 1, 0, (s32)&fileMan, 0, 0);
+    D_00438B98 = fileManUpdate;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqInit);
 
@@ -56,25 +145,48 @@ void fileReqBegin(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqPoll);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetStatus);
+u8 fileReqGetStatus(s32 request) {
+    return D_00457F68[request].status;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSize);
+s32 fileReqGetSize(s32 request) {
+    return D_00457F68[request].sizeKiB << 10;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqIsSlotMetadataDirty);
+u8 fileReqIsSlotMetadataDirty(s32 request) {
+    return D_00457F68[request].slotMetadataDirty;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqClearSlotMetadataDirty);
+void fileReqClearSlotMetadataDirty(s32 request) {
+    D_00457F68[request].slotMetadataDirty = 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqMarkSlotMetadataDirty);
+void fileReqMarkSlotMetadataDirty(s32 request) {
+    D_00457F68[request].slotMetadataDirty = 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqClearSlotFlags);
+void fileReqClearSlotFlags(s32 request, s32 slot) {
+    slot += request * FILE_REQ_WORDS_PER_ENTRY;
+    D_00457F7C[slot] = 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqSetSlotFlags);
+void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
+    slot += request * FILE_REQ_WORDS_PER_ENTRY;
+    D_00457F7C[slot] |= mask;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSlotFlags);
+u32 fileReqGetSlotFlags(s32 request, s32 slot) {
+    slot += request * FILE_REQ_WORDS_PER_ENTRY;
+    return D_00457F7C[slot];
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqGetSelectedSlot);
+s8 fileReqGetSelectedSlot(s32 request) {
+    return D_00457F68[request].selectedSlot;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqSetSelectedSlot);
+void fileReqSetSelectedSlot(s32 request, s8 selectedSlot) {
+    D_00457F68[request].selectedSlot = selectedSlot;
+}
 
 void func_002C92D0(u32 arg0) {
     func_0034FCE0(arg0, 0);

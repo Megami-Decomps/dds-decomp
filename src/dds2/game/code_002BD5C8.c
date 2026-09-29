@@ -4,7 +4,20 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD9E0);
+s32 func_002BD9E0(s32 arg0, s32 arg1, s32 arg2, u32 *window, s32 arg4) {
+    s32 result = func_002BD5C8(window, arg4);
+
+    switch (result) {
+    case 1:
+        *window &= ~2;
+        return 1;
+    case 2:
+        *window &= ~2;
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDA50);
 

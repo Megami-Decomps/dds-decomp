@@ -59,7 +59,7 @@ extern void *billCreateIndexed(s32 arg0, u32 arg1);
 extern void *func_00151E60(void *arg);
 
 /* Release the effect's dependent resources before clearing its data handle. */
-void func_00114570(EffectObj *obj) {
+void effObjReleaseObjectData(EffectObj *obj) {
     EffectData *data;
 
     data = obj->data;
@@ -91,7 +91,7 @@ void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
 }
 
 /* Create an indexed billboard of kind one and dispatch it. */
-void func_00114C38(u32 billId, void *vec, s32 extra) {
+void effObjCreateIndexedKindOne(u32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateIndexed(1, billId);
@@ -99,7 +99,7 @@ void func_00114C38(u32 billId, void *vec, s32 extra) {
 }
 
 /* Create a resource-backed billboard of kind one and dispatch it. */
-void func_00114C80(s32 billId, void *vec, s32 extra) {
+void effObjCreateResourceKindOne(s32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateFromResource(1, billId);
@@ -119,14 +119,14 @@ void func_00114DB8(EffectObj *obj, void *vec, s32 extra) {
     func_00114CE8(handle, vec, extra);
 }
 
-void func_00114E00(u32 billId, void *vec, s32 extra) {
+void effObjCreateIndexedKindZero(u32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateIndexed(0, billId);
     func_00114CE8(handle, vec, extra);
 }
 
-void func_00114E48(s32 billId, void *vec, s32 extra) {
+void effObjCreateResourceKindZero(s32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateFromResource(0, billId);

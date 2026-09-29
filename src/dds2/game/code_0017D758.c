@@ -20,6 +20,19 @@ typedef struct ScatterObject {
     u32 value130;
 } ScatterObject;
 
+typedef struct PcpScatterWork4 PcpScatterWork4;
+
+/* func_001730D0 */
+struct PcpScatterWork4 {
+    u8 pad00[0x40];
+    s128 unk40;
+    u8 pad50[0x12C];
+    f32 unk17C;
+    u32 unk180;
+    u32 scatterObject;
+    u32 ownedBuffer;
+};
+
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
 
 /* Store the float parameter beside the scatter object's trailing control word. */

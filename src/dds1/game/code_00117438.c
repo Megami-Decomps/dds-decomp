@@ -74,7 +74,7 @@ extern void *func_002D03F8(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
-s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
+s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
@@ -300,7 +300,7 @@ s32 ptyComputeMaxMp(s32 unit) {
 
 /* Sdf dispatch: pick the script id from the unit's runtime flag byte and run
  * it against the given entry index. 0x40/0x80 select the alternate scripts. */
-s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;
     u8 flags;
 
@@ -320,10 +320,10 @@ s32 func_001184A8(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
 }
 
 void sdfDispatchCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    func_001184A8(arg0, arg1, arg2, (u8)arg3);
+    sdfDispatchUnitScriptDefault5(arg0, arg1, arg2, (u8)arg3);
 }
 
-s32 func_00118570(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;
     u8 flags;
 

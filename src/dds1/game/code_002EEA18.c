@@ -55,7 +55,7 @@ typedef struct SdfStreamCfg {
 
 extern SdfStreamCfg D_003FF340;
 extern u8 D_003FF4C0[];
-extern void func_002E6D48();
+extern void sdfDevQueueRead();
 
 void sdfStreamSendChunk(void) {
     s32 length = D_003FF340.length;
@@ -63,7 +63,7 @@ void sdfStreamSendChunk(void) {
     if (length > 0x4000) {
         length = 0x4000;
     }
-    func_002E6D48(D_003FF340.dest, D_003FF4C0, length);
+    sdfDevQueueRead(D_003FF340.dest, D_003FF4C0, length);
 }
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF408);

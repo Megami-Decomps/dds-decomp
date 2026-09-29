@@ -365,7 +365,7 @@ s32 func_002004B8(s32 unused, s32 action) {
 }
 
 /* Find an active unit on the 0x200 side with the requested unit mode. */
-s32 func_00200530(s32 unused, s32 kind) {
+s32 btlHasGroup200UnitMode(s32 unused, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
@@ -379,7 +379,7 @@ s32 func_00200530(s32 unused, s32 kind) {
 }
 
 /* Check the opposing side for another unit of the same mode but a different identity. */
-s32 func_002005A0(u8 *actor, s32 kind) {
+s32 btlHasOtherGroup400UnitMode(u8 *actor, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
@@ -606,7 +606,7 @@ extern s32 func_001A1850(void *);
 
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
-s32 func_00201070(u8 *unit, s32 percentage) {
+s32 btlIsUnitStatAtOrBelowRate(u8 *unit, s32 percentage) {
     void *stats = unit + 0x120;
     u32 current = func_001A1800(stats);
     u32 scaledMaximum = func_001A1850(stats) * percentage;
@@ -743,7 +743,7 @@ s32 func_00201568(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_002015E8(s32 unused, s32 kind) {
+s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
@@ -756,7 +756,7 @@ s32 func_002015E8(s32 unused, s32 kind) {
     return 0;
 }
 
-s32 func_00201658(u8 *actor, s32 kind) {
+s32 btlHasOtherGroup400DifferentUnitMode(u8 *actor, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
@@ -950,12 +950,12 @@ s32 func_00201E10(void) {
     return D_003BB870 < 1;
 }
 
-extern s32 func_00201FE0(s32, s32, s32);
+extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
 s32 func_00201E20(s32 unused, s32 action) {
     s32 unit = *(s32 *)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if (func_00201FE0(unit, action, 0x200) != 0) {
+        if (btlUnitBlocksElementQuery(unit, action, 0x200) != 0) {
             return 1;
         }
         unit = *(s32 *)(unit + 0x344);
@@ -1007,7 +1007,7 @@ s32 func_00201F30(s32 unused, s32 query, u32 mask) {
 extern s32 func_001A55A8(void *, s32);
 extern s32 fldGetSelectedUnitStat();
 
-s32 func_00201FE0(s32 unit, s32 action, s32 mask) {
+s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
     u32 flags = *(u32 *)(unit + 0x110);
     s32 stat;
     s32 value;
@@ -1254,7 +1254,7 @@ void func_002044F0(u8 *command, u8 *unused) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(userPos) : "memory");
     btlUnitGetMuzzlePosVU(target);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(targetPos) : "memory");
-    func_001D6898(target, user);
+    btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
         *(u32 *)(command + 0xF0) |= 0x200;
     } else {
@@ -1321,7 +1321,7 @@ void func_00204BA8(u8 *unit, u8 *command) {
     }
 }
 
-s32 func_00204C88(void) {
+s32 btlClearUnitRestrictionFlag(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     BtlUnit *unit;
     if (battle->mode != 2) {
@@ -2180,7 +2180,7 @@ void func_00208400(void) {
 }
 
 /* Allocate and launch a subtask from the active battle task slot. */
-u64 func_00208440(u64 input) {
+u64 btlStartSubtaskWithInput(u64 input) {
     u8 *subtaskSlot = *(u8 **)(func_001A17F0() + 0x694);
     u8 *task = (u8 *)func_001D9038(*(void **)subtaskSlot, 12);
     if (input != 0) {
@@ -2449,7 +2449,7 @@ void func_00208FB0(void) {
 extern s32 mdlGetNodeField2C(s32, s32);
 extern void func_00221EF0(void *, s32, s32);
 
-void func_00208FF0(void) {
+void btlStepFocusAngle(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     u32 *slot;
     BtlUnit *player;
@@ -2949,7 +2949,7 @@ extern void func_0020B190(u8 *, void *);
 extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_001DC568(void);
 
-s32 func_0020CB38(u8 *unit) {
+s32 btlDispatchActionAnimationB(u8 *unit) {
     u16 flags = *(u16 *)((u8 *)D_003BAA60 + *(s32 *)(unit + 0x114) * 32 + 0x1c);
     if (flags & 0x4000) {
         func_001DC760();
@@ -3363,7 +3363,7 @@ s32 btlReleaseScriptResource(void) {
 
 extern char D_003BB8B8[];
 
-s32 func_0020FA08(void) {
+s32 btlCanStartPrimaryScriptTask(void) {
     u8 *battle = (u8 *)func_001A17F0();
     if (*(s16 *)(battle + 0x1c0) == -1) {
         return 0;
@@ -3379,7 +3379,7 @@ s32 func_0020FA08(void) {
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 
-void func_0020FA70(void) {
+void btlStartPrimaryScriptTask(void) {
     u8 *battle = (u8 *)func_001A17F0();
     s32 skill;
     s32 handle;
@@ -3419,7 +3419,7 @@ s32 btlHasScriptResource(void) {
     return btlFindScriptResource(D_003BB8C0) != -1;
 }
 
-void func_0020FB98(void) {
+void btlStartSecondaryScriptTask(void) {
     u8 *battle = (u8 *)func_001A17F0();
     s32 skill;
     s32 handle;
@@ -3504,7 +3504,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002101C8);
 
 extern char D_003A6838[];
 
-void func_00210288(void) {
+void btlReleaseEventAssets(void) {
     u8 *battle = (u8 *)func_001A17F0();
     void *data;
     btlReleaseEventData();
@@ -3518,10 +3518,10 @@ void func_00210288(void) {
 
 extern s32 func_00241BF0(s16, s32);
 
-s32 func_002102D8(void) {
-    s32 first = func_0010D428(0);
-    s32 second = func_0010D428(1);
-    s32 action = func_0010D428(2);
+s32 btlCommandSelectEventAction(void) {
+    s32 first = scrReadIntParameter(0);
+    s32 second = scrReadIntParameter(1);
+    s32 action = scrReadIntParameter(2);
     u8 *unit;
     u8 *battle;
     s32 result;
@@ -3550,16 +3550,16 @@ s32 func_002102D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002103A0);
 
-extern s32 func_0010D428(s32);
+extern s32 scrReadIntParameter(s32);
 extern u8 *btlFindUnitByModeClear(s32);
 extern u8 *btlFindUnitByModeFlagged(s32);
-extern void *func_001D87D0(void *, s32, s32, s32, s32, s32);
+extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
 s32 func_00210450(void) {
-    s32 choice = func_0010D428(0);
-    s32 unitIndex = func_0010D428(1);
-    s32 first = func_0010D428(2);
-    s32 second = func_0010D428(3);
+    s32 choice = scrReadIntParameter(0);
+    s32 unitIndex = scrReadIntParameter(1);
+    s32 first = scrReadIntParameter(2);
+    s32 second = scrReadIntParameter(3);
     u8 *unit;
     if ((u32)unitIndex >= 0x180) {
         return 1;
@@ -3575,7 +3575,7 @@ s32 func_00210450(void) {
     if (unit == NULL) {
         return 1;
     }
-    btlStartTask(func_001D87D0(unit, choice != 0, first, second, 0x18, 0));
+    btlStartTask(btlCreateModelChangeTask(unit, choice != 0, first, second, 0x18, 0));
     return 1;
 }
 
@@ -3591,9 +3591,9 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00210540);
 
 extern char D_003A6848[];
 
-s32 func_002105F8(void) {
+s32 btlCommandSetSequenceVolumePan(void) {
     u8 *battle = (u8 *)func_001A17F0();
-    s32 index = func_0010D428(0);
+    s32 index = scrReadIntParameter(0);
     if (func_002E92C0(*(s32 *)(battle + 0x1e4)) != 0) {
         sndSetSequenceVolumePan(*(s32 *)(battle + 0x1e4) + index, 0x7f, 0x3f);
         func_001FB0A8(D_003A6848, *(s32 *)(battle + 0x1e4) + index);
@@ -3903,7 +3903,7 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
     }
 }
 
-extern s32 func_00217068(s32, s32, s32);
+extern s32 mdlRequestAsset(s32, s32, s32);
 extern s32 fileRequestIsReady(void *);
 
 s32 func_002114E8(u8 *task) {
@@ -3911,8 +3911,8 @@ s32 func_002114E8(u8 *task) {
     if (*(s8 *)(task + 0xc) != 0) {
         return 1;
     }
-    if (func_00217068(*(s32 *)task, *(s32 *)(task + 4), 0) == 0 ||
-        func_00217068(*(s32 *)task, *(s32 *)(task + 4), 0) == -1) {
+    if (mdlRequestAsset(*(s32 *)task, *(s32 *)(task + 4), 0) == 0 ||
+        mdlRequestAsset(*(s32 *)task, *(s32 *)(task + 4), 0) == -1) {
         return 0;
     }
     if (*(void **)(task + 0x10) == 0) {
@@ -4053,7 +4053,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002127A8);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00212998);
 
-void func_002131F8(void) {
+void btlInitFadeColors(void) {
     btlInitVisibilityGrid();
     D_003D7580.color10 = 0x80808080;
     if (D_003D7580.unk_06 < 2) {
@@ -4076,7 +4076,7 @@ extern BattleGraphicsCallback D_00325708;
 extern u32 sdfCreateInitializedPacketList(void);
 extern void func_00212998(u32, u32, u32, u32, u32, s32);
 
-s32 func_00213280(void) {
+s32 btlUpdateFadeIn(void) {
     u32 packets = sdfCreateInitializedPacketList();
     if ((D_003D7580.color18 & 0xFF000000) != 0x80000000) {
         D_003D7580.color18 += 0x10000000;
@@ -4108,7 +4108,7 @@ void func_00213538(void) {
     s32 i;
     u64 clearValue;
     func_001054D0(0x200, 0xe0, 0.0f);
-    func_001055F8();
+    kwlnTextureSetReferenceFlagIfPresent();
     entry = D_00325870;
     i = 0;
     clearValue = 0x80008000ULL;
@@ -4125,14 +4125,14 @@ void func_00213538(void) {
 void btlReleaseRuntimeResource(void) {
     extern void effReleaseSharedReference(void *);
     extern void func_00105618(void);
-    extern void func_001055C0(void);
+    extern void kwlnTextureReleaseHeldReference(void);
     void *resource = D_003D7580.resource;
     if (resource != 0) {
         effReleaseSharedReference(resource);
         D_003D7580.resource = 0;
     }
     func_00105618();
-    func_001055C0();
+    kwlnTextureReleaseHeldReference();
 }
 
 extern void *func_002D0518(s32);
@@ -4428,7 +4428,7 @@ typedef struct MenuList {
     u32 rows;
 } MenuList;
 
-s32 func_002142C0(MenuList *list) {
+s32 mnuListMoveCursor(MenuList *list) {
     if (D_00398628->b6 & 2) {
         if (list->cursor != 0) {
             list->cursor--;
@@ -4689,7 +4689,7 @@ void btlAddGroupId(s32 group, s32 id) {
     *head = node;
 }
 
-void func_002167E0(s32 arg0, s32 arg1) {
+void btlRemoveGroupId(s32 arg0, s32 arg1) {
     s32 *temp_v0;
     s32 *temp_v1;
 

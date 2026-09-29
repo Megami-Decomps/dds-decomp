@@ -173,7 +173,7 @@ u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
  * contribute to its 16-byte block count. */
-s32 func_002D2308(SdfTex *tex) {
+s32 sdfTexGetPrimaryBufferSize(SdfTex *tex) {
     SdfTexBuf *buf = tex->unk28;
 
     if (buf == NULL) {
@@ -194,7 +194,7 @@ s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
-s32 func_002D2368(SdfTex *tex) {
+s32 sdfTexGetSecondaryBufferSize(SdfTex *tex) {
     SdfTexBuf *buf = tex->unk2C;
 
     if (buf == NULL) {

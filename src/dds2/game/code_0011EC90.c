@@ -4,7 +4,7 @@ extern u32 func_002AB598(void);
 
 extern s32 func_0011C0B0(s32 param0, s32 param1);
 
-extern s32 func_0010D650(s32 idx);
+extern s32 scrReadIntParameter(s32 idx);
 
 extern s32 func_0010D818(s32 arg0);
 
@@ -14,8 +14,10 @@ typedef struct GlyphOwner {
     u32 glyph;
 } GlyphOwner;
 
+extern u32 D_00438EB0;
+
 s32 func_0011EC90(void) {
-    s32 unitId = func_0010D650(0);
+    s32 unitId = scrReadIntParameter(0);
 
     func_0010D818(func_0011C680(unitId) == 1);
     return 1;
@@ -23,8 +25,8 @@ s32 func_0011EC90(void) {
 
 /* Evaluate a two-operand VM expression and publish its result. */
 s32 func_0011ECC8(void) {
-    s32 firstOperand = func_0010D650(0);
-    s32 secondOperand = func_0010D650(1);
+    s32 firstOperand = scrReadIntParameter(0);
+    s32 secondOperand = scrReadIntParameter(1);
 
     func_0010D818(func_0011C0B0(firstOperand, secondOperand));
     return 1;
@@ -61,7 +63,12 @@ INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EE98);
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EED8);
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EF18);
+void func_0011EF18(void) {
+    u32 current;
+    while ((current = D_00438EB0) != 0) {
+        func_0011EED8(current);
+    }
+}
 
 void func_0011EF48(s32 object, u32 value) {
     *(u32 *)(object + 8) = value;

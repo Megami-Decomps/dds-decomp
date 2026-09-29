@@ -308,7 +308,7 @@ INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
 
 /* Script command parameter `idx` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
-s32 func_0010D428(s32 idx) {
+s32 scrReadIntParameter(s32 idx) {
     ScrData *scr = D_003BD78C;
     s32 stackIndex = scr->sp - idx - 1;
 
@@ -346,7 +346,7 @@ f32 bfWaitReadArgFloat(s32 idx)
 }
 
 /* Return a string parameter only when its VM stack tag is STRING. */
-char *func_0010D5A8(s32 paramIdx)
+char *scrReadStringParameter(s32 paramIdx)
 {
     ScrData *scr = D_003BD78C;
     s32 stackIndex = scr->sp - paramIdx - 1;

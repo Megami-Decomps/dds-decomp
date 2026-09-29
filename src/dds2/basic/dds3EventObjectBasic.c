@@ -27,7 +27,7 @@ void dds3ReleaseEventData(EventObj *event) {
 }
 
 /* Snapshot the node's vectors once its pending flag is observed. */
-s32 func_001163F0(EventObj *event) {
+s32 dds3BackupEventNodeVectorsIfFlagged(EventObj *event) {
     void *node;
 
     node = event->node;

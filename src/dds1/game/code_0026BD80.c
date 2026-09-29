@@ -26,7 +26,7 @@ extern s8 D_00324510[];
 
 extern void func_0026C048(void);
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BD80);
+INCLUDE_ASM(const s32, "game/code_0026BD80", mnuDrawSprite);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BE38);
 
@@ -39,7 +39,7 @@ u32 func_0026BED0(void) {
 }
 
 void func_0026BEE8(s32 advanceCount) {
-    func_0027BB08(((MenuState *)D_003BC5D0)->linkedState);
+    mnuSelectFirstListNode(((MenuState *)D_003BC5D0)->linkedState);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
@@ -92,23 +92,23 @@ void mnuReleaseSpriteHandle(void) {
     }
 }
 
-extern s32 func_0026BD80(s32, s32, s32, s32, s32, s32, s32);
+extern s32 mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 /* These entry points differ only in the selected menu sound identifier. */
 s64 mnuStartMovieMenuSfx16(s32 parameter) {
-    return func_0026BD80(0, 0, 0, parameter, 0, 0x16, 0x53);
+    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
 }
 
-s64 func_0026C188(s32 parameter) {
-    return func_0026BD80(0, 0, 0, parameter, 0, 0x17, 0x53);
+s64 mnuStartMovieMenuSfx17(s32 parameter) {
+    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
 }
 
-s64 func_0026C1C0(s32 parameter) {
-    return func_0026BD80(0, 0, 0, parameter, 0, 0x18, 0x53);
+s64 mnuStartMovieMenuSfx18(s32 parameter) {
+    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
 }
 
 s64 func_0026C1F8(s32 parameter) {
-    return func_0026BD80(0, 0, 0, parameter, 0, 0x1A, 0x53);
+    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
 extern void func_002C0A48(s32, s32);
@@ -137,10 +137,10 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C4B8);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C7E0);
 
 s64 mnuStartMovieMenuSfxGroup(void) {
-    func_0026BD80(0, 0, 0, 0x80, 0, 6, 0x53);
-    func_0026BD80(0, 0, 0, 0x80, 0, 0xD, 0x53);
-    func_0026BD80(0, 0, 0, 0x80, 0, 0xE, 0x53);
-    return func_0026BD80(0, 0, 0, 0x80, 0, 0xF, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 6, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0xD, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0xE, 0x53);
+    return mnuDrawSprite(0, 0, 0, 0x80, 0, 0xF, 0x53);
 }
 
 void func_0026CAB0(void) {

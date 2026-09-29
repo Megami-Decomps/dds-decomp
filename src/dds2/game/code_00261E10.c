@@ -148,7 +148,7 @@ s32 evtInitializeSelectedSlot(void) {
     return 1;
 }
 
-s32 func_00261F08(void) {
+s32 evtAdvancePhaseOne(void) {
     EvtStateTableContext *context = (EvtStateTableContext *)func_00101958();
     if (context->stateCode == 1) {
         mnuSetCommandPhase((s32)context, 4);

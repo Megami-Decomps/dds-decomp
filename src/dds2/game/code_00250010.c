@@ -187,11 +187,11 @@ extern void func_003421E8(s32 arg0);
 
 extern s32 func_00342168(s32 arg0);
 
-extern void func_00341BB8(s32 arg0);
+extern void sndStartTrackDefault(s32 arg0);
 
 extern void func_0035B6E0(char *fmt, ...);
 
-extern void func_00342538(s32 arg0);
+extern void sndStartTrackExtended(s32 arg0);
 
 extern void func_00342580(u32 arg0);
 
@@ -204,8 +204,8 @@ extern s32 (*D_003C9928[])(s32, s32, void *);
 extern char D_004373C0[];
 extern void func_0024FF80();
 extern void func_0024FFC8();
-extern u8 *func_0024FE98();
-extern void func_0024FEC0();
+extern u8 *evtAllocateContext();
+extern void evtSetConvertedContextValue();
 
 typedef struct EvtTaskData {
     u32 pad00;
@@ -216,8 +216,8 @@ typedef struct EvtTaskData {
 
 /* Create a task with an initialized event payload. */
 void evtCreateTask(s32 taskId, s32 value) {
-    s32 taskData = (s32)func_0024FE98();
-    func_0024FEC0(taskData, value);
+    s32 taskData = (s32)evtAllocateContext();
+    evtSetConvertedContextValue(taskData, value);
     kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, taskData);
 }
 
@@ -225,10 +225,10 @@ extern s32 kwlnTaskCreate(char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, 
 extern char D_004373C0[];
 extern void func_0024FF80();
 extern void func_0024FFC8();
-extern u8 *func_0024FE98();
+extern u8 *evtAllocateContext();
 
 void evtCreateTaskWithValue(s32 taskId, s32 value) {
-    EvtTaskData *taskData = (EvtTaskData *)func_0024FE98();
+    EvtTaskData *taskData = (EvtTaskData *)evtAllocateContext();
     taskData->value = value;
     kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, (s32)taskData);
 }
@@ -294,13 +294,13 @@ void evtDestroySkyTask(void) {
     }
 }
 
-extern void func_00135568();
+extern void fldSetSwayMode();
 extern void func_00135578();
 extern void func_00135588();
 extern void fldSetFadeTarget();
 
 void evtCreateSkyTask(void) {
-    func_00135568(0);
+    fldSetSwayMode(0);
     func_00135578(0x80);
     func_00135588(0);
     fldSetFadeTarget(0, 1, 0);
@@ -431,7 +431,7 @@ s32 func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     }
 }
 
-extern void func_0024A9F0();
+extern void evtViewerDispatchFlagMode();
 extern void func_00249088();
 extern s32 func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
 
@@ -481,7 +481,7 @@ s32 func_00250D68(s32 x, s32 y, EvtRuntime *ctx) {
     if (D_0037F510.apply != 0) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
-            func_0024A9F0(ctx, step, &D_0037F510);
+            evtViewerDispatchFlagMode(ctx, step, &D_0037F510);
             func_00249088(ctx->curFrame, ctx);
         }
     }
@@ -492,7 +492,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00250F20);
 
 extern void func_00250F20(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
-s32 func_00251180(s32 x, s32 y, EvtRuntime *ctx) {
+s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
 
     list = sdfCreateResetPacketList();
@@ -772,7 +772,7 @@ void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
 
 extern void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
-s32 func_00253C08(s32 x, s32 y, EvtRuntime *ctx) {
+s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 rows;
 
@@ -933,7 +933,7 @@ s32 func_002566F8(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
 
 extern s32 func_002566F8(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx);
 
-s32 func_002567A8(s32 x, s32 y, EvtRuntime *ctx) {
+s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
 
     list = sdfCreateResetPacketList();
@@ -1469,7 +1469,7 @@ s32 evtPlayBgm(s32 id, s32 fade) {
     }
     sound = evtEncodeBgmSoundCode(id, fade);
     func_0035B6E0("Event BGM play :%08X\n", sound);
-    func_00341BB8(sound);
+    sndStartTrackDefault(sound);
     return sound;
 }
 
@@ -1498,7 +1498,7 @@ s32 evtFadeInBgm(s32 id, s32 fade) {
     }
     sound = evtEncodeBgmSoundCode(id, fade);
     func_0035B6E0("Event BGM fade in play :%08X\n", sound);
-    func_00342538(sound);
+    sndStartTrackExtended(sound);
     return sound;
 }
 
@@ -1611,7 +1611,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
     s32 handle;
     if (resource != 0) {
         if (data->effectHandle != 0) {
-            func_0032BBB0(data->effectHandle);
+            sdfTexReleaseReferenceViaHandler(data->effectHandle);
             data->effectHandle = 0;
         }
         handle = func_0032C138(resource);

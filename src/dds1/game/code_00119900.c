@@ -59,7 +59,7 @@ extern s32 D_003C2E7C[];
 extern s32 D_003C2E80[];
 
 extern s32 scrCreateTaskWithDefaultOption(void);
-extern s32 func_0010D428(s32 idx);
+extern s32 scrReadIntParameter(s32 idx);
 extern s32 func_0010D5F0(s32 arg0);
 extern void func_0010D608(f32 arg0);
 extern Entry1A4 *dds3FindEntry(s32 arg0);
@@ -244,7 +244,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B308);
 
-void func_0011B418(s32 arg0) {
+void evtCopyRosterTableValue(s32 arg0) {
     ((Entry1A4 *)arg0)->tableValue = D_0032AEA8[((Entry1A4 *)arg0)->rosterIndex].value;
 }
 
@@ -257,7 +257,7 @@ void evtUpdateFlaggedEntries(void) {
             s32 id = 0;
             do {
                 if (entry->rosterIndex == id) {
-                    func_0011B418((s32)entry);
+                    evtCopyRosterTableValue((s32)entry);
                 }
                 id++;
             } while (id < 16);
@@ -302,7 +302,7 @@ void dds3ForEachFlagged(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B6A8);
 
-void func_0011B7B8(s32 arg0) {
+void evtRandomizeEntryValue(s32 arg0) {
     s32 randomOffset;
 
     randomOffset = effMiscRandMod(0, 4);
@@ -315,7 +315,7 @@ extern s32 effMiscRandMod(u32 arg0, u32 arg1);
 
 /* Clear a subset of per-unit status flags on occupied qualifying entries,
  * gated by the event RNG; report whether any flags were cleared. */
-s32 func_0011B7F0(void) {
+s32 evtClearRandomStatusFlags(void) {
     s32 changed = 0;
     s32 remaining;
     s32 entry;
@@ -339,7 +339,7 @@ s32 func_0011B7F0(void) {
 }
 
 extern void func_0010BE30(u32, s32);
-extern void func_0010C0B0(u32);
+extern void bfStepContext(u32);
 
 s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     func_0010BE30(D_003BAAB4, script);
@@ -348,7 +348,7 @@ s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     ((EvtScriptContext *)D_003C2E70)->second = second;
     ((EvtScriptContext *)D_003C2E70)->options = flags;
     ((EvtScriptContext *)D_003C2E70)->stateFlags &= 0xFFFE;
-    func_0010C0B0(D_003BAAB4);
+    bfStepContext(D_003BAAB4);
     return ((EvtScriptContext *)D_003C2E70)->result;
 }
 
@@ -405,14 +405,14 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011BBB8);
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011BC60);
 
 s32 func_0011BD08(void) {
-    s32 val = func_0010D428(0);
+    s32 val = scrReadIntParameter(0);
 
     func_0010D5F0(func_00119368(D_003C2E78[0], val));
     return 1;
 }
 
 s32 func_0011BD40(void) {
-    s32 val = func_0010D428(0);
+    s32 val = scrReadIntParameter(0);
 
     func_0010D5F0(func_00119368(D_003C2E7C[0], val));
     return 1;
@@ -474,7 +474,7 @@ s32 func_0011C0B0(void) {
     u16 bits = ((EvtScriptContext *)D_003C2E70)->stateFlags | 1;
 
     ((EvtScriptContext *)D_003C2E70)->stateFlags = bits;
-    ((EvtScriptContext *)D_003C2E70)->result = func_0010D428(0);
+    ((EvtScriptContext *)D_003C2E70)->result = scrReadIntParameter(0);
     return 1;
 }
 
@@ -489,8 +489,8 @@ s32 func_0011C118(void) {
 }
 
 /* Apply a random percentage offset around 1.0 to the active script value. */
-s32 func_0011C150(void) {
-    s32 range = func_0010D428(0);
+s32 evtRollRandomScale(void) {
+    s32 range = scrReadIntParameter(0);
     s32 roll = effMiscRandMod(0, range * 2);
 
     func_0010D608((f32)(roll - range + 100) / 100.0f);
@@ -501,7 +501,7 @@ s32 func_0011C1B8(void) {
     s32 available = func_001A1438();
     s32 value;
     if (available) {
-        s32 choice = func_0010D428(0);
+        s32 choice = scrReadIntParameter(0);
         value = func_001A93B8(choice ? 0x20 : 4);
     }
     else {
@@ -515,7 +515,7 @@ s32 func_0011C208(void) {
     s32 available = func_001A1438();
     s32 value;
     if (available) {
-        s32 choice = func_0010D428(0);
+        s32 choice = scrReadIntParameter(0);
         value = func_001A92D0(choice ? 0x20 : 4);
     }
     else {
@@ -529,7 +529,7 @@ s32 func_0011C258(void) {
     s32 available = func_001A1438();
     s32 value;
     if (available) {
-        s32 choice = func_0010D428(0);
+        s32 choice = scrReadIntParameter(0);
         value = func_001A94A0(choice ? 0x20 : 4);
     }
     else {
@@ -701,7 +701,7 @@ void func_0011CE48(void) {
 }
 
 s32 func_0011CE50(void) {
-    s32 val = func_0010D428(0);
+    s32 val = scrReadIntParameter(0);
 
     func_0010D5F0(func_0011A968(val) == 1);
     return 1;

@@ -96,7 +96,7 @@ extern u32 func_002DDCA0(u32, u32);
 
 extern s32 func_0010D8D0(void);
 
-extern u16 func_0010D650(u32);
+extern u16 scrReadIntParameter(u32);
 
 extern u64 func_001B76F0(void);
 
@@ -206,7 +206,7 @@ typedef struct BtlVec3 {
 
 extern f32 bfWaitReadArgFloat(s32);
 
-extern s32 func_001E8D00(s32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern s32 btlCreateFloatTask28(s32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern s32 btlScheduleContextReset(void);
 
@@ -214,7 +214,7 @@ extern f32 D_00452F90[];
 
 extern f32 D_00452FB0[];
 
-extern s32 func_001E8EC0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern s32 btlCreateFloatTask29(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_0023CB68(s32, s32);
 
@@ -258,11 +258,11 @@ extern u8 D_00436C50[];
 
 extern u8 D_00436C58[];
 
-extern void func_0032BBB0(s32);
+extern void sdfTexReleaseReferenceViaHandler(s32);
 
 extern void func_003297C8(s32);
 
-void func_0020E180(BtlResourceDescriptor *, s32);
+void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
 extern s32 func_0032C138(s32);
 
@@ -280,7 +280,7 @@ extern f32 func_00209390(f32 *, f32 *, f32 *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
-extern void func_00340C40(void);
+extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effObjFetchInnerFirstVec(u32);
 
@@ -328,7 +328,7 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
-    func_00340C40();
+    effMiscQuaternionToMatrixVU();
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->muzzleOffset));
     __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
     __asm__ volatile(
@@ -350,7 +350,7 @@ void btlUnitGetBodyPosVU(BtlUnit *unit) {
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->unk_70));
-    func_00340C40();
+    effMiscQuaternionToMatrixVU();
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->bodyOffset));
     __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
     __asm__ volatile(
@@ -852,7 +852,7 @@ void func_00209720(s32 arg0, f32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209770);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002097E8);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawIconAtSize);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209978);
 
@@ -877,7 +877,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern void sdfResetPacketList(void *);
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
-void func_002099C0(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     BtnUv *uv;
     s32 texture;
     void *packet;
@@ -925,7 +925,7 @@ void func_00209CD0(void) {
     D_00438F6C = func_00343ED0(D_00436AF0, &D_00438F70, 0);
 }
 
-void func_00209D08(void) {
+void btlRetainButtonTexture(void) {
     BtlState *state;
     u32 handle;
 
@@ -934,7 +934,7 @@ void func_00209D08(void) {
     state->buttonTextureHandle = handle;
 }
 
-void func_00209D40(void) {
+void btlReleaseButtonTexture(void) {
     BtlState *state;
 
     state = (BtlState *)func_001AA6F8();
@@ -1000,7 +1000,7 @@ s32 func_0020A048(void) {
     return 1;
 }
 
-u32 func_0020A070(void) {
+u32 btlEnableCommandStateFlag(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)func_0010D8D0();
@@ -1013,7 +1013,7 @@ u32 func_0020A0A0(void) {
     s32 context;
 
     context = func_0010D8D0();
-    value = func_0010D650(0);
+    value = scrReadIntParameter(0);
     *(u16 *)(*(s32 *)(context + 0x18) + 0x122) = value;
     return 1;
 }
@@ -1024,7 +1024,7 @@ u32 func_0020A0E0(void) {
 
     battle = func_001AA6F8();
     func_0010D8D0();
-    value = func_0010D650(0);
+    value = scrReadIntParameter(0);
     *(u8 *)(battle + 0x282) = 4;
     *(s32 *)(battle + 0x2A4) = value;
     return 1;
@@ -1037,7 +1037,7 @@ u32 func_0020A130(void) {
 
 u32 func_0020A158(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     btlCmdSimpleB(context, value);
     return 1;
 }
@@ -1054,7 +1054,7 @@ u32 func_0020A1C0(void) {
 
 u32 func_0020A1E8(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     btlCmdSimpleA(context, value);
     return 1;
 }
@@ -1071,21 +1071,21 @@ u32 func_0020A250(void) {
 
 u32 func_0020A278(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     btlCmdSimpleC(context, value);
     return 1;
 }
 
 u32 func_0020A2B8(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     btlCmdSimpleD(context, value);
     return 1;
 }
 
 u32 func_0020A2F8(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     btlCmdSimpleE(context, value);
     return 1;
 }
@@ -1112,7 +1112,7 @@ u32 func_0020A3C0(void) {
 
 s32 func_0020A3F0(void) {
     s32 context = func_0010D8D0();
-    func_002110E8(context, func_0010D650(0));
+    func_002110E8(context, scrReadIntParameter(0));
     return 1;
 }
 
@@ -1128,7 +1128,7 @@ s32 func_0020A458(void) {
 
 u32 func_0020A480(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     btlCmdSimpleJ(context, value);
     return 1;
 }
@@ -1140,7 +1140,7 @@ u32 func_0020A4C0(void) {
 
 s32 func_0020A4F0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x400000)) {
         func_0010D818(1);
         context->choicesA[0] = choice;
@@ -1154,7 +1154,7 @@ s32 func_0020A4F0(void) {
 
 s32 func_0020A580(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x7000000)) {
         func_0010D818(1);
         context->choicesA[1] = choice;
@@ -1168,7 +1168,7 @@ s32 func_0020A580(void) {
 
 s32 func_0020A610(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x7000000)) {
         func_0010D818(1);
         context->choicesA[1] = choice;
@@ -1182,7 +1182,7 @@ s32 func_0020A610(void) {
 
 s32 func_0020A6A0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x800000)) {
         func_0010D818(1);
         context->choicesA[2] = choice;
@@ -1196,7 +1196,7 @@ s32 func_0020A6A0(void) {
 
 s32 func_0020A730(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xc00000)) {
         func_0010D818(1);
         context->choicesA[2] = choice;
@@ -1210,7 +1210,7 @@ s32 func_0020A730(void) {
 
 s32 func_0020A7C0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x1000000)) {
         func_0010D818(1);
         context->choicesA[2] = choice;
@@ -1224,7 +1224,7 @@ s32 func_0020A7C0(void) {
 
 s32 func_0020A850(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x1c00000)) {
         func_0010D818(1);
         context->choicesA[3] = choice;
@@ -1238,7 +1238,7 @@ s32 func_0020A850(void) {
 
 s32 func_0020A8E0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x2000000)) {
         func_0010D818(1);
         context->choicesA[4] = choice;
@@ -1252,7 +1252,7 @@ s32 func_0020A8E0(void) {
 
 s32 func_0020A970(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x2400000)) {
         func_0010D818(1);
         context->choicesA[5] = choice;
@@ -1266,7 +1266,7 @@ s32 func_0020A970(void) {
 
 s32 func_0020AA00(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x2800000)) {
         func_0010D818(1);
         context->choicesA[6] = choice;
@@ -1282,7 +1282,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020AA90);
 
 s32 func_0020AB38(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x3000000)) {
         func_0010D818(1);
         context->choicesA[7] = choice;
@@ -1296,7 +1296,7 @@ s32 func_0020AB38(void) {
 
 s32 func_0020ABC8(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x3400000)) {
         func_0010D818(1);
         context->choicesExtra[0] = choice;
@@ -1310,7 +1310,7 @@ s32 func_0020ABC8(void) {
 
 s32 func_0020AC58(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x3800000)) {
         func_0010D818(1);
         context->choicesExtra[1] = choice;
@@ -1324,7 +1324,7 @@ s32 func_0020AC58(void) {
 
 s32 func_0020ACE8(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x3C00000)) {
         func_0010D818(1);
         context->choicesExtra[2] = choice;
@@ -1338,7 +1338,7 @@ s32 func_0020ACE8(void) {
 
 s32 func_0020AD78(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x4000000)) {
         func_0010D818(1);
         context->choicesExtra[3] = choice;
@@ -1352,7 +1352,7 @@ s32 func_0020AD78(void) {
 
 s32 func_0020AE08(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x4400000)) {
         func_0010D818(1);
         context->choicesExtra[4] = choice;
@@ -1390,7 +1390,7 @@ u32 func_0020AF10(void) {
 
 s32 func_0020AF90(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x5800000)) {
         func_0010D818(1);
         context->choiceD8 = choice;
@@ -1404,7 +1404,7 @@ s32 func_0020AF90(void) {
 
 s32 func_0020B020(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x5C00000)) {
         func_0010D818(1);
         context->choiceD8 = choice;
@@ -1454,7 +1454,7 @@ u32 func_0020B150(void) {
 
 s32 func_0020B1A0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0A800000)) {
         func_0010D818(1);
         context->savedChoices[0] = choice;
@@ -1468,7 +1468,7 @@ s32 func_0020B1A0(void) {
 
 s32 func_0020B240(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0AC00000)) {
         func_0010D818(1);
         context->savedChoices[1] = choice;
@@ -1482,7 +1482,7 @@ s32 func_0020B240(void) {
 
 u32 func_0020B2E0(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), func_0010D650(0) | 0x12C00000)) {
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x12C00000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1492,7 +1492,7 @@ u32 func_0020B2E0(void) {
 
 u32 func_0020B350(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), func_0010D650(0) | 0x13000000)) {
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x13000000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1502,7 +1502,7 @@ u32 func_0020B350(void) {
 
 s32 func_0020B3C0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0BC00000)) {
         func_0010D818(1);
         context->savedChoices[2] = choice;
@@ -1516,7 +1516,7 @@ s32 func_0020B3C0(void) {
 
 s32 func_0020B460(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0C000000)) {
         func_0010D818(1);
         context->savedChoices[3] = choice;
@@ -1530,7 +1530,7 @@ s32 func_0020B460(void) {
 
 s32 func_0020B500(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0C400000)) {
         func_0010D818(1);
         context->savedChoices[4] = choice;
@@ -1544,7 +1544,7 @@ s32 func_0020B500(void) {
 
 s32 func_0020B5A0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0C800000)) {
         func_0010D818(1);
         context->savedChoices[4] = choice;
@@ -1558,7 +1558,7 @@ s32 func_0020B5A0(void) {
 
 s32 func_0020B640(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x0CC00000)) {
         func_0010D818(1);
         context->savedChoices[5] = choice;
@@ -1572,7 +1572,7 @@ s32 func_0020B640(void) {
 
 s32 func_0020B6E0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xd800000)) {
         func_0010D818(1);
         context->choicesB[0] = choice;
@@ -1586,7 +1586,7 @@ s32 func_0020B6E0(void) {
 
 s32 func_0020B770(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xdc00000)) {
         func_0010D818(1);
         context->choicesB[1] = choice;
@@ -1600,7 +1600,7 @@ s32 func_0020B770(void) {
 
 s32 func_0020B800(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xe000000)) {
         func_0010D818(1);
         context->choicesB[2] = choice;
@@ -1614,7 +1614,7 @@ s32 func_0020B800(void) {
 
 s32 func_0020B890(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xe400000)) {
         func_0010D818(1);
         context->choicesB[3] = choice;
@@ -1628,7 +1628,7 @@ s32 func_0020B890(void) {
 
 s32 func_0020B920(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xE800000)) {
         func_0010D818(1);
         context->choicesC[0] = choice;
@@ -1642,7 +1642,7 @@ s32 func_0020B920(void) {
 
 s32 func_0020B9B0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xEC00000)) {
         func_0010D818(1);
         context->choicesC[1] = choice;
@@ -1656,7 +1656,7 @@ s32 func_0020B9B0(void) {
 
 s32 func_0020BA40(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xF400000)) {
         func_0010D818(1);
         context->choicesC[6] = choice;
@@ -1670,7 +1670,7 @@ s32 func_0020BA40(void) {
 
 s32 func_0020BAD0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xF800000)) {
         func_0010D818(1);
         context->choicesC[7] = choice;
@@ -1684,7 +1684,7 @@ s32 func_0020BAD0(void) {
 
 u32 func_0020BB60(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), func_0010D650(0) | 0x13400000)) {
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x13400000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1694,7 +1694,7 @@ u32 func_0020BB60(void) {
 
 s32 func_0020BBD0(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), func_0010D650(0) | 0x13800000)) {
+    if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x13800000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1704,7 +1704,7 @@ s32 func_0020BBD0(void) {
 
 s32 func_0020BC40(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0xB400000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x124) = choice;
@@ -1718,7 +1718,7 @@ s32 func_0020BC40(void) {
 
 s32 func_0020BCD0(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0xFC00000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x13C) = choice;
@@ -1732,7 +1732,7 @@ s32 func_0020BCD0(void) {
 
 s32 func_0020BD60(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), 0xF000000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x128) = choice;
@@ -1758,7 +1758,7 @@ u32 func_0020BDE8(void) {
 
 u32 func_0020BE38(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, *(s32 *)(context + 0x18), func_0010D650(0) | 0x10C00000)) {
+    if (func_00210EA0(context, *(s32 *)(context + 0x18), scrReadIntParameter(0) | 0x10C00000)) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1792,7 +1792,7 @@ u32 func_0020BEF8(void) {
 
 s32 func_0020BF48(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), 0xD000000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x100) = choice;
@@ -1806,7 +1806,7 @@ s32 func_0020BF48(void) {
 
 s32 func_0020BFE0(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), 0xD400000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x108) = choice;
@@ -1860,9 +1860,9 @@ u32 func_0020C140(void) {
 
 u32 func_0020C180(void) {
     BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
-    s32 side = func_0010D650(0);
-    s32 id = func_0010D650(1);
-    s32 percent = func_0010D650(2);
+    s32 side = scrReadIntParameter(0);
+    s32 id = scrReadIntParameter(1);
+    s32 percent = scrReadIntParameter(2);
     u32 mask = 0x200;
     if (side) {
         mask = 0x400;
@@ -1889,7 +1889,7 @@ u32 func_0020C290(void) {
 
 s32 func_0020C298(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0x12000000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x144) = choice;
@@ -1903,7 +1903,7 @@ s32 func_0020C298(void) {
 
 s32 func_0020C328(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0x12400000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x148) = choice;
@@ -1917,7 +1917,7 @@ s32 func_0020C328(void) {
 
 s32 func_0020C3C0(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    u32 choice = func_0010D650(0);
+    u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, *(s32 *)(context + 0x18), choice | 0x11C00000)) {
         func_0010D818(1);
         *(u32 *)(context + 0x140) = choice;
@@ -2044,13 +2044,13 @@ u32 func_0020C690(void) {
 
 u32 func_0020C6B8(void) {
     s32 context = func_0010D8D0();
-    u16 value = func_0010D650(0);
+    u16 value = scrReadIntParameter(0);
     func_002112C8(context, value);
     return 1;
 }
 
 s32 func_0020C6F8(void) {
-    func_00226558(func_0010D650(0));
+    func_00226558(scrReadIntParameter(0));
     return 1;
 }
 
@@ -2072,7 +2072,7 @@ u32 func_0020C760(void) {
 }
 
 u32 func_0020C780(void) {
-    func_001CFAE0();
+    fldBeginSceneTransition();
     return 1;
 }
 
@@ -2105,7 +2105,7 @@ u32 btlCmdCameraMove(void) {
     target[3] = bfWaitReadArgFloat(6);
     btlStartTask(func_001E66D8());
     btlStartTask(func_001E6740());
-    btlStartTask(func_001E8D00(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
+    btlStartTask(btlCreateFloatTask28(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
     btlStartTask(btlScheduleContextReset());
     return 1;
 }
@@ -2161,7 +2161,7 @@ u32 btlCmdCameraMoveBlend(void) {
     f32 timeB = bfWaitReadArgFloat(1);
     btlStartTask(func_001E66D8());
     btlStartTask(func_001E6740());
-    btlStartTask(func_001E8EC0(0, D_00452F90[0], D_00452F90[1], D_00452F90[2], D_00452FB0[0], D_00452FB0[1],
+    btlStartTask(btlCreateFloatTask29(0, D_00452F90[0], D_00452F90[1], D_00452F90[2], D_00452FB0[0], D_00452FB0[1],
                                 D_00452FB0[2], D_00452FB0[3], D_00452F90[4], D_00452F90[5], D_00452F90[6],
                                 D_00452FB0[4], D_00452FB0[5], D_00452FB0[6], D_00452FB0[7], timeA, timeB));
     btlStartTask(btlScheduleContextReset());
@@ -2535,9 +2535,9 @@ s32 func_0020D3A0(s32 unused, BtlReader *reader) {
     return strlen(reader->name);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D448);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlScanDirectory);
 
-void func_0020D8F0(s32 arg0) {
+void btlDestroyEntryList(s32 arg0) {
     s32 temp_v0;
 
     if (*(s32 *)(arg0 + 8) != 0) {
@@ -2579,10 +2579,10 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DA28);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DAB8);
 
-void func_0020DF68(BtlResourceDescriptor *resource) {
+void btlDestroyResourceDescriptor(BtlResourceDescriptor *resource) {
     s32 handle = resource->handle;
     if (handle != 0 && resource->ownsHandle == 1) {
-        func_0032BBB0(handle);
+        sdfTexReleaseReferenceViaHandler(handle);
     }
     func_00328E48(resource);
 }
@@ -2600,7 +2600,7 @@ u32 func_0020DFC8(s32 arg0) {
     return *(u32 *)(arg0 + 8);
 }
 
-s32 func_0020DFD0(BtlResourceDescriptor *resource, char *output) {
+s32 btlFormatSelectedResourceName(BtlResourceDescriptor *resource, char *output) {
     s32 index = resource->selector->index;
     if (index != 0) {
         func_0035C860(output, D_00436C50, index, resource->path->name);
@@ -2623,27 +2623,27 @@ s32 btlTrimResourceName(BtlResourceDescriptor *resource, char *output) {
     return resource->path->id;
 }
 
-u32 func_0020E0F8(BtlResourceDescriptor *resource) {
+u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
     return resource->path->variant;
 }
 
-void func_0020E108(BtlResourceDescriptor *resource, s32 name) {
+void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
     u32 loaded;
     s32 handle = resource->handle;
     s32 buffer;
     if (handle != 0 && resource->ownsHandle == 1) {
-        func_0032BBB0(handle);
+        sdfTexReleaseReferenceViaHandler(handle);
         resource->handle = 0;
     }
     buffer = func_00343ED0(name, &loaded, 0);
-    func_0020E180(resource, loaded);
+    btlReplaceResourceHandle(resource, loaded);
     func_003297C8(buffer);
 }
 
-void func_0020E180(BtlResourceDescriptor *resource, s32 name) {
+void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
     s32 handle = resource->handle;
     if (handle != 0 && resource->ownsHandle == 1) {
-        func_0032BBB0(handle);
+        sdfTexReleaseReferenceViaHandler(handle);
         resource->handle = 0;
     }
     resource->handle = func_0032C138(name);

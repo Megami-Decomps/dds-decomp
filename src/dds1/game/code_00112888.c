@@ -30,7 +30,7 @@ void func_00112930(u32 unused, u32 value) {
 }
 
 /* Allocate the inner state and associate it with its world-object handle. */
-u32 func_00112958(WorldInnerOwner *object) {
+u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
     WorldInnerState *inner;
     u32 handle;
 

@@ -12,7 +12,7 @@ typedef struct {
 } LightObject;
 
 /* Releases the light's buffer and resource before freeing the object itself. */
-void func_001165A0(LightObject *light) {
+void lightReleaseObject(LightObject *light) {
     LightData *data;
 
     data = light->data;

@@ -120,14 +120,14 @@ void itfSetModelInstanceValuePair(ModelInstance *model, s32 value) {
 }
 
 /* Write the second three-component vector without changing its other state. */
-void func_0031D530(ModelInstance *model, f32 x, f32 y, f32 z) {
+void itfSetModelInstanceSecondaryVector(ModelInstance *model, f32 x, f32 y, f32 z) {
     model->vector10[0] = x;
     model->vector10[1] = y;
     model->vector10[2] = z;
 }
 
 /* Write the first vector and reset its associated word at +0x0C. */
-void func_0031D540(ModelInstance *model, f32 x, f32 y, f32 z) {
+void itfSetModelInstancePrimaryVector(ModelInstance *model, f32 x, f32 y, f32 z) {
     model->vector0[0] = x;
     model->vector0[1] = y;
     model->vector0[2] = z;

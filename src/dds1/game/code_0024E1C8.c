@@ -165,7 +165,7 @@ typedef struct MenuCleanupOwner {
 } MenuCleanupOwner;
 
 /* Tear down the linked resource nodes and release the task's allocation. */
-void func_0024FB30(s32 unused, s32 *taskData) {
+void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     MenuCleanupOwner *owner = (MenuCleanupOwner *)taskData[3];
     MenuCleanupNode *node = owner->first;
     u8 *record = (u8 *)func_002CB3B8(D_003BC4CC, -1);

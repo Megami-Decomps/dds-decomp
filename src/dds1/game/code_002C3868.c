@@ -8,7 +8,7 @@ extern void func_002C5C70(void);
 
 extern void func_002C3DB0(void);
 
-extern s32 func_002C4A10(void);
+extern s32 sdfCounterGetDisplayValue(void);
 
 typedef struct {
     u32 *word;         /* 0x00 */
@@ -82,7 +82,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3AC8);
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3C48);
 
 /* Reset the current selection before installing the requested index. */
-void func_002C3CD0(u32 index) {
+void sdfSetSelectedIndex(u32 index) {
     func_002C3C48();
     D_003BD268 = index;
 }
@@ -98,7 +98,7 @@ void sdfCycleForward(void) {
 }
 
 /* Cycle through the same bounded selection in the opposite direction. */
-void func_002C3D48(void) {
+void sdfCycleBackward(void) {
     if (D_003BD268 != 0) {
         func_002C3C48();
         D_003BD268 = D_003BD268 - 1;
@@ -146,7 +146,7 @@ u32 sdfCounterGetDisplayWordPointer(void) {
     return (u32)((SdfCounterRuntime *)D_003BD274)->channel->display->word;
 }
 
-s32 func_002C4A10(void) {
+s32 sdfCounterGetDisplayValue(void) {
     return ((SdfCounterRuntime *)D_003BD274)->channel->display->value;
 }
 

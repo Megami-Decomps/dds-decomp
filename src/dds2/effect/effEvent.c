@@ -74,7 +74,7 @@ INCLUDE_RODATA(const s32, "effect/effEvent", D_00414A00);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00198710);
 
-void func_00198908(EffEventWork *work) {
+void effEventReleaseSharedResources(EffEventWork *work) {
     D_00436530 = D_00436530 - 1;
     if (D_00436530 == 0) {
         billDispatchByKind(D_00436534);

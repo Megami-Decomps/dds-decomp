@@ -25,6 +25,10 @@ typedef struct EventVisualData {
     u8 solarPhase;
 } EventVisualData;
 
+extern u32 D_00435CBC;
+
+void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
+
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
 
 /* Seed both visual-value tables and cache the current raw solar phase. */
@@ -90,7 +94,10 @@ void func_00245820(void) {
     func_0010BFE0();
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", evtStartTestTask);
+void evtStartTestTask(void) {
+    D_00435CBC = 0x80000000;
+    kwlnTaskCreate(D_004221D8, 0x2AF9, 1, 1, func_00245818, func_00245820, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00244F00", evtStopTestTasks);
 

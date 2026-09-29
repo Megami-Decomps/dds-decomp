@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_0010D428(u64);
+extern u64 scrReadIntParameter(u64);
 extern u64 func_0011B140(u64, u64);
 
 extern u32 D_003BD7A8;
@@ -14,7 +14,7 @@ typedef struct GlyphOwner {
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
 u32 func_0011CEB8(void) {
-    func_0010D5F0(ptyRemoveUnit(func_0010D428(0)) == 1);
+    func_0010D5F0(ptyRemoveUnit(scrReadIntParameter(0)) == 1);
     return 1;
 }
 
@@ -23,8 +23,8 @@ u32 func_0011CEF0(void) {
     u64 firstOperand;
     u64 secondOperand;
 
-    firstOperand = func_0010D428(0);
-    secondOperand = func_0010D428(1);
+    firstOperand = scrReadIntParameter(0);
+    secondOperand = scrReadIntParameter(1);
     firstOperand = func_0011B140(firstOperand, secondOperand);
     func_0010D5F0(firstOperand);
     return 1;

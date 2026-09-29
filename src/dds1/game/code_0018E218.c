@@ -102,7 +102,7 @@ extern void func_00187598(BDWork2C *arg);
 extern void func_00187988(Work30 *arg);
 extern void func_00187C08(Work18 *arg);
 extern void func_00188068(BDWork24 *arg);
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E218);
+INCLUDE_ASM(const s32, "game/code_0018E218", effCreateSlotArray);
 
 void effReleaseArrayAllocation(EffArrHdr *header) {
     func_002D0918((u32)header->unk8);

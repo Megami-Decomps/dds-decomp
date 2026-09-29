@@ -83,7 +83,7 @@ extern s32 D_0043909C;
 
 extern u32 D_004390A0;
 
-extern s32 func_0030C9B8(void);
+extern s32 sdfCounterGetDisplayValue(void);
 
 extern s32 D_004388BC;
 
@@ -142,7 +142,7 @@ typedef struct SdfSlotSet {
 extern SdfQuad D_00400990;
 extern SdfQuad D_004009A0;
 
-extern s32 func_002B8158(s32, s32, s32);
+extern s32 mnuCreateListState(s32, s32, s32);
 extern void *func_00328D68(s32);
 extern void *memset(void *, s32, u32);
 extern s32 func_0030B600(void);
@@ -228,7 +228,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BA98);
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BBA8);
 
 /* Reset the current selection before installing the requested index. */
-void func_0030BC30(u32 index) {
+void sdfSetSelectedIndex(u32 index) {
     func_0030BBA8();
     D_004388B8 = index;
 }
@@ -244,7 +244,7 @@ void sdfCycleForward(void) {
 }
 
 /* Cycle through the same bounded selection in the opposite direction. */
-void func_0030BCA8(void) {
+void sdfCycleBackward(void) {
     if (D_004388B8 != 0) {
         func_0030BBA8();
         D_004388B8 = D_004388B8 - 1;
@@ -278,7 +278,7 @@ s32 func_0030C378(s32 mask, s32 index) {
     s32 i;
 
     count = 0;
-    D_004388C4 = func_002B8158(0, 8, 0x16);
+    D_004388C4 = mnuCreateListState(0, 8, 0x16);
     ((SdfCounterRuntime *)D_004388C4)->timer = func_00328D68(0x24);
     memset(((SdfCounterRuntime *)D_004388C4)->timer, 0, 0x24);
     ((SdfCounterRuntime *)D_004388C4)->draw = (SdfCounterDrawFn)func_0030CC68;
@@ -363,7 +363,7 @@ u32 sdfCounterGetDisplayWordPointer(void) {
     return (u32)((SdfCounterRuntime *)D_004388C4)->channel->display->word;
 }
 
-s32 func_0030C9B8(void) {
+s32 sdfCounterGetDisplayValue(void) {
     return ((SdfCounterRuntime *)D_004388C4)->channel->display->value;
 }
 
@@ -671,7 +671,7 @@ void func_0030E130(void) {
     s32 temp_v0;
 
     D_00439098 = 0;
-    temp_v0 = func_0030C9B8();
+    temp_v0 = sdfCounterGetDisplayValue();
     D_0043909C = temp_v0 - 1;
     D_004390A0 = 0x3c;
 }

@@ -285,7 +285,7 @@ extern void func_002E9340(s32);
 extern void initPartyPanelSlots(s32);
 extern void func_00271500(s32, s32);
 extern void effRequestResourceByMode(char *, char *, s32, s32);
-extern void func_0027AEA8(s32);
+extern void mnuRequestBaseAssets(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 s32 mnuStaffInitPanel(s32 work) {
@@ -296,14 +296,14 @@ s32 mnuStaffInitPanel(s32 work) {
     initPartyPanelSlots(work + 0x574);
     func_00271500(*(s32 *)(work + 0x58), work + 0x4F8);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, work + 0x90);
-    func_0027AEA8(work + 0xD1C);
+    mnuRequestBaseAssets(work + 0xD1C);
     *(s32 *)(work + 0x570) = 1;
     kwlnFadeInStart(0, 0, 0, 1);
     kwlnFadeInStart(0, 0, 0, 0);
     return 1;
 }
 
-extern s32 func_002716E8(s32, s32);
+extern s32 mnuStaffSlotsAllFilled(s32, s32);
 extern s32 func_0027AF28(s32);
 extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -317,7 +317,7 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (func_002716E8(ctx->fadeTarget, work + 0x4F8) == 0) {
+    if (mnuStaffSlotsAllFilled(ctx->fadeTarget, work + 0x4F8) == 0) {
         return 1;
     }
     if (func_002877A8() == 1) {

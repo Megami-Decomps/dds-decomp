@@ -64,8 +64,8 @@ extern void func_00320C88(u32);
 extern void func_00321908(u32);
 extern u32 func_0035A828(s32 bytes);
 extern u8 *func_00321238(void);
-extern u8 *func_00321328(s32 index);
-extern MenuWorkEntry *func_00322D50(void);
+extern u8 *mnuGetResourceRecordByIndex(s32 index);
+extern MenuWorkEntry *mnuFindUnusedWorkEntry(void);
 extern void func_00322E18(u32 node, u32 context, s32 mode, s32 x, s32 y,
                           f32 progress);
 
@@ -346,7 +346,7 @@ void func_00322D18(void) {
 }
 
 
-MenuWorkEntry *func_00322D50(void) {
+MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
     s32 i = 0;
     MenuWorkEntry *entry;
 
@@ -372,7 +372,7 @@ f32 mnuEvaluateTimedValue(u8 *entry) {
     u8 *registry = func_003224F0(*(u32 *)(entry + 4));
     if ((**(u32 **)(registry + 0xc) & 1) != 0) {
         u8 *clock = func_00321238();
-        u8 *segment = func_00321328(*(s32 *)(entry + 8));
+        u8 *segment = mnuGetResourceRecordByIndex(*(s32 *)(entry + 8));
         return *(f32 *)(entry + 0x14) +
             (f32)((s32)*(u16 *)(clock + 2) - *(s32 *)(segment + 0xc));
     }
@@ -381,7 +381,7 @@ f32 mnuEvaluateTimedValue(u8 *entry) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
 
-void func_00322F00(MenuWorkEntry *entry) {
+void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
     if (entry->callback != 0) {
         func_00320C88(entry->callback);
@@ -437,7 +437,7 @@ void func_00323938(u8 *arg0) {
     D_004389B0 = arg0;
 }
 
-u32 func_00323940(MenuWorkEntry *entry, s32 elapsed) {
+u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
     if ((s16)entry->remaining - elapsed < 1) {
         entry->remaining = 0;
         entry->flags = entry->flags | MNU_WORK_FINISHED;
@@ -492,7 +492,7 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
 
 u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
-    u32 node = (u32)func_00322D50();
+    u32 node = (u32)mnuFindUnusedWorkEntry();
     if (node != 0) {
         func_00322E18(node, context, 0, (s32)x, (s32)y, progress);
         *(u32 *)(node + 0x40) |= 0x10;

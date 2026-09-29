@@ -103,7 +103,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002530D8);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
-void func_00253520(s32 context) {
+void mnuReinitializeSceneGrid(s32 context) {
     sdfDestroyGridWork(*(s32 *)(context + 0x484));
     func_00250978(context);
     mnuCopySceneCoordinates(context);

@@ -104,7 +104,7 @@ INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424D8);
 
 /* Sends a prepared track identifier with the 0x17f setting. */
 
-void func_00342538(s32 trackId) {
+void sndStartTrackExtended(s32 trackId) {
     CmdPacket packet;
 
     func_003421E8(trackId);

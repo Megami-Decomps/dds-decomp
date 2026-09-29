@@ -2,7 +2,7 @@
 
 extern s64 kwlnTaskIsRegistered(u64);
 
-extern u64 func_0010D650(u64);
+extern u64 scrReadIntParameter(u64);
 
 extern s32 D_00435DD0;
 
@@ -16,7 +16,7 @@ void func_00101968(s32 arg0, s32 arg1);
 
 s32 func_0010D8C8(void);
 
-char *func_0010D7D0(s32 idx);
+char *scrReadStringParameter(s32 idx);
 
 void func_0010D818(s32 value);
 
@@ -58,7 +58,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         func_0035B6E0(D_00422050);
         return 1;
     }
-    childTask = evtCreateTask(0x2afe, func_0010D7D0(0));
+    childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
     func_00101968(work->taskKey, childTask);
     func_0010D818(childTask);
     return 1;
@@ -68,7 +68,7 @@ u32 evtOpcodeSetTaskContextFlag(void) {
     u64 task;
     s64 registered;
 
-    task = func_0010D650(0);
+    task = scrReadIntParameter(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
         evtSetContextFlag(task);
@@ -80,7 +80,7 @@ u32 evtOpcodeClearTaskContextFlag(void) {
     u64 task;
     s64 registered;
 
-    task = func_0010D650(0);
+    task = scrReadIntParameter(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
         evtClearContextFlag(task);
@@ -92,7 +92,7 @@ u32 evtOpcodeDestroyTask(void) {
     u64 task;
     s64 registered;
 
-    task = func_0010D650(0);
+    task = scrReadIntParameter(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
         evtDestroyTaskHierarchy(task);
@@ -105,11 +105,11 @@ u32 evtOpcodeSetFadeTarget(void) {
     u64 target;
     u64 duration;
 
-    func_00135568(0);
+    fldSetSwayMode(0);
     func_00135578(0x80);
-    area = func_0010D650(0);
-    target = func_0010D650(1);
-    duration = func_0010D650(2);
+    area = scrReadIntParameter(0);
+    target = scrReadIntParameter(1);
+    duration = scrReadIntParameter(2);
     fldSetFadeTarget(area, target, duration);
     return 1;
 }
@@ -119,7 +119,7 @@ INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422050);
 u32 evtSetSkyAlpha(void) {
     s64 alpha;
 
-    alpha = func_0010D650(1);
+    alpha = scrReadIntParameter(1);
     if (alpha < -255) {
         func_0010AE38("warning : SET_SKY_A alpha < -255\n");
         alpha = -255;
@@ -128,7 +128,7 @@ u32 evtSetSkyAlpha(void) {
         func_0010AE38("warning : SET_SKY_A alpha > 255\n");
         alpha = 255;
     }
-    evtStartSkyAlphaTransition(func_0010D650(0), alpha);
+    evtStartSkyAlphaTransition(scrReadIntParameter(0), alpha);
     return 1;
 }
 
@@ -148,8 +148,8 @@ u32 evtOpcodePlayBgm(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D650(0);
-    fade = func_0010D650(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     evtPlayBgm(id, fade);
     return 1;
 }
@@ -158,8 +158,8 @@ u32 evtOpcodeTransitionBgm(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D650(0);
-    fade = func_0010D650(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     evtTransitionBgm(id, fade);
     return 1;
 }
@@ -168,8 +168,8 @@ u32 func_00243140(void) {
     u64 first;
     u64 second;
 
-    first = func_0010D650(0);
-    second = func_0010D650(1);
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
     func_0025CE68(first, second);
     return 1;
 }
@@ -188,8 +188,8 @@ u32 evtOpcodeSetBgmVolumePan(void) {
     u64 volume;
     u64 pan;
 
-    volume = func_0010D650(0);
-    pan = func_0010D650(1);
+    volume = scrReadIntParameter(0);
+    pan = scrReadIntParameter(1);
     evtSetBgmVolumePan(volume, pan);
     return 1;
 }
@@ -198,8 +198,8 @@ u32 func_00243200(void) {
     u64 first;
     u64 second;
 
-    first = func_0010D650(0);
-    second = func_0010D650(1);
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
     func_0025CF00(first, second);
     return 1;
 }
@@ -208,8 +208,8 @@ u32 evtOpcodeRefreshTaskData(void) {
     u64 task;
     u64 value;
 
-    task = func_0010D650(0);
-    value = func_0010D650(1);
+    task = scrReadIntParameter(0);
+    value = scrReadIntParameter(1);
     evtRefreshTaskData(task, value);
     return 1;
 }

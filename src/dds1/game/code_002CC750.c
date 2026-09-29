@@ -698,7 +698,7 @@ typedef struct SdfFlagListWork {
     u32 resource;             /* 0x54 */
 } SdfFlagListWork;
 
-void func_002CEA90(s32 context) {
+void sdfResetFlagListEntries(s32 context) {
     u32 count;
     u32 *mark;
     u32 index;
@@ -788,13 +788,13 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     return CreateSema(&sema);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF468);
+INCLUDE_ASM(const s32, "game/code_002CC750", sdfCreateThread);
 
 void func_002CF4E0(u64 destination, u64 encoded, u64 option) {
     u64 decoded;
 
     decoded = func_002CF530(encoded);
-    func_002CF468(destination, decoded, encoded, option);
+    sdfCreateThread(destination, decoded, encoded, option);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2B8);

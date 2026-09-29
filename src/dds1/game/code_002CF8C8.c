@@ -6,9 +6,9 @@ extern void (*D_003BD2D4)(void);
 
 extern void sdfSleepThreadCount(s32);
 
-extern void func_002E3970(void);
+extern void sdfPadUpdatePorts(void);
 
-extern void func_002E39C8(void);
+extern void sdfPadBuildButtonStates(void);
 
 extern void sdfTickThreadPriorityOverride(void);
 
@@ -42,9 +42,9 @@ u32 sdfGetElapsedTimerTicks(u32 previous) {
 void sdfRunTickWorkerThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
-        func_002E3970();
+        sdfPadUpdatePorts();
         if (!D_003BD39C) {
-            func_002E39C8();
+            sdfPadBuildButtonStates();
         }
         sdfTickThreadPriorityOverride();
         if (D_003BD2D4 != NULL) {

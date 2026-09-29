@@ -11,7 +11,7 @@ typedef struct SdfVec4 {
     f32 w;
 } SdfVec4;
 
-extern f32 func_00326978();
+extern f32 sdfVec3Normalize();
 
 
 extern u64 func_003283E0(u64);
@@ -28,7 +28,7 @@ extern s32 CreateSema(void *);
 
 extern void (*D_004389C4)(void);
 
-extern f32 func_00326A40(void *, void *);
+extern f32 sdfVec3DotNormalized(void *, void *);
 
 extern f32 func_003532B8(f32);
 
@@ -144,7 +144,7 @@ void func_00326918(float *vector, float x, float y, float z) {
     vector[2] += z;
 }
 
-void func_00326940(float *vector, float x, float y, float z) {
+void sdfVec3SetComponents(float *vector, float x, float y, float z) {
     vector[0] = x;
     vector[1] = y;
     vector[2] = z;
@@ -156,11 +156,11 @@ void sdfVectorScale(float factor, float *vector) {
     vector[2] = vector[2] * factor;
 }
 
-extern f32 func_003269F0();
+extern f32 sdfVectorLength();
 
 /* Normalize the first three components; a zero-length vector stays unchanged. */
-f32 func_00326978(f32 *vector) {
-    f32 length = func_003269F0();
+f32 sdfVec3Normalize(f32 *vector) {
+    f32 length = sdfVectorLength();
 
     if (length == 0.0f) {
         return 0.0f;
@@ -171,20 +171,20 @@ f32 func_00326978(f32 *vector) {
     return length;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003269F0);
+INCLUDE_ASM(const s32, "game/code_00324DF8", sdfVectorLength);
 
 /* Dot product of two normalized 3D directions (w is ignored). */
-f32 func_00326A40(void *first, void *second) {
+f32 sdfVec3DotNormalized(void *first, void *second) {
     SdfVec4 firstNormalized = *(SdfVec4 *)first;
     SdfVec4 secondNormalized = *(SdfVec4 *)second;
 
-    func_00326978(&firstNormalized);
-    func_00326978(&secondNormalized);
+    sdfVec3Normalize(&firstNormalized);
+    sdfVec3Normalize(&secondNormalized);
     return firstNormalized.x * secondNormalized.x + firstNormalized.y * secondNormalized.y + firstNormalized.z * secondNormalized.z;
 }
 
 f32 func_00326AE0(void *a, void *b) {
-    return func_003532B8(func_00326A40(a, b));
+    return func_003532B8(sdfVec3DotNormalized(a, b));
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326B00);
@@ -196,7 +196,7 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_003270C8);
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003275C8);
 
 /* Transpose through a local copy so source and destination may alias. */
-void func_00327AC8(SdfMat4 *dst, SdfMat4 *src) {
+void sdfMat4Transpose(SdfMat4 *dst, SdfMat4 *src) {
     SdfMat4 t = *src;
 
     dst->m[0] = t.m[0];
@@ -219,7 +219,7 @@ void func_00327AC8(SdfMat4 *dst, SdfMat4 *src) {
 
 extern void *memcpy(void *, const void *, u32);
 
-f32 *func_00327BD8(f32 *vec, f32 *mat) {
+f32 *sdfVectorTransformByMatrix(f32 *vec, f32 *mat) {
     f32 out[4];
     f32 x = vec[0];
     f32 y = vec[1];
@@ -256,13 +256,13 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     return CreateSema(&sema);
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328318);
+INCLUDE_ASM(const s32, "game/code_00324DF8", sdfCreateThread);
 
 void func_00328390(u64 destination, u64 source, u64 option) {
     u64 handle;
 
     handle = func_003283E0(source);
-    func_00328318(destination, handle, source, option);
+    sdfCreateThread(destination, handle, source, option);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);

@@ -28,7 +28,7 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern f32 func_002FA1C0(f32);
 
-extern f32 func_002E77F8(f32);
+extern f32 sdfSinPoly(f32);
 
 extern f32 func_002E78F8(f32);
 
@@ -67,6 +67,21 @@ extern s32 func_002D03F8(s32);
 extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void func_002CC740();
+
+typedef struct SdfListNode {
+    u32 index;                  /* 0x00 */
+    s32 key;                    /* 0x04 */
+    struct SdfListNode *next;   /* 0x08 */
+    struct SdfListNode *prev;   /* 0x0C */
+    s32 value;                  /* 0x10 */
+} SdfListNode;
+
+typedef struct SdfList {
+    u32 pad00;
+    u32 count;                  /* 0x04 */
+    SdfListNode *head;          /* 0x08 */
+    SdfListNode *tail;          /* 0x0C */
+} SdfList;
 
 float sdfQuatLengthSquared(float *arg0) {
     return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
@@ -139,7 +154,7 @@ void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f3
 
 void sdfQuatLog(f32 *out, f32 *in) {
     f32 angle = func_002FA1C0(in[3]);
-    f32 sine = func_002E77F8(angle);
+    f32 sine = sdfSinPoly(angle);
     out[3] = 0.0f;
     if (out[3] < sine) {
         out[0] = angle * in[0] / sine;
@@ -153,7 +168,7 @@ void sdfQuatLog(f32 *out, f32 *in) {
 void sdfQuatExp(f32 *out, f32 *in) {
     f32 x = in[0], y = in[1], z = in[2];
     f32 length = fsqrtf(x * x + y * y + z * z);
-    f32 sine = func_002E77F8(length);
+    f32 sine = sdfSinPoly(length);
     out[3] = func_002E78F8(length);
     if (length > 0.0f) {
         out[0] = sine * in[0] / length;
@@ -353,7 +368,35 @@ void sdfSetTaskSecondaryCallback(SdfTaskHeader *work, s32 callback) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAEC8);
+SdfListNode *func_002CAEC8(SdfList *list, SdfListNode *node) {
+    SdfListNode *it;
+
+    if (node == NULL) {
+        return NULL;
+    }
+    for (it = list->head; it != NULL; it = it->next) {
+        if (node->index < it->index) {
+            it->index = it->index - 1;
+        }
+    }
+    list->count = list->count - 1;
+    if (node->next != NULL) {
+        node->next->prev = node->prev;
+    }
+    if (node->prev != NULL) {
+        node->prev->next = node->next;
+    }
+    if (node == list->head) {
+        list->head = node->next;
+    }
+    if (node == list->tail) {
+        list->tail = node->prev;
+    }
+    if (node->next != NULL) {
+        return node->next;
+    }
+    return node->prev;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAF78);
 
@@ -397,6 +440,7 @@ typedef struct SdfLink {
     struct SdfLink *prev;
     struct SdfLink *next;
 } SdfLink;
+
 void func_002CB058(SdfLink *list, SdfLink *a, SdfLink *b) {
     SdfLink *tmpNext;
     SdfLink *tmpPrev;
@@ -627,7 +671,6 @@ typedef struct SdfGrid {
 } SdfGrid;
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBB68);
-
 
 void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *mod, u32 *div) {
     SdfGridCell *cell = grid->cursor;

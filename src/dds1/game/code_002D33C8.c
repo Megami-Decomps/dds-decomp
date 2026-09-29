@@ -21,7 +21,7 @@ extern SdfResource *D_003BD308;
 
 extern u32 func_002CFEB8(u32);
 
-extern u32 func_002D42B8(u32);
+extern u32 sdfCreateReferenceDmaNode(u32);
 
 extern s32 D_003BD314;
 extern s32 D_003BD318[2];
@@ -357,7 +357,7 @@ s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4240);
 
 /* Make a REF DMA node for the payload following the source tag. */
-u32 func_002D42B8(u32 source) {
+u32 sdfCreateReferenceDmaNode(u32 source) {
     SdfDmaNode *node = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     SdfDmaSrc *src = (SdfDmaSrc *)source;
     u64 tag = src->unk0;
@@ -373,10 +373,10 @@ u32 func_002D42B8(u32 source) {
 }
 
 /* Patch the prior NEXT tag to chain in a reference to source's payload. */
-s32 func_002D4320(s32 previous, u32 source) {
+s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
     u32 packet;
 
-    packet = func_002D42B8(source);
+    packet = sdfCreateReferenceDmaNode(source);
     ((SdfDmaTagHeader *)previous)->kind = SDF_DMA_TAG_NEXT_BYTE;
     ((SdfDmaTagHeader *)previous)->address = packet & 0xfffffff;
     return packet + 0x10;

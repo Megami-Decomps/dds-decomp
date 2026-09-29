@@ -25,7 +25,7 @@ void func_00101A80(s32 arg0, s32 arg1);
 
 EvtCommandWork *func_0010D6A0(void);
 
-char *func_0010D5A8(s32 idx);
+char *scrReadStringParameter(s32 idx);
 
 void func_0010D5F0(s32 value);
 
@@ -50,7 +50,7 @@ extern SolarWorldState *D_003BAA00;
 
 extern s64 kwlnTaskIsRegistered(u64);
 
-extern u64 func_0010D428(u64);
+extern u64 scrReadIntParameter(u64);
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
@@ -70,7 +70,7 @@ u32 evtOpcodeCreateTaskForCurrentWork(void) {
         func_003003F0(D_003ACAE0);
         return 1;
     }
-    task = evtCreateTask(0x2afe, func_0010D5A8(0));
+    task = evtCreateTask(0x2afe, scrReadStringParameter(0));
     func_00101A80(work->taskKey, task);
     func_0010D5F0(task);
     return 1;
@@ -80,7 +80,7 @@ u32 evtOpcodeEnableCurrentContextFlag(void) {
     u64 task;
     s64 registered;
 
-    task = func_0010D428(0);
+    task = scrReadIntParameter(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
         evtSetContextFlag(task);
@@ -92,7 +92,7 @@ u32 evtOpcodeDisableCurrentContextFlag(void) {
     u64 task;
     s64 registered;
 
-    task = func_0010D428(0);
+    task = scrReadIntParameter(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
         evtClearContextFlag(task);
@@ -104,7 +104,7 @@ u32 evtOpcodeDestroyRegisteredTask(void) {
     u64 task;
     s64 registered;
 
-    task = func_0010D428(0);
+    task = scrReadIntParameter(0);
     registered = kwlnTaskIsRegistered(task);
     if (registered != 0) {
         evtDestroyTaskHierarchy(task);
@@ -117,11 +117,11 @@ u32 evtOpcodeSetFieldFadeTarget(void) {
     u64 target;
     u64 duration;
 
-    func_00132B60(0);
+    fldSetSwayMode(0);
     func_00132B70(0x80);
-    area = func_0010D428(0);
-    target = func_0010D428(1);
-    duration = func_0010D428(2);
+    area = scrReadIntParameter(0);
+    target = scrReadIntParameter(1);
+    duration = scrReadIntParameter(2);
     fldSetFadeTarget(area, target, duration);
     return 1;
 }
@@ -131,7 +131,7 @@ INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACAE0);
 u32 evtSetSkyAlpha(void) {
     s64 alpha;
 
-    alpha = func_0010D428(1);
+    alpha = scrReadIntParameter(1);
     if (alpha < -255) {
         func_0010AC10("warning : SET_SKY_A alpha < -255\n");
         alpha = -255;
@@ -140,7 +140,7 @@ u32 evtSetSkyAlpha(void) {
         func_0010AC10("warning : SET_SKY_A alpha > 255\n");
         alpha = 255;
     }
-    evtBeginSkyParameterTransition(func_0010D428(0), alpha);
+    evtBeginSkyParameterTransition(scrReadIntParameter(0), alpha);
     return 1;
 }
 
@@ -160,8 +160,8 @@ u32 evtOpcodePlayBgm(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D428(0);
-    fade = func_0010D428(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     evtPlayBgm(id, fade);
     return 1;
 }
@@ -170,8 +170,8 @@ u32 evtOpcodeTransitionBgm(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D428(0);
-    fade = func_0010D428(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     evtTransitionBgm(id, fade);
     return 1;
 }
@@ -180,8 +180,8 @@ u32 func_002284E0(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D428(0);
-    fade = func_0010D428(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     func_00241A50(id, fade);
     return 1;
 }
@@ -202,8 +202,8 @@ u32 evtOpcodeSetBgmVolumePan(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D428(0);
-    fade = func_0010D428(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     evtSetBgmVolumePan(id, fade);
     return 1;
 }
@@ -212,8 +212,8 @@ u32 func_002285B0(void) {
     u64 id;
     u64 fade;
 
-    id = func_0010D428(0);
-    fade = func_0010D428(1);
+    id = scrReadIntParameter(0);
+    fade = scrReadIntParameter(1);
     func_00241AE8(id, fade);
     return 1;
 }
@@ -222,8 +222,8 @@ u32 evtOpcodeRefreshTaskData(void) {
     u64 task;
     u64 value;
 
-    task = func_0010D428(0);
-    value = func_0010D428(1);
+    task = scrReadIntParameter(0);
+    value = scrReadIntParameter(1);
     evtRefreshTaskData(task, value);
     return 1;
 }

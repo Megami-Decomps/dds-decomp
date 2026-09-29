@@ -70,8 +70,8 @@ extern s32 effMiscRand(void *);
 extern u8 D_003AA868[];
 
 /* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
-/* K&R: func_00177078 passes the table block as the raw 64-bit value. */
-EffectRing *func_00176E28(source)
+/* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
+EffectRing *effCreateRingFan(source)
 EffectRing *source;
 {
     u32 handle;
@@ -110,18 +110,18 @@ EffectRing *source;
 }
 
 /* Create a ring from the first parameter-table block. */
-void func_00177078(u64 params) {
+void effCreateRingFanFromParams(u64 params) {
     u64 block;
 
     block = effParamTableGetBlock(params, 0);
-    func_00176E28(block);
+    effCreateRingFan(block);
 }
 void func_00177098(void) {
-    func_00176E28();
+    effCreateRingFan();
 }
 
 /* Release both the ring's matrix work and its backing allocation. */
-void func_001770B0(EffectRing *ring) {
+void effReleaseRingResources(EffectRing *ring) {
     func_001781F8(ring->matrix);
     func_003297C8(ring->handle);
 }
@@ -130,7 +130,7 @@ void func_001770E0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_001770F0(EffectRing *ring, u32 color) {
+void effSetRingColor(EffectRing *ring, u32 color) {
     ring->color = color;
 }
 
@@ -144,7 +144,7 @@ void func_00177100(EffectRing *ring, void *src) {
     VU0_STORE_MATRIX(ring->matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177130);
+INCLUDE_ASM(const s32, "game/code_00176E28", effFlashWriteRingColorSlots);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177220);
 

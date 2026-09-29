@@ -106,7 +106,7 @@ u32 func_0029B778(void) {
 }
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
-s64 func_0029B780(u64 request) {
+s64 mnuRunPanelWithIdleFallback(u64 request) {
     s32 context = func_00101958();
     s32 *panelState = (s32 *)(context + 0x54);
     s64 result;

@@ -112,7 +112,7 @@ typedef struct SdfResourceList {
     u32 *items;
 } SdfResourceList;
 
-void func_0032BBB0(u32);
+void sdfTexReleaseReferenceViaHandler(u32);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
@@ -360,7 +360,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
     if (freeItems != 0) {
         count = list->count;
         for (i = 0; i < count; i++) {
-            func_0032BBB0(list->items[i]);
+            sdfTexReleaseReferenceViaHandler(list->items[i]);
         }
     }
     sdfDestroyDevRequest(list);
@@ -714,7 +714,7 @@ void func_00333B38(SdfAsset *asset, void *entryArg) {
     func_00333A30(entry + 0x80, asset->fourth);
 }
 
-void func_00333BC8(SdfTextParam *asset, SdfTextParam *param) {
+void sdfAssetCopyPairToTextParam(SdfTextParam *asset, SdfTextParam *param) {
     param->unk28 = asset->unk40;
     param->unk2C = asset->unk44;
 }
@@ -732,7 +732,7 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
         func_00333B38(asset, entry);
     }
     if (flags & (64 << index)) {
-        func_00333BC8(asset, entry);
+        sdfAssetCopyPairToTextParam(asset, entry);
     }
     asset->pad00[6] = flags & (0x55 << (index ^ 1));
 }
@@ -752,7 +752,7 @@ void func_00333CB0(SdfAsset *asset, s32 index) {
         func_00333B38(asset, entry);
     }
     if (flags & (64 << index)) {
-        func_00333BC8(asset, entry);
+        sdfAssetCopyPairToTextParam(asset, entry);
     }
     asset->pad00[6] = flags & (0x55 << (index ^ 1));
 }

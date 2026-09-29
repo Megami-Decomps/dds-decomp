@@ -20,7 +20,7 @@ void *sdfTexGetPrimaryResourceWord();
 void *sdfTexGetSecondaryResourceWord(void *arg0);
 void func_002D2D48(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
-s32 func_002D2A28(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
+s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
     s32 colorsPerPalette;
 
@@ -35,7 +35,7 @@ s32 func_002D2A28(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2A58);
 
 /* Copy the texture's backing image without changing the resource metadata. */
-void *func_002D2A98(SdfTex *texture, void *source) {
+void *sdfTexCopyImageData(SdfTex *texture, void *source) {
     return memcpy(texture->data, source, texture->dataSize);
 }
 
@@ -85,7 +85,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
 }
 
 /* Hand the last reference to func_002D3C30 rather than releasing it here. */
-void func_002D2D00(SdfTex *texture) {
+void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     SdfTexRef *ref;
     s32 count;
 

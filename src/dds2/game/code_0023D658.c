@@ -46,7 +46,7 @@ extern void *func_00110C60(void *arg0);
 
 extern s32 func_0010D818(s32 arg0);
 
-extern s32 func_0010D650(s32 idx);
+extern s32 scrReadIntParameter(s32 idx);
 
 extern void dds3SetObjectFlags(void *arg0, s32 arg1);
 
@@ -80,7 +80,7 @@ extern u8 D_004219F0[];
 
 extern u8 D_00421AC0[];
 
-extern s32 func_0010D7D0(s32 idx);
+extern s32 scrReadStringParameter(s32 idx);
 
 extern void effObjSetFlags(void *arg0, s32 arg1);
 
@@ -254,8 +254,8 @@ u32 func_0023E758(void) {
     s32 param1;
     s32 value;
 
-    param0 = func_0010D650(0);
-    param1 = func_0010D650(1);
+    param0 = scrReadIntParameter(0);
+    param1 = scrReadIntParameter(1);
     value = func_0023A7A0(param0, param1);
     func_0010D818(value);
     return 1;
@@ -270,18 +270,18 @@ u32 func_0023E7A0(void) {
     if (func_0010D8C8() == 0) {
         return 1;
     }
-    param0 = func_0010D650(0);
-    rid = func_0010D650(1);
+    param0 = scrReadIntParameter(0);
+    rid = scrReadIntParameter(1);
     model = func_0025D230(param0, rid);
     if (model < 0) {
-        func_0010AE38("MODEL_BE not fount RID = %d!\n", func_0010D650(1));
+        func_0010AE38("MODEL_BE not fount RID = %d!\n", scrReadIntParameter(1));
         return 1;
     }
-    param0 = func_0010D650(0);
-    rid = func_0010D650(1);
+    param0 = scrReadIntParameter(0);
+    rid = scrReadIntParameter(1);
     ret = evtCreateMotionSeTask(model, param0, rid);
     if (ret != 0) {
-        func_00101968(evtFindTaskById(func_0010D650(0)), ret);
+        func_00101968(evtFindTaskById(scrReadIntParameter(0)), ret);
     }
     return func_0010D818(model);
 }
@@ -290,8 +290,8 @@ u32 func_0023E898(void) {
     u64 temp_v0;
     u64 temp_v1;
 
-    temp_v0 = func_0010D650(0);
-    temp_v1 = func_0010D650(1);
+    temp_v0 = scrReadIntParameter(0);
+    temp_v1 = scrReadIntParameter(1);
     func_0023A8C0(temp_v0, temp_v1);
     return 1;
 }
@@ -303,7 +303,7 @@ u32 func_0023E8D8(void) {
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(ctx, id, 5);
     if (unit == NULL) {
         return ret;
@@ -320,7 +320,7 @@ u32 func_0023E948(void) {
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(ctx, id, 5);
     if (unit == NULL) {
         return ret;
@@ -337,7 +337,7 @@ u32 func_0023E9B8(void) {
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(ctx, id, 5);
     if (unit == NULL) {
         return ret;
@@ -354,12 +354,12 @@ u32 func_0023EA28(void) {
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(ctx, id, 5);
     if (unit == NULL) {
         return ret;
     }
-    func_00113660(unit, func_0010D650(1));
+    func_00113660(unit, scrReadIntParameter(1));
     return 1;
 }
 
@@ -370,7 +370,7 @@ u32 func_0023EA90(void) {
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(ctx, id, 5);
     if (unit == NULL) {
         return ret;
@@ -389,7 +389,7 @@ u32 evtSetWorldUnitFirstVector(void) {
 
     memset(vector, 0, 0x10);
     world = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(world, id, 5);
     if (unit == NULL) {
         return 1;
@@ -412,7 +412,7 @@ u32 evtSetWorldUnitThirdVector(void) {
     memset(vector, 0, 0x10);
     vector[3] = 1.0f;
     world = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(world, id, 5);
     if (unit == NULL) {
         return 1;
@@ -429,15 +429,15 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EE08);
 u32 evtOpSetUnitParams5(void) {
     EvtUnit *unit;
 
-    unit = func_0023CC00(func_0010D650(0));
+    unit = func_0023CC00(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     {
-        s32 arg1 = func_0010D650(1);
-        s32 arg2 = func_0010D650(2);
-        s32 arg3 = func_0010D650(3);
-        s32 arg4 = func_0010D650(4);
+        s32 arg1 = scrReadIntParameter(1);
+        s32 arg2 = scrReadIntParameter(2);
+        s32 arg3 = scrReadIntParameter(3);
+        s32 arg4 = scrReadIntParameter(4);
         func_0023CF70(unit, arg1, arg2, arg3, arg4);
     }
     return 1;
@@ -446,16 +446,16 @@ u32 evtOpSetUnitParams5(void) {
 u32 evtOpSetUnitParams6(void) {
     EvtUnit *unit;
 
-    unit = func_0023CC00(func_0010D650(0));
+    unit = func_0023CC00(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     {
-        s32 arg1 = func_0010D650(1);
-        s32 arg2 = func_0010D650(2);
-        s32 arg3 = func_0010D650(3);
-        s32 arg4 = func_0010D650(4);
-        s32 arg5 = func_0010D650(5);
+        s32 arg1 = scrReadIntParameter(1);
+        s32 arg2 = scrReadIntParameter(2);
+        s32 arg3 = scrReadIntParameter(3);
+        s32 arg4 = scrReadIntParameter(4);
+        s32 arg5 = scrReadIntParameter(5);
         func_0023CED8(unit, arg1, arg2, arg3, arg4, arg5);
     }
     return 1;
@@ -474,13 +474,13 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_0023F168);
 u32 evtOpBeginWindowCallback(void) {
     EvtUnit *unit;
 
-    unit = func_0023CC00(func_0010D650(0));
+    unit = func_0023CC00(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     {
-        s32 arg1 = func_0010D650(1);
-        s32 arg2 = func_0010D650(2);
+        s32 arg1 = scrReadIntParameter(1);
+        s32 arg2 = scrReadIntParameter(2);
         func_0023CE98(unit, arg1, arg2);
         D_004371EC = (u32)unit;
     }
@@ -497,13 +497,13 @@ u32 evtOpBeginWindowCallback(void) {
 u32 func_0023F308(void) {
     EvtUnit *unit;
 
-    unit = func_0023CC00(func_0010D650(0));
+    unit = func_0023CC00(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     {
-        s32 arg1 = func_0010D650(1);
-        s32 arg2 = func_0010D650(2);
+        s32 arg1 = scrReadIntParameter(1);
+        s32 arg2 = scrReadIntParameter(2);
         func_0023CE98(unit, arg1, arg2);
         func_0023CEA8((u32)unit);
         D_004371EC = (u32)unit;
@@ -523,7 +523,7 @@ u32 func_0023F3A8(void) {
     EvtUnit *unit;
     u32 ret = 1;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit == NULL) {
         return ret;
@@ -537,16 +537,16 @@ u32 func_0023F3E8(void) {
     s32 off;
     u32 ret = 1;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit == NULL) {
         return ret;
     }
-    off = func_0010D650(1);
+    off = scrReadIntParameter(1);
     if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->modelNode, func_0010D650(1)) != 0;
+    return mdlCheckNodeByte30(unit->modelNode, scrReadIntParameter(1)) != 0;
 }
 
 u32 func_0023F460(void) {
@@ -556,7 +556,7 @@ u32 func_0023F460(void) {
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_00110C70(ctx, id, 5);
     if (unit == NULL) {
         return ret;
@@ -568,19 +568,19 @@ u32 func_0023F460(void) {
 u32 func_0023F4B8(void) {
     EvtUnit *unit;
 
-    unit = func_0023CC00(func_0010D650(0));
+    unit = func_0023CC00(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     unit->unkB2 = 0;
     {
-        s32 arg1 = func_0010D650(2);
-        s32 arg2 = func_0010D650(1);
-        s32 arg3 = func_0010D650(3);
-        s32 arg4 = func_0010D650(4);
+        s32 arg1 = scrReadIntParameter(2);
+        s32 arg2 = scrReadIntParameter(1);
+        s32 arg3 = scrReadIntParameter(3);
+        s32 arg4 = scrReadIntParameter(4);
         func_0023D740(unit, arg1, arg2, -1, arg3, arg4, 0, 0);
     }
-    if (func_0010D650(2) == 1) {
+    if (scrReadIntParameter(2) == 1) {
         func_0023D360(unit);
     }
     return 1;
@@ -589,18 +589,18 @@ u32 func_0023F4B8(void) {
 u32 func_0023F580(void) {
     EvtUnit *unit;
 
-    unit = func_0023CC00(func_0010D650(0));
+    unit = func_0023CC00(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     unit->unkB2 = 0;
     {
-        s32 arg1 = func_0010D650(1);
-        s32 arg2 = func_0010D650(5);
-        s32 arg3 = func_0010D650(6);
-        s32 arg4 = func_0010D650(2);
-        s32 arg5 = func_0010D650(4);
-        s32 arg6 = func_0010D650(3);
+        s32 arg1 = scrReadIntParameter(1);
+        s32 arg2 = scrReadIntParameter(5);
+        s32 arg3 = scrReadIntParameter(6);
+        s32 arg4 = scrReadIntParameter(2);
+        s32 arg5 = scrReadIntParameter(4);
+        s32 arg6 = scrReadIntParameter(3);
         func_0023D800(unit, arg1, arg2, arg3, arg4, arg5, arg6);
     }
     return 1;
@@ -612,12 +612,12 @@ u32 evtCommandSetUnitValue(void) {
     s32 id;
     EvtUnit *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit == NULL) {
         return 1;
     }
-    unit->valueBC = func_0010D650(1);
+    unit->valueBC = scrReadIntParameter(1);
     return 1;
 }
 
@@ -625,13 +625,13 @@ u32 func_0023F730(void) {
     s32 id;
     EvtUnit *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit == NULL) {
         return 1;
     }
-    unit->unkBE = func_0010D650(1);
-    unit->unkC0 = func_0010D650(2);
+    unit->unkBE = scrReadIntParameter(1);
+    unit->unkC0 = scrReadIntParameter(2);
     return 1;
 }
 
@@ -639,12 +639,12 @@ u32 func_0023F788(void) {
     s32 id;
     EvtUnit *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit == NULL) {
         return 1;
     }
-    func_0023CF70(unit, func_0010D650(1), 5, 7, 1);
+    func_0023CF70(unit, scrReadIntParameter(1), 5, 7, 1);
     func_0035B6E0(D_004219F0);
     return 1;
 }
@@ -655,14 +655,14 @@ u32 func_0023F7F8(void) {
     s32 param1;
     s32 param2;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit == NULL) {
         return 1;
     }
     unit->unkB2 = 0;
-    param1 = func_0010D650(1);
-    param2 = func_0010D650(2);
+    param1 = scrReadIntParameter(1);
+    param2 = scrReadIntParameter(2);
     evtAttachSecondaryWorldUnit(unit, param1, param2);
     return 1;
 }
@@ -695,7 +695,7 @@ u32 evtUnitClearFlagBit(void) {
     s32 id;
     EvtUnit *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit != NULL) {
         *unit->modelNode &= ~1;
@@ -707,7 +707,7 @@ u32 evtUnitSetFlagBit(void) {
     s32 id;
     EvtUnit *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit != NULL) {
         *unit->modelNode |= 1;
@@ -719,7 +719,7 @@ u32 func_0023FDC0(void) {
     s32 id;
     EvtUnit *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     evtUnitSetStateBits(unit);
     return 1;
@@ -730,9 +730,9 @@ u32 func_0023FDF0(void) {
     EvtUnit *unit;
     s32 param1;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
-    param1 = func_0010D650(1);
+    param1 = scrReadIntParameter(1);
     func_0023CB68(unit, param1);
     return 1;
 }
@@ -742,7 +742,7 @@ u8 evtUnitHasNoStatusFlags(void) {
     EvtUnit *unit;
     u8 active;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     active = evtUnitHasStateBits(unit);
     return active == 0;
@@ -763,13 +763,13 @@ u32 func_002401C0(void) {
     EvtUnit *unit;
     void *target;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
-    target = evtFindWorldObjectByIdAndKind(9, func_0010D650(2));
+    target = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(2));
     if (target == NULL) {
         return 1;
     }
-    evtSetUnitValueTransition(unit, target, func_0010D650(1));
+    evtSetUnitValueTransition(unit, target, scrReadIntParameter(1));
     return 1;
 }
 
@@ -778,9 +778,9 @@ u32 func_00240238(void) {
     EvtUnit *unit;
     s32 param1;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
-    param1 = func_0010D650(1);
+    param1 = scrReadIntParameter(1);
     evtEndUnitValueTransition(unit, param1);
     return 1;
 }
@@ -795,11 +795,11 @@ u32 func_00240368(void) {
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
-    param0 = func_0010D7D0(0);
+    param0 = scrReadStringParameter(0);
     unit = func_00115208(param0, buf1, buf2);
     if (unit == NULL) {
         func_0035B6E0(D_00421A90, 1);
-        func_0035B6E0(D_00421AC0, func_0010D7D0(0));
+        func_0035B6E0(D_00421AC0, scrReadStringParameter(0));
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -817,11 +817,11 @@ u32 func_00240420(void) {
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     buf2[3] = 1.0f;
-    param0 = func_0010D7D0(0);
+    param0 = scrReadStringParameter(0);
     unit = func_00115518(param0, buf1, buf2);
     if (unit == NULL) {
         func_0035B6E0(D_00421A90, 1);
-        func_0035B6E0(D_00421AC0, func_0010D7D0(0));
+        func_0035B6E0(D_00421AC0, scrReadStringParameter(0));
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -847,10 +847,10 @@ u32 evtUnitCheckModelCut(void) {
     void *unit;
     u32 param1;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
-        param1 = func_0010D650(1);
+        param1 = scrReadIntParameter(1);
         if (param1 >= 3U) {
             func_0010AE38(D_00421AF8, param1);
             return 1;
@@ -866,16 +866,16 @@ INCLUDE_ASM(const s32, "game/code_0023D658", func_00240640);
 u32 func_002406C0(void) {
     void *unit;
 
-    unit = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    unit = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (unit != NULL) {
-        s32 mode = func_0010D650(1);
+        s32 mode = scrReadIntParameter(1);
         s32 index;
         if ((u32)mode >= 3) {
             func_0010AE38(D_00421AF8, mode);
             return 1;
         }
         func_00115580(unit, mode);
-        index = func_0010D650(2);
+        index = scrReadIntParameter(2);
         if (index >= 0) {
             f32 value = func_00240640(index);
             void *target = *(void **)(*(u8 **)((u8 *)unit + 0x18) + 0x2C);
@@ -891,11 +891,11 @@ u32 func_00240770(void) {
     s32 param0;
     EvtUnit *unit;
 
-    param0 = func_0010D7D0(0);
+    param0 = scrReadStringParameter(0);
     unit = func_00115AC0(1, param0);
     if (unit == NULL) {
         func_0035B6E0(D_00421B20, 1);
-        func_0035B6E0(D_00421AC0, func_0010D7D0(0));
+        func_0035B6E0(D_00421AC0, scrReadStringParameter(0));
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -914,11 +914,11 @@ u32 func_002408A8(void) {
     s32 param0;
     EvtUnit *unit;
 
-    param0 = func_0010D7D0(0);
+    param0 = scrReadStringParameter(0);
     unit = func_00115AC0(2, param0);
     if (unit == NULL) {
         func_0035B6E0(D_00421B70, 1);
-        func_0035B6E0(D_00421AC0, func_0010D7D0(0));
+        func_0035B6E0(D_00421AC0, scrReadStringParameter(0));
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -935,7 +935,7 @@ u32 func_002409E0(void) {
     s32 id;
     void *obj;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00115BD8(obj);
@@ -947,7 +947,7 @@ u32 func_00240A20(void) {
     s32 id;
     void *obj;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00115BD8(obj);
@@ -959,7 +959,7 @@ u32 func_00240A60(void) {
     s32 id;
     void *obj;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
         func_00110B50(obj);

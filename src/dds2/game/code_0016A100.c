@@ -134,7 +134,7 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A620);
 
 /* Invoke the kind-specific callback on this parameter block. */
-void func_0016A668(EffParamWork *work) {
+void effParamWorkInvokeCallback(EffParamWork *work) {
     u16 id = work->id;
 
     D_003B0044[id].cb(work->data);

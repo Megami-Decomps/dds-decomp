@@ -41,7 +41,7 @@ typedef struct F9B00Entry {
 
 extern F9B00Entry D_00476480[];
 
-extern void func_0033C478(F9B00Entry *);
+extern void sdfPadUpdatePort(F9B00Entry *);
 
 extern u32 D_00438AB4;
 
@@ -1129,26 +1129,26 @@ u32 func_0033C218(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C240);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C478);
+INCLUDE_ASM(const s32, "game/code_00336B48", sdfPadUpdatePort);
 
-void func_0033C820(void) {
+void sdfPadUpdatePorts(void) {
     s32 i;
     for (i = 0; i != 2; i++) {
-        func_0033C478(&D_00476480[i]);
+        sdfPadUpdatePort(&D_00476480[i]);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C878);
 
-void func_0033C9F0(s32 padIndex, u8 mode) {
+void sdfPadRequestMode(s32 padIndex, u8 mode) {
     D_00476480[padIndex].requestedMode = mode;
 }
 
-void func_0033CA10(s32 padIndex, u16 strength) {
+void sdfPadSetSmallMotor(s32 padIndex, u16 strength) {
     D_00476480[padIndex].smallMotor = strength;
 }
 
-void func_0033CA30(s32 padIndex, u8 strength) {
+void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
     D_00476480[padIndex].largeMotor = strength;
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+
 extern s8 D_0043643D;
 
 #include "eff.h"
@@ -36,6 +37,25 @@ extern char D_00436450[];
 extern EffHandler D_003B2068[];
 
 extern void func_0036B420(void);
+
+/* Directory entry filled by the effect data directory iterator. */
+typedef struct EffDirEnt {
+    u32 flags;      /* 0x00: bit 12 cleared */
+    u8 pad04[0x3C]; /* 0x04 */
+    char name[0x40]; /* 0x40 */
+} EffDirEnt;
+
+extern char *D_003B20D8[];
+
+extern s32 func_0036B588(void);
+
+extern u8 D_003846F0[];
+
+extern u8 D_0037F610[];
+
+extern u8 D_0037F660[];
+
+extern void func_00336C10(void *);
 
 EffResult *effAllocDispatch(s32 kind, s32 input) {
     EffResult *result = func_00328D68(8);
@@ -259,7 +279,20 @@ void effRunIfEnabled(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", effNextDataDirEntry);
+/* In built-in mode the name table supplies entries instead of the
+ * directory iterator; clearing 0x1000 marks a synthesized entry. */
+s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
+    if (D_00438B66 != 0) {
+        return func_0036B588();
+    }
+    if ((u32)D_00438F08 >= 0x2F) {
+        return 0;
+    }
+    strcpy(entry->name, D_003B20D8[D_00438F08]);
+    entry->flags &= ~0x1000;
+    D_00438F08++;
+    return strlen(entry->name);
+}
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194BD0);
 
@@ -286,7 +319,7 @@ void effFreeWork(EffWork *work) {
 
     soundHandle = work->unk3C;
     if (soundHandle != 0) {
-        func_0032BBB0(soundHandle);
+        sdfTexReleaseReferenceViaHandler(soundHandle);
         work->unk3C = 0;
     }
     func_00328E48(work);
@@ -329,7 +362,7 @@ void effSetupWorkSound(EffWork *work, u64 resource) {
     u32 resourceData[4];
 
     if (work->unk3C != 0) {
-        func_0032BBB0(work->unk3C);
+        sdfTexReleaseReferenceViaHandler(work->unk3C);
         work->unk3C = 0;
     }
     allocation = func_00343ED0(resource, resourceData, 0);
@@ -348,7 +381,44 @@ void func_001957E8(void) {
     func_001027D8(0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00195810);
+void func_00195810(void) {
+    u8 *matrix;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0(%0)\n"
+        "lqc2 vf29, 0x10(%0)\n"
+        "lqc2 vf30, 0x20(%0)\n"
+        "lqc2 vf31, 0x30(%0)\n"
+        ".set reorder"
+        : : "r"(D_003846F0) : "memory");
+    matrix = D_0037F610;
+    func_00336C10(matrix);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmulax.xyzw ACC, vf28, vf10x\n"
+        "vmadday.xyzw ACC, vf29, vf10y\n"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n"
+        "vmaddw.xyzw vf10, vf31, vf0w\n"
+        "vdiv Q, vf0w, vf10w\n"
+        "vmove.w vf10, vf0\n"
+        "vwaitq\n"
+        "vmulq.xyzw vf10, vf10, Q\n"
+        ".set reorder"
+        : : : "memory");
+    matrix += 0x40;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        "vmul.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(matrix) : "memory");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf11, 0(%0)\n"
+        "vadd.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "r"(D_0037F660) : "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195890);
 

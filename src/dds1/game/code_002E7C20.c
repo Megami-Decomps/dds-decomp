@@ -6,7 +6,7 @@ typedef struct EffRandState
 } EffRandState;
 
 extern EffRandState D_00398938;
-extern f32 func_002E77F8(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
 extern f32 func_002E78F8(f32 angle);
 extern void sdfAtan2(f32 x, f32 y);
 extern f32 D_00398380[4];
@@ -70,7 +70,7 @@ void effMiscNormalizeVU(void)
     );
 }
 
-f32 func_002E7CA8(void)
+f32 effMiscQuatLengthSqVU(void)
 {
     f32 result;
     __asm__ volatile (
@@ -88,7 +88,7 @@ f32 func_002E7CA8(void)
 }
 
 /* Return the component-wise dot product of quaternions in vf10 and vf11. */
-f32 func_002E7CD0(void)
+f32 effMiscQuaternionDotVU(void)
 {
     f32 result;
     __asm__ volatile (
@@ -109,7 +109,7 @@ f32 func_002E7CD0(void)
 void effMiscAxisAngleToQuaternionVU(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
-    f32 trigValue = func_002E77F8(halfAngle);
+    f32 trigValue = sdfSinPoly(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -128,10 +128,10 @@ void effMiscAxisAngleToQuaternionVU(f32 angle)
 }
 
 /* As above, but write the second VU quaternion register (vf11). */
-void func_002E7D48(f32 angle)
+void effMiscAxisAngleToQuaternionVf11(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
-    f32 trigValue = func_002E77F8(halfAngle);
+    f32 trigValue = sdfSinPoly(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -151,7 +151,7 @@ void func_002E7D48(f32 angle)
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* vu0 routine: rotation matrix vf28-vf31 from the quaternion in vf10 */
-void func_002E7D98(void)
+void effMiscQuaternionToMatrixVU(void)
 {
     __asm__ volatile (
         ".set noreorder                              \n"
@@ -197,7 +197,7 @@ INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8038);
 INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8180);
 
 /* vu0 routine: normalized lerp of quaternions vf10 and vf11 by amount (shorter arc), result in vf10 */
-void func_002E8278(f32 amount)
+void effMiscQuaternionNlerpVU(f32 amount)
 {
     f32 dot;
     __asm__ volatile (
@@ -241,7 +241,7 @@ void func_002E82F8(void)
 {
     f32 x;
     f32 y;
-    func_002E7D98();
+    effMiscQuaternionToMatrixVU();
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%2)\n"

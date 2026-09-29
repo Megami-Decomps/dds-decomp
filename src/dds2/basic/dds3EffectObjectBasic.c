@@ -42,7 +42,7 @@ typedef struct {
 EffectData *func_00115B20(EffectObj *obj);
 
 /* Release the effect's dependent resources before clearing its data handle. */
-void func_001147D8(u32 object) {
+void effObjReleaseObjectData(u32 object) {
     u32 *data;
     s32 objectAddress;
 
@@ -75,14 +75,14 @@ void func_00114E58(EffectObj *obj, u64 arg1, u64 arg2) {
     func_00114D80(bill, arg1, arg2);
 }
 /* Create an indexed billboard of kind one and dispatch it. */
-void func_00114EA0(u64 billId, u64 arg1, u64 arg2) {
+void effObjCreateIndexedKindOne(u64 billId, u64 arg1, u64 arg2) {
     u64 bill;
 
     bill = billCreateIndexed(1, billId);
     func_00114D80(bill, arg1, arg2);
 }
 /* Create a resource-backed billboard of kind one and dispatch it. */
-void func_00114EE8(u64 resourceId, u64 arg1, u64 arg2) {
+void effObjCreateResourceKindOne(u64 resourceId, u64 arg1, u64 arg2) {
     u64 bill;
 
     bill = billCreateFromResource(1, resourceId);
@@ -105,7 +105,7 @@ void func_00115020(EffectObj *obj, u64 arg1, u64 arg2) {
 }
 
 /* Create an indexed billboard of kind zero for the second handler. */
-void func_00115068(u64 billId, u64 arg1, u64 arg2) {
+void effObjCreateIndexedKindZero(u64 billId, u64 arg1, u64 arg2) {
     u64 bill;
 
     bill = billCreateIndexed(0, billId);
@@ -113,7 +113,7 @@ void func_00115068(u64 billId, u64 arg1, u64 arg2) {
 }
 
 /* Create a resource-backed billboard of kind zero for the second handler. */
-void func_001150B0(u64 resourceId, u64 arg1, u64 arg2) {
+void effObjCreateResourceKindZero(u64 resourceId, u64 arg1, u64 arg2) {
     u64 bill;
 
     bill = billCreateFromResource(0, resourceId);

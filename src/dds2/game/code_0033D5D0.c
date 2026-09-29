@@ -131,7 +131,7 @@ extern s32 func_0033F898(s32, void **);
 
 extern void func_0033EC48(DevState *);
 
-extern DevState *func_0033F9D0(void *, s32, s32,
+extern DevState *sdfDevAllocState(void *, s32, s32,
                                 void (*)(DevState *, s32, s32, s32, s32), s32);
 
 extern u16 D_00438B24;
@@ -154,7 +154,7 @@ extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
 extern void func_0035B6E0(const char *);
 
-extern f32 func_003406A0(f32 arg0);
+extern f32 sdfSinPoly(f32 arg0);
 
 extern void func_00328520(const char *arg0, ...) __attribute__((noreturn));
 
@@ -248,7 +248,7 @@ s32 func_0033DAD8(const char *fmt, ...) {
     return length;
 }
 
-u32 func_0033DB58(void) {
+u32 sdfDevGetLoadedFileAddress(void) {
     return D_004391A4;
 }
 
@@ -465,7 +465,7 @@ void sdfInitDeviceSemaphores(void) {
 extern char D_00438AE8[];
 
 /* Convert a relative disc path to the drive's uppercase backslash form with ;1 suffix. */
-void func_0033E6B0(char *dst, char *src) {
+void sdfDevMakeDiscPath(char *dst, char *src) {
     s32 c;
 
     memcpy(dst, D_00438AE8, 8);
@@ -551,7 +551,7 @@ void func_0033EAE0(u32 arg0) {
 }
 
 void func_0033EB10(void) {
-    func_0033FBF0();
+    sdfDevQueueRead();
     WaitSema(D_00438AE4);
 }
 
@@ -645,13 +645,13 @@ void sdfDevDeactivate(DevState *state, s32 result) {
 
 INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E288);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EF58);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevWorkerThread);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F650);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 
-DevState *func_0033F9D0(void *resource, s32 workerIndex, s32 operation,
+DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 context) {
     DevState *state = (DevState *)func_00328E18(0x40);
     state->resource = resource;
@@ -673,7 +673,7 @@ DevState *sdfDevCreateCallbackState(s32 path, void (*callback)(DevState *, s32, 
     if (id < 0) {
         return NULL;
     }
-    state = func_0033F9D0(resource, id, 1, callback, context);
+    state = sdfDevAllocState(resource, id, 1, callback, context);
     func_0033EC48(state);
     return state;
 }
@@ -687,7 +687,7 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
     if (id < 0) {
         return NULL;
     }
-    state = func_0033F9D0(resource, id, 2, callback, context);
+    state = sdfDevAllocState(resource, id, 2, callback, context);
     state->options = options != 0 ? options : D_00438B24;
     func_0033EC48(state);
     return state;
@@ -713,7 +713,7 @@ s32 func_0033FB98(DevState *arg0) {
     return 0;
 }
 
-s32 func_0033FBF0(DevState *state, void *data, s32 extra) {
+s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
     if (state->state != 7) {
         return -1;
     }
@@ -724,7 +724,7 @@ s32 func_0033FBF0(DevState *state, void *data, s32 extra) {
     return 0;
 }
 
-s32 func_0033FC50(DevState *state, void *data, s32 extra) {
+s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
     if (state->state != 7) {
         return -1;
     }
@@ -766,7 +766,7 @@ DevState *sdfDevCreateRequest(s32 path, void *data, s32 extra,
     if (id < 0) {
         return NULL;
     }
-    state = func_0033F9D0(resource, id, 8, completion, completionContext);
+    state = sdfDevAllocState(resource, id, 8, completion, completionContext);
     state->requestExtra = extra;
     state->requestData = data;
     state->unk18 = 0;
@@ -784,7 +784,7 @@ DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
     if (id < 0) {
         return NULL;
     }
-    state = func_0033F9D0(resource, id, 9, completion, completionContext);
+    state = sdfDevAllocState(resource, id, 9, completion, completionContext);
     state->requestExtra = extra;
     state->requestData = data;
     state->options = options != 0 ? options : D_00438B24;
@@ -968,7 +968,7 @@ void func_003405D8(DevRequest *request, s32 count) {
     }
 }
 
-f32 func_003406A0(f32 angle) {
+f32 sdfSinPoly(f32 angle) {
     f32 x = angle * 0.15915494f;
     f32 t;
     f32 t2;
@@ -998,7 +998,7 @@ f32 func_003406A0(f32 angle) {
 }
 
 void func_003407A0(f32 arg0) {
-    func_003406A0(arg0 + 1.5707963f);
+    sdfSinPoly(arg0 + 1.5707963f);
 }
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003407C0);

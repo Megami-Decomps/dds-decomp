@@ -3,7 +3,7 @@
 extern s32 scrGetCommandTimer(void);
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
-s32 func_0010D650(s32 idx);
+s32 scrReadIntParameter(s32 idx);
 
 void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
@@ -31,7 +31,7 @@ void func_00144EE0(void);
 
 void func_00144F08(void);
 
-char *func_0010D7D0(s32 idx);
+char *scrReadStringParameter(s32 idx);
 
 void fldInitializeSequenceAndResetFlags(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 
@@ -130,7 +130,7 @@ s32 evtCommandEnablePathUnit(void)
     s32 id;
     void *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
         func_0023B078(unit, 1);
@@ -141,7 +141,7 @@ s32 evtCommandEnablePathUnit(void)
 
 /* The path search covers the six object kinds 4 through 9. */
 s32 func_00240F58(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     s32 found;
     s32 i;
 
@@ -150,7 +150,7 @@ s32 func_00240F58(void) {
     }
     i = 4;
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(1));
+        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(1));
         i++;
     } while (i < 10 && found == 0);
     if (found == 0) {
@@ -161,7 +161,7 @@ s32 func_00240F58(void) {
 }
 
 s32 func_00240FE8(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     s32 found;
     s32 i;
 
@@ -170,13 +170,13 @@ s32 func_00240FE8(void) {
     }
     i = 4;
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(1));
+        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(1));
         i++;
     } while (i < 10 && found == 0);
     if (found == 0) {
         return 1;
     }
-    func_00115EE8(path, found, func_0010D650(2));
+    func_00115EE8(path, found, scrReadIntParameter(2));
     return 1;
 }
 
@@ -185,7 +185,7 @@ s32 func_00241090(void)
     s32 id;
     void *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit == NULL) {
         return 1;
@@ -199,7 +199,7 @@ s32 func_002410D0(void)
     s32 id;
     void *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
         func_0023B078(unit, 0);
@@ -211,12 +211,12 @@ s32 func_00241110(void) {
     void *effect;
     void *path;
 
-    effect = evtFindWorldObjectByIdAndKind(7, func_0010D650(0));
+    effect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (effect == NULL) {
         func_0010AE38("EFFECT_PATH_MOVE not found eff!\n");
         return 1;
     }
-    path = evtFindWorldObjectByIdAndKind(0x10, func_0010D650(1));
+    path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
     if (path == NULL) {
         func_0010AE38("EFFECT_PATH_MOVE not found path!\n", effect);
         return 1;
@@ -237,10 +237,10 @@ extern EvtIdNode *func_001111A8(s32 world, char *id);
 s32 func_00241218(void) {
     EvtIdNode *node;
 
-    node = func_001111A8(dds3GetWorldSecondaryObject(), func_0010D7D0(0));
+    node = func_001111A8(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
     if (node == NULL) {
-        func_0035B6E0("ID : id not found!! <%s>\n", func_0010D7D0(0));
-        func_0010AE38("WARNING: ID not found! <%s>\n", func_0010D7D0(0));
+        func_0035B6E0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
+        func_0010AE38("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
         func_0010D818(0);
     } else {
         func_0010D818(node->value);
@@ -267,8 +267,8 @@ s32 func_00241340(void)
 {
     s32 args[2];
 
-    args[0] = func_0010D650(0);
-    args[1] = func_0010D650(1);
+    args[0] = scrReadIntParameter(0);
+    args[1] = scrReadIntParameter(1);
     func_001027D8(0x15, (s32)args, 8, 0);
     func_0010D818(0);
     return 1;
@@ -277,14 +277,14 @@ s32 func_00241340(void)
 extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
 s32 func_00241390(void) {
-    s32 a = func_0010D650(0);
-    s32 b = func_0010D650(1);
-    s32 c = func_0010D650(2);
+    s32 a = scrReadIntParameter(0);
+    s32 b = scrReadIntParameter(1);
+    s32 c = scrReadIntParameter(2);
     s32 d;
 
     func_0035B6E0("CALL_NEXT(%d,%d,%d)\n", a, b, c);
-    d = func_0010D650(1);
-    fldSetDeferredFieldCommand(d, func_0010D650(2));
+    d = scrReadIntParameter(1);
+    fldSetDeferredFieldCommand(d, scrReadIntParameter(2));
     return 1;
 }
 
@@ -293,7 +293,7 @@ s32 evtCommandCallEvent(void)
 {
     s32 eventId;
 
-    eventId = func_0010D650(0);
+    eventId = scrReadIntParameter(0);
     func_0035B6E0("call_event:%d\n", eventId);
     func_001027D8(6, (s32)&eventId, 4, 0);
     func_0010BFE0();
@@ -327,7 +327,7 @@ s32 evtCommandSubmitEvent(void)
 {
     s32 eventId;
 
-    eventId = func_0010D650(0);
+    eventId = scrReadIntParameter(0);
     evtSubmitEventRequest(eventId, 0);
     return 1;
 }
@@ -349,7 +349,7 @@ s32 evtCommandSubmitEventImmediate(void)
 {
     s32 eventId;
 
-    eventId = func_0010D650(0);
+    eventId = scrReadIntParameter(0);
     evtSubmitEventRequestImmediate(eventId);
     return 1;
 }
@@ -359,8 +359,8 @@ s32 evtCommandSubmitEventWithMode(void)
     s32 eventId;
     s32 mode;
 
-    eventId = func_0010D650(0);
-    mode = func_0010D650(1);
+    eventId = scrReadIntParameter(0);
+    mode = scrReadIntParameter(1);
     evtSubmitEventRequest(eventId, mode);
     return 1;
 }
@@ -374,9 +374,9 @@ s32 func_002415E8(void)
     u8 request[0xa0];
 
     func_00144F08();
-    firstArg = func_0010D650(0);
-    secondArg = func_0010D650(1);
-    textArg = func_0010D7D0(2);
+    firstArg = scrReadIntParameter(0);
+    secondArg = scrReadIntParameter(1);
+    textArg = scrReadStringParameter(2);
     fldInitializeSequenceAndResetFlags((s32)request, firstArg, secondArg, textArg);
     func_001027D8(5, (s32)request, 0xa0, 0);
     func_0010BFE0();
@@ -389,8 +389,8 @@ s32 func_00241668(void)
     char *textArg;
     u8 request[0xa0];
 
-    firstArg = func_0010D650(0);
-    textArg = func_0010D7D0(1);
+    firstArg = scrReadIntParameter(0);
+    textArg = scrReadStringParameter(1);
     fldInitializeSequenceAndResetFlags((s32)request, D_00389780[0], firstArg, textArg);
     func_001027D8(5, (s32)request, 0xa0, 0);
     func_0010BFE0();
@@ -401,7 +401,7 @@ s32 func_002416D0(void)
 {
     s32 p0;
 
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     func_001027D8(0x1c, (s32)&p0, 4, 0);
     return 1;
 }
@@ -412,8 +412,8 @@ s32 func_00241708(void)
     char *textArg;
     u8 request[0xa0];
 
-    firstArg = func_0010D650(0);
-    textArg = func_0010D7D0(1);
+    firstArg = scrReadIntParameter(0);
+    textArg = scrReadStringParameter(1);
     fldInitializeAlternateSequence((s32)request, D_00389780[0], firstArg, textArg);
     func_001027D8(5, (s32)request, 0xa0, 0);
     func_0010BFE0();
@@ -426,8 +426,8 @@ s32 evtCommandDispatchFieldBE(void)
     s32 secondArg;
 
     func_0033DAD8("FIELD_BE start\n");
-    firstArg = func_0010D650(0);
-    secondArg = func_0010D650(1);
+    firstArg = scrReadIntParameter(0);
+    secondArg = scrReadIntParameter(1);
     func_0025D390(firstArg, secondArg);
     func_0033DAD8("FIELD_BE end\n");
     return 1;
@@ -439,12 +439,12 @@ s32 func_002417C8(void)
     s32 lowPart;
     s32 targetKey;
 
-    highPart = func_0010D650(0);
-    lowPart = func_0010D650(1);
+    highPart = scrReadIntParameter(0);
+    lowPart = scrReadIntParameter(1);
     targetKey = (highPart << 16) + lowPart;
     if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != targetKey) {
-        highPart = func_0010D650(0);
-        lowPart = func_0010D650(1);
+        highPart = scrReadIntParameter(0);
+        lowPart = scrReadIntParameter(1);
         func_0023AA30(highPart, lowPart);
     }
     return 1;
@@ -453,7 +453,7 @@ s32 func_002417C8(void)
 u32 func_00241838(void) {
     u64 value;
 
-    value = func_0010D650(0);
+    value = scrReadIntParameter(0);
     func_0023B0D0(0, value);
     return 1;
 }
@@ -461,7 +461,7 @@ u32 func_00241838(void) {
 u32 func_00241868(void) {
     u64 value;
 
-    value = func_0010D650(0);
+    value = scrReadIntParameter(0);
     func_0023B0D0(1, value);
     return 1;
 }
@@ -515,10 +515,10 @@ s32 func_002419B0(void)
 s32 func_002419F8(void) {
     void *unit;
 
-    if (func_0010D650(0) < 0) {
+    if (scrReadIntParameter(0) < 0) {
         unit = (void *)func_00125F38();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
     if (unit == NULL) {
         return 1;
@@ -530,10 +530,10 @@ s32 func_002419F8(void) {
 s32 func_00241A70(void) {
     void *unit;
 
-    if (func_0010D650(0) < 0) {
+    if (scrReadIntParameter(0) < 0) {
         unit = (void *)func_00125F38();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
         *(u32 *)(*(u8 **)((u8 *)unit + 0x18) + 0x88) |= 1;
     }
     if (unit == NULL) {
@@ -571,7 +571,7 @@ s32 func_00241CB0(void)
     s32 id;
     void *unit;
 
-    id = func_0010D650(0);
+    id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(4, id);
     if (unit == NULL) {
         return 1;
@@ -585,10 +585,10 @@ s32 func_00241CF0(void) {
     f32 vec[4];
 
     memset(vec, 0, sizeof(vec));
-    if (func_0010D650(0) < 0) {
+    if (scrReadIntParameter(0) < 0) {
         unit = (void *)func_00125F38();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
     if (unit == NULL) {
         return 1;
@@ -606,10 +606,10 @@ s32 func_00241E70(void) {
     void *unit;
     f32 vec[4];
 
-    if (func_0010D650(0) < 0) {
+    if (scrReadIntParameter(0) < 0) {
         unit = (void *)func_00125F38();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
     if (unit == NULL) {
         return 1;
@@ -659,7 +659,7 @@ s32 evtCommandReadSolarPhase(void)
 u32 evtCommandSetSolarPhase(void) {
     u64 phase;
 
-    phase = func_0010D650(0);
+    phase = scrReadIntParameter(0);
     evtSetSolarPhase(phase);
     return 1;
 }
@@ -668,11 +668,11 @@ INCLUDE_ASM(const s32, "event/evtCommand", evtCommandWaitForCampTask);
 
 extern s32 mnuCampCreateTask(s32 id);
 
+/* Start the camp task only if no task with this ID exists yet. */
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
-/* Start the camp task only if no task with this ID exists yet. */
 s32 evtCommandStartCampTaskIfAbsent(void) {
-    s32 id = func_0010D650(0);
+    s32 id = scrReadIntParameter(0);
     EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
 
     if (work == NULL) {
@@ -687,7 +687,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
 }
 
 s32 evtCommandTestCampTaskReady(void) {
-    s32 id = func_0010D650(0);
+    s32 id = scrReadIntParameter(0);
     s32 ok;
 
     if (func_0010D8C8() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
@@ -703,7 +703,7 @@ s32 evtCommandTestCampTaskReady(void) {
 extern void mnuCampDestroyTaskById(s32 id);
 
 s32 evtCommandDestroyCampTask(void) {
-    s32 id = func_0010D650(0);
+    s32 id = scrReadIntParameter(0);
 
     if (func_0010D8C8() == 0) {
         return 1;
@@ -724,7 +724,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 {
     s32 p0;
 
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     evtPolygonMovieClearFlagBits(p0, 1);
     func_0010D818(p0);
     return 1;
@@ -744,8 +744,8 @@ s32 evtCommandCreatePolygonMovie(void) {
         func_0035B6E0(D_00421F68);
         return 1;
     }
-    a = func_0010D650(0);
-    b = func_0010D650(1);
+    a = scrReadIntParameter(0);
+    b = scrReadIntParameter(1);
     result = func_0024FCB8(work->campTask->resource, a, b);
     func_00101968((s32)work->campTask, result);
     func_0010D818(result);
@@ -758,11 +758,11 @@ s32 func_00242818(void) {
     s32 i = 4;
 
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
         i++;
     } while (i < 10 && found == 0);
     if (found == 0) {
-        found = func_001287B8(func_0010D650(0));
+        found = func_001287B8(scrReadIntParameter(0));
         if (found == 0) {
             return 1;
         }
@@ -776,11 +776,11 @@ s32 func_00242898(void) {
     s32 i = 4;
 
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
         i++;
     } while (i < 10 && found == 0);
     if (found == 0) {
-        found = func_001287B8(func_0010D650(0));
+        found = func_001287B8(scrReadIntParameter(0));
         if (found == 0) {
             return 1;
         }
@@ -796,11 +796,11 @@ s32 func_00242918(void) {
     s32 i = 4;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
         i++;
     } while (i < 10 && unit == NULL);
     if (unit == NULL) {
-        unit = (u8 *)func_001287B8(func_0010D650(0));
+        unit = (u8 *)func_001287B8(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -828,23 +828,23 @@ s32 func_00242A30(void) {
     s32 i = 4;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
         i++;
     } while (i < 10 && unit == NULL);
     if (unit == NULL) {
-        unit = (u8 *)func_001287B8(func_0010D650(0));
+        unit = (u8 *)func_001287B8(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
     }
-    func_0023AE70(unit, func_0010D650(1));
+    func_0023AE70(unit, scrReadIntParameter(1));
     owner = *(char **)(unit + 8);
     if (owner == 0) {
         return 1;
     }
     count = func_00154FA0(owner);
     if (count > 0) {
-        if (func_0010D650(1) == 0) {
+        if (scrReadIntParameter(1) == 0) {
             func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
         } else {
             func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 0);
@@ -860,11 +860,11 @@ s32 func_00242B40(void)
 
     i = 4;
     do {
-        unit = evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
         i++;
     } while (i < 10 && unit == NULL);
     if (unit == NULL) {
-        unit = (void *)func_001287B8(func_0010D650(0));
+        unit = (void *)func_001287B8(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -880,11 +880,11 @@ s32 func_00242BC0(void)
 
     i = 4;
     do {
-        unit = evtFindWorldObjectByIdAndKind(i, func_0010D650(0));
+        unit = evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
         i++;
     } while (i < 10 && unit == NULL);
     if (unit == NULL) {
-        unit = (void *)func_001287B8(func_0010D650(0));
+        unit = (void *)func_001287B8(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -894,9 +894,9 @@ s32 func_00242BC0(void)
 }
 
 s32 func_00242C40(void) {
-    void *path = evtFindWorldObjectByIdAndKind(9, func_0010D650(0));
+    void *path = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0));
 
-    if (func_0023AEB0(evtFindWorldObjectByIdAndKind(0x10, func_0010D650(1)), path) != 0) {
+    if (func_0023AEB0(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), path) != 0) {
         return 1;
     }
     func_0035B6E0(D_00421FB0);

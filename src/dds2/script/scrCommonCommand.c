@@ -40,7 +40,7 @@ extern ScrComGlobals *D_00435DD0;
 
 s32 func_0010D990(void)
 {
-    func_0010D818(effMiscRandMod(0, func_0010D650(0)) + 1);
+    func_0010D818(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
     return 1;
 }
 
@@ -51,10 +51,10 @@ s32 func_0010D9C8(void)
 
 /* DDS2 twin of DDS1 func_0010D7C0: BF wait step-ticks-at-least callback. */
 s32 func_0010D9E8(void) {
-    if (func_0010D650(0) <= 0) {
+    if (scrReadIntParameter(0) <= 0) {
         return 1;
     }
-    if (scrGetCommandTimer() < func_0010D650(0)) {
+    if (scrGetCommandTimer() < scrReadIntParameter(0)) {
         return 0;
     }
     return 1;
@@ -62,13 +62,13 @@ s32 func_0010D9E8(void) {
 
 s32 func_0010DA30(void)
 {
-    func_0010AE38(D_00412648, func_0010D650(0));
+    func_0010AE38(D_00412648, scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010DA60(void)
 {
-    func_0010AE38(D_00412658, func_0010D7D0(0));
+    func_0010AE38(D_00412658, scrReadStringParameter(0));
     return 1;
 }
 
@@ -78,14 +78,14 @@ s32 bfWaitCbScreenFadeA(void)
 
     if (scrGetCommandTimer() == 0)
     {
-        mode = func_0010D650(0);
+        mode = scrReadIntParameter(0);
         switch (mode)
         {
         case 0:
-            kwlnFadeOutStart(0, 0, 0, func_0010D650(1));
+            kwlnFadeOutStart(0, 0, 0, scrReadIntParameter(1));
             break;
         case 1:
-            kwlnFadeOutStart(0xFF, 0xFF, 0xFF, func_0010D650(1));
+            kwlnFadeOutStart(0xFF, 0xFF, 0xFF, scrReadIntParameter(1));
             break;
         default:
             return 1;
@@ -101,14 +101,14 @@ s32 bfWaitCbScreenFadeB(void)
 
     if (scrGetCommandTimer() == 0)
     {
-        mode = func_0010D650(0);
+        mode = scrReadIntParameter(0);
         switch (mode)
         {
         case 0:
-            kwlnFadeInStart(0, 0, 0, func_0010D650(1));
+            kwlnFadeInStart(0, 0, 0, scrReadIntParameter(1));
             break;
         case 1:
-            kwlnFadeInStart(0xFF, 0xFF, 0xFF, func_0010D650(1));
+            kwlnFadeInStart(0xFF, 0xFF, 0xFF, scrReadIntParameter(1));
             break;
         default:
             return 1;
@@ -122,7 +122,7 @@ s32 func_0010DBD0(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        func_00105FE8(func_0010D650(0));
+        func_00105FE8(scrReadIntParameter(0));
         return 0;
     }
     return 1;
@@ -132,7 +132,7 @@ s32 func_0010DC10(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        func_00106080(func_0010D650(0));
+        func_00106080(scrReadIntParameter(0));
         return 0;
     }
     return 1;
@@ -142,12 +142,12 @@ s32 func_0010DC50(void)
 {
     s32 argumentIndex;
     s32 label;
-    argumentIndex = func_0010D650(0);
+    argumentIndex = scrReadIntParameter(0);
     if (argumentIndex < 0)
     {
         return 1;
     }
-    label = func_0010D650(argumentIndex + 1);
+    label = scrReadIntParameter(argumentIndex + 1);
     if (label < 0)
     {
         return 1;
@@ -158,13 +158,13 @@ s32 func_0010DC50(void)
 
 s32 func_0010DCA8(void)
 {
-    func_0010D818(D_0040B7D8[func_0010D650(0)] < 0);
+    func_0010D818(D_0040B7D8[scrReadIntParameter(0)] < 0);
     return 1;
 }
 
 s32 func_0010DCE0(void)
 {
-    func_0010D818(D_0040B7D8[func_0010D650(0)] & 1);
+    func_0010D818(D_0040B7D8[scrReadIntParameter(0)] & 1);
     return 1;
 }
 
@@ -172,9 +172,9 @@ s32 func_0010DD18(void)
 {
     s32 p0;
     s32 p1;
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    func_00103F58(p0, p1 & 0xFF, func_0010D650(2));
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    func_00103F58(p0, p1 & 0xFF, scrReadIntParameter(2));
     return 1;
 }
 
@@ -219,7 +219,7 @@ s32 bfWaitCbCreateTask(void)
     s32 index;
     BfWaitContext *ctx;
 
-    index = func_0010D650(0);
+    index = scrReadIntParameter(0);
     ctx = (BfWaitContext *)func_0010D8C8();
     if (ctx == NULL)
     {
@@ -234,7 +234,7 @@ s32 bfWaitCbCreateTask(void)
         return 1;
     }
     func_0010D818(func_0010BEE0(
-        ctx->record->basePriority + func_0010D650(1), ctx->base.unkAC,
+        ctx->record->basePriority + scrReadIntParameter(1), ctx->base.unkAC,
         ctx->base.unkB0, ctx->base.procedures, ctx->base.labels,
         ctx->base.instructions, ctx->base.unkC0, ctx->base.strings, index));
     return 1;
@@ -243,7 +243,7 @@ s32 bfWaitCbCreateTask(void)
 s32 func_0010DEA8(void)
 {
     s32 p0;
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     if (kwlnTaskIsRegistered(p0) == 0)
     {
         return 1;
@@ -254,12 +254,12 @@ s32 func_0010DEA8(void)
 
 s32 func_0010DEF0(void)
 {
-    return kwlnTaskIsRegistered(func_0010D650(0)) == 0;
+    return kwlnTaskIsRegistered(scrReadIntParameter(0)) == 0;
 }
 
 s32 func_0010DF18(void)
 {
-    if (kwlnTaskIsRegistered(func_0010D650(0)) != 0)
+    if (kwlnTaskIsRegistered(scrReadIntParameter(0)) != 0)
     {
         func_0010D818(1);
     }
@@ -274,7 +274,7 @@ s32 func_0010DF18(void)
 u32 scrCommand_SCR_GET_TIMER()
 {
     KwlnTask* task;
-    task = (KwlnTask*)func_0010D650(0);
+    task = (KwlnTask*)scrReadIntParameter(0);
     if (!kwlnTaskIsRegistered(task))
     {
         func_0010D818(0);
@@ -289,8 +289,8 @@ u32 scrCommand_SCR_GET_TIMER()
 s32 func_0010DFC0(void)
 {
     s32 p0;
-    p0 = func_0010D650(0);
-    kwlnFadeSetupFrames(p0, func_0010D650(1));
+    p0 = scrReadIntParameter(0);
+    kwlnFadeSetupFrames(p0, scrReadIntParameter(1));
     return 1;
 }
 
@@ -313,7 +313,7 @@ s32 func_0010E020(void)
     z = bfWaitReadArgFloat(3);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.z $vf10, $vf00, $vf02x" :: "r"(z));
     __asm__ volatile ("vmulx.w $vf10, $vf10, $vf00x\n\tsqc2 $vf10, %0" : "=m"(v));
-    func_00107EF8(func_0010D650(0), 0, &v);
+    func_00107EF8(scrReadIntParameter(0), 0, &v);
     return 1;
 }
 
@@ -338,7 +338,7 @@ s32 func_0010E148(void)
     z = bfWaitReadArgFloat(3);
     __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.z $vf10, $vf00, $vf02x" :: "r"(z));
     __asm__ volatile ("vmove.w $vf10, $vf00\n\tsqc2 $vf10, %0" : "=m"(v));
-    func_00108138(func_0010D650(0), &v);
+    func_00108138(scrReadIntParameter(0), &v);
     return 1;
 }
 
@@ -349,7 +349,7 @@ s32 func_0010E1B8(void)
     v.y = bfWaitReadArgFloat(2);
     v.z = bfWaitReadArgFloat(3);
     v.w = 0;
-    func_001081F8(func_0010D650(0), &v);
+    func_001081F8(scrReadIntParameter(0), &v);
     return 1;
 }
 
@@ -361,11 +361,11 @@ s32 func_0010E210(void)
     f32 z;
     f32 w;
 
-    p0 = func_0010D650(0);
-    x = (f32)(u32)func_0010D650(1);
-    y = (f32)(u32)func_0010D650(3);
-    z = (f32)(u32)func_0010D650(2);
-    w = (f32)(u32)func_0010D650(4);
+    p0 = scrReadIntParameter(0);
+    x = (f32)(u32)scrReadIntParameter(1);
+    y = (f32)(u32)scrReadIntParameter(3);
+    z = (f32)(u32)scrReadIntParameter(2);
+    w = (f32)(u32)scrReadIntParameter(4);
     evtSetDrawVectorTarget(p0, x, y, z, w);
     return 1;
 }
@@ -373,7 +373,7 @@ s32 func_0010E210(void)
 s32 func_0010E348(void)
 {
     s32 p0;
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     evtUnk89F8SetState(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
     return 1;
 }
@@ -382,9 +382,9 @@ s32 func_0010E3A0(void)
 {
     s32 p0;
     s32 p1;
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    kwlnDrawSetOffsetTransition(p0, p1, func_0010D650(2));
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    kwlnDrawSetOffsetTransition(p0, p1, scrReadIntParameter(2));
     return 1;
 }
 
@@ -395,7 +395,7 @@ s32 func_0010E3F8(void)
     f32 first;
     f32 second;
 
-    p2 = func_0010D650(2);
+    p2 = scrReadIntParameter(2);
     switch (p2)
     {
     case 1:
@@ -422,10 +422,10 @@ s32 func_0010E480(void)
     s32 p0;
     s32 p3;
     s32 p1;
-    p0 = func_0010D650(0);
-    p3 = func_0010D650(3);
-    p2 = func_0010D650(2);
-    p1 = func_0010D650(1);
+    p0 = scrReadIntParameter(0);
+    p3 = scrReadIntParameter(3);
+    p2 = scrReadIntParameter(2);
+    p1 = scrReadIntParameter(1);
     kwlnDrawSetC70Second(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
@@ -434,27 +434,27 @@ s32 func_0010E508(void)
 {
     s32 p0;
     s32 p1;
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    kwlnDrawSetC70Triple(p0, p1, func_0010D650(2));
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    kwlnDrawSetC70Triple(p0, p1, scrReadIntParameter(2));
     return 1;
 }
 
 s32 func_0010E560(void)
 {
-    func_00106AE8(func_0010D650(0));
+    func_00106AE8(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010E588(void)
 {
-    kwlnDrawSetupC70(func_0010D650(0));
+    kwlnDrawSetupC70(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010E5B0(void)
 {
-    kwlnDrawSetupC70B(func_0010D650(0));
+    kwlnDrawSetupC70B(scrReadIntParameter(0));
     return 1;
 }
 
@@ -469,7 +469,7 @@ s32 func_0010E5D8(void)
     f32 f3;
     f32 f5;
 
-    sel = func_0010D650(6);
+    sel = scrReadIntParameter(6);
     switch (sel)
     {
     case 1:
@@ -483,9 +483,9 @@ s32 func_0010E5D8(void)
         kind = 0x44;
         break;
     }
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    p2 = func_0010D650(2);
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    p2 = scrReadIntParameter(2);
     f3 = bfWaitReadArgFloat(3);
     f4 = bfWaitReadArgFloat(4);
     f5 = bfWaitReadArgFloat(5);
@@ -500,10 +500,10 @@ s32 func_0010E6C0(void)
     s32 p0;
     s32 p3;
     s32 p1;
-    p0 = func_0010D650(0);
-    p3 = func_0010D650(3);
-    p2 = func_0010D650(2);
-    p1 = func_0010D650(1);
+    p0 = scrReadIntParameter(0);
+    p3 = scrReadIntParameter(3);
+    p2 = scrReadIntParameter(2);
+    p1 = scrReadIntParameter(1);
     kwlnDrawSetCd0Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
@@ -512,27 +512,27 @@ s32 func_0010E748(void)
 {
     s32 p0;
     s32 p1;
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    kwlnDrawSetCd0Triple(p0, p1, func_0010D650(2));
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    kwlnDrawSetCd0Triple(p0, p1, scrReadIntParameter(2));
     return 1;
 }
 
 s32 func_0010E7A0(void)
 {
-    func_00106D10(func_0010D650(0));
+    func_00106D10(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010E7C8(void)
 {
-    kwlnDrawSetupCd0(func_0010D650(0));
+    kwlnDrawSetupCd0(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010E7F0(void)
 {
-    kwlnDrawEnableCd0(func_0010D650(0));
+    kwlnDrawEnableCd0(scrReadIntParameter(0));
     return 1;
 }
 
@@ -547,7 +547,7 @@ s32 func_0010E818(void)
     f32 f4;
     f32 f5;
 
-    mode = func_0010D650(6);
+    mode = scrReadIntParameter(6);
     switch (mode)
     {
     case 1:
@@ -561,7 +561,7 @@ s32 func_0010E818(void)
         sel = 0x44;
         break;
     }
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     f1 = bfWaitReadArgFloat(1);
     f2 = bfWaitReadArgFloat(2);
     f3 = bfWaitReadArgFloat(3);
@@ -578,10 +578,10 @@ s32 func_0010E900(void)
     s32 p0;
     s32 p3;
     s32 p1;
-    p0 = func_0010D650(0);
-    p3 = func_0010D650(3);
-    p2 = func_0010D650(2);
-    p1 = func_0010D650(1);
+    p0 = scrReadIntParameter(0);
+    p3 = scrReadIntParameter(3);
+    p2 = scrReadIntParameter(2);
+    p1 = scrReadIntParameter(1);
     kwlnDrawSetD30Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
@@ -590,27 +590,27 @@ s32 func_0010E988(void)
 {
     s32 p0;
     s32 p1;
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    kwlnDrawSetD30Triple(p0, p1, func_0010D650(2));
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    kwlnDrawSetD30Triple(p0, p1, scrReadIntParameter(2));
     return 1;
 }
 
 s32 func_0010E9E0(void)
 {
-    func_00106F38(func_0010D650(0));
+    func_00106F38(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010EA08(void)
 {
-    kwlnDrawSetupD30(func_0010D650(0));
+    kwlnDrawSetupD30(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010EA30(void)
 {
-    kwlnDrawEnableD30(func_0010D650(0));
+    kwlnDrawEnableD30(scrReadIntParameter(0));
     return 1;
 }
 
@@ -623,10 +623,10 @@ s32 func_0010EAF8(void)
     s32 p0;
     s32 p3;
     s32 p1;
-    p0 = func_0010D650(0);
-    p3 = func_0010D650(3);
-    p2 = func_0010D650(2);
-    p1 = func_0010D650(1);
+    p0 = scrReadIntParameter(0);
+    p3 = scrReadIntParameter(3);
+    p2 = scrReadIntParameter(2);
+    p1 = scrReadIntParameter(1);
     kwlnDrawSetD88First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
@@ -634,26 +634,26 @@ s32 func_0010EAF8(void)
 s32 func_0010EB80(void)
 {
     s32 p0;
-    p0 = func_0010D650(0);
-    kwlnDrawSetD88Pair(p0, func_0010D650(1));
+    p0 = scrReadIntParameter(0);
+    kwlnDrawSetD88Pair(p0, scrReadIntParameter(1));
     return 1;
 }
 
 s32 func_0010EBC0(void)
 {
-    func_001068C8(func_0010D650(0));
+    func_001068C8(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010EBE8(void)
 {
-    kwlnDrawSetupD88(func_0010D650(0));
+    kwlnDrawSetupD88(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010EC10(void)
 {
-    kwlnDrawEnableD88(func_0010D650(0));
+    kwlnDrawEnableD88(scrReadIntParameter(0));
     return 1;
 }
 
@@ -661,7 +661,7 @@ s32 func_0010EC38(void)
 {
     s32 p0;
     s32 mode;
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     switch (p0)
     {
     case 1:
@@ -692,29 +692,29 @@ s32 func_0010ECB8(void)
     s32 p0;
     s32 p3;
     s32 p1;
-    p0 = func_0010D650(0);
-    p3 = func_0010D650(3);
-    p2 = func_0010D650(2);
-    p1 = func_0010D650(1);
+    p0 = scrReadIntParameter(0);
+    p3 = scrReadIntParameter(3);
+    p2 = scrReadIntParameter(2);
+    p1 = scrReadIntParameter(1);
     kwlnDrawSetDc8First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
 
 s32 func_0010ED40(void)
 {
-    func_00106460(func_0010D650(0));
+    func_00106460(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010ED68(void)
 {
-    kwlnDrawSetupDc8(func_0010D650(0));
+    kwlnDrawSetupDc8(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010ED90(void)
 {
-    kwlnDrawEnableDc8(func_0010D650(0));
+    kwlnDrawEnableDc8(scrReadIntParameter(0));
     return 1;
 }
 
@@ -722,7 +722,7 @@ s32 func_0010EDB8(void)
 {
     s32 p0;
     s32 mode;
-    p0 = func_0010D650(0);
+    p0 = scrReadIntParameter(0);
     switch (p0)
     {
     case 1:
@@ -753,10 +753,10 @@ s32 func_0010EE38(void)
     s32 p0;
     s32 p3;
     s32 p1;
-    p0 = func_0010D650(0);
-    p3 = func_0010D650(3);
-    p2 = func_0010D650(2);
-    p1 = func_0010D650(1);
+    p0 = scrReadIntParameter(0);
+    p3 = scrReadIntParameter(3);
+    p2 = scrReadIntParameter(2);
+    p1 = scrReadIntParameter(1);
     kwlnDrawSetE08Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
     return 1;
 }
@@ -765,27 +765,27 @@ s32 func_0010EEC0(void)
 {
     s32 p0;
     s32 p1;
-    p0 = func_0010D650(0);
-    p1 = func_0010D650(1);
-    kwlnDrawSetE08Triple(p0, p1, func_0010D650(2));
+    p0 = scrReadIntParameter(0);
+    p1 = scrReadIntParameter(1);
+    kwlnDrawSetE08Triple(p0, p1, scrReadIntParameter(2));
     return 1;
 }
 
 s32 func_0010EF18(void)
 {
-    func_00106658(func_0010D650(0));
+    func_00106658(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010EF40(void)
 {
-    kwlnDrawSetupE08(func_0010D650(0));
+    kwlnDrawSetupE08(scrReadIntParameter(0));
     return 1;
 }
 
 s32 func_0010EF68(void)
 {
-    kwlnDrawEnableE08(func_0010D650(0));
+    kwlnDrawEnableE08(scrReadIntParameter(0));
     return 1;
 }
 
@@ -804,7 +804,7 @@ s32 func_0010EFE0(void)
 {
     kwlnDrawEnableDc8(0);
     kwlnDrawEnableE08(0);
-    func_00135568(0);
+    fldSetSwayMode(0);
     func_00135578(0x80);
     func_00135588(0);
     fldSetFadeTarget(0, 1, 0);
@@ -831,14 +831,14 @@ s32 func_0010F058(void)
 s32 func_0010F068(void)
 {
     s32 p0;
-    p0 = func_0010D650(0);
-    func_0011A118(p0, func_0010D650(1));
+    p0 = scrReadIntParameter(0);
+    func_0011A118(p0, scrReadIntParameter(1));
     return 1;
 }
 
 s32 func_0010F0A8(void)
 {
-    func_0011A0D0(func_0010D650(0));
+    func_0011A0D0(scrReadIntParameter(0));
     return 1;
 }
 
@@ -846,7 +846,7 @@ s32 func_0010F0A8(void)
 u32 scrCommand_SCR_EXISTS()
 {
     KwlnTask* task;
-    task = (KwlnTask*)func_0010D650(0);
+    task = (KwlnTask*)scrReadIntParameter(0);
     if (func_0011A100(task))
     {
         func_0010D818(1);

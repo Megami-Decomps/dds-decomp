@@ -39,7 +39,7 @@ extern s32 func_003139D8();
 
 extern f32 func_003532B8(f32);
 
-extern f32 func_003406A0(f32);
+extern f32 sdfSinPoly(f32);
 
 extern f32 func_003407A0(f32);
 
@@ -254,7 +254,7 @@ void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f3
 
 void sdfQuatLog(f32 *out, f32 *in) {
     f32 angle = func_003532B8(in[3]);
-    f32 sine = func_003406A0(angle);
+    f32 sine = sdfSinPoly(angle);
     out[3] = 0.0f;
     if (out[3] < sine) {
         out[0] = angle * in[0] / sine;
@@ -268,7 +268,7 @@ void sdfQuatLog(f32 *out, f32 *in) {
 void sdfQuatExp(f32 *out, f32 *in) {
     f32 x = in[0], y = in[1], z = in[2];
     f32 length = fsqrtf(x * x + y * y + z * z);
-    f32 sine = func_003406A0(length);
+    f32 sine = sdfSinPoly(length);
     out[3] = func_003407A0(length);
     if (length > 0.0f) {
         out[0] = sine * in[0] / length;

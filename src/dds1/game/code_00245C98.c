@@ -72,7 +72,7 @@ extern void func_002444D0();
 extern s16 mnuShopHasPendingFlag();
 
 /* Prepare the active menu state and copy the selection into its window. */
-s32 func_00245D08(void) {
+s32 evtInitializeActiveMenuState(void) {
     s32 state = func_00101A70();
     s32 window;
     s16 pending;
@@ -92,7 +92,7 @@ s32 func_00245D08(void) {
 }
 
 /* Advance command phase when the current menu state is phase one. */
-s32 func_00245DA0(void) {
+s32 evtAdvancePhaseOne(void) {
     EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
 
     if (state->action == 1) {

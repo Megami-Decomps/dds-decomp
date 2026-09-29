@@ -4,7 +4,12 @@ extern u32 effMiscRand(void *state);
 
 extern s8 D_004391E0;
 
-INCLUDE_ASM(const s32, "game/code_00341240", func_00341240);
+/* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
+f32 func_00341240(void *state) {
+    u32 value = effMiscRand(state) & 0xFFFFFF;
+
+    return (f32)value * 5.9604644775390625e-8f;
+}
 
 u32 effMiscRandMod(void *state, u32 modulus) {
     return effMiscRand(state) % modulus;

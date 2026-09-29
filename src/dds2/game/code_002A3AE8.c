@@ -20,18 +20,18 @@ typedef struct { s32 unk0; s32 gfx[1]; } SprWork;
 
 extern SprEntry D_003E3790[];
 
-s32 func_002A3AE8(u32 index) {
+s32 mnuSpriteGraphicHandle(u32 index) {
     SprWork *work = (SprWork *)D_00437A40;
     return work->gfx[D_003E3790[index].gfx];
 }
 
-s16 func_002A3B10(u32 index) {
+s16 mnuSpriteDrawParam(u32 index) {
     return D_003E3792[index * 4];
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3B28);
+INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuDrawSprite);
 
-extern s32 func_002B8158(s32, s32, s32);
+extern s32 mnuCreateListState(s32, s32, s32);
 
 extern void func_002B81C8(s32);
 
@@ -45,7 +45,7 @@ void func_002A3BE0(void) {
     if (*(s32 *)(D_00437A40 + 0x24) != 0) {
         func_002B81C8(*(s32 *)(D_00437A40 + 0x24));
     }
-    node = func_002B8158(0, 3, 0);
+    node = mnuCreateListState(0, 3, 0);
     *(s32 *)(D_00437A40 + 0x24) = node;
     *(void **)(node + 0x2C) = func_002A5A78;
     for (i = 0; i < 3; i++) {
@@ -62,7 +62,7 @@ u32 func_002A3C78(void) {
 }
 
 void func_002A3C90(s32 arg0) {
-    func_002B8968(*(u32 *)(D_00437A40 + 0x24));
+    mnuSelectFirstListNode(*(u32 *)(D_00437A40 + 0x24));
     if (0 < arg0) {
         do {
             arg0 = arg0 - 1;
@@ -118,18 +118,18 @@ void mnuReleaseSpriteHandle(void) {
 }
 
 s64 mnuStartMovieMenuSfx16(s32 arg0) {
-    return func_002A3B28(0, 0, 0, arg0, 0, 0x1F, 0x53);
+    return mnuDrawSprite(0, 0, 0, arg0, 0, 0x1F, 0x53);
 }
 
-void func_002A3F28(u32 work) {
-    func_002A3B28(0, 0, 0, work, 0, 0x20, 0x53);
+void mnuStartMovieMenuSfx17(u32 work) {
+    mnuDrawSprite(0, 0, 0, work, 0, 0x20, 0x53);
 }
 
-void func_002A3F60(u32 work) {
-    func_002A3B28(0, 0, 0, work, 0, 0x21, 0x53);
+void mnuStartMovieMenuSfx18(u32 work) {
+    mnuDrawSprite(0, 0, 0, work, 0, 0x21, 0x53);
 }
 
-void func_002A3F98(u32 *work, s32 state) {
+void mnuSlideBarSetState(u32 *work, s32 state) {
     switch (state) {
     case 2:
         work[1] = 0;
@@ -147,7 +147,7 @@ void func_002A3F98(u32 *work, s32 state) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3FE0);
 
-void func_002A40C8(u32 *state, u32 mode) {
+void mnuSlideBarSetStateB(u32 *state, u32 mode) {
     switch (mode) {
     case 2: state[1] = 0; mode = 0; break;
     case 3: mode = 1; state[1] = 0x200; break;
@@ -157,7 +157,7 @@ void func_002A40C8(u32 *state, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4110);
 
-void func_002A41C0(u32 *state, u32 mode) {
+void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
     switch (mode) {
     case 2: state[2] = 0; mode = 0; break;
     case 3: mode = 1; state[2] = 0x80; break;
@@ -217,7 +217,7 @@ void titlePickRandomSlot(list)
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A44C0);
 
-void func_002A4670(u32 *work, s32 state) {
+void mnuPairedSlideBarSetState(u32 *work, s32 state) {
     switch (state) {
     case 2:
         work[1] = 0;
@@ -283,7 +283,7 @@ s32 func_002A47E8(s32 position) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4870);
 
-void func_002A48F0(s32 position, s32 *outX, s32 *outY) {
+void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
     s32 segment = func_002A47E8(position);
     s32 start = func_002A4770(segment);
     s32 end = func_002A4870(segment);
@@ -310,13 +310,13 @@ extern void func_002A44C0(SlideBar *, s32);
 
 extern void func_002A4B70(SlideBar *, s32);
 
-extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
     if (bar->active != 0 || bar->pos != 0) {
         titlePickRandomSlot();
         func_002A44C0(bar, arg1);
-        func_002A3B28(0, 0, 0, bar->pos, 0, 0x16, arg1);
+        mnuDrawSprite(0, 0, 0, bar->pos, 0, 0x16, arg1);
         func_002A4B70(bar, arg1);
         if (bar->active != 0) {
             bar->pos += 8;
@@ -334,7 +334,7 @@ void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
 
 typedef struct { s32 active; s32 pos; s32 id; s32 timer; } SlideBarTimed;
 
-void func_002A4DF0(SlideBarTimed *bar, s32 mode, s32 timer) {
+void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer) {
     bar->timer = timer;
     if (timer > 0) {
         bar->id = mode;
@@ -347,19 +347,19 @@ void func_002A4DF0(SlideBarTimed *bar, s32 mode, s32 timer) {
     bar->active = mode;
 }
 
-extern void func_002A3B28(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 arg1) {
     if (bar->timer > 0) {
         bar->timer--;
         if (bar->timer == 0) {
-            func_002A4DF0(bar, bar->id, 0);
+            mnuTimedSlideBarSetState(bar, bar->id, 0);
         }
     }
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
-    func_002A3B28(0, 0, 0, bar->pos / 4, 0, 0x12, arg1);
+    mnuDrawSprite(0, 0, 0, bar->pos / 4, 0, 0x12, arg1);
     if (bar->active != 0) {
         bar->pos += 0x10;
     } else {
@@ -380,10 +380,10 @@ void mnuAdvanceMultiSpriteSlideBar(SlideBar *bar, s32 arg1) {
         return;
     }
     half = bar->pos / 4;
-    func_002A3B28(0, 0, 0, half, 0, 0x13, arg1);
-    func_002A3B28(0, 0, 0, half, 0, 0x1A, arg1);
-    func_002A3B28(0, 0, 0, half, 0, 0x1B, arg1);
-    func_002A3B28(0, 0, 0, half, 0, 0x1C, arg1);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x13, arg1);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x1A, arg1);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x1B, arg1);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x1C, arg1);
     if (bar->active != 0) {
         bar->pos += 0x1B;
     } else {
@@ -425,11 +425,11 @@ void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 arg1) {
 
         switch (i) {
         case 0:
-            func_002A3B28(0, 0, 0, pos, 0, 0xF, arg1);
-            func_002A3B28(0, 0, 0, pos, 0, 0x10, arg1);
+            mnuDrawSprite(0, 0, 0, pos, 0, 0xF, arg1);
+            mnuDrawSprite(0, 0, 0, pos, 0, 0x10, arg1);
             break;
         case 1:
-            func_002A3B28(0, 0, 0, pos, 0, 0x11, arg1);
+            mnuDrawSprite(0, 0, 0, pos, 0, 0x11, arg1);
             break;
         }
         if (bars->active[i] == 0) {

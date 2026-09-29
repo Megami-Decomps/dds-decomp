@@ -107,7 +107,7 @@ void func_00113AA8(EffectObject *obj) {
 
     data = obj->data;
     if (data->activeId != -1) {
-        func_001166F0(obj, 10);
+        evtEndUnitValueTransitionForObject(obj, 10);
         data->activeId = 0xffffffff;
     }
 }
@@ -209,7 +209,7 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_00113F28);
 INCLUDE_ASM(const s32, "game/code_001130E0", func_001141C0);
 
 /* Refresh the object's stored xyz from the source vector. */
-void func_001143B0(WorldObj *obj) {
+void dds3RefreshStoredVec3(WorldObj *obj) {
     f32 *src = obj->source;
     WorldSubState *dst = obj->state;
     dst->vec[0] = src[0x10];

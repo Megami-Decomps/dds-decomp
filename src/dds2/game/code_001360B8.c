@@ -26,9 +26,9 @@ INCLUDE_ASM(const s32, "game/code_001360B8", func_001363D8);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_00136718);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_00136850);
+INCLUDE_ASM(const s32, "game/code_001360B8", fldApplyLightSetCurrent);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_00136A70);
+INCLUDE_ASM(const s32, "game/code_001360B8", fldApplyLightSetIndex);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_00136C90);
 

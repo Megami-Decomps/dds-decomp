@@ -1169,7 +1169,7 @@ extern s32 func_002F2850(s32 port, s32 slot, void *actData);
 extern s32 scePadSetMainMode(s32 port, s32 slot, s32 offs, s32 lock);
 extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
 
-void func_002E35C8(F9B00Entry *entry) {
+void sdfPadUpdatePort(F9B00Entry *entry) {
     u8 data[0x20];
     u8 act[6];
     s32 port = entry->port;
@@ -1317,12 +1317,12 @@ void func_002E35C8(F9B00Entry *entry) {
 }
 
 
-extern void func_002E35C8(F9B00Entry *entry);
+extern void sdfPadUpdatePort(F9B00Entry *entry);
 
-void func_002E3970(void) {
+void sdfPadUpdatePorts(void) {
     s32 i;
     for (i = 0; i != 2; i++) {
-        func_002E35C8(&D_003F9B00[i]);
+        sdfPadUpdatePort(&D_003F9B00[i]);
     }
 }
 
@@ -1337,7 +1337,7 @@ extern u8 D_00398648[0x18];
 
 /* Build per-button held/repeat/new-press flags for both controller ports.
  * Repeat starts after 15 ticks, then recurs every four ticks. */
-void func_002E39C8(void) {
+void sdfPadBuildButtonStates(void) {
     s32 now = D_003BD2D8;
     s32 i;
     s32 bit;
@@ -1380,15 +1380,15 @@ void func_002E39C8(void) {
 }
 
 
-void func_002E3B40(s32 padIndex, u8 mode) {
+void sdfPadRequestMode(s32 padIndex, u8 mode) {
     D_003F9B00[padIndex].requestedMode = mode;
 }
 
-void func_002E3B60(s32 padIndex, u16 strength) {
+void sdfPadSetSmallMotor(s32 padIndex, u16 strength) {
     D_003F9B00[padIndex].smallMotor = strength;
 }
 
-void func_002E3B80(s32 padIndex, u8 strength) {
+void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
     D_003F9B00[padIndex].largeMotor = strength;
 }
 

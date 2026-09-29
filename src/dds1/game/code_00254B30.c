@@ -11,7 +11,7 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00254B30);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 /* Store the selected value in the display unit and open its scaled window. */
-void func_00254C30(s32 x, s32 y, s32 z, s32 value, s32 context, s32 parameter) {
+void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, s32 context, s32 parameter) {
     s32 unit = *(s32 *)(context + 0xC);
 
     **(s32 **)(unit + 0x30) = value;
@@ -25,7 +25,7 @@ extern void func_002CD0D8(u32, s32, void *);
 extern void func_002CA858(s32, s32, s32, u32, s32, void *, u32, s32);
 
 /* Fetch an indexed display record and draw it with the requested tag bits. */
-void func_00254E48(s32 x, s32 y, s32 layer, u32 attributes, u32 entry, s32 context) {
+void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry, s32 context) {
     u32 tag = attributes | 0xA09DC300;
     u32 id = entry & 0xFFFF;
     u8 buffer[0x20];
@@ -65,7 +65,7 @@ extern void func_0024DA58(s32);
 extern void func_0024DAB8(s32);
 
 /* Populate four menu labels from the current selection and scene metadata. */
-void func_00255508(void) {
+void itfDspPopulatePrimaryLabels(void) {
     s32 *selection = (s32 *)func_0024FA18();
     u8 *scene = (u8 *)fldGetSceneMetadataNode();
     char text[16];
@@ -81,7 +81,7 @@ void func_00255508(void) {
 }
 
 /* Populate the same menu labels, selecting the alternate display signal. */
-void func_002555E8(void) {
+void itfDspPopulateAlternateLabels(void) {
     s32 *selection = (s32 *)func_0024FA18();
     u8 *scene = (u8 *)fldGetSceneMetadataNode();
     char text[16];
@@ -97,7 +97,7 @@ void func_002555E8(void) {
 }
 
 /* Populate menu labels for the third display signal. */
-void func_002556C8(void) {
+void itfDspPopulateThirdLabels(void) {
     s32 *selection = (s32 *)func_0024FA18();
     u8 *scene = (u8 *)fldGetSceneMetadataNode();
     char text[16];

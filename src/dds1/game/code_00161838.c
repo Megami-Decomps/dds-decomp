@@ -8,7 +8,7 @@ extern u32 D_003BB030;
 extern u32 D_003BB034;
 
 /* Keep the original selector and optional overrides separately for field-color lookups. */
-void func_00161838(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
+void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
     D_003BB030 = (u32)baseId;
     D_003BB028 = D_003BB030;
     if (overrideId != 0) {
@@ -38,7 +38,7 @@ u32 func_00161870(void) {
 }
 
 /* Default RGB adjustment used when no field-specific color is supplied. */
-void func_00161878(u32 unused, f32 *color) {
+void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
     color[0] = -0.73f;
     color[1] = 1.55f;
     color[2] = 0.24f;
@@ -55,7 +55,7 @@ typedef struct Entry20B {
 
 extern Entry20B D_0034E740[];
 
-u32 func_001619C8(s32 index) {
+u32 effBTLFieldColorGetEntryWord(s32 index) {
     return D_0034E740[index].value;
 }
 

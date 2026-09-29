@@ -176,7 +176,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118AB0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchCmd);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118BA8);
+INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchUnitScriptDefault9);
 
 void func_00118C58(u32 context, u32 first, u32 second, u8 flags) {
     evtRunContext(10, first, second, context, flags);

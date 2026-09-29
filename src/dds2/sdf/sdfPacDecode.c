@@ -74,13 +74,13 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 
 void func_00328E48(void *arg0);
 
-void func_00347290(PacState *state, PacHead *packet);
+void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
 
 void func_00347320(PacState *state, PacHead *packet);
 
 void func_003473B0(PacState *state, PacHead *packet);
 
-void func_00347710(PacState *state, PacHead *packet);
+void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 
 void func_00347948(PacState *arg0, void *arg1);
 
@@ -160,10 +160,10 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     if (status == 0) {
         switch (packet->command) {
         case PAC_COMMAND_PAYLOAD:
-            func_00347290(state, packet);
+            sdfPacStartRegularPacket(state, packet);
             return 0;
         case PAC_COMMAND_ALLOCATION_LIST:
-            func_00347710(state, packet);
+            sdfPacStartAllocationList(state, packet);
             return 0;
         case 6:
             func_00347320(state, packet);
@@ -248,7 +248,7 @@ void sdfPacSkipPendingBytes(PacState *state) {
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacStartPacketPayload);
 
 /* Begin a regular payload; completion is the normal packet finalizer. */
-void func_00347290(PacState *state, PacHead *packet) {
+void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = func_00346C40;
 }
@@ -336,7 +336,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003475A0);
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003476D0);
 
 /* Allocate per-packet state for a list of allocation entries. */
-void func_00347710(PacState *state, PacHead *packet) {
+void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
     sdfPacEnqueuePacket(state, packet);
     {
         void *allocation = func_00328D68(0x10);
@@ -347,7 +347,7 @@ void func_00347710(PacState *state, PacHead *packet) {
 }
 
 /* Start the next allocation entry at its inline descriptor. */
-void func_00347768(PacState *state) {
+void sdfPacStartNextAllocationEntry(PacState *state) {
     func_003475A0(state, (u8 *)state->allocation + 0x10, (u8 *)state->allocation + 0x20);
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
@@ -357,7 +357,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477A8);
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacAdvanceAllocationEntry);
 
 /* Discard pending input until the next allocation entry can start. */
-void func_00347850(PacState *state) {
+void sdfPacSkipAllocationEntryBytes(PacState *state) {
     s32 available = state->inputAvailable;
     if (state->pendingBytes < available) {
         available = state->pendingBytes;

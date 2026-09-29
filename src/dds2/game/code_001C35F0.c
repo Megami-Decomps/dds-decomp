@@ -65,7 +65,7 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3A38);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3BB0);
 
-void func_001C3D20(u8 *context, s8 mode) {
+void btlUpdateActorSlotStates(u8 *context, s8 mode) {
     u8 *entry = context + 0x80;
     s32 modeZeroState = 3;
     s32 modeNonzeroState = 4;

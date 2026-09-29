@@ -127,7 +127,7 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00194618);
+INCLUDE_ASM(const s32, "interface/frFont", frFontLoadDefaultFonts);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194668);
 

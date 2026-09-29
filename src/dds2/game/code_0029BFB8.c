@@ -60,7 +60,7 @@ INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C3F0);
 extern u32 func_00309138(u32, u32, s32);
 
 /* The opacity is latched at 0x80; later fade steps leave it untouched. */
-void func_0029C450(TitleMenuWork *work) {
+void itfUpdateFadeColor(TitleMenuWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;
     u32 opacity;
     if (work->opacityReady != 0) {

@@ -43,7 +43,7 @@ typedef struct EffCounterOwner {
 
 
 extern s32 (*D_00360D10[])(s32, u32);
-extern s32 func_001FE950();
+extern s32 btlWaitEffectTask();
 extern void func_001FDA78();
 extern void func_001FE820();
 extern s8 D_00324510[];
@@ -141,7 +141,7 @@ typedef struct BtlExtendedLink {
     u8 parameter;       /* 0x28 */
 } BtlExtendedLink;
 
-BtlEffObj *func_001FDEF8(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateEffectCounterTask(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0x2C);
     BtlExtendedLink *link;
 
@@ -274,7 +274,7 @@ u32 func_001FE658(void) {
     return 1;
 }
 
-BtlEffObj *func_001FE660(BtlEffOwner *owner, u16 arg) {
+BtlEffObj *btlCreateEffectTask3E(BtlEffOwner *owner, u16 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -314,7 +314,7 @@ BtlEffObj *func_001FE790(BtlEffOwner *owner, s32 arg) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE820);
 
-BtlEffObj *func_001FE8B8(BtlEffOwner *owner, u16 arg) {
+BtlEffObj *btlCreateEffectWaitTask(BtlEffOwner *owner, u16 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -340,7 +340,7 @@ typedef struct BtlWaitTask {
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 
-s32 func_001FE950(BtlWaitTask *task) {
+s32 btlWaitEffectTask(BtlWaitTask *task) {
     if (task->ticks == 0) {
         func_001AD230(task->value, 0);
         func_001BCB88(0, 8);
@@ -359,7 +359,7 @@ s32 func_001FE950(BtlWaitTask *task) {
     return 0;
 }
 
-BtlEffObj *func_001FE9F8(BtlEffOwner *owner) {
+BtlEffObj *btlCreateEffectTask44(BtlEffOwner *owner) {
     BtlEffObj *obj = btlAllocTask(8);
     BtlObjLink *link;
 
@@ -368,7 +368,7 @@ BtlEffObj *func_001FE9F8(BtlEffOwner *owner) {
     obj->flags |= 2;
     obj->id = 0x44;
     obj->ownerData = owner->ownerData;
-    obj->update = func_001FE950;
+    obj->update = btlWaitEffectTask;
     link = func_001D47D8(obj);
     link->owner = owner;
     link->arg = 0;

@@ -114,7 +114,7 @@ void menuCopyPartyEntries(context)
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275030);
 
-void func_00275328(context)
+void mnuRestorePartyEntriesAndRefresh(context)
     s32 context;
 {
     PartyMenuData *menu = (PartyMenuData *)*(s32 *)(context + 0x90C);
@@ -156,7 +156,7 @@ s32 mnuCountActiveSlots(void) {
 
 extern void menuCopyPartyEntries();
 
-void func_002754E0(s32 context) {
+void mnuClearPartySelectionAndActivateSlots(s32 context) {
     s32 menu = *(s32 *)(context + 0x90C);
     s32 i;
     s32 node;
@@ -175,7 +175,7 @@ void func_002754E0(s32 context) {
     }
 }
 
-void func_002755A0(s32 context) {
+void mnuRefreshPartyPanelSlots(s32 context) {
     func_0027F0D8(context + 0x15c);
     initPartyPanelSlots(context + 0x7ec);
     menuUpdateHandleStates(context + 0x15c);
@@ -186,7 +186,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
 s32 mnuShopReleaseResources(void) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90c);
-    func_002755A0(context);
+    mnuRefreshPartyPanelSlots(context);
     func_00274EE0(context);
     func_00274BA0(context);
     func_002D0918(*(s32 *)menu);
@@ -195,7 +195,7 @@ s32 mnuShopReleaseResources(void) {
 
 void func_002758D8(s32 menu) {
     extern u8 D_0037CA58[];
-    func_00275328();
+    mnuRestorePartyEntriesAndRefresh();
     func_002858F8(menu + 0x54, (s32)D_0037CA58);
     func_0027E790(*(s32 *)(menu + 0x138), *(s32 *)(menu + 0x6c), 0, 1);
 }
@@ -211,7 +211,7 @@ typedef struct StaffFadeState {
 } StaffFadeState;
 
 /* Two-stage fade: B rises first when opening, A falls first when closing. */
-void func_00275F48(s32 opening, StaffFadeState *state) {
+void mnuUpdateStaffFade(s32 opening, StaffFadeState *state) {
     if (opening == 0) {
         if (state->fadeA > 0) {
             state->fadeA -= 0x10;
@@ -316,7 +316,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_002764D8);
 
 extern u8 D_0037C3A8[];
 extern s32 func_002BD8F8(s32);
-extern void func_00272688();
+extern void mnuDrawStaffCampScreen();
 extern void mnuCreateStaffImageSprite();
 extern void func_002723B0();
 extern void func_00272668();
@@ -327,9 +327,9 @@ s64 func_002765E8(s32 arg0) {
     s32 menu = *(s32 *)(context + 0x90C);
 
     if (func_002BD8F8(*(s32 *)(context + 0x64)) != 0) {
-        func_00272688(0, arg0);
+        mnuDrawStaffCampScreen(0, arg0);
     } else {
-        func_00272688(1, arg0);
+        mnuDrawStaffCampScreen(1, arg0);
     }
     if (*(s32 *)(menu + 0x14) == 0) {
         mnuCreateStaffImageSprite(0x12);
@@ -366,7 +366,7 @@ extern void mnuReleaseResourceList();
 extern void func_0027E6B8();
 
 /* Tear down the staff panel and all four optional scene-side resources. */
-s32 func_00276A18(void) {
+s32 mnuStaffReleasePanelScene(void) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90C);
     s32 entryList = context + 0x15C;
@@ -463,8 +463,8 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00277390);
 
 extern u32 effMiscRand(s32);
 extern s32 func_00287FE0();
-extern u32 func_00287E60(s32);
-extern void func_00287EC8(s32, u32);
+extern u32 evtStageTestCountFlags(s32);
+extern void evtStageTestQueueMotion(s32, u32);
 
 typedef struct MenuIdleVoiceState {
     u8 pad00[0x28];
@@ -483,8 +483,8 @@ void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer, s32 panel) {
             voiceTimer->idleTicks = voiceTimer->idleTicks + 1;
         }
         if (voiceTimer->idleTicks >= MENU_IDLE_VOICE_TICKS) {
-            voiceCount = func_00287E60(0);
-            func_00287EC8(0, effMiscRand(0) % voiceCount);
+            voiceCount = evtStageTestCountFlags(0);
+            evtStageTestQueueMotion(0, effMiscRand(0) % voiceCount);
             voiceTimer->idleTicks = 0;
         }
     }

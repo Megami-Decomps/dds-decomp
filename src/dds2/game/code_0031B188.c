@@ -162,12 +162,12 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BC10);
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BDE8);
 
 void func_0031BFA0(void) {
-    func_002D2C80(2);
+    fileSetRenderFlag(2);
 }
 
 
 void func_0031BFC0(void) {
-    func_002D2C90(2);
+    fileClearRenderFlag(2);
 }
 
 
@@ -265,13 +265,13 @@ void func_0031C578(s32 arg0) {
     *node->model = *node->model | 1;
 }
 
-void func_0031C590(u8 *node, s32 value) {
+void mnuSetNodePairValue(u8 *node, s32 value) {
     value &= 0xFFFF;
     ((MnuModelNode *)node)->value48 = value;
     ((MnuModelNode *)node)->value4A = value;
 }
 
-void func_0031C5A0(u8 *node, f32 x, f32 y, f32 z) {
+void mnuSetNodePosition(u8 *node, f32 x, f32 y, f32 z) {
     ((MnuModelNode *)node)->x = x;
     ((MnuModelNode *)node)->y = y;
     ((MnuModelNode *)node)->z = z;

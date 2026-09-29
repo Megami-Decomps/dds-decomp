@@ -292,7 +292,7 @@ extern f32 D_00436110;
 
 extern s32 D_00436114;
 
-extern f32 func_003406A0(f32);
+extern f32 sdfSinPoly(f32);
 
 extern s32 D_00389780[];
 
@@ -342,7 +342,7 @@ extern u8 D_00384790[];
 
 extern s32 sdfTexGetPrimaryBuffer(s32);
 
-extern s32 func_0032B1B8(s32);
+extern s32 sdfTexGetPrimaryBufferSize(s32);
 
 extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
 
@@ -424,7 +424,7 @@ typedef struct FldActionSpawn {
     u32 arg0;
 } FldActionSpawn;
 
-void func_001295E0(FldActionSpawn *list, u32 count) {
+void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     u32 i;
     s32 handle;
 
@@ -444,9 +444,9 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129940);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129B40);
 
 /* Handle a field request, creating the player only in non-special scene states. */
-void func_00129CC0(u32 *request) {
+void fldProcessFieldRequest(u32 *request) {
     s32 state;
-    func_001295E0((FldActionSpawn *)request[4], request[3]);
+    fldSpawnActionObjects((FldActionSpawn *)request[4], request[3]);
     state = D_00389770[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
     func_00128FE8(request[1], request[0], 0);
@@ -461,7 +461,7 @@ s32 func_00129D60(s32 arg0) {
     return arg0 + 0xc;
 }
 
-void func_00129D68(u32 *table, u32 base, u8 *data, s32 size) {
+void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
     u8 *p = data;
     s32 code;
     s32 i;
@@ -489,12 +489,12 @@ void func_00129D68(u32 *table, u32 base, u8 *data, s32 size) {
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void func_00129E50(u32 buffer, FldTransferChunk *chunk) {
+void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk) {
     sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
 }
 
 void func_00129E78(u32 buffer, FldTransferChunk *chunk) {
-    func_00129D68((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
+    fldRelocatePackedWords((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
 }
 
 void fldSetPendingAreaAndFloor(u32 arg0, u32 arg1) {
@@ -524,7 +524,7 @@ s32 fldLoadAreaResource(void) {
 extern void sdfRaiseDeviceThreadPriority(void);
 extern s32 D_00436010;
 
-s32 func_00129F58(s32 area, s32 room) {
+s32 fldRequestAreaResource(s32 area, s32 room) {
     char directory[64];
     char path[80];
 
@@ -686,7 +686,7 @@ void *func_0012A360(void **destination, s32 area, s32 room) {
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_004130D8);
 
-void func_0012A3D8(char *out) {
+void fldFormatAreaResourceName(char *out) {
     char directory[32];
     s32 area = D_00389780[0];
 
@@ -709,7 +709,7 @@ void func_0012A3D8(char *out) {
 u8 func_0012A4E0(void) {
     char buf[32];
 
-    func_0012A3D8(buf);
+    fldFormatAreaResourceName(buf);
     return strcmp(D_00444950, buf) != 0;
 }
 
@@ -737,12 +737,12 @@ extern u32 sdfMemoryGetBlockAddress(u32);
 extern void func_00145730(u32, u32);
 extern void func_00145550();
 
-void func_0012A510(void) {
+void fldLoadAreaPackedResources(void) {
     char name[32];
     FldPackedEntry *entry;
 
     if (D_00389770[4] < 200) {
-        func_0012A3D8(name);
+        fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
         D_00435FC4 = func_002C7FF0(name);
         func_002C81D0(D_00435FC4);
@@ -811,7 +811,7 @@ extern void fldResetObjectSlots();
 extern void fldResetRecordState();
 extern s32 fldTitleMiniIsActive();
 extern void func_0013B818();
-extern void func_00144598();
+extern void fldResetPendingSounds();
 extern void func_001457E0();
 extern void func_0014A228();
 extern void func_0014B748();
@@ -835,7 +835,7 @@ extern u32 D_00435FE4;
 extern u32 D_00435FE8;
 extern u32 D_00435FEC;
 
-void func_0012ADA0(void) {
+void fldReleaseFieldResources(void) {
     s32 i;
     FldDisplayNode *node;
 
@@ -865,7 +865,7 @@ void func_0012ADA0(void) {
         }
         fldResetRecordState();
         func_0013B818();
-        func_00144598();
+        fldResetPendingSounds();
         fldClearMenuEntries();
         mnuReleaseResourceEntries();
         fldReleaseTextureSlots();
@@ -1327,9 +1327,9 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg
     descriptor->open(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C650);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsGradientTriangle);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C888);
+INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsGradientQuad);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CB08);
 
@@ -1344,7 +1344,7 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
 
     sdfResetPacketList(command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), func_0032B1B8(arg0));
+    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), sdfTexGetPrimaryBufferSize(arg0));
     sdfAppendReferencePacket(command, header);
     func_003365B8(*(f32 *)(arg1 + 0x44));
     __asm__ volatile(
@@ -1458,7 +1458,7 @@ typedef struct FldMarkerPacket {
     f32 scale;
 } FldMarkerPacket;
 
-void func_0012D9D0(f32 *pos) {
+void fldDrawMarkerQuad(f32 *pos) {
     FldMarkerPacket packet;
     f32 half = 36.0f;
 
@@ -1489,7 +1489,7 @@ void func_0012D9D0(f32 *pos) {
     fldSubmitModelPacket(D_00436080, (u8 *)&packet);
 }
 
-void func_0012DAA0(f32 *pos, s32 color) {
+void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     FldMarkerPacket packet;
     f32 half = 36.0f;
 
@@ -1849,7 +1849,7 @@ void fldSetCameraMoveMode(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130A40);
 
-void func_00130C20(void) {
+void fldClearCameraMoveMode(void) {
     D_004360AC = 0;
 }
 
@@ -1857,7 +1857,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130C28);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130DE0);
 
-s32 func_00130F38(void) {
+s32 fldSyncObjectFlagsB(void) {
     s32 result;
 
     if (D_00435F0C == 0) {
@@ -2027,7 +2027,7 @@ void func_00133DC8(void) {
     D_00389910[0] = 0;
 }
 
-void func_00133DD8(f32 first, f32 second) {
+void fldQueueCameraXYOverride(f32 first, f32 second) {
     FldCameraOverrides *camera = (FldCameraOverrides *)D_00389770;
 
     camera->xyValue0 = first;
@@ -2035,7 +2035,7 @@ void func_00133DD8(f32 first, f32 second) {
     camera->xyPending = 1;
 }
 
-void func_00133DF8(f32 x, f32 unusedY, f32 z) {
+void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
     FldCameraOverrides *camera;
     f32 angle;
 
@@ -2046,7 +2046,7 @@ void func_00133DF8(f32 x, f32 unusedY, f32 z) {
     camera->targetHeading = -angle;
 }
 
-void func_00133E38(void) {
+void fldUpdateCameraHeadingFromXY(void) {
     f32 dx;
     f32 dz;
 
@@ -2061,7 +2061,7 @@ void func_00133E38(void) {
     }
 }
 
-void func_00133EE0(void) {
+void fldApplyPendingCameraHeading(void) {
     FldCameraOverrides *camera = (FldCameraOverrides *)D_00389770;
 
     if (camera->headingPending != 0) {
@@ -2086,7 +2086,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00134620);
 
 void func_00134790(void) {
     if (D_00436100 != 0) {
-        func_0032BBB0(D_00436100);
+        sdfTexReleaseReferenceViaHandler(D_00436100);
         D_00436100 = 0;
     }
     if (D_00438ECC != 0) {
@@ -2126,27 +2126,27 @@ void fldUpdateSwayOffset(void) {
     switch (D_0043610C) {
     case 1:
         D_00436110 += 0.1f;
-        D_00436114 = func_003406A0(D_00436110) * 32.0f;
+        D_00436114 = sdfSinPoly(D_00436110) * 32.0f;
         break;
     case 2:
         D_00436110 += 0.2f;
-        D_00436114 = func_003406A0(D_00436110) * 32.0f;
+        D_00436114 = sdfSinPoly(D_00436110) * 32.0f;
         break;
     case 3:
         D_00436110 += 0.05f;
-        D_00436114 = func_003406A0(D_00436110) * 32.0f;
+        D_00436114 = sdfSinPoly(D_00436110) * 32.0f;
         break;
     case 4:
         D_00436110 += 0.1f;
-        D_00436114 = func_003406A0(D_00436110) * 48.0f;
+        D_00436114 = sdfSinPoly(D_00436110) * 48.0f;
         break;
     case 5:
         D_00436110 += 0.2f;
-        D_00436114 = func_003406A0(D_00436110) * 48.0f;
+        D_00436114 = sdfSinPoly(D_00436110) * 48.0f;
         break;
     case 6:
         D_00436110 += 0.05f;
-        D_00436114 = func_003406A0(D_00436110) * 48.0f;
+        D_00436114 = sdfSinPoly(D_00436110) * 48.0f;
         break;
     }
 }
@@ -2170,7 +2170,7 @@ void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
     D_00436104[area * 73] = value;
 }
 
-void func_00135568(u32 arg0) {
+void fldSetSwayMode(u32 arg0) {
     D_0043610C = arg0;
     D_00436110 = 0;
     D_00436114 = 0;

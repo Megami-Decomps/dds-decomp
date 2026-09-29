@@ -1,5 +1,20 @@
 #include "common.h"
 
+typedef struct MenuFadeHost {
+    u8 pad00[0x84];
+    s32 reduced;      /* 0x84 */
+    u8 pad88[0xCC];
+    s32 fadeColor;    /* 0x154 */
+} MenuFadeHost;
+
+extern void sndStartTrackExtended(s32);
+
+extern void func_002E9708(void);
+
+extern void func_002E96D8(s32);
+
+extern void func_002E9730(void);
+
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024A728);
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024A930);

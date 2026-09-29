@@ -153,7 +153,7 @@ void *mdlWaitGroupThenFind(s32 group, s32 id) {
 void mdlExecuteAndFreeJob(MdlPacket *packet) {
     func_00216DB8(packet->unk0, packet->unk2, packet->unk8, packet->extra);
     WaitSema(D_003BD878);
-    func_002167E0(packet->unk0, packet->unk2);
+    btlRemoveGroupId(packet->unk0, packet->unk2);
     SignalSema(D_003BD878);
     func_002CFF98(packet);
 }
@@ -192,10 +192,10 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217068);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
 void func_00217298(u32 arg0, u32 arg1) {
-    func_00217068(arg0, arg1, 1);
+    mdlRequestAsset(arg0, arg1, 1);
 }
 
 typedef struct MdlGroup {

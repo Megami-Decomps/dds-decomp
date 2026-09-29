@@ -132,7 +132,7 @@ extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
-SlotTab *func_00195E50(u32 count) {
+SlotTab *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * 0x60;
     s32 handle = func_003292A8(slotBytes + 0xC);
     Slot60 *slot = (Slot60 *)sdfResourceRetainAddress(handle);

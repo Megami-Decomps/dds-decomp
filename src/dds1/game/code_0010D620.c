@@ -21,7 +21,7 @@ typedef struct {
     u32 unkF0;
 } ScriptState;
 
-extern u64 func_0010D428(u64);
+extern u64 scrReadIntParameter(u64);
 extern u64 mdlFlagTest(u64);
 
 extern ScriptState *D_003BD78C;
@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6B8);
 u32 scrCommandTestModelFlag(void) {
     u64 flagId;
 
-    flagId = func_0010D428(0);
+    flagId = scrReadIntParameter(0);
     flagId = mdlFlagTest(flagId);
     func_0010D5F0(flagId);
     return 1;
@@ -75,7 +75,7 @@ u32 scrCommandTestModelFlag(void) {
 u32 scrCommandSetModelFlag(void) {
     u64 flagId;
 
-    flagId = func_0010D428(0);
+    flagId = scrReadIntParameter(0);
     mdlFlagSet(flagId);
     return 1;
 }
@@ -83,7 +83,7 @@ u32 scrCommandSetModelFlag(void) {
 u32 scrCommandClearModelFlag(void) {
     u64 flagId;
 
-    flagId = func_0010D428(0);
+    flagId = scrReadIntParameter(0);
     mdlFlagClear(flagId);
     return 1;
 }

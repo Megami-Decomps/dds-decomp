@@ -12,9 +12,9 @@ extern void mnuTitleRenderFadeAndPanels(s32);
 
 extern void func_002C4038(s32, s32, s32, s32);
 
-extern s32 func_00298E80(s32);
+extern s32 brsTaskIsUiUpdateAllowed(s32);
 
-extern void func_0029CDD8(s32);
+extern void brsDecaySharedAnimCounter(s32);
 
 typedef struct MenuItem {
     u8 pad00[0x55];
@@ -43,7 +43,7 @@ INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 void mnuStaffRunPanel1(s32 input) {
     s32 context = func_00101958();
 
-    if (func_00298E80(context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
         func_002C4038(context + 8, context + 0x54, 1, input);
     }
@@ -52,8 +52,8 @@ void mnuStaffRunPanel1(s32 input) {
 void mnuStaffRunPanel2(s32 input) {
     s32 context = func_00101958();
 
-    if (func_00298E80(context) != 0) {
-        func_0029CDD8(context);
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
+        brsDecaySharedAnimCounter(context);
         func_002C4038(context + 8, context + 0x54, 2, input);
     }
 }
@@ -66,7 +66,7 @@ u32 func_00299EF8(void) {
     return 1;
 }
 
-void func_00299F00(s32 input) {
+void mnuStaffRunPanel0(s32 input) {
     s32 context = func_00101958();
     func_002C44E8(0x33);
     func_002C4038(context + 8, context + 0x54, 0, input);

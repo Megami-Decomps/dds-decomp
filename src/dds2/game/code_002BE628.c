@@ -33,7 +33,7 @@ extern void func_00232390(s32, s32);
 extern s32 skillApplyFieldUseEffect(s32, s32, s32, s32);
 extern u32 ptyGetSkillNibbleState(s32, u16);
 
-extern void func_002C6A20(void);
+extern void evtStageTestStop(void);
 
 extern u8 D_003E7940[];
 
@@ -41,7 +41,7 @@ extern u8 D_003E7950[];
 
 extern s32 func_00328D68(u32);
 
-extern void func_002C2920(s32, s32, s32);
+extern void mnuPositionPanelItemPoints(s32, s32, s32);
 
 extern s8 D_003E7928[];
 
@@ -121,7 +121,7 @@ typedef struct StageTestSlot {
     s32 modelId;    /* 0x08 */
     s32 unk0C;
     s32 unk10;
-    u32 flags;      /* 0x14: bit 0 cleared by func_002C7428 case 1 */
+    u32 flags;      /* 0x14: bit 0 cleared by evtStageTestQueueMotion case 1 */
     s32 state;      /* 0x18 */
     s32 index;      /* 0x1C */
     s32 unk20;
@@ -244,7 +244,7 @@ typedef struct MenuListState {
 extern void func_002BF830(s32, s32, s32, MenuListState *, s32, s32);
 extern void func_002BFEA0(s32, s32, s32, MenuListState *, s32, s32);
 
-void func_002C0330(s32 x, s32 y, s32 z, MenuListState *menu, s32 panelIndex, s32 param) {
+void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuListState *menu, s32 panelIndex, s32 param) {
     MenuListPanel *panel = (MenuListPanel *)((u8 *)menu + 0x78) + panelIndex;
     s32 mode = panel->mode;
 
@@ -308,14 +308,14 @@ void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
 }
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
-void func_002C04C0(s32 arg0) {
+void mnuAdvancePanelTransition(s32 arg0) {
     if (*(s32 *)(arg0 + 4) < 0x100) {
         *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 8;
     }
 }
 
 /* Apply a temporary override to the selected node while drawing its panel. */
-void func_002C04E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
+void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
     s32 positionOffset[2];
     MenuListPanel *panel = (MenuListPanel *)((s32)menu + menu->selectedPanel * 0x2138 + 0x78);
     MenuListNode *node;
@@ -328,9 +328,9 @@ void func_002C04E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, 
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     if (menu->flags & 0x80) {
-        func_002C0330(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     } else {
-        func_002C0330(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     }
     node = panel->node;
     if (node != NULL) {
@@ -394,12 +394,12 @@ void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
                                     u32 y) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
-    func_00307388(&panel->firstPosition, x, y);
+    itfGridStorePosition(&panel->firstPosition, x, y);
 }
 
-void func_002C0800(MenuPanelState *panel, s32 x, s32 y, s32 guideX, s32 guideTopY, s32 guideBottomY) {
-    func_00307388(&panel->guideStart, guideX, guideTopY);
-    func_00307388(&panel->guideEnd, guideX, guideBottomY);
+void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, s32 guideX, s32 guideTopY, s32 guideBottomY) {
+    itfGridStorePosition(&panel->guideStart, guideX, guideTopY);
+    itfGridStorePosition(&panel->guideEnd, guideX, guideBottomY);
     panel->corners[0].x = x;
     panel->corners[0].y = y;
     panel->corners[1].x = x + 0xC0;
@@ -423,14 +423,14 @@ void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
                                     u32 y) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
-    func_00307388(&panel->secondPosition, x, y);
+    itfGridStorePosition(&panel->secondPosition, x, y);
 }
 
 void func_002C0908(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
                                     u32 additionalValue) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
-    func_00307388(&panel->thirdPosition, x, 0);
+    itfGridStorePosition(&panel->thirdPosition, x, 0);
     panel->thirdValueC = additionalValue;
 }
 
@@ -440,7 +440,7 @@ void func_002C0950(MenuPanelState *panel, u32 state) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
-extern s32 func_002C2680(void);
+extern s32 mnuCreatePanelItem(void);
 
 extern void func_002C26D8(s32, s32, s32, s32, s32);
 
@@ -459,7 +459,7 @@ s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
     s32 *slot = group->entries;
     s32 index;
     for (index = 0; index < 5; index++) {
-        s32 entry = func_002C2680();
+        s32 entry = mnuCreatePanelItem();
         func_002C26D8(entry, owner, texture, mode, index);
         *slot++ = entry;
     }
@@ -482,7 +482,7 @@ void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 data) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        func_002C2920(group->entries[i], data, i);
+        mnuPositionPanelItemPoints(group->entries[i], data, i);
     }
 }
 
@@ -513,7 +513,7 @@ void func_002C0F48(MenuPanelGroup *group, s32 index, u32 value) {
 }
 
 /* Apply each of the five packed values to its corresponding panel entry. */
-void func_002C0F70(MenuPanelGroup *group, u64 value) {
+void mnuApplyPackedGroupValues(MenuPanelGroup *group, u64 value) {
     u32 child;
     u64 entryValue;
     s32 nextIndex;
@@ -555,7 +555,7 @@ void func_002C1050(void) {
 }
 
 /* The sequel selects its draw variant from the range index plus eight. */
-void func_002C1068(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
+void mnuDrawRangeSpriteVariant(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u16 rangeId, u32 arg5, u32 arg6) {
     s32 rangeIndex;
 
@@ -621,7 +621,7 @@ typedef struct MenuEffectPair {
 } MenuEffectPair;
 
 /* Feed two mirrored effect positions from the active menu entry. */
-void func_002C1CD0(MenuEffectPair *pair) {
+void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     MenuEffectNode *first = pair->first;
     MenuEffectNode *second = pair->second;
     MenuEffectPosition *firstData = first->position;
@@ -640,12 +640,12 @@ void func_002C1CD0(MenuEffectPair *pair) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1D10);
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
-void func_002C1DC8(s32 object) {
+void mnuCyclePairedEffectSetting(s32 object) {
     s32 *settings;
     s32 setting;
 
     func_002C1D10(object);
-    func_002C1CD0(object);
+    mnuSetPairedEffectPositions(object);
     settings = *(s32 **)(object + 0x14);
     setting = 0;
     if (settings != 0) {
@@ -660,7 +660,7 @@ void func_002C1DC8(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 
-void func_002C1F68(s32 object) {
+void mnuCreatePairedEffects(s32 object) {
     u32 effectHandle;
 
     effectHandle = func_00304998(3);
@@ -745,7 +745,7 @@ typedef struct MenuPanelItem {
     u8 padA8[4];
 } MenuPanelItem;
 
-s32 func_002C2680(void) {
+s32 mnuCreatePanelItem(void) {
     MenuPanelItem *item = (MenuPanelItem *)func_00328D68(0xAC);
 
     memset(item, 0, 0xAC);
@@ -758,19 +758,19 @@ s32 func_002C2680(void) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C26D8);
 
 /* Arrange five panel points using the parent layout's fixed anchor slots. */
-void func_002C2920(s32 obj, s32 param, s32 index) {
+void mnuPositionPanelItemPoints(s32 obj, s32 param, s32 index) {
     s32 table[5] = {0, 4, 1, 2, 3};
     MenuPanelItem *item = (MenuPanelItem *)obj;
 
-    func_00307388(&item->points[0], param, 7);
+    itfGridStorePosition(&item->points[0], param, 7);
     func_003071D0(item->points[0].x, item->points[0].y, -0x50, -0x50, 0, 0);
-    func_00307388(&item->points[1], param, 5);
+    itfGridStorePosition(&item->points[1], param, 5);
     func_003071D0(item->points[1].x, item->points[1].y, 0x390, -8, 0, 0);
-    func_00307388(&item->points[2], param, 6);
+    itfGridStorePosition(&item->points[2], param, 6);
     func_003071D0(item->points[2].x, item->points[2].y, 0x390, -8, 0, 0);
-    func_00307388(&item->points[3], param, 9);
+    itfGridStorePosition(&item->points[3], param, 9);
     func_003071D0(item->points[3].x, item->points[3].y, 0x5D0, 0, 0, 0);
-    func_00307388(&item->points[4], param, table[index]);
+    itfGridStorePosition(&item->points[4], param, table[index]);
     func_003071D0(item->points[4].x, item->points[4].y, 0x130, -0x30, 0, 0);
 }
 
@@ -992,7 +992,7 @@ void mnuPlayInputSound(s32 arg0, s32 buttons, s32 *state) {
     }
 }
 
-void func_002C49F0(s32 buttons, s8 kind) {
+void mnuPlayInputSoundKind(s32 buttons, s8 kind) {
     if (buttons & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;
@@ -1033,7 +1033,7 @@ void func_002C49F0(s32 buttons, s8 kind) {
 }
 
 void func_002C4B40(u32 arg0) {
-    func_002C49F0(arg0, 0);
+    mnuPlayInputSoundKind(arg0, 0);
 }
 
 s32 mnuFindMatchingPartyEntryIndex(s32 object) {
@@ -1103,7 +1103,7 @@ u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
 }
 
 /* Only secondary-kind-2 entries expose the paired value. */
-u16 func_002C4D78(s32 entryId) {
+u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
     RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + D_00435E20);
 
     if (entry->secondaryKind != 2) {
@@ -1112,7 +1112,7 @@ u16 func_002C4D78(s32 entryId) {
     return entry->secondaryValue;
 }
 
-u8 func_002C4DB0(u32 arg0) {
+u8 mnuGetRangeEntryKind(u32 arg0) {
     return ((RangeEntry *)((arg0 & 0xffff) * 0x38 + D_00435E20))->kind;
 }
 
@@ -1120,19 +1120,19 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_00435E20);
     u16 base = entry->value;
     u16 addition = entry->addition;
-    if (func_002C4DB0(id & 0xFFFF) == 1) {
+    if (mnuGetRangeEntryKind(id & 0xFFFF) == 1) {
         base = addition + *(u16 *)(object + 8) * base / 100;
     }
     return base;
 }
 
-s32 func_002C4E58(s32 arg0) {
+s32 mnuGetRangeEntryFlatValue(s32 arg0) {
     s32 index = arg0 & 0xFFFF;
     RangeEntry *record = (RangeEntry *)(index * 0x38 + D_00435E20);
     s32 scale = record->value;
     s32 addition = record->addition;
 
-    if (func_002C4DB0(index) == 1) {
+    if (mnuGetRangeEntryKind(index) == 1) {
         return scale + addition;
     }
     return scale;
@@ -1140,7 +1140,7 @@ s32 func_002C4E58(s32 arg0) {
 
 s32 func_002C4EB8(u16 id, s32 item) {
     u16 minimum = ((RangeEntry *)D_00435E20)[id].value;
-    s32 kind = func_002C4DB0(id);
+    s32 kind = mnuGetRangeEntryKind(id);
 
     switch (kind) {
     case 1:
@@ -1501,7 +1501,7 @@ s32 func_002C5CD0(s32 amount, s32 divisor) {
     return 0;
 }
 
-MenuPanelEntry *func_002C5D20(u32 *table) {
+MenuPanelEntry *mnuPickBestPartyEntry(u32 *table) {
     MenuPanelEntry *best = NULL;
     MenuPanelEntry *entry;
     s32 pass;
@@ -1538,7 +1538,7 @@ MenuPanelEntry *func_002C5D20(u32 *table) {
     return 0;
 }
 
-MenuPanelEntry *func_002C5DE0(s32 *out) {
+MenuPanelEntry *mnuFindPartyEntryBySelection(s32 *out) {
     u16 table[5][2] = {{0x400, 0xD4}, {0x100, 0xCF}, {0x80, 0xA9}, {0x40, 0xCE}, {0x10, 0xA8}};
     u32 i;
 
@@ -1556,9 +1556,9 @@ MenuPanelEntry *func_002C5DE0(s32 *out) {
     return 0;
 }
 
-s32 func_002C5EA8(s32 partyPanel, s32 skill, s32 target, s32 commit) {
+s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
     s32 id;
-    MenuPanelEntry *entry = func_002C5DE0(&id);
+    MenuPanelEntry *entry = mnuFindPartyEntryBySelection(&id);
 
     if (entry == 0) {
         return 3;
@@ -1649,7 +1649,7 @@ void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     func_002C6E20(-1);
 }
 
-void func_002C6610(s32 index, s32 dx, s32 dy, s32 dz) {
+void evtStageTestOffsetEntryPosition(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
     StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
     f32 x = entry->position[0] + (f32)dx;
@@ -1661,7 +1661,7 @@ void func_002C6610(s32 index, s32 dx, s32 dy, s32 dz) {
     entry->position[2] = z;
 }
 
-void func_002C6670(s32 index, s32 dx, s32 dy, s32 dz) {
+void evtStageTestOffsetEntryRotation(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
     StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
     f32 x = entry->rotation[0] + (f32)dx;
@@ -1701,7 +1701,7 @@ void func_002C6958(f32 value) {
     func_002C6790();
 }
 
-void func_002C6988(s32 mode) {
+void evtStageTestInit(s32 mode) {
     f32 offset;
     s32 i;
     s32 value;
@@ -1729,7 +1729,7 @@ void func_002C6988(s32 mode) {
     func_002C6958(offset);
 }
 
-void func_002C6A20(void) {
+void evtStageTestStop(void) {
     StageTestState *state = &D_00457EB0;
 
     if (state->mode == 1) {
@@ -1747,13 +1747,13 @@ void func_002C6A20(void) {
 }
 
 void mnuResetWorkFloats(void) {
-    func_002C6A20();
+    evtStageTestStop();
     D_0037F5E0[4] = 2048.0f;
     D_0037F5E0[5] = 2048.0f;
 }
 
 void func_002C6AC0(s32 arg0, s32 arg1, s32 arg2) {
-    D_00457EB0.unk04 = func_00231B80();
+    D_00457EB0.unk04 = mdlRequestAsset();
 }
 
 void mnuForwardTableByte(s32 arg0) {
@@ -1770,7 +1770,7 @@ typedef struct MenuBlock40 {
     u32 word[10];
 } MenuBlock40;
 
-s32 func_002C6B38(u8 *object) {
+s32 mnuCommitPendingBlock(u8 *object) {
     if (!(*(u32 *)object & 1)) {
         return 0;
     }
@@ -1861,7 +1861,7 @@ void evtStageTestApplyEntryRotation(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7168);
 
-s8 func_002C72E0(s32 arg0) {
+s8 evtStageTestUpdate(s32 arg0) {
     s8 result = func_002C6CE8();
 
     if (result == 1) {
@@ -1890,7 +1890,7 @@ s8 func_002C72E0(s32 arg0) {
     return result;
 }
 
-s32 func_002C73C0(s32 mode) {
+s32 evtStageTestCountFlags(s32 mode) {
     StageTestSlot *slot = D_00457EB0.slot;
     s32 index = slot->entryIndex;
     s32 count = 0;
@@ -1911,7 +1911,7 @@ s32 func_002C73C0(s32 mode) {
     return count;
 }
 
-void func_002C7428(s32 kind, u32 index) {
+void evtStageTestQueueMotion(s32 kind, u32 index) {
     StageTestSlot *slot = D_00457EB0.slot;
     f32 start = 0.0f;
     s32 value;
@@ -1985,7 +1985,7 @@ void func_002C76A8(s32 arg0) {
     if (D_00457EB0.effect != 0) {
         func_002C76F0();
     }
-    D_00457EB0.effect = func_00203DA8(D_00457EB0.model, 0x30);
+    D_00457EB0.effect = sndCreateSystemEffectHandle(D_00457EB0.model, 0x30);
 }
 
 void func_002C76F0(void) {
@@ -2033,7 +2033,7 @@ void *evtCreateBattleStageTestCamera(void) {
     return func_002C79B8;
 }
 
-void *func_002C7A60(void) {
+void *evtBattleStageTestScreen(void) {
     void *packets = sdfAllocPacketAligned(0x20);
 
     sdfResetPacketList(packets);
@@ -2074,7 +2074,7 @@ void func_002C7C18(void) {
 
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
-    kwlnTaskCreate(D_0042B610, 0x2B0C, 1, 1, func_002C7A60, func_002C7C00, 0);
+    kwlnTaskCreate(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, func_002C7C00, 0);
 }
 
 s32 btlDestroyStageTask(object)

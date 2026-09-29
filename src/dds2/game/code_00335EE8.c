@@ -13,7 +13,7 @@ s32 func_00335EF0(void *object, s32 command) {
 }
 
 /* Select a 16-byte entry from the source object's motion pointer table. */
-void func_00335F20(s32 destination, s32 source, u32 unused, s32 entryIndex) {
+void sdfSelectMotionPointerEntry(s32 destination, s32 source, u32 unused, s32 entryIndex) {
     sdfSetMotionPointerPair();
     *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10;
 }

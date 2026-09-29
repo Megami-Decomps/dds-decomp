@@ -75,8 +75,8 @@ s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 func_002F6858(s32 arg0, void *arg1, s32 *arg2);
 void func_002F6E90(u32 arg0, s32 arg1);
-void func_002E6D48(void *deviceRequest, u32 transferAddress, u32 byteCount);
-void func_002E6DA8(void *deviceRequest, u32 transferAddress, u32 byteCount);
+void sdfDevQueueRead(void *deviceRequest, u32 transferAddress, u32 byteCount);
+void sdfDevQueueWrite(void *deviceRequest, u32 transferAddress, u32 byteCount);
 s32 fileMan(void);
 s32 fileManUpdate(void);
 void fileReqInit(s32 arg0);
@@ -91,7 +91,7 @@ void func_00289030(FileJob *job) {
     }
     job->state = FILE_JOB_TRANSFERRING;
     SignalSema(D_003DC658.sema);
-    func_002E6D48(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
+    sdfDevQueueRead(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_002890B8);
@@ -104,7 +104,7 @@ void func_002892F8(FileJob *job) {
     }
     job->state = FILE_JOB_TRANSFERRING;
     SignalSema(D_003DC658.sema);
-    func_002E6DA8(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
+    sdfDevQueueWrite(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);

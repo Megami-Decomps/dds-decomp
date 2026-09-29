@@ -73,7 +73,7 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199B80);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199CF0);
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199E38);
+INCLUDE_ASM(const s32, "game/code_00199AD8", itfPanelSetRectVerts);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199E68);
 
@@ -101,7 +101,7 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_00199FE0);
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A040);
 
-void func_0019A0D0(u8 *base, s32 red, s32 green, s32 blue, s32 alpha) {
+void itfPanelSetRectSpan(u8 *base, s32 red, s32 green, s32 blue, s32 alpha) {
     u32 *color = (u32 *)(base + 0x20);
     color[0] = red;
     color[1] = green;
@@ -110,7 +110,7 @@ void func_0019A0D0(u8 *base, s32 red, s32 green, s32 blue, s32 alpha) {
 }
 
 /* Two adjacent panel colors: the first is transparent. */
-void func_0019A0E8(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void itfPanelInitRects30(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x30);
 
     panelSetVec4(vec, red, green, blue, 0);
@@ -119,7 +119,7 @@ void func_0019A0E8(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
 }
 
 /* Set both panel colors to the same blue tint with zero alpha. */
-void func_0019A118(u8 *base) {
+void itfPanelSetBlueTint(u8 *base) {
     u32 *vec = (u32 *)(base + 0x44);
 
     panelSetVec4(vec, 0x73, 0x87, 0xFF, 0);

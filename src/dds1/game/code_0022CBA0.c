@@ -165,7 +165,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E5A0);
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtPolygonMovieClampTime(s32 object, s32 arg1, s32 start, s32 end);
 
-void func_0022EA18(s32 arg0, EventViewerState *viewer) {
+void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
     s32 scene;
     s32 world;
     s32 object;
@@ -208,7 +208,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022EB10);
 
 extern void func_0022EB10();
 
-void func_0022EE90(s32 arg0, EventViewerState *viewer) {
+void evtViewerSyncWorldGroups(s32 arg0, EventViewerState *viewer) {
     s32 object;
     EvtViewNode *node;
     EvtViewNode *found;
@@ -362,7 +362,7 @@ EvtViewGlyph *func_0022FA68(EvtViewNode *group, s32 position, s32 channel) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FB30);
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
-void func_0022FDE8(u32 viewerAddr) {
+void evtViewerDispatchFlagMode(u32 viewerAddr) {
     s32 viewer;
 
     viewer = (s32)viewerAddr;
@@ -780,7 +780,7 @@ extern void func_00270030();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void func_002D0A10();
-extern void func_001055C0();
+extern void kwlnTextureReleaseHeldReference();
 extern void func_0022C4F0();
 extern void func_0022C478();
 extern void func_002D0918();
@@ -788,7 +788,7 @@ extern void func_00134CF0();
 extern void func_00106240();
 void func_002300B8(s32 arg0);
 
-void func_00232BC0(viewer)
+void evtViewerReleaseResources(viewer)
     EventViewerState *viewer;
 {
     func_002441E8();
@@ -814,7 +814,7 @@ void func_00232BC0(viewer)
     }
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_001055C0();
+    kwlnTextureReleaseHeldReference();
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_0022C4F0(viewer);
@@ -834,7 +834,7 @@ void func_00232D08(void) {
     u64 viewer;
 
     viewer = func_00101A70();
-    func_00232BC0(viewer);
+    evtViewerReleaseResources(viewer);
 }
 
 /* Alternate destroy callback for the same active viewer. */
@@ -842,7 +842,7 @@ void func_00232D28(void) {
     u64 viewer;
 
     viewer = func_00101A70();
-    func_00232BC0(viewer);
+    evtViewerReleaseResources(viewer);
 }
 
 void func_00232D48(void *unused) {

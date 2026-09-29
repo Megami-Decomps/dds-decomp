@@ -4,7 +4,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s64 func_0026C768(void);
 
-extern s32 func_00268BE0(s32);
+extern s32 fldGetModeFrameRecordIndex(s32);
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -60,7 +60,7 @@ extern const char D_00424F20[];
 
 extern s32 D_0043785C;
 
-extern s32 func_002B8158(s32, s32, s32, s32);
+extern s32 mnuCreateListState(s32, s32, s32, s32);
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -278,7 +278,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00267500);
 
 /* Omit the selected entry when building the progress list. */
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
-    MenuProgressList *list = (MenuProgressList *)func_002B8158(0, count, 0x16, callback);
+    MenuProgressList *list = (MenuProgressList *)mnuCreateListState(0, count, 0x16, callback);
     s32 i;
     list->callback = callback;
     list->updateCallback = (s32)func_00267500;
@@ -428,7 +428,7 @@ typedef struct MenuFadeHost {
     s32 fadeColor;    /* 0x154 */
 } MenuFadeHost;
 
-extern void func_00342538(s32);
+extern void sndStartTrackExtended(s32);
 extern void func_003425B0(void);
 extern void func_00342580(s32);
 extern void func_003425D8(void);
@@ -436,7 +436,7 @@ extern void func_003425D8(void);
 void func_00268128(s32 mode, MenuFadeHost *host) {
     if (mode == 0) {
         if (host->reduced == 0) {
-            func_00342538(host->fadeColor);
+            sndStartTrackExtended(host->fadeColor);
         } else {
             func_003425B0();
         }
@@ -586,7 +586,7 @@ typedef struct {
 } SceneFrameOwner;
 
 /* Scene modes 1 and 2 select different entries from the same frame table. */
-s32 func_00268BE0(s32 object) {
+s32 fldGetModeFrameRecordIndex(s32 object) {
     switch (((SceneFrameOwner *)object)->mode) {
     case 1:
         return 0x32;
@@ -600,7 +600,7 @@ s32 func_00268BE0(s32 object) {
 u8 func_00268C08(SceneFrameOwner *scene) {
     s32 index;
 
-    index = func_00268BE0((s32)scene);
+    index = fldGetModeFrameRecordIndex((s32)scene);
     return scene->frameTable->records[index].unk14;
 }
 

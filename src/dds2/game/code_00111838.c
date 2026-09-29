@@ -3,10 +3,10 @@
 extern u32 func_00116FA0(u32);
 
 typedef struct ObjectResource {
-    u32 owner;      /* 0x00: object that owns this resource */
-    u32 handle;     /* 0x04 */
+    u32 owner;      /* 0x00: object passed to the slot constructor */
+    u32 handle;     /* 0x04: resource released before replacement */
     u32 value;      /* 0x08 */
-    u32 resourceId; /* 0x0C */
+    u32 resourceId; /* 0x0C: used to construct the replacement */
 } ObjectResource;
 
 typedef struct ObjectWithResource {
@@ -14,7 +14,40 @@ typedef struct ObjectWithResource {
     ObjectResource *resource;
 } ObjectWithResource;
 
-INCLUDE_ASM(const s32, "game/code_00111838", dds3SpawnSlotRingObj3);
+typedef struct {
+    u8 unk0[0x10];
+} SlotEntry;
+
+typedef struct {
+    u8 unk0[4];        /* 0x0 */
+    u32 unk4;          /* 0x4 */
+    SlotEntry *entry;     /* 0x8: slot from D_00329A68 */
+    u8 unkC[0xC];      /* 0xC */
+    ObjectResource *resource; /* 0x18 */
+} SlotObjectFull;
+
+extern SlotObjectFull *func_00110AA8();
+
+extern u32 dds3AdvanceWorldCounter();
+
+extern SlotEntry D_00384A80[];
+
+extern s32 D_00435D90;
+
+SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
+    SlotObjectFull *obj = func_00110AA8(3);
+    ObjectResource *resource = obj->resource;
+    u32 sequence = dds3AdvanceWorldCounter();
+    s32 slot;
+
+    resource->owner = owner;
+    slot = D_00435D90;
+    obj->unk4 = sequence;
+    obj->entry = &D_00384A80[slot];
+    D_00435D90 = slot + 1;
+    D_00435D90 = D_00435D90 % 10;
+    return obj;
+}
 
 void dds3SetSlotValue(ObjectWithResource *object, u32 value) {
     object->resource->value = value;

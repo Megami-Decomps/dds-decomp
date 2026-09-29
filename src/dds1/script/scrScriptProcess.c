@@ -5,7 +5,7 @@ extern ScrProcGlobals *D_003BAA00;
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 bfTaskUpdate();
-s32 func_0010C070();
+s32 scrReplaceCurrentTask();
 s32 bfContextCreate(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 s32 bfParseFLW0(s32 processId, s32 option);
 /* Load a script resource, create its VM process and retain its resource handle. */
@@ -32,7 +32,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
 s32 scrProcCreateTask(s32 priority, ScrProcTask *task)
 {
     s32 taskId;
-    taskId = kwlnTaskCreate(task->nameTableBase + (task->nameIndex << 5), priority, 1, 1, bfTaskUpdate, func_0010C070, (s32)task);
+    taskId = kwlnTaskCreate(task->nameTableBase + (task->nameIndex << 5), priority, 1, 1, bfTaskUpdate, scrReplaceCurrentTask, (s32)task);
     task->taskId = taskId;
     return taskId;
 }

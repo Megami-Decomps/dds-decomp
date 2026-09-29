@@ -5,7 +5,7 @@ void dds3ClearSceneObjectState(Scene *scene) {
     SceneObject *object;
 
     object = scene->object;
-    func_0012ADA0();
+    fldReleaseFieldResources();
     object->state = 0;
 }
 

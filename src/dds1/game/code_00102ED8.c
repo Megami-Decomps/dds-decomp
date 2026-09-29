@@ -309,7 +309,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105370);
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001054D0);
 
 /* Release the retained texture and clear its request/pending flags. */
-void func_001055C0(void) {
+void kwlnTextureReleaseHeldReference(void) {
     if (D_003BA8F8 != 0) {
         sdfTexReleaseReference(D_003BA8F8);
     }
@@ -318,7 +318,7 @@ void func_001055C0(void) {
     D_003BA8F0 = 0;
 }
 
-s32 func_001055F8(void) {
+s32 kwlnTextureSetReferenceFlagIfPresent(void) {
     s32 result = 0;
 
     if (D_003BA8F8 == 0) {

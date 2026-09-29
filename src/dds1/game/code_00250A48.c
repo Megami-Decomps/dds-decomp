@@ -24,7 +24,7 @@ extern MnuTransRec *mnuAppendDisplayListNode(MnuTransHead *head);
 extern u32 *func_0024FA18(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
-extern void func_00253520(MnuTransWork *work);
+extern void mnuReinitializeSceneGrid(MnuTransWork *work);
 
 void mnuBeginTransition(MnuTransWork *work, s32 mode) {
     MnuTransRec *transition = mnuAppendDisplayListNode(&work->list584);
@@ -32,10 +32,10 @@ void mnuBeginTransition(MnuTransWork *work, s32 mode) {
     if (transition != NULL) {
         if (work->state >= 6) {
             mnuStopResourceAnimation();
-            func_00253520(work);
+            mnuReinitializeSceneGrid(work);
         } else if (work->state < -5) {
             mnuResetResourceAnimation();
-            func_00253520(work);
+            mnuReinitializeSceneGrid(work);
         }
         transition->mode = mode;
         if (mode == 1) {

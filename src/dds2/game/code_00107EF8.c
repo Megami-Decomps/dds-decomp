@@ -262,9 +262,37 @@ void func_001089A0(u32 arg0) {
     D_00435CB8 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_001089A8);
+void func_001089A8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    u8 *command;
+    sdfResetPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = func_0033A290(packet, 0x30);
+    *(u64 *)(command + 0x20) = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    *(u64 *)(command + 0x28) = 0x47;
+    sdfAppendPacket(list, packet);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (D_00435CB8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108AC0);
+void func_00108AC0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    u8 *command;
+    sdfResetPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = func_0033A290(packet, 0x30);
+    *(u64 *)(command + 0x20) = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    *(u64 *)(command + 0x28) = 0x48;
+    sdfAppendPacket(list, packet);
+    {
+        u8 *surface = (u8 *)D_0037FB48 + (D_00435CB8 << 5);
+        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108BD8);
 
@@ -790,7 +818,7 @@ void func_0010A9F0(u32 arg0, u32 arg1) {
 
 u32 func_0010AA18(void) {
     evtDestroySkyTask();
-    func_00260808();
+    mnuCampDestroyPanelTasks();
     func_00128618();
     return 0;
 }
@@ -946,7 +974,7 @@ void func_0010AD28(u32 arg0, s32 arg1) {
     if (arg1 != 0) {
         temp_v0 = *(u32 *)arg1;
     }
-    func_002D0A20(temp_v0);
+    fileMenuWorkCreate(temp_v0);
     func_002CE208(4);
 }
 

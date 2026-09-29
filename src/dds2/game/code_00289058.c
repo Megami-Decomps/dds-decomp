@@ -7,7 +7,7 @@ extern s32 func_00314B78(s32);
 extern s32 func_0026CF70(s16);
 extern void func_0028D070(s32, s32, s32);
 extern void func_00291118(void);
-extern void func_0026E560(void);
+extern void mnuReleaseMiddleMantraSpriteSlots(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void func_002A2408(void);
 extern void func_002A2550(void);
@@ -121,7 +121,7 @@ typedef struct MantraMenuBits {
 } MantraMenuBits;
 
 extern void func_0028E858(s32 object);
-extern void func_002C6988(s32 a);
+extern void evtStageTestInit(s32 a);
 extern void func_002A2200(s32 a);
 extern void func_002A2388(void);
 
@@ -145,7 +145,7 @@ void func_00289DC8(s32 object) {
     *(s32 *)(state + 0x5D8) = count;
     *(s32 *)(state + 0x5D4) = **(s32 **)((s32)list + 0x1C);
     func_0028D070(object, 5, 0);
-    func_002C6988(0);
+    evtStageTestInit(0);
     kwlnFadeOutStart(0, 0, 0, 0);
     func_0010AE38("AT3 LOAD!!\n");
     func_002A2408();
@@ -182,7 +182,7 @@ void func_00289ED0(s32 object) {
 
 void func_00289F58(void) {
     func_00291118();
-    func_0026E560();
+    mnuReleaseMiddleMantraSpriteSlots();
     kwlnFadeOutStart(0, 0, 0, 0);
     func_002A2408();
     func_002A2550();

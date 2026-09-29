@@ -22,7 +22,7 @@ INCLUDE_ASM(const s32, "game/code_00167178", func_00167A78);
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167BF8);
 
 /* Forward the first two parameter-table blocks as one effect-handler pair. */
-void func_00167E78(u64 paramTable) {
+void effApplyParamBlockPair(u64 paramTable) {
     u64 firstBlock;
     u64 secondBlock;
 

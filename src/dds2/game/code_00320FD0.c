@@ -120,7 +120,7 @@ void func_00321318(u32 arg0, u32 arg1) {
 }
 
 /* The externally owned table stores 28-byte records. */
-u8 *func_00321328(s32 recordIndex) {
+u8 *mnuGetResourceRecordByIndex(s32 recordIndex) {
     return (u8 *)D_004390C0 + recordIndex * 28;
 }
 

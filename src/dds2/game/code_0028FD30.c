@@ -4,9 +4,9 @@ extern u32 D_00438FC8;
 
 extern u32 *D_00437960;
 
-extern u64 func_00279DC8(u32, u64, u64, u64, u64, u64);
+extern u64 mnuSpawnPanelSlotB(u32, u64, u64, u64, u64, u64);
 
-extern u64 func_0027A628(u32, u64, u64);
+extern u64 mnuFindPanelSlotById(u32, u64, u64);
 
 extern s32 func_002890A8(s32);
 
@@ -158,7 +158,7 @@ void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
         u32 flags;
         u32 option;
         func_00289128(object, selection);
-        func_00279F90(state->resource, 0);
+        mnuTransitionActivePanelAnimations(state->resource, 0);
         flags = state->flags;
         func_00291590(object, 5, 1, selection, (flags >> 28) & 1, 0);
         option = (selection & 0xf) << 24;
@@ -204,11 +204,11 @@ void func_00292998(MenuPanelObject *object) {
     resource = object->resource;
     func_0026D098(0);
     record = func_00291400(0, 8);
-    effectHandle = func_0027A628(resource, 8, 0);
-    func_0027A798(effectHandle, 7, 0);
-    effectHandle = func_00279DC8(resource, 8, 1, 0, 0, 0);
-    func_00279F30(effectHandle, 0, 0, 0, 0x80, 0x53, 0, 0);
-    func_0027A798(effectHandle, 8, 0);
+    effectHandle = mnuFindPanelSlotById(resource, 8, 0);
+    mnuQueuePanelAnimationTransition(effectHandle, 7, 0);
+    effectHandle = mnuSpawnPanelSlotB(resource, 8, 1, 0, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(effectHandle, 0, 0, 0, 0x80, 0x53, 0, 0);
+    mnuQueuePanelAnimationTransition(effectHandle, 8, 0);
     *(u16 *)(record + 2) = (*(u16 *)(record + 2) & 0xfff0) | 1;
 }
 
@@ -289,7 +289,7 @@ extern s32 func_003292A8(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */
-void func_00294420(void) {
+void mnuInitPanelSoundEntries(void) {
     s32 handle;
     MenuPanelEntryPool *pool;
 
@@ -312,7 +312,7 @@ void mnuReleasePanelEntryPool(void) {
 }
 
 extern void sndSetSequenceVolumePan(s32, s32, s32);
-void func_002944B0(void) {
+void mnuTickPanelSoundEntries(void) {
     s32 i;
     MenuPanelEntry *entry = ((MenuPanelEntryPool *)D_00437960)->entries;
 

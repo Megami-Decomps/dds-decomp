@@ -66,7 +66,7 @@ INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AAB0);
 
 /* The 0x1C flag takes precedence over 0x13 when selecting the map variant. */
-void func_0030AB20(LmapTaskState *task) {
+void fldInitializeLmapTaskVariant(LmapTaskState *task) {
     s64 flagSet;
     u32 variant;
 

@@ -138,7 +138,7 @@ void func_0015AD18(s32 arg0, s32 arg1);
 
 void func_0015B330(s32 arg0);
 
-void func_0015B5C0(EffTemplatePacketList *effect);
+void effSetTemplateTagPeriod(EffTemplatePacketList *effect);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -324,7 +324,7 @@ s32 func_00159E50(s32 arg0) {
 }
 
 /* Start every entry's animation at the requested frame, with mode zero. */
-void func_00159E78(BillObj *effect, u32 time) {
+void billSetEntryFrameMode0(BillObj *effect, u32 time) {
     if (effect->unk2C == 1) {
         s32 count = effect->entryCount;
 
@@ -345,7 +345,7 @@ void func_00159E78(BillObj *effect, u32 time) {
 }
 
 /* Start every entry's animation at the requested frame, with mode one. */
-void func_00159ED8(BillObj *effect, u32 time) {
+void billSetEntryFrameMode1(BillObj *effect, u32 time) {
     if (effect->unk2C == 1) {
         s32 count = effect->entryCount;
 
@@ -457,7 +457,7 @@ void billSetChildValue(EffInstance *instance, u32 value) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void func_0015A3C8(void *dst, void *src) {
+void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
@@ -537,7 +537,7 @@ void effDestroyResources(EffResourceOwner *owner) {
     func_0015B318(owner->buffer);
 }
 
-void func_0015B5C0(EffTemplatePacketList *effect) {
+void effSetTemplateTagPeriod(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 i;
     u32 next;
@@ -559,7 +559,7 @@ void func_0015B5C0(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015B630(float scale, EffTemplatePacketList *effect) {
+void effScaleTemplateTail13(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -576,7 +576,7 @@ s32 func_0015B680(EffTemplatePacketList *source) {
     memcpy((void *)obj, source, source->templateSize);
     memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(obj);
-    func_0015B5C0(obj);
+    effSetTemplateTagPeriod(obj);
     return obj;
 }
 
@@ -960,7 +960,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EE70);
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F1C0);
 
 void func_0015F560(void) {
-    func_0015F648();
+    effInitParticleRecord();
 }
 
 void func_0015F578(float scale, EffTemplatePacketList *effect) {
@@ -991,7 +991,7 @@ extern u8 D_003AA868[];
 extern f32 func_00341240(void *);
 
 /* Initialize a particle record, applying random speed and angle jitter. */
-void func_0015F648(effect)
+void effInitParticleRecord(effect)
     EffParticle *effect;
 {
     EffParticleRecord *particle = (EffParticleRecord *)effect->buffer->records;
@@ -1022,7 +1022,7 @@ void func_0015F748(EffParticle *effect) {
     u32 color;
 
     if (record->unk20 == 0) {
-        func_0015F648(effect);
+        effInitParticleRecord(effect);
     }
     record->unk20 = record->unk20 + 1;
     record->x = effect->x;
