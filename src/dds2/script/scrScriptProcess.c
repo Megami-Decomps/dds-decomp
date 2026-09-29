@@ -83,7 +83,29 @@ s32 func_0010BF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return func_0010B9E8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0);
 }
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BF48);
+extern void func_0010AE38(char *, u32);
+extern void func_00328E48(void *);
+extern void func_001A39D0(s32);
+extern void func_003297C8(void *);
+extern void evtUnlinkWorkNode(void *);
+
+void func_0010BF48(u8 *ctx) {
+    func_0010AE38("end <%s>\n", *(u32 *)(ctx + 0xB4) + (*(u32 *)(ctx + 0xC8) << 5));
+    if (*(u32 *)(ctx + 0xDC) != 0) {
+        func_00328E48((void *)*(u32 *)(ctx + 0xDC));
+    }
+    if (*(u32 *)(ctx + 0xE0) != 0) {
+        func_00328E48((void *)*(u32 *)(ctx + 0xE0));
+    }
+    if (*(s32 *)(ctx + 0xCC) >= 0) {
+        func_001A39D0(*(s32 *)(ctx + 0xCC));
+    }
+    if (*(u32 *)(ctx + 0xD8) != 0) {
+        func_003297C8((void *)*(u32 *)(ctx + 0xD8));
+    }
+    evtUnlinkWorkNode(ctx);
+    func_00328E48(ctx);
+}
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BFE0);
 

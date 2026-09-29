@@ -79,9 +79,33 @@ u32 func_001178B8(WorldSlotData *slot) {
     return slot->value18;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001178C0);
+/* Load the vector at the slot's +0x18 pointer into VF10. */
+void func_001178C0(WorldSlotData *slot) {
+    void *vec = (void *)func_001178B8(slot);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001178E0);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
+
+/* Same, from the second quadword at +0x18. */
+void func_001178E0(WorldSlotData *slot) {
+    void *vec = (void *)((u8 *)func_001178B8(slot) + 0x10);
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117908);
 
