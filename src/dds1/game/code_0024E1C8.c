@@ -45,7 +45,18 @@ INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF730);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F4F0);
+extern u8 D_0036C568[];
+extern void effRequestResourceByMode(char *, void *, s32, void *);
+
+void func_0024F4F0(void) {
+    s32 i;
+
+    for (i = 0; i < 14; i++) {
+        if (D_0036C698[i] == 0) {
+            effRequestResourceByMode("/facility/spr/mantra/", &D_0036C568[i * 0x10], 0, &D_0036C698[i]);
+        }
+    }
+}
 
 s32 mnuAreResourceSlotsOccupied(void) {
     s32 i;
@@ -114,9 +125,42 @@ void mnuResetResourceAnimation(void) {
     func_0027BE90(*(s32 *)(object + 0xC));
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024FAC8);
+extern s32 func_002D03F8(s32);
+extern void *sdfMemoryGetBlockAddress(s32);
+extern void *memset(void *, s32, u32);
+extern void func_0024F8D8(void *);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024FB30);
+u32 *func_0024FAC8(void) {
+    s32 handle = func_002D03F8(0x10);
+    u32 *block = sdfMemoryGetBlockAddress(handle);
+
+    memset(block, 0, 0x10);
+    block[0] = handle;
+    func_0024F8D8(block);
+    block[1] = 0;
+    block[2] = 0;
+    return block;
+}
+
+extern void func_002CFF98(void *);
+extern void func_0027B368(void *);
+extern void func_00249930(s32);
+extern void func_002D0918(s32);
+
+void func_0024FB30(s32 arg0, s32 *arg1) {
+    u8 *owner = (u8 *)arg1[3];
+    u8 *node = *(u8 **)(owner + 0x1C);
+    u8 *record = (u8 *)func_002CB3B8(D_003BC4CC, -1);
+
+    while (node != NULL) {
+        func_002CFF98(*(void **)(node + 0x70));
+        node = *(u8 **)(node + 0x58);
+    }
+    func_002CFF98(*(void **)(owner + 0x30));
+    func_0027B368(owner);
+    func_00249930(*(s32 *)(record + 0x24));
+    func_002D0918(arg1[0]);
+}
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF7A8);
 

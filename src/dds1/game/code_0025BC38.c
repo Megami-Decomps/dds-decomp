@@ -29,7 +29,12 @@ void func_0025BC38(MovieResourceGroup *resources) {
     func_002D0918(resources->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BCA0);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern s32 D_0036C698[];
+
+void func_0025BCA0(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
+    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, D_0036C698[0], 0x25, param);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BD18);
 
@@ -92,9 +97,38 @@ void func_0025C568(s32 *frame) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C7E0);
+extern void func_00255FF8(s32 *, s32);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C830);
+void func_0025C7E0(s32 arg0, s32 arg1, u8 *arg2) {
+    s32 *counter = *(s32 **)(arg2 + 4);
+    s32 value = *counter + 1;
+
+    *counter = value;
+    if ((f32)value > 60.0f) {
+        *counter = 0;
+    }
+    func_00255FF8(counter, arg0);
+}
+
+typedef struct EntrySlot8 {
+    s32 a;
+    s32 b;
+} EntrySlot8;
+
+void func_0025C830(s32 arg0, s32 arg1) {
+    u8 *grid = *(u8 **)(arg1 + 0x484);
+    s32 row;
+    s32 col;
+
+    for (row = 0; row < 0x11; row++) {
+        EntrySlot8 *slot = (EntrySlot8 *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * 8);
+        for (col = 0; col < 15; col++) {
+            if (slot[col].b != 0) {
+                func_0025C7E0(arg0, (s32)grid, (u8 *)&slot[col]);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C8D0);
 
@@ -104,13 +138,29 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025CFA0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D100);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D2C0);
+extern void func_0025C830(s32, s32);
+
+void func_0025D2C0(s32 arg0, s32 arg1) {
+    func_0025C830(arg1, arg0);
+    func_0025C568((s32 *)(arg0 + 0x490));
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D2F8);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D628);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D798);
+typedef struct Bytes7 {
+    s8 b[7];
+} Bytes7;
+
+extern Bytes7 D_003BC4E8[];
+extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+
+void func_0025D798(s32 x, s32 y, s32 z, s32 entry, s32 arg4, s32 arg5) {
+    Bytes7 table = D_003BC4E8[0];
+
+    func_0024E260(x - 0x19, y + 0x5C, z, arg4, table.b[*(u16 *)(entry + 4)], arg5);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D7F8);
 
@@ -156,11 +206,40 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DBB0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DCC8);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DD80);
+extern s32 func_0025DCC8(s32, s32, s32);
+extern void func_0025D798(s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DDF0);
+void func_0025DD80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    if (func_0025DCC8(arg1, arg2, arg3) != 0) {
+        func_0025D798(0, 0, 0, arg0, arg2, arg3);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DE60);
+extern u16 D_0036C6D0[];
+extern s32 mdlFlagTest(s32);
+
+void func_0025DDF0(u8 *flags) {
+    u32 i;
+
+    for (i = 0; i < 0x29; i++, flags++) {
+        if (mdlFlagTest(D_0036C6D0[i]) != 0) {
+            *flags = 1;
+        }
+    }
+}
+
+extern u16 D_0036C6D0[];
+extern void mdlFlagSet(s32);
+
+void func_0025DE60(u8 *flags) {
+    u32 i;
+
+    for (i = 0; i < 0x29; i++) {
+        if (*flags++ != 0) {
+            mdlFlagSet(D_0036C6D0[i]);
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0025BC38", D_003AFA00);
 
