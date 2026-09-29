@@ -29,7 +29,20 @@ void func_00279AF8(s32 selection) {
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279B30);
+extern void func_002806E8(void *, u32);
+extern void func_00277A50(s32, s32);
+extern void func_00278330(void *);
+
+s32 func_00279B30(s32 arg0) {
+    u8 *ctx = (u8 *)func_00101A70();
+    u32 *p = (u32 *)(ctx + 0x15C);
+
+    func_002806E8(p, *(u32 *)(*(u32 *)(*(u32 *)(ctx + 0x7D8) + 0x1C)));
+    *p |= 0x400;
+    func_00277A50(0, arg0);
+    func_00278330(ctx);
+    return 1;
+}
 
 s32 func_00279BA8(s32 selection) {
     s32 context = func_00101A70();
