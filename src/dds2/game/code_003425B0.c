@@ -66,6 +66,16 @@ typedef struct SoundNode {
 
 extern SoundNode *D_004391F8;
 
+typedef struct SdfStreamNode {
+    struct SdfStreamNode *prev;
+    struct SdfStreamNode *next;
+    u8 pad8[5];
+    u8 queued;
+} SdfStreamNode;
+
+extern SdfStreamNode *D_0043920C;
+extern SdfStreamNode *D_00439210;
+
 extern s32 sceIpuSync(s32, s32);
 
 typedef struct SoundIpuBuffer {
@@ -167,7 +177,24 @@ void func_00342798(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003427C0);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfSoundHandleRpcEvent);
+extern void FlushCache(s32);
+extern s32 SignalSema(s32);
+
+s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
+    switch (event) {
+    case 5:
+        FlushCache(0);
+    case 4:
+        SignalSema(D_004391F0);
+        break;
+    case 0:
+    case 2:
+    case 7:
+        SignalSema(D_004391F0);
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342848);
 
@@ -224,7 +251,11 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00343D60);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00343E18);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343ED0);
+extern u64 func_00343E18(u64, u32 *, u64, u64);
+
+u64 func_00343ED0(u64 arg0, u32 *info, u64 arg2) {
+    return func_00343E18(arg0, info, arg2, 0);
+}
 
 u64 func_00343EE8(u64 arg0) {
     u64 temp_v0;
@@ -237,7 +268,24 @@ u64 func_00343EE8(u64 arg0) {
     return temp_v1;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343F38);
+extern s32 func_00332E58(s32);
+extern void func_00332F08(s32, u64);
+
+u64 func_00343F38(u32 resource) {
+    s32 i = 0;
+    s32 count = *(s32 *)(resource + 0x10);
+    s32 handle = func_00332E58(count);
+    s32 *entry;
+    if (count != i) {
+        entry = (s32 *)(resource + 0x14);
+        do {
+            i++;
+            func_00332F08(handle, func_0032C138(resource + *entry));
+            entry++;
+        } while (i != count);
+    }
+    return handle;
+}
 
 u64 func_00343FC0(u64 arg0) {
     u64 temp_v0;
@@ -284,9 +332,54 @@ u64 func_003440D8(u64 arg0, s32 *out) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344120);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344208);
+void func_00344208(SdfStreamNode *node, s32 inInterrupt) {
+    s32 interruptsEnabled = 0;
+    SdfStreamNode *prev;
+    SdfStreamNode *next;
+    if (inInterrupt == 0) {
+        interruptsEnabled = func_0036DE70();
+    }
+    if (node->queued != 0) {
+        prev = node->prev;
+        next = node->next;
+        if (prev == 0) {
+            D_0043920C = next;
+        } else {
+            prev->next = next;
+        }
+        if (next == 0) {
+            D_00439210 = prev;
+        } else {
+            next->prev = prev;
+        }
+        node->queued = 0;
+    }
+    if (inInterrupt == 0 && interruptsEnabled != 0) {
+        EIntr();
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344298);
+void func_00344298(SdfStreamNode *node, s32 inInterrupt) {
+    s32 interruptsEnabled = 0;
+    if (inInterrupt == 0) {
+        interruptsEnabled = func_0036DE70();
+    }
+    if (node->queued != 0) {
+        func_00344208(node, 1);
+    }
+    node->queued = 1;
+    if (D_00439210 == 0) {
+        D_0043920C = node;
+    } else {
+        D_00439210->next = node;
+    }
+    node->prev = D_00439210;
+    node->next = 0;
+    D_00439210 = node;
+    if (inInterrupt == 0 && interruptsEnabled != 0) {
+        EIntr();
+    }
+}
 
 void sdfSoundAppendNode(SoundNode *node) {
     SoundNode **tail = &D_004391F8;
@@ -320,11 +413,51 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003444F8);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344768);
+extern void *memset(void *, s32, u32);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003447D8);
+void func_00344768(u8 *dst, u8 *src) {
+    memset(dst, 0, 0x8C);
+    if (src[0] == 0) {
+        dst[0x14] = 0;
+    } else {
+        if (src[1] == 0) {
+            dst[0x14] = 1;
+        } else {
+            dst[0x14] = 2;
+        }
+    }
+    dst[0x15] = src[2];
+    dst[0x16] = src[3];
+}
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344870);
+extern void func_00344420();
+
+void func_003447D8(u8 *state, s32 arg1, u8 *src, s32 size) {
+    s32 interruptsEnabled;
+    func_00344768(state, arg1);
+    *(u16 *)(state + 0x3C) = *(u16 *)(src + 8);
+    *(s32 *)(state + 0x40) = *(s32 *)(src + 0xC);
+    *(u16 *)(state + 0x3E) = *(u16 *)(src + 0xA);
+    sdfAllocateStreamFrameBuffers(state);
+    func_00344420(state, src + 0x10, size - 0x10);
+    interruptsEnabled = func_0036DE70();
+    func_00344298((SdfStreamNode *)state, 0);
+    if (interruptsEnabled != 0) {
+        EIntr();
+    }
+    func_003450D8(0);
+}
+
+extern s32 func_003283E0(s32);
+extern void func_00344768();
+
+void func_00344870(u8 *state, s32 arg1, s32 arg2, s32 arg3) {
+    func_00344768(state, arg1);
+    *(s32 *)(state + 0x5C) = arg2;
+    *(s32 *)(state + 0x60) = arg3;
+    state[0xC] = 1;
+    *(s32 *)(state + 0x54) = func_003283E0(0x10100) + 0x100;
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003448D0);
 
@@ -403,19 +536,103 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
     func_003450D8(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345408);
+extern void func_0032AEA0(s32, s32);
+extern void func_003444F8();
+
+s32 func_00345408(MidiPlaybackState *state) {
+    u32 *buffer;
+    if (state->pending == 0) {
+        return 0;
+    }
+    buffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
+    if (*buffer == 0) {
+        func_003444F8();
+    }
+    func_0032AEA0(*buffer, *buffer + state->bufferSize - 0x10);
+    sdfAdvanceBufferedPlayback(state);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345488);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003455F0);
+void func_003455F0(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    func_003447D8(state, arg1, arg2, arg3);
+    *(s32 *)(state + 0x34) = arg4;
+    sdfSoundAppendNode((SoundNode *)state);
+}
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345628);
+typedef struct SdfStreamParams {
+    u8 mode;
+    u8 param1;
+    u8 param2;
+    u8 param3;
+} SdfStreamParams;
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003456C0);
+extern s32 sdfTexGetPrimaryResourceWord();
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003456F8);
+void func_00345628(s32 arg0, SdfStreamParams *params, s32 arg2, s32 arg3, u8 *source) {
+    SdfStreamParams local = *params;
+    switch (source[0x1A]) {
+    case 0:
+        local.mode = 0;
+        break;
+    case 2:
+        local.mode = 1;
+        break;
+    }
+    func_003455F0(arg0, &local, arg2, arg3, sdfTexGetPrimaryResourceWord(source));
+}
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003457A8);
+void func_003456C0(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    func_00344870(state, arg1, arg2, arg3);
+    *(s32 *)(state + 0x34) = arg4;
+    sdfSoundAppendNode((SoundNode *)state);
+}
+
+extern s32 D_004391FC;
+extern s32 D_00439200;
+extern s32 D_00439204;
+extern s32 D_00439214;
+extern u8 D_0047B480[];
+extern s32 sdfAddHandler();
+extern s32 func_00328318();
+extern void func_003668B8();
+extern void sceIpuInit();
+extern void _StartThread();
+extern void func_00345198();
+extern void func_00345268();
+extern void func_00345298();
+
+void func_003456F8(void) {
+    sceIpuInit();
+    *(vu32 *)0x10002000 = 0x90000000;
+    D_004391F8 = 0;
+    D_00439204 = 0;
+    D_004391FC = sdfAddHandler(1, 3, func_00345268, -1, 0);
+    func_003668B8(3);
+    D_00439200 = sdfAddHandler(1, 4, func_00345298, -1, 0);
+    func_003668B8(4);
+    D_00439214 = func_00328318(func_00345198, D_0047B480, 0x800, 0x46);
+    _StartThread(D_00439214, 0);
+}
+
+extern s32 D_004391FC;
+extern s32 D_00439200;
+extern void func_00328668();
+extern s32 func_00366850();
+
+s32 func_003457A8(void) {
+    if (D_004391FC != 0) {
+        func_00328668(D_004391FC);
+        D_004391FC = 0;
+    }
+    func_00366850(3);
+    if (D_00439200 != 0) {
+        func_00328668(D_00439200);
+        D_00439200 = 0;
+    }
+    return func_00366850(4);
+}
 
 void func_003457F8(void) {
     func_0035B7D8();

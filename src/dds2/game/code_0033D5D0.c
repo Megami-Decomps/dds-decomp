@@ -249,7 +249,9 @@ void func_0033E490(void) {
     }
 }
 
-u8 sdfPacketExists(u32 index) {
+u32 sdfPacketExists(index)
+    u32 index;
+{
     s64 packet;
     u8 buffer[16];
 
@@ -402,7 +404,18 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F650);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F9D0);
+DevState *func_0033F9D0(void *resource, s32 workerIndex, s32 operation,
+                        void (*callback)(DevState *, s32, s32, s32, s32), s32 context) {
+    DevState *state = (DevState *)func_00328E18(0x40);
+    state->unk10 = resource;
+    state->workerIndex = workerIndex;
+    state->operation = operation;
+    state->state = 0;
+    state->resourceId = -1;
+    state->callback = callback;
+    state->callbackContext = context;
+    return state;
+}
 
 DevState *sdfDevCreateCallbackState(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 context) {
