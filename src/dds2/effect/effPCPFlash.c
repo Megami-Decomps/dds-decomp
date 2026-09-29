@@ -60,11 +60,13 @@ struct PcpFlashWork2 {
     s32 lifetime;
     s32 rampTime;
     u32 randomRange;
-    u32 unk24;
-    u32 unk28;
-    u8 pad2C[0x08];
+    u32 colorA;
+    u32 colorB;
+    f32 unk2C;
+    f32 unk30;
     f32 maxScale;
-    u8 pad38[0x08];
+    f32 unk38;
+    u8 pad3C[0x04];
     PcpFlashRotatingParticle *parts;
     s32 updateCount;
     u32 unk48;
@@ -376,7 +378,10 @@ struct PcpFlashRotatingParticle {
     f32 angle;
     f32 scale;
     f32 position[3];
-    u8 pad1C[0x10];
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
 };
 
 typedef struct PcpFlashRotationWork {
@@ -431,18 +436,19 @@ void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00171F28);
 
+extern void func_00171F28();
 extern u8 D_0037F680[];
 extern u8 D_0037F690[];
 extern s32 effBlendColor(s32, s32, f32);
-extern void func_00171F28();
+extern void func_001727A0(void *, s32, void *);
 extern void func_00177CD0(void *);
 
-typedef struct PcpFlashHandle1 {
+typedef struct PcpFlashHandle {
     u8 pad00[0x40];
     f32 origin[3];
     u8 pad4C[0x10];
     f32 unk5C;
-} PcpFlashHandle1;
+} PcpFlashHandle;
 
 void effFlashUpdateWork1(PcpFlashWork1 *work) {
     f32 axis[4];
@@ -455,7 +461,7 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
     s32 restart;
     s32 fadeParam;
     PcpFlashParticle10 *part;
-    PcpFlashHandle1 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
@@ -521,7 +527,7 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashHandle1 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
@@ -573,8 +579,8 @@ void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 flag, s32 param) {
     s32 colorB;
 
     slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
-    colorA = work->unk24 & 0xFFFFFF;
-    colorB = work->unk28 & 0xFFFFFF;
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = func_00195A30(colorB, param);
     slot->color[1] = func_00195A30(colorB, param);
     if (flag & 1) {
@@ -588,7 +594,61 @@ void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 flag, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172628);
+extern f32 func_00341240(void *state);
+extern u8 D_003AA868[];
+
+void func_00172628(PcpFlashWork2 *work, s32 index, void *orientation) {
+    PcpFlashRotatingParticle *part = work->parts + index;
+    f32 direction[4];
+    f32 factor;
+    f32 scale;
+
+    direction[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    direction[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    direction[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    __asm__ volatile(".set noreorder
+	lqc2 $vf10, 0(%0)
+	.set reorder" : : "r"(direction));
+    __asm__ volatile(".set noreorder
+	lqc2 $vf11, 0(%0)
+	.set reorder" : : "r"(orientation));
+    __asm__ volatile(".set noreorder
+	vopmula.xyz ACC, $vf10, $vf11
+	vopmsub.xyz $vf10, $vf11, $vf10
+	.set reorder");
+    __asm__ volatile(
+        ".set noreorder
+	"
+        "vmul.xyz $vf2, $vf10, $vf10
+	"
+        "vmulax.w ACC, $vf0, $vf2x
+	"
+        "vmadday.w ACC, $vf0, $vf2y
+	"
+        "vmaddz.w $vf2, $vf0, $vf2z
+	"
+        "vrsqrt Q, $vf0w, $vf2w
+	"
+        "vwaitq
+	"
+        "vmulq.xyz $vf10, $vf10, Q
+	"
+        ".set reorder");
+    __asm__ volatile(".set noreorder
+	sqc2 $vf10, 0(%0)
+	.set reorder" : : "r"(direction) : "memory");
+    part->position[0] = direction[0];
+    part->position[1] = direction[1];
+    part->position[2] = direction[2];
+    factor = func_00341240(D_003AA868) * 0.3f + 0.7f;
+    scale = work->maxScale * factor;
+    part->unk28 = scale;
+    part->scale = scale;
+    factor = (func_00341240(D_003AA868) * 0.5f + 0.5f) * 0.5f;
+    part->unk20 = work->unk2C * factor;
+    part->unk24 = work->unk30 * factor;
+    part->angle = work->unk38 * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001727A0);
 
@@ -616,20 +676,11 @@ void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void 
 }
 
 extern u32 effMiscRand(void *);
-extern void func_00172628(void *, s32, void *);
-extern void func_001727A0(void *, s32, void *);
 extern s32 effBlendColor(s32, s32, f32);
 extern void func_001778B0(void *);
 extern u8 D_003AA868[];
 extern u8 D_0037F680[];
 extern u8 D_0037F690[];
-
-typedef struct PcpFlashHandle {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle;
 
 void effFlashUpdateStreak(PcpFlashWork2 *work) {
     s128 axis;
@@ -774,13 +825,6 @@ void func_001731C8(PcpFlashWork3 *work, s32 index) {
 
 extern void func_00172FE0(void *, s32);
 
-typedef struct PcpFlashHandle3 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle3;
-
 void effFlashUpdateWork3(PcpFlashWork3 *work) {
     s32 index;
     s32 lifetime;
@@ -792,7 +836,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
     s32 fadeParam;
     u32 range;
     PcpFlashPtc14 *part;
-    PcpFlashHandle3 *handle;
+    PcpFlashHandle *handle;
 
     lifetime = work->lifetime;
     count = work->particleCount;
@@ -847,7 +891,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashHandle3 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk4C = work->unk4C + 1;
     handle->origin[1] = work->origin[1];
@@ -1020,17 +1064,17 @@ extern u8 D_003AA868[];
 
 void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     PcpFlashPtc20A *part = work->parts + index;
-    f32 v;
-    f32 size;
+    f32 factor;
+    f32 scale;
 
     part->accumulator = func_00341240(D_003AA868) * 6.2831853f;
-    v = func_00341240(D_003AA868) * 0.3f + 0.7f;
-    size = work->unk40 * v;
-    part->unk1C = size;
-    part->unk0C = size;
-    v = (func_00341240(D_003AA868) * 0.5f + 0.5f) * 0.5f;
-    part->unk14 = work->unk38 * v;
-    part->unk18 = work->unk3C * v;
+    factor = func_00341240(D_003AA868) * 0.3f + 0.7f;
+    scale = work->unk40 * factor;
+    part->unk1C = scale;
+    part->unk0C = scale;
+    factor = (func_00341240(D_003AA868) * 0.5f + 0.5f) * 0.5f;
+    part->unk14 = work->unk38 * factor;
+    part->unk18 = work->unk3C * factor;
     part->increment = work->unk44 * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
 }
 
@@ -1045,13 +1089,6 @@ void func_00174C18(PcpFlashWork6 *work, s32 index, void *orientation) {
 
 extern void func_00174A58(void *, s32, void *);
 
-typedef struct PcpFlashHandle6 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle6;
-
 void effFlashUpdateWork6(PcpFlashWork6 *work) {
     s128 axis;
     s32 index;
@@ -1065,7 +1102,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     s32 fadeParam;
     u32 range;
     PcpFlashPtc20A *part;
-    PcpFlashHandle6 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
@@ -1133,7 +1170,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashHandle6 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk50 = work->unk50 + 1;
     handle->origin[1] = work->origin[1];
@@ -1192,13 +1229,6 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175160);
 extern void func_00175160();
 extern void func_00177CD0(void *);
 
-typedef struct PcpFlashHandle7 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle7;
-
 void effFlashUpdateWork7(PcpFlashWork7 *work) {
     s128 axis;
     s32 restart;
@@ -1213,7 +1243,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     f32 startB;
     f32 decay;
     PcpFlashPtc10 *part;
-    PcpFlashHandle7 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
@@ -1280,7 +1310,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
             }
         }
     }
-    handle = (PcpFlashHandle7 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
@@ -1338,13 +1368,6 @@ void func_00175BE8(PcpFlashWork8 *work, s32 index, void *orientation) {
 extern void func_001758E8();
 extern void func_001759C0();
 
-typedef struct PcpFlashHandle8 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle8;
-
 void effFlashUpdateWork8(PcpFlashWork8 *work) {
     s128 axis;
     s32 index;
@@ -1360,7 +1383,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
     u32 range;
     s32 fadeParam;
     PcpFlashPtc20B *part;
-    PcpFlashHandle8 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
@@ -1422,7 +1445,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
             }
         }
     }
-    handle = (PcpFlashHandle8 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unkD4 = work->unkD4 + 1;
     handle->origin[1] = work->origin[1];
@@ -1494,13 +1517,6 @@ void func_00176478(PcpFlashWork9 *work, s32 index) {
 
 extern void func_00176290();
 
-typedef struct PcpFlashHandle9 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle9;
-
 void effFlashUpdateWork9(PcpFlashWork9 *work) {
     s32 restart;
     s32 fadeParam;
@@ -1513,7 +1529,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
     f32 maxScale;
     u32 range;
     PcpFlashPtc14 *part;
-    PcpFlashHandle9 *handle;
+    PcpFlashHandle *handle;
 
     count = work->particleCount;
     part = work->parts;
@@ -1575,7 +1591,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
             }
         }
     }
-    handle = (PcpFlashHandle9 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk54 = work->unk54 + 1;
     handle->origin[1] = work->origin[1];
@@ -1634,13 +1650,6 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001769C0);
 extern void func_001769C0();
 extern void func_00177CD0(void *);
 
-typedef struct PcpFlashHandle10 {
-    u8 pad00[0x40];
-    f32 origin[3];
-    u8 pad4C[0x10];
-    f32 unk5C;
-} PcpFlashHandle10;
-
 void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 axis[4];
     s32 restart;
@@ -1656,7 +1665,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 decay;
     f32 scale;
     PcpFlashPtc10 *part;
-    PcpFlashHandle10 *handle;
+    PcpFlashHandle *handle;
 
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F680));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
@@ -1724,7 +1733,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
         }
     }
     scale = work->unk38 * work->unk4C;
-    handle = (PcpFlashHandle10 *)work->resourceHandle;
+    handle = (PcpFlashHandle *)work->resourceHandle;
     work->updateCount = work->updateCount + 1;
     handle->origin[0] = work->origin[0] + axis[0] * scale;
     handle->origin[1] = work->origin[1] + axis[1] * scale;
