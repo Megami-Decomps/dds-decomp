@@ -111,13 +111,46 @@ extern u32 D_003BC950;
 
 extern u32 D_003BC954;
 
-extern s32 *D_003BC948;
+typedef struct EffModelOwner {
+    f32 scale;
+    s32 model;
+    void *ownedBuffer;
+} EffModelOwner;
+
+typedef struct EffectObjectFlag {
+    u8 pad00[0xC];
+    u32 flags;
+} EffectObjectFlag;
+
+typedef struct EffectObjectNode {
+    EffectObjectFlag *object;
+    struct EffectObjectNode *prev;
+    struct EffectObjectNode *next;
+} EffectObjectNode;
+
+extern EffectObjectNode *D_003BC948;
+
+typedef struct EffectResourceSizeEntry {
+    u32 resourceSize;
+    u8 pad_04[0x18];
+} EffectResourceSizeEntry;
+
+extern EffectResourceSizeEntry D_0037EDA8[];
+
+typedef struct EffectRecordGroup {
+    u32 unk_00;
+    u32 unk_04;
+    u32 count;
+    u8 *records;
+} EffectRecordGroup;
+
+extern EffectRecordGroup D_0038FD88[];
 
 extern s64 func_001A1438(void);
 
 extern s64 btlIsCurrentActorFullyMarked(void);
 
-extern u32 func_0029A958();
+extern EffModelOwner *func_0029A958();
 
 /* 4x4 float matrix with 128-bit row access for VU0/DMA transfers. */
 typedef struct Matrix4 {
@@ -238,7 +271,7 @@ extern FnTbl24 D_0037EE40[];
 
 extern FnTbl24 D_0037EE44[];
 
-extern void func_0029B168(s32 *);
+extern void func_0029B168(EffectObjectNode *);
 
 extern FnTbl28 D_0037E8B4[];
 
@@ -372,7 +405,7 @@ extern u8 D_003BD10A;
 
 extern s32 func_002B9320(s32, s32, s32);
 
-extern u8 D_003DE148[];
+extern u8 D_003DE148[] __attribute__((aligned(4)));
 
 /* Value holder with a float field and a u16 data pointer (layout inferred). */
 typedef struct ValPtr44 {
@@ -484,7 +517,22 @@ void func_0029A938(s32 arg0) {
     func_002177D0();
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029A958);
+EffModelOwner *func_0029A958(u8 *source) {
+    EffModelOwner *owner = func_002CFF68(0x10);
+    owner->ownedBuffer = func_002CFF68(0xE0);
+    if (source != NULL) {
+        s32 data;
+        *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
+        data = fileResolveSecondaryBuffer(source);
+        if (data != 0) {
+            owner->model = func_0029A8D8(data, *(u32 *)(source + 0x24));
+            __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder" : : : "memory");
+            __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2", "memory");
+            mdlStoreTertiaryVectorVU((void *)owner->model);
+        }
+    }
+    return owner;
+}
 
 void effDestroyModelOwner(void *p) {
     void *q = *(void **)((s32)p + 8);
@@ -572,17 +620,17 @@ void func_0029ABF8(s32 arg0, float scale) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AC30);
 
-u32 func_0029AD68(void) {
-    u32 temp_v0;
+EffModelOwner *func_0029AD68(u8 *source) {
+    EffModelOwner *owner;
     s64 temp_v1;
 
-    temp_v0 = func_0029A958();
-    func_0029AC30(temp_v0);
+    owner = func_0029A958(source);
+    func_0029AC30(owner);
     temp_v1 = func_001A1438();
     if ((temp_v1 != 0) && (temp_v1 = btlIsCurrentActorFullyMarked(), temp_v1 == 0)) {
-        func_0029B108(temp_v0);
+        func_0029B108((EffectObjectFlag *)owner);
     }
-    return temp_v0;
+    return owner;
 }
 
 void func_0029ADC8(u8 *work) {
@@ -631,102 +679,117 @@ typedef struct TrackedEffectObject {
     u32 flags;
 } TrackedEffectObject;
 
-void func_0029B108(void *object) {
-    s32 *entry = func_002CFF68(12);
-    s32 *head = D_003BC948;
-    TrackedEffectObject *linkedObject;
+void func_0029B108(EffectObjectFlag *obj) {
+    EffectObjectNode *entry = func_002CFF68(sizeof(EffectObjectNode));
 
-    entry[0] = (s32)object;
-    entry[1] = 0;
-    if (head != NULL) {
-        head[1] = (s32)entry;
-        entry[2] = (s32)head;
+    entry->object = obj;
+    entry->prev = NULL;
+    if (D_003BC948 != NULL) {
+        D_003BC948->prev = entry;
+        entry->next = D_003BC948;
     } else {
-        entry[2] = 0;
+        entry->next = NULL;
     }
-    linkedObject = (TrackedEffectObject *)entry[0];
     D_003BC948 = entry;
-    linkedObject->flags |= 4;
+    entry->object->flags |= 4;
 }
 
 extern char D_003B2AA0[];
 
 extern void func_003003F0(const char *, void *);
 
-void func_0029B168(s32 *entry) {
-    if (entry[0] != 0) {
-        func_003003F0(D_003B2AA0, (void *)entry[0]);
-        effDestroyModelOwner((void *)entry[0]);
-        entry[0] = 0;
+void func_0029B168(EffectObjectNode *node) {
+    if (node->object != NULL) {
+        func_003003F0(D_003B2AA0, node->object);
+        effDestroyModelOwner((EffModelOwner *)node->object);
+        node->object = NULL;
     }
-    if (entry[2] != 0) {
-        *(s32 *)(entry[2] + 4) = entry[1];
+    if (node->next != NULL) {
+        node->next->prev = node->prev;
     }
-    if (entry[1] != 0) {
-        *(s32 *)(entry[1] + 8) = entry[2];
+    if (node->prev != NULL) {
+        node->prev->next = node->next;
     } else {
-        D_003BC948 = (s32 *)entry[2];
+        D_003BC948 = node->next;
     }
-    func_002CFF98(entry);
+    func_002CFF98(node);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B1D8);
-
-void mdlPropagateObjectFlag(void) {
-    s32 *node = D_003BC948;
-    s32 obj;
-    s32 v;
+void func_0029B1D8(void) {
+    EffectObjectNode *node = D_003BC948;
+    EffectObjectNode *next;
 
     if (node != NULL) {
         do {
-            obj = *node;
-            v = *(s32 *)(obj + 0xC);
-            if ((v & 2) != 0) {
-                *(s32 *)(obj + 0xC) = v | 8;
+            next = node->next;
+            if (!(node->object->flags & 8)) {
+                if ((node->object->flags & 0x31) == 1) {
+                    func_0029AE88(node->object);
+                }
+                node->object->flags &= ~0x20;
+            } else {
+                func_0029B168(node);
             }
-            node = *(s32 **)((s32)node + 8);
+            node = next;
+        } while (node != NULL);
+    }
+}
+
+void mdlPropagateObjectFlag(void) {
+    EffectObjectNode *node = D_003BC948;
+    EffectObjectFlag *object;
+    s32 flags;
+
+    if (node != NULL) {
+        do {
+            object = node->object;
+            flags = object->flags;
+            if ((flags & 2) != 0) {
+                object->flags = flags | 8;
+            }
+            node = node->next;
         } while (node != NULL);
     }
 }
 
 void mdlClearListedObjectFlag(void) {
-    s32 temp_v0;
-    s32 *piVar2;
+    EffectObjectFlag *object;
+    EffectObjectNode *node;
 
-    piVar2 = D_003BC948;
-    while (piVar2 != (s32 *)0x0) {
-        temp_v0 = *piVar2;
-        piVar2 = (s32 *)piVar2[2];
-        *(u32 *)(temp_v0 + 0xc) = *(u32 *)(temp_v0 + 0xc) & 0xffffffef;
+    node = D_003BC948;
+    while (node != NULL) {
+        object = node->object;
+        node = node->next;
+        object->flags = object->flags & 0xffffffef;
     }
 }
 
 void mdlSetListedObjectFlag(void) {
-    s32 temp_v0;
-    s32 *piVar2;
+    EffectObjectFlag *object;
+    EffectObjectNode *node;
 
-    piVar2 = D_003BC948;
-    while (piVar2 != (s32 *)0x0) {
-        temp_v0 = *piVar2;
-        piVar2 = (s32 *)piVar2[2];
-        *(u32 *)(temp_v0 + 0xc) = *(u32 *)(temp_v0 + 0xc) | 0x10;
+    node = D_003BC948;
+    while (node != NULL) {
+        object = node->object;
+        node = node->next;
+        object->flags = object->flags | 0x10;
     }
 }
 
 void mdlMarkAndProcessObjectNodes(void) {
-    s32 *node = D_003BC948;
-    s32 obj;
-    s32 *next;
-    s32 v;
+    EffectObjectNode *node = D_003BC948;
+    EffectObjectFlag *object;
+    EffectObjectNode *next;
+    s32 flags;
 
     if (node == NULL) {
         return;
     }
     do {
-        obj = *node;
-        next = *(s32 **)((s32)node + 8);
-        v = *(s32 *)(obj + 0xC) | 0xA;
-        *(s32 *)(obj + 0xC) = v;
+        object = node->object;
+        next = node->next;
+        flags = object->flags | 0xA;
+        object->flags = flags;
         func_0029B168(node);
         node = next;
     } while (node != NULL);
@@ -2425,11 +2488,6 @@ void func_002A34D8(u8 *work) {
         : : "f"(*(f32 *)(work + 0x20)), "r"(work), "r"(mtx) : "$2", "memory");
     func_002A3E10(out, mtx);
 }
-
-typedef struct EffectResourceSizeEntry {
-    u32 resourceSize;
-    u8 pad_04[0x18];
-} EffectResourceSizeEntry;
 
 extern EffectResourceSizeEntry D_0037E8B8[];
 
@@ -4514,8 +4572,6 @@ void effOffsetNodeRowsVU(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B0408);
 
-extern EffectResourceSizeEntry D_0037EDA8[];
-
 u8 *allocateEffectBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037EDA8[kind].resourceSize;
@@ -6211,7 +6267,20 @@ s32 effRunWithStateBackup(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B8BF0);
+extern u32 func_002B8648(u8 *, s32);
+
+u32 func_002B8BF0(void) {
+    u8 *file = fileQueueGetAt(D_003BD060, func_002B5990());
+    u32 result;
+
+    memcpy(D_003DF840, file, 0x90);
+    result = func_002B8648(D_003DF840, 1);
+    memcpy(file, D_003DF840, 0x90);
+    if (result & 1) {
+        result |= 0x800000;
+    }
+    return result;
+}
 
 extern u8 D_003BD954;
 
@@ -6886,7 +6955,92 @@ u32 fileLoadEffectSlotA(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BBC70);
+typedef struct EffFileQueryInfo {
+    u8 pad0[0xFC];
+    u32 resourceMask;
+    s32 status;
+    u8 pad104[0xC];
+} EffFileQueryInfo;
+
+typedef struct EffFileResourceRecord {
+    char *name;
+    u8 pad4[4];
+    u16 mode;
+    u8 padA[2];
+    u8 *buffer;
+    u32 size;
+    u32 allocationHandle;
+} EffFileResourceRecord;
+
+typedef struct EffFileJobEntry {
+    u8 pad0[0x90];
+    u32 fileHandle;
+    u8 pad94[8];
+    char filename[1];
+} EffFileJobEntry;
+
+extern u8 D_00384A08[] __attribute__((aligned(4)));
+
+u32 func_002BBC70(void) {
+    EffFileQueryInfo fileInfo;
+    u32 result;
+    s32 status;
+    u8 *job;
+    EffFileJobEntry *entry;
+    EffFileResourceRecord *resource;
+    u8 *buffer;
+    u32 command;
+    u32 totalLength;
+    u32 dataLength;
+    u32 allocation;
+
+    func_002B8EA8(D_003B3BA0, 4, &fileInfo);
+    status = fileInfo.status;
+    result = 0x600001;
+    if (status == 2) {
+        result = 0x400000;
+    } else if (status == 1) {
+        u32 headerBytes = 0x40;
+        u32 oldAllocation;
+        u32 queuedFile;
+        job = (u8 *)fileCreateJob(6);
+        command = sdfDevCreateCommandState(&fileInfo);
+        dataLength = func_002E5C88(command);
+        totalLength = dataLength + headerBytes;
+        allocation = (u32)func_002D03F8(totalLength);
+        buffer = (u8 *)sdfResourceRetainAddress(allocation);
+        memset(buffer, 0, headerBytes);
+        func_002E5C68(command, buffer + headerBytes, dataLength);
+        func_002E5C38(command);
+        func_002937E0(job, buffer, totalLength, 0);
+        entry = (EffFileJobEntry *)fileAppendJob(D_003BD060, job);
+        D_003BD070 = (u32)entry;
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
+        strcpy(entry->filename, resource->name);
+        memcpy(D_003DF9A0, entry, 0x80);
+        queuedFile = entry->fileHandle;
+        oldAllocation = resource->allocationHandle;
+        D_003BD068 = queuedFile;
+        if (oldAllocation != 0) {
+            func_002D0918(oldAllocation);
+        }
+        resource->allocationHandle = allocation;
+        resource->buffer = buffer;
+        resource->size = dataLength + headerBytes;
+        resource->mode = 0;
+        memcpy(D_003DE148, D_00384A08, 0x3C);
+        D_003BD064 = func_002B5390(resource);
+        D_003BD09C = effFindAssetObject(entry);
+        *(u8 **)(D_003BD09C + 0x34) = (u8 *)D_0038F2F0;
+        func_002BC510();
+        if (D_003BD06C != 0) {
+            fileJobDestroy(D_003BD06C);
+            D_003BD06C = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
 
 u32 fileLoadEffectSlotB(void) {
     u8 fileInfo[0x110];
@@ -7338,15 +7492,6 @@ u32 func_002BCEA8(u32 arg0) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BCED8);
-
-typedef struct EffectRecordGroup {
-    u32 unk_00;
-    u32 unk_04;
-    u32 count;
-    u8 *records;
-} EffectRecordGroup;
-
-extern EffectRecordGroup D_0038FD88[];
 
 extern u32 func_002BCED8(u32 *, void *, void *, void *);
 
