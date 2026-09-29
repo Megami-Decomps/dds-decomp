@@ -148,6 +148,20 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
   across it; retail's code has none.
 - `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.
+- A single-bit test used as a value, `x = (f & 2) != 0;`, compiles to
+  `srl; andi 1`. Retail's `andi $2,f,2; sltu $3,$0,$2` (a 0/1 flag through
+  `$3`) comes from `x = 0; if (f & 2) x = 1;` (and `else if (f & 2) x = 1;`).
+  `func_002C5D20` (DDS2 `code_002BE628`).
+- Loop initializers fill a branch delay slot in source order: when retail's
+  loop-back branch carries `daddu $j,$0,$0` and the loop head starts with the
+  pointer setup, write `for (j = 0, p = base; j < 5; j++, p++)`
+  (`func_002C5DE0`). A local `u16 t[5][2] = {...}` is the source of a rodata
+  table that retail copies to the stack with `ldl/ldr`; remove its
+  `INCLUDE_RODATA` when converting the function.
+- Nested-if returns and flat early returns give different block order and
+  delay slots: `if (a != 0) { if (g() != 0) return 0; ...; return 2; } return 1;`
+  matched where `if (g() == 0) {...; return 2;} return 0;` produced `bnel`
+  instead of `bne` (`func_002C5EA8`).
 
 ## Rodata order
 
