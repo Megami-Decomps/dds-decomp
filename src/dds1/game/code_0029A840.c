@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 
 #include "pcp_vu0.h"
 
@@ -529,7 +530,7 @@ void func_0029AB28(s32 arg0) {
 
 extern u8 D_00325828[];
 
-extern s32 func_002B3090(void *, void *);
+extern s64 func_002B3090(void *, void *);
 
 extern void func_00217878(void *, void *);
 
@@ -1193,7 +1194,28 @@ EffKindWork *func_0029DDD0(u16 kind, u8 *source) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029DF00);
+EffKindWork *func_0029DF00(u8 *work) {
+    void *source = fileResolvePrimaryBuffer(work);
+    EffKindWork *effect = func_0029DDD0(*(u16 *)(work + 0xC), source);
+    u32 *secondary = fileResolveSecondaryBuffer(work);
+
+    if (secondary != NULL) {
+        if (D_0037E770[effect->kind].apply != NULL) {
+            u32 kind = *(u16 *)(work + 0x1C);
+            effect->sourceKind = kind;
+            switch (kind) {
+            case 1:
+                effect->target = func_002D3288(secondary);
+                break;
+            case 4:
+                effect->target = func_00151FC8(secondary[0]);
+                break;
+            }
+            D_0037E770[effect->kind].apply(effect, effect->target);
+        }
+    }
+    return effect;
+}
 
 void effReleaseLinkedTarget(u8 *work) {
     void *handle = *(void **)(work + 0x24);
@@ -1265,7 +1287,28 @@ EffKindWork *func_0029E0F0(u16 kind, u8 *source) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E220);
+EffKindWork *func_0029E220(u8 *work) {
+    void *source = fileResolvePrimaryBuffer(work);
+    EffKindWork *effect = func_0029E0F0(*(u16 *)(work + 0xC), source);
+    u32 *secondary = fileResolveSecondaryBuffer(work);
+
+    if (secondary != NULL) {
+        if (D_0037E7E8[effect->kind].apply != NULL) {
+            u32 kind = *(u16 *)(work + 0x1C);
+            effect->sourceKind = kind;
+            switch (kind) {
+            case 1:
+                effect->target = func_002D3288(secondary);
+                break;
+            case 4:
+                effect->target = func_00151FC8(secondary[0]);
+                break;
+            }
+            D_0037E7E8[effect->kind].apply(effect, effect->target);
+        }
+    }
+    return effect;
+}
 
 void func_0029E300(u8 *work) {
     void *handle = *(void **)(work + 0x24);
@@ -1436,31 +1479,11 @@ void func_0029EEC8(BillCellDrawWork *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -1545,31 +1568,11 @@ void func_0029F8A0(BillCellDrawWork *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -1654,31 +1657,11 @@ void func_002A0260(BillCellDrawWork *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -1837,31 +1820,11 @@ void func_002A0BE0(BillCellDrawWork *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -1994,31 +1957,11 @@ void func_002A1588(u8 *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = *(s32 *)(work + 0x24);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -2668,7 +2611,72 @@ void func_002A4448(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A4478);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A46E0);
+extern void func_002A5640(u8 *, void *);
+
+void func_002A46E0(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = *(u32 *)(config + 0x34);
+    u32 *list = work->instances;
+    u8 *out = (u8 *)list[0];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = func_00296F58(config, config + 0x24, limit, progress);
+    unit = 0x3C000000;
+    color1[0] = work->baseColor;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %1\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vftoi0.xyzw vf10, vf10\n"
+        "qmfc2.ni %0, vf10\n"
+        "ppach %0, $0, %0\n"
+        "ppacb %0, $0, %0\n"
+        ".set reorder"
+        : "=r"(packed) : "f"(128.0f) : "$2");
+    blended[0] = packed;
+    *(u32 *)(out + 4) = blended[0];
+    if ((packed & 0xFF000000) != 0) {
+        *(u32 *)out = *(u32 *)(config + 0x28);
+        *(u8 *)(out + 0xC) = *(u8 *)(config + 0x3C);
+        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+        func_002E7D98();
+        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+        __asm__ volatile (
+            ".set noreorder\n"
+            "mfc1 $2, %0\n"
+            "qmtc2.ni $2, vf2\n"
+            "vmulx.xyzw vf10, vf10, vf2x\n"
+            "vmulx.xyzw vf28, vf28, vf10x\n"
+            "vmuly.xyzw vf29, vf29, vf10y\n"
+            "vmulz.xyzw vf30, vf30, vf10z\n"
+            "lqc2 vf10, 0(%1)\n"
+            "vmove.w vf10, vf0\n"
+            "vmove.xyzw vf31, vf10\n"
+            "sqc2 vf28, 0(%2)\n"
+            "sqc2 vf29, 0x10(%2)\n"
+            "sqc2 vf30, 0x20(%2)\n"
+            "sqc2 vf31, 0x30(%2)\n"
+            ".set reorder"
+            : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+        func_002A5640(out, mtx);
+    }
+}
 
 void func_002A4850(s32 arg0) {
     u32 temp_v0;
@@ -2735,12 +2743,97 @@ void func_002A4EA0(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A4ED0);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5118);
+void func_002A5118(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = *(u32 *)(config + 0x34);
+    u32 *list = work->instances;
+    u8 *out = (u8 *)list[0];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5288);
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = func_00296F58(config, config + 0x24, limit, progress);
+    unit = 0x3C000000;
+    color1[0] = work->baseColor;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %1\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        "vftoi0.xyzw vf10, vf10\n"
+        "qmfc2.ni %0, vf10\n"
+        "ppach %0, $0, %0\n"
+        "ppacb %0, $0, %0\n"
+        ".set reorder"
+        : "=r"(packed) : "f"(128.0f) : "$2");
+    blended[0] = packed;
+    *(u32 *)(out + 4) = blended[0];
+    if ((packed & 0xFF000000) != 0) {
+        *(u32 *)out = *(u32 *)(config + 0x28);
+        *(u8 *)(out + 0xC) = *(u8 *)(config + 0x3C);
+        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+        func_002E7D98();
+        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+        __asm__ volatile (
+            ".set noreorder\n"
+            "mfc1 $2, %0\n"
+            "qmtc2.ni $2, vf2\n"
+            "vmulx.xyzw vf10, vf10, vf2x\n"
+            "vmulx.xyzw vf28, vf28, vf10x\n"
+            "vmuly.xyzw vf29, vf29, vf10y\n"
+            "vmulz.xyzw vf30, vf30, vf10z\n"
+            "lqc2 vf10, 0(%1)\n"
+            "vmove.w vf10, vf0\n"
+            "vmove.xyzw vf31, vf10\n"
+            "sqc2 vf28, 0(%2)\n"
+            "sqc2 vf29, 0x10(%2)\n"
+            "sqc2 vf30, 0x20(%2)\n"
+            "sqc2 vf31, 0x30(%2)\n"
+            ".set reorder"
+            : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+        func_002A5640(out, mtx);
+    }
+}
+
+typedef struct EffectResourceSizeEntry24 {
+    u32 resourceSize;
+    u8 pad_04[0x14];
+} EffectResourceSizeEntry24;
+
+extern EffectResourceSizeEntry24 D_0037EAE4[];
+
+u8 *func_002A5288(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = D_0037EAE4[kind].resourceSize;
+    u8 *effect = func_002CFEB8(size + headerSize);
+    *(u8 **)(effect + 0x34) = effect + headerSize;
+    *(u32 *)(effect + 0x24) = 0x80808080;
+    *(float *)(effect + 0x20) = 1.0f;
+    *(u32 *)(effect + 0x28) = 0;
+    *(u32 *)(effect + 0x2C) = kind;
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect));
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10));
+    memcpy(*(void **)(effect + 0x34), source, size);
+    *(u32 *)(effect + 0x30) = D_0037EAD0[kind].createResource(source);
+    D_0037EAD0[kind].fn(effect);
+    return effect;
+}
 
 void func_002A5378(s32 arg0) {
-    u64 temp_v0;
+    void *temp_v0;
 
     temp_v0 = fileResolvePrimaryBuffer();
     func_002A5288(*(u16 *)(arg0 + 0xc), temp_v0);
@@ -3600,31 +3693,11 @@ void func_002AC4E0(u8 *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = *(s32 *)(work + 0x24);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -3809,31 +3882,11 @@ void func_002AD150(BillCellDrawWork *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %1\n"
@@ -4019,18 +4072,8 @@ void func_002ADCE0(u8 *work) {
     second = func_00296F58(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = *(s32 *)(work + 0x24);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
     color2[0] = second;
     __asm__ volatile (
         ".set noreorder\n"
@@ -4808,17 +4851,53 @@ void func_002B2E98(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B2F20);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3090);
+extern void mdlLoadPrimaryVectorVU(void *);
+
+extern u128 D_003DCBD0[];
+
+extern s8 D_003BC9AC;
+
+extern u128 D_003DCBE0[];
+
+extern u128 D_003DCBA0[];
+
+extern u8 D_0037EE80[];
+
+extern void func_002E1938(void *, void *, void *);
+
+s64 func_002B3090(void *vector, void *target) {
+    s64 result = func_001A1438();
+
+    if (result != 0) {
+        if (D_003BC9AC == 0) {
+            return 0;
+        }
+    mdlLoadPrimaryVectorVU(vector);
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003DCBE0));
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vmulx.w $vf10, $vf10, $vf0x\n\t"
+        "vmul.xyz $vf2, $vf10, $vf10\n\t"
+        "vmulax.w ACC, $vf0, $vf2x\n\t"
+        "vmadday.w ACC, $vf0, $vf2y\n\t"
+        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
+        "vrsqrt Q, $vf0w, $vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz $vf10, $vf10, Q\n\t"
+        ".set reorder");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003DCBA0) : "memory");
+    func_002E1938(target, D_0037EE80, D_003DCBD0);
+    return 1;
+    }
+    return result;
+}
 
 extern u128 *D_00324770[];
 
 extern u128 D_003DCB90[];
 
-extern u128 D_003DCBD0[];
-
 extern u128 D_00324780[];
-
-extern u8 D_003BC9AC;
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_003DCB90;
@@ -5033,7 +5112,26 @@ void func_002B41D8(void) {
     func_001EF9D8(0xc);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B41F0);
+void func_002B41F0(u8 *arg0) {
+    u32 *puVar3;
+    u32 temp_v0;
+    u32 temp_v1;
+
+    func_001A17F0();
+    temp_v0 = *(u32 *)(arg0 + 0x28);
+    puVar3 = *(u32 **)(arg0 + 0x38);
+    temp_v1 = puVar3[0];
+    if (temp_v1 < puVar3[3]) {
+        return;
+    }
+    if (temp_v0 == 0) {
+        func_001EF990(puVar3[1], *(u16 *)(puVar3 + 2));
+        temp_v1 = puVar3[0];
+    }
+    if (temp_v1 != 0 && temp_v0 == temp_v1 - puVar3[3]) {
+        func_001EF9D8(*(u16 *)(puVar3 + 3));
+    }
+}
 
 extern f32 D_003BC9A8;
 
@@ -5256,7 +5354,44 @@ void setBattleEffectOffset(void *src) {
     PCP_COPY_VECTOR(D_003DF910, src);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B51E8);
+extern s32 D_003BD060;
+
+extern void func_00295D08(u8 *, void *);
+
+void func_002B51E8(u8 *effect) {
+    u128 direction;
+    u32 flags = *(u32 *)(effect + 0x68);
+
+    if ((flags & 0x18) != 0) {
+        func_00295D08(effect, &direction);
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&direction));
+        flags = *(u32 *)(effect + 0x68);
+    } else {
+        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(effect + 0x40));
+    }
+    if ((flags & 0x80) != 0) {
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "mfc1 $2, %0\n\t"
+            "qmtc2.ni $2, $vf2\n\t"
+            "vmulx.xyzw $vf10, $vf10, $vf2x\n\t"
+            ".set reorder"
+            : : "f"(*(f32 *)((u8 *)D_003BD060 + 0x74)) : "$2");
+    }
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003DF910));
+    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003BD060));
+    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    if ((flags & 4) != 0) {
+        __asm__ volatile(
+            ".set noreorder\n\t"
+            "mfc1 $2, %0\n\t"
+            "qmtc2.ni $2, $vf2\n\t"
+            "vaddx.y $vf10, $vf0, $vf2x\n\t"
+            ".set reorder"
+            : : "f"(-5.0f) : "$2");
+    }
+}
 
 extern s32 D_003BD060;
 
@@ -5278,9 +5413,56 @@ void effMultiplyQuatWithFlag(u8 *effect) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5300);
+typedef struct EffBattleCamera {
+    u8 pad_00[0x60];
+    f32 scale;
+    u32 mode;
+} EffBattleCamera;
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B5390);
+extern u8 D_003DF9A0[];
+
+extern void func_002B51E8(u8 *);
+
+extern void func_002936E0(void *, void *);
+
+extern void func_00293720(void *, void *);
+
+extern void func_00293760(void *, f32);
+
+extern void func_002937A0(void *, u32);
+
+void func_002B5300(work)
+    void *work;
+{
+    u128 rotation[2];
+
+    func_002B51E8(D_003DF9A0);
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&rotation[0]));
+    func_002936E0(work, &rotation[0]);
+    effMultiplyQuatWithFlag(D_003DF9A0);
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&rotation[1]));
+    func_00293720(work, &rotation[1]);
+    func_00293760(work, ((EffBattleCamera *)D_003DF9A0)->scale * *(f32 *)((u8 *)D_003BD060 + 0x74));
+    func_002937A0(work, ((EffBattleCamera *)D_003DF9A0)->mode);
+}
+
+extern void func_002937E0(u32, void *, u32, u16);
+
+u32 func_002B5390(u8 *request) {
+    void *output = *(void **)(request + 0xC);
+    u32 job;
+
+    if (output != NULL) {
+        if (*(u16 *)(request + 4) == 6) {
+            memcpy(output, D_003DE148, 0x3C);
+            output = *(void **)(request + 0xC);
+        }
+        func_002937E0(D_003BD068, output, *(u32 *)(request + 0x10), *(u16 *)(request + 8));
+    }
+    job = func_00293450(D_003BD068);
+    func_002B5300(job);
+    return job;
+}
 
 extern u32 func_00293D90(u32);
 
@@ -6653,8 +6835,6 @@ typedef struct EffectFileHeader {
     u32 length;
 } EffectFileHeader;
 
-extern u8 D_003DF9A0[];
-
 extern u32 D_003BD064;
 
 extern void func_002BC510(void);
@@ -7170,7 +7350,16 @@ extern EffectRecordGroup D_0038FD88[];
 
 extern u32 func_002BCED8(u32 *, void *, void *, void *);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", effSumRecordStatuses);
+u32 effSumRecordStatuses(u32 *payload) {
+    EffectRecordGroup *group = &D_0038FD88[payload[5]];
+    u32 total = 0;
+    u32 i;
+
+    for (i = 0; i < group->count; i++) {
+        total += func_002BCED8((u32 *)(group->records + i * 0x18 + 4), 0, 0, 0);
+    }
+    return total;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BD028);
 
@@ -7192,7 +7381,7 @@ u32 *func_002BD258(u32 kind) {
     {
         u32 *payload = (u32 *)header[2];
         payload[5] = kind;
-        size = effSumRecordStatuses((s32)payload);
+        size = effSumRecordStatuses(payload);
     }
     scratch = func_002CFEB8(size);
     ((u32 *)header[2])[8] = (u32)scratch;
@@ -7394,7 +7583,7 @@ u32 func_002BDE18(u32 arg0, s32 arg1, s32 arg2, u32 arg3) {
     return 1;
 }
 
-u32 func_002BDE50(s32 arg0) {
+u32 func_002BDE50(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x10) = 0;
     return 1;
 }
@@ -7498,9 +7687,31 @@ u32 effConfigureWithDefaultSetting(u32 effect, u32 slot, u32 kind, u32 value, u3
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BE3A0);
+u32 func_002BE3A0(u8 *table, u32 first, u32 arg) {
+    u32 i = 0;
+    u32 index;
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002BE448);
+    do {
+        func_002BDE50((first + i) * 0xA0 + *(u32 *)(table + 0x18) + 0x28, arg);
+        i++;
+        index = first + i;
+    } while (index < *(u32 *)(table + 8) && (*(u32 *)(index * 0x80 + *(u32 *)(table + 0x10) + 0x18) & 0x20));
+    return 1;
+}
+
+void func_002BE448(u32 mode, u32 arg) {
+    switch (mode) {
+    case 0:
+        func_002C0A48(0x44, arg);
+        return;
+    case 1:
+        func_002C0A48(0x48, arg);
+        return;
+    case 2:
+        func_002C0A48(0x42, arg);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002BE4B8);
 
