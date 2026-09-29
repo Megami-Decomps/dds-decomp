@@ -399,7 +399,10 @@ def main():
             covered.update(range(table_off, end))
             continue
         k, wrong = 0, 0
-        while rodata_relocs.get(table_off + 4 * k, ("", ""))[1] == ".text":
+        # Stop at the next table: with the asm skipped, tables of C functions
+        # that retail keeps apart can sit back to back here.
+        while rodata_relocs.get(table_off + 4 * k, ("", ""))[1] == ".text" \
+                and (k == 0 or table_off + 4 * k not in starts):
             label = struct.unpack_from("<I", rodata, table_off + 4 * k)[0]
             owner = next(((o, n) for o, s, n in funcs_by_off if o <= label < o + s), None)
             want = struct.unpack_from("<I", retail, va_to_off(segs, retail_addr + 4 * k))[0]
