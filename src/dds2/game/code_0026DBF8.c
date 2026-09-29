@@ -105,6 +105,51 @@ typedef struct MantraEffectResource {
     u8 pad00[0x6C];
     u32 handle;
 } MantraEffectResource;
+
+typedef struct MantraFadeState {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 timer;
+    /* 0x04 */ u32 unk4;
+    /* 0x08 */ f32 value;
+    /* 0x0C */ u32 flagsC;
+    /* 0x10 */ u32 flags10;
+    /* 0x14 */ u32 armed : 1;
+    u32 countdown : 31;
+    /* 0x18 */ s32 clock;
+    /* 0x1C */ u16 queuedState;
+    /* 0x1E */ u16 delay;
+    /* 0x20 */ u32 queuedFlags;
+} MantraFadeState;
+
+typedef struct MantraSourceEntry {
+    u32 unk0;
+    u32 flags;
+    u32 unk8;
+    s32 value;
+    u32 unk10;
+} MantraSourceEntry;
+
+typedef struct MantraListState {
+    u32 unk0;
+    MantraDisplayNode *head;
+    u32 entries[8];
+    s16 count;
+    s16 index;
+    u32 unk2C;
+} MantraListState;
+
+typedef struct MantraFileEntry {
+    struct MantraFileEntry *next;
+    u8 pad04[4];
+    u32 handle;
+    u8 pad0C[4];
+    u8 kind;
+} MantraFileEntry;
+
+typedef struct MantraFileRequest {
+    u8 pad00[0x60];
+    MantraFileEntry *entries;
+} MantraFileRequest;
 extern u32 func_002C7FF0(const char *);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
                             void (*)(), void *);
@@ -291,7 +336,21 @@ u32 mnuReleaseDisplayListNodeAndGetNext(MantraDisplayNode *node) {
     return next;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F5D8);
+void func_0026F5D8(MantraListState *list, u32 *entries, s32 count, s32 index) {
+    s32 n = 8;
+    s32 i;
+
+    memset(list, 0, sizeof(MantraListState));
+    if (count < 8) {
+        n = count;
+    }
+    for (i = 0; i < n; i++) {
+        list->entries[i] = entries[i];
+    }
+    list->count = n;
+    list->index = index;
+    func_0010AE38("[MaxNum %d][CurrentIndex %d]\n", n, index);
+}
 
 u32 func_0026F680(u32 state, s8 selection) {
     u32 item;
@@ -842,20 +901,6 @@ void func_00271348(u32 obj) {
     func_00328E48(*(u32 *)(obj + 0x20));
 }
 
-typedef struct MantraFadeState {
-    /* 0x00 */ u16 state;
-    /* 0x02 */ u16 timer;
-    /* 0x04 */ u32 unk4;
-    /* 0x08 */ f32 value;
-    /* 0x0C */ u32 flagsC;
-    /* 0x10 */ u32 flags10;
-    /* 0x14 */ u32 armed : 1;
-    u32 countdown : 31;
-    /* 0x18 */ s32 clock;
-    /* 0x1C */ u16 queuedState;
-    /* 0x1E */ u16 delay;
-    /* 0x20 */ u32 queuedFlags;
-} MantraFadeState;
 
 s32 func_00271368(s32 arg0, s32 arg1) {
     MantraFadeState *fade = *(MantraFadeState **)(arg1 + 0x20);

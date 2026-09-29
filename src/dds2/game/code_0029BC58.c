@@ -1085,7 +1085,9 @@ void mnuReleaseSpriteHandle(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", mnuStartMovieMenuSfx16);
+s64 mnuStartMovieMenuSfx16(s32 arg0) {
+    return func_002A3B28(0, 0, 0, arg0, 0, 0x1F, 0x53);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3F28);
 
