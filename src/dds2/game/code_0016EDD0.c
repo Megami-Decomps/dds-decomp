@@ -33,6 +33,7 @@ INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016F6D0);
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016F850);
 
+/* Forward the first two parameter-table blocks as one effect-handler pair. */
 void func_0016FAD0(u64 table) {
     u64 firstBlock;
     u64 secondBlock;
@@ -61,6 +62,7 @@ void effReleaseEffectResources(EffectResourceWork *work) {
     func_003297C8(work->allocation);
 }
 
+/* Restore the neutral gray color and default effect mode before rendering. */
 void effInitializeColorState(EffectColorState *state) {
     state->mode = 3;
     state->color = 0x80808080;

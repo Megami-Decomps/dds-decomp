@@ -181,12 +181,6 @@ typedef struct MenuSpacing {
     s32 tail;
 } MenuSpacing;
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B118);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
-
 typedef struct MenuListNode {
     u8 pad00[0xC];
     s32 overrideValue;
@@ -207,6 +201,12 @@ typedef struct MenuListState {
     s32 selectedPanel; /* 0xA698 */
     s32 scrollOffset; /* 0xA69C */
 } MenuListState;
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B118);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
 
 void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
@@ -239,18 +239,20 @@ void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
     }
 }
 
+/* Advance the panel's current transition value toward its 0x100 limit. */
 void func_002C04C0(s32 arg0) {
     if (*(s32 *)(arg0 + 4) < 0x100) {
         *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 8;
     }
 }
 
+/* Apply a temporary override to the selected node while drawing its panel. */
 void func_002C04E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
-    s32 offset[2];
+    s32 positionOffset[2];
     MenuListPanel *panel = (MenuListPanel *)((s32)menu + menu->selectedPanel * 0x2138 + 0x78);
     MenuListNode *node;
 
-    mnuCalcListEntryOffset(offset, menu, 0);
+    mnuCalcListEntryOffset(positionOffset, menu, 0);
     node = panel->node;
     if (node != NULL) {
         node->overrideValue = overrideValue;
@@ -258,9 +260,9 @@ void func_002C04E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, 
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     if (menu->flags & 0x80) {
-        func_002C0330(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
+        func_002C0330(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     } else {
-        func_002C0330(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
+        func_002C0330(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     }
     node = panel->node;
     if (node != NULL) {
@@ -442,23 +444,24 @@ void func_002C0F48(MenuPanelGroup *group, s32 index, u32 value) {
     func_002C2AA0(group->entries[index], value);
 }
 
+/* Apply each of the five packed values to its corresponding panel entry. */
 void func_002C0F70(MenuPanelGroup *group, u64 value) {
-    u32 temp_v0;
-    u64 temp_v1;
-    s32 temp_v2;
-    u32 *puVar5;
-    s32 temp_v3;
+    u32 child;
+    u64 entryValue;
+    s32 nextIndex;
+    u32 *entries;
+    s32 index;
 
-    puVar5 = (u32 *)group->entries;
-    temp_v3 = 0;
+    entries = (u32 *)group->entries;
+    index = 0;
     do {
-        temp_v2 = temp_v3 + 1;
-        temp_v1 = func_0011D360(value, temp_v3);
-        temp_v0 = *puVar5;
-        puVar5 = puVar5 + 1;
-        func_002C2AA0(temp_v0, temp_v1);
-        temp_v3 = temp_v2;
-    } while (temp_v2 < 5);
+        nextIndex = index + 1;
+        entryValue = func_0011D360(value, index);
+        child = *entries;
+        entries = entries + 1;
+        func_002C2AA0(child, entryValue);
+        index = nextIndex;
+    } while (nextIndex < 5);
 }
 
 typedef struct MenuSpriteState {
@@ -483,12 +486,13 @@ void func_002C1050(void) {
     func_00328E48();
 }
 
+/* The sequel selects its draw variant from the range index plus eight. */
 void func_002C1068(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u16 arg4, u32 arg5, u32 arg6) {
-    s32 temp_v0;
+                                    u16 rangeId, u32 arg5, u32 arg6) {
+    s32 rangeIndex;
 
-    temp_v0 = mnuLookupRangeEntry(arg4);
-    func_00306CD0(arg0, arg1, arg2, arg3, 1, arg5, temp_v0 + 8, arg6);
+    rangeIndex = mnuLookupRangeEntry(rangeId);
+    func_00306CD0(arg0, arg1, arg2, arg3, 1, arg5, rangeIndex + 8, arg6);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
@@ -530,17 +534,36 @@ void func_002C1C20(u8 *object, s32 arg1, s32 arg2, s32 arg3, s32 count, s32 arg5
     }
 }
 
-void func_002C1CD0(s32 object) {
-    s32 first = *(s32 *)(object + 0x38);
-    s32 second = *(s32 *)(object + 0x3C);
-    s32 firstData = *(s32 *)(first + 8);
-    s32 secondData = *(s32 *)(second + 8);
-    s32 *pos = *(s32 **)(firstData + 0x20);
+typedef struct MenuEffectPosition {
+    u8 pad00[0x20];
+    s32 *coordinates;
+} MenuEffectPosition;
+
+typedef struct MenuEffectNode {
+    u8 pad00[8];
+    MenuEffectPosition *position;
+} MenuEffectNode;
+
+typedef struct MenuEffectPair {
+    u8 pad00[0x19];
+    s8 positionY; /* 0x19 */
+    u8 pad1A[0x1E];
+    MenuEffectNode *first;  /* 0x38 */
+    MenuEffectNode *second; /* 0x3C */
+} MenuEffectPair;
+
+/* Feed two mirrored effect positions from the active menu entry. */
+void func_002C1CD0(MenuEffectPair *pair) {
+    MenuEffectNode *first = pair->first;
+    MenuEffectNode *second = pair->second;
+    MenuEffectPosition *firstData = first->position;
+    MenuEffectPosition *secondData = second->position;
+    s32 *pos = firstData->coordinates;
 
     pos[0] = 10;
-    pos[1] = *(s8 *)(object + 0x19);
+    pos[1] = pair->positionY;
     pos[2] = 10;
-    pos = *(s32 **)(secondData + 0x20);
+    pos = secondData->coordinates;
     pos[1] = 5;
     pos[0] = 10;
     pos[2] = 10;
@@ -548,18 +571,19 @@ void func_002C1CD0(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1D10);
 
+/* Cycle through four indexed settings while refreshing the paired effects. */
 void func_002C1DC8(s32 object) {
-    s32 *table;
-    s32 value;
+    s32 *settings;
+    s32 setting;
 
     func_002C1D10(object);
     func_002C1CD0(object);
-    table = *(s32 **)(object + 0x14);
-    value = 0;
-    if (table != 0) {
-        value = table[*(s8 *)(object + 0x18)];
+    settings = *(s32 **)(object + 0x14);
+    setting = 0;
+    if (settings != 0) {
+        setting = settings[*(s8 *)(object + 0x18)];
     }
-    effConfigureWithDefaultSetting(*(s32 *)(object + 0x28), 0, *(s32 *)(object + 0x38), 0, value, 0);
+    effConfigureWithDefaultSetting(*(s32 *)(object + 0x28), 0, *(s32 *)(object + 0x38), 0, setting, 0);
     *(u8 *)(object + 0x18) += 1;
     if ((s8)*(u8 *)(object + 0x18) >= 4) {
         *(u8 *)(object + 0x18) = 0;
@@ -568,13 +592,13 @@ void func_002C1DC8(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 
-void func_002C1F68(s32 arg0) {
-    u32 temp_v0;
+void func_002C1F68(s32 object) {
+    u32 effectHandle;
 
-    temp_v0 = func_00304998(3);
-    *(u32 *)(arg0 + 0x38) = temp_v0;
-    temp_v0 = func_00304998(3);
-    *(u32 *)(arg0 + 0x3c) = temp_v0;
+    effectHandle = func_00304998(3);
+    *(u32 *)(object + 0x38) = effectHandle;
+    effectHandle = func_00304998(3);
+    *(u32 *)(object + 0x3c) = effectHandle;
 }
 
 void func_002C1FA0(s32 *list) {
@@ -635,35 +659,55 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C24E8);
 
+/* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
+typedef struct MenuPanelItem {
+    u8 pad00[0x10];
+    u32 value10;
+    s32 value14;
+    s32 value18;
+    u32 option;
+    s32 selection;
+    u32 value24;
+    u32 value28;
+    u8 pad2C[0x48];
+    MenuPoint points[5]; /* 0x74 */
+    u8 pad9C[4];
+    u32 initialValue; /* 0xA0 */
+    u32 selectionRamp; /* 0xA4 */
+    u8 padA8[4];
+} MenuPanelItem;
+
 s32 func_002C2680(void) {
-    s32 item = func_00328D68(0xAC);
+    MenuPanelItem *item = (MenuPanelItem *)func_00328D68(0xAC);
 
     memset(item, 0, 0xAC);
-    *(s32 *)(item + 0x14) = 0x63;
-    *(s32 *)(item + 0x10) = 0x8c;
-    *(s32 *)(item + 0xA0) = 0x100;
-    return item;
+    item->value14 = 0x63;
+    item->value10 = 0x8c;
+    item->initialValue = 0x100;
+    return (s32)item;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C26D8);
 
+/* Arrange five panel points using the parent layout's fixed anchor slots. */
 void func_002C2920(s32 obj, s32 param, s32 index) {
     s32 table[5] = {0, 4, 1, 2, 3};
+    MenuPanelItem *item = (MenuPanelItem *)obj;
 
-    func_00307388(obj + 0x74, param, 7);
-    func_003071D0(*(s32 *)(obj + 0x74), *(s32 *)(obj + 0x78), -0x50, -0x50, 0, 0);
-    func_00307388(obj + 0x7C, param, 5);
-    func_003071D0(*(s32 *)(obj + 0x7C), *(s32 *)(obj + 0x80), 0x390, -8, 0, 0);
-    func_00307388(obj + 0x84, param, 6);
-    func_003071D0(*(s32 *)(obj + 0x84), *(s32 *)(obj + 0x88), 0x390, -8, 0, 0);
-    func_00307388(obj + 0x8C, param, 9);
-    func_003071D0(*(s32 *)(obj + 0x8C), *(s32 *)(obj + 0x90), 0x5D0, 0, 0, 0);
-    func_00307388(obj + 0x94, param, table[index]);
-    func_003071D0(*(s32 *)(obj + 0x94), *(s32 *)(obj + 0x98), 0x130, -0x30, 0, 0);
+    func_00307388(&item->points[0], param, 7);
+    func_003071D0(item->points[0].x, item->points[0].y, -0x50, -0x50, 0, 0);
+    func_00307388(&item->points[1], param, 5);
+    func_003071D0(item->points[1].x, item->points[1].y, 0x390, -8, 0, 0);
+    func_00307388(&item->points[2], param, 6);
+    func_003071D0(item->points[2].x, item->points[2].y, 0x390, -8, 0, 0);
+    func_00307388(&item->points[3], param, 9);
+    func_003071D0(item->points[3].x, item->points[3].y, 0x5D0, 0, 0, 0);
+    func_00307388(&item->points[4], param, table[index]);
+    func_003071D0(item->points[4].x, item->points[4].y, 0x130, -0x30, 0, 0);
 }
 
-void func_002C2A88(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x10) = arg1;
+void func_002C2A88(MenuPanelItem *item, u32 value) {
+    item->value10 = value;
 }
 
 void mnuSetGroupPair(u32 *entry, u32 left, u32 right) {
@@ -671,23 +715,23 @@ void mnuSetGroupPair(u32 *entry, u32 left, u32 right) {
     entry[7] = right;
 }
 
-void func_002C2AA0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+void func_002C2AA0(MenuPanelItem *item, u32 value) {
+    item->value24 = value;
 }
 
-void func_002C2AA8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x28) = arg1;
+void func_002C2AA8(MenuPanelItem *item, u32 value) {
+    item->value28 = value;
 }
 
-void func_002C2AB0(s32 arg0, s32 arg1) {
-    if (*(s32 *)(arg0 + 0x20) != arg1) {
-        *(u32 *)(arg0 + 0xa4) = 0x100;
+void func_002C2AB0(MenuPanelItem *item, s32 selection) {
+    if (item->selection != selection) {
+        item->selectionRamp = 0x100;
     }
-    *(s32 *)(arg0 + 0x20) = arg1;
+    item->selection = selection;
 }
 
-void func_002C2AC8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x1c) = arg1;
+void func_002C2AC8(MenuPanelItem *item, u32 option) {
+    item->option = option;
 }
 
 void func_002C2AD0(void) {
@@ -952,13 +996,14 @@ u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
     return D_003E7902[D_003E792A[(base + sum) * 3]];
 }
 
-u16 func_002C4D78(s32 arg0) {
-    s32 temp_v0 = (arg0 & 0xffff) * 56 + D_00435E20;
+/* Only secondary-kind-2 entries expose the paired value. */
+u16 func_002C4D78(s32 entryId) {
+    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + D_00435E20);
 
-    if (((RangeEntry *)temp_v0)->secondaryKind != 2) {
+    if (entry->secondaryKind != 2) {
         return 0;
     }
-    return ((RangeEntry *)temp_v0)->secondaryValue;
+    return entry->secondaryValue;
 }
 
 u8 func_002C4DB0(u32 arg0) {
@@ -966,9 +1011,9 @@ u8 func_002C4DB0(u32 arg0) {
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
-    s32 entry = (id & 0xFFFF) * 0x38 + D_00435E20;
-    u16 base = ((RangeEntry *)entry)->value;
-    u16 addition = ((RangeEntry *)entry)->addition;
+    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_00435E20);
+    u16 base = entry->value;
+    u16 addition = entry->addition;
     if (func_002C4DB0(id & 0xFFFF) == 1) {
         base = addition + *(u16 *)(object + 8) * base / 100;
     }
@@ -1340,6 +1385,8 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5DE0);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5EA8);
 
+/* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
+ * field-6/field-8 ratios without converting to floating point. */
 s32 func_002C5F78(u32 *left, u32 *right) {
     u8 *a = (u8 *)*left;
     u8 *b = (u8 *)*right;

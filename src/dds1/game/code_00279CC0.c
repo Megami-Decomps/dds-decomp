@@ -1720,7 +1720,12 @@ void func_0027FA20(s32 window) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FA70);
+s32 func_0027FA70(s32 value, s32 total) {
+    if (total > 0) {
+        return value * 100 / total;
+    }
+    return 100;
+}
 
 typedef struct MenuGaugeRow {
     s32 id;

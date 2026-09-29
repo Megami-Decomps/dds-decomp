@@ -32,6 +32,13 @@ typedef struct SdfPackedValue {
     u16 flagsAndValue;
 } SdfPackedValue;
 
+/* Channel mask occupies the low 15 bits; the high status bit survives updates. */
+#define SDF_PACKED_STATUS_BIT 0x8000
+#define SDF_PACKED_CHANNEL_MASK 0x7fff
+
+/* The 0x20 flag selects base enemy vitals instead of the party script path. */
+#define SDF_UNIT_ENEMY 0x20
+
 /* Party-unit header used for HP/MP script dispatch. Full stride: 0x1A4. */
 typedef struct SdfPartyUnit {
     u16 flags;          /* 0x00 */
@@ -261,11 +268,11 @@ void sdfResetChannels(void) {
 s32 ptyComputeMaxHp(s32 unit) {
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & 0x20) != 0) {
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
         return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
     }
     result = evtRunContext(1, unit, 0, 0, 0);
-    if ((((SdfPartyUnit *)unit)->flags & 0x20) == 0) {
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
         result += ((SdfPartyUnit *)unit)->hpBonus;
         if (result >= 1000) {
             result = 999;
@@ -278,11 +285,11 @@ s32 ptyComputeMaxHp(s32 unit) {
 s32 ptyComputeMaxMp(s32 unit) {
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & 0x20) != 0) {
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
         return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
     }
     result = evtRunContext(2, unit, 0, 0, 0);
-    if ((((SdfPartyUnit *)unit)->flags & 0x20) == 0) {
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
         result += ((SdfPartyUnit *)unit)->mpBonus;
         if (result >= 1000) {
             result = 999;
@@ -360,7 +367,7 @@ u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
         return 0;
     }
     result = func_001189A0(index, arg1, packed);
-    if ((result & (packed->flagsAndValue & 0x7FFF)) == 0) {
+    if ((result & (packed->flagsAndValue & SDF_PACKED_CHANNEL_MASK)) == 0) {
         result = 0;
     }
     return result;
@@ -369,7 +376,7 @@ u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118E38);
 
 void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
-    item->flagsAndValue = (item->flagsAndValue & 0x8000) | (value & 0x7fff);
+    item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_STATUS_BIT) | (value & SDF_PACKED_CHANNEL_MASK);
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00119018);

@@ -38,6 +38,7 @@ typedef struct EffMagatuhiDst {
     f32 f50;
 } EffMagatuhiDst; /* 0x54 */
 
+/* Resource pairs belong to distinct owner paths, not interchangeable buffers. */
 typedef struct EffMagatuhiResourceSet {
     u8 pad00[0x120];
     u32 firstResource;   /* 0x120 */

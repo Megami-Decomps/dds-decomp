@@ -11,7 +11,7 @@ typedef struct {
     u8    pad0C[0x0C];  /* 0x0C */
     u32  *out18;        /* 0x18 result table */
     u8    pad1C[4];     /* 0x1C */
-    u32  *unk20;        /* 0x20 table written by effMagatuhiSetValue */
+    u32  *values;       /* 0x20: indexed value table */
     u8    pad24[0x10];  /* 0x24 */
     void *resource;     /* 0x34 released by effMagatuhiReleaseResource */
 } EffMagatuhiWork; /* 0x38 */
@@ -19,24 +19,30 @@ typedef struct {
 extern void *effGetHandlerArg(void *arg);
 
 
-/* Mid-size variant holding the pairs freed by func_0018B1D0/func_0018C2A8. */
+/* The two resource slots select different owners during each variant's teardown. */
 typedef struct {
     u8   pad_0x000[0x120]; /* 0x000 */
-    void *unk120;          /* 0x120 */
-    void *unk124;          /* 0x124 */
-    void *unk128;          /* 0x128 */
-    void *unk12C;          /* 0x12C */
+    void *firstResource;   /* 0x120 */
+    void *secondResource;  /* 0x124 */
+    void *buffer;          /* 0x128 */
+    void *extraBuffer;     /* 0x12C */
 } EffMagatuhiMidWork; /* 0x130 */
 
-/* Large variant holding the triple freed by func_00189E60/func_0018A800. */
+/* The first and second teardown paths use different offsets for the trio. */
 typedef struct {
-    u8   pad_0x000[0x180]; /* 0x000 */
-    void *unk180;          /* 0x180 */
-    void *unk184;          /* 0x184 */
-    void *unk188;          /* 0x188 */
-    void *unk18C;          /* 0x18C */
-    void *unk190;          /* 0x190 */
-} EffMagatuhiBigWork; /* 0x194 */
+    u8 pad00[0x180];
+    void *mathResource;    /* 0x180 */
+    u8 pad184[8];
+    void *managedResource; /* 0x18C */
+    void *buffer;          /* 0x190 */
+} EffMagatuhiWideFirst;
+
+typedef struct {
+    u8 pad00[0x184];
+    void *mathResource;    /* 0x184 */
+    void *managedResource; /* 0x188 */
+    void *buffer;          /* 0x18C */
+} EffMagatuhiWideSecond;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
 typedef struct EffMagatuhiSrc {
@@ -67,7 +73,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001893D8);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189818);
 
 void effMagatuhiSetValue(EffMagatuhiWork *work, s32 index, u32 value) {
-    work->unk20[index] = value;
+    work->values[index] = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189BA8);
@@ -78,10 +84,10 @@ void func_00189C80(void) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189C98);
 
-void func_00189E60(EffMagatuhiBigWork *work) {
-    effMathReleaseWorkResource(work->unk180);
-    effReleaseSceneResource(work->unk18C);
-    func_002D0918(work->unk190);
+void func_00189E60(EffMagatuhiWideFirst *work) {
+    effMathReleaseWorkResource(work->mathResource);
+    effReleaseSceneResource(work->managedResource);
+    func_002D0918(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189E98);
@@ -103,10 +109,10 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A678);
 
-void func_0018A800(EffMagatuhiBigWork *work) {
-    effMathReleaseWorkResource(work->unk184);
-    effReleaseSceneResource(work->unk188);
-    func_002D0918(work->unk18C);
+void func_0018A800(EffMagatuhiWideSecond *work) {
+    effMathReleaseWorkResource(work->mathResource);
+    effReleaseSceneResource(work->managedResource);
+    func_002D0918(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A838);
@@ -120,8 +126,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018ADD8);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018AFE8);
 
 void func_0018B1D0(EffMagatuhiMidWork *work) {
-    effReleaseSceneResource(work->unk120);
-    func_002D0918(work->unk128);
+    effReleaseSceneResource(work->firstResource);
+    func_002D0918(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B200);
@@ -133,7 +139,7 @@ void func_0018B600(void *work, void *src) {
 }
 
 void effMagatuhiSetSecondResource(EffMagatuhiMidWork *work, void *value) {
-    work->unk124 = value;
+    work->secondResource = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -146,8 +152,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B648);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B850);
 
 void func_0018BA00(EffMagatuhiMidWork *work) {
-    effReleaseSceneResource(work->unk124);
-    func_002D0918(work->unk12C);
+    effReleaseSceneResource(work->secondResource);
+    func_002D0918(work->extraBuffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BA30);
@@ -159,7 +165,7 @@ void func_0018BE50(void *work, void *src) {
 }
 
 void func_0018BE68(EffMagatuhiMidWork *work, void *value) {
-    work->unk128 = value;
+    work->buffer = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -172,8 +178,8 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE98);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C0C0);
 
 void func_0018C2A8(EffMagatuhiMidWork *work) {
-    effReleaseSceneResource(work->unk124);
-    func_002D0918(work->unk128);
+    effReleaseSceneResource(work->secondResource);
+    func_002D0918(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C2D8);
@@ -185,7 +191,7 @@ void func_0018C7A8(void *work, void *src) {
 }
 
 void effMagatuhiSetFirstResource(EffMagatuhiMidWork *work, void *value) {
-    work->unk120 = value;
+    work->firstResource = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */

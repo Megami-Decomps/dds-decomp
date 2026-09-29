@@ -29,6 +29,7 @@ void sdfGraphSetDisplayMode(s32 mode) {
     D_0043913C = 1;
 }
 
+/* Release all three independently allocated image buffers before rebuilding. */
 void sdfReleaseGraphBuffers(SdfGraphObj *graph) {
     func_0032AA40(graph->firstBuffer);
     graph->firstBuffer = NULL;
@@ -38,6 +39,7 @@ void sdfReleaseGraphBuffers(SdfGraphObj *graph) {
     graph->auxBuffer = NULL;
 }
 
+/* The auxiliary buffer uses its own mode; both primary buffers share one mode. */
 void sdfRecreateGraphBuffers(SdfGraphObj *graph) {
     s16 width;
     s16 height;

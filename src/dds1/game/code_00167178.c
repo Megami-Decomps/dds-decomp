@@ -21,6 +21,7 @@ INCLUDE_ASM(const s32, "game/code_00167178", func_00167A78);
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167BF8);
 
+/* Forward the first two parameter-table blocks as one effect-handler pair. */
 void func_00167E78(u64 paramTable) {
     u64 firstBlock;
     u64 secondBlock;
@@ -46,21 +47,30 @@ void func_00169938(s32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00169940);
 
+/* The packed color state is identical to the sequel's effect state layout. */
+typedef struct EffectColorState {
+    u32 color;    /* 0x00 */
+    u8 pad04[8];
+    u32 valueC;   /* 0x0C */
+    u32 mode;     /* 0x10 */
+} EffectColorState;
+
 typedef struct EffFragmentResources {
     u8 pad00[0x20];
-    u32 resource; /* 0x20: released by sdfQueueAssetRelease */
-    u32 buffer;   /* 0x24: released by func_002D0918 */
+    u32 resourceHandle; /* 0x20: released by sdfQueueAssetRelease */
+    u32 allocation;     /* 0x24: released by func_002D0918 */
 } EffFragmentResources;
 
 void effReleaseEffectResources(EffFragmentResources *work) {
-    sdfQueueAssetRelease(work->resource);
-    func_002D0918(work->buffer);
+    sdfQueueAssetRelease(work->resourceHandle);
+    func_002D0918(work->allocation);
 }
 
-void effInitializeColorState(u32 *arg0) {
-    arg0[4] = 3;
-    *arg0 = 0x80808080;
-    arg0[3] = 0;
+/* Restore the neutral gray color and default effect mode before rendering. */
+void effInitializeColorState(EffectColorState *state) {
+    state->mode = 3;
+    state->color = 0x80808080;
+    state->valueC = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00169B90);

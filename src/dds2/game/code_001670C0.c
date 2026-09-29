@@ -57,6 +57,7 @@ void func_001672D8(EffectDispatchState *effect, u32 value) {
     effect->value60 = value;
 }
 
+/* A value staged with no pending work is immediately mirrored to the active slot. */
 void effBillSetWorkValue(BillWork *work, u8 value) {
     if (work->pendingCount == 0) {
         work->stagedValue = value;

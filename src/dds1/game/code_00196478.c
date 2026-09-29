@@ -230,6 +230,7 @@ void mnuUnloadStaffFonts(void) {
     frFontFreeEntry(5);
 }
 
+/* Decode a two-byte glyph through the DDS1 lookup table; 0xFFFF is missing. */
 u32 itfDecodeGlyph(u32 value) {
     s32 adjusted = (value & 0xffff) + 0xffff7f80;
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
@@ -240,6 +241,7 @@ u32 itfDecodeGlyph(u32 value) {
     return 0xffff;
 }
 
+/* Preserve single-byte text and substitute 0x8080 for unmapped glyph pairs. */
 void itfConvertText(u8 *output, const char *input) {
     s32 i;
     s32 length = strlen(input);
@@ -262,17 +264,18 @@ void itfConvertText(u8 *output, const char *input) {
     }
 }
 
-void func_001974B8(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
-                                    u64 arg4, u64 arg5) {
-    u64 temp_v0;
+/* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
+void func_001974B8(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+                                    u64 glyphSource, u64 parent) {
+    u64 glyph;
 
-    temp_v0 = func_00195160(arg4, 0, 0, 0, 0);
-    func_001953D8(temp_v0, 0x10, 0x12);
-    func_00195450(temp_v0, arg0, arg1);
-    func_00195460(temp_v0, arg2 << 4);
-    frFontSetChildColors(temp_v0, arg3);
-    frFontSetFlagAndMeasureGlyphs(temp_v0, 0xfffffffffffffffc);
-    frFontLinkGlyph(arg5, temp_v0, 0);
+    glyph = func_00195160(glyphSource, 0, 0, 0, 0);
+    func_001953D8(glyph, 0x10, 0x12);
+    func_00195450(glyph, arg0, arg1);
+    func_00195460(glyph, arg2 << 4);
+    frFontSetChildColors(glyph, colors);
+    frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
+    frFontLinkGlyph(parent, glyph, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197580);
@@ -303,17 +306,18 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001979C8);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197A98);
 
-void func_00197B78(u64 arg0, u64 arg1, s32 arg2, u64 arg3,
-                                    u64 arg4, u64 arg5) {
-    u64 temp_v0;
+/* Attach the alternate font glyph, with a 12x16 cell, to its parent. */
+void func_00197B78(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+                                    u64 glyphSource, u64 parent) {
+    u64 glyph;
 
-    temp_v0 = func_001951C8(arg4, 0, 0, 0, 0);
-    func_001953D8(temp_v0, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs(temp_v0, 3);
-    func_00195450(temp_v0, arg0, arg1);
-    func_00195460(temp_v0, arg2 << 4);
-    frFontSetChildColors(temp_v0, arg3);
-    frFontLinkGlyph(arg5, temp_v0, 0);
+    glyph = func_001951C8(glyphSource, 0, 0, 0, 0);
+    func_001953D8(glyph, 0xc, 0x10);
+    frFontSetFlagAndMeasureGlyphs(glyph, 3);
+    func_00195450(glyph, arg0, arg1);
+    func_00195460(glyph, arg2 << 4);
+    frFontSetChildColors(glyph, colors);
+    frFontLinkGlyph(parent, glyph, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197C40);
@@ -374,6 +378,7 @@ u32 func_00198068(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
 
+/* The header before each payload forms a circular free-node list. */
 u32 func_001981A8(s32 payloadBytes, s32 count) {
     u32 buffer;
     u8 *list;
@@ -473,17 +478,18 @@ void func_00198408(void) {
     func_00198308();
 }
 
+/* Return an all-bits-set ready mask only while the registered task is in state 3. */
 u32 func_00198428(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 taskState;
+    u32 readyMask;
 
     func_00198320();
-    temp_v0 = kwlnTaskGetRegisteredState(D_003BB190);
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 3) {
-        temp_v1 = 0;
+    taskState = kwlnTaskGetRegisteredState(D_003BB190);
+    readyMask = 0xffffffff;
+    if (taskState != 3) {
+        readyMask = 0;
     }
-    return temp_v1;
+    return readyMask;
 }
 
 void itfInitPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
@@ -627,17 +633,20 @@ typedef struct DrawColorRec {
     u32 word[4];
 } DrawColorRec;
 
-u64 func_001986E0(const char *arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+/* Keep the sprite texture handle while releasing the temporary file allocation. */
+u64 func_001986E0(const char *path) {
+    u64 fileAllocation;
+    u64 textureHandle;
+    u32 assetInfo[4];
 
-    temp_v0 = func_002EB028(arg0, temp_v2, 0);
-    temp_v1 = func_002D3288(temp_v2[0]);
-    func_002D0918(temp_v0);
-    return temp_v1;
+    fileAllocation = func_002EB028(path, assetInfo, 0);
+    textureHandle = func_002D3288(assetInfo[0]);
+    func_002D0918(fileAllocation);
+    return textureHandle;
 }
 
+/* Pack each RGBA/XYZ pair into GS qwords; the 0x7000/0x7900 biases place
+ * vertex coordinates in the GS screen-space origin. */
 void func_00198730(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, u64 command) {
     u64 packet;
     u64 *dst;

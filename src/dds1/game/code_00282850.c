@@ -138,6 +138,7 @@ extern void func_00288500(void);
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282850);
 INCLUDE_ASM(const s32, "game/code_00282850", func_002828D0);
 
+/* Advance the panel's current transition value toward its 0x100 limit. */
 void func_002829C0(s32 arg0) {
     if (*(s32 *)(arg0 + 4) < 0x100) {
         *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 8;
@@ -162,12 +163,13 @@ typedef struct MenuStagePanel {
     MenuStageNode *node;
 } MenuStagePanel;
 
+/* Apply a temporary override to the selected node while drawing its panel. */
 void func_002829E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
-    s32 offset[2];
+    s32 positionOffset[2];
     MenuStagePanel *panel = (MenuStagePanel *)((s32)menu + menu->selectedPanel * 0x134 + 0x78);
     MenuStageNode *node;
 
-    func_002828D0(offset, menu, 0);
+    func_002828D0(positionOffset, menu, 0);
     node = panel->node;
     if (node != NULL) {
         node->overrideValue = overrideValue;
@@ -175,9 +177,9 @@ void func_002829E0(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *m
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     if (menu->flags & 0x100) {
-        func_00282850(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
+        func_00282850(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     } else {
-        func_00282850(x + offset[0], y + offset[1], z, menu, menu->selectedPanel, param);
+        func_00282850(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     }
     node = panel->node;
     if (node != NULL) {
@@ -352,17 +354,18 @@ void func_002832F8(void) {
     func_002CFF98();
 }
 
+/* Select the range entry's sprite variant before submitting its draw request. */
 void func_00283310(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u16 arg4, s32 arg5, u32 arg6, u32 arg7) {
-    s32 temp_v0;
-    s32 temp_v1;
+                                    u16 rangeId, s32 alternate, u32 arg6, u32 arg7) {
+    s32 rangeIndex;
+    s32 variant;
 
-    temp_v1 = 0x11;
-    if (arg5 != 0) {
-        temp_v1 = 0x12;
+    variant = 0x11;
+    if (alternate != 0) {
+        variant = 0x12;
     }
-    temp_v0 = mnuLookupRangeEntry(arg4);
-    func_002BF4E0(arg0, arg1, arg2, arg3, 1, arg6, temp_v0 * 2 + temp_v1, arg7);
+    rangeIndex = mnuLookupRangeEntry(rangeId);
+    func_002BF4E0(arg0, arg1, arg2, arg3, 1, arg6, rangeIndex * 2 + variant, arg7);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
@@ -397,45 +400,65 @@ void func_00283BF0(u32 *arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283BF8);
 
-void func_00283CA8(s32 object) {
-    s32 first = *(s32 *)(object + 0x40);
-    s32 second = *(s32 *)(object + 0x44);
-    s32 firstData = *(s32 *)(first + 8);
-    s32 secondData = *(s32 *)(second + 8);
-    s32 *pos = *(s32 **)(firstData + 0x20);
+typedef struct MenuEffectPosition {
+    u8 pad00[0x20];
+    s32 *coordinates;
+} MenuEffectPosition;
+
+typedef struct MenuEffectNode {
+    u8 pad00[8];
+    MenuEffectPosition *position;
+} MenuEffectNode;
+
+typedef struct MenuEffectPair {
+    u8 pad00[0x19];
+    s8 positionY; /* 0x19 */
+    u8 pad1A[0x26];
+    MenuEffectNode *first;  /* 0x40 */
+    MenuEffectNode *second; /* 0x44 */
+} MenuEffectPair;
+
+/* Feed two mirrored effect positions from the active menu entry. */
+void func_00283CA8(MenuEffectPair *pair) {
+    MenuEffectNode *first = pair->first;
+    MenuEffectNode *second = pair->second;
+    MenuEffectPosition *firstData = first->position;
+    MenuEffectPosition *secondData = second->position;
+    s32 *pos = firstData->coordinates;
 
     pos[0] = 10;
-    pos[1] = *(s8 *)(object + 0x19);
+    pos[1] = pair->positionY;
     pos[2] = 10;
-    pos = *(s32 **)(secondData + 0x20);
+    pos = secondData->coordinates;
     pos[1] = 5;
     pos[0] = 10;
     pos[2] = 10;
 }
 
-s32 mnuRateByThreshold(s32 arg0) {
-    s32 temp_v0 = *(s32 *)(arg0 + 0x10);
+s32 mnuRateByThreshold(s32 object) {
+    s32 value = *(s32 *)(object + 0x10);
 
-    if (temp_v0 < 0x32) {
-        return (temp_v0 >= 0x14) ? 1 : 2;
+    if (value < 0x32) {
+        return (value >= 0x14) ? 1 : 2;
     }
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283D10);
 
+/* Cycle through four indexed settings while refreshing the paired effects. */
 void func_00283E60(s32 object) {
-    s32 *table;
-    s32 value;
+    s32 *settings;
+    s32 setting;
 
     func_00283D10(object);
     func_00283CA8(object);
-    table = *(s32 **)(object + 0x14);
-    value = 0;
-    if (table != 0) {
-        value = table[*(s8 *)(object + 0x18)];
+    settings = *(s32 **)(object + 0x14);
+    setting = 0;
+    if (settings != 0) {
+        setting = settings[*(s8 *)(object + 0x18)];
     }
-    effConfigureWithDefaultSetting(*(s32 *)(object + 0x38), 0, *(s32 *)(object + 0x40), 0, value, 0);
+    effConfigureWithDefaultSetting(*(s32 *)(object + 0x38), 0, *(s32 *)(object + 0x40), 0, setting, 0);
     *(u8 *)(object + 0x18) += 1;
     if ((s8)*(u8 *)(object + 0x18) >= 4) {
         *(u8 *)(object + 0x18) = 0;
@@ -444,13 +467,13 @@ void func_00283E60(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283EE0);
 
-void func_00284080(s32 arg0) {
-    u32 temp_v0;
+void func_00284080(s32 object) {
+    u32 effectHandle;
 
-    temp_v0 = func_002BD258(3);
-    *(u32 *)(arg0 + 0x40) = temp_v0;
-    temp_v0 = func_002BD258(3);
-    *(u32 *)(arg0 + 0x44) = temp_v0;
+    effectHandle = func_002BD258(3);
+    *(u32 *)(object + 0x40) = effectHandle;
+    effectHandle = func_002BD258(3);
+    *(u32 *)(object + 0x44) = effectHandle;
 }
 
 void func_002840B8(s32 *list) {
@@ -817,13 +840,14 @@ u16 lookupPartyTableValue(u32 count, s32 base, s32 which) {
     return D_0037CE1A[D_0037CE42[(base + sum) * 3]];
 }
 
-u16 func_00286288(s32 arg0) {
-    s32 temp_v0 = (arg0 & 0xffff) * 56 + D_003BAA50;
+/* Only secondary-kind-2 entries expose the paired value. */
+u16 func_00286288(s32 entryId) {
+    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + D_003BAA50);
 
-    if (((RangeEntry *)temp_v0)->secondaryKind != 2) {
+    if (entry->secondaryKind != 2) {
         return 0;
     }
-    return ((RangeEntry *)temp_v0)->secondaryValue;
+    return entry->secondaryValue;
 }
 
 u8 func_002862C0(u32 arg0) {
@@ -831,9 +855,9 @@ u8 func_002862C0(u32 arg0) {
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
-    s32 entry = (id & 0xFFFF) * 0x38 + D_003BAA50;
-    u16 base = ((RangeEntry *)entry)->value;
-    u16 addition = ((RangeEntry *)entry)->addition;
+    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_003BAA50);
+    u16 base = entry->value;
+    u16 addition = entry->addition;
     if (func_002862C0(id & 0xFFFF) == 1) {
         base = addition + *(u16 *)(object + 8) * base / 100;
     }
@@ -1189,6 +1213,8 @@ f32 func_002871C0(s32 arg0) {
     return *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x18);
 }
 
+/* Keep these repeated byte offsets: sharing a typed base changes ee-gcc's
+ * instruction sequence. Each 60-byte entry has vectors at +0x1C and +0x2C. */
 void func_002871E8(s32 arg0, f32 *arg1) {
     arg1[0] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x1c);
     arg1[1] = *(f32 *)(D_003DC5F8[0] + (arg0 & 0xffff) * 60 + 0x20);
