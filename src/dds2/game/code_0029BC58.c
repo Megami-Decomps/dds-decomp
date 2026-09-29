@@ -120,7 +120,7 @@ typedef struct TitleMenuWork {
 
 extern void mnuRefreshSelectedUnitPanels(TitleSeq *, u8 *);
 
-extern void btlAddBaseStats(u8 *, TitleSeq *);
+extern s32 btlAddBaseStats(u8 *, TitleSeq *);
 
 void mnuTitleApplySequenceState(u8 *work) {
     s32 state = ((TitleMenuWork *)work)->sequenceMode;
@@ -153,7 +153,12 @@ void mnuTitleApplySequenceState(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", itfRunPanelMode1);
+s64 itfRunPanelMode1(s32 arg0) {
+    s32 ctx = func_00101958();
+    func_0029AA48(ctx);
+    func_0029AC20(ctx, 0);
+    return func_002C4038(ctx + 8, ctx + 0x54, 1, arg0);
+}
 
 s64 itfRunPanelMode2(s32 arg0) {
     s32 temp_v0 = func_00101958();
@@ -736,7 +741,30 @@ void func_002A1820(u32 source) {
     func_0034E820(1, 0x80e0, 0, 2, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", sndMixSampleBuffers);
+typedef struct SndSampleBuf {
+    u8 pad0[0x18];
+    s16 *samples;
+} SndSampleBuf;
+void sndMixSampleBuffers(s16 *dst, SndSampleBuf *b, SndSampleBuf *a) {
+    s16 *src = a->samples;
+    s16 *out = dst;
+    s32 i;
+    for (i = 0; i < 0x800; i++) {
+        *out++ = *src++;
+    }
+    src = b->samples;
+    out -= 0x800;
+    for (i = 0; i < 0x800; i++) {
+        s32 v = *out + *src++;
+        if (v > 0x7FFF) {
+            v = 0x7FFF;
+        }
+        if (v < -0x7FFF) {
+            v = -0x7FFF;
+        }
+        *out++ = v;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A1928);
 
@@ -1021,7 +1049,23 @@ s16 func_002A3B10(u32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3B28);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3BE0);
+extern s32 func_002B8158(s32, s32, s32);
+extern void func_002B81C8(s32);
+extern void mnuListAppendNode(s32, s32);
+extern void func_002A5A78();
+void func_002A3BE0(void) {
+    s32 i;
+    s32 node;
+    if (*(s32 *)(D_00437A40 + 0x24) != 0) {
+        func_002B81C8(*(s32 *)(D_00437A40 + 0x24));
+    }
+    node = func_002B8158(0, 3, 0);
+    *(s32 *)(D_00437A40 + 0x24) = node;
+    *(void **)(node + 0x2C) = func_002A5A78;
+    for (i = 0; i < 3; i++) {
+        mnuListAppendNode(*(s32 *)(D_00437A40 + 0x24), 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A3C58);
 
@@ -2259,7 +2303,27 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8120);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A81C8);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", mnuClearMovieList);
+typedef struct MovieList {
+    u32 task;
+    u32 *head;
+    s16 count;
+    s16 offset;
+    s16 unkC;
+} MovieList;
+void mnuClearMovieList(void) {
+    u32 *node = ((MovieList *)D_00457E48)->head;
+    if (node != NULL) {
+        do {
+            u32 *next = (u32 *)*node;
+            func_00328E48(node);
+            node = next;
+        } while (node != NULL);
+        ((MovieList *)D_00457E48)->head = NULL;
+        ((MovieList *)D_00457E48)->count = 0;
+        ((MovieList *)D_00457E48)->offset = 0;
+        ((MovieList *)D_00457E48)->unkC = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_002A8268);
 
@@ -2287,7 +2351,15 @@ void mnuCreateMovieViewerTask(void) {
     D_00457E48[0] = kwlnTaskCreate(D_0042A418, 0x2b02, 1, 0, func_002A88A0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", mnuDestroyMovieViewerTask);
+void mnuDestroyMovieViewerTask(void) {
+    s32 movieTask = func_00101740(D_0042A418);
+    if (movieTask != 0) {
+        kwlnTaskDestroyWithHierarchy(movieTask, 0);
+        D_00457E48[0] = 0;
+        func_002A7FD0();
+    }
+    mnuClearMovieList();
+}
 
 void func_002A8B78(void) {
     D_00457E60[2] = 1;
