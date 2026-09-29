@@ -686,7 +686,7 @@ void func_0028AB30(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028AB48);
 
-void func_0028AE68(void) {
+void fileClearAllSlotFlags(void) {
     fileReqMarkSlotMetadataDirty(D_003BC7E8);
     fileReqClearSlotFlags(D_003BC7E8, 0);
     fileReqClearSlotFlags(D_003BC7E8, 1);
@@ -816,7 +816,7 @@ s32 func_0028B3B0(void) {
 }
 
 void *func_0028B3F0(void) {
-    func_0028AE68();
+    fileClearAllSlotFlags();
     func_0028AB30(0);
     D_003BC854 = 1;
     D_003BC858 = 0;
@@ -825,7 +825,7 @@ void *func_0028B3F0(void) {
 }
 
 void *fileResetSelection(void) {
-    func_0028AE68();
+    fileClearAllSlotFlags();
     D_003DC7C0[0] = 0;
     D_003DC7C0[1] = 0;
     D_003DC7C0[2] = 0;
@@ -844,14 +844,14 @@ void *fileResetSelection(void) {
     return func_0028B748;
 }
 
-u32 func_0028B4B0(void) {
+u32 fileAbortSlotFlow(void) {
     func_0028AB30(0);
     D_003BC810 = 0;
     D_003BC80C = 0;
     return 0xffffffff;
 }
 
-u32 func_0028B4D8(void) {
+u32 mcdEnterDefaultFileFlow(void) {
     u32 temp_v0 [4];
 
     temp_v0[0] = 0;
@@ -860,7 +860,7 @@ u32 func_0028B4D8(void) {
 }
 
 s32 func_0028B508(void) {
-    return func_0028B4D8();
+    return mcdEnterDefaultFileFlow();
 }
 
 s32 func_0028B520(void) {
@@ -872,7 +872,7 @@ s32 func_0028B520(void) {
 }
 
 void func_0028B560(void) {
-    func_0028AE68();
+    fileClearAllSlotFlags();
     func_0028AB30(1);
     D_003BC854 = 0;
     D_003BC810 = 0;
@@ -912,7 +912,7 @@ void func_0028B658(void) {
         func_0028B520();
     } else {
         func_0028AB30(0);
-        fileBeginWait(&func_0028B4B0);
+        fileBeginWait(&fileAbortSlotFlow);
     }
 }
 
@@ -958,7 +958,7 @@ void *func_0028B748(void) {
         return func_0028B3F0();
     case 2:
         if (D_003BC848 == 0) {
-            func_0028AE68();
+            fileClearAllSlotFlags();
             func_0028AB30(0);
             D_003BC854 = 0;
             D_003BC834 = 2;
@@ -970,7 +970,7 @@ void *func_0028B748(void) {
         fileReqBegin(D_003BC7E8);
         return func_0028BAC0;
     case 3:
-        func_0028AE68();
+        fileClearAllSlotFlags();
         func_0028AB30(0);
         D_003BC854 = 2;
         D_003BC858 = 0;
@@ -1486,7 +1486,7 @@ s32 mnuSelectFileBranch(void) {
         return func_0028FB48(func_0028B2C0, fileResetSelection, 1);
     }
     D_003BC834 = 7;
-    return func_0028FB48(func_0028B4B0, fileResetSelection, 1);
+    return func_0028FB48(fileAbortSlotFlow, fileResetSelection, 1);
 }
 
 void *fileBeginSlotCreate(void) {
@@ -2681,10 +2681,6 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297658);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297CB0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", effScaleParameterSet);
-
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002985D0);
-
 typedef struct ScaleEntry {
     f32 unk0;
     f32 value;
@@ -2714,6 +2710,10 @@ typedef struct ScaleOwner {
     ScaleSet *dst;
     ScaleSet *src;
 } ScaleOwner;
+
+INCLUDE_ASM(const s32, "game/code_0028A0E0", effScaleParameterSet);
+
+INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002985D0);
 
 void loadObjScaleParamsA(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
