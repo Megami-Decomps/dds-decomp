@@ -32,6 +32,16 @@ typedef struct SdfPackedValue {
 } SdfPackedValue;
 
 extern u32 func_001189A0(s32 index, s32 arg1, SdfPackedValue *packed);
+extern char D_003BA9E0[];
+extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
+extern s32 func_002D0A60(s32 arg0);
+extern s32 func_002D0918(s32 arg0);
+void func_00117808(void);
+s32 sdfBumpTickCounters(void);
+void func_001177A8(void);
+extern void *func_002D03F8(s32 size);
+extern void *sdfResourceRetainAddress(void *resource);
+extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 
 s32 func_001184A8(u32 arg0, u32 arg1, u32 arg2, u8 arg3);
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
@@ -97,13 +107,61 @@ u32 func_00117650(EvtScaledValue *value) {
     return value->value18;
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117658);
+/* Load the vector at the scaled value's +0x18 pointer into VF10. */
+void func_00117658(EvtScaledValue *value) {
+    void *vec = (void *)func_00117650(value);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117678);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_001176A0);
+/* Same, from the second quadword at +0x18. */
+void func_00117678(EvtScaledValue *value) {
+    void *vec = (void *)((u8 *)func_00117650(value) + 0x10);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117730);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        :
+        : "r"(vec)
+        : "memory"
+    );
+}
+
+/* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
+ * and register the "GBWK" tick task that owns it. */
+void func_001176A0(void) {
+    void *mem = func_002D03F8(0x33600);
+    u8 *state = (u8 *)sdfResourceRetainAddress(mem);
+
+    memset(state, 0, 0x33600);
+    *(s32 *)(state + 0x30) = (s32)mem;
+    *(s32 *)(state + 0x34) = 0;
+    *(s32 *)(state + 0x38) = 0;
+    kwlnTaskCreate(D_003BA9E0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
+    D_003BAA00 = (s32)state;
+    func_001177A8();
+}
+
+/* Tear down the "GBWK" task hierarchy, clear the backing scene allocation
+ * owned by the game state, and release the global state handle. */
+void func_00117730(void) {
+    s32 handle;
+
+    kwlnTaskDestroyWithHierarchyByName(D_003BA9E0, 0);
+    func_00117808();
+    handle = *(s32 *)(D_003BAA00 + 0x30);
+    func_002D0A60(handle);
+    func_002D0918(handle);
+    D_003BAA00 = 0;
+}
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;
