@@ -380,19 +380,19 @@ s32 func_00226B68(void)
 
 s32 func_00226BD8(void)
 {
-    s32 p0;
+    s32 value;
 
-    p0 = func_0010D428(0);
-    func_00220560(0, p0);
+    value = func_0010D428(0);
+    func_00220560(0, value);
     return 1;
 }
 
 s32 func_00226C08(void)
 {
-    s32 p0;
+    s32 value;
 
-    p0 = func_0010D428(0);
-    func_00220560(1, p0);
+    value = func_0010D428(0);
+    func_00220560(1, value);
     return 1;
 }
 

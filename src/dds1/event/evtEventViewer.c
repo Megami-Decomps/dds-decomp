@@ -52,10 +52,11 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BF00);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BFD8);
 
-void evtEventViewerProcessPending(s32 arg0)
+/* Consume queued viewer events until the pending check reports none. */
+void evtEventViewerProcessPending(s32 viewer)
 {
-    while (func_0022BE40(arg0) != 0) {
-        func_0022BF00(arg0);
+    while (func_0022BE40(viewer) != 0) {
+        func_0022BF00(viewer);
     }
 }
 
@@ -163,6 +164,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C478);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C4F0);
 
+/* Search the fixed-width (0x20-byte) event-name records. */
 s32 evtEventViewerFindNameIndex(const char *name, EvtViewer *viewer)
 {
     const char *slot;

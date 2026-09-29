@@ -51,8 +51,9 @@ ResourceNode *mnuFindResourceNodeById();
 
 ResourceNode *mnuFindResourceNodeByHandle();
 
-void func_00324DF8(u32 *arg0, u32 arg1) {
-    func_00320CE0(*arg0, 0, arg1);
+/* Reset the first resource list in a two-list owner. */
+void func_00324DF8(u32 *lists, u32 option) {
+    func_00320CE0(*lists, 0, option);
 }
 
 u32 func_00324E18(u32 *pair, u32 key, u32 value) {
@@ -87,12 +88,12 @@ void func_00324F38(ResourceList **list) {
     mnuFindResourceNodeById(*list);
 }
 
-u64 func_00324F50(s32 arg0, u64 arg1) {
-    u64 temp_v0;
+u64 func_00324F50(s32 owner, u64 resource) {
+    u64 handle;
 
-    temp_v0 = func_0035A828(arg1);
-    func_00320CE0(*(u32 *)(arg0 + 4), 0, temp_v0);
-    return temp_v0;
+    handle = func_0035A828(resource);
+    func_00320CE0(*(u32 *)(owner + 4), 0, handle);
+    return handle;
 }
 
 s64 func_00324F98(u32 *pair) {
@@ -137,16 +138,16 @@ void sdfVectorSubtract(float *vector, float *delta) {
     vector[2] = vector[2] - delta[2];
 }
 
-void func_00326918(float *vec, float x, float y, float z) {
-    vec[0] += x;
-    vec[1] += y;
-    vec[2] += z;
+void func_00326918(float *vector, float x, float y, float z) {
+    vector[0] += x;
+    vector[1] += y;
+    vector[2] += z;
 }
 
-void func_00326940(float *vec, float x, float y, float z) {
-    vec[0] = x;
-    vec[1] = y;
-    vec[2] = z;
+void func_00326940(float *vector, float x, float y, float z) {
+    vector[0] = x;
+    vector[1] = y;
+    vector[2] = z;
 }
 
 void sdfVectorScale(float factor, float *vector) {
@@ -157,27 +158,29 @@ void sdfVectorScale(float factor, float *vector) {
 
 extern f32 func_003269F0();
 
-f32 func_00326978(f32 *vec) {
+/* Normalize the first three components; a zero-length vector stays unchanged. */
+f32 func_00326978(f32 *vector) {
     f32 length = func_003269F0();
 
     if (length == 0.0f) {
         return 0.0f;
     }
-    vec[0] = vec[0] / length;
-    vec[1] = vec[1] / length;
-    vec[2] = vec[2] / length;
+    vector[0] = vector[0] / length;
+    vector[1] = vector[1] / length;
+    vector[2] = vector[2] / length;
     return length;
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003269F0);
 
-f32 func_00326A40(void *a, void *b) {
-    SdfVec4 va = *(SdfVec4 *)a;
-    SdfVec4 vb = *(SdfVec4 *)b;
+/* Dot product of two normalized 3D directions (w is ignored). */
+f32 func_00326A40(void *first, void *second) {
+    SdfVec4 firstNormalized = *(SdfVec4 *)first;
+    SdfVec4 secondNormalized = *(SdfVec4 *)second;
 
-    func_00326978(&va);
-    func_00326978(&vb);
-    return va.x * vb.x + va.y * vb.y + va.z * vb.z;
+    func_00326978(&firstNormalized);
+    func_00326978(&secondNormalized);
+    return firstNormalized.x * secondNormalized.x + firstNormalized.y * secondNormalized.y + firstNormalized.z * secondNormalized.z;
 }
 
 f32 func_00326AE0(void *a, void *b) {
@@ -192,6 +195,7 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_003270C8);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003275C8);
 
+/* Transpose through a local copy so source and destination may alias. */
 void func_00327AC8(SdfMat4 *dst, SdfMat4 *src) {
     SdfMat4 t = *src;
 
@@ -254,11 +258,11 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328318);
 
-void func_00328390(u64 arg0, u64 arg1, u64 arg2) {
-    u64 temp_v0;
+void func_00328390(u64 destination, u64 source, u64 option) {
+    u64 handle;
 
-    temp_v0 = func_003283E0(arg1);
-    func_00328318(arg0, temp_v0, arg1, arg2);
+    handle = func_003283E0(source);
+    func_00328318(destination, handle, source, option);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);

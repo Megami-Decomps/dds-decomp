@@ -7,17 +7,18 @@ extern u32 D_003BB02C;
 extern u32 D_003BB030;
 extern u32 D_003BB034;
 
-void func_00161838(s32 arg0, u32 arg1, s32 arg2, s32 arg3) {
-    D_003BB030 = (u32)arg0;
+/* Keep the original selector and optional overrides separately for field-color lookups. */
+void func_00161838(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
+    D_003BB030 = (u32)baseId;
     D_003BB028 = D_003BB030;
-    if (arg2 != 0) {
-        D_003BB030 = (u32)arg2;
+    if (overrideId != 0) {
+        D_003BB030 = (u32)overrideId;
     }
-    if (arg3 != 0) {
-        arg0 = arg3;
+    if (finalId != 0) {
+        baseId = finalId;
     }
-    D_003BB02C = arg1;
-    D_003BB034 = (s32)arg0;
+    D_003BB02C = variant;
+    D_003BB034 = (s32)baseId;
 }
 
 u32 func_00161858(void) {
@@ -36,10 +37,11 @@ u32 func_00161870(void) {
     return D_003BB034;
 }
 
-void func_00161878(u32 unused, f32 *out) {
-    out[0] = -0.73f;
-    out[1] = 1.55f;
-    out[2] = 0.24f;
+/* Default RGB adjustment used when no field-specific color is supplied. */
+void func_00161878(u32 unused, f32 *color) {
+    color[0] = -0.73f;
+    color[1] = 1.55f;
+    color[2] = 0.24f;
 }
 
 INCLUDE_ASM(const s32, "game/code_00161838", effBTLFieldColorGetBaseColor);
@@ -47,14 +49,14 @@ INCLUDE_ASM(const s32, "game/code_00161838", effBTLFieldColorGetBaseColor);
 INCLUDE_ASM(const s32, "game/code_00161838", func_001619A0);
 
 typedef struct Entry20B {
-    u32 v0;
+    u32 value;
     u8 pad_0x04[0x10];
 } Entry20B;
 
 extern Entry20B D_0034E740[];
 
-u32 func_001619C8(s32 i) {
-    return D_0034E740[i].v0;
+u32 func_001619C8(s32 index) {
+    return D_0034E740[index].value;
 }
 
 u32 func_001619E8(void) {

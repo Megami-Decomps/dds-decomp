@@ -8,18 +8,20 @@ extern s32 func_0010D650(s32 idx);
 
 extern s32 func_0010D818(s32 arg0);
 
+/* Shared glyph owner layout: handle at +0x10, released by the font routines. */
 typedef struct GlyphOwner {
     u8 pad00[0x10];
     u32 glyph;
 } GlyphOwner;
 
 s32 func_0011EC90(void) {
-    s32 val = func_0010D650(0);
+    s32 unitId = func_0010D650(0);
 
-    func_0010D818(func_0011C680(val) == 1);
+    func_0010D818(func_0011C680(unitId) == 1);
     return 1;
 }
 
+/* Evaluate a two-operand VM expression and publish its result. */
 s32 func_0011ECC8(void) {
     s32 firstOperand = func_0010D650(0);
     s32 secondOperand = func_0010D650(1);
@@ -37,6 +39,7 @@ s32 func_0011ED60(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED88);
 
+/* Append an intrusive node; linkOffset selects its previous/next pair. */
 void dds3AppendIntrusiveNode(s32 *list, s32 node, s32 linkOffset) {
     s32 last;
 

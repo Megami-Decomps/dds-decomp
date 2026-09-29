@@ -31,6 +31,7 @@ typedef struct MenuSceneConfig {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD3B8);
 
+/* Ask the menu state machine to handle a new request after clearing stale state. */
 void func_002AD4C0(s32 request) {
     s32 context = func_00101958();
 
@@ -48,6 +49,7 @@ u32 func_002AD510(void) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD518);
 
+/* Set up a staff image and its associated menu resources before entering the state. */
 s64 func_002AD618(s32 callback) {
     s32 context = func_00101958();
     func_002AAE80(callback);
@@ -75,6 +77,7 @@ u32 func_002AD700(void) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AD708);
 
+/* The three staff image states share the same setup, but select different images. */
 s64 func_002AD808(s32 callback) {
     s32 context = func_00101958();
     func_002AAE80(callback);
@@ -155,14 +158,15 @@ s64 func_002AE078(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE0B0);
 
+/* Release the current entry list, its panel group and its auxiliary resource. */
 s32 func_002AE1F0(void) {
     s32 context = func_00101958();
-    s32 entries = context + 0x284;
+    s32 entryList = context + 0x284;
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002ABEB0(context);
-    func_002B2C88(entries, 0, 0, 0);
-    func_002BD2E0(entries);
-    mnuClearEntries(entries);
+    func_002B2C88(entryList, 0, 0, 0);
+    func_002BD2E0(entryList);
+    mnuClearEntries(entryList);
     if (*(s32 *)(context + 0xaa34) != 0) {
         mnuDestroyPanelGroup(*(s32 *)(context + 0xaa34));
         *(s32 *)(context + 0xaa34) = 0;
@@ -195,14 +199,15 @@ void func_002AEA58(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AEAA0);
 
+/* Variant cleanup for the adjacent menu state; keep the same release ordering. */
 s32 func_002AEC10(void) {
     s32 context = func_00101958();
-    s32 entries = context + 0x284;
+    s32 entryList = context + 0x284;
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002AC660(context);
-    func_002B2C88(entries, 0, 0, 0);
-    func_002BD2E0(entries);
-    mnuClearEntries(entries);
+    func_002B2C88(entryList, 0, 0, 0);
+    func_002BD2E0(entryList);
+    mnuClearEntries(entryList);
     if (*(s32 *)(context + 0xaa34) != 0) {
         mnuDestroyPanelGroup(*(s32 *)(context + 0xaa34));
         *(s32 *)(context + 0xaa34) = 0;
@@ -239,14 +244,15 @@ void func_002AF898(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF8E0);
 
+/* Third menu-state cleanup uses the matching state-specific pre-release. */
 s32 func_002AFA58(void) {
     s32 context = func_00101958();
-    s32 entries = context + 0x284;
+    s32 entryList = context + 0x284;
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002ACA98(context);
-    func_002B2C88(entries, 0, 0, 0);
-    func_002BD2E0(entries);
-    mnuClearEntries(entries);
+    func_002B2C88(entryList, 0, 0, 0);
+    func_002BD2E0(entryList);
+    mnuClearEntries(entryList);
     if (*(s32 *)(context + 0xaa34) != 0) {
         mnuDestroyPanelGroup(*(s32 *)(context + 0xaa34));
         *(s32 *)(context + 0xaa34) = 0;

@@ -9,6 +9,7 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_00241F78);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_002420B8);
 
+/* Free the event state shared with the motion-sound task. */
 void evtFreeEventPackState(void)
 {
     func_002CFF98(func_00101A70());
@@ -69,13 +70,13 @@ typedef struct EvtPackResources {
     s32 effect75;            /* 0x44 */
 } EvtPackResources;
 
-/* Release every effect/resource the battle-event work holds, then free it. */
+/* Release the event task's owned handles, then free its state. */
 void evtReleaseEventPackResources(void) {
-    s32 obj = func_00101A70();
-    EvtPackResources *resources = (EvtPackResources *)obj;
+    s32 state = func_00101A70();
+    EvtPackResources *resources = (EvtPackResources *)state;
 
     func_00288C68();
-    if (obj != 0) {
+    if (state != 0) {
         if (resources->effect72 != 0) {
             effInitCh72Id();
             func_002D2D00(resources->effect72);
@@ -105,7 +106,7 @@ void evtReleaseEventPackResources(void) {
             func_002D0918(resources->sceneAllocation2);
         }
     }
-    func_002CFF98(obj);
+    func_002CFF98(state);
 }
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC368);

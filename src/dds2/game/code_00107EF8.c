@@ -203,6 +203,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108138);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_001081F8);
 
+/* Either replace the draw vector immediately or interpolate from its prior value. */
 void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
     if (mode == 0) {
         D_00435CD4 &= ~0x400;
@@ -231,21 +232,21 @@ void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108318);
 
-void evtUnk89F8SetState(s32 arg0, f32 farg0, f32 farg1) {
-    if (arg0 == 0) {
+void evtUnk89F8SetState(s32 frames, f32 first, f32 second) {
+    if (frames == 0) {
         D_00435CD4 &= ~0x4000;
-        D_00438A48 = farg0;
-        D_00438A4C = farg1;
+        D_00438A48 = first;
+        D_00438A4C = second;
     }
     else {
-        f32 b0 = D_00438A48;
-        f32 b1 = D_00438A4C;
+        f32 previousFirst = D_00438A48;
+        f32 previousSecond = D_00438A4C;
         D_00435CD4 |= 0x4000;
-        D_00438E06 = arg0;
-        D_00438E08 = b0;
-        D_00438E0C = farg0;
-        D_00438E10 = b1;
-        D_00438E14 = farg1;
+        D_00438E06 = frames;
+        D_00438E08 = previousFirst;
+        D_00438E0C = first;
+        D_00438E10 = previousSecond;
+        D_00438E14 = second;
         D_00438E04 = 0;
     }
 }
@@ -364,12 +365,12 @@ void func_00109C30(s32 x, s32 y, s32 arg2, s32 arg3) {
     (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
 }
 
-void func_00109D00(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+void func_00109D00(s32 width, s32 height, u64 first, u64 second) {
+    u64 resource;
 
-    temp_v0 = func_0019F448(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_0019D518(temp_v0);
-    func_0019C5B0(temp_v0);
+    resource = func_0019F448(width << 4, height << 3, 0, first, second, 0);
+    func_0019D518(resource);
+    func_0019C5B0(resource);
 }
 
 s32 evtSelStateCreate(s32 limit, s16 frames, s32 arg2, s32 arg3) {
@@ -444,17 +445,17 @@ void func_0010A358(void) {
 }
 
 u32 func_0010A370(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 operationResult;
+    u32 status;
 
     func_002CE750();
     func_002CE758();
-    temp_v0 = func_002CE920();
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 0) {
-        temp_v1 = 0;
+    operationResult = func_002CE920();
+    status = 0xffffffff;
+    if (operationResult != 0) {
+        status = 0;
     }
-    return temp_v1;
+    return status;
 }
 
 u8 func_0010A3A8(void) {
@@ -520,17 +521,17 @@ void func_0010A4D8(void) {
 }
 
 u32 func_0010A4F0(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 operationResult;
+    u32 status;
 
     func_002CE750();
     func_002CE758();
-    temp_v0 = func_002CE920();
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 0) {
-        temp_v1 = 0;
+    operationResult = func_002CE920();
+    status = 0xffffffff;
+    if (operationResult != 0) {
+        status = 0;
     }
-    return temp_v1;
+    return status;
 }
 
 u8 func_0010A528(void) {
@@ -546,16 +547,16 @@ void func_0010A548(u32 arg0, u32 arg1) {
 }
 
 u32 func_0010A588(void) {
-    s64 temp_v0;
-    u32 temp_v1;
+    s64 operationResult;
+    u32 status;
 
     func_00125EE8();
-    temp_v0 = func_00128580();
-    temp_v1 = 0xffffffff;
-    if (temp_v0 != 0) {
-        temp_v1 = 0;
+    operationResult = func_00128580();
+    status = 0xffffffff;
+    if (operationResult != 0) {
+        status = 0;
     }
-    return temp_v1;
+    return status;
 }
 
 u32 func_0010A5B8(void) {
@@ -574,23 +575,24 @@ u32 func_0010A5E0(void) {
     return 0;
 }
 
-void evtUnkA4A8Dispatch(s32 arg0, s32 *arg1) {
-    s32 v0 = 0;
+/* Source zero takes an explicit value; source one uses the pending event mode. */
+void evtUnkA4A8Dispatch(s32 source, s32 *params) {
+    s32 selection = 0;
 
     D_00435BB0 = 0;
-    switch (arg0) {
+    switch (source) {
     case 0:
-        v0 = arg1[0];
+        selection = params[0];
         break;
     case 1:
-        v0 = D_004371E8;
+        selection = D_004371E8;
         break;
     }
-    if (v0 <= 0) {
+    if (selection <= 0) {
         return;
     }
     evtCreateSkyTask();
-    func_0023AC80(v0);
+    func_0023AC80(selection);
 }
 
 u32 func_0010A650(void) {
@@ -1034,6 +1036,7 @@ void func_0010B8D8(s8 mode) {
     }
 }
 
+/* Append to the event-work doubly linked list, maintaining both endpoints. */
 void evtLinkWorkNode(B728Work *node) {
     B728Work *tail = D_00435D68;
 
@@ -1052,6 +1055,7 @@ void evtLinkWorkNode(B728Work *node) {
     D_00435D60++;
 }
 
+/* Detach from either end or the middle, and clear the old links. */
 void evtUnlinkWorkNode(B728Work *node) {
     if ((B728Work *)D_00435D64 == node) {
         D_00435D64 = node->next;

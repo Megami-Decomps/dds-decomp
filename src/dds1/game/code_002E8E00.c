@@ -1,12 +1,12 @@
 #include "common.h"
 
-typedef struct CmdPacket {
-    /* 0x0 */ u32 id;
+typedef struct SequenceVolumePanPacket {
+    /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
     /* 0x8 */ u16 volume;
     /* 0xA */ u16 pan;
     /* 0xC */ u32 unkC;
-} CmdPacket;
+} SequenceVolumePanPacket;
 
 u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
@@ -26,10 +26,12 @@ void func_002E8E50(void) {
     func_002E87A8(0x40, 0, 0, 0);
 }
 
+/* Dispatch the command family selected by the caller, without a payload. */
 void func_002E8E78(u32 command) {
     func_002E87A8(command | 0x50, 0, 0, 0);
 }
 
+/* Send a NUL-terminated command string; the transport excludes the terminator. */
 u32 func_002E8EA0(s32 command, char *text) {
     u32 length = strlen(text);
 
@@ -48,10 +50,11 @@ u32 func_002E8F30(s32 command, char *text) {
     return func_002E8900(command | 0x80, 0, text, length);
 }
 
-void sndSetSequenceVolumePan(s32 id, s32 volume, s32 pan) {
-    CmdPacket packet;
-    func_002E9340(id);
-    packet.id = id;
+/* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
+void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
+    SequenceVolumePanPacket packet;
+    func_002E9340(trackId);
+    packet.trackId = trackId;
     packet.volume = volume;
     packet.pan = (u8)pan;
     func_002E87A8(0x90, 0, &packet, 0xC);

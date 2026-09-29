@@ -6,12 +6,27 @@ typedef struct MenuSearchState {
     s16 targetId;
 } MenuSearchState;
 
+typedef struct MenuSearchValue {
+    u8 pad0[4];
+    u16 id;
+} MenuSearchValue;
+
 typedef struct MenuSearchNode {
     u8 pad0[0x58];
     struct MenuSearchNode *next;
     u8 pad5C[0x14];
-    u8 *value;
+    MenuSearchValue *value; /* 0x70: item whose ID is compared */
 } MenuSearchNode;
+
+typedef struct MenuSearchList {
+    u8 pad0[0x10];
+    MenuSearchNode *head;
+} MenuSearchList;
+
+typedef struct MenuSearchObject {
+    u8 pad0[4];
+    MenuSearchList *list;
+} MenuSearchObject;
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028E350);
 
@@ -49,11 +64,13 @@ INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F380);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F570);
 
-s32 mnuSelectMatchingNode(s32 object, MenuSearchState *state) {
-    MenuSearchNode *current = *(MenuSearchNode **)(*(s32 *)(object + 4) + 0x10);
+/* Select the first list item whose ID matches the requested ID.
+ * If absent, retain the previous selection; the return value is always zero. */
+s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
+    MenuSearchNode *current = object->list->head;
     s32 index = 0;
     while (current != 0) {
-        if (*(u16 *)(current->value + 4) == state->targetId) {
+        if (current->value->id == state->targetId) {
             state->selectedIndex = index;
             return 0;
         }

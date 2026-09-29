@@ -5,7 +5,7 @@ extern u64 effParamTableGetBlock(u64, u64);
 
 typedef struct {
     u8 pad00[0x24];
-    u32 unk24;
+    u32 parameter; /* 0x24 set by effPCPBossSetParameter */
     u32 resource28;
     u32 resource2C;
 } EffPCPBossWork;
@@ -18,13 +18,14 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C288);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C4E8);
 
-void func_0018C618(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
+/* Apply the first two packed parameter blocks to the boss effect. */
+void func_0018C618(u64 data) {
+    u64 firstBlock;
+    u64 secondBlock;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    func_0018C4E8(temp_v0, temp_v1);
+    firstBlock = effParamTableGetBlock(data, 0);
+    secondBlock = effParamTableGetBlock(data, 1);
+    func_0018C4E8(firstBlock, secondBlock);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C660);
@@ -40,24 +41,25 @@ void func_0018D210(dst, src)
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0018D220(arg0, arg1)
-    s32 arg0;
-    u32 arg1;
+void func_0018D220(work, value)
+    s32 work;
+    u32 value;
 {
-    *(u32 *)(arg0 + 0xA0) = arg1;
+    *(u32 *)(work + 0xA0) = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D228);
 
-void func_0018D2C8(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
+/* Apply three packed parameter blocks to the boss effect. */
+void func_0018D2C8(u64 data) {
+    u64 firstBlock;
+    u64 secondBlock;
+    u64 thirdBlock;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    temp_v2 = effParamTableGetBlock(arg0, 2);
-    func_0018D228(temp_v0, temp_v1, temp_v2);
+    firstBlock = effParamTableGetBlock(data, 0);
+    secondBlock = effParamTableGetBlock(data, 1);
+    thirdBlock = effParamTableGetBlock(data, 2);
+    func_0018D228(firstBlock, secondBlock, thirdBlock);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D330);
@@ -75,7 +77,7 @@ void effPCPBossSetParameterVector(u8 *work, void *src) {
 }
 
 void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
-    work->unk24 = value;
+    work->parameter = value;
 }
 
 u32 func_0018D540(void) {

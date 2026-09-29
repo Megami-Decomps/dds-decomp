@@ -1,5 +1,10 @@
 #include "common.h"
 
+/* The boss classification is checked by entry lookup and HEKATO scaling. */
+#define BTL_UNIT_BOSS_FLAG 0x400
+/* The debug text in btlAccumulateBossRatioScale names skill 0x1A9. */
+#define BTL_SKILL_HEKATO 0x1A9
+
 typedef struct BtlUnit BtlUnit;
 
 typedef struct BtlUnitExt {
@@ -140,10 +145,11 @@ void btlCancelCurrentSubtask(void) {
     }
 }
 
-u64 func_0021B600(u64 arg) {
+/* Allocate and launch a subtask from the active battle task slot. */
+u64 func_0021B600(u64 input) {
     BtlTask *task = func_001E5FF8(func_001AA6F8()->sub->task, 0xC);
-    if (arg != 0) {
-        task->arg = arg;
+    if (input != 0) {
+        task->arg = input;
         task->kind = 4;
     }
     task->flags = 0x8000000000000003;
@@ -152,7 +158,7 @@ u64 func_0021B600(u64 arg) {
 }
 
 void func_0021B670(BtlUnit *unit) {
-    if (unit->flags & 0x400) {
+    if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (unit->flags & 2) {
             unit->ext->flags |= 0x1000000;
             unit->stateFlags |= 0x20000;
@@ -168,7 +174,7 @@ f32 func_0021B6C0(BtlUnit *unit, BtlUnit *target) {
         if (target->mode == 0x110) {
             for (other = func_001AA6F8()->actorList; other != 0; other = other->next) {
                 if (other->flags & 1) {
-                    if (other->flags & 0x400) {
+                    if (other->flags & BTL_UNIT_BOSS_FLAG) {
                         if (!(other->flags & 0xE0)) {
                             if (other->mode >= 0x111 && other->mode < 0x113) {
                                 break;
@@ -248,7 +254,7 @@ INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021E778);
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021E8C0);
 
 s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
-    if (!(unit->flags & 0x400)) {
+    if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
     if (D_00435E30[index].kind == 0) {
@@ -273,7 +279,7 @@ s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
 }
 
 s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
-    if (!(unit->flags & 0x400)) {
+    if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
     if (D_00435E30[index].kind == 0) {
@@ -284,7 +290,7 @@ s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
 
 s32 func_0021EB28(BtlUnit *unit, s32 value) {
     s32 mode;
-    if (!(unit->flags & 0x400)) {
+    if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return value;
     }
     mode = unit->mode;
@@ -303,7 +309,7 @@ s32 func_0021EB28(BtlUnit *unit, s32 value) {
 
 void func_0021EB78(BtlUnit *unit) {
     s32 mode;
-    if (unit->flags & 0x400) {
+    if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (func_001B2430(unit, 0)) {
             mode = unit->mode;
             if (mode < 0x113) {
@@ -334,9 +340,9 @@ void btlAccumulateBossRatioScale(BtlSkillTask *task) {
     f32 *ratio;
     BtlParams *params;
     if (task->flags & 8) {
-        if (task->unit->flags & 0x400) {
+        if (task->unit->flags & BTL_UNIT_BOSS_FLAG) {
             ratio = &func_001AA6F8()->sub->scale;
-            if (task->kind == 0x1A9) {
+            if (task->kind == BTL_SKILL_HEKATO) {
                 params = D_00435E44;
                 *ratio *= params->ratioScale;
                 if (*ratio > params->ratioMax) {
@@ -350,8 +356,8 @@ void btlAccumulateBossRatioScale(BtlSkillTask *task) {
 
 f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     f32 scale = 1.0f;
-    if (kind == 0x1A9 && flag == 1) {
-        if (unit->flags & 0x400) {
+    if (kind == BTL_SKILL_HEKATO && flag == 1) {
+        if (unit->flags & BTL_UNIT_BOSS_FLAG) {
             scale = func_001AA6F8()->sub->scale;
         }
     }

@@ -6,7 +6,7 @@ typedef struct EvtGlobal {
     u32 *flags;    /* 0x8 */
 } EvtGlobal;
 
-/* Polygon-movie clip: playback position is clamped to [0, duration]. */
+/* Polygon-movie clip: time is stored as a float, but compared as whole frames. */
 typedef struct PolyMovieClip {
     u8 pad[8];       /* 0x0 */
     f32 duration;    /* 0x8 */
@@ -57,7 +57,8 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00233FB8);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00234120);
 
-void evtPolygonMovieSetFlagBits(s32 arg0, u32 bits)
+/* Apply a caller-provided mask to the event state's flag word. */
+void evtPolygonMovieSetFlagBits(s32 unused, u32 bits)
 {
     EvtGlobal *state;
 
@@ -65,7 +66,7 @@ void evtPolygonMovieSetFlagBits(s32 arg0, u32 bits)
     *state->flags = *state->flags | bits;
 }
 
-void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits)
+void evtPolygonMovieClearFlagBits(s32 unused, u32 bits)
 {
     EvtGlobal *state;
 
@@ -75,7 +76,8 @@ void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits)
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_002342F8);
 
-void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 arg1, s32 start, s32 end)
+/* Store elapsed frames, bounded below by zero and above by clip duration. */
+void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32 end)
 {
     PolyMovieClip *clip;
     s32 frame;

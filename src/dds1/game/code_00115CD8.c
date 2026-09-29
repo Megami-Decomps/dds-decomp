@@ -3,20 +3,27 @@
 extern u32 func_001117A8(u32);
 extern u32 func_002CFEB8(u32);
 
+/* The resource pointer is stored at +0x18 in both games. */
+typedef struct WorldResourceOwner {
+    u8 pad00[0x18];
+    u32 *resource;
+} WorldResourceOwner;
+
 INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115CD8);
 
 INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115D08);
 
 INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115E10);
 
-u32 dds3InitializeResourceOwner(u32 object) {
-    u32 *valueSlot;
-    u32 value;
+/* Attach the owner's newly allocated resource slot and store its handle. */
+u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
+    u32 *resource;
+    u32 handle;
 
     effObjInnerCreate();
-    valueSlot = (u32 *)func_002CFEB8(0x10);
-    *(u32 **)((s32)object + 0x18) = valueSlot;
-    value = func_001117A8(object);
-    *valueSlot = value;
+    resource = (u32 *)func_002CFEB8(0x10);
+    object->resource = resource;
+    handle = func_001117A8((u32)object);
+    *resource = handle;
     return 1;
 }

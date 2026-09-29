@@ -111,6 +111,7 @@ void frFontSetEntryFlag(s32 index, s32 flag) {
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B900);
 
+/* Return the one-based highest set bit, wrapped to a byte; zero stays zero. */
 s32 frFontHighestSetBitIndex(u32 value) {
     s32 count = 0;
 

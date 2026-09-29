@@ -132,12 +132,12 @@ void func_00162948(void) {
     func_001028E8(0, 0, 0, 0);
 }
 
-u32 effParamWorkGetData(s32 arg0) {
-    return *(u32 *)(arg0 + 4);
+u32 effParamWorkGetData(EffParamWork *work) {
+    return (u32)work->data;
 }
 
-u16 effParamWorkGetId(u16 *arg0) {
-    return *arg0;
+u16 effParamWorkGetId(EffParamWork *work) {
+    return work->id;
 }
 
 EffParamWork *effParamWorkCreate(u16 id, void *data) {
@@ -198,16 +198,16 @@ void effParamWorkCallback5(EffParamWork *work) {
     }
 }
 
-void func_00162C60(u32 arg0) {
-    billCreateIndexed(0, arg0);
+void func_00162C60(u32 index) {
+    billCreateIndexed(0, index);
 }
 
-void func_00162C80(u32 arg0) {
-    billCreateIndexed(1, arg0);
+void func_00162C80(u32 index) {
+    billCreateIndexed(1, index);
 }
 
-void effParamDispatchFloat(f32 arg0) {
-    func_00152000(arg0, arg0);
+void effParamDispatchFloat(f32 value) {
+    func_00152000(value, value);
 }
 
 void effParamInitWork(EffInitWork *work) {
@@ -235,48 +235,56 @@ void *effParamCreateInitWork(void *arg0) {
     return work;
 }
 
-void effParamInitFromGlobal(void *arg0) {
-    func_00217878(arg0, &D_00325828);
+void effParamInitFromGlobal(void *work) {
+    func_00217878(work, &D_00325828);
 }
 
 void func_00162DE0(void) {
     func_002177D0();
 }
 
-void *effParamAssembleWork(void *arg0) {
-    void *a;
-    void *b;
+/* Assemble a parameter work item from the two pieces extracted from source. */
+void *effParamAssembleWork(void *source) {
+    void *firstPart;
+    void *secondPart;
     void *work;
 
-    a = func_002183D0(arg0);
-    b = func_002183E0(arg0);
-    work = func_00217680(a, b);
+    firstPart = func_002183D0(source);
+    secondPart = func_002183E0(source);
+    work = func_00217680(firstPart, secondPart);
     effParamInitWork(work);
     return work;
 }
 
-void effParamForwardVector(void *arg0, void *vec) {
+void effParamForwardVector(void *work, void *vec) {
     __asm__ volatile (
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (vec) : "memory");
-    mdlStorePrimaryVectorVU(arg0);
+    mdlStorePrimaryVectorVU(work);
 }
 
-void effParamBuildVector(void *arg0, f32 x) {
+/* Broadcast one scalar into three components before loading VU0 vf10. */
+void effParamBuildVector(void *work, f32 scalar) {
     f32 v[3];
 
-    v[0] = v[1] = v[2] = x;
+    v[0] = v[1] = v[2] = scalar;
     __asm__ volatile (
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%0)\n\t"
         ".set reorder"
         : : "r" (v) : "memory");
-    mdlStoreTertiaryVectorVU(arg0);
+    mdlStoreTertiaryVectorVU(work);
 }
 
-void effParamScatterVectors(void *work, void *src) {
+/* The scatter work holds its destination vector block at +0x18. */
+typedef struct EffScatterWork {
+    u8 pad00[0x18];
+    u8 *destination;
+} EffScatterWork;
+
+void effParamScatterVectors(EffScatterWork *work, void *src) {
     u8 *firstVector;
     u8 *secondVector;
     u8 *thirdVector;
@@ -289,19 +297,19 @@ void effParamScatterVectors(void *work, void *src) {
         "lqc2 vf31, 48(%0)\n\t"
         ".set reorder"
         : : "r" (src) : "memory");
-    firstVector = *(u8 **)((u8 *)work + 0x18) + 0x20;
+    firstVector = work->destination + 0x20;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf28, 0(%0)\n\t"
         ".set reorder"
         : : "r" (firstVector) : "memory");
-    secondVector = *(u8 **)((u8 *)work + 0x18) + 0x30;
+    secondVector = work->destination + 0x30;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf29, 0(%0)\n\t"
         ".set reorder"
         : : "r" (secondVector) : "memory");
-    thirdVector = *(u8 **)((u8 *)work + 0x18) + 0x40;
+    thirdVector = work->destination + 0x40;
     __asm__ volatile (
         ".set noreorder\n\t"
         "sqc2 vf30, 0(%0)\n\t"
@@ -362,30 +370,33 @@ void effParamWorkExCallback5(EffParamWorkEx *work) {
     }
 }
 
-u32 func_00163248(u32 *arg0) {
-    return *arg0;
+u32 func_00163248(u32 *word) {
+    return *word;
 }
 
-u32 func_00163250(s32 arg0) {
-    return *(u32 *)(arg0 + 4);
+u32 func_00163250(s32 address) {
+    return *(u32 *)(address + 4);
 }
 
-void *effParamTableGetBlock(void *arg0, s32 index) {
-    u8 *data = (u8 *)arg0;
+/* Table records are 16 bytes apart after a 16-byte header; block offsets
+ * are relative to the start of the table, not to each record.
+ */
+void *effParamTableGetBlock(void *table, s32 index) {
+    u8 *data = (u8 *)table;
     u8 *row = data + index * 16;
 
     return data + *(s32 *)(row + 0x14);
 }
 
-u32 effParamTableGetWord(void *arg0, s32 index) {
-    u8 *data = (u8 *)arg0;
+u32 effParamTableGetWord(void *table, s32 index) {
+    u8 *data = (u8 *)table;
 
     data += index * 16;
     return *(u32 *)(data + 0x10);
 }
 
-u32 effParamTableGetWord2(void *arg0, s32 index) {
-    u8 *data = (u8 *)arg0;
+u32 effParamTableGetWord2(void *table, s32 index) {
+    u8 *data = (u8 *)table;
 
     data += index * 16;
     return *(u32 *)(data + 0x18);

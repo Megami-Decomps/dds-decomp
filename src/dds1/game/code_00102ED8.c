@@ -308,6 +308,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105370);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001054D0);
 
+/* Release the retained texture and clear its request/pending flags. */
 void func_001055C0(void) {
     if (D_003BA8F8 != 0) {
         sdfTexReleaseReference(D_003BA8F8);
@@ -318,10 +319,10 @@ void func_001055C0(void) {
 }
 
 s32 func_001055F8(void) {
-    s32 ret = 0;
+    s32 result = 0;
 
     if (D_003BA8F8 == 0) {
-        return ret;
+        return result;
     }
     D_003BA8F0 = 1;
     return 1;
@@ -341,6 +342,7 @@ s32 func_00105628(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105630);
 
+/* The frame count is stored in tenths before deriving the forty-percent mark. */
 void kwlnFadeSetupFrames(s32 mode, s32 frames) {
     if (frames == 0) {
         D_003BA918 = 0;
@@ -364,6 +366,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001059F0);
 
+/* The low two bits select the active fade direction; clearing cancels it. */
 void kwlnFadeClear(void) {
     D_003BA904 &= ~3;
     D_003BA920.r = 0;
@@ -407,6 +410,7 @@ void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
     D_003BA904 = (D_003BA904 | 1) & ~2;
 }
 
+/* Enter the first fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartIn(s32 duration) {
     D_003BA920.a = -0x80;
     if (duration == 0) {
@@ -421,6 +425,7 @@ void kwlnFadeStartIn(s32 duration) {
     }
 }
 
+/* Select the second fade direction using the specified RGB color. */
 void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
     D_003BA920.r = red;
     D_003BA920.g = green;
@@ -438,6 +443,7 @@ void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
     D_003BA904 = (D_003BA904 & ~1) | 2;
 }
 
+/* Enter the second fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartOut(s32 duration) {
     D_003BA920.a = 0;
     if (duration == 0) {
@@ -462,6 +468,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105D00);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105DD8);
 
+/* Reset the background fade's color bytes and its two parameter words. */
 void kwlnFadeResetBackground(void) {
     D_003BA904 &= 0xF3FFFFFF;
     D_003BA928[0] = 0;

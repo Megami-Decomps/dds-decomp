@@ -2174,16 +2174,17 @@ void func_00208400(void) {
     }
 }
 
-u64 func_00208440(u64 owner) {
-    u8 *data = *(u8 **)(func_001A17F0() + 0x694);
-    u8 *entry = (u8 *)func_001D9038(*(void **)data, 12);
-    if (owner != 0) {
-        *(u64 *)(entry + 8) = owner;
-        *entry = 4;
+/* Allocate and launch a subtask from the active battle task slot. */
+u64 func_00208440(u64 input) {
+    u8 *subtaskSlot = *(u8 **)(func_001A17F0() + 0x694);
+    u8 *task = (u8 *)func_001D9038(*(void **)subtaskSlot, 12);
+    if (input != 0) {
+        *(u64 *)(task + 8) = input;
+        *task = 4;
     }
-    *(u64 *)(entry + 0x40) = 0x8000000000000003ULL;
-    btlStartTask(entry);
-    return *(u64 *)(entry + 0x38);
+    *(u64 *)(task + 0x40) = 0x8000000000000003ULL;
+    btlStartTask(task);
+    return *(u64 *)(task + 0x38);
 }
 
 extern s32 func_00207DD0(void *);

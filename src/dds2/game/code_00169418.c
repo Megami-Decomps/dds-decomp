@@ -10,17 +10,18 @@ extern u32 D_00436424;
 
 extern u32 D_00436414;
 
-void func_00169418(s32 arg0, u32 arg1, s32 arg2, s32 arg3) {
-    D_00436420 = (u32)arg0;
+/* Keep the original selector and optional overrides separately for field-color lookups. */
+void func_00169418(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
+    D_00436420 = (u32)baseId;
     D_00436418 = D_00436420;
-    if (arg2 != 0) {
-        D_00436420 = (u32)arg2;
+    if (overrideId != 0) {
+        D_00436420 = (u32)overrideId;
     }
-    if (arg3 != 0) {
-        arg0 = arg3;
+    if (finalId != 0) {
+        baseId = finalId;
     }
-    D_0043641C = arg1;
-    D_00436424 = (s32)arg0;
+    D_0043641C = variant;
+    D_00436424 = (s32)baseId;
 }
 
 u32 func_00169438(void) {
@@ -39,10 +40,11 @@ u32 func_00169450(void) {
     return D_00436424;
 }
 
-void func_00169458(u32 unused, f32 *out) {
-    out[0] = -0.73f;
-    out[1] = 1.55f;
-    out[2] = 0.24f;
+/* Default RGB adjustment used when no field-specific color is supplied. */
+void func_00169458(u32 unused, f32 *color) {
+    color[0] = -0.73f;
+    color[1] = 1.55f;
+    color[2] = 0.24f;
 }
 
 INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);

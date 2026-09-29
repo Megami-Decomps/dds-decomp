@@ -365,15 +365,16 @@ extern void func_00285160();
 extern void mnuReleaseResourceList();
 extern void func_0027E6B8();
 
+/* Tear down the staff panel and all four optional scene-side resources. */
 s32 func_00276A18(void) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90C);
-    s32 panel = context + 0x15C;
+    s32 entryList = context + 0x15C;
 
-    func_00276720(panel, 0, *(s32 *)(menu + 0x14), *(s32 *)(menu + 0x10));
+    func_00276720(entryList, 0, *(s32 *)(menu + 0x14), *(s32 *)(menu + 0x10));
     btlStopStage();
-    mnuClearEntries(panel);
-    func_0027FA20(panel);
+    mnuClearEntries(entryList);
+    func_0027FA20(entryList);
     if (*(s32 *)(context + 0x8F8) != 0) {
         mnuDestroyPanelGroup(*(s32 *)(context + 0x8F8));
         *(s32 *)(context + 0x8F8) = 0;
