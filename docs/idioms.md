@@ -115,6 +115,13 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - Callers that pass fewer arguments than the callee reads want the callee
   unprototyped (K&R). A missing unused parameter is real too: m2c drops
   parameters nothing reads, so check the callers.
+- Registers in `$7`–`$10` that stay unchanged until a final call are often
+  *parameters* passed straight through, not locals. Declaring them as `s32`
+  parameters gives them their home registers (`func_00242780`). As
+  `s16`/`u16` parameters they get masked on entry.
+- `bltzl` with the fallback constant in the delay slot is
+  `if (a + b < 0) x = K; else x += b;`: the sum sits in the condition and
+  both arms store. A temporary or a ternary gives `movn`.
 - Loops over parallel per-slot arrays (`set->handle[i]`, `set->active[i]`)
   keep retail's count-up loop. A pointer walk becomes a count-down loop.
 - To keep two `slti` where C would fold a range test into `sltiu`, nest the
