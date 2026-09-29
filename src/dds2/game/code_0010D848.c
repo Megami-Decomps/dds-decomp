@@ -63,27 +63,28 @@ u32 func_0010D8D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010D848", func_0010D8E0);
 
+/* Evaluate a script-supplied model flag and push the test result. */
 u32 scrOpcodeTestModelFlag(void) {
-    u64 flag;
+    u64 flagId;
 
-    flag = func_0010D650(0);
-    flag = mdlFlagTest(flag);
-    func_0010D818(flag);
+    flagId = func_0010D650(0);
+    flagId = mdlFlagTest(flagId);
+    func_0010D818(flagId);
     return 1;
 }
 
 u32 scrOpcodeSetModelFlag(void) {
-    u64 flag;
+    u64 flagId;
 
-    flag = func_0010D650(0);
-    mdlFlagSet(flag);
+    flagId = func_0010D650(0);
+    mdlFlagSet(flagId);
     return 1;
 }
 
 u32 scrOpcodeClearModelFlag(void) {
-    u64 flag;
+    u64 flagId;
 
-    flag = func_0010D650(0);
-    mdlFlagClear(flag);
+    flagId = func_0010D650(0);
+    mdlFlagClear(flagId);
     return 1;
 }

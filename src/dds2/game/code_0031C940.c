@@ -1,5 +1,6 @@
 #include "common.h"
 
+/* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
 typedef struct ModelInstance {
     f32 vector0[3];
     u32 valueC;
@@ -40,6 +41,7 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D260);
 
+/* Clear all slots; the loop index intentionally wraps to 16 bits. */
 void itfClearModelInstances(ModelInstanceList *list) {
     ModelInstance *item;
     u32 index;
@@ -55,7 +57,8 @@ void itfClearModelInstances(ModelInstanceList *list) {
     }
 }
 
-void itfSetModelInstanceParameterBits(ModelInstanceList *list, u32 value) {
+/* Store an eight-bit parameter in flags bits 3..10, preserving other flags. */
+void itfSetModelInstanceParameterBits(ModelInstanceList *list, u32 parameter) {
     ModelInstance *item;
     s32 index;
 
@@ -64,7 +67,7 @@ void itfSetModelInstanceParameterBits(ModelInstanceList *list, u32 value) {
     if (0 < list->count) {
         do {
             index = index + 1;
-            item->flags = (item->flags & 0xfffff807) | ((value & 0xff) << 3);
+            item->flags = (item->flags & 0xfffff807) | ((parameter & 0xff) << 3);
             item = item + 1;
         } while (index < list->count);
     }
@@ -82,6 +85,7 @@ void itfDeactivateModelInstances(ModelInstanceList *list) {
     }
 }
 
+/* Return the first unclaimed record after resetting its time and value pair. */
 s32 itfClaimFreeModelInstance(ModelInstanceList *list) {
     ModelInstance *item;
     s32 index;
@@ -115,12 +119,14 @@ void itfSetModelInstanceValuePair(ModelInstance *model, s32 value) {
     model->secondValue = value;
 }
 
+/* Write the second three-component vector without changing its other state. */
 void func_0031D530(ModelInstance *model, f32 x, f32 y, f32 z) {
     model->vector10[0] = x;
     model->vector10[1] = y;
     model->vector10[2] = z;
 }
 
+/* Write the first vector and reset its associated word at +0x0C. */
 void func_0031D540(ModelInstance *model, f32 x, f32 y, f32 z) {
     model->vector0[0] = x;
     model->vector0[1] = y;

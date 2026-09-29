@@ -1,5 +1,6 @@
 #include "common.h"
 
+/* Script label records are 0x20 bytes; the address lives at +0x18. */
 typedef struct {
     u8 pad[0x18];
     u32 address;
@@ -61,12 +62,13 @@ u32 func_0010D6A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6B8);
 
+/* Evaluate a script-supplied model flag and push the test result. */
 u32 scrCommandTestModelFlag(void) {
-    u64 flagValue;
+    u64 flagId;
 
-    flagValue = func_0010D428(0);
-    flagValue = mdlFlagTest(flagValue);
-    func_0010D5F0(flagValue);
+    flagId = func_0010D428(0);
+    flagId = mdlFlagTest(flagId);
+    func_0010D5F0(flagId);
     return 1;
 }
 

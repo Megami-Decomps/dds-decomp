@@ -489,16 +489,18 @@ u32 evtStartFadeOut(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002481A0);
 
-void evtDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+/* Register a callback for the next asynchronous dispatch. */
+void evtDispatchStart(s32 callback) {
+    s32 eventContext = func_00101A70();
 
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00285670(eventContext + 8, eventContext + 0x54, 1, callback);
 }
 
-void evtDispatchSync(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+/* Register a callback for synchronous dispatch (mode 2). */
+void evtDispatchSync(s32 callback) {
+    s32 eventContext = func_00101A70();
 
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(eventContext + 8, eventContext + 0x54, 2, callback);
 }
 
 u32 func_002482B0(void) {

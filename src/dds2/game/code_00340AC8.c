@@ -91,6 +91,7 @@ f32 func_00340B50(void)
     return result;
 }
 
+/* Return the component-wise dot product of quaternions in vf10 and vf11. */
 f32 func_00340B78(void)
 {
     f32 result;
@@ -108,46 +109,48 @@ f32 func_00340B78(void)
     return result;
 }
 
+/* vf10 initially holds the axis; write the sine-scaled axis and cosine W. */
 void effMiscAxisAngleToQuaternionVU(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
-    f32 sine = func_003406A0(halfAngle);
+    f32 trigValue = func_003406A0(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
         "qmtc2.ni $2, vf2\n"
         "vmulx.xyzw vf10, vf10, vf2x\n"
         ".set reorder\n"
-        : : "f"(sine));
-    sine = func_003407A0(halfAngle);
+        : : "f"(trigValue));
+    trigValue = func_003407A0(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
         "qmtc2.ni $2, vf2\n"
         "vmulx.w vf10, vf0, vf2x\n"
         ".set reorder\n"
-        : : "f"(sine));
+        : : "f"(trigValue));
 }
 
+/* As above, but write the second VU quaternion register (vf11). */
 void func_00340BF0(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
-    f32 sine = func_003406A0(halfAngle);
+    f32 trigValue = func_003406A0(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
         "qmtc2.ni $2, vf2\n"
         "vmulx.xyzw vf11, vf11, vf2x\n"
         ".set reorder\n"
-        : : "f"(sine));
-    sine = func_003407A0(halfAngle);
+        : : "f"(trigValue));
+    trigValue = func_003407A0(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
         "qmtc2.ni $2, vf2\n"
         "vmulx.w vf11, vf0, vf2x\n"
         ".set reorder\n"
-        : : "f"(sine));
+        : : "f"(trigValue));
 }
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
@@ -260,6 +263,7 @@ void func_003411A0(void)
 }
 
 /* Persona 4 effMiscRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+/* Four-word shift-register PRNG; NULL selects the shared effect RNG state. */
 u32 effMiscRand(EffRandState* state)
 {
     u32 x0;
@@ -275,6 +279,7 @@ u32 effMiscRand(EffRandState* state)
     x1 = state->x[1];
     x2 = state->x[2];
     x3 = state->x[3];
+    /* Mix the high two bits of x0 and high bit of x2 into the shifted taps. */
     rand = ((x1 << 0x02) | (((x0 >> 0x1e)) % 4)) ^ ((x3 << 0x01) | (((x2 >> 0x1f)) % 2));
     state->x[0] = rand;
     state->x[1] = x0;
