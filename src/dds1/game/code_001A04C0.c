@@ -109,6 +109,16 @@ extern void func_001EB368(s32, s32);
 
 extern s32 btlCountTasksForOwner(s64);
 
+typedef struct BtlSlotRecord {
+    u8 pad_00[0x84];
+    u32 word[7];
+} BtlSlotRecord;
+
+typedef struct BtlSlotOwner {
+    u8 pad_00[0x18];
+    BtlSlotRecord *records;
+} BtlSlotOwner;
+
 typedef struct SoundBankEntry {
     u32 unk_00;
     u32 resource;
@@ -1233,7 +1243,28 @@ INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A7AD8);
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A7C20);
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A7D38);
+s32 func_001A7D38(u8 *acquirer, u8 *enemy) {
+    s32 result = 0;
+    s32 money;
+    u8 *entry;
+    if (!(*(u32 *)(enemy + 0x110) & 0x400)) {
+        return result;
+    }
+    if (acquirer != 0 && !(*(u32 *)(acquirer + 0x110) & 0x200)) {
+        return result;
+    }
+    entry = (u8 *)(D_003BAA1C + *(u16 *)(enemy + 0x124) * 0x4C);
+    money = *(s32 *)(entry + 0x28);
+    if (*(u32 *)entry & 0x2000) {
+        money *= 100;
+    }
+    if (acquirer != 0) {
+        func_001FB0A8("btl:money=%d\n", money, acquirer);
+    } else {
+        func_001FB0A8("btl:money=%d(acquisition)\n", money);
+    }
+    return money;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A7DF0);
 
@@ -2318,7 +2349,27 @@ INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A27C8);
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001B05D0);
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001B0938);
+u32 func_001B0938(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
+    u32 word = owner->records[group].word[slot];
+    u32 limit;
+    u32 value;
+    if (delta > 0) {
+        limit = value = word & 0xFF;
+        if ((u32)delta < value) {
+            value = delta;
+        }
+    } else {
+        limit = word & 0xFF;
+        value = 0;
+    }
+    delta = value;
+    if (limit > 0x80) {
+        if (delta >= 0x80) {
+            delta = limit;
+        }
+    }
+    return (word & ~0xFF) | delta;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001B09A8);
 
@@ -4636,7 +4687,11 @@ typedef struct BattleActionState {
 
 extern BattleActionState D_00359B28[];
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", btlDispatchStateHandler);
+void btlDispatchStateHandler(s32 action, s32 state) {
+    *(s32 *)action = state;
+    *(s32 *)(action + 0x10) = 0;
+    D_00359B28[state].start(action);
+}
 
 extern char D_003A3788[]; /* "btl:action seq create[%p]\n" */
 
