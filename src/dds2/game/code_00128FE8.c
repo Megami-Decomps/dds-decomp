@@ -1261,7 +1261,7 @@ void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012BE18);
 
-void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6) {
+void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     s32 coords[4];
     u64 command;
     u64 packet;
@@ -1281,8 +1281,8 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
     sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = func_0033A2D0(packet);
-    lo = (u64)arg4 | ((u64)arg5 << 32);
-    hi = (u64)arg6 | (0x8000LL << 24);
+    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
+    hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
     for (i = 0; i < 2; i++) {
         dst[0] = lo;
@@ -1298,7 +1298,7 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, 
     descriptor->open(descriptor, command);
 }
 
-void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 arg6) {
+void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     u32 coords[4];
     u64 command;
     u64 packet;
@@ -1318,8 +1318,8 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 ar
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
     sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = func_0033A2D0(packet);
-    lo = (u64)arg4 | ((u64)arg5 << 32);
-    hi = (u64)arg6 | (0x8000LL << 24);
+    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
+    hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
     for (i = 0; i < 2; i++) {
         dst[0] = lo;
@@ -1335,7 +1335,7 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 ar
     descriptor->open(descriptor, command);
 }
 
-void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
     u64 command;
     u64 packet;
@@ -1359,8 +1359,8 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 a
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_0033A2D0(packet);
-    lo = (u64)arg4 | ((u64)arg5 << 32);
-    hi = (u64)arg6 | ((u64)arg7 << 32);
+    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
+    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -1376,7 +1376,7 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 a
     descriptor->open(descriptor, command);
 }
 
-void func_0012C360(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7, u32 arg8) {
+void func_0012C360(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
     u64 command;
     u64 packet;
@@ -1401,9 +1401,9 @@ void func_0012C360(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_0033A2D0(packet);
-    tag = arg4;
-    lo = (u64)arg5 | ((u64)arg6 << 32);
-    hi = (u64)arg7 | ((u64)arg8 << 32);
+    tag = vertexTag;
+    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
+    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -1419,7 +1419,7 @@ void func_0012C360(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     descriptor->open(descriptor, command);
 }
 
-void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
+void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     u32 coords[8];
     u64 command;
     u64 packet;
@@ -1443,8 +1443,8 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_0033A2D0(packet);
-    lo = (u64)arg4 | ((u64)arg5 << 32);
-    hi = (u64)arg6 | ((u64)arg7 << 32);
+    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
+    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -1466,7 +1466,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsGradientQuad);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CB08);
 
-void func_0012CDC0(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7, u32 arg8) {
+void func_0012CDC0(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
     s32 coords[8];
     u64 command;
     u64 packet;
@@ -1491,9 +1491,9 @@ void func_0012CDC0(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_0033A2D0(packet);
-    lo = (u64)arg4 | ((u64)arg5 << 32);
-    hi = (u64)arg6 | ((u64)arg7 << 32);
-    tag = arg8;
+    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
+    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
+    tag = vertexTag;
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -1509,7 +1509,14 @@ void func_0012CDC0(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     descriptor->open(descriptor, command);
 }
 
-void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
+/* Model draw input: angle for the VU0 matrix and a geometry packet value. */
+typedef struct FldModelPacketInput {
+    u8 pad00[0x40];
+    s32 geometryValue; /* 0x40 */
+    f32 angle;         /* 0x44 */
+} FldModelPacketInput;
+
+void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 header;
     u64 packet;
@@ -1518,9 +1525,9 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
 
     sdfInitPacketList(command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), sdfTexGetPrimaryBufferSize(arg0));
+    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(textureId), sdfTexGetPrimaryBufferSize(textureId));
     sdfAppendReferencePacket(command, header);
-    func_003365B8(*(f32 *)(arg1 + 0x44));
+    func_003365B8(((FldModelPacketInput *)modelData)->angle);
     __asm__ volatile(
         ".set noreorder\n"
         "sqc2 vf28, 0(%0)\n"
@@ -1533,7 +1540,7 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
     sdfInitGeometryDmaPacket(packet, mat);
     sdfAppendPacket(command, packet);
     packet = sdfAllocPacketAligned(0x80);
-    func_0033B530(packet, arg1, *(s32 *)(arg1 + 0x40), arg1 + 0x10, arg1 + 0x20);
+    func_0033B530(packet, modelData, ((FldModelPacketInput *)modelData)->geometryValue, modelData + 0x10, modelData + 0x20);
     sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
     descriptor->open(descriptor, command);
@@ -1760,7 +1767,7 @@ void fldStartQuadPacketList(FldQuadState *quad) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DE70);
 
-void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
+void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1776,12 +1783,12 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7D;
     fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, 0);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg2));
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380748.invoke(&D_00380748, quad.packetList);
 }
 
-void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
+void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1796,13 +1803,13 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, arg2);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg3));
+    sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, packetField);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
-void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
+void fldDrawMapQuadTiled(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1818,12 +1825,12 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436070, arg2));
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436070, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
-void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
+void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1839,12 +1846,12 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436078, arg2));
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436078, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
-void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
+void fldDrawMapQuad(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1860,12 +1867,12 @@ void fldDrawMapQuad(s32 x, s32 y, s32 arg2) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
     sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg2));
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
-void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
+void fldDrawMapQuadPacket(s32 x, s32 y, s32 packetField, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1880,13 +1887,13 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, arg2);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg3));
+    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, packetField);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
-void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
+void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     FldQuadState quad;
     u8 packet[16];
 
@@ -1901,8 +1908,8 @@ void fldDrawMapQuadScaled(s32 arg0, s32 arg1, f32 x, f32 y) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + (s32)(x * 16.0f), quad.y + (s32)(y * 8.0f), quad.unk24, arg0);
-    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, arg1));
+    sdfPktInit(packet, quad.x + (s32)(x * 16.0f), quad.y + (s32)(y * 8.0f), quad.unk24, packetField);
+    sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
@@ -1942,15 +1949,15 @@ s32 fldEncProc(void) {
     return 0;
 }
 
-void func_0012EBF8(u32 arg0, s32 arg1) {
-    if ((arg1 < 0x400) && ((*(u16 *)((s32)arg1 * 0x28 + D_00435E04 + 0x20) & 0x8000) != 0))
+void func_0012EBF8(u32 mode, s32 recordIndex) {
+    if ((recordIndex < 0x400) && ((*(u16 *)((s32)recordIndex * 0x28 + D_00435E04 + 0x20) & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
         func_0012EC80(3);
         return;
     }
     sndSetSequenceVolumePan(0xf, 0x7f, 0x3f);
-    func_0012EC80(arg0);
+    func_0012EC80(mode);
 }
 
 s32 func_0012EC80(s32 mode) {
@@ -2073,13 +2080,7 @@ void func_00130C28(void) {
         matrices = *(u8 ***)(model + 0xC);
         VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
         VU0_LOAD_VF(vf10, vec);
-        __asm__ volatile (
-            ".set noreorder\n"
-            "vmulax.xyzw ACC, vf28, vf10x\n"
-            "vmadday.xyzw ACC, vf29, vf10y\n"
-            "vmaddaz.xyzw ACC, vf30, vf10z\n"
-            "vmaddw.xyzw vf10, vf31, vf10w\n"
-            ".set reorder");
+        VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, vec);
         if (fldPointDistance(vec[0], vec[1], vec[2], D_0038BAC0[0], D_0038BAC0[1], D_0038BAC0[2]) < range) {
             func_001283A8(0x40);
@@ -2524,8 +2525,8 @@ void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
     D_00436104[area * 73] = value;
 }
 
-void fldSetSwayMode(u32 arg0) {
-    D_0043610C = arg0;
+void fldSetSwayMode(u32 mode) {
+    D_0043610C = mode;
     D_00436110 = 0;
     D_00436114 = 0;
 }

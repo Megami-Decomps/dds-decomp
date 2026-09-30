@@ -1363,7 +1363,7 @@ void func_002DFFE0(s128 *dst, s128 *src) {
 }
 
 void func_002DFFF0(s32 work, u32 value) {
-    *(u32 *)(work + 0x14) = value;
+    ((EffKindWork *)work)->color = value;
 }
 
 void func_002DFFF8(Matrix4 *mat, float value) {
@@ -1461,11 +1461,11 @@ void func_002E0358(s128 *dst, s128 *src) {
 }
 
 void func_002E0368(s32 work, u32 value) {
-    *(u32 *)(work + 0x14) = value;
+    ((EffKindWork *)work)->color = value;
 }
 
 void func_002E0370(s32 object, f32 value) {
-    *(f32 *)(object + 0x18) = value;
+    ((EffKindWork *)object)->scale = value;
 }
 
 extern s32 func_0032C138(s32 *);
@@ -1572,13 +1572,22 @@ void func_002E07C0(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
+/* DDS1/DDS2 frame asset: storage at +0x1C, count at +0x08. */
+typedef struct EffFrameAsset {
+    u8 pad_00[8];
+    u32 frameCount;
+    u8 pad_0C[0x10];
+    void *frameStorage;
+    f32 *transformRows;
+} EffFrameAsset;
+
 void effClearBillFrames(u8 *owner) {
     u8 *source = *(u8 **)(owner + 0x30);
     u8 *descriptor = *(u8 **)(source + 4);
     u8 *entry = *(u8 **)source;
     s32 count = *(s32 *)(*(u8 **)(owner + 0x34) + 0x38);
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1693,7 +1702,7 @@ void billResetCellIndices(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1782,7 +1791,7 @@ void billResetParticleIndices(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1871,7 +1880,7 @@ void effClearAnimatedFrames(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1884,7 +1893,7 @@ void effClearAnimatedFrames(u8 *owner) {
 
 u8 *func_002E24A8(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = func_003292A8(*(u32 *)(config + 0x38) * 0x18 + headerSize);
+    u8 *base = func_003292A8(((EffBillConfig *)config)->frames.count * 0x18 + headerSize);
     u8 *node = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *entries = node + headerSize;
 
@@ -1897,9 +1906,9 @@ u8 *func_002E24A8(u8 *config) {
 }
 
 void effInitializeAlternatingTransformRows(u8 *work, u8 *descriptor) {
-    u32 count = *(u32 *)(descriptor + 0x38);
+    u32 count = ((EffBillConfig *)descriptor)->frames.count;
     if (count != 0) {
-        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        f32 *row = ((EffFrameAsset *)*(u8 **)(work + 4))->transformRows;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -1929,7 +1938,7 @@ extern u8 *func_002E24A8();
 u8 *billCreateAnimatedTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E24A8(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 3, handle);
+    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 3, handle);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
@@ -2020,7 +2029,7 @@ void billResetEmitterIndices(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2034,9 +2043,9 @@ void billResetEmitterIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E2E28);
 
 void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
-    u32 count = *(u32 *)(descriptor + 0x38);
+    u32 count = ((EffBillConfig *)descriptor)->frames.count;
     if (count != 0) {
-        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        f32 *row = ((EffFrameAsset *)*(u8 **)(work + 4))->transformRows;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2066,7 +2075,7 @@ extern u8 *func_002E2E28();
 u8 *billCreateEmitterTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E2E28(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 4, handle);
+    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 4, handle);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
@@ -2157,7 +2166,7 @@ void effClearStripFrames(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2171,9 +2180,9 @@ void effClearStripFrames(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E37D0);
 
 void billInitializeStripRows(u8 *work, u8 *descriptor) {
-    u32 count = *(u32 *)(descriptor + 0x38);
+    u32 count = ((EffBillConfig *)descriptor)->frames.count;
     if (count != 0) {
-        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        f32 *row = ((EffFrameAsset *)*(u8 **)(work + 4))->transformRows;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2203,7 +2212,7 @@ extern u8 *func_002E37D0();
 u8 *billCreateStripTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E37D0(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 3, handle);
+    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 3, handle);
     billInitializeStripRows(work, descriptor);
     return work;
 }
@@ -2314,7 +2323,7 @@ void billResetTrailIndices(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2423,7 +2432,7 @@ void billResetQuadIndices(u8 *owner) {
     u8 *entry = *(u8 **)source;
     s32 count = ((EffBillConfig *)*(u8 **)(owner + 0x34))->frames.signedCount;
 
-    memset(*(void **)(descriptor + 0x1C), 0, *(u32 *)(descriptor + 8) * 0x10);
+    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2437,9 +2446,9 @@ void billResetQuadIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4CA8);
 
 void billInitializeQuadRows(u8 *work, u8 *descriptor) {
-    u32 count = *(u32 *)(descriptor + 0x38);
+    u32 count = ((EffBillConfig *)descriptor)->frames.count;
     if (count != 0) {
-        f32 *row = *(f32 **)(*(u8 **)(work + 4) + 0x20);
+        f32 *row = ((EffFrameAsset *)*(u8 **)(work + 4))->transformRows;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2469,7 +2478,7 @@ extern u8 *func_002E4CA8();
 u8 *billCreateQuadTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E4CA8(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(*(u32 *)(descriptor + 0x38), 4, handle);
+    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 4, handle);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
@@ -2644,7 +2653,7 @@ u8 *effCreateActiveResource(EffActiveInstance *obj) {
 }
 
 void func_002E5978(u8 *work) {
-    D_003E9950[*(s32 *)(work + 0x2c)].fn();
+    D_003E9950[((EffActiveInstance *)work)->kind].fn();
     *(u32 *)(work + 0x28) = 0;
 }
 
@@ -3060,7 +3069,7 @@ void func_002E7420(u32 *obj) {
 }
 
 void func_002E7468(s32 work) {
-    func_002E7300(*(u16 *)(work + 0x2c), *(u32 *)(work + 0x34));
+    func_002E7300(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
 }
 
 void func_002E7488(u8 *work) {
@@ -3095,7 +3104,7 @@ void func_002E75A0(s128 *dst, s128 *src) {
 }
 
 void func_002E75B8(s32 work, u32 value) {
-    *(u32 *)(work + 0x24) = value;
+    ((EffClassWork *)work)->color = value;
 }
 
 void func_002E75C0(Matrix4 *mat, float value) {
@@ -3326,8 +3335,8 @@ void func_002E96A8(s32 node) {
     func_002DC0F0(((EffectSlotNode54 *)node)->record);
 }
 
-void func_002E96C0(s32 arg0, u32 fieldValue) {
-    *(u32 *)(arg0 + 4) = fieldValue;
+void func_002E96C0(s32 node, u32 color) {
+    ((EffectSlotNode54 *)node)->color = color;
 }
 
 void func_002E96C8(u8 *p, f32 value) {
@@ -3656,7 +3665,7 @@ void func_002EDE10(s32 work) {
 }
 
 u32 func_002EDE58(s32 work) {
-    return func_002EDCF0(*(u16 *)(work + 0x2c), *(u32 *)(work + 0x34));
+    return func_002EDCF0(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
 }
 
 void effResetDispatchCounter(u8 *work) {
@@ -3796,12 +3805,12 @@ void func_002EED88(s32 node) {
     func_002DC0F0(((EffectStripNode *)node)->active);
 }
 
-void func_002EEDA0(s32 node, u32 value) {
-    *(u32 *)(node + 4) = value;
+void func_002EEDA0(s32 node, u32 color) {
+    ((EffectStripNode *)node)->color = color;
 }
 
 void func_002EEDA8(u8 *p, f32 value) {
-    *(f32 *)(p + 8) = value;
+    ((EffectStripNode *)p)->opacity = value;
     dds3DispatchIndexedCallback(((EffectStripNode *)p)->active, value);
 }
 
@@ -4437,7 +4446,7 @@ void func_002F13E0(u32 *obj) {
 }
 
 u8 *effDuplicateActiveResourceB(u8 *obj) {
-    u8 *work = effAllocateBlock(*(u16 *)(obj + 0x2C), *(void **)(obj + 0x34));
+    u8 *work = effAllocateBlock(*(u16 *)(obj + 0x2C), ((EffClassWork *)obj)->payload);
     *(void **)(work + 0x30) = D_003E9DD8[*(s32 *)(obj + 0x2C)].duplicate(obj);
     D_003E9DD8[*(s32 *)(obj + 0x2C)].fn(work);
     return work;
@@ -4809,7 +4818,7 @@ void effDispatchCleanupOp(u8 *work) {
 }
 
 u8 *effRecreateActiveByClass(u8 *obj) {
-    u8 *work = effAllocateBlockWithModel(*(u16 *)(obj + 0x2C), *(void **)(obj + 0x34));
+    u8 *work = effAllocateBlockWithModel(*(u16 *)(obj + 0x2C), ((EffClassWork *)obj)->payload);
     *(void **)(work + 0x30) = D_003E9E60[*(s32 *)(obj + 0x2C)].duplicate(obj);
     D_003E9E60[*(s32 *)(obj + 0x2C)].fn(work);
     return work;
@@ -7311,7 +7320,7 @@ s32 effPollPartResource(void) {
     s32 entry;
 
     effPollResourceBankSlot(D_0042CF58, 0x20, request);
-    state = *(s32 *)(request + 0x100);
+    state = ((EffResourceBankSlot *)request)->state;
     if (state == 2) {
         result = 0x400000;
     } else if (state == 1) {
@@ -7330,7 +7339,7 @@ u32 effPollNamedFileJob(void) {
     u32 result = 0x400001;
 
     effPollResourceBankSlot(D_0042CF70, 0x10, record);
-    state = *(u32 *)(record + 0x100);
+    state = ((EffResourceBankSlot *)record)->state;
     if (state == 2) {
         result = 0x400000;
     } else if (state == 1) {
@@ -8056,13 +8065,13 @@ s32 effPollFileRecord(const char *resourceName, s32 mode) {
     s32 result = 0x600001;
 
     effPollResourceBankSlot(resourceName, mode, status);
-    if (*(s32 *)(status + 0x100) == 2) {
+    if (((EffResourceBankSlot *)status)->state == 2) {
         result = 0x400000;
-    } else if (*(s32 *)(status + 0x100) == 1) {
+    } else if (((EffResourceBankSlot *)status)->state == 1) {
         func_002D4E60(D_004386B8, D_004386C8);
-        if (*(s32 *)(status + 0xFC) != 8) {
+        if (((EffResourceBankSlot *)status)->type != 8) {
             func_002D3A68(D_004386C0, status,
-                           func_00303C78(*(s32 *)(status + 0xFC)));
+                           func_00303C78(((EffResourceBankSlot *)status)->type));
         } else {
             fileJobSetSecondaryData(D_004386C0, status + 0x104, 4, 4);
         }
@@ -8153,7 +8162,7 @@ u32 fileLoadEffectSlotA(void) {
     u32 result;
 
     effPollResourceBankSlot(D_0042D128, 4, fileInfo);
-    status = *(s32 *)(fileInfo + 0x100);
+    status = ((EffResourceBankSlot *)fileInfo)->state;
     result = 0x600001;
     if (status == 2) {
         result = 0x400000;
@@ -8161,7 +8170,7 @@ u32 fileLoadEffectSlotA(void) {
         job = (u8 *)fileCreateJob(3);
         fileJobSetPrimaryData(job, D_003F01D0.start, D_003F01D0.length,
                       D_003F01D0.mode);
-        func_002D3A68(job, fileInfo, func_00303C78(*(u32 *)(fileInfo + 0xFC)));
+        func_002D3A68(job, fileInfo, func_00303C78(((EffResourceBankSlot *)fileInfo)->type));
         entry = (u8 *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (s32)entry;
         memcpy(D_0045C270, entry, 0x80);
