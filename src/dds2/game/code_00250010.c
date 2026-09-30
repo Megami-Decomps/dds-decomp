@@ -4,7 +4,7 @@ extern u32 D_004373CC;
 
 extern u16 D_004373C8;
 
-extern void func_00135588(s32 arg0);
+extern void func_00135588(s32 value);
 
 extern s16 func_00135598(void);
 
@@ -18,7 +18,7 @@ extern s16 D_00438FB6;
 
 extern void func_00134A18(void);
 
-extern void func_0012BC38(s32 arg0);
+extern void func_0012BC38(s32 id);
 
 extern void func_0012D3E0(void);
 
@@ -27,8 +27,8 @@ extern void sdfAppendPacket(s32 list, s32 packet);
 extern s32 func_0033D810();
 
 typedef struct {
-    s16 unk0;
-    s8 unk2;
+    s16 enabled;
+    s8 tableValue; /* D_003C9732 aliases this byte for indexed menu lookups. */
     u8 pad3[7];
 } EvtTblEntry; /* 0xA bytes */
 
@@ -49,7 +49,7 @@ typedef struct EvtRuntimeChild {
         s32 words[8];
         struct {
             u8 pad00[2];
-            u16 unk0A;
+            u16 groupTypeIndex; /* Reassigned consecutively across children of a group type. */
             u8 pad04[6];
             u16 unk12;
         } f;
@@ -192,21 +192,21 @@ extern void func_00250338(s32 list, s32 x, s32 y, s32 col, s32 rows, s32 first, 
 extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
 extern s32 func_001036B0(s32, s32, s32, s32, s32, s32, s32 *, s32, s32 *);
 
-extern void func_003421E8(s32 arg0);
+extern void func_003421E8(s32 sound);
 
-extern s32 func_00342168(s32 arg0);
+extern s32 func_00342168(s32 sound);
 
-extern void sndStartTrackDefault(s32 arg0);
+extern void sndStartTrackDefault(s32 track);
 
 extern void func_0035B6E0(char *fmt, ...);
 
-extern void sndStartTrackExtended(s32 arg0);
+extern void sndStartTrackExtended(s32 track);
 
-extern void func_00342580(u32 arg0);
+extern void func_00342580(u32 sound);
 
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
-extern void func_00341C78(u32 arg0);
+extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, void *);
 
@@ -230,7 +230,7 @@ void evtCreateTask(s32 taskId, s32 value) {
     kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)func_0024FF80, (s32)func_0024FFC8, taskData);
 }
 
-extern s32 kwlnTaskCreate(char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
+extern s32 kwlnTaskCreate(char *name, s32 taskId, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
 extern char D_004373C0[];
 extern void func_0024FF80();
 extern void func_0024FFC8();
@@ -320,7 +320,7 @@ void evtCreateSkyTask(void) {
    stack local; an unused buffer matches but is a codegen lever, not source). */
 INCLUDE_ASM(const s32, "game/code_00250010", evtUpdateFrameVariableTask);
 
-extern s32 kwlnTaskCreate(char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
+extern s32 kwlnTaskCreate(char *name, s32 taskId, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
 extern s32 evtUpdateFrameVariableTask();
 extern char D_00423380[]; /* "FrameVar" */
 
@@ -935,7 +935,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00254250);
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254458);
 
 s32 func_00254620(s32 *index) {
-    return D_003C9730[*index].unk0 != 0;
+    return D_003C9730[*index].enabled != 0;
 }
 
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
@@ -1205,7 +1205,7 @@ s32 func_00258988(EvtRuntime *runtime) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1219,7 +1219,7 @@ s32 func_002589F0(EvtRuntime *runtime) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1233,7 +1233,7 @@ s32 func_00258A58(EvtRuntime *runtime) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1247,7 +1247,7 @@ s32 func_00258AC0(EvtRuntime *runtime) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1261,7 +1261,7 @@ s32 func_00258B28(EvtRuntime *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1275,7 +1275,7 @@ s32 func_00258B90(EvtRuntime *runtime) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1289,7 +1289,7 @@ s32 func_00258BF8(EvtRuntime *runtime) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1303,7 +1303,7 @@ s32 func_00258C60(EvtRuntime *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk0A = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1820,7 +1820,7 @@ typedef struct EvtResHeader {
 } EvtResHeader;
 
 typedef struct EvtResTask {
-    s32 unk00;
+    s32 pad00;
     s32 type;             /* 0x04 */
     u8 pad08[8];
     s32 base;             /* 0x10 */
@@ -1869,7 +1869,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
 /* Party/enemy model table entry (0x270 bytes); only the scale-source field is known here. */
 typedef struct Entry270 {
     u8 pad00[0x18];
-    f32 unk18;
+    f32 modelScale;
     u8 pad1C[0x254];
 } Entry270;
 
@@ -1906,7 +1906,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {
                 inner = ((EvtEffectObject *)obj)->inner;
-                func_00197F40(inner->scaledObject, D_00435DF0[index].unk18 / D_00435DE0->unk18);
+                func_00197F40(inner->scaledObject, D_00435DF0[index].modelScale / D_00435DE0->modelScale);
             }
             return obj;
         }

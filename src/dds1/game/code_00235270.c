@@ -56,7 +56,7 @@ typedef struct EvtRuntimeChild {
     u8 pad00[2];
     u16 unk02;
     u8 pad04[6];
-    u16 unk0A;
+    u16 groupTypeIndex; /* Reassigned consecutively across children of a group type. */
     u8 pad0C[6];
     u16 unk12;
     u8 pad14[0x18];
@@ -153,8 +153,8 @@ typedef struct EvtRuntime {
 } EvtRuntime;
 
 typedef struct {
-    s16 unk0;
-    s8 unk2;
+    s16 enabled;
+    s8 tableValue; /* D_00368952 aliases this byte for indexed menu lookups. */
     u8 pad3[7];
 } EvtTblEntry; /* 0xA bytes */
 extern EvtTblEntry D_00368950[];
@@ -514,37 +514,37 @@ extern u8 D_003688B8[];
 
 typedef struct EvtDrawWork {
     u8 pad00[0x2280];
-    s32 unk2280;
+    s32 mode;
     u8 pad2284[0x38];
-    s32 unk22BC;
-    s32 unk22C0;
-    char *label;
-    s32 *unk22C8;
-    s32 unk22CC;
-    s32 unk22D0;
+    s32 cursor;
+    s32 itemCount;
+    char *title;
+    s32 *itemNames;
+    s32 charCol;
+    s32 charRow;
     u8 pad22D4[0x114];
-    char *name0;
-    char *name1;
+    char *text0;
+    char *text1;
 } EvtDrawWork;
 
 s32 evtDrawStringEntry(s32 output, s32 x, s32 y, EvtDrawWork *work) {
-    if (work->label == 0) {
+    if (work->title == 0) {
         return 0;
     }
-    sdfAppendPacket(output, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->label));
+    sdfAppendPacket(output, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->title));
     return 2;
 }
 
 void func_00236510(s32 list, s32 x, s32 y, s32 index, EvtDrawWork *work) {
     s32 color;
 
-    if (index < work->unk22C0) {
-        if (work->unk22BC == index) {
-            color = work->unk2280 == 2 ? 4 : 5;
+    if (index < work->itemCount) {
+        if (work->cursor == index) {
+            color = work->mode == 2 ? 4 : 5;
         } else {
             color = 0;
         }
-        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003BC090, work->unk22C8[index]));
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003BC090, work->itemNames[index]));
     }
 }
 
@@ -552,18 +552,18 @@ s32 func_002365A0(s32 x, s32 y, EvtDrawWork *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 width = 10;
 
-    if (work->label != 0) {
-        width = strlen(work->label);
+    if (work->title != 0) {
+        width = strlen(work->title);
         if (width < 6) {
             width = 6;
         }
     }
-    func_00235598(packets, x, y, width, work->unk22C0 + 3, 0, work->unk22C0, (u8 *)work, evtDrawStringEntry, func_00236510);
+    func_00235598(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, (u8 *)work, evtDrawStringEntry, func_00236510);
     D_00325748.invoke(&D_00325748, (void *)packets);
-    if (work->unk2280 != 2) {
+    if (work->mode != 2) {
         return 0;
     }
-    return func_001037C0(0, 1, work->unk22C0, 1, work->unk22C0, 0, 0, 0, (u8 *)work + 0x22BC);
+    return func_001037C0(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, (u8 *)work + 0x22BC);
 }
 
 s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
@@ -583,8 +583,8 @@ void evtDrawKeyboardRow(s32 list, s32 xPosition, s32 y, s32 row, EvtDrawWork *wo
 
     do {
         color = 0;
-        if (work->unk22D0 == row && work->unk22CC == i) {
-            color = work->unk2280 == 3 ? 4 : 5;
+        if (work->charRow == row && work->charCol == i) {
+            color = work->mode == 3 ? 4 : 5;
         }
         ch = *table++;
         drawX = x;
@@ -802,8 +802,18 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
     return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
 }
 
-s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, u8 *work) {
-    s32 count = itfMesGetEntryCount(*(s32 *)(*(s32 *)(work + 8) + 0x104));
+typedef struct EvtMessageWindow {
+    u8 pad00[0x104];
+    s32 entryHandle;
+} EvtMessageWindow;
+
+typedef struct EvtMessageMenuWork {
+    u8 pad00[8];
+    EvtMessageWindow *window;
+} EvtMessageMenuWork;
+
+s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtMessageMenuWork *work) {
+    s32 count = itfMesGetEntryCount(work->window->entryHandle);
     sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
 }
@@ -850,7 +860,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_002393A0);
 INCLUDE_ASM(const s32, "game/code_00235270", func_002395A8);
 
 s32 func_00239770(s32 *index) {
-    return D_00368950[*index].unk0 != 0;
+    return D_00368950[*index].enabled != 0;
 }
 
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
@@ -925,13 +935,13 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023B200);
 void func_0023B848(s32 list, s32 x, s32 y, s32 kind, EvtDrawWork *work) {
     switch (kind) {
     case 0:
-        if (work->name0 != 0) {
-            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->name0));
+        if (work->text0 != 0) {
+            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->text0));
         }
         return;
     case 1:
-        if (work->name1 != 0) {
-            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->name1));
+        if (work->text1 != 0) {
+            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->text1));
         }
         break;
     }
@@ -1110,7 +1120,7 @@ s32 func_0023D698(EvtRuntime *runtime) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1124,7 +1134,7 @@ s32 func_0023D700(EvtRuntime *runtime) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1138,7 +1148,7 @@ s32 func_0023D768(EvtRuntime *runtime) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1152,7 +1162,7 @@ s32 func_0023D7D0(EvtRuntime *runtime) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1166,7 +1176,7 @@ s32 func_0023D838(EvtRuntime *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1180,7 +1190,7 @@ s32 func_0023D8A0(EvtRuntime *runtime) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1194,7 +1204,7 @@ s32 func_0023D908(EvtRuntime *runtime) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1208,7 +1218,7 @@ s32 func_0023D970(EvtRuntime *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk0A = index++;
+                child->groupTypeIndex = index++;
             }
         }
     }
@@ -1764,7 +1774,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
 /* Party/enemy model table entry (0x270 bytes); only the scale-source field is known here. */
 typedef struct Entry270 {
     u8 pad00[0x18];
-    f32 unk18;
+    f32 modelScale;
     u8 pad1C[0x254];
 } Entry270;
 
@@ -1797,7 +1807,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {
                 inner = ((EvtEffectObject *)obj)->inner;
-                func_00190308(inner->scaledObject, D_003BAA20[index].unk18 / D_003BAA10->unk18);
+                func_00190308(inner->scaledObject, D_003BAA20[index].modelScale / D_003BAA10->modelScale);
             }
             return obj;
         }

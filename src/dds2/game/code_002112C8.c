@@ -103,7 +103,7 @@ typedef struct BattleWork {
     u8 pad27D[0x23];
     s32 mode;
     u8 pad2A4[0x474];
-    struct BattleSub *sub;
+    struct BattleSub *sub; /* 0x718: reused as BtlSelectCtrl in unit-selection modes. */
 } BattleWork;
 
 typedef struct BattleNamedResource BattleNamedResource;
@@ -344,13 +344,13 @@ typedef struct BtlUnit {
     s32 unk_EC;
     u8 unk_F0[0x20];
     u32 flags;
-    u32 unk_114;
+    u32 stateFlags; /* 0x114: same unit-state word as BattleUnit.stateFlags. */
     u8 unk_118[8];
     u16 unk_120;
     u8 unk_122[2];
     u16 mode;
     u8 unk_126[8];
-    u16 unk_12E;
+    u16 conditionFlags; /* 0x12E: also read via BattleUnit.conditionFlags. */
     u8 unk_130[0x1EC];
     u32 unk_31C;
     struct BtlUnitModel *model;
@@ -363,45 +363,6 @@ typedef struct BtlUnit {
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern BtlUnit *func_002172B8();
-
-typedef struct BtlState {
-    u8 unk_000[0x1C0];
-    s16 unk_1C0;
-    u8 unk_1C2[0x32];
-    u32 unk_1F4;
-    u8 unk_1F8[4];
-    u32 unk_1FC;
-    u8 unk_200[0x24];
-    BtlTask *tasks;
-    BtlUnit *units;
-    u8 unk_22C[0x20];
-    u16 unk_24C;
-    u8 unk_24E[0x446];
-    struct BattleEffectState *effect;
-    u8 unk_698[0xC];
-    s32 unk_6A4;
-    s32 unk_6A8;
-    u8 unk_6AC[8];
-    s32 unk_6B4;
-    s32 unk_6B8;
-    u8 unk_6BC[8];
-    s32 unk_6C4;
-    u8 unk_6C8[0x10];
-    s32 unk_6D8;
-    u8 unk_6DC[8];
-    s32 unk_6E4;
-    s32 unk_6E8;
-    u8 unk_6EC[8];
-    s32 unk_6F4;
-    u8 unk_6F8[0x10];
-    s32 unk_708;
-    s32 table0[0x20];
-    s32 table1[0x180];
-    s32 table2[0x20];
-    s8 unk_E0C;
-    u8 unk_E0D;
-    s16 unk_E0E;
-} BtlState;
 
 extern void *func_001E5DA8(void *, s32, s32);
 
@@ -1957,7 +1918,8 @@ void btlStartUnitActionIfPairedSelected(void) {
     BattleUnit *other;
     s32 handle;
 
-    if (**(s8 **)((u8 *)work + 0x718) == 0) {
+    /* The selection gate tests the first byte of the stored unit pointer, not the whole pointer. */
+    if (*(s8 *)work->sub == 0) {
         found = 0;
         other = 0;
         for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
@@ -2001,6 +1963,17 @@ u32 btlGetSelectionEmptyValue(void) {
     return value;
 }
 
+/* Kind is the first halfword of each 20-byte action record after the table header. */
+typedef struct BtlActionKindRow {
+    s16 kind;
+    u8 pad02[18];
+} BtlActionKindRow;
+
+typedef struct BtlActionKindTable {
+    u8 pad00[0x2C];
+    BtlActionKindRow rows[1]; /* The resource contains additional records. */
+} BtlActionKindTable;
+
 s32 btlShiftUnitUpForScriptAction(u8 *command) {
     BtlUnit *user = func_002172B8(command);
     u8 *table;
@@ -2013,7 +1986,7 @@ s32 btlShiftUnitUpForScriptAction(u8 *command) {
     if (user->mode == 0x5F || user->mode == 0x101) {
         table = func_001ABFD8(user->resourceKind, user->species);
         if (func_001EA598(command) == 0) {
-            kind = *(s16 *)(table + ((BtlCommandView *)command)->record->slot * 20 + 0x2C);
+            kind = ((BtlActionKindTable *)table)->rows[((BtlCommandView *)command)->record->slot].kind;
             if (kind == 2 || kind == 7) {
                 func_001E3108(user, pos);
                 pos[2] += 350.0f;
@@ -2075,7 +2048,7 @@ void func_00218250(void) {
 s64 btlClaimCommandSlot(s32 battler, s32 task) {
     s32 *slot;
     if (((BattleUnit *)battler)->flags & 0x400) {
-        slot = *(s32 **)(func_001AA6F8() + 0x718);
+        slot = (s32 *)((BattleWork *)func_001AA6F8())->sub;
         ((BattleTaskControl *)task)->control &= ~1;
         ((BattleTaskControl *)task)->control &= ~2;
         if (func_001B2430(battler, 0) != 0) {
@@ -2090,7 +2063,7 @@ s64 btlClaimCommandSlot(s32 battler, s32 task) {
 
 void btlStartReadyUnitAction(void) {
     BattleWork *work = (BattleWork *)func_001AA6F8();
-    BtlSelectCtrl *ctrl = *(BtlSelectCtrl **)((u8 *)work + 0x718);
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)work->sub;
     BattleUnit *unit;
     s32 handle;
 
@@ -2122,7 +2095,7 @@ void btlStartReadyUnitAction(void) {
 }
 
 void btlStartPrevUnitScriptAction(BattleActorHandle *handle) {
-    BtlSelectCtrl *ctrl = *(BtlSelectCtrl **)(func_001AA6F8() + 0x718);
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub;
     s32 script;
     BattleTaskControl *task;
 
@@ -2234,11 +2207,11 @@ s32 btlIsUnitListReady(void) {
 
 void btlAttachActionEffectToUnit(BtlUnit *unit) {
     f32 vec[3];
-    **(BtlUnit ***)(func_001AA6F8() + 0x718) = unit;
+    ((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit = (BattleUnit *)unit;
     unit->flags &= ~0x100;
     unit->flags &= ~8;
-    unit->unk_114 |= 0x180;
-    unit->unk_12E = 0;
+    unit->stateFlags |= 0x180;
+    unit->conditionFlags = 0;
     vec[0] = 0.0f;
     vec[1] = 10000.0f;
     vec[2] = -10000.0f;
@@ -2246,7 +2219,7 @@ void btlAttachActionEffectToUnit(BtlUnit *unit) {
 }
 
 void btlCommitSelectedUnit(void) {
-    BtlSelectCtrl *ctrl = *(BtlSelectCtrl **)(func_001AA6F8() + 0x718);
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub;
     BattleUnit *unit = ctrl->unit;
 
     if (unit != 0) {
@@ -2298,7 +2271,7 @@ s32 btlCheckActionRecordUnit(BattleActionRecord *record) {
     if ((record->flags & 8) == 0) {
         return -1;
     }
-    return **(u32 **)(func_001AA6F8() + 0x718) == (u32)record->unit ? 12 : -1;
+    return ((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit == record->unit ? 12 : -1;
 }
 
 extern u8 *btlCreateCommandSoundUpdateTask(void);
@@ -2316,7 +2289,7 @@ s32 btlStartActionRecordTasks(BattleActionRecord *record) {
     if (!(record->flags & 8)) {
         return -1;
     }
-    if (**(s32 **)(func_001AA6F8() + 0x718) != (s32)record->unit) {
+    if (((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit != record->unit) {
         return -1;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -2396,7 +2369,7 @@ s32 btlRaiseUnitForCommandSlot(u8 *command) {
     if (user->mode == 0x108) {
         table = func_001ABFD8(user->resourceKind, user->species);
         if (func_001EA598(command) == 0) {
-            kind = *(s16 *)(table + ((BtlCommandView *)command)->record->slot * 20 + 0x2C);
+            kind = ((BtlActionKindTable *)table)->rows[((BtlCommandView *)command)->record->slot].kind;
             if (kind == 2 || kind == 7) {
                 func_001E3108(user, pos);
                 pos[2] += 1250.0f;
@@ -2431,6 +2404,14 @@ s32 btlSpawnLinkedActionEffect(u8 *task) {
     return 1;
 }
 
+/* The sound and model-load tasks both store their caller-supplied owner at +8. */
+typedef struct BtlOwnedTask {
+    u8 pad00[8];
+    u64 owner;
+    u8 pad10[0x28];
+    u64 result; /* 0x38: returned by the model-load task starter */
+} BtlOwnedTask;
+
 extern u8 *sndCreateStationedSeTask(s32);
 
 void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 controlBase) {
@@ -2441,7 +2422,7 @@ void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 co
         if (unit->flags & 0x400) {
             if (unit->mode == 0x108) {
                 task = sndCreateStationedSeTask(*(s32 *)(func_001AA6F8() + 0x208) + 6);
-                *(u64 *)(task + 8) = owner;
+                ((BtlOwnedTask *)task)->owner = owner;
                 task[0] = 4;
                 ((BattleTaskControl *)task)->control = controlBase + 0x28;
                 btlStartTask(task);
@@ -2451,14 +2432,14 @@ void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 co
 }
 
 void btlResetActionEffectOnUnit(void) {
-    BtlUnit *unit = **(BtlUnit ***)(func_001AA6F8() + 0x718);
+    BtlUnit *unit = (BtlUnit *)((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit;
     if (unit != NULL) {
         f32 vec[3];
         vec[0] = 0.0f;
         vec[1] = 10000.0f;
         vec[2] = -10000.0f;
         unit->flags &= ~8;
-        unit->unk_114 |= 0x180;
+        unit->stateFlags |= 0x180;
         effObjSetInnerFirstVec(unit->effObj, vec);
     }
 }
@@ -2503,7 +2484,7 @@ void btlClearSubtaskHandle(void) {
 s64 btlClaimCommandSlotAndTarget(s32 battler, s32 task) {
     s32 *slot;
     if (((BattleUnit *)battler)->flags & 0x400) {
-        slot = *(s32 **)(func_001AA6F8() + 0x718);
+        slot = (s32 *)((BattleWork *)func_001AA6F8())->sub;
         ((BattleTaskControl *)task)->control &= ~1;
         ((BattleTaskControl *)task)->control &= ~2;
         if (func_001B2430(battler, 0) != 0) {
@@ -2532,7 +2513,7 @@ s32 btlSetSubtaskControlEnabled(s32 unused, s32 ignored, s32 action) {
 
 void btlStartReadyUnitActionCopy(void) {
     BattleWork *work = (BattleWork *)func_001AA6F8();
-    BtlSelectCtrl *ctrl = *(BtlSelectCtrl **)((u8 *)work + 0x718);
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)work->sub;
     BattleUnit *unit;
     s32 handle;
 
@@ -2568,7 +2549,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002195E0);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219760);
 
 s32 btlGetSubtaskActorMotionClass(void) {
-    s32 *slot = *(s32 **)(func_001AA6F8() + 0x718);
+    s32 *slot = (s32 *)((BattleWork *)func_001AA6F8())->sub;
     if (slot[2] == 0) {
         return 0x64;
     }
@@ -2891,7 +2872,7 @@ struct BattleNamedResource {
 };
 
 s8 btlDispatchNamedChunkNode(s32 name) {
-    BattleUnit *battler = **(BattleUnit ***)(func_001AA6F8() + 0x718);
+    BattleUnit *battler = ((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit;
     BattleNamedResource *resource;
     NamedChunkDescriptor *chunk;
     s32 index;
@@ -2933,7 +2914,7 @@ void btlResetNamedChunkNodeTree(NamedChunkNode *node) {
 }
 
 void btlClearNamedChunkFlags(s32 name) {
-    BattleUnit *battler = **(BattleUnit ***)(func_001AA6F8() + 0x718);
+    BattleUnit *battler = ((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit;
     if (battler != 0 && (battler->flags & 2) != 0) {
         BattleNamedResource *resource = battler->namedResource;
         NamedChunkDescriptor *chunk = resource->holder->chunk;
@@ -2953,7 +2934,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A778);
 s64 btlReturnUnitToGroup(BtlTask *task) {
     if (task->flags & 8) {
         BtlUnit *unit = task->unit;
-        if (!(unit->unk_12E & 0x4000)) {
+        if (!(unit->conditionFlags & 0x4000)) {
             unit->flags &= ~0x20;
             unit->flags &= ~0x08000000;
             unit->flags |= 1;
@@ -2967,7 +2948,7 @@ s64 btlReturnUnitToGroup(BtlTask *task) {
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A978);
 
 void btlSetUnitResourceFloatByMode(BattleUnit *unit, s32 group, f32 value) {
-    if ((*(BtlSelectCtrl **)(func_001AA6F8() + 0x718))->unit != unit) {
+    if (((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit != unit) {
         if (!(unit->flags & 0x400)) {
             func_0023CE10(unit->namedResource, group);
             func_0023CE18(unit->namedResource, value);
@@ -2991,7 +2972,7 @@ void btlSetUnitResourceFloatByMode(BattleUnit *unit, s32 group, f32 value) {
 }
 
 void btlSetUnitResourceHalvesByMode(BattleUnit *unit, s32 first, s32 second) {
-    if ((*(BtlSelectCtrl **)(func_001AA6F8() + 0x718))->unit != unit) {
+    if (((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit != unit) {
         if (!(unit->flags & 0x400)) {
             func_0023CE20(unit->namedResource, first, second);
             return;
@@ -3072,7 +3053,7 @@ extern void func_001AA898(s32, s32);
 extern u8 *btlCreateModelLoadPollTask(s32, s32, s32, s32);
 
 s64 btlEnsureHeroUnitTask(u64 owner) {
-    s32 *slot = *(s32 **)(func_001AA6F8() + 0x718);
+    s32 *slot = (s32 *)((BattleWork *)func_001AA6F8())->sub;
     u8 *task;
     if (*slot != 0) {
         return func_001A9920();
@@ -3081,11 +3062,11 @@ s64 btlEnsureHeroUnitTask(u64 owner) {
     func_001AA898(*slot + 0x120, 0x110);
     task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (owner != 0) {
-        *(u64 *)(task + 8) = owner;
+        ((BtlOwnedTask *)task)->owner = owner;
         task[0] = 4;
     }
     btlStartTask(task);
-    return *(u64 *)(task + 0x38);
+    return ((BtlOwnedTask *)task)->result;
 }
 
 INCLUDE_SDATA(const s32, "game/code_002112C8", D_00436CC0);
