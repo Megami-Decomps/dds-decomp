@@ -97,7 +97,7 @@ typedef struct EffResourceBankSlot {
     s32 state;          // 0x100
     s32 count;          // 0x104
 } EffResourceBankSlot;
-extern void func_00300100(char *, u32, EffResourceBankSlot *);
+extern void effPollResourceBankSlot(char *, u32, EffResourceBankSlot *);
 extern EffectBlock128 D_0045C1F0;
 typedef struct EffModelResource {
     u8 pad0[0x28];
@@ -210,7 +210,7 @@ extern u32 D_0045C2F0[];
 extern u8 D_004386E0[];
 extern u8 D_004386E8[];
 
-extern u32 func_00304938(u32);
+extern u32 effCreateMappedResource(u32);
 
 extern u32 sdfResourceRetainAddress();
 
@@ -477,7 +477,7 @@ static inline u32 effSlotCount(u8 *p, u32 max) {
 }
 
 
-extern void func_002040A8(u32);
+extern void sndLoadAndPlayStationedSe(u32);
 
 extern u32 func_002E5C50(u32, u32, u32);
 
@@ -571,10 +571,10 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC1D0);
 
 void func_002DC260(s32 owner) {
     *(u32 *)(*(s32 *)(owner + 0x18) + 0x80) = 0;
-    func_002322E8();
+    mdlDestroyContext();
 }
 
-void *func_002DC280(void *sourceModel) {
+void *effCloneModelWithVUState(void *sourceModel) {
     s32 group;
     s32 id;
     void *model;
@@ -697,7 +697,7 @@ void func_002DC748(u32 *p) {
     }
 }
 
-EffModelOwner *func_002DC788(EffModelOwner *source) {
+EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     EffModelOwner *owner = effCreateModelOwner(0);
     s64 marked;
 
@@ -756,7 +756,7 @@ void effFloorModelListRemove(EffectObjectNode *node) {
     func_00328E48(node);
 }
 
-void func_002DCB58(void) {
+void effSweepFloorModelList(void) {
     EffectObjectNode *node = D_00437E30;
     EffectObjectNode *next;
 
@@ -1178,7 +1178,7 @@ void func_002DECD0(void) {
 }
 
 void func_002DECF0(u32 allocation) {
-    func_0010A298();
+    evtDestroySelectionState();
     func_00328E48(allocation);
 }
 
@@ -3321,7 +3321,7 @@ void func_002E9668(u32 node) {
 }
 
 void func_002E9690(s32 node) {
-    menuRecordSetVector(((EffectSlotNode54 *)node)->record);
+    mnuRecordSetVector(((EffectSlotNode54 *)node)->record);
 }
 
 void func_002E96A8(s32 node) {
@@ -3383,7 +3383,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002E9BC8);
 s32 func_002E9E48(const Matrix4 *matrix) {
     void *work = sdfAllocPacketAligned(0x20);
     D_00437E68 = (u32)work;
-    sdfResetPacketList(work);
+    sdfInitPacketList(work);
     __asm__ volatile(
         ".set noreorder\n\t"
         "lqc2 $vf28, 0(%0)\n\t"
@@ -3735,7 +3735,7 @@ void func_002EED48(u32 node) {
 }
 
 void func_002EED70(s32 node) {
-    menuRecordSetVector(((EffectStripNode *)node)->active);
+    mnuRecordSetVector(((EffectStripNode *)node)->active);
 }
 
 void func_002EED88(s32 node) {
@@ -4609,7 +4609,7 @@ void effSynchronizeFileTransform(u8 *work) {
     u32 *record = *(u32 **)(work + 0x30);
 
     if (((EffAnimationState *)record)->record != 0) {
-        menuRecordSetVector(((EffAnimationState *)record)->record, work);
+        mnuRecordSetVector(((EffAnimationState *)record)->record, work);
         func_002DC0F0(((EffAnimationState *)record)->record, work + 0x10);
         dds3DispatchIndexedCallback(((EffAnimationState *)record)->record, *(f32 *)(work + 0x20));
         fileAcquireRecord(((EffAnimationState *)record)->record);
@@ -5199,10 +5199,10 @@ void effReportResourceStatus(u8 *work) {
     status = **(u32 **)(work + 0x38);
     switch (status) {
     case 0:
-        func_002040A8(0x1000A);
+        sndLoadAndPlayStationedSe(0x1000A);
         break;
     case 1:
-        func_002040A8(0x1000B);
+        sndLoadAndPlayStationedSe(0x1000B);
         break;
     }
 }
@@ -5292,7 +5292,7 @@ void func_002F77D0(s32 work) {
 }
 
 void func_002F7890(void) {
-    func_002005B0(0xc);
+    btlInitTintTransitionDefault(0xc);
 }
 
 void effUpdateSlotTimerPair(u8 *work) {
@@ -5308,11 +5308,11 @@ void effUpdateSlotTimerPair(u8 *work) {
         return;
     }
     if (phase == 0) {
-        func_00200568(slot[1], *(u16 *)(slot + 2));
+        btlInitTintTransitionResource(slot[1], *(u16 *)(slot + 2));
         first = slot[0];
     }
     if (first != 0 && phase == first - slot[3]) {
-        func_002005B0(*(u16 *)(slot + 3));
+        btlInitTintTransitionDefault(*(u16 *)(slot + 3));
     }
 }
 
@@ -5615,7 +5615,7 @@ typedef struct EffFadeNode {
 
 extern void func_0023CA60(void *, u32, u32);
 
-void func_002F8C38(void) {
+void effSyncFadeColorToTargets(void) {
     s32 owner = func_001AA6F8();
 
     if ((*(u32 *)(owner + 0x218) & 0x6000000) == 0x6000000) {
@@ -5651,7 +5651,7 @@ extern EffMotionSetup D_004584C0;
 extern u8 D_003E9FF0[];
 extern void func_003332D0(void *, f32);
 
-s32 *func_002F8FB8(s32 *context) {
+s32 *effCreateMotionResource(s32 *context) {
     s32 *work = (s32 *)func_00328D68(8);
 
     work[0] = 0;
@@ -5670,7 +5670,7 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9048);
 s32 *func_002F9118(s32 *request) {
     s32 *source = (s32 *)request[0x30 / 4];
     s32 *context = (s32 *)request[0x38 / 4];
-    s32 *resource = func_002F8FB8(context);
+    s32 *resource = effCreateMotionResource(context);
     resource[0] = func_00159A50(*source);
     func_00159FA0(resource[0]);
     billSetBillboardMode(resource[0], *(s16 *)((u8 *)context + 0x4C));
@@ -6062,7 +6062,7 @@ void func_002FB400(u32 node) {
 }
 
 void func_002FB428(s32 node) {
-    menuRecordSetVector(((EffectSlotNode80 *)node)->record);
+    mnuRecordSetVector(((EffectSlotNode80 *)node)->record);
 }
 
 void func_002FB440(s32 node) {
@@ -6247,7 +6247,7 @@ void effApplyBattleCameraToObject(work)
     func_002D3808(work, ((EffBattleCamera *)D_0045C270)->mode);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FC340);
+INCLUDE_ASM(const s32, "game/code_002DC138", effQueueEffectFileJob);
 
 typedef struct EffFileJobRequest {
     u8 pad0[4];
@@ -6411,7 +6411,7 @@ s32 effPollAttachedFile(void) {
     return result;
 }
 
-u8 *func_002FC8F8(u8 *work) {
+u8 *effFindAssetData(u8 *work) {
     u8 *requested = *(u8 **)(work + 0x90);
     u16 type = ((EffAssetRequest *)requested)->type;
     u16 id = ((EffAssetRequest *)requested)->id;
@@ -6443,7 +6443,7 @@ u8 *func_002FC8F8(u8 *work) {
     return NULL;
 }
 
-u32 func_002FC9B8(u8 *work) {
+u32 effFindAssetObject(u8 *work) {
     u8 *requested = *(u8 **)(work + 0x90);
     u16 type = ((EffAssetRequest *)requested)->type;
     u16 id = ((EffAssetRequest *)requested)->id;
@@ -7030,14 +7030,14 @@ s32 effPollPartResource(void) {
     s32 result = 0x400001;
     s32 entry;
 
-    func_00300100(D_0042CF58, 0x20, request);
+    effPollResourceBankSlot(D_0042CF58, 0x20, request);
     state = *(s32 *)(request + 0x100);
     if (state == 2) {
         result = 0x400000;
     } else if (state == 1) {
         if (D_004386B8 != 0) {
             entry = fileAppendJobFromEntry(D_004386B8, request);
-            strcpy((char *)(entry + 0x9C), *(char **)func_002FC8F8(entry));
+            strcpy((char *)(entry + 0x9C), *(char **)effFindAssetData(entry));
         }
         result = 0x400002;
     }
@@ -7049,7 +7049,7 @@ u32 effPollNamedFileJob(void) {
     u32 state;
     u32 result = 0x400001;
 
-    func_00300100(D_0042CF70, 0x10, record);
+    effPollResourceBankSlot(D_0042CF70, 0x10, record);
     state = *(u32 *)(record + 0x100);
     if (state == 2) {
         result = 0x400000;
@@ -7176,10 +7176,10 @@ void func_003000B8(void) {
     }
 }
 
-void func_00300100(char *path, u32 unused, EffResourceBankSlot *slot) {
+void effPollResourceBankSlot(char *path, u32 unused, EffResourceBankSlot *slot) {
     if (D_0043875C == 0) {
         D_0043875C = btlScanDirectory();
-        D_00438760 = func_0020DA28(D_0043875C);
+        D_00438760 = btlCreateResourceDescriptor(D_0043875C);
         func_0020DFB0(D_00438760, 0xBA, 0x1C);
     } else {
         func_0020DAB8(D_00438760);
@@ -7300,7 +7300,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
                 btlAppendEntry(D_0043875C, name, 8, i, 0);
             }
         }
-        D_00438760 = func_0020DA28(D_0043875C);
+        D_00438760 = btlCreateResourceDescriptor(D_0043875C);
         func_0020DFB0(D_00438760, 0xBA, 0x1C);
     } else {
         func_0020DAB8(D_00438760);
@@ -7735,7 +7735,7 @@ void func_00302B90(s32 work) {
 
 extern u32 D_004386C8;
 
-s32 effPollGeneralResource(s32 mode) {
+s32 effPollFileQueueRecord(s32 mode) {
     u8 status[0xE0];
     u8 *entry;
     s32 result = 0x600001;
@@ -7760,22 +7760,22 @@ s32 effPollGeneralResource(s32 mode) {
 }
 
 void func_00302C78(void) {
-    effPollGeneralResource(0x4b);
+    effPollFileQueueRecord(0x4b);
 }
 
 void func_00302C90(void) {
-    effPollGeneralResource(0x4b);
+    effPollFileQueueRecord(0x4b);
 }
 
 void func_00302CA8(void) {
-    effPollGeneralResource(0xb);
+    effPollFileQueueRecord(0xb);
 }
 
-s32 effPollNamedResource(const char *resourceName, s32 mode) {
+s32 effPollFileRecord(const char *resourceName, s32 mode) {
     u8 status[0x110];
     s32 result = 0x600001;
 
-    func_00300100(resourceName, mode, status);
+    effPollResourceBankSlot(resourceName, mode, status);
     if (*(s32 *)(status + 0x100) == 2) {
         result = 0x400000;
     } else if (*(s32 *)(status + 0x100) == 1) {
@@ -7795,39 +7795,39 @@ extern char D_0042CF70[]; /* "/tool/effect/" */
 extern char D_0042D140[]; /* "/tool/effect/hlp/" */
 
 void func_00302D70(void) {
-    effPollNamedResource(D_0042D128, 0x43);
+    effPollFileRecord(D_0042D128, 0x43);
 }
 
 void func_00302D90(void) {
-    effPollNamedResource(D_0042D128, 0x43);
+    effPollFileRecord(D_0042D128, 0x43);
 }
 
 void func_00302DB0(void) {
-    effPollNamedResource(D_0042CF58, 0x20);
+    effPollFileRecord(D_0042CF58, 0x20);
 }
 
 void func_00302DD0(void) {
-    effPollNamedResource(D_0042CF70, 0x10);
+    effPollFileRecord(D_0042CF70, 0x10);
 }
 
 void func_00302DF0(void) {
-    effPollNamedResource(D_0042CF58, 0x20);
+    effPollFileRecord(D_0042CF58, 0x20);
 }
 
 void func_00302E10(void) {
-    effPollNamedResource(D_0042CF70, 0x10);
+    effPollFileRecord(D_0042CF70, 0x10);
 }
 
 void func_00302E30(void) {
-    effPollNamedResource(D_0042D128, 1);
+    effPollFileRecord(D_0042D128, 1);
 }
 
 void func_00302E50(void) {
-    effPollNamedResource(D_0042D128, 1);
+    effPollFileRecord(D_0042D128, 1);
 }
 
 void func_00302E70(void) {
-    effPollNamedResource(D_0042D128, 1);
+    effPollFileRecord(D_0042D128, 1);
 }
 
 u32 func_00302E90(void) {
@@ -7837,19 +7837,19 @@ u32 func_00302E90(void) {
 }
 
 void func_00302EC8(void) {
-    effPollNamedResource(D_0042D140, 4);
+    effPollFileRecord(D_0042D140, 4);
 }
 
 void func_00302EE8(void) {
-    effPollNamedResource(D_0042D128, 4);
+    effPollFileRecord(D_0042D128, 4);
 }
 
 void func_00302F08(void) {
-    effPollNamedResource(D_0042CF70, 0x10);
+    effPollFileRecord(D_0042CF70, 0x10);
 }
 
 void func_00302F28(void) {
-    effPollNamedResource(D_0042D140, 4);
+    effPollFileRecord(D_0042D140, 4);
 }
 
 
@@ -7872,7 +7872,7 @@ u32 fileLoadEffectSlotA(void) {
     s32 status;
     u32 result;
 
-    func_00300100(D_0042D128, 4, fileInfo);
+    effPollResourceBankSlot(D_0042D128, 4, fileInfo);
     status = *(s32 *)(fileInfo + 0x100);
     result = 0x600001;
     if (status == 2) {
@@ -7886,13 +7886,13 @@ u32 fileLoadEffectSlotA(void) {
         D_004386C8 = (s32)entry;
         memcpy(D_0045C270, entry, 0x80);
         D_004386C0 = *(u32 *)(entry + 0x90);
-        resource = (u8 *)func_002FC8F8(entry);
+        resource = (u8 *)effFindAssetData(entry);
         strcpy((char *)(entry + 0x9C), *(char **)resource);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
         memcpy(*(void **)(resource + 0xC), fileData,
                *(u32 *)(resource + 0x10));
-        D_004386BC = func_002FC340(resource);
-        D_004386F4 = func_002FC9B8(entry);
+        D_004386BC = effQueueEffectFileJob(resource);
+        D_004386F4 = effFindAssetObject(entry);
         *(u8 **)(D_004386F4 + 0x34) = (u8 *)D_003FFA78;
         func_00303C50();
         if (D_004386C4 != 0) {
@@ -7947,7 +7947,7 @@ u32 effQueueGeneratedFileJob(void) {
     u32 dataLength;
     u32 allocation;
 
-    func_00300100(D_0042D140, 4, &fileInfo);
+    effPollResourceBankSlot(D_0042D140, 4, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
@@ -7968,7 +7968,7 @@ u32 effQueueGeneratedFileJob(void) {
         fileJobSetPrimaryData(job, buffer, totalLength, 1);
         entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
-        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
         strcpy(entry->filename, resource->name);
         memcpy(D_0045C270, entry, 0x80);
         queuedFile = entry->fileHandle;
@@ -7982,8 +7982,8 @@ u32 effQueueGeneratedFileJob(void) {
         resource->size = dataLength + headerBytes;
         resource->mode = 1;
         memcpy(D_00459E30, D_003F0DA8, 0x74);
-        D_004386BC = func_002FC340(resource);
-        D_004386F4 = func_002FC9B8(entry);
+        D_004386BC = effQueueEffectFileJob(resource);
+        D_004386F4 = effFindAssetObject(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
         func_00303C50();
         if (D_004386C4 != 0) {
@@ -8006,7 +8006,7 @@ u32 func_00303478(void) {
     s32 status;
     u32 result;
 
-    func_00300100(D_0042D128, 4, &fileInfo);
+    effPollResourceBankSlot(D_0042D128, 4, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
@@ -8020,12 +8020,12 @@ u32 func_00303478(void) {
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
         D_004386C0 = entry->fileHandle;
-        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
         strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
         memcpy(resource->buffer, fileData, resource->size);
-        D_004386BC = func_002FC340(resource);
-        D_004386F4 = func_002FC9B8(entry);
+        D_004386BC = effQueueEffectFileJob(resource);
+        D_004386F4 = effFindAssetObject(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
         func_00303C50();
         if (D_004386C4 != 0) {
@@ -8064,7 +8064,7 @@ u32 effLoadFileSlotF2(void) {
     s32 status;
     u32 result;
 
-    func_00300100("/tool/effect/f2/", 0x80, &fileInfo);
+    effPollResourceBankSlot("/tool/effect/f2/", 0x80, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
@@ -8078,12 +8078,12 @@ u32 effLoadFileSlotF2(void) {
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
         D_004386C0 = entry->fileHandle;
-        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
         strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
         memcpy(resource->buffer, fileData, resource->size);
-        D_004386BC = func_002FC340(resource);
-        D_004386F4 = func_002FC9B8(entry);
+        D_004386BC = effQueueEffectFileJob(resource);
+        D_004386F4 = effFindAssetObject(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
         func_00303C50();
         if (D_004386C4 != 0) {
@@ -8106,7 +8106,7 @@ u32 effLoadMaterialFile(void) {
     s32 status;
     u32 result;
 
-    func_00300100(D_0042D128, 2, &fileInfo);
+    effPollResourceBankSlot(D_0042D128, 2, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
@@ -8120,12 +8120,12 @@ u32 effLoadMaterialFile(void) {
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
         D_004386C0 = entry->fileHandle;
-        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
         strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
         memcpy(resource->buffer, fileData, resource->size);
-        D_004386BC = func_002FC340(resource);
-        D_004386F4 = func_002FC9B8(entry);
+        D_004386BC = effQueueEffectFileJob(resource);
+        D_004386F4 = effFindAssetObject(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
         func_00303C50();
         if (D_004386C4 != 0) {
@@ -8150,7 +8150,7 @@ u32 func_00303A30(void) {
     u32 index;
     f32 *coordinates;
 
-    func_00300100(D_0042D128, 4, &fileInfo);
+    effPollResourceBankSlot(D_0042D128, 4, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == 2) {
@@ -8168,12 +8168,12 @@ u32 func_00303A30(void) {
         D_004386C8 = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
         D_004386C0 = entry->fileHandle;
-        resource = (EffFileResourceRecord *)func_002FC8F8(entry);
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
         strcpy(entry->filename, resource->name);
         fileData = fileResolvePrimaryBuffer(D_004386C0);
         memcpy(resource->buffer, fileData, resource->size);
-        D_004386BC = func_002FC340(resource);
-        D_004386F4 = func_002FC9B8(entry);
+        D_004386BC = effQueueEffectFileJob(resource);
+        D_004386F4 = effFindAssetObject(entry);
         *(u8 **)(D_004386F4 + 0x34) = D_003FFA78;
         func_00303C50();
         if (D_004386C4 != 0) {
@@ -8343,7 +8343,7 @@ u32 effLoadMappedResource(s32 category, s32 index) {
     u32 resource;
     func_0035C860(path, D_004387E8, category, index);
     handle = func_00343ED0(path, &buffer, 0);
-    resource = func_00304938(buffer);
+    resource = effCreateMappedResource(buffer);
     func_003297C8(handle);
     return resource;
 }
@@ -8355,7 +8355,7 @@ void func_00304258(u64 job, u32 *result) {
 
     handle = fileGetResourceHandle();
     buffer = sdfResourceRetainAddress(handle);
-    resource = func_00304938(buffer);
+    resource = effCreateMappedResource(buffer);
     *result = resource;
     func_003297C8(handle);
     func_002C7D00(job);
@@ -8494,7 +8494,7 @@ typedef struct EffMappedResource {
 
 extern void *func_00304768(u32, EffMappedHeader *);
 
-u32 func_00304938(u32 source) {
+u32 effCreateMappedResource(u32 source) {
     EffMappedResource *work = (EffMappedResource *)func_00328D68(0xC);
     EffMappedHeader header;
 

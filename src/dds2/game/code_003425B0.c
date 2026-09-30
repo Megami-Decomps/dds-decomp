@@ -403,7 +403,32 @@ u64 func_003440D8(u64 arg0, s32 *out) {
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfRelocatePackedResourceWords);
+void sdfRelocatePackedResourceWords(s32 *words, s32 base, u8 *table, s32 size) {
+    u8 *cursor = table;
+    s32 value;
+    s32 i;
+
+    while (cursor - table < size) {
+        value = *cursor++;
+        if ((value & 1) == 0) {
+            value >>= 1;
+        } else if ((value & 2) == 0) {
+            value = (value | *cursor++ << 8) >> 2;
+        } else if ((value & 4) == 0) {
+            value = (value | cursor[0] << 8 | cursor[1] << 16) >> 3;
+            cursor += 2;
+        } else {
+            value = (value >> 3) + 2;
+            for (i = 0; i < value; i++) {
+                words++;
+                *words += base;
+            }
+            continue;
+        }
+        words += value;
+        *words += base;
+    }
+}
 
 void sdfStreamNodeUnlink(SdfStreamNode *node, s32 inInterrupt) {
     s32 interruptsEnabled = 0;

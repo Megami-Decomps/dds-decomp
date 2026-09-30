@@ -121,7 +121,7 @@ struct SdfRouteNode {
     SdfRouteOwner *root;
 };
 
-extern void sdfBuildQuadPacket102(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildQuadPacket(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfBuildPacket116(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -202,7 +202,7 @@ typedef struct SdfLink {
 } SdfLink;
 
 /* Detach the pending chain and clear each node's peer back-reference. */
-SdfLink *sdfDetachPendingList(void) {
+SdfLink *sdfDetachQueue(void) {
     SdfLink *head = D_00439160;
     SdfLink *link;
 
@@ -221,7 +221,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CBF0);
 
 /* Hand the oldest pending slot to the worker, shift the slot list down and
  * refill the last slot with the newly detached list. */
-void func_0032CCC0(void) {
+void sdfRotatePendingSlots(void) {
     u32 i;
 
     D_00439164 = 1;
@@ -230,7 +230,7 @@ void func_0032CCC0(void) {
     for (i = 0; i < 1; i++) {
         D_00439158[i] = D_00439158[i + 1];
     }
-    D_00439158[1] = (s32)sdfDetachPendingList();
+    D_00439158[1] = (s32)sdfDetachQueue();
     SignalSema(D_004389FC);
     D_00439164 = 0;
 }
@@ -258,7 +258,7 @@ u64 sdfGraphHasPendingWork(void) {
 }
 
 /* Preserve interrupt state while querying pending work. */
-u64 sdfGraphHasPendingWorkInterruptSafe(void) {
+u64 sdfCheckPendingWorkWithInterrupts(void) {
     s64 interruptState;
     u64 pendingWork;
 
@@ -314,7 +314,7 @@ void sdfSetPacketCursorAligned(s32 cursor) {
 }
 
 /* Clear all links and metadata before building a new packet list. */
-void sdfResetPacketList(SdfListHead *list) {
+void sdfInitPacketList(SdfListHead *list) {
     list->unkC = 0xFFFF;
     list->unk0 = 0;
     list->first = 0;
@@ -475,7 +475,7 @@ typedef struct SdfRefNode {
 } SdfRefNode;
 
 /* Give each pending reference (+0x14, then +0x10) its own DMA node, chained in front of the list. */
-void func_0032D2A8(SdfListHead *list) {
+void sdfChainReferenceNodes(SdfListHead *list) {
     SdfRefNode *node;
     u32 address;
     u32 source;
@@ -509,7 +509,7 @@ typedef struct SdfPoolNode {
 } SdfPoolNode;
 
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
-s32 func_0032D340(SdfPoolNode *node) {
+s32 sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfPoolNode *tail = NULL;
     s32 head = 0;
 
@@ -520,7 +520,7 @@ s32 func_0032D340(SdfPoolNode *node) {
                 func_0032D218(tail, node->first);
             } else {
                 head = node->first;
-                func_0032D2A8((SdfListHead *)head);
+                sdfChainReferenceNodes((SdfListHead *)head);
             }
             tail = (SdfPoolNode *)node->last;
         }
@@ -645,7 +645,7 @@ typedef struct SdfSceneNode {
 
 extern void func_0032D898();
 
-void func_0032DA50(SdfSceneNode *node, SdfViewBox *view) {
+void sdfInitSceneNode(SdfSceneNode *node, SdfViewBox *view) {
     func_0032D460(&node->header, 0x15);
     node->view = view;
     node->handler = func_0032D898;
@@ -747,7 +747,7 @@ s32 sdfAllocatePacketList(s32 (*allocate)(s32)) {
         allocator = sdfAllocPacketAligned;
     }
     list = allocator(0x20);
-    sdfResetPacketList((SdfListHead *)list);
+    sdfInitPacketList((SdfListHead *)list);
     return list;
 }
 
@@ -1107,7 +1107,7 @@ void func_00330430(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     sdfAppendPacket(list, buffer);
 }
 
-void sdfBuildQuadPacket102(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+void sdfBuildQuadPacket(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
     u64 *packet = (u64 *)address;
     u64 hi = (u64)g << 32;
 
@@ -1131,7 +1131,7 @@ void func_003305D0(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     buffer = alloc(0x60);
     *(u64 *)buffer = 0x20000005ULL;
     *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
-    sdfBuildQuadPacket102(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildQuadPacket(buffer + 0x10, a, b, c, d, e, f, g);
     sdfAppendPacket(list, buffer);
 }
 
@@ -1239,7 +1239,7 @@ typedef struct SdfTree {
 } SdfTree;
 
 /* Store every node of the tree, in depth-first order, into the list's element array. */
-void func_00330A18(SdfTree *tree) {
+void sdfCollectTreeNodes(SdfTree *tree) {
     SdfTreeNode **elements = (SdfTreeNode **)tree->list->elements;
     SdfTreeNode *node = tree->root;
     SdfTreeNode **out;
@@ -1274,7 +1274,7 @@ void func_00330A88(s32 *list, u32 owner, u32 node) {
     temp_v0 = *(s16 *)(temp_v2 + 4);
     temp_v3 = temp_v0 + 1;
     if ((s64)*(s16 *)(temp_v2 + 6) < (s64)temp_v3) {
-        func_00340558(temp_v2);
+        sdfDevBufferedRequestGrow(temp_v2);
         temp_v2 = *list;
     }
     temp_v1 = *(s32 *)(temp_v2 + 0xc);

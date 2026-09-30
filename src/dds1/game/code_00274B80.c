@@ -158,7 +158,7 @@ extern void func_0027C788(s32);
 extern void func_0027C770(s32);
 extern void func_0027C758(s32);
 extern void func_0027C658(s32);
-extern void menuPlayInputSound(s32, u32, s32);
+extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
 
@@ -189,11 +189,11 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274D48);
 
 void func_00274EE0(s32 arg0) {
-    func_0027C430((u32)((PartyMenuHead *)((CampMenuContext *)arg0)->menu)->selection);
+    mnuDestroyWindowContainer((u32)((PartyMenuHead *)((CampMenuContext *)arg0)->menu)->selection);
 }
 
 /* Snapshot five party entries; at most three active slots are displayed. */
-void menuCopyPartyEntries(context)
+void mnuCopyPartyEntries(context)
     s32 context;
 {
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
@@ -243,8 +243,8 @@ void mnuRestorePartyEntriesAndRefresh(context)
     }
     panel = context + 0x15C;
     func_0027F0D8(panel);
-    initPartyPanelSlots(context + 0x7EC);
-    menuUpdateHandleStates(panel);
+    mnuInitPartyPanelSlots(context + 0x7EC);
+    mnuUpdateHandleStates(panel);
     func_00280048(panel);
 }
 
@@ -260,19 +260,19 @@ s32 mnuCountActiveSlots(void) {
     return (active < 4) ? active : 3;
 }
 
-extern void menuCopyPartyEntries();
+extern void mnuCopyPartyEntries();
 
 void mnuClearPartySelectionAndActivateSlots(s32 context) {
     s32 menu = ((CampMenuContext *)context)->menu;
     s32 i;
     s32 node;
 
-    menuCopyPartyEntries();
+    mnuCopyPartyEntries();
     ((PartyMenuData *)menu)->selection = 0;
     memset(((PartyMenuData *)menu)->backup, 0, 0x834);
     ((CampMenuContext *)context)->activePanel = 1;
     ((CampMenuContext *)context)->finalPanelSlot = mnuCountActiveSlots() - 1;
-    menuUpdateHandleStates(context + 0x15C);
+    mnuUpdateHandleStates(context + 0x15C);
     for (i = 0; i < 5; i++) {
         ((PartyPanelSlot *)(context + 0x1D8))[i].flags |= 0x80;
     }
@@ -283,8 +283,8 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 
 void mnuRefreshPartyPanelSlots(s32 context) {
     func_0027F0D8(context + 0x15c);
-    initPartyPanelSlots(context + 0x7ec);
-    menuUpdateHandleStates(context + 0x15c);
+    mnuInitPartyPanelSlots(context + 0x7ec);
+    mnuUpdateHandleStates(context + 0x15c);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
@@ -363,7 +363,7 @@ s64 func_00276250(s32 callback) {
     return menuRunPanel(func_00101A70(), 2, callback);
 }
 
-u8 func_00276288(void) {
+u8 mnuIsStateNotOne(void) {
     s64 result;
 
     result = func_002877A8();
@@ -631,7 +631,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuBuildEquippedSlots);
 u32 func_00277C80() {
     s32 context = func_00101A70();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
-    func_0027C430(menu->selectedList);
+    mnuDestroyWindowContainer(menu->selectedList);
     menu->selectedList = 0;
     return 1;
 }
@@ -699,7 +699,7 @@ extern s32 func_002D03F8(s32);
 extern s32 *sdfResourceRetainAddress(s32);
 extern void func_0027E790();
 
-s32 campMenuInit(void) {
+s32 mnuCampMenuInit(void) {
     s32 context = func_00101A70();
     s32 handle = func_002D03F8(0x38);
     s32 *menu = sdfResourceRetainAddress(handle);
@@ -739,7 +739,7 @@ s32 func_00278868(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuShellUpdate);
 
-s64 campMenuDrawSlotLabel(s32 param) {
+s64 mnuCampMenuDrawSlotLabel(s32 param) {
     s32 context = func_00101A70();
     s32 *slot;
 
@@ -798,7 +798,7 @@ u32 func_00278D68(void) {
 extern void ptyRecomputeMaxHpMp();
 extern void scrClearSecondaryScriptFlag();
 
-void func_00278D90(s32 obj, s32 id, s32 slot) {
+void mnuAddPartySkillIfMissing(s32 obj, s32 id, s32 slot) {
     u16 code = id;
 
     if (ptyHasSkill(obj, code) == 0) {
@@ -808,12 +808,12 @@ void func_00278D90(s32 obj, s32 id, s32 slot) {
     }
 }
 
-void func_00278E08(s32 arg0, s32 arg1) {
+void mnuClearPartySkillSlot(s32 arg0, s32 arg1) {
     ((PartySkillSlots *)arg0)->code[arg1] = 0;
     ptyRecomputeMaxHpMp();
 }
 
-void campMenuHandleInput(void) {
+void mnuCampMenuHandleInput(void) {
     s32 context = func_00101A70();
     s32 menu = ((CampMenuContext *)context)->menu;
     u32 input = func_00285B20(0x33);
@@ -845,13 +845,13 @@ void campMenuHandleInput(void) {
             func_0027C758(node);
         }
         func_0027C658(node);
-        menuPlayInputSound(0, input, (s32)((MenuInputNode *)node)->flags);
+        mnuPlayInputSound(0, input, (s32)((MenuInputNode *)node)->flags);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuHandleSelection);
 
-void func_00279130(s32 entry, s32 firstSlot, s32 secondSlot) {
+void mnuSwapPartySkillSlots(s32 entry, s32 firstSlot, s32 secondSlot) {
     u8 *slotBase = (u8 *)(entry + 2);
     s32 firstOffset = firstSlot * 2 + 32;
     s32 secondOffset = secondSlot * 2 + 32;

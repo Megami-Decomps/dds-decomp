@@ -109,17 +109,10 @@ extern void *func_002183D0(void *arg);
 
 extern void *func_002183E0(void *arg);
 
-/* Callback table at D_0037E14C (0x28 bytes per entry). */
+/* Callback table at D_003B0044 (0x28 bytes per entry). */
 typedef struct Cb3714C {
-    void (*cb)(void *arg);    /* 0x00 */
-    u8 pad4[8];               /* 0x04 */
-    void (*cbC)(void *, void *); /* 0x0C */
-    void (*cb10)(void *arg);  /* 0x10 */
-    void (*cb14)(void *arg);  /* 0x14 */
-    void (*cb18)(void *arg, void *extra);  /* 0x18 */
-    void (*cb1C)(void *arg);  /* 0x1C */
-    void (*cb20)(void *arg);  /* 0x20 */
-    u32 unk24;                /* 0x24 */
+    void (*cb)(void *arg); /* 0x00 */
+    u8 pad4[0x24];         /* 0x04 */
 } Cb3714C;
 
 extern Cb3714C D_00353714[];
@@ -151,7 +144,12 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001629F0);
 
-INCLUDE_ASM(const s32, "game/code_001624D0", effParamWorkInvokeCallback);
+/* Invoke the kind-specific callback on this parameter block. */
+void effParamWorkInvokeCallback(EffParamWork *work) {
+    u16 id = work->id;
+
+    D_00353714[id].cb(work->data);
+}
 
 EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
     EffParamWork *work;
@@ -240,7 +238,7 @@ void effParamInitFromGlobal(void *work) {
 }
 
 void func_00162DE0(void) {
-    func_002177D0();
+    mdlDestroyContext();
 }
 
 /* Assemble a parameter work item from the two pieces extracted from source. */

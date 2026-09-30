@@ -65,7 +65,7 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E3F58);
 
 /* Forward a character and explicit attribute to the console renderer. */
-void sdfDevConsWriteCharacterWithAttribute(DevConsState *console, s32 character, s32 attribute) {
+void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {
     func_002E3F58(console, character, attribute);
 }
 

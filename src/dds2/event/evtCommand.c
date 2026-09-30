@@ -19,7 +19,7 @@ void func_0010BFE0(void);
 
 void evtSubmitEventRequest(s32 arg0, s32 arg1);
 
-void func_00144F60(void);
+void fldPlayCurrentBgmSound(void);
 
 void func_0012EBF8(u32 arg0, s32 arg1);
 
@@ -27,9 +27,9 @@ extern u32 D_004371E8;
 
 void evtSubmitEventRequestImmediate(s32 arg0);
 
-void func_00144EE0(void);
+void fldStopCurrentBgm(void);
 
-void func_00144F08(void);
+void fldReleaseCurrentBgm(void);
 
 char *scrReadStringParameter(s32 idx);
 
@@ -53,9 +53,9 @@ void func_0010AE38(const char *fmt, ...);
 
 void func_0023A9E0(void);
 
-s32 sdfGraphHasPendingWorkInterruptSafe(void);
+s32 sdfCheckPendingWorkWithInterrupts(void);
 
-void evtDestroyWorldSecondaryNode(void);
+void evtDestroySecondaryWorldNode(void);
 
 extern u32 D_00435CD4;
 
@@ -71,7 +71,7 @@ void effObjSetFlags(void *unit, s32 flag);
 
 s32 evtGetMirroredSolarPhase(void);
 
-s32 evtGetRawSolarPhase(void);
+s32 evtGetSolarPhase(void);
 
 void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits);
 
@@ -107,7 +107,7 @@ void evtClearWorldSlotStatusFlag();
 
 void func_0023AE08(s32 arg0, f32 arg1);
 
-s32 func_00154FA0(char *name);
+s32 fldParseRoomNumberFromName(char *name);
 
 s32 func_001235E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
@@ -314,7 +314,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
 {
     s32 args[2];
 
-    func_00144F60();
+    fldPlayCurrentBgmSound();
     func_0012EBF8(2, eventId);
     D_004371E8 = requestMode;
     args[0] = 0;
@@ -336,7 +336,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
 {
     s32 args[2];
 
-    func_00144EE0();
+    fldStopCurrentBgm();
     func_0012EBF8(2, eventId);
     D_004371E8 = 0;
     args[0] = 0;
@@ -373,7 +373,7 @@ s32 func_002415E8(void)
     char *textArg;
     u8 request[0xa0];
 
-    func_00144F08();
+    fldReleaseCurrentBgm();
     firstArg = scrReadIntParameter(0);
     secondArg = scrReadIntParameter(1);
     textArg = scrReadStringParameter(2);
@@ -469,10 +469,10 @@ u32 func_00241868(void) {
 s32 evtCommandShutdownStage(void)
 {
     func_0023A9E0();
-    while (sdfGraphHasPendingWorkInterruptSafe()) {
+    while (sdfCheckPendingWorkWithInterrupts()) {
     }
-    evtDestroyWorldSecondaryNode();
-    while (sdfGraphHasPendingWorkInterruptSafe()) {
+    evtDestroySecondaryWorldNode();
+    while (sdfCheckPendingWorkWithInterrupts()) {
     }
     D_00435CD4 |= 0x2000000;
     func_0035B6E0("event stage shutdown !!\n");
@@ -483,10 +483,10 @@ s32 evtCommandShutdownStage(void)
 s32 evtCommandShutdownStageAlternate(void)
 {
     func_0023A9E0();
-    while (sdfGraphHasPendingWorkInterruptSafe()) {
+    while (sdfCheckPendingWorkWithInterrupts()) {
     }
-    evtDestroyWorldSecondaryNode();
-    while (sdfGraphHasPendingWorkInterruptSafe()) {
+    evtDestroySecondaryWorldNode();
+    while (sdfCheckPendingWorkWithInterrupts()) {
     }
     D_00435CD4 |= 0x2000000;
     func_0035B6E0("event stage shutdown2 !!\n");
@@ -505,7 +505,7 @@ s32 evtCommandClearAllUnits(void)
 s32 func_002419B0(void)
 {
     func_0023A9E0();
-    while (sdfGraphHasPendingWorkInterruptSafe()) {
+    while (sdfCheckPendingWorkWithInterrupts()) {
     }
     func_0035B6E0("unit all clear2 !!\n");
     func_0010AE38("unit all clear2.\n");
@@ -652,7 +652,7 @@ s32 evtCommandReadMirroredSolarPhase(void)
 
 s32 evtCommandReadSolarPhase(void)
 {
-    func_0010D818(evtGetRawSolarPhase());
+    func_0010D818(evtGetSolarPhase());
     return 1;
 }
 
@@ -810,7 +810,7 @@ s32 func_00242918(void) {
     if (owner == 0) {
         return 1;
     }
-    count = func_00154FA0(owner);
+    count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
             func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
@@ -842,7 +842,7 @@ s32 func_00242A30(void) {
     if (owner == 0) {
         return 1;
     }
-    count = func_00154FA0(owner);
+    count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (scrReadIntParameter(1) == 0) {
             func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);

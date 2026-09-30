@@ -34,7 +34,7 @@ s32 mnuCheckResourceTask(void) {
 }
 
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskPair(D_00437924);
+    sdfDestroyTaskWorkerTasks(D_00437924);
     D_00437924 = 0;
 }
 

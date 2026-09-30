@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "pcp_vu0.h"
 
 extern s32 D_003BB014;
@@ -50,10 +51,15 @@ typedef struct ParCell {
 } ParCell; /* 0x14 */
 
 extern ParDispatch D_0034E250[];
+
 extern s32 func_00151E60(s32);
+
 extern void func_00152000(s32, f32, f32);
-extern void effBillSetMode(s32, s16);
+
+extern void billSetBillboardMode(s32, s16);
+
 extern void func_001523B0(s32);
+
 extern ParDispatch D_0034E258[];
 
 extern void (*D_0034E5E0[])(void *, void *, void *);
@@ -77,6 +83,20 @@ typedef struct ParSystem {
     u8 pad0C[8];
     ParCell *cells;      /* 0x14 */
 } ParSystem;
+
+typedef struct ParScaleObj {
+    u16 kind;
+    u8 pad2[6];
+    f32 scale; /* 0x8 */
+} ParScaleObj;
+
+extern f32 D_003D6490[];
+
+extern f32 D_003D64A0[];
+
+extern u8 D_00324680[];
+
+extern u8 D_00324690[];
 
 void func_0015A758(ParObj *work, u32 value) {
     work->valueF0 = value;
@@ -136,7 +156,7 @@ ParObj *parInstantiateKind(ParObj *work) {
     if (work->unk28 == -1) {
         s32 transform = func_00151E60(work->billId);
         func_00152000(transform, particle->unk10, particle->unk14);
-        effBillSetMode(transform, particle->unk2C);
+        billSetBillboardMode(transform, particle->unk2C);
         func_001523B0(transform);
         particle->billId = transform;
     }
@@ -180,11 +200,42 @@ void func_0015AD98(ParObj *work, u8 value) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADD0);
+/* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
+ * shared vector and store the (vf10 - vf11) difference. */
+void func_0015ADD0(ParScaleObj *obj) {
+    f32 scale;
+
+    switch (obj->kind) {
+    case 0:
+    case 1:
+        return;
+    case 2:
+        scale = obj->scale;
+        D_003D64A0[0] = D_003D64A0[1] = D_003D64A0[2] = scale;
+        break;
+    case 3:
+        scale = obj->scale;
+        D_003D64A0[0] = D_003D64A0[1] = D_003D64A0[2] = scale;
+        break;
+    case 4:
+        scale = obj->scale;
+        D_003D64A0[0] = D_003D64A0[1] = D_003D64A0[2] = scale;
+        break;
+    default:
+        return;
+    }
+    VU0_LOAD_VF($vf10, D_00324680);
+    VU0_LOAD_VF($vf11, D_00324690);
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    VU0_STORE_VF($vf10, D_003D6490);
+}
 
 extern void func_00159CF0(s32);
+
 extern void func_0015AF70(s32, s32, u32);
+
 extern void func_0015B058(s32, s32, u32);
+
 extern void func_0015B148(s32, s32, u32);
 
 void parDispatchKindUpdate(void *work, s32 index, u32 color) {
@@ -205,6 +256,7 @@ void parDispatchKindUpdate(void *work, s32 index, u32 color) {
 }
 
 extern void parClearSlotFlag(s32);
+
 extern void func_00188510(s32);
 
 void parDispatchKindInit(void *work, s32 index) {
@@ -224,9 +276,8 @@ void parDispatchKindInit(void *work, s32 index) {
     }
 }
 
-extern u8 D_003D6490[];
-extern u8 D_003D64A0[];
 extern void effBillSetEntryValue(s32, s32, u32);
+
 extern void func_0015BB90(s32, s32);
 
 void func_0015AF70(s32 particle, s32 index, u32 color) {
@@ -259,10 +310,8 @@ void func_0015AF70(s32 particle, s32 index, u32 color) {
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-
-extern u8 D_003D6490[];
-extern u8 D_003D64A0[];
 extern void effBillSetEntryValue(s32, s32, u32);
+
 extern void func_0015BCE8(s32, s32);
 
 void func_0015B058(s32 particle, s32 index, u32 color) {
@@ -295,10 +344,8 @@ void func_0015B058(s32 particle, s32 index, u32 color) {
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-
-extern u8 D_003D6490[];
-extern u8 D_003D64A0[];
 extern void func_001884E8(s32, s32, void *);
+
 extern void func_00188538(s32, s32, u32);
 
 void func_0015B148(s32 particle, s32 index, u32 color) {
@@ -329,7 +376,6 @@ void func_0015B148(s32 particle, s32 index, u32 color) {
     func_001884E8(particle, index, axis);
     func_00188538(particle, index, (color & 0xFF000000) | 0x808080);
 }
-
 
 u32 func_0015B220(void) {
     return 0;
@@ -412,7 +458,6 @@ void func_0015B9E0(ParSystem *system, s32 index, void *delta) {
     }
 }
 
-
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BA38);
 
 void func_0015BB00(ParSystem *system, s32 index, void *delta) {
@@ -442,7 +487,6 @@ void func_0015BB00(ParSystem *system, s32 index, void *delta) {
         } while (i != 0);
     }
 }
-
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BB90);
 
@@ -556,6 +600,7 @@ typedef struct ParBlock {
 } ParBlock;
 
 extern s32 func_002DA730();
+
 extern void func_002DA420(s32, f32);
 
 ParBlock *func_0015D710(s32 count) {
@@ -574,7 +619,6 @@ ParBlock *func_0015D710(s32 count) {
     func_002DA420(block->object, 1.0f);
     return block;
 }
-
 
 void func_0015D7B8(s32 arg0) {
     sdfQueueAssetRelease(*(u32 *)(arg0 + 0x10));
@@ -603,9 +647,13 @@ typedef struct ParDrawCmd {
 } ParDrawCmd;
 
 extern s32 sdfAllocPacketAligned(s32);
+
 extern void sdfInitPacketList(s32);
+
 extern void sdfConsAppendClearPacket(s32, s32);
+
 extern void sdfAppendPacket(s32, s32);
+
 extern s32 func_0015FE20(ParDrawState *);
 
 void func_0015D7E8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
@@ -634,7 +682,6 @@ void func_0015D7E8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     }
     emitter->finish(emitter, list);
 }
-
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D910);
 

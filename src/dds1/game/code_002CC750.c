@@ -742,7 +742,7 @@ void func_002CF3A0(s32 arg0) {
     func_00296F58(arg0 + 0x14, arg0 + 0x38, 0, 0);
 }
 
-void scrSetRgbAndAlpha(RgbAlpha *p, u32 color) {
+void itfSetPackedRgbAlpha(RgbAlpha *p, u32 color) {
     p->rgb = color & 0xFFFFFF;
     p->alpha = color >> 24;
 }

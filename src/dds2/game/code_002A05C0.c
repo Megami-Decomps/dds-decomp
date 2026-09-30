@@ -600,7 +600,7 @@ u32 func_002A3AA0(void) {
 }
 
 void func_002A3AC0(void) {
-    evtDestroyWorldSecondaryNode();
+    evtDestroySecondaryWorldNode();
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();
 }

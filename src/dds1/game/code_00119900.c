@@ -172,7 +172,7 @@ void ptyRecoverAllUnits(void) {
     } while (remaining >= 0);
 }
 
-s32 func_00119E88(u32 mask, s32 mode) {
+s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
     s32 i = 0;
 
@@ -530,7 +530,7 @@ s32 func_0011BE90(void) {
     return 1;
 }
 
-s32 func_0011BED0(void) {
+s32 evtSelectScriptStatValue(void) {
     s32 value;
 
     switch (((EvtScriptContext *)D_003C2E70)->options) {

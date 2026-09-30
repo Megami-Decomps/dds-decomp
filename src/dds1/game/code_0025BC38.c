@@ -46,7 +46,7 @@ typedef struct MovieCueNode {
 } MovieCueNode;
 
 extern void func_0025BA20(s32, s32, u8 *, s32);
-extern u8 *func_002CAF78(s32, u8 *);
+extern u8 *sdfListRemoveNode(s32, u8 *);
 
 s32 mnuTickResourceGroup(s32 owner, s32 group) {
     u8 *list = *(u8 **)(group + 8);
@@ -64,7 +64,7 @@ s32 mnuTickResourceGroup(s32 owner, s32 group) {
             func_0025BA20(owner, group, (u8 *)node, node->cueIndex);
         }
         if (node->framesLeft == 0) {
-            list = func_002CAF78(group, list);
+            list = sdfListRemoveNode(group, list);
         } else {
             list = *(u8 **)(list + 8);
         }
@@ -81,7 +81,7 @@ typedef struct {
     u32 resourceHandle; /* 0x6C */
 } MenuResourceWork;
 
-u32 mnuRequestResourceWork(u32 ctx, u32 config) {
+u32 mnuRequestEffectResource(u32 ctx, u32 config) {
     MenuResourceWork *work = (MenuResourceWork *)func_002CFEB8(0x70);
     memset(work, 0, 0x70);
     effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
@@ -98,11 +98,11 @@ typedef struct {
     MenuListNode *first; /* 0x08 */
 } MenuListHead;
 
-u8 mnuHasResourceHandle(MenuResourceWork *work) {
+u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
     return work->resourceHandle != 0;
 }
 
-void mnuReleaseResourceWork(MenuResourceWork *work) {
+void mnuReleaseEffectResource(MenuResourceWork *work) {
     func_002BDD60(work->resourceHandle);
     func_002CFF98(work);
 }
@@ -190,7 +190,7 @@ typedef struct Bytes7 {
 extern Bytes7 D_003BC4E8[];
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-void func_0025D798(s32 x, s32 y, s32 z, s32 entry, s32 arg4, s32 arg5) {
+void mnuDrawMantraCostIcon(s32 x, s32 y, s32 z, s32 entry, s32 arg4, s32 arg5) {
     Bytes7 table = D_003BC4E8[0];
 
     func_0024E260(x - 0x19, y + 0x5C, z, arg4, table.b[*(u16 *)(entry + 4)], arg5);
@@ -270,11 +270,11 @@ s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 extern s32 mnuAdvanceDisplayList(s32, s32, s32);
-extern void func_0025D798(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraCostIcon(s32, s32, s32, s32, s32, s32);
 
 void func_0025DD80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     if (mnuAdvanceDisplayList(arg1, arg2, arg3) != 0) {
-        func_0025D798(0, 0, 0, arg0, arg2, arg3);
+        mnuDrawMantraCostIcon(0, 0, 0, arg0, arg2, arg3);
     }
 }
 

@@ -8,7 +8,7 @@ extern s32 func_0024D9D8(s32);
 extern s32 func_00244848();
 extern s32 D_003BC520;
 extern s32 func_0019D208(s32, s32);
-extern void func_00243440();
+extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
 
@@ -62,7 +62,7 @@ void mnuCampCreateTask(s32 taskId) {
     }
 }
 
-void campDestroyTaskById(void) {
+void mnuCampDestroyTaskById(void) {
     s64 task;
 
     task = evtFindTaskById();
@@ -73,7 +73,7 @@ void campDestroyTaskById(void) {
 }
 
 /* Drain every camp task at the scheduler priority used during creation. */
-void campDestroyAllTasks(void) {
+void mnuCampDestroyAllTasks(void) {
     s64 task;
 
     while (task = kwlnTaskFindByPriority(CAMP_TASK_PRIORITY), task != 0) {
@@ -155,7 +155,7 @@ typedef struct FxWorld {
     FxNode *nodes;        /* 0x2034 */
 } FxWorld;
 
-void func_00242780(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
+void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
     FxNode *node;
     FxChild *child;
     s32 total;
@@ -229,7 +229,7 @@ void func_00242780(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offse
     evtViewerDispatchFlagMode(world);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242950);
+INCLUDE_ASM(const s32, "game/code_00242608", mnuFxWorldDropOutOfRange);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002429F0);
 
@@ -337,7 +337,7 @@ s32 func_00243390(CampWorld *scene) {
     for (node = scene->entries; node != NULL; node = node->next) {
         if (node->kind == 4) {
             for (child = node->children; child != NULL; child = child->next) {
-                func_00243440(child, &low, &high);
+                mnuUnpackNibbleFields(child, &low, &high);
                 if (func_0019D208(scene->owner->handle, low) == 1) {
                     return 1;
                 }
@@ -355,7 +355,7 @@ typedef struct CampPacked {
     } value;
 } CampPacked;
 
-void func_00243440(CampPacked *src, s32 *low, s32 *high) {
+void mnuUnpackNibbleFields(CampPacked *src, s32 *low, s32 *high) {
     *low = src->value.packed & 0xFFF;
     *high = src->value.packed >> 12;
 }
@@ -388,7 +388,7 @@ typedef struct {
     s32 registeredIds[10]; /* 0x2448 */
 } CampScene;
 
-s32 campFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
+s32 mnuCampFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
     CampEntryNode *node = scene->entries;
     while (node != NULL) {
         if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24,
@@ -458,7 +458,7 @@ void func_00243558(CampScene *scene, CampCue *cue) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243608);
 
-void campResetEntryStatus(CampScene *scene) {
+void fldResetCampSceneEntries(CampScene *scene) {
     CampEntryNode *node;
 
     node = scene->entries;
@@ -762,7 +762,7 @@ typedef struct ShopSprite {
     ShopBuf *data;   /* 0x14 */
 } ShopSprite;
 
-extern void func_0027C430();
+extern void mnuDestroyWindowContainer();
 extern void func_002CFF98();
 
 void mnuShopReleaseSprites(u8 *scene) {
@@ -777,11 +777,11 @@ void mnuShopReleaseSprites(u8 *scene) {
             sprite = *slot;
             sprite->data->buffer = NULL;
         }
-        func_0027C430(sprite);
+        mnuDestroyWindowContainer(sprite);
         slot++;
     }
     if (*(s32 *)(scene + 0x70) != 0) {
-        func_0027C430(*(s32 *)(scene + 0x70));
+        mnuDestroyWindowContainer(*(s32 *)(scene + 0x70));
     }
 }
 

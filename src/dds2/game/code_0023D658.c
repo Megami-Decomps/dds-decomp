@@ -98,11 +98,11 @@ extern u8 D_00421B70[];
 
 extern s32 func_0023A7A0(s32 arg0, s32 arg1);
 
-extern void evtUnitSetStateBits(EvtUnit *unit);
+extern void evtSetUnitStatusFlags(EvtUnit *unit);
 
 extern void func_0023CB68(EvtUnit *unit, s32 arg1);
 
-extern u8 evtUnitHasStateBits(EvtUnit *unit);
+extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
 extern void evtSetUnitValueTransition(EvtUnit *unit, void *arg1, s32 arg2);
 
@@ -147,7 +147,7 @@ extern f32 func_00240640(s32);
 extern void func_00197F40(void *, f32);
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
-void func_0023D658(EvtUnit *eventUnit, s128 *sourceVector, s32 stepCount) {
+void evtBeginVectorTransition(EvtUnit *eventUnit, s128 *sourceVector, s32 stepCount) {
     s128 *destination = &eventUnit->vector;
 
     if ((u32)(stepCount - 1) < 100) {
@@ -167,7 +167,7 @@ void evtAttachSecondaryWorldUnit(EvtUnit *eventUnit, s32 objectId, s32 stepCount
 
     sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (sourceUnit != NULL) {
-        func_0023D658(eventUnit, (s128 *)(*(u32 *)((u8 *)sourceUnit + 0x18) + 0x10), stepCount);
+        evtBeginVectorTransition(eventUnit, (s128 *)(*(u32 *)((u8 *)sourceUnit + 0x18) + 0x10), stepCount);
         eventUnit->sourceUnit = sourceUnit;
     }
 }
@@ -234,7 +234,7 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
     func_00110C70(world, id, kind);
 }
 
-u32 evtCommandGetSelectedUnitValue(void) {
+u32 evtGetWorldObjectId(void) {
     void *world;
     EvtUnit *object;
     s32 id;
@@ -721,7 +721,7 @@ u32 func_0023FDC0(void) {
 
     id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
-    evtUnitSetStateBits(unit);
+    evtSetUnitStatusFlags(unit);
     return 1;
 }
 
@@ -744,7 +744,7 @@ u8 evtUnitHasNoStatusFlags(void) {
 
     id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
-    active = evtUnitHasStateBits(unit);
+    active = evtTestUnitStatusFlags(unit);
     return active == 0;
 }
 

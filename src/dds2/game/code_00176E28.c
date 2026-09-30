@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
@@ -28,6 +29,7 @@ typedef struct EffRecordPool {
 } EffRecordPool;
 
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
+
 #define EFFECT_RING_FULL_TURN (6.2831853f)
 
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
@@ -64,15 +66,22 @@ typedef struct EffectRing {
 } EffectRing;
 
 extern u32 func_003292A8(s32);
+
 extern u32 sdfResourceRetainAddress(u32);
+
 extern u8 *func_001781B0(u32);
+
 extern s32 effMiscRand(void *);
+
 extern u8 D_003AA868[];
 
 /* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
 /* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
+extern s32 func_00195A30(s32 color, s32 param);
+
 EffectRing *effCreateRingFan(source)
 EffectRing *source;
+
 {
     u32 handle;
     EffectRing *ring;
@@ -116,6 +125,7 @@ void effCreateRingFanFromParams(u64 params) {
     block = effParamTableGetBlock(params, 0);
     effCreateRingFan(block);
 }
+
 void func_00177098(void) {
     effCreateRingFan();
 }
@@ -144,7 +154,26 @@ void func_00177100(EffectRing *ring, void *src) {
     VU0_STORE_MATRIX(ring->matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", effFlashWriteRingColorSlots);
+void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
+    s32 slot;
+    s32 rgb1;
+    s32 rgb2;
+
+    slot = func_001784C8(*(void **)(work + 0x7C), index);
+    rgb1 = *(u32 *)(work + 0x28) & 0xFFFFFF;
+    rgb2 = *(u32 *)(work + 0x2C) & 0xFFFFFF;
+    *(s32 *)(slot + 0) = func_00195A30(rgb2, param);
+    *(s32 *)(slot + 4) = func_00195A30(rgb2, param);
+    if (index & 1) {
+        *(s32 *)(slot + 8) = func_00195A30(0x80000000, param);
+        *(s32 *)(slot + 0xC) = func_00195A30(rgb1 | 0xFF000000, param);
+        *(s32 *)(slot + 0x10) = func_00195A30(0x80000000, param);
+    } else {
+        *(s32 *)(slot + 8) = func_00195A30(0xFF000000, param);
+        *(s32 *)(slot + 0xC) = func_00195A30(rgb1 | 0x40000000, param);
+        *(s32 *)(slot + 0x10) = func_00195A30(0xFF000000, param);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177220);
 

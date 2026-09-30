@@ -56,7 +56,7 @@ void dds3SetSlotKey(ObjectWithResource *object, u32 resourceId) {
 
 /* Keep the old handle until it has been freed; the new resource is keyed
  * by resourceId rather than by the previous handle. */
-void dds3ReloadSlotPath(ObjectWithResource *object) {
+void dds3ReplaceObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
     u32 handle;
 
@@ -68,7 +68,7 @@ void dds3ReloadSlotPath(ObjectWithResource *object) {
     resource->handle = handle;
 }
 
-void dds3ReleaseSlotPath(ObjectWithResource *object) {
+void dds3ReleaseObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
     s32 handle;
 
@@ -80,7 +80,7 @@ void dds3ReleaseSlotPath(ObjectWithResource *object) {
     }
 }
 
-u32 dds3GetSlotPath(ObjectWithResource *object) {
+u32 dds3GetObjectResourceHandle(ObjectWithResource *object) {
     return object->resource->handle;
 }
 

@@ -10,10 +10,10 @@ void func_00232720(void);
 void func_00134C68(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
-void func_0022C408(u64 arg0);
+void evtEventViewerReset(u64 arg0);
 void *func_002329A0(s32 arg0);
 extern u32 D_003BA904;
-s32 func_0022BE40(s32 arg0);
+s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
 void func_0022FF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 dds3GetWorldObject(void);
@@ -605,7 +605,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 arg0, s32 arg1, EventViewerState *viewer) {
     s32 value = viewer->commandValue;
-    EvtViewEntry *entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
         return 0;
@@ -626,7 +626,7 @@ u32 func_00231C18(u32 unused0, u32 unused1, EventViewerState *viewer) {
     s32 slot;
 
     value = viewer->commandValue;
-    entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
         slot = viewer->sel->fieldSelector - 1;
         if ((u32)slot < 0x11u) {
@@ -661,7 +661,7 @@ u32 func_00231CC0(void) {
 u32 func_00231CC8(u32 unused0, u32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry;
 
-    entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
         entry->p0C.i = viewer->commandValue;
         func_0022E5A0(viewer->glyphAdvancePosition, viewer);
@@ -673,7 +673,7 @@ u32 func_00231CC8(u32 unused0, u32 unused1, EventViewerState *viewer) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231D18);
 
 u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
-    u8 *record = (u8 *)func_0022BE40((s32)scene);
+    u8 *record = (u8 *)evtEventViewerGetPendingNode((s32)scene);
     if (record != NULL) {
         f32 *dst = *(f32 **)(record + 0x2C);
         f32 *src = (f32 *)(scene + 0x2350);
@@ -695,7 +695,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
 
 /* Transfer a selected two-component viewer position to the command entry. */
 s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
         return 0;
@@ -719,7 +719,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231F18);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 arg0, s32 arg1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)func_0022BE40((s32)viewer);
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     entry->p0C.b[0] = viewer->slotType;
     entry->p0C.b[1] = viewer->slotFlag;
@@ -761,7 +761,7 @@ s32 evtViewCmdSelectMode(u32 arg0, u32 arg1, EventViewerState *viewer) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232108);
 
 u32 func_002323E8(u32 arg0, u32 arg1, u32 arg2) {
-    if (func_0022BE40(arg2) != 0) {
+    if (evtEventViewerGetPendingNode(arg2) != 0) {
         ((EventViewerState *)arg2)->unk22AC = 0;
         ((EventViewerState *)arg2)->unk22B4 = 0;
         func_0022FF30(0xa, 0x9c, 0x54, arg2);
@@ -794,7 +794,7 @@ void *func_00232A00(void) {
 
     viewer = func_00101A70();
     func_00134C68();
-    func_0022C408(viewer);
+    evtEventViewerReset(viewer);
     D_003BA904 |= 0x2000000;
     return (void *)func_002329A0;
 }
@@ -814,11 +814,11 @@ extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void func_002D0A10();
 extern void kwlnTextureReleaseHeldReference();
-extern void func_0022C4F0();
-extern void func_0022C478();
+extern void evtEventViewerReleaseGroups();
+extern void evtEventViewerShutdown();
 extern void func_002D0918();
 extern void func_00134CF0();
-extern void func_00106240();
+extern void kwlnFadeSetMode();
 void func_002300B8(s32 arg0);
 
 void evtViewerReleaseResources(viewer)
@@ -850,15 +850,15 @@ void evtViewerReleaseResources(viewer)
     kwlnTextureReleaseHeldReference();
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_0022C4F0(viewer);
-    func_0022C478(viewer);
+    evtEventViewerReleaseGroups(viewer);
+    evtEventViewerShutdown(viewer);
     func_002D0918(viewer->resourceHandle);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_00134CF0();
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_00106240(0);
+    kwlnFadeSetMode(0);
     D_003BA904 |= 0x2000000;
 }
 

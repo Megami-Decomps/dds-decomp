@@ -128,7 +128,7 @@ u32 evtSetSkyAlpha(void) {
         func_0010AE38("warning : SET_SKY_A alpha > 255\n");
         alpha = 255;
     }
-    evtStartSkyAlphaTransition(scrReadIntParameter(0), alpha);
+    evtBeginSkyParameterTransition(scrReadIntParameter(0), alpha);
     return 1;
 }
 
@@ -247,7 +247,7 @@ s32 evtGetMirroredSolarPhase(void) {
     return phase;
 }
 
-u8 evtGetRawSolarPhase(void) {
+u8 evtGetSolarPhase(void) {
     return ((SolarWorldState *)D_00435DD0)->phase;
 }
 

@@ -77,7 +77,7 @@ u32 func_0029AF40(void) {
     return 1;
 }
 
-void mnuClearSelectionWidths(MenuLayoutContext *context) {
+void mnuClearItemSelectionSlots(MenuLayoutContext *context) {
     s32 remaining;
     u32 *destination;
 

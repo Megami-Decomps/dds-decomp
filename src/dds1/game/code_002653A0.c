@@ -185,7 +185,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", ptyAccumulateStatGains);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyBuildProfileCapSkillList);
 
-void mnuInitTitleParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
+void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);
     state[0] = first;
     state[1] = second;
@@ -198,7 +198,7 @@ extern s32 ptyComputeTotalExp(u8 *, s32);
 extern s32 ptyAddProfilePoints(u8 *, s32);
 extern s8 ptyGetCurrentProfileId(u8 *);
 extern u32 prfGetCapValue(u16);
-extern void mnuInitTitleParameters(u32 *, u32, u32, u32, u32);
+extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
 typedef struct BrsUnitExp {
     u8 pad00[0x10];
@@ -220,11 +220,11 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
     memset(state, 0, 0x2C);
     ((BrsProgressRow *)state)->unit = (u32)entry;
     levelDelta = ptyCalcLevelUps(entry);
-    mnuInitTitleParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
+    mnuTitleInitFourParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
         ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
     profilePoints = ptyAddProfilePoints(entry, 0);
-    mnuInitTitleParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
+    mnuTitleInitFourParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
         prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 

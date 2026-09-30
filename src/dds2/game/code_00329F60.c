@@ -124,7 +124,7 @@ void sdfWaitAndSelectBuffer(void) {
     func_0033A0C8();
 }
 
-s32 func_0032A5A0(u32 format) {
+s32 sdfFormatBitsPerPixelA(u32 format) {
     switch (format) {
     case 0x0:
     case 0x1:
@@ -148,7 +148,7 @@ s32 func_0032A5A0(u32 format) {
     }
 }
 
-s32 func_0032A5F0(u32 format) {
+s32 sdfFormatBitsPerPixelB(u32 format) {
     switch (format) {
     case 0x0:
     case 0x30:
@@ -256,7 +256,7 @@ void sdfTexInitializeLists(void) {
     sdfInitializeSynchronizedRequest(&D_00439148, func_0032AA40);
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AB20);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfAllocImageBuffer);
 
 u32 func_0032ABC0(void) {
     return D_00439140;
@@ -266,7 +266,7 @@ u32 func_0032ABC8(void) {
     return D_00439144;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032ABD0);
+INCLUDE_ASM(const s32, "game/code_00329F60", sdfFormatImageSize);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AC30);
 
@@ -383,7 +383,7 @@ u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
     return texture->primaryResource->word;
 }
 
-s32 func_0032B270(u32 format) {
+s32 sdfFormatBitsPerPixelC(u32 format) {
     switch (format) {
     case 0:
         return 0x20;

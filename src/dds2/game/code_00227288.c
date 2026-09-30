@@ -19,7 +19,7 @@ extern void func_002C7CE8(void *);
 
 extern void sndReleaseSlotOwner(void *);
 
-extern void func_0020D128();
+extern void btlBossDebugPrintf();
 
 extern u8 *D_00435E20;
 
@@ -27,11 +27,11 @@ extern void *btlAllocateIndexList(s32);
 
 extern u32 func_001AC360(u64, u64, u64);
 
-extern u32 func_001E8058();
+extern u32 btlGetIndexListCount();
 
-extern void *func_001E8060(void *, u32);
+extern void *btlGetIndexListEntry(void *, u32);
 
-extern void func_001E8018(void *);
+extern void btlFreeIndexList(void *);
 
 extern u32 btlGetEffectActive(void);
 
@@ -400,7 +400,7 @@ extern s32 func_0022ED90(u8 *, u8 *, s32, u8 *, s32);
 
 extern void *sdfAllocPacketAligned(s32);
 
-extern void sdfResetPacketList(void *);
+extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, s32);
 
@@ -419,7 +419,7 @@ extern void func_00328E48(void *);
 
 extern void func_003298C0(void *);
 
-extern void func_002322E8(s32);
+extern void mdlDestroyContext(s32);
 
 extern void func_00234858(s32);
 
@@ -908,7 +908,7 @@ void func_0022A7D0(void) {
     if (cleanup != 0) {
         cleanup();
     }
-    func_0020D128(D_0041B628);
+    btlBossDebugPrintf(D_0041B628);
 }
 
 void btlReleaseBossData(void) {
@@ -927,7 +927,7 @@ void btlReleaseBossData(void) {
         *(void **)(battle + 0x718) = 0;
     }
     *(u32 *)(battle + 0x218) &= ~0x80000;
-    func_0020D128(D_0041B640);
+    btlBossDebugPrintf(D_0041B640);
 }
 
 s32 btlFindScriptResource(char *name) {
@@ -1066,13 +1066,13 @@ void btlReleaseEventData(void) {
     }
     data = battle->eventAuxData;
     if (data != 0) {
-        func_001683F0(data);
+        sndReleaseAllVoices(data);
         battle->eventAuxData = 0;
     }
     battle->eventSubstate = 0;
     battle->eventAction = -1;
     battle->eventFlags &= ~2;
-    func_0020D128(D_0041B768);
+    btlBossDebugPrintf(D_0041B768);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B768);
@@ -1088,7 +1088,7 @@ void btlReleaseEventAssets(void) {
         func_003297C8(data);
         battle->assetData = 0;
     }
-    func_0020D128(D_0041B7D0);
+    btlBossDebugPrintf(D_0041B7D0);
 }
 
 s32 btlCommandSelectEventAction(void) {
@@ -1161,7 +1161,7 @@ s32 btlCommandSetSequenceVolumePan(void) {
     s32 index = scrReadIntParameter(0);
     if (func_00342168(battle->sequenceBaseHandle) != 0) {
         sndSetSequenceVolumePan(battle->sequenceBaseHandle + index, 0x7f, 0x3f);
-        func_0020D128(D_0041B7E0, battle->sequenceBaseHandle + index);
+        btlBossDebugPrintf(D_0041B7E0, battle->sequenceBaseHandle + index);
     }
     return 1;
 }
@@ -1425,15 +1425,15 @@ s32 func_0022C1B0(BtlTask *task, s32 command) {
     flaggedCount = 0;
     list = btlAllocateIndexList(0xD);
     func_001AC360((s32)task, (s32)list, 0);
-    count = func_001E8058(list);
+    count = btlGetIndexListCount(list);
     if (D_00435E20[command * 0x38] & 8) {
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)func_001E8060(list, i))->unk_12E & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->unk_12E & 0x800) {
                 flaggedCount++;
             }
         }
     }
-    func_001E8018(list);
+    btlFreeIndexList(list);
     if (count != 0) {
         if (count != flaggedCount) {
             return 0;
@@ -1498,7 +1498,7 @@ void btlReleaseModelEntry(BattleModelEntry *entry) {
         *(BattleModelEntry **)((u8 *)func_001AA6F8() + 0x264) = entry->next;
     }
     func_00328E48(entry);
-    func_0020D128("btl:pack free[%X,%X]\n", entry->kind, entry->id);
+    btlBossDebugPrintf("btl:pack free[%X,%X]\n", entry->kind, entry->id);
 }
 
 void btlReleaseAllModelEntries(void) {
@@ -1636,7 +1636,7 @@ s32 func_0022DDD0(void) {
     return result;
 }
 
-void func_0022DE38(void) {
+void btlClearOverlayBuffers(void) {
     u8 *entry;
     s32 i;
     u64 clearValue;
@@ -1991,7 +1991,7 @@ s32 func_0022EF18(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
     s32 rowY;
     func_0020D1C0(x - 4, y - 4, mode, *(s32 *)(menu + 0xC) * 24 + 4, 0x80806020, 0x30000000);
     handle = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(handle);
+    sdfInitPacketList(handle);
     first = *(u32 *)(menu + 8);
     count = *(u32 *)(menu + 0xC);
     end = first + count;
@@ -2205,7 +2205,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     node->flag = 0;
     if (node->unk_10 != 0) {
         do {
-            func_002322E8(node->unk_10);
+            mdlDestroyContext(node->unk_10);
         } while (node->unk_10 != 0);
     }
     if (flag != 0) {

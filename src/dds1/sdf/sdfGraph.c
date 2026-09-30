@@ -17,7 +17,7 @@ extern u8 D_003BD9DC;
 
 void func_002D0E30(void *arg0, s32 arg1, s32 arg2);
 void func_002D1B90(void *arg0);
-void *func_002D1C70(s32 arg0, s32 arg1, s32 arg2);
+void *sdfAllocImageBuffer(s32 arg0, s32 arg1, s32 arg2);
 
 void sdfGraphSetDisplayMode(s32 arg0) {
     D_003BD2E8 = (u8)arg0;
@@ -44,10 +44,10 @@ void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
     sdfGraphReleaseBuffers(graph);
     width = graph->width;
     height = graph->height;
-    graph->auxBuffer = func_002D1C70(width, height, graph->auxiliaryMode);
+    graph->auxBuffer = sdfAllocImageBuffer(width, height, graph->auxiliaryMode);
     mode = graph->bufferMode;
-    graph->firstBuffer = func_002D1C70(width, height, mode);
-    graph->secondBuffer = func_002D1C70(width, height, mode);
+    graph->firstBuffer = sdfAllocImageBuffer(width, height, mode);
+    graph->secondBuffer = sdfAllocImageBuffer(width, height, mode);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfGraph", func_002D0F90);

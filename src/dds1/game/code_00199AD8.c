@@ -304,7 +304,7 @@ void func_0019ACE0(void *list) {
     sdfAppendPacket(list, packet);
 }
 
-s32 func_0019AD50(void) {
+s32 itfPanelStartEntry(void) {
     s32 window = scrGetWindow();
     PanelRec *rec;
     PanelRecSub *sub;
@@ -341,7 +341,7 @@ void itfPanelSetStatus(s32 index, s8 status) {
     D_003D6ECC[index].ptr->sub24.status = status;
 }
 
-s32 func_0019AE78(void) {
+s32 itfPanelAcquireHold(void) {
     PanelCursor *cursor;
     s32 window;
 
@@ -358,7 +358,7 @@ s32 func_0019AE78(void) {
     return 1;
 }
 
-s32 func_0019AED8(void) {
+s32 itfPanelReleaseHold(void) {
     PanelCursor *cursor = &D_00357D90;
 
     if (cursor->unk0 < 0) {

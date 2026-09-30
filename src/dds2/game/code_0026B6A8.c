@@ -142,7 +142,14 @@ u32 func_0026C168(void) {
     return 0xffffffff;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026C170);
+s32 func_0026C170(s32 id, s32 dst) {
+    s32 src = func_001110F8(dds3GetWorldSecondaryObject(), 9, id);
+    if (src != 0) {
+        *(s32 *)(*(s32 *)(dst + 0x18) + 0x80) = *(s32 *)(*(s32 *)(src + 0x18) + 0x78);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026B6A8", D_00425018);
 

@@ -240,7 +240,7 @@ void evtSetSkyOverlayEnabled(u32 enabled) {
 }
 
 /* Either set the sky alpha immediately or interpolate from its current value. */
-void evtStartSkyAlphaTransition(s32 duration, s32 target) {
+void evtBeginSkyParameterTransition(s32 duration, s32 target) {
     s16 current;
 
     current = func_00135598();
@@ -258,11 +258,11 @@ void evtStartSkyAlphaTransition(s32 duration, s32 target) {
     }
 }
 
-u16 evtIsSkyAlphaTransitionActive(void) {
+u16 evtIsSkyTransitionActive(void) {
     return D_004373C8;
 }
 
-void evtUpdateSkyAlphaTransition(void) {
+void evtAdvanceSkyTransition(void) {
     if (D_004373C8 != 0) {
         D_00438FB0 += 1;
         func_00135588(D_00438FB4 + (s32)((f32)(D_00438FB6 - D_00438FB4) * ((f32)D_00438FB0 / (f32)D_00438FB2)));
@@ -273,7 +273,7 @@ void evtUpdateSkyAlphaTransition(void) {
 }
 
 s32 evtUpdateSkyTask(void) {
-    evtUpdateSkyAlphaTransition();
+    evtAdvanceSkyTransition();
     func_00134A18();
     if (D_004373CC != 0) {
         func_0012BC38(0x53);
@@ -747,7 +747,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00253938);
 
 extern char D_004376A8[]; /* "P%d:" */
 extern char D_004376B0[]; /* "   %s" */
-extern s32 func_002467B8();
+extern s32 evtEventViewerGetPendingNode();
 extern EvtWorldNode *func_001111A8(EvtWorldObject *world, char *name);
 
 void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -760,7 +760,7 @@ void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     if (ctx->inputB != index) {
         color = 0;
     }
-    slot = *(s8 *)(index + func_002467B8(ctx) + 0xC);
+    slot = *(s8 *)(index + evtEventViewerGetPendingNode(ctx) + 0xC);
     if (slot >= 0) {
         node = func_001111A8(dds3GetWorldObject(), ctx->entryName[slot]);
     }
@@ -799,7 +799,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_00423EC0[]; /* "MESSAGE MENU (MESMAX %3d)" */
 
-s32 func_00253D08(s32 list, s32 x, s32 y, u8 *ctx) {
+s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, u8 *ctx) {
     sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(*(s32 *)(*(u8 **)(ctx + 8) + 0x104))));
     return 2;
 }

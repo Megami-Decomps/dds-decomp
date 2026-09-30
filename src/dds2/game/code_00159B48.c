@@ -130,7 +130,7 @@ extern s32 D_00451EE0[];
 
 s32 sdfAllocPacketAligned(s32 arg0);
 
-void sdfResetPacketList(s32 arg0);
+void sdfInitPacketList(s32 arg0);
 
 void func_0015AA30(s32 arg0, s32 arg1);
 
@@ -470,7 +470,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015AA30);
 void func_0015ACB0(s32 arg0, s32 arg1) {
     s32 tmp = sdfAllocPacketAligned(0x20);
 
-    sdfResetPacketList(tmp);
+    sdfInitPacketList(tmp);
     func_0015AA30(tmp, arg1);
     ((void (*)(s32, s32))*(s32 *)(arg0 + 0x10))(arg0, tmp);
 }
@@ -480,7 +480,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015AD18);
 void func_0015B208(s32 arg0, s32 arg1) {
     s32 tmp = sdfAllocPacketAligned(0x20);
 
-    sdfResetPacketList(tmp);
+    sdfInitPacketList(tmp);
     func_0015AD18(tmp, arg1);
     ((void (*)(s32, s32))*(s32 *)(arg0 + 0x10))(arg0, tmp);
 }

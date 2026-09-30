@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_002C2FF8(void);
+extern void fldShutdownLmapResources(void);
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern char D_003B3CA0[]; /* "LmapMain" */
@@ -39,7 +39,7 @@ extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_003BD254;
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 func_002C2F40(void);
-extern s32 func_002C2DA0(void);
+extern s32 fldLmapTaskUpdate(void);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
@@ -171,7 +171,7 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2BF8);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2CC0);
 
-s32 func_002C2DA0(void) {
+s32 fldLmapTaskUpdate(void) {
     s32 state = D_003BD96C;
     s32 result;
 
@@ -199,19 +199,19 @@ s32 func_002C2DA0(void) {
     return 0;
 }
 
-void func_002C2E38(s32 arg0) {
+void fldStartLmapTask(s32 arg0) {
     if (arg0 != 0) {
         D_003BD23C = func_002C2F40();
     } else {
         D_003BD23C = 1;
     }
-    kwlnTaskCreate(D_003B3CA0, 0x2AF8, 0, 0, func_002C2DA0, 0, 0);
+    kwlnTaskCreate(D_003B3CA0, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
     D_003BD96C = 0;
     fldInitializeLmapState();
 }
 
 void fldStopLmapTask(void) {
-    func_002C2FF8();
+    fldShutdownLmapResources();
     kwlnTaskDestroyWithHierarchyByName(D_003B3CA0, 1);
 }
 
@@ -236,7 +236,7 @@ void fldInitializeLmapState(void) {
     D_003BD260 = (u32)(flagSet == 0);
 }
 
-void func_002C2FF8(void) {
+void fldShutdownLmapResources(void) {
     func_002E96D8(0x400001);
     fldReleaseLocalMapResources();
     func_002C4630();
@@ -318,7 +318,7 @@ void func_002C3690(void) {
     func_0024DAB8(1);
 }
 
-s32 func_002C36E8(void) {
+s32 fldLmapToggleOverlay(void) {
     s32 result = 0;
 
     if (func_0024DC08() != 0) {

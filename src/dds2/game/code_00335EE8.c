@@ -48,7 +48,7 @@ s32 func_00335F78(s32 source, s32 unused, s32 entryIndex) {
     return entry;
 }
 
-void func_00335FD8(MotionBlend *motion) {
+void sdfBlendMotionKeys(MotionBlend *motion) {
     MotionKeySample sample;
     MotionKey *out;
     s32 firstId;

@@ -65,7 +65,7 @@ extern s32 D_003BD308;
 extern s32 D_003BA8D8;
 extern u8 D_00324550[];
 extern void func_002E8430(void *data, u32 tag);
-extern s32 func_00104A98(void);
+extern s32 kwlnTextureViewerHandlePad(void);
 extern void func_00104B88(void *data, s32 handle);
 
 extern void kwlnTextureAttachTask(u8 *scene);
@@ -74,7 +74,7 @@ extern void func_00105150(s32 arg0);
 
 extern void func_00105890(void);
 
-extern void evtUnk8A48Ensure(void);
+extern void evtEnsureDrawVectorState(void);
 
 extern void sdfGraphSetDisplayMode(s32 arg0);
 extern void *sdfAllocPacketAligned(s32);
@@ -88,10 +88,10 @@ extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 extern void func_00104290(void);
 extern void *D_003BD6A8;
-extern s32 func_001049A8(void);
+extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 func_003014F0();
 extern s32 func_002E4960();
-extern u64 sdfCreateInitializedPacketList(void);
+extern u64 sdfCreateResetPacketList(void);
 extern u32 func_00100518(void);
 extern u8 D_003C2620[];
 extern s32 D_003BA724;
@@ -140,7 +140,7 @@ extern void func_00102CD8(void);
 extern void func_00102E58(void);
 extern void *func_002CFEB8(s32);
 
-void func_00102ED8(void) {
+void kwlnDebugTaskCreate(void) {
     KwlnDebugWork *work;
     s32 i;
 
@@ -196,7 +196,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001039E0);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103B10);
 
-void func_00104008(void) {
+void kwlnPadStepLargeMotorLevel(void) {
     u8 target = D_003BD699;
 
     if (D_003BD690[1] < target) {
@@ -254,7 +254,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104678);
 void kwlnTextureDrawPageCounter(void *task) {
     char buffer[0x70];
     s32 current = kwlnTextureGetPageIndex();
-    s32 count = func_001049A8();
+    s32 count = kwlnTextureCountIncompleteResources();
     func_003014F0(buffer, "TEX VIEWER [%d/%d]", current, count - 1);
     sdfAppendPacket(task, func_002E4960(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
 }
@@ -263,7 +263,7 @@ INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104810);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_001049A8);
+INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnTextureCountIncompleteResources);
 
 u32 kwlnTextureGetPageIndex(void) {
     return D_003BA8DC;
@@ -271,7 +271,7 @@ u32 kwlnTextureGetPageIndex(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104A18);
 
-s32 func_00104A98(void) {
+s32 kwlnTextureViewerHandlePad(void) {
     if (D_00398628.unk13 < 0) {
         return 0;
     }
@@ -299,7 +299,7 @@ s32 kwlnSwapActiveResource(s32 resource) {
     if (D_003BD308 == 0) {
         return 0;
     }
-    status = func_00104A98();
+    status = kwlnTextureViewerHandlePad();
     func_00104B88((void *)resource, D_003BA8D8);
     return status;
 }
@@ -308,7 +308,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (D_003BD308 == 0) {
         return 0;
     }
-    if (func_00104A98() == 0) {
+    if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
     func_00104B88(D_00325748, D_003BA8D8);
@@ -362,7 +362,7 @@ void func_00105320(void) {
     func_00105150(1);
     func_00105890();
     D_003BA7FC = 0;
-    evtUnk8A48Ensure();
+    evtEnsureDrawVectorState();
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105370);
@@ -426,7 +426,7 @@ void func_00105888(void) {
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
 u64 func_001059F0(s32 arg0) {
-    u64 list = sdfCreateInitializedPacketList();
+    u64 list = sdfCreateResetPacketList();
 
     sdfAppendPacket(list, D_003C2620 + arg0 * 0x160 + func_00100518() * 0xB0);
     return list;
@@ -528,7 +528,7 @@ u8 kwlnFadeIsActive(void) {
     return (D_003BA904 & 3) != 0;
 }
 
-void func_00105C58(void) {
+void kwlnFadeUpdate(void) {
     if (kwlnFadeIsActive() != 0) {
         if (D_003BA904 & 1) {
             D_003BD6C0 -= 1;
@@ -544,7 +544,7 @@ void func_00105C58(void) {
     }
 }
 
-void func_00105D00(void) {
+void kwlnDrawBlurErrorCounters(void) {
     void *task;
 
     if (D_003BA724 != 0) {
@@ -575,7 +575,7 @@ void kwlnFadeResetBackground(void) {
     D_003BA930 = 0x4F;
 }
 
-void func_001060C8(s32 duration) {
+void kwlnFadeBackgroundStartOut(s32 duration) {
     D_003BA928[0] = 0;
     D_003BA928[1] = 0;
     D_003BA928[2] = 0;
@@ -595,7 +595,7 @@ void func_001060C8(s32 duration) {
     D_003245EC[2] = 2048.0f;
 }
 
-void func_00106160(s32 duration) {
+void kwlnFadeBackgroundStartIn(s32 duration) {
     D_003BA928[0] = 0;
     D_003BA928[1] = 0;
     D_003BA928[2] = 0;
@@ -629,7 +629,7 @@ s32 func_001061E8(void) {
     return 1;
 }
 
-void func_00106240(s32 mode) {
+void kwlnFadeSetMode(s32 mode) {
     D_003BA92C = mode;
     if (D_003BA92C == 0) {
         D_003BA92E = 0;

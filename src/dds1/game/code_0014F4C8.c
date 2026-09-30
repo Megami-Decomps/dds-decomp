@@ -58,7 +58,7 @@ extern s32 evtGetMirroredSolarPhase(void);
 extern s32 D_0034DDF0[];
 
 /* Roll against the threshold associated with the mirrored solar phase. */
-s32 func_0014F5E8(void) {
+s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = D_0034DDF0[evtGetMirroredSolarPhase()];
     if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
         func_0010D5F0(1);
@@ -114,7 +114,7 @@ s32 func_0014F780(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", func_0014F790);
+INCLUDE_ASM(const s32, "game/code_0014F4C8", fldCreateFieldEffectTask);
 
 INCLUDE_SDATA(const s32, "game/code_0014F4C8", D_003BB008);
 

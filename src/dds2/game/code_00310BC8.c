@@ -170,30 +170,30 @@ extern char D_004388E0[];
 extern s64 func_00312B50();
 
 extern void func_00312D48();
-extern s32 func_00312DA0(void);
+extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
 extern void func_00312DF8(void);
 extern void func_00312D48();
-extern s32 func_00312DA0(void);
+extern s32 sdfTaskWorkRunAll(void);
 extern void func_00312DF8(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
 extern void func_00312E20(void);
 
-float mdlQuaternionLengthSquared(float *quaternion) {
+float sdfQuatLengthSquared(float *quaternion) {
     return *quaternion * *quaternion + quaternion[1] * quaternion[1] +
                   quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3];
 }
 
 float sdfQuaternionMagnitude(float *quaternion) {
-    return fsqrtf(mdlQuaternionLengthSquared(quaternion));
+    return fsqrtf(sdfQuatLengthSquared(quaternion));
 }
 
 void sdfQuaternionInverse(float *values) {
-    float lengthSquared = mdlQuaternionLengthSquared(values);
+    float lengthSquared = sdfQuatLengthSquared(values);
     if (lengthSquared != 0.0f) {
         values[0] = -values[0] / lengthSquared;
         values[1] = -values[1] / lengthSquared;
@@ -428,7 +428,7 @@ s32 func_00311E60(s32 x, s32 y, u64 first, u64 second, u8 opacity, u16 width, u6
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311F20);
 
-void *sdfCreateCallbackNode(u32 arg0) {
+void *sdfCreateTaskHeader(u32 arg0) {
     s32 allocation = func_003292A8(0x1C);
     u32 *obj = sdfMemoryGetBlockAddress(allocation);
 
@@ -495,7 +495,7 @@ SdfListNode *func_00312320(SdfList *list, SdfListNode *node) {
 }
 
 /* Unlink a node, hand it to the list's removal callback, free it, return its neighbour. */
-SdfListNode *func_003123D0(SdfList *list, SdfListNode *node) {
+SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     SdfListNode *neighbour;
 
     if (node == NULL) {
@@ -584,11 +584,11 @@ TaskWork *func_00312620(char *name, s32 first, s32 second, u32 item, s32 destroy
     work = func_00312910(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
     kwlnTaskCreate(work->primaryTaskName, first, 1, 1, func_00312D48, func_00312DF8, work);
-    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, func_00312DA0, NULL, work);
+    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
     return work;
 }
 
-s64 sdfDestroyTaskPair(TaskWork *work) {
+s64 sdfDestroyTaskWorkerTasks(TaskWork *work) {
     if (work != NULL) {
         kwlnTaskDestroyWithHierarchyByName(work->primaryTaskName, 1);
         return kwlnTaskDestroyWithHierarchyByName(work->secondaryTaskName, 0);
@@ -621,7 +621,7 @@ void sdfAttachTaskItem(TaskWork *work, u32 *item) {
 s64 sdfRemoveTaskItem(TaskWork *work, s32 key) {
     void *node = sdfFindTaskListNodeByKey(work->list, key);
     if (node != NULL) {
-        return func_003123D0(work->list, node);
+        return sdfListRemoveNode(work->list, node);
     }
 }
 
@@ -663,7 +663,7 @@ void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312910);
 
-s64 sdfFreeTaskWork(TaskWork *work) {
+s64 sdfDestroyTaskResourceWork(TaskWork *work) {
     if (work != NULL) {
         sdfDestroyTaskWork(work->list);
         func_00328E48(work->primaryTaskName);
@@ -696,7 +696,7 @@ extern void *func_00101958(void);
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312B70);
 
 /* Advance the work's cursor one node and run the node's callback when flagged. */
-s32 func_00312C78(TaskWork *work) {
+s32 sdfTaskWorkStep(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
     SdfTaskEntry *entry;
     u32 flags;
@@ -725,19 +725,19 @@ s32 func_00312C78(TaskWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312D48);
 
-s32 func_00312DA0(void) {
+s32 sdfTaskWorkRunAll(void) {
     TaskWork *work = func_00101958();
 
     if (work->firstItemHandle == 0) {
         return -1;
     }
-    while (func_00312C78(work) == 1) {
+    while (sdfTaskWorkStep(work) == 1) {
     }
     return 0;
 }
 
 void func_00312DF8(void) {
-    sdfFreeTaskWork(func_00101958());
+    sdfDestroyTaskResourceWork(func_00101958());
 }
 
 void func_00312E20(void) {
@@ -762,7 +762,7 @@ s64 func_00312FB0(void) {
     return func_003139D8();
 }
 
-SdfGridCell *func_00312FD0(SdfGrid *grid, s32 column, s32 row) {
+SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
     u32 cellIndex;
 
     cellIndex = row * grid->width + column;
@@ -778,7 +778,7 @@ void sdfGridGetCursorCoordinates(void *p, u32 *mod, u32 *div) {
     *div = *t / *(u32 *)((s32)p + 0x14);
 }
 
-u32 func_00313040(SdfGrid *grid, s32 column, s32 row) {
+u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
     u32 cellIndex;
 
     cellIndex = row * grid->width + column;

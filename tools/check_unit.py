@@ -240,6 +240,7 @@ def main():
         print(f"RODATA the full unit's .rodata differs from retail at {ro_diff} (string literal "
               "or INCLUDE_RODATA order/content); the build links it there")
     tables = []  # (offset in our .rodata, retail address, function)
+    bounds = []  # .rodata items of as-built functions: they only end a neighbour
     small = []   # the same for .sdata
     for off, size, name in sorted(funcs):
         if args.func and name != args.func:
@@ -252,6 +253,17 @@ def main():
         if name in as_built:
             ok += 1
             print(f"OK   {name} @ 0x{addr:08X} (as built in the full unit; the SKIP_ASM compile differs)")
+            # Its jump tables still sit in our .rodata and end the item before
+            # them; the full-unit .rodata check above compares their bytes.
+            hi = None
+            for i in range(0, size, 4):
+                r = relocs.get(off + i)
+                if r and r[1].split("+")[0] == ".rodata":
+                    w = struct.unpack_from("<I", text, off + i)[0]
+                    if r[0] == "R_MIPS_HI16":
+                        hi = w & 0xFFFF
+                    elif r[0] == "R_MIPS_LO16" and hi is not None:
+                        bounds.append((hi << 16) + ((w & 0xFFFF) ^ 0x8000) - 0x8000)
             continue
         roff = va_to_off(segs, addr)
         diffs = []
@@ -419,7 +431,7 @@ def main():
     # label) and data items such as string literals (bytes must equal retail's).
     funcs_by_off = sorted(funcs)
     covered = set()
-    starts = sorted({t[0] for t in tables} | {len(rodata)})
+    starts = sorted({t[0] for t in tables} | set(bounds) | {len(rodata)})
     # Two retail copies that the C compiles to one object item: gcc merged
     # identical constants (e.g. two equal string initializers) that the
     # original kept apart, so the unit's rodata comes out short.
@@ -491,6 +503,9 @@ def main():
             bad += 1
             print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
                   "after it that no C or asm supplies; keep the function as asm")
+    for b in bounds:  # as-built items: compared by the full-unit .rodata check
+        if 0 <= b < len(rodata):
+            covered.update(range(b, next(s for s in starts if s > b)))
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]

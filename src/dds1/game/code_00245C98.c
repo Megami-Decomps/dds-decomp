@@ -273,7 +273,7 @@ u32 evtResetStateProgressTimer(void) {
 
     state = func_00101A70();
     ((EvtDispatchState *)state)->progressTicks = 0;
-    func_0027BB28(*(u32 *)(*(s32 *)(state + 0x6c) + 0x14));
+    mnuSelectLastListNode(*(u32 *)(*(s32 *)(state + 0x6c) + 0x14));
     return 1;
 }
 
@@ -610,7 +610,7 @@ void mnuLoadResourceHandles(u32 *work) {
 }
 
 extern void func_002BDD60(u32);
-extern void mnuReleaseResourceWork(u32);
+extern void mnuReleaseEffectResource(u32);
 
 void mnuReleaseResourceHandles(u32 *work) {
     s32 i;
@@ -620,7 +620,7 @@ void mnuReleaseResourceHandles(u32 *work) {
     }
     func_002BDD60(work[0x1B]);
     if (work[0x56] != 0) {
-        mnuReleaseResourceWork(work[0x56]);
+        mnuReleaseEffectResource(work[0x56]);
         work[0x56] = 0;
     }
 }

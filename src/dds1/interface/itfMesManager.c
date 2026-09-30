@@ -171,34 +171,58 @@ typedef struct ItfMesSpan {
 } ItfMesSpan;
 
 extern ItfMesSlot D_003D6ECC[];
+
 extern ItfMesGlobals D_003D6EA0;
+
 extern ItfMesZero D_00357D80;
 
 extern u32 D_003BB1E8;
 
 s32 scrGetWindow(void);
+
 s32 scrReadIntParameter(s32 arg0);
+
 void func_0014DAF0(s32 arg0);
+
 void func_0019C060(s32 window, u32 value);
+
 void itfMesCountClearBits(s32 window, u32 value);
+
 void itfMesBlk24MoveTo(s32 window, s32 arg1, s32 arg2);
+
 void itfMesSetWindowHighFlags(s32 window, u32 value);
+
 void itfMesClearWindowHighFlags(s32 window, u32 value);
+
 void func_0019C968(s32 window, s32 arg1, s32 arg2);
+
 void func_0019B4A0(s32 window);
+
 void itfMesCleanupWindow(s32 window, s32 arg1);
+
 void itfMesResetWindow(s32 window);
+
 ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 index);
+
 ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
+
 u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
+
 void itfMesDestroyWindow(s32 window);
+
 void func_0019C590(s32 window, s32 arg1, s32 arg2, s32 arg3);
+
 void func_0019C9F0(s32 window, s32 arg1, s32 arg2);
+
 void func_00194920(FrFontGlyph *arg0);
+
 void func_0019DDD0(void *arg0, s32 arg1);
+
 void func_0019DDA8(void *arg0, s32 arg1);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
+
+extern void func_00196BC0();
 
 s32 itfMesScriptSetPanelValue(void) {
     s32 window = scrGetWindow();
@@ -679,7 +703,12 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesBuildEntryGlyph);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019D460);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesInitCharTable);
+void itfMesInitCharTable(s32 *table) {
+    s32 i;
+    for (i = 0; i < 0x20; i++) {
+        func_00196BC0(i, table[i]);
+    }
+}
 
 u32 itfMesGetNextEntrySelectedItem(ItfMesIndex *req) {
     u32 *table;
@@ -790,7 +819,19 @@ s32 itfMesMaxGroupedExtent(ItfMesNode *node) {
     return best << 4;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesNthClearBit);
+s32 itfMesNthClearBit(s32 skip, u32 mask) {
+    s32 bit = 0;
+    while (bit < 0x20) {
+        if ((mask & 1) == 0) {
+            if (--skip < 0) {
+                break;
+            }
+        }
+        bit++;
+        mask >>= 1;
+    }
+    return bit;
+}
 
 /* Persona 4 func_0027a580 @ 0027A580 (src/itfMesManager.c), recompiled unchanged */
 void func_0019DB40(ItfMesNode *node) {

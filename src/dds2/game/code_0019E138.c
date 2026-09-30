@@ -2,7 +2,7 @@
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfAllocPacketAligned(s32);
-extern void *func_0033A2D8(void *, s32, s32, s64, s32);
+extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern u64 *func_0033A2D0(void *);
 extern void sdfAppendPacket();
 
@@ -514,7 +514,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     return 1;
 }
 
-u32 itfReleasePayloadAllocation(s32 arg0) {
+u32 itfReleaseMemNodeBuffer(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 - 4));
     return 1;
 }
@@ -738,7 +738,7 @@ void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s3
     s32 i;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
-    func_0033A2D8(packet, 0x4B, 2, 0x51, 3);
+    sdfConsInitPacketHeader(packet, 0x4B, 2, 0x51, 3);
     dst = func_0033A2D0(packet);
     for (i = 0; i < 3; i++) {
         dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
@@ -759,7 +759,7 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     s32 i;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_0033A2D8(packet, 0x4D, 2, 0x51, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x51, 4);
     dst = func_0033A2D0(packet);
     for (i = 0; i < 4; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
@@ -783,7 +783,7 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
     s32 i;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 4));
-    func_0033A2D8(packet, (flag << 9) | 0x5D, 3, 0x512, 4);
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x5D, 3, 0x512, 4);
     dst = func_0033A2D0(packet);
     for (i = 0; i < 4; i++) {
         f32 *uvDst = (f32 *)dst;
@@ -813,7 +813,7 @@ void func_001A0E20(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors,
     s32 x0, y0, x1, y1;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    func_0033A2D8(packet, (flag << 9) | 0x15E, 5, 0x53531, 1);
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x15E, 5, 0x53531, 1);
     x0 = vertices[0].x + 0x7000;
     y0 = vertices[0].y + 0x7900;
     x1 = vertices[1].x + 0x7000;
@@ -835,7 +835,7 @@ void func_001A0F88(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 fla
     u64 *dst;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
-    func_0033A2D8(packet, (flag << 9) | 0x46, 3, 0x551, 1);
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x46, 3, 0x551, 1);
     dst = func_0033A2D0(packet);
     dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
     dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
@@ -855,7 +855,7 @@ void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
     s32 i;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, half));
-    func_0033A2D8(packet, 0x4C, 4, 0x5151, half);
+    sdfConsInitPacketHeader(packet, 0x4C, 4, 0x5151, half);
     dst = func_0033A2D0(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
@@ -877,7 +877,7 @@ void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     s32 i;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    func_0033A2D8(packet, 0x14A, 2, 0x51, count);
+    sdfConsInitPacketHeader(packet, 0x14A, 2, 0x51, count);
     dst = func_0033A2D0(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
@@ -899,7 +899,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     s32 i;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    func_0033A2D8(packet, 0x49, 2, 0x51, count);
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x51, count);
     dst = func_0033A2D0(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];

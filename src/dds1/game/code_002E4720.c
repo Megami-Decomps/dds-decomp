@@ -462,7 +462,7 @@ u32 func_002E5968(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5970);
 
-void sdfDevReportCommandResult(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
+void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
     if (event != 3) {
         if (event == 4) {
             D_003BDA68 = value;
@@ -472,20 +472,20 @@ void sdfDevReportCommandResult(DevState *state, s32 event, s32 unused, s32 value
     }
     SignalSema(D_003BD3F4);
 }
-s32 sdfDevActivate(DevState *);
+s32 sdfDevReactivate(DevState *);
 
 DevState *sdfDevCreateCommandState(s32 command) {
     DevState *state;
     if (D_003BD3F4 < 0) {
         D_003BD3F4 = sdfCreateSemaphore(0, 0x80, 0);
     }
-    state = sdfDevCreateCallbackState(command, sdfDevReportCommandResult, 0);
+    state = sdfDevCreateCallbackState(command, sdfDevCommandReplyCallback, 0);
     WaitSema(D_003BD3F4);
-    sdfDevActivate(state);
+    sdfDevReactivate(state);
     return state;
 }
 
-s32 func_002E5BB8(char *path) {
+s32 sdfPathExists(char *path) {
     char *resolved = func_002E5970(path);
     s32 fd;
 
@@ -501,7 +501,7 @@ s32 func_002E5BB8(char *path) {
 void func_002E5C38(u32 arg0) {
     sdfDevQueueActiveOperation();
     WaitSema(D_003BD3F4);
-    func_002E6E88(arg0);
+    sdfDevQueueReleaseState(arg0);
 }
 
 void func_002E5C68(void) {
@@ -681,7 +681,7 @@ s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
 }
 
 
-s32 sdfDevActivate(DevState *arg0) {
+s32 sdfDevReactivate(DevState *arg0) {
     if (arg0->state != SDF_DEV_STATE_INACTIVE) {
         return -1;
     }
@@ -701,7 +701,7 @@ s32 sdfDevQueueActiveOperation(DevState *arg0) {
     return 0;
 }
 
-s32 func_002E6E88(DevState *state) {
+s32 sdfDevQueueReleaseState(DevState *state) {
     if (state->state < 9) {
         if (state->state >= 7) {
             func_002E5E90(state);
@@ -831,7 +831,7 @@ void sdfLoadDevModule(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E73F0);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7480);
+INCLUDE_ASM(const s32, "game/code_002E4720", sdfClearQuadwords);
 
 char *sdfStrDup(const char *text) {
     u32 length;
@@ -896,7 +896,7 @@ void sdfDestroyDevRequest(DevRequest *request) {
 
 void func_002E7730(DevRequest *request, s32 count);
 
-void func_002E76B0(DevRequest *request) {
+void sdfDevBufferedRequestGrow(DevRequest *request) {
     if (request->handle == 0) {
         func_002E7730(request, request->mode);
         return;
@@ -967,7 +967,7 @@ void func_002E78F8(f32 arg0) {
 }
 
 /* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
-f32 func_002E7918(f32 value, f32 *table, s32 count) {
+f32 sdfTableInterpolate(f32 value, f32 *table, s32 count) {
     f32 unit = 1 / count;
     s32 lo = 0;
     s32 hi = count;
@@ -1030,7 +1030,7 @@ f32 sdfAtan2(f32 arg0, f32 arg1) {
     return r;
 }
 
-f32 func_002E7AA8(f32 x) {
+f32 sdfAsinTable(f32 x) {
     f32 sign;
     f32 result;
 
@@ -1040,11 +1040,11 @@ f32 func_002E7AA8(f32 x) {
     } else {
         sign = 1.0f;
     }
-    result = x >= 1.0f ? 1.5707963f : func_002E7918(x, D_0039DAF4, 128) * 1.5707963f;
+    result = x >= 1.0f ? 1.5707963f : sdfTableInterpolate(x, D_0039DAF4, 128) * 1.5707963f;
     return result * sign;
 }
 
-f32 func_002E7B20(f32 x) {
+f32 sdfAcosTable(f32 x) {
     f32 sign;
     f32 result;
 
@@ -1056,7 +1056,7 @@ f32 func_002E7B20(f32 x) {
     }
     result = 0.0f;
     if (!(x >= 1.0f)) {
-        result = (1.0f - func_002E7918(x, D_0039DAF4, 128)) * 1.5707963f;
+        result = (1.0f - sdfTableInterpolate(x, D_0039DAF4, 128)) * 1.5707963f;
     }
     return result * sign;
 }

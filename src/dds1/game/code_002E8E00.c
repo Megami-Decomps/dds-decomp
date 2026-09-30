@@ -27,7 +27,7 @@ void func_002E8E50(void) {
 }
 
 /* Dispatch the command family selected by the caller, without a payload. */
-void sndSendCommandFamily50(u32 command) {
+void sndDispatchCommandWithoutPayload(u32 command) {
     func_002E87A8(command | 0x50, 0, 0, 0);
 }
 

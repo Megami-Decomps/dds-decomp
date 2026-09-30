@@ -1,9 +1,11 @@
 #include "common.h"
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
- * entry per table; its handler lives at +0x00. The first family uses tables
- * D_003B0040/4C/50/54/58/5C/60/64 and the extended family uses tables
- * D_003B01C0/C4/C8/CC/D0/D4.
+ * entry per table; the handler lives at +0x0. Slots are declared as separate
+ * arrays (D_00353710/14/18/1C/20/24/28/2C/30/34 and D_00353880/84/88/90/94/
+ * 98/9C/A0/A4). The family2 create table (D_00353880) additionally carries a
+ * fallback selector at +0x0C: nonzero calls the entry handler directly,
+ * zero falls back through D_003536A0.
  */
 typedef struct EffDispatchEntry {
     void *(*func)(void *); /* 0x00 handler, may be NULL */
@@ -105,6 +107,12 @@ extern void func_00159BF0(f32 arg0, f32 arg1);
 extern u8 D_00380828[];
 
 extern void func_00232390(void *arg0, void *arg1);
+
+extern EffDispatchEntry D_003B01B8[];
+
+extern void func_00328E48(void *p);
+
+extern EffDispatchEntry D_003B01B4[];
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A100);
 
@@ -219,7 +227,7 @@ void effParamInitFromGlobal(void *work) {
 }
 
 void func_0016AA38(void) {
-    func_002322E8();
+    mdlDestroyContext();
 }
 
 /* Assemble a parameter work item from the two pieces extracted from source. */
@@ -296,9 +304,14 @@ void func_0016AB30(void) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AB48);
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016ABF8);
+void func_0016ABF8(EffParamWorkEx *work) {
+    ((void (*)(void *))D_003B01B8[work->id].func)(work->data);
+    func_00328E48(work);
+}
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AC40);
+void func_0016AC40(EffParamWorkEx *work) {
+    ((void (*)(void *))D_003B01B4[work->id].func)(work->data);
+}
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AC78);
 

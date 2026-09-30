@@ -21,7 +21,7 @@ typedef struct SdfGraphObj {
 
 void func_0032AA40(void *arg0);
 
-void *func_0032AB20(s32 arg0, s32 arg1, s32 arg2);
+void *sdfAllocImageBuffer(s32 arg0, s32 arg1, s32 arg2);
 
 void sdfGraphSetDisplayMode(s32 mode) {
     D_004389D8 = (u8)mode;
@@ -30,7 +30,7 @@ void sdfGraphSetDisplayMode(s32 mode) {
 }
 
 /* Release all three independently allocated image buffers before rebuilding. */
-void sdfReleaseGraphBuffers(SdfGraphObj *graph) {
+void sdfGraphReleaseBuffers(SdfGraphObj *graph) {
     func_0032AA40(graph->firstBuffer);
     graph->firstBuffer = NULL;
     func_0032AA40(graph->secondBuffer);
@@ -40,18 +40,18 @@ void sdfReleaseGraphBuffers(SdfGraphObj *graph) {
 }
 
 /* The auxiliary buffer uses its own mode; both primary buffers share one mode. */
-void sdfRecreateGraphBuffers(SdfGraphObj *graph) {
+void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
     s16 width;
     s16 height;
     u8 mode;
 
-    sdfReleaseGraphBuffers(graph);
+    sdfGraphReleaseBuffers(graph);
     width = graph->width;
     height = graph->height;
-    graph->auxBuffer = func_0032AB20(width, height, graph->auxiliaryMode);
+    graph->auxBuffer = sdfAllocImageBuffer(width, height, graph->auxiliaryMode);
     mode = graph->bufferMode;
-    graph->firstBuffer = func_0032AB20(width, height, mode);
-    graph->secondBuffer = func_0032AB20(width, height, mode);
+    graph->firstBuffer = sdfAllocImageBuffer(width, height, mode);
+    graph->secondBuffer = sdfAllocImageBuffer(width, height, mode);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfGraph", func_00329E40);

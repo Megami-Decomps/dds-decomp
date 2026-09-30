@@ -4,7 +4,7 @@ extern s32 func_00101958();
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-extern s64 func_002D13F0(void);
+extern s64 fileConsumeConfigTaskReady(void);
 
 extern u8 D_003E7034[];
 
@@ -43,7 +43,7 @@ s64 func_002AB278(s32 callback) {
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s64 state = func_002C4038(context + 8, dispatchEntry, 0, callback);
     if (state == 0) {
-        if (func_002D13F0() == 0) {
+        if (fileConsumeConfigTaskReady() == 0) {
             func_002C42C0(dispatchEntry, D_003E7034);
         }
         return 0;

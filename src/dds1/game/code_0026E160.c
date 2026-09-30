@@ -21,7 +21,7 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 
 extern void sdfDestroyTaskWork(s32);
 extern void func_0026DED0(s32, s32, u8 *, s32);
-extern u8 *func_002CAF78(s32, u8 *);
+extern u8 *sdfListRemoveNode(s32, u8 *);
 
 s32 mnuTickMovieGroup(s32 owner, s32 group) {
     u8 *list = *(u8 **)(group + 8);
@@ -38,7 +38,7 @@ s32 mnuTickMovieGroup(s32 owner, s32 group) {
             func_0026DED0(owner, group, node, *(s8 *)(node + 0x11));
         }
         if (*(s32 *)(node + 8) == 0) {
-            list = func_002CAF78(group, list);
+            list = sdfListRemoveNode(group, list);
         } else {
             list = *(u8 **)(list + 8);
         }

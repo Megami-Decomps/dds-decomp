@@ -42,7 +42,7 @@ u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
 void func_002E9340(s32 trackId);
 
 /* Converts world coordinates to the sound engine's one-tenth scale. */
-void soundSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
+void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
     u32 packet[8];
 
     packet[0] = trackId;

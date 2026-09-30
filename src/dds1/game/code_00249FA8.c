@@ -20,6 +20,19 @@ extern const char D_003AF678[];
 
 extern s32 D_003BC3E4;
 
+typedef struct MenuSlotState {
+    u8 pad00[0x64];
+    s32 batch;     /* 0x64 */
+    u8 pad68[0x40];
+    s32 effect[7]; /* 0xA8 */
+    s32 cur;       /* 0xC4 */
+    s32 prev;      /* 0xC8 */
+    u8 padCC[0x18];
+    s32 mode;      /* 0xE4 */
+} MenuSlotState;
+
+extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_00249FA8);
 
 void fldStopSceneTasks(void) {
@@ -44,6 +57,7 @@ s32 fldPollSceneState(void) {
 }
 
 extern char D_0036ADF4[];
+
 extern void func_002858E8(s32 *, char *);
 
 void func_0024A0D8(s32 value) {
@@ -138,6 +152,7 @@ typedef struct {
     u8 pad68[0x74];
     s32 mode; /* 0xDC */
 } SceneFrameOwner;
+
 extern s32 fldGetModeFrameRecordIndex(SceneFrameOwner *);
 
 /* Scene modes 1 and 2 select different entries from the same frame table. */

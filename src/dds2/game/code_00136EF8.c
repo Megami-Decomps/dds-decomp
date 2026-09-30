@@ -6,8 +6,8 @@ extern u64 dds3GetWorldObject(void);
 extern s32 mdlFlagTest(s32);
 extern int strcmp(const char *, const char *);
 
-extern void func_001089A0();
-extern void func_001089A8();
+extern void evtSetDrawSurfaceIndex();
+extern void evtSubmitGsRegister47();
 extern void func_00108BD8();
 extern void func_00108EC0();
 
@@ -1015,9 +1015,9 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143C98);
 extern s32 D_00399F90[];
 
 void func_00143D90(s32 mode) {
-    func_001089A0(0x53);
+    evtSetDrawSurfaceIndex(0x53);
     func_00108BD8(0);
-    func_001089A8(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108EC0(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   D_00389770[0x7F]);
     func_00108EC0(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
@@ -1037,9 +1037,9 @@ void func_00143D90(s32 mode) {
 extern s32 D_00389978[];
 
 void func_00143F78(s32 arg0, s32 arg1) {
-    func_001089A0(0x53);
+    evtSetDrawSurfaceIndex(0x53);
     func_00108BD8(0);
-    func_001089A8(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108EC0(arg0, arg1, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00389978[0]);
     func_00108BD8(0);
 }

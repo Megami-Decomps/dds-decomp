@@ -14,7 +14,7 @@ void func_00328E18(s32 size) {
     u64 allocation;
 
     allocation = func_00328D68();
-    func_00340328(allocation, (size + 0xf) >> 4);
+    sdfClearQuadwords(allocation, (size + 0xf) >> 4);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfChip", func_00328E48);

@@ -134,7 +134,7 @@ extern s32 D_00438F6C;
 
 extern s32 func_00343ED0(s32, u32 *, s32);
 
-extern void func_0020D128(s32, ...);
+extern void btlBossDebugPrintf(s32, ...);
 
 extern void btlCmdSimpleB(s32, u16);
 
@@ -202,9 +202,9 @@ extern void btlFlagUnitDefeatCandidate(s32 actor);
 
 extern void func_001E2220(s32 actor);
 
-extern u32 func_001E8058(s32 actor);
+extern u32 btlGetIndexListCount(s32 actor);
 
-extern s32 func_001E8060(s32 actor, u32 index);
+extern s32 btlGetIndexListEntry(s32 actor, u32 index);
 
 extern void func_0021F3E8(s32);
 
@@ -300,7 +300,7 @@ typedef struct BtlReader {
     char name[0x40];
 } BtlReader;
 
-extern f32 func_00209390(f32 *, f32 *, f32 *);
+extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
@@ -496,7 +496,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208750);
 
-BtlUnit *btlFindNearestOtherUnit(u32 mask, BtlUnit *target) {
+BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     BtlState *state = (BtlState *)func_001AA6F8();
     BtlUnit *unit;
     BtlUnit *nearest;
@@ -577,7 +577,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
 
-void func_00208D58(void) {
+void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
     BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
     for (unit = work->unitList; unit != NULL; unit = unit->next) {
@@ -593,7 +593,7 @@ void func_00208DA0(void) {
     }
 }
 
-void func_00208DE8(s32 mask) {
+void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     BtlUnit *unit;
 
     unit = ((BtlState *)func_001AA6F8())->units;
@@ -621,12 +621,12 @@ void func_00208E48(s32 mask) {
     }
 }
 
-void func_00208EA8(s32 actor) {
+void btlFlagActorUnitsDefeatCandidate(s32 actor) {
     u32 i = 0;
-    u32 count = func_001E8058(actor);
+    u32 count = btlGetIndexListCount(actor);
     if (count != 0) {
         do {
-            btlFlagUnitDefeatCandidate(func_001E8060(actor, i));
+            btlFlagUnitDefeatCandidate(btlGetIndexListEntry(actor, i));
             i++;
         } while (i < count);
     }
@@ -634,10 +634,10 @@ void func_00208EA8(s32 actor) {
 
 void func_00208F10(s32 actor) {
     u32 i = 0;
-    u32 count = func_001E8058(actor);
+    u32 count = btlGetIndexListCount(actor);
     if (count != 0) {
         do {
-            func_001E2220(func_001E8060(actor, i));
+            func_001E2220(btlGetIndexListEntry(actor, i));
             i++;
         } while (i < count);
     }
@@ -665,7 +665,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_002091C8);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlAimHorizontalDirectionVU);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 
@@ -700,7 +700,7 @@ void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
         : "memory");
 }
 
-f32 func_00209390(f32 *a, f32 *b, f32 *c) {
+f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
     f32 normal[4];
     f32 dot;
     btlTriangleNormalVU(a, b, c);
@@ -715,7 +715,7 @@ f32 func_00209390(f32 *a, f32 *b, f32 *c) {
 
 /* vu0 routine: vf10 = c + normalize(d - c) * dist */
 void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
-    f32 dist = func_00209390(a, b, c);
+    f32 dist = btlTriangleNormalDotEdge(a, b, c);
     __asm__ volatile(
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%0)\n\t"
@@ -862,14 +862,14 @@ typedef struct BtlScalarRange {
     f32 target;      /* 0x10 */
 } BtlScalarRange;
 
-void func_002096B8(s32 arg0, f32 arg1) {
+void btlScalarRangeSetStartClearEnd(s32 arg0, f32 arg1) {
     ((BtlScalarRange *)arg0)->start = arg1;
     ((BtlScalarRange *)arg0)->end = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002096C8);
 
-void func_00209720(s32 arg0, f32 arg1) {
+void btlScalarRangeInitQuadratic(s32 arg0, f32 arg1) {
     f32 temp_f0;
 
     ((BtlScalarRange *)arg0)->zero = 0.0f;
@@ -889,7 +889,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawIconAtSize);
 
 extern void btlDrawIconAtSize(BtnSurface *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
 
-void func_00209978(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s32 c3, s32 index) {
+void btlDrawButtonIconFixed64(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s32 c3, s32 index) {
     btlDrawIconAtSize(surface, x, y, 0x40, 0x40, c0, c1, c2, c3, index);
 }
 
@@ -911,7 +911,7 @@ extern BtnUv D_003BE1A0[];
 extern s32 func_002DDD60();
 extern void func_00330068();
 extern void *sdfAllocPacketAligned(s32);
-extern void sdfResetPacketList(void *);
+extern void sdfInitPacketList(void *);
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
 void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
@@ -943,7 +943,7 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
         }
         texture = func_002DDD60(surface, ((BtlState *)func_001AA6F8())->buttonTextureHandle);
         packet = sdfAllocPacketAligned(0x20);
-        sdfResetPacketList(packet);
+        sdfInitPacketList(packet);
         sdfConsCreateDrawPacket(packet, texture, 0);
         xFixed = x * 0x10;
         yFixed = y * 8;
@@ -957,8 +957,8 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
     }
 }
 
-void func_00209CD0(void) {
-    func_0020D128((s32)"btl:[%s]\n", D_00436AF0);
+void btlOpenButtonIconResource(void) {
+    btlBossDebugPrintf((s32)"btl:[%s]\n", D_00436AF0);
     D_00438F6C = func_00343ED0(D_00436AF0, &D_00438F70, 0);
 }
 
@@ -1006,7 +1006,7 @@ u32 func_00209DD8(void) {
     return 1;
 }
 
-u32 func_00209E08(void) {
+u32 btlCmdSetContextFlagOne(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)func_0010D8D0();
@@ -1035,7 +1035,7 @@ extern s8 *D_00435E1C;
 extern s32 func_001B2F50(void *, s32);
 extern s32 func_001ACD10(void *, s32, BtlActionProbe *);
 
-u32 func_00209E68(void) {
+u32 btlScriptSelectActionEntry(void) {
     BtlCommandCtx *context;
     BtlActionProbe probe;
     s32 index;
@@ -1060,7 +1060,7 @@ u32 func_00209E68(void) {
     return 1;
 }
 
-u32 func_00209F28(void) {
+u32 btlScriptSelectByKind(void) {
     BtlCommandCtx *context;
     s32 kind;
     s32 value;
@@ -1078,7 +1078,7 @@ u32 func_00209F28(void) {
     return 1;
 }
 
-u32 func_00209FA0(void) {
+u32 btlScriptSelectWeightedEntry(void) {
     BtlCommandCtx *context;
     s32 value;
 
@@ -1092,7 +1092,7 @@ u32 func_00209FA0(void) {
     return 1;
 }
 
-u32 func_00209FF8(void) {
+u32 btlScriptSelectDirect(void) {
     BtlCommandCtx *context;
     s32 value;
 
@@ -1388,7 +1388,7 @@ s32 func_0020AA00(void) {
     return 1;
 }
 
-u32 func_0020AA90(void) {
+u32 btlScriptSetChoiceFlag(void) {
     BtlCommandCtx *context;
     s32 first;
     s32 second;
@@ -1949,7 +1949,7 @@ u32 func_0020C078(void) {
     return 1;
 }
 
-u32 func_0020C080(void) {
+u32 btlCmdTestEffectActor(void) {
     if (btlHasEffectActor() != 0) {
         func_0010D818(1);
     } else {
@@ -2204,19 +2204,19 @@ u32 func_0020C780(void) {
 }
 
 u32 func_0020C7A0(void) {
-    func_00208D58();
+    btlFlagAllUnitsDefeatCandidate();
     return 1;
 }
 
 u32 func_0020C7C0(void) {
     func_00208DA0();
-    func_00208DE8(0x200);
+    btlFlagMatchingUnitsDefeatCandidate(0x200);
     return 1;
 }
 
 u32 func_0020C7E8(void) {
     func_00208DA0();
-    func_00208DE8(0x400);
+    btlFlagMatchingUnitsDefeatCandidate(0x400);
     return 1;
 }
 
@@ -2296,13 +2296,13 @@ u32 btlCmdCameraMoveBlend(void) {
 }
 
 u32 func_0020CB80(void) {
-    func_0020D128(D_00419570);
+    btlBossDebugPrintf(D_00419570);
     func_0010D818(0);
     return 1;
 }
 
 u32 func_0020CBB0(void) {
-    func_0020D128(D_00419590);
+    btlBossDebugPrintf(D_00419590);
     func_0010D818(0x14);
     return 1;
 }
@@ -2316,38 +2316,38 @@ u32 func_0020CBE0(void) {
 }
 
 u32 func_0020CC10(void) {
-    func_0020D128(D_004195B8);
+    btlBossDebugPrintf(D_004195B8);
     func_0010D818(0);
     return 1;
 }
 
 u32 func_0020CC40(void) {
-    func_0020D128(D_004195D8);
+    btlBossDebugPrintf(D_004195D8);
     return 1;
 }
 
 u32 func_0020CC68(void) {
-    func_0020D128(D_004195F8);
+    btlBossDebugPrintf(D_004195F8);
     return 1;
 }
 
 u32 func_0020CC90(void) {
-    func_0020D128(D_00419620);
+    btlBossDebugPrintf(D_00419620);
     return 1;
 }
 
 u32 func_0020CCB8(void) {
-    func_0020D128(D_00419648);
+    btlBossDebugPrintf(D_00419648);
     return 1;
 }
 
 u32 func_0020CCE0(void) {
-    func_0020D128(D_00419668);
+    btlBossDebugPrintf(D_00419668);
     return 1;
 }
 
 u32 func_0020CD08(void) {
-    func_0020D128(D_00419688);
+    btlBossDebugPrintf(D_00419688);
     return 1;
 }
 
@@ -2456,10 +2456,10 @@ void func_0020D118(void) {
 void func_0020D120(void) {
 }
 
-void func_0020D128(s32 format, ...) {
+void btlBossDebugPrintf(s32 format, ...) {
 }
 
-void func_0020D170(s32 a, s32 b, s32 c, s32 d, ...) {
+void btlBossDebugPrintfN(s32 a, s32 b, s32 c, s32 d, ...) {
 }
 
 void func_0020D1B0(void) {
@@ -2741,7 +2741,7 @@ void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32
     list->count++;
 }
 
-BtlResourceDescriptor *func_0020DA28(BtlEntryList *list) {
+BtlResourceDescriptor *btlCreateResourceDescriptor(BtlEntryList *list) {
     BtlResourceDescriptor *resource = func_00328D68(0x48);
 
     resource->word00 = 8;

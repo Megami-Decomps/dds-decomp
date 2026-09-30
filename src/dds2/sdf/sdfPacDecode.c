@@ -26,7 +26,7 @@ typedef struct PacExtensionHeader {
 } PacExtensionHeader;
 
 typedef struct PacWork {
-    struct PacWork *next; /* 0x0: packet queue link */
+    struct PacWork *next; /* 0x0 */
     struct PacState *owner; /* 0x4 */
     s32 resourceHandle; /* 0x8 */
     u8 *dataCursor; /* 0xC */
@@ -113,6 +113,24 @@ void func_003476D0(PacState *arg0);
 void sdfPacAdvanceAllocationEntry(PacState *arg0);
 
 void func_003477A8(PacState *arg0);
+
+s32 func_003293C8(s32 arg0);
+
+s32 func_003292A8(s32 arg0);
+
+void sdfStoreWordAndSetState(void *arg0, void *arg1);
+
+/* Relocation record embedded in the work item's data stream. */
+typedef struct PacReloc {
+    s32 offset; /* 0x00: displacement from the payload */
+    s32 count;  /* 0x04: number of relocation bytes */
+    u8 pad08[8];
+    u8 payload[1]; /* 0x10 */
+} PacReloc;
+
+void sdfRelocatePackedResourceWords(void *arg0, void *arg1, void *arg2, s32 arg3);
+
+void func_00332F08(s32 arg0, s32 arg1);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 
@@ -245,7 +263,42 @@ void sdfPacSkipPendingBytes(PacState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacStartPacketPayload);
+/* Allocate or skip a payload and select its raw/compressed input handler. */
+void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
+    s32 allocationSize = packet->decodedSize;
+    if (allocationSize == 0) {
+        allocationSize = packet->payloadSize + (packet->flags & 0xF0) - 0x10;
+    }
+    if (state->flags & 1) {
+        PacWork *node = sdfPacEnqueuePacket(state, packet);
+        node->dataCursor = packet->payload;
+        state->onInput = sdfPacSkipPendingBytes;
+    } else {
+        PacWork *node;
+        state->phase = 2;
+        node = sdfPacEnqueuePacket(state, packet);
+        if (state->flags & 2) {
+            node->resourceHandle = func_003293C8(allocationSize);
+        } else {
+            node->resourceHandle = func_003292A8(allocationSize);
+        }
+        state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
+        switch (packet->flags & 0xF) {
+        case PAC_ENCODING_RAW:
+            state->onInput = sdfPacCopyPendingBytes;
+            break;
+        case PAC_ENCODING_COMPRESSED: {
+            PacBuf *decoder = func_00328D68(0x20);
+            state->decoder = decoder;
+            sdfStoreWordAndSetState(decoder, state->outputCursor);
+            state->onInput = sdfPacDecodePendingBytes;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+}
 
 /* Begin a regular payload; completion is the normal packet finalizer. */
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
@@ -253,7 +306,19 @@ void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
     state->onComplete = func_00346C40;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003472C0);
+/* Apply the relocation record at the front of the queued payload. */
+void func_003472C0(PacState *state) {
+    PacWork *work = state->queueTail;
+    PacReloc *record = (PacReloc *)work->dataCursor;
+    u8 *payload = record->payload;
+    s32 count = record->count;
+    work->dataCursor = payload;
+    if (count != 0) {
+        sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
+        record->count = 0;
+    }
+    func_00346C40(state);
+}
 
 /* Begin a payload that must be relocated before normal finalization. */
 void func_00347320(PacState *state, PacHead *packet) {
@@ -261,7 +326,19 @@ void func_00347320(PacState *state, PacHead *packet) {
     state->onComplete = func_003472C0;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00347350);
+/* Complete the second relocation-command variant with the same word fixups. */
+void func_00347350(PacState *state) {
+    PacWork *work = state->queueTail;
+    PacReloc *record = (PacReloc *)work->dataCursor;
+    u8 *payload = record->payload;
+    s32 count = record->count;
+    work->dataCursor = payload;
+    if (count != 0) {
+        sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
+        record->count = 0;
+    }
+    func_00346C40(state);
+}
 
 /* Begin the second relocation-command variant. */
 void func_003473B0(PacState *state, PacHead *packet) {
@@ -354,7 +431,21 @@ void sdfPacStartNextAllocationEntry(PacState *state) {
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477A8);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacAdvanceAllocationEntry);
+/* Advance the entry index and complete or request the next entry. */
+void sdfPacAdvanceAllocationEntry(PacState *state) {
+    PacAlloc *allocation = state->allocation;
+    func_00332F08(state->queueTail->resourceHandle, allocation->unk20);
+    {
+        s32 nextIndex = allocation->entryIndex + 1;
+        allocation->entryIndex = nextIndex;
+        if (nextIndex == allocation->entryCount) {
+            func_00328E48(allocation);
+            func_00346C40(state);
+        } else {
+            func_003477A8(state);
+        }
+    }
+}
 
 /* Discard pending input until the next allocation entry can start. */
 void sdfPacSkipAllocationEntryBytes(PacState *state) {

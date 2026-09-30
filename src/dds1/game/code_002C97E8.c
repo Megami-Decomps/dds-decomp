@@ -88,11 +88,11 @@ float sdfQuatLengthSquared(float *arg0) {
                   arg0[3] * arg0[3];
 }
 
-float sdfQuatMagnitude(float *values) {
+float sdfQuaternionMagnitude(float *values) {
     return fsqrtf(sdfQuatLengthSquared(values));
 }
 
-void sdfQuatInverse(float *values) {
+void sdfQuaternionInverse(float *values) {
     float lengthSquared = sdfQuatLengthSquared(values);
     if (lengthSquared != 0.0f) {
         values[0] = -values[0] / lengthSquared;
@@ -102,8 +102,8 @@ void sdfQuatInverse(float *values) {
     }
 }
 
-void sdfQuatNormalize(float *values) {
-    float length = sdfQuatMagnitude(values);
+void sdfQuaternionNormalize(float *values) {
+    float length = sdfQuaternionMagnitude(values);
     values[0] /= length;
     values[1] /= length;
     values[2] /= length;
@@ -118,13 +118,13 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9AD0);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9BF0);
 
-void sdfQuatBlendNormalize(float *out, float *from, float *to, float fraction) {
+void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fraction) {
     float inv = 1.0f - fraction;
     out[0] = from[0] * inv + to[0] * fraction;
     out[1] = from[1] * inv + to[1] * fraction;
     out[2] = from[2] * inv + to[2] * fraction;
     out[3] = from[3] * inv + to[3] * fraction;
-    sdfQuatNormalize(out);
+    sdfQuaternionNormalize(out);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9D98);
@@ -140,7 +140,7 @@ void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
         out[2] = (from[2] * firstWeight + to[2] * secondWeight) / denominator;
         out[3] = (from[3] * firstWeight + to[3] * secondWeight) / denominator;
     } else {
-        sdfQuatBlendNormalize(out, from, to, fraction);
+        sdfQuaternionBlendNormalize(out, from, to, fraction);
     }
 }
 
@@ -399,7 +399,7 @@ SdfListNode *func_002CAEC8(SdfList *list, SdfListNode *node) {
 }
 
 /* Unlink a node, hand it to the list's removal callback, free it, return its neighbour. */
-SdfListNode *func_002CAF78(SdfList *list, SdfListNode *node) {
+SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     SdfListNode *neighbour;
 
     if (node == NULL) {
@@ -548,7 +548,7 @@ void sdfAttachTaskItem(TaskWork *work, u32 *item) {
 void sdfRemoveTaskItem(TaskWork *work, s32 key) {
     void *item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
-        func_002CAF78(work->list, item);
+        sdfListRemoveNode(work->list, item);
     }
 }
 
@@ -644,7 +644,7 @@ extern void *func_00101A70(void);
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB718);
 
 /* Advance the work's cursor one node and run the node's callback when flagged. */
-s32 func_002CB850(TaskWork *work) {
+s32 sdfTaskWorkStep(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
     SdfTaskEntry *entry;
     u32 flags;
@@ -672,13 +672,13 @@ s32 func_002CB850(TaskWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB8E0);
 
-s32 func_002CB938(void) {
+s32 sdfTaskWorkRunAll(void) {
     TaskWork *work = func_00101A70();
 
     if (work->firstItemHandle == 0) {
         return -1;
     }
-    while (func_002CB850(work) == 1) {
+    while (sdfTaskWorkStep(work) == 1) {
     }
     return 0;
 }
@@ -725,7 +725,7 @@ typedef struct SdfGrid {
     void (*releaseCell)(u32, u32); /* 0x1C */
 } SdfGrid;
 
-SdfGridCell *func_002CBB68(SdfGrid *grid, s32 column, s32 row) {
+SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
     u32 cellIndex;
 
     cellIndex = row * grid->width + column;
@@ -741,7 +741,7 @@ void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *mod, u32 *div) {
     *div = cell->index / grid->width;
 }
 
-u32 func_002CBBD8(SdfGrid *grid, s32 column, s32 row) {
+u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
     u32 cellIndex;
 
     cellIndex = row * grid->width + column;

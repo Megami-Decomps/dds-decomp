@@ -22,7 +22,7 @@ extern void func_0027DBD0(s32, s32, s32, s32, u32 *, s32);
 extern s32 D_003BAA98;
 
 extern void func_0027C140();
-extern void menuHideWindowHandles(u32);
+extern void mnuHideWindowHandles(u32);
 
 extern void mnuDrawWindowSprites();
 
@@ -198,7 +198,7 @@ void func_00279CC0(s32 menu, s32 target) {
             n--;
         } while (n != 0);
     }
-    func_0027BF10(*(s32 *)(list + 0x14));
+    mnuResetListNodeFadeCounters(*(s32 *)(list + 0x14));
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
@@ -269,7 +269,7 @@ u32 func_0027A778() {
 
     window = func_00101A70();
     window = *(s32 *)(window + 0x90c);
-    func_0027C430(*(u32 *)(window + 0x24));
+    mnuDestroyWindowContainer(*(u32 *)(window + 0x24));
     *(u32 *)(window + 0x24) = 0;
     return 1;
 }
@@ -277,7 +277,7 @@ u32 func_0027A778() {
 s32 mnuResetSelection(s32 selection) {
     s32 context;
     s32 menu;
-    campMenuInit();
+    mnuCampMenuInit();
     context = func_00101A70(selection);
     menu = *(s32 *)(context + 0x90C);
     ptySkillMenuBuildLinkageSkills(selection);
@@ -333,7 +333,7 @@ void mnuDrawListFrames(s32 menu) {
     }
 }
 
-void campMenuDrawStatus(s32 param) {
+void mnuCampMenuDrawStatus(s32 param) {
     s32 context = func_00101A70();
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
@@ -685,7 +685,7 @@ void mnuSelectFirstListNode(MenuList *list) {
     mnuSeekListNode(0, list);
 }
 
-void func_0027BB28(MenuList *list) {
+void mnuSelectLastListNode(MenuList *list) {
     mnuSeekListNode(list->count - 1, list);
 }
 
@@ -708,7 +708,7 @@ s32 mnuAdvanceListWindowStart(MenuList *list) {
 }
 
 /* Step the visible head back one node when a full window follows it. */
-s32 func_0027BB80(MenuList *list) {
+s32 mnuRetreatListWindowStart(MenuList *list) {
     MenuListNode *cursor = list->cursor;
     MenuListNode *head = list->head;
     MenuListNode *node;
@@ -742,12 +742,12 @@ void func_0027BEB0(u32 list) {
     func_0027BD48(list, 0, 0);
 }
 
-void func_0027BED0(u32 *flags) {
+void mnuClearListFlagsOneAndTwo(u32 *flags) {
     *flags &= ~1;
     *flags &= ~2;
 }
 
-u32 func_0027BEF0(u32 *flags) {
+u32 mnuTestListFlagTwo(u32 *flags) {
     return *flags & 2;
 }
 
@@ -756,7 +756,7 @@ s32 func_0027BF00(s32 list) {
 }
 
 /* Cancel the pending animation on every node in this list. */
-void func_0027BF10(MenuList *list) {
+void mnuResetListNodeFadeCounters(MenuList *list) {
     MenuListNode *node;
 
     node = list->first;
@@ -769,7 +769,7 @@ void func_0027BF10(MenuList *list) {
 }
 
 /* Tick every node's animation down in units of 16, clamping at zero. */
-void func_0027BF48(MenuList *list) {
+void mnuDecreaseListNodeFadeCounters(MenuList *list) {
     MenuListNode *node = list->first;
     if (node != NULL) {
         do {
@@ -872,7 +872,7 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 left, s32 right)
     return (s32)item;
 }
 
-void func_0027C430(u32 context) {
+void mnuDestroyWindowContainer(u32 context) {
     MenuWindowContainer *window = (MenuWindowContainer *)context;
     s32 textures;
 
@@ -888,7 +888,7 @@ void func_0027C470(s32 window, u32 sprite) {
     ((MenuWindowContainer *)window)->overlaySprite = sprite;
 }
 
-void func_0027C478(s32 window, u32 fade) {
+void mnuSetWindowContainerState(s32 window, u32 fade) {
     ((MenuWindowContainer *)window)->fade = fade;
 }
 
@@ -984,11 +984,11 @@ void func_0027C770(u32 window) {
 }
 
 void func_0027C788(s32 window) {
-    func_0027BED0(((MenuWindowContainer *)window)->list);
+    mnuClearListFlagsOneAndTwo(((MenuWindowContainer *)window)->list);
 }
 
 void func_0027C7A0(s32 window) {
-    func_0027BEF0(((MenuWindowContainer *)window)->list);
+    mnuTestListFlagTwo(((MenuWindowContainer *)window)->list);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027C7B8);
@@ -1024,7 +1024,7 @@ void func_0027CCD0(s32 x, s32 base, s32 depth, s32 menu, s32 param) {
         }
         base += *(s32 *)(node + 0x24) * *(s32 *)(node + 0x28);
         func_0027DCE8(x, base, depth, texture, (u32 *)panel, flag, param);
-        menuHideWindowHandles(panel);
+        mnuHideWindowHandles(panel);
         if (window->flags & 4) {
             window->transition += 0x10;
             if (window->transition >= 0x200) {
@@ -1201,7 +1201,7 @@ typedef struct MenuPanelHandles {
     s32 handles[6];
 } MenuPanelHandles;
 
-void menuHideWindowHandles(u32 obj) {
+void mnuHideWindowHandles(u32 obj) {
     MenuPanelHandles *panel = (MenuPanelHandles *)obj;
     switch (panel->mode) {
     case 0:
@@ -1275,7 +1275,7 @@ void mnuResetNodeLinks(MenuList *list, s32 restoreOffset) {
     }
 }
 
-void menuLinkItemList(MenuListNode **items, s32 count) {
+void mnuLinkItemList(MenuListNode **items, s32 count) {
     s32 i;
 
     items[0]->prev = NULL;
@@ -1363,7 +1363,7 @@ INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2380);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B23A0);
 
-void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
+void mnuSortItems(s32 menu, s32 sortKey, s32 descending) {
     s32 (*comparators[6])(MenuListNode **, MenuListNode **) = {
         mnuComparePrimaryKeyDescending, mnuCompareSecondaryKeyDescending, mnuCompareTertiaryKeyDescending,
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
@@ -1382,7 +1382,7 @@ void menuSortItems(s32 menu, s32 sortKey, s32 descending) {
         sortKey += 3;
     }
     func_00300508(items, count, 4, comparators[sortKey]);
-    menuLinkItemList(items, count);
+    mnuLinkItemList(items, count);
     func_0027DE60(menu);
     func_0027DE98(menu);
     mnuResetNodeLinks((s32 *)menu, 0);
@@ -1396,7 +1396,7 @@ void mnuAllocateListEntries(s32 *list) {
     }
 }
 
-void freeMenuListEntries(s32 *list) {
+void mnuFreeListEntries(s32 *list) {
     u32 i;
     s32 *entry = list + 1;
     for (i = 0; i < 4; i++, entry++) {
@@ -1434,7 +1434,7 @@ void func_0027E2F0(s32 *list, u32 index) {
         entries = list + 1;
         slot = entries + index;
         if (((MenuFadeEntry *)*slot)->active != 0) {
-            func_0027C430(((MenuFadeEntry *)*slot)->handle);
+            mnuDestroyWindowContainer(((MenuFadeEntry *)*slot)->handle);
         }
         i = list[0] - 1;
         ((MenuFadeEntry *)*slot)->handle = 0;
@@ -1974,7 +1974,7 @@ void mnuRegisterResourceHandles(s32 destination, s32 *source) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027FCA0);
 
-void menuUpdateHandleStates(s32 obj) {
+void mnuUpdateHandleStates(s32 obj) {
     s32 *handle = (s32 *)(obj + 0x24);
     s32 i;
     s32 offset;
@@ -2050,7 +2050,7 @@ typedef struct MenuPageHandles {
     u8 padDC[0x58];
 } MenuPageHandles;
 
-void menuReleaseHandles(s32 obj) {
+void mnuReleaseHandles(s32 obj) {
     MenuPageHandles *page = (MenuPageHandles *)obj;
     s32 *handle = page->base;
     u32 i;
@@ -2080,12 +2080,12 @@ void menuReleaseHandles(s32 obj) {
     }
 }
 
-extern void menuReleaseHandles(s32);
+extern void mnuReleaseHandles(s32);
 
 void mnuShutdownContext(s32 context) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        menuReleaseHandles(context + 0x78 + i * 0x134);
+        mnuReleaseHandles(context + 0x78 + i * 0x134);
     }
     func_0027FB90(context);
     func_00280228(context);

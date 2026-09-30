@@ -55,13 +55,13 @@ u32 func_002890A8(MenuContainer *object) {
 
 u32 func_002890B8(MenuContainer *object) {
     func_002B8D10(object->list);
-    func_002B8F98(object->list);
+    mnuClearListFlagsOneAndTwo(object->list);
     return 1;
 }
 
 u32 func_002890F0(MenuContainer *object) {
     func_002B8CF0(object->list);
-    func_002B8F98(object->list);
+    mnuClearListFlagsOneAndTwo(object->list);
     return 1;
 }
 
@@ -82,11 +82,11 @@ s32 func_00289128(MenuContainer *object, s8 target) {
         if (diff > 0) {
             func_002B8D10(object->list);
             diff--;
-            func_002B8F98(object->list);
+            mnuClearListFlagsOneAndTwo(object->list);
         } else {
             func_002B8CF0(object->list);
             diff++;
-            func_002B8F98(object->list);
+            mnuClearListFlagsOneAndTwo(object->list);
         }
     }
     return 1;

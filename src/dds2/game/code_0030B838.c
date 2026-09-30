@@ -163,7 +163,7 @@ extern void func_001094F8(s32, s32, s32, s32, u32, u32, u32, u32);
 
 extern void func_0030F2A8(s32, s32, u32, u8 *);
 
-extern void func_001089A8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00108BD8(s32);
 extern void func_00108EC0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
 
@@ -496,7 +496,7 @@ void func_0030D500(s32 arg0, s32 x, f32 fade) {
     grow = fade * 0.5f + (1.0f - fade) * 2.5f;
     offset = ((SdfCounterRuntime *)D_004388C4)->selected->index * (((SdfCounterRuntime *)D_004388C4)->posX >> 3);
     timer = ((SdfCounterRuntime *)D_004388C4)->timer;
-    func_001089A8(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108BD8(1);
     shrink = (1.0f - grow) * 8.5f;
     func_00108EC0((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
@@ -649,7 +649,7 @@ s64 func_0030E010(f32 x) {
     return func_0030DE08(x, x);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030E030);
+INCLUDE_ASM(const s32, "game/code_0030B838", fldLoadLocalMapResources);
 
 s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;

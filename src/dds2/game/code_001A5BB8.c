@@ -142,7 +142,7 @@ extern s32 D_00435E1C;
 
 extern char D_00415158[];
 
-extern s32 func_0020D128(const char *, ...);
+extern s32 btlBossDebugPrintf(const char *, ...);
 
 extern s8 D_0037F550[];
 
@@ -244,7 +244,7 @@ extern u8 D_003B4D28[];
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
-extern void sdfResetPacketList(s32 mem);
+extern void sdfInitPacketList(s32 mem);
 
 extern void itfSendTablePacket(s32 arg0, s32 arg1, s32 arg2);
 
@@ -781,7 +781,7 @@ s32 sndUpdateTestMsgTask(void) {
     s32 mem;
     if ((D_00436644 != 0) && (D_00436640 != 3)) {
         mem = sdfAllocPacketAligned(0x20);
-        sdfResetPacketList(mem);
+        sdfInitPacketList(mem);
         itfSendTablePacket(mem, 0, 0);
         func_001A0CA0(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, D_00436644, 0, mem);
         D_003805A8.submitPacket(&D_003805A8, mem);
@@ -850,7 +850,7 @@ extern s32 btlUpdateFadeColor(void);
 
 extern s32 btlUpdateAutoMusic(void);
 
-extern s32 func_00200828(void);
+extern s32 btlUpdateTintAndWorldLight(void);
 
 extern s32 func_00205160(void);
 
@@ -877,7 +877,7 @@ s32 func_001A9988(void) {
     if (((BattleController *)D_004366E4)->flags & 1) {
         btlUpdateFadeColor();
         btlUpdateAutoMusic();
-        func_00200828();
+        btlUpdateTintAndWorldLight();
         func_00205160();
         btlUpdateScene();
         func_001D3ED8();
@@ -893,7 +893,7 @@ s32 func_001A9988(void) {
     return 0;
 }
 
-extern s32 func_002008C0(void);
+extern s32 btlTickFieldSwayAndTint(void);
 
 extern s32 func_00200AD8(void);
 
@@ -915,7 +915,7 @@ s32 func_001A9A30(void) {
         return 0;
     }
     if (battle->flags & 1) {
-        func_002008C0();
+        btlTickFieldSwayAndTint();
         func_00200AD8();
         func_00203258();
         func_001E7960();
@@ -964,7 +964,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9D70);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
 
 void func_001AA2E0(void) {
-    func_00209CD0();
+    btlOpenButtonIconResource();
     func_001CFB48();
     func_00203B90();
 }
@@ -1141,7 +1141,7 @@ void btlSyncPlayerWork(UiObject *actor) {
     dst->unk1AC = src->unk1AC;
     dst->unk1AE = src->unk1AE;
     dst->unk1B0 = src->unk1B0;
-    func_0020D128("btl:player work set[%p]\n", actor);
+    btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
 s32 func_001AABC0(UiObject *object) {
@@ -1254,7 +1254,7 @@ s32 func_001AC050(s32 arg0, s32 arg1) {
 
 s32 func_001AC098(s32 index) {
     u16 item = *(u16 *)(D_00435E38 + index * 8 + 2);
-    func_0020D128(D_00415158, index, item);
+    btlBossDebugPrintf(D_00415158, index, item);
     return item;
 }
 
@@ -1467,7 +1467,7 @@ void func_001ADC48(u32 arg0) {
     } while (temp_v0 < 7);
 }
 
-s32 btlActorEntryIsActive(UiObject *unit, s32 index) {
+s32 btlActorEntryIsExpired(UiObject *unit, s32 index) {
     if (unit->entrySlots[index].code == 0) {
         return 0;
     }
@@ -1665,7 +1665,7 @@ s32 btlRollFearChance(s32 unused, u8 *unit, s32 flagsA, s32 flagsB) {
     if (!(flagsB & 2)) {
         threshold = !(flagsB & 4) ? 0 : 0x28;
     }
-    func_0020D128(D_00415440, threshold);
+    btlBossDebugPrintf(D_00415440, threshold);
     return func_00211DE0() < threshold;
 }
 
@@ -1738,7 +1738,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1F80);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B20C8);
 
-s32 func_001B21E0(u8 *acquirer, u8 *enemy) {
+s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     s32 result = 0;
     s32 money;
     u8 *entry;
@@ -1754,9 +1754,9 @@ s32 func_001B21E0(u8 *acquirer, u8 *enemy) {
         money *= 100;
     }
     if (acquirer != 0) {
-        func_0020D128("btl:money=%d\n", money, acquirer);
+        btlBossDebugPrintf("btl:money=%d\n", money, acquirer);
     } else {
-        func_0020D128("btl:money=%d(acquisition)\n", money);
+        btlBossDebugPrintf("btl:money=%d(acquisition)\n", money);
     }
     return money;
 }
@@ -1774,7 +1774,7 @@ s32 func_001B2388(u8 *unit) {
     } else if (btlCheckSpecialAbility((s32)unit + 0x120, 0x249) != 0) {
         recovery = (s32)(*(u16 *)(unit + 0x12C) * D_00435E2C->hpRate);
     }
-    func_0020D128(D_00415638, recovery);
+    btlBossDebugPrintf(D_00415638, recovery);
     return recovery;
 }
 
@@ -2269,7 +2269,7 @@ s32 func_001B4738(u8 *unit) {
     if (btlCheckSpecialAbility((s32)unit + 0x120, 0x251) != 0) {
         return 1;
     }
-    func_0020D128(D_00415840, 5, 1.0);
+    btlBossDebugPrintf(D_00415840, 5, 1.0);
     return func_00211DE0() < 5;
 }
 
@@ -2947,7 +2947,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004162F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB1E8);
 
-u32 func_001BB550(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
+u32 btlSetSlotLowByteClamped(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
     u32 word = owner->records[group].word[slot];
     u32 limit;
     u32 value;

@@ -8,7 +8,7 @@ extern u32 func_001A3360(u64, u64, u64);
 
 extern void *btlAllocateIndexList(s32);
 
-extern u32 func_001DAE48();
+extern u32 btlGetIndexListCount();
 
 extern s32 func_001A8818();
 
@@ -207,7 +207,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF8D8);
 
 /* Weighted pick of a table row: returns the first slot whose cumulative
    weight reaches `roll` (func_001FFCD8) among the five slots of row `index`. */
-u32 func_001FFC18(s32 unit, s32 species, s32 index) {
+u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 index) {
     u32 roll;
     u32 total;
     u32 i;
@@ -225,7 +225,7 @@ u32 func_001FFC18(s32 unit, s32 species, s32 index) {
     }
     btlDebugPrintf("AI_BUGBUGBUGBUGBUG           \n");
     if (D_003BD476 == 0) {
-        func_001FB0A8(D_003A5988);
+        btlBossDebugPrintf(D_003A5988);
     }
     return 0;
 }
@@ -276,7 +276,7 @@ u32 func_00200208(void) {
     return 1;
 }
 
-s32 func_00200238(s32 unused, u32 limit) {
+s32 btlIsGroup400CountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
@@ -291,7 +291,7 @@ s32 func_00200238(s32 unused, u32 limit) {
     return 1;
 }
 
-s32 func_00200298(s32 unused, u32 limit) {
+s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
@@ -315,7 +315,7 @@ u8 func_00200308(void) {
     return result != 0;
 }
 
-s32 func_00200328(s32 unused, u32 limit) {
+s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
@@ -330,15 +330,15 @@ s32 func_00200328(s32 unused, u32 limit) {
     return 1;
 }
 
-s32 func_00200388(s32 arg0, s32 arg1) {
+s32 btlUnitHasActionMask(s32 arg0, s32 arg1) {
     return (func_001A1938(arg0 + 0x120, arg1) & arg1) != 0;
 }
 
-s32 func_002003B8(s32 unused, s32 action) {
+s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x401) == 0x401) {
-            if (func_00200388((s32)unit, action) != 0) {
+            if (btlUnitHasActionMask((s32)unit, action) != 0) {
                 return 1;
             }
         }
@@ -347,11 +347,11 @@ s32 func_002003B8(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00200438(s32 unused, s32 action) {
+s32 btlAnyGroup200HasActionMask(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
-            if (func_00200388((s32)unit, action) != 0) {
+            if (btlUnitHasActionMask((s32)unit, action) != 0) {
                 return 1;
             }
         }
@@ -360,11 +360,11 @@ s32 func_00200438(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_002004B8(s32 unused, s32 action) {
+s32 btlAllGroup200HaveActionMask(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
-            if (func_00200388((s32)unit, action) == 0) {
+            if (btlUnitHasActionMask((s32)unit, action) == 0) {
                 return 0;
             }
         }
@@ -411,7 +411,7 @@ extern s32 func_001A8448(void *, s32);
 
 extern const s32 D_003A5A08[10];
 
-s32 func_00200948(void *actor) {
+s32 btlUnitHasAllTenActions(void *actor) {
     s32 actions[10];
     s32 i;
     memcpy(actions, D_003A5A08, sizeof(actions));
@@ -541,7 +541,7 @@ s32 func_00200DF0(s32 unused, u32 action) {
     return 0;
 }
 
-s32 func_00200E78(void) {
+s32 btlAnyGroup200LacksFlag1000(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
@@ -636,9 +636,9 @@ u8 func_002010D8(void) {
 
 extern void func_001A30F8(s32, void *, s32, s32, s32);
 
-extern s32 func_001DAE50(void *, u32);
+extern s32 btlGetIndexListEntry(void *, u32);
 
-extern void func_001DAE08(void *);
+extern void btlFreeIndexList(void *);
 
 s32 func_002010F8(u8 *unit) {
     u32 i;
@@ -651,20 +651,20 @@ s32 func_002010F8(u8 *unit) {
     battle = *(s32 *)D_003BB87C;
     list = btlAllocateIndexList(13);
     func_001A30F8(battle, list, 2, 0, 0);
-    count = func_001DAE48(list);
+    count = btlGetIndexListCount(list);
     for (i = 0; i < count; i++) {
-        if (func_001A8818(func_001DAE50(list, i)) != 0) {
-            func_001DAE08(list);
+        if (func_001A8818(btlGetIndexListEntry(list, i)) != 0) {
+            btlFreeIndexList(list);
             return 1;
         }
     }
-    func_001DAE08(list);
+    btlFreeIndexList(list);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002011C8);
 
-s32 func_002012B0(s32 arg0) {
+s32 btlUnitHasFlag1000(s32 arg0) {
     return ((*(s32 *)(arg0 + 0x110) & 0x1000) > 0);
 }
 
@@ -782,7 +782,7 @@ s32 btlHasOtherGroup400DifferentUnitMode(u8 *actor, s32 kind) {
     return 0;
 }
 
-s32 battleAnyUnitPassesCheck200(s32 unused, s32 action) {
+s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (func_00202178(unit, action, 0x200) == 0) {
@@ -804,7 +804,7 @@ s32 func_00201748(s32 unused, s32 action) {
     return 1;
 }
 
-s32 battleAnyUnitPassesCheck400(s32 unused, s32 action) {
+s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (func_00202178(unit, action, 0x400) == 0) {
@@ -833,12 +833,12 @@ extern u8 D_003BD476;
 s32 func_002018A0(s32 actor) {
     if (func_001A8050(actor, 0) != 0) {
         if (D_003BD476 == 0) {
-            func_001FB0A8(D_003A5A80);
+            btlBossDebugPrintf(D_003A5A80);
         }
         return 1;
     }
     if (D_003BD476 == 0) {
-        func_001FB0A8(D_003A5AA8);
+        btlBossDebugPrintf(D_003A5AA8);
     }
     return 0;
 }
@@ -908,7 +908,7 @@ s32 func_00201C60(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
-            if (func_00200948(unit) != 0) {
+            if (btlUnitHasAllTenActions(unit) != 0) {
                 return 1;
             }
         }
@@ -921,7 +921,7 @@ s32 func_00201CD0(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
         if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
-            if (func_00200948(unit) != 0) {
+            if (btlUnitHasAllTenActions(unit) != 0) {
                 return 1;
             }
         }
@@ -962,7 +962,7 @@ s32 func_00201E10(void) {
 
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
-s32 func_00201E20(s32 unused, s32 action) {
+s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQuery(unit, action, 0x200) != 0) {
@@ -987,14 +987,14 @@ s32 func_00201E88(void) {
 }
 
 s64 btlAnyGroup400HasQuery(s32 unused, s32 query, u32 unused2) {
-    return func_00201F30(unused, query, 0x400);
+    return btlAnyUnitHasQueuedQuery(unused, query, 0x400);
 }
 
 s64 btlAnyGroup200HasQuery(s32 unused, s32 query, u32 unused2) {
-    return func_00201F30(unused, query, 0x200);
+    return btlAnyUnitHasQueuedQuery(unused, query, 0x200);
 }
 
-s32 func_00201F30(s32 unused, s32 query, u32 mask) {
+s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
     u8 *node = *(u8 **)(func_001A17F0() + 0x224);
     while (node != 0) {
         u8 *owner = *(u8 **)(node + 0x18);
@@ -1097,7 +1097,7 @@ s32 func_00202178(u8 *unit, s32 action, u32 mask) {
     return 2;
 }
 
-s32 battleAllUnitsPassCheck200(s32 unused, s32 action) {
+s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
     s32 node = (s32)((BtlState *)func_001A17F0())->units;
     while (node != 0) {
         if (func_00202178(node, action, 0x200) == 0) {
@@ -1108,7 +1108,7 @@ s32 battleAllUnitsPassCheck200(s32 unused, s32 action) {
     return 1;
 }
 
-s32 battleAllUnitsPassCheck400(s32 unused, s32 action) {
+s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     s32 node = (s32)((BtlState *)func_001A17F0())->units;
     while (node != 0) {
         if (func_00202178(node, action, 0x400) == 0) {
@@ -1119,16 +1119,16 @@ s32 battleAllUnitsPassCheck400(s32 unused, s32 action) {
     return 1;
 }
 
-extern s32 func_00202448(void *, s32);
+extern s32 btlGroup400UnitHasAction(void *, s32);
 
 s32 func_00202390(void *unit) {
-    if (func_00202448(unit, 0x1b2) != 0 ||
-        func_00202448(unit, 0x1b6) != 0 ||
-        func_00202448(unit, 0x1ba) != 0 ||
-        func_00202448(unit, 0x1be) != 0) {
+    if (btlGroup400UnitHasAction(unit, 0x1b2) != 0 ||
+        btlGroup400UnitHasAction(unit, 0x1b6) != 0 ||
+        btlGroup400UnitHasAction(unit, 0x1ba) != 0 ||
+        btlGroup400UnitHasAction(unit, 0x1be) != 0) {
         return 1;
     }
-    return func_00202448(unit, 0x1c2) != 0;
+    return btlGroup400UnitHasAction(unit, 0x1c2) != 0;
 }
 
 s32 btlActionMatchesUnit(u8 *unit, s32 action) {
@@ -1143,7 +1143,7 @@ s32 btlActionMatchesUnit(u8 *unit, s32 action) {
 
 extern s32 func_001A8A30(void *, s32);
 
-s32 func_00202448(void *unit, s32 action) {
+s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     func_001A17F0();
     if ((*(u64 *)((u8 *)unit + 0x110) & 0x421) == 0x401) {
         if (func_001A8A30(unit, action) != 0) {
@@ -1155,14 +1155,14 @@ s32 func_00202448(void *unit, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002024A8);
 
-u64 func_002025F8(u64 arg0, u32 *arg1, u32 *arg2) {
+u64 btlBuildActorIndexListAndCount(u64 arg0, u32 *arg1, u32 *arg2) {
     u32 result;
     u64 list;
 
     list = btlAllocateIndexList(0xd);
     result = func_001A3360(arg0, list, 0);
     *arg1 = result;
-    result = func_001DAE48(list);
+    result = btlGetIndexListCount(list);
     *arg2 = result;
     return list;
 }
@@ -1208,9 +1208,9 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00203E38);
 s32 func_00203F98(s32 actor) {
     void *list = btlAllocateIndexList(13);
     func_001A30F8(actor, list, 1, 1, 0);
-    func_001DAE48(list);
-    func_001DAE20(*(s32 *)(actor + 0x60), *(s32 *)(actor + 0x18));
-    func_001DAE08(list);
+    btlGetIndexListCount(list);
+    btlAppendIndexListEntry(*(s32 *)(actor + 0x60), *(s32 *)(actor + 0x18));
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1228,7 +1228,7 @@ u32 func_00204048(s32 arg0) {
     u32 actor;
 
     actor = btlGetEffectActor();
-    func_001DAE20(*(u32 *)(arg0 + 0x60), actor);
+    btlAppendIndexListEntry(*(u32 *)(arg0 + 0x60), actor);
     return 1;
 }
 
@@ -1254,11 +1254,11 @@ void func_002044F0(u8 *command, u8 *unused) {
     f32 userPos[4];
     f32 targetPos[4];
     user = btlGetTargetUnitForLink(command);
-    target = (BtlUnit *)func_001DAE50(*(u32 *)(command + 0x118), 0);
+    target = (BtlUnit *)btlGetIndexListEntry(*(u32 *)(command + 0x118), 0);
     if (!(user->flags & target->flags & 0x600)) {
         func_001F7428();
         btlFlagUnitDefeatCandidate(user);
-        func_001F7470(target->flags & 0x600);
+        btlFlagMatchingUnitsDefeatCandidate(target->flags & 0x600);
     } else {
         func_001F7428();
         btlFlagUnitDefeatCandidate(user);
@@ -2091,7 +2091,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00207E68);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00207FF0);
 
-s32 battleAdjustSpeciesAnimation(u8 *unit, s32 animation) {
+s32 btlAdjustSpeciesAnimation(u8 *unit, s32 animation) {
     s32 species;
     u32 flags = ((BtlUnit *)unit)->flags;
     if ((flags & 1) == 0) {
@@ -2366,7 +2366,7 @@ void func_00208D30(void) {
     *(u32 *)(data + 4) = 0x80808080;
     *(u32 *)(data + 8) = 0;
     *(u32 *)(data + 0xc) = effMiscRand(D_00324550) % 6;
-    func_001FB0A8(D_003A5D98, *(u32 *)(data + 0xc));
+    btlBossDebugPrintf(D_003A5D98, *(u32 *)(data + 0xc));
 }
 
 s32 func_00208D98(u8 *unit, s32 command) {
@@ -2899,8 +2899,8 @@ s32 func_0020B580(u8 *unit) {
         if ((flags & 0x1000) == 0) {
             return 0;
         }
-        if (func_001DAE48(*(u32 *)(entry + 0x60)) == 1) {
-            other = (u8 *)func_001DAE50(*(u32 *)(entry + 0x60), 0);
+        if (btlGetIndexListCount(*(u32 *)(entry + 0x60)) == 1) {
+            other = (u8 *)btlGetIndexListEntry(*(u32 *)(entry + 0x60), 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -2921,8 +2921,8 @@ s32 func_0020B770(u8 *unit) {
     u8 *entry = *(u8 **)(unit + 0xf4);
     u8 *other;
     if (*(u32 *)(*(u8 **)(entry + 0x18) + 0x110) & 0x200) {
-        if (func_001DAE48(*(u32 *)(entry + 0x60)) == 1) {
-            other = (u8 *)func_001DAE50(*(u32 *)(entry + 0x60), 0);
+        if (btlGetIndexListCount(*(u32 *)(entry + 0x60)) == 1) {
+            other = (u8 *)btlGetIndexListEntry(*(u32 *)(entry + 0x60), 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -2965,7 +2965,7 @@ extern void func_0020B190(u8 *, void *);
 
 extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void func_001DC568(void);
+extern void btlClearRuntimeFlag2000(void);
 
 s32 btlDispatchActionAnimationB(u8 *unit) {
     u16 flags = *(u16 *)((u8 *)D_003BAA60 + ((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
@@ -2984,8 +2984,8 @@ s32 btlDispatchActionAnimationB(u8 *unit) {
         func_001DC760();
         func_0020B348(unit, unit, 0);
     } else if (flags & 8) {
-        if (func_001DAE48(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
-            void *other = (void *)func_001DAE50((void *)*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60), 0);
+        if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
+            void *other = (void *)btlGetIndexListEntry((void *)*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60), 0);
             func_001DC760();
             func_0020B190(unit, other);
             ((BtlUnit *)unit)->flags = 0;
@@ -2996,7 +2996,7 @@ s32 btlDispatchActionAnimationB(u8 *unit) {
     } else {
         return 0;
     }
-    func_001DC568();
+    btlClearRuntimeFlag2000();
     return 1;
 }
 
@@ -3024,7 +3024,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D168);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D2E0);
 
-s32 battleAllowsSpeciesCondition(u8 *unit, u8 *other, s32 condition) {
+s32 btlAllowsSpeciesCondition(u8 *unit, u8 *other, s32 condition) {
     s32 kind;
     if ((((BtlUnit *)unit)->flags & 0x200) == 0) {
         return 1;
@@ -3246,8 +3246,8 @@ s32 func_0020E868(u8 *unit) {
     u8 *entry = *(u8 **)(unit + 0xf4);
     u8 *other;
     if (*(u32 *)(*(u8 **)(entry + 0x18) + 0x110) & 0x200) {
-        if (func_001DAE48(*(u32 *)(entry + 0x60)) == 1) {
-            other = (u8 *)func_001DAE50(*(u32 *)(entry + 0x60), 0);
+        if (btlGetIndexListCount(*(u32 *)(entry + 0x60)) == 1) {
+            other = (u8 *)btlGetIndexListEntry(*(u32 *)(entry + 0x60), 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -3279,7 +3279,7 @@ s32 func_0020E910(u8 *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (func_001DAE48(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
+        if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
             func_001DC760();
             func_0020DB90(unit);
         } else {

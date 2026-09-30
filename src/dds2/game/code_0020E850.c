@@ -703,7 +703,7 @@ s32 func_00210C10(void) {
     return 1;
 }
 
-u32 btlRandomBelow(u32 limit) {
+u32 btlNextScaledRandom(u32 limit) {
     D_00436CB0 = D_00436CB0 * 0x41c64e6d + 0x3039;
     return (D_00436CB0 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
@@ -718,7 +718,7 @@ s32 func_00210CE0(s32 lower, s32 upper) {
         lower = swap;
     }
     upper = upper - lower + 1;
-    return (s32)btlRandomBelow(0xFFFF) % upper + lower;
+    return (s32)btlNextScaledRandom(0xFFFF) % upper + lower;
 }
 
 s32 btlAllocAndCheck(s32 object) {

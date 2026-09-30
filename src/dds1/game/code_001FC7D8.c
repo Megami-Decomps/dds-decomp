@@ -240,7 +240,7 @@ typedef struct BtlJyokyoState {
     s32 id;          /* 0x498 */
 } BtlJyokyoState;
 
-s32 func_001FE3B8(BtlObjLink *link) {
+s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
     BtlJyokyoState *state = (BtlJyokyoState *)func_001A17F0();
     BtlJyokyoOwner *owner = link->owner;
 
@@ -269,7 +269,7 @@ BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
     if (owner != NULL) {
         obj->ownerData = owner->ownerData;
     }
-    obj->update = func_001FE3B8;
+    obj->update = btlJyokyoEffectUpdate;
     link = func_001D47D8(obj);
     link->owner = owner;
     link->arg = arg;

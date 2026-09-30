@@ -4,8 +4,8 @@
 
 extern void func_001D54C0(s32 actor);
 
-extern u32 func_001DAE48(s32 actor);
-extern s32 func_001DAE50(s32 actor, u32 index);
+extern u32 btlGetIndexListCount(s32 actor);
+extern s32 btlGetIndexListEntry(s32 actor, u32 index);
 extern void btlFlagUnitDefeatCandidate(s32 actor);
 
 extern s32 D_00360348[];
@@ -40,7 +40,7 @@ extern s32 D_003BD868;
 
 extern s8 D_003A54A8[];
 
-extern void func_001FB0A8(s32, ...);
+extern void btlBossDebugPrintf(s32, ...);
 
 extern s8 D_003A54C8[];
 
@@ -144,7 +144,7 @@ extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void effObjFetchInnerFirstVec(u32);
 
-extern f32 func_001F79A0(f32 *, f32 *, f32 *);
+extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 
 typedef union BtlVec4 {
     f32 f[4];
@@ -283,7 +283,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
 }
 
 
-f32 btlUnitGetMaxScaledExtent(BtlUnit *unit) {
+f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
     f32 reach;
     f32 height;
 
@@ -475,7 +475,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F72C8);
 
-void func_001F73E0(void) {
+void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
@@ -491,7 +491,7 @@ void func_001F7428(void) {
     }
 }
 
-void func_001F7470(s32 mask) {
+void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     BtlUnit *unit;
 
     unit = ((BtlState *)func_001A17F0())->units;
@@ -519,12 +519,12 @@ void func_001F74D0(s32 mask) {
     }
 }
 
-void func_001F7530(s32 actor) {
+void btlFlagActorUnitsDefeatCandidate(s32 actor) {
     u32 i = 0;
-    u32 count = func_001DAE48(actor);
+    u32 count = btlGetIndexListCount(actor);
     if (count != 0) {
         do {
-            btlFlagUnitDefeatCandidate(func_001DAE50(actor, i));
+            btlFlagUnitDefeatCandidate(btlGetIndexListEntry(actor, i));
             i++;
         } while (i < count);
     }
@@ -533,10 +533,10 @@ void func_001F7530(s32 actor) {
 
 void func_001F7598(s32 actor) {
     u32 i = 0;
-    u32 count = func_001DAE48(actor);
+    u32 count = btlGetIndexListCount(actor);
     if (count != 0) {
         do {
-            func_001D54C0(func_001DAE50(actor, i));
+            func_001D54C0(btlGetIndexListEntry(actor, i));
             i++;
         } while (i < count);
     }
@@ -617,7 +617,7 @@ extern void func_002E7F20(f32, f32, f32);
 extern f32 func_002FA1F0(f32, f32);
 extern u128 D_0035F9E0;
 
-s32 func_001F77D8(f32 *from, f32 *to) {
+s32 btlAimHorizontalDirectionVU(f32 *from, f32 *to) {
     f32 delta[4];
     delta[0] = to[0] - from[0];
     delta[2] = to[2] - from[2];
@@ -665,7 +665,7 @@ void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
 }
 
 
-f32 func_001F79A0(f32 *a, f32 *b, f32 *c) {
+f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
     f32 normal[4];
     f32 dot;
     btlTriangleNormalVU(a, b, c);
@@ -680,7 +680,7 @@ f32 func_001F79A0(f32 *a, f32 *b, f32 *c) {
 
 /* vu0 routine: vf10 = c + normalize(d - c) * dist */
 void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
-    f32 dist = func_001F79A0(a, b, c);
+    f32 dist = btlTriangleNormalDotEdge(a, b, c);
     __asm__ volatile(
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%0)\n\t"
@@ -833,14 +833,14 @@ typedef struct BtlScalarRange {
     f32 target;      /* 0x10 */
 } BtlScalarRange;
 
-void func_001F7CC8(s32 arg0, f32 arg1) {
+void btlScalarRangeSetStartClearEnd(s32 arg0, f32 arg1) {
     ((BtlScalarRange *)arg0)->start = arg1;
     ((BtlScalarRange *)arg0)->end = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7CD8);
 
-void func_001F7D30(s32 arg0, f32 arg1) {
+void btlScalarRangeInitQuadratic(s32 arg0, f32 arg1) {
     f32 zero;
 
     ((BtlScalarRange *)arg0)->zero = 0.0f;
@@ -860,8 +860,8 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7DF8);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", btlDrawButtonIcon);
 
-void func_001F8280(void) {
-    func_001FB0A8((s32)"btl:[%s]\n", D_003BB6B8);
+void btlOpenButtonIconResource(void) {
+    btlBossDebugPrintf((s32)"btl:[%s]\n", D_003BB6B8);
     D_003BD854 = func_002EB028(D_003BB6B8, &D_003BD858, 0);
 }
 
@@ -921,7 +921,7 @@ u32 func_001F83B8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F83E8);
+INCLUDE_ASM(const s32, "game/code_001F6110", btlScriptSelectActionEntry);
 
 u32 func_001F84A8(void) {
     s32 context = func_0010D6A8();
@@ -934,7 +934,7 @@ u32 func_001F84A8(void) {
     return 1;
 }
 
-u32 func_001F8508(void) {
+u32 btlCmdSetContextFlagOne(void) {
     s32 context;
 
     context = func_0010D6A8();
@@ -1624,7 +1624,7 @@ u32 func_001FA0A0(void) {
     return 1;
 }
 
-u32 func_001FA0E0(void) {
+u32 btlCmdTestEffectActor(void) {
     if (btlHasEffectActor() != 0) {
         func_0010D5F0(1);
     } else {
@@ -1848,19 +1848,19 @@ u32 func_001FA738(void) {
 }
 
 u32 func_001FA758(void) {
-    func_001F73E0();
+    btlFlagAllUnitsDefeatCandidate();
     return 1;
 }
 
 u32 func_001FA778(void) {
     func_001F7428();
-    func_001F7470(0x200);
+    btlFlagMatchingUnitsDefeatCandidate(0x200);
     return 1;
 }
 
 u32 func_001FA7A0(void) {
     func_001F7428();
-    func_001F7470(0x400);
+    btlFlagMatchingUnitsDefeatCandidate(0x400);
     return 1;
 }
 
@@ -1950,13 +1950,13 @@ u32 btlCmdCameraMoveBlend(void) {
 
 
 u32 func_001FAB38(void) {
-    func_001FB0A8(D_003A5440);
+    btlBossDebugPrintf(D_003A5440);
     func_0010D5F0(0);
     return 1;
 }
 
 u32 func_001FAB68(void) {
-    func_001FB0A8(D_003A5460);
+    btlBossDebugPrintf(D_003A5460);
     func_0010D5F0(0x14);
     return 1;
 }
@@ -1967,38 +1967,38 @@ u32 func_001FAB98(void) {
 }
 
 u32 func_001FABB8(void) {
-    func_001FB0A8(D_003A5488);
+    btlBossDebugPrintf(D_003A5488);
     func_0010D5F0(0);
     return 1;
 }
 
 u32 func_001FABE8(void) {
-    func_001FB0A8(D_003A54A8);
+    btlBossDebugPrintf(D_003A54A8);
     return 1;
 }
 
 u32 func_001FAC10(void) {
-    func_001FB0A8(D_003A54C8);
+    btlBossDebugPrintf(D_003A54C8);
     return 1;
 }
 
 u32 func_001FAC38(void) {
-    func_001FB0A8(D_003A54F0);
+    btlBossDebugPrintf(D_003A54F0);
     return 1;
 }
 
 u32 func_001FAC60(void) {
-    func_001FB0A8(D_003A5518);
+    btlBossDebugPrintf(D_003A5518);
     return 1;
 }
 
 u32 func_001FAC88(void) {
-    func_001FB0A8(D_003A5538);
+    btlBossDebugPrintf(D_003A5538);
     return 1;
 }
 
 u32 func_001FACB0(void) {
-    func_001FB0A8(D_003A5558);
+    btlBossDebugPrintf(D_003A5558);
     return 1;
 }
 
@@ -2091,10 +2091,10 @@ void func_001FB098(void) {
 void func_001FB0A0(void) {
 }
 
-void func_001FB0A8(s32 arg0, ...) {
+void btlBossDebugPrintf(s32 arg0, ...) {
 }
 
-void func_001FB0F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, ...) {
+void btlBossDebugPrintfN(s32 arg0, s32 arg1, s32 arg2, s32 arg3, ...) {
 }
 
 void func_001FB130(void) {
@@ -2391,7 +2391,7 @@ void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FB9A8);
+INCLUDE_ASM(const s32, "game/code_001F6110", btlCreateResourceDescriptor);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBA38);
 

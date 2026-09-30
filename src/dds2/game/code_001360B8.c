@@ -10,6 +10,107 @@ extern void *memset(void *s, s32 c, u32 n);
 
 extern s32 D_00436170;
 
+extern u32 D_00436128;
+
+extern u32 D_00389988[];
+
+typedef struct {
+    u8 type;
+    u8 pad1[3];
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 pad10[0xC];
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+    f32 unk7C;
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    u8 pad8C[0x54];
+} FldLightSet; /* 0xE0 bytes */
+
+extern void *D_004360F0;
+
+extern s32 func_001081F8(s32, void *);
+
+extern s32 func_00107EF8(s32, s32, void *);
+
+extern s32 func_00108138(s32, void *);
+
+extern s32 func_00107FF8(s32, s32, void *);
+
+extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+
+extern void fldSetSwayMode(u32);
+
+extern void *D_004360EC;
+
+extern s32 D_004360F8;
+
+extern u32 D_004360FC;
+
+typedef struct FldColorParams {
+    s32 enabled;
+    s32 unk4;
+    s32 mode;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 unk18;
+    s32 unk1C;
+} FldColorParams;
+
+typedef struct FldCameraSetting {
+    s32 unk0;
+    FldColorParams color;
+    u8 pad24[0x30];
+} FldCameraSetting; /* 0x54 bytes */
+
+typedef struct FldFadeColor {
+    u8 pad0[4];
+    s32 colorA;
+    s32 colorB;
+    u8 padC[0x18];
+    s32 unk24;
+    s32 unk28;
+    u8 pad2C[0xC];
+    s32 unk38;
+    f32 unk3C;
+} FldFadeColor;
+
+extern FldFadeColor D_00444990[];
+
+extern FldCameraSetting *D_004360F4;
+
+extern FldCameraSetting D_004449D0[];
+
+extern u32 func_002DEB80(const void *);
+
+extern void func_002DEBB0(s32);
+
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
@@ -26,11 +127,159 @@ INCLUDE_ASM(const s32, "game/code_001360B8", func_001363D8);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_00136718);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", fldApplyLightSetCurrent);
+void fldApplyLightSetCurrent(void) {
+    FldLightSet *light = &((FldLightSet *)D_004360F0)[D_00436128];
+    f32 vec[4];
+    f32 dir[4];
+    s32 area;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_001360B8", fldApplyLightSetIndex);
+    area = light->type;
+    D_00389988[13] = area;
+    D_00389988[14] = light->unk4;
+    value = light->unk8;
+    D_00389988[15] = value;
+    D_00389988[16] = light->unkC;
+    fldSetFadeTarget(area, value, 0);
+    fldSetSwayMode(D_00389988[16]);
+    vec[0] = light->unk2C * 0.00390625f;
+    vec[1] = light->unk30 * 0.00390625f;
+    vec[2] = light->unk34 * 0.00390625f;
+    vec[3] = 0;
+    func_001081F8(0, vec);
+    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    dir[0] = light->unk44;
+    dir[1] = light->unk48;
+    dir[2] = light->unk4C;
+    dir[3] = 0;
+    func_00107FF8(0, 0, dir);
+    vec[0] = light->unk38;
+    vec[1] = light->unk3C;
+    vec[2] = light->unk40;
+    vec[3] = 0;
+    func_00107EF8(0, 0, vec);
+    dir[0] = light->unk5C;
+    dir[1] = light->unk60;
+    dir[2] = light->unk64;
+    dir[3] = 0;
+    func_00107FF8(0, 1, dir);
+    vec[0] = light->unk50;
+    vec[1] = light->unk54;
+    vec[2] = light->unk58;
+    vec[3] = 0;
+    func_00107EF8(0, 1, vec);
+    dir[0] = light->unk74;
+    dir[1] = light->unk78;
+    dir[2] = light->unk7C;
+    dir[3] = 0;
+    func_00107FF8(0, 2, dir);
+    vec[0] = light->unk68;
+    vec[1] = light->unk6C;
+    vec[2] = light->unk70;
+    vec[3] = 0;
+    func_00107EF8(0, 2, vec);
+    vec[0] = light->unk80;
+    vec[1] = light->unk84;
+    vec[2] = light->unk88;
+    vec[3] = 1.0f;
+    func_00108138(0, vec);
+}
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_00136C90);
+void fldApplyLightSetIndex(s32 index) {
+    FldLightSet *light = &((FldLightSet *)D_004360EC)[index];
+    f32 vec[4];
+    f32 dir[4];
+    s32 area;
+    s32 value;
+
+    D_00436128 = index;
+    area = light->type;
+    D_00389988[13] = area;
+    D_00389988[14] = light->unk4;
+    value = light->unk8;
+    D_00389988[15] = value;
+    D_00389988[16] = light->unkC;
+    fldSetFadeTarget(area, value, 0);
+    fldSetSwayMode(D_00389988[16]);
+    vec[0] = light->unk2C * 0.00390625f;
+    vec[1] = light->unk30 * 0.00390625f;
+    vec[2] = light->unk34 * 0.00390625f;
+    vec[3] = 0;
+    func_001081F8(0, vec);
+    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    dir[0] = light->unk44;
+    dir[1] = light->unk48;
+    dir[2] = light->unk4C;
+    dir[3] = 0;
+    func_00107FF8(0, 0, dir);
+    vec[0] = light->unk38;
+    vec[1] = light->unk3C;
+    vec[2] = light->unk40;
+    vec[3] = 0;
+    func_00107EF8(0, 0, vec);
+    dir[0] = light->unk5C;
+    dir[1] = light->unk60;
+    dir[2] = light->unk64;
+    dir[3] = 0;
+    func_00107FF8(0, 1, dir);
+    vec[0] = light->unk50;
+    vec[1] = light->unk54;
+    vec[2] = light->unk58;
+    vec[3] = 0;
+    func_00107EF8(0, 1, vec);
+    dir[0] = light->unk74;
+    dir[1] = light->unk78;
+    dir[2] = light->unk7C;
+    dir[3] = 0;
+    func_00107FF8(0, 2, dir);
+    vec[0] = light->unk68;
+    vec[1] = light->unk6C;
+    vec[2] = light->unk70;
+    vec[3] = 0;
+    func_00107EF8(0, 2, vec);
+    vec[0] = light->unk80;
+    vec[1] = light->unk84;
+    vec[2] = light->unk88;
+    vec[3] = 1.0f;
+    func_00108138(0, vec);
+}
+
+void func_00136C90(s32 enable) {
+    FldCameraSetting *setting;
+    FldColorParams *color;
+
+    if (D_004360FC == 0 && enable != 0) {
+        if (D_004360F8 != 0) {
+            func_002DEBB0(D_004360F8);
+        }
+        setting = D_004360F4;
+        D_004360F8 = 0;
+        color = &setting->color;
+        if (color->enabled != 0) {
+            D_00444990->colorB = D_00444990->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            D_00444990->unk24 = color->unk18;
+            switch (color->mode) {
+            case 0:
+                D_00444990->unk28 = 1;
+                break;
+            case 1:
+                D_00444990->unk28 = 2;
+                break;
+            default:
+                D_00444990->unk28 = 3;
+                break;
+            }
+            D_00444990->unk38 = color->unk4;
+            D_00444990->unk3C = color->unk1C;
+            D_004360F8 = func_002DEB80(D_00444990);
+            setting = D_004360F4;
+        }
+    } else {
+        setting = D_004360F4;
+    }
+    *D_004449D0 = *setting;
+    D_004360FC = enable;
+}
 
 s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     s32 scaled;

@@ -218,7 +218,7 @@ void func_0031C208(s32 *list) {
             u32 model = *(u32 *)(node + 0x40);
             node += 0x50;
             if (model != 0) {
-                func_002322E8(model);
+                mdlDestroyContext(model);
             }
             index++;
         } while (index < list[1]);
@@ -314,7 +314,7 @@ void mnuSetNodePosition(u8 *node, f32 x, f32 y, f32 z) {
 }
 
 /* Set the primary (0x00) vector and load it into the model. */
-void func_0031C5B8(u8 *node, f32 x, f32 y, f32 z) {
+void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
     MnuModelNode *n = (MnuModelNode *)node;
 
     n->primary[0] = x;
@@ -342,7 +342,7 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C630);
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
 
 /* Fill the tertiary (0x20) vector with one value and load it into the model. */
-void func_0031C850(u8 *node, f32 value) {
+void mnuSetNodeScaleVector(u8 *node, f32 value) {
     MnuModelNode *n = (MnuModelNode *)node;
 
     n->tertiary[0] = value;

@@ -234,7 +234,7 @@ u32 evtSelectFinalVisualNode(void) {
     s32 context;
 
     context = func_00101A70();
-    func_0027BB28(*(u32 *)(context + 0x70));
+    mnuSelectLastListNode(*(u32 *)(context + 0x70));
     return 1;
 }
 

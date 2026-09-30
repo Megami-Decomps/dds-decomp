@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "fpu.h"
 
 extern s32 func_003297C8(u32);
@@ -34,17 +35,19 @@ extern Entry24W D_00404AA4[];
 
 extern u8 D_00405CA8[];
 
-/* Operand block used by the script VM helpers near func_002CD730 (layout inferred from field accesses). */
+/* Operand block used by the script VM helpers near ptyGetProfileRecord (layout inferred from field accesses). */
 typedef struct ScrVmOperand {
     u8 pad_0x00[0x04]; // 0x00
-    u8 b04;            // 0x04
-    u8 pad_0x05[0x0F]; // 0x05
+    u16 h04;           // 0x04
+    u8 pad_0x06[0x0E]; // 0x06
     u16 h14;           // 0x14
     u8 pad_0x16[0x3A]; // 0x16
     float f50;         // 0x50
     u8 unk54;          // 0x54
-    s8 s55;            // 0x55
-} ScrVmOperand; // 0x56
+    s8 selectedIndex;  // 0x55: active operand chosen by scrSelectOperandIndex
+    u8 pad_0x56[2];    // 0x56
+    u32 flags[0x4C];   // 0x58: eight 4-bit flag slots per word
+} ScrVmOperand;
 
 /* Script flag storage overlaps the other VM operand view near 0x50. */
 typedef struct ScriptFlagWork {
@@ -105,13 +108,50 @@ typedef struct ScriptEntry44 {
 extern ScriptEntry44 D_00402BE0[];
 
 extern u8 D_0040132C[];
+
 extern u16 D_00401332[];
+
 typedef struct SdfScriptRef {
     u8 pad00[4];
     u16 script;     /* 0x04 */
 } SdfScriptRef;
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00313BB8);
+extern s32 func_00359A98(const char *, const char *);
+
+extern void func_00359AC0(s32, const char *, s32, s32);
+
+extern void func_003594A8(s32);
+
+extern char D_00438908[];
+
+extern char D_00438910[];
+
+/* Party profile header; each party slot occupies 0x1A4 bytes in game state. */
+typedef struct PtyProfileUnit {
+    u16 flags;          /* 0x00: bit 0 indicates an occupied slot */
+    u8 pad02[2];
+    u16 unitId;         /* 0x04: profile preset table index */
+    u8 pad06[0x1C];
+    u16 skills[24];     /* 0x22 */
+} PtyProfileUnit;
+
+void func_003140C8(s32 useCurrentProfile, u8 *unit);
+
+extern u32 func_0019FC38(s32, s32, u32, u16, u32, u32);
+
+extern void frFontSetChildColors(u32, u32);
+
+extern void func_0019D550(u32, s32, s32);
+
+extern void func_0019C5B0(u32);
+
+void func_00313BB8(s32 left, s32 right) {
+    s32 file = func_00359A98("debug.log", D_00438908);
+    if (file != 0) {
+        func_00359AC0(file, D_00438910, left, right);
+        func_003594A8(file);
+    }
+}
 
 void ptyClearProfileRecords(void) {
     memset(D_00435DD0 + 0x17210, 0, 0x5800);
@@ -677,7 +717,12 @@ u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
     return *(u16 *)&((ScriptFlagEntry *)func_00314B80(context, entryId))->flags;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316450);
+void func_00316450(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
+    u32 handle = func_0019FC38(x, y, first, width, (u32)D_00405CA8, 0);
+    frFontSetChildColors(handle, second);
+    func_0019D550(handle, 1, option);
+    func_0019C5B0(handle);
+}
 
 u8 *func_003164C0(void) {
     return D_00405CA8;

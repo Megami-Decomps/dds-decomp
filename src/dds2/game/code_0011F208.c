@@ -71,7 +71,7 @@ u8 func_001283A8(u32 arg0);
 
 extern s32 D_00435F80;
 
-extern u32 func_0014A250(void);
+extern u32 fldGetSceneReadyFlag(void);
 
 extern u32 D_00435F6C;
 
@@ -151,7 +151,7 @@ extern s32 fldGetResourceReadyFlag(void);
 
 extern void fldFreeDisplayObjects(void);
 
-extern s32 sdfGraphHasPendingWorkInterruptSafe(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern void *dds3AdvanceWorldCounter(void);
 
@@ -292,7 +292,7 @@ extern s32 effMiscRand();
 
 extern u32 D_00435F98[2];
 
-extern void func_001512E8(void);
+extern void fldResetEventSceneState(void);
 
 extern u32 func_00151498(void);
 
@@ -316,7 +316,7 @@ extern void func_00144238(void), evtSetSolarOverlayFullyTransparent(void), fldDe
 
 extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), func_0010BFE0(void);
 
-extern void func_0014A228(void);
+extern void fldReleaseMenuSlotsAfterWait(void);
 
 void func_0011F208(u32 *state, u32 firstValue, u32 secondValue) {
     state[4] = firstValue;
@@ -327,7 +327,7 @@ u64 sdfCreateResetPacketList(void) {
     u64 packet;
 
     packet = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(packet);
+    sdfInitPacketList(packet);
     return packet;
 }
 
@@ -547,7 +547,7 @@ void func_0011FC68(u32 *arg0, s32 arg1) {
     fldStepColorChannelByPad(arg0, arg1, (s8 *)D_0037F530);
 }
 
-void func_0011FC88(f32 value, char *out) {
+void fldFormatSecondsText(f32 value, char *out) {
     s32 whole;
     s32 tenths;
     s32 hundredths;
@@ -594,7 +594,7 @@ s32 fldTestDrawUpdate(void) {
     func_00136EF8();
     func_00134A18();
     if (D_00389988[9] != 0) {
-        if (func_0014A250() == 0) {
+        if (fldGetSceneReadyFlag() == 0) {
             func_0012BC38(0x53);
         } else {
             func_0012BC38(0x5E);
@@ -1460,9 +1460,9 @@ void func_00125EE8(void) {
     fldResetTaskSlots();
     fldTestDrawDestroy();
     func_00125E68();
-    evtDestroyWorldSecondaryNode();
+    evtDestroySecondaryWorldNode();
     func_001284C8();
-    func_00152C18();
+    fldResetTargetViewAndSound();
 }
 
 u32 * func_00125F28(void) {
@@ -1709,7 +1709,7 @@ s32 fldAdvanceToNextScene(void) {
     u32 scene;
     u32 area;
 
-    func_001512E8();
+    fldResetEventSceneState();
     D_00435F98[0] = 0;
     D_00435F98[1] = func_00151498();
     scene = D_00389770[5];
@@ -1752,7 +1752,7 @@ u8 func_001275D0(void) {
     if (D_00435F80 > 0) {
         return 2;
     }
-    return func_0014A250() != 0;
+    return fldGetSceneReadyFlag() != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00127600);
@@ -1846,7 +1846,7 @@ void func_001284C8(void) {
     }
     mnuDestroyCampTasks();
     func_0010BFE0();
-    func_0014A228();
+    fldReleaseMenuSlotsAfterWait();
 }
 
 u8 func_00128580(void) {
@@ -1856,7 +1856,7 @@ u8 func_00128580(void) {
         fldFreeDisplayObjects();
         return 0;
     }
-    return sdfGraphHasPendingWorkInterruptSafe() == 0;
+    return sdfCheckPendingWorkWithInterrupts() == 0;
 }
 
 void func_001285E8(void) {
@@ -1864,7 +1864,7 @@ void func_001285E8(void) {
 }
 
 void func_00128600(void) {
-    func_00144EE0();
+    fldStopCurrentBgm();
 }
 
 void func_00128618(void) {

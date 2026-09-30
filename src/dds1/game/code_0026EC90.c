@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0027C430(u32);
+extern void mnuDestroyWindowContainer(u32);
 
 extern void mnuReleaseResourceList(u32);
 
@@ -767,7 +767,7 @@ void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     func_0027FBE0(arg0, arg1 + 9);
     func_0027FC10(arg0, arg1 + 0x11);
     mnuRegisterResourceHandles(arg0, arg1 + 0x19);
-    menuUpdateHandleStates(arg0);
+    mnuUpdateHandleStates(arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271500);
@@ -855,16 +855,16 @@ void mnuCreateStaffPanelSet(StaffSpriteHandles *menu) {
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], *(u32 *)((u8 *)menu + 0x74), 0, 0, 0);
     menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
-    func_0027C478(menu->images[1], 0x100);
+    mnuSetWindowContainerState(menu->images[1], 0x100);
     menu->images[2] = func_00271B50(D_0037B980, 2, 0x200, menu, 0);
-    func_0027C478(menu->images[2], 0x100);
+    mnuSetWindowContainerState(menu->images[2], 0x100);
 }
 
 void func_00271DF8(StaffSpriteHandles *handles) {
     u32 *image = handles->images;
     u32 index = 0;
     do {
-        func_0027C430(*image++);
+        mnuDestroyWindowContainer(*image++);
     } while (++index < 3);
     mnuReleaseResourceList(handles->resourceList);
 }
@@ -915,13 +915,13 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     if (func_0024DC08() == 0) {
         if (buttons & 8) {
             if (func_002877A8() != 1) {
-                if (func_002913B8() == 0) {
+                if (fileConsumeConfigTaskReady() == 0) {
                     mnuDestroyCampTasks();
-                    menuPlayInputSound(0, 2, 0);
+                    mnuPlayInputSound(0, 2, 0);
                     return -1;
                 }
             }
-            menuPlayInputSound(0, 0x8000, 0);
+            mnuPlayInputSound(0, 0x8000, 0);
         }
     }
     return result;
