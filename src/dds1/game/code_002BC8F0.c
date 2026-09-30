@@ -469,7 +469,52 @@ u32 effSumRecordStatuses(u32 *payload) {
     return total;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD028);
+typedef struct EffMappedHeader {
+    u8 pad_00[0x14];
+    u32 count;        // 0x14
+    u8 pad_18[8];
+} EffMappedHeader;    // 0x20
+
+typedef struct EffMappedRecord {
+    u8 pad_00[0x18];
+    u32 size;         // 0x18
+    u8 pad_1C[4];
+    u8 *status;       // 0x20
+} EffMappedRecord;    // 0x24
+
+void *func_002BD028(u8 *source, EffMappedHeader *headerOut) {
+    EffMappedHeader header;
+    u32 allocation;
+    EffMappedRecord *records;
+    u32 index = 0;
+    u32 needed;
+
+    memcpy(&header, source, sizeof(header));
+    source += sizeof(header);
+    allocation = func_002D03F8(header.count * 0x24);
+    records = (EffMappedRecord *)sdfResourceRetainAddress(allocation);
+    for (; index < header.count; index++) {
+        EffMappedRecord *record = &records[index];
+
+        memcpy(record, source, 0x20);
+        source += 0x20;
+        needed = effSumRecordStatuses((u32 *)records);
+        if (needed < record->size) {
+            needed = record->size;
+        }
+        record->status = func_002CFEB8(needed);
+        memset(record->status, 0, needed);
+        memcpy(record->status, source, record->size);
+        source += record->size;
+        if (record->size < needed) {
+            record->size = needed;
+        }
+    }
+    if (headerOut != 0) {
+        memcpy(headerOut, &header, sizeof(header));
+    }
+    return (void *)allocation;
+}
 
 typedef struct {
     s32 count;
@@ -477,18 +522,11 @@ typedef struct {
     void *allocation;
 } EffMappedResource;
 
-typedef struct {
-    u8 pad00[0x14];
-    s32 count;
-} EffMappedHeader;
-
-extern void *func_002BD028(u32 source, EffMappedHeader *header);
-
 u32 effCreateMappedResource(u32 source) {
     EffMappedResource *work = (EffMappedResource *)func_002CFEB8(0xC);
     EffMappedHeader header;
 
-    work->records = func_002BD028(source, &header);
+    work->records = func_002BD028((u8 *)source, &header);
     work->allocation = (void *)sdfResourceRetainAddress((u32)work->records);
     work->count = header.count;
     return (u32)work;

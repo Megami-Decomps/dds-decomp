@@ -1509,7 +1509,75 @@ void func_0029D1D0(void) {
     func_00186CB8();
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029D1E8);
+typedef struct EffMapOutB {
+    s32 mode;   // 0x00
+    u32 color;  // 0x04
+    u32 param;  // 0x08
+    f32 rateB;  // 0x0C
+    f32 rateA;  // 0x10
+    s32 posX;   // 0x14
+    s32 posY;   // 0x18
+} EffMapOutB;
+
+void func_0029D1E8(EffFadeWork *work) {
+    EffRateConfig *config = (EffRateConfig *)work->config;
+    EffMapOutB *out = (EffMapOutB *)work->map;
+    s32 progress = config->progress;
+    s32 limit = 0;
+    f32 rate;
+    f32 pos[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress != 0) {
+        limit = work->frameLimit;
+    }
+    if (progress < limit) {
+        return;
+    }
+    rate = func_00297270((u8 *)config + 0x8C, limit, progress);
+    if (config->fixedMode != 0) {
+        out->posX = 0;
+        out->posY = 0;
+        out->mode = (s32)(rate * 16.0f);
+    } else {
+        s32 mode;
+        s32 px;
+        s32 py;
+
+        rate *= work->scale;
+        VU0_LOAD_VF(vf10, work);
+        mode = (s32)(func_00292E50(rate) * 16.0f);
+        out->mode = mode;
+        if (mode == 0) {
+            return;
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        py = (s32)(pos[1] * 16.0f) - 0x8000;
+        px = (s32)(pos[0] * 16.0f) - 0x8000;
+        out->posX = px;
+        out->posY = py << 1;
+    }
+    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    color1[0] = work->baseColor;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed);
+    blended[0] = packed;
+    out->color = blended[0];
+    out->rateA = func_00297270((u8 *)config + 0x34, limit, progress) * 0.01f + 1.0f;
+    out->rateB = func_00297270((u8 *)config + 0x60, limit, progress) * 0.01f;
+    out->param = work->param;
+    func_00186D48(out);
+}
 
 void effUpdateTarget(u8 *work, u32 target) {
     u32 previous = ((EffKindWork *)work)->target;
@@ -3626,7 +3694,58 @@ void func_002A4AB8(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A4AF0);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A4C40);
+extern void effRunClassPostFrame(s32);
+
+void func_002A4C40(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 *list = work->instances;
+    u8 *out = (u8 *)list[2];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = func_00296F58(config, config + 0x24, limit, progress);
+    unit = 0x3C000000;
+    color1[0] = work->baseColor;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK_UNCLOBBERED(packed);
+    blended[0] = packed;
+    *(u32 *)(out + 4) = packed;
+    if (packed & 0xFF000000) {
+        EffClassWork *dst = (EffClassWork *)list[1];
+
+        dst->color = work->baseColor;
+        dst->scale = work->scale;
+        PCP_COPY_VECTOR(dst->transform, work);
+        PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
+        effRunClassPostFrame((s32)dst);
+        *(u32 *)out = ((EffBillConfig *)config)->textureId;
+        out[0x14] = *(u8 *)(config + 0x3C);
+        VU0_LOAD_VF(vf10, work->transform);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_0037E0E0);
+        VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALE_MATRIX_ROWS(vf10);
+        VU0_LOAD_VF(vf10, work);
+        VU0_SET_W_ONE(vf10);
+        VU0_MOVE_VF(vf31, vf10);
+        VU0_STORE_MATRIX(mtx);
+        func_002A3E10(out, mtx);
+    }
+}
 
 void func_002A4DE8(s32 work) {
     *(u32 *)(**(s32 **)(work + 0x30) + 4) = 0;
