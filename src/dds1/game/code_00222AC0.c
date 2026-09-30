@@ -129,7 +129,17 @@ typedef struct EvtWorldUnitRef {
     s128 *transform; /* 0x18: first aligned vector */
 } EvtWorldUnitRef;
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222AC0);
+void func_00222AC0(EvtUnit *work, s128 *vector, s32 frames) {
+    if (frames > 0 && frames <= 100) {
+        work->linkedUnit = NULL;
+        work->unkAC = 3;
+        PCP_COPY_VECTOR(&work->unk70, vector);
+        work->unkB4 = frames;
+        work->unkB6 = 0;
+        work->unk94 = 0;
+        work->unkB2 = 0;
+    }
+}
 
 void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 arg2) {
     EvtWorldUnitRef *worldUnit;
