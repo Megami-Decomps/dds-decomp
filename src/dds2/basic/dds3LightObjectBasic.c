@@ -1,8 +1,18 @@
 #include "common.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 typedef struct {
-    u8 pad0[0x74];
-    u32 resource;
+    f32 unk0[4];
+    u8 pad10[0x30];
+    f32 unk40[4];
+    u8 pad50[0x14];
+    s32 unk64;
+    s32 unk68;
+    s32 unk6C;
+    u16 unk70;
+    u16 unk72;
+    s32 resource;
     void *buffer;
 } LightData;
 
@@ -10,6 +20,20 @@ typedef struct {
     u8 pad0[0x18];
     LightData *data;
 } LightObject;
+
+typedef struct LightSlotDesc {
+    void *points;
+    s32 unk4;
+    s32 unk8;
+} LightSlotDesc;
+
+void effObjFreeInner(void *arg);
+void func_00111A68(s32 arg);
+void func_00328E48(void *arg);
+void func_0033A7E8(void *arg0, LightSlotDesc *desc, f32 *color);
+void *memset(void *s, s32 c, u32 n);
+extern void *D_0037F770[];
+extern void *D_0037F780[];
 
 /* Releases the light's buffer and resource before freeing the object itself. */
 void lightReleaseObject(LightObject *light) {
