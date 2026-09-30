@@ -94,5 +94,14 @@
 #define VU0_SET_ONES_XYZ(vf) __asm__ volatile ( \
     ".set noreorder\n\tvaddw.xyz " #vf ", vf0, vf0w\n\tvmulx.w " #vf ", vf0, vf0x\n\t.set reorder" \
     : : : "memory")
+/* Broadcast a float into vf2 through the SDK scratch $2 and apply one VU op
+ * that reads vf2x, e.g. VU0_SCALAR_OP(t, "vmulx.xyzw vf10, vf10, vf2x").
+ * $2 is not declared clobbered, as in the Sony samples (docs/idioms.md). */
+#define VU0_SCALAR_OP(f, insn) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
+    : : "f" (f))
+/* Register-to-register vector copy between calls (vmove.xyzw). */
+#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
 
 #endif
