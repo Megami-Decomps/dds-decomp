@@ -935,7 +935,15 @@ void fldReleaseFieldResources(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldFormatAreaDirectory);
+void fldFormatAreaDirectory(char *buffer, s32 area, s32 unused) {
+    if (area < 200) {
+        func_0035C860(buffer, "/fld/f/f%03d/", area);
+    } else if (area < 500) {
+        func_0035C860(buffer, "/fld/b/f%03d/", area);
+    } else {
+        func_0035C860(buffer, "/fld/e/f%03d/", area);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B0D0);
 

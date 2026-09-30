@@ -202,7 +202,9 @@ extern s32 func_0025D008(s16, s32);
 extern char D_0041B7E0[];
 
 typedef struct BattleCombatant {
-    u8 unk_00[0x110];
+    u8 unk_00[0xE0];
+    s32 unk_E0;
+    u8 unk_E4[0x2C];
     u32 status;
     u32 statusExtra;
     u8 unk_118[8];
@@ -212,7 +214,9 @@ typedef struct BattleCombatant {
     u16 alternateKind;
     u8 unk_128[6];
     u16 ailment;
-    u8 unk_130[0x234];
+    u8 unk_130[4];
+    s32 unk_134;
+    u8 unk_138[0x22C];
     struct BattleCombatant *next;
 } BattleCombatant;
 
@@ -531,7 +535,15 @@ BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002277D8);
+s32 func_002277D8(BattleCombatant *unit) {
+    switch (unit->kind) {
+    case 0x119:
+    case 0x12E:
+    case 0x12F:
+        return 0x119;
+    }
+    return unit->unk_E0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227820);
 
@@ -709,7 +721,15 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00228B08);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228D68);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228F20);
+s32 func_00228F20(BattleCombatant *unit) {
+    switch (unit->unk_134) {
+    case 0x171:
+        return 1;
+    case 0x189:
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
 
