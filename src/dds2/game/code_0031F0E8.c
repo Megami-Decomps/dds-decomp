@@ -8,8 +8,6 @@ extern u64 func_00320AE8(u64, u64, u32 *);
 
 extern u64 func_00325790(u64, u32);
 
-extern u64 func_0031F0E8(void);
-
 extern void (*D_004389C4)(void);
 
 extern void func_00320C88(u32);
@@ -54,7 +52,23 @@ typedef struct DdsCallbackCollection {
     u32 callbacks[3]; /* 0x04, 0x08, 0x0C */
 } DdsCallbackCollection;
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F0E8);
+/* Allocation block: bytes used so far and its 0x10000-byte buffer
+   (func_0031F138 frees both). */
+typedef struct DdsAllocBlock {
+    u32 used;   /* 0x00 */
+    u32 buffer; /* 0x04 */
+} DdsAllocBlock;
+
+u64 func_0031F0E8(void) {
+    DdsAllocBlock *block = (DdsAllocBlock *)func_0035A828(8);
+    u32 buffer;
+
+    memset(block, 0, 8);
+    buffer = func_0035A828(0x10000);
+    block->used = 0;
+    block->buffer = buffer;
+    return (u64)block;
+}
 
 void func_0031F138(u32 node) {
     func_0035A880(*(u32 *)(node + 4));
