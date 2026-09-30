@@ -45,7 +45,7 @@ typedef struct EffCounterOwner {
 extern s32 (*D_00360D10[])(s32, u32);
 extern s32 btlWaitEffectTask();
 extern void func_001FDA78();
-extern void func_001FE820();
+extern s32 func_001FE820();
 extern s32 func_001ADB30();
 extern void func_001ADB78(s32, s32);
 extern void func_0019C590(s32, s32, s32, s32);
@@ -184,9 +184,23 @@ BtlEffObj *btlCreateEffObjD(BtlEffOwner *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE118);
+extern s32 D_003BAA84;
+extern void func_001AD970(s32);
+extern s32 func_001AD928(void);
 
-extern void func_001FE118();
+s32 func_001FE118(BtlObjLink *link) {
+    func_001A17F0();
+    if (link->unk8 == 0) {
+        func_001AD970(D_003BAA84 + link->arg * 0x19);
+    }
+    if (func_001AD928() == 0 || (u32)link->unk8 >= 0x1E) {
+        return 1;
+    }
+    link->unk8++;
+    return 0;
+}
+
+extern s32 func_001FE118();
 
 BtlEffObj *func_001FE198(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
@@ -321,9 +335,25 @@ BtlEffObj *btlCreateEffectTask3E(BtlEffOwner *owner, u16 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE6F0);
+s32 func_001FE6F0(BtlObjLink *link) {
+    BtlJyokyoState *state = (BtlJyokyoState *)func_001A17F0();
+    BtlJyokyoOwner *owner = (BtlJyokyoOwner *)link->owner;
 
-extern void func_001FE6F0();
+    if (link->unk8 == 0) {
+        if (owner != NULL) {
+            func_0019C590(*(s32 *)((u8 *)state + 0x4A0), 0, owner->unk124,
+                          (owner->flags & 0x20) ? 1 : 2);
+        }
+        func_001ADB78(*(s32 *)((u8 *)state + 0x4A0), link->arg);
+    }
+    if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
+        return 1;
+    }
+    link->unk8++;
+    return 0;
+}
+
+extern s32 func_001FE6F0();
 
 BtlEffObj *func_001FE790(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
@@ -410,7 +440,20 @@ u32 btlNextScaledRandom(u32 limit) {
     return (D_003BB874 >> 0x10) * (limit & 0xffff) >> 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEAA8);
+extern u32 btlNextScaledRandom(u32 limit);
+
+s32 func_001FEAA8(s32 a0, s32 a1) {
+    s32 lo = a1;
+    s32 hi = a0;
+
+    if (lo < hi) {
+        s32 t = lo;
+        lo = hi;
+        hi = t;
+    }
+    lo = lo - hi + 1;
+    return (s32)btlNextScaledRandom(0xFFFF) % lo + hi;
+}
 
 s32 btlAllocAndCheck(s32 object) {
     s32 allocation = func_002CFF68(0x10);
@@ -448,7 +491,19 @@ void btlClearNodeFlags(void) {
     D_003BB870 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEC68);
+extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
+
+s32 func_001FEC68(s32 a0, BtlJyokyoOwner *owner, s32 a2) {
+    s32 *work = (s32 *)func_002CFF68(0x10);
+    s32 result;
+
+    D_003BB87C = (s32)work;
+    work[1] = owner->unk124;
+    work[0] = a0;
+    result = btlDispatchPackedEffectAction((s32)owner, a2);
+    func_002CFF98(D_003BB87C);
+    return result;
+}
 
 /* Top ten bits select the callback; the lower 22 bits are its argument. */
 s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {

@@ -32,11 +32,17 @@ typedef struct MnuNodeList {
     s32 count;           /* 0x04 */
 } MnuNodeList;
 
-extern void mdlBroadcastMasked(u32 sprite);
+extern void mdlBroadcastMasked();
 extern void mdlStorePrimaryVectorVU(void *model);
 extern void mdlStoreTertiaryVectorVU(void *model);
 
 extern u32 *D_00438940;
+
+extern u32 mdlGetBroadcastValue(u32 model);
+
+extern void func_00328160(f32 *out);
+
+extern void func_00232AD0(u32 model);
 
 void mnuClearNodeBroadcastFlag(u8 *node);
 void dds3ReleaseSoundSlotPool(void);
@@ -139,7 +145,20 @@ void func_0031B668(s32 *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B6D0);
+void func_0031B6D0(s32 *list) {
+    u8 *node = (u8 *)list[0];
+    s16 index = 0;
+
+    if (list[1] > 0) {
+        do {
+            if (*(u32 *)node != 0) {
+                fileQueueDestroy(*(u32 *)node);
+            }
+            node += 0x20;
+            index++;
+        } while (index < list[1]);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B748);
 
@@ -252,7 +271,22 @@ u8 *mnuAcquireUnusedModelNode(u32 *group) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C3C8);
+void func_0031C3C8(s32 *list, s8 value) {
+    u8 *node = (u8 *)list[0];
+    s32 index = 0;
+
+    if (list[1] > 0) {
+        do {
+            u32 active = *(u32 *)(node + 0x44) & 1;
+
+            if (active == 1) {
+                func_0031C900(node, value);
+            }
+            index++;
+            node += 0x50;
+        } while (index < list[1]);
+    }
+}
 
 /* Set the model Z of every active node. */
 void func_0031C458(MnuNodeList *list, f32 z) {
@@ -337,7 +371,17 @@ void func_0031C5E8(u8 *node, f32 x, f32 y, f32 z) {
     mdlStorePrimaryVectorVU(n->model);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C630);
+void func_0031C630(u8 *node) {
+    f32 vec[4];
+
+    func_00328160(vec);
+    *(f32 *)(node + 0x10) = vec[0];
+    *(f32 *)(node + 0x14) = vec[1];
+    *(f32 *)(node + 0x18) = vec[2];
+    *(f32 *)(node + 0x1C) = vec[3];
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x10));
+    func_00232AD0(*(u32 *)(node + 0x40));
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
 
@@ -361,7 +405,11 @@ void func_0031C888(u8 *node) {
 void func_0031C8A8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C8B0);
+void func_0031C8B0(u8 *node, u8 value) {
+    u32 broadcast = mdlGetBroadcastValue(*(u32 *)(node + 0x40)) & 0xFFFFFF;
+
+    mdlBroadcastMasked(*(u32 *)(node + 0x40), broadcast | ((u32)value << 24));
+}
 
 void func_0031C900(u8 *node, s8 selector) {
     MnuModelNode *entry = (MnuModelNode *)node;

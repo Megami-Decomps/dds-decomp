@@ -36,9 +36,15 @@ typedef struct MenuResourceOwner {
     MenuResourceSet *resources;
 } MenuResourceOwner;
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB890);
+extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8C0);
+void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    func_002AB690(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+}
+
+void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    func_002AB690(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8F0);
 
@@ -95,7 +101,13 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACE58);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF00);
+static inline s64 menuSetHandler(s32 context, u64 mode, s32 callback) {
+    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
+}
+
+s64 func_002ACF00(s32 callback) {
+    return menuSetHandler(func_00101958(), 2, callback);
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
 

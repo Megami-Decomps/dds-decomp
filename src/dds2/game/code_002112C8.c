@@ -280,6 +280,7 @@ extern char D_00419B68[];
 extern char D_00419B88[];
 
 extern s32 func_001ABF50();
+extern u32 func_001B39E8(s32);
 
 typedef struct BtlUnit {
     u8 unk_00[0xC8];
@@ -811,14 +812,22 @@ s64 btlCheckCounterLimit(s32 unused, u32 limit) {
 }
 
 s32 btlCounterReachedLimit(s32 unused, u32 limit) {
-    extern u32 func_001B39E8(s32);
     if (func_001B39E8(4) < limit) {
         return 0;
     }
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002134C8);
+s32 func_002134C8(s32 unused, u32 limit) {
+    BattleCtx *ctx = *D_00436CB8;
+
+    ctx->turns = ctx->turns + 1;
+    ctx->turns = ctx->turns == 0 ? 0 : ctx->turns >= 0x100 ? 0xFF : ctx->turns;
+    if ((*D_00436CB8)->turns < limit) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 btlTurnReachedLimit(s32 unused, u32 limit) {
     if (((BattleWork *)func_001AA6F8())->turnCount < limit) {
