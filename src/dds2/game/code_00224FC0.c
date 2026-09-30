@@ -29,7 +29,7 @@ typedef struct BattleActor {
     u8 pad00[0x18];
     BattleActionUnit *owner;
     u8 pad1C[0x44];
-    u32 actionEntity;
+    u32 targetIndexList; /* 0x60: passed to btlGetIndexListCount/Entry */
 } BattleActor;
 
 struct BattleActionUnit {
@@ -76,12 +76,14 @@ void func_00225778(u32 unit) {
     func_002254C8(unit);
 }
 
+/* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
+ * and clear the action transition. Other owner/target combinations do nothing. */
 u32 func_00225798(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     BattleActionUnit *owner = actor->owner;
     if (owner->flags & 0x200) {
-        if (btlGetIndexListCount(actor->actionEntity) == 1) {
-            BattleActionUnit *target = (BattleActionUnit *)btlGetIndexListEntry(actor->actionEntity, 0);
+        if (btlGetIndexListCount(actor->targetIndexList) == 1) {
+            BattleActionUnit *target = (BattleActionUnit *)btlGetIndexListEntry(actor->targetIndexList, 0);
             if ((target->flags & 0x400) == 0) {
                 return 0;
             }
@@ -212,6 +214,7 @@ void func_00226820(BattleActionUnit *unit) {
     }
 }
 
+/* Type 0x187 uses this frame counter for its later marked-entry motion. */
 u32 func_00226850(BattleActionUnit *unit) {
     if (unit->type == 0x187) {
         unit->frameCounter = 0;
@@ -219,6 +222,7 @@ u32 func_00226850(BattleActionUnit *unit) {
     return 0;
 }
 
+/* After frame 0x34, repeatedly apply this fixed transform while marked. */
 u32 func_00226868(BattleActionUnit *unit) {
     if (unit->type != 0x187) {
         return 0;
@@ -236,17 +240,18 @@ u32 func_00226868(BattleActionUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226900);
 
+/* Release the command restriction for each active group-0x400 unit of kind 0x118. */
 void func_002269E0(void) {
-    BattleActionUnit *node = ((BattleActionContext *)func_001AA6F8())->firstUnit;
-    while (node != 0) {
-        u32 flags = node->flags;
+    BattleActionUnit *unit = ((BattleActionContext *)func_001AA6F8())->firstUnit;
+    while (unit != 0) {
+        u32 flags = unit->flags;
         if (flags & 1) {
-            if ((flags & 0x400) && node->kind == 0x118) {
-                node->entryFlags &= ~0x2000;
-                func_001E2758(node);
+            if ((flags & 0x400) && unit->kind == 0x118) {
+                unit->entryFlags &= ~0x2000;
+                func_001E2758(unit);
             }
         }
-        node = node->next;
+        unit = unit->next;
     }
 }
 

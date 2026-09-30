@@ -66,7 +66,7 @@ typedef struct BattleCtx {
     u8 pad10[0x80];
     u16 turns;
     u8 pad92[0xBC];
-    s8 hold14E; /* 0x14E */
+    s8 lowHpActionHold; /* 0x14E: positive suppresses btlIsLowHpActionReady */
     u8 pad14F;
     s32 action;
 } BattleCtx;
@@ -83,7 +83,8 @@ typedef struct BattleUnit BattleUnit;
 typedef struct BattleWork {
     u8 pad0[0x1E4];
     s16 scriptGroup; /* 0x1E4: selects the script resource path */
-    u8 pad1E6[0x26];
+    u8 pad1E6[0x22];
+    s32 soundTaskBase; /* 0x208: offset +6 selects the stationed sound task */
     s32 resourceHandle; /* 0x20C */
     u8 pad210[8];
     u32 resourceFlags; /* 0x218 */
@@ -111,7 +112,9 @@ typedef struct BattleNamedResource BattleNamedResource;
 struct BattleUnit {
     u8 pad0[0x20];
     f32 position20; /* 0x20: adjusted after linked-action motion */
-    u8 pad24[0xE4];
+    u8 pad24[0xC];
+    f32 position[4]; /* 0x30: vector copied when recentering the group */
+    u8 pad40[0xC8];
     u64 unitId;
     u32 flags;
     u32 stateFlags;
@@ -346,7 +349,7 @@ typedef struct BtlUnit {
     u32 flags;
     u32 stateFlags; /* 0x114: same unit-state word as BattleUnit.stateFlags. */
     u8 unk_118[8];
-    u16 unk_120;
+    u16 statBits; /* 0x120: queried for bit 0x2000; also base of stat accessors */
     u8 unk_122[2];
     u16 mode;
     u8 unk_126[8];
@@ -839,7 +842,7 @@ s32 func_00213438(s32 battler) {
     if (((BattleUnit *)battler)->flags & 0x200) {
         return 0;
     }
-    flags = ((BtlUnit *)battler)->unk_120 & 0x2000;
+    flags = ((BtlUnit *)battler)->statBits & 0x2000;
     return flags != 0;
 }
 
@@ -894,9 +897,9 @@ s32 btlIsReadyWithoutTurns(void) {
 }
 
 s32 btlIsUnitStatAtOrBelowRate(u8 *unit, s32 count) {
-    void *flags = unit + 0x120;
-    u32 amount = func_001AA708(flags);
-    u32 total = func_001AA758(flags) * count;
+    void *stats = ((BattleUnit *)unit)->stats;
+    u32 amount = func_001AA708(stats);
+    u32 total = func_001AA758(stats) * count;
     if (total < amount * 100) {
         return 0;
     }
@@ -969,7 +972,7 @@ s32 btlIsLowHpActionReady(BattleUnit *unit) {
     u16 rank = ((BattleUnitRank *)unit)->rank;
     s32 late = func_001B39E8(4) < (u32)(rank + 0xF);
 
-    if (ctx->hold14E <= 0) {
+    if (ctx->lowHpActionHold <= 0) {
         if (late == 0 && unit->step * 100 / unit->maxStep < 0x1E && btlIsGroup400CountAtMost(unit, 2) != 0) {
             pick = btlRollAiBucket();
             roll = pick < 0x1E;
@@ -1238,11 +1241,13 @@ extern s32 D_00435E1C;
 
 extern s32 D_00435E20;
 
+/* Scan active group-0x200 actors for a queued action whose table entry has
+ * nonzero byte 8 and class byte 9 equal to 2. */
 s32 func_002143A0(void) {
     u8 *actor;
     u8 *owner;
-    u8 *entry;
-    s16 id;
+    u8 *actionEntry;
+    s16 actionId;
     s32 i;
     for (actor = (u8 *)((BattleWork *)func_001AA6F8())->actionActors; actor != 0; actor = (u8 *)((BattleActorHandle *)actor)->next) {
         owner = (u8 *)((BattleActorHandle *)actor)->owner;
@@ -1253,18 +1258,18 @@ s32 func_002143A0(void) {
             continue;
         }
         for (i = 0; i < 8; i++) {
-            id = ((BattleActorHandle *)actor)->actions[i].actionId;
-            if (id == 0) {
+            actionId = ((BattleActorHandle *)actor)->actions[i].actionId;
+            if (actionId == 0) {
                 continue;
             }
-            if ((u32)(*(u8 *)(D_00435E1C + id * 2) - 0x10) < 2U) {
+            if ((u32)(*(u8 *)(D_00435E1C + actionId * 2) - 0x10) < 2U) {
                 continue;
             }
-            entry = (u8 *)(id * 0x38 + D_00435E20);
-            if (entry[8] == 0) {
+            actionEntry = (u8 *)(actionId * 0x38 + D_00435E20);
+            if (actionEntry[8] == 0) {
                 continue;
             }
-            if (entry[9] != 2) {
+            if (actionEntry[9] != 2) {
                 continue;
             }
             return 1;
@@ -1492,7 +1497,7 @@ s32 btlActionMatchesUnit(s32 unit, s32 action) {
 
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     func_001AA6F8();
-    if ((*(u64 *)((u8 *)unit + 0x110) & 0x421) == 0x401) {
+    if ((*(u64 *)&((BattleUnit *)unit)->flags & 0x421) == 0x401) {
         if (func_001B2F50(unit, action) != 0) {
             return 1;
         }
@@ -1551,33 +1556,33 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
     u32 count;
     s32 list;
     u16 picked[12];
-    s32 best;
-    u32 bestIndex;
+    s32 lowestPercent;
+    u32 lowestIndex;
     u32 i;
-    s32 result;
+    s32 target;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
     switch (matched) {
     case 0:
-        best = 0x63;
+        lowestPercent = 0x63;
         memset(picked, 0, sizeof(picked));
-        bestIndex = 0x20;
+        lowestIndex = 0x20;
         for (i = 0; i < count; i++) {
             u8 *stats = ((BattleUnit *)btlGetIndexListEntry(list, i))->stats;
             s32 current = func_001AA700(stats);
             s32 percent = current * 100 / func_001AA740(stats);
 
-            if (best >= percent && current != 0) {
-                best = percent;
-                bestIndex = i;
+            if (lowestPercent >= percent && current != 0) {
+                lowestPercent = percent;
+                lowestIndex = i;
             }
         }
-        if (bestIndex != 0x20) {
-            result = btlGetIndexListEntry(list, bestIndex);
+        if (lowestIndex != 0x20) {
+            target = btlGetIndexListEntry(list, lowestIndex);
         } else {
-            result = func_00215118(list, picked, count);
+            target = func_00215118(list, picked, count);
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, result);
+        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, target);
         break;
     case 1:
     case 2:
@@ -2421,7 +2426,7 @@ void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 co
         unit = record->unit;
         if (unit->flags & 0x400) {
             if (unit->mode == 0x108) {
-                task = sndCreateStationedSeTask(*(s32 *)(func_001AA6F8() + 0x208) + 6);
+                task = sndCreateStationedSeTask(((BattleWork *)func_001AA6F8())->soundTaskBase + 6);
                 ((BtlOwnedTask *)task)->owner = owner;
                 task[0] = 4;
                 ((BattleTaskControl *)task)->control = controlBase + 0x28;
@@ -2610,6 +2615,7 @@ s32 func_00219950(u8 *unit) {
     return 1;
 }
 
+/* In this path stateFlags holds a link address rather than ordinary status bits. */
 s32 btlTriggerLinkedActionMotionAlternate(s32 object) {
     s32 state = ((BattleUnit *)object)->stateFlags;
     if ((((BattleUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0 &&
@@ -2772,7 +2778,7 @@ void btlRecenterActorsAroundLead(void) {
         func_001E3108(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
+        PCP_COPY_VECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
             if (unit->flags & 1) {
@@ -2780,7 +2786,7 @@ void btlRecenterActorsAroundLead(void) {
                     if (unit != lead) {
                         func_001E3108(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
+                        PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }

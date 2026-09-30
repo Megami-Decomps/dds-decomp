@@ -32,7 +32,7 @@ typedef struct MdlViewState {
     s32 viewerTask;
     s8 unk08;
     s8 unk09;
-    s8 unk0A;
+    s8 taskPhase; /* 0x0A: one-based index into D_003C87F0 */
     s8 unk0B;
     u8 unk0C;
     u8 pad0D[2];
@@ -46,17 +46,17 @@ typedef struct MdlViewState {
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
-    s16 unk22;
-    u16 unk24;
-    s16 unk26;
+    s16 activeEntryId;   /* 0x22: record key most recently added to the viewer */
+    u16 selectedEntryId; /* 0x24: key passed to mdlAddEntry* */
+    s16 selectedNodeId;  /* 0x26: checked by mdlHasNode */
     s16 unk28;
     s16 unk2A;
     s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
+    s16 entryHeight; /* 0x2E */
+    s16 entryWidth;  /* 0x30: limited to entryHeight when drawing */
     u8 pad32[2];
-    s16 unk34;
-    s16 unk36;
+    s16 labelIndexA; /* 0x34: indexes D_003C88C0 */
+    s16 labelIndexB; /* 0x36: indexes D_003C88C8 */
     u8 pad38[2];
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
     u8 pad3C[6];
@@ -72,7 +72,7 @@ typedef struct MdlViewState {
     s32 slotBeforeResources[1];
     void *resources[1];
     u8 pad94[0x2C];
-    s32 unkC0;
+    s32 packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
 
 extern MdlViewState D_00453550;
@@ -262,10 +262,11 @@ void func_00233700(void) {
     func_00328E48();
 }
 
+/* Three separately allocated resources per slot; their roles are not yet known. */
 typedef struct MdlSlotEntry {
-    s32 a;
-    s32 b;
-    s32 c;
+    s32 firstHandle;
+    s32 secondHandle;
+    s32 thirdHandle;
 } MdlSlotEntry;
 
 typedef struct MdlSlotTable {
@@ -294,9 +295,9 @@ void func_00233718(void) {
         i = 0;
         do {
             i++;
-            func_00328E48(entry->b);
-            func_00328E48(entry->a);
-            func_00328E48(entry->c);
+            func_00328E48(entry->secondHandle);
+            func_00328E48(entry->firstHandle);
+            func_00328E48(entry->thirdHandle);
             entry++;
         } while (i < count);
     }
@@ -312,7 +313,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_002337C0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
 
-s32 func_00233DD8(s32 table, s32 slot, s32 a, s32 b, s32 c) {
+s32 func_00233DD8(s32 table, s32 slot, s32 firstHandle, s32 secondHandle, s32 thirdHandle) {
     MdlSlotEntry *entries = D_003C6588[table].entries;
 
     if (entries == NULL) {
@@ -321,9 +322,9 @@ s32 func_00233DD8(s32 table, s32 slot, s32 a, s32 b, s32 c) {
     if (slot >= D_003C6588[table].count) {
         return 0;
     }
-    entries[slot].a = a;
-    entries[slot].b = b;
-    entries[slot].c = c;
+    entries[slot].firstHandle = firstHandle;
+    entries[slot].secondHandle = secondHandle;
+    entries[slot].thirdHandle = thirdHandle;
     return 1;
 }
 
@@ -352,7 +353,7 @@ typedef struct MdlViewerSlots {
     u8 pad00[4];
     s16 count; /* 0x04 */
     u8 pad06[6];
-    s32 first; /* 0x0C: base of 0x10-byte slot entries */
+    s32 entryBase; /* 0x0C: base of 0x10-byte slot entries */
 } MdlViewerSlots;
 
 typedef struct MdlObj {
@@ -631,7 +632,7 @@ s32 func_00234A10(MdlViewerResource *resource, s32 index) {
     if (index >= ((MdlViewerSlots *)slotTable)->count) {
         return 0;
     }
-    return ((MdlViewerSlots *)slotTable)->first + index * 0x10;
+    return ((MdlViewerSlots *)slotTable)->entryBase + index * 0x10;
 }
 
 typedef struct MdlPartRec {
@@ -964,9 +965,9 @@ void func_002353F0(void) {
 
     loaded = func_00232198(D_00453550.unk18, D_00453550.unk1A);
     D_00453550.resources[0] = loaded;
-    D_00453550.unk22 = 0;
-    D_00453550.unk24 = 0;
-    D_00453550.unk26 = 0;
+    D_00453550.activeEntryId = 0;
+    D_00453550.selectedEntryId = 0;
+    D_00453550.selectedNodeId = 0;
     D_00453550.unk28 = 0;
     D_00453550.unk2A = 0;
     D_00453550.unk2C = 0;
@@ -1046,16 +1047,16 @@ void mdlAddViewEntryFlagged(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasNode(state->resources[0], state->unk26) == 0) {
+    if (mdlHasNode(state->resources[0], state->selectedNodeId) == 0) {
         return;
     }
-    height = (f32)state->unk2E;
-    width = (f32)state->unk30;
+    height = (f32)state->entryHeight;
+    width = (f32)state->entryWidth;
     if (height < width) {
         width = height;
     }
-    state->unk22 = state->unk24;
-    mdlAddEntryFlaggedEx(state->resources[0], state->unk26, state->unk24, width, height);
+    state->activeEntryId = state->selectedEntryId;
+    mdlAddEntryFlaggedEx(state->resources[0], state->selectedNodeId, state->selectedEntryId, width, height);
 }
 
 void func_002358E8(void) {
@@ -1063,16 +1064,16 @@ void func_002358E8(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasNode(state->resources[0], state->unk26) == 0) {
+    if (mdlHasNode(state->resources[0], state->selectedNodeId) == 0) {
         return;
     }
-    height = (f32)state->unk2E;
-    width = (f32)state->unk30;
+    height = (f32)state->entryHeight;
+    width = (f32)state->entryWidth;
     if (height < width) {
         width = height;
     }
-    state->unk22 = state->unk24;
-    mdlAddEntryPlainEx(state->resources[0], state->unk26, state->unk24, width, height);
+    state->activeEntryId = state->selectedEntryId;
+    mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, state->selectedEntryId, width, height);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
@@ -1095,8 +1096,8 @@ void func_002364C0(void) {
     s32 packets;
 
     func_00235198(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    packets = D_00453550.unkC0;
-    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[D_00453550.unk34]));
+    packets = D_00453550.packetList;
+    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[D_00453550.labelIndexA]));
 }
 
 u32 func_00236540(void) {
@@ -1111,8 +1112,8 @@ void func_00236940(void) {
     s32 packets;
 
     func_00235198(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    packets = D_00453550.unkC0;
-    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[D_00453550.unk36]));
+    packets = D_00453550.packetList;
+    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[D_00453550.labelIndexB]));
 }
 
 s32 func_002369C0(void) {
@@ -1212,7 +1213,7 @@ u32 func_002379E0(void) {
 s32 mdlCountActiveRecords(void) {
     MdlViewerResource *resource = D_00453550.resources[0];
     s32 first = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
-    s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_00453550.unk22));
+    s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_00453550.activeEntryId));
 
     return first + second;
 }
@@ -1268,8 +1269,8 @@ extern u8 D_003C8990[];
 void func_00238140(void) {
     s32 list;
 
-    if (D_00453550.unk0A < 4) {
-        if (D_00453550.unk0A >= 2) {
+    if (D_00453550.taskPhase < 4) {
+        if (D_00453550.taskPhase >= 2) {
             list = sdfCreateResetPacketList();
             __asm__ volatile(
                 ".set noreorder\n\t"
@@ -1309,9 +1310,9 @@ extern void func_00101968(s32, s32);
 void func_002382F0(void) {
     mdlViewerTaskDestroy();
     D_00453550.viewerTask =
-        kwlnTaskCreate(D_003C87F0[D_00453550.unk0A - 1].name, 0x2B00, 1, 0,
-                       D_003C87F0[D_00453550.unk0A - 1].update, 0,
-                       D_003C87F0[D_00453550.unk0A - 1].data);
+        kwlnTaskCreate(D_003C87F0[D_00453550.taskPhase - 1].name, 0x2B00, 1, 0,
+                       D_003C87F0[D_00453550.taskPhase - 1].update, 0,
+                       D_003C87F0[D_00453550.taskPhase - 1].data);
     func_00101968(D_00453550.unk00, D_00453550.viewerTask);
 }
 
