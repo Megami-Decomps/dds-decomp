@@ -659,6 +659,27 @@ computed. Natural source shapes that flip it:
    first and the base pointer assigned after the `if` puts flag in `$20` and the
    table pointer in `$19`.
 
+### FP registers: local-alloc before global-alloc
+
+A pseudo born and dying once inside one basic block is a local qty, allocated
+by local-alloc before global-alloc (even across calls); local priority is the
+same formula, each qty takes the lowest free FPR. `t = a * b` ties `t` to the
+first dying input's qty. sched1 runs first, so an independent `mtc1`/`cvt`
+is born early (long life, low priority). A value that must land *above* a
+competitor needs the competitor to be a function-scope multi-block variable.
+Dumps: `cc.sh -dl -dg` on a scratch copy; `.greg` shows `regs to allocate: ...`.
+
+1. **Global scale, local temps.** DDS2 `func_0027C2F0` (+4 twins): function-scope
+   `f32 scale;`, each arm `scale = field * 0.25f;` in one statement, then
+   `scale = 1.0f - scale;` separately. Not `f32 scale = field; scale *= k;`.
+2. **One variable per role.** DDS1 `func_00190D18`: a variable reused for two
+   values is one global pseudo; `scale` and `range` as two locals each get `$f20`.
+3. **Reload, don't cache across a call** when retail reloads the field after the
+   `jal` (a cached copy costs one more callee-saved FPR).
+4. **Repeat the constant per arm.** DDS1 `func_00162088`: `height = -1.0f` on
+   both sides of the `||` (retail loads it twice) gives the extra refs that order
+   `length`/`height`.
+
 ### Alias sets stop gcse merging a reload
 
 gcse refuses to merge two MEMs with different alias sets, so a typed field access
@@ -669,6 +690,12 @@ codebase already has a second struct view of the object (DDS1 `func_00277CB8`:
 `MenuSelectionState->list` for the walk, `((MenuInputNode *)state)->flags` for
 the seek argument). A raw cast next to a typed access of the same field is a
 lever (DDS2 `func_002B40F8` stays INCLUDE_ASM).
+
+### Float constants never in a delay slot
+
+Neither ELF has `mtc1 $1,$fN` or `mtc1 $0,$fN` in a branch slot, so
+`tools/as_coproc_delay.py` keeps every `li.s` out of the following slot
+(retail `li.s $f12,K; jal f; nop`, DDS2 `func_001ECC18`).
 
 ## Not allowed
 
