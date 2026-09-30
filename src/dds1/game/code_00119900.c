@@ -155,9 +155,42 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_00119B08);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119CF0);
 
-INCLUDE_ASM(const s32, "game/code_00119900", ptyRecoverAllUnits);
+void ptyRecoverAllUnits(void) {
+    s32 offset = 0;
+    s32 remaining = 4;
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119E88);
+    do {
+        Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + offset + 0xa60);
+
+        offset += 0x1A4;
+        if (entry->flags & 1) {
+            datMoveCursorX(entry, 9999);
+            datMoveCursorY(entry, 9999);
+            entry->unkE &= 0x8000;
+        }
+        remaining--;
+    } while (remaining >= 0);
+}
+
+s32 func_00119E88(u32 mask, s32 mode) {
+    Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
+    s32 i = 0;
+
+    do {
+        if (entry->flags & 1) {
+            if (entry->unk6 != 0) {
+                if (mode != 1 || (entry->flags & 2)) {
+                    if (entry->unkE & mask) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        i++;
+        entry++;
+    } while (i < 5);
+    return 0;
+}
 
 void func_00119EF8(s32 arg0, s32 arg1) {
     *(s32 *)(arg0 + 0x10) = *(s32 *)(arg0 + 0x10) + arg1;
@@ -256,7 +289,22 @@ s32 dds3EntryMax(void) {
     return maximum;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", ptyGetAverageLevel);
+s32 ptyGetAverageLevel(void) {
+    Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
+    s32 total = 0;
+    s32 count = 0;
+    s32 remaining = 4;
+
+    do {
+        if (entry->flags & 1) {
+            count++;
+            total += entry->level;
+        }
+        entry++;
+        remaining--;
+    } while (remaining >= 0);
+    return (total + count - 1) / count;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyAddUnit);
 
@@ -482,7 +530,23 @@ s32 func_0011BE90(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011BED0);
+s32 func_0011BED0(void) {
+    s32 value;
+
+    switch (((EvtScriptContext *)D_003C2E70)->options) {
+    case 1:
+        value = *(s16 *)(D_003BAA50 + ((EvtScriptContext *)D_003C2E70)->third * 0x38 + 0x18);
+        break;
+    case 2:
+        value = *(s16 *)(D_003BAA50 + ((EvtScriptContext *)D_003C2E70)->third * 0x38 + 0x1C);
+        break;
+    default:
+        value = 0;
+        break;
+    }
+    func_0010D5F0(value);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011BF50);
 

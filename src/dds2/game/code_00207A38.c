@@ -248,12 +248,20 @@ typedef struct BtlResourceSelector {
 } BtlResourceSelector;
 
 typedef struct BtlResourceDescriptor {
-    u8 pad0[0x34];
-    BtlResourcePath *path;
-    u8 pad38[4];
-    s32 handle;
-    s32 ownsHandle;
-    BtlResourceSelector *selector;
+    s32 word00;             // 0x00
+    s32 word04;             // 0x04
+    u32 word08;             // 0x08
+    s32 entryCount;         // 0x0C
+    u32 word10[5];          // 0x10
+    u32 word24;             // 0x24
+    u32 word28;             // 0x28
+    u32 word2C;             // 0x2C
+    struct BtlEntry *head;  // 0x30
+    BtlResourcePath *path;  // 0x34
+    u32 word38;             // 0x38
+    s32 handle;             // 0x3C
+    s32 ownsHandle;         // 0x40
+    BtlResourceSelector *selector; // 0x44
 } BtlResourceDescriptor;
 
 extern u8 D_00436C50[];
@@ -647,7 +655,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002091C8);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 
-/* Unit normal of the triangle (a, b, c); result in vf10 (VU register convention). */
+/* vu0 routine: unit normal of the triangle (a, b, c); result in vf10 (VU register convention) */
 void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -865,7 +873,11 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00209770);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawIconAtSize);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209978);
+extern void btlDrawIconAtSize(BtnSurface *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
+
+void func_00209978(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s32 c3, s32 index) {
+    btlDrawIconAtSize(surface, x, y, 0x40, 0x40, c0, c1, c2, c3, index);
+}
 
 extern BtnUv D_003BE130[];
 extern BtnUv D_003BE138[];
@@ -998,13 +1010,86 @@ u32 func_00209E38(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209E68);
+typedef struct BtlActionProbe {
+    u16 id;         // 0x00
+    u8 pad_02[2];
+    void *first;    // 0x04
+    void *second;   // 0x08
+} BtlActionProbe;
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209F28);
+extern s8 *D_00435E1C;
+extern s32 func_001B2F50(void *, s32);
+extern s32 func_001ACD10(void *, s32, BtlActionProbe *);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209FA0);
+u32 func_00209E68(void) {
+    BtlCommandCtx *context;
+    BtlActionProbe probe;
+    s32 index;
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209FF8);
+    context = (BtlCommandCtx *)func_0010D8D0();
+    index = scrReadIntParameter(0);
+    if (D_00435E1C[index * 2 + 1] == 1) {
+        if (func_001B2F50((void *)context->actor, index) != 0 &&
+            func_001ACD10((void *)context->actor, index, &probe) != 0) {
+            *(void **)((u8 *)context + 0x2C) = probe.first;
+            context->commandMode = 3;
+            context->commandValue = probe.id;
+            *(void **)((u8 *)context + 0x30) = probe.second;
+        } else {
+            context->commandValue = 0;
+            context->commandMode = 1;
+        }
+    } else {
+        context->commandMode = 2;
+        context->commandValue = index;
+    }
+    return 1;
+}
+
+u32 func_00209F28(void) {
+    BtlCommandCtx *context;
+    s32 kind;
+    s32 value;
+
+    context = (BtlCommandCtx *)func_0010D8D0();
+    kind = scrReadIntParameter(0);
+    value = scrReadIntParameter(1);
+    context->commandMode = 2;
+    context->commandValue = kind;
+    if (kind == 0x196) {
+        value = func_0021F698();
+    }
+    *(s32 *)((u8 *)context + 0x94) = value;
+    *(s32 *)((u8 *)context + 0x38) = value;
+    return 1;
+}
+
+u32 func_00209FA0(void) {
+    BtlCommandCtx *context;
+    s32 value;
+
+    context = (BtlCommandCtx *)func_0010D8D0();
+    value = scrReadIntParameter(0);
+    context->commandMode = 5;
+    context->commandValue = 0;
+    value = btlPickWeightedEntry((u16)value);
+    *(s32 *)((u8 *)context + 0x94) = value;
+    *(s32 *)((u8 *)context + 0x38) = value;
+    return 1;
+}
+
+u32 func_00209FF8(void) {
+    BtlCommandCtx *context;
+    s32 value;
+
+    context = (BtlCommandCtx *)func_0010D8D0();
+    value = scrReadIntParameter(0);
+    context->commandMode = 5;
+    context->commandValue = 0;
+    *(s32 *)((u8 *)context + 0x94) = value;
+    *(s32 *)((u8 *)context + 0x38) = value;
+    return 1;
+}
 
 s32 func_0020A048(void) {
     func_0021F3E8(func_0010D8D0());
@@ -1289,7 +1374,24 @@ s32 func_0020AA00(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020AA90);
+u32 func_0020AA90(void) {
+    BtlCommandCtx *context;
+    s32 first;
+    s32 second;
+
+    context = (BtlCommandCtx *)func_0010D8D0();
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
+    if (func_00210EA0((s32)context, context->actor, ((first & 0x3F) << 16) | (u16)second | 0x2C00000)) {
+        func_0010D818(1);
+        *(s32 *)((u8 *)context + 0xB8) = first;
+        context->selectionFlagsA |= 0x40;
+    } else {
+        func_0010D818(0);
+        context->selectionFlagsA &= ~0x40;
+    }
+    return 1;
+}
 
 s32 func_0020AB38(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
@@ -2248,7 +2350,32 @@ u32 func_0020CD50(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlBindActorSlot);
+extern s32 scrCreateTaskForProcessId(s32, s32, s32);
+extern void scrSetCurrentActor(u32, u32);
+extern s32 func_00101958(s32);
+extern void func_00101968(s32, s32);
+extern void func_001A45C0(s32, s32, s32, s32);
+
+void btlBindActorSlot(s32 actor, s32 option) {
+    s32 battle = func_001AA6F8();
+    s32 task;
+    s32 window;
+
+    task = scrCreateTaskForProcessId(*(s32 *)(*(s32 *)(battle + 0x2C4) + 0x20) - 1, D_00435E7C, option);
+    scrSetCurrentActor(task, actor);
+    window = *(s32 *)(func_00101958(task) + 0xCC);
+    if (window >= 0) {
+        s32 unit = *(s32 *)(actor + 0x18);
+        s32 width = 2;
+
+        if (*(u16 *)(unit + 0x120) & 0x20) {
+            width = 1;
+        }
+        func_001A45C0(window, 0, *(u16 *)(unit + 0x124), width);
+    }
+    func_00101968(*(s32 *)(battle + 0x2C4), task);
+    *(s32 *)(battle + 0x2CC) = task;
+}
 
 void func_0020CE28(void) {
 }
@@ -2315,9 +2442,11 @@ void func_0020D118(void) {
 void func_0020D120(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D128);
+void func_0020D128(s32 format, ...) {
+}
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020D170);
+void func_0020D170(s32 a, s32 b, s32 c, s32 d, ...) {
+}
 
 void func_0020D1B0(void) {
 }
@@ -2598,7 +2727,28 @@ void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32
     list->count++;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DA28);
+BtlResourceDescriptor *func_0020DA28(BtlEntryList *list) {
+    BtlResourceDescriptor *resource = func_00328D68(0x48);
+
+    resource->word00 = 8;
+    resource->word04 = 8;
+    resource->word08 = 0;
+    resource->entryCount = list->count;
+    resource->word10[0] = 0;
+    resource->word10[1] = 0;
+    resource->word10[2] = 0;
+    resource->word10[3] = 0;
+    resource->word10[4] = 0;
+    resource->word24 = 0x60;
+    resource->word28 = 0x80806020;
+    resource->word2C = 0x60000000;
+    resource->head = list->head;
+    resource->path = (BtlResourcePath *)list->head;
+    resource->word38 = 0;
+    resource->handle = 0;
+    resource->selector = (BtlResourceSelector *)list;
+    return resource;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DAB8);
 

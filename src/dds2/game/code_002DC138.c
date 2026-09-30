@@ -90,7 +90,14 @@ extern void effComputeBattleCameraPositionVU(u8 *);
 extern void func_002D3808(void *, u32);
 extern void func_002D3748(void *, void *);
 extern s32 func_002D5AA8(void *);
-extern void func_00300100(char *, u32, void *);
+typedef struct EffResourceBankSlot {
+    u8 pad_00[0xC8];
+    char name[0x34];    // 0xC8
+    s32 type;           // 0xFC
+    s32 state;          // 0x100
+    s32 count;          // 0x104
+} EffResourceBankSlot;
+extern void func_00300100(char *, u32, EffResourceBankSlot *);
 extern EffectBlock128 D_0045C1F0;
 typedef struct EffModelResource {
     u8 pad0[0x28];
@@ -231,6 +238,12 @@ extern s32 fileResolveSecondaryBuffer(void *);
 extern void *func_00328E18(s32);
 
 extern void func_00328E48();
+extern void mdlLoadPrimaryVectorVU(void *);
+extern void func_0033A7E8(u32, void *, void *);
+extern u128 D_004584B0[];
+extern u128 D_00458470[];
+extern u8 D_003E9F50[];
+extern EffOp24 D_003E9F10[];
 
 extern void sdfTexReleaseReference();
 
@@ -513,7 +526,7 @@ extern u128 D_004584A0[];
 
 extern u128 D_0037F780[];
 
-extern u8 D_00437E94;
+extern s8 D_00437E94;
 
 typedef struct EffectResourceSizeEntry {
     u32 resourceSize;
@@ -4866,9 +4879,11 @@ u32 func_002F5488(u8 *work) {
     return func_002F5358(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
 }
 
-extern EffOp24 D_003E9F10[];
-
-INCLUDE_ASM(const s32, "game/code_002DC138", effDestroyModelResource);
+void effDestroyModelResource(EffModelResource *effect) {
+    D_003E9F10[effect->kind].run(effect->childResource);
+    func_002DC260((s32)effect->model);
+    func_00328E48(effect);
+}
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = (EffModelResource *)func_002F5358(work->kind, work->source, 0, 0);
@@ -5012,7 +5027,31 @@ void func_002F6450(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F64D8);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", effComputeLightDirectionVU);
+s64 effComputeLightDirectionVU(void *model, void *target) {
+    if (func_001AA308() == 0) {
+        return 0;
+    }
+    if (D_00437E94 == 0) {
+        return 0;
+    }
+    mdlLoadPrimaryVectorVU(model);
+    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_004584B0));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vsub.xyzw $vf10, $vf10, $vf11\n\t"
+        "vmulx.w $vf10, $vf10, $vf0x\n\t"
+        "vmul.xyz $vf2, $vf10, $vf10\n\t"
+        "vmulax.w ACC, $vf0, $vf2x\n\t"
+        "vmadday.w ACC, $vf0, $vf2y\n\t"
+        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
+        "vrsqrt Q, $vf0w, $vf2w\n\t"
+        "vwaitq\n\t"
+        "vmulq.xyz $vf10, $vf10, Q\n\t"
+        ".set reorder");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00458470) : "memory");
+    func_0033A7E8(target, D_003E9F50, D_004584A0);
+    return 1;
+}
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_00458460;
@@ -5556,13 +5595,75 @@ void func_002F8640(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8648);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8C38);
+typedef struct EffFadeTarget {
+    u8 pad_00[0x60];
+    u32 color;              // 0x60
+} EffFadeTarget;
+
+typedef struct EffFadeNode {
+    u8 pad_00[0x54];
+    u32 color;              // 0x54
+    u8 pad_58[0x2C];
+    u32 packedColor;        // 0x84
+    u8 pad_88[0x88];
+    u32 flags;              // 0x110
+    u8 pad_114[0x22C];
+    EffFadeTarget *target;  // 0x340
+    u8 pad_344[0x20];
+    struct EffFadeNode *next; // 0x364
+} EffFadeNode;
+
+extern void func_0023CA60(void *, u32, u32);
+
+void func_002F8C38(void) {
+    s32 owner = func_001AA6F8();
+
+    if ((*(u32 *)(owner + 0x218) & 0x6000000) == 0x6000000) {
+        EffFadeNode *node = *(EffFadeNode **)(owner + 0x24C);
+
+        while (node != 0) {
+            if (node->flags & 2) {
+                EffFadeTarget *target = node->target;
+
+                if (target != 0) {
+                    node->packedColor = (node->packedColor & 0xFFFFFF) | (node->color & 0xFF000000);
+                    target->color = node->color;
+                    func_0023CA60(target, 0, node->color);
+                }
+            }
+            node = node->next;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8CF0);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8FB8);
+typedef struct EffMotionSetup {
+    u16 mode;       // 0x00
+    u16 kind;       // 0x02
+    u16 flags;      // 0x04
+    u8 pad_06[6];
+    void *table;    // 0x0C
+    u8 pad_10[0x1C];
+} EffMotionSetup;   // 0x2C
 
-extern s32 *func_002F8FB8(s32 *);
+extern EffMotionSetup D_004584C0;
+extern u8 D_003E9FF0[];
+extern void func_003332D0(void *, f32);
+
+s32 *func_002F8FB8(s32 *context) {
+    s32 *work = (s32 *)func_00328D68(8);
+
+    work[0] = 0;
+    work[1] = (s32)func_003335E0();
+    func_003332D0((void *)work[1], 1.0f);
+    memset(&D_004584C0, 0, sizeof(EffMotionSetup));
+    D_004584C0.flags = 0x4000;
+    D_004584C0.table = D_003E9FF0;
+    D_004584C0.mode = 4;
+    D_004584C0.kind = 6;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9048);
 
@@ -7075,7 +7176,25 @@ void func_003000B8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00300100);
+void func_00300100(char *path, u32 arg1, EffResourceBankSlot *slot) {
+    if (D_0043875C == 0) {
+        D_0043875C = btlScanDirectory();
+        D_00438760 = func_0020DA28(D_0043875C);
+        func_0020DFB0(D_00438760, 0xBA, 0x1C);
+    } else {
+        func_0020DAB8(D_00438760);
+        slot->state = func_0020DFC8(D_00438760);
+        slot->type = btlFormatSelectedResourceName(D_00438760, slot);
+        slot->count = btlGetResourcePathVariant(D_00438760);
+        btlTrimResourceName(D_00438760, slot->name);
+        if (slot->state == 1) {
+            btlDestroyResourceDescriptor(D_00438760);
+            D_00438760 = 0;
+            btlDestroyEntryList(D_0043875C);
+            D_0043875C = 0;
+        }
+    }
+}
 
 extern s32 D_00438764;
 
@@ -7418,11 +7537,41 @@ s32 func_003016F0(s32 arg0) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00301750);
+s32 func_00301750(s32 arg0) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)arg0)->object;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003017B8);
+    D_00400018.table = D_003FFF58;
+    D_00400018.count = 8;
+    result = func_00300578(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
+    D_00400018.table = D_003FFDD8;
+    D_00400018.count = 8;
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00301820);
+s32 func_003017B8(s32 arg0) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)arg0)->object;
+
+    D_00400018.table = D_003FFF58;
+    D_00400018.count = 8;
+    result = func_00300578(object + 0x7c, object + 0xa0, ((EffMappingObject *)object)->value108);
+    D_00400018.table = D_003FFDD8;
+    D_00400018.count = 8;
+    return result;
+}
+
+s32 func_00301820(s32 arg0) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)arg0)->object;
+
+    D_00400018.table = D_003FFF58;
+    D_00400018.count = 8;
+    result = func_00300578(object + 0x24, object + 0x48, *(s32 *)object);
+    D_00400018.table = D_003FFDD8;
+    D_00400018.count = 8;
+    return result;
+}
 
 void btlResetEffectWork(void) {
     u8 *first = D_00400150;
@@ -8331,7 +8480,29 @@ u32 effSumRecordStatuses(u8 *buffer) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304768);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304938);
+typedef struct EffMappedHeader {
+    u8 pad_00[0x14];
+    u32 count;        // 0x14
+    u8 pad_18[8];
+} EffMappedHeader;    // 0x20
+
+typedef struct EffMappedResource {
+    u32 count;        // 0x00
+    void *records;    // 0x04
+    void *allocation; // 0x08
+} EffMappedResource;
+
+extern void *func_00304768(u32, EffMappedHeader *);
+
+u32 func_00304938(u32 source) {
+    EffMappedResource *work = (EffMappedResource *)func_00328D68(0xC);
+    EffMappedHeader header;
+
+    work->records = func_00304768(source, &header);
+    work->allocation = (void *)sdfResourceRetainAddress((u32)work->records);
+    work->count = header.count;
+    return (u32)work;
+}
 
 u32 *func_00304998(u32 category) {
     u32 *batch = (u32 *)func_00328D68(0xC);

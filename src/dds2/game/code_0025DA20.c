@@ -991,7 +991,33 @@ s32 func_00260B50(s32 id) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260B90);
+typedef struct EffItemSlot44 {
+    u32 id;
+    u8 pad_04[0x40];
+} EffItemSlot44;
+
+extern EffItemSlot44 D_003CD8F0[];
+extern void mdlFlagSet(u32);
+
+s32 func_00260B90(s32 row) {
+    s32 first = row * 2;
+    EffItemSlot44 *slot = &D_003CD8F0[first];
+    s32 i = 0;
+
+    do {
+        u32 id = slot->id;
+
+        slot++;
+        if (id != 0) {
+            if (mdlFlagTest(id) == 0) {
+                mdlFlagSet(id);
+                return i;
+            }
+        }
+        i++;
+    } while (i < 2);
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260C28);
 
