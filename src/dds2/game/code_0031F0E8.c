@@ -35,6 +35,25 @@ typedef struct DdsNamedList {
     DdsNamedNode *first; /* 0x04 */
 } DdsNamedList;
 
+typedef struct DdsPackedObject {
+    u32 maxPackedOffset; /* 0x00 */
+    u32 segments; /* 0x04 */
+    u32 namedReferences; /* 0x08 */
+    u32 pendingReferences; /* 0x0C */
+} DdsPackedObject;
+
+typedef struct DdsCallbackNode {
+    u8 pad00[0xC];
+    u32 userData; /* 0x0C */
+    s32 onFirst; /* 0x10 */
+    s32 onLast; /* 0x14 */
+} DdsCallbackNode;
+
+typedef struct DdsCallbackCollection {
+    u8 pad00[4];
+    u32 callbacks[3]; /* 0x04, 0x08, 0x0C */
+} DdsCallbackCollection;
+
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F0E8);
 
 void func_0031F138(u32 node) {
@@ -69,16 +88,16 @@ u64 func_0031F228(s32 object) {
     return record;
 }
 
-u32 func_0031F270(s32 arg0) {
-    return *(u32 *)(*(s32 *)(*(s32 *)(arg0 + 4) + 8) + 0x10);
+u32 func_0031F270(s32 object) {
+    return *(u32 *)(*(s32 *)(*(s32 *)(object + 4) + 8) + 0x10);
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F280);
 
 void func_0031F300(u32 node) {
-    func_00320C88(*(u32 *)(node + 4));
-    func_00320C88(*(u32 *)(node + 8));
-    func_00320C88(*(u32 *)(node + 0xc));
+    func_00320C88(((DdsCallbackCollection *)node)->callbacks[0]);
+    func_00320C88(((DdsCallbackCollection *)node)->callbacks[1]);
+    func_00320C88(((DdsCallbackCollection *)node)->callbacks[2]);
     func_0035A880(node);
 }
 
@@ -99,9 +118,9 @@ INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
 
 void dds3RecordNamedReference(u32 context, const char *name) {
     u32 record = func_0031F168();
-    strncpy((char *)*(u32 *)record, name, DDS_NAMED_RECORD_NAME_BYTES);
-    func_00320CE0(*(u32 *)(context + 0xc), 0, record);
-    *(u32 *)(record + 4) = *(u32 *)context;
+    strncpy((char *)((DdsNamedRecord *)record)->name, name, DDS_NAMED_RECORD_NAME_BYTES);
+    func_00320CE0(((DdsPackedObject *)context)->pendingReferences, 0, record);
+    ((DdsNamedRecord *)record)->value = ((DdsPackedObject *)context)->maxPackedOffset;
     dds3WritePackedValue(context, -1, 4);
 }
 
@@ -124,20 +143,20 @@ u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
     u32 segment;
-    if (packedOffset > object[0]) {
+    if (packedOffset > ((DdsPackedObject *)object)->maxPackedOffset) {
         return 0;
     }
-    segment = mnuFindResourceNodeById(object[1], segmentIndex);
+    segment = mnuFindResourceNodeById(((DdsPackedObject *)object)->segments, segmentIndex);
     return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
 }
 
 /* Replace recorded pointer slots with their matching named addresses. */
 s32 dds3ApplyNamedRelocations(u32 *object) {
-    DdsNamedNode *node = ((DdsNamedList *)object[3])->first;
+    DdsNamedNode *node = ((DdsNamedList *)((DdsPackedObject *)object)->pendingReferences)->first;
     if (node != NULL) {
         do {
             DdsNamedRecord *record = node->record;
-            u32 found = dds3FindNamedRecord(object[2], record->name);
+            u32 found = dds3FindNamedRecord(((DdsPackedObject *)object)->namedReferences, record->name);
             u32 address;
             u32 replacement;
             if (found == 0) {
@@ -153,7 +172,7 @@ s32 dds3ApplyNamedRelocations(u32 *object) {
 }
 
 u32 func_0031F6A0(u32 object) {
-    DdsNamedNode *node = ((DdsNamedList *)*(u32 *)(object + 0xc))->first;
+    DdsNamedNode *node = ((DdsNamedList *)((DdsPackedObject *)object)->pendingReferences)->first;
     u32 destination;
     if (node == NULL) {
         return 0;
@@ -256,9 +275,9 @@ INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);
 u32 mnuCreateCallbackNode(u32 userData) {
     u32 *node = (u32 *)func_0035A828(0x18);
     memset(node, 0, 0x18);
-    node[3] = userData;
-    node[4] = (u32)func_003211F0;
-    node[5] = (u32)func_003211F0;
+    ((DdsCallbackNode *)node)->userData = userData;
+    ((DdsCallbackNode *)node)->onFirst = (u32)func_003211F0;
+    ((DdsCallbackNode *)node)->onLast = (u32)func_003211F0;
     return (u32)node;
 }
 
@@ -266,16 +285,16 @@ void func_00320C88(u32 node) {
     if (node != 0) {
         void (*callback)(s32, u32);
         func_00321018(node);
-        callback = *(void (**)(s32, u32))(node + 0x14);
-        callback(-1, *(u32 *)(node + 0xc));
+        callback = (void (*)(s32, u32))((DdsCallbackNode *)node)->onLast;
+        callback(-1, ((DdsCallbackNode *)node)->userData);
         func_0035A880(node);
     }
 }
 
 
-void func_00320CD0(s32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *(s32 *)(arg0 + 0x14) = (s32)arg1;
+void func_00320CD0(s32 callbackNode, s32 callbackAddress) {
+    if (callbackAddress != 0) {
+        ((DdsCallbackNode *)callbackNode)->onLast = (s32)callbackAddress;
     }
 }
 
@@ -283,9 +302,9 @@ INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320CE0);
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320D80);
 
-void func_00320EA8(s32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *(s32 *)(arg0 + 0x10) = (s32)arg1;
+void func_00320EA8(s32 callbackNode, s32 callbackAddress) {
+    if (callbackAddress != 0) {
+        ((DdsCallbackNode *)callbackNode)->onFirst = (s32)callbackAddress;
     }
 }
 

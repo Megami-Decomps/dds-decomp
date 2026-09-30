@@ -11,21 +11,21 @@ void func_00115F40(void *unit);
 
 void func_0010D818(s32 value);
 
-void func_001027D8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_001027D8(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
 void func_0035B6E0(const char *fmt, ...);
 
 void func_0010BFE0(void);
 
-void evtSubmitEventRequest(s32 arg0, s32 arg1);
+void evtSubmitEventRequest(s32 eventId, s32 requestMode);
 
 void fldPlayCurrentBgmSound(void);
 
-void func_0012EBF8(u32 arg0, s32 arg1);
+void func_0012EBF8(u32 kind, s32 eventId);
 
 extern u32 D_004371E8;
 
-void evtSubmitEventRequestImmediate(s32 arg0);
+void evtSubmitEventRequestImmediate(s32 eventId);
 
 void fldStopCurrentBgm(void);
 
@@ -33,21 +33,21 @@ void fldReleaseCurrentBgm(void);
 
 char *scrReadStringParameter(s32 idx);
 
-void fldInitializeSequenceAndResetFlags(s32 arg0, s32 arg1, s32 arg2, char *arg3);
+void fldInitializeSequenceAndResetFlags(s32 request, s32 sequence, s32 variant, char *name);
 
 extern s32 D_00389780[];
 
-void fldInitializeAlternateSequence(s32 arg0, s32 arg1, s32 arg2, char *arg3);
+void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char *name);
 
 void func_0033DAD8(const char *msg, ...);
 
-void func_0025D390(s32 arg0, s32 arg1);
+void func_0025D390(s32 first, s32 second);
 
 s32 dds3GetWorldSecondaryObject(void);
 
-s32 dds3GetWorldObjectValue(s32 arg0);
+s32 dds3GetWorldObjectValue(s32 world);
 
-void func_0023AA30(s32 arg0, s32 arg1);
+void func_0023AA30(s32 highPart, s32 lowPart);
 
 void func_0010AE38(const char *fmt, ...);
 
@@ -61,9 +61,9 @@ extern u32 D_00435CD4;
 
 void func_00110B50(void *unit);
 
-s32 func_001287B8(s32 arg0);
+s32 func_001287B8(s32 id);
 
-void func_0023AFC8(void *arg0, s32 arg1);
+void func_0023AFC8(void *unit, s32 enabled);
 
 void func_0023B078(void *unit, s32 flag);
 
@@ -73,19 +73,19 @@ s32 evtGetMirroredSolarPhase(void);
 
 s32 evtGetSolarPhase(void);
 
-void evtPolygonMovieClearFlagBits(s32 arg0, u32 bits);
+void evtPolygonMovieClearFlagBits(s32 movieId, u32 bits);
 
 u32 func_00125F38(void);
 
-void func_00110BE0(s32 arg0, u32 arg1);
+void func_00110BE0(s32 world, u32 unit);
 
 f32 bfWaitReadArgFloat(s32 idx);
 
 s32 func_0010D8C8(void);
 
-s32 evtFindTaskById(s32 arg0);
+s32 evtFindTaskById(s32 id);
 
-s32 evtGetTaskValueWord(s32 arg0);
+s32 evtGetTaskValueWord(s32 id);
 
 extern s32 mnuCampCreateTask(s32 id);
 
@@ -103,23 +103,36 @@ typedef struct EvtCommandWork {
     EvtCampTask *campTask;
 } EvtCommandWork;
 
+/* Same room-name and inner-status offsets as the DDS1 event unit. */
+typedef struct EvtWorldUnitInner {
+    u8 pad00[0x88];
+    u32 statusFlags; /* 0x88 */
+} EvtWorldUnitInner;
+
+typedef struct EvtWorldUnit {
+    u8 pad00[8];
+    char *roomName; /* 0x08 */
+    u8 pad0C[0xC];
+    EvtWorldUnitInner *inner; /* 0x18 */
+} EvtWorldUnit;
+
 extern char D_00421F68[];
 
 void evtSetWorldSlotStatusFlag();
 
 void evtClearWorldSlotStatusFlag();
 
-void func_0023AE08(s32 arg0, f32 arg1);
+void func_0023AE08(s32 unit, f32 value);
 
 s32 fldParseRoomNumberFromName(char *name);
 
-s32 func_001235E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_001235E8(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
 extern u32 D_00389770[];
 
-void func_0023AE70(void *arg0, s32 arg1);
+void func_0023AE70(void *unit, s32 value);
 
-s32 func_0023AEB0(void *arg0, void *arg1);
+s32 func_0023AEB0(void *target, void *path);
 
 extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
@@ -538,7 +551,7 @@ s32 func_00241A70(void) {
         unit = (void *)func_00125F38();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
-        *(u32 *)(*(u8 **)((u8 *)unit + 0x18) + 0x88) |= 1;
+        ((EvtWorldUnit *)unit)->inner->statusFlags |= 1;
     }
     if (unit == NULL) {
         return 1;
@@ -852,7 +865,7 @@ s32 func_00242918(void) {
         }
     }
     func_0023AE08(unit, bfWaitReadArgFloat(1));
-    owner = *(char **)(unit + 8);
+    owner = ((EvtWorldUnit *)unit)->roomName;
     if (owner == 0) {
         return 1;
     }
@@ -884,7 +897,7 @@ s32 func_00242A30(void) {
         }
     }
     func_0023AE70(unit, scrReadIntParameter(1));
-    owner = *(char **)(unit + 8);
+    owner = ((EvtWorldUnit *)unit)->roomName;
     if (owner == 0) {
         return 1;
     }
