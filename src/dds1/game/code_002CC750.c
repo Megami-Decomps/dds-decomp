@@ -311,7 +311,16 @@ s32 scrCheckStateBits(ScrVmOperand *work) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptySetProfileFlag1);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyTestProfileFlag1);
+s32 ptyTestProfileFlag1(ScrVmOperand *work, u16 id) {
+    u32 word;
+    u32 shift;
+    u32 *flags;
+
+    prfDecodeFlagPair(id, &word, &shift);
+    flags = (u32 *)D_003BAA00;
+    shift++;
+    return (flags[0x2e9f0 / 4 + word + work->h04 * 7] & (1 << shift)) != 0;
+}
 
 s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
     return op->selectedIndex;

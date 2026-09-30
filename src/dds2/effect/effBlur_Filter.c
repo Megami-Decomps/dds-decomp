@@ -61,7 +61,9 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E908);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E980);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA00);
+void func_0018EA00(EffBlurParams *dst, EffBlurParams *src) {
+    *dst = *src;
+}
 
 /* Select the source handle used by the first blur variant. */
 void effBlurSetHandle(EffBlurWork *work, u32 setting) {

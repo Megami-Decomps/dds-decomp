@@ -1003,7 +1003,43 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00256AE0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00256CF0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", evtSynchronizeSelectedEntry);
+extern s32 func_00197AE8();
+
+extern s32 kwlnTaskGetTimer(s32 task);
+
+typedef struct EvtSelectionCache {
+    u8 pad00[0x24];
+    s32 selected; /* 0x24 */
+} EvtSelectionCache;
+
+extern EvtSelectionCache *D_00436518;
+
+extern s32 D_00438FB8;
+
+s32 evtSynchronizeSelectedEntry(s32 task) {
+    EvtRuntime *runtime = (EvtRuntime *)func_00101958(task);
+
+    if (func_00197AE8() == 0) {
+        runtime->busy = 0;
+        return -1;
+    }
+    if (kwlnTaskGetTimer(task) == 0) {
+        s32 selected = runtime->selected;
+
+        D_00438FB8 = selected;
+        if (selected != 0) {
+            D_00436518->selected = selected;
+        }
+    }
+    if (D_00436518->selected != runtime->selected) {
+        s32 selected = runtime->selected;
+
+        if (selected != 0) {
+            D_00436518->selected = selected;
+        }
+    }
+    return 0;
+}
 
 s32 func_002570B8(void) {
     void *runtime;

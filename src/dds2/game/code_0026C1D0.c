@@ -385,7 +385,18 @@ s32 func_0026CB48(u32 resource) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CB98);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CC88);
+extern s32 func_002B8FC8(s32);
+
+extern void func_00308808(s32, s32, s32, s32, s32, u32, s32);
+
+extern void func_0026CB98(s32, s32, s32, s32, s32);
+
+void func_0026CC88(s32 x, s32 y, s32 width, s32 record) {
+    s32 height = func_002B8FC8(*(s32 *)(record + 0x18)) + 0x80;
+
+    func_00308808(x, y, 0, width, height, 0x30303040, 0x53);
+    func_0026CB98(x + width - 0xA0, y, y + height, 8, record);
+}
 
 void func_0026CD20(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_00308808(arg0, arg1, 0, arg2, arg3, 0x30303040, 0x53);

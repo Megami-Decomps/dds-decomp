@@ -26,16 +26,24 @@ typedef struct {
 } SdfCounterTimer;
 
 typedef struct {
-    u8 pad00[0x70];
-    SdfCounterDisplay *display; /* 0x70 */
+    u8 pad00[0x58];
+    struct SdfCounterChannel *next;    /* 0x58 */
+    u8 pad5C[0x14];
+    SdfCounterDisplay *display;        /* 0x70 */
 } SdfCounterChannel;
 
 typedef struct {
-    u8 pad00[0x1C];
-    SdfCounterChannel *channel; /* 0x1C */
+    u8 pad00[0x10];
+    SdfCounterChannel *first;          /* 0x10 */
+    u8 pad14[0x8];
+    SdfCounterChannel *channel;        /* 0x1C */
     u8 pad20[0x10];
-    SdfCounterTimer *timer;     /* 0x30 */
+    SdfCounterTimer *timer;            /* 0x30 */
 } SdfCounterRuntime;
+
+extern void func_002CFF98(void *);
+
+extern void func_0027B368(SdfCounterRuntime *);
 
 extern s32 D_003BD274;
 
@@ -67,7 +75,7 @@ typedef struct EffObjHeader {
     EffObjVtbl *vtbl;           /* 0x10 */
 } EffObjHeader;
 
-extern s32 func_002C45C8();
+extern void func_002C45C8(SdfCounterRuntime *);
 
 void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(D_003BD264, D_003900A0);
@@ -126,10 +134,22 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C42F0);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C44D0);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C45C8);
+void func_002C45C8(SdfCounterRuntime *rt) {
+    SdfCounterChannel *channel;
 
-s64 func_002C4630(void) {
-    return func_002C45C8(D_003BD274);
+    if (rt != NULL) {
+        for (channel = rt->first; channel != NULL; channel = channel->next) {
+            func_002CFF98(channel->display);
+            channel->display = NULL;
+        }
+        func_002CFF98(rt->timer);
+        rt->timer = NULL;
+        func_0027B368(rt);
+    }
+}
+
+void func_002C4630(void) {
+    func_002C45C8(D_003BD274);
 }
 
 void func_002C4650(void) {
