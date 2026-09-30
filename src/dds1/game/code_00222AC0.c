@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Event unit/work object shared by the setup helpers below and the
  * script opcodes. Field layout matches event/evtUnitManager's EvtUnit
@@ -140,7 +141,17 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 arg2) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222B70);
+void func_00222B70(EvtUnit *work, s32 arg1, s128 *vector, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    work->unkB0 = arg1;
+    work->unkAC = 1;
+    work->unkAE = 0;
+    work->linkedUnit = NULL;
+    PCP_COPY_VECTOR(&work->unk70, vector);
+    work->unkB4 = arg4;
+    work->unkB6 = arg5;
+    work->unk94 = arg6;
+    work->unkB2 = 0;
+}
 
 void func_00222BA8(EvtUnit *work, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     EvtWorldUnitRef *worldUnit;
@@ -169,7 +180,17 @@ s32 func_00222EB0(EvtUnit *work, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222ED8);
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223540);
+extern void func_00242BD0(f32 *, f32 *, f32 *, f32 *, f32 *);
+
+void func_00223540(void) {
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        func_00242BD0(&D_003D7BD8[i].unk08, &D_003D7BD8[i].unk18, &D_003D7BD8[i].unk28, &D_003D7BD8[i].unk30[2], &D_003D7BD8[i].unk30[3]);
+        D_003D7BD8[i].unk00 = 0;
+        D_003D7BD8[i].unk04 = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_002235E8);
 
@@ -179,7 +200,26 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223718);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223828);
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00223A10);
+/* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
+s32 func_00223A10(s32 id, f32 *outX, f32 *outY) {
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (D_003D7BD8[i].unk00 == 3 && D_003D7BD8[i].unk04 == id) {
+            *outX = D_003D7BD8[i].unk30[2];
+            *outY = D_003D7BD8[i].unk30[3];
+            return 1;
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        if (D_003D7BD8[i].unk00 == 2) {
+            *outX = D_003D7BD8[i].unk30[2];
+            *outY = D_003D7BD8[i].unk30[3];
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
     void *world;
@@ -834,7 +874,16 @@ u32 evtUnitCheckModelCut(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_002259E0);
+f32 func_002259E0(s32 index) {
+    f32 scale = (D_003BAA20[index].unk18 + D_003BAA20[index].unk1C * 0.5f) * 0.5f * D_003BAA20[index].unk10 * (1.0f / 70.0f);
+
+    if (scale > 2.0f) {
+        scale = 2.0f;
+    } else if (scale < 0.8f) {
+        scale = 0.8f;
+    }
+    return scale;
+}
 
 extern f32 func_002259E0(s32);
 extern void func_00190308(void *, f32);

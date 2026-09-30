@@ -32,7 +32,9 @@ typedef struct MdlInner {
     MdlNode *list; /* 0x14: intrusive list walked by func_00218320/368 */
     u8 unk18[4]; /* 0x18 */
     u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
-    u8 pad20[0x30];
+    u128 vector20; /* 0x20: matrix row 0 (vf28) */
+    u128 vector30; /* 0x30: matrix row 1 (vf29) */
+    u128 vector40; /* 0x40: matrix row 2 (vf30) */
     u128 vector50; /* 0x50 */
     u128 vector60; /* 0x60 */
     u128 vector70; /* 0x70 */
@@ -45,7 +47,18 @@ typedef struct MdlCtx {
     u32 unk10;         /* 0x10 */
     u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
     MdlInner *inner;   /* 0x18 */
+    u8 unk1C[0x14];    /* 0x1C */
+    struct MdlDevList *devList; /* 0x30: device slots released with the model */
 } MdlCtx;
+
+typedef struct MdlDevSlot {
+    struct MdlDevSlot *next; /* 0x0 */
+    void *slot;              /* 0x4 */
+} MdlDevSlot;
+
+typedef struct MdlDevList {
+    MdlDevSlot *first; /* 0x0 */
+} MdlDevList;
 
 /* Packet parsed by mdlExecuteAndFreeJob. */
 typedef struct MdlPacket {
@@ -99,6 +112,7 @@ void func_00217CA8(MdlCtx *ctx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5
 
 extern void *func_00288B90();
 extern u32 func_002EB090(void *);
+extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
 
 extern u32 D_003BD878;
 
@@ -138,7 +152,41 @@ void func_00216CC8(void *unused0, void *unused1, void *command) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216CF8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00216DB8);
+/* Group setup record carried in the payload of an mdlRequestAsset job. */
+typedef struct MdlGroupSetup {
+    s32 unk0;   /* 0x0 */
+    s32 unk4;   /* 0x4 */
+    s32 unk8;   /* 0x8 */
+    s32 flags;  /* 0xC */
+    s32 unk10;  /* 0x10 */
+    s32 unk14;  /* 0x14 */
+    s32 unk18;  /* 0x18 */
+    s32 unk1C;  /* 0x1C */
+} MdlGroupSetup;
+
+typedef struct MdlGroupEntity {
+    u8 unk0[0xA0];
+    void *unkA0;
+    void *unkA4;
+    void *unkA8;
+} MdlGroupEntity;
+
+extern void battleCreateGroupNode();
+
+void func_00216DB8(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
+    MdlGroupEntity *entity;
+
+    battleCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
+    if (setup->flags != 0) {
+        func_00216CF8(group, id, mode, 0, 0, 0, setup->flags, setup->unk10);
+    }
+    if (setup->unk14 != 0) {
+        entity = btlFindGroupedEntity(group, id);
+        entity->unkA4 = setup->unk14;
+        entity->unkA0 = setup->unk18;
+        entity->unkA8 = setup->unk1C;
+    }
+}
 
 extern s32 btlGroupContainsId(s32 group, s32 id);
 extern s32 fileManUpdate(void);
@@ -170,7 +218,24 @@ void func_00216F18(void *arg0, MdlLoadReq *req) {
     func_002887A0(arg0);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00216F68);
+typedef struct MdlLoadCmd {
+    u8 unk0[6];    /* 0x0 */
+    u8 deferred;   /* 0x6: non-zero when the caller runs the job itself */
+    u8 unk7[9];    /* 0x7 */
+    u32 size;      /* 0x10 */
+    u32 handle;    /* 0x14 */
+} MdlLoadCmd;
+
+extern s32 func_002EB168();
+
+void func_00216F68(s32 arg0, MdlLoadCmd *cmd) {
+    cmd->handle = fileGetResourceHandle(arg0);
+    cmd->size = func_002EB168(func_00288B90(arg0));
+    func_002887A0(arg0);
+    if (cmd->deferred == 0) {
+        mdlExecuteAndFreeJob((MdlPacket *)cmd);
+    }
+}
 
 extern s32 func_002EB1F0();
 
@@ -239,13 +304,51 @@ void func_002172B0(MdlLink *link) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217310);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217438);
+extern void sdfReleaseDevSlot(void *, s32, s32);
+
+void func_00217438(MdlCtx *ctx) {
+    MdlDevList *list = ctx->devList;
+    MdlDevSlot *node;
+    MdlDevSlot *cur;
+
+    if (list != NULL) {
+        node = list->first;
+        while (node != NULL) {
+            cur = node;
+            node = node->next;
+            sdfReleaseDevSlot(cur->slot, 1, 1);
+            func_002CFF98(cur);
+        }
+        func_002CFF98(list);
+        ctx->devList = NULL;
+    }
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002174C0);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217680);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002177D0);
+extern void mdlDestroyResourceItem(u32 *);
+extern void sdfResourceListRelease(u32, s32);
+
+void func_002177D0(MdlCtx *ctx) {
+    MdlInner *inner = ctx->inner;
+    u32 *node;
+    u32 *next;
+
+    while (inner->list != NULL) {
+        func_002DB308(inner->list);
+    }
+    sdfResourceListRelease(inner->resourceHandle, 1);
+    for (node = ctx->list14; node != NULL; node = next) {
+        next = (u32 *)*node;
+        mdlDestroyResourceItem(node);
+    }
+    func_00217438(ctx);
+    sdfReleaseDevSlot(inner, 1, 1);
+    func_002172B0((MdlLink *)ctx);
+    func_002CFF98(ctx);
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217878);
 
@@ -379,7 +482,41 @@ void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
         : : "r"(vec) : "memory");
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217FB8);
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* Store vf10 as the secondary vector, then the rotation matrix rows built by the VU0 routine. */
+void func_00217FB8(MdlCtx *ctx) {
+    void *secondary;
+    void *row0;
+    void *row1;
+    void *row2;
+
+    secondary = &ctx->inner->vector60;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf10, 0(%0)\n"
+        ".set reorder"
+        : : "r"(secondary) : "memory");
+    effMiscQuaternionToMatrixVU();
+    row0 = &ctx->inner->vector20;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf28, 0(%0)\n"
+        ".set reorder"
+        : : "r"(row0) : "memory");
+    row1 = &ctx->inner->vector30;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf29, 0(%0)\n"
+        ".set reorder"
+        : : "r"(row1) : "memory");
+    row2 = &ctx->inner->vector40;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "sqc2 vf30, 0(%0)\n"
+        ".set reorder"
+        : : "r"(row2) : "memory");
+}
 
 void mdlLoadTertiaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector70;
@@ -421,7 +558,13 @@ void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
     mdlSetAllResourceFrames(ctx, value);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218100);
+void func_00218100(MdlCtx *ctx, f32 amount) {
+    u32 *node;
+
+    for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
+        mdlSetResourceAmount(ctx, node, amount);
+    }
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218158);
 
@@ -499,9 +642,40 @@ void func_002189D8(MdlRes *res) {
     func_002CFF98(res);
 }
 
+/* Completion job created by func_00218A88 and run by func_00218A08. */
+typedef struct MdlDoneJob {
+    u16 group;         /* 0x0 */
+    u16 id;            /* 0x2 */
+    u32 arg;           /* 0x4 */
+    void *owner;       /* 0x8: request slot from func_002889D8 */
+    void (*done)(u32); /* 0xC */
+    u32 doneArg;       /* 0x10 */
+} MdlDoneJob;
+
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218A08);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218A88);
+extern void *func_002CFF68();
+extern s32 func_002889D8();
+extern void func_00288C50();
+extern void func_00218A08();
+
+s32 func_00218A88(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
+    MdlDoneJob *job = func_002CFF68(0x14);
+    s32 slot;
+
+    job->group = group;
+    job->id = id;
+    job->arg = arg;
+    job->doneArg = doneArg;
+    job->done = done;
+    slot = func_002889D8(handle, 0, 0, func_00218A08, job);
+    job->owner = (void *)slot;
+    if (done == NULL) {
+        func_00288C50(slot);
+        func_002189D8((MdlRes *)job);
+    }
+    return 0;
+}
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB60);
 

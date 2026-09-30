@@ -210,7 +210,14 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_001969B8);
 
 INCLUDE_ASM(const s32, "game/code_00195E50", func_00196B08);
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00196F18);
+extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
+
+void func_00196F18(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
+    void *list = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(list);
+    sdfAppendPacket(list, func_0011F250(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, w * 0x10, h * 8, arg4, arg5));
+    D_00380748.submit(&D_00380748, list);
+}
 
 void func_00196FD8(void) {
     D_00436460 = 1;
