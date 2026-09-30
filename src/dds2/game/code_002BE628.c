@@ -1,6 +1,12 @@
 #include "common.h"
 
 extern s32 D_00437C9C;
+extern s32 func_002B8E30();
+extern s32 mnuScrollListToEnd();
+extern void func_002B96D8();
+extern void func_002BE730();
+extern void func_002BED10();
+extern s32 func_002C6008();
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -190,7 +196,47 @@ void func_002BEE38(u32 *entry) {
     *entry = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BEE50);
+/* Retail returns int here without a return statement: the last call is a plain jal, not a sibcall. */
+s32 func_002BEE50(u8 *menu, s32 window, u32 kind, s32 arg) {
+    u8 *base = menu + window * 0x2138;
+    u8 *block = base + 0x78;
+    s32 *count = (s32 *)(base + 0x17C);
+    s32 best = 0x200;
+    s32 bestIndex = 0;
+    s32 i;
+    u8 *entry;
+    u32 flags;
+
+    for (i = 0; i < 2; i++, count += 0x409) {
+        if (*count < best) {
+            best = *count;
+            bestIndex = i;
+        }
+    }
+    flags = *(u16 *)(D_00435DD0 + window * 0x1C4 + 0xA60);
+    entry = block + bestIndex * 0x1024 + 0xF0;
+    *(s32 *)(entry + 0x14) = 0x200;
+    *(s32 *)(entry + 0x18) = arg;
+    *(s32 *)(entry + 4) = kind;
+    if ((flags & 2) != 0) {
+        *(s32 *)(entry + 8) = 0;
+    } else {
+        *(s32 *)(entry + 8) = 1;
+    }
+    switch (kind) {
+    case 0:
+        func_002BE730(entry);
+        *(s32 *)(menu + 0xA6A0) = 0;
+        break;
+    case 1:
+        func_002BED10(entry);
+        *(s32 *)(menu + 0xA6A0) = 0;
+        break;
+    case 2:
+        func_002BEE38(entry);
+        break;
+    }
+}
 
 void mnuClearSpriteRecord(u32 *entry) {
     entry[0] = 0;
@@ -348,10 +394,27 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0630);
+void func_002C0630(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
+    s32 positionOffset[2];
+    s32 *layout = menu->entryCount;
+    s32 count;
+    s32 i;
+
+    count = layout[0];
+    count += layout[1];
+    if (menu->selectedPanel >= 0) {
+        mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
+    } else {
+        for (i = 0; i < count; i++) {
+            mnuCalcListEntryOffset(positionOffset, menu, i);
+            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, i, param);
+        }
+    }
+    mnuAdvancePanelTransition((s32)menu);
+}
 
 void func_002C0718(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
-    func_002C0630(x, y, depth, 0, source, mode);
+    func_002C0630(x, y, depth, 0, (MenuListState *)source, mode);
 }
 
 typedef struct MenuPoint {
@@ -972,7 +1035,32 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C44E8);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C47C8);
+void func_002C47C8(s32 active, u8 *menu, u32 *buttons) {
+    s32 top = 0;
+    s32 bottom = 0;
+    u8 *list = *(u8 **)(menu + 0x18);
+
+    if (active != 0) {
+        if (*(s32 *)(list + 0x20) >= *(s32 *)(list + 0xC)) {
+            if (*buttons & 0x400) {
+                top = func_002B8E30(list);
+            }
+            if (*buttons & 0x800) {
+                bottom = mnuScrollListToEnd(*(u8 **)(menu + 0x18));
+            }
+            if (top == 0) {
+                *buttons &= ~0x400;
+            }
+            if (bottom == 0) {
+                *buttons &= ~0x800;
+            }
+            func_002B96D8(menu);
+            return;
+        }
+    }
+    *buttons &= ~0x400;
+    *buttons &= ~0x800;
+}
 
 void func_002C48C8(u32 item, u32 option) {
     func_002C47C8(*(u32 *)((s32)item + 0x90), item, option);
@@ -1619,7 +1707,43 @@ s32 func_002C5F78(u32 *left, u32 *right) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6008);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6348);
+s32 func_002C6348(s32 partyPanel, s32 skill, s32 commit) {
+    u32 used[32];
+    MenuPanelEntry *entry;
+    s32 pass;
+    s32 more;
+    s32 result;
+
+    for (pass = 0; pass < 2; pass++) {
+        memset(used, 0, sizeof(used));
+        more = 1;
+        do {
+            entry = mnuPickBestPartyEntry(used);
+            if (entry == 0) {
+                break;
+            }
+            if (pass == 0) {
+                result = mnuTryUseFieldSkill(partyPanel, skill, (s32)entry, commit);
+            } else {
+                result = func_002C6008(partyPanel, skill, entry, commit);
+            }
+            switch (result) {
+            case 0:
+                used[entry->tableIndex] = 1;
+                break;
+            case 1:
+                used[entry->tableIndex] = result;
+                break;
+            case 2:
+                return pass + 1;
+            default:
+                more = 0;
+                break;
+            }
+        } while (more != 0);
+    }
+    return 0;
+}
 
 u8 func_002C6480(void) {
     return D_00437C9C != 0;
@@ -1802,7 +1926,32 @@ void func_002C6BB8(void) {
     D_00457EB0.flags &= ~1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6BD8);
+s32 func_002C6BD8(s32 encodedIndex, s32 arg1, s32 arg2) {
+    s32 index = encodedIndex & 0xFFFF;
+    s32 bank;
+    StageTestSlot *slot;
+
+    if (D_00457EB0.model != 0 && D_00457EB0.slot[0].modelId == D_00457EB0.entries[index].modelId) {
+        return 0;
+    }
+    evtStageTestStop();
+    bank = 0;
+    if (D_00457EB0.flags & 2) {
+        bank = 1;
+    }
+    D_00457EB0.flags |= 2;
+    D_00457EB0.flags &= ~4;
+    if (bank) {
+        D_00457EB0.flags |= 1;
+    }
+    slot = &D_00457EB0.slot[bank];
+    slot->entryIndex = index;
+    slot->modelId = D_00457EB0.entries[index].modelId;
+    slot->unk0C = arg2;
+    slot->unk10 = arg1;
+    slot->state = 0;
+    return 1;
+}
 
 void func_002C6CC8(u16 id, u32 option) {
     func_002C6BD8(id, 0xffffffffffffffff, option);

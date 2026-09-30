@@ -1,7 +1,12 @@
 #include "common.h"
 #include "btl.h"
+#include "pcp_vu0.h"
 
 extern s32 *btlFindGroupedEntity();
+extern void func_001E31F0();
+extern void func_001E8510();
+extern void func_001E9598();
+extern void func_001E88A8();
 
 extern u8 D_00436F5D;
 
@@ -47,6 +52,7 @@ extern u32 func_001AC360(u64, u64, u64);
 extern u32 btlGetIndexListCount();
 
 extern void *btlGetIndexListEntry(void *, u32);
+extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern void btlFreeIndexList(void *);
 
@@ -324,8 +330,16 @@ extern s32 btlHasEffectActor(void);
 extern s32 btlHasEffectActor(void);
 
 extern s64 btlStartTask(void *);
+extern s32 func_001E66D8();
+extern s32 func_001E6740();
+extern s32 btlCreateCommandSoundTask();
+extern s32 btlCreateEffObjB();
+extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 
 extern s32 scrReadIntParameter(s32);
+extern void func_001E2C00(BtlUnit *, s32, s32, f32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
+extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 
 extern u8 *btlFindUnitByModeClear(s32);
 
@@ -560,7 +574,27 @@ s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
     return effect->actor == (u32)task->unit ? 12 : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00227CC8);
+s32 func_00227CC8(BtlTask *task) {
+    BattleLinkedEffectState *effect;
+    u8 *group;
+
+    if ((task->flags & 8) == 0) {
+        return -1;
+    }
+    effect = *(BattleLinkedEffectState **)(func_001AA6F8() + 0x718);
+    if (effect->actor != (u32)task->unit) {
+        return -1;
+    }
+    btlStartTask(func_001E66D8());
+    btlStartTask(func_001E6740());
+    btlStartTask(btlCreateCommandSoundTask(task, 9));
+    btlStartTask(btlCreateEffObjB(task->unit, 0xB4));
+    group = fldCreateSceneGroupAction(task, 0x64, 1);
+    *(s32 *)(group + 0x28) = 0x16;
+    btlStartTask(group);
+    effect->phase = 1;
+    return (*(u16 *)((u8 *)task->unit + 0x12E) & 0x480) ? 0x19 : 0x1B;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
@@ -721,7 +755,70 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228B08);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228D68);
+typedef struct BtlAimUnit {
+    u8 pad00[0x30];
+    u8 anim[0x90];     /* 0x30 */
+    f32 origin[4];     /* 0xC0 */
+    f32 direction[4];  /* 0xD0 */
+    f32 distance;      /* 0xE0 */
+    u8 padE4[0x4C];
+    s32 state;         /* 0x130 */
+    s32 kind;          /* 0x134 */
+    u8 pad138[4];
+    s32 armed;         /* 0x13C */
+    u8 pad140[0x14];
+    f32 scale;         /* 0x154 */
+} BtlAimUnit;
+
+s32 func_00228D68(BtlAimUnit *unit) {
+    u8 *battle = (u8 *)func_001AA6F8();
+    u8 *target;
+    u32 flags;
+    f32 distance;
+
+    if (unit->kind == 0x171) {
+        return 1;
+    }
+    if (unit->kind != 0x189) {
+        return 0;
+    }
+    for (target = *(u8 **)(battle + 0x24C); target != 0; target = *(u8 **)(target + 0x364)) {
+        flags = *(u32 *)(target + 0x110);
+        if ((flags & 1) != 0) {
+            if ((flags & 0x400) != 0) {
+                if ((flags & 2) != 0) {
+                    if (*(u16 *)(target + 0x124) == 0x12F) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (target == 0) {
+        return 1;
+    }
+    if (unit->state != 0x1E || unit->armed != 0) {
+        return 1;
+    }
+    func_001E9598(unit->anim, unit);
+    unit->scale = 10.0f;
+    unit->armed = 1;
+    unit->state = 0;
+    func_001E31F0(target, 0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, unit->origin);
+    unit->origin[1] += 150.0f;
+    func_001E8510(unit->anim);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, unit->origin);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    unit->distance = distance;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, unit->direction);
+    unit->distance += 45.0f;
+    func_001E88A8(unit->origin);
+    return 1;
+}
 
 s32 func_00228F20(BattleCombatant *unit) {
     switch (unit->unk_134) {
@@ -1192,7 +1289,32 @@ u8 func_0022B5E0(void) {
     return taskCount == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022B600);
+s32 func_0022B600(void) {
+    s32 choice = scrReadIntParameter(0);
+    s32 unitIndex = scrReadIntParameter(1);
+    s32 index = scrReadIntParameter(2);
+    BtlUnit *unit;
+
+    if (choice == 0) {
+        unit = (BtlUnit *)btlFindUnitByModeClear(unitIndex);
+    } else {
+        unit = (BtlUnit *)btlFindUnitByModeFlagged(unitIndex);
+    }
+    if (unit == 0) {
+        return 1;
+    }
+    if ((unit->flags & 2) == 0) {
+        return 1;
+    }
+    if (index >= 0) {
+        if (index < 0x1D) {
+            func_001E2C00(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
+        } else {
+            mdlAddEntryPlainEx((s32)unit->model->flags, 0, index, 0.0f, 0.0f);
+        }
+    }
+    return 1;
+}
 
 s32 btlCommandSetSequenceVolumePan(void) {
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
@@ -1381,15 +1503,66 @@ s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022BDC0);
+s32 func_0022BDC0(void *list, s32 code, u32 mask) {
+    u32 matched = 0;
+    u32 i;
+    u32 count = btlGetIndexListCount(list);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022BEB0);
+    for (i = 0; i < count; i++) {
+        switch (btlMatchActorEntryCode(btlGetIndexListEntry(list, i), code)) {
+        case 1:
+            if (mask & 0x2555) {
+                matched++;
+            }
+            break;
+        case 2:
+            if (mask & 0x2AA) {
+                matched++;
+            }
+            break;
+        }
+    }
+    return matched == count;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7D0);
 
 INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7E0);
 
-INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B800);
+s32 func_0022BEB0(void *list, s32 command) {
+    s32 codes[5] = {0, 1, 2, 3, 4};
+    s32 count = btlGetIndexListCount(list);
+    s32 i;
+    u32 j;
+    void *entry;
+    s32 flags;
+
+    for (i = 0; i < count; i++) {
+        entry = btlGetIndexListEntry(list, i);
+        flags = *(s32 *)(D_00435E20 + command * 0x38 + 0x28);
+        switch (flags) {
+        case 0x800:
+            for (j = 0; j < 5; j++) {
+                if (btlActorEntryIsExpired(entry, codes[j]) != 0) {
+                    if (btlGetActorEntryCode(entry, codes[j]) > 0) {
+                        return 0;
+                    }
+                }
+            }
+            break;
+        case 0x1000:
+            for (j = 0; j < 5; j++) {
+                if (btlActorEntryIsExpired(entry, codes[j]) != 0) {
+                    if (btlGetActorEntryCode(entry, codes[j]) < 0) {
+                        return 0;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return 1;
+}
 
 u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
     s32 result = -1;
@@ -1594,7 +1767,29 @@ void func_0022CA48(void) {
     btlReleaseAllModelEntries();
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022CA60);
+void func_0022CA60(s32 kind, s32 id) {
+    char path[128];
+    BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
+
+    if (entry == 0) {
+        entry = btlCreateModelEntry();
+        entry->kind = kind;
+        entry->id = id;
+        mdlRequestAsset(kind, id, 0);
+        if (sndFindListNodeForChannel(kind, id) == 0) {
+            btlFormatModelResourcePath(kind, id, path);
+            entry->resource = (void *)func_002C7FF0(path);
+            btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
+        } else {
+            entry->resource = 0;
+            entry->actor = 0;
+            btlBossDebugPrintf("btl:pack load start[same motSE find][%X,%X]\n", kind, id);
+        }
+    } else {
+        btlBossDebugPrintf("btl:same pack find[%X,%X]\n", kind, id);
+        entry->refs++;
+    }
+}
 
 void func_0022CB68(void) {
     s32 entry;
