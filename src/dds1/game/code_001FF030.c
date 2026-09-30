@@ -591,7 +591,20 @@ s32 btlCounterReachedLimit(s32 unused, u32 limit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00200FB0);
+typedef struct BtlCounterState {
+    u8 unk_00[0x88];
+    u16 count; /* 0x88: saturates at 0xFF */
+} BtlCounterState;
+
+s32 func_00200FB0(s32 unused, u32 limit) {
+    BtlCounterState *state = *(BtlCounterState **)D_003BB87C;
+    state->count++;
+    state->count = state->count <= 0 ? 0 : state->count >= 0x100 ? 0xFF : state->count;
+    if ((*(BtlCounterState **)D_003BB87C)->count < limit) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 btlTurnReachedLimit(s32 unused, u32 limit) {
     s32 *battle = (s32 *)func_001A17F0();

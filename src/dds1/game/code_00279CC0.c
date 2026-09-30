@@ -51,6 +51,22 @@ extern void mnuCreateStaffImageSprite(s32);
 
 extern void func_002723B0(s32, s32);
 
+extern void ptySkillMenuCopyPageState(s32);
+
+extern void mnuDrawStaffCampScreen(s32, s32);
+
+extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
+
+extern void func_00272668(s32, s32, s32, s32, s32, s32);
+
+extern void func_0027C658(s32);
+
+extern void mnuPlayInputSound(s32, s32, s32);
+
+extern void func_002858F8(s32 *, char *);
+
+extern char D_0037CC20[];
+
 typedef struct MenuSlot {
     s32 resources[3];
     u16 unused;
@@ -203,7 +219,26 @@ void func_00279CC0(s32 menu, s32 target) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_00279F88);
+s64 func_00279F88(s32 callback) {
+    s32 context = func_00101A70();
+    s32 *menu = *(s32 **)(context + 0x90C);
+    s32 index = **(s32 **)(menu[3] + 0x1C);
+    s32 label = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)((s32)menu + 0x10 + (index << 2)) + 0x14) + 0x1C) + 0x60);
+    s32 window;
+    ptySkillMenuCopyPageState(context);
+    mnuDrawStaffCampScreen(1, callback);
+    mnuCreateStaffImageSprite(0xB);
+    if (label != 0xFFFF && label != 0) {
+        func_00272518(1, label, D_003BAA98, context, 1, 1, 0x53);
+    } else {
+        func_00272668(1, 0, 0, context, 1, 0x53);
+    }
+    window = menu[9];
+    **(u32 **)(window + 0x14) |= 8;
+    func_0027CDD0(0x1C0, 0x3D0, 0, window, 0x53);
+    func_002723B0(3, *(s32 *)(context + 0x78));
+    return menuRunPanel(context, 1, callback);
+}
 
 s64 func_0027A0A8(s32 callback) {
     return menuRunPanel(func_00101A70(), 2, callback);
@@ -294,7 +329,37 @@ s32 func_0027A810(s32 selection) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A860);
+s64 func_0027A860(s32 callback) {
+    s32 context = func_00101A70();
+    s32 *popup = (s32 *)(context + 0x54);
+    s32 *menu = *(s32 **)(context + 0x90C);
+    u32 buttons = func_00285B20(0x32);
+    s64 state;
+    s32 *list;
+
+    state = menuRunPanel(context, 0, callback);
+    if (state == 0) {
+        if ((buttons & 0x300000) == 0) {
+            list = menu + 1;
+            func_0027C788(list[8 + menu[11]]);
+        }
+        list = menu + 1;
+        if (buttons & 0x10) {
+            func_0027C770(list[8 + menu[11]]);
+        }
+        if (buttons & 0x20) {
+            func_0027C758(list[8 + menu[11]]);
+        }
+        func_0027C658(list[8 + menu[11]]);
+        mnuPlayInputSound(0, buttons, ((MenuWindow *)list[8 + menu[11]])->field14);
+        if (buttons & 2) {
+            func_002858F8(popup, D_0037CC20);
+            func_0027E790(*(u32 **)(context + 0x138), *(s32 *)(context + 0x6C), 0, 1);
+        }
+        return 0;
+    }
+    return state;
+}
 
 /* Sprite slots of the active skill-menu context; intervening state is opaque. */
 typedef struct MenuContextSprites {
