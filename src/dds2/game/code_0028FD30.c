@@ -231,12 +231,14 @@ void func_00292BB0(MenuPanelObject *object) {
     func_002790F0((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
 }
 
+/* Install the panel's default selector and position its selection controller. */
 void func_00292C58(MenuPanelObject *object) {
     u8 *base = (u8 *)object + 0x240;
     s16 *record;
 
     record = (s16 *)func_0026D098(0x71);
     *(s16 **)(base + 0x560) = record;
+    /* Record coordinates are tenths; the two screen axes use different scales. */
     func_00278E50((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
 }
 

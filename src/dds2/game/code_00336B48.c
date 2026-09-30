@@ -1593,9 +1593,10 @@ void sdfDevConsResetNode(ConsNode *node) {
     sdfDevConsNodeClear(node);
 }
 
+/* Create a console pixel buffer (two bytes per cell) and link it for cleanup. */
 ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 width, s32 height) {
     ConsNode *node;
-    u32 h;
+    u32 bufferHandle;
 
     sdfDevConsInit();
     node = func_00328D68(0x20);
@@ -1606,9 +1607,9 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 width, s32 height) {
     node->unk17 = 8;
     node->unk14 = 0;
     node->unk16 = 0;
-    h = func_003292A8((width * height) * 2);
-    node->bufferHandle = h;
-    node->pixels = (u8 *)sdfResourceRetainAddress(h);
+    bufferHandle = func_003292A8((width * height) * 2);
+    node->bufferHandle = bufferHandle;
+    node->pixels = (u8 *)sdfResourceRetainAddress(bufferHandle);
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

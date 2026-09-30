@@ -42,7 +42,7 @@ extern s32 func_001979E0(void);
 
 typedef struct EvtRuntimeChild {
     u16 unk00;
-    u16 unk02;
+    u16 groupTypeBIndex; /* Consecutive index among children of type 0xB groups. */
     u16 unk04;
     u8 pad06[2];
     union {
@@ -51,7 +51,7 @@ typedef struct EvtRuntimeChild {
             u8 pad00[2];
             u16 groupTypeIndex; /* Reassigned consecutively across children of a group type. */
             u8 pad04[6];
-            u16 unk12;
+            u16 groupTypeAIndex; /* Consecutive index among children of type 0xA groups. */
         } f;
     } body; /* 0x08 */
     u8 pad28[4];
@@ -1177,7 +1177,7 @@ s32 func_002588B8(EvtRuntime *runtime) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.unk12 = index++;
+                child->body.f.groupTypeAIndex = index++;
             }
         }
     }
@@ -1191,7 +1191,7 @@ s32 func_00258920(EvtRuntime *runtime) {
         if (group->type == 0xB) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk02 = index++;
+                child->groupTypeBIndex = index++;
             }
         }
     }
