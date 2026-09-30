@@ -47,7 +47,10 @@ typedef struct FrFontGlyph {
     s32 x;            /* 0x4: horizontal position */
     s32 y;            /* 0x8: vertical position */
     s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
-    u32 unk10;        /* 0x10 */
+    union {
+        u32 word;     /* 0x10: word view */
+        u16 half[2];  /* 0x10: halfword views */
+    } u10;
     union {
         u32 w;        /* 0x14: word view */
         u8 b[4];      /* 0x14: byte views */
@@ -68,11 +71,33 @@ typedef struct FrFontGlyph {
     s32 unk40;        /* 0x40 */
 } FrFontGlyph;
 
-/* Word at +0x194/+0x198 selected by frFontAdvanceSelectedGlyphSlot. */
+/* Font slot record (0x24 bytes); `resource` is non-NULL while the slot is loaded. */
+typedef struct FrFontEntry {
+    u8 unk0[0x18];  /* 0x0 */
+    s32 *table;     /* 0x18: per-slot word table */
+    void *resource; /* 0x1C: loaded font data */
+    u8 unk20[4];    /* 0x20 */
+} FrFontEntry;
+
+/* Font system at D_003D6C80 (see game/code_00193C08.c). */
 typedef struct FrFontSys {
-    u8 unk0[0x194];           /* 0x0 */
+    FrFontEntry entries[9];   /* 0x0 */
+    s32 count;                /* 0x144 */
+    u8 unk148[0x4C];          /* 0x148 */
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
+
+/* Value record reached through D_003D6C84 entries. */
+typedef struct FrFontRecVal {
+    u8 unk0[0x10];
+    u16 unk10;
+    u16 unk12;
+} FrFontRecVal;
+
+typedef struct FrFontRec {
+    FrFontRecVal *val; /* 0x0 */
+    u8 unk4[0x20];
+} FrFontRec;
 
 extern u32 D_003BB164;
 
@@ -85,6 +110,10 @@ extern u8 D_003BB180[];
 extern FrFontSave D_003D6DC4;
 
 extern FrFontSys D_003D6C80;
+
+extern FrFontRec D_003D6C84[];
+
+extern s32 D_003BB168;
 
 extern FrFontGlyph *D_003D6E14[];
 
@@ -108,7 +137,9 @@ extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 ar
 
 extern s32 func_001958A0(FrFontGlyph *arg0, s8 arg1, u32 arg2);
 
-extern FrFontCtx *func_00195160(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern FrFontCtx *func_00195160(void *arg0, s8 arg1, s8 arg2, s8 arg3, s32 arg4);
+
+extern FrFontGlyph *func_001951C8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 void func_00195880(FrFontGlyph *arg0, s8 arg1);
 
@@ -127,13 +158,47 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
-INCLUDE_ASM(const s32, "interface/frFont", frFontLoadDefaultFonts);
+extern void func_00194190(s32 id, const char *path);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00194668);
+void frFontLoadDefaultFonts(void) {
+    func_00194190(0, "/font/font0.fnt");
+    func_00194190(1, "/font/font1.fnt");
+    func_00194190(2, "/font/font2.fnt");
+    func_00194190(3, "/font/font3.fnt");
+}
+
+void func_00194668(void) {
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        if (D_003D6C80.entries[i].resource != NULL) {
+            frFontFreeEntry((u8)i);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001946C8);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00194788);
+/* Record referenced by a glyph's first child pointer. */
+typedef struct FrFontItem {
+    u16 index;    /* 0x0 */
+    u8 unk2[2];   /* 0x2 */
+    u16 refs;     /* 0x4 */
+    u8 unk6[2];   /* 0x6 */
+    void *node;   /* 0x8 */
+} FrFontItem;
+
+void func_00194788(FrFontGlyph *glyph) {
+    FrFontItem *item = (FrFontItem *)glyph->firstChild;
+
+    if (item != NULL) {
+        if (item->refs == 0) {
+            D_003D6C80.entries[glyph->u14.b[1]].table[item->index] = 0;
+            frFontListInsert(item->node);
+            D_003D6C80.count--;
+        }
+    }
+}
 
 FrFontGlyph *func_00194800(FrFontGlyph *glyph) {
     if (func_00195550(glyph) != 0) {
@@ -182,7 +247,25 @@ FrFontGlyph *func_00194CD0(FrFontGlyph *source, FrFontGlyph *destination) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194D20);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00194E00);
+typedef struct FrFontSegments {
+    void *first;
+    void *second;
+    void *third;
+} FrFontSegments;
+
+extern void *func_002CFEB8(s32 size);
+extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
+extern void func_00198088(void *dst, s32 arg1, void *block, FrFontSegments *segments);
+
+void *func_00194E00(u8 index, s32 arg1) {
+    FrFontEntry *entry = &D_003D6C80.entries[index];
+    void *dst = func_002CFEB8(0x120);
+    FrFontSegments segments;
+
+    itfSplitRelativeSegments(entry->resource, &segments);
+    func_00198088(dst, arg1, entry->resource, &segments);
+    return dst;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00194E80);
 
@@ -192,7 +275,7 @@ void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 f
     glyph->u14.b[0] = byte0;
     glyph->u14.b[2] = byte2;
     glyph->u0.h = glyphId;
-    glyph->unk10 = flags & ~0xFF;
+    glyph->u10.word = flags & ~0xFF;
     glyph->u14.b[3] = D_003BB174;
     glyph->x = 0;
     glyph->y = 0;
@@ -227,7 +310,14 @@ void frFontInitGlyph(FrFontGlyph *arg0) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195010);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195160);
+FrFontCtx *func_00195160(void *arg0, s8 arg1, s8 arg2, s8 arg3, s32 arg4) {
+    FrFontGlyph *glyph = func_001951C8(arg0, arg1, arg2, arg3, 0);
+
+    if (glyph == NULL) {
+        return (FrFontCtx *)arg4;
+    }
+    return (FrFontCtx *)frFontLinkGlyphAfterPrevious((FrFontGlyph *)arg4, glyph);
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001951C8);
 
@@ -251,7 +341,21 @@ void frFontSetFlagAndMeasureGlyphs(FrFontCtx *ctx, u8 flag) {
     ctx->uC.w = frFontMeasureGlyphChain(ctx);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001953D8);
+void func_001953D8(FrFontGlyph *glyph, s32 arg1, s32 arg2) {
+    FrFontGlyph *head = glyph;
+    FrFontGlyph *child;
+
+    head->u10.half[0] = arg1;
+    head->u10.half[1] = arg2;
+    for (; glyph != NULL; glyph = glyph->previous) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
+            child->advance = arg1;
+            child->unk18.b[0] = arg1;
+            child->unk18.b[1] = arg2;
+        }
+    }
+    head->advance = frFontMeasureGlyphChain(head);
+}
 
 void func_00195450(FrFontCtx *ctx, u32 arg1, u32 arg2) {
     ctx->unk4 = arg1;
@@ -292,7 +396,30 @@ void func_00195548(u32 arg0) {
     D_003BB178 = arg0;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195550);
+s32 func_00195550(FrFontGlyph *glyph) {
+    FrFontGlyph *child;
+    s32 changed = 0;
+
+    for (; glyph != NULL; glyph = glyph->previous) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
+            if (child->u14.b[2] == 2) {
+                u32 flags = child->u10.word;
+                s32 alpha = flags & 0xFF;
+
+                if (alpha != 0) {
+                    alpha -= 8;
+                    if (alpha < 0) {
+                        alpha = 0;
+                    }
+                    child->y += 0x10;
+                    child->u10.word = (flags & ~0xFF) | alpha;
+                    changed = 1;
+                }
+            }
+        }
+    }
+    return changed;
+}
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001955D8);
 
@@ -401,9 +528,27 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195CD8);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195DC8);
+u32 func_00195DC8(u8 arg0) {
+    s32 index = arg0;
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195E08);
+    if (index < 2) {
+        if (index >= 0) {
+            return D_003BB168;
+        }
+    }
+    return D_003D6C84[index].val->unk10;
+}
+
+u32 func_00195E08(u8 arg0) {
+    s32 index = arg0;
+
+    if (index < 2) {
+        if (index >= 0) {
+            return D_003BB168;
+        }
+    }
+    return D_003D6C84[index].val->unk12;
+}
 
 void func_00195E48(void) {
     D_003BB164 = 0x15;
