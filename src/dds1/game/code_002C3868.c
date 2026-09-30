@@ -203,6 +203,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5338);
 
+/* The display counter saturates at ten rather than wrapping. */
 void sdfCounterIncrease(void) {
     s32 currentValue;
 

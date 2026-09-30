@@ -268,10 +268,11 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C250);
 
+/* Create display channels for the enabled bits of the counter mask. */
 s32 func_0030C378(s32 mask, s32 index) {
     SdfCounterDisplay *display;
     SdfCounterChannel *channel;
-    s32 done;
+    s32 completedMask;
     s32 count;
     s32 i;
 
@@ -280,7 +281,7 @@ s32 func_0030C378(s32 mask, s32 index) {
     ((SdfCounterRuntime *)D_004388C4)->timer = func_00328D68(0x24);
     memset(((SdfCounterRuntime *)D_004388C4)->timer, 0, 0x24);
     ((SdfCounterRuntime *)D_004388C4)->draw = (SdfCounterDrawFn)func_0030CC68;
-    done = func_0030B600();
+    completedMask = func_0030B600();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
             channel = mnuListAppendNode(D_004388C4, 0);
@@ -289,7 +290,7 @@ s32 func_0030C378(s32 mask, s32 index) {
             display->value = i + 1;
             display->word = (u32 *)(D_00400AF0 + i * 0x18);
             display->info = func_0030C568(i + 1);
-            if ((done >> i) & 1) {
+            if ((completedMask >> i) & 1) {
                 display->flag = 1;
             }
             channel->display = display;

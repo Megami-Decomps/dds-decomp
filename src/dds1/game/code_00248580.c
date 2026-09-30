@@ -142,14 +142,14 @@ void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     }
 }
 
-void mnuCreateNumberSprite(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s32 priority) {
-    char buf[16];
-    s32 handle;
+void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 fade, s32 number, u32 color, s32 priority) {
+    char text[16];
+    s32 sprite;
 
-    func_003014F0(buf, D_003BC3E8, a4);
-    handle = func_001978E8(a0, a1, a2, uiBlendColors(color, color & ~0xFF, a3), (s32)buf, 0);
-    func_001958A0(handle, 1, priority);
-    func_00194920(handle);
+    func_003014F0(text, D_003BC3E8, number);
+    sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~0xFF, fade), (s32)text, 0);
+    func_001958A0(sprite, 1, priority);
+    func_00194920(sprite);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);

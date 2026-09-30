@@ -194,25 +194,26 @@ typedef struct {
     s32 countdown;
     s32 period;
     f32 strength;
-    u8 particles[8][12];
+    DspParticle particles[8];
 } DspParticleState;
 
 void func_002559F8(DspParticleState *state) {
-    u8 *particle;
-    s32 value;
+    DspParticle *particle;
+    s32 duration;
     s32 i;
 
     state->countdown = state->countdown - 1;
     if (state->countdown < 0) {
-        value = func_002E8398(0) * 60.0f + 60.0f;
-        state->period = value;
-        state->countdown = value;
+        duration = func_002E8398(0) * 60.0f + 60.0f;
+        state->period = duration;
+        state->countdown = duration;
         state->strength = func_002E8398(0) * 0.20000005f + 0.4f;
     }
-    particle = state->particles[0];
+    /* Advance every particle, including those waiting for their next phase. */
+    particle = state->particles;
     for (i = 7; i >= 0; i--) {
         func_00255838(particle);
-        particle += 12;
+        particle++;
     }
 }
 
