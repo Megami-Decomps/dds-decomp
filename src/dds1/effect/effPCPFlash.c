@@ -464,16 +464,16 @@ void func_0016A228(PcpFlashWork1 *work, f32 value)
 
 void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_00170238(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot *)func_00170238(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 8) = func_0018DDF8(rgb1 | 0xFF000000, param);
+    slot->first = func_0018DDF8(rgb2, param);
+    slot->second = func_0018DDF8(rgb2, param);
+    slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A2D0);
@@ -606,23 +606,23 @@ extern s32 func_0016FF20(s32 handle, s32 index);
 
 void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot5 *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_0016FF20(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    slot->color[0] = func_0018DDF8(rgb2, param);
+    slot->color[1] = func_0018DDF8(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0x80000000, param);
+        slot->color[2] = func_0018DDF8(0x80000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
+        slot->color[4] = func_0018DDF8(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = func_0018DDF8(0xFF000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
+        slot->color[4] = func_0018DDF8(0xFF000000, param);
     }
 }
 
@@ -821,23 +821,23 @@ void func_0016B290(PcpFlashWork3 *work, f32 value)
 
 void func_0016B298(PcpFlashWork3 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot5 *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_0016FF20(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    slot->color[0] = func_0018DDF8(rgb2, param);
+    slot->color[1] = func_0018DDF8(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0x80000000, param);
+        slot->color[2] = func_0018DDF8(0x80000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
+        slot->color[4] = func_0018DDF8(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = func_0018DDF8(0xFF000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
+        slot->color[4] = func_0018DDF8(0xFF000000, param);
     }
 }
 
@@ -1008,23 +1008,23 @@ void func_0016C3B8(PcpFlashWork5 *work, f32 value)
 
 void func_0016C3C0(PcpFlashWork5 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot5 *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_0016FF20(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    slot->color[0] = func_0018DDF8(rgb2, param);
+    slot->color[1] = func_0018DDF8(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0x80000000, param);
+        slot->color[2] = func_0018DDF8(0x80000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
+        slot->color[4] = func_0018DDF8(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = func_0018DDF8(0xFF000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
+        slot->color[4] = func_0018DDF8(0xFF000000, param);
     }
 }
 
@@ -1074,23 +1074,23 @@ void func_0016CC30(PcpFlashWork6 *work, f32 value)
 
 void func_0016CC38(PcpFlashWork6 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot5 *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_0016FF20(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    slot->color[0] = func_0018DDF8(rgb2, param);
+    slot->color[1] = func_0018DDF8(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0x80000000, param);
+        slot->color[2] = func_0018DDF8(0x80000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
+        slot->color[4] = func_0018DDF8(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = func_0018DDF8(0xFF000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
+        slot->color[4] = func_0018DDF8(0xFF000000, param);
     }
 }
 
@@ -1248,16 +1248,16 @@ void func_0016D460(PcpFlashWork7 *work, f32 value)
 
 void func_0016D468(PcpFlashWork7 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_00170238(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot *)func_00170238(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 8) = func_0018DDF8(rgb1 | 0xFF000000, param);
+    slot->first = func_0018DDF8(rgb2, param);
+    slot->second = func_0018DDF8(rgb2, param);
+    slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D508);
@@ -1524,23 +1524,23 @@ void func_0016E540(PcpFlashWork9 *work, f32 value)
 
 void func_0016E548(PcpFlashWork9 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot5 *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_0016FF20(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    slot->color[0] = func_0018DDF8(rgb2, param);
+    slot->color[1] = func_0018DDF8(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0x80000000, param);
+        slot->color[2] = func_0018DDF8(0x80000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
+        slot->color[4] = func_0018DDF8(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
-        *(s32 *)(slot + 12) = func_0018DDF8(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 16) = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = func_0018DDF8(0xFF000000, param);
+        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
+        slot->color[4] = func_0018DDF8(0xFF000000, param);
     }
 }
 
@@ -1671,16 +1671,16 @@ void func_0016ECC0(PcpFlashWork10 *work, f32 value)
 
 void func_0016ECC8(PcpFlashWork10 *work, s32 index, s32 param)
 {
-    s32 slot;
+    PcpFlashColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_00170238(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot *)func_00170238(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 8) = func_0018DDF8(rgb1 | 0xFF000000, param);
+    slot->first = func_0018DDF8(rgb2, param);
+    slot->second = func_0018DDF8(rgb2, param);
+    slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016ED68);
