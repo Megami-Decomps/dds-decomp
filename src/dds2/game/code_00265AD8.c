@@ -24,6 +24,10 @@ extern s32 sdfResourceRetainAddress(s32);
 
 extern s32 mdlFlagTest(s32);
 
+extern void mdlFlagClear(s32);
+
+extern void mdlFlagSet(s32);
+
 extern s32 func_003292A8(s32);
 
 typedef struct FlagPair {
@@ -87,8 +91,17 @@ typedef struct EventDispatchState {
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265E78);
+s64 func_00265E78(s32 callback) {
+    s32 context = func_00101958();
 
+    if (*(s32 *)(context + 0xE0) != 0) {
+        func_0025FD78(context);
+    }
+    if (*(s32 *)(context + 0xB8) != 0) {
+        func_00294758(context, *(s32 *)(context + 0xB8));
+    }
+    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
+}
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
 s64 func_00265EE8(s32 callback) {
     s32 eventContext = func_00101958();
@@ -106,9 +119,31 @@ u32 func_00265F58(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265F60);
+extern u8 D_003CE690[];
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265FE8);
+s64 func_00265F60(s32 callback) {
+    s32 context = func_00101958();
+    s32 *window = (s32 *)(context + 0x58);
+    s64 state = func_002C4038(context + 0xC, window, 0, callback);
+
+    if (state == 0) {
+        if (*window == 0) {
+            if (func_0026C768() == 0) {
+                func_0026C710();
+                func_002C42C0(window, D_003CE690);
+            }
+        }
+        return 0;
+    }
+    return state;
+}
+
+s64 func_00265FE8(s32 callback) {
+    s32 context = func_00101958();
+
+    func_0025FD78(context);
+    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
+}
 
 s64 func_00266038(s32 callback) {
     s32 eventContext = func_00101958();
@@ -116,7 +151,14 @@ s64 func_00266038(s32 callback) {
     return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266080);
+u32 func_00266080(void) {
+    evtClearActiveFlag(0);
+    func_0026CA80(0, 1);
+    func_0026CA80(1, 0);
+    kwlnFadeInStart(0, 0, 0, 0xF);
+    func_00342580(0x300000);
+    return 1;
+}
 
 u32 evtStartFadeOut(void) {
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -138,9 +180,18 @@ s64 func_00266108(s32 callback) {
     return state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266188);
+s64 func_00266188(s32 callback) {
+    s32 context = func_00101958();
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", evtDispatchSync);
+    func_0025FD78(context);
+    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
+}
+
+s64 evtDispatchSync(s32 callback) {
+    s32 context = func_00101958();
+
+    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 2, callback);
+}
 
 u32 func_00266210(void) {
     return 1;
@@ -183,9 +234,40 @@ s32 mnuCreateFlagEntries(void) {
     return handle;
 }
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00266320);
+void func_00266320(s32 handle) {
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_002663D8);
+    for (i = 0; i < 4; i++) {
+        if (entries[i].firstOn != 0) {
+            mdlFlagSet(entries[i].firstFlag);
+        }
+        if (entries[i].secondOn != 0) {
+            mdlFlagSet(entries[i].secondFlag);
+        }
+    }
+    for (i = 0; i < 16; i++) {
+        if (entries[4 + i].firstOn != 0) {
+            mdlFlagSet(entries[4 + i].firstFlag);
+        }
+        if (entries[4 + i].secondOn != 0) {
+            mdlFlagSet(entries[4 + i].secondFlag);
+        }
+    }
+}
+
+void func_002663D8(void) {
+    u32 i;
+
+    for (i = 0; i < 4; i++) {
+        mdlFlagClear(D_003CE6E8[i].first);
+        mdlFlagClear(D_003CE6E8[i].second);
+    }
+    for (i = 0; i < 16; i++) {
+        mdlFlagClear(D_003CE728[i].first);
+        mdlFlagClear(D_003CE728[i].second);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D50);
 

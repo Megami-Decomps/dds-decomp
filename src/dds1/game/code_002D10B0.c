@@ -151,13 +151,49 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D17D8);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D18F8);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1A18);
+extern s32 func_00312C08(void);
+extern void EIntr(void);
+extern struct SdfTexHead *func_002D18F8(s32 size, s32 arg1);
+
+SdfTexHead *func_002D1A18(s32 width, s32 height, s32 format, s32 arg3, s32 arg4) {
+    s32 bits = sdfFormatBitsPerPixelA(format);
+    s32 size = (width * height * bits) >> 5;
+    SdfTexHead *node;
+
+    if (arg4 != 0) {
+        node = func_002D17D8(size, arg3);
+    } else {
+        node = func_002D18F8(size, arg3);
+    }
+    node->width = width;
+    node->height = height;
+    node->format = format;
+    return node;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1AB8);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1B28);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1B90);
+void func_002D1B90(void *arg0) {
+    SdfTexHead *node = (SdfTexHead *)arg0;
+    s32 state;
+
+    if (node == NULL) {
+        return;
+    }
+    state = func_00312C08();
+    node->unk8 = NULL;
+    func_002D1AB8(node);
+    if (node->next != NULL) {
+        if (((SdfTexHead *)node->next)->unk8 == NULL) {
+            func_002D1AB8((SdfTexHead *)node->next);
+        }
+    }
+    if (state != 0) {
+        EIntr();
+    }
+}
 
 void func_002D1C08(s32 arg0) {
     func_002D3C30(&D_003BD9E8, arg0);
@@ -357,7 +393,15 @@ void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 arg1, s32 arg2) {
     buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D24C0);
+void func_002D24C0(SdfTex *tex, s32 arg1, s32 arg2) {
+    SdfTexBuf *buf = tex->unk2C;
+
+    if (buf == NULL) {
+        sdfTexCreateSecondPacket();
+        buf = tex->unk2C;
+    }
+    buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
+}
 
 void func_002D2530(SdfTex *texture, u8 value) {
     texture->unk1F = value;
