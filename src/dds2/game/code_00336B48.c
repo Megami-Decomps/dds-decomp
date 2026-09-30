@@ -110,12 +110,12 @@ typedef struct {
     u32 selectedFlags;     /* 0x44 */
     u32 nextParam;         /* 0x48 */
     u32 flags;             /* 0x4C */
-    s16 unk50;             /* 0x50 */
+    s16 nodeCount;         /* 0x50: geometry references submitted to VU in chunks */
     u8 pad52[2];
     VuAsset *asset;        /* 0x54 */
     u32 unk58;             /* 0x58 */
-    f32 unk5C;             /* 0x5C */
-    f32 unk60;             /* 0x60 */
+    f32 offsetX;           /* 0x5C */
+    f32 offsetY;           /* 0x60 */
     u32 ringSrc;           /* 0x64 */
     u32 ringDst;           /* 0x68 */
     u32 ringWrap;          /* 0x6C */
@@ -164,19 +164,21 @@ extern s32 func_003292A8(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
+/* Texture draw packet: three resource-derived values alternate with their
+ * GS register addresses after the GIF tag and payload header. */
 typedef struct SdfDrawPacket {
     u16 quadwords;
     u8 pad02[6];
-    u32 unk8;
+    u32 reservedWord;
     u32 command;
-    u64 unk10;
-    u64 unk18;
-    u64 unk20;
-    u64 unk28;
-    u64 unk30;
-    u64 unk38;
-    u64 unk40;
-    u64 unk48;
+    u64 gifTag;
+    u64 payloadHeader;
+    u64 textureWordA;
+    u64 registerAddressA;
+    u64 textureWordB;
+    u64 registerAddressB;
+    u64 textureWordC;
+    u64 registerAddressC;
 } SdfDrawPacket;
 
 extern u64 func_0032B318(void *);
@@ -558,7 +560,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003385C0);
 void func_00338B30(work)
     VuWork *work;
 {
-    s32 remaining = work->unk50;
+    s32 remaining = work->nodeCount;
     s32 chunk;
     s32 first;
     u32 *out;
@@ -627,7 +629,7 @@ void func_00338B30(work)
 }
 
 void func_00338D78(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 mask) {
-    s32 remaining = work->unk50;
+    s32 remaining = work->nodeCount;
     s32 chunk;
     s32 first;
     u32 *out;
@@ -704,7 +706,7 @@ void func_00338D78(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 mask) {
 void func_00339000(work)
     VuWork *work;
 {
-    s32 remaining = work->unk50;
+    s32 remaining = work->nodeCount;
     s32 chunk;
     u32 *out;
     VuGeomRef *ref;
@@ -880,16 +882,16 @@ u32 func_0033A170(s32 tex) {
 
 SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 data) {
     p->quadwords = 4;
-    p->unk10 = 0x1000000000008003ULL;
+    p->gifTag = 0x1000000000008003ULL;
     p->command = 0x50000004;
-    p->unk8 = 0;
-    p->unk18 = 0xE;
-    p->unk20 = func_0032B328(tex);
-    p->unk28 = data + 0x14;
-    p->unk30 = func_0032B318(tex);
-    p->unk38 = data + 6;
-    p->unk40 = func_0032B338(tex);
-    p->unk48 = data + 8;
+    p->reservedWord = 0;
+    p->payloadHeader = 0xE;
+    p->textureWordA = func_0032B328(tex);
+    p->registerAddressA = data + 0x14;
+    p->textureWordB = func_0032B318(tex);
+    p->registerAddressB = data + 6;
+    p->textureWordC = func_0032B338(tex);
+    p->registerAddressC = data + 8;
     return p;
 }
 
@@ -918,10 +920,10 @@ void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 flags, s32 width, s64 c
 
     header |= (s64)flags << 47;
     header |= 0x400000008000LL;
-    packet->unk10 = header;
+    packet->gifTag = header;
     packet->command = quadwords | 0x50000000;
-    packet->unk18 = command;
-    packet->unk8 = 0;
+    packet->payloadHeader = command;
+    packet->reservedWord = 0;
     packet->quadwords = quadwords;
     return packet;
 }
@@ -935,23 +937,23 @@ void *sdfConsAllocateColumnPacket(s32 height) {
 typedef struct SdfVuBonePacket {
     u16 quadwords;
     u8 pad02[6];
-    u32 unk8;
+    u32 reservedWord;
     u32 command;
     u8 matrixA[0x40]; /* 0x10 */
     u8 matrixB[0x40]; /* 0x50 */
     u8 vecA[0x10];    /* 0x90 */
     u8 vecB[0x10];    /* 0xA0 */
     u8 vecC[0x10];    /* 0xB0 */
-    u32 unkC0;
-    u32 unkC4;
-    u32 unkC8;
-    u32 unkCC;
+    u32 stmodCommand;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
 } SdfVuBonePacket;
 
 void func_0033A388(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
-    packet->unk8 = 0;
+    packet->reservedWord = 0;
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(packet->matrixA);
     func_00336C10(node + 0x30);
@@ -965,10 +967,10 @@ void func_0033A388(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     VU0_MOVE_VF(vf10, vf31);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecC));
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x90));
-    packet->unkC4 = 0x14000000;
-    packet->unkC0 = 0x04000002;
-    packet->unkC8 = 0;
-    packet->unkCC = 0;
+    packet->mscalCommand = 0x14000000;
+    packet->stmodCommand = 0x04000002;
+    packet->reservedA = 0;
+    packet->reservedB = 0;
 }
 
 typedef struct SdfNodeBlock {
@@ -1096,21 +1098,23 @@ typedef struct SdfProjParams {
     u32 count;
 } SdfProjParams;
 
+/* DMA/VIF prefix, projection range terms, then a one-register GIF write
+ * and the VU execution command. */
 typedef struct SdfProjPacket {
-    u64 header;
-    u64 vifCode;
+    u64 dmaTag;
+    u64 vifUnpackCode;
     f32 rangeMax;
     f32 rangeMin;
     f32 offset;
     f32 scale;
-    u64 giftag;
-    u64 giftagReg;
-    u64 count;
-    u64 unk38;
-    u32 unk40;
-    u32 unk44;
-    u32 unk48;
-    u32 unk4C;
+    u64 gifTag;
+    u64 gifRegister;
+    u64 registerValue;
+    u64 fogColorRegister;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+    u32 reservedC;
 } SdfProjPacket;
 
 void func_0033AAA0(SdfProjPacket *packet, SdfProjParams *params) {
@@ -1119,20 +1123,20 @@ void func_0033AAA0(SdfProjPacket *packet, SdfProjParams *params) {
     f32 near = params->near;
     f32 far = params->far;
     u32 count = params->count;
-    packet->header = 0x20000004;
-    packet->vifCode = 0x6C03C00013000000ULL;
+    packet->dmaTag = 0x20000004;
+    packet->vifUnpackCode = 0x6C03C00013000000ULL;
     packet->rangeMax = rangeMax;
     packet->rangeMin = rangeMin;
     packet->offset = (((rangeMax - rangeMin) * (far + near)) / (far - near) + (rangeMax + rangeMin)) * 0.5f;
     packet->scale = ((far * near) * (rangeMin - rangeMax)) / (far - near);
-    packet->giftag = 0x1000000000008001ULL;
-    packet->giftagReg = 0xE;
-    packet->count = count;
-    packet->unk38 = 0x3D;
-    packet->unk40 = 0x14000014;
-    packet->unk44 = 0;
-    packet->unk48 = 0;
-    packet->unk4C = 0;
+    packet->gifTag = 0x1000000000008001ULL;
+    packet->gifRegister = 0xE;
+    packet->registerValue = count;
+    packet->fogColorRegister = 0x3D;
+    packet->mscalCommand = 0x14000014;
+    packet->reservedA = 0;
+    packet->reservedB = 0;
+    packet->reservedC = 0;
 }
 
 void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
