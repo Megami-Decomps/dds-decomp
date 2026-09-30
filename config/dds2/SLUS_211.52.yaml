@@ -549,7 +549,7 @@ segments:
       - [0x337530, .sdata, effect/effEvent]
       - [0x337540, .sdata, game/code_0019A0C0]
       - [0x337550, .sdata, interface/frFont]
-      - [0x337580, .sdata, game/code_0019E138]
+      - [0x337584, .sdata, game/code_0019E138]  # D_00436580 is frFont's: code_0019E138 reaches it with lui/addiu, not gp_rel
       - [0x3375A8, .sdata, game/code_001A1B08]
       - [0x3375E8, .sdata, interface/itfMesManager]
       - [0x337630, .sdata, game/code_001A5BB8]
