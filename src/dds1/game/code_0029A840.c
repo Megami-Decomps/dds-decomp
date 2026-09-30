@@ -504,7 +504,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
             owner->model = func_0029A8D8(data, *(u32 *)(source + 0x24));
-            __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder" : : : "memory");
+            VU0_SET_ONES_XYZ(vf10);
             __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2", "memory");
             mdlStoreTertiaryVectorVU((void *)owner->model);
         }
