@@ -90,6 +90,7 @@ typedef struct BtlEffTask {
     u64 unk40;         /* 0x40 */
     u8 pad48[4];
     s32 (*callback)(); /* 0x4C */
+    void (*destroy)(); /* 0x50 */
 } BtlEffTask;
 
 typedef struct BtlEffActor {
@@ -97,6 +98,13 @@ typedef struct BtlEffActor {
     u64 ownerData;    /* 0x108 */
     s32 flags;        /* 0x110: bit 9 selects the one-step offset */
 } BtlEffActor;
+
+typedef struct BtlExtendedLink {
+    u8 pad00[0x20];
+    BtlEffActor *owner; /* 0x20 */
+    s32 state;          /* 0x24 */
+    u8 parameter;       /* 0x28 */
+} BtlExtendedLink;
 
 extern BtlEffTask *btlAllocTask(s32 size);
 extern BtlEffLink *func_001E14F8();
@@ -127,6 +135,12 @@ typedef struct BtlPackedCtx {
 } BtlPackedCtx;
 extern s32 func_00210258();
 extern s32 func_0020FFB8();
+extern void func_0020FA98();
+extern void func_00210148();
+extern void func_002103F8();
+extern void func_00210530();
+extern void func_00210720();
+extern void func_00210850();
 
 
 void func_0020E850(EffCounterOwner *owner, u32 value) {
@@ -183,41 +197,185 @@ void effDecrementSecondCountdown(EffCounterOwner *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectCounterTask);
+BtlEffTask *btlCreateEffectCounterTask(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0x2C);
+    BtlExtendedLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x3E;
+    obj->unk40 = owner->ownerData;
+    obj->callback = func_0020FA98;
+    obj->destroy = effDecrementSecondCountdown;
+    link = (BtlExtendedLink *)func_001E14F8(obj);
+    link->parameter = arg;
+    link->owner = owner;
+    link->state = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FFB8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjD);
+BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x43;
+    obj->unk40 = owner->ownerData;
+    obj->callback = func_0020FFB8;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210148);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_002101C8);
+BtlEffTask *func_002101C8(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x44;
+    obj->unk40 = owner->ownerData;
+    obj->callback = func_00210148;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210258);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjA);
+BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x45;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->unk40 = owner->ownerData;
+    }
+    obj->callback = func_00210258;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_002103F8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjB);
+BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x3F;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->unk40 = owner->ownerData;
+    }
+    obj->callback = func_002103F8;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210530);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffObjC);
+BtlEffTask *btlCreateEffObjC(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x40;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->unk40 = owner->ownerData;
+    }
+    obj->callback = func_00210530;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 u32 func_00210688(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectTask3E);
+BtlEffTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x41;
+    obj->unk40 = owner->ownerData;
+    obj->callback = func_00210688;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    *(u16 *)&link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210720);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_002107C0);
+BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x42;
+    obj->unk40 = owner->ownerData;
+    obj->callback = func_00210720;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210850);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectWaitTask);
+BtlEffTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x46;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->unk40 = owner->ownerData;
+    }
+    obj->callback = func_00210850;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    *(u16 *)&link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 s32 btlWaitEffectTask(BtlWaitTask *task) {
@@ -239,7 +397,21 @@ s32 btlWaitEffectTask(BtlWaitTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", btlCreateEffectTask44);
+BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
+    BtlEffTask *obj = btlAllocTask(8);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    obj->flags |= 2;
+    obj->id = 0x47;
+    obj->unk40 = owner->ownerData;
+    obj->callback = btlWaitEffectTask;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210AA8);
 

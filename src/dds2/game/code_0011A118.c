@@ -2,7 +2,7 @@
 
 extern s32 D_00435E38;
 
-extern s32 dds3FindEntry(void);
+extern s32 dds3FindEntry();
 
 extern u32 D_00435E88;
 
@@ -43,7 +43,7 @@ extern void func_0011CA88(Entry1A4 *arg0);
 
 extern s32 D_0043E5C8[];
 
-extern s32 func_0010D818(s32 arg0);
+extern s32 func_0010D818();
 
 extern s32 D_0043E5CC[];
 
@@ -52,6 +52,12 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 func_00119A78(s32 arg0, s32 arg1);
 
 extern s32 D_00435E20;
+
+extern s32 D_00435E1C;
+
+extern s32 D_00435DE8;
+
+extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 D_0043E5C4[];
 
@@ -62,6 +68,10 @@ extern s32 D_0043E5D0[];
 extern void func_0010D830(f32 arg0);
 
 extern s32 effMiscRandMod(u32 arg0, u32 arg1);
+
+extern s32 datMoveCursorX(void *, s32);
+
+extern s32 datMoveCursorY(void *, s32);
 
 extern u8 func_001AA308(void);
 
@@ -124,7 +134,22 @@ u8 evtGetFlaggedRosterValue(Entry1A4 *entry) {
     return *(u8 *)(D_00435DEC + entry->rosterIndex * 76 + 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", dds3FindEntryIndex);
+s32 dds3FindEntryIndex(rosterIndex)
+    s32 rosterIndex;
+{
+    s32 index = 0;
+    s32 entry = D_00435DD0 + 0xA60;
+    do {
+        if (((Entry1A4 *)entry)->flags & 1) {
+            if (((Entry1A4 *)entry)->rosterIndex == rosterIndex) {
+                return index;
+            }
+        }
+        index++;
+        entry += 0x1C4;
+    } while (index < 5);
+    return -1;
+}
 
 s8 func_0011A318(s32 arg0) {
     return *(s8 *)(arg0 + D_00435DD0 + 0xa76);
@@ -134,9 +159,39 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A510);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", ptyRecoverAllUnits);
+void ptyRecoverAllUnits(void) {
+    s32 offset = 0;
+    s32 remaining = 4;
+    do {
+        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        offset += 0x1C4;
+        if (entry->flags & 1) {
+            datMoveCursorX(entry, 9999);
+            datMoveCursorY(entry, 9999);
+            entry->unkE &= 0x8000;
+        }
+        remaining--;
+    } while (remaining >= 0);
+}
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A788);
+s32 func_0011A788(u32 mask, s32 mode) {
+    s32 index = 0;
+    s32 entry = D_00435DD0 + 0xA60;
+    do {
+        if (((Entry1A4 *)entry)->flags & 1) {
+            if (((Entry1A4 *)entry)->unk6 != 0) {
+                if (mode != 1 || (((Entry1A4 *)entry)->flags & 2)) {
+                    if (((Entry1A4 *)entry)->unkE & mask) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        index++;
+        entry += 0x1C4;
+    } while (index < 5);
+    return 0;
+}
 
 void func_0011A7F8(s32 arg0, s32 arg1) {
     *(s32 *)(arg0 + 0x10) = *(s32 *)(arg0 + 0x10) + arg1;
@@ -190,7 +245,20 @@ u16 dds3Clamp99(s32 unit) {
     return level < 100 ? level : 99;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", dds3FindEntry);
+s32 dds3FindEntry(rosterIndex)
+    s32 rosterIndex;
+{
+    s32 index = 0;
+    s32 entry = D_00435DD0 + 0xA60;
+    do {
+        if (((Entry1A4 *)entry)->rosterIndex == rosterIndex && (((Entry1A4 *)entry)->flags & 1)) {
+            return entry;
+        }
+        index++;
+        entry += 0x1C4;
+    } while (index < 5);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AEE0);
 
@@ -201,7 +269,22 @@ u8 func_0011B260(void) {
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", dds3EntryMax);
+s32 dds3EntryMax(void) {
+    s32 max = 0;
+    s32 remaining = 4;
+    s32 entry = D_00435DD0 + 0xA60;
+    do {
+        remaining--;
+        if (((Entry1A4 *)entry)->flags & 1) {
+            s32 level = ((Entry1A4 *)entry)->level;
+            if (max < level) {
+                max = level;
+            }
+        }
+        entry += 0x1C4;
+    } while (remaining >= 0);
+    return max;
+}
 
 s32 func_0011B2C0(void) {
     s32 sum = 0;
@@ -490,20 +573,87 @@ s32 func_0011D990(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D9C8);
+s32 func_0011D9C8(void) {
+    s32 value;
+    s32 index = D_0043E5C0[1];
+    if (*(s8 *)(D_00435E1C + index * 2 + 1) == 5) {
+        u16 id = *(u16 *)(D_0043E5C0[2] + 4);
+        value = *(u8 *)(D_00435DE8 + id * 20 + 2);
+    } else {
+        value = *(u8 *)(D_00435E20 + index * 56 + 0x11);
+    }
+    func_0010D818(value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011DA50);
+s32 func_0011DA50(void) {
+    s32 value;
+    s32 index = D_0043E5C0[1];
+    value = *(u8 *)(D_00435E20 + index * 56 + 0x25);
+    if (*(s8 *)(D_00435E1C + index * 2 + 1) == 5) {
+        u16 id = *(u16 *)(D_0043E5C0[2] + 4);
+        value = (s32)((f32)value * *(f32 *)(D_00435DE8 + id * 20 + 4));
+    }
+    func_0010D818(value);
+    return 1;
+}
 
 s32 func_0011DAE0(void) {
     func_0010D818(*(u8 *)(D_00435E20 + D_0043E5C4[0] * 56 + 0x2d));
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011DB20);
+s32 func_0011DB20(void) {
+    s32 *work = D_0043E5C0;
+    s32 value;
+    u16 mode = *(u16 *)((u8 *)work + 0x14);
+    switch (mode) {
+    case 1:
+        value = *(s16 *)(D_00435E20 + work[1] * 56 + 0x18);
+        break;
+    case 2:
+        value = *(s16 *)(D_00435E20 + work[1] * 56 + 0x1C);
+        break;
+    default:
+        value = 0;
+        break;
+    }
+    func_0010D818(value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011DBA0);
+s32 func_0011DBA0(void) {
+    s32 *work = D_0043E5C0;
+    s32 value;
+    u16 mode = *(u16 *)((u8 *)work + 0x14);
+    u16 index = *(u16 *)(D_00435E38 + *(u16 *)(work[2] + 0x52) * 8 + 2);
+    switch (mode) {
+    case 1:
+        value = *(s16 *)(D_00435E20 + index * 56 + 0x18);
+        break;
+    case 2:
+        value = *(s16 *)(D_00435E20 + index * 56 + 0x1C);
+        break;
+    default:
+        value = 0;
+        break;
+    }
+    func_0010D818(value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011DC38);
+s32 func_0011DC38(void) {
+    s32 value;
+    s32 index = D_0043E5C0[1];
+    if (*(s8 *)(D_00435E1C + index * 2 + 1) == 5) {
+        u16 id = *(u16 *)(D_0043E5C0[2] + 4);
+        value = *(u8 *)(D_00435DE8 + id * 20 + 3);
+    } else {
+        value = *(s16 *)(D_00435E20 + index * 56 + 0x34);
+    }
+    func_0010D818(value);
+    return 1;
+}
 
 s32 func_0011DCC0(void) {
     func_0010D818(*(s16 *)(D_00435E20 + D_0043E5C4[0] * 56 + 0x36));
@@ -579,7 +729,21 @@ s32 func_0011DEA8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011DEF8);
+s32 func_0011DEF8(void) {
+    s32 available = func_001AA308();
+    u64 value;
+    if (available) {
+        s32 choice = scrReadIntParameter(0);
+        s32 divisor = scrReadIntParameter(1);
+        s32 dividend = choice ? 0x20 : 4;
+        value = (u64)dividend / divisor;
+    }
+    else {
+        value = 0;
+    }
+    func_0010D818(value);
+    return 1;
+}
 
 s32 func_0011DF60(void) {
     s32 v0 = func_001AA308();
@@ -649,9 +813,16 @@ s32 func_0011E1D0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E208);
-
-extern s32 D_00435DE8;
+s32 func_0011E208(void) {
+    s32 value;
+    if ((*(u16 *)D_0043E5CC[0] & 0x20) == 0) {
+        value = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
+    } else {
+        value = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
+    }
+    func_0010D818(value);
+    return 1;
+}
 
 s32 func_0011E268(void) {
     u16 index = *(u16 *)(D_0043E5C8[0] + 4);
@@ -676,7 +847,24 @@ s32 func_0011E430(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E498);
+s32 func_0011E498(u32 flags) {
+    u32 type = flags >> 16;
+    switch (type) {
+    case 0:
+        break;
+    case 1:
+        if (flags & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (mdlFlagTest(flags & 0xFFFF)) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E528);
 

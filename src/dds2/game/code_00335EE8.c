@@ -1,9 +1,32 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 extern s32 (*D_0040B480[])(void *a0, s32 a1);
 
 extern s32 (*D_0040B510[])(void *a0, s32 a1);
+
+extern u8 D_0040B518[];
+
+extern s32 func_00328D68(s32);
+
+typedef struct MotionKey {
+    s32 id;
+    f32 value;
+} MotionKey;
+
+typedef struct MotionKeySample {
+    MotionKey *first;
+    MotionKey *second;
+    f32 weight;
+} MotionKeySample;
+
+typedef struct MotionBlend {
+    u8 pad00[0xC];
+    MotionKey *out;
+} MotionBlend;
+
+extern void func_00334678(void *, void *);
 
 void func_00335EE8(void) {
 }
@@ -13,14 +36,48 @@ s32 func_00335EF0(void *object, s32 command) {
 }
 
 /* Select a 16-byte entry from the source object's motion pointer table. */
-void sdfSelectMotionPointerEntry(s32 destination, s32 source, u32 unused, s32 entryIndex) {
+void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 entryIndex) {
     sdfSetMotionPointerPair();
     *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00335F78);
+s32 func_00335F78(s32 source, s32 unused, s32 entryIndex) {
+    s32 entry = func_00328D68(0x20);
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00335FD8);
+    sdfSelectMotionPointerEntry(entry, source, D_0040B518, entryIndex);
+    return entry;
+}
+
+void func_00335FD8(MotionBlend *motion) {
+    MotionKeySample sample;
+    MotionKey *out;
+    s32 firstId;
+    s32 secondId;
+    f32 firstValue;
+    f32 secondValue;
+    f32 weight;
+    f32 inverse;
+
+    func_00334678(motion, &sample);
+    firstId = sample.first->id;
+    secondId = sample.second->id;
+    firstValue = sample.first->value;
+    secondValue = sample.second->value;
+    weight = sample.weight;
+    inverse = 1.0f - weight;
+    out = motion->out;
+    if (firstId == secondId) {
+        out[0].id = firstId;
+        out[0].value = firstValue * inverse + secondValue * weight;
+        out[1].id = secondId;
+        out[1].value = 0;
+    } else {
+        out[0].id = firstId;
+        out[0].value = firstValue * inverse;
+        out[1].id = secondId;
+        out[1].value = secondValue * weight;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336068);
 
@@ -34,21 +91,79 @@ void func_00336240(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336258);
+void func_00336258(void *dst) {
+    VU0_STORE_MATRIX(dst);
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336270);
+void func_00336270(void *dst) {
+    VU0_STORE_MATRIX_B(dst);
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336288);
+/* vu0 routine: vf24-vf27 = vf28-vf31 */
+void func_00336288(void) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf28\n"
+        "vmove.xyzw vf25, vf29\n"
+        "vmove.xyzw vf26, vf30\n"
+        "vmove.xyzw vf27, vf31\n"
+        ".set reorder\n");
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_003362A0);
+/* vu0 routine: vf20-vf23 = vf28-vf31 */
+void func_003362A0(void) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf20, vf28\n"
+        "vmove.xyzw vf21, vf29\n"
+        "vmove.xyzw vf22, vf30\n"
+        "vmove.xyzw vf23, vf31\n"
+        ".set reorder\n");
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_003362B8);
+/* vu0 routine: vf28-vf31 = vf24-vf27 */
+void func_003362B8(void) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf28, vf24\n"
+        "vmove.xyzw vf29, vf25\n"
+        "vmove.xyzw vf30, vf26\n"
+        "vmove.xyzw vf31, vf27\n"
+        ".set reorder\n");
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_003362D0);
+/* vu0 routine: vf20-vf23 = vf24-vf27 */
+void func_003362D0(void) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf20, vf24\n"
+        "vmove.xyzw vf21, vf25\n"
+        "vmove.xyzw vf22, vf26\n"
+        "vmove.xyzw vf23, vf27\n"
+        ".set reorder\n");
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_003362E8);
+/* vu0 routine: vf28-vf31 = vf20-vf23 */
+void func_003362E8(void) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf28, vf20\n"
+        "vmove.xyzw vf29, vf21\n"
+        "vmove.xyzw vf30, vf22\n"
+        "vmove.xyzw vf31, vf23\n"
+        ".set reorder\n");
+}
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336300);
+/* vu0 routine: vf24-vf27 = vf20-vf23 */
+void func_00336300(void) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmove.xyzw vf24, vf20\n"
+        "vmove.xyzw vf25, vf21\n"
+        "vmove.xyzw vf26, vf22\n"
+        "vmove.xyzw vf27, vf23\n"
+        ".set reorder\n");
+}
 
 void sdfSetPrimaryIdentityMatrixVU(void) {
     __asm__ volatile (
@@ -72,7 +187,10 @@ void sdfSetAlternateIdentityMatrixVU(void) {
         ".set reorder\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336358);
+/* libvu0: sceVu0UnitMatrix */
+void func_00336358(void *dst) {
+    EE_MMI_UNIT_MATRIX(dst);
+}
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */

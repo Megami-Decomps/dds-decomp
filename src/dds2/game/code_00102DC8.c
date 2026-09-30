@@ -1,5 +1,13 @@
 #include "common.h"
 
+typedef struct KwlnResourceNode {
+    s32 unk0;
+    struct KwlnResourceNode *next;
+    s32 *ready;
+} KwlnResourceNode;
+
+extern s8 D_00435C60;
+
 extern u32 D_00435CAC;
 
 extern u32 D_00435CC0;
@@ -25,6 +33,44 @@ extern u16 D_00438DC0;
 
 extern u16 D_00438DC2;
 
+extern s16 D_00435CEA;
+
+extern s16 D_00435CEC;
+
+extern u16 D_00435CEE;
+
+extern u32 kwlnTaskGetTimer(void);
+
+extern s32 effMiscRandMod(s32, s32);
+
+extern void func_00103F58(s32, u8, s32);
+
+extern void *sdfAllocPacketAligned(s32);
+
+extern void sdfResetPacketList(void *);
+
+extern void func_00104F30(void *, s32, s32);
+
+extern u32 kwlnTextureGetPageIndex(void);
+
+extern s32 func_00104898(void);
+
+extern s32 func_0035C860();
+
+extern s32 func_0033D810();
+
+extern void sdfAppendPacket();
+
+extern void func_00104180(void);
+
+extern void func_001044E8(void);
+
+extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
+
+extern void kwlnTaskDestroyWithHierarchy(void *, s32);
+
+extern void *D_00438DA8;
+
 extern f32 D_0037F5EC[];
 
 extern s32 D_004389F8;
@@ -39,13 +85,19 @@ extern u8 D_00380748[];
 
 extern s8 D_0037F53B[];
 
-extern void kwlnTextureAttachTask(void *arg0);
+extern void kwlnTextureAttachTask(u8 *scene);
 
 extern s16 D_00435CFE;
 
 extern s16 D_00435D00;
 
-extern s8 D_00435CF8[4];
+extern u8 D_00435CF8[4];
+
+extern s8 D_00435CFC;
+
+extern u8 D_00438D99;
+
+extern u8 D_00438D90[2];
 
 extern u8 D_0037F550[];
 
@@ -76,17 +128,40 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103790);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001037F8);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnDebugPulseColors);
+s32 kwlnDebugPulseColors(void) {
+    if (kwlnTaskGetTimer() % 0x4650 == 0) {
+        func_00103F58(0, 1, 0xF);
+        func_00103F58(1, (u8)(effMiscRandMod(0, 150) + 100), 30);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001038D0);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103A00);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103EF8);
+void func_00103EF8(void) {
+    u8 target = D_00438D99;
+
+    if (D_00438D90[1] < target) {
+        if (target - D_00438D90[1] > 0x20) {
+            D_00438D90[1] = D_00438D90[1] + 0x20;
+        } else {
+            D_00438D90[1] = target;
+        }
+    } else if (target < D_00438D90[1]) {
+        if (D_00438D90[1] - target > 0x20) {
+            D_00438D90[1] = D_00438D90[1] - 0x20;
+        } else {
+            D_00438D90[1] = target;
+        }
+    } else {
+        D_00438D90[1] = target;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103F58);
 
-extern u8 D_00438D90[2];
 extern u32 D_00438DA0[2];
 extern void sdfDevConsSetEntryPair(s32, s32, s32);
 
@@ -114,11 +189,23 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104180);
 void func_001044E8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnDebugGraphSetEnabled);
+void kwlnDebugGraphSetEnabled(s8 mode) {
+    if (mode == 1) {
+        D_00438DA8 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_00104180, func_001044E8, NULL);
+    } else if (mode == 0) {
+        kwlnTaskDestroyWithHierarchy(D_00438DA8, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104568);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnTextureDrawPageCounter);
+void kwlnTextureDrawPageCounter(void *task) {
+    char buffer[0x70];
+    s32 current = kwlnTextureGetPageIndex();
+    s32 count = func_00104898();
+    func_0035C860(buffer, "TEX VIEWER [%d/%d]", current, count - 1);
+    sdfAppendPacket(task, func_0033D810(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
+}
 
 INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
 
@@ -158,13 +245,34 @@ s32 kwlnLoadDefaultResource(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnTextureFindIncompleteResource);
+s32 (*kwlnTextureFindIncompleteResource(void))(void) {
+    KwlnResourceNode *node = (KwlnResourceNode *)D_004389F8;
+    if (node == NULL) {
+        return NULL;
+    }
+    D_00435CA8 = (s32)node;
+    D_00435C60 = 1;
+    D_00435CAC = 0;
+    while (node->ready != NULL && *node->ready != 0) {
+        node = ((KwlnResourceNode *)D_00435CA8)->next;
+        if (node == NULL) {
+            return NULL;
+        }
+        D_00435CA8 = (s32)node;
+    }
+    return kwlnLoadDefaultResource;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104D40);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104F30);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnTextureAttachTask);
+void kwlnTextureAttachTask(u8 *scene) {
+    void *task = sdfAllocPacketAligned(0x20);
+    sdfResetPacketList(task);
+    func_00104F30(task, 0x7180, 0x79C0);
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
+}
 
 s32 kwlnEnsureDefaultResource(void) {
     if (D_0037F53B[0] != 0) {
@@ -235,7 +343,20 @@ s32 func_00105548(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105550);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnFadeSetupFrames);
+void kwlnFadeSetupFrames(s32 mode, s32 frames) {
+    if (frames == 0) {
+        D_00435CE8 = 0;
+        return;
+    }
+    D_00435CE8 = 1;
+    if (mode == 0) {
+        D_00435CEA = -1;
+    } else {
+        D_00435CEA = mode;
+    }
+    D_00435CEE = frames * 10;
+    D_00435CEC = D_00435CEE * 4 / 10;
+}
 
 void func_001057A8(void) {
     D_00435CE8 = 0;
@@ -272,7 +393,22 @@ void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
     D_00435CF0.b = blue;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnFadeOutStart);
+void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
+    D_00435CF0.r = red;
+    D_00435CF0.g = green;
+    D_00435CF0.b = blue;
+    D_00435CF0.a = -0x80;
+    if (duration == 0) {
+        D_00435CF0.a = 0;
+        D_00438DC0 = 0;
+        D_00438DC2 = 0;
+        kwlnFadeClear();
+        return;
+    }
+    D_00438DC2 = duration;
+    D_00438DC0 = duration;
+    D_00435CD4 = (D_00435CD4 | 1) & ~2;
+}
 
 /* Enter the first fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartIn(s32 frames) {
@@ -347,9 +483,29 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105FE8);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106080);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106108);
+s32 func_00106108(void) {
+    if (D_00435CD4 & 0x0C000000) {
+        return 1;
+    }
+    if (D_00435CFC == 0) {
+        if (0x80 - D_00435CF8[3] >= 0x80) {
+            return 0;
+        }
+    } else if (D_00435CFE == 0x31) {
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106160);
+void func_00106160(s32 mode) {
+    D_00435CFC = mode;
+    if (D_00435CFC == 0) {
+        D_00435CFE = 0;
+        D_00435D00 = 0;
+    } else {
+        D_00435CF8[3] = 0x80;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106188);
 
