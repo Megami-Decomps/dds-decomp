@@ -238,6 +238,23 @@ extern void *sdfResourceRetainAddress(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
 extern s32 *func_00110F80();
+extern void fldClearMenuEntries();
+extern void fldDestroyTitleTask();
+extern void fldPlayPendingSounds();
+extern void fldReleaseObjectSlots();
+extern void fldReleaseTitleSlots();
+extern void fldReleaseResourceHandles();
+extern void fldReleaseTextureSlots();
+extern void fldResetObjectSlots();
+extern s32 fldTitleMiniIsActive();
+extern void func_00138C30();
+extern void fldResetPendingSounds();
+extern void fldReleaseSceneRecordChunk();
+extern void fldReleaseMenuSlotsAfterWait();
+extern void kwlnTaskDestroyWithHierarchyByName();
+extern void mnuReleaseResourceEntries();
+extern void sdfResourceListRelease();
+extern void func_0012B768(void);
 
 typedef struct {
     s16 data[12];
@@ -544,7 +561,54 @@ void *func_00127DA8(void **destination, s32 area, s32 room) {
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_0039FE38);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127E20);
+extern s32 mdlFlagTest(s32);
+
+void func_00127E20(char *out) {
+    char directory[32];
+    s32 area = D_0032E3B0[4];
+    s32 room = D_0032E3B0[5];
+
+    fldFormatAreaDirectory(directory, area, 1);
+    if (area == 0x1C) {
+        if (mdlFlagTest(0x5E1)) {
+            func_003014F0(out, "%sf%03d_000.LB", directory, 0x1C);
+        } else if (mdlFlagTest(0x5E2)) {
+            func_003014F0(out, "%sf%03d_00a.LB", directory, 0x1C);
+        } else if (mdlFlagTest(0x5E3)) {
+            func_003014F0(out, "%sf%03d_00b.LB", directory, 0x1C);
+        } else if (mdlFlagTest(0x5E4)) {
+            func_003014F0(out, "%sf%03d_00c.LB", directory, 0x1C);
+        } else {
+            func_003014F0(out, "%sf%03d_00d.LB", directory, 0x1C);
+        }
+        return;
+    }
+    if (area == 0x1B) {
+        switch (room) {
+        case 8 ... 21:
+            func_003014F0(out, "%sf%03d_00a.LB", directory, area);
+            break;
+        case 7:
+            func_003014F0(out, "%sf%03d_00b.LB", directory, area);
+            break;
+        case 22:
+        case 23:
+        case 27:
+            if (mdlFlagTest(0x58D)) {
+                func_003014F0(out, "%sf%03d_00d.LB", directory, area);
+            } else {
+                func_003014F0(out, "%sf%03d_00c.LB", directory, area);
+            }
+            break;
+        case 24 ... 26:
+        default:
+            func_003014F0(out, "%sf%03d_000.LB", directory, area);
+            break;
+        }
+        return;
+    }
+    func_003014F0(out, "%sf%03d_000.LB", directory, area);
+}
 
 u8 func_00127FD0(void) {
     char buf[32];
@@ -553,7 +617,73 @@ u8 func_00127FD0(void) {
     return strcmp(D_003C9200, buf) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldLoadAreaPackedResources);
+extern void func_00288C50(u32);
+extern void fldSetNpcPalette();
+extern void fldUploadSkyBuffer();
+extern void fldCopyActorWaypointTable();
+extern void func_0013D598();
+extern u32 sdfMemoryGetBlockSize(u32);
+extern u32 sdfMemoryGetBlockAddress(u32);
+extern void fldSetSceneRecordChunk(u32, u32);
+extern void fldCacheMapLabelLengths();
+
+typedef struct FldPackedEntry {
+    struct FldPackedEntry *next;
+    u8 pad04[4];
+    u32 block;
+    u32 arg;
+    u8 pad10[2];
+    u16 kind;
+} FldPackedEntry;
+
+typedef struct FldPackedArchive {
+    u8 pad00[0x60];
+    FldPackedEntry *entries;
+} FldPackedArchive;
+
+void fldLoadAreaPackedResources(void) {
+    char name[32];
+    FldPackedEntry *entry;
+
+    if (D_0032E3B0[4] < 200) {
+        func_00127E20(name);
+        strcpy(D_003C9200, name);
+        D_003BAC34 = func_00288A80(name);
+        func_00288C50(D_003BAC34);
+        for (entry = ((FldPackedArchive *)D_003BAC34)->entries; entry != NULL;
+             entry = entry->next) {
+            switch (entry->kind) {
+            case 1:
+                func_0013D598(entry->arg);
+                func_002D0A10(entry->block);
+                break;
+            case 2:
+                fldSetNpcPalette(entry->arg);
+                func_002D0A10(entry->block);
+                break;
+            case 3:
+                fldUploadSkyBuffer(entry->arg);
+                func_002D0A10(entry->block);
+                break;
+            case 4:
+                fldCopyActorWaypointTable(entry->arg);
+                func_002D0A10(entry->block);
+                break;
+            case 5:
+                D_003BAC48 = (u32)func_002D03F8(sdfMemoryGetBlockSize(entry->block));
+                memcpy((void *)sdfMemoryGetBlockAddress(D_003BAC48),
+                       (void *)sdfMemoryGetBlockAddress(entry->block),
+                       sdfMemoryGetBlockSize(entry->block));
+                func_002D0A10(entry->block);
+                break;
+            case 6:
+                fldSetSceneRecordChunk(entry->arg, entry->block);
+                break;
+            }
+        }
+        fldCacheMapLabelLengths(D_0032E3B0[4] % 100);
+    }
+}
 
 void fldReleaseAreaResourceCache(void) {
     u32 resourceHandle = D_003BAC48;
@@ -574,7 +704,121 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001281E0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128780);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00128890);
+extern u32 D_003C91E0[];
+extern u32 D_003C91F0[];
+extern s32 D_003BAC10;
+extern s32 D_003BAC14;
+extern FldTransferChunk *D_003BAC18;
+extern u32 D_003BAC1C;
+extern FldTransferChunk *D_003BAC20;
+extern u32 D_003BAC24;
+extern FldTransferChunk *D_003BAC28;
+extern u32 D_003BAC2C;
+extern FldAreaResource *D_003BAC38;
+extern s32 D_003BAC4C;
+extern u32 D_003BAC50;
+extern u32 D_003BAC54;
+extern u32 D_003BAC58;
+extern u32 D_003BAC5C;
+
+void func_00128890(void) {
+    s32 i;
+    FldAreaResourceNode *node;
+
+    func_0012B768();
+    fldPlayPendingSounds();
+    fldDestroyTitleTask();
+    if (fldTitleMiniIsActive() != 0) {
+        kwlnTaskDestroyWithHierarchyByName("fldTitleMini", 1);
+    }
+    fldReleaseObjectSlots();
+    fldResetObjectSlots();
+    if (D_0032E3B0[4] < 0xC8) {
+        if (D_0032E3B0[8] != 0) {
+            if ((u32)(D_0032E3B0[4] - 0x1B) < 2U) {
+                fldReleaseTitleSlots(D_0032E3B0);
+                fldReleaseMenuSlotsAfterWait();
+                fldReleaseSceneRecordChunk();
+                fldReleaseAreaResourceCache();
+            }
+        } else {
+            fldReleaseTitleSlots(D_0032E3B0);
+            fldReleaseMenuSlotsAfterWait();
+            fldReleaseSceneRecordChunk();
+            fldReleaseResourceHandles();
+            fldReleaseAreaResourceCache();
+            func_00131D88();
+        }
+        fldResetRecordState();
+        func_00138C30();
+        fldResetPendingSounds();
+        fldClearMenuEntries();
+        mnuReleaseResourceEntries();
+        fldReleaseTextureSlots();
+    }
+    sdfResourceListRelease(D_003BAC14, 1);
+    D_003BAC14 = 0;
+    for (i = 0; i < 4; i++) {
+        if (D_003C91E0[i] != 0) {
+            func_002D0A10(D_003C91E0[i]);
+            D_003C91E0[i] = 0;
+            D_003C91F0[i] = 0;
+        }
+    }
+    if (D_003BAC30 != 0) {
+        if (D_003BAC18 != 0) {
+            func_001278C0(D_003BAC1C, D_003BAC18);
+            D_003BAC18 = 0;
+            D_003BAC1C = 0;
+        }
+        if (D_003BAC20 != 0) {
+            func_001278C0(D_003BAC24, D_003BAC20);
+            D_003BAC20 = 0;
+            D_003BAC24 = 0;
+        }
+        if (D_003BAC28 != 0) {
+            func_001278C0(D_003BAC2C, D_003BAC28);
+            D_003BAC28 = 0;
+            D_003BAC2C = 0;
+        }
+    }
+    D_003BAC10 = 0;
+    D_003BAC4C = 0;
+    if (D_003BAC50 != 0) {
+        func_002D0A10(D_003BAC50);
+        D_003BAC50 = 0;
+    }
+    if (D_003BAC54 != 0) {
+        func_002D0A10(D_003BAC54);
+        D_003BAC54 = 0;
+    }
+    if (D_003BAC58 != 0) {
+        func_002D0A10(D_003BAC58);
+        D_003BAC58 = 0;
+    }
+    if (D_003BAC5C != 0) {
+        func_002D0A10(D_003BAC5C);
+        D_003BAC5C = 0;
+    }
+    if (D_0032E3B0[4] < 0xC8 && D_0032E3B0[7] != D_0032E3B0[4]) {
+        D_0032E3B0[7] = D_0032E3B0[4];
+    }
+    if (D_003BAC38 != 0) {
+        node = D_003BAC38->nodes;
+        i = 0;
+        if (node != 0) {
+            do {
+                if (i > 0) {
+                    func_002D0A10(node->resourceHandle);
+                }
+                node = node->next;
+                i++;
+            } while (node != 0);
+        }
+        func_00288788((u32)D_003BAC38);
+        D_003BAC38 = 0;
+    }
+}
 
 extern s32 func_003014F0(char *, const char *, ...);
 
@@ -2591,7 +2835,39 @@ f32 fldCalculateVectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001350B8);
+void func_001350B8(f32 *points, f32 *nx, f32 *ny, f32 *nz, f32 *planeD) {
+    f32 p0[4];
+    f32 p1[4];
+    f32 p2[4];
+    f32 inv;
+
+    p0[0] = points[0];
+    p0[1] = points[1];
+    p0[2] = points[2];
+    p1[0] = points[4];
+    p1[1] = points[5];
+    p1[2] = points[6];
+    p2[0] = points[8];
+    p2[1] = points[9];
+    p2[2] = points[10];
+    *nx = (p1[1] - p0[1]) * (p2[2] - p1[2]) - (p1[2] - p0[2]) * (p2[1] - p1[1]);
+    *ny = (p1[2] - p0[2]) * (p2[0] - p1[0]) - (p1[0] - p0[0]) * (p2[2] - p1[2]);
+    *nz = (p1[0] - p0[0]) * (p2[1] - p1[1]) - (p1[1] - p0[1]) * (p2[0] - p1[0]);
+    inv = 1.0f / fsqrtf(*nx * *nx + *ny * *ny + *nz * *nz);
+    *nx = *nx * inv;
+    *ny = *ny * inv;
+    *nz = *nz * inv;
+    if (*nx > -0.0001f && *nx < 0.0001f) {
+        *nx = 0.0f;
+    }
+    if (*ny > -0.0001f && *ny < 0.0001f) {
+        *ny = 0.0f;
+    }
+    if (*nz > -0.0001f && *nz < 0.0001f) {
+        *nz = 0.0f;
+    }
+    *planeD = -(*nx * p2[0] + *ny * p2[1] + *nz * p2[2]);
+}
 
 typedef struct FldRecE4 {
     u8 pad0[0xCC];

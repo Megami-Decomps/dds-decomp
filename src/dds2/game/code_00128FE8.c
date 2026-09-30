@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "fpu.h"
+#include "pcp_vu0.h"
 
 extern s32 D_00435F14;
 
@@ -361,18 +362,18 @@ extern void func_00139950(f32 *);
 typedef struct {
     u8 pad0[0x84];
     s32 unk84;
-    u8 pad88[0xB8];
-    f32 unk140;
-    f32 unk144;
-    f32 unk148;
+    u8 pad88[0xC4];
     f32 unk14C;
     f32 unk150;
     f32 unk154;
     f32 unk158;
     f32 unk15C;
     f32 unk160;
-    u8 pad164[0x14];
-    s32 unk178;
+    f32 unk164;
+    f32 unk168;
+    f32 unk16C;
+    u8 pad170[0x14];
+    s32 unk184;
 } FldCamState;
 
 typedef struct FldCameraOverrides {
@@ -431,7 +432,7 @@ typedef struct {
     f32 angle;
     u8 pad68[4];
     f32 dist;
-    u8 pad70[0xD0];
+    u8 pad70[0xDC];
     f32 x;
     f32 y;
     f32 z;
@@ -1375,7 +1376,48 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 a
     descriptor->open(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012C360);
+void func_0012C360(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7, u32 arg8) {
+    s32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    u64 tag;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = func_0033A2D0(packet);
+    tag = arg4;
+    lo = (u64)arg5 | ((u64)arg6 << 32);
+    hi = (u64)arg7 | ((u64)arg8 << 32);
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = tag;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
     u32 coords[8];
@@ -1424,7 +1466,48 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", fldSubmitGsGradientQuad);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CB08);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012CDC0);
+void func_0012CDC0(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32 arg7, u32 arg8) {
+    s32 coords[8];
+    u64 command;
+    u64 packet;
+    u64 *dst;
+    u64 lo;
+    u64 hi;
+    u64 tag;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+    s32 i;
+
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = func_0033A2D0(packet);
+    lo = (u64)arg4 | ((u64)arg5 << 32);
+    hi = (u64)arg6 | ((u64)arg7 << 32);
+    tag = arg8;
+    pos = coords;
+    for (i = 0; i < 4; i++) {
+        dst[0] = lo;
+        dst[1] = hi;
+        dst += 2;
+        dst[1] = tag;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) | ((u64)(pos[1] + 0x7900) << 32);
+        pos += 2;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
     u64 command = sdfAllocPacketAligned(0x20);
@@ -1908,7 +1991,20 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F078);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F400);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F770);
+void func_0012F770(void) {
+    FldCamWork *cam = (FldCamWork *)D_00389770;
+    f32 angle;
+
+    D_0038BAF0[0] = cam->x - sdfSinPoly(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_0038BAF0[1] = cam->y + D_0038AEB0[cam->rowIdx].y;
+    D_0038BAF0[2] = cam->z - func_003407A0(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_0038BAF0[3] = 1.0f;
+    angle = cam->angle * 3.14f / 180.0f;
+    D_0038BB00[0] = cam->x + sdfSinPoly(angle) * D_0038AEB0[cam->rowIdx].dist;
+    D_0038BB00[1] = cam->y + D_0038AEB0[cam->rowIdx].targetY;
+    D_0038BB00[2] = cam->z + func_003407A0(angle) * D_0038AEB0[cam->rowIdx].dist;
+    D_0038BB00[3] = 1.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F908);
 
@@ -1944,7 +2040,64 @@ void fldClearCameraMoveMode(void) {
     D_004360AC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130C28);
+extern u8 *func_00112AB0(u32);
+extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
+extern void func_00133A28(void);
+extern void func_00133A50(void);
+extern void func_00133AA8(void);
+extern void func_00133AE8(void);
+
+void func_00130C28(void) {
+    f32 vec[4];
+    f32 range = 45.0f;
+    s32 slot;
+    u8 *model;
+    u8 **modelRef;
+    u8 **matrices;
+
+    memset(vec, 0, sizeof(vec));
+    vec[3] = 1.0f;
+    if (fldGetLocationCoordinateValue(D_00389770[4], D_00389770[5] + 1) & 0x40) {
+        if (func_001283A8(0x40) == 0) {
+            return;
+        }
+    }
+    slot = *(s32 *)(func_00112AB0(D_00435F0C) + 0x5C);
+    modelRef = *(u8 ***)(D_00435F14 + 0x18);
+    if (mdlFlagTest(0x31)) {
+        range = 56.0f;
+        slot = 7;
+    }
+    if (slot >= 0) {
+        model = *modelRef;
+        matrices = *(u8 ***)(model + 0xC);
+        VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
+        VU0_LOAD_VF(vf10, vec);
+        __asm__ volatile (
+            ".set noreorder\n"
+            "vmulax.xyzw ACC, vf28, vf10x\n"
+            "vmadday.xyzw ACC, vf29, vf10y\n"
+            "vmaddaz.xyzw ACC, vf30, vf10z\n"
+            "vmaddw.xyzw vf10, vf31, vf10w\n"
+            ".set reorder");
+        VU0_STORE_VF(vf10, vec);
+        if (fldPointDistance(vec[0], vec[1], vec[2], D_0038BAC0[0], D_0038BAC0[1], D_0038BAC0[2]) < range) {
+            func_001283A8(0x40);
+            func_00133A50();
+            func_00133AE8();
+            func_00133A00();
+        } else {
+            func_00133AA8();
+            if (((FldCamWork *)D_00389770)->mode == 1 || ((FldCamWork *)D_00389770)->mode == 3) {
+                func_00133A00();
+            } else if (((FldCamWork *)D_00389770)->dist < 100.0f) {
+                func_00133A28();
+            } else {
+                func_00133A00();
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130DE0);
 
@@ -1993,7 +2146,36 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131000);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131478);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", fldUpdateCameraTarget);
+void fldUpdateCameraTarget(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } vec;
+    f32 cur[3];
+    FldCamState *st;
+    u128 *dst;
+
+    if (D_00435F0C != 0 && (st = (FldCamState *)D_00389770, st->unk184 != 1) && D_00435F30 != 0) {
+        cur[0] = st->unk14C;
+        cur[1] = st->unk150;
+        cur[2] = st->unk154;
+        func_00139950(cur);
+        if (st->unk84 != 0) {
+            st->unk14C = st->unk164;
+            st->unk150 = st->unk168;
+            st->unk154 = st->unk16C;
+            vec.f[0] = st->unk164;
+            vec.f[1] = st->unk168;
+            vec.f[2] = st->unk16C;
+            effObjSetInnerFirstVec(D_00435F0C, vec.f);
+            st->unk84 = 0;
+            effObjFetchInnerFirstVec(D_00435F0C);
+            VU0_STORE_VF(vf10, &vec);
+            dst = (u128 *)(*(u32 *)(D_00435F0C + 0x1C) + 0x70);
+            PCP_COPY_VECTOR(dst, &vec);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131B50);
 
@@ -2005,7 +2187,56 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132408);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133840);
+extern s32 fldGetSceneReadyFlag(void);
+extern s32 func_001283A8(s32);
+extern void func_00133A00(void);
+extern void func_001321F8(void);
+extern void func_00131B50(void);
+extern void func_00131478(s16, s16);
+extern void func_00132540(void);
+extern u32 D_00389988[];
+extern s32 D_003897C0[];
+
+/* Field camera model: node id at +0x12. */
+typedef struct FldCameraModel {
+    u8 pad00[0x12];
+    s16 nodeId;
+} FldCameraModel;
+
+s32 func_00133840(void) {
+    s16 node;
+
+    if (D_00389988[0] != 0) {
+        return 0;
+    }
+    if (fldGetSceneReadyFlag() != 0) {
+        return 0;
+    }
+    if (func_001283A8(0x40) == 0) {
+        if (D_00389770[20] == 1 || D_00389770[20] == 3) {
+            func_00133A00();
+        }
+        func_001321F8();
+        fldUpdateCameraTarget();
+        func_00131B50();
+        node = ((FldCameraModel *)D_00435F14)->nodeId;
+        func_00131478(node, node);
+        if (D_00389770[70] == 1) {
+            func_00131000(0, 0, 6.0f);
+        }
+        fldSyncObjectFlagsB();
+        return 0;
+    }
+    if (D_003897C0[0] == 1) {
+        func_00133A00();
+        func_00132540();
+        fldSyncObjectFlagsB();
+    } else {
+        func_00132540();
+        fldSyncObjectFlagsB();
+    }
+    return 0;
+}
 
 u8 func_00133950(void) {
     if (D_00389770[0x62] == 0) {
@@ -2173,7 +2404,48 @@ INCLUDE_RODATA(const s32, "game/code_00128FE8", D_004132E0);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001343E8);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00134620);
+typedef struct FldSkyBuffer {
+    u32 word[0x3800];
+} FldSkyBuffer;
+
+extern FldSkyBuffer *D_004360EC;
+
+extern u32 D_00438ED0;
+
+extern char D_00413350[];
+
+extern u32 func_00343ED0(const char *, u32 *, s32);
+
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 func_0033EB10(u32, void *, u32);
+extern void func_0033EAE0(u32);
+
+void func_00134620(s32 area) {
+    char path[64];
+    char directory[32];
+    u32 command;
+
+    D_00436108 = 0x80;
+    if (area < 200) {
+        fldFormatAreaDirectory(directory, area, 1);
+        if (area == 0x17 && mdlFlagTest(0x19)) {
+            func_0035C860(path, "%sF%03dt.SKY", directory, 0x17);
+        } else if (area == 0x18 && mdlFlagTest(0x19)) {
+            func_0035C860(path, "%sF%03dt.SKY", directory, 0x18);
+        } else if (area == 0x1B && mdlFlagTest(0x19)) {
+            func_0035C860(path, "%sF%03dT.SKY", directory, 0x1B);
+        } else {
+            func_0035C860(path, "%sF%03d.SKY", directory, area);
+        }
+        command = sdfDevCreateCommandState(path);
+        func_0033EB10(command, D_004360EC, 0xE000);
+        func_0033EAE0(command);
+        if (area >= 2 && area < 100 && D_00438ECC == 0) {
+            D_00438ECC = func_00343ED0(D_00413350, &D_00438ED0, 0);
+            D_00436100 = func_0032C138((void *)D_00438ED0);
+        }
+    }
+}
 
 void func_00134790(void) {
     if (D_00436100 != 0) {
@@ -2190,18 +2462,6 @@ void func_00134790(void) {
     }
     D_004360FC = 0;
 }
-
-typedef struct FldSkyBuffer {
-    u32 word[0x3800];
-} FldSkyBuffer;
-
-extern FldSkyBuffer *D_004360EC;
-
-extern u32 D_00438ED0;
-
-extern char D_00413350[];
-
-extern u32 func_00343ED0(const char *, u32 *, s32);
 
 void fldUploadSkyBuffer(FldSkyBuffer *src) {
     D_00436108 = 0x80;
