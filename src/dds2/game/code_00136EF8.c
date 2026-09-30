@@ -1296,7 +1296,52 @@ void fldCopyActorWaypointTable(FldWaypointBlock *src) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142B70);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143768);
+void func_00143768(s32 id) {
+    s32 i;
+    u32 *npc;
+    FldActorEntry *actor;
+
+    if (id == 0) {
+        return;
+    }
+    if (id == -1) {
+        return;
+    }
+    if (D_00389780[0] == 0x1D || D_00389780[0] == 0x1E) {
+        for (i = 0; i < 0x100; i++) {
+            actor = (FldActorEntry *)(D_003932A0 + i * 108);
+            npc = D_00449B30[i];
+            if (npc[0] == 1 && npc[1] == id) {
+                fldApplyRoomObjectModeZero(0, 0, actor->name0, 0);
+                return;
+            }
+        }
+    } else {
+        for (i = 0; i < 256; i++) {
+            actor = (FldActorEntry *)(D_003932A0 + i * 108);
+            npc = D_00449B30[i];
+            if (npc[0] == 1 && npc[1] == id) {
+                npc[0] = 2;
+                npc[7] = 0;
+                npc[8] = 0;
+                npc[9] = 0;
+                if (actor->state == 5 || actor->state2 == 5 || actor->state == 6 || actor->state2 == 6
+                    || actor->state == 7 || actor->state2 == 7 || actor->state == 8 || actor->state2 == 8) {
+                    npc[10] = 0x28;
+                } else {
+                    npc[10] = 0x14;
+                }
+                npc[11] = 0;
+                npc[12] = 0;
+                npc[13] = 0;
+                npc[17] = 0;
+                npc[18] = 0;
+                npc[19] = 0;
+                fldApplyPendingCameraHeading();
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004135D0);
 
@@ -1307,7 +1352,20 @@ void func_00143C90(void) {
 
 extern void fldApplyRoomObjectModeOne(s32, s32, void *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143C98);
+void func_00143C98(void) {
+    FldActorEntry *entry;
+    s32 i;
+
+    for (i = 0; i < 256; i++) {
+        entry = (FldActorEntry *)(D_003932A0 + i * 108);
+        if (entry->kind == 1 && entry->area == ((FldAreaState *)D_00389770)->areaIndex + 1 && entry->state != 0) {
+            fldApplyRoomObjectModeOne(0, 0, entry->name0, 0);
+        }
+        if (entry->kind == 11 && entry->area == ((FldAreaState *)D_00389770)->areaIndex + 1 && entry->state == 3) {
+            fldApplyRoomObjectModeOne(0, 0, entry->name1, 0);
+        }
+    }
+}
 
 extern s32 D_00399F90[];
 

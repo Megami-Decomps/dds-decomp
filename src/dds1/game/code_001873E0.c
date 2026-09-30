@@ -45,6 +45,10 @@ typedef struct {
     EffBlurSlot2 *slots; /* 0x34 */
 } EffBlurWork2; /* 0x38 */
 
+extern void *func_002D03F8(s32 size);
+extern void *sdfResourceRetainAddress(void *allocation);
+extern u32 func_00151FC8(s32 index);
+
 extern void func_001873A8(EffBlurWork2 *work, EffBlurSlot2 *slot);
 
 void effBlurSecondInitSlots(EffBlurWork2 *work) {
@@ -58,7 +62,27 @@ void effBlurSecondInitSlots(EffBlurWork2 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001873E0", func_00187460);
+/* Allocate a slot array for the second variant and seed every slot. */
+EffBlurWork2 *func_00187460(EffBlurWork2 *src) {
+    s32 count = src->count;
+    void *allocation = func_002D03F8(count * 0x30 + 0x38);
+    EffBlurWork2 *work = (EffBlurWork2 *)sdfResourceRetainAddress(allocation);
+    EffBlurSlot2 *slot;
+    s32 i = 0;
+
+    memcpy(work, src, 0x2C);
+    work->resource = allocation;
+    work->slots = (EffBlurSlot2 *)((u8 *)work + 0x38);
+    work->setting = func_00151FC8(3);
+    slot = work->slots;
+    while (i < count) {
+        func_001873A8(work, slot);
+        slot->phase = -(work->spacing * (f32)i);
+        i++;
+        slot = (EffBlurSlot2 *)((u8 *)slot + 0x30);
+    }
+    return work;
+}
 
 /* Release the second variant's owned effect resource. */
 void effBlurReleaseSecondResource(EffBlurWork *work) {

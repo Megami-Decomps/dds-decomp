@@ -490,7 +490,45 @@ s32 btlHasOtherGroup400UnitMode(u8 *actor, s32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00200628);
+extern s32 D_00360E98[];
+extern s32 btlActorEntryIsExpired();
+extern s32 btlGetActorEntryCode();
+
+/* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own
+   entry. Every failure falls out to the single trailing `return 0`. K&R:
+   callers pass one argument or none. */
+s32 func_00200628(actor, kind)
+    s32 actor;
+    s32 kind;
+{
+    s32 i;
+    s32 j;
+
+    if (kind == 0xB) {
+        for (i = 0; i < 10; i += 2) {
+            if (btlActorEntryIsExpired(actor, D_00360E98[i]) != 0 && btlGetActorEntryCode(actor, D_00360E98[i]) > 0) {
+                return 1;
+            }
+        }
+    } else if (kind == 0xC) {
+        for (j = 1; j < 10; j += 2) {
+            if (btlActorEntryIsExpired(actor, D_00360E98[j]) != 0 && btlGetActorEntryCode(actor, D_00360E98[j]) <= 0) {
+                return 1;
+            }
+        }
+    } else if (btlActorEntryIsExpired(actor, D_00360E98[kind]) != 0 || kind == 0xA || kind == 0xD) {
+        if ((kind & 1) == 0 || kind == 0xD) {
+            if (btlGetActorEntryCode(actor, D_00360E98[kind]) > 0) {
+                return 1;
+            }
+        } else {
+            if (btlGetActorEntryCode(actor, D_00360E98[kind]) <= 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002007A8);
 
@@ -1669,11 +1707,41 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
     btlFreeIndexList((void *)list);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", btlGetTargetUnitForLink);
+extern s32 btlCanUseLinkedActor();
+
+/* Guard clauses: each `return unit->task->unit` fallback is its own exit. */
+BtlUnit *btlGetTargetUnitForLink(BtlUnit *unit) {
+    s32 kind = unit->unk_114;
+
+    if ((u32)(kind - 1) >= 0x25F) {
+        return unit->task->unit;
+    }
+    if (D_003BAA4C[kind * 2 + 1] != 1) {
+        return unit->task->unit;
+    }
+    if (unit->linkedA == NULL && unit->linkedB == NULL) {
+        return unit->task->unit;
+    }
+    if (btlCanUseLinkedActor(unit) == 0) {
+        return unit->task->unit;
+    }
+    if (unit->linkedA != NULL) {
+        if (unit->linkedB != NULL) {
+            return unit->task->unit;
+        }
+        if (!(unit->linkedA->flags & 0x1000)) {
+            return unit->linkedA;
+        }
+    }
+    if (unit->linkedB != NULL) {
+        if (!(unit->linkedB->flags & 0x1000)) {
+            return unit->linkedB;
+        }
+    }
+    return unit->task->unit;
+}
 
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
-
-extern BtlUnit *btlGetTargetUnitForLink();
 
 /* Linked-command target/direction and motion fields; DDS2 moves the target/flags +0x20. */
 typedef struct BtlLinkedCommand {
@@ -1694,7 +1762,7 @@ void func_002044F0(u8 *command, u8 *unused) {
     BtlUnit *target;
     f32 userPos[4];
     f32 targetPos[4];
-    user = btlGetTargetUnitForLink(command);
+    user = btlGetTargetUnitForLink((BtlUnit *)command);
     target = (BtlUnit *)btlGetIndexListEntry(((BtlLinkedCommand *)command)->targetList, 0);
     if (!(user->flags & target->flags & 0x600)) {
         btlClearAllUnitDefeatCandidates();
