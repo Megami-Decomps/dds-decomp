@@ -225,6 +225,9 @@ typedef struct EvtSourceObj {
 } EvtSourceObj;
 
 extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
+extern void func_00340DC8(f32, f32, f32);
+extern void effMiscQuatMultiplyVU();
+extern void effObjSetInnerSecondVec(void *, void *);
 
 extern EvtUnit *func_0023CC00(s32 idx);
 
@@ -777,7 +780,34 @@ u32 evtSetWorldUnitFirstVector(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EC80);
+u32 func_0023EC80(void) {
+    f32 v[4];
+    void *ctx;
+    s32 id;
+    void *unit;
+    f32 toRad;
+    f32 x;
+    f32 y;
+
+    memset(v, 0, 0x10);
+    v[3] = 1.0f;
+    ctx = dds3GetWorldObject();
+    id = scrReadIntParameter(0);
+    unit = func_00110C70(ctx, id, 5);
+    if (unit == NULL) {
+        return 1;
+    }
+    toRad = 0.017453293f;
+    x = bfWaitReadArgFloat(1) * toRad;
+    y = bfWaitReadArgFloat(2) * toRad;
+    func_00340DC8(x, y, 0.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    func_00340DC8(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
+    effMiscQuatMultiplyVU();
+    VU0_STORE_VF($vf10, v);
+    effObjSetInnerSecondVec(unit, v);
+    return 1;
+}
 
 u32 evtSetWorldUnitThirdVector(void) {
     f32 vector[4];
@@ -1439,7 +1469,29 @@ u32 func_00240AA0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_00240B68);
+u32 func_00240B68(void) {
+    f32 v[4];
+    EvtModelObj *obj;
+    f32 toRad;
+    f32 x;
+    f32 y;
+
+    memset(v, 0, 0x10);
+    v[3] = 1.0f;
+    obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (!(obj->header->flags & 4)) {
+        toRad = 0.017453293f;
+        x = bfWaitReadArgFloat(1) * toRad;
+        y = bfWaitReadArgFloat(2) * toRad;
+        func_00340DC8(x, y, 0.0f);
+        VU0_MOVE_VF(vf11, vf10);
+        func_00340DC8(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF($vf10, v);
+        effObjSetInnerSecondVec(obj, v);
+    }
+    return 1;
+}
 
 u32 func_00240C48(void) {
     EvtModelObj *obj;

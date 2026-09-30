@@ -36,13 +36,16 @@ typedef struct EvtUnit {
     u32 color50;       /* 0x50 */
     u8 pad54[0x18];   /* 0x54 */
     u32 value;         /* 0x6c: changed by evtUnitSetValueAndFlag */
-    u8 pad70[0x14];   /* 0x70 */
+    u8 pad70[0x10];   /* 0x70 */
+    void *effObj;      /* 0x80: effect object the vectors are written to */
     s32 currentTransitionValue; /* 0x84 */
     s32 previousTransitionValue; /* 0x88 */
     EvtUnitOwner *owner; /* 0x8c */
     u8 pad90[4];      /* 0x90 */
     s32 unk94;         /* 0x94 */
-    u8 pad98[0x10];   /* 0x98 */
+    u8 pad98[8];      /* 0x98 */
+    s32 pathId;        /* 0xa0 */
+    u8 padA4[4];      /* 0xa4 */
     u32 flags;         /* 0xa8 */
     s16 unkAC;         /* 0xac */
     u8 padAE[4];      /* 0xae */
@@ -65,6 +68,14 @@ typedef struct EvtUnit {
     s16 transitionElapsed; /* 0x15c */
     s16 transitionDuration; /* 0x15e */
 } EvtUnit;
+
+extern void func_001174C0(s32 path);
+extern void func_00116F38(s32 path);
+extern void dds3PreparePathVectorPair(s32 path);
+extern void effObjSetInnerFirstVec(void *obj, void *vec);
+extern void effObjSetInnerSecondVec(void *obj, void *vec);
+extern void func_002E7F20(f32, f32, f32);
+extern void effMiscQuatMultiplyVU();
 
 void func_00221D00(EvtUnit *unit, s32 a, s32 b, s32 c);
 
@@ -370,7 +381,23 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC080);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_002227C8);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222A20);
+s32 func_00222A20(EvtUnit *unit) {
+    f32 v[4];
+
+    func_001174C0(unit->pathId);
+    func_00116F38(unit->pathId);
+    VU0_STORE_VF($vf10, v);
+    effObjSetInnerFirstVec(unit->effObj, v);
+    if (unit->flags & 0x10) {
+        dds3PreparePathVectorPair(unit->pathId);
+        VU0_MOVE_VF(vf11, vf10);
+        func_002E7F20(0.0f, 3.14159265f, 0.0f);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF($vf10, v);
+        effObjSetInnerSecondVec(unit->effObj, v);
+    }
+    return 1;
+}
 
 void func_00222AA8(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x70, src);
