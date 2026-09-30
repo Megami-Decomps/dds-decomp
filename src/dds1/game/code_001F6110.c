@@ -86,7 +86,7 @@ typedef struct BtlUnit {
     u32 effectFlags; /* 0x114 */
     u8 unk_118[8];
     u16 unk_120;
-    u8 unk_122[2];
+    u16 unk_122;
     u16 mode;
     u8 unk_126[0x1F6];
     u32 effectObject;
@@ -119,7 +119,9 @@ typedef struct BtlState {
 } BtlState;
 
 typedef struct BtlCmdCtx {
-    u8 unk_00[0x18];
+    u8 unk_00[0xC];
+    u32 flags; /* 0x0C: command-context flags */
+    u8 unk_10[8];
     BtlUnit *unit;
     u8 unk_1C[4];
     s32 commandMode;
@@ -1016,8 +1018,8 @@ u32 func_001F84A8(void) {
     s32 context = func_0010D6A8();
     u16 first = scrReadIntParameter(0);
     u32 second = scrReadIntParameter(1);
-    *(u32 *)(context + 0x20) = 2;
-    *(u32 *)(context + 0x24) = first;
+    ((BtlCmdCtx *)context)->commandMode = 2;
+    ((BtlCmdCtx *)context)->commandValue = first;
     *(u32 *)(context + 0x8c) = second;
     *(u32 *)(context + 0x38) = second;
     return 1;
@@ -1027,7 +1029,7 @@ u32 btlCmdSetContextFlagOne(void) {
     s32 context;
 
     context = func_0010D6A8();
-    *(u32 *)(context + 0xc) = *(u32 *)(context + 0xc) | 1;
+    ((BtlCmdCtx *)context)->flags = ((BtlCmdCtx *)context)->flags | 1;
     return 1;
 }
 
@@ -1037,7 +1039,7 @@ u32 func_001F8538(void) {
 
     context = func_0010D6A8();
     value = scrReadIntParameter(0);
-    *(u16 *)(*(s32 *)(context + 0x18) + 0x122) = value;
+    ((BtlCmdCtx *)context)->unit->unk_122 = value;
     return 1;
 }
 
@@ -1809,7 +1811,7 @@ u32 func_001FA460(void) {
     s32 context;
 
     context = func_0010D6A8();
-    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x10000000) != 0) {
+    if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x10000000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -2098,9 +2100,9 @@ u32 func_001FACD8(void) {
 
 extern s32 D_003BAAA8;
 
-void btlBindActorSlot(BtlActor *actor, s32 arg1) {
+void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)func_001A17F0();
-    s32 slot = scrCreateTaskForProcessId(state->list->count - 1, D_003BAAA8, arg1);
+    s32 slot = scrCreateTaskForProcessId(state->list->count - 1, D_003BAAA8, taskArg);
     s32 handle;
     scrSetCurrentActor(slot, actor);
     handle = *(s32 *)((u8 *)func_00101A70(slot) + 0xCC);
@@ -2145,15 +2147,15 @@ extern void func_00221FF8(s32, s32);
 void func_001FADF8(void) {
     s32 state = func_001A17F0();
     if ((*(u32 *)(state + 0x1f4) & 0x40000000) == 0) {
-        s32 actor = *(s32 *)(state + 0x228);
+        BtlUnit *actor = ((BtlState *)state)->units;
         while (actor != 0) {
-            if ((*(u32 *)(actor + 0x110) & 2) != 0) {
-                s32 effect = *(s32 *)(actor + 0x320);
+            if ((actor->flags & 2) != 0) {
+                s32 effect = actor->statusEffectHandle;
                 if (effect != 0) {
                     func_00221FF8(effect, 0);
                 }
             }
-            actor = *(s32 *)(actor + 0x344);
+            actor = actor->next;
         }
     }
 }
@@ -2382,11 +2384,11 @@ INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5750);
 
 INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5760);
 
-s32 func_001FB2A0(s32 arg0) {
+s32 func_001FB2A0(s32 directory) {
     char buf[0x70];
 
     if (D_003BD476 != 0) {
-        func_003014F0(buf, "pfs0:/%s", arg0);
+        func_003014F0(buf, "pfs0:/%s", directory);
         return sceDopen(buf);
     }
     D_003BD868 = 0;
@@ -2554,17 +2556,17 @@ typedef struct BtlResourceNameRecord {
     char name[0x1C]; /* 0x1C */
 } BtlResourceNameRecord;
 
-void func_001FBF30(s32 arg0, s32 arg1, s32 arg2) {
-    ((BtlResourceNameRecord *)arg0)->word00 = arg1;
-    ((BtlResourceNameRecord *)arg0)->word04 = arg2;
+void func_001FBF30(s32 recordAddress, s32 firstWord, s32 secondWord) {
+    ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
+    ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
 }
 
-u32 func_001FBF40(s32 arg0) {
-    return ((BtlResourceNameRecord *)arg0)->word14;
+u32 func_001FBF40(s32 recordAddress) {
+    return ((BtlResourceNameRecord *)recordAddress)->word14;
 }
 
-u32 func_001FBF48(s32 arg0) {
-    return ((BtlResourceNameRecord *)arg0)->word08;
+u32 func_001FBF48(s32 recordAddress) {
+    return ((BtlResourceNameRecord *)recordAddress)->word08;
 }
 
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *resource, char *output) {
@@ -2646,30 +2648,30 @@ void func_001FC2E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);
 
-void func_001FC720(s32 arg0, s32 arg1, s32 arg2) {
-    ((BtlResourceNameRecord *)arg0)->word00 = arg1;
-    ((BtlResourceNameRecord *)arg0)->word04 = arg2;
+void func_001FC720(s32 recordAddress, s32 firstWord, s32 secondWord) {
+    ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
+    ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
 }
 
-u32 func_001FC730(s32 arg0) {
-    return ((BtlResourceNameRecord *)arg0)->word08;
+u32 func_001FC730(s32 recordAddress) {
+    return ((BtlResourceNameRecord *)recordAddress)->word08;
 }
 
-void func_001FC738(char *arg0, char *arg1) {
-    strcpy(arg0 + 0x21, arg1);
-    ((BtlResourceNameRecord *)arg0)->nameLength = strlen(arg1);
+void func_001FC738(char *record, char *name) {
+    strcpy(record + 0x21, name);
+    ((BtlResourceNameRecord *)record)->nameLength = strlen(name);
 }
 
-void func_001FC778(s32 arg0, void *arg1) {
-    func_003014F0(arg1, D_003BB818, arg0 + 0x21, arg0 + 0x1c);
+void func_001FC778(s32 recordAddress, void *output) {
+    func_003014F0(output, D_003BB818, recordAddress + 0x21, recordAddress + 0x1c);
 }
 
-void func_001FC7A8(s32 arg0, void *arg1) {
-    func_003014F0(arg1, D_003BB820, arg0 + 0x21);
+void func_001FC7A8(s32 recordAddress, void *output) {
+    func_003014F0(output, D_003BB820, recordAddress + 0x21);
 }
 
-void func_001FC7D0(s32 arg0, u32 arg1) {
-    ((BtlResourceNameRecord *)arg0)->word14 = arg1;
+void func_001FC7D0(s32 recordAddress, u32 value) {
+    ((BtlResourceNameRecord *)recordAddress)->word14 = value;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);
