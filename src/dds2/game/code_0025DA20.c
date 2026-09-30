@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern s32 func_0024B040(u32);
+
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void func_002C3E58(u8 *);
@@ -124,6 +126,9 @@ extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *updat
 extern void func_0025D8C8(void);
 
 extern s32 func_002C54B0(s32);
+extern s32 func_002C5480(s32);
+extern s32 func_002C5498(s32);
+extern u8 *D_00435E38;
 
 extern u8 D_003CDA88[];
 
@@ -402,6 +407,24 @@ void func_0025E240(CampDisplayDefaults *display) {
     display->unk1C = 0;
 }
 
+typedef struct CampKeyNode {
+    u16 frame;
+    u8 pad02[0xA];
+    s16 condition;             /* 0xC */
+    u8 pad0E[0x22];
+    struct CampKeyNode *next;  /* 0x30 */
+    struct CampKeyNode *alt;   /* 0x34 */
+} CampKeyNode;
+
+typedef struct CampKeyTrack {
+    s32 type;
+    u8 pad04[0x18];
+    s16 base;                  /* 0x1C */
+    u8 pad1E[0x36];
+    CampKeyNode *first;        /* 0x54 */
+    CampKeyNode *fallback;     /* 0x58 */
+} CampKeyTrack;
+
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E288);
 
 typedef struct CampListLayout {
@@ -439,7 +462,33 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E460);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E6F0);
+void func_0025E6F0(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNode **out2) {
+    s32 base;
+
+    *out1 = 0;
+    *out2 = 0;
+    if (track == 0) {
+        return;
+    }
+    base = track->base;
+    *out2 = track->first;
+    while (*out2 != 0) {
+        if (value < (*out2)->frame + base) {
+            break;
+        }
+        *out2 = (*out2)->next;
+    }
+    if (*out2 != 0) {
+        *out1 = (*out2)->alt;
+    } else {
+        *out1 = track->fallback;
+    }
+    if (track->type == 2) {
+        while (*out1 != 0 && func_0024B040((*out1)->condition) != 1) {
+            *out1 = (*out1)->alt;
+        }
+    }
+}
 
 u32 func_0025E7B0(void) {
     return 0;
@@ -471,12 +520,18 @@ typedef struct CampEntryNode {
 typedef struct {
     u8 pad00[0x2034];
     CampEntryNode *entries; /* 0x2034 */
-    u8 pad2038[0x3A8];
+    u8 pad2038[0x394];
+    s32 sceneMode; /* 0x23CC */
+    u8 pad23D0[0x10];
     s32 pendingValue; /* 0x23E0 */
     u8 pad23E4[0x28];
     u32 state; /* 0x240C */
     u32 effectHandle; /* 0x2410 */
-    u8 pad2414[0x30];
+    u8 pad2414[0x1C];
+    u32 menuState; /* 0x2430 */
+    u8 pad2434[8];
+    u32 optionFlags; /* 0x243C */
+    u8 pad2440[4];
     s32 idCount; /* 0x2444 */
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
@@ -568,9 +623,9 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EC00);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025ED10);
 
-void func_0025EE00(s32 arg0) {
+void func_0025EE00(CampScene *scene) {
     func_0025EC00();
-    if (*(s32 *)(arg0 + 0x23cc) == 1) {
+    if (scene->sceneMode == 1) {
         func_00137888();
         return;
     }
@@ -600,9 +655,9 @@ void func_0025EEC0(void) {
     quotient = 1 / info[0];
 }
 
-void func_0025EEE8(s32 arg0) {
-    if ((*(s32 *)(arg0 + 0x2430) == 0) || (*(s32 *)(arg0 + 0x2430) == 5)) {
-        *(u32 *)(arg0 + 0x2430) = 1;
+void func_0025EEE8(CampScene *scene) {
+    if ((scene->menuState == 0) || (scene->menuState == 5)) {
+        scene->menuState = 1;
     }
 }
 
@@ -636,20 +691,20 @@ void func_0025F2B0(s32 arg0) {
 void func_0025F2C8(void) {
 }
 
-void mnuCampSetPrimaryOption(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x243c) = (*(u32 *)(arg0 + 0x243c) & 0xfffffffc) | (arg1 & 3);
+void mnuCampSetPrimaryOption(CampScene *scene, u32 option) {
+    scene->optionFlags = (scene->optionFlags & 0xfffffffc) | (option & 3);
 }
 
-u32 mnuCampGetPrimaryOption(s32 arg0) {
-    return *(u32 *)(arg0 + 0x243c) & 3;
+u32 mnuCampGetPrimaryOption(CampScene *scene) {
+    return scene->optionFlags & 3;
 }
 
-void mnuCampSetSecondaryOption(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x243c) = (*(u32 *)(arg0 + 0x243c) & 0xfffffff3) | ((arg1 & 3) << 2);
+void mnuCampSetSecondaryOption(CampScene *scene, u32 option) {
+    scene->optionFlags = (scene->optionFlags & 0xfffffff3) | ((option & 3) << 2);
 }
 
-u32 mnuCampGetSecondaryOption(s32 arg0) {
-    return (*(u32 *)(arg0 + 0x243c) & 0xc) >> 2;
+u32 mnuCampGetSecondaryOption(CampScene *scene) {
+    return (scene->optionFlags & 0xc) >> 2;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F330);
@@ -819,7 +874,31 @@ void func_0025FCD8(s32 scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FD78);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FE70);
+s32 func_0025FE70(void) {
+    s32 result = 0;
+    s32 i;
+
+    for (i = 0; i < 0x100; i++) {
+        if (func_002C5480(i) != 0) {
+            continue;
+        }
+        if (func_002C54B0(i) != 0) {
+            continue;
+        }
+        if (*(u8 *)(i + D_00435DD0 + 0x1340) == 0) {
+            continue;
+        }
+        if ((D_00435E38[i * 8] & 3) != 0) {
+            result = 1;
+            break;
+        }
+        if (func_002C5498(i) != 0) {
+            result = 1;
+            break;
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FF18);
 

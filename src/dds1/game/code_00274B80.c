@@ -80,7 +80,8 @@ typedef struct StaffMenuWork {
     u8 pad18[8];
     s32 resourceList;         /* 0x20 */
     s32 selectedList;         /* 0x24 */
-    u8 pad28[8];
+    s32 activeMark;           /* 0x28 */
+    u8 pad2C[4];
     u32 selectionFlags;       /* 0x30 */
     u32 selectionId;          /* 0x34 */
 } StaffMenuWork;
@@ -91,6 +92,8 @@ typedef struct MenuSelectionNode {
     u32 flags;                /* 0x48 */
     u8 pad4C[0xC];
     struct MenuSelectionNode *next; /* 0x58 */
+    u8 pad5C[4];
+    u32 sortKey;              /* 0x60 */
 } MenuSelectionNode;
 
 typedef struct MenuSelectionList {
@@ -152,6 +155,11 @@ typedef struct MenuSpriteArguments {
 } MenuSpriteArguments;
 
 extern u32 func_00285B20(u32);
+extern void func_0027BEB0();
+extern void func_0027BE90();
+extern void mnuClearListFlagsOneAndTwo();
+extern void sndSetSequenceVolumePan();
+extern void func_00276898();
 extern void func_002858E8();
 extern void func_002858F8(s32, void *);
 extern void func_0027C788(s32);
@@ -487,7 +495,7 @@ extern void mnuReleaseResourceList();
 extern void func_0027E6B8();
 
 /* Tear down the staff panel and all four optional scene-side resources. */
-s32 mnuStaffReleasePanelScene(void) {
+s32 mnuStaffReleasePanelScene(s32 unused) {
     s32 context = func_00101A70();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 entryList = context + 0x15C;
@@ -525,7 +533,34 @@ void func_00276B10(s32 arg0) {
     ;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276B38);
+s32 func_00276B38(s32 arg0) {
+    s32 context = func_00101A70();
+    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
+    s32 changed = 0;
+    u32 input = func_00285B20(0x300);
+
+    if (input & 0x100) {
+        mnuStaffReleasePanelScene(arg0);
+        func_0027BEB0(*(s32 *)(context + 0x7D8));
+        changed = 1;
+    }
+    if (input & 0x200 && changed == 0) {
+        mnuStaffReleasePanelScene(arg0);
+        func_0027BE90(*(s32 *)(context + 0x7D8));
+        changed = 1;
+    }
+    mnuClearListFlagsOneAndTwo(*(s32 *)(context + 0x7D8));
+    if (changed != 0) {
+        func_00276898(arg0);
+        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        menu->activeMark = 0;
+        if (menu->staffMode == 1) {
+            func_00276B10(context);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276C28);
 
@@ -682,7 +717,22 @@ u32 func_00277C80() {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277CB8);
+void func_00277CB8(void) {
+    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)func_00101A70())->menu;
+    MenuSelectionState *state = (MenuSelectionState *)menu->selectedList;
+    MenuSelectionNode *node = state->list->first;
+
+    while (node != NULL) {
+        u32 key = node->sortKey;
+        if (!(node->flags & 1) && key != 0) {
+            break;
+        }
+        node = node->next;
+    }
+    if (node != NULL) {
+        mnuSeekListNode(node->index, (s32)((MenuInputNode *)state)->flags);
+    }
+}
 
 u32 ptySkillMenuRebuildAfterMutation(s32 arg0, s32 arg1) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)func_00101A70(arg1))->menu;

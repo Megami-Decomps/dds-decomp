@@ -595,6 +595,81 @@ The same holds after `cvt.w.s`/`trunc.w.s` (no `cvt.w.s $fN; jr; swc1 $fN` in
 either retail ELF), and retail never moves the closing `addu` of an indexed
 `la $rd,sym($rs)` into a following `jr`'s slot; the pre-pass handles both.
 
+## Loops, tail calls and register priority (gcc 2.95 internals)
+
+### Non-rotated loops: `b` to the top-of-body test (stmt.c `expand_end_loop`)
+
+`expand_end_loop` "rolls" the loop-top test to the bottom. It scans from the top
+of the loop for every jump whose target is the loop's exit label (the loop test
+*and every `break`*). It counts INSN and JUMP_INSN only (CALL_INSN not counted)
+and stops looking once more than 30 have been counted after the first exit
+found. Everything from the loop top up to and including the **last** such jump
+is moved after the rest of the loop (the `continue`/increment block) and a
+`b start` is put in front:
+
+- last exit jump inside the 30-insn window: `[b top][incr][top: test + body up
+  to the last break][remaining tail]`. This is retail's non-rotated loop
+  (for `for` loops the increment sits before the test). The tail block that
+  follows the last `break` ends up physically before the increment.
+- last exit farther away: only the test is rolled, and jump.c
+  `duplicate_loop_exit_test` (no call or label in the exit code) rotates it into
+  guard + do-while. This is what plain C usually gives.
+
+So a loop that keeps `b` + test at the top needs its last `break` within the
+first ~30 insns of the loop. Example (DDS2 `func_0025FE70`): a `continue` chain
+followed by two separate `{ result = 1; break; }` exits; one merged
+`if (a || b) continue; result = 1; break;` rotates differently.
+
+`*out` as the loop cursor (DDS2 `func_0025E6F0`): `*out2 = track->first;
+while (*out2 != 0) { if (v < (*out2)->frame + base) break; *out2 = (*out2)->next; }`,
+then `if (*out2 != 0) *out1 = (*out2)->alt; else *out1 = track->fallback;` (a
+store in each arm; a ternary puts the temp in `$7`).
+
+List walks with a shared increment block (`b test; L: lw next; test: beqz node;
+... bnez flags, L`): load the second field into its own local first
+(`u32 key = node->sortKey;` before the `flags & 1` test) so reorg fills the
+`bnez` slot with that load; otherwise both slots take a copy of the increment.
+
+### Tail call kept as `jal` + epilogue: loop notes
+
+Any loop construct around the last call leaves NOTE_INSN_LOOP notes and the call
+stops being a sibcall (`do { } while (0)`, `for (;;) { ...; break; }`, a
+one-iteration `for`); `switch (0)`, statement expressions, `if (1)` and plain
+blocks do not. A real loop around the call is therefore one natural cause of a
+`jal` tail. A dummy `do { ... } while (0)` wrapped around a whole function body
+only for this is a lever and is not accepted (DDS2 `func_002A5F80`,
+`func_002A5890`, DDS1 `func_002C1548` match that way and stay INCLUDE_ASM).
+Other causes: varargs, struct return, converted return, address-taken locals,
+stack arguments, nested `return;`.
+
+### Saved-register order: global-alloc priority
+
+global.c `allocno_compare`: priority = `floor_log2(n_refs) * n_refs / live_length`.
+Higher priority allocates first and takes the lowest free callee-saved register;
+ties go to the lower pseudo number (parameters in declaration order).
+`cc.sh -dl` prints `used N times across L insns` per pseudo, so the order can be
+computed. Natural source shapes that flip it:
+
+1. **End a live range earlier.** DDS1 `func_00276B38`: `changed = 1;` after the
+   calls in each `if` block (not before them) shortens `input`'s live length and
+   fixes a `$17`/`$18` swap.
+2. **Drop a reference.** DDS2 `func_002B4180`: one `window` local for paired
+   stores removes a use of `party`, which lets `arg1` outrank it.
+3. **Order of the definition.** DDS2 `func_002A7260`: `u32 flag = keep != 0;`
+   first and the base pointer assigned after the `if` puts flag in `$20` and the
+   table pointer in `$19`.
+
+### Alias sets stop gcse merging a reload
+
+gcse refuses to merge two MEMs with different alias sets, so a typed field access
+and a differently typed access to the same location stay two loads; two typed or
+two raw accesses are merged even across a loop. A retail reload after a loop
+therefore means the two accesses had different types. Acceptable only when the
+codebase already has a second struct view of the object (DDS1 `func_00277CB8`:
+`MenuSelectionState->list` for the walk, `((MenuInputNode *)state)->flags` for
+the seek argument). A raw cast next to a typed access of the same field is a
+lever (DDS2 `func_002B40F8` stays INCLUDE_ASM).
+
 ## Not allowed
 
 These are fakes, and check_unit reports them as `TRICK`:
