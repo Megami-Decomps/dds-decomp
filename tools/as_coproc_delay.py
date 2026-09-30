@@ -55,6 +55,10 @@ def expands_indexed(line):
 # `sdl; sdr; jr; nop` (the filled retail cases are cc1's own .set noreorder fills).
 UNALIGNED_STORE = re.compile(r"\s+(?:sdl|sdr|swl|swr)\s")
 
+# A float constant load (`li.s`, whatever it expands to) stays out of the next
+# branch's slot: neither ELF has `mtc1 $1,$fN` or `mtc1 $0,$fN` in a delay slot.
+LI_S = re.compile(r"\s+li\.s\s")
+
 
 # Retail never fills a branch delay slot with mfhi/mflo (DDS1 135 and DDS2 101
 # `mfhi|mflo; branch` sequences, none with the move in the slot).
@@ -98,7 +102,7 @@ def main(src, dst):
         after_unaligned = i > 0 and UNALIGNED_STORE.match(lines[i - 1]) and MEM_INDEXED.match(line)
         if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
                 next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line) or labelled
-                                    or UNALIGNED_STORE.match(line) or after_unaligned)) \
+                                    or UNALIGNED_STORE.match(line) or after_unaligned or LI_S.match(line))) \
                 or hilo_before_branch:
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
