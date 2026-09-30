@@ -1,10 +1,25 @@
 #include "common.h"
 
+#include "pcp_vu0.h"
 #include "eff.h"
 
 extern BillDispatch D_003AAF88[];
 
 extern BillDispatch D_003AAF84[];
+
+extern void (*D_003AAFB0[])();
+
+extern void (*D_003AAFC0[])();
+
+extern BillDispatch D_003AAF80[];
+
+extern void func_00336AA8(void);
+extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern void *func_0033A2D8(void *, s32, s32, s64, s32);
+extern void func_001686F0(void *);
+extern void func_00169370(void *);
+extern void func_003297C8(void *);
 
 typedef struct EffectEntry {
     u8 pad00[0x10];
@@ -16,10 +31,12 @@ typedef struct EffectDispatchState {
     EffectEntry *entries;
     u8 pad18[4];
     u32 value1C;
-    u8 pad20[0x40];
+    u8 matrix20[0x40];
     u32 value60;
     u8 value64;
-    u8 pad65[0x4D];
+    u8 pad65[0xB];
+    u8 matrix70[0x40];
+    u16 handler;
     u16 valueB2;
 } EffectDispatchState;
 
@@ -33,25 +50,82 @@ typedef struct BillWork {
     u8 stagedValue;
 } BillWork;
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001670C0);
+typedef struct SoundBank {
+    u8 pad00[8];
+    s32 value08;
+    u8 pad0C[0x44];
+    s32 value50;
+    u8 pad54[0x24];
+    s32 value78;
+    u8 pad7C[0x59C];
+} SoundBank;
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167110);
+typedef struct SoundVoice SoundVoice;
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167168);
+typedef struct SoundMixer {
+    SoundBank banks[2];
+    u8 pad0C30[8];
+    void *resource;
+    u8 pad0C3C[4];
+    SoundVoice *voiceList;
+} SoundMixer;
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001671A0);
+struct SoundVoice {
+    u8 pad00[4];
+    SoundMixer *mixer;
+    u8 pad08[0x11C];
+    SoundVoice *next;
+};
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001671D8);
+void *func_001670C0(s32 index, void *arg) {
+    EffectDispatchState *effect = D_003AAF80[index].func(arg);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167220);
+    effect->handler = index;
+    effect->valueB2 = 1;
+    return effect;
+}
+
+void *func_00167110(EffectDispatchState *effect) {
+    EffectDispatchState *result = D_003AAF80[effect->handler].func();
+
+    result->handler = effect->handler;
+    result->valueB2 = 1;
+    return result;
+}
+
+void func_00167168(EffectDispatchState *effect) {
+    D_003AAF88[effect->handler].func();
+}
+
+void func_001671A0(EffectDispatchState *effect) {
+    D_003AAF84[effect->handler].func();
+}
+
+void func_001671D8(EffectDispatchState *effect) {
+    D_003AAFB0[effect->handler]();
+    effect->valueB2 = 1;
+}
+
+void func_00167220(EffectDispatchState *effect) {
+    D_003AAFC0[effect->handler]();
+    func_001671D8(effect);
+}
 
 u16 effBillGetQueuedCount(EffectDispatchState *effect) {
     return effect->valueB2;
 }
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167268);
+void func_00167268(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167278);
+/* vu0 routine: effect->matrix20 = matrix * effect->matrix70 via func_00336AA8 */
+void func_00167278(EffectDispatchState *effect, void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX_B(effect->matrix70);
+    func_00336AA8();
+    VU0_STORE_MATRIX(effect->matrix20);
+}
 
 void func_001672D8(EffectDispatchState *effect, u32 value) {
     effect->value60 = value;
@@ -83,7 +157,11 @@ s32 func_00167400(EffectDispatchState *effect) {
     return (s32)effect + 0x20;
 }
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167408);
+void *func_00167408(s32 height, s32 flags) {
+    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
+    func_0033A2D8(packet, flags | 0x54, 9, 0x525252521, height);
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167480);
 
@@ -93,7 +171,19 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_00167778);
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167838);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167988);
+u64 *func_00167988(u32 flags) {
+    u64 *packet = sdfAllocPacketAligned(0x80);
+
+    packet[0] = 7;
+    packet[1] = 0x5000000700000000ULL;
+    packet[2] = 0xB400000000008001ULL;
+    packet[3] = 0xFF515151510ULL;
+    packet[4] = flags | 0x14C;
+    packet[15] = 0;
+    packet[14] = 0;
+    packet[13] = 0;
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167A10);
 
@@ -105,15 +195,49 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_00168280);
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_001682B0);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001683F0);
+void func_001683F0(SoundMixer *mixer) {
+    SoundVoice *voice = mixer->voiceList;
+    SoundVoice *next;
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00168448);
+    while (voice != NULL) {
+        next = voice->next;
+        func_001686F0(voice);
+        voice = next;
+    }
+    func_00169370(mixer);
+    func_003297C8(mixer->resource);
+}
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00168478);
+s32 func_00168448(SoundMixer *mixer, u16 kind) {
+    int bank = kind >= 2;
+    return mixer->banks[bank].value50;
+}
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001684A8);
+s32 func_00168478(SoundMixer *mixer, u16 kind) {
+    int bank = kind >= 2;
+    return mixer->banks[bank].value08;
+}
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00168500);
+s32 func_001684A8(SoundMixer *mixer, u16 kind) {
+    int bank = kind >= 2;
+    if (kind == 2) {
+        return mixer->banks[bank].value08;
+    }
+    return mixer->banks[bank].value78;
+}
+
+void func_00168500(SoundVoice *voice) {
+    SoundVoice **link = &voice->mixer->voiceList;
+    SoundVoice *cur;
+
+    while ((cur = *link) != NULL) {
+        if (cur == voice) {
+            *link = cur->next;
+            return;
+        }
+        link = &cur->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00168548);
 
