@@ -112,6 +112,11 @@
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvaddx." #axis " vf10, vf0, vf2x\n\t" \
     "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
     : : "f" (f))
+/* vf *= f through a gcc-chosen GPR (qmtc2.ni reg,vf2; vmulx.xyzw vf,vf,vf2x):
+ * the scale bits stay in a saved register across a loop, unlike VU0_SCALAR_OP. */
+#define VU0_SCALE_VF(vf, f) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw " #vf ", " #vf ", vf2x\n\t.set reorder" \
+    : : "r" (f))
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
