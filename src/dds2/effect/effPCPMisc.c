@@ -310,6 +310,28 @@ typedef struct {
     u32 unk170;      /* 0x170 spawn parameter */
 } EffPCPWorkF34;
 
+/* Shared 0x10-byte task prefix, zeroed when paired resource work is created. */
+typedef struct EffPCPTaskHeader {
+    u32 word00;
+    u32 word04;
+    u32 word08;
+    u8 pad0C[4];
+} EffPCPTaskHeader;
+
+/* Four groups of duplicated handles share a count and two allocation handles. */
+typedef struct EffPCPBatchWork {
+    u8 pad00[0x58];
+    u32 count;            /* 0x58: handles per group */
+    u8 pad5C[0x30];
+    u8 activeGroups[4];  /* 0x8C */
+    u8 pad90[0xD4];
+    u32 *entries;         /* 0x164: six-word records */
+    u8 pad168[0xC];
+    u32 *duplicates;      /* 0x174: four groups of handles */
+    u32 duplicateHandle;  /* 0x178 */
+    u32 workHandle;       /* 0x17C */
+} EffPCPBatchWork;
+
 extern u8 D_003B1A38[];
 
 extern u8 D_003B1A88[];
@@ -926,7 +948,7 @@ extern void *func_0018B130();
 extern void *func_0018BB38();
 
 void func_0017EDE8(u32 arg0) {
-    billDispatchByKind(*(u32 *)((s32)arg0 + 0x1c));
+    billDispatchByKind(((EffPCPWork *)arg0)->unk1C);
     func_00328E48(arg0);
 }
 
@@ -1180,9 +1202,9 @@ EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
     } while (i < 8);
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -1212,9 +1234,9 @@ EffPCPWorkF14 *effCreatePairedResourceWork(EffPCPWork *source) {
     } while (i < 8);
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -1433,9 +1455,9 @@ EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
     }
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -1468,9 +1490,9 @@ EffPCPWorkF14 *effCopyIndexedResourceWork(EffPCPWork *source) {
     }
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -1590,8 +1612,8 @@ EffPCPWork1C *func_00180770(EffPCPWork *src) {
 }
 
 void func_001807E0(u32 arg0) {
-    func_0016A620(*(u32 *)((s32)arg0 + 0x14));
-    func_0016A620(*(u32 *)((s32)arg0 + 0x18));
+    func_0016A620(((EffPCPWork1C *)arg0)->unk14);
+    func_0016A620(((EffPCPWork1C *)arg0)->unk18);
     func_00328E48(arg0);
 }
 
@@ -2243,7 +2265,7 @@ void *func_00182250(void) {
 }
 
 void func_00182288(u32 arg0) {
-    effPCPThunderFree(*(u32 *)((s32)arg0 + 0x1c));
+    effPCPThunderFree(((EffPCPWork *)arg0)->unk1C);
     func_00328E48(arg0);
 }
 
@@ -2424,7 +2446,7 @@ void *func_00182938(void) {
 }
 
 void func_00182970(u32 arg0) {
-    effPCPThunderFree(*(u32 *)((s32)arg0 + 0x1c));
+    effPCPThunderFree(((EffPCPWork *)arg0)->unk1C);
     func_00328E48(arg0);
 }
 
@@ -2590,7 +2612,7 @@ void effSetSharedScale(u32 unused, f32 value) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
 
 void func_00182E70(u32 arg0) {
-    func_0018E8F0(*(u32 *)((s32)arg0 + 0x34));
+    func_0018E8F0(((EffPCPCompactWork *)arg0)->resource);
     func_00328E48(arg0);
 }
 
@@ -2669,7 +2691,7 @@ void effPcpCompactRespawn(EffPCPCompactSrc *work) {
 }
 
 void func_001830F0(u32 arg0) {
-    func_0018FC88(*(u32 *)((s32)arg0 + 0x38));
+    func_0018FC88(((EffPCPCompactWork3C *)arg0)->resource);
     func_00328E48(arg0);
 }
 
@@ -2725,7 +2747,7 @@ void effPcpCompactLongRespawn(EffPCPSrcA *work) {
 }
 
 void func_00183448(u32 arg0) {
-    func_0018E8F0(*(u32 *)((s32)arg0 + 0x38));
+    func_0018E8F0(((EffPCPCompactWork3C *)arg0)->resource);
     func_00328E48(arg0);
 }
 
@@ -2956,7 +2978,7 @@ void effPcpChargeRespawn(EffPCPSrcD *work) {
 }
 
 void func_00183BB8(u32 arg0) {
-    effBlurReleaseFirstResource(*(u32 *)((s32)arg0 + 0x34));
+    effBlurReleaseFirstResource((u32)((EffPCPSrcD *)arg0)->resource);
     func_00328E48(arg0);
 }
 
@@ -2967,7 +2989,7 @@ void func_00183DB0(void *dst, void *src) {
 }
 
 void func_00183DC0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x20) = arg1;
+    ((EffPCPCompactWork *)arg0)->color20 = arg1;
 }
 
 EffPCPCompactWork *func_00183DC8(EffPCPCompactParams *params) {
@@ -3008,7 +3030,7 @@ void effPcpChargeLongRespawn(EffPCPSrcD *work) {
 }
 
 void func_00183F28(u32 arg0) {
-    effBlurReleaseSecondResource(*(u32 *)((s32)arg0 + 0x34));
+    effBlurReleaseSecondResource((u32)((EffPCPSrcD *)arg0)->resource);
     func_00328E48(arg0);
 }
 
@@ -3019,7 +3041,7 @@ void func_00184148(void *dst, void *src) {
 }
 
 void func_00184158(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x20) = arg1;
+    ((EffPCPCompactWork *)arg0)->color20 = arg1;
 }
 
 void func_00184160(EffPCPWork *work) {
@@ -3039,7 +3061,7 @@ void *func_00184198(void) {
 }
 
 void func_001841D0(u32 arg0) {
-    effPCPThunderFree(*(u32 *)((s32)arg0 + 0x1c));
+    effPCPThunderFree(((EffPCPWork *)arg0)->unk1C);
     func_00328E48(arg0);
 }
 
@@ -3091,7 +3113,7 @@ void func_00184400(EffPCPWorkF10 *work, f32 val) {
 }
 
 void func_00184408(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1;
+    ((EffPCPWork *)arg0)->unk14 = arg1;
 }
 
 void func_00184410(EffPCPWork *work) {
@@ -3111,7 +3133,7 @@ void *func_00184448(void) {
 }
 
 void func_00184480(u32 arg0) {
-    effPCPThunderFree(*(u32 *)((s32)arg0 + 0x1c));
+    effPCPThunderFree(((EffPCPWork *)arg0)->unk1C);
     func_00328E48(arg0);
 }
 
@@ -3134,7 +3156,7 @@ void func_001846A8(EffPCPWorkF10 *work, f32 val) {
 }
 
 void func_001846B0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1;
+    ((EffPCPWork *)arg0)->unk14 = arg1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001846B8);
@@ -3177,7 +3199,7 @@ void func_00184B10(void *work, void *src) {
 }
 
 void func_00184B28(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 100) = arg1;
+    ((EffPCPWork *)arg0)->unk64 = arg1;
 }
 
 void func_00184B30(void *dst, void *src) {
@@ -3279,7 +3301,7 @@ void func_00185100(void *dst, void *src) {
 }
 
 void func_00185110(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+    ((EffPCPWork *)arg0)->unk54 = arg1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185118);
@@ -3351,7 +3373,7 @@ void effPcpCopyVector60(void *work, void *src) {
 }
 
 void func_00186118(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xb8) = arg1;
+    ((EffPCPWork *)arg0)->unkB8 = arg1;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -3575,7 +3597,7 @@ EffPCPSpinWork *func_00186C60(EffPCPSpinWork *src) {
 }
 
 void func_00186D40(u32 arg0) {
-    func_0016A620(*(u32 *)((s32)arg0 + 0x60));
+    func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle0);
     func_00328E48(arg0);
 }
 
@@ -3614,7 +3636,7 @@ void func_00186E18(void *dst, void *src) {
 }
 
 void func_00186E28(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x5c) = arg1;
+    ((EffPCPSpinWork *)arg0)->color = arg1;
 }
 
 void func_00186E30(EffPCPWork *work, f32 val) {
@@ -3654,8 +3676,8 @@ EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
 }
 
 void func_00186FE0(u32 arg0) {
-    func_0016A620(*(u32 *)((s32)arg0 + 100));
-    func_0016A620(*(u32 *)((s32)arg0 + 0x60));
+    func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle1);
+    func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle0);
     func_00328E48(arg0);
 }
 
@@ -3692,7 +3714,7 @@ void func_00187118(void *dst, void *src) {
 }
 
 void func_00187128(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x5c) = arg1;
+    ((EffPCPSpinWork *)arg0)->color = arg1;
 }
 
 void func_00187130(EffPCPWork *work, f32 val) {
@@ -3732,8 +3754,8 @@ EffPCPSpinWork *func_00187228(EffPCPSpinWork *src) {
 }
 
 void func_001872E0(u32 arg0) {
-    func_0016A620(*(u32 *)((s32)arg0 + 100));
-    func_0016A620(*(u32 *)((s32)arg0 + 0x60));
+    func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle1);
+    func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle0);
     func_00328E48(arg0);
 }
 
@@ -3768,7 +3790,7 @@ void func_00187418(void *dst, void *src) {
 }
 
 void func_00187428(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x5c) = arg1;
+    ((EffPCPSpinWork *)arg0)->color = arg1;
 }
 
 void func_00187430(EffPCPWork *work, f32 val) {
@@ -3969,7 +3991,7 @@ void func_00187940(void) {
 }
 
 void func_00187958(u32 arg0) {
-    effPCPThunderFree3(*(u32 *)((s32)arg0 + 0x20));
+    effPCPThunderFree3(((EffPCPBurstWork *)arg0)->unk20);
     func_00328E48(arg0);
 }
 
@@ -3980,7 +4002,7 @@ void func_00187A90(void *dst, void *src) {
 }
 
 void func_00187AA0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x10) = arg1;
+    ((EffPCPWork *)arg0)->unk10 = arg1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187AA8);
@@ -4031,7 +4053,7 @@ void func_00187B88(EffPCPSrc76 *work) {
 }
 
 void func_00187CA8(u32 arg0) {
-    effPCPThunderFree(*(u32 *)((s32)arg0 + 0x30));
+    effPCPThunderFree(((EffPCPSrc76 *)arg0)->resource);
     func_00328E48(arg0);
 }
 
@@ -4042,7 +4064,7 @@ void func_00187E30(void *dst, void *src) {
 }
 
 void func_00187E40(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x24) = arg1;
+    ((EffPCPWork *)arg0)->unk24 = arg1;
 }
 
 void func_00187E48(EffPCPWork *work, f32 val) {
@@ -4052,8 +4074,8 @@ void func_00187E48(EffPCPWork *work, f32 val) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187E50);
 
 void effPcpReleaseNestedWork(u32 arg0) {
-    sdfQueueAssetRelease(*(u32 *)((s32)arg0 + 0xa8));
-    func_003297C8(*(u32 *)((s32)arg0 + 0xac));
+    sdfQueueAssetRelease(((EffPCPWork *)arg0)->unkA8);
+    func_003297C8(((EffPCPWork *)arg0)->unkAC);
     func_00328E48(arg0);
 }
 
@@ -4116,7 +4138,7 @@ void func_00188508(void) {
 }
 
 void effPcpReleaseBeamClone(u32 arg0) {
-    effPcpReleaseNestedWork(*(u32 *)((s32)arg0 + 0x5c));
+    effPcpReleaseNestedWork((u32)((EffPCPWork *)arg0)->nestedWork);
     func_00328E48(arg0);
 }
 
@@ -4131,7 +4153,7 @@ void effPcpNestedWorkSetFloat(EffPCPWork *work, f32 value) {
 }
 
 void func_00188798(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+    ((EffPCPWork *)arg0)->unk54 = arg1;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -4222,7 +4244,7 @@ void func_00188C98(void) {
 }
 
 void func_00188CB0(u32 arg0) {
-    effPcpReleaseNestedWork(*(u32 *)((s32)arg0 + 0x7c));
+    effPcpReleaseNestedWork((u32)((EffPCPWork *)arg0)->linkedWork);
     func_00328E48(arg0);
 }
 
@@ -4292,7 +4314,7 @@ void effPcpLinkedWorkSetFloat(EffPCPWork *work, f32 value) {
 }
 
 void func_00188E28(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x60) = arg1;
+    ((EffPCPWork *)arg0)->unk60 = arg1;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -4315,8 +4337,8 @@ u8 *func_00189190(u8 *work) {
     u8 *flags;
     u32 i;
 
-    if (*(u32 *)(work + 0x174) != 0) {
-        count = *(u32 *)(work + 0x58);
+    if (((EffPCPBatchWork *)work)->duplicates != 0) {
+        count = ((EffPCPBatchWork *)work)->count;
         size = count * 16;
         stride = count * 4;
         group = 0;
@@ -4329,7 +4351,7 @@ u8 *func_00189190(u8 *work) {
             u32 *slot = (u32 *)(*(u8 **)(copy + 0x174) + offset);
 
             if (*flags != 0) {
-                u32 first = *(u32 *)(offset + *(u32 *)(work + 0x174));
+                u32 first = *(u32 *)(offset + (u32)((EffPCPBatchWork *)work)->duplicates);
                 for (i = 0; i < count; i++) {
                     *slot++ = effParamWorkDuplicate(first);
                 }
@@ -4343,8 +4365,8 @@ u8 *func_00189190(u8 *work) {
 
 void func_001892A8(u8 *work) {
     u32 i = 0;
-    u32 count = *(u32 *)(work + 0x58);
-    u32 *entry = *(u32 **)(work + 0x164);
+    u32 count = ((EffPCPBatchWork *)work)->count;
+    u32 *entry = ((EffPCPBatchWork *)work)->entries;
     u32 *list;
     u32 *p;
 
@@ -4356,7 +4378,7 @@ void func_001892A8(u8 *work) {
             effPCPThunderFree3(handle);
         } while (i < count);
     }
-    list = *(u32 **)(work + 0x174);
+    list = ((EffPCPBatchWork *)work)->duplicates;
     count = count * 4;
     if (list != NULL) {
         p = list;
@@ -4370,9 +4392,9 @@ void func_001892A8(u8 *work) {
                 i++;
             } while (i < count);
         }
-        func_003297C8(*(u32 *)(work + 0x178));
+        func_003297C8(((EffPCPBatchWork *)work)->duplicateHandle);
     }
-    func_003297C8(*(u32 *)(work + 0x17C));
+    func_003297C8(((EffPCPBatchWork *)work)->workHandle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189360);
@@ -4388,7 +4410,7 @@ void func_001898C8(EffPCPWork *work, f32 val) {
 }
 
 void func_001898D0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x170) = arg1;
+    ((EffPCPWork *)arg0)->unk170 = arg1;
 }
 
 EffPCPSprayWork *effSprayEffectCreateFromTable(void *src) {
@@ -4456,7 +4478,7 @@ void func_00189DC8(void *dst, void *src) {
 }
 
 void func_00189DD8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x14) = arg1;
+    ((EffPCPWork *)arg0)->unk14 = arg1;
 }
 
 void func_00189DE0(EffPCPWorkF10 *work, f32 val) {
@@ -4507,7 +4529,7 @@ void func_0018A688(EffPCPWork *work, f32 val) {
 }
 
 void func_0018A690(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x114) = arg1;
+    ((EffPCPWork *)arg0)->unk114 = arg1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A698);
@@ -4595,7 +4617,7 @@ void func_0018B118(void *dst, void *src) {
 }
 
 void func_0018B128(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x9c) = arg1;
+    ((EffPCPWork *)arg0)->unk9C = arg1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B130);
@@ -4707,7 +4729,7 @@ void func_0018BA08(EffPCPWork *work, f32 val) {
 }
 
 void func_0018BA10(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0xa4) = arg1;
+    ((EffPCPWork *)arg0)->unkA4 = arg1;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018BA18);
