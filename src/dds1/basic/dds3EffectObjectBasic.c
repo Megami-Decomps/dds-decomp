@@ -1,9 +1,10 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     void *objectHandle; /* 0x0 passed to func_00111840, returned by effObjGetObjectHandle */
     u32 flags;   /* 0x4 effect flag bits */
-    u32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
+    s32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
     void *bill;   /* 0xC passed to func_00151E60/billSetKind1Entry */
     u32 unk10;   /* 0x10 cleared by func_00115BB8 */
     u32 unk14;   /* 0x14 cleared by func_00115BB8 */
@@ -12,7 +13,9 @@ typedef struct {
     void *unk20; /* 0x20 set to the owner by func_00115BB8 */
     u16 unk24;   /* 0x24 */
     u16 unk26;   /* 0x26 kind copied from +0xF */
-} EffectData; /* 0x28 bytes */
+    void *unk28; /* 0x28 vector passed to func_00190130 */
+    void *unk2C; /* 0x2C node handle owned by func_00115318 */
+} EffectData; /* 0x30 bytes */
 
 typedef struct {
     u8 pad0[0x60];
@@ -20,7 +23,9 @@ typedef struct {
 } EffectParameters;
 
 typedef struct {
-    u8 pad[0xF];             /* 0x0 */
+    u8 pad0[4];              /* 0x0 */
+    u32 unk4;                /* 0x4 world counter copied by func_00114A78 */
+    u8 pad8[7];              /* 0x8 */
     u8 unkF;                 /* 0xF kind checked ==7 by func_001158B8 */
     u8 pad10[8];             /* 0x10 */
     EffectData *data;         /* 0x18 */
@@ -38,10 +43,10 @@ void billSetKind1Entry(void *arg);
 void func_00114CE8(void *arg0, void *vec, s32 arg2);
 void func_00114E90(void *arg0, void *vec, s32 arg2);
 void func_00114FE0(void *arg0, void *vec, s32 arg2);
-void func_001150F0(void);
+void *func_001150F0();
 void func_00115398(void);
-/* Old-style (K&R) callee: callers pass (object, value) positionally. */
-void func_00115478();
+/* Old-style (K&R) callee: callers pass (kind, value) positionally. */
+void *func_00115478();
 EffectData *func_001158B8(EffectObj *obj);
 void *func_002D0918(void *arg);
 void *func_002EB028(void *arg0, u32 *arg1, s32 arg2);
@@ -57,6 +62,22 @@ extern void *billCreateFromResource(s32 arg0, s32 arg1);
 extern void *billCreateIndexed(s32 arg0, u32 arg1);
 
 extern void *func_00151E60(void *arg);
+
+extern s32 func_002D9E58(void *param, s32 id);
+
+extern void effEventReleaseNode(void *node);
+
+extern void *func_00190130(void *bill, u32 id, void *vec);
+
+extern EffectObj *func_00110880(s32 kind);
+
+extern void dds3EnsureSlotData(void *obj);
+
+extern void effObjSetInnerFirstVec(void *obj, void *vec);
+
+extern void effObjSetInnerSecondVec(void *obj, void *vec);
+
+extern void effObjInnerVecBackup(void *params);
 
 /* Release the effect's dependent resources before clearing its data handle. */
 void effObjReleaseObjectData(EffectObj *obj) {
@@ -78,7 +99,28 @@ void *effObjGetObjectHandle(EffectObj *obj) {
     return obj->data->objectHandle;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114A78);
+EffectObj *func_00114A78(u32 arg0, void *arg1, void *arg2) {
+    EffectObj *obj;
+    EffectData *data;
+
+    obj = func_00110880(7);
+    if (obj == NULL) {
+        return NULL;
+    }
+    obj->unk4 = arg0;
+    dds3EnsureSlotData(obj);
+    effObjSetInnerFirstVec(obj, arg1);
+    effObjSetInnerSecondVec(obj, arg2);
+    effObjInnerVecBackup(obj->params);
+    data = obj->data;
+    data->flags = 0;
+    data->unk8 = 0;
+    data->bill = NULL;
+    data->unk20 = NULL;
+    data->unk24 = 0;
+    data->unk26 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114B18);
 
@@ -164,9 +206,37 @@ void func_00115298(void) {
     func_001150F0();
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001152B0);
+void *func_001152B0(void *arg0, void *arg1, void *arg2) {
+    u32 local;
+    void *result;
+    void *result2;
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115318);
+    local = 0;
+    result = func_002EB028(arg0, &local, 0);
+    result2 = func_001150F0(local, arg1, arg2);
+    func_002D0918(result);
+    return result2;
+}
+
+void func_00115318(EffectObj *obj, u32 arg1) {
+    EffectData *data;
+
+    data = obj->data;
+    if (data->unk8 != 5) {
+        return;
+    }
+    if (data->unk28 == NULL) {
+        return;
+    }
+    if (data->bill == NULL) {
+        return;
+    }
+    if (data->unk2C != NULL) {
+        effEventReleaseNode(data->unk2C);
+        data->unk2C = NULL;
+    }
+    data->unk2C = func_00190130(data->bill, arg1 & 0xFFFF, data->unk28);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115398);
 
@@ -180,11 +250,42 @@ void func_00115840(void) {
     func_00115478();
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115858);
+void *func_00115858(s32 kind, void *arg1) {
+    u32 local;
+    void *result;
+    void *result2;
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158B8);
+    local = 0;
+    result = func_002EB028(arg1, &local, 0);
+    result2 = func_00115478(kind, local);
+    func_002D0918(result);
+    return result2;
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001158F0);
+EffectData *func_001158B8(EffectObj *obj) {
+    EffectData *data;
+
+    data = NULL;
+    if (obj == NULL) {
+        return data;
+    }
+    if (obj->unkF != 7) {
+        return data;
+    }
+    data = obj->data;
+    if (data->unk8 != 6) {
+        data = NULL;
+    }
+    return data;
+}
+
+s32 func_001158F0(EffectObj *obj) {
+    if (func_001158B8(obj) == NULL) {
+        return 0;
+    }
+    VU0_LOAD_VF(vf10, (u8 *)obj->params + 0x40);
+    return 1;
+}
 
 /* Return the object's scalar parameter as an integer when data is present. */
 s32 effObjGetIntParam(EffectObj *obj) {
@@ -209,11 +310,67 @@ void effObjClearFlags(EffectObj *obj, s32 flags) {
     obj->data->flags &= ~flags;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BB8);
+s32 func_00115BB8(EffectObj *arg0, EffectObj *arg1) {
+    EffectData *data;
+    u8 kind;
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C20);
+    kind = arg1->unkF;
+    if (kind < 4 || (kind >= 10 && kind != 0x11)) {
+        return 0;
+    }
+    data = arg0->data;
+    data->unk18 = NULL;
+    data->unk20 = arg1;
+    data->unk24 = 0;
+    data->flags |= 4;
+    data->flags &= ~8;
+    data->unk10 = 0;
+    data->unk26 = arg1->unkF;
+    data->unk14 = 0;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C80);
+/* Billboard payload: state word and the SDF parameter block it was built from. */
+typedef struct {
+    u8 pad0[8];   /* 0x0 */
+    u32 unk8;     /* 0x8 */
+    void *unkC;   /* 0xC */
+} BillPayload;
+
+typedef struct {
+    u8 pad0[0x18]; /* 0x0 */
+    void *unk18;   /* 0x18 */
+} BillParam;
+
+void func_00115C20(EffectObj *obj) {
+    EffectData *data;
+    EffectObj *owner;
+    BillPayload *bill;
+
+    data = obj->data;
+    if (data->flags & 8) {
+        owner = data->unk20;
+        if (owner->unkF == 5) {
+            bill = owner->data->bill;
+            if (bill->unk8 != 0) {
+                return;
+            }
+            func_002D9E58(((BillParam *)bill->unkC)->unk18, data->unk24);
+        }
+    }
+}
+
+s32 func_00115C80(EffectObj *obj, EffectObj *arg1, s32 arg2) {
+    EffectData *data;
+
+    if (func_00115BB8(obj, arg1) == 0) {
+        return 1;
+    }
+    data = obj->data;
+    data->unk24 = arg2;
+    data->flags |= 8;
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F7D0);
 

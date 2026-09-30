@@ -6,13 +6,13 @@ extern s32 D_00437898;
 
 extern s32 func_0026CD50(u32);
 
-extern s64 func_0026C768(void);
+extern s32 func_0026C768(void);
 
 extern u32 func_00343ED0(u32, u32 *, u32);
 
 extern s32 D_00437880;
 
-extern u8 D_00437884;
+extern s8 D_00437884;
 
 extern void func_0026C900(void);
 
@@ -240,7 +240,15 @@ void func_0026C710(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C728);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C768);
+s32 func_0026C768(void) {
+    if (D_00437880 < 0) {
+        return 0;
+    }
+    if (D_00437885 != 0 && D_00437884 == 2) {
+        return 0;
+    }
+    return (s8)D_00437884;
+}
 
 s32 sndUpdateActiveMode(void) {
     if (D_00437880 < 0) {
