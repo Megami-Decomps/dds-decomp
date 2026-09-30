@@ -74,6 +74,19 @@
     "ppacb %0, $0, %0\n" \
     ".set reorder" \
     : "=r"(out) : "f"(128.0f) : "$3")
+/* The same pack without the "$3" clobber, as the effect draw templates wrote
+ * it (DDS2 func_002E6CB8 keeps a mask constant in $3 across the block). */
+#define EE_MMI_RGBA_PACK_UNCLOBBERED(out) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "mfc1 $3, %1\n" \
+    "qmtc2.ni $3, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    "vftoi0.xyzw vf10, vf10\n" \
+    "qmfc2.ni %0, vf10\n" \
+    "ppach %0, $0, %0\n" \
+    "ppacb %0, $0, %0\n" \
+    ".set reorder" \
+    : "=r"(out) : "f"(128.0f))
 
 /*
  * vf10 (floats) -> RGBA8888 word with the scale in a GPR:
