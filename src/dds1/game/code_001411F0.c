@@ -12,7 +12,9 @@ typedef struct FldCamPose {
     s32 unk50;
     u8 pad54[0x10];
     f32 negatedAngle;
-    u8 pad68[0x58];
+    u8 pad68[8];
+    s32 unk70;
+    u8 pad74[0x4C];
     s32 unkC0;
     u8 padC4[0x66];
     s16 unk12A;
@@ -755,7 +757,8 @@ typedef struct {
     u8 pad0[4];
     FldItem *items;
     u32 count;
-    u8 padC[8];
+    s32 model; /* 0xC */
+    FldPoint *pos; /* 0x10 */
 } FldSceneRecord; /* 0x14 bytes */
 
 s32 fldFindRecordItem(s32 scene, u32 index) {
@@ -802,6 +805,27 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_001447D0);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
+extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
+
+typedef struct FldFogParams {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    s32 unk10;
+} FldFogParams;
+extern FldFogParams D_00324B30;
+extern u128 D_00324A20;
+extern u128 D_00324A30;
+extern u128 D_00324A40;
+extern s32 D_003BAEB8;
+extern s32 D_003BAEBC;
+extern s32 D_003BAEC0;
+extern s32 D_003BAEC4;
+extern s32 D_003BAEC8;
+extern s32 D_003BAED0;
+extern s32 D_003BAECC;
+extern s32 D_003BAED4;
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00145B18);
 
 extern u32 D_003D40A0[];
@@ -860,9 +884,129 @@ void fldReleaseMenuSlots(void) {
     D_003BAED8 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00145EA0);
+extern void func_00125DA8(s32);
+extern f32 D_00324980[];
+extern FldVec4 D_003A05D8[]; /* default camera up vectors (3 copies), the first still read by asm func_00145B18 */
+extern void func_00133960(void);
+extern void func_00110860(s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00146080);
+/* Enters the field camera state for a fresh scene: releases the title slots and
+ * centers the camera on the scene's entry point. */
+void func_00145EA0(void) {
+    FldCamPose *cam = (FldCamPose *)D_0032E3B0;
+    f32 focus[4];
+    f32 eye[4];
+    FldVec4 up;
+    f32 entry[2];
+    s32 ix;
+    s32 iz;
+    s32 cx;
+    s32 cz;
+
+    sdfWaitSlotReady();
+    sdfWaitSlotReady();
+    fldReleaseTitleSlots();
+    D_003BAED8 = 0;
+    func_00125DA8(1);
+    func_00123E00();
+    evtSetSolarOverlayFullyVisible();
+    func_00133960();
+    cam->unk70 = 4;
+    func_00195548(0x54);
+    func_00110860(dds3GetWorldObject(), 1);
+    D_003BAED4 = 0;
+    D_003BAEB4 = cam->stage;
+    D_003BAEB8 = cam->unkC0;
+    D_003BAED0 = cam->unkC0;
+    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    cx = cam->x;
+    cz = cam->z;
+    iz = cz + entry[1];
+    ix = cx + entry[0];
+    memcpy(&up, &D_003A05D8[1], sizeof(up));
+    D_003BAECC = 0;
+    D_003BAEC8 = iz;
+    D_003BAEC4 = ix;
+    D_003BAEBC = ix;
+    D_003BAEC0 = iz;
+    focus[0] = ix;
+    focus[1] = 0.0f;
+    focus[2] = iz;
+    eye[0] = ix;
+    eye[1] = -24000.0f;
+    eye[2] = iz;
+    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&D_00324A20, focus);
+    PCP_COPY_VECTOR(&D_00324A40, &up);
+    D_00324B30.unk0 = 255.0f;
+    D_00324B30.unk8 = 1000.0f;
+    D_00324B30.unk4 = 255.0f;
+    D_00324B30.unkC = 20000.0f;
+    D_00324B30.unk10 = 0x108010;
+    D_00324980[4] = 2244.0f;
+    D_00324980[5] = 2118.0f;
+}
+
+extern s32 sdfModelCreateWithAlternateItems(s32, s32);
+extern s32 func_002D3288();
+
+/* Loads the scene's models into the menu slots, then centers the camera on the
+ * scene's entry point. */
+void func_00146080(void) {
+    FldCamPose *cam;
+    FldSceneRecord *rec;
+    f32 focus[4];
+    f32 eye[4];
+    FldVec4 up;
+    f32 entry[2];
+    s32 ix;
+    s32 iz;
+    s32 cx;
+    s32 cz;
+    s32 i;
+
+    rec = (FldSceneRecord *)D_003BAEDC;
+    for (i = 0; i < D_003BAEE0; i++, rec++) {
+        D_00348F30[i] = sdfModelCreateWithAlternateItems(0, rec->model);
+        ((FldPoint *)D_003D40B0)[i].x = rec->pos->x;
+        ((FldPoint *)D_003D40B0)[i].y = rec->pos->y;
+        ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
+    }
+    cam = (FldCamPose *)D_0032E3B0;
+    D_003D40A0[0] = func_002D3288(cam->fldmix[0].block);
+    D_003D40A0[1] = func_002D3288(cam->fldmix[1].block);
+    D_003BAED4 = 0;
+    D_003BAEB4 = cam->stage;
+    D_003BAEB8 = cam->unkC0;
+    D_003BAED0 = cam->unkC0;
+    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    cx = cam->x;
+    cz = cam->z;
+    iz = cz + entry[1];
+    ix = cx + entry[0];
+    memcpy(&up, &D_003A05D8[2], sizeof(up));
+    D_003BAECC = 0;
+    D_003BAEC8 = iz;
+    D_003BAEC4 = ix;
+    D_003BAEBC = ix;
+    D_003BAEC0 = iz;
+    focus[0] = ix;
+    focus[1] = 0.0f;
+    focus[2] = iz;
+    eye[0] = ix;
+    eye[1] = -24000.0f;
+    eye[2] = iz;
+    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&D_00324A20, focus);
+    PCP_COPY_VECTOR(&D_00324A40, &up);
+    D_00324B30.unk0 = 255.0f;
+    D_00324B30.unk8 = 1000.0f;
+    D_00324B30.unk4 = 255.0f;
+    D_00324B30.unkC = 20000.0f;
+    D_00324B30.unk10 = 0x108010;
+    D_00324980[4] = 2244.0f;
+    D_00324980[5] = 2118.0f;
+}
 
 void func_001462A8(void) {
     sdfWaitSlotReady();
@@ -876,7 +1020,41 @@ u32 func_001462D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001462D8);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00146900);
+/* Re-centers the scene camera on the current scene's entry point. */
+void func_00146900(void) {
+    FldCamPose *cam = (FldCamPose *)D_0032E3B0;
+    f32 focus[4];
+    f32 eye[4];
+    f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
+    f32 entry[2];
+    s32 ix;
+    s32 iz;
+
+    D_003BAEB4 = cam->stage;
+    D_003BAEB8 = cam->unkC0;
+    D_003BAED0 = cam->unkC0;
+    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    ix = (f32)(s32)cam->x + entry[0];
+    iz = (f32)(s32)cam->z + entry[1];
+    D_003BAEC8 = iz;
+    D_003BAEC4 = ix;
+    D_003BAEBC = ix;
+    D_003BAEC0 = iz;
+    focus[0] = ix;
+    focus[1] = 0.0f;
+    focus[2] = iz;
+    eye[0] = ix;
+    eye[1] = -24000.0f;
+    eye[2] = iz;
+    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&D_00324A20, focus);
+    PCP_COPY_VECTOR(&D_00324A40, up);
+    D_00324B30.unk0 = 255.0f;
+    D_00324B30.unk8 = 1000.0f;
+    D_00324B30.unk4 = 255.0f;
+    D_00324B30.unkC = 20000.0f;
+    D_00324B30.unk10 = 0x808080;
+}
 
 
 void func_00146A70(s32 arg0, s32 arg1, s32 arg2) {
@@ -1131,8 +1309,6 @@ void func_00147138(void) {
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A05D8);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0608);
-
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0618);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00147188);
 
