@@ -20,18 +20,17 @@ typedef struct {
 
 /* Billboard set allocated by func_00177120. */
 typedef struct EffBillboardWork {
-    s32 seed;   /* 0x00: copied from the parameter block */
-    u8 pad04[0xC];
+    u8 pad00[0x10];
     u32 mode;   /* 0x10 */
     u32 color;  /* 0x14 */
     f32 scale;  /* 0x18 */
     u32 handle; /* 0x1C */
 } EffBillboardWork;
 
-/* Parameter block read by func_00177120. */
-typedef struct Params {
-    s32 seed; /* 0x00 */
-} Params;
+/* Creation parameters read by func_00177120. */
+typedef struct EffBillboardParams {
+    s32 mode; /* 0x00: billboard mode for the new set */
+} EffBillboardParams;
 
 extern void *func_002CFEB8(s32 size);
 extern u32 effRetainResource(s32 kind);
@@ -83,11 +82,11 @@ void func_001770F8(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-/* Create the shared billboard set and seed its default colour and scale. */
-EffBillboardWork *func_00177120(Params *src) {
+/* Create the shared billboard set with its default colour and scale. */
+EffBillboardWork *func_00177120(EffBillboardParams *params) {
     EffBillboardWork *billboard = (EffBillboardWork *)func_002CFEB8(0x20);
 
-    billboard->mode = src->seed;
+    billboard->mode = params->mode;
     billboard->handle = effRetainResource(2);
     billSetBillboardMode(billboard->handle, 2);
     billboard->color = 0x80808080;
