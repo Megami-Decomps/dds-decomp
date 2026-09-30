@@ -131,7 +131,7 @@ void effDecrementFirstCountdown(EffCounterOwner *owner) {
 
 typedef struct BtlObjLink {
     void *owner;
-    s32 arg;
+    s32 arg; /* Some effect variants write/read only the low halfword. */
     s32 unk8;
 } BtlObjLink;
 

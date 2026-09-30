@@ -3030,15 +3030,16 @@ void billResetTrailIndices(u8 *work) {
 
 u8 *billCreateTrailNode(u8 *config, u32 resource) {
     u32 headerSize = 0x10;
-    u8 *base = func_002D03F8(*(u32 *)(config + 0x38) * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
-    u8 *node = body;
+    u8 *base = func_002D03F8(((EffBillConfig *)config)->frames.count * 0x2C + headerSize);
+    u8 *cursor = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *header = cursor;
 
-    body += headerSize;
-    *(u8 **)(node + 8) = base;
-    *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(*(u32 *)(config + 0x38), 0, resource);
-    return node;
+    cursor += headerSize;
+    *(u8 **)(header + 8) = base;
+    *(u8 **)header = cursor;
+    /* Required to match: this later count load retains byte-pointer arithmetic. */
+    ((EffFrameState *)header)->asset = (u8 *)func_002A3BD8(*(u32 *)(config + 0x38), 0, resource);
+    return header;
 }
 
 void func_002A2288(s32 work) {

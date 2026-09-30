@@ -41,9 +41,11 @@ typedef struct {
 } MenuProgressOwner;
 
 typedef struct MenuProgressWork {
-    u8 pad00[4];
+    s32 allocation;          /* 0x00 */
     s32 groupResource;       /* 0x04 */
-    u8 pad08[0x68];
+    u8 pad08[0x54];
+    s32 messageResources[2]; /* 0x5C: second handle opens the message window */
+    u8 pad64[0xC];
     s32 listResource;        /* 0x70 */
     MenuProgressOwner *list; /* 0x74 */
     MenuProgressOwner *owner;/* 0x78 */
@@ -86,10 +88,10 @@ typedef struct MenuSlotState {
     s32 batch;     /* 0x64 */
     u8 pad68[0x38];
     s32 effect[7]; /* 0xA0 */
-    s32 cur;       /* 0xBC */
-    s32 prev;      /* 0xC0 */
-    u8 padC4[0x18];
-    s32 mode;      /* 0xDC */
+    s32 cursorPositions[2]; /* 0xBC: initialized to -1 until selected */
+    u8 padC4[0x14];
+    s32 selectedSlot; /* 0xD8 */
+    s32 mode;         /* 0xDC */
 } MenuSlotState;
 
 typedef struct EffectPair {
@@ -587,19 +589,19 @@ u8 *func_00249E20(s32 reduced, s32 slot) {
     handle = func_002D03F8(0x164);
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x164);
-    *(s32 *)obj = handle;
+    ((MenuProgressWork *)obj)->allocation = handle;
     func_00285490(obj + 8);
     mnuLoadResourceHandles(obj);
-    mnuTerminalCreateEffects((s32)obj);
-    *(s32 *)(obj + 0x7C) = reduced;
-    *(s32 *)(obj + 0xDC) = reduced;
-    *(s32 *)(obj + 0x80) = slot;
-    *(s32 *)(obj + 0xD8) = slot;
-    mnuTerminalBuildMenus(obj);
-    evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj + 0x5C);
-    evtCreateMessageWindowIfMissing(*(s32 *)(obj + 0x60));
+    mnuTerminalCreateEffects((MenuSlotState *)obj);
+    ((MenuProgressWork *)obj)->mode = reduced;
+    ((MenuSlotState *)obj)->mode = reduced;
+    ((MenuProgressWork *)obj)->initState = slot;
+    ((MenuSlotState *)obj)->selectedSlot = slot;
+    mnuTerminalBuildMenus((MenuProgressWork *)obj);
+    evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", ((MenuProgressWork *)obj)->messageResources);
+    evtCreateMessageWindowIfMissing(((MenuProgressWork *)obj)->messageResources[1]);
     for (i = 0; i < 2; i++) {
-        *(s32 *)(obj + 0xBC + i * 4) = -1;
+        ((MenuSlotState *)obj)->cursorPositions[i] = -1;
     }
     func_00249DD0(obj);
     return obj;
