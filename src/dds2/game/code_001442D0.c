@@ -24,7 +24,9 @@ typedef struct FldWorkView {
     s32 unkC0;            /* 0xC0 */
     u8 unkC4[0x40];
     s16 eventActive;      /* 0x104 */
-    u8 unk106[0x46];
+    u8 unk106[0x24];
+    s16 unk12A;           /* 0x12A */
+    u8 unk12C[0x20];
     f32 x;                /* 0x14C */
     f32 y;
     f32 z;
@@ -2118,7 +2120,33 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D838);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DB50);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DDD8);
+extern s32 func_00128370(u32);
+
+void func_0014DDD8(void) {
+    if (D_00389770[4] < 0xC8) {
+        if (func_00128370(1) != 0) {
+            return;
+        }
+        if (func_00127398() != 0) {
+            return;
+        }
+        if (func_001275D0() != 0) {
+            return;
+        }
+        if (D_00436344 != 0) {
+            if (((FldWorkView *)D_00389770)->unk12A == 0) {
+                mnuSpawnResourceAtPosition(D_003A8EA0[0], D_003A8EA0[1], D_003A8EA0[2]);
+            }
+            D_00436344 = 0;
+        }
+        if (D_00436340 != 0) {
+            if (((FldWorkView *)D_00389770)->unk12A == 0) {
+                mnuSpawnResourceAtPosition(D_003A8E90[0], D_003A8E90[1], D_003A8E90[2]);
+            }
+            D_00436340 = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DEA8);
 
