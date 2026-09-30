@@ -184,6 +184,11 @@ extern u32 D_00436364;
 extern u32 D_00436354;
 
 extern u32 D_0043635C;
+extern s32 D_00436350;
+extern s32 D_00436358;
+extern s32 D_00436360;
+extern void func_003297C8(s32);
+extern void func_0014E6A8();
 
 extern s32 D_0043637C;
 
@@ -2214,7 +2219,37 @@ void fldReleaseTitleTextures(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C10);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014EC00);
+void func_0014EC00(s32 field, s32 arg1, s32 arg2) {
+    char path[32];
+    s32 size;
+    s32 handle;
+
+    D_00436350 = 0;
+    D_00436354 = 0;
+    D_00436358 = field;
+    D_0043635C = arg1;
+    D_00436360 = arg2;
+    D_00436364 = 0;
+    if ((u32)(field - 8) < 2) {
+        func_0035C860(path, "/fld/f/pnl/df%03d_a.tmx", field);
+    } else if (field == 0xC) {
+        func_0035C860(path, "/fld/f/pnl/df%03d_b.tmx", 0xC);
+    } else {
+        func_0035C860(path, "/fld/f/pnl/df%03d.tmx", field);
+    }
+    handle = func_00343ED0(path, &size, 0);
+    D_00436368 = func_0032C138(size);
+    func_003297C8(handle);
+    if (field == 0xC) {
+        func_0035C860(path, "/fld/f/pnl/df_b.tmx");
+        handle = func_00343ED0(path, &size, 0);
+        D_0043636C = func_0032C138(size);
+        func_003297C8(handle);
+    }
+    if (fldTitleIsActive() == 0) {
+        kwlnTaskCreate(D_00413C10, 0x2B0A, 0, 1, func_0014E6A8, fldReleaseTitleTextures, 0);
+    }
+}
 
 void fldDestroyTitleTask(void) {
     if (fldTitleIsActive()) {
