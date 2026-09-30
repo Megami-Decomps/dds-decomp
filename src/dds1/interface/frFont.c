@@ -390,7 +390,13 @@ void func_00195520(s32 arg0) {
     D_003BB174 = arg0;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195530);
+/* Clear flag bits from the shared font flag byte; returns the previous value. */
+u8 func_00195530(u8 mask) {
+    u8 old = D_003BB174;
+
+    D_003BB174 = old & ~mask;
+    return old;
+}
 
 void func_00195548(u32 arg0) {
     D_003BB178 = arg0;
