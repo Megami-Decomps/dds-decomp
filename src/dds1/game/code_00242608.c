@@ -509,7 +509,16 @@ void mnuCampLinkFontGlyph(CampScene *scene) {
     scene->fontResource = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243AD8);
+extern void func_002D0B50(s32 *);
+
+/* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
+void func_00243AD8(void) {
+    s32 info[8];
+    s32 quotient;
+
+    func_002D0B50(info);
+    quotient = 1 / info[0];
+}
 
 void func_00243B00(CampScene *scene) {
     if ((scene->menuState == 0) || (scene->menuState == 5)) {
