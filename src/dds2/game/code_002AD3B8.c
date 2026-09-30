@@ -105,28 +105,55 @@ typedef struct MenuStaffContext {
     u8 tail[4];           /* 0xB10C */
 } MenuStaffContext;
 
-/* Saved choices for the two staff-menu transition variants. */
+/* Each staff list owns a cursor-bearing window at +0x18. */
+typedef struct MenuStaffList {
+    u8 pad00[0x18];
+    u8 *window;
+} MenuStaffList;
+
+typedef struct MenuStaffWindow {
+    u8 pad00[0x18];
+    s32 *cursor;
+    u8 pad1C[8];
+    s32 rowCount; /* 0x24 */
+} MenuStaffWindow;
+
+/* Staff menu state: selected objects, three list variants, and pending transitions. */
 typedef struct MenuStaffChoices {
-    u8 pad00[0x24];
-    s32 previous;          /* 0x24 */
-    s32 requested;         /* 0x28 */
-    s32 alternatePrevious; /* 0x2C */
+    u8 pad00[8];
+    u8 *primaryObject;      /* 0x08 */
+    u8 *secondaryObject;    /* 0x0C */
+    u8 *firstList;          /* 0x10 */
+    u8 *secondList;         /* 0x14 */
+    u8 *thirdList;          /* 0x18 */
+    s32 currentSelection;   /* 0x1C */
+    s32 thirdListEnabled;   /* 0x20 */
+    s32 previous;           /* 0x24 */
+    s32 requested;          /* 0x28 */
+    s32 alternatePrevious;  /* 0x2C */
     s32 alternateRequested; /* 0x30 */
+    s32 firstListState;     /* 0x34 */
+    s32 secondListState;    /* 0x38 */
+    s32 secondListReset;    /* 0x3C */
+    s32 thirdListState;     /* 0x40 */
+    s32 thirdListIndex;     /* 0x44 */
+    s32 thirdListValue;     /* 0x48 */
+    s32 thirdListReset;     /* 0x4C */
 } MenuStaffChoices;
 
 s64 func_002AD3B8(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(5);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
-    object = *(u8 **)(menu + 8);
+    object = menu->primaryObject;
     if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
         func_002AD330(context, 0);
     } else {
-        if (*(s32 *)(menu + 0x38) == 0) {
+        if (menu->secondListState == 0) {
             func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
@@ -153,7 +180,7 @@ u32 func_002AD510(void) {
 
 s64 func_002AD518(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
     s64 state;
@@ -166,7 +193,7 @@ s64 func_002AD518(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        *(s32 *)(menu + 0x1C) = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
+        menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
         func_002C42C0(popup, D_003E74F8);
     }
     if (buttons & 2) {
@@ -205,7 +232,7 @@ u32 func_002AD700(void) {
 
 s64 func_002AD708(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
     s64 state;
@@ -218,7 +245,7 @@ s64 func_002AD708(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        *(s32 *)(menu + 0x1C) = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
+        menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
         func_002C42C0(popup, D_003E7514);
     }
     if (buttons & 2) {
@@ -257,7 +284,7 @@ u32 func_002AD8F0(void) {
 
 s64 func_002AD8F8(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
     s64 state;
@@ -270,7 +297,7 @@ s64 func_002AD8F8(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        *(s32 *)(menu + 0x1C) = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
+        menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
         func_002C42C0(popup, D_003E7530);
     }
     if (buttons & 2) {
@@ -316,7 +343,7 @@ u32 func_002ADB18(void) {
 
 s64 func_002ADB48(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(0xc33);
     s64 state;
@@ -332,7 +359,7 @@ s64 func_002ADB48(s32 callback) {
     if (buttons & 2) {
         func_002C42C0(popup, D_003E7434);
     }
-    window = *(u8 **)(menu + 0xC);
+    window = menu->secondaryObject;
     if (window != 0) {
         if (!(buttons & 0x300000)) {
             func_002B9808((s32)window);
@@ -352,13 +379,13 @@ s64 func_002ADB48(s32 callback) {
 
 s64 func_002ADC70(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(0xD);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
-    object = *(u8 **)(menu + 0xC);
+    object = menu->secondaryObject;
     if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
         func_002AD330(context, 1);
     } else {
@@ -378,13 +405,13 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
 
 s64 func_002ADF90(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(6);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
-    object = *(u8 **)(menu + 8);
+    object = menu->primaryObject;
     if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
         func_002AD330(context, 0);
     } else {
@@ -403,7 +430,7 @@ s64 func_002AE078(s32 callback) {
 
 s32 func_002AE0B0(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)func_00101958();
-    u8 *menu = context->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     u32 *window = &context->windowFlags;
     s32 index = **(s32 **)(context->selection + 0x1C);
 
@@ -417,8 +444,8 @@ s32 func_002AE0B0(s32 unused) {
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
-    *(s32 *)(menu + 0x34) = 0;
-    func_002BAF50(*(s32 *)(menu + 0x10), (s32)context->tail);
+    menu->firstListState = 0;
+    func_002BAF50((s32)menu->firstList, (s32)context->tail);
     return 1;
 }
 
@@ -470,18 +497,18 @@ void func_002AE2D0(s32 context, u8 *entry, s32 target) {
 
 s32 func_002AE408(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
-    u8 *window = *(u8 **)(*(s32 *)(menu + 0x10) + 0x18);
-    s32 *node = *(s32 **)(window + 0x18);
+    u8 *window = ((MenuStaffList *)menu->firstList)->window;
+    s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
     s32 count;
     s32 i;
 
     if (node != 0) {
         first = *node;
-        count = *(s32 *)(window + 0x24);
+        count = ((MenuStaffWindow *)window)->rowCount;
     } else {
         first = 0;
         count = 0;
@@ -502,13 +529,13 @@ s32 func_002AE408(s32 callback) {
     }
     func_002AE0B0(callback);
     if (first != 0 || count != 0) {
-        mnuSeekListNode(first, *(s32 *)(*(s32 *)(menu + 0x10) + 0x18));
+        mnuSeekListNode(first, (s32)((MenuStaffList *)menu->firstList)->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
-                func_002B97D8(*(s32 *)(menu + 0x10));
+                func_002B97D8((s32)menu->firstList);
             }
         }
-        mnuResetListNodeFadeCounters(*(s32 *)(*(s32 *)(menu + 0x10) + 0x18));
+        mnuResetListNodeFadeCounters((s32)((MenuStaffList *)menu->firstList)->window);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;
@@ -542,7 +569,7 @@ void func_002AEA58(s32 callback) {
 s32 func_002AEAA0(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)func_00101958();
     u32 *window = &context->windowFlags;
-    u8 *menu = context->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = **(s32 **)(context->selection + 0x1C);
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
@@ -560,8 +587,8 @@ s32 func_002AEAA0(s32 unused) {
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
-    *(s32 *)(menu + 0x3C) = 0;
-    func_002BAF50(*(s32 *)(menu + 0x14), (s32)context->tail);
+    menu->secondListReset = 0;
+    func_002BAF50((s32)menu->secondList, (s32)context->tail);
     return 1;
 }
 
@@ -621,18 +648,18 @@ void func_002AECF0(s32 context, u8 *entry, s32 target) {
 
 s32 func_002AEEA8(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
-    u8 *window = *(u8 **)(*(s32 *)(menu + 0x14) + 0x18);
-    s32 *node = *(s32 **)(window + 0x18);
+    u8 *window = ((MenuStaffList *)menu->secondList)->window;
+    s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
     s32 count;
     s32 i;
 
     if (node != 0) {
         first = *node;
-        count = *(s32 *)(window + 0x24);
+        count = ((MenuStaffWindow *)window)->rowCount;
     } else {
         first = 0;
         count = 0;
@@ -653,13 +680,13 @@ s32 func_002AEEA8(s32 callback) {
     }
     func_002AEAA0(callback);
     if (first != 0 || count != 0) {
-        mnuSeekListNode(first, *(s32 *)(*(s32 *)(menu + 0x14) + 0x18));
+        mnuSeekListNode(first, (s32)((MenuStaffList *)menu->secondList)->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
-                func_002B97D8(*(s32 *)(menu + 0x14));
+                func_002B97D8((s32)menu->secondList);
             }
         }
-        mnuResetListNodeFadeCounters(*(s32 *)(*(s32 *)(menu + 0x14) + 0x18));
+        mnuResetListNodeFadeCounters((s32)((MenuStaffList *)menu->secondList)->window);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;
@@ -685,7 +712,7 @@ void func_002AF898(s32 callback) {
 s32 func_002AF8E0(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)func_00101958();
     u32 *window = &context->windowFlags;
-    u8 *menu = context->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = **(s32 **)(context->selection + 0x1C);
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
@@ -703,11 +730,11 @@ s32 func_002AF8E0(s32 unused) {
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
-    *(s32 *)(menu + 0x40) = 0;
-    if (*(s32 *)(menu + 0x20) != 0) {
-        *(s32 *)(menu + 0x4C) = 0;
+    menu->thirdListState = 0;
+    if (menu->thirdListEnabled != 0) {
+        menu->thirdListReset = 0;
     }
-    func_002BAF50(*(s32 *)(menu + 0x18), (s32)context->tail);
+    func_002BAF50((s32)menu->thirdList, (s32)context->tail);
     return 1;
 }
 
@@ -735,15 +762,15 @@ s32 func_002AFA58(s32 unused) {
 
 void func_002AFB38(s32 context, u8 *entry, s32 unused, s32 flag) {
     char buf[16];
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 current;
     s32 base;
 
     func_002C1B68(context + 0xaa50, 1);
     current = func_002C55C0(entry);
     func_0026C918(0, D_00435E5C + current * 0x19);
-    func_0026C918(1, D_003E7400[*(s32 *)(menu + 0x44)]);
-    func_0035C860(buf, D_00437BD8, *(s32 *)(menu + 0x48));
+    func_0026C918(1, D_003E7400[menu->thirdListIndex]);
+    func_0035C860(buf, D_00437BD8, menu->thirdListValue);
     func_0026C918(2, (s32)buf);
     base = func_002BDA50(current);
     func_0035C860(buf, D_00437BD8, func_002BDA78(current) - base);
@@ -757,18 +784,18 @@ void func_002AFB38(s32 context, u8 *entry, s32 unused, s32 flag) {
 
 s32 func_002AFC58(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
-    u8 *window = *(u8 **)(*(s32 *)(menu + 0x18) + 0x18);
-    s32 *node = *(s32 **)(window + 0x18);
+    u8 *window = ((MenuStaffList *)menu->thirdList)->window;
+    s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
     s32 count;
     s32 i;
 
     if (node != 0) {
         first = *node;
-        count = *(s32 *)(window + 0x24);
+        count = ((MenuStaffWindow *)window)->rowCount;
     } else {
         first = 0;
         count = 0;
@@ -789,13 +816,13 @@ s32 func_002AFC58(s32 callback) {
     }
     func_002AF8E0(callback);
     if (first != 0 || count != 0) {
-        mnuSeekListNode(first, *(s32 *)(*(s32 *)(menu + 0x18) + 0x18));
+        mnuSeekListNode(first, (s32)((MenuStaffList *)menu->thirdList)->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
-                func_002B97D8(*(s32 *)(menu + 0x18));
+                func_002B97D8((s32)menu->thirdList);
             }
         }
-        mnuResetListNodeFadeCounters(*(s32 *)(*(s32 *)(menu + 0x18) + 0x18));
+        mnuResetListNodeFadeCounters((s32)((MenuStaffList *)menu->thirdList)->window);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;

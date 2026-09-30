@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 extern u32 D_00439188;
 
@@ -84,15 +85,15 @@ extern u16 D_00439184;
 
 typedef struct VuAsset {
     u8 pad00[4];
-    u32 unk4;              /* 0x04 */
-    u32 unk8;              /* 0x08 */
+    u32 param4;            /* 0x04 */
+    u32 param8;            /* 0x08 */
     u32 unkC;              /* 0x0C */
     u8 pad10[0xC];
-    f32 unk1C;             /* 0x1C */
+    f32 scale;             /* 0x1C */
     u32 unk20;             /* 0x20 */
-    u32 kind;              /* 0x24 */
-    f32 unk28;             /* 0x28 */
-    f32 unk2C;             /* 0x2C */
+    u32 mode;              /* 0x24 */
+    f32 y;                 /* 0x28 */
+    f32 x;                 /* 0x2C */
     u8 pad30[8];
     u64 unk38;             /* 0x38 */
     u64 unk40;             /* 0x40 */
@@ -141,7 +142,7 @@ extern VuGeomRef D_00468210[];
 
 extern void func_00336EC0(void *, u32, void *, u32, u32, f32, f32, f32);
 
-extern void func_00339160(s32 arg0);
+extern void func_00339160(s32 workAddress);
 
 extern u8 D_0037B080[];
 
@@ -285,14 +286,14 @@ void sdfVuMultiplyScratchByPrimary(void) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_00336BE8(void *arg0) {
-    VU0_LOAD_MATRIX_B(arg0);
+void func_00336BE8(void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
     func_00336AA8();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_00336C10(void *arg0) {
-    VU0_LOAD_MATRIX_B(arg0);
+void func_00336C10(void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
     func_00336B00();
 }
 
@@ -430,8 +431,8 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-/* vu0 routine: rotate the three vectors at arg0 + 0x40 by the 3x3 of the global matrix into vf24-vf26, store them */
-void func_00336E60(void *arg0) {
+/* vu0 routine: rotate the three vectors at vectors + 0x40 by the 3x3 of the global matrix into vf24-vf26, store them */
+void func_00336E60(void *vectors) {
     void *m = (void *)D_00439188;
     __asm__ volatile (
         ".set noreorder                \n"
@@ -454,17 +455,17 @@ void func_00336E60(void *arg0) {
         "sqc2 vf3, 0x10(%2)           \n"
         "sqc2 vf4, 0x20(%2) \n"
         ".set reorder"
-        : : "r"(arg0), "r"(m), "r"(D_00476250) : "memory");
+        : : "r"(vectors), "r"(m), "r"(D_00476250) : "memory");
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
 
-void func_00336F88(void *out, u8 *work, void *reference, f32 deltaX, f32 deltaY) {
+void func_00336F88(void *out, VuAsset *work, void *reference, f32 deltaX, f32 deltaY) {
     func_00336EC0(out, D_00439188, reference,
-                  *(u32 *)(work + 8), *(u32 *)(work + 4),
-                  *(f32 *)(work + 0x1c),
-                  *(f32 *)(work + 0x2c) + deltaX,
-                  *(f32 *)(work + 0x28) + deltaY);
+                  work->param8, work->param4,
+                  work->scale,
+                  work->x + deltaX,
+                  work->y + deltaY);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336FC8);
@@ -741,8 +742,8 @@ void func_00339000(work)
     }
 }
 
-void func_00339160(s32 arg0) {
-    if ((*(u32 *)(arg0 + 0x44) & 0x10) != 0) {
+void func_00339160(s32 workAddress) {
+    if ((*(u32 *)(workAddress + 0x44) & 0x10) != 0) {
         func_00338B30();
         return;
     }
@@ -753,19 +754,19 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00339188);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00339270);
 
-void func_00339390(u32 arg0) {
-    u32 temp_v0;
-    s32 temp_v1;
+void func_00339390(u32 workAddress) {
+    u32 flags;
+    s32 address;
 
-    temp_v1 = (s32)arg0;
-    func_00339160(temp_v1);
-    temp_v0 = *(u32 *)(temp_v1 + 0x44);
-    if ((temp_v0 & 0x1000) != 0) {
-        func_00339188(arg0);
-        temp_v0 = *(u32 *)(temp_v1 + 0x44);
+    address = (s32)workAddress;
+    func_00339160(address);
+    flags = *(u32 *)(address + 0x44);
+    if ((flags & 0x1000) != 0) {
+        func_00339188(workAddress);
+        flags = *(u32 *)(address + 0x44);
     }
-    if ((temp_v0 & 1) != 0) {
-        func_00339270(arg0);
+    if ((flags & 1) != 0) {
+        func_00339270(workAddress);
         return;
     }
 }
@@ -815,10 +816,22 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003395A0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003396D0);
 
-void sdfProcessReferencedObjects(u8 **context, u8 *source) {
-    u32 *objects = *(u32 **)(*context + 12);
-    u16 *indices = (u16 *)(source + 24);
-    if ((*(u16 *)(source + 22) & 0x800) != 0) {
+typedef struct VuObjectContext {
+    u8 pad00[0x0C];
+    u32 *objects; /* 0x0C: indexed object handles */
+} VuObjectContext;
+
+typedef struct VuObjectRefCommand {
+    u8 pad00[0x16];
+    u16 flags; /* 0x16 */
+    u16 count; /* 0x18 */
+    u16 objectIndices[1]; /* 0x1A */
+} VuObjectRefCommand;
+
+void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *source) {
+    u32 *objects = (*context)->objects;
+    u16 *indices = &source->count;
+    if ((source->flags & 0x800) != 0) {
         s32 count = *indices;
         if (count != 0) {
             indices++;
@@ -829,8 +842,8 @@ void sdfProcessReferencedObjects(u8 **context, u8 *source) {
     }
 }
 
-void func_0033A090(u32 arg0) {
-    D_00439188 = arg0;
+void func_0033A090(u32 matrixAddress) {
+    D_00439188 = matrixAddress;
 }
 
 extern u8 D_00476240[];
@@ -842,8 +855,8 @@ void func_0033A098(u8 *object) {
     }
 }
 
-void func_0033A0C0(f32 arg0) {
-    D_00439190 = arg0;
+void func_0033A0C0(f32 scale) {
+    D_00439190 = scale;
 }
 
 void func_0033A0C8(void) {
@@ -886,17 +899,17 @@ s32 sdfConsCreateDrawPacket(s32 list, s32 tex, s32 data) {
     return (s32)packet;
 }
 
-u32 func_0033A290(u32 arg0, s32 arg1) {
-    func_0032D460(arg0, (arg1 >> 4) - 2);
-    return arg0;
+u32 func_0033A290(u32 packet, s32 size) {
+    func_0032D460(packet, (size >> 4) - 2);
+    return packet;
 }
 
 s32 sdfConsCalculateDrawPacketSize(s32 width, s32 height) {
     return (width * height + 2) << 4;
 }
 
-s32 func_0033A2D0(s32 arg0) {
-    return arg0 + 0x20;
+s32 func_0033A2D0(s32 size) {
+    return size + 0x20;
 }
 
 void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s32 height) {
@@ -992,7 +1005,86 @@ void func_0033A5C0(u32 arg0) {
     D_00438A68 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A5C8);
+/* Camera/viewport record; builds the perspective matrix (vf28-vf31 -> matrix) and the screen offsets. */
+typedef struct SdfCamera {
+    u32 flags;       // 0x00: 1 half-height, 2 field-of-view projection
+    f32 aspect;      // 0x04
+    f32 scale;       // 0x08
+    f32 fov;         // 0x0C
+    f32 offsetX;     // 0x10
+    f32 offsetY;     // 0x14
+    f32 width;       // 0x18
+    f32 height;      // 0x1C
+    f32 top;         // 0x20
+    f32 bottom;      // 0x24
+    f32 nearZ;       // 0x28
+    f32 farZ;        // 0x2C
+    u8 matrix[0x40]; // 0x30
+    f32 halfWidth;   // 0x70
+    f32 halfHeight;  // 0x74
+    f32 centerY;     // 0x78
+    f32 one;         // 0x7C
+    f32 originX;     // 0x80
+    f32 originY;     // 0x84
+    f32 bottomY;     // 0x88
+    u32 zero;        // 0x8C
+} SdfCamera;
+
+extern s8 D_00438A50;
+extern f32 D_00438A54;
+extern f32 D_00438A58;
+extern f32 D_00438A5C;
+extern f32 D_00438A60;
+extern f32 func_00353228(f32);
+
+void func_0033A5C8(SdfCamera *cam) {
+    f32 m[16];
+    f32 farZ = cam->farZ;
+    f32 nearZ = cam->nearZ;
+    f32 range = farZ - nearZ;
+    f32 halfWidth = cam->width * 0.5f;
+    f32 halfHeight = cam->height * 0.5f;
+    f32 v;
+    f32 centerY;
+
+    EE_MMI_UNIT_MATRIX(m);
+    m[0] = 1.0f / (halfWidth * cam->aspect);
+    m[5] = 1.0f / halfHeight;
+    m[10] = farZ * nearZ * 2.0f / range;
+    m[14] = -(nearZ + farZ) / range;
+    VU0_LOAD_MATRIX(m);
+    EE_MMI_UNIT_MATRIX(m);
+    if (cam->flags & 2) {
+        v = cam->height / (func_00353228(cam->fov * 0.5f) * 2.0f);
+    } else {
+        v = cam->scale;
+    }
+    m[5] = m[0] = v;
+    m[10] = 0;
+    m[15] = 0;
+    m[14] = m[11] = 1.0f;
+    func_00336BE8(m);
+    VU0_STORE_MATRIX(cam->matrix);
+    cam->halfWidth = halfWidth;
+    centerY = (cam->bottom - cam->top) * 0.5f;
+    if (cam->flags & 1) {
+        cam->halfHeight = halfHeight * 0.5f;
+    } else {
+        cam->halfHeight = halfHeight;
+    }
+    cam->centerY = centerY;
+    cam->one = 1.0f;
+    cam->originX = cam->offsetX;
+    cam->originY = cam->offsetY;
+    cam->bottomY = centerY + cam->top;
+    cam->zero = 0;
+    if (D_00438A50 != 0) {
+        cam->halfWidth *= D_00438A54;
+        cam->halfHeight *= D_00438A58;
+        cam->originX += D_00438A5C;
+        cam->originY += D_00438A60;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A7E8);
 
@@ -1144,16 +1236,16 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B530);
 
-s32 func_0033B678(s32 arg0) {
-    return arg0 * 0x40 + 0x40;
+s32 func_0033B678(s32 count) {
+    return count * 0x40 + 0x40;
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B688);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B8B0);
 
-u32 func_0033BA40(s32 arg0) {
-    return (arg0 * 0x54 + 0x4bU) & 0xfffffff0;
+u32 func_0033BA40(s32 count) {
+    return (count * 0x54 + 0x4bU) & 0xfffffff0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BA68);
@@ -1168,8 +1260,8 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BE18);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C050);
 
-u32 func_0033C218(s32 arg0) {
-    return (arg0 * 0x6c + 0x4bU) & 0xfffffff0;
+u32 func_0033C218(s32 count) {
+    return (count * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C240);
@@ -1406,7 +1498,38 @@ void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
     D_00476480[index].largeMotor = large & 0xFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033CA88);
+extern u8 D_00438A88[4];
+extern u8 D_00476280[];
+extern u8 D_00438A8C;
+extern s32 func_0034AAF8(s32);
+extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
+
+void func_0033CA88(void) {
+    s32 i;
+
+    func_0034AAF8(0);
+    for (i = 0; i != 2; i++) {
+        s32 port = D_00438A88[i * 2];
+        s32 slot = D_00438A88[i * 2 + 1];
+        F9B00Entry *entry;
+
+        scePadPortOpen(port, slot, &D_00476280[i * 0x100]);
+        entry = &D_00476480[i];
+        entry->port = port;
+        entry->slot = slot;
+        entry->state = 0;
+        entry->mode = 0;
+        entry->requestedMode = 0;
+        entry->buttons = 0;
+        entry->prevButtons = 0;
+        entry->smallMotor = 0;
+        entry->largeMotor = 0;
+    }
+    memset(D_0040B7D8, 0, 0x20);
+    memset(D_00438A98, 0x80, 8);
+    memset(D_0040B7F8, 0, 0x18);
+    D_00438A8C = 0;
+}
 
 void sdfDevConsInit(void) {
     if (D_00438AB4 == 0) {
@@ -1466,20 +1589,20 @@ void sdfDevConsResetNode(ConsNode *node) {
     sdfDevConsNodeClear(node);
 }
 
-ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 arg2, s32 arg3) {
+ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 width, s32 height) {
     ConsNode *node;
     u32 h;
 
     sdfDevConsInit();
     node = func_00328D68(0x20);
-    node->unk8 = arg0;
-    node->unkA = arg1;
-    node->width = arg2;
-    node->height = arg3;
+    node->unk8 = first;
+    node->unkA = second;
+    node->width = width;
+    node->height = height;
     node->unk17 = 8;
     node->unk14 = 0;
     node->unk16 = 0;
-    h = func_003292A8((arg2 * arg3) * 2);
+    h = func_003292A8((width * height) * 2);
     node->bufferHandle = h;
     node->pixels = (u8 *)sdfResourceRetainAddress(h);
     sdfDevConsNodeClear(node);
@@ -1516,6 +1639,8 @@ INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A70);
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A78);
 
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A80);
+
+INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A88);
 
 INCLUDE_SDATA(const s32, "game/code_00336B48", D_00438A8C);
 
