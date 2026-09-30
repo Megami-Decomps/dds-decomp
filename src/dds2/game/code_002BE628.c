@@ -184,7 +184,34 @@ extern s8 D_0037F510[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE6E8);
+typedef struct MenuSubBlock {
+    u8 pad00[0x100];
+    s32 value; /* 0x100 */
+    u8 pad104[0xF20];
+} MenuSubBlock;
+
+typedef struct MenuPanelSlots {
+    MenuSubBlock sub[2];
+    u8 pad2048[0xF0];
+} MenuPanelSlots;
+
+typedef struct MenuPanelSet {
+    u8 pad00[0x84];
+    MenuPanelSlots panel[5]; /* 0x84, stride 0x2138 */
+} MenuPanelSet;
+
+/* Sets the value word of both sub-blocks of every panel. */
+void func_002BE6E8(MenuPanelSet *menu, s32 value) {
+    MenuPanelSlots *panel = menu->panel;
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 5; i++, panel++) {
+        for (j = 0; j < 2; j++) {
+            panel->sub[j].value = value;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE730);
 
