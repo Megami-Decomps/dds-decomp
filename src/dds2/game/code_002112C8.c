@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "pcp_vu0.h"
 
 extern u64 func_00219318(void);
 
@@ -19,7 +20,11 @@ extern u32 func_001AC360(u64, u64, u64);
 
 extern s8 D_00436CAC;
 
-extern void func_002112C8(s32, s32);
+extern void func_00211EA8();
+
+extern u32 btlPickWeightedAiSlot();
+
+extern s32 fldGetSelectedUnitStat();
 
 extern void func_002152D8(s32, s32);
 
@@ -56,7 +61,13 @@ typedef struct BattleSub {
 typedef struct BattleUnit BattleUnit;
 
 typedef struct BattleWork {
-    u8 pad0[0x22C];
+    u8 pad0[0x1E4];
+    s16 scriptGroup; /* 0x1E4: selects the script resource path */
+    u8 pad1E6[0x26];
+    s32 resourceHandle; /* 0x20C */
+    u8 pad210[8];
+    u32 resourceFlags; /* 0x218 */
+    u8 pad21C[0x10];
     s32 state22C; /* A value of 5 blocks the world-effect helpers. */
     u8 pad230[0x18];
     struct BattleActorHandle *actionActors; /* 0x248: linked action handles */
@@ -67,7 +78,9 @@ typedef struct BattleWork {
     u16 phaseControl; /* 0x270: required phase in func_00218150 */
     u8 pad272[2];
     s32 turnCount;
-    u8 pad278[0x28];
+    u8 pad278[4];
+    u8 encounterMode; /* 0x27C */
+    u8 pad27D[0x23];
     s32 mode;
     u8 pad2A4[0x474];
     struct BattleSub *sub;
@@ -88,7 +101,7 @@ struct BattleUnit {
     u16 step; /* 0x126 */
     u8 pad128[2];
     u16 actionGate; /* 0x12A: zero required by func_00214658 */
-    u8 pad12C[2];
+    u16 pendingMotion; /* 0x12C */
     u16 conditionFlags;
     u8 pad130[4];
     u32 actionCode; /* 0x134 */
@@ -352,6 +365,10 @@ extern void *func_001E5DA8(void *, s32, s32);
 
 extern s64 btlStartTask(void *);
 
+extern void func_001E3108(void *, void *);
+
+extern void btlSetUnitPosition(void *, void *);
+
 extern s32 func_001B2430(s32, s32);
 
 extern s32 btlIsActiveActor();
@@ -364,7 +381,16 @@ extern void fldAppendTaskToGroup(void *);
 
 extern s32 btlDispatchStateHandler(void *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002112C8);
+void func_002112C8(ActionStateLink *task, s32 row) {
+    u16 species;
+    s32 index;
+
+    D_00436CB8 = func_00328E18(0x10);
+    species = ((BattleUnit *)task->owner)->mode;
+    index = btlPickWeightedAiSlot(task->owner, species, row);
+    func_00211EA8(task, D_00435DF4[species].slot[row * 5 + index].actionId, D_00435DF4[species].slot[row * 5 + index].actionArg);
+    func_00328E48(D_00436CB8);
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00211360);
 
@@ -942,7 +968,19 @@ u8 func_00213930(void) {
     return result != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlElementToBitIndex);
+extern const s32 D_00419BE0[20];
+
+s32 btlElementToBitIndex(s32 mask, s32 index) {
+    s32 table[20];
+    memcpy(table, D_00419BE0, sizeof(table));
+    if ((mask & table[index]) == 0) {
+        return 0x80;
+    }
+    if (index != 0) {
+        return index - 1;
+    }
+    return -1;
+}
 
 s32 func_00213A58(void *unit, s32 mask) {
     s32 i;
@@ -1311,7 +1349,39 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlUnitBlocksElementQuery);
+s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
+    u32 flags = ((BattleUnit *)unit)->flags;
+    s32 stat;
+    s32 value;
+    if (flags & 1) {
+        if (flags & mask) {
+            if (!(flags & 0x20)) {
+                stat = fldGetSelectedUnitStat();
+                if (action & 0x100000) {
+                    s32 i;
+                    for (i = 0; i < 19; i++) {
+                        s32 index = btlElementToBitIndex(action, i);
+                        if (index == 0x80) {
+                            continue;
+                        }
+                        value = func_001ABF50((void *)unit, index);
+                        if (func_001AEB20((void *)unit, index) != 0 || (value & 0x20000) ||
+                            (stat == 0x20000 && func_001B2900((void *)unit, index) != 0)) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                }
+                value = func_001ABF50((void *)unit, action);
+                if (func_001AEB20((void *)unit, action) != 0 || (value & 0x20000) ||
+                    (stat == 0x20000 && func_001B2900((void *)unit, action) != 0)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 s64 func_00214928(void) {
     return func_001B3200(0);
@@ -1821,7 +1891,18 @@ void func_00218B78(void) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218BA8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00218D00);
+s32 func_00218D00(s32 unit, s32 unused, s32 action) {
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub;
+    if (action != 0x17A) {
+        return 0;
+    }
+    if ((((BattleUnit *)unit)->flags & 0x400) && ((BattleUnit *)unit)->mode == 0x108 &&
+        btlHasActiveSubtask() != 0) {
+        ctrl->pending = 1;
+        btlBossDebugPrintf("btl:ABADON HpMp 1\n");
+    }
+    return 0;
+}
 
 typedef struct BattleActionRecord {
     u8 pad0[8];
@@ -2228,9 +2309,78 @@ s32 func_00219F28(s32 battler, s32 action) {
     return action == 19;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00219F58);
+void func_00219F58(void) {
+    BattleWork *work = (BattleWork *)func_001AA6F8();
+    BattleUnit *unit;
+    BattleUnit *lead = 0;
+    f32 shift;
+    f32 pos[4];
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A098);
+    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->mode == 0x10D) {
+                    lead = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (lead != 0) {
+        func_001E3108(lead, pos);
+        shift = -pos[0];
+        pos[0] = 0;
+        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
+        btlSetUnitPosition(lead, pos);
+        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit != lead) {
+                        func_001E3108(unit, pos);
+                        pos[0] = pos[0] + shift;
+                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
+                        btlSetUnitPosition(unit, pos);
+                    }
+                }
+            }
+        }
+    }
+}
+
+s32 func_0021A098(void) {
+    BattleUnit *unit = ((BattleWork *)func_001AA6F8())->actorList;
+    BattleUnit *head = unit;
+    s32 result = -1;
+    for (; unit != NULL; unit = unit->nextActor) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->mode == 0x10D) {
+                    if (unit->flags & 0x20) {
+                        result = 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (result != -1) {
+        for (unit = head; unit != NULL; unit = unit->nextActor) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit->flags & 2) {
+                        if (!(unit->flags & 0xE0)) {
+                            if (unit->mode != 0x10D) {
+                                btlStartTask(func_001E5DA8(unit, 6, 0xA));
+                                unit->flags &= ~1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A1D8);
 
