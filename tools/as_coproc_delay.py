@@ -50,6 +50,12 @@ def expands_indexed(line):
         return True  # symbolic offset on a base register
 
 
+# An unaligned store (sdl/sdr/swl/swr) that cc1 left for the assembler stays
+# out of the following branch's delay slot: retail's struct-copy setters end
+# `sdl; sdr; jr; nop` (the filled retail cases are cc1's own .set noreorder fills).
+UNALIGNED_STORE = re.compile(r"\s+(?:sdl|sdr|swl|swr)\s")
+
+
 # Retail never fills a branch delay slot with mfhi/mflo (DDS1 135 and DDS2 101
 # `mfhi|mflo; branch` sequences, none with the move in the slot).
 HILO = re.compile(r"\s+(mfhi|mflo)\s")
@@ -89,7 +95,8 @@ def main(src, dst):
         labelled = i > 0 and LABEL.match(lines[i - 1]) and line.strip() and not line.strip().startswith((".", "#")) \
             and not BRANCH.match(line)
         if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
-                next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line) or labelled)) \
+                next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line) or labelled
+                                    or UNALIGNED_STORE.match(line))) \
                 or hilo_before_branch:
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
