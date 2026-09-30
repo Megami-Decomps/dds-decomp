@@ -16,7 +16,21 @@ MemBlock *sdfMemoryNextBlock(MemBlock *block) {
     return next;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMemory", sdfMemoryGetBlockSize);
+extern s32 func_0036DE70(void);
+
+extern void EIntr(void);
+
+s32 sdfMemoryGetBlockSize(MemBlock *block) {
+    s32 size;
+    s32 interruptsDisabled;
+
+    interruptsDisabled = func_0036DE70();
+    size = block->next->addr - block->addr;
+    if (interruptsDisabled) {
+        EIntr();
+    }
+    return size;
+}
 
 u32 sdfMemoryGetBlockAddress(MemBlock *block) {
     return block->addr;

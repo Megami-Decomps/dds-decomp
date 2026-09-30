@@ -478,7 +478,17 @@ void func_002A24A0(void) {
 
 extern u8 D_00455DB0[];
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2500);
+extern void func_003298C0(u32 arg0);
+
+void func_002A2500(void) {
+    if (D_00454D30[8] != 0) {
+        func_003298C0(D_00454D30[8]);
+        D_00454D30[9] = 0;
+        D_00454D30[8] = 0;
+        D_00454D30[5] = 0;
+        D_00454D30[6] = (u32)D_00455DB0;
+    }
+}
 
 void func_002A2550(void) {
     WaitSema(D_00438FE8);

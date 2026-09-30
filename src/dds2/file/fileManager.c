@@ -1,7 +1,5 @@
 #include "common.h"
 
-extern s32 func_002C8128(u32);
-
 /* Intrusive list node threaded through +0x4. */
 typedef struct FileNode {
     u32 unk0;              /* 0x0 */
@@ -75,7 +73,20 @@ u32 func_002C8120(FileWork *work) {
     return work->unk10;
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C8128);
+extern s32 func_002C8128(FileRequest *file);
+
+s32 func_002C8128(FileRequest *file) {
+    s32 result;
+
+    if (file->pad00 == 1) {
+        result = 0;
+        if (file->unk68 != 0) {
+            result = file->state == 6;
+        }
+        return result;
+    }
+    return file->state == 6;
+}
 
 s32 fileRequestIsReady(FileRequest *file) {
     s32 result = 0;

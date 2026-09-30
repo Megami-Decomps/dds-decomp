@@ -182,7 +182,17 @@ INCLUDE_ASM(const s32, "game/code_0018E218", func_0018ED80);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018EED0);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F2E0);
+extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
+
+void func_0018F2E0(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
+    void *list = sdfAllocPacketAligned(0x20);
+    u8 *scene;
+
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, func_0011D3E8(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, w * 0x10, h * 8, arg4, arg5));
+    scene = D_00325748;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+}
 
 void func_0018F3A0(void) {
     D_003BB070 = 1;

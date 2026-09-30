@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 extern s32 (*D_003982D0[])(void *a0, s32 a1);
@@ -24,7 +25,19 @@ INCLUDE_ASM(const s32, "game/code_002DD038", sdfBlendMotionKeys);
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD1B8);
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD348);
+typedef struct {
+    u8 data[0x10];
+} Block16;
+
+typedef struct PoseCopy {
+    u8 pad00[0xC];
+    Block16 *src;
+    Block16 dst;
+} PoseCopy;
+
+void func_002DD348(PoseCopy *pose) {
+    pose->dst = *pose->src;
+}
 
 /* Matrix registers: vf28-vf31 are the primary matrix, vf24-vf27 its
  * alternate bank, and vf20-vf23 a third bank copied between the two. */
@@ -109,7 +122,10 @@ void sdfSetAlternateIdentityMatrixVU(void) {
         ".set reorder\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD4A8);
+/* libvu0: sceVu0UnitMatrix */
+void func_002DD4A8(void *dst) {
+    EE_MMI_UNIT_MATRIX(dst);
+}
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
