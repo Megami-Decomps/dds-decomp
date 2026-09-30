@@ -103,5 +103,10 @@
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
+/* dst = primary matrix (vf28-vf31) * src: the core of libvu0
+ * sceVu0ApplyMatrix, used with the sdf matrix-bank convention. */
+#define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
 
 #endif
