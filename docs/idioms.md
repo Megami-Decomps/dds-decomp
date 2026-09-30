@@ -494,6 +494,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_COPY_MATRIX(dst, src)` | `lqc2 vf28..vf31` from `src`, `sqc2 vf28..vf31` to `dst` |
 | `VU0_LOAD_MATRIX(src)` / `VU0_STORE_MATRIX(dst)` | the two halves of the copy above (primary matrix bank vf28-vf31) |
 | `VU0_LOAD_MATRIX_B(src)` / `VU0_STORE_MATRIX_B(dst)` | same for the second bank vf24-vf27 |
+| `VU0_STORE_MATRIX_UNCLOBBERED(dst)` | `VU0_STORE_MATRIX` without the memory clobber (the destination address stays shared with later uses) |
 | `VU0_LOAD_VF(vf, src)` | `.set noreorder; lqc2 vf,0(src); .set reorder` (register input, no memory clobber) |
 | `VU0_LOAD_VF_MEMORY(vf, src)` | same `lqc2` with a memory clobber |
 | `VU0_STORE_VF(vf, dst)` | `.set noreorder; sqc2 vf,0(dst); .set reorder` (register input, memory clobber) |

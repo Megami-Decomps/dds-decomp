@@ -50,6 +50,12 @@
     "sqc2 vf31, 48(%0)\n\t" \
     ".set reorder" \
     : : "r" (dst) : "memory")
+/* Same store for existing asm without a compiler memory clobber (retail keeps
+ * the destination address CSE'd across it). */
+#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t.set reorder" \
+    : : "r" (dst))
 
 /* Load four quadwords into the second matrix bank vf24-vf27 (the right-hand
  * operand of the sdf matrix-multiply routines). */
