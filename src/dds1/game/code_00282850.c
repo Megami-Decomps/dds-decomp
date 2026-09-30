@@ -1482,7 +1482,32 @@ void func_00287678(void) {
     D_003DC5E8.flags &= ~1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", evtStageTestSelectEntry);
+s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
+    s32 index = encodedIndex & 0xFFFF;
+    s32 bank;
+    StageTestSlot *slot;
+
+    if (D_003DC5E8.model != 0 && D_003DC5E8.slot[0].modelId == (s32)D_003DC5E8.entries[index].modelId) {
+        return 0;
+    }
+    btlStopStage();
+    bank = 0;
+    if (D_003DC5E8.flags & 2) {
+        bank = 1;
+    }
+    D_003DC5E8.flags |= 2;
+    D_003DC5E8.flags &= ~4;
+    if (bank) {
+        D_003DC5E8.flags |= 1;
+    }
+    slot = &D_003DC5E8.slot[bank];
+    slot->entryIndex = index;
+    slot->modelId = D_003DC5E8.entries[index].modelId;
+    slot->unk0C = option;
+    slot->unk10 = initialValue;
+    slot->state = 0;
+    return 1;
+}
 
 void func_00287788(u16 id, u32 option) {
     evtStageTestSelectEntry(id, 0xffffffffffffffff, option);

@@ -212,6 +212,7 @@ static inline s32 sprPlaceY(SdfSpritePlace *p) { return p->offsetY; }
 extern void func_0035C860(char *, const char *, ...);
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
+
 void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(D_004388B4, &D_00400970);
     effObjSetInnerSecondVec(D_004388B4, &D_00400980);
@@ -649,7 +650,21 @@ s64 func_0030E010(f32 x) {
     return func_0030DE08(x, x);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", fldLoadLocalMapResources);
+/* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
+s32 fldLoadLocalMapResources(void) {
+    char name[32];
+    s32 i;
+    MapResource *item = D_00401280;
+
+    for (i = 0; i < 10; i++) {
+        func_0035C860(name, "/lmap/sname_%02d.tmx", i + 1);
+        fldLoadMapResource(name, item);
+        item++;
+    }
+    fldLoadMapResource("/lmap/1006.tmx", &D_00401260);
+    fldLoadMapResource("/lmap/l_map00.tmx", &D_00401270);
+    return 1;
+}
 
 s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;

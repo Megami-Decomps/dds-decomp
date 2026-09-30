@@ -23,10 +23,12 @@ typedef struct {
     s16 pad08[2];
     s16 mapTimerPrimary;   /* 0x0C */
     s16 mapTimerSecondary; /* 0x0E */
+    s32 y;             /* 0x10 */
 } SdfCounterTimer;
 
 typedef struct {
-    u8 pad00[0x58];
+    s32 index;                     /* 0x00 */
+    u8 pad04[0x54];
     struct SdfCounterChannel *next;    /* 0x58 */
     u8 pad5C[0x14];
     SdfCounterDisplay *display;        /* 0x70 */
@@ -35,9 +37,12 @@ typedef struct {
 typedef struct {
     u8 pad00[0x10];
     SdfCounterChannel *first;          /* 0x10 */
-    u8 pad14[0x8];
+    u8 pad14[4];
+    SdfCounterChannel *selected;       /* 0x18 */
     SdfCounterChannel *channel;        /* 0x1C */
-    u8 pad20[0x10];
+    u8 pad20[8];
+    s32 posX;                          /* 0x28 */
+    u8 pad2C[4];
     SdfCounterTimer *timer;            /* 0x30 */
 } SdfCounterRuntime;
 
@@ -76,6 +81,21 @@ typedef struct EffObjHeader {
 } EffObjHeader;
 
 extern void func_002C45C8(SdfCounterRuntime *);
+
+extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern void func_00108CB8(s32);
+
+extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
+
+typedef struct MapResource {
+    u32 image;
+    u32 handle;
+    u32 descriptor;
+    u32 unkC;
+} MapResource;
+
+extern MapResource D_00390700;
 
 void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(D_003BD264, D_003900A0);
@@ -265,7 +285,27 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5C70);
 void func_002C5D30(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5D38);
+void func_002C5D38(s32 arg0, s32 x, f32 fade) {
+    SdfCounterTimer *timer;
+    s32 offset;
+    f32 grow;
+    f32 shrink;
+
+    grow = fade * 0.5f + (1.0f - fade) * 2.5f;
+    offset = ((SdfCounterRuntime *)D_003BD274)->selected->index * (((SdfCounterRuntime *)D_003BD274)->posX >> 3);
+    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_00108CB8(1);
+    shrink = (1.0f - grow) * 8.5f;
+    func_00108FA0((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
+                  0xB6, 0x151, 0x11, 0x11,
+                  ((u32)(fade * 64.0f) << 24) | 0x808080,
+                  ((u32)(fade * 64.0f) << 24) | 0x808080,
+                  ((u32)(fade * 64.0f) << 24) | 0x808080,
+                  ((u32)(fade * 64.0f) << 24) | 0x808080,
+                  D_00390700.image);
+    func_00108CB8(0);
+}
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD268);
 
