@@ -21,7 +21,7 @@ extern s32 func_00200628();
 
 extern s32 func_002007A8(u32, u32, u32);
 
-extern s32 func_001A87A0(void);
+extern s32 func_001A87A0();
 
 extern s8 D_003BB870;
 
@@ -104,11 +104,14 @@ typedef struct BtlUnit {
     u16 unk_120;
     u8 unk_122[2];
     u16 mode;
-    u8 unk_126[4];
+    u16 hp;           /* 0x126 */
+    u16 maxHp;        /* 0x128 */
     u16 unk_12A;      /* 0x12A */
     u8 unk_12C[2];
     u16 unk_12E;
-    u8 unk_130[0x180];
+    u8 unk_130[4];
+    u16 actionTime;   /* 0x134: tick count of the unit's last action */
+    u8 unk_136[0x17A];
     s16 actionSlot;   /* 0x2B0 */
     u8 unk_2B2[0x6A];
     u32 unk_31C;
@@ -208,8 +211,15 @@ extern void func_001DC2A8(s32, u8 *, u8 *);
 
 extern void *func_002CFF68(s32);
 extern void func_002CFF98(void *);
-extern void func_001FFDA0();
+extern s32 func_001FFDA0();
 extern u32 btlPickWeightedAiSlot();
+extern u32 btlNextScaledRandom(u32);
+extern u32 D_003BB878;
+extern s32 func_001FFE30(BtlTask *, s32, u16 *, s32 *);
+extern void (*D_00360E38[])(BtlTask *, u32, s32);
+extern void btlCopyIndexList(s32, s32);
+extern void *memset(void *, s32, u32);
+extern s32 func_002024A8(s32, u16 *, u16);
 
 void func_001FF030(BtlTask *task, s32 row) {
     u16 species;
@@ -257,9 +267,45 @@ u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFCD8);
+/* Sum of two 0..0xFFF rolls, folded into 0..0xFFF; /41 turns it into one of 100 buckets. */
+static inline u32 btlRollTwice(void) {
+    u32 value = btlNextScaledRandom(0x1000);
+    value += btlNextScaledRandom(0x1000);
+    return value & 0xFFF;
+}
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFDA0);
+/* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */
+u32 func_001FFCD8(void) {
+    u32 slot = btlRollTwice() / 0x29;
+    if (D_003BB878 < slot - 3 || D_003BB878 > slot + 3) {
+        D_003BB878 = slot;
+    } else {
+        u32 reroll = btlRollTwice();
+        D_003BB878 = slot;
+        return reroll / 0x29;
+    }
+    return slot;
+}
+
+/* Out parameters of the action-id lookup. */
+typedef struct BtlActionLookup {
+    u16 slot;
+    s32 result;
+} BtlActionLookup;
+
+/* `packed` holds the handler index in its top 10 bits and the handler argument in the low 22. */
+s32 func_001FFDA0(BtlTask *task, s32 id, u32 packed) {
+    BtlActionLookup lookup;
+    u32 op = packed >> 22;
+    u32 payload = packed & 0x3fffff;
+
+    func_001FFE30(task, id & 0xffff, &lookup.slot, &lookup.result);
+    task->result = lookup.result;
+    task->arg = lookup.slot;
+    task->unit->actionSlot = lookup.slot;
+    D_00360E38[op](task, payload, lookup.result);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5988);
 
@@ -701,7 +747,30 @@ s32 func_002010F8(u8 *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002011C8);
+s32 func_002011C8(BtlUnit *unit) {
+    s32 battle = *D_003BB87C;
+    s32 hit = 0;
+    u32 base = unit->actionTime;
+    u32 now = func_001A9488(4);
+    s16 roll;
+
+    if (*(s8 *)(battle + 0x146) <= 0) {
+        if (now >= base + 0xF) {
+            if (unit->hp * 100 / unit->maxHp < 0x1E) {
+                if (btlIsGroup400CountAtMost((s32)unit, 2) != 0) {
+                    roll = func_001FFCD8();
+                    hit = roll < 0x1E;
+                }
+            }
+        }
+    }
+    if (hit == 1) {
+        if (func_001A87A0(unit) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 btlUnitHasFlag1000(s32 unit) {
     return (((s32)((BtlUnit *)unit)->flags & 0x1000) > 0);
@@ -1208,9 +1277,9 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002024A8);
 
-u64 btlBuildActorIndexListAndCount(u64 actor, u32 *matchingCount, u32 *listCount) {
+s32 btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
     u32 result;
-    u64 list;
+    s32 list;
 
     list = btlAllocateIndexList(0xd);
     result = func_001A3360(actor, list, 0);
@@ -1240,11 +1309,98 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00202F90);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203098);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00203248);
+s32 func_00203248(s32 actor) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    s32 best;
+    u32 bestIndex;
+    u32 i;
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002033C0);
+    switch (matching) {
+    case 0:
+        best = 0x63;
+        memset(flags, 0, sizeof(flags));
+        bestIndex = 0x20;
+        for (i = 0; i < count; i++) {
+            void *stats = &((BtlUnit *)btlGetIndexListEntry((void *)list, i))->unk_120;
+            s32 current = func_001A17F8(stats);
+            s32 percent = current * 100 / func_001A1838(stats);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002034D0);
+            if (best >= percent && current != 0) {
+                best = percent;
+                bestIndex = i;
+            }
+        }
+        if (bestIndex != 0x20) {
+            result = btlGetIndexListEntry((void *)list, bestIndex);
+        } else {
+            result = func_002024A8(list, flags, count);
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, result);
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
+
+s32 func_002033C0(s32 actor, s32 mask) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        for (i = 0; i < count; i++) {
+            if (btlUnitHasActionMask(btlGetIndexListEntry((void *)list, i), mask) != 0) {
+                flags[i] = 1;
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
+
+s32 func_002034D0(s32 actor, s32 mask) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        for (i = 0; i < count; i++) {
+            if (btlUnitHasActionMask(btlGetIndexListEntry((void *)list, i), mask) == 0) {
+                flags[i] = 1;
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002035E0);
 
@@ -1285,15 +1441,102 @@ u32 func_00204048(s32 task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00204080);
+s32 func_00204080(s32 actor, s32 mask) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        for (i = 0; i < count; i++) {
+            if (btlUnitBlocksElementQuery(btlGetIndexListEntry((void *)list, i), mask, 0x200) != 0) {
+                flags[i] = 1;
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
 
 u32 func_00204198(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002041A0);
+s32 func_002041A0(s32 actor, s32 action) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002042E8);
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        for (i = 0; i < count; i++) {
+            s32 unit = btlGetIndexListEntry((void *)list, i);
+
+            if (((BtlUnit *)unit)->flags & 0x200) {
+                if (func_00202178(unit, action, 0x200) == 1) {
+                    flags[i] = 1;
+                }
+            } else {
+                if (func_00202178(unit, action, 0x400) == 1) {
+                    flags[i] = 1;
+                }
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
+
+void func_002042E8(s32 actor, s32 input, s8 invert) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        for (i = 0; i < count; i++) {
+            BtlUnit *unit = (BtlUnit *)btlGetIndexListEntry((void *)list, i);
+
+            if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
+                if (invert == 0) {
+                    if (unit->flags & 0x1000) {
+                        flags[i] = 1;
+                    }
+                } else if (!(unit->flags & 0x1000)) {
+                    flags[i] = 1;
+                }
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlGetTargetUnitForLink);
 
