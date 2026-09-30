@@ -1,6 +1,35 @@
 #include "common.h"
 #include "fpu.h"
 
+typedef struct FldColorParams {
+    s32 enabled;
+    s32 unk4;
+    s32 mode;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 unk18;
+    s32 unk1C;
+} FldColorParams;
+typedef struct FldCameraSetting {
+    s32 unk0;
+    FldColorParams color;
+    u8 pad24[0x30];
+} FldCameraSetting; /* 0x54 bytes */
+typedef struct FldFadeColor {
+    u8 pad0[4];
+    s32 colorA;
+    s32 colorB;
+    u8 padC[0x18];
+    s32 unk24;
+    s32 unk28;
+    u8 pad2C[0xC];
+    s32 unk38;
+    f32 unk3C;
+} FldFadeColor;
+
+extern void itfCopyColorFields(s32, void *);
+
 extern u64 dds3GetWorldObject(void);
 
 extern s32 mdlFlagTest(s32);
@@ -55,7 +84,15 @@ extern s32 D_004361CC;
 
 extern s32 D_004361D0;
 
-extern u8 *func_001404E0(u32);
+extern u8 *func_001404E0(const char *);
+extern s32 func_0010D8C8(void);
+extern void fldPlayMenuSound(s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeSetRGB(s32, s32, s32);
+extern void fldApplyPendingCameraHeading(void);
+extern void func_00155A08(s32, s32, void *, s32);
+extern void func_00143768(s32);
+extern s32 D_003898FC[];
 
 extern s16 D_00444C68[];
 
@@ -84,7 +121,17 @@ extern s32 D_00389784[];
 
 extern u8 D_003932A0[];
 
+extern u8 D_00391E50[];
+extern u8 D_00391E6C[];
+extern u8 D_00391E88[];
+extern u8 D_00391EA4[];
+extern u8 D_00391EDC[];
+extern u8 D_00391EF8[];
 extern u8 D_00391F30[];
+extern u8 D_00391F4C[];
+extern u8 D_00391F68[];
+extern u8 D_00391F84[];
+extern s32 D_004361FC;
 
 extern s32 D_00438ECC;
 
@@ -96,13 +143,15 @@ extern u32 D_00438ED0;
 
 extern u32 D_004360F4;
 
-extern u8 D_00444990[];
+extern FldFadeColor D_00444990[];
 
 extern u32 func_00343ED0(const char *, u32 *, s32);
 
 extern u32 func_002DEB80(const void *);
 
-extern void func_001379C0(u32);
+
+extern void func_001379C0(FldCameraSetting *setting);
+
 
 extern s32 func_0035C860(char *, const char *, ...);
 
@@ -231,8 +280,15 @@ extern FldS16Row D_003931A0[];
 
 extern u32 D_00449B30[][23];
 
+typedef struct FldAreaState {
+    u8 pad0[0x14];
+    s32 unk14;
+    u8 pad18[0xEC];
+    s16 unk104;
+} FldAreaState;
+
 typedef struct FldActorEntry {
-    /* 0x00 */ u8 kind;
+    /* 0x00 */ s8 kind;
     /* 0x01 */ u8 pad01;
     /* 0x02 */ s16 modelId;
     /* 0x04 */ s16 area;
@@ -242,14 +298,27 @@ typedef struct FldActorEntry {
     /* 0x16 */ s16 state3;
     /* 0x18 */ u8 name0[0xC];
     /* 0x24 */ u8 name1[0xC];
-    /* 0x30 */ s8 locked;
-    /* 0x31 */ u8 pad31;
-    /* 0x32 */ s16 warpArea;
+    /* 0x30 */ s8 variantMode;
+    /* 0x31 */ u8 flags31;
+    /* 0x32 */ s16 variant;
     /* 0x34 */ s16 warpEntry;
-    /* 0x36 */ u8 pad36[0xE];
+    /* 0x36 */ s16 warpEntry2;
+    /* 0x38 */ char warpName[0xC];
     /* 0x44 */ s8 linkKind;
-    /* 0x45 */ u8 pad45;
-    /* 0x46 */ u8 linkName[0x26];
+    /* 0x45 */ s8 unk45;
+    /* 0x46 */ char linkName[0xC];
+    /* 0x52 */ s8 unk52;
+    /* 0x53 */ s8 unk53;
+    /* 0x54 */ s8 unk54;
+    /* 0x55 */ char unk55[0xF];
+    /* 0x64 */ u8 flags64;
+    /* 0x65 */ s8 unk65;
+    /* 0x66 */ s8 unk66;
+    /* 0x67 */ s8 unk67;
+    /* 0x68 */ s8 unk68;
+    /* 0x69 */ s8 unk69;
+    /* 0x6A */ s8 unk6A;
+    /* 0x6B */ s8 unk6B;
 } FldActorEntry; /* 0x6C bytes */
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
@@ -286,13 +355,37 @@ typedef struct FldSaveHeader {
     u32 word[0x54 / 4];
 } FldSaveHeader;
 
-extern u8 D_004449D0[];
+extern FldCameraSetting D_004449D0[];
 
 void fldCopyCameraSetting(FldSaveHeader *dst) {
     *dst = *(FldSaveHeader *)D_004449D0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001379C0);
+
+void func_001379C0(FldCameraSetting *setting) {
+    FldColorParams *color = &setting->color;
+
+    if (color->enabled != 0) {
+        D_00444990->colorB = D_00444990->colorA =
+            (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+        D_00444990->unk24 = color->unk18;
+        switch (color->mode) {
+        case 0:
+            D_00444990->unk28 = 1;
+            break;
+        case 1:
+            D_00444990->unk28 = 2;
+            break;
+        default:
+            D_00444990->unk28 = 3;
+            break;
+        }
+        D_00444990->unk38 = color->unk4;
+        D_00444990->unk3C = color->unk1C;
+        itfCopyColorFields(D_004360F8, D_00444990);
+    }
+    *D_004449D0 = *setting;
+}
 
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
@@ -712,9 +805,127 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_00413448);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001402B8);
+u8 *func_001402B8(const char *name) {
+    s32 i = 0;
+    FldActorEntry *entry;
+    s16 flag;
+    s16 sub;
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_001404E0);
+    if (name == 0) {
+        return 0;
+    }
+    do {
+        entry = (FldActorEntry *)(D_003932A0 + i * 108);
+        flag = entry->modelId;
+        if ((flag == 0 || mdlFlagTest(flag) != 0)
+            && entry->area == ((FldAreaState *)D_00389770)->unk14 + 1
+            && strcmp(name, entry->name) == 0) {
+            switch (entry->kind) {
+            case 1:
+                if (((FldAreaState *)D_00389770)->unk104 != 0 && (entry->flags31 & 4)) {
+                    D_004361FC = 0xB;
+                    return D_00391F84;
+                }
+                if (entry->variantMode == 0) {
+                    sub = entry->variant;
+                    if (sub != 0) {
+                        if (sub == 1) {
+                            D_004361FC = 6;
+                            return D_00391EF8;
+                        }
+                    }
+                }
+                D_004361FC = 0;
+                return D_00391E50;
+            case 2:
+                D_004361FC = 1;
+                return D_00391E6C;
+            case 3:
+                D_004361FC = 2;
+                return D_00391E88;
+            case 4:
+                D_004361FC = 3;
+                return D_00391EA4;
+            case 5:
+                D_004361FC = 5;
+                return D_00391EDC;
+            case 10:
+                D_004361FC = 8;
+                return D_00391F30;
+            case 11:
+                D_004361FC = 9;
+                return D_00391F4C;
+            case 12:
+                D_004361FC = 0xA;
+                return D_00391F68;
+            }
+        }
+        i++;
+    } while (i < 0x100);
+    D_004361FC = -1;
+    return 0;
+}
+
+u8 *func_001404E0(const char *name) {
+    s32 i = 0;
+    FldActorEntry *entry;
+    s16 flag;
+    s16 sub;
+
+    if (name == 0) {
+        return 0;
+    }
+    do {
+        entry = (FldActorEntry *)(D_003932A0 + i * 108);
+        flag = entry->modelId;
+        if ((flag == 0 || mdlFlagTest(flag) != 0)
+            && entry->area == ((FldAreaState *)D_00389770)->unk14 + 1
+            && strcmp(name, entry->name) == 0) {
+            D_004361F4 = i;
+            switch (entry->kind) {
+            case 1:
+                if (((FldAreaState *)D_00389770)->unk104 != 0 && (entry->flags31 & 4)) {
+                    D_004361FC = 0xB;
+                    return D_00391F84;
+                }
+                if (entry->variantMode == 0) {
+                    sub = entry->variant;
+                    if (sub != 0) {
+                        if (sub == 1) {
+                            D_004361F8 = 6;
+                            return D_00391EF8;
+                        }
+                    }
+                }
+                D_004361F8 = 0;
+                return D_00391E50;
+            case 2:
+                D_004361F8 = 1;
+                return D_00391E6C;
+            case 3:
+                D_004361F8 = 2;
+                return D_00391E88;
+            case 4:
+                D_004361F8 = 3;
+                return D_00391EA4;
+            case 5:
+                D_004361F8 = 5;
+                return D_00391EDC;
+            case 10:
+                D_004361F8 = 0;
+                return D_00391F30;
+            case 11:
+                D_004361F8 = 0;
+                return D_00391F4C;
+            case 12:
+                D_004361F8 = 0;
+                return D_00391F68;
+            }
+        }
+        i++;
+    } while (i < 0x100);
+    return 0;
+}
 
 u8 *func_001406E8(void) {
     s32 index = D_00435F28;
@@ -750,7 +961,68 @@ s32 func_00140780(s32 mode) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140830);
+typedef struct FldTaskRecordWork {
+    u8 pad00[0xE4];
+    u32 key;
+} FldTaskRecordWork;
+
+void func_00140830(s32 arg0) {
+    s32 index;
+    s32 kind;
+    s32 record;
+    FldActorEntry *entry;
+
+    if (arg0 != 0) {
+        record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D8C8())->key);
+        if (record == 0) {
+            return;
+        }
+        if (func_001404E0((const char *)record) == 0) {
+            return;
+        }
+    }
+    index = D_004361F4;
+    entry = (FldActorEntry *)(D_003932A0 + index * 108);
+    kind = entry->kind;
+    if (kind == 1) {
+        if (entry->area == D_00389784[0] + 1) {
+            fldPlayMenuSound(entry->state3);
+            func_00143768(D_00449B30[index][1]);
+            return;
+        }
+    } else if (kind == 2) {
+        if (entry->area == D_00389770[5] + 1) {
+            D_00389770[97] = 1;
+            *(f32 *)&D_00389770[96] = *(f32 *)&D_00449B30[index][11];
+            if (entry->state == 1) {
+                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
+                return;
+            }
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            return;
+        }
+    } else if (kind == 3) {
+        kwlnFadeSetRGB(0, 0, 0);
+        return;
+    } else if (kind == 5) {
+        if (entry->state == 0) {
+            D_003898FC[0] = 0x64;
+        } else {
+            D_003898FC[0] = -0x64;
+        }
+    } else if (kind == 10) {
+    } else if (kind == 11) {
+        if (entry->area == D_00389784[0] + 1) {
+            if (entry->state == 3) {
+                func_00155A08(0, 0, entry->name1, 0);
+                return;
+            }
+        }
+    } else if (kind == 12) {
+    } else if (kind == 4) {
+        fldApplyPendingCameraHeading();
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140A58);
 
