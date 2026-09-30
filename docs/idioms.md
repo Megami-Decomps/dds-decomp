@@ -659,6 +659,12 @@ computed. Natural source shapes that flip it:
 3. **Order of the definition.** DDS2 `func_002A7260`: `u32 flag = keep != 0;`
    first and the base pointer assigned after the `if` puts flag in `$20` and the
    table pointer in `$19`.
+4. **Advance a cursor in place.** `entries = node + headerSize` ties the sum to
+   `headerSize` (the first operand that dies there), raising its priority.
+   Retail's effect allocators copy the header pointer first and then advance:
+   `u8 *node = body; body += headerSize;` (DDS2 `func_002E2E28` and 15 more,
+   `move $3,$2; move $4,$3; addu $3,$3,$17`). Where retail does give
+   `headerSize` the higher register (DDS2 `func_002E24A8`) the sum form is right.
 
 ### FP registers: local-alloc before global-alloc
 
