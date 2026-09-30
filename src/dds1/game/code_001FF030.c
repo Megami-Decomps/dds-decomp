@@ -52,6 +52,28 @@ extern u32 func_00208C68(void);
 
 extern s32 func_001A17F0(void);
 
+/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
+typedef struct AiSlot {
+    u8 weight;
+    u8 pad1;
+    u16 actionId;
+    u32 actionArg;
+} AiSlot;
+
+typedef struct AiSpecies {
+    u8 pad00[0x40];
+    AiSlot slot[25];
+    u8 pad108[0x54];
+} AiSpecies;
+
+extern AiSpecies *D_003BAA24;
+
+extern u8 D_003BD476;
+
+extern char D_003A5988[];
+
+extern void btlDebugPrintf(const char *, ...);
+
 typedef struct BtlUnit {
     u8 unk_00[0x90];
     s32 position90; /* 0x90 */
@@ -183,7 +205,30 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF560);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF8D8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFC18);
+/* Weighted pick of a table row: returns the first slot whose cumulative
+   weight reaches `roll` (func_001FFCD8) among the five slots of row `index`. */
+u32 func_001FFC18(s32 unit, s32 species, s32 index) {
+    u32 roll;
+    u32 total;
+    u32 i;
+
+    func_001A17F0();
+    roll = func_001FFCD8();
+    total = 0;
+    for (i = 0; i < 5; i++) {
+        u32 weight = D_003BAA24[species].slot[index * 5 + i].weight;
+
+        total = (total + weight) & 0xFFFF;
+        if (total >= roll && weight != 0) {
+            return i;
+        }
+    }
+    btlDebugPrintf("AI_BUGBUGBUGBUGBUG           \n");
+    if (D_003BD476 == 0) {
+        func_001FB0A8(D_003A5988);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFCD8);
 
