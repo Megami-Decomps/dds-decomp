@@ -51,7 +51,9 @@ typedef struct CampMenuContext {
     u8 pad70[4];
     s32 option;               /* 0x74 */
     s32 actor;                /* 0x78 */
-    u8 pad7C[0x64];
+    s32 staffVariant;         /* 0x7C: passed with display to menu drawing */
+    s32 staffParam;           /* 0x80 */
+    u8 pad84[0x5C];
     s32 variant;              /* 0xE0 */
     u8 padE4[0x40];
     s32 panel;                /* 0x124 */
@@ -59,7 +61,9 @@ typedef struct CampMenuContext {
     s32 panelList;            /* 0x12C */
     u8 pad130[8];
     s32 display;              /* 0x138 */
-    u8 pad13C[0x6B0];
+    u8 pad13C[0x69C];
+    s32 selectionList;        /* 0x7D8 */
+    u8 pad7DC[0x10];
     s32 activePanel;          /* 0x7EC: active party panel */
     s32 finalPanelSlot;       /* 0x7F0: last displayed slot */
     u8 pad7F4[0x104];
@@ -169,6 +173,14 @@ extern void func_0027C658(s32);
 extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
+extern u8 D_0037CAB0[];
+extern u8 D_0037CA78[];
+extern void func_00280978();
+extern void mnuClearListFlags();
+extern s32 func_002D03F8(s32);
+extern s32 *sdfResourceRetainAddress(s32);
+extern void func_00287450();
+extern void func_0027E790();
 
 extern s32 func_002877A8(void);
 
@@ -440,7 +452,34 @@ void func_002764C0(void) {
     func_00276428();
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_002764D8);
+s64 func_002764D8(s32 callback) {
+    s32 context = func_00101A70();
+    u8 *menu = (u8 *)((CampMenuContext *)context)->menu;
+    s32 *popup = (s32 *)(context + 0x54);
+    u32 buttons = func_00285B20(3);
+    s64 state;
+    s32 window;
+    state = func_00285670(context + 8, popup, 0, callback);
+    if (state != 0) {
+        return state;
+    }
+    if (*popup == 0) {
+        window = context + 0x15C;
+        func_00280978(4, window);
+        if (buttons & 1) {
+            *(s32 *)(menu + 0x18) = **(s32 **)(((CampMenuContext *)context)->selectionList + 0x1C);
+            func_002858E8(popup, D_0037CAB0);
+            *(s32 *)(menu + 0x24) = 1;
+        }
+        if (buttons & 2) {
+            func_002858F8((s32)popup, D_0037CA78);
+            func_0027E790(((CampMenuContext *)context)->display, ((CampMenuContext *)context)->displayVariant, 0, 1);
+            mnuClearListFlags(0, window);
+        }
+        mnuPlayInputSound(0, buttons, 0);
+    }
+    return 0;
+}
 
 extern u8 D_0037C3A8[];
 extern s32 func_002BD8F8(s32);
@@ -815,10 +854,6 @@ void func_002786E8(s32 context) {
         menu[2] = 0;
     }
 }
-
-extern s32 func_002D03F8(s32);
-extern s32 *sdfResourceRetainAddress(s32);
-extern void func_0027E790();
 
 s32 mnuCampMenuInit(void) {
     s32 context = func_00101A70();
