@@ -1,5 +1,7 @@
 // Hand-curated symbols (win over the generated block below)
 _start = 0x00100008; // type:func
+// Pad port table in .sdata (pad init reads it as its own 4-byte object)
+D_003BD398 = 0x003BD398; // type:u32
 // Names ported from Persona 4: P4's matched C recompiles byte-identical here (docs/p4-transfer.md)
 kwlnTaskGetTimer = 0x00101A60; // type:func size:0x8
 scrCommand_SCR_GET_TIMER = 0x0010DD38; // type:func size:0x5C

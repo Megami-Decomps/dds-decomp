@@ -2,6 +2,8 @@
 _start = 0x00100008; // type:func
 // $gp-relative byte spimdisasm leaves unsymbolized (emits an absolute %lo that encodes wrong)
 D_00435CF3 = 0x00435CF3; // type:u8
+// Pad port table in .sdata (pad init reads it as its own 4-byte object)
+D_00438A88 = 0x00438A88; // type:u32
 // Names from tools/names.py (provenance: name_sources.txt)
 kwlnTaskActivate = 0x00100980; // type:func
 kwlnTaskAdvanceStartDelays = 0x001009C8; // type:func
