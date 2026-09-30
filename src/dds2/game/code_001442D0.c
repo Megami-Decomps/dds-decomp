@@ -667,16 +667,16 @@ void fldDestroyTask(void) {
 }
 
 void fldResetPendingSounds(void) {
-    FldClear18 *temp_v0 = D_0044F730;
-    s32 temp_v1 = 7;
+    FldClear18 *entry = D_0044F730;
+    s32 remaining = 7;
 
     do {
-        temp_v1 -= 1;
-        temp_v0->flags = 0;
-        temp_v0->x = 0;
-        temp_v0->soundId = 0;
-        temp_v0 += 1;
-    } while (temp_v1 >= 0);
+        remaining -= 1;
+        entry->flags = 0;
+        entry->x = 0;
+        entry->soundId = 0;
+        entry += 1;
+    } while (remaining >= 0);
     D_0043621C = 0;
 }
 
@@ -1694,24 +1694,24 @@ void func_0014B088(void) {
 }
 
 void func_0014B0A8(void) {
-    u64 *puVar1;
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+    u64 *words;
+    s32 remaining;
+    s32 block;
+    s32 blockIndex;
 
-    temp_v2 = 0;
-    temp_v1 = D_00435DD0;
+    blockIndex = 0;
+    block = D_00435DD0;
     do {
-        puVar1 = (u64 *)(temp_v1 + 0xfcd0);
-        temp_v0 = 0x3f;
+        words = (u64 *)(block + 0xfcd0);
+        remaining = 0x3f;
         do {
-            temp_v0 = temp_v0 - 1;
-            *puVar1 = 0;
-            puVar1 = puVar1 + 1;
-        } while (-1 < temp_v0);
-        temp_v2 = temp_v2 + 1;
-        temp_v1 = temp_v1 + 0x200;
-    } while (temp_v2 < 10);
+            remaining = remaining - 1;
+            *words = 0;
+            words = words + 1;
+        } while (-1 < remaining);
+        blockIndex = blockIndex + 1;
+        block = block + 0x200;
+    } while (blockIndex < 10);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413788);
@@ -3254,11 +3254,11 @@ s32 func_00154CE0(void) {
 }
 
 s32 func_00154E08(void) {
-    char *temp_v0;
+    char *name;
 
-    temp_v0 = scrReadStringParameter(0);
+    name = scrReadStringParameter(0);
     D_00389770[0x14] = 5;
-    strcpy((char *)D_00389770 + 0x40, temp_v0);
+    strcpy((char *)D_00389770 + 0x40, name);
     return 1;
 }
 
@@ -3334,19 +3334,19 @@ s32 func_00154FA0(char *name) {
 }
 
 s32 func_00155020(void) {
-    s32 temp_v0;
+    s32 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    D_003897C8[0] = temp_v0;
+    value = scrReadIntParameter(0);
+    D_003897C8[0] = value;
     return 1;
 }
 
 s32 func_00155048(void) {
-    s32 temp_v0;
+    s32 value;
 
     D_00389988[11] = scrReadIntParameter(0);
-    temp_v0 = scrReadIntParameter(1);
-    func_00135A68(D_00389988[11], temp_v0);
+    value = scrReadIntParameter(1);
+    func_00135A68(D_00389988[11], value);
     return 1;
 }
 
@@ -3917,12 +3917,12 @@ s32 fldCmdPushSceneParam(void) {
 }
 
 u32 func_001568E0(void) {
-    s32 temp_v0;
-    u64 temp_v1;
+    s32 task;
+    u64 room;
 
-    temp_v0 = func_0010D8C8();
-    temp_v1 = fldFindRoomByTask(((EffCmdWork *)temp_v0)->key);
-    fldActivateFlaggedObject(temp_v1);
+    task = func_0010D8C8();
+    room = fldFindRoomByTask(((EffCmdWork *)task)->key);
+    fldActivateFlaggedObject(room);
     return 1;
 }
 
@@ -3950,10 +3950,10 @@ u32 func_00156960(void) {
 }
 
 u32 func_001569B8(void) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    func_001411F8(temp_v0);
+    value = scrReadIntParameter(0);
+    func_001411F8(value);
     return 1;
 }
 
@@ -3962,56 +3962,56 @@ u32 func_001569E0(void) {
 }
 
 u32 func_001569E8(void) {
-    s32 temp_v0;
+    s32 actorStat;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetActorStat0(temp_v0);
-    func_0010D818(temp_v0);
+    actorStat = scrReadIntParameter(0);
+    actorStat = fldGetActorStat0(actorStat);
+    func_0010D818(actorStat);
     return 1;
 }
 
 u32 func_00156A18(void) {
-    s32 temp_v0;
+    s32 actorStat;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = func_001421C0(temp_v0);
-    func_0010D818(temp_v0);
+    actorStat = scrReadIntParameter(0);
+    actorStat = func_001421C0(actorStat);
+    func_0010D818(actorStat);
     return 1;
 }
 
 u32 func_00156A48(void) {
-    s32 temp_v0;
+    s32 motionEntry;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetActorMotionEntry(temp_v0);
-    func_0010D818(temp_v0);
+    motionEntry = scrReadIntParameter(0);
+    motionEntry = fldGetActorMotionEntry(motionEntry);
+    func_0010D818(motionEntry);
     return 1;
 }
 
 u32 func_00156A78(void) {
-    s32 temp_v0;
+    s32 rowValue;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetRowValue(temp_v0);
-    func_0010D818(temp_v0);
+    rowValue = scrReadIntParameter(0);
+    rowValue = fldGetRowValue(rowValue);
+    func_0010D818(rowValue);
     return 1;
 }
 
 u32 func_00156AA8(void) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    func_00142670(temp_v0);
+    value = scrReadIntParameter(0);
+    func_00142670(value);
     return 1;
 }
 
 u32 func_00156AD0(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 first;
+    u64 second;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v1 = scrReadIntParameter(1);
-    func_001206D0(temp_v0, temp_v1);
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
+    func_001206D0(first, second);
     return 1;
 }
 
@@ -4137,10 +4137,10 @@ s32 fldCommandStartTitle(void) {
 }
 
 s32 func_00156EB8(void) {
-    s32 temp_v0;
+    s32 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    D_0038984C[0] = temp_v0;
+    value = scrReadIntParameter(0);
+    D_0038984C[0] = value;
     return 1;
 }
 

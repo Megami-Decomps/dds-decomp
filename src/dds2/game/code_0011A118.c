@@ -19,7 +19,9 @@ typedef struct Entry1A4 {
     u16 unkE; /* 0xE */
     u8 pad10[4]; /* 0x10 */
     u16 level; /* 0x14: clamped at level 99 by dds3Clamp99 */
-    u8 pad16[398]; /* 0x16 */
+    u8 pad16[0x3C]; /* 0x16 */
+    u16 tableValue; /* 0x52 */
+    u8 pad54[0x150]; /* through 0x1A4 */
 } Entry1A4;
 
 typedef struct TableEntry32 {
@@ -36,6 +38,61 @@ typedef struct Entry4 {
 } Entry4;
 
 extern Entry4 D_003862C8[];
+
+/* Script-visible records: only the accessed fields are identified. */
+typedef struct EventStatRecord {
+    u8 pad00[0x11];
+    u8 stat11;
+    u8 pad12[6];
+    s16 stat18;
+    u8 pad1A[2];
+    s16 stat1C;
+    u8 pad1E[7];
+    u8 stat25;
+    u8 pad26[7];
+    u8 stat2D;
+    u8 pad2E[6];
+    s16 stat34;
+    s16 stat36;
+} EventStatRecord; /* stride 0x38 */
+
+typedef struct EventRosterStat {
+    s16 base;             /* 0x00 */
+    u8 alternateA;        /* 0x02 */
+    u8 alternateB;        /* 0x03 */
+    f32 multiplier;       /* 0x04 */
+    u8 pad08[0x0C];
+} EventRosterStat; /* stride 0x14 */
+
+typedef struct EventRosterRecord {
+    u8 pad00[4];
+    u8 flaggedValue;      /* 0x04 */
+    u8 pad05[0x23];
+    s32 panelValue;       /* 0x28 */
+    u8 pad2C[0x20];
+} EventRosterRecord; /* stride 0x4C */
+
+typedef struct EventIndexRecord {
+    u8 pad00[2];
+    u16 index;            /* 0x02 */
+    u8 pad04[4];
+} EventIndexRecord; /* stride 0x08 */
+
+/* Both active script-entry pointers expose these same word offsets. */
+typedef struct EventScriptEntry {
+    u16 flags;           /* 0x00 */
+    u8 pad02[2];
+    u16 rosterIndex;     /* 0x04 */
+    u16 value6;          /* 0x06 */
+    u16 value8;          /* 0x08 */
+    u8 pad0A[0x0A];
+    u16 index14;         /* 0x14 */
+} EventScriptEntry;
+
+typedef struct EventModeSlot {
+    u8 pad0;
+    s8 kind;             /* 0x01 */
+} EventModeSlot;
 
 extern void func_0011A118(s32 arg0, s32 arg1);
 
@@ -131,7 +188,7 @@ u8 evtGetFlaggedRosterValue(Entry1A4 *entry) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return *(u8 *)(D_00435DEC + entry->rosterIndex * 76 + 4);
+    return ((EventRosterRecord *)D_00435DEC)[entry->rosterIndex].flaggedValue;
 }
 
 s32 dds3FindEntryIndex(rosterIndex)
@@ -236,7 +293,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AA58);
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AB38);
 
 u16 func_0011AE60(s32 arg0) {
-    return *(u16 *)(arg0 * 8 + D_00435E38 + 2);
+    return ((EventIndexRecord *)D_00435E38)[arg0].index;
 }
 
 u16 dds3Clamp99(s32 unit) {
@@ -263,10 +320,10 @@ s32 dds3FindEntry(rosterIndex)
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AEE0);
 
 u8 func_0011B260(void) {
-    s64 temp_v0;
+    s64 entry;
 
-    temp_v0 = dds3FindEntry();
-    return temp_v0 != 0;
+    entry = dds3FindEntry();
+    return entry != 0;
 }
 
 s32 dds3EntryMax(void) {
@@ -340,7 +397,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C6A8);
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C868);
 
 void evtCopyRosterTableValue(s32 arg0) {
-    *(u16 *)(arg0 + 0x52) = D_00386248[*(u16 *)(arg0 + 4)].unk0;
+    ((Entry1A4 *)arg0)->tableValue = D_00386248[((Entry1A4 *)arg0)->rosterIndex].unk0;
 }
 
 void evtUpdateFlaggedEntries(void) {
@@ -522,32 +579,32 @@ void func_0011D590(void) {
 }
 
 s32 func_0011D5B8(void) {
-    func_0010D818(*(u16 *)(D_0043E5C8[0] + 0x14));
+    func_0010D818(((EventScriptEntry *)D_0043E5C8[0])->index14);
     return 1;
 }
 
 s32 func_0011D5E0(void) {
-    func_0010D818(*(u16 *)(D_0043E5CC[0] + 0x14));
+    func_0010D818(((EventScriptEntry *)D_0043E5CC[0])->index14);
     return 1;
 }
 
 s32 func_0011D608(void) {
-    func_0010D818(*(u16 *)(D_0043E5C8[0] + 6));
+    func_0010D818(((EventScriptEntry *)D_0043E5C8[0])->value6);
     return 1;
 }
 
 s32 func_0011D630(void) {
-    func_0010D818(*(u16 *)(D_0043E5CC[0] + 6));
+    func_0010D818(((EventScriptEntry *)D_0043E5CC[0])->value6);
     return 1;
 }
 
 s32 func_0011D658(void) {
-    func_0010D818(*(u16 *)(D_0043E5C8[0] + 8));
+    func_0010D818(((EventScriptEntry *)D_0043E5C8[0])->value8);
     return 1;
 }
 
 s32 func_0011D680(void) {
-    func_0010D818(*(u16 *)(D_0043E5CC[0] + 8));
+    func_0010D818(((EventScriptEntry *)D_0043E5CC[0])->value8);
     return 1;
 }
 
@@ -576,11 +633,11 @@ s32 func_0011D990(void) {
 s32 func_0011D9C8(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
-    if (*(s8 *)(D_00435E1C + index * 2 + 1) == 5) {
-        u16 id = *(u16 *)(D_0043E5C0[2] + 4);
-        value = *(u8 *)(D_00435DE8 + id * 20 + 2);
+    if (((EventModeSlot *)D_00435E1C)[index].kind == 5) {
+        u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
+        value = ((EventRosterStat *)D_00435DE8)[id].alternateA;
     } else {
-        value = *(u8 *)(D_00435E20 + index * 56 + 0x11);
+        value = ((EventStatRecord *)D_00435E20)[index].stat11;
     }
     func_0010D818(value);
     return 1;
@@ -589,17 +646,17 @@ s32 func_0011D9C8(void) {
 s32 func_0011DA50(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
-    value = *(u8 *)(D_00435E20 + index * 56 + 0x25);
-    if (*(s8 *)(D_00435E1C + index * 2 + 1) == 5) {
-        u16 id = *(u16 *)(D_0043E5C0[2] + 4);
-        value = (s32)((f32)value * *(f32 *)(D_00435DE8 + id * 20 + 4));
+    value = ((EventStatRecord *)D_00435E20)[index].stat25;
+    if (((EventModeSlot *)D_00435E1C)[index].kind == 5) {
+        u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
+        value = (s32)((f32)value * ((EventRosterStat *)D_00435DE8)[id].multiplier);
     }
     func_0010D818(value);
     return 1;
 }
 
 s32 func_0011DAE0(void) {
-    func_0010D818(*(u8 *)(D_00435E20 + D_0043E5C4[0] * 56 + 0x2d));
+    func_0010D818(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat2D);
     return 1;
 }
 
@@ -609,10 +666,10 @@ s32 func_0011DB20(void) {
     u16 mode = *(u16 *)((u8 *)work + 0x14);
     switch (mode) {
     case 1:
-        value = *(s16 *)(D_00435E20 + work[1] * 56 + 0x18);
+        value = ((EventStatRecord *)D_00435E20)[work[1]].stat18;
         break;
     case 2:
-        value = *(s16 *)(D_00435E20 + work[1] * 56 + 0x1C);
+        value = ((EventStatRecord *)D_00435E20)[work[1]].stat1C;
         break;
     default:
         value = 0;
@@ -626,13 +683,13 @@ s32 func_0011DBA0(void) {
     s32 *work = D_0043E5C0;
     s32 value;
     u16 mode = *(u16 *)((u8 *)work + 0x14);
-    u16 index = *(u16 *)(D_00435E38 + *(u16 *)(work[2] + 0x52) * 8 + 2);
+    u16 index = ((EventIndexRecord *)D_00435E38)[((Entry1A4 *)work[2])->tableValue].index;
     switch (mode) {
     case 1:
-        value = *(s16 *)(D_00435E20 + index * 56 + 0x18);
+        value = ((EventStatRecord *)D_00435E20)[index].stat18;
         break;
     case 2:
-        value = *(s16 *)(D_00435E20 + index * 56 + 0x1C);
+        value = ((EventStatRecord *)D_00435E20)[index].stat1C;
         break;
     default:
         value = 0;
@@ -645,18 +702,18 @@ s32 func_0011DBA0(void) {
 s32 func_0011DC38(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
-    if (*(s8 *)(D_00435E1C + index * 2 + 1) == 5) {
-        u16 id = *(u16 *)(D_0043E5C0[2] + 4);
-        value = *(u8 *)(D_00435DE8 + id * 20 + 3);
+    if (((EventModeSlot *)D_00435E1C)[index].kind == 5) {
+        u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
+        value = ((EventRosterStat *)D_00435DE8)[id].alternateB;
     } else {
-        value = *(s16 *)(D_00435E20 + index * 56 + 0x34);
+        value = ((EventStatRecord *)D_00435E20)[index].stat34;
     }
     func_0010D818(value);
     return 1;
 }
 
 s32 func_0011DCC0(void) {
-    func_0010D818(*(s16 *)(D_00435E20 + D_0043E5C4[0] * 56 + 0x36));
+    func_0010D818(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat36);
     return 1;
 }
 
@@ -771,14 +828,14 @@ extern s32 D_00435E44;
 
 s32 func_0011DFE0(void) {
     s32 entry = D_0043E5C8[0];
-    u32 index = *(u16 *)(entry + 0x14);
+    u32 index = ((EventScriptEntry *)entry)->index14;
     func_0010D830(*(f32 *)((D_00435E44 - 4) + index * 4));
     return 1;
 }
 
 s32 func_0011E018(void) {
     s32 entry = D_0043E5C8[0];
-    u32 index = *(u16 *)(entry + 0x14);
+    u32 index = ((EventScriptEntry *)entry)->index14;
     func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x188));
     return 1;
 }
@@ -787,28 +844,28 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E050);
 
 s32 func_0011E128(void) {
     s32 entry = D_0043E5C8[0];
-    u32 index = *(u16 *)(entry + 0x14);
+    u32 index = ((EventScriptEntry *)entry)->index14;
     func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x360));
     return 1;
 }
 
 s32 func_0011E160(void) {
     s32 entry = D_0043E5C8[0];
-    u32 index = *(u16 *)(entry + 0x14);
+    u32 index = ((EventScriptEntry *)entry)->index14;
     func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x4EC));
     return 1;
 }
 
 s32 func_0011E198(void) {
     s32 entry = D_0043E5C8[0];
-    u32 index = *(u16 *)(entry + 0x14);
+    u32 index = ((EventScriptEntry *)entry)->index14;
     func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x678));
     return 1;
 }
 
 s32 func_0011E1D0(void) {
     s32 entry = D_0043E5C8[0];
-    u32 index = *(u16 *)(entry + 0x14);
+    u32 index = ((EventScriptEntry *)entry)->index14;
     func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x678));
     return 1;
 }
@@ -825,8 +882,8 @@ s32 func_0011E208(void) {
 }
 
 s32 func_0011E268(void) {
-    u16 index = *(u16 *)(D_0043E5C8[0] + 4);
-    func_0010D818(*(s16 *)(D_00435DE8 + index * 20));
+    u16 index = ((EventScriptEntry *)D_0043E5C8[0])->rosterIndex;
+    func_0010D818(((EventRosterStat *)D_00435DE8)[index].base);
     return 1;
 }
 
@@ -840,8 +897,8 @@ s32 func_0011E430(void) {
     if (!(*(u16 *)entry & 0x20)) {
         result = *(s32 *)(D_00435DD0 + 0x3C);
     } else {
-        s32 index = *(u16 *)(entry + 4);
-        result = *(s32 *)(D_00435DEC + index * 76 + 0x28);
+        s32 index = ((EventScriptEntry *)entry)->rosterIndex;
+        result = ((EventRosterRecord *)D_00435DEC)[index].panelValue;
     }
     func_0010D818(result);
     return 1;

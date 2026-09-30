@@ -597,10 +597,10 @@ s64 func_002B2790(s32 callback) {
 }
 
 u8 func_002B27C8(void) {
-    s64 temp_v0;
+    s64 state;
 
-    temp_v0 = func_002C6CE8();
-    return temp_v0 != 1;
+    state = func_002C6CE8();
+    return state != 1;
 }
 
 void func_002B27F0(u32 arg0) {
@@ -759,12 +759,12 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
 }
 
 void func_002B34E0(s32 arg0, u32 *arg1) {
-    s32 temp_v0;
+    s32 alpha;
 
-    temp_v0 = 0x100 - *(s32 *)(*(s32 *)(**(s32 **)(*(s32 *)(arg0 + 0xa690) + 0x1c) * 0x2138 + arg0
+    alpha = 0x100 - *(s32 *)(*(s32 *)(**(s32 **)(*(s32 *)(arg0 + 0xa690) + 0x1c) * 0x2138 + arg0
                                                                       + 0x154) + 0x60);
-    func_00306CD0(0xa0, 0xa30, 0, temp_v0, 1, arg1[1], 0x55, 0x53);
-    func_00306CD0(0x30, 0xaf8, 0, temp_v0, 1, *arg1, 0x1a, 0x53);
+    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, arg1[1], 0x55, 0x53);
+    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, *arg1, 0x1a, 0x53);
 }
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
@@ -832,12 +832,12 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3CA0);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3E80);
 
 u32 func_002B40B8(u32 callback) {
-    s32 temp_v0;
+    s32 party;
 
-    temp_v0 = func_00101958();
-    temp_v0 = ((MenuContext *)temp_v0)->party;
-    func_002B9520(*(u32 *)(temp_v0 + 0x24));
-    *(u32 *)(temp_v0 + 0x24) = 0;
+    party = func_00101958();
+    party = ((MenuContext *)party)->party;
+    func_002B9520(*(u32 *)(party + 0x24));
+    *(u32 *)(party + 0x24) = 0;
     return 1;
 }
 
@@ -887,9 +887,9 @@ void func_002B47F8(void) {
 }
 
 s32 mnuIsSkillCodeInBitset(s32 arg0, u32 *arg1) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
+    s32 wordIndex = (arg0 < 0) ? arg0 + 0x1f : arg0;
 
-    return (arg1[temp_v0 >> 5] & (1 << arg0)) != 0;
+    return (arg1[wordIndex >> 5] & (1 << arg0)) != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4848);
@@ -969,17 +969,17 @@ s64 func_002B5128(s32 callback) {
 }
 
 void func_002B5160(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    *(u32 *)(*(s32 *)(temp_v0 + 0xaa48) + 0x34) = 0xffffffff;
+    context = func_00101958();
+    *(u32 *)(*(s32 *)(context + 0xaa48) + 0x34) = 0xffffffff;
 }
 
 u32 func_002B5190(s32 callback) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101958();
-    return ~*(u32 *)(*(s32 *)(temp_v0 + 0xaa48) + 0x34) >> 0x1f;
+    context = func_00101958();
+    return ~*(u32 *)(*(s32 *)(context + 0xaa48) + 0x34) >> 0x1f;
 }
 
 void func_002B51C8(void) {
@@ -1028,14 +1028,14 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5450);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5580);
 
 void func_002B5778(s32 arg0, s32 arg1, s32 arg2) {
-    u8 *temp_v0 = (u8 *)(arg0 + 2);
-    s32 temp_v1 = arg1 * 2 + 32;
-    s32 temp_v2 = arg2 * 2 + 32;
-    u16 temp_v3 = *(u16 *)(temp_v0 + temp_v1);
-    u16 temp_v4 = *(u16 *)(temp_v0 + temp_v2);
+    u8 *entries = (u8 *)(arg0 + 2);
+    s32 firstOffset = arg1 * 2 + 32;
+    s32 secondOffset = arg2 * 2 + 32;
+    u16 firstValue = *(u16 *)(entries + firstOffset);
+    u16 secondValue = *(u16 *)(entries + secondOffset);
 
-    *(u16 *)(temp_v0 + temp_v1) = temp_v4;
-    *(u16 *)(temp_v0 + temp_v2) = temp_v3;
+    *(u16 *)(entries + firstOffset) = secondValue;
+    *(u16 *)(entries + secondOffset) = firstValue;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B57A8);
@@ -1290,12 +1290,12 @@ s32 mnuHasAvailableSlotResource(s32 id) {
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6D78);
 
 u32 func_002B6FA8(u32 callback) {
-    s32 temp_v0;
+    s32 party;
 
-    temp_v0 = func_00101958();
-    temp_v0 = ((MenuContext *)temp_v0)->party;
-    func_002B9520(*(u32 *)(temp_v0 + 0x24));
-    *(u32 *)(temp_v0 + 0x24) = 0;
+    party = func_00101958();
+    party = ((MenuContext *)party)->party;
+    func_002B9520(*(u32 *)(party + 0x24));
+    *(u32 *)(party + 0x24) = 0;
     return 1;
 }
 
@@ -1356,9 +1356,9 @@ s64 func_002B70C0(s32 callback) {
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7228);
 
 void func_002B7588(s32 arg0) {
-    s32 temp_v0;
+    s32 index;
 
-    for (temp_v0 = **(s32 **)(arg0 + 0x28c); temp_v0 < 3; temp_v0 = temp_v0 + 1) {
+    for (index = **(s32 **)(arg0 + 0x28c); index < 3; index = index + 1) {
     }
 }
 
@@ -1412,30 +1412,30 @@ void func_002B7730(u32 arg0, u32 *arg1) {
 }
 
 void func_002B7740(s32 arg0, s32 arg1) {
-    u32 *puVar1;
-    s32 temp_v0;
-    u32 *puVar3;
-    s32 temp_v1;
-    s32 temp_v2;
-    u32 temp_v3;
+    u32 *source;
+    s32 offset;
+    u32 *destination;
+    s32 remaining;
+    s32 sourceIndex;
+    u32 row;
 
-    temp_v3 = 0;
-    temp_v2 = 0;
+    row = 0;
+    sourceIndex = 0;
     do {
-        puVar3 = (u32 *)(arg1 + 0x40);
-        temp_v0 = temp_v2 << 2;
-        temp_v1 = 3;
+        destination = (u32 *)(arg1 + 0x40);
+        offset = sourceIndex << 2;
+        remaining = 3;
         do {
-            puVar1 = (u32 *)(temp_v0 + arg0);
-            temp_v0 = temp_v0 + 4;
-            temp_v1 = temp_v1 - 1;
-            *puVar3 = *puVar1;
-            puVar3 = puVar3 + 1;
-        } while (-1 < temp_v1);
-        temp_v3 = temp_v3 + 1;
+            source = (u32 *)(offset + arg0);
+            offset = offset + 4;
+            remaining = remaining - 1;
+            *destination = *source;
+            destination = destination + 1;
+        } while (-1 < remaining);
+        row = row + 1;
         arg1 = arg1 + 0x10;
-        temp_v2 = temp_v2 + 4;
-    } while (temp_v3 < 2);
+        sourceIndex = sourceIndex + 4;
+    } while (row < 2);
 }
 
 void func_002B7790(u32 first, u32 second, u32 *menu) {
@@ -1583,11 +1583,11 @@ u32 *mnuCreateListState(u32 owner, u32 callback, s32 count) {
 }
 
 u32 func_002B81C8(u32 arg0) {
-    s64 temp_v0;
+    s64 result;
 
     do {
-        temp_v0 = func_002B86E8(arg0);
-    } while (temp_v0 != 0);
+        result = func_002B86E8(arg0);
+    } while (result != 0);
     func_00328E48(arg0);
     return 1;
 }
@@ -1815,13 +1815,13 @@ s32 func_002B8FC8(s32 arg0) {
 }
 
 void func_002B8FD8(s32 arg0) {
-    s32 temp_v0;
+    s32 node;
 
-    temp_v0 = (s32)((MenuList *)arg0)->first;
-    if (temp_v0 != 0) {
-        ((MenuListNode *)temp_v0)->fadeCounter = 0;
-        while (temp_v0 = (s32)((MenuListNode *)temp_v0)->next, temp_v0 != 0) {
-            ((MenuListNode *)temp_v0)->fadeCounter = 0;
+    node = (s32)((MenuList *)arg0)->first;
+    if (node != 0) {
+        ((MenuListNode *)node)->fadeCounter = 0;
+        while (node = (s32)((MenuListNode *)node)->next, node != 0) {
+            ((MenuListNode *)node)->fadeCounter = 0;
         }
     }
 }
@@ -1910,12 +1910,12 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 left, s32 right)
 }
 
 void func_002B9520(u32 arg0) {
-    s32 temp_v0;
+    s32 resource;
 
     func_002B81C8((u32)((MenuWindowContainer *)arg0)->list);
-    temp_v0 = (s32)((MenuWindowContainer *)arg0)->resource;
-    if (temp_v0 != 0) {
-        func_002B99D8(temp_v0);
+    resource = (s32)((MenuWindowContainer *)arg0)->resource;
+    if (resource != 0) {
+        func_002B99D8(resource);
     }
     func_00328E48(arg0);
 }
@@ -2089,13 +2089,13 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9DD8);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9EA0);
 
 void func_002B9FB8(s32 arg0) {
-    s32 temp_v0;
+    s32 remaining;
 
-    temp_v0 = ((MenuWindowContainer *)arg0)->list->count;
-    if (0 < temp_v0) {
+    remaining = ((MenuWindowContainer *)arg0)->list->count;
+    if (0 < remaining) {
         do {
-            temp_v0 = temp_v0 - 1;
-        } while (temp_v0 != 0);
+            remaining = remaining - 1;
+        } while (remaining != 0);
     }
 }
 
@@ -2302,31 +2302,31 @@ void func_002BA7E8(u32 obj) {
 }
 
 void func_002BA890(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+    s32 node;
+    s32 first;
+    s32 previous;
 
-    temp_v2 = (s32)((MenuList *)arg0)->cursor;
-    temp_v1 = (s32)((MenuList *)arg0)->cursor;
-    while (temp_v0 = temp_v2, temp_v0 != 0) {
-        temp_v1 = temp_v0;
-        temp_v2 = (s32)((MenuListNode *)temp_v0)->prev;
+    previous = (s32)((MenuList *)arg0)->cursor;
+    first = (s32)((MenuList *)arg0)->cursor;
+    while (node = previous, node != 0) {
+        first = node;
+        previous = (s32)((MenuListNode *)node)->prev;
     }
-    ((MenuList *)arg0)->first = (MenuListNode *)temp_v1;
+    ((MenuList *)arg0)->first = (MenuListNode *)first;
 }
 
 void func_002BA8C8(s32 arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+    s32 node;
+    s32 last;
+    s32 next;
 
-    temp_v2 = (s32)((MenuList *)arg0)->cursor;
-    temp_v1 = (s32)((MenuList *)arg0)->cursor;
-    while (temp_v0 = temp_v2, temp_v0 != 0) {
-        temp_v1 = temp_v0;
-        temp_v2 = (s32)((MenuListNode *)temp_v0)->next;
+    next = (s32)((MenuList *)arg0)->cursor;
+    last = (s32)((MenuList *)arg0)->cursor;
+    while (node = next, node != 0) {
+        last = node;
+        next = (s32)((MenuListNode *)node)->next;
     }
-    ((MenuList *)arg0)->last = (MenuListNode *)temp_v1;
+    ((MenuList *)arg0)->last = (MenuListNode *)last;
 }
 
 void mnuResetNodeLinks(s32 *menu, s32 reset) {
@@ -2479,17 +2479,17 @@ void mnuFreeListEntries(s32 *list) {
 }
 
 void func_002BACF0(s32 arg0, s32 arg1, s32 *arg2) {
-    u32 temp_v0 = *arg2;
-    s32 *temp_v1 = arg2 + temp_v0;
-    s32 *temp_v2;
+    u32 count = *arg2;
+    s32 *slot = arg2 + count;
+    s32 *entry;
 
-    if (temp_v0 < 5) {
+    if (count < 5) {
         return;
     }
-    temp_v2 = (s32 *)temp_v1[1];
-    *arg2 = temp_v0 + 1;
-    temp_v2[0] = arg0;
-    temp_v2[4] = arg1;
+    entry = (s32 *)slot[1];
+    *arg2 = count + 1;
+    entry[0] = arg0;
+    entry[4] = arg1;
 }
 
 typedef struct MenuFadeEntry {
@@ -2674,49 +2674,49 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002BB510);
 
 void func_002BB850(s32 arg0, u32 arg1, u32 arg2, u32 arg3, s32 arg4
                                     ) {
-    u32 temp_v0;
+    u32 handle;
 
-    temp_v0 = effCreateResourceSlotSet(arg1, arg2, 1);
-    *(u32 *)(arg0 + 0xe4) = temp_v0;
-    temp_v0 = effCreateResourceSlotSet(arg1, arg3, 1);
-    *(u32 *)(arg0 + 0xe8) = temp_v0;
+    handle = effCreateResourceSlotSet(arg1, arg2, 1);
+    *(u32 *)(arg0 + 0xe4) = handle;
+    handle = effCreateResourceSlotSet(arg1, arg3, 1);
+    *(u32 *)(arg0 + 0xe8) = handle;
     if (-1 < arg4) {
-        temp_v0 = effCreateResourceSlotSet(arg1, arg4, 1);
-        *(u32 *)(arg0 + 0xec) = temp_v0;
+        handle = effCreateResourceSlotSet(arg1, arg4, 1);
+        *(u32 *)(arg0 + 0xec) = handle;
     }
 }
 
 void func_002BB8D8(s32 arg0) {
-    u32 temp_v0;
-    u32 *puVar2;
-    u32 *puVar3;
-    u32 *puVar4;
-    u32 temp_v1;
+    u32 flags;
+    u32 *slot;
+    u32 *secondHandle;
+    u32 *firstHandle;
+    u32 index;
 
-    puVar2 = (u32 *)(arg0 + 0x7c);
-    puVar3 = (u32 *)(arg0 + 0x164);
-    puVar4 = (u32 *)(arg0 + 0x160);
-    temp_v1 = 0;
+    slot = (u32 *)(arg0 + 0x7c);
+    secondHandle = (u32 *)(arg0 + 0x164);
+    firstHandle = (u32 *)(arg0 + 0x160);
+    index = 0;
     do {
-        if (puVar2[0x38] != 0) {
-            func_003054E8(puVar2[0x38]);
+        if (slot[0x38] != 0) {
+            func_003054E8(slot[0x38]);
         }
-        if (puVar2[0x39] != 0) {
-            func_003054E8(puVar2[0x39]);
+        if (slot[0x39] != 0) {
+            func_003054E8(slot[0x39]);
         }
-        if (puVar2[0x3a] != 0) {
-            func_003054E8(puVar2[0x3a]);
+        if (slot[0x3a] != 0) {
+            func_003054E8(slot[0x3a]);
         }
-        temp_v0 = *puVar2;
-        temp_v1 = temp_v1 + 1;
-        puVar2[0x38] = 0;
-        *puVar4 = 0;
-        *puVar2 = temp_v0 & 0xffffffbf;
-        puVar2 = puVar2 + 0x84e;
-        *puVar3 = 0;
-        puVar3 = puVar3 + 0x84e;
-        puVar4 = puVar4 + 0x84e;
-    } while (temp_v1 < 5);
+        flags = *slot;
+        index = index + 1;
+        slot[0x38] = 0;
+        *firstHandle = 0;
+        *slot = flags & 0xffffffbf;
+        slot = slot + 0x84e;
+        *secondHandle = 0;
+        secondHandle = secondHandle + 0x84e;
+        firstHandle = firstHandle + 0x84e;
+    } while (index < 5);
 }
 
 typedef struct MenuPartySlotValues {
@@ -2944,10 +2944,10 @@ void menuDrawFadeIcons(s32 a0, s32 a1, s32 a2, s32 a3, MenuFadeIcons *obj, s32 a
 }
 
 void func_002BC3C8(s32 arg0, s32 arg1, u32 arg2) {
-    u32 temp_v0;
+    u32 bundle;
 
-    temp_v0 = menuCreateIconBundle(arg2);
-    *(u32 *)(arg0 * 0x2138 + arg1 + 0x158) = temp_v0;
+    bundle = menuCreateIconBundle(arg2);
+    *(u32 *)(arg0 * 0x2138 + arg1 + 0x158) = bundle;
 }
 
 void func_002BC410(u8 *menu) {
@@ -2984,35 +2984,35 @@ void func_002BC580(u8 *menu) {
 }
 
 void func_002BC5D0(s32 arg0, u32 *arg1) {
-    u32 temp_v0;
-    u32 *puVar2;
-    u32 temp_v1;
+    u32 value;
+    u32 *destination;
+    u32 index;
 
-    puVar2 = (u32 *)(arg0 + 0x24);
-    temp_v1 = 0;
+    destination = (u32 *)(arg0 + 0x24);
+    index = 0;
     do {
-        temp_v0 = *arg1;
+        value = *arg1;
         arg1 = arg1 + 1;
-        temp_v1 = temp_v1 + 1;
-        *puVar2 = temp_v0;
-        puVar2 = puVar2 + 1;
-    } while (temp_v1 < 8);
+        index = index + 1;
+        *destination = value;
+        destination = destination + 1;
+    } while (index < 8);
 }
 
 void func_002BC600(s32 arg0, u32 *arg1) {
-    u32 temp_v0;
-    u32 *puVar2;
-    u32 temp_v1;
+    u32 value;
+    u32 *destination;
+    u32 index;
 
-    puVar2 = (u32 *)(arg0 + 0x44);
-    temp_v1 = 0;
+    destination = (u32 *)(arg0 + 0x44);
+    index = 0;
     do {
-        temp_v0 = *arg1;
+        value = *arg1;
         arg1 = arg1 + 1;
-        temp_v1 = temp_v1 + 1;
-        *puVar2 = temp_v0;
-        puVar2 = puVar2 + 1;
-    } while (temp_v1 < 8);
+        index = index + 1;
+        *destination = value;
+        destination = destination + 1;
+    } while (index < 8);
 }
 
 void mnuRegisterResourceHandles(s32 destination, s32 *source) {
@@ -3183,16 +3183,16 @@ void mnuFlagActiveWindows(u8 *menu) {
 }
 
 void func_002BD3A8(s32 arg0) {
-    u32 *puVar1;
-    u32 temp_v0;
+    u32 *flags;
+    u32 index;
 
-    puVar1 = (u32 *)(arg0 + 0x7c);
-    temp_v0 = 0;
+    flags = (u32 *)(arg0 + 0x7c);
+    index = 0;
     do {
-        temp_v0 = temp_v0 + 1;
-        *puVar1 = *puVar1 & 0xfffffffe;
-        puVar1 = puVar1 + 0x84e;
-    } while (temp_v0 < 5);
+        index = index + 1;
+        *flags = *flags & 0xfffffffe;
+        flags = flags + 0x84e;
+    } while (index < 5);
 }
 
 void mnuClearActionFlags(s32 kind, u8 *ctx) {

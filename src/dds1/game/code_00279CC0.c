@@ -69,11 +69,16 @@ typedef struct MenuPageParams {
 
 /* Page records of a menu window, stride 0x134, starting at window + 0x20. */
 typedef struct MenuPage {
-    u8 pad0[0xC0];
-    s32 scaleA;
-    u8 padC4[0x50];
-    s32 scaleB;
-    u8 pad118[0x1C];
+    u8 pad0[0x58];
+    s32 kind;          /* 0x58: active-page kind */
+    u32 flags;         /* 0x5C */
+    u8 pad60[0x60];
+    s32 scaleA;        /* 0xC0 */
+    s32 offsetA;       /* 0xC4 */
+    u8 padC8[0x4C];
+    s32 scaleB;        /* 0x114 */
+    s32 offsetB;       /* 0x118 */
+    u8 pad11C[0x18];
 } MenuPage;
 
 typedef struct MenuSourceEntry {
@@ -291,12 +296,26 @@ s32 func_0027A810(s32 selection) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A860);
 
+/* Sprite slots of the active skill-menu context; intervening state is opaque. */
+typedef struct MenuContextSprites {
+    u8 pad00[0x64];
+    u32 sprite64;
+    s32 label68;
+    u32 frame6C;
+    u8 pad70[4];
+    u32 sprite74;
+    u32 sprite78;
+    u8 pad7C[0x64];
+    u32 spriteE0;
+    u32 spriteE4;
+} MenuContextSprites;
+
 void func_0027A9A8(s32 arg0) {
-    func_002BF790(0x1c0, 0xa60, 0, 1, *(u32 *)(arg0 + 0x74), 0x1f, 0x53);
-    func_002BF790(0x150, 0xa00, 0, 1, *(u32 *)(arg0 + 0x74), 0, 0x53);
-    func_002BF790(0xbb0, 0xa00, 0, 1, *(u32 *)(arg0 + 0x74), 0, 0x53);
-    func_002BF790(0x250, 0x9c0, 0, 1, *(u32 *)(arg0 + 0xe4), 0x18, 0x53);
-    func_002BF790(0xce0, 0x9e0, 0, 1, *(u32 *)(arg0 + 100), 2, 0x53);
+    func_002BF790(0x1c0, 0xa60, 0, 1, ((MenuContextSprites *)arg0)->sprite74, 0x1f, 0x53);
+    func_002BF790(0x150, 0xa00, 0, 1, ((MenuContextSprites *)arg0)->sprite74, 0, 0x53);
+    func_002BF790(0xbb0, 0xa00, 0, 1, ((MenuContextSprites *)arg0)->sprite74, 0, 0x53);
+    func_002BF790(0x250, 0x9c0, 0, 1, ((MenuContextSprites *)arg0)->spriteE4, 0x18, 0x53);
+    func_002BF790(0xce0, 0x9e0, 0, 1, ((MenuContextSprites *)arg0)->sprite64, 2, 0x53);
 }
 
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -310,7 +329,7 @@ void mnuDrawListFrames(s32 menu) {
         if (i == 1) {
             x = 0xE70;
         }
-        func_002BF4E0(x, i * 0x320 + 0xC8, 0, 0x100, 1, *(s32 *)(menu + 0x6C), 7, 0x53);
+        func_002BF4E0(x, i * 0x320 + 0xC8, 0, 0x100, 1, ((MenuContextSprites *)menu)->frame6C, 7, 0x53);
     }
 }
 
@@ -333,10 +352,10 @@ void campMenuDrawStatus(s32 param) {
         if (label != 0xFFFF) {
             label &= 0xFFFF;
             mnuDrawSelectionLabel(label);
-            func_0027A140(label, *(s32 *)(context + 0x68), *(s32 *)(context + 0xE0));
+            func_0027A140(label, ((MenuContextSprites *)context)->label68, ((MenuContextSprites *)context)->spriteE0);
         }
     }
-    func_002723B0(2, *(s32 *)(context + 0x78));
+    func_002723B0(2, ((MenuContextSprites *)context)->sprite78);
     menuRunPanel(context, 1, param);
 }
 
@@ -733,7 +752,7 @@ u32 func_0027BEF0(u32 *arg0) {
 }
 
 s32 func_0027BF00(s32 arg0) {
-    return *(s32 *)(arg0 + 0x28) * *(s32 *)(arg0 + 0xc);
+    return ((MenuList *)arg0)->rowStep * ((MenuList *)arg0)->visibleCount;
 }
 
 /* Cancel the pending animation on every node in this list. */
@@ -769,15 +788,14 @@ void func_0027BF48(MenuList *list) {
 }
 
 void mnuDrawFourEntries(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    s32 base8 = arg4 + 8;
-    s32 baseC = arg4 + 0xC;
+    MenuSpriteGrid *grid = (MenuSpriteGrid *)arg4;
     u32 i = 0;
     do {
-        s32 eq = arg4 == *(s32 *)(arg3 + 0x1C);
-        s32 off = (eq * 4 + i) * 8;
-        s32 value = *(s32 *)(base8 + off);
-        if (value != 0) {
-            func_002BF790(arg0, arg1, arg2, 0, value, *(s32 *)(baseC + off), arg5);
+        s32 selected = arg4 == *(s32 *)(arg3 + 0x1C);
+        s32 index = selected * 4 + i;
+        s32 sprite = grid->slots[index].sprite;
+        if (sprite != 0) {
+            func_002BF790(arg0, arg1, arg2, 0, sprite, grid->slots[index].effect, arg5);
         }
         i++;
     } while (i < 4);
@@ -832,7 +850,11 @@ typedef struct MenuWindowContainer {
     u32 overlayColor;   /* 0x40 */
     u8 pad44[0x14];
     s32 visible;        /* 0x58 */
-    u8 pad5C[0x24];
+    u8 pad5C[0x14];
+    u32 left;           /* 0x70: copied panel layout */
+    u32 top;            /* 0x74 */
+    u32 right;          /* 0x78 */
+    u32 bottom;         /* 0x7c */
     s32 transition;     /* 0x80 */
     s32 textures;       /* 0x84 */
     s32 fade;           /* 0x88 */
@@ -903,11 +925,11 @@ void func_0027C570(s32 arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4) {
 void func_0027C590(u8 *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom) {
     memcpy(panel + 0x4c, layout, 0x38);
-    *(u32 *)(panel + 0x70) = left;
-    *(u32 *)(panel + 0x74) = top;
-    *(u32 *)(panel + 0x78) = right;
-    *(u32 *)(panel + 0x7c) = bottom;
-    *(u32 *)(panel + 4) |= 4;
+    ((MenuWindowContainer *)panel)->left = left;
+    ((MenuWindowContainer *)panel)->top = top;
+    ((MenuWindowContainer *)panel)->right = right;
+    ((MenuWindowContainer *)panel)->bottom = bottom;
+    ((MenuWindowContainer *)panel)->flags |= 4;
 }
 
 void func_0027C620(s32 arg0, u32 arg1, u32 arg2, u32 arg3,
@@ -1045,7 +1067,7 @@ void func_0027CDD0(s32 arg0, s32 arg1, s32 arg2, s32 menu, s32 param) {
 void func_0027CEE8(s32 arg0) {
     s32 remaining;
 
-    remaining = *(s32 *)(*(s32 *)(arg0 + 0x14) + 0x20);
+    remaining = ((MenuList *)((MenuWindowContainer *)arg0)->list)->count;
     if (0 < remaining) {
         do {
             remaining = remaining - 1;
@@ -1444,22 +1466,34 @@ void mnuUpdateFade(s32 *list) {
     }
 }
 
+/* 0x4C-byte scroll panel with three linked animation handles. */
+typedef struct MenuScrollPanel {
+    u8 pad00[4];
+    u32 selection;            /* 0x04 */
+    u32 firstSprite;          /* 0x08 */
+    u32 secondSprite;         /* 0x0C */
+    u8 pad10[0x10];
+    s32 overlaySprite;        /* 0x20 */
+    u8 pad24[0x1C];
+    ScrollHandle *handles[3]; /* 0x40 */
+} MenuScrollPanel;
+
 void mnuInitScrollHandles(u8 *menu) {
     ScrollHandle *handle;
 
     handle = func_002BD258(1);
-    *(ScrollHandle **)(menu + 0x40) = handle;
+    ((MenuScrollPanel *)menu)->handles[0] = handle;
     handle->inner->params->a = 10;
     handle->inner->params->b = 0;
 
     handle = func_002BD258(3);
-    *(ScrollHandle **)(menu + 0x44) = handle;
+    ((MenuScrollPanel *)menu)->handles[1] = handle;
     handle->inner->params->a = 8;
     handle->inner->params->b = 4;
     handle->inner->params->c = 8;
 
     handle = func_002BD258(1);
-    *(ScrollHandle **)(menu + 0x48) = handle;
+    ((MenuScrollPanel *)menu)->handles[2] = handle;
     handle->inner->params->a = 10;
     handle->inner->params->b = 0;
 }
@@ -1478,8 +1512,8 @@ s32 func_0027E5C0(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
 
     panel = func_002CFEB8(0x4c);
     memset(panel, 0, 0x4c);
-    *(u32 *)(panel + 8) = 0;
-    *(u32 *)(panel + 0xc) = 0;
+    ((MenuScrollPanel *)panel)->firstSprite = 0;
+    ((MenuScrollPanel *)panel)->secondSprite = 0;
     remaining = 1;
     itfGridStorePosition(panel + 0x10, arg0, arg1);
     itfGridStorePosition(panel + 0x18, arg2, arg3);
@@ -1501,7 +1535,7 @@ void func_0027E690(u32 arg0) {
 
 void func_0027E6B8(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     itfGridStorePosition(arg0 + 0x10);
-    *(u32 *)(arg0 + 4) = arg3;
+    ((MenuScrollPanel *)arg0)->selection = arg3;
 }
 
 void func_0027E6F0(u32 *menu) {
@@ -1537,7 +1571,7 @@ void func_0027E790(u32 *menu, s32 x, s32 y, s32 color) {
 }
 
 u8 func_0027E850(s32 arg0) {
-    return *(s32 *)(arg0 + 0x20) != 0;
+    return ((MenuScrollPanel *)arg0)->overlaySprite != 0;
 }
 
 void func_0027E860(u8 *panel, s32 y, s32 unknown,
@@ -1594,7 +1628,7 @@ void func_0027EF18(u8 *menu, s32 x, s32 y, s32 style, s32 color) {
     u32 i = 0;
     s32 offset = 0;
     for (; i < 5; i++) {
-        s32 entry = *(s32 *)(*(u32 *)(menu + 8) + offset + 0x10);
+        s32 entry = ((MenuRecord *)((u8 *)((MenuWindow *)menu)->records + offset))->gauge.id;
         offset += 0x34;
         if (entry >= 0) {
             *output = func_0027EAF0(x, y, style, 0, color, entry);
@@ -1608,7 +1642,7 @@ void mnuReleaseSlotResources(s32 context) {
     u32 i = 0;
     s32 offset = 0;
     for (; i < 5; i++) {
-        s32 node = *(s32 *)(*(s32 *)(context + 8) + offset + 0x10);
+        s32 node = ((MenuRecord *)((u8 *)((MenuWindow *)context)->records + offset))->gauge.id;
         offset += 0x34;
         if (node >= 0 && *slot != 0) {
             mnuDestroyResources(*slot);
@@ -1618,17 +1652,26 @@ void mnuReleaseSlotResources(s32 context) {
     }
 }
 
+typedef struct MenuPanelResources {
+    u8 pad00[0x10];
+    s32 primary;            /* 0x10 */
+    u8 pad14[0xD4];
+    u32 leftHandle;          /* 0xE8 */
+    u32 centerHandle;        /* 0xEC */
+    u32 rightHandle;         /* 0xF0 */
+} MenuPanelResources;
+
 void func_0027F050(s32 arg0, u32 arg1, u32 arg2, u32 arg3, s32 arg4
                                     ) {
     u32 handle;
 
     handle = effCreateResourceSlotSet(arg1, arg2, 1);
-    *(u32 *)(arg0 + 0xe8) = handle;
+    ((MenuPanelResources *)arg0)->leftHandle = handle;
     handle = effCreateResourceSlotSet(arg1, arg3, 1);
-    *(u32 *)(arg0 + 0xec) = handle;
+    ((MenuPanelResources *)arg0)->centerHandle = handle;
     if (-1 < arg4) {
         handle = effCreateResourceSlotSet(arg1, arg4, 1);
-        *(u32 *)(arg0 + 0xf0) = handle;
+        ((MenuPanelResources *)arg0)->rightHandle = handle;
     }
 }
 
@@ -1668,13 +1711,13 @@ void func_0027F0D8(s32 arg0) {
 void func_0027F198(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 page = arg0 + arg1 * 0x134 + 0x78;
 
-    *(s32 *)(page + 0x6C) = 0;
-    *(s32 *)(page + 0xC0) = 0;
+    ((MenuPage *)(page - 0x58))->offsetA = 0;
+    ((MenuPage *)(page - 0x58))->offsetB = 0;
     if (arg3 != 0) {
         return;
     }
-    *(s32 *)(page + 0x68) = 0x100;
-    *(s32 *)(page + 0xBC) = 0x100;
+    ((MenuPage *)(page - 0x58))->scaleA = 0x100;
+    ((MenuPage *)(page - 0x58))->scaleB = 0x100;
 }
 
 typedef struct MenuPageMotion {
@@ -1924,7 +1967,7 @@ void mnuRegisterResourceHandles(s32 destination, s32 *source) {
     u32 i;
     for (i = 0; i < 5; i++) {
         effResolveAndReleaseResource(source[i]);
-        *(s32 *)(destination + 0x64 + 4 * i) = source[i];
+        ((MenuWindow *)destination)->handlesC[i] = source[i];
     }
 }
 
@@ -1942,10 +1985,10 @@ void menuUpdateHandleStates(s32 obj) {
         }
     }
     for (i = 0, offset = 0; i < 5U; i++) {
-        s32 entry = *(s32 *)(obj + 8) + offset;
+        s32 entry = (s32)((u8 *)((MenuWindow *)obj)->records + offset);
 
         offset += 0x34;
-        if (*(s32 *)(entry + 0x10) >= 0) {
+        if (((MenuRecord *)entry)->gauge.id >= 0) {
             if (i < **(s32 **)(obj + 8)) {
                 func_0027FCA0(obj, i, 1);
             } else {
@@ -2268,15 +2311,15 @@ void func_002814D0(s32 x, s32 y, s32 z, s32 obj, s32 mode, s32 param) {
     s32 pos[2] = {0x180, 0xE0};
 
     if (mode == 0) {
-        func_002BF4E0(x, y, z, 0x100, 1, *(s32 *)(obj + 0x10), 0, param);
+        func_002BF4E0(x, y, z, 0x100, 1, ((MenuPanelResources *)obj)->primary, 0, param);
         x += pos[0];
         y += pos[1];
-        func_002BF4E0(x, y, z, 0x100, 1, *(s32 *)(obj + 0xE8), 0, param);
-        if (*(s32 *)(obj + 0xF0) == 0) {
-            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, *(s32 *)(obj + 0xEC), 0, param);
+        func_002BF4E0(x, y, z, 0x100, 1, ((MenuPanelResources *)obj)->leftHandle, 0, param);
+        if (((MenuPanelResources *)obj)->rightHandle == 0) {
+            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, ((MenuPanelResources *)obj)->centerHandle, 0, param);
         } else {
-            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, *(s32 *)(obj + 0xEC), 0, param);
-            func_002BF4E0(x + 0x790, y + 0x70, z, 0x100, 1, *(s32 *)(obj + 0xF0), 0, param);
+            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, ((MenuPanelResources *)obj)->centerHandle, 0, param);
+            func_002BF4E0(x + 0x790, y + 0x70, z, 0x100, 1, ((MenuPanelResources *)obj)->rightHandle, 0, param);
         }
     }
 }

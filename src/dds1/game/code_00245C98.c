@@ -176,29 +176,29 @@ void evtInstallStateTableC(EvtDispatchState *state) {
 }
 
 s32 func_00246538(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
+    s32 *state = (s32 *)func_00101A70();
 
-    if (temp_v0[43] == 1) {
-        func_002457E8(temp_v0);
+    if (state[43] == 1) {
+        func_002457E8(state);
     }
     return 1;
 }
 
 s32 evtSelectStateActionB(void) {
-    s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
+    s32 state = func_00101A70();
+    s32 action = ((EvtDispatchState *)state)->action;
 
-    if (temp_v1 == 5) {
-        mnuSetCommandPhase(temp_v0, 3);
-    } else if (temp_v1 == 7) {
-        s32 temp_v2;
+    if (action == 5) {
+        mnuSetCommandPhase(state, 3);
+    } else if (action == 7) {
+        s32 task;
 
-        mnuSetCommandPhase(temp_v0, 9);
-        temp_v2 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
-        *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
-        func_00260570(temp_v2, 10);
+        mnuSetCommandPhase(state, 9);
+        task = *(s32 *)(*(s32 *)(state + 0x70) + 0x14);
+        *(s32 *)(task + 0x2C) = (s32)func_0025F138;
+        func_00260570(task, 10);
     }
-    ((EvtDispatchState *)temp_v0)->substate = 0;
+    ((EvtDispatchState *)state)->substate = 0;
     return 1;
 }
 
@@ -226,29 +226,29 @@ void evtInstallStateTableD(EvtDispatchState *state) {
 }
 
 s32 evtEnableStateFlag(void) {
-    s32 temp_v0 = func_00101A70();
+    s32 state = func_00101A70();
 
-    if ((((EvtDispatchState *)temp_v0)->action == 1) && (func_00245A40(temp_v0) == 0)) {
-        ((EvtDispatchState *)temp_v0)->mode = 2;
+    if ((((EvtDispatchState *)state)->action == 1) && (func_00245A40(state) == 0)) {
+        ((EvtDispatchState *)state)->mode = 2;
     }
     return 1;
 }
 
 s32 evtSelectStateActionC(void) {
-    s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->action;
+    s32 state = func_00101A70();
+    s32 action = ((EvtDispatchState *)state)->action;
 
-    if (temp_v1 == 5) {
-        mnuSetCommandPhase(temp_v0, 3);
-    } else if (temp_v1 == 7) {
-        s32 temp_v2;
+    if (action == 5) {
+        mnuSetCommandPhase(state, 3);
+    } else if (action == 7) {
+        s32 task;
 
-        mnuSetCommandPhase(temp_v0, 9);
-        temp_v2 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
-        *(s32 *)(temp_v2 + 0x2C) = (s32)func_0025F138;
-        func_00260570(temp_v2, 10);
+        mnuSetCommandPhase(state, 9);
+        task = *(s32 *)(*(s32 *)(state + 0x70) + 0x14);
+        *(s32 *)(task + 0x2C) = (s32)func_0025F138;
+        func_00260570(task, 10);
     }
-    ((EvtDispatchState *)temp_v0)->substate = 0;
+    ((EvtDispatchState *)state)->substate = 0;
     return 1;
 }
 
@@ -269,11 +269,11 @@ void evtSetupDispatchSyncD(s32 callback) {
 }
 
 u32 evtResetStateProgressTimer(void) {
-    s32 temp_v0;
+    s32 state;
 
-    temp_v0 = func_00101A70();
-    ((EvtDispatchState *)temp_v0)->progressTicks = 0;
-    func_0027BB28(*(u32 *)(*(s32 *)(temp_v0 + 0x6c) + 0x14));
+    state = func_00101A70();
+    ((EvtDispatchState *)state)->progressTicks = 0;
+    func_0027BB28(*(u32 *)(*(s32 *)(state + 0x6c) + 0x14));
     return 1;
 }
 
@@ -312,24 +312,24 @@ void evtSetupDispatchSyncE(s32 callback) {
 }
 
 s32 func_00246E00(void) {
-    s32 *temp_v0 = (s32 *)func_00101A70();
+    s32 *state = (s32 *)func_00101A70();
 
-    temp_v0[32] = 1;
-    mnuCampClampSceneCounter(-1, temp_v0);
+    state[32] = 1;
+    mnuCampClampSceneCounter(-1, state);
     return 1;
 }
 
 s32 evtAdvanceStateStage(void) {
-    s32 temp_v0 = func_00101A70();
+    s32 state = func_00101A70();
 
-    if (((EvtDispatchState *)temp_v0)->action == 0xA) {
-        s32 temp_v1;
+    if (((EvtDispatchState *)state)->action == 0xA) {
+        s32 task;
 
-        ((EvtDispatchState *)temp_v0)->substate = 0xA;
-        mnuSetCommandPhase(temp_v0, 6);
-        temp_v1 = *(s32 *)(*(s32 *)(temp_v0 + 0x70) + 0x14);
-        *(s32 *)(temp_v1 + 0x2C) = (s32)func_0025ECD0;
-        func_00260530(temp_v1, 0);
+        ((EvtDispatchState *)state)->substate = 0xA;
+        mnuSetCommandPhase(state, 6);
+        task = *(s32 *)(*(s32 *)(state + 0x70) + 0x14);
+        *(s32 *)(task + 0x2C) = (s32)func_0025ECD0;
+        func_00260530(task, 0);
     }
     return 1;
 }
@@ -337,17 +337,17 @@ s32 evtAdvanceStateStage(void) {
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246EA0);
 
 void evtAlignDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+    s32 context = func_00101A70();
 
-    func_00261760(temp_v0);
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00261760(context);
+    func_00285670(context + 8, context + 0x54, 1, arg0);
 }
 
 void evtSetupDispatchSyncF(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, arg0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
@@ -355,10 +355,10 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002472D8);
 
 void evtAccumulateStateScore(s32 arg0) {
-    s32 temp_v0 = *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x70) + 0x14) + 0x1C) + 0x60;
+    s32 score = *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x70) + 0x14) + 0x1C) + 0x60;
 
-    if ((u32)(*(s32 *)(temp_v0 + 4) - 0x60) < 0x20) {
-        *(s32 *)(D_003BAA00 + 0xA50) += *(s32 *)temp_v0 * *(s32 *)(arg0 + 0x80);
+    if ((u32)(*(s32 *)(score + 4) - 0x60) < 0x20) {
+        *(s32 *)(D_003BAA00 + 0xA50) += *(s32 *)score * *(s32 *)(arg0 + 0x80);
     }
 }
 
@@ -369,10 +369,10 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247588);
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247728);
 
 void evtSetupDispatchSyncG(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, arg0);
 }
 
 extern void func_0024DA58();
@@ -434,10 +434,10 @@ s64 func_002479F0(u64 argument) {
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247A78);
 
 void evtSetupDispatchSyncH(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, arg0);
 }
 
 u32 func_00247CF8(void) {
@@ -458,20 +458,20 @@ INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF528);
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247D58);
 
 void evtRefreshDispatchStart(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
-    s32 temp_v1 = ((EvtDispatchState *)temp_v0)->progressTicks;
+    s32 state = func_00101A70();
+    s32 ticks = ((EvtDispatchState *)state)->progressTicks;
 
-    if (temp_v1 != 0) {
-        func_0025DF68(temp_v0, temp_v1);
+    if (ticks != 0) {
+        func_0025DF68(state, ticks);
     }
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 1, arg0);
+    func_00285670(state + 8, state + 0x54, 1, arg0);
 }
 
 void evtSetupDispatchSyncI(s32 arg0) {
-    s32 temp_v0 = func_00101A70();
+    s32 context = func_00101A70();
 
     func_0024DD78();
-    func_00285670(temp_v0 + 8, temp_v0 + 0x54, 2, arg0);
+    func_00285670(context + 8, context + 0x54, 2, arg0);
 }
 
 u32 evtResetStateFlags(void) {
