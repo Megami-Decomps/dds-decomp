@@ -677,10 +677,10 @@ s32 func_00213418(void) {
 s32 func_00213438(s32 battler) {
     u32 flags;
 
-    if (*(u32 *)(battler + 0x110) & 0x200) {
+    if (((BattleUnit *)battler)->flags & 0x200) {
         return 0;
     }
-    flags = *(u16 *)(battler + 0x120) & 0x2000;
+    flags = ((BtlUnit *)battler)->unk_120 & 0x2000;
     return flags != 0;
 }
 
@@ -710,7 +710,7 @@ s32 btlTurnReachedLimit(s32 unused, u32 limit) {
 }
 
 s32 func_00213548(s32 unused, u32 limit) {
-    if (limit < *(u32 *)(func_001AA6F8() + 0x274)) {
+    if (limit < (u32)((BattleWork *)func_001AA6F8())->turnCount) {
         return 0;
     }
     return 1;
@@ -718,8 +718,8 @@ s32 func_00213548(s32 unused, u32 limit) {
 
 s32 btlIsReadyWithoutTurns(void) {
     u8 *battle = (u8 *)func_001AA6F8();
-    if (*(u16 *)(battle + 0x26C) == 2) {
-        if (*(s32 *)(battle + 0x274) == 0) {
+    if (((BattleWork *)battle)->phase == 2) {
+        if (((BattleWork *)battle)->turnCount == 0) {
             return 1;
         }
     }
@@ -778,7 +778,7 @@ s32 func_00213748(u8 *unit) {
     u32 count;
     s32 battle;
     void *list;
-    if (*(u32 *)(unit + 0x110) & 0x400) {
+    if (((BattleUnit *)unit)->flags & 0x400) {
         return 0;
     }
     battle = (s32)*D_00436CB8;
@@ -1079,18 +1079,18 @@ s32 func_002143A0(void) {
 
 s32 btlHasUnitWithStatusBit(s32 battler, s32 scanAll) {
     if (scanAll != 0) {
-        battler = *(s32 *)(func_001AA6F8() + 0x24c);
+        battler = (s32)((BattleWork *)func_001AA6F8())->actorList;
         while (battler != 0) {
             if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-                (*(u32 *)(battler + 0x114) & 0x800000) != 0) {
+                (((BattleUnit *)battler)->stateFlags & 0x800000) != 0) {
                 return 1;
             }
-            battler = *(s32 *)(battler + 0x364);
+            battler = (s32)((BattleUnit *)battler)->nextActor;
         }
         return 0;
     }
     if ((*(u64 *)(battler + 0x110) & 0x21) == 1 &&
-        (*(u32 *)(battler + 0x114) & 0x800000) != 0) {
+        (((BattleUnit *)battler)->stateFlags & 0x800000) != 0) {
         return 1;
     }
     return 0;
@@ -1442,7 +1442,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00218018);
 extern s32 func_001B5288();
 
 s64 func_002180F8(s32 battler, s32 resource) {
-    if (*(u32 *)(battler + 0x110) & 0x400) {
+    if (((BattleUnit *)battler)->flags & 0x400) {
         if (mdlFlagTest(0x82b)) {
             return func_001B5288(battler, resource);
         }
@@ -1462,7 +1462,7 @@ s32 func_00218150(void) {
         if (flags & 1) {
             if (flags & 0x200) {
                 if (!(flags & 0xE0)) {
-                    if (!(*(u16 *)((u8 *)battler + 0x12e) & 0x2000)) {
+                    if (!(battler->conditionFlags & 0x2000)) {
                         return -1;
                     }
                     count++;
@@ -1526,7 +1526,7 @@ s32 func_00218630(BattleUnit *unit, s32 kind, s32 fallback) {
 }
 
 s32 func_00218690(void) {
-    return *(u32 *)(func_001AA6F8() + 0x2a0) == 0x303 ? 1 : 2;
+    return ((BattleWork *)func_001AA6F8())->mode == 0x303 ? 1 : 2;
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002186C0);
@@ -1539,8 +1539,8 @@ void func_00218968(void) {
 
 s32 func_00218980(s32 battler, s32 action, s32 defaultValue) {
     if (action == 11) {
-        if (*(u32 *)(battler + 0x110) & 0x400) {
-            if (*(u16 *)(battler + 0x124) == 0x107) {
+        if (((BattleUnit *)battler)->flags & 0x400) {
+            if (((BattleUnit *)battler)->mode == 0x107) {
                 return 1;
             }
         }
@@ -1899,15 +1899,15 @@ extern void func_001E88A8(s32);
 
 s32 btlTriggerLinkedActionMotion(s32 object) {
     s32 state = *(s32 *)(object + 0x114);
-    s32 battler = *(s32 *)(state + 0x18);
-    if ((*(u32 *)(battler + 0x110) & 0x200) != 0 &&
-        func_001E8058(*(s32 *)(state + 0x60)) == 1) {
-        s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
-        if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
-            if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+    s32 battler = ((ActionStateLink *)state)->owner;
+    if ((((BattleUnit *)battler)->flags & 0x200) != 0 &&
+        func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
+        s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+        if ((((BattleUnit *)owner)->flags & 0x400) != 0) {
+            if ((((BattleUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                 return 0;
             }
-            if (*(u16 *)(owner + 0x124) != 0x136) {
+            if (((BattleUnit *)owner)->mode != 0x136) {
                 return 0;
             }
             func_00217470(object, object, 0.0f, 0.1499999911f, 35.0f);
@@ -2082,18 +2082,18 @@ s32 btlResolveBoundActionCode(s32 battler, s32 action) {
     if (*(s32 *)slot == battler) {
         return -1;
     }
-    if ((*(u32 *)(battler + 0x110) & 0x400) == 0) {
+    if ((((BattleUnit *)battler)->flags & 0x400) == 0) {
         return action;
     }
-    if (action == 15 && *(u16 *)(battler + 0x124) == 0x112) {
+    if (action == 15 && ((BattleUnit *)battler)->mode == 0x112) {
         return 20;
     }
     if (action == 1 || action == 11) {
         if (*(s8 *)(slot + 8) != 0) {
-            s32 selected = *(u16 *)(battler + 0x124);
+            s32 selected = ((BattleUnit *)battler)->mode;
             if (selected < 0x113) {
                 if (selected >= 0x111) {
-                    return (*(u32 *)(battler + 0x114) & 0x80000) ? 10 : 21;
+                    return (((BattleUnit *)battler)->stateFlags & 0x80000) ? 10 : 21;
                 }
             }
         }

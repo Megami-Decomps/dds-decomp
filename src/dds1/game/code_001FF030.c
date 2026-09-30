@@ -764,45 +764,45 @@ s32 btlHasOtherGroup400DifferentUnitMode(u8 *actor, s32 kind) {
 }
 
 s32 battleAnyUnitPassesCheck200(s32 unused, s32 action) {
-    s32 unit = *(s32 *)(func_001A17F0() + 0x228);
+    s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (func_00202178(unit, action, 0x200) == 0) {
             return 1;
         }
-        unit = *(s32 *)(unit + 0x344);
+        unit = (s32)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00201748(s32 unused, s32 action) {
-    s32 unit = *(s32 *)(func_001A17F0() + 0x228);
+    s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (func_00202178(unit, action, 0x200) == 1) {
             return 0;
         }
-        unit = *(s32 *)(unit + 0x344);
+        unit = (s32)((BtlUnit *)unit)->next;
     }
     return 1;
 }
 
 s32 battleAnyUnitPassesCheck400(s32 unused, s32 action) {
-    s32 unit = *(s32 *)(func_001A17F0() + 0x228);
+    s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (func_00202178(unit, action, 0x400) == 0) {
             return 1;
         }
-        unit = *(s32 *)(unit + 0x344);
+        unit = (s32)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00201828(s32 unused, s32 action) {
-    s32 unit = *(s32 *)(func_001A17F0() + 0x228);
+    s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (func_00202178(unit, action, 0x400) == 1) {
             return 0;
         }
-        unit = *(s32 *)(unit + 0x344);
+        unit = (s32)((BtlUnit *)unit)->next;
     }
     return 1;
 }
@@ -944,12 +944,12 @@ s32 func_00201E10(void) {
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
 s32 func_00201E20(s32 unused, s32 action) {
-    s32 unit = *(s32 *)(func_001A17F0() + 0x228);
+    s32 unit = (s32)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQuery(unit, action, 0x200) != 0) {
             return 1;
         }
-        unit = *(s32 *)(unit + 0x344);
+        unit = (s32)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -1079,23 +1079,23 @@ s32 func_00202178(u8 *unit, s32 action, u32 mask) {
 }
 
 s32 battleAllUnitsPassCheck200(s32 unused, s32 action) {
-    s32 node = *(s32 *)(func_001A17F0() + 0x228);
+    s32 node = (s32)((BtlState *)func_001A17F0())->units;
     while (node != 0) {
         if (func_00202178(node, action, 0x200) == 0) {
             return 0;
         }
-        node = *(s32 *)(node + 0x344);
+        node = (s32)((BtlUnit *)node)->next;
     }
     return 1;
 }
 
 s32 battleAllUnitsPassCheck400(s32 unused, s32 action) {
-    s32 node = *(s32 *)(func_001A17F0() + 0x228);
+    s32 node = (s32)((BtlState *)func_001A17F0())->units;
     while (node != 0) {
         if (func_00202178(node, action, 0x400) == 0) {
             return 0;
         }
-        node = *(s32 *)(node + 0x344);
+        node = (s32)((BtlUnit *)node)->next;
     }
     return 1;
 }
@@ -1970,11 +1970,11 @@ u32 btlGetEffectActive(void) {
     if (((BtlState *)temp_v0)->battleMode != 0x108) {
         return 0;
     }
-    temp_v1 = *(s32 *)(temp_v0 + 0x694);
+    temp_v1 = (s32)((BtlState *)temp_v0)->effect;
     if (temp_v1 == 0) {
         return 0;
     }
-    return *(u8 *)(temp_v1 + 0xe);
+    return ((BattleEffectState *)temp_v1)->active;
 }
 
 s32 btlHasEffectActor(void) {
@@ -1986,11 +1986,11 @@ s32 btlHasEffectActor(void) {
     if (((BtlState *)temp_v1)->battleMode != 0x108) {
         return temp_v0;
     }
-    temp_v2 = *(s32 *)(temp_v1 + 0x694);
+    temp_v2 = (s32)((BtlState *)temp_v1)->effect;
     if (temp_v2 == 0) {
         return temp_v0;
     }
-    return (*(s32 *)(temp_v2 + 0) != 0);
+    return (((BattleEffectState *)temp_v2)->actor != 0);
 }
 
 u32 btlGetEffectValue(void) {
@@ -2001,18 +2001,18 @@ u32 btlGetEffectValue(void) {
     if (((BtlState *)temp_v0)->battleMode != 0x108) {
         return 0;
     }
-    temp_v1 = *(s32 *)(temp_v0 + 0x694);
+    temp_v1 = (s32)((BtlState *)temp_v0)->effect;
     if (temp_v1 == 0) {
         return 0;
     }
-    return *(u32 *)(temp_v1 + 0x8);
+    return ((BattleEffectState *)temp_v1)->value;
 }
 
 u32 btlGetEffectActor(void) {
     s32 temp_v0;
 
     temp_v0 = func_001A17F0();
-    return *(u32 *)(*(s32 *)(temp_v0 + 0x694));
+    return ((BtlState *)temp_v0)->effect->actor;
 }
 
 s32 func_00207C18(void) {
@@ -2307,7 +2307,7 @@ u32 func_00208C68(void) {
     if (((BtlState *)temp_v0)->battleMode != 0x116) {
         return 0;
     }
-    temp_v1 = *(s32 *)(temp_v0 + 0x694);
+    temp_v1 = (s32)((BtlState *)temp_v0)->effect;
     if (temp_v1 == 0) {
         return 0;
     }
@@ -2623,7 +2623,7 @@ u32 func_002099A0(void) {
     if (((BtlState *)temp_v0)->battleMode != 0x10b) {
         return 0;
     }
-    temp_v1 = *(s32 *)(temp_v0 + 0x694);
+    temp_v1 = (s32)((BtlState *)temp_v0)->effect;
     if (temp_v1 == 0) {
         return 0;
     }
@@ -2639,7 +2639,7 @@ s32 func_002099E0(void) {
     if (((BtlState *)temp_v1)->battleMode != 0x10b) {
         return temp_v0;
     }
-    temp_v2 = *(s32 *)(temp_v1 + 0x694);
+    temp_v2 = (s32)((BtlState *)temp_v1)->effect;
     if (temp_v2 == 0) {
         return temp_v0;
     }
