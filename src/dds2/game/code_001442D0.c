@@ -322,7 +322,7 @@ extern void effUpdateNode(u32 arg0);
 extern void func_001132F0(s32 arg0);
 
 typedef struct {
-    s32 unk0;
+    s32 objectHandle;
     s32 unk4;
     u8 pad8[0xC];
 } FldEnt14; /* 0x14 bytes */
@@ -491,9 +491,9 @@ extern s32 D_003A8E50[4];
 typedef struct {
     s32 unk0, unk4, unk8, unkC;
     u8 pad10[0x10];
-    s32 *unk20;
+    s32 *object;
     u8 pad24[8];
-    s32 unk2C, unk30, unk34, unk38;
+    s32 unk2C, unk30, unk34, room;
     s16 unk3C, unk3E;
     char name[0x10];
 } FldTblEnt50; /* 0x50 bytes */
@@ -502,11 +502,11 @@ extern FldTblEnt50 D_0044FF90[];
 
 typedef struct {
     s32 unk0;
-    s32 unk4;
+    s32 id;
     s32 unk8;
-    s32 unkC;
+    s32 activationRequested;
     u8 pad10[0x14];
-    s32 unk24;
+    s32 effectNode;
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
 
@@ -527,13 +527,12 @@ extern void func_00157790(s32 handle, f32 *pos);
 typedef struct FieldPair48 {
     f32 pos[4];
     f32 vel[4];
-    s32 unk20;
+    s32 hasVectors;
     s32 active;
     s32 unk28;
-    s16 unk2C;
+    s16 objectSlot;
     s16 unk2E;
 } FieldPair48; /* 0x30 bytes */
-
 extern FieldPair48 D_00450F90[];
 
 extern u32 effMiscRand();
@@ -598,7 +597,7 @@ extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 typedef struct {
     u8 pad0[0xC];
-    s32 *unkC;
+    s32 *drawNodeHandle;
 } FldEmitterRes;
 
 typedef struct {
@@ -1165,7 +1164,7 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    handle = *emitter->res->unkC;
+    handle = *emitter->res->drawNodeHandle;
     __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
     __asm__ volatile (".set noreorder\n\tvmove.w vf10, vf0\n\t.set reorder");
     __asm__ volatile (".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(emitter->pos) : "memory");
@@ -2030,11 +2029,11 @@ void fldClearMenuEntries(void) {
         D_0044FF90[i].unk4 = 0;
         D_0044FF90[i].unk8 = 0;
         D_0044FF90[i].unkC = 0;
-        D_0044FF90[i].unk20 = 0;
+        D_0044FF90[i].object = 0;
         D_0044FF90[i].unk2C = 0;
         D_0044FF90[i].unk30 = 0;
         D_0044FF90[i].unk34 = 0;
-        D_0044FF90[i].unk38 = 0;
+        D_0044FF90[i].room = 0;
         D_0044FF90[i].unk3C = 0;
         D_0044FF90[i].unk3E = 0;
     }
@@ -2046,14 +2045,14 @@ void fldResetObjectSlots(void) {
 
     D_00436320 = 0;
     for (i = 0; i < 32; i++) {
-        D_00450990[i].unk4 = -1;
+        D_00450990[i].id = -1;
         D_00450990[i].unk0 = 0;
         D_00450990[i].unk8 = 0;
-        D_00450990[i].unkC = 0;
-        if (D_00450990[i].unk24 != 0) {
-            effDestroyNode(D_00450990[i].unk24);
+        D_00450990[i].activationRequested = 0;
+        if (D_00450990[i].effectNode != 0) {
+            effDestroyNode(D_00450990[i].effectNode);
         }
-        D_00450990[i].unk24 = 0;
+        D_00450990[i].effectNode = 0;
     }
     D_00436300 = 0;
     D_0043630C = 0;
@@ -2077,8 +2076,8 @@ void fldActivateObjectById(s32 id) {
     s32 i;
 
     for (i = 0; i < D_00436320; i++) {
-        if (D_00450990[i].unk4 == id && D_00450990[i].unk8 == 0) {
-            D_00450990[i].unkC = 1;
+        if (D_00450990[i].id == id && D_00450990[i].unk8 == 0) {
+            D_00450990[i].activationRequested = 1;
         }
     }
 }
@@ -2087,17 +2086,17 @@ void fldReleaseObjectSlots(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (D_00450990[i].unk24 != 0) {
-            effDestroyNode(D_00450990[i].unk24);
-            D_00450990[i].unk24 = 0;
+        if (D_00450990[i].effectNode != 0) {
+            effDestroyNode(D_00450990[i].effectNode);
+            D_00450990[i].effectNode = 0;
         }
     }
     D_00436320 = 0;
     for (i = 0; i < 32; i++) {
-        D_00450990[i].unk4 = -1;
+        D_00450990[i].id = -1;
         D_00450990[i].unk0 = 0;
         D_00450990[i].unk8 = 0;
-        D_00450990[i].unkC = 0;
+        D_00450990[i].activationRequested = 0;
     }
 }
 
@@ -2164,10 +2163,10 @@ void fldFireRoomEffects(void) {
     s32 i;
 
     for (i = 0; i < D_004362C8; i++) {
-        s32 room = D_0044FF90[i].unk38;
+        s32 room = D_0044FF90[i].room;
         if (room != 0 && func_00123590(D_00389770[4], D_00389770[5] + 1, room) != 0) {
-            if (D_0044FF90[i].unk20 != 0) {
-                dds3SetObjectFlags(D_0044FF90[i].unk20, 1);
+            if (D_0044FF90[i].object != 0) {
+                dds3SetObjectFlags(D_0044FF90[i].object, 1);
             }
         }
     }
@@ -2215,7 +2214,7 @@ s32 fldFindEffectByName(char *name) {
 
     for (i = 0; i < D_004362C8; i++) {
         if (D_0044FF90[i].unk0 != 999 && strcmp(D_0044FF90[i].name, name) == 0) {
-            return D_0044FF90[i].unk20[1];
+            return D_0044FF90[i].object[1];
         }
     }
     return 0;
@@ -2562,12 +2561,12 @@ void fldClearObjectEntryHandles(void) {
     s32 i = 0x10;
 
     do {
-        s32 temp = entry->unk0;
+        s32 objectHandle = entry->objectHandle;
 
         i--;
-        if (temp != 0) {
-            func_001132F0(temp);
-            entry->unk0 = 0;
+        if (objectHandle != 0) {
+            func_001132F0(objectHandle);
+            entry->objectHandle = 0;
         }
         entry++;
     } while (i >= 0);
@@ -2578,16 +2577,16 @@ void fldInitSparkTable(void) {
 
     if (D_00389874[0] == 0) {
         for (i = 0; i < 64; i++) {
-            D_00450F90[i].unk20 = 0;
+            D_00450F90[i].hasVectors = 0;
             D_00450F90[i].active = 0;
             D_00450F90[i].unk28 = 0;
-            D_00450F90[i].unk2C = -1;
+            D_00450F90[i].objectSlot = -1;
             D_00450F90[i].unk2E = effMiscRand(0) % 60 + 15;
         }
     } else {
         for (i = 0; i < 64; i++) {
-            D_00450F90[i].unk20 = 0;
-            D_00450F90[i].unk2C = -1;
+            D_00450F90[i].hasVectors = 0;
+            D_00450F90[i].objectSlot = -1;
         }
     }
 }
@@ -2598,7 +2597,7 @@ void fldResetSparkTable(void) {
     for (i = 0; i < 64; i++) {
         D_00450F90[i].active = 0;
         D_00450F90[i].unk28 = 0;
-        D_00450F90[i].unk2C = -1;
+        D_00450F90[i].objectSlot = -1;
         D_00450F90[i].unk2E = effMiscRand(0) % 60 + 15;
     }
 }
@@ -2606,7 +2605,7 @@ void fldResetSparkTable(void) {
 s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     PCP_COPY_VECTOR(D_00450F90[index].pos, pos);
     PCP_COPY_VECTOR(D_00450F90[index].vel, vel);
-    D_00450F90[index].unk20 = 1;
+    D_00450F90[index].hasVectors = 1;
     return 1;
 }
 
@@ -2619,16 +2618,16 @@ void fldFreeSparkSlot(s32 index) {
     s16 slot;
 
     vec = D_00413DE8;
-    if (D_00450F90[index].unk20 == 1 && D_00450F90[index].active != 0 && D_00450F90[index].unk2C != -1) {
+    if (D_00450F90[index].hasVectors == 1 && D_00450F90[index].active != 0 && D_00450F90[index].objectSlot != -1) {
         vec.v[0] = D_00450F90[index].pos[0];
         vec.v[2] = D_00450F90[index].pos[2];
-        effObjSetInnerFirstVec(D_00451BE0[D_00450F90[index].unk2C].unk0, &vec);
-        obj = D_00451BE0[D_00450F90[index].unk2C].unk0;
+        effObjSetInnerFirstVec(D_00451BE0[D_00450F90[index].objectSlot].objectHandle, &vec);
+        obj = D_00451BE0[D_00450F90[index].objectSlot].objectHandle;
         flags = dds3GetUnk0C(obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
-        slot = D_00450F90[index].unk2C;
-        D_00450F90[index].unk2C = -1;
+        slot = D_00450F90[index].objectSlot;
+        D_00450F90[index].objectSlot = -1;
         D_00451BE0[slot].unk4 = -1;
     }
 }
@@ -2638,7 +2637,7 @@ void fldUpdateSparkSlots(void) {
 
     func_0014F5F0();
     for (i = 0; i < 64 && i < D_00451B90[13]; i++) {
-        if (D_00450F90[i].unk20 != 0 && D_00450F90[i].active != 0) {
+        if (D_00450F90[i].hasVectors != 0 && D_00450F90[i].active != 0) {
             func_0014F980(i, D_00450F90[i].unk28);
         }
     }
@@ -2650,7 +2649,7 @@ s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
     for (i = 0; i < 64 && i < D_00451B90[13]; i++) {
-        if (D_00450F90[i].active == 1 && D_00450F90[i].unk2C != -1) {
+        if (D_00450F90[i].active == 1 && D_00450F90[i].objectSlot != -1) {
             f32 dx = x - D_00450F90[i].pos[0];
             f32 dy = y - D_00450F90[i].pos[1];
             f32 dz = z - D_00450F90[i].pos[2];
