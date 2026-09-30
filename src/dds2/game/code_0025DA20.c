@@ -259,9 +259,9 @@ typedef struct FxWorld {
         u16 low;
     } limitv;             /* 0x0C */
     u8 pad10[4];
-    s32 unk14;            /* 0x14 */
-    s32 unk18;            /* 0x18 */
-    s32 unk1C;            /* 0x1C */
+    s32 scrollOffset;     /* 0x14: shifted by delta, wraps to 10 below zero */
+    s32 clampedOffset;    /* 0x18: cannot exceed the current limit */
+    s32 unk1C;            /* 0x1C: decremented on each scroll; other uses unknown */
     u8 pad20[0x2010];
     s32 count;            /* 0x2030 */
     FxNode *nodes;        /* 0x2034 */
@@ -275,18 +275,18 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
     if (world->count <= 0) {
         return;
     }
-    if (world->unk14 + delta < 0) {
-        world->unk14 = 10;
+    if (world->scrollOffset + delta < 0) {
+        world->scrollOffset = 10;
     } else {
-        world->unk14 += delta;
+        world->scrollOffset += delta;
     }
     if (world->limitv.whole + delta < 0) {
         world->limitv.whole = 10;
     } else {
         world->limitv.whole += delta;
     }
-    if (world->unk18 > world->limitv.whole) {
-        world->unk18 = world->limitv.whole;
+    if (world->clampedOffset > world->limitv.whole) {
+        world->clampedOffset = world->limitv.whole;
     }
     node = world->nodes;
     while (node != NULL) {
@@ -363,21 +363,22 @@ void mnuFxWorldDropOutOfRange(FxWorld *world, s32 threshold) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DE08);
 
-void func_0025DFE8(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e) {
-    a[0] = 0.7f;
-    a[1] = 0.7f;
-    a[2] = 0.7f;
-    a[3] = 0.0f;
-    b[0] = 0.65f;
-    b[1] = 0.39f;
-    b[2] = 0.65f;
-    b[3] = 0.0f;
-    c[0] = 0.2f;
-    c[1] = 0.2f;
-    c[2] = 0.2f;
-    c[3] = 1.0f;
-    *d = 7.0f;
-    *e = 0.0f;
+/* Default three-vector slot contents; the trailing two scalars have unknown roles. */
+void func_0025DFE8(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB) {
+    firstVector[0] = 0.7f;
+    firstVector[1] = 0.7f;
+    firstVector[2] = 0.7f;
+    firstVector[3] = 0.0f;
+    secondVector[0] = 0.65f;
+    secondVector[1] = 0.39f;
+    secondVector[2] = 0.65f;
+    secondVector[3] = 0.0f;
+    thirdVector[0] = 0.2f;
+    thirdVector[1] = 0.2f;
+    thirdVector[2] = 0.2f;
+    thirdVector[3] = 1.0f;
+    *scalarA = 7.0f;
+    *scalarB = 0.0f;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E048);
@@ -520,13 +521,15 @@ typedef struct CampEntryNode {
 typedef struct {
     u8 pad00[0x2034];
     CampEntryNode *entries; /* 0x2034 */
-    u8 pad2038[0x394];
+    u8 pad2038[0x2F8];
+    f32 transform[12]; /* 0x2330: three four-component vectors saved by shop */
+    u8 pad2360[0x6C];
     s32 sceneMode; /* 0x23CC */
     u8 pad23D0[0x10];
     s32 pendingValue; /* 0x23E0 */
     u8 pad23E4[0x28];
     u32 state; /* 0x240C */
-    u32 effectHandle; /* 0x2410 */
+    u32 fontDrawHandle; /* 0x2410: font draw handle created by func_0019CE78 */
     u8 pad2414[0x14];
     s32 descriptorHandle; /* 0x2428: submitted to the drawing packet */
     u8 pad242C[4];
@@ -635,16 +638,16 @@ void func_0025EE00(CampScene *scene) {
 }
 
 void mnuCampInitFontResource(CampScene *scene) {
-    s32 resource;
-    scene->effectHandle = 0;
-    resource = func_0019CE78(D_003C99B8, 0, 0, 0, 0);
-    scene->effectHandle = resource;
-    func_0019D100(resource, 0x960, 0x70);
+    s32 fontHandle;
+    scene->fontDrawHandle = 0;
+    fontHandle = func_0019CE78(D_003C99B8, 0, 0, 0, 0);
+    scene->fontDrawHandle = fontHandle;
+    func_0019D100(fontHandle, 0x960, 0x70);
 }
 
 void mnuCampLinkFontGlyph(CampScene *scene) {
-    func_0019C5B0(scene->effectHandle);
-    scene->effectHandle = 0;
+    func_0019C5B0(scene->fontDrawHandle);
+    scene->fontDrawHandle = 0;
 }
 
 extern void func_00329A00(s32 *);
@@ -714,7 +717,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F330);
 
 void mnuShopSavePrimaryTransform(u8 *scene) {
     s32 i;
-    f32 *coordinates = (f32 *)(scene + 0x2330);
+    f32 *coordinates = ((CampScene *)scene)->transform;
     for (i = 0; i < 4; i++) {
         D_00453CB0[i] = coordinates[i + 8];
         D_00453C90[i] = coordinates[i];
@@ -724,7 +727,7 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
 
 void mnuShopSaveFullTransform(u8 *scene) {
     s32 i;
-    f32 *coordinates = (f32 *)(scene + 0x2330);
+    f32 *coordinates = ((CampScene *)scene)->transform;
     for (i = 0; i < 4; i++) {
         D_00453CB0[i] = coordinates[i + 8];
         D_00453CA0[i] = coordinates[i + 4];
@@ -735,7 +738,7 @@ void mnuShopSaveFullTransform(u8 *scene) {
 
 void mnuShopRestoreTransform(u8 *scene) {
     s32 i;
-    f32 *coordinates = (f32 *)(scene + 0x2330);
+    f32 *coordinates = ((CampScene *)scene)->transform;
     s32 useMiddle = D_004377F0;
     for (i = 0; i < 4; i++) {
         coordinates[i + 8] = D_00453CB0[i];
@@ -951,12 +954,13 @@ s32 func_00260138(s32 row) {
     return D_003C9A40[row].value[0];
 }
 
+/* Scan the twenty-one flag IDs in descending slot order. */
 s32 mnuCampFindActiveSlot(void) {
     s32 i;
     u8 *base = D_003CBB70;
-    s16 *p = (s16 *)(base + 0x1450);
-    for (i = 0x14; i >= 0; i--, p = (s16 *)((u8 *)p - 0x104)) {
-        if (*p > 0 && mdlFlagTest(*p)) {
+    s16 *flagId = (s16 *)(base + 0x1450);
+    for (i = 0x14; i >= 0; i--, flagId = (s16 *)((u8 *)flagId - 0x104)) {
+        if (*flagId > 0 && mdlFlagTest(*flagId)) {
             return i;
         }
     }
