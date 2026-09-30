@@ -516,10 +516,6 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249D80);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249DD0);
 
-INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5E0);
-
-INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
-
 extern void func_00285490(void *);
 
 extern void mnuLoadResourceHandles(s32);
@@ -531,6 +527,10 @@ extern void evtLoadResourcePair(const char *, void *);
 extern void func_0024D9D8(s32);
 
 extern void func_00249DD0(s32);
+
+INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5E0);
+
+INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
 
 u8 *func_00249E20(s32 reduced, s32 slot) {
     s32 handle;
