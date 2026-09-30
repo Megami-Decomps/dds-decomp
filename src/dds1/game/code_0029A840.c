@@ -100,6 +100,14 @@ extern u32 D_003BC950;
 
 extern u32 D_003BC954;
 
+/* File job's effect kind and secondary-resource mode (the intervening data is unknown). */
+typedef struct EffFileRequest {
+    u8 pad_00[0xC];     // 0x00
+    u16 kind;           // 0x0C
+    u8 pad_0E[0xE];     // 0x0E
+    u16 secondaryMode;  // 0x1C
+} EffFileRequest;
+
 typedef struct EffModelOwner {
     f32 scale;
     s32 model;
@@ -1130,7 +1138,7 @@ void effUpdateTarget(u8 *work, u32 target) {
         }
         ((EffKindWork *)work)->target = target;
     }
-    *(u32 *)(*(u32 *)(work + 0x24) + 0x2C) = target;
+    *(u32 *)(((EffKindWork *)work)->handle + 0x2C) = target;
 }
 
 void func_0029D450(s32 arg0) {
@@ -1151,7 +1159,7 @@ void func_0029D650(u8 *work, u32 target) {
         }
         ((EffKindWork *)work)->target = target;
     }
-    *(u32 *)(*(u32 *)(work + 0x24) + 0x2C) = target;
+    *(u32 *)(((EffKindWork *)work)->handle + 0x2C) = target;
 }
 
 void func_0029D6B0(s32 arg0) {
@@ -1172,7 +1180,7 @@ void func_0029D8B0(u8 *work, u32 target) {
         }
         ((EffKindWork *)work)->target = target;
     }
-    *(u32 *)(*(u32 *)(work + 0x24) + 0x2C) = target;
+    *(u32 *)(((EffKindWork *)work)->handle + 0x2C) = target;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029D910);
@@ -1197,7 +1205,7 @@ void func_0029DD70(u8 *work, u32 target) {
         }
         ((EffKindWork *)work)->target = target;
     }
-    *(u32 *)(*(u32 *)(work + 0x24) + 0x24) = target;
+    *(u32 *)(((EffKindWork *)work)->handle + 0x24) = target;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2AA0);
@@ -1240,12 +1248,12 @@ EffKindWork *func_0029DDD0(u16 kind, u8 *source) {
 
 EffKindWork *effCreateKindWorkFromFile(u8 *work) {
     void *source = fileResolvePrimaryBuffer(work);
-    EffKindWork *effect = func_0029DDD0(*(u16 *)(work + 0xC), source);
+    EffKindWork *effect = func_0029DDD0(((EffFileRequest *)work)->kind, source);
     u32 *secondary = fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
         if (D_0037E770[effect->kind].apply != NULL) {
-            u32 kind = *(u16 *)(work + 0x1C);
+            u32 kind = ((EffFileRequest *)work)->secondaryMode;
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
@@ -1333,12 +1341,12 @@ EffKindWork *func_0029E0F0(u16 kind, u8 *source) {
 
 EffKindWork *effCreateKindWorkFromFileB(u8 *work) {
     void *source = fileResolvePrimaryBuffer(work);
-    EffKindWork *effect = func_0029E0F0(*(u16 *)(work + 0xC), source);
+    EffKindWork *effect = func_0029E0F0(((EffFileRequest *)work)->kind, source);
     u32 *secondary = fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
         if (D_0037E7E8[effect->kind].apply != NULL) {
-            u32 kind = *(u16 *)(work + 0x1C);
+            u32 kind = ((EffFileRequest *)work)->secondaryMode;
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
@@ -1458,14 +1466,30 @@ void func_0029E758(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
+/* Frame builder owns an entry array, a resource, and its allocation handle. */
+typedef struct EffFrameState {
+    u8 *entries;        // 0x00
+    u8 *asset;          // 0x04
+    u32 allocation;     // 0x08
+} EffFrameState;
+
+/* Per-instance frame storage and transform rows, as accessed by reset/initialization. */
+typedef struct EffFrameAsset {
+    u8 pad_00[8];       // 0x00
+    u32 frameCount;     // 0x08
+    u8 pad_0C[0x10];    // 0x0C
+    void *frameStorage; // 0x1C
+    f32 *transformRows; // 0x20
+} EffFrameAsset;
+
 void effClearBillFrames(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
+    u8 *asset = ((EffFrameState *)state)->asset;
     s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1492,6 +1516,36 @@ extern u8 D_0037E0E0[];
 
 extern void func_002A3E10(u8 *, void *);
 
+/* Billboard configuration shared by the frame builders and draw callbacks. */
+typedef struct EffBillConfig {
+    u8 pad_00[0x28];
+    u32 textureId;      // 0x28, copied into the output record
+    u8 pad_2C[8];
+    u32 progress;       // 0x34
+    union {
+        u32 count;      // 0x38
+        s32 signedCount;
+    } frames;
+    u8 pad_3C[0x1A];
+    u8 mode;            // 0x56
+    u8 pad_57[0x1D];
+    union {
+        u32 quantizedSamples; // 0x74, clamped to at least four
+        s32 signedRows;
+    } samples;
+    u8 pad_78[0x10];
+    f32 rowOffset;        // 0x88, applied across each four-vertex row
+    u32 resourceId;     // 0x8C
+    u8 pad_90[0x29];
+    u8 alternateMode;   // 0xB9, animation variants use this instead of mode
+} EffBillConfig;
+typedef struct EffBillOutput {
+    u32 textureId;      // 0x00
+    u32 color;          // 0x04
+    u32 field_08;       // 0x08
+    u8 pad_0C[8];
+    u8 mode;            // 0x14
+} EffBillOutput;
 typedef struct BillCellDrawWork {
     u8 pad0[0x10];
     u8 transform[0x10];
@@ -1506,7 +1560,7 @@ typedef struct BillCellDrawWork {
 void func_0029EEC8(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -1540,9 +1594,9 @@ void func_0029EEC8(BillCellDrawWork *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1569,11 +1623,11 @@ void func_0029EEC8(BillCellDrawWork *work) {
 void billResetCellIndices(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1595,7 +1649,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029F168);
 void func_0029F8A0(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -1629,9 +1683,9 @@ void func_0029F8A0(BillCellDrawWork *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1658,11 +1712,11 @@ void func_0029F8A0(BillCellDrawWork *work) {
 void billResetParticleIndices(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1684,7 +1738,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029FB48);
 void func_002A0260(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -1718,9 +1772,9 @@ void func_002A0260(BillCellDrawWork *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1747,11 +1801,11 @@ void func_002A0260(BillCellDrawWork *work) {
 void effClearAnimatedFrames(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1765,7 +1819,7 @@ extern void *func_002D03F8(u32);
 
 u8 *func_002A0440(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = func_002D03F8(*(u32 *)(config + 0x38) * 0x18 + headerSize);
+    u8 *base = func_002D03F8(((EffBillConfig *)config)->frames.count * 0x18 + headerSize);
     u8 *node = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *entries = node + headerSize;
 
@@ -1778,14 +1832,14 @@ u8 *func_002A0440(u8 *config) {
 }
 
 void effInitializeAlternatingTransformRows(u8 *node, u8 *config) {
-    u32 count = *(u32 *)(config + 0x38);
+    u32 count = ((EffBillConfig *)config)->frames.count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = *(f32 **)(*(u8 **)(node + 4) + 0x20);
+    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -1813,7 +1867,7 @@ extern u32 func_002A3BD8(u32, u32, u32);
 
 u8 *billCreateAnimatedTransform(u8 *config, u32 resource) {
     u8 *node = func_002A0440(config);
-    *(u32 *)(node + 4) = func_002A3BD8(*(u32 *)(config + 0x38), 3, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 3, resource);
     effInitializeAlternatingTransformRows(node, config);
     return node;
 }
@@ -1832,7 +1886,7 @@ u8 *billCloneAnimatedTransform(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002A0440(config);
-    *(u32 *)(node + 4) = effDuplicateResourceRefs(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
     effInitializeAlternatingTransformRows(node, config);
     return node;
 }
@@ -1847,7 +1901,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002A0638);
 void func_002A0BE0(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -1881,9 +1935,9 @@ void func_002A0BE0(BillCellDrawWork *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1910,11 +1964,11 @@ void func_002A0BE0(BillCellDrawWork *work) {
 void billResetEmitterIndices(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1927,14 +1981,14 @@ void billResetEmitterIndices(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A0DC0);
 
 void billInitializeEmitterRows(u8 *node, u8 *config) {
-    u32 count = *(u32 *)(config + 0x38);
+    u32 count = ((EffBillConfig *)config)->frames.count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = *(f32 **)(*(u8 **)(node + 4) + 0x20);
+    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -1960,7 +2014,7 @@ void billInitializeEmitterRows(u8 *node, u8 *config) {
 
 u8 *billCreateEmitterTransform(u8 *config, u32 resource) {
     u8 *node = func_002A0DC0(config);
-    *(u32 *)(node + 4) = func_002A3BD8(*(u32 *)(config + 0x38), 4, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 4, resource);
     billInitializeEmitterRows(node, config);
     return node;
 }
@@ -1969,7 +2023,7 @@ u8 *billCloneEmitterTransform(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002A0DC0(config);
-    *(u32 *)(node + 4) = effDuplicateResourceRefs(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
     billInitializeEmitterRows(node, config);
     return node;
 }
@@ -1984,7 +2038,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002A0FA0);
 void func_002A1588(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2018,9 +2072,9 @@ void func_002A1588(u8 *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2047,11 +2101,11 @@ void func_002A1588(u8 *work) {
 void effClearStripFrames(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -2064,14 +2118,14 @@ void effClearStripFrames(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A1768);
 
 void billInitializeStripRows(u8 *node, u8 *config) {
-    u32 count = *(u32 *)(config + 0x38);
+    u32 count = ((EffBillConfig *)config)->frames.count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = *(f32 **)(*(u8 **)(node + 4) + 0x20);
+    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -2100,7 +2154,7 @@ extern u8 *func_002A1768(u8 *);
 u8 *billCreateStripTransform(u8 *config, u32 resource) {
     u8 *node = func_002A1768(config);
 
-    *(u32 *)(node + 4) = func_002A3BD8(*(u32 *)(config + 0x38), 3, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 3, resource);
     billInitializeStripRows(node, config);
     return node;
 }
@@ -2109,7 +2163,7 @@ u8 *billCloneStripTransform(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002A1768(config);
-    *(u32 *)(node + 4) = effDuplicateResourceRefs(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
     billInitializeStripRows(node, config);
     return node;
 }
@@ -2124,7 +2178,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002A1948);
 void func_002A2008(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2178,9 +2232,9 @@ void func_002A2008(u8 *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2207,11 +2261,11 @@ void func_002A2008(u8 *work) {
 void billResetTrailIndices(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -2233,7 +2287,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002A22B8);
 void func_002A2A60(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2287,9 +2341,9 @@ void func_002A2A60(u8 *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2316,11 +2370,11 @@ void func_002A2A60(u8 *work) {
 void billResetQuadIndices(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *config = *(u8 **)(work + 0x34);
-    u8 *asset = *(u8 **)(state + 4);
-    s32 remaining = *(s32 *)(config + 0x38);
-    u8 *entry = *(u8 **)state;
+    u8 *asset = ((EffFrameState *)state)->asset;
+    s32 remaining = ((EffBillConfig *)config)->frames.signedCount;
+    u8 *entry = ((EffFrameState *)state)->entries;
 
-    memset(*(void **)(asset + 0x1C), 0, *(u32 *)(asset + 8) * 0x10);
+    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -2333,14 +2387,14 @@ void billResetQuadIndices(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A2C40);
 
 void billInitializeQuadRows(u8 *node, u8 *config) {
-    u32 count = *(u32 *)(config + 0x38);
+    u32 count = ((EffBillConfig *)config)->frames.count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = *(f32 **)(*(u8 **)(node + 4) + 0x20);
+    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -2366,7 +2420,7 @@ void billInitializeQuadRows(u8 *node, u8 *config) {
 
 u8 *billCreateQuadTransform(u8 *config, u32 resource) {
     u8 *node = func_002A2C40(config);
-    *(u32 *)(node + 4) = func_002A3BD8(*(u32 *)(config + 0x38), 4, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 4, resource);
     billInitializeQuadRows(node, config);
     return node;
 }
@@ -2375,7 +2429,7 @@ u8 *billCloneQuadTransform(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002A2C40(config);
-    *(u32 *)(node + 4) = effDuplicateResourceRefs(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
     billInitializeQuadRows(node, config);
     return node;
 }
@@ -2390,7 +2444,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002A2E18);
 void func_002A34D8(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = *(u32 *)(config + 0x34);
+    u32 progress = ((EffBillConfig *)config)->progress;
     u32 *list = *(u32 **)(work + 0x30);
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2444,9 +2498,9 @@ void func_002A34D8(u8 *work) {
         ".set reorder"
         : "=r"(packed) : "f"(128.0f) : "$2");
     blended[0] = packed;
-    *(u32 *)(out + 4) = blended[0];
-    *(u32 *)out = *(u32 *)(config + 0x28);
-    *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
+    ((EffBillOutput *)out)->color = blended[0];
+    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
+    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2472,53 +2526,6 @@ void func_002A34D8(u8 *work) {
 
 extern EffectResourceSizeEntry D_0037E8B8[];
 
-u8 *func_002A3640(u16 kind, void *source) {
-    u32 headerSize = 0x40;
-    u32 size = D_0037E8B8[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
-    *(u8 **)(effect + 0x34) = effect + headerSize;
-    *(u32 *)(effect + 0x24) = 0x80808080;
-    *(float *)(effect + 0x20) = 1.0f;
-    *(u32 *)(effect + 0x2C) = kind;
-    *(u32 *)(effect + 0x28) = 0;
-    VU0_STORE_VF($vf0, effect);
-    VU0_STORE_VF($vf0, effect + 0x10);
-    memcpy(*(void **)(effect + 0x34), source, size);
-    return effect;
-}
-
-/* Billboard configuration shared by the frame builders and draw callbacks. */
-typedef struct EffBillConfig {
-    u8 pad_00[0x28];
-    u32 textureId;      // 0x28, copied into the output record
-    u8 pad_2C[8];
-    u32 progress;       // 0x34
-    union {
-        u32 count;      // 0x38
-        s32 signedCount;
-    } frames;
-    u8 pad_3C[0x1A];
-    u8 mode;            // 0x56
-    u8 pad_57[0x1D];
-    union {
-        u32 quantizedSamples; // 0x74, clamped to at least four
-        s32 signedRows;
-    } samples;
-    u8 pad_78[0x10];
-    f32 rowOffset;        // 0x88, applied across each four-vertex row
-    u32 resourceId;     // 0x8C
-    u8 pad_90[0x29];
-    u8 alternateMode;   // 0xB9, animation variants use this instead of mode
-} EffBillConfig;
-
-typedef struct EffBillOutput {
-    u32 textureId;      // 0x00
-    u32 color;          // 0x04
-    u32 field_08;       // 0x08
-    u8 pad_0C[8];
-    u8 mode;            // 0x14
-} EffBillOutput;
-
 /* Common header of class-dispatched billboard/resource work (0x40-byte prefix). */
 typedef struct EffClassWork {
     u8 transform[0x20]; // 0x00, two VU0 vectors
@@ -2530,6 +2537,21 @@ typedef struct EffClassWork {
     void *payload;       // 0x34
     u8 pad_38[8];
 } EffClassWork;
+
+u8 *func_002A3640(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = D_0037E8B8[kind].resourceSize;
+    u8 *effect = func_002CFEB8(size + headerSize);
+    ((EffClassWork *)effect)->payload = effect + headerSize;
+    ((EffClassWork *)effect)->color = 0x80808080;
+    *(float *)(effect + 0x20) = 1.0f;
+    ((EffClassWork *)effect)->kind = kind;
+    ((EffClassWork *)effect)->frame = 0;
+    VU0_STORE_VF($vf0, effect);
+    VU0_STORE_VF($vf0, effect + 0x10);
+    memcpy(((EffClassWork *)effect)->payload, source, size);
+    return effect;
+}
 
 /* Render instance owns either a billboard or a reference, plus an asset slot. */
 typedef struct EffRenderResourceState {
@@ -2569,7 +2591,7 @@ u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
 u8 *effCreateFileResourceInstance(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
-    switch (*(u16 *)(work + 0x1C)) {
+    switch (((EffFileRequest *)work)->secondaryMode) {
     case 1:
         break;
     case 4:
@@ -2577,7 +2599,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceA(*(u16 *)(work + 0xC), source, (u32)secondary);
+    return effCreateResourceInstanceA(((EffFileRequest *)work)->kind, source, (u32)secondary);
 }
 
 void effDispatchDestroyOp(u8 *work) {
@@ -2587,12 +2609,12 @@ void effDispatchDestroyOp(u8 *work) {
 
 u8 *createActiveEffectResource(u8 *work) {
     u8 *effect;
-    if (D_0037E8A0[*(s32 *)(work + 0x2C)].createActiveResource == NULL) {
+    if (D_0037E8A0[((EffClassWork *)work)->kind].createActiveResource == NULL) {
         effect = effCreateResourceInstanceA(*(u16 *)(work + 0x2C), *(void **)(work + 0x34), 0);
     } else {
         effect = func_002A3640(*(u16 *)(work + 0x2C), *(void **)(work + 0x34));
         *(void **)(effect + 0x30) = (void *)D_0037E8A0[*(s32 *)(work + 0x2C)].createActiveResource(work);
-        D_0037E8A0[*(s32 *)(work + 0x2C)].fn(effect);
+        D_0037E8A0[((EffClassWork *)work)->kind].fn(effect);
     }
     return effect;
 }
@@ -2947,7 +2969,7 @@ void func_002A5378(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    func_002A5288(*(u16 *)(request + 0xc), source);
+    func_002A5288(((EffFileRequest *)request)->kind, source);
 }
 
 void func_002A53A8(u8 *work) {
@@ -3041,8 +3063,8 @@ EffectSurfaceNode *func_002A5A90(u8 *work) {
     EffGrid *params = (EffGrid *)(source + 0x1C);
     EffectSurfaceNode *node = func_002A5A58(params);
 
-    func_002A5F80(node, *(u16 *)(work + 0xC), source);
-    effReplaceResourceRef(node, *(u16 *)(work + 0xC), params);
+    func_002A5F80(node, ((EffFileRequest *)work)->kind, source);
+    effReplaceResourceRef(node, ((EffFileRequest *)work)->kind, params);
     return node;
 }
 
@@ -3471,7 +3493,7 @@ void func_002AAA18(s32 request) {
     u64 source;
 
     source = fileResolvePrimaryBuffer();
-    func_002AA928(*(u16 *)(request + 0xc), source);
+    func_002AA928(((EffFileRequest *)request)->kind, source);
 }
 
 void func_002AAA48(u8 *work) {
@@ -3767,7 +3789,7 @@ extern u32 func_002AE350(u32, u32, u32);
 u8 *func_002ABCF0(u8 *config, u32 resource) {
     u8 *node = func_002ABA38(config);
 
-    *(u32 *)(node + 4) = func_002AE350(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002AE350(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
     func_002ABAA8(node, config);
     return node;
 }
@@ -3778,7 +3800,7 @@ u8 *func_002ABD50(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002ABA38(config);
-    *(u32 *)(node + 4) = func_002AE430(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)func_002AE430((u32)((EffFrameState *)state)->asset);
     func_002ABAA8(node, config);
     return node;
 }
@@ -3787,8 +3809,8 @@ void func_002ABDB0(s32 work) {
     s32 state;
 
     state = *(s32 *)(work + 0x30);
-    func_002AE3C8(*(u32 *)(state + 4));
-    func_002D0918(*(u32 *)(state + 8));
+    func_002AE3C8((u32)((EffFrameState *)state)->asset);
+    func_002D0918(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002ABDE0);
@@ -3960,7 +3982,7 @@ void func_002AC708(u8 *node, u8 *config) {
 u8 *func_002AC950(u8 *config, u32 resource) {
     u8 *node = func_002AC698(config);
 
-    *(u32 *)(node + 4) = func_002AE350(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002AE350(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
     func_002AC708(node, config);
     return node;
 }
@@ -3969,7 +3991,7 @@ u8 *func_002AC9B0(u8 *work) {
     u8 *config = *(u8 **)(work + 0x34);
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002AC698(config);
-    *(u32 *)(node + 4) = func_002AE430(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)func_002AE430((u32)((EffFrameState *)state)->asset);
     func_002AC708(node, config);
     return node;
 }
@@ -3978,8 +4000,8 @@ void func_002ACA10(s32 work) {
     s32 state;
 
     state = *(s32 *)(work + 0x30);
-    func_002AE3C8(*(u32 *)(state + 4));
-    func_002D0918(*(u32 *)(state + 8));
+    func_002AE3C8((u32)((EffFrameState *)state)->asset);
+    func_002D0918(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002ACA40);
@@ -4149,7 +4171,7 @@ void func_002AD380(u8 *node, u8 *config) {
 u8 *func_002AD5C8(u8 *config, u32 resource) {
     u8 *node = func_002AD308(config);
 
-    *(u32 *)(node + 4) = func_002AE350(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
+    ((EffFrameState *)node)->asset = (u8 *)func_002AE350(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
     func_002AD380(node, config);
     return node;
 }
@@ -4159,7 +4181,7 @@ u8 *func_002AD628(u8 *work) {
     u8 *state = *(u8 **)(work + 0x30);
     u8 *node = func_002AD308(config);
 
-    *(u32 *)(node + 4) = func_002AE430(*(u32 *)(state + 4));
+    ((EffFrameState *)node)->asset = (u8 *)func_002AE430((u32)((EffFrameState *)state)->asset);
     func_002AD380(node, config);
     return node;
 }
@@ -4168,8 +4190,8 @@ void func_002AD688(s32 work) {
     s32 state;
 
     state = *(s32 *)(work + 0x30);
-    func_002AE3C8(*(u32 *)(state + 4));
-    func_002D0918(*(u32 *)(state + 8));
+    func_002AE3C8((u32)((EffFrameState *)state)->asset);
+    func_002D0918(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AD6B8);
@@ -4276,7 +4298,7 @@ u8 *effCreateResourceInstanceB(u16 kind, void *source, u32 option) {
 u8 *effCreateFileResourceInstanceB(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
-    switch (*(u16 *)(work + 0x1C)) {
+    switch (((EffFileRequest *)work)->secondaryMode) {
     case 1:
         break;
     case 4:
@@ -4284,7 +4306,7 @@ u8 *effCreateFileResourceInstanceB(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceB(*(u16 *)(work + 0xC), source, (u32)secondary);
+    return effCreateResourceInstanceB(((EffFileRequest *)work)->kind, source, (u32)secondary);
 }
 
 void func_002AE000(u8 *work) {
@@ -4459,8 +4481,8 @@ void func_002AEC30(s32 work) {
     s32 state;
 
     state = *(s32 *)(work + 0x30);
-    func_002B0B08(*(u32 *)(state + 4));
-    func_002D0918(*(u32 *)(state + 8));
+    func_002B0B08((u32)((EffFrameState *)state)->asset);
+    func_002D0918(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AEC60);
@@ -4614,8 +4636,8 @@ void func_002B0360(s32 work) {
     s32 state;
 
     state = *(s32 *)(work + 0x30);
-    func_002B0B08(*(u32 *)(state + 4));
-    func_002D0918(*(u32 *)(state + 8));
+    func_002B0B08((u32)((EffFrameState *)state)->asset);
+    func_002D0918(((EffFrameState *)state)->allocation);
 }
 
 void effOffsetNodeRowsVU(u8 *work) {
@@ -4672,7 +4694,7 @@ void func_002B06E0(s32 arg0) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effCreateResourceInstanceC(*(u16 *)(arg0 + 0xc), source);
+    effCreateResourceInstanceC(((EffFileRequest *)arg0)->kind, source);
 }
 
 void effDispatchCleanupOp(u8 *work) {
@@ -4798,7 +4820,7 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B1F58);
 u32 func_002B2088(u8 *work) {
     void *first = fileResolvePrimaryBuffer();
     void *second = fileResolveSecondaryBuffer(work);
-    return func_002B1F58(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
+    return func_002B1F58(((EffFileRequest *)work)->kind, first, second, *(u32 *)(work + 0x24));
 }
 
 typedef struct EffModelResource {
@@ -5332,7 +5354,7 @@ u32 createEffectResourceInstance(u16 kind, void *source, void *secondary, u32 pa
 u32 func_002B4498(u8 *work) {
     void *first = fileResolvePrimaryBuffer();
     void *second = fileResolveSecondaryBuffer(work);
-    return createEffectResourceInstance(*(u16 *)(work + 0xC), first, second, *(u32 *)(work + 0x24));
+    return createEffectResourceInstance(((EffFileRequest *)work)->kind, first, second, *(u32 *)(work + 0x24));
 }
 
 extern FnTbl28 D_0037EEE8[];
