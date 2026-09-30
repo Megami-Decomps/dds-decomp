@@ -195,6 +195,8 @@ extern void btlFreeIndexList(void *);
 
 extern u8 *D_003BAA50;
 
+extern s32 btlLowestSetPairIndex(u32);
+
 extern s64 btlStartTask(void *);
 
 extern s8 D_003BB880[];
@@ -900,7 +902,37 @@ s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210EB0);
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_002110B8);
+/* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
+s32 func_002110B8(void *list, s32 row) {
+    s32 result = 0;
+    u32 flags;
+    u32 mask;
+    s32 bit;
+    s32 index;
+
+    if (row <= 0) {
+        return result;
+    }
+    flags = *(u32 *)(D_003BAA50 + row * 0x38 + 0x28);
+    if (flags == 0) {
+        return result;
+    }
+    if (flags == 0x800 || flags == 0x1000) {
+        return btlIndexListNoExpiredEntryCodes(list, row) != 0 ? 3 : 0;
+    }
+    for (bit = 0; bit < 0x20; bit++) {
+        mask = 1 << bit;
+        if (flags & mask) {
+            index = btlLowestSetPairIndex(mask);
+            if (index < 7 && index != -1) {
+                if (btlIndexListMatchesEntryCodes(list, index, mask) == 0) {
+                    return 0;
+                }
+            }
+        }
+    }
+    return 3;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_002111A0);
 

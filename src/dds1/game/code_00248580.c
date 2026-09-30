@@ -552,7 +552,14 @@ void mnuTerminalCreateEffects(MenuSlotState *state) {
     obj->inner->pair->b = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249D80);
+void func_00249D80(s32 object) {
+    s32 *batch = (s32 *)(object + 0xA0);
+    u32 i;
+
+    for (i = 0; i < 7; i++) {
+        effDestroyPackedBatch(batch[i]);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249DD0);
 

@@ -69,7 +69,21 @@ s32 dds3GetWorldObjectValue(WorldObjectPointer *object) {
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110ED0);
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110F80);
+u32 *func_00110F80(WorldObjectPointer *object, const u8 *name) {
+    u32 *node;
+    s32 i;
+
+    if (object == NULL || name == NULL) {
+        return NULL;
+    }
+    for (i = 0; i < 0x12; i++) {
+        node = func_00110ED0(object, i, name);
+        if (node != NULL) {
+            return node;
+        }
+    }
+    return NULL;
+}
 
 s32 func_00110FF0(WorldObjectPointer *object) {
     u32 *p;
