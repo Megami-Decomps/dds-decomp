@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct RangeEntry {
     u8 pad00;
@@ -53,6 +54,18 @@ extern void func_00217878(s32, s32);
 extern void mnuApplyModelCamera(s32);
 extern void evtStageTestApplyEntryRotation(s32);
 extern void func_00287C20(void);
+extern s32 func_00100518(void);
+extern void func_002E1718(void *);
+extern void func_002E14D8(void *packet, void *node, void *matrix);
+extern void func_002E15D0(void *node, void *matrix);
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern u8 D_00324690[];
+extern u8 D_00324680[];
+extern u8 D_003246A0[];
+extern u8 D_00324590[];
+extern u8 D_0037CE80[];
+extern u8 D_003296F0[];
+extern u8 D_003270F0[];
 extern void func_00288008(void);
 
 typedef struct PartyPanelSlot {
@@ -1543,7 +1556,36 @@ void evtStageTestApplyEntryRotation(s32 model) {
     func_00217FB8(model);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287C20);
+/* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
+void func_00287C20(void)
+{
+    s128 eye;
+    s128 at;
+    s32 slot;
+
+    slot = func_00100518();
+    func_00287258();
+    PCP_COPY_VECTOR(D_00324690, D_0037CE70);
+    PCP_COPY_VECTOR(D_00324680, D_0037CE60);
+    PCP_COPY_VECTOR(D_003246A0, D_0037CE80);
+    func_002E1718(D_003245E0);
+    VU0_LOAD_VF(vf10, D_00324680);
+    VU0_LOAD_VF(vf11, D_00324690);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00324590);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, &eye);
+    VU0_LOAD_VF(vf10, D_00324690);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &at);
+    sdfVuBuildLookAtBasis(&eye, &at, D_003246A0);
+    VU0_STORE_MATRIX_UNCLOBBERED(D_003296F0);
+    func_002E14D8(D_003270F0 + slot * 8000, D_003245E0, D_003296F0);
+    func_002E15D0(D_003245E0, D_003296F0);
+}
 
 s8 evtStageTestUpdate(s32 frame) {
     s8 result = func_002877A8();

@@ -221,7 +221,58 @@ void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003340E0);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003341B8);
+void sdfDestroyDevRequest(void *a0);
+void func_00328E48(void *a0);
+
+typedef struct Link {
+    struct Link *next;
+} Link;
+
+typedef struct LinkOwner {
+    u8 pad[0x14];
+    Link head;
+} LinkOwner;
+
+typedef struct MotionNode {
+    Link link;
+    LinkOwner *owner;
+    s32 u8;
+    s32 uC;
+    ArrObj *request;
+} MotionNode;
+
+/* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
+void func_003341B8(MotionNode *node)
+{
+    Link *prev;
+    Link *cur;
+    ArrObj *request;
+    void **cb;
+    s32 n;
+    s32 i;
+
+    if (node == NULL) {
+        return;
+    }
+    if (node->owner != NULL) {
+        prev = &node->owner->head;
+        while ((cur = prev->next) != NULL) {
+            if (cur == &node->link) {
+                prev->next = node->link.next;
+                break;
+            }
+            prev = cur;
+        }
+    }
+    request = node->request;
+    n = request->n4;
+    cb = request->arrC;
+    for (i = 0; i < n; i++) {
+        sdfInvokeMotionObjectCallback(cb[i]);
+    }
+    sdfDestroyDevRequest(node->request);
+    func_00328E48(node);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334280);
 
@@ -250,8 +301,8 @@ void sdfMotionResume(MotionState *state) {
     }
 }
 
-void func_00334658(void) {
-    func_00328E48();
+void func_00334658(void *a0) {
+    func_00328E48(a0);
 }
 
 void sdfSetMotionOutputValue(SdfMotionOutput *output, u32 value) {

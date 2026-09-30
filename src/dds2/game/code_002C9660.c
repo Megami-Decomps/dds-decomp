@@ -205,8 +205,6 @@ extern Cb3714C D_003E916C[];
 
 extern void func_002D31C0(void *src);
 
-extern void func_002D4818(void *dst, void *src);
-
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
  * arrays (D_00353710/14/18/1C/20/24/28/2C/30/34 and D_00353880/84/88/90/94/
@@ -228,13 +226,23 @@ typedef struct EffParamWork {
     void *data;   /* 0x04 parameter block */
 } EffParamWork; /* 0x08 */
 
+typedef struct EffDispatchExtra {
+    void (*func)(void *, void *); /* 0x00 handler, may be NULL */
+    u8 pad04[0x24];
+} EffDispatchExtra;
+
+typedef struct EffDispatchScale {
+    void (*func)(void *, f32); /* 0x00 handler, may be NULL */
+    u8 pad04[0x24];
+} EffDispatchScale;
+
 extern EffDispatchEntry D_003E917C[];
 
-extern EffDispatchEntry D_003E9180[];
+extern EffDispatchExtra D_003E9180[];
 
-extern EffDispatchEntry D_003E9184[];
+extern EffDispatchExtra D_003E9184[];
 
-extern EffDispatchEntry D_003E9188[];
+extern EffDispatchScale D_003E9188[];
 
 extern EffDispatchEntry D_003E918C[];
 
@@ -373,7 +381,16 @@ typedef struct FileJob {
     u16 option;
     u16 unkE;
     FileJobBufferSlot slots[2];
-    u8 unk30[0x60];
+    u8 unk30[0x10];
+    f32 offset[4];    /* 0x40 */
+    f32 quat[4];      /* 0x50 */
+    f32 scale;        /* 0x60 */
+    u8 unk64[4];
+    u32 xformFlags;   /* 0x68 */
+    u8 unk6C[0x14];
+    s32 unk80;
+    u32 scaleFlags;   /* 0x84 */
+    u8 unk88[8];
     u32 id;
     u32 sector;
     u32 flags;
@@ -411,7 +428,13 @@ typedef struct FileSaveState {
 } FileSaveState;
 
 typedef struct FileQueue {
-    u8 unk0[0x68];
+    f32 offset[4];
+    f32 axis[4];
+    u8 unk20[0x20];
+    f32 position[4];   /* 0x40 */
+    f32 quat[4];       /* 0x50 */
+    f32 scale;         /* 0x60 */
+    u8 pad64[4];
     u32 transformWord; /* 0x68 */
     u8 pad6C[8];
     f32 transformValue; /* 0x74 */
@@ -510,6 +533,7 @@ extern u8 D_0037F660[];
 extern void func_00336C10(void *);
 
 extern void func_002D46F0(FileQueue *queue, void *vec);
+extern void func_002D4818(FileQueue *queue, void *rot);
 
 extern void func_002D48D0(FileQueue *queue, f32 scale);
 
@@ -2574,6 +2598,7 @@ extern f32 func_003532B8(f32);
 extern f32 func_003532E8(f32, f32);
 extern void func_00340DC8(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
+extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye D_0037F690, target D_0037F680 and up D_0037F6A0 */
 void func_002D3128(void)
@@ -2698,27 +2723,27 @@ void func_002D3710(FileJob *work) {
     D_003E916C[idx].cb(data);
 }
 
-void func_002D3748(void *work) {
+void func_002D3748(void *work, void *extra) {
     u16 id = ((FileJob *)work)->type;
 
     if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(((FileJob *)work)->data);
+        D_003E9180[id].func(((FileJob *)work)->data, extra);
     }
 }
 
-void func_002D3788(void *work) {
+void func_002D3788(void *work, void *extra) {
     u16 id = ((FileJob *)work)->type;
 
     if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(((FileJob *)work)->data);
+        D_003E9184[id].func(((FileJob *)work)->data, extra);
     }
 }
 
-void func_002D37C8(void *work) {
+void func_002D37C8(void *work, f32 scale) {
     u16 id = ((FileJob *)work)->type;
 
     if (D_003E9188[id].func != NULL) {
-        D_003E9188[id].func(((FileJob *)work)->data);
+        D_003E9188[id].func(((FileJob *)work)->data, scale);
     }
 }
 
@@ -2873,7 +2898,33 @@ u32 fileJobSerializedSize(FileJob *job) {
     return size;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3F08);
+/* View block initialised by func_002D3F08: (0,0,0,1) vectors, grey colour. */
+typedef struct FileViewBlock {
+    u8 pad00[0x44];
+    f32 unk44;
+    u8 pad48[0x18];
+    f32 unk60;
+    u32 color;
+    u32 unk68;
+    u8 pad6C[8];
+    f32 unk74;
+} FileViewBlock;
+
+void func_002D3F08(void *queue)
+{
+    FileViewBlock *view = queue;
+
+    memset(view, 0, 0x80);
+    VU0_STORE_VF_UNCLOBBERED(vf0, view);
+    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x40);
+    view->unk44 = -5.0f;
+    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x50);
+    view->unk60 = 1.0f;
+    view->unk74 = 1.0f;
+    view->color = 0x80808080;
+    view->unk68 = 0x80;
+}
 
 void func_002D3F80(FileJob *job) {
     s32 jobAddr;
@@ -2953,7 +3004,62 @@ void func_002D4380(u32 arg0, u32 arg1) {
     func_002D4138(arg1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4398);
+extern void func_002D5DC8();
+extern void func_002D5EC0();
+
+/* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start frame (job+0x80) has been reached; the frame counter only advances when D_00437E08 bit 1 is clear. */
+void func_002D4398(FileQueue *queue)
+{
+    f32 pos[4];
+    f32 aimQuat[4];
+    f32 savedQuat[4];
+    FileJob *job;
+    s32 limit;
+    f32 total;
+
+    if (queue->transformWord & 0x60) {
+        PCP_COPY_VECTOR(savedQuat, queue->quat);
+        func_002D5EC0(queue, aimQuat);
+        func_002D4818(queue, aimQuat);
+        PCP_COPY_VECTOR(queue->quat, savedQuat);
+    }
+    total = queue->scale * queue->transformValue;
+    limit = queue->unk84;
+    for (job = queue->first; job != NULL; job = job->next) {
+        if (limit < job->unk80) {
+            continue;
+        }
+        if (job->scaleFlags & 2) {
+            continue;
+        }
+        if (job->xformFlags & 0x18) {
+            func_002D5DC8(job, pos);
+            VU0_LOAD_VF(vf10, queue->quat);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf10, queue->position);
+            VU0_LOAD_VF(vf11, queue->offset);
+            VU0_ADD(vf10, vf10, vf11);
+            if (job->xformFlags & 4) {
+                VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
+            }
+            VU0_LOAD_VF(vf11, pos);
+            if (job->xformFlags & 0x80) {
+                VU0_SCALE_VF(vf11, total);
+            }
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+            func_002D3748((FileJob *)job->id, pos);
+        }
+        if (job->xformFlags & 0x60) {
+            func_002D5EC0(job, aimQuat);
+            func_002D3788((FileJob *)job->id, aimQuat);
+        }
+        func_002D3710((FileJob *)job->id);
+    }
+    if ((D_00437E08 & 2) == 0) {
+        queue->unk84++;
+    }
+}
 
 /* A queued job's +0x90 word is a child pointer when flag 1 is clear; it is
  * an ID for other job kinds. Destroy children before their parent jobs. */
@@ -3006,11 +3112,93 @@ void func_002D46A0(u8 *owner) {
     ((FileQueue *)owner)->unk84 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D46F0);
+void func_002D46F0(FileQueue *queue, void *vec)
+{
+    f32 rot[16];
+    f32 base[4];
+    f32 pos[4];
+    FileJob *job;
+    f32 scale;
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4818);
+    VU0_LOAD_VF(vf10, vec);
+    VU0_STORE_VF(vf10, queue->position);
+    VU0_LOAD_VF(vf11, queue->offset);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, base);
+    VU0_LOAD_VF(vf10, queue->quat);
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_MATRIX(rot);
+    scale = queue->scale * queue->transformValue;
+    for (job = queue->first; job != NULL; job = job->next) {
+        VU0_LOAD_VF(vf10, base);
+        if (job->xformFlags & 4) {
+            VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
+        }
+        VU0_LOAD_VF(vf11, job->offset);
+        if (job->xformFlags & 0x80) {
+            VU0_SCALE_VF(vf11, scale);
+        }
+        VU0_LOAD_MATRIX(rot);
+        VU0_ROTATE_VEC(vf11, vf11);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        func_002D3748((FileJob *)job->id, pos);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D48D0);
+void func_002D4818(FileQueue *queue, void *rot)
+{
+    f32 quat[4];
+    f32 pos[4];
+    FileJob *job;
+
+    VU0_LOAD_VF(vf10, rot);
+    VU0_STORE_VF(vf10, queue->quat);
+    VU0_STORE_VF(vf10, quat);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, queue->axis);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, queue->offset);
+    for (job = queue->first; job != NULL; job = job->next) {
+        VU0_LOAD_VF(vf10, job->quat);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        func_002D3788((FileJob *)job->id, pos);
+    }
+    func_002D46F0(queue, queue->position);
+}
+
+void func_002D48D0(FileQueue *queue, f32 scale)
+{
+    s128 pos;
+    FileJob *job;
+    f32 total;
+    f32 jobScale;
+
+    queue->scale = scale;
+    total = scale * queue->transformValue;
+    for (job = queue->first; job != NULL; job = job->next) {
+        jobScale = job->scale;
+        if (job->scaleFlags & 1) {
+            jobScale = jobScale * total;
+        }
+        func_002D37C8((FileJob *)job->id, jobScale);
+        if (job->xformFlags & 0x80) {
+            VU0_LOAD_VF(vf10, queue->position);
+            VU0_LOAD_VF(vf11, queue->offset);
+            VU0_ADD(vf10, vf10, vf11);
+            if (job->xformFlags & 4) {
+                VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
+            }
+            VU0_LOAD_VF(vf11, job->offset);
+            VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
+            func_002D3748((FileJob *)job->id, &pos);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D49B8);
 
