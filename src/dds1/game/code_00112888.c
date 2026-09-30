@@ -10,16 +10,34 @@ typedef struct WorldInnerState {
 } WorldInnerState;
 
 typedef struct WorldInnerOwner {
-    u8 pad00[0x18];
+    u8 pad00[0xF];
+    u8 kind; /* 0x0F selects which handle the object owns */
+    u8 pad10[0x8];
     WorldInnerState *inner;
 } WorldInnerOwner;
 
 extern u32 func_001117A8(u32);
 extern s32 func_002CFEB8(u32);
 
-extern s32 func_00112888(void);
+/* Each object kind keeps its handle in a different structure. */
+s32 func_00112888(object)
+    WorldInnerOwner *object;
+{
+    s32 handle;
 
-INCLUDE_ASM(const s32, "game/code_00112888", func_00112888);
+    handle = 0;
+    switch (object->kind - 4) {
+    case 0: handle = dds3GetCameraHandle(object); break;
+    case 1: handle = func_00113008(object); break;
+    case 2: handle = func_00113CD8(object); break;
+    case 3: handle = effObjGetObjectHandle(object); break;
+    case 4: handle = dds3GetResourceOwnerHandle(object); break;
+    case 5: handle = func_00116598(object); break;
+    }
+    return handle;
+}
+
+
 
 /* Store a value in the current world object's inner state. */
 void func_00112930(u32 unused, u32 value) {
