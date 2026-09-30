@@ -40,6 +40,7 @@ struct EffTransformNode {
 };
 
 extern void effMiscNormalizeVU(void);
+extern void effMiscQuatMultiplyVU(void);
 
 u32 func_0010F118(void) {
     u64 id;
@@ -135,7 +136,11 @@ void effObjInnerVecInit(EffTransformNode *arg0) {
     VU0_STORE_VF(vf10, p60);
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerVecBackup);
+void effObjInnerVecBackup(EffTransformNode *arg0) {
+    PCP_COPY_VECTOR(&arg0->vecA0, &arg0->vec60);
+    PCP_COPY_VECTOR(&arg0->vec90, &arg0->vec50);
+    PCP_COPY_VECTOR(&arg0->vec80, &arg0->vec40);
+}
 
 void effObjSetInnerFloat(EffTransformNode *arg0, f32 fparg0) {
     arg0->inner->scalar = fparg0;
@@ -145,11 +150,26 @@ f32 effObjGetInnerFloat(EffTransformNode *arg0) {
     return arg0->inner->scalar;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjSetInnerFirstVec);
+void effObjSetInnerFirstVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjSetInnerSecondVec);
+    inner->flags = (inner->flags | 1) & ~2;
+    PCP_COPY_VECTOR(&inner->vec40, arg1);
+}
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjSetInnerThirdVec);
+void effObjSetInnerSecondVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
+
+    inner->flags = (inner->flags | 1) & ~2;
+    PCP_COPY_VECTOR(&inner->vec50, arg1);
+}
+
+void effObjSetInnerThirdVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
+
+    inner->flags = (inner->flags | 1) & ~2;
+    PCP_COPY_VECTOR(&inner->vec60, arg1);
+}
 
 void effObjFetchInnerFirstVec(EffTransformNode *arg0) {
     u8 *p = (u8 *)arg0->inner + 0x40;
@@ -192,11 +212,43 @@ void effObjFetchInnerThirdVec(EffTransformNode *arg0) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjAddInnerFirstVec);
+void effObjAddInnerFirstVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjQuatMulInnerSecondVec);
+    inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
+    VU0_LOAD_VF($vf10, &inner->vec40);
+    VU0_LOAD_VF($vf11, arg1);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vadd.xyzw $vf10, $vf10, $vf11\n"
+        ".set reorder\n"
+        : : : "memory");
+    VU0_STORE_VF($vf10, &inner->vec40);
+}
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjMulInnerThirdVec);
+void effObjQuatMulInnerSecondVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
+
+    inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
+    VU0_LOAD_VF($vf10, &inner->vec50);
+    VU0_LOAD_VF($vf11, arg1);
+    effMiscQuatMultiplyVU();
+    VU0_STORE_VF($vf10, &inner->vec50);
+}
+
+void effObjMulInnerThirdVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
+
+    inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
+    VU0_LOAD_VF($vf10, &inner->vec60);
+    VU0_LOAD_VF($vf11, arg1);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vmul.xyzw $vf10, $vf10, $vf11\n"
+        ".set reorder\n"
+        : : : "memory");
+    VU0_STORE_VF($vf10, &inner->vec60);
+}
 
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D70);
 
