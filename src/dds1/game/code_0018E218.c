@@ -8,11 +8,13 @@ typedef struct Work18 {
 } Work18;
 
 typedef struct Work24 {
-    u8 data[0x24];
+    u8 data[0x20];
+    u32 unk20;
 } Work24;
 
 typedef struct Work2C {
-    u8 data[0x2C];
+    u8 data[0x28];
+    u32 unk28;
 } Work2C;
 
 typedef struct Work30 {
@@ -190,7 +192,9 @@ void func_0018F3B0(void) {
     D_003BB070 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F3B8);
+void func_0018F3B8(void *src) {
+    memcpy(&D_00355880, src, 0x28);
+}
 
 Work30 *effGetCh70Params(void) {
     return &D_00355880;
@@ -276,7 +280,9 @@ void func_0018F660(void) {
     D_003BB073 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F668);
+void func_0018F668(void *src) {
+    memcpy(&D_00355908, src, 0x28);
+}
 
 Work30 *effGetCh73Params(void) {
     return &D_00355908;
@@ -290,7 +296,9 @@ void func_0018F6E8(void) {
     D_003BB074 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F6F0);
+void func_0018F6F0(Work18 *src) {
+    D_00355930 = *src;
+}
 
 Work18 *effGetCh74Params(void) {
     return &D_00355930;
@@ -404,7 +412,9 @@ Work30 *effGetLoadDescA(void) {
     return &D_003559A0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018F9C0);
+void func_0018F9C0(void *src) {
+    memcpy(&D_003559A0, src, 0x28);
+}
 
 extern ChState D_00355C30;
 extern s8 D_003BB0CD;
@@ -442,7 +452,9 @@ Work2C *effGetLoadDescB(void) {
     return &D_00355AF8;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FAE8);
+void func_0018FAE8(Work2C *src) {
+    D_00355AF8 = *src;
+}
 
 extern ChState D_00355E08;
 extern s8 D_003BB0FF;
@@ -480,7 +492,9 @@ Work2C *effGetLoadDescC(void) {
     return &D_00355C70;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FC18);
+void func_0018FC18(Work2C *src) {
+    D_00355C70 = *src;
+}
 
 extern ChState D_00355F48;
 extern s8 D_003BB114;
@@ -518,7 +532,9 @@ Work30 *effGetLoadDescD(void) {
     return &D_00355E48;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FD48);
+void func_0018FD48(void *src) {
+    memcpy(&D_00355E48, src, 0x28);
+}
 
 extern ChState D_00356048;
 extern s8 D_003BB127;
@@ -556,7 +572,9 @@ Work18 *effGetLoadDescE(void) {
     return &D_00355F88;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FE70);
+void func_0018FE70(Work18 *src) {
+    D_00355F88 = *src;
+}
 
 extern ChState D_00356188;
 extern s8 D_003BB12C;
@@ -594,7 +612,9 @@ Work24 *effGetLoadDescF(void) {
     return &D_00356088;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018FF78);
+void func_0018FF78(Work24 *src) {
+    D_00356088 = *src;
+}
 
 extern ChState D_00356360;
 extern s8 D_003BB13F;
@@ -632,7 +652,9 @@ Work2C *effGetLoadDescG(void) {
     return &D_003561C8;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_00190098);
+void func_00190098(Work2C *src) {
+    D_003561C8 = *src;
+}
 
 void func_00190100(void) {
     func_001606C0();

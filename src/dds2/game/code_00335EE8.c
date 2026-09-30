@@ -81,7 +81,19 @@ void func_00335FD8(MotionBlend *motion) {
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336068);
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_003361F8);
+typedef struct Block16 {
+    u8 data[0x10];
+} Block16;
+
+typedef struct PoseCopy {
+    u8 pad00[0xC];
+    Block16 *src;
+    Block16 dst;
+} PoseCopy;
+
+void func_003361F8(PoseCopy *pose) {
+    pose->dst = *pose->src;
+}
 
 void func_00336228(void *matrix) {
     VU0_LOAD_MATRIX(matrix);
