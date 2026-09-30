@@ -117,6 +117,12 @@
 #define VU0_SCALE_VF(vf, f) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw " #vf ", " #vf ", vf2x\n\t.set reorder" \
     : : "r" (f))
+/* vf10 = vf10 * (1 - t) + vf11 * t (vf0.w is 1.0): the two-vector lerp of the
+ * particle, motion and battle tween code (45 retail sites). */
+#define VU0_LERP_VF10(t) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
+    : : "r" (t))
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
