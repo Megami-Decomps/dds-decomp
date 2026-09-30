@@ -1022,22 +1022,23 @@ void func_0032EB40(SdfBigPacket *packet, s32 entryIndex) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032EB80);
 
-void sdfBuildPacket116(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+/* Pack two UV/XYZ vertex pairs after the common primitive and color. */
+void sdfBuildPacket116(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)k << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x6400000000008001ULL;
     packet[1] = 0x535310;
-    packet[2] = (u32)(b | 0x116);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (e & 0xFFFF) | (f << 16);
-    packet[5] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[6] = (i & 0xFFFF) | (j << 16);
-    packet[7] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x116);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u0 & 0xFFFF) | (v0 << 16);
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
+    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
 }
 
-void func_0032ED60(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
+void func_0032ED60(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+                   s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1045,25 +1046,26 @@ void func_0032ED60(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x50);
     packet->unk0 = 0x20000004;
     packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    sdfBuildPacket116((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    sdfBuildPacket116((SdfPacket *)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void sdfBuildTriPacket104(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i) {
+/* Pack three GS XYZ vertices with a common depth. */
+void sdfBuildTriPacket104(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)i << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x6400000000008001ULL;
     packet[1] = 0xF55510;
-    packet[2] = (u32)(b | 0x104);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[5] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
-    packet[6] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x104);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[5] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void func_0032EF30(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 (*alloc)(s32)) {
+void func_0032EF30(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+                   s32 y1, s32 x2, s32 y2, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1071,26 +1073,27 @@ void func_0032EF30(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x50);
     packet->unk0 = 0x20000004;
     packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    sdfBuildTriPacket104((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h);
+    sdfBuildTriPacket104((SdfPacket *)&packet->unk10, color, primitive, x0, y0, x1, y1, x2, y2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void sdfBuildPacket104x4(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+/* Pack four GS XYZ vertices with a common depth. */
+void sdfBuildPacket104x4(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)k << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x6400000000008001ULL;
     packet[1] = 0x555510;
-    packet[2] = (u32)(b | 0x104);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[5] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
-    packet[6] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
-    packet[7] = (u32)((i & 0xFFFF) | (j << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x104);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[5] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet[7] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void sdfBuildPacketE(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
+void sdfBuildPacketE(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+                   s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1098,27 +1101,28 @@ void sdfBuildPacketE(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x50);
     packet->unk0 = 0x20000004;
     packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    sdfBuildPacket104x4((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    sdfBuildPacket104x4((SdfPacket *)&packet->unk10, color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void sdfBuildPacket10C(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k) {
+/* Emit three GS vertices, each with its own packed color and shared depth. */
+void sdfBuildPacket10C(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)k << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x8400000000008001ULL;
     packet[1] = 0xFFFFFFFFF5151510ULL;
-    packet[2] = (u32)(a | 0x10C);
-    packet[3] = (u32)d | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((b & 0xFFFF) | (c << 16)) | hi;
-    packet[5] = (u32)g | ((u64)0xFE00 << 46);
-    packet[6] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
-    packet[7] = (u32)j | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((h & 0xFFFF) | (i << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x10C);
+    packet[3] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[5] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[6] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[7] = (u32)color2 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void sdfBuildPacketF(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 (*alloc)(s32)) {
+void sdfBuildPacketF(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1,
+                   s32 color1, s32 x2, s32 y2, s32 color2, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1126,30 +1130,31 @@ void sdfBuildPacketF(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x60);
     packet->unk0 = 0x20000005;
     packet->unk8 = (((u64)0x50000005 << 16) | 0x1000) << 16;
-    sdfBuildPacket10C((SdfPacket *)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j);
+    sdfBuildPacket10C((SdfPacket *)&packet->unk10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void func_0032F428(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n) {
+/* Four vertices each carry their own color, with a common Z value. */
+void func_0032F428(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)n << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0xA400000000008001ULL;
     packet[1] = 0xF515151510ULL;
-    packet[2] = (u32)(a | 0x10C);
-    packet[3] = (u32)d | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((b & 0xFFFF) | (c << 16)) | hi;
-    packet[5] = (u32)g | ((u64)0xFE00 << 46);
-    packet[6] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
-    packet[7] = (u32)j | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((h & 0xFFFF) | (i << 16)) | hi;
-    packet[9] = (u32)m | ((u64)0xFE00 << 46);
-    packet[10] = (u32)((k & 0xFFFF) | (l << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x10C);
+    packet[3] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[5] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[6] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[7] = (u32)color2 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet[9] = (u32)color3 | ((u64)0xFE00 << 46);
+    packet[10] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void func_0032F540(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m,
-                   s32 (*alloc)(s32)) {
+void func_0032F540(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1,
+                   s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3,
+                   s32 y3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1157,29 +1162,30 @@ void func_0032F540(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x70);
     packet->unk0 = 0x20000006;
     packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    func_0032F428((s32)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j, k, l, m);
+    func_0032F428((s32)&packet->unk10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, x3, y3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void sdfBuildPacket114(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o) {
+/* Pack three UV/XYZ vertex pairs after the common primitive and color. */
+void sdfBuildPacket114(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)o << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x8400000000008001ULL;
     packet[1] = 0x53535310;
-    packet[2] = (u32)(b | 0x114);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (e & 0xFFFF) | (f << 16);
-    packet[5] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[6] = (i & 0xFFFF) | (j << 16);
-    packet[7] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
-    packet[8] = (m & 0xFFFF) | (n << 16);
-    packet[9] = (u32)((k & 0xFFFF) | (l << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x114);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u0 & 0xFFFF) | (v0 << 16);
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
+    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[8] = (u2 & 0xFFFF) | (v2 << 16);
+    packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void func_0032F788(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m,
-                   s32 n, s32 (*alloc)(s32)) {
+void func_0032F788(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+                   s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
+                   s32 u2, s32 v2, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1187,31 +1193,35 @@ void func_0032F788(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x60);
     packet->unk0 = 0x20000005;
     packet->unk8 = (((u64)0x50000005 << 16) | 0x1000) << 16;
-    sdfBuildPacket114((s32)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j, k, l, m, n);
+    sdfBuildPacket114((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void func_0032F8F0(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o, s32 p, s32 q, s32 r, s32 s) {
+/* Pack four textured vertices with a common color and depth. */
+void func_0032F8F0(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+                   s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2,
+                   s32 x3, s32 y3, s32 u3, s32 v3, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)s << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0xA400000000008001ULL;
     packet[1] = 0x5353535310ULL;
-    packet[2] = (u32)(b | 0x114);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (e & 0xFFFF) | (f << 16);
-    packet[5] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[6] = (i & 0xFFFF) | (j << 16);
-    packet[7] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
-    packet[8] = (m & 0xFFFF) | (n << 16);
-    packet[9] = (u32)((k & 0xFFFF) | (l << 16)) | hi;
-    packet[10] = (q & 0xFFFF) | (r << 16);
-    packet[11] = (u32)((o & 0xFFFF) | (p << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x114);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u0 & 0xFFFF) | (v0 << 16);
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
+    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[8] = (u2 & 0xFFFF) | (v2 << 16);
+    packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet[10] = (u3 & 0xFFFF) | (v3 << 16);
+    packet[11] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void func_0032FA48(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m,
-                   s32 n, s32 o, s32 p, s32 q, s32 r, s32 (*alloc)(s32)) {
+void func_0032FA48(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+                   s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
+                   s32 u2, s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
+                   s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1219,31 +1229,35 @@ void func_0032FA48(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x70);
     packet->unk0 = 0x20000006;
     packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    func_0032F8F0((s32)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r);
+    func_0032F8F0((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void func_0032FBF0(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o, s32 p, s32 q) {
+/* Three vertices each carry UV and color plus a shared Z value. */
+void func_0032FBF0(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+                   s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2,
+                   s32 u2, s32 v2, s32 color2, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)q << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0xA400000000008001ULL;
     packet[1] = 0x5135135130ULL;
-    packet[2] = (u32)(a | 0x11C);
-    packet[3] = (d & 0xFFFF) | (e << 16);
-    packet[4] = (u32)f | ((u64)0xFE00 << 46);
-    packet[5] = (u32)((b & 0xFFFF) | (c << 16)) | hi;
-    packet[6] = (i & 0xFFFF) | (j << 16);
-    packet[7] = (u32)k | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
-    packet[9] = (n & 0xFFFF) | (o << 16);
-    packet[10] = (u32)p | ((u64)0xFE00 << 46);
-    packet[11] = (u32)((l & 0xFFFF) | (m << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x11C);
+    packet[3] = (u0 & 0xFFFF) | (v0 << 16);
+    packet[4] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
+    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[9] = (u2 & 0xFFFF) | (v2 << 16);
+    packet[10] = (u32)color2 | ((u64)0xFE00 << 46);
+    packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void func_0032FD30(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m,
-                   s32 n, s32 o, s32 p, s32 (*alloc)(s32)) {
+void func_0032FD30(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+                   s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
+                   s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 depth,
+                   s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1251,35 +1265,38 @@ void func_0032FD30(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x70);
     packet->unk0 = 0x20000006;
     packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    func_0032FBF0((s32)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
+    func_0032FBF0((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void func_0032FEB8(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m, s32 n, s32 o, s32 p, s32 q, s32 r, s32 s, s32 t, s32 u, s32 v) {
+/* Pack four vertices with individual UV and color and a common depth. */
+void func_0032FEB8(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+                   s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2,
+                   s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)v << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0xE400000000008001ULL;
     packet[1] = 0xF5135135135130ULL;
-    packet[2] = (u32)(a | 0x11C);
-    packet[3] = (d & 0xFFFF) | (e << 16);
-    packet[4] = (u32)f | ((u64)0xFE00 << 46);
-    packet[5] = (u32)((b & 0xFFFF) | (c << 16)) | hi;
-    packet[6] = (i & 0xFFFF) | (j << 16);
-    packet[7] = (u32)k | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((g & 0xFFFF) | (h << 16)) | hi;
-    packet[9] = (n & 0xFFFF) | (o << 16);
-    packet[10] = (u32)p | ((u64)0xFE00 << 46);
-    packet[11] = (u32)((l & 0xFFFF) | (m << 16)) | hi;
-    packet[12] = (s & 0xFFFF) | (t << 16);
-    packet[13] = (u32)u | ((u64)0xFE00 << 46);
-    packet[14] = (u32)((q & 0xFFFF) | (r << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x11C);
+    packet[3] = (u0 & 0xFFFF) | (v0 << 16);
+    packet[4] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
+    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet[9] = (u2 & 0xFFFF) | (v2 << 16);
+    packet[10] = (u32)color2 | ((u64)0xFE00 << 46);
+    packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet[12] = (u3 & 0xFFFF) | (v3 << 16);
+    packet[13] = (u32)color3 | ((u64)0xFE00 << 46);
+    packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void func_00330068(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 f, s32 g, s32 h, s32 i, s32 j, s32 k, s32 l, s32 m,
-                   s32 n, s32 o, s32 p, s32 q, s32 r, s32 s, s32 t, s32 u,
-                   s32 (*alloc)(s32)) {
+void func_00330068(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+                   s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
+                   s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3,
+                   s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
@@ -1287,23 +1304,24 @@ void func_00330068(s32 list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
     packet = (SdfPacket *)alloc(0x90);
     packet->unk0 = 0x20000008;
     packet->unk8 = (((u64)0x50000008 << 16) | 0x1000) << 16;
-    func_0032FEB8((s32)&packet->unk10, source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u);
+    func_0032FEB8((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
-void sdfBuildFillPacket106(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+/* Emit two packed GS XYZ vertices; the high word supplies their shared depth. */
+void sdfBuildFillPacket106(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)g << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x4400000000008001ULL;
     packet[1] = 0x5510;
-    packet[2] = (u32)(b | 0x106);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[5] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x106);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet[5] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
 }
 
-void sdfCreatePacketA(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 (*alloc)(s32)) {
+void sdfCreatePacketA(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
@@ -1312,23 +1330,23 @@ void sdfCreatePacketA(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 
     buffer = alloc(0x40);
     *(u64 *)buffer = 0x20000003ULL;
     *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    sdfBuildFillPacket106(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildFillPacket106(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
     sdfAppendPacket(list, buffer);
 }
 
-void sdfBuildFillPacket101(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+void sdfBuildFillPacket101(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)g << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x4400000000008001ULL;
     packet[1] = 0x5510;
-    packet[2] = (u32)(b | 0x101);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[5] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x101);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet[5] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
 }
 
-void func_00330430(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 (*alloc)(s32)) {
+void func_00330430(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
@@ -1337,26 +1355,27 @@ void func_00330430(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     buffer = alloc(0x40);
     *(u64 *)buffer = 0x20000003ULL;
     *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    sdfBuildFillPacket101(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildFillPacket101(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
     sdfAppendPacket(list, buffer);
 }
 
-void sdfBuildQuadPacket(s32 address, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+/* Close the rectangle by repeating its first GS XYZ vertex. */
+void sdfBuildQuadPacket(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 *packet = (u64 *)address;
-    u64 hi = (u64)g << 32;
+    u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x8400000000008001ULL;
     packet[1] = 0xFFFFFFFFF5555510ULL;
-    packet[2] = (u32)(b | 0x102);
-    packet[3] = (u32)a | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
-    packet[5] = (u32)((e & 0xFFFF) | (d << 16)) | hi;
-    packet[6] = (u32)((e & 0xFFFF) | (f << 16)) | hi;
-    packet[7] = (u32)((c & 0xFFFF) | (f << 16)) | hi;
-    packet[8] = (u32)((c & 0xFFFF) | (d << 16)) | hi;
+    packet[2] = (u32)(primitive | 0x102);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet[5] = (u32)((right & 0xFFFF) | (top << 16)) | depthHigh;
+    packet[6] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet[7] = (u32)((left & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet[8] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
 }
 
-void func_003305D0(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 (*alloc)(s32)) {
+void func_003305D0(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
@@ -1365,7 +1384,7 @@ void func_003305D0(SdfListHead *list, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, 
     buffer = alloc(0x60);
     *(u64 *)buffer = 0x20000005ULL;
     *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
-    sdfBuildQuadPacket(buffer + 0x10, a, b, c, d, e, f, g);
+    sdfBuildQuadPacket(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
     sdfAppendPacket(list, buffer);
 }
 
@@ -1379,11 +1398,11 @@ void func_003306C0(void) {
 INCLUDE_ASM(const s32, "game/code_0032C278", func_003306E0);
 
 void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
-    u32 temp_v0;
+    u32 workspace;
 
     if (root->workspace == NULL) {
-        temp_v0 = func_00328D68(0x100);
-        root->workspace = (void *)temp_v0;
+        workspace = func_00328D68(0x100);
+        root->workspace = (void *)workspace;
     }
 }
 
@@ -1474,8 +1493,8 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
     }
 }
 
-void func_00330A00(u32 *arg0) {
-    func_003405D8(*arg0);
+void func_00330A00(u32 *handle) {
+    func_003405D8(*handle);
 }
 
 /* Node of the object tree: first child, else next sibling, else back up. */
@@ -1517,23 +1536,24 @@ void sdfCollectTreeNodes(SdfTree *tree) {
     }
 }
 
+/* DevRequest +4 tracks occupied slots; +6 is capacity and +C is the element buffer. */
 void func_00330A88(s32 *list, u32 owner, u32 node) {
-    s16 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
-    s32 temp_v3;
+    s16 usedCount;
+    s32 elements;
+    s32 request;
+    s32 newCount;
 
-    temp_v2 = *list;
-    temp_v0 = *(s16 *)(temp_v2 + 4);
-    temp_v3 = temp_v0 + 1;
-    if ((s64)*(s16 *)(temp_v2 + 6) < (s64)temp_v3) {
-        sdfDevBufferedRequestGrow(temp_v2);
-        temp_v2 = *list;
+    request = *list;
+    usedCount = *(s16 *)(request + 4);
+    newCount = usedCount + 1;
+    if ((s64)*(s16 *)(request + 6) < (s64)newCount) {
+        sdfDevBufferedRequestGrow(request);
+        request = *list;
     }
-    temp_v1 = *(s32 *)(temp_v2 + 0xc);
+    elements = *(s32 *)(request + 0xc);
     *(s32 **)((s32)node + 0x10) = list;
-    *(s16 *)(temp_v2 + 4) = (s16)temp_v3;
-    *(s32 *)(temp_v0 * 4 + temp_v1) = (s32)node;
+    *(s16 *)(request + 4) = (s16)newCount;
+    *(s32 *)(usedCount * 4 + elements) = (s32)node;
     sdfLinkRouteNode(node, owner);
 }
 
