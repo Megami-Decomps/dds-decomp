@@ -141,6 +141,17 @@ extern void func_002103F8();
 extern void func_00210530();
 extern void func_00210720();
 extern void func_00210850();
+extern s32 func_00210AA8();
+
+typedef struct BtlEffLinkEx {
+    u8 pad00[0x20];
+    BtlEffActor *owner; /* 0x20 */
+    s32 arg;            /* 0x24 */
+    s32 unk28;          /* 0x28 */
+    u8 pad2C[4];
+    u8 kind;            /* 0x30 */
+} BtlEffLinkEx;
+extern s32 func_0020F5E0();
 
 
 void func_0020E850(EffCounterOwner *owner, u32 value) {
@@ -185,7 +196,31 @@ void effDecrementFirstCountdown(EffCounterOwner *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F9D0);
+BtlEffTask *func_0020F9D0(BtlEffActor *owner, s32 arg, u8 kind) {
+    BtlEffTask *obj = btlAllocTask(0x34);
+    BtlEffLinkEx *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    switch (kind) {
+    case 0:
+        obj->id = 0x3C;
+        break;
+    case 1:
+        obj->id = 0x3D;
+        break;
+    }
+    obj->flags |= 2;
+    obj->unk40 = owner->ownerData;
+    obj->callback = func_0020F5E0;
+    obj->destroy = effDecrementFirstCountdown;
+    link = (BtlEffLinkEx *)func_001E14F8(obj);
+    link->kind = kind;
+    link->owner = owner;
+    link->arg = arg;
+    link->unk28 = 0;
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FA98);
 
@@ -415,7 +450,24 @@ BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210AA8);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210B78);
+BtlEffTask *func_00210B78(BtlEffActor *owner, s32 arg) {
+    BtlEffTask *obj = btlAllocTask(0xC);
+    BtlEffLink *link;
+
+    obj->kind = 1;
+    obj->id = 0x48;
+    obj->flags |= 2;
+    obj->unk10 = 0;
+    if (owner != NULL) {
+        obj->unk40 = owner->ownerData;
+    }
+    obj->callback = func_00210AA8;
+    link = func_001E14F8(obj);
+    link->actor = (s32)owner;
+    link->arg = arg;
+    link->unk08 = 0;
+    return obj;
+}
 
 extern s32 scrReadIntParameter(s32 index);
 extern BtlEffActor *btlFindUnitByModeClear(s32 id);

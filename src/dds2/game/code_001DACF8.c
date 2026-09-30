@@ -110,7 +110,9 @@ typedef struct BtlWork {
     s32 (*hook5D8)(s32);
     u8 pad5DC[0x14];
     s32 (*hook5F0)(BtlUnit *, s32);
-    u8 pad5F4[0x5C];
+    u8 pad5F4[0x44];
+    void (*hook638)(BtlUnit *);
+    u8 pad63C[0x14];
     s32 (*hook650)(BtlUnit *);
     u8 pad654[4];
     s32 (*hook658)(BtlUnit *);
@@ -138,9 +140,9 @@ struct BtlUnit {
     s32 state;
     u8 pad4[4];
     u32 seqFlags;
-    u8 padC[4];
+    u32 unkC;
     s32 stateTime;
-    u8 pad14[4];
+    s32 unk14;
     BtlUnit *link18;
     u8 pad1C[0x14];
     f32 positionX;   /* 0x30: current unit position */
@@ -210,6 +212,11 @@ struct BtlUnit {
     BtlUnit *previousActor;
     BtlUnit *nextActor;
 };
+
+extern void func_001DF700();
+extern void func_00210DC8(BtlUnit *);
+extern void func_001D3C00(BtlUnit *);
+extern void btlUnitTurnEndStateSelect(BtlUnit *);
 
 /* Command actor and its linked action/index state; distinct from BtlUnit. */
 typedef struct BattleActionLinkState {
@@ -788,7 +795,25 @@ void func_001DC890(BtlUnit *unit) {
 void func_001DC8F8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DC900);
+void func_001DC900(BtlUnit *unit) {
+    void (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook638;
+    BtlUnit *owner = unit->link18;
+    if (hook != 0) {
+        hook(unit);
+    }
+    func_00210DC8(unit);
+    func_001DF700((u8 *)unit + 0x20);
+    owner->unk314 = -1;
+    unit->unkC &= ~1;
+    unit->unk14 += 1;
+    owner->flags &= ~0x4000;
+    func_001D3C00(unit);
+    if (unit->link18->flags & 0x20) {
+        btlUnitTurnEndStateSelect(unit);
+    } else {
+        btlDispatchStateHandler((s32 *)unit, 2);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001DC9C0);
 
@@ -2074,7 +2099,20 @@ void func_001E2C00(u8 *unit, s32 index, s32 arg2, f32 scale) {
     func_001E22D8(unit, index, arg2, *(f32 *)(table + index * 0x14 + 0x34) * scale);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2C78);
+s32 func_001E2C78(u8 *unit, s32 index) {
+    u8 *table = (u8 *)func_001ABFD8(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
+    s32 value = *(s16 *)(table + index * 20 + 0x30);
+    switch (value) {
+    case 0:
+        return 0;
+    case 1:
+    case 2:
+    case 3:
+        return 2;
+    default:
+        return 0;
+    }
+}
 
 void btlUpdateUnitEffects(void) {
     s32 context = func_001AA6F8();
@@ -4007,7 +4045,20 @@ extern s32 D_00436A9C;
 
 extern s32 D_00436AA0;
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E99C0);
+s32 func_001E99C0(void) {
+    WorldMotionData *data;
+    if (!(((BtlWork *)func_001AA6F8())->battleFlags & 2)) {
+        return D_00436AA0;
+    }
+    data = func_00110C18(dds3GetWorldObject());
+    if (data == 0) {
+        return D_00436AA0;
+    }
+    if (data->unk8 == 0) {
+        return D_00436A9C;
+    }
+    return data->unk8;
+}
 
 s32 func_001E9A18(void) {
     WorldMotionData *data;

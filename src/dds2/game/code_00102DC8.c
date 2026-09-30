@@ -99,11 +99,54 @@ extern u8 D_00438D99;
 
 extern u8 D_00438D90[2];
 
+extern void *func_00101740(const char *);
+extern void *func_00328D68(s32);
+extern void func_00102BC8(void);
+extern void func_00102D48(void);
+extern char D_00435C18[];
+extern u64 sdfCreateResetPacketList(void);
+extern u32 func_00100400(void);
+extern u8 D_0043DDA0[];
+extern u16 D_00438DC4;
+extern u16 D_00438DC6;
+
 extern u8 D_0037F550[];
 
 extern void func_003412D8(void *data, u32 tag);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00102DC8);
+typedef struct KwlnDebugWork {
+    s32 unk0;
+    s32 unk4;
+    s8 unk8;
+    s8 unk9;
+    s8 unkA;
+    u8 padB;
+    s8 slotA[8];
+    s8 slotB[8];
+    s32 unk1C;
+    s8 unk20;
+} KwlnDebugWork;
+
+void func_00102DC8(void) {
+    KwlnDebugWork *work;
+    s32 i;
+
+    if (func_00101740(D_00435C18) == NULL) {
+        work = func_00328D68(0x24);
+        work->unk0 = 0;
+        work->unk4 = 0;
+        work->unk8 = -1;
+        work->unk9 = -1;
+        work->unkA = 0;
+        for (i = 0; i < 8; i++) {
+            work->slotA[i] = -1;
+            work->slotB[i] = 0;
+        }
+        work->unk1C = 0;
+        work->unk20 = 0;
+        kwlnTaskCreate(D_00435C18, 2, 0, 1, func_00102BC8, func_00102D48, work);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00102E88);
 
@@ -211,7 +254,23 @@ INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104700);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104898);
+s32 func_00104898(void) {
+    KwlnResourceNode *node = (KwlnResourceNode *)D_004389F8;
+    KwlnResourceNode *next;
+    s32 count = 0;
+    while (node != NULL) {
+        while (node->ready != NULL && *node->ready != 0) {
+            next = node->next;
+            if (next == NULL) {
+                return count;
+            }
+            node = next;
+        }
+        count++;
+        node = node->next;
+    }
+    return count;
+}
 
 u32 kwlnTextureGetPageIndex(void) {
     return D_00435CAC;
@@ -364,7 +423,12 @@ void func_001057A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105910);
+u64 func_00105910(s32 arg0) {
+    u64 list = sdfCreateResetPacketList();
+
+    sdfAppendPacket(list, D_0043DDA0 + arg0 * 0x160 + func_00100400() * 0xB0);
+    return list;
+}
 
 /* The low two bits select the active fade direction; clearing cancels it. */
 void kwlnFadeClear(void) {
@@ -462,7 +526,21 @@ u8 kwlnFadeIsActive(void) {
     return (D_00435CD4 & 3) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105B78);
+void func_00105B78(void) {
+    if (kwlnFadeIsActive() != 0) {
+        if (D_00435CD4 & 1) {
+            D_00438DC0 -= 1;
+        } else {
+            D_00438DC0 += 1;
+        }
+        D_00435CF0.a = (D_00438DC0 << 7) / D_00438DC2;
+        if (((D_00435CD4 & 1) && D_00438DC0 == 0) || ((D_00435CD4 & 2) && D_00438DC0 == D_00438DC2)) {
+            D_00438DC0 = 0;
+            D_00438DC2 = 0;
+            D_00435CD4 &= ~3;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105C20);
 
@@ -479,9 +557,45 @@ void kwlnFadeResetBackground(void) {
     D_00435D00 = 0x4F;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105FE8);
+void func_00105FE8(s32 duration) {
+    D_00435CF8[0] = 0;
+    D_00435CF8[1] = 0;
+    D_00435CF8[2] = 0;
+    D_00435CF8[3] = 0x80;
+    if (duration == 0) {
+        D_00435CF8[3] = 0;
+        D_00438DC4 = 0;
+        D_00438DC6 = 0;
+        D_00435CFE = 0x31;
+        D_00435D00 = 0x4F;
+        kwlnFadeResetBackground();
+    } else {
+        D_00438DC6 = duration;
+        D_00438DC4 = duration;
+        D_00435CD4 = (D_00435CD4 | 0x04000000) & 0xF7FFFFFF;
+    }
+    D_0037F5EC[2] = 2048.0f;
+}
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106080);
+void func_00106080(s32 duration) {
+    D_00435CF8[0] = 0;
+    D_00435CF8[1] = 0;
+    D_00435CF8[2] = 0;
+    D_00435CF8[3] = 0;
+    if (duration == 0) {
+        D_00438DC4 = 0;
+        D_00438DC6 = 0;
+        D_00435CF8[3] = 0x80;
+        D_00435CD4 &= 0xF3FFFFFF;
+        D_00435CFE = 0;
+        D_00435D00 = 0;
+    } else {
+        D_00438DC6 = duration;
+        D_00438DC4 = 0;
+        D_00435CD4 = (D_00435CD4 & 0xFBFFFFFF) | 0x08000000;
+    }
+    D_0037F5EC[2] = 2041.0f;
+}
 
 s32 func_00106108(void) {
     if (D_00435CD4 & 0x0C000000) {
