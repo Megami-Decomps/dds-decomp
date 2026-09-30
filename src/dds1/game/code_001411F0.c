@@ -683,10 +683,10 @@ void func_001425F8(s32 arg0, s32 arg1) {
 
 
 void func_00142658(void) {
-    s32 temp_v0 = D_0032E3C0[0];
+    s32 sceneId = D_0032E3C0[0];
 
-    if (temp_v0 < 0xC8) {
-        func_001422C0(temp_v0 % 100);
+    if (sceneId < 0xC8) {
+        func_001422C0(sceneId % 100);
         func_00142408();
     }
 }
@@ -1286,24 +1286,24 @@ void func_00147118(void) {
 }
 
 void func_00147138(void) {
-    u64 *puVar1;
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+    u64 *words;
+    s32 remaining;
+    s32 block;
+    s32 index;
 
-    temp_v2 = 0;
-    temp_v1 = D_003BAA00;
+    index = 0;
+    block = D_003BAA00;
     do {
-        puVar1 = (u64 *)(temp_v1 + 0x13f70);
-        temp_v0 = 0x3f;
+        words = (u64 *)(block + 0x13f70);
+        remaining = 0x3f;
         do {
-            temp_v0 = temp_v0 - 1;
-            *puVar1 = 0;
-            puVar1 = puVar1 + 1;
-        } while (-1 < temp_v0);
-        temp_v2 = temp_v2 + 1;
-        temp_v1 = temp_v1 + 0x200;
-    } while (temp_v2 < 0xd);
+            remaining = remaining - 1;
+            *words = 0;
+            words = words + 1;
+        } while (-1 < remaining);
+        index = index + 1;
+        block = block + 0x200;
+    } while (index < 0xd);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A05D8);
@@ -1830,12 +1830,12 @@ s32 fldFindEffectByName(const char *name) {
 
 
 s32 func_0014A250(void) {
-    s32 temp_v0 = func_0013C5D0();
+    s32 index = func_0013C5D0();
 
-    if (temp_v0 < 0) {
+    if (index < 0) {
         return 0;
     }
-    return D_003D46C0[temp_v0].unk0[1];
+    return D_003D46C0[index].unk0[1];
 }
 
 void func_0014A298(u32 arg0) {
@@ -1998,17 +1998,17 @@ void func_0014B5F8(void) {
 
 
 void *func_0014B648(s32 arg0, s32 arg1) {
-    FldEnt110 *temp_v0 = D_003BAA48;
-    s32 temp_v1 = 0;
+    FldEnt110 *entry = D_003BAA48;
+    s32 index = 0;
 
-    while (temp_v1 < 8) {
-        if (temp_v0->unk0 == arg0) {
-            if (temp_v0->unk2 == arg1) {
-                return temp_v0;
+    while (index < 8) {
+        if (entry->unk0 == arg0) {
+            if (entry->unk2 == arg1) {
+                return entry;
             }
         }
-        temp_v1++;
-        temp_v0++;
+        index++;
+        entry++;
     }
     return NULL;
 }
@@ -2365,11 +2365,11 @@ s32 func_0014D320(void) {
 
 
 s32 func_0014D3C0(void) {
-    s32 temp_v0;
+    s32 object;
 
     func_00123EA8();
-    temp_v0 = func_00110A38(dds3GetWorldObject());
-    if (temp_v0 == 0) {
+    object = func_00110A38(dds3GetWorldObject());
+    if (object == 0) {
         return 1;
     }
     func_001313E0();
@@ -2378,13 +2378,13 @@ s32 func_0014D3C0(void) {
 
 
 s32 func_0014D400(void) {
-    s32 temp_v0;
+    s32 object;
 
-    temp_v0 = func_00110A38(dds3GetWorldObject());
-    if (temp_v0 == 0) {
+    object = func_00110A38(dds3GetWorldObject());
+    if (object == 0) {
         return 1;
     }
-    dds3InvokeSlot1Handler(temp_v0, 0);
+    dds3InvokeSlot1Handler(object, 0);
     func_001313E0();
     func_00123E00();
     return 1;
@@ -2518,11 +2518,11 @@ s32 func_0014D8B8(void) {
 
 
 s32 func_0014D9E0(void) {
-    char *temp_v0;
+    char *name;
 
-    temp_v0 = scrReadStringParameter(0);
+    name = scrReadStringParameter(0);
     D_0032E3B0[0x14] = 5;
-    strcpy((char *)D_0032E3B0 + 0x40, temp_v0);
+    strcpy((char *)D_0032E3B0 + 0x40, name);
     return 1;
 }
 
@@ -2600,20 +2600,20 @@ s32 func_0014DB78(char *name) {
 
 
 s32 func_0014DBF8(void) {
-    s32 temp_v0;
+    s32 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    D_0032E408[0] = temp_v0;
+    value = scrReadIntParameter(0);
+    D_0032E408[0] = value;
     return 1;
 }
 
 
 s32 func_0014DC20(void) {
-    s32 temp_v0;
+    s32 value;
 
     D_0032E570[11] = scrReadIntParameter(0);
-    temp_v0 = scrReadIntParameter(1);
-    func_00132FD0(D_0032E570[11], temp_v0);
+    value = scrReadIntParameter(1);
+    func_00132FD0(D_0032E570[11], value);
     return 1;
 }
 
@@ -3110,12 +3110,12 @@ typedef struct FldTaskWork {
 
 
 u32 func_0014EE20(void) {
-    s32 temp_v0;
-    u64 temp_v1;
+    s32 task;
+    u64 room;
 
-    temp_v0 = func_0010D6A0();
-    temp_v1 = fldFindRoomByTask(((FldTaskWork *)temp_v0)->recordKey);
-    fldActivateFlaggedObject(temp_v1);
+    task = func_0010D6A0();
+    room = fldFindRoomByTask(((FldTaskWork *)task)->recordKey);
+    fldActivateFlaggedObject(room);
     return 1;
 }
 
@@ -3144,10 +3144,10 @@ u32 func_0014EEA0(void) {
 }
 
 u32 func_0014EEF8(void) {
-    s32 temp_v0;
+    s32 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    func_0013E5A8(temp_v0);
+    value = scrReadIntParameter(0);
+    func_0013E5A8(value);
     return 1;
 }
 
@@ -3156,56 +3156,56 @@ u32 func_0014EF20(void) {
 }
 
 u32 func_0014EF28(void) {
-    s32 temp_v0;
+    s32 actorStat;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetActorStat0(temp_v0);
-    func_0010D5F0(temp_v0);
+    actorStat = scrReadIntParameter(0);
+    actorStat = fldGetActorStat0(actorStat);
+    func_0010D5F0(actorStat);
     return 1;
 }
 
 u32 func_0014EF58(void) {
-    s32 temp_v0;
+    s32 actorStat;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetActorStat1(temp_v0);
-    func_0010D5F0(temp_v0);
+    actorStat = scrReadIntParameter(0);
+    actorStat = fldGetActorStat1(actorStat);
+    func_0010D5F0(actorStat);
     return 1;
 }
 
 u32 func_0014EF88(void) {
-    s32 temp_v0;
+    s32 motionEntry;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetActorMotionEntry(temp_v0);
-    func_0010D5F0(temp_v0);
+    motionEntry = scrReadIntParameter(0);
+    motionEntry = fldGetActorMotionEntry(motionEntry);
+    func_0010D5F0(motionEntry);
     return 1;
 }
 
 u32 func_0014EFB8(void) {
-    s32 temp_v0;
+    s32 rowValue;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v0 = fldGetRowValue(temp_v0);
-    func_0010D5F0(temp_v0);
+    rowValue = scrReadIntParameter(0);
+    rowValue = fldGetRowValue(rowValue);
+    func_0010D5F0(rowValue);
     return 1;
 }
 
 u32 func_0014EFE8(void) {
-    s32 temp_v0;
+    s32 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    func_0013FA40(temp_v0);
+    value = scrReadIntParameter(0);
+    func_0013FA40(value);
     return 1;
 }
 
 u32 func_0014F010(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 first;
+    s32 second;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v1 = scrReadIntParameter(1);
-    func_0011E810(temp_v0, temp_v1);
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
+    func_0011E810(first, second);
     return 1;
 }
 
@@ -3215,10 +3215,10 @@ u32 func_0014F050(void) {
 }
 
 u32 func_0014F070(void) {
-    u64 temp_v0;
+    u64 result;
 
-    temp_v0 = func_0011E998();
-    func_0010D5F0(temp_v0);
+    result = func_0011E998();
+    func_0010D5F0(result);
     return 1;
 }
 

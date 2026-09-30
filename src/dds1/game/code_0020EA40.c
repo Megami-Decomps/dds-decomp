@@ -581,10 +581,10 @@ s32 func_00210450(void) {
 }
 
 u8 func_00210520(void) {
-    s32 temp_v0;
+    s32 taskCount;
 
-    temp_v0 = btlCountTasksByKind(0x1a);
-    return temp_v0 == 0;
+    taskCount = btlCountTasksByKind(0x1a);
+    return taskCount == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210540);
@@ -950,11 +950,11 @@ void func_002115E8(void) {
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00211600);
 
 void func_00211708(void) {
-    s32 temp_v0;
+    s32 entry;
 
-    temp_v0 = btlFindModelEntry();
-    if (temp_v0 != 0) {
-        btlReleaseModelEntry((BattleModelEntry *)temp_v0);
+    entry = btlFindModelEntry();
+    if (entry != 0) {
+        btlReleaseModelEntry((BattleModelEntry *)entry);
         return;
     }
 }
@@ -991,16 +991,16 @@ u32 btlMulColor(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
-void func_00211A28(s32 *arg0) {
-    s32 *temp_a0 = arg0;
-    s32 temp_v0;
+void func_00211A28(s32 *colors) {
+    s32 *current = colors;
+    s32 color;
     s32 i = 0xff;
 
     do {
-        temp_v0 = *temp_a0;
+        color = *current;
         i--;
-        *temp_a0 = (temp_v0 & 0xffffff) | (temp_v0 << 0x18);
-        temp_a0++;
+        *current = (color & 0xffffff) | (color << 0x18);
+        current++;
     } while (i >= 0);
 }
 
@@ -1719,25 +1719,25 @@ void btlAddGroupId(s32 group, s32 id) {
     *head = node;
 }
 
-void btlRemoveGroupId(s32 arg0, s32 arg1) {
-    s32 *temp_v0;
-    s32 *temp_v1;
+void btlRemoveGroupId(s32 group, s32 id) {
+    s32 *link;
+    s32 *entry;
 
-    temp_v0 = &D_00367960[arg0];
-    temp_v1 = (s32 *)*temp_v0;
-    if (temp_v1 == 0) {
+    link = &D_00367960[group];
+    entry = (s32 *)*link;
+    if (entry == 0) {
         return;
     }
     do {
-        if (*(temp_v1 + 1) == arg1) {
-            *temp_v0 = *temp_v1;
-            func_002CFF98(temp_v1);
+        if (*(entry + 1) == id) {
+            *link = *entry;
+            func_002CFF98(entry);
             break;
         } else {
-            temp_v0 = temp_v1;
-            temp_v1 = (s32 *)*temp_v1;
+            link = entry;
+            entry = (s32 *)*entry;
         }
-    } while (temp_v1 != 0);
+    } while (entry != 0);
 }
 
 typedef struct BattleGroupSlot {
@@ -1848,10 +1848,10 @@ void battleDestroyGroupNode(BattleGroupNode *node) {
 }
 
 void func_00216A70(void) {
-    s32 *temp_v0;
+    s32 *node;
 
-    temp_v0 = btlFindGroupedEntity();
-    battleDestroyGroupNode(temp_v0);
+    node = btlFindGroupedEntity();
+    battleDestroyGroupNode(node);
 }
 
 void btlReleaseAllEntities(void) {

@@ -840,14 +840,14 @@ void func_001F7CC8(s32 arg0, f32 arg1) {
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7CD8);
 
 void func_001F7D30(s32 arg0, f32 arg1) {
-    f32 temp_f0;
+    f32 zero;
 
     ((BtlScalarRange *)arg0)->zero = 0.0f;
     ((BtlScalarRange *)arg0)->start = arg1;
-    temp_f0 = ((BtlScalarRange *)arg0)->zero;
+    zero = ((BtlScalarRange *)arg0)->zero;
     ((BtlScalarRange *)arg0)->end = arg1;
-    ((BtlScalarRange *)arg0)->target = temp_f0;
-    if (arg1 == temp_f0) {
+    ((BtlScalarRange *)arg0)->target = zero;
+    if (arg1 == zero) {
         return;
     }
     ((BtlScalarRange *)arg0)->inverseSpan = 1.0f / (arg1 * arg1 * 0.25f);
@@ -934,10 +934,10 @@ u32 func_001F84A8(void) {
 }
 
 u32 func_001F8508(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D6A8();
-    *(u32 *)(temp_v0 + 0xc) = *(u32 *)(temp_v0 + 0xc) | 1;
+    context = func_0010D6A8();
+    *(u32 *)(context + 0xc) = *(u32 *)(context + 0xc) | 1;
     return 1;
 }
 
@@ -1716,10 +1716,10 @@ u32 func_001FA3D0(void) {
 }
 
 u32 func_001FA460(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D6A8();
-    if (func_001FEC68(temp_v0, *(s32 *)(temp_v0 + 0x18), 0x10000000) != 0) {
+    context = func_0010D6A8();
+    if (func_001FEC68(context, *(s32 *)(context + 0x18), 0x10000000) != 0) {
         func_0010D5F0(1);
     } else {
         func_0010D5F0(0);
@@ -1760,10 +1760,10 @@ u32 func_001FA530(void) {
 }
 
 u32 func_001FA558(void) {
-    u32 temp_v0;
+    u32 result;
 
-    temp_v0 = func_002099A0();
-    func_0010D5F0(temp_v0);
+    result = func_002099A0();
+    func_0010D5F0(result);
     return 1;
 }
 
@@ -1792,10 +1792,10 @@ u32 func_001FA5D0(void) {
 }
 
 u32 func_001FA5F8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D6A8();
-    func_0010D5F0(*(s8 *)(temp_v0 + 0x146));
+    context = func_0010D6A8();
+    func_0010D5F0(*(s8 *)(context + 0x146));
     return 1;
 }
 
@@ -1805,10 +1805,10 @@ u32 func_001FA620(void) {
 }
 
 u32 func_001FA648(void) {
-    u32 temp_v0;
+    u32 result;
 
-    temp_v0 = func_0020A3F0();
-    func_0010D5F0(temp_v0);
+    result = func_0020A3F0();
+    func_0010D5F0(result);
     return 1;
 }
 
@@ -1825,14 +1825,14 @@ u32 func_001FA698(void) {
 }
 
 u32 func_001FA6D8(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 state;
+    s32 context;
 
-    temp_v1 = func_0010D6A8();
-    temp_v0 = D_003BB3D8;
-    *(u32 *)(temp_v1 + 0x20) = 0x10;
-    *(u32 *)(temp_v1 + 0x24) = 0;
-    *(u8 *)(temp_v0 + 0x54) = 1;
+    context = func_0010D6A8();
+    state = D_003BB3D8;
+    *(u32 *)(context + 0x20) = 0x10;
+    *(u32 *)(context + 0x24) = 0;
+    *(u8 *)(state + 0x54) = 1;
     return 1;
 }
 
@@ -1885,26 +1885,26 @@ u32 btlCmdCameraMove(void) {
 
 
 u32 func_001FA898(void) {
-    u64 temp_v0;
+    u64 task;
 
-    temp_v0 = func_001D9718();
-    btlStartTask(temp_v0);
-    temp_v0 = func_001D9780();
-    btlStartTask(temp_v0);
-    temp_v0 = btlCreateCommandSoundTask(func_0010D6A8(), 0x11);
-    btlStartTask(temp_v0);
+    task = func_001D9718();
+    btlStartTask(task);
+    task = func_001D9780();
+    btlStartTask(task);
+    task = btlCreateCommandSoundTask(func_0010D6A8(), 0x11);
+    btlStartTask(task);
     return 1;
 }
 
 u32 func_001FA8F0(void) {
-    u64 temp_v0;
+    u64 task;
 
-    temp_v0 = func_001D9718();
-    btlStartTask(temp_v0);
-    temp_v0 = func_001D9780();
-    btlStartTask(temp_v0);
-    temp_v0 = btlCreateCommandSoundTask(0, 3);
-    btlStartTask(temp_v0);
+    task = func_001D9718();
+    btlStartTask(task);
+    task = func_001D9780();
+    btlStartTask(task);
+    task = btlCreateCommandSoundTask(0, 3);
+    btlStartTask(task);
     return 1;
 }
 

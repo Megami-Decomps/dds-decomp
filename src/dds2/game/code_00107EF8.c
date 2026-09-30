@@ -487,10 +487,10 @@ u32 func_0010A370(void) {
 }
 
 u8 func_0010A3A8(void) {
-    s64 temp_v0;
+    s64 operationResult;
 
-    temp_v0 = func_002CE928();
-    return temp_v0 == 0;
+    operationResult = func_002CE928();
+    return operationResult == 0;
 }
 
 void func_0010A3C8(u32 arg0, s32 arg1) {
@@ -525,10 +525,10 @@ s32 evtUnkA2F8Check(void) {
 }
 
 u8 func_0010A478(void) {
-    s64 temp_v0;
+    s64 operationResult;
 
-    temp_v0 = func_002CE928();
-    return temp_v0 == 0;
+    operationResult = func_002CE928();
+    return operationResult == 0;
 }
 
 void func_0010A498(void) {
@@ -563,10 +563,10 @@ u32 func_0010A4F0(void) {
 }
 
 u8 func_0010A528(void) {
-    s64 temp_v0;
+    s64 operationResult;
 
-    temp_v0 = func_002CE928();
-    return temp_v0 == 0;
+    operationResult = func_002CE928();
+    return operationResult == 0;
 }
 
 void func_0010A548(u32 arg0, u32 arg1) {
@@ -644,10 +644,10 @@ u32 func_0010A6A0(void) {
 }
 
 u8 func_0010A6C0(void) {
-    s64 temp_v0;
+    s64 state;
 
-    temp_v0 = mnuAcknowledgeCampState();
-    return temp_v0 == 0;
+    state = mnuAcknowledgeCampState();
+    return state == 0;
 }
 
 void func_0010A6E0(void) {
@@ -683,10 +683,10 @@ u32 func_0010A728(void) {
 }
 
 u8 func_0010A750(void) {
-    s64 temp_v0;
+    s64 done;
 
-    temp_v0 = brsTaskConsumeDone();
-    return temp_v0 == 0;
+    done = brsTaskConsumeDone();
+    return done == 0;
 }
 
 void func_0010A770(void) {
@@ -699,10 +699,10 @@ u32 func_0010A788(void) {
 }
 
 u8 func_0010A7A8(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_002D13F0();
-    return temp_v0 == 0;
+    result = func_002D13F0();
+    return result == 0;
 }
 
 void evtUnkA688Dispatch(s32 arg0, s32 *arg1) {
@@ -805,10 +805,10 @@ u32 func_0010A9B0(void) {
 }
 
 u8 func_0010A9D0(void) {
-    s64 temp_v0;
+    s64 state;
 
-    temp_v0 = mnuAcknowledgeCampState();
-    return temp_v0 == 0;
+    state = mnuAcknowledgeCampState();
+    return state == 0;
 }
 
 void func_0010A9F0(u32 arg0, u32 arg1) {
@@ -824,10 +824,10 @@ u32 func_0010AA18(void) {
 }
 
 u8 func_0010AA48(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_00260848();
-    return temp_v0 == 0;
+    result = func_00260848();
+    return result == 0;
 }
 
 void func_0010AA68(u32 arg0, s32 arg1) {
@@ -846,10 +846,10 @@ u32 func_0010AAB0(void) {
 }
 
 u8 func_0010AAD8(void) {
-    s64 temp_v0;
+    s64 sceneState;
 
-    temp_v0 = fldPollSceneState();
-    return temp_v0 == 0;
+    sceneState = fldPollSceneState();
+    return sceneState == 0;
 }
 
 void func_0010AAF8(void) {
@@ -862,10 +862,10 @@ u32 func_0010AB10(void) {
 }
 
 u8 func_0010AB30(void) {
-    s64 temp_v0;
+    s64 done;
 
-    temp_v0 = brsTaskConsumeDone();
-    return temp_v0 == 0;
+    done = brsTaskConsumeDone();
+    return done == 0;
 }
 
 void func_0010AB50(void) {
@@ -945,10 +945,10 @@ u32 func_0010AC88(void) {
 }
 
 u8 func_0010ACB0(void) {
-    s64 temp_v0;
+    s64 taskExists;
 
-    temp_v0 = fldLmapTaskExists();
-    return temp_v0 == 0;
+    taskExists = fldLmapTaskExists();
+    return taskExists == 0;
 }
 
 void func_0010ACD0(void) {
@@ -961,20 +961,20 @@ u32 func_0010ACE8(void) {
 }
 
 u8 func_0010AD08(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_00316ED0();
-    return temp_v0 == 0;
+    result = func_00316ED0();
+    return result == 0;
 }
 
 void func_0010AD28(u32 arg0, s32 arg1) {
-    u32 temp_v0;
+    u32 menuArg;
 
-    temp_v0 = 0;
+    menuArg = 0;
     if (arg1 != 0) {
-        temp_v0 = *(u32 *)arg1;
+        menuArg = *(u32 *)arg1;
     }
-    fileMenuWorkCreate(temp_v0);
+    fileMenuWorkCreate(menuArg);
     func_002CE208(4);
 }
 
@@ -991,10 +991,10 @@ s32 func_0010AD58(void) {
 }
 
 u8 func_0010AD98(void) {
-    s64 temp_v0;
+    s64 operationResult;
 
-    temp_v0 = func_002CE928();
-    return temp_v0 == 0;
+    operationResult = func_002CE928();
+    return operationResult == 0;
 }
 
 u32 evtUnkAB90Ensure(void) {
