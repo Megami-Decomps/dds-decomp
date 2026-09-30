@@ -5,6 +5,9 @@
 extern s32 (*D_003982D0[])(void *a0, s32 a1);
 
 extern s32 (*D_00398360[])(void *a0, s32 a1);
+extern u8 D_00398368[];
+
+extern s32 func_002CFEB8(s32);
 
 void func_002DD038(void) {
 }
@@ -37,7 +40,12 @@ typedef struct MotionBlend {
 
 extern void func_002DB7C8(void *, void *);
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD0C8);
+s32 func_002DD0C8(s32 source, s32 unused, s32 entryIndex) {
+    s32 entry = func_002CFEB8(0x20);
+
+    sdfSelectMotionPointerEntry(entry, source, D_00398368, entryIndex);
+    return entry;
+}
 
 void sdfBlendMotionKeys(MotionBlend *motion) {
     MotionKeySample sample;

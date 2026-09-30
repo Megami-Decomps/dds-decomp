@@ -167,6 +167,8 @@ extern void func_0010B590(void);
 
 extern void *D_003BD768;
 
+extern char D_0039E238[]; /* "DebugTimeGrph" */
+
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001080D8);
@@ -1031,7 +1033,13 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B590);
 void func_0010B6A8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B6B0);
+void func_0010B6B0(s8 mode) {
+    if (mode == 1) {
+        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, func_0010B590, func_0010B6A8, NULL);
+    } else if (mode == 0) {
+        kwlnTaskDestroyWithHierarchy(D_003BD768, 0);
+    }
+}
 
 /* Append to the event-work doubly linked list, maintaining both endpoints. */
 void evtLinkWorkNode(B728Work *node) {
@@ -1070,6 +1078,8 @@ void evtUnlinkWorkNode(B728Work *node) {
     node->next = NULL;
     D_003BA990--;
 }
+
+INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", bfContextCreate);
 
