@@ -8589,7 +8589,74 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206970);
 void func_00206C10(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206C18);
+extern s128 D_003BE0A0;
+
+void func_00206C18(BattleActionLinkState *link, BtlUnit *other) {
+    BtlUnit *slot[2];
+    f32 pos[4];
+    f32 dir[4];
+    f32 rot[4];
+    f32 muzzle[4];
+    BtlUnit *unit;
+    f32 radius;
+    u32 i;
+    BtlUnit *linked = link->unit;
+    if (linked->lookupId < other->lookupId) {
+        slot[0] = linked;
+        slot[1] = other;
+    } else {
+        slot[0] = other;
+        slot[1] = linked;
+    }
+    for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                if (unit != slot[0] && unit != slot[1]) {
+                    btlClearUnitDefeatCandidate(unit);
+                    btlSetUnitPosition(unit, (f32 *)&D_003BE0A0);
+                    if ((unit->flags64 & 0x102) == 0x102) {
+                        PCP_COPY_VECTOR(pos, &D_003BE0A0);
+                        pos[1] += 1000000.0f;
+                        effObjSetInnerFirstVec(unit->effectObject, pos);
+                    }
+                }
+            }
+        }
+    }
+    if (btlGetIndexListCount(link->actorIndices) == 1) {
+        btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0));
+    } else {
+        func_00208750(link->actorIndices, 0, 0);
+    }
+    VU0_STORE_VF(vf10, muzzle);
+    VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
+    VU0_LOAD_VF(vf11, &D_003BE0A0);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_NEGATE_XYZ(vf10);
+    VU0_STORE_VF(vf10, dir);
+    for (i = 0; i < 2; i++) {
+        radius = slot[i]->unkBC * slot[i]->scale;
+        radius += 100.0f;
+        if (i == 0) {
+            func_00336538(1.0471975f);
+        } else {
+            func_00336538(-1.0471975f);
+        }
+        VU0_LOAD_VF(vf10, dir);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, &D_003BE0A0);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        btlSetUnitPosition(slot[i], pos);
+        if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)muzzle) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, rot);
+            btlSetUnitRotation(slot[i], (s128 *)rot);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206EA8);
 
