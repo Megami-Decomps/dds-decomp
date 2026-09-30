@@ -56,7 +56,7 @@ extern u32 D_00436190;
 
 extern s32 D_004361F8;
 
-extern void func_003298C0(u32 arg0);
+extern void func_003298C0(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -66,11 +66,11 @@ extern void *sdfResourceRetainAddress(void *p);
 
 extern u32 D_0038BD50[];
 
-extern s32 func_0010C100(u32 arg0);
+extern s32 func_0010C100(u32 task);
 
-extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
+extern s32 evtDestroyNamedTask(u64 world, u32 task);
 
-extern s32 kwlnTaskIsRegistered(u32 arg0);
+extern s32 kwlnTaskIsRegistered(u32 task);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -258,9 +258,9 @@ extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the sepa
 extern s32 *func_001111A8();
 
 typedef struct FldNpcMotion {
-    s32 unk0;
-    u8 unk4[0x10];
-    u8 unk14[0x10];
+    s32 defaultMotionId;
+    u8 primaryName[0x10];
+    u8 secondaryName[0x10];
     u8 unk24[0x10];
     u8 unk34[0x10];
     s32 unk44;
@@ -294,11 +294,13 @@ extern u32 D_00449B30[][23];
 
 typedef struct FldAreaState {
     u8 pad0[0x14];
-    s32 unk14;
+    s32 areaIndex;
     u8 pad18[0xEC];
     s16 unk104;
 } FldAreaState;
 
+/* Field actor table entries are 0x6C bytes; the area index stored by the
+ * field state is zero-based, whereas entry->area is one-based. */
 typedef struct FldActorEntry {
     /* 0x00 */ s8 kind;
     /* 0x01 */ u8 pad01;
@@ -817,6 +819,8 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_00413448);
 
+/* Resolve a named actor in the current area to its template; the selected
+ * template kind is also recorded for the caller in D_004361FC. */
 u8 *fldPickActorTemplateByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
@@ -830,7 +834,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
         flag = entry->modelId;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->area == ((FldAreaState *)D_00389770)->unk14 + 1
+            && entry->area == ((FldAreaState *)D_00389770)->areaIndex + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
@@ -878,6 +882,8 @@ u8 *fldPickActorTemplateByName(const char *name) {
     return 0;
 }
 
+/* Like the template lookup, but also records the matching actor slot and
+ * the kind-specific scene state before returning its template. */
 u8 *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
@@ -891,7 +897,7 @@ u8 *fldFindActorEntryByName(const char *name) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
         flag = entry->modelId;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->area == ((FldAreaState *)D_00389770)->unk14 + 1
+            && entry->area == ((FldAreaState *)D_00389770)->areaIndex + 1
             && strcmp(name, entry->name) == 0) {
             D_004361F4 = i;
             switch (entry->kind) {
@@ -939,10 +945,11 @@ u8 *fldFindActorEntryByName(const char *name) {
     return 0;
 }
 
+/* Use the selected actor slot only when it belongs to this area and kind 10. */
 u8 *func_001406E8(void) {
     s32 index = D_00435F28;
-    u8 *entry = D_003932A0 + index * 108;
-    if (*(s16 *)(entry + 4) == D_00389784[0] + 1 && *(s8 *)entry == 10) {
+    FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + index * 108);
+    if (entry->area == D_00389784[0] + 1 && entry->kind == 10) {
         D_004361F4 = index;
         D_004361F8 = 8;
         return D_00391F30;
@@ -954,20 +961,22 @@ s32 func_00140750(void) {
     return D_003932B2[D_004361F4 * 54];
 }
 
+/* Inspect two independent properties of the selected actor, depending on mode:
+ * mode 0 derives a size from the first two states; mode 1 tests a flag. */
 s32 func_00140780(s32 mode) {
-    u8 *entry = D_003932A0 + D_004361F4 * 0x6C;
+    FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + D_004361F4 * 0x6C);
     s16 a;
     u32 result;
-    if (mode == 0 && *(s8 *)entry == 1) {
-        a = *(s16 *)(entry + 0x12);
-        if (a == 5 || *(s16 *)(entry + 0x14) == 5 || a == 6 || *(s16 *)(entry + 0x14) == 6 || a == 7 ||
-            *(s16 *)(entry + 0x14) == 7 || a == 8 || *(s16 *)(entry + 0x14) == 8) {
+    if (mode == 0 && entry->kind == 1) {
+        a = entry->state;
+        if (a == 5 || entry->state2 == 5 || a == 6 || entry->state2 == 6 || a == 7 ||
+            entry->state2 == 7 || a == 8 || entry->state2 == 8) {
             return 0x28;
         }
         return 0x14;
     }
     if (mode == 1) {
-        result = *(u8 *)(entry + 0x54) & 8;
+        result = (u8)entry->unk54 & 8;
         return result != 0;
     }
     return 0;
@@ -978,13 +987,13 @@ typedef struct FldTaskRecordWork {
     u32 key;
 } FldTaskRecordWork;
 
-void fldApplyActorEntryTrigger(s32 arg0) {
+void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     s32 index;
     s32 kind;
     s32 record;
     FldActorEntry *entry;
 
-    if (arg0 != 0) {
+    if (useTaskRecord != 0) {
         record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D8C8())->key);
         if (record == 0) {
             return;
@@ -1042,11 +1051,11 @@ u8 fldIsSceneStateEight(void) {
     return D_004361F8 == 8;
 }
 
-void func_00140B90(s8 *arg0) {
-    if (arg0[0x53] != 0) {
-        D_00389770[0x22] = arg0[0x53] - 1;
+void func_00140B90(s8 *actorEntry) {
+    if (actorEntry[0x53] != 0) {
+        D_00389770[0x22] = actorEntry[0x53] - 1;
     }
-    D_00389770[0x16] = arg0[0x45];
+    D_00389770[0x16] = actorEntry[0x45];
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140BC8);
@@ -1075,26 +1084,28 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141CF0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
 
+/* Read a selected actor state or a named world-object value; cases 1 and 2
+ * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 mode) {
-    u8 *actor = D_003932A0 + D_004361F4 * 108;
+    FldActorEntry *actor = (FldActorEntry *)(D_003932A0 + D_004361F4 * 108);
     s32 *entry;
     s32 flags;
 
     switch (mode) {
     case 0:
-        return *(s16 *)(actor + 0x12);
+        return actor->state;
     case 1:
-        entry = func_001111A8(dds3GetWorldObject(), actor + 0x18);
+        entry = func_001111A8(dds3GetWorldObject(), actor->name0);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = func_001111A8(dds3GetWorldObject(), actor + 0x24);
+        entry = func_001111A8(dds3GetWorldObject(), actor->name1);
         if (entry != NULL) {
             return entry[1];
         }
     case 3:
-        flags = *(u16 *)(actor + 0x14);
+        flags = (u16)actor->state2;
         if (flags & 1) {
             return 1;
         }
@@ -1149,22 +1160,24 @@ s32 func_001421C0(u32 mode) {
     return 0;
 }
 
+/* Look up a motion-table attribute indexed by this actor's state; named
+ * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 kind) {
-    u8 *entry = D_003932A0 + D_004361F4 * 108;
-    s16 index = *(s16 *)(entry + 0x12);
+    FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + D_004361F4 * 108);
+    s16 index = entry->state;
     s32 *found;
     s32 flags;
 
     switch (kind) {
     case 0:
-        return D_00391FA0[index].unk0;
+        return D_00391FA0[index].defaultMotionId;
     case 1:
-        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].unk4);
+        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].primaryName);
         if (found != NULL) {
             return found[1];
         }
     case 2:
-        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].unk14);
+        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].secondaryName);
         if (found != NULL) {
             return found[1];
         }
@@ -1177,9 +1190,9 @@ s32 fldGetActorMotionEntry(u32 kind) {
     case 5:
         return D_00391FA0[index].unk44;
     case 6:
-        flags = entry[0x64];
+        flags = entry->flags64;
         if (flags & 1) {
-            return *(s8 *)(entry + 0x67);
+            return entry->unk67;
         }
         return -1;
     }
@@ -1320,11 +1333,11 @@ void func_00143D90(s32 mode) {
 
 extern s32 D_00389978[];
 
-void func_00143F78(s32 arg0, s32 arg1) {
+void func_00143F78(s32 x, s32 y) {
     evtSetDrawSurfaceIndex(0x53);
     func_00108BD8(0);
     evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108EC0(arg0, arg1, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00389978[0]);
+    func_00108EC0(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00389978[0]);
     func_00108BD8(0);
 }
 
@@ -1379,13 +1392,13 @@ s32 func_00144028(void *task) {
 extern void *func_00328D68(s32 size);
 extern void func_00101950(s32, void *);
 
-void *func_00144178(s32 arg0) {
+void *func_00144178(s32 task) {
     s16 *node = func_00328D68(8);
     node[1] = 1;
     node[0] = 0;
     node[2] = 0;
     node[3] = 0;
-    func_00101950(arg0, node);
+    func_00101950(task, node);
     return func_00144028;
 }
 

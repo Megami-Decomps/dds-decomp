@@ -121,7 +121,7 @@ typedef struct {
     VuBlendNode *blendList; /* 0x78 */
     void *dmaEnd;          /* 0x7C */
     u32 packetStart;       /* 0x80 */
-    u32 unk84;             /* 0x84 */
+    u32 header;            /* 0x84: aligned packet cursor + 0x30 */
     u32 *ringStart;        /* 0x88 */
     u32 *cursor;           /* 0x8C */
     u8 *payload;           /* 0x90 */
@@ -679,7 +679,7 @@ void func_002E0540(VuWork *work) {
     u32 aligned = (cursor + 0x3F) & ~0x3F;
     u32 ring = ((aligned + 0x40) & 0x0FFFFFFF) | 0x30000000;
     work->packetStart = cursor;
-    work->unk84 = aligned + 0x30;
+    work->header = aligned + 0x30;
     work->ringStart = (u32 *)ring;
     work->cursor = (u32 *)ring;
     if ((work->selectedFlags & 0x4000) != 0) {
@@ -789,19 +789,21 @@ u32 func_002E12C0(s32 width) {
     return 0x50;
 }
 
+/* Texture draw packet: three resource-derived values alternate with their
+ * GS register addresses after the GIF tag and payload header. */
 typedef struct SdfDrawPacket {
     u16 quadwords;
     u8 pad02[6];
-    u32 unk8;
+    u32 reservedWord;
     u32 command;
-    u64 unk10;
-    u64 unk18;
-    u64 smallMotor;
-    u64 unk28;
-    u64 unk30;
-    u64 unk38;
-    u64 unk40;
-    u64 unk48;
+    u64 gifTag;
+    u64 payloadHeader;
+    u64 textureWordA;
+    u64 registerAddressA;
+    u64 textureWordB;
+    u64 registerAddressB;
+    u64 textureWordC;
+    u64 registerAddressC;
 } SdfDrawPacket;
 
 extern u64 func_002D2468(void *);
@@ -810,16 +812,16 @@ extern u64 func_002D2488(void *);
 
 SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 data) {
     p->quadwords = 4;
-    p->unk10 = 0x1000000000008003ULL;
+    p->gifTag = 0x1000000000008003ULL;
     p->command = 0x50000004;
-    p->unk8 = 0;
-    p->unk18 = 0xE;
-    p->smallMotor = func_002D2478(tex);
-    p->unk28 = data + 0x14;
-    p->unk30 = func_002D2468(tex);
-    p->unk38 = data + 6;
-    p->unk40 = func_002D2488(tex);
-    p->unk48 = data + 8;
+    p->reservedWord = 0;
+    p->payloadHeader = 0xE;
+    p->textureWordA = func_002D2478(tex);
+    p->registerAddressA = data + 0x14;
+    p->textureWordB = func_002D2468(tex);
+    p->registerAddressB = data + 6;
+    p->textureWordC = func_002D2488(tex);
+    p->registerAddressC = data + 8;
     return p;
 }
 
@@ -850,10 +852,10 @@ void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 flags, s32 width, s64 c
 
     header |= (s64)flags << 47;
     header |= 0x400000008000LL;
-    packet->unk10 = header;
+    packet->gifTag = header;
     packet->command = quadwords | 0x50000000;
-    packet->unk18 = command;
-    packet->unk8 = 0;
+    packet->payloadHeader = command;
+    packet->reservedWord = 0;
     packet->quadwords = quadwords;
     return packet;
 }
@@ -867,24 +869,24 @@ void *sdfConsAllocateColumnPacket(s32 height) {
 typedef struct ConsMatrixPacket {
     u16 quadwords;
     u8 pad02[6];
-    u32 unk8;
+    u32 reservedWord;
     u32 command;
     u8 matrixA[0x40];
     u8 matrixB[0x40];
     u8 vecC[0x10];
     u8 vecD[0x10];
     u8 vecE[0x10];
-    u32 word0;
-    u32 word4;
-    u32 word8;
-    u32 wordC;
+    u32 stmodCommand;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
 } ConsMatrixPacket;
 
 
 void func_002E14D8(ConsMatrixPacket *packet, u8 *src, void *matrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
-    packet->unk8 = 0;
+    packet->reservedWord = 0;
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(packet->matrixA);
     func_002DDD60(src + 0x30);
@@ -898,10 +900,10 @@ void func_002E14D8(ConsMatrixPacket *packet, u8 *src, void *matrix) {
     VU0_MOVE_VF(vf10, vf31);
     VU0_STORE_VF(vf10, packet->vecE);
     VU0_STORE_VF(vf10, src + 0x90);
-    packet->word0 = 0x04000002;
-    packet->word4 = 0x14000000;
-    packet->word8 = 0;
-    packet->wordC = 0;
+    packet->stmodCommand = 0x04000002;
+    packet->mscalCommand = 0x14000000;
+    packet->reservedA = 0;
+    packet->reservedB = 0;
 }
 
 
@@ -1027,21 +1029,23 @@ typedef struct ConsFrustumParams {
     s32 mask;
 } ConsFrustumParams;
 
+/* DMA/VIF prefix, left/right projection terms, then a one-register GIF write
+ * and the VU execution command. */
 typedef struct ConsFrustumPacket {
-    u64 unk0;
-    u64 unk8;
+    u64 dmaTag;
+    u64 vifUnpackCode;
     f32 right;
     f32 left;
     f32 mid;
     f32 scale;
-    u64 smallMotor;
-    u64 unk28;
-    u64 unk30;
-    u64 unk38;
-    u32 unk40;
-    u32 unk44;
-    u32 unk48;
-    u32 unk4C;
+    u64 gifTag;
+    u64 gifRegister;
+    u64 registerValue;
+    u64 fogColorRegister;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+    u32 reservedC;
 } ConsFrustumPacket;
 
 void func_002E1BF0(ConsFrustumPacket *packet, ConsFrustumParams *params) {
@@ -1051,18 +1055,18 @@ void func_002E1BF0(ConsFrustumPacket *packet, ConsFrustumParams *params) {
     f32 farZ = params->farZ;
     f32 range = farZ - nearZ;
     s32 mask = params->mask;
-    packet->unk0 = 0x20000004;
-    packet->unk8 = 0x6C03C00013000000ULL;
-    packet->smallMotor = 0x1000000000008001ULL;
-    packet->unk28 = 0xE;
-    packet->unk30 = (u32)mask;
-    packet->unk38 = 0x3D;
-    packet->unk40 = 0x14000014;
-    packet->unk4C = 0;
+    packet->dmaTag = 0x20000004;
+    packet->vifUnpackCode = 0x6C03C00013000000ULL;
+    packet->gifTag = 0x1000000000008001ULL;
+    packet->gifRegister = 0xE;
+    packet->registerValue = (u32)mask;
+    packet->fogColorRegister = 0x3D;
+    packet->mscalCommand = 0x14000014;
+    packet->reservedC = 0;
     packet->right = right;
     packet->left = left;
-    packet->unk44 = 0;
-    packet->unk48 = 0;
+    packet->reservedA = 0;
+    packet->reservedB = 0;
     packet->mid = (((right - left) * (farZ + nearZ)) / range + (right + left)) * 0.5f;
     packet->scale = ((farZ * nearZ) * (left - right)) / range;
 }
