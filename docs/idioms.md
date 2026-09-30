@@ -496,6 +496,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_LOAD_VF_MEMORY(vf, src)` | same `lqc2` with a memory clobber |
 | `VU0_STORE_VF(vf, dst)` | `.set noreorder; sqc2 vf,0(dst); .set reorder` (register input, memory clobber) |
 | `VU0_STORE_VF_UNCLOBBERED(vf, dst)` | same `sqc2` without a memory clobber |
+| `VU0_SET_ONES_XYZ(vf)` | `vaddw.xyz vf,vf0,vf0w; vmulx.w vf,vf0,vf0x`: vf = (1,1,1,0), the unit scale stored beside the zero vectors and the unit matrix in object transform setup |
 
 Uses: the colour-modulate function (`func_00151568` and copies in
 `billManager`, `parManager`, `code_0018CAC8`, `code_001FF030`, dds2 twins),

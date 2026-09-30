@@ -88,5 +88,11 @@
 #define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
     : : "r" (dst))
+/* vf = (1, 1, 1, 0) from vf0 = (0, 0, 0, 1): the unit scale vector of an
+ * object's transform (stored next to the zero rotation/translation and the
+ * unit matrix). */
+#define VU0_SET_ONES_XYZ(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz " #vf ", vf0, vf0w\n\tvmulx.w " #vf ", vf0, vf0x\n\t.set reorder" \
+    : : : "memory")
 
 #endif
