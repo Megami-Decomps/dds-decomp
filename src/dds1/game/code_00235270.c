@@ -58,7 +58,17 @@ typedef struct EvtRuntimeChild {
 
 typedef struct EvtRuntimeGroup {
     s32 type;
-    u8 pad04[0x50];
+    u8 metadataFlag;  /* 0x04: included in serialized group metadata */
+    u8 pad05[3];
+    union {
+        s32 word;      /* 0x08: full value for group type 2 */
+        u16 shortValue; /* 0x08: truncated value in metadata */
+    } entryHeader;
+    u8 pad0C[0x10];
+    u16 metadataValue; /* 0x1C */
+    u8 metadataByte1;  /* 0x1E */
+    u8 metadataByte2;  /* 0x1F */
+    u8 pad20[0x34];
     EvtRuntimeChild *children;
     u8 pad58[0x24];
     struct EvtRuntimeGroup *next;
@@ -836,7 +846,7 @@ void evtWriteGroupHeader(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 2) {
             s32 header[4];
-            header[0] = *(s32 *)((s32)group + 8);
+            header[0] = group->entryHeader.word;
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
@@ -958,11 +968,11 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != NULL; group = group->next) {
         u8 header[8];
         header[0] = *(u8 *)group;
-        header[1] = *(u8 *)((s32)group + 4);
-        *(u16 *)&header[2] = *(u16 *)((s32)group + 8);
-        *(u16 *)&header[4] = *(u16 *)((s32)group + 0x1C);
-        header[6] = *(u8 *)((s32)group + 0x1E);
-        header[7] = *(u8 *)((s32)group + 0x1F);
+        header[1] = group->metadataFlag;
+        *(u16 *)&header[2] = group->entryHeader.shortValue;
+        *(u16 *)&header[4] = group->metadataValue;
+        header[6] = group->metadataByte1;
+        header[7] = group->metadataByte2;
         func_0023D5B0(output, header, sizeof(header));
     }
 }

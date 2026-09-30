@@ -34,6 +34,12 @@ typedef struct EvtUnit {
     s16 unkF0[1];       /* 0xF0 */
 } EvtUnit;
 
+/* World lookup results carry the address of their vector-bearing data at +0x18. */
+typedef struct EvtWorldVectorSource {
+    u8 pad00[0x18];
+    u32 vectorData;
+} EvtWorldVectorSource;
+
 extern void *func_00110C70(void *arg0, s32 arg1, s32 arg2);
 
 extern void *dds3GetWorldSecondaryObject(void);
@@ -163,11 +169,11 @@ void evtBeginVectorTransition(EvtUnit *eventUnit, s128 *sourceVector, s32 stepCo
 
 /* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
 void evtAttachSecondaryWorldUnit(EvtUnit *eventUnit, s32 objectId, s32 stepCount) {
-    void *sourceUnit;
+    EvtWorldVectorSource *sourceUnit;
 
     sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (sourceUnit != NULL) {
-        evtBeginVectorTransition(eventUnit, (s128 *)(*(u32 *)((u8 *)sourceUnit + 0x18) + 0x10), stepCount);
+        evtBeginVectorTransition(eventUnit, (s128 *)(sourceUnit->vectorData + 0x10), stepCount);
         eventUnit->sourceUnit = sourceUnit;
     }
 }
@@ -189,11 +195,11 @@ void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s
 
 /* Configure the same transition from a secondary-world object's vector. */
 void func_0023D740(EvtUnit *eventUnit, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    void *sourceUnit;
+    EvtWorldVectorSource *sourceUnit;
 
     sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (sourceUnit != NULL) {
-        func_0023D708(eventUnit, arg1, (s128 *)(*(u32 *)((u8 *)sourceUnit + 0x18)), arg3, arg4, arg5, arg6, arg7);
+        func_0023D708(eventUnit, arg1, (s128 *)sourceUnit->vectorData, arg3, arg4, arg5, arg6, arg7);
         eventUnit->unkAE = 1;
         eventUnit->sourceUnit = sourceUnit;
     }

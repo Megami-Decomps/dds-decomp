@@ -2700,6 +2700,8 @@ void func_00151480(void) {
     func_0014F560();
 }
 
+/* Reads the signed halfword at +6 of the current entry. The record's layout
+ * and the meaning of this value are not established elsewhere in this unit. */
 s32 func_00151498(void) {
     return *(s16 *)((u8 *)D_00451B94[0] + 6);
 }
