@@ -811,9 +811,25 @@ SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     return list;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfResourceListApplyEntryChanges);
+void sdfResourceListApplyEntryChanges(SdfResourceList *list, s32 index) {
+    s32 i;
+    s32 count = list->count;
+    u32 *items = list->items;
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333E98);
+    for (i = 0; i < count; i++) {
+        sdfAssetApplyEntryChanges((SdfAsset *)items[i], index);
+    }
+}
+
+void func_00333E98(SdfResourceList *list, s32 index) {
+    s32 i;
+    s32 count = list->count;
+    u32 *items = list->items;
+
+    for (i = 0; i < count; i++) {
+        func_00333CB0((SdfAsset *)items[i], index);
+    }
+}
 
 typedef struct SdfSubParamWords {
     u32 word[6];

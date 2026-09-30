@@ -142,4 +142,10 @@ void func_001622D8(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001622E8);
+/* vu0 routine: effect+0xB0 = matrix * effect+0x100 via func_00336AA8 */
+void func_001622E8(u8 *effect, void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX_B(effect + 0x100);
+    func_00336AA8();
+    VU0_STORE_MATRIX(effect + 0xB0);
+}

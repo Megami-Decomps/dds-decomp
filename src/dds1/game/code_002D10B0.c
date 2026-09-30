@@ -498,7 +498,24 @@ void sdfTexListInsert(SdfTex *texture) {
     D_003BD308 = texture;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2728);
+SdfTex *func_002D2728(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+    SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
+    SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
+
+    ref->refCount = 1;
+    tex->unk18 = arg6;
+    tex->unk19 = arg5;
+    tex->unkC = x;
+    tex->unkE = y;
+    tex->unk1A = pixelFormat;
+    tex->unk1B = arg3;
+    tex->secondaryResource = (SdfTexResource *)secondary;
+    tex->primaryResource = (SdfTexResource *)primary;
+    tex->reference = ref;
+    sdfTexListInsert(tex);
+    tex->unk38 = 0x80808080;
+    return tex;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2800);
 

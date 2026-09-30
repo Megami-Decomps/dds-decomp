@@ -461,7 +461,23 @@ u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
     return packed;
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00195A30);
+/* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
+u32 func_00195A30(u32 colorA, u32 colorB) {
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit = 0x3C000000;
+    color1[0] = colorA;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    color2[0] = colorB;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
+    EE_MMI_RGBA_PACK(packed);
+    blended[0] = packed;
+    return blended[0];
+}
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195AB0);
 

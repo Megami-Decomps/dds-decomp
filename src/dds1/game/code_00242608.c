@@ -323,7 +323,53 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242F78);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243048);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002432D0);
+typedef struct CampKeyNode {
+    u16 frame;
+    u8 pad02[0xA];
+    s16 condition;             /* 0xC */
+    u8 pad0E[0x22];
+    struct CampKeyNode *next;  /* 0x30 */
+    struct CampKeyNode *alt;   /* 0x34 */
+} CampKeyNode;
+
+typedef struct CampKeyTrack {
+    s32 type;
+    u8 pad04[0x18];
+    s16 base;                  /* 0x1C */
+    u8 pad1E[0x36];
+    CampKeyNode *first;        /* 0x54 */
+    CampKeyNode *fallback;     /* 0x58 */
+} CampKeyTrack;
+
+extern s32 evtViewerTestIndexedCondition(u32);
+
+void func_002432D0(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNode **out2) {
+    s32 base;
+
+    *out1 = 0;
+    *out2 = 0;
+    if (track == 0) {
+        return;
+    }
+    base = track->base;
+    *out2 = track->first;
+    while (*out2 != 0) {
+        if (value < (*out2)->frame + base) {
+            break;
+        }
+        *out2 = (*out2)->next;
+    }
+    if (*out2 != 0) {
+        *out1 = (*out2)->alt;
+    } else {
+        *out1 = track->fallback;
+    }
+    if (track->type == 2) {
+        while (*out1 != 0 && evtViewerTestIndexedCondition((*out1)->condition) != 1) {
+            *out1 = (*out1)->alt;
+        }
+    }
+}
 
 typedef struct CampOwner {
     u8 pad00[0x104];
