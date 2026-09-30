@@ -330,8 +330,8 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
     return 1;
 }
 
-s32 btlUnitHasActionMask(s32 arg0, s32 arg1) {
-    return (func_001A1938(arg0 + 0x120, arg1) & arg1) != 0;
+s32 btlUnitHasActionMask(s32 unit, s32 mask) {
+    return (func_001A1938(unit + 0x120, mask) & mask) != 0;
 }
 
 s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
@@ -664,8 +664,8 @@ s32 func_002010F8(u8 *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002011C8);
 
-s32 btlUnitHasFlag1000(s32 arg0) {
-    return ((*(s32 *)(arg0 + 0x110) & 0x1000) > 0);
+s32 btlUnitHasFlag1000(s32 unit) {
+    return (((s32)((BtlUnit *)unit)->flags & 0x1000) > 0);
 }
 
 u8 func_002012C0(void) {
@@ -847,6 +847,19 @@ extern s32 func_00201900(s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00201900);
 
+/* Action IDs occupy the low halfword of each 0x4-byte queued action slot. */
+typedef union BtlActionSlot {
+    s32 word;
+    s16 actionId;
+} BtlActionSlot;
+
+typedef struct BtlActionTask {
+    u8 pad00[0x148];
+    BtlActionSlot actions[8]; /* 0x148 */
+    u8 pad168[4];
+    struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
+} BtlActionTask;
+
 s32 btlAnyUnitHasActionInSlots(mask, action)
 u32 mask;
 s32 action;
@@ -859,6 +872,7 @@ s32 action;
             if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
                 s32 i;
                 for (i = 0; i < 8; i++) {
+                    /* Required to match: byte-offset indexing keeps the original induction register. */
                     if (func_00201900(action, *(s16 *)(node + 0x148 + i * 4), 1) != 0) {
                         return 1;
                     }
@@ -1003,7 +1017,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
             if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
                 s32 i;
                 for (i = 0; i < 8; i++) {
-                    if (*(s32 *)(node + 0x148 + i * 4) == query) {
+                    if (((BtlActionTask *)node)->actions[i].word == query) {
                         return 1;
                     }
                 }
@@ -1209,7 +1223,7 @@ s32 func_00203F98(s32 actor) {
     void *list = btlAllocateIndexList(13);
     func_001A30F8(actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(*(s32 *)(actor + 0x60), *(s32 *)(actor + 0x18));
+    btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, (s32)((BtlTask *)actor)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -1224,11 +1238,11 @@ u32 func_00204028(u32 arg0, u32 arg1) {
     return 1;
 }
 
-u32 func_00204048(s32 arg0) {
+u32 func_00204048(s32 task) {
     u32 actor;
 
     actor = btlGetEffectActor();
-    btlAppendIndexListEntry(*(u32 *)(arg0 + 0x60), actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, actor);
     return 1;
 }
 
@@ -1248,13 +1262,27 @@ extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern BtlUnit *btlGetTargetUnitForLink();
 
+/* Linked-command target/direction and motion fields; DDS2 moves the target/flags +0x20. */
+typedef struct BtlLinkedCommand {
+    u8 pad00[0x50];
+    f32 coordinate50; /* 0x50: increased when motion begins */
+    u8 pad54[0x8C];
+    f32 coordinateE0; /* 0xE0: increased along with coordinate50 */
+    u8 padE4[0xC];
+    u32 flags;         /* 0xF0 */
+    u8 padF4[0x24];
+    u32 targetList;    /* 0x118 */
+    u8 pad11C[0x14];
+    f32 value130;      /* 0x130: initialized to 30 for this motion */
+} BtlLinkedCommand;
+
 void func_002044F0(u8 *command, u8 *unused) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
     f32 targetPos[4];
     user = btlGetTargetUnitForLink(command);
-    target = (BtlUnit *)btlGetIndexListEntry(*(u32 *)(command + 0x118), 0);
+    target = (BtlUnit *)btlGetIndexListEntry(((BtlLinkedCommand *)command)->targetList, 0);
     if (!(user->flags & target->flags & 0x600)) {
         func_001F7428();
         btlFlagUnitDefeatCandidate(user);
@@ -1270,9 +1298,9 @@ void func_002044F0(u8 *command, u8 *unused) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(targetPos) : "memory");
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
-        *(u32 *)(command + 0xF0) |= 0x200;
+        ((BtlLinkedCommand *)command)->flags |= 0x200;
     } else {
-        *(u32 *)(command + 0xF0) &= ~0x200;
+        ((BtlLinkedCommand *)command)->flags &= ~0x200;
     }
 }
 
@@ -1299,8 +1327,8 @@ s32 btlFilterRestrictedCommand(s32 battler, s32 command) {
     return command;
 }
 
-u8 func_00204B78(u32 arg0, s32 arg1) {
-    return arg1 == 0xf;
+u8 func_00204B78(u32 unused, s32 command) {
+    return command == 0xf;
 }
 
 s32 btlSelectDisabledCommand(s32 battler) {
@@ -1309,6 +1337,15 @@ s32 btlSelectDisabledCommand(s32 battler) {
     }
     return (((BtlUnit *)battler)->unk_120 & 0x2000) ? 15 : -1;
 }
+
+/* Command condition words and the restriction flags tested by this boss mode. */
+typedef struct BtlCommandStatus {
+    s32 first;
+    s32 second;
+    s32 third;
+    u8 pad0C[0x1A];
+    u16 restrictionFlags; /* 0x26 */
+} BtlCommandStatus;
 
 void func_00204BA8(u8 *unit, u8 *command) {
     u8 *battle;
@@ -1321,13 +1358,14 @@ void func_00204BA8(u8 *unit, u8 *command) {
     species = ((BtlUnit *)unit)->mode;
     effect = *(u8 **)(battle + 0x694);
     if (species < 0x105) {
-        if (species >= 0x102 && (*(u16 *)(command + 0x26) & 0x10)) {
+        if (species >= 0x102 && (((BtlCommandStatus *)command)->restrictionFlags & 0x10)) {
             ((BtlUnit *)unit)->unk_120 |= 0x2000;
             *(s32 *)effect = ((BtlState *)battle)->turnCount;
         }
     }
-    if (species == 0x102 && (*(u16 *)(command + 0x26) & 0x100)) {
-        if (*(s32 *)command < 0 || *(s32 *)(command + 4) < 0 || *(s32 *)(command + 8) != 0) {
+    if (species == 0x102 && (((BtlCommandStatus *)command)->restrictionFlags & 0x100)) {
+        if (((BtlCommandStatus *)command)->first < 0 || ((BtlCommandStatus *)command)->second < 0 ||
+            ((BtlCommandStatus *)command)->third != 0) {
             if (*(s32 *)effect != ((BtlState *)battle)->turnCount) {
                 ((BtlUnit *)unit)->unk_120 &= ~0x2000;
             }
@@ -1445,7 +1483,7 @@ void func_00204FE0(void) {
                     continue;
                 }
                 if (species >= 0x102) {
-                    *(u16 *)(unit + 0x120) &= ~0x2000;
+                    ((BtlUnit *)unit)->unk_120 &= ~0x2000;
                     func_001D5990(unit);
                 }
             }
@@ -1561,14 +1599,14 @@ void func_00205520(u8 *unit) {
     ((BtlUnit *)unit)->unk_114 |= 0x20;
 }
 
-void func_002055B8(s32 arg0) {
+void func_002055B8(s32 unit) {
     u16 mode;
 
-    if (((BtlUnit *)arg0)->flags & 0x200) {
-        mode = ((BtlUnit *)arg0)->mode;
+    if (((BtlUnit *)unit)->flags & 0x200) {
+        mode = ((BtlUnit *)unit)->mode;
         if (mode == 1) {
-            if (((BtlUnit *)arg0)->displaySpecies == mode) {
-                ((BtlUnit *)arg0)->displaySpecies = 0x11;
+            if (((BtlUnit *)unit)->displaySpecies == mode) {
+                ((BtlUnit *)unit)->displaySpecies = 0x11;
             }
         }
     }
@@ -1632,8 +1670,9 @@ void func_00205838(void) {
         ((BtlUnit *)actor)->unk_114 = state;
         func_001D5990(actor);
         ((BtlUnit *)actor)->flags |= 8;
+        /* +0x10 is a float in this effect variant, but a u32 in BattleEffectState. */
         *(f32 *)(effect + 0x10) = -125.0f;
-        *(f32 *)(effect + 0x14) = 20.0f;
+        ((BattleEffectState *)effect)->speed = 20.0f;
     }
 }
 
@@ -1705,22 +1744,22 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206180);
 
-s32 btlAdjustDamageKind(BtlUnit *unit, s32 arg1) {
+s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind) {
     u32 id;
     if (!(unit->flags & 1)) {
-        return arg1;
+        return damageKind;
     }
     if (!(unit->flags & 0x400)) {
-        return arg1;
+        return damageKind;
     }
     if ((*(BattleEffectState **)(func_001A17F0() + 0x694))->active != 1) {
-        return arg1;
+        return damageKind;
     }
     id = unit->mode;
     if (id == 0x124) {
-        return arg1;
+        return damageKind;
     }
-    switch (arg1) {
+    switch (damageKind) {
     case 1:
         if (id == 0x107) {
             return 1;
@@ -1739,14 +1778,14 @@ s32 btlAdjustDamageKind(BtlUnit *unit, s32 arg1) {
         break;
     default:
         if (id == 0x107) {
-            return arg1 + 0x64;
+            return damageKind + 0x64;
         }
         if (id == 0x108) {
-            return arg1 + 0xC8;
+            return damageKind + 0xC8;
         }
         break;
     }
-    return arg1;
+    return damageKind;
 }
 
 u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
@@ -1774,13 +1813,13 @@ u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
     return 0;
 }
 
-s32 func_00206418(s32 arg0) {
-    s32 mode = ((BtlUnit *)arg0)->mode;
+s32 func_00206418(s32 unit) {
+    s32 mode = ((BtlUnit *)unit)->mode;
 
     if ((mode >= 0x107) && ((mode < 0x109) || (mode == 0x124))) {
         return 0x124;
     }
-    return ((BtlUnit *)arg0)->displaySpecies;
+    return ((BtlUnit *)unit)->displaySpecies;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206450);
@@ -1789,25 +1828,25 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00206608);
 
 s32 btlGetEffectTaskActorMatchCode(u8 *task) {
     BattleEffectState *effect;
-    if ((*(u32 *)(task + 8) & 8) == 0) {
+    if ((((BtlTask *)task)->flags & 8) == 0) {
         return -1;
     }
     effect = *(BattleEffectState **)((u8 *)func_001A17F0() + 0x694);
-    return effect->actor == *(u32 *)(task + 0x18) ? 12 : -1;
+    return effect->actor == (u32)((BtlTask *)task)->unit ? 12 : -1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002068E0);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002069C0);
 
-s32 btlIsEffectActor(s32 arg0) {
-    s32 actor;
+s32 btlIsEffectActor(s32 actor) {
+    s32 effectActor;
 
-    actor = *(s32 *)(*(s32 *)(func_001A17F0() + 0x694));
-    if (actor == 0) {
+    effectActor = ((BtlState *)func_001A17F0())->effect->actor;
+    if (effectActor == 0) {
         return 0;
     }
-    return (actor ^ arg0) == 0;
+    return (effectActor ^ actor) == 0;
 }
 
 extern s32 btlHasEffectActor(void);
@@ -2062,6 +2101,23 @@ extern s32 sdfNamedChunkFindId(void *, void *);
 
 extern void func_00207CA0(s32, s32);
 
+/* Named chunk indirection follows the same +0x18/+0x0C layout as DDS2. */
+typedef struct BtlNamedChunkData {
+    u8 pad00[0xC];
+    void **entries; /* 0x0C: indexed chunk node pointers */
+} BtlNamedChunkData;
+
+typedef struct BtlNamedChunkDescriptor {
+    BtlNamedChunkData *data;
+    u8 pad04[0x18];
+    s32 argument; /* 0x1C */
+} BtlNamedChunkDescriptor;
+
+typedef struct BtlNamedChunkHolder {
+    u8 pad00[0x18];
+    BtlNamedChunkDescriptor *chunk;
+} BtlNamedChunkHolder;
+
 s32 func_00207DD0(void *query) {
     u8 *effect = *(u8 **)(func_001A17F0() + 0x694);
     u8 *unit = *(u8 **)effect;
@@ -2075,15 +2131,15 @@ s32 func_00207DD0(void *query) {
     if ((((BtlUnit *)unit)->flags & 2) == 0) {
         return 1;
     }
-    model = *(u8 **)(*(u8 **)(unit + 0x320) + 0x8c);
-    descriptor = *(u8 **)(model + 0x18);
+    model = (u8 *)((BtlUnit *)unit)->model->flags;
+    descriptor = (u8 *)((BtlNamedChunkHolder *)model)->chunk;
     index = sdfNamedChunkFindId(descriptor, query);
     if (index == -1) {
         return 1;
     }
-    selected = *(s32 *)(*(u8 **)(*(u8 **)descriptor + 0xc) + index * 4);
+    selected = (s32)((BtlNamedChunkDescriptor *)descriptor)->data->entries[index];
     D_003BD86C = 1;
-    func_00207CA0(selected, *(s32 *)(descriptor + 0x1c));
+    func_00207CA0(selected, ((BtlNamedChunkDescriptor *)descriptor)->argument);
     return D_003BD86C;
 }
 
@@ -2265,8 +2321,8 @@ u32 func_00208660(void) {
     return 0xffffffff;
 }
 
-s32 func_00208668(s32 arg0) {
-    return ((*(s32 *)(arg0 + 0x110) & 0x200) < 1);
+s32 func_00208668(s32 unit) {
+    return ((*(s32 *)(unit + 0x110) & 0x200) < 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208678);
@@ -2296,13 +2352,13 @@ s32 func_002087E0(u8 *unit, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208860);
 
-void func_002089F0(s32 arg0) {
-    if (((BtlUnit *)arg0)->mode != 0x10d) {
+void func_002089F0(s32 unit) {
+    if (((BtlUnit *)unit)->mode != 0x10d) {
         return;
     }
     func_001A17F0();
-    func_001D4CA8(arg0, 1, 0x11d);
-    func_00208860(arg0, 0);
+    func_001D4CA8(unit, 1, 0x11d);
+    func_00208860(unit, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208A50);
@@ -2361,12 +2417,21 @@ extern char D_003A5D98[];
 
 extern char D_00324550[];
 
+/* Boss-selection view of battle->effect: +0x0C is a full-width lookup ID
+ * here, unlike the timer/phase view in BattleEffectState. */
+typedef struct BtlBossEffectPayload {
+    s32 actor;
+    u32 color;
+    s32 options;
+    s32 selectedId;
+} BtlBossEffectPayload;
+
 void func_00208D30(void) {
     u8 *data = *(u8 **)(func_001A17F0() + 0x694);
-    *(u32 *)(data + 4) = 0x80808080;
-    *(u32 *)(data + 8) = 0;
-    *(u32 *)(data + 0xc) = effMiscRand(D_00324550) % 6;
-    btlBossDebugPrintf(D_003A5D98, *(u32 *)(data + 0xc));
+    ((BtlBossEffectPayload *)data)->color = 0x80808080;
+    ((BtlBossEffectPayload *)data)->options = 0;
+    ((BtlBossEffectPayload *)data)->selectedId = effMiscRand(D_00324550) % 6;
+    btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
 s32 func_00208D98(u8 *unit, s32 command) {
@@ -2374,8 +2439,8 @@ s32 func_00208D98(u8 *unit, s32 command) {
     if (flags & 1) {
         if (flags & 0x400) {
             u8 *effect = *(u8 **)((u8 *)func_001A17F0() + 0x694);
-            if (((BtlUnit *)unit)->lookupId == *(u32 *)(effect + 0xc)) {
-                if (*(u32 *)(effect + 8) & 4) {
+            if (((BtlUnit *)unit)->lookupId == ((BtlBossEffectPayload *)effect)->selectedId) {
+                if (((BtlBossEffectPayload *)effect)->options & 4) {
                     return command;
                 }
             }
@@ -2399,7 +2464,7 @@ u8 *unit;
     ((BtlUnit *)unit)->positionB4 = 25.0f;
     ((BtlUnit *)unit)->positionB8 = 100.0f;
     ((BtlUnit *)unit)->positionBC = 25.0f;
-    if (*(s32 *)(battleData + 0xc) != *(u8 *)(unit + 0x11c)) {
+    if (((BtlBossEffectPayload *)battleData)->selectedId != ((BtlUnit *)unit)->lookupId) {
         entry = (u8 *)btlFindUnitByActor(unit);
         if (entry != 0) {
             *(u16 *)(entry + 4) = 0;
@@ -2482,7 +2547,7 @@ void btlStepFocusAngle(void) {
     for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (*(u8 *)((u8 *)unit + 0x11C) == slot[3]) {
+                if (unit->lookupId == slot[3]) {
                     break;
                 }
             }
@@ -2491,7 +2556,7 @@ void btlStepFocusAngle(void) {
     if (unit == NULL) {
         return;
     }
-    mdlGetNodeField2C(*(s32 *)((u8 *)player->model + 0x8C), 0);
+    mdlGetNodeField2C((s32)player->model->flags, 0);
     if (slot[2] & 4) {
         if ((slot[1] & 0xFF000000) != 0x80000000) {
             slot[1] += 0x10000000;
@@ -2506,11 +2571,11 @@ void btlStepFocusAngle(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209140);
 
-u32 func_00209220(u32 arg0, s32 arg1) {
+u32 func_00209220(u32 unused, s32 unit) {
     u32 result;
 
     result = 4;
-    if ((((BtlUnit *)arg1)->flags & 0x400) == 0) {
+    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         result = 0;
     }
     return result;
@@ -2542,7 +2607,7 @@ s32 func_00209460(void) {
         u32 flags = ((BtlUnit *)unit)->flags;
         if (flags & 1) {
             if (flags & 0x400) {
-                if (*(s32 *)(effect + 0xc) == unit[0x11c]) {
+                if (((BtlBossEffectPayload *)effect)->selectedId == ((BtlUnit *)unit)->lookupId) {
                     break;
                 }
             }
@@ -2556,25 +2621,34 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00209528);
 
 extern void func_001DF358(void *, void *);
 
+/* Event entry carrying a battle task and its action kind. */
+typedef struct BtlEventEntry {
+    u8 pad00[0xF0];
+    u32 flags;
+    BtlTask *task; /* 0xF4 */
+    u8 padF8[0xC];
+    u32 kind;      /* 0x104 */
+} BtlEventEntry;
+
 s32 func_002096E8(u8 *entry) {
-    u8 *unit = *(u8 **)(entry + 0xf4);
+    BtlTask *task = ((BtlEventEntry *)entry)->task;
     u8 *data;
     u32 kind;
-    if (unit == 0) {
+    if (task == 0) {
         return 1;
     }
-    if ((*(u32 *)(*(u8 **)(unit + 0x18) + 0x110) & 0x400) == 0) {
+    if ((task->unit->flags & 0x400) == 0) {
         return 1;
     }
     data = *(u8 **)((u8 *)func_001A17F0() + 0x694);
-    if (*(u32 *)(data + 8) & 4) {
+    if (((BtlBossEffectPayload *)data)->options & 4) {
         return 1;
     }
-    kind = *(u32 *)(entry + 0x104);
+    kind = ((BtlEventEntry *)entry)->kind;
     if (kind < 9) {
         if (kind >= 4) {
             func_001DF358(entry, entry);
-            *(u32 *)(entry + 0xf0) |= 0x1000;
+            ((BtlEventEntry *)entry)->flags |= 0x1000;
             return 0;
         }
     }
@@ -2586,12 +2660,12 @@ s32 btlCheckAttachedMember(u8 *entry) {
     if (unit == 0) {
         return 1;
     }
-    if ((*(u32 *)(*(u8 **)(unit + 0x18) + 0x110) & 0x400) == 0) {
+    if ((((BtlTask *)unit)->unit->flags & 0x400) == 0) {
         return 1;
     }
     {
         s32 *data = *(s32 **)(func_001A17F0() + 0x694);
-        s32 flags = data[2] & 4;
+        s32 flags = ((BtlBossEffectPayload *)data)->options & 4;
         if (flags) {
             return 1;
         }
@@ -2605,7 +2679,7 @@ s32 func_002097D0(u8 *unit) {
         return -1;
     }
     data = *(s32 **)(func_001A17F0() + 0x694);
-    return (data[2] & 4) ? -1 : 0;
+    return (((BtlBossEffectPayload *)data)->options & 4) ? -1 : 0;
 }
 
 s32 func_00209818(u8 *unit, s32 command, u8 mode) {
@@ -2614,7 +2688,7 @@ s32 func_00209818(u8 *unit, s32 command, u8 mode) {
         return command;
     }
     effect = *(u8 **)((u8 *)func_001A17F0() + 0x694);
-    if (((BtlUnit *)unit)->lookupId != *(u32 *)(effect + 0xc)) {
+    if (((BtlUnit *)unit)->lookupId != ((BtlBossEffectPayload *)effect)->selectedId) {
         return -1;
     }
     if (command == 13) {
@@ -2646,7 +2720,7 @@ u32 func_002099A0(void) {
     if (effect == 0) {
         return 0;
     }
-    return *(u32 *)(effect + 0xc);
+    return ((BtlBossEffectPayload *)effect)->selectedId;
 }
 
 s32 func_002099E0(void) {
@@ -2662,8 +2736,14 @@ s32 func_002099E0(void) {
     if (effect == 0) {
         return absent;
     }
-    return ((*(s32 *)(effect + 0x8) & 2) > 0);
+    return ((((BtlBossEffectPayload *)effect)->options & 2) > 0);
 }
+
+/* Effect-data overlay for the one-shot scripted resource trigger. */
+typedef struct BtlEventTriggers {
+    s8 pending;       /* 0x00: starts the trigger */
+    s8 resourceReady; /* 0x01: consumed when the resource is requested */
+} BtlEventTriggers;
 
 void func_00209A28(void) {
     u8 *data;
@@ -2671,8 +2751,8 @@ void func_00209A28(void) {
 
     battle = func_001A17F0();
     data = *(u8 **)(battle + 0x694);
-    data[1] = 1;
-    *data = 0;
+    ((BtlEventTriggers *)data)->resourceReady = 1;
+    ((BtlEventTriggers *)data)->pending = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209A58);
@@ -2682,12 +2762,12 @@ s32 func_00209B70(void) {
     s32 data;
 
     data = *(s32 *)(func_001A17F0() + 0x694);
-    if (*(s8 *)(data + 0) != 0) {
-        if (*(s8 *)(data + 1) != 0) {
-            *(u8 *)(data + 1) = 0;
+    if (((BtlEventTriggers *)data)->pending != 0) {
+        if (((BtlEventTriggers *)data)->resourceReady != 0) {
+            ((BtlEventTriggers *)data)->resourceReady = 0;
             return btlFindScriptResource(D_003BB8A0);
         }
-        *(u8 *)(data + 0) = 0;
+        ((BtlEventTriggers *)data)->pending = 0;
         return -1;
     }
     return absent;
@@ -2893,14 +2973,14 @@ s64 func_0020B560(void) {
 
 s32 func_0020B580(u8 *unit) {
     u8 *entry = *(u8 **)(unit + 0xf4);
-    u32 flags = *(u32 *)(*(u8 **)(entry + 0x18) + 0x110);
+    u32 flags = ((BtlTask *)entry)->unit->flags;
     u8 *other;
     if (flags & 0x200) {
         if ((flags & 0x1000) == 0) {
             return 0;
         }
-        if (btlGetIndexListCount(*(u32 *)(entry + 0x60)) == 1) {
-            other = (u8 *)btlGetIndexListEntry(*(u32 *)(entry + 0x60), 0);
+        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -2920,9 +3000,9 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B640);
 s32 func_0020B770(u8 *unit) {
     u8 *entry = *(u8 **)(unit + 0xf4);
     u8 *other;
-    if (*(u32 *)(*(u8 **)(entry + 0x18) + 0x110) & 0x200) {
-        if (btlGetIndexListCount(*(u32 *)(entry + 0x60)) == 1) {
-            other = (u8 *)btlGetIndexListEntry(*(u32 *)(entry + 0x60), 0);
+    if (((BtlTask *)entry)->unit->flags & 0x200) {
+        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -2965,10 +3045,19 @@ extern void func_0020B190(u8 *, void *);
 
 extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
+/* 0x20-byte action metadata entries referenced by a unit's action index. */
+typedef struct BtlActionTableRow {
+    u8 pad00[3];
+    u8 enabled; /* 0x03: zero rejects the action */
+    u8 pad04[0x18];
+    u16 flags;  /* 0x1C: special animation selection bits */
+    u8 pad1E[2];
+} BtlActionTableRow;
+
 extern void btlClearRuntimeFlag2000(void);
 
 s32 btlDispatchActionAnimationB(u8 *unit) {
-    u16 flags = *(u16 *)((u8 *)D_003BAA60 + ((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
+    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
     if (flags & 0x4000) {
         func_001DC760();
         if (!(flags & 0x10)) {
@@ -2984,8 +3073,8 @@ s32 btlDispatchActionAnimationB(u8 *unit) {
         func_001DC760();
         func_0020B348(unit, unit, 0);
     } else if (flags & 8) {
-        if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60), 0);
+        if (btlGetIndexListCount(((BtlTask *)*(u8 **)(unit + 0xf4))->unk_60) == 1) {
+            void *other = (void *)btlGetIndexListEntry((void *)((BtlTask *)*(u8 **)(unit + 0xf4))->unk_60, 0);
             func_001DC760();
             func_0020B190(unit, other);
             ((BtlUnit *)unit)->flags = 0;
@@ -3058,7 +3147,7 @@ s32 func_0020D550(s32 battler, s32 action) {
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return -1;
     }
-    if (*(u8 *)((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
         return -1;
     }
     if (((BtlUnit *)unit)->mode == 0x114) {
@@ -3218,10 +3307,10 @@ void func_0020DB90(u8 *actor) {
     u8 *position = actor + 0x30;
     u8 *rotation = actor + 0xc0;
     func_00204838(actor, position, rotation, 0, 1, 0.25f, 0.0f, 0.5f);
-    *(f32 *)(actor + 0x130) = 30.0f;
-    *(u32 *)(actor + 0xf0) |= 0x41;
-    *(f32 *)(actor + 0x50) += 500.0f;
-    *(f32 *)(actor + 0xe0) += 500.0f;
+    ((BtlLinkedCommand *)actor)->value130 = 30.0f;
+    ((BtlLinkedCommand *)actor)->flags |= 0x41;
+    ((BtlLinkedCommand *)actor)->coordinate50 += 500.0f;
+    ((BtlLinkedCommand *)actor)->coordinateE0 += 500.0f;
     func_001DB698(position);
     func_001DB698(rotation);
 }
@@ -3245,9 +3334,9 @@ extern void func_0020DA40(u8 *);
 s32 func_0020E868(u8 *unit) {
     u8 *entry = *(u8 **)(unit + 0xf4);
     u8 *other;
-    if (*(u32 *)(*(u8 **)(entry + 0x18) + 0x110) & 0x200) {
-        if (btlGetIndexListCount(*(u32 *)(entry + 0x60)) == 1) {
-            other = (u8 *)btlGetIndexListEntry(*(u32 *)(entry + 0x60), 0);
+    if (((BtlTask *)entry)->unit->flags & 0x200) {
+        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -3265,7 +3354,7 @@ s32 func_0020E868(u8 *unit) {
 extern void func_001DC760(void);
 
 s32 func_0020E910(u8 *unit) {
-    u16 flags = *(u16 *)((u8 *)D_003BAA60 + ((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
+    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
     if (flags & 0x1000) {
         func_001DC760();
         if (!(flags & 0x10)) {
@@ -3279,7 +3368,7 @@ s32 func_0020E910(u8 *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
+        if (btlGetIndexListCount(((BtlTask *)*(u8 **)(unit + 0xf4))->unk_60) == 1) {
             func_001DC760();
             func_0020DB90(unit);
         } else {
