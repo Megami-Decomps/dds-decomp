@@ -192,6 +192,10 @@ extern s32 func_0020DC38();
 extern s32 btlAnyUnitHasActionInSlots();
 
 extern s32 func_001A8CE0(s32);
+extern u32 func_001A9488(s32);
+extern u8 D_00360EE0[];
+extern u8 D_00360EF0[];
+extern void func_001DC2A8(s32, u8 *, u8 *);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF030);
 
@@ -584,7 +588,6 @@ s64 btlCheckCounterLimit(s32 unused, u32 limit) {
 }
 
 s32 btlCounterReachedLimit(s32 unused, u32 limit) {
-    extern u32 func_001A9488(s32);
     if (func_001A9488(4) < limit) {
         return 0;
     }
@@ -1654,9 +1657,6 @@ s32 func_002055F8(void) {
 }
 
 s32 btlInitializeResources(s32 unused, s32 resource) {
-    extern u8 D_00360EE0[];
-    extern u8 D_00360EF0[];
-    extern void func_001DC2A8(s32, u8 *, u8 *);
     func_001DC2A8(resource, D_00360EE0, D_00360EF0);
     return 1;
 }

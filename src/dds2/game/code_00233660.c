@@ -5,6 +5,7 @@
 extern s32 func_0033D810();
 
 extern void func_00328E48();
+extern void *func_00328E18(s32 size);
 
 extern s32 D_003C88C0[];
 
@@ -601,7 +602,6 @@ void func_00234858(MdlPartList *list) {
 }
 
 MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 subtype) {
-    extern void *func_00328E18(s32 size);
     MdlResourceItem *item = func_00328E18(0x20);
     MdlResourceItem *previous = object->first;
     item->type = type;
