@@ -1,5 +1,15 @@
 #include "common.h"
 
+extern s32 func_002D03F8(s32);
+extern u8 *sdfResourceRetainAddress(s32);
+extern void func_00285490(u8 *);
+extern void evtLoadResourcePair(const char *, u8 *);
+extern s32 func_0024D9D8(s32);
+extern s32 func_00244848();
+extern s32 D_003BC520;
+extern s32 func_0019D208(s32, s32);
+extern void func_00243440();
+
 extern u8 D_00368C40[];
 
 extern s32 D_003BAA00;
@@ -306,7 +316,36 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243048);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002432D0);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243390);
+typedef struct CampOwner {
+    u8 pad00[0x104];
+    s32 handle; /* 0x104 */
+} CampOwner;
+
+typedef struct CampWorld {
+    u8 pad00[8];
+    CampOwner *owner; /* 0x08 */
+    u8 pad0C[0x2028];
+    FxNode *entries;  /* 0x2034 */
+} CampWorld;
+
+s32 func_00243390(CampWorld *scene) {
+    FxNode *node;
+    FxChild *child;
+    s32 low;
+    s32 high;
+
+    for (node = scene->entries; node != NULL; node = node->next) {
+        if (node->kind == 4) {
+            for (child = node->children; child != NULL; child = child->next) {
+                func_00243440(child, &low, &high);
+                if (func_0019D208(scene->owner->handle, low) == 1) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 typedef struct CampPacked {
     u8 pad00[8];
@@ -324,7 +363,8 @@ void func_00243440(CampPacked *src, s32 *low, s32 *high) {
 typedef struct CampEntryNode {
     u8 pad00[8];
     s32 nameIndex; /* 0x08: 32-byte name in the owning scene */
-    u8 pad0C[0x1C];
+    u8 pad0C[0x18];
+    s32 value; /* 0x24 */
     u32 status; /* 0x28 */
     u8 pad2C[0x50];
     struct CampEntryNode *next; /* 0x7C */
@@ -333,7 +373,9 @@ typedef struct CampEntryNode {
 typedef struct {
     u8 pad00[0x2034];
     CampEntryNode *entries; /* 0x2034 */
-    u8 pad2038[0x3D4];
+    u8 pad2038[0x3A8];
+    s32 pendingValue; /* 0x23E0 */
+    u8 pad23E4[0x28];
     u32 state; /* 0x240C */
     u32 fontResource; /* 0x2410: returned by func_001951C8 */
     u8 pad2414[0x1C];
@@ -369,7 +411,50 @@ void *mnuCampFindEntryByName(CampScene *scene, const char *name) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243558);
+typedef struct CampCue {
+    u8 pad00[0x10];
+    s16 kind;             /* 0x10 */
+    u8 pad12[0x22];
+    struct CampCue *link; /* 0x34 */
+} CampCue;
+
+void func_00243558(CampScene *scene, CampCue *cue) {
+    CampCue *next;
+    s32 kind;
+    u16 id;
+
+    if (cue == NULL) {
+        return;
+    }
+    kind = cue->kind;
+    id = cue->kind;
+    if (kind == 1) {
+        scene->pendingValue = 0;
+        return;
+    }
+    if (kind == 0) {
+        next = cue->link;
+        scene->pendingValue = 0;
+        for (; ; next = next->link) {
+            s32 nextKind;
+
+            if (next == NULL) {
+                return;
+            }
+            nextKind = next->kind;
+            if (nextKind != 0) {
+                if (nextKind == 1) {
+                    scene->pendingValue = 0;
+                    return;
+                }
+                scene->pendingValue = ((CampEntryNode *)mnuCampFindEntryByName(scene, (char *)scene + (nextKind << 5) - 0x1C))->value;
+                return;
+            }
+        }
+    } else {
+        scene->pendingValue = ((CampEntryNode *)mnuCampFindEntryByName(scene, (char *)scene + ((s16)id << 5) - 0x1C))->value;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243608);
 
@@ -632,7 +717,24 @@ void func_002444D0(s32 *arg0) {
     arg0[27] = func_002443F8(D_00368C40, 3, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244508);
+typedef struct CampFlagRow {
+    s16 flag[8]; /* 0x00 */
+    u8 value[9]; /* 0x10: [0] default, [i + 1] for flag[i] */
+    u8 pad19;
+} CampFlagRow;
+
+extern CampFlagRow D_00368C50[];
+
+s32 func_00244508(s32 row) {
+    s32 i;
+
+    for (i = 7; i >= 0; i--) {
+        if (D_00368C50[row].flag[i] > 0 && mdlFlagTest(D_00368C50[row].flag[i])) {
+            return D_00368C50[row].value[i + 1];
+        }
+    }
+    return D_00368C50[row].value[0];
+}
 
 extern u8 D_00369A88[];
 
@@ -723,7 +825,24 @@ s32 func_00244898(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002448D0);
+u8 *func_002448D0(void) {
+    s32 handle;
+    u8 *obj;
+
+    handle = func_002D03F8(0xB4);
+    obj = sdfResourceRetainAddress(handle);
+    memset(obj, 0, 0xB4);
+    *(s32 *)obj = handle;
+    func_00285490(obj + 8);
+    mnuShopLoadSpriteAssets(obj);
+    func_00244258(obj);
+    evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj + 0x5C);
+    func_0024D9D8(*(s32 *)(obj + 0x60));
+    D_003BC520 = *(s32 *)(obj + 0x64);
+    *(s32 *)(obj + 0x98) = func_00244848();
+    *(s32 *)(obj + 0x8C) = func_00244898();
+    return obj;
+}
 
 extern s32 func_00101A70();
 extern void func_00285600();
@@ -746,7 +865,6 @@ void mnuShopDestroyScene(s32 arg) {
     }
 }
 
-extern u8 *func_002448D0(void);
 extern s64 mnuCampRunPanel0(u64 request);
 extern s64 mnuCampRunPanel1(u64 request);
 extern s64 mnuCampRunPanel2(u64 request);
