@@ -26,6 +26,37 @@ extern void func_0024A930(s32);
 
 extern void func_0024A610(s32);
 
+/* Offsets shared by the event-B menu/dispatch handlers in this unit. */
+typedef struct EvtBContext {
+    u8 pad00[0x54];
+    s32 dispatchState; /* 0x54 */
+    u32 dispatchTable; /* 0x58 */
+    u8 pad5C[0x14];
+    u32 visualList; /* 0x70 */
+    s32 thresholdList; /* 0x74 */
+    s32 selectionList; /* 0x78 */
+    u8 pad7C[0xC]; /* 0x7C: state meaning still unclear */
+    s32 panelMode; /* 0x88 */
+    u8 pad8C[0x40]; /* 0x98: reset flag meaning still unclear */
+    s32 exitPending; /* 0xCC */
+    s32 transitionPending; /* 0xD0 */
+    s32 transitionStage; /* 0xD4 */
+    u8 padD8[0x84];
+    s32 dispatchMode; /* 0x15C */
+    u32 resourceHandle; /* 0x160 */
+} EvtBContext;
+
+typedef struct EvtBSelectionNode {
+    u8 pad00[0x60];
+    s32 entryIndex; /* 0x60 */
+} EvtBSelectionNode;
+
+typedef struct EvtBSelectionList {
+    u8 pad00[0x1C];
+    EvtBSelectionNode *selected; /* 0x1C */
+    s32 mode; /* 0x20 */
+} EvtBSelectionList;
+
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B3A8);
 
 u32 func_0024B470(void) {
@@ -61,7 +92,7 @@ s32 evtBClearAndReset(void) {
     s32 context = func_00101A70();
 
     evtRememberDispatchCallback(0, context);
-    *(s32 *)(*(s32 *)(context + 0x70) + 0x3C) = 0;
+    *(s32 *)(((EvtBContext *)context)->visualList + 0x3C) = 0;
     func_00249C08(0);
     func_0024DBB0();
     return 1;
@@ -114,15 +145,15 @@ extern void func_0024DEF8(s32, s32);
 u32 func_0024B9D8(void) {
     s32 context = func_00101A70();
 
-    if (*(s32 *)(context + 0xD0) == 0) {
-        mnuSelectFirstListNode(*(s32 *)(context + 0x78));
+    if (((EvtBContext *)context)->transitionPending == 0) {
+        mnuSelectFirstListNode(((EvtBContext *)context)->selectionList);
         func_0024A728(3, context);
         evtRememberDispatchCallback((s32)func_0024AF58, context);
         func_0024AE18(3, context);
         func_0024AB70(4, context);
         func_0024A570(3, 1, context);
     }
-    *(s32 *)(context + 0xD0) = 0;
+    ((EvtBContext *)context)->transitionPending = 0;
     evtClearActiveFlag(0);
     func_0024DEF8(0, 3);
     return 1;
@@ -137,7 +168,7 @@ extern void func_0024A570(s32, s32, s32);
 u32 func_0024BA78(void) {
     s32 context = func_00101A70();
 
-    if (*(s32 *)(context + 0xD0) != 0) {
+    if (((EvtBContext *)context)->transitionPending != 0) {
         func_0024A728(3, context);
         evtRememberDispatchCallback((s32)func_0024ACD8, context);
         func_0024AE18(4, context);
@@ -145,7 +176,7 @@ u32 func_0024BA78(void) {
         func_0024A570(3, 0, context);
         func_0024DBB0();
     }
-    *(s32 *)(context + 0xD0) = 0;
+    ((EvtBContext *)context)->transitionPending = 0;
     return 1;
 }
 
@@ -178,8 +209,8 @@ extern void func_0024B168(void);
 u32 func_0024BCD0(void) {
     s32 context = func_00101A70();
 
-    mnuRefreshThresholdNodeFlags(*(s32 *)(context + 0x74));
-    mnuSelectFirstListNode(*(s32 *)(context + 0x74));
+    mnuRefreshThresholdNodeFlags(((EvtBContext *)context)->thresholdList);
+    mnuSelectFirstListNode(((EvtBContext *)context)->thresholdList);
     func_0024A570(3, 2, context);
     func_0024B090(3, context);
     func_0024AB70(4, context);
@@ -234,7 +265,7 @@ u32 evtSelectFinalVisualNode(void) {
     s32 context;
 
     context = func_00101A70();
-    mnuSelectLastListNode(*(u32 *)(context + 0x70));
+    mnuSelectLastListNode(((EvtBContext *)context)->visualList);
     return 1;
 }
 
@@ -265,11 +296,11 @@ u32 func_0024C2E0(void) {
     func_0024A570(2, -1, context);
     func_0024AB70(2, context);
     evtRememberDispatchCallback(0, context);
-    *(s32 *)(context + 0xCC) = 1;
+    ((EvtBContext *)context)->exitPending = 1;
     *(s32 *)(context + 0x98) = 0;
     func_0024DBB0();
     func_0024DBC8();
-    func_002E96D8(*(u32 *)(context + 0x160));
+    func_002E96D8(((EvtBContext *)context)->resourceHandle);
     return 1;
 }
 
@@ -299,10 +330,10 @@ extern void func_0024DAB8(s32);
 
 u32 evtPrepareSelectedMenuEntry(void) {
     s32 state = func_00101A70();
-    s32 owner = *(s32 *)(state + 0x78);
-    s32 *selectionIndex = (s32 *)(*(s32 *)(owner + 0x1C) + 0x60);
+    s32 owner = ((EvtBContext *)state)->selectionList;
+    s32 *selectionIndex = &((EvtBSelectionList *)owner)->selected->entryIndex;
 
-    if (*(s32 *)(owner + 0x20) == 1) {
+    if (((EvtBSelectionList *)owner)->mode == 1) {
         mnuSelectFirstListNode(owner);
     }
     func_0024DD90(0, &D_00347C68[*selectionIndex]);
@@ -343,7 +374,7 @@ u32 evtBCheckPanelMode(void) {
     s32 context = func_00101A70();
 
     func_0024DDC0(1);
-    switch (*(s32 *)(context + 0x88)) {
+    switch (((EvtBContext *)context)->panelMode) {
     case 1:
         func_0024DA58(1);
         break;
@@ -360,11 +391,11 @@ s64 evtBContinueDispatchOrRestoreTable(u64 input) {
     s32 *dispatchState;
 
     context = func_00101A70();
-    dispatchState = (s32 *)(context + 0x54);
+    dispatchState = &((EvtBContext *)context)->dispatchState;
     dispatchResult = func_00285670(context + 8, dispatchState, 0, input);
     if (dispatchResult == 0) {
         if ((*dispatchState == 0) && (dispatchResult = func_0024DC08(), dispatchResult == 0)) {
-            func_002858E8(dispatchState, *(u32 *)(context + 0x58));
+            func_002858E8(dispatchState, ((EvtBContext *)context)->dispatchTable);
         }
         dispatchResult = 0;
     }
@@ -399,7 +430,7 @@ u32 func_0024CA58(void) {
     s32 context = func_00101A70();
 
     func_0024A728(2, context);
-    if (*(s32 *)(context + 0xD4) >= 2) {
+    if (((EvtBContext *)context)->transitionStage >= 2) {
         func_0024A570(2, -1, context);
         func_0024AE18(2, context);
     } else {
@@ -407,8 +438,8 @@ u32 func_0024CA58(void) {
         func_0024AB70(2, context);
     }
     evtRememberDispatchCallback(0, context);
-    *(s32 *)(context + 0xCC) = 1;
-    func_002E96D8(*(u32 *)(context + 0x160));
+    ((EvtBContext *)context)->exitPending = 1;
+    func_002E96D8(((EvtBContext *)context)->resourceHandle);
     evtClearActiveFlag(0);
     return 1;
 }
@@ -429,8 +460,8 @@ u32 func_0024CB00(void) {
     func_0024A570(1, 0, context);
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
-    *(s32 *)(context + 0x15C) = 0;
-    *(s32 *)(context + 0xCC) = 0;
+    ((EvtBContext *)context)->dispatchMode = 0;
+    ((EvtBContext *)context)->exitPending = 0;
     return 1;
 }
 
@@ -448,7 +479,7 @@ void evtBDispatchSyncD2(s32 item) {
         func_0024A340(0, state);
     }
     func_0024B2E0(state);
-    if (*(s32 *)(state + 0x15C) != 3) {
+    if (((EvtBContext *)state)->dispatchMode != 3) {
         func_0024A930(state);
     }
     func_0024A610(state);

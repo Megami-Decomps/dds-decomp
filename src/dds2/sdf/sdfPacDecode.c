@@ -66,13 +66,13 @@ typedef struct PacState {
     PacWork *queueTail; /* 0x34 */
 } PacState;
 
-PacWork *sdfPacEnqueuePacket(PacState *arg0, PacHead *arg1);
+PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
 
 void *func_00328E18(s32 size);
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
-void func_00328E48(void *arg0);
+void func_00328E48(void *allocation);
 
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
 
@@ -82,43 +82,43 @@ void func_003473B0(PacState *state, PacHead *packet);
 
 void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 
-void func_00347948(PacState *arg0, void *arg1);
+void func_00347948(PacState *state, void *packet);
 
-void sdfPacAdvanceInput(PacState *arg0, s32 arg1);
+void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 
-s32 func_00347988(void *arg0, void *arg1, s32 arg2);
+s32 func_00347988(void *decoder, void *input, s32 available);
 
-void sdfPacStartPacketPayload(PacState *arg0, PacHead *arg1);
+void sdfPacStartPacketPayload(PacState *state, PacHead *packet);
 
-void func_00346C40(PacState *arg0);
+void func_00346C40(PacState *state);
 
-void func_003472C0(PacState *arg0);
+void func_003472C0(PacState *state);
 
-void func_00347350(PacState *arg0);
+void func_00347350(PacState *state);
 
-s32 sdfResourceRetainAddress(s32 arg0);
+s32 sdfResourceRetainAddress(s32 handle);
 
-s32 func_0032C138(s32 arg0);
+s32 func_0032C138(s32 resource);
 
-void sdfReleaseMemorySlot(void *arg0);
+void sdfReleaseMemorySlot(void *slot);
 
-s32 func_0032C150(void *arg0);
+s32 func_0032C150(void *resource);
 
 void *func_00328D68(s32 size);
 
-void func_003475A0(PacState *arg0, PacHead *arg1, PacBuf *arg2);
+void func_003475A0(PacState *state, PacHead *packet, PacBuf *buffer);
 
-void func_003476D0(PacState *arg0);
+void func_003476D0(PacState *state);
 
-void sdfPacAdvanceAllocationEntry(PacState *arg0);
+void sdfPacAdvanceAllocationEntry(PacState *state);
 
-void func_003477A8(PacState *arg0);
+void func_003477A8(PacState *state);
 
-s32 func_003293C8(s32 arg0);
+s32 func_003293C8(s32 size);
 
-s32 func_003292A8(s32 arg0);
+s32 func_003292A8(s32 size);
 
-void sdfStoreWordAndSetState(void *arg0, void *arg1);
+void sdfStoreWordAndSetState(void *decoder, void *destination);
 
 /* Relocation record embedded in the work item's data stream. */
 typedef struct PacReloc {
@@ -128,9 +128,9 @@ typedef struct PacReloc {
     u8 payload[1]; /* 0x10 */
 } PacReloc;
 
-void sdfRelocatePackedResourceWords(void *arg0, void *arg1, void *arg2, s32 arg3);
+void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 
-void func_00332F08(s32 arg0, s32 arg1);
+void func_00332F08(s32 handle, s32 resource);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 

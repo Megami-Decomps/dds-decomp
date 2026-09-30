@@ -102,10 +102,27 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_00289710);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_00289928);
 
+/* Work block at object+0x240; the node IDs fill the eight slots before
+   the selected index and count. */
+typedef struct MantraMenuWork {
+    u8 pad000[0x560];
+    s32 resourceId; /* 0x560 */
+    u8 pad564[8];
+    u32 spriteHandles[6]; /* 0x56C */
+    u8 pad584[0x30];
+    u32 nodeIds[8]; /* 0x5B4 */
+    s32 selectedIndex; /* 0x5D4 */
+    s32 nodeCount; /* 0x5D8 */
+    u8 pad5DC[0x3D0];
+    u32 displaySprite; /* 0x9AC */
+    u8 pad9B0[0x10];
+    u32 drawPool; /* 0x9C0 */
+} MantraMenuWork;
+
 void func_00289B40(s32 object) {
     s32 state = object + 0x240;
-    s16 id = func_00314B78(*(s32 *)(*(s32 *)(*(s32 *)(object + 4) + 0x1c) + 0x70));
-    *(s32 *)(state + 0x560) = func_0026CF70(id);
+    s16 id = func_00314B78(((MenuContainer *)object)->list->selected->value);
+    ((MantraMenuWork *)state)->resourceId = func_0026CF70(id);
     func_0028D070(object, 5, 0);
 }
 
@@ -119,6 +136,7 @@ typedef struct MantraMenuBits {
     u32 flag14 : 1;
     u32 pad15 : 17;
 } MantraMenuBits;
+
 
 extern void func_0028E858(s32 object);
 extern void evtStageTestInit(s32 a);
@@ -134,16 +152,16 @@ void func_00289DC8(s32 object) {
 
     ((MantraMenuBits *)(state + 0x554))->flag14 = 0;
     ((MantraMenuBits *)(state + 0x554))->mode = 1;
-    *(s32 *)(state + 0x560) = func_0026CF70(func_00314B78(*(s32 *)(*(s32 *)(*(s32 *)(object + 4) + 0x1C) + 0x70)));
+    ((MantraMenuWork *)state)->resourceId = func_0026CF70(func_00314B78(((MenuContainer *)object)->list->selected->value));
     func_0028E858(object);
     list = ((MenuContainer *)object)->list;
     node = list->head;
     count = 0;
     for (; node != 0; node = node->next) {
-        ((u32 *)(object + 0x7F4))[count++] = node->value;
+        ((MantraMenuWork *)state)->nodeIds[count++] = node->value;
     }
-    *(s32 *)(state + 0x5D8) = count;
-    *(s32 *)(state + 0x5D4) = **(s32 **)((s32)list + 0x1C);
+    ((MantraMenuWork *)state)->nodeCount = count;
+    ((MantraMenuWork *)state)->selectedIndex = *((MenuListCursor *)list)->index;
     func_0028D070(object, 5, 0);
     evtStageTestInit(0);
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -163,11 +181,11 @@ void func_00289ED0(s32 object) {
     u32 *handle;
     s32 i;
 
-    if (*(u32 *)(object + 0xC00) != 0) {
-        mnuDestroyMantraDrawPool(*(u32 *)(object + 0xC00));
+    if (((MantraMenuWork *)(object + 0x240))->drawPool != 0) {
+        mnuDestroyMantraDrawPool(((MantraMenuWork *)(object + 0x240))->drawPool);
     }
     state = object + 0x240;
-    handle = (u32 *)(object + 0x7AC);
+    handle = ((MantraMenuWork *)state)->spriteHandles;
     for (i = 5; i >= 0; i--) {
         if (*handle != 0) {
             func_0026D148((u32 *)*handle);
@@ -175,8 +193,8 @@ void func_00289ED0(s32 object) {
         *handle = 0;
         handle++;
     }
-    if (*(u32 *)(state + 0x9AC) != 0) {
-        func_00279C38((u32 *)*(u32 *)(state + 0x9AC));
+    if (((MantraMenuWork *)state)->displaySprite != 0) {
+        func_00279C38((u32 *)((MantraMenuWork *)state)->displaySprite);
     }
 }
 
@@ -275,21 +293,22 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028C8F8);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028CBF8);
 
-void func_0028CCA8(s32 arg0) {
-    *(u16 *)(arg0 + 0x822) = 0;
-    *(u8 *)(arg0 + 0x821) = 1;
-}
-
-void func_0028CCB8(s32 arg0) {
-    *(u16 *)(arg0 + 0x822) = 0;
-    *(u8 *)(arg0 + 0x821) = 2;
-}
-
 typedef struct MantraMenuTimer {
     u8 pad00[0x5E1];
     s8 mode;
     u16 timer;
 } MantraMenuTimer;
+
+void func_0028CCA8(s32 object) {
+    ((MantraMenuTimer *)(object + 0x240))->timer = 0;
+    ((MantraMenuTimer *)(object + 0x240))->mode = 1;
+}
+
+void func_0028CCB8(s32 object) {
+    ((MantraMenuTimer *)(object + 0x240))->timer = 0;
+    ((MantraMenuTimer *)(object + 0x240))->mode = 2;
+}
+
 
 /* Advances the 6-frame countdown of mode 1 (-> 3) or mode 2 (-> 0). */
 void func_0028CCC8(s32 object) {
