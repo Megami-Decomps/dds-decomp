@@ -60,6 +60,7 @@ extern u8 *D_003BAA50;
 extern s8 *D_003BAA4C;
 
 extern s32 mdlFlagTest(s32);
+extern u8 *func_001D9BA0(u8 *, f32);
 
 extern void btlSetUnitPosition(BtlUnit *, void *);
 extern void btlSetUnitRotation(BtlUnit *, void *);
@@ -1493,7 +1494,54 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00203A80);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203BA8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00203CA8);
+s32 func_00203CA8(s32 actor) {
+    void *list = btlAllocateIndexList(13);
+    u32 mode;
+    u32 count;
+    u16 picked[12];
+    u32 i;
+    s32 found;
+
+    switch (((BtlTask *)actor)->unit->mode) {
+    case 3:
+    case 5:
+    case 6:
+        mode = (((BtlTask *)actor)->unit->flags & 0x1000) ? 0 : 2;
+        break;
+    default:
+        mode = 0;
+        break;
+    }
+    func_001A30F8(actor, list, 1, 2, 0);
+    count = btlGetIndexListCount(list);
+    if (count == 0) {
+        mode = 0;
+    }
+    switch (mode) {
+    case 0:
+        found = 0;
+        memset(picked, 0, sizeof(picked));
+        for (i = 0; i < count; i++) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->identity != ((BtlTask *)actor)->unit->identity) {
+                picked[found] = 1;
+                found++;
+            }
+        }
+        if (found == 0) {
+            btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, (s32)((BtlTask *)actor)->unit);
+            btlFreeIndexList(list);
+            return 1;
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8((s32)list, picked, count));
+        btlFreeIndexList(list);
+        return 1;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, (s32)list);
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203E38);
 
@@ -3523,7 +3571,52 @@ s32 btlMapCommandToSkill(u32 command) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020A780);
+s32 func_0020A780(BtlUnit *unit, s32 arg1) {
+    u8 *task;
+
+    if (!(unit->flags & 0x400)) {
+        return arg1;
+    }
+    switch (unit->mode) {
+    case 0x11B:
+        if (arg1 == 2) {
+            return 0;
+        }
+        if (arg1 == 0xD) {
+            return -1;
+        }
+        break;
+    case 0x13D:
+    case 0x13E:
+    case 0x13F:
+    case 0x140:
+    case 0x141:
+    case 0x142:
+        switch (arg1) {
+        case 2:
+            return 0;
+        case 3:
+            return 4;
+        case 5:
+            return 4;
+        case 6:
+            return 4;
+        case 7:
+            return 4;
+        case 8:
+            return 4;
+        case 1:
+            task = func_001D9BA0((u8 *)unit, 8.0f);
+            *(s32 *)(task + 0x28) = 1;
+            btlStartTask(task);
+            return -1;
+        case 4:
+            break;
+        }
+        break;
+    }
+    return arg1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020A860);
 
@@ -3674,18 +3767,6 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6358);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020BE30);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020C9E8);
-
-u32 func_0020CB28(s32 action) {
-    u32 result;
-
-    result = 2;
-    if (action != 0x1d7) {
-        result = 0;
-    }
-    return result;
-}
-
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
 extern void func_0020AFB8();
@@ -3702,6 +3783,18 @@ typedef struct BtlActionTableRow {
     u16 flags;  /* 0x1C: special animation selection bits */
     u8 pad1E[2];
 } BtlActionTableRow;
+
+INCLUDE_ASM(const s32, "game/code_001FF030", func_0020C9E8);
+
+u32 func_0020CB28(s32 action) {
+    u32 result;
+
+    result = 2;
+    if (action != 0x1d7) {
+        result = 0;
+    }
+    return result;
+}
 
 extern void btlClearRuntimeFlag2000(void);
 
