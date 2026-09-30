@@ -51,7 +51,19 @@ void func_00199950(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfPanel", func_00199998);
+void func_00199998(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
+    void (*handler)(void *, s32, s32, s32, s32) =
+        (void (*)(void *, s32, s32, s32, s32))D_00357A00[panel->kind];
+
+    panel->a10 += a10;
+    panel->a14 += a14;
+    panel->a18 += a18;
+    panel->a1C += a1C;
+    panel->a0C += a0C;
+    if (handler != 0) {
+        handler(panel->context, panel->a10, panel->a14, panel->a18, panel->a1C);
+    }
+}
 
 void func_00199A20(PanelDefinition2 *panel, s32 a2C, s32 a30, s32 a34, s32 a38) {
     panel->a2C = a2C;
