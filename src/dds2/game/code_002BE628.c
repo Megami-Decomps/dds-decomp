@@ -196,8 +196,17 @@ void func_002BEE38(u32 *entry) {
     *entry = 0;
 }
 
+typedef struct MenuQueuedCommand {
+    u32 word00;
+    s32 kind;         /* 0x04 */
+    s32 option;       /* 0x08: chosen from the roster flag */
+    u8 pad0C[8];
+    s32 initialValue; /* 0x14 */
+    s32 argument;     /* 0x18 */
+} MenuQueuedCommand;
+
 /* Retail returns int here without a return statement: the last call is a plain jal, not a sibcall. */
-s32 func_002BEE50(u8 *menu, s32 window, u32 kind, s32 arg) {
+s32 func_002BEE50(u8 *menu, s32 window, u32 kind, s32 argument) {
     u8 *base = menu + window * 0x2138;
     u8 *block = base + 0x78;
     s32 *count = (s32 *)(base + 0x17C);
@@ -215,13 +224,13 @@ s32 func_002BEE50(u8 *menu, s32 window, u32 kind, s32 arg) {
     }
     flags = *(u16 *)(D_00435DD0 + window * 0x1C4 + 0xA60);
     entry = block + bestIndex * 0x1024 + 0xF0;
-    *(s32 *)(entry + 0x14) = 0x200;
-    *(s32 *)(entry + 0x18) = arg;
-    *(s32 *)(entry + 4) = kind;
+    ((MenuQueuedCommand *)entry)->initialValue = 0x200;
+    ((MenuQueuedCommand *)entry)->argument = argument;
+    ((MenuQueuedCommand *)entry)->kind = kind;
     if ((flags & 2) != 0) {
-        *(s32 *)(entry + 8) = 0;
+        ((MenuQueuedCommand *)entry)->option = 0;
     } else {
-        *(s32 *)(entry + 8) = 1;
+        ((MenuQueuedCommand *)entry)->option = 1;
     }
     switch (kind) {
     case 0:
@@ -290,7 +299,7 @@ typedef struct MenuListPanel {
 
 typedef struct MenuListState {
     u32 flags;
-    u8 pad04[4];
+    s32 transitionValue; /* 0x04: advances toward 0x100 */
     s32 *entryCount; /* 0x08 */
     u8 pad0C[0xA68C];
     s32 selectedPanel; /* 0xA698 */
@@ -364,9 +373,9 @@ void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
 }
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
-void mnuAdvancePanelTransition(s32 panel) {
-    if (*(s32 *)(panel + 4) < 0x100) {
-        *(s32 *)(panel + 4) = *(s32 *)(panel + 4) + 8;
+void mnuAdvancePanelTransition(MenuListState *menu) {
+    if (menu->transitionValue < 0x100) {
+        menu->transitionValue = menu->transitionValue + 8;
     }
 }
 
@@ -887,9 +896,9 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3010);
 
-void func_002C32A0(s32 item, s32 value, s32 option) {
-    *(s32 *)(item + 0x10) = value;
-    *(s32 *)(item + 0x14) = option;
+void func_002C32A0(MenuPanelItem *item, s32 value, s32 option) {
+    item->value10 = value;
+    item->value14 = option;
 }
 
 u32 *func_002C32B0(s32 source) {
@@ -1458,7 +1467,7 @@ u16 func_002C5580(s32 entry) {
 }
 
 u32 func_002C5588(u32 entry, u32 id) {
-    *(s16 *)((s32)entry + 0x1b2) = (s16)id;
+    ((MenuPanelEntry *)entry)->currentId = (s16)id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
     return 1;
@@ -1913,12 +1922,18 @@ typedef struct MenuBlock40 {
     u32 word[10];
 } MenuBlock40;
 
-s32 mnuCommitPendingBlock(u8 *object) {
-    if (!(*(u32 *)object & 1)) {
+typedef struct MenuBlockState {
+    u32 flags;             /* 0x00: bit 0 indicates a pending block */
+    u32 current[10];       /* 0x04 */
+    u32 pending[10];       /* 0x2C */
+} MenuBlockState;
+
+s32 mnuCommitPendingBlock(MenuBlockState *object) {
+    if (!(object->flags & 1)) {
         return 0;
     }
-    *(MenuBlock40 *)(object + 4) = *(MenuBlock40 *)(object + 0x2C);
-    *(u32 *)object &= ~1;
+    *(MenuBlock40 *)object->current = *(MenuBlock40 *)object->pending;
+    object->flags &= ~1;
     return 1;
 }
 
@@ -1926,7 +1941,7 @@ void func_002C6BB8(void) {
     D_00457EB0.flags &= ~1;
 }
 
-s32 func_002C6BD8(s32 encodedIndex, s32 arg1, s32 arg2) {
+s32 func_002C6BD8(s32 encodedIndex, s32 initialValue, s32 option) {
     s32 index = encodedIndex & 0xFFFF;
     s32 bank;
     StageTestSlot *slot;
@@ -1947,8 +1962,8 @@ s32 func_002C6BD8(s32 encodedIndex, s32 arg1, s32 arg2) {
     slot = &D_00457EB0.slot[bank];
     slot->entryIndex = index;
     slot->modelId = D_00457EB0.entries[index].modelId;
-    slot->unk0C = arg2;
-    slot->unk10 = arg1;
+    slot->unk0C = option;
+    slot->unk10 = initialValue;
     slot->state = 0;
     return 1;
 }
@@ -1982,13 +1997,25 @@ f32 mnuSetModelScaleVector(s32 model, s32 useTable) {
     return scale;
 }
 
+typedef struct MenuWorkCamera {
+    s32 x;
+    s32 y;
+    f32 depth; /* third component uses float in D_003E7950 */
+} MenuWorkCamera;
+
+typedef struct MenuWorkPosition {
+    s32 x;
+    s32 y;
+    s32 z;
+} MenuWorkPosition;
+
 void mnuResetWorkPair(void) {
-    *(s32 *)(D_003E7950 + 0) = 0;
-    *(s32 *)(D_003E7950 + 4) = 0;
-    *(f32 *)(D_003E7950 + 8) = -400.0f;
-    *(s32 *)(D_003E7940 + 0) = 0;
-    *(s32 *)(D_003E7940 + 4) = 0;
-    *(s32 *)(D_003E7940 + 8) = 0;
+    ((MenuWorkCamera *)D_003E7950)->x = 0;
+    ((MenuWorkCamera *)D_003E7950)->y = 0;
+    ((MenuWorkCamera *)D_003E7950)->depth = -400.0f;
+    ((MenuWorkPosition *)D_003E7940)->x = 0;
+    ((MenuWorkPosition *)D_003E7940)->y = 0;
+    ((MenuWorkPosition *)D_003E7940)->z = 0;
 }
 
 extern void mdlStorePrimaryVectorVU(s32);
@@ -2013,7 +2040,7 @@ void mnuApplyModelCamera(s32 model) {
         vec[0] -= entry->position[0] - entry->position[0] * scale;
         vec[1] -= entry->position[1] - entry->position[1] * scale;
         vec[2] = 0.0f;
-        *(f32 *)(D_003E7950 + 8) = (-400.0f - entry->position[2]) * scale;
+        ((MenuWorkCamera *)D_003E7950)->depth = (-400.0f - entry->position[2]) * scale;
     }
     VU_LOAD10(vec);
     mdlStorePrimaryVectorVU(model);

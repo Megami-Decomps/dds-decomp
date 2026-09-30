@@ -96,7 +96,7 @@ typedef struct EventModeSlot {
 
 extern void func_0011A118(s32 arg0, s32 arg1);
 
-extern void func_0011CA88(Entry1A4 *arg0);
+extern void func_0011CA88(Entry1A4 *entry);
 
 extern s32 D_0043E5C8[];
 
@@ -122,9 +122,9 @@ extern s32 D_0043E5C0[];
 
 extern s32 D_0043E5D0[];
 
-extern void func_0010D830(f32 arg0);
+extern void func_0010D830(f32 value);
 
-extern s32 effMiscRandMod(u32 arg0, u32 arg1);
+extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
 extern s32 datMoveCursorX(void *, s32);
 
@@ -138,7 +138,7 @@ extern u32 func_001ADA10(void);
 
 extern s32 D_00435E8C;
 
-extern s32 mdlFlagTest(s32 arg0);
+extern s32 mdlFlagTest(s32 flagIndex);
 
 extern s32 D_00435E3C;
 
@@ -208,8 +208,8 @@ s32 dds3FindEntryIndex(rosterIndex)
     return -1;
 }
 
-s8 func_0011A318(s32 arg0) {
-    return *(s8 *)(arg0 + D_00435DD0 + 0xa76);
+s8 func_0011A318(s32 index) {
+    return *(s8 *)(index + D_00435DD0 + 0xa76);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
@@ -250,8 +250,8 @@ s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     return 0;
 }
 
-void func_0011A7F8(s32 arg0, s32 arg1) {
-    *(s32 *)(arg0 + 0x10) = *(s32 *)(arg0 + 0x10) + arg1;
+void func_0011A7F8(s32 counterAddress, s32 increment) {
+    *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A808);
@@ -292,8 +292,8 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AA58);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AB38);
 
-u16 func_0011AE60(s32 arg0) {
-    return ((EventIndexRecord *)D_00435E38)[arg0].index;
+u16 func_0011AE60(s32 tableIndex) {
+    return ((EventIndexRecord *)D_00435E38)[tableIndex].index;
 }
 
 u16 dds3Clamp99(s32 unit) {
@@ -396,8 +396,8 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C6A8);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C868);
 
-void evtCopyRosterTableValue(s32 arg0) {
-    ((Entry1A4 *)arg0)->tableValue = D_00386248[((Entry1A4 *)arg0)->rosterIndex].unk0;
+void evtCopyRosterTableValue(s32 entryAddress) {
+    ((Entry1A4 *)entryAddress)->tableValue = D_00386248[((Entry1A4 *)entryAddress)->rosterIndex].unk0;
 }
 
 void evtUpdateFlaggedEntries(void) {
@@ -458,7 +458,7 @@ void func_0011D050(void) {
     do {
         s32 entry = D_00435DD0 + offset + 0xA60;
         offset += 0x1C4;
-        if ((*(u16 *)entry & 1) != 0) {
+        if ((((Entry1A4 *)entry)->flags & 1) != 0) {
             func_00314CE8(entry, 0x5B);
             func_00314CE8(entry, 0x5C);
             func_00314CE8(entry, 0x5D);
@@ -558,8 +558,8 @@ s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
     D_0043E5C0[1] = third;
     D_0043E5C0[2] = first;
     D_0043E5C0[3] = second;
-    *(u16 *)((u8 *)D_0043E5C0 + 0x14) = flags;
-    *(u16 *)D_0043E5C0 &= 0xFFFE;
+    ((EventScriptEntry *)D_0043E5C0)->index14 = flags;
+    ((EventScriptEntry *)D_0043E5C0)->flags &= 0xFFFE;
     bfStepContext(D_00435E88);
     return D_0043E5C0[4];
 }
@@ -663,7 +663,7 @@ s32 func_0011DAE0(void) {
 s32 evtSelectScriptStatValue(void) {
     s32 *work = D_0043E5C0;
     s32 value;
-    u16 mode = *(u16 *)((u8 *)work + 0x14);
+    u16 mode = ((EventScriptEntry *)work)->index14;
     switch (mode) {
     case 1:
         value = ((EventStatRecord *)D_00435E20)[work[1]].stat18;
@@ -682,7 +682,7 @@ s32 evtSelectScriptStatValue(void) {
 s32 func_0011DBA0(void) {
     s32 *work = D_0043E5C0;
     s32 value;
-    u16 mode = *(u16 *)((u8 *)work + 0x14);
+    u16 mode = ((EventScriptEntry *)work)->index14;
     u16 index = ((EventIndexRecord *)D_00435E38)[((Entry1A4 *)work[2])->tableValue].index;
     switch (mode) {
     case 1:
@@ -718,9 +718,9 @@ s32 func_0011DCC0(void) {
 }
 
 s32 func_0011DD00(void) {
-    u16 bits = *(u16 *)D_0043E5C0 | 1;
+    u16 bits = ((EventScriptEntry *)D_0043E5C0)->flags | 1;
 
-    *(u16 *)D_0043E5C0 = bits;
+    ((EventScriptEntry *)D_0043E5C0)->flags = bits;
     D_0043E5C0[4] = scrReadIntParameter(0);
     return 1;
 }
@@ -731,7 +731,7 @@ s32 func_0011DD40(void) {
 }
 
 s32 func_0011DD68(void) {
-    func_0010D818((((*(u16 *)D_0043E5C8[0]) >> 5) ^ 1) & 1);
+    func_0010D818((((((EventScriptEntry *)D_0043E5C8[0])->flags) >> 5) ^ 1) & 1);
     return 1;
 }
 
@@ -872,7 +872,7 @@ s32 func_0011E1D0(void) {
 
 s32 func_0011E208(void) {
     s32 value;
-    if ((*(u16 *)D_0043E5CC[0] & 0x20) == 0) {
+    if ((((EventScriptEntry *)D_0043E5CC[0])->flags & 0x20) == 0) {
         value = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
     } else {
         value = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
@@ -894,7 +894,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E3A0);
 s32 func_0011E430(void) {
     s32 entry = D_0043E5C8[0];
     s32 result;
-    if (!(*(u16 *)entry & 0x20)) {
+    if (!(((EventScriptEntry *)entry)->flags & 0x20)) {
         result = *(s32 *)(D_00435DD0 + 0x3C);
     } else {
         s32 index = ((EventScriptEntry *)entry)->rosterIndex;
