@@ -1,5 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 /* DMAC tag IDs occupy the high nibble of the header byte at offset three. */
 #define SDF_DMA_TAG_NEXT_BYTE 0x20
@@ -60,12 +62,23 @@ typedef struct SdfSynchronizedRequest {
 extern void sdfReleaseQueuedResource(s32, s32);
 
 
+/* Dev slot: buffered request, unit matrix at +0x20, two vectors at +0x60/+0x70. */
 typedef struct SdfDevSlot {
     u32 request;
     u8 pad04[8];
     s32 resource;
     void *device;
+    u8 pad14[6];
+    s16 unk1A;
+    u32 unk1C;
+    u8 pad20[0x40];
+    u128 unk60;
+    u128 unk70;
 } SdfDevSlot;
+
+extern void *func_002CFF68(s32);
+
+extern void *sdfDevCreateBufferedRequest(s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
 
@@ -1373,7 +1386,20 @@ void sdfReleaseFreeRoot(SdfFreeRoot *root) {
     func_002CFF98(root);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D79C0);
+/* Allocate a dev slot and seed its unit matrix, unit scale and colour. */
+SdfDevSlot *func_002D79C0(void) {
+    SdfDevSlot *slot;
+
+    slot = func_002CFF68(0x9C);
+    slot->request = sdfDevCreateBufferedRequest(0, 4, 0x20);
+    EE_MMI_UNIT_MATRIX((u8 *)&slot->pad20[0]);
+    VU0_STORE_VF(vf0, (u8 *)&slot->unk60);
+    VU0_SET_ONES_XYZ(vf10);
+    VU0_STORE_VF(vf10, (u8 *)&slot->unk70);
+    slot->unk1A = -1;
+    slot->unk1C = 0x80808080;
+    return slot;
+}
 
 typedef struct SdfObjectList {
     u8 pad00[4];

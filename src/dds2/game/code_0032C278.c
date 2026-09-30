@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 D_00438A00;
@@ -1413,7 +1415,34 @@ void sdfReleaseFreeRoot(SdfFreeRoot *root) {
     func_00328E48(root);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_00330870);
+/* Dev slot: buffered request, unit matrix at +0x20, two vectors at +0x60/+0x70. */
+typedef struct SdfDevSlot {
+    u32 request;
+    u8 pad04[8];
+    s32 resource;
+    void *device;
+    u8 pad14[6];
+    s16 unk1A;
+    u32 unk1C;
+    u8 pad20[0x40];
+    u128 unk60;
+    u128 unk70;
+} SdfDevSlot;
+
+/* Allocate a dev slot and seed its unit matrix, unit scale and colour. */
+SdfDevSlot *func_00330870(void) {
+    SdfDevSlot *slot;
+
+    slot = func_00328E18(0x9C);
+    slot->request = sdfDevCreateBufferedRequest(0, 4, 0x20);
+    EE_MMI_UNIT_MATRIX((u8 *)&slot->pad20[0]);
+    VU0_STORE_VF(vf0, (u8 *)&slot->unk60);
+    VU0_SET_ONES_XYZ(vf10);
+    VU0_STORE_VF(vf10, (u8 *)&slot->unk70);
+    slot->unk1A = -1;
+    slot->unk1C = 0x80808080;
+    return slot;
+}
 
 void sdfDestroyObjectList(SdfObjectList **owner) {
     s32 i;
@@ -1426,13 +1455,6 @@ void sdfDestroyObjectList(SdfObjectList **owner) {
 
 extern void sdfReleaseQueuedResource(s32, s32);
 extern void func_00328E48();
-
-typedef struct SdfDevSlot {
-    u32 request;
-    u8 pad04[8];
-    s32 resource;
-    void *device;
-} SdfDevSlot;
 
 void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
     if (slot == NULL) {

@@ -1,14 +1,16 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Polygon-track data: its ring position wraps against the entry count. */
 typedef struct {
     u8  pad_0x00[0x04]; /* 0x00 */
     u32 color;          /* 0x04 */
     s32 count;          /* 0x08 */
-    u32 unk0C;          /* 0x0C */
+    s32 unk0C;          /* 0x0C */
     s32 position;       /* 0x10 */
     s32 step;           /* 0x14 */
-    u8  pad_0x18[0x08]; /* 0x18 */
+    u128 *points;      /* 0x18 */
+    u8  pad_0x1C[0x04]; /* 0x1C */
     void *nodeHandle;   /* 0x20 */
     void *resourceHandle; /* 0x24 */
 } EffTrackPolyData; /* 0x28 */
@@ -34,7 +36,7 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188278);
 
-void func_001882D8(EffTrackPolyWork *work) {
+void func_001882D8(EffTrackPolyWork *work, void *data) {
     func_00188A78(work->data);
 }
 
@@ -50,9 +52,20 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188318);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001883E0);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188480);
+void func_00188480(EffTrackPolyWork ***list) {
+    u32 count = list[1];
+    u32 i = 0;
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001884E8);
+    while (i < count) {
+        effTrackPolyRelease(list[0][i]);
+        i++;
+    }
+    func_002D0918(list[2]);
+}
+
+void func_001884E8(EffTrackPolyWork ***tables, s32 index, void *data) {
+    func_001882D8((*tables)[index], data);
+}
 
 void func_00188510(EffTrackPolyWork ***tables, s32 index) {
     effTrackPolyReset((*tables)[index]);
@@ -62,7 +75,15 @@ void func_00188538(EffTrackPolyWork ***tables, s32 index, u32 value) {
     effTrackPolySetColor((*tables)[index], value);
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188560);
+void func_00188560(EffTrackPolyWork ***list) {
+    u32 count = list[1];
+    u32 i = 0;
+
+    while (i < count) {
+        func_00188300(list[0][i]);
+        i++;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001885C0);
 
@@ -85,7 +106,19 @@ void func_00188870(u32 *dst, u32 value) {
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188878);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188958);
+/* Copy the pair of track points at the wrapped position into the two outputs. */
+void func_00188958(EffTrackPolyData *data, u128 *dst0, u128 *dst1, s32 amount) {
+    s32 pos = data->position - (data->step * (amount - 1) + amount) * 2;
+    u128 *p;
+
+    if (pos < 2) {
+        pos = (pos + data->count) - 2;
+    }
+    p = &data->points[pos];
+    PCP_COPY_VECTOR(dst0, p);
+    p++;
+    PCP_COPY_VECTOR(dst1, p);
+}
 
 /* Advance around the track's ring, wrapping below the reserved first pair. */
 void effTrackPolyAdvancePosition(EffTrackPolyData *data, s32 amount) {
@@ -97,7 +130,26 @@ void effTrackPolyAdvancePosition(EffTrackPolyData *data, s32 amount) {
     data->position = pos;
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188A00);
+/* Append a point pair at the ring position, wrapping back to the reserved pair. */
+void func_00188A00(EffTrackPolyData *data, u128 *src) {
+    s32 position = data->position;
+    u128 *points = data->points;
+    s32 count;
+
+    PCP_COPY_VECTOR(&points[position], src);
+    PCP_COPY_VECTOR(&points[position + 1], src + 1);
+    position += 2;
+    count = data->count;
+    data->position = position;
+    if (position == count) {
+        PCP_COPY_VECTOR(&points[0], src);
+        PCP_COPY_VECTOR(&points[1], src + 1);
+        data->position = 2;
+    }
+    if (data->unk0C < count - 2) {
+        data->unk0C += 2;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188A78);
 
