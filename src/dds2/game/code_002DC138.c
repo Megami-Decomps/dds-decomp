@@ -168,7 +168,8 @@ extern EffOp24 D_003E9D08[];
 extern s32 D_004386B8;
 
 typedef struct EffRecordBucket {
-    u8 pad_00[8];
+    u8 pad_00[4];
+    s32 (*step)(u8 *, u8 *, void *);   // 0x04
     u32 count;
     u8 *records;
 } EffRecordBucket;
@@ -194,8 +195,9 @@ extern void func_002E76C8(u8 *, void *);
 extern void func_002F1888(u8 *, void *);
 
 extern void func_003343E8(s32, f32);
-extern u32 D_00437E98[2];
-extern u32 D_00437EA0[2];
+extern void func_00103F58(s32, u8, s32);
+extern s32 D_00437E98[2];
+extern s32 D_00437EA0[2];
 extern u8 D_00437EA8[2];
 extern u8 D_00437EB0[2];
 typedef struct EffectMapping {
@@ -2043,6 +2045,8 @@ typedef struct EffFrameAsset {
     u8 pad_0C[0x10];
     void *frameStorage;
     f32 *transformRows;
+    u32 pad_24;
+    u32 *colorRows;
 } EffFrameAsset;
 
 void effClearBillFrames(u8 *owner) {
@@ -2090,7 +2094,10 @@ typedef struct EffBillConfig {
     } frames;
     u8 pad_3C[0x1A];
     u8 mode;            // 0x56
-    u8 pad_57[0x35];
+    u8 pad_57[0x21];
+    f32 fadeInEnd;      // 0x78, ramp-up length as a fraction of `resourceId`
+    f32 fadeOutStart;   // 0x7C, start of the ramp-down
+    u8 pad_80[0xC];
     u32 resourceId;     // 0x8C
     u8 pad_90[0x29];
     u8 alternateMode;   // 0xB9, animation variants use this instead of mode
@@ -5239,7 +5246,68 @@ void func_002F15F0(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F15F8);
+typedef struct EffMotionSetup {
+    u16 mode;       // 0x00
+    u16 kind;       // 0x02
+    u16 flags;      // 0x04
+    u8 pad_06[6];
+    void *table;    // 0x0C
+    u8 pad_10[0x1C];
+} EffMotionSetup;   // 0x2C
+
+extern EffMotionSetup D_004584C0;
+
+typedef struct EffRibbonWork {
+    u32 count;          // 0x00
+    u32 field_04;       // 0x04
+    u32 color;          // 0x08
+    s32 rowStride;      // 0x0C
+    s32 repeat;         // 0x10
+    u8 field_14;        // 0x14
+    u8 pad_15[3];
+    u32 resource;       // 0x18
+    u32 *colors;        // 0x1C
+    u8 *positions;      // 0x20
+    u8 *uvs;            // 0x24
+    u8 *extra;          // 0x28
+    s32 *handle;        // 0x2C
+    u8 *allocation;     // 0x30
+} EffRibbonWork;
+
+extern EffMotionSetup D_004583D0;
+
+u8 *func_002F15F8(u32 count, u32 repeat) {
+    u32 rowStride = repeat * 4 + 4;
+    u32 size = (rowStride * 0x1C + 4) * count;
+    u32 cells = rowStride * count;
+    u8 *allocation = func_003292A8(size + 0x34);
+    u8 *p = (u8 *)sdfResourceRetainAddress((u32)allocation);
+    EffRibbonWork *work = (EffRibbonWork *)(p + size);
+    u32 i;
+
+    work->positions = p;
+    p += cells * 16;
+    work->uvs = p;
+    p += cells * 8;
+    work->extra = p;
+    p += cells * 4;
+    work->field_04 = 2;
+    work->color = 0x80808080;
+    work->rowStride = rowStride;
+    work->repeat = repeat;
+    work->allocation = allocation;
+    work->colors = (u32 *)p;
+    work->count = count;
+    work->field_14 = 0;
+    for (i = 0; i < count; i++) {
+        ((u32 *)p)[i] = 0x80808080;
+    }
+    work->handle = func_003335E0();
+    func_003332D0(work->handle, 1.0f);
+    memset(&D_004583D0, 0, sizeof(EffMotionSetup));
+    D_004583D0.flags = 0x4000;
+    return (u8 *)work;
+}
 
 u32 func_002F1740(u32 count, u32 repeat, u32 resource) {
     u8 *node = func_002F15F8(count, repeat);
@@ -5324,7 +5392,45 @@ u8 *effAllocateAnimationBuffer(u8 *config) {
     return (u8 *)node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F1D90);
+void func_002F1D90(u8 *work, u8 *config) {
+    EffBillConfig *cfg = (EffBillConfig *)config;
+    u32 rows = cfg->frames.count;
+    u32 i;
+
+    if (rows != 0) {
+        s32 width = cfg->resourceId;
+        f32 fw = width;
+        s32 fadeInEnd = cfg->fadeInEnd * fw;
+        s32 fadeOutStart = cfg->fadeOutStart * fw;
+        u32 cols = width + 1;
+        u32 stride = cols * 4;
+        u32 *color = ((EffFrameAsset *)*(u8 **)(work + 4))->colorRows;
+        u32 *first = color;
+
+        for (i = 0; i < cols; i++) {
+            f32 t;
+            u32 alpha;
+
+            if (i < fadeInEnd) {
+                t = (f32)i / (f32)fadeInEnd;
+            } else if (fadeOutStart < i) {
+                t = (f32)(width - i) / (f32)(width - fadeOutStart);
+            } else {
+                t = 1.0f;
+            }
+            alpha = (u32)(t * 128.0f) << 24;
+            color[0] = 0x808080;
+            color[1] = alpha | 0x808080;
+            color[2] = alpha | 0x808080;
+            color[3] = 0x808080;
+            color += 4;
+        }
+        for (i = 1; i < rows; i++) {
+            memcpy(color, first, stride * 4);
+            color += stride;
+        }
+    }
+}
 
 u32 *effPrepareTextureAnimation(u8 *src) {
     u32 *buf = (u32 *)effAllocateAnimationBuffer(src);
@@ -6252,7 +6358,26 @@ void func_002F72D8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7320);
+void func_002F7320(u8 *work) {
+    f32 from[3];
+    f32 to[3];
+    u32 *colors;
+    u32 c;
+
+    func_001AA6F8();
+    colors = *(u32 **)(work + 0x38);
+    if (*(s32 *)(work + 0x28) == 0) {
+        c = colors[0];
+        from[0] = (c & 0xFF) / 255.0f;
+        from[1] = ((c >> 8) & 0xFF) / 255.0f;
+        from[2] = ((c >> 16) & 0xFF) / 255.0f;
+        c = colors[1];
+        to[0] = (c & 0xFF) / 255.0f;
+        to[1] = ((c >> 8) & 0xFF) / 255.0f;
+        to[2] = ((c >> 16) & 0xFF) / 255.0f;
+        func_00200930(from, to, colors[2]);
+    }
+}
 
 void effResetSlots(void) {
     D_00437E98[0] = 0;
@@ -6266,7 +6391,28 @@ void effResetSlots(void) {
     func_00104020();
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F7580);
+void func_002F7580(void) {
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (D_00437EA8[i] != 0) {
+            if (D_00437EA0[i] > 0 && D_00437E98[i] > 0) {
+                f32 ratio = (f32)D_00437EA0[i] / (f32)D_00437E98[i];
+
+                if (D_00437EB0[i] != 0) {
+                    ratio = 1.0f - ratio;
+                }
+                func_00103F58(i, (u8)(D_00437EA8[i] * ratio), 100);
+                D_00437EA0[i] -= 1;
+            } else if (D_00437EB0[i] == 1) {
+                func_00103F58(i, D_00437EA8[i], 100);
+            } else {
+                func_00103F58(i, 0, 0);
+                D_00437E98[i] = 0;
+            }
+        }
+    }
+}
 
 void effSetDormantSlot(u32 slot, u8 value, u32 data) {
     if (slot < 2) {
@@ -6669,16 +6815,6 @@ void effSyncFadeColorToTargets(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F8CF0);
 
-typedef struct EffMotionSetup {
-    u16 mode;       // 0x00
-    u16 kind;       // 0x02
-    u16 flags;      // 0x04
-    u8 pad_06[6];
-    void *table;    // 0x0C
-    u8 pad_10[0x1C];
-} EffMotionSetup;   // 0x2C
-
-extern EffMotionSetup D_004584C0;
 extern u8 D_003E9FF0[];
 extern void func_003332D0(void *, f32);
 
@@ -9780,7 +9916,40 @@ void func_00304D80(u32 owner, u32 index) {
     func_00304D60(owner, index, entry);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_00304DE8);
+typedef struct EffResourceSet {
+    u8 pad_00[0x1C];
+    u32 count;          // 0x1C
+    u8 pad_20[4];
+    void **slots;       // 0x24
+} EffResourceSet;
+
+u8 *func_00304DE8(EffResourceSet *owner, u8 *data, s32 release, s32 only) {
+    u32 i = 0;
+    u8 *entry = data;
+
+    entry += *(u32 *)(entry + 0xC);
+
+    if (owner->count != 0) {
+        do {
+            s32 *resource = (s32 *)(data + *(u32 *)(entry + 4));
+
+            entry += 8;
+            if (release == 0) {
+                if (only == -1 || only == i) {
+                    if (owner->slots[i] == 0) {
+                        owner->slots[i] = (void *)func_0032C138(resource);
+                    }
+                } else {
+                    owner->slots[i] = 0;
+                }
+            } else {
+                owner->slots[i] = 0;
+            }
+            i++;
+        } while (i < owner->count);
+    }
+    return entry;
+}
 
 void effResolveAndReleaseResource(u32 *owner) {
     if (owner[0] != 0) {
@@ -9950,7 +10119,66 @@ s32 func_00305650(u32 effect, u32 slot, u32 *state) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_003056B0);
+typedef struct EffTimedState {
+    u32 flags;      // 0x00
+    s32 value;      // 0x04
+    s32 delay;      // 0x08
+    s32 delayMax;   // 0x0C
+    u8 *source;     // 0x10
+} EffTimedState;    // 0x14
+
+typedef struct EffStateSource {
+    u8 pad_00[0x14];
+    u32 kind;       // 0x14
+} EffStateSource;
+
+extern u32 effResetRecordRun(u8 *, u32, u32);
+
+u8 *func_003056B0(u8 *effect, u32 slot, u8 *entry) {
+    EffTimedState *states = (EffTimedState *)(entry + 0x28);
+    u8 *record = *(u8 **)(effect + 0x18) + slot * 0xA0;
+    s32 idle = 1;
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        EffTimedState *state = &states[i];
+        EffStateSource *source = (EffStateSource *)state->source;
+
+        if (source != 0 && source->kind != 0) {
+            EffRecordBucket *bucket = &D_00400508[source->kind];
+            s32 step = bucket->step(record, entry, state);
+
+            if (state->delay > 0) {
+                step = 0;
+                state->delay -= 1;
+            }
+            if (step >= 0) {
+                if (state->flags & 1) {
+                    if (state->value != 0x10000) {
+                        state->value += step;
+                        idle = 0;
+                        if (func_003055E8(effect, slot, state) == 0) {
+                            state->delay = state->delayMax;
+                            return 0;
+                        }
+                    }
+                } else if (state->value != 0) {
+                    state->value -= step;
+                    idle = 0;
+                    if (func_00305650(effect, slot, state) == 0) {
+                        state->delay = state->delayMax;
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    if (idle != 0) {
+        effResetRecordRun(effect, slot, -1);
+        return 0;
+    }
+    return effect;
+}
 
 s32 func_00305848(u8 *effect, u32 slot, u32 material) {
     u32 offset = slot * 0xA0;
