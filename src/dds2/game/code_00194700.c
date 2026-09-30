@@ -8,7 +8,7 @@ extern u32 func_0032C138(u32);
 
 extern u64 func_00343ED0(u64, u32 *, u64);
 
-extern void *func_00328D68(s32 arg0);
+extern void *func_00328D68(s32 size);
 
 extern EffHandler32 D_003B2060[];
 
@@ -28,9 +28,9 @@ extern char D_00436448[];
 
 extern void func_0035C860();
 
-extern s32 sceDopen(void *arg0);
+extern s32 sceDopen(void *path);
 
-extern void func_00328E48(void *arg0);
+extern void func_00328E48(void *allocation);
 
 extern char D_00436450[];
 
@@ -79,8 +79,8 @@ u32 effGetHandlerArg(EffWork *work) {
     return (u32)work->unk4;
 }
 
-u32 func_001947F8(u32 *arg0) {
-    return *arg0;
+u32 func_001947F8(u32 *value) {
+    return *value;
 }
 
 void func_00194800(void) {
@@ -114,76 +114,75 @@ void effTypeDispatchGuardedC(EffWork *work) {
     }
 }
 
-void effSetSubSlot(EffWork *arg0, s32 arg1) {
-    u8 v = arg1;
-    u32 t = arg0->type;
+void effSetSubSlot(EffWork *work, s32 slot) {
+    u8 slotByte = slot;
+    u32 kind = work->type;
 
-    switch (t) {
+    switch (kind) {
     case 0:
-        ((EffSub *)arg0->unk4)->unk20 = v;
+        ((EffSub *)work->unk4)->unk20 = slotByte;
         return;
     case 1:
-        ((EffSub *)arg0->unk4)->unk40 = v;
+        ((EffSub *)work->unk4)->unk40 = slotByte;
         return;
     case 2:
-        ((EffSub *)arg0->unk4)->unk50 = v;
+        ((EffSub *)work->unk4)->unk50 = slotByte;
         return;
     case 3:
-        ((EffSub *)arg0->unk4)->unk50 = v;
+        ((EffSub *)work->unk4)->unk50 = slotByte;
         return;
     case 4:
-        ((EffSub *)arg0->unk4)->unk50 = v;
+        ((EffSub *)work->unk4)->unk50 = slotByte;
         return;
     default:
         return;
     }
 }
 
-u32 effGetSubSlot(EffWork *arg0, s32 arg1) {
-    u8 v = arg1;
-    u32 t = arg0->type;
+u32 effGetSubSlot(EffWork *work, s32 unused) {
+    u32 kind = work->type;
 
-    switch (t) {
+    switch (kind) {
     case 0:
-        return ((EffSub *)arg0->unk4)->unk20;
+        return ((EffSub *)work->unk4)->unk20;
     case 1:
-        return ((EffSub *)arg0->unk4)->unk40;
+        return ((EffSub *)work->unk4)->unk40;
     case 2:
-        return ((EffSub *)arg0->unk4)->unk50;
+        return ((EffSub *)work->unk4)->unk50;
     case 3:
-        return ((EffSub *)arg0->unk4)->unk50;
+        return ((EffSub *)work->unk4)->unk50;
     case 4:
-        return ((EffSub *)arg0->unk4)->unk50;
+        return ((EffSub *)work->unk4)->unk50;
     default:
         break;
     }
     return 0;
 }
 
-void effAllocSubWork(EffWork *arg0) {
-    u32 t = arg0->type;
-    u32 v = 0;
+void effAllocSubWork(EffWork *work) {
+    u32 kind = work->type;
+    u32 handlerInput = 0;
 
-    switch (t) {
+    switch (kind) {
     case 0:
-        v = arg0->unk4;
+        handlerInput = work->unk4;
         break;
     case 1:
-        v = arg0->unk4;
+        handlerInput = work->unk4;
         break;
     case 2:
-        v = arg0->unk4 + 0x40;
+        handlerInput = work->unk4 + 0x40;
         break;
     case 3:
-        v = arg0->unk4 + 0x40;
+        handlerInput = work->unk4 + 0x40;
         break;
     case 4:
-        v = arg0->unk4 + 0x40;
+        handlerInput = work->unk4 + 0x40;
         break;
     default:
         break;
     }
-    effAllocDispatch((EffWork *)t, v);
+    effAllocDispatch((EffWork *)kind, handlerInput);
 }
 
 void func_001949D8(void) {
@@ -193,8 +192,8 @@ void func_001949E0(void) {
     func_001027D8(0, 0, 0, 0);
 }
 
-u32 func_00194A08(u32 arg0) {
-    return arg0;
+u32 func_00194A08(u32 value) {
+    return value;
 }
 
 void func_00194A10(void) {
@@ -230,8 +229,8 @@ void func_00194A58(void) {
 void func_00194A60(void) {
 }
 
-s32 func_00194A68(s32 arg0) {
-    return arg0;
+s32 func_00194A68(s32 value) {
+    return value;
 }
 
 void func_00194A70(void) {
@@ -351,9 +350,9 @@ void effSetWorkSecond(EffWork *work, u32 value) {
     work->unk24 = value;
 }
 
-void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
-    arg0->unk28 = arg1;
-    arg0->unk2C = arg2;
+void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
+    message->unk28 = first;
+    message->unk2C = second;
 }
 
 void effSetupWorkSound(EffWork *work, u64 resource) {
@@ -428,23 +427,23 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_00195A30);
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195AB0);
 
-void *effAllocSlotArray(s32 n) {
-    void *mem1 = func_003292A8(n * 0x38 + 0xC);
-    void *mem2 = sdfResourceRetainAddress(mem1);
-    u32 i = 0;
-    EffSlot38 *r = mem2;
-    u8 *end = (u8 *)r + n * 0x38;
+void *effAllocSlotArray(s32 count) {
+    void *allocation = func_003292A8(count * 0x38 + 0xC);
+    void *slotBase = sdfResourceRetainAddress(allocation);
+    u32 index = 0;
+    EffSlot38 *slot = slotBase;
+    u8 *end = (u8 *)(slot + count);
 
-    ((EffArrHdr *)end)->unk8 = mem1;
-    ((EffArrHdr *)end)->unk0 = mem2;
-    ((EffArrHdr *)end)->unk4 = n;
-    if (n != 0) {
+    ((EffArrHdr *)end)->unk8 = allocation;
+    ((EffArrHdr *)end)->unk0 = slotBase;
+    ((EffArrHdr *)end)->unk4 = count;
+    if (count != 0) {
         do {
-            i++;
-            r->unk30 = 0;
-            r->unk34 = 0.05f;
-            r = (EffSlot38 *)((u8 *)r + 0x38);
-        } while (i < n);
+            index++;
+            slot->unk30 = 0;
+            slot->unk34 = 0.05f;
+            slot++;
+        } while (index < count);
     }
     return end;
 }
