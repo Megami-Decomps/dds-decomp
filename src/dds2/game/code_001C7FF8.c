@@ -1550,7 +1550,21 @@ void btlQueueScene(u32 scene) {
     work->queuedScene = scene;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", btlUpdateScene);
+void btlUpdateScene(void) {
+    BattleSceneWork *work = (BattleSceneWork *)func_001AA6F8();
+    SceneInitializer *entry;
+    s32 event;
+    if (work->queuedScene != 0) {
+        btlSetScene(work->queuedScene);
+        work->queuedScene = 0;
+    }
+    entry = &D_003B6938[work->currentScene];
+    event = entry->update((s32)work);
+    if (event != 0) {
+        btlQueueScene(event);
+    }
+    work->frame++;
+}
 
 void btlResetToInitialScene(void) {
     BattleSceneWork *work;
