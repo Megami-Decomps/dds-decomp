@@ -3250,7 +3250,48 @@ void func_001846B0(EffPCPWork *work, u32 value) {
     work->unk14 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001846B8);
+typedef struct EffPCPSpanHead {
+    u32 word[4];
+    s32 left;
+    s32 right;
+    s32 width;
+    f32 scale;
+} EffPCPSpanHead;
+
+typedef struct EffPCPSpanParams {
+    EffPCPSpanHead head;
+    u32 unk20;
+} EffPCPSpanParams;
+
+typedef struct EffPCPSpanWork {
+    u128 matrix[4];
+    EffPCPSpanParams params;
+    u32 color;
+    u32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    u32 optionalHandle;
+} EffPCPSpanWork;
+
+EffPCPWork *func_001846B8(void *params, void *handleParams) {
+    EffPCPSpanParams *src = params;
+    EffPCPSpanWork *work;
+    f32 size;
+
+    work = func_00328D68(0x78);
+    work->params = *src;
+    work->color = 0x80808080;
+    work->unk68 = 0;
+    size = work->params.head.scale * 0.017453292f;
+    work->unk6C = -(size * 0.5f);
+    work->unk70 = size / (f32)(work->params.head.right - ((work->params.head.width >> 1) + work->params.head.left));
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->optionalHandle = 0;
+    if (handleParams != NULL) {
+        work->optionalHandle = func_001578C0((u32)handleParams);
+    }
+    return (EffPCPWork *)work;
+}
 
 void func_001847E0(void *args) {
     void *param0;
@@ -4440,9 +4481,126 @@ void func_00188E30(EffPCPWork *work, void *src) {
     VU0_STORE_MATRIX(&work->linkedWork->pad3C[4]);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E60);
+/* Block-set parameter head (0x164 bytes, copied whole into each new work). */
+typedef struct EffPCPGroupHead {
+    u8 pad00[0x50];
+    u8 unk50;            /* 0x50 */
+    u8 pad51[3];
+    s32 unk54;           /* 0x54: frames per entry */
+    u32 count;           /* 0x58: handles per group */
+    s32 unk5C;           /* 0x5C: delay spread */
+    u32 unk60;           /* 0x60 */
+    u32 unk64;           /* 0x64 */
+    f32 unk68;           /* 0x68 */
+    f32 unk6C;           /* 0x6C */
+    f32 unk70;           /* 0x70 */
+    f32 unk74;           /* 0x74 */
+    f32 unk78;           /* 0x78 */
+    f32 unk7C;           /* 0x7C */
+    f32 unk80;           /* 0x80 */
+    f32 unk84;           /* 0x84 */
+    f32 unk88;           /* 0x88 */
+    u8 activeGroups[4];  /* 0x8C */
+    u8 unk90[4];         /* 0x90 */
+    f32 unk94;           /* 0x94 */
+    u8 pad98[0xCC];
+} EffPCPGroupHead;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001890E8);
+typedef struct EffPCPGroupEntry {
+    u32 handle;          /* 0x00 */
+    s32 unk04;           /* 0x04 */
+    f32 unk08;           /* 0x08 */
+    f32 unk0C;           /* 0x0C */
+    f32 unk10;           /* 0x10 */
+    f32 unk14;           /* 0x14 */
+} EffPCPGroupEntry;
+
+typedef struct EffPCPGroupSet {
+    EffPCPGroupHead head;
+    EffPCPGroupEntry *entries;  /* 0x164 */
+    f32 unk168;
+    f32 unk16C;
+    u32 color;           /* 0x170 */
+    u32 *duplicates;     /* 0x174: four groups of handles */
+    void *duplicateHandle;
+    void *workHandle;
+} EffPCPGroupSet;
+
+EffPCPGroupSet *func_00188E60(EffPCPGroupHead *first, u32 *blocks) {
+    u32 count = first->count;
+    void *resource = func_003292A8(count * 0x18 + 0x180);
+    EffPCPGroupSet *copy = sdfResourceRetainAddress(resource);
+    EffPCPGroupEntry *entry;
+    u32 g;
+    u32 i;
+
+    copy->head = *first;
+    copy->unk168 = 1.0f;
+    copy->color = 0x80808080;
+    copy->workHandle = resource;
+    copy->unk16C = first->unk94;
+    entry = (EffPCPGroupEntry *)((u8 *)copy + 0x180);
+    copy->entries = entry;
+    copy->duplicates = 0;
+    if (blocks != NULL) {
+        u32 size = count * 16;
+        u32 *list = blocks;
+        u32 offset;
+        u32 stride;
+        u8 *flags;
+
+        g = 0;
+        copy->duplicateHandle = func_003292A8(size);
+        flags = first->activeGroups;
+        offset = 0;
+        stride = count * 4;
+        copy->duplicates = sdfResourceRetainAddress(copy->duplicateHandle);
+        memset(copy->duplicates, 0, size);
+        for (; g < 4; g++) {
+            u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
+
+            if (*flags != 0) {
+                u32 head;
+
+                if (g < 2) {
+                    *slot = effParamWorkCreate(0, (void *)*list);
+                } else {
+                    *slot = effParamWorkCreate(6, (void *)*list);
+                }
+                head = *slot;
+                for (i = 1; i < count; i++) {
+                    slot++;
+                    *slot = effParamWorkDuplicate(head);
+                }
+            }
+            list++;
+            flags++;
+            offset += stride;
+        }
+    }
+    for (g = 0; g < count; g++) {
+        entry->handle = func_0016D070(first->unk90);
+        entry->unk04 = 0;
+        entry++;
+    }
+    return copy;
+}
+
+void func_001890E8(void *args) {
+    EffPCPGroupHead *work;
+    void *resources[4];
+    u32 i;
+
+    work = effParamTableGetBlock(args, 0);
+    for (i = 0; i < 4; i++) {
+        if (work->activeGroups[i] != 0) {
+            resources[i] = effParamTableGetBlock(args, i + 1);
+        } else {
+            resources[i] = NULL;
+        }
+    }
+    func_00188E60(work, resources);
+}
 
 u8 *effBlockSetCloneWithDuplicates(u8 *work) {
     u8 *copy = func_00188E60(work, 0);
@@ -4514,7 +4672,25 @@ void effBlockSetRelease(u8 *work) {
     func_003297C8(((EffPCPBatchWork *)work)->workHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189360);
+/* Randomises entry `index` of a group set: a start delay, a jittered
+ * position step per frame and a spread angle step. */
+void func_00189360(EffPCPGroupSet *work, s32 index) {
+    EffPCPGroupEntry *entry = work->entries + index;
+    s32 spread = work->head.unk5C;
+    f32 scale = work->unk168;
+    f32 ratio;
+
+    if (spread > 0) {
+        entry->unk04 = -(effMiscRand(D_003AA868) % spread);
+    }
+    ratio = work->head.unk70;
+    entry->unk08 = work->head.unk68 * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale;
+    ratio = work->head.unk74;
+    entry->unk0C = (work->head.unk6C * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale - entry->unk08) / (f32)work->head.unk54;
+    entry->unk10 = 3.14159265f * 2.0f / (f32)work->head.count * (f32)index;
+    ratio = work->head.unk80;
+    entry->unk14 = work->head.unk78 * (func_00341240(D_003AA868) * ratio + (1.0f - ratio));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189500);
 
