@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 scrReadIntParameter(u64);
 
@@ -126,41 +127,12 @@ void effObjInnerVecInit(EffTransformNode *arg0) {
     u8 *p50;
     u8 *p60;
 
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "sqc2 vf0, 0(%0)     \n"
-        ".set reorder"
-        :
-        : "r" (p40)
-        : "memory"
-    );
+    VU0_STORE_VF(vf0, p40);
     p50 = (u8 *)arg0 + 0x50;
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "sqc2 vf0, 0(%0)     \n"
-        ".set reorder"
-        :
-        : "r" (p50)
-        : "memory"
-    );
-    __asm__ volatile (
-        ".set noreorder            \n"
-        "vaddw.xyz vf10, vf0, vf0w \n"
-        "vmulx.w vf10, vf0, vf0x   \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+    VU0_STORE_VF(vf0, p50);
+    VU0_SET_ONES_XYZ(vf10);
     p60 = (u8 *)arg0 + 0x60;
-    __asm__ volatile (
-        ".set noreorder       \n"
-        "sqc2 vf10, 0(%0)     \n"
-        ".set reorder"
-        :
-        : "r" (p60)
-        : "memory"
-    );
+    VU0_STORE_VF(vf10, p60);
 }
 
 INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerVecBackup);

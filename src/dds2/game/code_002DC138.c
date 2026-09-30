@@ -559,7 +559,7 @@ void effInitModelVUState(void *model) {
     mdlStorePrimaryVectorVU(model);
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
     func_00232AD0(model);
-    __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder");
+    VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
     if (*(void **)(model + 0x1C) != NULL) {
@@ -597,7 +597,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
             owner->model = func_002DC1D0(data, *(u32 *)(source + 0x24));
-            __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder" : : : "memory");
+            VU0_SET_ONES_XYZ(vf10);
             __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2", "memory");
             mdlStoreTertiaryVectorVU((void *)owner->model);
         }
@@ -635,7 +635,7 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     id = func_00232EF8((void *)source->model);
     model = func_00232198(group, id);
     effInitModelVUState(model);
-    __asm__ volatile(".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\tvmulx.w vf10, vf0, vf0x\n\t.set reorder");
+    VU0_SET_ONES_XYZ(vf10);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2");
     mdlStoreTertiaryVectorVU(model);
     owner->model = (s32)model;
@@ -920,11 +920,7 @@ void func_002DDA50(s32 model) {
 
 void effScaleModelVec(u8 *work, float scale) {
     u32 bits;
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vaddw.xyz vf10, vf0, vf0w\n\t"
-        "vmulx.w vf10, vf0, vf0x\n\t"
-        ".set reorder" ::: "memory");
+    VU0_SET_ONES_XYZ(vf10);
     __asm__ volatile(
         ".set noreorder\n\t"
         "mfc1 %0, %1\n\t"
@@ -5791,15 +5787,11 @@ void effApplyModelTransform(u8 *work) {
     u8 *animation = *(u8 **)(work + 0x38);
     u32 bits;
     float scale;
-    __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(work) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(*(void **)(modelContext + 4));
-    __asm__ volatile("lqc2 $vf10, 0(%0)" :: "r"(work + 0x10) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, work + 0x10);
     func_00232AD0(*(void **)(modelContext + 4));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vaddw.xyz vf10, vf0, vf0w\n\t"
-        "vmulx.w vf10, vf0, vf0x\n\t"
-        ".set reorder" ::: "memory");
+    VU0_SET_ONES_XYZ(vf10);
     scale = *(float *)(work + 0x20);
     __asm__ volatile(
         ".set noreorder\n\t"
