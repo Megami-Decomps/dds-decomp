@@ -138,13 +138,14 @@ typedef struct FldTransferChunk {
     u32 size;
 } FldTransferChunk;
 
+/* Four resource references are copied into the scene's load queue in order. */
 typedef struct FldLoadRecord {
     u32 unk_0;
-    u32 unk_4;
-    void *unk_8;
-    void *unk_c;
-    void *unk_10;
-    void *unk_14;
+    u32 displayState;
+    void *resourceA;
+    void *resourceB;
+    void *resourceC;
+    void *resourceD;
 } FldLoadRecord;
 
 typedef struct FldLoadRequest {
@@ -262,17 +263,19 @@ extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32,
 
 extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 
+/* Packed quad input: geometry fields precede the live packet origin and depth.
+ * Preserve the unclassified words for the opaque renderer. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
+    s32 baseX;
+    s32 baseY;
     s32 unk8;
     s32 unkC;
     s32 unk10;
     s32 unk14;
-    s32 unk18;
-    s32 x;          /* 0x1C: quad origin X */
-    s32 y;          /* 0x20: quad origin Y */
-    s32 unk24;
+    s32 rgba;
+    s32 rowX;      /* 0x1C: quad origin X */
+    s32 rowY;      /* 0x20: quad origin Y */
+    s32 drawDepth;
     s32 packetList; /* 0x28 */
 } FldQuadState; /* 0x2C bytes */
 
@@ -377,19 +380,20 @@ extern s32 D_00435F30;
 
 extern void func_00139950(f32 *);
 
+/* The target position is copied to the current camera position when pending. */
 typedef struct {
     u8 pad0[0x84];
-    s32 unk84;
+    s32 positionPending;
     u8 pad88[0xC4];
-    f32 unk14C;
-    f32 unk150;
-    f32 unk154;
+    f32 currentX;
+    f32 currentY;
+    f32 currentZ;
     f32 unk158;
     f32 unk15C;
     f32 unk160;
-    f32 unk164;
-    f32 unk168;
-    f32 unk16C;
+    f32 targetX;
+    f32 targetY;
+    f32 targetZ;
     u8 pad170[0x14];
     s32 unk184;
 } FldCamState;
@@ -501,6 +505,15 @@ typedef struct FldActionSpawn {
     u32 firstValue;
 } FldActionSpawn;
 
+/* Layout shared by the two field-request dispatch paths. */
+typedef struct FldSceneRequest {
+    u32 primaryValue;
+    u32 secondaryValue;
+    FldLoadRecord *record;
+    u32 spawnCount;
+    FldActionSpawn *spawnList;
+} FldSceneRequest;
+
 void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     u32 i;
     s32 handle;
@@ -523,11 +536,11 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     char path[64];
     s32 i;
 
-    fldSetDisplayState(request->record->unk_4);
-    D_00444920[0] = (u32)request->record->unk_8;
-    D_00444920[1] = (u32)request->record->unk_c;
-    D_00444920[2] = (u32)request->record->unk_10;
-    D_00444920[3] = (u32)request->record->unk_14;
+    fldSetDisplayState(request->record->displayState);
+    D_00444920[0] = (u32)request->record->resourceA;
+    D_00444920[1] = (u32)request->record->resourceB;
+    D_00444920[2] = (u32)request->record->resourceC;
+    D_00444920[3] = (u32)request->record->resourceD;
     for (i = 0; i < 4; i++) {
         D_00444930[i] = 0;
         D_00444940[i] = 0;
@@ -545,17 +558,17 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
-void fldProcessFieldRequest(u32 *request) {
+void fldProcessFieldRequest(FldSceneRequest *request) {
     s32 state;
-    fldSpawnActionObjects((FldActionSpawn *)request[4], request[3]);
+    fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = D_00389770[4];
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    func_00128FE8(request[1], request[0], 0);
-    D_00389770[1] = ((u32 *)request[2])[1];
+    func_00128FE8(request->secondaryValue, request->primaryValue, 0);
+    D_00389770[1] = request->record->displayState;
 }
 
-void fldProcessFieldRequestAlternate(u32 *request) {
-    func_00128FE8(request[1], *request, 1);
+void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
+    func_00128FE8(request->secondaryValue, request->primaryValue, 1);
 }
 
 s32 func_00129D60(s32 record) {
@@ -818,8 +831,8 @@ u8 func_0012A4E0(void) {
 typedef struct FldPackedEntry {
     struct FldPackedEntry *next;
     u8 pad04[4];
-    u32 block;
-    u32 arg;
+    u32 blockHandle;
+    u32 payload;
     u8 pad10[2];
     u16 kind;
 } FldPackedEntry;
@@ -860,30 +873,30 @@ void fldLoadAreaPackedResources(void) {
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
-                func_00140180(entry->arg);
-                func_003298C0(entry->block);
+                func_00140180(entry->payload);
+                func_003298C0(entry->blockHandle);
                 break;
             case 2:
-                fldSetNpcPalette(entry->arg);
-                func_003298C0(entry->block);
+                fldSetNpcPalette(entry->payload);
+                func_003298C0(entry->blockHandle);
                 break;
             case 3:
-                fldUploadSkyBuffer(entry->arg);
-                func_003298C0(entry->block);
+                fldUploadSkyBuffer(entry->payload);
+                func_003298C0(entry->blockHandle);
                 break;
             case 4:
-                fldCopyActorWaypointTable(entry->arg);
-                func_003298C0(entry->block);
+                fldCopyActorWaypointTable(entry->payload);
+                func_003298C0(entry->blockHandle);
                 break;
             case 5:
-                D_00435FD8 = (u32)func_003292A8(sdfMemoryGetBlockSize(entry->block));
+                D_00435FD8 = (u32)func_003292A8(sdfMemoryGetBlockSize(entry->blockHandle));
                 memcpy((void *)sdfMemoryGetBlockAddress(D_00435FD8),
-                       (void *)sdfMemoryGetBlockAddress(entry->block),
-                       sdfMemoryGetBlockSize(entry->block));
-                func_003298C0(entry->block);
+                       (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
+                       sdfMemoryGetBlockSize(entry->blockHandle));
+                func_003298C0(entry->blockHandle);
                 break;
             case 6:
-                fldSetSceneRecordChunk(entry->arg, entry->block);
+                fldSetSceneRecordChunk(entry->payload, entry->blockHandle);
                 break;
             }
         }
@@ -1094,8 +1107,9 @@ INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413198);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B2B8);
 
-void func_0012B4A0(u32 value) {
-    D_00435FC0 = value;
+/* Enable or skip relocation of remaining transfer chunks during field teardown. */
+void func_0012B4A0(u32 relocateOnRelease) {
+    D_00435FC0 = relocateOnRelease;
 }
 
 void fldInitDisplayObjects(void) {
@@ -1859,7 +1873,7 @@ void func_0012DDC0(s32 x, s32 y, u64 firstPayload, u64 secondPayload) {
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {
-    quad->y = quad->y + 0x60;
+    quad->rowY = quad->rowY + 0x60;
 }
 
 void fldStartQuadPacketList(FldQuadState *quad) {
@@ -1879,18 +1893,18 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x73C0;
-    quad.y = 0x7CC0;
-    quad.unk24 = 0x0FFFFF7E;
+    quad.rowX = 0x73C0;
+    quad.rowY = 0x7CC0;
+    quad.drawDepth = 0x0FFFFF7E;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x73C0;
-    quad.unk4 = 0x7CC0;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x73C0;
+    quad.baseY = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, 0);
+    sdfPktInit(packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380748.invoke(&D_00380748, quad.packetList);
@@ -1900,18 +1914,18 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x73C0;
-    quad.y = 0x7CC0;
-    quad.unk24 = 0x0FFFFF80;
+    quad.rowX = 0x73C0;
+    quad.rowY = 0x7CC0;
+    quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x73C0;
-    quad.unk4 = 0x7CC0;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x73C0;
+    quad.baseY = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x, quad.y + y, quad.unk24, packetField);
+    sdfPktInit(packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
@@ -1921,18 +1935,18 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x7000;
-    quad.y = 0x7900;
-    quad.unk24 = 0x0FFFFF80;
+    quad.rowX = 0x7000;
+    quad.rowY = 0x7900;
+    quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x7000;
-    quad.unk4 = 0x7900;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x7000;
+    quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
+    sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436070, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
@@ -1942,18 +1956,18 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x7000;
-    quad.y = 0x7900;
-    quad.unk24 = 0x0FFFFF80;
+    quad.rowX = 0x7000;
+    quad.rowY = 0x7900;
+    quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x7000;
-    quad.unk4 = 0x7900;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x7000;
+    quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
+    sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, D_00436078, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
@@ -1963,18 +1977,18 @@ void fldDrawMapQuad(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x7000;
-    quad.y = 0x7900;
-    quad.unk24 = 0x0FFFFF80;
+    quad.rowX = 0x7000;
+    quad.rowY = 0x7900;
+    quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x7000;
-    quad.unk4 = 0x7900;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x7000;
+    quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, 0);
+    sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
@@ -1984,18 +1998,18 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 packetField, s32 drawValue) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x7000;
-    quad.y = 0x7900;
-    quad.unk24 = 0x0FFFFF80;
+    quad.rowX = 0x7000;
+    quad.rowY = 0x7900;
+    quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x7000;
-    quad.unk4 = 0x7900;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x7000;
+    quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + x * 16, quad.y + y * 8, quad.unk24, packetField);
+    sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
@@ -2005,18 +2019,18 @@ void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     FldQuadState quad;
     u8 packet[16];
 
-    quad.x = 0x7000;
-    quad.y = 0x7900;
-    quad.unk24 = 0x0FFFFF80;
+    quad.rowX = 0x7000;
+    quad.rowY = 0x7900;
+    quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.unk18 = 0x80806020;
-    quad.unk0 = 0x7000;
-    quad.unk4 = 0x7900;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x7000;
+    quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
-    sdfPktInit(packet, quad.x + (s32)(x * 16.0f), quad.y + (s32)(y * 8.0f), quad.unk24, packetField);
+    sdfPktInit(packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
     sdfAppendPacket(quad.packetList, func_0033D7B8(packet, drawValue));
     fldAdvanceQuadRow(&quad);
     D_00380708.invoke(&D_00380708, quad.packetList);
@@ -2301,19 +2315,19 @@ void fldUpdateCameraTarget(void) {
     u128 *dst;
 
     if (D_00435F0C != 0 && (st = (FldCamState *)D_00389770, st->unk184 != 1) && D_00435F30 != 0) {
-        cur[0] = st->unk14C;
-        cur[1] = st->unk150;
-        cur[2] = st->unk154;
+        cur[0] = st->currentX;
+        cur[1] = st->currentY;
+        cur[2] = st->currentZ;
         func_00139950(cur);
-        if (st->unk84 != 0) {
-            st->unk14C = st->unk164;
-            st->unk150 = st->unk168;
-            st->unk154 = st->unk16C;
-            vec.f[0] = st->unk164;
-            vec.f[1] = st->unk168;
-            vec.f[2] = st->unk16C;
+        if (st->positionPending != 0) {
+            st->currentX = st->targetX;
+            st->currentY = st->targetY;
+            st->currentZ = st->targetZ;
+            vec.f[0] = st->targetX;
+            vec.f[1] = st->targetY;
+            vec.f[2] = st->targetZ;
             effObjSetInnerFirstVec(D_00435F0C, vec.f);
-            st->unk84 = 0;
+            st->positionPending = 0;
             effObjFetchInnerFirstVec(D_00435F0C);
             VU0_STORE_VF(vf10, &vec);
             dst = (u128 *)(*(u32 *)(D_00435F0C + 0x1C) + 0x70);
