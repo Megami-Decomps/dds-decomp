@@ -979,8 +979,8 @@ void func_0017EE18(EffPCPRingWork *work) {
     u32 color;
     s32 i;
 
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_0037F680));
+    VU0_LOAD_VF($vf10, D_0037F690);
+    VU0_LOAD_VF($vf11, D_0037F680);
     __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -992,17 +992,17 @@ void func_0017EE18(EffPCPRingWork *work) {
         "vwaitq\n\t"
         "vmulq.xyz $vf10, $vf10, Q\n\t"
         ".set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir) : "memory");
+    VU0_STORE_VF($vf10, dir);
     handle = work->handle;
     size[0] = work->scale;
     size[1] = work->scale;
     size[2] = work->scale;
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(size));
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(dir));
+    VU0_LOAD_VF($vf10, size);
+    VU0_LOAD_VF($vf11, dir);
     __asm__ volatile(".set noreorder\n\tvmul.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(work));
+    VU0_LOAD_VF($vf11, work);
     __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    VU0_STORE_VF($vf10, pos);
     effCopyVector(handle, pos);
     scale = work->scale;
     color = 0x10808080;
@@ -1131,7 +1131,7 @@ void func_0017F358(EffPCPTwinWork *work) {
         }
         obj[0] = effParamWorkGetData(work->pair[i][0]);
         obj[1] = effParamWorkGetData(work->pair[i][1]);
-        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work));
+        VU0_LOAD_VF(vf10, work);
         mdlStorePrimaryVectorVU(obj[0]);
         effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
         effParamWorkCallback1(work->pair[i][1], 1.75f);
@@ -1139,7 +1139,7 @@ void func_0017F358(EffPCPTwinWork *work) {
         func_00232390(obj[0], D_00380828);
         func_00332D48(((EffPCPWork *)obj[0])->unk18, 1);
         posp = &pos;
-        __asm__ volatile (".set noreorder\nsqc2 vf10, 0(%0)\n.set reorder" : : "r"(posp));
+        VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
         func_00232390(obj[1], D_00380828);
         if (work->unk14 > 0x18) {
@@ -1391,7 +1391,7 @@ void func_0017FD88(EffPCPCrossWork *work) {
     s32 j;
 
     anchor = effParamWorkGetData(work->base);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work));
+    VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
     effParamWorkCallback1(work->base, work->scale);
     func_00232390(anchor, D_00380828);
@@ -1727,7 +1727,7 @@ void func_00180918(EffSpawnGroup *group) {
         dir[0] = sinv;
         dir[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir));
+        VU0_LOAD_VF($vf10, dir);
         __asm__ volatile(
             ".set noreorder\n\t"
             "vmul.xyz $vf2, $vf10, $vf10\n\t"
@@ -1738,17 +1738,17 @@ void func_00180918(EffSpawnGroup *group) {
             "vwaitq\n\t"
             "vmulq.xyz $vf10, $vf10, Q\n\t"
             ".set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir) : "memory");
+        VU0_STORE_VF($vf10, dir);
         reach = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 350.0f;
         scale[2] = reach;
         scale[0] = reach;
         scale[1] = -reach;
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(dir));
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(scale));
+        VU0_LOAD_VF($vf10, dir);
+        VU0_LOAD_VF($vf11, scale);
         __asm__ volatile(".set noreorder\n\tvmul.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003B1680));
+        VU0_LOAD_VF($vf11, D_003B1680);
         __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1670) : "memory");
+        VU0_STORE_VF($vf10, D_003B1670);
         if (scale[0] < 250.0f) {
             speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand(D_003AA868) % 5 + 5;
@@ -1845,14 +1845,14 @@ void func_00180DB0(EffSpawnGroup *group) {
         D_003B16D0->pos[0] = 0;
         D_003B16D0->pos[2] = 0;
         D_003B16D0->pos[1] = -height;
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B16D0->pos));
+        VU0_LOAD_VF($vf10, D_003B16D0->pos);
         __asm__ volatile(
             ".set noreorder\n\t"
             "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
             "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
             "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
             ".set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B16D0->pos) : "memory");
+        VU0_STORE_VF($vf10, D_003B16D0->pos);
         D_003B16D0->pos[0] += D_003B16D0->vel[0];
         D_003B16D0->pos[2] += D_003B16D0->vel[2];
         if (height < 300.0f) {
@@ -1943,14 +1943,14 @@ void func_00181228(EffSpawnGroup *group) {
         D_003B1730->pos[0] = 0;
         D_003B1730->pos[2] = 0;
         D_003B1730->pos[1] = -height;
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1730->pos));
+        VU0_LOAD_VF($vf10, D_003B1730->pos);
         __asm__ volatile(
             ".set noreorder\n\t"
             "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
             "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
             "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
             ".set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1730->pos) : "memory");
+        VU0_STORE_VF($vf10, D_003B1730->pos);
         D_003B1730->pos[0] += D_003B1730->vel[0];
         D_003B1730->pos[2] += D_003B1730->vel[2];
         if (height < 300.0f) {
@@ -2042,14 +2042,14 @@ void func_001816C0(EffSpawnGroup *group) {
         D_003B1790->pos[0] = 0;
         D_003B1790->pos[2] = 0;
         D_003B1790->pos[1] = -height;
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1790->pos));
+        VU0_LOAD_VF($vf10, D_003B1790->pos);
         __asm__ volatile(
             ".set noreorder\n\t"
             "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
             "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
             "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
             ".set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1790->pos) : "memory");
+        VU0_STORE_VF($vf10, D_003B1790->pos);
         D_003B1790->pos[0] += D_003B1790->vel[0];
         D_003B1790->pos[2] += D_003B1790->vel[2];
         if (height < 300.0f) {
@@ -2196,14 +2196,14 @@ void func_00181EA8(EffSpawnGroup *group) {
         func_003364B8((func_00341240(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         func_00336898((func_00341240(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         func_00336B00();
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(params->pos));
+        VU0_LOAD_VF($vf10, params->pos);
         __asm__ volatile(
             ".set noreorder\n\t"
             "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
             "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
             "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
             ".set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(params->pos) : "memory");
+        VU0_STORE_VF($vf10, params->pos);
         params->pos[0] += params->vel[0];
         params->pos[2] += params->vel[2];
         group->handles[i] = func_0016D070(params);
@@ -2367,14 +2367,14 @@ void func_00182468(EffSpawnGroup *group) {
         D_003B1990->pos[0] = 0;
         D_003B1990->pos[2] = 0;
         D_003B1990->pos[1] = -height;
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1990->pos));
+        VU0_LOAD_VF($vf10, D_003B1990->pos);
         __asm__ volatile(
             ".set noreorder\n\t"
             "vmulax.xyzw ACC, $vf28, $vf10x\n\t"
             "vmadday.xyzw ACC, $vf29, $vf10y\n\t"
             "vmaddz.xyzw $vf10, $vf30, $vf10z\n\t"
             ".set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003B1990->pos) : "memory");
+        VU0_STORE_VF($vf10, D_003B1990->pos);
         D_003B1990->pos[0] += D_003B1990->vel[0];
         D_003B1990->pos[2] += D_003B1990->vel[2];
         if (height < 300.0f) {
@@ -2583,9 +2583,9 @@ void func_00182C60(ref)
     *ref = *ref + 1;
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(work));
+        VU0_LOAD_VF($vf10, work);
         obj->size = (s32)((f32)func_00195890(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+        VU0_STORE_VF($vf10, pos);
         obj->x = (s32)pos[0] - 0x800;
         obj->y = ((s32)pos[1] - 0x800) << 1;
         if (obj->size < EFF_SHARED_TRAIL->minSize) {
@@ -2623,9 +2623,9 @@ void func_00182EA0(EffPCPTrailWork *work) {
     f32 pos[4];
 
     obj = work->obj;
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(work->pos));
+    VU0_LOAD_VF($vf10, work->pos);
     obj->size = (s32)((f32)func_00195890(work->unk1C) * work->unk2C);
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    VU0_STORE_VF($vf10, pos);
     obj->x = (s32)pos[0] - 0x800;
     obj->y = ((s32)pos[1] - 0x800) << 1;
     if (obj->size < work->minSize) {

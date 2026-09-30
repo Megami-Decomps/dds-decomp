@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 extern void func_001D54C0(s32 actor);
 
@@ -213,9 +214,9 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
+    VU0_LOAD_VF(vf10, unit->rotation);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->muzzleOffset));
+    VU0_LOAD_VF(vf10, unit->muzzleOffset);
     __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->scale));
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -236,9 +237,9 @@ void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
+    VU0_LOAD_VF(vf10, unit->rotation);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->localBodyPosition));
+    VU0_LOAD_VF(vf10, unit->localBodyPosition);
     __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->scale));
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -262,10 +263,10 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
         return;
     }
     effObjFetchInnerFirstVec(unit->effectObject);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->rotation));
+    VU0_STORE_VF(vf10, pos);
+    VU0_LOAD_VF(vf10, unit->rotation);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->muzzleOffset));
+    VU0_LOAD_VF(vf10, unit->muzzleOffset);
     __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->scale));
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -297,7 +298,7 @@ f32 btlUnitGetMaxScaledExtent(BtlUnit *unit) {
 f32 btlUnitGetTopY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    VU0_STORE_VF(vf10, pos);
     return unit->height * unit->scale * 0.5f - pos[1];
 }
 
@@ -305,7 +306,7 @@ f32 btlUnitGetTopY(BtlUnit *unit) {
 f32 btlUnitGetBottomY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+    VU0_STORE_VF(vf10, pos);
     return -pos[1] - unit->height * unit->scale * 0.5f;
 }
 
@@ -363,7 +364,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
             btlUnitGetMuzzlePosVU(unit);
-            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
+            VU0_STORE_VF(vf10, pos);
             if (mask & 0x200) {
                 value = pos[2] + unit->reach * unit->scale;
                 if (first) {
@@ -400,7 +401,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     f32 distance;
     BtlVec4 targetPos;
     btlUnitGetMuzzlePosVU(target);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(&targetPos) : "memory");
+    VU0_STORE_VF(vf10, &targetPos);
     unit = state->units;
     nearest = NULL;
     first = 1;
@@ -412,7 +413,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                     if (unit->flags & mask) {
                         btlUnitGetMuzzlePosVU(unit);
                         __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" : : "f"(targetPos.f[1]) : "$2");
-                        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(&targetPos));
+                        VU0_LOAD_VF($vf11, &targetPos);
                         __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmul.xyz $vf2, $vf10, $vf10\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tvsqrt Q, $vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(distance) : : "$2");
                         if (first) {
                             nearestDistance = distance;
@@ -585,7 +586,7 @@ void btlRefreshUnitEffects(void) {
             if (unit->effectFlags & 0x10) {
                 handle = unit->statusEffectHandle;
                 evtSetUnitStatusFlags(handle);
-                __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit));
+                VU0_LOAD_VF(vf10, unit);
                 func_00221D98(handle, 0);
             }
         }
@@ -624,7 +625,7 @@ s32 func_001F77D8(f32 *from, f32 *to) {
         func_002E7F20(0.0f, func_002FA1F0(delta[0], delta[2]), 0.0f);
         return 1;
     }
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&D_0035F9E0));
+    VU0_LOAD_VF($vf10, &D_0035F9E0);
     return 0;
 }
 
@@ -668,11 +669,11 @@ f32 func_001F79A0(f32 *a, f32 *b, f32 *c) {
     f32 normal[4];
     f32 dot;
     btlTriangleNormalVU(a, b, c);
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(normal) : "memory");
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(a));
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(c));
+    VU0_STORE_VF($vf10, normal);
+    VU0_LOAD_VF($vf10, a);
+    VU0_LOAD_VF($vf11, c);
     __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmove.xyzw $vf11, $vf10\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(normal));
+    VU0_LOAD_VF($vf10, normal);
     __asm__ volatile(".set noreorder\n\tvmul.xyz $vf2, $vf10, $vf11\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tqmfc2.ni $2, $vf2\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(dot) : : "$2");
     return dot;
 }
@@ -713,7 +714,7 @@ void btlProjectOnPlaneVU(f32 *a, f32 *b, f32 *c) {
     f32 normal[4];
     f32 dot;
     btlTriangleNormalVU(a, b, c);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(normal) : "memory");
+    VU0_STORE_VF(vf10, normal);
     __asm__ volatile(
         ".set noreorder\n\t"
         "lqc2 vf10, 0(%1)\n\t"

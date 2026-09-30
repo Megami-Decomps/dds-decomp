@@ -879,10 +879,6 @@ typedef struct ConsMatrixPacket {
     u32 wordC;
 } ConsMatrixPacket;
 
-#define VU0_LOAD_VF10(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(src) : "memory")
-#define VU0_STORE_VF10(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(dst) : "memory")
 
 void func_002E14D8(ConsMatrixPacket *packet, u8 *src, void *matrix) {
     packet->quadwords = 0xC;
@@ -892,15 +888,15 @@ void func_002E14D8(ConsMatrixPacket *packet, u8 *src, void *matrix) {
     VU0_STORE_MATRIX(packet->matrixA);
     func_002DDD60(src + 0x30);
     VU0_STORE_MATRIX(packet->matrixB);
-    VU0_LOAD_VF10(src + 0x70);
-    VU0_STORE_VF10(packet->vecC);
-    VU0_LOAD_VF10(src + 0x80);
-    VU0_STORE_VF10(packet->vecD);
+    VU0_LOAD_VF_MEMORY(vf10, src + 0x70);
+    VU0_STORE_VF(vf10, packet->vecC);
+    VU0_LOAD_VF_MEMORY(vf10, src + 0x80);
+    VU0_STORE_VF(vf10, packet->vecD);
     VU0_LOAD_MATRIX(matrix);
     func_002DD520();
     __asm__ volatile (".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder");
-    VU0_STORE_VF10(packet->vecE);
-    VU0_STORE_VF10(src + 0x90);
+    VU0_STORE_VF(vf10, packet->vecE);
+    VU0_STORE_VF(vf10, src + 0x90);
     packet->word0 = 0x04000002;
     packet->word4 = 0x14000000;
     packet->word8 = 0;
@@ -917,7 +913,7 @@ void func_002E15D0(u8 *node, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(D_003984B0);
     func_002DDD60(node + 0x30);
-    VU0_LOAD_VF10(node + 0x90);
+    VU0_LOAD_VF_MEMORY(vf10, node + 0x90);
     VU0_STORE_MATRIX(D_00398470);
     __asm__ volatile (
         ".set noreorder\n"
@@ -926,7 +922,7 @@ void func_002E15D0(u8 *node, void *matrix) {
         "vmaddaz.xyzw ACC, vf30, vf10z\n"
         "vmaddw.xyzw vf10, vf31, vf0w\n"
         ".set reorder");
-    VU0_STORE_VF10(D_003984F0);
+    VU0_STORE_VF(vf10, D_003984F0);
     memcpy(D_003983D0, node, 0xA0);
 }
 
