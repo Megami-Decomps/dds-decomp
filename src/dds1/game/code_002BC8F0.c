@@ -130,6 +130,13 @@ typedef struct EffectSlotSet {
     s32 workEntries;     // 0x18
 } EffectSlotSet;
 
+/* Per-slot 0x80-byte description; bit 0x20 chains a following slot. */
+typedef struct EffectSlotDescription {
+    u8 pad00[0x18];
+    u32 flags;
+    u8 pad1C[0x64];
+} EffectSlotDescription;
+
 extern u32 D_003BC94C;
 
 extern void func_002BD3D8(void *, s32, void *);
@@ -167,6 +174,17 @@ typedef struct TexHandleSet {
     u8 pad_0x20[4];    // 0x20
     void **handles;    // 0x24
 } TexHandleSet; // 0x28
+
+/* Relative offsets in an effect resource's table and its eight-byte entries. */
+typedef struct EffectResourceTable {
+    u8 pad00[0xC];
+    u32 entryOffset;
+} EffectResourceTable;
+
+typedef struct EffectResourceEntry {
+    u32 unknown;
+    u32 resourceOffset;
+} EffectResourceEntry;
 
 extern void func_002BD5C8(s32);
 
@@ -416,9 +434,9 @@ u32 effDispatchRecordBuckets(u32 active, EffectOwnerRecord *list, s32 option) {
     return 1;
 }
 
-u32 func_002BCEA8(u32 arg0) {
+u32 func_002BCEA8(u32 list) {
     effReleaseRecordBuckets();
-    func_002CFF98(arg0);
+    func_002CFF98(list);
     return 1;
 }
 
@@ -508,8 +526,8 @@ u32 effDestroyPackedBatch(PackedEffectBatch *batch) {
     return 1;
 }
 
-u32 func_002BD378(s32 arg0) {
-    func_002D0918(((EffectSlotSet *)arg0)->workAllocation);
+u32 func_002BD378(s32 work) {
+    func_002D0918(((EffectSlotSet *)work)->workAllocation);
     return 1;
 }
 
@@ -525,18 +543,18 @@ s32 func_002BD398(s32 work, s32 index) {
     return entry;
 }
 
-void func_002BD3B8(BdWork *p) {
-    if (p->flags & 1) {
-        p->phase16_16 = 0;
+void func_002BD3B8(BdWork *effect) {
+    if (effect->flags & 1) {
+        effect->phase16_16 = 0;
     } else {
-        p->phase16_16 = 0x10000;
+        effect->phase16_16 = 0x10000;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD3D8);
 
-void func_002BD5A0(s32 arg0, s32 arg1) {
-    func_002BD3D8(arg0, arg1, ((EffectSlotSet *)arg0)->workEntries + arg1 * 0xa0);
+void func_002BD5A0(s32 work, s32 index) {
+    func_002BD3D8(work, index, ((EffectSlotSet *)work)->workEntries + index * 0xa0);
 }
 
 void func_002BD5C8(s32 work) {
@@ -546,10 +564,10 @@ void func_002BD5C8(s32 work) {
     }
 }
 
-void func_002BD620(void *a0, s32 a1, BdWork *p) {
-    p->owner = a0;
-    p->slotIndex = a1;
-    func_002BD3D8(a0, a1, p);
+void func_002BD620(void *owner, s32 index, BdWork *entry) {
+    entry->owner = owner;
+    entry->slotIndex = index;
+    func_002BD3D8(owner, index, entry);
 }
 
 void func_002BD640(u32 work, u32 index) {
@@ -564,11 +582,11 @@ u32 func_002BD6A8(TexHandleSet *set, u8 *data, s32 release, s32 only) {
     u32 i = 0;
     u8 *entry = data;
 
-    entry += *(u32 *)(entry + 0xC);
+    entry += ((EffectResourceTable *)entry)->entryOffset;
 
     if (set->count != 0) {
         do {
-            s32 *resource = (s32 *)(data + *(u32 *)(entry + 4));
+            s32 *resource = (s32 *)(data + ((EffectResourceEntry *)entry)->resourceOffset);
 
             entry += 8;
             if (release == 0) {
@@ -618,8 +636,8 @@ void func_002BD870(TexHandleSet *set) {
     func_002BD5C8((s32)set);
 }
 
-u8 func_002BD8F8(s32 arg0) {
-    return **(s32 **)(arg0 + 0x24) != 0;
+u8 func_002BD8F8(s32 set) {
+    return **(s32 **)(set + 0x24) != 0;
 }
 
 u32 *effCreatePayload(u32 count) {
@@ -636,9 +654,9 @@ u32 *effCreatePayload(u32 count) {
     return header;
 }
 
-u32 func_002BD988(u32 arg0) {
-    func_002D0918(*(u32 *)arg0);
-    func_002CFF98(arg0);
+u32 func_002BD988(u32 payload) {
+    func_002D0918(*(u32 *)payload);
+    func_002CFF98(payload);
     return 1;
 }
 
@@ -674,40 +692,54 @@ u32 *effCreateResourceSlotSet(u32 *source, u32 slot, u32 count) {
     return effect;
 }
 
-u32 func_002BDD60(u32 arg0) {
-    s32 *piVar1;
+u32 func_002BDD60(u32 work) {
+    s32 *words;
 
-    piVar1 = (s32 *)arg0;
-    if (*piVar1 != 0) {
-        func_002D0918(*piVar1);
+    words = (s32 *)work;
+    if (*words != 0) {
+        func_002D0918(*words);
     }
-    if (piVar1[1] == 0) {
-        func_002BD870(arg0);
-        func_002D0918(piVar1[8]);
+    if (words[1] == 0) {
+        func_002BD870(work);
+        func_002D0918(words[8]);
     }
-    func_002D0918(piVar1[3]);
-    func_002BD378(arg0);
-    func_002CFF98(arg0);
+    func_002D0918(words[3]);
+    func_002BD378(work);
+    func_002CFF98(work);
     return 1;
 }
 
-u32 func_002BDDD0(u32 *arg0, u32 arg1, u32 arg2) {
-    *arg0 = arg2;
-    arg0[4] = arg1;
-    if ((arg2 & 2) != 0) {
-        func_002BD3B8((BdWork *)arg0);
+/* Resource table holding 0x24-byte effect records at its +8 pointer. */
+typedef struct EffectRecordSource {
+    u8 pad00[8];
+    s32 records;
+} EffectRecordSource;
+
+typedef struct EffectRecordState {
+    u32 flags;
+    u32 reserved;
+    u32 count;
+    u32 reserved2;
+    u32 resource;
+} EffectRecordState;
+
+u32 func_002BDDD0(u32 *record, u32 entry, u32 flags) {
+    *record = flags;
+    record[4] = entry;
+    if ((flags & 2) != 0) {
+        func_002BD3B8((BdWork *)record);
     }
-    arg0[2] = arg0[2] + 1;
+    record[2] = record[2] + 1;
     return 1;
 }
 
-u32 func_002BDE18(u32 arg0, s32 arg1, s32 arg2, u32 arg3) {
-    func_002BDDD0(arg0, *(s32 *)(arg1 + 8) + arg2 * 0x24, arg3);
+u32 func_002BDE18(u32 record, s32 data, s32 item, u32 flags) {
+    func_002BDDD0(record, ((EffectRecordSource *)data)->records + item * 0x24, flags);
     return 1;
 }
 
-u32 func_002BDE50(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x10) = 0;
+u32 func_002BDE50(s32 record, u32 unused) {
+    ((EffectRecordState *)record)->resource = 0;
     return 1;
 }
 
@@ -747,10 +779,10 @@ INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BDF28);
 
 u32 func_002BE0C0(s32 work, s32 index, void *value) {
     s32 offset = index * 0xA0;
-    if (*(void **)(offset + ((EffectSlotSet *)work)->workEntries + 0x9C) == 0) {
+    if (((BdWork *)(offset + ((EffectSlotSet *)work)->workEntries))->alternate == 0) {
         func_002BD620((void *)work, index, (BdWork *)value);
     }
-    *(void **)(offset + ((EffectSlotSet *)work)->workEntries + 0x9C) = value;
+    ((BdWork *)(offset + ((EffectSlotSet *)work)->workEntries))->alternate = (s32)value;
     return 1;
 }
 
@@ -763,10 +795,10 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
     s32 offset = index * 0xA0;
     u32 i;
     EffectMaterialSlot *slots;
-    if (*(void **)(offset + ((EffectSlotSet *)work)->workEntries + 0x9C) == NULL) {
+    if (((BdWork *)(offset + ((EffectSlotSet *)work)->workEntries))->alternate == 0) {
         func_002BD620((void *)work, index, asset);
     }
-    *(BdWork **)(offset + ((EffectSlotSet *)work)->workEntries + 0x9C) = asset;
+    ((BdWork *)(offset + ((EffectSlotSet *)work)->workEntries))->alternate = (s32)asset;
     slots = (EffectMaterialSlot *)((u8 *)asset + 0x30);
     for (i = 0; i < 2; i++) {
         slots[i].value = value;
@@ -774,8 +806,8 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
     return 1;
 }
 
-u32 func_002BE1C8(s32 arg0, s32 arg1) {
-    ((BdWork *)(arg1 * 0xa0 + ((EffectSlotSet *)arg0)->workEntries))->alternate = 0;
+u32 func_002BE1C8(s32 work, s32 index) {
+    ((BdWork *)(index * 0xa0 + ((EffectSlotSet *)work)->workEntries))->alternate = 0;
     return 1;
 }
 
@@ -790,7 +822,7 @@ u32 func_002BE1E8(s32 work, s32 index, u32 value, u32 flags) {
 
 u32 func_002BE258(s32 work, s32 index, s32 data, s32 item, u32 flags) {
     s32 effect = ((EffectSlotSet *)work)->workEntries + index * 0xA0;
-    func_002BDDD0((u32 *)(effect + 0x28), *(u32 *)(data + 8) + item * 0x24, flags);
+    func_002BDDD0((u32 *)(effect + 0x28), ((EffectRecordSource *)data)->records + item * 0x24, flags);
     func_002BDF28(work, index, (BdWork *)effect);
     return 1;
 }
@@ -798,7 +830,7 @@ u32 func_002BE258(s32 work, s32 index, s32 data, s32 item, u32 flags) {
 u32 func_002BE2D8(s32 work, s32 index, s32 data, s32 item,
                   u32 flags, u32 color, u32 option) {
     s32 effect = ((EffectSlotSet *)work)->workEntries + index * 0xA0;
-    func_002BDDD0((u32 *)(effect + 0x28), *(u32 *)(data + 8) + item * 0x24, option);
+    func_002BDDD0((u32 *)(effect + 0x28), ((EffectRecordSource *)data)->records + item * 0x24, option);
     func_002BDF28(work, index, (BdWork *)effect);
     ((BdWork *)effect)->materialFlags = flags;
     ((BdWork *)effect)->materialColor = color;
@@ -810,28 +842,28 @@ u32 effConfigureWithDefaultSetting(u32 effect, u32 slot, u32 kind, u32 value, u3
     return 1;
 }
 
-u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
+u32 effResetRecordRun(u8 *work, u32 first, u32 unused) {
     u32 i = 0;
     u32 index;
 
     do {
-        func_002BDE50((first + i) * 0xA0 + ((EffectSlotSet *)table)->workEntries + 0x28, arg);
+        func_002BDE50((first + i) * 0xA0 + ((EffectSlotSet *)work)->workEntries + 0x28, unused);
         i++;
         index = first + i;
-    } while (index < ((EffectSlotSet *)table)->count && (*(u32 *)(index * 0x80 + ((EffectSlotSet *)table)->descriptions + 0x18) & 0x20));
+    } while (index < ((EffectSlotSet *)work)->count && (((EffectSlotDescription *)(index * 0x80 + ((EffectSlotSet *)work)->descriptions))->flags & 0x20));
     return 1;
 }
 
-void effSelectPresetByKind(u32 mode, u32 arg) {
+void effSelectPresetByKind(u32 mode, u32 value) {
     switch (mode) {
     case 0:
-        func_002C0A48(0x44, arg);
+        func_002C0A48(0x44, value);
         return;
     case 1:
-        func_002C0A48(0x48, arg);
+        func_002C0A48(0x48, value);
         return;
     case 2:
-        func_002C0A48(0x42, arg);
+        func_002C0A48(0x42, value);
         break;
     }
 }
@@ -843,9 +875,9 @@ INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE728);
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE8A8);
 
 void func_002BED28(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
-    effSelectPresetByKind(arg6, arg7);
-    func_002C0F88(arg0, arg1, arg2, arg3, arg4, arg5, arg7);
-    func_002C0A48(0x44, arg7);
+                                    u32 arg4, u32 arg5, u32 presetMode, u32 presetValue) {
+    effSelectPresetByKind(presetMode, presetValue);
+    func_002C0F88(arg0, arg1, arg2, arg3, arg4, arg5, presetValue);
+    func_002C0A48(0x44, presetValue);
 }
 

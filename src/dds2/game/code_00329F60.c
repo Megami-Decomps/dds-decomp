@@ -40,7 +40,7 @@ extern SdfTex *D_004389F8;
 
 extern u8 D_00439148;
 
-void func_0032CAE0(void *arg0, s32 arg1);
+void func_0032CAE0(void *request, s32 value);
 
 typedef struct SdfTexHead {
     SdfTex *unk0; /* 0x0 */
@@ -59,13 +59,13 @@ extern SdfTexHead *D_00439140;
 
 void *func_00328D68(s32 size);
 
-s32 func_0032AA40(void *arg0);
+s32 func_0032AA40(SdfTexBlock *block);
 
-void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
+void sdfInitializeSynchronizedRequest(void *request, void (*onComplete)(void *));
 
-extern SdfTexHead *func_0032A688(s32 size, s32 arg1);
+extern SdfTexHead *func_0032A688(s32 size, s32 allocationMode);
 
-extern SdfTexHead *func_0032A7A8(s32 size, s32 arg1);
+extern SdfTexHead *func_0032A7A8(s32 size, s32 allocationMode);
 
 extern SdfSemaObj D_004681F8;
 
@@ -197,15 +197,15 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A688);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A7A8);
 
-SdfTexHead *func_0032A8C8(s32 width, s32 height, s32 format, s32 arg3, s32 arg4) {
+SdfTexHead *func_0032A8C8(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
     s32 bits = sdfFormatBitsPerPixelA(format);
     s32 size = (width * height * bits) >> 5;
     SdfTexHead *node;
 
-    if (arg4 != 0) {
-        node = func_0032A688(size, arg3);
+    if (useFirstAllocator != 0) {
+        node = func_0032A688(size, allocationMode);
     } else {
-        node = func_0032A7A8(size, arg3);
+        node = func_0032A7A8(size, allocationMode);
     }
     node->width = width;
     node->height = height;
@@ -239,16 +239,16 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A9D8);
 extern s32 func_0036DE70();
 
 
-s32 func_0032AA40(void *node) {
+s32 func_0032AA40(SdfTexBlock *block) {
     s32 interruptsEnabled;
-    u8 *next;
+    SdfTexBlock *next;
 
-    if (node != NULL) {
+    if (block != NULL) {
         interruptsEnabled = func_0036DE70();
-        *(s32 *)((u8 *)node + 8) = 0;
-        func_0032A968(node);
-        next = *(u8 **)node;
-        if (next != NULL && *(s32 *)(next + 8) == 0) {
+        block->used = 0;
+        func_0032A968(block);
+        next = block->next;
+        if (next != NULL && next->used == 0) {
             func_0032A968(next);
         }
         if (interruptsEnabled != 0) {
@@ -257,8 +257,8 @@ s32 func_0032AA40(void *node) {
     }
 }
 
-void func_0032AAB8(s32 arg0) {
-    func_0032CAE0(&D_00439148, arg0);
+void func_0032AAB8(s32 value) {
+    func_0032CAE0(&D_00439148, value);
 }
 
 void sdfTexInitializeLists(void) {
@@ -435,8 +435,8 @@ s32 sdfTexGetSecondaryBufferSize(SdfTex *tex) {
     return ((buf->unk0 & 0x7FFF) + 1) << 4;
 }
 
-u8 func_0032B240(s32 arg0) {
-    return *(u8 *)(arg0 + 0x18);
+u8 func_0032B240(SdfTex *texture) {
+    return texture->unk18;
 }
 
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture) {
@@ -484,21 +484,21 @@ u64 func_0032B338(SdfTex *texture) {
     return texture->unk28->unk30;
 }
 
-void sdfTexSetPrimaryBufferModeBits(SdfTex *arg0, s32 arg1, s32 arg2) {
+void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 firstMode, s32 secondMode) {
     SdfTexBuf *buf;
 
-    buf = arg0->unk28;
-    buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
+    buf = texture->unk28;
+    buf->unk10 = (buf->unk10 & ~0x1E0) | (firstMode << 5) | (secondMode << 6);
 }
 
-void func_0032B370(SdfTex *tex, s32 arg1, s32 arg2) {
+void func_0032B370(SdfTex *tex, s32 firstMode, s32 secondMode) {
     SdfTexBuf *buf = tex->unk2C;
 
     if (buf == NULL) {
         sdfTexCreateSecondPacket();
         buf = tex->unk2C;
     }
-    buf->unk10 = (arg2 << 6) | ((arg1 << 5) | (buf->unk10 & ~0x1E0));
+    buf->unk10 = (secondMode << 6) | ((firstMode << 5) | (buf->unk10 & ~0x1E0));
 }
 
 void func_0032B3E0(SdfTex *texture, u8 value) {
@@ -528,20 +528,20 @@ void func_0032B558(SdfTex *tex) {
     }
 }
 
-void sdfTexListInsert(SdfTex *arg0) {
-    arg0->next = NULL;
+void sdfTexListInsert(SdfTex *texture) {
+    texture->next = NULL;
     if (D_004389F8 != NULL) {
-        arg0->prev = D_004389F8;
-        D_004389F8->next = arg0;
+        texture->prev = D_004389F8;
+        D_004389F8->next = texture;
     } else {
-        arg0->prev = NULL;
+        texture->prev = NULL;
     }
-    D_004389F8 = arg0;
+    D_004389F8 = texture;
 }
 
 extern void *func_00328E18(s32 size);
 
-SdfTex *func_0032B5D8(s32 x, s32 y, s32 arg2, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+SdfTex *func_0032B5D8(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
     SdfTex *tex = func_00328E18(0x40);
     SdfTexRef *ref = func_00328E18(8);
 
@@ -550,7 +550,7 @@ SdfTex *func_0032B5D8(s32 x, s32 y, s32 arg2, s32 arg3, s32 primary, s32 arg5, s
     tex->unk19 = arg5;
     tex->unkC = x;
     tex->unkE = y;
-    tex->unk1A = arg2;
+    tex->unk1A = pixelFormat;
     tex->unk1B = arg3;
     tex->secondaryResource = (SdfTexResource *)secondary;
     tex->primaryResource = (SdfTexResource *)primary;
