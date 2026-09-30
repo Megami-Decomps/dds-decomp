@@ -276,6 +276,18 @@ typedef struct MenuWindowContainer {
     u32 state;             /* 0x94 */
 } MenuWindowContainer;
 
+/* Menu-owned window and selection state (only offsets shared by these handlers). */
+typedef struct MenuPartyRuntime {
+    u8 pad00[8];
+    MenuWindowContainer *primaryWindow; /* 0x08 */
+    u8 pad0C[0x18];
+    MenuWindowContainer *selectedWindow; /* 0x24 */
+    u8 pad28[0xC];
+    u32 selectedIndex; /* 0x34: compared with MenuListNode.index */
+    u8 pad38[0x1DA0];
+    s32 state1DD8; /* 0x1DD8: checked before func_002B2408 */
+} MenuPartyRuntime;
+
 extern MenuListNode *func_00328E18(s32);
 
 extern void ptyRecomputeMaxHpMp();
@@ -440,7 +452,7 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0FA0);
 
 void func_002B1150(s32 context) {
-    mnuDestroyWindowContainer(*(u32 *)(((MenuContext *)context)->party + 8));
+    mnuDestroyWindowContainer((u32)((MenuPartyRuntime *)((MenuContext *)context)->party)->primaryWindow);
 }
 
 typedef struct PartyEntryCopy {
@@ -515,7 +527,8 @@ void func_002B17C0(s32 context) {
     for (i = 0; i < 5; i++) {
         *(u32 *)(context + 0x300 + i * 0x2138) |= 0x40;
     }
-    for (node = *(s32 *)(*(s32 *)(*(s32 *)((s32)menu + 8) + 0x18) + 0x10); node != 0; node = *(s32 *)(node + 0x58)) {
+    for (node = (s32)((MenuWindowContainer *)*(s32 *)((s32)menu + 8))->list->first;
+         node != 0; node = (s32)((MenuListNode *)node)->next) {
         ((MenuListNode *)node)->flags48 &= ~1;
     }
 }
@@ -545,7 +558,7 @@ void func_002B1BF0(s32 menu) {
     func_002C42C0(menu + 0x54, D_003E7588);
     func_002BB498(((MenuContext *)menu)->panelHandle, ((MenuContext *)menu)->displayHandle, 0, 1);
     func_002BAF50(((MenuContext *)menu)->imageHandle, menu + 0xB10C);
-    *(s32 *)(party + 0x1DD8) = 1;
+    ((MenuPartyRuntime *)party)->state1DD8 = 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1C68);
@@ -602,7 +615,7 @@ s64 func_002B2698(s32 callback) {
         **(u32 **)(*(s32 *)(menu + 8) + 0x18) &= ~0x10;
     }
     func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
-    if (*(s32 *)(menu + 0x1dd8) == 0) {
+    if (((MenuPartyRuntime *)menu)->state1DD8 == 0) {
         func_002B2408(context);
     }
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
@@ -708,7 +721,7 @@ s64 func_002B2B48(s32 callback) {
     func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
     if (menu[9] != 0) {
-        func_002AAC98(0, **(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c), D_003E69B0, context, 1, 0x53);
+        func_002AAC98(0, ((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index, D_003E69B0, context, 1, 0x53);
     }
     return menuSetHandler(context, 1, callback);
 }
@@ -854,8 +867,8 @@ u32 func_002B40B8(u32 callback) {
 
     party = func_00101958();
     party = ((MenuContext *)party)->party;
-    mnuDestroyWindowContainer(*(u32 *)(party + 0x24));
-    *(u32 *)(party + 0x24) = 0;
+    mnuDestroyWindowContainer((u32)((MenuPartyRuntime *)party)->selectedWindow);
+    ((MenuPartyRuntime *)party)->selectedWindow = 0;
     return 1;
 }
 
@@ -935,7 +948,7 @@ u32 mnuCreateItemState(s32 callback) {
     memset(state, 0, 0x3c);
     state[0] = handle;
     func_002B4270(context);
-    switch (**(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c)) {
+    switch (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index) {
     case 0:
         func_002BB498(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->labelHandle, 0, 0);
         break;
@@ -946,7 +959,7 @@ u32 mnuCreateItemState(s32 callback) {
         func_002BB498(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->labelHandle, 0xa, 0);
         break;
     }
-    mnuSeekListNode(0, (MenuList *)*(s32 *)(((MenuContext *)context)->listHandle + 0x18));
+    mnuSeekListNode(0, ((MenuWindowContainer *)((MenuContext *)context)->listHandle)->list);
     return 1;
 }
 
@@ -966,13 +979,13 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4E58);
 s64 func_002B5028(s32 callback) {
     s32 context = func_00101958();
     func_002AAE80(callback);
-    if (**(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c) == 0) {
+    if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
         mnuCreateStaffImageSprite(1);
     } else {
         mnuCreateStaffImageSprite(0xe);
     }
-    func_002AAC98(0, **(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c), D_003E69B0, context, 1, 0x53);
-    if (**(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c) == 0) {
+    func_002AAC98(0, ((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index, D_003E69B0, context, 1, 0x53);
+    if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
         func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     } else {
         func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
@@ -990,21 +1003,21 @@ void func_002B5160(void) {
     s32 context;
 
     context = func_00101958();
-    *(u32 *)(((MenuContext *)context)->party + 0x34) = 0xffffffff;
+    ((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedIndex = 0xffffffff;
 }
 
 u32 func_002B5190(s32 callback) {
     s32 context;
 
     context = func_00101958();
-    return ~*(u32 *)(((MenuContext *)context)->party + 0x34) >> 0x1f;
+    return ~((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedIndex >> 0x1f;
 }
 
 void func_002B51C8(void) {
     u8 *state = *(u8 **)(func_00101958() + 0xaa48);
-    u8 *node = *(u8 **)(*(u8 **)(*(u8 **)(state + 0x24) + 0x18) + 0x10);
+    u8 *node = (u8 *)((MenuPartyRuntime *)state)->selectedWindow->list->first;
     while (node != NULL) {
-        if (*(u32 *)node == *(u32 *)(state + 0x34)) {
+        if (((MenuListNode *)node)->index == ((MenuPartyRuntime *)state)->selectedIndex) {
             ((MenuListNode *)node)->flags48 |= 2;
         } else {
             ((MenuListNode *)node)->flags48 &= ~2;
@@ -1019,7 +1032,7 @@ u32 func_002B5358(void) {
     s32 context = func_00101958();
     u32 *state = (u32 *)((MenuContext *)context)->party;
     s32 image = ((MenuContext *)context)->imageHandle;
-    if (**(s32 **)(*(s32 *)(image + 0x18) + 0x1c) == 0) {
+    if (((MenuWindowContainer *)image)->list->cursor->index == 0) {
         func_002BAF50(image, context + 0xb10c);
     }
     state[12] = 0;
@@ -1099,7 +1112,7 @@ s64 func_002B5980(s32 callback) {
     if (state != 0) {
         return state;
     }
-    if (**(s32 **)(*(s32 *)(*(s32 *)(context + 0x104) + 0x18) + 0x1c) == 0) {
+    if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
         func_002B5450(callback);
     } else if (menu[12] == 0) {
         func_002B5580(callback);
@@ -1115,14 +1128,14 @@ s64 func_002B5BE8(s32 callback) {
     s32 context = func_00101958();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
     s32 label;
-    if (**(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c) == 0) {
+    if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
         func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     } else {
         func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
         func_002B5A30(context);
     }
     func_002AAE80(callback);
-    if (**(s32 **)(*(s32 *)(((MenuContext *)context)->imageHandle + 0x18) + 0x1c) == 0) {
+    if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
         mnuCreateStaffImageSprite(2);
     } else if (menu[12] != 0) {
         if (func_002B5190(callback) == 0) {
@@ -1135,7 +1148,7 @@ s64 func_002B5BE8(s32 callback) {
     } else {
         mnuCreateStaffImageSprite(0x10);
     }
-    label = *(s32 *)(*(s32 *)(*(s32 *)(menu[9] + 0x18) + 0x1c) + 0x60);
+    label = ((MenuWindowContainer *)menu[9])->list->cursor->sortKeyPrimary;
     if (label != 0xffff && label != 0) {
         func_002AAC70(0, label, D_00435E6C, context, 1, 1, 0x53);
     } else {
@@ -1154,7 +1167,7 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5DE8);
 
 void mnuFlagMatchingEntries(s32 context) {
     s32 slot = D_00435DD0 + **(s32 **)(((MenuContext *)context)->selectionList + 0x1c) * 0x1c4 + 0xa60;
-    MenuLink *link = *(MenuLink **)(*(s32 *)(*(s32 *)(((MenuContext *)context)->party + 0x24) + 0x18) + 0x10);
+    MenuLink *link = (MenuLink *)((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedWindow->list->first;
     if (link != NULL) {
         do {
             if (func_002C4FB8(link->id, slot)) {
@@ -1178,7 +1191,7 @@ s64 func_002B5FA8(s32 callback) {
     if (state != 0) {
         return state;
     }
-    label = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(menu + 0x24) + 0x18) + 0x1c) + 0x60);
+    label = ((MenuPartyRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary;
     code = label;
     if (func_002C50C0(code) == 2) {
         ((MenuContext *)context)->actionFlags |= 0x10;
@@ -1205,8 +1218,8 @@ s64 func_002B60E8(s32 callback) {
     u8 *menu = *(u8 **)(context + 0xaa48);
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(3);
-    func_002AAC70(0, *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(menu + 0x24) + 0x18) + 0x1c) + 0x60), D_00435E6C, context, 1, 1, 0x53);
-    **(u32 **)(*(s32 *)(menu + 0x24) + 0x18) &= ~8;
+    func_002AAC70(0, ((MenuPartyRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary, D_00435E6C, context, 1, 1, 0x53);
+    ((MenuPartyRuntime *)menu)->selectedWindow->list->unk0 &= ~8;
     func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
     return menuSetHandler(context, 1, callback);
@@ -1276,8 +1289,8 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6498);
 s64 func_002B66D8(s32 callback) {
     s32 context = func_00101958();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
-    s32 index = **(s32 **)(menu[3] + 0x1c);
-    s32 label = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)((s32)menu + 0x10 + (index << 2)) + 0x18) + 0x1c) + 0x60);
+    s32 index = ((MenuList *)menu[3])->cursor->index;
+    s32 label = ((MenuWindowContainer *)*(s32 *)((s32)menu + 0x10 + (index << 2)))->list->cursor->sortKeyPrimary;
     func_002B5A30(context);
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(0xf);
@@ -1359,8 +1372,8 @@ u32 func_002B6FA8(u32 callback) {
 
     party = func_00101958();
     party = ((MenuContext *)party)->party;
-    mnuDestroyWindowContainer(*(u32 *)(party + 0x24));
-    *(u32 *)(party + 0x24) = 0;
+    mnuDestroyWindowContainer((u32)((MenuPartyRuntime *)party)->selectedWindow);
+    ((MenuPartyRuntime *)party)->selectedWindow = 0;
     return 1;
 }
 
@@ -2202,25 +2215,25 @@ void func_002B9DD8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 par
 }
 
 void func_002B9EA0(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
-    s32 texture = *(s32 *)(menu + 0x94);
+    s32 texture = ((MenuWindowContainer *)menu)->state;
     s32 count;
 
-    *(s32 *)(*(s32 *)(menu + 0x18) + 0x3C) = texture;
+    *(s32 *)((u8 *)((MenuWindowContainer *)menu)->list + 0x3C) = texture;
     func_002B9CF8(x, y, depth, menu, param);
     func_002B9CD8(x, y, depth, menu, param);
-    if (*(s32 *)(*(s32 *)(menu + 0x18) + 0x20) != 0) {
+    if (((MenuWindowContainer *)menu)->list->count != 0) {
         func_002B9DD8(x, y, depth, menu, param);
     }
-    func_002B9218(x, y, depth, *(s32 *)(menu + 0x10), *(s32 *)(menu + 0x14), texture, *(s32 *)(menu + 4),
-                  *(s32 *)(menu + 0x18), param);
-    if (*(s32 *)(menu + 0x90) != 0) {
+    func_002B9218(x, y, depth, ((MenuWindowContainer *)menu)->width, ((MenuWindowContainer *)menu)->height,
+                  texture, ((MenuWindowContainer *)menu)->flags, (s32)((MenuWindowContainer *)menu)->list, param);
+    if (((MenuWindowContainer *)menu)->resource != 0) {
         func_002B9BB0(x, y, depth, menu, param);
     }
-    count = *(s32 *)(menu + 0x94);
+    count = ((MenuWindowContainer *)menu)->state;
     if (count < 0x100) {
-        *(s32 *)(menu + 0x94) = count + 0x20;
+        ((MenuWindowContainer *)menu)->state = count + 0x20;
     }
-    *(u32 *)(menu + 4) |= 4;
+    ((MenuWindowContainer *)menu)->flags |= 4;
 }
 
 void func_002B9FB8(s32 window) {
