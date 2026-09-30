@@ -34,7 +34,7 @@ typedef struct MdlViewState {
     s16 unk34;
     s16 unk36;
     s16 unk38;
-    s16 unk3A;
+    s16 nodeCursor; /* 0x3A: selection within the loaded node count */
     u8 pad3C[4];
     s16 unk40;
     s16 unk42;
@@ -1022,6 +1022,7 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 void func_0021A880(void) {
     MdlResource *resource = func_00217680(D_003D7A50.unk18, D_003D7A50.unk1A);
 
+    /* Required to match: storing through a typed pointer preserves the load/store order. */
     *(MdlResource **)&D_003D7A50.resources[0] = resource;
     D_003D7A50.unk22 = 0;
     D_003D7A50.unk24 = 0;
@@ -1032,7 +1033,7 @@ void func_0021A880(void) {
     if (resource->hasEntries != 0) {
         mdlAddEntryFlagged(resource, 0, 0);
     }
-    D_003D7A50.unk3A = 0;
+    D_003D7A50.nodeCursor = 0;
 }
 
 extern u128 D_003D7B20;
@@ -1293,13 +1294,13 @@ typedef struct MdlLoaded {
 } MdlLoaded;
 
 void func_0021C6A0(void) {
-    s32 firstNode = (s32)((MdlLoaded *)D_003D7A50.resources[0])->info->first;
+    MdlCountNode *firstNode = ((MdlLoaded *)D_003D7A50.resources[0])->info->first;
 
     if (firstNode != 0) {
-        s16 nodeCount = ((MdlCountNode *)firstNode)->count;
+        s16 nodeCount = firstNode->count;
 
         if (nodeCount > 0) {
-            func_0021A660((void *)((s32)&D_003D7A50 + 0x3A), nodeCount);
+            func_0021A660(&D_003D7A50.nodeCursor, nodeCount);
         }
     }
 }
@@ -1420,7 +1421,7 @@ void func_0021D668(void) {
 
     if (D_003D7A50.unk0A == 3) {
         list = sdfCreateResetPacketList();
-        resource = *(MdlResource **)&D_003D7A50.resources[0];
+        resource = (MdlResource *)D_003D7A50.resources[0];
         __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(resource->chunk + 0x20));
         packet = func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
         if ((D_00398628[13] < 0) & (D_003BBCB8 == 0)) {

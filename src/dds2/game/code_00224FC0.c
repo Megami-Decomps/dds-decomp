@@ -151,7 +151,8 @@ void func_00226558(u8 value) {
 
     battle = (BattleActionContext *)func_001AA6F8();
     if (battle->battleId == 0x31b) {
-        *(u8 *)battle->effect = value;
+        /* Only the low byte at +0x00 changes; other paths use the full word as an actor. */
+        ((u8 *)&battle->effect->actor)[0] = value;
     }
 }
 
@@ -170,8 +171,9 @@ s32 btlFilterRestrictedCommand(BattleActionUnit *battler, s32 command) {
     return command;
 }
 
-u8 func_002266A8(u32 arg0, s32 arg1) {
-    return arg1 == 0xf;
+/* This command selector ignores the unit and tests only the requested command. */
+u8 func_002266A8(u32 unusedUnit, s32 command) {
+    return command == 0xf;
 }
 
 s32 btlSelectDisabledCommand(BattleActionUnit *battler) {
@@ -252,22 +254,38 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226A60);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226AB0);
 
+/* This effect path treats the word normally used as an actor pointer at +0x114
+ * as bit flags; keep the view separate from BattleActionUnit. */
+typedef struct BattleEffectUnitView {
+    u8 pad00[0x110];
+    u32 flags;
+    u32 stateBits;
+} BattleEffectUnitView;
+
+/* Here +0x10 is a float, although other effect paths use it as a handle. */
+typedef struct BattleEffectResetView {
+    BattleEffectUnitView *actor;
+    u8 pad04[0xC];
+    f32 value10;
+    f32 speed;
+} BattleEffectResetView;
+
 void func_00226BB8(void) {
-    u8 *effect = *(u8 **)((u8 *)func_001AA6F8() + 0x718);
-    u8 *actor = *(u8 **)effect;
+    BattleEffectResetView *effect = (BattleEffectResetView *)((BattleActionContext *)func_001AA6F8())->effect;
+    BattleEffectUnitView *actor = effect->actor;
     if (actor != 0) {
-        u32 state = *(u32 *)(actor + 0x114);
-        u32 flags = *(u32 *)(actor + 0x110);
+        u32 state = actor->stateBits;
+        u32 flags = actor->flags;
         state &= ~0x80;
         state &= ~0x100;
         flags |= 0x100;
-        *(u8 **)effect = 0;
-        *(u32 *)(actor + 0x110) = flags;
-        *(u32 *)(actor + 0x114) = state;
+        effect->actor = 0;
+        actor->flags = flags;
+        actor->stateBits = state;
         func_001E2758(actor);
-        *(u32 *)(actor + 0x110) |= 8;
-        *(f32 *)(effect + 0x10) = -125.0f;
-        *(f32 *)(effect + 0x14) = 20.0f;
+        actor->flags |= 8;
+        effect->value10 = -125.0f;
+        effect->speed = 20.0f;
     }
 }
 
