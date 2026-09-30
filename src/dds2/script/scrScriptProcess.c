@@ -113,7 +113,28 @@ INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BFE0);
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C058);
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C100);
+/* Node of the script-name table walked by func_0010C100. */
+typedef struct ScriptNameNode {
+    char name[1];                 /* 0x0: the name text is stored in place */
+    u8 pad01[0xEB];
+    struct ScriptNameNode *next; /* 0xEC */
+} ScriptNameNode;
+
+extern ScriptNameNode *D_00435D64;
+extern s32 strcmp(const char *a, const char *b);
+
+/* Find the node whose name matches, or NULL when the table is exhausted. */
+ScriptNameNode *func_0010C100(char *name) {
+    ScriptNameNode *node = D_00435D64;
+
+    while (node != NULL) {
+        if (strcmp(name, node->name) == 0) {
+            return node;
+        }
+        node = node->next;
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", bfFindScriptIndexByName);
 

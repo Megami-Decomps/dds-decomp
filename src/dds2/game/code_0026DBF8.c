@@ -1185,7 +1185,23 @@ void func_00271250(u32 pool, u32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00271290);
+void func_00271290(s32 pool, u32 flags) {
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 1);
+    MantraFadeState *fade;
+
+    if (item != 0) {
+        fade = item->data;
+        if (fade->delay == 0) {
+            fade->armed = 0;
+            fade->countdown = 0;
+            fade->flagsC = flags;
+            fade->flags10 = 0;
+            fade->queuedFlags = flags;
+        } else {
+            fade->queuedFlags = flags;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002712E0);
 
