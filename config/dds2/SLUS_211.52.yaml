@@ -140,6 +140,7 @@ segments:
       - [0x8D190, c, effect/effPCPBoss]  # Nocturne __FILE__
       - [0x8EA70, c, game/code_0018DA70]
       - [0x8F8F0, c, effect/effBlur_Filter]  # Nocturne __FILE__
+      - [0x90018, c, game/code_0018F018]
       - [0x909E8, c, game/code_0018F9E8]
       - [0x90E60, c, effect/effModelTrackPoly]  # Nocturne __FILE__
       - [0x91D10, c, game/code_00190D10]
@@ -170,6 +171,7 @@ segments:
       - [0x125FC0, c, game/code_00224FC0]
       - [0x128288, c, game/code_00227288]
       - [0x132690, c, model/mdlManager]  # Nocturne __FILE__
+      - [0x132A80, c, game/code_00231A80]
       - [0x134660, c, game/code_00233660]
       - [0x13B9A8, c, event/evtStage]  # Nocturne __FILE__
       - [0x13BF20, c, game/code_0023AF20]
@@ -219,6 +221,8 @@ segments:
       - [0x1A15C0, c, game/code_002A05C0]
       - [0x1A4AE8, c, game/code_002A3AE8]
       - [0x1A6260, c, game/code_002A5260]
+      - [0x1A9048, c, game/code_002A8048]
+      - [0x1AA068, c, game/code_002A9068]
       - [0x1ABEA0, c, game/code_002AAEA0]
       - [0x1AC890, c, game/code_002AB890]
       - [0x1AE3B8, c, game/code_002AD3B8]
@@ -388,6 +392,8 @@ segments:
       - [0x329560, .rodata, game/code_0029DF18]
       - [0x3295F0, .rodata, game/code_002A05C0]
       - [0x3297A0, .rodata, game/code_002A5260]
+      - [0x32B3C8, .rodata, game/code_002A8048]  # `movieMan` (func_002A8080)
+      - [0x32B440, .rodata, game/code_002A9068]  # 16-aligned block start (jump tables); movie strings end at 0x42A438
       - [0x32BCA0, .rodata, game/code_002AD3B8]
       - [0x32BD20, .rodata, game/code_002B0278]
       - [0x32C000, .rodata, game/code_002BD5C8]
@@ -454,6 +460,7 @@ segments:
       - [0x3344C4, .lit4, effect/effPCPBoss]
       - [0x3344C8, .lit4, game/code_0018DA70]
       - [0x3344D0, .lit4, effect/effBlur_Filter]
+      - [0x3344DC, .lit4, game/code_0018F018]
       - [0x3344E0, .lit4, game/code_0018F9E8]
       - [0x3344E8, .lit4, game/code_00190D10]
       - [0x3344F0, .lit4, effect/effMagatuhi]
@@ -473,7 +480,7 @@ segments:
       - [0x3354A0, .lit4, game/code_0021EE10]
       - [0x335F28, .lit4, game/code_00224FC0]
       - [0x336218, .lit4, game/code_00227288]
-      - [0x336368, .lit4, model/mdlManager]
+      - [0x336368, .lit4, game/code_00231A80]
       - [0x33636C, .lit4, game/code_00233660]
       - [0x3363C4, .lit4, event/evtStage]
       - [0x3363D0, .lit4, event/evtUnitManager]
@@ -560,7 +567,7 @@ segments:
       - [0x337CC0, .sdata, game/code_002112C8]
       - [0x337CF0, .sdata, game/code_0021EE10]
       - [0x337CF8, .sdata, game/code_00227288]
-      - [0x337FA0, .sdata, model/mdlManager]
+      - [0x337FA0, .sdata, game/code_00231A80]  # `/model/` (func_00231B50)
       - [0x337FAC, .sdata, game/code_00233660]
       - [0x3381EC, .sdata, game/code_0023D658]
       - [0x3381F8, .sdata, game/code_00242CB8]
@@ -583,6 +590,8 @@ segments:
       - [0x3389B0, .sdata, game/code_00299D58]
       - [0x3389B8, .sdata, game/code_0029AFC0]
       - [0x3389C0, .sdata, game/code_0029BC58]
+      - [0x338AE8, .sdata, game/code_002A8048]  # first used by func_002A80C0
+      - [0x338B78, .sdata, game/code_002A9068]
       - [0x338B88, .sdata, game/code_002AAEA0]
       - [0x338BD0, .sdata, game/code_002AD3B8]
       - [0x338BE0, .sdata, game/code_002B0278]
@@ -594,6 +603,7 @@ segments:
       - [0x339868, .sdata, game/code_00306F80]
       - [0x339888, .sdata, game/code_0030A128]
       - [0x3398B4, .sdata, game/code_0030B7D0]
+      - [0x339908, .sdata, game/code_00313BB8]  # `at` (func_00313BB8)
       - [0x33991C, .sdata, game/code_00316E08]
       - [0x339950, .sdata, game/code_0031B188]
       - [0x339958, .sdata, game/code_0031D890]
