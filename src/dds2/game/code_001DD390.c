@@ -419,6 +419,14 @@ typedef struct SoundEntry {
 
 extern SoundEntry D_003BDE18[];
 
+typedef struct BtlAt3Entry {
+    u8 volume;
+    u8 pad01[3];
+    char fileName[12];
+} BtlAt3Entry;
+
+extern BtlAt3Entry D_003E0F60[];
+
 extern s128 D_003B6B80;
 
 extern u8 D_003BD7D0[];
@@ -2741,6 +2749,18 @@ SoundTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
+/* Each resource row is 0x14 bytes; the reach offset sits 0x0C into it. */
+typedef struct BtlApproachRecord {
+    u8 pad00[0xC];
+    f32 reachOffset;
+    u8 pad10[4];
+} BtlApproachRecord;
+
+typedef struct BtlApproachTable {
+    u8 pad00[0x2C];
+    BtlApproachRecord records[1];
+} BtlApproachTable;
+
 typedef struct BtlApproachTaskArgs {
     BtlUnit *unit;
     BtlUnit *target;
@@ -2762,8 +2782,8 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     s128 toPos;
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
-        u8 *table = (u8 *)func_001ABFD8(unit->resourceKind, unit->resourceIndex);
-        args->offset = *(f32 *)(table + unit->unkEC * 0x14 + 0x38) * unit->scale;
+        BtlApproachTable *table = (BtlApproachTable *)func_001ABFD8(unit->resourceKind, unit->resourceIndex);
+        args->offset = table->records[unit->unkEC].reachOffset * unit->scale;
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
@@ -5369,7 +5389,7 @@ void func_001ECC18(void *unit, f32 *pose, u8 *out) {
     } else {
         func_00336538(20.0f * 0.017453293f);
     }
-    VU0_STORE_VF(vf10, (u8 *)pose + 0x10);
+    VU0_STORE_VF(vf10, pose + 4);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, out + 0x10);
 }
@@ -7399,7 +7419,12 @@ typedef struct SoundHandleNode {
     void *actor;
 } SoundHandleNode;
 
-INCLUDE_ASM(const s32, "game/code_001DD390", sndCreateSystemEffectHandle);
+SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
+    SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
+    node->actor = actor;
+    node->handle = func_002D4138(D_003BDE18[index].unk4);
+    return node;
+}
 
 extern void mdlLoadPrimaryVectorVU(s32);
 
@@ -8040,14 +8065,6 @@ typedef struct BtlAt3LoadArgs {
     s32 state;
     s32 index;
 } BtlAt3LoadArgs;
-
-typedef struct BtlAt3Entry {
-    u8 volume;
-    u8 pad01[3];
-    char fileName[12];
-} BtlAt3Entry;
-
-extern BtlAt3Entry D_003E0F60[];
 
 s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
     char path[0x80];
