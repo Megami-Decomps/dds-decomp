@@ -48,6 +48,7 @@ typedef struct SdfTextParam {
 typedef struct SdfChunk {
     u32 id;   /* 0x0: entry id, 0 terminates the list */
     u32 size; /* 0x4: byte offset to the next entry */
+    u32 firstValue; /* 0x8: payload of single-value UNIQ/LODC chunks */
 } SdfChunk;
 
 typedef struct SdfMapPositionRecord {
@@ -69,7 +70,7 @@ extern u8 D_00439170;
 
 extern u8 D_00439178;
 
-void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
+void sdfInitializeSynchronizedRequest(void *request, void (*callback)(void));
 
 typedef struct SdfResourceList SdfResourceList;
 void sdfResourceListReleaseAssets(SdfResourceList *);
@@ -78,7 +79,7 @@ extern SdfSubParam *sdfSubParamCreate(void);
 
 void *func_00328D68(s32 size);
 
-void func_0032CAE0(void *arg0, s32 arg1);
+void func_0032CAE0(void *queue, s32 assetId);
 
 void sdfDestroyDevRequest(void *);
 
@@ -124,6 +125,16 @@ extern void func_0032E4B8(void *);
 extern void func_0032E5C8(void *);
 extern void func_0032E6D8(void *);
 extern void func_0032E7E8(void *);
+typedef struct SdfPacketCommand {
+    u8 pad00[0x28];
+    u32 opcode; /* 0x28: packet header command */
+} SdfPacketCommand;
+
+typedef struct SdfPacketFooter {
+    u64 data;
+    u64 opcode;
+} SdfPacketFooter;
+
 void func_00332860(u8 *ctx) {
     u8 *packet = ctx;
     s32 i;
@@ -133,14 +144,14 @@ void func_00332860(u8 *ctx) {
     func_0032E6D8(ctx + 0xE0);
     func_0032E7E8(ctx + 0x140);
     for (i = 0; i != 4; i++) {
-        *(u32 *)(packet + 0x28) = 0x11000000;
+        ((SdfPacketCommand *)packet)->opcode = 0x11000000;
         sdfInitPacketList(packet);
         sdfAppendPacket(packet, packet + 0x20);
         packet += 0x60;
     }
     sdfInitPacketList(ctx + 0x180);
-    *(u64 *)(ctx + 0x1A0) = 0;
-    *(u64 *)(ctx + 0x1A8) = 0x13000000;
+    ((SdfPacketFooter *)(ctx + 0x1A0))->data = 0;
+    ((SdfPacketFooter *)(ctx + 0x1A0))->opcode = 0x13000000;
     sdfAppendPacket(ctx + 0x180, ctx + 0x1A0);
 }
 
@@ -307,7 +318,7 @@ s32 func_00332D48(SdfTextParam *param, s32 id) {
 u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
-        return *(u32 *)((u8 *)chunk + 8);
+        return chunk->firstValue;
     }
     return 0;
 }
@@ -315,7 +326,7 @@ u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
 u32 sdfGetLodChunkValue(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
-        return *(u32 *)((u8 *)chunk + 8);
+        return chunk->firstValue;
     }
     return 0;
 }
@@ -344,8 +355,8 @@ f32 sdfGetSecondTextOverrideOrDefault(SdfTextParam *param) {
     return D_00438A4C;
 }
 
-void func_00332E50(u32 arg0) {
-    D_00438A3C = arg0;
+void func_00332E50(u32 mode) {
+    D_00438A3C = mode;
 }
 
 void *sdfDevCreateBufferedRequest(s32, s32, s32);
@@ -370,15 +381,15 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
 
-void sdfReduceResourceListCount(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp_v0;
+void sdfReduceResourceListCount(s32 listAddress, s32 newCount, s32 applyReduction) {
+    s32 countCursor;
 
-    if ((arg1 < *(s16 *)(arg0 + 4)) && (arg2 != 0)) {
-        temp_v0 = (s32)arg1;
+    if ((newCount < ((SdfResourceList *)listAddress)->count) && (applyReduction != 0)) {
+        countCursor = (s32)newCount;
         do {
-            temp_v0 = temp_v0 + 1;
-        } while ((s64)temp_v0 != (s64)*(s16 *)(arg0 + 4));
-        *(s16 *)(arg0 + 4) = (s16)arg1;
+            countCursor = countCursor + 1;
+        } while ((s64)countCursor != (s64)((SdfResourceList *)listAddress)->count);
+        ((SdfResourceList *)listAddress)->count = (s16)newCount;
     }
     func_003405D8();
 }
@@ -669,23 +680,23 @@ void sdfAssetRelease(SdfAsset *asset) {
     func_00328E48(asset);
 }
 
-void sdfQueueAssetRelease(s32 arg0) {
-    s32 id = arg0;
+void sdfQueueAssetRelease(s32 assetId) {
+    s32 id = assetId;
 
     if (id != 0) {
         func_0032CAE0(&D_00439178, id);
     }
 }
 
-void *sdfInitNodeHeaderFromWords(u32 *arg0, SdfNode *arg1, s32 arg2) {
-    u32 *entry = arg0 + arg2;
+void *sdfInitNodeHeaderFromWords(u32 *words, SdfNode *node, s32 wordIndex) {
+    u32 *entry = words + wordIndex;
 
-    arg1->unk3 = 0x30;
-    arg1->unk4 = entry[2] & 0x0FFFFFFF;
-    arg1->unk0 = 0xA;
-    arg1->unk8 = 0;
-    arg1->unkC = 0;
-    return (void *)((u8 *)arg1 + 0x10);
+    node->unk3 = 0x30;
+    node->unk4 = entry[2] & 0x0FFFFFFF;
+    node->unk0 = 0xA;
+    node->unk8 = 0;
+    node->unkC = 0;
+    return (void *)((u8 *)node + 0x10);
 }
 
 void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
@@ -709,9 +720,19 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_00333A30);
 
-void func_00333B18(s32 arg0, s32 arg1) {
-    func_00333A30(arg1 + 0x68, *(u32 *)(arg0 + 0x38));
+void func_00333B18(s32 assetAddress, s32 entryAddress) {
+    func_00333A30(entryAddress + 0x68, ((SdfAsset *)assetAddress)->third);
 }
+
+typedef struct SdfDrawPacket {
+    u8 pad00[0xC];
+    u32 color; /* 0x0C */
+    u8 pad10[0x10];
+    u32 paletteValue; /* 0x20 */
+    u32 mode;         /* 0x24 */
+    u8 pad28[0x28];
+    u64 textureWords[3]; /* 0x50, 0x58, 0x60 */
+} SdfDrawPacket;
 
 extern u16 D_0040B348[];
 void func_00333B38(SdfAsset *asset, void *entryArg) {
@@ -719,14 +740,14 @@ void func_00333B38(SdfAsset *asset, void *entryArg) {
     SdfTex *tex = *(SdfTex **)((u8 *)asset + 0x30);
     u32 mode;
 
-    *(u32 *)(entry + 0xC) = asset->unk18;
+    ((SdfDrawPacket *)entry)->color = asset->unk18;
     mode = *(u32 *)((u8 *)asset + 0x34);
-    *(u32 *)(entry + 0x24) = mode;
-    *(u32 *)(entry + 0x20) = D_0040B348[mode];
+    ((SdfDrawPacket *)entry)->mode = mode;
+    ((SdfDrawPacket *)entry)->paletteValue = D_0040B348[mode];
     if (tex != NULL) {
-        *(u64 *)(entry + 0x50) = func_0032B328(tex);
-        *(u64 *)(entry + 0x58) = func_0032B318(tex);
-        *(u64 *)(entry + 0x60) = func_0032B338(tex);
+        ((SdfDrawPacket *)entry)->textureWords[0] = func_0032B328(tex);
+        ((SdfDrawPacket *)entry)->textureWords[1] = func_0032B318(tex);
+        ((SdfDrawPacket *)entry)->textureWords[2] = func_0032B338(tex);
     }
     func_00333A30(entry + 0x80, asset->fourth);
 }
@@ -835,8 +856,8 @@ void func_00334008(SdfResourceList *dst, SdfResourceList *src) {
 }
 
 extern s32 (*D_0040B358[])(u32, u32);
-s32 func_00334078(u32 arg0, u32 arg1) {
-    D_0040B358[arg1 >> 16](arg0, arg1);
+s32 func_00334078(u32 context, u32 command) {
+    D_0040B358[command >> 16](context, command);
 }
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A38);

@@ -49,7 +49,11 @@ typedef struct RosterDetail {
 typedef struct EventStatRow {
     u8 pad0[0x11];
     u8 stat;           /* 0x11 */
-    u8 pad12[0x13];
+    u8 pad12[6];
+    s16 stat18;        /* 0x18: script-selected value */
+    u8 pad1A[2];
+    s16 stat1C;        /* 0x1C: alternate script-selected value */
+    u8 pad1E[7];
     u8 scaledStat;     /* 0x25 */
     u8 pad26[7];
     u8 grade;          /* 0x2D */
@@ -68,6 +72,12 @@ typedef struct RosterFlagValue {
     u8 value;          /* 0x04 */
     u8 pad5[0x47];
 } RosterFlagValue; /* 0x4C */
+typedef struct EventIndexRecord {
+    u8 pad0[2];
+    u16 index; /* 0x02 */
+    u8 pad4[4];
+} EventIndexRecord;
+
 
 typedef struct EvtScriptContext {
     u16 stateFlags;      /* 0x00 */
@@ -94,8 +104,8 @@ extern s32 D_003C2E80[];
 extern s32 scrCreateTaskWithDefaultOption(void);
 extern s32 scrReadIntParameter(s32 idx);
 extern s32 func_0010D5F0();
-extern void func_0010D608(f32 arg0);
-extern Entry1A4 *dds3FindEntry(s32 arg0);
+extern void func_0010D608(f32 value);
+extern Entry1A4 *dds3FindEntry(s32 rosterIndex);
 extern void func_00119900(s32 arg0, s32 arg1);
 extern void ptyMergeStockSkills(Entry1A4 *unit);
 extern s32 func_00119368(s32 arg0, s32 arg1);
@@ -106,8 +116,8 @@ extern s32 func_001A92D0(u32 arg0);
 extern s32 func_001A93B8(u32 arg0);
 extern s32 func_001A94A0(u32 arg0);
 extern void *memset(void *dst, s32 c, u32 n);
-extern s32 mdlFlagTest(s32 arg0);
-extern s32 effMiscRandMod(u32 arg0, u32 arg1);
+extern s32 mdlFlagTest(s32 flagIndex);
+extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119900);
 
@@ -123,21 +133,21 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119A00);
 
-u8 evtGetFlaggedRosterValue(s32 arg0) {
-    Entry1A4 *entry = (Entry1A4 *)arg0;
+u8 evtGetFlaggedRosterValue(s32 entryAddress) {
+    Entry1A4 *entry = (Entry1A4 *)entryAddress;
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
     return ((RosterFlagValue *)D_003BAA1C)[entry->rosterIndex].value;
 }
 
-s32 dds3FindEntryIndex(s32 arg0) {
+s32 dds3FindEntryIndex(s32 rosterIndex) {
     Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
     s32 n = 0;
 
     do {
         if (p->flags & 1) {
-            if (p->rosterIndex == arg0) {
+            if (p->rosterIndex == rosterIndex) {
                 return n;
             }
         }
@@ -147,8 +157,8 @@ s32 dds3FindEntryIndex(s32 arg0) {
     return -1;
 }
 
-s8 func_00119AF8(s32 arg0) {
-    return *(s8 *)(arg0 + D_003BAA00 + 0xa76);
+s8 func_00119AF8(s32 index) {
+    return *(s8 *)(index + D_003BAA00 + 0xa76);
 }
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119B08);
@@ -192,8 +202,8 @@ s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     return 0;
 }
 
-void func_00119EF8(s32 arg0, s32 arg1) {
-    *(s32 *)(arg0 + 0x10) = *(s32 *)(arg0 + 0x10) + arg1;
+void func_00119EF8(s32 counterAddress, s32 increment) {
+    *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
 }
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119F08);
@@ -238,8 +248,8 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011A158);
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyInitRuntime);
 
-u16 func_0011A568(s32 arg0) {
-    return *(u16 *)(arg0 * 8 + D_003BAA68 + 2);
+u16 func_0011A568(s32 tableIndex) {
+    return ((EventIndexRecord *)D_003BAA68)[tableIndex].index;
 }
 
 u16 dds3Clamp99(s32 unit) {
@@ -268,8 +278,8 @@ Entry1A4 *dds3FindEntry(s32 rosterIndex) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyRebalanceFrontline);
 
-u8 func_0011A968(s32 arg0) {
-    return dds3FindEntry(arg0) != 0;
+u8 func_0011A968(s32 rosterIndex) {
+    return dds3FindEntry(rosterIndex) != 0;
 }
 
 s32 dds3EntryMax(void) {
@@ -326,8 +336,8 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B308);
 
-void evtCopyRosterTableValue(s32 arg0) {
-    ((Entry1A4 *)arg0)->tableValue = D_0032AEA8[((Entry1A4 *)arg0)->rosterIndex].value;
+void evtCopyRosterTableValue(s32 entryAddress) {
+    ((Entry1A4 *)entryAddress)->tableValue = D_0032AEA8[((Entry1A4 *)entryAddress)->rosterIndex].value;
 }
 
 void evtUpdateFlaggedEntries(void) {
@@ -384,16 +394,16 @@ void dds3ForEachFlagged(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B6A8);
 
-void evtRandomizeEntryValue(s32 arg0) {
+void evtRandomizeEntryValue(s32 entryAddress) {
     s32 randomOffset;
 
     randomOffset = effMiscRandMod(0, 4);
-    ((Entry1A4 *)arg0)->randomizedValue = 0x12 - randomOffset;
+    ((Entry1A4 *)entryAddress)->randomizedValue = 0x12 - randomOffset;
 }
 
 extern s32 D_003BAA00;
 
-extern s32 effMiscRandMod(u32 arg0, u32 arg1);
+extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
 /* Clear a subset of per-unit status flags on occupied qualifying entries,
  * gated by the event RNG; report whether any flags were cleared. */
@@ -535,10 +545,10 @@ s32 evtSelectScriptStatValue(void) {
 
     switch (((EvtScriptContext *)D_003C2E70)->options) {
     case 1:
-        value = *(s16 *)(D_003BAA50 + ((EvtScriptContext *)D_003C2E70)->third * 0x38 + 0x18);
+        value = ((EventStatRow *)D_003BAA50)[((EvtScriptContext *)D_003C2E70)->third].stat18;
         break;
     case 2:
-        value = *(s16 *)(D_003BAA50 + ((EvtScriptContext *)D_003C2E70)->third * 0x38 + 0x1C);
+        value = ((EventStatRow *)D_003BAA50)[((EvtScriptContext *)D_003C2E70)->third].stat1C;
         break;
     default:
         value = 0;
@@ -551,15 +561,15 @@ s32 evtSelectScriptStatValue(void) {
 s32 func_0011BF50(void) {
     s32 *work = D_003C2E70;
     s32 value;
-    u16 mode = *(u16 *)((u8 *)work + 0x14);
-    u16 index = *(u16 *)(D_003BAA68 + ((Entry1A4 *)work[2])->tableValue * 8 + 2);
+    u16 mode = ((EvtScriptContext *)work)->options;
+    u16 index = ((EventIndexRecord *)D_003BAA68)[((Entry1A4 *)work[2])->tableValue].index;
 
     switch (mode) {
     case 1:
-        value = *(s16 *)(D_003BAA50 + index * 0x38 + 0x18);
+        value = ((EventStatRow *)D_003BAA50)[index].stat18;
         break;
     case 2:
-        value = *(s16 *)(D_003BAA50 + index * 0x38 + 0x1C);
+        value = ((EventStatRow *)D_003BAA50)[index].stat1C;
         break;
     default:
         value = 0;
@@ -601,7 +611,7 @@ s32 func_0011C0F0(void) {
 }
 
 s32 func_0011C118(void) {
-    func_0010D5F0((((*(u16 *)D_003C2E78[0]) >> 5) ^ 1) & 1);
+    func_0010D5F0((((((Entry1A4 *)D_003C2E78[0])->flags) >> 5) ^ 1) & 1);
     return 1;
 }
 
@@ -751,7 +761,7 @@ void evtScriptSelectRandomValue(void) {
     s32 value;
     s32 roll;
 
-    if ((*(u16 *)D_003C2E7C[0] & 0x20) == 0) {
+    if ((((Entry1A4 *)D_003C2E7C[0])->flags & 0x20) == 0) {
         roll = effMiscRandMod(0, 0x20);
         value = roll != 0 ? 10 : 0x80;
     } else {
@@ -762,12 +772,12 @@ void evtScriptSelectRandomValue(void) {
 }
 
 void func_0011C5D8(void) {
-    func_0010D5F0(((RosterDetail *)D_003BAA18)[*(u16 *)(D_003C2E78[0] + 4)].baseValue);
+    func_0010D5F0(((RosterDetail *)D_003BAA18)[((Entry1A4 *)D_003C2E78[0])->rosterIndex].baseValue);
 }
 
 void evtSelectFineStatGrade(void) {
     s32 total = func_001190B0(((EvtScriptContext *)D_003C2E70)->second);
-    s32 current = *(u16 *)(((EvtScriptContext *)D_003C2E70)->second + 6);
+    s32 current = ((Entry1A4 *)((EvtScriptContext *)D_003C2E70)->second)->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;
 
