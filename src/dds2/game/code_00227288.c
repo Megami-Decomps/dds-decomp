@@ -297,7 +297,7 @@ typedef struct BtlState {
     u8 unk_24E[0x2E];
     s32 battleMode;
     u8 unk_2A4[0x448];
-    s32 (*unk_6EC)(s32);
+    s32 (*unk_6EC)();
     u8 unk_6F0[0x28];
     struct BattleLinkedEffectState *effect;
     u8 unk_71C[0xC];
@@ -1334,7 +1334,17 @@ s32 btlCommandSetSequenceVolumePan(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022B760);
+/* Optional hook: it reads its argument (100) straight from $a0 and returns the value passed to func_0010D818. */
+s32 func_0022B760(void) {
+    BtlState *state = (BtlState *)func_001AA6F8();
+    s32 value = 100;
+
+    if (state->unk_6EC != NULL) {
+        value = state->unk_6EC();
+    }
+    func_0010D818(value);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B7A0);
 
