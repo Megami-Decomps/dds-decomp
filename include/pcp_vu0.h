@@ -72,4 +72,21 @@
     ".set reorder" \
     : : "r" (dst) : "memory")
 
+/* One quadword between memory and a named VU0 register. The load has no
+ * memory clobber; the store does, matching the standalone COP2 asm idiom. */
+#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+/* Same load when the source asm also barred compiler memory motion. */
+#define VU0_LOAD_VF_MEMORY(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+/* Store variant for existing asm without a compiler memory clobber. */
+#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+
 #endif

@@ -980,7 +980,7 @@ const u8 *source;
 {
     u8 *effect = (u8 *)func_002CFEB8(0x58);
     memset(effect, 0, 0x58);
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
+    VU0_STORE_VF($vf0, effect);
     memcpy(effect + 0x18, source, 0x40);
     return effect;
 }
@@ -1213,7 +1213,7 @@ EffKindWork *func_0029DDD0(u16 kind, u8 *source) {
     work->target = 0;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(work) : "memory");
+    VU0_STORE_VF($vf0, work);
     work->payload = (u8 *)work + headerSize;
     memcpy(work->payload, source, size);
     switch (*(s32 *)(source + 0x28)) {
@@ -1306,7 +1306,7 @@ EffKindWork *func_0029E0F0(u16 kind, u8 *source) {
     work->target = 0;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(work) : "memory");
+    VU0_STORE_VF($vf0, work);
     work->payload = (u8 *)work + headerSize;
     memcpy(work->payload, source, size);
     switch (*(s32 *)(source + 0x28)) {
@@ -1543,9 +1543,9 @@ void func_0029EEC8(BillCellDrawWork *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+    VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -1632,9 +1632,9 @@ void func_0029F8A0(BillCellDrawWork *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+    VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -1721,9 +1721,9 @@ void func_002A0260(BillCellDrawWork *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+    VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -1884,9 +1884,9 @@ void func_002A0BE0(BillCellDrawWork *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+    VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -2021,9 +2021,9 @@ void func_002A1588(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -2181,9 +2181,9 @@ void func_002A2008(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -2290,9 +2290,9 @@ void func_002A2A60(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -2447,9 +2447,9 @@ void func_002A34D8(u8 *work) {
     *(u32 *)(out + 4) = blended[0];
     *(u32 *)out = *(u32 *)(config + 0x28);
     *(u8 *)(out + 0x14) = *(u8 *)(config + 0x56);
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -2481,8 +2481,8 @@ u8 *func_002A3640(u16 kind, void *source) {
     *(float *)(effect + 0x20) = 1.0f;
     *(u32 *)(effect + 0x2C) = kind;
     *(u32 *)(effect + 0x28) = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
+    VU0_STORE_VF($vf0, effect);
+    VU0_STORE_VF($vf0, effect + 0x10);
     memcpy(*(void **)(effect + 0x34), source, size);
     return effect;
 }
@@ -2765,9 +2765,9 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     if ((packed & 0xFF000000) != 0) {
         ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
         *(u8 *)(out + 0xC) = *(u8 *)(config + 0x3C);
-        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+        VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
-        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+        VU0_LOAD_VF(vf10, D_0037E0E0);
         __asm__ volatile (
             ".set noreorder\n"
             "mfc1 $2, %0\n"
@@ -2895,9 +2895,9 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
     if ((packed & 0xFF000000) != 0) {
         ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
         *(u8 *)(out + 0xC) = *(u8 *)(config + 0x3C);
-        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work->transform));
+        VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
-        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+        VU0_LOAD_VF(vf10, D_0037E0E0);
         __asm__ volatile (
             ".set noreorder\n"
             "mfc1 $2, %0\n"
@@ -2935,8 +2935,8 @@ u8 *func_002A5288(u16 kind, void *source) {
     ((EffClassWork *)effect)->scale = 1.0f;
     ((EffClassWork *)effect)->frame = 0;
     ((EffClassWork *)effect)->kind = kind;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect));
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10));
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
     ((EffClassWork *)effect)->resource = D_0037EAD0[kind].createResource(source);
     D_0037EAD0[kind].fn(effect);
@@ -3835,9 +3835,9 @@ void func_002AC4E0(u8 *work) {
     ((EffBillOutput *)out)->field_08 = blended[0];
     ((EffBillOutput *)out)->color = ((EffBillConfig *)config)->textureId;
     ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->alternateMode;
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(work + 0x10));
+    VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(D_0037E0E0));
+    VU0_LOAD_VF(vf10, D_0037E0E0);
     __asm__ volatile (
         ".set noreorder\n"
         "mfc1 $2, %0\n"
@@ -4653,8 +4653,8 @@ u8 *allocateEffectBlockWithModel(u16 kind, void *source) {
     ((EffClassWork *)effect)->scale = 1.0f;
     ((EffClassWork *)effect)->kind = kind;
     ((EffClassWork *)effect)->frame = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
+    VU0_STORE_VF($vf0, effect);
+    VU0_STORE_VF($vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
     return effect;
 }
@@ -4945,7 +4945,7 @@ void getEffectWorldVector(u32 which) {
         u128 *vec = &result;
 
         func_00161AA0(handle, &request, vec);
-        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(vec) : "memory");
+        VU0_LOAD_VF_MEMORY(vf10, vec);
     } else {
         __asm__ volatile (".set noreorder\nvmove.xyzw vf10, vf0\n.set reorder");
     }
@@ -5001,7 +5001,7 @@ s64 effComputeLightDirectionVU(void *vector, void *target) {
             return 0;
         }
     mdlLoadPrimaryVectorVU(vector);
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003DCBE0));
+    VU0_LOAD_VF($vf11, D_003DCBE0);
     __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -5014,7 +5014,7 @@ s64 effComputeLightDirectionVU(void *vector, void *target) {
         "vwaitq\n\t"
         "vmulq.xyz $vf10, $vf10, Q\n\t"
         ".set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_003DCBA0) : "memory");
+    VU0_STORE_VF($vf10, D_003DCBA0);
     func_002E1938(target, D_0037EE80, D_003DCBD0);
     return 1;
     }
@@ -5307,8 +5307,8 @@ u8 *effAllocateResourcePayload(u16 kind, void *source) {
     ((EffActiveResource *)effect)->scale = 1.0f;
     ((EffActiveResource *)effect)->kind.index = kind;
     ((EffActiveResource *)effect)->frame = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
+    VU0_STORE_VF($vf0, effect);
+    VU0_STORE_VF($vf0, effect + 0x10);
     memcpy(((EffActiveResource *)effect)->payload, source, size);
     return effect;
 }
@@ -5480,7 +5480,7 @@ void btlInitializeEffectWork(void) {
     D_003DF8D0[0] = 0;
     D_003BD058 = 0;
     D_003BD955 = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" :: "r"(D_003DF910) : "memory");
+    VU0_STORE_VF($vf0, D_003DF910);
 }
 
 s32 btlUpdateEffectWork(void) {
@@ -5515,10 +5515,10 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
 
     if ((flags & 0x18) != 0) {
         func_00295D08(effect, &direction);
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&direction));
+        VU0_LOAD_VF($vf10, &direction);
         flags = *(u32 *)(effect + 0x68);
     } else {
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(effect + 0x40));
+        VU0_LOAD_VF($vf10, effect + 0x40);
     }
     if ((flags & 0x80) != 0) {
         __asm__ volatile(
@@ -5529,9 +5529,9 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
             ".set reorder"
             : : "f"(*(f32 *)((u8 *)D_003BD060 + 0x74)) : "$2");
     }
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003DF910));
+    VU0_LOAD_VF($vf11, D_003DF910);
     __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(D_003BD060));
+    VU0_LOAD_VF($vf11, D_003BD060);
     __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
     if ((flags & 4) != 0) {
         __asm__ volatile(
@@ -5554,12 +5554,12 @@ void effMultiplyQuatWithFlag(u8 *effect) {
     if ((*(u32 *)(effect + 0x68) & 0x60) != 0) {
         u128 quaternion;
         func_00295E00(effect, &quaternion);
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)D_003BD060 + 0x50));
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(&quaternion));
+        VU0_LOAD_VF($vf10, (u8 *)D_003BD060 + 0x50);
+        VU0_LOAD_VF($vf11, &quaternion);
         effMiscQuatMultiplyVU();
     } else {
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)D_003BD060 + 0x50));
-        __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(effect + 0x50));
+        VU0_LOAD_VF($vf10, (u8 *)D_003BD060 + 0x50);
+        VU0_LOAD_VF($vf11, effect + 0x50);
         effMiscQuatMultiplyVU();
     }
 }
@@ -5588,10 +5588,10 @@ void effApplyBattleCameraToObject(work)
     u128 rotation[2];
 
     effComputeBattleCameraPositionVU(D_003DF9A0);
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&rotation[0]));
+    VU0_STORE_VF_UNCLOBBERED($vf10, &rotation[0]);
     func_002936E0(work, &rotation[0]);
     effMultiplyQuatWithFlag(D_003DF9A0);
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(&rotation[1]));
+    VU0_STORE_VF_UNCLOBBERED($vf10, &rotation[1]);
     func_00293720(work, &rotation[1]);
     func_00293760(work, ((EffBattleCamera *)D_003DF9A0)->scale * *(f32 *)((u8 *)D_003BD060 + 0x74));
     func_002937A0(work, ((EffBattleCamera *)D_003DF9A0)->mode);
@@ -6349,7 +6349,7 @@ s32 func_002B8618(void) {
     D_003DF840[0x88] = 8;
     D_003DF840[0x89] = 0;
     D_003DF840[0x8a] = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" :: "r"(D_003DFA30) : "memory");
+    VU0_STORE_VF($vf0, D_003DFA30);
     return 0;
 }
 

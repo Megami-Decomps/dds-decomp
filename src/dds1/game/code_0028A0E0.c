@@ -3191,8 +3191,8 @@ void *func_0029A5E0(u16 type, u32 count, void *data) {
     memcpy(rec->data0, src, dataBytes);
     memcpy(rec->data1, src, dataBytes);
     vec = rec->data0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec + 0x10) : "memory");
+    VU0_STORE_VF($vf0, vec);
+    VU0_STORE_VF($vf0, vec + 0x10);
     if (vec[0xBC] != 0) {
         rec->flags |= 1;
     }

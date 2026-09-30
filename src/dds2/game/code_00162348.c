@@ -26,6 +26,17 @@ typedef struct ParCellNode {
     struct ParCellNode *next;
 } ParCellNode;
 
+typedef struct ParScaleObj {
+    u16 kind;
+    u8 pad2[6];
+    f32 scale; /* 0x8 */
+} ParScaleObj;
+
+extern f32 D_00451F30[];
+extern f32 D_00451F40[];
+extern u8 D_0037F680[];
+extern u8 D_0037F690[];
+
 extern ParListNode *D_00436400;
 
 extern ParCellNode *D_00436404;
@@ -171,7 +182,35 @@ void func_00162988(u32 arg0, u8 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_001629C0);
+/* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
+ * shared vector and store the (vf10 - vf11) difference. */
+void func_001629C0(ParScaleObj *obj) {
+    f32 scale;
+
+    switch (obj->kind) {
+    case 0:
+    case 1:
+        return;
+    case 2:
+        scale = obj->scale;
+        D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
+        break;
+    case 3:
+        scale = obj->scale;
+        D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
+        break;
+    case 4:
+        scale = obj->scale;
+        D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
+        break;
+    default:
+        return;
+    }
+    VU0_LOAD_VF($vf10, D_0037F680);
+    VU0_LOAD_VF($vf11, D_0037F690);
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    VU0_STORE_VF($vf10, D_00451F30);
+}
 
 void parDispatchKindUpdate(void *work) {
     switch (*(u16 *)work) {
