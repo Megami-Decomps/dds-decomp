@@ -1,27 +1,183 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
-extern u64 effParamTableGetBlock(u64, u64);
+typedef struct EffParamWork EffParamWork;
 
+/* Packed effect parameter-set accessor (see game/code_001624D0). */
+extern void *effParamTableGetBlock(void *data, s32 index);
+extern void func_0018C820(void *work);
+extern void func_0018D210();
+extern void func_0018D830(void *work);
+
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *func_00328D68(s32 size);
+extern EffParamWork *effParamWorkCreate(s32 kind, void *params);
+extern EffParamWork *effParamWorkDuplicate(EffParamWork *param);
+extern void func_0016A620(EffParamWork *handle);
+extern void func_00328E48(void *work);
+extern u32 func_001695C8(void);
+extern u32 func_00169440(void);
+extern void btlUnitGetMuzzlePosVU(u32 unit);
+extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
+extern void func_003363D0(void);
+extern void effParamWorkCallback0(EffParamWork *handle, void *vec);
+extern void effParamWorkCallback2(EffParamWork *handle, void *matrix);
+extern void effParamWorkCallback3(EffParamWork *handle, u32 value);
+extern void effParamWorkInvokeCallback(EffParamWork *handle);
+extern u8 D_003B1FF0[];
+
+/* Boss effect work: two parameter-set handles released on free. */
 typedef struct {
-    u8 pad00[0x24];
-    u32 parameter; /* 0x24 set by effPCPBossSetParameter */
-    u32 resource28;
-    u32 resource2C;
+    f32 position[4]; /* 0x00 */
+    u32 parameterVector[4]; /* 0x10 copied from the parameter block */
+    s32 frame;      /* 0x20 counts updates */
+    u32 color;      /* 0x24 set by effPCPBossSetParameter, starts 0x80808080 */
+    EffParamWork *resource28;  /* 0x28 released by func_0016A620 */
+    EffParamWork *resource2C;  /* 0x2C released by func_0016A620 */
 } EffPCPBossWork;
 
-extern void func_0018D210();
+/* Trail effect built from a 0x8C-byte parameter head (copied verbatim on spawn),
+   `groupCount` groups of `cellCount` cells each. */
+typedef struct {
+    u8 pad00[0x14];
+    f32 modelScale;   /* 0x14 */
+    f32 scale;        /* 0x18 applied to every random cell offset */
+    u8 pad1C[0x1C];
+    u16 systemParam;  /* 0x38 */
+    u8 pad3A[2];
+    u8 hasCells;      /* 0x3C */
+    u8 pad3D[7];
+    u32 spread;       /* 0x44 modulus of the cell delay */
+    u8 pad48[0x10];
+    f32 xRange;       /* 0x58 */
+    f32 xBlend;       /* 0x5C */
+    f32 yRange;       /* 0x60 */
+    f32 zRange;       /* 0x64 */
+    f32 yBlend;       /* 0x68 */
+    u8 pad6C[0x18];
+    u32 incrementBits; /* 0x84 */
+    u8 forward;       /* 0x88 */
+    u8 pad89[3];
+} EffBossHead; /* 0x8C */
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C190);
+/* Parameter block as read by func_0018D6A8: two words follow the head. */
+typedef struct {
+    EffBossHead head;
+    u32 groupValue;   /* 0x8C */
+    f32 groupFloat;   /* 0x90 */
+} EffBossParams;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 delay;        /* 0x0C */
+    u8 flip;          /* 0x10 */
+    u8 pad11[3];
+} EffBossCell; /* 0x14 */
+
+typedef struct EffBossRecords EffBossRecords;
+
+typedef struct {
+    EffBossRecords *records; /* 0x00 */
+    u32 unk04;
+    f32 direction;    /* 0x08 -1.0 or 1.0 */
+    u32 unk0C;
+    u8 pad10[4];
+    u32 unk14;
+    u32 unk18;
+    f32 unk1C;
+    EffBossCell *cells; /* 0x20 */
+} EffBossGroup; /* 0x24 */
+
+typedef struct {
+    EffBossHead head;
+    EffBossGroup *groups; /* 0x8C */
+    u32 groupsHandle; /* 0x90 */
+    u32 groupCount;   /* 0x94 */
+    u16 cellCount;    /* 0x98 */
+    u8 pad9A[2];
+    u32 unk9C;
+    u32 color;        /* 0xA0 */
+    u32 system;       /* 0xA4 */
+    EffParamWork *paramWork; /* 0xA8 */
+} EffBossWork;
+
+typedef struct {
+    u32 w0;
+    u32 w1;
+    u32 w2;
+    u32 w3;
+    u32 w4;
+} EffBossIndex; /* 0x14 */
+
+typedef struct {
+    u8 pad00[0x20];
+    f32 scale;        /* 0x20 */
+    u8 pad24[0xA];
+    u16 cellCount;    /* 0x2E */
+} EffBossModelHeader;
+
+typedef struct {
+    u8 pad00[0x18];
+    void *chunk;      /* 0x18 */
+    EffBossModelHeader *model; /* 0x1C */
+} EffBossModelData;
+
+extern void *effParamWorkGetData(EffParamWork *handle);
+extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
+extern u32 sdfCountMapPositionRecords(void *chunk);
+extern u32 func_00163290(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
+extern void func_00164C68(u32 system, u32 value);
+extern u32 func_003292A8(s32 size);
+extern u8 *sdfResourceRetainAddress(u32 handle);
+extern EffBossRecords *func_00177760(u32 cellCount);
+extern u32 func_00177B60(EffBossRecords *records, s32 index);
+extern EffBossIndex *func_00177B78(EffBossRecords *records, s32 index);
+extern void effSetVectorIncrementBits(EffBossRecords *records, u32 bits);
+extern u32 effMiscRand(void *state);
+extern f32 func_00341240(void *state);
+extern u8 D_003AA868[];
+extern f32 D_004334C4;
+extern void func_0018C288(EffBossWork *work);
+extern EffBossWork *func_0018C660(EffBossWork *src);
+extern void func_00177880(EffBossRecords *records);
+extern void func_003297C8(u32 handle);
+extern void func_001634A8(u32 system);
+
+void func_0018C190(EffBossWork *work, EffBossCell *cell) {
+    f32 blend = work->head.xBlend;
+    f32 scale = work->head.scale;
+    f32 t;
+
+    cell->x = work->head.xRange * (func_00341240(D_003AA868) * blend + (1.0f - blend)) * scale;
+    blend = work->head.yBlend;
+    t = func_00341240(D_003AA868) * blend + (1.0f - blend);
+    cell->y = work->head.yRange * t * scale;
+    cell->z = work->head.zRange * t * scale;
+    cell->flip = effMiscRand(D_003AA868) & 1;
+    cell->delay = -(effMiscRand(D_003AA868) % work->head.spread);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C288);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C4E8);
+EffBossWork *func_0018C4E8(EffBossParams *src, void *param1) {
+    EffBossWork *work;
+
+    work = func_00328D68(sizeof(EffBossWork));
+    work->head = src->head;
+    work->unk9C = 0;
+    work->color = 0x80808080;
+    work->paramWork = effParamWorkCreate(3, param1);
+    func_0018C288(work);
+    return work;
+}
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-void effPCPBossApplyTwoBlocks(u64 data) {
-    u64 firstBlock;
-    u64 secondBlock;
+void effPCPBossApplyTwoBlocks(void *data) {
+    void *firstBlock;
+    void *secondBlock;
 
     firstBlock = effParamTableGetBlock(data, 0);
     secondBlock = effParamTableGetBlock(data, 1);
@@ -30,31 +186,50 @@ void effPCPBossApplyTwoBlocks(u64 data) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C660);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C788);
+void func_0018C788(EffBossWork *work) {
+    u32 i;
+
+    if (work->groupsHandle != 0) {
+        for (i = 0; i < work->groupCount; i++) {
+            func_00177880(work->groups[i].records);
+        }
+        func_003297C8(work->groupsHandle);
+    }
+    func_001634A8(work->system);
+    func_0016A620(work->paramWork);
+    func_00328E48(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C820);
 
 void func_0018D210(dst, src)
-    void *dst;
-    void *src;
+void *dst;
+void *src;
 {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0018D220(work, value)
-    s32 work;
-    u32 value;
-{
-    *(u32 *)(work + 0xA0) = value;
+void func_0018D220(u8 *work, s32 value) {
+    *(s32 *)(work + 0xA0) = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D228);
+EffPCPBossWork *func_0018D228(void *vector, void *paramA, void *paramB) {
+    EffPCPBossWork *work;
+
+    work = func_00328D68(sizeof(EffPCPBossWork));
+    memcpy(work->parameterVector, vector, 0x10);
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->resource28 = effParamWorkCreate(3, paramA);
+    work->resource2C = effParamWorkCreate(6, paramB);
+    return work;
+}
 
 /* Apply three packed parameter blocks to the boss effect. */
-void effPCPBossApplyThreeBlocks(u64 data) {
-    u64 firstBlock;
-    u64 secondBlock;
-    u64 thirdBlock;
+void effPCPBossApplyThreeBlocks(void *data) {
+    void *firstBlock;
+    void *secondBlock;
+    void *thirdBlock;
 
     firstBlock = effParamTableGetBlock(data, 0);
     secondBlock = effParamTableGetBlock(data, 1);
@@ -62,7 +237,17 @@ void effPCPBossApplyThreeBlocks(u64 data) {
     func_0018D228(firstBlock, secondBlock, thirdBlock);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D330);
+EffPCPBossWork *func_0018D330(EffPCPBossWork *src) {
+    EffPCPBossWork *work;
+
+    work = func_00328D68(sizeof(EffPCPBossWork));
+    memcpy(work->parameterVector, src->parameterVector, 0x10);
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->resource28 = effParamWorkDuplicate(src->resource28);
+    work->resource2C = effParamWorkDuplicate(src->resource2C);
+    return work;
+}
 
 void effPCPBossFree(EffPCPBossWork *work) {
     func_0016A620(work->resource2C);
@@ -70,14 +255,47 @@ void effPCPBossFree(EffPCPBossWork *work) {
     func_00328E48(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D3E8);
+/* Per-frame update: basis from the muzzle position (or identity) fed to both parameter works. */
+void func_0018D3E8(EffPCPBossWork *work) {
+    u128 matrix[4];
+    void *direction;
 
-void effPCPBossSetParameterVector(u8 *work, void *src) {
-    PCP_COPY_VECTOR(work + 0x10, src);
+    if (func_001695C8() != 0) {
+        if (work->frame == 0) {
+            btlUnitGetMuzzlePosVU(func_00169440());
+            VU0_STORE_VF(vf10, work->position);
+        }
+        direction = work->parameterVector;
+        sdfVuBuildLookAtBasis(work, direction, D_003B1FF0);
+        func_003363D0();
+        VU0_MOVE_VF(vf31, vf0);
+        VU0_STORE_MATRIX(matrix);
+    } else {
+        work->position[0] = 0;
+        work->position[1] = 0;
+        work->position[2] = 400.0f;
+        work->position[3] = 0;
+        VU0_STORE_VF(vf0, work->position);
+        EE_MMI_UNIT_MATRIX(matrix);
+        direction = work->parameterVector;
+    }
+    effParamWorkCallback2(work->resource28, matrix);
+    effParamWorkCallback2(work->resource2C, matrix);
+    effParamWorkCallback0(work->resource28, direction);
+    effParamWorkCallback0(work->resource2C, direction);
+    effParamWorkCallback3(work->resource28, work->color);
+    effParamWorkCallback3(work->resource2C, work->color);
+    effParamWorkInvokeCallback(work->resource28);
+    effParamWorkInvokeCallback(work->resource2C);
+    work->frame++;
+}
+
+void effPCPBossSetParameterVector(EffPCPBossWork *work, void *src) {
+    PCP_COPY_VECTOR(&work->parameterVector, src);
 }
 
 void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
-    work->parameter = value;
+    work->color = value;
 }
 
 u32 func_0018D540(void) {
@@ -236,44 +454,66 @@ void func_0018D698(void) {
 void func_0018D6A0(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D6A8);
+EffBossWork *func_0018D6A8(EffBossParams *src, void *param1) {
+    EffBossWork *work;
+    u32 i;
 
-void func_0018D710(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    temp_v1 = effParamTableGetBlock(arg0, 1);
-    func_0018D6A8(temp_v0, temp_v1);
+    work = func_0018C4E8(src, param1);
+    for (i = 0; i < work->groupCount; i++) {
+        work->groups[i].unk1C = src->groupFloat;
+        work->groups[i].unk18 = src->groupValue;
+        work->groups[i].unk14 = 0;
+    }
+    return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D758);
+void func_0018D710(void *data) {
+    void *work0;
+    void *work1;
 
-void func_0018D7D0(void) {
-    func_0018C788();
+    work0 = effParamTableGetBlock(data, 0);
+    work1 = effParamTableGetBlock(data, 1);
+    func_0018D6A8(work0, work1);
 }
 
-void func_0018D7E8(void) {
-    func_0018C820();
+EffBossWork *func_0018D758(EffBossWork *src) {
+    EffBossWork *work;
+    u32 i;
+
+    work = func_0018C660(src);
+    for (i = 0; i < work->groupCount; i++) {
+        work->groups[i].unk1C = src->groups[i].unk1C;
+        work->groups[i].unk18 = src->groups[i].unk18;
+        work->groups[i].unk14 = 0;
+    }
+    return work;
 }
 
-void func_0018D800(void) {
-    func_0018D210();
+void func_0018D7D0(void *work) {
+    func_0018C788(work);
 }
 
-void func_0018D818(void) {
-    func_0018D220();
+void func_0018D7E8(void *work) {
+    func_0018C820(work);
+}
+
+void func_0018D800(void *work) {
+    func_0018D210(work);
+}
+
+void func_0018D818(u8 *work, s32 value) {
+    func_0018D220(work, value);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D830);
 
-void func_0018DA38(u64 arg0) {
-    u64 temp_v0;
+void func_0018DA38(void *data) {
+    void *work;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_0018D830(temp_v0);
+    work = effParamTableGetBlock(data, 0);
+    func_0018D830(work);
 }
 
-void func_0018DA58(void) {
-    func_0018D830();
+void func_0018DA58(void *work) {
+    func_0018D830(work);
 }
