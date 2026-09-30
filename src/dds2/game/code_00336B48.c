@@ -27,16 +27,20 @@ extern f32 D_00439190;
 typedef struct F9B00Entry {
     /* 0x00 */ u8 port;
     /* 0x01 */ u8 slot;
-    /* 0x02 */ u8 unk2;
+    /* 0x02 */ u8 state;
     /* 0x03 */ u8 pad03;
-    /* 0x04 */ u8 unk4;
+    /* 0x04 */ u8 mode;
     /* 0x05 */ u8 requestedMode;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u8 pad0A[0x16];
-    /* 0x20 */ u16 smallMotor;
-    /* 0x22 */ u16 largeMotor;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x06 */ u16 buttons;
+    /* 0x08 */ u16 prevButtons;
+    /* 0x0A */ u8 pad0A[2];
+    /* 0x0C */ u32 repeatTime;
+    /* 0x10 */ u8 stick[4];
+    /* 0x14 */ u8 pressure[12];
+    /* 0x20 */ s16 smallMotor;
+    /* 0x22 */ s16 largeMotor;
+    /* 0x24 */ s16 lastSmallMotor;
+    /* 0x26 */ s16 lastLargeMotor;
 } F9B00Entry;
 
 extern F9B00Entry D_00476480[];
@@ -1170,7 +1174,161 @@ u32 func_0033C218(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C240);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", sdfPadUpdatePort);
+extern u8 D_0040B7D0[];
+extern s32 func_0034B128(s32 port, s32 slot);
+extern s32 func_0034B0A8(s32 port, s32 slot, void *data);
+extern s32 func_0034B240(s32 port, s32 slot);
+extern s32 func_0034B2C8(s32 port, s32 slot, s32 actNo, s32 term);
+extern s32 func_0034B6F8(s32 port, s32 slot, void *actData);
+extern s32 scePadSetMainMode(s32 port, s32 slot, s32 offs, s32 lock);
+extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
+
+void sdfPadUpdatePort(F9B00Entry *entry) {
+    u8 data[0x20];
+    u8 act[6];
+    s32 port = entry->port;
+    s32 slot = entry->slot;
+    s32 padState;
+    s32 hasButtons;
+    s32 hasAnalog;
+    s32 hasPressure;
+    s32 result;
+    s32 mode;
+    s32 small;
+    s32 large;
+    data[0] = -1;
+    padState = func_0034B128(port, slot);
+    switch (entry->state) {
+    case 0:
+        if (padState == 2 || padState == 6) {
+            entry->lastSmallMotor = -1;
+            entry->lastLargeMotor = -1;
+            mode = entry->mode = entry->requestedMode;
+            switch (mode) {
+            case 0:
+                entry->state = 3;
+                break;
+            case 1:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 0, 0) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            case 2:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 0, 3) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            case 3:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 1, 3) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            }
+        }
+        break;
+    case 1:
+        if (padState == 6) {
+            entry->state = 3;
+        } else if (padState != 5) {
+            entry->state = 0;
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        if (func_0034B2C8(port, slot, -1, 0) != 0) {
+            if (scePadSetActAlign(port, slot, D_0040B7D0) != 0) {
+                entry->state = 4;
+            }
+        } else {
+            entry->state = 5;
+        }
+        break;
+    case 4:
+        result = func_0034B240(port, slot);
+        if (result != 0) {
+            if (result == 1) {
+                entry->state = 3;
+            }
+        } else {
+            entry->state = 5;
+        }
+        break;
+    case 5:
+        if (padState != 2 && padState != 6) {
+            entry->state = 0;
+        } else if (entry->mode != entry->requestedMode) {
+            entry->state = 0;
+        } else {
+            func_0034B0A8(port, slot, data);
+            small = entry->smallMotor;
+            large = entry->largeMotor;
+            if (small != entry->lastSmallMotor || large != entry->lastLargeMotor) {
+                entry->lastSmallMotor = small;
+                entry->lastLargeMotor = large;
+                act[0] = small;
+                act[1] = large;
+                func_0034B6F8(port, slot, act);
+            }
+        }
+        break;
+    }
+    /* Pad reply IDs: digital, analog-stick, and pressure-sensitive modes.
+     * Missing channels are normalized before consumers see this port. */
+    hasAnalog = 0;
+    hasPressure = 0;
+    hasButtons = 0;
+    if (data[0] == 0) {
+        switch (data[1]) {
+        case 0x41:
+            hasButtons = 1;
+            break;
+        case 0x73:
+            hasButtons = 1;
+            hasAnalog = 1;
+            break;
+        case 0x79:
+            hasButtons = 1;
+            hasAnalog = 1;
+            hasPressure = 1;
+            break;
+        }
+    }
+    if (hasButtons) {
+        memset(entry->pressure, 0, 12);
+        entry->buttons = ~(data[3] | (data[2] << 8));
+    } else {
+        entry->buttons = 0;
+    }
+    if (hasAnalog) {
+        entry->stick[0] = data[4];
+        entry->stick[1] = data[5];
+        entry->stick[2] = data[6];
+        entry->stick[3] = data[7];
+    } else {
+        entry->stick[0] = 0x80;
+        entry->stick[1] = 0x80;
+        entry->stick[2] = 0x80;
+        entry->stick[3] = 0x80;
+    }
+    if (hasPressure) {
+        memcpy(entry->pressure, &data[8], 12);
+    } else {
+        memset(entry->pressure, 0, 12);
+    }
+}
 
 void sdfPadUpdatePorts(void) {
     s32 i;
@@ -1179,7 +1337,56 @@ void sdfPadUpdatePorts(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C878);
+extern s32 D_004389C8;
+extern u16 D_00438A90[4];
+extern u8 D_00438A98[8];
+extern u16 D_0040B7B0[16];
+extern u8 D_0040B7D8[0x20];
+extern u8 D_0040B7F8[0x18];
+
+/* Build per-button held/repeat/new-press flags for both controller ports.
+ * Repeat starts after 15 ticks, then recurs every four ticks. */
+void func_0033C878(void) {
+    s32 now = D_004389C8;
+    s32 i;
+    s32 bit;
+    for (i = 0; i != 2; i++) {
+        F9B00Entry *entry = &D_00476480[i];
+        s32 buttons = entry->buttons;
+        s32 prev = entry->prevButtons;
+        s32 pressed;
+        s32 repeat;
+        D_00438A90[i] = buttons;
+        entry->prevButtons = buttons;
+        pressed = (buttons ^ prev) & buttons;
+        if (buttons != prev) {
+            entry->repeatTime = now + 15;
+            repeat = pressed;
+        } else {
+            repeat = 0;
+            if (buttons != 0) {
+                s32 late = now - entry->repeatTime;
+                if (late >= 0) {
+                    repeat = buttons;
+                    entry->repeatTime = now + late + 4;
+                }
+            }
+        }
+        for (bit = 0; bit != 16; bit++) {
+            s32 mask = D_0040B7B0[bit];
+            s32 state = (buttons & mask) != 0;
+            if (repeat & mask) {
+                state |= 2;
+            }
+            if (pressed & mask) {
+                state |= 0x80;
+            }
+            D_0040B7D8[i * 0x10 + bit] = state;
+        }
+        memcpy(&D_00438A98[i * 4], entry->stick, 4);
+        memcpy(&D_0040B7F8[i * 12], entry->pressure, 12);
+    }
+}
 
 void sdfPadRequestMode(s32 padIndex, u8 mode) {
     D_00476480[padIndex].requestedMode = mode;
