@@ -66,9 +66,10 @@ typedef struct BtlState {
     s32 field2A4;
     u8 pad2A8[0x18];
     BtlList *list;
-    u8 unk_2C4[4];
+    BtlList *taskList; /* 0x2C4: source list for spawned actor tasks */
     s32 slot;
-    u8 pad2CC[0x21C];
+    s32 boundTask; /* 0x2CC */
+    u8 pad2D0[0x218];
     u32 buttonTextureHandle; /* 0x4E8: retained until the battle UI releases it */
 } BtlState;
 
@@ -85,7 +86,10 @@ typedef struct BtlCommandCtx {
     u8 pad1C[4];
     u32 commandMode;
     u32 commandValue;
-    u8 pad28[0x10];
+    u8 pad28[4];
+    void *actionFirst;  /* 0x2C: first pointer from an action probe */
+    void *actionSecond; /* 0x30: second pointer from an action probe */
+    u8 pad34[4];
     s32 selectedValue; /* 0x38: command selection */
     u8 pad3C[0x58];
     s32 pendingValue;  /* 0x94: mirrored command selection */
@@ -902,25 +906,25 @@ typedef struct BtlScalarRange {
     f32 target;      /* 0x10 */
 } BtlScalarRange;
 
-void btlScalarRangeSetStartClearEnd(s32 arg0, f32 arg1) {
-    ((BtlScalarRange *)arg0)->start = arg1;
-    ((BtlScalarRange *)arg0)->end = 0;
+void btlScalarRangeSetStartClearEnd(s32 range, f32 start) {
+    ((BtlScalarRange *)range)->start = start;
+    ((BtlScalarRange *)range)->end = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002096C8);
 
-void btlScalarRangeInitQuadratic(s32 arg0, f32 arg1) {
+void btlScalarRangeInitQuadratic(s32 range, f32 start) {
     f32 temp_f0;
 
-    ((BtlScalarRange *)arg0)->zero = 0.0f;
-    ((BtlScalarRange *)arg0)->start = arg1;
-    temp_f0 = ((BtlScalarRange *)arg0)->zero;
-    ((BtlScalarRange *)arg0)->end = arg1;
-    ((BtlScalarRange *)arg0)->target = temp_f0;
-    if (arg1 == temp_f0) {
+    ((BtlScalarRange *)range)->zero = 0.0f;
+    ((BtlScalarRange *)range)->start = start;
+    temp_f0 = ((BtlScalarRange *)range)->zero;
+    ((BtlScalarRange *)range)->end = start;
+    ((BtlScalarRange *)range)->target = temp_f0;
+    if (start == temp_f0) {
         return;
     }
-    ((BtlScalarRange *)arg0)->inverseSpan = 1.0f / (arg1 * arg1 * 0.25f);
+    ((BtlScalarRange *)range)->inverseSpan = 1.0f / (start * start * 0.25f);
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209770);
@@ -1085,10 +1089,10 @@ u32 btlScriptSelectActionEntry(void) {
     if (D_00435E1C[index * 2 + 1] == 1) {
         if (func_001B2F50((void *)context->actor, index) != 0 &&
             func_001ACD10((void *)context->actor, index, &probe) != 0) {
-            *(void **)((u8 *)context + 0x2C) = probe.first;
+            context->actionFirst = probe.first;
             context->commandMode = 3;
             context->commandValue = probe.id;
-            *(void **)((u8 *)context + 0x30) = probe.second;
+            context->actionSecond = probe.second;
         } else {
             context->commandValue = 0;
             context->commandMode = 1;
@@ -1438,7 +1442,7 @@ u32 btlScriptSetChoiceFlag(void) {
     second = scrReadIntParameter(1);
     if (func_00210EA0((s32)context, context->actor, ((first & 0x3F) << 16) | (u16)second | 0x2C00000)) {
         func_0010D818(1);
-        *(s32 *)((u8 *)context + 0xB8) = first;
+        context->choicesA[6] = first;
         context->selectionFlagsA |= 0x40;
     } else {
         func_0010D818(0);
@@ -1912,10 +1916,10 @@ s32 func_0020BD60(void) {
 }
 
 u32 func_0020BDE8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, ((BtlCommandCtx *)temp_v0)->actor, 0x10800000) != 0) {
+    context = func_0010D8D0();
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1934,10 +1938,10 @@ u32 func_0020BE38(void) {
 }
 
 u32 func_0020BEA8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, ((BtlCommandCtx *)temp_v0)->actor, 0x11000000) != 0) {
+    context = func_0010D8D0();
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -1946,10 +1950,10 @@ u32 func_0020BEA8(void) {
 }
 
 u32 func_0020BEF8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    if (func_00210EA0(temp_v0, ((BtlCommandCtx *)temp_v0)->actor, 0x11400000) != 0) {
+    context = func_0010D8D0();
+    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
         func_0010D818(1);
     } else {
         func_0010D818(0);
@@ -2188,10 +2192,10 @@ u32 func_0020C610(void) {
 }
 
 u32 func_0020C638(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_0010D8D0();
-    func_0010D818(*(s8 *)(temp_v0 + 0x14E));
+    context = func_0010D8D0();
+    func_0010D818(*(s8 *)(context + 0x14E));
     return 1;
 }
 
@@ -2222,14 +2226,14 @@ s32 func_0020C6F8(void) {
 }
 
 u32 func_0020C720(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 state;
+    s32 context;
 
-    temp_v1 = func_0010D8D0();
-    temp_v0 = D_004367F4;
-    ((BtlCommandCtx *)temp_v1)->commandMode = 0x10;
-    ((BtlCommandCtx *)temp_v1)->commandValue = 0;
-    *(u8 *)(temp_v0 + 0x54) = 1;
+    context = func_0010D8D0();
+    state = D_004367F4;
+    ((BtlCommandCtx *)context)->commandMode = 0x10;
+    ((BtlCommandCtx *)context)->commandValue = 0;
+    *(u8 *)(state + 0x54) = 1;
     return 1;
 }
 
@@ -2278,26 +2282,26 @@ u32 btlCmdCameraMove(void) {
 }
 
 u32 func_0020C8E0(void) {
-    u64 temp_v0;
+    u64 task;
 
-    temp_v0 = func_001E66D8();
-    btlStartTask(temp_v0);
-    temp_v0 = func_001E6740();
-    btlStartTask(temp_v0);
-    temp_v0 = btlCreateCommandSoundTask(func_0010D8D0(), 0x11);
-    btlStartTask(temp_v0);
+    task = func_001E66D8();
+    btlStartTask(task);
+    task = func_001E6740();
+    btlStartTask(task);
+    task = btlCreateCommandSoundTask(func_0010D8D0(), 0x11);
+    btlStartTask(task);
     return 1;
 }
 
 u32 func_0020C938(void) {
-    u64 temp_v0;
+    u64 task;
 
-    temp_v0 = func_001E66D8();
-    btlStartTask(temp_v0);
-    temp_v0 = func_001E6740();
-    btlStartTask(temp_v0);
-    temp_v0 = btlCreateCommandSoundTask(0, 3);
-    btlStartTask(temp_v0);
+    task = func_001E66D8();
+    btlStartTask(task);
+    task = func_001E6740();
+    btlStartTask(task);
+    task = btlCreateCommandSoundTask(0, 3);
+    btlStartTask(task);
     return 1;
 }
 
@@ -2348,10 +2352,10 @@ u32 func_0020CBB0(void) {
 }
 
 u32 func_0020CBE0(void) {
-    s32 temp_v0;
+    BtlCommandCtx *context;
 
-    temp_v0 = func_0010D8D0();
-    func_0010D818(*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 0x122));
+    context = (BtlCommandCtx *)func_0010D8D0();
+    func_0010D818(((BtlUnit *)context->actor)->unk_122);
     return 1;
 }
 
@@ -2397,10 +2401,10 @@ u32 func_0020CD30(void) {
 }
 
 u32 func_0020CD50(void) {
-    s32 temp_v0;
+    s32 index;
 
-    temp_v0 = func_00211DE0();
-    func_0010D818(temp_v0 + 1);
+    index = func_00211DE0();
+    func_0010D818(index + 1);
     return 1;
 }
 
@@ -2415,20 +2419,20 @@ void btlBindActorSlot(s32 actor, s32 option) {
     s32 task;
     s32 window;
 
-    task = scrCreateTaskForProcessId(*(s32 *)(*(s32 *)(battle + 0x2C4) + 0x20) - 1, D_00435E7C, option);
+    task = scrCreateTaskForProcessId(((BtlState *)battle)->taskList->count - 1, D_00435E7C, option);
     scrSetCurrentActor(task, actor);
     window = *(s32 *)(func_00101958(task) + 0xCC);
     if (window >= 0) {
-        s32 unit = *(s32 *)(actor + 0x18);
+        s32 unit = (s32)((BtlActor *)actor)->unit;
         s32 width = 2;
 
-        if (*(u16 *)(unit + 0x120) & 0x20) {
+        if (((BtlUnit *)unit)->unk_120 & 0x20) {
             width = 1;
         }
-        func_001A45C0(window, 0, *(u16 *)(unit + 0x124), width);
+        func_001A45C0(window, 0, ((BtlUnit *)unit)->mode, width);
     }
-    func_00101968(*(s32 *)(battle + 0x2C4), task);
-    *(s32 *)(battle + 0x2CC) = task;
+    func_00101968((s32)((BtlState *)battle)->taskList, task);
+    ((BtlState *)battle)->boundTask = task;
 }
 
 void func_0020CE28(void) {
@@ -2445,8 +2449,8 @@ u32 func_0020CE40(void) {
     return 0;
 }
 
-u32 func_0020CE58(u32 arg0) {
-    return arg0;
+u32 func_0020CE58(u32 value) {
+    return value;
 }
 
 void func_0020CE60(void) {
@@ -2568,8 +2572,8 @@ void func_0020D250(void) {
 void func_0020D258(void) {
 }
 
-u32 func_0020D260(u32 arg0) {
-    return arg0;
+u32 func_0020D260(u32 value) {
+    return value;
 }
 
 void func_0020D268(void) {
@@ -2710,11 +2714,11 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419880);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
 
-s32 func_0020D320(s32 arg0) {
+s32 func_0020D320(s32 path) {
     char buf[0x70];
 
     if (D_00438B66 != 0) {
-        func_0035C860(buf, "pfs0:/%s", arg0);
+        func_0035C860(buf, "pfs0:/%s", path);
         return sceDopen(buf);
     }
     D_00438F80 = 0;
@@ -2743,19 +2747,19 @@ s32 func_0020D3A0(s32 unused, BtlReader *reader) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlScanDirectory);
 
-void btlDestroyEntryList(s32 arg0) {
+void btlDestroyEntryList(s32 list) {
     s32 entry;
 
-    if (((BtlEntryList *)arg0)->head != 0) {
-        entry = (s32)((BtlEntryList *)arg0)->head;
+    if (((BtlEntryList *)list)->head != 0) {
+        entry = (s32)((BtlEntryList *)list)->head;
         do {
             s32 nextEntry = (s32)((BtlEntry *)entry)->next;
             func_00328E48(entry);
             entry = nextEntry;
         } while (entry != 0);
     }
-    func_00328E48(((BtlEntryList *)arg0)->unk_04);
-    func_00328E48(arg0);
+    func_00328E48(((BtlEntryList *)list)->unk_04);
+    func_00328E48(list);
 }
 
 void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
@@ -2826,17 +2830,17 @@ typedef struct BtlResourceNameRecord {
     char name[0x1C]; /* 0x1C */
 } BtlResourceNameRecord;
 
-void func_0020DFB0(s32 arg0, s32 arg1, s32 arg2) {
-    ((BtlResourceNameRecord *)arg0)->word00 = arg1;
-    ((BtlResourceNameRecord *)arg0)->word04 = arg2;
+void func_0020DFB0(s32 record, s32 first, s32 second) {
+    ((BtlResourceNameRecord *)record)->word00 = first;
+    ((BtlResourceNameRecord *)record)->word04 = second;
 }
 
-u32 func_0020DFC0(s32 arg0) {
-    return ((BtlResourceNameRecord *)arg0)->word14;
+u32 func_0020DFC0(s32 record) {
+    return ((BtlResourceNameRecord *)record)->word14;
 }
 
-u32 func_0020DFC8(s32 arg0) {
-    return ((BtlResourceNameRecord *)arg0)->word08;
+u32 func_0020DFC8(s32 record) {
+    return ((BtlResourceNameRecord *)record)->word08;
 }
 
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *resource, char *output) {
@@ -2911,26 +2915,26 @@ void func_0020E368(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
 
-void func_0020E7A0(s32 arg0, s32 arg1, s32 arg2) {
-    ((BtlResourceNameRecord *)arg0)->word00 = arg1;
-    ((BtlResourceNameRecord *)arg0)->word04 = arg2;
+void func_0020E7A0(s32 record, s32 first, s32 second) {
+    ((BtlResourceNameRecord *)record)->word00 = first;
+    ((BtlResourceNameRecord *)record)->word04 = second;
 }
 
-u32 func_0020E7B0(s32 arg0) {
-    return ((BtlResourceNameRecord *)arg0)->word08;
+u32 func_0020E7B0(s32 record) {
+    return ((BtlResourceNameRecord *)record)->word08;
 }
 
-void func_0020E7B8(char *arg0, char *arg1) {
-    strcpy(arg0 + 0x21, arg1);
-    ((BtlResourceNameRecord *)arg0)->nameLength = strlen(arg1);
+void func_0020E7B8(char *record, char *name) {
+    strcpy(record + 0x21, name);
+    ((BtlResourceNameRecord *)record)->nameLength = strlen(name);
 }
 
-void func_0020E7F8(s32 arg0, void *arg1) {
-    func_0035C860(arg1, D_00436C50, arg0 + 0x21, arg0 + 0x1c);
+void func_0020E7F8(s32 record, void *output) {
+    func_0035C860(output, D_00436C50, record + 0x21, record + 0x1c);
 }
 
-void func_0020E828(s32 arg0, void *arg1) {
-    func_0035C860(arg1, D_00436C58, arg0 + 0x21);
+void func_0020E828(s32 record, void *output) {
+    func_0035C860(output, D_00436C58, record + 0x21);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436AF0);
