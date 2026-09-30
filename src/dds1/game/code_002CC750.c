@@ -386,7 +386,17 @@ void scrSetGlobalSeenBit(u32 id) {
     *word |= 1U << (bit & 31);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", scrTestGlobalSeenBit);
+u32 scrTestGlobalSeenBit(u32 arg) {
+    u16 id = arg;
+    u32 *word;
+    s32 offset;
+    if (id < 0x1ab) return 0;
+    if (id >= 0x200) return 0;
+    id = id + 0xfe55;
+    offset = 0x2e9d0 + (id >> 5) * 4;
+    word = (u32 *)(D_003BAA00 + offset);
+    return *word & (1U << (id & 31));
+}
 
 void scrSetSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
     u32 word, shift;
@@ -589,7 +599,29 @@ s32 ptyReqProfileCountAtLeast(s32 state, u8 *operand) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyProfileCountAtLeast);
+typedef struct PtyReqEntry {
+    u8 unk0[5];
+    u8 value5;
+    u8 pad6[0x16];
+} PtyReqEntry;
+
+s32 ptyProfileCountAtLeast(u8 *work, u8 *req) {
+    PtyReqEntry *entry = (PtyReqEntry *)D_003907B0;
+    u32 index;
+    u32 count = 0;
+
+    for (index = 0; index < 0x60; index++) {
+        if (ptyTestProfileFlag0((s32)work, (u16)index)) {
+            if (entry[index].value5 >= req[5]) {
+                count++;
+            }
+        }
+    }
+    if (count < ((PrfRequirementOperand *)req)->requiredValue) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 ptyAreReqProfilesInParty(u8 *operand) {
     s32 index = 0;

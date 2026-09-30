@@ -6,9 +6,53 @@ typedef struct WorldObjectPointer {
     u32 *value;
 } WorldObjectPointer;
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110DC0);
+s32 func_001104F8(s32 object, s32 (*callback)(void *));
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110E28);
+s32 dds3ExchangeAreaSlot(void *arg);
+
+void dds3DestroyWorldIndexNode(u32 node);
+
+void func_002CFF98(void *arg);
+
+const s32 func_00110DC0(WorldObjectPointer *object, s32 index, s32 value) {
+    u32 *node;
+
+    if (object == NULL || value == 0) {
+        return 0;
+    }
+    node = *(u32 **)((u8 *)object->value[2] + index * 12 + 4);
+    while (node != NULL) {
+        if (node == (u32 *)value) {
+            return 1;
+        }
+        node = *(u32 **)((u8 *)node + 0x20);
+    }
+    return 0;
+}
+
+const s32 func_00110E28(WorldObjectPointer *object, s32 value) {
+    u8 *p;
+    s32 i;
+
+    if (object == NULL || value == 0) {
+        return 0;
+    }
+    p = (u8 *)object->value[2] + 4;
+    for (i = 0; i < 0x12; i++, p += 0xC) {
+        u32 *node = *(u32 **)p;
+
+        if (node == NULL) {
+            continue;
+        }
+        do {
+            if (node == (u32 *)value) {
+                return 1;
+            }
+            node = *(u32 **)((u8 *)node + 0x20);
+        } while (node != 0);
+    }
+    return 0;
+}
 
 void dds3SetWorldObjectValue(WorldObjectPointer *object, u32 value) {
     if (object != NULL) {
@@ -40,7 +84,18 @@ s32 func_00110FF0(WorldObjectPointer *object) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_00111050);
+void func_00111050(WorldObjectPointer *object) {
+    u32 *p;
+    u32 i;
+
+    p = object->value;
+    func_001104F8(p[0], dds3ExchangeAreaSlot);
+    func_001104F8(p[1], dds3ExchangeAreaSlot);
+    for (i = 0; i < 2; i++) {
+        dds3DestroyWorldIndexNode(p[i]);
+    }
+    func_002CFF98(p);
+}
 
 extern void *func_002CFEB8(s32 size);
 

@@ -408,6 +408,12 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C98E8);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9BE8);
 
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436858);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436860);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
+
 void func_001C9DC8(s32 unused) {
     char text[8] = "Retreat";
     s32 color;
@@ -564,11 +570,19 @@ void func_001CB158(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CB190);
+extern s32 D_00416BB8[];
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CB278);
+void func_001CB190(s32 *outX, s32 *outY, s32 dir, s32 step) {
+    s32 offsets[3][8][2];
+
+    memcpy(offsets, D_00416BB8, sizeof(offsets));
+    *outX = offsets[dir][step][0];
+    *outY = offsets[dir][step][1];
+}
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416BB8);
+
+INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CB278);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CB498);
 
@@ -2092,12 +2106,6 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5FB0);
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00417348);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00417360);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436858);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436860);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436878);
 

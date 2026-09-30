@@ -60,7 +60,25 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC998);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCAC0);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCB50);
+extern u32 func_001FFCD8(void);
+
+s32 func_001FCB50(u8 *arg0) {
+    s32 result = 0;
+    u8 *unit = *(u8 **)(arg0 + 0x18);
+    u16 flags;
+
+    if (*(u32 *)(arg0 + 8) & 0x40) {
+        return result;
+    }
+    flags = *(u16 *)(unit + 0x12E);
+    if (!(flags & 0x20)) {
+        return result;
+    }
+    if ((flags & 0x7FFF) != 0x20) {
+        return 1;
+    }
+    return func_001FFCD8() < 0x46;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001FC7D8", D_003A57E0);
 
@@ -99,21 +117,6 @@ void effDecrementFirstCountdown(EffCounterOwner *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD9B0);
-
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDA78);
-
-void effDecrementSecondCountdown(EffCounterOwner *owner) {
-    u8 remaining;
-    EffChildCounters *child;
-
-    child = owner->child;
-    remaining = child->secondCountdown;
-    if (remaining != 0) {
-        child->secondCountdown = remaining + 0xff;
-    }
-}
-
 typedef struct BtlObjLink {
     void *owner;
     s32 arg;
@@ -137,6 +140,57 @@ typedef struct BtlEffObj {
 
 extern BtlEffObj *btlAllocTask(s32);
 extern BtlObjLink *func_001D47D8(BtlEffObj *);
+extern void func_001FD5C8();
+
+/* Link block hung off a freshly created effect object. */
+typedef struct BtlEffLinkEx {
+    u8 pad00[0x20];
+    BtlEffOwner *owner; /* 0x20 */
+    s32 arg;            /* 0x24 */
+    s32 unk28;          /* 0x28 */
+    u8 pad2C[4];
+    u8 kind;            /* 0x30 */
+} BtlEffLinkEx;
+
+BtlEffObj *func_001FD9B0(BtlEffOwner *owner, s32 arg, u8 kind) {
+    BtlEffObj *obj = btlAllocTask(0x34);
+    BtlEffLinkEx *link;
+
+    obj->kind = 1;
+    obj->unk10 = 0;
+    switch (kind) {
+    case 0:
+        obj->id = 0x39;
+        break;
+    case 1:
+        obj->id = 0x3A;
+        break;
+    }
+    obj->flags |= 2;
+    obj->ownerData = owner->ownerData;
+    obj->update = func_001FD5C8;
+    obj->destroy = effDecrementFirstCountdown;
+    link = (BtlEffLinkEx *)func_001D47D8(obj);
+    link->kind = kind;
+    link->owner = owner;
+    link->arg = arg;
+    link->unk28 = 0;
+    return obj;
+}
+
+INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDA78);
+
+void effDecrementSecondCountdown(EffCounterOwner *owner) {
+    u8 remaining;
+    EffChildCounters *child;
+
+    child = owner->child;
+    remaining = child->secondCountdown;
+    if (remaining != 0) {
+        child->secondCountdown = remaining + 0xff;
+    }
+}
+
 
 typedef struct BtlExtendedLink {
     u8 pad00[0x20];
@@ -291,9 +345,26 @@ BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE500);
+s32 func_001FE500(BtlObjLink *link) {
+    s32 work = func_001A17F0();
+    s32 actor = link->owner;
 
-extern void func_001FE500();
+    if (actor != 0 && !(*(u16 *)(actor + 0x12E) & 1)) {
+        return 1;
+    }
+    if (link->unk8 == 0) {
+        if (actor != 0) {
+            func_0019C590(*(s32 *)(work + 0x49C), 0, *(u16 *)(actor + 0x124),
+                          (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+        }
+        func_001ADB78(*(s32 *)(work + 0x49C), link->arg);
+    }
+    if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
+        return 1;
+    }
+    link->unk8++;
+    return 0;
+}
 
 BtlEffObj *btlCreateEffObjC(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
@@ -372,7 +443,21 @@ BtlEffObj *func_001FE790(BtlEffOwner *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE820);
+s32 func_001FE820(BtlObjLink *link) {
+    s32 work = func_001A17F0();
+
+    if (link->unk8 == 0) {
+        if (link->owner != 0) {
+            func_0019C590(*(s32 *)(work + 0x498), 0, *(u16 *)&link->arg, 0xD);
+        }
+        func_001ADB78(*(s32 *)(work + 0x498), 0x75);
+    }
+    if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
+        return 1;
+    }
+    link->unk8++;
+    return 0;
+}
 
 BtlEffObj *btlCreateEffectWaitTask(BtlEffOwner *owner, u16 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
@@ -475,7 +560,20 @@ u32 func_001FEB78(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FEB90);
+extern void func_001FEDE0(u8 *work, s8 flag);
+
+typedef struct BtlHistObj {
+    u8 pad00[0x146];
+    s8 counter; /* 0x146 */
+} BtlHistObj;
+
+void func_001FEB90(BtlHistObj *obj) {
+    obj->counter++;
+    obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
+    func_001FEDE0((u8 *)obj, 0);
+    D_003BB870++;
+    D_003BB870 = D_003BB870 <= 0 ? 0 : D_003BB870 >= 0x21 ? 0x20 : D_003BB870;
+}
 
 void btlClearNodeFlags(void) {
     s32 node = *(s32 *)(func_001A17F0() + 0x224);

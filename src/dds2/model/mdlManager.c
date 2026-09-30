@@ -10,7 +10,7 @@ extern void func_00336B00(void);
 
 extern u64 fileGetResourceHandle(u64);
 
-extern u64 func_002C8110(void);
+extern u64 func_002C8110();
 
 extern u32 func_00343F38(u64);
 
@@ -27,9 +27,23 @@ typedef struct MdlSub {
     u16 unkA;   /* 0xA */
 } MdlSub;
 
+typedef struct MdlEntry {
+    u8 unk0[0x14]; /* 0x0 */
+    s16 enabled;   /* 0x14 */
+} MdlEntry;
+
+/* Entry table pointed to by the first word of MdlInner. */
+typedef struct MdlEntryTable {
+    u8 unk0[4];       /* 0x0 */
+    s16 count;        /* 0x4 */
+    u8 unk6[6];       /* 0x6 */
+    MdlEntry **items; /* 0xC */
+} MdlEntryTable;
+
 /* Record behind MdlCtx.inner. */
 typedef struct MdlInner {
-    u8 unk0[8];  /* 0x0 */
+    MdlEntryTable *entries; /* 0x0 */
+    u8 unk4[4];  /* 0x4 */
     u32 resourceHandle; /* 0x8: released by mdlReleaseInnerResourceHandle */
     u8 unkC[8];  /* 0xC */
     struct MdlNode *list; /* 0x14: intrusive node list */
@@ -216,7 +230,25 @@ void func_00231A30(u64 resource, s32 destination) {
     func_002C7D00(resource);
 }
 
+extern u32 func_00344010(u64);
+
+typedef struct MdlLoadCmd {
+    u8 unk0[6];    /* 0x0 */
+    u8 deferred;   /* 0x6: non-zero when the caller runs the job itself */
+    u8 unk7[9];    /* 0x7 */
+    u32 size;      /* 0x10 */
+    u32 handle;    /* 0x14 */
+} MdlLoadCmd;
+
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231A80);
+
+extern u32 func_00344098(u64);
+
+typedef struct MdlLoadJob {
+    u8 unk0[0x18]; /* 0x0 */
+    u32 sizeWord;  /* 0x18 */
+    u32 handle;    /* 0x1C */
+} MdlLoadJob;
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231AF8);
 
@@ -306,7 +338,16 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00232390);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002324C0);
 
-INCLUDE_ASM(const s32, "model/mdlManager", mdlEnableAllEntries);
+void mdlEnableAllEntries(MdlCtx *ctx) {
+    MdlEntryTable *table = ctx->inner->entries;
+    s32 count = table->count;
+    MdlEntry **items = table->items;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        items[i]->enabled = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_002327C0);
 

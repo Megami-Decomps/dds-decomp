@@ -634,7 +634,84 @@ s32 func_00234A10(MdlViewerResource *resource, s32 index) {
     return ((MdlViewerSlots *)slotTable)->first + index * 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234A48);
+typedef struct MdlPartRec {
+    u8 pad00[4];
+    u32 size;      /* 0x04 */
+    s32 firstId;   /* 0x08 */
+    u16 count;     /* 0x0C */
+    u16 partIndex; /* 0x0E */
+    f32 value;     /* 0x10 */
+} MdlPartRec;
+
+typedef struct MdlPartItem {
+    u8 pad00[8];
+    s32 handle;         /* 0x08 */
+    MdlPartEntry *part; /* 0x0C */
+    void *record;       /* 0x10 */
+    f32 value;          /* 0x14 */
+} MdlPartItem;
+
+extern void *sdfChunkFindRecordById(void *chunk, s32 id);
+
+s32 func_00234A48(MdlResourceOwner *owner, MdlPartRec *rec, s32 option, s32 type, s32 (*create)(MdlPartEntry *)) {
+    MdlPartEntry *part = (MdlPartEntry *)func_00234A10((MdlViewerResource *)owner, rec->partIndex);
+
+    if (part != NULL) {
+        void *chunk = owner->chunk;
+        s32 id = rec->firstId;
+        s32 count = rec->count;
+        f32 value = 0.0f;
+
+        if (rec->size >= 0x11) {
+            value = rec->value;
+        }
+        do {
+            void *record = sdfChunkFindRecordById(chunk, id++);
+
+            if (record != NULL) {
+                MdlPartItem *item = (MdlPartItem *)mdlInsertResourceItem(owner, type, option);
+
+                item->handle = create(part);
+                item->part = part;
+                item->record = record;
+                item->value = value;
+            }
+        } while (--count != 0);
+    }
+}
+
+typedef struct MdlEffectRec {
+    u8 pad00[8];
+    s32 effectId; /* 0x08 */
+    s32 param0C;  /* 0x0C */
+    u16 scaleX;   /* 0x10 */
+    u16 scaleY;   /* 0x12 */
+    u16 value14;  /* 0x14 */
+    u8 value16;   /* 0x16 */
+    u8 value17;   /* 0x17 */
+    s32 value18;  /* 0x18 */
+    s32 value1C;  /* 0x1C */
+    s32 value20;  /* 0x20 */
+    s32 value24;  /* 0x24 */
+} MdlEffectRec;
+
+typedef struct MdlEffectParams {
+    MdlResourceOwner *owner; /* 0x00 */
+    s32 effectId;            /* 0x04 */
+    s32 param0C;             /* 0x08 */
+    f32 scaleX;              /* 0x0C */
+    f32 scaleY;              /* 0x10 */
+    s32 value14;             /* 0x14 */
+    s32 value16;             /* 0x18 */
+    s32 mode;                /* 0x1C */
+    s32 value17;             /* 0x20 */
+    s32 value18;             /* 0x24 */
+    s32 value1C;             /* 0x28 */
+    s32 value20;             /* 0x2C */
+    s32 value24;             /* 0x30 */
+} MdlEffectParams;
+
+extern s32 func_0018FD88(MdlEffectParams *params);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234B48);
 
@@ -655,8 +732,6 @@ s32 func_00234BF8(u32 owner, s32 record) {
                   ((MdlStreamRecord *)record)->value10);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234C20);
-
 /* Same conditional object-entry offsets as the DDS1 model viewer. */
 typedef struct MdlObjItem {
     u8 pad00[8];
@@ -666,6 +741,47 @@ typedef struct MdlObjItem {
     s32 param;               /* 0x14 */
     u8 attr[8];              /* 0x18 */
 } MdlObjItem;
+
+typedef struct MdlEntryRec {
+    u8 pad00[8];
+    s32 dataId; /* 0x08 */
+    s32 param;  /* 0x0C */
+    u8 flagB;   /* 0x10 */
+    u8 flagA;   /* 0x11 */
+    u16 index;  /* 0x12 */
+} MdlEntryRec;
+
+typedef struct MdlSlotRec {
+    u8 pad00[8];
+    MdlObj *obj; /* 0x08 */
+} MdlSlotRec;
+
+extern void *sdfFindResourceById(s32 id);
+
+s32 func_00234C20(MdlResourceOwner *owner, MdlEntryRec *entry, s32 option) {
+    MdlSlotRec *slot = (MdlSlotRec *)func_00234A10((MdlViewerResource *)owner, entry->index);
+
+    if (slot != 0) {
+        MdlObj *obj = slot->obj;
+        if (obj->inUse == 0) {
+            s32 data = (s32)sdfFindResourceById(entry->dataId);
+            if (data != 0) {
+                MdlObjItem *item;
+                u8 *attr;
+                obj->inUse = 1;
+                item = (MdlObjItem *)mdlInsertResourceItem(owner, 3, option);
+                item->owner = owner;
+                item->obj = (s32)obj;
+                attr = item->attr;
+                item->data = data;
+                item->param = entry->param;
+                attr[1] = 1;
+                attr[2] = entry->flagA;
+                attr[3] = entry->flagB;
+            }
+        }
+    }
+}
 
 void mdlCondInitEntry(s32 entry) {
     s32 object = ((MdlObjItem *)entry)->obj;
@@ -679,9 +795,9 @@ void mdlCondInitEntry(s32 entry) {
     }
 }
 
-extern s32 func_00234A48(s32 object, s32 *record, s32 option, s32 type, void (*advance)());
+extern s32 func_00234A48(MdlResourceOwner *object, MdlPartRec *record, s32 option, s32 type, s32 (*advance)(MdlPartEntry *));
 
-extern s32 func_00234C20(s32 object, s32 *record, s32 option);
+extern s32 func_00234C20(MdlResourceOwner *object, MdlEntryRec *record, s32 option);
 
 s32 mdlDispatchResourceEntry(s32 object, s32 *record, s32 option) {
     switch (*record) {

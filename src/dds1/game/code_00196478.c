@@ -17,6 +17,14 @@ extern u64 func_001951C8(u64, u64, u64, u64, u64);
 
 extern u64 func_00195160(u64, u64, u64, u64, u64);
 
+extern void frFontSetEntryFlag(s32 kind, u64 flag);
+
+extern void func_00195520(u64 value);
+
+extern void func_00195530(u64 value);
+
+extern void frFontSetChainFlag(u64 glyph, u64 value);
+
 extern s32 D_003BB168;
 
 extern u32 D_003BB170;
@@ -236,7 +244,28 @@ void func_00197220(s32 limit) {
     D_003BB168 = limit;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197238);
+u64 func_00197238(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
+    u64 glyph;
+    s32 kind = 4;
+
+    if (alt) {
+        kind = 5;
+    }
+    frFontSetEntryFlag(kind, entryFlag);
+    func_00195520(1);
+    func_00195530(2);
+    func_00195530(0x10);
+    glyph = func_00195160(source, kind, 0, 0, 0);
+    func_00195520(0x10);
+    func_00195520(2);
+    func_00195530(1);
+    frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
+    func_00195450(glyph, x, y);
+    func_00195460(glyph, depth << 4);
+    frFontSetChildColors(glyph, colors);
+    frFontSetChainFlag(glyph, 5);
+    return glyph;
+}
 
 void mnuLoadStaffFonts(void) {
     func_00194190(4, "/font/staff1.fnt");
@@ -751,7 +780,23 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00198C70);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198DF0);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198F58);
+void func_00198F58(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, u64 command) {
+    u64 packet;
+    u64 *dst;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x46, 3, 0x551, 1);
+    dst = func_002E1420(packet);
+    dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+    dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+    dst += 2;
+    dst[1] = (u64)tail;
+    dst[0] = (u64)(u32)(vertices[0].x + 0x7000) | ((u64)(vertices[0].y + 0x7900) << 32);
+    dst += 2;
+    dst[1] = (u64)tail;
+    dst[0] = (u64)(u32)(vertices[1].x + 0x7000) | ((u64)(vertices[1].y + 0x7900) << 32);
+    sdfAppendPacket(command, packet);
+}
 
 void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command) {
     u64 packet;
