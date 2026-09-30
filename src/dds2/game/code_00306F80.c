@@ -277,9 +277,10 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_003078A8);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307A68);
 
+/* Convert the owner's fixed-point angle to degrees and return its angular step. */
 s32 func_00307BA8(s32 unused, u8 *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
-    s32 i = 3;
+    s32 repetitions = 3;
 
     do {
         if (table->mirrored == 0) {
@@ -287,7 +288,7 @@ s32 func_00307BA8(s32 unused, u8 *out, GridAngleOwner *owner) {
         } else {
             *(f32 *)(out + 0x24) = (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
         }
-    } while (--i >= 0);
+    } while (--repetitions >= 0);
     return 0x10000 / table->divisor;
 }
 
