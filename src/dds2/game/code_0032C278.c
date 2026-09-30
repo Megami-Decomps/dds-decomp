@@ -219,7 +219,21 @@ SdfLink *sdfDetachPendingList(void) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CBF0);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032CCC0);
+/* Hand the oldest pending slot to the worker, shift the slot list down and
+ * refill the last slot with the newly detached list. */
+void func_0032CCC0(void) {
+    u32 i;
+
+    D_00439164 = 1;
+    WaitSema(D_004389FC);
+    func_0032CBF0(D_00439158[0]);
+    for (i = 0; i < 1; i++) {
+        D_00439158[i] = D_00439158[i + 1];
+    }
+    D_00439158[1] = (s32)sdfDetachPendingList();
+    SignalSema(D_004389FC);
+    D_00439164 = 0;
+}
 
 /* Test all three pending-work sources: flag, chain, and two slots. */
 u64 sdfGraphHasPendingWork(void) {
@@ -455,9 +469,68 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D218);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D2A8);
+typedef struct SdfRefNode {
+    u8 pad00[0x10];
+    u64 chain; /* 0x10: NEXT tag chaining to the previous head */
+} SdfRefNode;
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D340);
+/* Give each pending reference (+0x14, then +0x10) its own DMA node, chained in front of the list. */
+void func_0032D2A8(SdfListHead *list) {
+    SdfRefNode *node;
+    u32 address;
+    u32 source;
+
+    source = list->unk14;
+    if (source != 0) {
+        node = (SdfRefNode *)sdfCreateReferenceDmaNode(source);
+        address = list->first & 0xFFFFFFF;
+        list->first = (u32)node;
+        node->chain = ((s64)address << 32) | 0x20000000;
+    }
+    source = list->unk10;
+    if (source != 0) {
+        node = (SdfRefNode *)sdfCreateReferenceDmaNode(source);
+        address = list->first & 0xFFFFFFF;
+        list->first = (u32)node;
+        node->chain = ((s64)address << 32) | 0x20000000;
+    }
+}
+
+/* Pool entry made by func_0032D0F0: per-entry packet list with append/prepend handlers. */
+typedef struct SdfPoolNode {
+    struct SdfPoolNode *next; /* 0x0 */
+    u32 first;                /* 0x4: first packet */
+    u32 last;                 /* 0x8: last packet */
+    u32 unkC;
+    void (*append)(struct SdfPoolNode *, struct SdfPoolNode *);      /* 0x10 */
+    s32 (*prepend)(struct SdfPoolNode *, s32, struct SdfPoolNode *); /* 0x14 */
+    u32 unk18;
+    u32 unk1C;
+} SdfPoolNode;
+
+/* Flush every pool entry, chain the packet lists together and terminate the last. */
+s32 func_0032D340(SdfPoolNode *node) {
+    SdfPoolNode *tail = NULL;
+    s32 head = 0;
+
+    for (; node != NULL; node = node->next) {
+        node->prepend(node, 0, NULL);
+        if (node->first != 0) {
+            if (head != 0) {
+                func_0032D218(tail, node->first);
+            } else {
+                head = node->first;
+                func_0032D2A8((SdfListHead *)head);
+            }
+            tail = (SdfPoolNode *)node->last;
+        }
+    }
+    if (tail != NULL) {
+        ((SdfDmaTagHeader *)tail->last)->kind = 0x70;
+        ((SdfDmaTagHeader *)tail->last)->address = 0;
+    }
+    return head;
+}
 
 void func_0032D3F0(SdfListHead *arg0) {
     arg0->unk0 = 0;
@@ -515,7 +588,7 @@ void func_0032D4A0(u64 *packet, u32 address, s32 count) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D528);
 
-void func_0032D5E0(u64 *packet, s32 x, s32 y) {
+void func_0032D5E0(u64 *packet, s32 x, s32 y, s32 unused0, s32 unused1) {
     u32 low = ((0x1000 - y) << 19) | ((0x1000 - x) << 3);
     u32 high = ((y + 0x1000) << 19) | ((x + 0x1000) << 3);
 
@@ -551,7 +624,42 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D758);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D898);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DA50);
+typedef struct SdfViewBox {
+    s16 x;       /* 0x0 */
+    u8 pad2[2];
+    s16 y;       /* 0x4 */
+    u8 unk6;     /* 0x6 */
+    u8 unk7;     /* 0x7 */
+} SdfViewBox;
+
+typedef struct SdfSceneNode {
+    u8 pad00[4];
+    void (*handler)(); /* 0x4 */
+    SdfViewBox *view;  /* 0x8 */
+    u8 padC[4];
+    SdfPacket header;  /* 0x10 */
+    u64 draw[24];      /* 0x30 */
+    u64 limits[10];    /* 0xF0 */
+    u64 regs[8];       /* 0x140 */
+} SdfSceneNode;
+
+extern void func_0032D898();
+
+void func_0032DA50(SdfSceneNode *node, SdfViewBox *view) {
+    func_0032D460(&node->header, 0x15);
+    node->view = view;
+    node->handler = func_0032D898;
+    func_0032D5E0(node->limits, view->x, view->y, view->unk6, view->unk7);
+    node->regs[0] = 0x517FB;
+    node->regs[1] = 0x47;
+    node->regs[2] = 0x44;
+    node->regs[3] = 0x42;
+    node->regs[4] = 0x517FB;
+    node->regs[5] = 0x48;
+    node->regs[6] = 0x44;
+    node->regs[7] = 0x43;
+    sdfInitDrawPacket(node->draw);
+}
 
 void sdfAppendLinkedPacketPayload(SdfListHead *list, SdfListHead *other, u32 *node) {
     sdfAppendLinkedPacketNode(other, node);
@@ -1118,7 +1226,44 @@ void func_00330A00(u32 *arg0) {
     func_003405D8(*arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_00330A18);
+/* Node of the object tree: first child, else next sibling, else back up. */
+typedef struct SdfTreeNode {
+    u8 pad00[4];
+    struct SdfTreeNode *sibling; /* 0x4 */
+    struct SdfTreeNode *parent;  /* 0x8 */
+    struct SdfTreeNode *child;   /* 0xC */
+} SdfTreeNode;
+
+typedef struct SdfTree {
+    SdfObjectList *list; /* 0x0 */
+    SdfTreeNode *root;   /* 0x4 */
+} SdfTree;
+
+/* Store every node of the tree, in depth-first order, into the list's element array. */
+void func_00330A18(SdfTree *tree) {
+    SdfTreeNode **elements = (SdfTreeNode **)tree->list->elements;
+    SdfTreeNode *node = tree->root;
+    SdfTreeNode **out;
+
+    if (node != NULL) {
+        out = elements;
+        do {
+            *out++ = node;
+            if (node->child != NULL) {
+                node = node->child;
+            } else {
+                do {
+                    SdfTreeNode *next = node->sibling;
+                    if (next != NULL) {
+                        node = next;
+                        break;
+                    }
+                    node = node->parent;
+                } while (node != NULL);
+            }
+        } while (node != NULL);
+    }
+}
 
 void func_00330A88(s32 *arg0, u32 arg1, u32 arg2) {
     s16 temp_v0;
