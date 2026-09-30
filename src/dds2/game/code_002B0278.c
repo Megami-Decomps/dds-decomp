@@ -1185,7 +1185,7 @@ s64 func_002B5128(s32 callback) {
     return menuSetHandler(context, 2, callback);
 }
 
-void mnuClearSelectedListNodeId(void) {
+void mnuClearSelectedListNodeId() {
     s32 context;
 
     context = func_00101958();
@@ -1199,7 +1199,7 @@ u32 mnuHasSelectedListNodeId(s32 callback) {
     return ~((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedIndex >> 0x1f;
 }
 
-void mnuHighlightSelectedListNode(void) {
+void mnuHighlightSelectedListNode() {
     u8 *state = (u8 *)((MenuContext *)func_00101958())->party;
     u8 *node = (u8 *)((MenuPartyRuntime *)state)->selectedWindow->list->first;
     while (node != NULL) {
@@ -1289,7 +1289,50 @@ void mnuSwapPartySkillSlots(s32 party, s32 firstSlot, s32 secondSlot) {
     *(u16 *)(entries + secondOffset) = firstValue;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B57A8);
+void func_002B57A8(s32 callback) {
+    s32 context = func_00101958();
+    s32 menu = ((MenuContext *)context)->party;
+    u32 input = func_002C44E8(0x37);
+    MenuWindowContainer *window = ((MenuPartyRuntime *)menu)->selectedWindow;
+    s32 slot = D_00435DD0 + ((MenuList *)((MenuContext *)context)->selectionList)->cursor->index * 0x1c4 + 0xa60;
+    MenuList *list = window->list;
+
+    list->unk0 &= ~8;
+    if (input & 1) {
+        s32 selected = list->cursor->index;
+
+        if (mnuHasSelectedListNodeId(callback) == 0) {
+            ((MenuPartyRuntime *)menu)->selectedIndex = selected;
+        } else if (selected != ((MenuPartyRuntime *)menu)->selectedIndex) {
+            mnuSwapPartySkillSlots(slot, ((MenuPartyRuntime *)menu)->selectedIndex, selected);
+            mnuClearSelectedListNodeId(callback);
+            window = mnuSeekSelectedWindowCursor(0, callback);
+        } else {
+            input = 0x8000;
+        }
+    }
+    if (input & 6) {
+        input = 2;
+        if (mnuHasSelectedListNodeId(callback) == 0) {
+            func_002C42C0(context + 0x54, D_003E7790);
+        }
+        mnuClearSelectedListNodeId(callback);
+    }
+    mnuHighlightSelectedListNode(callback);
+    if (window != 0) {
+        if (!(input & 0x300000)) {
+            func_002B9808((s32)window);
+        }
+        if (input & 0x10) {
+            func_002B97F0((s32)window);
+        }
+        if (input & 0x20) {
+            func_002B97D8((s32)window);
+        }
+        func_002B96D8((s32)window);
+        mnuPlayInputSound(0, input, (s32)window->list);
+    }
+}
 
 s64 func_002B5980(s32 callback) {
     s32 context = func_00101958();
@@ -1308,7 +1351,55 @@ s64 func_002B5980(s32 callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5A30);
+typedef struct MenuPanelBlock {
+    u32 word[14];
+} MenuPanelBlock;
+
+typedef struct MenuPanelWindow {
+    u8 pad0[4];
+    s32 field4;
+    u8 pad8[0x10];
+    MenuList *list; /* 0x18 */
+    u8 pad1C[0x3C];
+    MenuPanelBlock block; /* 0x58 */
+    u8 pad90[4];
+    s32 field94;
+} MenuPanelWindow;
+
+extern void func_002C0950();
+extern void func_002C0958();
+
+void func_002B5A30(s32 context) {
+    s32 *party = (s32 *)((MenuContext *)context)->party;
+    MenuPanelWindow **windows = (MenuPanelWindow **)(party + 4);
+    MenuPanelWindow **slot;
+    MenuPanelWindow *window;
+    s32 index = ((MenuList *)party[3])->cursor->index;
+    u32 j;
+
+    slot = windows + index;
+    window = *slot;
+    func_00306F80(0xED0, 0x2E0, 0, 1, ((MenuContext *)context)->labelHandle, 0x24, 0x53);
+    func_002C0950(party[8], index);
+    func_002C0958(0xED0, 0x328, 0, party[8], 0x53);
+    if (window->list->cursor->index == 0) {
+        window->list->unk0 |= 0x10;
+    } else {
+        window->list->unk0 &= ~0x10;
+    }
+    func_002B9EA0(0x1190, 0x658, 0, (s32)window, 0x53);
+    for (j = 0; j < 4; j++) {
+        if (j != index) {
+            memcpy(&windows[j]->block, &window->block, sizeof(MenuPanelBlock));
+            windows[j]->field94 = window->field94;
+            windows[j]->field4 = window->field4;
+        }
+    }
+    if (party[14] >= 0x19D) {
+        party[14] -= 0x138;
+    }
+    party[14] += 6;
+}
 
 s64 func_002B5BE8(s32 callback) {
     s32 context = func_00101958();
@@ -1511,7 +1602,72 @@ void func_002B63F0(s32 menu, s32 target) {
     mnuResetListNodeFadeCounters(((MenuWindowContainer *)list)->list);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6498);
+s64 func_002B6498(s32 callback) {
+    s32 context = func_00101958();
+    s32 *menu = (s32 *)((MenuContext *)context)->party;
+    u32 input = func_002C44E8(0xC37);
+    s32 *popup = (s32 *)(context + 0x54);
+    u32 buttons = func_002C44E8(0xC0);
+    s64 state = func_002C4038(context + 8, popup, 0, callback);
+    s32 *windows;
+    s32 *windowSlot;
+    MenuWindowContainer *window;
+    s32 offset;
+
+    if (state != 0) {
+        return state;
+    }
+    if (func_002B6308(callback) != 0) {
+        return 0;
+    }
+    windows = menu + 4;
+    windowSlot = windows + ((MenuList *)menu[3])->cursor->index;
+    window = (MenuWindowContainer *)*windowSlot;
+    if (!(input & 0x300000)) {
+        func_002B9808((s32)window);
+    }
+    if (input & 0x10) {
+        func_002B97F0((s32)window);
+    }
+    if (input & 0x20) {
+        func_002B97D8((s32)window);
+    }
+    func_002C48C8(window, &input);
+    if (!(buttons & 0xC00000)) {
+        mnuClearListFlagsOneAndTwo(menu[3]);
+    }
+    offset = window->list->windowOffset;
+    if (buttons & 0x40) {
+        func_002B8D10(menu[3]);
+        func_002B63F0((s32)(menu + 2), offset);
+    }
+    if (buttons & 0x80) {
+        func_002B8CF0(menu[3]);
+        func_002B63F0((s32)(menu + 2), offset);
+    }
+    mnuPlayInputSound(0, buttons, menu[3]);
+    windowSlot = windows + ((MenuList *)menu[3])->cursor->index;
+    window = (MenuWindowContainer *)*windowSlot;
+    if (input & 1) {
+        MenuListNode *node = window->list->cursor;
+
+        if (node->sortKeyPrimary != 0xFFFF && !(node->flags48 & 1)) {
+            func_002C42B0(popup, D_003E7758);
+        } else {
+            input = 0x8000;
+        }
+    }
+    if (input & 4) {
+        menu[12] = 1;
+        func_002C42B0(popup, D_003E7758);
+        input = 1;
+    }
+    if (input & 2) {
+        func_002C42C0(popup, D_003E773C);
+    }
+    mnuPlayInputSound(0, input, (s32)window->list);
+    return 0;
+}
 
 s64 func_002B66D8(s32 callback) {
     s32 context = func_00101958();
