@@ -86,7 +86,7 @@ typedef struct MdlNode {
     u8 pad31[7];          /* 0x31 */
 } MdlNode;
 
-extern void func_003341B8(void *arg);
+extern void sdfDestroyMotion(void *arg);
 
 extern s32 btlGroupContainsId(s32 group, s32 id);
 
@@ -99,7 +99,7 @@ void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
     if (*slot == node) {
         *slot = NULL;
     }
-    func_003341B8(node);
+    sdfDestroyMotion(node);
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {

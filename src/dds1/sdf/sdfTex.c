@@ -12,7 +12,7 @@ void *memcpy(void *arg0, void *arg1, u32 arg2);
 void func_002D1B90(void *arg0);
 void func_002CFF98(void *arg0);
 void sdfFreeMemoryFromEitherHeap(void *arg0);
-void func_002D3C30(void *arg0, void *arg1);
+void sdfPendingQueuePush(void *arg0, void *arg1);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 void *func_002D30C8(void *arg0, s32 arg1);
 void *func_002CFEB8(s32 arg0);
@@ -84,7 +84,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
     }
 }
 
-/* Hand the last reference to func_002D3C30 rather than releasing it here. */
+/* Hand the last reference to sdfPendingQueuePush rather than releasing it here. */
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     SdfTexRef *ref;
     s32 count;
@@ -95,7 +95,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->unk20 = 0;
-            func_002D3C30(&D_003BD9F0, texture);
+            sdfPendingQueuePush(&D_003BD9F0, texture);
         }
     }
 }

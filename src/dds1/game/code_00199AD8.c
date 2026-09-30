@@ -99,7 +99,7 @@ void itfPanelDispatchHandler(PanelObj *panel) {
     D_00357A50[panel->handlerIndex](panel);
 }
 
-void func_00199B08(PanelPt *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetFourColumnVertices(PanelPt *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[4];
     s32 i;
 
@@ -184,7 +184,7 @@ void func_00199ED8(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Write the same RGB at two offsets, with a transparent first color. */
-void func_00199F50(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void itfPanelSetVertexPairs(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x40);
 
     panelSetVec4(vec, red, green, blue, 0);

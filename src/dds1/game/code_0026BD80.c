@@ -7,7 +7,7 @@ extern void func_0026C7E0();
 typedef struct {
     s32 pad00;
     u32 firstResource;    /* 0x04: released by func_0026C048 */
-    s32 spriteHandle;     /* 0x08: released through func_002BDD60 */
+    s32 spriteHandle;     /* 0x08: released through effDestroyResourceSlotSet */
     u32 secondResource;   /* 0x0C: released by func_0026C048 */
     s32 pad10;
     s32 word14;
@@ -39,7 +39,7 @@ void func_0026BE38(void) {
     s32 node;
 
     if (((MenuState *)D_003BC5D0)->linkedState != 0) {
-        func_0027B368(((MenuState *)D_003BC5D0)->linkedState);
+        mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
     }
     node = mnuCreateListState(0, 3, 0);
     ((MenuState *)D_003BC5D0)->linkedState = node;
@@ -50,7 +50,7 @@ void func_0026BE38(void) {
 }
 
 s64 func_0026BEB0(void) {
-    return func_0027B368(((MenuState *)D_003BC5D0)->linkedState);
+    return mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
 }
 
 u32 func_0026BED0(void) {
@@ -87,12 +87,12 @@ u32 func_0026C040(void) {
 void func_0026C048(void) {
     MenuState *state = (MenuState *)D_003BC5D0;
     if (state->firstResource != 0) {
-        func_002BDD60(state->firstResource);
+        effDestroyResourceSlotSet(state->firstResource);
         state = (MenuState *)D_003BC5D0;
         state->firstResource = 0;
     }
     if (state->secondResource != 0) {
-        func_002BDD60(state->secondResource);
+        effDestroyResourceSlotSet(state->secondResource);
         state = (MenuState *)D_003BC5D0;
         state->secondResource = 0;
     }
@@ -106,7 +106,7 @@ u8 mnuHasSpriteHandle(void) {
 
 void mnuReleaseSpriteHandle(void) {
     if (((MenuState *)D_003BC5D0)->spriteHandle != 0) {
-        func_002BDD60(((MenuState *)D_003BC5D0)->spriteHandle);
+        effDestroyResourceSlotSet(((MenuState *)D_003BC5D0)->spriteHandle);
         ((MenuState *)D_003BC5D0)->spriteHandle = 0;
     }
 }

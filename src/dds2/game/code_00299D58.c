@@ -150,7 +150,7 @@ u32 func_0029A650(void) {
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A658);
 
-u32 func_0029A748(u32 kind) {
+u32 mnuKindIsSelectable(u32 kind) {
     if (kind == 1) {
         return 1;
     }

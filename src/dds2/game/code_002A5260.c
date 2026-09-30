@@ -704,7 +704,7 @@ void func_002A78B0(void) {
 }
 
 void func_002A7900(void) {
-    func_003054E8(D_00437AB0[1]);
+    effDestroyResourceSlotSet(D_00437AB0[1]);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_003458E8(0);

@@ -161,7 +161,7 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
 typedef struct ItfMesItem {
     u8 unk0[0x10];         /* 0x0 */
     u32 word10;            /* 0x10: low byte is the color */
-    u8 flag14;             /* 0x14: byte set by func_001A5988 */
+    u8 flag14;             /* 0x14: byte set by itfMesSetRowItemFlag */
     u8 unk15;              /* 0x15 */
     u8 flag16;             /* 0x16: tested by func_001A5B70 */
     u8 unk17[0x11];        /* 0x17 */
@@ -515,7 +515,7 @@ void itfMesClearFlags(u32 flags) {
     D_004365E8 = D_004365E8 & ~flags;
 }
 
-s32 func_001A38D8(ItfMesSub *sub) {
+s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesPoolNode *node = itfAcquirePoolNode(&D_00452940.pool);
     s32 window = node->index;
     ItfMesState *mes;
@@ -580,7 +580,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     func_001A5DD8(blk14, 0);
 }
 
-void func_001A3DA8(ItfMesState *mes) {
+void itfMesBuildOptionFrame(ItfMesState *mes) {
     ItfMesBlk40 *blk = &mes->blk40;
     ItfMesBlkA4 *blkA4 = &mes->blkA4;
     s32 rect[4];
@@ -609,7 +609,7 @@ void func_001A3DA8(ItfMesState *mes) {
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
-void func_001A3EE0(s32 window, s32 entryIndex) {
+void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     ItfMesState *mes = D_0045296C[window].mes;
     ItfMesBlk40 *blk = &mes->blk40;
     ItfMesEntry *entry = itfMesGetEntry(mes, entryIndex);
@@ -628,11 +628,11 @@ void func_001A3EE0(s32 window, s32 entryIndex) {
     if (*(s32 *)&mes->unk8[0] != 0) {
         func_0019D8A8(*(s32 *)&mes->unk8[0]);
     }
-    blk->unk8 = (FrFontGlyph *)func_001A5670((u32 *)((u8 *)table + 0x20), table->unk1A, blk->panelValue, blk->x, y, mes->unkC);
+    blk->unk8 = (FrFontGlyph *)itfMesBuildNodeRows((u32 *)((u8 *)table + 0x20), table->unk1A, blk->panelValue, blk->x, y, mes->unkC);
     blk->unk16 = count;
     mes->flags = (mes->flags & ~0x38) | 0x10;
     if (mes->unk12 == 3) {
-        func_001A3DA8(mes);
+        itfMesBuildOptionFrame(mes);
     }
     blk->unk10 = 1;
 }
@@ -821,7 +821,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4988);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4A10);
 
-s32 func_001A4AD8(s32 window, s32 entryIndex, s32 itemIndex) {
+s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     ItfMesState *mes = D_0045296C[window].mes;
     ItfMesTable *table;
     u32 item;
@@ -854,7 +854,7 @@ void func_001A4BB8(s32 window, u32 value) {
     D_0045296C[window].mes->unk1DC = value;
 }
 
-void func_001A4BD8(void) {
+void itfMesInit(void) {
     ItfMesPoolNode *node;
 
     D_00452940.unk0 = 0;
@@ -986,7 +986,7 @@ extern s32 func_0019E800();
 extern s8 func_0019E8E0();
 extern s32 func_0019E908();
 extern s32 func_0019E910();
-extern void func_0023F010();
+extern void evtLipsExecFunction();
 extern void itfMesCopyGlyphShade();
 extern void func_001A5B70();
 
@@ -1034,7 +1034,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     if (func_0019E8E0(8) != 0) {
         helper = func_0019E908();
-        func_0023F010(helper, func_0019E910());
+        evtLipsExecFunction(helper, func_0019E910());
     }
     func_001A5950((ItfMesNode *)glyph, mes->unkC);
     *(s16 *)(blk + 0x16) = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
@@ -1076,7 +1076,7 @@ s32 itfMesCountZeroBits(s32 count, u32 bits) {
 }
 
 /* Build one node per clear bit of mask, stacking them downward from y. */
-ItfMesNode *func_001A5670(u32 *items, s32 count, u32 mask, s32 x, s32 y, s32 value) {
+ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 count, u32 mask, s32 x, s32 y, s32 value) {
     ItfMesNode *node = NULL;
     s32 i;
 
@@ -1140,7 +1140,7 @@ void func_001A5950(ItfMesNode *node, s32 value) {
 
 /* Skip to the row (last - first - 1) rows below the node, then set the flag
  * byte on every child of that row's nodes. */
-void func_001A5988(ItfMesNode *node, s32 first, s32 last, s32 value) {
+void itfMesSetRowItemFlag(ItfMesNode *node, s32 first, s32 last, s32 value) {
     s32 rows = last - first - 1;
     s32 row = node->y;
     s32 cur = row;

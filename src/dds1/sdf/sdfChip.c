@@ -30,7 +30,7 @@ extern u8 D_003BD9C0;
 
 void *func_002CFEB8(s32 arg0);
 void *sdfClearQuadwords(void *arg0, s32 arg1);
-void func_002D3C30(void *arg0, s32 arg1);
+void sdfPendingQueuePush(void *arg0, s32 arg1);
 s32 func_00312C08(void);
 s32 EIntr(void);
 void sdfAdvanceNodeCursor(SdfChipOwner *owner);
@@ -87,7 +87,7 @@ void func_002CFF98(void *arg0) {
 }
 
 void func_002D00B8(s32 value) {
-    func_002D3C30(&D_003BD9C0, value);
+    sdfPendingQueuePush(&D_003BD9C0, value);
 }
 
 s32 sdfChipIsInRange(s32 address) {

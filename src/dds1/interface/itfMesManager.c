@@ -280,7 +280,7 @@ s32 func_00196BD8();
 
 s32 func_00196BE0();
 
-void func_002243D8();
+void evtLipsExecFunction();
 
 void func_0019D920(ItfMesNode *node, s32 value);
 
@@ -521,7 +521,7 @@ void itfMesClearFlags(u32 flags) {
     D_003BB1E8 &= ~flags;
 }
 
-s32 func_0019B8A8(ItfMesSub *sub) {
+s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesPoolNode *node = itfAcquirePoolNode(&D_003D6EA0.pool);
     s32 window = node->index;
     ItfMesState *mes;
@@ -586,7 +586,7 @@ void itfMesCleanupWindow(s32 window, s32 arg1) {
     func_0019DDA8(blk14, 0);
 }
 
-void func_0019BD78(ItfMesState *mes) {
+void itfMesBuildOptionFrame(ItfMesState *mes) {
     ItfMesBlk40 *blk = &mes->blk40;
     ItfMesBlkA4 *blkA4 = &mes->blkA4;
     s32 rect[4];
@@ -615,7 +615,7 @@ void func_0019BD78(ItfMesState *mes) {
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
-void func_0019BEB0(s32 window, s32 entryIndex) {
+void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     ItfMesState *mes = D_003D6ECC[window].mes;
     ItfMesBlk40 *blk = &mes->blk40;
     ItfMesEntry *entry = itfMesGetEntry(mes, entryIndex);
@@ -634,11 +634,11 @@ void func_0019BEB0(s32 window, s32 entryIndex) {
     if (*(s32 *)&mes->unk8[0] != 0) {
         func_00195BD8(*(s32 *)&mes->unk8[0]);
     }
-    blk->unk8 = (FrFontGlyph *)func_0019D640((u32 *)((u8 *)table + 0x20), table->unk1A, blk->unkC, blk->x, y, mes->unkC);
+    blk->unk8 = (FrFontGlyph *)itfMesBuildNodeRows((u32 *)((u8 *)table + 0x20), table->unk1A, blk->unkC, blk->x, y, mes->unkC);
     blk->unk16 = count;
     mes->flags = (mes->flags & ~0x38) | 0x10;
     if (mes->unk12 == 3) {
-        func_0019BD78(mes);
+        itfMesBuildOptionFrame(mes);
     }
     blk->unk10 = 1;
 }
@@ -840,7 +840,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C968);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C9F0);
 
-s32 func_0019CAB8(s32 window, s32 arg1, s32 arg2) {
+s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
     ItfMesState *mes = D_003D6ECC[window].mes;
     ItfMesTable *table;
     u32 item;
@@ -873,7 +873,7 @@ void func_0019CB98(s32 window, u32 value) {
     D_003D6ECC[window].mes->unk1DC = value;
 }
 
-void func_0019CBB8(void) {
+void itfMesInit(void) {
     ItfMesPoolNode *node;
 
     D_003D6EA0.unk0 = 0;
@@ -1041,7 +1041,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     if (func_00196BB0(8) != 0) {
         helper = func_00196BD8();
-        func_002243D8(helper, func_00196BE0());
+        evtLipsExecFunction(helper, func_00196BE0());
     }
     func_0019D920((ItfMesNode *)glyph, *(s32 *)(m + 0xC));
     *(s16 *)(blk + 0x16) = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
@@ -1081,7 +1081,7 @@ s32 itfMesCountZeroBits(s32 bits, u32 value) {
 }
 
 /* Build one node per clear bit of mask, stacking them downward from y. */
-ItfMesNode *func_0019D640(u32 *items, s32 count, u32 mask, s32 x, s32 y, s32 value) {
+ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 count, u32 mask, s32 x, s32 y, s32 value) {
     ItfMesNode *node = NULL;
     s32 i;
 
@@ -1145,7 +1145,7 @@ void func_0019D920(ItfMesNode *node, s32 value) {
 
 /* Skip to the row (last - first - 1) rows below the node, then set the flag
  * byte on every child of that row's nodes. */
-void func_0019D958(ItfMesNode *node, s32 first, s32 last, s32 value) {
+void itfMesSetRowItemFlag(ItfMesNode *node, s32 first, s32 last, s32 value) {
     s32 rows = last - first - 1;
     s32 row = node->y;
     s32 cur = row;

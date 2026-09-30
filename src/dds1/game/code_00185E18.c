@@ -14,7 +14,7 @@ typedef struct {
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void func_00167A78(u32 handle);
-extern void func_001D63E8(u32 unit, s32 arg1);
+extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(EffectPair *pair) {
     func_00167350(pair->resource[1]);
@@ -22,7 +22,7 @@ void effFreePairedResources(EffectPair *pair) {
     func_002CFF98(pair);
 }
 
-void func_00185E50(EffectPair *work) {
+void effUpdatePairedResources(EffectPair *work) {
     s32 total = work->total;
     s32 frame = work->frame;
     s32 fadeIn = work->fadeIn;
@@ -48,9 +48,9 @@ void func_00185E50(EffectPair *work) {
             i = 0;
             do {
                 if (*(u16 *)(obj + 0x124) == 0x109) {
-                    func_001D63E8(obj, i + 0x14);
+                    btlSetActorEffectParameterOrMuzzlePosition(obj, i + 0x14);
                 } else {
-                    func_001D63E8(obj, 0xB);
+                    btlSetActorEffectParameterOrMuzzlePosition(obj, 0xB);
                 }
                 VU0_STORE_VF(vf10, vec);
                 record = (u8 *)func_001673C0(work->resource[i]);

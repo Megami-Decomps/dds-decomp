@@ -149,7 +149,7 @@ typedef struct {
     SdfItemList *items;   /* 0x00 */
 } SdfItemListRef;
 
-/* Per-item record applied to a draw node by func_002D8650 (0x50 bytes). */
+/* Per-item record applied to a draw node by sdfDrawNodeSetFromItem (0x50 bytes). */
 typedef struct {
     u8 pad00[8];
     s32 unk8;         /* 0x08 */
@@ -163,14 +163,14 @@ typedef struct {
     s32 unk40;        /* 0x40 */
 } SdfItem;
 
-extern SdfModel *func_002D8918(void *arg0, void *arg1);
+extern SdfModel *sdfModelCreateFromAssetData(void *arg0, void *arg1);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_002E7F20(f32 x, f32 y, f32 z);
-void func_002D8600(SdfDrawNode *node);
-void func_002D8650(SdfDrawNode *node, SdfItem *item);
+void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
+void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7D68);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelFindDrawNode);
 
 /* Emit the model's indexed address and fixed packet command words. */
 SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
@@ -194,7 +194,7 @@ void *sdfModelWriteIndexedAssetPacket(SdfChunk *chunk, s32 index, s32 packet, s3
     return sdfInitNodeHeaderFromWords(chunk->assets->entries[index], packet, frame);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7E80);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfCommandListMeasure);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7F40);
 
@@ -206,14 +206,14 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8388);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D83F8);
 
-void func_002D8600(SdfDrawNode *node) {
+void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
     VU0_LOAD_VF(vf10, node->quaternion);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf31, node->vectors[0]);
     VU0_STORE_MATRIX(node->vectors[2]);
 }
 
-void func_002D8650(SdfDrawNode *node, SdfItem *item) {
+void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->unk38 = item;
     node->unk18 = item->unk8;
     func_002E7F20(item->x, item->y, item->z);
@@ -221,7 +221,7 @@ void func_002D8650(SdfDrawNode *node, SdfItem *item) {
     PCP_COPY_VECTOR(node->vectors[0], &item->vec20);
     PCP_COPY_VECTOR(node->vectors[1], &item->vec30);
     ((f32 *)node->vectors[0])[3] = 1.0f;
-    func_002D8600(node);
+    sdfDrawNodeBuildMatrix(node);
     node->unk34 = item->unk40;
 }
 
@@ -235,7 +235,7 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
     model->unk38 = arg1;
     sdfFreeNodeLists();
     sdfEnsureFreeRootWorkspace(model);
-    func_002D8600((SdfDrawNode *)model);
+    sdfDrawNodeBuildMatrix((SdfDrawNode *)model);
     /* The re-initialization below is load-bearing for a byte-identical build. */
     i = 0;
     j = 0;
@@ -248,12 +248,12 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8890);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8918);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelCreateFromAssetData);
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
 SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
-    SdfModel *model = func_002D8918(data, listRef);
+    SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
     u8 *item = &list->firstItem;
@@ -271,7 +271,7 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
 /* Attach each item using the alternate draw-node setup path. */
 SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) {
     s32 i = 0;
-    SdfModel *model = func_002D8918(data, listRef);
+    SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
     SdfItemList *list;
     s32 count;
     u8 *item;
@@ -282,7 +282,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     item = &list->firstItem;
     if (count != i) {
         do {
-            func_002D8650(model->list->entries[i], (SdfItem *)item);
+            sdfDrawNodeSetFromItem(model->list->entries[i], (SdfItem *)item);
             item += 0x50;
             i++;
         } while (i != count);

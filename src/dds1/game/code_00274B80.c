@@ -221,7 +221,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274D48);
 
-void func_00274EE0(s32 context) {
+void mnuDestroyPartySelectionWindow(s32 context) {
     mnuDestroyWindowContainer((u32)((PartyMenuHead *)((CampMenuContext *)context)->menu)->selection);
 }
 
@@ -326,7 +326,7 @@ s32 mnuShopReleaseResources(void) {
     s32 context = func_00101A70();
     s32 menu = ((CampMenuContext *)context)->menu;
     mnuRefreshPartyPanelSlots(context);
-    func_00274EE0(context);
+    mnuDestroyPartySelectionWindow(context);
     func_00274BA0(context);
     func_002D0918(*(s32 *)menu);
     return 1;
@@ -415,7 +415,7 @@ void func_002762B0(u32 context) {
 void func_002762D0() {
 }
 
-void func_002762D8(s32 *menu) {
+void mnuReleaseStaffMenuResources(s32 *menu) {
     s32 i;
     for (i = 0; i < 2; i++) {
         effResolveAndReleaseResource(menu[7 + i]);
@@ -425,7 +425,7 @@ void func_002762D8(s32 *menu) {
 void func_00276320(s32 *menu) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        func_002BD870(menu[7 + i]);
+        effReleaseTextureHandlesAndResetSlots(menu[7 + i]);
     }
 }
 
@@ -456,7 +456,7 @@ void func_002764C0(void) {
     func_00276428();
 }
 
-s64 func_002764D8(s32 callback) {
+s64 mnuStaffPopupUpdate(s32 callback) {
     s32 context = func_00101A70();
     u8 *menu = (u8 *)((CampMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
@@ -486,7 +486,7 @@ s64 func_002764D8(s32 callback) {
 }
 
 extern u8 D_0037C3A8[];
-extern s32 func_002BD8F8(s32);
+extern s32 effHasFirstTextureHandle(s32);
 extern void mnuDrawStaffCampScreen();
 extern void mnuCreateStaffImageSprite();
 extern void func_002723B0();
@@ -498,7 +498,7 @@ s64 func_002765E8(s32 callback) {
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuWork *menu = (StaffMenuWork *)work->menu;
 
-    if (func_002BD8F8(work->resource) != 0) {
+    if (effHasFirstTextureHandle(work->resource) != 0) {
         mnuDrawStaffCampScreen(0, callback);
     } else {
         mnuDrawStaffCampScreen(1, callback);
@@ -529,7 +529,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00276898);
 extern void func_00276720();
 extern void btlStopStage();
 extern void mnuClearEntries();
-extern void func_0027FA20();
+extern void mnuReleasePartyIconBundles();
 extern void mnuDestroyPanelGroup();
 extern void func_002832F8();
 extern void func_00283820();
@@ -547,7 +547,7 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
     func_00276720(entryList, 0, menu->staffImage, menu->staffMode);
     btlStopStage();
     mnuClearEntries(entryList);
-    func_0027FA20(entryList);
+    mnuReleasePartyIconBundles(entryList);
     if (work->sceneGroup != 0) {
         mnuDestroyPanelGroup(work->sceneGroup);
         work->sceneGroup = 0;
@@ -648,7 +648,7 @@ extern s32 func_00195160(s32, s32, s32, s32, s32);
 extern void func_00195450(s32, s32, s32);
 extern void func_00195460(s32, s32);
 extern void frFontSetChildColors(s32, u32);
-extern void func_00195530(s32);
+extern void frFontClearFlagBits(s32);
 extern void func_001958A0(s32, s32, s32);
 extern void func_00194920(s32);
 
@@ -661,7 +661,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     func_00195450(item, x, top);
     func_00195460(item, scale * 0x10);
     frFontSetChildColors(item, color);
-    func_00195530(1);
+    frFontClearFlagBits(1);
     func_001958A0(item, 1, param);
     func_00194920(item);
 }
@@ -850,7 +850,7 @@ void func_002786E8(s32 context) {
         u32 i = 0;
         u32 *resource = menu + 4;
         mnuDestroyPanelState(menu[8]);
-        func_0027B368(menu[3]);
+        mnuDestroyListState(menu[3]);
         do {
             mnuDestroyWindowContainer(*resource++);
             i++;
@@ -924,17 +924,17 @@ s64 func_00278B90(s32 callback) {
     return menuRunPanel(func_00101A70(), 2, callback);
 }
 
-void func_00278BC8(void) {
+void mnuClearSelectedListNodeId(void) {
     s32 context = func_00101A70();
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId = 0xffffffff;
 }
 
-u32 func_00278BF0(void) {
+u32 mnuHasSelectedListNodeId(void) {
     s32 context = func_00101A70();
     return ~((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId >> 0x1f;
 }
 
-void func_00278C20(void) {
+void mnuHighlightSelectedListNode(void) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)func_00101A70())->menu;
     MenuSelectionNode *node = ((MenuSelectionState *)menu->selectedList)->list->first;
 

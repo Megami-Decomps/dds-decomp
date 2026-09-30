@@ -8,7 +8,7 @@ extern s32 bfFindScriptIndexByName(void *, const char *);
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
-extern void func_00110CC0(Scene *);
+extern void evtReleaseSceneResource(Scene *);
 
 /* Scene object fields used by the resource helpers (0x20). */
 typedef struct {
@@ -21,16 +21,16 @@ void dds3ClearSceneObjectState(Scene *scene) {
     SceneObject *object;
 
     object = scene->object;
-    func_00128890();
+    fldReleaseFieldResources();
     object->state = 0;
 }
 
 /* Loads another scene's resource into this one; stays asm: a $16/$17
    saved-register priority swap no natural declaration order produces. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", func_00110BE0);
+INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtLoadSceneResourceFrom);
 
 /* Retain `name` and hand its address to the scene object. */
-s32 func_00110C58(Scene *scene, void *name) {
+s32 evtRetainSceneResource(Scene *scene, void *name) {
     s32 result = 0;
     void *address;
     SceneObjectRes *object = (SceneObjectRes *)scene->object;
@@ -39,7 +39,7 @@ s32 func_00110C58(Scene *scene, void *name) {
         return result;
     }
     if (object->unk18 != NULL) {
-        func_00110CC0(scene);
+        evtReleaseSceneResource(scene);
     }
     address = sdfResourceRetainAddress(name);
     if (address != NULL) {
@@ -51,7 +51,7 @@ s32 func_00110C58(Scene *scene, void *name) {
 }
 
 /* Release the resource this scene object currently owns. */
-void func_00110CC0(Scene *scene) {
+void evtReleaseSceneResource(Scene *scene) {
     SceneObjectRes *object = (SceneObjectRes *)scene->object;
 
     if (object->unk18 != NULL) {
@@ -63,8 +63,8 @@ void func_00110CC0(Scene *scene) {
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", func_00110D00);
+INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtStartSceneResourceTask);
 
 /* Destroys the task named by `name`; stays asm: retail keeps the tail call as
    jal+epilogue, which needs a nosibcall flag this unit does not carry. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", func_00110D88);
+INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtDestroyNamedTask);

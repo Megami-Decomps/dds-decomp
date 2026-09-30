@@ -118,7 +118,7 @@ extern void func_002DD9E8(f32 angle);
 extern void func_002DDC50(void);
 
 /* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */
-void func_002DDBB8(const RwV3d *rot)
+void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
 {
     func_002DD608(rot->x);
     func_002DD968(rot->y);

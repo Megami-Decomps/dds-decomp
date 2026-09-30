@@ -42,7 +42,7 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 extern void func_0024DD90(s32, s32);
-extern void func_0024DDC0();
+extern void dspSetActive();
 extern void itfMesSetWindowHighFlags(s32, s32);
 extern void itfMesClearWindowHighFlags(s32, s32);
 extern void itfPanelSetStatus(s32, s32);
@@ -83,11 +83,11 @@ extern SceneFlagEntry D_0036ABB8[4];
 extern PartyFlagPair D_0036ABF8[];
 
 void func_0024CFB0(s32 arg0) {
-    func_0024DBC8();
+    dspCloseChannel();
     func_0024D9D8(*(u32 *)(arg0 + 0x60));
 }
 
-s32 func_0024CFD8(s32 context) {
+s32 dspStartFlagEvent(s32 context) {
     s32 kind = *(s32 *)(context + 0x7C);
     s32 i;
     PartySlotHeader *slot;
@@ -95,19 +95,19 @@ s32 func_0024CFD8(s32 context) {
     if (kind < 2) {
         if (kind >= 0) {
             if (mdlFlagTest(0x902) != 0 && mdlFlagTest(0x907) == 0) {
-                func_0024DDC0(1);
-                func_0024DA58(5);
+                dspSetActive(1);
+                dspStartEntry(5);
                 mdlFlagSet(0x907);
                 return 1;
             }
             for (i = 0; i < sizeof(D_0036ABB8) / sizeof(D_0036ABB8[0]); i++) {
                 if (mdlFlagTest(D_0036ABB8[i].needFlag) != 0 && mdlFlagTest(D_0036ABB8[i].doneFlag) == 0) {
                     func_0024CFB0(context);
-                    func_0024DDC0(1);
+                    dspSetActive(1);
                     func_0024DD90(0, D_003BAA84 + D_0036ABB8[i].areaIndex * 0x19);
                     func_0024DD90(1, D_003BAA78 + D_0036ABB8[i].nameIndex * 0x13);
                     func_0024DD90(2, D_003BAA74 + D_0036ABB8[i].dialogIndex * 0x11);
-                    func_0024DA58(3);
+                    dspStartEntry(3);
                     mdlFlagSet(D_0036ABB8[i].doneFlag);
                     return 1;
                 }
@@ -117,9 +117,9 @@ s32 func_0024CFD8(s32 context) {
                 if ((slot->flags & 1) != 0 && mdlFlagTest(D_0036ABF8[slot->id].needFlag) != 0
                     && mdlFlagTest(D_0036ABF8[slot->id].doneFlag) == 0) {
                     func_0024CFB0(context);
-                    func_0024DDC0(1);
+                    dspSetActive(1);
                     func_0024DD90(0, D_003BAA70 + slot->id * 0x11);
-                    func_0024DA58(4);
+                    dspStartEntry(4);
                     mdlFlagSet(D_0036ABF8[slot->id].doneFlag);
                     return 1;
                 }
@@ -141,7 +141,7 @@ u32 func_0024D260(void) {
     return 1;
 }
 
-s64 func_0024D268(s32 request) {
+s64 dspUpdateFlagEvent(s32 request) {
     s32 state = func_00101A70();
     s32 *panel = (s32 *)(state + 0x54);
     s64 result = func_00285670(state + 8, panel, 0, request);
@@ -150,7 +150,7 @@ s64 func_0024D268(s32 request) {
     }
     if (*panel == 0) {
         if (func_0024DC08() == 0) {
-            if (func_0024CFD8(state) == 0) {
+            if (dspStartFlagEvent(state) == 0) {
                 func_002858F8(panel, D_0036ACF8);
             }
         }
@@ -158,13 +158,13 @@ s64 func_0024D268(s32 request) {
     return 0;
 }
 
-s64 func_0024D300(s32 request) {
+s64 mnuStartPanelDispatch(s32 request) {
     s32 state = func_00101A70();
     func_0024A2D8(state);
     return menuRunPanel(state, 1, request);
 }
 
-s64 func_0024D350(s32 request) {
+s64 mnuStartPanelExit(s32 request) {
     s32 state = func_00101A70();
     func_0024DD78();
     return menuRunPanel(state, 2, request);
@@ -219,7 +219,7 @@ s32 func_0024D5B0(void) {
     s32 *state = (s32 *)func_00101A70();
 
     mnuReleaseWorkResources(state);
-    func_00249498(state);
+    mnuTerminalBuildMenus(state);
     return 1;
 }
 
@@ -369,7 +369,7 @@ void evtReleaseResourcePairHandle(u32 *record) {
 
 s32 func_0024D9D8(s32 unused) {
     if (D_003BC408 < 0) {
-        D_003BC408 = func_0019B8A8();
+        D_003BC408 = itfMesCreateWindow();
         func_0019C968(D_003BC408, 2, 0);
         return 1;
     }
@@ -384,7 +384,7 @@ s32 func_0024DA20(s32 arg0) {
     return 1;
 }
 
-s32 func_0024DA58(s32 entry) {
+s32 dspStartEntry(s32 entry) {
     if (D_003BC408 < 0) {
         return 0;
     }
@@ -435,7 +435,7 @@ u32 func_0024DB48(s32 notify) {
             func_0019B4A0(D_003BC408);
         }
         itfMesCleanupWindow(D_003BC408, 0);
-        func_0024DDC0(1);
+        dspSetActive(1);
         D_003BC40C = 0;
         result = 1;
     }
@@ -446,7 +446,7 @@ void func_0024DBB0(void) {
     func_0024DB48(1);
 }
 
-s32 func_0024DBC8(void) {
+s32 dspCloseChannel(void) {
     s32 channel = D_003BC408;
     if (channel < 0) {
         return 0;
@@ -495,7 +495,7 @@ s8 func_0024DDB8(void) {
     return D_003BC40D;
 }
 
-void func_0024DDC0(s32 enable) {
+void dspSetActive(s32 enable) {
     if (enable) {
         itfMesClearWindowHighFlags(D_003BC408, 0x800000);
         itfMesClearWindowHighFlags(D_003BC408, 0x100000);
@@ -573,7 +573,7 @@ u32 func_0024DFC0(u32 path) {
 INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024E010);
 
 void func_0024E100(s32 x, s32 y, s32 width, s32 record) {
-    s32 height = func_0027BF00(*(s32 *)(record + 0x14)) + 0x80;
+    s32 height = mnuGetListViewportHeight(*(s32 *)(record + 0x14)) + 0x80;
     func_002C0DD8(x, y, 0, width, height, 0x30303040, 0x53);
     func_0024E010(x + width - 0xA0, y, y + height, 8, record);
 }

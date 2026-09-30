@@ -38,7 +38,7 @@ INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264D90);
 
-extern u32 func_002C1630(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 
 /* The opacity update latches at its threshold. Keep fadeProgress signed:
  * the decay path converts it through a signed float. */
@@ -55,7 +55,7 @@ void itfUpdateFadeColor(TitleFadeWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;
 
     if (work->opacityReady == 0) {
-        u32 opacity = func_002C1630(0x80808080, 0x80808000, remaining) & 0xFF;
+        u32 opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
 
         work->opacity = opacity;
         if (opacity >= 0x80) {

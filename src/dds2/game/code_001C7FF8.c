@@ -269,20 +269,20 @@ extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
 extern void func_0022E4C0();
 extern void kwlnFadeStartIn();
-extern s32 func_0012EB78();
-extern void func_0012EBB8();
+extern s32 fldGetEncounterRuntimeResult();
+extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
 extern void func_001AF060();
 extern void func_00204000();
 extern void func_001E9410();
 extern void btlSpawnBattleWorldAction();
-extern void func_002009E0();
+extern void btlCreateRainEffect();
 extern s32 btlReleaseScriptResourceA();
 extern s32 btlReleaseScriptResource();
 extern s32 func_00201540();
-extern s32 func_00201738();
-extern s32 func_00202750();
-extern s32 func_00202840();
+extern s32 btlCreateSoundReleaseTask();
+extern s32 btlCreateWaitUnitListIdleTask();
+extern s32 btlCreateApplyToActiveActorsTask();
 extern s32 func_002028C8();
 extern void func_001B8078();
 extern void func_001B81B0();
@@ -828,7 +828,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE838);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF0B0);
 
-void func_001CF500(void) {
+void fldInitSceneFadeRecords(void) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
     SceneSlot *slot = scene->slots;
     SceneFadingRecord *rec = scene->fading;
@@ -891,7 +891,7 @@ s32 btlFadeStaleSceneSlots(void) {
     return changed;
 }
 
-s32 func_001CF720(BattleSceneWork *scene, s32 *outFadeCount) {
+s32 fldCountSceneFadeKinds(BattleSceneWork *scene, s32 *outFadeCount) {
     SceneGlobalState *global;
     SceneFadingRecord *rec = scene->fading;
     SceneSlot *slot;
@@ -1008,7 +1008,7 @@ u32 func_001CFF00(void) {
     return 0;
 }
 
-void func_001CFF08(u8 *scene) {
+void fldBattleSceneEnterInit(u8 *scene) {
     u32 id = ((BattleSceneWork *)scene)->mode;
 
     if (id < 0x400 && (D_00435E04[id].flags & 0x8000) != 0) {
@@ -1056,7 +1056,7 @@ s32 fldSceneStateStartTileEffect(BattleSceneWork *scene) {
         func_00204000();
         func_001E9410();
         btlSpawnBattleWorldAction();
-        func_002009E0(scene->tileX, scene->tileY);
+        btlCreateRainEffect(scene->tileX, scene->tileY);
         if (scene->subFlags & 0x40000) {
             params.rotation[0] = 0.19607843f;
             params.rotation[1] = 0.19607843f;
@@ -1103,8 +1103,8 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
             if (!(scene->subFlags & 8)) {
                 kwlnFadeStartIn(0);
             }
-            if (func_0012EB78() != 0) {
-                func_0012EBB8(1);
+            if (fldGetEncounterRuntimeResult() != 0) {
+                fldSetEncounterPendingValue(1);
             }
             evtSetSolarOverlayFullyVisible();
         }
@@ -1165,7 +1165,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D1200);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D14B0);
 
-s32 func_001D1700(BattleSceneWork *scene) {
+s32 fldSceneStateWaitScriptRelease(BattleSceneWork *scene) {
     s32 finished = 1;
     s32 state = scene->scriptState;
 
@@ -1175,11 +1175,11 @@ s32 func_001D1700(BattleSceneWork *scene) {
             finished = 0;
         } else if (!(scene->subFlags & 0x40000)) {
             btlStartTask(func_00201540(0xC));
-            btlStartTask(func_00201738(0xC));
-            btlStartTask(func_00202750(0xC));
-            btlStartTask(func_00202840(0xC));
+            btlStartTask(btlCreateSoundReleaseTask(0xC));
+            btlStartTask(btlCreateWaitUnitListIdleTask(0xC));
+            btlStartTask(btlCreateApplyToActiveActorsTask(0xC));
             btlStartTask(func_002028C8());
-            btlStartTask(func_001E6740());
+            btlStartTask(btlCreateSecondaryCommandSoundTask());
         }
         break;
     case 0xF000000:
@@ -1452,7 +1452,7 @@ void fldCompactSceneSlots(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3520);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3690);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", fldInsertSceneSlots);
 
 void fldSwapSceneSlots(s32 index) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
@@ -1567,7 +1567,7 @@ void fldAppendSceneGroupHandle(s32 handle) {
     *slot = handle;
 }
 
-void func_001D3C00(SceneTask *task) {
+void fldUpdateSceneGroupTask(SceneTask *task) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
     SceneActor *actor;
     s32 kind;
@@ -1652,7 +1652,7 @@ s32 fldGetSceneGroupEntry(s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3ED8);
 
-void func_001D4020(void) {
+void fldClearSceneSlotsAndGroups(void) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
     u32 i;
 
@@ -1725,7 +1725,7 @@ s32 fldActivateRequestedSceneActor(u32 *request) {
     if (actor != 0 && (actor[2] & 0x40) != 0) {
         return 1;
     }
-    func_001D3690(request[1]);
+    fldInsertSceneSlots(request[1]);
     return 1;
 }
 
@@ -2031,13 +2031,13 @@ extern s32 btlCreateEffObjB();
 extern s32 btlStartTask();
 extern s32 sndHasActiveActor();
 extern s64 func_001A9920(void);
-extern s32 func_001E66D8(void);
-extern s32 func_001E6740(void);
+extern s32 btlCreateCommandSoundUpdateTask(void);
+extern s32 btlCreateSecondaryCommandSoundTask(void);
 extern s32 btlCreateCommandSoundTask();
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5368);
 
-void func_001D54B8(u8 *task) {
+void btlCommandResultEffectSelect(u8 *task) {
     s32 selection;
 
     ((SceneTask *)task)->flags &= ~4;
@@ -2163,8 +2163,8 @@ void btlCommandStartSoundTasks(u8 *task) {
     if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
         unit = (u8 *)((SceneTask *)task)->actor;
         ownerId = func_001A9920();
-        btlStartTask(func_001E66D8());
-        btlStartTask(func_001E6740());
+        btlStartTask(btlCreateCommandSoundUpdateTask());
+        btlStartTask(btlCreateSecondaryCommandSoundTask());
         if (((SceneActor *)unit)->status.words.activeFlags & 0x200) {
             btlStartTask(btlCreateCommandSoundTask(task, 9));
         } else {

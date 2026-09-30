@@ -41,7 +41,7 @@ typedef struct {
     u32 color08;      /* 0x08: 0x80808080 */
 } EffThunderFrag; /* 0x0C */
 
-/* 20-byte thunder element (see effThunderRandomizeCell/func_00167070): randomized on
+/* 20-byte thunder element (see effThunderRandomizeCell/effThunderCellUpdate): randomized on
  * setup (direction floats plus moduli), then counted down while active. */
 typedef struct {
     f32 directionX; /* 0x00 randomized to [-1, 1] */
@@ -189,7 +189,7 @@ typedef struct {
 } EffThunderParSystem;
 
 /* Restart a cell: random counters and three unit direction vectors, plus two ranges. */
-void func_00163548(EffThunderWork4C *work, s32 index) {
+void effThunderCellRestart(EffThunderWork4C *work, s32 index) {
     EffThunderCell2C *cell = work->cells + index;
     f32 dir[4];
 
@@ -225,7 +225,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163AF8);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163CD0);
 
-EffThunderWork4C *func_00163E10(EffThunderHead4C *src) {
+EffThunderWork4C *effThunderWorkCreate(EffThunderHead4C *src) {
     u32 handle = func_002D03F8(src->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
     EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(handle);
     u32 i;
@@ -256,11 +256,11 @@ void func_00164000(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
-    func_00163E10(work);
+    effThunderWorkCreate(work);
 }
 
 void func_00164020(void *work) {
-    func_00163E10(work);
+    effThunderWorkCreate(work);
 }
 
 void func_00164038(void *dst, void *src) {
@@ -280,7 +280,7 @@ u32 func_00164070(u32 arg0) {
     return arg0;
 }
 
-/* Restart a cell (same routine as func_00163548, for the second effect). */
+/* Restart a cell (same routine as effThunderCellRestart, for the second effect). */
 void func_00164078(EffThunderWork4C *work, s32 index) {
     EffThunderCell2C *cell = work->cells + index;
     f32 dir[4];
@@ -348,9 +348,9 @@ typedef struct {
     u32 handle;         /* 0xAC */
 } EffThunderWorkA4; /* 0xB0 */
 
-extern void func_00164AB0(EffThunderWorkA4 *work, s32 index);
+extern void effThunderSparkInit(EffThunderWorkA4 *work, s32 index);
 
-EffThunderWorkA4 *func_00164838(EffThunderHeadA4 *src) {
+EffThunderWorkA4 *effThunderSparkCreate(EffThunderHeadA4 *src) {
     u32 handle = func_002D03F8(src->sparkCount * sizeof(EffThunderSub) + sizeof(EffThunderWorkA4));
     EffThunderWorkA4 *work = (EffThunderWorkA4 *)sdfResourceRetainAddress(handle);
     s32 spread;
@@ -368,7 +368,7 @@ EffThunderWorkA4 *func_00164838(EffThunderHeadA4 *src) {
         work->subs[i].handle1C = (u32)func_0015B6A0(1, work->head.halfLife * 2 - 1, 0, 0);
         parDispatchSub((void *)work->subs[i].handle1C, 2, work->head.dispatchArg, work->head.dispatchArg);
         func_0015D078((void *)work->subs[i].handle1C, work->head.systemParam);
-        func_00164AB0(work, i);
+        effThunderSparkInit(work, i);
         work->subs[i].delay = -(effMiscRand(D_0034DF38) % spread);
     }
     return work;
@@ -395,7 +395,7 @@ void effPCPThunderSetParamA8(EffPCPThunderWorkB *work, u32 value) {
     work->unkA8 = value;
 }
 
-void func_00164AB0(EffThunderWorkA4 *work, s32 index) {
+void effThunderSparkInit(EffThunderWorkA4 *work, s32 index) {
     EffThunderSub *spark = work->subs + index;
     f32 blend;
 
@@ -445,7 +445,7 @@ typedef struct {
 
 extern void effThunderRandomizeFrag(EffThunderWork54 *work, s32 index);
 
-EffThunderWork54 *func_00165418(EffThunderHead54 *src) {
+EffThunderWork54 *effThunderFragCreate(EffThunderHead54 *src) {
     u32 handle = func_002D03F8(src->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderWork54));
     EffThunderWork54 *work = (EffThunderWork54 *)sdfResourceRetainAddress(handle);
     u32 i;
@@ -607,7 +607,7 @@ typedef struct {
 
 extern void effThunderRandomizeCell(EffThunderWork48 *work, s32 index);
 
-EffThunderWork48 *func_00166960(EffThunderHead48 *src) {
+EffThunderWork48 *effThunderCellCreate(EffThunderHead48 *src) {
     u32 handle = func_002D03F8(src->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderWork48));
     EffThunderWork48 *work = (EffThunderWork48 *)sdfResourceRetainAddress(handle);
     u32 i;
@@ -657,7 +657,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00166C18);
 extern void func_00166C18(EffThunderWork48 *work, s32 index);
 
 /* Per-frame update of the cell effect: count down, fade, re-randomize, then flush the system. */
-void func_00167070(EffThunderWork48 *work) {
+void effThunderCellUpdate(EffThunderWork48 *work) {
     s32 i = 0;
     s32 count = work->head.cellCount;
     EffThunderCell *cell = work->cells;

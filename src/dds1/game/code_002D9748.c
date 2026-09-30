@@ -98,7 +98,7 @@ void *sdfChunkFindRecordById(SdfTextParam *, s32);
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
 void func_002D9D80(SdfTextParam *param, void *resource);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
-void func_002D3C30(void *arg0, s32 arg1);
+void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(SdfResourceList *list);
 void func_002DB048(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);
@@ -109,7 +109,7 @@ u8 *func_002DA830(SdfAsset *, SdfTextParam *, u8 *);
 void func_002DA358(SdfResourceList *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void func_002DAC88(SdfAsset *, void *);
-u8 *func_002D7D68(void *chunk, s32 id);
+u8 *sdfModelFindDrawNode(void *chunk, s32 id);
 void func_002DDD60(void *);
 void func_002DAE00(SdfAsset *, s32);
 extern void func_002DAB80(u8 *, void *);
@@ -208,7 +208,7 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
 
 /* vu0 routine: build the basis in vf28-vf31 from the vectors at record+0x10/+0x20/+0x30, then load the chunk matrix */
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
-    u8 *base = func_002D7D68(param, *(s32 *)resource);
+    u8 *base = sdfModelFindDrawNode(param, *(s32 *)resource);
     u8 *record = resource;
     u8 *vec = record + 0x20;
 
@@ -249,7 +249,7 @@ void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
 
 /* vu0 routine: transform the vector at resource+0x10 by the chunk matrix at +0xC0 (result in vf10) */
 void func_002D9D80(SdfTextParam *param, void *resource) {
-    u8 *matrix = func_002D7D68(param, *(s32 *)resource) + 0xC0;
+    u8 *matrix = sdfModelFindDrawNode(param, *(s32 *)resource) + 0xC0;
     u8 *vector;
 
     VU0_LOAD_MATRIX(matrix);
@@ -437,7 +437,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
         return;
     }
     if (retained != 0) {
-        func_002D3C30(&D_003BDA10, (s32)resource);
+        sdfPendingQueuePush(&D_003BDA10, (s32)resource);
     } else {
         sdfDestroyDevRequest(resource);
     }
@@ -669,7 +669,7 @@ void sdfQueueAssetRelease(SdfAsset *asset) {
     s32 id = (s32)asset;
 
     if (id != 0) {
-        func_002D3C30(&D_003BDA18, id);
+        sdfPendingQueuePush(&D_003BDA18, id);
     }
 }
 

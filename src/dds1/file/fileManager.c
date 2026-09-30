@@ -38,7 +38,7 @@ void filePrependNode(FileWork *list, FileNode *node) {
 }
 
 /* Unlink a node from the list threaded through +0x4. */
-void func_00288998(FileWork *list, FileNode *node) {
+void fileUnlinkNode(FileWork *list, FileNode *node) {
     FileNode **link = &list->head;
     FileNode *cur;
     while ((cur = *link) != node) {
@@ -128,7 +128,7 @@ typedef struct FileManWork {
 extern FileManWork D_003DC658;
 
 /* Spin until the file manager has no work left. */
-void func_00288C68(void) {
+void fileWaitIdle(void) {
     FileManWork *work = &D_003DC658;
     while (work->unk8 != 0 || work->unk18 != 0) {
         fileManUpdate();

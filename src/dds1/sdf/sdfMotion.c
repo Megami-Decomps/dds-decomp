@@ -253,7 +253,7 @@ void func_002CFF98(void *a0);
 void *func_002CFEB8(s32 size);
 ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
 s32 func_002DB1C8(void *a0, s32 a1, s32 a2);
-s32 func_002D7D68(void *a0, s32 a1);
+s32 sdfModelFindDrawNode(void *a0, s32 a1);
 void func_002DA3C0(void *a0, s32 a1);
 void func_002DA3D8(void *a0, s32 a1);
 void func_002DA3F0(void *a0, s32 a1);
@@ -321,7 +321,7 @@ typedef struct MotionNode {
 } MotionNode;
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
-void func_002DB308(MotionNode *node)
+void sdfDestroyMotion(MotionNode *node)
 {
     Link *prev;
     Link *cur;
@@ -423,7 +423,7 @@ s32 sdfDispatchMotionBySelector(void *a0, s32 a1) {
 
 void func_002DBA80(void *tmp, void *src, void *tbl, s32 x) {
     sdfSetMotionPointerPair(tmp, src, tbl);
-    ((TmpBuf *)tmp)->unkC = func_002D7D68(((HasPtr4 *)src)->unk4, x);
+    ((TmpBuf *)tmp)->unkC = sdfModelFindDrawNode(((HasPtr4 *)src)->unk4, x);
 }
 
 void *func_002DBAD0(void *a0, s32 a1, s32 a2) {

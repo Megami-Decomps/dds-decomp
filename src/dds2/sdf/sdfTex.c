@@ -25,7 +25,7 @@ void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *a
 
 extern u8 D_00439150;
 
-void func_0032CAE0(void *arg0, void *arg1);
+void sdfPendingQueuePush(void *arg0, void *arg1);
 
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
@@ -92,7 +92,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
     }
 }
 
-/* Hand the last reference to func_0032CAE0 rather than releasing it here. */
+/* Hand the last reference to sdfPendingQueuePush rather than releasing it here. */
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     SdfTexRef *ref;
     s32 count;
@@ -103,7 +103,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->unk20 = 0;
-            func_0032CAE0(&D_00439150, texture);
+            sdfPendingQueuePush(&D_00439150, texture);
         }
     }
 }

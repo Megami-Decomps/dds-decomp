@@ -47,7 +47,7 @@ typedef struct {
 
 extern void func_001873A8(EffBlurWork2 *work, EffBlurSlot2 *slot);
 
-void func_001873E0(EffBlurWork2 *work) {
+void effBlurSecondInitSlots(EffBlurWork2 *work) {
     EffBlurSlot2 *slot = work->slots;
     s32 count = work->count;
     s32 i;

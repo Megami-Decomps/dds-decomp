@@ -14,7 +14,7 @@ extern u8 D_003E7200[];
 
 extern u8 D_003E73F8[];
 
-extern s32 func_002C6348(s32, s32, s32);
+extern s32 mnuUseFieldSkillOnParty(s32, s32, s32);
 
 /* Sub-object reached through the context's +0x104 chain. */
 typedef struct {
@@ -44,7 +44,7 @@ u32 func_002AAEA0(void) {
     s32 context;
 
     context = func_00101958();
-    if (func_002C6348(0xA928 + context, context + 0x284, 0) == 0) {
+    if (mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 0) == 0) {
         ((MtrRoot *)*(u32 *)(context + 0x104))->mid->sub->flags |= 1;
     } else {
         ((MtrRoot *)*(u32 *)(context + 0x104))->mid->sub->flags &= ~1;
@@ -143,7 +143,7 @@ s64 func_002AB3C8(s32 arg0) {
     if (state != 0) {
         return state;
     }
-    func_002C6348(0xA928 + context, context + 0x284, 1);
+    mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 1);
     func_002C42B0(context + 0x54, D_003E7034);
     return 0;
 }
@@ -161,7 +161,7 @@ u32 func_002AB550(void) {
     return 1;
 }
 
-s32 func_002AB558(s32 arg0) {
+s32 mtrMantraIdIsValid(s32 arg0) {
     u32 i;
 
     for (i = 0; i < 5; i++) {
@@ -174,7 +174,7 @@ s32 func_002AB558(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB598);
 
-s32 func_002AB650(s32 arg0) {
+s32 mtrMantraFindIndex(s32 arg0) {
     u32 i;
 
     for (i = 0; i < 0x12; i++) {

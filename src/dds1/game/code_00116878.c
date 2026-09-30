@@ -21,7 +21,7 @@ typedef struct ObjWork {
 } ObjWork;
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
-s32 func_00116878(s32 a, s32 b, s32 c, s32 d, s32 e) {
+s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
     ScriptObj *object = (ScriptObj *)func_00110880(10);
     ObjWork *work = (ObjWork *)object->work;
 
@@ -41,7 +41,7 @@ typedef struct ObjWithWork {
     void *work;
 } ObjWithWork;
 
-u32 func_00116968(ObjWithWork *obj) {
+u32 evtCreateModelFromObject(ObjWithWork *obj) {
     u32 *work = (u32 *)obj->work;
     u32 result;
 
@@ -53,7 +53,7 @@ u32 func_00116968(ObjWithWork *obj) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116878", func_001169B0);
+INCLUDE_ASM(const s32, "game/code_00116878", evtAttachScriptToObject);
 
 extern void *func_002CFEB8(s32 size);
 

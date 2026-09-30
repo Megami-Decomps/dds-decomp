@@ -35,7 +35,7 @@ typedef struct {
     s8 baseStats[5];
 } BrsStatUnit;
 
-extern u32 func_00309138(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 
 void itfUpdateFadeColor(u8 *work);
 
@@ -49,7 +49,7 @@ extern void func_0029C880(s32, s32, s32, u32, u8 *, s32, u8 *);
 
 void mnuTitleDrawFadeMenuEntries(u8 *work) {
     u8 *res = work + 0x5C;
-    u32 color = func_00309138(0xFFF06480, 0xFFF06400, 0x100 - ((TitleMenuWork *)work)->fadeProgress);
+    u32 color = uiBlendColors(0xFFF06480, 0xFFF06400, 0x100 - ((TitleMenuWork *)work)->fadeProgress);
 
     mnuCampDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
     func_0029CB70(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
@@ -240,7 +240,7 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
 
 u32 func_0029DA58(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     func_00314C10(*(u32 *)(resource + 8));
-    return func_00309138(0x80808080, 0x80808000, blend);
+    return uiBlendColors(0x80808080, 0x80808000, blend);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029DA98);

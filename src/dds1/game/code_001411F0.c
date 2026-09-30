@@ -110,19 +110,19 @@ extern char *D_003BAE44;
 extern void *func_00110A48(u64, s32, s32);
 extern s32 func_0013A720(s32, void *);
 extern s32 func_0013A9B0(s32, void *);
-extern void func_001313E0(void);
+extern void fldSetCameraNodeModeWithTen(void);
 extern void dds3InvokeSlot1Handler(s32 arg0, s32 arg1);
 extern void effUpdateNode(u32 arg0);
 extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 extern s32 func_001277A8(s32 arg0);
 extern void func_00123E00(void);
-extern void func_0012E9E8(s32 arg0);
+extern void fldReleaseCameraModel(s32 arg0);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern s32 D_0032E5C4[];
 extern s32 D_0032E4C4[];
 extern u8 D_0034D8F0[];
 extern void func_0024D9D8(void *arg0);
-extern void func_0024DA58(s32 arg0);
+extern void dspStartEntry(s32 arg0);
 extern void func_00123EA8(void);
 extern char *scrReadStringParameter(s32 idx);
 extern s32 D_0032E478[];
@@ -188,7 +188,7 @@ extern u64 func_00101A70(void);
 extern void func_00129720(u32);
 extern void func_00129900(u32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
+extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001411F0);
 
@@ -714,7 +714,7 @@ typedef struct {
 } FldEmitter;
 
 extern u8 D_00325838[];
-extern void func_002D8600();
+extern void sdfDrawNodeBuildMatrix();
 extern void sdfModelUpdateCurrentFrameTransforms();
 extern void func_002D9238();
 
@@ -731,7 +731,7 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
     __asm__ volatile (".set noreorder\n\tvmove.w vf10, vf0\n\t.set reorder");
     __asm__ volatile (".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(emitter->pos) : "memory");
-    func_002D8600(handle);
+    sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
     func_002D9238(D_00325838, emitter);
 }
@@ -1717,11 +1717,11 @@ void func_001493D0(s32 alpha, s32 x, s32 y) {
         func_00129720(0x53);
         func_00129900(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
-        func_00129000(x + 0x123, y, 0x7D, 0x34, 1, 0x31, 0x7D, 0x34, 0x80808080, D_003BAF30);
-        func_00129000(x + 0x1A0, y, 0x62, 0x34, 0x7D, 0x31, 1, 0x34, 0x80808080, D_003BAF30);
+        fldSubmitSpriteRect(x + 0x123, y, 0x7D, 0x34, 1, 0x31, 0x7D, 0x34, 0x80808080, D_003BAF30);
+        fldSubmitSpriteRect(x + 0x1A0, y, 0x62, 0x34, 0x7D, 0x31, 1, 0x34, 0x80808080, D_003BAF30);
         if (ptyAnyUnitFlagMatch(0x5D0, 0) != 0) {
             color = 0x808080;
-            func_00129000(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, 0x80808080, D_003BAF30);
+            fldSubmitSpriteRect(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, 0x80808080, D_003BAF30);
             if (D_003BAF98 < 45.0f) {
                 color = (s32)(sdfSinPoly(D_003BAF98 * 4.0f * 3.14f / 180.0f) * 128.0f) + 0x80;
                 color |= (color << 8) | (color << 16);
@@ -1745,10 +1745,10 @@ void fldDrawGaugeBar(s32 width) {
         func_00129900(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         x = 0x9D - (width >> 1);
-        func_00129000(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
-        func_00129000(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
+        fldSubmitSpriteRect(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
+        fldSubmitSpriteRect(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
         x += width;
-        func_00129000(x + 0x63, 0x123, 0x63, 0x2E, 0x65, 1, -0x63, 0x2E, 0x80808080, D_003BAF30);
+        fldSubmitSpriteRect(x + 0x63, 0x123, 0x63, 0x2E, 0x65, 1, -0x63, 0x2E, 0x80808080, D_003BAF30);
         func_00129900(0);
     }
 }
@@ -1756,14 +1756,14 @@ void fldDrawGaugeBar(s32 width) {
 extern void func_00129720(u32);
 extern void func_00129900(u32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
+extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
 
 void fldDrawTitleBanner(s32 x, s32 y) {
     if (D_0032E3C0[0] < 200) {
         func_00129720(0x53);
         func_00129900(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
-        func_00129000(x, y, 0x10, 0x11, 0x68, 1, 0x10, 0x11, 0x80808080, D_003BAF30);
+        fldSubmitSpriteRect(x, y, 0x10, 0x11, 0x68, 1, 0x10, 0x11, 0x80808080, D_003BAF30);
         func_00129900(0);
     }
 }
@@ -1772,7 +1772,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00149810);
 
 extern s32 func_00125DC0(u32);
 
-void func_00149A98(void) {
+void fldFlushQueuedEffectPositions(void) {
     if (D_0032E3B0[4] < 0xC8) {
         if (func_00125DC0(1) != 0) {
             return;
@@ -2013,7 +2013,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
 }
 
 
-void func_0014B5F8(void) {
+void fldUpdateWeatherEffectNodes(void) {
     if (D_003BAFD0 != 0 && D_003BAFD4 != 0) {
         effUpdateNode(D_003BAFD0);
     }
@@ -2046,7 +2046,7 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A08F8);
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014B688);
 
 
-void func_0014B858(void) {
+void fldClearObjectEntryHandles(void) {
     FldEnt14 *entry = D_003D62E0;
     s32 i = 0x10;
 
@@ -2186,7 +2186,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
 extern s32 D_0032E5C4[];
 extern s32 D_003D62A0[];
 extern void func_001239C8(void);
-extern void func_0014B858(void);
+extern void fldClearObjectEntryHandles(void);
 extern void func_0014B4D0(void);
 extern void fldStartSceneBgmAlternate(void);
 extern void func_00123E00(void);
@@ -2202,7 +2202,7 @@ void fldFinishEventFieldState(void) {
     if (state->eventActive != 0) {
         D_0032E5C4[0] = 0;
         func_001239C8();
-        func_0014B858();
+        fldClearObjectEntryHandles();
         func_0014B4D0();
         fldStartSceneBgmAlternate();
         func_00123E00();
@@ -2230,10 +2230,10 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014CB08);
 
 
 void fldResetEventSceneState(void) {
-    func_0012E9E8(0);
+    fldReleaseCameraModel(0);
     D_0032E5C4[0] = 0;
     D_0032E3B0[0x46] = 0;
-    func_0014B858();
+    fldClearObjectEntryHandles();
     func_0014B4D0();
     func_00123E00();
     D_0032E3B0[0x45] = 1;
@@ -2246,7 +2246,7 @@ void fldResetEventSceneState(void) {
 
 void fldStartDeferredFieldExit(void) {
     func_0024D9D8(D_0034D8F0);
-    func_0024DA58(5);
+    dspStartEntry(5);
     func_00123EA8();
     D_0032E4C4[0] = 2;
 }
@@ -2256,7 +2256,7 @@ void fldFinishDeferredExit(void) {
         func_0024DD78();
         if (!func_0024DC08()) {
             func_0024DBB0();
-            func_0024DBC8();
+            dspCloseChannel();
             func_00123E00();
             D_0032E3B0[0x45] = 0;
         }
@@ -2271,8 +2271,8 @@ s32 fldIsEventPhaseAtLeastTwo(void) {
     return 1;
 }
 
-void func_0014D0E8(void) {
-    func_0014B5F8();
+void fldTickWeatherEffectNodes(void) {
+    fldUpdateWeatherEffectNodes();
 }
 
 
@@ -2355,7 +2355,7 @@ s32 func_0014D1E8(void) {
 }
 
 
-s32 func_0014D2C0(void) {
+s32 fldCmdReadSceneStatus(void) {
     s32 result;
 
     func_001411C0(scrReadIntParameter(0));
@@ -2404,12 +2404,12 @@ s32 func_0014D3C0(void) {
     if (object == 0) {
         return 1;
     }
-    func_001313E0();
+    fldSetCameraNodeModeWithTen();
     return 1;
 }
 
 
-s32 func_0014D400(void) {
+s32 fldCmdReleaseCurrentObject(void) {
     s32 object;
 
     object = func_00110A38(dds3GetWorldObject());
@@ -2417,7 +2417,7 @@ s32 func_0014D400(void) {
         return 1;
     }
     dds3InvokeSlot1Handler(object, 0);
-    func_001313E0();
+    fldSetCameraNodeModeWithTen();
     func_00123E00();
     return 1;
 }
@@ -2444,7 +2444,7 @@ typedef struct FldObj {
 
 extern void func_0012DB70(void);
 
-s32 func_0014D498(void) {
+s32 fldCmdFocusCameraOnObject(void) {
     FldCamPose *work;
     FldObj *obj;
     u64 world = dds3GetWorldSecondaryObject();
@@ -2495,7 +2495,7 @@ s32 fldUpdateLookAtSegment(void) {
 }
 
 
-s32 func_0014D6C0(void) {
+s32 fldCmdSetScenePhaseThree(void) {
     D_0032E400[0] = 3;
     return 1;
 }
@@ -2505,12 +2505,12 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014D6D8);
 extern s32 func_00123DE0(void);
 extern s32 func_001109B8(s32, s32);
 extern void func_00112EE8(s32, f32 *, f32 *);
-extern void func_0012D240(void);
+extern void fldUpdateCameraProjectionEndpoints(void);
 extern f32 D_00330630[];
 extern f32 D_00330640[];
 extern s32 D_003BAD24;
 extern s32 D_003BAD28;
-s32 func_0014D8B8(void) {
+s32 fldCmdCaptureObjectPose(void) {
     f32 pos[4];
     f32 rot[4];
     s32 handle;
@@ -2527,7 +2527,7 @@ s32 func_0014D8B8(void) {
             return 1;
         }
         func_00112EE8(object, pos, rot);
-        func_0012D240();
+        fldUpdateCameraProjectionEndpoints();
         D_00330630[0] = pos[0];
         D_00330630[1] = pos[1];
         D_00330630[2] = pos[2];
@@ -2602,7 +2602,7 @@ u32 func_0014DAF8(void) {
     return 1;
 }
 
-u32 func_0014DB00(void) {
+u32 fldCmdFreeDisplayObjects(void) {
     fldFreeDisplayObjects();
     return 1;
 }
@@ -2640,7 +2640,7 @@ s32 fldCmdSetSceneControlValue(void) {
 }
 
 
-s32 func_0014DC20(void) {
+s32 fldCmdSetFieldParameterPair(void) {
     s32 value;
 
     D_0032E570[11] = scrReadIntParameter(0);
@@ -2674,7 +2674,7 @@ typedef struct FldWorldItem {
 } FldWorldItem;
 extern FldWorldItem *func_00110458(u64);
 extern void func_00113E20(FldWorldItem *, s32);
-s32 func_0014DCE0(void) {
+s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;
     s32 stage;
     s32 mode;
@@ -2727,7 +2727,7 @@ s32 func_0014DCE0(void) {
     return 1;
 }
 
-s32 func_0014DEB8(void) {
+s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 world;
     s32 stage;
     s32 mode;
@@ -2785,7 +2785,7 @@ s32 func_0014DEB8(void) {
 
 extern void func_001210A0(s32, s32, s32, s32);
 extern void func_00112008(void *, s32);
-s32 func_0014E0B0(void) {
+s32 fldCmdApplyRoomObjectModeZero(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -2832,7 +2832,7 @@ s32 func_0014E0B0(void) {
     return 1;
 }
 
-s32 func_0014E270(void) {
+s32 fldCmdApplyRoomObjectModeOne(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -2905,7 +2905,7 @@ s32 fldCmdSetSceneBits(void) {
 }
 
 extern char *D_003BAE48;
-s32 func_0014E4D0(void) {
+s32 fldCmdSetSceneBitsBarrierRoom(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -3161,10 +3161,10 @@ u32 fldCmdTestTaskRoomObjectActive(void) {
     return 1;
 }
 
-u32 func_0014EEA0(void) {
+u32 fldCmdSetCurrentTaskScene(void) {
     s32 scene;
 
-    if (func_0013DF18()) {
+    if (fldIsSceneStateEight()) {
         func_0013DF60(0);
         return 1;
     }

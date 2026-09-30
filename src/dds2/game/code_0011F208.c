@@ -173,7 +173,7 @@ extern s32 fldStepColorChannelByPad(u32 *, s32, s8 *);
 
 extern s32 fldTestDrawUpdate(void);
 
-extern s32 func_0012EB78(void);
+extern s32 fldGetEncounterRuntimeResult(void);
 
 extern u8 func_00127398(void);
 
@@ -227,9 +227,9 @@ extern s32 dds3TestObjectFlags(u64, s32);
 
 extern void dds3DestroyWorldIndexNode(u64);
 
-extern void func_0012DCC8(void);
+extern void fldSubmitBackgroundResourcePacket(void);
 
-extern void func_0012DD48(void);
+extern void fldSubmitBackgroundDescriptorPacket(void);
 
 extern s32 D_00389780[];
 
@@ -304,7 +304,7 @@ extern void func_00128340(u32);
 
 extern void func_0023ACE8(void);
 
-extern void func_00110F28(u64, void *);
+extern void evtStartSceneResourceTask(u64, void *);
 
 extern void func_00150800(void);
 
@@ -584,7 +584,7 @@ u32 func_001200E0(void) {
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001200E8);
 
 s32 fldTestDrawUpdate(void) {
-    if (func_0012EB78() != 0) {
+    if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
     if (func_00127398() == 1) {
@@ -680,9 +680,9 @@ void func_00120A88(void) {
     }
     if (found != 0) {
         func_0012BC38(0x24);
-        func_0012DCC8();
+        fldSubmitBackgroundResourcePacket();
         func_0012BC38(0x26);
-        func_0012DD48();
+        fldSubmitBackgroundDescriptorPacket();
     }
 }
 
@@ -1783,7 +1783,7 @@ s32 func_001277D8(void) {
     }
     D_00389770[64] = 0;
     if ((D_00435F24 & 2) && *(s8 *)D_00387D60 != 0) {
-        func_00110F28(dds3GetWorldSecondaryObject(), D_00387D60);
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), D_00387D60);
         flags = D_00435F24;
         if (!(flags & 1)) {
             D_00387D60[0] = 0;
@@ -1792,11 +1792,11 @@ s32 func_001277D8(void) {
         return 1;
     }
     if (buffer[13] == 0 && *(s8 *)((u8 *)buffer + 0x80) != 0) {
-        func_00110F28(dds3GetWorldSecondaryObject(), (u8 *)buffer + 0x80);
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), (u8 *)buffer + 0x80);
         return 1;
     }
     if (D_00389770[1] != 0) {
-        func_00110F28(dds3GetWorldSecondaryObject(), (void *)D_00389770[1]);
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), (void *)D_00389770[1]);
         return 1;
     }
     return 0;

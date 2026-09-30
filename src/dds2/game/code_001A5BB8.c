@@ -313,7 +313,7 @@ typedef struct SndSeqSelect {
     s16 entryCount;
 } SndSeqSelect;
 
-extern void func_001A5988();
+extern void itfMesSetRowItemFlag();
 extern void sndSetSequenceVolumePan();
 extern void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir);
 typedef struct SndPad {
@@ -589,8 +589,8 @@ s32 sndSeqSelectPoll(s32 obj) {
     if (sel->entryCount > 0 && (index = func_001A6AB8(sel)) >= 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         if (index != sel->current) {
-            func_001A5988(sel->seq, sel->current, sel->count, 0);
-            func_001A5988(sel->seq, index, sel->count, 1);
+            itfMesSetRowItemFlag(sel->seq, sel->current, sel->count, 0);
+            itfMesSetRowItemFlag(sel->seq, index, sel->count, 1);
             sel->current = index;
             sel->saved = index;
         }
@@ -602,7 +602,7 @@ s32 sndSeqSelectPoll(s32 obj) {
 
 void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
     s32 index = sel->current;
-    func_001A5988(sel->seq, index, sel->count, 0);
+    itfMesSetRowItemFlag(sel->seq, index, sel->count, 0);
     if (dir < 0) {
         index--;
         if (index < 0) {
@@ -614,7 +614,7 @@ void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
             index = 0;
         }
     }
-    func_001A5988(sel->seq, index, sel->count, 1);
+    itfMesSetRowItemFlag(sel->seq, index, sel->count, 1);
     sel->current = index;
     sel->saved = index;
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
@@ -897,7 +897,7 @@ extern s32 btlTickFieldSwayAndTint(void);
 
 extern s32 func_00200AD8(void);
 
-extern s32 func_00203258(void);
+extern s32 btlSweepFloorModelLists(void);
 
 extern s32 func_001E7960(void);
 
@@ -917,7 +917,7 @@ s32 func_001A9A30(void) {
     if (battle->flags & 1) {
         btlTickFieldSwayAndTint();
         func_00200AD8();
-        func_00203258();
+        btlSweepFloorModelLists();
         func_001E7960();
         func_0022AC10();
         func_0020D110();
@@ -966,7 +966,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
 void func_001AA2E0(void) {
     btlOpenButtonIconResource();
     func_001CFB48();
-    func_00203B90();
+    sndLoadSysEffLb();
 }
 
 u8 func_001AA308(void) {
@@ -1645,7 +1645,7 @@ s32 func_001B08F8(UiObject *object) {
 
 extern char D_00415440[]; /* "btl:fear ratio[%d]\n" */
 
-extern s32 func_00211DE0();
+extern s32 btlRollAiBucket();
 
 s32 btlRollFearChance(s32 unused, u8 *unit, s32 flagsA, s32 flagsB) {
     s32 threshold;
@@ -1666,7 +1666,7 @@ s32 btlRollFearChance(s32 unused, u8 *unit, s32 flagsA, s32 flagsB) {
         threshold = !(flagsB & 4) ? 0 : 0x28;
     }
     btlBossDebugPrintf(D_00415440, threshold);
-    return func_00211DE0() < threshold;
+    return btlRollAiBucket() < threshold;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415440);
@@ -2270,7 +2270,7 @@ s32 func_001B4738(u8 *unit) {
         return 1;
     }
     btlBossDebugPrintf(D_00415840, 5, 1.0);
-    return func_00211DE0() < 5;
+    return btlRollAiBucket() < 5;
 }
 
 s32 func_001B47E0(UiObject *object) {
@@ -2549,16 +2549,16 @@ void btlLoadResourceBlock(void) {
     }
 }
 
-extern s32 func_003054E8(s32);
+extern s32 effDestroyResourceSlotSet(s32);
 
 void btlReleaseResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)func_001AA6F8();
     if (D_00436801 != 0) {
-        func_003054E8(D_00436804->resA);
+        effDestroyResourceSlotSet(D_00436804->resA);
         D_00436804->resA = 0;
-        func_003054E8(D_00436804->resB);
+        effDestroyResourceSlotSet(D_00436804->resB);
         D_00436804->resB = 0;
-        func_003054E8(D_00436804->resC);
+        effDestroyResourceSlotSet(D_00436804->resC);
         D_00436804->resC = 0;
         work->resA = 0;
         work->resB = 0;
@@ -2603,7 +2603,7 @@ void func_001B76F0(void) {
     s32 buf[4];
 
     temp_v0 = func_001AA6F8();
-    func_001CF720(temp_v0, buf);
+    fldCountSceneFadeKinds(temp_v0, buf);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7718);
@@ -3250,12 +3250,12 @@ s64 btlClearFlagEntries(void) {
 
 extern u32 D_004367EC;
 
-extern void func_0026C728(void);
+extern void dspCloseChannel(void);
 
 s64 btlDestroyTaskC(void) {
     s64 result = func_00101740(D_004367EC);
     if (result != 0) {
-        func_0026C728();
+        dspCloseChannel();
         if (func_001B88C8(0xC) != 0) {
             kwlnTaskDestroyWithHierarchy(func_001B88C8(0xC), 0);
         }
@@ -3289,7 +3289,7 @@ extern u32 D_004367F0;
 s64 btlDestroyTaskD(void) {
     s64 result = func_00101740(D_004367F0);
     if (result != 0) {
-        func_0026C728();
+        dspCloseChannel();
         if (func_001B88C8(0xD) != 0) {
             kwlnTaskDestroyWithHierarchy(func_001B88C8(0xD), 0);
         }

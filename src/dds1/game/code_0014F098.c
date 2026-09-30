@@ -12,7 +12,7 @@ extern s32 func_0013CBA8(s32 index);
 
 extern s32 func_0013CEB0(s32 param0, s32 param1);
 
-extern s32 func_0013D410(s32 param0, s32 param1);
+extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
 
 extern void func_0013D650(void);
 
@@ -57,7 +57,7 @@ extern s32 D_0032E48C[];
 
 extern s32 func_0010D6A0(void);
 
-extern s32 func_0013DF18(void);
+extern s32 fldIsSceneStateEight(void);
 
 extern s32 D_0032E3D8[];
 
@@ -68,7 +68,7 @@ s32 fldCmdQuerySceneValue(void) {
 
 u32 fldCmdUpdateTaskRecordScene(void) {
     s32 scene;
-    if (func_0013DF18()) {
+    if (fldIsSceneStateEight()) {
         scene = 0;
     } else {
         scene = fldFindTaskRecordId(((FldCommandWork *)func_0010D6A0())->key);
@@ -89,7 +89,7 @@ s32 func_0014F158(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    func_0010D5F0(func_0013D410(param0, param1));
+    func_0010D5F0(fldGetActorSlotAttribute(param0, param1));
     return 1;
 }
 

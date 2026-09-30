@@ -112,7 +112,7 @@ typedef struct Hdr8 {
 
 extern u32 D_00367904[][2];
 extern u8 D_003BBB60[];
-extern void func_002DB308(void *arg);
+extern void sdfDestroyMotion(void *arg);
 extern char *strcat(char *dst, const char *src);
 
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id);
@@ -133,7 +133,7 @@ void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
     if (*slot == node) {
         *slot = NULL;
     }
-    func_002DB308(node);
+    sdfDestroyMotion(node);
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
@@ -236,7 +236,7 @@ typedef struct MdlLoadCmd {
 
 extern s32 func_002EB168();
 
-void func_00216F68(s32 arg0, MdlLoadCmd *cmd) {
+void mdlFinishLoadCmd(s32 arg0, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(arg0);
     cmd->size = func_002EB168(func_00288B90(arg0));
     func_002887A0(arg0);
@@ -253,7 +253,7 @@ typedef struct MdlLoadJob {
     u32 handle;    /* 0x1C */
 } MdlLoadJob;
 
-void func_00216FE0(s32 arg0, MdlLoadJob *job) {
+void mdlFinishLoadJob(s32 arg0, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(arg0);
     job->sizeWord = func_002EB1F0(func_00288B90(arg0));
     func_002887A0(arg0);
@@ -345,7 +345,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     u32 *next;
 
     while (inner->list != NULL) {
-        func_002DB308(inner->list);
+        sdfDestroyMotion(inner->list);
     }
     sdfResourceListRelease(inner->resourceHandle, 1);
     for (node = ctx->list14; node != NULL; node = next) {
@@ -575,7 +575,7 @@ void func_00218100(MdlCtx *ctx, f32 amount) {
 }
 
 /* vu0 routine: project `point` through the camera and the model's scaled matrix, result left in vf10 */
-void func_00218158(MdlCtx *ctx, void *point)
+void mdlProjectPointVU(MdlCtx *ctx, void *point)
 {
     VU0_LOAD_MATRIX(D_003296F0);
     func_002DDD60(D_00324610);
@@ -596,7 +596,7 @@ void func_00218158(MdlCtx *ctx, void *point)
 }
 
 /* Project `count` points through the model's scaled matrix and the camera. */
-void func_00218228(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
+void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
 {
     s32 i;
 

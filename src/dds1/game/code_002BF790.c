@@ -80,7 +80,7 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(s32);
 
 void func_002BF790(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
-    s32 entry = func_002BD398(e, f);
+    s32 entry = effGetSlotWorkOrOverride(e, f);
     func_002BF400(a, b, c, d, e, f, entry, g);
 }
 
@@ -88,13 +88,13 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
 /* Resolve an entry by key, falling back to the object's stored value. */
 s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = func_002BD398(object);
+    s32 entry = effGetSlotWorkOrOverride(object);
     s32 result;
 
     if (*(s32 *)(entry + 0x30) == 0) {
         func_002BF828(object, key);
     }
-    result = func_002BDF28(object, key, entry);
+    result = effUpdateTimedStates(object, key, entry);
     if (result == 0) {
         result = ((GridEntryOwner *)object)->defaultValue;
     }
@@ -105,7 +105,7 @@ extern void func_002BD3D8(void *, s32, void *);
 
 void func_002BF9E0(u8 *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(((GridEntryOwner *)object)->quantizedEntries + index * 0x80);
-    s32 record = func_002BD398((s32)object, index);
+    s32 record = effGetSlotWorkOrOverride((s32)object, index);
 
     entry->x = x >> 4;
     entry->y = y >> 3;
@@ -132,7 +132,7 @@ void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
 }
 
 void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
-    GridWidget *widget = (GridWidget *)func_002BD398(a, b);
+    GridWidget *widget = (GridWidget *)effGetSlotWorkOrOverride(a, b);
     widget->x = x;
     widget->y = y;
     widget->width = width;
@@ -361,7 +361,7 @@ void func_002C0F88(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
 }
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
-void func_002C0FA8(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
+void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
     func_002C1098(x, y, z, x + width, y, z, color, context);
     func_002C1098(x, y, z, x, y + height, z, color, context);
     func_002C1098(x + width, y, z, x + width, y + height, z, color, context);
@@ -425,7 +425,7 @@ void func_002C1588(u32 surface) {
 }
 
 /* Scale the top three bytes of a packed color by scale / 256; the low byte is kept. */
-u32 func_002C15E0(u32 color, u32 scale) {
+u32 uiScaleColorRgb(u32 color, u32 scale) {
     u32 a = color >> 24;
     u32 b = (color >> 16) & 0xFF;
     u32 c = (color & 0xFF00) >> 8;
@@ -437,7 +437,7 @@ u32 func_002C15E0(u32 color, u32 scale) {
 }
 
 /* Blend two packed 8-bit-channel colors: weight t (mirrored above 0x100) for the first, 0x100 - t for the second. */
-u32 func_002C1630(u32 c0, u32 c1, u32 t) {
+u32 uiBlendColors(u32 c0, u32 c1, u32 t) {
     u32 a0 = c0 >> 24;
     u32 r0 = (c0 & 0xFF0000) >> 16;
     u32 g0 = (c0 & 0xFF00) >> 8;

@@ -58,11 +58,11 @@ extern s32 D_00438890;
 extern void func_00342580(u32);
 extern s32 func_0030DAE8(void);
 extern void func_0030C640(void);
-extern void func_0030E8E8(void);
+extern void fldReleaseMapRequestQueues(void);
 extern void func_001378A0(void);
 extern void func_00316E70(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
-extern void func_0026C728(void);
+extern void dspCloseChannel(void);
 extern void func_003298C0(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_004388A4;
@@ -70,7 +70,7 @@ extern s32 sdfCounterGetDisplayWordPointer(void);
 extern void func_0035C860(char *, char *, ...);
 extern void func_0026C918(s32, void *);
 extern void func_0026C648(s32);
-extern void func_0026C5B8(s32);
+extern void dspStartEntry(s32);
 extern void func_0026C618(s32);
 extern char D_004388A0[];
 extern s64 func_0026C768(void);
@@ -232,11 +232,11 @@ void fldShutdownLmapResources(void) {
     func_00342580(0x400001);
     func_0030DAE8();
     func_0030C640();
-    func_0030E8E8();
+    fldReleaseMapRequestQueues();
     func_001378A0();
     func_00316E70();
     evtSetSolarOverlayFullyTransparent();
-    func_0026C728();
+    dspCloseChannel();
     func_003298C0(D_004388A4);
     evtDestroySecondaryWorldNode();
 }
@@ -292,7 +292,7 @@ void func_0030B680(void) {
     func_0035C860(text, D_004388A0, sdfCounterGetDisplayWordPointer());
     func_0026C918(0, text);
     func_0026C648(0);
-    func_0026C5B8(0);
+    dspStartEntry(0);
     func_0026C618(1);
 }
 

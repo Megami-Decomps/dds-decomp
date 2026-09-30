@@ -47,4 +47,4 @@ void lightReleaseObject(LightObject *light) {
     effObjFreeInner(light);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3LightObjectBasic", func_001165F0);
+INCLUDE_ASM(const s32, "basic/dds3LightObjectBasic", lightBlendAmbientColors);

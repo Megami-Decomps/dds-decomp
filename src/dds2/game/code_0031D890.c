@@ -105,7 +105,7 @@ INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E2E8);
 /* Per-glyph texture byte, one 12-byte entry per glyph. */
 extern u8 D_0040B088[];
 
-u8 func_0031E410(s32 index) {
+u8 mnuGetIndexedFadeTexture(s32 index) {
     return D_0040B088[index * 12];
 }
 

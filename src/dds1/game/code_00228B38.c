@@ -15,7 +15,7 @@ typedef struct {
 void func_00228CA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
 u32 effLoadIndexedResource(void *arg0, const char *arg1, s32 arg2);
-void func_002BDD60(u32 sprite);
+void effDestroyResourceSlotSet(u32 sprite);
 void func_002C1430(s32 object);
 void func_002C0A48(s32 property, s32 object);
 void func_002C0950(s32 property, s32 object);
@@ -30,7 +30,7 @@ void evtLoadSolarNoiseSprite(u32 *sprite) {
 }
 
 void evtReleaseSolarNoiseSprite(u32 *sprite) {
-    func_002BDD60(*sprite);
+    effDestroyResourceSlotSet(*sprite);
 }
 
 void evtInitializeSolarOverlay(s32 object) {

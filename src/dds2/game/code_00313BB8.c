@@ -412,7 +412,7 @@ void scrSetGlobalBitFlag(u32 id) {
 }
 
 /* Tests the global bit that scrSetGlobalBitFlag sets (ids 0x1AB..0x21F). */
-u32 func_00314E80(u16 id) {
+u32 scrTestGlobalBitFlag(u16 id) {
     if (id < 0x1ab) return 0;
     if (id >= 0x220) return 0;
     id += 0xfe55;
@@ -544,7 +544,7 @@ u32 scrCallIfOperandReady(u8 *operand, s32 value) {
     }
 }
 
-u16 func_003152D8(u16 scriptId, u32 entry) {
+u16 prfGetSkillAtIndex(u16 scriptId, u32 entry) {
     if (entry >= 8) {
         return 0;
     }
@@ -629,7 +629,7 @@ s32 ptyReqProfileCountAtLeast(s32 state, u8 *operand) {
     return 1;
 }
 
-s32 func_003157A0(u8 *work, u8 *req) {
+s32 ptyProfileCountAtLeast(u8 *work, u8 *req) {
     u32 index;
     u32 count = 0;
 

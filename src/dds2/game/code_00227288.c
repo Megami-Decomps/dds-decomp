@@ -3,9 +3,9 @@
 #include "pcp_vu0.h"
 
 extern s32 *btlFindGroupedEntity();
-extern void func_001E31F0();
-extern void func_001E8510();
-extern void func_001E9598();
+extern void btlSetActorEffectParameterOrMuzzlePosition();
+extern void btlInterpolateVectorStep();
+extern void btlCopyMotionTransform();
 extern void func_001E88A8();
 
 extern u8 D_00436F5D;
@@ -332,14 +332,14 @@ extern s32 btlHasEffectActor(void);
 extern s32 btlHasEffectActor(void);
 
 extern s64 btlStartTask(void *);
-extern s32 func_001E66D8();
-extern s32 func_001E6740();
+extern s32 btlCreateCommandSoundUpdateTask();
+extern s32 btlCreateSecondaryCommandSoundTask();
 extern s32 btlCreateCommandSoundTask();
 extern s32 btlCreateEffObjB();
 extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 
 extern s32 scrReadIntParameter(s32);
-extern void func_001E2C00(BtlUnit *, s32, s32, f32);
+extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 
@@ -582,7 +582,7 @@ s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
     return effect->actor == (u32)task->unit ? 12 : -1;
 }
 
-s32 func_00227CC8(BtlTask *task) {
+s32 btlEffectTaskStartFinale(BtlTask *task) {
     BattleLinkedEffectState *effect;
     u8 *group;
 
@@ -593,8 +593,8 @@ s32 func_00227CC8(BtlTask *task) {
     if (effect->actor != (u32)task->unit) {
         return -1;
     }
-    btlStartTask(func_001E66D8());
-    btlStartTask(func_001E6740());
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateCommandSoundTask(task, 9));
     btlStartTask(btlCreateEffObjB(task->unit, 0xB4));
     group = fldCreateSceneGroupAction(task, 0x64, 1);
@@ -778,7 +778,7 @@ typedef struct BtlAimUnit {
     f32 scale;         /* 0x154 */
 } BtlAimUnit;
 
-s32 func_00228D68(BtlAimUnit *unit) {
+s32 btlUnitStartAimAtTarget(BtlAimUnit *unit) {
     u8 *battle = (u8 *)func_001AA6F8();
     u8 *target;
     u32 flags;
@@ -808,14 +808,14 @@ s32 func_00228D68(BtlAimUnit *unit) {
     if (unit->state != 0x1E || unit->armed != 0) {
         return 1;
     }
-    func_001E9598(unit->anim, unit);
+    btlCopyMotionTransform(unit->anim, unit);
     unit->scale = 10.0f;
     unit->armed = 1;
     unit->state = 0;
-    func_001E31F0(target, 0);
+    btlSetActorEffectParameterOrMuzzlePosition(target, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, unit->origin);
     unit->origin[1] += 150.0f;
-    func_001E8510(unit->anim);
+    btlInterpolateVectorStep(unit->anim);
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, unit->origin);
     VU0_SUB(vf10, vf10, vf11);
@@ -1023,7 +1023,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_002294D0);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
-s32 func_00229690(u8 *unit) {
+s32 btlUnitInEncounterList(u8 *unit) {
     BtlState *battle;
     u16 *entry;
     u32 id;
@@ -1297,7 +1297,7 @@ u8 func_0022B5E0(void) {
     return taskCount == 0;
 }
 
-s32 func_0022B600(void) {
+s32 btlCommandPlayUnitMotion(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
     s32 index = scrReadIntParameter(2);
@@ -1316,7 +1316,7 @@ s32 func_0022B600(void) {
     }
     if (index >= 0) {
         if (index < 0x1D) {
-            func_001E2C00(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
+            btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
         } else {
             mdlAddEntryPlainEx((s32)unit->model->flags, 0, index, 0.0f, 0.0f);
         }
@@ -1513,7 +1513,7 @@ s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     return 0;
 }
 
-s32 func_0022BDC0(void *list, s32 code, u32 mask) {
+s32 btlIndexListMatchesEntryCodes(void *list, s32 code, u32 mask) {
     u32 matched = 0;
     u32 i;
     u32 count = btlGetIndexListCount(list);
@@ -1555,7 +1555,7 @@ INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7D0);
 
 INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7E0);
 
-s32 func_0022BEB0(void *list, s32 command) {
+s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
     s32 codes[5] = {0, 1, 2, 3, 4};
     s32 count = btlGetIndexListCount(list);
     s32 i;
@@ -1784,7 +1784,7 @@ void func_0022CA48(void) {
     btlReleaseAllModelEntries();
 }
 
-void func_0022CA60(s32 kind, s32 id) {
+void btlLoadModelPack(s32 kind, s32 id) {
     char path[128];
     BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
 
@@ -1828,7 +1828,7 @@ s32 btlGetEntryState(s32 kind, s32 value) {
     return 0;
 }
 
-s32 func_0022CD30(s32 kind, s32 id) {
+s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     s32 entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         return func_0022C948((u8 *)entry);
@@ -1845,7 +1845,7 @@ void func_0022CF58(s32 packet, s32 first, s32 second, s32 color) {
                   0x8700, 0x9000, 0x8700, color, 0);
 }
 
-void func_0022CFB0(void) {
+void btlInitLightParams(void) {
     D_0037FA50.r = 1.75f;
     D_0037FA50.g = 1.75f;
     D_0037FA50.b = 1.75f;

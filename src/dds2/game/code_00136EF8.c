@@ -68,7 +68,7 @@ extern u32 D_0038BD50[];
 
 extern s32 func_0010C100(u32 arg0);
 
-extern s32 func_00110FB0(u64 arg0, u32 arg1);
+extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
 
 extern s32 kwlnTaskIsRegistered(u32 arg0);
 
@@ -84,13 +84,13 @@ extern s32 D_004361CC;
 
 extern s32 D_004361D0;
 
-extern u8 *func_001404E0(const char *);
+extern u8 *fldFindActorEntryByName(const char *);
 extern s32 func_0010D8C8(void);
 extern void fldPlayMenuSound(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldApplyPendingCameraHeading(void);
-extern void func_00155A08(s32, s32, void *, s32);
+extern void fldApplyRoomObjectModeZero(s32, s32, void *, s32);
 extern void func_00143768(s32);
 extern s32 D_003898FC[];
 extern s32 D_00389780[];
@@ -202,7 +202,7 @@ extern s32 D_004361B0;
 
 extern s32 D_004361B4;
 
-extern s32 func_00110F28();
+extern s32 evtStartSceneResourceTask();
 
 extern s32 D_004361BC;
 
@@ -432,7 +432,7 @@ f32 fldCalculateVectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
-void func_00137C68(f32 *points, f32 *nx, f32 *ny, f32 *nz, f32 *planeD) {
+void fldCalcTrianglePlane(f32 *points, f32 *nx, f32 *ny, f32 *nz, f32 *planeD) {
     f32 p0[4];
     f32 p1[4];
     f32 p2[4];
@@ -568,7 +568,7 @@ void fldResetTaskSlots(void) {
             if (info->slot >= 0) {
                 id = dds3GetPathState(func_00110C70(world, *(u32 *)D_00444A30[info->slot], 0xD));
                 if (func_0010C100(id) != 0) {
-                    func_00110FB0(dds3GetWorldObject(), id);
+                    evtDestroyNamedTask(dds3GetWorldObject(), id);
                 }
             }
         }
@@ -592,7 +592,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D598);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D7F8);
 
-s32 func_0013DA10(f32 *direction, s32 index) {
+s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
     f32 probe[3];
     f32 planar[2];
     s32 i;
@@ -634,7 +634,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DBB0);
 s32 func_0013DC70(u32 flag, u32 slot) {
     D_0038BD50[slot] = 0;
     if (func_0010C100(flag) != 0) {
-        func_00110FB0(dds3GetWorldObject(), flag);
+        evtDestroyNamedTask(dds3GetWorldObject(), flag);
         return 0;
     }
     return -1;
@@ -661,13 +661,13 @@ s32 func_0013DD18(void) {
         return 0;
     }
     if ((state & 2) != 0 && D_00387D60[0] != 0) {
-        func_00110FB0(dds3GetWorldObject(), D_00387D60);
+        evtDestroyNamedTask(dds3GetWorldObject(), D_00387D60);
     }
     D_00387D60[0] = 0;
     D_00435F24 = 0;
     object = func_001406E8();
     if (func_0010C100((u32)object) == 0) {
-        func_00110F28(dds3GetWorldObject(), object);
+        evtStartSceneResourceTask(dds3GetWorldObject(), object);
     }
     return 1;
 }
@@ -790,7 +790,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FA98);
 
 extern s32 D_004361C8;
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FFF8);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetActorSlotAttribute);
 
 void fldLoadInfoTable(s32 field) {
     char path[64];
@@ -817,7 +817,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_00413448);
 
-u8 *func_001402B8(const char *name) {
+u8 *fldPickActorTemplateByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
     s16 flag;
@@ -878,7 +878,7 @@ u8 *func_001402B8(const char *name) {
     return 0;
 }
 
-u8 *func_001404E0(const char *name) {
+u8 *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
     s16 flag;
@@ -978,7 +978,7 @@ typedef struct FldTaskRecordWork {
     u32 key;
 } FldTaskRecordWork;
 
-void func_00140830(s32 arg0) {
+void fldApplyActorEntryTrigger(s32 arg0) {
     s32 index;
     s32 kind;
     s32 record;
@@ -989,7 +989,7 @@ void func_00140830(s32 arg0) {
         if (record == 0) {
             return;
         }
-        if (func_001404E0((const char *)record) == 0) {
+        if (fldFindActorEntryByName((const char *)record) == 0) {
             return;
         }
     }
@@ -1026,7 +1026,7 @@ void func_00140830(s32 arg0) {
     } else if (kind == 11) {
         if (entry->area == D_00389784[0] + 1) {
             if (entry->state == 3) {
-                func_00155A08(0, 0, entry->name1, 0);
+                fldApplyRoomObjectModeZero(0, 0, entry->name1, 0);
                 return;
             }
         }
@@ -1038,7 +1038,7 @@ void func_00140830(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140A58);
 
-u8 func_00140B80(void) {
+u8 fldIsSceneStateEight(void) {
     return D_004361F8 == 8;
 }
 
@@ -1292,7 +1292,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143910);
 void func_00143C90(void) {
 }
 
-extern void func_00155D48(s32, s32, void *, s32);
+extern void fldApplyRoomObjectModeOne(s32, s32, void *, s32);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143C98);
 

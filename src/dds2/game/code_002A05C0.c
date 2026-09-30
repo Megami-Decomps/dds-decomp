@@ -436,7 +436,7 @@ extern u32 D_00454D68[];
 void func_002A2388(void) {
     WaitSema(D_00438FE8);
     if (mnuUpdateTitleTransition() == 1) {
-        func_002C81E8();
+        fileWaitIdle();
         func_002A20A0(D_00454D30);
     }
     if (D_00454D30[4] != 1) {
@@ -480,7 +480,7 @@ extern u8 D_00455DB0[];
 
 extern void func_003298C0(u32 arg0);
 
-void func_002A2500(void) {
+void mnuResetTitleStream(void) {
     if (D_00454D30[8] != 0) {
         func_003298C0(D_00454D30[8]);
         D_00454D30[9] = 0;
@@ -492,7 +492,7 @@ void func_002A2500(void) {
 
 void func_002A2550(void) {
     WaitSema(D_00438FE8);
-    func_002A2500();
+    mnuResetTitleStream();
     SignalSema(D_00438FE8);
 }
 

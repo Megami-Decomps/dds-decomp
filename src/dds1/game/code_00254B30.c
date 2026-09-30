@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0024DA58(s32 signal);
+extern void dspStartEntry(s32 signal);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
@@ -83,10 +83,10 @@ extern MenuSlot19 *D_003BAA78;
 extern char D_003BC468[];
 extern s32 fldGetSceneMetadataNode();
 extern void func_0024DD90(s32, void *);
-extern s32 func_0024F800(s32);
+extern s32 mnuGetMantraSourceValue(s32);
 extern void func_003014F0(void *, void *, s32);
 extern void func_0024DAE8(s32);
-extern void func_0024DA58(s32);
+extern void dspStartEntry(s32);
 extern void func_0024DAB8(s32);
 
 /* Populate four menu labels from the current selection and scene metadata. */
@@ -98,10 +98,10 @@ void itfDspPopulatePrimaryLabels(void) {
     func_0024DD90(0, &D_003BAA70[selection->entry->index]);
     func_0024DD90(1, &D_003BAA78[selection->alternate]);
     func_0024DD90(2, &D_003BAA78[scene->sceneId]);
-    func_003014F0(text, D_003BC468, func_0024F800(scene->sceneId));
+    func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
     func_0024DAE8(0);
-    func_0024DA58(0);
+    dspStartEntry(0);
     func_0024DAB8(8);
 }
 
@@ -114,10 +114,10 @@ void itfDspPopulateAlternateLabels(void) {
     func_0024DD90(0, &D_003BAA70[selection->entry->index]);
     func_0024DD90(1, &D_003BAA78[selection->alternate]);
     func_0024DD90(2, &D_003BAA78[scene->sceneId]);
-    func_003014F0(text, D_003BC468, func_0024F800(scene->sceneId));
+    func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
     func_0024DAE8(0);
-    func_0024DA58(1);
+    dspStartEntry(1);
     func_0024DAB8(8);
 }
 
@@ -130,29 +130,29 @@ void itfDspPopulateThirdLabels(void) {
     func_0024DD90(0, &D_003BAA70[selection->entry->index]);
     func_0024DD90(1, &D_003BAA78[selection->alternate]);
     func_0024DD90(2, &D_003BAA78[scene->sceneId]);
-    func_003014F0(text, D_003BC468, func_0024F800(scene->sceneId));
+    func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
-    func_0024DA58(2);
+    dspStartEntry(2);
 }
 
 void itfDspSignalA(void) {
-    func_0024DA58(3);
+    dspStartEntry(3);
 }
 
 void itfDspSignalB(void) {
-    func_0024DA58(4);
+    dspStartEntry(4);
 }
 
 void itfDspSignalC(void) {
-    func_0024DA58(5);
+    dspStartEntry(5);
 }
 
 void itfDspSignalD(void) {
-    func_0024DA58(6);
+    dspStartEntry(6);
 }
 
 void itfDspSignalE(void) {
-    func_0024DA58(7);
+    dspStartEntry(7);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255838);

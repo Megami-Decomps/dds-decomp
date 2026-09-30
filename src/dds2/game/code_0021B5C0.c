@@ -122,15 +122,15 @@ extern s32 func_001AB9F0(BtlUnit *, s32);
 extern s32 func_001B3610(BtlUnit *, s32, s32, s32, s32);
 extern s8 func_001B36B8(s32, s32, s32);
 extern void func_001EC868(void *, f32 *, f32);
-extern void func_001E9598(void *, f32 *);
+extern void btlCopyMotionTransform(void *, f32 *);
 extern void func_00336538(f32);
-extern void func_001E9A88();
-extern void func_001E9660(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlFlagAllUnitDefeatCandidatesTask();
+extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
 extern BtlUnit *func_002172B8(BtlEffect *);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
 extern void func_00336AA8(void);
-extern void func_001E96C8(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern s32 func_0021C5E0();
 
 void btlCancelCurrentSubtask(void) {
@@ -203,19 +203,19 @@ INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021B828);
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021C0C8);
 
 void func_0021C390(u8 *obj) {
-    func_001E9A88(obj);
-    func_001E96C8(obj, -176.6f, -137.8f, -1564.9f, -0.01f, -0.038f, -0.012f, 0.99f, -217.8f,
+    btlFlagAllUnitDefeatCandidatesTask(obj);
+    btlSetEffectCameraKeys(obj, -176.6f, -137.8f, -1564.9f, -0.01f, -0.038f, -0.012f, 0.99f, -217.8f,
                   -253.6f, -2272.8f, -0.009f, -0.038f, -0.013f, 0.99f, 40.0f, 15.0f);
 }
 
 void func_0021C428(BtlEffect *fx) {
     switch (fx->task->unit->mode) {
     case 0x111:
-        func_001E96C8(fx, 533.4f, -167.8f, -1104.7f, -0.052f, 0.285f, -0.028f, 0.947f, 430.5f,
+        btlSetEffectCameraKeys(fx, 533.4f, -167.8f, -1104.7f, -0.052f, 0.285f, -0.028f, 0.947f, 430.5f,
                       -91.7f, -1373.1f, -0.089f, 0.198f, -0.03f, 0.967f, 40.0f, 15.0f);
         break;
     case 0x112:
-        func_001E96C8(fx, -440.9f, -333.4f, -1307.2f, 0.026f, -0.223f, -0.017f, 0.965f, -844.6f,
+        btlSetEffectCameraKeys(fx, -440.9f, -333.4f, -1307.2f, 0.026f, -0.223f, -0.017f, 0.965f, -844.6f,
                       -358.7f, -1194.1f, 0.024f, -0.346f, -0.02f, 0.928f, 40.0f, 10.0f);
         break;
     }
@@ -225,7 +225,7 @@ s32 btlInitializeEffectVectors(BtlEffect *fx) {
     f32 *vec = fx->vec30;
     fx->vec10[0] = 1.0f;
     func_001EC868(fx, vec, 25.0f);
-    func_001E9598(fx->vecC0, vec);
+    btlCopyMotionTransform(fx->vecC0, vec);
     func_00336538(-0.87266463f);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(fx->vec40) : "memory");
     __asm__ volatile(".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\tvmaddz.xyzw vf10, vf30, vf10z\n\t.set reorder");

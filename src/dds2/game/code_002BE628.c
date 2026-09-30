@@ -18,7 +18,7 @@ extern s32 func_002C6CE8(void);
 
 extern u32 func_002B9FF8(u32);
 
-extern u32 func_00304998(u32);
+extern u32 effCreateStatusBatch(u32);
 
 extern s32 D_00435E20;
 
@@ -33,7 +33,7 @@ extern u8 D_003E7978[];
 
 extern void func_002C7508(u32, f32, f32);
 extern void func_002C76A8(s32);
-extern void func_002C7168(void);
+extern void evtStageTestUpdateCamera(void);
 extern void func_00203E18(s32);
 extern void func_00232390(s32, s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
@@ -174,7 +174,7 @@ typedef struct StageGraphicsCallback {
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, s32);
-extern void func_00103790(void *, s32, s32, s32, s32);
+extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern s32 func_0033D810();
 extern void func_0023AA30(s32, s32);
 extern s32 D_00437CB8;
@@ -201,7 +201,7 @@ typedef struct MenuPanelSet {
 } MenuPanelSet;
 
 /* Sets the value word of both sub-blocks of every panel. */
-void func_002BE6E8(MenuPanelSet *menu, s32 value) {
+void mnuSetPanelSlotValues(MenuPanelSet *menu, s32 value) {
     MenuPanelSlots *panel = menu->panel;
     s32 i;
     s32 j;
@@ -233,7 +233,7 @@ typedef struct MenuQueuedCommand {
 } MenuQueuedCommand;
 
 /* Retail returns int here without a return statement: the last call is a plain jal, not a sibcall. */
-s32 func_002BEE50(u8 *menu, s32 window, u32 kind, s32 argument) {
+s32 mnuQueueListEntry(u8 *menu, s32 window, u32 kind, s32 argument) {
     u8 *base = menu + window * 0x2138;
     u8 *block = base + 0x78;
     s32 *count = (s32 *)(base + 0x17C);
@@ -430,7 +430,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
 }
 
-void func_002C0630(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
+void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
     s32 positionOffset[2];
     s32 *layout = menu->entryCount;
     s32 count;
@@ -450,7 +450,7 @@ void func_002C0630(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, 
 }
 
 void func_002C0718(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
-    func_002C0630(x, y, depth, 0, (MenuListState *)source, mode);
+    mnuDrawListPanels(x, y, depth, 0, (MenuListState *)source, mode);
 }
 
 typedef struct MenuPoint {
@@ -776,9 +776,9 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 void mnuCreatePairedEffects(MenuEffectPair *pair) {
     u32 effectHandle;
 
-    effectHandle = func_00304998(3);
+    effectHandle = effCreateStatusBatch(3);
     pair->first = (MenuEffectNode *)effectHandle;
-    effectHandle = func_00304998(3);
+    effectHandle = effCreateStatusBatch(3);
     pair->second = (MenuEffectNode *)effectHandle;
 }
 
@@ -815,7 +815,7 @@ void func_002C21F8(u32 *group) {
     u32 *entry = group + 7;
     u32 index = 0;
     do {
-        func_003054E8(*entry++);
+        effDestroyResourceSlotSet(*entry++);
         index++;
     } while (index < 7);
     func_002C1FA0(group);
@@ -1577,7 +1577,7 @@ s32 func_002C5758(u32 id, s32 mode) {
                 id += 0x17;
                 break;
             }
-            func_0026C5B8(id);
+            dspStartEntry(id);
             return 1;
         }
     }
@@ -1743,7 +1743,7 @@ s32 func_002C5F78(u32 *left, u32 *right) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6008);
 
-s32 func_002C6348(s32 partyPanel, s32 skill, s32 commit) {
+s32 mnuUseFieldSkillOnParty(s32 partyPanel, s32 skill, s32 commit) {
     u32 used[32];
     MenuPanelEntry *entry;
     s32 pass;
@@ -1968,7 +1968,7 @@ void func_002C6BB8(void) {
     D_00457EB0.flags &= ~1;
 }
 
-s32 func_002C6BD8(s32 encodedIndex, s32 initialValue, s32 option) {
+s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
     s32 index = encodedIndex & 0xFFFF;
     s32 bank;
     StageTestSlot *slot;
@@ -1996,7 +1996,7 @@ s32 func_002C6BD8(s32 encodedIndex, s32 initialValue, s32 option) {
 }
 
 void func_002C6CC8(u16 id, u32 option) {
-    func_002C6BD8(id, 0xffffffffffffffff, option);
+    evtStageTestSelectEntry(id, 0xffffffffffffffff, option);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
@@ -2082,7 +2082,7 @@ void evtStageTestApplyEntryRotation(s32 model) {
 }
 
 extern s32 func_00100400(void);
-extern void func_0033A5C8(void *);
+extern void sdfCameraBuildProjection(void *);
 extern void func_0033A388(void *packet, void *node, void *matrix);
 extern void func_0033A480(void *node, void *matrix);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
@@ -2095,7 +2095,7 @@ extern u8 D_003846F0[];
 extern u8 D_003820F0[];
 
 /* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
-void func_002C7168(void)
+void evtStageTestUpdateCamera(void)
 {
     s128 eye;
     s128 at;
@@ -2106,7 +2106,7 @@ void func_002C7168(void)
     PCP_COPY_VECTOR(D_0037F690, D_003E7950);
     PCP_COPY_VECTOR(D_0037F680, D_003E7940);
     PCP_COPY_VECTOR(D_0037F6A0, D_003E7960);
-    func_0033A5C8(D_0037F5E0);
+    sdfCameraBuildProjection(D_0037F5E0);
     VU0_LOAD_VF(vf10, D_0037F680);
     VU0_LOAD_VF(vf11, D_0037F690);
     VU0_SUB(vf10, vf10, vf11);
@@ -2135,7 +2135,7 @@ s8 evtStageTestUpdate(s32 frame) {
         if (D_00457EB0.model != 0) {
             mnuApplyModelCamera(D_00457EB0.model);
             evtStageTestApplyEntryRotation(D_00457EB0.model);
-            func_002C7168();
+            evtStageTestUpdateCamera();
             if (D_00457EB0.unk70 == 0) {
                 D_00457EB0.unk70 = 1;
             } else {
@@ -2301,7 +2301,7 @@ void *evtBattleStageTestScreen(void) {
     void *packets = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(packets);
-    func_00103790(packets, 0x84, 0x46, 0x14, 9);
+    kwlnDrawSpriteCell(packets, 0x84, 0x46, 0x14, 9);
     sdfAppendPacket(packets, func_0033D810(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
     sdfAppendPacket(packets, func_0033D810(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
     sdfAppendPacket(packets, func_0033D810(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));

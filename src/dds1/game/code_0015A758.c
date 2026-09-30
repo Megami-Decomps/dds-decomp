@@ -343,7 +343,7 @@ void parDispatchKindInit(ParSystem *work, s32 index) {
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
-extern void func_0015BB90(s32, s32);
+extern void parFadeAlphaCell(s32, s32);
 
 void func_0015AF70(s32 particle, s32 index, u32 color) {
     u128 axis[2];
@@ -371,7 +371,7 @@ void func_0015AF70(s32 particle, s32 index, u32 color) {
     __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
     __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
     func_0015B928(particle, index, axis);
-    func_0015BB90(particle, index);
+    parFadeAlphaCell(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
@@ -610,7 +610,7 @@ void func_0015BB00(ParSystem *system, s32 index, void *delta) {
     }
 }
 
-void func_0015BB90(s32 particle, s32 index) {
+void parFadeAlphaCell(s32 particle, s32 index) {
     ParSystem *system = (ParSystem *)particle;
     u32 count = system->cells[index].vertexCount >> 1;
     u32 *vertex = system->cells[index].vertices;
@@ -672,7 +672,7 @@ void parFillVertexPairs(ParSystem *system, s32 firstWord, s32 secondWord) {
     }
 }
 
-void func_0015BFD8(ParSystem *system, u32 color) {
+void parFadeAlphaAllCells(ParSystem *system, u32 color) {
     u32 perCell = system->vertexWordCount >> 1;
     u32 count = system->cellCount;
     u32 i;
@@ -712,7 +712,7 @@ void func_0015BFD8(ParSystem *system, u32 color) {
     }
 }
 
-void func_0015C128(ParSystem *system, u32 color) {
+void parFadeAlphaUpDownAllCells(ParSystem *system, u32 color) {
     u32 words = system->vertexWordCount;
     u32 count = system->cellCount;
     u32 quarter = words >> 2;
@@ -802,7 +802,7 @@ void func_0015C2F0(ParSystem *system, s32 middleWord, s32 edgeWord) {
     }
 }
 
-void func_0015C360(ParSystem *system, u32 middleWord, u32 edgeWord) {
+void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWord) {
     f32 cur0[4];
     f32 cur1[4];
     f32 step0[4];

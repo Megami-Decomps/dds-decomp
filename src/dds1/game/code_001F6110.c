@@ -2,7 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-extern void func_001D54C0(s32 actor);
+extern void btlClearUnitDefeatCandidate(s32 actor);
 
 extern u32 btlGetIndexListCount(s32 actor);
 extern s32 btlGetIndexListEntry(s32 actor, u32 index);
@@ -18,7 +18,7 @@ extern void btlCmdSimpleA(s32, u16);
 extern void btlCmdSimpleE(s32, u16);
 extern void btlCmdSimpleD(s32, u16);
 extern void btlCmdSimpleJ(s32, u16);
-extern void func_001FF030(s32, u16);
+extern void btlRunWeightedAiAction(s32, u16);
 
 extern s8 D_003BB870;
 
@@ -58,7 +58,7 @@ extern void func_003014F0();
 
 extern u8 D_003BB820[];
 
-extern u64 func_001D9718(void);
+extern u64 btlCreateCommandSoundUpdateTask(void);
 
 typedef struct BtlUnit {
     u8 unk_00[0x70];
@@ -166,7 +166,7 @@ typedef union BtlVec4 {
     u128 q;
 } BtlVec4;
 
-extern u64 func_001D9780(void);
+extern u64 btlCreateSecondaryCommandSoundTask(void);
 
 extern u64 btlCreateCommandSoundTask(u64, u64);
 
@@ -486,11 +486,11 @@ void btlFlagAllUnitsDefeatCandidate(void) {
     }
 }
 
-void func_001F7428(void) {
+void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)func_001A17F0())->units; unit != NULL; unit = unit->next) {
-        func_001D54C0((s32)unit);
+        btlClearUnitDefeatCandidate((s32)unit);
     }
 }
 
@@ -508,14 +508,14 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     }
 }
 
-void func_001F74D0(s32 mask) {
+void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     BtlUnit *unit;
 
     unit = ((BtlState *)func_001A17F0())->units;
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                func_001D54C0((s32)unit);
+                btlClearUnitDefeatCandidate((s32)unit);
             }
             unit = unit->next;
         } while (unit != NULL);
@@ -534,12 +534,12 @@ void btlFlagActorUnitsDefeatCandidate(s32 actor) {
 }
 
 
-void func_001F7598(s32 actor) {
+void btlClearActorUnitDefeatCandidates(s32 actor) {
     u32 i = 0;
     u32 count = btlGetIndexListCount(actor);
     if (count != 0) {
         do {
-            func_001D54C0(btlGetIndexListEntry(actor, i));
+            btlClearUnitDefeatCandidate(btlGetIndexListEntry(actor, i));
             i++;
         } while (i < count);
     }
@@ -955,7 +955,7 @@ void btlReleaseButtonTexture(void) {
 
 /* Script command handlers set the command state at +0x20 and its
  * argument at +0x24; their numeric opcodes are still unidentified. */
-u32 func_001F8328(void) {
+u32 btlScriptSelectEmptyCommand(void) {
     BtlCmdCtx *context;
 
     context = (BtlCmdCtx *)func_0010D6A8();
@@ -973,7 +973,7 @@ u32 func_001F8358(void) {
     return 1;
 }
 
-u32 func_001F8388(void) {
+u32 btlScriptSelectModeDValueOne(void) {
     BtlCmdCtx *context;
 
     context = (BtlCmdCtx *)func_0010D6A8();
@@ -982,7 +982,7 @@ u32 func_001F8388(void) {
     return 1;
 }
 
-u32 func_001F83B8(void) {
+u32 btlScriptSelectModeAValueOne(void) {
     BtlCmdCtx *context;
 
     context = (BtlCmdCtx *)func_0010D6A8();
@@ -1056,7 +1056,7 @@ u32 func_001F8538(void) {
     return 1;
 }
 
-u32 func_001F8578(void) {
+u32 btlScriptSetBattleWorkParameter(void) {
     s32 battle;
     s16 value;
 
@@ -1068,60 +1068,60 @@ u32 func_001F8578(void) {
     return 1;
 }
 
-u32 func_001F85C8(void) {
+u32 btlScriptCmdWithArgA(void) {
     btlCmdWithArgA(func_0010D6A8());
     return 1;
 }
 
-u32 func_001F85F0(void) {
+u32 btlScriptCmdSimpleB(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleB(context, value);
     return 1;
 }
 
-u32 func_001F8630(void) {
+u32 btlScriptCmdWithArgB(void) {
     btlCmdWithArgB(func_0010D6A8());
     return 1;
 }
 
-u32 func_001F8658(void) {
+u32 btlScriptCmdWithArgC(void) {
     btlCmdWithArgC(func_0010D6A8());
     return 1;
 }
 
-u32 func_001F8680(void) {
+u32 btlScriptCmdSimpleA(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleA(context, value);
     return 1;
 }
 
-u32 func_001F86C0(void) {
+u32 btlScriptCmdWithArgE(void) {
     btlCmdWithArgE(func_0010D6A8());
     return 1;
 }
 
-u32 func_001F86E8(void) {
+u32 btlScriptCmdWithArgD(void) {
     btlCmdWithArgD(func_0010D6A8());
     return 1;
 }
 
-u32 func_001F8710(void) {
+u32 btlScriptCmdSimpleC(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleC(context, value);
     return 1;
 }
 
-u32 func_001F8750(void) {
+u32 btlScriptCmdSimpleD(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleD(context, value);
     return 1;
 }
 
-u32 func_001F8790(void) {
+u32 btlScriptCmdSimpleE(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleE(context, value);
@@ -1133,34 +1133,34 @@ u32 func_001F87D0(void) {
     return 1;
 }
 
-u32 func_001F87F8(void) {
+u32 btlScriptCmdSimpleF(void) {
     btlCmdSimpleF(func_0010D6A8(), 0);
     return 1;
 }
 
-u32 func_001F8828(void) {
+u32 btlScriptCmdSimpleG(void) {
     btlCmdSimpleG(func_0010D6A8(), 0);
     return 1;
 }
 
-u32 func_001F8858(void) {
+u32 btlScriptCmdSimpleH(void) {
     btlCmdSimpleH(func_0010D6A8(), 0);
     return 1;
 }
 
-u32 func_001F8888(void) {
+u32 btlScriptCmdWithArgF(void) {
     btlCmdWithArgF(func_0010D6A8());
     return 1;
 }
 
-u32 func_001F88B0(void) {
+u32 btlScriptCmdSimpleJ(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleJ(context, value);
     return 1;
 }
 
-u32 func_001F88F0(void) {
+u32 btlScriptCmdSimpleI(void) {
     btlCmdSimpleI(func_0010D6A8(), 0);
     return 1;
 }
@@ -1832,7 +1832,7 @@ u32 func_001FA460(void) {
     return 1;
 }
 
-u32 func_001FA4B0(void) {
+u32 btlScriptReturnBattleValue(void) {
     u64 result;
 
     result = func_001ACAE0();
@@ -1840,7 +1840,7 @@ u32 func_001FA4B0(void) {
     return 1;
 }
 
-u32 func_001FA4D8(void) {
+u32 btlScriptReturnWorkParameter(void) {
     s32 battle;
 
     battle = func_001A17F0();
@@ -1872,7 +1872,7 @@ u32 func_001FA558(void) {
     return 1;
 }
 
-u32 func_001FA580(void) {
+u32 btlScriptReturnEffectActive(void) {
     u32 active;
 
     active = btlGetEffectActive();
@@ -1888,7 +1888,7 @@ u32 func_001FA5A8(void) {
     return 1;
 }
 
-u32 func_001FA5D0(void) {
+u32 btlScriptReturnEffectValue(void) {
     u32 value;
 
     value = btlGetEffectValue();
@@ -1896,7 +1896,7 @@ u32 func_001FA5D0(void) {
     return 1;
 }
 
-u32 func_001FA5F8(void) {
+u32 btlScriptReturnContextSignedByte(void) {
     s32 context;
 
     context = func_0010D6A8();
@@ -1904,7 +1904,7 @@ u32 func_001FA5F8(void) {
     return 1;
 }
 
-u32 func_001FA620(void) {
+u32 btlScriptReturnGlobalDebugValue(void) {
     func_0010D5F0(D_003BB870);
     return 1;
 }
@@ -1922,10 +1922,10 @@ u32 func_001FA670(void) {
     return 1;
 }
 
-u32 func_001FA698(void) {
+u32 btlScriptSetBattleCommand(void) {
     s32 context = func_0010D6A8();
     u16 value = scrReadIntParameter(0);
-    func_001FF030(context, value);
+    btlRunWeightedAiAction(context, value);
     return 1;
 }
 
@@ -1946,24 +1946,24 @@ u32 func_001FA718(void) {
     return 1;
 }
 
-u32 func_001FA738(void) {
+u32 btlScriptBeginSceneTransition(void) {
     fldBeginSceneTransition();
     return 1;
 }
 
-u32 func_001FA758(void) {
+u32 btlScriptFlagAllUnitsDefeatCandidates(void) {
     btlFlagAllUnitsDefeatCandidate();
     return 1;
 }
 
 u32 func_001FA778(void) {
-    func_001F7428();
+    btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(0x200);
     return 1;
 }
 
 u32 func_001FA7A0(void) {
-    func_001F7428();
+    btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(0x400);
     return 1;
 }
@@ -1981,32 +1981,32 @@ u32 btlCmdCameraMove(void) {
     target[1] = bfWaitReadArgFloat(4);
     target[2] = bfWaitReadArgFloat(5);
     target[3] = bfWaitReadArgFloat(6);
-    btlStartTask(func_001D9718());
-    btlStartTask(func_001D9780());
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateFloatTask28(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
     btlStartTask(btlScheduleContextReset());
     return 1;
 }
 
 
-u32 func_001FA898(void) {
+u32 btlScriptQueueActorCommandSound(void) {
     u64 task;
 
-    task = func_001D9718();
+    task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
-    task = func_001D9780();
+    task = btlCreateSecondaryCommandSoundTask();
     btlStartTask(task);
     task = btlCreateCommandSoundTask(func_0010D6A8(), 0x11);
     btlStartTask(task);
     return 1;
 }
 
-u32 func_001FA8F0(void) {
+u32 btlScriptQueueUnboundCommandSound(void) {
     u64 task;
 
-    task = func_001D9718();
+    task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
-    task = func_001D9780();
+    task = btlCreateSecondaryCommandSoundTask();
     btlStartTask(task);
     task = btlCreateCommandSoundTask(0, 3);
     btlStartTask(task);
@@ -2016,7 +2016,7 @@ u32 func_001FA8F0(void) {
 extern f32 D_003D74E0[];
 extern f32 D_003D7500[];
 
-s32 func_001FA940(void) {
+s32 btlScriptSetCameraBlendStart(void) {
     D_003D74E0[0] = bfWaitReadArgFloat(0);
     D_003D74E0[1] = bfWaitReadArgFloat(1);
     D_003D74E0[2] = bfWaitReadArgFloat(2);
@@ -2027,7 +2027,7 @@ s32 func_001FA940(void) {
     return 1;
 }
 
-s32 func_001FA9C8(void) {
+s32 btlScriptSetCameraBlendEnd(void) {
     D_003D74E0[4] = bfWaitReadArgFloat(0);
     D_003D74E0[5] = bfWaitReadArgFloat(1);
     D_003D74E0[6] = bfWaitReadArgFloat(2);
@@ -2043,8 +2043,8 @@ extern s32 btlCreateFloatTask29(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32
 u32 btlCmdCameraMoveBlend(void) {
     f32 timeA = bfWaitReadArgFloat(0);
     f32 timeB = bfWaitReadArgFloat(1);
-    btlStartTask(func_001D9718());
-    btlStartTask(func_001D9780());
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateFloatTask29(0, D_003D74E0[0], D_003D74E0[1], D_003D74E0[2], D_003D7500[0], D_003D7500[1],
                                 D_003D7500[2], D_003D7500[3], D_003D74E0[4], D_003D74E0[5], D_003D74E0[6],
                                 D_003D7500[4], D_003D7500[5], D_003D7500[6], D_003D7500[7], timeA, timeB));
@@ -2157,7 +2157,7 @@ void func_001FADF0(void) {
 
 extern void func_00221FF8(s32, s32);
 
-void func_001FADF8(void) {
+void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     s32 state = func_001A17F0();
     if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         BtlUnit *actor = ((BtlState *)state)->units;
@@ -2412,7 +2412,7 @@ INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5750);
 
 INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5760);
 
-s32 func_001FB2A0(s32 directory) {
+s32 btlOpenPfsDebugDirectory(s32 directory) {
     char buf[0x70];
 
     if (D_003BD476 != 0) {
@@ -2440,7 +2440,7 @@ typedef struct BtlReader {
     char name[0x40];
 } BtlReader;
 
-s32 func_001FB320(s32 unused, BtlReader *reader) {
+s32 btlReadBattleResourceDirectoryEntry(s32 unused, BtlReader *reader) {
     if (D_003BD476 != 0) {
         return func_00310320();
     }
@@ -2584,7 +2584,7 @@ typedef struct BtlResourceNameRecord {
     char name[0x1C]; /* 0x1C */
 } BtlResourceNameRecord;
 
-void func_001FBF30(s32 recordAddress, s32 firstWord, s32 secondWord) {
+void btlSetResourceNameHeaderPair(s32 recordAddress, s32 firstWord, s32 secondWord) {
     ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
     ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
 }
@@ -2655,7 +2655,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);
 
-s32 func_001FC280(s32 name) {
+s32 btlCreateResourceNameRecord(s32 name) {
     s32 recordAddress;
 
     recordAddress = (s32)func_002CFEB8(0x38);
@@ -2676,7 +2676,7 @@ void func_001FC2E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);
 
-void func_001FC720(s32 recordAddress, s32 firstWord, s32 secondWord) {
+void btlSetResourceNameHeaderPairAlternate(s32 recordAddress, s32 firstWord, s32 secondWord) {
     ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
     ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
 }
@@ -2685,16 +2685,16 @@ u32 func_001FC730(s32 recordAddress) {
     return ((BtlResourceNameRecord *)recordAddress)->word08;
 }
 
-void func_001FC738(char *record, char *name) {
+void btlResourceRecordSetName(char *record, char *name) {
     strcpy(record + 0x21, name);
     ((BtlResourceNameRecord *)record)->nameLength = strlen(name);
 }
 
-void func_001FC778(s32 recordAddress, void *output) {
+void btlFormatResourceNameWithPrefix(s32 recordAddress, void *output) {
     func_003014F0(output, D_003BB818, recordAddress + 0x21, recordAddress + 0x1c);
 }
 
-void func_001FC7A8(s32 recordAddress, void *output) {
+void btlFormatResourceNameWithoutPrefix(s32 recordAddress, void *output) {
     func_003014F0(output, D_003BB820, recordAddress + 0x21);
 }
 

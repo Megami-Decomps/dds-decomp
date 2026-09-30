@@ -44,9 +44,9 @@ extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void func_0026B680(s32);
 extern void func_0026C918(s32, void *);
-extern void func_0026C948();
+extern void dspSetActive();
 
-s32 func_0026B6A8(s32 context) {
+s32 dspStartFlagEvent(s32 context) {
     s32 kind = *(s32 *)(context + 0x84);
     s32 i;
     PartySlotHeader *slot;
@@ -54,19 +54,19 @@ s32 func_0026B6A8(s32 context) {
     if (kind < 2) {
         if (kind >= 0) {
             if (mdlFlagTest(0x1B1) != 0 && mdlFlagTest(0x916) == 0) {
-                func_0026C948(1);
-                func_0026C5B8(5);
+                dspSetActive(1);
+                dspStartEntry(5);
                 mdlFlagSet(0x916);
                 return 1;
             }
             for (i = 0; i < sizeof(D_003CE6E8) / sizeof(D_003CE6E8[0]); i++) {
                 if (mdlFlagTest(D_003CE6E8[i].needFlag) != 0 && mdlFlagTest(D_003CE6E8[i].doneFlag) == 0) {
                     func_0026B680(context);
-                    func_0026C948(1);
+                    dspSetActive(1);
                     func_0026C918(0, (void *)(D_00435E5C + D_003CE6E8[i].areaIndex * 0x19));
                     func_0026C918(1, (void *)(D_00435E50 + D_003CE6E8[i].nameIndex * 0x13));
                     func_0026C918(2, (void *)(D_00435E4C + D_003CE6E8[i].dialogIndex * 0x11));
-                    func_0026C5B8(3);
+                    dspStartEntry(3);
                     mdlFlagSet(D_003CE6E8[i].doneFlag);
                     return 1;
                 }
@@ -76,9 +76,9 @@ s32 func_0026B6A8(s32 context) {
                 if ((slot->flags & 1) != 0 && mdlFlagTest(D_003CE728[slot->id].needFlag) != 0
                     && mdlFlagTest(D_003CE728[slot->id].doneFlag) == 0) {
                     func_0026B680(context);
-                    func_0026C948(1);
+                    dspSetActive(1);
                     func_0026C918(0, (void *)(D_00435E48 + slot->id * 0x11));
-                    func_0026C5B8(4);
+                    dspStartEntry(4);
                     mdlFlagSet(D_003CE728[slot->id].doneFlag);
                     return 1;
                 }
@@ -101,7 +101,7 @@ u32 func_0026B930(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026B938);
+INCLUDE_ASM(const s32, "game/code_0026B6A8", dspUpdateFlagEvent);
 
 void func_0026B9D0(s32 request) {
     s32 state = func_00101958();
@@ -180,7 +180,7 @@ s32 func_0026BC28(void) {
     s32 *state = (s32 *)func_00101958();
 
     mnuReleaseWorkResources(state);
-    func_00267768(state);
+    mnuTerminalBuildMenus(state);
     return 1;
 }
 

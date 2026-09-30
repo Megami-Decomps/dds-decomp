@@ -20,7 +20,7 @@ extern s32 kwlnTaskFindByPriority(u32);
 
 extern s64 evtFindTaskById(void);
 
-s32 func_002BDD60(u32 sprite);
+s32 effDestroyResourceSlotSet(u32 sprite);
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
 
@@ -43,7 +43,7 @@ extern f32 D_003D80E0[];
 extern f32 D_003D80D0[];
 extern s32 D_003BC380;
 extern s32 func_00241A50(s32, s32);
-extern u8 *func_002BD258(s32 kind);
+extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
 extern s32 D_0036AA60[];
 extern s32 effLoadIndexedResource(const char *, s32, s32);
@@ -337,7 +337,7 @@ typedef struct CampWorld {
     FxNode *entries;  /* 0x2034 */
 } CampWorld;
 
-s32 func_00243390(CampWorld *scene) {
+s32 campAnyPackedFlagSet(CampWorld *scene) {
     FxNode *node;
     FxChild *child;
     s32 low;
@@ -436,7 +436,7 @@ typedef struct CampCue {
     struct CampCue *link; /* 0x34 */
 } CampCue;
 
-void func_00243558(CampScene *scene, CampCue *cue) {
+void campResolvePendingValue(CampScene *scene, CampCue *cue) {
     CampCue *next;
     s32 kind;
     u16 id;
@@ -521,7 +521,7 @@ void mnuCampLinkFontGlyph(CampScene *scene) {
 extern void func_002D0B50(s32 *);
 
 /* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
-void func_00243AD8(void) {
+void mnuCampCheckClockDivisor(void) {
     s32 info[8];
     s32 quotient;
 
@@ -686,7 +686,7 @@ void func_00244258(ShopScene *scene) {
     s32 *params;
     s32 defaultValue = 15;
     scene->batchState = 0;
-    object = (ShopBatch *)func_002BD258(6);
+    object = (ShopBatch *)effCreateStatusBatch(6);
     graphics = object->graphics;
     scene->batches[0] = (u8 *)object;
     params = graphics->params;
@@ -695,7 +695,7 @@ void func_00244258(ShopScene *scene) {
     params[2] = 0;
     params[3] = 0;
     params[4] = 0;
-    object = (ShopBatch *)func_002BD258(1);
+    object = (ShopBatch *)effCreateStatusBatch(1);
     graphics = object->graphics;
     scene->batches[1] = (u8 *)object;
     params = graphics->params;
@@ -721,7 +721,7 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
 }
 
 s64 func_00244360(ShopScene *scene) {
-    return func_002BDD60(scene->spriteResource);
+    return effDestroyResourceSlotSet(scene->spriteResource);
 }
 
 extern s32 D_003BAA00;
@@ -763,7 +763,7 @@ typedef struct CampFlagRow {
 
 extern CampFlagRow D_00368C50[];
 
-s32 func_00244508(s32 row) {
+s32 campFlagRowValue(s32 row) {
     s32 i;
 
     for (i = 7; i >= 0; i--) {
@@ -863,7 +863,7 @@ s32 func_00244898(void) {
     return count;
 }
 
-ShopScene *func_002448D0(void) {
+ShopScene *mnuShopCreateScene(void) {
     s32 handle;
     ShopScene *obj;
 
@@ -884,7 +884,7 @@ ShopScene *func_002448D0(void) {
 
 extern s32 func_00101A70();
 extern void func_00285600();
-extern void func_0024DBC8();
+extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle();
 extern void func_002D0918();
 
@@ -896,7 +896,7 @@ void mnuShopDestroyScene(s32 arg) {
         func_00244360(scene);
         mnuShopReleaseSceneObjects(scene);
         func_00285600((u8 *)scene + 8, arg);
-        func_0024DBC8();
+        dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
         func_002D0918(scene->resourceHandle);
         D_003BC39C = 2;
@@ -911,7 +911,7 @@ extern s64 mnuCampRunPanel2(u64 request);
  * Optionally seed the initial selection from the caller. */
 
 s32 func_002449F0(s32 *initialSelection) {
-    ShopScene *ctx = func_002448D0();
+    ShopScene *ctx = mnuShopCreateScene();
     s32 result;
 
     if (initialSelection != 0) {

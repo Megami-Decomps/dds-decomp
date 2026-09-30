@@ -67,7 +67,7 @@ extern char D_0042A428[];
 extern s32 sdfCreateResetPacketList(void);
 extern void sdfCreatePacketA(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 func_002A88A0();
+extern s32 mnuMovieViewer();
 
 void func_002A7AF0();
 
@@ -176,7 +176,7 @@ INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF0);
 
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF8);
 
-void func_002A8610(void) {
+void mnuDrawMovieList(void) {
     u32 *node;
     s32 packets;
     s32 selected;
@@ -223,11 +223,11 @@ void func_002A87F0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A8048", func_002A88A0);
+INCLUDE_ASM(const s32, "game/code_002A8048", mnuMovieViewer);
 
 void mnuCreateMovieViewerTask(void) {
     func_002A8268();
-    D_00457E48.task = kwlnTaskCreate(D_0042A418, 0x2b02, 1, 0, func_002A88A0, 0, 0);
+    D_00457E48.task = kwlnTaskCreate(D_0042A418, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
 }
 
 void mnuDestroyMovieViewerTask(void) {
@@ -261,7 +261,7 @@ void func_002A8BC8(void) {
     }
 }
 
-s32 func_002A8C80(void) {
+s32 mnuUpdateIpuRegisterViewer(void) {
     s32 packets;
     s32 n;
     s32 i;

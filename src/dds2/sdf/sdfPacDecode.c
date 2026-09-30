@@ -112,7 +112,7 @@ void func_003476D0(PacState *state);
 
 void sdfPacAdvanceAllocationEntry(PacState *state);
 
-void func_003477A8(PacState *state);
+void sdfPacResetOutputToAllocationEntry(PacState *state);
 
 s32 func_003293C8(s32 size);
 
@@ -429,7 +429,7 @@ void sdfPacStartNextAllocationEntry(PacState *state) {
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003477A8);
+INCLUDE_ASM(const s32, "sdf/sdfPacDecode", sdfPacResetOutputToAllocationEntry);
 
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
@@ -442,7 +442,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
             func_00328E48(allocation);
             func_00346C40(state);
         } else {
-            func_003477A8(state);
+            sdfPacResetOutputToAllocationEntry(state);
         }
     }
 }
@@ -461,5 +461,5 @@ void sdfPacSkipAllocationEntryBytes(PacState *state) {
             return;
         }
     }
-    func_003477A8(state);
+    sdfPacResetOutputToAllocationEntry(state);
 }

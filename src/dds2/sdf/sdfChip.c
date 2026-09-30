@@ -30,7 +30,7 @@ extern u8 D_00439120;
 
 extern u64 func_00328D68(void);
 
-void func_0032CAE0(void *arg0, s32 arg1);
+void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 s32 func_0036DE70(void);
 s32 EIntr(void);
@@ -91,7 +91,7 @@ void func_00328E48(void *arg0) {
 }
 
 void func_00328F68(s32 value) {
-    func_0032CAE0(&D_00439120, value);
+    sdfPendingQueuePush(&D_00439120, value);
 }
 
 s32 sdfChipIsInRange(s32 address) {

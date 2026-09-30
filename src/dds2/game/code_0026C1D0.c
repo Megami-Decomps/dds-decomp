@@ -172,10 +172,10 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
     func_003297C8(record->handle);
 }
 
-extern s32 func_001A38D8(void);
+extern s32 itfMesCreateWindow(void);
 s32 func_0026C538(void) {
     if (D_00437880 < 0) {
-        D_00437880 = func_001A38D8();
+        D_00437880 = itfMesCreateWindow();
         func_001A4988(D_00437880, 2, 0);
         return 1;
     }
@@ -193,7 +193,7 @@ s32 func_0026C580(s32 value) {
 extern void itfMesSetWindowHighFlags(s32, u32);
 extern void itfMesStartEntry(s32, s32, s32);
 extern void itfPanelSetPairFirst(s32, s32);
-s32 func_0026C5B8(s32 entry) {
+s32 dspStartEntry(s32 entry) {
     if (D_00437880 < 0) {
         return 0;
     }
@@ -244,7 +244,7 @@ u32 func_0026C6A8(s32 notify) {
             func_001A34D0(D_00437880);
         }
         itfMesCleanupWindow(D_00437880, 0);
-        func_0026C948(1);
+        dspSetActive(1);
         D_00437884 = 0;
         result = 1;
     }
@@ -256,7 +256,7 @@ void func_0026C710(void) {
 }
 
 extern void func_001A39D0(s32);
-s32 func_0026C728(void) {
+s32 dspCloseChannel(void) {
     if (D_00437880 < 0) {
         return 0;
     }
@@ -308,7 +308,7 @@ s8 func_0026C940(void) {
 
 extern void itfMesClearWindowHighFlags(s32, u32);
 extern void itfPanelSetStatus(s32, s32);
-void func_0026C948(s32 enabled) {
+void dspSetActive(s32 enabled) {
     if (enabled != 0) {
         itfMesClearWindowHighFlags(D_00437880, 0x800000);
         itfMesClearWindowHighFlags(D_00437880, 0x100000);
@@ -390,7 +390,7 @@ s32 func_0026CB48(u32 resource) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CB98);
 
-extern s32 func_002B8FC8(s32);
+extern s32 mnuGetListViewportHeight(s32);
 
 extern void func_00308808(s32, s32, s32, s32, s32, u32, s32);
 
@@ -398,7 +398,7 @@ extern void func_0026CB98(s32, s32, s32, s32, s32);
 
 typedef struct {
     u8 pad0[0x18];
-    s32 heightSource; /* 0x18: passed to func_002B8FC8 for the panel height */
+    s32 heightSource; /* 0x18: passed to mnuGetListViewportHeight for the panel height */
 } EvtPanelRecord;
 
 typedef struct {
@@ -408,7 +408,7 @@ typedef struct {
 } EvtLoadedRecord;
 
 void func_0026CC88(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
-    s32 height = func_002B8FC8(record->heightSource) + 0x80;
+    s32 height = mnuGetListViewportHeight(record->heightSource) + 0x80;
 
     func_00308808(x, y, 0, width, height, 0x30303040, 0x53);
     func_0026CB98(x + width - 0xA0, y, y + height, 8, (s32)record);

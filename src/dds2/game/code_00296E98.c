@@ -24,7 +24,7 @@ extern void func_003421E8(s32);
 
 extern void mnuInitPartyPanelSlots(s32);
 
-extern void func_002A9640(s32, s32);
+extern void mnuAppendCampSpriteRequests(s32, s32);
 
 extern void effRequestResourceByMode(char *, char *, s32, s32);
 
@@ -219,7 +219,7 @@ void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) 
     func_00299018(partyWork, rewardState);
 }
 
-extern void func_002B2818(s32);
+extern void mnuReleaseStaffMenuResources(s32);
 extern void func_002A95B0(s32, s32, s32, s32);
 extern s32 func_002C0B80(s32, s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
@@ -260,7 +260,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     s32 *group = &work->panelGroup;
     s32 panel;
 
-    func_002B2818((s32)group);
+    mnuReleaseStaffMenuResources((s32)group);
     func_002A95B0((s32)work + 0x690, (s32)group, 0, (s32)work + 0x584);
     panel = func_002C0B80(work->spriteArg0, work->spriteArg1, 0);
     work->panelHandle = panel;
@@ -280,7 +280,7 @@ s32 func_00299320(s32 work) {
     }
     func_003421E8(0x50000);
     mnuInitPartyPanelSlots(work + 0x584);
-    func_002A9640(*(s32 *)(work + 0x58), work + 0x51C);
+    mnuAppendCampSpriteRequests(*(s32 *)(work + 0x58), work + 0x51C);
     effRequestResourceByMode(D_00428358, D_00428368, 0, work + 0x94);
     mnuRequestEffectResources(0xAD40 + work);
     *(s32 *)(work + 0x580) = 1;
@@ -366,12 +366,12 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 
 extern s32 func_00101958(void);
-extern void func_003054E8(s32);
+extern void effDestroyResourceSlotSet(s32);
 extern void func_002C3FC8(s32, s32);
 extern s32 func_002993D0(s32);
 extern void func_00299280(s32);
 extern void func_00303D58(s32);
-extern void func_0026C728(void);
+extern void dspCloseChannel(void);
 extern void func_003297C8(s32);
 
 /* Release the panel and task resources, then mark the result task finished. */
@@ -379,14 +379,14 @@ void brsStaffTaskDestroy(s32 taskArg) {
     s32 context = func_00101958();
 
     if (((BrsSkillPackageWork *)context)->teardownHandle != 0) {
-        func_003054E8(((BrsSkillPackageWork *)context)->teardownHandle);
+        effDestroyResourceSlotSet(((BrsSkillPackageWork *)context)->teardownHandle);
     }
     func_002C3FC8(context + 8, taskArg);
     if (func_002993D0(context) == 0) {
         func_00299280(context);
     }
     func_00303D58(((BrsSkillPackageWork *)context)->fadeTarget);
-    func_0026C728();
+    dspCloseChannel();
     func_003297C8(*(s32 *)context);
     D_00437988 = 2;
 }

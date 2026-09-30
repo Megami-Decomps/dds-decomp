@@ -55,7 +55,7 @@ extern s32 func_00248BA0(s32, s32);
 
 extern s32 func_002CFEB8(s32);
 
-extern s32 func_0027FA70(u16, u16);
+extern s32 mnuPercentOrHundred(u16, u16);
 
 extern void func_00284258(s32, s32, s32, s32, s32, s32);
 
@@ -71,7 +71,7 @@ extern s32 mnuWalkNodeList(s32, s32);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern u32 func_002C1630(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 
 extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
 
@@ -107,7 +107,7 @@ typedef struct EffectObject {
     EffectInner *inner; /* 0x08 */
 } EffectObject;
 
-extern EffectObject *func_002BD258(s32);
+extern EffectObject *effCreateStatusBatch(s32);
 
 extern s32 effDestroyPackedBatch(s32);
 
@@ -117,8 +117,8 @@ void mnuReleaseVisualResources(MenuVisualWork *work) {
 }
 
 void func_002485B0(MenuVisualWork *work) {
-    func_002BD870(work->firstResource);
-    func_002BD870(work->secondResource);
+    effReleaseTextureHandlesAndResetSlots(work->firstResource);
+    effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
@@ -142,12 +142,12 @@ void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     }
 }
 
-void func_00248750(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s32 priority) {
+void mnuCreateNumberSprite(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s32 priority) {
     char buf[16];
     s32 handle;
 
     func_003014F0(buf, D_003BC3E8, a4);
-    handle = func_001978E8(a0, a1, a2, func_002C1630(color, color & ~0xFF, a3), (s32)buf, 0);
+    handle = func_001978E8(a0, a1, a2, uiBlendColors(color, color & ~0xFF, a3), (s32)buf, 0);
     func_001958A0(handle, 1, priority);
     func_00194920(handle);
 }
@@ -160,17 +160,17 @@ extern s32 func_00248BA0(s32, s32);
 
 extern s32 func_002CFEB8(s32);
 
-extern s32 func_0027FA70(u16, u16);
+extern s32 mnuPercentOrHundred(u16, u16);
 
 extern void func_00284258(s32, s32, s32, s32, s32, s32);
 
 s32 func_00248BA0(s32 resource, s32 context) {
     s32 panel = func_002CFEB8(0xa8);
     func_00284258(panel, 0, 0, 0x1e,
-        func_0027FA70(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
+        mnuPercentOrHundred(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
         *(s32 *)(context + 0xe0));
     func_00284258(panel + 0x54, 1, 0, 0x1e,
-        func_0027FA70(*(u16 *)(resource + 0xa), *(u16 *)(resource + 0xc)),
+        mnuPercentOrHundred(*(u16 *)(resource + 0xa), *(u16 *)(resource + 0xc)),
         *(s32 *)(context + 0xe0));
     return panel;
 }
@@ -219,7 +219,7 @@ extern s32 func_00248658(s32);
 
 extern s32 func_00248810(s32);
 
-void func_00248D40(MenuProgressWork *host) {
+void mnuBuildTerminalNodeList(MenuProgressWork *host) {
     MenuProgressList *list;
     s32 i;
 
@@ -249,7 +249,7 @@ void func_00248D40(MenuProgressWork *host) {
 }
 
 void func_00248E18(s32 arg0) {
-    func_0027B368((u32)((MenuProgressWork *)arg0)->list);
+    mnuDestroyListState((u32)((MenuProgressWork *)arg0)->list);
 }
 
 void func_00248E30(s32 arg0) {
@@ -331,9 +331,9 @@ void func_00249420(s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249498);
+INCLUDE_ASM(const s32, "game/code_00248580", mnuTerminalBuildMenus);
 
-extern void func_0027B368(u32);
+extern void mnuDestroyListState(u32);
 
 extern void mnuReleaseStaffImageHandles(u8 *);
 
@@ -341,12 +341,12 @@ void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
     for (i = 0; i < 1; i++) {
-        func_0027B368(*(u32 *)(work + 0x70 + i * 4));
+        mnuDestroyListState(*(u32 *)(work + 0x70 + i * 4));
     }
     mnuDestroyThresholdNodePanels((s32)work);
     mnuReleaseStaffImageHandles(work + 0xE0);
     func_00248E18((s32)work);
-    func_0027B368((u32)((MenuProgressWork *)work)->owner);
+    mnuDestroyListState((u32)((MenuProgressWork *)work)->owner);
 }
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -393,7 +393,7 @@ extern s32 func_002BC5C0(s32);
 
 extern void mnuInitPartyPanelSlots(s32);
 
-extern void func_00271500(s32, s32);
+extern void mnuAppendCampSpriteRequests(s32, s32);
 
 u8 *mnuCreateWorkBlock(void) {
     s32 handle = func_002D03F8(0x82C);
@@ -403,7 +403,7 @@ u8 *mnuCreateWorkBlock(void) {
     *(s32 *)work = handle;
     ((MenuProgressWork *)work)->groupResource = func_002BC5C0(1);
     mnuInitPartyPanelSlots((s32)(work + 0x84));
-    func_00271500(((MenuProgressWork *)work)->groupResource, (s32)(work + 8));
+    mnuAppendCampSpriteRequests(((MenuProgressWork *)work)->groupResource, (s32)(work + 8));
     ((MenuProgressWork *)work)->initState = 1;
     return work;
 }
@@ -418,7 +418,7 @@ void func_00249770(u32 *arg0) {
 
 extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
 
-extern void func_002762D8(s32 *);
+extern void mnuReleaseStaffMenuResources(s32 *);
 
 extern void func_00271480(s32, s32 *, s32, s32);
 
@@ -436,7 +436,7 @@ s32 mnuTickInitState(u8 *work) {
     if (mnuStaffSlotsAllFilled(((MenuProgressWork *)work)->groupResource, group) == 0) {
         return 1;
     }
-    func_002762D8(group);
+    mnuReleaseStaffMenuResources(group);
     func_00271480((s32)(work + 0x190), group, 0, (s32)(work + 0x84));
     ((MenuProgressWork *)work)->initState = 2;
     return 0;
@@ -446,7 +446,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 
 void func_00249930(s32 arg0) {
     mnuClearEntries(arg0 + 400);
-    func_0027FA20(arg0 + 400);
+    mnuReleasePartyIconBundles(arg0 + 400);
     mnuDestroyPanelGroup(((MenuVisualWork *)arg0)->panelGroup);
     func_00283820(((MenuVisualWork *)arg0)->displayResource);
     func_00285160(((MenuVisualWork *)arg0)->effectResource);
@@ -479,34 +479,34 @@ void func_00249C08(s8 enabled) {
     }
 }
 
-void func_00249C78(MenuSlotState *state) {
+void mnuTerminalCreateEffects(MenuSlotState *state) {
     EffectObject *obj;
 
-    obj = func_002BD258(1);
+    obj = effCreateStatusBatch(1);
     state->effect[0] = (s32)obj;
     obj->inner->pair->a = 0x14;
     obj->inner->pair->b = 1;
-    obj = func_002BD258(1);
+    obj = effCreateStatusBatch(1);
     state->effect[1] = (s32)obj;
     obj->inner->pair->a = 0xF;
     obj->inner->pair->b = 0;
-    obj = func_002BD258(8);
+    obj = effCreateStatusBatch(8);
     state->effect[2] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 1;
-    obj = func_002BD258(8);
+    obj = effCreateStatusBatch(8);
     state->effect[3] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 0;
-    obj = func_002BD258(1);
+    obj = effCreateStatusBatch(1);
     state->effect[4] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 1;
-    obj = func_002BD258(1);
+    obj = effCreateStatusBatch(1);
     state->effect[5] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 0;
-    obj = func_002BD258(1);
+    obj = effCreateStatusBatch(1);
     state->effect[6] = (s32)obj;
     obj->inner->pair->a = 0x78;
     obj->inner->pair->b = 0;
@@ -520,7 +520,7 @@ extern void func_00285490(void *);
 
 extern void mnuLoadResourceHandles(s32);
 
-extern void func_00249498(s32);
+extern void mnuTerminalBuildMenus(s32);
 
 extern void evtLoadResourcePair(const char *, void *);
 
@@ -543,12 +543,12 @@ u8 *func_00249E20(s32 reduced, s32 slot) {
     *(s32 *)obj = handle;
     func_00285490(obj + 8);
     mnuLoadResourceHandles(obj);
-    func_00249C78((s32)obj);
+    mnuTerminalCreateEffects((s32)obj);
     *(s32 *)(obj + 0x7C) = reduced;
     *(s32 *)(obj + 0xDC) = reduced;
     *(s32 *)(obj + 0x80) = slot;
     *(s32 *)(obj + 0xD8) = slot;
-    func_00249498(obj);
+    mnuTerminalBuildMenus(obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj + 0x5C);
     func_0024D9D8(*(s32 *)(obj + 0x60));
     for (i = 0; i < 2; i++) {

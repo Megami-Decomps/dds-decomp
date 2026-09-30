@@ -488,7 +488,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D360);
 
-s32 func_0023D5B8(EvtUnit *unit) {
+s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
     func_00117728(unit->pathId);

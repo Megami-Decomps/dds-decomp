@@ -21,7 +21,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode);
 
 void fldPlayCurrentBgmSound(void);
 
-void func_0012EBF8(u32 kind, s32 eventId);
+void fldRequestEncounterWithFade(u32 kind, s32 eventId);
 
 extern u32 D_004371E8;
 
@@ -332,7 +332,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
     s32 args[2];
 
     fldPlayCurrentBgmSound();
-    func_0012EBF8(2, eventId);
+    fldRequestEncounterWithFade(2, eventId);
     D_004371E8 = requestMode;
     args[0] = 0;
     args[1] = eventId;
@@ -354,7 +354,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
     s32 args[2];
 
     fldStopCurrentBgm();
-    func_0012EBF8(2, eventId);
+    fldRequestEncounterWithFade(2, eventId);
     D_004371E8 = 0;
     args[0] = 0;
     args[1] = eventId;

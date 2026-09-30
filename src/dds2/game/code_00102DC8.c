@@ -200,12 +200,12 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_001034E8);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001036B0);
 
-void func_00103790(void *list, s32 col, s32 row, s32 cols, s32 rows) {
+void kwlnDrawSpriteCell(void *list, s32 col, s32 row, s32 cols, s32 rows) {
     s32 cw = 0xC0, ch = 0x60;
     sdfAppendPacket(list, func_0011F250(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF, cols * cw + ch, rows * ch + 0x30, 0x60000000, 0x40806020));
 }
 
-void func_001037F8(void *list, s32 col, s32 row, s32 cols, s32 rows, s32 z) {
+void kwlnDrawSpriteCellZ(void *list, s32 col, s32 row, s32 cols, s32 rows, s32 z) {
     s32 cw = 0xC0, ch = 0x60;
     sdfAppendPacket(list, func_0011F250(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, z, cols * cw + ch, rows * ch + 0x30, 0x60000000, 0x40806020));
 }
@@ -401,7 +401,7 @@ s32 kwlnEnsureDefaultResource(void) {
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105070);
 
 extern void sdfGraphSetDisplayMode(s32);
-extern void func_0033A5C8(void *);
+extern void sdfCameraBuildProjection(void *);
 extern void func_00105070(s32);
 extern void func_001057B0(void);
 extern u8 D_0037F5E0[];
@@ -411,8 +411,8 @@ extern void evtEnsureDrawVectorState(void);
 
 void func_00105240(void) {
     sdfGraphSetDisplayMode(1);
-    func_0033A5C8(D_0037F5E0);
-    func_0033A5C8(D_0037F980);
+    sdfCameraBuildProjection(D_0037F5E0);
+    sdfCameraBuildProjection(D_0037F980);
     func_00105070(0);
     func_00105070(1);
     func_001057B0();

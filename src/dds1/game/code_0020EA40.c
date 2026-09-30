@@ -12,7 +12,7 @@ extern s32 btlCountTasksByKind(u32);
 
 extern s32 btlGetSlotRateKind(u8 *, s32);
 
-extern void func_001D5DF8(u8 *, s32, s32, f32);
+extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 
 extern u32 func_001A3360(u64, u64, u64);
 
@@ -200,17 +200,17 @@ extern s8 D_003BB888[];
 
 extern s8 D_003BB890[];
 
-extern void func_001DC760(void);
+extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
-extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_0020DA40(u8 *);
 
-extern void func_001DC760(void);
+extern void btlFlagAllUnitDefeatCandidatesTask(void);
 extern s32 kwlnTaskIsRegistered(s32);
 extern void effReleaseSharedReference(void *);
 extern void func_00105618(void);
@@ -222,26 +222,26 @@ void func_0020DB90(u8 *actor);
 s32 btlDispatchActionAnimation(u8 *unit) {
     u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
     if (flags & 0x4000) {
-        func_001DC760();
+        btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
             func_0020DA40(unit);
         } else {
-            func_001DC3A0(unit, -203.0f, -531.1f, -1259.0f,
+            btlSetEffectCameraKeys(unit, -203.0f, -531.1f, -1259.0f,
                            0.124f, -0.07f, -0.021f, 0.981f,
                            -203.0f, -46.1f, -1259.0f, -0.144f,
                            -0.066f, -0.003f, 0.978f, 45.0f, 30.0f);
         }
         ((BtlUnit *)unit)->flags = 0;
     } else if (flags & 0x8000) {
-        func_001DC760();
+        btlFlagAllUnitDefeatCandidatesTask();
         func_0020DC38(unit, unit, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
-            func_001DC760();
+            btlFlagAllUnitDefeatCandidatesTask();
             func_0020DB90(unit);
             ((BtlUnit *)unit)->flags = 0;
         } else {
-            func_001DC760();
+            btlFlagAllUnitDefeatCandidatesTask();
             func_0020DA40(unit);
         }
     } else {
@@ -273,7 +273,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020EC20);
 
 extern s32 D_003BAA34;
 
-s32 func_0020ECF8(u8 *unit) {
+s32 btlIsActionIdListed(u8 *unit) {
     BtlState *battle;
     u16 *entry;
     u32 id;
@@ -594,7 +594,7 @@ u8 func_00210520(void) {
     return taskCount == 0;
 }
 
-s32 func_00210540(void) {
+s32 btlCommandStartSlotMotion(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
     s32 index = scrReadIntParameter(2);
@@ -612,7 +612,7 @@ s32 func_00210540(void) {
         return 1;
     }
     if (index >= 0) {
-        func_001D5DF8(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
+        btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
     }
     return 1;
 }
@@ -732,7 +732,7 @@ s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     return 0;
 }
 
-s32 func_00210928(void *list, s32 code, u32 mask) {
+s32 btlIndexListMatchesEntryCodes(void *list, s32 code, u32 mask) {
     u32 matched = 0;
     u32 i;
     u32 count = btlGetIndexListCount(list);
@@ -758,7 +758,7 @@ INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A6848);
 
-s32 func_00210A18(void *list, s32 command) {
+s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
     s32 codes[5] = {0, 1, 2, 3, 4};
     s32 count = btlGetIndexListCount(list);
     s32 i;
@@ -1025,7 +1025,7 @@ void func_002115E8(void) {
     btlReleaseAllModelEntries();
 }
 
-void func_00211600(s32 kind, s32 id) {
+void btlLoadModelPack(s32 kind, s32 id) {
     char path[128];
     BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
 
@@ -1069,7 +1069,7 @@ s32 btlGetEntryState(s32 kind, s32 value) {
     return 0;
 }
 
-s32 func_002118A8(s32 kind, s32 id) {
+s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     s32 entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         return func_002114E8((u8 *)entry);

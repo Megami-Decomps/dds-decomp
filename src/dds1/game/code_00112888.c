@@ -20,7 +20,7 @@ extern u32 func_001117A8(u32);
 extern s32 func_002CFEB8(u32);
 
 /* Each object kind keeps its handle in a different structure. */
-s32 func_00112888(object)
+s32 dds3GetObjectOwnedHandle(object)
     WorldInnerOwner *object;
 {
     s32 handle;
@@ -43,7 +43,7 @@ s32 func_00112888(object)
 void func_00112930(u32 unused, u32 value) {
     WorldInnerState *inner;
 
-    inner = (WorldInnerState *)func_00112888();
+    inner = (WorldInnerState *)dds3GetObjectOwnedHandle();
     inner->value44 = value;
 }
 

@@ -395,17 +395,17 @@ void evtSetupDispatchSyncG(s32 callback) {
     func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
-extern void func_0024DA58();
+extern void dspStartEntry();
 
 s32 evtPlayDispatchModeCue(void) {
     EvtDispatchState *state = (EvtDispatchState *)func_00101A70();
-    func_0024DDC0(1);
+    dspSetActive(1);
     switch (state->mode) {
     case 1:
-        func_0024DA58(5);
+        dspStartEntry(5);
         break;
     case 2:
-        func_0024DA58(6);
+        dspStartEntry(6);
         break;
     }
     return 1;
@@ -629,16 +629,16 @@ void mnuLoadResourceHandles(u32 *work) {
     work[0x1B] = effCreateResourceSlotSet(work[0x19], 7, 1);
 }
 
-extern void func_002BDD60(u32);
+extern void effDestroyResourceSlotSet(u32);
 extern void mnuReleaseEffectResource(u32);
 
 void mnuReleaseResourceHandles(u32 *work) {
     s32 i;
 
     for (i = 0; i < 2; i++) {
-        func_002BDD60(work[0x19 + i]);
+        effDestroyResourceSlotSet(work[0x19 + i]);
     }
-    func_002BDD60(work[0x1B]);
+    effDestroyResourceSlotSet(work[0x1B]);
     if (work[0x56] != 0) {
         mnuReleaseEffectResource(work[0x56]);
         work[0x56] = 0;

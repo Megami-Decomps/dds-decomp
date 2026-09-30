@@ -6,9 +6,9 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 func_00101A70();
 
-extern void func_0024DDC0(s32);
+extern void dspSetActive(s32);
 
-extern void func_0024DA58(s32);
+extern void dspStartEntry(s32);
 
 extern s32 ptyGetCurrentProfileRecord(void *);
 
@@ -83,8 +83,8 @@ INCLUDE_ASM(const s32, "game/code_00263148", prfCapPresentMessages);
 
 s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
     if (scene->overlayFlags & 1) {
-        func_0024DDC0(1);
-        func_0024DA58(1);
+        dspSetActive(1);
+        dspStartEntry(1);
         scene->overlayFlags &= ~1;
         return 1;
     }

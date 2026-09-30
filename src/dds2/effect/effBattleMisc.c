@@ -21,7 +21,7 @@ extern u32 D_003AB050[];
 extern void (*D_003AF208[])();
 
 /* Look up the position provider selected by param->unk00; it leaves the vector in vf10. */
-void func_001696D0(void *owner, EffBattleMiscParam *param, u128 *out) {
+void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *out) {
     D_003AF208[param->unk00](owner, param);
     VU0_STORE_VF(vf10, out);
 }
@@ -38,14 +38,14 @@ void func_00169740(u32 unused, void *arg) {
     func_001697D0(func_00169450(), arg);
 }
 
-extern void func_001E31F0();
+extern void btlSetActorEffectParameterOrMuzzlePosition();
 
 void func_00169770(u32 unused, EffBattleMiscParam *param) {
-    func_001E31F0(func_00169448(), param->value);
+    btlSetActorEffectParameterOrMuzzlePosition(func_00169448(), param->value);
 }
 
 void func_001697A0(u32 unused, EffBattleMiscParam *param) {
-    func_001E31F0(func_00169450(), param->value);
+    btlSetActorEffectParameterOrMuzzlePosition(func_00169450(), param->value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001697D0);
@@ -150,14 +150,14 @@ void func_00169CB8(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
 }
 
 void effBattleMiscApplyParamByte(u32 owner, EffBattleMiscParam *param) {
-    func_001E31F0(owner, param->value);
+    btlSetActorEffectParameterOrMuzzlePosition(owner, param->value);
 }
 
 extern f32 func_00208298(u32 mask, s32 a, s32 b);
 extern void btlUnitGetEffectPosVU(void *unit);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 
-f32 func_00169EA0(EffBattleMiscUnit *unit, EffBattleMiscParam *param) {
+f32 effBattleMiscQueryScalar(EffBattleMiscUnit *unit, EffBattleMiscParam *param) {
     EffBattleMiscUnit *other;
     f32 result = 0;
 
@@ -189,10 +189,10 @@ f32 func_00169EA0(EffBattleMiscUnit *unit, EffBattleMiscParam *param) {
 }
 
 /* Unit vector from the queried position to the unit's effect or muzzle position. */
-void func_00169F68(EffBattleMiscUnit *unit, EffBattleMiscParam *param, f32 *out) {
+void effBattleMiscDirectionTo(EffBattleMiscUnit *unit, EffBattleMiscParam *param, f32 *out) {
     f32 origin[4];
 
-    func_001696D0(unit, param, (u128 *)origin);
+    effBattleMiscQueryPosition(unit, param, (u128 *)origin);
     if (unit->flags114 & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
@@ -220,7 +220,7 @@ extern void func_00336818(f32 value);
 extern void func_00336B00(void);
 
 /* Build a 4x4 basis matrix into `out`: look-at for kinds 4 / sub 9, else a table-driven rotation. */
-void func_00169FF0(EffBattleMiscBasisParam *param, u128 *out) {
+void effBattleMiscBuildBasis(EffBattleMiscBasisParam *param, u128 *out) {
     f32 angle = 0;
     f32 tilt = 0;
 

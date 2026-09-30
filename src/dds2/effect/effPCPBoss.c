@@ -61,7 +61,7 @@ typedef struct {
     u8 pad89[3];
 } EffBossHead; /* 0x8C */
 
-/* Parameter block as read by func_0018D6A8: two words follow the head. */
+/* Parameter block as read by effBossCreateWithGroups: two words follow the head. */
 typedef struct {
     EffBossHead head;
     u32 groupValue;   /* 0x8C */
@@ -146,7 +146,7 @@ extern void func_00177880(EffBossRecords *records);
 extern void func_003297C8(u32 handle);
 extern void func_001634A8(u32 system);
 
-void func_0018C190(EffBossWork *work, EffBossCell *cell) {
+void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     f32 blend = work->head.xBlend;
     f32 scale = work->head.scale;
     f32 t;
@@ -162,7 +162,7 @@ void func_0018C190(EffBossWork *work, EffBossCell *cell) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C288);
 
-EffBossWork *func_0018C4E8(EffBossParams *src, void *param1) {
+EffBossWork *effBossCreate(EffBossParams *src, void *param1) {
     EffBossWork *work;
 
     work = func_00328D68(sizeof(EffBossWork));
@@ -181,12 +181,12 @@ void effPCPBossApplyTwoBlocks(void *data) {
 
     firstBlock = effParamTableGetBlock(data, 0);
     secondBlock = effParamTableGetBlock(data, 1);
-    func_0018C4E8(firstBlock, secondBlock);
+    effBossCreate(firstBlock, secondBlock);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C660);
 
-void func_0018C788(EffBossWork *work) {
+void effBossDestroy(EffBossWork *work) {
     u32 i;
 
     if (work->groupsHandle != 0) {
@@ -213,7 +213,7 @@ void func_0018D220(u8 *work, s32 value) {
     *(s32 *)(work + 0xA0) = value;
 }
 
-EffPCPBossWork *func_0018D228(void *vector, void *paramA, void *paramB) {
+EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
     EffPCPBossWork *work;
 
     work = func_00328D68(sizeof(EffPCPBossWork));
@@ -234,10 +234,10 @@ void effPCPBossApplyThreeBlocks(void *data) {
     firstBlock = effParamTableGetBlock(data, 0);
     secondBlock = effParamTableGetBlock(data, 1);
     thirdBlock = effParamTableGetBlock(data, 2);
-    func_0018D228(firstBlock, secondBlock, thirdBlock);
+    effBossBeamCreate(firstBlock, secondBlock, thirdBlock);
 }
 
-EffPCPBossWork *func_0018D330(EffPCPBossWork *src) {
+EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
     EffPCPBossWork *work;
 
     work = func_00328D68(sizeof(EffPCPBossWork));
@@ -256,7 +256,7 @@ void effPCPBossFree(EffPCPBossWork *work) {
 }
 
 /* Per-frame update: basis from the muzzle position (or identity) fed to both parameter works. */
-void func_0018D3E8(EffPCPBossWork *work) {
+void effBossBeamUpdate(EffPCPBossWork *work) {
     u128 matrix[4];
     void *direction;
 
@@ -454,11 +454,11 @@ void func_0018D698(void) {
 void func_0018D6A0(void) {
 }
 
-EffBossWork *func_0018D6A8(EffBossParams *src, void *param1) {
+EffBossWork *effBossCreateWithGroups(EffBossParams *src, void *param1) {
     EffBossWork *work;
     u32 i;
 
-    work = func_0018C4E8(src, param1);
+    work = effBossCreate(src, param1);
     for (i = 0; i < work->groupCount; i++) {
         work->groups[i].unk1C = src->groupFloat;
         work->groups[i].unk18 = src->groupValue;
@@ -473,10 +473,10 @@ void func_0018D710(void *data) {
 
     work0 = effParamTableGetBlock(data, 0);
     work1 = effParamTableGetBlock(data, 1);
-    func_0018D6A8(work0, work1);
+    effBossCreateWithGroups(work0, work1);
 }
 
-EffBossWork *func_0018D758(EffBossWork *src) {
+EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     EffBossWork *work;
     u32 i;
 
@@ -490,7 +490,7 @@ EffBossWork *func_0018D758(EffBossWork *src) {
 }
 
 void func_0018D7D0(void *work) {
-    func_0018C788(work);
+    effBossDestroy(work);
 }
 
 void func_0018D7E8(void *work) {

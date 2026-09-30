@@ -481,7 +481,7 @@ void func_0026A8A0(void) {
 }
 
 /* Release the title stream request and reset the playback state. */
-void func_0026A900(void) {
+void mnuResetTitleStream(void) {
     if (D_003D9140[8] != 0) {
         func_002D0A10(D_003D9140[8]);
         D_003D9140[9] = 0;
@@ -493,7 +493,7 @@ void func_0026A900(void) {
 
 void func_0026A950(void) {
     WaitSema(D_003BD8D0);
-    func_0026A900();
+    mnuResetTitleStream();
     SignalSema(D_003BD8D0);
 }
 

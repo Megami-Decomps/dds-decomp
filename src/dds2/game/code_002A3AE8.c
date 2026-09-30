@@ -48,7 +48,7 @@ INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuDrawSprite);
 
 extern s32 mnuCreateListState(s32, s32, s32);
 
-extern void func_002B81C8(s32);
+extern void mnuDestroyListState(s32);
 
 extern void mnuListAppendNode(s32, s32);
 
@@ -58,7 +58,7 @@ void func_002A3BE0(void) {
     s32 i;
     s32 node;
     if (((SpriteMenuState *)D_00437A40)->list != 0) {
-        func_002B81C8(((SpriteMenuState *)D_00437A40)->list);
+        mnuDestroyListState(((SpriteMenuState *)D_00437A40)->list);
     }
     node = mnuCreateListState(0, 3, 0);
     ((SpriteMenuState *)D_00437A40)->list = node;
@@ -69,7 +69,7 @@ void func_002A3BE0(void) {
 }
 
 void func_002A3C58(void) {
-    func_002B81C8(((SpriteMenuState *)D_00437A40)->list);
+    mnuDestroyListState(((SpriteMenuState *)D_00437A40)->list);
 }
 
 u32 func_002A3C78(void) {
@@ -108,12 +108,12 @@ INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3D70);
 void func_002A3DE8(void) {
     u32 *state = (u32 *)D_00437A40;
     if (state[1] != 0) {
-        func_003054E8(state[1]);
+        effDestroyResourceSlotSet(state[1]);
         state = (u32 *)D_00437A40;
         state[1] = 0;
     }
     if (state[3] != 0) {
-        func_003054E8(state[3]);
+        effDestroyResourceSlotSet(state[3]);
         state = (u32 *)D_00437A40;
         state[3] = 0;
     }
@@ -127,7 +127,7 @@ u8 mnuHasSpriteHandle(void) {
 
 void mnuReleaseSpriteHandle(void) {
     if (((SpriteMenuState *)D_00437A40)->spriteHandle != 0) {
-        func_003054E8(((SpriteMenuState *)D_00437A40)->spriteHandle);
+        effDestroyResourceSlotSet(((SpriteMenuState *)D_00437A40)->spriteHandle);
         ((SpriteMenuState *)D_00437A40)->spriteHandle = 0;
     }
 }

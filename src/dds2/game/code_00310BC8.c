@@ -43,7 +43,7 @@ extern u32 func_00312A48(SdfTaskItemDesc *);
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern void func_003139D8();
+extern void sdfGridReleaseAllCells();
 
 extern f32 func_003532B8(f32);
 
@@ -191,13 +191,13 @@ extern char D_004388D8[];
 extern char D_004388E0[];
 extern void func_00312B50();
 
-extern s32 func_00312D48(void);
+extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
 extern void func_00312DF8(void);
-extern s32 func_00312D48(void);
+extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void func_00312DF8(void);
 extern void kwlnTaskCreate();
@@ -235,7 +235,7 @@ void sdfQuaternionNormalize(float *values) {
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310D28);
 
 /* Quaternion rotating direction `from` onto `to`. */
-void func_00310DE8(f32 *out, f32 *from, f32 *to) {
+void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
     f32 cross[4];
     f32 scale;
 
@@ -286,7 +286,7 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
 }
 
 /* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
-void func_00311178(f32 *out, f32 *from, f32 *to, f32 fraction) {
+void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 target[4];
     f32 angle = sdfQuatDot(from, to);
     f32 firstWeight;
@@ -418,7 +418,7 @@ f32 func_003118E8(f32 *direction, f32 *target) {
 }
 
 /* Intersect the rotated Z axis with the plane at height plane[1]; write the hit vector to out. */
-void func_00311978(f32 *plane, f32 *rotation, f32 *out) {
+void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     f32 matrix[16];
     f32 forward[4] = {0, 0, 1.0f, 0};
     f32 up[4] = {0, 1.0f, 0, 0};
@@ -561,7 +561,7 @@ void sdfSetTaskDestroyCallback(s32 arg0, s32 arg1) {
     }
 }
 
-SdfListNode *func_00312188(SdfList *list, s32 key, void *value) {
+SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
     SdfListNode *node = func_00328D68(0x14);
 
     memset(node, 0, 0x14);
@@ -579,7 +579,7 @@ SdfListNode *func_00312188(SdfList *list, s32 key, void *value) {
 }
 
 /* Insert a new node after `after`, bumping the index of every later node. */
-SdfListNode *func_00312228(SdfList *list, SdfListNode *after, s32 key, void *value) {
+SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void *value) {
     SdfListNode *node = func_00328D68(0x14);
     SdfListNode *it;
 
@@ -765,12 +765,12 @@ u32 func_00312578(void) {
     return flags;
 }
 
-TaskWork *func_00312620(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
+TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
     TaskWork *work;
 
     work = func_00312910(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
-    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, func_00312D48, func_00312DF8, work);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, func_00312DF8, work);
     kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
     return work;
 }
@@ -799,7 +799,7 @@ s32 kwlnTaskExists(u32 name) {
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
-    u32 result = (u32)func_00312188((SdfList *)work->list, item->key, func_00312A48(item));
+    u32 result = (u32)sdfListAppend((SdfList *)work->list, item->key, func_00312A48(item));
     if (work->firstItemHandle == 0) {
         work->firstItemHandle = result;
     }
@@ -875,7 +875,7 @@ void func_00312B50(u32 unused, SdfTaskEntry *entry) {
 
 extern void *func_00101958(void);
 
-s32 func_00312B70(TaskWork *work) {
+s32 sdfTaskWorkStepEntry(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
     SdfTaskEntry *entry;
     u32 flags;
@@ -939,13 +939,13 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 func_00312D48(void) {
+s32 sdfTaskWorkRunAllEntries(void) {
     TaskWork *work = func_00101958();
 
     if (work->firstItemHandle == 0) {
         return -1;
     }
-    while (func_00312B70(work) == 1) {
+    while (sdfTaskWorkStepEntry(work) == 1) {
     }
     return 0;
 }
@@ -977,14 +977,14 @@ void func_00312F58(ShortPair2C *p, s32 a, s32 b) {
 
 s64 sdfDestroyGridWork(SdfGridOwner *owner) {
     if (owner != NULL) {
-        func_003139D8();
+        sdfGridReleaseAllCells();
         owner->onDestroy(0, owner->destroyArg);
         return func_003297C8(owner->handle);
     }
 }
 
 void func_00312FB0(void) {
-    func_003139D8();
+    sdfGridReleaseAllCells();
 }
 
 SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
@@ -1076,7 +1076,7 @@ u8 *sdfGridCursorRight(u8 *grid) {
     return cell;
 }
 
-SdfGridCell *func_00313210(SdfGrid *grid, u32 column, u32 row) {
+SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
     SdfGridCell *result = NULL;
 
     if (column >= grid->width) {
@@ -1098,7 +1098,7 @@ INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313538);
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_003136A0);
 
-SdfGridCell *func_00313810(SdfGrid *grid, u32 column, u32 row) {
+SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
     SdfGridCell *result = NULL;
     SdfGridCell *cell;
 
@@ -1119,7 +1119,7 @@ SdfGridCell *func_00313810(SdfGrid *grid, u32 column, u32 row) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313898);
 
-void func_003139D8(SdfGrid *grid) {
+void sdfGridReleaseAllCells(SdfGrid *grid) {
     u32 i = 0;
     SdfGridCell *cells = grid->cells;
     SdfGridCell *cell;

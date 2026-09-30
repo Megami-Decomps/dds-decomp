@@ -52,7 +52,7 @@ void mnuBlendPanelSlots(MenuBlendObject *dst, MenuBlendObject *src, u32 amount) 
     s32 ctx = (s32)dst->context;
 
     for (i = 0; i < 4; i++) {
-        s32 result = func_00309138(((MenuBlendContext *)ctx)->source[i],
+        s32 result = uiBlendColors(((MenuBlendContext *)ctx)->source[i],
                                    src->context->source[i],
                                    (s32)amount / 2 + 0x80, ctx);
         s32 current = (s32)dst->context;

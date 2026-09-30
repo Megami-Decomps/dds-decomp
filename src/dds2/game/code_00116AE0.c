@@ -30,7 +30,7 @@ typedef struct ObjWork {
 } ObjWork;
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
-s32 func_00116AE0(s32 a, s32 b, s32 c, s32 d, s32 e) {
+s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
     ScriptObj *object = (ScriptObj *)func_00110AA8(10);
     ObjWork *work = (ObjWork *)object->work;
 
@@ -43,12 +43,12 @@ s32 func_00116AE0(s32 a, s32 b, s32 c, s32 d, s32 e) {
     return (s32)object;
 }
 
-/* Same as func_00116AE0 but stores arg3 at work+0xC instead of 0x10; stays
+/* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10; stays
    asm: a $18/$19 saved-register priority swap no declaration order produces. */
 INCLUDE_ASM(const s32, "game/code_00116AE0", func_00116B58);
 
 /* Create the model from the loaded resource, or from the fallback. */
-s32 func_00116BD0(ObjWithWork *object) {
+s32 evtCreateModelFromObject(ObjWithWork *object) {
     ObjWork *work = (ObjWork *)object->work;
     void *model;
 
@@ -62,7 +62,7 @@ s32 func_00116BD0(ObjWithWork *object) {
 
 /* Attach the named script to the object's work area, registering a task;
    stays asm: retail's $6 argument copy has no plain-C shape. */
-INCLUDE_ASM(const s32, "game/code_00116AE0", func_00116C18);
+INCLUDE_ASM(const s32, "game/code_00116AE0", evtAttachScriptToObject);
 
 s32 dds3AllocateObjectWork(ObjWithWork *obj) {
     obj->work = func_00328D68(0x18);

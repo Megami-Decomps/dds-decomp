@@ -4,7 +4,7 @@ extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern void func_0035C860();
 extern void func_00259AE8();
-extern void func_0025CAF8();
+extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
 extern void func_00110BE0(void *, s32);
 extern f32 dds3GetCameraValue(s32);
@@ -812,7 +812,7 @@ u32 func_0024CC08(u32 unused0, u32 unused1, u32 viewerAddr) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CC28);
+INCLUDE_ASM(const s32, "game/code_00247518", evtViewCmdResolveSlot);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
@@ -840,9 +840,9 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EventViewerState *viewer) {
                 func_00259AE8(0, viewer);
                 func_00259AE8(1, viewer);
             } else if (mode == 1) {
-                func_0025CAF8(0, viewer);
+                evtReloadEventViewer(0, viewer);
             } else if (mode == 2) {
-                func_0025CAF8(1, viewer);
+                evtReloadEventViewer(1, viewer);
             }
             handled = 1;
         }
@@ -865,7 +865,7 @@ INCLUDE_RODATA(const s32, "game/code_00247518", D_00423050);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D148);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024D408);
+INCLUDE_ASM(const s32, "game/code_00247518", evtViewerPickNextHandler);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D430);
 
@@ -901,7 +901,7 @@ s32 func_0024D760(u8 *ctx) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *func_0024D788(void) {
+void *evtViewerAdvanceUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)func_00101958();
     EvtWindowContext *window;
     s32 flags;
@@ -933,7 +933,7 @@ void *func_0024D788(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024D878);
+INCLUDE_ASM(const s32, "game/code_00247518", evtViewerStartUpdate);
 
 u8 func_0024D908(s32 task) {
     return ((EvtTaskContext *)task)->taskId == 0x263;

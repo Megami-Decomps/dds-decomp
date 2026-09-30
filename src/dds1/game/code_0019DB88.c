@@ -116,7 +116,7 @@ extern s32 func_0019F770(UiSprite *sprite);
 
 extern s32 func_0019EA88();
 
-extern void func_0019D958(s32 sequence, s32 index, s32 count, s32 selected);
+extern void itfMesSetRowItemFlag(s32 sequence, s32 index, s32 count, s32 selected);
 
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
@@ -381,8 +381,8 @@ s32 sndSeqSelectPoll(s32 obj) {
     if (sel->entryCount > 0 && (index = func_0019EA88(sel)) >= 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         if (index != sel->current) {
-            func_0019D958(sel->seq, sel->current, sel->count, 0);
-            func_0019D958(sel->seq, index, sel->count, 1);
+            itfMesSetRowItemFlag(sel->seq, sel->current, sel->count, 0);
+            itfMesSetRowItemFlag(sel->seq, index, sel->count, 1);
             sel->current = index;
             sel->saved = index;
         }
@@ -394,7 +394,7 @@ s32 sndSeqSelectPoll(s32 obj) {
 void sndStepSequenceIndex(SoundSeq *obj, s32 dir) {
     s32 cur = obj->current;
     u16 maxv;
-    func_0019D958(obj->seq, cur, obj->count, 0);
+    itfMesSetRowItemFlag(obj->seq, cur, obj->count, 0);
     if (dir < 0) {
         cur = cur - 1;
         if (cur < 0) {
@@ -408,7 +408,7 @@ void sndStepSequenceIndex(SoundSeq *obj, s32 dir) {
         }
         maxv = obj->count;
     }
-    func_0019D958(obj->seq, cur, (s16)maxv, 1);
+    itfMesSetRowItemFlag(obj->seq, cur, (s16)maxv, 1);
     obj->current = cur;
     obj->saved = cur;
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);

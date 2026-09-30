@@ -1037,7 +1037,7 @@ extern f32 D_00438A5C;
 extern f32 D_00438A60;
 extern f32 func_00353228(f32);
 
-void func_0033A5C8(SdfCamera *cam) {
+void sdfCameraBuildProjection(SdfCamera *cam) {
     f32 m[16];
     f32 farZ = cam->farZ;
     f32 nearZ = cam->nearZ;
@@ -1504,7 +1504,7 @@ extern u8 D_00438A8C;
 extern s32 func_0034AAF8(s32);
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
-void func_0033CA88(void) {
+void sdfPadInit(void) {
     s32 i;
 
     func_0034AAF8(0);

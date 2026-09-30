@@ -119,7 +119,7 @@ void func_0015DC48(PolyNode *obj) {
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DC70);
 
 /* Push each point pair of the strip entry apart along its own direction, by the node's scale. */
-void func_0015DDC8(PolyNode *obj, s32 index) {
+void polyStripPushPairsApart(PolyNode *obj, s32 index) {
     PolyStrip *strip = (PolyStrip *)obj->unkDC;
     PolyStripEntry *entry = &strip->entries[index];
     f32 scale[4];
@@ -177,7 +177,7 @@ typedef struct {
 } PolyBand;
 
 /* Lay the band's point pairs of strip entry `index` around the ring: an inner and an outer radius, moved to the origin. */
-void func_0015E238(PolyBand *obj, s32 index, f32 width)
+void polyBandLayoutRing(PolyBand *obj, s32 index, f32 width)
 {
     PolyStrip *strip = obj->strip;
     PolyStripEntry *entry = &strip->entries[index];
@@ -244,7 +244,7 @@ typedef struct {
 } PolyRing2;
 
 /* Lay a ring of point pairs for strip entry `index`, scaled per axis and lifted along y. */
-void func_0015E3D8(PolyRing2 *obj, s32 index) {
+void polyStripBuildScaledRing(PolyRing2 *obj, s32 index) {
     PolyStrip *strip = obj->strip;
     PolyRing2Rec *rec = &obj->recs[index];
     PolyStripEntry *entry = &strip->entries[index];
@@ -358,8 +358,8 @@ typedef struct {
     PolyRec *recs;      /* 0xF8 */
 } PolyBandC;
 
-/* Same ring as func_0015E238, but the record's rotation is applied through the second matrix bank first. */
-void func_0015F0C0(PolyBandC *obj, s32 index)
+/* Same ring as polyBandLayoutRing, but the record's rotation is applied through the second matrix bank first. */
+void polyBandLayoutRingRotated(PolyBandC *obj, s32 index)
 {
     PolyStrip *strip = obj->strip;
     PolyRec *rec = &obj->recs[index];

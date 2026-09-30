@@ -204,7 +204,7 @@ extern s32 func_00140780(s32 value);
 
 extern s32 func_0013FA98(s32 param0, s32 param1);
 
-extern s32 func_0013FFF8(s32 param0, s32 param1);
+extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
 
 extern void func_00140238(void);
 
@@ -224,7 +224,7 @@ extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
 extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
-extern void func_0014EC00(s32 param0, s32 param1, s32 param2);
+extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
 extern s32 fldGetTaskRecordValue(u32 key);
 
@@ -325,7 +325,7 @@ extern u8 D_003A9EB0[];
 
 extern void func_0026C538(void *arg0);
 
-extern void func_0026C5B8(s32 arg0);
+extern void dspStartEntry(s32 arg0);
 
 extern void func_00126000(void);
 
@@ -380,7 +380,7 @@ extern s32 scrReadIntParameter(s32);
 
 extern s32 D_0038984C[];
 
-extern s32 func_00140B80(void);
+extern s32 fldIsSceneStateEight(void);
 
 extern void func_00123DE8(s32, s32, s32, s32, s32, s32);
 
@@ -564,7 +564,7 @@ extern s32 func_00110BE0(s32, s32);
 
 extern void func_00113110(s32, f32 *, f32 *);
 
-extern void func_0012F770(void);
+extern void fldUpdateCameraProjectionEndpoints(void);
 
 extern f32 D_0038BAD0[];
 
@@ -599,7 +599,7 @@ typedef struct {
 
 extern u8 D_00380838[];
 
-extern void func_003314B0();
+extern void sdfDrawNodeBuildMatrix();
 
 extern void sdfModelUpdateCurrentFrameTransforms();
 
@@ -1159,7 +1159,7 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(pos) : "memory");
     __asm__ volatile (".set noreorder\n\tvmove.w vf10, vf0\n\t.set reorder");
     __asm__ volatile (".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(emitter->pos) : "memory");
-    func_003314B0(handle);
+    sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
     func_003320E8(D_00380838, emitter);
 }
@@ -2122,7 +2122,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DB50);
 
 extern s32 func_00128370(u32);
 
-void func_0014DDD8(void) {
+void fldFlushQueuedEffectPositions(void) {
     if (D_00389770[4] < 0xC8) {
         if (func_00128370(1) != 0) {
             return;
@@ -2247,7 +2247,7 @@ void fldReleaseTitleTextures(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C10);
 
-void func_0014EC00(s32 field, s32 arg1, s32 arg2) {
+void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     char path[32];
     s32 size;
     s32 handle;
@@ -2510,7 +2510,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
     }
 }
 
-void func_0014F560(void) {
+void fldUpdateWeatherEffectNodes(void) {
     if (D_00436388 != 0 && D_0043638C != 0) {
         effUpdateNode(D_00436388);
     }
@@ -2530,7 +2530,7 @@ typedef struct {
 
 extern FieldResourceRecord *D_00435E18;
 
-s32 func_0014F5B0(s32 category, s32 id) {
+s32 fldFindResourceRecordIndex(s32 category, s32 id) {
     FieldResourceRecord *record = D_00435E18;
     s32 index;
     for (index = 0; index < 8; index++, record++) {
@@ -2547,7 +2547,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DC8);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014F5F0);
 
-void func_0014F788(void) {
+void fldClearObjectEntryHandles(void) {
     FldEnt14 *entry = D_00451BE0;
     s32 i = 0x10;
 
@@ -2666,7 +2666,7 @@ void fldFinishEventFieldState(void) {
     if (work->eventActive != 0) {
         D_003899E0[0] = 0;
         func_00125B10();
-        func_0014F788();
+        fldClearObjectEntryHandles();
         func_0014F408();
         fldStartSceneBgmAlternate();
         func_00125F58();
@@ -2703,13 +2703,13 @@ void func_001512D8(void) {
 
 extern s32 D_003899E0[];
 
-extern void func_00130F98(s32);
+extern void fldReleaseCameraModel(s32);
 
 void fldResetEventSceneState(void) {
-    func_00130F98(0);
+    fldReleaseCameraModel(0);
     D_003899E0[0] = 0;
     D_00389770[0x118 / 4] = 0;
-    func_0014F788();
+    fldClearObjectEntryHandles();
     func_0014F408();
     func_00125F58();
     D_00389770[0x114 / 4] = 1;
@@ -2723,7 +2723,7 @@ void fldResetAfterEvent(void) {
     mnuAdvanceTitleStateUnderSemaphore();
     D_003899E0[0] = 0;
     D_00389770[0x118 / 4] = 0;
-    func_0014F788();
+    fldClearObjectEntryHandles();
     func_0014F408();
     fldStartSceneBgmAlternate();
     D_00389770[0x114 / 4] = 0;
@@ -2735,7 +2735,7 @@ void fldResetAfterEvent(void) {
 
 void fldStartDeferredFieldExit(void) {
     func_0026C538(D_003A9EB0);
-    func_0026C5B8(4);
+    dspStartEntry(4);
     func_00126000();
     D_00389884[0] = 2;
 }
@@ -2745,7 +2745,7 @@ void fldFinishDeferredExit(void) {
         func_0026C900();
         if (!func_0026C768()) {
             func_0026C710();
-            func_0026C728();
+            dspCloseChannel();
             func_00125F58();
             D_00389770[0x45] = 0;
         }
@@ -2759,8 +2759,8 @@ s32 fldIsEventPhaseAtLeastTwo(void) {
     return 1;
 }
 
-void func_00151480(void) {
-    func_0014F560();
+void fldTickWeatherEffectNodes(void) {
+    fldUpdateWeatherEffectNodes();
 }
 
 /* Reads the signed halfword at +6 of the current entry. The record's layout
@@ -3011,7 +3011,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001536B8);
 
-void func_00153D40(s32 active) {
+void fldSetTargetGuideEnabled(s32 active) {
     if (active == 0) {
         D_00451D3C[0] = 1;
         return;
@@ -3047,7 +3047,7 @@ extern f32 D_004363E0;
 
 extern f32 D_004363E4;
 
-void func_00154540(f32 *x, f32 *y) {
+void fldGetFieldFloatPair(f32 *x, f32 *y) {
     *x = D_004363E0;
     *y = D_004363E4;
 }
@@ -3126,7 +3126,7 @@ s32 func_00154628(void) {
 extern void func_001442A0(s32);
 extern void func_00144270(s32);
 
-s32 func_001546F8(void) {
+s32 fldCmdReadSceneStatus(void) {
     s32 result;
 
     func_001442A0(scrReadIntParameter(0));
@@ -3166,14 +3166,14 @@ s32 func_00154758(void) {
     return 1;
 }
 
-extern void func_00133C18(void);
+extern void fldSetCameraNodeModeWithTen(void);
 
 s32 func_001547F0(void) {
     func_00126000();
     if (D_00435F0C == 0) {
         return 1;
     }
-    func_00133C18();
+    fldSetCameraNodeModeWithTen();
     return 1;
 }
 
@@ -3181,12 +3181,12 @@ extern s32 D_003898B0[];
 
 extern void dds3InvokeSlot1Handler(s32, s32);
 
-s32 func_00154828(void) {
+s32 fldCmdReleaseCurrentObject(void) {
     if (D_00435F0C == 0) {
         return 1;
     }
     dds3InvokeSlot1Handler(D_00435F0C, 0);
-    func_00133C18();
+    fldSetCameraNodeModeWithTen();
     func_00125F58();
     D_003898B0[0] = 0;
     return 1;
@@ -3219,7 +3219,7 @@ typedef struct FldObj {
 
 extern void func_001300A0(void);
 
-s32 func_001548C0(void) {
+s32 fldCmdFocusCameraOnObject(void) {
     FldWorkView *work;
     FldObj *obj;
     u64 world = dds3GetWorldSecondaryObject();
@@ -3273,14 +3273,14 @@ s32 fldUpdateLookAtSegment(void) {
     return 1;
 }
 
-s32 func_00154AE8(void) {
+s32 fldCmdSetScenePhaseThree(void) {
     D_003897C0[0] = 3;
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00154B00);
 
-s32 func_00154CE0(void) {
+s32 fldCmdCaptureObjectPose(void) {
     f32 pos[4];
     f32 rot[4];
     s32 handle;
@@ -3297,7 +3297,7 @@ s32 func_00154CE0(void) {
             return 1;
         }
         func_00113110(object, pos, rot);
-        func_0012F770();
+        fldUpdateCameraProjectionEndpoints();
         D_0038BAD0[0] = pos[0];
         D_0038BAD0[1] = pos[1];
         D_0038BAD0[2] = pos[2];
@@ -3372,7 +3372,7 @@ u32 func_00154F20(void) {
     return 1;
 }
 
-u32 func_00154F28(void) {
+u32 fldCmdFreeDisplayObjects(void) {
     fldFreeDisplayObjects();
     return 1;
 }
@@ -3406,7 +3406,7 @@ s32 fldCmdSetSceneControlValue(void) {
     return 1;
 }
 
-s32 func_00155048(void) {
+s32 fldCmdSetFieldParameterPair(void) {
     s32 value;
 
     D_00389988[11] = scrReadIntParameter(0);
@@ -3439,7 +3439,7 @@ typedef struct FldWorldItem {
 extern FldWorldItem *func_00110680(u64);
 extern void func_00114048(FldWorldItem *, s32);
 
-s32 func_00155108(void) {
+s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;
     s32 stage;
     s32 mode;
@@ -3496,7 +3496,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001552E0);
 
 extern char *D_004361D4;
 
-s32 func_00155498(void) {
+s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 world;
     s32 stage;
     s32 mode;
@@ -3554,7 +3554,7 @@ s32 func_00155498(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00155690);
 
-s32 func_00155848(void) {
+s32 fldCmdApplyRoomObjectModeZero(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -3603,7 +3603,7 @@ s32 func_00155848(void) {
     return 1;
 }
 
-s32 func_00155A08(s32 world, s32 stage, char *name, s32 mode) {
+s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
     s32 i;
     s32 searchId;
     void *obj;
@@ -3646,7 +3646,7 @@ s32 func_00155A08(s32 world, s32 stage, char *name, s32 mode) {
     return 1;
 }
 
-s32 func_00155BA8(void) {
+s32 fldCmdApplyRoomObjectModeOne(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -3693,7 +3693,7 @@ s32 func_00155BA8(void) {
 }
 
 
-s32 func_00155D48(s32 world, s32 stage, char *name, s32 mode) {
+s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
     s32 i;
     s32 searchId;
     void *obj;
@@ -3758,7 +3758,7 @@ s32 fldCmdSetSceneBits(void) {
     return 1;
 }
 
-s32 func_00155F90(void) {
+s32 fldCmdSetSceneBitsBarrierRoom(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -3957,29 +3957,7 @@ extern FldSceneParamRow D_003A8EB0[];
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
 
-s32 fldCmdPushSceneParam(void) {
-    s32 room;
-
-    room = fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key);
-    switch (scrReadIntParameter(0)) {
-    case 0:
-        func_0010D818(D_003A8EB0[room].unk0);
-        break;
-    case 1:
-        func_0010D818(D_003A8EB0[room].unk4);
-        break;
-    case 2:
-        func_0010D818(D_003A8EB0[room].unk6);
-        break;
-    case 3:
-        func_0010D818(D_003A8EB0[room].unk8);
-        break;
-    case 4:
-        func_0010D818(D_003A8EB0[room].unkC);
-        break;
-    }
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_001442D0", fldCmdPushSceneParam);
 
 u32 fldCmdActivateTaskRoomObject(void) {
     s32 task;
@@ -4000,10 +3978,10 @@ u32 fldCmdTestTaskRoomObjectActive(void) {
     return 1;
 }
 
-u32 func_00156960(void) {
+u32 fldCmdSetCurrentTaskScene(void) {
     s32 scene;
 
-    if (func_00140B80()) {
+    if (fldIsSceneStateEight()) {
         func_00140BC8(0);
         return 1;
     }
@@ -4098,12 +4076,12 @@ s32 fldCmdQuerySceneValue(void) {
 
 u32 fldCmdUpdateTaskRecordScene(void) {
     s32 scene;
-    if (func_00140B80()) {
+    if (fldIsSceneStateEight()) {
         scene = 0;
     } else {
         scene = fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key);
     }
-    func_00140830(scene);
+    fldApplyActorEntryTrigger(scene);
     return 1;
 }
 
@@ -4123,7 +4101,7 @@ s32 func_00156C30(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    func_0010D818(func_0013FFF8(param0, param1));
+    func_0010D818(fldGetActorSlotAttribute(param0, param1));
     return 1;
 }
 
@@ -4197,7 +4175,7 @@ s32 fldCommandStartTitle(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    func_0014EC00(param0, param1, 0x3c);
+    fldStartTitle(param0, param1, 0x3c);
     return 1;
 }
 
@@ -4342,14 +4320,14 @@ s32 fldCmdGetPendingSceneParam(void) {
     return 1;
 }
 
-s32 func_001572A0(void) {
+s32 fldCmdSetTargetGuideMode(void) {
     if (scrReadIntParameter(0) == 2) {
-        func_00153D40(0);
+        fldSetTargetGuideEnabled(0);
         D_003898B0[0] = 0;
     } else if (scrReadIntParameter(0) == 0) {
-        func_00153D40(0);
+        fldSetTargetGuideEnabled(0);
     } else {
-        func_00153D40(1);
+        fldSetTargetGuideEnabled(1);
     }
     return 1;
 }

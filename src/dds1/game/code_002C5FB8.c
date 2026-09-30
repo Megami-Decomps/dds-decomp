@@ -303,7 +303,7 @@ extern void func_002C7430(void);
 void fldSetMapRequestInterval(MapRequestState *state, u16 interval);
 
 /* Allocate the two map request queues and install their dispatch callbacks. */
-void func_002C7000(void) {
+void fldCreateMapRequestQueues(void) {
     D_003BD988 = func_002C7A60(0x14, 0xC);
     D_003BD988->callback = func_002C7180;
     fldSetMapRequestInterval(D_003BD988, 0);
@@ -312,7 +312,7 @@ void func_002C7000(void) {
 }
 
 /* Release both map request queues. */
-s64 func_002C7058(void) {
+s64 fldReleaseMapRequestQueues(void) {
     func_002C7B38(D_003BD988);
     return func_002C7B38(D_003BD98C);
 }

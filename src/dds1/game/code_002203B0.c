@@ -183,7 +183,7 @@ INCLUDE_ASM(const s32, "game/code_002203B0", func_00220678);
 extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
 extern void func_00116F38(void *value);
 
-s32 func_00220748(EvtMoveUnit *unit) {
+s32 evtUnitStepScaledValue(EvtMoveUnit *unit) {
     f32 t;
 
     if (unit->mode != 1) {

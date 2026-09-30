@@ -88,7 +88,7 @@ void effInitCh71Id(void);
 void effInitCh72Id(void);
 void effInitCh76Id(void);
 void effInitCh75Id(void);
-void func_0024F7D0(EvtGroupTable *table);
+void evtPolygonMovieFreeWork(EvtGroupTable *table);
 void func_00231588(s32 group, s32 type);
 void func_00104020(void);
 EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
@@ -320,7 +320,7 @@ void evtEventViewerShutdown(EvtViewer *viewer) {
         evtEventViewerDestroyEntry(viewer->head, viewer);
     }
     if (viewer->unk08 != 0) {
-        func_0024F7D0(viewer->unk08);
+        evtPolygonMovieFreeWork(viewer->unk08);
         viewer->unk08 = 0;
     }
     func_00104020();

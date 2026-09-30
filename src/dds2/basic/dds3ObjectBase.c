@@ -21,28 +21,28 @@ void dds3SetSlotKey(void *arg0, void *arg1);
 
 void dds3ReplaceObjectResource(void *arg0);
 
-extern AdminWork *func_00112AB0();
+extern AdminWork *dds3GetObjectOwnedHandle();
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
 void dds3SetObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
 
-    base = (ObjBase *)func_00112AB0();
+    base = (ObjBase *)dds3GetObjectOwnedHandle();
     base->flags = base->flags | flags;
 }
 
 void dds3ClearObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
 
-    base = (ObjBase *)func_00112AB0();
+    base = (ObjBase *)dds3GetObjectOwnedHandle();
     base->flags = base->flags & ~flags;
 }
 
 u8 dds3TestObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
 
-    base = (ObjBase *)func_00112AB0();
+    base = (ObjBase *)dds3GetObjectOwnedHandle();
     return (base->flags & flags) != 0;
 }
 
@@ -61,7 +61,7 @@ void *dds3ExchangeSlot(void *obj, void *data, s32 index) {
     void *old;
 
     old = dds3GetSlot(obj, index);
-    ((ObjBase *)func_00112AB0(obj))->slots[index] = data;
+    ((ObjBase *)dds3GetObjectOwnedHandle(obj))->slots[index] = data;
     return old;
 }
 
@@ -70,7 +70,7 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetSlot);
 u32 dds3GetUnk04(void) {
     ObjBase *base;
 
-    base = (ObjBase *)func_00112AB0();
+    base = (ObjBase *)dds3GetObjectOwnedHandle();
     return base->unk4;
 }
 

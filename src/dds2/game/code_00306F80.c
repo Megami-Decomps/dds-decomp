@@ -89,7 +89,7 @@ typedef struct GridDrawWork {
     s32 overlayDataSize;     /* 0x34 */
 } GridDrawWork;
 
-extern s32 func_00304AD8();
+extern s32 effGetSlotWorkOrOverride();
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -119,20 +119,20 @@ typedef struct GridAngleOwner {
 } GridAngleOwner;
 
 void func_00306F80(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
-    u32 record = func_00304AD8(e, f);
+    u32 record = effGetSlotWorkOrOverride(e, f);
     func_00306BF0(a, b, c, d, e, f, record, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
 s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = func_00304AD8(object);
+    s32 entry = effGetSlotWorkOrOverride(object);
     s32 result;
 
     if (*(s32 *)(entry + 0x30) == 0) {
         func_00307018(object, key);
     }
-    result = func_003056B0(object, key, entry);
+    result = effUpdateTimedStates(object, key, entry);
     if (result == 0) {
         result = *(s32 *)(object + 0x28);
     }
@@ -144,7 +144,7 @@ extern void func_00304B18();
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
 void func_003071D0(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
-    s32 record = func_00304AD8(object, index);
+    s32 record = effGetSlotWorkOrOverride(object, index);
 
     entry->x = x >> 4;
     entry->y = y >> 3;
@@ -172,7 +172,7 @@ void itfGridSetQuantizedBounds(GridEntryStorage *object, s32 index, s32 x, s32 y
 
 /* Set the unquantized bounds of the selected grid widget. */
 void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
-    GridWidget *widget = (GridWidget *)func_00304AD8(a, b);
+    GridWidget *widget = (GridWidget *)effGetSlotWorkOrOverride(a, b);
     widget->x = x;
     widget->y = y;
     widget->width = width;
@@ -442,7 +442,7 @@ void func_003089B8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 colors, u32 h) {
 }
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
-void func_003089D8(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
+void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
     func_00308AC8(x, y, z, x + width, y, z, color, context);
     func_00308AC8(x, y, z, x, y + height, z, color, context);
     func_00308AC8(x + width, y, z, x + width, y + height, z, color, context);
@@ -516,9 +516,9 @@ void func_00309090(u32 context) {
     func_00308808(0, 0, 0, 0x2000, 0xe00, 0, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003090E8);
+INCLUDE_ASM(const s32, "game/code_00306F80", uiScaleColorRgb);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309138);
+INCLUDE_ASM(const s32, "game/code_00306F80", uiBlendColors);
 
 void func_003091E8(void) {
 }
