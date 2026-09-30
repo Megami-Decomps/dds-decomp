@@ -3635,7 +3635,66 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D7458);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D7770);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D78E8);
+/* Output of func_002D78E8: a view-space position, the sampled frame, colour, scale and heading. */
+typedef struct FileKeyOut {
+    f32 pos[4];
+    s32 frame;
+    s32 color;
+    f32 scale;
+    f32 angle;
+} FileKeyOut;
+
+/* Keyframe tracks of a view block (scale, heading and colour curves). */
+typedef struct FileKeyBlock {
+    u8 pad00[0x2C];
+    u8 unk2C[0x24];
+    u8 unk50[0x10];
+    u8 unk60[0x2C];
+    u8 unk8C[0x10];
+    u8 mode;
+    u8 pad9D[0x1B];
+    s32 length;
+} FileKeyBlock;
+
+extern s32 func_002D7458(void *, void *, s32, s32);
+extern f32 func_002D7770(void *, s32, s32);
+
+/* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target (0 when they coincide) */
+void func_002D78E8(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
+{
+    f32 delta[4];
+
+    out->color = func_002D7458(block->unk2C, block->unk50, frame, block->length);
+    out->scale = func_002D7770(block->unk60, frame, block->length);
+    if (block->mode != 2) {
+        out->angle = func_002D7770(block->unk8C, frame, block->length);
+        return;
+    }
+    VU0_MOVE_VF(vf20, vf28);
+    VU0_MOVE_VF(vf21, vf29);
+    VU0_MOVE_VF(vf22, vf30);
+    VU0_MOVE_VF(vf23, vf31);
+    VU0_LOAD_MATRIX(D_003846F0);
+    func_00336C10(D_0037F610);
+    VU0_LOAD_VF(vf10, out->pos);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, target);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, delta);
+    if (delta[0] != 0.0f || delta[1] != 0.0f) {
+        out->angle = func_003532E8(delta[1], delta[0]);
+    } else {
+        out->angle = 0.0f;
+    }
+    VU0_MOVE_VF(vf28, vf20);
+    VU0_MOVE_VF(vf29, vf21);
+    VU0_MOVE_VF(vf30, vf22);
+    VU0_MOVE_VF(vf31, vf23);
+}
 
 void func_002D7A58(FileSlotTable *table, u32 slotAddr) {
     FileGridDimensions *grid = (FileGridDimensions *)table->data0;

@@ -349,7 +349,6 @@ extern void func_00293EA0(void *queue);
 
 extern void func_00293158(void *src);
 
-extern void func_00294798(void *dst, void *src);
 
 extern void *func_002CFEB8(s32 size);
 
@@ -532,7 +531,9 @@ typedef struct FileJob {
     u16 option;
     u16 unkE;
     FileJobBufferSlot slots[2];
-    u8 unk30[0x60];
+    u8 unk30[0x20];
+    f32 quat[4];
+    u8 unk60[0x30];
     u32 id;
     u32 sector;
     u32 flags;
@@ -552,7 +553,12 @@ extern FileJob *fileJobCreate(void);
 extern void func_0029A730(s32 record);
 
 typedef struct FileQueue {
-    u8 unk0[0x80];
+    f32 offset[4];
+    f32 axis[4];
+    u8 unk20[0x20];
+    f32 position[4];
+    f32 quat[4];
+    u8 unk60[0x20];
     s32 count;
     u32 unk84;
     FileJob *head;
@@ -2703,6 +2709,8 @@ void func_002944D8(FileQueue *queue) {
 }
 
 extern void func_00294670(FileQueue *queue, void *vec);
+extern void func_00294798(FileQueue *queue, void *rot);
+extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00294850(FileQueue *queue, f32 scale);
 extern void func_00294938(FileQueue *queue, u32 color);
 extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
@@ -3226,7 +3234,64 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296F58);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297270);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002973E8);
+/* Output of func_002973E8: a view-space position, the sampled frame, colour, scale and heading. */
+typedef struct FileKeyOut {
+    f32 pos[4];
+    s32 frame;
+    s32 color;
+    f32 scale;
+    f32 angle;
+} FileKeyOut;
+
+/* Keyframe tracks of a view block (scale, heading and colour curves). */
+typedef struct FileKeyBlock {
+    u8 pad00[0x2C];
+    u8 unk2C[0x24];
+    u8 unk50[0x10];
+    u8 unk60[0x2C];
+    u8 unk8C[0x10];
+    u8 mode;
+    u8 pad9D[0x1B];
+    s32 length;
+} FileKeyBlock;
+
+extern s32 func_00296F58(void *, void *, s32, s32);
+extern f32 func_00297270(void *, s32, s32);
+
+/* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target */
+void func_002973E8(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
+{
+    f32 delta[4];
+
+    out->color = func_00296F58(block->unk2C, block->unk50, frame, block->length);
+    out->scale = func_00297270(block->unk60, frame, block->length);
+    if (block->mode != 2) {
+        out->angle = func_00297270(block->unk8C, frame, block->length);
+        return;
+    }
+    VU0_MOVE_VF(vf20, vf28);
+    VU0_MOVE_VF(vf21, vf29);
+    VU0_MOVE_VF(vf22, vf30);
+    VU0_MOVE_VF(vf23, vf31);
+    VU0_LOAD_MATRIX(D_003296F0);
+    func_002DDD60(D_00324610);
+    VU0_LOAD_VF(vf10, out->pos);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, target);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, delta);
+    if (delta[0] != 0.0f || delta[1] != 0.0f) {
+        out->angle = func_002FA1F0(delta[1], delta[0]);
+    }
+    VU0_MOVE_VF(vf28, vf20);
+    VU0_MOVE_VF(vf29, vf21);
+    VU0_MOVE_VF(vf30, vf22);
+    VU0_MOVE_VF(vf31, vf23);
+}
 
 typedef struct FileGridDimensions {
     u8 pad0[0xC0];
