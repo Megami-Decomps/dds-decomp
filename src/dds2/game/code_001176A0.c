@@ -65,15 +65,16 @@ typedef struct SdfPackedValue {
 #define SDF_PACKED_VALUE_MASK 0x7FFF
 
 typedef struct SdfChannelState {
-    u8 pad00[0x24];
+    u8 scriptFlags; /* 0x00: 0x40/0x80 select alternate dispatch scripts */
+    u8 pad01[0x23];
     u8 mode; /* 0x24 */
     u8 pad25[0x13];
 } SdfChannelState;
 
-/* Two-byte runtime-mode entries read by the unit script dispatcher. */
+/* Byte 0 supplies an entry/resource code; byte 1 selects the script kind. */
 typedef struct SdfUnitMode {
-    u8 pad00;
-    s8 mode; /* 0x01 */
+    s8 code; /* 0x00: used as a resource index by sound/UI consumers */
+    s8 kind; /* 0x01: 5 selects the alternate unit script */
 } SdfUnitMode;
 
 extern SdfUnitMode *D_00435E1C;
@@ -268,10 +269,10 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)D_00435E1C)[unitIndex].mode == 5) {
+    if (D_00435E1C[unitIndex].kind == 5) {
         result = evtRunContext(0x19, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = ((u8 *)D_00435E20)[unitIndex * 0x38];
+        flags = D_00435E20[unitIndex].scriptFlags;
         if (flags & 0x40) {
             result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {

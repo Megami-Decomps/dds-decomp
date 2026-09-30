@@ -553,7 +553,7 @@ void mnuTerminalCreateEffects(MenuSlotState *state) {
 }
 
 void func_00249D80(s32 object) {
-    s32 *batch = (s32 *)(object + 0xA0);
+    s32 *batch = ((MenuSlotState *)object)->effect;
     u32 i;
 
     for (i = 0; i < 7; i++) {
