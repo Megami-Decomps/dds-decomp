@@ -47,32 +47,32 @@ typedef struct EvtLipsWorld {
 extern u32 sdfGetUniqueChunkValue();
 extern s32 mdlGetNodeRefHalf();
 
-/* Event work layout overlaps event/evtUnitManager's EventUnit at
- * value6C, flags, and valueBC. */
+/* Event work layout overlaps event/evtUnitManager's EvtUnit at
+ * value, flags, and unkBC. */
 typedef struct EvtUnit {
     u8 pad00[0x04];     /* 0x00 */
-    s32 unk04;          /* 0x04 */
+    s32 objectId;       /* 0x04: returned to event scripts */
     u8 pad08[0x60];     /* 0x08 */
     s32 unk68;          /* 0x68 */
-    u32 value6C;        /* 0x6C */
-    s128 vector;         /* 0x70: 16-byte vector copied by the setup helpers */
+    u32 value;          /* 0x6C: matches evtUnitManager */
+    s128 vector;        /* 0x70: 16-byte vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
-    u32 *modelNode;      /* 0x8C: node flag word updated by script opcodes */
-    void *sourceUnit;    /* 0x90: matching secondary-world unit */
+    u32 *flagWord;      /* 0x8C: status opcodes update its first bit */
+    void *linkedUnit;   /* 0x90: matching secondary-world unit */
     s32 unk94;          /* 0x94 */
     s32 unk98;          /* 0x98 */
     s32 unk9C;          /* 0x9C */
     s32 unkA0;          /* 0xA0 */
     f32 unkA4;          /* 0xA4 */
     u32 flags;          /* 0xA8 */
-    s16 mode;            /* 0xAC */
+    s16 mode;           /* 0xAC */
     s16 unkAE;          /* 0xAE */
     s16 unkB0;          /* 0xB0 */
     s16 unkB2;          /* 0xB2 */
     s16 unkB4;          /* 0xB4 */
     s16 unkB6;          /* 0xB6 */
     u8 padB8[0x04];     /* 0xB8 */
-    u16 valueBC;        /* 0xBC */
+    u16 unkBC;          /* 0xBC */
     s16 unkBE;          /* 0xBE */
     s16 unkC0;          /* 0xC0 */
     u8 padC2[0x2E];     /* 0xC2 */
@@ -83,10 +83,10 @@ typedef struct EvtUnit {
 } EvtUnit;
 
 /* World lookup results carry the address of their vector-bearing data at +0x18. */
-typedef struct EvtWorldVectorSource {
+typedef struct EvtWorldUnitRef {
     u8 pad00[0x18];
-    u32 vectorData;
-} EvtWorldVectorSource;
+    s128 *transform;     /* 0x18: first aligned vector, as in DDS1 */
+} EvtWorldUnitRef;
 
 typedef struct EvtLodRoot {
     u8 pad00[0x98];
@@ -155,7 +155,7 @@ extern f32 func_0023B3A0(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void func_001177D0(s32, s32);
 
-extern void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7);
+extern void func_0023D708(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
 
 extern void *dds3GetWorldObject(void);
 
@@ -187,6 +187,8 @@ typedef struct EvtModelHeader {
     f32 unk10;          /* 0x10 */
     f32 unk14;          /* 0x14 */
     f32 unk18;          /* 0x18 */
+    u8 pad1C[0x10];
+    void *target2C;     /* 0x2C: scaled by the model-cut opcode */
 } EvtModelHeader;
 
 typedef struct EvtModelParams {
@@ -314,59 +316,59 @@ extern f32 func_00240640(s32);
 extern void func_00197F40(void *, f32);
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
-void evtBeginVectorTransition(EvtUnit *eventUnit, s128 *sourceVector, s32 stepCount) {
-    s128 *destination = &eventUnit->vector;
+void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
+    s128 *destination = &work->vector;
 
-    if ((u32)(stepCount - 1) < 100) {
-        eventUnit->sourceUnit = NULL;
-        eventUnit->mode = 3;
-        PCP_COPY_VECTOR(destination, sourceVector);
-        eventUnit->unkB4 = stepCount;
-        eventUnit->unkB6 = 0;
-        eventUnit->unk94 = 0;
-        eventUnit->unkB2 = 0;
+    if ((u32)(frames - 1) < 100) {
+        work->linkedUnit = NULL;
+        work->mode = 3;
+        PCP_COPY_VECTOR(destination, vector);
+        work->unkB4 = frames;
+        work->unkB6 = 0;
+        work->unk94 = 0;
+        work->unkB2 = 0;
     }
 }
 
 /* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
-void evtAttachSecondaryWorldUnit(EvtUnit *eventUnit, s32 objectId, s32 stepCount) {
-    EvtWorldVectorSource *sourceUnit;
+void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
+    EvtWorldUnitRef *worldUnit;
 
-    sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
-    if (sourceUnit != NULL) {
-        evtBeginVectorTransition(eventUnit, (s128 *)(sourceUnit->vectorData + 0x10), stepCount);
-        eventUnit->sourceUnit = sourceUnit;
+    worldUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    if (worldUnit != NULL) {
+        evtBeginVectorTransition(work, worldUnit->transform + 1, frames);
+        work->linkedUnit = worldUnit;
     }
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
-    s128 *destination = &eventUnit->vector;
+void func_0023D708(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+    s128 *destination = &work->vector;
 
-    eventUnit->unkB0 = arg1;
-    eventUnit->mode = 1;
-    eventUnit->unkAE = 0;
-    eventUnit->sourceUnit = NULL;
-    PCP_COPY_VECTOR(destination, sourceVector);
-    eventUnit->unkB4 = frames;
-    eventUnit->unkB6 = arg5;
-    eventUnit->unk94 = arg6;
-    eventUnit->unkB2 = 0;
+    work->unkB0 = mode;
+    work->mode = 1;
+    work->unkAE = 0;
+    work->linkedUnit = NULL;
+    PCP_COPY_VECTOR(destination, vector);
+    work->unkB4 = frames;
+    work->unkB6 = valueB6;
+    work->unk94 = value94;
+    work->unkB2 = 0;
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void func_0023D740(EvtUnit *eventUnit, s32 arg1, s32 objectId, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
-    EvtWorldVectorSource *sourceUnit;
+void func_0023D740(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+    EvtWorldUnitRef *worldUnit;
 
-    sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
-    if (sourceUnit != NULL) {
-        func_0023D708(eventUnit, arg1, (s128 *)sourceUnit->vectorData, arg3, frames, arg5, arg6, arg7);
-        eventUnit->unkAE = 1;
-        eventUnit->sourceUnit = sourceUnit;
+    worldUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    if (worldUnit != NULL) {
+        func_0023D708(work, mode, worldUnit->transform, unused, frames, valueB6, value94, unusedLast);
+        work->unkAE = 1;
+        work->linkedUnit = worldUnit;
     }
 }
 
-void func_0023D800(EvtUnit *work, s32 objectId, s32 frames, s32 arg3, s32 mode, s32 dirFlag, s32 sideMode) {
+void func_0023D800(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
     void *pathSource;
     s32 path;
 
@@ -422,11 +424,11 @@ void func_0023D800(EvtUnit *work, s32 objectId, s32 frames, s32 arg3, s32 mode, 
     }
     work->mode = 1;
     work->unkAE = 2;
-    work->sourceUnit = pathSource;
+    work->linkedUnit = pathSource;
     func_001171A0(path);
     VU0_STORE_VF($vf10, &work->vector);
     work->unkB4 = frames;
-    work->unkB6 = arg3;
+    work->unkB6 = valueB6;
     work->unk94 = 0;
     work->unkB2 = 0;
 }
@@ -550,7 +552,7 @@ void func_0023E460(EvtUnit *unit) {
         }
     }
     func_0033A7E8(unit->unk68, &desc, color);
-    unit->value6C = unit->unk68;
+    unit->value = unit->unk68;
 }
 
 /* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
@@ -590,7 +592,7 @@ u32 evtGetWorldObjectId(void) {
     object = func_00110C60(world);
     id = -1;
     if (object != NULL) {
-        id = object->unk04;
+        id = object->objectId;
     }
     func_0010D818(id);
     return 1;
@@ -634,12 +636,12 @@ u32 func_0023E7A0(void) {
 }
 
 u32 func_0023E898(void) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 scriptParam0;
+    u64 scriptParam1;
 
-    temp_v0 = scrReadIntParameter(0);
-    temp_v1 = scrReadIntParameter(1);
-    func_0023A8C0(temp_v0, temp_v1);
+    scriptParam0 = scrReadIntParameter(0);
+    scriptParam1 = scrReadIntParameter(1);
+    func_0023A8C0(scriptParam0, scriptParam1);
     return 1;
 }
 
@@ -844,11 +846,11 @@ u32 evtOpSetUnitParams5(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        s32 arg3 = scrReadIntParameter(3);
-        s32 arg4 = scrReadIntParameter(4);
-        func_0023CF70(unit, arg1, arg2, arg3, arg4);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        s32 scriptParam3 = scrReadIntParameter(3);
+        s32 scriptParam4 = scrReadIntParameter(4);
+        func_0023CF70(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4);
     }
     return 1;
 }
@@ -861,12 +863,12 @@ u32 evtOpSetUnitParams6(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        s32 arg3 = scrReadIntParameter(3);
-        s32 arg4 = scrReadIntParameter(4);
-        s32 arg5 = scrReadIntParameter(5);
-        func_0023CED8(unit, arg1, arg2, arg3, arg4, arg5);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        s32 scriptParam3 = scrReadIntParameter(3);
+        s32 scriptParam4 = scrReadIntParameter(4);
+        s32 scriptParam5 = scrReadIntParameter(5);
+        func_0023CED8(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4, scriptParam5);
     }
     return 1;
 }
@@ -941,9 +943,9 @@ u32 evtOpBeginWindowCallback(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        func_0023CE98(unit, arg1, arg2);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        func_0023CE98(unit, scriptParam1, scriptParam2);
         D_004371EC = (u32)unit;
     }
     {
@@ -964,9 +966,9 @@ u32 func_0023F308(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        func_0023CE98(unit, arg1, arg2);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        func_0023CE98(unit, scriptParam1, scriptParam2);
         func_0023CEA8((u32)unit);
         D_004371EC = (u32)unit;
     }
@@ -1008,7 +1010,7 @@ u32 func_0023F3E8(void) {
     if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->modelNode, scrReadIntParameter(1)) != 0;
+    return mdlCheckNodeByte30(unit->flagWord, scrReadIntParameter(1)) != 0;
 }
 
 u32 func_0023F460(void) {
@@ -1039,8 +1041,8 @@ u32 func_0023F4B8(void) {
         s32 mode = scrReadIntParameter(2);
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(3);
-        s32 arg4 = scrReadIntParameter(4);
-        func_0023D740(unit, mode, objectId, -1, frames, arg4, 0, 0);
+        s32 valueB6 = scrReadIntParameter(4);
+        func_0023D740(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         func_0023D360(unit);
@@ -1059,11 +1061,11 @@ u32 func_0023F580(void) {
     {
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(5);
-        s32 arg3 = scrReadIntParameter(6);
-        s32 arg4 = scrReadIntParameter(2);
-        s32 arg5 = scrReadIntParameter(4);
-        s32 arg6 = scrReadIntParameter(3);
-        func_0023D800(unit, objectId, frames, arg3, arg4, arg5, arg6);
+        s32 valueB6 = scrReadIntParameter(6);
+        s32 mode = scrReadIntParameter(2);
+        s32 dirFlag = scrReadIntParameter(4);
+        s32 sideMode = scrReadIntParameter(3);
+        func_0023D800(unit, objectId, frames, valueB6, mode, dirFlag, sideMode);
     }
     return 1;
 }
@@ -1095,7 +1097,7 @@ u32 evtCommandSetUnitValue(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->valueBC = scrReadIntParameter(1);
+    unit->unkBC = scrReadIntParameter(1);
     return 1;
 }
 
@@ -1176,7 +1178,7 @@ u32 evtUnitClearFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit != NULL) {
-        *unit->modelNode &= ~1;
+        *unit->flagWord &= ~1;
     }
     return 1;
 }
@@ -1188,7 +1190,7 @@ u32 evtUnitSetFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = func_0023CC00(id);
     if (unit != NULL) {
-        *unit->modelNode |= 1;
+        *unit->flagWord |= 1;
     }
     return 1;
 }
@@ -1330,7 +1332,7 @@ u32 func_00240368(void) {
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D818(unit->unk04);
+        func_0010D818(unit->objectId);
     }
     return 1;
 }
@@ -1352,7 +1354,7 @@ u32 func_00240420(void) {
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D818(unit->unk04);
+        func_0010D818(unit->objectId);
     }
     return 1;
 }
@@ -1400,7 +1402,7 @@ f32 func_00240640(s32 index) {
 }
 
 u32 func_002406C0(void) {
-    void *unit;
+    EvtModelObj *unit;
 
     unit = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (unit != NULL) {
@@ -1414,7 +1416,7 @@ u32 func_002406C0(void) {
         index = scrReadIntParameter(2);
         if (index >= 0) {
             f32 value = func_00240640(index);
-            void *target = *(void **)(*(u8 **)((u8 *)unit + 0x18) + 0x2C);
+            void *target = unit->header->target2C;
             if (target != NULL) {
                 func_00197F40(target, value);
             }
@@ -1435,7 +1437,7 @@ u32 func_00240770(void) {
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D818(unit->unk04);
+        func_0010D818(unit->objectId);
     }
     return 1;
 }
@@ -1458,7 +1460,7 @@ u32 func_002408A8(void) {
         func_0010D818(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D818(unit->unk04);
+        func_0010D818(unit->objectId);
     }
     return 1;
 }

@@ -4,18 +4,31 @@
 
 #include "pcp_vu0.h"
 
-/* Particle dispatch object; see the matching DDS1 game unit. */
+/* Particle object layout mirrors the matching DDS1 unit and parManager. */
 typedef struct ParObj {
-    u8 pad0[0x8C];
-    f32 scale8C;
-    u8 pad90[0x60];
-    u32 valueF0; /* 0xF0 settable param */
-    u8 padF4[0x4C];
+    u8 pad00[0x10];    /* 0x00 */
+    f32 unk10;          /* 0x10 */
+    f32 unk14;          /* 0x14 */
+    u8 pad18[0x10];    /* 0x18 */
+    s32 unk28;          /* 0x28 */
+    s16 unk2C;          /* 0x2C */
+    u8 pad2E[0x5E];    /* 0x2E */
+    f32 scale8C;       /* 0x8C */
+    u8 pad90[0x14];    /* 0x90 */
+    u32 unkA4;         /* 0xA4 */
+    u8 padA8[0x48];    /* 0xA8 */
+    u32 valueF0;       /* 0xF0 */
+    s32 billId;        /* 0xF4 */
+    u8 padF8[4];       /* 0xF8 */
+    void *unkFC;       /* 0xFC */
+    u8 pad100[0x40];   /* 0x100 */
     u16 dispatchIndex; /* 0x140: particle dispatch table index */
     u16 restartFlag;   /* 0x142: set after mode changes */
     u8 pad144[0x0C];
     u8 mode150;
     u8 mode151;
+    u8 pad152[0x22];
+    void *child;       /* 0x174 */
 } ParObj;
 
 typedef struct ParListNode {
@@ -27,6 +40,15 @@ typedef struct ParCellNode {
     u8 pad00[0x24];
     struct ParCellNode *next;
 } ParCellNode;
+
+/* Kind resource owner: release flag and handles at +0x10/+0x40. */
+typedef struct ParReleaseRecord {
+    u16 released;       /* 0x00 */
+    u8 pad02[0x0E];
+    u32 allocation;     /* 0x10 */
+    u8 pad14[0x2C];
+    u32 asset;          /* 0x40 */
+} ParReleaseRecord;
 
 typedef struct ParScaleObj {
     u16 kind;
@@ -199,19 +221,6 @@ s32 parObjGetMode(ParObj *object) {
     }
 }
 
-typedef struct ParKindObj {
-    u8 pad00[0x10];
-    f32 unk10;
-    f32 unk14;
-    u8 pad18[0x10];
-    s32 unk28;
-    s16 unk2C;
-    u8 pad2E[0xC6];
-    s32 billId; /* 0xF4 */
-    u8 padF8[0x48];
-    u16 kind;   /* 0x140 */
-} ParKindObj;
-
 extern BillDispatch D_003AAB80[];
 
 extern s32 func_00159A50(s32 id);
@@ -224,12 +233,12 @@ extern void func_00159FA0(s32 id);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
-ParKindObj *parInstantiateKind(ParKindObj *src) {
-    ParKindObj *obj;
+ParObj *parInstantiateKind(ParObj *src) {
+    ParObj *obj;
     s32 bill;
 
-    obj = D_003AAB80[src->kind].func();
-    obj->kind = src->kind;
+    obj = D_003AAB80[src->dispatchIndex].func();
+    obj->dispatchIndex = src->dispatchIndex;
     if (src->unk28 == -1) {
         bill = func_00159A50(src->billId);
         func_00159BF0(bill, obj->unk10, obj->unk14);
@@ -309,36 +318,36 @@ void func_001629C0(ParScaleObj *obj) {
     VU0_STORE_VF($vf10, D_00451F30);
 }
 
-void parDispatchKindUpdate(void *work) {
-    switch (*(u16 *)work) {
+void parDispatchKindUpdate(ParSystem *work) {
+    switch ((u16)work->kind) {
     case 1:
-        func_001618E0(*(s32 *)((u8 *)work + 8));
+        func_001618E0(work->vertexWordCount);
         return;
     case 2:
-        func_00162B60(*(s32 *)((u8 *)work + 0x10));
+        func_00162B60(work->handle);
         return;
     case 3:
-        func_00162C48(*(s32 *)((u8 *)work + 0x14));
+        func_00162C48((s32)work->cells);
         return;
     case 4:
-        func_00162D38(*(s32 *)((u8 *)work + 0x14));
+        func_00162D38((s32)work->cells);
         break;
     }
 }
 
-void parDispatchKindInit(void *work, s32 index) {
-    switch (*(u16 *)work) {
+void parDispatchKindInit(ParSystem *work, s32 index) {
+    switch ((u16)work->kind) {
     case 1:
-        parClearSlotFlag(*(s32 *)((u8 *)work + 8));
+        parClearSlotFlag(work->vertexWordCount);
         return;
     case 2:
-        parCellInit((void *)*(s32 *)((u8 *)work + 0x10), index);
+        parCellInit((void *)work->handle, index);
         return;
     case 3:
-        parCellInit((void *)*(s32 *)((u8 *)work + 0x14), index);
+        parCellInit((void *)work->cells, index);
         return;
     case 4:
-        func_00190148(*(s32 *)((u8 *)work + 0x14));
+        func_00190148((s32)work->cells);
         break;
     }
 }
@@ -451,10 +460,10 @@ void func_00162E40(void) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 
-void func_00162FC8(u16 *arg0) {
-    *arg0 = 1;
-    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
-    func_003297C8(*(u32 *)(arg0 + 8));
+void func_00162FC8(ParReleaseRecord *record) {
+    record->released = 1;
+    sdfQueueAssetRelease(record->asset);
+    func_003297C8(record->allocation);
 }
 
 void func_00163000(ParListNode *node) {
@@ -464,15 +473,15 @@ void func_00163000(ParListNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
 
-void func_00163238(s32 arg0) {
-    func_003332E8(*(u32 *)(arg0 + 0x40));
+void func_00163238(ParReleaseRecord *record) {
+    func_003332E8(record->asset);
 }
 
 /* Draw parameter block filled per strip by func_00164CB0. */
 typedef struct ParDrawState {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
+    s16 width;    /* 0x00 */
+    s16 height;   /* 0x02 */
+    s16 flags;    /* 0x04 */
     u8 pad6[2];
     s32 unk8;
     void *unkC;
@@ -486,7 +495,7 @@ extern ParDrawState D_00451F60;
 
 void parControlInit(void) {
     memset(&D_00451F60, 0, 0x2C);
-    D_00451F60.unk4 = 0x4000;
+    D_00451F60.flags = 0x4000;
 }
 
 ParSystem *func_00163290(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -796,8 +805,8 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001649E0);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164AE8);
 
-void func_00164C68(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 2) = arg1;
+void func_00164C68(s32 recordAddress, u16 value) {
+    *(u16 *)(recordAddress + 2) = value;
 }
 
 void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
@@ -838,9 +847,9 @@ void func_001653D8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     sdfConsAppendClearPacket(list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
-    state.unk0 = 0x10;
-    state.unk2 = 0x30;
-    state.unk4 = 0x4000;
+    state.width = 0x10;
+    state.height = 0x30;
+    state.flags = 0x4000;
     state.unk10 = cmd->unk8;
     state.unk20 = cmd->unkC;
     state.unk8 = cmd->unk4;
