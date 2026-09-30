@@ -37,6 +37,13 @@ struct PcpFlashWork1 {
 };
 
 extern s32 func_00177E90(s32 base, s32 index);
+extern f32 *func_00177B60(u32 handle, s32 index);
+extern f32 D_003B1230[];
+extern f32 D_003B1260[];
+extern f32 D_003B1240[];
+extern f32 D_003B1290[];
+extern f32 func_003407A0(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
 
 extern s32 func_00195A30(s32 color, s32 param);
 
@@ -99,9 +106,11 @@ struct PcpFlashWork3 {
     u32 randomRange;
     u32 colorA;
     u32 colorB;
-    u8 pad2C[0x0C];
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
     f32 maxScale;
-    u8 pad3C[0x04];
+    f32 unk3C;
     f32 increment;
     u32 unk44;
     PcpFlashPtc14 *parts;
@@ -332,9 +341,11 @@ struct PcpFlashWork9 {
     s32 fadeOutTime;
     u32 colorA;
     u32 colorB;
-    u8 pad34[0x0C];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
     f32 maxScale;
-    u8 pad44[0x04];
+    f32 unk44;
     f32 increment;
     u32 unk4C;
     PcpFlashPtc14 *parts;
@@ -441,7 +452,7 @@ extern void func_00171F28();
 extern u8 D_0037F680[];
 extern u8 D_0037F690[];
 extern s32 effBlendColor(s32, s32, f32);
-extern void func_001727A0(void *, s32, void *);
+extern void func_001727A0(PcpFlashWork2 *, s32, void *);
 extern void func_00177CD0(void *);
 
 typedef struct PcpFlashHandle {
@@ -652,7 +663,66 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
     part->angle = work->unk38 * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001727A0);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
+void func_001727A0(PcpFlashWork2 *work, s32 index, void *view)
+{
+    PcpFlashRotatingParticle *part = &work->parts[index];
+    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 center[4];
+    f32 scale[4];
+    f32 across[4];
+    f32 up[4];
+    f32 ratio;
+    f32 size;
+    f32 acrossLen;
+    f32 upLen;
+
+    size = part->scale;
+    ratio = size / part->unk28;
+    VEC3_SPLAT(scale, size);
+    acrossLen = part->unk24 * ratio;
+    VEC3_SPLAT(across, acrossLen);
+    upLen = part->unk20 * ratio;
+    VEC3_SPLAT(up, upLen);
+    center[0] = part->position[0];
+    center[1] = part->position[1];
+    center[2] = part->position[2];
+    VU0_LOAD_VF(vf10, center);
+    VU0_LOAD_VF(vf11, view);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, across);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, across);
+    VU0_LOAD_VF(vf10, up);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, up);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, D_003B1230);
+    VU0_LOAD_VF(vf11, up);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, D_003B1230);
+    VU0_LOAD_VF(vf11, across);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void *orientation)
 {
@@ -816,7 +886,79 @@ void func_00172EF0(PcpFlashWork3 *work, s32 flag, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172FE0);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: billboard corner offsets for a scaling particle on an arc, built from a normalised direction and its perpendicular */
+void func_00172FE0(PcpFlashWork3 *work, s32 index)
+{
+    PcpFlashPtc14 *part = &work->parts[index];
+    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 offset[4];
+    f32 unit[4];
+    f32 scaleA[4];
+    f32 scaleB[4];
+    f32 scaleC[4];
+    f32 size;
+    f32 ratio;
+    f32 sinv;
+    f32 height;
+    f32 widthB;
+    f32 widthC;
+
+    size = part->scale;
+    ratio = size / part->unk0C;
+    VEC3_SPLAT(scaleA, size);
+    widthB = work->unk30 * ratio;
+    widthC = work->unk2C * ratio;
+    VEC3_SPLAT(scaleB, widthB);
+    VEC3_SPLAT(scaleC, widthC);
+    unit[0] = func_003407A0(part->accumulator);
+    unit[1] = 0;
+    sinv = sdfSinPoly(part->accumulator);
+    unit[2] = sinv;
+    offset[0] = unit[0] * work->unk34;
+    offset[1] = 0;
+    offset[2] = sinv * work->unk34;
+    height = work->unk3C;
+    D_003B1240[0] = unit[0] * height;
+    D_003B1240[1] = height + -1.0f;
+    D_003B1240[2] = sinv * height;
+    VU0_LOAD_VF(vf10, D_003B1240);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, unit);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, scaleB);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleB);
+    VU0_LOAD_VF(vf10, scaleC);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleC);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scaleA);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleC);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleB);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void func_001731C8(PcpFlashWork3 *work, s32 index) {
     PcpFlashPtc14 *part;
@@ -824,8 +966,6 @@ void func_001731C8(PcpFlashWork3 *work, s32 index) {
     part = &work->parts[index];
     part->accumulator += work->increment;
 }
-
-extern void func_00172FE0(void *, s32);
 
 void effFlashUpdateWork3(PcpFlashWork3 *work) {
     s32 index;
@@ -998,7 +1138,71 @@ void func_00174018(PcpFlashWork5 *work, s32 flag, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174108);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: billboard corner offsets for a particle on an arc, built from a normalised direction and its perpendicular */
+void func_00174108(PcpFlashWork5 *work, s32 index)
+{
+    PcpFlashPtc10 *part = &work->parts[index];
+    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 offset[4];
+    f32 unit[4];
+    f32 scaleA[4];
+    f32 scaleB[4];
+    f32 scaleC[4];
+    f32 sinv;
+    f32 height;
+
+    VEC3_SPLAT(scaleA, work->unk6C);
+    VEC3_SPLAT(scaleB, work->unk74);
+    VEC3_SPLAT(scaleC, work->unk70);
+    unit[0] = func_003407A0(part->accumulator);
+    unit[1] = 0;
+    sinv = sdfSinPoly(part->accumulator);
+    unit[2] = sinv;
+    offset[0] = unit[0] * work->unk68;
+    offset[1] = 0;
+    offset[2] = sinv * work->unk68;
+    height = part->unk0C;
+    D_003B1260[0] = unit[0] * height;
+    D_003B1260[1] = height + -1.0f;
+    D_003B1260[2] = sinv * height;
+    VU0_LOAD_VF(vf10, D_003B1260);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, unit);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, scaleB);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleB);
+    VU0_LOAD_VF(vf10, scaleC);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleC);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scaleA);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleC);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleB);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void func_001742D0(PcpFlashWork5 *work, s32 index) {
     PcpFlashPtc10 *part;
@@ -1508,7 +1712,79 @@ void func_001761A0(PcpFlashWork9 *work, s32 flag, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176290);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: billboard corner offsets for a scaling particle on an arc, built from a normalised direction and its perpendicular */
+void func_00176290(PcpFlashWork9 *work, s32 index)
+{
+    PcpFlashPtc14 *part = &work->parts[index];
+    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 offset[4];
+    f32 unit[4];
+    f32 scaleA[4];
+    f32 scaleB[4];
+    f32 scaleC[4];
+    f32 size;
+    f32 ratio;
+    f32 sinv;
+    f32 height;
+    f32 widthB;
+    f32 widthC;
+
+    size = part->scale;
+    ratio = size / part->unk0C;
+    VEC3_SPLAT(scaleA, size);
+    widthB = work->unk38 * ratio;
+    widthC = work->unk34 * ratio;
+    VEC3_SPLAT(scaleB, widthB);
+    VEC3_SPLAT(scaleC, widthC);
+    unit[0] = func_003407A0(part->accumulator);
+    unit[1] = 0;
+    sinv = sdfSinPoly(part->accumulator);
+    unit[2] = sinv;
+    offset[0] = unit[0] * work->unk3C;
+    offset[1] = 0;
+    offset[2] = sinv * work->unk3C;
+    height = work->unk44;
+    D_003B1290[0] = unit[0] * height;
+    D_003B1290[1] = height + -1.0f;
+    D_003B1290[2] = sinv * height;
+    VU0_LOAD_VF(vf10, D_003B1290);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, unit);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, scaleB);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleB);
+    VU0_LOAD_VF(vf10, scaleC);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleC);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scaleA);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleC);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleB);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void func_00176478(PcpFlashWork9 *work, s32 index) {
     PcpFlashPtc14 *part;
@@ -1516,8 +1792,6 @@ void func_00176478(PcpFlashWork9 *work, s32 index) {
     part = &work->parts[index];
     part->accumulator += work->increment;
 }
-
-extern void func_00176290();
 
 void effFlashUpdateWork9(PcpFlashWork9 *work) {
     s32 restart;

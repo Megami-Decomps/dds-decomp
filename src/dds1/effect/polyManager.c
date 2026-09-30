@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Polygon node with an f32 scale pair and a resource handle at 0xDC.
    (Retail lwc1 at +0xDC belongs to the PolyQuad flavor below, whose
@@ -74,6 +75,11 @@ void func_0015B918(u32 arg);
 void func_0015DAA0(void);
 void func_002CFF98(void *arg);
 void func_002D0918(void *arg);
+extern f32 func_002E78F8(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+extern void func_002DD608(f32 angle);
+extern void func_002DD968(f32 angle);
+extern void func_002DDC50(void);
 
 void effPolyDestroyWork(PolyNode *obj) {
     func_0015B8B8(obj->unkDC);
@@ -111,7 +117,84 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015E100);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E148);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015E238);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* Point buffer of one strip; `count` is copied from the strip's own count. */
+typedef struct {
+    u32 points;   /* 0x0 */
+    u32 unk4;     /* 0x4 */
+    s32 count;    /* 0x8 */
+    u32 unkC;     /* 0xC */
+    u32 unk10;    /* 0x10 */
+} PolyStripEntry; /* 0x14 bytes */
+
+typedef struct {
+    u8 pad00[8];             /* 0x0 */
+    s32 count;               /* 0x8 */
+    u8 pad0C[8];             /* 0xC */
+    PolyStripEntry *entries; /* 0x14 */
+} PolyStrip;
+
+/* Band node: an origin, a transform, the ring's segment count and a strip at 0xF0. */
+typedef struct {
+    f32 origin[4];      /* 0x0 */
+    u8 pad10[0x10];     /* 0x10 */
+    f32 matrix[16];     /* 0x20 */
+    u8 pad60[0x64];     /* 0x60 */
+    u32 segments;       /* 0xC4 */
+    f32 unkC8;          /* 0xC8 */
+    u8 padCC[0x24];     /* 0xCC */
+    PolyStrip *strip;   /* 0xF0 */
+} PolyBand;
+
+/* Lay the band's point pairs of strip entry `index` around the ring: an inner and an outer radius, moved to the origin. */
+void func_0015E238(PolyBand *obj, s32 index, f32 width)
+{
+    PolyStrip *strip = obj->strip;
+    PolyStripEntry *entry = &strip->entries[index];
+    f32 dir[4];
+    f32 wide[4];
+    f32 narrow[4];
+    f32 step;
+    f32 angle;
+    f32 *out;
+    f32 *first;
+    s32 pairs;
+    s32 i;
+
+    entry->count = strip->count;
+    out = (f32 *)entry->points;
+    pairs = strip->count / 2;
+    VEC3_SPLAT(wide, width);
+    VEC3_SPLAT(narrow, width + obj->unkC8);
+    step = 3.14159265f * 2.0f / (f32)obj->segments;
+    VU0_LOAD_MATRIX(obj->matrix);
+    angle = 0.0f;
+    VU0_LOAD_VF(vf12, obj->origin);
+    for (i = 0; i < pairs - 1; i++) {
+        dir[0] = func_002E78F8(angle);
+        dir[1] = 0;
+        dir[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, dir);
+        VU0_LOAD_VF(vf11, wide);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, out + 4);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_LOAD_VF(vf11, narrow);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, out);
+        out += 8;
+        angle += step;
+    }
+    first = (f32 *)entry->points;
+    PCP_COPY_VECTOR(out, first);
+    PCP_COPY_VECTOR(out + 4, first + 4);
+}
+#undef VEC3_SPLAT
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E3D8);
 
@@ -154,7 +237,87 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015EEF0);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015EF50);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015F0C0);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+typedef struct {
+    u8 pad00[4];
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+} PolyRec; /* 0x14 bytes */
+
+/* Band node with its own rotation records at 0xF8 and a strip at 0xF4. */
+typedef struct {
+    f32 origin[4];      /* 0x0 */
+    u8 pad10[0x10];     /* 0x10 */
+    f32 matrix[16];     /* 0x20 */
+    u8 pad60[0x64];     /* 0x60 */
+    u32 segments;       /* 0xC4 */
+    f32 unkC8;          /* 0xC8 */
+    u8 padCC[0x18];     /* 0xCC */
+    f32 unkE4;          /* 0xE4 */
+    u8 padE8[0xC];      /* 0xE8 */
+    PolyStrip *strip;   /* 0xF4 */
+    PolyRec *recs;      /* 0xF8 */
+} PolyBandC;
+
+/* Same ring as func_0015E238, but the record's rotation is applied through the second matrix bank first. */
+void func_0015F0C0(PolyBandC *obj, s32 index)
+{
+    PolyStrip *strip = obj->strip;
+    PolyRec *rec = &obj->recs[index];
+    PolyStripEntry *entry = &strip->entries[index];
+    f32 dir[4];
+    f32 wide[4];
+    f32 narrow[4];
+    f32 step;
+    f32 angle;
+    f32 *out;
+    f32 *first;
+    s32 pairs;
+    s32 i;
+
+    entry->count = strip->count;
+    out = (f32 *)entry->points;
+    pairs = strip->count >> 1;
+    func_002DD608(rec->unk0C);
+    func_002DD968(rec->unk10);
+    func_002DDC50();
+    rec->unk10 += obj->unkE4 * (3.14159265f / 180.0f);
+    angle = rec->unk04;
+    rec->unk04 = angle + rec->unk08;
+    step = 3.14159265f * 2.0f / (f32)obj->segments;
+    VU0_LOAD_MATRIX_B(obj->matrix);
+    func_002DDC50();
+    VEC3_SPLAT(wide, angle);
+    VEC3_SPLAT(narrow, angle + obj->unkC8);
+    angle = 0.0f;
+    VU0_LOAD_VF(vf12, obj->origin);
+    for (i = 0; i < pairs - 1; i++) {
+        dir[0] = func_002E78F8(angle);
+        dir[1] = 0;
+        dir[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, dir);
+        VU0_LOAD_VF(vf11, wide);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, out + 4);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_LOAD_VF(vf11, narrow);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, out);
+        out += 8;
+        angle += step;
+    }
+    first = (f32 *)entry->points;
+    PCP_COPY_VECTOR(out, first);
+    PCP_COPY_VECTOR(out + 4, first + 4);
+}
+#undef VEC3_SPLAT
 
 void func_0015F2B0(f32 scale, PolyNode *obj) {
     obj->unkCC = obj->unkCC * scale;

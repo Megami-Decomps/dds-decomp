@@ -8,6 +8,17 @@ extern u64 effParamTableGetBlock(u64, u64);
 
 extern u32 effPcpScatterResAddRef(u32);
 
+extern u8 D_003AA868[];
+extern f32 func_00341240(void *state);
+extern f32 func_003407A0(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+extern void func_003364B8(f32 angle);
+extern void func_00336818(f32 angle);
+extern void func_00336B00(void);
+extern void func_00336A68(f32 *rot);
+extern s32 effGetScatterWideBlock(u32 object, s32 index);
+extern s32 effGetScatterNarrowBlock(u32 object, s32 index);
+
 /* Shared resource handed between scatter effects. func_00173018 creates it,
    func_001730B8 takes a reference, func_00173068 releases it. */
 typedef struct PcpScatterRes PcpScatterRes;
@@ -288,7 +299,55 @@ void effPcpScatterReleaseSharedParticles(PcpScatterSharedWork *work) {
     func_003297C8(work->particles.buffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179618);
+typedef struct PcpScatterSprite {
+    u32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} PcpScatterSprite;
+
+typedef struct PcpScatterWork10 {
+    u8 pad00[0x30];
+    s32 unk30;
+    u8 pad34[4];
+    f32 unk38;
+    u8 pad3C[4];
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    u8 pad50[0x14];
+    PcpScatterSprite *sprites;
+} PcpScatterWork10;
+
+/* Init sprite `index`: random spin, jittered start and end distances, and a random unit direction. */
+void func_00179618(PcpScatterWork10 *work, s32 index)
+{
+    PcpScatterSprite *sprite = &work->sprites[index];
+    f32 dir[4];
+    f32 jitter;
+
+    sprite->unk10 = func_00341240(D_003AA868) * (3.14159265f * 2.0f);
+    jitter = work->unk48;
+    sprite->unk0C = work->unk40 * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->unk4C;
+    sprite->unk04 = (work->unk44 * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) - sprite->unk0C) / (f32)work->unk30;
+    sprite->unk08 = work->unk38;
+    dir[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    dir[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    dir[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, dir);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, dir);
+    sprite->unk00 = 0;
+    sprite->unk14 = dir[0];
+    sprite->unk18 = dir[1];
+    sprite->unk1C = dir[2];
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179780);
 
@@ -476,8 +535,6 @@ extern void effCreateScatterResource(void *object, u32 resource);
 
 extern u32 effMiscRand(void *state);
 
-extern u8 D_003AA868[];
-
 /* Allocate particles after the scatter work, then assign randomized offsets. */
 PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
     PcpScatterParams *src;
@@ -542,7 +599,80 @@ void func_0017AFD0(PcpScatterWork4 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B000);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B390);
+typedef struct PcpScatterRing {
+    f32 unk00;
+    f32 unk04;
+    u8 pad08[4];
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8 pad24[4];
+} PcpScatterRing;
+
+typedef struct PcpScatterBlockObject {
+    u8 pad00[0x5C];
+    s32 stride;
+} PcpScatterBlockObject;
+
+typedef struct PcpScatterWork11 {
+    u8 pad00[0xCC];
+    f32 unkCC;
+    u8 padD0[8];
+    f32 unkD8;
+    u8 padDC[0x9C];
+    PcpScatterRing *rings;
+    u8 pad17C[8];
+    u32 scatterObject;
+} PcpScatterWork11;
+
+/* Advance ring `index`: rebuild the rotation matrix, then lay the ring's vertex pairs around it. */
+void func_0017B390(PcpScatterWork11 *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    PcpScatterRing *ring;
+    f32 radius;
+    f32 rise;
+    f32 angle;
+    f32 step;
+    u32 count;
+    u32 i;
+
+    effGetScatterNarrowBlock(work->scatterObject, index);
+    ring = &work->rings[index];
+    radius = ring->unk1C + ring->unk20;
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    rise = ring->unk0C;
+    angle = ring->unk10;
+    step = ring->unk18;
+    func_003364B8(ring->unk00);
+    func_00336818(ring->unk04);
+    func_00336B00();
+    ring->unk04 += ring->unk14;
+    ring->unk14 *= work->unkD8;
+    ring->unk1C = radius;
+    ring->unk0C = rise * work->unkCC;
+    for (i = 0; i < count; i++) {
+        f32 s;
+
+        vertex[0] = func_003407A0(angle) * radius;
+        vertex[1] += rise;
+        s = sdfSinPoly(angle);
+        vertex[4] = vertex[0];
+        vertex[5] += rise;
+        vertex[6] = vertex[2] = s * radius;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        angle += step;
+        vertex += 8;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B520);
 
@@ -660,7 +790,65 @@ void func_0017BA60(PcpScatterWork5 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BA90);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BE08);
+typedef struct PcpScatterWork12 {
+    u8 pad00[0xCC];
+    f32 unkCC;
+    u8 padD0[8];
+    f32 unkD8;
+    u8 padDC[0x10];
+    f32 unkEC;
+    u8 padF0[0x8C];
+    PcpScatterRing *rings;
+    u8 pad180[0xC];
+    u32 scatterObject;
+} PcpScatterWork12;
+
+/* Same ring update as func_0017B390, with the ring's 0x20 radius step scaled as well. */
+void func_0017BE08(PcpScatterWork12 *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    PcpScatterRing *ring;
+    f32 radius;
+    f32 rise;
+    f32 angle;
+    f32 step;
+    u32 count;
+    u32 i;
+
+    effGetScatterNarrowBlock(work->scatterObject, index);
+    ring = &work->rings[index];
+    radius = ring->unk1C + ring->unk20;
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    rise = ring->unk0C;
+    angle = ring->unk10;
+    step = ring->unk18;
+    func_003364B8(ring->unk00);
+    func_00336818(ring->unk04);
+    func_00336B00();
+    ring->unk04 += ring->unk14;
+    ring->unk14 *= work->unkD8;
+    ring->unk1C = radius;
+    ring->unk20 *= work->unkEC;
+    ring->unk0C = rise * work->unkCC;
+    for (i = 0; i < count; i++) {
+        f32 s;
+
+        vertex[0] = func_003407A0(angle) * radius;
+        vertex[1] += rise;
+        s = sdfSinPoly(angle);
+        vertex[4] = vertex[0];
+        vertex[5] += rise;
+        vertex[6] = vertex[2] = s * radius;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        angle += step;
+        vertex += 8;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BFA8);
 
@@ -778,7 +966,65 @@ void func_0017C568(PcpScatterWork6 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C598);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017C988);
+typedef struct PcpScatterWork13 {
+    u8 pad00[0xD0];
+    f32 unkD0;
+    u8 padD4[8];
+    f32 unkDC;
+    u8 padE0[0x10];
+    f32 unkF0;
+    u8 padF4[0x90];
+    PcpScatterRing *rings;
+    u8 pad188[0xC];
+    u32 scatterObject;
+} PcpScatterWork13;
+
+/* Same ring update as func_0017BE08 on a work area with a longer header. */
+void func_0017C988(PcpScatterWork13 *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    PcpScatterRing *ring;
+    f32 radius;
+    f32 rise;
+    f32 angle;
+    f32 step;
+    u32 count;
+    u32 i;
+
+    effGetScatterNarrowBlock(work->scatterObject, index);
+    ring = &work->rings[index];
+    radius = ring->unk1C + ring->unk20;
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    rise = ring->unk0C;
+    angle = ring->unk10;
+    step = ring->unk18;
+    func_003364B8(ring->unk00);
+    func_00336818(ring->unk04);
+    func_00336B00();
+    ring->unk04 += ring->unk14;
+    ring->unk14 *= work->unkDC;
+    ring->unk1C = radius;
+    ring->unk20 *= work->unkF0;
+    ring->unk0C = rise * work->unkD0;
+    for (i = 0; i < count; i++) {
+        f32 s;
+
+        vertex[0] = func_003407A0(angle) * radius;
+        vertex[1] += rise;
+        s = sdfSinPoly(angle);
+        vertex[4] = vertex[0];
+        vertex[5] += rise;
+        vertex[6] = vertex[2] = s * radius;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        angle += step;
+        vertex += 8;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CB28);
 
@@ -830,6 +1076,73 @@ void func_0017D108(PcpScatterWork7 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D138);
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D3D8);
+typedef struct PcpScatterRingB {
+    f32 rot[3];
+    s32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+} PcpScatterRingB;
+
+typedef struct PcpScatterWork14 {
+    u8 pad00[0x84];
+    f32 unk84;
+    u8 pad88[0xC];
+    f32 unk94;
+    s32 unk98;
+    u8 pad9C[0x8C];
+    PcpScatterRingB *rings;
+    u8 pad12C[8];
+    u32 scatterObject;
+} PcpScatterWork14;
+
+/* Advance ring `index` and lay its vertex pairs around a flat circle rotated by the ring's own angles. */
+void func_0017D3D8(PcpScatterWork14 *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    PcpScatterRingB *ring;
+    f32 angle;
+    f32 radius;
+    f32 step;
+    f32 height;
+    f32 s;
+    u32 count;
+    u32 i;
+
+    effGetScatterNarrowBlock(work->scatterObject, index);
+    ring = &work->rings[index];
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    angle = ring->unk10 + ring->unk14;
+    radius = ring->unk1C;
+    step = ring->unk18;
+    radius += ring->unk20;
+    if (ring->unk0C >= work->unk98) {
+        ring->unk20 *= work->unk94;
+    }
+    func_00336A68(ring);
+    ring->unk1C = radius;
+    ring->unk10 = angle;
+    ring->unk14 *= work->unk84;
+    height = ring->unk24;
+    for (i = 0; i < count; i++) {
+        vertex[0] = func_003407A0(angle) * radius;
+        vertex[1] = 0;
+        s = sdfSinPoly(angle);
+        vertex[4] = vertex[0];
+        vertex[5] = -height;
+        vertex[6] = vertex[2] = s * radius;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        angle += step;
+        vertex += 8;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D560);
