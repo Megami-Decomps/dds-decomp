@@ -67,7 +67,24 @@ u32 dds3GetCameraHandle(CameraObject *camera) {
     return camera->data->handle;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112DE8);
+typedef struct ActionObj {
+    u8 unk0[4];    /* 0x0 */
+    s32 unk4;      /* 0x4 */
+    u8 unk8[0x14]; /* 0x8 */
+    s32 unk1C;     /* 0x1C */
+} ActionObj;
+
+extern ActionObj *func_00110AA8();
+
+extern void dds3EnsureSlotData();
+
+ActionObj *func_00112DE8(s32 value) {
+    ActionObj *obj = func_00110AA8(4);
+
+    obj->unk4 = value;
+    dds3EnsureSlotData(obj);
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112E30);
 

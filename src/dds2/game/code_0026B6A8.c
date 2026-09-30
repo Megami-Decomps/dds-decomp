@@ -12,6 +12,8 @@ extern s64 evtGetMessageWindowControlState(void);
 
 extern s32 D_00435DD0;
 
+extern char D_003CE848[];
+
 typedef struct SceneFlagEntry {
     s32 needFlag;    /* 0x00 */
     s32 doneFlag;    /* 0x04 */
@@ -101,7 +103,22 @@ u32 func_0026B930(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", dspUpdateFlagEvent);
+s64 dspUpdateFlagEvent(s32 request) {
+    s32 state = kwlnTaskGetUserValue();
+    s32 *panel = (s32 *)(state + 0x54);
+    s64 result = func_002C4038(state + 8, panel, 0, request);
+    if (result != 0) {
+        return result;
+    }
+    if (*panel == 0) {
+        if (evtGetMessageWindowControlState() == 0) {
+            if (dspStartFlagEvent(state) == 0) {
+                mnuSetPopupEntryFlagged(panel, D_003CE848);
+            }
+        }
+    }
+    return 0;
+}
 
 void func_0026B9D0(s32 request) {
     s32 state = kwlnTaskGetUserValue();

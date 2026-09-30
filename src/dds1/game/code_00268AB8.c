@@ -1,5 +1,23 @@
 #include "common.h"
 
+extern s32 dds3AdvanceWorldCounter(void);
+
+extern s32 func_00112C08(s32 counter, f32 *position, f32 *rotation);
+
+extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
+
+extern void effObjSetInnerFloat(s32 object, f32 value);
+
+extern s32 dds3GetWorldSecondaryObject(void);
+
+extern void func_001109B8(s32, void *);
+
+extern u8 D_003DC1C0[];
+
+extern u8 D_003DC1D0[];
+
+extern void *D_003BD8E0;
+
 extern char D_003AFD48[]; /* "---------- AT3 --------\n", followed by 8 zero bytes no C function emits */
 
 extern char D_003AFD80[]; /* "titleProc" */
@@ -561,11 +579,13 @@ void func_0026AEB0(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD48);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AEC8);
+void func_0026AEC8(void) {
+    D_003BD8E0 = func_00112C08(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0);
+    dds3SetWorldEntryCallbackTarget(D_003BD8E0, "title_camera");
+    effObjSetInnerFloat(D_003BD8E0, 2.0f);
+    func_001109B8(dds3GetWorldSecondaryObject(), D_003BD8E0);
+}
 
-extern u8 D_003DC1C0[];
-extern u8 D_003DC1D0[];
-extern void *D_003BD8E0;
 extern void effObjSetInnerFirstVec(void *, void *);
 extern void effObjSetInnerSecondVec(void *, void *);
 

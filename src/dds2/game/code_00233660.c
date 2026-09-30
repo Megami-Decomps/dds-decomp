@@ -34,8 +34,9 @@ typedef struct MdlViewState {
     s8 unk09;
     s8 taskPhase; /* 0x0A: one-based index into D_003C87F0 */
     s8 unk0B;
-    u8 unk0C;
-    u8 pad0D[2];
+    s8 unk0C;
+    s8 unk0D;
+    u8 pad0E;
     u8 unk0F;
     u8 unk10;
     u8 pad11[3];
@@ -68,7 +69,8 @@ typedef struct MdlViewState {
     s16 unk4E;
     s16 unk50;
     s16 unk52;
-    u8 pad54[0x38];
+    f32 unk54; /* viewer zoom, in hundredths */
+    u8 pad58[0x34];
     s32 slotBeforeResources[1];
     void *resources[1];
     u8 pad94[0x2C];
@@ -1234,7 +1236,46 @@ s32 func_002369C0(void) {
 
 extern s8 D_0037F510[];
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlAdjustViewerScale);
+void mdlAdjustViewerScale(void) {
+    s32 value = (s32)(D_00453550.unk54 * 100.0f + 0.5f);
+
+    if (D_0037F510[0x27] & 2) {
+        if (value < 0x32) {
+            value += 1;
+        } else if (value < 0x1F4) {
+            value += 10;
+        } else {
+            value += 100;
+            if (value >= 0x7D1) {
+                value = 0x7D0;
+            }
+        }
+        D_00453550.unk54 = value * 0.01f;
+    } else if (D_0037F510[0x26] & 2) {
+        if (value < 0x33) {
+            value -= 1;
+            if (value < 5) {
+                value = 5;
+            }
+        } else if (value < 0x1F5) {
+            value -= 10;
+        } else {
+            value -= 100;
+        }
+        D_00453550.unk54 = value * 0.01f;
+    }
+    if (D_0037F510[0x23] < 0) {
+        D_00453550.unk0C ^= 1;
+    }
+    D_00453550.unk0D = 0;
+    if (D_00453550.unk0C != 0) {
+        if (D_0037F510[0x25] != 0) {
+            D_00453550.unk0D = 1;
+        } else if (D_0037F510[0x24] != 0) {
+            D_00453550.unk0D = -1;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236B20);
 

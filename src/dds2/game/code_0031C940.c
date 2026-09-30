@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern s32 func_0031CF88(f32, f32);
+
 /* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
 typedef struct ModelInstance {
     f32 vector0[3];
@@ -33,7 +35,9 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CDE8);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CE60);
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF68);
+s64 func_0031CF68(f32 x) {
+    return func_0031CF88(x, x);
+}
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF88);
 

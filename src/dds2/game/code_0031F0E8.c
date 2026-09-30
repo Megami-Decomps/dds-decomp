@@ -322,7 +322,51 @@ void func_00320EA8(s32 callbackNode, s32 callbackAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320EB8);
+typedef struct SdfListNode {
+    u32 index;                  /* 0x00 */
+    s32 key;                    /* 0x04 */
+    struct SdfListNode *next;   /* 0x08 */
+    struct SdfListNode *prev;   /* 0x0C */
+    void *value;                /* 0x10 */
+} SdfListNode;
+
+typedef struct SdfList {
+    u32 count;                     /* 0x00 */
+    SdfListNode *head;             /* 0x04 */
+    SdfListNode *tail;             /* 0x08 */
+    u32 pad0C;
+    void (*onRemove)(u32, void *); /* 0x10 */
+} SdfList;
+
+SdfListNode *func_00320EB8(SdfList *list, SdfListNode *node) {
+    SdfListNode *it;
+
+    if (node == NULL) {
+        return NULL;
+    }
+    for (it = list->head; it != NULL; it = it->next) {
+        if (node->index < it->index) {
+            it->index = it->index - 1;
+        }
+    }
+    list->count = list->count - 1;
+    if (node->next != NULL) {
+        node->next->prev = node->prev;
+    }
+    if (node->prev != NULL) {
+        node->prev->next = node->next;
+    }
+    if (node == list->head) {
+        list->head = node->next;
+    }
+    if (node == list->tail) {
+        list->tail = node->prev;
+    }
+    if (node->next != NULL) {
+        return node->next;
+    }
+    return node->prev;
+}
 
 u32 func_00320F68(u32 list, u32 node) {
     u32 remaining;

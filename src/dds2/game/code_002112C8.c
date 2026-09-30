@@ -26,6 +26,12 @@ extern s8 D_00436CAC;
 
 extern void func_00211EA8();
 
+extern s32 btlActorEntryIsExpired();
+
+extern s32 btlGetActorEntryCode();
+
+extern s32 D_003BF660[];
+
 extern u32 btlPickWeightedAiSlot();
 
 extern s32 fldGetSelectedUnitStat();
@@ -689,7 +695,41 @@ s32 btlHasOtherGroup400UnitMode(s32 excludedUnit, s32 mode) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00212B38);
+/* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own
+   entry. Every failure falls out to the single trailing `return 0`. K&R:
+   callers pass one argument or none. */
+s32 func_00212B38(actor, kind)
+    s32 actor;
+    s32 kind;
+{
+    s32 i;
+    s32 j;
+
+    if (kind == 0xB) {
+        for (i = 0; i < 10; i += 2) {
+            if (btlActorEntryIsExpired(actor, D_003BF660[i]) != 0 && btlGetActorEntryCode(actor, D_003BF660[i]) > 0) {
+                return 1;
+            }
+        }
+    } else if (kind == 0xC) {
+        for (j = 1; j < 10; j += 2) {
+            if (btlActorEntryIsExpired(actor, D_003BF660[j]) != 0 && btlGetActorEntryCode(actor, D_003BF660[j]) <= 0) {
+                return 1;
+            }
+        }
+    } else if (btlActorEntryIsExpired(actor, D_003BF660[kind]) != 0 || kind == 0xA || kind == 0xD) {
+        if ((kind & 1) == 0 || kind == 0xD) {
+            if (btlGetActorEntryCode(actor, D_003BF660[kind]) > 0) {
+                return 1;
+            }
+        } else {
+            if (btlGetActorEntryCode(actor, D_003BF660[kind]) <= 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00212CB8);
 
