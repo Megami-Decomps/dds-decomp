@@ -2084,13 +2084,25 @@ void *func_002D0678(void) {
     return func_002D0498;
 }
 
+typedef struct MenuWork {
+    u8 pad0[0x30];
+    u8 unk30;
+    u8 unk31;
+    u16 unk32;
+    u16 unk34;
+    u16 unk36;
+    u16 unk38;
+    u16 unk3A;
+    u32 unk3C;
+} MenuWork;
+
 void func_002D06B0(void) {
-    *(u8 *)(D_00437D84 + 0x31) = 0;
+    ((MenuWork *)D_00437D84)->unk31 = 0;
     func_002D0678();
 }
 
 void func_002D06D0(void) {
-    *(u8 *)(D_00437D84 + 0x31) = 1;
+    ((MenuWork *)D_00437D84)->unk31 = 1;
     func_002D0678();
 }
 
@@ -2104,7 +2116,7 @@ void *func_002D0730(void) {
     D_00437D18 = -1;
     D_00437D1C = 0;
     func_002CA1D8(0x18);
-    *(u8 *)(D_00437D84 + 0x30) = 1;
+    ((MenuWork *)D_00437D84)->unk30 = 1;
     return func_002D0340((u32)func_002D06F0);
 }
 
@@ -2152,7 +2164,7 @@ void *func_002D08F0(void) {
 void func_002D0920(void) {
     func_002CA1D8(0);
     D_00437D1C = 10;
-    *(u8 *)(D_00437D84 + 0x30) = 0;
+    ((MenuWork *)D_00437D84)->unk30 = 0;
     func_002D0470((u32)func_002D0770, (u32)func_002D0678, (u32)func_002D08F0, 0);
 }
 
@@ -2163,7 +2175,7 @@ s32 mcdContinueLoadSelection(void) {
     if (state != 0) {
         if (state == 2) {
             block = D_00437D84;
-            *(u16 *)(block + 0x36) = 0;
+            ((MenuWork *)block)->unk36 = 0;
             func_002D0D90(block);
             sndSetSequenceVolumePan(8, 0x7f, 0x3f);
             next = (s32)func_002D0810;
@@ -2186,24 +2198,13 @@ void *fileMenuWorkStart(void) {
     if (kwlnFadeIsActive()) {
         kwlnFadeStartIn(0x10);
     }
-    if (*(u16 *)(D_00437D84 + 0x34) == 0) {
+    if (((MenuWork *)D_00437D84)->unk34 == 0) {
         return func_002D0920;
     }
-    *(u8 *)(D_00437D84 + 0x30) = 1;
+    ((MenuWork *)D_00437D84)->unk30 = 1;
     return func_002D06F0();
 }
 
-typedef struct MenuWork {
-    u8 pad0[0x30];
-    u8 unk30;
-    u8 unk31;
-    u16 unk32;
-    u16 unk34;
-    u16 unk36;
-    u16 unk38;
-    u16 unk3A;
-    u32 unk3C;
-} MenuWork;
 
 void fileMenuWorkCreate(u32 arg0) {
     u32 buffer = func_003292A8(0x40);
@@ -2221,7 +2222,7 @@ void fileMenuWorkCreate(u32 arg0) {
 
 void func_002D0A90(void) {
     if (D_00437D84 != 0) {
-        func_003298C0(*(u32 *)(D_00437D84 + 0x3c));
+        func_003298C0(((MenuWork *)D_00437D84)->unk3C);
         D_00437D84 = 0;
     }
 }
@@ -2248,13 +2249,13 @@ INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B938);
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0B08);
 
 void func_002D0D00(s32 arg0) {
-    s32 temp_v0;
+    s32 state;
 
-    temp_v0 = D_00435DD0;
+    state = D_00435DD0;
     *(u32 *)(D_00435DD0 + 0x20) = *(u32 *)(arg0 + 0x20);
-    *(u32 *)(temp_v0 + 0x24) = *(u32 *)(arg0 + 0x24);
-    *(u32 *)(temp_v0 + 0x28) = *(u32 *)(arg0 + 0x28);
-    *(u32 *)(temp_v0 + 0x2c) = *(u32 *)(arg0 + 0x2c);
+    *(u32 *)(state + 0x24) = *(u32 *)(arg0 + 0x24);
+    *(u32 *)(state + 0x28) = *(u32 *)(arg0 + 0x28);
+    *(u32 *)(state + 0x2c) = *(u32 *)(arg0 + 0x2c);
 }
 
 typedef struct {
@@ -2372,9 +2373,20 @@ s32 func_002D13F0(void) {
     return 0;
 }
 
+/* Save/config task context: DDS2 places the status four bytes later. */
+typedef struct FileConfigTask {
+    u8 pad0[0xC];
+    u32 frame;      /* 0x0C: passed to menu window drawing */
+    u32 slots[4];   /* 0x10 */
+    u8 pad20[8];
+    s32 result;     /* 0x28: negative when the queued load failed */
+    u8 pad2C[0xC];
+    u32 pending;    /* 0x38: zero when no load can start */
+} FileConfigTask;
+
 u32 func_002D1428(s32 arg0) {
     if (arg0 < 4) {
-        return *(u32 *)((s32)arg0 * 4 + D_00439058 + 0x10);
+        return ((FileConfigTask *)D_00439058)->slots[arg0];
     }
     return 0;
 }
@@ -2388,25 +2400,25 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D1450);
 extern void func_002D27A0(void *);
 
 s32 fileStartQueuedLoad(void) {
-    if (*(u32 *)(D_00439058 + 0x38) == 0) {
+    if (((FileConfigTask *)D_00439058)->pending == 0) {
         return 0;
     }
-    if (*(s32 *)(D_00439058 + 0x28) < 0) {
+    if (((FileConfigTask *)D_00439058)->result < 0) {
         return -1;
     }
     func_002D27A0((void *)D_00439058);
-    mnuCallInitWide(0x400, 0x400, 0, *(u32 *)(D_00439058 + 0xC), 0x53);
+    mnuCallInitWide(0x400, 0x400, 0, ((FileConfigTask *)D_00439058)->frame, 0x53);
     return 0;
 }
 
 u32 func_002D1910(void) {
-    u32 temp_v0;
+    u32 result;
 
-    temp_v0 = 0xffffffff;
-    if ((*(u32 *)(D_00439058 + 0x28) & 0x80000000) == 0) {
-        temp_v0 = 0;
+    result = 0xffffffff;
+    if ((((FileConfigTask *)D_00439058)->result & 0x80000000) == 0) {
+        result = 0;
     }
-    return temp_v0;
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D1930);
@@ -2571,49 +2583,49 @@ void fileJobNotifyPair(FileJob *left, FileJob *right) {
 }
 
 void fileJobNotifyComplete(void *work) {
-    u16 id = *(u16 *)((u8 *)work + 4);
+    u16 id = ((FileJob *)work)->type;
 
     if (D_003E917C[id].func != NULL) {
-        D_003E917C[id].func(*(void **)((u8 *)work + 8));
+        D_003E917C[id].func(((FileJob *)work)->data);
     }
 }
 
 void func_002D3710(void *arg0) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
-    void *data = *(void **)((u8 *)arg0 + 8);
+    u16 idx = ((FileJob *)arg0)->type;
+    void *data = ((FileJob *)arg0)->data;
 
     D_003E916C[idx].cb(data);
 }
 
 void func_002D3748(void *work) {
-    u16 id = *(u16 *)((u8 *)work + 4);
+    u16 id = ((FileJob *)work)->type;
 
     if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(*(void **)((u8 *)work + 8));
+        D_003E9180[id].func(((FileJob *)work)->data);
     }
 }
 
 void func_002D3788(void *work) {
-    u16 id = *(u16 *)((u8 *)work + 4);
+    u16 id = ((FileJob *)work)->type;
 
     if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(*(void **)((u8 *)work + 8));
+        D_003E9184[id].func(((FileJob *)work)->data);
     }
 }
 
 void func_002D37C8(void *work) {
-    u16 id = *(u16 *)((u8 *)work + 4);
+    u16 id = ((FileJob *)work)->type;
 
     if (D_003E9188[id].func != NULL) {
-        D_003E9188[id].func(*(void **)((u8 *)work + 8));
+        D_003E9188[id].func(((FileJob *)work)->data);
     }
 }
 
 void func_002D3808(void *work) {
-    u16 id = *(u16 *)((u8 *)work + 4);
+    u16 id = ((FileJob *)work)->type;
 
     if (D_003E918C[id].func != NULL) {
-        D_003E918C[id].func(*(void **)((u8 *)work + 8));
+        D_003E918C[id].func(((FileJob *)work)->data);
     }
 }
 
@@ -2634,20 +2646,20 @@ void fileJobSetPrimaryData(job, src, size, option)
 }
 
 void func_002D38E8(u64 arg0, u64 arg1, u16 arg2) {
-    s64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
-    u64 temp_v3;
+    s64 command;
+    u64 size;
+    u64 handle;
+    u64 address;
 
-    temp_v0 = sdfDevCreateCommandState(arg1);
-    if (temp_v0 != 0) {
-        temp_v1 = func_0033EB30(temp_v0);
-        temp_v2 = func_003292A8(temp_v1);
-        temp_v3 = sdfResourceRetainAddress(temp_v2);
-        func_0033EB10(temp_v0, temp_v3, temp_v1);
-        func_0033EAE0(temp_v0);
-        fileJobSetPrimaryData(arg0, temp_v3, temp_v1, arg2);
-        func_003297C8(temp_v2);
+    command = sdfDevCreateCommandState(arg1);
+    if (command != 0) {
+        size = func_0033EB30(command);
+        handle = func_003292A8(size);
+        address = sdfResourceRetainAddress(handle);
+        func_0033EB10(command, address, size);
+        func_0033EAE0(command);
+        fileJobSetPrimaryData(arg0, address, size, arg2);
+        func_003297C8(handle);
         return;
     }
 }
@@ -2669,20 +2681,20 @@ void fileJobSetSecondaryData(job, src, size, selector)
 }
 
 void func_002D3A68(u64 arg0, u64 arg1, u16 arg2) {
-    s64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
-    u64 temp_v3;
+    s64 command;
+    u64 size;
+    u64 handle;
+    u64 address;
 
-    temp_v0 = sdfDevCreateCommandState(arg1);
-    if (temp_v0 != 0) {
-        temp_v1 = func_0033EB30(temp_v0);
-        temp_v2 = func_003292A8(temp_v1);
-        temp_v3 = sdfResourceRetainAddress(temp_v2);
-        func_0033EB10(temp_v0, temp_v3, temp_v1);
-        func_0033EAE0(temp_v0);
-        fileJobSetSecondaryData(arg0, temp_v3, temp_v1, arg2);
-        func_003297C8(temp_v2);
+    command = sdfDevCreateCommandState(arg1);
+    if (command != 0) {
+        size = func_0033EB30(command);
+        handle = func_003292A8(size);
+        address = sdfResourceRetainAddress(handle);
+        func_0033EB10(command, address, size);
+        func_0033EAE0(command);
+        fileJobSetSecondaryData(arg0, address, size, arg2);
+        func_003297C8(handle);
         return;
     }
 }
@@ -2763,14 +2775,14 @@ u32 fileJobSerializedSize(FileJob *job) {
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3F08);
 
 void func_002D3F80(u32 arg0) {
-    s32 temp_v0;
+    s32 queue;
 
     memset(arg0, 0, 0x90);
-    temp_v0 = (s32)arg0;
-    *(u32 *)(temp_v0 + 0x84) = 1;
-    *(u8 *)(temp_v0 + 0x88) = 8;
-    *(u8 *)(temp_v0 + 0x89) = 0;
-    *(u8 *)(temp_v0 + 0x8a) = 0;
+    queue = (s32)arg0;
+    *(u32 *)(queue + 0x84) = 1;
+    *(u8 *)(queue + 0x88) = 8;
+    *(u8 *)(queue + 0x89) = 0;
+    *(u8 *)(queue + 0x8a) = 0;
     func_002D3F08(arg0);
 }
 
@@ -3051,6 +3063,33 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D5EC0);
 
 extern void *func_00328E18(s32);
 
+typedef struct FileSlot {
+    u8 pad0[0x10];
+    u32 state;
+    u8 pad14[0xC];
+} FileSlot;
+
+typedef struct FileSlotTable {
+    u16 type;
+    u8 pad02[2];
+    u32 instances;
+    u32 count;
+    u32 flags;
+    u32 references;
+    u32 unk14;
+    FileSlot *slots;
+    u8 *unk1C;
+    u8 *data0;
+    u8 *data1;
+    u32 handle;
+} FileSlotTable;
+
+/* The record's signed +0x54 mode is consumed by every billboard opener. */
+typedef struct FileBillboardRecord {
+    u8 pad0[0x54];
+    s16 mode; /* 0x54 */
+} FileBillboardRecord;
+
 /* 0x54-byte loader record: same head as LoadObj (owner/colour/scale) but with a
    u16 tail at 0x50, so it is a separate type rather than DDS2's 0x50 LoadObj. */
 typedef struct LoaderRecord {
@@ -3140,14 +3179,14 @@ void func_002D6160(EffectSurfaceNode *node) {
         billDispatchByKind(node->resource);
     }
     if (node->jobHandle != 0) {
-        count = *(u32 *)(node->active + 8);
+        count = ((FileSlotTable *)node->active)->count;
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
         func_003297C8(node->jobHandle);
     }
     if (node->queueHandle != 0) {
-        count = *(u32 *)(node->active + 8);
+        count = ((FileSlotTable *)node->active)->count;
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
@@ -3186,11 +3225,11 @@ void func_002D62D8(EffectSurfaceNode *dst, EffectSurfaceNode *src) {
         dst->resource = (void *)func_00159A50((u32)src->resource);
         func_00159FA0((u32)dst->resource);
         if (dst->active != 0) {
-            billSetBillboardMode((u32)dst->resource, *(s16 *)(*(u32 *)(dst->active + 0x20) + 0x54));
+            billSetBillboardMode((u32)dst->resource, ((FileBillboardRecord *)((FileSlotTable *)dst->active)->data0)->mode);
         }
         break;
     case 5:
-        count = *(u32 *)(src->active + 8);
+        count = ((FileSlotTable *)src->active)->count;
         if (count == 0) {
             return;
         }
@@ -3213,7 +3252,7 @@ void func_002D62D8(EffectSurfaceNode *dst, EffectSurfaceNode *src) {
         }
         break;
     case 6:
-        count = *(u32 *)(src->active + 8);
+        count = ((FileSlotTable *)src->active)->count;
         if (count == 0) {
             return;
         }
@@ -3260,7 +3299,7 @@ void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
     resource = effRetainResource(resourceId);
     node->resource = (void *)resource;
     if (node->active != 0) {
-        billSetBillboardMode(resource, *(s16 *)(*(u32 *)(node->active + 0x20) + 0x54));
+        billSetBillboardMode(resource, ((FileBillboardRecord *)((FileSlotTable *)node->active)->data0)->mode);
     }
 }
 
@@ -3272,7 +3311,7 @@ void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
     resource = billCreateIndexed(0, resourceId);
     node->resource = (void *)resource;
     if (node->active != 0) {
-        billSetBillboardMode(resource, *(s16 *)(*(u32 *)(node->active + 0x20) + 0x54));
+        billSetBillboardMode(resource, ((FileBillboardRecord *)((FileSlotTable *)node->active)->data0)->mode);
     }
 }
 
@@ -3285,12 +3324,12 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     node->resource = (void *)resource;
     func_00159FA0(resource);
     if (node->active != 0) {
-        billSetBillboardMode(node->resource, *(s16 *)(*(u32 *)(node->active + 0x20) + 0x54));
+        billSetBillboardMode(node->resource, ((FileBillboardRecord *)((FileSlotTable *)node->active)->data0)->mode);
     }
 }
 
 void func_002D6710(EffectSurfaceNode *node, FileJob *job) {
-    u32 count = *(u32 *)(node->active + 8);
+    u32 count = ((FileSlotTable *)node->active)->count;
     u32 i;
     s32 size;
 
@@ -3314,7 +3353,7 @@ void func_002D6710(EffectSurfaceNode *node, FileJob *job) {
 }
 
 void func_002D6808(EffectSurfaceNode *node, FileJob *job) {
-    u32 count = *(u32 *)(node->active + 8);
+    u32 count = ((FileSlotTable *)node->active)->count;
     u32 i;
     s32 size;
 
@@ -3380,26 +3419,6 @@ void fileSetLoadObjectScale(LoadObj *arg0, f32 arg1) {
     dds3DispatchIndexedCallback(arg0->recordWork);
 }
 
-typedef struct FileSlot {
-    u8 pad0[0x10];
-    u32 state;
-    u8 pad14[0xC];
-} FileSlot;
-
-typedef struct FileSlotTable {
-    u16 type;
-    u8 pad02[2];
-    u32 instances;
-    u32 count;
-    u32 flags;
-    u32 references;
-    u32 unk14;
-    FileSlot *slots;
-    u8 *unk1C;
-    u8 *data0;
-    u8 *data1;
-    u32 handle;
-} FileSlotTable;
 
 typedef struct FileRecordType {
     void (*acquire)(void *);
@@ -3632,11 +3651,11 @@ u32 func_002DBED8(u16 type, u32 count, void *data) {
 }
 
 void func_002DC028(s32 arg0) {
-    func_003297C8(*(u32 *)(arg0 + 0x28));
+    func_003297C8(((FileSlotTable *)arg0)->handle);
 }
 
 void fileClearRecordReferences(s32 arg0) {
-    *(u32 *)(arg0 + 0x10) = 0;
+    ((FileSlotTable *)arg0)->references = 0;
 }
 
 void fileAcquireRecord(FileSlotTable *record) {

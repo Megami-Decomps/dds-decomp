@@ -25,7 +25,8 @@ typedef struct Entry1A4 {
     u8 pad2[2]; /* 0x2 */
     u16 rosterIndex; /* 0x4: entry identifier */
     u16 unk6; /* 0x6 */
-    u8 pad8[6]; /* 0x8 */
+    u16 unk8; /* 0x8: script-visible halfword */
+    u8 padA[4];
     u16 unkE; /* 0xE */
     u8 pad10[4]; /* 0x10 */
     u16 level; /* 0x14: clamped at level 99 by dds3Clamp99 */
@@ -35,6 +36,38 @@ typedef struct Entry1A4 {
     s32 randomizedValue;  /* 0x194 */
     u8 pad198[0xC];
 } Entry1A4;
+
+/* Script-visible data tables indexed by roster number or event parameter. */
+typedef struct RosterDetail {
+    s16 baseValue;     /* 0x00 */
+    u8 lowValue;       /* 0x02 */
+    u8 highValue;      /* 0x03 */
+    f32 scale;         /* 0x04 */
+    u8 pad8[0xC];
+} RosterDetail; /* 0x14 */
+
+typedef struct EventStatRow {
+    u8 pad0[0x11];
+    u8 stat;           /* 0x11 */
+    u8 pad12[0x13];
+    u8 scaledStat;     /* 0x25 */
+    u8 pad26[7];
+    u8 grade;          /* 0x2D */
+    u8 pad2E[6];
+    s16 total;         /* 0x34 */
+    s16 max;           /* 0x36 */
+} EventStatRow; /* 0x38 */
+
+typedef struct EventSelector {
+    u8 pad0;
+    s8 kind;           /* 0x01: kind five uses roster details instead */
+} EventSelector; /* 0x02 */
+
+typedef struct RosterFlagValue {
+    u8 pad0[4];
+    u8 value;          /* 0x04 */
+    u8 pad5[0x47];
+} RosterFlagValue; /* 0x4C */
 
 typedef struct EvtScriptContext {
     u16 stateFlags;      /* 0x00 */
@@ -91,10 +124,11 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119A00);
 
 u8 evtGetFlaggedRosterValue(s32 arg0) {
-    if ((*(u16 *)arg0 & 0x20) == 0) {
+    Entry1A4 *entry = (Entry1A4 *)arg0;
+    if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return *(u8 *)(D_003BAA1C + *(u16 *)(arg0 + 4) * 76 + 4);
+    return ((RosterFlagValue *)D_003BAA1C)[entry->rosterIndex].value;
 }
 
 s32 dds3FindEntryIndex(s32 arg0) {
@@ -367,32 +401,32 @@ void func_0011B940(void) {
 }
 
 s32 func_0011B968(void) {
-    func_0010D5F0(*(u16 *)(D_003C2E78[0] + 0x14));
+    func_0010D5F0(((Entry1A4 *)D_003C2E78[0])->level);
     return 1;
 }
 
 s32 func_0011B990(void) {
-    func_0010D5F0(*(u16 *)(D_003C2E7C[0] + 0x14));
+    func_0010D5F0(((Entry1A4 *)D_003C2E7C[0])->level);
     return 1;
 }
 
 s32 func_0011B9B8(void) {
-    func_0010D5F0(*(u16 *)(D_003C2E78[0] + 6));
+    func_0010D5F0(((Entry1A4 *)D_003C2E78[0])->unk6);
     return 1;
 }
 
 s32 func_0011B9E0(void) {
-    func_0010D5F0(*(u16 *)(D_003C2E7C[0] + 6));
+    func_0010D5F0(((Entry1A4 *)D_003C2E7C[0])->unk6);
     return 1;
 }
 
 s32 func_0011BA08(void) {
-    func_0010D5F0(*(u16 *)(D_003C2E78[0] + 8));
+    func_0010D5F0(((Entry1A4 *)D_003C2E78[0])->unk8);
     return 1;
 }
 
 s32 func_0011BA30(void) {
-    func_0010D5F0(*(u16 *)(D_003C2E7C[0] + 8));
+    func_0010D5F0(((Entry1A4 *)D_003C2E7C[0])->unk8);
     return 1;
 }
 
@@ -422,10 +456,10 @@ s32 func_0011BD78(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
     s32 index = work->third;
     s32 value;
-    if (*(s8 *)(D_003BAA4C + index * 2 + 1) == 5) {
-        value = *(u8 *)(D_003BAA18 + ((Entry1A4 *)work->first)->rosterIndex * 20 + 2);
+    if (((EventSelector *)D_003BAA4C)[index].kind == 5) {
+        value = ((RosterDetail *)D_003BAA18)[((Entry1A4 *)work->first)->rosterIndex].lowValue;
     } else {
-        value = *(u8 *)(D_003BAA50 + index * 56 + 0x11);
+        value = ((EventStatRow *)D_003BAA50)[index].stat;
     }
     func_0010D5F0(value);
     return 1;
@@ -434,9 +468,9 @@ s32 func_0011BD78(void) {
 s32 func_0011BE00(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
     s32 index = work->third;
-    s32 value = *(u8 *)(D_003BAA50 + index * 56 + 0x25);
-    if (*(s8 *)(D_003BAA4C + index * 2 + 1) == 5) {
-        f32 scale = *(f32 *)(D_003BAA18 + ((Entry1A4 *)work->first)->rosterIndex * 20 + 4);
+    s32 value = ((EventStatRow *)D_003BAA50)[index].scaledStat;
+    if (((EventSelector *)D_003BAA4C)[index].kind == 5) {
+        f32 scale = ((RosterDetail *)D_003BAA18)[((Entry1A4 *)work->first)->rosterIndex].scale;
         value = (s32)((f32)value * scale);
     }
     func_0010D5F0(value);
@@ -444,7 +478,7 @@ s32 func_0011BE00(void) {
 }
 
 s32 func_0011BE90(void) {
-    func_0010D5F0(*(u8 *)(D_003BAA50 + D_003C2E74[0] * 56 + 0x2d));
+    func_0010D5F0(((EventStatRow *)D_003BAA50)[D_003C2E74[0]].grade);
     return 1;
 }
 
@@ -456,17 +490,17 @@ s32 func_0011BFE8(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
     s32 index = work->third;
     s32 value;
-    if (*(s8 *)(D_003BAA4C + index * 2 + 1) == 5) {
-        value = *(u8 *)(D_003BAA18 + ((Entry1A4 *)work->first)->rosterIndex * 20 + 3);
+    if (((EventSelector *)D_003BAA4C)[index].kind == 5) {
+        value = ((RosterDetail *)D_003BAA18)[((Entry1A4 *)work->first)->rosterIndex].highValue;
     } else {
-        value = *(s16 *)(D_003BAA50 + index * 56 + 0x34);
+        value = ((EventStatRow *)D_003BAA50)[index].total;
     }
     func_0010D5F0(value);
     return 1;
 }
 
 s32 func_0011C070(void) {
-    func_0010D5F0(*(s16 *)(D_003BAA50 + D_003C2E74[0] * 56 + 0x36));
+    func_0010D5F0(((EventStatRow *)D_003BAA50)[D_003C2E74[0]].max);
     return 1;
 }
 
@@ -564,18 +598,18 @@ s32 func_0011C350(void) {
 }
 
 void func_0011C390(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 - 4));
+    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 - 4));
 }
 
 void func_0011C3C0(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x188));
+    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x188));
 }
 
 extern s32 func_001190B0(s32);
 
 void evtSelectStatGrade(void) {
     s32 total = func_001190B0(((EvtScriptContext *)D_003C2E70)->second);
-    s32 current = *(u16 *)(((EvtScriptContext *)D_003C2E70)->second + 6);
+    s32 current = ((Entry1A4 *)((EvtScriptContext *)D_003C2E70)->second)->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;
 
@@ -601,19 +635,19 @@ void evtSelectStatGrade(void) {
 }
 
 void func_0011C4C0(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x360));
+    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x360));
 }
 
 void func_0011C4F0(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x4ec));
+    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x4ec));
 }
 
 void func_0011C520(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x678));
+    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
 }
 
 void func_0011C550(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + *(u16 *)(D_003C2E78[0] + 0x14) * 4 + 0x678));
+    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
 }
 
 void evtScriptSelectRandomValue(void) {
@@ -631,7 +665,7 @@ void evtScriptSelectRandomValue(void) {
 }
 
 void func_0011C5D8(void) {
-    func_0010D5F0(*(s16 *)(D_003BAA18 + *(u16 *)(D_003C2E78[0] + 4) * 20));
+    func_0010D5F0(((RosterDetail *)D_003BAA18)[*(u16 *)(D_003C2E78[0] + 4)].baseValue);
 }
 
 void evtSelectFineStatGrade(void) {
