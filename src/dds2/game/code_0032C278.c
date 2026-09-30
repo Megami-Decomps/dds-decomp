@@ -532,11 +532,11 @@ s32 func_0032D340(SdfPoolNode *node) {
     return head;
 }
 
-void func_0032D3F0(SdfListHead *arg0) {
-    arg0->unk0 = 0;
-    arg0->first = 0;
-    arg0->last = 0;
-    arg0->unkC = 0;
+void func_0032D3F0(SdfListHead *list) {
+    list->unk0 = 0;
+    list->first = 0;
+    list->last = 0;
+    list->unkC = 0;
 }
 
 void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
@@ -550,29 +550,29 @@ void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
     *node = 0;
 }
 
-void func_0032D428(SdfListHead *arg0) {
-    arg0->unk0 = 0;
-    arg0->first = 0;
+void func_0032D428(SdfListHead *list) {
+    list->unk0 = 0;
+    list->first = 0;
 }
 
-void func_0032D438(s32 *arg0, s32 arg1) {
-    if (arg0[1] == 0) {
-        *arg0 = arg1;
+void func_0032D438(s32 *head, s32 node) {
+    if (head[1] == 0) {
+        *head = node;
     }
     else {
-        **(u32 **)(arg0[1] + 8) = *(u32 *)(arg1 + 8);
+        **(u32 **)(head[1] + 8) = *(u32 *)(node + 8);
     }
-    arg0[1] = arg1;
+    head[1] = node;
 }
 
-void func_0032D460(SdfPacket *arg0, s32 arg1) {
+void func_0032D460(SdfPacket *packet, s32 address) {
     s64 temp;
 
-    temp = arg1 + 1;
-    arg0->unk8 = (((temp | 0x50000000) << 32) | 0x10000000);
-    arg0->unk10 = (arg1 | (((s64)0x10000000 << 32) | 0x8000));
-    arg0->unk0 = temp;
-    arg0->unk18 = 0xE;
+    temp = address + 1;
+    packet->unk8 = (((temp | 0x50000000) << 32) | 0x10000000);
+    packet->unk10 = (address | (((s64)0x10000000 << 32) | 0x8000));
+    packet->unk0 = temp;
+    packet->unk18 = 0xE;
 }
 
 void func_0032D4A0(u64 *packet, u32 address, s32 count) {
@@ -666,20 +666,20 @@ void sdfAppendLinkedPacketPayload(SdfListHead *list, SdfListHead *other, u32 *no
     sdfAppendPacket(list, (s32)node + 0x10);
 }
 
-void func_0032DB30(s32 arg0, u32 arg1, s32 arg2) {
-    if (arg2 == 0) {
-        func_0032D4A0(arg1, arg0 + 0x180, 1);
+void func_0032DB30(s32 source, u32 packet, s32 variant) {
+    if (variant == 0) {
+        func_0032D4A0(packet, source + 0x180, 1);
         return;
     }
-    func_0032D4A0(arg1, arg0 + 400, 1);
+    func_0032D4A0(packet, source + 400, 1);
 }
 
-void func_0032DB78(s32 arg0, u32 arg1, s32 arg2) {
-    if (arg2 == 0) {
-        func_0032D4A0(arg1, arg0 + 0x70, 1);
+void func_0032DB78(s32 source, u32 packet, s32 variant) {
+    if (variant == 0) {
+        func_0032D4A0(packet, source + 0x70, 1);
         return;
     }
-    func_0032D4A0(arg1, arg0 + 0xb0, 1);
+    func_0032D4A0(packet, source + 0xb0, 1);
 }
 
 void sdfAppendDmaPrimary(s32 list, u32 source, SdfDmaNode *node) {
@@ -709,8 +709,8 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DD98);
 
-void func_0032DE98(s32 arg0) {
-    D_00438A23 = (arg0 < 0) ? 0 : arg0;
+void func_0032DE98(s32 value) {
+    D_00438A23 = (value < 0) ? 0 : value;
 }
 
 void func_0032DEB0(void) {
@@ -763,137 +763,136 @@ void sdfAppendInitializedPacket(s32 list, void (*initialize)(s32), s32 size, s32
     initialize(packet);
     sdfAppendPacket(list, packet);
 }
-void func_0032E468(SdfPacket *arg0) {
-    arg0->unk0 = 0x717FB;
-    arg0->unk8 = 0x47;
-    arg0->unk10 = 0x44;
-    arg0->unk18 = 0x42;
+void func_0032E468(SdfPacket *packet) {
+    packet->unk0 = 0x717FB;
+    packet->unk8 = 0x47;
+    packet->unk10 = 0x44;
+    packet->unk18 = 0x42;
 }
 
-void func_0032E490(SdfPacket *arg0) {
-    arg0->unk0 = 0x717FB;
-    arg0->unk8 = 0x48;
-    arg0->unk10 = 0x44;
-    arg0->unk18 = 0x43;
+void func_0032E490(SdfPacket *packet) {
+    packet->unk0 = 0x717FB;
+    packet->unk8 = 0x48;
+    packet->unk10 = 0x44;
+    packet->unk18 = 0x43;
 }
 
-void func_0032E4B8(SdfPacket *arg0) {
-    func_0032E468(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E4B8(SdfPacket *packet) {
+    func_0032E468(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E518(SdfPacket *arg0) {
-    func_0032E490(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E518(SdfPacket *packet) {
+    func_0032E490(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E578(SdfPacket *arg0) {
-    arg0->unk0 = 0x717FB;
-    arg0->unk8 = 0x47;
-    arg0->unk10 = 0x44;
-    arg0->unk18 = 0x42;
+void func_0032E578(SdfPacket *packet) {
+    packet->unk0 = 0x717FB;
+    packet->unk8 = 0x47;
+    packet->unk10 = 0x44;
+    packet->unk18 = 0x42;
+}
+void func_0032E5A0(SdfPacket *packet) {
+    packet->unk0 = 0x717FB;
+    packet->unk8 = 0x48;
+    packet->unk10 = 0x44;
+    packet->unk18 = 0x43;
 }
 
-void func_0032E5A0(SdfPacket *arg0) {
-    arg0->unk0 = 0x717FB;
-    arg0->unk8 = 0x48;
-    arg0->unk10 = 0x44;
-    arg0->unk18 = 0x43;
+void func_0032E5C8(SdfPacket *packet) {
+    func_0032E578(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E5C8(SdfPacket *arg0) {
-    func_0032E578(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E628(SdfPacket *packet) {
+    func_0032E5A0(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E628(SdfPacket *arg0) {
-    func_0032E5A0(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E688(SdfPacket *packet) {
+    packet->unk0 = 0x71801;
+    packet->unk8 = 0x47;
+    packet->unk10 = 0x48;
+    packet->unk18 = 0x42;
 }
 
-void func_0032E688(SdfPacket *arg0) {
-    arg0->unk0 = 0x71801;
-    arg0->unk8 = 0x47;
-    arg0->unk10 = 0x48;
-    arg0->unk18 = 0x42;
+void func_0032E6B0(SdfPacket *packet) {
+    packet->unk0 = 0x71801;
+    packet->unk8 = 0x48;
+    packet->unk10 = 0x48;
+    packet->unk18 = 0x43;
 }
 
-void func_0032E6B0(SdfPacket *arg0) {
-    arg0->unk0 = 0x71801;
-    arg0->unk8 = 0x48;
-    arg0->unk10 = 0x48;
-    arg0->unk18 = 0x43;
+void func_0032E6D8(SdfPacket *packet) {
+    func_0032E688(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E6D8(SdfPacket *arg0) {
-    func_0032E688(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E738(SdfPacket *packet) {
+    func_0032E6B0(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E738(SdfPacket *arg0) {
-    func_0032E6B0(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E798(SdfPacket *packet) {
+    packet->unk0 = 0x71801;
+    packet->unk8 = 0x47;
+    packet->unk10 = 0x42;
+    packet->unk18 = 0x42;
 }
 
-void func_0032E798(SdfPacket *arg0) {
-    arg0->unk0 = 0x71801;
-    arg0->unk8 = 0x47;
-    arg0->unk10 = 0x42;
-    arg0->unk18 = 0x42;
+void func_0032E7C0(SdfPacket *packet) {
+    packet->unk0 = 0x71801;
+    packet->unk8 = 0x48;
+    packet->unk10 = 0x42;
+    packet->unk18 = 0x43;
 }
 
-void func_0032E7C0(SdfPacket *arg0) {
-    arg0->unk0 = 0x71801;
-    arg0->unk8 = 0x48;
-    arg0->unk10 = 0x42;
-    arg0->unk18 = 0x43;
+void func_0032E7E8(SdfPacket *packet) {
+    func_0032E798(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E7E8(SdfPacket *arg0) {
-    func_0032E798(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E848(SdfPacket *packet) {
+    func_0032E7C0(packet + 1);
+    packet->unk0 = 3;
+    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    packet->unk18 = 0xE;
 }
 
-void func_0032E848(SdfPacket *arg0) {
-    func_0032E7C0(arg0 + 1);
-    arg0->unk0 = 3;
-    arg0->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    arg0->unk18 = 0xE;
+void func_0032E8A8(u64 *packet) {
+    *packet = 0;
+    packet[1] = 0x3f;
 }
 
-void func_0032E8A8(u64 *arg0) {
-    *arg0 = 0;
-    arg0[1] = 0x3f;
-}
-
-void func_0032E8B8(SdfPacket *arg0) {
-    func_0032E8A8((u64 *)(arg0 + 1));
-    arg0->unk0 = 2;
-    arg0->unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
-    arg0->unk10 = (((u64)0x10000000 << 32) | 0x8001);
-    arg0->unk18 = 0xE;
+void func_0032E8B8(SdfPacket *packet) {
+    func_0032E8A8((u64 *)(packet + 1));
+    packet->unk0 = 2;
+    packet->unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
+    packet->unk10 = (((u64)0x10000000 << 32) | 0x8001);
+    packet->unk18 = 0xE;
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032E918);
@@ -921,8 +920,8 @@ void sdfCreateExtendedPacket(s32 list, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s
     sdfAppendPacket(list, buffer);
 }
 
-void func_0032EB40(SdfBigPacket *arg0, s32 arg1) {
-    arg0->unk30 = (arg0->unk30 & ~0x3FFF) | (u64)(u32)(D_0040B298[arg1 ^ arg0->unk08]->unk0C >> 6);
+void func_0032EB40(SdfBigPacket *packet, s32 entryIndex) {
+    packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(D_0040B298[entryIndex ^ packet->unk08]->unk0C >> 6);
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032EB80);
@@ -1265,24 +1264,24 @@ void func_00330A18(SdfTree *tree) {
     }
 }
 
-void func_00330A88(s32 *arg0, u32 arg1, u32 arg2) {
+void func_00330A88(s32 *list, u32 owner, u32 node) {
     s16 temp_v0;
     s32 temp_v1;
     s32 temp_v2;
     s32 temp_v3;
 
-    temp_v2 = *arg0;
+    temp_v2 = *list;
     temp_v0 = *(s16 *)(temp_v2 + 4);
     temp_v3 = temp_v0 + 1;
     if ((s64)*(s16 *)(temp_v2 + 6) < (s64)temp_v3) {
         func_00340558(temp_v2);
-        temp_v2 = *arg0;
+        temp_v2 = *list;
     }
     temp_v1 = *(s32 *)(temp_v2 + 0xc);
-    *(s32 **)((s32)arg2 + 0x10) = arg0;
+    *(s32 **)((s32)node + 0x10) = list;
     *(s16 *)(temp_v2 + 4) = (s16)temp_v3;
-    *(s32 *)(temp_v0 * 4 + temp_v1) = (s32)arg2;
-    sdfLinkRouteNode(arg2, arg1);
+    *(s32 *)(temp_v0 * 4 + temp_v1) = (s32)node;
+    sdfLinkRouteNode(node, owner);
 }
 
 void sdfUnlinkRouteNode(SdfRouteNode *node) {
