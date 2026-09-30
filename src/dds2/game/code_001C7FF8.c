@@ -206,7 +206,8 @@ typedef struct BattleSceneWork {
     s32 loadStep;             /* 0x2B0 */
     u8 pad2B4[0x10];
     u32 taskParent;
-    u8 pad2C8[8];
+    u8 pad2C8[4];
+    s32 pendingTask;          /* 0x2CC */
     u32 sceneObject;
     u32 spriteObject;
     u32 sceneStatus;
@@ -806,7 +807,74 @@ s32 fldStepSceneStateMachine(s32 handle) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC9C0);
+typedef struct SceneAiWork {
+    s32 state;                /* 0x00 */
+    u32 result;               /* 0x04 */
+    s32 entry;                /* 0x08 */
+    void *listA;              /* 0x0C */
+    void *listB;              /* 0x10 */
+    s32 source;               /* 0x14 */
+    u8 pad18[0x8C];
+} SceneAiWork;
+
+typedef struct SceneAiOther {
+    u8 pad00[0x7BE];
+    s16 index;                /* 0x7BE */
+} SceneAiOther;
+
+extern char *D_004367CC;
+extern void *func_00328E18(s32);
+extern void *btlAllocateIndexList();
+extern u32 btlGetIndexListCount();
+extern u32 btlGetIndexListEntry();
+extern void btlAppendIndexListEntry();
+extern void btlCopyIndexList();
+extern void func_001AC0F8();
+extern s32 func_001AC360();
+extern s32 func_001AC510();
+
+/* Creates the AI work object for `source`: allocates two index lists and
+ * fills them according to the current scene object state. */
+s32 func_001CC9C0(s32 source) {
+    SceneAiWork *work;
+    SceneObject *object;
+    SceneAiOther *other;
+    s32 id;
+    s32 count;
+    func_001AA6F8();
+    work = (SceneAiWork *)func_00328E18(0xA4);
+    object = (SceneObject *)func_00101958(func_00101740(D_004367BC));
+    work->listA = btlAllocateIndexList(0xD);
+    work->listB = btlAllocateIndexList(0xD);
+    if (object->state == 8) {
+        other = (SceneAiOther *)func_00101958(func_00101740(D_004367CC));
+        count = btlCountFlaggedSceneActors();
+        if (count < 2 && (D_00435DD0->entry[other->index].mask & 0x4800)) {
+            func_001AC0F8(source, work->listA, 1, 4, -0x4801);
+        } else {
+            func_001AC0F8(source, work->listA, 1, 4, -1);
+        }
+        btlGetIndexListCount(work->listA);
+        work->result = 0;
+    } else if (source != 0) {
+        work->result = func_001AC360(source, work->listA, 0);
+    }
+    work->entry = 0;
+    switch (work->result) {
+    case 0:
+        id = func_001AC510(source, work->listA);
+        work->entry = id;
+        btlAppendIndexListEntry(work->listB, btlGetIndexListEntry(work->listA, id));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(work->listB, work->listA);
+        break;
+    }
+    work->source = source;
+    work->state = 1;
+    return (s32)work;
+}
 
 void fldReleaseSceneSpriteWork(SceneSpriteWork *work) {
     btlFreeIndexList(work->secondResource);
@@ -2539,7 +2607,67 @@ void func_001D5938(s32 task) {
     ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xffffff7f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5950);
+typedef struct SceneAiEntry {
+    u8 kind;                  /* 0x000 */
+    u8 pad01;
+    u16 slot;                 /* 0x002 */
+    u8 pad04[0x158];
+} SceneAiEntry;
+
+extern SceneAiEntry *D_00435DF4;
+extern s32 btlAllocAndCheck();
+extern void func_00210DB0();
+extern void btlBindActorSlot();
+extern void func_00210F58();
+extern s32 func_0020EBD0();
+extern s32 kwlnTaskIsRegistered();
+
+/* AI task: binds the acting unit's slot on first run, then waits for the
+ * pending AI task and dispatches state 0xB or 0xC. */
+s32 func_001D5950(SceneTask *task) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    u16 index;
+    if (!(scene->flags & 0x20)) {
+        if (sndHasActiveActor() == 0) {
+            if (func_001D46A8((s32)task->actor) != 0) {
+                if (!(task->flags & 0x80)) {
+                    index = task->actor->kind;
+                    scene->pendingTask = 0;
+                    if (D_00435DF4[index].kind != 1 && btlAllocAndCheck(task) != 0) {
+                        func_00210DB0(task);
+                    } else if (D_00435DF4[index].slot != 0) {
+                        btlBindActorSlot(task, D_00435DF4[index].slot);
+                    } else {
+                        func_00210F58(task);
+                    }
+                    task->flags |= 0x80;
+                    scene->flags &= ~0x100000;
+                }
+                if (scene->pendingTask == 0) {
+                    scene->flags |= 0x100000;
+                    if (func_0020EBD0(task) != 0) {
+                        btlDispatchStateHandler(task, 0xB);
+                    } else {
+                        btlDispatchStateHandler(task, 0xC);
+                    }
+                } else if (kwlnTaskIsRegistered(scene->pendingTask) == 0) {
+                    if (task->command == -1) {
+                        btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
+                        btlDebugPrintf("AI script return NULL\n");
+                        func_00210F58(task);
+                    }
+                    scene->flags |= 0x100000;
+                    if (func_0020EBD0(task) != 0) {
+                        btlDispatchStateHandler(task, 0xB);
+                    } else {
+                        btlDispatchStateHandler(task, 0xC);
+                    }
+                    scene->pendingTask = 0;
+                }
+            }
+        }
+    }
+}
 
 void func_001D5B38(s32 task) {
     func_001C35F0(task, 0, 0);
