@@ -1,5 +1,17 @@
 #include "common.h"
 
+extern s32 func_003292A8(s32);
+extern u8 *sdfResourceRetainAddress(s32);
+extern void func_002C3E58(u8 *);
+extern void func_0025F7F0(u8 *);
+extern void func_002945B8(u8 *);
+extern void func_002C1B58(u8 *, s32);
+extern void func_003421E8(s32);
+extern void sndStartTrackExtended(s32);
+extern s32 func_00261198();
+extern s32 func_002613C8();
+extern s32 func_002C54C8(s32);
+
 extern s8 D_003CD8D8[34];
 
 extern void func_00246950();
@@ -486,7 +498,50 @@ void *mnuCampFindEntryByName(CampScene *scene, const char *name) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E8D0);
+typedef struct CampCue {
+    u8 pad00[0x10];
+    s16 kind;             /* 0x10 */
+    u8 pad12[0x22];
+    struct CampCue *link; /* 0x34 */
+} CampCue;
+
+void func_0025E8D0(CampScene *scene, CampCue *cue) {
+    CampCue *next;
+    s32 kind;
+    u16 id;
+
+    if (cue == NULL) {
+        return;
+    }
+    kind = cue->kind;
+    id = cue->kind;
+    if (kind == 1) {
+        scene->pendingValue = 0;
+        return;
+    }
+    if (kind == 0) {
+        next = cue->link;
+        scene->pendingValue = 0;
+        for (; ; next = next->link) {
+            s32 nextKind;
+
+            if (next == NULL) {
+                return;
+            }
+            nextKind = next->kind;
+            if (nextKind != 0) {
+                if (nextKind == 1) {
+                    scene->pendingValue = 0;
+                    return;
+                }
+                scene->pendingValue = ((CampEntryNode *)mnuCampFindEntryByName(scene, (char *)scene + (nextKind << 5) - 0x1C))->value;
+                return;
+            }
+        }
+    } else {
+        scene->pendingValue = ((CampEntryNode *)mnuCampFindEntryByName(scene, (char *)scene + ((s16)id << 5) - 0x1C))->value;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E980);
 
@@ -900,7 +955,26 @@ void func_00260538(void) {
     } while (temp_v1 < 3);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260570);
+u8 *func_00260570(void) {
+    s32 handle;
+    u8 *obj;
+
+    handle = func_003292A8(0x38C);
+    obj = sdfResourceRetainAddress(handle);
+    memset(obj, 0, 0x38C);
+    *(s32 *)obj = handle;
+    func_002C3E58(obj + 0xC);
+    func_0025F7F0(obj);
+    *(u32 *)(obj + 0xAC) = func_00260460();
+    *(s32 *)(obj + 0x9C) = func_00260468();
+    *(s32 *)(obj + 0xE4) = 0xF;
+    func_002945B8(obj);
+    func_002C1B58(obj + 0x37C, 0x60);
+    func_00260538();
+    func_003421E8(0x300000);
+    sndStartTrackExtended(0x300000);
+    return obj;
+}
 
 void func_00260620(s32 arg) {
     s32 scene = func_00101958();
@@ -1117,7 +1191,25 @@ s32 func_002610C0(s32 row, s32 column) {
     return *(s32 *)(D_003CD8F8 + row * 0x44 + column * 8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002610E8);
+s32 func_002610E8(s32 mode, s32 id, s32 record) {
+    s32 value = *(s32 *)(record + 0x9C);
+
+    if (mode == 1) {
+        value -= func_002C54C8(id);
+    } else if (mode == 3) {
+        value = 1 - *(u8 *)(id + D_00435DD0 + 0x1340);
+    } else if (mode == 2) {
+        value = 1 - *(u8 *)(id + D_00435DD0 + 0x1340);
+    } else {
+        value = 99 - *(u8 *)(id + D_00435DD0 + 0x1340);
+    }
+    if (func_00260B50(id) >= 0) {
+        if (value >= 2) {
+            value = *(u8 *)(id + D_00435DD0 + 0x1340) == 0;
+        }
+    }
+    return value < 0 ? 0 : value;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
 
@@ -1127,7 +1219,36 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261310);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_002613C8);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261480);
+typedef struct CampCounterSlot {
+    s32 value;  /* 0x00 */
+    u8 pad04[4];
+    s32 limit;  /* 0x08 */
+} CampCounterSlot;
+
+s32 func_00261480(s32 delta, u8 *scene) {
+    s32 max = func_00261198(scene);
+    CampCounterSlot *slot = (CampCounterSlot *)(*(u8 **)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x1C) + 0x60);
+    s32 sum = *(s32 *)(scene + 0x90) + delta;
+    s32 cur;
+
+    *(s32 *)(scene + 0x90) = sum;
+    if (sum <= 0) {
+        *(s32 *)(scene + 0x90) = 1;
+    }
+    cur = *(s32 *)(scene + 0x90);
+    if (cur >= max) {
+        scene[0xC7] = 1;
+        *(s32 *)(scene + 0x90) = max;
+        cur = max;
+    } else {
+        scene[0xC7] = 0;
+    }
+    if (*(s32 *)(*(u8 **)(*(u8 **)(*(u8 **)(scene + 0x7C) + 0x18) + 0x1C) + 0x60) == 3) {
+        slot->value = func_002613C8(cur, slot->limit);
+        cur = *(s32 *)(scene + 0x90);
+    }
+    return cur;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261538);
 
