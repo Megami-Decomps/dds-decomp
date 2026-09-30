@@ -123,13 +123,13 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 func_0021FC30(s32 arg0, s32 arg1);
 
 
-extern void *func_00110A48(void *arg0, s32 arg1, s32 arg2);
-extern void *func_00110A38(void *arg0);
+extern void *func_00110A48(void *world, s32 objectId, s32 kind);
+extern void *func_00110A38(void *world);
 extern s32 func_00222298(EvtUnit *unit);
 extern void func_00115970(void *arg0);
 extern void func_00110928(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
-extern void func_00222B70(EvtUnit *work, s32 arg1, s128 *vector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7);
+extern void func_00222B70(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
 extern void dds3FreePathObject(s32);
 extern s32 func_00116D38(void *);
 extern void func_00116F38(s32);
@@ -281,30 +281,30 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
     }
 }
 
-void func_00222B70(EvtUnit *work, s32 arg1, s128 *vector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
-    work->unkB0 = arg1;
+void func_00222B70(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+    work->unkB0 = mode;
     work->unkAC = 1;
     work->unkAE = 0;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(&work->unk70, vector);
     work->unkB4 = frames;
-    work->unkB6 = arg5;
-    work->unk94 = arg6;
+    work->unkB6 = valueB6;
+    work->unk94 = value94;
     work->unkB2 = 0;
 }
 
-void func_00222BA8(EvtUnit *work, s32 arg1, s32 objectId, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
+void func_00222BA8(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222B70(work, arg1, worldUnit->transform, arg3, frames, arg5, arg6, arg7);
+        func_00222B70(work, mode, worldUnit->transform, unused, frames, valueB6, value94, unusedLast);
         work->unkAE = 1;
         work->linkedUnit = worldUnit;
     }
 }
 
-void func_00222C68(EvtUnit *work, s32 objectId, s32 frames, s32 arg3, s32 mode, s32 dirFlag, s32 sideMode) {
+void func_00222C68(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
     void *pathSource;
     s32 path;
 
@@ -364,7 +364,7 @@ void func_00222C68(EvtUnit *work, s32 objectId, s32 frames, s32 arg3, s32 mode, 
     func_00116F38(path);
     VU0_STORE_VF($vf10, &work->unk70);
     work->unkB4 = frames;
-    work->unkB6 = arg3;
+    work->unkB6 = valueB6;
     work->unk94 = 0;
     work->unkB2 = 0;
 }
@@ -784,11 +784,11 @@ u32 evtOpSetUnitParams5(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        s32 arg3 = scrReadIntParameter(3);
-        s32 arg4 = scrReadIntParameter(4);
-        func_002223D8(unit, arg1, arg2, arg3, arg4);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        s32 scriptParam3 = scrReadIntParameter(3);
+        s32 scriptParam4 = scrReadIntParameter(4);
+        func_002223D8(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4);
     }
     return 1;
 }
@@ -803,12 +803,12 @@ u32 evtOpSetUnitParams6(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        s32 arg3 = scrReadIntParameter(3);
-        s32 arg4 = scrReadIntParameter(4);
-        s32 arg5 = scrReadIntParameter(5);
-        func_00222340(unit, arg1, arg2, arg3, arg4, arg5);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        s32 scriptParam3 = scrReadIntParameter(3);
+        s32 scriptParam4 = scrReadIntParameter(4);
+        s32 scriptParam5 = scrReadIntParameter(5);
+        func_00222340(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4, scriptParam5);
     }
     return 1;
 }
@@ -883,9 +883,9 @@ u32 evtOpBeginWindowCallback(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        func_00222300(unit, arg1, arg2);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        func_00222300(unit, scriptParam1, scriptParam2);
         D_003BBDAC = (u32)unit;
     }
     {
@@ -906,9 +906,9 @@ u32 func_002246D0(void) {
         return 1;
     }
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(2);
-        func_00222300(unit, arg1, arg2);
+        s32 scriptParam1 = scrReadIntParameter(1);
+        s32 scriptParam2 = scrReadIntParameter(2);
+        func_00222300(unit, scriptParam1, scriptParam2);
         func_00222310((u32)unit);
         D_003BBDAC = (u32)unit;
     }
@@ -983,8 +983,8 @@ u32 func_00224880(void) {
         s32 mode = scrReadIntParameter(2);
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(3);
-        s32 arg4 = scrReadIntParameter(4);
-        func_00222BA8(unit, mode, objectId, -1, frames, arg4, 0, 0);
+        s32 valueB6 = scrReadIntParameter(4);
+        func_00222BA8(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         func_002227C8(unit);
@@ -1003,11 +1003,11 @@ u32 func_00224948(void) {
     {
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(5);
-        s32 arg3 = scrReadIntParameter(6);
-        s32 arg4 = scrReadIntParameter(2);
-        s32 arg5 = scrReadIntParameter(4);
-        s32 arg6 = scrReadIntParameter(3);
-        func_00222C68(unit, objectId, frames, arg3, arg4, arg5, arg6);
+        s32 valueB6 = scrReadIntParameter(6);
+        s32 mode = scrReadIntParameter(2);
+        s32 dirFlag = scrReadIntParameter(4);
+        s32 sideMode = scrReadIntParameter(3);
+        func_00222C68(unit, objectId, frames, valueB6, mode, dirFlag, sideMode);
     }
     return 1;
 }
