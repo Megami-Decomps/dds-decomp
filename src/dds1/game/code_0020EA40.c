@@ -10,6 +10,10 @@ extern s32 btlFindModelEntry();
 
 extern s32 btlCountTasksByKind(u32);
 
+extern s32 btlGetSlotRateKind(u8 *, s32);
+
+extern void func_001D5DF8(u8 *, s32, s32, f32);
+
 extern u32 func_001A3360(u64, u64, u64);
 
 extern void *btlAllocateIndexList(s32);
@@ -590,7 +594,28 @@ u8 func_00210520(void) {
     return taskCount == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210540);
+s32 func_00210540(void) {
+    s32 choice = scrReadIntParameter(0);
+    s32 unitIndex = scrReadIntParameter(1);
+    s32 index = scrReadIntParameter(2);
+    u8 *unit;
+
+    if (choice == 0) {
+        unit = btlFindUnitByModeClear(unitIndex);
+    } else {
+        unit = btlFindUnitByModeFlagged(unitIndex);
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    if ((((BtlUnit *)unit)->flags & 2) == 0) {
+        return 1;
+    }
+    if (index >= 0) {
+        func_001D5DF8(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
+    }
+    return 1;
+}
 
 extern char D_003A6848[];
 
