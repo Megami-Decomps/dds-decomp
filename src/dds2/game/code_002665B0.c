@@ -74,7 +74,8 @@ extern s32 func_002BC460(u16, u16);
 
 extern void func_002C2128(s32, s32, s32, s32, s32, s32);
 
-extern void effDestroyPackedBatch(s32);
+extern s32 effDestroyPackedBatch(s32);
+extern void func_002C3390(s32);
 
 typedef struct MenuResourceGroup {
     u8 pad0[0x64];
@@ -188,7 +189,25 @@ void func_002669B0(u32 arg0) {
     func_00266928(arg0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002669C8);
+extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
+extern void func_0019D550(s32, s32, s32);
+extern void func_0019C5B0(s32);
+extern u8 D_003A41A8[];
+extern u8 D_003A47E8[];
+
+void func_002669C8(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 alternate) {
+    u8 *entry;
+    s32 handle;
+
+    if (alternate == 0) {
+        entry = D_003A41A8 + slot * 32;
+    } else {
+        entry = D_003A47E8 + slot * 32;
+    }
+    handle = func_0019F460(a0 - 0x120, a1, a2, a3, (s32)entry, 0);
+    func_0019D550(handle, 1, 0x52);
+    func_0019C5B0(handle);
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266A48);
 
@@ -392,7 +411,10 @@ void func_00267D30(s32 unused, s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267DA0);
+void func_00267DA0(s32 object) {
+    func_002C3390(*(s32 *)(object + 0xa828));
+    *(s32 *)(object + 0xa828) = 0;
+}
 
 s32 func_00267DE0(s32 arg0, s32 arg1, s32 arg2, s32 object) {
     return func_002C3E08(arg0, arg1, arg2, *(s32 *)(object + 0xa828));
@@ -417,9 +439,14 @@ s32 func_00267F68(s8 index) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267F88);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268090);
+void func_00268090(s32 object) {
+    s32 *batch = (s32 *)(object + 0xA8);
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002680E0);
+    for (i = 0; i < 7; i++) {
+        effDestroyPackedBatch(batch[i]);
+    }
+}
 
 typedef struct MenuFadeHost {
     u8 pad00[0x84];
@@ -427,6 +454,8 @@ typedef struct MenuFadeHost {
     u8 pad88[0xCC];
     s32 fadeColor;    /* 0x154 */
 } MenuFadeHost;
+
+INCLUDE_ASM(const s32, "game/code_002665B0", func_002680E0);
 
 extern void sndStartTrackExtended(s32);
 extern void func_003425B0(void);

@@ -223,7 +223,22 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242950);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002429F0);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242BD0);
+void func_00242BD0(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e) {
+    a[0] = 0.7f;
+    a[1] = 0.7f;
+    a[2] = 0.7f;
+    a[3] = 0.0f;
+    b[0] = 0.65f;
+    b[1] = 0.39f;
+    b[2] = 0.65f;
+    b[3] = 0.0f;
+    c[0] = 0.2f;
+    c[1] = 0.2f;
+    c[2] = 0.2f;
+    c[3] = 1.0f;
+    d[0] = 7.0f;
+    *e = 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
 
@@ -254,7 +269,36 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242E70);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242F20);
+typedef struct CampWindowDefaults {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    u8 pad18[8];
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+} CampWindowDefaults;
+
+void func_00242F20(CampWindowDefaults *w) {
+    w->unk0 = 0x96;
+    w->unk4 = 0x96;
+    w->unk10 = 0x50;
+    w->unk8 = 0x96;
+    w->unkC = 0x1E;
+    w->unk14 = 1;
+    w->unk20 = 7;
+    w->unk24 = 4;
+    w->unk28 = 0xA;
+    w->unk2C = 0x20;
+    w->unk30 = 0x10;
+    w->unk34 = 0x10;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242F78);
 
@@ -264,7 +308,18 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002432D0);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243390);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243440);
+typedef struct CampPacked {
+    u8 pad00[8];
+    union {
+        u32 whole;
+        u16 packed;
+    } value;
+} CampPacked;
+
+void func_00243440(CampPacked *src, s32 *low, s32 *high) {
+    *low = src->value.packed & 0xFFF;
+    *high = src->value.packed >> 12;
+}
 
 typedef struct CampEntryNode {
     u8 pad00[8];
