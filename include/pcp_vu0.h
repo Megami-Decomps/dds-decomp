@@ -114,6 +114,11 @@
 #define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
     "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
+/* dst = 3x3 of the primary matrix (vf28-vf30) times src.xyz: a rotation, no
+ * translation (the vmaddz form of the apply above). */
+#define VU0_ROTATE_VEC(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddz.xyzw " #dst ", vf30, " #src "z\n\t.set reorder")
 /* dst = a - b, dst = a + b, dst = a * b on all four components
  * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
 #define VU0_SUB(dst, a, b) __asm__ volatile ( \
