@@ -12,6 +12,11 @@ void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void evtEventViewerReset(u64 arg0);
 void *func_002329A0(s32 arg0);
+extern void func_00232E20(s32 arg0);
+extern s32 func_0026A720(void);
+extern void func_0026A808(void);
+extern void func_0023EF90(s32 arg0, void *arg1);
+
 extern u32 D_003BA904;
 s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
@@ -81,7 +86,9 @@ typedef struct EventViewerState {
     f32 slotValue; /* 0x2424 */
     s32 pendingWork;  /* 0x2428: reset when pendingResource is released */
     s32 pendingResource; /* 0x242C */
-    u8 pad2430[0x60]; /* allocated as 0x2490 bytes */
+    u8 pad2430[0x10];
+    s32 unk2440; /* 0x2440 */
+    u8 pad2444[0x4C]; /* allocated as 0x2490 bytes */
 } EventViewerState;
 
 typedef struct EvtViewSel {
@@ -799,7 +806,34 @@ void *func_00232A00(void) {
     return (void *)func_002329A0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232A50);
+/* Advance the viewer update: tick the timed action or hand over to the next task. */
+void *func_00232A50(void) {
+    EventViewerState *viewer = (EventViewerState *)func_00101A70();
+    s32 flags;
+
+    func_00232E20(viewer->windowContext);
+    flags = *(s32 *)viewer->windowContext;
+    if ((flags & 8) == 0) {
+        D_003BA904 |= 0x2000000;
+        return 0;
+    } else {
+        if ((flags & 1) != 0) {
+            D_003BA904 |= 0x2000000;
+            return 0;
+        }
+        if ((u32)(func_0026A720() - 3) < 2) {
+            if (viewer->unk2440 == 0x78) {
+                func_0026A808();
+            }
+            viewer->unk2440++;
+            D_003BA904 |= 0x2000000;
+            return 0;
+        }
+        func_0023EF90(viewer->windowContext, viewer);
+        D_003BA904 |= 0x2000000;
+        return (void *)func_002329A0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232B30);
 

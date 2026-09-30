@@ -34,6 +34,12 @@ extern u32 D_00435CD4;
 
 void func_00137818(void);
 
+extern void func_0024DBB8(s32 arg0);
+extern s32 func_002A2330(void);
+extern void func_002A2408(void);
+extern void func_0025A280(s32 arg0, void *arg1);
+extern s32 func_0024D760(u8 *ctx);
+
 void evtEventViewerReset(u64 arg0);
 
 typedef struct EvtViewerGlyph {
@@ -107,12 +113,15 @@ typedef struct EventViewerState {
     f32 slotValue;   /* 0x2424 */
     s32 pendingWork; /* 0x2428: reset when pendingResource is released */
     s32 pendingResource; /* 0x242C */
-    u8 pad2430[0x8C]; /* allocated as 0x24BC bytes */
+    u8 pad2430[0x10];
+    s32 unk2440;   /* 0x2440 */
+    u8 pad2444[0x78]; /* allocated as 0x24BC bytes */
 } EventViewerState;
 
 /* Handles retained by the viewer and by its owning task context. */
 typedef struct EvtWindowContext {
-    u8 pad00[0x104];
+    s32 flags; /* 0x00 */
+    u8 pad04[0x100];
     s32 windowHandle;
 } EvtWindowContext;
 
@@ -891,7 +900,38 @@ s32 func_0024D760(u8 *ctx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024D788);
+/* Advance the viewer update: tick the timed action or hand over to the next task. */
+void *func_0024D788(void) {
+    EventViewerState *viewer = (EventViewerState *)func_00101958();
+    EvtWindowContext *window;
+    s32 flags;
+
+    func_0024DBB8(viewer->windowContext);
+    window = (EvtWindowContext *)viewer->windowContext;
+    flags = window->flags;
+    if ((flags & 8) == 0) {
+        D_00435CD4 |= 0x2000000;
+        return 0;
+    } else {
+        if ((flags & 1) != 0) {
+            D_00435CD4 |= 0x2000000;
+            return 0;
+        }
+        if (func_0024D760((u8 *)window) == 0) {
+            if ((u32)(func_002A2330() - 3) < 2) {
+                if (viewer->unk2440 == 0x78) {
+                    func_002A2408();
+                }
+                viewer->unk2440++;
+                D_00435CD4 |= 0x2000000;
+                return 0;
+            }
+        }
+        func_0025A280(viewer->windowContext, viewer);
+        D_00435CD4 |= 0x2000000;
+        return (void *)func_0024D6B0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D878);
 
