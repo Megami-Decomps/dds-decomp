@@ -70,10 +70,18 @@ typedef struct GridTextWidget {
 typedef struct GridListNode {
     u8 pad00[6];
     u16 key;            /* 0x06, also used as a span in list traversal */
-    u8 pad08[0x14];
+    u8 pad08[0x10];
+    void *head;         /* 0x18 */
     u8 *next;           /* 0x1C */
     u32 child;          /* 0x20: child widget for tree traversal */
 } GridListNode;
+
+typedef struct GridListOwner {
+    u8 pad00[6];
+    u16 count;          /* 0x06 */
+    u8 pad08[8];
+    GridListNode *list; /* 0x10 */
+} GridListOwner;
 
 
 typedef struct GridDrawWork {
@@ -516,9 +524,39 @@ void func_00309090(u32 context) {
     func_00308808(0, 0, 0, 0x2000, 0xe00, 0, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", uiScaleColorRgb);
+u32 uiScaleColorRgb(u32 color, u32 scale) {
+    u32 a = color >> 24;
+    u32 b = (color >> 16) & 0xFF;
+    u32 c = (color & 0xFF00) >> 8;
+    u32 d = color & 0xFF;
 
-INCLUDE_ASM(const s32, "game/code_00306F80", uiBlendColors);
+    a = (a * scale) >> 8;
+    b = (b * scale) >> 8;
+    c = (c * scale) >> 8;
+    return (a << 24) | (b << 16) | (c << 8) | d;
+}
+
+u32 uiBlendColors(u32 c0, u32 c1, u32 t) {
+    u32 a0 = c0 >> 24;
+    u32 r0 = (c0 & 0xFF0000) >> 16;
+    u32 g0 = (c0 & 0xFF00) >> 8;
+    u32 b0 = c0 & 0xFF;
+    u32 a1 = c1 >> 24;
+    u32 r1 = (c1 & 0xFF0000) >> 16;
+    u32 g1 = (c1 & 0xFF00) >> 8;
+    u32 b1 = c1 & 0xFF;
+    u32 inv;
+
+    if (t > 0x100) {
+        t = 0x200 - t;
+    }
+    inv = 0x100 - t;
+    a0 = (a0 * t + a1 * inv) >> 8;
+    r0 = (r0 * t + r1 * inv) >> 8;
+    g0 = (g0 * t + g1 * inv) >> 8;
+    b0 = (b0 * t + b1 * inv) >> 8;
+    return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
+}
 
 void func_003091E8(void) {
 }
@@ -639,7 +677,25 @@ void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003094C8);
+u32 func_003094C8(GridListOwner *owner) {
+    GridListNode *node = owner->list;
+    u32 flags;
+    s32 i;
+
+    if (node == 0) {
+        return 0;
+    }
+    flags = node->head != 0;
+    for (i = 0; i < owner->count; i++) {
+        node = node->next;
+        if (node == 0) {
+            flags &= ~2;
+            return flags;
+        }
+    }
+    flags |= 2;
+    return flags;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309538);
 

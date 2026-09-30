@@ -155,11 +155,40 @@ void itfDspSignalE(void) {
     dspStartEntry(7);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255838);
-
 extern f32 func_002E8398(s32);
 
-extern void func_00255838(void *);
+
+
+typedef struct DspParticle {
+    s16 x;         /* 0x00 */
+    s16 y;         /* 0x02 */
+    s16 timer;     /* 0x04 */
+    s16 timerMax;  /* 0x06 */
+    s16 z;         /* 0x08 */
+    s8 phase;      /* 0x0A */
+    u8 size;       /* 0x0B */
+} DspParticle;
+
+void func_00255838(DspParticle *spark) {
+    spark->timer = spark->timer - 1;
+    if (spark->timer < 0) {
+        if (spark->phase != 0) {
+            spark->phase = 0;
+            spark->timer = spark->timerMax = func_002E8398(0) * 30.0f + 1.0f;
+        } else if (func_002E8398(0) > 0.7f) {
+            spark->timer = spark->timerMax = func_002E8398(0) * 30.0f + 0.0f;
+        } else {
+            spark->phase = 1;
+            spark->timer = spark->timerMax = func_002E8398(0) * 60.0f + 45.0f;
+            spark->z = (func_002E8398(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = func_002E8398(0) * 10.0f;
+            spark->x = func_002E8398(0) * 512.0f + -256.0f;
+            spark->y = func_002E8398(0) * 448.0f + -128.0f;
+        }
+    }
+}
+
+
 
 typedef struct {
     s32 countdown;

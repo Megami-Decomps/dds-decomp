@@ -24,10 +24,10 @@ typedef struct MenuSlotState {
     u8 pad00[0x64];
     s32 batch;     /* 0x64 */
     u8 pad68[0x40];
-    s32 effect[7]; /* 0xA8 */
-    s32 cur;       /* 0xC4 */
-    s32 prev;      /* 0xC8 */
-    u8 padCC[0x18];
+    s32 effect[5]; /* 0xA8: pairs at +0x08/+0x0C select the two effect slots */
+    s32 cur;       /* 0xBC */
+    s32 prev;      /* 0xC0 */
+    u8 padC4[0x20];
     s32 mode;      /* 0xE4 */
 } MenuSlotState;
 
@@ -129,7 +129,27 @@ s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
     return frames >= 60 ? 2 : 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", mnuTerminalConfigureEffects);
+void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
+    s32 *slot = &state->cur;
+
+    if (*slot < 0) {
+        return;
+    }
+    switch (mode) {
+    case 1:
+        effConfigureWithDefaultSetting(state->batch, *slot, state->effect[2], 0, 5, 2);
+        break;
+    case 2:
+        effConfigureWithDefaultSetting(state->batch, *slot, state->effect[3], 0, 0, 2);
+        break;
+    case 3:
+        effConfigureWithDefaultSetting(state->batch, *slot, state->effect[2], 0, 0, 2);
+        if (slot[1] >= 0) {
+            effConfigureWithDefaultSetting(state->batch, slot[1], state->effect[3], 0, 0, 2);
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A570);
 

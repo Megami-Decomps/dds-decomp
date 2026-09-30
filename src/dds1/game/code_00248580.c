@@ -331,7 +331,47 @@ void func_00249420(s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", mnuTerminalBuildMenus);
+extern void mnuResolveStaffImageHandles(u8 *);
+
+extern s32 D_003AF5E0[];
+
+void mnuTerminalBuildMenus(MenuProgressWork *host) {
+    s32 table[15];
+    s32 row;
+    s32 count;
+    s32 excluded = -1;
+
+    memcpy(table, D_003AF5E0, 0x3C);
+
+
+    switch (host->mode) {
+    case 0:
+        row = 0;
+        count = 5;
+        if (func_00249198() != 0) {
+            excluded = 1;
+        }
+        break;
+    case 1:
+        row = 1;
+        count = 4;
+        if (func_00249198() != 0) {
+            excluded = 1;
+        }
+        break;
+    default:
+        row = 2;
+        count = 2;
+        break;
+    }
+    host->listResource = mnuBuildThresholdNodeList(table + row * 5, count, excluded, (s32)host);
+    mnuBuildTerminalNodeList(host);
+    mnuResolveStaffImageHandles((u8 *)host + 0xE0);
+    mnuUpdateGroupResources((u8 *)host);
+    func_00249058(host);
+    func_002493B0(host);
+    func_00249420(host);
+}
 
 extern void mnuDestroyListState(u32);
 
@@ -520,7 +560,7 @@ extern void func_00285490(void *);
 
 extern void mnuLoadResourceHandles(s32);
 
-extern void mnuTerminalBuildMenus(s32);
+extern void mnuTerminalBuildMenus(MenuProgressWork *host);
 
 extern void evtLoadResourcePair(const char *, void *);
 
