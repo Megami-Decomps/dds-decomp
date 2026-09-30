@@ -111,6 +111,10 @@ extern void func_0019D010(FrFontCtx *ctx, s32 arg1);
 
 extern void func_0019D100(FrFontCtx *ctx, u32 arg1, u32 arg2);
 
+void frFontCreateContext();
+
+extern u8 D_00436578[];
+
 /* Font system at D_00452720 (see game/code_0019B840.c); the two glyph slots
  * at +0x194/+0x198 are selected by func_00195B10. */
 typedef struct FrFontSys {
@@ -591,7 +595,17 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DE70);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DEE0);
 
-INCLUDE_ASM(const s32, "interface/frFont", frFontCreateContext);
+/* Old-style definition: callers invoke it without arguments and rely on $a0. */
+void frFontCreateContext(ctx)
+    FrFontCtx *ctx;
+
+{
+    FrFontCtx *newCtx = func_0019CE10(&D_00436578, 0, ctx->uC.b.bD, ctx->uC.b.bE, ctx->u14.shifted);
+
+    ctx->u14.ptr = newCtx;
+    func_0019D010(newCtx, ctx->uC.b.bF);
+    ctx->flag1C = 0;
+}
 
 void func_0019E0A0(FrFontCtx *ctx) {
     s8 flag;

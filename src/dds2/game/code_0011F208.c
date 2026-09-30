@@ -217,6 +217,8 @@ extern s32 D_00435EF4;
 
 extern s32 D_00435EF8;
 
+extern void fldSetCameraMoveMode(s32 mode);
+
 extern void fldClearCameraMoveMode(void);
 
 extern u32 func_001106B8(u64);
@@ -633,7 +635,22 @@ void func_00120820(void) {
     fldClearCameraMoveMode();
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00120858);
+/* Report the pending camera move mode, kicking the field camera when the
+ * stored start and end indices agree. */
+s32 func_00120858(void) {
+    if (D_00435EF8 == 1) {
+        return 2;
+    }
+    if (D_00435EF4 != -999 && D_00435EE0 == D_00435EEC) {
+        if (D_00435EE4 < D_00435EE0) {
+            fldSetCameraMoveMode(2);
+        } else {
+            fldSetCameraMoveMode(-2);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412B90);
 

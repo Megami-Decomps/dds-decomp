@@ -20,6 +20,22 @@ extern s8 D_00437989;
 
 extern s8 D_00437988;
 
+extern void func_003421E8(s32);
+
+extern void mnuInitPartyPanelSlots(s32);
+
+extern void func_002A9640(s32, s32);
+
+extern void effRequestResourceByMode(char *, char *, s32, s32);
+
+extern void mnuRequestEffectResources(s32);
+
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+
+extern char D_00428358[];
+
+extern char D_00428368[];
+
 typedef struct MenuAction {
     u32 value;
     u32 mode;
@@ -258,9 +274,20 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299280);
 
-INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
-
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299320);
+s32 func_00299320(s32 work) {
+    if (*(s32 *)(work + 0x580) != 0) {
+        return 0;
+    }
+    func_003421E8(0x50000);
+    mnuInitPartyPanelSlots(work + 0x584);
+    func_002A9640(*(s32 *)(work + 0x58), work + 0x51C);
+    effRequestResourceByMode(D_00428358, D_00428368, 0, work + 0x94);
+    mnuRequestEffectResources(0xAD40 + work);
+    *(s32 *)(work + 0x580) = 1;
+    kwlnFadeInStart(0, 0, 0, 1);
+    kwlnFadeInStart(0, 0, 0, 0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_002993D0);
 
@@ -331,6 +358,10 @@ void brsTaskLatchPendingRows(s32 context) {
         D_00437989 = 1;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
+
+INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 

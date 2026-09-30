@@ -33,7 +33,7 @@ typedef struct EventDispatchState {
     u32 dispatchValue; /* 0x58 */
     u8 pad5C[0x1C];
     EventVisualState *visualState; /* 0x78 */
-    u8 pad7C[4];
+    EventMenuOwner *thresholdOwner; /* 0x7C */
     EventMenuOwner *menuOwner; /* 0x80 */
     s32 menuMode; /* 0x84 */
     u8 pad88[8];
@@ -44,9 +44,23 @@ typedef struct EventDispatchState {
     u32 callback; /* 0xCC */
     u32 previousCallback; /* 0xD0 */
     s32 exitState; /* 0xD4 */
-    u8 padD8[0x74];
-    s32 stage; /* 0x14C */
+    s32 menuActive;      /* 0xD8: cleared when the menu command chain ends */
+    s32 selectionStep;  /* 0xDC: compared against 2 by func_0026B120 */
+    u8 padE0[0x6C];
+    s32 stage;           /* 0x14C */
+    u8 pad150[4];
+    u32 menuResource;    /* 0x154: released by func_00342580 */
 } EventDispatchState;
+
+extern void func_00268CC0(s32, s32);
+
+extern void func_0026CA80(s32, s32);
+
+extern void evtClearActiveFlag(s32);
+
+extern void func_002698A0(s32, s32);
+
+extern void func_00342580(u32);
 
 extern s32 fldClassifyRemainingFrames(s32);
 
@@ -197,9 +211,37 @@ void evtBSetupDispatchSyncB(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026A1B8);
+u32 func_0026A1B8(void) {
+    EventDispatchState *context = (EventDispatchState *)func_00101958();
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026A258);
+    if (context->menuActive == 0) {
+        mnuSelectFirstListNode((s32)context->menuOwner);
+        func_00268CC0(3, (s32)context);
+        evtRememberDispatchCallback((s32)func_00269638, (s32)context);
+        func_00269478(3, (s32)context);
+        func_002690A8(4, (s32)context);
+        func_00268AA0(3, 1, (s32)context);
+    }
+    context->menuActive = 0;
+    evtClearActiveFlag(0);
+    func_0026CA80(0, 3);
+    return 1;
+}
+
+u32 func_0026A258(void) {
+    EventDispatchState *context = (EventDispatchState *)func_00101958();
+
+    if (context->menuActive != 0) {
+        func_00268CC0(3, (s32)context);
+        evtRememberDispatchCallback((s32)func_00269230, (s32)context);
+        func_00269478(4, (s32)context);
+        func_002690A8(3, (s32)context);
+        func_00268AA0(3, 0, (s32)context);
+        func_0026C710();
+    }
+    context->menuActive = 0;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A2E0);
 
@@ -222,7 +264,17 @@ void evtBSetupDispatchSyncC(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026A4B0);
+u32 func_0026A4B0(void) {
+    EventDispatchState *context = (EventDispatchState *)func_00101958();
+
+    mnuRefreshThresholdNodeFlags((s32)context->thresholdOwner);
+    mnuSelectFirstListNode((s32)context->thresholdOwner);
+    func_00268AA0(3, 2, (s32)context);
+    func_002698A0(3, (s32)context);
+    func_002690A8(4, (s32)context);
+    evtRememberDispatchCallback((s32)func_00269978, (s32)context);
+    return 1;
+}
 
 u32 evtBEnterStateA(void) {
     s32 context = func_00101958();
@@ -471,9 +523,24 @@ void evtBSetupDispatchSyncG(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_0026B120);
+u32 func_0026B120(void) {
+    EventDispatchState *context = (EventDispatchState *)func_00101958();
 
-extern void func_00268CC0(s32, s32);
+    func_00268CC0(2, (s32)context);
+    if (context->selectionStep >= 2) {
+        func_00268AA0(2, -1, (s32)context);
+        func_00269478(2, (s32)context);
+    } else {
+        func_00268AA0(2, -1, (s32)context);
+        func_002690A8(2, (s32)context);
+    }
+    evtRememberDispatchCallback(0, (s32)context);
+    context->exitState = 1;
+    func_00342580(context->menuResource);
+    evtClearActiveFlag(0);
+    return 1;
+}
+
 
 s32 func_0026B1C8(void) {
     s32 state = func_00101958();

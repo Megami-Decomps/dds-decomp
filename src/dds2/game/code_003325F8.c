@@ -112,6 +112,8 @@ typedef struct SdfResourceList {
     u32 *items;
 } SdfResourceList;
 
+void func_0032C278(u32 asset, s32 arg, f32 value);
+
 void sdfTexReleaseReferenceViaHandler(u32);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
@@ -399,7 +401,22 @@ SdfResourceList *sdfResourceListClone(SdfResourceList *src) {
     return dst;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333060);
+void func_00333060(SdfResourceList *list, s32 arg, f32 value) {
+    s32 i;
+    s32 count;
+
+    if (list == NULL) {
+        return;
+    }
+    count = list->count;
+    for (i = 0; i < count; i++) {
+        SdfAsset *item = (SdfAsset *)list->items[i];
+
+        if (*((u8 *)item + 0x18) != 0) {
+            func_0032C278((u32)item, arg, value);
+        }
+    }
+}
 
 void sdfRegisterResourceQueueCallbacks(void) {
     sdfInitializeSynchronizedRequest(&D_00439170, sdfResourceListReleaseAssets);

@@ -12,6 +12,8 @@ s32 evtGetSolarPhase(s32 object);
 
 extern char D_004221D8[]; /* "EventTest" */
 
+extern char D_004221E8[]; /* "PolygonMovie" */
+
 void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 
 void evtDestroySecondaryWorldNode(void);
@@ -99,7 +101,11 @@ void evtStartTestTask(void) {
     kwlnTaskCreate(D_004221D8, 0x2AF9, 1, 1, func_00245818, func_00245820, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", evtStopTestTasks);
+void evtStopTestTasks(void) {
+    kwlnTaskDestroyWithHierarchyByName(D_004221D8, 1);
+    kwlnTaskDestroyWithHierarchyByName(D_004221E8, 0);
+    evtDestroySecondaryWorldNode();
+}
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_002458B8);
 

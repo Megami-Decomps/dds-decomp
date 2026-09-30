@@ -48,8 +48,9 @@ typedef struct SdfTexHead {
     void *unk8; /* 0x8 */
     void *unkC; /* 0xC */
     s32 unk10; /* 0x10 */
-    void *unk14; /* 0x14 */
-    void *unk18; /* 0x18 */
+    s16 width; /* 0x14 */
+    s16 height; /* 0x16 */
+    s32 format; /* 0x18 */
 } SdfTexHead;
 
 extern SdfTexHead *D_00439144;
@@ -61,6 +62,10 @@ void *func_00328D68(s32 size);
 s32 func_0032AA40(void *arg0);
 
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
+
+extern SdfTexHead *func_0032A688(s32 size, s32 arg1);
+
+extern SdfTexHead *func_0032A7A8(s32 size, s32 arg1);
 
 extern SdfSemaObj D_004681F8;
 
@@ -192,7 +197,21 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A688);
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A7A8);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A8C8);
+SdfTexHead *func_0032A8C8(s32 width, s32 height, s32 format, s32 arg3, s32 arg4) {
+    s32 bits = sdfFormatBitsPerPixelA(format);
+    s32 size = (width * height * bits) >> 5;
+    SdfTexHead *node;
+
+    if (arg4 != 0) {
+        node = func_0032A688(size, arg3);
+    } else {
+        node = func_0032A7A8(size, arg3);
+    }
+    node->width = width;
+    node->height = height;
+    node->format = format;
+    return node;
+}
 
 s32 func_0032A968(SdfTexBlock *block) {
     SdfTexBlock *prev = block->prev;
@@ -256,7 +275,30 @@ void sdfTexInitializeLists(void) {
     sdfInitializeSynchronizedRequest(&D_00439148, func_0032AA40);
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", sdfAllocImageBuffer);
+SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
+    s32 alignedWidth = (width + 0x3F) & -0x40;
+    s32 alignedHeight = (height + 0x1F) & -0x20;
+    SdfTexHead *node;
+
+    switch (format) {
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        alignedWidth >>= 1;
+        break;
+    case 0x0:
+    case 0x1:
+    case 0x30:
+    case 0x31:
+        break;
+    }
+    node = func_0032A688((alignedWidth * alignedHeight + 0x7FF) & -0x800, 1);
+    node->width = width;
+    node->height = height;
+    node->format = format;
+    return node;
+}
 
 u32 func_0032ABC0(void) {
     return D_00439140;
@@ -266,7 +308,35 @@ u32 func_0032ABC8(void) {
     return D_00439144;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", sdfFormatImageSize);
+s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
+    s32 bits;
+
+    switch (format) {
+    case 0x1:
+    case 0x31:
+        bits = 0x18;
+        break;
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        bits = 0x10;
+        break;
+    case 0x13:
+    case 0x1B:
+        bits = 8;
+        break;
+    case 0x14:
+    case 0x24:
+    case 0x2C:
+        bits = 4;
+        break;
+    default:
+        bits = 0x20;
+        break;
+    }
+    return (bits * width * height) >> 7;
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AC30);
 

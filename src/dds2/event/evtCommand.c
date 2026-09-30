@@ -39,7 +39,7 @@ extern s32 D_00389780[];
 
 void fldInitializeAlternateSequence(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 
-void func_0033DAD8(const char *msg);
+void func_0033DAD8(const char *msg, ...);
 
 void func_0025D390(s32 arg0, s32 arg1);
 
@@ -87,7 +87,11 @@ s32 evtFindTaskById(s32 arg0);
 
 s32 evtGetTaskValueWord(s32 arg0);
 
+extern s32 mnuCampCreateTask(s32 id);
+
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
+
+extern char D_00421F08[];
 
 typedef struct EvtCampTask {
     u8 pad00[0x20];
@@ -664,9 +668,29 @@ u32 evtCommandSetSolarPhase(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommandWaitForCampTask);
+s32 evtCommandWaitForCampTask(void) {
+    s32 id = scrReadIntParameter(0);
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
+    char *msg;
 
-extern s32 mnuCampCreateTask(s32 id);
+    if (work == NULL) {
+        return 1;
+    }
+    if (evtFindTaskById(id) == 0) {
+        msg = "load BE (%d)..\n";
+        func_0010AE38(msg, id);
+        func_0033DAD8(msg, id);
+        func_00101968((s32)work->campTask, mnuCampCreateTask(id));
+        return 0;
+    }
+    if (evtGetTaskValueWord(id) == 2) {
+        msg = D_00421ED8;
+        func_0010AE38(msg, id);
+        func_0033DAD8(msg, id);
+        return 1;
+    }
+    return 0;
+}
 
 /* Start the camp task only if no task with this ID exists yet. */
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
@@ -716,9 +740,31 @@ s32 evtCommandDestroyCampTask(void) {
     return 1;
 }
 
+/* Start a polygon movie on the active camp task's resource. */
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommandStartPolygonMovie);
+s32 evtCommandStartPolygonMovie(void) {
+    EvtCommandWork *work = (EvtCommandWork *)func_0010D8C8();
+    s32 a;
+    s32 b;
+    s32 result;
+
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->campTask == 0) {
+        func_0035B6E0(D_00421F08);
+        return 1;
+    }
+    a = scrReadIntParameter(0);
+    b = scrReadIntParameter(1);
+    result = func_0024FCB8(work->campTask->resource, a, b);
+    func_0010AE38("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
+    func_00101968((s32)work->campTask, result);
+    evtPolygonMovieSetFlagBits(result, 1);
+    func_0010D818(result);
+    return 1;
+}
 
 s32 evtCommandClearPolygonMovieFlag(void)
 {

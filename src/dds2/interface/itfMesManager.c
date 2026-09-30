@@ -12,6 +12,22 @@ typedef struct ItfMesSlot {
 
 extern ItfMesSlot D_0045296C[];
 
+/* Node of the pool at D_00452940 + 0x10 (0x14 bytes each). */
+typedef struct ItfMesPoolNode {
+    struct ItfMesPoolNode *previous; /* 0x0 */
+    struct ItfMesPoolNode *next;     /* 0x4 */
+    s32 index;                       /* 0x8 */
+    s32 unkC;                        /* 0xC */
+    s32 unk10;                       /* 0x10 */
+} ItfMesPoolNode;
+
+typedef struct ItfMesPool {
+    ItfMesPoolNode *activeHead; /* 0x0 */
+    ItfMesPoolNode *activeTail; /* 0x4 */
+    ItfMesPoolNode *firstFree;  /* 0x8 */
+    ItfMesPoolNode *lastFree;   /* 0xC */
+} ItfMesPool;
+
 /* Globals behind D_003D6EA0: word at +0x4, bitfield at +0xC. */
 typedef struct ItfMesGlobals {
     u32 unk0; /* 0x0 */
@@ -19,6 +35,8 @@ typedef struct ItfMesGlobals {
     u32 unk8; /* 0x8 */
     u16 flags; /* 0xC: set/cleared by itfMesSetGlobalFlags */
     u16 unkE; /* 0xE */
+    ItfMesPool pool; /* 0x10 */
+    ItfMesPoolNode nodes[0x40]; /* 0x20 */
 } ItfMesGlobals;
 
 extern ItfMesGlobals D_00452940;
@@ -130,7 +148,8 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
 typedef struct ItfMesItem {
     u8 unk0[0x10];         /* 0x0 */
     u32 word10;            /* 0x10: low byte is the color */
-    u8 unk14[2];           /* 0x14 */
+    u8 flag14;             /* 0x14: byte set by func_001A5988 */
+    u8 unk15;              /* 0x15 */
     u8 flag16;             /* 0x16: tested by func_001A5B70 */
     u8 unk17[0x11];        /* 0x17 */
     struct ItfMesItem *next; /* 0x28 */
@@ -142,7 +161,8 @@ typedef struct ItfMesNode {
     s32 x;             /* 0x4: adjusted with horizontal node offsets */
     s32 y;             /* 0x8: groups nodes on the same row */
     s32 advance;       /* 0xC: accumulated within a row */
-    u8 unk10[4];       /* 0x10 */
+    u8 unk10[2];       /* 0x10 */
+    s16 unk12;         /* 0x12: row height in 1/8 units */
     s32 unk14;         /* 0x14: set by func_001A5950 */
     u8 unk18[4];       /* 0x18 */
     ItfMesItem *child; /* 0x1C */
@@ -180,7 +200,7 @@ void func_001A4988(s32 window, s32 arg1, s32 arg2);
 
 void func_001A4A10(s32 window, s32 arg1, s32 arg2);
 
-void func_001A34D0(s32 window, s32 arg1, s32 arg2);
+void func_001A34D0();
 
 void itfMesCleanupWindow(s32 window, s32 arg1);
 
@@ -193,6 +213,26 @@ void func_0019C5B0(FrFontGlyph *arg0);
 void func_001A5E00(void *arg0, s32 arg1);
 
 void func_001A5DD8(void *arg0, s32 arg1);
+
+void itfMesInitCharTable(s32 *table);
+
+s32 itfMesMaxGroupedExtent(ItfMesNode *node);
+
+extern void func_0019D8A8(u32 arg0);
+
+extern ItfMesNode *func_0019E7C8(s32 x, s32 y, s32 encodedText, s32 sub);
+
+extern u32 itfLoadTextureFromAsset(const char *path);
+
+extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
+
+extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
+
+extern s32 sndVisitQueuedResources(void);
+
+extern void sndFlushMessageQueue(void);
+
+extern void func_001A76C8(void);
 
 /* Glyph/record chain walked by func_001958A0/frFontLinkGlyph. */
 typedef struct FrFontGlyph {
@@ -256,7 +296,22 @@ s32 itfMesScriptActivatePanel(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3458);
+s32 func_001A3458(void) {
+    s32 window = scrGetWindow();
+    ItfMesState *mes;
+    u32 state;
+
+    if (window < 0) {
+        return 1;
+    }
+    mes = D_0045296C[window].mes;
+    state = mes->flags & 0x300;
+    if (state == 0x100 || state == 0x200) {
+        func_001A34D0(window);
+        func_00154F18(3);
+    }
+    return state < 1;
+}
 
 void func_001A34D0(s32 window, s32 arg1, s32 arg2) {
     ItfMesState *mes = D_0045296C[window].mes;
@@ -629,7 +684,30 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4988);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4A10);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4AD8);
+s32 func_001A4AD8(s32 window, s32 arg1, s32 arg2) {
+    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesTable *table;
+    u32 item;
+    ItfMesNode *glyph;
+    s32 extent;
+
+    table = itfMesGetEntry(mes, arg1)->table;
+    if (table->count == 0) {
+        return 0;
+    }
+    itfMesInitCharTable((s32 *)mes->tableD0);
+    if (*(s32 *)&mes->unk8[0] != 0) {
+        func_0019D8A8(*(s32 *)&mes->unk8[0]);
+    }
+    item = itfMesGetTableItem(table, arg2);
+    if (item == 0) {
+        return item;
+    }
+    glyph = func_0019E7C8(0, 0, item, 0);
+    extent = itfMesMaxGroupedExtent(glyph);
+    func_0019C5B0((FrFontGlyph *)glyph);
+    return extent;
+}
 
 void func_001A4B98(s32 window, u8 value) {
     D_0045296C[window].mes->unk39 = value;
@@ -639,7 +717,20 @@ void func_001A4BB8(s32 window, u32 value) {
     D_0045296C[window].mes->unk1DC = value;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4BD8);
+void func_001A4BD8(void) {
+    ItfMesPoolNode *node;
+
+    D_00452940.unk0 = 0;
+    D_00452940.unk8 = 0;
+    D_00452940.flags = 0;
+    D_00452940.unk4 = itfLoadTextureFromAsset("/itf/MESWIN.TMX");
+    itfInitPool(&D_00452940.pool, D_00452940.nodes, 0x40, 0x14);
+    for (node = D_00452940.pool.firstFree; node != NULL; node = node->next) {
+        node->unkC = 0;
+    }
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))sndVisitQueuedResources, sndFlushMessageQueue, NULL);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, func_001A76C8, sndFlushMessageQueue, NULL);
+}
 
 void itfMesSetGlobalFlags(u32 bits) {
     D_00452940.flags |= bits;
@@ -844,7 +935,26 @@ s32 itfMesCountZeroBits(s32 count, u32 bits) {
     return zeros;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5670);
+/* Build one node per clear bit of mask, stacking them downward from y. */
+ItfMesNode *func_001A5670(u32 *items, s32 count, u32 mask, s32 x, s32 y, s32 value) {
+    ItfMesNode *node = NULL;
+    s32 i;
+
+    for (i = 0; i < count; i++, items++) {
+        if (mask & 1) {
+            mask >>= 1;
+        } else {
+            node = (ItfMesNode *)func_0019E800(x, y, 0, 0, 0, 0x80, *items, node);
+            mask >>= 1;
+            y += node->unk12 << 3;
+        }
+    }
+    if (node != NULL) {
+        func_001A5950(node, value);
+        itfMesRecolorNodeChildren(node, 0x80);
+    }
+    return node;
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5760);
 
@@ -889,7 +999,34 @@ void func_001A5950(ItfMesNode *node, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5988);
+/* Skip to the row (last - first - 1) rows below the node, then set the flag
+ * byte on every child of that row's nodes. */
+void func_001A5988(ItfMesNode *node, s32 first, s32 last, s32 value) {
+    s32 rows = last - first - 1;
+    s32 row = node->y;
+    s32 cur = row;
+    ItfMesItem *item;
+    u8 color;
+
+    while (rows > 0) {
+        while (row == cur) {
+            node = node->next;
+            if (node == NULL) {
+                return;
+            }
+            cur = node->y;
+        }
+        rows--;
+        row = cur;
+    }
+    color = value;
+    do {
+        for (item = node->child; item != NULL; item = item->next) {
+            item->flag14 = color;
+        }
+        node = node->next;
+    } while (node != NULL && row == node->y);
+}
 
 void func_001A5A28(FrFontGlyph *glyph, u8 value) {
     FrFontGlyph *child;

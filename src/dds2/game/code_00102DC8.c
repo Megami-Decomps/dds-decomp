@@ -71,6 +71,20 @@ extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*
 
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
+
+extern s32 D_00435BA4;
+
+extern s32 D_00435D04;
+
+extern s32 D_00435D08;
+
+typedef struct {
+    u8 unknown[0x10];
+    void (*submit)(void *, void *);
+} KwlnGraphicsSink;
+
+extern KwlnGraphicsSink D_00380708;
+
 extern void *D_00438DA8;
 
 extern f32 D_0037F5EC[];
@@ -585,7 +599,23 @@ void kwlnFadeUpdate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnDrawBlurErrorCounters);
+void kwlnDrawBlurErrorCounters(void) {
+    void *task;
+
+    if (D_00435BA4 != 0) {
+        if (D_00435D04 != 0 || D_00435D08 != 0) {
+            task = sdfAllocPacketAligned(0x20);
+            sdfInitPacketList(task);
+            if (D_00435D04 > 0) {
+                sdfAppendPacket(task, func_0033D810(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_00435D04));
+            }
+            if (D_00435D08 > 0) {
+                sdfAppendPacket(task, func_0033D810(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_00435D08));
+            }
+            D_00380708.submit(&D_00380708, task);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105CF8);
 

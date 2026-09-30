@@ -16,6 +16,23 @@ extern s32 CancelWakeupThread(u64);
 
 extern u64 GetThreadId(void);
 
+typedef struct SdfThreadNode {
+    struct SdfThreadNode *next; /* 0x00 */
+    s32 threadId;               /* 0x04 */
+} SdfThreadNode;
+
+extern s32 sdfCreateThread(s32 entry, s32 stack, s32 stackSize, s32 priority);
+
+extern s32 WaitSema(s32 sema);
+
+extern s32 SignalSema(s32 sema);
+
+extern void _StartThread(s32 threadId, s32 arg);
+
+extern u32 D_003BD998;
+
+extern SdfThreadNode *D_003BD99C;
+
 void sdfWakeAlarmThread(u32 unused0, u32 unused1, u32 threadId) {
     iWakeupThread(threadId);
 }
@@ -55,7 +72,15 @@ void sdfRunTickWorkerThread(void) {
 
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CF9A8);
 
-INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CFA68);
+/* Register the thread under the list semaphore before starting it. */
+void func_002CFA68(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
+    node->threadId = sdfCreateThread(entry, stack, stackSize, priority);
+    WaitSema(D_003BD998);
+    node->next = D_003BD99C;
+    D_003BD99C = node;
+    SignalSema(D_003BD998);
+    _StartThread(node->threadId, arg);
+}
 
 /* A previously queued wakeup counts toward the requested sleep count. */
 void sdfSleepThreadCount(s32 count) {

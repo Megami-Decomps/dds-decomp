@@ -23,6 +23,19 @@ typedef struct EffectObject {
     EffectObjectData *data;
 } EffectObject;
 
+typedef struct WorldSubState {
+    u8 pad00[0x10];
+    f32 vec[4];
+} WorldSubState;
+
+typedef struct WorldObj {
+    u8 pad00[4];
+    s32 unk4;             /* 0x4 world counter copied on spawn */
+    u8 pad08[0x10];
+    WorldSubState *state; /* 0x18 */
+    f32 *source;          /* 0x1C */
+} WorldObj;
+
 extern void effObjInnerCreate();
 
 extern void *func_00328D68(s32 size);
@@ -124,7 +137,35 @@ u32 func_00113F00(EffectObject *object) {
     return object->data->handle;
 }
 
-INCLUDE_ASM(const s32, "game/code_00113308", dds3SpawnInnerVecObj6);
+extern WorldObj *func_00110AA8();
+
+extern void dds3EnsureSlotData();
+
+extern void effObjSetInnerFirstVec();
+
+extern void effObjSetInnerSecondVec();
+
+extern void effObjInnerVecBackup();
+
+/* Spawn a world object of kind 6 and seed its stored vector. */
+WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
+    f32 zero[4];
+    WorldObj *obj;
+
+    memset(zero, 0, 0x10);
+    zero[3] = 1.0f;
+    obj = func_00110AA8(6);
+    obj->unk4 = a;
+    dds3EnsureSlotData(obj);
+    effObjSetInnerSecondVec(obj, second);
+    effObjSetInnerFirstVec(obj, zero);
+    effObjInnerVecBackup(obj->source);
+    obj->state->vec[0] = vec[0];
+    obj->state->vec[1] = vec[1];
+    obj->state->vec[2] = vec[2];
+    obj->state->vec[3] = vec[3];
+    return obj;
+}
 
 void func_00113FD0(void) {
     func_00110B50();
@@ -177,17 +218,6 @@ INCLUDE_RODATA(const s32, "game/code_00113308", D_004128B0);
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114150);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114428);
-
-typedef struct WorldSubState {
-    u8 pad00[0x10];
-    f32 vec[4];
-} WorldSubState;
-
-typedef struct WorldObj {
-    u8 pad00[0x18];
-    WorldSubState *state;
-    f32 *source;
-} WorldObj;
 
 /* Refresh the object's stored xyz from the source vector. */
 void dds3RefreshStoredVec3(WorldObj *obj) {

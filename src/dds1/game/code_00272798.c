@@ -10,6 +10,14 @@ extern u8 D_0037C844[];
 
 extern void func_002858F8();
 
+extern void mnuDrawBackdrop(s32, s32);
+
+extern void func_0027E8D8(s32, s32, s32, u32, s32);
+
+extern void mnuCreateStaffImageSprite(s32);
+
+extern void func_002723B0(s32, u32);
+
 INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
@@ -51,7 +59,16 @@ s64 func_00272A90(s32 callback) {
     return state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00272798", func_00272B00);
+s64 func_00272B00(s32 arg0) {
+    s32 context;
+
+    context = func_00101A70();
+    mnuDrawBackdrop(context + 0x13C, 0x20);
+    func_0027E8D8(-0x10, -8, 0, *(u32 *)(context + 0x138), 0x54);
+    mnuCreateStaffImageSprite(0x14);
+    func_002723B0(2, *(u32 *)(context + 0x78));
+    return func_00285670(context + 8, (s32 *)(context + 0x54), 1, arg0);
+}
 
 void func_00272B80(s32 request) {
     s32 context = func_00101A70();

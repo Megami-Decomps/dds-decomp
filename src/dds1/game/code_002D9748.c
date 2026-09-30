@@ -79,15 +79,28 @@ extern u64 func_002D2468(SdfTex *);
 extern u64 func_002D2478(SdfTex *);
 extern u64 func_002D2488(SdfTex *);
 
+extern void sdfInitPacketList(void *);
+
+extern void sdfAppendPacket(void *, void *);
+
+extern void func_002D5608(void *);
+
+extern void func_002D5718(void *);
+
+extern void func_002D5828(void *);
+
+extern void func_002D5938(void *);
+
 void *sdfChunkFindById(SdfChunk *chunk, s32 id);
 void *func_002CFEB8(s32 size);
+void *func_002CFF68(s32 size);
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
 void func_002D9D80(SdfTextParam *param, void *resource);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void func_002D3C30(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(SdfResourceList *list);
-void func_002DB048(u32, u32);
+void func_002DB048(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);
 void sdfDestroyDevRequest(void *);
 void sdfTexReleaseReferenceViaHandler(u32);
@@ -111,7 +124,25 @@ typedef struct SdfPacketOwner {
 } SdfPacketOwner;
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9748);
 
-INCLUDE_ASM(const s32, "game/code_002D9748", func_002D99B0);
+void func_002D99B0(u8 *ctx) {
+    u8 *packet = ctx;
+    s32 i;
+
+    func_002D5608(ctx + 0x20);
+    func_002D5718(ctx + 0x80);
+    func_002D5828(ctx + 0xE0);
+    func_002D5938(ctx + 0x140);
+    for (i = 0; i != 4; i++) {
+        *(u32 *)(packet + 0x28) = 0x11000000;
+        sdfInitPacketList(packet);
+        sdfAppendPacket(packet, packet + 0x20);
+        packet += 0x60;
+    }
+    sdfInitPacketList(ctx + 0x180);
+    *(u64 *)(ctx + 0x1A0) = 0;
+    *(u64 *)(ctx + 0x1A8) = 0x13000000;
+    sdfAppendPacket(ctx + 0x180, ctx + 0x1A0);
+}
 
 void func_002D9A70(SdfPacketOwner **owners, u8 *packets) {
     s32 i;
@@ -537,9 +568,90 @@ void func_002DA718(SdfTextParam *param, f32 first, f32 second) {
     param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA730);
+SdfAsset *func_002DA730(void) {
+    SdfAsset *asset;
+    u32 *entry;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA830);
+    D_003BD348++;
+    asset = func_002CFF68(0x48);
+    asset->pad00[6] = 0xFF;
+    for (i = 0; i != 2; i++) {
+        entry = func_002CFEB8(0xA0);
+        asset->entries[i] = entry;
+        entry[0] = 0x6E05C000;
+        entry[0x18 / 4] = 0x6005C005;
+        entry[0x30 / 4] = 0;
+        entry[0x34 / 4] = 0x640CC00A;
+        entry[0x98 / 4] = 0x400000C;
+        entry[0x9C / 4] = 0x14000000;
+    }
+    asset->unk40 = 0;
+    asset->unk44 = 0;
+    asset->unk10 = 0x80808080;
+    asset->unk14 = 0x80808080;
+    asset->unk18 = 0x80808080;
+    return asset;
+}
+
+u8 *func_002DA830(SdfAsset *asset, SdfTextParam *lookup, u8 *data) {
+    SdfTextParam *param = (SdfTextParam *)asset;
+    u32 flags;
+    u8 *cursor;
+    u32 packed;
+
+    *(u32 *)param = *(u32 *)data;
+    *(u16 *)((u8 *)param + 4) = *(u16 *)(data + 4);
+    flags = *(u16 *)(data + 6);
+    cursor = data + 8;
+    if (flags & 0x1) {
+        func_002DA3C0(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x2) {
+        func_002DA3D8(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x4) {
+        func_002DA438(param, ((SdfResourceList *)lookup)->items[*(u16 *)cursor]);
+        cursor += 4;
+    }
+    if (flags & 0x8) {
+        func_002DA4C8(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
+        cursor += 0x14;
+    }
+    if (flags & 0x10) {
+        func_002DA5B0(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x20) {
+        packed = *(u32 *)cursor;
+        cursor += 4;
+        func_002DA5E0(param, ((SdfResourceList *)lookup)->items[packed & 0xFFFF]);
+        func_002DA5C8(param, packed >> 16);
+    }
+    if (flags & 0x40) {
+        func_002DA630(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
+        cursor += 0x14;
+    }
+    if (flags & 0x80) {
+        func_002DA3F0(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x100) {
+        func_002DA408(param, *(u32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x200) {
+        func_002DA420(param, *(f32 *)cursor);
+        cursor += 4;
+    }
+    if (flags & 0x400) {
+        func_002DA718(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1]);
+        cursor += 8;
+    }
+    return cursor;
+}
 
 void sdfAssetRelease(SdfAsset *asset) {
     if (asset == NULL) {
@@ -637,7 +749,26 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
     asset->pad00[6] = flags & (0x55 << (index ^ 1));
 }
 
-INCLUDE_ASM(const s32, "game/code_002D9748", func_002DAE00);
+void func_002DAE00(SdfAsset *asset, s32 index) {
+    u8 flags = asset->pad00[6];
+    SdfAssetEntry *entry = asset->entries[index];
+
+    if ((flags >> index) & 1) {
+        sdfAssetCopyTextureState(asset, entry);
+    } else if (D_003BD34C != 0) {
+        sdfAssetCopyTextureState(asset, entry);
+    }
+    if (flags & (4 << index)) {
+        func_002DAC68(asset, (u8 *)entry);
+    }
+    if (flags & (16 << index)) {
+        func_002DAC88(asset, entry);
+    }
+    if (flags & (64 << index)) {
+        sdfAssetCopyPairToTextParam(asset, entry);
+    }
+    asset->pad00[6] = flags & (0x55 << (index ^ 1));
+}
 
 SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     u32 count = *data;
@@ -672,7 +803,33 @@ void func_002DAFE8(SdfResourceList *list, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D9748", func_002DB048);
+typedef struct SdfSubParamWords {
+    u32 word[6];
+} SdfSubParamWords;
+
+void func_002DB048(SdfAsset *dst, SdfAsset *src) {
+    SdfSubParamWords *sub;
+
+    dst->pad00[6] = 0xFF;
+    dst->unk10 = src->unk10;
+    dst->unk14 = src->unk14;
+    dst->unk1C = src->unk1C;
+    dst->unk18 = src->unk18;
+    *(u16 *)&dst->pad00[4] = *(u16 *)&src->pad00[4];
+    dst->unk2C = src->unk2C;
+    dst->unk20 = src->unk20;
+    dst->unk28 = src->unk28;
+    sub = src->third;
+    if (sub != NULL) {
+        *(SdfSubParamWords *)sdfEnsurePrimaryTextSubParam((SdfTextParam *)dst) = *sub;
+    }
+    sub = src->fourth;
+    if (sub != NULL) {
+        *(SdfSubParamWords *)sdfEnsureSecondaryTextSubParam((SdfTextParam *)dst) = *sub;
+    }
+    dst->unk40 = src->unk40;
+    dst->unk44 = src->unk44;
+}
 
 void func_002DB158(SdfResourceList *first, SdfResourceList *second) {
     s32 i;

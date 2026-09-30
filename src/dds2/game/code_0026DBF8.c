@@ -229,6 +229,22 @@ typedef struct MantraSourceEntry {
     u32 unk10;
 } MantraSourceEntry;
 
+/* One of the two 0x14-byte slots of a mantra source entry. */
+typedef struct {
+    s32 value;      /* 0x00 */
+    u8 pad04[8];
+    u32 unk0C;      /* 0x0C */
+    u8 pad10[4];
+} MnuSourceSlot;
+
+/* Slot view of a mantra source entry (0x34 bytes). */
+typedef struct {
+    u8 pad00[4];
+    u32 flags;             /* 0x04 */
+    u8 pad08[4];
+    MnuSourceSlot slot[2]; /* 0x0C */
+} MnuSourceEntrySlots;
+
 typedef struct MantraListState {
     u32 unk0;
     MantraDisplayNode *head;
@@ -388,7 +404,21 @@ void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u3
 
 extern MantraSourceEntry *func_003162D8(u16);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E470);
+/* Pick the value of the first active slot, preferring slot 0. */
+s32 func_0026E470(u16 index) {
+    s32 result = 0;
+    MnuSourceEntrySlots *entry = (MnuSourceEntrySlots *)func_003162D8(index);
+    s32 slot = 0;
+
+    if (entry->flags & 0x20) {
+        slot = 0;
+    } else if (entry->slot[0].unk0C & 0x20) {
+        slot = 1;
+    } else {
+        return result;
+    }
+    return entry->slot[slot].value;
+}
 
 void mnuMergeMantraSpriteSlots(u32 *values) {
     s32 i;
