@@ -1,6 +1,8 @@
 #include "common.h"
 #include "eff.h"
 
+extern void *memcpy(void *, const void *, u32);
+
 /* Each slot has a 0x60-byte stride; only its resettable tail is known. */
 typedef struct Slot60 {
     u8 pad[0x54];
@@ -81,7 +83,8 @@ extern BDWork2C *func_0018F098(void *arg);
 extern Work30 D_003B22D0;
 
 typedef struct Work2C {
-    u8 data[0x2C];
+    u8 data[0x28];
+    u32 unk28;
 } Work2C;
 
 extern Work2C D_003B2428;
@@ -93,7 +96,8 @@ extern Work30 D_003B2778;
 extern Work18 D_003B28B8;
 
 typedef struct Work24 {
-    u8 data[0x24];
+    u8 data[0x20];
+    u32 unk20;
 } Work24;
 
 extern Work24 D_003B29B8;
@@ -216,7 +220,9 @@ void func_00196FE8(void) {
     D_00436460 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00196FF0);
+void func_00196FF0(void *src) {
+    memcpy(&D_003B21B0, src, 0x28);
+}
 
 Work30 *effGetCh70Params(void) {
     return &D_003B21B0;
@@ -302,7 +308,9 @@ void func_00197298(void) {
     D_00436463 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_001972A0);
+void func_001972A0(void *src) {
+    memcpy(&D_003B2238, src, 0x28);
+}
 
 Work30 *effGetCh73Params(void) {
     return &D_003B2238;
@@ -316,7 +324,9 @@ void func_00197320(void) {
     D_00436464 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197328);
+void func_00197328(Work18 *src) {
+    D_003B2260 = *src;
+}
 
 Work18 *effGetCh74Params(void) {
     return &D_003B2260;
@@ -392,7 +402,6 @@ typedef struct EffLoader {
 extern EffLoader D_003B23E8;
 extern s8 D_004364AD;
 extern s8 D_0040B7DB[];
-extern void *memcpy(void *, const void *, u32);
 extern void func_00194A08();
 extern void func_00194A28();
 extern void func_00194A30();
@@ -424,7 +433,9 @@ Work30 *effGetLoadDescA(void) {
     return &D_003B22D0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_001975F8);
+void func_001975F8(void *src) {
+    memcpy(&D_003B22D0, src, 0x28);
+}
 
 extern EffLoader D_003B2560;
 extern s8 D_004364BD;
@@ -455,7 +466,9 @@ Work2C *effGetLoadDescB(void) {
     return &D_003B2428;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197720);
+void func_00197720(Work2C *src) {
+    D_003B2428 = *src;
+}
 
 extern EffLoader D_003B2738;
 extern s8 D_004364EF;
@@ -486,7 +499,9 @@ Work2C *effGetLoadDescC(void) {
     return &D_003B25A0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197850);
+void func_00197850(Work2C *src) {
+    D_003B25A0 = *src;
+}
 
 extern EffLoader D_003B2878;
 extern s8 D_00436504;
@@ -517,7 +532,9 @@ Work30 *effGetLoadDescD(void) {
     return &D_003B2778;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197980);
+void func_00197980(void *src) {
+    memcpy(&D_003B2778, src, 0x28);
+}
 
 extern EffLoader D_003B2978;
 extern s8 D_00436517;
@@ -548,7 +565,9 @@ Work18 *effGetLoadDescE(void) {
     return &D_003B28B8;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197AA8);
+void func_00197AA8(Work18 *src) {
+    D_003B28B8 = *src;
+}
 
 extern EffLoader D_003B2AB8;
 extern s8 D_0043651C;
@@ -579,7 +598,9 @@ Work24 *effGetLoadDescF(void) {
     return &D_003B29B8;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197BB0);
+void func_00197BB0(Work24 *src) {
+    D_003B29B8 = *src;
+}
 
 extern EffLoader D_003B2C90;
 extern s8 D_0043652F;
@@ -610,7 +631,9 @@ Work2C *effGetLoadDescG(void) {
     return &D_003B2AF8;
 }
 
-INCLUDE_ASM(const s32, "game/code_00195E50", func_00197CD0);
+void func_00197CD0(Work2C *src) {
+    D_003B2AF8 = *src;
+}
 
 void func_00197D38(void) {
     func_001682B0();
