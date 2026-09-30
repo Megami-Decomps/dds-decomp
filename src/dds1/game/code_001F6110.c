@@ -125,8 +125,8 @@ typedef struct BtlCmdCtx {
     s32 commandMode;
     s32 commandValue;
     u8 unk_28[4];
-    s32 unk_2C;
-    s32 unk_30;
+    void *unk_2C;
+    void *unk_30;
 } BtlCmdCtx;
 
 extern f32 btlUnitGetTopY(BtlUnit *);
@@ -858,7 +858,80 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7D80);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7DF8);
 
-INCLUDE_ASM(const s32, "game/code_001F6110", btlDrawButtonIcon);
+typedef struct BtnUv {
+    s32 u;
+    s32 v;
+} BtnUv;
+
+typedef struct BtnSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct BtnSurface *, void *);
+} BtnSurface;
+
+extern BtnUv D_0035FA30[];
+extern BtnUv D_0035FA38[];
+extern BtnUv D_0035FA40[];
+extern BtnUv D_0035FA48[];
+extern BtnUv D_0035FA50[];
+extern BtnUv D_0035FA58[];
+extern BtnUv D_0035FA60[];
+extern BtnUv D_0035FA68[];
+extern BtnUv D_0035FA70[];
+extern BtnUv D_0035FA78[];
+extern BtnUv D_0035FA80[];
+extern BtnUv D_0035FA88[];
+extern BtnUv D_0035FA90[];
+extern BtnUv D_0035FA98[];
+extern BtnUv D_0035FAA0[];
+extern s32 func_0029C048();
+extern void func_002D71B8();
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfConsCreateDrawPacket();
+
+/* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
+void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+    BtnUv *uv;
+    s32 texture;
+    void *packet;
+    s32 xFixed;
+    s32 yFixed;
+
+    button &= 0x7FFF;
+    if (button != 0) {
+        switch (button) {
+        case 1: uv = D_0035FA30; break;
+        case 2: uv = D_0035FA38; break;
+        case 4: uv = D_0035FA40; break;
+        case 8: uv = D_0035FA48; break;
+        case 0x10: uv = D_0035FA50; break;
+        case 0x20: uv = D_0035FA58; break;
+        case 0x40: uv = D_0035FA60; break;
+        case 0x80: uv = D_0035FA68; break;
+        case 0x100: uv = D_0035FA70; break;
+        case 0x200: uv = D_0035FA78; break;
+        case 0x400: uv = D_0035FA80; break;
+        case 0x800: uv = D_0035FA88; break;
+        case 0x1000: uv = D_0035FA90; break;
+        case 0x2000: uv = D_0035FA98; break;
+        case 0x4000: uv = D_0035FAA0; break;
+        default: uv = 0; break;
+        }
+        texture = func_0029C048(surface, ((BtlState *)func_001A17F0())->buttonTextureHandle);
+        packet = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(packet);
+        sdfConsCreateDrawPacket(packet, texture, 0);
+        xFixed = x * 0x10;
+        yFixed = y * 8;
+        func_002D71B8(packet, 0x40,
+                      xFixed + 0x7000, yFixed + 0x7900, uv->u * 0x10, uv->v * 0x10, topLeftColor,
+                      xFixed + 0x7200, yFixed + 0x7900, uv->u * 0x10 + 0x200, uv->v * 0x10, topRightColor,
+                      xFixed + 0x7000, yFixed + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, bottomLeftColor,
+                      xFixed + 0x7200, yFixed + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, bottomRightColor,
+                      0xFF0000, 0);
+        surface->submit(surface, packet);
+    }
+}
 
 void btlOpenButtonIconResource(void) {
     btlBossDebugPrintf((s32)"btl:[%s]\n", D_003BB6B8);
@@ -921,7 +994,41 @@ u32 func_001F83B8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", btlScriptSelectActionEntry);
+typedef struct BtlActionProbe {
+    u16 id;         /* 0x00 */
+    u8 pad_02[2];
+    void *first;    /* 0x04 */
+    void *second;   /* 0x08 */
+} BtlActionProbe;
+
+extern s8 *D_003BAA4C;
+extern s32 func_001A8A30(void *, s32);
+extern s32 func_001A3CE0(void *, s32, BtlActionProbe *);
+
+u32 btlScriptSelectActionEntry(void) {
+    BtlCmdCtx *context;
+    BtlActionProbe probe;
+    s32 index;
+
+    context = (BtlCmdCtx *)func_0010D6A8();
+    index = scrReadIntParameter(0);
+    if (D_003BAA4C[index * 2 + 1] == 1) {
+        if (func_001A8A30(context->unit, index) != 0 &&
+            func_001A3CE0(context->unit, index, &probe) != 0) {
+            context->unk_2C = probe.first;
+            context->commandMode = 3;
+            context->commandValue = probe.id;
+            context->unk_30 = probe.second;
+        } else {
+            context->commandValue = 0;
+            context->commandMode = 1;
+        }
+    } else {
+        context->commandMode = 2;
+        context->commandValue = index;
+    }
+    return 1;
+}
 
 u32 func_001F84A8(void) {
     s32 context = func_0010D6A8();
@@ -2391,10 +2498,6 @@ void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", btlCreateResourceDescriptor);
-
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBA38);
-
 typedef struct BtlResourcePath {
     s32 id;
     u32 variant;
@@ -2408,13 +2511,46 @@ typedef struct BtlResourceSelector {
 } BtlResourceSelector;
 
 typedef struct BtlResourceDescriptor {
-    u8 pad0[0x34];
-    BtlResourcePath *path;
-    u8 pad38[4];
-    s32 handle;
-    s32 ownsHandle;
-    BtlResourceSelector *selector;
+    s32 word00;             /* 0x00 */
+    s32 word04;             /* 0x04 */
+    u32 word08;             /* 0x08 */
+    s32 entryCount;         /* 0x0C */
+    u32 word10[5];          /* 0x10 */
+    u32 word24;             /* 0x24 */
+    u32 word28;             /* 0x28 */
+    u32 word2C;             /* 0x2C */
+    struct BtlEntry *head;  /* 0x30 */
+    BtlResourcePath *path;  /* 0x34 */
+    u32 word38;             /* 0x38 */
+    s32 handle;             /* 0x3C */
+    s32 ownsHandle;         /* 0x40 */
+    BtlResourceSelector *selector; /* 0x44 */
 } BtlResourceDescriptor;
+
+BtlResourceDescriptor *btlCreateResourceDescriptor(BtlEntryList *list) {
+    BtlResourceDescriptor *resource = func_002CFEB8(0x48);
+
+    resource->word00 = 8;
+    resource->word04 = 8;
+    resource->word08 = 0;
+    resource->entryCount = list->count;
+    resource->word10[0] = 0;
+    resource->word10[1] = 0;
+    resource->word10[2] = 0;
+    resource->word10[3] = 0;
+    resource->word10[4] = 0;
+    resource->word24 = 0x60;
+    resource->word28 = 0x80806020;
+    resource->word2C = 0x60000000;
+    resource->head = list->head;
+    resource->path = (BtlResourcePath *)list->head;
+    resource->word38 = 0;
+    resource->handle = 0;
+    resource->selector = (BtlResourceSelector *)list;
+    return resource;
+}
+
+INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBA38);
 
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *resource) {
     s32 handle = resource->handle;
