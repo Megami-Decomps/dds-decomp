@@ -198,6 +198,12 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
+/* Shared save-header flag word used when leaving and re-entering file flow. */
+typedef struct FileSaveState {
+    u8 pad00[0xA54];
+    u32 slotFlags;
+} FileSaveState;
+
 extern LoadMirror D_003BC8D8;
 
 extern u32 D_003BC8DC;
@@ -2011,11 +2017,11 @@ s32 fileLoadStateChanged(void) {
 
 void fileCacheSlotFlagsFromState(void) {
     D_003BC8D8.current = D_003BC8D8.previous =
-        *(u32 *)(D_003BAA00 + 0xA54);
+        ((FileSaveState *)D_003BAA00)->slotFlags;
 }
 
 void fileRestoreSlotFlagsToState(void) {
-    *(u32 *)(D_003BAA00 + 0xa54) = D_003BC8DC;
+    ((FileSaveState *)D_003BAA00)->slotFlags = D_003BC8DC;
 }
 
 s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
@@ -2125,7 +2131,7 @@ void func_002911B8(void) {
     s32 i;
 
     if (D_003BD938 != 0) {
-        D_003BC8DC = *(u32 *)(D_003BAA00 + 0xA54);
+        D_003BC8DC = ((FileSaveState *)D_003BAA00)->slotFlags;
         if (*(u32 *)(D_003BD938 + 4) == 1) {
             func_001028E8(2, &request, 4, 0);
             mnuReleaseEffectResource(((FileConfigTask *)D_003BD938)->effect);
@@ -2731,13 +2737,13 @@ void func_00293EA0(void *queue)
     view->unk68 = 0x80;
 }
 
-void func_00293F18(void *queue) {
-    memset(queue, 0, 0x90);
-    *(u32 *)((u8 *)queue + 0x84) = 1;
-    *(u8 *)((u8 *)queue + 0x88) = 8;
-    *(u8 *)((u8 *)queue + 0x89) = 0;
-    *(u8 *)((u8 *)queue + 0x8A) = 0;
-    func_00293EA0(queue);
+void func_00293F18(FileJob *job) {
+    memset(job, 0, 0x90);
+    job->scaleFlags = 1;
+    job->unk88[0] = 8;
+    job->unk88[1] = 0;
+    job->unk88[2] = 0;
+    func_00293EA0(job);
 }
 
 void fileQueueAppend(FileQueue *queue, FileJob *job) {
@@ -2885,8 +2891,8 @@ FileQueue *fileQueueClone(FileQueue *source) {
 
     PCP_COPY_VECTOR(queue, source);
     PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
-    *(f32 *)((u8 *)queue + 0x74) = *(f32 *)((u8 *)source + 0x74);
-    *(u32 *)((u8 *)queue + 0x68) = *(u32 *)((u8 *)source + 0x68);
+    queue->baseScale = source->baseScale;
+    queue->unk68 = source->unk68;
     for (src = source->tail; src != NULL; src = src->next) {
         FileJob *job = fileJobCreate();
         job->id = (u32)fileJobCreateChild((FileJob *)src->id);
@@ -3291,9 +3297,9 @@ void effLoadObjectDestroy(LoadObj *obj) {
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
-    LoadObj *source = *(LoadObj **)((u8 *)owner->recordWork + 0x24);
+    LoadObj *source = (LoadObj *)((FileRecordSlots *)owner->recordWork)->data1;
     LoadObj *result = func_00295F58(source);
-    fileLoadObjectSetResource(result, *(u16 *)owner->recordWork, source);
+    fileLoadObjectSetResource(result, ((FileRecordSlots *)owner->recordWork)->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
 }

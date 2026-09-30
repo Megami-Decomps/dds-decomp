@@ -136,7 +136,7 @@ extern void func_0035C860(void *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
-extern void fileReqBegin(s32 arg0);
+extern void fileReqBegin(s32 context);
 
 extern void *fileBeginSlotMetadataRefresh(void);
 
@@ -148,7 +148,7 @@ extern void func_002CB2C0(void);
 
 extern s32 fileIsCardSpaceAboveMinimum(void);
 
-extern s32 fileReqGetSize(s32 arg0);
+extern s32 fileReqGetSize(s32 context);
 
 extern u32 D_00439020;
 
@@ -160,9 +160,9 @@ extern void func_002CB740(void);
 
 extern s32 D_00437D10;
 
-extern void mcdFormatSaveSlotName(void *arg0, s32 arg1);
+extern void mcdFormatSaveSlotName(void *buffer, s32 slot);
 
-extern void func_002C9328(u32 arg0, void *arg1);
+extern void func_002C9328(u32 context, void *buffer);
 
 extern void *fileScanSlotIconSysBegin(void);
 
@@ -178,7 +178,7 @@ extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void func_00342580(s32 command);
 extern void *fileBeginWait(s32 result);
 
-extern void func_002C92D0(u32 arg0);
+extern void func_002C92D0(u32 context);
 
 extern void *mcHandleDetectionResult(void);
 
@@ -301,13 +301,13 @@ extern void *fileReadSlotPreviewWait(void);
 
 extern void *func_002CBA90(void);
 
-extern void fileReqSetSelectedSlot(u32 ctx, s32 arg);
+extern void fileReqSetSelectedSlot(u32 ctx, s32 slot);
 
 extern void func_002C9500(u32, const char *, s32);
 
 extern void *fileBeginSlotOpen(void);
 
-extern u32 fileReqGetSlotFlags(s32 arg0, s32 arg1);
+extern u32 fileReqGetSlotFlags(s32 context, s32 slot);
 
 extern void *fileSlotSelectPollClear(void);
 
@@ -323,11 +323,11 @@ extern void *D_0043901C;
 
 extern void *fileUpdateWait(void);
 
-extern void fileReqSetSlotFlags(s32 arg0, s32 arg1, s32 arg2);
+extern void fileReqSetSlotFlags(s32 context, s32 slot, s32 flags);
 
 extern void *mcHandleSlotWriteResult(void);
 
-extern s32 mcPollNonnegativeResult(void *arg0);
+extern s32 mcPollNonnegativeResult(void *result);
 
 extern s32 fileBeginSlotPromptFive(void);
 
@@ -464,7 +464,7 @@ typedef struct FileQueue {
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);
 
-extern void func_002D3F08(void *arg0);
+extern void func_002D3F08(void *queue);
 
 extern FileJob *fileJobCreate(void);
 
@@ -514,7 +514,7 @@ extern void fileAbortSlotScanOnInput(void);
 
 extern s32 mcPollSyncResult(void);
 
-extern void func_002C9400(u32 arg0, const char *arg1, void *arg2, s32 arg3);
+extern void func_002C9400(u32 context, const char *path, void *buffer, s32 mode);
 
 extern char D_0042B6B8[];
 
@@ -522,7 +522,7 @@ extern u8 D_00458040[];
 
 extern void fileReqClearSlotFlags(s32, s32);
 
-extern u8 fileReqIsSlotMetadataDirty(s32 arg0);
+extern u8 fileReqIsSlotMetadataDirty(s32 context);
 
 extern void *mcClearSlotMetadata(void);
 
@@ -1525,15 +1525,15 @@ void *mcChooseLoadPath(void) {
     return fileBuildMainBlobAfterDelete;
 }
 
-extern u32 D_00439048;
-extern u32 D_0043904C;
+extern u32 *D_00439048;
+extern u32 *D_0043904C;
 extern u32 D_00439050;
 extern u32 D_00439054;
 extern s32 fileWriteWaitOpen(void);
 
 s32 fileBeginRequest(char *name, void *a1, void *a2, void *a3, void *a4) {
-    D_00439048 = (u32)a1;
-    D_0043904C = (u32)a2;
+    D_00439048 = (u32 *)a1;
+    D_0043904C = (u32 *)a2;
     D_00439050 = (u32)a3;
     D_00439054 = (u32)a4;
     func_002C9500(D_00437CD0, name, 0x203);
@@ -1585,7 +1585,7 @@ void *fileFinishRequest(void) {
     if (D_00437CE0 != 0) {
         return NULL;
     }
-    fileWriteBegin(D_0043903C, *(u32 *)D_00439048, *(u32 *)D_0043904C);
+    fileWriteBegin(D_0043903C, *D_00439048, *D_0043904C);
     return mcHandleLoadResult;
 }
 
@@ -1745,7 +1745,7 @@ void *fileRunMenuState(s32 arg) {
 
 extern s32 D_00437D4C;
 
-s32 fileDrawMenuFrame(s32 arg0) {
+s32 fileDrawMenuFrame(s32 task) {
     s32 fade;
     s32 alpha;
 
@@ -1759,7 +1759,7 @@ s32 fileDrawMenuFrame(s32 arg0) {
                       D_00437D78);
     }
     if (D_00437CF8 != 0) {
-        func_002CD028(arg0);
+        func_002CD028(task);
     }
     fade = D_00437D4C;
     if (fade > 0) {
@@ -1933,8 +1933,8 @@ void fileSetPreviewLocation(s16 x, s16 y) {
     work->previewY = y;
 }
 
-void func_002CF958(u32 arg0) {
-    D_003E8008[0] = arg0;
+void func_002CF958(u32 value) {
+    D_003E8008[0] = value;
     D_003E7FD8.unkC = 0x80;
     D_003E7FD8.unk4 = 0;
 }
@@ -3125,14 +3125,11 @@ void func_002D3F08(void *queue)
 }
 
 void func_002D3F80(FileJob *job) {
-    s32 jobAddr;
-
     memset(job, 0, 0x90);
-    jobAddr = (s32)job;
-    *(u32 *)(jobAddr + 0x84) = 1;
-    *(u8 *)(jobAddr + 0x88) = 8;
-    *(u8 *)(jobAddr + 0x89) = 0;
-    *(u8 *)(jobAddr + 0x8a) = 0;
+    job->scaleFlags = 1;
+    job->unk88[0] = 8;
+    job->unk88[1] = 0;
+    job->unk88[2] = 0;
     func_002D3F08(job);
 }
 
@@ -3198,8 +3195,8 @@ void func_002D4120(FileJob *job) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D4138);
 
-void func_002D4380(u32 arg0, u32 arg1) {
-    func_002D4138(arg1);
+void func_002D4380(u32 unused, u32 job) {
+    func_002D4138(job);
 }
 
 extern void func_002D5DC8();
@@ -3408,12 +3405,12 @@ void func_002D4AB0(void *work, void *dst) {
     PCP_COPY_VECTOR(dst, (u8 *)work + 0x50);
 }
 
-f32 func_002D4AC8(s32 object) {
-    return *(f32 *)(object + 0x60);
+f32 func_002D4AC8(FileQueue *queue) {
+    return queue->scale;
 }
 
-u32 func_002D4AD0(s32 arg0) {
-    return *(u32 *)(arg0 + 100);
+u32 func_002D4AD0(FileQueue *queue) {
+    return queue->color;
 }
 
 void func_002D4AD8(void *dst, void *src) {
@@ -3776,10 +3773,10 @@ void func_002D6160(EffectSurfaceNode *node) {
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
-    LoadObj *source = *(LoadObj **)((u8 *)owner->recordWork + 0x24);
+    LoadObj *source = (LoadObj *)((FileSlotTable *)owner->recordWork)->data1;
     LoadObj *result = func_002D6020(source);
 
-    fileLoadObjectSetResource(result, *(u16 *)owner->recordWork, source);
+    fileLoadObjectSetResource(result, ((FileSlotTable *)owner->recordWork)->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
 }
@@ -4207,9 +4204,9 @@ void func_002DA2D8(ScaleOwner *owner, f32 scale) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DA358);
 
-void func_002DAA58(u8 *object, f32 factor) {
-    f32 *source = *(f32 **)(object + 0x24);
-    f32 *destination = *(f32 **)(object + 0x20);
+void func_002DAA58(ScaleOwner *owner, f32 factor) {
+    f32 *source = (f32 *)owner->src;
+    f32 *destination = (f32 *)owner->dst;
     u8 *sourceEntries = (u8 *)source + 4;
     u8 *destinationEntries = (u8 *)destination + 4;
     u32 index = 0;
@@ -4230,9 +4227,9 @@ void func_002DAA58(u8 *object, f32 factor) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DAAE0);
 
-void func_002DB200(u8 *object, f32 factor) {
-    f32 *source = *(f32 **)(object + 0x24);
-    f32 *destination = *(f32 **)(object + 0x20);
+void func_002DB200(ScaleOwner *owner, f32 factor) {
+    f32 *source = (f32 *)owner->src;
+    f32 *destination = (f32 *)owner->dst;
     u8 *sourceEntries = (u8 *)source + 4;
     u8 *destinationEntries = (u8 *)destination + 4;
     u32 index = 0;
@@ -4251,18 +4248,18 @@ void func_002DB200(u8 *object, f32 factor) {
     destination[0xE4 / 4] = source[0xE4 / 4] * factor;
 }
 
-void func_002DB288(u8 *node, const f32 *value) {
-    if (*(u16 *)node == 7) {
-        f32 *sprite = *(f32 **)(node + 0x20);
+void func_002DB288(FileSlotTable *record, const f32 *value) {
+    if (record->type == 7) {
+        f32 *sprite = (f32 *)record->data0;
         sprite[0xFC / 4] = value[0];
         sprite[0x100 / 4] = value[1];
         sprite[0x104 / 4] = value[2];
     }
 }
 
-void func_002DB2C0(u8 *node, const f32 *value) {
-    if (*(u16 *)node == 7) {
-        f32 *sprite = *(f32 **)(node + 0x20);
+void func_002DB2C0(FileSlotTable *record, const f32 *value) {
+    if (record->type == 7) {
+        f32 *sprite = (f32 *)record->data0;
         sprite[0x108 / 4] = value[0];
         sprite[0x10C / 4] = value[1];
         sprite[0x110 / 4] = value[2];

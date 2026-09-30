@@ -57,7 +57,9 @@ extern void func_003425B0(void);
 /* One of five 0x1C4-byte party records at D_00435DD0 + 0xA60. */
 typedef struct PartyRecord {
     u16 flags;
-    u8 pad02[0x1B0];
+    u16 pad02;
+    u16 slotIndex; /* +0x04: selects an entry in the category-model list */
+    u8 pad06[0x1AC];
     u16 unk1B2;
     u8 pad1B4[0x10];
 } PartyRecord;
@@ -331,15 +333,17 @@ u8 *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *work) {
     }
 }
 
+/* Release the first category model plus one model per occupied party slot;
+ * slotIndex is offset by the active party selection before indexing list. */
 void func_002A92D8(s32 list, s32 count, u8 *work) {
     s32 i;
 
     effResolveAndReleaseResource(*(u32 *)list);
     for (i = 0; i < 5; i++) {
-        u8 *slot = (u8 *)(D_00435DD0 + 0xA60 + i * 0x1C4);
+        PartyRecord *slot = (PartyRecord *)(D_00435DD0 + 0xA60 + i * 0x1C4);
 
-        if ((*(u16 *)slot & 1) != 0) {
-            s32 index = *(u16 *)(slot + 4) + D_00437B73;
+        if ((slot->flags & 1) != 0) {
+            s32 index = slot->slotIndex + D_00437B73;
 
             effResolveAndReleaseResource(*(u32 *)(list + index * 4 - 4));
         }
@@ -372,8 +376,38 @@ void func_002A93F8(s32 kind, u8 *work) {
     }
 }
 
+typedef struct { u8 pad0[0x20]; s32 *data; } MotSub;
+
+typedef struct { u8 pad0[8]; MotSub *sub; } MotRes;
+
+/* Camp work's drawing parameters; the intervening regions belong to the
+ * resource lists and party-panel state initialized elsewhere in this unit. */
+typedef struct CampVisualWork {
+    u32 allocationHandle;  /* 0x0000 */
+    u8 pad04[0x58];
+    u32 menuResource;      /* 0x005C */
+    s32 drawContext;        /* 0x0060 */
+    s32 titleContext;       /* 0x0064 */
+    u8 pad68[0x98];
+    u32 motionResource;     /* 0x0100 */
+    u8 pad104[0xC];
+    MotRes *motion[2];      /* 0x0110 and 0x0114 */
+    u32 modelHandle;        /* 0x0118 */
+    u8 pad11C[0x16C];
+    s32 backgroundOpacity;  /* 0x0288 */
+    u8 pad28C[0xA7C0];
+    s32 categoryKind;      /* 0xAA4C */
+    u8 padAA50[0x780];
+    s32 titleFadingOut;     /* 0xB1D0 */
+    s32 titleOpacity;       /* 0xB1D4, range 0..0x100 */
+    s32 titleSlide;         /* 0xB1D8, approaches zero from below */
+    s32 highlightOpacity;   /* 0xB1DC, range 0..0x100 */
+} CampVisualWork;
+
+/* Switch the active category, releasing its old handles and resolving the
+ * next category's models; a repeated category needs no work. */
 void func_002A9460(s32 kind, u8 *work) {
-    s32 old = *(s32 *)(work + 0xAA4C);
+    s32 old = ((CampVisualWork *)work)->categoryKind;
     if (kind == old) {
         return;
     }
@@ -383,28 +417,24 @@ void func_002A9460(s32 kind, u8 *work) {
     if (kind != 0) {
         movReleaseCategoryModels(kind, work);
     }
-    *(s32 *)(work + 0xAA4C) = kind;
+    ((CampVisualWork *)work)->categoryKind = kind;
 }
 
 extern u32 D_003E6970[];
 
-typedef struct { u8 pad0[0x20]; s32 *data; } MotSub;
-
-typedef struct { u8 pad0[8]; MotSub *sub; } MotRes;
-
 void movLoadTitleEffects(u8 *work) {
     s32 *data;
 
-    *(u32 *)(work + 0x100) = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
-    *(MotRes **)(work + 0x110) = func_00304998(6);
-    data = (*(MotRes **)(work + 0x110))->sub->data;
+    ((CampVisualWork *)work)->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
+    ((CampVisualWork *)work)->motion[0] = func_00304998(6);
+    data = ((CampVisualWork *)work)->motion[0]->sub->data;
     data[0] = 0xF;
     data[1] = 0;
     data[2] = 0;
     data[3] = 0;
     data[4] = 0;
-    *(MotRes **)(work + 0x114) = func_00304998(1);
-    data = (*(MotRes **)(work + 0x114))->sub->data;
+    ((CampVisualWork *)work)->motion[1] = func_00304998(1);
+    data = ((CampVisualWork *)work)->motion[1]->sub->data;
     data[0] = 0xF;
     data[1] = 0;
 }
@@ -418,14 +448,14 @@ void movReleaseTitleEffects(u32 *state) {
     }
 }
 
-void func_002A95B0(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
-    func_002BCD90(arg0, arg3, *arg1, 1, arg1[1], 0x2d, arg1[1], 0x1d);
-    func_002BC498(arg0, arg1[1]);
-    func_002BC5D0(arg0, arg1 + 4);
-    func_002BC600(arg0, arg1 + 0xc);
-    mnuRegisterResourceHandles(arg0, arg1 + 0x14);
-    func_002BCA98(arg0);
-    func_002BE6E8(arg0, arg1[1]);
+void func_002A95B0(u32 container, u32 *resources, u32 unused, u32 mode) {
+    func_002BCD90(container, mode, *resources, 1, resources[1], 0x2d, resources[1], 0x1d);
+    func_002BC498(container, resources[1]);
+    func_002BC5D0(container, resources + 4);
+    func_002BC600(container, resources + 0xc);
+    mnuRegisterResourceHandles(container, resources + 0x14);
+    func_002BCA98(container);
+    func_002BE6E8(container, resources[1]);
 }
 
 void func_002A9640(u32 *list, u32 *state) {
@@ -518,10 +548,10 @@ typedef struct StaffResourceHeader {
     u32 resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
 
-void func_002A9BC8(s32 arg0, u32 arg1, u32 arg2, s32 arg3, u32 arg4,
-                                    u32 arg5) {
-    func_00306F80(arg0 + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(arg3 + 0x30) + 100), 10,
-                                arg5);
+void func_002A9BC8(s32 drawWork, u32 arg1, u32 arg2, s32 record, u32 unused,
+                   u32 layer) {
+    func_00306F80(drawWork + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
+                  layer);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9BF8);
@@ -636,13 +666,13 @@ u8 *func_002AA0D8(void) {
     handle = func_003292A8(0xB1E0);
     work = (u8 *)sdfResourceRetainAddress(handle);
     memset(work, 0, 0xB1E0);
-    *(s32 *)work = handle;
+    ((CampVisualWork *)work)->allocationHandle = handle;
     effects = work + 0x11C;
     func_002C3E58(work + 8);
     if (func_00102970() != 0) {
-        *(s32 *)(work + 0x5C) = func_00303D00(1);
+        ((CampVisualWork *)work)->menuResource = func_00303D00(1);
     } else {
-        *(s32 *)(work + 0x5C) = func_00303D00(0);
+        ((CampVisualWork *)work)->menuResource = func_00303D00(0);
     }
     mnuInitPartyPanelSlots((s32)work + 0xA928);
     mnuLoadEffectResources(effects);
@@ -665,23 +695,23 @@ void mnuDestroyStaffMenuTask(u32 task) {
     }
     func_002C3FC8(work + 8, task);
     func_002A9F08(work);
-    func_002BB418(*(u32 *)(work + 0x118));
+    func_002BB418(((CampVisualWork *)work)->modelHandle);
     mnuShutdownContext(work + 0x284);
     func_0026C728();
     mnuDestroyEffectResources(work + 0x11c);
     func_002A9A40(work);
     movReleaseTitleEffects(work);
-    func_00303D58(*(u32 *)(work + 0x5c));
-    func_003297C8(*(u32 *)work);
+    func_00303D58(((CampVisualWork *)work)->menuResource);
+    func_003297C8(((CampVisualWork *)work)->allocationHandle);
     D_00437B72 = 2;
     func_003425D8();
 }
 
 u32 func_002AA278(void) {
-    s32 temp_v0;
+    s32 work;
 
-    temp_v0 = func_00101958();
-    func_002C1B70(temp_v0 + 0xaa50, 0x53);
+    work = func_00101958();
+    func_002C1B70(work + 0xaa50, 0x53);
     return 0;
 }
 
@@ -763,51 +793,54 @@ s32 mnuAcknowledgeCampState(void) {
 }
 
 u8 mnuIsFadeIdle(void) {
-    s64 temp_v0;
+    s64 fadeActive;
 
-    temp_v0 = kwlnFadeIsActive();
-    return temp_v0 == 0;
+    fadeActive = kwlnFadeIsActive();
+    return fadeActive == 0;
 }
 
-void func_002AA530(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *work, s32 arg5) {
+/* Draw the camp title using the task's draw context and layer, then ease its
+ * horizontal slide toward zero and its opacity toward the fade target. */
+void func_002AA530(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 *work, s32 layer) {
     char buffer[16];
     s32 object;
     s32 offset;
     s32 magnitude;
+    CampVisualWork *visual = (CampVisualWork *)work;
 
     if (mdlFlagTest(0x290) == 0) {
         return;
     }
-    func_00306CD0((*(s32 *)(work + 0xB1D8) + 0x1A) << 4, 0xCB8, 0, *(s32 *)(work + 0xB1D4), 1, arg3, 0x3F, arg5);
+    func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
     func_0035C860(buffer, D_00437B80, *(s32 *)(D_00435DD0 + 0x3C));
-    object = func_0019F798((*(s32 *)(work + 0xB1D8) + 0x33) << 4, 0xCD8, arg2,
-                           func_00309138(0xA09DC380, 0xA09DC300, *(s32 *)(work + 0xB1D4)), buffer, 0);
-    func_0019D550(object, 1, arg5);
+    object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
+                           func_00309138(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
+    func_0019D550(object, 1, layer);
     func_0019C5B0(object);
-    offset = *(s32 *)(work + 0xB1D8);
+    offset = visual->titleSlide;
     magnitude = offset;
     if (offset < 0) {
         magnitude = -offset;
     }
     if (offset < 0) {
-        *(s32 *)(work + 0xB1D8) = offset + magnitude / 5 + 1;
+        visual->titleSlide = offset + magnitude / 5 + 1;
     }
-    if (*(s32 *)(work + 0xB1D8) > 0) {
-        *(s32 *)(work + 0xB1D8) = 0;
+    if (visual->titleSlide > 0) {
+        visual->titleSlide = 0;
     }
-    if (*(s32 *)(work + 0xB1D0) == 0) {
-        if (*(s32 *)(work + 0xB1D4) < 0x100) {
-            *(s32 *)(work + 0xB1D4) += 0x14;
+    if (visual->titleFadingOut == 0) {
+        if (visual->titleOpacity < 0x100) {
+            visual->titleOpacity += 0x14;
         }
-        if (*(s32 *)(work + 0xB1D4) > 0x100) {
-            *(s32 *)(work + 0xB1D4) = 0x100;
+        if (visual->titleOpacity > 0x100) {
+            visual->titleOpacity = 0x100;
         }
     } else {
-        if (*(s32 *)(work + 0xB1D4) > 0) {
-            *(s32 *)(work + 0xB1D4) -= 0x1E;
+        if (visual->titleOpacity > 0) {
+            visual->titleOpacity -= 0x1E;
         }
-        if (*(s32 *)(work + 0xB1D4) < 0) {
-            *(s32 *)(work + 0xB1D4) = 0;
+        if (visual->titleOpacity < 0) {
+            visual->titleOpacity = 0;
         }
     }
 }
@@ -835,44 +868,47 @@ void func_002AAC98(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
     func_002AAC70(a, b, c, d, e, 0, f);
 }
 
+/* Draw one camp-menu frame for task: kind 2 animates the highlight, kind 1
+ * displays the background, and all other kinds reset the highlight alpha. */
 void func_002AACB8(s32 kind, s32 task) {
     u8 *work = (u8 *)func_00101958(task);
+    CampVisualWork *visual = (CampVisualWork *)work;
     s32 ctx;
     s32 sub;
 
     func_002B7F80(work + 0x11C, 0x20);
     switch (kind) {
     case 2:
-        func_00306CD0(0, 0, 0, *(s32 *)(work + 0xB1DC), 0, *(s32 *)(work + 0x60), 0x19, 0x53);
-        ctx = *(s32 *)(work + 0x60);
+        func_00306CD0(0, 0, 0, visual->highlightOpacity, 0, visual->drawContext, 0x19, 0x53);
+        ctx = visual->drawContext;
         sub = *(s32 *)(ctx + 0x18);
         *(s32 *)(sub + 0xE6C) = (*(s32 *)(sub + 0xEDC) + 0x40) << 4;
-        func_00306CD0(0xD40, 0x2E0, 0, *(s32 *)(work + 0xB1DC), 0, ctx, 0x17, 0x53);
-        if (*(s32 *)(work + 0xB1DC) < 0x100) {
-            *(s32 *)(work + 0xB1DC) += 0x10;
+        func_00306CD0(0xD40, 0x2E0, 0, visual->highlightOpacity, 0, ctx, 0x17, 0x53);
+        if (visual->highlightOpacity < 0x100) {
+            visual->highlightOpacity += 0x10;
         }
-        if (*(s32 *)(work + 0xB1DC) > 0x100) {
-            *(s32 *)(work + 0xB1DC) = 0x100;
+        if (visual->highlightOpacity > 0x100) {
+            visual->highlightOpacity = 0x100;
         }
         break;
     case 1:
-        ctx = *(s32 *)(work + 0x60);
+        ctx = visual->drawContext;
         sub = *(s32 *)(ctx + 0x18);
         *(s32 *)(sub + 0xE6C) = *(s32 *)(sub + 0xEDC) << 4;
-        func_00306CD0(0x1140, 0x2E0, 0, *(s32 *)(work + 0x288), 0, ctx, 0x17, 0x53);
+        func_00306CD0(0x1140, 0x2E0, 0, visual->backgroundOpacity, 0, ctx, 0x17, 0x53);
     default:
-        *(s32 *)(work + 0xB1DC) = 0;
+        visual->highlightOpacity = 0;
         break;
     }
     if (func_002A9AB8(task) != 0) {
-        func_002BB510(-0x10, -8, 0, *(s32 *)(work + 0x118), 0x53);
+        func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
         func_002C0718(0, 0, 0, work + 0x284, 0x53);
-        func_002AA530(0, 0, 0, *(s32 *)(work + 0x64), work, 0x53);
+        func_002AA530(0, 0, 0, visual->titleContext, work, 0x53);
     }
 }
 
-void func_002AAE80(u32 arg0) {
-    func_002AACB8(0, arg0);
+void func_002AAE80(u32 task) {
+    func_002AACB8(0, task);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA48);
