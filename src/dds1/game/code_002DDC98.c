@@ -64,7 +64,6 @@ extern void *D_003BD380;
 extern void *D_003BD390;
 extern void *func_002D3288(void *);
 extern void *func_002D32A0(void *);
-extern void *func_002E1428(void *, s64, s64, s64, s32);
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 extern void *sdfAllocPacketAligned(s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
@@ -844,7 +843,19 @@ s32 func_002E1420(s32 arg0) {
     return arg0 + 0x20;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1428);
+void *func_002E1428(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s32 height) {
+    s32 quadwords = width * height + 1;
+    s64 header = height | ((s64)width << 60);
+
+    header |= (s64)flags << 47;
+    header |= 0x400000008000LL;
+    packet->unk10 = header;
+    packet->command = quadwords | 0x50000000;
+    packet->unk18 = command;
+    packet->unk8 = 0;
+    packet->quadwords = quadwords;
+    return packet;
+}
 
 void *sdfConsAllocateColumnPacket(s32 height) {
     void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, height));
