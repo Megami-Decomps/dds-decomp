@@ -1,11 +1,8 @@
 #include "common.h"
 #include "fpu.h"
+#include "sdf.h"
 
 extern s32 D_004388B4;
-
-typedef struct SdfQuad {
-    u32 word[4];
-} SdfQuad;
 
 extern SdfQuad D_00400970;
 

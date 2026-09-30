@@ -1,30 +1,6 @@
 #include "common.h"
 #include "eff.h"
 
-/* Primary work object (created by func_00192CC8): owned buffers plus the
- * channel-B cursor (count at +0x8, index at +0x20). Extends past 0x2C with
- * the rand/emit control words used by effFillRandRecords. */
-
-typedef struct EffPrim {
-    void *unk0;       /* 0x0: buffer freed by effFreeBuffers */
-    void *unk4;       /* 0x4: buffer freed by effFreeBuffers */
-    u32 recordCount; /* 0x8: number of keyframe records */
-    u16 unkC;         /* 0xC: flag set by func_00192CC8 */
-    u8 unkE[2];       /* 0xE */
-    s32 unk10;        /* 0x10 */
-    void *unk14;      /* 0x14: buffer or NULL, tested by effFreeBuffers */
-    void *unk18;      /* 0x18 */
-    void *unk1C;      /* 0x1C */
-    u32 cursorIndex;  /* 0x20: channel-B record index */
-    f32 cursorPosition; /* 0x24: channel-B interpolation position */
-    f32 cursorStep;  /* 0x28: channel-B position increment */
-    u8 unk2C[0x18];   /* 0x2C */
-    u32 randomCount;   /* 0x44: number of random records */
-    u32 randomModulus; /* 0x48: modulus for each random slot */
-    u8 unk4C[0x11C];  /* 0x4C */
-    struct EffCntRec *counterRecords; /* 0x168 */
-    s32 *unk16C;      /* 0x16C: base for effMathGetSlotAt */
-} EffPrim;
 /* The channel copies three coordinates from each four-float source row,
  * then copies the four trailing values to a second block. */
 typedef struct EffFloatRows {

@@ -9,6 +9,29 @@ typedef struct EffCntRec {
     u32 unk4;        /* +0x04: id released with its owner */
 } EffCntRec;
 
+/* Effect primitive work: owned buffers, channel-B cursor and random records (0x170).
+ * Shared by DDS1/2 effect and panel units. */
+typedef struct EffPrim {
+    void *unk0;            /* +0x00: buffer freed by effFreeBuffers */
+    void *unk4;            /* +0x04: buffer freed by effFreeBuffers */
+    u32 recordCount;       /* +0x08: number of keyframe records */
+    u16 unkC;              /* +0x0C: flag set during creation */
+    u8 unkE[2];
+    s32 unk10;
+    void *unk14;           /* +0x14: optional buffer */
+    void *unk18;
+    void *unk1C;
+    u32 cursorIndex;       /* +0x20: channel-B record index */
+    f32 cursorPosition;    /* +0x24: channel-B interpolation position */
+    f32 cursorStep;        /* +0x28: channel-B position increment */
+    u8 unk2C[0x18];
+    u32 randomCount;       /* +0x44: number of random records */
+    u32 randomModulus;     /* +0x48: modulus for each random slot */
+    u8 unk4C[0x11C];
+    EffCntRec *counterRecords; /* +0x168 */
+    s32 *unk16C;           /* +0x16C: slot lookup base */
+} EffPrim;
+
 /* Type-indexed effect work and sound handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffWork {
     u32 type;

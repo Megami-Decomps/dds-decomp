@@ -1,10 +1,7 @@
 #include "common.h"
+#include "sdf.h"
 
 extern s32 D_003BD264;
-
-typedef struct SdfQuad {
-    u32 word[4];
-} SdfQuad;
 
 extern SdfQuad D_003900A0;
 

@@ -3,6 +3,11 @@
 
 #include "common.h"
 
+/* Four integer words used as a camera input record (0x10), not ScrVec4 floats. */
+typedef struct SdfQuad {
+    u32 word[4];
+} SdfQuad;
+
 /* Reference-counted texture handle (0x8); DDS1 sdf/sdfTex.c and DDS1/2 SdfTex owners. */
 typedef struct SdfTexRef {
     void *unk0;
