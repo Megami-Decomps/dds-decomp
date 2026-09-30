@@ -14,7 +14,7 @@ typedef struct {
     u8 pad00[0x10];  /* 0x00 task header */
     u32 unk10;       /* 0x10 resource handle */
     u32 unk14;       /* 0x14 resource handle */
-    f32 unk18;       /* 0x18 spawn parameter */
+    f32 scale;       /* 0x18 effect scale for the ring and twin effects */
     u32 unk1C;       /* 0x1C resource released on destroy */
     u32 unk20;       /* 0x20 spawn parameter */
     u32 unk24;       /* 0x24 spawn parameter */
@@ -54,7 +54,7 @@ typedef struct {
 typedef struct {
     u8 pad00[0x10];  /* 0x00 task header */
     u32 unk10;       /* 0x10 resource handle */
-    f32 unk14;       /* 0x14 spawn parameter */
+    f32 scale;       /* 0x14 effect scale, initialised to 1.0 */
     u32 unk18;       /* 0x18 resource handle */
     u32 unk1C;       /* 0x1C resource released on destroy */
     u32 unk20;       /* 0x20 spawn parameter */
@@ -101,14 +101,14 @@ typedef struct {
     u32 unkAF4;
     u32 unkAF8;
     u8 padAFC[0x838];
-    u32 unk1334;       /* 0x1334 spawn parameter */
-    f32 unk1338;       /* 0x1338 spawn parameter */
+    u32 color;         /* 0x1334: configurable colour */
+    f32 scale;         /* 0x1338: configurable scale */
     u32 unk133C;       /* 0x133C cleared on init */
     u32 unk1340;       /* 0x1340 cleared on init */
     u32 color1344;     /* 0x1344 initialised to grey 0x80808080 */
-    u32 unk1348;       /* 0x1348 resource released on destroy */
-    u32 unk134C;       /* 0x134C resource released on destroy */
-    u32 unk1350;       /* 0x1350 resource released on destroy */
+    u32 secondaryHandle; /* 0x1348: parameter block 1 */
+    u32 primaryHandle;   /* 0x134C: parameter block 0 */
+    u32 allocationHandle; /* 0x1350: backing allocation */
 } EffPCPChargeWork;
 
 /* Particle/effect work layouts shared by the matched functions of this TU.
@@ -169,8 +169,8 @@ typedef struct {
     u32 unk08;    /* 0x08 cleared on init */
     u8 pad0C[0x4]; /* 0x0C */
     u32 color10;  /* 0x10 initialised to grey 0x80808080 */
-    u32 unk14;    /* 0x14 resource released on destroy */
-    u32 unk18;    /* 0x18 resource released on destroy */
+    u32 primaryHandle;   /* 0x14 parameter block 0 */
+    u32 secondaryHandle; /* 0x18 parameter block 1 */
 } EffPCPWork1C;
 
 extern void *func_00328D68(s32 size);
@@ -519,7 +519,7 @@ typedef struct {
     f32 y;
     f32 z;
     u8 pad0C[4];
-    u32 unk10;
+    u32 color;       /* 0x10 sent to the paired object's colour callback */
     f32 scale;
     f32 offset[8];
     u32 handle[16];
@@ -620,7 +620,7 @@ typedef struct EffPCPTwinWork {
     u32 unk08;
     u8 pad0C[4];
     u32 color;          /* 0x10 */
-    u32 unk14;
+    u32 frame;          /* 0x14: shared callback starts after frame 24 */
     f32 scale;          /* 0x18 */
     u32 pair[8][2];     /* 0x1C parameter handle pairs (source uses [0] and [1]) */
     u32 shared[8];      /* 0x5C */
@@ -881,7 +881,7 @@ extern void effParamWorkCallback1(u32 handle, f32 value);
 
 typedef struct {
     u8 pad00[0x10];
-    u32 unk10;
+    u32 color;       /* 0x10 sent to the paired object's colour callback */
     u8 pad14[4];
     u32 handle[12];
     u32 delay[6];
@@ -1044,7 +1044,7 @@ void func_0017EF60(EffPCPWorkF18 *work, u32 value) {
 }
 
 void func_0017EF68(EffPCPWorkF18 *work, f32 val) {
-    work->unk18 = val;
+    work->scale = val;
 }
 
 /* Re-rolls slot `index`: random-angle rotation matrix pushed to both handles
@@ -1096,7 +1096,7 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
     work->scale = 1.0f;
     work->unk04 = 0;
     work->unk08 = 0;
-    work->unk14 = 0;
+    work->frame = 0;
     return work;
 }
 
@@ -1131,7 +1131,7 @@ EffPCPTwinWork *effTwinEffectClone(EffPCPTwinWork *src) {
     work->scale = 1.0f;
     work->unk04 = 0;
     work->unk08 = 0;
-    work->unk14 = 0;
+    work->frame = 0;
     return work;
 }
 
@@ -1162,12 +1162,12 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
         func_00232390(obj[1], D_00380828);
-        if (work->unk14 > 0x18) {
+        if (work->frame > 0x18) {
             effParamWorkCallback0(work->shared[i], posp);
             effParamWorkInvokeCallback(work->shared[i]);
         }
     }
-    work->unk14++;
+    work->frame++;
 }
 
 void func_0017F4A8(void *dst, void *src) {
@@ -1175,7 +1175,7 @@ void func_0017F4A8(void *dst, void *src) {
 }
 
 void func_0017F4B8(EffPCPWorkF18 *work, f32 val) {
-    work->unk18 = val;
+    work->scale = val;
 }
 
 void func_0017F4C0(EffPCPWorkF18 *work, u32 value) {
@@ -1221,7 +1221,7 @@ EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
         effPcpStaggerRerollSlot(work, i++);
     } while (i < 8);
     work->unk10 = 0x80808080;
-    work->unk14 = 1.0f;
+    work->scale = 1.0f;
     ((EffPCPTaskHeader *)work)->word00 = 0;
     ((EffPCPTaskHeader *)work)->word04 = 0;
     ((EffPCPTaskHeader *)work)->word08 = 0;
@@ -1253,7 +1253,7 @@ EffPCPWorkF14 *effCreatePairedResourceWork(EffPCPWork *source) {
         i++;
     } while (i < 8);
     work->unk10 = 0x80808080;
-    work->unk14 = 1.0f;
+    work->scale = 1.0f;
     ((EffPCPTaskHeader *)work)->word00 = 0;
     ((EffPCPTaskHeader *)work)->word04 = 0;
     ((EffPCPTaskHeader *)work)->word08 = 0;
@@ -1282,7 +1282,7 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             mdlStorePrimaryVectorVU(obj[0]);
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
-            mdlBroadcastMasked(obj[1], work->unk10);
+            mdlBroadcastMasked(obj[1], work->color);
             func_00232390(obj[0], D_00380828);
             func_00332D48(((EffPCPWork *)obj[0])->unk18, 1);
             mdlStorePrimaryVectorVU(obj[1]);
@@ -1296,7 +1296,7 @@ void func_0017F928(void *dst, void *src) {
 }
 
 void func_0017F938(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_0017F940(EffPCPWorkF14 *work, u32 value) {
@@ -1435,7 +1435,7 @@ void func_0017FEB8(void *dst, void *src) {
 }
 
 void func_0017FEC8(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_0017FED0(EffPCPWorkF14 *work, u32 value) {
@@ -1474,7 +1474,7 @@ EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
         effPcpDelayedPairsRerollSlot(work, i);
     }
     work->unk10 = 0x80808080;
-    work->unk14 = 1.0f;
+    work->scale = 1.0f;
     ((EffPCPTaskHeader *)work)->word00 = 0;
     ((EffPCPTaskHeader *)work)->word04 = 0;
     ((EffPCPTaskHeader *)work)->word08 = 0;
@@ -1509,7 +1509,7 @@ EffPCPWorkF14 *effCopyIndexedResourceWork(EffPCPWork *source) {
         effPcpDelayedPairsRerollSlot(work, i);
     }
     work->unk10 = 0x80808080;
-    work->unk14 = 1.0f;
+    work->scale = 1.0f;
     ((EffPCPTaskHeader *)work)->word00 = 0;
     ((EffPCPTaskHeader *)work)->word04 = 0;
     ((EffPCPTaskHeader *)work)->word08 = 0;
@@ -1533,7 +1533,7 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
                 ".set reorder"
                 : : "r"(work) : "memory");
             mdlStorePrimaryVectorVU(obj[0]);
-            mdlBroadcastMasked(obj[1], work->unk10);
+            mdlBroadcastMasked(obj[1], work->color);
             func_00232390(obj[0], D_00380828);
             func_00332D48(((EffPCPWork *)obj[0])->unk18, 1);
             __asm__ volatile (
@@ -1552,7 +1552,7 @@ void func_00180240(void *dst, void *src) {
 }
 
 void func_00180250(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_00180258(EffPCPWorkF14 *work, u32 value) {
@@ -1568,37 +1568,37 @@ void effPcpChargeInitTail(EffPCPChargeWork *work) {
 EffPCPChargeWork *effCreateChargeWork(void *source) {
     void *resource = func_003292A8(0x1354);
     EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
-    work->unk1350 = (u32)resource;
-    work->unk134C = effParamCreateFromTable(source, 0);
-    work->unk1348 = effParamCreateFromTable(source, 1);
+    work->allocationHandle = (u32)resource;
+    work->primaryHandle = effParamCreateFromTable(source, 0);
+    work->secondaryHandle = effParamCreateFromTable(source, 1);
     effPcpChargeInitTail(work);
     work->unkAF0 = 0;
     work->unkAF4 = 0;
     work->unkAF8 = 0;
-    work->unk1334 = 0x80808080;
-    work->unk1338 = 1.0f;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
     return work;
 }
 
 void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
-    func_0016A620(work->unk134C);
-    func_0016A620(work->unk1348);
-    func_003297C8(work->unk1350);
+    func_0016A620(work->primaryHandle);
+    func_0016A620(work->secondaryHandle);
+    func_003297C8(work->allocationHandle);
 }
 
 EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     void *resource = func_003292A8(0x1354);
     EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
-    u32 firstHandle = source->unk134C;
-    work->unk1350 = (u32)resource;
-    work->unk134C = effParamWorkDuplicate(firstHandle);
-    work->unk1348 = effParamWorkDuplicate(source->unk1348);
+    u32 firstHandle = source->primaryHandle;
+    work->allocationHandle = (u32)resource;
+    work->primaryHandle = effParamWorkDuplicate(firstHandle);
+    work->secondaryHandle = effParamWorkDuplicate(source->secondaryHandle);
     effPcpChargeInitTail(work);
     work->unkAF0 = 0;
     work->unkAF4 = 0;
     work->unkAF8 = 0;
-    work->unk1334 = 0x80808080;
-    work->unk1338 = 1.0f;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
     return work;
 }
 
@@ -1609,11 +1609,11 @@ void effPcpCopyVectorAF0(void *work, void *src) {
 }
 
 void func_00180760(EffPCPChargeWork *work, f32 val) {
-    work->unk1338 = val;
+    work->scale = val;
 }
 
 void func_00180768(EffPCPChargeWork *work, u32 value) {
-    work->unk1334 = value;
+    work->color = value;
 }
 
 EffPCPWork1C *effPcpSpawnOnceCreate(EffPCPWork *src) {
@@ -1621,10 +1621,10 @@ EffPCPWork1C *effPcpSpawnOnceCreate(EffPCPWork *src) {
     u32 handle;
 
     dst = func_00328D68(0x1C);
-    dst->unk14 = effParamCreateFromTable(src, 0);
+    dst->primaryHandle = effParamCreateFromTable(src, 0);
     handle = effParamCreateFromTable(src, 1);
     dst->unk00 = 0;
-    dst->unk18 = handle;
+    dst->secondaryHandle = handle;
     dst->unk04 = 0;
     dst->color10 = 0x80808080;
     dst->unk08 = 0;
@@ -1632,38 +1632,38 @@ EffPCPWork1C *effPcpSpawnOnceCreate(EffPCPWork *src) {
 }
 
 void effPcpSpawnOnceRelease(EffPCPWork1C *work) {
-    func_0016A620(work->unk14);
-    func_0016A620(work->unk18);
+    func_0016A620(work->primaryHandle);
+    func_0016A620(work->secondaryHandle);
     func_00328E48(work);
 }
 
-EffPCPWork1C *effPcpSpawnOnceClone(EffPCPWork *src) {
+EffPCPWork1C *effPcpSpawnOnceClone(EffPCPWork1C *src) {
     EffPCPWork1C *dst;
     u32 handle;
 
     dst = func_00328D68(0x1C);
-    dst->unk14 = effParamWorkDuplicate(src->unk14);
-    handle = effParamWorkDuplicate(src->unk18);
+    dst->primaryHandle = effParamWorkDuplicate(src->primaryHandle);
+    handle = effParamWorkDuplicate(src->secondaryHandle);
     dst->unk00 = 0;
-    dst->unk18 = handle;
+    dst->secondaryHandle = handle;
     dst->unk04 = 0;
     dst->color10 = 0x80808080;
     dst->unk08 = 0;
     return dst;
 }
 
-void effPcpSpawnOnce(EffPCPWork *work) {
+void effPcpSpawnOnce(EffPCPWork1C *work) {
     void *obj;
     u128 vec;
 
-    obj = effParamWorkGetData(work->unk14);
+    obj = effParamWorkGetData(work->primaryHandle);
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
         ".set reorder"
         : : "r"(work) : "memory");
     mdlStorePrimaryVectorVU(obj);
-    effParamWorkCallback3(work->unk18, work->unk10);
+    effParamWorkCallback3(work->secondaryHandle, work->color10);
     func_00232390(obj, D_00380828);
     func_00332D48(((EffPCPWork *)obj)->unk18, 1);
     __asm__ volatile (
@@ -1671,16 +1671,16 @@ void effPcpSpawnOnce(EffPCPWork *work) {
         "sqc2 vf10, %0\n"
         ".set reorder"
         : "=m"(vec) : : "memory");
-    effParamWorkCallback0(work->unk18, &vec);
-    effParamWorkInvokeCallback(work->unk18);
+    effParamWorkCallback0(work->secondaryHandle, &vec);
+    effParamWorkInvokeCallback(work->secondaryHandle);
 }
 
 void func_00180900(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00180910(EffPCPWork *work, u32 value) {
-    work->unk10 = value;
+void func_00180910(EffPCPWork1C *work, u32 value) {
+    work->color10 = value;
 }
 
 /* Shared scratch parameter block handed to the particle spawner (D_003B1670)
@@ -1689,9 +1689,9 @@ typedef struct EffSpawnParams {
     f32 pos[4];
     f32 vel[4];
     u8 pad20[0x0C];
-    f32 unk2C;
+    f32 speed;       /* 0x2C: randomised motion speed */
     u8 pad30[0x08];
-    s16 unk38;
+    s16 lifetime;    /* 0x38: randomised particle lifetime */
     u8 pad3A[0x0A];
     f32 unk44;
     u8 pad48[0x04];
@@ -1776,8 +1776,8 @@ void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
             speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
-        D_003B1670->unk38 = life;
-        D_003B1670->unk2C = speed;
+        D_003B1670->lifetime = life;
+        D_003B1670->speed = speed;
         *out = effThunderFragCreate(D_003B1670);
         out++;
         i++;
@@ -1853,7 +1853,7 @@ void func_00180D90(void *dst, void *src) {
 }
 
 void func_00180DA0(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_00180DA8(EffPCPWorkF14 *work, u32 value) {
@@ -1915,8 +1915,8 @@ void effPcpSpawnConeTwelve(EffSpawnGroup *group) {
             speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
-        D_003B16D0->unk38 = life;
-        D_003B16D0->unk2C = speed;
+        D_003B16D0->lifetime = life;
+        D_003B16D0->speed = speed;
         group->handles[i] = effThunderFragCreate(D_003B16D0);
         i++;
     } while (i < 12);
@@ -1955,7 +1955,7 @@ void func_00181208(void *dst, void *src) {
 }
 
 void func_00181218(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_00181220(EffPCPWorkF14 *work, u32 value) {
@@ -2015,8 +2015,8 @@ void effPcpSpawnConeThirty(EffSpawnGroup *group) {
             speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
-        D_003B1730->unk38 = life;
-        D_003B1730->unk2C = speed;
+        D_003B1730->lifetime = life;
+        D_003B1730->speed = speed;
         group->handles[i] = effThunderFragCreate(D_003B1730);
         i++;
     } while (i < 30);
@@ -2055,7 +2055,7 @@ void func_001816A0(void *dst, void *src) {
 }
 
 void func_001816B0(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_001816B8(EffPCPWorkF14 *work, u32 value) {
@@ -2116,8 +2116,8 @@ void effPcpSpawnWideConeTwelve(EffSpawnGroup *group) {
             speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
-        D_003B1790->unk38 = life;
-        D_003B1790->unk2C = speed;
+        D_003B1790->lifetime = life;
+        D_003B1790->speed = speed;
         group->handles[i] = effThunderFragCreate(D_003B1790);
         i++;
     } while (i < 12);
@@ -2156,7 +2156,7 @@ void func_00181B18(void *dst, void *src) {
 }
 
 void func_00181B28(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_00181B30(EffPCPWorkF14 *work, u32 value) {
@@ -2176,12 +2176,12 @@ void effPcpSpawnFixedOriginTwelve(EffSpawnGroup *group) {
 
     for (i = 0; i < 12; i++) {
         params = &D_003B17E8[effMiscRand(D_003AA868) & 1];
-        params->unk2C = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 20.0f;
+        params->speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 20.0f;
         life = effMiscRand(D_003AA868) % 6 + 15;
         params->pos[0] = -150.0f;
         params->pos[1] = -500.0f;
         params->pos[2] = 0;
-        params->unk38 = life;
+        params->lifetime = life;
         angle = func_00341240(D_003AA868) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
         dist = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 600.0f;
         params->vel[0] = params->pos[0] + func_003407A0(angle) * dist;
@@ -2224,7 +2224,7 @@ void func_00181E88(void *dst, void *src) {
 }
 
 void func_00181E98(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_00181EA0(EffPCPWorkF14 *work, u32 value) {
@@ -2304,7 +2304,7 @@ void func_001821F8(void *dst, void *src) {
 }
 
 void func_00182208(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_00182210(EffPCPWorkF14 *work, u32 value) {
@@ -2342,13 +2342,13 @@ void *func_001822B8(void) {
 
 typedef struct EffPCPFadeTarget {
     u8 pad00[0x1C];
-    f32 unk1C;
-    f32 unk20;
+    f32 sizeX; /* animated dimension on the first axis */
+    f32 sizeY; /* animated dimension on the second axis */
 } EffPCPFadeTarget;
 
 typedef struct EffPCPFadeWork {
     u8 pad00[0x14];
-    u32 unk14;
+    u32 color;   /* fades from this colour to zero */
     u32 frame;
     u32 handle;
 } EffPCPFadeWork;
@@ -2363,21 +2363,21 @@ extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
     EffPCPFadeTarget *target;
     f32 phase;
-    u32 handle;
+    u32 fadedColor;
 
     if (work->frame < 0x17) {
         target = func_0016B198(work->handle);
         phase = (f32)work->frame / 22.0f;
-        target->unk1C = phase * 600.0f + 200.0f;
-        target->unk20 = phase * 300.0f + 100.0f;
+        target->sizeX = phase * 600.0f + 200.0f;
+        target->sizeY = phase * 300.0f + 100.0f;
     }
     if (work->frame >= 0x2D) {
         phase = (f32)(work->frame - 0x2D) / 30.0f;
-        handle = effBlendColor(work->unk14, 0, phase);
+        fadedColor = effBlendColor(work->color, 0, phase);
     } else {
-        handle = work->unk14;
+        fadedColor = work->color;
     }
-    effPCPThunderSetParam50(work->handle, handle);
+    effPCPThunderSetParam50(work->handle, fadedColor);
     func_0016B160(work->handle, work);
     func_0016B928(work->handle);
     work->frame++;
@@ -2447,8 +2447,8 @@ void func_00182468(EffSpawnGroup *group) {
             speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
-        D_003B1990->unk38 = life;
-        D_003B1990->unk2C = speed;
+        D_003B1990->lifetime = life;
+        D_003B1990->speed = speed;
         group->handles[i] = effThunderFragCreate(D_003B1990);
         i++;
     } while (i < 30);
@@ -2487,7 +2487,7 @@ void func_001828E0(void *dst, void *src) {
 }
 
 void func_001828F0(EffPCPWorkF14 *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void func_001828F8(EffPCPWorkF14 *work, u32 value) {
@@ -2528,7 +2528,7 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
     EffPCPFadeTarget *target;
     f32 phase;
     f32 value;
-    u32 handle;
+    u32 fadedColor;
     u32 frame;
 
     frame = work->frame;
@@ -2539,15 +2539,15 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
         target = func_0016B198(work->handle);
         phase = (f32)frame / 30.0f;
         value = phase * 200.0f + 150.0f;
-        target->unk1C = value;
-        target->unk20 = value;
+        target->sizeX = value;
+        target->sizeY = value;
     }
     if (frame >= 0x39) {
         phase = ((f32)frame - 57.0f) * 0.125f;
-        handle = effBlendColor(work->unk14, 0, phase);
-        effPCPThunderSetParam50(work->handle, handle);
+        fadedColor = effBlendColor(work->color, 0, phase);
+        effPCPThunderSetParam50(work->handle, fadedColor);
     } else {
-        effPCPThunderSetParam50(work->handle, work->unk14);
+        effPCPThunderSetParam50(work->handle, work->color);
     }
     func_0016B160(work->handle, work);
     func_0016B928(work->handle);
@@ -2597,7 +2597,7 @@ typedef struct EffPCPTrailWork {
     f32 unk1C;
     u32 count;
     u32 colors[2];
-    f32 unk2C;
+    f32 scale; /* multiplies the computed trail size */
     s32 minSize;
     EffPCPTrailObj *obj;
 } EffPCPTrailWork;
@@ -2689,7 +2689,7 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
 
     obj = work->obj;
     VU0_LOAD_VF($vf10, work->pos);
-    obj->size = (s32)((f32)func_00195890(work->unk1C) * work->unk2C);
+    obj->size = (s32)((f32)func_00195890(work->unk1C) * work->scale);
     VU0_STORE_VF($vf10, pos);
     obj->x = (s32)pos[0] - 0x800;
     obj->y = ((s32)pos[1] - 0x800) << 1;
@@ -2866,8 +2866,8 @@ typedef struct EffPCPFadeTimer {
     u8 pad10[4];
     u32 unk14;
     u32 unk18;
-    u32 unk1C;
-    u32 unk20;
+    u32 width;  /* 0x200: PS2 render width */
+    u32 height; /* 0x1C0: PS2 render height */
     u32 colorFrom;
     u32 colorTo;
     s32 frame;
@@ -2890,8 +2890,8 @@ void effPcpFadeTimerUpdate(EffPCPFadeTimer *work) {
     fadeIn = work->fadeIn;
     work->unk14 = 0;
     work->unk18 = 0;
-    work->unk1C = 0x200;
-    work->unk20 = 0x1C0;
+    work->width = 0x200;
+    work->height = 0x1C0;
     fadeOut = work->fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -2947,8 +2947,8 @@ typedef struct EffPCPFadeTimerLong {
     u32 unk20;
     u32 unk24;
     u32 unk28;
-    u32 unk2C;
-    u32 unk30;
+    u32 width;  /* 0x200: PS2 render width */
+    u32 height; /* 0x1C0: PS2 render height */
     u32 colorFrom;
     u32 colorTo;
     s32 frame;
@@ -2972,8 +2972,8 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     work->unk20 = 0;
     work->unk24 = 0;
     work->unk28 = 0;
-    work->unk2C = 0x200;
-    work->unk30 = 0x1C0;
+    work->width = 0x200;
+    work->height = 0x1C0;
     fadeOut = work->fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -3142,28 +3142,28 @@ void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
     EffPCPFadeTarget *target;
     f32 phase;
     f32 value;
-    u32 handle;
+    u32 fadedColor;
 
     if (work->frame < 0x1F) {
         target = func_0016B198(work->handle);
         phase = (f32)work->frame / 30.0f;
         value = phase * 150.0f + 100.0f;
-        target->unk1C = value;
-        target->unk20 = value;
+        target->sizeX = value;
+        target->sizeY = value;
     } else if (work->frame - 0x2D < 0x10) {
         target = func_0016B198(work->handle);
         phase = (f32)(work->frame - 0x2D) / 15.0f;
         value = phase * 150.0f + 250.0f;
-        target->unk1C = value;
-        target->unk20 = value;
+        target->sizeX = value;
+        target->sizeY = value;
     }
     if (work->frame >= 0x2D) {
         phase = (f32)(work->frame - 0x2D) / 35.0f;
-        handle = effBlendColor(work->unk14, 0, phase);
+        fadedColor = effBlendColor(work->color, 0, phase);
     } else {
-        handle = work->unk14;
+        fadedColor = work->color;
     }
-    effPCPThunderSetParam50(work->handle, handle);
+    effPCPThunderSetParam50(work->handle, fadedColor);
     func_0016B160(work->handle, work);
     func_0016B928(work->handle);
     work->frame++;
@@ -3215,24 +3215,24 @@ void *func_001844B0(void) {
 void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
     EffPCPFadeTarget *target;
     f32 phase;
-    u32 handle;
+    u32 fadedColor;
 
     if (work->frame < 0x2E) {
         target = func_0016B198(work->handle);
         phase = (f32)work->frame / 45.0f;
-        target->unk20 = target->unk1C = phase * 950.0f + 200.0f;
+        target->sizeY = target->sizeX = phase * 950.0f + 200.0f;
     } else if (work->frame >= 0x3C && work->frame < 0x4C) {
         target = func_0016B198(work->handle);
         phase = (f32)(work->frame - 0x3C) / 15.0f;
-        target->unk20 = target->unk1C = phase * 150.0f + 1050.0f;
+        target->sizeY = target->sizeX = phase * 150.0f + 1050.0f;
     }
     if (work->frame >= 0x3C) {
         phase = (f32)(work->frame - 0x3C) / 15.0f;
-        handle = effBlendColor(work->unk14, 0, phase);
+        fadedColor = effBlendColor(work->color, 0, phase);
     } else {
-        handle = work->unk14;
+        fadedColor = work->color;
     }
-    effPCPThunderSetParam50(work->handle, handle);
+    effPCPThunderSetParam50(work->handle, fadedColor);
     func_0016B160(work->handle, work);
     func_0016B928(work->handle);
     work->frame++;
@@ -3268,8 +3268,8 @@ typedef struct EffPCPSpanWork {
     EffPCPSpanParams params;
     u32 color;
     u32 unk68;
-    f32 unk6C;
-    f32 unk70;
+    f32 startAngle;  /* 0x6C: negative half angular span */
+    f32 angleStep;   /* 0x70: angular span divided by the number of steps */
     u32 optionalHandle;
 } EffPCPSpanWork;
 
@@ -3283,8 +3283,8 @@ EffPCPWork *effPcpSpanCreate(void *params, void *handleParams) {
     work->color = 0x80808080;
     work->unk68 = 0;
     size = work->params.head.scale * 0.017453292f;
-    work->unk6C = -(size * 0.5f);
-    work->unk70 = size / (f32)(work->params.head.right - ((work->params.head.width >> 1) + work->params.head.left));
+    work->startAngle = -(size * 0.5f);
+    work->angleStep = size / (f32)(work->params.head.right - ((work->params.head.width >> 1) + work->params.head.left));
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->optionalHandle = 0;
     if (handleParams != NULL) {
@@ -3306,7 +3306,7 @@ EffPCPWork *effPcpCloneWithOptionalHandle(EffPCPWork *work) {
     EffPCPWork *child;
     u32 handle;
 
-    child = effPcpSpanCreate(&work->pad3C[4], NULL);
+    child = effPcpSpanCreate(&((EffPCPSpanWork *)work)->params, NULL);
     handle = work->optionalHandle;
     if (handle != 0) {
         child->optionalHandle = func_00157A50(handle);
@@ -4486,39 +4486,39 @@ typedef struct EffPCPGroupHead {
     u8 pad00[0x50];
     u8 unk50;            /* 0x50 */
     u8 pad51[3];
-    s32 unk54;           /* 0x54: frames per entry */
+    s32 framesPerEntry;   /* 0x54: interpolation duration */
     u32 count;           /* 0x58: handles per group */
-    s32 unk5C;           /* 0x5C: delay spread */
+    s32 delaySpread;      /* 0x5C: random initial delay */
     u32 unk60;           /* 0x60 */
     u32 unk64;           /* 0x64 */
-    f32 unk68;           /* 0x68 */
-    f32 unk6C;           /* 0x6C */
-    f32 unk70;           /* 0x70 */
-    f32 unk74;           /* 0x74 */
+    f32 startPosition;    /* 0x68: interpolated position at frame zero */
+    f32 endPosition;      /* 0x6C: interpolated position at final frame */
+    f32 startJitter;      /* 0x70: fractional random variation */
+    f32 endJitter;        /* 0x74: fractional random variation */
     f32 unk78;           /* 0x78 */
     f32 unk7C;           /* 0x7C */
     f32 unk80;           /* 0x80 */
     f32 unk84;           /* 0x84 */
     f32 unk88;           /* 0x88 */
     u8 activeGroups[4];  /* 0x8C */
-    u8 unk90[4];         /* 0x90 */
+    u8 spawnParams[4];    /* 0x90: beginning of the particle spawn template */
     f32 unk94;           /* 0x94 */
     u8 pad98[0xCC];
 } EffPCPGroupHead;
 
 typedef struct EffPCPGroupEntry {
     u32 handle;          /* 0x00 */
-    s32 unk04;           /* 0x04 */
-    f32 unk08;           /* 0x08 */
-    f32 unk0C;           /* 0x0C */
-    f32 unk10;           /* 0x10 */
+    s32 frame;            /* 0x04: negative until the start delay expires */
+    f32 position;         /* 0x08: initial interpolated position */
+    f32 positionStep;     /* 0x0C: change per frame */
+    f32 angle;            /* 0x10: evenly spaced angle in radians */
     f32 unk14;           /* 0x14 */
 } EffPCPGroupEntry;
 
 typedef struct EffPCPGroupSet {
     EffPCPGroupHead head;
     EffPCPGroupEntry *entries;  /* 0x164 */
-    f32 unk168;
+    f32 scale;            /* 0x168: multiplies start/end positions */
     f32 unk16C;
     u32 color;           /* 0x170 */
     u32 *duplicates;     /* 0x174: four groups of handles */
@@ -4535,7 +4535,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
     u32 i;
 
     copy->head = *first;
-    copy->unk168 = 1.0f;
+    copy->scale = 1.0f;
     copy->color = 0x80808080;
     copy->workHandle = resource;
     copy->unk16C = first->unk94;
@@ -4579,8 +4579,8 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
         }
     }
     for (g = 0; g < count; g++) {
-        entry->handle = effThunderFragCreate(first->unk90);
-        entry->unk04 = 0;
+        entry->handle = effThunderFragCreate(first->spawnParams);
+        entry->frame = 0;
         entry++;
     }
     return copy;
@@ -4676,18 +4676,18 @@ void effBlockSetRelease(u8 *work) {
  * position step per frame and a spread angle step. */
 void effPcpGroupSetInitEntry(EffPCPGroupSet *work, s32 index) {
     EffPCPGroupEntry *entry = work->entries + index;
-    s32 spread = work->head.unk5C;
-    f32 scale = work->unk168;
+    s32 spread = work->head.delaySpread;
+    f32 scale = work->scale;
     f32 ratio;
 
     if (spread > 0) {
-        entry->unk04 = -(effMiscRand(D_003AA868) % spread);
+        entry->frame = -(effMiscRand(D_003AA868) % spread);
     }
-    ratio = work->head.unk70;
-    entry->unk08 = work->head.unk68 * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale;
-    ratio = work->head.unk74;
-    entry->unk0C = (work->head.unk6C * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale - entry->unk08) / (f32)work->head.unk54;
-    entry->unk10 = 3.14159265f * 2.0f / (f32)work->head.count * (f32)index;
+    ratio = work->head.startJitter;
+    entry->position = work->head.startPosition * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale;
+    ratio = work->head.endJitter;
+    entry->positionStep = (work->head.endPosition * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale - entry->position) / (f32)work->head.framesPerEntry;
+    entry->angle = 3.14159265f * 2.0f / (f32)work->head.count * (f32)index;
     ratio = work->head.unk80;
     entry->unk14 = work->head.unk78 * (func_00341240(D_003AA868) * ratio + (1.0f - ratio));
 }
@@ -4698,12 +4698,12 @@ void func_001898B8(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_001898C8(EffPCPWork *work, f32 val) {
-    work->unk168 = val;
+void func_001898C8(EffPCPGroupSet *work, f32 val) {
+    work->scale = val;
 }
 
-void func_001898D0(EffPCPWork *work, u32 value) {
-    work->unk170 = value;
+void func_001898D0(EffPCPGroupSet *work, u32 value) {
+    work->color = value;
 }
 
 EffPCPSprayWork *effSprayEffectCreateFromTable(void *src) {
@@ -4811,9 +4811,9 @@ void effPcpEventGroupRelease(EffPCPEventGroup18 *work) {
 
 typedef struct EffPCPDriftSlot {
     u8 pad00[8];
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
+    f32 position;
+    f32 positionStep;
+    f32 angle;
     f32 unk14;
 } EffPCPDriftSlot;
 
@@ -4822,10 +4822,10 @@ typedef struct EffPCPDriftWork {
     s32 count;
     u32 steps;
     u8 pad5C[0xC];
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
+    f32 startPosition;
+    f32 endPosition;
+    f32 startJitter;
+    f32 endJitter;
     f32 unk78;
     u8 pad7C[4];
     f32 unk80;
@@ -4842,11 +4842,11 @@ void effPcpDriftRandomizeSlot(EffPCPDriftWork *work, s32 index) {
 
     slot = &work->slots[index];
     scale = work->scale;
-    spread = work->unk70;
-    slot->unk08 = work->unk68 * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale;
-    spread = work->unk74;
-    slot->unk0C = (work->unk6C * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale - slot->unk08) / (f32)work->count;
-    slot->unk10 = 6.2831852f / (f32)work->steps * (f32)index;
+    spread = work->startJitter;
+    slot->position = work->startPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale;
+    spread = work->endJitter;
+    slot->positionStep = (work->endPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->count;
+    slot->angle = 6.2831852f / (f32)work->steps * (f32)index;
     spread = work->unk80;
     slot->unk14 = work->unk78 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
 }
@@ -5004,10 +5004,10 @@ typedef struct EffPCPSpawnSlot {
     u32 unk04;
     f32 unk08;
     f32 unk0C;
-    f32 unk10;
+    f32 angle;         /* sampled over one full turn */
     f32 unk14;
-    f32 unk18;
-    f32 unk1C;
+    f32 position;
+    f32 positionStep;
 } EffPCPSpawnSlot;
 
 typedef struct EffPCPSpawnRange {
@@ -5020,10 +5020,10 @@ typedef struct EffPCPSpawnRange {
     f32 unk74;
     f32 unk78;
     u8 pad7C[4];
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
+    f32 startPosition;
+    f32 endPosition;
+    f32 startJitter;
+    f32 endJitter;
     f32 unk90;
     EffPCPSpawnSlot *slots;
     u8 pad98[8];
@@ -5042,13 +5042,13 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRange *work, s32 index) {
     slot->unk08 = -work->unk90 * func_00341240(D_003AA868);
     spread = work->unk78;
     slot->unk0C = work->unk74 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
-    slot->unk10 = func_00341240(D_003AA868) * (3.14159265f * 2.0f);
+    slot->angle = func_00341240(D_003AA868) * (3.14159265f * 2.0f);
     spread = work->unk6C;
     slot->unk14 = work->unk68 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
-    spread = work->unk88;
-    slot->unk18 = work->unk80 * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale;
-    spread = work->unk8C;
-    slot->unk1C = (work->unk84 * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale - slot->unk18) / (f32)work->count;
+    spread = work->startJitter;
+    slot->position = work->startPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale;
+    spread = work->endJitter;
+    slot->positionStep = (work->endPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->count;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B778);
