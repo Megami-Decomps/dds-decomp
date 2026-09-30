@@ -145,6 +145,8 @@ typedef struct SdfGrid {
 extern void func_00310888(f32 *, f32 *);
 extern void func_00310320(f32 *, f32 *);
 extern void func_0030F8D0(f32 *);
+extern void func_0030FA28(f32 *, f32 *, f32 *);
+extern void sdfVec3ScaleInPlace(f32, f32 *);
 
 extern void func_0019D550(u64, s32, s32);
 extern void frFontSetChildColors(u64, u64);
@@ -163,7 +165,7 @@ typedef struct SdfListNode {
     s32 key;                    /* 0x04 */
     struct SdfListNode *next;   /* 0x08 */
     struct SdfListNode *prev;   /* 0x0C */
-    s32 value;                  /* 0x10 */
+    void *value;                /* 0x10 */
 } SdfListNode;
 
 typedef struct SdfList {
@@ -172,7 +174,7 @@ typedef struct SdfList {
     SdfListNode *head;          /* 0x08 */
     SdfListNode *tail;          /* 0x0C */
     u32 pad10;
-    void (*onRemove)(u32, s32); /* 0x14 */
+    void (*onRemove)(u32, void *); /* 0x14 */
 } SdfList;
 extern void *func_00328D68(s32);
 extern void *memset(void *, s32, u32);
@@ -232,9 +234,45 @@ void sdfQuaternionNormalize(float *values) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310D28);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310DE8);
+/* Quaternion rotating direction `from` onto `to`. */
+void func_00310DE8(f32 *out, f32 *from, f32 *to) {
+    f32 cross[4];
+    f32 scale;
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310EB0);
+    func_0030F8D0(from);
+    func_0030F8D0(to);
+    func_0030FA28(cross, from, to);
+    scale = fsqrtf(2.0f * (fldNormalizedVectorDot(from, to) + 1.0f));
+    out[0] = cross[0] / scale;
+    out[1] = cross[1] / scale;
+    out[2] = cross[2] / scale;
+    out[3] = scale * 0.5f;
+}
+
+/* Quaternion from Euler angles: half angles are negated. */
+void func_00310EB0(f32 *out, f32 x, f32 y, f32 z) {
+    f32 half;
+    f32 cx;
+    f32 sx;
+    f32 cy;
+    f32 sy;
+    f32 cz;
+    f32 sz;
+
+    half = -x * 0.5f;
+    cx = func_003407A0(half);
+    sx = sdfSinPoly(half);
+    half = -y * 0.5f;
+    cy = func_003407A0(half);
+    sy = sdfSinPoly(half);
+    half = -z * 0.5f;
+    cz = func_003407A0(half);
+    sz = sdfSinPoly(half);
+    out[0] = sz * sy * cx + cz * cy * sx;
+    out[1] = cz * sy * cx - sz * cy * sx;
+    out[2] = sz * cy * cx + cz * sy * sx;
+    out[3] = cz * cy * cx - sz * sy * sx;
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310FD0);
 
@@ -247,7 +285,36 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
     sdfQuaternionNormalize(out);
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311178);
+/* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
+void func_00311178(f32 *out, f32 *from, f32 *to, f32 fraction) {
+    f32 target[4];
+    f32 angle = sdfQuatDot(from, to);
+    f32 firstWeight;
+    f32 secondWeight;
+    f32 denominator;
+
+    if (angle < 0.0f) {
+        angle = -angle;
+        target[0] = -to[0];
+        target[1] = -to[1];
+        target[2] = -to[2];
+        target[3] = -to[3];
+    } else {
+        memcpy(target, to, 16);
+    }
+    if (angle < 0.95f) {
+        angle = func_003532B8(angle);
+        firstWeight = func_00353140(angle * (1.0f - fraction));
+        secondWeight = func_00353140(angle * fraction);
+        denominator = func_00353140(angle);
+        out[0] = (from[0] * firstWeight + target[0] * secondWeight) / denominator;
+        out[1] = (from[1] * firstWeight + target[1] * secondWeight) / denominator;
+        out[2] = (from[2] * firstWeight + target[2] * secondWeight) / denominator;
+        out[3] = (from[3] * firstWeight + target[3] * secondWeight) / denominator;
+    } else {
+        sdfQuaternionBlendNormalize(out, from, target, fraction);
+    }
+}
 
 void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 angle = sdfQuatDot(from, to);
@@ -350,7 +417,27 @@ f32 func_003118E8(f32 *direction, f32 *target) {
     return component / projection;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311978);
+/* Intersect the rotated Z axis with the plane at height plane[1]; write the hit vector to out. */
+void func_00311978(f32 *plane, f32 *rotation, f32 *out) {
+    f32 matrix[16];
+    f32 forward[4] = {0, 0, 1.0f, 0};
+    f32 up[4] = {0, 1.0f, 0, 0};
+    f32 dot;
+    f32 dist;
+
+    func_00310888(matrix, rotation);
+    func_00310320(forward, matrix);
+    dot = fldNormalizedVectorDot(up, forward);
+    func_0030F8D0(forward);
+    dist = plane[1];
+    if (dist < 0.0f) {
+        dist = -dist / dot;
+    } else {
+        dist = dist / dot;
+    }
+    sdfVec3ScaleInPlace(dist, forward);
+    memcpy(out, forward, 16);
+}
 
 s64 sdfFontRegisterShort(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 temp_v0;
@@ -474,9 +561,49 @@ void sdfSetTaskDestroyCallback(s32 arg0, s32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312188);
+SdfListNode *func_00312188(SdfList *list, s32 key, void *value) {
+    SdfListNode *node = func_00328D68(0x14);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312228);
+    memset(node, 0, 0x14);
+    node->value = value;
+    node->index = list->count++;
+    node->key = key;
+    if (list->head == NULL) {
+        list->head = node;
+    } else {
+        node->prev = list->tail;
+        list->tail->next = node;
+    }
+    list->tail = node;
+    return node;
+}
+
+/* Insert a new node after `after`, bumping the index of every later node. */
+SdfListNode *func_00312228(SdfList *list, SdfListNode *after, s32 key, void *value) {
+    SdfListNode *node = func_00328D68(0x14);
+    SdfListNode *it;
+
+    memset(node, 0, 0x14);
+    node->index = after->index + 1;
+    node->key = key;
+    node->value = value;
+    list->count++;
+    for (it = after->next; it != NULL; it = it->next) {
+        if (it->index != 0) {
+            it->index++;
+        }
+    }
+    node->prev = after;
+    if (after->next != NULL) {
+        node->next = after->next;
+        after->next->prev = node;
+        after->next = node;
+    } else {
+        after->next = node;
+        list->tail = node;
+    }
+    return node;
+}
 
 void sdfSetTaskSecondaryCallback(s32 arg0, s32 arg1) {
     if (arg1 != 0) {
