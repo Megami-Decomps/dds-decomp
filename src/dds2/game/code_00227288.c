@@ -317,9 +317,9 @@ typedef struct BtlState {
     s32 unk_778;
     u8 unk_77C[0x10];
     s32 unk_78C;
-    s32 table0[0x20];
+    s32 table0[0x30];
     s32 table1[0x180];
-    s32 table2[0x20];
+    s32 table2[0x60];
     s8 unk_E0C;
     u8 unk_E0D;
     s16 unk_E0E;
@@ -1346,7 +1346,53 @@ s32 func_0022B760(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022B7A0);
+typedef struct BtlFlagSlot {
+    u8 key;
+    u8 pad[3];
+} BtlFlagSlot;
+
+extern BtlFlagSlot D_003BF960[];
+extern s32 effMiscRandMod();
+
+/* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to func_0010D818. */
+s32 func_0022B7A0(void) {
+    u32 value = scrReadIntParameter(0);
+    s32 count;
+    s32 pick;
+    u32 group;
+    u32 i;
+
+    if (value < 100) {
+        group = D_003BF960[value].key;
+        count = 0;
+        for (i = 0; i < 100; i++) {
+            if (group == D_003BF960[i].key) {
+                if (mdlFlagTest(0x8FF - i) == 0) {
+                    count++;
+                }
+            }
+        }
+        if (count > 0) {
+            pick = effMiscRandMod(0, count);
+            for (i = 0; i < 100; i++) {
+                if (group == D_003BF960[i].key) {
+                    if (mdlFlagTest(0x8FF - i) == 0) {
+                        if (--pick == -1) {
+                            break;
+                        }
+                    }
+                }
+            }
+            value = i < 100 ? i : -1;
+        } else {
+            value = -1;
+        }
+    } else {
+        value = 0;
+    }
+    func_0010D818(value);
+    return 1;
+}
 
 u32 func_0022B8E0(void) {
     u32 index = scrReadIntParameter(0);
@@ -1682,7 +1728,37 @@ s32 func_0022C1B0(BtlTask *task, s32 command) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022C308);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022C518);
+/* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
+s32 func_0022C518(void *list, s32 row) {
+    s32 result = 0;
+    u32 flags;
+    u32 mask;
+    s32 bit;
+    s32 index;
+
+    if (row <= 0) {
+        return result;
+    }
+    flags = *(u32 *)(D_00435E20 + row * 0x38 + 0x28);
+    if (flags == 0) {
+        return result;
+    }
+    if (flags == 0x800 || flags == 0x1000) {
+        return btlIndexListNoExpiredEntryCodes(list, row) != 0 ? 3 : 0;
+    }
+    for (bit = 0; bit < 0x20; bit++) {
+        mask = 1 << bit;
+        if (flags & mask) {
+            index = btlLowestSetPairIndex(mask);
+            if (index < 7 && index != -1) {
+                if (btlIndexListMatchesEntryCodes(list, index, mask) == 0) {
+                    return 0;
+                }
+            }
+        }
+    }
+    return 3;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022C600);
 
