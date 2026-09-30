@@ -174,7 +174,8 @@ typedef struct MenuSlot {
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
-    u8 pad00[0x60];
+    u8 pad00[0x54];
+    s32 popupState[3];     /* 0x54: passed to the popup state handlers */
     s32 displayHandle;     /* 0x60 */
     s32 resourceHandle;    /* 0x64 */
     void *displayResource; /* 0x68 */
@@ -387,7 +388,7 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B06A8);
 
 s64 func_002B0898(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 *popup = (s32 *)(context + 0x54);
+    s32 *popup = ((MenuContext *)context)->popupState;
     s32 slot = D_00435DD0 + ((MenuList *)((MenuContext *)context)->selectionList)->cursor->index * 0x1c4 + 0xa60;
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     s64 state = func_002C4038(context + 8, popup, 0, callback);
@@ -458,7 +459,7 @@ u32 func_002B0B88(void) {
 
 s64 mnuPartySlotConfirmClearUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 *popup = (s32 *)(context + 0x54);
+    s32 *popup = ((MenuContext *)context)->popupState;
     s32 slot = D_00435DD0 + ((MenuList *)((MenuContext *)context)->selectionList)->cursor->index * 0x1c4 + 0xa60;
     s64 state = func_002C4038(context + 8, popup, 0, callback);
     s32 selectedEntry;
@@ -771,7 +772,7 @@ void func_002B2A10(void) {
 s64 mnuStaffPopupUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     u8 *menu = (u8 *)((MenuContext *)context)->party;
-    s32 *popup = (s32 *)(context + 0x54);
+    s32 *popup = ((MenuContext *)context)->popupState;
     u32 buttons = func_002C44E8(3);
     s64 state;
     u8 *window;
@@ -902,7 +903,7 @@ s64 mnuStaffBrowsePartyUpdate(s32 callback) {
     } else {
         buttons = func_002C44E8(2);
     }
-    popup = (s32 *)(context + 0x54);
+    popup = ((MenuContext *)context)->popupState;
     state = func_002C4038(context + 8, popup, 0, callback);
     if (state != 0) {
         return state;
@@ -1337,7 +1338,7 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
 s64 ptySkillMenuUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
-    s64 state = func_002C4038(context + 8, (s32 *)(context + 0x54), 0, callback);
+    s64 state = func_002C4038(context + 8, ((MenuContext *)context)->popupState, 0, callback);
     if (state != 0) {
         return state;
     }
@@ -1476,7 +1477,7 @@ void mnuFlagMatchingEntries(s32 context) {
 s64 ptySkillMenuHandleFieldUse(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     u8 *menu = (u8 *)((MenuContext *)context)->party;
-    s32 *popup = (s32 *)(context + 0x54);
+    s32 *popup = ((MenuContext *)context)->popupState;
     u32 buttons = func_002C44E8(3);
     s64 state;
     s32 label;
@@ -1606,7 +1607,7 @@ s64 ptySkillMenuBrowseCandidatePages(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
     u32 input = func_002C44E8(0xC37);
-    s32 *popup = (s32 *)(context + 0x54);
+    s32 *popup = ((MenuContext *)context)->popupState;
     u32 buttons = func_002C44E8(0xC0);
     s64 state = func_002C4038(context + 8, popup, 0, callback);
     s32 *windows;
@@ -1785,7 +1786,7 @@ u32 mnuCloseSkillSelection(u32 callback) {
 s64 mnuUpdateSkillListInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
-    s32 *popup = (s32 *)(context + 0x54);
+    s32 *popup = ((MenuContext *)context)->popupState;
     u32 buttons = func_002C44E8(0xc32);
     s64 state;
     s32 *list;

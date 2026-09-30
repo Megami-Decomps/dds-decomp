@@ -178,11 +178,14 @@ struct BtlUnit {
     u8 pad3C[0x14];
     f32 unk50;
     u32 baseColor;
-    u8 pad58[0x28];
+    u8 pad58[0x18];
+    f32 orientation[4]; /* 0x70: quaternion converted to a rotation matrix */
     f32 scale;           /* 0x80 */
     u32 overlayColor;
     f32 positionZOffset;
-    u8 pad8C[0x24];
+    u8 pad8C[4];
+    f32 bodyOffset[4]; /* 0x90: scaled and rotated into the unit's body position */
+    u8 padA0[0x10];
     f32 height;          /* 0xB0 */
     f32 reach;           /* 0xB4 */
     u8 padB8[4];
@@ -267,7 +270,8 @@ typedef struct ActionUnit {
     u8 pad00[0x30];
     f32 pos30[4];
     f32 dir40[4];
-    u8 pad50[0x90];
+    u8 pad50[0x70];
+    u8 outputPose[0x20];    /* 0xC0: receives the transformed pose */
     f32 fE0;                /* 0xE0 */
     u8 padE4[0x2C];
     u32 flags;              /* 0x110 */
@@ -2804,9 +2808,9 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     VU0_LOAD_VF(vf11, &fromPos);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(dist);
-    VU0_LOAD_VF(vf10, (u8 *)unit + 0x70);
+    VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, (u8 *)unit + 0x90);
+    VU0_LOAD_VF(vf10, unit->bodyOffset);
     VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_NEGATE_XYZ(vf10);
@@ -5164,10 +5168,10 @@ void btlAdvanceActorStageAndPose(ActionUnit *action) {
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, (u8 *)action + 0x10);
             ((XformData *)action)->f20 += 150.0f;
-            out = (u8 *)action + 0xC0;
+            out = action->outputPose;
         } else {
-            u8 *pose = (u8 *)action + 0x30;
-            out = (u8 *)action + 0xC0;
+            u8 *pose = (u8 *)action->pos30;
+            out = action->outputPose;
             func_001EF030(action, pose);
             btlCopyMotionTransform((XformData *)out, (XformData *)pose);
             action->fE0 += 100.0f;

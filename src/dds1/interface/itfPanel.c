@@ -75,11 +75,17 @@ void func_00199A20(PanelDefinition2 *panel, s32 a2C, s32 a30, s32 a34, s32 a38) 
     }
 }
 
+/* The packet owner's callback occupies its 0x10 dispatch slot. */
+typedef struct PanelPacketDispatch {
+    u8 pad00[0x10];
+    s32 (*handler)(s32 owner, s32 packet);
+} PanelPacketDispatch;
+
 s32 func_00199A68(PanelDefinition *panel, s32 arg1) {
     s32 work = sdfAllocPacketAligned(0x20, arg1);
 
     sdfInitPacketList(work);
     func_0019ACE0(work);
     itfPanelDispatchHandler(panel, work);
-    return ((s32 (*)(s32, s32))*(u32 *)(arg1 + 0x10))(arg1, work);
+    return ((PanelPacketDispatch *)arg1)->handler(arg1, work);
 }

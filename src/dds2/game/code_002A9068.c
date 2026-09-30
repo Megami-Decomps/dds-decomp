@@ -63,6 +63,12 @@ typedef struct PartyRecord {
     u16 unk1B2;
     u8 pad1B4[0x10];
 } PartyRecord;
+/* Global scene's spendable currency is clamped by datAddCurrencyClamped. */
+typedef struct CampCurrency {
+    u8 pad00[0x3C];
+    s32 currency;
+} CampCurrency;
+
 
 extern void func_00314C68(void *);
 
@@ -812,7 +818,8 @@ void func_002AA530(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 
         return;
     }
     func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
-    func_0035C860(buffer, D_00437B80, *(s32 *)(D_00435DD0 + 0x3C));
+    func_0035C860(buffer, D_00437B80, ((CampCurrency *)D_00435DD0)->currency);
+    /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
     func_0019D550(object, 1, layer);
