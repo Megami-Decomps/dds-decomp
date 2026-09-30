@@ -2,9 +2,9 @@
 
 typedef struct ActionObj {
     u8 unk0[4];   /* 0x0 */
-    s32 unk4;     /* 0x4 */
+    s32 initialValue; /* 0x4 */
     u8 unk8[0x10]; /* 0x8 */
-    u32 *value;    /* 0x18: nested value pointer */
+    u32 *resource; /* 0x18: resource owner's nested handle */
     s32 unk1C;     /* 0x1C */
 } ActionObj;
 
@@ -19,7 +19,7 @@ extern void effObjInnerVecBackup();
 ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
     ActionObj *obj = func_00110880(8);
 
-    obj->unk4 = initialValue;
+    obj->initialValue = initialValue;
     effObjSetInnerFirstVec(obj, firstVector);
     effObjSetInnerSecondVec(obj, secondVector);
     effObjInnerVecBackup(obj->unk1C);
@@ -27,7 +27,7 @@ ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *seco
 }
 
 u32 dds3GetResourceOwnerHandle(ActionObj *object) {
-    return *object->value;
+    return *object->resource;
 }
 
 
@@ -63,7 +63,7 @@ u32 func_00116260(ActionObj *object) {
 
     effObjInnerCreate();
     obj = (InnerVecObj *)func_002CFEB8(0x7C);
-    object->value = (u32 *)obj;
+    object->resource = (u32 *)obj;
     obj->handle74 = func_001117A8(object);
     dds3SetObjectFlags(object, 0x62);
     obj->unk64 = 0;
