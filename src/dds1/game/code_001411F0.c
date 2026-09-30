@@ -1770,7 +1770,33 @@ void fldDrawTitleBanner(s32 x, s32 y) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00149810);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00149A98);
+extern s32 func_00125DC0(u32);
+
+void func_00149A98(void) {
+    if (D_0032E3B0[4] < 0xC8) {
+        if (func_00125DC0(1) != 0) {
+            return;
+        }
+        if (func_00124F08() != 0) {
+            return;
+        }
+        if (func_00125140() != 0) {
+            return;
+        }
+        if (D_003BAF90 != 0) {
+            if (FLD_WORK->unk12A == 0) {
+                mnuSpawnResourceAtPosition(D_0034C8E0[0], D_0034C8E0[1], D_0034C8E0[2]);
+            }
+            D_003BAF90 = 0;
+        }
+        if (D_003BAF8C != 0) {
+            if (FLD_WORK->unk12A == 0) {
+                mnuSpawnResourceAtPosition(D_0034C8D0[0], D_0034C8D0[1], D_0034C8D0[2]);
+            }
+            D_003BAF8C = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 

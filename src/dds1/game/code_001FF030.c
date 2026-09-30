@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl.h"
 #include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 extern u32 btlGetEffectActor(void);
 
@@ -197,7 +198,21 @@ extern u8 D_00360EE0[];
 extern u8 D_00360EF0[];
 extern void func_001DC2A8(s32, u8 *, u8 *);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF030);
+extern void *func_002CFF68(s32);
+extern void func_002CFF98(void *);
+extern void func_001FFDA0();
+extern u32 btlPickWeightedAiSlot();
+
+void func_001FF030(BtlTask *task, s32 row) {
+    u16 species;
+    s32 index;
+
+    D_003BB87C = func_002CFF68(0x10);
+    species = task->unit->mode;
+    index = btlPickWeightedAiSlot(task->unit, species, row);
+    func_001FFDA0(task, D_003BAA24[species].slot[row * 5 + index].actionId, D_003BAA24[species].slot[row * 5 + index].actionArg);
+    func_002CFF98(D_003BB87C);
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF0C8);
 
@@ -1848,7 +1863,33 @@ s32 btlGetEffectTaskActorMatchCode(u8 *task) {
     return effect->actor == (u32)((BtlTask *)task)->unit ? 12 : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002068E0);
+extern s32 func_001D9718();
+extern s32 func_001D9780();
+extern s32 btlCreateCommandSoundTask();
+extern s32 btlCreateEffObjB();
+extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
+
+s32 func_002068E0(BtlTask *task) {
+    BattleEffectState *effect;
+    u8 *group;
+
+    if ((task->flags & 8) == 0) {
+        return -1;
+    }
+    effect = *(BattleEffectState **)((u8 *)func_001A17F0() + 0x694);
+    if (effect->actor != (u32)task->unit) {
+        return -1;
+    }
+    btlStartTask(func_001D9718());
+    btlStartTask(func_001D9780());
+    btlStartTask(btlCreateCommandSoundTask(task, 9));
+    btlStartTask(btlCreateEffObjB(task->unit, 0xB4));
+    group = fldCreateSceneGroupAction(task, 0x64, 1);
+    *(s32 *)(group + 0x28) = 0x16;
+    btlStartTask(group);
+    effect->phase = 1;
+    return (*(u16 *)((u8 *)task->unit + 0x12E) & 0x480) ? 0x18 : 0x1A;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002069C0);
 
@@ -2020,7 +2061,75 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00207718);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00207948);
+extern void func_001DC270();
+extern void func_001D63E8();
+extern void func_001DB300();
+extern void func_001DB698();
+
+typedef struct BtlAimUnit {
+    u8 pad00[0x30];
+    u8 anim[0x90];     /* 0x30 */
+    f32 origin[4];     /* 0xC0 */
+    f32 direction[4];  /* 0xD0 */
+    f32 distance;      /* 0xE0 */
+    u8 padE4[0x2C];
+    s32 state;         /* 0x110 */
+    s32 kind;          /* 0x114 */
+    u8 pad118[4];
+    s32 armed;         /* 0x11C */
+    u8 pad120[0x10];
+    f32 scale;         /* 0x130 */
+} BtlAimUnit;
+
+s32 func_00207948(BtlAimUnit *unit) {
+    u8 *battle = (u8 *)func_001A17F0();
+    u8 *target;
+    u32 flags;
+    f32 distance;
+
+    if (unit->kind == 0x171) {
+        return 1;
+    }
+    if (unit->kind != 0x189) {
+        return 0;
+    }
+    for (target = *(u8 **)(battle + 0x228); target != 0; target = *(u8 **)(target + 0x344)) {
+        flags = *(u32 *)(target + 0x110);
+        if ((flags & 1) != 0) {
+            if ((flags & 0x400) != 0) {
+                if ((flags & 2) != 0) {
+                    if (*(u16 *)(target + 0x124) == 0x107) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (target == 0) {
+        return 1;
+    }
+    if (unit->state != 0x1E || unit->armed != 0) {
+        return 1;
+    }
+    func_001DC270(unit->anim, unit);
+    unit->scale = 10.0f;
+    unit->armed = 1;
+    unit->state = 0;
+    func_001D63E8(target, 0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, unit->origin);
+    unit->origin[1] += 150.0f;
+    func_001DB300(unit->anim);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, unit->origin);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    unit->distance = distance;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, unit->direction);
+    unit->distance += 45.0f;
+    func_001DB698(unit->origin);
+    return 1;
+}
 
 s32 btlIsSpecialActionKind(s32 unit) {
     switch (((BtlUnit *)unit)->unk_114) {
@@ -2719,7 +2828,42 @@ s32 func_00209818(u8 *unit, s32 command, u8 mode) {
     return command;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002098B8);
+extern void btlSetUnitPosition(BtlUnit *, void *);
+extern void btlSetUnitRotation(BtlUnit *, void *);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *);
+
+typedef struct BtlEffectLink {
+    BtlUnit *actor;
+    u32 unk4;
+    u32 flags; /* 8 */
+    s32 code;  /* 0xC */
+} BtlEffectLink;
+
+void func_002098B8(BtlUnit *unit, u8 *task) {
+    BtlEffectLink *effect;
+    BtlUnit *target;
+    BtlUnit *actor;
+
+    if (unit->flags & 0x400) {
+        effect = (BtlEffectLink *)((BtlState *)func_001A17F0())->effect;
+        target = effect->actor;
+        if (target != 0) {
+            if (target->flags & 2) {
+                if (unit->lookupId == effect->code) {
+                    if ((*(u16 *)(task + 0x26) & 0x800) == 0) {
+                        effect->flags |= 4;
+                        PCP_COPY_VECTOR((u8 *)target + 0x30, (u8 *)unit + 0x30);
+                        btlSetUnitPosition(target, (u8 *)unit + 0x60);
+                        actor = effect->actor;
+                        PCP_COPY_VECTOR((u8 *)actor + 0x40, (u8 *)unit + 0x40);
+                        btlSetUnitRotation(actor, (u8 *)unit + 0x70);
+                        btlFlagUnitDefeatCandidate(effect->actor);
+                    }
+                }
+            }
+        }
+    }
+}
 
 u32 func_002099A0(void) {
     s32 battle;
@@ -2768,7 +2912,54 @@ void func_00209A28(void) {
     ((BtlEventTriggers *)data)->pending = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00209A58);
+extern void fldAppendSceneGroupHandle();
+extern void btlAppendIndexListEntry();
+
+typedef struct BtlMarkState {
+    u8 marked;  /* 0 */
+    s8 variant; /* 1 */
+} BtlMarkState;
+
+s32 func_00209A58(void) {
+    BtlState *state = (BtlState *)func_001A17F0();
+    BtlMarkState *mark = (BtlMarkState *)state->effect;
+    BtlTask *candidates[16];
+    BtlTask *task;
+    BtlUnit *unit;
+    s32 count;
+
+    if (state->mode != 1) {
+        return -1;
+    }
+    count = 0;
+    for (task = state->tasks; task != 0; task = task->next) {
+        if (task->flags & 8) {
+            unit = task->unit;
+            if (unit->flags & 1) {
+                if (unit->flags & 0x200) {
+                    if ((unit->unk_12E & 0x7FFF) == 0x2000) {
+                        candidates[count++] = task;
+                    }
+                }
+            }
+        }
+    }
+    if (count == 0) {
+        return -1;
+    }
+    task = candidates[effMiscRandMod(0, count)];
+    unit = task->unit;
+    fldAppendSceneGroupHandle(task);
+    task->result = 2;
+    if (mark->variant != 0) {
+        task->arg = 0xD1;
+    } else {
+        task->arg = 0xD2;
+    }
+    btlAppendIndexListEntry(task->unk_60, (s32)unit);
+    mark->marked = 1;
+    return -1;
+}
 
 s32 func_00209B70(void) {
     s32 absent = -1;
@@ -3183,7 +3374,28 @@ s32 func_0020D598(s32 battler, s32 action) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D5E0);
+s32 func_0020D5E0(BtlUnit *unit, s32 arg1, s32 arg2) {
+    BtlTask *link = *(BtlTask **)((u8 *)unit + 0xF4);
+    BtlUnit *other;
+    f32 pos[4] __attribute__((aligned(16)));
+
+    if (link == 0) {
+        return 1;
+    }
+    other = link->unit;
+    if ((other->flags & 0x400) == 0) {
+        return 0;
+    }
+    if (other->mode != 0x111) {
+        return 0;
+    }
+    if (unit->unk_114 == 0x175) {
+        PCP_COPY_VECTOR(pos, (u8 *)other + 0x30);
+        pos[2] += 600.0f;
+        btlSetUnitPosition(other, pos);
+    }
+    return 0;
+}
 
 extern s32 func_0020D5E0();
 
