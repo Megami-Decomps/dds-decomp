@@ -3410,12 +3410,16 @@ void fileClearLoadObjectReferences(LoadObj *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6980);
+s32 func_002D6980(LoadObj *obj) {
+    if ((D_00437E08 & 2) == 0 && obj->recordWork != NULL) {
+        fileAcquireRecord(obj->recordWork);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D69B8);
 
 void func_002D7398(u32 arg0) {
-    func_002D6980();
+    func_002D6980((LoadObj *)arg0);
     func_002D69B8(arg0);
 }
 
@@ -3475,9 +3479,40 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D7770);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D78E8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D7A58);
+void func_002D7A58(FileSlotTable *table, u32 slotAddr) {
+    FileGridDimensions *grid = (FileGridDimensions *)table->data0;
+    s32 rows = grid->rows;
+    s32 columns = grid->columns;
+    s32 n = columns * rows;
+    u32 index;
+    FileSlot *slot;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D7AC8);
+    if (n != 0) {
+        index = (slotAddr - (u32)table->slots) >> 5;
+        slot = table->slots + (table->instances + index * n);
+        for (i = 0; i < n; i++) {
+            slot->state = 0xFFFFFFFF;
+            slot++;
+        }
+    }
+}
+
+void func_002D7AC8(FileSlotTable *table, FileSlot *source) {
+    FileGridDimensions *grid = (FileGridDimensions *)table->data0;
+    s32 rows = grid->rows;
+    s32 columns = grid->columns;
+    s32 n = columns * rows;
+    u32 index;
+    FileSlot *slot;
+
+    if (n != 0) {
+        index = ((u32)source - (u32)table->slots) >> 5;
+        slot = table->slots + (table->instances + index * n);
+        *slot = *source;
+        slot->state = 0xFFFFFFFF;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D7B58);
 
@@ -3622,7 +3657,17 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002DB2F8);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DB3E0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002DBE78);
+void func_002DBE78(ScaleOwner *owner, f32 scale) {
+    ScaleSet *src = owner->src;
+    ScaleSet *dst = owner->dst;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+}
 
 u32 func_002DBED8(u16 type, u32 count, void *data) {
     FileGridDimensions *src = data;
