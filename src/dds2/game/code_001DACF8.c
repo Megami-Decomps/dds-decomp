@@ -184,7 +184,8 @@ struct BtlUnit {
     u8 pad8C[0x24];
     f32 height;          /* 0xB0 */
     f32 reach;           /* 0xB4 */
-    u8 padB8[8];
+    u8 padB8[4];
+    f32 unkBC;
     f32 unkC0;
     s32 resourceKind;    /* 0xC4 */
     s32 resourceIndex;   /* 0xC8 */
@@ -270,7 +271,8 @@ typedef struct ActionUnit {
     u8 padE4[0x2C];
     u32 flags;              /* 0x110 */
     BattleActionLinkState *link;  /* 0x114 */
-    u8 pad118[0xC];
+    u8 pad118[8];
+    BtlUnit *focus;         /* 0x120 */
     u32 status;             /* 0x124 */
     s32 actionKind;         /* 0x128 */
     u16 stepKind;           /* 0x12C */
@@ -717,6 +719,8 @@ extern void effMiscQuaternionNlerpVU(f32);
 extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
+
+extern u8 D_003E9120[];
 
 extern s32 D_003BBF70[];
 
@@ -3015,9 +3019,67 @@ SoundTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E4700);
+typedef struct BtlApproachTaskArgs {
+    BtlUnit *unit;
+    BtlUnit *target;
+    f32 offset;
+    f32 scale;
+    s32 unk10;
+    s32 count;
+} BtlApproachTaskArgs;
 
-extern u32 func_001E4700(u32 *);
+/* vu0 routine: move the unit along the line to the target's muzzle, offset by reach */
+s32 func_001E4700(BtlApproachTaskArgs *args) {
+    BtlUnit *unit = args->unit;
+    BtlUnit *target = args->target;
+    f32 scale;
+    f32 reach;
+    f32 dist;
+    f32 pos[4];
+    s128 fromPos;
+    s128 toPos;
+    scale = args->scale == 0.0f ? 1.0f : args->scale;
+    if (args->count == 0) {
+        u8 *table = (u8 *)func_001ABFD8(unit->resourceKind, unit->resourceIndex);
+        args->offset = *(f32 *)(table + unit->unkEC * 0x14 + 0x38) * unit->scale;
+    }
+    reach = args->offset + target->reach * target->scale;
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &fromPos);
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &toPos);
+    ((f32 *)&toPos)[1] = ((f32 *)&fromPos)[1];
+    VU0_LOAD_VF(vf10, &fromPos);
+    VU0_LOAD_VF(vf11, &toPos);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_LERP_VF10(0.8f / scale);
+    VU0_STORE_VF(vf10, pos);
+    VU0_LOAD_VF(vf11, &fromPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(dist);
+    VU0_LOAD_VF(vf10, (u8 *)unit + 0x70);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, (u8 *)unit + 0x90);
+    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_LOAD_VF(vf11, pos);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, pos);
+    pos[2] -= unit->positionZOffset;
+    btlSetUnitPosition(args->unit, pos);
+    btlUnitFaceTarget(unit, target);
+    if (dist < 1.0f) {
+        return 1;
+    }
+    args->count++;
+    return 0;
+}
 
 SoundTask *func_001E4908(BtlUnit *unit, s32 index, f32 scale) {
     SoundTask *task = btlAllocTask(24);
@@ -5519,6 +5581,10 @@ void func_001ECC18(void *unit, f32 *pose, u8 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ECCB0);
 
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417D70);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417E30);
+
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED008);
 
 void func_001ED300(u8 *fx) {
@@ -5554,7 +5620,35 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED6C8);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED9A0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EDAF8);
+extern f32 func_00353228(f32);
+
+void func_001EDAF8(ActionUnit *action, XformData *from, XformData *to) {
+    f32 quat[4];
+    BtlUnit *unit = action->link->unit;
+    f32 fov;
+    func_00208DA0();
+    btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
+    btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quat);
+    fov = ((XformData *)action)->f24;
+    from->f24 = fov;
+    if (func_001E3230(unit, 1) == 0) {
+        btlUnitGetMuzzlePosVU(unit);
+    }
+    VU0_STORE_VF(vf10, &from->vec0);
+    from->f20 = unit->unkC0 * unit->scale / func_00353228(fov * 0.5f);
+    VU0_LOAD_VF(vf10, quat);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, &from->vec1);
+    func_001E9598(to, from);
+    to->f20 += 550.0f;
+    action->flags = (action->flags & ~0x14) | 0x41;
+    action->unk154 = 25.0f;
+    func_001E88A8((u8 *)from);
+    func_001E88A8((u8 *)to);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EDC38);
 
@@ -5700,6 +5794,26 @@ void func_001F2740(u8 *unit, f32 *vec) {
     func_001EC868(unit, vec, 0.0f);
 }
 
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417EF0);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417F30);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180B0);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180C0);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418240);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418250);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418310);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418320);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418330);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418338);
+
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F2758);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F2AE8);
@@ -5765,30 +5879,6 @@ void func_001F4D70(s32 action, s32 state) {
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417D70);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417E30);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417EF0);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417F30);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180B0);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180C0);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418240);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418250);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418310);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418320);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418330);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418338);
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418398);
 
@@ -8273,7 +8363,60 @@ void btlMoveOtherUnitsAway(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_002061B0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206370);
+void func_00206370(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+    BtlUnit *slot[3];
+    f32 center[4];
+    f32 pos[4];
+    f32 radius;
+    BtlUnit *target;
+    if (btlGetIndexListCount(link->actorIndices) == 1) {
+        target = (BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0);
+        btlFlagAllUnitsDefeatCandidate();
+        func_00208E48(target->flags & 0x600);
+        btlFlagUnitDefeatCandidate(target);
+        slot[0] = 0;
+        slot[1] = 0;
+        slot[2] = 0;
+        slot[link->unit->lookupId] = link->unit;
+        slot[first->lookupId] = first;
+        slot[second->lookupId] = second;
+        btlUnitGetMuzzlePosVU(target);
+        VU0_STORE_VF(vf10, center);
+        center[1] = 0.0f;
+        radius = target->unkBC * target->scale;
+        radius += 100.0f;
+        if (radius < 500.0f) {
+            radius = 500.0f;
+        }
+        VU0_LOAD_VF(vf10, (u8 *)target + 0x70);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, center);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        btlSetUnitPosition(slot[1], pos);
+        btlUnitFaceTarget(slot[1], target);
+        VU0_LOAD_VF(vf10, D_003E9120);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, center);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        btlSetUnitPosition(slot[0], pos);
+        btlUnitFaceTarget(slot[0], target);
+        VU0_LOAD_VF(vf10, D_003E9120);
+        VU0_NEGATE_XYZ(vf10);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, center);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        btlSetUnitPosition(slot[2], pos);
+        btlUnitFaceTarget(slot[2], target);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206570);
 
