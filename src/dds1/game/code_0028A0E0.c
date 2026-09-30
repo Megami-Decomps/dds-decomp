@@ -4,7 +4,7 @@
 
 
 
-
+extern void func_00104068(s32, u8, s32);
 extern s32 D_003BC87C;
 
 
@@ -495,7 +495,7 @@ typedef struct LoadObj {
     u16 unk4A;
 } LoadObj;
 
-extern LoadObj *func_00295F58(LoadObj *source);
+extern LoadObj *func_00295F58(void *source);
 
 extern void *mcdHandleSaveSetupDone(void);
 
@@ -1994,7 +1994,31 @@ void fileRestoreSlotFlagsToState(void) {
     *(u32 *)(D_003BAA00 + 0xa54) = D_003BC8DC;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileToggleSlotFlagsBit);
+s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
+    switch (kind) {
+    case 0:
+        *flags ^= 2;
+        if (fileTestSlotFlagsBit(kind, flags) != 0) {
+            func_00104068(0, 1, 0xF);
+            func_00104068(1, 0x80, 0xF);
+        } else {
+            func_00104068(0, 0, 0xF);
+            func_00104068(1, 0, 0xF);
+        }
+        return 1;
+    case 1:
+        *flags ^= 4;
+        return 1;
+    case 2:
+        *flags ^= 8;
+        return 1;
+    case 3:
+        *flags ^= 0x10;
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B28A0);
 
@@ -2493,6 +2517,18 @@ u32 fileJobSerializedSize(FileJob *job) {
     return size;
 }
 
+/* View block initialised by func_00293EA0: (0,0,0,1) vectors, grey colour. */
+typedef struct FileViewBlock {
+    u8 pad00[0x44];
+    f32 unk44;
+    u8 pad48[0x18];
+    f32 unk60;
+    u32 color;
+    u32 unk68;
+    u8 pad6C[8];
+    f32 unk74;
+} FileViewBlock;
+
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293EA0);
 
 void func_00293F18(void *arg0) {
@@ -2672,7 +2708,11 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
     return job;
 }
 
+extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
+
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294C30);
+
+extern void func_00294C30(FileQueue *queue, FileJob *job, FileJob *first);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294DA0);
 
@@ -2770,6 +2810,15 @@ LoadObj *fileLoadObjectCreate(void *owner) {
     obj->unk48 = 1;
     return obj;
 }
+
+/* Creates a load object sized by the record's cell count, capped at 0x12C. */
+typedef struct FileCellGrid {
+    u8 pad00[0x20];
+    u32 cols;
+    u32 rows;
+    u8 pad28[0x90];
+    u32 layers;
+} FileCellGrid;
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F58);
 
@@ -3030,8 +3079,49 @@ typedef struct FileGridDimensions {
     s32 rows;
 } FileGridDimensions;
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297558);
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002975C8);
+typedef struct FileSlotGroup {
+    u8 pad0[4];
+    u32 first;
+    u8 pad8[0x10];
+    u8 *slots;
+    u8 pad1C[4];
+    FileGridDimensions *dims;
+} FileSlotGroup;
+
+/* Invalidates the cells x rows slots of the group that starts at `slot`. */
+void func_00297558(FileSlotGroup *group, u8 *slot) {
+    FileGridDimensions *dims = group->dims;
+    s32 rows = dims->rows;
+    s32 columns = dims->columns;
+    s32 count = columns * rows;
+    FileRecordSlot *p;
+    s32 i;
+
+    if (count != 0) {
+        u8 *base = group->slots;
+        p = (FileRecordSlot *)(base + ((group->first + ((u32)(slot - base) >> 5) * count) << 5));
+        for (i = 0; i < count; i++) {
+            p->state = -1;
+            p++;
+        }
+    }
+}
+
+/* Same, but first copies the slot at `slot` over the group's first slot. */
+void func_002975C8(FileSlotGroup *group, u8 *slot) {
+    FileGridDimensions *dims = group->dims;
+    s32 rows = dims->rows;
+    s32 columns = dims->columns;
+    s32 count = columns * rows;
+    FileRecordSlot *p;
+
+    if (count != 0) {
+        u8 *base = group->slots;
+        p = (FileRecordSlot *)(base + ((group->first + ((u32)(slot - base) >> 5) * count) << 5));
+        *p = *(FileRecordSlot *)slot;
+        p->state = -1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297658);
 
