@@ -51,6 +51,10 @@ return 1;
 
 (`if/else` with two returns gives the same code.) Example: `func_0014D0D0`.
 
+The same holds for a sign test: `return x < 0;` compiles to `srl $2,$2,31`,
+while retail's `slti $2,$2,0` comes from `if (x < 0) { return 1; } return 0;`
+(`func_0010D8E0`, `func_0010D6B8`).
+
 ## Square roots: `sqrt.s`
 
 Retail always has a bare `sqrt.s` (33 in 11 DDS1 units) and never the
