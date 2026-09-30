@@ -55,7 +55,7 @@ extern u8 D_00437A00[];
 
 extern u8 D_00437A08[];
 
-extern u8 *D_00435DD0;
+extern s32 D_00435DD0;
 
 extern s8 D_00437B73;
 
@@ -89,6 +89,28 @@ void func_002A2408(void);
 
 void func_002A2550(void);
 
+extern void func_002A5260(s32, s32);
+extern void func_002A55B8(s32, s32);
+extern void func_002A50E8(s32, s32, u8);
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
+extern void *memset(void *, s32, u32);
+extern void func_002AAF70();
+extern void func_002AB0E0();
+extern void func_002AB1B0();
+extern void func_00101968(s32, s32);
+extern void kwlnFadeOutStart(s8, s8, s8, s32);
+extern void func_002C3E58(u8 *);
+extern s32 func_00102970(void);
+extern s32 func_00303D00(s32);
+extern void mnuInitPartyPanelSlots(s32);
+extern void mnuLoadEffectResources(u8 *);
+extern void func_002B8140(u8 *);
+extern void func_0026C538(s32);
+extern u8 D_003E5778[];
+extern void func_002A9908(u8 *);
+extern void func_002C1B58(u8 *, s32);
+extern void func_003425B0(void);
+
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5260);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A55B8);
@@ -112,7 +134,20 @@ void func_002A58D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A58E8);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A20);
+void func_002A5A20(void) {
+    s32 *title = (s32 *)D_00437A40;
+
+    switch (title[0x28 / 4]) {
+    case 0:
+        func_002A5260(0, title[0x14 / 4]);
+        return;
+    case 1:
+        func_002A5260(1, title[0x14 / 4]);
+        break;
+    case 2:
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A78);
 
@@ -126,7 +161,27 @@ void mnuTitleResetSequenceTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5C58);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5E00);
+void func_002A5E00(void) {
+    switch (*(u32 *)(D_00437A40 + 0x28)) {
+    case 1:
+        func_002A5260(2, *(s32 *)(D_00437A40 + 0x14));
+        func_002A55B8(0, *(s32 *)(D_00437A40 + 0x14));
+        func_002A50E8(D_00437A40 + 0x100, 1, 1);
+        return;
+    case 0:
+        func_002A55B8(1, *(s32 *)(D_00437A40 + 0x14));
+        func_002A50E8(D_00437A40 + 0x100, 1, 1);
+        return;
+    case 2:
+        mnuCallInitWide(0, 0, 0, *(s32 *)(D_00437A40 + 0x24), 0x53);
+        return;
+    case 3:
+    case 4:
+        func_002A55B8(2, *(s32 *)(D_00437A40 + 0x14));
+        func_002A50E8(D_00437A40 + 0x100, 1, 0);
+        break;
+    }
+}
 
 void func_002A5EE8(u32 arg0, s32 arg1) {
     s32 temp_v0;
@@ -1165,7 +1220,47 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A418);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A8C80);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A9068);
+/* One of five 0x1C4-byte party records at D_00435DD0 + 0xA60. */
+typedef struct PartyRecord {
+    u16 flags;
+    u8 pad02[0x1B0];
+    u16 unk1B2;
+    u8 pad1B4[0x10];
+} PartyRecord;
+
+extern void func_00314C68(void *);
+extern void mnuClearEntryBlocked(s32);
+extern void mdlFlagClear(s32);
+extern void func_00314838(void);
+extern void func_00315A50(void);
+extern void func_00314D90(void);
+extern void ptyClearProfileRecords(void);
+extern void ptyRebuildAllProfiles(void);
+
+void func_002A9068(void) {
+    s32 offset = 0;
+    s32 i = 4;
+
+    do {
+        PartyRecord *rec = (PartyRecord *)(D_00435DD0 + offset + 0xA60);
+        offset += 0x1C4;
+        if (rec->flags & 1) {
+            func_00314C68(rec);
+            rec->unk1B2 = 0;
+        }
+        i--;
+    } while (i >= 0);
+    for (i = 0xC0; i < 0x100; i++) {
+        *(u8 *)(i + D_00435DD0 + 0x1340) = 0;
+        mnuClearEntryBlocked(i);
+    }
+    mdlFlagClear(0x901);
+    func_00314838();
+    func_00315A50();
+    func_00314D90();
+    ptyClearProfileRecords();
+    ptyRebuildAllProfiles();
+}
 
 extern u32 D_00438FF8[2];
 
@@ -1370,7 +1465,7 @@ void func_002A92D8(s32 list, s32 count, u8 *work) {
 
     effResolveAndReleaseResource(*(u32 *)list);
     for (i = 0; i < 5; i++) {
-        u8 *slot = D_00435DD0 + 0xA60 + i * 0x1C4;
+        u8 *slot = (u8 *)(D_00435DD0 + 0xA60 + i * 0x1C4);
 
         if ((*(u16 *)slot & 1) != 0) {
             s32 index = *(u16 *)(slot + 4) + D_00437B73;
@@ -1463,7 +1558,27 @@ void func_002A95B0(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A9640);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A9788);
+/* Releases the sprite handle groups held by the movie/title effect work. */
+void func_002A9788(u32 *work) {
+    s32 i;
+    u32 *group0;
+    u32 *group1;
+    u32 *group2;
+
+    func_002A9200(work);
+    group0 = work + 0x10 / 4;
+    for (i = 0xF; i >= 0; i--) {
+        func_003054E8(*group0++);
+    }
+    group1 = work + 0x50 / 4;
+    for (i = 4; i >= 0; i--) {
+        func_003054E8(*group1++);
+    }
+    group2 = work + 0x8 / 4;
+    for (i = 1; i >= 0; i--) {
+        func_003054E8(*group2++);
+    }
+}
 
 s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
     u32 *entry;
@@ -1570,13 +1685,89 @@ void func_002A9F08(u8 *work) {
     mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[2]);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A9F78);
+extern u16 D_003E6500[];
+extern u16 D_003E6730[];
+extern u16 D_003E6788[];
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A9FF0);
+/* Lookup tables inside the list menu work: id minus the table base gives the list slot. */
+typedef struct ListSlotWork {
+    u8 pad00[0xAA60];
+    u16 slotOfA[0x2A0]; /* 0xAA60: ids 0x2A1..0x540 */
+    u16 slotOfB[0x40];  /* 0xAFA0: ids 0xC0.. (slot + 1) */
+    u16 slotOfC[0x75];  /* 0xB020: skill ids 0x1AB..0x21F */
+} ListSlotWork;
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002AA068);
+void func_002A9F78(ListSlotWork *work) {
+    u16 *slot;
+    s32 id;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002AA0D8);
+    for (i = 0x29F, slot = &work->slotOfA[0x29F], id = 0x540; i >= 0; i--, slot--, id--) {
+        *slot = id;
+    }
+    for (i = 0; i < 0x118; i++) {
+        work->slotOfA[D_003E6500[i]] = i + 1;
+    }
+}
+
+void func_002A9FF0(ListSlotWork *work) {
+    u16 *slot;
+    s32 i;
+    s32 idx;
+
+    for (i = 0x3F, slot = &work->slotOfB[0x3F]; i >= 0; i--, slot--) {
+        *slot = 0;
+    }
+    for (i = 0; i < 0x2B; i++) {
+        idx = D_003E6730[i] - 0xC0;
+        work->slotOfB[idx] = i + 1;
+    }
+}
+
+void func_002AA068(ListSlotWork *work) {
+    u16 *slot;
+    s32 id;
+    s32 i;
+    s32 idx;
+
+    for (i = 0x74, slot = &work->slotOfC[0x74], id = 0x21F; i >= 0; i--, slot--, id--) {
+        *slot = id;
+    }
+    for (i = 0; i < 0x60; i++) {
+        idx = D_003E6788[i] - 0x1AB;
+        work->slotOfC[idx] = i;
+    }
+}
+
+u8 *func_002AA0D8(void) {
+    s32 handle;
+    u8 *work;
+    u8 *effects;
+
+    handle = func_003292A8(0xB1E0);
+    work = (u8 *)sdfResourceRetainAddress(handle);
+    memset(work, 0, 0xB1E0);
+    *(s32 *)work = handle;
+    effects = work + 0x11C;
+    func_002C3E58(work + 8);
+    if (func_00102970() != 0) {
+        *(s32 *)(work + 0x5C) = func_00303D00(1);
+    } else {
+        *(s32 *)(work + 0x5C) = func_00303D00(0);
+    }
+    mnuInitPartyPanelSlots((s32)work + 0xA928);
+    mnuLoadEffectResources(effects);
+    func_002B8140(effects);
+    func_0026C538((s32)D_003E5778);
+    movLoadTitleEffects(work);
+    func_002A9908(work);
+    func_002C1B58(work + 0xAA50, 0x60);
+    func_002A9F78((ListSlotWork *)work);
+    func_002A9FF0((ListSlotWork *)work);
+    func_002AA068((ListSlotWork *)work);
+    func_003425B0();
+    return work;
+}
 
 void mnuDestroyStaffMenuTask(u32 task) {
     u8 *work = (u8 *)func_00101958(task);
@@ -1648,7 +1839,19 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042AA08);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042AA18);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002AA360);
+void func_002AA360(void) {
+    s32 work;
+    s32 draw;
+
+    work = (s32)func_002AA0D8();
+    kwlnTaskCreate(D_00437B78, 0x3F2, 1, 0, func_002AAF70, 0, work);
+    draw = kwlnTaskCreate(D_0042AA08, 0x2B07, 1, 0, func_002AB0E0, 0, work);
+    kwlnTaskCreate(D_0042AA18, 0x520B, 1, 0, func_002AB1B0, mnuDestroyStaffMenuTask, work);
+    func_00101968(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, work));
+    func_00101968(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
+    kwlnFadeOutStart(0, 0, 0, 0xF);
+    D_00437B72 = 1;
+}
 
 void mnuDestroyCampTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00437B78, 0);

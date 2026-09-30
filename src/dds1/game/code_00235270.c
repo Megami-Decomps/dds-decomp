@@ -15,6 +15,10 @@ extern s32 evtFindTaskById();
 extern void func_003014F0(void *arg0, void *arg1, s32 arg2);
 extern void evtFormatTaskName(s32 arg0, void *arg1);
 extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern void *memset(void *, s32, u32);
+extern void effObjSetFlags(void *arg0, s32 arg1);
+extern void *func_00115298(void *obj, void *vecA, void *vecB);
+extern void func_00190308(void *target, f32 scale);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern void fldSetSwayMode(s32 arg0);
@@ -1189,9 +1193,49 @@ EvtTaskData *evtGetTaskData(u32 taskId) {
     return (EvtTaskData *)task;
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00241BF0);
+/* Task data of a resource-list task: entries[] are 0x20 bytes, keyed at +0x10. */
+typedef struct EvtResourceEntry {
+    u8 pad00[0xC];
+    s32 offset;
+    s32 key;
+    u8 pad14[0xC];
+} EvtResourceEntry;
 
-extern s32 func_00241BF0(s32 arg0, s32 arg1);
+typedef struct EvtResourceHeader {
+    u8 pad00[0x10];
+    s32 count;
+} EvtResourceHeader;
+
+typedef struct EvtResourceTask {
+    u32 pad00;
+    s32 kind;
+    u8 pad08[8];
+    s32 base;
+    EvtResourceHeader *header;
+    EvtResourceEntry *entries;
+} EvtResourceTask;
+
+s32 func_00241BF0(u32 taskId, s32 key) {
+    s32 i;
+    EvtResourceTask *data;
+    s32 task;
+
+    task = evtFindTaskById(taskId);
+    if (task != 0) {
+        data = func_00101A70(task);
+        if (data->kind != 2) {
+            return 0;
+        }
+        for (i = 0; i < data->header->count; i++) {
+            if (data->entries[i].key == key) {
+                return data->base + data->entries[i].offset;
+            }
+        }
+        return 0;
+    }
+    return task;
+}
+
 extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern s32 func_002D3288(s32 arg0);
 extern void effSetCh72Id(s32 arg0);
@@ -1211,7 +1255,45 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00241D28);
+/* Party/enemy model table entry (0x270 bytes); only the scale-source field is known here. */
+typedef struct Entry270 {
+    u8 pad00[0x18];
+    f32 unk18;
+    u8 pad1C[0x254];
+} Entry270;
+
+typedef struct EvtEffectObject {
+    u8 pad00[0x18];
+    u8 *inner;
+} EvtEffectObject;
+
+extern Entry270 *D_003BAA10;
+extern Entry270 *D_003BAA20;
+
+void *func_00241D28(s32 taskId, s32 key, s32 index) {
+    u8 vecA[16];
+    u8 vecB[16];
+    void *found;
+    void *obj;
+    u8 *inner;
+
+    memset(vecA, 0, 0x10);
+    memset(vecB, 0, 0x10);
+    found = (void *)func_00241BF0(taskId, key);
+    if (found != 0) {
+        obj = func_00115298(found, vecA, vecB);
+        if (obj != 0) {
+            effObjSetFlags(obj, 1);
+            if (index >= 0) {
+                inner = ((EvtEffectObject *)obj)->inner;
+                func_00190308(*(void **)(inner + 0x2C), D_003BAA20[index].unk18 / D_003BAA10->unk18);
+            }
+            return obj;
+        }
+        return obj;
+    }
+    return found;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF80);
 
