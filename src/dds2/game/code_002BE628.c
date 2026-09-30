@@ -184,10 +184,10 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE730);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BED10);
 
-void func_002BEE38(u32 *arg0) {
-    arg0[3] = 0x18;
-    arg0[4] = 5;
-    *arg0 = 0;
+void func_002BEE38(u32 *entry) {
+    entry[3] = 0x18;
+    entry[4] = 5;
+    *entry = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BEE50);
@@ -318,9 +318,9 @@ void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
 }
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
-void mnuAdvancePanelTransition(s32 arg0) {
-    if (*(s32 *)(arg0 + 4) < 0x100) {
-        *(s32 *)(arg0 + 4) = *(s32 *)(arg0 + 4) + 8;
+void mnuAdvancePanelTransition(s32 panel) {
+    if (*(s32 *)(panel + 4) < 0x100) {
+        *(s32 *)(panel + 4) = *(s32 *)(panel + 4) + 8;
     }
 }
 
@@ -350,8 +350,8 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0630);
 
-void func_002C0718(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_002C0630(arg0, arg1, arg2, 0, arg3, arg4);
+void func_002C0718(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
+    func_002C0630(x, y, depth, 0, source, mode);
 }
 
 typedef struct MenuPoint {
@@ -565,12 +565,12 @@ void func_002C1050(void) {
 }
 
 /* The sequel selects its draw variant from the range index plus eight. */
-void mnuDrawRangeSpriteVariant(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u16 rangeId, u32 arg5, u32 arg6) {
+void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
+                                    u16 rangeId, u32 drawArg, u32 texture) {
     s32 rangeIndex;
 
     rangeIndex = mnuLookupRangeEntry(rangeId);
-    func_00306CD0(arg0, arg1, arg2, arg3, 1, arg5, rangeIndex + 8, arg6);
+    func_00306CD0(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
@@ -591,23 +591,23 @@ void func_002C16D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
 
-void func_002C1B58(s32 arg0, s32 arg1) {
-    *(s32 *)(arg0 + 4) = arg1;
-    *(s32 *)arg0 = 0;
-    *(s32 *)(arg0 + 8) = 0;
+void func_002C1B58(s32 state, s32 value) {
+    *(s32 *)(state + 4) = value;
+    *(s32 *)state = 0;
+    *(s32 *)(state + 8) = 0;
 }
 
-void func_002C1B68(u32 *arg0, u32 arg1) {
-    *arg0 = arg1;
+void func_002C1B68(u32 *out, u32 value) {
+    *out = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1B70);
 
-void func_002C1C20(u8 *object, s32 arg1, s32 arg2, s32 arg3, s32 count, s32 arg5, s32 arg6, s32 arg7) {
+void func_002C1C20(u8 *object, s32 x, s32 y, s32 depth, s32 count, s32 drawArg, s32 variant, s32 texture) {
     s32 i;
 
     for (i = 0; i < count; i++) {
-        func_00306CD0(object, arg1, arg2, arg3, 1, arg5, arg6, arg7);
+        func_00306CD0(object, x, y, depth, 1, drawArg, variant, texture);
         object += 0xA0;
     }
 }
@@ -701,14 +701,14 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B220);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B270);
 
-void func_002C2128(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void func_002C2128(s32 x, s32 y, s32 depth, s32 color, s32 variant, s32 texture) {
     s32 tableA[7] = {0x29, 0x23, 0x24, 0x25, 0x25, 0x2A, 0x2C};
     s32 tableB[7] = {0x29, 0x26, 0x27, 0x28, 0x28, 0x2B, 0x2C};
 
-    if (arg1 == 1) {
-        func_002C1FF0(arg0, arg1, arg2, arg3, arg4, arg5, tableB, 7);
+    if (y == 1) {
+        func_002C1FF0(x, y, depth, color, variant, texture, tableB, 7);
     } else {
-        func_002C1FF0(arg0, arg1, arg2, arg3, arg4, arg5, tableA, 7);
+        func_002C1FF0(x, y, depth, color, variant, texture, tableA, 7);
     }
 }
 
@@ -824,9 +824,9 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3010);
 
-void func_002C32A0(s32 arg0, s32 arg1, s32 arg2) {
-    *(s32 *)(arg0 + 0x10) = arg1;
-    *(s32 *)(arg0 + 0x14) = arg2;
+void func_002C32A0(s32 item, s32 value, s32 option) {
+    *(s32 *)(item + 0x10) = value;
+    *(s32 *)(item + 0x14) = option;
 }
 
 u32 *func_002C32B0(s32 source) {
@@ -876,59 +876,59 @@ void func_002C3E08(s32 x, s32 y, s32 z, u32 *item, s32 option) {
     item[16] = previous - 0x200;
 }
 
-void func_002C3E58(u32 arg0) {
-    memset(arg0, 0, 0x4c);
+void func_002C3E58(u32 item) {
+    memset(item, 0, 0x4c);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3E78);
 
-void func_002C3FC8(u32 arg0, u32 arg1) {
+void func_002C3FC8(u32 item, u32 option) {
     s32 currentValue;
 
-    currentValue = *(s32 *)arg0;
+    currentValue = *(s32 *)item;
     while (currentValue != 0) {
-        func_002C3E78(1, 0, arg0, arg1);
-        currentValue = *(s32 *)arg0;
+        func_002C3E78(1, 0, item, option);
+        currentValue = *(s32 *)item;
     }
 }
 
-s32 func_002C4020(s32 *arg0) {
-    return (*arg0 & 0x200000) > 0;
+s32 func_002C4020(s32 *flags) {
+    return (*flags & 0x200000) > 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4038);
 
-u8 func_002C42A0(s32 arg0, s32 arg1) {
-    return *(s32 *)(arg0 + 0x44) == arg1;
+u8 func_002C42A0(s32 item, s32 value) {
+    return *(s32 *)(item + 0x44) == value;
 }
 
-void func_002C42B0(s32 arg0, s32 arg1) {
+void func_002C42B0(s32 out, s32 entry) {
     u16 lowHalf;
 
-    lowHalf = *(u16 *)arg1;
-    *(s32 *)arg0 = arg1;
-    *(s32 *)arg1 = lowHalf;
+    lowHalf = *(u16 *)entry;
+    *(s32 *)out = entry;
+    *(s32 *)entry = lowHalf;
 }
 
-void func_002C42C0(s32 arg0, s32 arg1) {
+void func_002C42C0(s32 out, s32 entry) {
     u16 lowHalf;
 
-    lowHalf = *(u16 *)arg1;
-    *(s32 *)arg0 = arg1;
-    *(s32 *)arg1 = lowHalf | 0x20000;
+    lowHalf = *(u16 *)entry;
+    *(s32 *)out = entry;
+    *(s32 *)entry = lowHalf | 0x20000;
 }
 
-void func_002C42D8(s32 arg0, s32 arg1) {
+void func_002C42D8(s32 out, s32 entry) {
     u16 lowHalf;
 
-    lowHalf = *(u16 *)arg1;
-    *(s32 *)arg0 = arg1;
-    *(s32 *)arg1 = lowHalf | 0x60000;
+    lowHalf = *(u16 *)entry;
+    *(s32 *)out = entry;
+    *(s32 *)entry = lowHalf | 0x60000;
 }
 
-void func_002C42F0(s32 arg0, u32 arg1) {
-    if (*(s32 *)(arg0 + 0x44) != 0) {
-        func_002C42C0(arg1, *(s32 *)(arg0 + 0x44));
+void func_002C42F0(s32 item, u32 out) {
+    if (*(s32 *)(item + 0x44) != 0) {
+        func_002C42C0(out, *(s32 *)(item + 0x44));
         return;
     }
 }
@@ -974,11 +974,11 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C44E8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C47C8);
 
-void func_002C48C8(u32 arg0, u32 arg1) {
-    func_002C47C8(*(u32 *)((s32)arg0 + 0x90), arg0, arg1);
+void func_002C48C8(u32 item, u32 option) {
+    func_002C47C8(*(u32 *)((s32)item + 0x90), item, option);
 }
 
-void mnuPlayInputSound(s32 arg0, s32 buttons, s32 *state) {
+void mnuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
     if (buttons & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;
@@ -1046,8 +1046,8 @@ void mnuPlayInputSoundKind(s32 buttons, s8 kind) {
     }
 }
 
-void func_002C4B40(u32 arg0) {
-    mnuPlayInputSoundKind(arg0, 0);
+void func_002C4B40(u32 buttons) {
+    mnuPlayInputSoundKind(buttons, 0);
 }
 
 typedef struct MenuPanelEntry {
@@ -1079,10 +1079,10 @@ s32 mnuFindMatchingPartyEntryIndex(s32 object) {
     return 0;
 }
 
-s32 mnuLookupRangeEntry(u16 arg0) {
+s32 mnuLookupRangeEntry(u16 rangeId) {
     u16 *table = D_003E7900;
     s8 *entries = D_003E7928;
-    u32 key = arg0 & 0xffff;
+    u32 key = rangeId & 0xffff;
     u32 i;
     for (i = 0; i < 0x14; i += 2, table += 2) {
         if (key < table[0]) {
@@ -1144,8 +1144,8 @@ u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
     return entry->secondaryValue;
 }
 
-u8 mnuGetRangeEntryKind(u32 arg0) {
-    return ((RangeEntry *)((arg0 & 0xffff) * 0x38 + D_00435E20))->kind;
+u8 mnuGetRangeEntryKind(u32 id) {
+    return ((RangeEntry *)((id & 0xffff) * 0x38 + D_00435E20))->kind;
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
@@ -1158,8 +1158,8 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     return base;
 }
 
-s32 mnuGetRangeEntryFlatValue(s32 arg0) {
-    s32 index = arg0 & 0xFFFF;
+s32 mnuGetRangeEntryFlatValue(s32 id) {
+    s32 index = id & 0xFFFF;
     RangeEntry *record = (RangeEntry *)(index * 0x38 + D_00435E20);
     s32 scale = record->value;
     s32 addition = record->addition;
@@ -1217,8 +1217,8 @@ s32 func_002C4FB8(u16 id, s32 object) {
     return 0;
 }
 
-s32 func_002C5030(s32 arg0, u8 *cursor) {
-    RangeEntry *record = (RangeEntry *)((arg0 & 0xFFFF) * 0x38 + D_00435E20);
+s32 func_002C5030(s32 id, u8 *cursor) {
+    RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_00435E20);
     u16 amount = record->value;
 
     switch (record->kind) {
@@ -1256,8 +1256,8 @@ s32 func_002C50C0(u16 ability) {
     return 0;
 }
 
-void func_002C5128(u16 arg0) {
-    func_00119548(arg0);
+void func_002C5128(u16 ability) {
+    func_00119548(ability);
 }
 
 u32 func_002C5140(void) {
@@ -1266,12 +1266,12 @@ u32 func_002C5140(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", skillApplyFieldUseEffect);
 
-u8 func_002C5338(u32 arg0) {
-    return *(s8 *)((arg0 & 0xffff) * 2 + D_00435E1C) == '\x01';
+u8 func_002C5338(u32 id) {
+    return *(s8 *)((id & 0xffff) * 2 + D_00435E1C) == '\x01';
 }
 
-s32 func_002C5358(s32 arg0, s32 arg1) {
-    s32 flags = ((AffinityRow *)D_00435E24)[(arg0 - 0x1AB) & 0xFFFF].affinity[arg1];
+s32 func_002C5358(s32 affinityId, s32 index) {
+    s32 flags = ((AffinityRow *)D_00435E24)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (flags == -1) {
         return -1;
@@ -1309,8 +1309,8 @@ s32 func_002C5358(s32 arg0, s32 arg1) {
     return -1;
 }
 
-s32 func_002C5428(s32 arg0, s32 arg1) {
-    s32 value = ((AffinityRow *)D_00435E24)[(arg0 - 0x1AB) & 0xFFFF].affinity[arg1];
+s32 func_002C5428(s32 affinityId, s32 index) {
+    s32 value = ((AffinityRow *)D_00435E24)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (value == -1) {
         return 0;
@@ -1321,25 +1321,25 @@ s32 func_002C5428(s32 arg0, s32 arg1) {
     return value;
 }
 
-s32 func_002C5480(s32 arg0) {
-    if (arg0 < 0xA0) {
+s32 func_002C5480(s32 id) {
+    if (id < 0xA0) {
         return 0;
     }
-    return arg0 < 0xC0;
+    return id < 0xC0;
 }
 
-s32 func_002C5498(s32 arg0) {
-    if (arg0 < 0x60) {
+s32 func_002C5498(s32 id) {
+    if (id < 0x60) {
         return 0;
     }
-    return arg0 < 0x6D;
+    return id < 0x6D;
 }
 
-s32 func_002C54B0(s32 arg0) {
-    if (arg0 < 0xC0) {
+s32 func_002C54B0(s32 id) {
+    if (id < 0xC0) {
         return 0;
     }
-    return arg0 < 0x100;
+    return id < 0x100;
 }
 
 
@@ -1360,24 +1360,24 @@ u32 func_002C54C8(s32 id) {
     return value;
 }
 
-u32 func_002C5570(s32 arg0, u16 arg1) {
-    ((MenuPanelEntry *)arg0)->menuValue = arg1;
+u32 func_002C5570(s32 entry, u16 value) {
+    ((MenuPanelEntry *)entry)->menuValue = value;
     return 1;
 }
 
-u16 func_002C5580(s32 arg0) {
-    return ((MenuPanelEntry *)arg0)->menuValue;
+u16 func_002C5580(s32 entry) {
+    return ((MenuPanelEntry *)entry)->menuValue;
 }
 
-u32 func_002C5588(u32 arg0, u32 arg1) {
-    *(s16 *)((s32)arg0 + 0x1b2) = (s16)arg1;
-    mnuMarkEntryBlocked(arg1);
-    ptyRecomputeMaxHpMp(arg0);
+u32 func_002C5588(u32 entry, u32 id) {
+    *(s16 *)((s32)entry + 0x1b2) = (s16)id;
+    mnuMarkEntryBlocked(id);
+    ptyRecomputeMaxHpMp(entry);
     return 1;
 }
 
-u16 func_002C55C0(s32 arg0) {
-    return ((MenuPanelEntry *)arg0)->currentId;
+u16 func_002C55C0(s32 entry) {
+    return ((MenuPanelEntry *)entry)->currentId;
 }
 
 MenuPanelEntry *func_002C55C8(u32 id) {
@@ -1771,18 +1771,18 @@ void mnuResetWorkFloats(void) {
     D_0037F5E0[5] = 2048.0f;
 }
 
-void func_002C6AC0(s32 arg0, s32 arg1, s32 arg2) {
+void func_002C6AC0(s32 resource, s32 modelId, s32 option) {
     D_00457EB0.unk04 = mdlRequestAsset();
 }
 
-void mnuForwardTableByte(s32 arg0) {
+void mnuForwardTableByte(s32 encodedIndex) {
     StageTestSlot *slot = D_00457EB0.slot;
 
-    func_002C6AC0(slot->unk04, D_00457EB0.entries[arg0 & 0xffff].modelId, 0);
+    func_002C6AC0(slot->unk04, D_00457EB0.entries[encodedIndex & 0xffff].modelId, 0);
 }
 
-u32 func_002C6B28(u32 *arg0) {
-    return *arg0 & 1;
+u32 func_002C6B28(u32 *flags) {
+    return *flags & 1;
 }
 
 typedef struct MenuBlock40 {
@@ -1804,8 +1804,8 @@ void func_002C6BB8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6BD8);
 
-void func_002C6CC8(u16 arg0, u32 arg1) {
-    func_002C6BD8(arg0, 0xffffffffffffffff, arg1);
+void func_002C6CC8(u16 id, u32 option) {
+    func_002C6BD8(id, 0xffffffffffffffff, option);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
@@ -1817,7 +1817,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 extern s32 D_00435DF0;
 extern void mdlStoreTertiaryVectorVU(s32);
 
-f32 mnuSetModelScaleVector(s32 arg0, s32 useTable) {
+f32 mnuSetModelScaleVector(s32 model, s32 useTable) {
     f32 scale = 1.0f;
     f32 vec[4];
 
@@ -1829,7 +1829,7 @@ f32 mnuSetModelScaleVector(s32 arg0, s32 useTable) {
     vec[2] = scale;
     vec[3] = 1.0f;
     VU_LOAD10(vec);
-    mdlStoreTertiaryVectorVU(arg0);
+    mdlStoreTertiaryVectorVU(model);
     return scale;
 }
 
@@ -1844,7 +1844,7 @@ void mnuResetWorkPair(void) {
 
 extern void mdlStorePrimaryVectorVU(s32);
 
-void mnuApplyModelCamera(s32 arg0) {
+void mnuApplyModelCamera(s32 model) {
     f32 vec[4];
     StageTestEntry *entry;
     f32 scale;
@@ -1855,11 +1855,11 @@ void mnuApplyModelCamera(s32 arg0) {
     vec[0] = entry->position[0];
     vec[1] = entry->position[1];
     if (D_00457EB0.flag != 1) {
-        mnuSetModelScaleVector(arg0, 0);
+        mnuSetModelScaleVector(model, 0);
         vec[2] = ((StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries))->position[2];
         mnuResetWorkPair();
     } else {
-        scale = mnuSetModelScaleVector(arg0, 1);
+        scale = mnuSetModelScaleVector(model, 1);
         entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
         vec[0] -= entry->position[0] - entry->position[0] * scale;
         vec[1] -= entry->position[1] - entry->position[1] * scale;
@@ -1867,20 +1867,20 @@ void mnuApplyModelCamera(s32 arg0) {
         *(f32 *)(D_003E7950 + 8) = (-400.0f - entry->position[2]) * scale;
     }
     VU_LOAD10(vec);
-    mdlStorePrimaryVectorVU(arg0);
+    mdlStorePrimaryVectorVU(model);
 }
 
-void evtStageTestApplyEntryRotation(s32 arg0) {
+void evtStageTestApplyEntryRotation(s32 model) {
     StageTestEntry *entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
 
     func_00340DC8(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
                   entry->rotation[2] * 3.14159265f / 180.0f);
-    func_00232AD0(arg0);
+    func_00232AD0(model);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7168);
 
-s8 evtStageTestUpdate(s32 arg0) {
+s8 evtStageTestUpdate(s32 frame) {
     s8 result = func_002C6CE8();
 
     if (result == 1) {
@@ -1901,7 +1901,7 @@ s8 evtStageTestUpdate(s32 arg0) {
                 if (D_00457EB0.effect != 0) {
                     func_00203E18(D_00457EB0.effect);
                 }
-                func_00232390(D_00457EB0.model, arg0);
+                func_00232390(D_00457EB0.model, frame);
                 func_002C7568();
             }
         }
@@ -1954,13 +1954,13 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
     }
 }
 
-void func_002C7508(u32 menuId, f32 x, f32 y) {
+void func_002C7508(u32 motionIndex, f32 startFrame, f32 endFrame) {
     StageTestSlot *slot = D_00457EB0.slot;
 
     slot->state = 1;
-    slot->index = menuId;
-    slot->unk20 = (s32)x;
-    slot->unk24 = (s32)y;
+    slot->index = motionIndex;
+    slot->unk20 = (s32)startFrame;
+    slot->unk24 = (s32)endFrame;
 }
 
 void func_002C7530(void) {
@@ -2000,7 +2000,7 @@ void func_002C7568(void) {
     }
 }
 
-void func_002C76A8(s32 arg0) {
+void func_002C76A8(s32 unused) {
     if (D_00457EB0.effect != 0) {
         func_002C76F0();
     }
@@ -2018,8 +2018,8 @@ void func_002C76F0(void) {
     stage->effect = 0;
 }
 
-void func_002C7730(u32 arg0) {
-    D_00457EB0.pendingEffect = arg0;
+void func_002C7730(u32 effect) {
+    D_00457EB0.pendingEffect = effect;
 }
 
 s32 func_002C7740(void) {
