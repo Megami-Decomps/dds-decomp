@@ -1167,13 +1167,13 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
 }
 
 u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
-    switch (*(s32 *)argument) {
+    switch (((BtlCommandArgument *)argument)->command) {
     case 1: {
         u32 count = btlGetIndexListCount(((BtlCommandArgument *)argument)->actorIndices);
         if ((unit->flags & 0x200) && ((unit->flags & 0x1000) || (unit->unk120 & 0x10)) &&
             (unit->unk12E & 0x1000) == 0 && count == 1) {
-            u8 *option = *(u8 **)(argument + 0x68);
-            if (((BtlCommandOption *)option)->kind == 2 && option[0x14] == 0) {
+            BtlCommandOption *option = ((BtlCommandArgument *)argument)->option;
+            if (option->kind == 2 && option->inactive == 0) {
                 return 0x17;
             }
         }
@@ -3066,8 +3066,8 @@ SoundTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08, s32 
 }
 
 void func_001E5870(s32 taskArgs) {
-    if ((((BtlUnit *)*(s32 *)(taskArgs + 0xc))->flags & 2) != 0) {
-        evtSetUnitStatusFlags((u32)((BtlUnit *)*(s32 *)(taskArgs + 0xc))->ext);
+    if ((((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->flags & 2) != 0) {
+        evtSetUnitStatusFlags((u32)((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->ext);
         return;
     }
 }
@@ -3097,8 +3097,8 @@ SoundTask *btlCreateUnitTask0F(BtlUnit *unit, s32 value, s32 option, s32 value08
 }
 
 void func_001E59A0(s32 taskArgs) {
-    if ((((BtlUnit *)*(s32 *)(taskArgs + 0x14))->flags & 2) != 0) {
-        evtSetUnitStatusFlags((u32)((BtlUnit *)*(s32 *)(taskArgs + 0x14))->ext);
+    if ((((FxTask *)taskArgs)->unit->flags & 2) != 0) {
+        evtSetUnitStatusFlags((u32)((FxTask *)taskArgs)->unit->ext);
         return;
     }
 }
@@ -3890,8 +3890,8 @@ BtlUnit *btlFindUnitByModeFlagged(s32 mode) {
 
 void *btlAllocateIndexList(s32 capacity) {
     u8 *list = func_00328E18(capacity * 4 + 12);
-    *(s32 *)list = capacity;
-    *(u32 **)(list + 8) = (u32 *)(list + 12);
+    ((BtlIndexList *)list)->capacity = capacity;
+    ((BtlIndexList *)list)->entries = (u32 *)(list + 12);
     ((BtlIndexList *)list)->count = 0;
     return list;
 }
@@ -4696,7 +4696,7 @@ s32 func_001EA598(u8 *fx) {
         return 0;
     }
     task = (u8 *)((ActionUnit *)fx)->link;
-    owner = *(u8 **)(task + 0x18);
+    owner = (u8 *)((BattleActionLinkState *)task)->unit;
     index = *(s32 *)(task + 0x44);
     table = (u8 *)func_001ABFD8(((BtlUnit *)owner)->resourceKind, ((BtlUnit *)owner)->resourceIndex);
     if (((ActionUnit *)fx)->category == 0x91) {

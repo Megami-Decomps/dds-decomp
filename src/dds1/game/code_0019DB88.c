@@ -134,9 +134,9 @@ extern s32 itfLoadTextureFromAsset(u32);
 
 extern u8 D_003D6EB0[0x18];
 
-void func_0019DB88(s32 arg0) {
-    for (; arg0 != 0; arg0 = *(s32 *)(arg0 + 0x24)) {
-        frFontEnableContextMode(arg0);
+void func_0019DB88(s32 node) {
+    for (; node != 0; node = *(s32 *)(node + 0x24)) {
+        frFontEnableContextMode(node);
     }
 }
 
@@ -173,13 +173,13 @@ void func_0019DCB8(UiPanel *panel) {
     }
 }
 
-void func_0019DDA8(u32 *arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *arg0 = 0x280;
-        arg0[1] = 0xa10;
+void func_0019DDA8(u32 *cursorWords, s32 resetPosition) {
+    if (resetPosition != 0) {
+        *cursorWords = 0x280;
+        cursorWords[1] = 0xa10;
     }
-    arg0[2] = 0;
-    *(u16 *)(arg0 + 3) = 0xffff;
+    cursorWords[2] = 0;
+    *(u16 *)(cursorWords + 3) = 0xffff;
 }
 
 void func_0019DDD0(UiCursor *cur, s32 resetPos) {
@@ -222,33 +222,41 @@ void func_0019DE58(u32 *object) {
     func_0019E048((s32)object, 0, 0);
 }
 
-void func_0019DE88(s32 arg0) {
-    s32 temp_v0;
-    u32 *puVar2;
+void func_0019DE88(s32 words) {
+    s32 remaining;
+    u32 *cursor;
 
-    puVar2 = (u32 *)(arg0 + 0x7c);
-    temp_v0 = 0x1f;
+    cursor = (u32 *)(words + 0x7c);
+    remaining = 0x1f;
     do {
-        temp_v0 = temp_v0 - 1;
-        *puVar2 = 0;
-        puVar2 = puVar2 + -1;
-    } while (-1 < temp_v0);
+        remaining = remaining - 1;
+        *cursor = 0;
+        cursor = cursor + -1;
+    } while (-1 < remaining);
 }
 
-void func_0019DEB8(s32 arg0, s32 arg1) {
-    if (arg1 == 0) {
-        *(u8 *)arg0 = 0;
+typedef struct BtlFade {
+    u8 kind;
+    u8 pad1;
+    s16 phase;
+    s16 alpha;
+    s16 timer;
+} BtlFade;
+
+void func_0019DEB8(s32 fadeAddress, s32 preserveKind) {
+    if (preserveKind == 0) {
+        ((BtlFade *)fadeAddress)->kind = 0;
     }
-    *(u16 *)(arg0 + 2) = 0;
-    *(u16 *)(arg0 + 6) = 0;
-    *(u16 *)(arg0 + 4) = 0x40;
-    *(u32 *)(arg0 + 8) = 0;
+    ((BtlFade *)fadeAddress)->phase = 0;
+    ((BtlFade *)fadeAddress)->timer = 0;
+    ((BtlFade *)fadeAddress)->alpha = 0x40;
+    *(u32 *)(fadeAddress + 8) = 0;
 }
 
-void func_0019DED8(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
-    *(s16 *)(arg0 + 2) = arg1;
-    *(s16 *)(arg0 + 4) = arg2;
-    *(s16 *)(arg0 + 6) = arg3;
+void func_0019DED8(s32 fadeAddress, s16 phase, s16 alpha, s16 timer) {
+    ((BtlFade *)fadeAddress)->phase = phase;
+    ((BtlFade *)fadeAddress)->alpha = alpha;
+    ((BtlFade *)fadeAddress)->timer = timer;
 }
 
 void btlReleaseEffectResourceHandles(u8 *effect) {
@@ -268,18 +276,18 @@ void btlReleaseEffectResourceHandles(u8 *effect) {
     *(u32 *)effect &= ~0xF00;
 }
 
-void func_0019DF70(s32 *arg0) {
-    s32 temp_v0;
+void func_0019DF70(s32 *resourceFlags) {
+    s32 remaining;
 
-    temp_v0 = 0x1f;
+    remaining = 0x1f;
     do {
-        if (*arg0 != 0) {
-            func_002D0918(arg0[0x20]);
-            *arg0 = 0;
+        if (*resourceFlags != 0) {
+            func_002D0918(resourceFlags[0x20]);
+            *resourceFlags = 0;
         }
-        temp_v0 = temp_v0 - 1;
-        arg0 = arg0 + 1;
-    } while (-1 < temp_v0);
+        remaining = remaining - 1;
+        resourceFlags = resourceFlags + 1;
+    } while (-1 < remaining);
 }
 
 u16 *txtFormatNumberU16(s32 value, u16 *out) {
@@ -392,13 +400,6 @@ void sndStepSequenceIndex(SoundSeq *obj, s32 dir) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EA88);
 
-typedef struct BtlFade {
-    u8 kind;
-    u8 pad1;
-    s16 phase;
-    s16 alpha;
-    s16 timer;
-} BtlFade;
 
 void btlUpdateFadeIndicator(u8 *obj) {
     BtlFade *fade = (BtlFade *)(obj + 0x1D0);

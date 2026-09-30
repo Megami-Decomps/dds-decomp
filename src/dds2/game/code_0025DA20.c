@@ -527,7 +527,9 @@ typedef struct {
     u8 pad23E4[0x28];
     u32 state; /* 0x240C */
     u32 effectHandle; /* 0x2410 */
-    u8 pad2414[0x1C];
+    u8 pad2414[0x14];
+    s32 descriptorHandle; /* 0x2428: submitted to the drawing packet */
+    u8 pad242C[4];
     u32 menuState; /* 0x2430 */
     u8 pad2434[8];
     u32 optionFlags; /* 0x243C */
@@ -675,9 +677,9 @@ extern BufferDescriptor D_00380708;
 void mnuShopSubmitDescriptor(u8 *work) {
     s32 packet;
 
-    if (*(s32 *)(work + 0x2428) != 0) {
+    if (((CampScene *)work)->descriptorHandle != 0) {
         packet = sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(packet, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0x200, 0xE0, *(s32 *)(work + 0x2428), 0);
+        sdfCreateDescriptorPacket(packet, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0x200, 0xE0, ((CampScene *)work)->descriptorHandle, 0);
         D_00380708.open(&D_00380708, packet);
     }
 }
@@ -943,6 +945,10 @@ typedef struct ShopScene {
     u8 unk0[0x7C];
     ShopSprite *sprites[1]; /* 0x7C */
     ShopSprite *extra;      /* 0x80 */
+    u8 pad84[0xC];
+    s32 quantity;           /* 0x90: clamped to [1, maximum] */
+    u8 pad94[0x33];
+    u8 atLimit;             /* 0xC7 */
 } ShopScene;
 
 void func_00260380(s32 keepExtra, ShopScene *scene) {
@@ -982,21 +988,21 @@ u32 func_00260460(void) {
 }
 
 s32 func_00260468(void) {
-    u16 temp_v0;
-    u16 *puVar2;
-    s32 temp_v1;
-    s32 temp_v2;
+    u16 entryFlags;
+    u16 *entry;
+    s32 remaining;
+    s32 enabledCount;
 
-    temp_v2 = 0;
-    temp_v1 = 4;
-    puVar2 = (u16 *)(D_00435DD0 + 0xa60);
+    enabledCount = 0;
+    remaining = 4;
+    entry = (u16 *)(D_00435DD0 + 0xa60);
     do {
-        temp_v0 = *puVar2;
-        puVar2 = puVar2 + 0xe2;
-        temp_v1 = temp_v1 - 1;
-        temp_v2 = temp_v2 + (temp_v0 & 1);
-    } while (-1 < temp_v1);
-    return temp_v2;
+        entryFlags = *entry;
+        entry = entry + 0xe2;
+        remaining = remaining - 1;
+        enabledCount = enabledCount + (entryFlags & 1);
+    } while (-1 < remaining);
+    return enabledCount;
 }
 
 typedef struct CampTier {
@@ -1022,18 +1028,18 @@ s32 func_002604A0(void) {
 }
 
 void func_00260538(void) {
-    u16 temp_v0;
-    s8 *pcVar2;
-    u32 temp_v1;
+    u16 entryId;
+    s8 *entry;
+    u32 index;
 
-    temp_v1 = 0;
-    pcVar2 = D_003CD8D8;
+    index = 0;
+    entry = D_003CD8D8;
     do {
-        temp_v0 = *(u16 *)pcVar2;
-        pcVar2 = (s8 *)((s32)pcVar2 + 8);
-        temp_v1 = temp_v1 + 1;
-        *(u8 *)((u32)temp_v0 + D_00435DD0 + 0x1340) = 0;
-    } while (temp_v1 < 3);
+        entryId = *(u16 *)entry;
+        entry = (s8 *)((s32)entry + 8);
+        index = index + 1;
+        *(u8 *)((u32)entryId + D_00435DD0 + 0x1340) = 0;
+    } while (index < 3);
 }
 
 u8 *func_00260570(void) {
@@ -1309,24 +1315,24 @@ typedef struct CampCounterSlot {
 s32 func_00261480(s32 delta, u8 *scene) {
     s32 max = func_00261198(scene);
     CampCounterSlot *slot = (CampCounterSlot *)(*(u8 **)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x1C) + 0x60);
-    s32 sum = *(s32 *)(scene + 0x90) + delta;
+    s32 sum = ((ShopScene *)scene)->quantity + delta;
     s32 cur;
 
-    *(s32 *)(scene + 0x90) = sum;
+    ((ShopScene *)scene)->quantity = sum;
     if (sum <= 0) {
-        *(s32 *)(scene + 0x90) = 1;
+        ((ShopScene *)scene)->quantity = 1;
     }
-    cur = *(s32 *)(scene + 0x90);
+    cur = ((ShopScene *)scene)->quantity;
     if (cur >= max) {
-        scene[0xC7] = 1;
-        *(s32 *)(scene + 0x90) = max;
+        ((ShopScene *)scene)->atLimit = 1;
+        ((ShopScene *)scene)->quantity = max;
         cur = max;
     } else {
-        scene[0xC7] = 0;
+        ((ShopScene *)scene)->atLimit = 0;
     }
     if (*(s32 *)(*(u8 **)(*(u8 **)(*(u8 **)(scene + 0x7C) + 0x18) + 0x1C) + 0x60) == 3) {
         slot->value = func_002613C8(cur, slot->limit);
-        cur = *(s32 *)(scene + 0x90);
+        cur = ((ShopScene *)scene)->quantity;
     }
     return cur;
 }
