@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 /* Global event state behind func_00101958; the polygon-movie word at 0x0 and
@@ -79,6 +80,12 @@ typedef struct EvtBlendF {
     u32 u1;       /* 0x28 */
 } EvtBlendF;
 
+typedef struct EvtBlendG {
+    u32 color;    /* 0x00 */
+    u32 word;     /* 0x04 */
+    s32 m[2][2];  /* 0x08 */
+} EvtBlendG;
+
 typedef struct EvtBlendH {
     s32 w[4];     /* 0x00 */
     s32 x;        /* 0x10 */
@@ -105,6 +112,7 @@ extern f32 D_003C9320[4];
 extern f32 D_003C9330[4];
 extern EvtBlendA D_003C9360;
 extern EvtBlendB D_003C9390;
+extern EvtBlendG D_003C93C0;
 extern EvtBlendD D_003C93E0;
 extern EvtBlendE D_003C9410;
 extern EvtBlendF D_003C9440;
@@ -252,7 +260,28 @@ u32 func_0024DDB8(s32 enable, f32 t, u32 a, u32 b) {
     return a;
 }
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024DE70);
+/* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
+u32 func_0024DE70(s32 enable, f32 t, u32 a, u32 b) {
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+
+    if (enable) {
+        color1[0] = a;
+        EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
+        VU0_SCALE_VF(vf10, 1.0f - t);
+        VU0_MOVE_VF(vf11, vf10);
+        color2[0] = b;
+        EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
+        VU0_SCALE_VF(vf10, t);
+        VU0_ADD(vf10, vf10, vf11);
+        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        blended[0] = packed;
+        return blended[0];
+    }
+    return a;
+}
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
 void func_0024DF38(s32 enable, f32 t, f32 *a, f32 *b, f32 *out) {
@@ -361,7 +390,27 @@ void func_0024E4E0(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *out
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024E688);
+void func_0024E688(s32 enable, f32 t, EvtBlendG *a, EvtBlendG *b, EvtBlendG *out) {
+    s32 i;
+    s32 j;
+
+    if (enable == 0) {
+        t = 0.0f;
+    }
+    if (a == NULL) {
+        a = &D_003C93C0;
+    }
+    if (b == NULL) {
+        b = &D_003C93C0;
+    }
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            out->m[i][j] = func_0024DD78(enable, t, a->m[i][j], b->m[i][j]);
+        }
+    }
+    out->color = func_0024DE70(enable, t, a->color, b->color);
+    out->word = a->word;
+}
 
 void func_0024E7A8(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *out) {
     s32 i;
