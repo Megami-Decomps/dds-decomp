@@ -262,7 +262,10 @@ typedef struct BattleActionLinkState {
 } BattleActionLinkState;
 
 typedef struct ActionUnit {
-    u8 pad00[0xE0];
+    u8 pad00[0x30];
+    f32 pos30[4];
+    f32 dir40[4];
+    u8 pad50[0x90];
     f32 fE0;                /* 0xE0 */
     u8 padE4[0x2C];
     u32 flags;              /* 0x110 */
@@ -274,8 +277,11 @@ typedef struct ActionUnit {
     u8 pad12E[6];
     s32 category;           /* 0x134 */
     s32 actorIndices;       /* 0x138 */
-    u8 pad13C[8];
+    s32 unk13C;
+    u8 pad140[4];
     s32 stageCount;         /* 0x144 */
+    u8 pad148[0xC];
+    f32 unk154;
 } ActionUnit;
 
 /* Metadata records reached through the battle table pointers. */
@@ -3031,9 +3037,41 @@ SoundTask *func_001E4908(BtlUnit *unit, s32 index, f32 scale) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E49A8);
+typedef struct BtlPosLerpTaskArgs {
+    s128 from;
+    s128 to;
+    f32 rate;
+    f32 t;
+    s32 count;
+    BtlUnit *unit;
+} BtlPosLerpTaskArgs;
 
-extern u32 func_001E49A8(u32 *);
+s32 func_001E49A8(BtlPosLerpTaskArgs *args) {
+    s128 pos;
+    f32 t = args->t;
+    f32 rate;
+    BtlUnit *unit = args->unit;
+    if (t < 1.0f && args->rate > 0.0f && args->rate < 1.0f) {
+        rate = args->rate;
+        if (args->count == 0) {
+            PCP_COPY_VECTOR(&args->from, (u8 *)unit + 0x60);
+        }
+        args->t = t + (1.0f - t) * rate;
+        if (args->t > 0.999f) {
+            args->t = 1.0f;
+        }
+        VU0_LOAD_VF(vf10, &args->from);
+        VU0_LOAD_VF(vf11, &args->to);
+        VU0_LERP_VF10(args->t);
+        VU0_STORE_VF(vf10, &pos);
+        btlSetUnitPosition(unit, (f32 *)&pos);
+    } else {
+        btlSetUnitPosition(unit, (f32 *)&args->to);
+        return 1;
+    }
+    args->count++;
+    return 0;
+}
 
 SoundTask *func_001E4A90(BtlUnit *unit, f32 *target, f32 scale) {
     SoundTask *task = btlAllocTask(0x30);
@@ -5590,7 +5628,47 @@ void func_001F01E8(ActionUnit *command, ActionUnit *unused) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F02E0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F0508);
+void func_001F0508(ActionUnit *command) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 lookPos[4];
+
+    user = command->link->unit;
+    target = (BtlUnit *)btlGetIndexListEntry(command->actorIndices, 0);
+    if (!(user->flags & target->flags & 0x600)) {
+        btlFlagAllUnitsDefeatCandidate();
+    } else {
+        func_001ECBF8(command, command);
+        return;
+    }
+    func_001EF668(command, command->pos30);
+    btlUnitGetMuzzlePosVU(user);
+    VU_STORE10(userPos);
+    btlUnitGetMuzzlePosVU(target);
+    VU_STORE10(targetPos);
+    if (userPos[0] < targetPos[0]) {
+        command->flags |= 0x200;
+    } else {
+        command->flags &= ~0x200;
+    }
+    command->flags |= 0x41;
+    command->unk13C = 0;
+    command->unk154 = 15.0f;
+    func_001E8510(command->pos30);
+    VU_STORE10(lookPos);
+    btlUnitGetMuzzlePosVU(user);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, command->pos30);
+    VU0_LERP_VF10(0.25f);
+    VU0_STORE_VF(vf10, command->pos30);
+    VU0_LOAD_VF(vf11, lookPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, command->dir40);
+    btlUnitFaceTarget(user, target);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F0690);
 

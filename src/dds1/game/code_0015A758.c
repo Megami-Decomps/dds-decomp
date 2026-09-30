@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 typedef struct ParListNode ParListNode;
 typedef struct ParCellNode ParCellNode;
@@ -147,6 +148,14 @@ typedef struct ParScaleObj {
 extern f32 D_003D6490[];
 
 extern f32 D_003D64A0[];
+
+extern f32 D_0034E590[];
+
+extern f32 D_0034E5B0[];
+
+extern f32 D_0034E5C0[];
+
+extern f32 D_0034E5D0[];
 
 extern u8 D_00324680[];
 
@@ -601,7 +610,37 @@ void func_0015BB00(ParSystem *system, s32 index, void *delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BB90);
+void func_0015BB90(s32 particle, s32 index) {
+    ParSystem *system = (ParSystem *)particle;
+    u32 count = system->cells[index].vertexCount >> 1;
+    u32 *vertex = system->cells[index].vertices;
+    u32 word = vertex[0];
+    u32 i;
+    s32 alpha[4];
+    s32 start[4];
+    s32 out[4];
+    u32 packed;
+    if (count >= 2) {
+        alpha[0] = word & 0xFF000000;
+        EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, D_0034E590);
+        VU0_LERP_VF10(1.0f / count);
+        VU0_MOVE_VF(vf12, vf10);
+        start[0] = word;
+        EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
+        for (i = 0; i < count; i++) {
+            VU0_MOVE_VF(vf11, vf10);
+            EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            out[0] = packed;
+            vertex[0] = packed;
+            vertex[1] = packed;
+            VU0_SUB(vf11, vf11, vf12);
+            VU0_MOVE_VF(vf10, vf11);
+            vertex += 2;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BCE8);
 
@@ -633,9 +672,106 @@ void parFillVertexPairs(ParSystem *system, s32 firstWord, s32 secondWord) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BFD8);
+void func_0015BFD8(ParSystem *system, u32 color) {
+    u32 perCell = system->vertexWordCount >> 1;
+    u32 count = system->cellCount;
+    u32 i;
+    u32 j;
+    u8 *cell;
+    u32 *vertex;
+    s32 alpha[4];
+    s32 start[4];
+    s32 out[4];
+    u32 packed;
+    alpha[0] = color & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_0034E5B0);
+    VU0_LERP_VF10(1.0f / perCell);
+    VU0_MOVE_VF(vf12, vf10);
+    i = 0;
+    if (count != 0) {
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u32 **)cell;
+            start[0] = color;
+            EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
+            for (j = 0; j < perCell; j++) {
+                VU0_MOVE_VF(vf11, vf10);
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                out[0] = packed;
+                vertex[0] = packed;
+                vertex[1] = packed;
+                VU0_SUB(vf11, vf11, vf12);
+                VU0_MOVE_VF(vf10, vf11);
+                vertex += 2;
+            }
+            i++;
+            cell += 0x14;
+        } while (i < count);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C128);
+void func_0015C128(ParSystem *system, u32 color) {
+    u32 words = system->vertexWordCount;
+    u32 count = system->cellCount;
+    u32 quarter = words >> 2;
+    u32 i;
+    u32 j;
+    u8 *cell;
+    u32 *vertex;
+    s32 alpha[4];
+    s32 start[4];
+    s32 rise[4];
+    s32 fall[4];
+    u32 base;
+    u32 odd;
+    u32 packed;
+    alpha[0] = color & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_0034E5C0);
+    VU0_LERP_VF10(1.0f / quarter);
+    VU0_MOVE_VF(vf12, vf10);
+    i = 0;
+    if (count != 0) {
+        base = color & 0xFFFFFF;
+        odd = (words >> 1) & 1;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u32 **)cell;
+            start[0] = base;
+            EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
+            for (j = 0; j < quarter; j++) {
+                VU0_MOVE_VF(vf11, vf10);
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                rise[0] = packed;
+                vertex[0] = packed;
+                vertex[1] = packed;
+                VU0_ADD(vf11, vf11, vf12);
+                VU0_MOVE_VF(vf10, vf11);
+                vertex += 2;
+            }
+            if (odd) {
+                vertex[0] = color;
+                vertex[1] = color;
+                vertex += 2;
+            }
+            for (j = 0; j < quarter; j++) {
+                VU0_MOVE_VF(vf11, vf10);
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                fall[0] = packed;
+                vertex[0] = packed;
+                vertex[1] = packed;
+                VU0_SUB(vf11, vf11, vf12);
+                VU0_MOVE_VF(vf10, vf11);
+                vertex += 2;
+            }
+            i++;
+            cell += 0x14;
+        } while (i < count);
+    }
+}
 
 void func_0015C2F0(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
@@ -666,7 +802,74 @@ void func_0015C2F0(ParSystem *system, s32 middleWord, s32 edgeWord) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C360);
+void func_0015C360(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    f32 cur0[4];
+    f32 cur1[4];
+    f32 step0[4];
+    f32 step1[4];
+    s32 alpha0[4];
+    s32 alpha1[4];
+    s32 col0[4];
+    s32 col1[4];
+    s32 out0[4];
+    s32 out1[4];
+    s32 groups = 3;
+    u32 perCell = system->vertexWordCount / groups;
+    u32 count = system->cellCount;
+    u32 i;
+    u32 j;
+    u8 *cell;
+    u32 *vertex;
+    u32 packedMiddle;
+    u32 packedEdge;
+    alpha0[0] = middleWord & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha0, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_0034E5D0);
+    VU0_LERP_VF10(1.0f / perCell);
+    VU0_STORE_VF(vf10, step0);
+    alpha1[0] = edgeWord & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha1, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_0034E5D0);
+    VU0_LERP_VF10(1.0f / perCell);
+    VU0_STORE_VF(vf10, step1);
+    i = 0;
+    if (count != 0) {
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u32 **)cell;
+            col0[0] = middleWord;
+            EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
+            VU0_STORE_VF(vf10, cur0);
+            col1[0] = edgeWord;
+            EE_MMI_RGBA_UNPACK(col1, 1.0f / 128.0f);
+            VU0_STORE_VF(vf10, cur1);
+            for (j = 0; j < perCell; j++) {
+                VU0_LOAD_VF(vf10, cur0);
+                VU0_MOVE_VF(vf11, vf10);
+                EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
+                out0[0] = packedMiddle;
+                vertex[1] = packedMiddle;
+                VU0_LOAD_VF(vf12, step0);
+                VU0_SUB(vf11, vf11, vf12);
+                VU0_STORE_VF(vf11, cur0);
+                VU0_LOAD_VF(vf10, cur1);
+                VU0_MOVE_VF(vf11, vf10);
+                EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
+                out1[0] = packedEdge;
+                vertex[0] = packedEdge;
+                vertex[2] = packedEdge;
+                VU0_LOAD_VF(vf12, step1);
+                VU0_SUB(vf11, vf11, vf12);
+                VU0_STORE_VF(vf11, cur1);
+                vertex += 3;
+            }
+            i++;
+            cell += 0x14;
+        } while (i < count);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C618);
 
