@@ -3,28 +3,6 @@
 #include "pcp_vu0.h"
 #include "eff.h"
 
-/* 0x44-byte init record built by func_0018D428. */
-typedef struct EffBig44 {
-    u32 unk0;      /* 0x0 */
-    u32 unk4;      /* 0x4 */
-    u32 unk8;      /* 0x8 */
-    u32 unkC;      /* 0xC: parent type */
-    u32 unk10;     /* 0x10 */
-    u32 unk14;     /* 0x14 */
-    u32 unk18;     /* 0x18 */
-    u32 unk1C;     /* 0x1C */
-    u32 unk20;     /* 0x20 */
-    u32 unk24;     /* 0x24 */
-    u32 unk28;     /* 0x28 */
-    u32 unk2C;     /* 0x2C */
-    u32 unk30;     /* 0x30 */
-    u32 unk34;     /* 0x34 */
-    u32 unk38;     /* 0x38 */
-    u32 unk3C;     /* 0x3C */
-    void *unk40;   /* 0x40 */
-} EffBig44;
-
-
 /* Directory entry filled by the effect data directory iterator. */
 typedef struct EffDirEnt {
     u32 flags;      /* 0x00: bit 12 cleared */
@@ -60,42 +38,6 @@ extern void *func_002E1420(s32 arg0);
 extern s32 sdfConsAllocateColumnPacket(s32 arg0);
 extern void sdfAppendPacket(s32 arg0, s32 arg1);
 
-/* Voice parameters read via EffWork.unk3C. */
-typedef struct SndVoice {
-    u8 unk0[0xC]; /* 0x0 */
-    s16 unkC;     /* 0xC */
-    s16 unkE;     /* 0xE */
-} SndVoice;
-
-/* Sound register block built by func_0018DA70. */
-typedef struct SndReg {
-    s32 unk0;      /* 0x0 */
-    s32 unk4;      /* 0x4 */
-    s32 unk8;      /* 0x8 */
-    s32 unkC;      /* 0xC */
-    s32 unk10;     /* 0x10 */
-    s32 unk14;     /* 0x14 */
-    u8 unk18[8];   /* 0x18 */
-    s32 unk20;     /* 0x20 */
-    s32 unk24;     /* 0x24 */
-    s32 unk28;     /* 0x28 */
-    s32 unk2C;     /* 0x2C */
-    s32 unk30;     /* 0x30 */
-    s32 unk34;     /* 0x34 */
-    u8 unk38[8];   /* 0x38 */
-    s32 unk40;     /* 0x40 */
-    s32 unk44;     /* 0x44 */
-    s32 unk48;     /* 0x48 */
-    s32 unk4C;     /* 0x4C */
-} SndReg;
-
-/* Sound device with method at +0x10. */
-typedef struct SndDev {
-    u8 unk0[0x10];            /* 0x0 */
-    void (*unk10)(void *, s32); /* 0x10 */
-} SndDev;
-
-extern SndDev D_003255A8;
 extern EffHandler32 D_00355730[];
 
 extern u8 D_003296F0[];
@@ -164,6 +106,8 @@ void effTypeDispatchGuardedC(EffWork *work) {
     }
 }
 
+/* Each effect type keeps its mutable subslot at a different byte offset
+ * within the callback payload at EffWork +4. */
 void effSetSubSlot(EffWork *work, s32 slotValue) {
     u8 value = slotValue;
     u32 type = work->type;
@@ -349,6 +293,8 @@ s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
 
+/* The root's +8 points to the first node; each node's +0x38 points to the
+ * next. The root also owns the separate allocation stored at +4. */
 void effFreeWorkList(EffWork *root) {
     EffWork *node = (EffWork *)root->unk8;
 
@@ -407,6 +353,8 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
     message->unk2C = second;
 }
 
+/* Replace the work's sound handle, keeping the newly acquired voice handle
+ * but releasing the temporary resource returned by the loader. */
 void effSetupWorkSound(EffWork *work, u64 soundResource) {
     u32 voiceHandle;
     u64 loadedResource;

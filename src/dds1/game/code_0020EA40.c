@@ -27,7 +27,7 @@ extern s8 D_003D7588[];
 typedef struct BattleRuntimeState {
     u32 flags;
     u16 state;
-    u8 unk_06;
+    u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
     u8 pending;
     s8 active;
     u8 unk_09[3];
@@ -91,7 +91,7 @@ typedef struct BtlUnit {
     u8 unk_F0[0x18];
     u64 identity; /* 0x108: compared to exclude the current actor */
     u32 flags;
-    u32 unk_114;
+    u32 actionRecordIndex; /* indexes the 0x20-byte action animation records */
     u8 unk_118[4];
     u8 lookupId;      /* 0x11C */
     u8 unk_11D[3];
@@ -101,7 +101,7 @@ typedef struct BtlUnit {
     u8 unk_126[4];
     u16 unk_12A;      /* 0x12A */
     u8 unk_12C[2];
-    u16 unk_12E;
+    u16 conditionFlags; /* 0x12E: mirrors DDS2's conditionFlags */
     u8 unk_130[0x180];
     s16 actionSlot;   /* 0x2B0 */
     u8 unk_2B2[0x6A];
@@ -110,10 +110,11 @@ typedef struct BtlUnit {
     u8 unk_324[0x20];
     struct BtlUnit *next;
 } BtlUnit;
+struct BattleModelEntry;
 
 typedef struct BtlState {
     u8 unk_000[0x1C0];
-    s16 unk_1C0;
+    s16 eventTaskId; /* 0x1C0: -1 when no event task is available */
     u8 unk_1C2[2];
     u32 scriptFlags;      /* 0x1C4 */
     u32 eventFlags;       /* 0x1C8 */
@@ -134,7 +135,9 @@ typedef struct BtlState {
     u8 unk_200[0x24];
     BtlTask *tasks;
     BtlUnit *units;
-    u8 unk_22C[0x1C];
+    u8 unk_22C[0x14];
+    struct BattleModelEntry *modelEntries; /* 0x240: head of doubly-linked model list */
+    u8 unk_244[4];
     u16 turnPhase;    /* 0x248 */
     u8 unk_24A[2];
     u16 mode;
@@ -220,7 +223,7 @@ extern s32 func_001061E8(void);
 void func_0020DB90(u8 *actor);
 
 s32 btlDispatchActionAnimation(u8 *unit) {
-    u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
+    u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->actionRecordIndex * 32 + 0x1c);
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
@@ -279,13 +282,13 @@ s32 btlIsActionIdListed(u8 *unit) {
     u32 id;
     u32 i;
 
-    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return 0;
     }
     battle = (BtlState *)func_001A17F0();
     i = 0;
     entry = (u16 *)(battle->battleMode * 0x28 + D_003BAA34 + 6);
-    id = *(u16 *)(unit + 0x124);
+    id = ((BtlUnit *)unit)->mode;
     for (; i < 0xB; i++) {
         if (*entry++ == id) {
             return 1;
@@ -337,14 +340,14 @@ s32 btlFindScriptResource(char *name) {
     if (battle->scriptHandle == 0) {
         return -1;
     }
-    func_003014F0(path, D_003A66F0, battle->unk_1C0, name);
+    func_003014F0(path, D_003A66F0, battle->eventTaskId, name);
     return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 
 void func_0020F940(s32 skill) {
     BtlState *battle = (BtlState *)func_001A17F0();
     s32 handle;
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return;
     }
     handle = scrCreateTaskForProcessId(*(s32 *)(battle->scriptProcess + 0x20) - 1,
@@ -356,7 +359,7 @@ void func_0020F940(s32 skill) {
 
 s32 btlReleaseScriptResource(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return 1;
     }
     if (kwlnTaskIsRegistered(battle->scriptTask) == 0) {
@@ -370,7 +373,7 @@ extern char D_003BB8B8[];
 
 s32 btlCanStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return 0;
     }
     if (battle->scriptFlags & 1) {
@@ -388,7 +391,7 @@ void btlStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     s32 skill;
     s32 handle;
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return;
     }
     skill = btlFindScriptResource(D_003BB8B8);
@@ -412,7 +415,7 @@ extern char D_003BB8C0[];
 s32 btlHasScriptResource(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
 
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return 0;
     }
     if (battle->scriptHandle == 0) {
@@ -428,7 +431,7 @@ void btlStartSecondaryScriptTask(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     s32 skill;
     s32 handle;
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return;
     }
     skill = btlFindScriptResource(D_003BB8C0);
@@ -461,14 +464,14 @@ extern char D_003A67A0[], D_003A67B8[];
 
 s32 func_002100A8(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
-    if (battle->unk_1C0 == -1) {
+    if (battle->eventTaskId == -1) {
         return 1;
     }
     if (func_002E92C0(battle->sequenceHandle) == 0) {
         btlBossDebugPrintf(D_003A67A0);
         return 0;
     }
-    if (evtGetTaskValueWord(battle->unk_1C0) == 2) {
+    if (evtGetTaskValueWord(battle->eventTaskId) == 2) {
         return 1;
     }
     btlBossDebugPrintf(D_003A67B8);
@@ -538,11 +541,11 @@ s32 btlCommandSelectEventAction(void) {
     if (unit == 0) {
         return 1;
     }
-    if ((*(u32 *)(unit + 0x110) & 2) == 0) {
+    if ((((BtlUnit *)unit)->flags & 2) == 0) {
         return 1;
     }
     battle = (BtlState *)func_001A17F0();
-    result = func_00241BF0(battle->unk_1C0, action);
+    result = func_00241BF0(battle->eventTaskId, action);
     if (result == 0) {
         return 1;
     }
@@ -674,7 +677,7 @@ s32 btlHasRestrictedUnit(void) {
             if (status & 0xe0) {
                 return 1;
             }
-            if (unit->unk_12E & 0x4000) {
+            if (unit->conditionFlags & 0x4000) {
                 return 1;
             }
         }
@@ -881,7 +884,7 @@ s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
     /* Keep this byte-table load separate from record for the matching address calculation. */
     if (D_003BAA50[command * 0x38] & 8) {
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)btlGetIndexListEntry(list, i))->unk_12E & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->conditionFlags & 0x800) {
                 flaggedCount++;
             }
         }
@@ -917,20 +920,20 @@ extern void *func_002CFF68(s32);
 
 BattleModelEntry *btlCreateModelEntry(void) {
     BattleModelEntry *entry = func_002CFF68(sizeof(BattleModelEntry));
-    u8 *battle;
+    BtlState *battle;
     BattleModelEntry *head;
     entry->refs = 1;
     entry->state = 0;
-    battle = (u8 *)func_001A17F0();
+    battle = (BtlState *)func_001A17F0();
     entry->prev = 0;
-    head = *(BattleModelEntry **)(battle + 0x240);
+    head = battle->modelEntries;
     if (head != 0) {
         head->prev = entry;
-        entry->next = *(BattleModelEntry **)(battle + 0x240);
+        entry->next = battle->modelEntries;
     } else {
         entry->next = 0;
     }
-    *(BattleModelEntry **)(battle + 0x240) = entry;
+    battle->modelEntries = entry;
     return entry;
 }
 
@@ -958,14 +961,14 @@ void btlReleaseModelEntry(BattleModelEntry *entry) {
     if (entry->prev != 0) {
         entry->prev->next = entry->next;
     } else {
-        *(BattleModelEntry **)((u8 *)func_001A17F0() + 0x240) = entry->next;
+        ((BtlState *)func_001A17F0())->modelEntries = entry->next;
     }
     func_002CFF98(entry);
     btlBossDebugPrintf(D_003A68F8, entry->kind, entry->id);
 }
 
 void btlReleaseAllModelEntries(void) {
-    BattleModelEntry *entry = *(BattleModelEntry **)((u8 *)func_001A17F0() + 0x240);
+    BattleModelEntry *entry = ((BtlState *)func_001A17F0())->modelEntries;
     BattleModelEntry *next;
     while (entry != 0) {
         next = entry->next;
@@ -988,19 +991,19 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 fileRequestIsReady(void *);
 
-s8 func_002114E8(u8 *task) {
+s8 func_002114E8(BattleModelEntry *entry) {
     s32 result;
-    if (*(s8 *)(task + 0xc) != 0) {
+    if (entry->state != 0) {
         return 1;
     }
-    if (mdlRequestAsset(*(s32 *)task, *(s32 *)(task + 4), 0) == 0 ||
-        mdlRequestAsset(*(s32 *)task, *(s32 *)(task + 4), 0) == -1) {
+    if (mdlRequestAsset(entry->kind, entry->id, 0) == 0 ||
+        mdlRequestAsset(entry->kind, entry->id, 0) == -1) {
         return 0;
     }
-    if (*(void **)(task + 0x10) == 0) {
+    if (entry->resource == 0) {
         return 1;
     }
-    result = fileRequestIsReady(*(void **)(task + 0x10));
+    result = fileRequestIsReady(entry->resource);
     return result;
 }
 
@@ -1008,7 +1011,7 @@ s32 btlFindModelEntry(kind, id)
 s32 kind;
 s32 id;
 {
-    BattleModelEntry *entry = *(BattleModelEntry **)((u8 *)func_001A17F0() + 0x240);
+    BattleModelEntry *entry = ((BtlState *)func_001A17F0())->modelEntries;
     while (entry != 0) {
         if (entry->kind == kind && entry->id == id) {
             return (s32)entry;
@@ -1072,7 +1075,7 @@ s32 btlGetEntryState(s32 kind, s32 value) {
 s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     s32 entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return func_002114E8((u8 *)entry);
+        return func_002114E8((BattleModelEntry *)entry);
     }
     return entry;
 }
@@ -1165,7 +1168,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_00212998);
 void btlInitFadeColors(void) {
     btlInitVisibilityGrid();
     D_003D7580.color10 = 0x80808080;
-    if (D_003D7580.unk_06 < 2) {
+    if (D_003D7580.fadeMode < 2) {
         D_003D7580.color1C = 0x20FFFFFF;
         D_003D7580.color14 = 0x20FFFFFF;
     } else {
@@ -1313,7 +1316,7 @@ void btlClearRuntimeState(void) {
     memset(state, 0, sizeof(*state));
     state->flags = 0;
     state->state = 0;
-    state->unk_06 = 0;
+    state->fadeMode = 0;
     state->pending = 0;
     state->active = 0;
     state->options = 0;
@@ -1334,9 +1337,9 @@ void btlResetAsyncState(void) {
     btlResetRuntimeState();
 }
 
-void btlActivateRuntime(u8 condition) {
+void btlActivateRuntime(u8 fadeMode) {
     BattleRuntimeState *battle = &D_003D7580;
-    battle->unk_06 = condition;
+    battle->fadeMode = fadeMode;
     battle->flags = 0;
     battle->state = 1;
     battle->active = 1;
@@ -1844,7 +1847,7 @@ typedef struct BattleGroupSlot {
     s32 unk_0;
     s32 unk_4;
     s32 unk_8;
-    s32 unk_C;
+    s32 resourceHandle; /* released when the owning group is destroyed */
 } BattleGroupSlot;
 
 typedef struct BattleGroupNode {
@@ -1854,10 +1857,10 @@ typedef struct BattleGroupNode {
     u16 type;
     u8 flag;
     u8 unk_0D[3];
-    s32 unk_10;
-    s32 unk_14;
+    s32 modelContext;
+    s32 resourceList;
     s32 unk_18;
-    s32 unk_1C;
+    s32 requestHandle;
     BattleGroupSlot slots[8];
     s32 unk_A0;
     s32 unk_A4;
@@ -1866,7 +1869,7 @@ typedef struct BattleGroupNode {
     f32 unk_B0;
 } BattleGroupNode;
 
-void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s32 arg5) {
+void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg4, s32 requestHandle) {
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
@@ -1880,15 +1883,15 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s32 a
     node->next = head;
     node->group = group;
     node->type = type;
-    node->unk_14 = arg3;
+    node->resourceList = resourceList;
     node->unk_18 = arg4;
-    node->unk_1C = arg5;
+    node->requestHandle = requestHandle;
     node->prev = NULL;
-    node->unk_10 = 0;
+    node->modelContext = 0;
     for (i = 0; i != 8; i++) {
         node->slots[i].unk_0 = 0;
         node->slots[i].unk_8 = 0;
-        node->slots[i].unk_C = 0;
+        node->slots[i].resourceHandle = 0;
     }
     node->flag = flag & 1;
     node->unk_A0 = 0;
@@ -1927,17 +1930,17 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     }
     flag = node->flag;
     node->flag = 0;
-    if (node->unk_10 != 0) {
+    if (node->modelContext != 0) {
         do {
-            mdlDestroyContext(node->unk_10);
-        } while (node->unk_10 != 0);
+            mdlDestroyContext(node->modelContext);
+        } while (node->modelContext != 0);
     }
     if (flag != 0) {
-        sdfResourceListRelease((void *)node->unk_14, 1);
-        func_002D0A10((void *)node->unk_1C);
+        sdfResourceListRelease((void *)node->resourceList, 1);
+        func_002D0A10((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
-            if (node->slots[i].unk_C != 0) {
-                func_002D0918(node->slots[i].unk_C);
+            if (node->slots[i].resourceHandle != 0) {
+                func_002D0918(node->slots[i].resourceHandle);
             }
         }
     }
