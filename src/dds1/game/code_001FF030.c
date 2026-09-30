@@ -280,14 +280,14 @@ s32 btlIsUnitAtOrBelowHealthRate(u8 *unit, s32 multiplier) {
 }
 
 s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 multiplier) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x401) == 0x401) {
             if (btlIsUnitAtOrBelowHealthRate(unit, multiplier) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -305,12 +305,12 @@ u32 func_00200208(void) {
 
 s32 btlIsGroup400CountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             count++;
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (limit < count) {
         return 0;
@@ -320,14 +320,14 @@ s32 btlIsGroup400CountAtMost(s32 unused, u32 limit) {
 
 s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->unk_12E & 0x800) == 0) {
                 count++;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (limit < count) {
         return 0;
@@ -344,12 +344,12 @@ u8 func_00200308(void) {
 
 s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             count++;
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (limit < count) {
         return 0;
@@ -362,61 +362,61 @@ s32 btlUnitHasActionMask(s32 unit, s32 mask) {
 }
 
 s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x401) == 0x401) {
             if (btlUnitHasActionMask((s32)unit, action) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 btlAnyGroup200HasActionMask(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (btlUnitHasActionMask((s32)unit, action) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 btlAllGroup200HaveActionMask(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (btlUnitHasActionMask((s32)unit, action) == 0) {
                 return 0;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 1;
 }
 
 /* Find an active unit on the 0x200 side with the requested unit mode. */
 s32 btlHasGroup200UnitMode(s32 unused, s32 kind) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (((BtlUnit *)unit)->mode == kind) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 /* Check the opposing side for another unit of the same mode but a different identity. */
 s32 btlHasOtherGroup400UnitMode(u8 *actor, s32 kind) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (((BtlUnit *)unit)->mode == kind) {
@@ -425,7 +425,7 @@ s32 btlHasOtherGroup400UnitMode(u8 *actor, s32 kind) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -451,27 +451,27 @@ s32 btlUnitHasAllTenActions(void *actor) {
 }
 
 s32 func_00200A08(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_00200628((s32)unit, action) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00200A88(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_00200628((s32)unit, action) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -491,92 +491,92 @@ u8 func_00200B28(u32 unit, u32 action) {
 }
 
 s32 func_00200B48(s32 unused, u32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_002007A8((u32)unit, action, 0) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00200BD0(s32 unused, u32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_002007A8((u32)unit, action, 1) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00200C58(s32 unused, u32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_002007A8((u32)unit, action, 0) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00200CE0(s32 unused, u32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_002007A8((u32)unit, action, 1) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00200D68(s32 unused, u32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_002007A8((u32)unit, action, 0) == 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00200DF0(s32 unused, u32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_002007A8((u32)unit, action, 0) == 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 btlAnyGroup200LacksFlag1000(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->flags & 0x1000) == 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -768,46 +768,46 @@ s32 func_00201408(void *unit, s32 mask) {
 extern s32 func_00201408(void *, s32);
 
 s32 func_002014E8(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x401) == 0x401) {
             if (func_00201408(unit, action) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00201568(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x201) == 0x201) {
             if (func_00201408(unit, action) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 kind) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (((BtlUnit *)unit)->mode != kind) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 btlHasOtherGroup400DifferentUnitMode(u8 *actor, s32 kind) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (((BtlUnit *)unit)->mode != kind) {
@@ -816,7 +816,7 @@ s32 btlHasOtherGroup400DifferentUnitMode(u8 *actor, s32 kind) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -903,9 +903,9 @@ s32 btlAnyUnitHasActionInSlots(mask, action)
 u32 mask;
 s32 action;
 {
-    u8 *node = *(u8 **)(func_001A17F0() + 0x224);
+    u8 *node = (u8 *)((BtlState *)func_001A17F0())->tasks;
     while (node != 0) {
-        u8 *owner = *(u8 **)(node + 0x18);
+        u8 *owner = (u8 *)((BtlTask *)node)->unit;
         if (owner != 0) {
             u32 flags = ((BtlUnit *)owner)->flags;
             if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
@@ -918,7 +918,7 @@ s32 action;
                 }
             }
         }
-        node = *(u8 **)(node + 0x16c);
+        node = (u8 *)((BtlTask *)node)->next;
     }
     return 0;
 }
@@ -932,79 +932,79 @@ s64 btlAnyGroup400HasAction(s32 unused, s32 action) {
 }
 
 s32 func_00201B50(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_00201900(action, ((BtlUnit *)unit)->actionSlot, 0) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00201BD8(s32 unused, s32 action) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_00201900(action, ((BtlUnit *)unit)->actionSlot, 0) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00201C60(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (btlUnitHasAllTenActions(unit) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 func_00201CD0(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (btlUnitHasAllTenActions(unit) != 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
 
 s32 btlAreUnitsMissingStatusFlag(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->flags & 0x1000) != 0) {
                 return 0;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 1;
 }
 
 s32 btlAreUnitsHoldingStatusFlag(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->flags & 0x1000) == 0) {
                 return 0;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 1;
 }
@@ -1027,14 +1027,14 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
 }
 
 s32 func_00201E88(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (((BtlUnit *)unit)->unk_12A == 0) {
                 return 1;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -1048,9 +1048,9 @@ s64 btlAnyGroup200HasQuery(s32 unused, s32 query, u32 unused2) {
 }
 
 s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
-    u8 *node = *(u8 **)(func_001A17F0() + 0x224);
+    u8 *node = (u8 *)((BtlState *)func_001A17F0())->tasks;
     while (node != 0) {
-        u8 *owner = *(u8 **)(node + 0x18);
+        u8 *owner = (u8 *)((BtlTask *)node)->unit;
         if (owner != 0) {
             u32 flags = ((BtlUnit *)owner)->flags;
             if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
@@ -1062,7 +1062,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
                 }
             }
         }
-        node = *(u8 **)(node + 0x16c);
+        node = (u8 *)((BtlTask *)node)->next;
     }
     return 0;
 }
@@ -1267,13 +1267,13 @@ s32 func_00203F98(s32 actor) {
     return 1;
 }
 
-u32 func_00204008(u32 arg0, u32 arg1) {
-    func_002042E8(arg0, arg1, 1);
+u32 func_00204008(u32 task, u32 input) {
+    func_002042E8(task, input, 1);
     return 1;
 }
 
-u32 func_00204028(u32 arg0, u32 arg1) {
-    func_002042E8(arg0, arg1, 0);
+u32 func_00204028(u32 task, u32 input) {
+    func_002042E8(task, input, 0);
     return 1;
 }
 
@@ -1395,7 +1395,7 @@ void func_00204BA8(u8 *unit, u8 *command) {
     }
     battle = (u8 *)func_001A17F0();
     species = ((BtlUnit *)unit)->mode;
-    effect = *(u8 **)(battle + 0x694);
+    effect = (u8 *)((BtlState *)battle)->effect;
     if (species < 0x105) {
         if (species >= 0x102 && (((BtlCommandStatus *)command)->restrictionFlags & 0x10)) {
             ((BtlUnit *)unit)->unk_120 |= 0x2000;
@@ -1504,21 +1504,21 @@ void btlResetUnitPlacement(void) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     } while (unit != 0);
 }
 
 extern void func_001D5990(void *);
 
 void func_00204FE0(void) {
-    u8 *unit = *(u8 **)((u8 *)func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         u32 flags = ((BtlUnit *)unit)->flags;
         if (flags & 1) {
             if (flags & 0x400) {
                 s32 species = ((BtlUnit *)unit)->mode;
                 if (species >= 0x105) {
-                    unit = *(u8 **)(unit + 0x344);
+                    unit = (u8 *)((BtlUnit *)unit)->next;
                     continue;
                 }
                 if (species >= 0x102) {
@@ -1527,7 +1527,7 @@ void func_00204FE0(void) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
 }
 
@@ -1662,7 +1662,7 @@ extern void mdlFlagSet(u32);
 extern void mdlFlagClear(u32);
 
 s32 func_002055F8(void) {
-    u8 *unit = *(u8 **)((u8 *)func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (((BtlUnit *)unit)->flags & 1) {
             if (func_001A8018(unit) != 0) {
@@ -1674,7 +1674,7 @@ s32 func_002055F8(void) {
                 return 6;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return -1;
 }
@@ -1693,7 +1693,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002056E0);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205730);
 
 void func_00205838(void) {
-    u8 *effect = *(u8 **)((u8 *)func_001A17F0() + 0x694);
+    u8 *effect = (u8 *)((BtlState *)func_001A17F0())->effect;
     u8 *actor = *(u8 **)effect;
     if (actor != 0) {
         u32 state = ((BtlUnit *)actor)->unk_114;
@@ -1714,7 +1714,7 @@ void func_00205838(void) {
 
 void btlResetEffectState(void) {
     u8 *battle = (u8 *)func_001A17F0();
-    BattleEffectState *data = *(BattleEffectState **)(battle + 0x694);
+    BattleEffectState *data = ((BtlState *)battle)->effect;
     data->active = 1;
     data->speed = 20.0f;
     data->flags = 0;
@@ -1832,7 +1832,7 @@ u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
     if (species != 0x124) {
         return 0;
     }
-    unit = *(u8 **)((u8 *)func_001A17F0() + 0x228);
+    unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         u32 flags = ((BtlUnit *)unit)->flags;
         if (flags & 1) {
@@ -1844,7 +1844,7 @@ u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return 0;
 }
@@ -1867,7 +1867,7 @@ s32 btlGetEffectTaskActorMatchCode(u8 *task) {
     if ((((BtlTask *)task)->flags & 8) == 0) {
         return -1;
     }
-    effect = *(BattleEffectState **)((u8 *)func_001A17F0() + 0x694);
+    effect = ((BtlState *)func_001A17F0())->effect;
     return effect->actor == (u32)((BtlTask *)task)->unit ? 12 : -1;
 }
 
@@ -1884,7 +1884,7 @@ s32 func_002068E0(BtlTask *task) {
     if ((task->flags & 8) == 0) {
         return -1;
     }
-    effect = *(BattleEffectState **)((u8 *)func_001A17F0() + 0x694);
+    effect = ((BtlState *)func_001A17F0())->effect;
     if (effect->actor != (u32)task->unit) {
         return -1;
     }
@@ -1952,7 +1952,7 @@ s32 btlHasDifferentActiveTarget(u32 target) {
 
 extern s32 btlHasEffectActor(void);
 
-s32 btlSetLinkFlagOff(BtlUnit *arg) {
+s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
     BtlUnit *unit;
     BtlUnit *other;
     if (btlHasEffectActor() == 0) {
@@ -1972,11 +1972,11 @@ s32 btlSetLinkFlagOff(BtlUnit *arg) {
         if (!(other->flags & 2)) {
             return 1;
         }
-        if (unit == arg) {
+        if (unit == requestedUnit) {
             *other->model->flags &= ~1;
             return 1;
         }
-        if (other != arg) {
+        if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
@@ -1991,7 +1991,7 @@ s32 btlSetLinkFlagOff(BtlUnit *arg) {
 
 extern s32 btlHasEffectActor(void);
 
-s32 btlSetLinkFlagOn(BtlUnit *arg) {
+s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     BtlUnit *unit;
     BtlUnit *other;
     if (btlHasEffectActor() == 0) {
@@ -2011,11 +2011,11 @@ s32 btlSetLinkFlagOn(BtlUnit *arg) {
         if (!(other->flags & 2)) {
             return 1;
         }
-        if (unit == arg) {
+        if (unit == requestedUnit) {
             *other->model->flags |= 1;
             return 1;
         }
-        if (other != arg) {
+        if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
@@ -2041,14 +2041,14 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return 1;
     }
-    effect = *(u8 **)(battle + 0x694);
-    if (effect[0xe] != 0) {
+    effect = (u8 *)((BtlState *)battle)->effect;
+    if (((BattleEffectState *)effect)->active != 0) {
         return 1;
     }
     if (((BtlUnit *)unit)->species == 0x124) {
         return 1;
     }
-    other = *(u8 **)(battle + 0x228);
+    other = (u8 *)((BtlState *)battle)->units;
     while (other != 0) {
         u32 flags = ((BtlUnit *)other)->flags;
         if (flags & 1) {
@@ -2060,7 +2060,7 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
                 }
             }
         }
-        other = *(u8 **)(other + 0x344);
+        other = (u8 *)((BtlUnit *)other)->next;
     }
     btlStartTask(func_001D8DE8(unit, 8, 10));
     ((BtlUnit *)unit)->flags &= ~0x100;
@@ -2101,12 +2101,12 @@ s32 func_00207948(BtlAimUnit *unit) {
     if (unit->kind != 0x189) {
         return 0;
     }
-    for (target = *(u8 **)(battle + 0x228); target != 0; target = *(u8 **)(target + 0x344)) {
-        flags = *(u32 *)(target + 0x110);
+    for (target = (u8 *)((BtlState *)battle)->units; target != 0; target = (u8 *)((BtlUnit *)target)->next) {
+        flags = ((BtlUnit *)target)->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
                 if ((flags & 2) != 0) {
-                    if (*(u16 *)(target + 0x124) == 0x107) {
+                    if (((BtlUnit *)target)->mode == 0x107) {
                         break;
                     }
                 }
@@ -2205,14 +2205,14 @@ u32 btlGetEffectActor(void) {
 
 s32 func_00207C18(void) {
     u8 *battle = (u8 *)func_001A17F0();
-    u8 *unit = *(u8 **)(battle + 0x228);
-    u8 *effect = *(u8 **)(battle + 0x694);
+    u8 *unit = (u8 *)((BtlState *)battle)->units;
+    u8 *effect = (u8 *)((BtlState *)battle)->effect;
     while (unit != 0) {
         if ((((BtlUnit *)unit)->flags & 0x400) &&
             ((BtlUnit *)unit)->mode == 0x107) {
             break;
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (unit == 0) {
         return 1;
@@ -2366,7 +2366,7 @@ void func_00208400(void) {
     s32 unit;
 
     unit = func_001A17F0();
-    data = *(s32 **)(unit + 0x694);
+    data = (s32 *)((BtlState *)unit)->effect;
     unit = *data;
     if (unit != 0) {
         btlDestroyUnit(unit);
@@ -2376,7 +2376,7 @@ void func_00208400(void) {
 
 /* Allocate and launch a subtask from the active battle task slot. */
 u64 btlStartSubtaskWithInput(u64 input) {
-    u8 *subtaskSlot = *(u8 **)(func_001A17F0() + 0x694);
+    u8 *subtaskSlot = (u8 *)((BtlState *)func_001A17F0())->effect;
     u8 *task = (u8 *)func_001D9038(*(void **)subtaskSlot, 12);
     if (input != 0) {
         *(u64 *)(task + 8) = input;
@@ -2429,7 +2429,7 @@ void btlUpdateReadyUnits(void) {
 }
 
 s32 func_002085E8(void) {
-    u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     s32 count = 0;
     while (unit != 0) {
         u32 flags = ((BtlUnit *)unit)->flags;
@@ -2442,7 +2442,7 @@ s32 func_002085E8(void) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return count == 0;
 }
@@ -2525,14 +2525,14 @@ extern void func_001F53F0(void);
 
 void func_00208CA8(void) {
     u8 *battle = (u8 *)func_001A17F0();
-    u8 *unit = *(u8 **)(battle + 0x228);
+    u8 *unit = (u8 *)((BtlState *)battle)->units;
     while (unit != 0) {
         if (((BtlUnit *)unit)->flags & 0x400) {
             if (((BtlUnit *)unit)->mode == 0x10d) {
                 break;
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (unit != 0) {
         ((BtlState *)battle)->unk_5B8 = 0;
@@ -2646,7 +2646,7 @@ void func_00208FB0(void) {
     s32 unit;
 
     unit = func_001A17F0();
-    data = *(s32 **)(unit + 0x694);
+    data = (s32 *)((BtlState *)unit)->effect;
     unit = *data;
     if (unit != 0) {
         btlDestroyUnit(unit);
@@ -2731,8 +2731,8 @@ s32 func_00209400(void) {
 
 s32 func_00209460(void) {
     u8 *battle = (u8 *)func_001A17F0();
-    u8 *unit = *(u8 **)(battle + 0x228);
-    u8 *effect = *(u8 **)(battle + 0x694);
+    u8 *unit = (u8 *)((BtlState *)battle)->units;
+    u8 *effect = (u8 *)((BtlState *)battle)->effect;
     while (unit != 0) {
         u32 flags = ((BtlUnit *)unit)->flags;
         if (flags & 1) {
@@ -2742,7 +2742,7 @@ s32 func_00209460(void) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     return (((BtlUnit *)unit)->flags & 0x20) ? 1 : -1;
 }
@@ -2786,7 +2786,7 @@ s32 func_002096E8(u8 *entry) {
 }
 
 s32 btlCheckAttachedMember(u8 *entry) {
-    u8 *unit = *(u8 **)(entry + 0xf4);
+    u8 *unit = (u8 *)((BtlEventEntry *)entry)->task;
     if (unit == 0) {
         return 1;
     }
@@ -2915,7 +2915,7 @@ void func_00209A28(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    data = *(u8 **)(battle + 0x694);
+    data = (u8 *)((BtlState *)battle)->effect;
     ((BtlEventTriggers *)data)->resourceReady = 1;
     ((BtlEventTriggers *)data)->pending = 0;
 }
@@ -2989,7 +2989,7 @@ void func_00209BC8(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    **(u16 **)(battle + 0x694) = 0;
+    *(u16 *)((BtlState *)battle)->effect = 0;
 }
 
 s32 btlRemapBossAction(BtlUnit *unit, s32 action, u8 option) {
@@ -3032,11 +3032,11 @@ u32 func_0020A3F0(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    return *(u16 *)(*(s32 *)(battle + 0x694));
+    return *(u16 *)((BtlState *)battle)->effect;
 }
 
 s32 func_0020A418(void) {
-    u8 *unit = *(u8 **)((u8 *)func_001A17F0() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     u16 species = 0;
     while (unit != 0) {
         u32 flags = ((BtlUnit *)unit)->flags;
@@ -3048,7 +3048,7 @@ s32 func_0020A418(void) {
                 }
             }
         }
-        unit = *(u8 **)(unit + 0x344);
+        unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (unit == 0) {
         return 0;
@@ -3184,7 +3184,7 @@ s64 func_0020B560(void) {
 }
 
 s32 func_0020B580(u8 *unit) {
-    u8 *entry = *(u8 **)(unit + 0xf4);
+    u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
     u32 flags = ((BtlTask *)entry)->unit->flags;
     u8 *other;
     if (flags & 0x200) {
@@ -3210,7 +3210,7 @@ s32 func_0020B580(u8 *unit) {
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B640);
 
 s32 func_0020B770(u8 *unit) {
-    u8 *entry = *(u8 **)(unit + 0xf4);
+    u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
     u8 *other;
     if (((BtlTask *)entry)->unit->flags & 0x200) {
         if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
@@ -3285,8 +3285,8 @@ s32 btlDispatchActionAnimationB(u8 *unit) {
         func_001DC760();
         func_0020B348(unit, unit, 0);
     } else if (flags & 8) {
-        if (btlGetIndexListCount(((BtlTask *)*(u8 **)(unit + 0xf4))->unk_60) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)((BtlTask *)*(u8 **)(unit + 0xf4))->unk_60, 0);
+        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
+            void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->unk_60, 0);
             func_001DC760();
             func_0020B190(unit, other);
             ((BtlUnit *)unit)->flags = 0;
@@ -3601,7 +3601,7 @@ extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f
 extern void func_0020DA40(u8 *);
 
 s32 func_0020E868(u8 *unit) {
-    u8 *entry = *(u8 **)(unit + 0xf4);
+    u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
     u8 *other;
     if (((BtlTask *)entry)->unit->flags & 0x200) {
         if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
@@ -3637,7 +3637,7 @@ s32 func_0020E910(u8 *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (btlGetIndexListCount(((BtlTask *)*(u8 **)(unit + 0xf4))->unk_60) == 1) {
+        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
             func_001DC760();
             func_0020DB90(unit);
         } else {
