@@ -1523,17 +1523,17 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012DD70);
 
 /* Suppress the world object's current entry when it is already selected. */
 s64 func_0012E488(void) {
-    u64 temp_v0;
-    s64 temp_v1;
+    u64 worldObject;
+    s64 currentEntry;
     s64 temp_v2;
 
-    temp_v0 = dds3GetWorldObject();
-    temp_v1 = func_001109F0(temp_v0);
+    worldObject = dds3GetWorldObject();
+    currentEntry = func_001109F0(worldObject);
     temp_v2 = func_00123DE0();
-    if (temp_v2 == temp_v1) {
-        temp_v1 = 0;
+    if (temp_v2 == currentEntry) {
+        currentEntry = 0;
     }
-    return temp_v1;
+    return currentEntry;
 }
 
 void fldSetCameraMoveMode(u32 value) {
@@ -1863,48 +1863,63 @@ void func_00131590(void) {
     D_0032E544[0] = 0;
 }
 
+typedef struct FldCameraFacingWork {
+    u8 pad000[0x140];
+    f32 cameraX;        /* 0x140 */
+    u8 pad144[4];
+    f32 cameraZ;        /* 0x148 */
+    u8 pad14C[0x1C];
+    f32 facingAngle;    /* 0x168 */
+    u8 pad16C[0x1C];
+    u32 pointState;     /* 0x188: 1 pending, 2 applied */
+    f32 targetX;        /* 0x18C */
+    f32 targetZ;        /* 0x190 */
+    u32 angleState;     /* 0x194: 1 pending, 2 applied */
+    f32 targetAngle;    /* 0x198 */
+} FldCameraFacingWork;
+
 /* Camera facing requests share the field-work block. Both request states
  * advance from 1 to 2 when their new angle is installed. */
-void fldQueueCameraFacingPoint(f32 arg0, f32 arg1) {
-    u8 *temp_v0 = (u8 *)D_0032E3B0;
+void fldQueueCameraFacingPoint(f32 targetX, f32 targetZ) {
+    FldCameraFacingWork *work = (FldCameraFacingWork *)D_0032E3B0;
 
-    *(f32 *)(temp_v0 + 0x18C) = arg0;
-    *(f32 *)(temp_v0 + 0x190) = arg1;
-    *(u32 *)(temp_v0 + 0x188) = 1;
+    work->targetX = targetX;
+    work->targetZ = targetZ;
+    work->pointState = 1;
 }
 
-void fldQueueCameraFacingAngle(f32 arg0, f32 arg1, f32 arg2) {
-    u8 *temp_v0;
-    f32 temp_f0;
+void fldQueueCameraFacingAngle(f32 x, f32 unusedY, f32 z) {
+    FldCameraFacingWork *work;
+    f32 angle;
 
-    temp_f0 = sdfAtan2(arg0, arg2);
-    temp_v0 = (u8 *)D_0032E3B0;
-    temp_f0 *= 180.0f / 3.14f;
-    *(u32 *)(temp_v0 + 0x194) = 1;
-    *(f32 *)(temp_v0 + 0x198) = -temp_f0;
+    angle = sdfAtan2(x, z);
+    work = (FldCameraFacingWork *)D_0032E3B0;
+    angle *= 180.0f / 3.14f;
+    work->angleState = 1;
+    work->targetAngle = -angle;
 }
 
 void fldApplyCameraFacingPoint(void) {
-    u8 *temp_v0 = (u8 *)D_0032E3B0;
+    u8 *cameraWork = (u8 *)D_0032E3B0;
 
-    if (*(u32 *)(temp_v0 + 0x188) != 0) {
-        f32 temp_f12 = *(f32 *)(temp_v0 + 0x140) - *(f32 *)(temp_v0 + 0x18C);
-        f32 temp_f13 = *(f32 *)(temp_v0 + 0x148) - *(f32 *)(temp_v0 + 0x190);
-        f32 temp_f0;
+    if (*(u32 *)(cameraWork + 0x188) != 0) {
+        f32 deltaX = *(f32 *)(cameraWork + 0x140) - *(f32 *)(cameraWork + 0x18C);
+        f32 deltaZ = *(f32 *)(cameraWork + 0x148) - *(f32 *)(cameraWork + 0x190);
+        f32 angle;
 
-        *(u32 *)(temp_v0 + 0x188) = 2;
-        temp_f0 = sdfAtan2(temp_f12, temp_f13);
-        temp_f0 *= 180.0f / 3.14f;
-        *(f32 *)(temp_v0 + 0x168) = -temp_f0;
+        *(u32 *)(cameraWork + 0x188) = 2;
+        angle = sdfAtan2(deltaX, deltaZ);
+        angle *= 180.0f / 3.14f;
+        *(f32 *)(cameraWork + 0x168) = -angle;
     }
 }
 
 void fldApplyCameraFacingAngle(void) {
-    u8 *temp_v0 = (u8 *)D_0032E3B0;
+    u8 *cameraWork = (u8 *)D_0032E3B0;
 
-    if (*(u32 *)(temp_v0 + 0x194) != 0) {
-        *(u32 *)(temp_v0 + 0x194) = 2;
-        *(f32 *)(temp_v0 + 0x168) = *(f32 *)(temp_v0 + 0x198);
+    if (*(u32 *)(cameraWork + 0x194) != 0) {
+        *(u32 *)(cameraWork + 0x194) = 2;
+        *(f32 *)(cameraWork + 0x168) = *(f32 *)(cameraWork + 0x198);
     }
 }
 
@@ -2052,12 +2067,12 @@ u32 func_00132B90(void) {
 }
 
 void func_00132BA0(u32 arg0) {
-    u32 temp_v0 = D_0032E59C[0];
+    u32 previousValue = D_0032E59C[0];
 
     D_003BAD9C = arg0;
     D_003BADA0 = 0;
-    D_003BADA4 = temp_v0;
-    func_00132FD0(temp_v0, 1);
+    D_003BADA4 = previousValue;
+    func_00132FD0(previousValue, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00132BD0);
@@ -2771,12 +2786,12 @@ s32 fldHasActiveTasks(void) {
 }
 
 s32 func_0013C5D0(void) {
-    s32 temp_v0 = D_003BAE3C;
+    s32 slot = D_003BAE3C;
 
-    if (temp_v0 < 0) {
+    if (slot < 0) {
         return -1;
     }
-    return D_003C9518[temp_v0 * 160];
+    return D_003C9518[slot * 160];
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C600);
@@ -2846,9 +2861,34 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
 
+/* Packed 0x6C-byte field actor row. Offsets come from the parallel actor
+ * searches, motion lookups, and sound dispatch below. */
+typedef struct FldActorEntry {
+    s8 kind;               /* 0x00 */
+    u8 pad01;
+    s16 requiredFlag;      /* 0x02: zero or a model-flag ID */
+    s16 area;              /* 0x04: current area plus one */
+    char name[0x0C];       /* 0x06 */
+    s16 motion;            /* 0x12 */
+    s16 secondaryMotion;   /* 0x14 */
+    s16 sound;             /* 0x16 */
+    char motionName[0x0C]; /* 0x18 */
+    char otherName[0x0C];  /* 0x24 */
+    s8 variantMode;        /* 0x30 */
+    u8 flags31;            /* 0x31 */
+    s16 variant;           /* 0x32 */
+    u8 pad34[0x20];
+    u8 flags54;            /* 0x54 */
+    u8 pad55[0x0F];
+    u8 flags64;            /* 0x64 */
+    u8 pad65[2];
+    s8 value67;            /* 0x67 */
+    u8 pad68[4];
+} FldActorEntry;
+
 u8 *func_0013D6D0(const char *name) {
     s32 i = 0;
-    u8 *entry;
+    FldActorEntry *entry;
     s16 flag;
     s16 sub;
 
@@ -2856,16 +2896,16 @@ u8 *func_0013D6D0(const char *name) {
         return 0;
     }
     do {
-        entry = D_00337D00 + i * 108;
-        flag = *(s16 *)(entry + 2);
+        entry = (FldActorEntry *)(D_00337D00 + i * 108);
+        flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && (((FldAreaState *)D_0032E3B0)->unk104 == 0 || !(entry[0x31] & 4))
-            && *(s16 *)(entry + 4) == ((FldAreaState *)D_0032E3B0)->unk14 + 1
-            && strcmp(name, (char *)(entry + 6)) == 0) {
-            switch (*(s8 *)entry) {
+            && (((FldAreaState *)D_0032E3B0)->unk104 == 0 || !(entry->flags31 & 4))
+            && entry->area == ((FldAreaState *)D_0032E3B0)->unk14 + 1
+            && strcmp(name, entry->name) == 0) {
+            switch (entry->kind) {
             case 1:
-                if (*(s8 *)(entry + 0x30) == 0) {
-                    sub = *(s16 *)(entry + 0x32);
+                if (entry->variantMode == 0) {
+                    sub = entry->variant;
                     if (sub != 0) {
                         if (sub == 1) {
                             D_003BAE6C = 6;
@@ -2906,7 +2946,7 @@ u8 *func_0013D6D0(const char *name) {
 
 u8 *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
-    u8 *entry;
+    FldActorEntry *entry;
     s16 flag;
     s16 sub;
 
@@ -2914,17 +2954,17 @@ u8 *fldFindActorEntryByName(const char *name) {
         return 0;
     }
     do {
-        entry = D_00337D00 + i * 108;
-        flag = *(s16 *)(entry + 2);
+        entry = (FldActorEntry *)(D_00337D00 + i * 108);
+        flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && (((FldAreaState *)D_0032E3B0)->unk104 == 0 || !(entry[0x31] & 4))
-            && *(s16 *)(entry + 4) == ((FldAreaState *)D_0032E3B0)->unk14 + 1
-            && strcmp(name, (char *)(entry + 6)) == 0) {
+            && (((FldAreaState *)D_0032E3B0)->unk104 == 0 || !(entry->flags31 & 4))
+            && entry->area == ((FldAreaState *)D_0032E3B0)->unk14 + 1
+            && strcmp(name, entry->name) == 0) {
             D_003BAE64 = i;
-            switch (*(s8 *)entry) {
+            switch (entry->kind) {
             case 1:
-                if (*(s8 *)(entry + 0x30) == 0) {
-                    sub = *(s16 *)(entry + 0x32);
+                if (entry->variantMode == 0) {
+                    sub = entry->variant;
                     if (sub != 0) {
                         if (sub == 1) {
                             D_003BAE68 = 6;
@@ -2967,8 +3007,8 @@ extern s32 D_0032E3C4[];
 extern u8 D_00336A30[];
 u8 *func_0013DAC0(void) {
     s32 index = D_003BAB40;
-    u8 *entry = D_00337D00 + index * 108;
-    if (*(s16 *)(entry + 4) == D_0032E3C4[0] + 1 && *(s8 *)entry == 10) {
+    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    if (entry->area == D_0032E3C4[0] + 1 && entry->kind == 10) {
         D_003BAE64 = index;
         D_003BAE68 = 8;
         return D_00336A30;
@@ -2981,18 +3021,18 @@ s32 func_0013DB28(void) {
 }
 
 s32 func_0013DB58(s32 arg0) {
-    u8 *entry = D_00337D00 + D_003BAE64 * 108;
+    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + D_003BAE64 * 108);
 
-    if (arg0 == 0 && *(s8 *)entry == 1) {
-        if (*(s16 *)(entry + 0x12) == 5 || *(s16 *)(entry + 0x14) == 5 || *(s16 *)(entry + 0x12) == 6
-            || *(s16 *)(entry + 0x14) == 6 || *(s16 *)(entry + 0x12) == 7 || *(s16 *)(entry + 0x14) == 7
-            || *(s16 *)(entry + 0x12) == 8 || *(s16 *)(entry + 0x14) == 8) {
+    if (arg0 == 0 && entry->kind == 1) {
+        if (entry->motion == 5 || entry->secondaryMotion == 5 || entry->motion == 6
+            || entry->secondaryMotion == 6 || entry->motion == 7 || entry->secondaryMotion == 7
+            || entry->motion == 8 || entry->secondaryMotion == 8) {
             return 0x28;
         }
         return 0x14;
     }
     if (arg0 == 1) {
-        return fldTestBits(entry[0x54], 8);
+        return fldTestBits(entry->flags54, 8);
     }
     return 0;
 }
@@ -3008,7 +3048,7 @@ void func_0013DC08(s32 arg0) {
     s32 index;
     s32 kind;
     s32 record;
-    u8 *entry;
+    FldActorEntry *entry;
 
     if (arg0 != 0) {
         record = fldGetTaskRecordValue(*(u32 *)(func_0010D6A0() + 0xE4));
@@ -3020,19 +3060,19 @@ void func_0013DC08(s32 arg0) {
         }
     }
     index = D_003BAE64;
-    entry = D_00337D00 + index * 108;
-    kind = *(s8 *)entry;
+    entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    kind = entry->kind;
     if (kind == 1) {
-        if (*(s16 *)(entry + 4) == D_0032E3C4[0] + 1) {
-            fldPlayFieldSeVolumePan(*(s16 *)(entry + 0x16));
+        if (entry->area == D_0032E3C4[0] + 1) {
+            fldPlayFieldSeVolumePan(entry->sound);
             func_00140AB8(D_003CE3E0[index][1]);
             return;
         }
     } else if (kind == 2) {
-        if (*(s16 *)(entry + 4) == D_0032E3B0[5] + 1) {
+        if (entry->area == D_0032E3B0[5] + 1) {
             D_0032E3B0[94] = 1;
             *(f32 *)&D_0032E3B0[93] = *(f32 *)&D_003CE3E0[index][11];
-            if (*(s16 *)(entry + 0x12) == 1) {
+            if (entry->motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
                 return;
             }
@@ -3043,7 +3083,7 @@ void func_0013DC08(s32 arg0) {
         kwlnFadeSetRGB(0, 0, 0);
         return;
     } else if (kind == 5) {
-        if (*(s16 *)(entry + 0x12) == 0) {
+        if (entry->motion == 0) {
             D_0032E530[0] = 0x64;
         } else {
             D_0032E530[0] = -0x64;
@@ -3099,25 +3139,25 @@ extern void fldRequestAreaResource();
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
 
 s32 fldGetActorStat0(s32 mode) {
-    u8 *actor = D_00337D00 + D_003BAE64 * 108;
+    FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + D_003BAE64 * 108);
     s32 *entry;
     s32 flags;
 
     switch (mode) {
     case 0:
-        return *(s16 *)(actor + 0x12);
+        return actor->motion;
     case 1:
-        entry = func_00110F80(dds3GetWorldObject(), actor + 0x18);
+        entry = func_00110F80(dds3GetWorldObject(), actor->motionName);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = func_00110F80(dds3GetWorldObject(), actor + 0x24);
+        entry = func_00110F80(dds3GetWorldObject(), actor->otherName);
         if (entry != NULL) {
             return entry[1];
         }
     case 3:
-        flags = *(u16 *)(actor + 0x14);
+        flags = (u16)actor->secondaryMotion;
         if (flags & 1) {
             return 1;
         }
@@ -3131,12 +3171,12 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0270);
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
 s32 fldGetActorStat1(u32 kind) {
-    u8 *entry = D_00337D00 + D_003BAE64 * 108;
+    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + D_003BAE64 * 108);
     s32 *found;
 
     switch (kind) {
     case 0:
-        switch (*(s16 *)(entry + 0x12)) {
+        switch (entry->motion) {
         case 0:
             return 12;
         case 1:
@@ -3150,55 +3190,55 @@ s32 fldGetActorStat1(u32 kind) {
         }
         return 0;
     case 1:
-        found = func_00110F80(dds3GetWorldObject(), entry + 0x18);
+        found = func_00110F80(dds3GetWorldObject(), entry->motionName);
         if (found != NULL) {
             return found[1];
         }
     case 2:
-        found = func_00110F80(dds3GetWorldObject(), entry + 0x24);
+        found = func_00110F80(dds3GetWorldObject(), entry->otherName);
         if (found != NULL) {
             return found[1];
         }
-        return *(s16 *)(entry + 0x14);
+        return entry->secondaryMotion;
     case 3:
-        return *(s16 *)(entry + 0x14);
+        return entry->secondaryMotion;
     case 4:
-        return *(s16 *)(entry + 0x16);
+        return entry->sound;
     }
     return 0;
 }
 
 s32 fldGetActorMotionEntry(u32 kind) {
-    u8 *entry = D_00337D00 + D_003BAE64 * 108;
-    s16 index = *(s16 *)(entry + 0x12);
-    s32 *found;
-    s32 flags;
+    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + D_003BAE64 * 108);
+    s16 motionIndex = entry->motion;
+    s32 *motionRecord;
+    s32 entryFlags;
 
     switch (kind) {
     case 0:
-        return D_00336A60[index].unk0;
+        return D_00336A60[motionIndex].unk0;
     case 1:
-        found = func_00110F80(dds3GetWorldObject(), D_00336A60[index].unk4);
-        if (found != NULL) {
-            return found[1];
+        motionRecord = func_00110F80(dds3GetWorldObject(), D_00336A60[motionIndex].unk4);
+        if (motionRecord != NULL) {
+            return motionRecord[1];
         }
     case 2:
-        found = func_00110F80(dds3GetWorldObject(), D_00336A60[index].unk14);
-        if (found != NULL) {
-            return found[1];
+        motionRecord = func_00110F80(dds3GetWorldObject(), D_00336A60[motionIndex].unk14);
+        if (motionRecord != NULL) {
+            return motionRecord[1];
         }
     case 3:
-        D_003BAE44 = D_00336A60[index].unk24;
+        D_003BAE44 = D_00336A60[motionIndex].unk24;
         return 0;
     case 4:
-        D_003BAE48 = D_00336A60[index].unk34;
+        D_003BAE48 = D_00336A60[motionIndex].unk34;
         return 0;
     case 5:
-        return D_00336A60[index].unk44;
+        return D_00336A60[motionIndex].unk44;
     case 6:
-        flags = entry[0x64];
-        if (flags & 1) {
-            return *(s8 *)(entry + 0x67);
+        entryFlags = entry->flags64;
+        if (entryFlags & 1) {
+            return entry->value67;
         }
         return -1;
     }
@@ -3359,13 +3399,13 @@ s32 func_00140F70(u32 task) {
 }
 
 void * func_00141098(u32 arg0) {
-    u16 *temp_v0 = func_002CFEB8(8);
+    u16 *ticket = func_002CFEB8(8);
 
-    temp_v0[1] = 1;
-    temp_v0[0] = 0;
-    temp_v0[2] = 0;
-    temp_v0[3] = 0;
-    func_00101A68(arg0, temp_v0);
+    ticket[1] = 1;
+    ticket[0] = 0;
+    ticket[2] = 0;
+    ticket[3] = 0;
+    func_00101A68(arg0, ticket);
     return (void *)func_00140F70;
 }
 

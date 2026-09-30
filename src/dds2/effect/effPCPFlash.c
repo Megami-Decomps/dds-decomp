@@ -392,10 +392,10 @@ typedef struct PcpFlashRotationWork {
 extern void func_00336768(void *orientation, f32 angle);
 
 void func_00171E00(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00171CE0(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00171CE0(effectParams);
 }
 
 void func_00171E20(void) {
@@ -540,10 +540,10 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172318);
 
 void func_001724B0(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00172318(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00172318(effectParams);
 }
 
 void func_001724D0(void) {
@@ -767,10 +767,10 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172C48);
 
 void func_00172E68(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00172C48(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00172C48(effectParams);
 }
 
 void func_00172E88(void) {
@@ -905,10 +905,10 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173458);
 
 void func_00173690(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00173458(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00173458(effectParams);
 }
 
 void func_001736B0(void) {
@@ -949,10 +949,10 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173AA0);
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173D40);
 
 void func_00173F90(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00173D40(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00173D40(effectParams);
 }
 
 void func_00173FB0(void) {
@@ -1012,10 +1012,10 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001742F0);
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174648);
 
 void func_00174808(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00174648(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00174648(effectParams);
 }
 
 void func_00174828(void) {
@@ -1184,10 +1184,10 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174F00);
 
 void func_00175038(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00174F00(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00174F00(effectParams);
 }
 
 void func_00175058(void) {
@@ -1326,10 +1326,10 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175598);
 
 void func_00175770(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00175598(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00175598(effectParams);
 }
 
 void func_00175790(void) {
@@ -1459,10 +1459,10 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175EE8);
 
 void func_00176118(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00175EE8(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00175EE8(effectParams);
 }
 
 void func_00176138(void) {
@@ -1605,10 +1605,10 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176758);
 
 void func_00176898(u64 arg0) {
-    u64 temp_v0;
+    u64 effectParams;
 
-    temp_v0 = effParamTableGetBlock(arg0, 0);
-    func_00176758(temp_v0);
+    effectParams = effParamTableGetBlock(arg0, 0);
+    func_00176758(effectParams);
 }
 
 void func_001768B8(void) {

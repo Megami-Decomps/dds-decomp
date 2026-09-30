@@ -3860,44 +3860,71 @@ void effResetChild(EffPCPSubEffectWork *work) {
     work->state = 0;
 }
 
+/* The clone copies the 0x50-byte parameter prefix, then attaches a node whose
+ * entries receive three colors from that prefix. */
+typedef struct EffPCPBeamWork {
+    u8 pad00[0x30];
+    u32 kind;              /* 0x30 */
+    u32 nodeColor;         /* 0x34 */
+    u8 pad38[0x04];
+    u32 firstColor;        /* 0x3C */
+    u8 pad40[0x04];
+    u32 middleColor;       /* 0x44 */
+    u8 pad48[0x04];
+    u32 lastColor;         /* 0x4C */
+    u32 state;             /* 0x50 */
+    u32 color;             /* 0x54 */
+    u32 colorCount;        /* 0x58 */
+    struct EffPCPBeamColorNode *node; /* 0x5C */
+} EffPCPBeamWork;
+
+typedef struct EffPCPBeamColorNode {
+    u8 pad00[0x94];
+    u32 color;             /* 0x94 */
+    u8 pad98[0x04];
+    u32 colorCount;        /* 0x9C */
+    u8 padA0[0x04];
+    u32 *colors;           /* 0xA4 */
+} EffPCPBeamColorNode;
+
 extern u8 *func_001801F8(u32);
 
 u8 *effBeamEffectClone(src)
-    u8 *src;
+    EffPCPBeamWork *src;
 {
-    u8 *work = func_002CFEB8(0x60);
+    EffPCPBeamWork *work = func_002CFEB8(0x60);
     u32 kind;
-    u8 *node;
+    EffPCPBeamColorNode *node;
     u32 *entry;
     s32 groups;
     u32 i;
 
     *(EffPCPBlock50 *)work = *(EffPCPBlock50 *)src;
-    *(u32 *)(work + 0x54) = 0x80808080;
-    *(u32 *)(work + 0x50) = 0;
-    kind = *(u32 *)(src + 0x30);
+    work->color = 0x80808080;
+    work->state = 0;
+    kind = src->kind;
     if (kind < 3) {
-        *(u32 *)(src + 0x30) = 3;
+        src->kind = 3;
         kind = 3;
     }
-    node = func_001801F8(kind);
+    node = (EffPCPBeamColorNode *)func_001801F8(kind);
     i = 0;
-    *(u8 **)(work + 0x5C) = node;
-    *(u32 *)(work + 0x58) = *(u32 *)(node + 0x9C);
-    groups = *(s32 *)(node + 0x9C) >> 2;
-    entry = *(u32 **)(node + 0xA4);
+    work->node = node;
+    work->colorCount = node->colorCount;
+    groups = (s32)node->colorCount >> 2;
+    entry = node->colors;
     for (i = 0; i < groups; i++) {
         u32 second;
 
-        entry[0] = *(u32 *)(src + 0x3C);
-        second = *(u32 *)(src + 0x44);
+        entry[0] = src->firstColor;
+        second = src->middleColor;
         entry[1] = entry[2] = second;
-        entry[3] = *(u32 *)(src + 0x4C);
+        entry[3] = src->lastColor;
         entry += 4;
     }
     effResetChild((EffPCPSubEffectWork *)work);
-    *(u32 *)(*(u8 **)(work + 0x5C) + 0x94) = *(u32 *)(src + 0x34);
-    return work;
+    work->node->color = src->nodeColor;
+    return (u8 *)work;
 }
 
 void func_00180890(void *args) {
@@ -3992,41 +4019,57 @@ typedef struct EffPCPBlock5C {
     u32 word[23];
 } EffPCPBlock5C;
 
+typedef struct EffPCPBeamLargeWork {
+    u8 pad00[0x3C];
+    u32 kind;               /* 0x3C */
+    u32 nodeColor;          /* 0x40 */
+    u8 pad44[0x04];
+    u32 firstColor;         /* 0x48 */
+    u8 pad4C[0x04];
+    u32 middleColor;        /* 0x50 */
+    u8 pad54[0x04];
+    u32 lastColor;          /* 0x58 */
+    u32 state;              /* 0x5C */
+    u32 color;              /* 0x60 */
+    u8 pad64[0x18];
+    EffPCPBeamColorNode *node; /* 0x7C */
+} EffPCPBeamLargeWork;
+
 u8 *effBeamEffectCloneLarge(src)
-    u8 *src;
+    EffPCPBeamLargeWork *src;
 {
-    u8 *work = func_002CFEB8(0x80);
+    EffPCPBeamLargeWork *work = func_002CFEB8(0x80);
     u32 kind;
-    u8 *node;
+    EffPCPBeamColorNode *node;
     u32 *entry;
     s32 groups;
     u32 i;
 
     *(EffPCPBlock5C *)work = *(EffPCPBlock5C *)src;
-    *(u32 *)(work + 0x60) = 0x80808080;
-    *(u32 *)(work + 0x5C) = 0;
-    kind = *(u32 *)(src + 0x3C);
+    work->color = 0x80808080;
+    work->state = 0;
+    kind = src->kind;
     if (kind < 3) {
-        *(u32 *)(src + 0x3C) = 3;
+        src->kind = 3;
         kind = 3;
     }
-    node = func_001801F8(kind);
+    node = (EffPCPBeamColorNode *)func_001801F8(kind);
     i = 0;
-    *(u8 **)(work + 0x7C) = node;
-    groups = *(s32 *)(node + 0x9C) >> 2;
-    entry = *(u32 **)(node + 0xA4);
+    work->node = node;
+    groups = (s32)node->colorCount >> 2;
+    entry = node->colors;
     for (i = 0; i < groups; i++) {
         u32 second;
 
-        entry[0] = *(u32 *)(src + 0x48);
-        second = *(u32 *)(src + 0x50);
+        entry[0] = src->firstColor;
+        second = src->middleColor;
         entry[1] = entry[2] = second;
-        entry[3] = *(u32 *)(src + 0x58);
+        entry[3] = src->lastColor;
         entry += 4;
     }
-    effPrepareAngles(work);
-    *(u32 *)(*(u8 **)(work + 0x7C) + 0x94) = *(u32 *)(src + 0x40);
-    return work;
+    effPrepareAngles((EffPCPAngleWork *)work);
+    work->node->color = src->nodeColor;
+    return (u8 *)work;
 }
 
 void func_00181020(void *args) {

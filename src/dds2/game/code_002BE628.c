@@ -70,6 +70,16 @@ typedef struct RangeEntry {
     u8 pad28[0x10];
 } RangeEntry;
 
+/* Counts checked before cursor moves; the primary/denominator pair also
+ * supplies the fixed-point comparison used to sort available entries. */
+typedef struct MenuItemCounts {
+    u16 flags;       /* 0x00 */
+    u8 pad02[4];
+    u16 primary;     /* 0x06 */
+    u16 denominator; /* 0x08 */
+    u16 secondary;   /* 0x0A */
+} MenuItemCounts;
+
 typedef struct AffinityRow {
     s32 affinity[4];
 } AffinityRow;
@@ -613,9 +623,13 @@ typedef struct MenuEffectNode {
 } MenuEffectNode;
 
 typedef struct MenuEffectPair {
-    u8 pad00[0x19];
+    u8 pad00[0x14];
+    s32 *settings; /* 0x14: four selectable effect settings */
+    u8 settingIndex; /* 0x18 */
     s8 positionY; /* 0x19 */
-    u8 pad1A[0x1E];
+    u8 pad1A[0x0E];
+    s32 configurationHandle; /* 0x28 */
+    u8 pad2C[0x0C];
     MenuEffectNode *first;  /* 0x38 */
     MenuEffectNode *second; /* 0x3C */
 } MenuEffectPair;
@@ -640,33 +654,33 @@ void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1D10);
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
-void mnuCyclePairedEffectSetting(s32 object) {
+void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     s32 *settings;
     s32 setting;
 
-    func_002C1D10(object);
-    mnuSetPairedEffectPositions(object);
-    settings = *(s32 **)(object + 0x14);
+    func_002C1D10(pair);
+    mnuSetPairedEffectPositions(pair);
+    settings = pair->settings;
     setting = 0;
     if (settings != 0) {
-        setting = settings[*(s8 *)(object + 0x18)];
+        setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting(*(s32 *)(object + 0x28), 0, *(s32 *)(object + 0x38), 0, setting, 0);
-    *(u8 *)(object + 0x18) += 1;
-    if ((s8)*(u8 *)(object + 0x18) >= 4) {
-        *(u8 *)(object + 0x18) = 0;
+    effConfigureWithDefaultSetting(pair->configurationHandle, 0, (s32)pair->first, 0, setting, 0);
+    pair->settingIndex += 1;
+    if ((s8)pair->settingIndex >= 4) {
+        pair->settingIndex = 0;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 
-void mnuCreatePairedEffects(s32 object) {
+void mnuCreatePairedEffects(MenuEffectPair *pair) {
     u32 effectHandle;
 
     effectHandle = func_00304998(3);
-    *(u32 *)(object + 0x38) = effectHandle;
+    pair->first = (MenuEffectNode *)effectHandle;
     effectHandle = func_00304998(3);
-    *(u32 *)(object + 0x3c) = effectHandle;
+    pair->second = (MenuEffectNode *)effectHandle;
 }
 
 void func_002C1FA0(s32 *list) {
@@ -869,12 +883,12 @@ void func_002C3E58(u32 arg0) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3E78);
 
 void func_002C3FC8(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+    s32 currentValue;
 
-    temp_v0 = *(s32 *)arg0;
-    while (temp_v0 != 0) {
+    currentValue = *(s32 *)arg0;
+    while (currentValue != 0) {
         func_002C3E78(1, 0, arg0, arg1);
-        temp_v0 = *(s32 *)arg0;
+        currentValue = *(s32 *)arg0;
     }
 }
 
@@ -889,27 +903,27 @@ u8 func_002C42A0(s32 arg0, s32 arg1) {
 }
 
 void func_002C42B0(s32 arg0, s32 arg1) {
-    u16 temp_v0;
+    u16 lowHalf;
 
-    temp_v0 = *(u16 *)arg1;
+    lowHalf = *(u16 *)arg1;
     *(s32 *)arg0 = arg1;
-    *(s32 *)arg1 = temp_v0;
+    *(s32 *)arg1 = lowHalf;
 }
 
 void func_002C42C0(s32 arg0, s32 arg1) {
-    u16 temp_v0;
+    u16 lowHalf;
 
-    temp_v0 = *(u16 *)arg1;
+    lowHalf = *(u16 *)arg1;
     *(s32 *)arg0 = arg1;
-    *(s32 *)arg1 = temp_v0 | 0x20000;
+    *(s32 *)arg1 = lowHalf | 0x20000;
 }
 
 void func_002C42D8(s32 arg0, s32 arg1) {
-    u16 temp_v0;
+    u16 lowHalf;
 
-    temp_v0 = *(u16 *)arg1;
+    lowHalf = *(u16 *)arg1;
     *(s32 *)arg0 = arg1;
-    *(s32 *)arg1 = temp_v0 | 0x60000;
+    *(s32 *)arg1 = lowHalf | 0x60000;
 }
 
 void func_002C42F0(s32 arg0, u32 arg1) {
@@ -1036,11 +1050,29 @@ void func_002C4B40(u32 arg0) {
     mnuPlayInputSoundKind(arg0, 0);
 }
 
+typedef struct MenuPanelEntry {
+    u16 flags;
+    u8 unknown02[2];
+    u16 tableIndex; /* 0x04 */
+    u8 unknown06[4];
+    u16 weight;     /* 0x0A */
+    u8 unknown0C[2];
+    u16 state;      /* 0x0E */
+    u8 unknown10[4];
+    u16 marker;
+    u8 unknown16[0x3C];
+    u16 menuValue; /* 0x52 */
+    u8 unknown54[0x15E];
+    u16 currentId;
+    u8 unknown1B4[0x10];
+} MenuPanelEntry;
+
 s32 mnuFindMatchingPartyEntryIndex(s32 object) {
     s32 i;
     u8 *entry = D_00435DD0 + 0xA60;
     for (i = 0; i < 5; i++, entry += 0x1C4) {
-        if ((*(u16 *)entry & 1) && *(u16 *)(object + 4) == *(u16 *)(entry + 4)) {
+        if ((((MenuPanelEntry *)entry)->flags & 1) &&
+            ((MenuPanelEntry *)object)->tableIndex == ((MenuPanelEntry *)entry)->tableIndex) {
             return i;
         }
     }
@@ -1121,7 +1153,7 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     u16 base = entry->value;
     u16 addition = entry->addition;
     if (mnuGetRangeEntryKind(id & 0xFFFF) == 1) {
-        base = addition + *(u16 *)(object + 8) * base / 100;
+        base = addition + ((MenuItemCounts *)object)->denominator * base / 100;
     }
     return base;
 }
@@ -1144,12 +1176,12 @@ s32 func_002C4EB8(u16 id, s32 item) {
 
     switch (kind) {
     case 1:
-        if (*(u16 *)(item + 6) < minimum) {
+        if (((MenuItemCounts *)item)->primary < minimum) {
             return 0;
         }
         break;
     case 2:
-        if (*(u16 *)(item + 0xA) < minimum) {
+        if (((MenuItemCounts *)item)->secondary < minimum) {
             return 0;
         }
         break;
@@ -1172,12 +1204,12 @@ s32 func_002C4FB8(u16 id, s32 object) {
 
     switch (kind) {
     case 1:
-        if (*(u16 *)(object + 6) < value) {
+        if (((MenuItemCounts *)object)->primary < value) {
             return 1;
         }
         break;
     case 2:
-        if (*(u16 *)(object + 0xA) < value) {
+        if (((MenuItemCounts *)object)->secondary < value) {
             return 1;
         }
         break;
@@ -1186,18 +1218,18 @@ s32 func_002C4FB8(u16 id, s32 object) {
 }
 
 s32 func_002C5030(s32 arg0, u8 *cursor) {
-    u8 *record = (u8 *)((arg0 & 0xFFFF) * 0x38 + D_00435E20);
-    u16 amount = *(u16 *)(record + 4);
+    RangeEntry *record = (RangeEntry *)((arg0 & 0xFFFF) * 0x38 + D_00435E20);
+    u16 amount = record->value;
 
-    switch (record[3]) {
+    switch (record->kind) {
     case 1:
-        if (*(u16 *)(cursor + 6) < amount) {
+        if (((MenuItemCounts *)cursor)->primary < amount) {
             return 0;
         }
         datMoveCursorX(cursor, -amount);
         return 1;
     case 2:
-        if (*(u16 *)(cursor + 0xA) < amount) {
+        if (((MenuItemCounts *)cursor)->secondary < amount) {
             return 0;
         }
         datMoveCursorY(cursor, -amount);
@@ -1310,20 +1342,6 @@ s32 func_002C54B0(s32 arg0) {
     return arg0 < 0x100;
 }
 
-typedef struct MenuPanelEntry {
-    u16 flags;
-    u8 unknown02[2];
-    u16 tableIndex; /* 0x04 */
-    u8 unknown06[4];
-    u16 weight;     /* 0x0A */
-    u8 unknown0C[2];
-    u16 state;      /* 0x0E */
-    u8 unknown10[4];
-    u16 marker;
-    u8 unknown16[0x19C];
-    u16 currentId;
-    u8 unknown1B4[0x10];
-} MenuPanelEntry;
 
 extern u16 func_002C5580(s32);
 
@@ -1343,12 +1361,12 @@ u32 func_002C54C8(s32 id) {
 }
 
 u32 func_002C5570(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 0x52) = arg1;
+    ((MenuPanelEntry *)arg0)->menuValue = arg1;
     return 1;
 }
 
 u16 func_002C5580(s32 arg0) {
-    return *(u16 *)(arg0 + 0x52);
+    return ((MenuPanelEntry *)arg0)->menuValue;
 }
 
 u32 func_002C5588(u32 arg0, u32 arg1) {
@@ -1359,7 +1377,7 @@ u32 func_002C5588(u32 arg0, u32 arg1) {
 }
 
 u16 func_002C55C0(s32 arg0) {
-    return *(u16 *)(arg0 + 0x1b2);
+    return ((MenuPanelEntry *)arg0)->currentId;
 }
 
 MenuPanelEntry *func_002C55C8(u32 id) {
@@ -1479,7 +1497,8 @@ s32 mnuGetMatchingPartyEntryMask(s32 object) {
     s32 i;
     u8 *entry = D_00435DD0 + 0xA60;
     for (i = 0; i < 5; i++, entry += 0x1C4) {
-        if ((*(u16 *)entry & 1) && *(u16 *)(entry + 4) == *(u16 *)(object + 4)) {
+        if ((((MenuPanelEntry *)entry)->flags & 1) &&
+            ((MenuPanelEntry *)entry)->tableIndex == ((MenuPanelEntry *)object)->tableIndex) {
             return 1 << i;
         }
     }
@@ -1582,15 +1601,15 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
 /* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
  * field-6/field-8 ratios without converting to floating point. */
 s32 func_002C5F78(u32 *left, u32 *right) {
-    u8 *a = (u8 *)*left;
-    u8 *b = (u8 *)*right;
-    s32 leftRatio = (*(u16 *)(a + 6) << 10) / *(u16 *)(a + 8);
-    s32 rightRatio = (*(u16 *)(b + 6) << 10) / *(u16 *)(b + 8);
-    if (*(u16 *)a & 2) {
-        if (!(*(u16 *)b & 2)) {
+    MenuItemCounts *a = (MenuItemCounts *)*left;
+    MenuItemCounts *b = (MenuItemCounts *)*right;
+    s32 leftRatio = (a->primary << 10) / a->denominator;
+    s32 rightRatio = (b->primary << 10) / b->denominator;
+    if (a->flags & 2) {
+        if (!(b->flags & 2)) {
             return -1;
         }
-    } else if (*(u16 *)b & 2) {
+    } else if (b->flags & 2) {
         return 1;
     }
     if (rightRatio < leftRatio) return 1;
@@ -1949,9 +1968,9 @@ void func_002C7530(void) {
 }
 
 s32 func_002C7540(void) {
-    s32 temp_v0 = D_00457EB0.slot[0].state;
+    s32 state = D_00457EB0.slot[0].state;
 
-    if ((temp_v0 == 0) || (temp_v0 == 3)) {
+    if ((state == 0) || (state == 3)) {
         return 0;
     }
     return 1;
@@ -1989,14 +2008,14 @@ void func_002C76A8(s32 arg0) {
 }
 
 void func_002C76F0(void) {
-    StageTestState *temp_v0 = &D_00457EB0;
-    u32 temp_v1 = temp_v0->effect;
+    StageTestState *stage = &D_00457EB0;
+    u32 effectHandle = stage->effect;
 
-    if (temp_v1 == 0) {
+    if (effectHandle == 0) {
         return;
     }
-    func_00203E90(temp_v1);
-    temp_v0->effect = 0;
+    func_00203E90(effectHandle);
+    stage->effect = 0;
 }
 
 void func_002C7730(u32 arg0) {
@@ -2077,16 +2096,26 @@ void btlCreateStageTestTask(void) {
     kwlnTaskCreate(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, func_002C7C00, 0);
 }
 
+typedef struct StageTestTaskWork {
+    u8 pad00;
+    u8 kind;            /* 0x01: kind 6 owns stage-test resources */
+    u8 pad02[6];
+    void *allocation;   /* 0x08 */
+    s32 resource;       /* 0x0C */
+    u8 pad10[0x20];
+    u8 payload[1];      /* 0x30: passed to the stage cleanup routine */
+} StageTestTaskWork;
+
 s32 btlDestroyStageTask(object)
-    s32 object;
+    StageTestTaskWork *object;
 {
-    if (*(u8 *)(object + 1) == 6) {
-        s32 resource = *(s32 *)(object + 0xC);
+    if (object->kind == 6) {
+        s32 resource = object->resource;
         if (resource != 0) {
             func_0033FD30(resource);
         }
-        func_00346AF8(object + 0x30);
-        func_00328E48(*(void **)(object + 8));
+        func_00346AF8(object->payload);
+        func_00328E48(object->allocation);
         func_00328E48((void *)object);
         return 0;
     }
