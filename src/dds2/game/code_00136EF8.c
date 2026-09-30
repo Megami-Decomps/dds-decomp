@@ -93,6 +93,18 @@ extern void fldApplyPendingCameraHeading(void);
 extern void func_00155A08(s32, s32, void *, s32);
 extern void func_00143768(s32);
 extern s32 D_003898FC[];
+extern s32 D_00389780[];
+extern s32 D_00399F60[];
+extern u8 D_00399EA0[][16];
+extern s32 func_00127398(void);
+extern s32 func_001275D0(void);
+extern s32 fileMenuTaskExists(void);
+extern s32 func_00127320(void);
+extern s32 func_00127348(void);
+extern s32 func_00127370(void);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u32 func_00101958(void *);
+extern void func_0012DDC0(s32, s32, u32, const u8 *);
 
 extern s16 D_00444C68[];
 
@@ -1316,11 +1328,56 @@ void func_00143F78(s32 arg0, s32 arg1) {
     func_00108BD8(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00144028);
+typedef struct FldMenuState {
+    u16 position;
+    u16 choice;
+    u16 pending;
+} FldMenuState;
+
+s32 func_00144028(void *task) {
+    FldMenuState *menu;
+
+    if (D_00389780[0] >= 200) {
+        return 0;
+    }
+    if (func_00127398() != 0) {
+        return 0;
+    }
+    if (func_001275D0() != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (func_00127320() != 0) {
+        return 0;
+    }
+    if (func_00127348() != 0) {
+        return 0;
+    }
+    if (func_00127370() != 0) {
+        return 0;
+    }
+    if (fldIsEventPhaseAtLeastTwo() != 0) {
+        return 0;
+    }
+    menu = (FldMenuState *)func_00101958(task);
+    if (menu->pending != 0) {
+        func_00143D90(menu->position);
+        func_00143F78(D_00399F60[menu->choice] - 9, 0x130);
+        func_0019B8B0(0x13);
+        func_0012DDC0(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
+        func_0019B8B0(-1);
+        menu->position++;
+        menu->pending = 0;
+    } else {
+        menu->position = 0;
+    }
+    return 0;
+}
 
 extern void *func_00328D68(s32 size);
 extern void func_00101950(s32, void *);
-extern void func_00144028();
 
 void *func_00144178(s32 arg0) {
     s16 *node = func_00328D68(8);
