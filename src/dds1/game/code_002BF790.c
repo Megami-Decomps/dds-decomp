@@ -528,66 +528,66 @@ void func_002C1CC8(GridTextWidget *widget, u8 *node, const char *text) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1D78);
 
-void itfAdvanceGridScrollPosition(u32 arg0, u32 arg1, s32 arg2) {
-    s32 temp_v0;
-    s32 temp_v1;
-    float *pfVar3;
-    float temp_v2;
-    float temp_v3;
+void itfAdvanceGridScrollPosition(u32 widget, u32 key, s32 steps) {
+    s32 bounds;
+    s32 node;
+    float *position;
+    float increment;
+    float previousPosition;
 
-    temp_v1 = itfFindGridNodeByKey(arg1, arg0);
-    temp_v0 = *(s32 *)(temp_v1 + 8);
-    pfVar3 = (float *)(temp_v1 + 0xc);
-    temp_v2 = *(float *)(temp_v0 + 0xc);
-    if (1 < arg2) {
-        temp_v2 = temp_v2 * (float)(s32)arg2;
+    node = itfFindGridNodeByKey(key, widget);
+    bounds = *(s32 *)(node + 8);
+    position = (float *)(node + 0xc);
+    increment = *(float *)(bounds + 0xc);
+    if (1 < steps) {
+        increment = increment * (float)(s32)steps;
     }
-    temp_v3 = *pfVar3;
-    *pfVar3 = temp_v3 + temp_v2;
-    if (*(float *)(temp_v0 + 8) < temp_v3 + temp_v2) {
-        *pfVar3 = *(float *)(temp_v0 + 4);
+    previousPosition = *position;
+    *position = previousPosition + increment;
+    if (*(float *)(bounds + 8) < previousPosition + increment) {
+        *position = *(float *)(bounds + 4);
     }
 }
 
-void func_002C1F88(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002C1F88(u32 widget, u32 steps) {
+    s32 widgetAddress;
 
-    temp_v0 = (s32)arg0;
-    if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        itfAdvanceGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
-                                    arg1);
+    widgetAddress = (s32)widget;
+    if ((*(u32 *)(widgetAddress + 0xc) & 1) != 0) {
+        itfAdvanceGridScrollPosition(widget, (u32)*(u16 *)(*(s32 *)(widgetAddress + 0x18) + 6) + *(s32 *)(widgetAddress + 0x3c),
+                                    steps);
         return;
     }
 }
 
-void itfReverseGridScrollPosition(u32 arg0, u32 arg1, s32 arg2) {
-    s32 temp_v0;
-    s32 temp_v1;
-    float *pfVar3;
-    float temp_v2;
-    float temp_v3;
+void itfReverseGridScrollPosition(u32 widget, u32 key, s32 steps) {
+    s32 bounds;
+    s32 node;
+    float *position;
+    float increment;
+    float previousPosition;
 
-    temp_v1 = itfFindGridNodeByKey(arg1, arg0);
-    temp_v0 = *(s32 *)(temp_v1 + 8);
-    pfVar3 = (float *)(temp_v1 + 0xc);
-    temp_v2 = *(float *)(temp_v0 + 0xc);
-    if (1 < arg2) {
-        temp_v2 = temp_v2 * (float)(s32)arg2;
+    node = itfFindGridNodeByKey(key, widget);
+    bounds = *(s32 *)(node + 8);
+    position = (float *)(node + 0xc);
+    increment = *(float *)(bounds + 0xc);
+    if (1 < steps) {
+        increment = increment * (float)(s32)steps;
     }
-    temp_v3 = *pfVar3;
-    *pfVar3 = temp_v3 - temp_v2;
-    if (temp_v3 - temp_v2 < *(float *)(temp_v0 + 4)) {
-        *pfVar3 = *(float *)(temp_v0 + 8);
+    previousPosition = *position;
+    *position = previousPosition - increment;
+    if (previousPosition - increment < *(float *)(bounds + 4)) {
+        *position = *(float *)(bounds + 8);
     }
 }
 
-void func_002C2040(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002C2040(u32 widget, u32 steps) {
+    s32 widgetAddress;
 
-    temp_v0 = (s32)arg0;
-    if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        itfReverseGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
-                                    arg1);
+    widgetAddress = (s32)widget;
+    if ((*(u32 *)(widgetAddress + 0xc) & 1) != 0) {
+        itfReverseGridScrollPosition(widget, (u32)*(u16 *)(*(s32 *)(widgetAddress + 0x18) + 6) + *(s32 *)(widgetAddress + 0x3c),
+                                    steps);
         return;
     }
 }

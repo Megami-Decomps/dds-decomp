@@ -110,15 +110,15 @@ s32 mnuStaffImageProc(void) {
 }
 
 void func_0026FD88(void) {
-    s64 temp_v0;
+    s64 pendingWork;
 
     D_003BA72C = 2;
     func_0026A808();
     func_0026A950();
     func_0026F518();
     do {
-        temp_v0 = sdfCheckPendingWorkWithInterrupts();
-    } while (temp_v0 != 0);
+        pendingWork = sdfCheckPendingWorkWithInterrupts();
+    } while (pendingWork != 0);
     func_002D0A10(*D_003BC610);
     D_003BC610 = (u32 *)0x0;
 }
@@ -180,10 +180,10 @@ void func_0026FFA0(u32 resource, void *data) {
     }
 }
 
-void func_0026FFF8(s32 arg0) {
-    u8 *temp_v0 = D_0037B168 + arg0 * 24;
+void func_0026FFF8(s32 index) {
+    u8 *entry = D_0037B168 + index * 24;
 
-    func_0026FFA0(*(s32 *)temp_v0, (s32)(temp_v0 + 4));
+    func_0026FFA0(*(s32 *)entry, (s32)(entry + 4));
 }
 
 void func_00270030(void) {
@@ -368,10 +368,10 @@ void mnuCreateMovieManagerTask(void) {
 }
 
 u32 func_00270110(void) {
-    s32 temp_v0;
+    s32 movieIndex;
 
-    temp_v0 = scrReadIntParameter(0);
-    func_0026FFF8(temp_v0);
+    movieIndex = scrReadIntParameter(0);
+    func_0026FFF8(movieIndex);
     D_003BC630 = 0;
     return 1;
 }
@@ -386,10 +386,10 @@ u32 func_00270140(void) {
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270170);
 
 u8 func_00270218(void) {
-    s64 temp_v0;
+    s64 movieState;
 
-    temp_v0 = func_00270088();
-    return temp_v0 == 2;
+    movieState = func_00270088();
+    return movieState == 2;
 }
 
 void mnuClearMovieList(void) {
@@ -450,10 +450,10 @@ void func_00270AC0(void) {
 }
 
 void func_00270AD8(void) {
-    u32 *temp_v0 = (u32 *)D_003DC578;
+    u32 *state = (u32 *)D_003DC578;
 
-    temp_v0[1] = 0x10002010;
-    temp_v0[2] = (u32)D_0037B888;
+    state[1] = 0x10002010;
+    state[2] = (u32)D_0037B888;
     func_00270AC0();
 }
 
@@ -897,10 +897,10 @@ void mnuDestroyStaffMenuTask(u32 task) {
 }
 
 u32 func_00271FC8(void) {
-    s32 temp_v0;
+    s32 context;
 
-    temp_v0 = func_00101A70();
-    func_00283BF8(temp_v0 + 0x914, 0x53);
+    context = func_00101A70();
+    func_00283BF8(context + 0x914, 0x53);
     return 0;
 }
 
@@ -954,10 +954,10 @@ s32 mnuAcknowledgeCampState(void) {
 }
 
 u8 mnuIsFadeIdle(void) {
-    s64 temp_v0;
+    s64 fadeActive;
 
-    temp_v0 = kwlnFadeIsActive();
-    return temp_v0 == 0;
+    fadeActive = kwlnFadeIsActive();
+    return fadeActive == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00272280);

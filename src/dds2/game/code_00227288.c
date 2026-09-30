@@ -831,36 +831,36 @@ s32 func_00229280(void) {
 }
 
 void func_002292D8(void) {
-    u16 temp_v0;
-    u16 *puVar2;
-    u32 temp_v1;
-    u32 temp_v2;
-    u32 temp_v3;
-    u8 temp_v4;
+    u16 flags;
+    u16 *entry;
+    u32 markedCount;
+    u32 index;
+    u32 activeCount;
+    u8 hasKindTwo;
 
-    temp_v4 = 0;
-    temp_v1 = 0;
-    temp_v3 = 0;
-    puVar2 = (u16 *)(D_00435DD0 + 0xa60);
-    temp_v2 = 0;
+    hasKindTwo = 0;
+    markedCount = 0;
+    activeCount = 0;
+    entry = (u16 *)(D_00435DD0 + 0xa60);
+    index = 0;
     do {
-        temp_v0 = *puVar2;
-        if ((temp_v0 & 1) != 0) {
-            if (puVar2[2] == 2) {
-                if ((temp_v0 & 2) != 0) {
+        flags = *entry;
+        if ((flags & 1) != 0) {
+            if (entry[2] == 2) {
+                if ((flags & 2) != 0) {
                     return;
                 }
-                temp_v4 = 1;
+                hasKindTwo = 1;
             }
-            temp_v3 = temp_v3 + 1;
-            if ((temp_v0 & 2) != 0) {
-                temp_v1 = temp_v1 + 1;
+            activeCount = activeCount + 1;
+            if ((flags & 2) != 0) {
+                markedCount = markedCount + 1;
             }
         }
-        temp_v2 = temp_v2 + 1;
-        puVar2 = puVar2 + 0xe2;
-    } while (temp_v2 < 5);
-    if (((temp_v3 < 4) && (temp_v1 < 3)) && (temp_v4)) {
+        index = index + 1;
+        entry = entry + 0xe2;
+    } while (index < 5);
+    if (((activeCount < 4) && (markedCount < 3)) && (hasKindTwo)) {
         func_0011AEE0(2);
         return;
     }
