@@ -12,7 +12,7 @@ extern void evtSetConvertedContextValue(s32 context, s32 value);
 extern void func_002351E0(void);
 extern void func_00235228(void);
 extern s32 evtFindTaskById();
-extern void func_003014F0(char *, char *, ...);
+extern s32 func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern void kwlnTaskCreate(void *name, s32 taskId, s32, s32, void *update, void *destroy, void *data);
 extern void *memset(void *, s32, u32);
@@ -45,6 +45,7 @@ extern u8 D_003BBF80[];
 extern u8 D_003BBF90[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
+extern char D_003BC098[];
 extern u16 D_003BD898;
 extern u16 D_003BD89A;
 extern s16 D_003BD89C;
@@ -63,6 +64,11 @@ typedef struct EvtRuntimeChild {
     struct EvtRuntimeChild *next; /* 0x30 */
 } EvtRuntimeChild;
 
+typedef struct EvtGroupInfo {
+    u8 pad00[8];
+    char *name; /* 0x08 */
+} EvtGroupInfo;
+
 typedef struct EvtRuntimeGroup {
     s32 type;
     u8 metadataFlag;  /* 0x04: included in serialized group metadata */
@@ -71,7 +77,9 @@ typedef struct EvtRuntimeGroup {
         s32 word;      /* 0x08: full value for group type 2 */
         u16 shortValue; /* 0x08: truncated value in metadata */
     } entryHeader;
-    u8 pad0C[0x10];
+    u8 pad0C[4];
+    EvtGroupInfo *info; /* 0x10 */
+    u8 pad14[8];
     u16 metadataValue; /* 0x1C */
     u8 metadataByte1;  /* 0x1E */
     u8 metadataByte2;  /* 0x1F */
@@ -81,8 +89,23 @@ typedef struct EvtRuntimeGroup {
     struct EvtRuntimeGroup *next;
 } EvtRuntimeGroup;
 
+typedef struct EvtFrameNode {
+    u8 pad00[0x30];
+    struct EvtFrameNode *next; /* 0x30 */
+} EvtFrameNode;
+
+typedef struct EvtFrameList {
+    s32 kind;           /* 0x00 */
+    u8 pad04[0x4C];
+    s32 count;          /* 0x50 */
+    EvtFrameNode *head; /* 0x54 */
+} EvtFrameList;
+
 typedef struct EvtRuntime {
-    u8 pad00[0x18];
+    u8 pad00[4];
+    u32 flags; /* 0x04 */
+    s32 windowContext; /* 0x08 */
+    u8 pad0C[0xC];
     s32 curFrame; /* 0x18 */
     u8 pad1C[4];
     s32 entryTotal; /* 0x20 */
@@ -102,8 +125,10 @@ typedef struct EvtRuntime {
     u8 pad22BC[0x38];
     s32 entryCursor; /* 0x22F4 */
     s32 entryFirst;  /* 0x22F8 */
-    u8 pad22FC[0xC];
-    s32 *tableRowIndex; /* 0x2308 */
+    u8 pad22FC[0x4];
+    s32 frameFirst; /* 0x2300 */
+    s32 frameCursor; /* 0x2304 */
+    EvtFrameList *frameList; /* 0x2308 */
     u8 pad230C[0x4];
     s32 value; /* 0x2310 */
     s32 valueMin; /* 0x2314 */
@@ -118,7 +143,12 @@ typedef struct EvtRuntime {
     s32 commandFirst; /* 0x23E4 */
     s32 commandSecond; /* 0x23E8 */
     s32 commandThird; /* 0x23EC */
-    u8 pad23F0[0x4C];
+    u8 pad23F0[0x24];
+    s32 timedActive; /* 0x2414 */
+    u8 pad2418[0x10];
+    s32 pendingWork; /* 0x2428 */
+    s32 pendingResource; /* 0x242C */
+    u8 pad2430[0xC];
     s32 headerMetadata; /* 0x243C: fourth serialized header word */
 } EvtRuntime;
 
@@ -131,6 +161,8 @@ extern EvtTblEntry D_00368950[];
 extern s8 D_00368952[];
 
 extern u16 D_003BBF88;
+extern u16 D_003BBE78;
+extern u16 D_003BBE7A;
 
 extern u32 D_003BBF8C;
 
@@ -534,7 +566,12 @@ s32 func_002365A0(s32 x, s32 y, EvtDrawWork *work) {
     return func_001037C0(0, 1, work->unk22C0, 1, work->unk22C0, 0, 0, 0, (u8 *)work + 0x22BC);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002366A0);
+s32 func_002366A0(s32 list, s32 x, s32 y, u8 *ctx) {
+    char text[16];
+    func_003014F0(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
+    sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, text));
+    return 2;
+}
 
 void func_00236728(s32 list, s32 xPosition, s32 y, s32 row, EvtDrawWork *work) {
     s32 x = xPosition + 0xC0;
@@ -565,7 +602,12 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0C8);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0D8);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236A40);
+s32 func_00236A40(s32 list, s32 x, s32 y) {
+    char text[32];
+    func_003014F0(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
+    sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, text));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236AC8);
 
@@ -619,7 +661,37 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE580);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002375D8);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00238600);
+extern void func_002375D8(s32 list, s32 x, s32 y, s32 color, EvtFrameNode *node, EvtRuntime *ctx);
+
+s32 func_00238600(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    EvtFrameNode *node;
+    s32 color;
+    s32 i;
+
+    if (index < ctx->frameList->count + 1) {
+        node = NULL;
+        if (index != ctx->frameList->count) {
+            node = ctx->frameList->head;
+            for (i = 0; i < index; i++) {
+                node = node->next;
+            }
+        }
+        if (ctx->frameCursor + ctx->frameFirst == index) {
+            if (ctx->actionMode == 5) {
+                color = 4;
+            } else {
+                color = 5;
+            }
+        } else {
+            color = 0;
+        }
+        if (node != NULL) {
+            func_002375D8(list, x, y, color, node, ctx);
+        } else {
+            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002386E0);
 
@@ -712,7 +784,7 @@ extern void func_00238BE8();
 s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 rows;
-    switch (*((EvtRuntime *)work)->tableRowIndex) {
+    switch (((EvtRuntime *)work)->frameList->kind) {
     case 20:
         rows = 2;
         break;
@@ -782,7 +854,7 @@ s32 func_00239770(s32 *index) {
 }
 
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
-    return D_00368952[runtime->tableColumn + *runtime->tableRowIndex * 10];
+    return D_00368952[runtime->tableColumn + runtime->frameList->kind * 10];
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002397C8);
@@ -802,7 +874,39 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00239E30);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023A0D0);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023A4B0);
+extern char D_003BC288[]; /* "DISABLE" */
+extern char D_003BC280[]; /* "ALL" */
+extern char D_003AEA80[]; /* "UNIT ALL" */
+
+void func_0023A4B0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    EvtRuntimeGroup *group;
+    s32 color;
+    s32 n;
+
+    color = 4;
+    if (ctx->groupFirst + ctx->groupCursor != index) {
+        color = 0;
+    }
+    if (index == 0) {
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003BC288));
+    } else if (index == 1) {
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003BC280));
+        return;
+    } else if (index == 2) {
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003AEA80));
+        return;
+    }
+    n = 3;
+    for (group = ctx->groups; group != NULL; group = group->next) {
+        if (group->type == 1) {
+            if (n == index) {
+                sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003BC088, group->info->name));
+                return;
+            }
+            n++;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023A688);
 
@@ -1403,7 +1507,70 @@ void func_0023EE98(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *link) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023EF90);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002416E0);
+extern void func_002441E8(EvtRuntime *runtime);
+extern void func_00270030(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern void func_002D0A10(s32 resource);
+extern void kwlnTextureReleaseHeldReference(void);
+extern u32 D_003BA904;
+extern void func_00234CA8(u16 a, u16 b, char *path0, char *path1, char *path2);
+extern s32 sdfPathExists(char *path);
+extern void evtEventViewerShutdown(EvtRuntime *runtime);
+extern void evtDestroySecondaryWorldNode(void);
+extern void evtEventViewerReleaseGroups(EvtRuntime *runtime);
+extern void evtEventViewerReset(EvtRuntime *runtime);
+extern s32 func_00234DA8(u16 a, u16 b, s32 mode);
+extern void func_0023EF90(s32 handle, EvtRuntime *runtime);
+
+s32 func_002416E0(s32 mode, EvtRuntime *runtime) {
+    char path0[0x80];
+    char path1[0x80];
+    char path2[0x80];
+    s32 handle;
+
+    func_002441E8(runtime);
+    if (runtime->timedActive == 1) {
+        func_00270030();
+        runtime->timedActive = 0;
+    }
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    }
+    if (runtime->pendingResource != 0) {
+        func_002D0A10(runtime->pendingResource);
+        runtime->pendingResource = 0;
+        runtime->pendingWork = 0;
+    }
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    }
+    kwlnTextureReleaseHeldReference();
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    }
+    D_003BA904 |= 0x2000000;
+    func_00234CA8(D_003BBE78, D_003BBE7A, path0, path1, path2);
+    if (mode == 1) {
+        if (sdfPathExists(path0) != 1) {
+            return 0;
+        }
+    } else {
+        if (sdfPathExists(path0) != 1 || sdfPathExists(path1) != 1) {
+            return 0;
+        }
+    }
+    evtEventViewerShutdown(runtime);
+    evtDestroySecondaryWorldNode();
+    evtEventViewerReleaseGroups(runtime);
+    evtEventViewerReset(runtime);
+    runtime->flags |= 1;
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    }
+    handle = func_00234DA8(D_003BBE78, D_003BBE7A, mode);
+    if (handle != 0) {
+        runtime->windowContext = handle;
+        func_0023EF90(handle, runtime);
+        return 1;
+    }
+    return handle;
+}
 
 s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {
     s32 sequenceId;
