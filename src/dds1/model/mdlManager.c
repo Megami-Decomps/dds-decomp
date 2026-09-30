@@ -171,12 +171,12 @@ typedef struct MdlGroupEntity {
     void *unkA8;
 } MdlGroupEntity;
 
-extern void battleCreateGroupNode();
+extern void btlCreateGroupNode();
 
-void func_00216DB8(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
+void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
     MdlGroupEntity *entity;
 
-    battleCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
+    btlCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
     if (setup->flags != 0) {
         func_00216CF8(group, id, mode, 0, 0, 0, setup->flags, setup->unk10);
     }
@@ -199,7 +199,7 @@ void *mdlWaitGroupThenFind(s32 group, s32 id) {
 }
 
 void mdlExecuteAndFreeJob(MdlPacket *packet) {
-    func_00216DB8(packet->unk0, packet->unk2, packet->unk8, packet->extra);
+    mdlApplyGroupSetup(packet->unk0, packet->unk2, packet->unk8, packet->extra);
     WaitSema(D_003BD878);
     btlRemoveGroupId(packet->unk0, packet->unk2);
     SignalSema(D_003BD878);
@@ -277,7 +277,7 @@ typedef struct MdlLink {
     MdlGroup *group;
 } MdlLink;
 
-extern void battleDestroyGroupNode();
+extern void btlDestroyGroupNode();
 
 void func_002172B0(MdlLink *link) {
     MdlLink *prev = link->prev;
@@ -296,7 +296,7 @@ void func_002172B0(MdlLink *link) {
         } else {
             group->tail = NULL;
             if (group->flag != 0) {
-                battleDestroyGroupNode(group);
+                btlDestroyGroupNode(group);
             }
         }
     }
@@ -306,7 +306,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217310);
 
 extern void sdfReleaseDevSlot(void *, s32, s32);
 
-void func_00217438(MdlCtx *ctx) {
+void mdlReleaseDevSlots(MdlCtx *ctx) {
     MdlDevList *list = ctx->devList;
     MdlDevSlot *node;
     MdlDevSlot *cur;
@@ -331,7 +331,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217680);
 extern void mdlDestroyResourceItem(u32 *);
 extern void sdfResourceListRelease(u32, s32);
 
-void func_002177D0(MdlCtx *ctx) {
+void mdlDestroyContext(MdlCtx *ctx) {
     MdlInner *inner = ctx->inner;
     u32 *node;
     u32 *next;
@@ -344,7 +344,7 @@ void func_002177D0(MdlCtx *ctx) {
         next = (u32 *)*node;
         mdlDestroyResourceItem(node);
     }
-    func_00217438(ctx);
+    mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
     func_002172B0((MdlLink *)ctx);
     func_002CFF98(ctx);
@@ -642,7 +642,7 @@ void func_002189D8(MdlRes *res) {
     func_002CFF98(res);
 }
 
-/* Completion job created by func_00218A88 and run by func_00218A08. */
+/* Completion job created by mdlRequestLoadWithCallback and run by func_00218A08. */
 typedef struct MdlDoneJob {
     u16 group;         /* 0x0 */
     u16 id;            /* 0x2 */
@@ -659,7 +659,7 @@ extern s32 func_002889D8();
 extern void func_00288C50();
 extern void func_00218A08();
 
-s32 func_00218A88(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
+s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
     MdlDoneJob *job = func_002CFF68(0x14);
     s32 slot;
 

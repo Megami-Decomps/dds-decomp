@@ -163,19 +163,19 @@ typedef struct {
     s32 maxCount;      /* 0x20 */
 } MapSelection;
 
-void fldSetSelectionCount(MapSelection *selection, s32 count) {
+void fldSetMapSelectedCount(MapSelection *selection, s32 count) {
     if ((count <= selection->maxCount) && (count != 0)) {
         selection->selectedCount = count;
     }
 }
 
-void fldIncrementSelectionCount(MapSelection *selection) {
+void fldIncreaseMapSelectedCount(MapSelection *selection) {
     if (selection->selectedCount < 10) {
         selection->selectedCount = selection->selectedCount + 1;
     }
 }
 
-void fldDecrementSelectionCount(MapSelection *selection) {
+void fldDecreaseMapSelectedCount(MapSelection *selection) {
     if (1 < selection->selectedCount) {
         selection->selectedCount = selection->selectedCount - 1;
     }
@@ -216,7 +216,7 @@ s32 func_002C60F8(MapSelectionContext *context) {
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6130);
 
 /* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
-s32 func_002C62D8(void) {
+s32 fldLoadLocalMapResources(void) {
     char name[32];
     s32 i;
     MapResource *item = D_00390710;

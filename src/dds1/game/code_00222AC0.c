@@ -129,7 +129,7 @@ typedef struct EvtWorldUnitRef {
     s128 *transform; /* 0x18: first aligned vector */
 } EvtWorldUnitRef;
 
-void func_00222AC0(EvtUnit *work, s128 *vector, s32 frames) {
+void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
         work->unkAC = 3;
@@ -146,7 +146,7 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222AC0(work, worldUnit->transform + 1, frames);
+        evtBeginVectorTransition(work, worldUnit->transform + 1, frames);
         work->linkedUnit = worldUnit;
     }
 }

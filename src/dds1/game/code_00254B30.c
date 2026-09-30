@@ -218,7 +218,7 @@ DspListNode *mnuAppendDisplayListNode(DspListHead *head) {
     return node;
 }
 
-DspListNode *mnuFreeDisplayListNodeAndGetNext(DspListNode *node) {
+DspListNode *mnuReleaseDisplayListNodeAndGetNext(DspListNode *node) {
     DspListNode *next;
 
     next = node->next;
@@ -230,7 +230,7 @@ void mnuReleaseDisplayListNodes(DspListHead *head) {
     DspListNode *node = head->first;
 
     while (node != NULL) {
-        node = mnuFreeDisplayListNodeAndGetNext(node);
+        node = mnuReleaseDisplayListNodeAndGetNext(node);
     }
 }
 
@@ -256,7 +256,7 @@ s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
 
         index++;
         if (completed != 0) {
-            node = mnuFreeDisplayListNodeAndGetNext(node);
+            node = mnuReleaseDisplayListNodeAndGetNext(node);
             head->first = node;
         } else {
             node = node->next;

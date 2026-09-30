@@ -12,7 +12,7 @@ extern s32 mnuPollTaskState(void);
 
 extern u32 D_003BA958;
 
-extern s32 func_002913B8(void);
+extern s32 fileConsumeConfigTaskReady(void);
 
 extern s32 brsTaskConsumeDone(void);
 
@@ -22,7 +22,7 @@ extern u32 D_003BA730;
 
 extern s32 func_00125FD0(void);
 
-extern s32 func_0028F600(void);
+extern s32 fileMenuTaskExists(void);
 
 extern s32 func_0028F5F8(void);
 
@@ -113,7 +113,7 @@ extern void evtSelStateDestroy(void);
 
 extern s32 D_0032E3C0[];
 
-extern void func_002C2E38(s32 arg0);
+extern void fldStartLmapTask(s32 arg0);
 
 extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
@@ -170,7 +170,7 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108218);
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001082D8);
 
 /* Either replace the draw vector immediately or interpolate from its prior value. */
-void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
+void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
     if (mode == 0) {
         D_003BA904 &= ~0x400;
         D_00324790.x = x;
@@ -198,7 +198,7 @@ void evtUnk8360SetVec(s32 mode, f32 x, f32 y, f32 z, f32 w) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001083F8);
 
-void evtUnk89F8SetState(s32 frames, f32 first, f32 second) {
+void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second) {
     if (frames == 0) {
         D_003BA904 &= ~0x4000;
         D_003BD358 = first;
@@ -217,14 +217,14 @@ void evtUnk89F8SetState(s32 frames, f32 first, f32 second) {
     }
 }
 
-void evtUnk8A48Ensure(void) {
+void evtEnsureDrawVectorState(void) {
     if (D_003BD6B0 == NULL) {
         D_003BD6B0 = func_002DA730();
         *(f32 *)((u8 *)D_003BD6B0 + 0x1C) = 1.0f;
     }
 }
 
-void func_00108A80(u32 arg0) {
+void evtSetDrawSurfaceIndex(u32 arg0) {
     D_003BA8E8 = arg0;
 }
 
@@ -244,7 +244,7 @@ extern void sdfAppendPacket(void *, void *);
 
 extern u8 *func_002E13E0(void *, s32);
 
-void func_00108A88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void evtSubmitGsRegister47(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
     u8 *command;
@@ -260,7 +260,7 @@ void func_00108A88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     }
 }
 
-void func_00108BA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void evtSubmitGsRegister48(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
     u8 *command;
@@ -415,7 +415,7 @@ s32 evtSelStateCreate(s32 limit, s16 frames, s32 arg2, s32 arg3) {
     return 1;
 }
 
-u32 evtUnk9CC0Check(void) {
+u32 evtCheckSelectionState(void) {
     EvtSelState *sel;
     if (D_003BA948 == 0) {
         return 0;
@@ -432,7 +432,7 @@ u32 evtUnk9CC0Check(void) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109D20);
 
-void func_0010A158(void) {
+void evtDestroySelectionState(void) {
     evtSelStateDestroy();
 }
 
@@ -458,16 +458,16 @@ u32 func_0010A210(void) {
     return 0;
 }
 
-void func_0010A218(void) {
+void evtOpenFileMenuModeThree(void) {
     fileEnterMcPackScene(3);
 }
 
-u32 func_0010A230(void) {
+u32 evtPollFileMenuModeThree(void) {
     s64 operationResult;
     u32 status;
 
     func_0028F458();
-    func_0028F460();
+    fileReleaseMenuResources();
     operationResult = func_0028F5F8();
     status = 0xffffffff;
     if (operationResult != 0) {
@@ -476,10 +476,10 @@ u32 func_0010A230(void) {
     return status;
 }
 
-u8 func_0010A268(void) {
+u8 evtWaitFileMenuTaskThree(void) {
     s64 operationResult;
 
-    operationResult = func_0028F600();
+    operationResult = fileMenuTaskExists();
     return operationResult == 0;
 }
 
@@ -500,13 +500,13 @@ u32 func_0010A2D8(void) {
     return 0;
 }
 
-void func_0010A2E0(void) {
+void evtOpenFileMenuModeOne(void) {
     fileEnterMcPackScene(1);
 }
 
-s32 evtUnkA2F8Check(void) {
+s32 evtCheckSelectionInput(void) {
     func_0028F458();
-    func_0028F460();
+    fileReleaseMenuResources();
     if (func_0028F5F8() != 0) {
         fldStartSequenceRecord();
         return 0;
@@ -517,15 +517,15 @@ s32 evtUnkA2F8Check(void) {
 u8 func_0010A338(void) {
     s64 operationResult;
 
-    operationResult = func_0028F600();
+    operationResult = fileMenuTaskExists();
     return operationResult == 0;
 }
 
-void func_0010A358(void) {
+void evtStartStaffMovieRequest(void) {
     mnuStartStaffMovieRequest();
 }
 
-u32 func_0010A370(void) {
+u32 evtStopStaffTasks(void) {
     mnuStopStaffTasks();
     return 0;
 }
@@ -534,16 +534,16 @@ u32 func_0010A390(void) {
     return 0;
 }
 
-void func_0010A398(void) {
+void evtOpenFileMenuModeTwo(void) {
     fileEnterMcPackScene(2);
 }
 
-u32 func_0010A3B0(void) {
+u32 evtPollFileMenuModeTwo(void) {
     s64 operationResult;
     u32 status;
 
     func_0028F458();
-    func_0028F460();
+    fileReleaseMenuResources();
     operationResult = func_0028F5F8();
     status = 0xffffffff;
     if (operationResult != 0) {
@@ -555,16 +555,16 @@ u32 func_0010A3B0(void) {
 u8 func_0010A3E8(void) {
     s64 operationResult;
 
-    operationResult = func_0028F600();
+    operationResult = fileMenuTaskExists();
     return operationResult == 0;
 }
 
-void func_0010A408(u32 arg0, u32 arg1) {
-    func_001060C8(0);
+void evtStartAreaFromSelection(u32 arg0, u32 arg1) {
+    kwlnFadeBackgroundStartOut(0);
     func_00125E08(arg1, arg0);
 }
 
-u32 func_0010A448(void) {
+u32 evtPollSelectedAreaReady(void) {
     s64 operationResult;
     u32 status;
 
@@ -582,7 +582,7 @@ u32 func_0010A478(void) {
 }
 
 void func_0010A480(void) {
-    func_001060C8(0);
+    kwlnFadeBackgroundStartOut(0);
 }
 
 u32 func_0010A498(void) {
@@ -594,7 +594,7 @@ u32 func_0010A4A0(void) {
 }
 
 /* Source zero takes an explicit value; source one uses the pending event mode. */
-void evtUnkA4A8Dispatch(s32 source, s32 *params) {
+void evtDispatchSelectionValue(s32 source, s32 *params) {
     s32 selection = 0;
 
     D_003BA730 = 0;
@@ -613,7 +613,7 @@ void evtUnkA4A8Dispatch(s32 source, s32 *params) {
     func_00220110(selection);
 }
 
-u32 func_0010A510(void) {
+u32 evtCloseSkyEventTask(void) {
     D_003BA730 = 1;
     evtDestroySkyTask();
     fldDispatchDeferredFieldCommand();
@@ -628,12 +628,12 @@ void func_0010A548(void) {
     func_002720B0();
 }
 
-u32 func_0010A560(void) {
+u32 evtDestroyCampTasks(void) {
     mnuDestroyCampTasks();
     return 0;
 }
 
-u8 func_0010A580(void) {
+u8 evtWaitCampStateAcknowledged(void) {
     s64 campState;
 
     campState = mnuAcknowledgeCampState();
@@ -662,28 +662,28 @@ u32 func_0010A5C8(void) {
     return 1;
 }
 
-void func_0010A5D0(void) {
+void evtCreateStaffTasks(void) {
     mnuStaffCreateTasks();
 }
 
-u32 func_0010A5E8(void) {
+u32 evtDestroyStaffTasks(void) {
     fldDispatchDeferredFieldCommand();
     mnuStaffDestroyTasks();
     return 0;
 }
 
-u8 func_0010A610(void) {
+u8 evtWaitStaffTaskDone(void) {
     s64 taskResult;
 
     taskResult = brsTaskConsumeDone();
     return taskResult == 0;
 }
 
-void func_0010A630(void) {
-    configTasksCreate(1);
+void evtCreateConfigTasks(void) {
+    mnuCreateConfigTasks(1);
 }
 
-u32 func_0010A648(void) {
+u32 evtDestroyConfigTasks(void) {
     mnuConfigTasksDestroy();
     return 0;
 }
@@ -691,11 +691,11 @@ u32 func_0010A648(void) {
 u8 func_0010A668(void) {
     s64 taskResult;
 
-    taskResult = func_002913B8();
+    taskResult = fileConsumeConfigTaskReady();
     return taskResult == 0;
 }
 
-void evtUnkA688Dispatch(s32 arg0, s32 *arg1) {
+void evtDispatchSelectionCommand(s32 arg0, s32 *arg1) {
     if (arg0 == 0) {
         if (arg1 == NULL) {
             func_001A11F0(1, 0, 0);
@@ -714,7 +714,7 @@ void func_0010A6E0(void) {
     func_001A1068();
 }
 
-u32 evtUnkA6F8Ensure(void) {
+u32 evtEnsureSelectionTask(void) {
     if (kwlnTaskGetTaskByName(D_003BA950) != NULL) {
         return 0;
     }
@@ -725,7 +725,7 @@ u32 evtUnkA6F8Ensure(void) {
     return 0;
 }
 
-void func_0010A748(void) {
+void evtCreateBattleStageTestTask(void) {
     btlCreateStageTestTask();
 }
 
@@ -738,18 +738,18 @@ u32 func_0010A780(void) {
     return 0;
 }
 
-void func_0010A788(void) {
+void evtCreateTestAndSkyTasks(void) {
     D_003BA730 = 0;
     D_003BA958 = 0;
     evtStartTestTask();
     evtCreateSkyTask();
 }
 
-extern void func_001060C8();
+extern void kwlnFadeBackgroundStartOut();
 
-u32 evtUnkA7A8Init(void) {
+u32 evtInitializeSelectionScene(void) {
     D_003BA730 = 1;
-    func_001060C8(0);
+    kwlnFadeBackgroundStartOut(0);
     evtStopTestTasks();
     evtDestroySkyTask();
     return 1;
@@ -759,16 +759,16 @@ u32 func_0010A7E0(void) {
     return 0;
 }
 
-void func_0010A7E8(void) {
+void evtClearSecondaryWorldAndViewer(void) {
     D_003BA730 = 0;
     evtDestroySecondaryWorldNode();
     func_00232D60();
 }
 
-u32 evtUnkA808Init(void) {
+u32 evtInitializeSelectionScreen(void) {
     evtEventViewerDestroyTask();
     D_003BA730 = 1;
-    func_001060C8(0);
+    kwlnFadeBackgroundStartOut(0);
     return 0;
 }
 
@@ -803,12 +803,12 @@ u8 func_0010A890(void) {
     return campState == 0;
 }
 
-void func_0010A8B0(u32 arg0, u32 arg1) {
+void evtCreateSkyAndCampTasks(u32 arg0, u32 arg1) {
     evtCreateSkyTask();
     func_002449F0(arg1);
 }
 
-u32 func_0010A8D8(void) {
+u32 evtDestroySkyAndCampTasks(void) {
     evtDestroySkyTask();
     mnuCampDestroyPanelTasks();
     func_00126068();
@@ -822,7 +822,7 @@ u8 func_0010A908(void) {
     return taskState == 0;
 }
 
-void func_0010A928(u32 arg0, s32 arg1) {
+void evtCreateSkyAndFieldTasks(u32 arg0, s32 arg1) {
     evtCreateSkyTask();
     if (arg1 != 0) {
         func_00249FA8(*(u32 *)arg1, ((u32 *)arg1)[1]);
@@ -831,29 +831,29 @@ void func_0010A928(u32 arg0, s32 arg1) {
     func_00249FA8(0, 1);
 }
 
-u32 func_0010A970(void) {
+u32 evtDestroySkyAndFieldTasks(void) {
     evtDestroySkyTask();
     fldStopSceneTasks();
     return 0;
 }
 
-u8 func_0010A998(void) {
+u8 evtWaitFieldSceneState(void) {
     s64 sceneState;
 
     sceneState = fldPollSceneState();
     return sceneState == 0;
 }
 
-void func_0010A9B8(void) {
+void evtCreateStaffTasksAlternate(void) {
     mnuStaffCreateTasks();
 }
 
-u32 func_0010A9D0(void) {
+u32 evtDestroyStaffTasksAlternate(void) {
     mnuStaffDestroyTasks();
     return 0;
 }
 
-u8 func_0010A9F0(void) {
+u8 evtWaitStaffTaskDoneAlternate(void) {
     s64 taskResult;
 
     taskResult = brsTaskConsumeDone();
@@ -894,11 +894,11 @@ u32 evtTestFontCheck(void) {
     return kwlnTaskGetTaskByName(D_0039E200) == NULL;
 }
 
-void func_0010AA88(void) {
+void evtCreateMovieViewerTask(void) {
     mnuCreateMovieViewerTask();
 }
 
-u32 func_0010AAA0(void) {
+u32 evtDestroyMovieViewerTask(void) {
     mnuDestroyMovieViewerTask();
     return 0;
 }
@@ -920,30 +920,30 @@ u32 func_0010AB00(void) {
     return 0;
 }
 
-void evtUnkAB08Call(s32 arg0, s32 *arg1) {
+void evtSelectFontResource(s32 arg0, s32 *arg1) {
     if (arg1 == NULL) {
-        func_002C2E38(0);
+        fldStartLmapTask(0);
     }
     else {
-        func_002C2E38(arg1[0]);
+        fldStartLmapTask(arg1[0]);
     }
     D_0032E3C0[0] = 0x3E7;
 }
 
-u32 func_0010AB48(void) {
+u32 evtDestroyLmapTask(void) {
     fldStopLmapTask();
     func_00126110();
     return 0;
 }
 
-u8 func_0010AB70(void) {
+u8 evtWaitLmapTaskGone(void) {
     s64 taskExists;
 
     taskExists = fldLmapTaskExists();
     return taskExists == 0;
 }
 
-u32 evtUnkAB90Ensure(void) {
+u32 evtEnsureFontResourceChain(void) {
     if (D_003BA960 == 0) {
         D_003BA960 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
         func_002E41B0(D_003BA960, 2);

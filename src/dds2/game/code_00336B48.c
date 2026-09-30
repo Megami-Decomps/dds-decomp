@@ -895,7 +895,7 @@ s32 func_0033A2D0(s32 arg0) {
     return arg0 + 0x20;
 }
 
-void *func_0033A2D8(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s32 height) {
+void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s32 height) {
     s32 quadwords = width * height + 1;
     s64 header = height | ((s64)width << 60);
 
@@ -911,7 +911,7 @@ void *func_0033A2D8(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s3
 
 void *sdfConsAllocateColumnPacket(s32 height) {
     void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, height));
-    func_0033A2D8(packet, 0x156, 5, 0x53531, height);
+    sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, height);
     return packet;
 }
 

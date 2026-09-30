@@ -163,7 +163,7 @@ typedef struct MdlGroupEntity {
 extern void btlCreateGroupNode();
 extern void func_00231810();
 
-void func_002318D0(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
+void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
     MdlGroupEntity *entity;
 
     btlCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
@@ -189,7 +189,7 @@ void mdlExecuteAndFreeJob(u32 job) {
     u16 *words;
 
     words = (u16 *)job;
-    func_002318D0(*words, words[1], *(u32 *)(words + 4), words + 6);
+    mdlApplyGroupSetup(*words, words[1], *(u32 *)(words + 4), words + 6);
     WaitSema(D_00438F90);
     btlRemoveGroupId(*words, words[1]);
     SignalSema(D_00438F90);
@@ -250,7 +250,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00231E28);
 
 extern void sdfReleaseDevSlot(void *, s32, s32);
 
-void func_00231F50(MdlCtx *ctx) {
+void mdlReleaseDevSlots(MdlCtx *ctx) {
     MdlDevList *list = ctx->devList;
     MdlDevSlot *node;
     MdlDevSlot *cur;
@@ -275,7 +275,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00232198);
 extern void mdlDestroyResourceItem(u32 *);
 extern void sdfResourceListRelease(u32, s32);
 
-void func_002322E8(MdlCtx *ctx) {
+void mdlDestroyContext(MdlCtx *ctx) {
     MdlInner *inner = ctx->inner;
     u32 *node;
     u32 *next;
@@ -288,7 +288,7 @@ void func_002322E8(MdlCtx *ctx) {
         next = (u32 *)*node;
         mdlDestroyResourceItem(node);
     }
-    func_00231F50(ctx);
+    mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
     func_00231DC8((MdlLink *)ctx);
     func_00328E48(ctx);
@@ -570,7 +570,7 @@ void func_002334F0(u32 arg0) {
     func_00328E48(arg0);
 }
 
-/* Completion job created by func_002335A0 and run by func_00233520. */
+/* Completion job created by mdlRequestLoadWithCallback and run by func_00233520. */
 typedef struct MdlDoneJob {
     u16 group;         /* 0x0 */
     u16 id;            /* 0x2 */
@@ -587,7 +587,7 @@ extern s32 func_002C7F38();
 extern void func_002C81D0();
 extern void func_00233520();
 
-s32 func_002335A0(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
+s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
     MdlDoneJob *job = func_00328E18(0x14);
     s32 slot;
 

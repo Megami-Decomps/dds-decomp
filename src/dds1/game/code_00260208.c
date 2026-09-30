@@ -282,7 +282,7 @@ void brsCloseSkillPackagePanel(s32 work) {
 extern char D_003AFA88[];
 extern char D_003AFA98[];
 extern void func_002E9340(s32);
-extern void initPartyPanelSlots(s32);
+extern void mnuInitPartyPanelSlots(s32);
 extern void func_00271500(s32, s32);
 extern void effRequestResourceByMode(char *, char *, s32, s32);
 extern void mnuRequestBaseAssets(s32);
@@ -293,7 +293,7 @@ s32 mnuStaffInitPanel(s32 work) {
         return 0;
     }
     func_002E9340(0x50000);
-    initPartyPanelSlots(work + 0x574);
+    mnuInitPartyPanelSlots(work + 0x574);
     func_00271500(*(s32 *)(work + 0x58), work + 0x4F8);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, work + 0x90);
     mnuRequestBaseAssets(work + 0xD1C);
@@ -511,8 +511,8 @@ s32 brsTaskIsFadeIdle(void) {
 }
 
 void mnuRefreshSelectedUnitPanels(u32 unused, s32 menu) {
-    initPartyPanelSlots(menu + 0x574);
-    menuUpdateHandleStates(menu + 0x680);
+    mnuInitPartyPanelSlots(menu + 0x574);
+    mnuUpdateHandleStates(menu + 0x680);
     func_00280048(menu + 0x680);
 }
 

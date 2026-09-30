@@ -39,7 +39,7 @@ typedef struct FldActionSpawn {
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 evtSpawnActionObj2(s32, s32);
-extern s32 func_001462D0(void);
+extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void func_00131218(void);
 extern void func_0012FC20(void);
@@ -88,7 +88,7 @@ extern void btlActivateRuntime(s32 mode);
 extern void func_00110860(u64, s8);
 extern void sdfInitPacketList(u64);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void func_002E1428(u64, s32, s32, s32, s32);
+extern void sdfConsInitPacketHeader(u64, s32, s32, s32, s32);
 extern u64 *func_002E1420(u64);
 extern s32 sdfConsAllocateColumnPacket(s32);
 extern void sdfConsCreateDrawPacket(u64, s32, s32);
@@ -141,7 +141,7 @@ extern s32 D_003BAA34;
 
 extern u32 D_003BACF8;
 
-extern u32 sdfCreateInitializedPacketList(void);
+extern u32 sdfCreateResetPacketList(void);
 extern u64 sdfAllocPacketAligned(u64);
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
@@ -346,7 +346,7 @@ void func_001278C0(u32 buffer, FldTransferChunk *chunk) {
     fldRelocatePackedWords((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
 }
 
-void fldSetAreaResourceRequest(u32 arg0, u32 arg1) {
+void fldSetPendingAreaAndFloor(u32 arg0, u32 arg1) {
     D_003BAC84 = arg0;
     D_003BAC88 = arg1;
 }
@@ -477,7 +477,7 @@ u8 fldIsAreaResourceReady(void) {
     return D_0032E428[0] != 0;
 }
 
-s32 fldIsAreaResourceReadyFor(s32 area, s32 room) {
+s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     if (D_0032E3B0[31] != area || D_0032E3B0[32] != room) {
         return 0;
     }
@@ -846,7 +846,7 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, 
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    func_002E1428(packet, 0x49, 2, 0x41, 2);
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | (0x8000LL << 24);
@@ -883,7 +883,7 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 ar
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    func_002E1428(packet, 0x49, 2, 0x41, 2);
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | (0x8000LL << 24);
@@ -924,7 +924,7 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 a
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | ((u64)arg7 << 32);
@@ -966,7 +966,7 @@ void func_00129E30(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     tag = arg4;
     lo = (u64)arg5 | ((u64)arg6 << 32);
@@ -1008,7 +1008,7 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | ((u64)arg7 << 32);
@@ -1056,7 +1056,7 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 arg6, u32
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_002E1428(packet, 0x4D, 2, 0x41, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_002E1420(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | ((u64)arg7 << 32);
@@ -1365,7 +1365,7 @@ void fldStartQuadPacketList(s32 quadState) {
     u64 packet;
     u32 packetList;
 
-    packetList = sdfCreateInitializedPacketList();
+    packetList = sdfCreateResetPacketList();
     *(u32 *)(quadState + 0x28) = packetList;
     packet = sdfAllocPacketAligned(0x40);
     func_002D5608(packet);
@@ -1582,7 +1582,7 @@ s32 fldEncProc(void) {
 void func_0012C6C8(u32 arg0, s32 arg1) {
     if ((arg1 < 0x400) && ((*(u16 *)((s32)arg1 * 0x28 + D_003BAA34 + 0x20) & 0x8000) != 0))
     {
-        func_001060C8(0);
+        kwlnFadeBackgroundStartOut(0);
         func_0012C750(3);
         return;
     }
@@ -1737,40 +1737,7 @@ void func_0012E6F8(void) {
     }
 }
 
-s32 func_0012E878(void) {
-    FldCamWork *cam;
-    s32 *obj = func_00123DD0();
-
-    if (*obj != 0 && D_003BAB34 != 0) {
-        func_00131278();
-        if (func_0012E488() != 0) {
-            fldToggleWorldNodeState(1);
-            func_0012E510();
-            func_00131218();
-            return 0;
-        } else {
-            func_0012C880();
-            cam = (FldCamWork *)D_0032E3B0;
-            dds3SetCameraValue(*obj, D_0032FA10[cam->rowIdx].fov * 3.14f / 180.0f);
-            switch (cam->mode) {
-            case 0:
-                func_0012D528();
-                if (cam->dist < 50.0f) {
-                    func_0012D528();
-                }
-                break;
-            case 1:
-                func_0012DD70();
-                break;
-            case 4:
-                func_0012D3D8();
-                break;
-            }
-            func_0012E6F8();
-        }
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E878);
 
 void func_0012E9D0(void) {
     D_003BAD38 = 0;
@@ -1871,7 +1838,7 @@ s32 func_00131098(void) {
     if (D_0032E570[0] != 0) {
         return 0;
     }
-    if (func_001462D0() != 0) {
+    if (fldGetSceneReadyFlag() != 0) {
         return 0;
     }
     if (func_00125DF8(0x40) == 0) {
@@ -2014,7 +1981,7 @@ typedef struct FldCameraFacingWork {
 
 /* Camera facing requests share the field-work block. Both request states
  * advance from 1 to 2 when their new angle is installed. */
-void fldQueueCameraFacingPoint(f32 targetX, f32 targetZ) {
+void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
     FldCameraFacingWork *work = (FldCameraFacingWork *)D_0032E3B0;
 
     work->targetX = targetX;
@@ -2022,7 +1989,7 @@ void fldQueueCameraFacingPoint(f32 targetX, f32 targetZ) {
     work->pointState = 1;
 }
 
-void fldQueueCameraFacingAngle(f32 x, f32 unusedY, f32 z) {
+void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
     FldCameraFacingWork *work;
     f32 angle;
 
@@ -2048,7 +2015,7 @@ void fldApplyCameraFacingPoint(void) {
     }
 }
 
-void fldApplyCameraFacingAngle(void) {
+void fldApplyPendingCameraHeading(void) {
     u8 *cameraWork = (u8 *)D_0032E3B0;
 
     if (*(u32 *)(cameraWork + 0x194) != 0) {
@@ -2298,7 +2265,7 @@ extern s32 func_001082D8(s32, void *);
 extern s32 func_00107FD8(s32, s32, void *);
 extern s32 func_00108218(s32, void *);
 extern s32 func_001080D8(s32, s32, void *);
-extern s32 evtUnk8360SetVec(s32, f32, f32, f32, f32);
+extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 void fldApplyLightSetCurrent(void) {
     FldLightSet *light = &((FldLightSet *)D_003BAD60)[D_003BAD98];
@@ -2320,7 +2287,7 @@ void fldApplyLightSetCurrent(void) {
     vec[2] = light->unk34 * 0.00390625f;
     vec[3] = 0;
     func_001082D8(0, vec);
-    evtUnk8360SetVec(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
     dir[0] = light->unk44;
     dir[1] = light->unk48;
     dir[2] = light->unk4C;
@@ -2379,7 +2346,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[2] = light->unk34 * 0.00390625f;
     vec[3] = 0;
     func_001082D8(0, vec);
-    evtUnk8360SetVec(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
     dir[0] = light->unk44;
     dir[1] = light->unk48;
     dir[2] = light->unk4C;
@@ -3024,10 +2991,6 @@ extern u8 D_00336A30[];
 extern u8 D_00336A40[];
 extern u8 D_00336A50[];
 extern s32 D_003BAE6C;
-INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
-
-INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
-
 /* Packed 0x6C-byte field actor row. Offsets come from the parallel actor
  * searches, motion lookups, and sound dispatch below. */
 typedef struct FldActorEntry {
@@ -3052,6 +3015,10 @@ typedef struct FldActorEntry {
     s8 value67;            /* 0x67 */
     u8 pad68[4];
 } FldActorEntry;
+
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
+
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0200);
 
 u8 *func_0013D6D0(const char *name) {
     s32 i = 0;
@@ -3259,7 +3226,7 @@ void func_0013DC08(s32 arg0) {
     } else if (kind == 11) {
     } else if (kind == 12) {
     } else if (kind == 4) {
-        fldApplyCameraFacingAngle();
+        fldApplyPendingCameraHeading();
     }
 }
 
@@ -3514,9 +3481,9 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00140BE8);
 void func_00140F68(void) {
 }
 
-extern s32 func_00124F08(void), func_00125140(void), func_0028F600(void);
+extern s32 func_00124F08(void), func_00125140(void), fileMenuTaskExists(void);
 extern s32 func_00124E90(void), func_00124EB8(void), func_00124EE0(void);
-extern s32 func_0014D0D0(void);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern u16 *func_00101A70(u32);
 extern s32 func_00195CD8(void *, s32, s32);
 extern void fldDrawGaugeBar(s32);
@@ -3535,7 +3502,7 @@ s32 func_00140F70(u32 task) {
     if (func_00125140() != 0) {
         return 0;
     }
-    if (func_0028F600() != 0) {
+    if (fileMenuTaskExists() != 0) {
         return 0;
     }
     if (func_00124E90() != 0) {
@@ -3547,7 +3514,7 @@ s32 func_00140F70(u32 task) {
     if (func_00124EE0() != 0) {
         return 0;
     }
-    if (func_0014D0D0() != 0) {
+    if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
     ticket = func_00101A70(task);

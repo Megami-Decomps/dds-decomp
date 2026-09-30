@@ -16,7 +16,7 @@ extern s32 func_00101740(u32);
 
 extern char D_0042D240[]; /* "LmapMain" */
 
-extern void func_0030AB88(void);
+extern void fldShutdownLmapResources(void);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
@@ -64,7 +64,7 @@ extern void func_00316E70(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void func_0026C728(void);
 extern void func_003298C0(s32);
-extern void evtDestroyWorldSecondaryNode(void);
+extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
 extern void func_0035C860(char *, char *, ...);
@@ -176,7 +176,7 @@ INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A7C8);
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A8A8);
 
-void func_0030A970(s32 arg0) {
+void fldStartLmapTask(s32 arg0) {
     void *handle = func_003292A8(0x88);
     u32 *block = sdfMemoryGetBlockAddress((u32)handle);
 
@@ -191,7 +191,7 @@ void func_0030A970(s32 arg0) {
 }
 
 void fldStopLmapTask(void) {
-    func_0030AB88();
+    fldShutdownLmapResources();
     kwlnTaskDestroyWithHierarchyByName(D_0042D240, 1);
 }
 
@@ -228,7 +228,7 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
     task->value4 = 0;
 }
 
-void func_0030AB88(void) {
+void fldShutdownLmapResources(void) {
     func_00342580(0x400001);
     func_0030DAE8();
     func_0030C640();
@@ -238,7 +238,7 @@ void func_0030AB88(void) {
     evtSetSolarOverlayFullyTransparent();
     func_0026C728();
     func_003298C0(D_004388A4);
-    evtDestroyWorldSecondaryNode();
+    evtDestroySecondaryWorldNode();
 }
 
 u8 func_0030ABF0(void) {
@@ -296,7 +296,7 @@ void func_0030B680(void) {
     func_0026C618(1);
 }
 
-s32 func_0030B6D8(void) {
+s32 fldLmapToggleOverlay(void) {
     s32 result = 0;
 
     if (func_0026C768() != 0) {

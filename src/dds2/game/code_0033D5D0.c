@@ -543,12 +543,12 @@ DevState *sdfDevCreateCommandState(s32 command) {
     return state;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EA60);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPathExists);
 
 void func_0033EAE0(u32 arg0) {
     sdfDevQueueActiveOperation();
     WaitSema(D_00438AE4);
-    func_0033FD30(arg0);
+    sdfDevQueueReleaseState(arg0);
 }
 
 void func_0033EB10(void) {
@@ -756,7 +756,7 @@ s32 sdfDevQueueActiveOperation(DevState *arg0) {
     return 0;
 }
 
-s32 func_0033FD30(DevState *state) {
+s32 sdfDevQueueReleaseState(DevState *state) {
     if (state->state < 9) {
         if (state->state >= 7) {
             func_0033ED38(state);
@@ -885,7 +885,7 @@ void sdfLoadDevModule(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340298);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340328);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfClearQuadwords);
 
 char *sdfStrDup(const char *arg0) {
     u32 len;
@@ -952,7 +952,7 @@ extern void func_00329910(s32 handle);
 extern void func_00329600(s32 handle, s32 size);
 void func_003405D8(DevRequest *request, s32 count);
 
-void func_00340558(DevRequest *request) {
+void sdfDevBufferedRequestGrow(DevRequest *request) {
     if (request->handle == 0) {
         func_003405D8(request, request->mode);
         return;
@@ -1021,7 +1021,7 @@ void func_003407A0(f32 arg0) {
 }
 
 /* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
-f32 func_003407C0(f32 value, f32 *table, s32 count) {
+f32 sdfTableInterpolate(f32 value, f32 *table, s32 count) {
     f32 unit = 1 / count;
     s32 lo = 0;
     s32 hi = count;
@@ -1084,7 +1084,7 @@ f32 sdfAtan2(f32 arg0, f32 arg1) {
     return r;
 }
 
-f32 func_00340950(f32 x) {
+f32 sdfAsinTable(f32 x) {
     f32 sign;
     f32 result;
 
@@ -1094,11 +1094,11 @@ f32 func_00340950(f32 x) {
     } else {
         sign = 1.0f;
     }
-    result = x >= 1.0f ? 1.5707963f : func_003407C0(x, D_00410C6C, 128) * 1.5707963f;
+    result = x >= 1.0f ? 1.5707963f : sdfTableInterpolate(x, D_00410C6C, 128) * 1.5707963f;
     return result * sign;
 }
 
-f32 func_003409C8(f32 x) {
+f32 sdfAcosTable(f32 x) {
     f32 sign;
     f32 result;
 
@@ -1110,7 +1110,7 @@ f32 func_003409C8(f32 x) {
     }
     result = 0.0f;
     if (!(x >= 1.0f)) {
-        result = (1.0f - func_003407C0(x, D_00410C6C, 128)) * 1.5707963f;
+        result = (1.0f - sdfTableInterpolate(x, D_00410C6C, 128)) * 1.5707963f;
     }
     return result * sign;
 }

@@ -86,7 +86,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189C98);
 
 void func_00189E60(EffMagatuhiWideFirst *work) {
     effMathReleaseWorkResource(work->mathResource);
-    effReleaseSceneResource(work->managedResource);
+    effReleaseMagatuhiOwner(work->managedResource);
     func_002D0918(work->buffer);
 }
 
@@ -111,7 +111,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A678);
 
 void func_0018A800(EffMagatuhiWideSecond *work) {
     effMathReleaseWorkResource(work->mathResource);
-    effReleaseSceneResource(work->managedResource);
+    effReleaseMagatuhiOwner(work->managedResource);
     func_002D0918(work->buffer);
 }
 
@@ -126,7 +126,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018ADD8);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018AFE8);
 
 void func_0018B1D0(EffMagatuhiMidWork *work) {
-    effReleaseSceneResource(work->firstResource);
+    effReleaseMagatuhiOwner(work->firstResource);
     func_002D0918(work->buffer);
 }
 
@@ -152,7 +152,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B648);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B850);
 
 void func_0018BA00(EffMagatuhiMidWork *work) {
-    effReleaseSceneResource(work->secondResource);
+    effReleaseMagatuhiOwner(work->secondResource);
     func_002D0918(work->extraBuffer);
 }
 
@@ -178,7 +178,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018BE98);
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C0C0);
 
 void func_0018C2A8(EffMagatuhiMidWork *work) {
-    effReleaseSceneResource(work->secondResource);
+    effReleaseMagatuhiOwner(work->secondResource);
     func_002D0918(work->buffer);
 }
 

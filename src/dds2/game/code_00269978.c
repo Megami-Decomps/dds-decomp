@@ -265,7 +265,7 @@ u32 evtSelectFinalVisualNode(void) {
     EventDispatchState *state;
 
     state = (EventDispatchState *)func_00101958();
-    func_002B8988((u32)state->visualState);
+    mnuSelectLastListNode((u32)state->visualState);
     return 1;
 }
 
@@ -320,7 +320,7 @@ extern void mnuCreateResourceTask(void);
 
 extern s32 mnuCheckResourceTask(void);
 
-extern s32 sdfGraphHasPendingWorkInterruptSafe(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern void func_002C42C0(s32 *, char *);
 
@@ -342,7 +342,7 @@ s64 evtPollDispatchAfterFade(u64 request) {
             }
             if (*dispatch == 0 && state->fadeStarted == 1 &&
                 mnuCheckResourceTask() == 0) {
-                if (sdfGraphHasPendingWorkInterruptSafe() != 0) return 0;
+                if (sdfCheckPendingWorkWithInterrupts() != 0) return 0;
                 func_002680E0((s32)state);
                 state->fadeStarted = 0;
                 func_002C42C0(dispatch, D_003CE848);
@@ -420,7 +420,7 @@ void evtBSetupDispatchSyncF(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-u32 evtQueueCueForDisplayMode(void) {
+u32 evtBCheckPanelMode(void) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
 
     func_0026C948(1);
@@ -435,7 +435,7 @@ u32 evtQueueCueForDisplayMode(void) {
     return 1;
 }
 
-s64 evtPollDispatchStatus(u64 request) {
+s64 evtBContinueDispatchOrRestoreTable(u64 request) {
     EventDispatchState *state;
     s64 result;
     s32 *dispatch;

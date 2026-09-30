@@ -468,7 +468,7 @@ u32 evtResetStateProgressTimer(void) {
 
     context = (EvtStateTableContext *)func_00101958();
     context->progressTimer = 0;
-    func_002B8988(context->primaryObject->node);
+    mnuSelectLastListNode(context->primaryObject->node);
     return 1;
 }
 

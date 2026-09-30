@@ -167,7 +167,7 @@ void frFontLoadDefaultFonts(void) {
     func_00194190(3, "/font/font3.fnt");
 }
 
-void func_00194668(void) {
+void frFontFreeAllEntries(void) {
     s32 i;
 
     for (i = 0; i < 9; i++) {
@@ -257,7 +257,7 @@ extern void *func_002CFEB8(s32 size);
 extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
 extern void func_00198088(void *dst, s32 arg1, void *block, FrFontSegments *segments);
 
-void *func_00194E00(u8 index, s32 arg1) {
+void *frFontCloneEntryResource(u8 index, s32 arg1) {
     FrFontEntry *entry = &D_003D6C80.entries[index];
     void *dst = func_002CFEB8(0x120);
     FrFontSegments segments;

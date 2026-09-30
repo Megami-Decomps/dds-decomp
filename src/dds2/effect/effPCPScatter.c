@@ -1,7 +1,8 @@
 #include "common.h"
-#include "pcp_vu0.h"
-extern void func_00336AA8(void);
 
+#include "pcp_vu0.h"
+
+extern void func_00336AA8(void);
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -116,6 +117,82 @@ typedef struct PcpScatterPool {
 } PcpScatterPool;
 
 /* Spawn a scatter variant from three parameter-table blocks. */
+/* Shared resource handed between scatter effects. effPcpScatterResCreate creates it,
+   effPcpScatterResAddRef takes a reference, effPcpScatterResRelease releases it. */
+typedef struct PcpScatterRes PcpScatterRes;
+
+extern u32 effParamWorkDuplicate(u32 param);
+
+extern u32 func_003292A8(u32 size);
+
+extern u32 *sdfResourceRetainAddress(u32 handle);
+
+/* Effect initializers implemented in assembly below (func_001708A0 lives in
+   another unit). Each is entered with and without spawn arguments, so they
+   are declared unchecked. */
+extern void *func_001784F8();
+
+/* Per-effect work areas. Only the fields touched by the matched spawn,
+   teardown and scale helpers are known; the update bodies are still assembly.
+   Each work area belongs to the effect whose initializer is noted. */
+typedef struct PcpScatterWork1 PcpScatterWork1;
+
+typedef struct PcpScatterWork3 PcpScatterWork3;
+
+/* func_001708A0 */
+struct PcpScatterWork1 {
+    u8 pad00[0x20];
+    u32 unk20;
+    u8 pad24[0x18];
+    f32 unk3C;
+    u32 unk40;
+    u32 unk44;
+    u32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    u8 pad54[0x14];
+    u8 unk68;
+    u8 pad69[7];
+    u32 unk70;
+    u8 pad74[0xC];
+    PcpScatterWork3 *childWork;
+    u32 ownedResource;
+    u32 duplicatedCount;
+    u32 *duplicatedHandles;
+    u32 duplicateAllocation;
+};
+
+/* Resource-holding effect around effPcpScatterCreatePoolResource */
+struct PcpScatterWork3 {
+    u8 pad00[0x20];
+    s32 unk20;
+    s32 unk24;
+    u32 unk28;
+    u32 unk2C;
+    PcpScatterRes *res;
+    u8 pad34[0x20];
+    u32 unk54;
+};
+
+extern void *func_00179DB0();
+
+/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (func_00172138 scales
+   the same word as a float). */
+typedef struct {
+    u8 pad00[0x20];
+    u32 unk20;
+    u8 pad24[0x1C];
+    u8 unk40;
+    u8 pad41[7];
+    u32 unk48;
+    u8 pad4C[0xC];
+    PcpScatterWork3 *unk58;
+    u32 unk5C;
+    u32 unk60;
+    u32 *unk64;
+    u32 unk68;
+} PcpScatterWork2Copy;
+
 void func_001787E0(u64 table) {
     u64 params;
     u64 resource;
@@ -323,6 +400,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 }
 
 extern void sdfTexReleaseReferenceViaHandler(u32);
+
 extern void func_00328E48(void *);
 
 void effPcpScatterResRelease(PcpScatterRes *res) {
@@ -393,16 +471,19 @@ typedef struct PcpScatterInstance {
 } PcpScatterInstance;
 
 extern void *func_0017D7A8();
-extern u32 func_003292A8(s32 size);
-extern u32 sdfResourceRetainAddress(u32 allocation);
+
 extern void effCreateScatterResource(void *object, u32 resource);
+
 extern u32 effMiscRand(void *state);
+
 extern u8 D_003AA868[];
 
 /* Allocate particles after the scatter work, then assign randomized offsets. */
 PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
     PcpScatterParams *src;
+
     u32 resource;
+
 {
     u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x18C);
     PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
@@ -511,7 +592,9 @@ typedef struct PcpScatterInstanceB {
 /* Same particle layout with a longer parameter block and one extra control word. */
 void *effScatterInstanceCreateB(src, resource)
     PcpScatterParamsB *src;
+
     u32 resource;
+
 {
     u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x194);
     PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
@@ -627,7 +710,9 @@ typedef struct PcpScatterInstanceC {
 /* Third particle variant has another eight bytes of per-instance state. */
 void *effScatterInstanceCreateC(src, resource)
     PcpScatterParamsC *src;
+
     u32 resource;
+
 {
     u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x19C);
     PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);

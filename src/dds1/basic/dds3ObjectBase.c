@@ -13,8 +13,8 @@ void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
 void func_001111C8(void *arg0, void *arg1);
 void dds3SetSlotValue(void *arg0, void *arg1);
 void dds3SetSlotKey(void *arg0, void *arg1);
-void dds3ReloadSlotPath(void *arg0);
-void func_002177D0(s32 arg0, s32 arg1);
+void dds3ReplaceObjectResource(void *arg0);
+void mdlDestroyContext(s32 arg0, s32 arg1);
 void func_00222200(u32 arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void func_002DB308(void *arg);
@@ -132,15 +132,15 @@ void dds3RunSlot1Handlers(void *obj, void *context) {
 
     handler = dds3GetSlot(obj, 1);
     dds3SetSlotKey(handler, context);
-    dds3ReloadSlotPath(obj);
+    dds3ReplaceObjectResource(obj);
 }
 
 void dds3ReleaseSlot1Data(void *obj) {
-    dds3ReleaseSlotPath(dds3GetSlot(obj, 1));
+    dds3ReleaseObjectResource(dds3GetSlot(obj, 1));
 }
 
 void dds3GetSlot1Data(void *obj) {
-    dds3GetSlotPath(dds3GetSlot(obj, 1));
+    dds3GetObjectResourceHandle(dds3GetSlot(obj, 1));
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);

@@ -118,13 +118,13 @@ u32 func_0024FA18(void) {
 
 void mnuStopResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
-    func_0027BED0(*(s32 *)(object + 0xC));
+    mnuClearListFlagsOneAndTwo(*(s32 *)(object + 0xC));
     func_0027BEB0(*(s32 *)(object + 0xC));
 }
 
 void mnuResetResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
-    func_0027BED0(*(s32 *)(object + 0xC));
+    mnuClearListFlagsOneAndTwo(*(s32 *)(object + 0xC));
     func_0027BE90(*(s32 *)(object + 0xC));
 }
 

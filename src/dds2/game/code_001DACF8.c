@@ -213,7 +213,7 @@ struct BtlUnit {
     BtlUnit *nextActor;
 };
 
-extern void func_001DF700();
+extern void btlResetIndexWork();
 extern void func_00210DC8(BtlUnit *);
 extern void func_001D3C00(BtlUnit *);
 extern void btlUnitTurnEndStateSelect(BtlUnit *);
@@ -459,7 +459,7 @@ extern struct SoundTask *D_00436A1C;
 
 extern struct SoundTask *D_00436A20;
 
-extern s32 sdfGraphHasPendingWorkInterruptSafe(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern u32 D_00435CD4;
 
@@ -525,7 +525,7 @@ typedef struct SoundResourceNode {
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern void func_002046F0(s32, s32);
+extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 extern s32 D_00435E20;
 
@@ -542,9 +542,9 @@ typedef struct ActiveSoundNode {
 
 extern s32 btlCountTasksForOwner(s64);
 
-extern void func_001E15F0(SoundTask *);
+extern void btlRunTask(SoundTask *);
 
-extern s32 func_0020D128(const char *, ...);
+extern s32 btlBossDebugPrintf(const char *, ...);
 
 extern s32 func_00232EE8(s32);
 
@@ -651,7 +651,7 @@ extern void func_001E96C8(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32,
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern void func_001E9890(void);
+extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
 
@@ -723,7 +723,7 @@ extern void fldApplyLightSetCurrent(void);
 
 extern f32 *D_0037F770[];
 
-extern s32 func_00202F60(s32, u16);
+extern s32 sndGetEffectNodeParameter(s32, u16);
 
 extern u32 func_002D4138(u32);
 
@@ -823,14 +823,14 @@ void func_001DC890(BtlUnit *unit) {
 void func_001DC8F8(void) {
 }
 
-void func_001DC900(BtlUnit *unit) {
+void btlUnitTurnEndCommit(BtlUnit *unit) {
     void (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook638;
     BtlUnit *owner = unit->link18;
     if (hook != 0) {
         hook(unit);
     }
     func_00210DC8(unit);
-    func_001DF700((u8 *)unit + 0x20);
+    btlResetIndexWork((u8 *)unit + 0x20);
     owner->unk314 = -1;
     unit->unkC &= ~1;
     unit->unk14 += 1;
@@ -916,12 +916,12 @@ BtlUnit *btlCreateActionSeq(void) {
     }
     work->head = seq;
     btlDispatchStateHandler(seq, 0);
-    func_0020D128("btl:action seq create[%p]\n", seq);
+    btlBossDebugPrintf("btl:action seq create[%p]\n", seq);
     return seq;
 }
 
 void btlDestroyActionSeq(BtlUnit *unit) {
-    func_0020D128("btl:action seq delete[%p]\n", unit);
+    btlBossDebugPrintf("btl:action seq delete[%p]\n", unit);
     btlReleaseObjectBuffers((s32 *)((u8 *)unit + 0x20));
     if (unit->next != 0) {
         unit->next->prev = unit->prev;
@@ -986,7 +986,7 @@ s32 func_001DD5E8(s32 *state) {
     }
 }
 
-s32 func_001DD628(BtlUnit *unit, s32 *argument) {
+s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
     s32 value;
     switch (argument[0]) {
     case 1:
@@ -1013,10 +1013,10 @@ s32 func_001DD628(BtlUnit *unit, s32 *argument) {
     }
 }
 
-u32 func_001DD6D8(BtlUnit *unit, u8 *argument) {
+u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     switch (*(s32 *)argument) {
     case 1: {
-        u32 count = func_001E8058(((BtlCommandArgument *)argument)->actorIndices);
+        u32 count = btlGetIndexListCount(((BtlCommandArgument *)argument)->actorIndices);
         if ((unit->flags & 0x200) && ((unit->flags & 0x1000) || (unit->unk120 & 0x10)) &&
             (unit->unk12E & 0x1000) == 0 && count == 1) {
             u8 *option = *(u8 **)(argument + 0x68);
@@ -1096,7 +1096,7 @@ typedef struct BattleIndexWork {
     u32 command;
 } BattleIndexWork;
 
-void func_001DF700(BattleIndexWork *work) {
+void btlResetIndexWork(BattleIndexWork *work) {
     u32 i;
     s32 offset;
     BattleIndexEntry *entry;
@@ -1131,7 +1131,7 @@ void func_001DF700(BattleIndexWork *work) {
         offset += 0x59C;
         next->unk10 = 0;
     }
-    func_001E8050(work->indices);
+    btlClearIndexList(work->indices);
 }
 
 extern void *btlAllocateIndexList(s32);
@@ -1147,7 +1147,7 @@ void func_001DF7B8(BattleIndexWork *work) {
     work->device = sdfResourceRetainAddress(command);
     work->command = command;
     work->previous = 0;
-    func_001DF700(work);
+    btlResetIndexWork(work);
 }
 
 void btlReleaseObjectBuffers(s32 *object) {
@@ -1156,7 +1156,7 @@ void btlReleaseObjectBuffers(s32 *object) {
         object[0x6C / 4] = 0;
     }
     if (object[0x40 / 4] != 0) {
-        func_001E8018(object[0x40 / 4]);
+        btlFreeIndexList(object[0x40 / 4]);
         object[0x40 / 4] = 0;
     }
 }
@@ -1431,13 +1431,13 @@ u32 btlAddEpFromPacket(s32 packetAddress) {
         return 1;
     }
     work->experienceEarned += packet->amount;
-    func_0020D128("btl:epall=%d[%d](packet)\n", work->experienceEarned, packet->amount);
+    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", work->experienceEarned, packet->amount);
     return 1;
 }
 
 extern u32 btlAddEpFromPacket(s32);
 
-SoundTask *func_001E0858(void *actor, s32 amount) {
+SoundTask *btlScheduleEpPacketTask(void *actor, s32 amount) {
     SoundTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->status = 0;
@@ -1462,13 +1462,13 @@ u32 btlAddMoneyFromPacket(s32 packetAddress) {
         return 1;
     }
     work->moneyEarned += packet->amount;
-    func_0020D128("btl:money=%d[%d](packet)\n", work->moneyEarned, packet->amount);
+    btlBossDebugPrintf("btl:money=%d[%d](packet)\n", work->moneyEarned, packet->amount);
     return 1;
 }
 
 extern u32 btlAddMoneyFromPacket(s32);
 
-SoundTask *func_001E0950(void *actor, s32 amount) {
+SoundTask *btlScheduleMoneyPacketTask(void *actor, s32 amount) {
     SoundTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->status = 0;
@@ -1557,13 +1557,13 @@ void btlUpdateAutoMusic(void) {
             ((BtlWork *)context)->battleFlags = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             func_001B8278(0);
-            func_0020D128(D_004178A8);
+            btlBossDebugPrintf(D_004178A8);
         }
     } else if ((s8)D_0037F510[0x22] < 0) {
         ((BtlWork *)context)->battleFlags = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
         func_001B8278(1);
-        func_0020D128(D_004178B8);
+        btlBossDebugPrintf(D_004178B8);
     }
 }
 
@@ -1648,10 +1648,6 @@ void btlFlagTasksForUpdate(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004178A8);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004178B8);
-
 typedef struct SoundCondition {
     u8 kind;
     u8 pad1[7];
@@ -1666,7 +1662,11 @@ extern SoundTask *btlFindTaskByHandle(u64);
 extern SoundTask *btlFindTaskByOwner(u64);
 extern SoundTask *btlFindTaskByKind(u16);
 
-s32 func_001E1368(SoundCondition *cond, s32 value) {
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004178A8);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004178B8);
+
+s32 btlEvalTaskCondition(SoundCondition *cond, s32 value) {
     s32 result = 0;
     SoundTask *task;
     switch (cond->kind) {
@@ -1802,7 +1802,7 @@ void func_001E15E0(void) {
     D_00436A20 = 0;
 }
 
-void func_001E15F0(SoundTask *task) {
+void btlRunTask(SoundTask *task) {
     u32 counter;
     if (!(task->flags & 8)) {
         return;
@@ -1815,7 +1815,7 @@ void func_001E15F0(SoundTask *task) {
     task->unk_30 = counter + 1;
     switch (task->unk_22) {
     case 0:
-        if (func_001E1368(task, counter) == 0) {
+        if (btlEvalTaskCondition(task, counter) == 0) {
             break;
         }
         task->unk_22 = 1;
@@ -1827,7 +1827,7 @@ void func_001E15F0(SoundTask *task) {
             break;
         }
     case 2:
-        if (func_001E1368((u8 *)task + 0x10, task->unk_34) != 0) {
+        if (btlEvalTaskCondition((u8 *)task + 0x10, task->unk_34) != 0) {
             task->unk_22 = 3;
         } else if (task->callback(task->args) != 0) {
             task->unk_22 = 3;
@@ -1851,7 +1851,7 @@ void btlSweepFinishedTasks(void) {
     for (task = ((BtlWork *)func_001AA6F8())->taskList254; task != 0; task = next) {
         next = task->next;
         if (!(task->flags & 2)) {
-            func_001E15F0(task);
+            btlRunTask(task);
         } else {
             task->deferNext = 0;
             if (D_00436A1C != 0) {
@@ -1870,7 +1870,7 @@ void btlClearDeferredTasks(void) {
     SoundTask *node = D_00436A20;
     while (node != 0) {
         SoundTask *next = node->deferNext;
-        func_001E15F0(node);
+        btlRunTask(node);
         node = next;
     }
     D_00436A1C = 0;
@@ -1906,11 +1906,11 @@ void btlDumpTaskQueue(void) {
     s32 context = func_001AA6F8();
     s32 node = (s32)((BtlWork *)context)->taskList254;
     while (node != 0) {
-        func_0020D128("btl:packet[%d]\n", ((SoundTask *)node)->taskId);
+        btlBossDebugPrintf("btl:packet[%d]\n", ((SoundTask *)node)->taskId);
         node = (s32)((SoundTask *)node)->next;
     }
-    func_0020D128("btl:packet head[%p]\n", *(void **)(context + 0x250));
-    func_0020D128("btl:packet tail[%p]\n", *(void **)(context + 0x254));
+    btlBossDebugPrintf("btl:packet head[%p]\n", *(void **)(context + 0x250));
+    btlBossDebugPrintf("btl:packet tail[%p]\n", *(void **)(context + 0x254));
 }
 
 void btlInitUnitFxDefaults(BtlFx *fx) {
@@ -2013,7 +2013,7 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
         if (unit->unk344 != 0) {
             sdfReleaseDevSlot(unit->unk344, 1, 1);
             unit->unk344 = 0;
-            func_0020D128(D_00417940, unit);
+            btlBossDebugPrintf(D_00417940, unit);
         }
         if (unit->effectObject != 0) {
             func_00110B50(unit->effectObject);
@@ -2138,7 +2138,7 @@ void func_001E2C00(u8 *unit, s32 index, s32 arg2, f32 scale) {
     func_001E22D8(unit, index, arg2, *(f32 *)(table + index * 0x14 + 0x34) * scale);
 }
 
-s32 func_001E2C78(u8 *unit, s32 index) {
+s32 btlGetSlotRateKind(u8 *unit, s32 index) {
     u8 *table = (u8 *)func_001ABFD8(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
     s32 value = *(s16 *)(table + index * 20 + 0x30);
     switch (value) {
@@ -2175,7 +2175,7 @@ void btlUpdateUnitEffects(void) {
     }
 }
 
-void func_001E2DA0(u8 *object) {
+void btlApplyUnitModelScaledValue(u8 *object) {
     s32 context;
     u8 *resource;
     f32 volume;
@@ -2190,7 +2190,7 @@ void func_001E2DA0(u8 *object) {
         volume * (30.0f / (f32)((BtlWork *)context)->unk4C4);
 }
 
-void func_001E2E20(BtlUnit *unit) {
+void btlResetUnitModelProgress(BtlUnit *unit) {
     if (unit->flags & 2) {
         unit->unkE8 |= 1;
         unit->ext->info->data->unk20 = 0;
@@ -2199,7 +2199,7 @@ void func_001E2E20(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2E58);
 
-f32 func_001E2EE8(BtlUnit *unit) {
+f32 btlGetUnitModelValue1C(BtlUnit *unit) {
     f32 value = 0.0f;
     if (unit->flags & 2) {
         value = unit->ext->info->data->f1C;
@@ -2207,14 +2207,14 @@ f32 func_001E2EE8(BtlUnit *unit) {
     return value;
 }
 
-void func_001E2F18(s32 arg0) {
+void btlAdvanceUnitModelFrame(s32 arg0) {
     if ((((BtlUnit *)arg0)->flags & 2) != 0) {
         func_003343E8(*(u32 *)(*(s32 *)(*(s32 *)(arg0 + 0x340) + 0x8c) + 0x1c));
         return;
     }
 }
 
-u16 func_001E2F50(BtlUnit *unit) {
+u16 btlGetUnitModelFrameCount(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
         return 0;
     }
@@ -2223,7 +2223,7 @@ u16 func_001E2F50(BtlUnit *unit) {
 
 extern s32 func_003343E8(BtlUnitData *, f32);
 
-void func_001E2F78(BtlUnit *unit) {
+void btlSeekUnitModelFrameZero(BtlUnit *unit) {
     if (unit->flags & 2) {
         func_003343E8(unit->ext->info->data, 0.0f);
     }
@@ -2235,7 +2235,7 @@ s64 btlSeekRandomModelFrame(BtlUnit *unit) {
     s32 count;
     f32 amount;
     if (unit->flags & 2) {
-        count = func_001E2F50(unit);
+        count = btlGetUnitModelFrameCount(unit);
         if (count > 0) {
             amount = effMiscRandMod(0, count);
             return func_003343E8(unit->ext->info->data, amount);
@@ -2243,7 +2243,7 @@ s64 btlSeekRandomModelFrame(BtlUnit *unit) {
     }
 }
 
-s32 func_001E3040(BtlUnit *unit) {
+s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
         return 1;
     }
@@ -2289,7 +2289,7 @@ void btlGetUnitWorldPos(u8 *unit, s128 *dst) {
 
 extern s32 func_00332D48(s32, s32);
 
-extern void btlUpdateUnitEffectVectors(BtlUnit *);
+extern void btlRefreshUnitFxVectors(BtlUnit *);
 
 s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
     s32 (*hook)(BtlUnit *, s32);
@@ -2300,7 +2300,7 @@ s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
     if (hook != 0) {
         mode = hook(unit, mode);
     }
-    btlUpdateUnitEffectVectors(unit);
+    btlRefreshUnitFxVectors(unit);
     return func_00332D48(unit->ext->info->unk18, mode);
 }
 
@@ -2326,7 +2326,7 @@ s8 btlSetActorAlternateEffectParameter(unit, mode)
     if (hook != 0) {
         mode = hook(unit, mode);
     }
-    btlUpdateUnitEffectVectors(unit);
+    btlRefreshUnitFxVectors(unit);
     return func_00332D08(unit->ext->info->unk18, mode);
 }
 
@@ -2342,7 +2342,7 @@ void func_001E33A8(void) {
     }
 }
 
-s32 func_001E33E0(u8 *object) {
+s32 btlIsUnitAtStoredPosition(u8 *object) {
     f32 position[3];
     func_001E3108(object, position);
     if (((BtlUnit *)object)->positionX == position[0] &&
@@ -2377,7 +2377,7 @@ void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     }
 }
 
-void func_001E34D8(u8 *unit, s128 *dst) {
+void btlCopyUnitRotationQuaternion(u8 *unit, s128 *dst) {
     PCP_COPY_VECTOR(dst, unit + 0x70);
 }
 
@@ -2403,7 +2403,7 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     }
 }
 
-void func_001E35F8(BtlUnit *unit, u32 value) {
+void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value) {
     mdlReleaseInnerResourceHandle(unit->ext->info, (value & 0xFFFFFF) | 0x80000000);
 }
 
@@ -2417,7 +2417,7 @@ extern void func_00232AD0(BtlUnitInfo *);
 
 extern void sdfModelUpdateCurrentFrameTransforms(s32);
 
-void btlUpdateUnitEffectVectors(BtlUnit *unit) {
+void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
         return;
     }
@@ -2428,7 +2428,7 @@ void btlUpdateUnitEffectVectors(BtlUnit *unit) {
     sdfModelUpdateCurrentFrameTransforms(unit->ext->info->unk18);
 }
 
-extern s32 func_002091C8(s128 *, s128 *);
+extern s32 btlAimHorizontalDirectionVU(s128 *, s128 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
@@ -2443,7 +2443,7 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target) {
         __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
         btlUnitGetBodyPosVU(target);
         __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
-        if (func_002091C8(&from, &to) != 0) {
+        if (btlAimHorizontalDirectionVU(&from, &to) != 0) {
             __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&hit));
             btlSetUnitRotation(unit, &hit);
         }
@@ -2452,7 +2452,7 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target) {
 
 extern s32 func_00209258(s128 *, s128 *, f32);
 
-void func_001E3720(BtlUnit *unit, BtlUnit *target, f32 scale) {
+void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale) {
     s128 from;
     s128 to;
     s128 hit;
@@ -2478,7 +2478,7 @@ extern s32 btlGetEntryFlagsUnlessDisabled(const void *);
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004179E0);
 
-s32 func_001E37A8(BattleEntryHeader *entry) {
+s32 btlClassifySpecialEntryObject(BattleEntryHeader *entry) {
     if (!(entry->flags & 0x400)) {
         return 0;
     }
@@ -2497,7 +2497,7 @@ typedef struct BtlUnitStats {
     u32 word[0x71];
 } BtlUnitStats;
 
-void func_001E3810(s32 arg0, s32 arg1) {
+void btlCopyUnitStats(s32 arg0, s32 arg1) {
     BtlUnitStats *stats = (BtlUnitStats *)(arg0 + 0x120);
     *stats = *(BtlUnitStats *)arg1;
     func_001AA7A0(stats);
@@ -2523,14 +2523,14 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     shape = *(u8 **)((u8 *)unit->ext->info + 0xC);
     unit->unk344 = sdfModelCreateWithItems(((BtlShapeResource *)shape)->itemKind, ((BtlShapeResource *)shape)->itemIndex);
     dds3SetObjectFlags(unit->effectObject, 1);
-    func_0020D128("btl:unit transparency create[%p]\n", unit);
+    btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3CB8);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3E20);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E4028);
+INCLUDE_ASM(const s32, "game/code_001DACF8", btlFormatUnitBedName);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E40F0);
 
@@ -2563,7 +2563,7 @@ SoundTask *func_001E44E0(BtlUnit *unit, s32 index, s32 value, f32 scale) {
 }
 
 u32 func_001E4588(u32 *arg0) {
-    func_001E2DA0(*arg0);
+    btlApplyUnitModelScaledValue(*arg0);
     return 1;
 }
 
@@ -2582,9 +2582,9 @@ SoundTask *func_001E45A8(BtlUnit *unit) {
 }
 
 u32 btlPollThresholdTask(s32 *arguments) {
-    if ((s32)func_001E2EE8((BtlUnit *)arguments[0]) >= arguments[1]) {
+    if ((s32)btlGetUnitModelValue1C((BtlUnit *)arguments[0]) >= arguments[1]) {
         if ((((BtlUnit *)arguments[0])->unkE8 & 1) == 0) {
-            func_001E2E20((BtlUnit *)arguments[0]);
+            btlResetUnitModelProgress((BtlUnit *)arguments[0]);
         }
         return 1;
     }
@@ -2689,11 +2689,11 @@ void btlRequestModelOrReuse(u32 *arguments) {
             func_0023CA60((u32)((BtlUnit *)object)->ext, 0, 0);
             ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
         }
-        func_0020D128(D_00417AF0, effect, model);
+        btlBossDebugPrintf(D_00417AF0, effect, model);
     } else {
         func_001E2058(object, effect, model);
         ((BtlUnit *)object)->gunResourceFlags |= 1;
-        func_0020D128(D_00417B10, effect, model);
+        btlBossDebugPrintf(D_00417B10, effect, model);
     }
 }
 
@@ -2707,7 +2707,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         }
         func_001E1BB8(object, effect, model);
         func_001E20B8(object, effect, model);
-        func_0020D128(D_00417B30, effect, model, object);
+        btlBossDebugPrintf(D_00417B30, effect, model, object);
     }
     if (*(s8 *)(arguments + 3) == 0) {
         func_001E2220(object);
@@ -2770,7 +2770,7 @@ s32 btlBeginModelChange(u32 *arguments) {
     if (status == 0) {
         func_001E2058(owner, model, variant);
         *(u32 *)(owner + 0x118) = (*(u32 *)(owner + 0x118) | 1) & ~2;
-        return func_0020D128("btl:model change start[%X,%X]\n", model, variant);
+        return btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
     return status;
 }
@@ -2803,7 +2803,7 @@ SoundTask *btlCreateModelChangeTask(BtlUnit *unit, s32 arg1, s32 arg2, s32 arg3,
 
 void func_001E5870(s32 arg0) {
     if ((*(u32 *)(*(s32 *)(arg0 + 0xc) + 0x110) & 2) != 0) {
-        evtUnitSetStateBits(*(u32 *)(*(s32 *)(arg0 + 0xc) + 0x340));
+        evtSetUnitStatusFlags(*(u32 *)(*(s32 *)(arg0 + 0xc) + 0x340));
         return;
     }
 }
@@ -2834,7 +2834,7 @@ SoundTask *btlCreateUnitTask0F(BtlUnit *unit, s32 arg1, s32 arg2, s32 arg3) {
 
 void func_001E59A0(s32 arg0) {
     if ((*(u32 *)(*(s32 *)(arg0 + 0x14) + 0x110) & 2) != 0) {
-        evtUnitSetStateBits(*(u32 *)(*(s32 *)(arg0 + 0x14) + 0x340));
+        evtSetUnitStatusFlags(*(u32 *)(*(s32 *)(arg0 + 0x14) + 0x340));
         return;
     }
 }
@@ -3025,7 +3025,7 @@ void func_001E65C0(u32 *arguments) {
         func_001686F0(value);
     }
     if (arguments[1] != 0) {
-        func_001683F0(arguments[1]);
+        sndReleaseAllVoices(arguments[1]);
     }
     func_001E2220(arguments[0]);
     *(u32 *)(arguments[0] + 0x110) |= 0x40;
@@ -3177,7 +3177,7 @@ SoundTask *btlScheduleActorUpdate(BtlUnit *unit) {
 }
 
 u32 func_001E6F38(u32 *arg0) {
-    btlUpdateUnitEffectVectors(*arg0);
+    btlRefreshUnitFxVectors(*arg0);
     return 1;
 }
 
@@ -3195,7 +3195,7 @@ SoundTask *func_001E6F58(BtlUnit *unit) {
     return task;
 }
 
-extern s32 func_001E4028(BtlUnit *, char *);
+extern s32 btlFormatUnitBedName(BtlUnit *, char *);
 extern s32 func_002C80E8(char *);
 
 void btlStartGunFinishLoad(s32 *task) {
@@ -3208,10 +3208,10 @@ void btlStartGunFinishLoad(s32 *task) {
         sdfFreeMemoryFromEitherHeap(unit->gunResource);
         unit->gunResource = 0;
     }
-    if (func_001E4028(unit, filename)) {
+    if (btlFormatUnitBedName(unit, filename)) {
         s32 handle = func_002C80E8(filename);
         task[1] = handle;
-        func_0020D128("btl:gun & finish load start[%s][%p]\n", filename, handle);
+        btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
     unit->gunResourceFlags = (unit->gunResourceFlags | 4) & ~8;
 }
@@ -3236,7 +3236,7 @@ u32 btlPollGunLoad(s32 arg) {
     if (func_002C8128(args->handle) == 0) {
         return 0;
     }
-    func_0020D128("btl:gun & finish load end[%p]\n", args->handle);
+    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
     unit->gunResource = sdfResourceRetainAddress(fileGetResourceHandle(args->handle));
     func_002C7D00(args->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
@@ -3331,7 +3331,7 @@ u32 func_001E7438(s32 arg0) {
     __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
     btlUnitGetBodyPosVU(*(BtlUnit **)(arg0 + 4));
     __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
-    if (func_002091C8(&from, &to) != 0) {
+    if (btlAimHorizontalDirectionVU(&from, &to) != 0) {
         __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(hit));
         btlSetUnitRotation(*(BtlUnit **)arg0, hit);
     }
@@ -3440,7 +3440,7 @@ BtlUnit *btlCreateUnit(void) {
         unit->nextActor = 0;
     }
     work->actorList = unit;
-    func_0020D128("btl:unit create[%p]\n", unit);
+    btlBossDebugPrintf("btl:unit create[%p]\n", unit);
     return unit;
 }
 
@@ -3459,7 +3459,7 @@ extern void btlReleaseActorModelResources(BtlUnit *);
 extern void sndFreeListNode(struct ActiveSoundNode *);
 
 void btlReleaseUnitResources(BtlUnit *unit) {
-    func_0020D128("btl:unit data free[%p]\n", unit);
+    btlBossDebugPrintf("btl:unit data free[%p]\n", unit);
     if (unit->node318 != 0) {
         sndFreeResourceNode(unit->node318);
         unit->node318 = 0;
@@ -3493,7 +3493,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
 extern void func_003297C8(u32);
 
 void btlDestroyUnit(BtlUnit *unit) {
-    func_0020D128("btl:unit delete[%p]\n", unit);
+    btlBossDebugPrintf("btl:unit delete[%p]\n", unit);
     btlReleaseUnitResources(unit);
     if (unit->nextActor != 0) {
         unit->nextActor->previousActor = unit->previousActor;
@@ -3575,11 +3575,11 @@ void *btlAllocateIndexList(s32 capacity) {
     return list;
 }
 
-void func_001E8018(s32 list) {
+void btlFreeIndexList(s32 list) {
     func_00328E48(list);
 }
 
-void func_001E8030(s32 arg0, u32 arg1) {
+void btlAppendIndexListEntry(s32 arg0, u32 arg1) {
     s32 index;
 
     index = ((BtlIndexList *)arg0)->count;
@@ -3587,15 +3587,15 @@ void func_001E8030(s32 arg0, u32 arg1) {
     ((BtlIndexList *)arg0)->entries[index] = arg1;
 }
 
-void func_001E8050(s32 arg0) {
+void btlClearIndexList(s32 arg0) {
     ((BtlIndexList *)arg0)->count = 0;
 }
 
-u32 func_001E8058(s32 arg0) {
+u32 btlGetIndexListCount(s32 arg0) {
     return ((BtlIndexList *)arg0)->count;
 }
 
-u32 func_001E8060(s32 arg0, s32 arg1) {
+u32 btlGetIndexListEntry(s32 arg0, s32 arg1) {
     return ((BtlIndexList *)arg0)->entries[arg1];
 }
 
@@ -3603,14 +3603,14 @@ void btlCopyIndexList(s32 destination, s32 source) {
     u32 count;
     u32 index;
 
-    func_001E8050(destination);
-    count = func_001E8058(source);
+    btlClearIndexList(destination);
+    count = btlGetIndexListCount(source);
     for (index = 0; index < count; index++) {
-        func_001E8030(destination, func_001E8060(source, index));
+        btlAppendIndexListEntry(destination, btlGetIndexListEntry(source, index));
     }
 }
 
-void func_001E80F8(s32 arg0, s32 arg1, s32 arg2) {
+void btlSwapIndexListEntries(s32 arg0, s32 arg1, s32 arg2) {
     s32 *entries;
     s32 first;
     s32 second;
@@ -3626,10 +3626,10 @@ void func_001E80F8(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 u32 btlFindListIndex(s32 arg0, s32 value) {
-    u32 count = func_001E8058(arg0);
+    u32 count = btlGetIndexListCount(arg0);
     u32 i;
     for (i = 0; i < count; i++) {
-        if (value == func_001E8060(arg0, i)) {
+        if (value == btlGetIndexListEntry(arg0, i)) {
             return i;
         }
     }
@@ -3668,7 +3668,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8580);
 
 extern void func_001E8580(XformData *, XformData *, XformData *, f32);
 
-extern void func_00209720(u8 *, f32);
+extern void btlScalarRangeInitQuadratic(u8 *, f32);
 
 extern f32 func_00209770(f32);
 
@@ -3676,7 +3676,7 @@ s32 btlStepPoseBlendHalf(u8 *fx) {
     f32 t;
     if (((BattlePoseBlendState *)fx)->blendMode == 0) {
         ((BattlePoseBlendState *)fx)->progressBits = 0;
-        func_00209720(fx + 0x160, (f32)(((BattlePoseBlendState *)fx)->durationFrames * 2));
+        btlScalarRangeInitQuadratic(fx + 0x160, (f32)(((BattlePoseBlendState *)fx)->durationFrames * 2));
         func_001E9598((XformData *)fx, (XformData *)(fx + 0x30));
         return 0;
     }
@@ -3692,7 +3692,7 @@ s32 btlStepPoseBlendHalf(u8 *fx) {
     return 0;
 }
 
-extern void func_002096B8(u8 *, f32);
+extern void btlScalarRangeSetStartClearEnd(u8 *, f32);
 
 extern f32 func_002096C8(u8 *);
 
@@ -3703,7 +3703,7 @@ s32 btlStepPoseBlend(u8 *fx) {
     u8 *pose = fx + 0x30;
     f32 t;
     if (((BattlePoseBlendState *)fx)->blendMode == 0) {
-        func_002096B8(timer, ((BattlePoseBlendState *)fx)->duration);
+        btlScalarRangeSetStartClearEnd(timer, ((BattlePoseBlendState *)fx)->duration);
         func_001E9598((XformData *)fx, (XformData *)pose);
     }
     t = func_002096C8(timer);
@@ -3717,7 +3717,7 @@ s32 btlStepPoseBlend(u8 *fx) {
 
 extern void func_001E8580(XformData *, XformData *, XformData *, f32);
 
-extern void func_00209720(u8 *, f32);
+extern void btlScalarRangeInitQuadratic(u8 *, f32);
 
 extern f32 func_00209770(f32);
 
@@ -3725,7 +3725,7 @@ s32 btlStepPoseBlendFrame(u8 *fx) {
     f32 t;
     if (((BattlePoseBlendState *)fx)->blendMode == 0) {
         ((BattlePoseBlendState *)fx)->progressBits = 0;
-        func_00209720(fx + 0x160, (f32)((BattlePoseBlendState *)fx)->durationFrames);
+        btlScalarRangeInitQuadratic(fx + 0x160, (f32)((BattlePoseBlendState *)fx)->durationFrames);
         func_001E9598((XformData *)fx, (XformData *)(fx + 0x30));
         return 0;
     }
@@ -3738,7 +3738,7 @@ s32 btlStepPoseBlendFrame(u8 *fx) {
     return 0;
 }
 
-s32 func_001E8840(u8 *fx) {
+s32 btlStepPoseBlendRatio(u8 *fx) {
     f32 ratio = (f32)((BattlePoseBlendState *)fx)->blendMode / (f32)((BattlePoseBlendState *)fx)->durationFrames;
     if (ratio <= 1.0f) {
         func_001E8580((XformData *)fx, (XformData *)(fx + 0x30), (XformData *)(fx + 0xC0), ratio);
@@ -3889,7 +3889,7 @@ u32 func_001E90C0(void) {
     s32 work;
 
     work = func_001AA6F8();
-    func_001E9B80(work + 0x70);
+    btlResetCameraMotion(work + 0x70);
     return 1;
 }
 
@@ -3912,7 +3912,7 @@ void btlClearPendingSoundList(void) {
     s32 list = ((BtlWork *)context)->pendingSoundList;
 
     if (list != 0) {
-        func_001E8018(list);
+        btlFreeIndexList(list);
         ((BtlWork *)context)->pendingSoundList = 0;
     }
     ((BtlWork *)context)->battleFlags &= ~0x10;
@@ -3951,7 +3951,7 @@ void func_001E95D0(u8 *object, f32 *origin, f32 *direction) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object) : "memory");
     ((XformData *)object)->f20 = 1.0f;
     ((XformData *)object)->f24 = 0.6981317f;
-    func_001E9890();
+    btlClearRuntimeFlag2000();
 }
 
 void func_001E9660(u8 *object, f32 x, f32 y, f32 z, f32 vx, f32 vy,
@@ -3972,14 +3972,14 @@ void func_001E9660(u8 *object, f32 x, f32 y, f32 z, f32 vx, f32 vy,
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E96C8);
 
-u32 func_001E9798(void) {
+u32 btlGetActiveUnitId(void) {
     s32 workAddress;
 
     workAddress = func_001AA6F8();
     return ((BtlWork *)workAddress)->activeUnitId;
 }
 
-f32 func_001E97B8(u8 *unit) {
+f32 btlGetPoseBlendProgress(u8 *unit) {
     return ((BattlePoseBlendState *)unit)->progress;
 }
 
@@ -3991,39 +3991,39 @@ s32 btlIsUnitInActiveList(s32 unit) {
     if (slot != 0 && ((BtlActiveSlot *)slot)->unit == unit) {
         return 1;
     }
-    count = func_001E8058(((BtlWork *)work)->pendingSoundList);
+    count = btlGetIndexListCount(((BtlWork *)work)->pendingSoundList);
     for (i = 0; i < count; i++) {
-        if (func_001E8060(((BtlWork *)work)->pendingSoundList, i) == unit) {
+        if (btlGetIndexListEntry(((BtlWork *)work)->pendingSoundList, i) == unit) {
             return 1;
         }
     }
     return 0;
 }
 
-void func_001E9860(void) {
+void btlResetActiveUnitList(void) {
     s32 workAddress;
 
     workAddress = func_001AA6F8();
     ((BtlWork *)workAddress)->activeSlot = 0;
     ((BtlWork *)workAddress)->runtimeFlags = ((BtlWork *)workAddress)->runtimeFlags | 0x400;
-    func_001E8050(((BtlWork *)workAddress)->pendingSoundList);
+    btlClearIndexList(((BtlWork *)workAddress)->pendingSoundList);
 }
 
-void func_001E9890(void) {
+void btlClearRuntimeFlag2000(void) {
     s32 workAddress;
 
     workAddress = func_001AA6F8();
     ((BtlWork *)workAddress)->runtimeFlags = ((BtlWork *)workAddress)->runtimeFlags & 0xffffdfff;
 }
 
-void func_001E98C0(void) {
+void btlSetRuntimeFlag2000(void) {
     s32 workAddress;
 
     workAddress = func_001AA6F8();
     ((BtlWork *)workAddress)->runtimeFlags = ((BtlWork *)workAddress)->runtimeFlags | 0x2000;
 }
 
-u32 func_001E98E8(void) {
+u32 btlIsRuntimeFlag2000Clear(void) {
     s32 workAddress;
 
     workAddress = func_001AA6F8();
@@ -4060,7 +4060,7 @@ extern void func_00110BE0(void *, s32);
 extern f32 dds3GetCameraValue(s32);
 extern void func_001063A8(f32);
 
-void func_001E9918(void) {
+void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
     s32 handle;
     if (((BtlWork *)func_001AA6F8())->battleFlags & 2) {
@@ -4084,7 +4084,7 @@ extern s32 D_00436A9C;
 
 extern s32 D_00436AA0;
 
-s32 func_001E99C0(void) {
+s32 btlGetWorldObjectDefault(void) {
     WorldMotionData *data;
     if (!(((BtlWork *)func_001AA6F8())->battleFlags & 2)) {
         return D_00436AA0;
@@ -4099,7 +4099,7 @@ s32 func_001E99C0(void) {
     return data->unk8;
 }
 
-s32 func_001E9A18(void) {
+s32 btlIsWorldMotionIdle(void) {
     WorldMotionData *data;
     if (!(((BtlWork *)func_001AA6F8())->battleFlags & 2)) {
         return 0;
@@ -4111,7 +4111,7 @@ s32 func_001E9A18(void) {
     return data->unk8 == 0;
 }
 
-s32 func_001E9A68(void) {
+s32 btlGetCameraVectorWork(void) {
     s32 work;
 
     work = func_001AA6F8();
@@ -4119,7 +4119,7 @@ s32 func_001E9A68(void) {
 }
 
 void func_001E9A88(void) {
-    func_00208D58();
+    btlFlagAllUnitsDefeatCandidate();
 }
 
 void func_001E9AA0(void) {
@@ -4127,24 +4127,26 @@ void func_001E9AA0(void) {
 }
 
 void func_001E9AB8(s32 arg0) {
-    func_00208DE8(((ActionUnit *)arg0)->link->unit->flags & 0x600);
+    btlFlagMatchingUnitsDefeatCandidate(((ActionUnit *)arg0)->link->unit->flags & 0x600);
 }
 
-extern void func_00208DE8(s32);
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
 void btlApplyCombinedActorFlags(u8 *fx) {
     u32 i = 0;
     s32 bits = 0;
-    u32 count = func_001E8058(((ActionUnit *)fx)->actorIndices);
+    u32 count = btlGetIndexListCount(((ActionUnit *)fx)->actorIndices);
     if (count != 0) {
         do {
-            bits |= ((BtlUnit *)func_001E8060(((ActionUnit *)fx)->actorIndices, i++))->flags & 0x600;
+            bits |= ((BtlUnit *)btlGetIndexListEntry(((ActionUnit *)fx)->actorIndices, i++))->flags & 0x600;
         } while (i < count);
     }
     if (bits != 0) {
-        func_00208DE8(bits);
+        btlFlagMatchingUnitsDefeatCandidate(bits);
     }
 }
+
+extern f32 D_003B6D90[];
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417C78);
 
@@ -4156,9 +4158,7 @@ INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417CA8);
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417CB8);
 
-extern f32 D_003B6D90[];
-
-void func_001E9B80(s32 arg0) {
+void btlResetCameraMotion(s32 arg0) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     BtlUnit *unit;
     f32 current;
@@ -4171,8 +4171,8 @@ void func_001E9B80(s32 arg0) {
                         if (unit->ext != 0) {
                             s32 node = mdlGetNodeField2C(unit->ext->info, 0);
                             if (node == 0xD || node == 0x12) {
-                                current = func_001E2EE8(unit);
-                                limit = (f32)func_001E2F50(unit);
+                                current = btlGetUnitModelValue1C(unit);
+                                limit = (f32)btlGetUnitModelFrameCount(unit);
                                 if (unit->mode < 0xA) {
                                     limit = limit * D_003B6D90[unit->mode];
                                 } else {
@@ -4180,7 +4180,7 @@ void func_001E9B80(s32 arg0) {
                                 }
                                 if (current < limit) {
                                     func_003343E8(unit->ext->info->data, limit);
-                                    func_0020D128("btl:camera mot reset[%p]\n", unit);
+                                    btlBossDebugPrintf("btl:camera mot reset[%p]\n", unit);
                                 }
                             }
                         }
@@ -4199,11 +4199,11 @@ s32 func_001E9CD8(ActionUnit *arg0) {
     if (work->unk268 != 3) {
         return 0;
     }
-    count = func_001E8058(arg0->actorIndices);
+    count = btlGetIndexListCount(arg0->actorIndices);
     if (count != 1) {
         return 0;
     }
-    unit = (BtlUnit *)func_001E8060(arg0->actorIndices, 0);
+    unit = (BtlUnit *)btlGetIndexListEntry(arg0->actorIndices, 0);
     if (!(unit->flags & 0x200)) {
         return 0;
     }
@@ -4226,7 +4226,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9F30);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA058);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EA120);
+INCLUDE_ASM(const s32, "game/code_001DACF8", btlMatchFirstLinkedActorFlags);
 
 s32 btlHasMarkedEntry14(s32 actor) {
     s32 linked = (s32)((ActionUnit *)actor)->link;
@@ -4237,7 +4237,7 @@ s32 btlHasMarkedEntry14(s32 actor) {
     if (linked == 0) {
         return 0;
     }
-    count = func_001E8058(((BattleActionLinkState *)linked)->actorIndices);
+    count = btlGetIndexListCount(((BattleActionLinkState *)linked)->actorIndices);
     entry = ((BattleActionLinkState *)linked)->entries;
     for (i = 0; i < count; i++, entry += 0x59C) {
         if (entry[0x14] != 0) {
@@ -4287,7 +4287,7 @@ s32 btlHasMarkedEntry10(s32 actor) {
     if (linked == 0) {
         return 0;
     }
-    count = func_001E8058(((BattleActionLinkState *)linked)->actorIndices);
+    count = btlGetIndexListCount(((BattleActionLinkState *)linked)->actorIndices);
     entry = ((BattleActionLinkState *)linked)->entries;
     for (i = 0; i < count; i++, entry += 0x59C) {
         if (entry[0x10] != 0) {
@@ -4316,14 +4316,14 @@ s32 btlCheckActorDistanceLimit(void) {
     return 1;
 }
 
-s32 func_001EA3B8(void) {
+s32 btlIsEntryHeightWithinLimit(void) {
     if (func_00208000(0x400, 0, 0) > 600.0f) {
         return 0;
     }
     return 1;
 }
 
-s32 func_001EA3F8(u8 *actor) {
+s32 btlHasIdleLinkedSlotKindTwo(u8 *actor) {
     u8 *linked = (u8 *)((ActionUnit *)actor)->link;
     u32 count;
     u32 i;
@@ -4332,18 +4332,18 @@ s32 func_001EA3F8(u8 *actor) {
         return 0;
     }
     i = 0;
-    count = func_001E8058(((BattleActionLinkState *)linked)->actorIndices);
+    count = btlGetIndexListCount(((BattleActionLinkState *)linked)->actorIndices);
     entry = ((BattleActionLinkState *)linked)->entries;
     for (; i < count; i++, entry += 0x59C) {
         if (entry[0x10] == 0 && *(s32 *)(entry + 8) == 1 && *(s32 *)(entry + 0xC) == 2 &&
-            !(((BtlUnit *)func_001E8060(((BattleActionLinkState *)linked)->actorIndices, i))->flags & 0x80002000)) {
+            !(((BtlUnit *)btlGetIndexListEntry(((BattleActionLinkState *)linked)->actorIndices, i))->flags & 0x80002000)) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_001EA4D8(u8 *actor) {
+s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor) {
     u8 *linked = (u8 *)((ActionUnit *)actor)->link;
     u32 count;
     u32 i;
@@ -4352,11 +4352,11 @@ s32 func_001EA4D8(u8 *actor) {
         return 0;
     }
     i = 0;
-    count = func_001E8058(((BattleActionLinkState *)linked)->actorIndices);
+    count = btlGetIndexListCount(((BattleActionLinkState *)linked)->actorIndices);
     entry = ((BattleActionLinkState *)linked)->entries;
     for (; i < count; i++, entry += 0x59C) {
         if (*(s32 *)(entry + 8) == 2 &&
-            !(((BtlUnit *)func_001E8060(((BattleActionLinkState *)linked)->actorIndices, i))->flags & 0x80002000)) {
+            !(((BtlUnit *)btlGetIndexListEntry(((BattleActionLinkState *)linked)->actorIndices, i))->flags & 0x80002000)) {
             return 1;
         }
     }
@@ -4430,7 +4430,7 @@ s32 btlHasSingleLinkedResource(s32 actor) {
     if (category != 0 && ((BtlCategoryTableEntry *)D_00435E20)[category].restriction != 0) {
         return 0;
     }
-    return func_001E8058(((ActionUnit *)actor)->actorIndices) == 1;
+    return btlGetIndexListCount(((ActionUnit *)actor)->actorIndices) == 1;
 }
 
 s32 btlCanUseActorCategoryFlag4(s32 actor) {
@@ -4481,10 +4481,10 @@ s32 btlMatchLinkedActorFlags(s32 actor) {
     if (linked == 0) {
         return 0;
     }
-    if (func_001E8058(((BattleActionLinkState *)linked)->actorIndices) >= 2) {
+    if (btlGetIndexListCount(((BattleActionLinkState *)linked)->actorIndices) >= 2) {
         return 0;
     }
-    entry = func_001E8060(((BattleActionLinkState *)linked)->actorIndices, 0);
+    entry = btlGetIndexListEntry(((BattleActionLinkState *)linked)->actorIndices, 0);
     return ((((BattleActionLinkState *)linked)->unit->flags ^ ((BtlUnit *)entry)->flags) & 0x600) == 0;
 }
 
@@ -4496,10 +4496,10 @@ s32 btlHasFirstLinkedCategoryFlag1000(s32 actor) {
     if (linked == 0) {
         return 0;
     }
-    if (func_001E8058(((BattleActionLinkState *)linked)->actorIndices) >= 2) {
+    if (btlGetIndexListCount(((BattleActionLinkState *)linked)->actorIndices) >= 2) {
         return 0;
     }
-    entry = func_001E8060(((BattleActionLinkState *)linked)->actorIndices, 0);
+    entry = btlGetIndexListEntry(((BattleActionLinkState *)linked)->actorIndices, 0);
     if ((((BtlUnit *)entry)->flags & 0x400) == 0) {
         return 0;
     }
@@ -4654,7 +4654,7 @@ void func_001EC688(u32 arg0) {
     s32 actor;
 
     actor = (s32)arg0;
-    func_001E8030(((ActionUnit *)actor)->actorIndices, (u32)((ActionUnit *)actor)->link->unit);
+    btlAppendIndexListEntry(((ActionUnit *)actor)->actorIndices, (u32)((ActionUnit *)actor)->link->unit);
     func_001F2E30(arg0, actor + 0x30, actor + 0xc0);
 }
 
@@ -4971,7 +4971,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FC5E0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FD400);
 
-BtlUnit *btlFindFlaggedUnitById(s32 id) {
+BtlUnit *btlFindActiveActorById(s32 id) {
     BtlUnit *unit;
     for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->flags & 1) {
@@ -5068,7 +5068,7 @@ void func_001FFAD8(s32 arg0, s32 arg1) {
 void func_001FFBB0(s32 arg0, s32 arg1) {
     s32 first;
     func_001AA6F8();
-    first = func_001E8060(((ActionUnit *)arg0)->actorIndices, 0);
+    first = btlGetIndexListEntry(((ActionUnit *)arg0)->actorIndices, 0);
     memset(CURSOR, 0, 0x130);
     func_001E4378(first);
     if (btlHasFirstLinkedCategoryFlag1000(arg0) != 0) {
@@ -5124,7 +5124,7 @@ s32 func_001FFF68(s32 arg0, s32 arg1) {
     return result;
 }
 
-void func_001FFFF8(void) {
+void btlSpawnBattleWorldAction(void) {
     u64 worldCounter;
     s32 work;
     u32 action;
@@ -5164,11 +5164,11 @@ void func_002000D0(void) {
 
     func_0023A9E0();
     do {
-        pending = sdfGraphHasPendingWorkInterruptSafe();
+        pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    evtDestroyWorldSecondaryNode();
+    evtDestroySecondaryWorldNode();
     do {
-        pending = sdfGraphHasPendingWorkInterruptSafe();
+        pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
     btlReleaseWorkBuffers();
     work = func_001AA6F8();
@@ -5182,7 +5182,7 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", btlFreeFieldBlocks);
 void func_002001F0(void) {
     u8 *context = (u8 *)func_001AA6F8();
     fldApplyLightSetCurrent();
-    func_00200568(0x80, 0);
+    btlInitTintTransitionResource(0x80, 0);
     VU_LOAD10((u8 *)D_0037F770[0] + 0x10);
     VU_STORE10(context + 0x10);
     VU_STORE10(context + 0x40);
@@ -5197,7 +5197,7 @@ void func_002001F0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200290);
 
-s32 func_00200490(s32 index) {
+s32 btlGetActionDefaultOrOverride(s32 index) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     if (work->battleFlags & 0x30000000) {
         return work->unk724;
@@ -5205,7 +5205,7 @@ s32 func_00200490(s32 index) {
     return ((BtlActionTableEntry *)D_00435E30)[index].defaultValue;
 }
 
-u32 func_002004E8(void) {
+u32 btlCameraVectorHasNaN(void) {
     u8 *context = (u8 *)func_001AA6F8();
     if (((BtlCameraVectors *)context)->eye[0] != ((BtlCameraVectors *)context)->eye[0] ||
         ((BtlCameraVectors *)context)->eye[1] != ((BtlCameraVectors *)context)->eye[1] ||
@@ -5218,7 +5218,7 @@ u32 func_002004E8(void) {
     return 0;
 }
 
-void func_00200568(u32 resource, u16 soundId) {
+void btlInitTintTransitionResource(u32 resource, u16 soundId) {
     u32 handle;
     D_003BDC90.currentId = soundId;
     D_003BDC90.nextId = soundId;
@@ -5227,7 +5227,7 @@ void func_00200568(u32 resource, u16 soundId) {
     D_003BDC90.handle = handle;
 }
 
-void func_002005B0(u16 soundId) {
+void btlInitTintTransitionDefault(u16 soundId) {
     u32 handle;
     D_003BDC90.currentId = soundId;
     D_003BDC90.nextId = soundId;
@@ -5238,7 +5238,7 @@ void func_002005B0(u16 soundId) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_002005F0);
 
-void func_002006B0(u32 resource, u16 soundId) {
+void btlQueueTintTransition(u32 resource, u16 soundId) {
     SoundTransition *transition;
     if (soundId == 0) {
         transition = (SoundTransition *)D_003BDCA0;
@@ -5254,7 +5254,7 @@ void func_002006B0(u32 resource, u16 soundId) {
     transition->queuedResource = resource;
 }
 
-void func_002006F0(u16 soundId) {
+void btlQueueTintTransitionToZero(u16 soundId) {
     SoundTransition *transition;
     if (soundId == 0) {
         transition = (SoundTransition *)D_003BDCA0;
@@ -5284,7 +5284,7 @@ void btlStepBlendColor(void) {
     func_002005F0();
 }
 
-void func_002007B0(void) {
+void btlDrawTintIfVisible(void) {
     SoundTransition *transition = (SoundTransition *)D_003BDCA0;
     if (transition->currentResource & 0xFF000000) {
         func_0018F840(transition);
@@ -5299,12 +5299,12 @@ void sndResetTransition(void) {
     transition->currentResource = 0;
 }
 
-void func_00200808(void) {
-    func_002006F0(0);
+void btlClearTintAndEnableCamera(void) {
+    btlQueueTintTransitionToZero(0);
     func_00114068(1);
 }
 
-void func_00200828(void) {
+void btlUpdateTintAndWorldLight(void) {
     u8 *context = (u8 *)func_001AA6F8();
     f32 *position = D_0037F770[0];
 
@@ -5320,7 +5320,7 @@ void func_00200828(void) {
     btlStepBlendColor();
 }
 
-void func_002008C0(void) {
+void btlTickFieldSwayAndTint(void) {
     s32 work;
 
     work = func_001AA6F8();
@@ -5330,7 +5330,7 @@ void func_002008C0(void) {
         fldUpdateSwayOffset();
         func_00134A18();
     }
-    func_002007B0();
+    btlDrawTintIfVisible();
 }
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00200930);
@@ -5343,7 +5343,7 @@ void func_00200AD8(void) {
 void func_00200AE0(void) {
     u8 *work = (u8 *)func_001AA6F8();
     if (((BtlWork *)work)->soundTransitionTask != 0) {
-        func_0020D128("btl:rain exit\n");
+        btlBossDebugPrintf("btl:rain exit\n");
         func_002DEBB0(((BtlWork *)work)->soundTransitionTask);
         ((BtlWork *)work)->soundTransitionTask = 0;
     }
@@ -5448,7 +5448,7 @@ SoundTask *func_00201540(void) {
 s32 func_00201578(u32 *arg0) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     if (!(work->battleFlags & 0x20000000)) {
-        func_002006B0(arg0[0], *(u16 *)(arg0 + 1));
+        btlQueueTintTransition(arg0[0], *(u16 *)(arg0 + 1));
     }
     D_00436AD8++;
     return 1;
@@ -5483,7 +5483,7 @@ s32 sndTickFadeCounter(soundId)
     if ((((BtlWork *)context)->battleFlags & 0x20000000) != 0) {
         return 1;
     }
-    func_002006F0(*soundId);
+    btlQueueTintTransitionToZero(*soundId);
     return 1;
 }
 
@@ -5556,7 +5556,7 @@ void sndCreateSystemEffect(u32 *effect) {
         if (effect[4] == 0) {
             if (effect[1] == 0) {
                 effect[4] = func_001682B0(effect[5]);
-                func_0020D128("btl:system effect create[%p]\n", effect[4]);
+                btlBossDebugPrintf("btl:system effect create[%p]\n", effect[4]);
             }
         }
     }
@@ -5564,8 +5564,8 @@ void sndCreateSystemEffect(u32 *effect) {
 
 void sndDeleteSystemEffect(u32 *effect) {
     if ((effect[0] & 8) && effect[4] && !effect[1]) {
-        func_0020D128("btl:system effect delete[%p]\n", effect[4]);
-        func_001683F0(effect[4]);
+        btlBossDebugPrintf("btl:system effect delete[%p]\n", effect[4]);
+        sndReleaseAllVoices(effect[4]);
         effect[4] = 0;
     }
 }
@@ -5726,7 +5726,7 @@ u32 func_002023B8(u32 *args) {
     if ((effect[0] & 2) == 0) {
         return 0;
     }
-    frames = func_00202F60((s32)effect, (u16)args[1]);
+    frames = sndGetEffectNodeParameter((s32)effect, (u16)args[1]);
     if ((s32)args[5] >= frames) {
         ((SoundEffectNode *)args[0])->activeCount -= 1;
         if ((s32)args[3] >= 0) {
@@ -5770,14 +5770,14 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
     SoundEffectNode *effect = args->effect;
     if (effect->flags & 2) {
         if (effect->handle != 0) {
-            func_001683F0(effect->handle);
+            sndReleaseAllVoices(effect->handle);
             effect->handle = 0;
         }
         effect->flags &= ~2;
     }
     args->loadHandle = func_002C80C8(args->name);
     effect->flags |= 1;
-    func_0020D128("btl:effect load start[%s]\n", args->name);
+    btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
 
 u32 sndPollEffectLoad(s32 arg) {
@@ -5790,7 +5790,7 @@ u32 sndPollEffectLoad(s32 arg) {
     if (func_002C8128((s32)args->loadHandle) == 0) {
         return 0;
     }
-    func_0020D128("btl:effect load end[%s]\n", args->name);
+    btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
     resource = fileGetResourceHandle((s32)args->loadHandle);
     effect->handle = func_001682B0(sdfResourceRetainAddress(resource));
     func_003297C8(resource);
@@ -5936,17 +5936,17 @@ SoundTask *func_00202BB0(u32 effect, BtlUnit *owner, u64 resource) {
     return task;
 }
 
-u32 func_00202C70(u32 *arg0) {
+u32 btlTaskStartFadeIn(u32 *arg0) {
     kwlnFadeStartIn(*arg0);
     return 1;
 }
 
-SoundTask *func_00202C90(u32 value) {
+SoundTask *btlCreateFadeInTask(u32 value) {
     SoundTask *task = btlAllocTask(4);
     SoundTaskArgs *args;
     task->enabled = 1;
     task->taskId = 0x38;
-    task->callback = func_00202C70;
+    task->callback = btlTaskStartFadeIn;
     task->status = 0;
     task->onStart = 0;
     args = func_001E14F8((s32)task);
@@ -5954,19 +5954,19 @@ SoundTask *func_00202C90(u32 value) {
     return task;
 }
 
-u32 func_00202CF8(u8 *arg0) {
+u32 btlTaskStartCustomFadeIn(u8 *arg0) {
     kwlnFadeInStart(*arg0, arg0[1], arg0[2], *(u32 *)(arg0 + 4));
     return 1;
 }
 
-extern u32 func_00202CF8(u8 *);
+extern u32 btlTaskStartCustomFadeIn(u8 *);
 
 SoundTask *sndCreateCustomTask(s32 arg0, s32 arg1) {
     SoundTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->enabled = 1;
     task->taskId = 0x39;
-    task->callback = func_00202CF8;
+    task->callback = btlTaskStartCustomFadeIn;
     task->status = 0;
     task->onStart = 0;
     args = func_001E14F8((s32)task);
@@ -5975,7 +5975,7 @@ SoundTask *sndCreateCustomTask(s32 arg0, s32 arg1) {
     return task;
 }
 
-u32 func_00202DA8(void) {
+u32 btlTaskSetBattleFlag40000(void) {
     s32 work;
 
     work = func_001AA6F8();
@@ -5987,14 +5987,14 @@ u32 func_00202DA8(void) {
 SoundTask *sndCreateSetBattleFlagTask(void) {
     SoundTask *task = btlAllocTask(0);
     task->enabled = 1;
-    task->callback = func_00202DA8;
+    task->callback = btlTaskSetBattleFlag40000;
     task->taskId = 0x3A;
     task->onStart = 0;
     task->status = 0;
     return task;
 }
 
-u32 func_00202E28(void) {
+u32 btlTaskClearBattleFlag40000(void) {
     s32 work;
 
     work = func_001AA6F8();
@@ -6006,7 +6006,7 @@ u32 func_00202E28(void) {
 SoundTask *sndCreateClearBattleFlagTask(void) {
     SoundTask *task = btlAllocTask(0);
     task->enabled = 1;
-    task->callback = func_00202E28;
+    task->callback = btlTaskClearBattleFlag40000;
     task->taskId = 0x3B;
     task->onStart = 0;
     task->status = 0;
@@ -6015,15 +6015,15 @@ SoundTask *sndCreateClearBattleFlagTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00202EA8);
 
-void func_00202F40(s32 arg0, u16 arg1) {
+void sndSetEffectNodeParameter(s32 arg0, u16 arg1) {
     func_001684A8(((SoundEffectNode *)arg0)->handle, arg1);
 }
 
-s32 func_00202F60(s32 arg0, u16 arg1) {
+s32 sndGetEffectNodeParameter(s32 arg0, u16 arg1) {
     return func_00168448(((SoundEffectNode *)arg0)->handle, arg1);
 }
 
-s32 func_00202F80(s32 arg0) {
+s32 sndIsResourceNodeReferencedOrActive(s32 arg0) {
     if (((SoundEffectNode *)arg0)->referenceCount != 0) {
         return 1;
     }
@@ -6033,7 +6033,7 @@ s32 func_00202F80(s32 arg0) {
 s32 sndHasActiveActor(void) {
     BtlUnit *unit;
     for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
-        if (unit->node318 != 0 && func_00202F80((s32)unit->node318) != 0) {
+        if (unit->node318 != 0 && sndIsResourceNodeReferencedOrActive((s32)unit->node318) != 0) {
             return 1;
         }
     }
@@ -6066,13 +6066,13 @@ SoundResourceNode *sndCreateResourceNode(u32 soundId) {
     return node;
 }
 
-extern void func_001683F0(u32);
+extern void sndReleaseAllVoices(u32);
 
 extern void func_00328E48(void *);
 
 void sndFreeResourceNode(SoundResourceNode *node) {
     if (node->resourceHandle != 0) {
-        func_001683F0(node->resourceHandle);
+        sndReleaseAllVoices(node->resourceHandle);
     }
     if (node->next != 0) {
         node->next->previous = node->previous;
@@ -6096,7 +6096,7 @@ void btlUpdateFadeColor(void) {
             node->fadeCountdown = node->fadeCountdown - 1;
         }
     }
-    if ((u32)(func_001E9798() - 9) < 2 || context->unk2CC != 0 || context->unk22C == 8) {
+    if ((u32)(btlGetActiveUnitId() - 9) < 2 || context->unk2CC != 0 || context->unk22C == 8) {
         context->fadeEnabled = 0;
     } else {
         context->fadeEnabled = 1;
@@ -6128,7 +6128,7 @@ void btlUpdateFadeColor(void) {
 }
 
 void func_00203258(void) {
-    func_002DCB58();
+    effSweepFloorModelList();
 }
 
 void func_00203270(void) {
@@ -6406,7 +6406,7 @@ void func_00203E18(s32 *args) {
     func_002D4398(args[0]);
 }
 
-void func_00203E90(u32 arg0) {
+void sndDestroyFileQueueWrapper(u32 arg0) {
     fileQueueDestroy(*(u32 *)arg0);
     func_00328E48(arg0);
 }
@@ -6414,11 +6414,11 @@ void func_00203E90(u32 arg0) {
 void func_00203EC0(void) {
 }
 
-void func_00203EC8(u32 arg0) {
+void sndSetStationedSeVolume(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x58, 0x3f);
 }
 
-void func_00203EE8(u32 arg0) {
+void sndSetStationedSeHighVolume(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x319c, 0x3f);
 }
 
@@ -6448,7 +6448,7 @@ void func_00203F08(s32 arg0, s32 arg1) {
     }
 }
 
-u8 func_00203FD8(void) {
+u8 sndIsStreamStatusTwoOrThree(void) {
     s32 status;
 
     status = func_002A2330();
@@ -6465,28 +6465,28 @@ void func_00204000(void) {
     }
 }
 
-void func_00204038(void) {
+void btlAdvanceTitleState(void) {
     mnuAdvanceTitleStateUnderSemaphore();
 }
 
-void func_00204050(void) {
+void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
     func_00341CD0();
     func_00341CA8();
 }
 
 void func_00204078(void) {
-    func_00204038();
+    btlAdvanceTitleState();
 }
 
 void func_00204090(void) {
-    func_00204050();
+    btlAdvanceTitleStateWithAudioCleanup();
 }
 
-s32 func_002040A8(u32 soundId) {
+s32 sndLoadAndPlayStationedSe(u32 soundId) {
     s32 loaded = func_00342168(soundId);
     if (loaded != 0) {
-        func_00203EC8(soundId);
+        sndSetStationedSeVolume(soundId);
         return 1;
     }
     return loaded;
@@ -6494,8 +6494,8 @@ s32 func_002040A8(u32 soundId) {
 
 s32 sndPlayStationedSe(u32 *sound) {
     u32 soundId = *sound;
-    if (func_002040A8(soundId)) {
-        func_0020D128("btl:sound stationedSE play[%X-%X]\n", soundId >> 16, soundId & 0xFFFF);
+    if (sndLoadAndPlayStationedSe(soundId)) {
+        btlBossDebugPrintf("btl:sound stationedSE play[%X-%X]\n", soundId >> 16, soundId & 0xFFFF);
     }
     return 1;
 }
@@ -6559,32 +6559,32 @@ void sndStartFileLoad(FileLoadArgs *args) {
     node->flags |= 1;
     node->position = (args->frames + 0x200) << 16;
     node->mode = 2;
-    func_0020D128("btl:sound file load start[%s]\n", args->name);
+    btlBossDebugPrintf("btl:sound file load start[%s]\n", args->name);
 }
 
 u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
     SoundFileNode *node = request->node;
     if (sndHasActiveFileLoad()) {
-        func_0020D128("btl:sound wait[motSE]\n");
+        btlBossDebugPrintf("btl:sound wait[motSE]\n");
         return 0;
     }
     if ((node->flags & 2) == 0) {
         if (func_002C8128((s32)request->loadHandle)) {
             s32 size;
             s32 data;
-            func_0020D128("btl:sound file load end[%s]\n", request->name);
+            btlBossDebugPrintf("btl:sound file load end[%s]\n", request->name);
             request->resourceHandle = fileGetResourceHandle((s32)request->loadHandle);
             size = fileGetResourceSize((s32)request->loadHandle);
             data = sdfResourceRetainAddress(request->resourceHandle);
             if (func_00342168(node->position) == 0) {
                 func_003422F8(data, size);
                 node->flags |= 8;
-                func_0020D128("btl:sound SPU load start[%X][size:%d]\n", *(u16 *)((u8 *)node + 0xA), size);
+                btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", *(u16 *)((u8 *)node + 0xA), size);
             }
             node->flags = (node->flags & ~1) | 2;
         }
     } else if (func_00342168(node->position) != 0) {
-        func_0020D128("btl:sound SPU load end[%X]\n", *(u16 *)((u8 *)node + 0xA));
+        btlBossDebugPrintf("btl:sound SPU load end[%X]\n", *(u16 *)((u8 *)node + 0xA));
         func_003297C8(request->resourceHandle);
         func_002C7D00((s32)request->loadHandle);
         node->flags = (node->flags & ~8) | 0x10;
@@ -6614,10 +6614,10 @@ SoundTask *sndCreateFileLoadTask(s32 arg0, s32 arg1, char *name) {
 
 s32 sndLoadDataFile(s32 *data) {
     char filename[0x70];
-    if (func_00204678()) {
+    if (sndIsCommandBusySigned()) {
         return 1;
     }
-    func_002046F0(data[0], (s32)filename);
+    sndFormatResourceNameFromUnitMode(data[0], (s32)filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
@@ -6636,11 +6636,11 @@ SoundTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
     return task;
 }
 
-s32 func_00204678(void) {
+s32 sndIsCommandBusySigned(void) {
     return (s8)sdfSoundIsCommandBusy();
 }
 
-s32 func_002046A0(s32 arg0) {
+s32 sndHasResourceFlagsOneOrEight(s32 arg0) {
     s32 flags;
 
     flags = *(s32 *)arg0;
@@ -6650,11 +6650,11 @@ s32 func_002046A0(s32 arg0) {
     return (flags & 8) > 0;
 }
 
-void func_002046C0(s32 source, s32 output) {
+void sndFormatResourceNameFromIndex(s32 source, s32 output) {
     func_0035C860(output, D_004192D8, D_00436AE8, (u16)(source + 0x200));
 }
 
-void func_002046F0(s32 unit, s32 output) {
+void sndFormatResourceNameFromUnitMode(s32 unit, s32 output) {
     func_0035C860(output, D_004192E8, ((BtlUnit *)unit)->mode);
 }
 
@@ -6757,7 +6757,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     SoundSlotOwner *owner = sndFindListNodeForChannel(category, id);
     BtlWork *work;
     if (owner != 0) {
-        func_0020D128("btl:motSE search hit[%p]\n", owner);
+        btlBossDebugPrintf("btl:motSE search hit[%p]\n", owner);
         owner->refCount++;
         return owner;
     }
@@ -6877,7 +6877,7 @@ extern char D_00419408[]; /* "btl:sound load BSE SMG\n" */
 void sndLoadBattleBank(void) {
     if (func_00342168(0x10000) == 0) {
         func_003421E8(0x10000);
-        func_0020D128(D_00419408);
+        btlBossDebugPrintf(D_00419408);
     }
 }
 
@@ -6955,7 +6955,7 @@ SoundTask *func_002055E0(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00205660);
 
-s32 func_00205758(u32 *args) {
+s32 sndDeadAtracPlaybackTask(u32 *args) {
     s32 data;
     s32 size;
     if (args[1] == 0) {
@@ -6969,12 +6969,12 @@ s32 func_00205758(u32 *args) {
             func_002C7D00(args[1]);
             func_002A27A8(data, size, 2);
             func_002A2998();
-            func_0020D128("btl:ATRAC3 dead load end\n");
+            btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
         }
         return 0;
     }
     if (func_002A2928() == 0) {
-        func_0020D128("btl:ATRAC3 dead play end\n");
+        btlBossDebugPrintf("btl:ATRAC3 dead play end\n");
         return 1;
     }
     return 0;
@@ -6999,7 +6999,7 @@ SoundTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     task->flags &= ~1;
     task->owner = owner->owner;
     task->onStart = func_00205660;
-    task->callback = func_00205758;
+    task->callback = sndDeadAtracPlaybackTask;
     task->onFinish = (void (*)(u32 *))sndFinishEarringPlaybackTask;
     args = func_001E14F8((s32)task);
     args->actor = owner;
@@ -7009,7 +7009,7 @@ SoundTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
 }
 
 u32 func_00205930(void) {
-    func_002040A8(0x1c);
+    sndLoadAndPlayStationedSe(0x1c);
     return 1;
 }
 
@@ -7023,7 +7023,7 @@ SoundTask *func_00205950(void) {
 }
 
 u32 func_00205990(void) {
-    func_00204038();
+    btlAdvanceTitleState();
     return 1;
 }
 
@@ -7050,7 +7050,7 @@ s64 func_00206090(void) {
     return func_00205CC8(0x400);
 }
 
-void func_002060B0(BtlUnit *unit) {
+void btlMoveOtherUnitsAway(BtlUnit *unit) {
     f32 pos[4];
     BtlUnit *other = ((BtlWork *)func_001AA6F8())->actorList;
     u32 mask = unit->link18->flags & 0x600;
@@ -7101,7 +7101,7 @@ u32 func_002076E0(u32 *command) {
         return 1;
     }
     if (category >= 0x5B) {
-        func_002060B0((BtlUnit *)command[0]);
+        btlMoveOtherUnitsAway((BtlUnit *)command[0]);
     }
     return 1;
 }

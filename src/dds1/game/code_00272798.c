@@ -2,7 +2,7 @@
 
 extern s32 func_00101A70();
 
-extern s64 func_002913B8(void);
+extern s64 fileConsumeConfigTaskReady(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
@@ -24,7 +24,7 @@ s32 mnuStartStaffDisplay(void) {
     u8 *context = (u8 *)func_00101A70();
     mnuSetStaffDisplayMode(5, context);
     func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x114), 0, 1);
-    configTasksCreate(0);
+    mnuCreateConfigTasks(0);
     return 1;
 }
 
@@ -43,7 +43,7 @@ s64 func_00272A90(s32 callback) {
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s64 state = func_00285670(context + 8, dispatchEntry, 0, callback);
     if (state == 0) {
-        if (func_002913B8() == 0) {
+        if (fileConsumeConfigTaskReady() == 0) {
             func_002858F8(dispatchEntry, D_0037C844);
         }
         return 0;

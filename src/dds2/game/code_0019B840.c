@@ -62,11 +62,11 @@ typedef struct FrFontSysLocal {
 
 extern FrFontSysLocal D_00452720;
 
-extern void func_0019C2F8(void);
+extern void frFontFreeAllEntries(void);
 
 extern void *func_0019C4D0(void *arg0);
 
-extern u32 itfReleasePayloadAllocation(s32 arg0);
+extern u32 itfReleaseMemNodeBuffer(s32 arg0);
 
 extern void func_0019B7A8(void);
 
@@ -140,11 +140,11 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BE20);
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BEB8);
 
 void frFontReleaseAll(void) {
-    func_0019C2F8();
+    frFontFreeAllEntries();
     func_0019C4D0(D_00452720.glyphSlots[0]);
     func_0019C4D0(D_00452720.glyphSlots[1]);
-    itfReleasePayloadAllocation(D_00452720.unk150);
-    itfReleasePayloadAllocation(D_00452720.unk154);
+    itfReleaseMemNodeBuffer(D_00452720.unk150);
+    itfReleaseMemNodeBuffer(D_00452720.unk154);
     func_0019B7A8();
     func_0032AA40(D_00452720.unk158);
     func_0032AA40(D_00452720.unk15C);

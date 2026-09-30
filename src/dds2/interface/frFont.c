@@ -186,7 +186,7 @@ void frFontLoadDefaultFonts(void) {
 }
 
 
-void func_0019C2F8(void) {
+void frFontFreeAllEntries(void) {
     FrFontEntry *entries = (FrFontEntry *)&D_00452720;
     s32 i;
 
@@ -258,7 +258,7 @@ FrFontGlyph *func_0019C980(FrFontGlyph *source, FrFontGlyph *destination) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
 
-void *func_0019CAB0(u8 index, s32 arg1) {
+void *frFontCloneEntryResource(u8 index, s32 arg1) {
     FrFontEntry *entry = &D_00452720.entries[index];
     void *dst = func_00328D68(0x120);
     FrFontSegments segments;

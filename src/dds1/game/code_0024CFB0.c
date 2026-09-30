@@ -231,7 +231,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     }
 }
 
-s32 evtCompareByteValues(u8 *left, u8 *right) {
+s32 evtCompareBytesAscending(u8 *left, u8 *right) {
     u8 leftValue = *left;
     u8 rightValue = *right;
 

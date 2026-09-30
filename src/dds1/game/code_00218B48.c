@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "pcp_vu0.h"
 
 typedef struct MdlViewState {
@@ -59,10 +60,15 @@ typedef struct MdlCtrlState {
 } MdlCtrlState;
 
 extern MdlViewState D_003D7A50;
+
 extern MdlCtrlState D_003D7B50;
+
 extern s32 D_003BAA00;
+
 extern s32 D_003D7B10[];
+
 extern s8 D_003D7A60[];
+
 typedef struct MdlViewerTaskDef {
     const char *name;
     void *update;
@@ -77,38 +83,89 @@ typedef struct MdlSystemTask {
 } MdlSystemTask;
 
 extern MdlSystemTask D_00367AE0[3];
+
 extern char D_003ABF78[]; /* "modelViewer" */
+
 extern char D_003ABF88[]; /* "modelViewerEnd" */
 
 extern void mdlViewer();
+
 extern void mdlViewerEnd();
 
 s32 func_0011D3E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
 void func_0011E080(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
 void func_0014FB70(s32 arg0, float arg1);
+
 s32 func_0014FD20(s32 arg0);
+
 void func_00152000(s32 arg0, float arg1, float arg2);
+
 s32 billCreateIndexed(s32 arg0, s32 arg1);
+
 s32 func_0021A608(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
 s32 func_0021A660(s16 *arg0, s32 arg1);
+
 void func_0021B9F8(void);
+
 void func_0021BDD0(void);
+
 void sdfAppendPacket(s32 arg0, s32 arg1);
+
 void sdfStreamCreateWithParams(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
 extern s32 kwlnTaskGetTaskByName(void *name);
+
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+
 extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, s32 data);
+
 void func_00102A18(void);
+
 void func_00101A80(s32 arg0, s32 arg1);
+
 void func_0021E3C0(MdlViewState *arg0);
+
 void func_002EDBD8(void *buffer, s32 arg1);
+
 void func_002EDC30(void *buffer);
+
 void func_002EDE48(void *buffer, s32 arg1, s32 arg2);
+
 void func_00218768(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+
 void func_002EDC50(void *buffer);
+
 s32 *mdlFindViewerRecord(s32 arg0, s32 arg1);
+
 s32 mdlCountRecords(s32 arg0);
+
 /* Assemble the resource request in a temporary buffer before loading it. */
+extern void func_002CFF98();
+
+typedef struct MdlSlotEntry {
+    s32 a;
+    s32 b;
+    s32 c;
+} MdlSlotEntry;
+
+typedef struct MdlSlotTable {
+    MdlSlotEntry *entries;
+    s32 count;
+} MdlSlotTable;
+
+extern MdlSlotTable D_00365858[];
+
+extern MdlSlotTable D_00367900[];
+
+extern s32 D_003BBB6C;
+
+extern s32 D_003BBB70;
+
+extern void sdfReleaseMemorySlot(s32 *slot);
+
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
@@ -125,7 +182,30 @@ void func_00218BE8(s32 arg0) {
     func_002CFF98((void *)arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00218C00);
+void func_00218C00(void) {
+    MdlSlotEntry *entry;
+    s32 count;
+    s32 i;
+
+    count = D_00365858[5].count;
+    if (count > 0) {
+        entry = D_00365858[5].entries;
+        i = 0;
+        do {
+            i++;
+            func_002CFF98(entry->b);
+            func_002CFF98(entry->a);
+            func_002CFF98(entry->c);
+            entry++;
+        } while (i < count);
+    }
+    D_00367900[5].entries = NULL;
+    D_00367900[5].count = 0;
+    D_00365858[5].entries = NULL;
+    D_00365858[5].count = 0;
+    sdfReleaseMemorySlot(&D_003BBB6C);
+    sdfReleaseMemorySlot(&D_003BBB70);
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218CA8);
 
@@ -232,9 +312,13 @@ typedef struct EffMarkParams {
 } EffMarkParams;
 
 extern char *D_003679B8[];
+
 extern u8 D_003679B0[];
+
 extern u16 D_00367980[];
+
 extern char D_003BBBB0[];
+
 extern char D_003BBBB8[];
 
 /* Draw labeled marker fields and each of four packed color channels. */
@@ -285,7 +369,9 @@ typedef struct MdlPartList {
 } MdlPartList;
 
 #define MDL_PART_BILLBOARD 0
+
 #define MDL_PART_EFFECT 1
+
 #define MDL_PART_OBJECT 3
 
 void mdlAddBillboardPart(MdlPartList *list, s32 index) {
@@ -680,6 +766,7 @@ typedef struct MdlAnchorRec {
 } MdlAnchorRec;
 
 extern u8 D_00324690[];
+
 extern u8 *func_002D7D68(void *chunk, s32 id);
 
 /* vu0 routine: out = p + normalize(p - D_00324690) * scale, p = node position transformed by the node matrix */
@@ -698,9 +785,13 @@ void func_0021A3D8(void *chunk, MdlAnchorRec *rec, f32 *out) {
 }
 
 extern void effCopyVector(s32 handle, f32 *src);
+
 extern void billInvokeCallback(s32 handle);
+
 extern void func_0014FBF0(s32 handle, f32 *pos);
+
 extern void effUpdateNode(s32 handle);
+
 extern void func_00188318(s32 handle);
 
 void func_0021A490(MdlResourceOwner *owner, MdlAnchorRec *rec) {
@@ -882,6 +973,7 @@ typedef struct MdlResource {
 } MdlResource;
 
 extern MdlResource *func_00217680(s16 arg0, s16 arg1);
+
 extern void mdlAddEntryFlagged(void *arg0, s32 arg1, s32 arg2);
 
 void func_0021A880(void) {
@@ -901,11 +993,17 @@ void func_0021A880(void) {
 }
 
 extern u128 D_003D7B20;
+
 extern u128 D_003D7B30;
+
 extern u128 D_003D7B40;
+
 extern u128 D_00367A10;
+
 extern u128 D_00367A20;
+
 extern u128 D_00367A30;
+
 extern s16 D_003D7A84[];
 
 void func_0021A8F0(void) {
@@ -975,7 +1073,9 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC80);
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ABB8);
 
 extern s32 mdlHasNode(s32 resource, s32 id);
+
 extern void mdlAddEntryFlaggedEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
+
 extern void mdlAddEntryPlainEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
 
 void mdlAddViewEntryFlagged(void) {
@@ -1029,6 +1129,7 @@ u32 func_0021B4E8(void) {
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B510);
 
 extern s32 D_00367B10[];
+
 extern s32 func_002E4960();
 
 void func_0021B950(void) {
@@ -1216,9 +1317,13 @@ typedef struct MdlDrawDevice {
 } MdlDrawDevice;
 
 extern MdlDrawDevice D_00325048;
+
 extern u8 D_00367B80[];
+
 extern u8 D_00367BE0[];
-extern s32 sdfCreateInitializedPacketList(void);
+
+extern s32 sdfCreateResetPacketList(void);
+
 extern s32 func_002EF2E0(void *arg0, void *arg1, s32 arg2, s32 arg3);
 
 void func_0021D5D0(void) {
@@ -1226,7 +1331,7 @@ void func_0021D5D0(void) {
 
     if (D_003D7A50.unk0A < 4) {
         if (D_003D7A50.unk0A >= 2) {
-            list = sdfCreateInitializedPacketList();
+            list = sdfCreateResetPacketList();
             __asm__ volatile(".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\tvmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder");
             sdfAppendPacket(list, func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80));
             D_00325048.submit(&D_00325048, list);
@@ -1235,8 +1340,11 @@ void func_0021D5D0(void) {
 }
 
 extern u8 D_00367C00[];
+
 extern u8 D_00367C40[];
+
 extern s32 D_003BBCB8;
+
 extern void func_002EA2E0(s32 packet, s32 arg);
 
 void func_0021D668(void) {
@@ -1245,7 +1353,7 @@ void func_0021D668(void) {
     MdlResource *resource;
 
     if (D_003D7A50.unk0A == 3) {
-        list = sdfCreateInitializedPacketList();
+        list = sdfCreateResetPacketList();
         resource = *(MdlResource **)&D_003D7A50.resources[0];
         __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(resource->chunk + 0x20));
         packet = func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
@@ -1274,10 +1382,14 @@ void func_0021D780(void) {
 INCLUDE_ASM(const s32, "game/code_00218B48", mdlViewer);
 
 extern u8 D_00367C50[];
+
 extern u8 D_00367CB0[];
+
 extern s32 sdfCountMapPositionRecords(void *chunk);
+
 extern u8 *sdfChunkFindByTag(void *chunk, s32 tag);
-extern void func_002D9D00(void *chunk, u8 *record);
+
+extern void sdfSetLookAtBasisFromRecord(void *chunk, u8 *record);
 
 void func_0021DAE0(MdlResource *resource) {
     s32 count = sdfCountMapPositionRecords(resource->chunk);
@@ -1286,10 +1398,10 @@ void func_0021DAE0(MdlResource *resource) {
     u8 *record;
 
     if (count > 0) {
-        list = sdfCreateInitializedPacketList();
+        list = sdfCreateResetPacketList();
         record = sdfChunkFindByTag(resource->chunk, 0x534F504D) + 0x10;
         for (i = 0; i != count; i++) {
-            func_002D9D00(resource->chunk, record);
+            sdfSetLookAtBasisFromRecord(resource->chunk, record);
             record += 0x40;
             sdfAppendPacket(list, func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80));
         }
@@ -1305,7 +1417,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E068);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E1C8);
 
-extern void func_002177D0(s32 resource);
+extern void mdlDestroyContext(s32 resource);
 
 void mdlFreeViewResources(void) {
     s32 i;
@@ -1313,12 +1425,13 @@ void mdlFreeViewResources(void) {
         s32 handle = D_003D7A50.resources[i];
         if (handle != 0) {
             D_003D7A50.resources[i] = 0;
-            func_002177D0(handle);
+            mdlDestroyContext(handle);
         }
     }
 }
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 flag);
+
 extern void func_00103498(const char *name, s32 arg, s32 arg2, s32 arg3);
 
 void func_0021E3C0(MdlViewState *view) {
@@ -1412,12 +1525,19 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
 extern s32 dds3AdvanceWorldCounter(void);
+
 extern s32 func_00112C08(s32 counter, f32 *position, f32 *rotation);
+
 extern void effObjSetInnerFloat(s32 object, f32 value);
+
 extern void dds3EnsureSlotData();
+
 extern s32 dds3GetWorldSecondaryObject(void);
+
 extern void func_001109B8(s32 world, s32 object);
+
 extern void func_001127A0(s32 object, s32 arg);
+
 extern void *memset(void *dst, s32 value, u32 size);
 
 void func_0021FA78(void) {
@@ -1435,8 +1555,11 @@ void func_0021FA78(void) {
 }
 
 extern void func_00111E30(s32 object, s32 arg1, s32 arg2);
+
 extern s32 dds3SpawnCameraSlotObj5(s32 counter, f32 *position, f32 *rotation);
+
 extern void dds3SetObjectFlags(s32 object, s32 flags);
+
 extern s32 *dds3GetUnk0C(s32 object);
 
 s32 func_0021FB30(s32 arg0, s32 arg1) {
@@ -1462,7 +1585,9 @@ s32 func_0021FB30(s32 arg0, s32 arg1) {
 }
 
 extern void *func_00110A48(s32 world, s32 id, s32 kind);
+
 extern void dds3SetSlotByKind(s32 object, s32 slot);
+
 extern void dds3InvokeSlot5Handler(s32 object);
 
 s32 func_0021FC30(s32 arg0, s32 arg1) {
@@ -1500,9 +1625,13 @@ typedef struct MdlAttachObj {
 } MdlAttachObj;
 
 extern void effObjSetInnerFirstVec();
+
 extern void effObjSetInnerSecondVec();
+
 extern void effObjFetchInnerFirstVec();
+
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+
 extern void effMiscQuatMultiplyVU(void);
 
 void func_0021FD50(s32 targetId, s32 sourceId) {

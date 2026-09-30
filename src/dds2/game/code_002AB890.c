@@ -46,8 +46,8 @@ void func_002ABCD0(MenuResourceOwner *object) {
     MenuResourceSet *resources;
 
     resources = object->resources;
-    func_002B9520(resources->first);
-    func_002B9520(resources->second);
+    mnuDestroyWindowContainer(resources->first);
+    mnuDestroyWindowContainer(resources->second);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD08);
@@ -55,7 +55,7 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD08);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
 void func_002ABEB0(MenuResourceOwner *object) {
-    func_002B9520(object->resources->third);
+    mnuDestroyWindowContainer(object->resources->third);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
@@ -65,7 +65,7 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC408);
 
 void func_002AC660(MenuResourceOwner *object) {
-    func_002B9520(object->resources->fourth);
+    mnuDestroyWindowContainer(object->resources->fourth);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC688);
@@ -75,7 +75,7 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC8F0);
 
 void func_002ACA98(MenuResourceOwner *object) {
-    func_002B9520(object->resources->fifth);
+    mnuDestroyWindowContainer(object->resources->fifth);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACAC0);

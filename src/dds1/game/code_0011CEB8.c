@@ -35,7 +35,7 @@ INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CF38);
 INCLUDE_ASM(const s32, "game/code_0011CEB8", func_0011CF88);
 
 /* Append an intrusive node; linkOffset selects its previous/next pair. */
-void dds3AppendLinkedNode(s32 *list, s32 node, s32 linkOffset) {
+void dds3AppendIntrusiveNode(s32 *list, s32 node, s32 linkOffset) {
     s32 last;
 
     last = list[1];

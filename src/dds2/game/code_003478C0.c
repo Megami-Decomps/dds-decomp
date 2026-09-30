@@ -83,7 +83,7 @@ void func_00347948(SdfAllocWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347988);
 
-void sdfActivateRequest(SdfRequest *request, u32 value) {
+void sdfStoreWordAndSetState(SdfRequest *request, u32 value) {
     request->value = value;
     request->active = 1;
 }

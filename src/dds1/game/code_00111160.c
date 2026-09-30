@@ -59,7 +59,7 @@ void dds3ReleaseWorldSlotResource(ObjWithWork *obj) {
     u32 *slot;
 
     slot = obj->work;
-    dds3ReleaseSlotPath();
+    dds3ReleaseObjectResource();
     dds3ExchangeSlot(*slot, 0, 1);
     func_002CFF98(slot);
 }

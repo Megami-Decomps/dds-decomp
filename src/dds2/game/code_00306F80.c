@@ -81,6 +81,7 @@ typedef struct GridDrawWork {
 } GridDrawWork;
 
 extern s32 func_00304AD8();
+
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
 extern s32 func_00100400(void);
@@ -90,6 +91,23 @@ extern u8 D_00381ED0[];
 extern void func_0032DB30(const void *, void *, s32);
 
 extern void func_0032CF98(void *, void *);
+
+typedef struct GridAngleTable {
+    s32 divisor;  /* 0x00 */
+    s32 mirrored; /* 0x04 */
+} GridAngleTable;
+
+typedef struct GridAngleSlot {
+    u8 pad00[0x20];
+    GridAngleTable *table; /* 0x20 */
+} GridAngleSlot;
+
+typedef struct GridAngleOwner {
+    u8 pad00[4];
+    s32 angle; /* 0x04 */
+    u8 pad08[8];
+    GridAngleSlot *slot; /* 0x10 */
+} GridAngleOwner;
 
 void func_00306F80(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
     u32 record = func_00304AD8(e, f);
@@ -113,6 +131,7 @@ s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
 }
 
 extern void func_00304B18();
+
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
 void func_003071D0(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
@@ -201,15 +220,17 @@ typedef struct RenderCallbackEntry {
 } RenderCallbackEntry;
 
 extern RenderCallbackEntry D_0037FB48[];
+
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfResetPacketList(s32);
+
+extern void sdfInitPacketList(s32);
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
 GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
     s32 context = sdfAllocPacketAligned(0x20);
     u8 *cursor;
     RenderCallbackEntry *entry;
-    sdfResetPacketList(context);
+    sdfInitPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
     if (itfGridGetOverlayFlag(object) != 0) {
         func_003073D8(object, (s32)cursor, context);
@@ -240,7 +261,19 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_003078A8);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307A68);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307BA8);
+s32 func_00307BA8(s32 unused, u8 *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 i = 3;
+
+    do {
+        if (table->mirrored == 0) {
+            *(f32 *)(out + 0x24) = 360.0f - (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
+        } else {
+            *(f32 *)(out + 0x24) = (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
+        }
+    } while (--i >= 0);
+    return 0x10000 / table->divisor;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307C30);
 
@@ -265,7 +298,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_0033A2D0(packet);
     descriptor[0] = normalized;
     if (!alternate) {
@@ -274,7 +307,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
         descriptor[1] = 0x4B;
     }
     context = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(context);
+    sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
@@ -290,7 +323,7 @@ void func_003082A8(s32 data, s32 alternate, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_0033A2D0(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -299,7 +332,7 @@ void func_003082A8(s32 data, s32 alternate, s32 kind) {
         descriptor[1] = 0x48;
     }
     context = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(context);
+    sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
@@ -318,7 +351,7 @@ void func_003083A0(s32 data, s32 alternate, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_0033A2D0(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -327,7 +360,7 @@ void func_003083A0(s32 data, s32 alternate, s32 kind) {
         descriptor[1] = 0x43;
     }
     context = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(context);
+    sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
@@ -343,12 +376,12 @@ void func_00308498(s32 data, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_0033A2D0(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
     context = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(context);
+    sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
@@ -360,12 +393,12 @@ void func_00308550(s32 data, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_0033A2D8(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_0033A2D0(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
     context = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(context);
+    sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
@@ -420,7 +453,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00308C58);
 void func_00308DB0(s32 surfaceIndex) {
     void *list = sdfAllocPacketAligned(0x20);
     void *texture;
-    sdfResetPacketList((s32)list);
+    sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
     func_0032CF98(list, texture);
@@ -431,12 +464,13 @@ void func_00308DB0(s32 surfaceIndex) {
 }
 
 extern void func_0032DB78(void *, void *, s32);
+
 void func_00308E60(surfaceIndex)
     s32 surfaceIndex;
 {
     void *list = sdfAllocPacketAligned(0x20);
     void *texture;
-    sdfResetPacketList((s32)list);
+    sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
     func_0032CF98(list, texture);

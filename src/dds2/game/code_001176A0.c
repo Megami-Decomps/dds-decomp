@@ -254,7 +254,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001190B0);
 
-u32 func_00119480(s32 channel, s32 arg1, SdfPackedValue *item) {
+u32 sdfQueryChannelValue(s32 channel, s32 arg1, SdfPackedValue *item) {
     u32 result;
     u32 mode = D_00435E20[channel].mode;
 

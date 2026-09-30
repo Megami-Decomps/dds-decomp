@@ -12,7 +12,7 @@ typedef struct {
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186DC8);
 
 /* Supply a source handle for the first blur variant. */
-void effBlurSetSetting(EffBlurWork *work, u32 setting) {
+void effBlurSetHandle(EffBlurWork *work, u32 setting) {
     work->setting = setting;
 }
 

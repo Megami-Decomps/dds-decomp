@@ -358,7 +358,7 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001189A0);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118D70);
+INCLUDE_ASM(const s32, "game/code_00117438", sdfQueryChannelValue);
 
 u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
     u32 result;

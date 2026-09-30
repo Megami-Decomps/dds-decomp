@@ -30,8 +30,8 @@ void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
     StaffWindowResources *resources;
 
     resources = context->resources;
-    func_0027C430(resources->firstWindow);
-    func_0027C430(resources->secondWindow);
+    mnuDestroyWindowContainer(resources->firstWindow);
+    mnuDestroyWindowContainer(resources->secondWindow);
 }
 
 extern void func_0027C6A0(s32);
@@ -60,7 +60,7 @@ s32 func_00273050(s32 itemId, s32 context) {
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002730A0);
 
 void mnuReleaseStaffExtraWindow(StaffDisplayContext *context) {
-    func_0027C430(context->resources->thirdWindow);
+    mnuDestroyWindowContainer(context->resources->thirdWindow);
 }
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273220);
@@ -74,7 +74,7 @@ void func_002733B0() {
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002733B8);
 
-s32 freeStaffDisplayResources(void) {
+s32 mnuStaffFreeDisplayResources(void) {
     StaffDisplayContext *context = (StaffDisplayContext *)func_00101A70();
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
@@ -97,12 +97,12 @@ s64 mnuStaffRunPanel2b(u64 request) {
     return menuRunPanel(state, 2, request);
 }
 
-extern s32 battleItemApplyDirectEffect(s32, s32, s32, s32);
-extern s32 skillApplyFieldUseEffect(s32, s32, s32, s32);
+extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
+extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 func_0011A568(s32);
 extern void func_00119900(s32, s32);
-extern void initPartyPanelSlots(s32);
-extern void menuUpdateHandleStates(s32);
+extern void mnuInitPartyPanelSlots(s32);
+extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 
 typedef struct StaffSelectionList {
@@ -121,19 +121,19 @@ typedef struct StaffItemContext {
 s32 mnuUseStaffItem(s32 itemId, s32 context) {
     s32 partyPanel = context + 0x15C;
     s32 targetUnit = D_003BAA00 + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
-    s32 result = battleItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
+    s32 result = btlItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
         if (result == 2) {
             return 0;
         }
-        if (skillApplyFieldUseEffect(partyPanel, func_0011A568(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
+        if (ptySkillApplyFieldUseEffect(partyPanel, func_0011A568(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
             return 0;
         }
     }
     func_00119900(itemId, -1);
-    initPartyPanelSlots(context + 0x7EC);
-    menuUpdateHandleStates(partyPanel);
+    mnuInitPartyPanelSlots(context + 0x7EC);
+    mnuUpdateHandleStates(partyPanel);
     func_00280048(partyPanel);
     return 1;
 }

@@ -5,11 +5,11 @@ extern s32 D_003BD9B4;
 extern u8 D_003BD9C0;
 
 void *func_002CFEB8(s32 arg0);
-void *func_002E7480(void *arg0, s32 arg1);
+void *sdfClearQuadwords(void *arg0, s32 arg1);
 void func_002D3C30(void *arg0, s32 arg1);
 
 void *func_002CFF68(s32 size) {
-    return func_002E7480(func_002CFEB8(size), (size + 15) >> 4);
+    return sdfClearQuadwords(func_002CFEB8(size), (size + 15) >> 4);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfChip", func_002CFF98);

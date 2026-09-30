@@ -213,7 +213,7 @@ extern void func_00196FD8(void);
 
 extern void func_00196FE8(void);
 
-extern u8 D_0037F780[];
+extern u128 D_0037F780;
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyRow128);
 

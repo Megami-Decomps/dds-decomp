@@ -246,11 +246,11 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C978);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CA60);
 
-u8 evtUnitHasStateBits(EventUnit *unit) {
+u8 evtTestUnitStatusFlags(EventUnit *unit) {
     return (unit->flags & 0x7800) != 0;
 }
 
-void evtUnitSetStateBits(EventUnit *unit) {
+void evtSetUnitStatusFlags(EventUnit *unit) {
     unit->flags = unit->flags | 0x300;
 }
 

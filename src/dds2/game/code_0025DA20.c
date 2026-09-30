@@ -77,7 +77,7 @@ extern void func_00260380();
 
 extern void func_00328E48();
 
-extern void func_002B9520();
+extern void mnuDestroyWindowContainer();
 
 extern void func_0025FCD8();
 
@@ -256,7 +256,7 @@ typedef struct FxWorld {
     FxNode *nodes;        /* 0x2034 */
 } FxWorld;
 
-void func_0025DB98(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
+void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
     FxNode *node;
     FxChild *child;
     s32 total;
@@ -330,7 +330,7 @@ void func_0025DB98(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offse
     evtViewerDispatchFlagMode(world);
 }
 
-void func_0025DD68(FxWorld *world, s32 threshold) {
+void mnuFxWorldDropOutOfRange(FxWorld *world, s32 threshold) {
     FxNode *node;
     FxChild *child;
 
@@ -447,7 +447,7 @@ typedef struct PackedPair {
     } packed;
 } PackedPair;
 
-void func_0025E7B8(PackedPair *pair, s32 *low, s32 *high) {
+void mnuUnpackNibbleFields(PackedPair *pair, s32 *low, s32 *high) {
     *low = pair->packed.half & 0xFFF;
     *high = pair->packed.half >> 12;
 }
@@ -578,7 +578,7 @@ void mnuCampInitFontResource(CampScene *scene) {
     func_0019D100(resource, 0x960, 0x70);
 }
 
-void mnuCampReleaseEffectHandle(CampScene *scene) {
+void mnuCampLinkFontGlyph(CampScene *scene) {
     func_0019C5B0(scene->effectHandle);
     scene->effectHandle = 0;
 }
@@ -877,7 +877,7 @@ void func_00260380(s32 keepExtra, ShopScene *scene) {
                 sprite = *slot;
                 sprite->data->buffer = NULL;
             }
-            func_002B9520(sprite);
+            mnuDestroyWindowContainer(sprite);
         }
         slot++;
     }
@@ -887,7 +887,7 @@ void func_00260380(s32 keepExtra, ShopScene *scene) {
                 func_00328E48(scene->extra->data->buffer);
                 scene->extra->data->buffer = NULL;
             }
-            func_002B9520(scene->extra);
+            mnuDestroyWindowContainer(scene->extra);
         }
     }
 }
@@ -1073,7 +1073,7 @@ typedef struct EffItemSlot44 {
 extern EffItemSlot44 D_003CD8F0[];
 extern void mdlFlagSet(u32);
 
-s32 func_00260B90(s32 row) {
+s32 itmClaimFreeSlot(s32 row) {
     s32 first = row * 2;
     EffItemSlot44 *slot = &D_003CD8F0[first];
     s32 i = 0;

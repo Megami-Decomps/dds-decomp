@@ -123,7 +123,7 @@ void func_0028A008(void) {
     func_002F6338();
 }
 
-s32 func_0028A020(void) {
+s32 fileWaitCommandDone(void) {
     s32 command;
     s32 result;
 

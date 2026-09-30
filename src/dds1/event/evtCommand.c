@@ -47,15 +47,15 @@ void func_00115CD8(void *unit);
 
 void func_00110928(void *unit);
 
-void func_00141D18(void);
+void fldStopCurrentBgm(void);
 
-void func_00141D98(void);
+void fldPlayCurrentBgmSound(void);
 
-void func_00141D40(void);
+void fldReleaseCurrentBgm(void);
 
 char *scrReadStringParameter(s32 idx);
 
-void fldInitializeSequenceRecord(s32 arg0, s32 arg1, s32 arg2, char *arg3);
+void fldInitializeSequenceAndResetFlags(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 
 void fldInitializeAlternateSequence(s32 arg0, s32 arg1, s32 arg2, char *arg3);
 
@@ -75,7 +75,7 @@ f32 bfWaitReadArgFloat(s32 idx);
 
 void func_00220298(s32 arg0, f32 arg1);
 
-s32 func_0014DB78(char *name);
+s32 fldParseRoomNumberFromName(char *name);
 
 s32 func_00121650(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
@@ -348,7 +348,7 @@ void evtSubmitEventRequest(s32 eventId, s32 mode)
 {
     s32 args[2];
 
-    func_00141D98();
+    fldPlayCurrentBgmSound();
     func_0012C6C8(2, eventId);
     D_003BBDA8 = mode;
     args[0] = 0;
@@ -370,7 +370,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
 {
     s32 args[2];
 
-    func_00141D18();
+    fldStopCurrentBgm();
     func_0012C6C8(2, eventId);
     D_003BBDA8 = 0;
     args[0] = 0;
@@ -406,11 +406,11 @@ s32 func_00226988(void)
     char *textArg;
     u8 request[0xa0];
 
-    func_00141D40();
+    fldReleaseCurrentBgm();
     firstArg = scrReadIntParameter(0);
     secondArg = scrReadIntParameter(1);
     textArg = scrReadStringParameter(2);
-    fldInitializeSequenceRecord((s32)request, firstArg, secondArg, textArg);
+    fldInitializeSequenceAndResetFlags((s32)request, firstArg, secondArg, textArg);
     func_001028E8(5, (s32)request, 0xa0, 0);
     func_0010BDB8();
     return 1;
@@ -424,7 +424,7 @@ s32 func_00226A08(void)
 
     firstArg = scrReadIntParameter(0);
     textArg = scrReadStringParameter(1);
-    fldInitializeSequenceRecord((s32)request, D_0032E3C0[0], firstArg, textArg);
+    fldInitializeSequenceAndResetFlags((s32)request, D_0032E3C0[0], firstArg, textArg);
     func_001028E8(5, (s32)request, 0xa0, 0);
     func_0010BDB8();
     return 1;
@@ -757,7 +757,7 @@ s32 evtCommandDestroyCampTask(void) {
         return 1;
     }
     func_0010AC10(D_003AC988, id);
-    campDestroyTaskById(id);
+    mnuCampDestroyTaskById(id);
     return 1;
 }
 
@@ -872,7 +872,7 @@ s32 func_00227CB8(void) {
     if (owner == 0) {
         return 1;
     }
-    count = func_0014DB78(owner);
+    count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
             func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 1);
@@ -904,7 +904,7 @@ s32 func_00227DD0(void) {
     if (owner == 0) {
         return 1;
     }
-    count = func_0014DB78(owner);
+    count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (scrReadIntParameter(1) == 0) {
             func_00121650(D_0032E3B0[4], D_0032E3B0[5] + 1, count, 1);

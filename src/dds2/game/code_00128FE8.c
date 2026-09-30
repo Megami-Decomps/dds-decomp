@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "fpu.h"
 
 extern s32 D_00435F14;
@@ -70,7 +71,6 @@ extern u8 D_00435BB4;
 extern u32 D_003897E8[];
 
 extern char D_00444950[];
-
 
 extern s32 strcmp(const char *a, const char *b);
 
@@ -173,11 +173,11 @@ typedef struct {
     u32 unk14[3];
 } FieldBufferDescriptor;
 
-extern void sdfResetPacketList(u64);
+extern void sdfInitPacketList(u64);
 
 extern u32 D_0037FB48[];
 
-extern void sdfResetPacketList(u64);
+extern void sdfInitPacketList(u64);
 
 extern void sdfAppendPacket(u64, u64);
 
@@ -189,7 +189,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
-extern void func_0033A2D8(u64, s32, s32, s32, s32);
+extern void sdfConsInitPacketHeader(u64, s32, s32, s32, s32);
 
 extern u64 *func_0033A2D0(u64);
 
@@ -413,9 +413,50 @@ extern void func_00131000(s16, s32, f32);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
 
+typedef struct {
+    f32 dist;
+    f32 y;
+    f32 targetY;
+    f32 fov;
+    f32 unk10;
+    f32 unk14;
+} FldCamRow; /* 0x18 bytes */
+
+typedef struct {
+    u8 pad0[0x50];
+    s32 mode;
+    u8 pad54[4];
+    s32 rowIdx;
+    u8 pad5C[8];
+    f32 angle;
+    u8 pad68[4];
+    f32 dist;
+    u8 pad70[0xD0];
+    f32 x;
+    f32 y;
+    f32 z;
+} FldCamWork;
+
+extern FldCamRow D_0038AEB0[];
+
+extern f32 D_0038BAF0[];
+
+extern f32 D_0038BB00[];
+
+extern f32 func_003407A0(f32);
+
+extern s32 *func_00125F28();
+
+extern void dds3SetCameraValue(s32, f32);
+
+extern void fldToggleWorldNodeState(s32);
+
+extern void func_0012EDB0(void);
+
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00128FE8);
 
 extern s32 evtSpawnActionObj2(u32, u32);
+
 extern void *dds3GetWorldSecondaryObject(void);
 
 typedef struct FldActionSpawn {
@@ -522,6 +563,7 @@ s32 fldLoadAreaResource(void) {
 }
 
 extern void sdfRaiseDeviceThreadPriority(void);
+
 extern s32 D_00436010;
 
 s32 fldRequestAreaResource(s32 area, s32 room) {
@@ -728,14 +770,22 @@ typedef struct FldPackedArchive {
 } FldPackedArchive;
 
 extern void func_002C81D0(u32);
+
 extern void func_00140180(u32);
+
 extern void fldSetNpcPalette(u32);
+
 extern void fldUploadSkyBuffer();
+
 extern void fldCopyActorWaypointTable(u32);
+
 extern u32 sdfMemoryGetBlockSize(u32);
+
 extern u32 sdfMemoryGetBlockAddress(u32);
-extern void func_00145730(u32, u32);
-extern void func_00145550();
+
+extern void fldSetSceneRecordChunk(u32, u32);
+
+extern void fldCacheMapLabelLengths();
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
@@ -773,11 +823,11 @@ void fldLoadAreaPackedResources(void) {
                 func_003298C0(entry->block);
                 break;
             case 6:
-                func_00145730(entry->arg, entry->block);
+                fldSetSceneRecordChunk(entry->arg, entry->block);
                 break;
             }
         }
-        func_00145550(D_00389770[4] % 100);
+        fldCacheMapLabelLengths(D_00389770[4] % 100);
     }
 }
 
@@ -801,38 +851,71 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012A6F0);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012AC90);
 
 extern void fldClearMenuEntries();
+
 extern void fldDestroyTitleTask();
+
 extern void fldFreeSceneResources();
+
 extern void fldPlayPendingSounds();
+
 extern void fldReleaseObjectSlots();
+
 extern void fldReleaseResourceSlots();
+
 extern void fldReleaseTextureSlots();
+
 extern void fldResetObjectSlots();
+
 extern void fldResetRecordState();
+
 extern s32 fldTitleMiniIsActive();
+
 extern void func_0013B818();
+
 extern void fldResetPendingSounds();
-extern void func_001457E0();
-extern void func_0014A228();
+
+extern void fldReleaseSceneRecordChunk();
+
+extern void fldReleaseMenuSlotsAfterWait();
+
 extern void func_0014B748();
+
 extern void kwlnTaskDestroyWithHierarchyByName();
+
 extern void mnuReleaseResourceEntries();
+
 extern void sdfResourceListRelease();
+
 extern u32 D_00444930[];
+
 extern u32 D_00444940[];
+
 extern s32 D_00435FA0;
+
 extern s32 D_00435FA4;
+
 extern FldTransferChunk *D_00435FA8;
+
 extern u32 D_00435FAC;
+
 extern FldTransferChunk *D_00435FB0;
+
 extern u32 D_00435FB4;
+
 extern FldTransferChunk *D_00435FB8;
+
 extern u32 D_00435FBC;
+
 extern FldDisplayWork *D_00435FC8;
+
 extern s32 D_00435FDC;
+
 extern u32 D_00435FE0;
+
 extern u32 D_00435FE4;
+
 extern u32 D_00435FE8;
+
 extern u32 D_00435FEC;
 
 void fldReleaseFieldResources(void) {
@@ -851,14 +934,14 @@ void fldReleaseFieldResources(void) {
         if (D_00389770[8] != 0) {
             if ((u32)(D_00389770[4] - 0x1B) < 2U) {
                 fldReleaseResourceSlots(D_00389770);
-                func_0014A228();
-                func_001457E0();
+                fldReleaseMenuSlotsAfterWait();
+                fldReleaseSceneRecordChunk();
                 fldReleaseAreaResourceCache();
             }
         } else {
             fldReleaseResourceSlots(D_00389770);
-            func_0014A228();
-            func_001457E0();
+            fldReleaseMenuSlotsAfterWait();
+            fldReleaseSceneRecordChunk();
             fldFreeSceneResources();
             fldReleaseAreaResourceCache();
             func_00134790();
@@ -1149,7 +1232,7 @@ void func_0012BC40(s32 lower, s32 bits, u64 upper) {
     u64 *entry;
     FieldBufferDescriptor *descriptor;
 
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     entry = func_0033A290(packet, 0x30);
     entry[5] = 0x3B;
@@ -1165,7 +1248,7 @@ void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     u64 *data;
     FieldBufferDescriptor *descriptor;
 
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     data = func_0033A290(packet, 0x30);
     data[4] = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
@@ -1193,9 +1276,9 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, 
     coords[2] = x1 * 16;
     coords[3] = y1 * 16;
     command = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    func_0033A2D8(packet, 0x49, 2, 0x41, 2);
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = func_0033A2D0(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | (0x8000LL << 24);
@@ -1230,9 +1313,9 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 arg4, u32 arg5, u32 ar
     coords[2] = x1;
     coords[3] = y1;
     command = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    func_0033A2D8(packet, 0x49, 2, 0x41, 2);
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = func_0033A2D0(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | (0x8000LL << 24);
@@ -1271,9 +1354,9 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 arg4, u32 arg5, u32 a
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
     command = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_0033A2D8(packet, 0x4D, 2, 0x41, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_0033A2D0(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | ((u64)arg7 << 32);
@@ -1314,9 +1397,9 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 arg4, u32 arg5, u32 arg
     coords[6] = x0;
     coords[7] = y1;
     command = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    func_0033A2D8(packet, 0x4D, 2, 0x41, 4);
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = func_0033A2D0(packet);
     lo = (u64)arg4 | ((u64)arg5 << 32);
     hi = (u64)arg6 | ((u64)arg7 << 32);
@@ -1350,7 +1433,7 @@ void fldSubmitModelPacket(s32 arg0, u8 *arg1) {
     f32 mat[16];
     FieldBufferDescriptor *descriptor;
 
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     header = sdfAllocPacketAligned(0x20);
     sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(arg0), sdfTexGetPrimaryBufferSize(arg0));
     sdfAppendReferencePacket(command, header);
@@ -1377,7 +1460,7 @@ void func_0012D070(void) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
     func_0032CF98(command, texture);
@@ -1389,7 +1472,7 @@ void func_0012D110(void) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
     func_0032CF98(command, texture);
@@ -1410,7 +1493,7 @@ void func_0012D1B0(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     D_0038A9A0[1] = second;
     D_0038A9A0[0] = first;
     resource = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(resource);
+    sdfInitPacketList(resource);
     record = func_00348158(D_0038A980, D_0038A9A0, 2, 0x80);
     sdfAppendPacket(resource, record);
     descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
@@ -1425,7 +1508,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     FieldBufferDescriptor *descriptor;
 
     command = sdfAllocPacketAligned(0x20);
-    sdfResetPacketList(command);
+    sdfInitPacketList(command);
     sdfConsAppendClearPacket(command, 0);
     sdfConsAppendAssetPacket(command, D_0043607C, 0);
     memset(&desc, 0, 0x2C);
@@ -1779,7 +1862,7 @@ s32 fldEncProc(void) {
 void func_0012EBF8(u32 arg0, s32 arg1) {
     if ((arg1 < 0x400) && ((*(u16 *)((s32)arg1 * 0x28 + D_00435E04 + 0x20) & 0x8000) != 0))
     {
-        func_00105FE8(0);
+        kwlnFadeBackgroundStartOut(0);
         func_0012EC80(3);
         return;
     }
@@ -2113,8 +2196,11 @@ typedef struct FldSkyBuffer {
 } FldSkyBuffer;
 
 extern FldSkyBuffer *D_004360EC;
+
 extern u32 D_00438ED0;
+
 extern char D_00413350[];
+
 extern u32 func_00343ED0(const char *, u32 *, s32);
 
 void fldUploadSkyBuffer(FldSkyBuffer *src) {

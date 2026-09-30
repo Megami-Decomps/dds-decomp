@@ -1,13 +1,23 @@
 #include "common.h"
+
 #include "pcp_vu0.h"
+
 extern s32 func_0033D810();
+
 extern void func_00328E48();
+
 extern s32 D_003C88C0[];
+
 extern s32 D_003C88C8[];
+
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
 extern void func_00103388(s32, s32, s32, s32);
+
 extern s32 mdlHasNode(s32, s16);
+
 extern void mdlAddEntryFlaggedEx(s32, s16, s16, f32, f32);
+
 extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
 
 extern s32 D_00435DD0;
@@ -83,17 +93,22 @@ typedef struct MdlLoaded {
 } MdlLoaded;
 
 extern void *memset(void *dst, s32 value, u32 size);
+
 extern s32 dds3AdvanceWorldCounter();
+
 extern s32 dds3SpawnCameraSlotObj5(s32 world, f32 *pos, f32 *rot);
+
 extern void dds3SetObjectFlags(s32 obj, u32 flags);
+
 extern void effObjSetInnerFloat(s32 obj, f32 value);
+
 extern void func_00112058(s32 obj, s32 a, s32 b);
+
 extern MdlLoaded *dds3GetUnk0C(s32 obj);
+
 extern void func_001129C8(s32 obj, s32 a);
 
 extern s32 dds3GetWorldSecondaryObject();
-
-
 
 extern s8 D_00453560[];
 
@@ -183,6 +198,47 @@ extern char D_00436FF0[];
 extern char D_00436FF8[];
 
 /* Assemble the resource request in a temporary buffer before loading it. */
+
+#define MDL_PART_OBJECT 3
+
+typedef struct MdlHandlerNode {
+    s32 a;      /* 0x00 */
+    void *b;    /* 0x04 */
+    u8 pad08[8];
+    s32 c;      /* 0x10 */
+    u8 pad14[0x98];
+} MdlHandlerNode;
+
+typedef struct MdlNodeInfo {
+    s32 id;       /* 0x00 */
+    u8 pad04[0xC];
+    f32 pos[4];   /* 0x10 */
+} MdlNodeInfo;
+
+typedef struct MdlAnchorRec {
+    u8 pad00[4];
+    u16 type;          /* 0x04 */
+    u8 pad06[2];
+    s32 handle;        /* 0x08 */
+    u8 pad0C[4];
+    MdlNodeInfo *info; /* 0x10 */
+    f32 scale;         /* 0x14 */
+} MdlAnchorRec;
+
+extern u8 D_0037F690[];
+
+extern u8 *func_00330C18(void *chunk, s32 id);
+
+extern void effCopyVector(s32 handle, f32 *src);
+
+extern void billInvokeCallback(s32 handle);
+
+extern void func_00157790(s32 handle, f32 *pos);
+
+extern void effUpdateNode(s32 handle);
+
+extern void func_0018FF50(s32 handle);
+
 void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
@@ -213,8 +269,11 @@ typedef struct MdlSlotTable {
 extern MdlSlotTable D_003C6588[];
 
 extern MdlSlotTable D_003C86B0[];
+
 extern s32 D_00436FAC;
+
 extern s32 D_00436FB0;
+
 extern void sdfReleaseMemorySlot(s32 *slot);
 
 void func_00233718(void) {
@@ -273,7 +332,7 @@ typedef struct MdlRecord {
 typedef struct MdlObj {
     s32 unk0;             /* 0x00 */
     s32 handle;           /* 0x04 */
-    u8 claimed;           /* 0x08 */
+    u8 inUse;             /* 0x08: set when an item claims the object */
     u8 initialized;       /* 0x09 */
     u8 pad0A[6];
     s32 unk10;            /* 0x10 */
@@ -282,20 +341,21 @@ typedef struct MdlObj {
 } MdlObj;
 
 typedef struct MdlPartEntry {
-    s32 kind;
-    s32 state;
-    s32 object;
+    u32 kind;     /* 0x00: billboard or effect */
+    s32 state;    /* 0x04 */
+    s32 object;   /* 0x08 */
     u8 pad0C[4];
 } MdlPartEntry;
 
 typedef struct MdlPartList {
     u8 pad00[4];
-    s16 count;
+    s16 count;    /* 0x04 */
     u8 pad06[6];
     MdlPartEntry *entries; /* 0x0C */
 } MdlPartList;
 
 #define MDL_PART_BILLBOARD 0
+
 #define MDL_PART_EFFECT 1
 
 typedef struct MdlItemCfg {
@@ -307,19 +367,16 @@ typedef struct MdlItemCfg {
 
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next; /* 0x00 */
-    u16 type;                     /* 0x04 */
+    u16 type;                     /* 0x04: billboard / effect kind */
     s16 subtype;                  /* 0x06 */
     s32 resource;                 /* 0x08 */
-    MdlObj *obj;                  /* 0x0C */
-    s32 sdfResource;              /* 0x10 */
-    s32 count;                    /* 0x14 */
-    MdlItemCfg cfg;               /* 0x18 */
-    u8 pad1C[4];
+    u8 pad0C[0x14];
 } MdlResourceItem;
 
-typedef struct MdlResourceOwner {
+typedef struct {
     u8 pad00[0x14];
     MdlResourceItem *first; /* 0x14 */
+    void *chunk;            /* 0x18 */
 } MdlResourceOwner;
 
 /* Read the model record's payload word without advancing its relative link. */
@@ -456,9 +513,18 @@ void mdlAddEffectPart(MdlPartList *list, s32 index) {
     list->count += 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234720);
+void func_00234720(MdlPartList *list, s32 a, void *b, s32 c) {
+    MdlHandlerNode *node = func_00328E18(0xAC);
+    MdlPartEntry *entry = &list->entries[list->count];
 
-
+    node->c = c;
+    node->a = a;
+    node->b = b;
+    entry->kind = MDL_PART_OBJECT;
+    entry->state = 0;
+    entry->object = (s32)node;
+    list->count += 1;
+}
 
 void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
@@ -479,7 +545,28 @@ void func_00234838(u32 arg0) {
     sdfDevCreateBufferedRequest(arg0, 0x10, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234858);
+void func_00234858(MdlPartList *list) {
+    s32 i;
+
+    if (list != NULL) {
+        for (i = 0; i < list->count; i++) {
+            MdlPartEntry *entry = &list->entries[i];
+
+            switch (entry->kind) {
+            case MDL_PART_BILLBOARD:
+                billDispatchByKind(entry->object);
+                break;
+            case MDL_PART_EFFECT:
+                effDestroyNode(entry->object);
+                break;
+            case MDL_PART_OBJECT:
+                mdlObjDestroy((MdlObj *)entry->object);
+                break;
+            }
+        }
+        sdfDestroyDevRequest(list);
+    }
+}
 
 MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 subtype) {
     extern void *func_00328E18(s32 size);
@@ -539,6 +626,7 @@ void mdlCondInitEntry(s32 arg0) {
 }
 
 extern s32 func_00234A48(s32 object, s32 *record, s32 option, s32 type, void (*advance)());
+
 extern s32 func_00234C20(s32 object, s32 *record, s32 option);
 
 s32 mdlDispatchResourceEntry(s32 object, s32 *record, s32 option) {
@@ -599,9 +687,47 @@ void mdlRemoveResourceSubtype(MdlResourceOwner *object, s32 subtype) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234F48);
+/* vu0 routine: out = p + normalize(p - D_00324690) * scale, p = node position transformed by the node matrix */
+void func_00234F48(void *chunk, MdlAnchorRec *rec, f32 *out) {
+    MdlNodeInfo *info = rec->info;
+    u8 *matrix = func_00330C18(chunk, info->id);
+    f32 scale = rec->scale;
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235000);
+    __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(matrix + 0xC0));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(info->pos));
+    __asm__ volatile(".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\tvmaddw.xyzw vf10, vf31, vf0w\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r"(D_0037F690));
+    __asm__ volatile(".set noreorder\n\tvsub.xyzw vf10, vf10, vf12\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\tvmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\tvwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(scale));
+    __asm__ volatile(".set noreorder\n\tvmulx.xyzw vf10, vf10, vf2x\n\tvadd.xyzw vf10, vf10, vf11\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(out));
+}
+
+void func_00235000(MdlResourceOwner *owner, MdlAnchorRec *rec) {
+    void *chunk = owner->chunk;
+    f32 position[4];
+    s32 handle;
+
+    switch (rec->type) {
+    case 0:
+        func_00234F48(chunk, rec, position);
+        handle = rec->handle;
+        effCopyVector(handle, position);
+        billInvokeCallback(handle);
+        break;
+    case 1:
+        func_00234F48(chunk, rec, position);
+        handle = rec->handle;
+        func_00157790(handle, position);
+        effUpdateNode(handle);
+        break;
+    case 2:
+        func_0018FF50(rec->handle);
+        break;
+    case 3:
+        mdlCondInitEntry((s32)rec);
+        break;
+    }
+}
 
 void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
@@ -641,6 +767,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_002351D0);
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235288);
 
 extern MdlLoaded *func_00232198(s16 a, s16 b);
+
 extern void mdlAddEntryFlagged(MdlLoaded *loaded, s32 a, s32 b);
 
 void func_002353F0(void) {
@@ -930,15 +1057,23 @@ typedef struct MdlDrawSurface {
 } MdlDrawSurface;
 
 extern MdlDrawSurface D_00380048;
+
 extern u8 D_003C8A00[];
+
 extern u8 D_003C8A60[];
+
 extern s32 sdfCreateResetPacketList(void);
+
 extern s32 func_00348188(void *, void *, s32, s32);
+
 extern s32 sdfCountMapPositionRecords(s32);
+
 extern s32 sdfChunkFindByTag(s32, s32);
-extern void func_00332BB0(s32, s32);
+
+extern void sdfSetLookAtBasisFromRecord(s32, s32);
 
 extern u8 D_003C8930[];
+
 extern u8 D_003C8990[];
 
 void func_00238140(void) {
@@ -987,7 +1122,7 @@ void func_00238650(u8 *obj) {
 
             i++;
             record += 0x40;
-            func_00332BB0(*(s32 *)(obj + 0x18), current);
+            sdfSetLookAtBasisFromRecord(*(s32 *)(obj + 0x18), current);
             sdfAppendPacket(list, func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (i != count);
         D_00380048.submit(&D_00380048, list);
@@ -1012,7 +1147,7 @@ void mdlFreeViewResources(void) {
 
         if (handle != 0) {
             *slot = 0;
-            func_002322E8(handle);
+            mdlDestroyContext(handle);
         }
         slot++;
     }
@@ -1024,7 +1159,9 @@ typedef struct MdlTaskDef {
 } MdlTaskDef;
 
 extern MdlTaskDef D_003C8890[];
+
 extern char D_004214E8[];
+
 extern char D_004214F8[];
 
 void func_00238F30(void) {
@@ -1121,7 +1258,9 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421518);
 INCLUDE_ASM(const s32, "game/code_00233660", func_0023A1A0);
 
 extern s32 func_00112E30(s32 world, f32 *pos, f32 *rot);
+
 extern void dds3EnsureSlotData(s32 obj);
+
 extern void func_00110BE0(s32 world, s32 obj);
 
 s32 func_0023A5E8(void) {
@@ -1161,7 +1300,9 @@ s32 func_0023A6A0(s32 arg0, s32 arg1) {
 }
 
 extern s32 func_00110C70(s32 world, s32 a, s32 b);
+
 extern void dds3SetSlotByKind(s32 obj, s32 slot);
+
 extern void dds3InvokeSlot5Handler(s32 obj);
 
 s32 func_0023A7A0(s32 arg0, s32 arg1) {
@@ -1198,10 +1339,15 @@ typedef struct MdlAimObj {
 } MdlAimObj;
 
 extern s32 func_00110C70(s32 world, s32 id, s32 kind);
+
 extern void effObjSetInnerFirstVec(MdlAimObj *obj, u8 *vec);
+
 extern void effObjSetInnerSecondVec(MdlAimObj *obj, f32 *vec);
+
 extern void effObjFetchInnerFirstVec(MdlAimObj *obj);
+
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+
 extern void effMiscQuatMultiplyVU();
 
 void func_0023A8C0(s32 firstId, s32 secondId) {

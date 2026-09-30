@@ -83,7 +83,7 @@ void sdfWaitAndSelectBuffer(void) {
     func_002E1218();
 }
 
-s32 func_002D16F0(u32 format) {
+s32 sdfFormatBitsPerPixelA(u32 format) {
     switch (format) {
     case 0x0:
     case 0x1:
@@ -107,7 +107,7 @@ s32 func_002D16F0(u32 format) {
     }
 }
 
-s32 func_002D1740(u32 format) {
+s32 sdfFormatBitsPerPixelB(u32 format) {
     switch (format) {
     case 0x0:
     case 0x30:
@@ -177,7 +177,7 @@ void sdfTexInitializeLists(void) {
     sdfInitializeSynchronizedRequest(&D_003BD9E8, func_002D1B90);
 }
 
-SdfTexHead *func_002D1C70(s32 width, s32 height, s32 format) {
+SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     s32 alignedWidth = (width + 0x3F) & -0x40;
     s32 alignedHeight = (height + 0x1F) & -0x20;
     SdfTexHead *node;
@@ -210,7 +210,7 @@ SdfTexHead *func_002D1D18(void) {
     return D_003BD9E4;
 }
 
-s32 func_002D1D20(u32 format, s32 width, s32 height) {
+s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
     s32 bits;
 
     switch (format) {
@@ -319,7 +319,7 @@ u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
     return texture->primaryResource->word;
 }
 
-s32 func_002D23C0(u32 format) {
+s32 sdfFormatBitsPerPixelC(u32 format) {
     switch (format) {
     case 0:
         return 0x20;

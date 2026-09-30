@@ -35,7 +35,7 @@ typedef struct EvtUnit {
     u8 pad40[0x10];   /* 0x40 */
     u32 color50;       /* 0x50 */
     u8 pad54[0x18];   /* 0x54 */
-    u32 value;         /* 0x6c: changed by evtSetUnitValueAndFlag */
+    u32 value;         /* 0x6c: changed by evtUnitSetValueAndFlag */
     u8 pad70[0x14];   /* 0x70 */
     s32 currentTransitionValue; /* 0x84 */
     s32 previousTransitionValue; /* 0x88 */
@@ -172,7 +172,7 @@ void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
     }
 }
 
-void evtSetUnitValueAndFlag(EvtUnit *unit, u32 value)
+void evtUnitSetValueAndFlag(EvtUnit *unit, u32 value)
 {
     unit->value = value;
     unit->flags = unit->flags | 0x20000;

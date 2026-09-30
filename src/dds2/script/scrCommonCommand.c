@@ -21,7 +21,7 @@ s32 func_00108138(s32 arg0, void *arg1);
 
 s32 func_001081F8(s32 arg0, void *arg1);
 
-s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
+s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
 s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 
 s32 kwlnDrawSetDc8Second(s32 arg0);
@@ -124,7 +124,7 @@ s32 func_0010DBD0(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        func_00105FE8(scrReadIntParameter(0));
+        kwlnFadeBackgroundStartOut(scrReadIntParameter(0));
         return 0;
     }
     return 1;
@@ -134,7 +134,7 @@ s32 func_0010DC10(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        func_00106080(scrReadIntParameter(0));
+        kwlnFadeBackgroundStartIn(scrReadIntParameter(0));
         return 0;
     }
     return 1;
@@ -376,7 +376,7 @@ s32 func_0010E348(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
-    evtUnk89F8SetState(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
+    evtToggleSavedDrawVectors(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
     return 1;
 }
 

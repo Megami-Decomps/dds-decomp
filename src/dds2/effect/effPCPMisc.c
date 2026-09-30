@@ -506,9 +506,9 @@ typedef struct {
     u32 delay[8];
 } EffPCPStaggered;
 
-extern void func_0017F4C8(EffPCPStaggered *work, s32 index);
+extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 
-extern void func_0017FED8(void *work, s32 index);
+extern void effPcpDelayedPairsRerollSlot(void *work, s32 index);
 
 extern void *func_003292A8(s32 size);
 
@@ -608,7 +608,7 @@ typedef struct EffPCPTwinWork {
     u32 counter[8];     /* 0x9C */
 } EffPCPTwinWork; /* 0xBC */
 
-extern void func_0017EF70(EffPCPTwinWork *work, s32 index);
+extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 extern void *effParamWorkGetData(u32 handle);
 
@@ -947,7 +947,7 @@ extern void *func_0018B130();
    are declared unchecked. */
 extern void *func_0018BB38();
 
-void func_0017EDE8(u32 arg0) {
+void effPcpDispatchKindAndRelease(u32 arg0) {
     billDispatchByKind(((EffPCPWork *)arg0)->unk1C);
     func_00328E48(arg0);
 }
@@ -970,7 +970,7 @@ typedef struct EffPCPRingWork {
 
 /* Places a ring of 10 shrinking, brightening copies of the handle along the
  * fixed view direction. */
-void func_0017EE18(EffPCPRingWork *work) {
+void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
@@ -1029,7 +1029,7 @@ void func_0017EF68(EffPCPWorkF18 *work, f32 val) {
 
 /* Re-rolls slot `index`: random-angle rotation matrix pushed to both handles
  * of the pair, then a new random countdown. */
-void func_0017EF70(EffPCPTwinWork *work, s32 index) {
+void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
     u128 mtx[4];
 
     func_00336538((func_00341240(D_003AA868) - 0.5f) * 2.0f * 6.283185f);
@@ -1063,7 +1063,7 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
             work->pair[i][0] = effParamWorkDuplicate(work->pair[i & 1][0]);
             work->pair[i][1] = effParamWorkDuplicate(work->pair[i & 1][1]);
         }
-        func_0017EF70(work, i);
+        effTwinEffectRerollSlot(work, i);
     }
     work->shared[0] = effParamCreateFromTable(src, 3);
     work->state[0] = 0;
@@ -1080,7 +1080,7 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
     return work;
 }
 
-void func_0017F1E8(s32 *obj) {
+void effTwinEffectRelease(s32 *obj) {
     s32 *a = obj + 0x17;
     s32 *b = obj + 7;
     s32 i;
@@ -1104,7 +1104,7 @@ EffPCPTwinWork *effTwinEffectClone(EffPCPTwinWork *src) {
         work->pair[i][1] = effParamWorkDuplicate(src->pair[i & 1][1]);
         work->shared[i] = effParamWorkDuplicate(src->shared[0]);
         work->state[i] = 0;
-        func_0017EF70(work, i);
+        effTwinEffectRerollSlot(work, i);
     }
     work->unk00 = 0;
     work->color = 0x80808080;
@@ -1118,7 +1118,7 @@ EffPCPTwinWork *effTwinEffectClone(EffPCPTwinWork *src) {
 /* Per-frame update of the 8 twin slots: a slot whose countdown reached zero
  * fires its handle pair; after frame 0x18 its position is pushed to the shared
  * handle. */
-void func_0017F358(EffPCPTwinWork *work) {
+void effTwinEffectUpdate(EffPCPTwinWork *work) {
     void *obj[2];
     u128 pos;
     u128 *posp;
@@ -1164,7 +1164,7 @@ void func_0017F4C0(EffPCPWorkF18 *work, u32 value) {
 
 /* Re-rolls slot `index` of the staggered effect: random-angle rotation matrix
  * for both handles, new random offset and delay. */
-void func_0017F4C8(EffPCPStaggered *work, s32 index) {
+void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
     func_00336538((func_00341240(D_003AA868) - 0.5f) * 2.0f * 6.283185f);
@@ -1198,7 +1198,7 @@ EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
             handle[0] = effParamWorkDuplicate(*(u32 *)work->pad3C);
         }
         handle += 2;
-        func_0017F4C8(work, i++);
+        effPcpStaggerRerollSlot(work, i++);
     } while (i < 8);
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
@@ -1208,7 +1208,7 @@ EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
     return work;
 }
 
-void func_0017F6C0(s32 *obj) {
+void effPcpStaggerRelease(s32 *obj) {
     s32 *p = obj + 15;
     s32 i;
 
@@ -1229,7 +1229,7 @@ EffPCPWorkF14 *effCreatePairedResourceWork(EffPCPWork *source) {
         handle[-1] = effParamWorkDuplicate(source->unk38);
         handle[0] = effParamWorkDuplicate(*(u32 *)source->pad3C);
         handle += 2;
-        func_0017F4C8(work, i);
+        effPcpStaggerRerollSlot(work, i);
         i++;
     } while (i < 8);
     work->unk10 = 0x80808080;
@@ -1284,7 +1284,7 @@ void func_0017F940(EffPCPWorkF14 *work, u32 value) {
 }
 
 /* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
-void func_0017F948(EffPCPCrossWork *work, u32 i, u32 j) {
+void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     u128 mtx[4];
     f32 angle;
 
@@ -1329,7 +1329,7 @@ EffPCPCrossWork *effCrossEffectCreateFromTable(void *src) {
             } else {
                 work->handle[i][j] = effParamWorkDuplicate(work->handle[i][0]);
             }
-            func_0017F948(work, i, j);
+            effCrossArmSpawn(work, i, j);
         }
     }
     work->unk00 = 0;
@@ -1347,7 +1347,7 @@ typedef struct EffPCPGroupBlock {
 } EffPCPGroupBlock;
 
 /* Destroys the cross effect: releases the main handle and all 12 group handles. */
-void func_0017FBE8(EffPCPWork *work) {
+void effCrossEffectRelease(EffPCPWork *work) {
     EffPCPGroupBlock *block = (EffPCPGroupBlock *)((u8 *)work + 0xC);
     s32 i;
     s32 j;
@@ -1371,7 +1371,7 @@ EffPCPCrossWork *effCrossEffectClone(EffPCPCrossWork *src) {
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             work->handle[i][j] = effParamWorkDuplicate(src->handle[i][0]);
-            func_0017F948(work, i, j);
+            effCrossArmSpawn(work, i, j);
         }
     }
     work->unk00 = 0;
@@ -1384,7 +1384,7 @@ EffPCPCrossWork *effCrossEffectClone(EffPCPCrossWork *src) {
 
 /* Per-frame update of the cross effect: scales the anchor model and fires each
  * of the 12 slots whose countdown has expired. */
-void func_0017FD88(EffPCPCrossWork *work) {
+void effCrossEffectUpdate(EffPCPCrossWork *work) {
     EffPCPWork *anchor;
     void *obj;
     s32 i;
@@ -1431,7 +1431,7 @@ typedef struct EffPCPPairBlock {
 
 /* Re-arms slot `index`: registers both handles of the pair and rolls a new
  * random countdown. */
-void func_0017FED8(void *work, s32 index) {
+void effPcpDelayedPairsRerollSlot(void *work, s32 index) {
     EffPCPPairBlock *block = (EffPCPPairBlock *)((u8 *)work + 8);
 
     mdlAddEntryPlain(effParamWorkGetData(block->handle[index * 2]), 0, 0);
@@ -1451,7 +1451,7 @@ EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
         handle[-1] = effParamCreateFromTable(source, i);
         handle[0] = effParamWorkDuplicate(work->unk1C);
         handle += 2;
-        func_0017FED8(work, i);
+        effPcpDelayedPairsRerollSlot(work, i);
     }
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
@@ -1461,7 +1461,7 @@ EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
     return work;
 }
 
-void func_00180040(s32 *obj) {
+void effPcpDelayedPairsRelease(s32 *obj) {
     s32 *p = obj + 7;
     s32 i;
 
@@ -1486,7 +1486,7 @@ EffPCPWorkF14 *effCopyIndexedResourceWork(EffPCPWork *source) {
         workHandle[0] = effParamWorkDuplicate(sourceHandle[0]);
         sourceHandle += 2;
         workHandle += 2;
-        func_0017FED8(work, i);
+        effPcpDelayedPairsRerollSlot(work, i);
     }
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
@@ -1539,7 +1539,7 @@ void func_00180258(EffPCPWorkF14 *work, u32 value) {
     work->unk10 = value;
 }
 
-void func_00180260(EffPCPChargeWork *work) {
+void effPcpChargeInitTail(EffPCPChargeWork *work) {
     work->unk133C = 0;
     work->unk1340 = 0;
     work->color1344 = 0x80808080;
@@ -1551,7 +1551,7 @@ EffPCPChargeWork *effCreateChargeWork(void *source) {
     work->unk1350 = (u32)resource;
     work->unk134C = effParamCreateFromTable(source, 0);
     work->unk1348 = effParamCreateFromTable(source, 1);
-    func_00180260(work);
+    effPcpChargeInitTail(work);
     work->unkAF0 = 0;
     work->unkAF4 = 0;
     work->unkAF8 = 0;
@@ -1560,7 +1560,7 @@ EffPCPChargeWork *effCreateChargeWork(void *source) {
     return work;
 }
 
-void func_00180318(EffPCPChargeWork *work) {
+void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
     func_0016A620(work->unk134C);
     func_0016A620(work->unk1348);
     func_003297C8(work->unk1350);
@@ -1573,7 +1573,7 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     work->unk1350 = (u32)resource;
     work->unk134C = effParamWorkDuplicate(firstHandle);
     work->unk1348 = effParamWorkDuplicate(source->unk1348);
-    func_00180260(work);
+    effPcpChargeInitTail(work);
     work->unkAF0 = 0;
     work->unkAF4 = 0;
     work->unkAF8 = 0;
@@ -1596,7 +1596,7 @@ void func_00180768(EffPCPChargeWork *work, u32 value) {
     work->unk1334 = value;
 }
 
-EffPCPWork1C *func_00180770(EffPCPWork *src) {
+EffPCPWork1C *effPcpSpawnOnceCreate(EffPCPWork *src) {
     EffPCPWork1C *dst;
     u32 handle;
 
@@ -1611,13 +1611,13 @@ EffPCPWork1C *func_00180770(EffPCPWork *src) {
     return dst;
 }
 
-void func_001807E0(u32 arg0) {
+void effPcpSpawnOnceRelease(u32 arg0) {
     func_0016A620(((EffPCPWork1C *)arg0)->unk14);
     func_0016A620(((EffPCPWork1C *)arg0)->unk18);
     func_00328E48(arg0);
 }
 
-EffPCPWork1C *func_00180818(EffPCPWork *src) {
+EffPCPWork1C *effPcpSpawnOnceClone(EffPCPWork *src) {
     EffPCPWork1C *dst;
     u32 handle;
 
@@ -1695,7 +1695,7 @@ extern void func_00336768(f32 *axis, f32 angle);
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
  * (60 degrees). Direction is normalised on the VU, scaled per axis and offset
  * by the origin vector; short-reach particles get a shorter life. */
-void func_00180918(EffSpawnGroup *group) {
+void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
     s32 i;
     u32 *out;
     f32 angle = 0.0f;
@@ -1764,11 +1764,11 @@ void func_00180918(EffSpawnGroup *group) {
     } while (i < 12);
 }
 
-void *func_00180BD8(void) {
+void *effPcpCreateTwelveRadialParticles(void) {
     void *work;
 
     work = func_00328D68(0x4c);
-    func_00180918(work);
+    effPcpInitTwelveRadialParticles(work);
     return work;
 }
 
@@ -1777,7 +1777,7 @@ typedef struct MenuPanelChildren1C {
     void *children[30];
 } MenuPanelChildren1C;
 
-void func_00180C10(MenuPanelChildren1C *group) {
+void effPcpReleaseTwelveRadialParticles(MenuPanelChildren1C *group) {
     s32 i;
     for (i = 0; i < 12; i++) {
         effPCPThunderFree3(group->children[i]);
@@ -1789,7 +1789,7 @@ void *func_00180C68(void) {
     void *work;
 
     work = func_00328D68(0x4c);
-    func_00180918(work);
+    effPcpInitTwelveRadialParticles(work);
     return work;
 }
 
@@ -2611,14 +2611,14 @@ void effSetSharedScale(u32 unused, f32 value) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
 
-void func_00182E70(u32 arg0) {
+void effPcpTrailRelease(u32 arg0) {
     func_0018E8F0(((EffPCPCompactWork *)arg0)->resource);
     func_00328E48(arg0);
 }
 
 /* Per-frame update: places the trail object from the work position and
  * alternates its colour between two entries until the count runs out. */
-void func_00182EA0(EffPCPTrailWork *work) {
+void effPcpTrailUpdate(EffPCPTrailWork *work) {
     EffPCPTrailObj *obj;
     f32 pos[4];
 
@@ -2812,7 +2812,7 @@ extern void func_0018F840(u32 *color);
 
 /* Timeline update: blend factor ramps up over fadeIn frames, holds at 1.0, then
  * ramps down over the last fadeOut frames. */
-void func_00183720(EffPCPFadeTimer *work) {
+void effPcpFadeTimerUpdate(EffPCPFadeTimer *work) {
     s32 frame = work->frame;
     s32 duration = work->duration;
     s32 fadeIn;
@@ -2891,8 +2891,8 @@ typedef struct EffPCPFadeTimerLong {
 
 extern void func_0018E0D0(u32 *color);
 
-/* Same timeline as func_00183720 on the longer work layout. */
-void func_00183938(EffPCPFadeTimerLong *work) {
+/* Same timeline as effPcpFadeTimerUpdate on the longer work layout. */
+void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     s32 frame = work->frame;
     s32 duration = work->duration;
     s32 fadeIn;
@@ -3073,7 +3073,7 @@ void *func_00184200(void) {
     return work;
 }
 
-void func_00184238(EffPCPFadeWork *work) {
+void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
     EffPCPFadeTarget *target;
     f32 phase;
     f32 value;
@@ -3483,7 +3483,7 @@ void func_001865D0(args)
 
 /* Clones the rotate work: block copy of the head plus one fresh block-clone work
  * per id, each initialised from the source's sub-work. */
-EffPCPRotateWork *func_00186708(EffPCPRotateWork *src) {
+EffPCPRotateWork *effPcpRotateClone(EffPCPRotateWork *src) {
     EffPCPRotateWork *work;
     EffPCPBlockCloneWork *sub;
     u32 i;
@@ -3505,7 +3505,7 @@ EffPCPRotateWork *func_00186708(EffPCPRotateWork *src) {
     return work;
 }
 
-void func_00186990(EffPCPRotateWork *work) {
+void effPcpRotateRelease(EffPCPRotateWork *work) {
     u32 i;
     s32 *id;
 
@@ -3535,7 +3535,7 @@ void effPcpRotateFireIds(s32 *arg0) {
     arg0[0x42] = currentFrame + 1;
 }
 
-void func_00186A68(EffPCPRotateWork *work, void *src) {
+void effPcpRotateSetChildVectors(EffPCPRotateWork *work, void *src) {
     u32 i;
     s32 *id;
 
@@ -3545,7 +3545,7 @@ void func_00186A68(EffPCPRotateWork *work, void *src) {
     }
 }
 
-void func_00186AC8(EffPCPRotateWork *work, u32 val) {
+void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
     u32 i;
     s32 *id;
 
@@ -3555,7 +3555,7 @@ void func_00186AC8(EffPCPRotateWork *work, u32 val) {
     }
 }
 
-void func_00186B28(EffPCPRotateWork *work, void *src) {
+void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
     u32 i;
     s32 *id;
 
@@ -3565,7 +3565,7 @@ void func_00186B28(EffPCPRotateWork *work, void *src) {
     }
 }
 
-EffPCPSpinWork *func_00186B88(void *src) {
+EffPCPSpinWork *effSpinSingleCreateFromTable(void *src) {
     EffPCPSpinWork *work = func_00328D68(0x64);
 
     work->frame = 0;
@@ -3581,7 +3581,7 @@ EffPCPSpinWork *func_00186B88(void *src) {
 }
 
 /* Single-handle variant: allocation stops before handle1 (0x64 bytes). */
-EffPCPSpinWork *func_00186C60(EffPCPSpinWork *src) {
+EffPCPSpinWork *effSpinSingleClone(EffPCPSpinWork *src) {
     EffPCPSpinWork *work = func_00328D68(0x64);
 
     work->frame = 0;
@@ -3596,7 +3596,7 @@ EffPCPSpinWork *func_00186C60(EffPCPSpinWork *src) {
     return work;
 }
 
-void func_00186D40(u32 arg0) {
+void effSpinSingleRelease(u32 arg0) {
     func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle0);
     func_00328E48(arg0);
 }
@@ -3675,7 +3675,7 @@ EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
     return work;
 }
 
-void func_00186FE0(u32 arg0) {
+void effSpinPairRelease(u32 arg0) {
     func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle1);
     func_0016A620((u32)((EffPCPSpinWork *)arg0)->handle0);
     func_00328E48(arg0);
@@ -3684,7 +3684,7 @@ void func_00186FE0(u32 arg0) {
 /* Per-frame update of a two-handle spin effect: pushes the work state to both
  * handles, rebuilds the rotation matrix from the angle and hands it over. The
  * VU0 blocks are bare asm (no "memory" clobber), as the original macros were. */
-void func_00187018(EffPCPSpinWork *work) {
+void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
     u32 handle[2];
     u128 mtx[4];
 
@@ -4327,7 +4327,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188E60);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001890E8);
 
-u8 *func_00189190(u8 *work) {
+u8 *effBlockSetCloneWithDuplicates(u8 *work) {
     u8 *copy = func_00188E60(work, 0);
     u32 group;
     u32 offset;
@@ -4363,7 +4363,7 @@ u8 *func_00189190(u8 *work) {
     return copy;
 }
 
-void func_001892A8(u8 *work) {
+void effBlockSetRelease(u8 *work) {
     u32 i = 0;
     u32 count = ((EffPCPBatchWork *)work)->count;
     u32 *entry = ((EffPCPBatchWork *)work)->entries;
@@ -4458,14 +4458,14 @@ void effDestroyIndexedResources(s32 *obj) {
     func_00328E48(obj);
 }
 
-void func_00189B48(EffPCPNode *node) {
+void effPcpCaptureNodeVectors(EffPCPNode *node) {
     EffPCPNode *child;
 
     __asm__ volatile ("sqc2 vf10, 0(%0)" :: "r" (node->vector70) : "memory");
     child = node->child;
     if (child != NULL) {
         do {
-            func_00189B48(child);
+            effPcpCaptureNodeVectors(child);
             child = child->next;
         } while (child != node->child);
     }
@@ -4698,7 +4698,7 @@ typedef struct EffPCPSpawnRange {
 } EffPCPSpawnRange;
 
 /* Randomises spawn slot `index` inside the ranges held by the work. */
-void func_0018B628(EffPCPSpawnRange *work, s32 index) {
+void effPcpRandomizeSpawnSlot(EffPCPSpawnRange *work, s32 index) {
     EffPCPSpawnSlot *slot;
     f32 spread;
     f32 scale;
@@ -4753,7 +4753,7 @@ typedef struct {
     u32 resource;
 } EffPCPEventCloneWork;
 
-EffPCPEventCloneWork *func_0018BC90(EffPCPEventCloneWork *src) {
+EffPCPEventCloneWork *effEventWorkClone(EffPCPEventCloneWork *src) {
     EffPCPEventCloneWork *work;
 
     work = func_0018BB38(src, 0, 0);

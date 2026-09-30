@@ -26,7 +26,7 @@ void func_0033CE08(DevConsState *arg0, s32 arg1, s32 arg2);
 void func_00360E78(void *arg0, const char *arg1, void *arg2);
 
 /* Scroll the two-byte cell grid at its last row, or advance the cursor. */
-void sdfAdvanceConsoleRow(DevConsState *console) {
+void sdfDevConsAdvanceRow(DevConsState *console) {
     if (console->cursorRow == console->rows - 1) {
         s32 rowBytes = console->columns * 2;
         s32 copyBytes = rowBytes * console->cursorRow;
@@ -75,7 +75,7 @@ void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
 }
 
 /* Select the attribute passed to each subsequently printed character. */
-void sdfDevConsSetCharacterAttribute(DevConsState *console, u8 attribute) {
+void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute) {
     console->textAttribute = attribute;
 }
 

@@ -58,7 +58,7 @@ INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_002280B0);
 
-u32 evtOpcodeCreateTaskForCurrentWork(void) {
+u32 evtOpcodeCreateWorldChildTask(void) {
     EvtCommandWork *work;
     s32 task;
 
@@ -76,7 +76,7 @@ u32 evtOpcodeCreateTaskForCurrentWork(void) {
     return 1;
 }
 
-u32 evtOpcodeEnableCurrentContextFlag(void) {
+u32 evtOpcodeSetTaskContextFlag(void) {
     u64 task;
     s64 registered;
 
@@ -88,7 +88,7 @@ u32 evtOpcodeEnableCurrentContextFlag(void) {
     return 1;
 }
 
-u32 evtOpcodeDisableCurrentContextFlag(void) {
+u32 evtOpcodeClearTaskContextFlag(void) {
     u64 task;
     s64 registered;
 
@@ -100,7 +100,7 @@ u32 evtOpcodeDisableCurrentContextFlag(void) {
     return 1;
 }
 
-u32 evtOpcodeDestroyRegisteredTask(void) {
+u32 evtOpcodeDestroyTask(void) {
     u64 task;
     s64 registered;
 
@@ -112,7 +112,7 @@ u32 evtOpcodeDestroyRegisteredTask(void) {
     return 1;
 }
 
-u32 evtOpcodeSetFieldFadeTarget(void) {
+u32 evtOpcodeSetFadeTarget(void) {
     u64 area;
     u64 target;
     u64 duration;

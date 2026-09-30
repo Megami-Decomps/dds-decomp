@@ -247,14 +247,14 @@ typedef struct MenuGfxCallback {
     void (*invoke)(void *, void *);
 } MenuGfxCallback;
 extern MenuGfxCallback D_00325748;
-extern u32 sdfCreateInitializedPacketList(void);
+extern u32 sdfCreateResetPacketList(void);
 extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, void *, void *);
 extern void func_00236180();
 extern void func_00237130();
 extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
 
 s32 mnuDrawInfoWindowA(s32 arg0, s32 arg1, u8 *work) {
-    u32 packets = sdfCreateInitializedPacketList();
+    u32 packets = sdfCreateResetPacketList();
     func_00235598(packets, arg0, arg1, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 1) {
@@ -305,7 +305,7 @@ void func_00236510(s32 arg0, s32 arg1, s32 arg2, s32 index, EvtDrawWork *work) {
 }
 
 s32 func_002365A0(s32 arg0, s32 arg1, EvtDrawWork *work) {
-    u32 packets = sdfCreateInitializedPacketList();
+    u32 packets = sdfCreateResetPacketList();
     s32 width = 10;
 
     if (work->label != 0) {
@@ -371,7 +371,7 @@ void func_00237048(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 
 s32 func_00237348(s32 arg0, s32 arg1, u8 *work) {
-    u32 packets = sdfCreateInitializedPacketList();
+    u32 packets = sdfCreateResetPacketList();
     s32 count;
     s32 shown;
 
@@ -420,7 +420,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00238BE8);
 extern void func_00238BE8();
 
 s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
-    u32 packets = sdfCreateInitializedPacketList();
+    u32 packets = sdfCreateResetPacketList();
     s32 rows;
     switch (*((EvtRuntime *)work)->tableRowIndex) {
     case 20:
@@ -440,7 +440,7 @@ s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
 }
 
-s32 func_00238E58(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
+s32 mnuDrawMessageMenuLabel(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
     s32 count = itfMesGetEntryCount(*(s32 *)(*(s32 *)(arg3 + 8) + 0x104));
     sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
@@ -546,7 +546,7 @@ void func_0023B848(s32 list, s32 x, s32 y, s32 kind, EvtDrawWork *work) {
 extern s8 D_00324510[];
 
 s32 mnuDrawTimedPrompt(s32 arg0, s32 arg1, u8 *work) {
-    u32 packets = sdfCreateInitializedPacketList();
+    u32 packets = sdfCreateResetPacketList();
     s32 count;
     func_00235598(packets, arg0, arg1, 0x19, 2, 0, 1, work, 0, func_0023B848);
     D_00325748.invoke(&D_00325748, (void *)packets);

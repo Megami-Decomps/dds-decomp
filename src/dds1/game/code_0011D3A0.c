@@ -47,7 +47,7 @@ extern s32 fldTestDrawUpdate(void);
 extern void fldClearCameraMoveMode(void);
 extern void fldSetCameraMoveMode(s32);
 extern void func_0013E5A8(u32 arg0);
-extern u32 func_001462D0(void);
+extern u32 fldGetSceneReadyFlag(void);
 extern s32 func_0010BED8(const char *arg0);
 extern void func_002D8C88(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -61,7 +61,7 @@ extern u32 D_003BABE8;
 extern u32 D_003BAB38;
 extern void effObjFetchInnerFirstVec(u32);
 extern void effObjFetchInnerSecondVecNorm(u32);
-extern void fldSetAreaResourceRequest(s32, s32);
+extern void fldSetPendingAreaAndFloor(s32, s32);
 extern s32 fldIsAreaResourceReady(void);
 extern void fldPollAreaResourceLoad(void);
 extern s32 fldGetResourceReadyFlag(void);
@@ -111,7 +111,7 @@ u8 func_00125DF8(u32 arg0);
 u32 *func_00123DD0(void);
 
 extern u32 D_003BAC08[2];
-extern void func_0014CFC0(void);
+extern void fldResetEventSceneState(void);
 extern u32 func_0014D100(void);
 extern void fldResetTaskSlots(void);
 extern void func_00125D90(u32);
@@ -122,7 +122,7 @@ void func_0011D3A0(u32 *packet, u32 first, u32 second) {
     packet[5] = second;
 }
 
-u64 sdfCreateInitializedPacketList(void) {
+u64 sdfCreateResetPacketList(void) {
     u64 packet;
 
     packet = sdfAllocPacketAligned(0x20);
@@ -202,7 +202,7 @@ void func_0011DE00(u32 *arg0, s32 arg1) {
 }
 
 /* Formats a time in seconds as "d.dd" (digits saturate at 9.99). */
-void func_0011DE20(char *digits, f32 value) {
+void fldFormatSecondsText(char *digits, f32 value) {
     s32 whole;
     s32 tenths;
     s32 hundredths;
@@ -259,7 +259,7 @@ s32 fldTestDrawUpdate(void) {
     func_00134348();
     func_00132010();
     if (D_0032E570[9] != 0) {
-        if (func_001462D0() == 0) {
+        if (fldGetSceneReadyFlag() == 0) {
             func_00129720(0x53);
         } else {
             func_00129720(0x5E);
@@ -320,7 +320,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011EA10);
 
 extern u32 func_00110490(u64);
 extern s32 dds3TestObjectFlags(u64, s32);
-extern void dds3RemoveWorldIndex(u64);
+extern void dds3DestroyWorldIndexNode(u64);
 extern void func_00129720(s32);
 extern void func_0012B798(void);
 extern void func_0012B818(void);
@@ -342,7 +342,7 @@ void func_0011EBC8(void) {
                 }
             } while (func_001104B0(list) != 0);
         }
-        dds3RemoveWorldIndex(list);
+        dds3DestroyWorldIndexNode(list);
     }
     if (D_0032E3C0[0] == 1) {
         found = 0;
@@ -832,7 +832,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
         }
         status = func_001104B0(list);
     } while (status != 0);
-    dds3RemoveWorldIndex(list);
+    dds3DestroyWorldIndexNode(list);
 }
 
 extern u32 D_0032E570[];
@@ -866,13 +866,13 @@ void func_00122CB8(void) {
 }
 
 
-extern s32 func_0028F628(void);
+extern s32 fileGetSelectionPendingFlag(void);
 extern void func_00120C08(s32);
 extern char D_003BAB68[];
 void fldStartSequenceRecord(void) {
     u8 buffer[0xA0];
 
-    if (func_0028F628() == 1) {
+    if (fileGetSelectionPendingFlag() == 1) {
         return;
     }
     if (*(s16 *)(D_003BAA00 + 0xE) != 0) {
@@ -884,7 +884,7 @@ void fldStartSequenceRecord(void) {
     D_0032E570[0x44 / 4] = 1;
     mdlFlagSet(0xC0F);
     fldSetDeferredFieldCommand(0, 0);
-    fldInitializeSequenceRecord(buffer, 1, 1, D_003BAB68);
+    fldInitializeSequenceAndResetFlags(buffer, 1, 1, D_003BAB68);
     *(u32 *)(buffer + 0x90) = 1;
     /* Record options at +0x90; command submission copies the padded 0xA0-byte packet. */
     func_001028E8(5, buffer, 0xA0, 0);
@@ -959,7 +959,7 @@ typedef struct FieldSequenceRecord {
     u32 options;
 } FieldSequenceRecord;
 
-void fldInitializeSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
+void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
     if (kwlnTaskGetTaskByName(D_0039FBC0) != NULL) {
         if (D_0032E3B0[4] == stage) {
             D_0032E3B0[8] = 1;
@@ -1034,7 +1034,7 @@ void func_001230D0(FieldSequenceRecord *record, s32 stage, s32 kind, const char 
     record->options = 0;
 }
 
-void fldInitializeSequenceRecordWithNote(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, const char *subname) {
     if (kwlnTaskGetTaskByName(D_0039FBC0) != NULL) {
         if (D_0032E3B0[4] == stage) {
@@ -1059,7 +1059,7 @@ void fldInitializeSequenceRecordWithNote(FieldSequenceRecord *record, s32 stage,
     record->options = 0;
 }
 
-void fldInitializeLinkedSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, s32 link, const char *subname) {
     record->unk_30 = 0;
     record->unk_3c = 0;
@@ -1167,7 +1167,7 @@ void fldReleaseResources(void) {
     }
     if (D_0032E3D0[0] == 0 && D_003BABE8 == 0) {
         fldUnloadPlayerModel();
-        fldSetAreaResourceRequest(0, 0);
+        fldSetPendingAreaAndFloor(0, 0);
     }
 }
 
@@ -1468,7 +1468,7 @@ s32 fldAdvanceToNextScene(void) {
     u32 scene;
     u32 area;
 
-    func_0014CFC0();
+    fldResetEventSceneState();
     D_003BAC08[0] = 0;
     D_003BAC08[1] = func_0014D100();
     scene = D_0032E3B0[5];
@@ -1511,7 +1511,7 @@ u8 func_00125140(void) {
     if (D_003BABF0 > 0) {
         return 2;
     }
-    return func_001462D0() != 0;
+    return fldGetSceneReadyFlag() != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125170);
@@ -1605,7 +1605,7 @@ extern char D_0039FD30[], D_0039FD40[];
 extern void kwlnFadeResetBackground(void);
 extern void func_00141158(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
 extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), func_0010BDB8(void);
-extern void func_001462A8(void);
+extern void fldReleaseMenuSlotsAfterWait(void);
 
 void func_00125F18(void) {
     if (D_003BABF4 == 0) return;
@@ -1626,7 +1626,7 @@ void func_00125F18(void) {
     }
     mnuDestroyCampTasks();
     func_0010BDB8();
-    func_001462A8();
+    fldReleaseMenuSlotsAfterWait();
 }
 
 u8 func_00125FD0(void) {
@@ -1644,7 +1644,7 @@ void func_00126038(void) {
 }
 
 void func_00126050(void) {
-    func_00141D18();
+    fldStopCurrentBgm();
 }
 
 void func_00126068(void) {

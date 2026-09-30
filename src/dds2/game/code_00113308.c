@@ -23,6 +23,12 @@ typedef struct EffectObject {
     EffectObjectData *data;
 } EffectObject;
 
+extern void effObjInnerCreate();
+
+extern void *func_00328D68(s32 size);
+
+extern u32 func_001119D0();
+
 u32 func_00113308(EffectObject *object) {
     return object->data->handle;
 }
@@ -194,7 +200,17 @@ void dds3RefreshStoredVec3(WorldObj *obj) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114640);
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00114770);
+s32 func_00114770(EffectObject *obj) {
+    EffectObjectData *data;
+
+    effObjInnerCreate(obj);
+    obj->data = func_00328D68(0x50);
+    memset(obj->data, 0, 0x50);
+    data = obj->data;
+    data->handle = func_001119D0(obj);
+    dds3SetObjectFlags(obj, 0x60);
+    return 1;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00113308", D_00435DA0);
 

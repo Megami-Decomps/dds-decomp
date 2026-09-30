@@ -11,6 +11,13 @@ extern u32 D_00436424;
 extern u32 D_00436414;
 
 /* Keep the original selector and optional overrides separately for field-color lookups. */
+typedef struct Entry20B {
+    u32 value;
+    u8 pad_0x04[0x10];
+} Entry20B;
+
+extern Entry20B D_003AB070[];
+
 void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
     D_00436420 = (u32)baseId;
     D_00436418 = D_00436420;
@@ -51,7 +58,9 @@ INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);
 
 INCLUDE_ASM(const s32, "game/code_00169418", func_00169580);
 
-INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetEntryWord);
+u32 effBTLFieldColorGetEntryWord(s32 index) {
+    return D_003AB070[index].value;
+}
 
 u32 func_001695C8(void) {
     return 1;

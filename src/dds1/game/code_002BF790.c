@@ -114,7 +114,7 @@ void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
     widget->height = height;
 }
 
-void itfCopyGridEntryWords(s32 owner, s32 index) {
+void itfGridCopyEntryQuad(s32 owner, s32 index) {
     u32 *destination;
     s32 remaining;
 
@@ -195,7 +195,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_002E1428(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_002E1420(packet);
     descriptor[0] = normalized;
     if (!alternate) {
@@ -220,7 +220,7 @@ void func_002C0878(s32 data, s32 alternate, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_002E1428(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_002E1420(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -245,7 +245,7 @@ void func_002C0970(s32 data, s32 alternate, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_002E1428(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_002E1420(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -270,7 +270,7 @@ void func_002C0A68(s32 data, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_002E1428(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_002E1420(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
@@ -287,7 +287,7 @@ void func_002C0B20(s32 data, s32 kind) {
     s32 context;
     RenderCallbackEntry *entry;
 
-    func_002E1428(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)func_002E1420(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
@@ -488,7 +488,7 @@ u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     return 1;
 }
 
-void itfExpandGridWidgetColumnWidth(s32 columns, GridTextWidget *work) {
+void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
     s32 flags = work->flags;
     s32 width;
     if (flags & 0x100) {
@@ -522,7 +522,7 @@ void func_002C1CC8(GridTextWidget *widget, u8 *node, const char *text) {
     *(char **)node = copy;
     memcpy(copy, text, allocation);
     if (widget != NULL) {
-        itfExpandGridWidgetColumnWidth(length, widget);
+        itfExpandWidgetColumnWidth(length, widget);
     }
 }
 

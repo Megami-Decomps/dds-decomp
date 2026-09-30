@@ -63,7 +63,7 @@ u32 func_0010D6A8(void) {
 INCLUDE_ASM(const s32, "game/code_0010D620", func_0010D6B8);
 
 /* Evaluate a script-supplied model flag and push the test result. */
-u32 scrCommandTestModelFlag(void) {
+u32 scrOpcodeTestModelFlag(void) {
     u64 flagId;
 
     flagId = scrReadIntParameter(0);
@@ -72,7 +72,7 @@ u32 scrCommandTestModelFlag(void) {
     return 1;
 }
 
-u32 scrCommandSetModelFlag(void) {
+u32 scrOpcodeSetModelFlag(void) {
     u64 flagId;
 
     flagId = scrReadIntParameter(0);
@@ -80,7 +80,7 @@ u32 scrCommandSetModelFlag(void) {
     return 1;
 }
 
-u32 scrCommandClearModelFlag(void) {
+u32 scrOpcodeClearModelFlag(void) {
     u64 flagId;
 
     flagId = scrReadIntParameter(0);

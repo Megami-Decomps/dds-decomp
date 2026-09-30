@@ -13,7 +13,7 @@ extern u16 D_00435BAC;
 
 extern u32 *D_00437AB0;
 
-extern s32 sdfGraphHasPendingWorkInterruptSafe(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern u32 D_00437AE8;
 
@@ -710,7 +710,7 @@ void func_002A78B0(void) {
     func_002A2550();
     func_002A6018();
     do {
-        temp_v0 = sdfGraphHasPendingWorkInterruptSafe();
+        temp_v0 = sdfCheckPendingWorkWithInterrupts();
     } while (temp_v0 != 0);
     func_003298C0(*D_00437AB0);
     D_00437AB0 = (u32 *)0x0;
@@ -718,7 +718,7 @@ void func_002A78B0(void) {
 
 void func_002A7900(void) {
     func_003054E8(D_00437AB0[1]);
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_003458E8(0);
 }
@@ -806,7 +806,7 @@ extern char D_0042A380[];
 
 extern u32 D_00437AD0;
 
-s32 movieDrawNextProc(s32 procedure) {
+s32 mnuMovieDrawNextProc(s32 procedure) {
     if (D_00437ACC == 0) {
         func_0035B6E0(D_0042A348);
         return -1;
@@ -1528,7 +1528,7 @@ extern s32 func_002B9FF8(s32, s32, s32);
 
 extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
 
-extern void func_002B9568(s32, s32);
+extern void mnuSetWindowContainerState(s32, s32);
 
 extern void func_002BAF10(u8 *);
 
@@ -1546,15 +1546,15 @@ void mnuStaffInitResourceLists(u8 *work) {
     ((StaffResourceHeader *)work)->resourceLists[0] = func_002A9BF8(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
     list = func_002A9BF8(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
     ((StaffResourceHeader *)work)->resourceLists[1] = list;
-    func_002B9568(list, 0x100);
+    mnuSetWindowContainerState(list, 0x100);
     list = func_002A9BF8(D_003E5708, 2, 0x1C0, 0x10, work, 0);
     ((StaffResourceHeader *)work)->resourceLists[2] = list;
-    func_002B9568(list, 0x100);
+    mnuSetWindowContainerState(list, 0x100);
     func_002BAF10(ctx);
     func_002BAF50(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
-extern void func_002B9520(u32);
+extern void mnuDestroyWindowContainer(u32);
 
 extern void mnuReleaseResourceList(u32);
 
@@ -1563,7 +1563,7 @@ void func_002A9F08(u8 *work) {
     u32 i;
 
     for (i = 0; i < 3; i++) {
-        func_002B9520(*handles++);
+        mnuDestroyWindowContainer(*handles++);
     }
     mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[0]);
     mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[1]);
@@ -1613,7 +1613,7 @@ extern s32 func_0026C768(void);
 
 extern s32 func_002C6CE8(void);
 
-extern s32 func_002D13F0(void);
+extern s32 fileConsumeConfigTaskReady(void);
 
 extern void mnuDestroyCampTasks(void);
 
@@ -1632,7 +1632,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     if (func_0026C768() == 0) {
         if (buttons & 8) {
             if (func_002C6CE8() != 1) {
-                if (func_002D13F0() == 0) {
+                if (fileConsumeConfigTaskReady() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);
                     return -1;

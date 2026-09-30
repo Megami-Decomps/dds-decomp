@@ -51,7 +51,7 @@ extern void func_00288148(s32);
 extern void func_001F3188(s32);
 extern void func_00217878(s32, s32);
 extern void mnuApplyModelCamera(s32);
-extern void stageTestApplyEntryRotation(s32);
+extern void evtStageTestApplyEntryRotation(s32);
 extern void func_00287C20(void);
 extern void func_00288008(void);
 
@@ -778,7 +778,7 @@ void func_00285928(s32 item, u32 out) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285960);
 
-void initPartyPanelSlots(PartyPanel *panel) {
+void mnuInitPartyPanelSlots(PartyPanel *panel) {
     u32 i;
     u8 *entry;
     s32 offset = 0;
@@ -800,7 +800,7 @@ void initPartyPanelSlots(PartyPanel *panel) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285B20);
 
-void menuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
+void mnuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
     if (buttons & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;
@@ -943,7 +943,7 @@ s32 mnuGetIndexedNonzeroEffect(s32 index) {
 
 extern s8 D_0037CE42[];
 
-u16 lookupPartyTableValue(u32 count, s32 base, s32 which) {
+u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
     u32 i;
     s32 sum = 0;
 
@@ -1107,7 +1107,7 @@ u32 func_002866C8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", skillApplyFieldUseEffect);
+INCLUDE_ASM(const s32, "game/code_00282850", ptySkillApplyFieldUseEffect);
 
 u8 func_002868C0(u32 id) {
     return *(s8 *)((id & 0xffff) * 2 + D_003BAA4C) == '\x01';
@@ -1115,7 +1115,7 @@ u8 func_002868C0(u32 id) {
 
 extern u32 D_003BAA54;
 
-s32 getAffinityKind(s32 affinityId, s32 index) {
+s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
     s32 flags = ((AffinityRow *)D_003BAA54)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (flags == -1) {
@@ -1233,9 +1233,9 @@ s32 sndPlayPartyItemSe(u32 id, s32 mode) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyPermanentBonus);
+INCLUDE_ASM(const s32, "game/code_00282850", btlItemApplyPermanentBonus);
 
-INCLUDE_ASM(const s32, "game/code_00282850", battleItemApplyDirectEffect);
+INCLUDE_ASM(const s32, "game/code_00282850", btlItemApplyDirectEffect);
 
 s32 mnuGetSelectionFromFlags(s32 entry) {
     u16 flags = *(u16 *)(entry + 0xe);
@@ -1295,7 +1295,7 @@ u32 func_00286F90(void) {
 }
 
 /* Clamp the motion selector to the loaded model's available motions. */
-void stageTestSetEntryIndex(s32 encodedIndex, s32 value) {
+void evtStageTestSetEntryIndex(s32 encodedIndex, s32 value) {
     s32 index = encodedIndex & 0xFFFF;
     if (value < 0) {
         value = 0;
@@ -1308,7 +1308,7 @@ void stageTestSetEntryIndex(s32 encodedIndex, s32 value) {
 }
 
 /* Advance the selected entry's animation frame and request a stage refresh. */
-void stageTestAddEntryValue(s32 encodedIndex, f32 delta) {
+void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     s32 index = encodedIndex & 0xFFFF;
     StageTestEntry *entry;
 
@@ -1407,7 +1407,7 @@ void btlStopStage(void) {
             func_00288190();
         }
         if (D_003DC5E8.model != 0) {
-            func_002177D0(D_003DC5E8.model);
+            mdlDestroyContext(D_003DC5E8.model);
             D_003DC5E8.model = 0;
         }
     }
@@ -1516,7 +1516,7 @@ void mnuApplyModelCamera(s32 model) {
     mdlStorePrimaryVectorVU((void *)model);
 }
 
-void stageTestApplyEntryRotation(s32 model) {
+void evtStageTestApplyEntryRotation(s32 model) {
     StageTestEntry *entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
 
     func_002E7F20(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
@@ -1526,7 +1526,7 @@ void stageTestApplyEntryRotation(s32 model) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287C20);
 
-s8 stageTestUpdate(s32 frame) {
+s8 evtStageTestUpdate(s32 frame) {
     s8 result = func_002877A8();
 
     if (result == 1) {
@@ -1535,7 +1535,7 @@ s8 stageTestUpdate(s32 frame) {
     if (D_003DC5E8.mode != 1) {
         if (D_003DC5E8.model != 0) {
             mnuApplyModelCamera(D_003DC5E8.model);
-            stageTestApplyEntryRotation(D_003DC5E8.model);
+            evtStageTestApplyEntryRotation(D_003DC5E8.model);
             func_00287C20();
             if (D_003DC5E8.pendingEffect >= 0) {
                 func_00288148(D_003DC5E8.pendingEffect);
@@ -1656,7 +1656,7 @@ void func_00288190(void) {
     if (effectHandle == 0) {
         return;
     }
-    func_001F3200(effectHandle);
+    sndDestroyFileQueueWrapper(effectHandle);
     stage->effect = 0;
 }
 
@@ -1683,7 +1683,7 @@ u32 func_00288458(void) {
     return 0;
 }
 
-void *createBattleStageTestCamera(void) {
+void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
     StageCameraTarget *target = func_002204A8(position, orientation);
@@ -1719,7 +1719,7 @@ void *evtBattleStageTestScreen(void) {
     D_00325708.invoke(&D_00325708, packets);
     if (D_00324510[0x21] < 0) {
         func_0021FEC0(D_003BC7D0, D_003BC7D4);
-        return createBattleStageTestCamera;
+        return evtCreateBattleStageTestCamera;
     }
     if (D_00324510[0x25] & 2) {
         D_003BC7D0++;
@@ -1766,7 +1766,7 @@ s32 btlDestroyStageTask(object)
     if (object->kind == 6) {
         s32 resource = object->resource;
         if (resource != 0) {
-            func_002E6E88(resource);
+            sdfDevQueueReleaseState(resource);
         }
         func_002EDC50(object->payload);
         func_002CFF98(object->allocation);

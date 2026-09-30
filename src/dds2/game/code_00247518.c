@@ -14,7 +14,7 @@ extern s32 evtViewerHasUpdateFlag(s32);
 
 extern s32 D_00435DD0;
 
-s32 func_002467B8(s32 arg0);
+s32 evtEventViewerGetPendingNode(s32 arg0);
 
 void func_00249088(s32 arg0, void *arg1);
 
@@ -34,7 +34,7 @@ extern u32 D_00435CD4;
 
 void func_00137818(void);
 
-void func_00246D80(u64 arg0);
+void evtEventViewerReset(u64 arg0);
 
 typedef struct EvtViewerGlyph {
     u16 x;
@@ -676,7 +676,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024C650);
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 arg0, s32 arg1, EventViewerState *viewer) {
     s32 value = viewer->commandValue;
-    EvtViewEntry *entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
         return 0;
@@ -697,7 +697,7 @@ u32 func_0024C928(u32 unused0, u32 unused1, EventViewerState *viewer) {
     s32 slot;
 
     value = viewer->commandValue;
-    entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+    entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
         slot = viewer->sel->fieldSelector - 1;
         if ((u32)slot < 0x13u) {
@@ -738,7 +738,7 @@ u32 func_0024C9D0(void) {
 u32 func_0024C9D8(u32 unused0, u32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry;
 
-    entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+    entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
         entry->p0C.i = viewer->commandValue;
         func_00249088(viewer->glyphAdvancePosition, viewer);
@@ -750,7 +750,7 @@ u32 func_0024C9D8(u32 unused0, u32 unused1, EventViewerState *viewer) {
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CA28);
 
 u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
-    u8 *record = (u8 *)func_002467B8((s32)scene);
+    u8 *record = (u8 *)evtEventViewerGetPendingNode((s32)scene);
     if (record != NULL) {
         f32 *dst = *(f32 **)(record + 0x2C);
         f32 *src = (f32 *)(scene + 0x2350);
@@ -772,7 +772,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
 
 /* Transfer a selected two-component viewer position to the command entry. */
 s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
         return 0;
@@ -796,7 +796,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024CC28);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 arg0, s32 arg1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)func_002467B8((s32)viewer);
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     entry->p0C.b[0] = viewer->slotType;
     entry->p0C.b[1] = viewer->slotFlag;
@@ -833,7 +833,7 @@ s32 evtViewCmdSelectMode(s32 arg0, s32 arg1, EventViewerState *viewer) {
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CE18);
 
 u32 func_0024D0F8(u32 arg0, u32 arg1, u32 arg2) {
-    if (func_002467B8(arg2) != 0) {
+    if (evtEventViewerGetPendingNode(arg2) != 0) {
         ((EventViewerState *)arg2)->unk22AC = 0;
         ((EventViewerState *)arg2)->unk22B4 = 0;
         func_0024AB38(0xa, 0x9c, 0x54, arg2);
@@ -866,7 +866,7 @@ void *func_0024D710(void) {
 
     viewer = func_00101958();
     func_00137818();
-    func_00246D80(viewer);
+    evtEventViewerReset(viewer);
     D_00435CD4 |= 0x2000000;
     return (void *)func_0024D6B0;
 }
@@ -890,18 +890,18 @@ u8 func_0024D908(s32 arg0) {
 
 extern f32 D_0037F590[];
 extern void func_0023E178();
-extern void mnuCampReleaseEffectHandle();
+extern void mnuCampLinkFontGlyph();
 extern void func_0014E668();
 extern void func_001057A8();
-extern s32 sdfGraphHasPendingWorkInterruptSafe();
-extern void evtDestroyWorldSecondaryNode();
+extern s32 sdfCheckPendingWorkWithInterrupts();
+extern void evtDestroySecondaryWorldNode();
 extern void func_003298C0();
 extern void kwlnTextureReleaseHeldReference();
-extern void func_00246E68();
-extern void func_00246DF0();
+extern void evtEventViewerReleaseGroups();
+extern void evtEventViewerShutdown();
 extern void func_003297C8();
 extern void func_001378A0();
-extern void func_00106160();
+extern void kwlnFadeSetMode();
 extern void func_0025F5D0();
 void func_0024ACC0(s32 arg0);
 
@@ -913,7 +913,7 @@ void evtViewerRelease(viewer)
     }
     func_0023E178();
     func_0024ACC0((s32)viewer);
-    mnuCampReleaseEffectHandle(viewer);
+    mnuCampLinkFontGlyph(viewer);
     func_0014E668(0);
     func_001057A8();
     D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
@@ -923,30 +923,30 @@ void evtViewerRelease(viewer)
         }
         viewer->timedActive = 0;
     }
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    evtDestroyWorldSecondaryNode();
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    evtDestroySecondaryWorldNode();
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
         func_003298C0(viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     kwlnTextureReleaseHeldReference();
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_00246E68(viewer);
-    func_00246DF0(viewer);
+    evtEventViewerReleaseGroups(viewer);
+    evtEventViewerShutdown(viewer);
     func_003297C8(viewer->resourceHandle);
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_001378A0();
-    while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_00106160(0);
+    kwlnFadeSetMode(0);
     D_00435CD4 |= 0x2000000;
 }
 

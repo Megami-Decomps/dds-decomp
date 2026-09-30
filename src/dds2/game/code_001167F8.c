@@ -14,6 +14,17 @@ typedef struct WorldUnitOwner {
     WorldUnitState *state;
 } WorldUnitOwner;
 
+typedef struct ActionObj {
+    u8 unk0[4];   /* 0x0 */
+    s32 unk4;     /* 0x4 */
+    u8 unk8[0x14]; /* 0x8 */
+    s32 unk1C;    /* 0x1C */
+} ActionObj;
+
+extern ActionObj *func_00110AA8();
+
+extern void dds3EnsureSlotData();
+
 u32 func_001167F8(void) {
     return 1;
 }
@@ -22,7 +33,13 @@ u32 func_00116800(WorldUnitOwner *object) {
     return object->state->value74;
 }
 
-INCLUDE_ASM(const s32, "game/code_001167F8", evtSpawnActionObj9);
+ActionObj *evtSpawnActionObj9(s32 value) {
+    ActionObj *obj = func_00110AA8(9);
+
+    obj->unk4 = value;
+    dds3EnsureSlotData(obj);
+    return obj;
+}
 
 void func_00116858(void) {
     func_00110B50();

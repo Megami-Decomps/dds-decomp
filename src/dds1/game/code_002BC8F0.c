@@ -4,7 +4,7 @@
 
 extern void func_002BD640(u32, u32);
 
-extern u32 func_002BD1F8(u32);
+extern u32 effCreateMappedResource(u32);
 
 extern u32 sdfResourceRetainAddress(u32);
 
@@ -272,7 +272,7 @@ u32 effLoadMappedResource(const char *base, const char *name) {
 
     func_003014F0(path, D_003BD198, base, name);
     resource = func_002EB028(path, &handle, 0);
-    value = func_002BD1F8(handle);
+    value = effCreateMappedResource(handle);
     func_002D0918(resource);
     return value;
 }
@@ -284,7 +284,7 @@ void func_002BCB18(u64 job, u32 *out) {
 
     resource = fileGetResourceHandle();
     address = sdfResourceRetainAddress(resource);
-    mapped = func_002BD1F8(address);
+    mapped = effCreateMappedResource(address);
     *out = mapped;
     func_002D0918(resource);
     func_002887A0(job);
@@ -439,7 +439,7 @@ u32 effSumRecordStatuses(u32 *payload) {
 
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD028);
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD1F8);
+INCLUDE_ASM(const s32, "game/code_002BC8F0", effCreateMappedResource);
 
 u32 *func_002BD258(u32 kind) {
     u32 *header = func_002CFEB8(0xC);

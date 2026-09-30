@@ -83,7 +83,7 @@ typedef struct EvtRange {
 void evtUnlinkListNode(EvtEvEntry *entry, EvtEvNode *node);
 void func_00328E48(void *ptr);
 void sdfTexReleaseReference(s32 tex);
-s32 sdfGraphHasPendingWorkInterruptSafe();
+s32 sdfCheckPendingWorkWithInterrupts();
 void effInitCh71Id(void);
 void effInitCh72Id(void);
 void effInitCh76Id(void);
@@ -91,7 +91,7 @@ void effInitCh75Id(void);
 void func_0024F7D0(EvtGroupTable *table);
 void func_00231588(s32 group, s32 type);
 void func_00104020(void);
-EvtEvNode *func_002467B8(EvtViewer *viewer);
+EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
 void func_00246878(EvtViewer *viewer);
 
 void func_002467A0(void) {
@@ -99,7 +99,7 @@ void func_002467A0(void) {
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */
-EvtEvNode *func_002467B8(EvtViewer *viewer) {
+EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer) {
     EvtEvEntry *queue;
     EvtEvNode *node;
     s32 i;
@@ -116,7 +116,7 @@ EvtEvNode *func_002467B8(EvtViewer *viewer) {
 }
 
 /* Release a queued node from its entry, freeing its buffer unless the entry id is 0x12. */
-void func_00246820(EvtEvEntry *entry, EvtEvNode *node) {
+void evtEventViewerReleaseNode(EvtEvEntry *entry, EvtEvNode *node) {
     evtUnlinkListNode(entry, node);
     if (node->buf != NULL) {
         if (entry->id != 0x12) {
@@ -133,13 +133,13 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246950);
 
 /* Consume queued viewer events until the pending check reports none. */
 void evtEventViewerProcessPending(EvtViewer *viewer) {
-    while (func_002467B8(viewer) != 0) {
+    while (evtEventViewerGetPendingNode(viewer) != 0) {
         func_00246878(viewer);
     }
 }
 
 /* Insert an entry into the viewer's list, ordered by id. */
-void func_00246A60(EvtEvEntry *entry, EvtViewer *viewer) {
+void evtEventViewerInsertEntry(EvtEvEntry *entry, EvtViewer *viewer) {
     EvtEvEntry *node;
 
     node = viewer->head;
@@ -193,7 +193,7 @@ void evtEventViewerUnlinkEntry(EvtEvEntry *entry, EvtViewer *viewer) {
 }
 
 /* Allocate a zeroed 0x84-byte entry for an id and queue it in the viewer. */
-EvtEvEntry *func_00246B50(s32 id, EvtViewer *viewer) {
+EvtEvEntry *evtEventViewerCreateEntry(s32 id, EvtViewer *viewer) {
     EvtEvEntry *entry;
 
     entry = func_00328D68(0x84);
@@ -204,7 +204,7 @@ EvtEvEntry *func_00246B50(s32 id, EvtViewer *viewer) {
     entry->id = id;
     entry->unk8 = -1;
     entry->unkC = -1;
-    func_00246A60(entry, viewer);
+    evtEventViewerInsertEntry(entry, viewer);
     return entry;
 }
 
@@ -237,7 +237,7 @@ s32 evtEventViewerCountEntries(EvtViewer *viewer) {
 }
 
 /* Sum nodeCount over entries: mode 2 skips ids 5/0x13, mode 3 takes only those. */
-s32 func_00246C38(s32 mode, EvtViewer *viewer) {
+s32 evtEventViewerSumNodeCounts(s32 mode, EvtViewer *viewer) {
     EvtEvEntry *entry;
     s32 total;
 
@@ -260,14 +260,14 @@ s32 func_00246C38(s32 mode, EvtViewer *viewer) {
 }
 
 /* Destroy an entry: free its nodes, drop a type-0x18 texture, unlink it, free it. */
-void func_00246CB8(EvtEvEntry *entry, EvtViewer *viewer) {
+void evtEventViewerDestroyEntry(EvtEvEntry *entry, EvtViewer *viewer) {
     while (entry->firstNode != NULL) {
-        func_00246820(entry, entry->firstNode);
+        evtEventViewerReleaseNode(entry, entry->firstNode);
     }
     if (entry->id == 0x18) {
         sdfTexReleaseReference(entry->tex);
         entry->tex = 0;
-        while (sdfGraphHasPendingWorkInterruptSafe() != 0) {
+        while (sdfCheckPendingWorkWithInterrupts() != 0) {
         }
     }
     evtEventViewerUnlinkEntry(entry, viewer);
@@ -295,7 +295,7 @@ void evtViewerSetMaximumFromCurrent(EvtRange *range) {
 }
 
 /* Reset the viewer (0x24BC bytes) but keep its first and 0x2410 fields. */
-void func_00246D80(EvtViewer *viewer) {
+void evtEventViewerReset(EvtViewer *viewer) {
     s32 keepA;
     s32 keepB;
 
@@ -311,13 +311,13 @@ void func_00246D80(EvtViewer *viewer) {
 }
 
 /* Shut the viewer down: reset effect channels, destroy entries, release the handle. */
-void func_00246DF0(EvtViewer *viewer) {
+void evtEventViewerShutdown(EvtViewer *viewer) {
     effInitCh71Id();
     effInitCh72Id();
     effInitCh76Id();
     effInitCh75Id();
     while (viewer->head != NULL) {
-        func_00246CB8(viewer->head, viewer);
+        evtEventViewerDestroyEntry(viewer->head, viewer);
     }
     if (viewer->unk08 != 0) {
         func_0024F7D0(viewer->unk08);
@@ -327,7 +327,7 @@ void func_00246DF0(EvtViewer *viewer) {
 }
 
 /* Destroy every grouped entity listed in the viewer's table. */
-void func_00246E68(EvtViewer *viewer) {
+void evtEventViewerReleaseGroups(EvtViewer *viewer) {
     s32 i;
 
     if (viewer->unk08 != NULL) {
@@ -357,7 +357,7 @@ s32 evtEventViewerFindNameIndex(const char *name, EvtViewer *viewer) {
 }
 
 /* Return the index of a name in the table, appending it when missing. */
-s32 func_00246F60(const char *name, EvtViewer *viewer) {
+s32 evtEventViewerAddName(const char *name, EvtViewer *viewer) {
     s32 found;
     s32 index;
 
@@ -372,7 +372,7 @@ s32 func_00246F60(const char *name, EvtViewer *viewer) {
 }
 
 /* Look up a name record by index in the world object (type 7). */
-s32 func_00246FC0(s32 index, EvtViewer *viewer) {
+s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer) {
     if (index < 0) {
         return 0;
     }

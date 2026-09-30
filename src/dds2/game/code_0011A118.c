@@ -231,7 +231,7 @@ void ptyRecoverAllUnits(void) {
     } while (remaining >= 0);
 }
 
-s32 func_0011A788(u32 mask, s32 mode) {
+s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     s32 index = 0;
     s32 entry = D_00435DD0 + 0xA60;
     do {
@@ -660,7 +660,7 @@ s32 func_0011DAE0(void) {
     return 1;
 }
 
-s32 func_0011DB20(void) {
+s32 evtSelectScriptStatValue(void) {
     s32 *work = D_0043E5C0;
     s32 value;
     u16 mode = *(u16 *)((u8 *)work + 0x14);

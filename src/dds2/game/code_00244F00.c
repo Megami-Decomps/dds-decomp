@@ -8,13 +8,13 @@ void evtInitializeVisualData(s32 arg0);
 
 extern s8 D_00438FA4;
 
-s32 evtGetRawSolarPhase(s32 object);
+s32 evtGetSolarPhase(s32 object);
 
 extern char D_004221D8[]; /* "EventTest" */
 
 void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 
-void evtDestroyWorldSecondaryNode(void);
+void evtDestroySecondaryWorldNode(void);
 
 typedef struct EventVisualData {
     u8 pad00[0x3C];
@@ -33,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
 
 /* Seed both visual-value tables and cache the current raw solar phase. */
 void evtInitializeVisualData(s32 object) {
-    s32 solarPhase = evtGetRawSolarPhase(object);
+    s32 solarPhase = evtGetSolarPhase(object);
     s16 *values = ((EventVisualData *)object)->firstValues;
     ((EventVisualData *)object)->solarPhase = solarPhase;
     values[0] = 0x39;

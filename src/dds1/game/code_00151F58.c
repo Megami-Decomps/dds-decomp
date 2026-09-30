@@ -160,7 +160,7 @@ typedef struct EffUnitObject {
     void *resource; /* 0x84 */
 } EffUnitObject;
 
-void effBillSetMode(BillObj *effect, s32 mode) {
+void billSetBillboardMode(BillObj *effect, s32 mode) {
     s32 count;
     s32 remaining;
     s32 entry;

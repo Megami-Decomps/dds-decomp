@@ -20,11 +20,11 @@ extern s32 func_0013DB28(void);
 
 extern s32 func_0013DB58(s32 value);
 
-extern void func_00141D18(void);
+extern void fldStopCurrentBgm(void);
 
-extern void func_00141D40(void);
+extern void fldReleaseCurrentBgm(void);
 
-extern void func_00141D98(void);
+extern void fldPlayCurrentBgmSound(void);
 
 extern void fldPlayFieldSeVolumePan(s32 param);
 
@@ -32,9 +32,9 @@ extern void fldPlayFieldSe(s32 param);
 
 extern s32 fldPollArchiveLoad(s32 param);
 
-extern void func_001421D0(s32 param0, s32 param1);
+extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
-extern void func_00142200(s32 param0, s32 param1);
+extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
 extern void func_00147DB0(s32 handle);
 
@@ -61,12 +61,12 @@ extern s32 func_0013DF18(void);
 
 extern s32 D_0032E3D8[];
 
-s32 func_0014F098(void) {
+s32 fldCmdQuerySceneValue(void) {
     func_0010D5F0(func_0013DB58(scrReadIntParameter(0)));
     return 1;
 }
 
-u32 func_0014F0C8(void) {
+u32 fldCmdUpdateTaskRecordScene(void) {
     s32 scene;
     if (func_0013DF18()) {
         scene = 0;
@@ -102,30 +102,30 @@ s32 func_0014F1C0(void) {
     return 1;
 }
 
-s32 func_0014F1E0(void) {
+s32 fldCmdStartSceneBgm(void) {
     D_0032E3D8[0] = scrReadIntParameter(0);
-    func_00141B10();
+    fldStartSceneBgm();
     return 1;
 }
 
-s32 func_0014F210(void) {
+s32 fldCmdStartSceneBgmAlternate(void) {
     D_0032E3D8[0] = scrReadIntParameter(0);
-    func_00141C40();
+    fldStartSceneBgmAlternate();
     return 1;
 }
 
-s32 func_0014F240(void) {
-    func_00141D18();
+s32 fldCmdStopCurrentBgm(void) {
+    fldStopCurrentBgm();
     return 1;
 }
 
-s32 func_0014F260(void) {
-    func_00141D98();
+s32 fldCmdPlayCurrentBgmSound(void) {
+    fldPlayCurrentBgmSound();
     return 1;
 }
 
-s32 func_0014F280(void) {
-    func_00141D40();
+s32 fldCmdReleaseCurrentBgm(void) {
+    fldReleaseCurrentBgm();
     return 1;
 }
 
@@ -145,20 +145,20 @@ u8 fldCommandLoadArchive(void) {
 }
 
 /* Script command: set volume and pan for a grouped sequence ID. */
-s32 func_0014F318(void) {
+s32 fldCmdSetArchiveSoundVolumePan(void) {
     s32 sequenceGroup = scrReadIntParameter(0);
     s32 sequenceIndex = scrReadIntParameter(1);
 
-    func_001421D0(sequenceGroup, sequenceIndex);
+    fldSetArchiveSoundVolumePan(sequenceGroup, sequenceIndex);
     return 1;
 }
 
 /* Script command: pass the same grouped sequence ID to the other sound path. */
-s32 func_0014F358(void) {
+s32 fldCmdPlayArchiveSound(void) {
     s32 sequenceGroup = scrReadIntParameter(0);
     s32 sequenceIndex = scrReadIntParameter(1);
 
-    func_00142200(sequenceGroup, sequenceIndex);
+    fldPlayArchiveSound(sequenceGroup, sequenceIndex);
     return 1;
 }
 
@@ -180,7 +180,7 @@ s32 func_0014F3E0(void) {
 }
 
 /* Look up the command's task record before applying its associated entry. */
-s32 func_0014F408(void) {
+s32 fldCmdApplyTaskRecordEntry(void) {
     FldCommandWork *command = func_0010D6A0();
     void *record = fldGetTaskRecordValue(command->key);
 

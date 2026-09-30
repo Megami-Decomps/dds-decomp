@@ -24,7 +24,7 @@ void func_00176A28(s32 work, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_00176A30);
 
-void effReleaseResourceHandles(u32 work) {
+void effReleaseAttachedResources(u32 work) {
     sdfQueueAssetRelease(((EffResourceWork *)work)->resource6C);
     effReleaseOptionalResource(work);
     func_002D0918(((EffResourceWork *)work)->resource70);

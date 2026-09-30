@@ -1,11 +1,11 @@
 #include "common.h"
 
-extern u64 sdfFindThreadById(u64);
+extern u64 sdfFindThreadNode(u64);
 
 void func_002CFC18(void) {
     u64 thread;
 
-    thread = sdfFindThreadById(0xffffffffffffffff);
+    thread = sdfFindThreadNode(0xffffffffffffffff);
     func_002CFB18(thread);
 }
 

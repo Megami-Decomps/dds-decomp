@@ -4,7 +4,7 @@ extern s32 dds3GetSlot1Data(void);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-void evtDestroyWorldSecondaryNode(void) {
+void evtDestroySecondaryWorldNode(void) {
     s64 secondary;
 
     secondary = dds3GetWorldSecondaryObject();

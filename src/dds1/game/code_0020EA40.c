@@ -14,7 +14,7 @@ extern u32 func_001A3360(u64, u64, u64);
 
 extern void *btlAllocateIndexList(s32);
 
-extern u32 func_001DAE48();
+extern u32 btlGetIndexListCount();
 
 extern s8 D_003D7588[];
 
@@ -178,9 +178,9 @@ typedef struct BtlState {
 
 extern s32 func_0020DC38();
 
-extern s32 func_001DAE50(void *, u32);
+extern s32 btlGetIndexListEntry(void *, u32);
 
-extern void func_001DAE08(void *);
+extern void btlFreeIndexList(void *);
 
 extern u8 *D_003BAA50;
 
@@ -196,7 +196,7 @@ extern void func_001DC760(void);
 
 extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void func_001DC568(void);
+extern void btlClearRuntimeFlag2000(void);
 
 extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -206,7 +206,7 @@ extern void func_001DC760(void);
 
 void func_0020DB90(u8 *actor);
 
-s32 battleDispatchActionAnimation(u8 *unit) {
+s32 btlDispatchActionAnimation(u8 *unit) {
     u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
     if (flags & 0x4000) {
         func_001DC760();
@@ -223,7 +223,7 @@ s32 battleDispatchActionAnimation(u8 *unit) {
         func_001DC760();
         func_0020DC38(unit, unit, 0);
     } else if (flags & 8) {
-        if (func_001DAE48(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
+        if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
             func_001DC760();
             func_0020DB90(unit);
             ((BtlUnit *)unit)->flags = 0;
@@ -234,7 +234,7 @@ s32 battleDispatchActionAnimation(u8 *unit) {
     } else {
         return 0;
     }
-    func_001DC568();
+    btlClearRuntimeFlag2000();
     return 1;
 }
 
@@ -291,7 +291,7 @@ void func_0020F808(void) {
     if (cleanup != 0) {
         cleanup();
     }
-    func_001FB0A8(D_003A66C0);
+    btlBossDebugPrintf(D_003A66C0);
 }
 
 extern char D_003A66D8[];
@@ -312,7 +312,7 @@ void btlReleaseBossData(void) {
         battle->effect = 0;
     }
     battle->unk_1F4 &= ~0x80000;
-    func_001FB0A8(D_003A66D8);
+    btlBossDebugPrintf(D_003A66D8);
 }
 
 extern char D_003A66F0[];
@@ -453,13 +453,13 @@ s32 func_002100A8(void) {
         return 1;
     }
     if (func_002E92C0(battle->sequenceHandle) == 0) {
-        func_001FB0A8(D_003A67A0);
+        btlBossDebugPrintf(D_003A67A0);
         return 0;
     }
     if (evtGetTaskValueWord(battle->unk_1C0) == 2) {
         return 1;
     }
-    func_001FB0A8(D_003A67B8);
+    btlBossDebugPrintf(D_003A67B8);
     return 0;
 }
 
@@ -478,13 +478,13 @@ void btlReleaseEventData(void) {
     }
     data = battle->eventRequest;
     if (data != 0) {
-        func_00160800(data);
+        sndReleaseAllVoices(data);
         battle->eventRequest = 0;
     }
     battle->eventActive = 0;
     battle->eventAction = -1;
     battle->eventFlags &= ~2;
-    func_001FB0A8(D_003A67D0);
+    btlBossDebugPrintf(D_003A67D0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A67A0);
@@ -506,7 +506,7 @@ void btlReleaseEventAssets(void) {
         func_002D0918(data);
         battle->eventAssets = 0;
     }
-    func_001FB0A8(D_003A6838);
+    btlBossDebugPrintf(D_003A6838);
 }
 
 extern s32 func_00241BF0(s16, s32);
@@ -591,7 +591,7 @@ s32 btlCommandSetSequenceVolumePan(void) {
     s32 index = scrReadIntParameter(0);
     if (func_002E92C0(battle->sequenceHandle) != 0) {
         sndSetSequenceVolumePan(battle->sequenceHandle + index, 0x7f, 0x3f);
-        func_001FB0A8(D_003A6848, battle->sequenceHandle + index);
+        btlBossDebugPrintf(D_003A6848, battle->sequenceHandle + index);
     }
     return 1;
 }
@@ -793,16 +793,16 @@ s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
     flaggedCount = 0;
     list = btlAllocateIndexList(0xD);
     func_001A3360((s32)task, (s32)list, 0);
-    count = func_001DAE48(list);
+    count = btlGetIndexListCount(list);
     /* Keep this byte-table load separate from record for the matching address calculation. */
     if (D_003BAA50[command * 0x38] & 8) {
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)func_001DAE50(list, i))->unk_12E & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->unk_12E & 0x800) {
                 flaggedCount++;
             }
         }
     }
-    func_001DAE08(list);
+    btlFreeIndexList(list);
     if (count != 0) {
         if (count != flaggedCount) {
             return 0;
@@ -877,7 +877,7 @@ void btlReleaseModelEntry(BattleModelEntry *entry) {
         *(BattleModelEntry **)((u8 *)func_001A17F0() + 0x240) = entry->next;
     }
     func_002CFF98(entry);
-    func_001FB0A8(D_003A68F8, entry->kind, entry->id);
+    btlBossDebugPrintf(D_003A68F8, entry->kind, entry->id);
 }
 
 void btlReleaseAllModelEntries(void) {
@@ -1074,12 +1074,12 @@ typedef struct BattleGraphicsCallback {
 
 extern BattleGraphicsCallback D_00325708;
 
-extern u32 sdfCreateInitializedPacketList(void);
+extern u32 sdfCreateResetPacketList(void);
 
 extern void func_00212998(u32, u32, u32, u32, u32, s32);
 
 s32 btlUpdateFadeIn(void) {
-    u32 packets = sdfCreateInitializedPacketList();
+    u32 packets = sdfCreateResetPacketList();
     if ((D_003D7580.color18 & 0xFF000000) != 0x80000000) {
         D_003D7580.color18 += 0x10000000;
     }
@@ -1106,7 +1106,7 @@ extern void func_001054D0(s32, s32, f32);
 
 extern u8 D_00325870[];
 
-void func_00213538(void) {
+void btlClearOverlayBuffers(void) {
     u8 *entry;
     s32 i;
     u64 clearValue;
@@ -1761,7 +1761,7 @@ typedef struct BattleGroupNode {
     f32 unk_B0;
 } BattleGroupNode;
 
-void battleCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s32 arg5) {
+void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s32 arg5) {
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
@@ -1793,7 +1793,7 @@ void battleCreateGroupNode(s32 group, s32 type, s32 flag, s32 arg3, s32 arg4, s3
     node->unk_B0 = 100.0f;
 }
 
-extern void func_002177D0(s32);
+extern void mdlDestroyContext(s32);
 
 extern void func_00219CE8(s32);
 
@@ -1803,7 +1803,7 @@ extern void sdfResourceListRelease(void *, s32);
 
 extern void func_002CFF98(void *);
 
-void battleDestroyGroupNode(BattleGroupNode *node) {
+void btlDestroyGroupNode(BattleGroupNode *node) {
     BattleGroupNode *prev;
     BattleGroupNode *next;
     u8 flag;
@@ -1825,7 +1825,7 @@ void battleDestroyGroupNode(BattleGroupNode *node) {
     node->flag = 0;
     if (node->unk_10 != 0) {
         do {
-            func_002177D0(node->unk_10);
+            mdlDestroyContext(node->unk_10);
         } while (node->unk_10 != 0);
     }
     if (flag != 0) {
@@ -1846,7 +1846,7 @@ void func_00216A70(void) {
     s32 *node;
 
     node = btlFindGroupedEntity();
-    battleDestroyGroupNode(node);
+    btlDestroyGroupNode(node);
 }
 
 void btlReleaseAllEntities(void) {
@@ -1856,7 +1856,7 @@ void btlReleaseAllEntities(void) {
         s32 *node = (s32 *)*head;
         while (node != 0) {
             s32 *next = (s32 *)*node;
-            battleDestroyGroupNode(node);
+            btlDestroyGroupNode(node);
             node = next;
         }
         i++;

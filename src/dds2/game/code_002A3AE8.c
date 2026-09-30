@@ -183,7 +183,7 @@ typedef struct PickList {
     PickEntry entry[32];
 } PickList;
 
-void titlePickRandomSlot(list)
+void mnuTitlePickRandomSlot(list)
     PickList *list;
 {
     u32 range = 0x20;
@@ -304,7 +304,7 @@ INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4A68);
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4B70);
 
-extern void titlePickRandomSlot();
+extern void mnuTitlePickRandomSlot();
 
 extern void func_002A44C0(SlideBar *, s32);
 
@@ -314,7 +314,7 @@ extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
     if (bar->active != 0 || bar->pos != 0) {
-        titlePickRandomSlot();
+        mnuTitlePickRandomSlot();
         func_002A44C0(bar, arg1);
         mnuDrawSprite(0, 0, 0, bar->pos, 0, 0x16, arg1);
         func_002A4B70(bar, arg1);

@@ -20,7 +20,7 @@ void sdfSelectMotionPointerEntry(s32 destination, s32 source, u32 unused, s32 en
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD0C8);
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD128);
+INCLUDE_ASM(const s32, "game/code_002DD038", sdfBlendMotionKeys);
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD1B8);
 

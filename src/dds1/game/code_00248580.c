@@ -69,6 +69,48 @@ extern u8 D_003BC3F8[];
 
 extern s32 mnuWalkNodeList(s32, s32);
 
+extern s32 func_003014F0(char *, const char *, ...);
+
+extern u32 func_002C1630(u32, u32, s32);
+
+extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
+
+extern char D_003BC3E8[];
+
+extern void func_001958A0(s32, s32, s32);
+
+extern void func_00194920(s32);
+
+typedef struct MenuSlotState {
+    u8 pad00[0x64];
+    s32 batch;     /* 0x64 */
+    u8 pad68[0x40];
+    s32 effect[7]; /* 0xA8 */
+    s32 cur;       /* 0xC4 */
+    s32 prev;      /* 0xC8 */
+    u8 padCC[0x18];
+    s32 mode;      /* 0xE4 */
+} MenuSlotState;
+
+typedef struct EffectPair {
+    s32 a;
+    s32 b;
+} EffectPair;
+
+typedef struct EffectInner {
+    u8 pad00[0x20];
+    EffectPair *pair; /* 0x20 */
+} EffectInner;
+
+typedef struct EffectObject {
+    u8 pad00[8];
+    EffectInner *inner; /* 0x08 */
+} EffectObject;
+
+extern EffectObject *func_002BD258(s32);
+
+extern s32 effDestroyPackedBatch(s32);
+
 void mnuReleaseVisualResources(MenuVisualWork *work) {
     effResolveAndReleaseResource(work->firstResource);
     effResolveAndReleaseResource(work->secondResource);
@@ -100,7 +142,15 @@ void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248750);
+void func_00248750(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s32 priority) {
+    char buf[16];
+    s32 handle;
+
+    func_003014F0(buf, D_003BC3E8, a4);
+    handle = func_001978E8(a0, a1, a2, func_002C1630(color, color & ~0xFF, a3), (s32)buf, 0);
+    func_001958A0(handle, 1, priority);
+    func_00194920(handle);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
 
@@ -240,6 +290,7 @@ void func_00249420(s32 object) {
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249498);
 
 extern void func_0027B368(u32);
+
 extern void mnuReleaseStaffImageHandles(u8 *);
 
 void mnuReleaseWorkResources(u8 *work) {
@@ -255,8 +306,11 @@ void mnuReleaseWorkResources(u8 *work) {
 }
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
+
 extern void func_00220110(s32);
+
 extern void evtClearActiveFlag(s32);
+
 extern void func_0024DEF8(s32, s32);
 
 void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
@@ -286,10 +340,15 @@ void func_002496D8(u8 *work) {
 }
 
 extern s32 func_002D03F8(s32);
+
 extern s32 sdfResourceRetainAddress(s32);
+
 extern void *memset(void *, s32, u32);
+
 extern s32 func_002BC5C0(s32);
-extern void initPartyPanelSlots(s32);
+
+extern void mnuInitPartyPanelSlots(s32);
+
 extern void func_00271500(s32, s32);
 
 u8 *mnuCreateWorkBlock(void) {
@@ -299,7 +358,7 @@ u8 *mnuCreateWorkBlock(void) {
     memset(work, 0, 0x82C);
     *(s32 *)work = handle;
     ((MenuProgressWork *)work)->groupResource = func_002BC5C0(1);
-    initPartyPanelSlots((s32)(work + 0x84));
+    mnuInitPartyPanelSlots((s32)(work + 0x84));
     func_00271500(((MenuProgressWork *)work)->groupResource, (s32)(work + 8));
     ((MenuProgressWork *)work)->initState = 1;
     return work;
@@ -314,7 +373,9 @@ void func_00249770(u32 *arg0) {
 }
 
 extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
+
 extern void func_002762D8(s32 *);
+
 extern void func_00271480(s32, s32 *, s32, s32);
 
 s32 mnuTickInitState(u8 *work) {

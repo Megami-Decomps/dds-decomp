@@ -82,11 +82,11 @@ extern u64 func_002D2488(SdfTex *);
 void *sdfChunkFindById(SdfChunk *chunk, s32 id);
 void *func_002CFEB8(s32 size);
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
-void func_002D9D00(SdfTextParam *param, void *resource);
+void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
 void func_002D9D80(SdfTextParam *param, void *resource);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void func_002D3C30(void *arg0, s32 arg1);
-void func_002DA290(SdfResourceList *list);
+void sdfResourceListReleaseAssets(SdfResourceList *list);
 void func_002DB048(u32, u32);
 void sdfAssetRelease(SdfAsset *);
 void sdfDestroyDevRequest(void *);
@@ -176,7 +176,7 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
 }
 
 /* vu0 routine: build the basis in vf28-vf31 from the vectors at record+0x10/+0x20/+0x30, then load the chunk matrix */
-void func_002D9D00(SdfTextParam *param, void *resource) {
+void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
     u8 *base = func_002D7D68(param, *(s32 *)resource);
     u8 *record = resource;
     u8 *vec = record + 0x20;
@@ -255,7 +255,7 @@ void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
 s32 func_002D9E58(SdfTextParam *param, s32 id) {
     void *resource = sdfChunkFindRecordById(param, id);
     if (resource != NULL) {
-        func_002D9D00(param, resource);
+        sdfSetLookAtBasisFromRecord(param, resource);
         return 1;
     }
     return 0;
@@ -349,7 +349,7 @@ void sdfReduceResourceListCount(SdfResourceList *list, s32 count, s32 enabled) {
     func_002E7730();
 }
 
-SdfResourceList *func_002DA118(SdfResourceList *list) {
+SdfResourceList *sdfResourceListClone(SdfResourceList *list) {
     s32 count;
     SdfResourceList *copy;
     s32 i;
@@ -384,7 +384,7 @@ void func_002DA1B0(SdfResourceList *list, s32 arg, f32 value) {
 }
 
 void sdfRegisterResourceQueueCallbacks(void) {
-    sdfInitializeSynchronizedRequest(&D_003BDA10, func_002DA290);
+    sdfInitializeSynchronizedRequest(&D_003BDA10, sdfResourceListReleaseAssets);
     sdfInitializeSynchronizedRequest(&D_003BDA18, sdfAssetRelease);
 }
 
@@ -392,7 +392,7 @@ SdfResourceList *sdfCreateResourceList(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 8);
 }
 
-void func_002DA290(SdfResourceList *list) {
+void sdfResourceListReleaseAssets(SdfResourceList *list) {
     s32 i;
 
     for (i = 0; i < list->count; i++) {
@@ -413,7 +413,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
 }
 
 void func_002DA340(void) {
-    func_002E76B0();
+    sdfDevBufferedRequestGrow();
 }
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DA358);
@@ -652,7 +652,7 @@ SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     return list;
 }
 
-void func_002DAF88(SdfResourceList *list, s32 index) {
+void sdfResourceListApplyEntryChanges(SdfResourceList *list, s32 index) {
     s32 i;
     s32 count = list->count;
     u32 *items = list->items;

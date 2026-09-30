@@ -113,7 +113,7 @@ struct BtlUnit {
 extern BtlParams *D_00435E44;
 extern BtlEntry *D_00435E30;
 extern BtlWork *func_001AA6F8(void);
-extern s32 func_0020D128(const char *, ...);
+extern s32 btlBossDebugPrintf(const char *, ...);
 extern BtlTask *func_001E5FF8(s32, s32);
 extern void btlStartTask(BtlTask *);
 extern s32 func_001B2430(BtlUnit *, s32);
@@ -348,7 +348,7 @@ void btlAccumulateBossRatioScale(BtlSkillTask *task) {
                 if (*ratio > params->ratioMax) {
                     *ratio = params->ratioMax;
                 }
-                func_0020D128("btl:boss HEKATO ratio = %f\n", *ratio);
+                btlBossDebugPrintf("btl:boss HEKATO ratio = %f\n", *ratio);
             }
         }
     }

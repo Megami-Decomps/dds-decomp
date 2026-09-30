@@ -5,7 +5,7 @@ extern s64 btlStartTask(void *);
 
 extern s32 func_001AA6F8(void);
 
-extern void func_001E98C0();
+extern void btlSetRuntimeFlag2000();
 
 extern u32 func_00220958(void);
 
@@ -25,15 +25,15 @@ extern void btlFlagUnitDefeatCandidate(u32);
 
 extern u32 func_0021F808(void);
 
-extern void func_001E9890(void);
+extern void btlClearRuntimeFlag2000(void);
 
 extern void func_001EC868(u32, u32, f32);
 
 extern void func_001ECBF8();
 
-extern u32 func_001E8058(u32);
+extern u32 btlGetIndexListCount(u32);
 
-extern u32 func_001E8060(u32, u32);
+extern u32 btlGetIndexListEntry(u32, u32);
 
 extern void func_001E9A88(void);
 
@@ -578,7 +578,7 @@ u32 btlTickAction19A(ActionUnit *unit) {
     u32 action = unit->action;
     if (action < 0x19C) {
         if (action >= 0x19A) {
-            func_001E98C0(unit);
+            btlSetRuntimeFlag2000(unit);
             return 1;
         }
     }
@@ -741,7 +741,7 @@ u32 func_002210D0(ActionUnit *unit) {
 
 u32 func_00221128(ActionUnit *unit) {
     if (unit->action == 0x1a4) {
-        func_001E98C0(unit);
+        btlSetRuntimeFlag2000(unit);
         return 1;
     }
     return 0;
@@ -762,7 +762,7 @@ u32 func_00221390(ActionUnit *unit) {
 
 u32 func_002213E0(ActionUnit *unit) {
     if (unit->action == 0x6b) {
-        func_001E98C0(unit);
+        btlSetRuntimeFlag2000(unit);
         return 1;
     }
     return 0;
@@ -775,14 +775,14 @@ u32 btlTickAction6B(u32 unit) {
      * leaves $a0 holding the compared constant across these calls. */
     if (((ActionUnit *)unit)->actionTimer >= 0) {
         if (((ActionUnit *)unit)->actionTimer >= 0xF) {
-            func_001E9890();
+            btlClearRuntimeFlag2000();
             func_001ECBF8(unit, unit);
         } else {
-            func_001E98C0();
+            btlSetRuntimeFlag2000();
         }
         ++((ActionUnit *)unit)->actionTimer;
     } else {
-        func_001E98C0();
+        btlSetRuntimeFlag2000();
     }
     return 1;
 }
@@ -800,7 +800,7 @@ u32 func_002214C0(ActionUnit *unit) {
         return 0;
     }
     if (btlHasMarkedEntry14((u32)unit) && unit->actionTimer == 0x25) {
-        func_001E9890();
+        btlClearRuntimeFlag2000();
         func_001EC868((u32)unit, (u32)unit, 0.0f);
     }
     ++unit->actionTimer;
@@ -860,7 +860,7 @@ void btlMarkSpecialActionUnit(ActionUnit *actor) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002218C8);
 
-extern void func_0020D128(const char *, ...);
+extern void btlBossDebugPrintf(const char *, ...);
 s32 func_00221988(ActionUnit *unit) {
     f32 *state;
     u8 *table;
@@ -874,7 +874,7 @@ s32 func_00221988(ActionUnit *unit) {
                 if (((BattleActionScaleTable *)table)->ratioMaximum < state[1]) {
                     state[1] = ((BattleActionScaleTable *)table)->ratioMaximum;
                 }
-                func_0020D128("btl:boss BRAHMA ratio = %f\n", state[1]);
+                btlBossDebugPrintf("btl:boss BRAHMA ratio = %f\n", state[1]);
             }
         }
     }
@@ -992,7 +992,7 @@ u32 func_00221FE8(u32 unit, u32 action) {
 
 extern s32 btlFindUnitByActor(ActionUnit *);
 extern void fldAppendSceneGroupHandle(s32);
-extern void func_001E8030(s32, u32);
+extern void btlAppendIndexListEntry(s32, u32);
 s32 func_00222028(void) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     ActionUnit *unit;
@@ -1026,7 +1026,7 @@ s32 func_00222028(void) {
     fldAppendSceneGroupHandle(handle);
     ((BattleActorHandle *)handle)->phase = 0x11;
     ((BattleActorHandle *)handle)->flags |= 8;
-    func_001E8030(((BattleActorHandle *)handle)->actorIndices, ((BattleActorHandle *)handle)->owner);
+    btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, ((BattleActorHandle *)handle)->owner);
     return -1;
 }
 
@@ -1094,13 +1094,13 @@ extern void func_001E96C8(u32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32,
 void func_00222768(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
-        func_0020D128(D_0041ACA8);
+        btlBossDebugPrintf(D_0041ACA8);
         func_001E9A88();
         func_001E96C8(unit, -1823.5f, -270.6f, -1359.2f, -0.137f, -0.247f, 0.027f, 0.95f, -1302.8f,
                       -42.7f, -2059.2f, -0.123f, -0.148f, 0.011f, 0.972f, 40.0f, 30.0f);
         break;
     case 1:
-        func_0020D128(D_0041ACC0);
+        btlBossDebugPrintf(D_0041ACC0);
         func_001E9A88();
         func_001E96C8(unit, 149.7f, -65.4f, -1514.7f, -0.168f, 0.02f, -0.011f, 0.976f, 1438.0f,
                       -482.6f, -1234.3f, -0.099f, 0.195f, -0.027f, 0.966f, 40.0f, 30.0f);
@@ -1115,12 +1115,12 @@ INCLUDE_RODATA(const s32, "game/code_0021EE10", D_0041ACC0);
 void func_002228C0(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
-        func_0020D128("BRAHMA:ALL-0 ++++\n");
+        btlBossDebugPrintf("BRAHMA:ALL-0 ++++\n");
         func_001E96C8(unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
                       -17.3f, -1980.7f, 0.098f, -0.114f, 0.02f, -0.979f, 40.0f, 30.0f);
         break;
     case 1:
-        func_0020D128("BRAHMA:ALL-1 ++++\n");
+        btlBossDebugPrintf("BRAHMA:ALL-1 ++++\n");
         func_001E96C8(unit, -803.2f, -117.2f, -1426.5f, -0.072f, -0.187f, 0.001f, 0.971f, -738.1f,
                       -78.6f, -1749.6f, -0.1f, -0.138f, 0.001f, 0.977f, 40.0f, 20.0f);
         break;
@@ -1133,8 +1133,8 @@ u32 func_00222D18(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
     u32 owner = ((ActionStateLink *)actor)->owner;
     if (((ActionUnit *)owner)->flags & 0x200) {
-        if (func_001E8058(((ActionStateLink *)actor)->targetHandle) == 1) {
-            u32 target = func_001E8060(((ActionStateLink *)actor)->targetHandle, 0);
+        if (btlGetIndexListCount(((ActionStateLink *)actor)->targetHandle) == 1) {
+            u32 target = btlGetIndexListEntry(((ActionStateLink *)actor)->targetHandle, 0);
             if ((((ActionUnit *)target)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -1152,8 +1152,8 @@ s32 func_00222DA8(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
-        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
             if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
                 if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
@@ -1175,8 +1175,8 @@ s32 func_00222E58(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
-        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
             if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
                 if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
@@ -1212,7 +1212,7 @@ s32 func_00223D10(ActionUnit *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (func_001E8058(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             func_001E9A88();
             btlUnitSetCameraOffset((u32)unit);
             return 1;
@@ -1274,7 +1274,7 @@ u32 func_00223FB0(ActionUnit *unit) {
 
 u32 func_00223FE0(ActionUnit *unit) {
     if (unit->action == 0x10b) {
-        func_001E98C0(unit);
+        btlSetRuntimeFlag2000(unit);
         return 1;
     }
     return 0;
@@ -1309,8 +1309,8 @@ u32 func_002240F8(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
     u32 owner = ((ActionStateLink *)actor)->owner;
     if (((ActionUnit *)owner)->flags & 0x200) {
-        if (func_001E8058(((ActionStateLink *)actor)->targetHandle) == 1) {
-            u32 target = func_001E8060(((ActionStateLink *)actor)->targetHandle, 0);
+        if (btlGetIndexListCount(((ActionStateLink *)actor)->targetHandle) == 1) {
+            u32 target = btlGetIndexListEntry(((ActionStateLink *)actor)->targetHandle, 0);
             if ((((ActionUnit *)target)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -1327,8 +1327,8 @@ s32 func_00224188(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
-        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
             if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
                 if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
@@ -1349,8 +1349,8 @@ s32 func_00224238(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
-        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
             if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
                 if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
@@ -1391,7 +1391,7 @@ s32 func_00224D28(ActionUnit *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (func_001E8058(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             func_001E9A88();
             func_00224020((u32)unit);
             return 1;

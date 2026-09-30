@@ -5,7 +5,7 @@ s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, 
 
 typedef struct KwlnTask KwlnTask;
 f32 bfWaitReadArgFloat(s32 idx);
-s32 evtUnk89F8SetState(s32 arg0, f32 arg1, f32 arg2);
+s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
 s32 func_001082D8(s32 arg0, void *arg1);
 /* Declared floats-first: gcc 2.96 emits the outgoing register moves in
  * parameter order and schedules the last one into the jal delay slot, so
@@ -23,7 +23,7 @@ s32 kwlnDrawSetE08Fifth(s32 arg0);
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_00106488(f32 arg0);
-s32 evtUnk8360SetVec(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
+s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 s32 fptodp(void);
 extern ScrComGlobals *D_003BAA00;
 extern s8 D_00398628[];
@@ -119,7 +119,7 @@ s32 func_0010D9A8(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        func_001060C8(scrReadIntParameter(0));
+        kwlnFadeBackgroundStartOut(scrReadIntParameter(0));
         return 0;
     }
     return 1;
@@ -129,7 +129,7 @@ s32 func_0010D9E8(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        func_00106160(scrReadIntParameter(0));
+        kwlnFadeBackgroundStartIn(scrReadIntParameter(0));
         return 0;
     }
     return 1;
@@ -358,7 +358,7 @@ s32 func_0010DFE8(void)
     y = (f32)(u32)scrReadIntParameter(3);
     z = (f32)(u32)scrReadIntParameter(2);
     w = (f32)(u32)scrReadIntParameter(4);
-    evtUnk8360SetVec(p0, x, y, z, w);
+    evtSetDrawVectorTarget(p0, x, y, z, w);
     return 1;
 }
 
@@ -366,7 +366,7 @@ s32 func_0010E120(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
-    evtUnk89F8SetState(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
+    evtToggleSavedDrawVectors(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
     return 1;
 }
 

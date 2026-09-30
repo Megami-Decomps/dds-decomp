@@ -137,7 +137,7 @@ SlotTab *effCreateSlotArray(u32 count) {
     return table;
 }
 
-void effReleaseArrayAllocation(EffArrHdr *header) {
+void effReleaseSlotArrayAllocation(EffArrHdr *header) {
     func_002D0918((u32)header->unk8);
 }
 
@@ -154,7 +154,7 @@ void effInitSlotTail(SlotTab *table, s32 index) {
     slot->unk54 = slot->unk58 = 0;
 }
 
-s32 effGetSlotAtIndex(SlotTab *table, s32 index) {
+s32 effGetSlotAt(SlotTab *table, s32 index) {
     return (s32)&table->slots[index];
 }
 
@@ -661,7 +661,7 @@ void func_00190100(void) {
 }
 
 void func_00190118(void) {
-    func_00160800();
+    sndReleaseAllVoices();
 }
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_00190130);

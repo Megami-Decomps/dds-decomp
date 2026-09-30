@@ -9,13 +9,13 @@ extern s32 func_001AA6F8(void);
 
 extern u32 btlHasMarkedEntry14(u32);
 
-extern void func_001E9890(void);
+extern void btlClearRuntimeFlag2000(void);
 
-extern u32 func_001E8058(u32);
+extern u32 btlGetIndexListCount(u32);
 
-extern u32 func_001E8060(u32, u32);
+extern u32 btlGetIndexListEntry(u32, u32);
 
-extern void func_00208D58(void);
+extern void btlFlagAllUnitsDefeatCandidate(void);
 
 extern void func_00224EE8(u32);
 
@@ -80,12 +80,12 @@ u32 func_00225798(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     BattleActionUnit *owner = actor->owner;
     if (owner->flags & 0x200) {
-        if (func_001E8058(actor->actionEntity) == 1) {
-            BattleActionUnit *target = (BattleActionUnit *)func_001E8060(actor->actionEntity, 0);
+        if (btlGetIndexListCount(actor->actionEntity) == 1) {
+            BattleActionUnit *target = (BattleActionUnit *)btlGetIndexListEntry(actor->actionEntity, 0);
             if ((target->flags & 0x400) == 0) {
                 return 0;
             }
-            func_00208D58();
+            btlFlagAllUnitsDefeatCandidate();
             func_00224EE8((u32)unit);
             unit->transitionState = 0;
             return 1;
@@ -223,7 +223,7 @@ u32 func_00226868(BattleActionUnit *unit) {
     }
     if (btlHasMarkedEntry14((u32)unit)) {
         if (unit->frameCounter >= 0x34) {
-            func_001E9890();
+            btlClearRuntimeFlag2000();
             func_001E9660((u32)unit, 517.3f, -476.0f, -947.2f, 0.177f,
                            0.283f, 0.042f, 0.933f, 40.0f);
         }

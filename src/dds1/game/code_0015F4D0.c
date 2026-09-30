@@ -7,7 +7,7 @@ extern BillDispatch D_0034E658[];
 extern BillDispatch D_0034E654[];
 extern BillDispatch D_0034E650[];
 extern void func_002DDBF8(void);
-extern void *func_002E1428(void *, s32, s32, s64, s32);
+extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
@@ -71,7 +71,7 @@ typedef struct BillEntryOwner {
     u32 value1C; /* matches DDS2 EffectDispatchState at +0x1C */
 } BillEntryOwner;
 
-void *func_0015F4D0(s32 index, void *arg) {
+void *effBillCreateDispatch(s32 index, void *arg) {
     EffectDispatchState *effect = D_0034E650[index].func(arg);
 
     effect->handler = index;
@@ -154,7 +154,7 @@ s32 func_0015F810(s32 arg0) {
 void *func_0015F818(s32 height, s32 flags) {
     void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
 
-    func_002E1428(packet, flags | 0x54, 9, 0x525252521, height);
+    sdfConsInitPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
     return packet;
 }
 
@@ -190,7 +190,7 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_00160690);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_001606C0);
 
-void func_00160800(SoundMixer *mixer) {
+void sndReleaseAllVoices(SoundMixer *mixer) {
     SoundVoice *voice = mixer->voiceList;
     SoundVoice *next;
 
@@ -221,7 +221,7 @@ s32 func_001608B8(SoundMixer *mixer, u16 kind) {
     return mixer->banks[bank].value78;
 }
 
-void func_00160910(SoundVoice *voice) {
+void sndUnlinkVoice(SoundVoice *voice) {
     SoundVoice **link = &voice->mixer->voiceList;
     SoundVoice *cur;
 

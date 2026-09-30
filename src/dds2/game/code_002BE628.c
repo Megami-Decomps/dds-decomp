@@ -30,7 +30,7 @@ extern void func_002C76A8(s32);
 extern void func_002C7168(void);
 extern void func_00203E18(s32);
 extern void func_00232390(s32, s32);
-extern s32 skillApplyFieldUseEffect(s32, s32, s32, s32);
+extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern u32 ptyGetSkillNibbleState(s32, u16);
 
 extern void evtStageTestStop(void);
@@ -166,7 +166,7 @@ typedef struct StageGraphicsCallback {
 } StageGraphicsCallback;
 
 extern void *sdfAllocPacketAligned(s32);
-extern void sdfResetPacketList(void *);
+extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, s32);
 extern void func_00103790(void *, s32, s32, s32, s32);
 extern s32 func_0033D810();
@@ -1264,7 +1264,7 @@ u32 func_002C5140(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", skillApplyFieldUseEffect);
+INCLUDE_ASM(const s32, "game/code_002BE628", ptySkillApplyFieldUseEffect);
 
 u8 func_002C5338(u32 id) {
     return *(s8 *)((id & 0xffff) * 2 + D_00435E1C) == '\x01';
@@ -1472,7 +1472,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", battleItemApplyPermanentBonus);
+INCLUDE_ASM(const s32, "game/code_002BE628", btlItemApplyPermanentBonus);
 
 s32 func_002C59B0(void) {
     if (func_0011B260(1)) return 1;
@@ -1587,7 +1587,7 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
             return 0;
         }
         if (commit != 0) {
-            skillApplyFieldUseEffect(skill, id & 0xFFFF, target, (s32)entry);
+            ptySkillApplyFieldUseEffect(skill, id & 0xFFFF, target, (s32)entry);
             func_002C5030(id & 0xFFFF, (u8 *)target);
             mnuInitPartyPanelSlots((PartyPanel *)partyPanel);
             func_002BCA98(skill);
@@ -1668,7 +1668,7 @@ void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     func_002C6E20(-1);
 }
 
-void evtStageTestOffsetEntryPosition(s32 index, s32 dx, s32 dy, s32 dz) {
+void mnuOffsetPanelPosition(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
     StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
     f32 x = entry->position[0] + (f32)dx;
@@ -1680,7 +1680,7 @@ void evtStageTestOffsetEntryPosition(s32 index, s32 dx, s32 dy, s32 dz) {
     entry->position[2] = z;
 }
 
-void evtStageTestOffsetEntryRotation(s32 index, s32 dx, s32 dy, s32 dz) {
+void mnuOffsetPanelTarget(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
     StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
     f32 x = entry->rotation[0] + (f32)dx;
@@ -1759,7 +1759,7 @@ void evtStageTestStop(void) {
         func_002C76F0();
     }
     if (state->model != 0) {
-        func_002322E8(state->model);
+        mdlDestroyContext(state->model);
         state->model = 0;
         state->unk70 = 0;
     }
@@ -2014,7 +2014,7 @@ void func_002C76F0(void) {
     if (effectHandle == 0) {
         return;
     }
-    func_00203E90(effectHandle);
+    sndDestroyFileQueueWrapper(effectHandle);
     stage->effect = 0;
 }
 
@@ -2055,7 +2055,7 @@ void *evtCreateBattleStageTestCamera(void) {
 void *evtBattleStageTestScreen(void) {
     void *packets = sdfAllocPacketAligned(0x20);
 
-    sdfResetPacketList(packets);
+    sdfInitPacketList(packets);
     func_00103790(packets, 0x84, 0x46, 0x14, 9);
     sdfAppendPacket(packets, func_0033D810(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
     sdfAppendPacket(packets, func_0033D810(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
@@ -2082,7 +2082,7 @@ void *evtBattleStageTestScreen(void) {
 }
 
 void func_002C7C00(void) {
-    evtDestroyWorldSecondaryNode();
+    evtDestroySecondaryWorldNode();
 }
 
 void func_002C7C18(void) {
@@ -2112,7 +2112,7 @@ s32 btlDestroyStageTask(object)
     if (object->kind == 6) {
         s32 resource = object->resource;
         if (resource != 0) {
-            func_0033FD30(resource);
+            sdfDevQueueReleaseState(resource);
         }
         func_00346AF8(object->payload);
         func_00328E48(object->allocation);
