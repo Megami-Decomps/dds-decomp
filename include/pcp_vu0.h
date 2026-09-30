@@ -156,6 +156,10 @@
     ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_MUL(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+/* vf.xyz = -vf.xyz, w kept (vsub.xyz vf,vf0,vf; vf0.xyz is 0): the reversed
+ * direction after a matrix apply (95 retail sites, battle and effects). */
+#define VU0_NEGATE_XYZ(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyz " #vf ", vf0, " #vf "\n\t.set reorder")
 /* vf.w = 0 (vmulx.w vf,vf,vf0x) and vf.w = 1 (vmove.w vf,vf0): the w fix-up
  * retail does before packing a colour or storing a point/direction. */
 #define VU0_CLEAR_W(vf) __asm__ volatile ( \
