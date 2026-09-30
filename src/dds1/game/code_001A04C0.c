@@ -4325,7 +4325,23 @@ void btlQueueScene(u32 arg0) {
     *(u32 *)(temp_v0 + 0x20c) = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", btlUpdateScene);
+extern void btlSetScene(s32);
+extern s32 D_00359A8C[];
+
+void btlUpdateScene(void) {
+    s32 context = func_001A17F0();
+    s32 next = *(s32 *)(context + 0x20C);
+    s32 result;
+    if (next != 0) {
+        btlSetScene(next);
+        *(s32 *)(context + 0x20C) = 0;
+    }
+    result = ((s32 (*)(s32))D_00359A8C[*(s32 *)(context + 0x208) * 3])(context);
+    if (result != 0) {
+        btlQueueScene(result);
+    }
+    *(s32 *)(context + 0x210) += 1;
+}
 
 void btlResetToInitialScene(void) {
     s32 temp_v0;
@@ -5393,7 +5409,29 @@ void func_001D00E0(s32 object) {
 void func_001D0148(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", btlUnitTurnEndCommit);
+extern void func_001FEB90(s32 task);
+extern void btlResetIndexWork();
+
+void btlUnitTurnEndCommit(s32 task) {
+    void (*hook)(s32) = *(void (**)(s32))(func_001A17F0() + 0x600);
+    s32 owner = *(s32 *)(task + 0x18);
+
+    if (hook != 0) {
+        hook(task);
+    }
+    func_001FEB90(task);
+    btlResetIndexWork((u8 *)task + 0x20);
+    *(s32 *)(owner + 0x2F4) = -1;
+    *(u32 *)(task + 0xC) &= ~1;
+    *(s32 *)(task + 0x14) += 1;
+    *(u32 *)(owner + 0x110) &= ~0x4000;
+    func_001C80C8(task);
+    if (*(u32 *)(*(s32 *)(task + 0x18) + 0x110) & 0x20) {
+        btlUnitTurnEndStateSelect((u8 *)task);
+    } else {
+        btlDispatchStateHandler(task, 2);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D0210);
 
@@ -6672,7 +6710,20 @@ void func_001D5DF8(u8 *object, s32 index, s32 argument, f32 scale) {
     func_001D5578(object, index, argument, value * scale);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", btlGetSlotRateKind);
+s32 btlGetSlotRateKind(u8 *object, s32 index) {
+    u8 *resource = (u8 *)func_001A2FD8(*(s32 *)(object + 0xC4), *(s32 *)(object + 0xC8));
+    s32 value = *(s16 *)(resource + index * 20 + 0x30);
+
+    switch (value) {
+    case 0:
+        return 0;
+    case 1:
+    case 2:
+    case 3:
+        return 2;
+    }
+    return 0;
+}
 
 void btlUpdateUnitEffects(void) {
     s32 context = func_001A17F0();
