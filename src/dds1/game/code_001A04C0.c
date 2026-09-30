@@ -468,7 +468,17 @@ void func_001A0CA0(void) {
     D_003BB2E8 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A0CB0);
+u64 func_001A0CB0(void) {
+    s64 value = D_003BB2E8 + 1;
+
+    if (value < 0) {
+        value = 1;
+        D_003BB2E8 = value;
+    } else {
+        D_003BB2E8 = value;
+    }
+    return value;
+}
 
 void func_001A0CD8(void) {
     s32 temp_v0;
@@ -1078,7 +1088,55 @@ void btlTickActorEntryCountdowns(u8 *scene) {
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A5030);
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A51C8);
+extern s32 D_003BAA5C;
+
+s32 func_001A51C8(u8 *actor, s32 attr) {
+    u32 value = 100;
+
+    switch (attr) {
+    case 0:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23C)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x1E0) * (f32)value);
+        }
+        break;
+    case 2:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23D)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x1E8) * (f32)value);
+        }
+        break;
+    case 3:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23E)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x1F0) * (f32)value);
+        }
+        break;
+    case 4:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23F)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x1F8) * (f32)value);
+        }
+        break;
+    case 5:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x240)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x200) * (f32)value);
+        }
+        break;
+    case 6:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x241)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x208) * (f32)value);
+        }
+        break;
+    case 8:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x242)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x210) * (f32)value);
+        }
+        break;
+    case 9:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x243)) {
+            value = (u32)(*(f32 *)(D_003BAA5C + 0x218) * (f32)value);
+        }
+        break;
+    }
+    return value;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A53D8);
 
@@ -1266,7 +1324,18 @@ s32 func_001A7D38(u8 *acquirer, u8 *enemy) {
     return money;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A7DF0);
+extern f32 func_001A7C20(u8 *, u8 *, s32);
+
+s32 func_001A7DF0(u8 *arg0, u8 *arg1) {
+    u8 *entry = (u8 *)(D_003BAA1C + *(u16 *)(arg1 + 0x124) * 76);
+    f32 ratio = func_001A7C20(arg0, arg1, 0);
+    u32 ep = (u32)((f32)*(u16 *)(entry + 0x30) * ratio);
+    if (*(u32 *)entry & 0x2000) {
+        ep *= 100;
+    }
+    func_001FB0A8("btl:ep=%d[%d,%.3f](hunt)\n", ep, *(u16 *)(entry + 0x30), ratio);
+    return ep;
+}
 
 u32 func_001A7ED8(void) {
     return 0;
@@ -1540,7 +1609,23 @@ f32 func_001A90B0(s32 unused0, s32 unused1, s32 index) {
     return (f32)*(u16 *)(D_003BAA50 + index * 56 + 0x22) / 100.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A90F0);
+u32 func_001A90F0(u32 flags, u32 secondary, u32 points, s32 index) {
+    if (flags & 0x20000) return 0x1194;
+    if (flags & 0x40000) return 0x1194;
+    if (flags & 0x10000) return points + 0x64;
+    if (flags & 2) return points + 0x64;
+    if (secondary & 4) return points >> 1;
+    if (secondary & 2) return points >> 1;
+    if (flags & 4) {
+        if (*(u16 *)(D_003BAA50 + index * 56 + 0x16) == 8 ||
+            *(u16 *)(D_003BAA50 + index * 56 + 0x16) == 10) {
+            return points;
+        }
+        if (*(u8 *)(D_003BAA50 + index * 56 + 2) == 2) return points;
+        return points + 0x64;
+    }
+    return points;
+}
 
 s32 func_001A91A8(u32 flags, u32 secondary) {
     if (flags & 0x20000) return 1;
@@ -4640,7 +4725,33 @@ INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D0498);
 void func_001D0590(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D0598);
+void func_001D0598(s32 arg0) {
+    if ((*(u32 *)(arg0 + 8) & 8) != 0) {
+        if (fldReleaseIdleSceneActorResources((SceneActor *)*(s32 *)(arg0 + 0x18)) == 0) {
+            return;
+        }
+        if (*(s32 *)(arg0 + 0x18) != 0) {
+            btlReleaseUnitResources((BtlUnit *)*(s32 *)(arg0 + 0x18));
+            {
+                u8 *fx = (u8 *)*(s32 *)(arg0 + 0x18);
+                *(u32 *)(fx + 0x54) = 0x80808080;
+                *(u32 *)(fx + 0x84) = 0x80808080;
+                *(u32 *)(fx + 0x110) = *(u32 *)(fx + 0x110) & 0x700;
+                btlInitUnitFxDefaults(fx);
+            }
+            {
+                u8 *model = (u8 *)*(s32 *)(arg0 + 0x18);
+                PCP_COPY_VECTOR(model + 0x60, model + 0x30);
+                PCP_COPY_VECTOR(model + 0x70, model + 0x40);
+                *(s32 *)(model + 0x2F0) = -1;
+            }
+            *(u32 *)(arg0 + 0x18) = 0;
+            *(u32 *)(arg0 + 8) &= ~8;
+        }
+    }
+    func_001C8818(arg0);
+    *(u32 *)(arg0 + 8) |= 2;
+}
 
 void func_001D0668(s32 arg0) {
     *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x110) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x110) | 0x4000
@@ -5698,7 +5809,28 @@ INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D5578);
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D5990);
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D5D58);
+s32 func_001D5D58(u8 *object) {
+    s32 value;
+    if ((*(u32 *)(object + 0x110) & 2) == 0) {
+        return 0;
+    }
+    {
+        s32 (*callback)(s32) = *(s32 (**)(s32))(func_001A17F0() + 0x5A4);
+        if (callback != 0 && callback(0) == *(s32 *)(object + 0xEC)) {
+            return 1;
+        }
+    }
+    value = *(s32 *)(object + 0xEC);
+    switch (value) {
+    case 0:
+    case 2:
+    case 9:
+    case 10:
+    case 11:
+        return 1;
+    }
+    return 0;
+}
 
 extern void func_001D5578(u8 *, s32, s32, f32);
 
