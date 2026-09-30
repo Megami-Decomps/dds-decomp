@@ -114,7 +114,46 @@ s32 func_0014F780(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014F4C8", fldCreateFieldEffectTask);
+extern void func_002E84A0(u8 *);
+
+extern void fileManagerResetSubsystems(void);
+
+extern void func_00150040(void);
+
+extern void parSysReset(void);
+
+extern void func_00153680(void);
+
+extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
+
+extern void func_0014F860(void);
+
+extern void effManagerUpdateAndDispatch(void);
+
+extern void effManagerInitializeSubsystems(void);
+
+extern void func_0018CE38(void);
+
+extern void effInitWorks(void);
+
+extern void effBTLFieldColorResetFlags(void);
+
+extern u8 D_0034DF38[];
+
+extern char D_003BB008[];
+
+void fldCreateFieldEffectTask(void) {
+    func_002E84A0(D_0034DF38);
+    fileManagerResetSubsystems();
+    func_00150040();
+    parSysReset();
+    func_00153680();
+    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, func_0014F860, NULL, 0);
+    kwlnTaskCreate(D_003BB008, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
+    func_0018CE38();
+    effInitWorks();
+    effBTLFieldColorResetFlags();
+}
 
 INCLUDE_SDATA(const s32, "game/code_0014F4C8", D_003BB008);
 

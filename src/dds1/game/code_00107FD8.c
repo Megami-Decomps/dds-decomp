@@ -244,6 +244,14 @@ extern void sdfAppendPacket(void *, void *);
 
 extern u8 *func_002E13E0(void *, s32);
 
+extern void *sdfCreateResetPacketList(void);
+
+extern void func_002D5608(void *);
+
+extern void sdfPktInit(void *, s32, s32, s32, s32);
+
+extern void *func_002E4908();
+
 void evtSubmitGsRegister47(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
@@ -369,7 +377,20 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109AF0);
+void func_00109AF0(s32 x, s32 y, s32 arg2, s32 arg3) {
+    u8 pkt[16];
+    void *list;
+    void *packet;
+    u8 *surface;
+    list = (void *)sdfCreateResetPacketList();
+    packet = sdfAllocPacketAligned(0x40);
+    func_002D5608(packet);
+    sdfAppendPacket(list, packet);
+    sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, arg2);
+    sdfAppendPacket(list, func_002E4908(pkt, arg3));
+    surface = D_00325748;
+    (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+}
 
 void func_00109BC0(s32 width, s32 height, u64 first, u64 second) {
     u64 resource;

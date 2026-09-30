@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad0[0x80];
@@ -78,9 +79,13 @@ void func_00113080(void) {
     func_00110B50();
 }
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00113098);
+void func_00113098(void *obj) {
+    VU0_LOAD_MATRIX(*(void **)((u8 *)obj + 0x18));
+}
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_001130B8);
+void func_001130B8(void *obj, void *src) {
+    PCP_COPY_VECTOR(*(u8 **)((u8 *)obj + 0x18) + 0x60, src);
+}
 
 void func_001130D0(EEF0Node *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x18) + 0x60;

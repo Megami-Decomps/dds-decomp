@@ -21,7 +21,7 @@ void dds3SetSlotKey(void *arg0, void *arg1);
 
 void dds3ReplaceObjectResource(void *arg0);
 
-extern AdminWork *func_00112AB0(void);
+extern AdminWork *func_00112AB0();
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
 
@@ -57,7 +57,13 @@ void *dds3SetSlotByKind(ObjBase *object, ObjData *data) {
     return dds3ExchangeSlot(object, data, func_00111980(data->kind));
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ExchangeSlot);
+void *dds3ExchangeSlot(void *obj, void *data, s32 index) {
+    void *old;
+
+    old = dds3GetSlot(obj, index);
+    ((ObjBase *)func_00112AB0(obj))->slots[index] = data;
+    return old;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetSlot);
 

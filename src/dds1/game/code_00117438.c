@@ -358,7 +358,19 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001189A0);
 
-INCLUDE_ASM(const s32, "game/code_00117438", sdfQueryChannelValue);
+u32 sdfQueryChannelValue(s32 channel, s32 arg1, SdfPackedValue *item) {
+    u32 result;
+    u32 mode = D_003BAA50[channel * 0x38 + 0x24];
+
+    if (mode != 1 && mode != 3) {
+        return 0;
+    }
+    result = func_001189A0(channel, arg1, item);
+    if (!((item->flagsAndValue & SDF_PACKED_CHANNEL_MASK) < result)) {
+        result = 0;
+    }
+    return result;
+}
 
 u32 sdfQueryChannelBits(s32 index, s32 arg1, SdfPackedValue *packed) {
     u32 result;

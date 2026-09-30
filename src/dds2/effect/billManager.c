@@ -27,7 +27,7 @@ typedef struct {
     s32 recordAddress;
 } BillOut;
 
-extern u64 billCreateIndexed(u64, u32);
+extern BillObj *billCreateIndexed(s32 index, u32 data);
 
 extern u64 func_00343ED0(u64, u32 *, u64);
 
@@ -170,11 +170,23 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00159848);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001598D8);
 
-INCLUDE_ASM(const s32, "effect/billManager", billCreateIndexed);
+extern BillDispatch D_003AA990[];
 
-u64 billCreateFromResource(u64 owner, u64 resource) {
+extern void func_00158D68(void *);
+
+BillObj *billCreateIndexed(s32 index, u32 data) {
+    BillObj *newobj;
+
+    newobj = D_003AA990[index].func(data);
+    func_00158D68(newobj);
+    newobj->unk2C = index;
+    newobj->unk28 = D_003AA990[index].unk4;
+    return newobj;
+}
+
+u64 billCreateFromResource(u32 owner, u64 resource) {
     u64 allocation;
-    u64 billboard;
+    BillObj *billboard;
     u32 header[4];
 
     allocation = func_00343ED0(resource, header, 0);

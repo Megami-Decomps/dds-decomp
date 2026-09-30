@@ -41,8 +41,6 @@ extern char D_0039FCA0[];
 extern char D_0039FCB0[];
 extern char D_0039FCC8[];
 extern void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep);
-extern void fldStepIntByPad(u32, u32, u32, u32, u32, u32, u8 *);
-extern void fldStepColorChannelByPad(u32 *arg0, s32 arg1, u8 *arg2);
 extern s32 fldTestDrawUpdate(void);
 extern void fldClearCameraMoveMode(void);
 extern void fldSetCameraMoveMode(s32);
@@ -189,13 +187,155 @@ void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigSte
     fldStepValueByPad(value, D_00324530, min, max, step, bigStep);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldStepIntByPad);
-
-void func_0011DC50(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
-    fldStepIntByPad(a, b, c, d, e, f, D_00324530);
+void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad) {
+    s64 value;
+    switch (type) {
+    case 1:
+        value = *(u8 *)ptr;
+        break;
+    case 2:
+        value = *(u16 *)ptr;
+        break;
+    case 4:
+        value = *(u32 *)ptr;
+        break;
+    case -1:
+        value = *(s8 *)ptr;
+        break;
+    case -2:
+        value = *(s16 *)ptr;
+        break;
+    case -4:
+        value = *(s32 *)ptr;
+        break;
+    default:
+        return;
+    }
+    if (pad[5] & 0x80) {
+        value += big;
+        if (max < value) {
+            value = min;
+        }
+    } else if (pad[5] & 2) {
+        value += big;
+        if (max < value) {
+            value = max;
+        }
+    } else if (pad[4] & 0x80) {
+        value -= big;
+        if (value < min) {
+            value = max;
+        }
+    } else if (pad[4] & 2) {
+        value -= big;
+        if (value < min) {
+            value = min;
+        }
+    } else if (pad[7] & 0x80) {
+        value += small;
+        if (max < value) {
+            value = min;
+        }
+    } else if (pad[7] & 2) {
+        value += small;
+        if (max < value) {
+            value = max;
+        }
+    } else if (pad[6] & 0x80) {
+        value -= small;
+        if (value < min) {
+            value = max;
+        }
+    } else if (pad[6] & 2) {
+        value -= small;
+        if (value < min) {
+            value = min;
+        }
+    } else {
+        return;
+    }
+    switch (type) {
+    case -1:
+    case 1:
+        *(u8 *)ptr = value;
+        break;
+    case -2:
+    case 2:
+        *(u16 *)ptr = value;
+        break;
+    case -4:
+    case 4:
+        *(u32 *)ptr = value;
+        break;
+    }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldStepColorChannelByPad);
+void func_0011DC50(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
+    fldStepIntByPad(ptr, type, min, max, step, bigStep, (s8 *)D_00324530);
+}
+
+s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
+    s32 old = *color;
+    s32 byte = old;
+    s32 value;
+    switch (channel) {
+    case 0:
+        break;
+    case 1:
+        byte = old >> 8;
+        break;
+    case 2:
+        byte = old >> 16;
+        break;
+    case 3:
+        byte = old >> 24;
+        break;
+    }
+    byte &= 0xFF;
+    if (((pad[5] & 0x80) || (pad[7] & 0x80)) && byte == 0xFF) {
+        byte = 0;
+    } else if (pad[5] & 2) {
+        byte += 10;
+        if (byte >= 0x100) {
+            byte = 0xFF;
+        }
+    } else if (((pad[4] & 0x80) || (pad[6] & 0x80)) && byte == 0) {
+        byte = 0xFF;
+    } else if (pad[4] & 2) {
+        byte -= 10;
+        if (byte < 0) {
+            byte = 0;
+        }
+    } else if (pad[7] & 2) {
+        byte += 1;
+        if (byte >= 0x100) {
+            byte = 0xFF;
+        }
+    } else if (pad[6] & 2) {
+        byte -= 1;
+        if (byte < 0) {
+            byte = 0;
+        }
+    } else {
+        return 0;
+    }
+    switch (channel) {
+    case 0:
+        value = (old & 0xFFFFFF00) | byte;
+        break;
+    case 1:
+        value = (old & 0xFFFF00FF) | (byte << 8);
+        break;
+    case 2:
+        value = (old & 0xFF00FFFF) | (byte << 16);
+        break;
+    default:
+        value = (old & 0x00FFFFFF) | (byte << 24);
+        break;
+    }
+    *color = value;
+    return value != old;
+}
 
 void func_0011DE00(u32 *arg0, s32 arg1) {
     fldStepColorChannelByPad(arg0, arg1, D_00324530);
@@ -787,7 +927,53 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FB60);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122498);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122710);
+f32 func_00122710(f32 angle) {
+    f32 best;
+    s32 index;
+    f32 diff;
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    best = 900.0f;
+    index = -1;
+    diff = fabsf(fldAngleDifference(0.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 0;
+    }
+    diff = fabsf(fldAngleDifference(90.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 2;
+    }
+    diff = fabsf(fldAngleDifference(180.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 4;
+    }
+    diff = fabsf(fldAngleDifference(270.0f, angle));
+    if (diff < best) {
+        index = 6;
+    }
+    switch (index) {
+    case 0:
+        angle = 0.0f;
+        break;
+    case 2:
+        angle = 90.0f;
+        break;
+    case 4:
+        angle = 180.0f;
+        break;
+    case 6:
+        angle = 270.0f;
+        break;
+    }
+    return angle;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001228D8);
 
