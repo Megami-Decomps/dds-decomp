@@ -1,6 +1,5 @@
 #include "common.h"
 
-extern s32 func_00112AB0(void);
 
 extern u32 func_001119D0(u32);
 
@@ -16,11 +15,30 @@ typedef struct WorldInnerState {
 } WorldInnerState;
 
 typedef struct WorldInnerOwner {
-    u8 pad00[0x18];
+    u8 pad00[0xF];
+    u8 kind; /* 0x0F selects which handle the object owns */
+    u8 pad10[0x8];
     WorldInnerState *inner;
 } WorldInnerOwner;
 
-INCLUDE_ASM(const s32, "game/code_00112AB0", func_00112AB0);
+/* Each object kind keeps its handle in a different structure. */
+s32 func_00112AB0(object)
+    WorldInnerOwner *object;
+{
+    s32 handle;
+
+    handle = 0;
+    switch (object->kind - 4) {
+    case 0: handle = dds3GetCameraHandle(object); break;
+    case 1: handle = func_00113230(object); break;
+    case 2: handle = func_00113F00(object); break;
+    case 3: handle = effObjGetObjectHandle(object); break;
+    case 4: handle = dds3GetResourceOwnerHandle(object); break;
+    case 5: handle = func_00116800(object); break;
+    }
+    return handle;
+}
+
 
 void func_00112B58(u32 unused, u32 value) {
     WorldInnerState *inner;
