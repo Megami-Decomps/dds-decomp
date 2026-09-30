@@ -65,7 +65,7 @@ extern u32 D_00436108;
 
 extern u32 D_00435FCC;
 
-extern u32 fileRequestIsReady(u32 arg0);
+extern u32 fileRequestIsReady(u32 request);
 
 extern u8 D_00435BB4;
 
@@ -81,9 +81,9 @@ extern u32 D_00435FC4;
 
 extern u8 D_00436020[];
 
-extern void func_003298C0(u32 arg0);
+extern void func_003298C0(u32 handle);
 
-extern void func_002C7CE8(u32 arg0);
+extern void func_002C7CE8(u32 handle);
 
 extern u8 D_003846F0[];
 
@@ -123,9 +123,9 @@ extern u8 D_00444980[];
 
 extern u8 D_00444970[];
 
-extern void func_00113110(s64 arg0, void *arg1, void *arg2);
+extern void func_00113110(s64, void *, void *);
 
-extern f32 sdfAtan2(f32 arg0, f32 arg1);
+extern f32 sdfAtan2(f32 y, f32 x);
 
 extern f32 D_0038BAB0[];
 
@@ -327,9 +327,9 @@ extern s32 D_00389780[];
 
 extern s32 D_004360E8;
 
-extern void func_00232E38(s32 arg0);
+extern void func_00232E38(s32 object);
 
-extern void func_00232E80(s32 arg0);
+extern void func_00232E80(s32 object);
 
 extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 
@@ -341,7 +341,7 @@ extern u32 D_00436134;
 
 extern u32 D_003899B4[];
 
-extern void func_00135A68(u32 arg0, s32 arg1);
+extern void func_00135A68(u32 value, s32 enabled);
 
 extern u32 D_00436128;
 
@@ -415,6 +415,25 @@ typedef struct FldAreaResourceState {
     s32 area;             /* 0x7C */
     s32 room;             /* 0x80 */
 } FldAreaResourceState;
+/* The 0x28-byte scene table checks its status halfword at +0x20. */
+typedef struct FldSceneFlagRecord {
+    u8 pad00[0x20];
+    u16 status;
+    u8 pad22[6];
+} FldSceneFlagRecord;
+
+/* Model's color state and node index, observed in the paired color setters. */
+typedef struct FldModelColorState {
+    u8 pad00[0x1C];
+    u32 color;
+} FldModelColorState;
+
+typedef struct FldModelHandle {
+    u8 pad00[0x12];
+    s16 node;
+    u8 pad14[4];
+    FldModelColorState *colorState;
+} FldModelHandle;
 
 extern void btlActivateRuntime(s32 mode);
 
@@ -424,7 +443,7 @@ extern char D_00436098[];
 
 extern void func_0022E338(void);
 
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern s32 kwlnTaskCreate(s32 name, s32 priority, s32, s32, s32, s32, s32);
 
 extern void func_00131000(s16, s32, f32);
 
@@ -478,8 +497,8 @@ extern void *dds3GetWorldSecondaryObject(void);
 
 typedef struct FldActionSpawn {
     u32 unk0;
-    u32 arg1;
-    u32 arg0;
+    u32 secondValue;
+    u32 firstValue;
 } FldActionSpawn;
 
 void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
@@ -488,7 +507,7 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
 
     dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, list++) {
-        handle = evtSpawnActionObj2(list->arg0, list->arg1);
+        handle = evtSpawnActionObj2(list->firstValue, list->secondValue);
         if (i == 0) {
             D_00389770[0] = handle;
         }
@@ -539,8 +558,8 @@ void func_00129D40(u32 *request) {
     func_00128FE8(request[1], *request, 1);
 }
 
-s32 func_00129D60(s32 arg0) {
-    return arg0 + 0xc;
+s32 func_00129D60(s32 record) {
+    return record + 0xc;
 }
 
 void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
@@ -1075,8 +1094,8 @@ INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413198);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B2B8);
 
-void func_0012B4A0(u32 arg0) {
-    D_00435FC0 = arg0;
+void func_0012B4A0(u32 value) {
+    D_00435FC0 = value;
 }
 
 void fldInitDisplayObjects(void) {
@@ -1110,7 +1129,7 @@ typedef struct FldSpriteVertex {
     FldSpriteCorner corner[2];
 } FldSpriteVertex;
 
-void func_0012B518(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 arg9) {
+void func_0012B518(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 drawMode) {
     s32 handle = sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)func_0033A2D0(handle);
     s32 ubase = u * 16;
@@ -1138,7 +1157,7 @@ void func_0012B518(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32
     vtx->corner[1].flag = 0;
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
-    sdfConsCreateDrawPacket(command, arg9, 0);
+    sdfConsCreateDrawPacket(command, drawMode, 0);
     sdfAppendPacket(command, handle);
     descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
     descriptor->open(descriptor, command);
@@ -1312,8 +1331,8 @@ void func_0012BBD0(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
 extern void sdfAppendPacket(u64, u64);
 
-void func_0012BC38(u32 arg0) {
-    D_00436060 = arg0;
+void func_0012BC38(u32 displayIndex) {
+    D_00436060 = displayIndex;
 }
 
 void func_0012BC40(s32 lower, s32 bits, u64 upper) {
@@ -1332,7 +1351,7 @@ void func_0012BC40(s32 lower, s32 bits, u64 upper) {
     descriptor->open(descriptor, command);
 }
 
-void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 packet;
     u64 *data;
@@ -1341,7 +1360,7 @@ void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     data = func_0033A290(packet, 0x30);
-    data[4] = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    data[4] = (field17 << 17) | 0x10000 | (flag15 << 15) | (flag14 << 14) | (field12 << 12) | (field4 << 4) | (flag1 << 1) | flag0;
     data[5] = 0x47;
     sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
@@ -1831,10 +1850,10 @@ void func_0012DD48(void) {
     }
 }
 
-void func_0012DDC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
+void func_0012DDC0(s32 x, s32 y, u64 firstPayload, u64 secondPayload) {
     u64 object;
 
-    object = func_0019F460(arg0 << 4, arg1 << 4, 0, arg2, arg3, 0);
+    object = func_0019F460(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     func_0019D518(object);
     func_0019C5B0(object);
 }
@@ -2023,8 +2042,8 @@ s32 func_0012EB78(void) {
     return result;
 }
 
-void func_0012EBB8(u32 arg0) {
-    D_00436088 = arg0;
+void func_0012EBB8(u32 value) {
+    D_00436088 = value;
 }
 
 s32 fldEncProc(void) {
@@ -2039,7 +2058,7 @@ s32 fldEncProc(void) {
 }
 
 void func_0012EBF8(u32 mode, s32 recordIndex) {
-    if ((recordIndex < 0x400) && ((*(u16 *)((s32)recordIndex * 0x28 + D_00435E04 + 0x20) & 0x8000) != 0))
+    if ((recordIndex < 0x400) && ((((FldSceneFlagRecord *)D_00435E04)[recordIndex].status & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
         func_0012EC80(3);
@@ -2215,21 +2234,21 @@ void func_00130F80(void) {
     D_004360D0 = 0;
 }
 
-void func_00130F98(u32 arg0) {
-    if (arg0 == 0) {
+void func_00130F98(u32 enabled) {
+    if (enabled == 0) {
         D_004360D0 = 0;
         if (D_00435F14 != 0) {
             func_00232E80(D_00435F14);
         }
     } else {
-        D_004360D0 = arg0;
+        D_004360D0 = enabled;
         func_00232E38(D_00435F14);
     }
 }
 
-void func_00130FF0(u32 arg0, u32 arg1) {
-    D_004360C4 = arg0;
-    D_004360C8 = arg1;
+void func_00130FF0(u32 first, u32 second) {
+    D_004360C4 = first;
+    D_004360C8 = second;
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131000);
@@ -2369,9 +2388,9 @@ void func_00133A50(void) {
     u8 hasSecondObject;
 
     hasSecondObject = D_00435F10 != 0;
-    *(u32 *)(*(s32 *)(D_00435F14 + 0x18) + 0x1c) = 0;
+    ((FldModelHandle *)D_00435F14)->colorState->color = 0;
     if (hasSecondObject) {
-        *(u32 *)(*(s32 *)(D_00435F18 + 0x18) + 0x1c) = 0;
+        ((FldModelHandle *)D_00435F18)->colorState->color = 0;
     }
 }
 
@@ -2379,9 +2398,9 @@ void func_00133A78(void) {
     u8 hasSecondObject;
 
     hasSecondObject = D_00435F10 != 0;
-    *(u32 *)(*(s32 *)(D_00435F14 + 0x18) + 0x1c) = 0x80808080;
+    ((FldModelHandle *)D_00435F14)->colorState->color = 0x80808080;
     if (hasSecondObject) {
-        *(u32 *)(*(s32 *)(D_00435F18 + 0x18) + 0x1c) = 0x80808080;
+        ((FldModelHandle *)D_00435F18)->colorState->color = 0x80808080;
     }
 }
 
@@ -2401,7 +2420,7 @@ void func_00133AE8(void) {
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133B10);
 
 void func_00133C18(void) {
-    s16 node = *(s16 *)(D_00435F14 + 0x12);
+    s16 node = ((FldModelHandle *)D_00435F14)->node;
     if (fldGetLocationCoordinateValue(D_00389770[4], D_00389770[5] + 1) & 0x40) {
         func_00131000(node, 0x12, 10.0f);
         return;
@@ -2410,7 +2429,7 @@ void func_00133C18(void) {
 }
 
 void func_00133C90(void) {
-    s16 node = *(s16 *)(D_00435F14 + 0x12);
+    s16 node = ((FldModelHandle *)D_00435F14)->node;
     if (fldGetLocationCoordinateValue(D_00389770[4], D_00389770[5] + 1) & 0x40) {
         func_00131000(node, 0x12, 0.0f);
         return;
@@ -2620,26 +2639,26 @@ void fldSetSwayMode(u32 mode) {
     D_00436114 = 0;
 }
 
-void func_00135578(u32 arg0) {
-    D_00436108 = arg0;
+void func_00135578(u32 value) {
+    D_00436108 = value;
 }
 
 u32 func_00135580(void) {
     return D_00436108;
 }
 
-void func_00135588(u32 arg0) {
-    D_003899C0[0] = arg0;
+void func_00135588(u32 value) {
+    D_003899C0[0] = value;
 }
 
 u32 func_00135598(void) {
     return D_003899C0[0];
 }
 
-void func_001355A8(u32 arg0) {
+void func_001355A8(u32 value) {
     u32 selectedValue = D_003899B4[0];
 
-    D_0043612C = arg0;
+    D_0043612C = value;
     D_00436130 = 0;
     D_00436134 = selectedValue;
     func_00135A68(selectedValue, 1);
