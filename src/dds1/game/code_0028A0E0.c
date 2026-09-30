@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "fpu.h"
 
 
 
@@ -500,8 +501,6 @@ typedef struct LoadObj {
     s16 unk48;          /* 0x48 */
     u16 unk4A;
 } LoadObj;
-
-extern LoadObj *func_00295F58(void *source);
 
 extern void *mcdHandleSaveSetupDone(void);
 
@@ -2089,11 +2088,71 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B29A0);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290FE0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002911B8);
+typedef struct FileConfigListNode {
+    u8 pad00[0x58];
+    struct FileConfigListNode *next; /* 0x58 */
+    u8 pad5C[0x14];
+    void *resource;                  /* 0x70 */
+} FileConfigListNode;
+
+typedef struct FileConfigList {
+    u8 pad00[0x10];
+    FileConfigListNode *head; /* 0x10 */
+    u8 pad14[0xC];
+    s32 count;                /* 0x20 */
+} FileConfigList;
+
+/* Save/config task context: its four resource slots start at +0x10. */
+typedef struct FileConfigTask {
+    void *memory;   /* 0x00 */
+    s32 state;      /* 0x04 */
+    u8 pad08[4];
+    u32 frame;      /* 0x0C: FileConfigList, passed to menu window drawing */
+    u32 slots[4];   /* 0x10 */
+    u8 pad20[4];
+    s32 result;     /* 0x24: negative when the queued load failed */
+    u8 pad28[0xC];
+    u32 pending;    /* 0x34: zero when no load can start */
+    u32 effect;     /* 0x38: effect resource requested for the save scene */
+} FileConfigTask;
+
+extern void mnuReleaseEffectResource(u32);
+extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
+
+void func_002911B8(void) {
+    s32 request = 1;
+    FileConfigListNode *node;
+    s32 i;
+
+    if (D_003BD938 != 0) {
+        D_003BC8DC = *(u32 *)(D_003BAA00 + 0xA54);
+        if (*(u32 *)(D_003BD938 + 4) == 1) {
+            func_001028E8(2, &request, 4, 0);
+            mnuReleaseEffectResource(((FileConfigTask *)D_003BD938)->effect);
+            mnuAdvanceTitleStateUnderSemaphore();
+        }
+        node = ((FileConfigList *)((FileConfigTask *)D_003BD938)->frame)->head;
+        for (i = 0; i < ((FileConfigList *)((FileConfigTask *)D_003BD938)->frame)->count; i++) {
+            func_002CFF98(node->resource);
+            node = node->next;
+        }
+        func_0027B368(((FileConfigTask *)D_003BD938)->frame);
+        ((FileConfigTask *)D_003BD938)->frame = 0;
+        for (i = 0; i < 4; i++) {
+            if (((FileConfigTask *)D_003BD938)->slots[i] != 0) {
+                func_002BDD60(((FileConfigTask *)D_003BD938)->slots[i]);
+                ((FileConfigTask *)D_003BD938)->slots[i] = 0;
+            }
+        }
+        func_002D0918(((FileConfigTask *)D_003BD938)->memory);
+        D_003BD938 = 0;
+        D_003BC8D5 = 0;
+    }
+}
 
 extern s32 func_00290FE0();
 extern s32 func_00291418(void);
-extern s32 func_002911B8(void);
+
 extern s32 fileStartQueuedLoad(void);
 extern u32 fileGetConfigTaskFailure(void);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 optionA, s32 optionB, void *update, void *destroy, s32 data);
@@ -2128,16 +2187,7 @@ s32 fileConsumeConfigTaskReady(void) {
     return 0;
 }
 
-/* Save/config task context: its four resource slots start at +0x10. */
-typedef struct FileConfigTask {
-    u8 pad0[0xC];
-    u32 frame;      /* 0x0C: passed to menu window drawing */
-    u32 slots[4];   /* 0x10 */
-    u8 pad20[4];
-    s32 result;     /* 0x24: negative when the queued load failed */
-    u8 pad28[0xC];
-    u32 pending;    /* 0x34: zero when no load can start */
-} FileConfigTask;
+
 
 u32 fileGetConfigTaskSlot(s32 slot) {
     if (slot < 4) {
@@ -2252,7 +2302,44 @@ void mnuProjectViewPoint(void) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292CE0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292E50);
+extern s32 func_00292CE0();
+
+/* vu0 routine: distance between the projected view point and a second point offset perpendicular to
+   the camera axis by rate; 0 when either projection (func_00292CE0) fails. Point comes in vf10. */
+f32 func_00292E50(f32 rate) {
+    f32 scale[4];
+    f32 second[4];
+    f32 first[4];
+    f32 origin[4];
+    f32 dx;
+    f32 dy;
+
+    VU0_STORE_VF(vf10, origin);
+    if (func_00292CE0() == 0) {
+        return 0.0f;
+    }
+    VU0_STORE_VF(vf10, first);
+    scale[0] = scale[1] = scale[2] = rate;
+    VU0_LOAD_VF(vf10, origin);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, D_00324690);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_003246A0);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    if (func_00292CE0() == 0) {
+        return 0.0f;
+    }
+    VU0_STORE_VF(vf10, second);
+    dx = second[0] - first[0];
+    dy = second[1] - first[1];
+    VU0_LOAD_VF(vf10, first);
+    return fsqrtf(dx * dx + dy * dy);
+}
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
@@ -3143,7 +3230,12 @@ typedef struct FileCellGrid {
     u32 layers;
 } FileCellGrid;
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295F58);
+LoadObj *func_00295F58(FileCellGrid *grid) {
+    u32 cols = grid->cols;
+    u32 count = (cols != 0 ? cols : grid->rows) * (cols != 0 ? grid->rows : grid->layers);
+
+    return fileLoadObjectCreate((void *)(count <= 0x12C ? count : 0x12C));
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2A18);
 
