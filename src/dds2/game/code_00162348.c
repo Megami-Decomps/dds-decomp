@@ -271,8 +271,8 @@ void func_00162980(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
-void func_00162988(u32 arg0, u8 arg1) {
-    parObjSetMode(arg0, arg1);
+void func_00162988(ParObj *work, u8 mode) {
+    parObjSetMode(work, mode);
 }
 
 s64 func_001629A0(ParObj *work) {
@@ -489,7 +489,7 @@ void parControlInit(void) {
     D_00451F60.unk4 = 0x4000;
 }
 
-ParSystem *func_00163290(s32 count, s32 perCell, s32 arg2, u32 kind) {
+ParSystem *func_00163290(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     s32 total;
     s32 handle;
     s32 base;
@@ -505,11 +505,11 @@ ParSystem *func_00163290(s32 count, s32 perCell, s32 arg2, u32 kind) {
         perCell = perCell * 6 + 6;
     } else {
         perCell = perCell * 2;
-        if (arg2 != 0) {
-            if (perCell % arg2 != 0) {
-                perCell = perCell / arg2 + 2;
+        if (groupDivisor != 0) {
+            if (perCell % groupDivisor != 0) {
+                perCell = perCell / groupDivisor + 2;
             } else {
-                perCell = perCell / arg2;
+                perCell = perCell / groupDivisor;
             }
         }
         perCell &= ~1;
@@ -541,16 +541,16 @@ ParSystem *func_00163290(s32 count, s32 perCell, s32 arg2, u32 kind) {
     system->cellCount = count;
     system->unk2 = 2;
     system->vertexWordCount = perCell;
-    system->unkC = arg2;
+    system->unkC = groupDivisor;
     system->handle = handle;
     system->unk24 = 0;
     system->unk28 = 0;
     return system;
 }
 
-void func_001634A8(s32 arg0) {
-    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
-    func_003297C8(*(u32 *)(arg0 + 0x10));
+void func_001634A8(ParSystem *system) {
+    sdfQueueAssetRelease(system->object);
+    func_003297C8(system->handle);
 }
 
 void parCellInit(ParSystem *system, s32 index) {
@@ -595,7 +595,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163628);
 void func_001636F0(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
     s32 count = cell->vertexCount / 3;
-    u8 *vertex = *(u8 **)cell;
+    u8 *vertex = (u8 *)cell->history;
     s32 i;
     __asm__ volatile (
         ".set noreorder\n"
@@ -624,7 +624,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163780);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
 
-void parFillVertexPairs(ParSystem *system, s32 arg1, s32 arg2) {
+void parFillVertexPairs(ParSystem *system, s32 firstWord, s32 secondWord) {
     s32 count = system->cellCount;
     s32 perCell = system->vertexWordCount >> 1;
     s32 i;
@@ -641,8 +641,8 @@ void parFillVertexPairs(ParSystem *system, s32 arg1, s32 arg2) {
                 j = perCell;
                 do {
                     j--;
-                    vertex[0] = arg1;
-                    vertex[1] = arg2;
+                    vertex[0] = firstWord;
+                    vertex[1] = secondWord;
                     vertex += 2;
                 } while (j != 0);
             }
@@ -656,7 +656,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163BC8);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163D18);
 
-void func_00163EE0(ParSystem *system, s32 arg1, s32 arg2) {
+void func_00163EE0(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 3;
@@ -673,9 +673,9 @@ void func_00163EE0(ParSystem *system, s32 arg1, s32 arg2) {
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 4) = arg1;
-                    *(s32 *)(vertex + 8) = arg2;
-                    *(s32 *)(vertex + 0) = arg2;
+                    *(s32 *)(vertex + 4) = middleWord;
+                    *(s32 *)(vertex + 8) = edgeWord;
+                    *(s32 *)(vertex + 0) = edgeWord;
                     vertex += 0xC;
                 } while (j != 0);
             }
@@ -689,7 +689,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00163F50);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164208);
 
-void func_00164318(ParSystem *system, s32 arg1, s32 arg2, s32 arg3) {
+void func_00164318(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 6;
@@ -706,12 +706,12 @@ void func_00164318(ParSystem *system, s32 arg1, s32 arg2, s32 arg3) {
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 0x0) = arg3;
-                    *(s32 *)(vertex + 0x4) = arg2;
-                    *(s32 *)(vertex + 0x8) = arg1;
-                    *(s32 *)(vertex + 0xC) = arg1;
-                    *(s32 *)(vertex + 0x10) = arg2;
-                    *(s32 *)(vertex + 0x14) = arg3;
+                    *(s32 *)(vertex + 0x0) = edgeWord;
+                    *(s32 *)(vertex + 0x4) = middleWord;
+                    *(s32 *)(vertex + 0x8) = centerWord;
+                    *(s32 *)(vertex + 0xC) = centerWord;
+                    *(s32 *)(vertex + 0x10) = middleWord;
+                    *(s32 *)(vertex + 0x14) = edgeWord;
                     vertex += 0x18;
                 } while (j != 0);
             }
@@ -725,7 +725,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164390);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001644B0);
 
-void parFillCellVertexQuads(ParSystem *system, s32 arg1, s32 arg2) {
+void parFillCellVertexQuads(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 count = system->cellCount;
     s32 perCell = system->vertexWordCount >> 2;
     s32 i;
@@ -742,10 +742,10 @@ void parFillCellVertexQuads(ParSystem *system, s32 arg1, s32 arg2) {
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 0x8) = arg1;
-                    *(s32 *)(vertex + 0x4) = arg1;
-                    *(s32 *)(vertex + 0xC) = arg2;
-                    *(s32 *)(vertex + 0x0) = arg2;
+                    *(s32 *)(vertex + 0x8) = middleWord;
+                    *(s32 *)(vertex + 0x4) = middleWord;
+                    *(s32 *)(vertex + 0xC) = edgeWord;
+                    *(s32 *)(vertex + 0x0) = edgeWord;
                     vertex += 0x10;
                 } while (j != 0);
             }
@@ -759,7 +759,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164690);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164748);
 
-void func_00164848(ParSystem *system, s32 arg1, s32 arg2, s32 arg3) {
+void func_00164848(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 5;
@@ -776,11 +776,11 @@ void func_00164848(ParSystem *system, s32 arg1, s32 arg2, s32 arg3) {
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 0x0) = arg3;
-                    *(s32 *)(vertex + 0x4) = arg2;
-                    *(s32 *)(vertex + 0x8) = arg1;
-                    *(s32 *)(vertex + 0xC) = arg2;
-                    *(s32 *)(vertex + 0x10) = arg3;
+                    *(s32 *)(vertex + 0x0) = edgeWord;
+                    *(s32 *)(vertex + 0x4) = middleWord;
+                    *(s32 *)(vertex + 0x8) = centerWord;
+                    *(s32 *)(vertex + 0xC) = middleWord;
+                    *(s32 *)(vertex + 0x10) = edgeWord;
                     vertex += 0x14;
                 } while (j != 0);
             }
@@ -825,9 +825,9 @@ ParBlock *func_00165300(s32 count) {
     return block;
 }
 
-void func_001653A8(s32 arg0) {
-    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x10));
-    func_003297C8(*(u32 *)(arg0 + 0x14));
+void func_001653A8(ParBlock *block) {
+    sdfQueueAssetRelease(block->object);
+    func_003297C8(block->handle);
 }
 
 void func_001653D8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
