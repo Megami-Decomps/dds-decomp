@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0024DA58(s32 arg0);
+extern void func_0024DA58(s32 signal);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
@@ -10,12 +10,37 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00254B30);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-/* Store the selected value in the display unit and open its scaled window. */
-void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, s32 context, s32 parameter) {
-    s32 unit = *(s32 *)(context + 0xC);
+typedef struct {
+    u8 pad0[4];
+    u16 index; /* 0x4: index into the display label or marker table */
+} DspEntry;
 
-    **(s32 **)(unit + 0x30) = value;
-    mnuCallInitWide(x << 4, y << 3, z, unit, parameter);
+typedef struct {
+    u8 pad0[0xC];
+    u16 sceneId; /* 0xC: label lookup and displayed scene identifier */
+} DspScene;
+
+typedef struct {
+    DspEntry *entry;   /* 0x0: selected display entry */
+    s32 alternate; /* 0x4: index for the alternate label table */
+} DspSelection;
+
+typedef struct {
+    u8 pad0[0x30];
+    s32 *selectedValue; /* 0x30 */
+} DspUnit;
+
+typedef struct {
+    u8 pad0[0xC];
+    DspUnit *unit; /* 0xC */
+} DspWindowContext;
+
+/* Store the selected value in the display unit and open its scaled window. */
+void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, DspWindowContext *context, s32 parameter) {
+    DspUnit *unit = context->unit;
+
+    *unit->selectedValue = value;
+    mnuCallInitWide(x << 4, y << 3, z, (s32)unit, parameter);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00254C68);
@@ -66,14 +91,14 @@ extern void func_0024DAB8(s32);
 
 /* Populate four menu labels from the current selection and scene metadata. */
 void itfDspPopulatePrimaryLabels(void) {
-    s32 *selection = (s32 *)func_0024FA18();
-    u8 *scene = (u8 *)fldGetSceneMetadataNode();
+    DspSelection *selection = (DspSelection *)func_0024FA18();
+    DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)selection + 4)]);
-    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)selection + 4)]);
-    func_0024DD90(2, &D_003BAA78[*(u16 *)(scene + 0xC)]);
-    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(scene + 0xC)));
+    func_0024DD90(0, &D_003BAA70[selection->entry->index]);
+    func_0024DD90(1, &D_003BAA78[selection->alternate]);
+    func_0024DD90(2, &D_003BAA78[scene->sceneId]);
+    func_003014F0(text, D_003BC468, func_0024F800(scene->sceneId));
     func_0024DD90(3, text);
     func_0024DAE8(0);
     func_0024DA58(0);
@@ -82,14 +107,14 @@ void itfDspPopulatePrimaryLabels(void) {
 
 /* Populate the same menu labels, selecting the alternate display signal. */
 void itfDspPopulateAlternateLabels(void) {
-    s32 *selection = (s32 *)func_0024FA18();
-    u8 *scene = (u8 *)fldGetSceneMetadataNode();
+    DspSelection *selection = (DspSelection *)func_0024FA18();
+    DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)selection + 4)]);
-    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)selection + 4)]);
-    func_0024DD90(2, &D_003BAA78[*(u16 *)(scene + 0xC)]);
-    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(scene + 0xC)));
+    func_0024DD90(0, &D_003BAA70[selection->entry->index]);
+    func_0024DD90(1, &D_003BAA78[selection->alternate]);
+    func_0024DD90(2, &D_003BAA78[scene->sceneId]);
+    func_003014F0(text, D_003BC468, func_0024F800(scene->sceneId));
     func_0024DD90(3, text);
     func_0024DAE8(0);
     func_0024DA58(1);
@@ -98,14 +123,14 @@ void itfDspPopulateAlternateLabels(void) {
 
 /* Populate menu labels for the third display signal. */
 void itfDspPopulateThirdLabels(void) {
-    s32 *selection = (s32 *)func_0024FA18();
-    u8 *scene = (u8 *)fldGetSceneMetadataNode();
+    DspSelection *selection = (DspSelection *)func_0024FA18();
+    DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[*(u16 *)(*(s32 *)selection + 4)]);
-    func_0024DD90(1, &D_003BAA78[*(s32 *)((u8 *)selection + 4)]);
-    func_0024DD90(2, &D_003BAA78[*(u16 *)(scene + 0xC)]);
-    func_003014F0(text, D_003BC468, func_0024F800(*(u16 *)(scene + 0xC)));
+    func_0024DD90(0, &D_003BAA70[selection->entry->index]);
+    func_0024DD90(1, &D_003BAA78[selection->alternate]);
+    func_0024DD90(2, &D_003BAA78[scene->sceneId]);
+    func_003014F0(text, D_003BC468, func_0024F800(scene->sceneId));
     func_0024DD90(3, text);
     func_0024DA58(2);
 }
@@ -136,19 +161,26 @@ extern f32 func_002E8398(s32);
 
 extern void func_00255838(void *);
 
-void func_002559F8(s32 *state) {
+typedef struct {
+    s32 countdown;
+    s32 period;
+    f32 strength;
+    u8 particles[8][12];
+} DspParticleState;
+
+void func_002559F8(DspParticleState *state) {
     u8 *particle;
     s32 value;
     s32 i;
 
-    state[0] = state[0] - 1;
-    if (state[0] < 0) {
+    state->countdown = state->countdown - 1;
+    if (state->countdown < 0) {
         value = func_002E8398(0) * 60.0f + 60.0f;
-        state[1] = value;
-        state[0] = value;
-        *(f32 *)(state + 2) = func_002E8398(0) * 0.20000005f + 0.4f;
+        state->period = value;
+        state->countdown = value;
+        state->strength = func_002E8398(0) * 0.20000005f + 0.4f;
     }
-    particle = (u8 *)(state + 3);
+    particle = state->particles[0];
     for (i = 7; i >= 0; i--) {
         func_00255838(particle);
         particle += 12;
@@ -163,27 +195,27 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00255D00);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255E08);
 
-void itfDspDrawMarksA(s32 arg0, s32 arg1) {
-    func_0024E260(0, 0, 0, arg0, 0x3A, arg1);
-    func_0024E260(0, 0, 0, arg0, 0x38, arg1);
-    func_0024E260(0, 0, 0, arg0, 0x39, arg1);
+void itfDspDrawMarksA(s32 scale, s32 context) {
+    func_0024E260(0, 0, 0, scale, 0x3A, context);
+    func_0024E260(0, 0, 0, scale, 0x38, context);
+    func_0024E260(0, 0, 0, scale, 0x39, context);
 }
 
-void itfDspDrawMarksB(s32 arg0, s32 arg1) {
-    func_0024E260(0, 0, 0, arg0, 0xF, arg1);
-    func_0024E260(0, 0, 0, arg0, 0x10, arg1);
-    func_0024E260(0, 0, 0, arg0, 0x12, arg1);
+void itfDspDrawMarksB(s32 scale, s32 context) {
+    func_0024E260(0, 0, 0, scale, 0xF, context);
+    func_0024E260(0, 0, 0, scale, 0x10, context);
+    func_0024E260(0, 0, 0, scale, 0x12, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255FF8);
 
-void itfDspDrawStrip(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_0024E260(arg0, arg1, arg2, arg3, 4, arg4);
-    func_0024E260(arg0, arg1, arg2, arg3, 5, arg4);
-    func_0024E260(arg0, arg1, arg2, arg3, 0xA, arg4);
-    func_0024E260(arg0, arg1, arg2, arg3, 0xB, arg4);
-    func_0024E260(arg0, arg1, arg2, arg3, 0xC, arg4);
-    func_0024E260(arg0, arg1, arg2, arg3, 0xD, arg4);
+void itfDspDrawStrip(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
+    func_0024E260(x, y, layer, scale, 4, context);
+    func_0024E260(x, y, layer, scale, 5, context);
+    func_0024E260(x, y, layer, scale, 0xA, context);
+    func_0024E260(x, y, layer, scale, 0xB, context);
+    func_0024E260(x, y, layer, scale, 0xC, context);
+    func_0024E260(x, y, layer, scale, 0xD, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_002561A0);
@@ -194,10 +226,10 @@ typedef struct Bytes7 {
 
 extern Bytes7 D_003BC478[];
 
-void func_00256290(s32 a, s32 b, s32 c, s32 entry, s32 d, s32 e) {
+void func_00256290(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
     Bytes7 table = D_003BC478[0];
 
-    func_0024E260(a, b, c, d, table.b[*(u16 *)(entry + 4)], e);
+    func_0024E260(x, y, layer, scale, table.b[entry->index], context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_002562E8);
@@ -259,7 +291,7 @@ extern s32 func_00256400(s32);
 extern s32 func_00256540(DspListNode *, s32, s32);
 
 /* Advance the display list's timer and release completed nodes in order. */
-s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
+s32 itfAdvanceDisplayList(DspListHead *head, s32 unused, s32 context) {
     s32 *counter = &head->frameCount;
     DspListNode *node = head->first;
     s32 index = 0;
@@ -273,7 +305,7 @@ s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
         return 1;
     }
     do {
-        s32 completed = func_00256540(node, index, arg2);
+        s32 completed = func_00256540(node, index, context);
 
         index++;
         if (completed != 0) {
@@ -286,19 +318,19 @@ s32 itfAdvanceDisplayList(DspListHead *head, s32 arg1, s32 arg2) {
     return 0;
 }
 
-void itfDspDrawScaledA(s32 arg0, s32 arg1, s32 arg2) {
-    func_0024E260(0, 0, 0, arg1, 0x16, arg2);
-    func_0024E260(0, 0, 0, arg1 * 0.5f, 0x18, arg2);
+void itfDspDrawScaledA(s32 unused, s32 scale, s32 context) {
+    func_0024E260(0, 0, 0, scale, 0x16, context);
+    func_0024E260(0, 0, 0, scale * 0.5f, 0x18, context);
 }
 
-void itfDspDrawScaledB(s32 arg0, s32 arg1, s32 arg2) {
-    func_0024E260(0, 0, 0, arg1, 0x17, arg2);
-    func_0024E260(0, 0, 0, arg1 * 0.5f, 0x19, arg2);
+void itfDspDrawScaledB(s32 unused, s32 scale, s32 context) {
+    func_0024E260(0, 0, 0, scale, 0x17, context);
+    func_0024E260(0, 0, 0, scale * 0.5f, 0x19, context);
 }
 
-void itfDspDrawPair(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_0024E260(arg0, arg1, arg2, arg3, 0x14, arg4);
-    func_0024E260(arg0, arg1, arg2, arg3, 0x15, arg4);
+void itfDspDrawPair(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
+    func_0024E260(x, y, layer, scale, 0x14, context);
+    func_0024E260(x, y, layer, scale, 0x15, context);
 }
 
 void func_00256E88(void) {
@@ -309,9 +341,24 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00256E90);
 extern s32 func_0024FA18(void);
 extern u32 func_00255FF8(u8 *, s32);
 
-void func_002570A8(s32 obj, s32 arg1, s32 arg2) {
+typedef struct {
+    u8 pad0[4];
+    u8 *entry; /* 0x4: entry tested by func_00255FF8 */
+} DspEntryLink;
+
+typedef struct {
+    u8 pad0[8];
+    DspEntryLink *link; /* 0x8 */
+} DspEntryContainer;
+
+typedef struct {
+    u8 pad0[0x484];
+    DspEntryContainer *entries; /* 0x484 */
+} DspDisplayObject;
+
+void func_002570A8(DspDisplayObject *obj, s32 scale, s32 context) {
     s32 target = func_0024FA18();
-    u8 *entry = *(u8 **)(*(u8 **)(*(u8 **)(obj + 0x484) + 8) + 4);
+    u8 *entry = obj->entries->link->entry;
     u32 flags;
     s32 kind;
 
@@ -326,7 +373,7 @@ void func_002570A8(s32 obj, s32 arg1, s32 arg2) {
         } else {
             kind = 7;
         }
-        func_0024E260(0, 0, 1, arg1, kind, arg2);
+        func_0024E260(0, 0, 1, scale, kind, context);
     }
 }
 
