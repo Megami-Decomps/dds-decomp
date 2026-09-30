@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s8 D_0037F770[13];
+extern u32 D_0037F770[4];
 
 extern u32 D_00435CD4;
 
@@ -100,7 +100,7 @@ extern u16 D_00438E54;
 
 extern u16 D_00438E56;
 
-extern void effCopyCh75Common(void *arg0);
+extern void effCopyCh75Common(void *);
 
 extern void func_00197378(void);
 
@@ -114,7 +114,7 @@ extern u16 D_00438E1E;
 
 extern u16 D_00438E1A;
 
-extern void effCopyCh71Common(void *arg0);
+extern void effCopyCh71Common(void *);
 
 extern void func_00197060(void);
 
@@ -128,7 +128,7 @@ extern u16 D_00438E2A;
 
 extern u16 D_00438E26;
 
-extern void effCopyCh72Common(void *arg0);
+extern void effCopyCh72Common(void *);
 
 extern void func_00197118(void);
 
@@ -144,7 +144,7 @@ extern u16 D_00438E32;
 
 extern void func_001971E0(void);
 
-extern void effCopyCh76Common(void *arg0);
+extern void effCopyCh76Common(void *);
 
 extern void func_001971D0(void);
 
@@ -178,7 +178,7 @@ extern u16 D_00438E4E;
 
 extern u16 D_00438E4A;
 
-extern void func_00197328(void *arg0);
+extern void func_00197328(void *);
 
 extern void func_00197310(void);
 
@@ -207,7 +207,7 @@ extern u16 D_00438E42;
 
 extern u16 D_00438E3E;
 
-extern void func_00196FF0(void *arg0);
+extern void func_00196FF0(void *);
 
 extern void func_00196FD8(void);
 
@@ -220,7 +220,7 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyRow128);
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyWords20);
 
 void dds3DrawSetIndexedWord(u32 value, s32 index) {
-    *(u32 *)(D_0037F770 + index * 4) = value;
+    D_0037F770[index] = value;
 }
 
 /* Default draw viewport is 512 by 448 pixels. */
@@ -231,25 +231,25 @@ void kwlnDrawInitRect(DrawRect *rect) {
     rect->x = 0;
 }
 
-void kwlnDrawSetDc8Second(u32 arg0) {
-    D_0043E548.unk04 = arg0;
+void kwlnDrawSetDc8Second(u32 value) {
+    D_0043E548.unk04 = value;
 }
 
-void kwlnDrawSetDc8First(u32 arg0) {
-    D_0043E548.u00.w = arg0;
+void kwlnDrawSetDc8First(u32 value) {
+    D_0043E548.u00.w = value;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106460);
 
-void kwlnDrawSetupDc8(s32 arg0) {
+void kwlnDrawSetupDc8(s32 mode) {
     DrawBlkDC8 *blk = &D_0043E548;
-    s32 t = arg0;
+    s32 requestedMode = mode;
 
     D_00438E4C = 0;
     D_00438E48 = 0;
     D_00438E4E = blk->u00.b[3];
-    D_00438E4A = t;
-    if (t == 0) {
+    D_00438E4A = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x80000;
         kwlnDrawInitRect(&blk->r08);
         func_00197328(blk);
@@ -293,13 +293,13 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106658);
 
 void kwlnDrawSetupE08(s32 mode) {
     DrawBlkE08 *blk = &D_0043E588;
-    s32 t = mode;
+    s32 requestedMode = mode;
 
     D_00438E58 = 0;
     D_00438E54 = 0;
     D_00438E5A = blk->u0C.b[3];
-    D_00438E56 = t;
-    if (t == 0) {
+    D_00438E56 = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x200000;
         effCopyCh75Common(blk);
         func_00197378();
@@ -347,32 +347,32 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     D_00438DB4 = 0;
 }
 
-void kwlnDrawSetD88FloatTriple(u32 arg0, f32 farg0, f32 farg1) {
-    D_0043E508.unk08 = farg0;
-    D_0043E508.unk0C = farg1;
-    D_0043E508.unk04 = arg0;
+void kwlnDrawSetD88FloatTriple(u32 value, f32 first, f32 second) {
+    D_0043E508.unk08 = first;
+    D_0043E508.unk0C = second;
+    D_0043E508.unk04 = value;
 }
 
-void kwlnDrawSetD88First(u32 arg0) {
-    D_0043E508.u00.w = arg0;
+void kwlnDrawSetD88First(u32 value) {
+    D_0043E508.u00.w = value;
 }
 
-void kwlnDrawSetD88Pair(u32 arg0, u32 arg1) {
-    D_0043E508.unk10 = arg0;
-    D_0043E508.unk14 = arg1;
+void kwlnDrawSetD88Pair(u32 first, u32 second) {
+    D_0043E508.unk10 = first;
+    D_0043E508.unk14 = second;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_001068C8);
 
-void kwlnDrawSetupD88(s32 arg0) {
+void kwlnDrawSetupD88(s32 mode) {
     DrawBlkD88 *blk = &D_0043E508;
-    s32 t = arg0;
+    s32 requestedMode = mode;
 
     D_00438E40 = 0;
     D_00438E3C = 0;
     D_00438E42 = blk->u00.b[3];
-    D_00438E3E = t;
-    if (t == 0) {
+    D_00438E3E = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x20000;
         kwlnDrawInitRect(&blk->r18);
         func_00196FF0(blk);
@@ -398,33 +398,33 @@ void kwlnDrawEnableD88(s32 enabled) {
     }
 }
 
-void kwlnDrawSetC70FloatTriple(u32 arg0, f32 farg0, f32 farg1) {
-    D_0043E3F0.unk0C = farg0;
-    D_0043E3F0.unk10 = farg1;
-    D_0043E3F0.unk08 = arg0;
+void kwlnDrawSetC70FloatTriple(u32 value, f32 first, f32 second) {
+    D_0043E3F0.unk0C = first;
+    D_0043E3F0.unk10 = second;
+    D_0043E3F0.unk08 = value;
 }
 
-void kwlnDrawSetC70Second(u32 arg0) {
-    D_0043E3F0.u04.w = arg0;
+void kwlnDrawSetC70Second(u32 value) {
+    D_0043E3F0.u04.w = value;
 }
 
-void kwlnDrawSetC70Triple(u32 arg0, u32 arg1, u32 arg2) {
-    D_0043E3F0.unk00 = arg0;
-    D_0043E3F0.unk14 = arg1;
-    D_0043E3F0.unk18 = arg2;
+void kwlnDrawSetC70Triple(u32 first, u32 second, u32 third) {
+    D_0043E3F0.unk00 = first;
+    D_0043E3F0.unk14 = second;
+    D_0043E3F0.unk18 = third;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106AE8);
 
 void kwlnDrawSetupC70(s32 mode) {
     DrawBlkC70 *blk = &D_0043E3F0;
-    s32 t = mode;
+    s32 requestedMode = mode;
 
     D_00438E1C = 0;
     D_00438E18 = 0;
     D_00438E1E = blk->u04.b[3];
-    D_00438E1A = t;
-    if (t == 0) {
+    D_00438E1A = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x1000;
         effCopyCh71Common(blk);
         func_00197060();
@@ -436,13 +436,13 @@ void kwlnDrawSetupC70(s32 mode) {
 
 void kwlnDrawSetupC70B(s32 mode) {
     DrawBlkC70 *blk = &D_0043E3F0;
-    s32 t = mode;
+    s32 requestedMode = mode;
 
     D_00438E1E = 0;
     D_00438E18 = 0;
     D_00438E1C = blk->u04.b[3];
-    D_00438E1A = t;
-    if (t == 0) {
+    D_00438E1A = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x1000;
         D_00435CD4 &= ~0x8000;
         effCopyCh71Common(blk);
@@ -453,41 +453,42 @@ void kwlnDrawSetupC70B(s32 mode) {
     }
 }
 
-void kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 farg0, f32 farg1, f32 farg2) {
-    if (arg0 >= 0x65) {
+void kwlnDrawSetCd0Clamped(s32 boundedValue, s32 lastWord, s32 secondWord, s32 fourthWord,
+                           f32 firstFloat, f32 secondFloat, f32 thirdFloat) {
+    if (boundedValue >= 0x65) {
         D_00435D04++;
-        arg0 = 0x64;
+        boundedValue = 0x64;
     }
-    D_0043E450.unk00 = arg0;
-    D_0043E450.unk28 = arg1;
-    D_0043E450.unk04 = arg2;
-    D_0043E450.unk08 = farg0;
-    D_0043E450.unk14 = farg1;
-    D_0043E450.unk18 = farg2;
-    D_0043E450.unk10 = arg3;
+    D_0043E450.unk00 = boundedValue;
+    D_0043E450.unk28 = lastWord;
+    D_0043E450.unk04 = secondWord;
+    D_0043E450.unk08 = firstFloat;
+    D_0043E450.unk14 = secondFloat;
+    D_0043E450.unk18 = thirdFloat;
+    D_0043E450.unk10 = fourthWord;
 }
 
-void kwlnDrawSetCd0Fourth(u32 arg0) {
-    D_0043E450.u0C.w = arg0;
+void kwlnDrawSetCd0Fourth(u32 value) {
+    D_0043E450.u0C.w = value;
 }
 
-void kwlnDrawSetCd0Triple(u32 arg0, u32 arg1, u32 arg2) {
-    D_0043E450.unk24 = arg0;
-    D_0043E450.unk1C = arg1;
-    D_0043E450.unk20 = arg2;
+void kwlnDrawSetCd0Triple(u32 first, u32 second, u32 third) {
+    D_0043E450.unk24 = first;
+    D_0043E450.unk1C = second;
+    D_0043E450.unk20 = third;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106D10);
 
 void kwlnDrawSetupCd0(s32 mode) {
     DrawBlkCD0 *blk = &D_0043E450;
-    s32 t = mode;
+    s32 requestedMode = mode;
 
     D_00438E28 = 0;
     D_00438E24 = 0;
     D_00438E2A = blk->u0C.b[3];
-    D_00438E26 = t;
-    if (t == 0) {
+    D_00438E26 = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x2000;
         effCopyCh72Common(blk);
         func_00197118();
@@ -514,41 +515,42 @@ void kwlnDrawEnableCd0(s32 mode) {
     }
 }
 
-void kwlnDrawSetD30Clamped(s32 arg0, s32 arg1, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4) {
-    if (arg0 >= 0x29) {
+void kwlnDrawSetD30Clamped(s32 boundedValue, s32 fourthWord, f32 firstFloat, f32 secondFloat,
+                           f32 thirdFloat, f32 fourthFloat, f32 fifthFloat) {
+    if (boundedValue >= 0x29) {
         D_00435D08++;
-        arg0 = 0x28;
+        boundedValue = 0x28;
     }
-    D_0043E4B0.unk00 = arg0;
-    D_0043E4B0.unk04 = farg0;
-    D_0043E4B0.unk08 = farg1;
-    D_0043E4B0.unk14 = farg2;
-    D_0043E4B0.unk18 = farg3;
-    D_0043E4B0.unk1C = farg4;
-    D_0043E4B0.unk10 = arg1;
+    D_0043E4B0.unk00 = boundedValue;
+    D_0043E4B0.unk04 = firstFloat;
+    D_0043E4B0.unk08 = secondFloat;
+    D_0043E4B0.unk14 = thirdFloat;
+    D_0043E4B0.unk18 = fourthFloat;
+    D_0043E4B0.unk1C = fifthFloat;
+    D_0043E4B0.unk10 = fourthWord;
 }
 
-void kwlnDrawSetD30Fourth(u32 arg0) {
-    D_0043E4B0.u0C.w = arg0;
+void kwlnDrawSetD30Fourth(u32 value) {
+    D_0043E4B0.u0C.w = value;
 }
 
-void kwlnDrawSetD30Triple(u32 arg0, u32 arg1, u32 arg2) {
-    D_0043E4B0.unk28 = arg0;
-    D_0043E4B0.unk20 = arg1;
-    D_0043E4B0.unk24 = arg2;
+void kwlnDrawSetD30Triple(u32 first, u32 second, u32 third) {
+    D_0043E4B0.unk28 = first;
+    D_0043E4B0.unk20 = second;
+    D_0043E4B0.unk24 = third;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106F38);
 
 void kwlnDrawSetupD30(s32 mode) {
     DrawBlkD30 *blk = &D_0043E4B0;
-    s32 t = mode;
+    s32 requestedMode = mode;
 
     D_00438E34 = 0;
     D_00438E30 = 0;
     D_00438E36 = blk->u0C.b[3];
-    D_00438E32 = t;
-    if (t == 0) {
+    D_00438E32 = requestedMode;
+    if (requestedMode == 0) {
         D_00435CD4 &= ~0x800000;
         effCopyCh76Common(blk);
         func_001971D0();

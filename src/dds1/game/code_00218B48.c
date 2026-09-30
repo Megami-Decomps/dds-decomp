@@ -92,55 +92,54 @@ extern void mdlViewer();
 
 extern void mdlViewerEnd();
 
-s32 func_0011D3E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0011E080(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+void func_0011E080(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0014FB70(s32 arg0, float arg1);
+void func_0014FB70(s32, float);
 
-s32 func_0014FD20(s32 arg0);
+s32 func_0014FD20(s32);
 
-void func_00152000(s32 arg0, float arg1, float arg2);
+void func_00152000(s32, float, float);
 
-s32 billCreateIndexed(s32 arg0, s32 arg1);
+s32 billCreateIndexed(s32, s32);
 
-s32 func_0021A608(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 func_0021A608(s32, s32, s32, s32, s32);
 
-s32 func_0021A660(s16 *arg0, s32 arg1);
+s32 func_0021A660(s16 *, s32);
 
 void func_0021B9F8(void);
 
 void func_0021BDD0(void);
 
-void sdfAppendPacket(s32 arg0, s32 arg1);
+void sdfAppendPacket(s32, s32);
 
-void sdfStreamCreateWithParams(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
 
 extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
-extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, s32 data);
+extern s32 kwlnTaskCreate(const char *name, s32 id, s32, s32, void *update, void *destroy, s32 data);
 
 void func_00102A18(void);
 
-void func_00101A80(s32 arg0, s32 arg1);
+void func_00101A80(s32, s32);
 
-void func_0021E3C0(MdlViewState *arg0);
+void func_0021E3C0(MdlViewState *);
 
-void func_002EDBD8(void *buffer, s32 arg1);
+void func_002EDBD8(void *buffer, s32);
 
 void func_002EDC30(void *buffer);
 
-void func_002EDE48(void *buffer, s32 arg1, s32 arg2);
+void func_002EDE48(void *buffer, s32, s32);
 
-void func_00218768(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_00218768(s32, s32, s32, s32);
 
 void func_002EDC50(void *buffer);
 
-s32 *mdlFindViewerRecord(s32 arg0, s32 arg1);
 
-s32 mdlCountRecords(s32 arg0);
+s32 mdlCountRecords(s32);
 
 /* Assemble the resource request in a temporary buffer before loading it. */
 extern void func_002CFF98();
@@ -173,20 +172,20 @@ typedef struct MdlPackageRequest {
     u8 pad34[0xC];
 } MdlPackageRequest;
 
-void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 flags, s32 arg3, s32 arg4) {
+void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s32 requestSecond) {
     u8 buffer[0x40];
 
     func_002EDBD8(buffer, 0);
     if (flags & 2) {
         func_002EDC30(buffer);
     }
-    func_002EDE48(buffer, arg3, arg4);
-    func_00218768(((MdlPackageRequest *)buffer)->handle, arg0, arg1, flags);
+    func_002EDE48(buffer, requestFirst, requestSecond);
+    func_00218768(((MdlPackageRequest *)buffer)->handle, first, second, flags);
     func_002EDC50(buffer);
 }
 
-void func_00218BE8(s32 arg0) {
-    func_002CFF98((void *)arg0);
+void func_00218BE8(s32 resource) {
+    func_002CFF98((void *)resource);
 }
 
 void func_00218C00(void) {
@@ -256,8 +255,8 @@ u16 func_002192C8(MdlRecord *record) {
 }
 
 /* Follow the relative links in a resource's record table to find an ID. */
-s32 *mdlFindViewerRecord(s32 resource, s32 id) {
-    s32 *table = ((MdlViewerResource *)resource)->data->records;
+s32 *mdlFindViewerRecord(MdlViewerResource *resource, s32 id) {
+    s32 *table = resource->data->records;
     s32 *record;
     s32 remaining;
 
@@ -279,7 +278,7 @@ s32 *mdlFindViewerRecord(s32 resource, s32 id) {
 s32 * mdlGetFirstRecord(s32 address) {
     s32 *record = (s32 *)(address + 8);
 
-    if (*record == 0xffff) {
+    if (((MdlRecord *)record)->kind == 0xffff) {
         record = NULL;
     }
     return record;
@@ -288,7 +287,7 @@ s32 * mdlGetFirstRecord(s32 address) {
 s32 * mdlGetNextRecord(MdlRecord *current) {
     s32 *record = (s32 *)((s32)current + current->nextOffset);
 
-    if (*record == 0xffff) {
+    if (((MdlRecord *)record)->kind == 0xffff) {
         record = NULL;
     }
     return record;
@@ -467,8 +466,8 @@ void mdlObjInit(MdlObj *obj, s32 data, s32 attributes) {
     }
 }
 
-void func_00219CC8(u32 arg0) {
-    sdfDevCreateBufferedRequest(arg0, 0x10, 4);
+void func_00219CC8(u32 request) {
+    sdfDevCreateBufferedRequest(request, 0x10, 4);
 }
 
 void func_00219CE8(MdlPartList *list) {
@@ -536,17 +535,17 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
     entry->state = entry->state + 1;
 }
 
-s32 func_00219EA0(s32 resource, s32 index) {
-    s32 tmp;
+s32 func_00219EA0(MdlViewerResource *resource, s32 index) {
+    s32 slotTable;
 
-    tmp = ((MdlViewerResource *)resource)->data->slotTable;
-    if (tmp == 0) {
+    slotTable = resource->data->slotTable;
+    if (slotTable == 0) {
         return 0;
     }
-    if (index >= ((MdlViewerSlots *)tmp)->count) {
+    if (index >= ((MdlViewerSlots *)slotTable)->count) {
         return 0;
     }
-    return ((MdlViewerSlots *)tmp)->first + index * 0x10;
+    return ((MdlViewerSlots *)slotTable)->first + index * 0x10;
 }
 
 typedef struct MdlPartRec {
@@ -569,7 +568,7 @@ typedef struct MdlPartItem {
 extern void *sdfChunkFindRecordById(void *chunk, s32 id);
 
 void func_00219ED8(MdlResourceOwner *owner, MdlPartRec *rec, s32 option, s32 type, s32 (*create)(MdlPartEntry *)) {
-    MdlPartEntry *part = (MdlPartEntry *)func_00219EA0((s32)owner, rec->partIndex);
+    MdlPartEntry *part = (MdlPartEntry *)func_00219EA0((MdlViewerResource *)owner, rec->partIndex);
 
     if (part != NULL) {
         void *chunk = owner->chunk;
@@ -692,7 +691,7 @@ typedef struct MdlSlotRec {
 extern void *sdfFindResourceById(s32 id);
 
 void func_0021A0B0(MdlResourceOwner *owner, MdlEntryRec *entry, s32 option) {
-    MdlSlotRec *slot = (MdlSlotRec *)func_00219EA0((s32)owner, entry->index);
+    MdlSlotRec *slot = (MdlSlotRec *)func_00219EA0((MdlViewerResource *)owner, entry->index);
 
     if (slot != 0) {
         MdlObj *obj = slot->obj;
@@ -717,14 +716,14 @@ void func_0021A0B0(MdlResourceOwner *owner, MdlEntryRec *entry, s32 option) {
 }
 
 void mdlCondInitEntry(s32 entry) {
-    s32 v = ((MdlObjItem *)entry)->obj;
-    if (((MdlObj *)v)->initialized == 0) {
+    s32 object = ((MdlObjItem *)entry)->obj;
+    if (((MdlObj *)object)->initialized == 0) {
         s32 count = ((MdlObjItem *)entry)->param;
-        f32 f = ((MdlObjItem *)entry)->owner->counterSource->value;
-        if ((u32)(s32)f < (u32)count) {
+        f32 counterValue = ((MdlObjItem *)entry)->owner->counterSource->value;
+        if ((u32)(s32)counterValue < (u32)count) {
             return;
         }
-        mdlObjInit(v, ((MdlObjItem *)entry)->data, entry + 0x18);
+        mdlObjInit(object, ((MdlObjItem *)entry)->data, entry + 0x18);
     }
 }
 
@@ -753,7 +752,7 @@ void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecordHeader *record, 
 }
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
-    s32 *block = mdlFindViewerRecord(object, id);
+    s32 *block = mdlFindViewerRecord((MdlViewerResource *)object, id);
     if (block != NULL) {
         s32 *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
@@ -888,15 +887,15 @@ void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
     }
 }
 
-s32 func_0021A608(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    return func_0011D3E8(arg0, arg1, arg2, arg3, arg4, 0x30000000, 0x60404040);
+s32 func_0021A608(s32 x, s32 y, s32 depth, s32 width, s32 height) {
+    return func_0011D3E8(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
-void func_0021A628(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    s32 tmp;
+void func_0021A628(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
+    s32 packet;
 
-    tmp = D_003D7B10[0];
-    sdfAppendPacket(tmp, func_0021A608(arg0, arg1, arg2, arg3, arg4));
+    packet = D_003D7B10[0];
+    sdfAppendPacket(packet, func_0021A608(x, y, depth, width, height));
 }
 
 extern s8 D_00398628[];
@@ -1017,9 +1016,9 @@ typedef struct MdlResource {
     s32 hasEntries; /* 0x1C */
 } MdlResource;
 
-extern MdlResource *func_00217680(s16 arg0, s16 arg1);
+extern MdlResource *func_00217680(s16, s16);
 
-extern void mdlAddEntryFlagged(void *arg0, s32 arg1, s32 arg2);
+extern void mdlAddEntryFlagged(void *, s32, s32);
 
 void func_0021A880(void) {
     MdlResource *resource = func_00217680(D_003D7A50.unk18, D_003D7A50.unk1A);
@@ -1119,9 +1118,9 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ABB8);
 
 extern s32 mdlHasNode(s32 resource, s32 id);
 
-extern void mdlAddEntryFlaggedEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
+extern void mdlAddEntryFlaggedEx(s32 resource, s32 id, s32, f32, f32);
 
-extern void mdlAddEntryPlainEx(s32 resource, s32 id, s32 arg2, f32 arg4, f32 arg5);
+extern void mdlAddEntryPlainEx(s32 resource, s32 id, s32, f32, f32);
 
 void mdlAddViewEntryFlagged(void) {
     f32 low;
@@ -1295,13 +1294,13 @@ typedef struct MdlLoaded {
 } MdlLoaded;
 
 void func_0021C6A0(void) {
-    s32 p = (s32)((MdlLoaded *)D_003D7A50.resources[0])->info->first;
+    s32 firstNode = (s32)((MdlLoaded *)D_003D7A50.resources[0])->info->first;
 
-    if (p != 0) {
-        s16 v = ((MdlCountNode *)p)->count;
+    if (firstNode != 0) {
+        s16 nodeCount = ((MdlCountNode *)firstNode)->count;
 
-        if (v > 0) {
-            func_0021A660((void *)((s32)&D_003D7A50 + 0x3A), v);
+        if (nodeCount > 0) {
+            func_0021A660((void *)((s32)&D_003D7A50 + 0x3A), nodeCount);
         }
     }
 }
@@ -1351,7 +1350,7 @@ u32 func_0021CE70(void) {
 }
 
 s32 mdlCountActiveRecords(void) {
-    s32 resource = D_003D7A50.resources[0];
+    MdlViewerResource *resource = (MdlViewerResource *)D_003D7A50.resources[0];
     s32 first = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
     s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_003D7A50.unk22));
 
@@ -1385,7 +1384,7 @@ extern u8 D_00367BE0[];
 
 extern s32 sdfCreateResetPacketList(void);
 
-extern s32 func_002EF2E0(void *arg0, void *arg1, s32 arg2, s32 arg3);
+extern s32 func_002EF2E0(void *, void *, s32, s32);
 
 void func_0021D5D0(void) {
     s32 list;
@@ -1493,7 +1492,7 @@ void mdlFreeViewResources(void) {
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 flag);
 
-extern void func_00103498(const char *name, s32 arg, s32 arg2, s32 arg3);
+extern void func_00103498(const char *name, s32, s32, s32);
 
 void func_0021E3C0(MdlViewState *view) {
     s32 i;
@@ -1512,11 +1511,11 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E450);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E618);
 
-void func_0021EB10(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 temp = arg2 & 0xffffff;
+void func_0021EB10(s32 first, s32 second, s32 color, s32 variant) {
+    s32 packedColor = color & 0xffffff;
 
-    func_0011E080(D_003D7B50.unk08, arg0, arg1,
-                  (D_003D7B50.unk04 == 0) ? -1 : arg3, temp | 0x80000000, 1, temp);
+    func_0011E080(D_003D7B50.unk08, first, second,
+                  (D_003D7B50.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021EB60);
@@ -1540,12 +1539,12 @@ typedef struct MdlFlagBank {
 
 void mdlFlagClearAll(void) {
     s32 i = 0x7f;
-    u32 *p = ((MdlFlagBank *)D_003BAA00)->words;
+    u32 *word = ((MdlFlagBank *)D_003BAA00)->words;
 
     do {
         i -= 1;
-        *p = 0;
-        p += 1;
+        *word = 0;
+        word += 1;
     } while (i >= 0);
 }
 
@@ -1618,7 +1617,7 @@ void func_0021FA78(void) {
     func_001127A0(object, 0);
 }
 
-extern void func_00111E30(s32 object, s32 arg1, s32 arg2);
+extern void func_00111E30(s32 object, s32, s32);
 
 extern s32 dds3SpawnCameraSlotObj5(s32 counter, f32 *position, f32 *rotation);
 
@@ -1626,7 +1625,7 @@ extern void dds3SetObjectFlags(s32 object, s32 flags);
 
 extern s32 *dds3GetUnk0C(s32 object);
 
-s32 func_0021FB30(s32 arg0, s32 arg1) {
+s32 func_0021FB30(s32 slotKind, s32 resource) {
     f32 position[4];
     f32 rotation[4];
     s32 counter;
@@ -1640,7 +1639,7 @@ s32 func_0021FB30(s32 arg0, s32 arg1) {
     object = dds3SpawnCameraSlotObj5(counter, position, rotation);
     dds3SetObjectFlags(object, 0x20);
     effObjSetInnerFloat(object, 10.0f);
-    func_00111E30(object, arg0, arg1);
+    func_00111E30(object, slotKind, resource);
     if (dds3GetUnk0C(object)[7] != 0) {
         mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
     }
@@ -1654,7 +1653,7 @@ extern void dds3SetSlotByKind(s32 object, s32 slot);
 
 extern void dds3InvokeSlot5Handler(s32 object);
 
-s32 func_0021FC30(s32 arg0, s32 arg1) {
+s32 func_0021FC30(s32 slotKind, s32 resource) {
     f32 position[4];
     f32 rotation[4];
     s32 counter;
@@ -1668,7 +1667,7 @@ s32 func_0021FC30(s32 arg0, s32 arg1) {
     object = dds3SpawnCameraSlotObj5(counter, position, rotation);
     dds3SetObjectFlags(object, 0x20);
     effObjSetInnerFloat(object, 10.0f);
-    func_00111E30(object, arg0, arg1);
+    func_00111E30(object, slotKind, resource);
     mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
     dds3SetSlotByKind(object, (s32)func_00110A48(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3InvokeSlot5Handler(object);
