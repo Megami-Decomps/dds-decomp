@@ -14,11 +14,14 @@ typedef struct {
 } WorldObjectData;
 
 typedef struct {
-    u8 pad00[6];
+    u8 pad00[4];
+    s16 index;   /* 0x04 */
     u16 value06; /* 0x06 */
     u8 pad08[0x10];
     WorldObjectData *data; /* 0x18 */
 } WorldObject;
+
+extern WorldObject *D_003BA9BC;
 
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_001102C8);
@@ -33,9 +36,26 @@ u16 func_00110400(s32 object) {
     return value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110418);
+u32 func_00110418(WorldObject *object, u32 value) {
+    if (object->value06 == 0) {
+        return 0;
+    }
+    if (object->index < 0) {
+        return 0;
+    }
+    ((u32 *)(D_003BA9BC->data->handle14))[object->index * 2] = value;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110458);
+u32 func_00110458(WorldObject *object) {
+    if (object->value06 == 0) {
+        return 0;
+    }
+    if (object->index < 0) {
+        return 0;
+    }
+    return ((u32 *)(D_003BA9BC->data->handle14))[object->index * 2];
+}
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
 u32 func_00110490(s16 *values) {
@@ -43,7 +63,13 @@ u32 func_00110490(s16 *values) {
     return (u32)~(s32)*values >> 0x1f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_001104B0);
+u32 func_001104B0(s16 *values) {
+    if (values[2] < 0) {
+        return 0;
+    }
+    values[2] = *(u16 *)((u8 *)D_003BA9BC->data->handle14 + values[2] * 8 + 4);
+    return (u32)~(s32)values[2] >> 0x1f;
+}
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_001104F8);
 

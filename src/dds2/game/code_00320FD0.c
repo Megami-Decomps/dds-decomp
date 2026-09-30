@@ -4,8 +4,6 @@ extern u32 D_004390C0;
 
 extern u32 D_004390C4;
 
-extern u8 D_004390B8;
-
 extern void (*D_004389C4)(void);
 
 extern u8 D_0045C860[];
@@ -13,6 +11,24 @@ extern u8 D_0045C860[];
 extern u32 D_0043899C;
 
 extern void func_00321908(u32);
+
+extern void *memcpy(void *, const void *, u32);
+
+extern void *memset(void *, s32, u32);
+
+/* Byte cursor state at D_004390B8 (8 bytes). */
+typedef struct CursorState {
+    u8 unk0[2];
+    u16 total;
+    u8 index;
+    u8 limit;
+    u8 step;
+    u8 unk7;
+} CursorState;
+
+extern CursorState D_004390B8;
+
+extern u16 D_0045C866[];
 
 typedef struct ResourceNode {
     u32 id;
@@ -100,19 +116,40 @@ u8 *func_003211F8(void) {
     return D_0045C860;
 }
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321208);
-
-u8 * func_00321238(void) {
-    return &D_004390B8;
+void func_00321208(u8 *src) {
+    memcpy(D_0045C860, src, 16);
 }
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321248);
+u8 * func_00321238(void) {
+    return (u8 *)&D_004390B8;
+}
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321258);
+void func_00321248(u8 arg0, u8 arg1) {
+    D_004390B8.limit = arg0;
+    D_004390B8.step = arg1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_003212A8);
+void func_00321258(u8 arg0, u8 arg1) {
+    memset(&D_004390B8, 0, 8);
+    D_004390B8.limit = arg0;
+    D_004390B8.step = arg1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321308);
+s32 func_003212A8(void) {
+    if (++D_004390B8.index >= D_004390B8.limit) {
+        D_004390B8.index = 0;
+        D_004390B8.total += D_004390B8.step;
+        if (D_004390B8.total >= D_0045C866[0]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void func_00321308(void) {
+    D_004390B8.index = 0;
+    D_004390B8.total = 0;
+}
 
 void func_00321318(u32 arg0, u32 arg1) {
     D_004390C0 = arg0;
