@@ -61,13 +61,25 @@ typedef struct FileRecordSlot {
 
 typedef struct FileRecordSlots {
     u16 type;
-    u8 pad2[6];
+    u8 pad2[2];
+    u32 instances;
     u32 count;
-    u8 padC[4];
+    u32 flags;
     u32 references;
-    u8 pad14[4];
+    u32 unk14;
     FileRecordSlot *slots;
+    u8 *unk1C;
+    u8 *data0;
+    u8 *data1;
+    u32 handle;
 } FileRecordSlots;
+
+typedef struct FileRecordType {
+    void (*acquire)(void *);
+    u32 unk4;
+    s32 slotBytes;
+    s32 dataBytes;
+} FileRecordType;
 
 extern u32 func_0029C230(u32);
 
@@ -105,7 +117,7 @@ extern void *fileUpdateWait(void);
 
 extern void *fileSlotStatusPoll(void);
 
-extern void (*D_0037E550[][4])(void *);
+extern FileRecordType D_0037E550[];
 
 extern void fileResetSlotStates(FileRecordSlots *record);
 
@@ -270,6 +282,7 @@ extern void dds3DispatchIndexedCallback(void *arg0);
 extern void func_002966D8(s32 arg0);
 
 extern void *fileResetSelection(void);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 extern void *fileBeginSlotReset(void);
 
@@ -415,7 +428,11 @@ extern void func_001523B0(void *handle);
 
 extern void effBillSetMode(void *handle, s16 index);
 
-extern void *func_0029A5E0(u16 type, u32 owner, void *data);
+extern void *func_0029A5E0(u16 type, u32 count, void *src);
+
+extern void *func_00151E60(void *handle);
+
+extern void *func_0029C408(void *holder);
 
 /* Init record at D_0037D4E0. */
 typedef struct Init374E0 {
@@ -1077,9 +1094,30 @@ void *fileSlotSelectPollClear(void) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028BAC0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028BCD0);
-
 extern s8 D_00324510[];
+
+void *func_0028BCD0(void) {
+    if (D_003BC858 == 0) {
+        if (func_0028A248(D_00324510[0x21] < 0) ||
+            func_0028A248(D_00324510[0x23] < 0)) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            D_003BC858 = 1;
+        }
+    }
+    if (fileReqPoll() != 0) {
+        if (D_003BC858 == 1) {
+            D_003BC854 = 0;
+            return fileScanSlotStates();
+        }
+        if (fileReqGetStatus(D_003BC7E8) != 1) {
+            D_003BC854 = 0;
+            D_003BC810 = 0;
+            return fileResetSelection();
+        }
+        fileReqBegin(D_003BC7E8);
+    }
+    return NULL;
+}
 
 void func_0028BDA0(void) {
     if (func_0028A248(D_00324510[0x21] < 0) ||
@@ -1109,7 +1147,20 @@ void *func_0028BE60(u32 arg0) {
     return func_0028BE78;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028BE78);
+void func_0028BE78(void) {
+    if (func_0028A248(D_00324510[0x21] < 0) ||
+        func_0028A248(D_00324510[0x23] < 0)) {
+        func_0028AB30(0);
+        D_003BC854 = 0;
+        D_003BC810 = 0;
+        func_002E96D8(0x310000);
+        if (D_003BD904 == -1) {
+            fileBeginWait((void *)-1);
+            return;
+        }
+        ((void (*)(void))D_003BD904)();
+    }
+}
 
 void *func_0028BF08(u32 arg0) {
     D_003BD904 = arg0;
@@ -1764,7 +1815,18 @@ u32 func_00290478(void) {
     return D_003BC81C;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileSetPreviewLocation);
+typedef struct FilePreviewWork {
+    u8 pad0[0x15990];
+    s16 previewX;
+    s16 previewY;
+} FilePreviewWork;
+
+void fileSetPreviewLocation(s16 x, s16 y) {
+    FilePreviewWork *work = (FilePreviewWork *)D_003BAA00;
+
+    work->previewX = x;
+    work->previewY = y;
+}
 
 void func_002904A8(u32 arg0) {
     D_0037D4D0[0] = arg0;
@@ -2754,7 +2816,59 @@ LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002961B0);
+void func_002961B0(LoadObj *dst, LoadObj *src) {
+    u32 selector = *(u32 *)((u8 *)src + 0xC);
+
+    switch (selector) {
+    case 1:
+    case 2:
+    case 4:
+        if (dst->deviceHandle != NULL) {
+            billDispatchByKind(dst->deviceHandle);
+        }
+        dst->deviceHandle = func_00151E60(src->deviceHandle);
+        func_001523B0(dst->deviceHandle);
+        if (dst->recordWork != NULL) {
+            void *record = *(void **)((u8 *)dst->recordWork + 0x20);
+            effBillSetMode(dst->deviceHandle, *(s16 *)((u8 *)record + 0x54));
+        }
+        break;
+    case 5: {
+        u32 count = *(u32 *)((u8 *)src->recordWork + 8);
+        s32 size;
+        u32 i;
+
+        if (count == 0) {
+            return;
+        }
+        if (dst->unk3C != 0) {
+            for (i = 0; i < count; i++) {
+                fileJobDestroy(((FileJob **)dst->unk38)[i]);
+            }
+            func_002D0918(dst->unk3C);
+            dst->unk38 = 0;
+            dst->unk3C = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->unk3C = func_002D03F8(size);
+        dst->unk38 = sdfResourceRetainAddress(dst->unk3C);
+        for (i = 0; i < count; i++) {
+            ((FileJob **)dst->unk38)[i] = fileJobCreateChild(*(FileJob **)src->unk38);
+        }
+        break;
+    }
+    case 7:
+        if (dst->referenceHolder != NULL) {
+            effReleaseReferenceHolder((s32)dst->referenceHolder);
+        }
+        dst->referenceHolder = func_0029C408(src->referenceHolder);
+        break;
+    }
+    *(u32 *)((u8 *)dst + 0xC) = *(u32 *)((u8 *)src + 0xC);
+}
 
 void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data) {
     if (obj->recordWork != NULL) {
@@ -2801,7 +2915,29 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296530);
+void func_00296530(LoadObj *obj, FileJob *job) {
+    u32 count = *(u32 *)((u8 *)obj->recordWork + 8);
+    u32 i;
+    s32 size;
+
+    if (obj->unk3C != 0) {
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(((FileJob **)obj->unk38)[i]);
+        }
+        func_002D0918(obj->unk3C);
+        obj->unk38 = 0;
+        obj->unk3C = 0;
+    }
+    size = count * 4;
+    if (size != 0) {
+        obj->unk3C = func_002D03F8(size);
+        obj->unk38 = sdfResourceRetainAddress(obj->unk3C);
+        *(FileJob **)obj->unk38 = fileJobCreateFromJob(job);
+        for (i = 1; i < count; i++) {
+            ((FileJob **)obj->unk38)[i] = fileJobCreateChild(*(FileJob **)obj->unk38);
+        }
+    }
+}
 
 void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
     u32 holder;
@@ -2969,7 +3105,20 @@ void loadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002995F8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00299DD8);
+void func_00299DD8(ScaleOwner *owner, f32 scale) {
+    ScaleSet *dst = owner->dst;
+    ScaleSet *src = owner->src;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+    dst->unkC8 = src->unkC8 * scale;
+    dst->unkD0 = src->unkD0 * scale;
+    dst->unkE4 = src->unkE4 * scale;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00299E58);
 
@@ -2989,7 +3138,48 @@ void loadObjScaleParamsB(ScaleOwner *owner, f32 scale) {
     dst->unkE4 = src->unkE4 * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0029A5E0);
+void *func_0029A5E0(u16 type, u32 count, void *data) {
+    FileGridDimensions *src = data;
+    u32 slotCount = count * src->columns * src->rows + count;
+    u32 slotBytes = slotCount << 5;
+    s32 dataBytes = D_0037E550[type].dataBytes;
+    u32 headerSize = 0x30;
+    u32 size;
+    u32 handle;
+    FileRecordSlots *rec;
+    u8 *body;
+    u8 *vec;
+
+    size = slotBytes + headerSize;
+    size += D_0037E550[type].slotBytes * count;
+    size += dataBytes * 2;
+    handle = func_002D03F8(size);
+    rec = sdfResourceRetainAddress(handle);
+    body = (u8 *)rec + headerSize;
+    rec->type = type;
+    rec->slots = (FileRecordSlot *)body;
+    body += slotBytes;
+    rec->data0 = body;
+    body += dataBytes;
+    rec->data1 = body;
+    body += dataBytes;
+    rec->unk1C = body;
+    rec->instances = count;
+    rec->count = slotCount;
+    rec->handle = handle;
+    rec->flags = 0;
+    rec->references = 0;
+    rec->unk14 = 0;
+    memcpy(rec->data0, src, dataBytes);
+    memcpy(rec->data1, src, dataBytes);
+    vec = rec->data0;
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec) : "memory");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec + 0x10) : "memory");
+    if (vec[0xBC] != 0) {
+        rec->flags |= 1;
+    }
+    return rec;
+}
 
 void func_0029A730(s32 arg0) {
     func_002D0918(*(u32 *)(arg0 + 0x28));
@@ -3003,7 +3193,7 @@ void fileAcquireRecord(FileRecordSlots *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
-    D_0037E550[record->type][0](record);
+    D_0037E550[record->type].acquire(record);
     record->references++;
 }
 

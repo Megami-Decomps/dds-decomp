@@ -9,7 +9,11 @@ typedef struct EffectSurfaceNode {
     u32 index;
     u32 pad_30;
     void *resource;
-    u8 pad_38[0x14];
+    void **jobs;
+    u32 jobHandle;
+    void **queues;
+    u32 queueHandle;
+    void *referenceHolder;
     u32 active;
     u16 count;
 } EffectSurfaceNode;
@@ -18,6 +22,8 @@ extern u32 effRetainResource(u32);
 extern void billSetBillboardMode(u32, s16);
 extern u32 billCreateIndexed(u32, u32);
 extern void func_00159FA0(u32);
+extern u32 func_00159A50(u32);
+extern u32 func_002DE120(u32);
 extern u32 D_00439044;
 extern u32 func_002DBED8(u16, u32, void *);
 #include "kwln.h"
@@ -70,6 +76,21 @@ extern u32 func_0019CE78(u32, u32, u32, u32, u32);
 extern s32 D_00437CD8;
 
 extern s32 D_00437CE4;
+extern s32 D_003E7FA8[];
+extern s32 D_00437D74;
+extern s32 D_00437D6C;
+extern s32 D_00437D68;
+extern s32 D_00437D64;
+extern s32 D_00437D60;
+extern s32 D_00437D5C;
+extern s32 D_00437D54;
+extern s32 D_00437D58;
+extern s32 sdfTexReleaseReferenceViaHandler(s32);
+extern s32 dds3GetWorldObject(void);
+extern void func_00110A88(s32, s32);
+extern void fileWaitReady(u32);
+extern void sdfReleaseMemorySlot(void *);
+extern void sdfFreeMemoryFromEitherHeap(s32);
 
 extern s32 D_00437D38;
 
@@ -175,7 +196,9 @@ extern u32 D_003E9150[];
 /* Callback table at D_0037E14C (0x28 bytes per entry). */
 typedef struct Cb3714C {
     void (*cb)(void *arg); /* 0x00 */
-    u8 pad4[0x24];         /* 0x04 */
+    u8 pad4[8];            /* 0x04 */
+    void (*cbC)(void *, void *); /* 0x0C */
+    u8 pad10[0x18];        /* 0x10 */
 } Cb3714C;
 
 extern Cb3714C D_003E916C[];
@@ -1080,7 +1103,28 @@ void *fileSlotSelectPollClear(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB2C0);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CB4D0);
+void *func_002CB4D0(void) {
+    if (D_00437D40 == 0) {
+        if (func_002C97D8(D_0037F510[0x21] < 0) ||
+            func_002C97D8(D_0037F510[0x23] < 0)) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            D_00437D40 = 1;
+        }
+    }
+    if (fileReqPoll() != 0) {
+        if (D_00437D40 == 1) {
+            D_00437D3C = 0;
+            return fileScanSlotStates();
+        }
+        if (fileReqGetStatus(D_00437CD0) != 1) {
+            D_00437D3C = 0;
+            D_00437CF8 = 0;
+            return fileResetSelection();
+        }
+        fileReqBegin(D_00437CD0);
+    }
+    return NULL;
+}
 
 void func_002CB5A0(void) {
     if (func_002C97D8(D_0037F510[0x21] < 0) ||
@@ -1639,7 +1683,42 @@ void *fileRunMenuState(s32 arg) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CDFD8);
+extern s32 D_00437D4C;
+
+s32 func_002CDFD8(s32 arg0) {
+    s32 fade;
+    s32 alpha;
+
+    func_001089A0(0x52);
+    func_00108BD8(0);
+    func_001089A8(1, 0, 0x80, 3, 0, 0, 1, 1);
+    if (D_00437CF4 != 0) {
+        func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                      D_00437D74);
+        func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                      D_00437D78);
+    }
+    if (D_00437CF8 != 0) {
+        func_002CD028(arg0);
+    }
+    fade = D_00437D4C;
+    if (fade > 0) {
+        if (fade < 4) {
+            alpha = fade * 20;
+        } else {
+            alpha = 0x50;
+        }
+        func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, (alpha * 0x80 / 100 << 24) | 0x808080,
+                      (alpha * 0x80 / 100 << 24) | 0x808080, (alpha * 0x80 / 100 << 24) | 0x808080,
+                      (alpha * 0x80 / 100 << 24) | 0x808080, D_00437D74);
+    }
+    func_002CA1F0();
+    func_002CEEC0();
+    func_002C9CF8();
+    func_00108BD8(0);
+    func_001089A8(1, 5, 0x80, 3, 0, 0, 1, 2);
+    return 0;
+}
 
 void func_002CE1A8(void) {
     func_002CA1D8(0);
@@ -1671,7 +1750,80 @@ void func_002CE738(void) {
 void func_002CE750(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002CE758);
+void func_002CE758(void) {
+    s32 *slot;
+    s32 i;
+    s32 world;
+    s32 handle;
+
+    if (D_00437CE4 != 0) {
+        D_00437CE4 = 0;
+        slot = D_003E7FA8;
+        i = 7;
+        do {
+            handle = *slot;
+            i--;
+            if (handle != 0) {
+                sdfTexReleaseReferenceViaHandler(handle);
+                *slot = 0;
+            }
+            slot++;
+        } while (i >= 0);
+        if (D_00437D78 != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D78);
+            D_00437D78 = 0;
+        }
+        if (D_00437D74 != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D74);
+            D_00437D74 = 0;
+        }
+        if (D_00437D70 != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D70);
+            D_00437D70 = 0;
+        }
+        if (D_00437D6C != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D6C);
+            D_00437D6C = 0;
+        }
+        if (D_00437D68 != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D68);
+            D_00437D68 = 0;
+        }
+        if (D_00437D64 != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D64);
+            D_00437D64 = 0;
+        }
+        if (D_00437D60 != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D60);
+            D_00437D60 = 0;
+        }
+        if (D_00437D5C != 0) {
+            sdfTexReleaseReferenceViaHandler(D_00437D5C);
+            D_00437D5C = 0;
+        }
+        if (D_00437D54 != 0) {
+            sdfFreeMemoryFromEitherHeap(D_00437D54);
+            D_00437D54 = 0;
+        }
+        if (D_00437D58 != 0) {
+            sdfFreeMemoryFromEitherHeap(D_00437D58);
+            D_00437D58 = 0;
+        }
+        world = dds3GetWorldObject();
+        if (world != 0) {
+            func_00110A88(world, 1);
+        }
+        if (D_00437CE0 != 0) {
+            fileWaitReady(D_00437CE0);
+            D_00439030 = fileGetResourceHandle(D_00437CE0);
+            func_002C7D00(D_00437CE0);
+            D_00437CE0 = 0;
+        }
+        sdfReleaseMemorySlot(&D_00439030);
+        kwlnTaskDestroyWithHierarchyByName(D_0042B720, 1);
+        func_00100498();
+    }
+}
 
 u32 func_002CE920(void) {
     return 1;
@@ -1708,7 +1860,18 @@ u32 func_002CF928(void) {
     return D_00437D04;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileSetPreviewLocation);
+typedef struct FilePreviewWork {
+    u8 pad0[0x110F0];
+    s16 previewX;
+    s16 previewY;
+} FilePreviewWork;
+
+void fileSetPreviewLocation(s16 x, s16 y) {
+    FilePreviewWork *work = (FilePreviewWork *)D_00435DD0;
+
+    work->previewX = x;
+    work->previewY = y;
+}
 
 void func_002CF958(u32 arg0) {
     D_003E8008[0] = arg0;
@@ -2399,14 +2562,11 @@ FileJob *fileJobCreateChild(FileJob *request) {
     return job;
 }
 
-extern u8 D_003E9178[];
+void fileJobNotifyPair(FileJob *left, FileJob *right) {
+    void (*cb)(void *, void *) = D_003E916C[right->type].cbC;
 
-void fileJobNotifyPair(u8 *a, u8 *b) {
-    u32 id = *(u16 *)(b + 4);
-    void (*fn)(u32, u32) = *(void (**)(u32, u32))(D_003E9178 + id * 40);
-
-    if (fn != 0) {
-        fn(*(u32 *)(a + 8), *(u32 *)(b + 8));
+    if (cb != NULL) {
+        cb(left->data, right->data);
     }
 }
 
@@ -2939,9 +3099,68 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6020);
 
 INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042BB28);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6058);
+EffectSurfaceNode *func_002D6058(FileJob *job) {
+    void *primary = fileResolvePrimaryBuffer(job);
+    EffectSurfaceNode *node = (EffectSurfaceNode *)func_002D6020(primary);
+    void *secondary;
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6160);
+    fileLoadObjectSetResource(node, job->option, primary);
+    secondary = fileResolveSecondaryBuffer(job);
+    if (secondary != NULL) {
+        switch (job->slots[0].selector) {
+        case 1:
+            fileLoadObjectOpenDevice(node, (u32)secondary);
+            break;
+        case 2:
+            fileLoadObjectOpenAndStartDevice(node, (u32)secondary);
+            break;
+        case 4:
+            fileLoadObjectOpenNamedDevice(node, *(u32 *)secondary);
+            break;
+        case 5:
+            func_002D6710(node, secondary);
+            break;
+        case 6:
+            func_002D6808(node, secondary);
+            break;
+        case 7:
+            fileReplaceReferenceHolder((LoadObj *)node, (u32)secondary);
+            break;
+        }
+        node->kind = job->slots[0].selector;
+    }
+    return node;
+}
+
+void func_002D6160(EffectSurfaceNode *node) {
+    u32 count;
+    u32 i;
+
+    if (node->resource != NULL) {
+        billDispatchByKind(node->resource);
+    }
+    if (node->jobHandle != 0) {
+        count = *(u32 *)(node->active + 8);
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(node->jobs[i]);
+        }
+        func_003297C8(node->jobHandle);
+    }
+    if (node->queueHandle != 0) {
+        count = *(u32 *)(node->active + 8);
+        for (i = 0; i < count; i++) {
+            fileQueueDestroy(node->queues[i]);
+        }
+        func_003297C8(node->queueHandle);
+    }
+    if (node->referenceHolder != NULL) {
+        effReleaseReferenceHolder((s32)node->referenceHolder);
+    }
+    if (node->active != 0) {
+        func_002DC028(node->active);
+    }
+    func_00328E48(node);
+}
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
     LoadObj *source = *(LoadObj **)((u8 *)owner->recordWork + 0x24);
@@ -2952,7 +3171,79 @@ LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D62D8);
+void func_002D62D8(EffectSurfaceNode *dst, EffectSurfaceNode *src) {
+    u32 count;
+    s32 size;
+    u32 i;
+
+    switch (src->kind) {
+    case 1:
+    case 2:
+    case 4:
+        if (dst->resource != NULL) {
+            billDispatchByKind(dst->resource);
+        }
+        dst->resource = (void *)func_00159A50((u32)src->resource);
+        func_00159FA0((u32)dst->resource);
+        if (dst->active != 0) {
+            billSetBillboardMode((u32)dst->resource, *(s16 *)(*(u32 *)(dst->active + 0x20) + 0x54));
+        }
+        break;
+    case 5:
+        count = *(u32 *)(src->active + 8);
+        if (count == 0) {
+            return;
+        }
+        if (dst->jobHandle != 0) {
+            for (i = 0; i < count; i++) {
+                fileJobDestroy(dst->jobs[i]);
+            }
+            func_003297C8(dst->jobHandle);
+            dst->jobs = 0;
+            dst->jobHandle = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->jobHandle = func_003292A8(size);
+        dst->jobs = sdfResourceRetainAddress(dst->jobHandle);
+        for (i = 0; i < count; i++) {
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
+        }
+        break;
+    case 6:
+        count = *(u32 *)(src->active + 8);
+        if (count == 0) {
+            return;
+        }
+        if (dst->queueHandle != 0) {
+            for (i = 0; i < count; i++) {
+                fileQueueDestroy(dst->queues[i]);
+            }
+            func_003297C8(dst->queueHandle);
+            dst->queues = 0;
+            dst->queueHandle = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->queueHandle = func_003292A8(size);
+        dst->queues = sdfResourceRetainAddress(dst->queueHandle);
+        for (i = 0; i < count; i++) {
+            dst->queues[i] = fileQueueClone(src->queues[0]);
+        }
+        break;
+    case 7:
+        if (dst->referenceHolder != NULL) {
+            effReleaseReferenceHolder((s32)dst->referenceHolder);
+        }
+        dst->referenceHolder = (void *)func_002DE120((u32)src->referenceHolder);
+        break;
+    }
+    dst->kind = src->kind;
+}
 
 void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
@@ -2998,9 +3289,53 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6710);
+void func_002D6710(EffectSurfaceNode *node, FileJob *job) {
+    u32 count = *(u32 *)(node->active + 8);
+    u32 i;
+    s32 size;
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6808);
+    if (node->jobHandle != 0) {
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(node->jobs[i]);
+        }
+        func_003297C8(node->jobHandle);
+        node->jobs = 0;
+        node->jobHandle = 0;
+    }
+    size = count * 4;
+    if (size != 0) {
+        node->jobHandle = func_003292A8(size);
+        node->jobs = sdfResourceRetainAddress(node->jobHandle);
+        node->jobs[0] = fileJobCreateFromJob(job);
+        for (i = 1; i < count; i++) {
+            node->jobs[i] = fileJobCreateChild(node->jobs[0]);
+        }
+    }
+}
+
+void func_002D6808(EffectSurfaceNode *node, FileJob *job) {
+    u32 count = *(u32 *)(node->active + 8);
+    u32 i;
+    s32 size;
+
+    if (node->queueHandle != 0) {
+        for (i = 0; i < count; i++) {
+            fileQueueDestroy(node->queues[i]);
+        }
+        func_003297C8(node->queueHandle);
+        node->queues = 0;
+        node->queueHandle = 0;
+    }
+    size = count * 4;
+    if (size != 0) {
+        node->queueHandle = func_003292A8(size);
+        node->queues = sdfResourceRetainAddress(node->queueHandle);
+        node->queues[0] = (void *)func_002D4138(job);
+        for (i = 1; i < count; i++) {
+            node->queues[i] = fileQueueClone(node->queues[0]);
+        }
+    }
+}
 
 void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
     u32 holder;
@@ -3053,13 +3388,33 @@ typedef struct FileSlot {
 
 typedef struct FileSlotTable {
     u16 type;
-    u8 pad02[6];
+    u8 pad02[2];
+    u32 instances;
     u32 count;
-    u8 pad0C[4];
+    u32 flags;
     u32 references;
-    u8 pad14[4];
+    u32 unk14;
     FileSlot *slots;
+    u8 *unk1C;
+    u8 *data0;
+    u8 *data1;
+    u32 handle;
 } FileSlotTable;
+
+typedef struct FileRecordType {
+    void (*acquire)(void *);
+    u32 unk4;
+    s32 slotBytes;
+    s32 dataBytes;
+} FileRecordType;
+
+typedef struct FileGridDimensions {
+    u8 pad0[0xC0];
+    s32 columns;
+    s32 rows;
+} FileGridDimensions;
+
+extern FileRecordType D_003E95C0[];
 
 void fileResetSlotStates(FileSlotTable *table) {
     u32 count;
@@ -3148,7 +3503,20 @@ void loadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D9AF8);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002DA2D8);
+void func_002DA2D8(ScaleOwner *owner, f32 scale) {
+    ScaleSet *dst = owner->dst;
+    ScaleSet *src = owner->src;
+    u32 i;
+
+    dst->unk64 = src->unk64 * scale;
+    dst->unk68 = src->unk68 * scale;
+    for (i = 0; i < 3; i++) {
+        dst->entries[i].value = src->entries[i].value * scale;
+    }
+    dst->unkC8 = src->unkC8 * scale;
+    dst->unkD0 = src->unkD0 * scale;
+    dst->unkE4 = src->unkE4 * scale;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DA358);
 
@@ -3220,7 +3588,48 @@ INCLUDE_ASM(const s32, "game/code_002C9660", func_002DB3E0);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DBE78);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002DBED8);
+u32 func_002DBED8(u16 type, u32 count, void *data) {
+    FileGridDimensions *src = data;
+    u32 slotCount = count * src->columns * src->rows + count;
+    u32 slotBytes = slotCount << 5;
+    s32 dataBytes = D_003E95C0[type].dataBytes;
+    u32 headerSize = 0x30;
+    u32 size;
+    u32 handle;
+    FileSlotTable *rec;
+    u8 *body;
+    u8 *vec;
+
+    size = slotBytes + headerSize;
+    size += D_003E95C0[type].slotBytes * count;
+    size += dataBytes * 2;
+    handle = func_003292A8(size);
+    rec = sdfResourceRetainAddress(handle);
+    body = (u8 *)rec + headerSize;
+    rec->type = type;
+    rec->slots = (FileSlot *)body;
+    body += slotBytes;
+    rec->data0 = body;
+    body += dataBytes;
+    rec->data1 = body;
+    body += dataBytes;
+    rec->unk1C = body;
+    rec->instances = count;
+    rec->count = slotCount;
+    rec->handle = handle;
+    rec->flags = 0;
+    rec->references = 0;
+    rec->unk14 = 0;
+    memcpy(rec->data0, src, dataBytes);
+    memcpy(rec->data1, src, dataBytes);
+    vec = rec->data0;
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec) : "memory");
+    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec + 0x10) : "memory");
+    if (vec[0xBC] != 0) {
+        rec->flags |= 1;
+    }
+    return (u32)rec;
+}
 
 void func_002DC028(s32 arg0) {
     func_003297C8(*(u32 *)(arg0 + 0x28));
@@ -3230,13 +3639,11 @@ void fileClearRecordReferences(s32 arg0) {
     *(u32 *)(arg0 + 0x10) = 0;
 }
 
-extern void (*D_003E95C0[][4])(void *);
-
 void fileAcquireRecord(FileSlotTable *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
-    D_003E95C0[record->type][0](record);
+    D_003E95C0[record->type].acquire(record);
     record->references++;
 }
 
