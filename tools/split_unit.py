@@ -49,7 +49,7 @@ def main():
         name = inc.group(3) if inc and inc.group(1) == "ASM" else (m.group(1) if m else None)
         if inc and inc.group(1) == "RODATA":
             pending.append(b)
-        elif name:
+        elif name and (name in names or re.fullmatch(r"\w*_[0-9A-Fa-f]{8}", name)):
             addr = names.get(name) or int(name[-8:], 16)
             pieces.append((addr, pending + [b], [d for d in pending if not INCLUDE.search(d)]))
             pending = []
@@ -58,6 +58,8 @@ def main():
             # become an undefined external call).
             includes += [line for line in b.split("\n") if line.startswith("#include") and line not in includes]
         elif pieces:
+            # Addressless definitions (static inline helpers) are declarations:
+            # every part that uses one gets its own copy.
             pending.append(b)
         else:
             head.append(b)
