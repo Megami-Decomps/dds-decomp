@@ -296,7 +296,8 @@ extern s32 func_001ABF50();
 extern u32 func_001B39E8(s32);
 
 typedef struct BtlUnit {
-    u8 unk_00[0xC8];
+    u8 unk_00[0xC4];
+    u32 resourceKind;
     u32 species;
     u8 unk_CC[0x20];
     s32 unk_EC;
@@ -2001,7 +2002,42 @@ s32 btlSelectSoleEligibleActor(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00218FD0);
+extern u8 *func_001ABFD8(s32, s32);
+extern s32 func_001EA598(void *);
+
+typedef struct BtlCommandRecord {
+    u8 pad00[0x44];
+    s32 slot; /* 0x44 */
+} BtlCommandRecord;
+
+typedef struct BtlCommandView {
+    u8 pad00[0x114];
+    BtlCommandRecord *record; /* 0x114 */
+} BtlCommandView;
+
+s32 func_00218FD0(u8 *command) {
+    BtlUnit *user = func_002172B8(command);
+    u8 *table;
+    s32 kind;
+    f32 pos[4];
+
+    if (!(user->flags & 0x400)) {
+        return 0;
+    }
+    if (user->mode == 0x108) {
+        table = func_001ABFD8(user->resourceKind, user->species);
+        if (func_001EA598(command) == 0) {
+            kind = *(s16 *)(table + ((BtlCommandView *)command)->record->slot * 20 + 0x2C);
+            if (kind == 2 || kind == 7) {
+                func_001E3108(user, pos);
+                pos[2] += 1250.0f;
+                btlSetUnitPosition(user, pos);
+            }
+        }
+        return 0;
+    }
+    return 0;
+}
 
 /* One-shot linked effect: its parent action, elapsed counter and spawn latch. */
 typedef struct BtlLinkedEffectTask {

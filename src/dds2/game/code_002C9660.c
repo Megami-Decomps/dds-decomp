@@ -26,7 +26,20 @@ extern u32 func_00159A50(u32);
 extern u32 func_002DE120(u32);
 extern u32 D_00439044;
 extern u32 func_002DBED8(u16, u32, void *);
+typedef struct MdlFlagPair {
+    s32 flag;
+    s32 unk4;
+} MdlFlagPair;
+extern MdlFlagPair D_003E8CE8[];
+extern MdlFlagPair D_003E8D10[];
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagSet(s32);
+extern void mdlFlagClear(s32);
+extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
+extern s32 func_002B81C8();
+extern s32 func_003054E8();
 #include "kwln.h"
+#include "fpu.h"
 
 extern void *fileDuplicateJob(void *);
 
@@ -235,6 +248,10 @@ typedef struct EffDispatchScale {
     void (*func)(void *, f32); /* 0x00 handler, may be NULL */
     u8 pad04[0x24];
 } EffDispatchScale;
+typedef struct EffDispatchColor {
+    void (*func)(void *, u32); /* 0x00 handler, may be NULL */
+    u8 pad04[0x24];
+} EffDispatchColor;
 
 extern EffDispatchEntry D_003E917C[];
 
@@ -244,7 +261,7 @@ extern EffDispatchExtra D_003E9184[];
 
 extern EffDispatchScale D_003E9188[];
 
-extern EffDispatchEntry D_003E918C[];
+extern EffDispatchColor D_003E918C[];
 
 extern s8 D_00437DE5;
 
@@ -385,7 +402,7 @@ typedef struct FileJob {
     f32 offset[4];    /* 0x40 */
     f32 quat[4];      /* 0x50 */
     f32 scale;        /* 0x60 */
-    u8 unk64[4];
+    u32 color;        /* 0x64 */
     u32 xformFlags;   /* 0x68 */
     u8 unk6C[0x14];
     s32 unk80;
@@ -434,7 +451,7 @@ typedef struct FileQueue {
     f32 position[4];   /* 0x40 */
     f32 quat[4];       /* 0x50 */
     f32 scale;         /* 0x60 */
-    u8 pad64[4];
+    u32 color;         /* 0x64: modulation colour */
     u32 transformWord; /* 0x68 */
     u8 pad6C[8];
     f32 transformValue; /* 0x74 */
@@ -2095,12 +2112,41 @@ void *fileCreateDetectionAudioCallback(u32 callback) {
     return mcdFinishFileDetectionWithAudio;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0358);
+extern u32 D_0043902C;
+
+void *func_002D0358(void) {
+    if (fileIsLoadStepComplete() == 0) {
+        return 0;
+    }
+    if (D_0037F510[0x27] < 0) {
+        if (D_00437D18 != 1) {
+            sndSetSequenceVolumePan(0, 0x7f, 0x3f);
+        }
+        D_00437D18 = 1;
+    } else if (D_0037F510[0x26] < 0) {
+        if (D_00437D18 != 0) {
+            sndSetSequenceVolumePan(0, 0x7f, 0x3f);
+        }
+        D_00437D18 = 0;
+    } else if (D_0037F510[0x21] < 0) {
+        sndSetSequenceVolumePan(8, 0x7f, 0x3f);
+        if (D_00437D18 == 0) {
+            return ((void *(*)(void))D_00439024)();
+        }
+        return ((void *(*)(void))D_00439028)();
+    } else if (D_0037F510[0x23] < 0) {
+        if (D_0043902C != 0) {
+            sndSetSequenceVolumePan(0xA, 0x7f, 0x3f);
+            return ((void *(*)(void))D_0043902C)();
+        }
+    }
+    return 0;
+}
 
 extern u32 D_00439024;
 extern u32 D_00439028;
 extern u32 D_0043902C;
-extern s32 func_002D0358();
+extern void *func_002D0358(void);
 
 void *fileBeginFourWayDialog(u32 ready, u32 completed, u32 cancelled, u32 state) {
     D_00439024 = ready;
@@ -2174,7 +2220,7 @@ void func_002D0798(void) {
     fileBeginFourWayDialog((u32)func_002D0730, (u32)func_002D0770, (u32)func_002D0770, 0);
 }
 
-extern s32 func_002D0810();
+extern void *func_002D0810(void);
 
 void *func_002D07D8(void) {
     if (fileIsLoadStepComplete() != 0) {
@@ -2183,7 +2229,26 @@ void *func_002D07D8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0810);
+typedef struct FileFlowEntry {
+    u16 state;
+    u16 mask;
+} FileFlowEntry;
+
+extern FileFlowEntry D_003E7FC8[];
+
+void *func_002D0810(void) {
+    while (((MenuWork *)D_00437D84)->unk36 < 4) {
+        MenuWork *work = (MenuWork *)D_00437D84;
+        u32 index = work->unk36;
+
+        work->unk36 = index + 1;
+        if (D_003E7FC8[index].mask & work->unk32) {
+            fileSetMenuFlowState(D_003E7FC8[index].state);
+            return func_002D07D8;
+        }
+    }
+    return func_002D0798;
+}
 
 extern u32 D_00435CD4;
 
@@ -2309,7 +2374,31 @@ void fileCopyRecordHeader(FileRecordHeader *destination, const FileRecordHeader 
     *destination = *source;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0D90);
+void func_002D0D90(MenuWork *work) {
+    u32 i;
+    s32 *bits = (s32 *)work + 1;
+
+    for (i = 0; i < 0x4F; i++) {
+        if ((bits[8 + (i >> 5)] >> (i & 0x1F)) & 1) {
+            mdlFlagSet(0xB40 + i);
+        } else {
+            mdlFlagClear(0xB40 + i);
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        if (mdlFlagTest(D_003E8CE8[i].flag)) {
+            work->unk32 |= 2;
+            break;
+        }
+    }
+    for (i = 0; i < 0x18; i++) {
+        if (mdlFlagTest(D_003E8D10[i].flag)) {
+            work->unk32 |= 4;
+            break;
+        }
+    }
+    work->unk32 |= 9;
+}
 
 s32 fileLoadStateChanged(void) {
     return D_00437DE8.current != D_00437DE8.previous;
@@ -2324,7 +2413,33 @@ void fileRestoreSlotFlagsToState(void) {
     ((FileSaveState *)D_00435DD0)->slotFlags = D_00437DEC;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileToggleSlotFlagsBit);
+extern void func_00103F58(s32, u8, s32);
+
+s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
+    switch (kind) {
+    case 0:
+        *flags ^= 2;
+        if (fileTestSlotFlagsBit(kind, flags) != 0) {
+            func_00103F58(0, 1, 0xF);
+            func_00103F58(1, 0x80, 0xF);
+        } else {
+            func_00103F58(0, 0, 0xF);
+            func_00103F58(1, 0, 0xF);
+        }
+        return 1;
+    case 1:
+        *flags ^= 4;
+        return 1;
+    case 2:
+        *flags ^= 8;
+        return 1;
+    case 3:
+        *flags ^= 0x10;
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B970);
 
@@ -2376,7 +2491,62 @@ void fileTestSavedSlotFlags(u32 kind) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D1058);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D11F8);
+typedef struct FileConfigListNode {
+    u8 pad00[0x58];
+    struct FileConfigListNode *next; /* 0x58 */
+    u8 pad5C[0x14];
+    void *resource;                  /* 0x70 */
+} FileConfigListNode;
+
+typedef struct FileConfigList {
+    u8 pad00[0x10];
+    FileConfigListNode *head; /* 0x10 */
+    u8 pad14[0xC];
+    s32 count;                /* 0x20 */
+} FileConfigList;
+
+/* Save/config task context: DDS2 places the status four bytes later. */
+typedef struct FileConfigTask {
+    void *memory;   /* 0x00 */
+    u32 state;      /* 0x04 */
+    u8 pad08[4];
+    u32 frame;      /* 0x0C: FileConfigList, passed to menu window drawing */
+    u32 slots[5];   /* 0x10 */
+    u8 pad24[4];
+    s32 result;     /* 0x28: negative when the queued load failed */
+    u8 pad2C[0xC];
+    u32 pending;    /* 0x38: zero when no load can start */
+} FileConfigTask;
+
+void func_002D11F8(void) {
+    s32 request = 1;
+    FileConfigListNode *node;
+    s32 i;
+
+    if (D_00439058 != 0) {
+        D_00437DEC = ((FileSaveState *)D_00435DD0)->slotFlags;
+        if (*(u32 *)(D_00439058 + 4) == 1) {
+            func_001027D8(2, &request, 4, 0);
+            mnuAdvanceTitleStateUnderSemaphore();
+        }
+        node = ((FileConfigList *)((FileConfigTask *)D_00439058)->frame)->head;
+        for (i = 0; i < ((FileConfigList *)((FileConfigTask *)D_00439058)->frame)->count; i++) {
+            func_00328E48(node->resource);
+            node = node->next;
+        }
+        func_002B81C8(((FileConfigTask *)D_00439058)->frame);
+        ((FileConfigTask *)D_00439058)->frame = 0;
+        for (i = 0; i < 5; i++) {
+            if (((FileConfigTask *)D_00439058)->slots[i] != 0) {
+                func_003054E8(((FileConfigTask *)D_00439058)->slots[i]);
+                ((FileConfigTask *)D_00439058)->slots[i] = 0;
+            }
+        }
+        func_003297C8(((FileConfigTask *)D_00439058)->memory);
+        D_00439058 = 0;
+        D_00437DE5 = 0;
+    }
+}
 
 extern s32 func_002D1058(void);
 extern s32 fileStartQueuedLoad(void);
@@ -2415,17 +2585,6 @@ s32 fileConsumeConfigTaskReady(void) {
     }
     return 0;
 }
-
-/* Save/config task context: DDS2 places the status four bytes later. */
-typedef struct FileConfigTask {
-    u8 pad0[0xC];
-    u32 frame;      /* 0x0C: passed to menu window drawing */
-    u32 slots[4];   /* 0x10 */
-    u8 pad20[8];
-    s32 result;     /* 0x28: negative when the queued load failed */
-    u8 pad2C[0xC];
-    u32 pending;    /* 0x38: zero when no load can start */
-} FileConfigTask;
 
 u32 fileGetConfigTaskSlot(s32 slot) {
     if (slot < 4) {
@@ -2532,7 +2691,46 @@ void mnuProjectViewPoint(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D2D48);
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D2EB8);
+extern s32 func_002D2D48();
+extern u8 D_0037F690[];
+extern u8 D_0037F6A0[];
+
+/* vu0 routine: distance between the projected view point and a second point offset perpendicular to
+   the camera axis by rate; 0 when either projection (func_002D2D48) fails. Point comes in vf10. */
+f32 func_002D2EB8(f32 rate) {
+    f32 scale[4];
+    f32 second[4];
+    f32 first[4];
+    f32 origin[4];
+    f32 dx;
+    f32 dy;
+
+    VU0_STORE_VF(vf10, origin);
+    if (func_002D2D48() == 0) {
+        return 0.0f;
+    }
+    VU0_STORE_VF(vf10, first);
+    scale[0] = scale[1] = scale[2] = rate;
+    VU0_LOAD_VF(vf10, origin);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, D_0037F690);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F6A0);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    if (func_002D2D48() == 0) {
+        return 0.0f;
+    }
+    VU0_STORE_VF(vf10, second);
+    dx = second[0] - first[0];
+    dy = second[1] - first[1];
+    VU0_LOAD_VF(vf10, first);
+    return fsqrtf(dx * dx + dy * dy);
+}
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
@@ -2747,11 +2945,11 @@ void func_002D37C8(void *work, f32 scale) {
     }
 }
 
-void func_002D3808(void *work) {
+void func_002D3808(void *work, u32 color) {
     u16 id = ((FileJob *)work)->type;
 
     if (D_003E918C[id].func != NULL) {
-        D_003E918C[id].func(((FileJob *)work)->data);
+        D_003E918C[id].func(((FileJob *)work)->data, color);
     }
 }
 
@@ -3497,7 +3695,20 @@ typedef struct LoadObj {
     void *recordWork;      /* 0x4C */
 } LoadObj;
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6020);
+typedef struct FileGridHeader {
+    u8 pad00[0x20];
+    s32 rows;   /* 0x20 */
+    s32 cols;   /* 0x24 */
+    u8 pad28[0x90];
+    s32 altCols; /* 0xB8 */
+} FileGridHeader;
+
+void *func_002D6020(FileGridHeader *hdr) {
+    u32 rows = hdr->rows;
+    u32 count = (rows != 0 ? rows : hdr->cols) * (rows != 0 ? hdr->cols : hdr->altCols);
+
+    return func_002D5FB8(count <= 0x12C ? count : 0x12C);
+}
 
 INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042BB28);
 
@@ -4058,7 +4269,24 @@ void func_002DB2C0(u8 *node, const f32 *value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002DB2F8);
+/* cubic Bezier point at t through four control points; result is left in vf10 */
+void func_002DB2F8(f32 t, f32 *p0, f32 *p1, f32 *p2, f32 *p3) {
+    f32 weight[4];
+    f32 point[4];
+    f32 t2 = t * t;
+    f32 t3 = t2 * t;
+    f32 u = 1.0f - t;
+    f32 u2 = u * u;
+
+    weight[0] = u2 * u;
+    weight[1] = t * u2 * 3.0f;
+    weight[2] = t2 * u * 3.0f;
+    weight[3] = t3;
+    point[0] = p0[0] * weight[0] + p1[0] * weight[1] + p2[0] * weight[2] + p3[0] * weight[3];
+    point[1] = p0[1] * weight[0] + p1[1] * weight[1] + p2[1] * weight[2] + p3[1] * weight[3];
+    point[2] = p0[2] * weight[0] + p1[2] * weight[1] + p2[2] * weight[2] + p3[2] * weight[3];
+    VU0_LOAD_VF(vf10, point);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002DB3E0);
 
