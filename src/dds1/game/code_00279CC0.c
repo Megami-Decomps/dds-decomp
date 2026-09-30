@@ -14,13 +14,15 @@ extern void func_00284258(s32, s32, s32, s32, s32, s32);
 
 extern u8 D_0037CD30[][0x10];
 
-extern void func_0027D850(s32, s32, s32, s32, u32 *, s32);
+extern void func_0027D850(s32, s32, s32, s32, u32 *, s32, s32);
+extern void *func_0027F230(s32, s32, s32);
 extern void func_0027DA80(s32, s32, s32, s32, u32 *, s32);
 extern void func_0027DBD0(s32, s32, s32, s32, u32 *, s32);
 
 extern s32 D_003BAA98;
 
 extern void func_0027C140();
+extern void menuHideWindowHandles(u32);
 
 extern void mnuDrawWindowSprites();
 
@@ -680,7 +682,28 @@ s32 mnuAdvanceListWindowStart(MenuList *list) {
     return (s32)cursor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BB80);
+/* Step the visible head back one node when a full window follows it. */
+s32 func_0027BB80(MenuList *list) {
+    MenuListNode *cursor = list->cursor;
+    MenuListNode *head = list->head;
+    MenuListNode *node;
+    s32 i;
+
+    if (cursor == list->first) {
+        return (s32)cursor;
+    }
+    node = head;
+    for (i = 0; i < list->visibleCount; i++) {
+        if (node == NULL) {
+            return (s32)cursor;
+        }
+        node = node->next;
+    }
+    head = head->prev;
+    list->head = head;
+    list->windowOffset++;
+    return (s32)cursor;
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BBF0);
 
@@ -922,7 +945,44 @@ void func_0027CA78(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027CA90);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027CCD0);
+void func_0027CCD0(s32 arg0, s32 base, s32 arg2, s32 menu, s32 param) {
+    s32 node;
+    s32 panel;
+    s32 flag;
+    s32 texture = *(s32 *)(menu + 0x88);
+
+    if (*(s32 *)(menu + 0x58) != 0) {
+        if (*(u32 *)(menu + 4) & 4) {
+            if (*(s32 *)(menu + 0x80) == 0) {
+                *(s32 *)(menu + 0x80) = 0x200;
+            } else if (*(s32 *)(menu + 0x80) < 0x100) {
+                *(s32 *)(menu + 0x80) = 0x100;
+            }
+        } else if (*(s32 *)(menu + 0x80) >= 0x101) {
+            *(s32 *)(menu + 0x80) = 0;
+        }
+        node = *(s32 *)(menu + 0x14);
+        panel = menu + 0x4C;
+        flag = 0;
+        if (*(u32 *)node & 8) {
+            flag = 1;
+        }
+        base += *(s32 *)(node + 0x24) * *(s32 *)(node + 0x28);
+        func_0027DCE8(arg0, base, arg2, texture, (u32 *)panel, flag, param);
+        menuHideWindowHandles(panel);
+        if (*(u32 *)(menu + 4) & 4) {
+            *(s32 *)(menu + 0x80) += 0x10;
+            if (*(s32 *)(menu + 0x80) >= 0x200) {
+                *(s32 *)(menu + 0x80) = 0x200;
+            }
+        } else {
+            *(s32 *)(menu + 0x80) += 0x20;
+            if (*(s32 *)(menu + 0x80) >= 0x101) {
+                *(s32 *)(menu + 0x80) = 0x100;
+            }
+        }
+    }
+}
 
 void func_0027CDD0(s32 arg0, s32 arg1, s32 arg2, s32 menu, s32 param) {
     s32 texture = *(s32 *)(menu + 0x88);
@@ -1055,7 +1115,19 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DA80);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DBD0);
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027DCE8);
+void func_0027DCE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 *list, s32 arg5, s32 arg6) {
+    switch (*list) {
+    case 0:
+        func_0027D850(arg0, arg1, arg2, arg3, list, arg5, arg6);
+        return;
+    case 1:
+        func_0027DA80(arg0, arg1, arg2, 0x100, list, arg6);
+        return;
+    case 2:
+        func_0027DBD0(arg0, arg1, arg2, arg3, list, arg6);
+        break;
+    }
+}
 
 void func_0027DD58(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_0027DCE8(arg0, arg1, arg2, arg3, arg4, 0, arg5);
@@ -1625,7 +1697,11 @@ void func_0027F588(s32 arg0, s32 arg1, s32 arg2, s32 skip, s32 *menu, s32 param)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027F638);
+void func_0027F638(s32 index, s32 window, s32 arg2, s32 arg3) {
+    mnuSelectPage((MenuWindow *)window, index);
+    *(void **)(index * 0x134 + window + 0x158) = func_0027F230(0, arg2, arg3);
+    *(u32 *)window |= 0x100;
+}
 
 void mnuClearEntries(s32 *menu) {
     u32 i;
