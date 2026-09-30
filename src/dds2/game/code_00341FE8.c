@@ -31,6 +31,16 @@ extern s32 func_00342168(s32 id);
 
 extern s32 D_00438B80;
 
+extern u8 D_0047AA40[];
+
+extern u8 D_0047AA50[];
+
+extern u8 D_0047B310[];
+
+extern s32 D_004391D0;
+
+extern void func_003666D8(void *a0, void *a1);
+
 /* Converts world coordinates to the sound engine's one-tenth scale. */
 void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
     u32 packet[8];
@@ -94,9 +104,13 @@ s32 func_00342470(s32 index) {
     return difference;
 }
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_00342498);
+u8 *func_00342498(void) {
+    return D_0047AA50;
+}
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424A8);
+FE250Entry *func_003424A8(void) {
+    return D_0047ABD0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424B8);
 

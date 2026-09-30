@@ -4,9 +4,27 @@ extern u32 func_002AB598(void);
 
 extern s32 func_0011C0B0(s32 param0, s32 param1);
 
+extern s32 func_0011C340(s32 param0, s32 param1);
+
 extern s32 scrReadIntParameter(s32 idx);
 
+extern s32 dds3FindEntryIndex(s32 rosterIndex);
+
+extern s32 scrSetFlag(u8 *work, u16 index);
+
+extern void func_00314F90(u8 *work);
+
+extern void scrSetSecondaryScriptFlag(u8 *work, u16 index);
+
+extern s32 D_00435DD0;
+
 extern s32 func_0010D818(s32 arg0);
+
+extern void *func_0019CE78(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+extern void func_0019D100(void *ctx, u32 arg1, u32 arg2);
+
+extern void *func_00328E18(s32 size);
 
 /* Shared glyph owner layout: handle at +0x10, released by the font routines. */
 typedef struct GlyphOwner {
@@ -14,7 +32,22 @@ typedef struct GlyphOwner {
     u32 glyph;
 } GlyphOwner;
 
+/* Intrusive list node; the virtual table at +0xC drives per-node callbacks. */
+typedef struct Dds3NodeOps {
+    void (*destroy)(s32 node);
+    void (*update)(s32 node);
+} Dds3NodeOps;
+
+typedef struct Dds3Node {
+    struct Dds3Node *prev;
+    struct Dds3Node *next;
+    s32 key;
+    Dds3NodeOps *ops;
+} Dds3Node;
+
 extern u32 D_00438EB0;
+
+extern Dds3NodeOps D_00435EA8;
 
 s32 func_0011EC90(void) {
     s32 unitId = scrReadIntParameter(0);
@@ -32,14 +65,36 @@ s32 func_0011ECC8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED10);
+s32 func_0011ED10(void) {
+    s32 firstOperand = scrReadIntParameter(0);
+    s32 secondOperand = scrReadIntParameter(1);
+
+    func_0010D818(func_0011C340(firstOperand, secondOperand) == 1);
+    return 1;
+}
 
 s32 func_0011ED60(void) {
     func_0010D818(func_002AB598());
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011ED88);
+s32 func_0011ED88(void) {
+    s32 a = scrReadIntParameter(0);
+    u16 b = scrReadIntParameter(1);
+    s32 index = dds3FindEntryIndex(a);
+    s32 result = 0;
+
+    if (index >= 0) {
+        u8 *entry = (u8 *)(D_00435DD0 + index * 0x1C4 + 0xA60);
+
+        scrSetFlag(entry, b);
+        func_00314F90(entry);
+        scrSetSecondaryScriptFlag(entry, b);
+        result = 1;
+    }
+    func_0010D818(result);
+    return 1;
+}
 
 /* Append an intrusive node; linkOffset selects its previous/next pair. */
 void dds3AppendIntrusiveNode(s32 *list, s32 node, s32 linkOffset) {
@@ -57,15 +112,39 @@ void dds3AppendIntrusiveNode(s32 *list, s32 node, s32 linkOffset) {
     list[1] = node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EE58);
+/* Unlink an intrusive node; linkOffset selects its previous/next pair. */
+void func_0011EE58(s32 *list, s32 node, s32 linkOffset) {
+    s32 *link = (s32 *)(node + linkOffset);
+    s32 prev = link[0];
+    s32 next = link[1];
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EE98);
+    if (prev == 0) {
+        *list = next;
+    }
+    else {
+        ((s32 *)(prev + linkOffset))[1] = next;
+    }
+    if (next == 0) {
+        list[1] = prev;
+    }
+    else {
+        *(s32 *)(next + linkOffset) = prev;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EED8);
+void func_0011EE98(Dds3Node *node, Dds3NodeOps *ops) {
+    dds3AppendIntrusiveNode((s32 *)&D_00438EB0, (s32)node, 0);
+    node->ops = ops;
+}
+
+void func_0011EED8(Dds3Node *node) {
+    func_0011EE58((s32 *)&D_00438EB0, (s32)node, 0);
+    node->ops->destroy((s32)node);
+}
 
 void func_0011EF18(void) {
-    u32 current;
-    while ((current = D_00438EB0) != 0) {
+    Dds3Node *current;
+    while ((current = (Dds3Node *)D_00438EB0) != 0) {
         func_0011EED8(current);
     }
 }
@@ -74,9 +153,27 @@ void func_0011EF48(s32 object, u32 value) {
     *(u32 *)(object + 8) = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EF50);
+void func_0011EF50(s32 key) {
+    Dds3Node *node = (Dds3Node *)D_00438EB0;
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011EFA0);
+    while (node != 0) {
+        Dds3Node *next = node->next;
+
+        if (node->key == key) {
+            func_0011EED8(node);
+        }
+        node = next;
+    }
+}
+
+void func_0011EFA0(void) {
+    Dds3Node *node = (Dds3Node *)D_00438EB0;
+
+    while (node != 0) {
+        node->ops->update((s32)node);
+        node = node->next;
+    }
+}
 
 void func_0011EFE0(GlyphOwner *owner) {
     func_0019C5B0(owner->glyph);
@@ -87,7 +184,19 @@ void func_0011F010(GlyphOwner *owner) {
     func_0019D518(owner->glyph);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011EC90", func_0011F028);
+s32 func_0011F028(s32 size, s32 a1, s32 a2) {
+    s32 obj = (s32)func_0019CE78((void *)a2, 0, 0, 0, 0);
+    Dds3Node *node;
+
+    if (size == 0x800000) {
+        size = (0x200 - *(s32 *)(obj + 0xC)) * 8;
+    }
+    func_0019D100((void *)obj, size, a1);
+    node = (Dds3Node *)func_00328E18(0x14);
+    *(s32 *)((u8 *)node + 0x10) = obj;
+    func_0011EE98(node, &D_00435EA8);
+    return (s32)node;
+}
 
 void func_0011F0C0(GlyphOwner *owner, u8 flag) {
     frFontSetChainFlag(owner->glyph, flag);

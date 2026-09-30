@@ -10,6 +10,14 @@ extern void func_00286F18(s32, s32);
 
 extern u8 D_003CFCC0[];
 
+extern void func_00288710();
+
+extern void func_002B81C8(s32);
+
+extern void func_00267DA0(s32);
+
+extern void func_00289ED0(void *);
+
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E20);
@@ -44,9 +52,20 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426060);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287600);
+s32 func_00287600(void) {
+    u64 selected = func_00312810(D_00437924, 0xffffffffffffffff);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287638);
+    func_002885E8(selected);
+    func_0010AE38("mtrUnitSelectInit\n");
+    return 0;
+}
+
+void func_00287638(void) {
+    u64 selected = func_00312810(D_00437924, 0xffffffffffffffff);
+
+    func_00288710(selected);
+    func_0010AE38("mtrUnitSelectRelease\n");
+}
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 
@@ -60,7 +79,14 @@ u64 func_00287768(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287798);
+s32 func_00287798(void) {
+    u64 selected = func_00312810(D_00437924, 0xffffffffffffffff);
+
+    func_00267F68(0);
+    func_00289DC8(selected);
+    func_0010AE38("mtrMantraSelectInit\n");
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002877E8);
 
@@ -88,7 +114,11 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_002884C0);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002885E8);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288710);
+void func_00288710(u8 *work) {
+    func_002B81C8(*(s32 *)(work + 4));
+    func_00267DA0(*(s32 *)(work + 0x48));
+    func_00289ED0(work);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426280);
 
